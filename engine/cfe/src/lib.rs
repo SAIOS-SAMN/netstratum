@@ -13,6 +13,7 @@
 //!   unreceipted accrual is workspace and never persists.
 
 pub mod dop;
+pub mod ipsal;
 pub mod ratio;
 pub mod tlv;
 pub mod vrp;

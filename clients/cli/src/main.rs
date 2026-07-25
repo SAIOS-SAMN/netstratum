@@ -10,9 +10,10 @@
 use std::io::{self, BufRead, Write};
 
 use cfe::dop::{ColonyOrb, Resource, ZoneKind};
+use cfe::ipsal::Scope;
 use cfe::ratio::Ratio;
 use cfe::vrp::ChainRead;
-use cfe::world::{replay, ActionRefused, World};
+use cfe::world::{replay, ActionRefused, World, SOVEREIGN};
 
 /// The slice's world is an 8×8 tile grid; tile = row*8 + col.
 const GRID: u16 = 8;
@@ -230,6 +231,73 @@ fn command(world: &mut World, line: &str, style: &Style) {
             }
             Err(refusal) => refuse(world, &refusal, style),
         },
+        Some("agent") => match words.next() {
+            Some(handle) => match world.register_agent(handle) {
+                Ok(id) => println!(
+                    "{} agent {} registered (entity {id}) — contained, ZERO grants; open scopes with {}",
+                    style.ok("✓"),
+                    style.strong(handle),
+                    style.strong("grant <handle> <build|raze|collect>")
+                ),
+                Err(refusal) => refuse(world, &refusal, style),
+            },
+            None => println!("{} usage: {}", style.bad("✗"), style.strong("agent <handle>")),
+        },
+        Some("grant") | Some("revoke") => {
+            let granting = line.starts_with("grant");
+            let target = words.next().and_then(|handle| entity_id(world, handle));
+            let scope = words.next().and_then(parse_scope);
+            match (target, scope) {
+                (Some(agent), Some(scope)) => {
+                    let outcome = match granting {
+                        true => world.grant(agent, scope),
+                        false => world.revoke(agent, scope),
+                    };
+                    match outcome {
+                        Ok(()) => println!(
+                            "{} {} {:?} for entity {agent} — receipt sealed",
+                            style.ok("✓"),
+                            if granting { "granted" } else { "revoked" },
+                            scope
+                        ),
+                        Err(refusal) => refuse(world, &refusal, style),
+                    }
+                }
+                _ => println!(
+                    "{} usage: {}",
+                    style.bad("✗"),
+                    style.strong("grant|revoke <handle> <build|raze|collect>")
+                ),
+            }
+        }
+        Some("as") => match words.next().and_then(|handle| entity_id(world, handle)) {
+            Some(actor) => {
+                let rest: Vec<&str> = words.collect();
+                act_as(world, actor, &rest, style);
+            }
+            None => println!(
+                "{} unknown entity — {} lists everyone",
+                style.bad("✗"),
+                style.strong("who")
+            ),
+        },
+        Some("who") => {
+            for entity in world.entities() {
+                let role = match entity.principal {
+                    None => style.ok("sovereign"),
+                    Some(principal) => style.warn(&format!("agent of {principal}")),
+                };
+                let grants = match entity.principal {
+                    None => style.dim("(all scopes by construction)"),
+                    Some(_) => style.dim(&format!("grants: {:?}", entity.grants)),
+                };
+                println!(
+                    "  {} {} — {role} {grants}",
+                    style.dim(&format!("#{}", entity.entity_id)),
+                    style.strong(&entity.handle)
+                );
+            }
+        }
         Some("map") => map(world, style),
         Some("status") => status(world, style),
         Some("chronicle") => chronicle(world, style),
@@ -278,6 +346,10 @@ fn help(style: &Style) {
         ("tick <n>", "let n ticks pass — active zones net yield−upkeep into the workspace; famine strikes if a store runs dry"),
         ("collect", "settle the workspace against the bank — sealed as receipts; only banked value persists"),
         ("raze <tile|r:c>", "demolish a zone for half its cost back — the famine escape hatch"),
+        ("agent <handle>", "register a contained agent (zero grants until you open scopes)"),
+        ("grant|revoke <handle> <scope>", "open or shut an agent's scope: build, raze, collect — revocation is immediate"),
+        ("as <handle> <cmd>", "act as an entity — its authority, its generation tag on the receipts"),
+        ("who", "everyone in this world: sovereigns, agents, grants"),
         ("map", "the tile grid"),
         ("status", "colony, ledgers, clock, receipts"),
         ("chronicle", "the world's full receipted history"),
@@ -287,6 +359,72 @@ fn help(style: &Style) {
     ];
     for (name, what) in lines {
         println!("  {:<28} {}", style.strong(name), what);
+    }
+}
+
+fn parse_scope(word: &str) -> Option<Scope> {
+    match word {
+        "build" => Some(Scope::Build),
+        "raze" => Some(Scope::Raze),
+        "collect" => Some(Scope::Collect),
+        _ => None,
+    }
+}
+
+fn entity_id(world: &World, handle: &str) -> Option<u64> {
+    world
+        .entities()
+        .iter()
+        .find(|entity| entity.handle == handle)
+        .map(|entity| entity.entity_id)
+}
+
+/// Run one action AS an entity — the containment demo: the same verbs,
+/// the entity's own authority.
+fn act_as(world: &mut World, actor: u64, rest: &[&str], style: &Style) {
+    match rest {
+        ["zone", tile, kind] => {
+            let tile = parse_tile(tile);
+            let kind = match *kind {
+                "ext" => Some(ZoneKind::Extractor),
+                "hab" => Some(ZoneKind::Habitat),
+                "smelt" => Some(ZoneKind::Smelter),
+                "synth" => Some(ZoneKind::Synthesizer),
+                _ => None,
+            };
+            match (tile, kind) {
+                (Some(tile), Some(kind)) => match world.zone_as(actor, tile, kind) {
+                    Ok(()) => println!(
+                        "{} entity {actor} zoned tile {tile} — receipt tagged to it",
+                        style.ok("✓")
+                    ),
+                    Err(refusal) => refuse(world, &refusal, style),
+                },
+                _ => println!("{} as <handle> zone <tile> <kind>", style.bad("✗")),
+            }
+        }
+        ["raze", tile] => match parse_tile(tile) {
+            Some(tile) => match world.raze_as(actor, tile) {
+                Ok(()) => println!(
+                    "{} entity {actor} razed tile {tile} — receipt tagged to it",
+                    style.ok("✓")
+                ),
+                Err(refusal) => refuse(world, &refusal, style),
+            },
+            None => println!("{} as <handle> raze <tile>", style.bad("✗")),
+        },
+        ["collect"] => match world.collect_as(actor) {
+            Ok(count) => println!(
+                "{} entity {actor} collected — {count} receipt(s) tagged to it",
+                style.ok("✓")
+            ),
+            Err(refusal) => refuse(world, &refusal, style),
+        },
+        _ => println!(
+            "{} as <handle> supports: {} — identity changes authority, not vocabulary",
+            style.bad("✗"),
+            style.strong("zone · raze · collect")
+        ),
     }
 }
 
@@ -370,6 +508,29 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
         ActionRefused::NothingAccrued => format!(
             "nothing to collect — let time pass first: {}",
             style.strong("tick <n>")
+        ),
+        ActionRefused::NoSuchEntity { entity } if *entity == SOVEREIGN => format!(
+            "no one is here yet — {} begins the story",
+            style.strong("found <name>")
+        ),
+        ActionRefused::NoSuchEntity { entity } => format!(
+            "no entity holds id {} — {} lists everyone",
+            style.strong(&entity.to_string()),
+            style.strong("who")
+        ),
+        ActionRefused::HandleTaken { handle } => format!(
+            "the handle {} is taken — every entity's name is its own",
+            style.strong(handle)
+        ),
+        ActionRefused::NotPermitted { entity, scope } => format!(
+            "entity {} holds no {:?} grant — containment refused it ({} opens the scope)",
+            style.strong(&entity.to_string()),
+            scope,
+            style.strong("grant <handle> <scope>")
+        ),
+        ActionRefused::NotAnAgent { entity } => format!(
+            "entity {} is sovereign — its authority is by construction, never by grant",
+            style.strong(&entity.to_string())
         ),
     };
     println!("{} {text}", style.bad("✗"));
@@ -549,12 +710,33 @@ fn chronicle(world: &World, style: &Style) {
                 style.strong(&tile.to_string()),
                 coordinate(*tile)
             ),
+            cfe::dop::ClosureEvent::EntityRegistered { entity_id, principal, handle } => {
+                match principal {
+                    0 => format!("☉ sovereign {} joined (entity {entity_id})", style.strong(handle)),
+                    _ => format!(
+                        "⚙ agent {} registered (entity {entity_id}, contained by {principal})",
+                        style.strong(handle)
+                    ),
+                }
+            }
+            cfe::dop::ClosureEvent::ScopeGranted { agent, scope } => {
+                format!("⚿ {:?} granted to entity {}", scope, style.strong(&agent.to_string()))
+            }
+            cfe::dop::ClosureEvent::ScopeRevoked { agent, scope } => {
+                format!("⚿ {:?} REVOKED from entity {}", scope, style.strong(&agent.to_string()))
+            }
         };
+        let tag = receipt
+            .provenance
+            .first()
+            .map(|entity| style.dim(&format!("by#{entity}")))
+            .unwrap_or_else(|| style.dim("world"));
         println!(
-            "  {} stamp {} {}  {}",
+            "  {} stamp {} {} {}  {}",
             style.dim(&format!("#{}", receipt.sequence)),
             receipt.stamp,
             style.dim(&hex(&receipt.own.0[..8])),
+            tag,
             described
         );
     }

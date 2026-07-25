@@ -15,6 +15,9 @@
 //!   5  ClosureEvent::FamineStruck
 //!   6  ClosureEvent::FamineRelieved
 //!   7  ClosureEvent::ZoneRazed
+//!   10 ClosureEvent::EntityRegistered (N3)
+//!   11 ClosureEvent::ScopeGranted (N3)
+//!   12 ClosureEvent::ScopeRevoked (N3)
 //!   16 Orb header (orb_id ‖ name)
 //!   17 Orb zone entry (tile ‖ kind)
 //!   18 Orb banked entry (resource ‖ ratio)
@@ -155,6 +158,13 @@ pub enum ClosureEvent {
     FamineRelieved { orb_id: u64, resource: Resource },
     /// A zone demolished for half its cost back.
     ZoneRazed { orb_id: u64, tile: u16 },
+    /// N3 — an entity joined this internet: principal 0 = a sovereign
+    /// human; nonzero = an agent contained by that principal.
+    EntityRegistered { entity_id: u64, principal: u64, handle: String },
+    /// N3 — a principal granted an agent one action scope.
+    ScopeGranted { agent: u64, scope: crate::ipsal::Scope },
+    /// N3 — a grant revoked; the agent's next such action refuses.
+    ScopeRevoked { agent: u64, scope: crate::ipsal::Scope },
 }
 
 impl ClosureEvent {
@@ -192,6 +202,22 @@ impl ClosureEvent {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.extend_from_slice(&tile.to_le_bytes());
                 tlv::put(7, &value, &mut out);
+            }
+            Self::EntityRegistered { entity_id, principal, handle } => {
+                let mut value = entity_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&principal.to_le_bytes());
+                value.extend_from_slice(handle.as_bytes());
+                tlv::put(10, &value, &mut out);
+            }
+            Self::ScopeGranted { agent, scope } => {
+                let mut value = agent.to_le_bytes().to_vec();
+                value.push(*scope as u8);
+                tlv::put(11, &value, &mut out);
+            }
+            Self::ScopeRevoked { agent, scope } => {
+                let mut value = agent.to_le_bytes().to_vec();
+                value.push(*scope as u8);
+                tlv::put(12, &value, &mut out);
             }
         }
         out
@@ -233,6 +259,22 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let tile = u16::from_le_bytes(value.get(8..10)?.try_into().ok()?);
                 Some(Self::ZoneRazed { orb_id, tile })
+            }
+            10 => {
+                let entity_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let principal = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let handle = String::from_utf8(value.get(16..)?.to_vec()).ok()?;
+                Some(Self::EntityRegistered { entity_id, principal, handle })
+            }
+            11 => {
+                let agent = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let scope = crate::ipsal::Scope::from_wire(*value.get(8)?)?;
+                Some(Self::ScopeGranted { agent, scope })
+            }
+            12 => {
+                let agent = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let scope = crate::ipsal::Scope::from_wire(*value.get(8)?)?;
+                Some(Self::ScopeRevoked { agent, scope })
             }
             _ => None,
         }

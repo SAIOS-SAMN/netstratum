@@ -66,6 +66,9 @@ One tag, one meaning, forever; retired codes are never reused.
 | 5 | event: FamineStruck (D1) | LE64(orb_id) ‖ resource u8 ‖ ratio (drawn) |
 | 6 | event: FamineRelieved (D1) | LE64(orb_id) ‖ resource u8 |
 | 7 | event: ZoneRazed (D1) | LE64(orb_id) ‖ LE16(tile) |
+| 10 | event: EntityRegistered (N3) | LE64(entity_id) ‖ LE64(principal) ‖ handle utf8 |
+| 11 | event: ScopeGranted (N3) | LE64(agent) ‖ scope u8 |
+| 12 | event: ScopeRevoked (N3) | LE64(agent) ‖ scope u8 |
 | 16 | orb header | LE64(orb_id) ‖ name utf8 |
 | 17 | orb zone entry | LE16(tile) ‖ kind u8 |
 | 18 | orb banked entry | resource u8 ‖ ratio |
@@ -99,19 +102,24 @@ YieldCollected{1,Iron,9/2}:   03140000000100000000000000010001000000090100000002
 
 ### 3.3 The session's receipts (NS-3 digests over the NS-1 event bytes)
 
+Since N3, every entity-forged receipt carries the actor's generation tag in
+provenance (here `[1]`, the sovereign — the tag participates in the
+digest), and the sovereign's registration precedes the founding:
+
 ```
-receipt 0  stamp 0  parent 00…00 (genesis)
-           own 6fd67c76f56c0812a77af13061b92cca898683f02db01e5a627e30562b379c70
-receipt 1  stamp 0  parent 6fd67c76…
-           own 2b75afc415e8bea409207e8f8ac4e914552a5220abfe8a02f6dfd8bf577bbb26
-receipt 2  stamp 3  parent 2b75afc4…   (YieldCollected iron 9/2)
-           own 8f8cef2122828202a928b7d9579b3eef057b0299bd22466f8cd1ce203420f394
-receipt 3  stamp 3  parent 8f8cef21…   (UpkeepSettled biomass 3/2)
-           own 4112f12d4454e810e7c79e705698135073e0cb4b7ee9d7e5b3eb90167e0bd549
+receipt 0  stamp 0  prov [1]  parent 00…00   (EntityRegistered founder)
+           own 174f294771ac5f2f41cb9670edc08350198bd6d66de79891f5ae3e91c8f62e3e
+receipt 1  stamp 0  prov [1]  parent 174f2947…   (ColonyFounded)
+           own a4ee7b018d7fd97caa3c1d434f28cd36ebb0bfe04fff63cff4983f3978fb53a0
+receipt 2  stamp 0  prov [1]  parent a4ee7b01…   (ZoneBuilt)
+           own 71f3f22f7b215a8c2b919d8af75be8bacf98368b43a881683480115c9511f948
+receipt 3  stamp 3  prov [1]  parent 71f3f22f…   (YieldCollected iron 9/2)
+           own 3fdd13fd79c04ea095953307daca1120e231c6c349ada5cc8092f79c03e1fef1
+receipt 4  stamp 3  prov [1]  parent 3fdd13fd…   (UpkeepSettled biomass 3/2)
+           own 16e33872ca55c70ea17a7ee3164b847c661070e9456d539bbd1f493780e34542
 ```
 Chain `Intact`; replay of the chronicle equals the committed world
-(measured: `the_chronicle_replays_the_committed_world`). Receipts 0–2 are
-byte-identical to the pre-D1 vectors — D1 was purely additive on the wire.
+(measured: `the_chronicle_replays_the_committed_world`).
 
 ## 4. Conformance
 

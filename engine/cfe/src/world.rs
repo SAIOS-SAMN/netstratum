@@ -13,8 +13,13 @@
 use crate::dop::{
     founding_reserves, ClosureEvent, ColonyOrb, Resource, Zone, ZoneKind,
 };
+use crate::ipsal::{Entity, Scope};
 use crate::ratio::{ratio, Ratio};
 use crate::vrp::{Attestation, Chronicle, Timekeeper, TickRead, WorldClock};
+
+/// The sovereign's entity id — the human at the terminal, registered
+/// at founding.
+pub const SOVEREIGN: u64 = 1;
 
 /// A typed action refusal — the world refuses instead of guessing.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -25,6 +30,14 @@ pub enum ActionRefused {
     NoSuchZone { tile: u16 },
     CannotAfford { resource: Resource, need: Box<Ratio>, have: Box<Ratio> },
     NothingAccrued,
+    /// N3 — no entity holds this id.
+    NoSuchEntity { entity: u64 },
+    /// N3 — the handle is already registered.
+    HandleTaken { handle: String },
+    /// N3 — the acting entity lacks the scope; containment refused it.
+    NotPermitted { entity: u64, scope: Scope },
+    /// N3 — grants and revocations apply to agents, never sovereigns.
+    NotAnAgent { entity: u64 },
 }
 
 /// One tick's read: the clock walk, and any famines that struck.
@@ -38,6 +51,7 @@ pub struct TickOutcome {
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Committed {
     pub orb: Option<ColonyOrb>,
+    pub entities: Vec<Entity>,
 }
 
 pub struct World {
@@ -45,6 +59,7 @@ pub struct World {
     keepers: [Timekeeper; 3],
     chronicle: Chronicle,
     orb: Option<ColonyOrb>,
+    entities: Vec<Entity>,
     /// WORKSPACE: net flow since the last collection — no receipt, no
     /// persistence, not part of the committed projection.
     accrued: Vec<(Resource, Ratio)>,
@@ -57,6 +72,7 @@ impl World {
             keepers: [Timekeeper { id: 0 }, Timekeeper { id: 1 }, Timekeeper { id: 2 }],
             chronicle: Chronicle::new(),
             orb: None,
+            entities: Vec::new(),
             accrued: Vec::new(),
         }
     }
@@ -77,12 +93,38 @@ impl World {
         &self.accrued
     }
 
+    pub fn entities(&self) -> &[Entity] {
+        &self.entities
+    }
+
+    pub fn entity(&self, entity: u64) -> Option<&Entity> {
+        self.entities.iter().find(|held| held.entity_id == entity)
+    }
+
     /// Found the colony — a closure; founding banks the bootstrap
-    /// reserves (02 §2.1).
+    /// reserves (02 §2.1) and, first, registers the SOVEREIGN: the
+    /// human at the terminal becomes entity 1, and every receipt they
+    /// forge carries their generation tag.
     pub fn found(&mut self, name: &str) -> Result<(), ActionRefused> {
         match self.orb {
             Some(_) => Err(ActionRefused::ColonyAlreadyFounded),
             None => {
+                if self.entities.is_empty() {
+                    self.entities.push(Entity {
+                        entity_id: SOVEREIGN,
+                        handle: "founder".to_string(),
+                        principal: None,
+                        grants: Vec::new(),
+                    });
+                    self.close(
+                        ClosureEvent::EntityRegistered {
+                            entity_id: SOVEREIGN,
+                            principal: 0,
+                            handle: "founder".to_string(),
+                        },
+                        SOVEREIGN,
+                    );
+                }
                 let orb_id = 1;
                 let mut orb = ColonyOrb {
                     orb_id,
@@ -93,18 +135,106 @@ impl World {
                     orb.bank(resource, amount);
                 }
                 self.orb = Some(orb);
-                self.close(ClosureEvent::ColonyFounded {
-                    orb_id,
-                    name: name.to_string(),
-                });
+                self.close(
+                    ClosureEvent::ColonyFounded {
+                        orb_id,
+                        name: name.to_string(),
+                    },
+                    SOVEREIGN,
+                );
                 Ok(())
             }
         }
     }
 
-    /// Zone a tile — the build SPENDS its cost from banked (02 §2.2);
-    /// an unaffordable build refuses with the exact shortfall.
+    /// Register a scripted agent contained by the sovereign (N3). The
+    /// agent starts with NO grants: containment first, capability by
+    /// explicit grant.
+    pub fn register_agent(&mut self, handle: &str) -> Result<u64, ActionRefused> {
+        if self.entities.is_empty() {
+            return Err(ActionRefused::NoSuchEntity { entity: SOVEREIGN });
+        }
+        if self.entities.iter().any(|held| held.handle == handle) {
+            return Err(ActionRefused::HandleTaken {
+                handle: handle.to_string(),
+            });
+        }
+        let entity_id = self.entities.iter().map(|held| held.entity_id).max().unwrap_or(0) + 1;
+        self.entities.push(Entity {
+            entity_id,
+            handle: handle.to_string(),
+            principal: Some(SOVEREIGN),
+            grants: Vec::new(),
+        });
+        self.close(
+            ClosureEvent::EntityRegistered {
+                entity_id,
+                principal: SOVEREIGN,
+                handle: handle.to_string(),
+            },
+            SOVEREIGN,
+        );
+        Ok(entity_id)
+    }
+
+    /// Grant an agent one action scope — a closure by the sovereign.
+    pub fn grant(&mut self, agent: u64, scope: Scope) -> Result<(), ActionRefused> {
+        let held = self
+            .entities
+            .iter_mut()
+            .find(|held| held.entity_id == agent)
+            .ok_or(ActionRefused::NoSuchEntity { entity: agent })?;
+        if held.principal.is_none() {
+            return Err(ActionRefused::NotAnAgent { entity: agent });
+        }
+        if !held.grants.contains(&scope) {
+            held.grants.push(scope);
+            held.grants.sort();
+            self.close(ClosureEvent::ScopeGranted { agent, scope }, SOVEREIGN);
+        }
+        Ok(())
+    }
+
+    /// Revoke a grant — revocation is immediate: the agent's next such
+    /// action refuses.
+    pub fn revoke(&mut self, agent: u64, scope: Scope) -> Result<(), ActionRefused> {
+        let held = self
+            .entities
+            .iter_mut()
+            .find(|held| held.entity_id == agent)
+            .ok_or(ActionRefused::NoSuchEntity { entity: agent })?;
+        if held.principal.is_none() {
+            return Err(ActionRefused::NotAnAgent { entity: agent });
+        }
+        if held.grants.contains(&scope) {
+            held.grants.retain(|granted| *granted != scope);
+            self.close(ClosureEvent::ScopeRevoked { agent, scope }, SOVEREIGN);
+        }
+        Ok(())
+    }
+
+    /// The containment check (NS-6): sovereigns act by construction;
+    /// agents act inside their grants, or the action refuses typed.
+    fn permitted(&self, actor: u64, scope: Scope) -> Result<(), ActionRefused> {
+        let entity = self
+            .entity(actor)
+            .ok_or(ActionRefused::NoSuchEntity { entity: actor })?;
+        match entity.permits(scope) {
+            true => Ok(()),
+            false => Err(ActionRefused::NotPermitted { entity: actor, scope }),
+        }
+    }
+
+    /// Zone a tile as the sovereign.
     pub fn zone(&mut self, tile: u16, kind: ZoneKind) -> Result<(), ActionRefused> {
+        self.zone_as(SOVEREIGN, tile, kind)
+    }
+
+    /// Zone a tile — the build SPENDS its cost from banked (02 §2.2);
+    /// an unaffordable build refuses with the exact shortfall. The
+    /// actor must hold Build scope; the receipt carries its tag.
+    pub fn zone_as(&mut self, actor: u64, tile: u16, kind: ZoneKind) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
         let orb = self.orb.as_mut().ok_or(ActionRefused::NoColony)?;
         if orb.zones.iter().any(|zone| zone.tile == tile) {
             return Err(ActionRefused::TileAlreadyZoned { tile });
@@ -125,13 +255,19 @@ impl World {
         orb.zones.push(Zone { tile, kind });
         orb.zones.sort_by_key(|zone| zone.tile);
         let orb_id = orb.orb_id;
-        self.close(ClosureEvent::ZoneBuilt { orb_id, tile, kind });
+        self.close(ClosureEvent::ZoneBuilt { orb_id, tile, kind }, actor);
         Ok(())
     }
 
-    /// Raze a zone for half its cost back (02 §2.4 — the way out), then
-    /// check famine relief (the drain just shrank).
+    /// Raze as the sovereign.
     pub fn raze(&mut self, tile: u16) -> Result<(), ActionRefused> {
+        self.raze_as(SOVEREIGN, tile)
+    }
+
+    /// Raze a zone for half its cost back (02 §2.4 — the way out), then
+    /// check famine relief (the drain just shrank). Raze scope required.
+    pub fn raze_as(&mut self, actor: u64, tile: u16) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Raze)?;
         let orb = self.orb.as_mut().ok_or(ActionRefused::NoColony)?;
         let at = orb
             .zones
@@ -143,7 +279,7 @@ impl World {
             orb.bank(resource, refund);
         }
         let orb_id = orb.orb_id;
-        self.close(ClosureEvent::ZoneRazed { orb_id, tile });
+        self.close(ClosureEvent::ZoneRazed { orb_id, tile }, actor);
         self.relieve_recovered();
         Ok(())
     }
@@ -206,10 +342,17 @@ impl World {
         }
     }
 
+    /// Collect as the sovereign.
+    pub fn collect(&mut self) -> Result<usize, ActionRefused> {
+        self.collect_as(SOVEREIGN)
+    }
+
     /// Collect — settle the workspace against banked: positive nets
     /// bank (`YieldCollected`), negative nets draw (`UpkeepSettled`).
-    /// Then check famine relief (the stores just moved).
-    pub fn collect(&mut self) -> Result<usize, ActionRefused> {
+    /// Then check famine relief (the stores just moved). Collect scope
+    /// required; every settle receipt carries the actor's tag.
+    pub fn collect_as(&mut self, actor: u64) -> Result<usize, ActionRefused> {
+        self.permitted(actor, Scope::Collect)?;
         let orb = self.orb.as_mut().ok_or(ActionRefused::NoColony)?;
         let accrued = std::mem::take(&mut self.accrued);
         let settleable: Vec<(Resource, Ratio)> = accrued
@@ -229,7 +372,7 @@ impl World {
                     self.chronicle.append(
                         ClosureEvent::YieldCollected { orb_id, resource, amount },
                         stamp,
-                        vec![],
+                        vec![actor],
                     );
                 }
                 false => {
@@ -245,7 +388,7 @@ impl World {
                             amount: drawn,
                         },
                         stamp,
-                        vec![],
+                        vec![actor],
                     );
                 }
             }
@@ -258,6 +401,7 @@ impl World {
     pub fn committed(&self) -> Committed {
         Committed {
             orb: self.orb.clone(),
+            entities: self.entities.clone(),
         }
     }
 
@@ -286,9 +430,12 @@ impl World {
         }
     }
 
-    fn close(&mut self, event: ClosureEvent) {
+    /// Seal a closure with its actor's generation tag (NS-6): the
+    /// receipt's provenance IS who forged it. World-drive closures
+    /// (famine) carry no tag — no entity forged them.
+    fn close(&mut self, event: ClosureEvent, actor: u64) {
         let stamp = self.clock.now();
-        self.chronicle.append(event, stamp, vec![]);
+        self.chronicle.append(event, stamp, vec![actor]);
     }
 }
 
@@ -304,8 +451,31 @@ impl Default for World {
 /// world exactly, workspace excluded by construction.
 pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut orb: Option<ColonyOrb> = None;
+    let mut entities: Vec<Entity> = Vec::new();
     for receipt in chronicle.receipts() {
         match &receipt.event {
+            ClosureEvent::EntityRegistered { entity_id, principal, handle } => {
+                entities.push(Entity {
+                    entity_id: *entity_id,
+                    handle: handle.clone(),
+                    principal: match principal {
+                        0 => None,
+                        held => Some(*held),
+                    },
+                    grants: Vec::new(),
+                });
+            }
+            ClosureEvent::ScopeGranted { agent, scope } => {
+                if let Some(held) = entities.iter_mut().find(|held| held.entity_id == *agent) {
+                    held.grants.push(*scope);
+                    held.grants.sort();
+                }
+            }
+            ClosureEvent::ScopeRevoked { agent, scope } => {
+                if let Some(held) = entities.iter_mut().find(|held| held.entity_id == *agent) {
+                    held.grants.retain(|granted| granted != scope);
+                }
+            }
             ClosureEvent::ColonyFounded { orb_id, name } => {
                 let mut founded = ColonyOrb {
                     orb_id: *orb_id,
@@ -360,7 +530,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             }
         }
     }
-    Committed { orb }
+    Committed { orb, entities }
 }
 
 fn ledger_amount(ledger: &[(Resource, Ratio)], resource: Resource) -> Ratio {

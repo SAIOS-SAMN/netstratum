@@ -74,9 +74,14 @@ fn the_chronicle_replays_the_committed_world() {
 #[test]
 fn actions_refuse_typed() {
     let mut world = World::new();
-    assert_eq!(world.zone(1, ZoneKind::Habitat), Err(ActionRefused::NoColony));
-    assert_eq!(world.collect(), Err(ActionRefused::NoColony));
-    assert_eq!(world.raze(1), Err(ActionRefused::NoColony));
+    // Containment precedes the world: before founding, no entity
+    // exists to act — the identity refusal outranks the colony one.
+    assert_eq!(
+        world.zone(1, ZoneKind::Habitat),
+        Err(ActionRefused::NoSuchEntity { entity: 1 })
+    );
+    assert_eq!(world.collect(), Err(ActionRefused::NoSuchEntity { entity: 1 }));
+    assert_eq!(world.raze(1), Err(ActionRefused::NoSuchEntity { entity: 1 }));
     world.found("meridian").expect("founding closes");
     assert_eq!(world.found("second"), Err(ActionRefused::ColonyAlreadyFounded));
     world.zone(1, ZoneKind::Habitat).expect("affordable");

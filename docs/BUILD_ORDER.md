@@ -32,7 +32,21 @@ same landing (CHARTER §1); commit on explicit operator go.
   registry at NS-1 §2.3 (events 1–3, orb 16–18); NS-1 vectors extracted from
   the running engine (`examples/ns1_vectors.rs`). The workspace invariant
   carried: accrued-uncollected yield has no receipt and does not persist.
-- **N2-UX LANDED** (2026-07-25, operator playtest feedback — presentation
+- **N3 LANDED** (2026-07-25): NS-6 ipsal-os first cut — THE ENTITY LAYER.
+  Identity (sovereign auto-registered at founding; agents contained by
+  their principal), scoped grants (Build/Raze/Collect, wire codes 1–3),
+  generation tagging (the NS-3 provenance field, until now empty, carries
+  the forging entity's id — no receipt format change spent). Tags 10–12.
+  Evidence: clippy zero; **26/26 witnesses green capped**; the three
+  containment laws measured (containment precedes the world; a grant is a
+  scope, not a blanket; revocation immediate and unilateral); no
+  simulation rule reads provenance; entities/grants/revocations replay
+  from receipts alone. One witness truth-update recorded: pre-founding
+  refusals are now NoSuchEntity (identity precedes the colony). The CLI
+  arc played end-to-end: agent refused → granted → collected with ITS tag
+  (`by#2` beside the sovereign's `by#1`) → revoked → refused again; chain
+  INTACT (9 receipts), replay MATCHES. NS-1 §3.3 vectors re-extracted
+  (provenance participates in the digest). (2026-07-25, operator playtest feedback — presentation
   only, no protocol change): the 8×8 MAP grid rendered after every build
   (`map`), `row:col` coordinate input beside plain tile numbers, refusals as
   human sentences with the cure named (each of the playtest's three stumbles

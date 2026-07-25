@@ -33,6 +33,13 @@ fn main() {
             resource: Resource::Iron,
             amount: ratio(9, 2),
         },
+        ClosureEvent::EntityRegistered {
+            entity_id: 2,
+            principal: 1,
+            handle: "harvest-bot".into(),
+        },
+        ClosureEvent::ScopeGranted { agent: 2, scope: cfe::ipsal::Scope::Collect },
+        ClosureEvent::ScopeRevoked { agent: 2, scope: cfe::ipsal::Scope::Collect },
     ] {
         println!("event {:?}", event);
         println!("  bytes: {}", hex(&event.wire_bytes()));
