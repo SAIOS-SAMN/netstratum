@@ -62,21 +62,29 @@ One tag, one meaning, forever; retired codes are never reused.
 | 1 | event: ColonyFounded | LE64(orb_id) ‖ name utf8 |
 | 2 | event: ZoneBuilt | LE64(orb_id) ‖ LE16(tile) ‖ kind u8 (1 extractor, 2 habitat) |
 | 3 | event: YieldCollected | LE64(orb_id) ‖ resource u8 (1 iron, 2 biomass) ‖ ratio |
+| 4 | event: UpkeepSettled (D1) | LE64(orb_id) ‖ resource u8 ‖ ratio |
+| 5 | event: FamineStruck (D1) | LE64(orb_id) ‖ resource u8 ‖ ratio (drawn) |
+| 6 | event: FamineRelieved (D1) | LE64(orb_id) ‖ resource u8 |
+| 7 | event: ZoneRazed (D1) | LE64(orb_id) ‖ LE16(tile) |
 | 16 | orb header | LE64(orb_id) ‖ name utf8 |
 | 17 | orb zone entry | LE16(tile) ‖ kind u8 |
 | 18 | orb banked entry | resource u8 ‖ ratio |
+| 19 | orb famine entry (D1) | resource u8 |
 
-## 3. Test vectors — extracted from the running engine
+## 3. Test vectors — extracted from the running engine (ruleset v1)
 
-Session: found "meridian" → zone tile 4 extractor → 3 ticks → collect.
-(`cargo run -p cfe --example ns1_vectors` reproduces every byte.)
+Session: found "meridian" (banks 20 iron / 10 biomass) → zone tile 4
+extractor (spends 10 iron) → 3 ticks (nets +9/2 iron, −3/2 biomass) →
+collect (settles both). (`cargo run -p cfe --example ns1_vectors`
+reproduces every byte.)
 
 ### 3.1 The orb, byte-exact
 
 ```
 101000000001000000000000006d6572696469616e   tag16 len16: orb 1, "meridian"
 1103000000040001                             tag17 len3:  tile 4, extractor
-120c000000010001000000090100000002           tag18 len12: iron, 9/2
+120c0000000100010000001d0100000002           tag18 len12: iron, 29/2
+120c000000020001000000110100000002           tag18 len12: biomass, 17/2
 ```
 Round trip: decode ‖ re-encode reproduces the bytes exactly (measured:
 `the_orb_round_trips_byte_exact`).
@@ -96,11 +104,14 @@ receipt 0  stamp 0  parent 00…00 (genesis)
            own 6fd67c76f56c0812a77af13061b92cca898683f02db01e5a627e30562b379c70
 receipt 1  stamp 0  parent 6fd67c76…
            own 2b75afc415e8bea409207e8f8ac4e914552a5220abfe8a02f6dfd8bf577bbb26
-receipt 2  stamp 3  parent 2b75afc4…
+receipt 2  stamp 3  parent 2b75afc4…   (YieldCollected iron 9/2)
            own 8f8cef2122828202a928b7d9579b3eef057b0299bd22466f8cd1ce203420f394
+receipt 3  stamp 3  parent 8f8cef21…   (UpkeepSettled biomass 3/2)
+           own 4112f12d4454e810e7c79e705698135073e0cb4b7ee9d7e5b3eb90167e0bd549
 ```
 Chain `Intact`; replay of the chronicle equals the committed world
-(measured: `the_chronicle_replays_the_committed_world`).
+(measured: `the_chronicle_replays_the_committed_world`). Receipts 0–2 are
+byte-identical to the pre-D1 vectors — D1 was purely additive on the wire.
 
 ## 4. Conformance
 

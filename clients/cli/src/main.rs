@@ -176,7 +176,15 @@ fn command(world: &mut World, line: &str, style: &Style) {
                 .and_then(|word| word.parse::<u64>().ok())
                 .unwrap_or(1);
             for _ in 0..count {
-                world.tick();
+                let outcome = world.tick();
+                for resource in outcome.struck {
+                    println!(
+                        "{} {} — the {} stores ran dry; its consumers fall DORMANT (raze to cut the drain, collect to restock)",
+                        style.bad("☠"),
+                        style.bad("FAMINE"),
+                        style.strong(resource_name(resource))
+                    );
+                }
             }
             println!(
                 "{} {} tick(s) pass — clock now {}",
@@ -185,6 +193,28 @@ fn command(world: &mut World, line: &str, style: &Style) {
                 style.strong(&world.now().to_string())
             );
             accrued_lines(world, style);
+        }
+        Some("raze") => {
+            match words.next().and_then(parse_tile) {
+                Some(tile) => match world.raze(tile) {
+                    Ok(()) => {
+                        println!(
+                            "{} tile {} ({}) razed — half the build cost refunded, receipt sealed",
+                            style.ok("✓"),
+                            style.strong(&tile.to_string()),
+                            coordinate(tile)
+                        );
+                        map(world, style);
+                    }
+                    Err(refusal) => refuse(world, &refusal, style),
+                },
+                None => println!(
+                    "{} usage: {} — e.g. {}",
+                    style.bad("✗"),
+                    style.strong("raze <tile|row:col>"),
+                    style.strong("raze 1:4")
+                ),
+            }
         }
         Some("collect") => match world.collect() {
             Ok(count) => {
@@ -241,10 +271,11 @@ fn command(world: &mut World, line: &str, style: &Style) {
 
 fn help(style: &Style) {
     let lines = [
-        ("found <name>", "establish your colony (once per world) — your first receipt"),
-        ("zone <tile|r:c> <ext|hab>", "build: ext = extractor (3/2 iron/tick), hab = habitat (1/4 biomass/tick)"),
-        ("tick <n>", "let n ticks pass — zones produce into the accrued workspace"),
-        ("collect", "bank the accrued yield — sealed as receipts; only banked yield persists"),
+        ("found <name>", "establish your colony (banks 20 iron + 10 biomass) — your first receipt"),
+        ("zone <tile|r:c> <ext|hab>", "build — ext: 10 iron, +3/2 iron/tick, eats 1/2 biomass/tick · hab: 5 biomass, +1 biomass/tick, eats 1/4 iron/tick"),
+        ("tick <n>", "let n ticks pass — active zones net yield−upkeep into the workspace; famine strikes if a store runs dry"),
+        ("collect", "settle the workspace against the bank — sealed as receipts; only banked value persists"),
+        ("raze <tile|r:c>", "demolish a zone for half its cost back — the famine escape hatch"),
         ("map", "the tile grid"),
         ("status", "colony, ledgers, clock, receipts"),
         ("chronicle", "the world's full receipted history"),
@@ -316,6 +347,20 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             coordinate(*tile),
             style.strong("map")
         ),
+        ActionRefused::NoSuchZone { tile } => format!(
+            "tile {} ({}) holds no zone to raze — {} shows what stands where",
+            style.strong(&tile.to_string()),
+            coordinate(*tile),
+            style.strong("map")
+        ),
+        ActionRefused::CannotAfford { resource, need, have } => format!(
+            "that costs {} {} and you have {} — {} to bank your accrual, or {} to reclaim half a build",
+            style.strong(&amount(need)),
+            resource_name(*resource),
+            style.strong(&amount(have)),
+            style.strong("collect"),
+            style.strong("raze <tile>")
+        ),
         ActionRefused::NothingAccrued => format!(
             "nothing to collect — let time pass first: {}",
             style.strong("tick <n>")
@@ -332,7 +377,7 @@ fn map(world: &World, style: &Style) {
     println!(
         "{}  {}",
         style.head("MAP"),
-        style.dim("E extractor · H habitat · · empty — zone <tile|r:c> <ext|hab>")
+        style.dim("E extractor · H habitat · lowercase = dormant · · empty")
     );
     print!("     ");
     for col in 0..GRID {
@@ -344,9 +389,15 @@ fn map(world: &World, style: &Style) {
         for col in 0..GRID {
             let tile = row * GRID + col;
             let cell = orb.zones.iter().find(|zone| zone.tile == tile);
-            let glyph = match cell.map(|zone| zone.kind) {
-                Some(ZoneKind::Extractor) => style.ok("E"),
-                Some(ZoneKind::Habitat) => style.head("H"),
+            let glyph = match cell {
+                Some(zone) if !orb.zone_active(zone) => style.bad(match zone.kind {
+                    ZoneKind::Extractor => "e",
+                    ZoneKind::Habitat => "h",
+                }),
+                Some(zone) => match zone.kind {
+                    ZoneKind::Extractor => style.ok("E"),
+                    ZoneKind::Habitat => style.head("H"),
+                },
                 None => style.dim("·"),
             };
             print!("{glyph} ");
@@ -389,6 +440,15 @@ fn status(world: &World, style: &Style) {
                 style.strong(&orb.name),
                 style.dim(&format!("(orb {})", orb.orb_id))
             );
+            for resource in &orb.famine {
+                println!(
+                    "    {} {} famine — its consumers are dormant ({} restocks, {} cuts the drain)",
+                    style.bad("☠"),
+                    style.bad(resource_name(*resource)),
+                    style.strong("collect"),
+                    style.strong("raze")
+                );
+            }
             zone_lines(orb, style);
             banked_lines(world, style);
             accrued_lines(world, style);
@@ -410,13 +470,25 @@ fn status(world: &World, style: &Style) {
 
 fn zone_lines(orb: &ColonyOrb, style: &Style) {
     for zone in &orb.zones {
-        let (resource, rate) = zone.kind.yield_per_tick();
+        let (yields, rate) = zone.kind.yield_per_tick();
+        let (eats, drain) = zone.kind.upkeep_per_tick();
+        let flows = format!(
+            "+{} {}/tick · −{} {}/tick",
+            amount(&rate),
+            resource_name(yields),
+            amount(&drain),
+            resource_name(eats)
+        );
+        let state = match orb.zone_active(zone) {
+            true => style.dim(&flows),
+            false => style.bad("DORMANT (famine)"),
+        };
         println!(
             "    tile {:>3} {}  {} {}",
             style.strong(&zone.tile.to_string()),
             style.dim(&format!("({})", coordinate(zone.tile))),
             kind_name(zone.kind),
-            style.dim(&format!("+{} {}/tick", amount(&rate), resource_name(resource)))
+            state
         );
     }
 }
@@ -439,6 +511,29 @@ fn chronicle(world: &World, style: &Style) {
                 "▣ collected {} {}",
                 style.strong(&amount(value)),
                 resource_name(*resource)
+            ),
+            cfe::dop::ClosureEvent::UpkeepSettled {
+                resource, amount: value, ..
+            } => format!(
+                "▽ upkeep settled: {} {} drawn from the bank",
+                style.strong(&amount(value)),
+                resource_name(*resource)
+            ),
+            cfe::dop::ClosureEvent::FamineStruck {
+                resource, drawn, ..
+            } => format!(
+                "☠ FAMINE — {} ran dry ({} drawn); consumers dormant",
+                style.strong(resource_name(*resource)),
+                amount(drawn)
+            ),
+            cfe::dop::ClosureEvent::FamineRelieved { resource, .. } => format!(
+                "☀ famine relieved — {} recovered; zones wake",
+                style.strong(resource_name(*resource))
+            ),
+            cfe::dop::ClosureEvent::ZoneRazed { tile, .. } => format!(
+                "⌫ tile {} ({}) razed — half cost refunded",
+                style.strong(&tile.to_string()),
+                coordinate(*tile)
             ),
         };
         println!(

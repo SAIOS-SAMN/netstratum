@@ -2,16 +2,25 @@
 //! a self-contained game object whose committed state round-trips its
 //! wire codec byte-exact.
 //!
+//! RULESET v1 (02_COLONY_LOOP §2 — LAW for replay; constants never
+//! change silently under an existing world): founding reserves, zone
+//! costs, yields, and upkeep live HERE, beside the types they rule.
+//!
 //! THE NETSTRATUM WIRE TAG REGISTRY (permanent — one tag, one meaning,
 //! forever; retired codes are never reused):
 //!   1  ClosureEvent::ColonyFounded
 //!   2  ClosureEvent::ZoneBuilt
 //!   3  ClosureEvent::YieldCollected
+//!   4  ClosureEvent::UpkeepSettled
+//!   5  ClosureEvent::FamineStruck
+//!   6  ClosureEvent::FamineRelieved
+//!   7  ClosureEvent::ZoneRazed
 //!   16 Orb header (orb_id ‖ name)
 //!   17 Orb zone entry (tile ‖ kind)
 //!   18 Orb banked entry (resource ‖ ratio)
+//!   19 Orb famine entry (resource)
 
-use crate::ratio::{self, Ratio};
+use crate::ratio::{self, ratio, Ratio};
 use crate::tlv;
 
 /// The resources of the first slice.
@@ -32,7 +41,15 @@ impl Resource {
     }
 }
 
-/// The zone kinds of the first slice, with their exact per-tick yields.
+/// Founding banks the bootstrap reserves (02 §2.1): 20 iron, 10 biomass.
+pub fn founding_reserves() -> Vec<(Resource, Ratio)> {
+    vec![
+        (Resource::Iron, ratio(20, 1)),
+        (Resource::Biomass, ratio(10, 1)),
+    ]
+}
+
+/// The zone kinds, with their ruleset-v1 economics.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum ZoneKind {
@@ -49,12 +66,34 @@ impl ZoneKind {
         }
     }
 
+    /// The build cost, spent from banked at build time (02 §2.2).
+    pub fn cost(&self) -> (Resource, Ratio) {
+        match self {
+            Self::Extractor => (Resource::Iron, ratio(10, 1)),
+            Self::Habitat => (Resource::Biomass, ratio(5, 1)),
+        }
+    }
+
     /// The exact yield rate — a ratio, never a float (RFA).
     pub fn yield_per_tick(&self) -> (Resource, Ratio) {
         match self {
-            Self::Extractor => (Resource::Iron, ratio::ratio(3, 2)),
-            Self::Habitat => (Resource::Biomass, ratio::ratio(1, 4)),
+            Self::Extractor => (Resource::Iron, ratio(3, 2)),
+            Self::Habitat => (Resource::Biomass, ratio(1, 1)),
         }
+    }
+
+    /// The per-tick upkeep drain (02 §2.2): crew rations / life support.
+    pub fn upkeep_per_tick(&self) -> (Resource, Ratio) {
+        match self {
+            Self::Extractor => (Resource::Biomass, ratio(1, 2)),
+            Self::Habitat => (Resource::Iron, ratio(1, 4)),
+        }
+    }
+
+    /// Razing refunds half the build cost (02 §2.4 — the way out).
+    pub fn raze_refund(&self) -> (Resource, Ratio) {
+        let (resource, cost) = self.cost();
+        (resource, cost / ratio(2, 1))
     }
 }
 
@@ -65,19 +104,27 @@ pub struct Zone {
     pub kind: ZoneKind,
 }
 
-/// The closures of the first slice — completed actions, the only
+/// The closures of the colony loop — completed transitions, the only
 /// things that chronicle (NS-3 §2.3).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ClosureEvent {
     ColonyFounded { orb_id: u64, name: String },
     ZoneBuilt { orb_id: u64, tile: u16, kind: ZoneKind },
     YieldCollected { orb_id: u64, resource: Resource, amount: Ratio },
+    /// Collect settled a negative net from banked (02 §2.3).
+    UpkeepSettled { orb_id: u64, resource: Resource, amount: Ratio },
+    /// banked+accrued fell below 0: the stores emptied (`drawn` = what
+    /// banked held at the strike), consumers went dormant (02 §2.4).
+    FamineStruck { orb_id: u64, resource: Resource, drawn: Ratio },
+    /// The resource recovered to one-tick upkeep; consumers woke.
+    FamineRelieved { orb_id: u64, resource: Resource },
+    /// A zone demolished for half its cost back.
+    ZoneRazed { orb_id: u64, tile: u16 },
 }
 
 impl ClosureEvent {
-    /// The normative TLV event encoding (NS-3 §2.2, landed here at N2):
-    /// one record, tag = the event's permanent code, value = the
-    /// event's field layout.
+    /// The normative TLV event encoding (NS-3 §2.2): one record, tag =
+    /// the event's permanent code, value = the event's field layout.
     pub fn wire_bytes(&self) -> Vec<u8> {
         let mut out = Vec::new();
         match self {
@@ -92,15 +139,24 @@ impl ClosureEvent {
                 value.push(*kind as u8);
                 tlv::put(2, &value, &mut out);
             }
-            Self::YieldCollected {
-                orb_id,
-                resource,
-                amount,
-            } => {
+            Self::YieldCollected { orb_id, resource, amount } => {
+                tlv::put(3, &amount_layout(*orb_id, *resource, amount), &mut out);
+            }
+            Self::UpkeepSettled { orb_id, resource, amount } => {
+                tlv::put(4, &amount_layout(*orb_id, *resource, amount), &mut out);
+            }
+            Self::FamineStruck { orb_id, resource, drawn } => {
+                tlv::put(5, &amount_layout(*orb_id, *resource, drawn), &mut out);
+            }
+            Self::FamineRelieved { orb_id, resource } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.push(*resource as u8);
-                ratio::encode(amount, &mut value);
-                tlv::put(3, &value, &mut out);
+                tlv::put(6, &value, &mut out);
+            }
+            Self::ZoneRazed { orb_id, tile } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&tile.to_le_bytes());
+                tlv::put(7, &value, &mut out);
             }
         }
         out
@@ -122,18 +178,45 @@ impl ClosureEvent {
                 Some(Self::ZoneBuilt { orb_id, tile, kind })
             }
             3 => {
+                let (orb_id, resource, amount) = amount_fields(value)?;
+                Some(Self::YieldCollected { orb_id, resource, amount })
+            }
+            4 => {
+                let (orb_id, resource, amount) = amount_fields(value)?;
+                Some(Self::UpkeepSettled { orb_id, resource, amount })
+            }
+            5 => {
+                let (orb_id, resource, drawn) = amount_fields(value)?;
+                Some(Self::FamineStruck { orb_id, resource, drawn })
+            }
+            6 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let resource = Resource::from_wire(*value.get(8)?)?;
-                let (amount, _) = ratio::decode(value.get(9..)?)?;
-                Some(Self::YieldCollected {
-                    orb_id,
-                    resource,
-                    amount,
-                })
+                Some(Self::FamineRelieved { orb_id, resource })
+            }
+            7 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let tile = u16::from_le_bytes(value.get(8..10)?.try_into().ok()?);
+                Some(Self::ZoneRazed { orb_id, tile })
             }
             _ => None,
         }
     }
+}
+
+/// The shared `LE64(orb_id) ‖ resource u8 ‖ ratio` layout (tags 3–5).
+fn amount_layout(orb_id: u64, resource: Resource, amount: &Ratio) -> Vec<u8> {
+    let mut value = orb_id.to_le_bytes().to_vec();
+    value.push(resource as u8);
+    ratio::encode(amount, &mut value);
+    value
+}
+
+fn amount_fields(value: &[u8]) -> Option<(u64, Resource, Ratio)> {
+    let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+    let resource = Resource::from_wire(*value.get(8)?)?;
+    let (amount, _) = ratio::decode(value.get(9..)?)?;
+    Some((orb_id, resource, amount))
 }
 
 /// The colony orb — COMMITTED state only. Unreceipted accrual is
@@ -145,14 +228,17 @@ pub struct ColonyOrb {
     pub name: String,
     /// Zones, tile-ascending (canonical order).
     pub zones: Vec<Zone>,
-    /// Banked yields, resource-ascending (canonical order).
+    /// Banked yields, resource-ascending (canonical order); zero
+    /// entries are dropped (one state, one encoding).
     pub banked: Vec<(Resource, Ratio)>,
+    /// Resources under famine, ascending — zones consuming these are
+    /// DORMANT (no yield, no drain).
+    pub famine: Vec<Resource>,
 }
 
 impl ColonyOrb {
-    /// The canonical orb codec: header, then zones tile-ascending, then
-    /// banked entries resource-ascending. Canonical order + canonical
-    /// ratio carriers = byte-exact round trips.
+    /// The canonical orb codec: header, zones tile-ascending, banked
+    /// resource-ascending, famines ascending.
     pub fn wire_bytes(&self) -> Vec<u8> {
         let mut out = Vec::new();
         let mut header = self.orb_id.to_le_bytes().to_vec();
@@ -168,11 +254,13 @@ impl ColonyOrb {
             ratio::encode(amount, &mut value);
             tlv::put(18, &value, &mut out);
         }
+        for resource in &self.famine {
+            tlv::put(19, &[*resource as u8], &mut out);
+        }
         out
     }
 
-    /// Decode an orb; unknown tags are SKIPPED (SEAL A) — bytes from a
-    /// future engine version decode to the fields this version knows.
+    /// Decode an orb; unknown tags are SKIPPED (SEAL A).
     pub fn from_wire(bytes: &[u8]) -> Option<Self> {
         let mut orb = ColonyOrb::default();
         let mut seen_header = false;
@@ -193,13 +281,26 @@ impl ColonyOrb {
                     let (amount, _) = ratio::decode(value.get(1..)?)?;
                     orb.banked.push((resource, amount));
                 }
+                19 => {
+                    orb.famine.push(Resource::from_wire(*value.first()?)?);
+                }
                 _ => {}
             }
         }
         seen_header.then_some(orb)
     }
 
-    /// Bank an amount into the canonical (resource-ascending) ledger.
+    /// The banked amount of a resource (zero when absent).
+    pub fn banked_amount(&self, resource: Resource) -> Ratio {
+        self.banked
+            .iter()
+            .find(|(held, _)| *held == resource)
+            .map(|(_, amount)| amount.clone())
+            .unwrap_or_else(|| ratio(0, 1))
+    }
+
+    /// Add (or, negative, draw) an amount in the canonical ledger; zero
+    /// entries drop so equal states share one encoding.
     pub fn bank(&mut self, resource: Resource, amount: Ratio) {
         match self.banked.iter_mut().find(|(held, _)| *held == resource) {
             Some((_, held)) => *held += amount,
@@ -208,5 +309,12 @@ impl ColonyOrb {
                 self.banked.sort_by_key(|(resource, _)| *resource);
             }
         }
+        self.banked.retain(|(_, amount)| amount != &ratio(0, 1));
+    }
+
+    /// Is a zone active? Dormant while its CONSUMED resource is famined.
+    pub fn zone_active(&self, zone: &Zone) -> bool {
+        let (consumed, _) = zone.kind.upkeep_per_tick();
+        !self.famine.contains(&consumed)
     }
 }

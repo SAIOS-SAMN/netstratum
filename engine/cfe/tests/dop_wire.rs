@@ -14,6 +14,7 @@ fn an_orb() -> ColonyOrb {
             Zone { tile: 9, kind: ZoneKind::Habitat },
         ],
         banked: Vec::new(),
+        famine: vec![Resource::Biomass],
     };
     orb.bank(Resource::Iron, ratio(6, 1));
     orb.bank(Resource::Biomass, ratio(1, 1));
@@ -70,6 +71,18 @@ fn events_round_trip_through_their_wire_records() {
             resource: Resource::Iron,
             amount: ratio(3, 2),
         },
+        ClosureEvent::UpkeepSettled {
+            orb_id: 1,
+            resource: Resource::Biomass,
+            amount: ratio(3, 2),
+        },
+        ClosureEvent::FamineStruck {
+            orb_id: 1,
+            resource: Resource::Biomass,
+            drawn: ratio(5, 1),
+        },
+        ClosureEvent::FamineRelieved { orb_id: 1, resource: Resource::Biomass },
+        ClosureEvent::ZoneRazed { orb_id: 1, tile: 4 },
     ];
     for event in events {
         let bytes = event.wire_bytes();

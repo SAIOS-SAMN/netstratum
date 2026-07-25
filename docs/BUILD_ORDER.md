@@ -67,6 +67,22 @@ Ruled 2026-07-25: the world must be worth sharing before N6 shares it. These
 interleave with the protocol board; ruleset constants live in 02 §2 and are
 LAW for replay.
 
+- **D1 LANDED** (2026-07-25): costs, upkeep, famine, raze. Evidence: clippy
+  zero; **17/17 witnesses green capped**, red-first honored (the knife-edge
+  witness caught a zero-net entry lingering in the workspace — recorded red,
+  cured: a zero net is not a datum). Measured: 2E+1H nets biomass EXACTLY 0
+  over 8 ticks (iron 22 = 8×11/4); the third extractor refuses at 0 iron with
+  the exact shortfall; famine strikes at EXACTLY tick 11 (5 − t/2 < 0);
+  dormant zones neither yield nor drain (measured per-tick delta); raze
+  refunds exactly half; relief at the collect where banked ≥ one-tick upkeep;
+  the FULL crisis replays from receipts alone. Wire: tags 4–7 + 19 live
+  (registry at NS-1 §2.3); pre-D1 receipts byte-identical (additive only);
+  NS-1 §3 vectors re-extracted under ruleset v1. CLI: `raze`, famine
+  banners, dormant zones lowercase on the map, costs in `help`, the
+  CannotAfford message names the cure. The full arc played end-to-end:
+  aggressive opening → earned third extractor → famine at tick 15 → raze →
+  relief → chain INTACT (11 receipts), replay MATCHES.
+
 | # | Landing | Contains | Proven by |
 |---|---|---|---|
 | **D1** | COSTS, UPKEEP, FAMINE | builds spend banked; per-tick net flows; famine/dormancy/relief; `raze` (half refund); tags 4–7 | the 2E+1H knife edge nets biomass exactly 0; a third extractor strikes famine on schedule; raze cuts the drain and the colony recovers; replay reproduces it all |
