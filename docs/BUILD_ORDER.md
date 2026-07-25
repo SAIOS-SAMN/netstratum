@@ -19,6 +19,19 @@ same landing (CHARTER §1); commit on explicit operator go.
   the document alone. Ruling carried: the normative TLV event encoding lands
   WITH the first engine implementation at N2 (the event vocabulary cannot
   precede the actions that close).
+- **N2 LANDED** (2026-07-25): NS-1 DOP first cut + THE FIRST PLAYABLE SLICE.
+  The workspace opened (`engine/cfe`, `clients/cli` — `cargo run -p
+  netstratum-cli` is the one onboarding command). Evidence: clippy zero;
+  **11/11 witnesses green, memory-capped** (NS-3 conformance: the inscribed
+  v0.4 vectors reproduce on the fresh implementation, tamper vector included;
+  the tick law refuses 2-of-3/skip/replay; the orb round-trips BYTE-exact;
+  unknown tags skip — SEAL A measured; replay equals the committed world —
+  SEAL B measured; exact accrual: 4×3/2 = 6, 3×3/2 = 9/2, no drift). The
+  played session: found → zone×2 → tick 4 → collect → chain `Intact` (5
+  receipts) → replay MATCHES. The N1 TLV debt PAID: the permanent tag
+  registry at NS-1 §2.3 (events 1–3, orb 16–18); NS-1 vectors extracted from
+  the running engine (`examples/ns1_vectors.rs`). The workspace invariant
+  carried: accrued-uncollected yield has no receipt and does not persist.
 
 ## 1. The board
 

@@ -1,0 +1,11 @@
+[package]
+name = "cfe"
+version = "0.1.0"
+edition = "2021"
+description = "Canonical Field Engine — the Netstratum runtime evaluating RFA state transitions"
+
+[dependencies]
+blake3.workspace = true
+num-bigint.workspace = true
+num-rational.workspace = true
+num-traits.workspace = true

@@ -1,6 +1,8 @@
 # NS-3 — VRP: Verification Receipt Protocol
 
-**Status:** LANDED at N1 — written FROM the working v0.4 chronicle organ
+**Status:** LANDED at N1; §2.2 TLV event encoding paid at N2 (conformance §4
+met by `engine/cfe` — witnesses `ns3_conformance.rs`). Written FROM the
+working v0.4 chronicle organ
 (`/opt/ipsal-autic-v0.4/iae/src/chronicle/`, exercised by
 `iae/tests/chronicle_receipts.rs`, 960 attested boundaries live in the sealed
 build). First consumer: the world chronicle — every player and agent action in
@@ -75,13 +77,14 @@ lawful at this layer only and never carry game-rule content.
 The v0.4 ancestor hashes a session-stable textual encoding of the typed event
 (its Rust `Debug` form) — sound within one build, explicitly provisional for
 the wire (its own code comment homes the codec at the persistence landing).
-NS-3 inherits that ruling: **the normative Netstratum event encoding is TLV,
-additive per CHARTER SEAL A (readers skip unknown tags), and it lands WITH
-the first engine implementation at N2** — the event vocabulary cannot be
-enumerated before the actions that close exist (CHARTER §1). What is
-normative NOW: one tag, one meaning, forever — a retired tag's code is never
-reused (the v0.4 permanent tag space, tags 1–32, is the working precedent
-and its collision-cure history is the cautionary record).
+NS-3 inherited that ruling, and the debt is PAID: **the normative Netstratum
+event encoding is TLV** (NS-1 §2 — the record layout, the ratio carrier, and
+the permanent tag registry), landed WITH the first engine consumer at N2 as
+ruled. `event_bytes` in §2.1 is the event's single TLV record. One tag, one
+meaning, forever — a retired tag's code is never reused (the v0.4 permanent
+tag space is the working precedent and its collision-cure history the
+cautionary record). Receipts over real NS-1 event bytes are vectored at
+NS-1 §3.3.
 
 ### 2.3 What may chronicle
 

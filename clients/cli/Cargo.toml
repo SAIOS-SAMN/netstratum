@@ -1,0 +1,12 @@
+[package]
+name = "netstratum-cli"
+version = "0.1.0"
+edition = "2021"
+description = "The Netstratum MUD client — one command launches it (CHARTER §3.5)"
+
+[[bin]]
+name = "netstratum"
+path = "src/main.rs"
+
+[dependencies]
+cfe = { path = "../../engine/cfe" }
