@@ -1,0 +1,8 @@
+name: arc_00576224
+kind: pair
+grid: train1_in 2 2 7 9 4 3
+grid: train1_out 6 6 7 9 7 9 7 9 4 3 4 3 4 3 9 7 9 7 9 7 3 4 3 4 3 4 7 9 7 9 7 9 4 3 4 3 4 3
+grid: train2_in 2 2 8 6 6 4
+grid: train2_out 6 6 8 6 8 6 8 6 6 4 6 4 6 4 6 8 6 8 6 8 4 6 4 6 4 6 8 6 8 6 8 6 6 4 6 4 6 4
+grid: test_in 2 2 3 2 7 8
+grid: test_expected 6 6 3 2 3 2 3 2 7 8 7 8 7 8 2 3 2 3 2 3 8 7 8 7 8 7 3 2 3 2 3 2 7 8 7 8 7 8

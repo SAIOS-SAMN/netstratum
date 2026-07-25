@@ -1,0 +1,8 @@
+[package]
+name = "solver"
+version = "0.1.0"
+edition = "2021"
+description = "The ARC solver harness — the cognitive apex: exact grid transformations searched over rfa-core-grade discipline, every solution a replayable proof chain"
+
+[dependencies]
+blake3.workspace = true
