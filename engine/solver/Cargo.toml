@@ -6,3 +6,4 @@ description = "The ARC solver harness — the cognitive apex: exact grid transfo
 
 [dependencies]
 blake3.workspace = true
+physics = { path = "../physics" }

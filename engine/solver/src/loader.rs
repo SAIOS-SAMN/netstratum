@@ -15,14 +15,14 @@ use crate::grid::Grid;
 use std::path::Path;
 
 /// One training pair: the observed transformation instance.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TaskPair {
     pub input: Grid,
     pub output: Grid,
 }
 
 /// One task: training pairs + the held-out test.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Task {
     pub name: String,
     pub train: Vec<TaskPair>,

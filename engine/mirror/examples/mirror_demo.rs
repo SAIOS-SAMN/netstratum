@@ -46,7 +46,7 @@ fn main() {
     mars.collect().unwrap();
     mirror.record("sol", "mars", "humans", &mars).unwrap();
     mirror
-        .record_solve("sol", "arc_6150a2bd", "rotate180", "deadbeef")
+        .record_solve("sol", "arc_6150a2bd", "rotate180", "deadbeef", 1)
         .unwrap();
 
     // Deep Chorus settles tidefall, in the kepler-passage world:

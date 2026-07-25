@@ -175,4 +175,5 @@ name = "solver"
 version = "0.1.0"
 dependencies = [
  "blake3",
+ "physics",
 ]

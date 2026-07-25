@@ -174,12 +174,15 @@ impl Mirror {
     }
 
     /// Record a proof-of-solution: one JSON file per confirmed task.
+    /// `depth` is the difficulty rung the solve was earned at (the
+    /// observer's DEPTH column reads the maximum).
     pub fn record_solve(
         &self,
         world: &str,
         task: &str,
         program: &str,
         certificate_hex: &str,
+        depth: u32,
     ) -> std::io::Result<()> {
         let dir = self.world_dir(world).join("solves");
         fs::create_dir_all(&dir)?;
@@ -188,6 +191,7 @@ impl Mirror {
         w.field_str("task", task);
         w.field_str("program", program);
         w.field_str("certificate", certificate_hex);
+        w.field_u64("depth", depth as u64);
         w.close();
         fs::write(dir.join(format!("{}.json", sanitize(task))), w.finish())
     }

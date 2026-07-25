@@ -105,11 +105,16 @@ def read_worlds(var_root):
         linked, _ = chain_linked(world_dir / "chronicle.jsonl")
         consumed = collected_total(world_dir / "chronicle.jsonl")
         solves = world_dir / "solves"
-        puzzles = (
-            sum(1 for p in solves.iterdir() if p.suffix == ".json")
-            if solves.is_dir()
-            else 0
-        )
+        puzzles, depth = 0, 0
+        if solves.is_dir():
+            for path in solves.iterdir():
+                if path.suffix != ".json":
+                    continue
+                puzzles += 1
+                try:
+                    depth = max(depth, json.loads(path.read_text(encoding="utf-8")).get("depth", 1))
+                except json.JSONDecodeError:
+                    pass
         planets_dir = world_dir / "planets"
         if not planets_dir.is_dir():
             continue
@@ -130,6 +135,7 @@ def read_worlds(var_root):
                 "zones": len(state.get("zones", [])),
                 "famine": state.get("famine", []),
                 "puzzles": puzzles,
+                "depth": depth,
                 "consumed": consumed,
                 "linked": linked,
             }
@@ -147,7 +153,7 @@ def aggregate_by_civilization(rows, registry):
     civs = {}
     for row in rows:
         agg = civs.setdefault(row["civilization"], {
-            "colonies": 0, "puzzles": 0, "consumed": Fraction(0),
+            "colonies": 0, "puzzles": 0, "depth": 0, "consumed": Fraction(0),
             "worlds": set(),
             **{r: Fraction(0) for r in RESOURCES},
         })
@@ -157,6 +163,7 @@ def aggregate_by_civilization(rows, registry):
         if row["world"] not in agg["worlds"]:
             agg["worlds"].add(row["world"])
             agg["puzzles"] += row["puzzles"]
+            agg["depth"] = max(agg["depth"], row["depth"])
             agg["consumed"] += row["consumed"]
     out = []
     for slug, agg in sorted(civs.items()):
@@ -171,6 +178,7 @@ def aggregate_by_civilization(rows, registry):
             "colonies": agg["colonies"],
             **{r: agg[r] for r in RESOURCES},
             "puzzles": agg["puzzles"],
+            "depth": agg["depth"],
             "intelligence": (Fraction(agg["puzzles"]) / agg["consumed"]
                              if agg["consumed"] > 0 else None),
         })
@@ -235,13 +243,13 @@ def render(rows, registry, sort_key, plain):
          str(agg["worlds"]), str(agg["colonies"]),
          show(agg["iron"]), show(agg["biomass"]),
          show(agg["alloy"]), show(agg["diamond"]),
-         str(agg["puzzles"]),
+         str(agg["puzzles"]), str(agg["depth"]),
          show(agg["intelligence"]) if agg["intelligence"] is not None else "—"]
         for agg in aggregate_by_civilization(rows, registry)
     ]
     sections += ["", "CIVILIZATIONS", tabulate(
         ["CIVILIZATION", "SPECIES", "AXES", "WORLDS", "COLONIES", "IRON",
-         "BIOMASS", "ALLOY", "DIAMOND", "PUZZLES", "INTELLIGENCE"],
+         "BIOMASS", "ALLOY", "DIAMOND", "PUZZLES", "DEPTH", "INTELLIGENCE"],
         civ_table)]
     return "\n".join(sections)
 

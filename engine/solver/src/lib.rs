@@ -17,11 +17,13 @@
 //!   Finding a solution is search; checking one is O(program length).
 
 pub mod certificate;
+pub mod forge;
 pub mod grid;
 pub mod loader;
 pub mod search;
 
 pub use certificate::{verify_certificate, CertificateRead, SolveCertificate};
+pub use forge::{forge_task, Difficulty};
 pub use grid::{Grid, Op, Program, TileMirror};
 pub use loader::{load_task, LoadError, Task, TaskPair};
 pub use search::{solve, SolveRead};
