@@ -61,3 +61,15 @@ before N4 (identity before query scope); N6 before N7 (anchoring needs the
 converged mesh root it anchors); N7 last. Each landing names its spec section
 and its game consumer in the landing record.
 
+## 2. The depth board (02_COLONY_LOOP — game depth before multiplayer)
+
+Ruled 2026-07-25: the world must be worth sharing before N6 shares it. These
+interleave with the protocol board; ruleset constants live in 02 §2 and are
+LAW for replay.
+
+| # | Landing | Contains | Proven by |
+|---|---|---|---|
+| **D1** | COSTS, UPKEEP, FAMINE | builds spend banked; per-tick net flows; famine/dormancy/relief; `raze` (half refund); tags 4–7 | the 2E+1H knife edge nets biomass exactly 0; a third extractor strikes famine on schedule; raze cuts the drain and the colony recovers; replay reproduces it all |
+| **D2** | TERRAIN + ADJACENCY | the seeded chart (tag 8); Standard/Rich/Barren multipliers; the adjacency pair; the map renders terrain | terrain replays deterministically from the receipted seed; a rich-seam extractor yields 9/4 exactly; the habitat-beside-pit penalty measures ×3/4 |
+| **D3** | SPOILAGE + MILESTONES | accrued biomass −1/4/tick floored at 0; the milestone ladder (tag 9) | spoilage floors at 0 and never banks; each milestone closes once, receipted |
+
