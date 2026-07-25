@@ -1,0 +1,9 @@
+[package]
+name = "mirror"
+version = "0.1.0"
+edition = "2021"
+description = "The world mirror — every civilization continuously reflected to disk (state snapshot + receipt stream + steward inbox); the observation seam and the persistence carrier in one"
+
+[dependencies]
+cfe = { path = "../cfe" }
+num-traits.workspace = true

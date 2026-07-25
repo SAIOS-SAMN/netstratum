@@ -111,6 +111,37 @@ verification (N6), and anchoring (N7) survive untouched.
   routes through the beacon with a named domain tag, and the tag
   appears in the receipt that consumed the draw.
 
+## 7. Observation and governance → the mirror, the observer, the steward
+
+Every console session reflects its civilization to `var/worlds/<civ>/`:
+`state.json` (atomic-replace snapshot), `chronicle.jsonl` (append-only
+receipt stream carrying the digest chain and the normative TLV bytes),
+`solves/` (proof-of-solution certificates), `inbox/` (steward
+directives; processed ones archive under `applied/`/`refused/`, never
+deleted). Quantities render exact (`9/2`, never `4.5`).
+
+- **Primitive:** `mirror::Mirror` (`record`, `pending_directives`,
+  `archive`, `record_solve`). The mirror is a REFLECTION, never an
+  authority — nothing reads `state.json` back into a world; replay
+  grounds worlds. The same stream is the persistence carrier: world =
+  replay(chronicle), so save/load and observation are one seam.
+- **Tools:** `tools/observer.py` — read-only by construction;
+  civilization-centric dashboard (resources, zones, clock, puzzles,
+  the intelligence ratio `puzzles / resources-collected`, per-stream
+  chain-linkage check that reads `✗ BROKEN` on any splice). 
+  `tools/steward.py` — the master control program on a leash: writes
+  directive FILES only. **THE STEWARD LAW: a directive becomes real
+  ONLY through the game loop as a scope-checked NS-6 action emitting
+  an ordinary attributed receipt; the steward never edits state, and
+  `revoke` shuts it out instantly.** Signature hardening on directive
+  files is a named seam for the first multi-user landing.
+- **Witness:** `mirror_pins.rs` (faithful + incremental reflection,
+  chain linkage in the stream, directive round-trip + archival,
+  exactness in the snapshot).
+- **coder-02 seam:** the CLI wires `Mirror::record` after each command
+  and drains `pending_directives` per tick via the `as steward` path;
+  the steward entity exists per-world with operator-granted scopes.
+
 ---
 
 ## Merge discipline
