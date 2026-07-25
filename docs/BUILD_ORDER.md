@@ -6,7 +6,19 @@ same landing (CHARTER §1); commit on explicit operator go.
 
 ## 0. The landed ledger
 
-*(empty — the scaffold precedes the first landing)*
+- **N0 LANDED** (`bd70ed2`, 2026-07-25): the scaffold — charter (Dark Forest
+  constraints, §7 bridge governance, §8 terminology law), this carrier,
+  NS-1..NS-7 stubs, the economy at design stage.
+- **N1 LANDED** (2026-07-25): NS-3 VRP written FROM the working v0.4
+  chronicle organ. Evidence: the sealed build driven read-only (path
+  dependency, fixture identical to the landed witness); the tick law measured
+  (3-of-3 ticks; 2-of-3, skip both refuse, clock unmoved); three receipts
+  extracted byte-exact (genesis parent zero; chain `Intact`); tamper
+  divergence measured (one changed u64 → digest `c86c17aa…` → `366aa785…`).
+  Vectors are self-contained in NS-3 §3 — any implementation verifies from
+  the document alone. Ruling carried: the normative TLV event encoding lands
+  WITH the first engine implementation at N2 (the event vocabulary cannot
+  precede the actions that close).
 
 ## 1. The board
 
