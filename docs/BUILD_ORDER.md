@@ -75,6 +75,24 @@ before N4 (identity before query scope); N6 before N7 (anchoring needs the
 converged mesh root it anchors); N7 last. Each landing names its spec section
 and its game consumer in the landing record.
 
+## 1a. The substrate slot (parallel-node protocol, CHARTER §10)
+
+- **N-RFA (coder-01, reserved):** `engine/rfa-core` (Delta,
+  for_each_residual, coherence_functional, coboundary_reduce,
+  validate_step) + `engine/physics` (FlowState, step_witness,
+  exhale/inhale) — the clean-room math substrate, landing from the
+  worktree on operator go, rebased onto N3 (disjoint files). Its
+  companion `docs/03_SUBSTRATE_CONTRACT.md` is the mechanic → primitive →
+  witness authority. Lore corrections it pins: the convergence-engine's
+  coherence is SUM-OF-SQUARES in code (its README wrongly says L1); the
+  incoherent 3-node reference vector measures C = 24, not 8.
+
+## 2a. The genesis board (04_CIVILIZATION_GENESIS — G1–G4)
+
+G1 genesis+disposition (after N-RFA) → G2 metabolism tables → G3
+perception+translation (lands WITH N4) → G4 the discovery mint (lands with
+N5/N6). Details and sequencing in 04 §5.
+
 ## 2. The depth board (02_COLONY_LOOP — game depth before multiplayer)
 
 Ruled 2026-07-25: the world must be worth sharing before N6 shares it. These

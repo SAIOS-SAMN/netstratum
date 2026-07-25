@@ -146,3 +146,29 @@ internet pattern-matching noise the work does not need; the mathematics is
 fully specified by its own proper names. (The symbol ℚ may still appear inside
 formal mathematical derivations where it denotes the field of rationals and
 nothing else.)
+
+## 9. THE STOCHASTIC LAW (inscribed before any randomness lands)
+
+In Netstratum, **"stochastic" means chronicle-seeded, receipted, replayable
+randomness — never ambient entropy, never floats.** Any mechanic that draws
+chance (hazards, shocks, prospecting) draws from a PRNG seeded by the
+previous tick's receipt digest, with probabilities as exact rationals and
+draws as exact modular arithmetic. A replay of the chronicle therefore
+reproduces every "random" outcome bit-for-bit. Wall-clock time, OS entropy,
+and floating-point sampling are refused at write time — they would break
+SEAL B (replay = committed world) and with it mesh consensus (NS-5) and
+anchoring (NS-7). Randomness is a *reading of history*, not an oracle
+outside it.
+
+## 10. THE PARALLEL-NODE PROTOCOL (coder-01 / coder-02, ratified 2026-07-25)
+
+Two engineering nodes work this repo. File ownership keeps merges
+conflict-free: **coder-02 (vocabulary node, main tree)** owns `docs/`
+(EXCEPT the substrate contract), `engine/cfe/src/world.rs`, `clients/cli/`.
+**coder-01 (substrate node, worktree)** owns `engine/rfa-core/`,
+`engine/physics/`, `docs/03_SUBSTRATE_CONTRACT.md`, and the workspace
+`Cargo.toml` members line. Neither node edits the other's territory without
+an operator relay. Cross-layer meaning is pinned by
+`docs/03_SUBSTRATE_CONTRACT.md` (each mechanic stated as mechanic →
+primitive → witness test) — the layers hold each other by tests, not by
+memory.
