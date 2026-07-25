@@ -1,7 +1,7 @@
 # THE WORLD-BOOK, CHAPTER 1 — THE COLONY LOOP
 
 **Status:** DESIGN, ruled — this chapter locks the first depth ruleset. It
-lands in three increments (D1–D3, boarded in BUILD_ORDER). Numbers here are
+lands in four increments (D1–D4, boarded in BUILD_ORDER). Numbers here are
 the ruleset v1 constants: exact ratios, tuned for tension, changeable only by
 a new ruleset version (never silently — replay depends on them).
 
@@ -66,7 +66,7 @@ nets draw down as `UpkeepSettled`. The workspace stays unreceipted
   collapsing) can raze extractors to cut the drain and rebuild — painful,
   survivable, and a real decision about what to sacrifice.
 
-### 2.5 Terrain (D2)
+### 2.5 Terrain (D3)
 
 The world is charted at founding from a **world seed** (recorded in the
 chronicle — terrain is deterministic and replays exactly). Tile classes and
@@ -83,7 +83,7 @@ NOT scale with terrain — rich tiles are strictly better, barren tiles are a
 cost you zone over only when the map forces you. Now tile choice matters and
 the map is worth reading before the first build.
 
-### 2.6 Adjacency (D2)
+### 2.6 Adjacency (D3)
 
 Applied after terrain, from the 4-neighborhood:
 
@@ -94,7 +94,7 @@ Applied after terrain, from the 4-neighborhood:
 One boost, one penalty — enough to make district planning real (industry
 clustered on the seams, housing set apart) without a modifier soup.
 
-### 2.7 Spoilage (D3) — the collect pressure
+### 2.7 Spoilage (D4) — the collect pressure
 
 **Accrued biomass spoils: −1/4 per tick, floored at 0** (linear, so the
 numbers stay crisp; iron does not rot). Spoiled yield simply never existed —
@@ -103,7 +103,7 @@ means the field loses a quarter of a tick's work every tick it waits:
 collect early and often, or set a rhythm and live with the loss. The collect
 button becomes a timing decision.
 
-### 2.8 Milestones (D3)
+### 2.8 Milestones (D4)
 
 A first goal ladder, each a closure (`MilestoneReached`), each pure flavor
 pointing at the future boards:
@@ -114,7 +114,7 @@ pointing at the future boards:
 
 ## 3. Protocol additions (the LAW XVII ledger)
 
-New permanent wire tags (NS-1 §2.3 registry; layouts land with D1/D2):
+New permanent wire tags (NS-1 §2.3 registry; layouts land with their increments):
 
 | tag | event | fired when |
 |---|---|---|
@@ -122,8 +122,8 @@ New permanent wire tags (NS-1 §2.3 registry; layouts land with D1/D2):
 | 5 | FamineStruck | a resource's banked+accrued falls below 0 |
 | 6 | FamineRelieved | a dormant resource recovers |
 | 7 | ZoneRazed | a zone is demolished for half cost |
-| 8 | WorldCharted | founding records the terrain seed (D2) |
-| 9 | MilestoneReached | a milestone closes (D3) |
+| 8 | WorldCharted | founding records the terrain seed (D3) |
+| 9 | MilestoneReached | a milestone closes (D4) |
 
 **Replay rule:** costs, upkeep, terrain generation, and multipliers are
 RULESET CONSTANTS, versioned with the engine — replay applies them to the
@@ -136,12 +136,75 @@ before it applies; constants never change silently under an existing world.
 | # | Landing | Contains | The decision it creates |
 |---|---|---|---|
 | **D1** | COSTS, UPKEEP, FAMINE | build costs spent from banked; per-tick net flows; famine/dormancy/relief; `raze`; tags 4–7 | build order under scarcity; food-vs-industry balance; crisis triage |
-| **D2** | TERRAIN + ADJACENCY | the seeded chart (tag 8); class multipliers; adjacency pair; map renders terrain | reading the map; district planning |
-| **D3** | SPOILAGE + MILESTONES | biomass decay in the workspace; the goal ladder (tag 9) | collect timing; something to play toward |
+| **D2** | THE INDUSTRIAL PIPELINE (§5) | alloy + diamond materials; smelter + synthesizer converter zones; multi-resource costs and upkeep | raw expansion vs refining; feeding the chain; when to climb the tier |
+| **D3** | TERRAIN + ADJACENCY | the seeded chart (tag 8); class multipliers; adjacency pair; map renders terrain | reading the map; district planning |
+| **D4** | SPOILAGE + MILESTONES | biomass decay in the workspace; the goal ladder (tag 9) | collect timing; something to play toward |
 
 Sequencing: D1 first (scarcity is the foundation every other tension leans
-on); D2 second (place only matters once builds cost something); D3 last
-(pressure and goals polish a loop that already exists). Each lands red-first
-with witnesses on the knife-edge cases: the 2E+1H zero-net equilibrium, the
-famine trigger at exactly −1/‌n, the raze refund, terrain determinism from
-the seed, spoilage flooring at 0.
+on); D2 second (the pipeline gives terrain something to matter FOR — rich
+seams feed smelters); D3 third; D4 last (pressure and goals polish a loop
+that already exists). Each lands red-first with witnesses on the knife-edge
+cases: the 2E+1H zero-net equilibrium, the famine trigger at exactly −1/n,
+the raze refund, the smelter's exact conversion, the starved synthesizer,
+terrain determinism from the seed, spoilage flooring at 0.
+
+## 5. THE INDUSTRIAL PIPELINE (D2 addendum, ruled 2026-07-25)
+
+The mid-game: raw ore is bulky and cheap; refined matter is dense and
+valuable. Mine → smelt → synthesize is the progression arc from outpost to
+industrial metropolis, and the dense outputs are what will be worth carrying
+along hyperlanes (the economy board) and finding with the scanner (N4).
+
+### 5.1 The materials
+
+| material | wire code | tier | earned by |
+|---|---|---|---|
+| ferrite (iron) | 1 | raw | extractors |
+| biomass | 2 | raw | habitats |
+| refined alloy | 3 | smelted | smelters |
+| synthetic diamond | 4 | ultra-refined | synthesizers |
+
+**Rulings against the first draft:** the draft's *resonance crystals* are
+DEFERRED to the N4 scanner landing, where the name earns its meaning
+(crystals as the scanner's power source); its *regolith slag / carboniferous
+matrix* intermediate materials are DROPPED (they appeared once each and fed
+nothing — every material must be produced by one zone and consumed by
+another, or it's inventory clutter).
+
+### 5.2 The converter zones
+
+A converter is a zone whose UPKEEP is its input and whose YIELD is its
+output — conversion is a per-tick net flow in the workspace, exactly like
+every other flow (02 §2.3):
+
+| zone | cost (spent at build) | inputs /tick | output /tick |
+|---|---|---|---|
+| Smelter | 15 iron + 10 biomass | −2 iron, −1/2 biomass (fuel) | +1 alloy |
+| Synthesizer | 20 alloy + 15 biomass | −4 alloy, −1 biomass | +1/4 diamond |
+
+Raze refunds remain half of each cost component.
+
+**The demand curve these ratios force:** one smelter consumes more iron than
+one extractor makes (2 vs 3/2) — smelting demands a mining base. One
+synthesizer consumes FOUR smelters' output. The full one-synthesizer colony
+(≈6E + 4S + 1Syn + 6H) lands biomass on the knife edge again at a
+seventeen-zone build — the early-game tension recurs at industrial scale.
+
+### 5.3 NO NEW EVENT VOCABULARY (the ruling that matters)
+
+The draft proposed `ResourceSmelted` / `DiamondSynthesized` /
+`ProductionDormant` tags. **Refused — the existing vocabulary already
+expresses the pipeline:**
+
+- Conversion is a workspace flow; `collect` settles it as the existing
+  `YieldCollected` (alloy, diamonds) and `UpkeepSettled` (consumed inputs).
+  Conversion rates are ruleset constants; the receipts fully ground replay.
+- Input starvation IS famine: a smelter outrunning its ore supply drives
+  iron's banked+accrued below zero → `FamineStruck{iron}` → iron consumers
+  dormant. `ProductionDormant` would be a second name for a mechanism that
+  already exists. A synthesizer built without four smelters behind it
+  starves within a tick — the pipeline teaches its own ratios.
+
+New wire content of D2 is therefore only: resource codes 3–4 and zone-kind
+codes 3–4 inside EXISTING tag layouts. Additive, byte-compatible, no new
+tags spent.

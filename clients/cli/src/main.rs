@@ -138,6 +138,8 @@ fn command(world: &mut World, line: &str, style: &Style) {
             let kind = match words.next() {
                 Some("ext") | Some("extractor") => Some(ZoneKind::Extractor),
                 Some("hab") | Some("habitat") => Some(ZoneKind::Habitat),
+                Some("smelt") | Some("smelter") => Some(ZoneKind::Smelter),
+                Some("synth") | Some("synthesizer") => Some(ZoneKind::Synthesizer),
                 _ => None,
             };
             match (tile, kind) {
@@ -164,9 +166,9 @@ fn command(world: &mut World, line: &str, style: &Style) {
                 _ => println!(
                     "{} usage: {} — e.g. {} or {}",
                     style.bad("✗"),
-                    style.strong("zone <tile|row:col> <ext|hab>"),
+                    style.strong("zone <tile|row:col> <ext|hab|smelt|synth>"),
                     style.strong("zone 12 ext"),
-                    style.strong("zone 1:4 hab")
+                    style.strong("zone 1:4 smelt")
                 ),
             }
         }
@@ -272,7 +274,7 @@ fn command(world: &mut World, line: &str, style: &Style) {
 fn help(style: &Style) {
     let lines = [
         ("found <name>", "establish your colony (banks 20 iron + 10 biomass) — your first receipt"),
-        ("zone <tile|r:c> <ext|hab>", "build — ext: 10 iron, +3/2 iron/tick, eats 1/2 biomass/tick · hab: 5 biomass, +1 biomass/tick, eats 1/4 iron/tick"),
+        ("zone <tile|r:c> <kind>", "build — ext: 10 iron → +3/2 iron/t · hab: 5 bio → +1 bio/t · smelt: 15 iron+10 bio → 2 iron+1/2 bio in, +1 alloy/t · synth: 20 alloy+15 bio → 4 alloy+1 bio in, +1/4 diamond/t"),
         ("tick <n>", "let n ticks pass — active zones net yield−upkeep into the workspace; famine strikes if a store runs dry"),
         ("collect", "settle the workspace against the bank — sealed as receipts; only banked value persists"),
         ("raze <tile|r:c>", "demolish a zone for half its cost back — the famine escape hatch"),
@@ -310,6 +312,8 @@ fn kind_name(kind: ZoneKind) -> &'static str {
     match kind {
         ZoneKind::Extractor => "extractor",
         ZoneKind::Habitat => "habitat",
+        ZoneKind::Smelter => "smelter",
+        ZoneKind::Synthesizer => "synthesizer",
     }
 }
 
@@ -317,6 +321,8 @@ fn resource_name(resource: Resource) -> &'static str {
     match resource {
         Resource::Iron => "iron",
         Resource::Biomass => "biomass",
+        Resource::Alloy => "alloy",
+        Resource::Diamond => "diamond",
     }
 }
 
@@ -377,7 +383,7 @@ fn map(world: &World, style: &Style) {
     println!(
         "{}  {}",
         style.head("MAP"),
-        style.dim("E extractor · H habitat · lowercase = dormant · · empty")
+        style.dim("E extractor · H habitat · S smelter · Y synthesizer · lowercase = dormant · · empty")
     );
     print!("     ");
     for col in 0..GRID {
@@ -393,10 +399,14 @@ fn map(world: &World, style: &Style) {
                 Some(zone) if !orb.zone_active(zone) => style.bad(match zone.kind {
                     ZoneKind::Extractor => "e",
                     ZoneKind::Habitat => "h",
+                    ZoneKind::Smelter => "s",
+                    ZoneKind::Synthesizer => "y",
                 }),
                 Some(zone) => match zone.kind {
                     ZoneKind::Extractor => style.ok("E"),
                     ZoneKind::Habitat => style.head("H"),
+                    ZoneKind::Smelter => style.warn("S"),
+                    ZoneKind::Synthesizer => style.prompt("Y"),
                 },
                 None => style.dim("·"),
             };
@@ -471,13 +481,17 @@ fn status(world: &World, style: &Style) {
 fn zone_lines(orb: &ColonyOrb, style: &Style) {
     for zone in &orb.zones {
         let (yields, rate) = zone.kind.yield_per_tick();
-        let (eats, drain) = zone.kind.upkeep_per_tick();
+        let drains = zone
+            .kind
+            .upkeep_per_tick()
+            .iter()
+            .map(|(eats, drain)| format!("−{} {}", amount(drain), resource_name(*eats)))
+            .collect::<Vec<_>>()
+            .join(" · ");
         let flows = format!(
-            "+{} {}/tick · −{} {}/tick",
+            "+{} {}/tick · {drains}/tick",
             amount(&rate),
-            resource_name(yields),
-            amount(&drain),
-            resource_name(eats)
+            resource_name(yields)
         );
         let state = match orb.zone_active(zone) {
             true => style.dim(&flows),

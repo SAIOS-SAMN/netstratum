@@ -60,8 +60,8 @@ One tag, one meaning, forever; retired codes are never reused.
 | tag | meaning | value layout |
 |---|---|---|
 | 1 | event: ColonyFounded | LE64(orb_id) ‖ name utf8 |
-| 2 | event: ZoneBuilt | LE64(orb_id) ‖ LE16(tile) ‖ kind u8 (1 extractor, 2 habitat) |
-| 3 | event: YieldCollected | LE64(orb_id) ‖ resource u8 (1 iron, 2 biomass) ‖ ratio |
+| 2 | event: ZoneBuilt | LE64(orb_id) ‖ LE16(tile) ‖ kind u8 (1 extractor, 2 habitat, 3 smelter [D2], 4 synthesizer [D2]) |
+| 3 | event: YieldCollected | LE64(orb_id) ‖ resource u8 (1 iron, 2 biomass, 3 alloy [D2], 4 diamond [D2]) ‖ ratio |
 | 4 | event: UpkeepSettled (D1) | LE64(orb_id) ‖ resource u8 ‖ ratio |
 | 5 | event: FamineStruck (D1) | LE64(orb_id) ‖ resource u8 ‖ ratio (drawn) |
 | 6 | event: FamineRelieved (D1) | LE64(orb_id) ‖ resource u8 |

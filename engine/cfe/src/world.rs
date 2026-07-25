@@ -109,16 +109,19 @@ impl World {
         if orb.zones.iter().any(|zone| zone.tile == tile) {
             return Err(ActionRefused::TileAlreadyZoned { tile });
         }
-        let (resource, cost) = kind.cost();
-        let have = orb.banked_amount(resource);
-        if have < cost {
-            return Err(ActionRefused::CannotAfford {
-                resource,
-                need: Box::new(cost),
-                have: Box::new(have),
-            });
+        for (resource, cost) in kind.cost() {
+            let have = orb.banked_amount(resource);
+            if have < cost {
+                return Err(ActionRefused::CannotAfford {
+                    resource,
+                    need: Box::new(cost),
+                    have: Box::new(have),
+                });
+            }
         }
-        orb.bank(resource, -cost);
+        for (resource, cost) in kind.cost() {
+            orb.bank(resource, -cost);
+        }
         orb.zones.push(Zone { tile, kind });
         orb.zones.sort_by_key(|zone| zone.tile);
         let orb_id = orb.orb_id;
@@ -136,8 +139,9 @@ impl World {
             .position(|zone| zone.tile == tile)
             .ok_or(ActionRefused::NoSuchZone { tile })?;
         let zone = orb.zones.remove(at);
-        let (resource, refund) = zone.kind.raze_refund();
-        orb.bank(resource, refund);
+        for (resource, refund) in zone.kind.raze_refund() {
+            orb.bank(resource, refund);
+        }
         let orb_id = orb.orb_id;
         self.close(ClosureEvent::ZoneRazed { orb_id, tile });
         self.relieve_recovered();
@@ -160,13 +164,14 @@ impl World {
             for zone in &active {
                 let (resource, amount) = zone.kind.yield_per_tick();
                 accrue(&mut self.accrued, resource, amount);
-                let (resource, amount) = zone.kind.upkeep_per_tick();
-                accrue(&mut self.accrued, resource, -amount);
+                for (resource, amount) in zone.kind.upkeep_per_tick() {
+                    accrue(&mut self.accrued, resource, -amount);
+                }
             }
         }
         // The famine check (02 §2.4): trigger where banked + accrued < 0.
         if let Some(orb) = &mut self.orb {
-            for resource in [Resource::Iron, Resource::Biomass] {
+            for resource in Resource::ALL {
                 let accrued = ledger_amount(&self.accrued, resource);
                 let banked = orb.banked_amount(resource);
                 let solvent = banked.clone() + accrued >= ratio(0, 1);
@@ -267,7 +272,7 @@ impl World {
             let one_tick: Ratio = orb
                 .zones
                 .iter()
-                .map(|zone| zone.kind.upkeep_per_tick())
+                .flat_map(|zone| zone.kind.upkeep_per_tick())
                 .filter(|(consumed, _)| *consumed == resource)
                 .map(|(_, amount)| amount)
                 .fold(ratio(0, 1), |sum, amount| sum + amount);
@@ -314,8 +319,9 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             }
             ClosureEvent::ZoneBuilt { tile, kind, .. } => {
                 if let Some(orb) = orb.as_mut() {
-                    let (resource, cost) = kind.cost();
-                    orb.bank(resource, -cost);
+                    for (resource, cost) in kind.cost() {
+                        orb.bank(resource, -cost);
+                    }
                     orb.zones.push(Zone { tile: *tile, kind: *kind });
                     orb.zones.sort_by_key(|zone| zone.tile);
                 }
@@ -346,8 +352,9 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 if let Some(orb) = orb.as_mut() {
                     if let Some(at) = orb.zones.iter().position(|zone| zone.tile == *tile) {
                         let zone = orb.zones.remove(at);
-                        let (resource, refund) = zone.kind.raze_refund();
-                        orb.bank(resource, refund);
+                        for (resource, refund) in zone.kind.raze_refund() {
+                            orb.bank(resource, refund);
+                        }
                     }
                 }
             }

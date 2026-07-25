@@ -82,6 +82,21 @@ LAW for replay.
   CannotAfford message names the cure. The full arc played end-to-end:
   aggressive opening → earned third extractor → famine at tick 15 → raze →
   relief → chain INTACT (11 receipts), replay MATCHES.
+- **D2 LANDED** (2026-07-25): THE INDUSTRIAL PIPELINE (02 §5). Materials
+  alloy (3) + diamond (4); converter zones smelter (3) + synthesizer (4) —
+  a converter's upkeep IS its input, its yield its output; multi-resource
+  costs, upkeep, and refunds. **NO NEW EVENT TAGS** (the §5.3 ruling): the
+  draft's ResourceSmelted/DiamondSynthesized/ProductionDormant refused —
+  conversion settles as YieldCollected/UpkeepSettled, input starvation IS
+  famine (measured: an under-fed synthesizer strikes ALLOY famine within
+  ticks and goes dormant while the smelter keeps forging). Evidence: clippy
+  zero; **21/21 witnesses green capped**; the smelter converts EXACTLY
+  (2E+2H+1S nets +1/2, +1/2, +1 alloy per tick); multi-resource refusals
+  name the exact shortfall per component (biomass gate, then the alloy
+  gate); the tier climb replays from receipts alone; the CLI session played
+  the full arc (S/Y glyphs live; the CannotAfford ladder taught the climb:
+  "costs 20 alloy, have 4" → "costs 15 biomass, have 10"). Crystals
+  DEFERRED to N4; slag/matrix intermediates DROPPED (02 §5.1 rulings).
 
 | # | Landing | Contains | Proven by |
 |---|---|---|---|

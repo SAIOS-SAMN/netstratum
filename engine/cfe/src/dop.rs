@@ -29,6 +29,10 @@ use crate::tlv;
 pub enum Resource {
     Iron = 1,
     Biomass = 2,
+    /// D2 (02 §5): smelted from iron; the tier-2 structural currency.
+    Alloy = 3,
+    /// D2 (02 §5): the ultra-refined tier — dense, trade-worthy.
+    Diamond = 4,
 }
 
 impl Resource {
@@ -36,9 +40,13 @@ impl Resource {
         match code {
             1 => Some(Self::Iron),
             2 => Some(Self::Biomass),
+            3 => Some(Self::Alloy),
+            4 => Some(Self::Diamond),
             _ => None,
         }
     }
+
+    pub const ALL: [Resource; 4] = [Self::Iron, Self::Biomass, Self::Alloy, Self::Diamond];
 }
 
 /// Founding banks the bootstrap reserves (02 §2.1): 20 iron, 10 biomass.
@@ -55,6 +63,10 @@ pub fn founding_reserves() -> Vec<(Resource, Ratio)> {
 pub enum ZoneKind {
     Extractor = 1,
     Habitat = 2,
+    /// D2 converter (02 §5.2): its upkeep is its INPUT, its yield its
+    /// OUTPUT — conversion is a net flow like every other flow.
+    Smelter = 3,
+    Synthesizer = 4,
 }
 
 impl ZoneKind {
@@ -62,15 +74,25 @@ impl ZoneKind {
         match code {
             1 => Some(Self::Extractor),
             2 => Some(Self::Habitat),
+            3 => Some(Self::Smelter),
+            4 => Some(Self::Synthesizer),
             _ => None,
         }
     }
 
-    /// The build cost, spent from banked at build time (02 §2.2).
-    pub fn cost(&self) -> (Resource, Ratio) {
+    /// The build cost, spent from banked at build time (02 §2.2, §5.2).
+    pub fn cost(&self) -> Vec<(Resource, Ratio)> {
         match self {
-            Self::Extractor => (Resource::Iron, ratio(10, 1)),
-            Self::Habitat => (Resource::Biomass, ratio(5, 1)),
+            Self::Extractor => vec![(Resource::Iron, ratio(10, 1))],
+            Self::Habitat => vec![(Resource::Biomass, ratio(5, 1))],
+            Self::Smelter => vec![
+                (Resource::Iron, ratio(15, 1)),
+                (Resource::Biomass, ratio(10, 1)),
+            ],
+            Self::Synthesizer => vec![
+                (Resource::Alloy, ratio(20, 1)),
+                (Resource::Biomass, ratio(15, 1)),
+            ],
         }
     }
 
@@ -79,21 +101,34 @@ impl ZoneKind {
         match self {
             Self::Extractor => (Resource::Iron, ratio(3, 2)),
             Self::Habitat => (Resource::Biomass, ratio(1, 1)),
+            Self::Smelter => (Resource::Alloy, ratio(1, 1)),
+            Self::Synthesizer => (Resource::Diamond, ratio(1, 4)),
         }
     }
 
-    /// The per-tick upkeep drain (02 §2.2): crew rations / life support.
-    pub fn upkeep_per_tick(&self) -> (Resource, Ratio) {
+    /// The per-tick upkeep drains (02 §2.2, §5.2): rations, life
+    /// support, and — for converters — the conversion inputs.
+    pub fn upkeep_per_tick(&self) -> Vec<(Resource, Ratio)> {
         match self {
-            Self::Extractor => (Resource::Biomass, ratio(1, 2)),
-            Self::Habitat => (Resource::Iron, ratio(1, 4)),
+            Self::Extractor => vec![(Resource::Biomass, ratio(1, 2))],
+            Self::Habitat => vec![(Resource::Iron, ratio(1, 4))],
+            Self::Smelter => vec![
+                (Resource::Iron, ratio(2, 1)),
+                (Resource::Biomass, ratio(1, 2)),
+            ],
+            Self::Synthesizer => vec![
+                (Resource::Alloy, ratio(4, 1)),
+                (Resource::Biomass, ratio(1, 1)),
+            ],
         }
     }
 
-    /// Razing refunds half the build cost (02 §2.4 — the way out).
-    pub fn raze_refund(&self) -> (Resource, Ratio) {
-        let (resource, cost) = self.cost();
-        (resource, cost / ratio(2, 1))
+    /// Razing refunds half of EACH cost component (02 §2.4).
+    pub fn raze_refund(&self) -> Vec<(Resource, Ratio)> {
+        self.cost()
+            .into_iter()
+            .map(|(resource, cost)| (resource, cost / ratio(2, 1)))
+            .collect()
     }
 }
 
@@ -312,9 +347,12 @@ impl ColonyOrb {
         self.banked.retain(|(_, amount)| amount != &ratio(0, 1));
     }
 
-    /// Is a zone active? Dormant while its CONSUMED resource is famined.
+    /// Is a zone active? Dormant while ANY of its consumed resources
+    /// is famined.
     pub fn zone_active(&self, zone: &Zone) -> bool {
-        let (consumed, _) = zone.kind.upkeep_per_tick();
-        !self.famine.contains(&consumed)
+        zone.kind
+            .upkeep_per_tick()
+            .iter()
+            .all(|(consumed, _)| !self.famine.contains(consumed))
     }
 }
