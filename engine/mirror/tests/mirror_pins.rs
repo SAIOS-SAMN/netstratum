@@ -41,6 +41,7 @@ fn humans() -> Civilization {
         metabolism: "biotic".into(),
         perception: "planar".into(),
         founder: "operator".into(),
+        lineage: None,
     }
 }
 

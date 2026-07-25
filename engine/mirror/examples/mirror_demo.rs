@@ -22,6 +22,7 @@ fn main() {
         metabolism: "biotic".into(),
         perception: "planar".into(),
         founder: "operator".into(),
+        lineage: None,
     });
     let _ = registry.create(&Civilization {
         name: "Deep Chorus".into(),
@@ -32,6 +33,7 @@ fn main() {
         metabolism: "biotic".into(),
         perception: "harmonic".into(),
         founder: "operator".into(),
+        lineage: None,
     });
 
     // Humans settle mars, in the sol world: the aggressive opening.

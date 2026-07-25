@@ -169,8 +169,13 @@ def aggregate_by_civilization(rows, registry):
     for slug, agg in sorted(civs.items()):
         card = registry.get(slug, {})
         axes = card.get("axes", {})
+        name = card.get("name", slug)
+        if card.get("founder") == "conductor":
+            name = "⚙ " + name
+        if card.get("lineage"):
+            name += " ↳ " + card["lineage"]
         out.append({
-            "civilization": card.get("name", slug),
+            "civilization": name,
             "species": card.get("species", "?"),
             "axes": "·".join(axes.get(a, "?")[:3] for a in
                              ["disposition", "metabolism", "perception"]),

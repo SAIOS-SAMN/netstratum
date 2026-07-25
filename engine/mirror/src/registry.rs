@@ -28,6 +28,9 @@ pub struct Civilization {
     pub metabolism: String,
     pub perception: String,
     pub founder: String,
+    /// The parent civilization's slug, for speciated descendants —
+    /// registry-recorded now, receipted at G1 like all identity.
+    pub lineage: Option<String>,
 }
 
 /// Typed refusals of registration.
@@ -85,6 +88,9 @@ impl Registry {
         w.field_str("perception", &civilization.perception);
         w.close();
         w.field_str("founder", &civilization.founder);
+        if let Some(lineage) = &civilization.lineage {
+            w.field_str("lineage", lineage);
+        }
         w.close();
         let mut text = w.finish();
         text.push('\n');
@@ -104,6 +110,7 @@ impl Registry {
             metabolism: extract_string(&text, "metabolism")?,
             perception: extract_string(&text, "perception")?,
             founder: extract_string(&text, "founder").unwrap_or_default(),
+            lineage: extract_string(&text, "lineage"),
         })
     }
 
