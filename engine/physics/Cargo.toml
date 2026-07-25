@@ -1,0 +1,12 @@
+[package]
+name = "physics"
+version = "0.1.0"
+edition = "2021"
+description = "Netstratum physics — event-driven exact kinematics on the RFA carrier (no floats, no scheduler, every step carries its inverse)"
+
+[dependencies]
+blake3.workspace = true
+cfe = { path = "../cfe" }
+num-bigint.workspace = true
+num-rational.workspace = true
+num-traits.workspace = true

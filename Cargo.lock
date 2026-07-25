@@ -135,6 +135,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "physics"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "cfe",
+ "num-bigint",
+ "num-rational",
+ "num-traits",
+]
+
+[[package]]
+name = "rfa-core"
+version = "0.1.0"
+dependencies = [
+ "cfe",
+ "num-bigint",
+ "num-integer",
+ "num-rational",
+ "num-traits",
+]
+
+[[package]]
 name = "shlex"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

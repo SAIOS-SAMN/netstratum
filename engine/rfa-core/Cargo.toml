@@ -1,0 +1,12 @@
+[package]
+name = "rfa-core"
+version = "0.1.0"
+edition = "2021"
+description = "Rational Field Algebra core — the antisymmetric relational Delta, cocycle residuals, coherence, H¹ reduction, and the validation gates (exact ℚ, no floats)"
+
+[dependencies]
+cfe = { path = "../cfe" }
+num-bigint.workspace = true
+num-rational.workspace = true
+num-traits.workspace = true
+num-integer = "0.1"
