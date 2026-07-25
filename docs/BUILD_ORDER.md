@@ -32,6 +32,16 @@ same landing (CHARTER §1); commit on explicit operator go.
   registry at NS-1 §2.3 (events 1–3, orb 16–18); NS-1 vectors extracted from
   the running engine (`examples/ns1_vectors.rs`). The workspace invariant
   carried: accrued-uncollected yield has no receipt and does not persist.
+- **N2-UX LANDED** (2026-07-25, operator playtest feedback — presentation
+  only, no protocol change): the 8×8 MAP grid rendered after every build
+  (`map`), `row:col` coordinate input beside plain tile numbers, refusals as
+  human sentences with the cure named (each of the playtest's three stumbles
+  reproduced and answered), color highlighting (✓ closures green, ✗ refusals
+  red, ◔ workspace yellow with "collect to keep", exact fractions bolded —
+  `--plain`/`NO_COLOR` for scripts), described chronicle lines, `help`.
+  Evidence: clippy zero; 11/11 witnesses green capped; the playtest session
+  re-run end-to-end with every error case answering usefully. Exactness
+  discipline held: fractions rendered whole ("3/2", never 1.5).
 
 ## 1. The board
 
@@ -50,3 +60,4 @@ Sequencing: N1 before N2 (receipts before the actions that emit them); N3
 before N4 (identity before query scope); N6 before N7 (anchoring needs the
 converged mesh root it anchors); N7 last. Each landing names its spec section
 and its game consumer in the landing record.
+

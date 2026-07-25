@@ -1,34 +1,47 @@
 //! The Netstratum CLI — the first slice's face. One command launches
 //! it (CHARTER §3.5); every completed action closes as an NS-3 receipt;
 //! `verify` and `replay` read the chain the way any peer would.
+//!
+//! Presentation only lives here: the map grid, colors, and friendly
+//! refusal text are the client's voice — the engine's typed refusals
+//! and exact ratios are the truth underneath, always shown as exact
+//! fractions (the C2R rule: "3/2", never 1.5).
 
 use std::io::{self, BufRead, Write};
 
-use cfe::dop::ZoneKind;
+use cfe::dop::{ColonyOrb, Resource, ZoneKind};
+use cfe::ratio::Ratio;
 use cfe::vrp::ChainRead;
-use cfe::world::{replay, World};
+use cfe::world::{replay, ActionRefused, World};
+
+/// The slice's world is an 8×8 tile grid; tile = row*8 + col.
+const GRID: u16 = 8;
 
 fn main() {
-    let script = std::env::args().skip_while(|arg| arg != "--script").nth(1);
+    let args: Vec<String> = std::env::args().collect();
+    let plain = args.iter().any(|arg| arg == "--plain") || std::env::var_os("NO_COLOR").is_some();
+    let script = args
+        .iter()
+        .position(|arg| arg == "--script")
+        .and_then(|at| args.get(at + 1))
+        .cloned();
+    let style = Style { plain };
     let mut world = World::new();
-    println!("NETSTRATUM — the first slice. Commands: found <name> | zone <tile> <ext|hab> | tick <n> | collect | status | chronicle | verify | replay | quit");
+    banner(&style);
     match script {
         Some(script) => {
             for line in script.split(';') {
                 let line = line.trim();
-                match line.is_empty() {
-                    true => {}
-                    false => {
-                        println!("> {line}");
-                        command(&mut world, line);
-                    }
+                if !line.is_empty() {
+                    println!("{} {line}", style.dim("»"));
+                    command(&mut world, line, &style);
                 }
             }
         }
         None => {
             let stdin = io::stdin();
             loop {
-                print!("netstratum> ");
+                print!("{} ", style.prompt("netstratum»"));
                 io::stdout().flush().ok();
                 let mut line = String::new();
                 match stdin.lock().read_line(&mut line) {
@@ -38,7 +51,7 @@ fn main() {
                         match line.as_str() {
                             "quit" | "exit" => break,
                             "" => {}
-                            _ => command(&mut world, &line),
+                            _ => command(&mut world, &line, &style),
                         }
                     }
                     Err(_) => break,
@@ -48,29 +61,113 @@ fn main() {
     }
 }
 
-fn command(world: &mut World, line: &str) {
+struct Style {
+    plain: bool,
+}
+
+impl Style {
+    fn wrap(&self, code: &str, text: &str) -> String {
+        match self.plain {
+            true => text.to_string(),
+            false => format!("\x1b[{code}m{text}\x1b[0m"),
+        }
+    }
+    fn ok(&self, text: &str) -> String {
+        self.wrap("1;32", text) // bold green — a sealed closure
+    }
+    fn warn(&self, text: &str) -> String {
+        self.wrap("1;33", text) // bold yellow — workspace / caution
+    }
+    fn bad(&self, text: &str) -> String {
+        self.wrap("1;31", text) // bold red — a refusal
+    }
+    fn head(&self, text: &str) -> String {
+        self.wrap("1;36", text) // bold cyan — section headers
+    }
+    fn strong(&self, text: &str) -> String {
+        self.wrap("1", text) // bold — numbers the eye should catch
+    }
+    fn dim(&self, text: &str) -> String {
+        self.wrap("2", text) // dim — structure, hashes, hints
+    }
+    fn prompt(&self, text: &str) -> String {
+        self.wrap("1;35", text)
+    }
+}
+
+fn banner(style: &Style) {
+    println!("{}", style.head("╔══════════════════════════════════════════════╗"));
+    println!("{}", style.head("║  NETSTRATUM — the first slice                ║"));
+    println!("{}", style.head("╚══════════════════════════════════════════════╝"));
+    println!(
+        "Start with {} then {} — type {} for everything.",
+        style.strong("found <name>"),
+        style.strong("zone <tile|r:c> <ext|hab>"),
+        style.strong("help")
+    );
+}
+
+fn command(world: &mut World, line: &str, style: &Style) {
     let mut words = line.split_whitespace();
     match words.next() {
+        Some("help") => help(style),
         Some("found") => {
             let name = words.collect::<Vec<_>>().join(" ");
-            match world.found(&name) {
-                Ok(()) => println!("colony '{name}' founded — receipt sealed"),
-                Err(refusal) => println!("refused: {refusal:?}"),
+            match name.is_empty() {
+                true => println!(
+                    "{} a colony needs a name — try: {}",
+                    style.bad("✗"),
+                    style.strong("found meridian")
+                ),
+                false => match world.found(&name) {
+                    Ok(()) => {
+                        println!(
+                            "{} colony {} founded — receipt {} sealed",
+                            style.ok("✓"),
+                            style.strong(&name),
+                            style.dim("#0")
+                        );
+                        map(world, style);
+                    }
+                    Err(refusal) => refuse(world, &refusal, style),
+                },
             }
         }
         Some("zone") => {
-            let tile = words.next().and_then(|word| word.parse::<u16>().ok());
+            let tile = words.next().and_then(parse_tile);
             let kind = match words.next() {
-                Some("ext") => Some(ZoneKind::Extractor),
-                Some("hab") => Some(ZoneKind::Habitat),
+                Some("ext") | Some("extractor") => Some(ZoneKind::Extractor),
+                Some("hab") | Some("habitat") => Some(ZoneKind::Habitat),
                 _ => None,
             };
             match (tile, kind) {
-                (Some(tile), Some(kind)) => match world.zone(tile, kind) {
-                    Ok(()) => println!("tile {tile} zoned {kind:?} — receipt sealed"),
-                    Err(refusal) => println!("refused: {refusal:?}"),
+                (Some(tile), Some(kind)) if tile < GRID * GRID => match world.zone(tile, kind) {
+                    Ok(()) => {
+                        let sequence = world.chronicle().receipts().len() - 1;
+                        println!(
+                            "{} tile {} ({}) zoned {} — receipt {} sealed",
+                            style.ok("✓"),
+                            style.strong(&tile.to_string()),
+                            coordinate(tile),
+                            style.strong(kind_name(kind)),
+                            style.dim(&format!("#{sequence}"))
+                        );
+                        map(world, style);
+                    }
+                    Err(refusal) => refuse(world, &refusal, style),
                 },
-                _ => println!("usage: zone <tile> <ext|hab>"),
+                (Some(tile), Some(_)) => println!(
+                    "{} tile {tile} is off the map — the grid is {GRID}×{GRID} (tiles 0–{}, or row:col up to 7:7)",
+                    style.bad("✗"),
+                    GRID * GRID - 1
+                ),
+                _ => println!(
+                    "{} usage: {} — e.g. {} or {}",
+                    style.bad("✗"),
+                    style.strong("zone <tile|row:col> <ext|hab>"),
+                    style.strong("zone 12 ext"),
+                    style.strong("zone 1:4 hab")
+                ),
             }
         }
         Some("tick") => {
@@ -81,54 +178,276 @@ fn command(world: &mut World, line: &str) {
             for _ in 0..count {
                 world.tick();
             }
-            println!("clock now {}", world.now());
+            println!(
+                "{} {} tick(s) pass — clock now {}",
+                style.ok("✓"),
+                style.strong(&count.to_string()),
+                style.strong(&world.now().to_string())
+            );
+            accrued_lines(world, style);
         }
         Some("collect") => match world.collect() {
-            Ok(count) => println!("collected — {count} receipt(s) sealed at stamp {}", world.now()),
-            Err(refusal) => println!("refused: {refusal:?}"),
-        },
-        Some("status") => {
-            match world.orb() {
-                Some(orb) => {
-                    println!("colony '{}' (orb {})", orb.name, orb.orb_id);
-                    for zone in &orb.zones {
-                        println!("  tile {:>3} {:?}", zone.tile, zone.kind);
-                    }
-                    for (resource, amount) in &orb.banked {
-                        println!("  banked {resource:?}: {amount}");
-                    }
-                }
-                None => println!("no colony — 'found <name>' begins the story"),
-            }
-            for (resource, amount) in world.accrued() {
-                println!("  accrued (workspace) {resource:?}: {amount}");
-            }
-            println!("clock {} | receipts {}", world.now(), world.chronicle().receipts().len());
-        }
-        Some("chronicle") => {
-            for receipt in world.chronicle().receipts() {
+            Ok(count) => {
                 println!(
-                    "#{} stamp {} own {} event {:?}",
-                    receipt.sequence,
-                    receipt.stamp,
-                    hex(&receipt.own.0[..8]),
-                    receipt.event
+                    "{} harvest banked — {} receipt(s) sealed at stamp {}",
+                    style.ok("✓"),
+                    style.strong(&count.to_string()),
+                    style.strong(&world.now().to_string())
                 );
+                banked_lines(world, style);
             }
-        }
+            Err(refusal) => refuse(world, &refusal, style),
+        },
+        Some("map") => map(world, style),
+        Some("status") => status(world, style),
+        Some("chronicle") => chronicle(world, style),
         Some("verify") => match world.chronicle().verify_chain() {
-            ChainRead::Intact => println!("chain INTACT ({} receipts)", world.chronicle().receipts().len()),
-            ChainRead::Broken { at } => println!("chain BROKEN at sequence {at}"),
+            ChainRead::Intact => println!(
+                "{} chain {} — {} receipts, every link re-verified",
+                style.ok("✓"),
+                style.ok("INTACT"),
+                style.strong(&world.chronicle().receipts().len().to_string())
+            ),
+            ChainRead::Broken { at } => println!(
+                "{} chain {} at receipt #{at} — history has been altered",
+                style.bad("✗"),
+                style.bad("BROKEN")
+            ),
         },
         Some("replay") => {
             let replayed = replay(world.chronicle());
             match replayed == world.committed() {
-                true => println!("replay MATCHES the committed world"),
-                false => println!("replay DIVERGES — the chronicle and the world disagree"),
+                true => println!(
+                    "{} replay {} — the receipts alone rebuild this exact world",
+                    style.ok("✓"),
+                    style.ok("MATCHES")
+                ),
+                false => println!(
+                    "{} replay {} — the chronicle and the world disagree",
+                    style.bad("✗"),
+                    style.bad("DIVERGES")
+                ),
             }
         }
-        Some(other) => println!("unknown command '{other}'"),
+        Some(other) => println!(
+            "{} unknown command {} — type {} to see them all",
+            style.bad("✗"),
+            style.strong(other),
+            style.strong("help")
+        ),
         None => {}
+    }
+}
+
+fn help(style: &Style) {
+    let lines = [
+        ("found <name>", "establish your colony (once per world) — your first receipt"),
+        ("zone <tile|r:c> <ext|hab>", "build: ext = extractor (3/2 iron/tick), hab = habitat (1/4 biomass/tick)"),
+        ("tick <n>", "let n ticks pass — zones produce into the accrued workspace"),
+        ("collect", "bank the accrued yield — sealed as receipts; only banked yield persists"),
+        ("map", "the tile grid"),
+        ("status", "colony, ledgers, clock, receipts"),
+        ("chronicle", "the world's full receipted history"),
+        ("verify", "re-check every hash link in the chain"),
+        ("replay", "rebuild the world from receipts alone and compare"),
+        ("quit", "leave (no disk persistence yet — each launch is a fresh world)"),
+    ];
+    for (name, what) in lines {
+        println!("  {:<28} {}", style.strong(name), what);
+    }
+}
+
+fn parse_tile(word: &str) -> Option<u16> {
+    match word.split_once(':') {
+        Some((row, col)) => {
+            let row: u16 = row.parse().ok()?;
+            let col: u16 = col.parse().ok()?;
+            match row < GRID && col < GRID {
+                true => Some(row * GRID + col),
+                false => Some(u16::MAX), // off-map: reported by the range check
+            }
+        }
+        None => word.parse().ok(),
+    }
+}
+
+fn coordinate(tile: u16) -> String {
+    format!("{}:{}", tile / GRID, tile % GRID)
+}
+
+fn kind_name(kind: ZoneKind) -> &'static str {
+    match kind {
+        ZoneKind::Extractor => "extractor",
+        ZoneKind::Habitat => "habitat",
+    }
+}
+
+fn resource_name(resource: Resource) -> &'static str {
+    match resource {
+        Resource::Iron => "iron",
+        Resource::Biomass => "biomass",
+    }
+}
+
+fn amount(value: &Ratio) -> String {
+    match value.denom() == &num_bigint::BigInt::from(1) {
+        true => value.numer().to_string(),
+        false => format!("{}/{}", value.numer(), value.denom()),
+    }
+}
+
+fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
+    let text = match refusal {
+        ActionRefused::NoColony => format!(
+            "no colony yet — start with {}",
+            style.strong("found <name>")
+        ),
+        ActionRefused::ColonyAlreadyFounded => {
+            let name = world.orb().map(|orb| orb.name.clone()).unwrap_or_default();
+            format!(
+                "your colony {} already stands (one colony per world in this slice) — did you mean {}?",
+                style.strong(&name),
+                style.strong("zone <tile> <ext|hab>")
+            )
+        }
+        ActionRefused::TileAlreadyZoned { tile } => format!(
+            "tile {} ({}) is already zoned — pick an empty tile ({} shows the grid)",
+            style.strong(&tile.to_string()),
+            coordinate(*tile),
+            style.strong("map")
+        ),
+        ActionRefused::NothingAccrued => format!(
+            "nothing to collect — let time pass first: {}",
+            style.strong("tick <n>")
+        ),
+    };
+    println!("{} {text}", style.bad("✗"));
+}
+
+fn map(world: &World, style: &Style) {
+    let Some(orb) = world.orb() else {
+        println!("{}", style.dim("(no colony yet — the map begins at 'found <name>')"));
+        return;
+    };
+    println!(
+        "{}  {}",
+        style.head("MAP"),
+        style.dim("E extractor · H habitat · · empty — zone <tile|r:c> <ext|hab>")
+    );
+    print!("     ");
+    for col in 0..GRID {
+        print!("{} ", style.dim(&col.to_string()));
+    }
+    println!();
+    for row in 0..GRID {
+        print!("  {} ", style.dim(&format!("{row}·")));
+        for col in 0..GRID {
+            let tile = row * GRID + col;
+            let cell = orb.zones.iter().find(|zone| zone.tile == tile);
+            let glyph = match cell.map(|zone| zone.kind) {
+                Some(ZoneKind::Extractor) => style.ok("E"),
+                Some(ZoneKind::Habitat) => style.head("H"),
+                None => style.dim("·"),
+            };
+            print!("{glyph} ");
+        }
+        println!();
+    }
+}
+
+fn accrued_lines(world: &World, style: &Style) {
+    for (resource, value) in world.accrued() {
+        println!(
+            "    {} {} {}  {}",
+            style.warn("◔"),
+            style.warn("accrued"),
+            format_args!("{}: {}", resource_name(*resource), style.strong(&amount(value))),
+            style.dim("(workspace — collect to keep)")
+        );
+    }
+}
+
+fn banked_lines(world: &World, style: &Style) {
+    if let Some(orb) = world.orb() {
+        for (resource, value) in &orb.banked {
+            println!(
+                "    {} banked {}: {}",
+                style.ok("▣"),
+                resource_name(*resource),
+                style.strong(&amount(value))
+            );
+        }
+    }
+}
+
+fn status(world: &World, style: &Style) {
+    match world.orb() {
+        Some(orb) => {
+            println!(
+                "{} colony {} {}",
+                style.head("■"),
+                style.strong(&orb.name),
+                style.dim(&format!("(orb {})", orb.orb_id))
+            );
+            zone_lines(orb, style);
+            banked_lines(world, style);
+            accrued_lines(world, style);
+        }
+        None => println!(
+            "{} no colony — {} begins the story",
+            style.head("■"),
+            style.strong("found <name>")
+        ),
+    }
+    println!(
+        "  {} clock {} · receipts {} {}",
+        style.dim("⏱"),
+        style.strong(&world.now().to_string()),
+        style.strong(&world.chronicle().receipts().len().to_string()),
+        style.dim("(verify · replay · chronicle)")
+    );
+}
+
+fn zone_lines(orb: &ColonyOrb, style: &Style) {
+    for zone in &orb.zones {
+        let (resource, rate) = zone.kind.yield_per_tick();
+        println!(
+            "    tile {:>3} {}  {} {}",
+            style.strong(&zone.tile.to_string()),
+            style.dim(&format!("({})", coordinate(zone.tile))),
+            kind_name(zone.kind),
+            style.dim(&format!("+{} {}/tick", amount(&rate), resource_name(resource)))
+        );
+    }
+}
+
+fn chronicle(world: &World, style: &Style) {
+    for receipt in world.chronicle().receipts() {
+        let described = match &receipt.event {
+            cfe::dop::ClosureEvent::ColonyFounded { name, .. } => {
+                format!("⚑ colony {} founded", style.strong(name))
+            }
+            cfe::dop::ClosureEvent::ZoneBuilt { tile, kind, .. } => format!(
+                "⛏ tile {} ({}) zoned {}",
+                style.strong(&tile.to_string()),
+                coordinate(*tile),
+                kind_name(*kind)
+            ),
+            cfe::dop::ClosureEvent::YieldCollected {
+                resource, amount: value, ..
+            } => format!(
+                "▣ collected {} {}",
+                style.strong(&amount(value)),
+                resource_name(*resource)
+            ),
+        };
+        println!(
+            "  {} stamp {} {}  {}",
+            style.dim(&format!("#{}", receipt.sequence)),
+            receipt.stamp,
+            style.dim(&hex(&receipt.own.0[..8])),
+            described
+        );
     }
 }
 
