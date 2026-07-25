@@ -142,6 +142,52 @@ deleted). Quantities render exact (`9/2`, never `4.5`).
   and drains `pending_directives` per tick via the `as steward` path;
   the steward entity exists per-world with operator-granted scopes.
 
+## 8. The topology and the registry — civilization → world → planet → colony
+
+**Ruled by the operator 2026-07-25.** A CIVILIZATION (species-level
+identity: "humans", "deep-chorus") spans worlds. A WORLD ("sol") is the
+simulation container — a collection of planets sharing ONE clock, ONE
+chronicle, ONE receipt chain (= one replay unit today, one mesh/
+consensus unit at N6). A PLANET ("mars") is a settled body; a COLONY is
+a civilization's settlement on it. Today the cardinality is degenerate
+(1 world = 1 planet = 1 colony) — the containers are NAMED now so they
+can grow at D3 (terrain/planets) and N6 (shared worlds) without
+renaming. The chronicle stays per-world, never per-planet.
+
+- **Registry (`var/registry/<slug>.json`):** who exists. Entries are
+  created by players at founding (join the directory or add to it):
+  name, species (free text — the encyclopedia grows itself), motto,
+  the three genesis axes from the CLOSED vocabulary (Ch. 2 §1), and
+  the founder. **Identity only until G1**: recorded, displayed,
+  joined; changing no rule. When G1 gives the axes mechanics, the
+  entry is re-committed as a genesis receipt and becomes binding.
+- **THE REGISTRY IS NEVER GROUND TRUTH (04 §5, binding):** once
+  genesis receipts exist, the registry is a browsing CACHE of
+  receipted truth — no mechanic may ever read the registry where a
+  receipt exists (an unreceipted side-channel replay cannot reproduce
+  is SEAL B dying for identity). The directory is for browsing; the
+  chronicle binds.
+- **Join/amend (04 §5):** anyone may JOIN a civilization; only its
+  FOUNDER amends its entry, until G1 rules collective governance.
+  (The current `Registry` API is create/load/list only — amendment
+  does not exist yet, so the rule is enforced by absence; an `amend`
+  gated on founder lands only with a consumer.)
+- **Naming debt (04 §5, registered):** the engine struct `World`
+  today means "one colony sim"; the word "world" is now reserved for
+  the CONTAINER. The struct renames at the multi-planet landing,
+  before N6.
+- **Primitive:** `mirror::registry::Registry` (`create` with typed
+  refusals `AlreadyRegistered`/`UnknownAxis`, `load`, `list`);
+  `Mirror::record(world, planet, civilization, &World)` writing
+  `worlds/<world>/world.json` + `planets/<planet>/state.json`;
+  directives and solves at world altitude.
+- **Witness:** `mirror_pins.rs` (topology layout, per-world chain,
+  registry vocabulary enforcement).
+- **coder-02 seam:** founding becomes the character screen — pick or
+  create civilization (registry), pick or create world, name the
+  planet, then the normal `found`. Axis prompts offer exactly the
+  closed vocabulary; species/motto free text.
+
 ---
 
 ## Merge discipline

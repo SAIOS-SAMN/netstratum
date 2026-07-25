@@ -1,41 +1,69 @@
-//! Play two short sessions and mirror them — the observer/steward
-//! smoke fixture. Usage: cargo run -p mirror --example mirror_demo -- <root>
+//! Register two civilizations and mirror two settled worlds — the
+//! observer/steward smoke fixture at the full topology.
+//! Usage: cargo run -p mirror --example mirror_demo -- <var-root>
+//! (writes <var-root>/registry and <var-root>/worlds)
 
 use cfe::dop::ZoneKind;
 use cfe::world::World;
+use mirror::registry::{Civilization, Registry};
 use mirror::Mirror;
 
 fn main() {
-    let root = std::env::args().nth(1).expect("usage: mirror_demo <root>");
-    let mirror = Mirror::at(&root);
+    let var = std::env::args().nth(1).expect("usage: mirror_demo <var-root>");
+    let registry = Registry::at(format!("{var}/registry"));
+    let mirror = Mirror::at(format!("{var}/worlds"));
 
-    // aurora: the aggressive two-extractor opening, played 6 ticks.
-    let mut aurora = World::new();
-    aurora.found("aurora").unwrap();
-    aurora.zone(0, ZoneKind::Extractor).unwrap();
-    aurora.zone(1, ZoneKind::Extractor).unwrap();
-    aurora.zone(8, ZoneKind::Habitat).unwrap();
+    let _ = registry.create(&Civilization {
+        name: "Humans".into(),
+        slug: "humans".into(),
+        species: "human".into(),
+        motto: "we go anyway".into(),
+        disposition: "empiricist".into(),
+        metabolism: "biotic".into(),
+        perception: "planar".into(),
+        founder: "operator".into(),
+    });
+    let _ = registry.create(&Civilization {
+        name: "Deep Chorus".into(),
+        slug: "deep-chorus".into(),
+        species: "blue whale".into(),
+        motto: "we heard it before you saw it".into(),
+        disposition: "epicurean".into(),
+        metabolism: "biotic".into(),
+        perception: "harmonic".into(),
+        founder: "operator".into(),
+    });
+
+    // Humans settle mars, in the sol world: the aggressive opening.
+    let mut mars = World::new();
+    mars.found("first-landing").unwrap();
+    mars.zone(0, ZoneKind::Extractor).unwrap();
+    mars.zone(1, ZoneKind::Extractor).unwrap();
+    mars.zone(8, ZoneKind::Habitat).unwrap();
     for _ in 0..6 {
-        aurora.tick();
+        mars.tick();
     }
-    aurora.collect().unwrap();
-    mirror.record("aurora", &aurora).unwrap();
+    mars.collect().unwrap();
+    mirror.record("sol", "mars", "humans", &mars).unwrap();
     mirror
-        .record_solve("aurora", "arc_6150a2bd", "rotate180", "deadbeef")
+        .record_solve("sol", "arc_6150a2bd", "rotate180", "deadbeef")
         .unwrap();
 
-    // whalesong: safe and slow, an agent on a leash, 3 ticks.
-    let mut whalesong = World::new();
-    whalesong.found("whalesong").unwrap();
-    whalesong.zone(0, ZoneKind::Extractor).unwrap();
-    whalesong.zone(8, ZoneKind::Habitat).unwrap();
-    let rover = whalesong.register_agent("rover").unwrap();
-    whalesong.grant(rover, cfe::ipsal::Scope::Collect).unwrap();
+    // Deep Chorus settles tidefall, in the kepler-passage world:
+    // safe and slow, an agent on a leash.
+    let mut tidefall = World::new();
+    tidefall.found("tidefall-reach").unwrap();
+    tidefall.zone(0, ZoneKind::Extractor).unwrap();
+    tidefall.zone(8, ZoneKind::Habitat).unwrap();
+    let rover = tidefall.register_agent("rover").unwrap();
+    tidefall.grant(rover, cfe::ipsal::Scope::Collect).unwrap();
     for _ in 0..3 {
-        whalesong.tick();
+        tidefall.tick();
     }
-    whalesong.collect_as(rover).unwrap();
-    mirror.record("whalesong", &whalesong).unwrap();
+    tidefall.collect_as(rover).unwrap();
+    mirror
+        .record("kepler-passage", "tidefall", "deep-chorus", &tidefall)
+        .unwrap();
 
-    println!("mirrored 2 civilizations under {root}");
+    println!("registered 2 civilizations, mirrored 2 worlds under {var}");
 }

@@ -1,15 +1,20 @@
-//! The world mirror (substrate contract §7).
+//! The world mirror (substrate contract §7–§8).
 //!
-//! Every console session reflects its civilization to
-//! `var/worlds/<civ>/` continuously:
+//! THE TOPOLOGY: a CIVILIZATION (registry identity, spans worlds)
+//! settles COLONIES on PLANETS inside a WORLD — the world is the
+//! simulation container: one clock, one chronicle, one receipt chain,
+//! one future mesh unit. Layout:
 //!
-//! - `state.json` — the committed snapshot (atomic replace per write)
-//! - `chronicle.jsonl` — the receipt stream, append-only, one JSON
-//!   object per receipt carrying the digest chain and the normative
+//! - `var/registry/<civ>.json` — who exists ([`registry::Registry`])
+//! - `var/worlds/<world>/world.json` — the container's own card
+//! - `var/worlds/<world>/chronicle.jsonl` — ONE receipt stream per
+//!   world, append-only, carrying the digest chain and the normative
 //!   TLV event bytes (hex)
-//! - `inbox/` — steward directives awaiting the game loop; applied or
-//!   refused ones are archived, never deleted
-//! - `solves/` — proof-of-solution certificates
+//! - `var/worlds/<world>/planets/<planet>/state.json` — the colony
+//!   snapshot on that planet (atomic replace per write)
+//! - `var/worlds/<world>/inbox/` — steward directives awaiting the
+//!   game loop; applied or refused ones are archived, never deleted
+//! - `var/worlds/<world>/solves/` — proof-of-solution certificates
 //!
 //! Two laws:
 //!
@@ -31,6 +36,7 @@ use std::io::Write as _;
 use std::path::PathBuf;
 
 mod json;
+pub mod registry;
 use json::JsonWriter;
 
 /// A steward directive: a requested verb, to be executed by the game
@@ -68,25 +74,51 @@ impl Mirror {
         Self { root: root.into() }
     }
 
-    /// The directory for one civilization (created on first touch).
-    pub fn civ_dir(&self, civ: &str) -> PathBuf {
-        self.root.join(sanitize(civ))
+    /// The directory for one world (created on first touch).
+    pub fn world_dir(&self, world: &str) -> PathBuf {
+        self.root.join(sanitize(world))
     }
 
-    /// Reflect the world: atomically replace `state.json`, append any
-    /// receipts the stream does not yet carry. Call after every
-    /// command; appending is incremental.
-    pub fn record(&self, civ: &str, world: &World) -> std::io::Result<()> {
-        let dir = self.civ_dir(civ);
+    /// Reflect one colony: atomically replace the planet's
+    /// `state.json`, refresh `world.json`, append any receipts the
+    /// world's stream does not yet carry. Call after every command;
+    /// appending is incremental.
+    pub fn record(
+        &self,
+        world_name: &str,
+        planet: &str,
+        civilization: &str,
+        world: &World,
+    ) -> std::io::Result<()> {
+        let dir = self.world_dir(world_name);
         fs::create_dir_all(dir.join("inbox"))?;
         fs::create_dir_all(dir.join("solves"))?;
+        let planet_dir = dir.join("planets").join(sanitize(planet));
+        fs::create_dir_all(&planet_dir)?;
 
         // state.json — write whole to a sibling, then rename (atomic
         // on POSIX): a reader never sees a torn snapshot.
-        let state = render_state(civ, world);
-        let tmp = dir.join("state.json.tmp");
+        let state = render_state(world_name, planet, civilization, world);
+        let tmp = planet_dir.join("state.json.tmp");
         fs::write(&tmp, state)?;
-        fs::rename(&tmp, dir.join("state.json"))?;
+        fs::rename(&tmp, planet_dir.join("state.json"))?;
+
+        // world.json — the container's card: name + settled planets.
+        let mut planets: Vec<String> = fs::read_dir(dir.join("planets"))?
+            .filter_map(|e| e.ok())
+            .filter(|e| e.path().is_dir())
+            .map(|e| e.file_name().to_string_lossy().into_owned())
+            .collect();
+        planets.sort();
+        let mut w = JsonWriter::new();
+        w.open();
+        w.field_str("world", world_name);
+        w.key("planets");
+        w.array(planets.into_iter());
+        w.close();
+        let tmp = dir.join("world.json.tmp");
+        fs::write(&tmp, w.finish())?;
+        fs::rename(&tmp, dir.join("world.json"))?;
 
         // chronicle.jsonl — append receipts beyond what is mirrored.
         let path = dir.join("chronicle.jsonl");
@@ -109,8 +141,8 @@ impl Mirror {
 
     /// Read pending directives, inbox-name ascending (the steward
     /// numbers them; order is the steward's stated order).
-    pub fn pending_directives(&self, civ: &str) -> std::io::Result<Vec<PendingDirective>> {
-        let inbox = self.civ_dir(civ).join("inbox");
+    pub fn pending_directives(&self, world: &str) -> std::io::Result<Vec<PendingDirective>> {
+        let inbox = self.world_dir(world).join("inbox");
         if !inbox.exists() {
             return Ok(Vec::new());
         }
@@ -144,12 +176,12 @@ impl Mirror {
     /// Record a proof-of-solution: one JSON file per confirmed task.
     pub fn record_solve(
         &self,
-        civ: &str,
+        world: &str,
         task: &str,
         program: &str,
         certificate_hex: &str,
     ) -> std::io::Result<()> {
-        let dir = self.civ_dir(civ).join("solves");
+        let dir = self.world_dir(world).join("solves");
         fs::create_dir_all(&dir)?;
         let mut w = JsonWriter::new();
         w.open();
@@ -161,9 +193,9 @@ impl Mirror {
     }
 }
 
-/// Filesystem-safe civilization/task names: lowercase alphanumerics
-/// and dashes, everything else becomes a dash.
-fn sanitize(name: &str) -> String {
+/// Filesystem-safe names (worlds, planets, civilizations, tasks):
+/// lowercase alphanumerics and dashes, everything else becomes a dash.
+pub(crate) fn sanitize(name: &str) -> String {
     name.chars()
         .map(|c| {
             let c = c.to_ascii_lowercase();
@@ -216,10 +248,12 @@ fn scope_name(s: cfe::ipsal::Scope) -> &'static str {
     }
 }
 
-fn render_state(civ: &str, world: &World) -> String {
+fn render_state(world_name: &str, planet: &str, civilization: &str, world: &World) -> String {
     let mut w = JsonWriter::new();
     w.open();
-    w.field_str("civilization", civ);
+    w.field_str("civilization", civilization);
+    w.field_str("world", world_name);
+    w.field_str("planet", planet);
     w.field_u64("clock", world.now());
     w.field_u64("receipts", world.chronicle().receipts().len() as u64);
 
