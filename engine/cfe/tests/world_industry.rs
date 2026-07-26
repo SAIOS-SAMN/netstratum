@@ -78,7 +78,7 @@ fn the_synthesizer_demands_alloy_it_cannot_forge_alone() {
     let mut alloy_famine = false;
     for _ in 0..3 {
         let outcome = world.tick();
-        if outcome.struck.contains(&Resource::Alloy) {
+        if outcome.struck.contains(&(1, Resource::Alloy)) {
             alloy_famine = true;
             break;
         }

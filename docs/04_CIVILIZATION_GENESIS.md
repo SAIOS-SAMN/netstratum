@@ -104,7 +104,40 @@ probabilities, exact draws, bit-for-bit replayable.
   measured loss visible ("harmonic bubble, 3/4 of structure survives your
   planar read — build a resonance array to close the gap").
 
-## 5. Board increments (proposed, root-first)
+## 5. THE TOPOLOGY (ruled 2026-07-25, all three nodes aligned)
+
+```
+CIVILIZATION  who — a species-level identity ("humans", "deep-chorus");
+              lives in var/registry/, SPANS worlds
+WORLD         where — a collection of planets sharing ONE clock, ONE
+              chronicle, ONE receipt chain (= one replay unit, one mesh
+              unit at N6, one anchor root at N7)
+PLANET        the settled body — terrain (D3), physical metabolism
+COLONY        a civilization's settlement ON a planet (today's 8×8 grid)
+```
+
+Three bindings that keep this honest:
+
+1. **The chronicle stays per-world.** One clock, one chain, all planets in
+   a world share history — the world IS the consensus unit. Never split
+   per planet.
+2. **The registry is a directory, never ground truth.** A registry entry
+   is pre-genesis identity: convenient, readable, editable. The moment G1
+   lands, the BINDING copy of a civilization's axes is its genesis receipt
+   in the world's chronicle — the registry is a cache of receipted truth,
+   and no mechanic may ever read the registry where a receipt exists
+   (SEAL B discipline applied to identity).
+3. **Registry entries are founder-amended only, append-only as a
+   directory** — anyone may JOIN a civilization (settle as it); only its
+   founder amends its entry, until G1 rules collective governance. This
+   keeps a shared directory from becoming an edit war.
+
+**Naming debt, registered:** the engine struct `World` currently means
+"one colony simulation" — the degenerate 1-world=1-planet=1-colony state.
+The word "world" is hereby reserved for the CONTAINER; the struct gets
+renamed at the multi-planet landing (before N6), not before.
+
+## 6. Board increments (proposed, root-first)
 
 | # | Landing | Contains | Blocked by |
 |---|---|---|---|

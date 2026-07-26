@@ -62,7 +62,7 @@ fn main() {
     for _ in 0..3 {
         tidefall.tick();
     }
-    tidefall.collect_as(rover).unwrap();
+    tidefall.collect_as(rover, cfe::world::FIRST_ORB).unwrap();
     mirror
         .record("kepler-passage", "tidefall", "deep-chorus", &tidefall)
         .unwrap();

@@ -69,6 +69,7 @@ One tag, one meaning, forever; retired codes are never reused.
 | 10 | event: EntityRegistered (N3) | LE64(entity_id) ‖ LE64(principal) ‖ handle utf8 |
 | 11 | event: ScopeGranted (N3) | LE64(agent) ‖ scope u8 |
 | 12 | event: ScopeRevoked (N3) | LE64(agent) ‖ scope u8 |
+| 13 | event: ColonyCharted (P1) | LE64(orb_id) ‖ LE64(source_orb) ‖ name utf8 — the founding reserves MOVE from source (conservation) |
 | 16 | orb header | LE64(orb_id) ‖ name utf8 |
 | 17 | orb zone entry | LE16(tile) ‖ kind u8 |
 | 18 | orb banked entry | resource u8 ‖ ratio |

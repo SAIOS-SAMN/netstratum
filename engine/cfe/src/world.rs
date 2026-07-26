@@ -1,14 +1,15 @@
-//! The world — the tick loop binding the organs, ruleset v1
-//! (02_COLONY_LOOP). Actions that complete CLOSE as receipts; per-tick
-//! accrual is workspace (unreceipted, never persisted); the chronicle
-//! replays the committed universe from sequence zero (CHARTER SEAL B).
+//! The world — THE CONTAINER of the topology (04 §5): multiple colony
+//! orbs (planets' settlements) under ONE clock, ONE chronicle, ONE
+//! receipt chain (binding #1 — the world is the replay unit, the mesh
+//! unit at N6, the anchor root at N7). The P1 landing paid the
+//! registered naming debt by making the struct MEAN the container.
 //!
-//! The flow model (02 §2.3): each tick, every ACTIVE zone nets
-//! yield − upkeep into the accrued workspace (per-resource, may be
-//! negative). `collect` settles the workspace against banked. Famine
-//! (02 §2.4) strikes at the tick where banked + accrued falls below
-//! zero: the stores empty, consumers go dormant, and relief needs the
-//! resource back at one-tick upkeep.
+//! The flow model (02 §2.3) runs PER ORB: each tick, every active zone
+//! nets yield − upkeep into its orb's accrued workspace; famine strikes
+//! per orb; `collect` settles one orb. Chartering (P1) founds a
+//! daughter colony by MOVING the founding reserves from a source
+//! colony's bank — conservation holds; no colony after the first gets
+//! free matter.
 
 use crate::dop::{
     founding_reserves, ClosureEvent, ColonyOrb, Resource, Zone, ZoneKind,
@@ -21,6 +22,9 @@ use crate::vrp::{Attestation, Chronicle, Timekeeper, TickRead, WorldClock};
 /// at founding.
 pub const SOVEREIGN: u64 = 1;
 
+/// The genesis orb id — the first colony.
+pub const FIRST_ORB: u64 = 1;
+
 /// A typed action refusal — the world refuses instead of guessing.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ActionRefused {
@@ -30,27 +34,28 @@ pub enum ActionRefused {
     NoSuchZone { tile: u16 },
     CannotAfford { resource: Resource, need: Box<Ratio>, have: Box<Ratio> },
     NothingAccrued,
-    /// N3 — no entity holds this id.
     NoSuchEntity { entity: u64 },
-    /// N3 — the handle is already registered.
     HandleTaken { handle: String },
-    /// N3 — the acting entity lacks the scope; containment refused it.
     NotPermitted { entity: u64, scope: Scope },
-    /// N3 — grants and revocations apply to agents, never sovereigns.
     NotAnAgent { entity: u64 },
+    /// P1 — no orb holds this id.
+    NoSuchOrb { orb: u64 },
+    /// P1 — a planet name is unique within its world.
+    PlanetNameTaken { name: String },
 }
 
-/// One tick's read: the clock walk, and any famines that struck.
+/// One tick's read: the clock walk, and any famines that struck
+/// (per orb).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TickOutcome {
     pub read: TickRead,
-    pub struck: Vec<Resource>,
+    pub struck: Vec<(u64, Resource)>,
 }
 
 /// The committed projection — exactly what the chronicle grounds.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Committed {
-    pub orb: Option<ColonyOrb>,
+    pub orbs: Vec<ColonyOrb>,
     pub entities: Vec<Entity>,
 }
 
@@ -58,11 +63,11 @@ pub struct World {
     clock: WorldClock,
     keepers: [Timekeeper; 3],
     chronicle: Chronicle,
-    orb: Option<ColonyOrb>,
+    orbs: Vec<ColonyOrb>,
     entities: Vec<Entity>,
-    /// WORKSPACE: net flow since the last collection — no receipt, no
-    /// persistence, not part of the committed projection.
-    accrued: Vec<(Resource, Ratio)>,
+    /// WORKSPACE, per orb: net flow since that orb's last collection —
+    /// no receipt, no persistence, not committed.
+    accrued: Vec<(u64, Resource, Ratio)>,
 }
 
 impl World {
@@ -71,7 +76,7 @@ impl World {
             clock: WorldClock::new(),
             keepers: [Timekeeper { id: 0 }, Timekeeper { id: 1 }, Timekeeper { id: 2 }],
             chronicle: Chronicle::new(),
-            orb: None,
+            orbs: Vec::new(),
             entities: Vec::new(),
             accrued: Vec::new(),
         }
@@ -85,12 +90,31 @@ impl World {
         &self.chronicle
     }
 
+    /// The genesis orb (convenience for the single-planet reads).
     pub fn orb(&self) -> Option<&ColonyOrb> {
-        self.orb.as_ref()
+        self.orbs.first()
     }
 
-    pub fn accrued(&self) -> &[(Resource, Ratio)] {
-        &self.accrued
+    pub fn orbs(&self) -> &[ColonyOrb] {
+        &self.orbs
+    }
+
+    pub fn orb_by_id(&self, orb: u64) -> Option<&ColonyOrb> {
+        self.orbs.iter().find(|held| held.orb_id == orb)
+    }
+
+    /// This orb's accrued workspace.
+    pub fn accrued_of(&self, orb: u64) -> Vec<(Resource, Ratio)> {
+        self.accrued
+            .iter()
+            .filter(|(held, _, _)| *held == orb)
+            .map(|(_, resource, amount)| (*resource, amount.clone()))
+            .collect()
+    }
+
+    /// The genesis orb's workspace (single-planet convenience).
+    pub fn accrued(&self) -> Vec<(Resource, Ratio)> {
+        self.accrued_of(FIRST_ORB)
     }
 
     pub fn entities(&self) -> &[Entity] {
@@ -101,14 +125,13 @@ impl World {
         self.entities.iter().find(|held| held.entity_id == entity)
     }
 
-    /// Found the colony — a closure; founding banks the bootstrap
-    /// reserves (02 §2.1) and, first, registers the SOVEREIGN: the
-    /// human at the terminal becomes entity 1, and every receipt they
-    /// forge carries their generation tag.
+    /// Found the GENESIS colony — banks the bootstrap reserves (02
+    /// §2.1); registers the sovereign first. Later colonies arrive by
+    /// `chart` — founding is once per world.
     pub fn found(&mut self, name: &str) -> Result<(), ActionRefused> {
-        match self.orb {
-            Some(_) => Err(ActionRefused::ColonyAlreadyFounded),
-            None => {
+        match self.orbs.is_empty() {
+            false => Err(ActionRefused::ColonyAlreadyFounded),
+            true => {
                 if self.entities.is_empty() {
                     self.entities.push(Entity {
                         entity_id: SOVEREIGN,
@@ -125,19 +148,18 @@ impl World {
                         SOVEREIGN,
                     );
                 }
-                let orb_id = 1;
                 let mut orb = ColonyOrb {
-                    orb_id,
+                    orb_id: FIRST_ORB,
                     name: name.to_string(),
                     ..ColonyOrb::default()
                 };
                 for (resource, amount) in founding_reserves() {
                     orb.bank(resource, amount);
                 }
-                self.orb = Some(orb);
+                self.orbs.push(orb);
                 self.close(
                     ClosureEvent::ColonyFounded {
-                        orb_id,
+                        orb_id: FIRST_ORB,
                         name: name.to_string(),
                     },
                     SOVEREIGN,
@@ -147,9 +169,62 @@ impl World {
         }
     }
 
-    /// Register a scripted agent contained by the sovereign (N3). The
-    /// agent starts with NO grants: containment first, capability by
-    /// explicit grant.
+    /// Chart a daughter colony as the sovereign.
+    pub fn chart(&mut self, name: &str, source: u64) -> Result<u64, ActionRefused> {
+        self.chart_as(SOVEREIGN, name, source)
+    }
+
+    /// P1 — chart a daughter colony on a new planet: the founding
+    /// reserves MOVE from the source colony's bank to the daughter's.
+    /// Conservation holds — chartering mints nothing. Build scope.
+    pub fn chart_as(&mut self, actor: u64, name: &str, source: u64) -> Result<u64, ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if self.orbs.is_empty() {
+            return Err(ActionRefused::NoColony);
+        }
+        if self.orbs.iter().any(|held| held.name == name) {
+            return Err(ActionRefused::PlanetNameTaken { name: name.to_string() });
+        }
+        let source_orb = self
+            .orbs
+            .iter_mut()
+            .find(|held| held.orb_id == source)
+            .ok_or(ActionRefused::NoSuchOrb { orb: source })?;
+        for (resource, amount) in founding_reserves() {
+            let have = source_orb.banked_amount(resource);
+            if have < amount {
+                return Err(ActionRefused::CannotAfford {
+                    resource,
+                    need: Box::new(amount),
+                    have: Box::new(have),
+                });
+            }
+        }
+        for (resource, amount) in founding_reserves() {
+            source_orb.bank(resource, -amount);
+        }
+        let orb_id = self.orbs.iter().map(|held| held.orb_id).max().unwrap_or(0) + 1;
+        let mut daughter = ColonyOrb {
+            orb_id,
+            name: name.to_string(),
+            ..ColonyOrb::default()
+        };
+        for (resource, amount) in founding_reserves() {
+            daughter.bank(resource, amount);
+        }
+        self.orbs.push(daughter);
+        self.close(
+            ClosureEvent::ColonyCharted {
+                orb_id,
+                source_orb: source,
+                name: name.to_string(),
+            },
+            actor,
+        );
+        Ok(orb_id)
+    }
+
+    /// Register a scripted agent contained by the sovereign (N3).
     pub fn register_agent(&mut self, handle: &str) -> Result<u64, ActionRefused> {
         if self.entities.is_empty() {
             return Err(ActionRefused::NoSuchEntity { entity: SOVEREIGN });
@@ -195,8 +270,7 @@ impl World {
         Ok(())
     }
 
-    /// Revoke a grant — revocation is immediate: the agent's next such
-    /// action refuses.
+    /// Revoke a grant — immediate; the agent's next such action refuses.
     pub fn revoke(&mut self, agent: u64, scope: Scope) -> Result<(), ActionRefused> {
         let held = self
             .entities
@@ -213,8 +287,6 @@ impl World {
         Ok(())
     }
 
-    /// The containment check (NS-6): sovereigns act by construction;
-    /// agents act inside their grants, or the action refuses typed.
     fn permitted(&self, actor: u64, scope: Scope) -> Result<(), ActionRefused> {
         let entity = self
             .entity(actor)
@@ -225,22 +297,34 @@ impl World {
         }
     }
 
-    /// Zone a tile as the sovereign.
+    /// Zone on the genesis orb as the sovereign.
     pub fn zone(&mut self, tile: u16, kind: ZoneKind) -> Result<(), ActionRefused> {
-        self.zone_as(SOVEREIGN, tile, kind)
+        self.zone_as(SOVEREIGN, FIRST_ORB, tile, kind)
     }
 
-    /// Zone a tile — the build SPENDS its cost from banked (02 §2.2);
-    /// an unaffordable build refuses with the exact shortfall. The
-    /// actor must hold Build scope; the receipt carries its tag.
-    pub fn zone_as(&mut self, actor: u64, tile: u16, kind: ZoneKind) -> Result<(), ActionRefused> {
+    /// Zone a tile of one orb — the build SPENDS from that orb's bank
+    /// (02 §2.2); Build scope; the receipt carries the actor's tag.
+    pub fn zone_as(
+        &mut self,
+        actor: u64,
+        orb: u64,
+        tile: u16,
+        kind: ZoneKind,
+    ) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Build)?;
-        let orb = self.orb.as_mut().ok_or(ActionRefused::NoColony)?;
-        if orb.zones.iter().any(|zone| zone.tile == tile) {
+        if self.orbs.is_empty() {
+            return Err(ActionRefused::NoColony);
+        }
+        let held = self
+            .orbs
+            .iter_mut()
+            .find(|held| held.orb_id == orb)
+            .ok_or(ActionRefused::NoSuchOrb { orb })?;
+        if held.zones.iter().any(|zone| zone.tile == tile) {
             return Err(ActionRefused::TileAlreadyZoned { tile });
         }
         for (resource, cost) in kind.cost() {
-            let have = orb.banked_amount(resource);
+            let have = held.banked_amount(resource);
             if have < cost {
                 return Err(ActionRefused::CannotAfford {
                     resource,
@@ -250,84 +334,98 @@ impl World {
             }
         }
         for (resource, cost) in kind.cost() {
-            orb.bank(resource, -cost);
+            held.bank(resource, -cost);
         }
-        orb.zones.push(Zone { tile, kind });
-        orb.zones.sort_by_key(|zone| zone.tile);
-        let orb_id = orb.orb_id;
+        held.zones.push(Zone { tile, kind });
+        held.zones.sort_by_key(|zone| zone.tile);
+        let orb_id = held.orb_id;
         self.close(ClosureEvent::ZoneBuilt { orb_id, tile, kind }, actor);
         Ok(())
     }
 
-    /// Raze as the sovereign.
+    /// Raze on the genesis orb as the sovereign.
     pub fn raze(&mut self, tile: u16) -> Result<(), ActionRefused> {
-        self.raze_as(SOVEREIGN, tile)
+        self.raze_as(SOVEREIGN, FIRST_ORB, tile)
     }
 
-    /// Raze a zone for half its cost back (02 §2.4 — the way out), then
-    /// check famine relief (the drain just shrank). Raze scope required.
-    pub fn raze_as(&mut self, actor: u64, tile: u16) -> Result<(), ActionRefused> {
+    /// Raze a zone of one orb for half its cost back (02 §2.4); Raze
+    /// scope; famine relief re-checked for that orb.
+    pub fn raze_as(&mut self, actor: u64, orb: u64, tile: u16) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Raze)?;
-        let orb = self.orb.as_mut().ok_or(ActionRefused::NoColony)?;
-        let at = orb
+        if self.orbs.is_empty() {
+            return Err(ActionRefused::NoColony);
+        }
+        let held = self
+            .orbs
+            .iter_mut()
+            .find(|held| held.orb_id == orb)
+            .ok_or(ActionRefused::NoSuchOrb { orb })?;
+        let at = held
             .zones
             .iter()
             .position(|zone| zone.tile == tile)
             .ok_or(ActionRefused::NoSuchZone { tile })?;
-        let zone = orb.zones.remove(at);
+        let zone = held.zones.remove(at);
         for (resource, refund) in zone.kind.raze_refund() {
-            orb.bank(resource, refund);
+            held.bank(resource, refund);
         }
-        let orb_id = orb.orb_id;
+        let orb_id = held.orb_id;
         self.close(ClosureEvent::ZoneRazed { orb_id, tile }, actor);
-        self.relieve_recovered();
+        self.relieve_recovered(orb);
         Ok(())
     }
 
-    /// One simulation tick: active zones net yield − upkeep into the
-    /// workspace; famine strikes where banked + accrued falls below
-    /// zero; the clock walks by quorum. Famine is a closure — it
-    /// chronicles; the per-tick flows do not (NS-3 §2.3).
+    /// One simulation tick for the WHOLE world: every orb's active
+    /// zones net their flows into that orb's workspace; famine strikes
+    /// per orb; the one clock walks by quorum.
     pub fn tick(&mut self) -> TickOutcome {
         let mut struck = Vec::new();
-        if let Some(orb) = &self.orb {
-            let active: Vec<Zone> = orb
-                .zones
-                .iter()
-                .filter(|zone| orb.zone_active(zone))
-                .cloned()
-                .collect();
-            for zone in &active {
+        let flows: Vec<(u64, Vec<Zone>)> = self
+            .orbs
+            .iter()
+            .map(|orb| {
+                (
+                    orb.orb_id,
+                    orb.zones
+                        .iter()
+                        .filter(|zone| orb.zone_active(zone))
+                        .cloned()
+                        .collect(),
+                )
+            })
+            .collect();
+        for (orb_id, active) in &flows {
+            for zone in active {
                 let (resource, amount) = zone.kind.yield_per_tick();
-                accrue(&mut self.accrued, resource, amount);
+                accrue(&mut self.accrued, *orb_id, resource, amount);
                 for (resource, amount) in zone.kind.upkeep_per_tick() {
-                    accrue(&mut self.accrued, resource, -amount);
+                    accrue(&mut self.accrued, *orb_id, resource, -amount);
                 }
             }
         }
-        // The famine check (02 §2.4): trigger where banked + accrued < 0.
-        if let Some(orb) = &mut self.orb {
+        // The famine check, per orb (02 §2.4).
+        let stamp = self.clock.now();
+        for orb in &mut self.orbs {
             for resource in Resource::ALL {
-                let accrued = ledger_amount(&self.accrued, resource);
+                let accrued = triple_amount(&self.accrued, orb.orb_id, resource);
                 let banked = orb.banked_amount(resource);
                 let solvent = banked.clone() + accrued >= ratio(0, 1);
                 if !solvent && !orb.famine.contains(&resource) {
-                    // The stores empty: banked drawn to zero, the
-                    // workspace deficit cleared — there is nothing left
-                    // to owe. Consumers go dormant.
                     orb.bank(resource, -banked.clone());
-                    self.accrued.retain(|(held, _)| *held != resource);
+                    self.accrued
+                        .retain(|(held, res, _)| !(*held == orb.orb_id && *res == resource));
                     orb.famine.push(resource);
                     orb.famine.sort();
-                    let orb_id = orb.orb_id;
-                    let event = ClosureEvent::FamineStruck {
-                        orb_id,
-                        resource,
-                        drawn: banked,
-                    };
-                    let stamp = self.clock.now();
-                    self.chronicle.append(event, stamp, vec![]);
-                    struck.push(resource);
+                    self.chronicle.append(
+                        ClosureEvent::FamineStruck {
+                            orb_id: orb.orb_id,
+                            resource,
+                            drawn: banked,
+                        },
+                        stamp,
+                        vec![],
+                    );
+                    struck.push((orb.orb_id, resource));
                 }
             }
         }
@@ -342,33 +440,43 @@ impl World {
         }
     }
 
-    /// Collect as the sovereign.
+    /// Collect the genesis orb as the sovereign.
     pub fn collect(&mut self) -> Result<usize, ActionRefused> {
-        self.collect_as(SOVEREIGN)
+        self.collect_as(SOVEREIGN, FIRST_ORB)
     }
 
-    /// Collect — settle the workspace against banked: positive nets
-    /// bank (`YieldCollected`), negative nets draw (`UpkeepSettled`).
-    /// Then check famine relief (the stores just moved). Collect scope
-    /// required; every settle receipt carries the actor's tag.
-    pub fn collect_as(&mut self, actor: u64) -> Result<usize, ActionRefused> {
+    /// Collect ONE orb — settle its workspace against its bank;
+    /// Collect scope; relief re-checked for that orb.
+    pub fn collect_as(&mut self, actor: u64, orb: u64) -> Result<usize, ActionRefused> {
         self.permitted(actor, Scope::Collect)?;
-        let orb = self.orb.as_mut().ok_or(ActionRefused::NoColony)?;
-        let accrued = std::mem::take(&mut self.accrued);
-        let settleable: Vec<(Resource, Ratio)> = accrued
-            .into_iter()
-            .filter(|(_, amount)| amount != &ratio(0, 1))
-            .collect();
+        if self.orbs.is_empty() {
+            return Err(ActionRefused::NoColony);
+        }
+        let held = self
+            .orbs
+            .iter_mut()
+            .find(|held| held.orb_id == orb)
+            .ok_or(ActionRefused::NoSuchOrb { orb })?;
+        let mut settleable: Vec<(Resource, Ratio)> = Vec::new();
+        self.accrued.retain(|(owner, resource, amount)| {
+            match *owner == orb && amount != &ratio(0, 1) {
+                true => {
+                    settleable.push((*resource, amount.clone()));
+                    false
+                }
+                false => *owner != orb,
+            }
+        });
         if settleable.is_empty() {
             return Err(ActionRefused::NothingAccrued);
         }
-        let orb_id = orb.orb_id;
+        let orb_id = held.orb_id;
         let stamp = self.clock.now();
         let count = settleable.len();
         for (resource, amount) in settleable {
             match amount >= ratio(0, 1) {
                 true => {
-                    orb.bank(resource, amount.clone());
+                    held.bank(resource, amount.clone());
                     self.chronicle.append(
                         ClosureEvent::YieldCollected { orb_id, resource, amount },
                         stamp,
@@ -376,11 +484,8 @@ impl World {
                     );
                 }
                 false => {
-                    // The tick-time famine check guarantees banked
-                    // covers this deficit (else famine already cleared
-                    // the workspace).
                     let drawn = -amount;
-                    orb.bank(resource, -drawn.clone());
+                    held.bank(resource, -drawn.clone());
                     self.chronicle.append(
                         ClosureEvent::UpkeepSettled {
                             orb_id,
@@ -393,46 +498,48 @@ impl World {
                 }
             }
         }
-        self.relieve_recovered();
+        self.relieve_recovered(orb);
         Ok(count)
     }
 
     /// The committed projection of the live world.
     pub fn committed(&self) -> Committed {
         Committed {
-            orb: self.orb.clone(),
+            orbs: self.orbs.clone(),
             entities: self.entities.clone(),
         }
     }
 
-    /// Famine relief (02 §2.4): a famined resource whose banked stock
-    /// covers its dormant zones' ONE-TICK upkeep recovers; the zones
-    /// wake. Checked after collect and raze — the two moves that
-    /// restock or shrink the drain.
-    fn relieve_recovered(&mut self) {
-        let Some(orb) = self.orb.as_mut() else { return };
-        let famined: Vec<Resource> = orb.famine.clone();
+    /// Famine relief for ONE orb (02 §2.4).
+    fn relieve_recovered(&mut self, orb: u64) {
+        let stamp = self.clock.now();
+        let Some(held) = self.orbs.iter_mut().find(|held| held.orb_id == orb) else {
+            return;
+        };
+        let famined: Vec<Resource> = held.famine.clone();
         for resource in famined {
-            let one_tick: Ratio = orb
+            let one_tick: Ratio = held
                 .zones
                 .iter()
                 .flat_map(|zone| zone.kind.upkeep_per_tick())
                 .filter(|(consumed, _)| *consumed == resource)
                 .map(|(_, amount)| amount)
                 .fold(ratio(0, 1), |sum, amount| sum + amount);
-            if orb.banked_amount(resource) >= one_tick {
-                orb.famine.retain(|held| *held != resource);
-                let orb_id = orb.orb_id;
-                let event = ClosureEvent::FamineRelieved { orb_id, resource };
-                let stamp = self.clock.now();
-                self.chronicle.append(event, stamp, vec![]);
+            if held.banked_amount(resource) >= one_tick {
+                held.famine.retain(|kept| *kept != resource);
+                self.chronicle.append(
+                    ClosureEvent::FamineRelieved {
+                        orb_id: held.orb_id,
+                        resource,
+                    },
+                    stamp,
+                    vec![],
+                );
             }
         }
     }
 
-    /// Seal a closure with its actor's generation tag (NS-6): the
-    /// receipt's provenance IS who forged it. World-drive closures
-    /// (famine) carry no tag — no entity forged them.
+    /// Seal a closure with its actor's generation tag (NS-6).
     fn close(&mut self, event: ClosureEvent, actor: u64) {
         let stamp = self.clock.now();
         self.chronicle.append(event, stamp, vec![actor]);
@@ -446,11 +553,9 @@ impl Default for World {
 }
 
 /// Replay a chronicle into the committed projection it grounds
-/// (CHARTER SEAL B). The ruleset constants (costs, reserves, refunds)
-/// apply to the receipted events — replay reproduces the committed
-/// world exactly, workspace excluded by construction.
+/// (CHARTER SEAL B) — every orb, every entity, from receipts alone.
 pub fn replay(chronicle: &Chronicle) -> Committed {
-    let mut orb: Option<ColonyOrb> = None;
+    let mut orbs: Vec<ColonyOrb> = Vec::new();
     let mut entities: Vec<Entity> = Vec::new();
     for receipt in chronicle.receipts() {
         match &receipt.event {
@@ -485,70 +590,88 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 for (resource, amount) in founding_reserves() {
                     founded.bank(resource, amount);
                 }
-                orb = Some(founded);
+                orbs.push(founded);
             }
-            ClosureEvent::ZoneBuilt { tile, kind, .. } => {
-                if let Some(orb) = orb.as_mut() {
-                    for (resource, cost) in kind.cost() {
-                        orb.bank(resource, -cost);
+            ClosureEvent::ColonyCharted { orb_id, source_orb, name } => {
+                if let Some(source) = orbs.iter_mut().find(|held| held.orb_id == *source_orb) {
+                    for (resource, amount) in founding_reserves() {
+                        source.bank(resource, -amount);
                     }
-                    orb.zones.push(Zone { tile: *tile, kind: *kind });
-                    orb.zones.sort_by_key(|zone| zone.tile);
+                }
+                let mut daughter = ColonyOrb {
+                    orb_id: *orb_id,
+                    name: name.clone(),
+                    ..ColonyOrb::default()
+                };
+                for (resource, amount) in founding_reserves() {
+                    daughter.bank(resource, amount);
+                }
+                orbs.push(daughter);
+            }
+            ClosureEvent::ZoneBuilt { orb_id, tile, kind } => {
+                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                    for (resource, cost) in kind.cost() {
+                        held.bank(resource, -cost);
+                    }
+                    held.zones.push(Zone { tile: *tile, kind: *kind });
+                    held.zones.sort_by_key(|zone| zone.tile);
                 }
             }
-            ClosureEvent::YieldCollected { resource, amount, .. } => {
-                if let Some(orb) = orb.as_mut() {
-                    orb.bank(*resource, amount.clone());
+            ClosureEvent::YieldCollected { orb_id, resource, amount } => {
+                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                    held.bank(*resource, amount.clone());
                 }
             }
-            ClosureEvent::UpkeepSettled { resource, amount, .. } => {
-                if let Some(orb) = orb.as_mut() {
-                    orb.bank(*resource, -amount.clone());
+            ClosureEvent::UpkeepSettled { orb_id, resource, amount } => {
+                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                    held.bank(*resource, -amount.clone());
                 }
             }
-            ClosureEvent::FamineStruck { resource, drawn, .. } => {
-                if let Some(orb) = orb.as_mut() {
-                    orb.bank(*resource, -drawn.clone());
-                    orb.famine.push(*resource);
-                    orb.famine.sort();
+            ClosureEvent::FamineStruck { orb_id, resource, drawn } => {
+                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                    held.bank(*resource, -drawn.clone());
+                    held.famine.push(*resource);
+                    held.famine.sort();
                 }
             }
-            ClosureEvent::FamineRelieved { resource, .. } => {
-                if let Some(orb) = orb.as_mut() {
-                    orb.famine.retain(|held| held != resource);
+            ClosureEvent::FamineRelieved { orb_id, resource } => {
+                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                    held.famine.retain(|kept| kept != resource);
                 }
             }
-            ClosureEvent::ZoneRazed { tile, .. } => {
-                if let Some(orb) = orb.as_mut() {
-                    if let Some(at) = orb.zones.iter().position(|zone| zone.tile == *tile) {
-                        let zone = orb.zones.remove(at);
+            ClosureEvent::ZoneRazed { orb_id, tile } => {
+                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                    if let Some(at) = held.zones.iter().position(|zone| zone.tile == *tile) {
+                        let zone = held.zones.remove(at);
                         for (resource, refund) in zone.kind.raze_refund() {
-                            orb.bank(resource, refund);
+                            held.bank(resource, refund);
                         }
                     }
                 }
             }
         }
     }
-    Committed { orb, entities }
+    Committed { orbs, entities }
 }
 
-fn ledger_amount(ledger: &[(Resource, Ratio)], resource: Resource) -> Ratio {
+fn triple_amount(ledger: &[(u64, Resource, Ratio)], orb: u64, resource: Resource) -> Ratio {
     ledger
         .iter()
-        .find(|(held, _)| *held == resource)
-        .map(|(_, amount)| amount.clone())
+        .find(|(held, res, _)| *held == orb && *res == resource)
+        .map(|(_, _, amount)| amount.clone())
         .unwrap_or_else(|| ratio(0, 1))
 }
 
-fn accrue(ledger: &mut Vec<(Resource, Ratio)>, resource: Resource, amount: Ratio) {
-    match ledger.iter_mut().find(|(held, _)| *held == resource) {
-        Some((_, held)) => *held += amount,
+fn accrue(ledger: &mut Vec<(u64, Resource, Ratio)>, orb: u64, resource: Resource, amount: Ratio) {
+    match ledger
+        .iter_mut()
+        .find(|(held, res, _)| *held == orb && *res == resource)
+    {
+        Some((_, _, held)) => *held += amount,
         None => {
-            ledger.push((resource, amount));
-            ledger.sort_by_key(|(resource, _)| *resource);
+            ledger.push((orb, resource, amount));
+            ledger.sort_by_key(|(orb, resource, _)| (*orb, *resource));
         }
     }
-    // A zero net is not a datum: the knife-edge ledger stays canonical.
-    ledger.retain(|(_, amount)| amount != &ratio(0, 1));
+    ledger.retain(|(_, _, amount)| amount != &ratio(0, 1));
 }

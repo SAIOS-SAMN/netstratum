@@ -63,7 +63,7 @@ fn the_chronicle_replays_the_committed_world() {
         world.committed(),
         "the chronicle grounds the committed world, and ONLY the committed world"
     );
-    let banked = &replayed.orb.expect("replay refounds the colony").banked;
+    let banked = &replayed.orbs.first().expect("replay refounds the colony").banked;
     assert_eq!(
         banked,
         &vec![(Resource::Iron, ratio(29, 2)), (Resource::Biomass, ratio(7, 2))],
