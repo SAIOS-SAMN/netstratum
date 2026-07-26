@@ -313,18 +313,37 @@ def render_starchart(chart, span, tuniversal):
 
     # The ascii canvas, worlds marked a, b, c…
     width, height = 49, 13
+
+    def label(i):
+        """Unambiguous marks: a..z, then aa, ab, … — never recycled."""
+        out = ""
+        i += 1
+        while i > 0:
+            i, r = divmod(i - 1, 26)
+            out = chr(ord("a") + r) + out
+        return out
+
     canvas = [[" "] * width for _ in range(height)]
+    occupied = {}
     marks = []
     for i, name in enumerate(names):
         x, y = chart[name][0], chart[name][1]
         col = int((x % span) / span * width) % width
         row = int((span - (y % span)) / span * height) % height
-        mark = chr(ord("a") + i % 26)
-        canvas[row][col] = mark
+        mark = label(i)
+        if (row, col) in occupied:
+            # More than one world in this cell: the map shows a stack
+            # marker; the legend carries the truth.
+            canvas[row][col] = "*"
+            occupied[(row, col)] += 1
+        else:
+            canvas[row][col] = mark[0] if len(mark) == 1 else "+"
+            occupied[(row, col)] = 1
         marks.append((mark, name))
     lines += ["  ·" + "-" * width + "·"]
     lines += ["  |" + "".join(r) + "|" for r in canvas]
-    lines += ["  ·" + "-" * width + "·"]
+    lines += ["  ·" + "-" * width + "·",
+              "  (* = several worlds share this cell · + = world beyond z on the legend)"]
 
     # Exact coordinates and nearest neighbor by squared distance.
     for mark, name in marks:
@@ -337,7 +356,7 @@ def render_starchart(chart, span, tuniversal):
             if best is None or d < best:
                 nearest, best = other, d
         lines.append(
-            f"  {mark}  {name:<28} S=({show(x)}, {show(y)}, {show(z)}) G={show(g)}"
+            f"  {mark:<3} {name:<28} S=({show(x)}, {show(y)}, {show(z)}) G={show(g)}"
             + (f"   nearest {nearest} at L1 {show(best)}" if best is not None else "")
         )
     return "\n".join(lines)
