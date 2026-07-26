@@ -5,7 +5,7 @@
 use cfe::dop::ZoneKind;
 use cfe::ipsal::Scope;
 use cfe::vrp::ChainRead;
-use cfe::world::{replay, ActionRefused, World, SOVEREIGN};
+use cfe::world::{replay, ActionRefused, World, FIRST_ORB, SOVEREIGN};
 
 #[test]
 fn the_sovereign_is_registered_and_tags_every_receipt() {
@@ -38,18 +38,18 @@ fn an_agent_acts_only_inside_its_grant() {
         world.tick();
     }
     assert_eq!(
-        world.collect_as(bot),
+        world.collect_as(bot, FIRST_ORB),
         Err(ActionRefused::NotPermitted { entity: bot, scope: Scope::Collect })
     );
     assert_eq!(
-        world.zone_as(bot, 1, ZoneKind::Extractor),
+        world.zone_as(bot, FIRST_ORB, 1, ZoneKind::Extractor),
         Err(ActionRefused::NotPermitted { entity: bot, scope: Scope::Build })
     );
     // One grant: exactly that scope opens, the others stay shut.
     world.grant(bot, Scope::Collect).expect("the sovereign grants");
-    world.collect_as(bot).expect("the granted scope acts");
+    world.collect_as(bot, FIRST_ORB).expect("the granted scope acts");
     assert_eq!(
-        world.zone_as(bot, 1, ZoneKind::Extractor),
+        world.zone_as(bot, FIRST_ORB, 1, ZoneKind::Extractor),
         Err(ActionRefused::NotPermitted { entity: bot, scope: Scope::Build }),
         "a grant is a scope, not a blanket"
     );
@@ -67,11 +67,11 @@ fn revocation_is_immediate() {
     let bot = world.register_agent("harvest-bot").expect("registers");
     world.grant(bot, Scope::Collect).expect("granted");
     world.tick();
-    world.collect_as(bot).expect("acts inside the grant");
+    world.collect_as(bot, FIRST_ORB).expect("acts inside the grant");
     world.revoke(bot, Scope::Collect).expect("revoked");
     world.tick();
     assert_eq!(
-        world.collect_as(bot),
+        world.collect_as(bot, FIRST_ORB),
         Err(ActionRefused::NotPermitted { entity: bot, scope: Scope::Collect }),
         "revocation needs no cooperation from the agent"
     );
@@ -82,7 +82,7 @@ fn containment_refuses_the_unknown_and_the_sovereign_shortcut() {
     let mut world = World::new();
     world.found("meridian").expect("founding closes");
     assert_eq!(
-        world.collect_as(99),
+        world.collect_as(99, FIRST_ORB),
         Err(ActionRefused::NoSuchEntity { entity: 99 })
     );
     let bot = world.register_agent("bot").expect("registers");
@@ -109,7 +109,7 @@ fn the_entity_registry_replays_from_receipts_alone() {
     world.grant(bot, Scope::Raze).expect("granted");
     world.revoke(bot, Scope::Raze).expect("revoked");
     world.tick();
-    world.collect_as(bot).expect("acts");
+    world.collect_as(bot, FIRST_ORB).expect("acts");
     assert_eq!(world.chronicle().verify_chain(), ChainRead::Intact);
     let replayed = replay(world.chronicle());
     assert_eq!(replayed, world.committed(), "entities, grants, and revocations replay");

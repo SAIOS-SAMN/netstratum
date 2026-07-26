@@ -284,7 +284,7 @@ fn render_state(world_name: &str, planet: &str, civilization: &str, world: &Worl
 
     w.key("accrued");
     w.open();
-    for (resource, amount) in world.accrued() {
+    for (resource, amount) in &world.accrued() {
         w.field_str(resource_name(*resource), &ratio_str(amount));
     }
     w.close();
@@ -339,6 +339,10 @@ fn render_receipt(receipt: &Receipt) -> String {
         E::ScopeRevoked { agent, scope } => {
             ("scope_revoked", format!("{} from #{agent}", scope_name(*scope)))
         }
+        E::ColonyCharted { orb_id, source_orb, name } => (
+            "colony_charted",
+            format!("{name} (orb {orb_id}) from orb {source_orb}"),
+        ),
     };
     w.field_str("event", name);
     w.field_str("detail", &detail);

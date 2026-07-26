@@ -227,7 +227,7 @@ impl BotWorld {
             }
         });
         if let (Some(kind), Some(tile)) = (wanted, next_free_tile(world)) {
-            let _ = world.zone_as(self.actor, tile, kind);
+            let _ = world.zone_as(self.actor, cfe::world::FIRST_ORB, tile, kind);
         }
     }
 
@@ -269,14 +269,14 @@ impl BotWorld {
         };
         match (directive.verb.as_str(), directive.args.as_slice()) {
             ("zone", [tile, kind]) => match (parse_tile(tile), parse_kind(kind)) {
-                (Some(tile), Some(kind)) => self.world.zone_as(self.steward, tile, kind).is_ok(),
+                (Some(tile), Some(kind)) => self.world.zone_as(self.steward, cfe::world::FIRST_ORB, tile, kind).is_ok(),
                 _ => false,
             },
             ("raze", [tile]) => match parse_tile(tile) {
-                Some(tile) => self.world.raze_as(self.steward, tile).is_ok(),
+                Some(tile) => self.world.raze_as(self.steward, cfe::world::FIRST_ORB, tile).is_ok(),
                 None => false,
             },
-            ("collect", []) => self.world.collect_as(self.steward).is_ok(),
+            ("collect", []) => self.world.collect_as(self.steward, cfe::world::FIRST_ORB).is_ok(),
             _ => false,
         }
     }
@@ -392,7 +392,7 @@ impl BotWorld {
         self.drain_inbox(mirror);
         self.build_step();
         self.world.tick();
-        let _ = self.world.collect_as(self.actor);
+        let _ = self.world.collect_as(self.actor, cfe::world::FIRST_ORB);
         self.research_step(mirror);
         let newborn = self.speciation_step(registry);
         let _ = mirror.record(

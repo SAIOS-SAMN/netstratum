@@ -166,9 +166,11 @@ Two engineering nodes work this repo. File ownership keeps merges
 conflict-free: **coder-02 (vocabulary node, main tree)** owns `docs/`
 (EXCEPT the substrate contract), `engine/cfe/src/world.rs`, `clients/cli/`.
 **coder-01 (substrate node, worktree)** owns `engine/rfa-core/`,
-`engine/physics/`, `docs/03_SUBSTRATE_CONTRACT.md`, and the workspace
-`Cargo.toml` members line. Neither node edits the other's territory without
-an operator relay. Cross-layer meaning is pinned by
+`engine/physics/`, `engine/solver/`, `engine/mirror/` (registry +
+observer), `docs/03_SUBSTRATE_CONTRACT.md`, and the workspace `Cargo.toml`
+members line. Runtime state (`var/`) is never tracked; the registry under
+it is a directory of receipted truth, never a source of it (04 §5).
+Neither node edits the other's territory without an operator relay. Cross-layer meaning is pinned by
 `docs/03_SUBSTRATE_CONTRACT.md` (each mechanic stated as mechanic →
 primitive → witness test) — the layers hold each other by tests, not by
 memory.

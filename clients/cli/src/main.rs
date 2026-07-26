@@ -28,6 +28,7 @@ fn main() {
         .cloned();
     let style = Style { plain };
     let mut world = World::new();
+    let mut current: u64 = cfe::world::FIRST_ORB;
     banner(&style);
     match script {
         Some(script) => {
@@ -35,7 +36,7 @@ fn main() {
                 let line = line.trim();
                 if !line.is_empty() {
                     println!("{} {line}", style.dim("»"));
-                    command(&mut world, line, &style);
+                    command(&mut world, line, &style, &mut current);
                 }
             }
         }
@@ -52,7 +53,7 @@ fn main() {
                         match line.as_str() {
                             "quit" | "exit" => break,
                             "" => {}
-                            _ => command(&mut world, &line, &style),
+                            _ => command(&mut world, &line, &style, &mut current),
                         }
                     }
                     Err(_) => break,
@@ -108,7 +109,7 @@ fn banner(style: &Style) {
     );
 }
 
-fn command(world: &mut World, line: &str, style: &Style) {
+fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
     let mut words = line.split_whitespace();
     match words.next() {
         Some("help") => help(style),
@@ -128,7 +129,7 @@ fn command(world: &mut World, line: &str, style: &Style) {
                             style.strong(&name),
                             style.dim("#0")
                         );
-                        map(world, style);
+                        map(world, style, *current);
                     }
                     Err(refusal) => refuse(world, &refusal, style),
                 },
@@ -144,7 +145,7 @@ fn command(world: &mut World, line: &str, style: &Style) {
                 _ => None,
             };
             match (tile, kind) {
-                (Some(tile), Some(kind)) if tile < GRID * GRID => match world.zone(tile, kind) {
+                (Some(tile), Some(kind)) if tile < GRID * GRID => match world.zone_as(SOVEREIGN, *current, tile, kind) {
                     Ok(()) => {
                         let sequence = world.chronicle().receipts().len() - 1;
                         println!(
@@ -155,7 +156,7 @@ fn command(world: &mut World, line: &str, style: &Style) {
                             style.strong(kind_name(kind)),
                             style.dim(&format!("#{sequence}"))
                         );
-                        map(world, style);
+                        map(world, style, *current);
                     }
                     Err(refusal) => refuse(world, &refusal, style),
                 },
@@ -180,11 +181,16 @@ fn command(world: &mut World, line: &str, style: &Style) {
                 .unwrap_or(1);
             for _ in 0..count {
                 let outcome = world.tick();
-                for resource in outcome.struck {
+                for (orb, resource) in outcome.struck {
+                    let planet = world
+                        .orb_by_id(orb)
+                        .map(|held| held.name.clone())
+                        .unwrap_or_else(|| orb.to_string());
                     println!(
-                        "{} {} — the {} stores ran dry; its consumers fall DORMANT (raze to cut the drain, collect to restock)",
+                        "{} {} on {} — the {} stores ran dry; its consumers fall DORMANT (raze to cut the drain, collect to restock)",
                         style.bad("☠"),
                         style.bad("FAMINE"),
+                        style.strong(&planet),
                         style.strong(resource_name(resource))
                     );
                 }
@@ -195,11 +201,11 @@ fn command(world: &mut World, line: &str, style: &Style) {
                 style.strong(&count.to_string()),
                 style.strong(&world.now().to_string())
             );
-            accrued_lines(world, style);
+            accrued_lines(world, style, *current);
         }
         Some("raze") => {
             match words.next().and_then(parse_tile) {
-                Some(tile) => match world.raze(tile) {
+                Some(tile) => match world.raze_as(SOVEREIGN, *current, tile) {
                     Ok(()) => {
                         println!(
                             "{} tile {} ({}) razed — half the build cost refunded, receipt sealed",
@@ -207,7 +213,7 @@ fn command(world: &mut World, line: &str, style: &Style) {
                             style.strong(&tile.to_string()),
                             coordinate(tile)
                         );
-                        map(world, style);
+                        map(world, style, *current);
                     }
                     Err(refusal) => refuse(world, &refusal, style),
                 },
@@ -219,7 +225,7 @@ fn command(world: &mut World, line: &str, style: &Style) {
                 ),
             }
         }
-        Some("collect") => match world.collect() {
+        Some("collect") => match world.collect_as(SOVEREIGN, *current) {
             Ok(count) => {
                 println!(
                     "{} harvest banked — {} receipt(s) sealed at stamp {}",
@@ -227,9 +233,75 @@ fn command(world: &mut World, line: &str, style: &Style) {
                     style.strong(&count.to_string()),
                     style.strong(&world.now().to_string())
                 );
-                banked_lines(world, style);
+                banked_lines(world, style, *current);
             }
             Err(refusal) => refuse(world, &refusal, style),
+        },
+        Some("chart") => {
+            let name = words.next().map(|word| word.to_string());
+            let source = match (words.next(), words.next()) {
+                (Some("from"), Some(planet)) => world
+                    .orbs()
+                    .iter()
+                    .find(|held| held.name == planet)
+                    .map(|held| held.orb_id),
+                _ => Some(*current),
+            };
+            match (name, source) {
+                (Some(name), Some(source)) => match world.chart(&name, source) {
+                    Ok(orb) => {
+                        *current = orb;
+                        println!(
+                            "{} planet {} charted (orb {orb}) — the founding reserves moved from the source colony; you are now here",
+                            style.ok("✓"),
+                            style.strong(&name)
+                        );
+                        map(world, style, *current);
+                    }
+                    Err(refusal) => refuse(world, &refusal, style),
+                },
+                (None, _) => println!(
+                    "{} usage: {} — the reserves move from the source (default: here)",
+                    style.bad("✗"),
+                    style.strong("chart <planet> [from <planet>]")
+                ),
+                (_, None) => println!(
+                    "{} unknown source planet — {} lists them",
+                    style.bad("✗"),
+                    style.strong("planets")
+                ),
+            }
+        }
+        Some("planets") => {
+            for orb in world.orbs() {
+                let here = match orb.orb_id == *current {
+                    true => style.ok("◉ here"),
+                    false => style.dim(" "),
+                };
+                println!(
+                    "  {} {} {} {}",
+                    style.dim(&format!("#{}", orb.orb_id)),
+                    style.strong(&orb.name),
+                    style.dim(&format!("({} zones)", orb.zones.len())),
+                    here
+                );
+            }
+        }
+        Some("planet") => match words.next() {
+            Some(name) => match world.orbs().iter().find(|held| held.name == name) {
+                Some(orb) => {
+                    *current = orb.orb_id;
+                    println!("{} now at {}", style.ok("✓"), style.strong(name));
+                    map(world, style, *current);
+                }
+                None => println!(
+                    "{} no planet named {} — {} lists them",
+                    style.bad("✗"),
+                    style.strong(name),
+                    style.strong("planets")
+                ),
+            },
+            None => println!("{} usage: {}", style.bad("✗"), style.strong("planet <name>")),
         },
         Some("agent") => match words.next() {
             Some(handle) => match world.register_agent(handle) {
@@ -273,7 +345,7 @@ fn command(world: &mut World, line: &str, style: &Style) {
         Some("as") => match words.next().and_then(|handle| entity_id(world, handle)) {
             Some(actor) => {
                 let rest: Vec<&str> = words.collect();
-                act_as(world, actor, &rest, style);
+                act_as(world, actor, &rest, style, current);
             }
             None => println!(
                 "{} unknown entity — {} lists everyone",
@@ -298,8 +370,8 @@ fn command(world: &mut World, line: &str, style: &Style) {
                 );
             }
         }
-        Some("map") => map(world, style),
-        Some("status") => status(world, style),
+        Some("map") => map(world, style, *current),
+        Some("status") => status(world, style, *current),
         Some("chronicle") => chronicle(world, style),
         Some("verify") => match world.chronicle().verify_chain() {
             ChainRead::Intact => println!(
@@ -346,6 +418,8 @@ fn help(style: &Style) {
         ("tick <n>", "let n ticks pass — active zones net yield−upkeep into the workspace; famine strikes if a store runs dry"),
         ("collect", "settle the workspace against the bank — sealed as receipts; only banked value persists"),
         ("raze <tile|r:c>", "demolish a zone for half its cost back — the famine escape hatch"),
+        ("chart <planet> [from <p>]", "found a daughter colony: the founding reserves MOVE from the source colony (nothing is minted)"),
+        ("planet <name> · planets", "switch the planet cursor · list this world's planets"),
         ("agent <handle>", "register a contained agent (zero grants until you open scopes)"),
         ("grant|revoke <handle> <scope>", "open or shut an agent's scope: build, raze, collect — revocation is immediate"),
         ("as <handle> <cmd>", "act as an entity — its authority, its generation tag on the receipts"),
@@ -381,7 +455,7 @@ fn entity_id(world: &World, handle: &str) -> Option<u64> {
 
 /// Run one action AS an entity — the containment demo: the same verbs,
 /// the entity's own authority.
-fn act_as(world: &mut World, actor: u64, rest: &[&str], style: &Style) {
+fn act_as(world: &mut World, actor: u64, rest: &[&str], style: &Style, current: &mut u64) {
     match rest {
         ["zone", tile, kind] => {
             let tile = parse_tile(tile);
@@ -393,7 +467,7 @@ fn act_as(world: &mut World, actor: u64, rest: &[&str], style: &Style) {
                 _ => None,
             };
             match (tile, kind) {
-                (Some(tile), Some(kind)) => match world.zone_as(actor, tile, kind) {
+                (Some(tile), Some(kind)) => match world.zone_as(actor, *current, tile, kind) {
                     Ok(()) => println!(
                         "{} entity {actor} zoned tile {tile} — receipt tagged to it",
                         style.ok("✓")
@@ -404,7 +478,7 @@ fn act_as(world: &mut World, actor: u64, rest: &[&str], style: &Style) {
             }
         }
         ["raze", tile] => match parse_tile(tile) {
-            Some(tile) => match world.raze_as(actor, tile) {
+            Some(tile) => match world.raze_as(actor, *current, tile) {
                 Ok(()) => println!(
                     "{} entity {actor} razed tile {tile} — receipt tagged to it",
                     style.ok("✓")
@@ -413,7 +487,7 @@ fn act_as(world: &mut World, actor: u64, rest: &[&str], style: &Style) {
             },
             None => println!("{} as <handle> raze <tile>", style.bad("✗")),
         },
-        ["collect"] => match world.collect_as(actor) {
+        ["collect"] => match world.collect_as(actor, *current) {
             Ok(count) => println!(
                 "{} entity {actor} collected — {count} receipt(s) tagged to it",
                 style.ok("✓")
@@ -532,12 +606,21 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "entity {} is sovereign — its authority is by construction, never by grant",
             style.strong(&entity.to_string())
         ),
+        ActionRefused::NoSuchOrb { orb } => format!(
+            "no planet holds orb id {} — {} lists them",
+            style.strong(&orb.to_string()),
+            style.strong("planets")
+        ),
+        ActionRefused::PlanetNameTaken { name } => format!(
+            "a planet named {} already turns in this world — planet names are unique here",
+            style.strong(name)
+        ),
     };
     println!("{} {text}", style.bad("✗"));
 }
 
-fn map(world: &World, style: &Style) {
-    let Some(orb) = world.orb() else {
+fn map(world: &World, style: &Style, current: u64) {
+    let Some(orb) = world.orb_by_id(current) else {
         println!("{}", style.dim("(no colony yet — the map begins at 'found <name>')"));
         return;
     };
@@ -577,8 +660,8 @@ fn map(world: &World, style: &Style) {
     }
 }
 
-fn accrued_lines(world: &World, style: &Style) {
-    for (resource, value) in world.accrued() {
+fn accrued_lines(world: &World, style: &Style, current: u64) {
+    for (resource, value) in &world.accrued_of(current) {
         println!(
             "    {} {} {}  {}",
             style.warn("◔"),
@@ -589,8 +672,8 @@ fn accrued_lines(world: &World, style: &Style) {
     }
 }
 
-fn banked_lines(world: &World, style: &Style) {
-    if let Some(orb) = world.orb() {
+fn banked_lines(world: &World, style: &Style, current: u64) {
+    if let Some(orb) = world.orb_by_id(current) {
         for (resource, value) in &orb.banked {
             println!(
                 "    {} banked {}: {}",
@@ -602,8 +685,8 @@ fn banked_lines(world: &World, style: &Style) {
     }
 }
 
-fn status(world: &World, style: &Style) {
-    match world.orb() {
+fn status(world: &World, style: &Style, current: u64) {
+    match world.orb_by_id(current) {
         Some(orb) => {
             println!(
                 "{} colony {} {}",
@@ -621,8 +704,8 @@ fn status(world: &World, style: &Style) {
                 );
             }
             zone_lines(orb, style);
-            banked_lines(world, style);
-            accrued_lines(world, style);
+            banked_lines(world, style, current);
+            accrued_lines(world, style, current);
         }
         None => println!(
             "{} no colony — {} begins the story",
@@ -725,6 +808,10 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::ScopeRevoked { agent, scope } => {
                 format!("⚿ {:?} REVOKED from entity {}", scope, style.strong(&agent.to_string()))
             }
+            cfe::dop::ClosureEvent::ColonyCharted { orb_id, source_orb, name } => format!(
+                "☄ planet {} charted (orb {orb_id}) — reserves moved from orb {source_orb}",
+                style.strong(name)
+            ),
         };
         let tag = receipt
             .provenance

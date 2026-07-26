@@ -71,7 +71,7 @@ fn a_third_extractor_strikes_famine_on_schedule() {
     }
     assert_eq!(
         struck_at,
-        Some((11, vec![Resource::Biomass])),
+        Some((11, vec![(1, Resource::Biomass)])),
         "5 − t/2 < 0 first at t = 11 — the famine clock is exact"
     );
     let orb = world.orb().expect("the colony stands");
@@ -79,7 +79,7 @@ fn a_third_extractor_strikes_famine_on_schedule() {
     assert_eq!(orb.banked_amount(Resource::Biomass), ratio(0, 1), "the stores emptied");
     // Dormancy: extractors (biomass consumers) idle — a tick now
     // accrues only the habitat's net (+1 biomass, −1/4 iron).
-    let before = world.accrued().to_vec();
+    let before = world.accrued();
     world.tick();
     let habitat_only: Vec<_> = world
         .accrued()
@@ -119,7 +119,7 @@ fn collect_relieves_a_famine_and_the_colony_recovers() {
     let orb = world.orb().expect("the colony stands");
     assert!(orb.famine.is_empty(), "famine relieved at the collect");
     assert!(orb.banked_amount(Resource::Biomass) >= ratio(3, 2));
-    let before = world.accrued().to_vec();
+    let before = world.accrued();
     world.tick();
     assert_ne!(world.accrued(), before.as_slice(), "the extractors turn again");
 }

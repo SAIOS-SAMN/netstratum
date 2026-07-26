@@ -87,11 +87,38 @@ and its game consumer in the landing record.
   coherence is SUM-OF-SQUARES in code (its README wrongly says L1); the
   incoherent 3-node reference vector measures C = 24, not 8.
 
-## 2a. The genesis board (04_CIVILIZATION_GENESIS — G1–G4)
+## 2a. The genesis board (04_CIVILIZATION_GENESIS — G0–G4)
+
+**G0 — THE DIRECTORY (identity now, mechanics at G1; joint landing):**
+coder-01: registry module (`engine/mirror`), observer CIVILIZATION/WORLD/
+PLANET columns, contract §8. coder-02: the three-step founding dialogue in
+the CLI (pick/create civilization → pick/create world → name the planet;
+species free-text). The topology and its three bindings at 04 §5. Axes are
+RECORDED identity only — zero rule changes until G1 re-commits them as
+genesis receipts.
 
 G1 genesis+disposition (after N-RFA) → G2 metabolism tables → G3
 perception+translation (lands WITH N4) → G4 the discovery mint (lands with
-N5/N6). Details and sequencing in 04 §5.
+N5/N6). Details and sequencing in 04 §6.
+
+## 1b. The planet board
+
+- **P1 LANDED** (2026-07-25, requested by coder-01 as "D3"; boarded P1 to
+  keep terrain's D3 name): MULTI-PLANET WORLDS. `World` now MEANS the
+  container (04 §5 naming debt PAID by truth, not rename): multiple colony
+  orbs under ONE clock / ONE chronicle (binding #1). CHARTERING (tag 13):
+  a daughter colony's founding reserves MOVE from a source colony's bank —
+  conservation holds, chartering mints nothing (the free-bootstrap exploit
+  closed at design time). Per-orb workspaces and famine; planet names
+  unique per world. Evidence: clippy zero; **77/77 workspace witnesses
+  green capped** (chartering conservation; typed refusals incl.
+  PlanetNameTaken/NoSuchOrb; a daughter famine at exactly t=11 never
+  touches the mother; the archipelago replays from receipts alone). CLI:
+  `chart <planet> [from <p>]`, `planet <name>`, `planets`, per-planet
+  status/map, famine banners name the planet. Cross-territory adaptations
+  (relayed): mirror/conductor/mirror_demo call sites updated mechanically
+  to the new arities + ColonyCharted arm added to the mirror's renderer —
+  no semantic changes.
 
 ## 2. The depth board (02_COLONY_LOOP — game depth before multiplayer)
 

@@ -18,6 +18,7 @@
 //!   10 ClosureEvent::EntityRegistered (N3)
 //!   11 ClosureEvent::ScopeGranted (N3)
 //!   12 ClosureEvent::ScopeRevoked (N3)
+//!   13 ClosureEvent::ColonyCharted (P1)
 //!   16 Orb header (orb_id ‖ name)
 //!   17 Orb zone entry (tile ‖ kind)
 //!   18 Orb banked entry (resource ‖ ratio)
@@ -165,6 +166,10 @@ pub enum ClosureEvent {
     ScopeGranted { agent: u64, scope: crate::ipsal::Scope },
     /// N3 — a grant revoked; the agent's next such action refuses.
     ScopeRevoked { agent: u64, scope: crate::ipsal::Scope },
+    /// P1 — a daughter colony charted on a new planet: the founding
+    /// reserves MOVE from the source orb's bank (conservation — a
+    /// charter mints nothing).
+    ColonyCharted { orb_id: u64, source_orb: u64, name: String },
 }
 
 impl ClosureEvent {
@@ -218,6 +223,12 @@ impl ClosureEvent {
                 let mut value = agent.to_le_bytes().to_vec();
                 value.push(*scope as u8);
                 tlv::put(12, &value, &mut out);
+            }
+            Self::ColonyCharted { orb_id, source_orb, name } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&source_orb.to_le_bytes());
+                value.extend_from_slice(name.as_bytes());
+                tlv::put(13, &value, &mut out);
             }
         }
         out
@@ -275,6 +286,12 @@ impl ClosureEvent {
                 let agent = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let scope = crate::ipsal::Scope::from_wire(*value.get(8)?)?;
                 Some(Self::ScopeRevoked { agent, scope })
+            }
+            13 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let source_orb = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let name = String::from_utf8(value.get(16..)?.to_vec()).ok()?;
+                Some(Self::ColonyCharted { orb_id, source_orb, name })
             }
             _ => None,
         }
