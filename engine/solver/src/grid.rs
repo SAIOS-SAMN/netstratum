@@ -50,6 +50,9 @@ pub enum Op {
     Transpose,
     /// A hue permutation/mapping: `map[old] = new`.
     Recolor([u8; 10]),
+    /// An object-centric operator (segmentation-based — see
+    /// `crate::objects`).
+    Object(crate::objects::ObjOp),
     /// Tile the grid `down × across`; odd tile rows/columns may carry
     /// a mirror (the symmetry-quilt family).
     Tile {
@@ -115,6 +118,7 @@ impl Op {
                 let m: Vec<String> = map.iter().map(|h| h.to_string()).collect();
                 format!("recolor[{}]", m.join(","))
             }
+            Op::Object(op) => op.describe().into(),
             Op::Tile {
                 down,
                 across,
@@ -148,6 +152,7 @@ impl Op {
                 cols: g.cols,
                 cells: g.cells.iter().map(|&h| map[h as usize]).collect(),
             },
+            Op::Object(op) => op.apply(g),
             Op::Tile {
                 down,
                 across,

@@ -20,6 +20,7 @@ pub mod certificate;
 pub mod forge;
 pub mod grid;
 pub mod loader;
+pub mod objects;
 pub mod search;
 pub mod volume;
 
@@ -27,6 +28,7 @@ pub use certificate::{verify_certificate, CertificateRead, SolveCertificate};
 pub use forge::{forge_task, Difficulty};
 pub use grid::{Grid, Op, Program, TileMirror};
 pub use loader::{load_task, LoadError, Task, TaskPair};
+pub use objects::{background, segment, ObjOp, Object, OBJ_OPS};
 pub use search::{solve, SolveRead};
 pub use volume::{
     forge_volume, run_volume, solve_volume, VOp, VolDifficulty, Volume, VolumeSolveRead,

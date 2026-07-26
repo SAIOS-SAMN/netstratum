@@ -119,6 +119,7 @@ pub fn solve(task: &Task, max_depth: usize) -> SolveRead {
         Op::FlipV,
         Op::Transpose,
     ];
+    vocabulary.extend(crate::objects::OBJ_OPS.iter().cloned().map(Op::Object));
     vocabulary.extend(derived_recolors(task));
     vocabulary.extend(derived_tiles(task));
 
