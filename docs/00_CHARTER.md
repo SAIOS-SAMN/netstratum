@@ -140,12 +140,25 @@ The substrate has two names and only two, split by responsibility:
   workspace that evaluates RFA state transitions, runs the TLV codecs, and
   drives the simulation ticks.
 
-The standalone letter "Q" is never used as a name, brand, or shorthand in any
-public-facing surface of this project. Single-letter branding attracts
-internet pattern-matching noise the work does not need; the mathematics is
-fully specified by its own proper names. (The symbol ℚ may still appear inside
-formal mathematical derivations where it denotes the field of rationals and
-nothing else.)
+Single mathematical set-letters are never used as names, brands, or shorthand
+anywhere in this project — not for the rationals, not for the integers, not as
+a hyphenated tag, and not inside derivations. Single-letter mathematical
+branding attracts internet pattern-matching noise (political and otherwise)
+the work does not need, and the mathematics is fully specified by its own
+proper words.
+
+The standing vocabulary is written out:
+
+- **exact rational arithmetic** — the principle; as an adjective,
+  **exact-rational** (e.g. "exact-rational joules", "an exact-rational state
+  machine").
+- **the exact rationals** / **the rationals** — the number domain; **a pair of
+  exact rationals** for a two-component value.
+- **the symbolic-π extension** — the rationals with π adjoined as an exact
+  symbol; values are **exact-rational polynomials in π**.
+- **RFA — Rational Field Algebra** and **CFE — Canonical Field Engine** stay
+  as the two names above: both spell their concept out and carry no
+  single-letter shorthand.
 
 ## 9. THE STOCHASTIC LAW (inscribed before any randomness lands)
 

@@ -43,7 +43,7 @@ radiation balance:
   • Atmosphere Freezes        • Optimal Human Capital    • Structural Distortion
 ```
 
-### 1.1 The exact-ℚ ruling (RFA semantics — binding on the CFE)
+### 1.1 The exact-rational ruling (RFA semantics — binding on the CFE)
 
 The fourth root and the physical constants π, σ are irrational; the CFE
 computes in exact rationals and refuses rounding drift (CHARTER §8). The
@@ -60,7 +60,60 @@ lawful formulation therefore never takes the root:
 - Kelvin readouts shown to players are a client-side rendering; the chronicle
   and all receipts carry only the exact `T⁴` rationals.
 
-### 1.2 The net-heat ledger
+**Carrying π exactly — the symbolic-π law.** Circular and spherical geometry
+(orbital perimeters, the `4πr²` flux shell, a `πR²` collector cross-section)
+need not approximate π at all. The CFE carries π as a symbolic transcendental
+adjoined to the rationals: a state value is a formal pair `(a, b)` of exact
+rationals denoting `a + bπ`, with addition componentwise and multiplication as
+exact-rational polynomials in π (the symbolic-π extension). Consequences:
+
+- **No approximation in `K`.** The `K = 1/(16πσ)` above need not be a *rational
+  approximation* — its π part is carried exactly in the symbolic-π extension;
+  only σ (a chosen physical constant) is a rational placeholder.
+- **Geometry stays pristine.** No boxy Manhattan/cube boundaries, no spatial
+  aliasing — continuous circles and spheres, exact.
+- **π cancels in interaction ratios.** When a continuous emitter (flux
+  `∝ 1/(4πr²)`) meets a continuous collector (area `πR²`), the π factors
+  cancel and the delivered quantity lands back in pure exact rationals — e.g.
+  absorbed power `= M c² R² / (4 r² Δt)`, π-free. Emitter↔collector state
+  transitions settle to exact rationals with no residue.
+- **The root is a separate matter.** A fourth root is not expressible in the
+  symbolic-π extension either, so the `T_eq⁴` / fourth-power discipline above
+  still stands. The symbolic-π extension removes the π approximation, not the
+  root.
+
+This is an engine-wide arithmetic law (all circular/spherical geometry), not a
+thermal-only rule; it is stated here because the thermal equation is its first
+consumer.
+
+### 1.2 Extreme stellar sources — the Luminal White Hole
+
+The master equation's `L` term admits extreme sources. A **Luminal White
+Hole** is the design's ultimate stellar engine: the time-reverse of a black
+hole (the Schwarzschild metric under `t → −t`, or outflowing
+Eddington–Finkelstein coordinates), an un-enterable spherical boundary at the
+gravitational radius `r_g = 2GM/c²` that continuously ejects energy outward at
+`c`.
+
+- **Impermeable boundary:** for `r ≤ r_g` all radial null/timelike geodesics
+  point strictly outward — nothing enters. In-game: an impenetrable spatial
+  barrier emitting maximum photon density; sectors build orbital collection
+  rings *around* it, never on it.
+- **Outward flux:** at a collector radius `r > r_g`,
+  `Φ(r) = E_ejection / (4πr²)`, with `E = M c²` over ejection interval `Δt`.
+  The π sits in the shell area and, per §1.1, is carried exactly and cancels
+  against a `πR²` collector — delivered power `P = M c² R² / (4 r² Δt)`, an
+  exact rational.
+- **Role:** a hyper-dense energy anchor at the extreme of the Crucible regime
+  (§3.1) — it pushes the equilibrium radius far outward, makes the surrounding
+  sectors the richest joule sources in the trade loop (§4), and its
+  gravitational/thermal push forces high-efficiency ring architecture around
+  it. `M`, `Δt`, `r_g` are placeholder parameters that tune at balance time.
+
+*(A design energy-source, not an astrophysical claim about real white-hole
+stability.)*
+
+### 1.4 The net-heat ledger
 
 Where local industry adds heat on top of stellar flux:
 
@@ -240,3 +293,108 @@ puzzle, and creates organic trade routes between thermal opposites.
   attributes (star `L`, node `A`, `r`) and NS-3 receipts for every thermal
   ledger mutation; the trade loop rides the existing economy design
   (`01_ECONOMY.md`).
+
+---
+
+## 7. The crypto ruling (thermal value at the settlement boundary)
+
+**The boundary is the charter's, restated:** game logic never touches
+contract bytecode; chains settle, never simulate (CHARTER §7). Crypto cannot
+enter the equation — it settles the *value* the equation creates. Three
+layers, world to chain:
+
+### 7.1 Energy is the in-world currency — chronicle-native, never a token
+
+`T_eq⁴` gives every sector an exact, replayable marginal cost of energy:
+near-free in the Crucible, expensive in the Frost. Energy (joules, exact
+rationals in the chronicle) is therefore the commodity money of the world —
+its supply set by physics, not by a mint. The hot/cold price differential IS
+the monetary system: coolant flowing hot-ward and energy cold-ward is a
+currency exchange between thermal regimes. This layer lives entirely in the
+CFE — free, high-frequency, chain-free, no wallet at onboarding
+(CHARTER §3.5).
+
+**The hard line:** no in-game unit is ever a per-unit crypto asset. Energy
+stays chronicle-native and free to move; anything tighter re-creates Dark
+Forest's every-tick-on-chain mistake.
+
+### 7.2 Thermal scarcity defines the NS-7 high-value triggers
+
+The thermal equation supplies NS-7 §1's (unwritten) high-value trigger
+conditions with physical definitions:
+
+- **Rare-world minting** (NS-7's named first consumer): rarity is a world
+  whose `T_eq⁴` sits inside a substrate's equilibrium band — a mesic-band
+  world near a dense star, or a frost moon with radiator headroom adjacent
+  to a crucible energy source, is provably scarce by the equation. That deed
+  anchors as an ERC-721.
+- **Thermal entropy rights** (§4): the transferable right to dump heat into
+  a sector's radiator headroom or draw from its flux — an ERC-1155 class,
+  settled through the adapter when it changes hands between empires.
+- **Macro-trades:** a long-lived coolant/energy route contract between a
+  crucible and a frost sector is the macro-trade NS-7 anticipates.
+
+### 7.3 The adapter maps value, never physics (SEAL C)
+
+On-chain token metadata never carries game rules, but it MAY carry the exact
+`T_eq⁴` rationals and band-membership facts from the anchored chronicle
+root, so an external buyer verifies what they own (which band, which
+substrate it suits) from the root alone. The chain sees a checkpoint
+containing thermal facts; it never computes them. If settlement ever needs
+ZK proofs of band membership, "`T_eq⁴` ∈ `[250⁴, 320⁴]`" is a cheap
+rational-comparison circuit — the no-float law (CHARTER §3.2) pays off
+directly at the crypto boundary.
+
+**Succinct settlement proofs (the buildable core).** The goal at the NS-7
+boundary is to prove a fact about the anchored chronicle root — a band
+membership, a delivered-quota inequality `A/B ≥ C/D`, a closed energy loop —
+*without replaying every tick* that produced it. The lawful tool is a real
+succinct proof system over a finite field: a STARK or a multilinear /
+sum-check prover (Lasso, Jolt, HyperPlonk) whose statements are exact-rational
+inequalities. This is a genuine win precisely because the state is already
+exact rational (CHARTER §3.2) — the arithmetization is clean and the
+verifier stays constant-size.
+
+Two guardrails keep this honest, learned from a rejected "topological /
+holographic" proposal (see `docs/OPEN_QUESTIONS.md` Q1):
+
+- **A proof, not a boundary check.** Matching neighbouring sectors on their
+  shared boundary gives *consistency*, not integrity — a node can compute a
+  false interior while keeping its edges clean. Settlement integrity requires
+  an actual succinct proof of the interior transition, never boundary-stitch
+  agreement alone.
+- **Structure is not history.** A homological / connectivity invariant can
+  prove "a route exists" or "a loop is closed", but it cannot prove "≥ N
+  joules were delivered by tick T". Quota and delivery facts settle by exact
+  rational inequality inside the proof, not by a topological invariant.
+
+The chain still never computes physics (§7.3); it verifies one succinct proof
+derived from the chronicle root and acts on the verdict.
+
+### 7.4 The chain ruling: existing chain, never a new one
+
+No new chain is spun up for settlement — inscribed here as a ruling, per
+CHARTER §7's definition of WWW3 as *existing* EVM/UTXO chains:
+
+- **The mesh IS the sovereign ledger.** The NS-3 chronicle is append-only
+  ground truth (SEAL B); NS-5 proof-of-convergence is the consensus. A
+  custom L1 would duplicate that machinery while adding validator
+  bootstrapping, security-budget, and liquidity-from-zero problems the
+  dual-anchoring design exists to avoid.
+- **Settlement rents what only existing chains have:** ownership that
+  survives any single node, and real market depth for deeds and
+  macro-trades. A fresh chain provides neither — anchoring to it is a
+  checkpoint into an empty room.
+- **SEAL C keeps the choice cheap:** adapters retarget; game state never
+  moves. At landing N7 the concrete pick is a cheap, stable EVM chain — an
+  established L2 fits the cadence (periodic single-root posts wanting
+  negligible gas and high uptime, not L1 prestige) — verified first against
+  a local testnet (NS-7 §3).
+
+**The mesh is the world; an existing chain is the notary.**
+
+### 7.5 The closed loop (world-book note)
+
+Frost zones are canonically where high-density compute lives (§2.1) — so the
+in-fiction home of proving and consensus infrastructure is the cold sectors.
+The world's physics explains its own settlement layer.

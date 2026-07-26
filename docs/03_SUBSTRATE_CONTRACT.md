@@ -81,7 +81,7 @@ A shock injects torsion into the colony Delta; the visible stress
 gauge is the coherence functional; recovery is a sequence of gated
 convergence steps.
 
-- **Primitive:** `rfa_core::coherence_functional` (`C = Σ R²`, exact ℚ,
+- **Primitive:** `rfa_core::coherence_functional` (`C = Σ R²`, exact rational,
   zero iff converged — the dashboard number);
   `rfa_core::for_each_residual` (WHERE the stress lives, per triple,
   per coordinate); `rfa_core::validate_step` (typed refusals:
@@ -100,7 +100,7 @@ ambient entropy, no wall clock ever enters. Replay (SEAL B), mesh
 verification (N6), and anchoring (N7) survive untouched.
 
 - **Primitive:** `physics::beacon` — `Beacon::from_digest` (a 32-byte
-  chronicle digest), `draw` (domain-tagged, exact-uniform over `ℚ ∩
+  chronicle digest), `draw` (domain-tagged, exact-uniform over `rationals ∩
   [0,1)` at 2⁻¹²⁸ grain), `bernoulli(p: Ratio)` (exact comparison, no
   rounding), `uniform_index(n)` (rejection-sampled — exactly uniform,
   no modulo bias).
@@ -147,17 +147,27 @@ deleted). Quantities render exact (`9/2`, never `4.5`).
   and drains `pending_directives` per tick via the `as steward` path;
   the steward entity exists per-world with operator-granted scopes.
 
-## 8. The topology and the registry — civilization → world → planet → colony
+## 8. The topology and the registry — civilization → star → planet → colony
 
-**Ruled by the operator 2026-07-25.** A CIVILIZATION (species-level
-identity: "humans", "deep-chorus") spans worlds. A WORLD ("sol") is the
-simulation container — a collection of planets sharing ONE clock, ONE
-chronicle, ONE receipt chain (= one replay unit today, one mesh/
-consensus unit at N6). A PLANET ("mars") is a settled body; a COLONY is
-a civilization's settlement on it. Today the cardinality is degenerate
-(1 world = 1 planet = 1 colony) — the containers are NAMED now so they
-can grow at D3 (terrain/planets) and N6 (shared worlds) without
-renaming. The chronicle stays per-world, never per-planet.
+**Ruled by the operator 2026-07-25; star/cardinality ruling 2026-07-26.**
+A CIVILIZATION (species-level identity: "humans", "deep-chorus") spans stars.
+A STAR — a star system named for its sun ("sol") — is the simulation
+container: a collection of planets bound to one sun, sharing ONE clock, ONE
+chronicle, ONE receipt chain (= one replay unit today, one mesh/consensus unit
+at N6). This tier was formerly named "world"; it is renamed **star** because
+the sun is what the planets orbit and what fixes their thermal regime
+(`05_THERMAL_BALANCE.md` §1), and each star carries a `StarClass`
+(NS-6 §7). A PLANET ("mars") is a settled body orbiting the star; a COLONY is
+a civilization's settlement on a planet.
+
+**Cardinality law (target, NS-6 §6):** `civilization 1:N star 1:N planet
+1:N colony` — a star holds MANY planets, a planet hosts MANY colonies
+(including colonies of different civilizations on one body). Today the runtime
+cardinality is still degenerate (1★ = 1 planet = 1 colony) — the containers
+are NAMED now so they can grow at D3 (terrain/planets, multi-colony) and N6
+(shared stars, mesh) without renaming. The chronicle stays per-star, never
+per-planet. "World" is retired as a container term; where it appears
+colloquially it means *a planet*, never the container.
 
 - **Registry (`var/registry/<slug>.json`):** who exists. Entries are
   created by players at founding (join the directory or add to it):
@@ -177,10 +187,12 @@ renaming. The chronicle stays per-world, never per-planet.
   (The current `Registry` API is create/load/list only — amendment
   does not exist yet, so the rule is enforced by absence; an `amend`
   gated on founder lands only with a consumer.)
-- **Naming debt (04 §5, registered):** the engine struct `World`
-  today means "one colony sim"; the word "world" is now reserved for
-  the CONTAINER. The struct renames at the multi-planet landing,
-  before N6.
+- **Naming debt (04 §5, registered; updated 2026-07-26):** the engine
+  struct `World` and the `worlds/<slug>/` path today mean "one colony
+  sim"; the CONTAINER tier is now named **star**. The struct renames to
+  `Star` and the path to `stars/<slug>/` at the multi-planet landing,
+  before N6 (see NS-6 §6). Code identifiers are untouched until that
+  landing.
 - **Primitive:** `mirror::registry::Registry` (`create` with typed
   refusals `AlreadyRegistered`/`UnknownAxis`, `load`, `list`);
   `Mirror::record(world, planet, civilization, &World)` writing
@@ -189,7 +201,7 @@ renaming. The chronicle stays per-world, never per-planet.
 - **Witness:** `mirror_pins.rs` (topology layout, per-world chain,
   registry vocabulary enforcement).
 - **coder-02 seam:** founding becomes the character screen — pick or
-  create civilization (registry), pick or create world, name the
+  create civilization (registry), pick or create star (system), name the
   planet, then the normal `found`. Axis prompts offer exactly the
   closed vocabulary; species/motto free text.
 

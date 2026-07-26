@@ -98,3 +98,123 @@ with no agent cooperation; (d) every entity-forged receipt carries the
 actor's id in provenance and no simulation rule reads it; (e) entities,
 grants, and revocations replay from receipts alone; (f) the §3 vectors
 reproduce.
+
+---
+
+## 5. Lineage — the CCL Entity Hierarchy (ancestry, recorded)
+
+The sovereign/agent containment above descends directly from the **Entity
+Hierarchy** of the Convergence Coding Language (CCL) —
+`/opt/ipsal-autic-v0.1/repos/convergence-engine/CCL.md`, Part IIb — carried
+here so the ancestry is not lost. CCL's tiers and its governing principle:
+
+| CCL tier | CCL role | netstratum NS-6 |
+|---|---|---|
+| **Founder** (was "Witness") | the generating element; *"it does not command, it seeds"* | the **sovereign** — authority is structural, not granted |
+| **Derived** (was "Elder") | first-order derivation, composed from the Founder | a **contained agent** (`principal` = the sovereign) |
+| **Emergent** (was "Child") | second-order emergence, the frontier | a further-contained agent (agents may contain agents) |
+
+The load-bearing inheritance is CCL's rule **"no entity governs another;
+self-consistency is the design principle."** NS-6 keeps it exactly: a
+sovereign contains, it does not command; an agent acts only inside the scopes
+its principal opened (§1.2). netstratum **collapses** CCL's three creation
+tiers into one recursive relation (sovereign ▷ agent ▷ agent…) — the tier
+*count* is not inscribed, but the seeds-not-commands principle and the
+upward-authority / downward-grant flow are. CCL's naming-discipline half lives
+separately, as the CHARTER §8 Terminology Law.
+
+### 5.1 "Sovereign" — the classifier (kept, defined)
+
+"Sovereign" is retained deliberately. Its loaded reading — the "sovereign
+citizen" movement — exists and is acknowledged, but in this domain the term's
+dominant meaning is **self-sovereign identity** (a mainstream identity concept:
+an entity that controls its own identity under no central authority), and CCL
+originally chose "sovereign" as the NEUTRAL replacement for the genuinely
+loaded `master` / `root` / `admin`. In netstratum it is not a political claim;
+it is a structural classifier.
+
+**Definition.** A **sovereign** is a self-governing entity that answers to no
+external principal — it holds its standing by its own establishment, never by
+grant, and sits at the top of its containment tree. Sovereignty is **earned by
+establishment, never assigned as a rank.** The classifier applies at every
+altitude of the §6 hierarchy:
+
+- **Individual (landed):** a founding entity with no `principal` (§1.1).
+  Authority is structural; a contained agent is never sovereign. (Unchanged —
+  the wire format and witnesses hold.)
+- **Species / civilization:** a **sovereign civilization** is one established
+  enough to govern itself — the classifier for extremely sophisticated,
+  deeply-established groupings, not merely any founded one.
+- **Star / star-power:** a sovereign power holding a star system on its own
+  standing (a higher landing).
+
+The unifying thread: sovereignty always means **self-governing
+establishment** — at the individual level the threshold is "no principal"; at
+the species/star level it is genuine, demonstrated establishment. An entity
+that answers to a principal is a contained **agent**, never sovereign.
+
+## 6. The place hierarchy — star ▷ planet ▷ colony
+
+Distinct from the authority hierarchy (§1, §5) is the **place** hierarchy: the
+containment of *locations*, normative here and mirrored in
+`03_SUBSTRATE_CONTRACT.md` §8.
+
+- A **STAR** (a star system: one sun and the bodies bound to it) is the
+  simulation container — ONE clock, ONE chronicle, ONE receipt chain (the
+  replay unit today, the mesh/consensus unit at N6). This tier was formerly
+  called "world"; it is renamed **star** because the sun is what the planets
+  orbit and what fixes their thermal regime (`05_THERMAL_BALANCE.md` §1). The
+  chronicle stays **per-star**, never per-planet.
+- A **PLANET** is a settled body orbiting the star. **A star contains MANY
+  planets** (cardinality 1★ : N planets).
+- A **COLONY** is one civilization's settlement on a planet. **A planet hosts
+  MANY colonies** (cardinality 1 planet : N colonies), including colonies of
+  different civilizations sharing one body.
+- A **CIVILIZATION** (species-level identity) spans **many stars**.
+
+**Cardinality law (target):** `civilization 1:N star 1:N planet 1:N colony`.
+Today the runtime cardinality is still degenerate (1★ = 1 planet = 1 colony);
+the tiers are named now so multi-colony (D3 terrain) and multi-star (N6 mesh)
+grow without renaming. "World" is retired as a container term; where "world"
+still appears colloquially it means *a planet* (e.g. rare-world deeds = a
+scarce planet), never the container.
+
+**Naming debt (extends §8):** the engine struct `World` and the
+`worlds/<slug>/` path still carry the old container name; they rename to
+`Star` / `stars/<slug>/` at the multi-planet landing, before N6. Code
+identifiers are untouched until that landing.
+
+## 7. StarClass — the enumerator of known stars (suns)
+
+Every star orb carries a `StarClass`. The class fixes the sun's luminosity
+`L`, which drives every bound planet's `T_eq⁴` and therefore its thermal band
+(`05_THERMAL_BALANCE.md` §1–§3). The main-sequence spectrum (Morgan–Keenan) is
+the core enumerator; remnants, giants, and the lore exotic follow.
+
+**Main sequence (the common suns):**
+
+| code | class | colour | ~surface T | luminosity vs Sol | thermal consequence (05) |
+|---|---|---|---|---|---|
+| 1 | **O** | blue | >30,000 K | ~10⁴–10⁶ L☉ | Crucible dominates; equilibrium band pushed far outward; rare |
+| 2 | **B** | blue-white | 10–30,000 K | ~25–30,000 L☉ | vast Crucible; hyper energy yield |
+| 3 | **A** | white | 7.5–10,000 K | ~5–25 L☉ | wide Crucible, mesic band far out |
+| 4 | **F** | yellow-white | 6–7.5,000 K | ~1.5–5 L☉ | mesic band beyond 1 unit |
+| 5 | **G** | yellow (Sol) | 5.2–6,000 K | ~0.6–1.5 L☉ | balanced; mesic band near 1 unit |
+| 6 | **K** | orange | 3.7–5.2,000 K | ~0.08–0.6 L☉ | mesic band pulled inward |
+| 7 | **M** | red dwarf | 2.4–3.7,000 K | ~10⁻⁴–0.08 L☉ | most common star; band hugs the star; deep Frost everywhere else |
+
+**Remnants, giants, and exotic:**
+
+| code | class | archetype | thermal consequence (05) |
+|---|---|---|---|
+| 8 | **L/T/Y** | brown dwarf (sub-stellar) | near-Frost at every radius; compute-favourable |
+| 9 | **D** | white dwarf (remnant) | low total output, fading; tight, shrinking bands |
+| 10 | **RG/SG** | red giant / supergiant (evolved) | enormous luminous shell; Crucible swallows inner orbits |
+| 11 | **N** | neutron star / pulsar (remnant) | beamed, extreme, hazardous; narrow usable shells |
+| 12 | **WR** | Wolf–Rayet (hot, mass-losing) | violent Crucible; short-lived, resource-rich |
+| 13 | **✦** | **Luminal White Hole** (lore exotic) | the ultimate energy anchor (`05_THERMAL_BALANCE.md` §1.2) |
+
+Codes are the wire enumerator (a permanent NS-1 tag at the star-orb landing);
+values here are placeholder parameters that tune at balance time. `StarClass`
+is descriptive substrate that feeds the exact-rational thermal math — it is
+never itself a game rule in bytecode (SEAL C).

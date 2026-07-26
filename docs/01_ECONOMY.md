@@ -111,3 +111,125 @@ players ──(domain leases, tariffs, rents)──► treasury + node-host pool
    must have a lawful (if costlier) alternative path — no player may hold
    absolute toll power over another player's only route. Measured in the
    world graph at balance time.
+
+## 6. Thermodynamic currency & settlement architecture
+
+The physical substrate of this economy is the thermal balance loop —
+inscribed whole in `05_THERMAL_BALANCE.md`, crypto ruling at its §7. This
+section holds the economic mechanics; the physics and the crypto boundary
+rules live there.
+
+### 6.1 Energy as native commodity money
+
+The economy operates on a physical energy standard derived from the exact
+thermodynamic state variable `T_eq⁴`.
+
+- **Supply and minting:** energy (joules, tracked as exact rationals in
+  the CFE chronicle) cannot be minted by fiat or player action; its total
+  volume and local density are governed strictly by sector thermal balance
+  (`05_THERMAL_BALANCE.md` §1, §3).
+- **Thermal arbitrage:** the intrinsic price differential between
+  energy-rich Crucible sectors and heat-sink Frost sectors is the core
+  macro-economic trade loop and the fundamental monetary axis. Transporting
+  coolant toward high-flux stars and energy toward cryogenic compute
+  sectors constitutes the primary monetary exchange between thermal
+  regimes.
+- **Frictionless movement:** in-game energy transfers, market orders, and
+  local consumption remain completely CFE-native — zero gas, no external
+  wallet (CHARTER §3.5; guardrail 2 holds).
+- **The hard line (05 §7.1):** no in-game unit is ever a per-unit crypto
+  asset. This extends guardrail 1 — monetization attaches at the settlement
+  boundary only.
+
+### 6.2 Macro-assets and the anchoring boundary (NS-7)
+
+Everyday energy flows freely inside the CFE with no on-chain footprint;
+only high-value economic claims cross the settlement adapter, under the
+trigger conditions defined in `05_THERMAL_BALANCE.md` §7.2:
+
+1. **Provably scarce worlds (ERC-721):** planets or moons whose `T_eq⁴`
+   falls inside a substrate's equilibrium band anchor as persistent deeds.
+2. **Thermal entropy rights (ERC-1155):** sector-level allocations for heat
+   dumping and radiator capacity — transferable, tradeable rights.
+3. **Inter-sector route contracts:** high-throughput, long-duration supply
+   agreements between Crucible and Frost regimes anchor externally so
+   ownership survives across empire boundaries.
+
+These ride the same rails as §1 domain leases and §2 land tenure, under the
+same guardrails 3 and 5. Settlement uses an existing chain, never a new one
+(05 §7.4): the mesh is the world; an existing chain is the notary.
+
+### 6.3 Separation of physics and valuation
+
+Per CHARTER §7 and SEAL C, contract bytecode is strictly passive and
+declarative — external tokens mirror immutable facts verified from the
+chronicle root (the exact `T_eq⁴` rationals and band-membership facts),
+provable by simple rational-comparison ZK circuits. Game-loop determinism
+and zero-latency tick execution are preserved: the chain never computes,
+only notarizes.
+
+## 7. Neutral geological escrow (Litho-Chalcogen nodes)
+
+Diplomacy needs a neutral place to hold a treaty and its collateral —
+somewhere neither party can quietly rewrite. In the world-book, the
+Glasskeepers (Litho-Chalcogens, `06 §1.1`) provide it: deep-crust crystalline
+matrices that vitrify under stress, freezing their held state. This section
+fixes the *mechanic* behind that lore; the physiology stays flavour (`06`
+register note).
+
+### 7.1 Non-falsifiable state contracts
+
+Multi-party treaties — a multi-decade coolant/energy supply pact, a
+non-aggression zone, an entropy-headroom lease — may be committed to a
+Litho-Chalcogen escrow node rather than a mutable surface store.
+
+- **Vitrified execution:** on mutual signing, the treaty's transition
+  function is encoded as an exact-rational state machine and the node vitrifies —
+  the escrowed state becomes immutable in-fiction.
+- **Exact-rational validation:** conditions evaluate strictly by exact rational
+  comparison over CFE chronicle data (e.g. "Empire A delivered ≥ 1,000,000 J
+  to Sector B within N ticks"). No float, no rounding, no subjective dispute
+  window (CHARTER §3.2).
+- **Dual-key collateral lock:** parties deposit collateral — in-game joules,
+  coolant, or entropy rights, or NS-7-bridged ERC-721/1155 assets. While
+  locked in the vitrified matrix it cannot be spent, moved, or re-pledged.
+- **Settlement:** condition true → release to the recipient; thermodynamic
+  breach (choking an agreed coolant stream, exceeding a sector's `T_eq⁴`
+  heat-dump threshold) → `BREACH_AND_SLASH`, collateral forfeits to the
+  aggrieved party.
+
+### 7.2 The two inscribed guardrails (these bind the mechanic)
+
+The escrow is powerful enough to break two charter walls if built naively;
+both are closed here:
+
+1. **The CFE is the arbiter, not the chain (CHARTER §7, SEAL C).** All
+   release/slash logic runs in the CFE state machine. Any ERC-721/1155 asset
+   in the pot is a *passive ownership record* only; the external contract
+   verifies a proof and moves a token, it never evaluates treaty terms or
+   game physics in bytecode.
+2. **Destroying a node cannot erase truth (SEAL B).** The vitrified lattice
+   holds a *copy* of the escrow state and the collateral claim, never an
+   alternate ground truth. Physical destruction of an active node defaults to
+   the recorded `BREACH_AND_SLASH` clause *in the chronicle* — it does not
+   delete history or let a party escape a settled obligation. The chronicle
+   stays sole ground truth; the lattice is a vault and a tripwire, not a
+   second ledger.
+
+### 7.3 Cross-boundary settlement (NS-7)
+
+For treaties settling on an external chain (inter-empire deeds, tokenized
+macro-routes), the vitrified escrow outcome anchors through NS-7 as a
+succinct proof over the chronicle root — the *real* proof-system version, per
+`05_THERMAL_BALANCE.md` §7.3 (a STARK / multilinear prover over exact-rational
+inequalities, not a boundary-stitch or topological invariant). The adapter
+verifies one succinct proof of fulfilment-or-breach and executes the token
+transfer; the chain never sees the treaty history or the physics.
+
+### 7.4 Guardrail alignment
+
+Escrowed choke mechanics (entropy-lease leverage, priority-proving swaps)
+remain bound by §5 guardrail 6: no treaty may hand one party *absolute* toll
+power over another's only route — a squeezed party always keeps a lawful,
+costlier alternative. Escrow enforces agreements; it does not manufacture
+inescapable monopolies.
