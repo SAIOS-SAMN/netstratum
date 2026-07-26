@@ -173,6 +173,149 @@ impl Mirror {
         fs::rename(&pending.path, dir.join(name))
     }
 
+    /// THE UNIVERSE MANIFOLD (contract §9): the base is a compact
+    /// 3-torus — spatial coordinates S = (x, y, z) live in ℚ mod
+    /// `span` per axis, so the universe has no edge and every
+    /// direction comes back around. A world's full coordinate is
+    /// TUniversal{S, G, T}: S the spatial triple, G the gauge (fiber
+    /// phase), T the universal tick clock. The polynomial FIBER at
+    /// every point is the physics carrier's graded dimensions
+    /// (`physics::AxisVector`), and a Mint GROWS them — the universe
+    /// gains dimensions as discoveries land. ("Calabi-Yau" is the
+    /// lore word; the claim made here is compact toroidal base +
+    /// polynomial fiber, nothing more.)
+    ///
+    /// THE L1 LAW (carried from the convergence doctrine): distance
+    /// is L1 — the wrapped |Δ| summed per axis, the short way around.
+    /// NO SQUARING: we do not square circles in a toroid; L2 would
+    /// collapse the geometry the residual carries.
+    ///
+    /// The span (default 64) reads from `<root>/universe.json`,
+    /// written on first chart.
+    pub fn universe_span(&self) -> Ratio {
+        fs::read_to_string(self.root.join("universe.json"))
+            .ok()
+            .and_then(|text| json::extract_string(&text, "span"))
+            .and_then(|s| parse_ratio(&s))
+            .unwrap_or_else(|| Ratio::from(num_bigint::BigInt::from(64)))
+    }
+
+    /// THE UNIVERSAL CLOCK — T of TUniversal{S, G, T}: a six-field
+    /// base-60 odometer over the era's tick count. It advances PER
+    /// TICK, never per wall-second (ambient time would kill SEAL B);
+    /// at a 2-second cadence it happens to move every 2 seconds, but
+    /// replay re-derives it exactly.
+    pub fn set_universal_clock(&self, ticks: u64) -> std::io::Result<()> {
+        fs::create_dir_all(&self.root)?;
+        self.write_universe_card(ticks)
+    }
+
+    fn write_universe_card(&self, ticks: u64) -> std::io::Result<()> {
+        let mut w = JsonWriter::new();
+        w.open();
+        w.field_str("topology", "torus");
+        w.field_str("span", "64");
+        w.field_str("tuniversal", &universal_clock(ticks));
+        w.field_u64("ticks", ticks);
+        w.field_str(
+            "fiber",
+            "polynomial (physics::AxisVector grades; minted dimensions grow it)",
+        );
+        w.close();
+        let tmp = self.root.join("universe.json.tmp");
+        fs::write(&tmp, w.finish())?;
+        fs::rename(&tmp, self.root.join("universe.json"))
+    }
+
+    /// Chart a world onto the star-chart: exact-ℚ coordinates in
+    /// `<root>/starchart.json` (merge-on-write; charting the same
+    /// world again moves it — the chart is a card, the chronicle is
+    /// the truth). Spatial coordinates WRAP onto the 3-torus: mod
+    /// span, exactly; `g` is the gauge phase (fiber coordinate).
+    pub fn chart_world(
+        &self,
+        world: &str,
+        s: (&Ratio, &Ratio, &Ratio),
+        g: &Ratio,
+    ) -> std::io::Result<()> {
+        fs::create_dir_all(&self.root)?;
+        // The universe card, written once (the clock rewrites it).
+        if !self.root.join("universe.json").exists() {
+            self.write_universe_card(0)?;
+        }
+        let span = self.universe_span();
+        let wrap = |v: &Ratio| -> Ratio { v - (v / &span).floor() * &span };
+        let (x, y, z) = (wrap(s.0), wrap(s.1), wrap(s.2));
+        let path = self.root.join("starchart.json");
+        let mut entries: Vec<(String, [String; 4])> = Vec::new();
+        if let Ok(text) = fs::read_to_string(&path) {
+            for line in text.lines() {
+                if let (Some(name), Some(px), Some(py)) = (
+                    json::extract_string(line, "world"),
+                    json::extract_string(line, "x"),
+                    json::extract_string(line, "y"),
+                ) {
+                    let pz = json::extract_string(line, "z").unwrap_or_else(|| "0".into());
+                    let pg = json::extract_string(line, "g").unwrap_or_else(|| "0".into());
+                    entries.push((name, [px, py, pz, pg]));
+                }
+            }
+        }
+        let slug = sanitize(world);
+        entries.retain(|(name, _)| name != &slug);
+        entries.push((
+            slug,
+            [ratio_str(&x), ratio_str(&y), ratio_str(&z), ratio_str(g)],
+        ));
+        entries.sort();
+        let mut out = String::new();
+        for (name, [px, py, pz, pg]) in &entries {
+            let mut w = JsonWriter::new();
+            w.open();
+            w.field_str("world", name);
+            w.field_str("x", px);
+            w.field_str("y", py);
+            w.field_str("z", pz);
+            w.field_str("g", pg);
+            w.close();
+            out.push_str(&w.finish());
+            out.push('\n');
+        }
+        let tmp = self.root.join("starchart.json.tmp");
+        fs::write(&tmp, out)?;
+        fs::rename(&tmp, path)
+    }
+
+    /// Read one world's charted coordinate: (S = (x, y, z), G).
+    pub fn charted_position(&self, world: &str) -> Option<((Ratio, Ratio, Ratio), Ratio)> {
+        let text = fs::read_to_string(self.root.join("starchart.json")).ok()?;
+        let slug = sanitize(world);
+        for line in text.lines() {
+            if json::extract_string(line, "world").as_deref() == Some(&slug) {
+                return Some((
+                    (
+                        parse_ratio(&json::extract_string(line, "x")?)?,
+                        parse_ratio(&json::extract_string(line, "y")?)?,
+                        parse_ratio(&json::extract_string(line, "z").unwrap_or_else(|| "0".into()))?,
+                    ),
+                    parse_ratio(&json::extract_string(line, "g").unwrap_or_else(|| "0".into()))?,
+                ));
+            }
+        }
+        None
+    }
+
+    /// The L1 toroidal distance between two charted worlds — wrapped
+    /// |Δ| summed over the spatial axes, exact. NO SQUARING (the L1
+    /// law): the short way around, per axis, added whole.
+    pub fn l1_distance(&self, a: &str, b: &str) -> Option<Ratio> {
+        let ((ax, ay, az), _) = self.charted_position(a)?;
+        let ((bx, by, bz), _) = self.charted_position(b)?;
+        let span = self.universe_span();
+        let leg = |u: &Ratio, v: &Ratio| -> Ratio { wrapped_abs(u, v, &span) };
+        Some(leg(&ax, &bx) + leg(&ay, &by) + leg(&az, &bz))
+    }
+
     /// Record a proof-of-solution: one JSON file per confirmed task.
     /// `depth` is the difficulty rung the solve was earned at (the
     /// observer's DEPTH column reads the maximum).
@@ -224,6 +367,49 @@ fn ratio_str(r: &Ratio) -> String {
 
 fn hex(bytes: &[u8]) -> String {
     bytes.iter().map(|b| format!("{b:02x}")).collect()
+}
+
+/// The six-field base-60 odometer: T of TUniversal, a pure function
+/// of the tick count — never of any wall clock.
+pub fn universal_clock(ticks: u64) -> String {
+    let mut fields = [0u64; 6];
+    let mut rest = ticks;
+    for slot in (0..6).rev() {
+        fields[slot] = rest % 60;
+        rest /= 60;
+    }
+    fields
+        .iter()
+        .map(|f| format!("{f:02}"))
+        .collect::<Vec<_>>()
+        .join(":")
+}
+
+/// The wrapped per-axis |Δ| — the short way around the torus.
+fn wrapped_abs(a: &Ratio, b: &Ratio, span: &Ratio) -> Ratio {
+    use num_traits::Signed;
+    let mut d = (a - b).abs();
+    // Both coordinates live in [0, span), so d < span already; take
+    // the shorter arc.
+    let around = span - &d;
+    if around < d {
+        d = around;
+    }
+    d
+}
+
+/// Parse the mirror's exact rendering back: `p/q` or a plain integer.
+fn parse_ratio(text: &str) -> Option<Ratio> {
+    use num_bigint::BigInt;
+    use std::str::FromStr;
+    let (numer, denom) = match text.split_once('/') {
+        Some((n, d)) => (n, d),
+        None => (text, "1"),
+    };
+    Some(Ratio::new(
+        BigInt::from_str(numer.trim()).ok()?,
+        BigInt::from_str(denom.trim()).ok()?,
+    ))
 }
 
 fn resource_name(r: cfe::dop::Resource) -> &'static str {

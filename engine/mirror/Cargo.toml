@@ -6,4 +6,5 @@ description = "The world mirror — every civilization continuously reflected to
 
 [dependencies]
 cfe = { path = "../cfe" }
+num-bigint.workspace = true
 num-traits.workspace = true

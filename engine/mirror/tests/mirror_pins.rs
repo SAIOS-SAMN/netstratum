@@ -188,6 +188,56 @@ fn the_registry_enforces_the_vocabulary() {
     );
 }
 
+/// The star-chart holds TUniversal{S, G}: exact-ℚ S = (x, y, z) on
+/// the 3-torus (negative coordinates wrap), the gauge phase rides
+/// along, distance is L1 (NO SQUARING — the L1 law), and the
+/// universal clock is a pure base-60 odometer of ticks.
+#[test]
+fn the_starchart_holds_tuniversal_coordinates() {
+    use cfe::ratio::ratio;
+    let root = scratch("starchart");
+    let mirror = Mirror::at(&root);
+    mirror
+        .chart_world("sol", (&ratio(0, 1), &ratio(0, 1), &ratio(0, 1)), &ratio(0, 1))
+        .expect("charts");
+    // Negative coordinates WRAP onto the torus: −7/2 mod 64 = 121/2.
+    mirror
+        .chart_world(
+            "kepler-passage",
+            (&ratio(-7, 2), &ratio(9, 1), &ratio(63, 1)),
+            &ratio(1, 4),
+        )
+        .expect("charts");
+    assert_eq!(
+        mirror.charted_position("kepler-passage"),
+        Some(((ratio(121, 2), ratio(9, 1), ratio(63, 1)), ratio(1, 4)))
+    );
+    // L1, the short way around: x-leg min(121/2, 64−121/2) = 7/2,
+    // y-leg 9, z-leg min(63, 1) = 1 → total 27/2. No squaring.
+    assert_eq!(mirror.l1_distance("sol", "kepler-passage"), Some(ratio(27, 2)));
+
+    // Re-charting moves the world; the entry count stays one.
+    mirror
+        .chart_world(
+            "kepler-passage",
+            (&ratio(1, 3), &ratio(9, 1), &ratio(0, 1)),
+            &ratio(0, 1),
+        )
+        .expect("re-charts");
+    let text = fs::read_to_string(root.join("starchart.json")).expect("read");
+    assert_eq!(text.lines().count(), 2, "one line per world");
+    assert!(text.contains("\"x\":\"1/3\""), "exact fraction rendering");
+    assert!(!text.contains("0.33"), "no float ever enters the universe");
+
+    // T: the six-field odometer, base 60, tick-derived only.
+    assert_eq!(mirror::universal_clock(0), "00:00:00:00:00:00");
+    assert_eq!(mirror::universal_clock(61), "00:00:00:00:01:01");
+    assert_eq!(mirror::universal_clock(3600), "00:00:00:01:00:00");
+    mirror.set_universal_clock(61).expect("writes the card");
+    let card = fs::read_to_string(root.join("universe.json")).expect("card");
+    assert!(card.contains("\"tuniversal\":\"00:00:00:00:01:01\""));
+}
+
 /// Exactness discipline holds through the topology: fractions render
 /// p/q, never decimals; the snapshot stays balanced JSON.
 #[test]

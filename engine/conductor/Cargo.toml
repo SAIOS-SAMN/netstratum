@@ -9,6 +9,7 @@ cfe = { path = "../cfe" }
 mirror = { path = "../mirror" }
 physics = { path = "../physics" }
 solver = { path = "../solver" }
+num-bigint.workspace = true
 num-traits.workspace = true
 
 [[bin]]

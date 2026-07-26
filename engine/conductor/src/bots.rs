@@ -5,6 +5,7 @@
 //! exist solely to write that first file.
 
 use crate::{BotSpec, Policy};
+use cfe::ratio::{ratio, Ratio};
 use mirror::registry::Civilization;
 use std::path::Path;
 
@@ -33,6 +34,7 @@ pub fn founding_bots() -> Vec<BotSpec> {
             planet: "bask".into(),
             colony: "first-vent".into(),
             policy: Policy::Aggressive,
+            position: (ratio(0, 1), ratio(0, 1), ratio(0, 1)),
         },
         BotSpec {
             civilization: civ(
@@ -43,6 +45,7 @@ pub fn founding_bots() -> Vec<BotSpec> {
             planet: "tidefall".into(),
             colony: "songline".into(),
             policy: Policy::Steady,
+            position: (ratio(12, 1), ratio(5, 1), ratio(3, 1)),
         },
         BotSpec {
             civilization: civ(
@@ -53,6 +56,18 @@ pub fn founding_bots() -> Vec<BotSpec> {
             planet: "comb".into(),
             colony: "waggle-reach".into(),
             policy: Policy::Industry,
+            position: (ratio(-7, 1), ratio(9, 1), ratio(2, 1)),
+        },
+        BotSpec {
+            civilization: civ(
+                "Eightfold", "eightfold", "octopus", "eight arms, one argument",
+                "epicurean", "biotic", "volumetric",
+            ),
+            world_name: "jovian-reach".into(),
+            planet: "europa".into(),
+            colony: "brine-garden".into(),
+            policy: Policy::Steady,
+            position: (ratio(5, 1), ratio(58, 1), ratio(61, 1)),
         },
     ]
 }
@@ -70,10 +85,13 @@ pub fn write_default_bots(path: &Path) -> std::io::Result<()> {
         out.push_str(&format!(
             "  {{\"name\":\"{}\",\"slug\":\"{}\",\"species\":\"{}\",\"motto\":\"{}\",\
              \"disposition\":\"{}\",\"metabolism\":\"{}\",\"perception\":\"{}\",\
-             \"world\":\"{}\",\"planet\":\"{}\",\"colony\":\"{}\",\"policy\":\"{}\"}}{}\n",
+             \"world\":\"{}\",\"planet\":\"{}\",\"colony\":\"{}\",\"policy\":\"{}\",\
+             \"x\":\"{}\",\"y\":\"{}\",\"z\":\"{}\"}}{}\n",
             c.name, c.slug, c.species, c.motto,
             c.disposition, c.metabolism, c.perception,
             bot.world_name, bot.planet, bot.colony, bot.policy.describe(),
+            ratio_text(&bot.position.0), ratio_text(&bot.position.1),
+            ratio_text(&bot.position.2),
             if i + 1 < bots.len() { "," } else { "" },
         ));
     }
@@ -106,6 +124,11 @@ pub fn load_bots(path: &Path) -> Option<Vec<BotSpec>> {
                 planet: field("planet")?,
                 colony: field("colony")?,
                 policy: Policy::parse(&field("policy")?)?,
+                position: (
+                    field("x").and_then(|v| parse_ratio(&v)).unwrap_or_else(|| ratio(0, 1)),
+                    field("y").and_then(|v| parse_ratio(&v)).unwrap_or_else(|| ratio(0, 1)),
+                    field("z").and_then(|v| parse_ratio(&v)).unwrap_or_else(|| ratio(0, 1)),
+                ),
             })
         })();
         match parsed {
@@ -151,4 +174,28 @@ fn extract_string(text: &str, key: &str) -> Option<String> {
     let after = after.trim_start().strip_prefix(':')?.trim_start();
     let inner = after.strip_prefix('"')?;
     Some(inner[..inner.find('"')?].to_string())
+}
+
+/// The mirror's exact rendering: whole if whole, else p/q.
+fn ratio_text(r: &Ratio) -> String {
+    use num_traits::One;
+    if r.denom().is_one() {
+        r.numer().to_string()
+    } else {
+        format!("{}/{}", r.numer(), r.denom())
+    }
+}
+
+/// Parse `p/q` or a plain integer.
+fn parse_ratio(text: &str) -> Option<Ratio> {
+    use num_bigint::BigInt;
+    use std::str::FromStr;
+    let (numer, denom) = match text.split_once('/') {
+        Some((n, d)) => (n, d),
+        None => (text, "1"),
+    };
+    Some(Ratio::new(
+        BigInt::from_str(numer.trim()).ok()?,
+        BigInt::from_str(denom.trim()).ok()?,
+    ))
 }

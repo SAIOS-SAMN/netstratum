@@ -14,6 +14,11 @@ fn hash_grid(hasher: &mut blake3::Hasher, g: &Grid) {
     hasher.update(&g.cells);
 }
 
+/// The one grid-hashing law, shared with the volumetric sealer.
+pub(crate) fn hash_grid_into(hasher: &mut blake3::Hasher, g: &Grid) {
+    hash_grid(hasher, g);
+}
+
 fn link(parent: &[u8; 32], payload: impl FnOnce(&mut blake3::Hasher)) -> [u8; 32] {
     let mut hasher = blake3::Hasher::new();
     hasher.update(parent);

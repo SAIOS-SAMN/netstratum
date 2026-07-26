@@ -106,7 +106,10 @@ fn a_thriving_line_speciates() {
     let root = scratch("speciate");
     let var = root.to_string_lossy().into_owned();
     let worlds = run_era(&var, 60);
-    assert!(worlds.len() > 3, "a daughter joined the board");
+    assert!(
+        worlds.iter().any(|b| b.spec.civilization.lineage.is_some()),
+        "a daughter joined the board"
+    );
 
     let registry = Registry::at(root.join("registry"));
     let daughters: Vec<_> = registry
@@ -133,13 +136,53 @@ fn a_thriving_line_speciates() {
     }
 
     // The daughter's world is mirrored and beating.
-    let newborn = worlds.get(3).expect("newborn world");
+    let newborn = worlds
+        .iter()
+        .find(|b| b.spec.civilization.lineage.is_some())
+        .expect("newborn world");
     assert!(newborn.world.now() > 0, "the daughter's clock runs");
     assert!(root
         .join("worlds")
         .join(&newborn.spec.world_name)
         .join("chronicle.jsonl")
         .exists());
+
+    // THE STAR-CHART: the daughter settled ADJACENT to its parent —
+    // charted, exact, displaced but within the half-unit-step reach
+    // (dist² ≤ 8, ≠ 0).
+    let mirror = Mirror::at(root.join("worlds"));
+    let parent_world = &worlds
+        .iter()
+        .find(|b| {
+            Some(&b.spec.civilization.slug)
+                == newborn.spec.civilization.lineage.as_ref()
+        })
+        .expect("the parent beats")
+        .spec;
+    // THEMED NAMES, NEVER CHAINS: a daughter's world is a fresh
+    // two-part themed name — ancestry lives in the lineage field and
+    // the star-chart adjacency, not in ever-growing strings.
+    assert!(
+        !newborn.spec.world_name.contains(&parent_world.world_name),
+        "no name concatenation: {}",
+        newborn.spec.world_name
+    );
+    assert!(
+        newborn.spec.world_name.matches('-').count() <= 1,
+        "two segments max: {}",
+        newborn.spec.world_name
+    );
+
+    // L1 toroidal distance (the L1 law: no squaring) — displaced but
+    // within the half-step reach: 0 < L1 ≤ 6 (three axes × 2 max).
+    let l1 = mirror
+        .l1_distance(&parent_world.world_name, &newborn.spec.world_name)
+        .expect("both charted");
+    assert!(!num_traits::Zero::is_zero(&l1), "displaced, never on top");
+    assert!(
+        l1 <= cfe::ratio::ratio(6, 1),
+        "adjacent on the torus: L1 = {l1} within reach"
+    );
 }
 
 /// The leash works end-to-end: a steward directive queued in the
@@ -154,7 +197,7 @@ fn a_steward_directive_lands_through_the_leash() {
 
     let mut worlds: Vec<BotWorld> = founding_bots()
         .into_iter()
-        .map(|spec| BotWorld::genesis(spec, &registry))
+        .map(|spec| BotWorld::genesis(spec, &registry, &mirror))
         .collect();
     for _ in 0..2 {
         for bot in &mut worlds {
@@ -190,6 +233,28 @@ fn a_steward_directive_lands_through_the_leash() {
             .any(|z| z.tile == 63),
         "tile 63 carries the steward's habitat"
     );
+}
+
+/// PERCEPTION ROUTES RESEARCH: the volumetric civilization's solves
+/// are volumetric tasks (volf_*), the planar civilizations' are
+/// planar (forge_*) — the genesis axis has mechanical teeth.
+#[test]
+fn perception_routes_the_research() {
+    let root = scratch("perception");
+    run_era(&root.to_string_lossy(), 8);
+    let names = |world: &str| -> Vec<String> {
+        fs::read_dir(root.join("worlds").join(world).join("solves"))
+            .map(|dir| {
+                dir.filter_map(|e| e.ok())
+                    .map(|e| e.file_name().to_string_lossy().into_owned())
+                    .collect()
+            })
+            .unwrap_or_default()
+    };
+    let hivelight = names("amber-veil"); // volumetric honeybees
+    let slagborn = names("cinder-reach"); // planar tardigrades
+    assert!(!hivelight.is_empty() && hivelight.iter().all(|n| n.starts_with("volf_")));
+    assert!(!slagborn.is_empty() && slagborn.iter().all(|n| n.starts_with("forge_")));
 }
 
 /// Lore lives in data: the default bots seed a file the operator

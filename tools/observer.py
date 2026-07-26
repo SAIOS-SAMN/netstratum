@@ -259,12 +259,99 @@ def render(rows, registry, sort_key, plain):
     return "\n".join(sections)
 
 
+def load_starchart(var_root):
+    """world -> (Fraction x, Fraction y) from the chart's JSONL."""
+    chart = {}
+    path = Path(var_root) / "worlds" / "starchart.json"
+    if path.exists():
+        for line in path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                card = json.loads(line)
+                chart[card["world"]] = (
+                    frac(card["x"]), frac(card["y"]), frac(card.get("z", "0")),
+                    frac(card.get("g", "0")),
+                )
+            except (json.JSONDecodeError, KeyError, ValueError):
+                continue
+    return chart
+
+
+def universe_card(var_root):
+    """span + TUniversal from universe.json."""
+    path = Path(var_root) / "worlds" / "universe.json"
+    if path.exists():
+        try:
+            card = json.loads(path.read_text(encoding="utf-8"))
+            return frac(card.get("span", "64")), card.get("tuniversal", "00:00:00:00:00:00")
+        except (json.JSONDecodeError, ValueError):
+            pass
+    return Fraction(64), "00:00:00:00:00:00"
+
+
+def toroidal_l1(a, b, span):
+    """THE L1 LAW: exact distance, the short way around each axis,
+    summed whole — no squaring in a toroid."""
+    total = Fraction(0)
+    for u, v in zip(a, b):
+        d = abs(u - v) % span
+        d = min(d, span - d)
+        total += d
+    return total
+
+
+def render_starchart(chart, span, tuniversal):
+    """An ascii x/y projection of the 3-torus (edges wrap) plus exact
+    TUniversal{S, G} coordinates and nearest neighbors by L1 (no
+    squaring in a toroid)."""
+    if not chart:
+        return ""
+    names = sorted(chart)
+    lines = ["", f"STAR CHART — 3-torus, span {show(span)} (edges wrap) — TUniversal {tuniversal}"]
+
+    # The ascii canvas, worlds marked a, b, c…
+    width, height = 49, 13
+    canvas = [[" "] * width for _ in range(height)]
+    marks = []
+    for i, name in enumerate(names):
+        x, y = chart[name][0], chart[name][1]
+        col = int((x % span) / span * width) % width
+        row = int((span - (y % span)) / span * height) % height
+        mark = chr(ord("a") + i % 26)
+        canvas[row][col] = mark
+        marks.append((mark, name))
+    lines += ["  ·" + "-" * width + "·"]
+    lines += ["  |" + "".join(r) + "|" for r in canvas]
+    lines += ["  ·" + "-" * width + "·"]
+
+    # Exact coordinates and nearest neighbor by squared distance.
+    for mark, name in marks:
+        x, y, z, g = chart[name]
+        nearest, best = "—", None
+        for other in names:
+            if other == name:
+                continue
+            d = toroidal_l1((x, y, z), chart[other][:3], span)
+            if best is None or d < best:
+                nearest, best = other, d
+        lines.append(
+            f"  {mark}  {name:<28} S=({show(x)}, {show(y)}, {show(z)}) G={show(g)}"
+            + (f"   nearest {nearest} at L1 {show(best)}" if best is not None else "")
+        )
+    return "\n".join(lines)
+
+
 def observe(var_root, sort_key, plain):
     rows = read_worlds(var_root)
     if not rows:
         return (f"(nothing mirrored under {var_root}/worlds yet — play a session "
                 "with the mirror wired, or run the mirror_demo)")
-    return render(rows, load_registry(var_root), sort_key, plain)
+    out = render(rows, load_registry(var_root), sort_key, plain)
+    span, tuniversal = universe_card(var_root)
+    chart = render_starchart(load_starchart(var_root), span, tuniversal)
+    return out + chart if chart else out
 
 
 def main():

@@ -40,7 +40,7 @@ fn main() {
     let mirror = Mirror::at(format!("{var_root}/worlds"));
     let mut worlds: Vec<BotWorld> = specs
         .into_iter()
-        .map(|spec| BotWorld::genesis(spec, &registry))
+        .map(|spec| BotWorld::genesis(spec, &registry, &mirror))
         .collect();
     println!(
         "conductor: {} civilizations from {} — {}",
@@ -56,6 +56,7 @@ fn main() {
     let mut beat: u64 = 0;
     loop {
         beat += 1;
+        let _ = mirror.set_universal_clock(beat);
         let mut newborns = Vec::new();
         for bot in &mut worlds {
             if let Some(spec) = bot.cycle(&mirror, &registry) {
@@ -71,7 +72,7 @@ fn main() {
                 spec.world_name,
                 spec.planet,
             );
-            worlds.push(BotWorld::genesis(spec, &registry));
+            worlds.push(BotWorld::genesis(spec, &registry, &mirror));
         }
         if beat.is_multiple_of(10) || (cycles > 0 && beat == cycles) {
             let summary: Vec<String> = worlds

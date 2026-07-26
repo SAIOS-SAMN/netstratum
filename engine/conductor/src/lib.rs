@@ -82,6 +82,8 @@ pub struct BotSpec {
     pub planet: String,
     pub colony: String,
     pub policy: Policy,
+    /// The world's spatial coordinate S = (x, y, z) on the 3-torus.
+    pub position: (Ratio, Ratio, Ratio),
 }
 
 /// One live bot world: the sim, its contained actor, its research rung.
@@ -126,11 +128,21 @@ fn next_free_tile(world: &World) -> Option<u16> {
     (0u16..64).find(|tile| !orb.zones.iter().any(|z| z.tile == *tile))
 }
 
+fn hex(bytes: &[u8; 32]) -> String {
+    bytes.iter().map(|b| format!("{b:02x}")).collect()
+}
+
 impl BotWorld {
     /// Found the era: registry entry (join if present), the colony,
-    /// the contained bot actor, and the steward entity.
-    pub fn genesis(spec: BotSpec, registry: &Registry) -> BotWorld {
+    /// the contained bot actor, the steward entity, and the world's
+    /// place on the star-chart.
+    pub fn genesis(spec: BotSpec, registry: &Registry, mirror: &Mirror) -> BotWorld {
         let _ = registry.create(&spec.civilization);
+        let _ = mirror.chart_world(
+            &spec.world_name,
+            (&spec.position.0, &spec.position.1, &spec.position.2),
+            &ratio(0, 1), // gauge phase: neutral at genesis; G moves with the fiber landings
+        );
         let mut world = World::new();
         world.found(&spec.colony).expect("a fresh world founds");
         let actor = world
@@ -283,39 +295,65 @@ impl BotWorld {
 
     /// The research arm: the world's own latest receipt digest seeds
     /// one forge attempt at the current rung. Three confirms promote.
+    ///
+    /// PERCEPTION ROUTES THE RESEARCH (the axis has teeth): a
+    /// volumetric civilization natively attempts VOLUMETRIC tasks —
+    /// stacked grids, stack operators — while planar and harmonic
+    /// civilizations work the planar forge (the harmonic carrier is a
+    /// named gap; it lands with its own vocabulary, not as a skin).
     fn research_step(&mut self, mirror: &Mirror) {
         let Some(receipt) = self.world.chronicle().receipts().last() else {
             return;
         };
-        let difficulty = Difficulty::level(self.level);
-        let task = forge_task(receipt.own.0, difficulty);
-        if let SolveRead::Solved {
-            program,
-            matches_expected: Some(true),
-            certificate,
-            ..
-        } = solve(&task, difficulty.word_len)
-        {
-            let word: Vec<String> = program.iter().map(|op| op.describe()).collect();
-            let mut cert_hex = String::new();
-            for byte in certificate.output {
-                cert_hex.push_str(&format!("{byte:02x}"));
-            }
-            let _ = mirror.record_solve(
-                &self.spec.world_name,
-                &task.name,
-                &word.join(" → "),
-                &cert_hex,
-                self.level,
-            );
-            self.solved += 1;
-            self.streak += 1;
-            if self.streak >= 3 && self.level < 5 {
-                self.level += 1;
-                self.streak = 0;
+        let digest = receipt.own.0;
+        let solved = if self.spec.civilization.perception == "volumetric" {
+            let difficulty = solver::VolDifficulty::level(self.level);
+            let task = solver::forge_volume(digest, difficulty);
+            match solver::solve_volume(&task, difficulty.word_len) {
+                solver::VolumeSolveRead::Solved {
+                    program,
+                    matches_expected: Some(true),
+                    certificate,
+                    ..
+                } => {
+                    let word: Vec<String> = program.iter().map(|op| op.describe()).collect();
+                    Some((task.name, word.join(" → "), hex(&certificate)))
+                }
+                _ => None,
             }
         } else {
-            self.streak = 0;
+            let difficulty = Difficulty::level(self.level);
+            let task = forge_task(digest, difficulty);
+            match solve(&task, difficulty.word_len) {
+                SolveRead::Solved {
+                    program,
+                    matches_expected: Some(true),
+                    certificate,
+                    ..
+                } => {
+                    let word: Vec<String> = program.iter().map(|op| op.describe()).collect();
+                    Some((task.name, word.join(" → "), hex(&certificate.output)))
+                }
+                _ => None,
+            }
+        };
+        match solved {
+            Some((name, word, cert_hex)) => {
+                let _ = mirror.record_solve(
+                    &self.spec.world_name,
+                    &name,
+                    &word,
+                    &cert_hex,
+                    self.level,
+                );
+                self.solved += 1;
+                self.streak += 1;
+                if self.streak >= 3 && self.level < 5 {
+                    self.level += 1;
+                    self.streak = 0;
+                }
+            }
+            None => self.streak = 0,
         }
     }
 
@@ -348,15 +386,35 @@ impl BotWorld {
             _ => perception = mutate(&perception, &PERCEPTIONS, "speciation.perception"),
         }
 
-        // The child's name, drawn from the digest.
-        const HEADS: [&str; 6] = ["cryo", "rust", "ember", "shard", "echo", "drift"];
-        const TAILS: [&str; 6] = ["born", "choir", "reach", "kin", "veil", "light"];
-        let head = HEADS[beacon.uniform_index("speciation.head", 6) as usize];
-        let tail = TAILS[beacon.uniform_index("speciation.tail", 6) as usize];
-        let slug = format!("{head}{tail}");
-        if registry.load(&slug).is_some() {
-            return None; // the name is taken this era; the line waits
+        // THEMED NAMING (operator ruling): the child's name derives
+        // from the parent's dominant CAPABILITIES — metabolism names
+        // the head, perception names the tail. Fresh two-part names,
+        // never concatenations of ancestry (lineage lives in the
+        // registry field, not in ever-growing strings).
+        let heads: &[&str] = match parent.metabolism.as_str() {
+            "mineral" => &["ember", "slag", "basalt", "vein", "cinder", "forge"],
+            _ => &["bloom", "grove", "reef", "moss", "fern", "spore"],
+        };
+        let tails: &[&str] = match perception.as_str() {
+            "harmonic" => &["choir", "chord", "hum", "call"],
+            "volumetric" => &["vault", "deep", "well", "hollow"],
+            _ => &["reach", "field", "span", "march"],
+        };
+        // Deterministic collision walk: start at the drawn combo,
+        // scan forward; if every themed name is taken, the line waits.
+        let start = beacon.uniform_index("speciation.name", (heads.len() * tails.len()) as u64)
+            as usize;
+        let mut chosen: Option<(String, &str, &str)> = None;
+        for offset in 0..heads.len() * tails.len() {
+            let k = (start + offset) % (heads.len() * tails.len());
+            let (head, tail) = (heads[k / tails.len()], tails[k % tails.len()]);
+            let slug = format!("{head}{tail}");
+            if registry.load(&slug).is_none() {
+                chosen = Some((slug, head, tail));
+                break;
+            }
         }
+        let (slug, head, tail) = chosen?;
         let mut name = slug.clone();
         name[..1].make_ascii_uppercase();
 
@@ -377,12 +435,30 @@ impl BotWorld {
         };
         registry.create(&daughter).ok()?;
         self.spawned = true;
+
+        // The daughter settles ADJACENT: parent position plus a small
+        // beacon-drawn displacement in ℚ per spatial axis (half-unit
+        // grain, never the zero vector).
+        let step = |domain: &str| -> Ratio {
+            ratio(beacon.uniform_index(domain, 9) as i64 - 4, 2)
+        };
+        let (mut dx, dy, dz) = (step("chart.dx"), step("chart.dy"), step("chart.dz"));
+        if dx == ratio(0, 1) && dy == ratio(0, 1) && dz == ratio(0, 1) {
+            dx = ratio(1, 1);
+        }
         Some(BotSpec {
             civilization: daughter,
-            world_name: format!("{}-{head}", self.spec.world_name),
+            // Fresh themed world and planet — ancestry is a registry
+            // fact and a star-chart adjacency, never a name chain.
+            world_name: format!("{head}-{tail}"),
             planet: format!("{tail}fall"),
             colony: format!("{slug}-landing"),
             policy: self.spec.policy,
+            position: (
+                &self.spec.position.0 + dx,
+                &self.spec.position.1 + dy,
+                &self.spec.position.2 + dz,
+            ),
         })
     }
 
@@ -412,9 +488,10 @@ pub fn run_era(var_root: &str, cycles: u32) -> Vec<BotWorld> {
     let mirror = Mirror::at(format!("{var_root}/worlds"));
     let mut worlds: Vec<BotWorld> = bots::founding_bots()
         .into_iter()
-        .map(|spec| BotWorld::genesis(spec, &registry))
+        .map(|spec| BotWorld::genesis(spec, &registry, &mirror))
         .collect();
-    for _ in 0..cycles {
+    for beat in 0..cycles {
+        let _ = mirror.set_universal_clock(u64::from(beat) + 1);
         let mut newborns = Vec::new();
         for bot in &mut worlds {
             if let Some(spec) = bot.cycle(&mirror, &registry) {
@@ -422,7 +499,7 @@ pub fn run_era(var_root: &str, cycles: u32) -> Vec<BotWorld> {
             }
         }
         for spec in newborns {
-            worlds.push(BotWorld::genesis(spec, &registry));
+            worlds.push(BotWorld::genesis(spec, &registry, &mirror));
         }
     }
     worlds
