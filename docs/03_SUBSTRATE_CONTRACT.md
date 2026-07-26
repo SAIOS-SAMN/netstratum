@@ -138,6 +138,11 @@ deleted). Quantities render exact (`9/2`, never `4.5`).
 - **Witness:** `mirror_pins.rs` (faithful + incremental reflection,
   chain linkage in the stream, directive round-trip + archival,
   exactness in the snapshot).
+- **Chartering conserves (P1):** founding a new planet MOVES reserves
+  from the source colony and mints nothing — conservation-by-movement
+  is a substrate claim, not a rule of thumb. Primitive:
+  `world::chart` / `chart_as` (Build scope). Witness:
+  `world_planets::chartering_moves_the_reserves_and_mints_nothing`.
 - **coder-02 seam:** the CLI wires `Mirror::record` after each command
   and drains `pending_directives` per tick via the `as steward` path;
   the steward entity exists per-world with operator-granted scopes.
