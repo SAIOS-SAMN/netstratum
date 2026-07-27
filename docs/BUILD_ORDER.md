@@ -203,6 +203,29 @@ N5/N6). Details and sequencing in 04 §6.
   demurrage; warm banked joules decay exactly 15/64 over 4 ticks by
   receipt; tags 27/29 byte-exact; replay MATCHES with the dual ledger).
 
+- **JOURNAL-1 LANDED** (2026-07-27, coder-node worktree, merged by
+  coder-01): THE CHRONICLE FEED / TERMINAL WALL (08). Civilizations speak:
+  one journal entry per 60-tick year, generated mirror-side as a pure
+  RENDERING (no receipts, no new state — deleting every journal changes
+  nothing, witnessed). Deterministic from the chronicle alone: year windows
+  half-open and closed under the clock law; boundary state grounds through
+  prefix replay of the real chain; flavor seeds from the year's last
+  receipt digest (CHARTER §9); all quantities exact `p/q`. Full 08 §2
+  mapping (joule stance vs the heating bill, famine/freeze-lock RED alerts,
+  vent delta, sink offered to Furnace traders, exact growth, expansion
+  notes, derived trade requests). Surfaces: `journal.jsonl` per world
+  (append-only, idempotent, byte-identical regeneration) + the static
+  self-contained cyber-noir `wall.html` (inline-only, filter bar) +
+  conductor year-boundary hooks + CLI `journal`. Evidence: clippy zero;
+  **123/123 workspace witnesses green** (7 new pins: regeneration
+  byte-identical; famine red-alert names resource + dormancy + want;
+  growth exact with the odometer pinned; the surplus/deficit stance flips
+  at exactly banked == need; wall inline-only with the inscribed palette;
+  reflection-only proof; terminology law asserted by code point).
+  Deviations recorded in doc-comments: world-local odometer (regeneration
+  must not depend on convergence state); two boundary facts witnessed via
+  exposed pure helpers; Wanderer archetype label for mesic generalists.
+
 ## 2. The depth board (02_COLONY_LOOP — game depth before multiplayer)
 
 Ruled 2026-07-25: the world must be worth sharing before N6 shares it. These
