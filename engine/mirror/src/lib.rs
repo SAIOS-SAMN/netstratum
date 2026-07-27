@@ -568,6 +568,14 @@ fn render_receipt(receipt: &Receipt) -> String {
             "demurrage_settled",
             format!("{} {}", ratio_str(amount), resource_name(*resource)),
         ),
+        E::ResourceTransferred { from_orb, to_orb, resource, amount } => (
+            "resource_transferred",
+            format!(
+                "{} {} orb {from_orb} → orb {to_orb}",
+                ratio_str(amount),
+                resource_name(*resource)
+            ),
+        ),
     };
     w.field_str("event", name);
     w.field_str("detail", &detail);

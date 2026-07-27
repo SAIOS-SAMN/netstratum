@@ -75,6 +75,7 @@ One tag, one meaning, forever; retired codes are never reused.
 | 27 | event: VentSettled (VENT-1) | LE64(orb_id) ‖ ratio (amount) |
 | 28 | orb: vent entry (VENT-1/SINK-1) | ratio (entropy_vented) ‖ LE64(last_touch) |
 | 29 | event: DemurrageSettled (SINK-1) | LE64(orb_id) ‖ resource u8 ‖ ratio |
+| 30 | event: ResourceTransferred (TRADE-1) | LE64(from_orb) ‖ LE64(to_orb) ‖ resource u8 ‖ ratio — banked value MOVES (conservation); both orbs settle demurrage at this touch; cohesion-book postings derive from this receipt + the counterparty's receipted crisis state, never stored |
 | 10 | event: EntityRegistered (N3) | LE64(entity_id) ‖ LE64(principal) ‖ handle utf8 |
 | 11 | event: ScopeGranted (N3) | LE64(agent) ‖ scope u8 |
 | 12 | event: ScopeRevoked (N3) | LE64(agent) ‖ scope u8 |

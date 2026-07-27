@@ -226,6 +226,37 @@ N5/N6). Details and sequencing in 04 §6.
   must not depend on convergence state); two boundary facts witnessed via
   exposed pure helpers; Wanderer archetype label for mesic generalists.
 
+- **TRADE-1 LANDED** (2026-07-27): THE TRANSFER SUBSTRATE — the first
+  ideology-board landing (09, §3 below). `ResourceTransferred` (tag 30,
+  NS-1 §2.3): banked value MOVES orb-to-orb inside one world — the
+  chartering conservation law generalized; typed refusals (BadTransfer,
+  NoSuchOrb, CannotAfford with the exact post-decay shortfall). The
+  SINK-1 touch law EXTENDED: both sides settle due demurrage by receipt
+  at the transfer's stamp (computed pure first — a refusal orphans
+  nothing); a same-stamp touch pays zero. THE COMPASSION BOOKS OPEN
+  (09 §2.1): `given_in_crisis` / `drawn_in_crisis` post iff the
+  counterparty stands in receipted, uncleared famine/overheat at the
+  deed's stamp — a replay fact, never a judgment call; weight-1
+  commensuration (placeholder table inscribed); wire encoding of the
+  books DEFERRED to IDEO-1 tag 38 as boarded. A gift covering the
+  one-tick bill relieves at the landed law (02 §2.4). One truth-update:
+  every settle is a touch — `UpkeepSettled` now anchors `last_touch` on
+  replay (the upkeep-only collect had diverged live-vs-replay,
+  latent since SINK-1; caught red, cured). Cross-territory (relayed,
+  the P1 precedent): one mechanical renderer arm in `engine/mirror`.
+  CLI: `send <amt> <res> to <planet> [from <planet>]`, relief banner,
+  refusals name the cure. Evidence: clippy zero (warnings denied);
+  **129/129 workspace witnesses green** (6 new: conservation exact —
+  20 iron stays 20 across the move, books balance both sides; the
+  1/4+1/4 biomass gift relieves EXACTLY at the one-tick bill, receipted
+  once; crisis posting replays — drawn 2, given 1/2, healthy transfers
+  post nothing; both sides settle demurrage at one touch — 7/64 mother,
+  1/8 daughter by receipt, same-stamp pays zero, 41/64 remains; the
+  upkeep-only collect anchors last_touch on replay; tag 30 byte-exact).
+  The arc played end-to-end: famine struck outpost → 1/4 gift held →
+  second 1/4 relieved with the banner → 100-iron refusal named "have
+  10" → self-send refused → replay MATCHES.
+
 ## 2. The depth board (02_COLONY_LOOP — game depth before multiplayer)
 
 Ruled 2026-07-25: the world must be worth sharing before N6 shares it. These

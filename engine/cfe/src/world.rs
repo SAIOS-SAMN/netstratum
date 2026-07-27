@@ -50,6 +50,9 @@ pub enum ActionRefused {
     AlreadySited { orb: u64 },
     /// THERMAL-1 — albedo must satisfy 0 ≤ A < 1, orbit r > 0.
     BadSiting,
+    /// TRADE-1 — a transfer moves a POSITIVE amount between two
+    /// DISTINCT orbs; anything else refuses whole.
+    BadTransfer,
 }
 
 /// One tick's read: the clock walk, any famines that struck, and any
@@ -713,27 +716,7 @@ impl World {
         let count = settleable.len();
         // SINK-1 (Q2): receipted demurrage at touch — un-vaulted banked
         // joules/sink decay for the elapsed span, settled openly.
-        if let (Some(class), Some(site)) = (self.star, held.thermal.clone()) {
-            let t4 = crate::thermal::t_eq4(&class.luminosity(), &site.albedo, &site.orbit_r);
-            if crate::thermal::leaks(&t4) && stamp > held.last_touch {
-                let elapsed = ratio((stamp - held.last_touch) as i64, 1);
-                for resource in [Resource::Joule, Resource::Sink] {
-                    let banked = held.banked_amount(resource);
-                    if banked > ratio(0, 1) {
-                        let decay =
-                            (banked.clone() * crate::dop::demurrage_per_tick() * elapsed.clone())
-                                .min(banked);
-                        held.bank(resource, -decay.clone());
-                        self.chronicle.append(
-                            ClosureEvent::DemurrageSettled { orb_id, resource, amount: decay },
-                            stamp,
-                            vec![],
-                        );
-                    }
-                }
-            }
-        }
-        held.last_touch = stamp;
+        touch(held, self.star, &mut self.chronicle, stamp);
         // VENT-1: seal the pending vented entropy into the ledger.
         let mut vented = ratio(0, 1);
         self.vent_pending.retain(|(held_orb, pending)| match *held_orb == orb_id {
@@ -778,6 +761,120 @@ impl World {
         }
         self.relieve_recovered(orb);
         Ok(count)
+    }
+
+    /// Transfer banked value between two orbs as the sovereign.
+    pub fn transfer(
+        &mut self,
+        from: u64,
+        to: u64,
+        resource: Resource,
+        amount: Ratio,
+    ) -> Result<(), ActionRefused> {
+        self.transfer_as(SOVEREIGN, from, to, resource, amount)
+    }
+
+    /// TRADE-1 (09 §2.1) — move BANKED value orb-to-orb within the
+    /// world: the chartering conservation law generalized (nothing
+    /// minted, nothing lost). Both sides settle due demurrage at the
+    /// touch (the SINK-1 law) before value moves; affordability is
+    /// judged on the post-decay bank; the compassion books post iff
+    /// the counterparty stands in receipted, uncleared crisis at this
+    /// stamp — a replay fact, never a judgment call. Collect scope;
+    /// relief for the receiver re-checked at the landed law (02 §2.4).
+    pub fn transfer_as(
+        &mut self,
+        actor: u64,
+        from: u64,
+        to: u64,
+        resource: Resource,
+        amount: Ratio,
+    ) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Collect)?;
+        if self.orbs.is_empty() {
+            return Err(ActionRefused::NoColony);
+        }
+        if from == to || amount <= ratio(0, 1) {
+            return Err(ActionRefused::BadTransfer);
+        }
+        if !self.orbs.iter().any(|held| held.orb_id == from) {
+            return Err(ActionRefused::NoSuchOrb { orb: from });
+        }
+        if !self.orbs.iter().any(|held| held.orb_id == to) {
+            return Err(ActionRefused::NoSuchOrb { orb: to });
+        }
+        let stamp = self.clock.now();
+        let star = self.star;
+        // Affordability on the post-decay bank — the books honest at
+        // the stamp — computed pure, so a refusal orphans nothing.
+        {
+            let source = self
+                .orbs
+                .iter()
+                .find(|held| held.orb_id == from)
+                .expect("checked above");
+            let decay = demurrage_due(source, star, stamp)
+                .into_iter()
+                .find(|(due, _)| *due == resource)
+                .map(|(_, decay)| decay)
+                .unwrap_or_else(|| ratio(0, 1));
+            let have = source.banked_amount(resource) - decay;
+            if have < amount {
+                return Err(ActionRefused::CannotAfford {
+                    resource,
+                    need: Box::new(amount),
+                    have: Box::new(have),
+                });
+            }
+        }
+        // Crisis reads BEFORE the move — the replay-fact order.
+        let from_crisis = {
+            let held = self.orbs.iter().find(|held| held.orb_id == from).expect("checked");
+            !held.famine.is_empty() || held.overheat
+        };
+        let to_crisis = {
+            let held = self.orbs.iter().find(|held| held.orb_id == to).expect("checked");
+            !held.famine.is_empty() || held.overheat
+        };
+        // The touch, both sides (SINK-1), then the move.
+        for orb in [from, to] {
+            let held = self
+                .orbs
+                .iter_mut()
+                .find(|held| held.orb_id == orb)
+                .expect("checked above");
+            touch(held, star, &mut self.chronicle, stamp);
+        }
+        let value = amount.clone() * crate::dop::commensurate_weight(resource);
+        {
+            let source = self
+                .orbs
+                .iter_mut()
+                .find(|held| held.orb_id == from)
+                .expect("checked above");
+            source.bank(resource, -amount.clone());
+            if to_crisis {
+                source.given_in_crisis += value.clone();
+            }
+        }
+        {
+            let target = self
+                .orbs
+                .iter_mut()
+                .find(|held| held.orb_id == to)
+                .expect("checked above");
+            target.bank(resource, amount.clone());
+            if from_crisis {
+                target.drawn_in_crisis += value;
+            }
+        }
+        self.chronicle.append(
+            ClosureEvent::ResourceTransferred { from_orb: from, to_orb: to, resource, amount },
+            stamp,
+            vec![actor],
+        );
+        self.relieve_recovered(to);
+        Ok(())
     }
 
     /// The committed projection of the live world.
@@ -924,6 +1021,10 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             ClosureEvent::UpkeepSettled { orb_id, resource, amount } => {
                 if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
                     held.bank(*resource, -amount.clone());
+                    // TRADE-1 truth-update: every settle is a touch —
+                    // the demurrage anchor replays for upkeep-only
+                    // collects too, exactly as the live path set it.
+                    held.last_touch = receipt.stamp;
                 }
             }
             ClosureEvent::FamineStruck { orb_id, resource, drawn } => {
@@ -987,9 +1088,86 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     held.last_touch = receipt.stamp;
                 }
             }
+            // TRADE-1: the move replays with the SAME crisis reads the
+            // live path made — the compassion books are a replay fact.
+            ClosureEvent::ResourceTransferred { from_orb, to_orb, resource, amount } => {
+                let from_crisis = orbs
+                    .iter()
+                    .find(|held| held.orb_id == *from_orb)
+                    .map(|held| !held.famine.is_empty() || held.overheat)
+                    .unwrap_or(false);
+                let to_crisis = orbs
+                    .iter()
+                    .find(|held| held.orb_id == *to_orb)
+                    .map(|held| !held.famine.is_empty() || held.overheat)
+                    .unwrap_or(false);
+                let value = amount.clone() * crate::dop::commensurate_weight(*resource);
+                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *from_orb) {
+                    held.bank(*resource, -amount.clone());
+                    held.last_touch = receipt.stamp;
+                    if to_crisis {
+                        held.given_in_crisis += value.clone();
+                    }
+                }
+                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *to_orb) {
+                    held.bank(*resource, amount.clone());
+                    held.last_touch = receipt.stamp;
+                    if from_crisis {
+                        held.drawn_in_crisis += value;
+                    }
+                }
+            }
         }
     }
     Committed { orbs, entities, star }
+}
+
+/// SINK-1 (Q2): the demurrage due on one orb's un-vaulted banked
+/// joules/sink at `stamp` — computed PURE; the caller applies and
+/// receipts (so a refused action never orphans a settlement).
+fn demurrage_due(
+    orb: &ColonyOrb,
+    star: Option<crate::thermal::StarClass>,
+    stamp: u64,
+) -> Vec<(Resource, Ratio)> {
+    let mut due = Vec::new();
+    if let (Some(class), Some(site)) = (star, &orb.thermal) {
+        let t4 = crate::thermal::t_eq4(&class.luminosity(), &site.albedo, &site.orbit_r);
+        if crate::thermal::leaks(&t4) && stamp > orb.last_touch {
+            let elapsed = ratio((stamp - orb.last_touch) as i64, 1);
+            for resource in [Resource::Joule, Resource::Sink] {
+                let banked = orb.banked_amount(resource);
+                if banked > ratio(0, 1) {
+                    let decay = (banked.clone()
+                        * crate::dop::demurrage_per_tick()
+                        * elapsed.clone())
+                    .min(banked);
+                    due.push((resource, decay));
+                }
+            }
+        }
+    }
+    due
+}
+
+/// The touch law (SINK-1, extended by TRADE-1): settle an orb's due
+/// demurrage by receipt and anchor `last_touch` — decay or not, a
+/// touch anchors.
+fn touch(
+    orb: &mut ColonyOrb,
+    star: Option<crate::thermal::StarClass>,
+    chronicle: &mut Chronicle,
+    stamp: u64,
+) {
+    for (resource, decay) in demurrage_due(orb, star, stamp) {
+        orb.bank(resource, -decay.clone());
+        chronicle.append(
+            ClosureEvent::DemurrageSettled { orb_id: orb.orb_id, resource, amount: decay },
+            stamp,
+            vec![],
+        );
+    }
+    orb.last_touch = stamp;
 }
 
 fn triple_amount(ledger: &[(u64, Resource, Ratio)], orb: u64, resource: Resource) -> Ratio {

@@ -366,6 +366,76 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 ),
             }
         }
+        Some("send") => {
+            let value = words.next().and_then(parse_ratio_arg);
+            let resource = words.next().and_then(parse_resource);
+            let to_word = words.next();
+            let target_name = words.next().map(|word| word.to_string());
+            let source = match (words.next(), words.next()) {
+                (Some("from"), Some(planet)) => world
+                    .orbs()
+                    .iter()
+                    .find(|held| held.name == planet)
+                    .map(|held| held.orb_id),
+                _ => Some(*current),
+            };
+            match (value, resource, to_word, target_name) {
+                (Some(value), Some(resource), Some("to"), Some(planet)) => {
+                    let target = world
+                        .orbs()
+                        .iter()
+                        .find(|held| held.name == planet)
+                        .map(|held| held.orb_id);
+                    match (target, source) {
+                        (Some(target), Some(source)) => {
+                            let famined_before = world
+                                .orb_by_id(target)
+                                .map(|held| held.famine.clone())
+                                .unwrap_or_default();
+                            match world.transfer_as(SOVEREIGN, source, target, resource, value.clone()) {
+                                Ok(()) => {
+                                    println!(
+                                        "{} {} {} sent to {} — receipt sealed at stamp {}; the books of both planets balance",
+                                        style.ok("✓"),
+                                        style.strong(&amount(&value)),
+                                        resource_name(resource),
+                                        style.strong(&planet),
+                                        style.strong(&world.now().to_string())
+                                    );
+                                    let famined_after = world
+                                        .orb_by_id(target)
+                                        .map(|held| held.famine.clone())
+                                        .unwrap_or_default();
+                                    for relieved in famined_before
+                                        .iter()
+                                        .filter(|held| !famined_after.contains(held))
+                                    {
+                                        println!(
+                                            "{} famine on {} relieved — the gift covered the one-tick bill; its zones wake",
+                                            style.ok("☀"),
+                                            style.strong(&planet)
+                                        );
+                                        let _ = relieved;
+                                    }
+                                }
+                                Err(refusal) => refuse(world, &refusal, style),
+                            }
+                        }
+                        _ => println!(
+                            "{} unknown planet — {} lists them",
+                            style.bad("✗"),
+                            style.strong("planets")
+                        ),
+                    }
+                }
+                _ => println!(
+                    "{} usage: {} (exact fractions) — e.g. {}",
+                    style.bad("✗"),
+                    style.strong("send <amount> <resource> to <planet> [from <planet>]"),
+                    style.strong("send 5/2 joule to outpost")
+                ),
+            }
+        }
         Some("planets") => {
             for orb in world.orbs() {
                 let here = match orb.orb_id == *current {
@@ -514,6 +584,7 @@ fn help(style: &Style) {
         ("collect", "settle the workspace against the bank — sealed as receipts; only banked value persists"),
         ("raze <tile|r:c>", "demolish a zone for half its cost back — the famine escape hatch"),
         ("chart <planet> [from <p>]", "found a daughter colony: the founding reserves MOVE from the source colony (nothing is minted)"),
+        ("send <amt> <res> to <p> [from <p>]", "move banked value between planets — conservation exact; demurrage settles both sides at the touch; a gift covering the one-tick bill relieves famine"),
         ("save · resume <world>", "sync the chronicle to var/worlds/<name>/ (append-only) · resume a saved world at launch"),
         ("planet <name> · planets", "switch the planet cursor · list this world's planets"),
         ("agent <handle>", "register a contained agent (zero grants until you open scopes)"),
@@ -628,6 +699,18 @@ fn kind_name(kind: ZoneKind) -> &'static str {
         ZoneKind::Synthesizer => "synthesizer",
         ZoneKind::Encasement => "encasement",
         ZoneKind::CryoArray => "cryo-array",
+    }
+}
+
+fn parse_resource(word: &str) -> Option<Resource> {
+    match word.to_ascii_lowercase().as_str() {
+        "iron" => Some(Resource::Iron),
+        "biomass" | "bio" => Some(Resource::Biomass),
+        "alloy" => Some(Resource::Alloy),
+        "diamond" => Some(Resource::Diamond),
+        "joule" | "joules" => Some(Resource::Joule),
+        "sink" => Some(Resource::Sink),
+        _ => None,
     }
 }
 
@@ -837,6 +920,10 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "siting needs {} with 0 ≤ A < 1 and r > 0 — e.g. {}",
             style.strong("site <albedo> <r>"),
             style.strong("site 3/10 1")
+        ),
+        ActionRefused::BadTransfer => format!(
+            "a transfer moves a positive amount between two different planets — e.g. {}",
+            style.strong("send 5/2 iron to outpost")
         ),
     };
     println!("{} {text}", style.bad("✗"));
@@ -1136,6 +1223,13 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::DemurrageSettled { resource, amount: decay, .. } => format!(
                 "◌ demurrage settled: {} {} decayed un-vaulted",
                 style.strong(&amount(decay)),
+                resource_name(*resource)
+            ),
+            cfe::dop::ClosureEvent::ResourceTransferred {
+                from_orb, to_orb, resource, amount: moved,
+            } => format!(
+                "⇄ {} {} moved orb {from_orb} → orb {to_orb} — conservation holds",
+                style.strong(&amount(moved)),
                 resource_name(*resource)
             ),
         };

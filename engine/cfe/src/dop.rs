@@ -26,15 +26,16 @@
 //!   25 ClosureEvent::PlanetSited (THERMAL-1)
 //!   27 ClosureEvent::VentSettled (VENT-1)
 //!   29 ClosureEvent::DemurrageSettled (SINK-1)
+//!   30 ClosureEvent::ResourceTransferred (TRADE-1)
 //!   16 Orb header (orb_id ‖ name)
 //!   17 Orb zone entry (tile ‖ kind)
 //!   18 Orb banked entry (resource ‖ ratio)
 //!   19 Orb famine entry (resource)
 //!   26 Orb thermal entry (albedo ‖ orbit_r ‖ overheat u8) — THERMAL-1
 //!   28 Orb vent entry (entropy_vented ratio ‖ LE64 last_touch) — VENT-1/SINK-1
-//!   30–38 RESERVED for the ideology board (09, BUILD_ORDER §3:
-//!         TRADE-1 → ABSORB-1 → BOND-1 → COVENANT-1 → IDEO-1) — next
-//!         free tag for any OTHER landing is 39.
+//!   31–38 RESERVED for the ideology board (09, BUILD_ORDER §3:
+//!         ABSORB-1 → BOND-1 → COVENANT-1 → IDEO-1) — next free tag
+//!         for any OTHER landing is 39.
 
 use crate::ratio::{self, ratio, Ratio};
 use crate::tlv;
@@ -121,6 +122,13 @@ pub fn sink_throughput() -> Ratio {
 /// on un-vaulted BANKED joules/sink, settled by receipt at touch.
 pub fn demurrage_per_tick() -> Ratio {
     ratio(1, 32)
+}
+
+/// TRADE-1 (09 §1, placeholder): the joule-commensurable weight of a
+/// resource for cohesion-book postings — the commensuration table.
+/// Weight 1 for every resource in v1; tunes at balance time.
+pub fn commensurate_weight(_resource: Resource) -> Ratio {
+    ratio(1, 1)
 }
 
 /// The zone kinds, with their ruleset-v1 economics.
@@ -285,6 +293,12 @@ pub enum ClosureEvent {
     /// SINK-1 (Q2) — receipted demurrage: un-vaulted banked stores
     /// decayed since last touch; settled here, never silently.
     DemurrageSettled { orb_id: u64, resource: Resource, amount: Ratio },
+    /// TRADE-1 (09 §2.1) — BANKED value moved orb-to-orb within one
+    /// world: the chartering conservation law generalized (nothing
+    /// minted, nothing lost). The cohesion-book postings derive from
+    /// this receipt and the counterparty's receipted crisis state — a
+    /// replay fact, never a judgment call.
+    ResourceTransferred { from_orb: u64, to_orb: u64, resource: Resource, amount: Ratio },
 }
 
 impl ClosureEvent {
@@ -377,6 +391,13 @@ impl ClosureEvent {
             }
             Self::DemurrageSettled { orb_id, resource, amount } => {
                 tlv::put(29, &amount_layout(*orb_id, *resource, amount), &mut out);
+            }
+            Self::ResourceTransferred { from_orb, to_orb, resource, amount } => {
+                let mut value = from_orb.to_le_bytes().to_vec();
+                value.extend_from_slice(&to_orb.to_le_bytes());
+                value.push(*resource as u8);
+                ratio::encode(amount, &mut value);
+                tlv::put(30, &value, &mut out);
             }
         }
         out
@@ -474,6 +495,13 @@ impl ClosureEvent {
                 let (orb_id, resource, amount) = amount_fields(value)?;
                 Some(Self::DemurrageSettled { orb_id, resource, amount })
             }
+            30 => {
+                let from_orb = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let to_orb = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let resource = Resource::from_wire(*value.get(16)?)?;
+                let (amount, _) = ratio::decode(value.get(17..)?)?;
+                Some(Self::ResourceTransferred { from_orb, to_orb, resource, amount })
+            }
             _ => None,
         }
     }
@@ -527,6 +555,15 @@ pub struct ColonyOrb {
     pub entropy_vented: Ratio,
     /// SINK-1: the stamp of the last settle (demurrage anchor).
     pub last_touch: u64,
+    /// TRADE-1 (09 §2.1): the compassion books — cumulative
+    /// joule-commensurable value given TO counterparties standing in
+    /// receipted crisis, and drawn FROM them. Committed state rebuilt
+    /// from receipts alone on replay; wire encoding DEFERRED to
+    /// IDEO-1 (the reserved orb cohesion entry, tag 38 — recorded on
+    /// the board).
+    pub given_in_crisis: Ratio,
+    /// The entropic book of the pair (see `given_in_crisis`).
+    pub drawn_in_crisis: Ratio,
 }
 
 impl ColonyOrb {
