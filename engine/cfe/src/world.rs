@@ -42,14 +42,26 @@ pub enum ActionRefused {
     NoSuchOrb { orb: u64 },
     /// P1 — a planet name is unique within its world.
     PlanetNameTaken { name: String },
+    /// THERMAL-1 — one sun per world; it is already commissioned.
+    StarAlreadyCommissioned,
+    /// THERMAL-1 — siting an orbit needs a commissioned sun first.
+    NoStarCommissioned,
+    /// THERMAL-1 — the orb is already sited; an orbit does not move.
+    AlreadySited { orb: u64 },
+    /// THERMAL-1 — albedo must satisfy 0 ≤ A < 1, orbit r > 0.
+    BadSiting,
 }
 
-/// One tick's read: the clock walk, and any famines that struck
-/// (per orb).
+/// One tick's read: the clock walk, any famines that struck, and any
+/// overheat transitions (per orb).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TickOutcome {
     pub read: TickRead,
     pub struck: Vec<(u64, Resource)>,
+    /// THERMAL-1: orbs whose overflow went positive this tick.
+    pub overheat_struck: Vec<u64>,
+    /// THERMAL-1: orbs whose overflow returned to zero this tick.
+    pub overheat_cleared: Vec<u64>,
 }
 
 /// The committed projection — exactly what the chronicle grounds.
@@ -57,6 +69,8 @@ pub struct TickOutcome {
 pub struct Committed {
     pub orbs: Vec<ColonyOrb>,
     pub entities: Vec<Entity>,
+    /// THERMAL-1: the commissioned sun, if any.
+    pub star: Option<crate::thermal::StarClass>,
 }
 
 pub struct World {
@@ -65,6 +79,9 @@ pub struct World {
     chronicle: Chronicle,
     orbs: Vec<ColonyOrb>,
     entities: Vec<Entity>,
+    /// THERMAL-1: the container's sun (the world IS the star system,
+    /// NS-6 §6); ABSENT until commissioned — thermal stays dormant.
+    star: Option<crate::thermal::StarClass>,
     /// WORKSPACE, per orb: net flow since that orb's last collection —
     /// no receipt, no persistence, not committed.
     accrued: Vec<(u64, Resource, Ratio)>,
@@ -78,6 +95,7 @@ impl World {
             chronicle: Chronicle::new(),
             orbs: Vec::new(),
             entities: Vec::new(),
+            star: None,
             accrued: Vec::new(),
         }
     }
@@ -101,8 +119,64 @@ impl World {
             chronicle,
             orbs: committed.orbs,
             entities: committed.entities,
+            star: committed.star,
             accrued: Vec::new(),
         }
+    }
+
+    /// THERMAL-1: the commissioned sun.
+    pub fn star(&self) -> Option<crate::thermal::StarClass> {
+        self.star
+    }
+
+    /// THERMAL-1 — commission the container's sun (once per world): the
+    /// StarClass fixes L for every orbit (NS-6 §7).
+    pub fn commission_star(
+        &mut self,
+        class: crate::thermal::StarClass,
+    ) -> Result<(), ActionRefused> {
+        if self.star.is_some() {
+            return Err(ActionRefused::StarAlreadyCommissioned);
+        }
+        self.star = Some(class);
+        self.close(ClosureEvent::StarCommissioned { class: class as u8 }, SOVEREIGN);
+        Ok(())
+    }
+
+    /// THERMAL-1 — site an orb on its orbit (05 §1.1): albedo A and
+    /// radius r enter the master equation; thermal wakes for this orb.
+    pub fn site_planet(
+        &mut self,
+        orb: u64,
+        albedo: Ratio,
+        orbit_r: Ratio,
+    ) -> Result<(), ActionRefused> {
+        use crate::dop::ThermalSite;
+        if self.star.is_none() {
+            return Err(ActionRefused::NoStarCommissioned);
+        }
+        let zero = ratio(0, 1);
+        let one = ratio(1, 1);
+        if albedo < zero || albedo >= one || orbit_r <= zero {
+            return Err(ActionRefused::BadSiting);
+        }
+        let held = self
+            .orbs
+            .iter_mut()
+            .find(|held| held.orb_id == orb)
+            .ok_or(ActionRefused::NoSuchOrb { orb })?;
+        if held.thermal.is_some() {
+            return Err(ActionRefused::AlreadySited { orb });
+        }
+        held.thermal = Some(ThermalSite {
+            albedo: albedo.clone(),
+            orbit_r: orbit_r.clone(),
+        });
+        self.close(
+            ClosureEvent::PlanetSited { orb_id: orb, albedo, orbit_r },
+            SOVEREIGN,
+        );
+        Ok(())
     }
 
     pub fn now(&self) -> u64 {
@@ -399,10 +473,16 @@ impl World {
     }
 
     /// One simulation tick for the WHOLE world: every orb's active
-    /// zones net their flows into that orb's workspace; famine strikes
-    /// per orb; the one clock walks by quorum.
+    /// zones net their flows into that orb's workspace — through the
+    /// heat law where thermal is live (05 §1.2: encase first, only the
+    /// overflow vents, degrade by 1/(1+overflow)); famine strikes per
+    /// orb; the one clock walks by quorum.
     pub fn tick(&mut self) -> TickOutcome {
+        use crate::dop::{encasement_throughput, joule_leak_per_tick, radiator_base};
+        use crate::thermal;
         let mut struck = Vec::new();
+        let mut overheat_struck = Vec::new();
+        let mut overheat_cleared = Vec::new();
         let flows: Vec<(u64, Vec<Zone>)> = self
             .orbs
             .iter()
@@ -417,12 +497,100 @@ impl World {
                 )
             })
             .collect();
+        let one = ratio(1, 1);
+        let zero = ratio(0, 1);
+        let stamp_now = self.clock.now();
         for (orb_id, active) in &flows {
+            // THERMAL-1: the heat law, live only when the sun is
+            // commissioned AND this orb is sited (the opt-in guard).
+            let site = self
+                .orbs
+                .iter()
+                .find(|held| held.orb_id == *orb_id)
+                .and_then(|held| held.thermal.clone());
+            let mut efficiency = one.clone();
+            let mut t4: Option<Ratio> = None;
+            if let (Some(class), Some(site)) = (self.star, site) {
+                let t_eq4 = thermal::t_eq4(&class.luminosity(), &site.albedo, &site.orbit_r);
+                let stellar_load = t_eq4.clone() / thermal::thermal_k();
+                let factory: Ratio = active
+                    .iter()
+                    .fold(zero.clone(), |sum, zone| sum + zone.kind.factory_heat());
+                let heat_net = stellar_load + factory - radiator_base();
+                if heat_net > zero {
+                    // The syntropic arm FIRST (05 §1.2): shells encase
+                    // up to their throughput; joules accrue as yield.
+                    let shells = active
+                        .iter()
+                        .filter(|zone| zone.kind == ZoneKind::Encasement)
+                        .count() as i64;
+                    let throughput = encasement_throughput() * ratio(shells, 1);
+                    let encased = heat_net.clone().min(throughput);
+                    if encased > zero {
+                        accrue(&mut self.accrued, *orb_id, Resource::Joule, encased.clone());
+                    }
+                    // The entropic arm: only the overflow vents.
+                    let overflow = heat_net - encased;
+                    if overflow > zero {
+                        efficiency = one.clone() / (one.clone() + overflow.clone());
+                        let held = self
+                            .orbs
+                            .iter_mut()
+                            .find(|held| held.orb_id == *orb_id)
+                            .expect("orb exists");
+                        if !held.overheat {
+                            held.overheat = true;
+                            self.chronicle.append(
+                                ClosureEvent::OverheatStruck {
+                                    orb_id: *orb_id,
+                                    overflow,
+                                },
+                                stamp_now,
+                                vec![],
+                            );
+                            overheat_struck.push(*orb_id);
+                        }
+                    }
+                }
+                t4 = Some(t_eq4);
+            }
+            if efficiency == one {
+                let held = self
+                    .orbs
+                    .iter_mut()
+                    .find(|held| held.orb_id == *orb_id)
+                    .expect("orb exists");
+                if held.overheat {
+                    held.overheat = false;
+                    self.chronicle.append(
+                        ClosureEvent::OverheatCleared { orb_id: *orb_id },
+                        stamp_now,
+                        vec![],
+                    );
+                    overheat_cleared.push(*orb_id);
+                }
+            }
             for zone in active {
                 let (resource, amount) = zone.kind.yield_per_tick();
-                accrue(&mut self.accrued, *orb_id, resource, amount);
+                accrue(
+                    &mut self.accrued,
+                    *orb_id,
+                    resource,
+                    amount * efficiency.clone(),
+                );
                 for (resource, amount) in zone.kind.upkeep_per_tick() {
                     accrue(&mut self.accrued, *orb_id, resource, -amount);
+                }
+            }
+            // The cryo law (05 §1.2): accrued joules leak outside the
+            // vault (T⁴ > 100⁴), floored at zero; lossless in the cold.
+            if let Some(t4) = t4 {
+                if t4 > thermal::cryo_vault_max4() {
+                    let held_joules = triple_amount(&self.accrued, *orb_id, Resource::Joule);
+                    if held_joules > zero {
+                        let leak = held_joules.min(joule_leak_per_tick());
+                        accrue(&mut self.accrued, *orb_id, Resource::Joule, -leak);
+                    }
                 }
             }
         }
@@ -460,6 +628,8 @@ impl World {
         TickOutcome {
             read: self.clock.tick(&attestations),
             struck,
+            overheat_struck,
+            overheat_cleared,
         }
     }
 
@@ -530,6 +700,7 @@ impl World {
         Committed {
             orbs: self.orbs.clone(),
             entities: self.entities.clone(),
+            star: self.star,
         }
     }
 
@@ -580,6 +751,7 @@ impl Default for World {
 pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut orbs: Vec<ColonyOrb> = Vec::new();
     let mut entities: Vec<Entity> = Vec::new();
+    let mut star: Option<crate::thermal::StarClass> = None;
     for receipt in chronicle.receipts() {
         match &receipt.event {
             ClosureEvent::EntityRegistered { entity_id, principal, handle } => {
@@ -675,9 +847,31 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             // CONVERGE-1 (07 §1): a universe-ledger event — it never
             // enters a world chronicle, and world replay ignores it.
             ClosureEvent::EraAnnexed { .. } => {}
+            // THERMAL-1 replay arms.
+            ClosureEvent::StarCommissioned { class } => {
+                star = crate::thermal::StarClass::from_wire(*class);
+            }
+            ClosureEvent::PlanetSited { orb_id, albedo, orbit_r } => {
+                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                    held.thermal = Some(crate::dop::ThermalSite {
+                        albedo: albedo.clone(),
+                        orbit_r: orbit_r.clone(),
+                    });
+                }
+            }
+            ClosureEvent::OverheatStruck { orb_id, .. } => {
+                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                    held.overheat = true;
+                }
+            }
+            ClosureEvent::OverheatCleared { orb_id } => {
+                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                    held.overheat = false;
+                }
+            }
         }
     }
-    Committed { orbs, entities }
+    Committed { orbs, entities, star }
 }
 
 fn triple_amount(ledger: &[(u64, Resource, Ratio)], orb: u64, resource: Resource) -> Ratio {

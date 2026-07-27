@@ -419,6 +419,7 @@ fn resource_name(r: cfe::dop::Resource) -> &'static str {
         cfe::dop::Resource::Biomass => "biomass",
         cfe::dop::Resource::Alloy => "alloy",
         cfe::dop::Resource::Diamond => "diamond",
+        cfe::dop::Resource::Joule => "joule",
     }
 }
 
@@ -428,6 +429,7 @@ fn zone_name(k: cfe::dop::ZoneKind) -> &'static str {
         cfe::dop::ZoneKind::Habitat => "habitat",
         cfe::dop::ZoneKind::Smelter => "smelter",
         cfe::dop::ZoneKind::Synthesizer => "synthesizer",
+        cfe::dop::ZoneKind::Encasement => "encasement",
     }
 }
 
@@ -533,6 +535,15 @@ fn render_receipt(receipt: &Receipt) -> String {
         E::EraAnnexed { era, world, offset, .. } => (
             "era_annexed",
             format!("{world} of {era} at offset {offset}"),
+        ),
+        E::OverheatStruck { overflow, .. } => {
+            ("overheat_struck", format!("overflow {}", ratio_str(overflow)))
+        }
+        E::OverheatCleared { .. } => ("overheat_cleared", String::new()),
+        E::StarCommissioned { class } => ("star_commissioned", format!("class {class}")),
+        E::PlanetSited { orb_id, albedo, orbit_r } => (
+            "planet_sited",
+            format!("orb {orb_id} A={} r={}", ratio_str(albedo), ratio_str(orbit_r)),
         ),
     };
     w.field_str("event", name);

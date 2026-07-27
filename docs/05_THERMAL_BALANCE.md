@@ -86,7 +86,7 @@ This is an engine-wide arithmetic law (all circular/spherical geometry), not a
 thermal-only rule; it is stated here because the thermal equation is its first
 consumer.
 
-### 1.2 The net-heat ledger
+### 1.2 The net-heat ledger — entropic arm AND syntropic arm
 
 Where local industry adds heat on top of stellar flux:
 
@@ -94,9 +94,37 @@ Where local industry adds heat on top of stellar flux:
     Heat_Net = Stellar Radiation + Factory Heat − Radiator Capacity
 ```
 
-If `Heat_Net > 0`: manufacturing efficiency drops, structural integrity
-decays, and habitats suffer catastrophic venting. All three terms are exact
-rationals per tick; the ledger accrues like yield (no float, no drift).
+All terms are exact rationals per tick; the ledger accrues like yield (no
+float, no drift).
+
+**The linear (entropic-only) reading is refused (operator ruling
+2026-07-27).** A design in which every excess joule vents to the void
+discards the residual — against the house law that the residual is
+structured information, measured and kept. The complete loop has two arms:
+
+- **The syntropic arm — ENCASEMENT (first):** excess heat is captured into
+  ordered store before anything vents. Each tick,
+  `encased = min(Heat_Net, encasement throughput)` accrues as **joules** —
+  the commodity money of `01_ECONOMY.md` §6.1, whose supply law ("governed
+  strictly by sector thermal balance") this mechanic makes literal.
+  Encasement is provided by encasement shells (a zone kind), the harvest
+  architecture of §3.1 at colony scale.
+- **The entropic arm — VENT (only the overflow):**
+  `overflow = Heat_Net − encased`. Only when `overflow > 0` does the sector
+  overheat: every yield that tick degrades by the exact factor
+  `1 / (1 + overflow)`, and the transition chronicles (OverheatStruck on
+  entering, OverheatCleared on leaving — the famine strike/relief shape).
+  The void is the failure mode, never the design.
+
+**The cryo law — the Frost is the bank:** accrued (uncollected) joules
+*leak* `1/8` per tick, floored at zero (the D3 spoilage precedent) — EXCEPT
+where `T_eq⁴ ≤ 100⁴ K⁴` (the cryogenic band and colder), where the store
+holds **lossless**: the coherence-vault physics of the Coherent
+(`06` §1.4). Banked (collected, receipted) joules are canonical everywhere.
+Consequence: the Furnace **mints**, the Frost **banks**, and the thermal
+trade loop (§4) closes into a circuit — mint → encase → ship cold-ward →
+vault — with entropy-to-void the only true loss. This two-armed closure is
+the **syntropic encasement**; cryo is its pole, not the cold end of a line.
 
 ### 1.3 Extreme stellar sources — the Luminal White Hole
 

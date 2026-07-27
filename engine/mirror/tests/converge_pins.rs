@@ -50,7 +50,7 @@ fn looped_world(colony: &str, ticks: u32) -> World {
 }
 
 /// Mirror one world into an era root, returning its terminal stamp.
-fn archive(era_root: &PathBuf, world_name: &str, world: &World) -> u64 {
+fn archive(era_root: &std::path::Path, world_name: &str, world: &World) -> u64 {
     let mirror = Mirror::at(era_root.join("worlds"));
     mirror
         .record(world_name, "prime", "pin-civ", world)

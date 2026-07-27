@@ -15,6 +15,7 @@ fn an_orb() -> ColonyOrb {
         ],
         banked: Vec::new(),
         famine: vec![Resource::Biomass],
+        ..ColonyOrb::default()
     };
     orb.bank(Resource::Iron, ratio(6, 1));
     orb.bank(Resource::Biomass, ratio(1, 1));

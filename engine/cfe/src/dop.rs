@@ -20,10 +20,15 @@
 //!   12 ClosureEvent::ScopeRevoked (N3)
 //!   13 ClosureEvent::ColonyCharted (P1)
 //!   21 ClosureEvent::EraAnnexed (CONVERGE-1 — universe ledger only)
+//!   22 ClosureEvent::OverheatStruck (THERMAL-1)
+//!   23 ClosureEvent::OverheatCleared (THERMAL-1)
+//!   24 ClosureEvent::StarCommissioned (THERMAL-1)
+//!   25 ClosureEvent::PlanetSited (THERMAL-1)
 //!   16 Orb header (orb_id ‖ name)
 //!   17 Orb zone entry (tile ‖ kind)
 //!   18 Orb banked entry (resource ‖ ratio)
 //!   19 Orb famine entry (resource)
+//!   26 Orb thermal entry (albedo ‖ orbit_r ‖ overheat u8) — THERMAL-1
 
 use crate::ratio::{self, ratio, Ratio};
 use crate::tlv;
@@ -38,6 +43,9 @@ pub enum Resource {
     Alloy = 3,
     /// D2 (02 §5): the ultra-refined tier — dense, trade-worthy.
     Diamond = 4,
+    /// THERMAL-1 (05 §1.2): the commodity joule — minted ONLY by
+    /// syntropic encasement of excess heat, never by fiat (01 §6.1).
+    Joule = 5,
 }
 
 impl Resource {
@@ -47,11 +55,18 @@ impl Resource {
             2 => Some(Self::Biomass),
             3 => Some(Self::Alloy),
             4 => Some(Self::Diamond),
+            5 => Some(Self::Joule),
             _ => None,
         }
     }
 
-    pub const ALL: [Resource; 4] = [Self::Iron, Self::Biomass, Self::Alloy, Self::Diamond];
+    pub const ALL: [Resource; 5] = [
+        Self::Iron,
+        Self::Biomass,
+        Self::Alloy,
+        Self::Diamond,
+        Self::Joule,
+    ];
 }
 
 /// Founding banks the bootstrap reserves (02 §2.1): 20 iron, 10 biomass.
@@ -60,6 +75,23 @@ pub fn founding_reserves() -> Vec<(Resource, Ratio)> {
         (Resource::Iron, ratio(20, 1)),
         (Resource::Biomass, ratio(10, 1)),
     ]
+}
+
+/// THERMAL-1 (05 §1.2, placeholder): joules one active encasement
+/// shell can capture per tick.
+pub fn encasement_throughput() -> Ratio {
+    ratio(2, 1)
+}
+
+/// THERMAL-1 (05 §1.2, placeholder): the orb's base radiator capacity.
+pub fn radiator_base() -> Ratio {
+    ratio(2, 1)
+}
+
+/// THERMAL-1 (05 §1.2, placeholder): the per-tick leak on ACCRUED
+/// joules outside the cryo vault — the D3 spoilage shape.
+pub fn joule_leak_per_tick() -> Ratio {
+    ratio(1, 8)
 }
 
 /// The zone kinds, with their ruleset-v1 economics.
@@ -72,6 +104,10 @@ pub enum ZoneKind {
     /// OUTPUT — conversion is a net flow like every other flow.
     Smelter = 3,
     Synthesizer = 4,
+    /// THERMAL-1 (05 §1.2): the syntropic shell — captures excess heat
+    /// into joules BEFORE anything vents. Its "yield" is computed by
+    /// the heat law at tick time, never by `yield_per_tick`.
+    Encasement = 5,
 }
 
 impl ZoneKind {
@@ -81,6 +117,7 @@ impl ZoneKind {
             2 => Some(Self::Habitat),
             3 => Some(Self::Smelter),
             4 => Some(Self::Synthesizer),
+            5 => Some(Self::Encasement),
             _ => None,
         }
     }
@@ -98,16 +135,20 @@ impl ZoneKind {
                 (Resource::Alloy, ratio(20, 1)),
                 (Resource::Biomass, ratio(15, 1)),
             ],
+            Self::Encasement => vec![(Resource::Iron, ratio(8, 1))],
         }
     }
 
-    /// The exact yield rate — a ratio, never a float (RFA).
+    /// The exact yield rate — a ratio, never a float (RFA). The
+    /// encasement shell's joules come from the heat law (05 §1.2), not
+    /// from here: its listed rate is zero.
     pub fn yield_per_tick(&self) -> (Resource, Ratio) {
         match self {
             Self::Extractor => (Resource::Iron, ratio(3, 2)),
             Self::Habitat => (Resource::Biomass, ratio(1, 1)),
             Self::Smelter => (Resource::Alloy, ratio(1, 1)),
             Self::Synthesizer => (Resource::Diamond, ratio(1, 4)),
+            Self::Encasement => (Resource::Joule, ratio(0, 1)),
         }
     }
 
@@ -125,6 +166,18 @@ impl ZoneKind {
                 (Resource::Alloy, ratio(4, 1)),
                 (Resource::Biomass, ratio(1, 1)),
             ],
+            Self::Encasement => vec![(Resource::Iron, ratio(1, 4))],
+        }
+    }
+
+    /// THERMAL-1 (05 §1.2): each zone's per-tick heat contribution to
+    /// the net-heat ledger (placeholder parameters — converters run
+    /// hot, the shell itself adds nothing).
+    pub fn factory_heat(&self) -> Ratio {
+        match self {
+            Self::Extractor | Self::Habitat => ratio(1, 4),
+            Self::Smelter | Self::Synthesizer => ratio(1, 1),
+            Self::Encasement => ratio(0, 1),
         }
     }
 
@@ -176,6 +229,18 @@ pub enum ClosureEvent {
     /// Lives ONLY in the universe ledger (`convergence.tlv`), never in
     /// a world chronicle; world replay ignores it.
     EraAnnexed { era: String, world: String, terminal: [u8; 32], offset: u64 },
+    /// THERMAL-1 (05 §1.2) — overflow exceeded encasement: the sector
+    /// overheats; yields degrade by 1/(1+overflow) until cleared.
+    /// World-driven (no entity forged it), the famine-strike shape.
+    OverheatStruck { orb_id: u64, overflow: Ratio },
+    /// THERMAL-1 — the overflow returned to zero; yields recover.
+    OverheatCleared { orb_id: u64 },
+    /// THERMAL-1 (NS-6 §7) — the container's sun commissioned with its
+    /// StarClass wire code. Once per world; fixes every orbit's L.
+    StarCommissioned { class: u8 },
+    /// THERMAL-1 (05 §1.1) — a colony sited on its orbit: albedo A and
+    /// orbit radius r, the orb's terms in the master equation.
+    PlanetSited { orb_id: u64, albedo: Ratio, orbit_r: Ratio },
 }
 
 impl ClosureEvent {
@@ -243,6 +308,23 @@ impl ClosureEvent {
                 value.extend_from_slice(era.as_bytes());
                 value.extend_from_slice(world.as_bytes());
                 tlv::put(21, &value, &mut out);
+            }
+            Self::OverheatStruck { orb_id, overflow } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                ratio::encode(overflow, &mut value);
+                tlv::put(22, &value, &mut out);
+            }
+            Self::OverheatCleared { orb_id } => {
+                tlv::put(23, &orb_id.to_le_bytes(), &mut out);
+            }
+            Self::StarCommissioned { class } => {
+                tlv::put(24, &[*class], &mut out);
+            }
+            Self::PlanetSited { orb_id, albedo, orbit_r } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                ratio::encode(albedo, &mut value);
+                ratio::encode(orbit_r, &mut value);
+                tlv::put(25, &value, &mut out);
             }
         }
         out
@@ -315,6 +397,22 @@ impl ClosureEvent {
                 let world = String::from_utf8(value.get(42 + era_len..)?.to_vec()).ok()?;
                 Some(Self::EraAnnexed { era, world, terminal, offset })
             }
+            22 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let (overflow, _) = ratio::decode(value.get(8..)?)?;
+                Some(Self::OverheatStruck { orb_id, overflow })
+            }
+            23 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                Some(Self::OverheatCleared { orb_id })
+            }
+            24 => Some(Self::StarCommissioned { class: *value.first()? }),
+            25 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let (albedo, used) = ratio::decode(value.get(8..)?)?;
+                let (orbit_r, _) = ratio::decode(value.get(8 + used..)?)?;
+                Some(Self::PlanetSited { orb_id, albedo, orbit_r })
+            }
             _ => None,
         }
     }
@@ -335,6 +433,15 @@ fn amount_fields(value: &[u8]) -> Option<(u64, Resource, Ratio)> {
     Some((orb_id, resource, amount))
 }
 
+/// THERMAL-1 (05 §1.1): a colony's terms in the master equation.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ThermalSite {
+    /// Albedo A, 0 ≤ A < 1.
+    pub albedo: Ratio,
+    /// Orbit radius r > 0, in the star's units.
+    pub orbit_r: Ratio,
+}
+
 /// The colony orb — COMMITTED state only. Unreceipted accrual is
 /// workspace (it lives on the world, not the orb) and never encodes:
 /// what has no receipt does not persist.
@@ -350,6 +457,11 @@ pub struct ColonyOrb {
     /// Resources under famine, ascending — zones consuming these are
     /// DORMANT (no yield, no drain).
     pub famine: Vec<Resource>,
+    /// THERMAL-1: the orbit siting; ABSENT until `PlanetSited` — an
+    /// unsited orb is thermally dormant (the opt-in guard).
+    pub thermal: Option<ThermalSite>,
+    /// THERMAL-1: currently overheating (overflow > 0)?
+    pub overheat: bool,
 }
 
 impl ColonyOrb {
@@ -372,6 +484,13 @@ impl ColonyOrb {
         }
         for resource in &self.famine {
             tlv::put(19, &[*resource as u8], &mut out);
+        }
+        if let Some(site) = &self.thermal {
+            let mut value = Vec::new();
+            ratio::encode(&site.albedo, &mut value);
+            ratio::encode(&site.orbit_r, &mut value);
+            value.push(self.overheat as u8);
+            tlv::put(26, &value, &mut out);
         }
         out
     }
@@ -399,6 +518,12 @@ impl ColonyOrb {
                 }
                 19 => {
                     orb.famine.push(Resource::from_wire(*value.first()?)?);
+                }
+                26 => {
+                    let (albedo, used) = ratio::decode(value)?;
+                    let (orbit_r, used_r) = ratio::decode(value.get(used..)?)?;
+                    orb.thermal = Some(ThermalSite { albedo, orbit_r });
+                    orb.overheat = *value.get(used + used_r)? != 0;
                 }
                 _ => {}
             }

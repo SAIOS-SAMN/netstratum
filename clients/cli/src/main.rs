@@ -142,6 +142,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 Some("hab") | Some("habitat") => Some(ZoneKind::Habitat),
                 Some("smelt") | Some("smelter") => Some(ZoneKind::Smelter),
                 Some("synth") | Some("synthesizer") => Some(ZoneKind::Synthesizer),
+                Some("enc") | Some("encasement") => Some(ZoneKind::Encasement),
                 _ => None,
             };
             match (tile, kind) {
@@ -174,6 +175,45 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 ),
             }
         }
+        Some("star") => match words.next().map(parse_star) {
+            Some(Some(class)) => match world.commission_star(class) {
+                Ok(()) => println!(
+                    "{} sun commissioned: {} (L = {}) — site your planets: {}",
+                    style.ok("✓"),
+                    style.strong(star_name(class as u8)),
+                    amount(&class.luminosity()),
+                    style.strong("site <albedo> <r>")
+                ),
+                Err(refusal) => refuse(world, &refusal, style),
+            },
+            _ => println!(
+                "{} usage: {} — classes: O B A F G K M · bd wd rg ns wr lwh",
+                style.bad("✗"),
+                style.strong("star <class>")
+            ),
+        },
+        Some("site") => {
+            let albedo = words.next().and_then(parse_ratio_arg);
+            let orbit_r = words.next().and_then(parse_ratio_arg);
+            match (albedo, orbit_r) {
+                (Some(albedo), Some(orbit_r)) => {
+                    match world.site_planet(*current, albedo, orbit_r) {
+                        Ok(()) => {
+                            thermal_line(world, style, *current);
+                            println!("{} orbit sited — thermal is live for this planet", style.ok("✓"));
+                        }
+                        Err(refusal) => refuse(world, &refusal, style),
+                    }
+                }
+                _ => println!(
+                    "{} usage: {} (exact fractions) — e.g. {}",
+                    style.bad("✗"),
+                    style.strong("site <albedo> <r>"),
+                    style.strong("site 3/10 1")
+                ),
+            }
+        }
+        Some("thermal") => thermal_line(world, style, *current),
         Some("tick") => {
             let count = words
                 .next()
@@ -467,7 +507,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
 fn help(style: &Style) {
     let lines = [
         ("found <name>", "establish your colony (banks 20 iron + 10 biomass) — your first receipt"),
-        ("zone <tile|r:c> <kind>", "build — ext: 10 iron → +3/2 iron/t · hab: 5 bio → +1 bio/t · smelt: 15 iron+10 bio → 2 iron+1/2 bio in, +1 alloy/t · synth: 20 alloy+15 bio → 4 alloy+1 bio in, +1/4 diamond/t"),
+        ("zone <tile|r:c> <kind>", "build — ext: 10 iron → +3/2 iron/t · hab: 5 bio → +1 bio/t · smelt: 15 iron+10 bio → 2 iron+1/2 bio in, +1 alloy/t · synth: 20 alloy+15 bio → 4 alloy+1 bio in, +1/4 diamond/t · enc: 8 iron → encases excess heat as joules"),
         ("tick <n>", "let n ticks pass — active zones net yield−upkeep into the workspace; famine strikes if a store runs dry"),
         ("collect", "settle the workspace against the bank — sealed as receipts; only banked value persists"),
         ("raze <tile|r:c>", "demolish a zone for half its cost back — the famine escape hatch"),
@@ -478,6 +518,9 @@ fn help(style: &Style) {
         ("grant|revoke <handle> <scope>", "open or shut an agent's scope: build, raze, collect — revocation is immediate"),
         ("as <handle> <cmd>", "act as an entity — its authority, its generation tag on the receipts"),
         ("who", "everyone in this world: sovereigns, agents, grants"),
+        ("star <class>", "commission the sun (once): O B A F G K M · bd wd rg ns wr lwh — fixes L for every orbit"),
+        ("site <albedo> <r>", "site this planet's orbit (exact fractions) — thermal wakes: encase first, only overflow vents"),
+        ("thermal", "the thermal read: T_eq⁴, band, overheat, encased joules"),
         ("map", "the tile grid"),
         ("status", "colony, ledgers, clock, receipts"),
         ("chronicle", "the world's full receipted history"),
@@ -580,6 +623,109 @@ fn kind_name(kind: ZoneKind) -> &'static str {
         ZoneKind::Habitat => "habitat",
         ZoneKind::Smelter => "smelter",
         ZoneKind::Synthesizer => "synthesizer",
+        ZoneKind::Encasement => "encasement",
+    }
+}
+
+fn parse_star(word: &str) -> Option<cfe::thermal::StarClass> {
+    use cfe::thermal::StarClass as S;
+    match word.to_ascii_lowercase().as_str() {
+        "o" => Some(S::O),
+        "b" => Some(S::B),
+        "a" => Some(S::A),
+        "f" => Some(S::F),
+        "g" => Some(S::G),
+        "k" => Some(S::K),
+        "m" => Some(S::M),
+        "bd" => Some(S::BrownDwarf),
+        "wd" => Some(S::WhiteDwarf),
+        "rg" => Some(S::RedGiant),
+        "ns" => Some(S::NeutronStar),
+        "wr" => Some(S::WolfRayet),
+        "lwh" => Some(S::LuminalWhiteHole),
+        _ => None,
+    }
+}
+
+fn star_name(class: u8) -> &'static str {
+    match cfe::thermal::StarClass::from_wire(class) {
+        Some(cfe::thermal::StarClass::O) => "class O (blue)",
+        Some(cfe::thermal::StarClass::B) => "class B (blue-white)",
+        Some(cfe::thermal::StarClass::A) => "class A (white)",
+        Some(cfe::thermal::StarClass::F) => "class F (yellow-white)",
+        Some(cfe::thermal::StarClass::G) => "class G (yellow, Sol-type)",
+        Some(cfe::thermal::StarClass::K) => "class K (orange)",
+        Some(cfe::thermal::StarClass::M) => "class M (red dwarf)",
+        Some(cfe::thermal::StarClass::BrownDwarf) => "brown dwarf",
+        Some(cfe::thermal::StarClass::WhiteDwarf) => "white dwarf",
+        Some(cfe::thermal::StarClass::RedGiant) => "red giant",
+        Some(cfe::thermal::StarClass::NeutronStar) => "neutron star",
+        Some(cfe::thermal::StarClass::WolfRayet) => "Wolf-Rayet",
+        Some(cfe::thermal::StarClass::LuminalWhiteHole) => "Luminal White Hole ✦",
+        None => "unknown class",
+    }
+}
+
+fn parse_ratio_arg(word: &str) -> Option<Ratio> {
+    use num_bigint::BigInt;
+    use std::str::FromStr;
+    let (n, d) = match word.split_once('/') {
+        Some((n, d)) => (n, d),
+        None => (word, "1"),
+    };
+    let denom = BigInt::from_str(d).ok()?;
+    if denom == BigInt::from(0) {
+        return None;
+    }
+    Some(Ratio::new(BigInt::from_str(n).ok()?, denom))
+}
+
+/// The thermal read for one orb (05 §1): T_eq⁴, band, the two arms.
+fn thermal_line(world: &World, style: &Style, current: u64) {
+    use cfe::thermal;
+    let Some(class) = world.star() else {
+        println!("{}", style.dim("(no sun — 'star <class>' commissions one)"));
+        return;
+    };
+    let Some(orb) = world.orb_by_id(current) else {
+        println!("{}", style.dim("(no colony yet)"));
+        return;
+    };
+    println!(
+        "{}  sun {}",
+        style.head("THERMAL"),
+        style.strong(star_name(class as u8))
+    );
+    let Some(site) = &orb.thermal else {
+        println!("{}", style.dim("  (this planet is unsited — 'site <albedo> <r>')"));
+        return;
+    };
+    let t4 = thermal::t_eq4(&class.luminosity(), &site.albedo, &site.orbit_r);
+    let band = match thermal::band_of(&t4) {
+        Some(thermal::SubstrateBand::Cryogenic) => "CRYOGENIC (the vault: lossless joule store)",
+        Some(thermal::SubstrateBand::Mesic) => "MESIC (near-zero life-support overhead)",
+        Some(thermal::SubstrateBand::HyperThermal) => "HYPER-THERMAL (Furnace-grade)",
+        None => match t4 <= thermal::cryo_vault_max4() {
+            true => "below every band — deep Frost (lossless vault)",
+            false => "between/above bands — no substrate holds equilibrium",
+        },
+    };
+    println!(
+        "  T_eq⁴ {} · band: {} · overheat: {}",
+        style.strong(&amount(&t4)),
+        band,
+        match orb.overheat {
+            true => style.bad("YES — overflow venting"),
+            false => style.ok("no"),
+        }
+    );
+    let joules = world
+        .accrued_of(current)
+        .into_iter()
+        .find(|(resource, _)| *resource == Resource::Joule)
+        .map(|(_, amount)| amount);
+    if let Some(value) = joules {
+        println!("  accrued joules {} (encased, uncollected)", style.strong(&amount(&value)));
     }
 }
 
@@ -589,6 +735,7 @@ fn resource_name(resource: Resource) -> &'static str {
         Resource::Biomass => "biomass",
         Resource::Alloy => "alloy",
         Resource::Diamond => "diamond",
+        Resource::Joule => "joule",
     }
 }
 
@@ -669,6 +816,23 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "a planet named {} already turns in this world — planet names are unique here",
             style.strong(name)
         ),
+        ActionRefused::StarAlreadyCommissioned => format!(
+            "this world's sun is already commissioned — one star per world (NS-6 §6); {} shows it",
+            style.strong("status")
+        ),
+        ActionRefused::NoStarCommissioned => format!(
+            "no sun yet — commission one first: {} (O B A F G K M · bd wd rg ns wr lwh)",
+            style.strong("star <class>")
+        ),
+        ActionRefused::AlreadySited { orb } => format!(
+            "orb {} is already sited — an orbit does not move",
+            style.strong(&orb.to_string())
+        ),
+        ActionRefused::BadSiting => format!(
+            "siting needs {} with 0 ≤ A < 1 and r > 0 — e.g. {}",
+            style.strong("site <albedo> <r>"),
+            style.strong("site 3/10 1")
+        ),
     };
     println!("{} {text}", style.bad("✗"));
 }
@@ -681,7 +845,7 @@ fn map(world: &World, style: &Style, current: u64) {
     println!(
         "{}  {}",
         style.head("MAP"),
-        style.dim("E extractor · H habitat · S smelter · Y synthesizer · lowercase = dormant · · empty")
+        style.dim("E extractor · H habitat · S smelter · Y synthesizer · C encasement · lowercase = dormant · · empty")
     );
     print!("     ");
     for col in 0..GRID {
@@ -699,12 +863,14 @@ fn map(world: &World, style: &Style, current: u64) {
                     ZoneKind::Habitat => "h",
                     ZoneKind::Smelter => "s",
                     ZoneKind::Synthesizer => "y",
+                    ZoneKind::Encasement => "c",
                 }),
                 Some(zone) => match zone.kind {
                     ZoneKind::Extractor => style.ok("E"),
                     ZoneKind::Habitat => style.head("H"),
                     ZoneKind::Smelter => style.warn("S"),
                     ZoneKind::Synthesizer => style.prompt("Y"),
+                    ZoneKind::Encasement => style.warn("C"),
                 },
                 None => style.dim("·"),
             };
@@ -870,6 +1036,23 @@ fn chronicle(world: &World, style: &Style) {
                 "✦ era {} world {} annexed at epoch offset {offset}",
                 style.dim(era),
                 style.strong(world)
+            ),
+            cfe::dop::ClosureEvent::OverheatStruck { overflow, .. } => format!(
+                "♨ OVERHEAT — overflow {} past encasement; yields degrade 1/(1+overflow)",
+                style.strong(&amount(overflow))
+            ),
+            cfe::dop::ClosureEvent::OverheatCleared { .. } => {
+                "❄ overheat cleared — flows recover whole".to_string()
+            }
+            cfe::dop::ClosureEvent::StarCommissioned { class } => format!(
+                "☀ sun commissioned — {}",
+                style.strong(star_name(*class))
+            ),
+            cfe::dop::ClosureEvent::PlanetSited { orb_id, albedo, orbit_r } => format!(
+                "◍ orb {} sited — albedo {} at orbit r {}",
+                style.strong(&orb_id.to_string()),
+                amount(albedo),
+                amount(orbit_r)
             ),
         };
         let tag = receipt

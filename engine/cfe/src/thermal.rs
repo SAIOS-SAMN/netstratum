@@ -58,6 +58,18 @@ impl SubstrateBand {
     }
 }
 
+/// THERMAL-1, the cryo law (05 §1.2): at or below this `T⁴` the store
+/// is a lossless vault — the cryogenic band's ceiling, `100⁴ K⁴`.
+pub fn cryo_vault_max4() -> Ratio {
+    SubstrateBand::Cryogenic.bounds4().1
+}
+
+/// Does an accrued joule store LEAK at this `T⁴`? False in the vault
+/// (cryo band and colder), true everywhere warmer (05 §1.2).
+pub fn leaks(t_eq4: &Ratio) -> bool {
+    *t_eq4 > cryo_vault_max4()
+}
+
 /// The band a `T_eq⁴` falls in, or `None` when it sits between/outside the
 /// known substrate bands (no known substrate holds equilibrium there).
 pub fn band_of(t_eq4: &Ratio) -> Option<SubstrateBand> {
@@ -76,27 +88,48 @@ pub fn band_of(t_eq4: &Ratio) -> Option<SubstrateBand> {
 
 /// The enumerator of known stars (NS-6 §7): each class fixes its sun's
 /// luminosity `L` (relative to Sol = 1), which drives every bound body's
-/// `T_eq⁴`. Values are placeholder parameters.
+/// `T_eq⁴`. Discriminants are the PERMANENT wire codes (NS-6 §7).
+/// Values are placeholder parameters.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u8)]
 pub enum StarClass {
     // Main sequence (Morgan–Keenan), hottest to coolest.
-    O,
-    B,
-    A,
-    F,
-    G,
-    K,
-    M,
+    O = 1,
+    B = 2,
+    A = 3,
+    F = 4,
+    G = 5,
+    K = 6,
+    M = 7,
     // Remnants, giants, and the lore exotic.
-    BrownDwarf,
-    WhiteDwarf,
-    RedGiant,
-    NeutronStar,
-    WolfRayet,
-    LuminalWhiteHole,
+    BrownDwarf = 8,
+    WhiteDwarf = 9,
+    RedGiant = 10,
+    NeutronStar = 11,
+    WolfRayet = 12,
+    LuminalWhiteHole = 13,
 }
 
 impl StarClass {
+    pub fn from_wire(code: u8) -> Option<Self> {
+        match code {
+            1 => Some(Self::O),
+            2 => Some(Self::B),
+            3 => Some(Self::A),
+            4 => Some(Self::F),
+            5 => Some(Self::G),
+            6 => Some(Self::K),
+            7 => Some(Self::M),
+            8 => Some(Self::BrownDwarf),
+            9 => Some(Self::WhiteDwarf),
+            10 => Some(Self::RedGiant),
+            11 => Some(Self::NeutronStar),
+            12 => Some(Self::WolfRayet),
+            13 => Some(Self::LuminalWhiteHole),
+            _ => None,
+        }
+    }
+
     /// Luminosity relative to Sol (exact rational placeholder).
     pub fn luminosity(self) -> Ratio {
         match self {

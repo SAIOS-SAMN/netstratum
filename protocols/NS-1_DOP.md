@@ -60,12 +60,18 @@ One tag, one meaning, forever; retired codes are never reused.
 | tag | meaning | value layout |
 |---|---|---|
 | 1 | event: ColonyFounded | LE64(orb_id) ‖ name utf8 |
-| 2 | event: ZoneBuilt | LE64(orb_id) ‖ LE16(tile) ‖ kind u8 (1 extractor, 2 habitat, 3 smelter [D2], 4 synthesizer [D2]) |
-| 3 | event: YieldCollected | LE64(orb_id) ‖ resource u8 (1 iron, 2 biomass, 3 alloy [D2], 4 diamond [D2]) ‖ ratio |
+| 2 | event: ZoneBuilt | LE64(orb_id) ‖ LE16(tile) ‖ kind u8 (1 extractor, 2 habitat, 3 smelter [D2], 4 synthesizer [D2], 5 encasement [THERMAL-1]) |
+| 3 | event: YieldCollected | LE64(orb_id) ‖ resource u8 (1 iron, 2 biomass, 3 alloy [D2], 4 diamond [D2], 5 joule [THERMAL-1]) ‖ ratio |
 | 4 | event: UpkeepSettled (D1) | LE64(orb_id) ‖ resource u8 ‖ ratio |
 | 5 | event: FamineStruck (D1) | LE64(orb_id) ‖ resource u8 ‖ ratio (drawn) |
 | 6 | event: FamineRelieved (D1) | LE64(orb_id) ‖ resource u8 |
 | 7 | event: ZoneRazed (D1) | LE64(orb_id) ‖ LE16(tile) |
+| 21 | event: EraAnnexed (CONVERGE-1 — universe ledger only) | LE64(offset) ‖ terminal[32] ‖ LE16(era len) ‖ era utf8 ‖ world utf8 |
+| 22 | event: OverheatStruck (THERMAL-1) | LE64(orb_id) ‖ ratio (overflow) |
+| 23 | event: OverheatCleared (THERMAL-1) | LE64(orb_id) |
+| 24 | event: StarCommissioned (THERMAL-1) | class u8 (NS-6 §7 codes) |
+| 25 | event: PlanetSited (THERMAL-1) | LE64(orb_id) ‖ ratio (albedo) ‖ ratio (orbit_r) |
+| 26 | orb: thermal entry (THERMAL-1) | ratio (albedo) ‖ ratio (orbit_r) ‖ overheat u8 |
 | 10 | event: EntityRegistered (N3) | LE64(entity_id) ‖ LE64(principal) ‖ handle utf8 |
 | 11 | event: ScopeGranted (N3) | LE64(agent) ‖ scope u8 |
 | 12 | event: ScopeRevoked (N3) | LE64(agent) ‖ scope u8 |

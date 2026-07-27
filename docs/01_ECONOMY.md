@@ -127,7 +127,10 @@ thermodynamic state variable `T_eq⁴`.
 - **Supply and minting:** energy (joules, tracked as exact rationals in
   the CFE chronicle) cannot be minted by fiat or player action; its total
   volume and local density are governed strictly by sector thermal balance
-  (`05_THERMAL_BALANCE.md` §1, §3).
+  (`05_THERMAL_BALANCE.md` §1, §3). The minting mechanism is **syntropic
+  encasement** (05 §1.2): joules enter the world only as excess stellar
+  and factory heat captured by encasement shells — the Furnace mints, the
+  Frost banks losslessly, warm stores leak.
 - **Thermal arbitrage:** the intrinsic price differential between
   energy-rich Furnace sectors and heat-sink Frost sectors is the core
   macro-economic trade loop and the fundamental monetary axis. Transporting

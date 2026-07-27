@@ -159,6 +159,29 @@ N5/N6). Details and sequencing in 04 §6.
   base 2151 = TUniversal `00:00:00:00:35:51`. Operator tool:
   `cargo run -p mirror --example converge_run -- <var-root>`.
 
+- **THERMAL-1 LANDED** (2026-07-27): THE MASTER EQUATION DRIVES THE WORLD —
+  with the syntropic encasement (05 §1.2, the operator's expansion ruling:
+  the linear entropic-only design refused). The sun commissions
+  (StarCommissioned, tag 24; NS-6 §7 StarClass codes fix L); planets site
+  their orbits (PlanetSited, tag 25: albedo + orbit r); the tick runs the
+  two-armed heat law in exact rationals: stellar load `T_eq⁴/K` + factory
+  heat − radiator, ENCASE FIRST (shells mint joules — Resource 5, zone
+  kind 5 — the 01 §6.1 commodity supply law made literal), only the
+  OVERFLOW vents (yields degrade 1/(1+overflow); OverheatStruck/Cleared,
+  tags 22–23, the famine-strike shape); accrued joules leak 1/8 outside
+  the cryo vault (T⁴ ≤ 100⁴ lossless — the Frost banks what the Furnace
+  mints). Opt-in by construction: no sun ⇒ the pre-thermal engine,
+  byte-identical. CLI: `star <class>` · `site <albedo> <r>` · `thermal` ·
+  `zone … enc`. Evidence: clippy zero; **111/111 workspace witnesses
+  green** (6 thermal: dormant-without-sun; mesic Sol runs clean at exact
+  5/4 iron; the furnace mints 15/8 joules/tick with overflow 1/2 venting
+  at exactly 2/3 efficiency, strike/clear chronicled once each; the vault
+  boundary flips at exactly 100⁴; typed refusals; replay MATCHES with
+  star+site+overheat and the orb round-trips byte-exact with tag 26).
+  Deferred honestly: cryo-side minting needs converter-scale factories a
+  founding colony cannot afford (a measured balance fact); thermal trade
+  routes and entropy rights await the economy landings.
+
 ## 2. The depth board (02_COLONY_LOOP — game depth before multiplayer)
 
 Ruled 2026-07-25: the world must be worth sharing before N6 shares it. These
