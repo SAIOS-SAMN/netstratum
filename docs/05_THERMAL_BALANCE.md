@@ -153,6 +153,63 @@ gravitational radius `r_g = 2GM/c²` that continuously ejects energy outward at
 *(A design energy-source, not an astrophysical claim about real white-hole
 stability.)*
 
+### 1.4 The sink dual — exporting cold, and the earned syntropic state
+
+**(Design stage — extends §1.2; lands with the VENT-1/ECON-J landing.)**
+
+**Exporting cold is exporting absorption capacity.** A dim-star system
+(`T_eq⁴ → 0`) holds the rarest resource in a high-flux universe: radiator
+headroom. It does not ship a negative substance — it sells **Banked Sink**
+(`S_cool`), the capacity to absorb heat, measured in the same joule-
+commensurable units as the energy side. Two export mechanisms:
+
+- **Physical:** cryogenic coolant cycles out; entropic (heated) fluid
+  returns; the cold system sheds the imported heat to the void through its
+  deep-space arrays and re-arms the coolant.
+- **Protocol:** radiator-headroom allocations — the thermal entropy rights
+  already inscribed (01 §6.2) — leased to Furnace sectors.
+
+**The symmetric ledger (the VENT-1 sheet, both sides):**
+
+| surplus side (heat) | deficit side (cold) |
+|---|---|
+| banked joules (captured syntropy) | banked sink (captured headroom) |
+| vented entropy (accumulated loss) | absorbed heat (imported waste) |
+
+**Conservation invariants (exact, witnessed at landing):** hot side:
+`encased + vented = total excess` (§1.2). Cold side: `heat_absorbed ≤
+banked_sink`, and `sink_consumed = heat_absorbed = vented_after_shed` —
+absorbing a neighbour's waste consumes sink and, once shed to the void,
+settles into the absorber's `entropy_vented` ledger. No fuzzy net: each
+side balances in its own books.
+
+**The earned-state law (operator ruling, 2026-07-27):** neither side is an
+environmental passive. Raw flux and raw void are worthless until a sector
+passes three gates, symmetric for energy and sink:
+
+1. **Research gate** — the capture capability unlocks (energy path and sink
+   path are separate unlocks). *Dependency: the research/milestone system —
+   the D3 milestone ladder is the current carrier; a full tech tree is its
+   own landing.* Ungated sectors lose 100% of excess to entropy.
+2. **Infrastructure gate** — the hard cap: structures (encasement shells /
+   cryo-lattice arrays) set max throughput per tick, exactly.
+3. **Throttle gate** — a policy coefficient `α ∈ [0,1]`, an exact rational
+   set per sector: `captured = α × raw excess`. The uncaptured `(1−α)`
+   accumulates into the vented ledger and settles as `VentSettled` at
+   collect — never un-receipted.
+
+**Symmetric decay (the §1.2 leak law, both sides):** ACCRUED stores leak
+outside their native band — joules leak when warm, sink leaks when
+irradiated without insulation. BANKED stores are canonical and never leak
+(landed law); vaulting either side in a Glasskeeper escrow node (01 §7)
+holds it lossless long-term.
+
+**The trade equilibrium:** the price ratio `S_cool / J` is the natural
+exchange rate of the Furnace↔Frost axis — energy cheap where sink is
+priceless, sink abundant where energy is scarce (ECON-J heating upkeep).
+Cold systems import joules to live; in exchange they absorb the thermal
+death of the Furnace. Placeholder pricing; tunes at balance.
+
 ---
 
 ## 2. Terminology ruling: no "Goldilocks"

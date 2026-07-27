@@ -236,3 +236,26 @@ remain bound by §5 guardrail 6: no treaty may hand one party *absolute* toll
 power over another's only route — a squeezed party always keeps a lawful,
 costlier alternative. Escrow enforces agreements; it does not manufacture
 inescapable monopolies.
+
+## 8. Coolant arbitrage & sink capacity export (design stage)
+
+The cold half of the thermal axis, dual to §6.1's joule minting — physics
+inscribed at `05_THERMAL_BALANCE.md` §1.4; lands with the VENT-1/ECON-J
+landing.
+
+- **The commodity:** a dim-star system's export is **Banked Sink**
+  (`S_cool`) — heat-absorption capacity in joule-commensurable units —
+  shipped physically (coolant out, entropic fluid back, re-armed against
+  the void) or leased as the §6.2 thermal entropy rights.
+- **The books balance per side (05 §1.4):** importing joules increments
+  banked joules; absorbing a neighbour's waste consumes banked sink and,
+  once shed to the void, settles into the absorber's `entropy_vented`
+  ledger (`VentSettled`, collect-settled — nothing un-receipted).
+- **Earned, never passive (05 §1.4):** both captures gate through
+  research → infrastructure → throttle `α ∈ [0,1]`; the uncaptured
+  `(1−α)` settles as vented loss. Guardrails 1 and 6 hold: no gate is
+  pay-to-win and no sink monopoly may be absolute.
+- **The equilibrium:** the `S_cool / J` price ratio is the Furnace↔Frost
+  exchange rate — cold systems import joules to live (ECON-J heating
+  upkeep) and in exchange absorb the Furnace's thermal death. Placeholder
+  pricing; tunes at balance.
