@@ -212,7 +212,7 @@ the core enumerator; remnants, giants, and the lore exotic follow.
 | 10 | **RG/SG** | red giant / supergiant (evolved) | enormous luminous shell; Furnace swallows inner orbits |
 | 11 | **N** | neutron star / pulsar (remnant) | beamed, extreme, hazardous; narrow usable shells |
 | 12 | **WR** | Wolf–Rayet (hot, mass-losing) | violent Furnace; short-lived, resource-rich |
-| 13 | **✦** | **Luminal White Hole** (lore exotic) | the ultimate energy anchor (`05_THERMAL_BALANCE.md` §1.2) |
+| 13 | **✦** | **Luminal White Hole** (lore exotic) | the ultimate energy anchor (`05_THERMAL_BALANCE.md` §1.3) |
 
 Codes are the wire enumerator (a permanent NS-1 tag at the star-orb landing);
 values here are placeholder parameters that tune at balance time. `StarClass`
