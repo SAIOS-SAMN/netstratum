@@ -1,0 +1,434 @@
+//! ERA CONVERGENCE (07 — CONVERGE-1): annex the archived timelines.
+//!
+//! The laws (07 §1): annex, never merge — archived chronicles are
+//! sealed, convergence appends `EraAnnexed` receipts to the universe
+//! ledger (`<root>/convergence.tlv`, real cfe chain machinery); verify
+//! before adopting — a broken chain quarantines, named, never merged
+//! and never deleted; one T axis by epoch shift; placement is a
+//! measurement (the four C's, 07 §2), never a hash; idempotent by
+//! (era, world) key; spawns read the converged chart.
+
+use std::collections::HashSet;
+use std::fs;
+use std::path::{Path, PathBuf};
+
+use cfe::dop::ClosureEvent;
+use cfe::persist;
+use cfe::ratio::{ratio, Ratio};
+use cfe::tlv;
+use cfe::vrp::{receipt_digest, ReceiptHash};
+use num_traits::Zero;
+use physics::{AxisVector, Triple};
+
+use crate::json::{self, JsonWriter};
+use crate::{sanitize, Mirror};
+
+/// One archived receipt, reconstructed from a chronicle.jsonl line —
+/// raw event bytes carried whole so verification never needs to decode
+/// the event (unknown tags still verify: SEAL A).
+struct RawReceipt {
+    sequence: u64,
+    stamp: u64,
+    parent: [u8; 32],
+    digest: [u8; 32],
+    by: Vec<u64>,
+    event_bytes: Vec<u8>,
+}
+
+/// A world excluded from the timeline: left on disk, named here.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Quarantined {
+    pub era: String,
+    pub world: String,
+    /// The first broken sequence, or `u64::MAX` for an unreadable file.
+    pub at: u64,
+}
+
+/// The convergence read: what one boot adopted, skipped, or refused.
+#[derive(Debug, Default)]
+pub struct ConvergeRead {
+    /// Worlds annexed THIS run: (era, world).
+    pub adopted: Vec<(String, String)>,
+    /// Worlds already annexed by a prior run (idempotence, 07 §1.5).
+    pub already: usize,
+    /// Broken chains, excluded and named (07 §1.2).
+    pub quarantined: Vec<Quarantined>,
+    /// Worlds whose final append was torn (07 §1.2): annexed at their
+    /// verified prefix, the tear recorded here.
+    pub torn: Vec<(String, String)>,
+    /// The final epoch base: the sum of every era's terminal T. Live
+    /// beats stack on top of this (TUniversal = epoch_base + beat).
+    pub epoch_base: u64,
+}
+
+/// Discover era roots beside `var_root`: every sibling directory named
+/// `<base>-era*` (name-ascending — era1 before era2), then the current
+/// root itself LAST (its prior-run worlds are the youngest era). Each
+/// entry is (era name, worlds dir).
+pub fn default_era_roots(var_root: &str) -> Vec<(String, PathBuf)> {
+    let root = PathBuf::from(var_root);
+    let base = root
+        .file_name()
+        .map(|n| n.to_string_lossy().into_owned())
+        .unwrap_or_else(|| "var".into());
+    let parent = match root.parent() {
+        // A bare relative root ("var") has an EMPTY parent — that is
+        // the current directory, not nowhere.
+        Some(p) if p.as_os_str().is_empty() => PathBuf::from("."),
+        Some(p) => p.to_path_buf(),
+        None => PathBuf::from("."),
+    };
+    let mut eras: Vec<(String, PathBuf)> = Vec::new();
+    if let Ok(entries) = fs::read_dir(&parent) {
+        for entry in entries.filter_map(|e| e.ok()) {
+            let name = entry.file_name().to_string_lossy().into_owned();
+            if name.starts_with(&format!("{base}-era")) && entry.path().is_dir() {
+                eras.push((name.clone(), entry.path().join("worlds")));
+            }
+        }
+    }
+    eras.sort();
+    eras.push((base, root.join("worlds")));
+    eras
+}
+
+/// Converge every archived era into the mirror's universe (07 §1):
+/// verify → quarantine broken → epoch-shift T → place by the four C's →
+/// append `EraAnnexed` to the ledger → chart + fiber cards → persist
+/// the universe card at the final epoch base. Idempotent: worlds
+/// already in the ledger are skipped.
+pub fn converge(mirror: &Mirror, eras: &[(String, PathBuf)]) -> std::io::Result<ConvergeRead> {
+    let ledger_path = mirror.root.join("convergence.tlv");
+    let mut ledger = match ledger_path.exists() {
+        true => persist::load(&ledger_path).map_err(io_error)?,
+        false => cfe::vrp::Chronicle::new(),
+    };
+    let mut seen: HashSet<(String, String)> = ledger
+        .receipts()
+        .iter()
+        .filter_map(|receipt| match &receipt.event {
+            ClosureEvent::EraAnnexed { era, world, .. } => {
+                Some((era.clone(), world.clone()))
+            }
+            _ => None,
+        })
+        .collect();
+
+    let mut read = ConvergeRead::default();
+    let mut offset: u64 = 0;
+    for (era, worlds_dir) in eras {
+        let mut era_terminal: u64 = 0;
+        let mut world_dirs: Vec<PathBuf> = fs::read_dir(worlds_dir)
+            .map(|entries| {
+                entries
+                    .filter_map(|e| e.ok().map(|e| e.path()))
+                    .filter(|p| p.is_dir() && p.join("chronicle.jsonl").exists())
+                    .collect()
+            })
+            .unwrap_or_default();
+        world_dirs.sort();
+        for dir in world_dirs {
+            let world = dir
+                .file_name()
+                .map(|n| n.to_string_lossy().into_owned())
+                .unwrap_or_default();
+            let lines = match fs::read_to_string(dir.join("chronicle.jsonl")) {
+                Ok(text) => text,
+                Err(_) => {
+                    read.quarantined.push(Quarantined {
+                        era: era.clone(),
+                        world,
+                        at: u64::MAX,
+                    });
+                    continue;
+                }
+            };
+            let (receipts, torn) = match parse_chronicle(&lines) {
+                ParsedChronicle::Parsed { receipts, torn } => (receipts, torn),
+                ParsedChronicle::Malformed { at } => {
+                    read.quarantined.push(Quarantined {
+                        era: era.clone(),
+                        world,
+                        at,
+                    });
+                    continue;
+                }
+            };
+            if torn {
+                read.torn.push((era.clone(), world.clone()));
+            }
+            // The verification door (07 §1.2) — the real chain law over
+            // the RAW event bytes; unknown event tags still verify.
+            if let Some(at) = first_break(&receipts) {
+                read.quarantined.push(Quarantined {
+                    era: era.clone(),
+                    world,
+                    at,
+                });
+                continue;
+            }
+            let terminal_t = receipts.iter().map(|r| r.stamp).max().unwrap_or(0);
+            era_terminal = era_terminal.max(terminal_t);
+            let terminal_digest = receipts
+                .last()
+                .map(|r| r.digest)
+                .unwrap_or(ReceiptHash::GENESIS.0);
+            let key = (era.clone(), world.clone());
+            if seen.contains(&key) {
+                read.already += 1;
+                continue;
+            }
+            // The four C's (07 §2): fold, residual, terminal window.
+            let events: Vec<ClosureEvent> = receipts
+                .iter()
+                .filter_map(|r| decode_event(&r.event_bytes))
+                .collect();
+            let fold = deposit(&events);
+            let window_start = events.len().saturating_sub(TERMINAL_WINDOW);
+            let window = deposit(&events[window_start..]);
+            let residual = loop_residual(&events);
+            // CONVERGENCE: placed where it was going — fold + one
+            // window step of the flow (07 §2).
+            let placed = Triple {
+                spatial: fold.spatial.add(&window.spatial),
+                temporal: fold.temporal.add(&window.temporal),
+                gauge: fold.gauge.add(&window.gauge),
+            };
+            let (x, y, z, g) = project(&placed);
+            let chart_name = format!("{era}--{world}");
+            mirror.chart_world(&chart_name, (&x, &y, &z), &g)?;
+            write_fiber_card(&mirror.root, &chart_name, &residual)?;
+            // TUniversal stamp: the world's terminal T on the one axis.
+            ledger.append(
+                ClosureEvent::EraAnnexed {
+                    era: era.clone(),
+                    world: world.clone(),
+                    terminal: terminal_digest,
+                    offset,
+                },
+                offset + terminal_t,
+                vec![],
+            );
+            seen.insert(key);
+            read.adopted.push((era.clone(), world.clone()));
+        }
+        // Eras stack end-to-end on the T axis (07 §1.3).
+        offset += era_terminal;
+    }
+    read.epoch_base = offset;
+    persist::sync(&ledger, &ledger_path).map_err(io_error)?;
+    mirror.set_universal_clock(offset)?;
+    Ok(read)
+}
+
+/// The terminal window W (07 §2, placeholder — tunes at balance time).
+const TERMINAL_WINDOW: usize = 8;
+
+/// CONGRUENCE (07 §2): each decoded event deposits an exact-rational
+/// shear onto the three axes. Unknown events deposited nothing before
+/// this point (they decode to `None` and are filtered — SEAL A).
+fn deposit(events: &[ClosureEvent]) -> Triple {
+    let mut spatial = AxisVector::empty();
+    let mut temporal = AxisVector::empty();
+    let mut gauge = AxisVector::empty();
+    for event in events {
+        // The pace line: every receipt +1 @0.
+        temporal = temporal.add(&at_grade(0, ratio(1, 1)));
+        match event {
+            ClosureEvent::YieldCollected { resource, amount, .. } => {
+                spatial = spatial.add(&at_grade(*resource as usize - 1, amount.clone()));
+            }
+            ClosureEvent::UpkeepSettled { resource, amount, .. } => {
+                spatial = spatial.add(&at_grade(*resource as usize - 1, -amount.clone()));
+            }
+            ClosureEvent::FamineStruck { resource, drawn, .. } => {
+                spatial = spatial.add(&at_grade(*resource as usize - 1, -drawn.clone()));
+            }
+            ClosureEvent::EntityRegistered { .. } => {
+                gauge = gauge.add(&at_grade(0, ratio(1, 1)));
+            }
+            ClosureEvent::ScopeGranted { .. } => {
+                gauge = gauge.add(&at_grade(1, ratio(1, 1)));
+            }
+            ClosureEvent::ScopeRevoked { .. } => {
+                gauge = gauge.add(&at_grade(1, ratio(-1, 1)));
+            }
+            ClosureEvent::ColonyFounded { .. } | ClosureEvent::ColonyCharted { .. } => {
+                gauge = gauge.add(&at_grade(2, ratio(1, 1)));
+            }
+            _ => {}
+        }
+    }
+    Triple {
+        spatial,
+        temporal,
+        gauge,
+    }
+}
+
+/// COHERENCE (07 §2): what loops fail to close — measured and KEPT.
+fn loop_residual(events: &[ClosureEvent]) -> Triple {
+    let mut strikes = ratio(0, 1);
+    let mut builds = ratio(0, 1);
+    let mut grants = ratio(0, 1);
+    for event in events {
+        match event {
+            ClosureEvent::FamineStruck { .. } => strikes += ratio(1, 1),
+            ClosureEvent::FamineRelieved { .. } => strikes -= ratio(1, 1),
+            ClosureEvent::ZoneBuilt { .. } => builds += ratio(1, 1),
+            ClosureEvent::ZoneRazed { .. } => builds -= ratio(1, 1),
+            ClosureEvent::ScopeGranted { .. } => grants += ratio(1, 1),
+            ClosureEvent::ScopeRevoked { .. } => grants -= ratio(1, 1),
+            _ => {}
+        }
+    }
+    Triple {
+        spatial: AxisVector::from_vec(vec![strikes, builds]),
+        temporal: AxisVector::empty(),
+        gauge: AxisVector::from_vec(vec![grants]),
+    }
+}
+
+/// The chart projection (07 §2, law): x = Σ spatial even grades,
+/// y = Σ spatial odd grades, z = Σ temporal, g = Σ gauge. Wrapping mod
+/// span happens in `chart_world` (the L1 torus).
+fn project(triple: &Triple) -> (Ratio, Ratio, Ratio, Ratio) {
+    let mut x = ratio(0, 1);
+    let mut y = ratio(0, 1);
+    for (grade, component) in triple.spatial.components().iter().enumerate() {
+        match grade % 2 {
+            0 => x += component,
+            _ => y += component,
+        }
+    }
+    let z = triple
+        .temporal
+        .components()
+        .iter()
+        .fold(ratio(0, 1), |sum, c| sum + c);
+    let g = triple
+        .gauge
+        .components()
+        .iter()
+        .fold(ratio(0, 1), |sum, c| sum + c);
+    (x, y, z, g)
+}
+
+fn at_grade(grade: usize, amount: Ratio) -> AxisVector {
+    let mut components = vec![Ratio::zero(); grade + 1];
+    components[grade] = amount;
+    AxisVector::from_vec(components)
+}
+
+/// COHESION (07 §2): the residual rides the fiber — a card, a
+/// reflection, never an authority.
+fn write_fiber_card(root: &Path, chart_name: &str, residual: &Triple) -> std::io::Result<()> {
+    let dir = root.join("fiber");
+    fs::create_dir_all(&dir)?;
+    let render = |axis: &AxisVector| -> String {
+        axis.components()
+            .iter()
+            .map(|c| format!("{c}"))
+            .collect::<Vec<_>>()
+            .join(" ")
+    };
+    let mut w = JsonWriter::new();
+    w.open();
+    w.field_str("world", chart_name);
+    w.field_str("residual_spatial", &render(&residual.spatial));
+    w.field_str("residual_gauge", &render(&residual.gauge));
+    w.close();
+    fs::write(
+        dir.join(format!("{}.json", sanitize(chart_name))),
+        w.finish(),
+    )
+}
+
+/// Parse one archived chronicle.jsonl into raw receipts, with the
+/// TORN-TAIL LAW (07 §1.2): a killed writer leaves a final line of NUL
+/// bytes or a half-written record — an append that never completed. By
+/// SEAL B (what has no receipt does not persist) the world annexes at
+/// its verified prefix and the tear is recorded. Pure-garbage lines
+/// (NUL/whitespace only) carry no receipt data and are skipped — if one
+/// ever hid a LOST receipt, the chain law breaks at the next parent
+/// link and the world quarantines anyway. A content-bearing malformed
+/// line anywhere BUT the tail is interior corruption: quarantine.
+fn parse_chronicle(text: &str) -> ParsedChronicle {
+    let lines: Vec<&str> = text
+        .lines()
+        .filter(|l| !l.trim_matches(['\0', ' ', '\t', '\r']).is_empty())
+        .collect();
+    let mut out = Vec::new();
+    let mut torn = false;
+    for (index, line) in lines.iter().enumerate() {
+        match parse_receipt_line(line) {
+            Some(receipt) => out.push(receipt),
+            None if index == lines.len() - 1 => torn = true,
+            None => return ParsedChronicle::Malformed { at: index as u64 },
+        }
+    }
+    ParsedChronicle::Parsed { receipts: out, torn }
+}
+
+enum ParsedChronicle {
+    Parsed { receipts: Vec<RawReceipt>, torn: bool },
+    /// Interior corruption at a content-bearing line — quarantine.
+    Malformed { at: u64 },
+}
+
+fn parse_receipt_line(line: &str) -> Option<RawReceipt> {
+    Some(RawReceipt {
+        sequence: json::extract_u64(line, "seq")?,
+        stamp: json::extract_u64(line, "stamp")?,
+        parent: hex32(&json::extract_string(line, "parent")?)?,
+        digest: hex32(&json::extract_string(line, "digest")?)?,
+        by: json::extract_string_array(line, "by")?
+            .iter()
+            .map(|s| s.parse().ok())
+            .collect::<Option<Vec<u64>>>()?,
+        event_bytes: hex_bytes(&json::extract_string(line, "tlv")?)?,
+    })
+}
+
+/// The real chain law (NS-3 §2.1) over raw event bytes: parent links
+/// and recomputed digests, first break named.
+fn first_break(receipts: &[RawReceipt]) -> Option<u64> {
+    let mut parent = ReceiptHash::GENESIS;
+    for receipt in receipts {
+        let expected = receipt_digest(
+            receipt.sequence,
+            receipt.stamp,
+            &parent,
+            &receipt.event_bytes,
+            &receipt.by,
+        );
+        if receipt.parent != parent.0 || receipt.digest != expected.0 {
+            return Some(receipt.sequence);
+        }
+        parent = ReceiptHash(receipt.digest);
+    }
+    None
+}
+
+fn decode_event(event_bytes: &[u8]) -> Option<ClosureEvent> {
+    let (tag, value) = tlv::records(event_bytes).next()?;
+    ClosureEvent::from_wire(tag, value)
+}
+
+fn hex_bytes(text: &str) -> Option<Vec<u8>> {
+    if !text.len().is_multiple_of(2) {
+        return None;
+    }
+    (0..text.len())
+        .step_by(2)
+        .map(|i| u8::from_str_radix(&text[i..i + 2], 16).ok())
+        .collect()
+}
+
+fn hex32(text: &str) -> Option<[u8; 32]> {
+    hex_bytes(text)?.try_into().ok()
+}
+
+fn io_error(refused: persist::PersistRefused) -> std::io::Error {
+    std::io::Error::other(format!("{refused:?}"))
+}

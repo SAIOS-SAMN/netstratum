@@ -866,6 +866,11 @@ fn chronicle(world: &World, style: &Style) {
                 "☄ planet {} charted (orb {orb_id}) — reserves moved from orb {source_orb}",
                 style.strong(name)
             ),
+            cfe::dop::ClosureEvent::EraAnnexed { era, world, offset, .. } => format!(
+                "✦ era {} world {} annexed at epoch offset {offset}",
+                style.dim(era),
+                style.strong(world)
+            ),
         };
         let tag = receipt
             .provenance

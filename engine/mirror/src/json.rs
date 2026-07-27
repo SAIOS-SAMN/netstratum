@@ -140,6 +140,16 @@ pub fn extract_string(text: &str, key: &str) -> Option<String> {
     None
 }
 
+/// Extract `"key":123` — an unquoted JSON number (the writer's
+/// `field_u64` form). Same known-shape discipline as `extract_string`.
+pub fn extract_u64(text: &str, key: &str) -> Option<u64> {
+    let needle = format!("\"{key}\"");
+    let after = &text[text.find(&needle)? + needle.len()..];
+    let after = after.trim_start().strip_prefix(':')?.trim_start();
+    let digits: String = after.chars().take_while(|c| c.is_ascii_digit()).collect();
+    digits.parse().ok()
+}
+
 /// Extract `"key":["a","b",...]` as strings.
 pub fn extract_string_array(text: &str, key: &str) -> Option<Vec<String>> {
     let needle = format!("\"{key}\"");

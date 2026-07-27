@@ -38,6 +38,23 @@ fn main() {
 
     let registry = Registry::at(format!("{var_root}/registry"));
     let mirror = Mirror::at(format!("{var_root}/worlds"));
+
+    // CONVERGE-1 (07 §1.6): converge the archived eras BEFORE genesis —
+    // boot adopts the past instead of founding blind beside it.
+    let eras = mirror::converge::default_era_roots(&var_root);
+    let converged = mirror::converge::converge(&mirror, &eras).expect("convergence");
+    println!(
+        "conductor: converged {} worlds ({} already annexed, {} quarantined) — epoch base {}",
+        converged.adopted.len(),
+        converged.already,
+        converged.quarantined.len(),
+        converged.epoch_base,
+    );
+    for q in &converged.quarantined {
+        println!("conductor: QUARANTINED {}/{} (break at {})", q.era, q.world, q.at);
+    }
+    let epoch_base = converged.epoch_base;
+
     let mut worlds: Vec<BotWorld> = specs
         .into_iter()
         .map(|spec| BotWorld::genesis(spec, &registry, &mirror))
@@ -56,7 +73,9 @@ fn main() {
     let mut beat: u64 = 0;
     loop {
         beat += 1;
-        let _ = mirror.set_universal_clock(beat);
+        // TUniversal T = epoch base + this era's beat (07 §1.3): live
+        // ticks stack on the converged timeline, never restart it.
+        let _ = mirror.set_universal_clock(epoch_base + beat);
         let mut newborns = Vec::new();
         for bot in &mut worlds {
             if let Some(spec) = bot.cycle(&mirror, &registry) {

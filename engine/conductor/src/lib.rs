@@ -481,17 +481,23 @@ impl BotWorld {
     }
 }
 
-/// Run one era: genesis for every bot, then `cycles` heartbeats;
-/// daughters born mid-era join the beat. Returns the live worlds.
+/// Run one era: CONVERGE the archived eras (07 §1.6), then genesis for
+/// every bot, then `cycles` heartbeats; daughters born mid-era join the
+/// beat. Returns the live worlds.
 pub fn run_era(var_root: &str, cycles: u32) -> Vec<BotWorld> {
     let registry = Registry::at(format!("{var_root}/registry"));
     let mirror = Mirror::at(format!("{var_root}/worlds"));
+    let eras = mirror::converge::default_era_roots(var_root);
+    let epoch_base = mirror::converge::converge(&mirror, &eras)
+        .map(|read| read.epoch_base)
+        .unwrap_or(0);
     let mut worlds: Vec<BotWorld> = bots::founding_bots()
         .into_iter()
         .map(|spec| BotWorld::genesis(spec, &registry, &mirror))
         .collect();
     for beat in 0..cycles {
-        let _ = mirror.set_universal_clock(u64::from(beat) + 1);
+        // TUniversal T = epoch base + this era's beat (07 §1.3).
+        let _ = mirror.set_universal_clock(epoch_base + u64::from(beat) + 1);
         let mut newborns = Vec::new();
         for bot in &mut worlds {
             if let Some(spec) = bot.cycle(&mirror, &registry) {

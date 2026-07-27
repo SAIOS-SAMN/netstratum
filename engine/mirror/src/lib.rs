@@ -35,6 +35,7 @@ use std::fs;
 use std::io::Write as _;
 use std::path::PathBuf;
 
+pub mod converge;
 mod json;
 pub mod registry;
 use json::JsonWriter;
@@ -528,6 +529,10 @@ fn render_receipt(receipt: &Receipt) -> String {
         E::ColonyCharted { orb_id, source_orb, name } => (
             "colony_charted",
             format!("{name} (orb {orb_id}) from orb {source_orb}"),
+        ),
+        E::EraAnnexed { era, world, offset, .. } => (
+            "era_annexed",
+            format!("{world} of {era} at offset {offset}"),
         ),
     };
     w.field_str("event", name);

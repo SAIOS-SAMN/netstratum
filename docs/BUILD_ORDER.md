@@ -135,6 +135,30 @@ N5/N6). Details and sequencing in 04 §6.
   demonstrated end-to-end. Dark Forest constraint #1 (persistence by
   construction) is now LIVED, not just inscribed.
 
+- **CONVERGE-1 LANDED** (2026-07-27): ERA CONVERGENCE — THE TIMELINES
+  UNIFY. `07_ERA_CONVERGENCE.md` inscribed and landed whole: TUniversal
+  {S,G,T} persisted (universe card at every beat AND at convergence);
+  boot converges BEFORE genesis (conductor main + `run_era`); annex,
+  never merge — `EraAnnexed` (permanent tag 21) appends to the universe
+  ledger `convergence.tlv` (real cfe chain machinery); placement is a
+  measurement (the four C's: congruence deposits onto the three axes,
+  coherence residuals ride the fiber cards, convergence places by the
+  terminal-window step); epoch-shift stacks eras end-to-end on one T
+  axis. THE TORN-TAIL LAW measured into 07 §1.2 on the real archives: a
+  killed writer's final NUL/half-written line is an append that never
+  landed — the world annexes at its verified prefix. Evidence: clippy
+  zero; **105/105 workspace witnesses green** (6 converge pins: annex
+  onto one axis with exact offsets and TUniversal stamps; placement
+  deterministic across independent roots and fiber-separated by loop
+  content; mid-chain tamper quarantines NAMED at its sequence while the
+  rest annex; torn tail annexes at prefix; double-converge appends
+  NOTHING; tag-21 byte-exact round trip). THE REAL RUN: eras discovered
+  `var-era1 → var-era2 → var`; **128 worlds annexed, 0 quarantined**
+  (the torn-tail law recovered all 46 NUL-tail worlds); second run
+  `adopted 0 · already 128` — idempotent on the real archives; epoch
+  base 2151 = TUniversal `00:00:00:00:35:51`. Operator tool:
+  `cargo run -p mirror --example converge_run -- <var-root>`.
+
 ## 2. The depth board (02_COLONY_LOOP — game depth before multiplayer)
 
 Ruled 2026-07-25: the world must be worth sharing before N6 shares it. These

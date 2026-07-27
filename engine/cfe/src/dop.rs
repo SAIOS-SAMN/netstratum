@@ -19,6 +19,7 @@
 //!   11 ClosureEvent::ScopeGranted (N3)
 //!   12 ClosureEvent::ScopeRevoked (N3)
 //!   13 ClosureEvent::ColonyCharted (P1)
+//!   21 ClosureEvent::EraAnnexed (CONVERGE-1 — universe ledger only)
 //!   16 Orb header (orb_id ‖ name)
 //!   17 Orb zone entry (tile ‖ kind)
 //!   18 Orb banked entry (resource ‖ ratio)
@@ -170,6 +171,11 @@ pub enum ClosureEvent {
     /// reserves MOVE from the source orb's bank (conservation — a
     /// charter mints nothing).
     ColonyCharted { orb_id: u64, source_orb: u64, name: String },
+    /// CONVERGE-1 (07 §1) — an archived world adopted onto the one
+    /// timeline: its era, name, terminal digest, and epoch offset.
+    /// Lives ONLY in the universe ledger (`convergence.tlv`), never in
+    /// a world chronicle; world replay ignores it.
+    EraAnnexed { era: String, world: String, terminal: [u8; 32], offset: u64 },
 }
 
 impl ClosureEvent {
@@ -229,6 +235,14 @@ impl ClosureEvent {
                 value.extend_from_slice(&source_orb.to_le_bytes());
                 value.extend_from_slice(name.as_bytes());
                 tlv::put(13, &value, &mut out);
+            }
+            Self::EraAnnexed { era, world, terminal, offset } => {
+                let mut value = offset.to_le_bytes().to_vec();
+                value.extend_from_slice(terminal);
+                value.extend_from_slice(&(era.len() as u16).to_le_bytes());
+                value.extend_from_slice(era.as_bytes());
+                value.extend_from_slice(world.as_bytes());
+                tlv::put(21, &value, &mut out);
             }
         }
         out
@@ -292,6 +306,14 @@ impl ClosureEvent {
                 let source_orb = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
                 let name = String::from_utf8(value.get(16..)?.to_vec()).ok()?;
                 Some(Self::ColonyCharted { orb_id, source_orb, name })
+            }
+            21 => {
+                let offset = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let terminal: [u8; 32] = value.get(8..40)?.try_into().ok()?;
+                let era_len = u16::from_le_bytes(value.get(40..42)?.try_into().ok()?) as usize;
+                let era = String::from_utf8(value.get(42..42 + era_len)?.to_vec()).ok()?;
+                let world = String::from_utf8(value.get(42 + era_len..)?.to_vec()).ok()?;
+                Some(Self::EraAnnexed { era, world, terminal, offset })
             }
             _ => None,
         }
