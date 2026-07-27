@@ -93,6 +93,24 @@ verified build — never per-tick simulation state, never speculative or
 provisional values. This is what keeps the chain small enough to anchor
 (NS-7) and replay.
 
+### 2.4 The receipt file (P2-PERSIST — the chronicle on disk)
+
+The save IS the chain: one append-only file per world
+(`var/worlds/<name>/chronicle.tlv`), a TLV stream of framed receipts.
+The frame (tag 20, permanent): `LE64(sequence) ‖ LE64(stamp) ‖ parent[32]
+‖ own[32] ‖ LE32(provenance count) ‖ LE64(k)… ‖ the event's TLV record`.
+
+Laws, all measured (`persist_boot.rs`):
+- **The one door back in:** loading re-verifies every link
+  (`Chronicle::from_receipts`); a tampered file refuses with its break
+  named. Unknown tags in the stream skip (SEAL A at the file layer).
+- **The file only grows:** sync appends exactly the receipts the file
+  lacks; a file holding history the chronicle does not have refuses
+  (`HistoryDiverged`) — a past is never clobbered silently.
+- **Resume is a reading, not a walk:** the clock reinstates at the highest
+  STAMPED value; un-receipted ticks and accrued workspace from the prior
+  era are honestly lost — what has no receipt does not persist.
+
 ## 3. Test vectors — extracted from the live v0.4 organ
 
 Produced by driving the sealed build's chronicle directly (harness: read-only

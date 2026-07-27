@@ -1,4 +1,4 @@
 target/
 *.tlv
-var/
+var*/
 .claude/

@@ -71,6 +71,7 @@ One tag, one meaning, forever; retired codes are never reused.
 | 12 | event: ScopeRevoked (N3) | LE64(agent) ‖ scope u8 |
 | 13 | event: ColonyCharted (P1) | LE64(orb_id) ‖ LE64(source_orb) ‖ name utf8 — the founding reserves MOVE from source (conservation) |
 | 16 | orb header | LE64(orb_id) ‖ name utf8 |
+| 20 | receipt frame (P2, NS-3 §2.4) | the on-disk framing of one whole receipt |
 | 17 | orb zone entry | LE16(tile) ‖ kind u8 |
 | 18 | orb banked entry | resource u8 ‖ ratio |
 | 19 | orb famine entry (D1) | resource u8 |

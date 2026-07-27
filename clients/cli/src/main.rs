@@ -237,6 +237,59 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             }
             Err(refusal) => refuse(world, &refusal, style),
         },
+        Some("save") => match world.orb() {
+            Some(orb) => {
+                let path = std::path::PathBuf::from("var/worlds")
+                    .join(&orb.name)
+                    .join("chronicle.tlv");
+                match cfe::persist::sync(world.chronicle(), &path) {
+                    Ok(appended) => println!(
+                        "{} world saved — {} receipt(s) appended to {} (the file only grows)",
+                        style.ok("✓"),
+                        style.strong(&appended.to_string()),
+                        style.dim(&path.display().to_string())
+                    ),
+                    Err(refusal) => println!("{} save refused: {refusal:?}", style.bad("✗")),
+                }
+            }
+            None => println!(
+                "{} nothing to save — {} begins the story",
+                style.bad("✗"),
+                style.strong("found <name>")
+            ),
+        },
+        Some("resume") => match words.next() {
+            Some(name) if world.chronicle().receipts().is_empty() => {
+                let path = std::path::PathBuf::from("var/worlds")
+                    .join(name)
+                    .join("chronicle.tlv");
+                match cfe::persist::load(&path) {
+                    Ok(chronicle) => {
+                        let receipts = chronicle.receipts().len();
+                        *world = World::resume(chronicle);
+                        *current = cfe::world::FIRST_ORB;
+                        println!(
+                            "{} world {} resumed — {} receipts verified, clock at {}; the story continues",
+                            style.ok("✓"),
+                            style.strong(name),
+                            style.strong(&receipts.to_string()),
+                            style.strong(&world.now().to_string())
+                        );
+                        map(world, style, *current);
+                    }
+                    Err(refusal) => println!(
+                        "{} resume refused: {refusal:?} — {}",
+                        style.bad("✗"),
+                        style.dim("a chronicle must verify before it becomes a world")
+                    ),
+                }
+            }
+            Some(_) => println!(
+                "{} this session already has history — resume only into a fresh launch",
+                style.bad("✗")
+            ),
+            None => println!("{} usage: {}", style.bad("✗"), style.strong("resume <world-name>")),
+        },
         Some("chart") => {
             let name = words.next().map(|word| word.to_string());
             let source = match (words.next(), words.next()) {
@@ -419,6 +472,7 @@ fn help(style: &Style) {
         ("collect", "settle the workspace against the bank — sealed as receipts; only banked value persists"),
         ("raze <tile|r:c>", "demolish a zone for half its cost back — the famine escape hatch"),
         ("chart <planet> [from <p>]", "found a daughter colony: the founding reserves MOVE from the source colony (nothing is minted)"),
+        ("save · resume <world>", "sync the chronicle to var/worlds/<name>/ (append-only) · resume a saved world at launch"),
         ("planet <name> · planets", "switch the planet cursor · list this world's planets"),
         ("agent <handle>", "register a contained agent (zero grants until you open scopes)"),
         ("grant|revoke <handle> <scope>", "open or shut an agent's scope: build, raze, collect — revocation is immediate"),

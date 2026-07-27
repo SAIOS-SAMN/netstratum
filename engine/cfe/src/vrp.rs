@@ -52,6 +52,16 @@ impl WorldClock {
         Self::default()
     }
 
+    /// Boot-time reinstatement (P2-PERSIST): the clock resumes at the
+    /// highest STAMPED value the chronicle proves — every tick up to it
+    /// was attested live in the era that stamped it. Ticks after the
+    /// last receipt were workspace-time and are honestly lost (what has
+    /// no receipt does not persist). This is not a walk: no attestation
+    /// is forged; a proven past is re-read.
+    pub fn resume(value: u64) -> Self {
+        Self { value }
+    }
+
     #[inline]
     pub fn now(&self) -> u64 {
         self.value
@@ -103,6 +113,59 @@ pub enum ChainRead {
     Broken { at: u64 },
 }
 
+/// The receipt FRAME tag (NS-3 §2.4, P2): the on-disk framing of one
+/// whole receipt. Permanent, like every tag.
+pub const RECEIPT_FRAME_TAG: u8 = 20;
+
+impl Receipt {
+    /// The receipt's on-disk frame (NS-3 §2.4): one TLV record, tag 20,
+    /// value = `LE64(sequence) ‖ LE64(stamp) ‖ parent[32] ‖ own[32] ‖
+    /// LE32(provenance count) ‖ LE64(k)… ‖ event TLV record`.
+    pub fn wire_bytes(&self) -> Vec<u8> {
+        let mut value = self.sequence.to_le_bytes().to_vec();
+        value.extend_from_slice(&self.stamp.to_le_bytes());
+        value.extend_from_slice(&self.parent.0);
+        value.extend_from_slice(&self.own.0);
+        value.extend_from_slice(&(self.provenance.len() as u32).to_le_bytes());
+        for k in &self.provenance {
+            value.extend_from_slice(&k.to_le_bytes());
+        }
+        value.extend_from_slice(&self.event.wire_bytes());
+        let mut out = Vec::new();
+        crate::tlv::put(RECEIPT_FRAME_TAG, &value, &mut out);
+        out
+    }
+
+    /// Decode one framed receipt; `None` on an unknown tag or a
+    /// malformed frame (the caller skips unknown tags — SEAL A).
+    pub fn from_wire(tag: u8, value: &[u8]) -> Option<Self> {
+        if tag != RECEIPT_FRAME_TAG {
+            return None;
+        }
+        let sequence = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+        let stamp = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+        let parent = ReceiptHash(value.get(16..48)?.try_into().ok()?);
+        let own = ReceiptHash(value.get(48..80)?.try_into().ok()?);
+        let count = u32::from_le_bytes(value.get(80..84)?.try_into().ok()?) as usize;
+        let mut at = 84usize;
+        let mut provenance = Vec::with_capacity(count);
+        for _ in 0..count {
+            provenance.push(u64::from_le_bytes(value.get(at..at + 8)?.try_into().ok()?));
+            at += 8;
+        }
+        let (event_tag, event_value) = crate::tlv::records(value.get(at..)?).next()?;
+        let event = ClosureEvent::from_wire(event_tag, event_value)?;
+        Some(Receipt {
+            sequence,
+            stamp,
+            parent,
+            own,
+            event,
+            provenance,
+        })
+    }
+}
+
 /// The chronicle: append-only — no removal, no mutation, no reorder.
 #[derive(Debug, Clone, Default)]
 pub struct Chronicle {
@@ -112,6 +175,17 @@ pub struct Chronicle {
 impl Chronicle {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// Reconstitute a chronicle from stored receipts — ONLY through the
+    /// verification read: a chain that does not re-verify from its own
+    /// content refuses with its first break named. Append-only holds
+    /// across the process boundary because this is the one door back in.
+    pub fn from_receipts(receipts: Vec<Receipt>) -> Result<Self, ChainRead> {
+        match verify_receipts(&receipts) {
+            ChainRead::Intact => Ok(Self { receipts }),
+            broken => Err(broken),
+        }
     }
 
     pub fn receipts(&self) -> &[Receipt] {

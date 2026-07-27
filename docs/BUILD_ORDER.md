@@ -120,6 +120,21 @@ N5/N6). Details and sequencing in 04 §6.
   to the new arities + ColonyCharted arm added to the mirror's renderer —
   no semantic changes.
 
+- **P2-PERSIST LANDED** (2026-07-25, joint ruling with coder-01): THE WORLD
+  REMEMBERS. NS-3 §2.4 (the receipt file: tag 20 frames, one append-only
+  `chronicle.tlv` per world); `cfe::persist` (load through the
+  verification door; sync appends only the tail; divergent history refuses
+  typed, never clobbered); `World::resume` (committed core replays; clock
+  reinstates at the highest PROVEN stamp; the workspace honestly vanishes
+  — what has no receipt does not persist, now measured ACROSS the process
+  boundary). CLI `save`/`resume`. Evidence: clippy zero; **92/92 workspace
+  witnesses green capped** incl. the two-boot witness (boot 2 byte-exact,
+  re-earns nothing, era two appends 1 frame, boot 3 replays both eras);
+  tamper and divergence refusals; resumed agent authority (the grant
+  survives the boundary, and only the grant). The real-CLI double boot
+  demonstrated end-to-end. Dark Forest constraint #1 (persistence by
+  construction) is now LIVED, not just inscribed.
+
 ## 2. The depth board (02_COLONY_LOOP — game depth before multiplayer)
 
 Ruled 2026-07-25: the world must be worth sharing before N6 shares it. These

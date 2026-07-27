@@ -82,6 +82,29 @@ impl World {
         }
     }
 
+    /// P2-PERSIST — resume a world from its chronicle: the committed
+    /// projection replays (orbs, entities), the clock reinstates at the
+    /// highest stamped value the receipts prove, and the workspace
+    /// starts EMPTY — accrued value and un-stamped ticks from the prior
+    /// era had no receipts, so they honestly do not persist.
+    pub fn resume(chronicle: Chronicle) -> World {
+        let committed = replay(&chronicle);
+        let stamp = chronicle
+            .receipts()
+            .iter()
+            .map(|receipt| receipt.stamp)
+            .max()
+            .unwrap_or(0);
+        World {
+            clock: WorldClock::resume(stamp),
+            keepers: [Timekeeper { id: 0 }, Timekeeper { id: 1 }, Timekeeper { id: 2 }],
+            chronicle,
+            orbs: committed.orbs,
+            entities: committed.entities,
+            accrued: Vec::new(),
+        }
+    }
+
     pub fn now(&self) -> u64 {
         self.clock.now()
     }

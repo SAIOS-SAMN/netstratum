@@ -14,6 +14,7 @@
 
 pub mod dop;
 pub mod ipsal;
+pub mod persist;
 pub mod ratio;
 pub mod tlv;
 pub mod vrp;
