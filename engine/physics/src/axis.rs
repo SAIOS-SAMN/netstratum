@@ -1,4 +1,4 @@
-//! The carrier types: one exact-ℚ vector per axis, three axes per state.
+//! The carrier types: one exact-rational vector per axis, three axes per state.
 //!
 //! An `AxisVector` is a graded coefficient list over the `Ratio` carrier
 //! (index = degree/plane). Addition aligns by degree and extends — no

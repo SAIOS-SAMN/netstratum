@@ -41,7 +41,7 @@ impl Beacon {
         u128::from_le_bytes(out.as_bytes()[..16].try_into().expect("32 ≥ 16"))
     }
 
-    /// One exact draw in ℚ ∩ [0, 1): `k / 2¹²⁸` where `k` is the
+    /// One exact draw in the exact rationals ∩ [0, 1): `k / 2¹²⁸` where `k` is the
     /// domain-tagged expansion. Uniform at 2⁻¹²⁸ grain, exact by
     /// construction.
     pub fn draw(&self, domain: &str) -> Ratio {

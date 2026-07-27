@@ -3,14 +3,14 @@
 //! Clean-room port of the convergence-engine math core onto the CFE
 //! `Ratio` carrier. The objects:
 //!
-//! - [`Delta`] — an antisymmetric relational tensor over exact ℚ:
-//!   `Δ_ij = −Δ_ji`, zero diagonal, one ℚ-vector of fiber coordinates
+//! - [`Delta`] — an antisymmetric relational tensor over exact rational:
+//!   `Δ_ij = −Δ_ji`, zero diagonal, one exact-rational-vector of fiber coordinates
 //!   per entry. It encodes RELATIONSHIPS between entities, never the
 //!   entities themselves.
 //! - [`for_each_residual`] — the ONE computation of the cocycle
 //!   condition `R_ijk = Δ_ik − Δ_ij − Δ_jk` over all ordered distinct
 //!   triples. Everything downstream (coherence, gates) composes it.
-//! - [`coherence_functional`] — `C(Δ) = Σ R²` over ℚ. `C(Δ) = 0` iff
+//! - [`coherence_functional`] — `C(Δ) = Σ R²` over the exact rationals. `C(Δ) = 0` iff
 //!   the cocycle condition holds; otherwise the residuals name exactly
 //!   what has not converged, and where.
 //! - [`coboundary_reduce`] — projection onto the canonical H¹

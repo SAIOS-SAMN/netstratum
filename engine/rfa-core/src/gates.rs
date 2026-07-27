@@ -13,7 +13,7 @@ pub struct StepBound {
     /// The reference magnitude (‖Δ‖² of the standing state, or a
     /// temporal mean the caller carries).
     pub reference: Ratio,
-    /// The allowed relative excursion (exact ℚ, e.g. 1/10).
+    /// The allowed relative excursion (exact rational, e.g. 1/10).
     pub epsilon: Ratio,
 }
 

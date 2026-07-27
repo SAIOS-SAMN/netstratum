@@ -188,7 +188,7 @@ fn the_registry_enforces_the_vocabulary() {
     );
 }
 
-/// The star-chart holds TUniversal{S, G}: exact-ℚ S = (x, y, z) on
+/// The star-chart holds TUniversal{S, G}: exact-rational S = (x, y, z) on
 /// the 3-torus (negative coordinates wrap), the gauge phase rides
 /// along, distance is L1 (NO SQUARING — the L1 law), and the
 /// universal clock is a pure base-60 odometer of ticks.

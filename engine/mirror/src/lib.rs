@@ -174,7 +174,7 @@ impl Mirror {
     }
 
     /// THE UNIVERSE MANIFOLD (contract §9): the base is a compact
-    /// 3-torus — spatial coordinates S = (x, y, z) live in ℚ mod
+    /// 3-torus — spatial coordinates S = (x, y, z) live in the exact rationals mod
     /// `span` per axis, so the universe has no edge and every
     /// direction comes back around. A world's full coordinate is
     /// TUniversal{S, G, T}: S the spatial triple, G the gauge (fiber
@@ -227,7 +227,7 @@ impl Mirror {
         fs::rename(&tmp, self.root.join("universe.json"))
     }
 
-    /// Chart a world onto the star-chart: exact-ℚ coordinates in
+    /// Chart a world onto the star-chart: exact-rational coordinates in
     /// `<root>/starchart.json` (merge-on-write; charting the same
     /// world again moves it — the chart is a card, the chronicle is
     /// the truth). Spatial coordinates WRAP onto the 3-torus: mod

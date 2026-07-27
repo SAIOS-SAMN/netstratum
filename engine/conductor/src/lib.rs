@@ -437,7 +437,7 @@ impl BotWorld {
         self.spawned = true;
 
         // The daughter settles ADJACENT: parent position plus a small
-        // beacon-drawn displacement in ℚ per spatial axis (half-unit
+        // beacon-drawn displacement in the exact rationals per spatial axis (half-unit
         // grain, never the zero vector).
         let step = |domain: &str| -> Ratio {
             ratio(beacon.uniform_index(domain, 9) as i64 - 4, 2)

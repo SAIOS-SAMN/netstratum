@@ -58,7 +58,7 @@ fn domains_and_digests_separate() {
     assert_ne!(b.draw("hazard.meteor"), other.draw("hazard.meteor"));
 }
 
-/// Exactness: every draw sits in ℚ ∩ [0, 1); a Bernoulli trial with
+/// Exactness: every draw sits in the exact rationals ∩ [0, 1); a Bernoulli trial with
 /// p = 0 never fires and with p = 1 always fires — the boundary is an
 /// exact comparison, not a float tolerance.
 #[test]

@@ -3,7 +3,7 @@
 use cfe::ratio::Ratio;
 use num_traits::Zero;
 
-/// An antisymmetric relational tensor over exact ℚ.
+/// An antisymmetric relational tensor over exact rational.
 ///
 /// `dim` entities; each ordered pair `(i, j)` carries a vector of
 /// `fiber` exact-rational coordinates. Invariants (enforced by the
@@ -15,7 +15,7 @@ use num_traits::Zero;
 pub struct Delta {
     dim: usize,
     fiber: usize,
-    /// `entries[i][j]` = the ℚ^fiber coordinates of the (i, j) relation.
+    /// `entries[i][j]` = the the exact rationals^fiber coordinates of the (i, j) relation.
     entries: Vec<Vec<Vec<Ratio>>>,
 }
 
@@ -117,7 +117,7 @@ where
 }
 
 /// The coherence functional: `C(Δ) = Σ R_ijk,l²` over all ordered
-/// distinct triples. `C(Δ) ≥ 0`, exact ℚ, and `C(Δ) = 0` iff
+/// distinct triples. `C(Δ) ≥ 0`, exact rational, and `C(Δ) = 0` iff
 /// `Δ_ik = Δ_ij + Δ_jk` for every triple — the cocycle condition.
 pub fn coherence_functional(delta: &Delta) -> Ratio {
     let mut c = Ratio::zero();
