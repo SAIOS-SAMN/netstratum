@@ -155,7 +155,9 @@ stability.)*
 
 ### 1.4 The sink dual — exporting cold, and the earned syntropic state
 
-**(Design stage — extends §1.2; lands with the VENT-1/ECON-J landing.)**
+**(Landed 2026-07-27 as VENT-1/ECON-J/SINK-1 — except the research and
+throttle gates, which await the tech-tree landing; the infrastructure gate
+is live.)**
 
 **Exporting cold is exporting absorption capacity.** A dim-star system
 (`T_eq⁴ → 0`) holds the rarest resource in a high-flux universe: radiator

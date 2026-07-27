@@ -420,6 +420,7 @@ fn resource_name(r: cfe::dop::Resource) -> &'static str {
         cfe::dop::Resource::Alloy => "alloy",
         cfe::dop::Resource::Diamond => "diamond",
         cfe::dop::Resource::Joule => "joule",
+        cfe::dop::Resource::Sink => "sink",
     }
 }
 
@@ -430,6 +431,7 @@ fn zone_name(k: cfe::dop::ZoneKind) -> &'static str {
         cfe::dop::ZoneKind::Smelter => "smelter",
         cfe::dop::ZoneKind::Synthesizer => "synthesizer",
         cfe::dop::ZoneKind::Encasement => "encasement",
+        cfe::dop::ZoneKind::CryoArray => "cryo-array",
     }
 }
 
@@ -450,8 +452,23 @@ fn render_state(world_name: &str, planet: &str, civilization: &str, world: &Worl
     w.field_u64("clock", world.now());
     w.field_u64("receipts", world.chronicle().receipts().len() as u64);
 
+    if let Some(class) = world.star() {
+        w.field_u64("star_class", class as u8 as u64);
+    }
     if let Some(orb) = world.orb() {
         w.field_str("colony", &orb.name);
+        // VENT-1 / observer uplink: the dual ledger and the derived
+        // (never stored) syntropy ratio.
+        w.field_str("entropy_vented", &ratio_str(&orb.entropy_vented));
+        let banked_j = orb.banked_amount(cfe::dop::Resource::Joule);
+        let denominator = banked_j.clone() + orb.entropy_vented.clone();
+        if denominator > Ratio::from(num_bigint::BigInt::from(0)) {
+            w.field_str("syntropy_ratio", &format!(
+                "{}/{}",
+                ratio_str(&banked_j),
+                ratio_str(&denominator)
+            ));
+        }
         w.key("banked");
         w.open();
         for (resource, amount) in &orb.banked {
@@ -544,6 +561,11 @@ fn render_receipt(receipt: &Receipt) -> String {
         E::PlanetSited { orb_id, albedo, orbit_r } => (
             "planet_sited",
             format!("orb {orb_id} A={} r={}", ratio_str(albedo), ratio_str(orbit_r)),
+        ),
+        E::VentSettled { amount, .. } => ("vent_settled", ratio_str(amount)),
+        E::DemurrageSettled { resource, amount, .. } => (
+            "demurrage_settled",
+            format!("{} {}", ratio_str(amount), resource_name(*resource)),
         ),
     };
     w.field_str("event", name);

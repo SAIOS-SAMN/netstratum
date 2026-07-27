@@ -143,6 +143,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 Some("smelt") | Some("smelter") => Some(ZoneKind::Smelter),
                 Some("synth") | Some("synthesizer") => Some(ZoneKind::Synthesizer),
                 Some("enc") | Some("encasement") => Some(ZoneKind::Encasement),
+                Some("cryo") | Some("cryo-array") => Some(ZoneKind::CryoArray),
                 _ => None,
             };
             match (tile, kind) {
@@ -624,6 +625,7 @@ fn kind_name(kind: ZoneKind) -> &'static str {
         ZoneKind::Smelter => "smelter",
         ZoneKind::Synthesizer => "synthesizer",
         ZoneKind::Encasement => "encasement",
+        ZoneKind::CryoArray => "cryo-array",
     }
 }
 
@@ -736,6 +738,7 @@ fn resource_name(resource: Resource) -> &'static str {
         Resource::Alloy => "alloy",
         Resource::Diamond => "diamond",
         Resource::Joule => "joule",
+        Resource::Sink => "sink",
     }
 }
 
@@ -845,7 +848,7 @@ fn map(world: &World, style: &Style, current: u64) {
     println!(
         "{}  {}",
         style.head("MAP"),
-        style.dim("E extractor · H habitat · S smelter · Y synthesizer · C encasement · lowercase = dormant · · empty")
+        style.dim("E extractor · H habitat · S smelter · Y synthesizer · C encasement · K cryo-array · lowercase = dormant · · empty")
     );
     print!("     ");
     for col in 0..GRID {
@@ -864,6 +867,7 @@ fn map(world: &World, style: &Style, current: u64) {
                     ZoneKind::Smelter => "s",
                     ZoneKind::Synthesizer => "y",
                     ZoneKind::Encasement => "c",
+                    ZoneKind::CryoArray => "k",
                 }),
                 Some(zone) => match zone.kind {
                     ZoneKind::Extractor => style.ok("E"),
@@ -871,6 +875,7 @@ fn map(world: &World, style: &Style, current: u64) {
                     ZoneKind::Smelter => style.warn("S"),
                     ZoneKind::Synthesizer => style.prompt("Y"),
                     ZoneKind::Encasement => style.warn("C"),
+                    ZoneKind::CryoArray => style.head("K"),
                 },
                 None => style.dim("·"),
             };
@@ -1053,6 +1058,15 @@ fn chronicle(world: &World, style: &Style) {
                 style.strong(&orb_id.to_string()),
                 amount(albedo),
                 amount(orbit_r)
+            ),
+            cfe::dop::ClosureEvent::VentSettled { amount: vented, .. } => format!(
+                "♨ vented entropy settled: {} into the cumulative ledger",
+                style.strong(&amount(vented))
+            ),
+            cfe::dop::ClosureEvent::DemurrageSettled { resource, amount: decay, .. } => format!(
+                "◌ demurrage settled: {} {} decayed un-vaulted",
+                style.strong(&amount(decay)),
+                resource_name(*resource)
             ),
         };
         let tag = receipt

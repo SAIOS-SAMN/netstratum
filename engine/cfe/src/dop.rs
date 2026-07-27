@@ -24,11 +24,14 @@
 //!   23 ClosureEvent::OverheatCleared (THERMAL-1)
 //!   24 ClosureEvent::StarCommissioned (THERMAL-1)
 //!   25 ClosureEvent::PlanetSited (THERMAL-1)
+//!   27 ClosureEvent::VentSettled (VENT-1)
+//!   29 ClosureEvent::DemurrageSettled (SINK-1)
 //!   16 Orb header (orb_id ‖ name)
 //!   17 Orb zone entry (tile ‖ kind)
 //!   18 Orb banked entry (resource ‖ ratio)
 //!   19 Orb famine entry (resource)
 //!   26 Orb thermal entry (albedo ‖ orbit_r ‖ overheat u8) — THERMAL-1
+//!   28 Orb vent entry (entropy_vented ratio ‖ LE64 last_touch) — VENT-1/SINK-1
 
 use crate::ratio::{self, ratio, Ratio};
 use crate::tlv;
@@ -46,6 +49,9 @@ pub enum Resource {
     /// THERMAL-1 (05 §1.2): the commodity joule — minted ONLY by
     /// syntropic encasement of excess heat, never by fiat (01 §6.1).
     Joule = 5,
+    /// SINK-1 (05 §1.4): bankable heat-absorption capacity — captured
+    /// from vault-band headroom by cryo-lattice arrays, never passive.
+    Sink = 6,
 }
 
 impl Resource {
@@ -56,16 +62,18 @@ impl Resource {
             3 => Some(Self::Alloy),
             4 => Some(Self::Diamond),
             5 => Some(Self::Joule),
+            6 => Some(Self::Sink),
             _ => None,
         }
     }
 
-    pub const ALL: [Resource; 5] = [
+    pub const ALL: [Resource; 6] = [
         Self::Iron,
         Self::Biomass,
         Self::Alloy,
         Self::Diamond,
         Self::Joule,
+        Self::Sink,
     ];
 }
 
@@ -94,6 +102,24 @@ pub fn joule_leak_per_tick() -> Ratio {
     ratio(1, 8)
 }
 
+/// ECON-J (05 §1.2, placeholder): joules one active zone burns per
+/// tick for heating on a sub-mesic sited orb.
+pub fn heating_per_zone() -> Ratio {
+    ratio(1, 4)
+}
+
+/// SINK-1 (05 §1.4, placeholder): sink capacity one active cryo-lattice
+/// array captures per tick from vault-band headroom.
+pub fn sink_throughput() -> Ratio {
+    ratio(2, 1)
+}
+
+/// SINK-1 (Q2 demurrage, placeholder): the per-elapsed-tick decay rate
+/// on un-vaulted BANKED joules/sink, settled by receipt at touch.
+pub fn demurrage_per_tick() -> Ratio {
+    ratio(1, 32)
+}
+
 /// The zone kinds, with their ruleset-v1 economics.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -108,6 +134,10 @@ pub enum ZoneKind {
     /// into joules BEFORE anything vents. Its "yield" is computed by
     /// the heat law at tick time, never by `yield_per_tick`.
     Encasement = 5,
+    /// SINK-1 (05 §1.4): the cryo-lattice array — captures vault-band
+    /// radiator headroom as bankable sink. Heat-law yield, like the
+    /// shell. The infrastructure gate; research/throttle gates deferred.
+    CryoArray = 6,
 }
 
 impl ZoneKind {
@@ -118,6 +148,7 @@ impl ZoneKind {
             3 => Some(Self::Smelter),
             4 => Some(Self::Synthesizer),
             5 => Some(Self::Encasement),
+            6 => Some(Self::CryoArray),
             _ => None,
         }
     }
@@ -136,6 +167,7 @@ impl ZoneKind {
                 (Resource::Biomass, ratio(15, 1)),
             ],
             Self::Encasement => vec![(Resource::Iron, ratio(8, 1))],
+            Self::CryoArray => vec![(Resource::Iron, ratio(10, 1))],
         }
     }
 
@@ -149,6 +181,7 @@ impl ZoneKind {
             Self::Smelter => (Resource::Alloy, ratio(1, 1)),
             Self::Synthesizer => (Resource::Diamond, ratio(1, 4)),
             Self::Encasement => (Resource::Joule, ratio(0, 1)),
+            Self::CryoArray => (Resource::Sink, ratio(0, 1)),
         }
     }
 
@@ -167,6 +200,7 @@ impl ZoneKind {
                 (Resource::Biomass, ratio(1, 1)),
             ],
             Self::Encasement => vec![(Resource::Iron, ratio(1, 4))],
+            Self::CryoArray => vec![(Resource::Iron, ratio(1, 4))],
         }
     }
 
@@ -177,7 +211,7 @@ impl ZoneKind {
         match self {
             Self::Extractor | Self::Habitat => ratio(1, 4),
             Self::Smelter | Self::Synthesizer => ratio(1, 1),
-            Self::Encasement => ratio(0, 1),
+            Self::Encasement | Self::CryoArray => ratio(0, 1),
         }
     }
 
@@ -241,6 +275,13 @@ pub enum ClosureEvent {
     /// THERMAL-1 (05 §1.1) — a colony sited on its orbit: albedo A and
     /// orbit radius r, the orb's terms in the master equation.
     PlanetSited { orb_id: u64, albedo: Ratio, orbit_r: Ratio },
+    /// VENT-1 (05 §1.4) — accumulated vented entropy settled into the
+    /// orb's cumulative ledger at collect (the yield pattern: one
+    /// receipt, no per-tick bloat).
+    VentSettled { orb_id: u64, amount: Ratio },
+    /// SINK-1 (Q2) — receipted demurrage: un-vaulted banked stores
+    /// decayed since last touch; settled here, never silently.
+    DemurrageSettled { orb_id: u64, resource: Resource, amount: Ratio },
 }
 
 impl ClosureEvent {
@@ -325,6 +366,14 @@ impl ClosureEvent {
                 ratio::encode(albedo, &mut value);
                 ratio::encode(orbit_r, &mut value);
                 tlv::put(25, &value, &mut out);
+            }
+            Self::VentSettled { orb_id, amount } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                ratio::encode(amount, &mut value);
+                tlv::put(27, &value, &mut out);
+            }
+            Self::DemurrageSettled { orb_id, resource, amount } => {
+                tlv::put(29, &amount_layout(*orb_id, *resource, amount), &mut out);
             }
         }
         out
@@ -413,6 +462,15 @@ impl ClosureEvent {
                 let (orbit_r, _) = ratio::decode(value.get(8 + used..)?)?;
                 Some(Self::PlanetSited { orb_id, albedo, orbit_r })
             }
+            27 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let (amount, _) = ratio::decode(value.get(8..)?)?;
+                Some(Self::VentSettled { orb_id, amount })
+            }
+            29 => {
+                let (orb_id, resource, amount) = amount_fields(value)?;
+                Some(Self::DemurrageSettled { orb_id, resource, amount })
+            }
             _ => None,
         }
     }
@@ -462,6 +520,10 @@ pub struct ColonyOrb {
     pub thermal: Option<ThermalSite>,
     /// THERMAL-1: currently overheating (overflow > 0)?
     pub overheat: bool,
+    /// VENT-1: cumulative vented entropy, settled by receipt.
+    pub entropy_vented: Ratio,
+    /// SINK-1: the stamp of the last settle (demurrage anchor).
+    pub last_touch: u64,
 }
 
 impl ColonyOrb {
@@ -491,6 +553,12 @@ impl ColonyOrb {
             ratio::encode(&site.orbit_r, &mut value);
             value.push(self.overheat as u8);
             tlv::put(26, &value, &mut out);
+        }
+        if self.entropy_vented != ratio(0, 1) || self.last_touch != 0 {
+            let mut value = Vec::new();
+            ratio::encode(&self.entropy_vented, &mut value);
+            value.extend_from_slice(&self.last_touch.to_le_bytes());
+            tlv::put(28, &value, &mut out);
         }
         out
     }
@@ -524,6 +592,12 @@ impl ColonyOrb {
                     let (orbit_r, used_r) = ratio::decode(value.get(used..)?)?;
                     orb.thermal = Some(ThermalSite { albedo, orbit_r });
                     orb.overheat = *value.get(used + used_r)? != 0;
+                }
+                28 => {
+                    let (vented, used) = ratio::decode(value)?;
+                    orb.entropy_vented = vented;
+                    orb.last_touch =
+                        u64::from_le_bytes(value.get(used..used + 8)?.try_into().ok()?);
                 }
                 _ => {}
             }

@@ -182,6 +182,27 @@ N5/N6). Details and sequencing in 04 §6.
   founding colony cannot afford (a measured balance fact); thermal trade
   routes and entropy rights await the economy landings.
 
+- **VENT-1 + ECON-J + SINK-1 LANDED** (2026-07-27): THE TWO-SIDED THERMAL
+  BALANCE SHEET. VENT-1: vented overflow accumulates as workspace and seals
+  by ONE `VentSettled` receipt at collect (tag 27) into the per-orb
+  cumulative `entropy_vented` ledger (orb entry tag 28); conservation
+  measured exact (banked + leaked + vented = total excess). ECON-J: sited
+  sub-mesic orbs burn joules per active zone for heating; unpaid ⇒ joule
+  famine ⇒ FREEZE-LOCK (no flows at all); relief requires the one-tick
+  heating bill covered. SINK-1: bankable sink (Resource 6) captured from
+  vault-band headroom by cryo-lattice arrays (zone kind 6) — the
+  infrastructure gate; the research and throttle-α gates DEFERRED to the
+  tech-tree landing (05 §1.4, recorded). Q2's receipted demurrage landed:
+  un-vaulted banked joules/sink decay 1/32 per elapsed tick, settled
+  openly at touch (`DemurrageSettled`, tag 29, anchored on `last_touch`);
+  the vault charges nothing. Observer uplink: `state.json` carries
+  star_class, entropy_vented, and the derived (never stored) syntropy
+  ratio. Evidence: clippy zero; **116/116 workspace witnesses green**
+  (5 new: the books balance exactly at 15/4 + 1/4 + 1 = 5; the cold orb
+  freeze-locks; the vault captures 19999/10000 sink and pays no
+  demurrage; warm banked joules decay exactly 15/64 over 4 ticks by
+  receipt; tags 27/29 byte-exact; replay MATCHES with the dual ledger).
+
 ## 2. The depth board (02_COLONY_LOOP — game depth before multiplayer)
 
 Ruled 2026-07-25: the world must be worth sharing before N6 shares it. These

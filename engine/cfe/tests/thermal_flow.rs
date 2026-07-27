@@ -197,3 +197,162 @@ fn the_thermal_world_replays_and_round_trips() {
     // The banked joules are canonical: collected encasement persisted.
     assert!(orb.banked_amount(Resource::Joule) > ratio(0, 1));
 }
+
+/// VENT-1 conservation (05 §1.4): captured + vented = total excess,
+/// exactly, and the vented ledger seals at collect via one receipt.
+#[test]
+fn the_vent_ledger_conserves_and_seals_at_collect() {
+    let mut world = World::new();
+    world.found("books").expect("founds");
+    world.commission_star(StarClass::G).expect("commissions");
+    world
+        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2))
+        .expect("sites");
+    world.zone(0, ZoneKind::Extractor).expect("zones");
+    world.zone(8, ZoneKind::Habitat).expect("zones");
+    world.zone(16, ZoneKind::Encasement).expect("zones");
+    // Per tick: excess 5/2 = encased 2 + vented 1/2. Two ticks.
+    world.tick();
+    world.tick();
+    world.collect().expect("collects");
+    let orb = world.orb().expect("orb");
+    assert_eq!(orb.entropy_vented, ratio(1, 1), "2 × 1/2 vented, sealed");
+    let banked_j = orb.banked_amount(Resource::Joule);
+    assert_eq!(banked_j, ratio(15, 4), "2×2 encased − 2×1/8 warm leak");
+    // The books: banked + leaked + vented = total excess. Exact.
+    assert_eq!(
+        banked_j + ratio(1, 4) + orb.entropy_vented.clone(),
+        ratio(5, 1)
+    );
+    let vents = world
+        .chronicle()
+        .receipts()
+        .iter()
+        .filter(|r| matches!(r.event, ClosureEvent::VentSettled { .. }))
+        .count();
+    assert_eq!(vents, 1, "one receipt, no per-tick bloat");
+}
+
+/// ECON-J (05 §1.2): a cold sited orb burns joules for heating; with
+/// none banked, joule famine strikes and the orb FREEZE-LOCKS — no
+/// flows at all until fuel arrives.
+#[test]
+fn a_cold_orb_burns_joules_and_freeze_locks() {
+    let mut world = World::new();
+    world.found("frost").expect("founds");
+    world.commission_star(StarClass::G).expect("commissions");
+    world
+        .site_planet(FIRST_ORB, ratio(0, 1), ratio(100, 1))
+        .expect("sites");
+    world.zone(0, ZoneKind::Extractor).expect("zones");
+    let outcome = world.tick();
+    assert!(
+        outcome.struck.contains(&(FIRST_ORB, Resource::Joule)),
+        "joule famine strikes: heating unpaid"
+    );
+    let iron_after_strike = iron(&world);
+    world.tick();
+    world.tick();
+    assert_eq!(iron(&world), iron_after_strike, "frozen: no flows accrue");
+}
+
+/// SINK-1 (05 §1.4): a vault-band cryo array captures headroom as
+/// bankable sink — exactly min(−heat_net, throughput) — and vaulted
+/// banked stores pay NO demurrage.
+#[test]
+fn the_vault_captures_sink_and_charges_no_demurrage() {
+    let mut world = World::new();
+    world.found("vault").expect("founds");
+    world.commission_star(StarClass::G).expect("commissions");
+    world
+        .site_planet(FIRST_ORB, ratio(0, 1), ratio(100, 1))
+        .expect("sites");
+    world.zone(0, ZoneKind::CryoArray).expect("zones");
+    world.tick();
+    // headroom = 2 − 1/10000 = 19999/10000, one array (throughput 2).
+    let sink = world
+        .accrued()
+        .into_iter()
+        .find(|(resource, _)| *resource == Resource::Sink)
+        .map(|(_, amount)| amount)
+        .expect("sink accrued");
+    assert_eq!(sink, ratio(19_999, 10_000));
+    world.collect().expect("collects");
+    assert_eq!(
+        world.orb().expect("orb").banked_amount(Resource::Sink),
+        ratio(19_999, 10_000)
+    );
+    // Let time pass; a second settle in the vault charges no demurrage.
+    world.tick();
+    world.tick();
+    let _ = world.collect();
+    let demurrage = world
+        .chronicle()
+        .receipts()
+        .iter()
+        .filter(|r| matches!(r.event, ClosureEvent::DemurrageSettled { .. }))
+        .count();
+    assert_eq!(demurrage, 0, "the vault is lossless — no decay receipts");
+}
+
+/// SINK-1/Q2: un-vaulted banked stores decay by receipted demurrage at
+/// touch — exact, open, never silent.
+#[test]
+fn warm_banked_joules_pay_receipted_demurrage_at_touch() {
+    let mut world = World::new();
+    world.found("demurrage").expect("founds");
+    world.commission_star(StarClass::G).expect("commissions");
+    world
+        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2))
+        .expect("sites");
+    world.zone(0, ZoneKind::Extractor).expect("zones");
+    world.zone(8, ZoneKind::Habitat).expect("zones");
+    world.zone(16, ZoneKind::Encasement).expect("zones");
+    world.tick();
+    world.collect().expect("collects");
+    let banked = world.orb().expect("orb").banked_amount(Resource::Joule);
+    assert_eq!(banked, ratio(15, 8));
+    let touch = world.orb().expect("orb").last_touch;
+    for _ in 0..4 {
+        world.tick();
+    }
+    world.collect().expect("collects again");
+    let elapsed = world.orb().expect("orb").last_touch - touch;
+    assert_eq!(elapsed, 4);
+    // decay = 15/8 × 1/32 × 4 = 15/64, settled by receipt.
+    let decayed = world
+        .chronicle()
+        .receipts()
+        .iter()
+        .find_map(|r| match &r.event {
+            ClosureEvent::DemurrageSettled { resource: Resource::Joule, amount, .. } => {
+                Some(amount.clone())
+            }
+            _ => None,
+        })
+        .expect("demurrage receipted");
+    assert_eq!(decayed, ratio(15, 64));
+    // And the whole story still replays.
+    let rebuilt = replay(world.chronicle());
+    assert_eq!(rebuilt, world.committed(), "replay MATCHES with the dual ledger");
+}
+
+/// The two new events round-trip byte-exact (tags 27, 29).
+#[test]
+fn vent_and_demurrage_events_round_trip() {
+    for event in [
+        ClosureEvent::VentSettled { orb_id: 3, amount: ratio(7, 2) },
+        ClosureEvent::DemurrageSettled {
+            orb_id: 3,
+            resource: Resource::Sink,
+            amount: ratio(15, 64),
+        },
+    ] {
+        let bytes = event.wire_bytes();
+        let (tag, value) = cfe::tlv::records(&bytes).next().expect("one record");
+        assert!(tag == 27 || tag == 29);
+        let decoded = ClosureEvent::from_wire(tag, value).expect("decodes");
+        assert_eq!(decoded, event);
+        assert_eq!(decoded.wire_bytes(), bytes);
+    }
+}

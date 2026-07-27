@@ -85,6 +85,9 @@ pub struct World {
     /// WORKSPACE, per orb: net flow since that orb's last collection —
     /// no receipt, no persistence, not committed.
     accrued: Vec<(u64, Resource, Ratio)>,
+    /// VENT-1 WORKSPACE, per orb: vented entropy since last settle —
+    /// sealed into the cumulative ledger by `VentSettled` at collect.
+    vent_pending: Vec<(u64, Ratio)>,
 }
 
 impl World {
@@ -97,6 +100,7 @@ impl World {
             entities: Vec::new(),
             star: None,
             accrued: Vec::new(),
+            vent_pending: Vec::new(),
         }
     }
 
@@ -121,6 +125,7 @@ impl World {
             entities: committed.entities,
             star: committed.star,
             accrued: Vec::new(),
+            vent_pending: Vec::new(),
         }
     }
 
@@ -503,21 +508,49 @@ impl World {
         for (orb_id, active) in &flows {
             // THERMAL-1: the heat law, live only when the sun is
             // commissioned AND this orb is sited (the opt-in guard).
-            let site = self
-                .orbs
-                .iter()
-                .find(|held| held.orb_id == *orb_id)
-                .and_then(|held| held.thermal.clone());
+            let holder = self.orbs.iter().find(|held| held.orb_id == *orb_id);
+            let site = holder.and_then(|held| held.thermal.clone());
+            let joule_famined = holder
+                .map(|held| held.famine.contains(&Resource::Joule))
+                .unwrap_or(false);
             let mut efficiency = one.clone();
             let mut t4: Option<Ratio> = None;
+            let mut frozen = false;
             if let (Some(class), Some(site)) = (self.star, site) {
                 let t_eq4 = thermal::t_eq4(&class.luminosity(), &site.albedo, &site.orbit_r);
+                // ECON-J freeze-lock (05 §1.2): a sub-mesic orb in joule
+                // famine is frozen whole — no flows until fuel arrives.
+                let sub_mesic = t_eq4 < thermal::SubstrateBand::Mesic.bounds4().0;
+                frozen = sub_mesic && joule_famined;
                 let stellar_load = t_eq4.clone() / thermal::thermal_k();
                 let factory: Ratio = active
                     .iter()
                     .fold(zero.clone(), |sum, zone| sum + zone.kind.factory_heat());
                 let heat_net = stellar_load + factory - radiator_base();
-                if heat_net > zero {
+                // ECON-J (05 §1.2): heating upkeep on a sub-mesic orb —
+                // every active zone burns joules against the cold.
+                if sub_mesic && !frozen && !active.is_empty() {
+                    let burn = crate::dop::heating_per_zone() * ratio(active.len() as i64, 1);
+                    accrue(&mut self.accrued, *orb_id, Resource::Joule, -burn);
+                }
+                // SINK-1 (05 §1.4): vault-band headroom is captured as
+                // bankable sink by active cryo-lattice arrays — the
+                // infrastructure gate (research/throttle gates deferred).
+                if !frozen && heat_net < zero && t_eq4 <= thermal::cryo_vault_max4() {
+                    let arrays = active
+                        .iter()
+                        .filter(|zone| zone.kind == ZoneKind::CryoArray)
+                        .count() as i64;
+                    if arrays > 0 {
+                        let headroom = -heat_net.clone();
+                        let captured =
+                            headroom.min(crate::dop::sink_throughput() * ratio(arrays, 1));
+                        if captured > zero {
+                            accrue(&mut self.accrued, *orb_id, Resource::Sink, captured);
+                        }
+                    }
+                }
+                if !frozen && heat_net > zero {
                     // The syntropic arm FIRST (05 §1.2): shells encase
                     // up to their throughput; joules accrue as yield.
                     let shells = active
@@ -533,6 +566,16 @@ impl World {
                     let overflow = heat_net - encased;
                     if overflow > zero {
                         efficiency = one.clone() / (one.clone() + overflow.clone());
+                        // VENT-1: the loss accumulates in workspace,
+                        // sealed by VentSettled at collect.
+                        match self
+                            .vent_pending
+                            .iter_mut()
+                            .find(|(held, _)| held == orb_id)
+                        {
+                            Some((_, pending)) => *pending += overflow.clone(),
+                            None => self.vent_pending.push((*orb_id, overflow.clone())),
+                        }
                         let held = self
                             .orbs
                             .iter_mut()
@@ -570,16 +613,18 @@ impl World {
                     overheat_cleared.push(*orb_id);
                 }
             }
-            for zone in active {
-                let (resource, amount) = zone.kind.yield_per_tick();
-                accrue(
-                    &mut self.accrued,
-                    *orb_id,
-                    resource,
-                    amount * efficiency.clone(),
-                );
-                for (resource, amount) in zone.kind.upkeep_per_tick() {
-                    accrue(&mut self.accrued, *orb_id, resource, -amount);
+            if !frozen {
+                for zone in active {
+                    let (resource, amount) = zone.kind.yield_per_tick();
+                    accrue(
+                        &mut self.accrued,
+                        *orb_id,
+                        resource,
+                        amount * efficiency.clone(),
+                    );
+                    for (resource, amount) in zone.kind.upkeep_per_tick() {
+                        accrue(&mut self.accrued, *orb_id, resource, -amount);
+                    }
                 }
             }
             // The cryo law (05 §1.2): accrued joules leak outside the
@@ -666,6 +711,46 @@ impl World {
         let orb_id = held.orb_id;
         let stamp = self.clock.now();
         let count = settleable.len();
+        // SINK-1 (Q2): receipted demurrage at touch — un-vaulted banked
+        // joules/sink decay for the elapsed span, settled openly.
+        if let (Some(class), Some(site)) = (self.star, held.thermal.clone()) {
+            let t4 = crate::thermal::t_eq4(&class.luminosity(), &site.albedo, &site.orbit_r);
+            if crate::thermal::leaks(&t4) && stamp > held.last_touch {
+                let elapsed = ratio((stamp - held.last_touch) as i64, 1);
+                for resource in [Resource::Joule, Resource::Sink] {
+                    let banked = held.banked_amount(resource);
+                    if banked > ratio(0, 1) {
+                        let decay =
+                            (banked.clone() * crate::dop::demurrage_per_tick() * elapsed.clone())
+                                .min(banked);
+                        held.bank(resource, -decay.clone());
+                        self.chronicle.append(
+                            ClosureEvent::DemurrageSettled { orb_id, resource, amount: decay },
+                            stamp,
+                            vec![],
+                        );
+                    }
+                }
+            }
+        }
+        held.last_touch = stamp;
+        // VENT-1: seal the pending vented entropy into the ledger.
+        let mut vented = ratio(0, 1);
+        self.vent_pending.retain(|(held_orb, pending)| match *held_orb == orb_id {
+            true => {
+                vented += pending.clone();
+                false
+            }
+            false => true,
+        });
+        if vented > ratio(0, 1) {
+            held.entropy_vented += vented.clone();
+            self.chronicle.append(
+                ClosureEvent::VentSettled { orb_id, amount: vented },
+                stamp,
+                vec![actor],
+            );
+        }
         for (resource, amount) in settleable {
             match amount >= ratio(0, 1) {
                 true => {
@@ -704,21 +789,39 @@ impl World {
         }
     }
 
-    /// Famine relief for ONE orb (02 §2.4).
+    /// Famine relief for ONE orb (02 §2.4). Joule relief on a cold orb
+    /// needs the one-tick HEATING bill covered (ECON-J), not zero.
     fn relieve_recovered(&mut self, orb: u64) {
         let stamp = self.clock.now();
+        let star = self.star;
         let Some(held) = self.orbs.iter_mut().find(|held| held.orb_id == orb) else {
             return;
         };
+        let heating_need: Ratio = match (star, &held.thermal) {
+            (Some(class), Some(site)) => {
+                let t4 =
+                    crate::thermal::t_eq4(&class.luminosity(), &site.albedo, &site.orbit_r);
+                match t4 < crate::thermal::SubstrateBand::Mesic.bounds4().0 {
+                    true => {
+                        crate::dop::heating_per_zone() * ratio(held.zones.len() as i64, 1)
+                    }
+                    false => ratio(0, 1),
+                }
+            }
+            _ => ratio(0, 1),
+        };
         let famined: Vec<Resource> = held.famine.clone();
         for resource in famined {
-            let one_tick: Ratio = held
+            let mut one_tick: Ratio = held
                 .zones
                 .iter()
                 .flat_map(|zone| zone.kind.upkeep_per_tick())
                 .filter(|(consumed, _)| *consumed == resource)
                 .map(|(_, amount)| amount)
                 .fold(ratio(0, 1), |sum, amount| sum + amount);
+            if resource == Resource::Joule {
+                one_tick += heating_need.clone();
+            }
             if held.banked_amount(resource) >= one_tick {
                 held.famine.retain(|kept| *kept != resource);
                 self.chronicle.append(
@@ -815,6 +918,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             ClosureEvent::YieldCollected { orb_id, resource, amount } => {
                 if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
                     held.bank(*resource, amount.clone());
+                    held.last_touch = receipt.stamp;
                 }
             }
             ClosureEvent::UpkeepSettled { orb_id, resource, amount } => {
@@ -867,6 +971,20 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             ClosureEvent::OverheatCleared { orb_id } => {
                 if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
                     held.overheat = false;
+                }
+            }
+            // VENT-1: the cumulative ledger replays from settlements.
+            ClosureEvent::VentSettled { orb_id, amount } => {
+                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                    held.entropy_vented += amount.clone();
+                    held.last_touch = receipt.stamp;
+                }
+            }
+            // SINK-1: receipted demurrage replays as a bank draw.
+            ClosureEvent::DemurrageSettled { orb_id, resource, amount } => {
+                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                    held.bank(*resource, -amount.clone());
+                    held.last_touch = receipt.stamp;
                 }
             }
         }
