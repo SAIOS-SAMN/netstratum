@@ -177,8 +177,9 @@ Candidate next work (the operator picks; nothing starts without go):
 3. **TECH-1** (`docs/10_TECH_EMERGENCE.md`, tags 39–40): carries the
    SINK-1 research/throttle gates.
 4. **BOT-THERM phase 2:** trade execution against the wants the wall
-   shows (boarded, not landed) — the bots could now use `send`/
-   `absorb`/`bond` and grow real books.
+   shows (boarded, not landed) — the egregores' automatons (ce5cd64
+   vocabulary: never "bots") could now use `send`/`absorb`/`bond` and
+   grow real cohesion books.
 5. **Depth board D2/D3** (terrain tag 8, spoilage+milestones tag 9)
    and the protocol board N4 (scanner) onward.
 6. **Q4 deferrals** when balance demands them (commensuration table,
