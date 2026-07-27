@@ -104,7 +104,7 @@ gravitational radius `r_g = 2GM/c²` that continuously ejects energy outward at
   The π sits in the shell area and, per §1.1, is carried exactly and cancels
   against a `πR²` collector — delivered power `P = M c² R² / (4 r² Δt)`, an
   exact rational.
-- **Role:** a hyper-dense energy anchor at the extreme of the Crucible regime
+- **Role:** a hyper-dense energy anchor at the extreme of the Furnace regime
   (§3.1) — it pushes the equilibrium radius far outward, makes the surrounding
   sectors the richest joule sources in the trade loop (§4), and its
   gravitational/thermal push forces high-efficiency ring architecture around
@@ -176,7 +176,7 @@ has its own optimal operating band `T_opt` and tolerance window `ΔT`
 
 - **Occupants:** exotic silicon/lithic lifeforms, plasma refineries, Dyson
   energy harvesters, heavy alloy smelters.
-- **Optimal placement:** inner-system crucible zones near dense Class O/B
+- **Optimal placement:** inner-system furnace zones near dense Class O/B
   stars or white dwarfs.
 - **Friction:** high structural stress, but zero heating overhead for
   high-activation-energy chemistry and nuclear work.
@@ -189,7 +189,7 @@ Per star (density/size fixing `L`), the sector's coordinate grid breaks into
 three operational regions. Note these are zones of the *grid*; which zone is
 "good" depends entirely on the occupying substrate (§2).
 
-### 3.1 The Crucible Zone (extreme heat)
+### 3.1 The Furnace Zone (extreme heat)
 
 - **Physics:** `T_eq⁴` above the thermal melting threshold — the star
   radiates massive photon energy and the vacuum cannot dissipate it.
@@ -223,7 +223,7 @@ The single balance loop natively creates the supply-and-demand chain without
 artificial mechanics:
 
 ```
-   CRUCIBLE ZONE (HEAVY HEAT)                    FROST ZONE (EXTREME COLD)
+   FURNACE ZONE (HEAVY HEAT)                    FROST ZONE (EXTREME COLD)
    ┌───────────────────────────┐                 ┌───────────────────────────┐
    │ • Excess Energy & Plasma  │                 │ • High Radiator Headroom  │
    │ • Desperate for Coolants  │                 │ • Desperate for Energy    │
@@ -248,7 +248,7 @@ produces non-zero-sum diplomacy:
    ┌──────────────────────────────┐                    ┌──────────────────────────────┐
    │ • Outer Frozen Moon:         │                    │ • Outer Frozen Moon:         │
    │   PARADISE (0 Coolant Cost)  │                    │   WASTE (High Heat Cost)     │
-   │ • Inner Crucible Planet:     │                    │ • Inner Crucible Planet:     │
+   │ • Inner Furnace Planet:     │                    │ • Inner Furnace Planet:     │
    │   HELL (Thermal Noise)       │                    │   UNHABITABLE (Meltdowns)    │
    └──────────────┬───────────────┘                    └──────────────┬───────────────┘
                   │                                                   │
@@ -306,7 +306,7 @@ layers, world to chain:
 ### 7.1 Energy is the in-world currency — chronicle-native, never a token
 
 `T_eq⁴` gives every sector an exact, replayable marginal cost of energy:
-near-free in the Crucible, expensive in the Frost. Energy (joules, exact
+near-free in the Furnace, expensive in the Frost. Energy (joules, exact
 rationals in the chronicle) is therefore the commodity money of the world —
 its supply set by physics, not by a mint. The hot/cold price differential IS
 the monetary system: coolant flowing hot-ward and energy cold-ward is a
@@ -326,13 +326,13 @@ conditions with physical definitions:
 - **Rare-world minting** (NS-7's named first consumer): rarity is a world
   whose `T_eq⁴` sits inside a substrate's equilibrium band — a mesic-band
   world near a dense star, or a frost moon with radiator headroom adjacent
-  to a crucible energy source, is provably scarce by the equation. That deed
+  to a furnace energy source, is provably scarce by the equation. That deed
   anchors as an ERC-721.
 - **Thermal entropy rights** (§4): the transferable right to dump heat into
   a sector's radiator headroom or draw from its flux — an ERC-1155 class,
   settled through the adapter when it changes hands between empires.
 - **Macro-trades:** a long-lived coolant/energy route contract between a
-  crucible and a frost sector is the macro-trade NS-7 anticipates.
+  furnace and a frost sector is the macro-trade NS-7 anticipates.
 
 ### 7.3 The adapter maps value, never physics (SEAL C)
 

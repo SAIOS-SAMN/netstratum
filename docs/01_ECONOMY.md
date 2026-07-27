@@ -129,7 +129,7 @@ thermodynamic state variable `T_eq⁴`.
   volume and local density are governed strictly by sector thermal balance
   (`05_THERMAL_BALANCE.md` §1, §3).
 - **Thermal arbitrage:** the intrinsic price differential between
-  energy-rich Crucible sectors and heat-sink Frost sectors is the core
+  energy-rich Furnace sectors and heat-sink Frost sectors is the core
   macro-economic trade loop and the fundamental monetary axis. Transporting
   coolant toward high-flux stars and energy toward cryogenic compute
   sectors constitutes the primary monetary exchange between thermal
@@ -152,7 +152,7 @@ trigger conditions defined in `05_THERMAL_BALANCE.md` §7.2:
 2. **Thermal entropy rights (ERC-1155):** sector-level allocations for heat
    dumping and radiator capacity — transferable, tradeable rights.
 3. **Inter-sector route contracts:** high-throughput, long-duration supply
-   agreements between Crucible and Frost regimes anchor externally so
+   agreements between Furnace and Frost regimes anchor externally so
    ownership survives across empire boundaries.
 
 These ride the same rails as §1 domain leases and §2 land tenure, under the

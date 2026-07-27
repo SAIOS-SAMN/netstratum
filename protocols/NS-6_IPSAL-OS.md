@@ -195,9 +195,9 @@ the core enumerator; remnants, giants, and the lore exotic follow.
 
 | code | class | colour | ~surface T | luminosity vs Sol | thermal consequence (05) |
 |---|---|---|---|---|---|
-| 1 | **O** | blue | >30,000 K | ~10⁴–10⁶ L☉ | Crucible dominates; equilibrium band pushed far outward; rare |
-| 2 | **B** | blue-white | 10–30,000 K | ~25–30,000 L☉ | vast Crucible; hyper energy yield |
-| 3 | **A** | white | 7.5–10,000 K | ~5–25 L☉ | wide Crucible, mesic band far out |
+| 1 | **O** | blue | >30,000 K | ~10⁴–10⁶ L☉ | Furnace dominates; equilibrium band pushed far outward; rare |
+| 2 | **B** | blue-white | 10–30,000 K | ~25–30,000 L☉ | vast Furnace; hyper energy yield |
+| 3 | **A** | white | 7.5–10,000 K | ~5–25 L☉ | wide Furnace, mesic band far out |
 | 4 | **F** | yellow-white | 6–7.5,000 K | ~1.5–5 L☉ | mesic band beyond 1 unit |
 | 5 | **G** | yellow (Sol) | 5.2–6,000 K | ~0.6–1.5 L☉ | balanced; mesic band near 1 unit |
 | 6 | **K** | orange | 3.7–5.2,000 K | ~0.08–0.6 L☉ | mesic band pulled inward |
@@ -209,9 +209,9 @@ the core enumerator; remnants, giants, and the lore exotic follow.
 |---|---|---|---|
 | 8 | **L/T/Y** | brown dwarf (sub-stellar) | near-Frost at every radius; compute-favourable |
 | 9 | **D** | white dwarf (remnant) | low total output, fading; tight, shrinking bands |
-| 10 | **RG/SG** | red giant / supergiant (evolved) | enormous luminous shell; Crucible swallows inner orbits |
+| 10 | **RG/SG** | red giant / supergiant (evolved) | enormous luminous shell; Furnace swallows inner orbits |
 | 11 | **N** | neutron star / pulsar (remnant) | beamed, extreme, hazardous; narrow usable shells |
-| 12 | **WR** | Wolf–Rayet (hot, mass-losing) | violent Crucible; short-lived, resource-rich |
+| 12 | **WR** | Wolf–Rayet (hot, mass-losing) | violent Furnace; short-lived, resource-rich |
 | 13 | **✦** | **Luminal White Hole** (lore exotic) | the ultimate energy anchor (`05_THERMAL_BALANCE.md` §1.2) |
 
 Codes are the wire enumerator (a permanent NS-1 tag at the star-orb landing);

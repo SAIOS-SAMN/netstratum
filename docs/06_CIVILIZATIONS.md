@@ -55,10 +55,10 @@ hyper-thermal 600–1500 K) or a cross-band deep regime (mantle, deep rock).
   energy where visible-light metabolism cannot reach, and draw a hardened
   dormancy shell about themselves in darkness or vacuum until the flux
   returns.
-- **Band / regime:** hyper-thermal / high-flux Crucible (05 §2.3, §3.1).
-- **Function — Crucible infrastructure & the first refineries.** The galaxy's
+- **Band / regime:** hyper-thermal / high-flux Furnace (05 §2.3, §3.1).
+- **Function — Furnace infrastructure & the first refineries.** The galaxy's
   greatest gatherers of stellar fire, thriving where ordinary works burn away.
-- **Netstratum tie-in:** the in-fiction source of the Crucible's cheap energy
+- **Netstratum tie-in:** the in-fiction source of the Furnace's cheap energy
   (05 §3.1). Harvest-grids around Emberkin holdings render stellar flux into
   exact-rational joules — the energy that flows cold-ward along the thermal trade
   loop (05 §4, 01 §6.1).
@@ -113,7 +113,7 @@ hyper-thermal 600–1500 K) or a cross-band deep regime (mantle, deep rock).
 |---|---|---|---|
 | The Wanderers (reference, not a baseline) | Variable / borderlands | Generalist; dormancy through drought | First colonization; masters of no niche |
 | Glasskeepers (Litho-Chalcogens) | Mantle / tectonic | Silicon–sulfur crystal; vitrification | Chronicle anchoring, deep storage, neutral escrow |
-| Emberkin (Radiotrophs) | High-flux Crucible (hyper-thermal) | Flux-harvesting lattice; dormancy shell | Energy harvesting & primary joules production |
+| Emberkin (Radiotrophs) | High-flux Furnace (hyper-thermal) | Flux-harvesting lattice; dormancy shell | Energy harvesting & primary joules production |
 | Marrow (Endolith collective) | Deep rock / moons | Eon-scale sub-rock collective; dormancy | Sub-surface terraforming & `T_eq⁴` band shifting |
 | Coherent (Cryo-Superconductors) | Deep Frost (`T_eq⁴ → 0`) | Superfluid / BEC; dissociates above `T_c` | High-speed proving & consensus reckoning-engines |
 
