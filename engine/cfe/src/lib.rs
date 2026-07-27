@@ -16,6 +16,7 @@ pub mod dop;
 pub mod ipsal;
 pub mod persist;
 pub mod ratio;
+pub mod thermal;
 pub mod tlv;
 pub mod vrp;
 pub mod world;
