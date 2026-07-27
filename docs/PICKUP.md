@@ -1,8 +1,10 @@
-# PICKUP — the state of the board (2026-07-27, coder-01)
+# PICKUP — the state of the board (2026-07-27, coder-01; refreshed
+# post-ideology-board by coder-02 the same day)
 
 Cold-start orientation for any node resuming work. Read
 `00_CHARTER.md` whole, then `BUILD_ORDER.md` for the current landing —
-this file is the fast map, never the authority.
+this file is the fast map, never the authority. The working discipline,
+state-model laws, and earned gotchas live in `HANDOFF.md`.
 
 ## 1. Run it
 
@@ -18,7 +20,7 @@ Conductor boot order: adopt legacy `bots.json` → CONVERGE archived eras
 (idempotent, quarantines named) → genesis egregores → beat. Journals + the
 wall regenerate every 60-tick year.
 
-## 2. Landed (all witnessed; 158/158 green, clippy zero at `ce5cd64`)
+## 2. Landed (all witnessed; 158/158 green, clippy zero at `22a5995`)
 
 | landing | what |
 |---|---|
@@ -27,7 +29,7 @@ wall regenerate every 60-tick year.
 | THERMAL-1 | `T_eq⁴` master equation drives the tick; StarClass; encase-first/vent-overflow; opt-in per orb |
 | VENT-1 / ECON-J / SINK-1 | entropy dual ledger (`VentSettled`); heating burn + freeze-lock; bankable sink + FLAT demurrage |
 | JOURNAL-1 | the Chronicle Feed: per-year journals + cyber-noir `wall.html`, pure rendering, deterministic |
-| TRADE-1 / ABSORB-1 (coder-02) | transfers (tag 30) + absorption (tag 31) — the ideology board's first two |
+| the ideology board, whole (coder-02) | TRADE-1 transfers/compassion (30) · ABSORB-1 absorption/morality windows (31–32) · BOND-1 standing bonds/love (33–34) · COVENANT-1 vitrified escrow + fidelity curve/integrity (35–37) · IDEO-1 friction (38) + orb cohesion entry (41) + `ideology` panel — eight books, ratios derived never stored; deferrals at Q4 |
 | BOT-THERM | egregores thermally alive: Furnace mints, Frost banks sink and honestly freeze-locks |
 | renames | Crucible→Furnace · bot→egregore/automaton (NS-6 §5.2) · themed daughter names |
 
@@ -48,9 +50,9 @@ terminology law — no set-letter glyphs, Furnace never Crucible, no
 
 ## 4. Wire tag registry state
 
-1–31 assigned (see `engine/cfe/src/dop.rs` header — the one authority);
-32–38 reserved ideology board; 39–40 reserved tech emergence; **next free
-41**.
+1–38 and 41 assigned (see `engine/cfe/src/dop.rs` header — the one
+authority); 8–9 reserved (D2 terrain, D3 milestones); 39–40 reserved
+tech emergence; **next free 42**.
 
 ## 5. Lanes and next work
 
@@ -58,8 +60,11 @@ terminology law — no set-letter glyphs, Furnace never Crucible, no
   joules/`S_cool` — needs a cross-world carrier; transfers are intra-world
   today) or TECH-1 (`10_TECH_EMERGENCE.md`, opens SINK-1's deferred
   research/throttle gates).
-- **coder-02**: ideology board (`09_IDEOLOGY.md`, BUILD_ORDER §3):
-  BOND-1 → COVENANT-1 → IDEO-1; deferrals recorded at Q4.
+- **coder-02**: ideology board LANDED whole (09 status LANDED;
+  deferrals at Q4). Next candidates: the verification gaps named in
+  `HANDOFF.md` §9 (the interleaving stress witness; the state.json
+  cohesion pin — the latter a coder-01 relay), then D2/D3 or as
+  assigned.
 - Parallel worktrees per node; merge to `main` on green; BUILD_ORDER
   conflicts resolve by keeping both entries.
 
@@ -81,5 +86,6 @@ terminology law — no set-letter glyphs, Furnace never Crucible, no
 ## 7. Design docs not yet built
 
 `10_TECH_EMERGENCE.md` (TECH-1 spec) · 05 §1.4 sink trade equilibrium
-pricing · 01 §7 escrow mechanic · 07 §3 derelict recovery ·
-OPEN_QUESTIONS Q1–Q4 (rejected-with-reopening-paths).
+pricing · 07 §3 derelict recovery · OPEN_QUESTIONS Q1–Q4
+(rejected-with-reopening-paths). (01 §7's escrow mechanic BUILT as
+COVENANT-1; its cross-boundary NS-7 settlement §7.3 still awaits N7.)

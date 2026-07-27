@@ -1,20 +1,23 @@
 # HANDOFF — the pickup document
 
-**Status:** PROCESS CARRIER (beside `BUILD_ORDER.md` and
-`OPEN_QUESTIONS.md`), for any engineering node joining or resuming
-work. **State is never read here:** the current landing and the landed
-ledger live in `BUILD_ORDER.md`, the ONE carrier. This document
-carries the working knowledge around that state — the discipline, the
-coordination protocol as lived, and the earned gotchas. Refresh the
-dated §9 at each major handoff; everything else changes only when a
-law or habit changes.
+**Status:** PROCESS CARRIER (beside `BUILD_ORDER.md`,
+`OPEN_QUESTIONS.md`, and `PICKUP.md`), for any engineering node
+joining or resuming work. The carrier split: **state is never read
+here** — the current landing and the landed ledger live in
+`BUILD_ORDER.md` (the ONE carrier), and the fast cold-start map (run
+commands, landed table, lanes, dark spots) lives in `PICKUP.md`. THIS
+document carries the practice: the discipline, the coordination
+protocol as lived, the state-model laws, and the earned gotchas. It
+changes only when a law or habit changes; the dated gap list in §9
+refreshes at each major handoff.
 
 ## 1. Reading order (before any change)
 
 1. `docs/00_CHARTER.md` — every law binds; §8 terminology, §9
    stochastic, §10 the parallel-node protocol.
 2. `docs/BUILD_ORDER.md` — the landed ledger + the boards. What to do
-   next is decided HERE, on operator go.
+   next is decided HERE, on operator go. (`docs/PICKUP.md` is the fast
+   map of the same state — orientation, never authority.)
 3. `docs/OPEN_QUESTIONS.md` — rejected ideas (never silently revive)
    and recorded deferrals with their reopen triggers (Q4 = the
    ideology board's).
@@ -66,11 +69,9 @@ law or habit changes.
 ## 4. The tag registry (permanent — one tag, one meaning, forever)
 
 Authoritative header: top of `engine/cfe/src/dop.rs`. Mirrors: NS-1
-§2.3 and the BUILD_ORDER boards. Update all three at landing, never
-before. As of 2026-07-27: events 1–7, 10–13, 21–25, 27, 29–38 and orb
-entries 16–19, 26, 28, 41 are spent; 8–9 reserved (D2 terrain, D3
-milestones); 20 receipt frame; **39–40 reserved (TECH-1)**; **next
-free: 42**. Contiguity is not law.
+§2.3, the BUILD_ORDER boards, and PICKUP §4 (the current spent/
+reserved/next-free numbers live THERE, not here). Update the header +
+NS-1 + BUILD_ORDER at landing, never before. Contiguity is not law.
 
 ## 5. The state model (get this right or replay breaks)
 
@@ -155,40 +156,27 @@ mechanical relay). `engine/mirror/src/converge.rs` and `journal.rs`
 have catch-alls. Adding an `ActionRefused` variant breaks the CLI
 `refuse()` match — the new arm must name the cure.
 
-## 9. Where things stand and what's next (dated: 2026-07-27)
+## 9. Verification gaps on record (dated: 2026-07-27)
 
-Landed this arc (see BUILD_ORDER §1b for the evidence blocks): the
-full ideology board — TRADE-1 (transfers, compassion), ABSORB-1
-(absorption + reciprocity windows, morality), BOND-1 (standing bonds,
-love), COVENANT-1 (vitrified escrow + fidelity curve, integrity),
-IDEO-1 (wire entry 41, observer uplink, friction 38, CLI `ideology`).
-Design authority: `docs/09_IDEOLOGY.md` (status LANDED); deferrals:
-OPEN_QUESTIONS Q4. Also landed by the coder node in the same span:
-BOT-THERM (thermal genesis for the egregores), JOURNAL-1 (the
-chronicle feed), the flat-demurrage and mirror-rotation fixes, and the
-egregore/automaton vocabulary (ce5cd64 — "bot" is retired).
+The landed state, the lanes, and the next-work candidates live in
+`PICKUP.md` §5 and the BUILD_ORDER boards. What lives HERE is the
+honest debt the witnesses have not yet measured:
 
-Candidate next work (the operator picks; nothing starts without go):
+1. **The interleaving stress witness** (coder-02, red-first-able): two
+   identical-remainder absorption debts on one lane lapsing at
+   different ticks — the replay removal is first-match by
+   pair+remainder, and its order-consistency with live emission is
+   argued, not measured; plus absorb + bond settle + covenant
+   resolution landing on one lane at one stamp.
+2. **The state.json `cohesion` block content pin** in `mirror_pins`
+   (coder-01, relay): the block is emitted mechanically and the
+   workspace compiles green, but nothing asserts its bytes.
+3. **JOURNAL follow-on (Q4.6, relay):** the Chronicle Feed reads the
+   cohesion books and friction receipts mirror-side under its
+   reflection law.
 
-1. **Verification gaps named at handoff:** (a) an interleaving stress
-   witness — two identical-remainder absorption debts on one lane
-   lapsing at different ticks (the replay removal is first-match by
-   pair+remainder; order-consistency is argued, not measured), and
-   absorb + bond settle + covenant resolution on one lane at one
-   stamp; coder-02 territory, red-first-able. (b) a `mirror_pins`
-   assertion for the state.json `cohesion` block content — coder-01,
-   relay.
-2. **JOURNAL follow-on (Q4.6, relay):** the Chronicle Feed reads the
-   cohesion books and friction receipts mirror-side.
-3. **TECH-1** (`docs/10_TECH_EMERGENCE.md`, tags 39–40): carries the
-   SINK-1 research/throttle gates.
-4. **BOT-THERM phase 2:** trade execution against the wants the wall
-   shows (boarded, not landed) — the egregores' automatons could now
-   use `send`/`absorb`/`bond` and grow real cohesion books.
-5. **Depth board D2/D3** (terrain tag 8, spoilage+milestones tag 9)
-   and the protocol board N4 (scanner) onward.
-6. **Q4 deferrals** when balance demands them (commensuration table,
-   recency windows, covenant templates, target-side severance).
+Strike entries here when their witnesses land; add new ones when a
+claim ships proven-by-argument.
 
 ## 10. Session habits that kept this clean
 
