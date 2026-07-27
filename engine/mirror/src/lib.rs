@@ -658,6 +658,31 @@ fn render_receipt(receipt: &Receipt) -> String {
                 }
             ),
         ),
+        E::CovenantSealed { obligor_orb, beneficiary_orb, resource, quota, window, collateral } => (
+            "covenant_sealed",
+            format!(
+                "{} {} orb {obligor_orb} → orb {beneficiary_orb} in {window} (collateral {})",
+                ratio_str(quota),
+                resource_name(*resource),
+                ratio_str(collateral)
+            ),
+        ),
+        E::CovenantReleased { obligor_orb, beneficiary_orb, resource, collateral } => (
+            "covenant_released",
+            format!(
+                "{} {} home to orb {obligor_orb} (pact with orb {beneficiary_orb})",
+                ratio_str(collateral),
+                resource_name(*resource)
+            ),
+        ),
+        E::CovenantSlashed { obligor_orb, beneficiary_orb, resource, collateral } => (
+            "covenant_slashed",
+            format!(
+                "{} {} forfeit orb {obligor_orb} → orb {beneficiary_orb}",
+                ratio_str(collateral),
+                resource_name(*resource)
+            ),
+        ),
     };
     w.field_str("event", name);
     w.field_str("detail", &detail);

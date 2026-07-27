@@ -61,6 +61,9 @@ pub enum ActionRefused {
     BondAlreadySealed,
     /// BOND-1 — no bond stands on this (source, target, resource).
     NoSuchBond,
+    /// COVENANT-1 — one OPEN covenant per (obligor, beneficiary,
+    /// resource); a vitrified pact cannot be cancelled, only run out.
+    CovenantAlreadySealed,
 }
 
 /// One tick's read: the clock walk, any famines that struck, and any
@@ -105,6 +108,25 @@ pub struct Bond {
     pub anchored: u64,
 }
 
+/// COVENANT-1 (01 §7, 09 §2.3): one vitrified delivery pact — the
+/// obligor's `collateral` sits OUT of its bank (the lock gates every
+/// spend by absence; the matrix is a lossless vault by construction)
+/// until `delivered ≥ quota` releases it home or the passed deadline
+/// slashes it to the beneficiary. Committed state; every mutation
+/// receipted; replays from receipts alone.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Covenant {
+    pub obligor: u64,
+    pub beneficiary: u64,
+    pub resource: Resource,
+    pub quota: Ratio,
+    /// Deliberate deliveries credited so far (transfers + bond flow).
+    pub delivered: Ratio,
+    pub collateral: Ratio,
+    pub sealed: u64,
+    pub window: u64,
+}
+
 /// The committed projection — exactly what the chronicle grounds.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Committed {
@@ -116,6 +138,8 @@ pub struct Committed {
     pub debts: Vec<AbsorptionDebt>,
     /// BOND-1: the standing orders, in sealing order.
     pub bonds: Vec<Bond>,
+    /// COVENANT-1: the open vitrified pacts, in sealing order.
+    pub covenants: Vec<Covenant>,
 }
 
 pub struct World {
@@ -139,6 +163,8 @@ pub struct World {
     debts: Vec<AbsorptionDebt>,
     /// BOND-1: the standing orders (committed, same law).
     bonds: Vec<Bond>,
+    /// COVENANT-1: the open vitrified pacts (committed, same law).
+    covenants: Vec<Covenant>,
 }
 
 impl World {
@@ -154,6 +180,7 @@ impl World {
             vent_pending: Vec::new(),
             debts: Vec::new(),
             bonds: Vec::new(),
+            covenants: Vec::new(),
         }
     }
 
@@ -181,6 +208,7 @@ impl World {
             vent_pending: Vec::new(),
             debts: committed.debts,
             bonds: committed.bonds,
+            covenants: committed.covenants,
         }
     }
 
@@ -591,6 +619,67 @@ impl World {
             for (source, target, resource) in expired {
                 self.settle_bond(source, target, resource, now, vec![], Some(ratio(0, 1)));
             }
+            // COVENANT-1: the vitrified pacts resolve at the boundary —
+            // fulfilment releases, the passed deadline slashes;
+            // fulfilment wins the tie. World-driven, the famine shape.
+            let due: Vec<(u64, u64, Resource, bool)> = self
+                .covenants
+                .iter()
+                .filter_map(|pact| {
+                    if pact.delivered >= pact.quota {
+                        Some((pact.obligor, pact.beneficiary, pact.resource, true))
+                    } else if now >= pact.sealed + pact.window {
+                        Some((pact.obligor, pact.beneficiary, pact.resource, false))
+                    } else {
+                        None
+                    }
+                })
+                .collect();
+            for (obligor, beneficiary, resource, fulfilled) in due {
+                let Some(at) = self.covenants.iter().position(|pact| {
+                    pact.obligor == obligor
+                        && pact.beneficiary == beneficiary
+                        && pact.resource == resource
+                }) else {
+                    continue;
+                };
+                let pact = self.covenants.remove(at);
+                let stake =
+                    pact.collateral.clone() * crate::dop::commensurate_weight(resource);
+                let recipient = match fulfilled {
+                    true => obligor,
+                    false => beneficiary,
+                };
+                if let Some(held) =
+                    self.orbs.iter_mut().find(|held| held.orb_id == recipient)
+                {
+                    held.bank(resource, pact.collateral.clone());
+                }
+                if let Some(held) =
+                    self.orbs.iter_mut().find(|held| held.orb_id == obligor)
+                {
+                    match fulfilled {
+                        true => held.covenants_fulfilled += stake,
+                        false => held.covenants_breached += stake,
+                    }
+                }
+                let event = match fulfilled {
+                    true => ClosureEvent::CovenantReleased {
+                        obligor_orb: obligor,
+                        beneficiary_orb: beneficiary,
+                        resource,
+                        collateral: pact.collateral,
+                    },
+                    false => ClosureEvent::CovenantSlashed {
+                        obligor_orb: obligor,
+                        beneficiary_orb: beneficiary,
+                        resource,
+                        collateral: pact.collateral,
+                    },
+                };
+                self.chronicle.append(event, now, vec![]);
+                self.relieve_recovered(recipient);
+            }
         }
         let mut struck = Vec::new();
         let mut overheat_struck = Vec::new();
@@ -991,6 +1080,8 @@ impl World {
         // ABSORB-1: the payment compensates open reciprocity windows
         // owed from→to, oldest first.
         settle_debts(&mut self.debts, &mut self.orbs, from, to, value);
+        // COVENANT-1: the delivery credits the open pact on this lane.
+        credit_covenants(&mut self.covenants, from, to, resource, &amount);
         self.chronicle.append(
             ClosureEvent::ResourceTransferred { from_orb: from, to_orb: to, resource, amount },
             stamp,
@@ -1187,6 +1278,8 @@ impl World {
                 held.bank(resource, pay.clone());
             }
             settle_debts(&mut self.debts, &mut self.orbs, source, target, value);
+            // COVENANT-1: the stream credits the open pact on this lane.
+            credit_covenants(&mut self.covenants, source, target, resource, &pay);
         }
         if ended {
             self.bonds.remove(at);
@@ -1216,6 +1309,115 @@ impl World {
         if pay > ratio(0, 1) {
             self.relieve_recovered(target);
         }
+    }
+
+    /// Seal a covenant as the sovereign.
+    pub fn seal_covenant(
+        &mut self,
+        obligor: u64,
+        beneficiary: u64,
+        resource: Resource,
+        quota: Ratio,
+        window: u64,
+    ) -> Result<(), ActionRefused> {
+        self.seal_covenant_as(SOVEREIGN, obligor, beneficiary, resource, quota, window)
+    }
+
+    /// COVENANT-1 (01 §7, 09 §2.3) — seal a vitrified delivery pact:
+    /// the obligor locks collateral (the fidelity curve prices it —
+    /// `dop::collateral_required`, the guardrail-6 ceiling holding)
+    /// against delivering ≥ quota within the window. The lock is a
+    /// bank withdrawal: every spend gate sees its absence, and the
+    /// vitrified matrix vaults it losslessly by construction. Once
+    /// sealed, the pact runs to release or slash — no cancel. One
+    /// open pact per (obligor, beneficiary, resource). Collect scope.
+    pub fn seal_covenant_as(
+        &mut self,
+        actor: u64,
+        obligor: u64,
+        beneficiary: u64,
+        resource: Resource,
+        quota: Ratio,
+        window: u64,
+    ) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Collect)?;
+        if self.orbs.is_empty() {
+            return Err(ActionRefused::NoColony);
+        }
+        if obligor == beneficiary || quota <= ratio(0, 1) || window == 0 {
+            return Err(ActionRefused::BadTransfer);
+        }
+        if !self.orbs.iter().any(|held| held.orb_id == obligor) {
+            return Err(ActionRefused::NoSuchOrb { orb: obligor });
+        }
+        if !self.orbs.iter().any(|held| held.orb_id == beneficiary) {
+            return Err(ActionRefused::NoSuchOrb { orb: beneficiary });
+        }
+        if self.covenants.iter().any(|held| {
+            held.obligor == obligor
+                && held.beneficiary == beneficiary
+                && held.resource == resource
+        }) {
+            return Err(ActionRefused::CovenantAlreadySealed);
+        }
+        let stamp = self.clock.now();
+        let collateral = {
+            let held = self
+                .orbs
+                .iter()
+                .find(|held| held.orb_id == obligor)
+                .expect("checked above");
+            let required = crate::dop::collateral_required(
+                &held.covenants_fulfilled,
+                &held.covenants_breached,
+                &quota,
+            );
+            let have = held.banked_amount(resource);
+            if have < required {
+                return Err(ActionRefused::CannotAfford {
+                    resource,
+                    need: Box::new(required),
+                    have: Box::new(have),
+                });
+            }
+            required
+        };
+        {
+            let held = self
+                .orbs
+                .iter_mut()
+                .find(|held| held.orb_id == obligor)
+                .expect("checked above");
+            held.bank(resource, -collateral.clone());
+        }
+        self.covenants.push(Covenant {
+            obligor,
+            beneficiary,
+            resource,
+            quota: quota.clone(),
+            delivered: ratio(0, 1),
+            collateral: collateral.clone(),
+            sealed: stamp,
+            window,
+        });
+        self.chronicle.append(
+            ClosureEvent::CovenantSealed {
+                obligor_orb: obligor,
+                beneficiary_orb: beneficiary,
+                resource,
+                quota,
+                window,
+                collateral,
+            },
+            stamp,
+            vec![actor],
+        );
+        Ok(())
+    }
+
+    /// COVENANT-1: the open vitrified pacts.
+    pub fn covenants(&self) -> &[Covenant] {
+        &self.covenants
     }
 
     /// Absorb as the sovereign.
@@ -1362,6 +1564,7 @@ impl World {
             star: self.star,
             debts: self.debts.clone(),
             bonds: self.bonds.clone(),
+            covenants: self.covenants.clone(),
         }
     }
 
@@ -1433,6 +1636,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut star: Option<crate::thermal::StarClass> = None;
     let mut debts: Vec<AbsorptionDebt> = Vec::new();
     let mut bonds: Vec<Bond> = Vec::new();
+    let mut covenants: Vec<Covenant> = Vec::new();
     for receipt in chronicle.receipts() {
         match &receipt.event {
             ClosureEvent::EntityRegistered { entity_id, principal, handle } => {
@@ -1598,6 +1802,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     }
                 }
                 settle_debts(&mut debts, &mut orbs, *from_orb, *to_orb, value);
+                credit_covenants(&mut covenants, *from_orb, *to_orb, *resource, amount);
             }
             // ABSORB-1: the three-way move replays — the absorber's
             // ledger carries the shed; the window opens; crisis reads
@@ -1684,6 +1889,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                         held.last_touch = receipt.stamp;
                     }
                     settle_debts(&mut debts, &mut orbs, *source_orb, *target_orb, value);
+                    credit_covenants(&mut covenants, *source_orb, *target_orb, *resource, amount);
                 }
                 match severed {
                     true => {
@@ -1713,9 +1919,69 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     }
                 }
             }
+            // COVENANT-1: the pact replays whole — the seal receipt
+            // carries the priced collateral (the curve never re-runs).
+            ClosureEvent::CovenantSealed {
+                obligor_orb,
+                beneficiary_orb,
+                resource,
+                quota,
+                window,
+                collateral,
+            } => {
+                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *obligor_orb) {
+                    held.bank(*resource, -collateral.clone());
+                }
+                covenants.push(Covenant {
+                    obligor: *obligor_orb,
+                    beneficiary: *beneficiary_orb,
+                    resource: *resource,
+                    quota: quota.clone(),
+                    delivered: ratio(0, 1),
+                    collateral: collateral.clone(),
+                    sealed: receipt.stamp,
+                    window: *window,
+                });
+            }
+            ClosureEvent::CovenantReleased {
+                obligor_orb, beneficiary_orb, resource, collateral,
+            } => {
+                let stake = collateral.clone() * crate::dop::commensurate_weight(*resource);
+                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *obligor_orb) {
+                    held.bank(*resource, collateral.clone());
+                    held.covenants_fulfilled += stake;
+                }
+                if let Some(at) = covenants.iter().position(|pact| {
+                    pact.obligor == *obligor_orb
+                        && pact.beneficiary == *beneficiary_orb
+                        && pact.resource == *resource
+                }) {
+                    covenants.remove(at);
+                }
+            }
+            ClosureEvent::CovenantSlashed {
+                obligor_orb, beneficiary_orb, resource, collateral,
+            } => {
+                let stake = collateral.clone() * crate::dop::commensurate_weight(*resource);
+                if let Some(held) =
+                    orbs.iter_mut().find(|held| held.orb_id == *beneficiary_orb)
+                {
+                    held.bank(*resource, collateral.clone());
+                }
+                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *obligor_orb) {
+                    held.covenants_breached += stake;
+                }
+                if let Some(at) = covenants.iter().position(|pact| {
+                    pact.obligor == *obligor_orb
+                        && pact.beneficiary == *beneficiary_orb
+                        && pact.resource == *resource
+                }) {
+                    covenants.remove(at);
+                }
+            }
         }
     }
-    Committed { orbs, entities, star, debts, bonds }
+    Committed { orbs, entities, star, debts, bonds, covenants }
 }
 
 /// SINK-1 (Q2): the demurrage due on one orb's un-vaulted banked
@@ -1798,6 +2064,24 @@ fn settle_debts(
         }
     }
     debts.retain(|debt| debt.remainder != ratio(0, 1));
+}
+
+/// COVENANT-1: a deliberate delivery (transfer or bond settlement)
+/// from obligor to beneficiary credits the open pact on that lane —
+/// at most one stands per (obligor, beneficiary, resource). Shared
+/// verbatim by the live paths and replay.
+fn credit_covenants(
+    covenants: &mut [Covenant],
+    from: u64,
+    to: u64,
+    resource: Resource,
+    amount: &Ratio,
+) {
+    for pact in covenants.iter_mut() {
+        if pact.obligor == from && pact.beneficiary == to && pact.resource == resource {
+            pact.delivered += amount.clone();
+        }
+    }
 }
 
 fn triple_amount(ledger: &[(u64, Resource, Ratio)], orb: u64, resource: Resource) -> Ratio {

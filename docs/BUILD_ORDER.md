@@ -380,6 +380,42 @@ N5/N6). Details and sequencing in 04 §6.
   lifeline sealed → streamed at the touch → severed → the coldstore
   froze again → replay MATCHES.
 
+- **COVENANT-1 LANDED** (2026-07-27): THE GLASSKEEPER ESCROW — the
+  fourth ideology-board landing (09 §2.3, 01 §7 first cut, §3 below).
+  The vitrified delivery pact (tags 35–37: CovenantSealed / Released /
+  Slashed): the obligor locks collateral OUT of its bank — the lock
+  gates every spend by ABSENCE (no second mechanism), and the lattice
+  vaults it losslessly by construction — against "deliver ≥ quota
+  within the window", measured from DELIBERATE deeds (TRADE-1
+  transfers + BOND-1 settlements; absorption recorded as non-counting).
+  Resolution is world-driven at the tick boundary (the famine shape):
+  fulfilment releases home, the passed deadline slashes to the
+  aggrieved — fulfilment wins the tie; vitrification means NO CANCEL.
+  THE INTEGRITY BOOKS OPEN, VALUE-weighted (`covenants_fulfilled` /
+  `covenants_breached` post the collateral stake — wash-trading closed
+  as designed). The fidelity curve landed (`collateral_required`,
+  placeholder): quota × (breached+1)/(fulfilled+1) clamped [1/4, 4] —
+  the empty book is not a credential (full collateral), the ceiling is
+  guardrail 6 made literal (zero fidelity pays 4×, NEVER barred); the
+  priced collateral rides the seal receipt so replay never re-runs the
+  curve. Recorded v1 rulings: collateral denominated in the pact's
+  resource; one open pact per lane; the delivery-quota pact IS the
+  landed 09 §3.3 template (01 §7.1's own example) — the Compassionate
+  and Bond Covenant templates deferred; resolution banners deferred to
+  the journal (chronicle carries the drama). Cross-territory (relayed):
+  three mechanical renderer arms in `engine/mirror`. CLI: `covenant <q>
+  <res> to <p> within <n>` · `covenants`, the ⛨/⚔ glyphs. Evidence:
+  clippy zero (warnings denied); **153/153 workspace witnesses green**
+  (7 new: a fulfilled pact releases exactly — 10−3−2−1+3 = 7 by the
+  books; the missed deadline slashes 3 to the aggrieved at exactly
+  stamp 21; the curve reads the books — 4 → 1 at fulfilled 3, floor
+  1/4 and ceiling 4× clamped, receipt-verified; locked collateral
+  refuses zone AND transfer with "have 7"; BOND-1 composes — the
+  stream fulfils the quota and the bond outlives the pact; refusals
+  typed incl. CovenantAlreadySealed; tags 35–37 byte-exact). The arc
+  played end-to-end: vitrified → delivered → released; the doomed
+  biomass pact slashed on schedule; replay MATCHES.
+
 ## 2. The depth board (02_COLONY_LOOP — game depth before multiplayer)
 
 Ruled 2026-07-25: the world must be worth sharing before N6 shares it. These

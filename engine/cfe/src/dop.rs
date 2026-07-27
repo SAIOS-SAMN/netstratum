@@ -32,16 +32,18 @@
 //!   33 ClosureEvent::BondSealed (BOND-1)
 //!   34 ClosureEvent::BondSettled (BOND-1 — settlement AND severance:
 //!      the severed flag + load ride the one settle receipt)
+//!   35 ClosureEvent::CovenantSealed (COVENANT-1)
+//!   36 ClosureEvent::CovenantReleased (COVENANT-1)
+//!   37 ClosureEvent::CovenantSlashed (COVENANT-1)
 //!   16 Orb header (orb_id ‖ name)
 //!   17 Orb zone entry (tile ‖ kind)
 //!   18 Orb banked entry (resource ‖ ratio)
 //!   19 Orb famine entry (resource)
 //!   26 Orb thermal entry (albedo ‖ orbit_r ‖ overheat u8) — THERMAL-1
 //!   28 Orb vent entry (entropy_vented ratio ‖ LE64 last_touch) — VENT-1/SINK-1
-//!   35–38 RESERVED for the ideology board (09, BUILD_ORDER §3:
-//!         COVENANT-1 35–37 → IDEO-1 friction 38; the orb cohesion
-//!         entry takes a post-40 tag at IDEO-1 — contiguity is not
-//!         law).
+//!   38    RESERVED for the ideology board (09, BUILD_ORDER §3:
+//!         IDEO-1 friction; the orb cohesion entry takes a post-40
+//!         tag at IDEO-1 — contiguity is not law).
 //!   39–40 RESERVED for tech emergence (10: TechDiscovered,
 //!         TechLicensed) — next free tag for any OTHER landing is 41.
 
@@ -152,6 +154,19 @@ pub fn reciprocity_window() -> u64 {
 /// term posts nothing.
 pub fn bond_notice_window() -> u64 {
     8
+}
+
+/// COVENANT-1 (09 §3.1, placeholder curve): collateral scales by the
+/// obligor's fidelity books — quota × (breached + 1)/(fulfilled + 1),
+/// clamped to [1/4, 4]. The empty book is not a credential (full
+/// collateral until history exists); the ceiling is the guardrail-6
+/// law made literal: a zero-fidelity orb pays the maximum and is
+/// NEVER barred.
+pub fn collateral_required(fulfilled: &Ratio, breached: &Ratio, quota: &Ratio) -> Ratio {
+    let one = ratio(1, 1);
+    let multiplier = (breached.clone() + one.clone()) / (fulfilled.clone() + one);
+    let clamped = multiplier.max(ratio(1, 4)).min(ratio(4, 1));
+    quota.clone() * clamped
 }
 
 /// The zone kinds, with their ruleset-v1 economics.
@@ -349,6 +364,37 @@ pub enum ClosureEvent {
         severed: bool,
         load: Ratio,
     },
+    /// COVENANT-1 (01 §7, 09 §2.3) — a vitrified delivery pact sealed:
+    /// the obligor locks `collateral` (out of its bank, the vault by
+    /// construction) against delivering ≥ `quota` of `resource` to the
+    /// beneficiary within `window` ticks. The collateral rides the
+    /// receipt so replay never re-derives the fidelity curve.
+    CovenantSealed {
+        obligor_orb: u64,
+        beneficiary_orb: u64,
+        resource: Resource,
+        quota: Ratio,
+        window: u64,
+        collateral: Ratio,
+    },
+    /// COVENANT-1 — the quota was met: the collateral returns home and
+    /// the stake posts `covenants_fulfilled`. World-driven at the tick
+    /// boundary (fulfilment wins the deadline tie).
+    CovenantReleased {
+        obligor_orb: u64,
+        beneficiary_orb: u64,
+        resource: Resource,
+        collateral: Ratio,
+    },
+    /// COVENANT-1 — the deadline passed unmet: BREACH_AND_SLASH — the
+    /// collateral forfeits to the aggrieved and the stake posts
+    /// `covenants_breached`.
+    CovenantSlashed {
+        obligor_orb: u64,
+        beneficiary_orb: u64,
+        resource: Resource,
+        collateral: Ratio,
+    },
 }
 
 impl ClosureEvent {
@@ -477,6 +523,36 @@ impl ClosureEvent {
                 value.push(*severed as u8);
                 ratio::encode(load, &mut value);
                 tlv::put(34, &value, &mut out);
+            }
+            Self::CovenantSealed {
+                obligor_orb,
+                beneficiary_orb,
+                resource,
+                quota,
+                window,
+                collateral,
+            } => {
+                let mut value = obligor_orb.to_le_bytes().to_vec();
+                value.extend_from_slice(&beneficiary_orb.to_le_bytes());
+                value.push(*resource as u8);
+                ratio::encode(quota, &mut value);
+                value.extend_from_slice(&window.to_le_bytes());
+                ratio::encode(collateral, &mut value);
+                tlv::put(35, &value, &mut out);
+            }
+            Self::CovenantReleased { obligor_orb, beneficiary_orb, resource, collateral } => {
+                tlv::put(
+                    36,
+                    &pact_layout(*obligor_orb, *beneficiary_orb, *resource, collateral),
+                    &mut out,
+                );
+            }
+            Self::CovenantSlashed { obligor_orb, beneficiary_orb, resource, collateral } => {
+                tlv::put(
+                    37,
+                    &pact_layout(*obligor_orb, *beneficiary_orb, *resource, collateral),
+                    &mut out,
+                );
             }
         }
         out
@@ -611,9 +687,51 @@ impl ClosureEvent {
                 let (load, _) = ratio::decode(value.get(18 + used..)?)?;
                 Some(Self::BondSettled { source_orb, target_orb, resource, amount, severed, load })
             }
+            35 => {
+                let obligor_orb = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let beneficiary_orb = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let resource = Resource::from_wire(*value.get(16)?)?;
+                let (quota, used) = ratio::decode(value.get(17..)?)?;
+                let window =
+                    u64::from_le_bytes(value.get(17 + used..25 + used)?.try_into().ok()?);
+                let (collateral, _) = ratio::decode(value.get(25 + used..)?)?;
+                Some(Self::CovenantSealed {
+                    obligor_orb,
+                    beneficiary_orb,
+                    resource,
+                    quota,
+                    window,
+                    collateral,
+                })
+            }
+            36 => {
+                let (obligor_orb, beneficiary_orb, resource, collateral) = pact_fields(value)?;
+                Some(Self::CovenantReleased { obligor_orb, beneficiary_orb, resource, collateral })
+            }
+            37 => {
+                let (obligor_orb, beneficiary_orb, resource, collateral) = pact_fields(value)?;
+                Some(Self::CovenantSlashed { obligor_orb, beneficiary_orb, resource, collateral })
+            }
             _ => None,
         }
     }
+}
+
+/// The shared `LE64 ‖ LE64 ‖ resource u8 ‖ ratio` pact layout (36–37).
+fn pact_layout(obligor: u64, beneficiary: u64, resource: Resource, collateral: &Ratio) -> Vec<u8> {
+    let mut value = obligor.to_le_bytes().to_vec();
+    value.extend_from_slice(&beneficiary.to_le_bytes());
+    value.push(resource as u8);
+    ratio::encode(collateral, &mut value);
+    value
+}
+
+fn pact_fields(value: &[u8]) -> Option<(u64, u64, Resource, Ratio)> {
+    let obligor = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+    let beneficiary = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+    let resource = Resource::from_wire(*value.get(16)?)?;
+    let (collateral, _) = ratio::decode(value.get(17..)?)?;
+    Some((obligor, beneficiary, resource, collateral))
 }
 
 /// The shared `LE64(orb_id) ‖ resource u8 ‖ ratio` layout (tags 3–5).
@@ -687,6 +805,13 @@ pub struct ColonyOrb {
     pub bond_flow: Ratio,
     /// The entropic book of the pair (see `bond_flow`).
     pub severance_load: Ratio,
+    /// COVENANT-1 (09 §2.3): the integrity books — VALUE-weighted
+    /// stakes of covenants released and slashed (a thousand toy
+    /// promises never wash one giant breach). Same deferral:
+    /// committed, replay-rebuilt, wire at IDEO-1.
+    pub covenants_fulfilled: Ratio,
+    /// The entropic book of the pair (see `covenants_fulfilled`).
+    pub covenants_breached: Ratio,
 }
 
 impl ColonyOrb {

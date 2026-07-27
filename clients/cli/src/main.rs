@@ -630,6 +630,93 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 }
             }
         }
+        Some("covenant") => {
+            let quota = words.next().and_then(parse_ratio_arg);
+            let resource = words.next().and_then(parse_resource);
+            let to_word = words.next();
+            let target_name = words.next().map(|word| word.to_string());
+            let mut window = None;
+            let mut obligor = Some(*current);
+            loop {
+                match (words.next(), words.next()) {
+                    (Some("within"), Some(span)) => window = span.parse().ok(),
+                    (Some("from"), Some(planet)) => {
+                        obligor = world
+                            .orbs()
+                            .iter()
+                            .find(|held| held.name == planet)
+                            .map(|held| held.orb_id)
+                    }
+                    _ => break,
+                }
+            }
+            match (quota, resource, to_word, target_name, window) {
+                (Some(quota), Some(resource), Some("to"), Some(planet), Some(window)) => {
+                    let beneficiary = world
+                        .orbs()
+                        .iter()
+                        .find(|held| held.name == planet)
+                        .map(|held| held.orb_id);
+                    match (beneficiary, obligor) {
+                        (Some(beneficiary), Some(obligor)) => {
+                            match world.seal_covenant_as(
+                                SOVEREIGN, obligor, beneficiary, resource, quota.clone(), window,
+                            ) {
+                                Ok(()) => println!(
+                                    "{} covenant vitrified: {} {} owed to {} within {} ticks — the collateral sits in the lattice until the word is kept or broken",
+                                    style.ok("⛨"),
+                                    style.strong(&amount(&quota)),
+                                    resource_name(resource),
+                                    style.strong(&planet),
+                                    style.strong(&window.to_string())
+                                ),
+                                Err(refusal) => refuse(world, &refusal, style),
+                            }
+                        }
+                        _ => println!(
+                            "{} unknown planet — {} lists them",
+                            style.bad("✗"),
+                            style.strong("planets")
+                        ),
+                    }
+                }
+                _ => println!(
+                    "{} usage: {} — e.g. {}",
+                    style.bad("✗"),
+                    style.strong("covenant <quota> <resource> to <planet> within <ticks> [from <planet>]"),
+                    style.strong("covenant 3 iron to outpost within 10")
+                ),
+            }
+        }
+        Some("covenants") => {
+            match world.covenants().is_empty() {
+                true => println!("{}", style.dim("(no open covenants)")),
+                false => {
+                    for pact in world.covenants() {
+                        let obligor = world
+                            .orb_by_id(pact.obligor)
+                            .map(|held| held.name.clone())
+                            .unwrap_or_else(|| pact.obligor.to_string());
+                        let beneficiary = world
+                            .orb_by_id(pact.beneficiary)
+                            .map(|held| held.name.clone())
+                            .unwrap_or_else(|| pact.beneficiary.to_string());
+                        println!(
+                            "  {} {} owes {} {} {} — delivered {} of {}, deadline {}, {} locked",
+                            style.ok("⛨"),
+                            style.strong(&obligor),
+                            style.strong(&beneficiary),
+                            style.strong(&amount(&pact.quota)),
+                            resource_name(pact.resource),
+                            style.strong(&amount(&pact.delivered)),
+                            amount(&pact.quota),
+                            style.strong(&(pact.sealed + pact.window).to_string()),
+                            style.strong(&amount(&pact.collateral))
+                        );
+                    }
+                }
+            }
+        }
         Some("planets") => {
             for orb in world.orbs() {
                 let here = match orb.orb_id == *current {
@@ -782,6 +869,7 @@ fn help(style: &Style) {
         ("absorb <amt> from <p> [into <p>]", "route a hot planet's un-sealed overflow into the absorber's banked sink — emptying it clears the strike; the draw owes the absorber within the reciprocity window or it lapses to the extraction book"),
         ("bond <rate> <res> to <p> [for <n>]", "seal a standing order: rate/tick streams without per-tick clearing, settled in one receipt at each touch — a term bond expires orderly; severing or defaulting posts the notice load"),
         ("sever <res> to <p> · bonds", "cut a standing bond (the load posts to the cutter) · list the standing orders"),
+        ("covenant <q> <res> to <p> within <n>", "vitrify a delivery pact in the Glasskeeper lattice — collateral (priced by your fidelity books, never barred) locks until the quota is delivered (release) or the deadline passes (BREACH_AND_SLASH); `covenants` lists the open pacts"),
         ("save · resume <world>", "sync the chronicle to var/worlds/<name>/ (append-only) · resume a saved world at launch"),
         ("planet <name> · planets", "switch the planet cursor · list this world's planets"),
         ("agent <handle>", "register a contained agent (zero grants until you open scopes)"),
@@ -1135,6 +1223,10 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "no bond stands there — {} lists the standing orders",
             style.strong("bonds")
         ),
+        ActionRefused::CovenantAlreadySealed => format!(
+            "an open covenant already stands on that lane — a vitrified pact cannot be cancelled, only fulfilled or slashed ({} lists them)",
+            style.strong("covenants")
+        ),
     };
     println!("{} {text}", style.bad("✗"));
 }
@@ -1480,6 +1572,28 @@ fn chronicle(world: &World, style: &Style) {
                     style.strong(&amount(load))
                 ),
             },
+            cfe::dop::ClosureEvent::CovenantSealed {
+                obligor_orb, beneficiary_orb, resource, quota, window, collateral,
+            } => format!(
+                "⛨ covenant vitrified: {} {} owed orb {obligor_orb} → orb {beneficiary_orb} within {window} ticks — {} collateral locked in the lattice",
+                style.strong(&amount(quota)),
+                resource_name(*resource),
+                style.strong(&amount(collateral))
+            ),
+            cfe::dop::ClosureEvent::CovenantReleased {
+                obligor_orb, resource, collateral, ..
+            } => format!(
+                "⛨ covenant fulfilled — {} {} collateral returns to orb {obligor_orb}; the word held",
+                style.strong(&amount(collateral)),
+                resource_name(*resource)
+            ),
+            cfe::dop::ClosureEvent::CovenantSlashed {
+                obligor_orb, beneficiary_orb, resource, collateral, ..
+            } => format!(
+                "⚔ BREACH_AND_SLASH — orb {obligor_orb} broke its word; {} {} forfeits to orb {beneficiary_orb}",
+                style.strong(&amount(collateral)),
+                resource_name(*resource)
+            ),
         };
         let tag = receipt
             .provenance

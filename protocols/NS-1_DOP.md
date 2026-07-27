@@ -80,6 +80,9 @@ One tag, one meaning, forever; retired codes are never reused.
 | 32 | event: AbsorptionLapsed (ABSORB-1) | LE64(debtor_orb) ‖ LE64(creditor_orb) ‖ ratio — a window expired unpaid; the remainder posts to the debtor's extraction book (world-driven, the famine-strike shape) |
 | 33 | event: BondSealed (BOND-1) | LE64(source_orb) ‖ LE64(target_orb) ‖ resource u8 ‖ ratio (rate/tick) ‖ LE64(term; 0 = open-ended) — one bond per (source, target, resource) |
 | 34 | event: BondSettled (BOND-1) | LE64(source_orb) ‖ LE64(target_orb) ‖ resource u8 ‖ ratio (amount) ‖ severed u8 ‖ ratio (load) — ONE receipt settles the accumulated span at each touch; its own tag so replay can re-anchor the bond (a manual transfer must stay distinguishable); severed ends the bond, load 0 = orderly |
+| 35 | event: CovenantSealed (COVENANT-1) | LE64(obligor_orb) ‖ LE64(beneficiary_orb) ‖ resource u8 ‖ ratio (quota) ‖ LE64(window) ‖ ratio (collateral) — the collateral rides the receipt so replay never re-derives the fidelity curve; the lock is a bank withdrawal (the vitrified vault, lossless by construction) |
+| 36 | event: CovenantReleased (COVENANT-1) | LE64(obligor_orb) ‖ LE64(beneficiary_orb) ‖ resource u8 ‖ ratio (collateral) — quota met: collateral home, the stake posts fulfilled (world-driven at the tick boundary; fulfilment wins the deadline tie) |
+| 37 | event: CovenantSlashed (COVENANT-1) | LE64(obligor_orb) ‖ LE64(beneficiary_orb) ‖ resource u8 ‖ ratio (collateral) — deadline passed unmet: BREACH_AND_SLASH to the aggrieved, the stake posts breached |
 | 10 | event: EntityRegistered (N3) | LE64(entity_id) ‖ LE64(principal) ‖ handle utf8 |
 | 11 | event: ScopeGranted (N3) | LE64(agent) ‖ scope u8 |
 | 12 | event: ScopeRevoked (N3) | LE64(agent) ‖ scope u8 |
