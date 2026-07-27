@@ -78,6 +78,8 @@ One tag, one meaning, forever; retired codes are never reused.
 | 30 | event: ResourceTransferred (TRADE-1) | LE64(from_orb) ‖ LE64(to_orb) ‖ resource u8 ‖ ratio — banked value MOVES (conservation); both orbs settle demurrage at this touch; cohesion-book postings derive from this receipt + the counterparty's receipted crisis state, never stored |
 | 31 | event: OverflowAbsorbed (ABSORB-1) | LE64(source_orb) ‖ LE64(absorber_orb) ‖ ratio — un-sealed overflow into the absorber's banked sink: sink_consumed = heat_absorbed = vented_after_shed (05 §1.4, the absorber's ledger carries the shed); opens a reciprocity window owed source → absorber |
 | 32 | event: AbsorptionLapsed (ABSORB-1) | LE64(debtor_orb) ‖ LE64(creditor_orb) ‖ ratio — a window expired unpaid; the remainder posts to the debtor's extraction book (world-driven, the famine-strike shape) |
+| 33 | event: BondSealed (BOND-1) | LE64(source_orb) ‖ LE64(target_orb) ‖ resource u8 ‖ ratio (rate/tick) ‖ LE64(term; 0 = open-ended) — one bond per (source, target, resource) |
+| 34 | event: BondSettled (BOND-1) | LE64(source_orb) ‖ LE64(target_orb) ‖ resource u8 ‖ ratio (amount) ‖ severed u8 ‖ ratio (load) — ONE receipt settles the accumulated span at each touch; its own tag so replay can re-anchor the bond (a manual transfer must stay distinguishable); severed ends the bond, load 0 = orderly |
 | 10 | event: EntityRegistered (N3) | LE64(entity_id) ‖ LE64(principal) ‖ handle utf8 |
 | 11 | event: ScopeGranted (N3) | LE64(agent) ‖ scope u8 |
 | 12 | event: ScopeRevoked (N3) | LE64(agent) ‖ scope u8 |

@@ -29,15 +29,19 @@
 //!   30 ClosureEvent::ResourceTransferred (TRADE-1)
 //!   31 ClosureEvent::OverflowAbsorbed (ABSORB-1)
 //!   32 ClosureEvent::AbsorptionLapsed (ABSORB-1)
+//!   33 ClosureEvent::BondSealed (BOND-1)
+//!   34 ClosureEvent::BondSettled (BOND-1 — settlement AND severance:
+//!      the severed flag + load ride the one settle receipt)
 //!   16 Orb header (orb_id ‖ name)
 //!   17 Orb zone entry (tile ‖ kind)
 //!   18 Orb banked entry (resource ‖ ratio)
 //!   19 Orb famine entry (resource)
 //!   26 Orb thermal entry (albedo ‖ orbit_r ‖ overheat u8) — THERMAL-1
 //!   28 Orb vent entry (entropy_vented ratio ‖ LE64 last_touch) — VENT-1/SINK-1
-//!   33–38 RESERVED for the ideology board (09, BUILD_ORDER §3:
-//!         BOND-1 → COVENANT-1 → IDEO-1; the orb cohesion entry takes
-//!         a post-40 tag at IDEO-1 — contiguity is not law).
+//!   35–38 RESERVED for the ideology board (09, BUILD_ORDER §3:
+//!         COVENANT-1 35–37 → IDEO-1 friction 38; the orb cohesion
+//!         entry takes a post-40 tag at IDEO-1 — contiguity is not
+//!         law).
 //!   39–40 RESERVED for tech emergence (10: TechDiscovered,
 //!         TechLicensed) — next free tag for any OTHER landing is 41.
 
@@ -139,6 +143,14 @@ pub fn commensurate_weight(_resource: Resource) -> Ratio {
 /// a cross-orb draw must be compensated within this span or the
 /// remainder lapses to the debtor's extraction book.
 pub fn reciprocity_window() -> u64 {
+    8
+}
+
+/// BOND-1 (09 §2.2, placeholder): the notice window in ticks — a bond
+/// cut without it (manual severance, or an insolvent default) posts
+/// `rate × this` to the cutter's severance book. A bond run to its
+/// term posts nothing.
+pub fn bond_notice_window() -> u64 {
     8
 }
 
@@ -320,6 +332,23 @@ pub enum ClosureEvent {
     /// remainder posts to the debtor's extraction book. World-driven
     /// at the exact stamp (the famine-strike shape).
     AbsorptionLapsed { debtor_orb: u64, creditor_orb: u64, amount: Ratio },
+    /// BOND-1 (09 §2.2) — a standing order sealed: source streams
+    /// `rate` of `resource` per tick to target; `term` in ticks, 0 =
+    /// open-ended. One bond per (source, target, resource).
+    BondSealed { source_orb: u64, target_orb: u64, resource: Resource, rate: Ratio, term: u64 },
+    /// BOND-1 — a bond's accumulated span settled by ONE receipt at
+    /// the touch (collect / sever / term expiry). `severed` ends the
+    /// bond; `load` is the severance posting (zero for an orderly
+    /// end). Its own tag — a bond settle must stay distinguishable
+    /// from a manual transfer, or replay could not re-anchor the bond.
+    BondSettled {
+        source_orb: u64,
+        target_orb: u64,
+        resource: Resource,
+        amount: Ratio,
+        severed: bool,
+        load: Ratio,
+    },
 }
 
 impl ClosureEvent {
@@ -431,6 +460,23 @@ impl ClosureEvent {
                 value.extend_from_slice(&creditor_orb.to_le_bytes());
                 ratio::encode(amount, &mut value);
                 tlv::put(32, &value, &mut out);
+            }
+            Self::BondSealed { source_orb, target_orb, resource, rate, term } => {
+                let mut value = source_orb.to_le_bytes().to_vec();
+                value.extend_from_slice(&target_orb.to_le_bytes());
+                value.push(*resource as u8);
+                ratio::encode(rate, &mut value);
+                value.extend_from_slice(&term.to_le_bytes());
+                tlv::put(33, &value, &mut out);
+            }
+            Self::BondSettled { source_orb, target_orb, resource, amount, severed, load } => {
+                let mut value = source_orb.to_le_bytes().to_vec();
+                value.extend_from_slice(&target_orb.to_le_bytes());
+                value.push(*resource as u8);
+                ratio::encode(amount, &mut value);
+                value.push(*severed as u8);
+                ratio::encode(load, &mut value);
+                tlv::put(34, &value, &mut out);
             }
         }
         out
@@ -547,6 +593,24 @@ impl ClosureEvent {
                 let (amount, _) = ratio::decode(value.get(16..)?)?;
                 Some(Self::AbsorptionLapsed { debtor_orb, creditor_orb, amount })
             }
+            33 => {
+                let source_orb = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let target_orb = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let resource = Resource::from_wire(*value.get(16)?)?;
+                let (rate, used) = ratio::decode(value.get(17..)?)?;
+                let term =
+                    u64::from_le_bytes(value.get(17 + used..17 + used + 8)?.try_into().ok()?);
+                Some(Self::BondSealed { source_orb, target_orb, resource, rate, term })
+            }
+            34 => {
+                let source_orb = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let target_orb = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let resource = Resource::from_wire(*value.get(16)?)?;
+                let (amount, used) = ratio::decode(value.get(17..)?)?;
+                let severed = *value.get(17 + used)? != 0;
+                let (load, _) = ratio::decode(value.get(18 + used..)?)?;
+                Some(Self::BondSettled { source_orb, target_orb, resource, amount, severed, load })
+            }
             _ => None,
         }
     }
@@ -616,6 +680,13 @@ pub struct ColonyOrb {
     pub returned_across: Ratio,
     /// The entropic book of the pair (see `returned_across`).
     pub extracted_across: Ratio,
+    /// BOND-1 (09 §2.2): the love books — cumulative value streamed
+    /// over this orb's standing bonds (as source), and the severance
+    /// loads posted when it cut a bond without notice (or defaulted).
+    /// Same deferral: committed, replay-rebuilt, wire at IDEO-1.
+    pub bond_flow: Ratio,
+    /// The entropic book of the pair (see `bond_flow`).
+    pub severance_load: Ratio,
 }
 
 impl ColonyOrb {

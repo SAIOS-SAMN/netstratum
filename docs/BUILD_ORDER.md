@@ -349,6 +349,37 @@ N5/N6). Details and sequencing in 04 §6.
   Emberkin/Coherent registers; the old bots.json shape still loads and
   derives.
 
+- **BOND-1 LANDED** (2026-07-27): STANDING BONDS — the third
+  ideology-board landing (09 §2.2, §3 below). `BondSealed` (tag 33:
+  rate/tick + term, 0 = open-ended; one bond per source/target/
+  resource) and `BondSettled` (tag 34): the accumulated span settles by
+  ONE receipt at each touch — collect, sever, term expiry — anchored
+  like demurrage; its OWN tag by necessity (a manual transfer must stay
+  distinguishable from bond flow or replay could not re-anchor). THE
+  LOVE BOOKS OPEN: `bond_flow` (source's syntropic book) /
+  `severance_load` (the cutter's entropic book = rate ×
+  `bond_notice_window()`, placeholder 8). An ORDERLY end — the bond run
+  to its term — posts NOTHING (leaving is not a sin); a manual sever or
+  an insolvent settle posts the load (the default IS the mid-winter
+  cut; recorded v1 rulings: the source side cuts; expiry-insolvency
+  posts zero — the term was served; settle sites are collect/sever/
+  expiry). Bond settlements post the love book only — the crisis books
+  belong to deliberate deeds — but still compensate open ABSORB-1
+  windows (settle_debts shared). Bond state committed (in Committed,
+  the AbsorptionDebt precedent). Cross-territory (relayed): two
+  mechanical renderer arms in `engine/mirror`. CLI: `bond <rate> <res>
+  to <p> [for <term>]` · `sever <res> to <p>` · `bonds`, the ⚭/✂
+  glyphs. Evidence: clippy zero (warnings denied); **146/146 workspace
+  witnesses green** (6 new: a 6-tick span settles exactly 3 iron in ONE
+  receipt and re-anchors; severing the heating lifeline mid-winter
+  posts load 2 and the freeze returns on schedule — measured; a term
+  bond streams exactly rate × term and expires posting NOTHING; an
+  insolvent settle pays every iron it holds (15) and defaults with load
+  32 in the same receipt; refusals typed incl. BondAlreadySealed /
+  NoSuchBond; tags 33/34 byte-exact). The arc played end-to-end: the
+  lifeline sealed → streamed at the touch → severed → the coldstore
+  froze again → replay MATCHES.
+
 ## 2. The depth board (02_COLONY_LOOP — game depth before multiplayer)
 
 Ruled 2026-07-25: the world must be worth sharing before N6 shares it. These

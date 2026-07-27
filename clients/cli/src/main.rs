@@ -497,6 +497,139 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 ),
             }
         }
+        Some("bond") => {
+            let rate = words.next().and_then(parse_ratio_arg);
+            let resource = words.next().and_then(parse_resource);
+            let to_word = words.next();
+            let target_name = words.next().map(|word| word.to_string());
+            let mut term = 0u64;
+            let mut source = Some(*current);
+            loop {
+                match (words.next(), words.next()) {
+                    (Some("for"), Some(span)) => term = span.parse().unwrap_or(0),
+                    (Some("from"), Some(planet)) => {
+                        source = world
+                            .orbs()
+                            .iter()
+                            .find(|held| held.name == planet)
+                            .map(|held| held.orb_id)
+                    }
+                    _ => break,
+                }
+            }
+            match (rate, resource, to_word, target_name) {
+                (Some(rate), Some(resource), Some("to"), Some(planet)) => {
+                    let target = world
+                        .orbs()
+                        .iter()
+                        .find(|held| held.name == planet)
+                        .map(|held| held.orb_id);
+                    match (target, source) {
+                        (Some(target), Some(source)) => {
+                            match world.seal_bond_as(SOVEREIGN, source, target, resource, rate.clone(), term) {
+                                Ok(()) => println!(
+                                    "{} bond sealed: {} {}/tick streams to {}{} — settles at each touch; severing without notice posts the load",
+                                    style.ok("⚭"),
+                                    style.strong(&amount(&rate)),
+                                    resource_name(resource),
+                                    style.strong(&planet),
+                                    match term {
+                                        0 => " (open-ended)".to_string(),
+                                        span => format!(" (term {span} ticks — expiry posts nothing)"),
+                                    }
+                                ),
+                                Err(refusal) => refuse(world, &refusal, style),
+                            }
+                        }
+                        _ => println!(
+                            "{} unknown planet — {} lists them",
+                            style.bad("✗"),
+                            style.strong("planets")
+                        ),
+                    }
+                }
+                _ => println!(
+                    "{} usage: {} — e.g. {}",
+                    style.bad("✗"),
+                    style.strong("bond <rate> <resource> to <planet> [for <term>] [from <planet>]"),
+                    style.strong("bond 1/4 joule to coldstore for 12")
+                ),
+            }
+        }
+        Some("sever") => {
+            let resource = words.next().and_then(parse_resource);
+            let to_word = words.next();
+            let target_name = words.next().map(|word| word.to_string());
+            let source = match (words.next(), words.next()) {
+                (Some("from"), Some(planet)) => world
+                    .orbs()
+                    .iter()
+                    .find(|held| held.name == planet)
+                    .map(|held| held.orb_id),
+                _ => Some(*current),
+            };
+            match (resource, to_word, target_name) {
+                (Some(resource), Some("to"), Some(planet)) => {
+                    let target = world
+                        .orbs()
+                        .iter()
+                        .find(|held| held.name == planet)
+                        .map(|held| held.orb_id);
+                    match (target, source) {
+                        (Some(target), Some(source)) => {
+                            match world.sever_bond_as(SOVEREIGN, source, target, resource) {
+                                Ok(()) => println!(
+                                    "{} bond severed — the final span settled; the notice load posts to the cutter's book ({} shows it)",
+                                    style.bad("✂"),
+                                    style.strong("chronicle")
+                                ),
+                                Err(refusal) => refuse(world, &refusal, style),
+                            }
+                        }
+                        _ => println!(
+                            "{} unknown planet — {} lists them",
+                            style.bad("✗"),
+                            style.strong("planets")
+                        ),
+                    }
+                }
+                _ => println!(
+                    "{} usage: {} — e.g. {}",
+                    style.bad("✗"),
+                    style.strong("sever <resource> to <planet> [from <planet>]"),
+                    style.strong("sever joule to coldstore")
+                ),
+            }
+        }
+        Some("bonds") => {
+            match world.bonds().is_empty() {
+                true => println!("{}", style.dim("(no standing bonds)")),
+                false => {
+                    for bond in world.bonds() {
+                        let source = world
+                            .orb_by_id(bond.source)
+                            .map(|held| held.name.clone())
+                            .unwrap_or_else(|| bond.source.to_string());
+                        let target = world
+                            .orb_by_id(bond.target)
+                            .map(|held| held.name.clone())
+                            .unwrap_or_else(|| bond.target.to_string());
+                        println!(
+                            "  {} {} {}/tick {} → {} {}",
+                            style.ok("⚭"),
+                            style.strong(&amount(&bond.rate)),
+                            resource_name(bond.resource),
+                            style.strong(&source),
+                            style.strong(&target),
+                            style.dim(&match bond.term {
+                                0 => format!("(open-ended, anchored {})", bond.anchored),
+                                span => format!("(expires at {}, anchored {})", bond.sealed + span, bond.anchored),
+                            })
+                        );
+                    }
+                }
+            }
+        }
         Some("planets") => {
             for orb in world.orbs() {
                 let here = match orb.orb_id == *current {
@@ -647,6 +780,8 @@ fn help(style: &Style) {
         ("chart <planet> [from <p>]", "found a daughter colony: the founding reserves MOVE from the source colony (nothing is minted)"),
         ("send <amt> <res> to <p> [from <p>]", "move banked value between planets — conservation exact; demurrage settles both sides at the touch; a gift covering the one-tick bill relieves famine"),
         ("absorb <amt> from <p> [into <p>]", "route a hot planet's un-sealed overflow into the absorber's banked sink — emptying it clears the strike; the draw owes the absorber within the reciprocity window or it lapses to the extraction book"),
+        ("bond <rate> <res> to <p> [for <n>]", "seal a standing order: rate/tick streams without per-tick clearing, settled in one receipt at each touch — a term bond expires orderly; severing or defaulting posts the notice load"),
+        ("sever <res> to <p> · bonds", "cut a standing bond (the load posts to the cutter) · list the standing orders"),
         ("save · resume <world>", "sync the chronicle to var/worlds/<name>/ (append-only) · resume a saved world at launch"),
         ("planet <name> · planets", "switch the planet cursor · list this world's planets"),
         ("agent <handle>", "register a contained agent (zero grants until you open scopes)"),
@@ -992,6 +1127,14 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             style.strong(&amount(pending)),
             style.strong("thermal")
         ),
+        ActionRefused::BondAlreadySealed => format!(
+            "a bond already stands on that resource between those planets — {} it before sealing a new rate",
+            style.strong("sever")
+        ),
+        ActionRefused::NoSuchBond => format!(
+            "no bond stands there — {} lists the standing orders",
+            style.strong("bonds")
+        ),
     };
     println!("{} {text}", style.bad("✗"));
 }
@@ -1311,6 +1454,32 @@ fn chronicle(world: &World, style: &Style) {
                 "⌛ absorption window lapsed: {} unpaid orb {debtor_orb} → orb {creditor_orb} — posted to the extraction book",
                 style.strong(&amount(unpaid))
             ),
+            cfe::dop::ClosureEvent::BondSealed {
+                source_orb, target_orb, resource, rate, term,
+            } => format!(
+                "⚭ bond sealed: {} {}/tick orb {source_orb} → orb {target_orb}{}",
+                style.strong(&amount(rate)),
+                resource_name(*resource),
+                match term {
+                    0 => " (open-ended)".to_string(),
+                    span => format!(" (term {span} ticks)"),
+                }
+            ),
+            cfe::dop::ClosureEvent::BondSettled {
+                source_orb, target_orb, resource, amount: span, severed, load,
+            } => match severed {
+                false => format!(
+                    "⚭ bond settled: {} {} streamed orb {source_orb} → orb {target_orb}",
+                    style.strong(&amount(span)),
+                    resource_name(*resource)
+                ),
+                true => format!(
+                    "✂ bond ended: {} {} final orb {source_orb} → orb {target_orb} — load {}",
+                    style.strong(&amount(span)),
+                    resource_name(*resource),
+                    style.strong(&amount(load))
+                ),
+            },
         };
         let tag = receipt
             .provenance

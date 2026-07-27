@@ -56,6 +56,11 @@ pub enum ActionRefused {
     /// ABSORB-1 — only un-sealed pending overflow absorbs; the refusal
     /// names exactly what stands.
     CannotAbsorb { pending: Box<Ratio> },
+    /// BOND-1 — one bond per (source, target, resource); the standing
+    /// one must be severed before a new rate is sealed.
+    BondAlreadySealed,
+    /// BOND-1 — no bond stands on this (source, target, resource).
+    NoSuchBond,
 }
 
 /// One tick's read: the clock walk, any famines that struck, and any
@@ -83,6 +88,23 @@ pub struct AbsorptionDebt {
     pub opened: u64,
 }
 
+/// BOND-1 (09 §2.2): one standing order — source streams `rate` of
+/// `resource` per tick to target, the span settled by ONE BondSettled
+/// receipt at each touch (collect / sever / term expiry), anchored
+/// like demurrage. Committed state; replays from receipts alone.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Bond {
+    pub source: u64,
+    pub target: u64,
+    pub resource: Resource,
+    pub rate: Ratio,
+    /// Term in ticks (0 = open-ended); expires ORDERLY at sealed+term.
+    pub term: u64,
+    pub sealed: u64,
+    /// The settle anchor — the stamp the span is owed from.
+    pub anchored: u64,
+}
+
 /// The committed projection — exactly what the chronicle grounds.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Committed {
@@ -92,6 +114,8 @@ pub struct Committed {
     pub star: Option<crate::thermal::StarClass>,
     /// ABSORB-1: the open reciprocity windows, in opening order.
     pub debts: Vec<AbsorptionDebt>,
+    /// BOND-1: the standing orders, in sealing order.
+    pub bonds: Vec<Bond>,
 }
 
 pub struct World {
@@ -113,6 +137,8 @@ pub struct World {
     /// ABSORB-1: the open reciprocity windows (committed — every
     /// mutation receipted; replays from receipts alone).
     debts: Vec<AbsorptionDebt>,
+    /// BOND-1: the standing orders (committed, same law).
+    bonds: Vec<Bond>,
 }
 
 impl World {
@@ -127,6 +153,7 @@ impl World {
             accrued: Vec::new(),
             vent_pending: Vec::new(),
             debts: Vec::new(),
+            bonds: Vec::new(),
         }
     }
 
@@ -153,6 +180,7 @@ impl World {
             accrued: Vec::new(),
             vent_pending: Vec::new(),
             debts: committed.debts,
+            bonds: committed.bonds,
         }
     }
 
@@ -552,6 +580,17 @@ impl World {
                     vec![],
                 );
             }
+            // BOND-1: term bonds expire ORDERLY at their exact
+            // boundary — the final span settles, nothing posts.
+            let expired: Vec<(u64, u64, Resource)> = self
+                .bonds
+                .iter()
+                .filter(|bond| bond.term > 0 && now >= bond.sealed + bond.term)
+                .map(|bond| (bond.source, bond.target, bond.resource))
+                .collect();
+            for (source, target, resource) in expired {
+                self.settle_bond(source, target, resource, now, vec![], Some(ratio(0, 1)));
+            }
         }
         let mut struck = Vec::new();
         let mut overheat_struck = Vec::new();
@@ -824,8 +863,24 @@ impl World {
                 }
             }
         }
+        // BOND-1: the standing orders touching this orb settle their
+        // accumulated spans — one receipt each (settle-at-touch).
+        let touching: Vec<(u64, u64, Resource)> = self
+            .bonds
+            .iter()
+            .filter(|bond| bond.source == orb || bond.target == orb)
+            .map(|bond| (bond.source, bond.target, bond.resource))
+            .collect();
+        for (source, target, resource) in touching {
+            self.settle_bond(source, target, resource, stamp, vec![actor], None);
+        }
         self.relieve_recovered(orb);
         Ok(count)
+    }
+
+    /// BOND-1: the standing orders.
+    pub fn bonds(&self) -> &[Bond] {
+        &self.bonds
     }
 
     /// Transfer banked value between two orbs as the sovereign.
@@ -943,6 +998,224 @@ impl World {
         );
         self.relieve_recovered(to);
         Ok(())
+    }
+
+    /// Seal a bond as the sovereign.
+    pub fn seal_bond(
+        &mut self,
+        source: u64,
+        target: u64,
+        resource: Resource,
+        rate: Ratio,
+        term: u64,
+    ) -> Result<(), ActionRefused> {
+        self.seal_bond_as(SOVEREIGN, source, target, resource, rate, term)
+    }
+
+    /// BOND-1 (09 §2.2) — seal a standing order: source streams `rate`
+    /// of `resource` per tick to target, non-transactional, settled by
+    /// ONE receipt at each touch. One bond per (source, target,
+    /// resource); `term` 0 is open-ended, otherwise the bond expires
+    /// ORDERLY at sealed+term posting nothing. Collect scope.
+    pub fn seal_bond_as(
+        &mut self,
+        actor: u64,
+        source: u64,
+        target: u64,
+        resource: Resource,
+        rate: Ratio,
+        term: u64,
+    ) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Collect)?;
+        if self.orbs.is_empty() {
+            return Err(ActionRefused::NoColony);
+        }
+        if source == target || rate <= ratio(0, 1) {
+            return Err(ActionRefused::BadTransfer);
+        }
+        if !self.orbs.iter().any(|held| held.orb_id == source) {
+            return Err(ActionRefused::NoSuchOrb { orb: source });
+        }
+        if !self.orbs.iter().any(|held| held.orb_id == target) {
+            return Err(ActionRefused::NoSuchOrb { orb: target });
+        }
+        if self.bonds.iter().any(|bond| {
+            bond.source == source && bond.target == target && bond.resource == resource
+        }) {
+            return Err(ActionRefused::BondAlreadySealed);
+        }
+        let stamp = self.clock.now();
+        self.bonds.push(Bond {
+            source,
+            target,
+            resource,
+            rate: rate.clone(),
+            term,
+            sealed: stamp,
+            anchored: stamp,
+        });
+        self.chronicle.append(
+            ClosureEvent::BondSealed {
+                source_orb: source,
+                target_orb: target,
+                resource,
+                rate,
+                term,
+            },
+            stamp,
+            vec![actor],
+        );
+        Ok(())
+    }
+
+    /// Sever a bond as the sovereign.
+    pub fn sever_bond(
+        &mut self,
+        source: u64,
+        target: u64,
+        resource: Resource,
+    ) -> Result<(), ActionRefused> {
+        self.sever_bond_as(SOVEREIGN, source, target, resource)
+    }
+
+    /// BOND-1 — cut a standing bond (v1 ruling: the SOURCE side cuts;
+    /// the load posts to it — the giver stopped giving without the
+    /// notice). The final span settles in the same receipt; the
+    /// severance load is `rate × bond_notice_window()`. Collect scope.
+    pub fn sever_bond_as(
+        &mut self,
+        actor: u64,
+        source: u64,
+        target: u64,
+        resource: Resource,
+    ) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Collect)?;
+        let Some(bond) = self.bonds.iter().find(|bond| {
+            bond.source == source && bond.target == target && bond.resource == resource
+        }) else {
+            return Err(ActionRefused::NoSuchBond);
+        };
+        let load = bond.rate.clone() * ratio(crate::dop::bond_notice_window() as i64, 1);
+        let stamp = self.clock.now();
+        self.settle_bond(source, target, resource, stamp, vec![actor], Some(load));
+        Ok(())
+    }
+
+    /// BOND-1 — settle one bond's accumulated span up to `stamp`
+    /// (capped at the term boundary) by ONE BondSettled receipt.
+    /// `ending: Some(load)` ends the bond deliberately (sever: rate ×
+    /// notice; term expiry: zero). Insolvency — the span exceeding the
+    /// source's post-decay bank — pays what stands and ends the bond
+    /// as a receipted DEFAULT with the notice load. Bond flow posts
+    /// the love book only (the crisis books belong to deliberate
+    /// deeds); the payment still compensates open reciprocity windows.
+    fn settle_bond(
+        &mut self,
+        source: u64,
+        target: u64,
+        resource: Resource,
+        stamp: u64,
+        provenance: Vec<u64>,
+        ending: Option<Ratio>,
+    ) {
+        let Some(at) = self.bonds.iter().position(|bond| {
+            bond.source == source && bond.target == target && bond.resource == resource
+        }) else {
+            return;
+        };
+        let (rate, term, sealed, anchored) = {
+            let bond = &self.bonds[at];
+            (bond.rate.clone(), bond.term, bond.sealed, bond.anchored)
+        };
+        let boundary = match term {
+            0 => stamp,
+            span => stamp.min(sealed + span),
+        };
+        let owed = rate.clone() * ratio(boundary.saturating_sub(anchored) as i64, 1);
+        let star = self.star;
+        let affordable = {
+            let held = self
+                .orbs
+                .iter()
+                .find(|held| held.orb_id == source)
+                .expect("bond endpoints exist");
+            let decay = demurrage_due(held, star, stamp)
+                .into_iter()
+                .find(|(due, _)| *due == resource)
+                .map(|(_, decay)| decay)
+                .unwrap_or_else(|| ratio(0, 1));
+            held.banked_amount(resource) - decay
+        };
+        let pay = owed.clone().min(affordable);
+        let insolvent = pay < owed;
+        let ended = ending.is_some() || insolvent;
+        // The caller's ruling wins (expiry: zero — the term was
+        // served); an undirected insolvency is the mid-winter default.
+        let load = match (&ending, insolvent) {
+            (Some(load), _) => load.clone(),
+            (None, true) => rate * ratio(crate::dop::bond_notice_window() as i64, 1),
+            (None, false) => ratio(0, 1),
+        };
+        if pay == ratio(0, 1) && !ended {
+            return; // nothing streamed, nothing ends — no receipt
+        }
+        let value = pay.clone() * crate::dop::commensurate_weight(resource);
+        if pay > ratio(0, 1) {
+            for orb in [source, target] {
+                let held = self
+                    .orbs
+                    .iter_mut()
+                    .find(|held| held.orb_id == orb)
+                    .expect("bond endpoints exist");
+                touch(held, star, &mut self.chronicle, stamp);
+            }
+            {
+                let held = self
+                    .orbs
+                    .iter_mut()
+                    .find(|held| held.orb_id == source)
+                    .expect("bond endpoints exist");
+                held.bank(resource, -pay.clone());
+                held.bond_flow += value.clone();
+            }
+            {
+                let held = self
+                    .orbs
+                    .iter_mut()
+                    .find(|held| held.orb_id == target)
+                    .expect("bond endpoints exist");
+                held.bank(resource, pay.clone());
+            }
+            settle_debts(&mut self.debts, &mut self.orbs, source, target, value);
+        }
+        if ended {
+            self.bonds.remove(at);
+            if load > ratio(0, 1) {
+                let held = self
+                    .orbs
+                    .iter_mut()
+                    .find(|held| held.orb_id == source)
+                    .expect("bond endpoints exist");
+                held.severance_load += load.clone();
+            }
+        } else {
+            self.bonds[at].anchored = boundary;
+        }
+        self.chronicle.append(
+            ClosureEvent::BondSettled {
+                source_orb: source,
+                target_orb: target,
+                resource,
+                amount: pay.clone(),
+                severed: ended,
+                load,
+            },
+            stamp,
+            provenance,
+        );
+        if pay > ratio(0, 1) {
+            self.relieve_recovered(target);
+        }
     }
 
     /// Absorb as the sovereign.
@@ -1088,6 +1361,7 @@ impl World {
             entities: self.entities.clone(),
             star: self.star,
             debts: self.debts.clone(),
+            bonds: self.bonds.clone(),
         }
     }
 
@@ -1158,6 +1432,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut entities: Vec<Entity> = Vec::new();
     let mut star: Option<crate::thermal::StarClass> = None;
     let mut debts: Vec<AbsorptionDebt> = Vec::new();
+    let mut bonds: Vec<Bond> = Vec::new();
     for receipt in chronicle.receipts() {
         match &receipt.event {
             ClosureEvent::EntityRegistered { entity_id, principal, handle } => {
@@ -1377,9 +1652,70 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     debts.remove(at);
                 }
             }
+            // BOND-1: the standing order replays whole.
+            ClosureEvent::BondSealed { source_orb, target_orb, resource, rate, term } => {
+                bonds.push(Bond {
+                    source: *source_orb,
+                    target: *target_orb,
+                    resource: *resource,
+                    rate: rate.clone(),
+                    term: *term,
+                    sealed: receipt.stamp,
+                    anchored: receipt.stamp,
+                });
+            }
+            // BOND-1: one settle receipt moves the span, posts the
+            // love book, compensates open windows, and — severed —
+            // ends the bond with its load. Non-ending settles re-
+            // anchor at the stamp (live boundary == stamp, proven at
+            // the landing).
+            ClosureEvent::BondSettled { source_orb, target_orb, resource, amount, severed, load } => {
+                let value = amount.clone() * crate::dop::commensurate_weight(*resource);
+                if *amount > ratio(0, 1) {
+                    if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *source_orb)
+                    {
+                        held.bank(*resource, -amount.clone());
+                        held.last_touch = receipt.stamp;
+                        held.bond_flow += value.clone();
+                    }
+                    if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *target_orb)
+                    {
+                        held.bank(*resource, amount.clone());
+                        held.last_touch = receipt.stamp;
+                    }
+                    settle_debts(&mut debts, &mut orbs, *source_orb, *target_orb, value);
+                }
+                match severed {
+                    true => {
+                        if let Some(at) = bonds.iter().position(|bond| {
+                            bond.source == *source_orb
+                                && bond.target == *target_orb
+                                && bond.resource == *resource
+                        }) {
+                            bonds.remove(at);
+                        }
+                        if *load > ratio(0, 1) {
+                            if let Some(held) =
+                                orbs.iter_mut().find(|held| held.orb_id == *source_orb)
+                            {
+                                held.severance_load += load.clone();
+                            }
+                        }
+                    }
+                    false => {
+                        if let Some(bond) = bonds.iter_mut().find(|bond| {
+                            bond.source == *source_orb
+                                && bond.target == *target_orb
+                                && bond.resource == *resource
+                        }) {
+                            bond.anchored = receipt.stamp;
+                        }
+                    }
+                }
+            }
         }
     }
-    Committed { orbs, entities, star, debts }
+    Committed { orbs, entities, star, debts, bonds }
 }
 
 /// SINK-1 (Q2): the demurrage due on one orb's un-vaulted banked

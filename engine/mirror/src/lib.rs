@@ -638,6 +638,26 @@ fn render_receipt(receipt: &Receipt) -> String {
                 ratio_str(amount)
             ),
         ),
+        E::BondSealed { source_orb, target_orb, resource, rate, term } => (
+            "bond_sealed",
+            format!(
+                "{} {}/tick orb {source_orb} → orb {target_orb} (term {term})",
+                ratio_str(rate),
+                resource_name(*resource)
+            ),
+        ),
+        E::BondSettled { source_orb, target_orb, resource, amount, severed, load } => (
+            "bond_settled",
+            format!(
+                "{} {} orb {source_orb} → orb {target_orb}{}",
+                ratio_str(amount),
+                resource_name(*resource),
+                match severed {
+                    true => format!(" SEVERED (load {})", ratio_str(load)),
+                    false => String::new(),
+                }
+            ),
+        ),
     };
     w.field_str("event", name);
     w.field_str("detail", &detail);
