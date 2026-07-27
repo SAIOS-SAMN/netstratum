@@ -69,3 +69,31 @@ succinct proof of each interior transition (not boundary agreement). At that
 point it is no longer "holographic field magic" — it is GPU-accelerated ZK
 over the existing chronicle, which is a legitimate performance project that
 does not touch the SEALs. That is the form in which it may return.
+
+---
+
+## Q2. Reopening paths for the sink-dual rejections (05 §1.4)
+
+Three rejections from the sink-dual draft carry lawful ways back in;
+recorded so a flat "no" doesn't bury a good tuning lever.
+
+1. **Passive sink minting — reopened by distinction.** `radiator_base`
+   is already a passive, ungated sink (every orb self-cools; landed in
+   THERMAL-1). What stays EARNED is *bankable/exportable* capacity
+   (`S_cool`). Baseline passive, tradeable earned. Reopen trigger:
+   balance shows the cold start too punishing without a baseline.
+2. **Banked-store decay — reopenable as receipted demurrage.** Banked
+   state never mutates silently (SEAL B), but decay MAY accumulate as
+   workspace and settle in one receipt at collect/transfer (the
+   VentSettled shape), or be held off by storage upkeep. Reopen trigger:
+   balance wants banked joules not to be a free eternal store outside
+   Glasskeeper vaults.
+3. **A global conservation sheet — reopenable at N6.** Per-side
+   invariants (05 §1.4) stay the orb-level ground truth; they compose
+   into a universe-level audit (Σ encased + Σ vented = Σ excess;
+   Σ absorbed = Σ sink-consumed) checked at mesh consensus (NS-5), not
+   imposed as an orb law.
+
+Closed for good: un-receipted anything (SEAL B — spills are workspace
+until `VentSettled` seals them, which is already the design); the
+terminology rulings (charter §8); section numbering (mechanical).
