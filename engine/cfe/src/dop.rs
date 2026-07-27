@@ -32,6 +32,9 @@
 //!   19 Orb famine entry (resource)
 //!   26 Orb thermal entry (albedo ‖ orbit_r ‖ overheat u8) — THERMAL-1
 //!   28 Orb vent entry (entropy_vented ratio ‖ LE64 last_touch) — VENT-1/SINK-1
+//!   30–38 RESERVED for the ideology board (09, BUILD_ORDER §3:
+//!         TRADE-1 → ABSORB-1 → BOND-1 → COVENANT-1 → IDEO-1) — next
+//!         free tag for any OTHER landing is 39.
 
 use crate::ratio::{self, ratio, Ratio};
 use crate::tlv;
