@@ -23,19 +23,19 @@
 //! a shared-chronicle sibling planet waits on the multi-colony
 //! engine).
 //!
-//! **LORE LIVES IN DATA, NOT SOURCE:** bot specs load from
-//! `<var>/bots.json` when present; `write_default_bots` seeds that
+//! **LORE LIVES IN DATA, NOT SOURCE:** egregore specs load from
+//! `<var>/egregores.json` when present; `write_default_egregores` seeds that
 //! file once so even the founding NPCs are operator-editable. NPC
 //! entries carry `founder: "conductor"` — the observer marks them ⚙.
 //!
 //! **THE AUTARKIES FEEL THE STAR (BOT-THERM):** genesis commissions
-//! every bot world's sun and sites its planet — spec-pinned, or
+//! every egregore world's sun and sites its planet — spec-pinned, or
 //! derived from the registry axes through the chronicle beacon (the
 //! civilization's own genesis receipts choose its sky). Furnace-sited
-//! bots answer heat with encasement shells and mint joules;
-//! Frost-sited bots raise a cryo-lattice array, bank sink, and hold
+//! egregores answer heat with encasement shells and mint joules;
+//! Frost-sited egregores raise a cryo-lattice array, bank sink, and hold
 //! expansion against the joule runway — honestly allowed to
-//! freeze-lock; mesic bots keep their temperament untouched.
+//! freeze-lock; mesic egregores keep their temperament untouched.
 //!
 //! Everything is deterministic: same era length → byte-identical
 //! receipts. HONEST SEAM: worlds live in process memory; reload from
@@ -51,10 +51,10 @@ use mirror::{Directive, Disposition, Mirror};
 use physics::Beacon;
 use solver::{forge_task, solve, Difficulty, SolveRead};
 
-mod bots;
-pub use bots::{founding_bots, load_bots, write_default_bots};
+mod egregores;
+pub use egregores::{founding_egregores, load_egregores, write_default_egregores};
 
-/// A build temperament — the only thing that differs between bots.
+/// A build temperament — the only thing that differs between egregores.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Policy {
     /// Two extractors per habitat, expand at the food knife-edge.
@@ -86,7 +86,7 @@ impl Policy {
 
 /// One scripted civilization and where it settles.
 #[derive(Debug, Clone)]
-pub struct BotSpec {
+pub struct EgregoreSpec {
     pub civilization: Civilization,
     pub world_name: String,
     pub planet: String,
@@ -104,12 +104,12 @@ pub struct BotSpec {
     pub orbit: Option<Ratio>,
 }
 
-/// One live bot world: the sim, its contained actor, its research rung.
-pub struct BotWorld {
-    pub spec: BotSpec,
+/// One live egregore world: the sim, its contained actor, its research rung.
+pub struct Egregore {
+    pub spec: EgregoreSpec,
     pub world: World,
-    /// The bot's contained agent (build/raze/collect granted).
-    actor: u64,
+    /// The egregore's contained agent (build/raze/collect granted).
+    automaton: u64,
     /// The steward's contained entity (drains the operator's inbox).
     steward: u64,
     /// The forge rung this civilization currently attempts.
@@ -159,7 +159,7 @@ pub fn joule_runway_allows(banked_joules: &Ratio, zones: usize) -> bool {
     *banked_joules >= cfe::dop::heating_per_zone() * ratio(zones as i64 + 1, 1)
 }
 
-/// BOT-THERM: the thermal regime a bot world lives in. The mesic band
+/// BOT-THERM: the thermal regime a egregore world lives in. The mesic band
 /// is home (temperament unchanged — `None`); above its ceiling the
 /// Furnace laws apply, below its floor the Frost laws. Unsited worlds
 /// carry no regime (the engine's opt-in guard, mirrored here).
@@ -214,11 +214,11 @@ fn derived_siting(civilization: &Civilization, beacon: &Beacon) -> (StarClass, R
     }
 }
 
-impl BotWorld {
+impl Egregore {
     /// Found the era: registry entry (join if present), the colony,
-    /// the contained bot actor, the steward entity, and the world's
+    /// the contained egregore actor, the steward entity, and the world's
     /// place on the star-chart.
-    pub fn genesis(spec: BotSpec, registry: &Registry, mirror: &Mirror) -> BotWorld {
+    pub fn genesis(spec: EgregoreSpec, registry: &Registry, mirror: &Mirror) -> Egregore {
         let _ = registry.create(&spec.civilization);
         let _ = mirror.chart_world(
             &spec.world_name,
@@ -227,15 +227,15 @@ impl BotWorld {
         );
         let mut world = World::new();
         world.found(&spec.colony).expect("a fresh world founds");
-        let actor = world
+        let automaton = world
             .register_agent(&format!("{}-conductor", spec.civilization.slug))
             .expect("registers");
         let steward = world.register_agent("steward").expect("registers");
         for scope in [Scope::Build, Scope::Raze, Scope::Collect] {
-            world.grant(actor, scope).expect("grants the bot");
+            world.grant(automaton, scope).expect("grants the automaton");
             world.grant(steward, scope).expect("grants the steward");
         }
-        // BOT-THERM: thermal genesis — every bot world founds under a
+        // BOT-THERM: thermal genesis — every egregore world founds under a
         // REAL sun. Spec-pinned fields rule; absent ones derive from
         // the registry axes, beacon-seeded by the world's own genesis
         // receipt digest (the chronicle-seeded discipline, CHARTER §9).
@@ -257,10 +257,10 @@ impl BotWorld {
         // leaves the orb thermally DORMANT (the engine's opt-in guard)
         // instead of killing the board; derived seats are always lawful.
         let _ = world.site_planet(cfe::world::FIRST_ORB, albedo, orbit);
-        BotWorld {
+        Egregore {
             spec,
             world,
-            actor,
+            automaton,
             steward,
             level: 1,
             streak: 0,
@@ -343,14 +343,14 @@ impl BotWorld {
             }
         };
 
-        // BOT-THERM: thermal temperament. A Furnace-sited bot answers
+        // BOT-THERM: thermal temperament. A Furnace-sited egregore answers
         // rising heat with encasement shells BEFORE anything else —
         // minted joules are what the regime is FOR (05 §1.2); a
-        // Frost-sited bot raises its sink charter (one cryo-lattice
+        // Frost-sited egregore raises its sink charter (one cryo-lattice
         // array, 05 §1.4), then holds every further build against the
         // joule runway — famine avoidance, honestly allowed to fail
         // (a freeze-lock is legitimate drama, not a bug). Mesic-sited
-        // and unsited bots keep their temperament untouched.
+        // and unsited egregores keep their temperament untouched.
         let affords = |world: &World, kind: ZoneKind| {
             kind.cost()
                 .into_iter()
@@ -423,7 +423,7 @@ impl BotWorld {
             None => industrial.or(settlement),
         };
         if let (Some(kind), Some(tile)) = (wanted, next_free_tile(world)) {
-            let _ = world.zone_as(self.actor, cfe::world::FIRST_ORB, tile, kind);
+            let _ = world.zone_as(self.automaton, cfe::world::FIRST_ORB, tile, kind);
         }
     }
 
@@ -545,7 +545,7 @@ impl BotWorld {
     /// latest receipt digest mints ONE daughter — a mutated axis, a
     /// derived name, a new world, the parent's temperament. The
     /// history chooses; nobody authors the child.
-    fn speciation_step(&mut self, registry: &Registry) -> Option<BotSpec> {
+    fn speciation_step(&mut self, registry: &Registry) -> Option<EgregoreSpec> {
         if self.spawned || self.level < 5 || self.solved < 20 {
             return None;
         }
@@ -630,7 +630,7 @@ impl BotWorld {
         if dx == ratio(0, 1) && dy == ratio(0, 1) && dz == ratio(0, 1) {
             dx = ratio(1, 1);
         }
-        Some(BotSpec {
+        Some(EgregoreSpec {
             civilization: daughter,
             // Fresh themed world and planet — ancestry is a registry
             // fact and a star-chart adjacency, never a name chain.
@@ -654,11 +654,11 @@ impl BotWorld {
 
     /// One full heartbeat. A speciation returns the newborn's spec —
     /// the era loop gives it a world of its own.
-    pub fn cycle(&mut self, mirror: &Mirror, registry: &Registry) -> Option<BotSpec> {
+    pub fn cycle(&mut self, mirror: &Mirror, registry: &Registry) -> Option<EgregoreSpec> {
         self.drain_inbox(mirror);
         self.build_step();
         self.world.tick();
-        let _ = self.world.collect_as(self.actor, cfe::world::FIRST_ORB);
+        let _ = self.world.collect_as(self.automaton, cfe::world::FIRST_ORB);
         self.research_step(mirror);
         let newborn = self.speciation_step(registry);
         let _ = mirror.record(
@@ -672,40 +672,40 @@ impl BotWorld {
 }
 
 /// Run one era: CONVERGE the archived eras (07 §1.6), then genesis for
-/// every bot, then `cycles` heartbeats; daughters born mid-era join the
+/// every egregore, then `cycles` heartbeats; daughters born mid-era join the
 /// beat. Returns the live worlds.
-pub fn run_era(var_root: &str, cycles: u32) -> Vec<BotWorld> {
+pub fn run_era(var_root: &str, cycles: u32) -> Vec<Egregore> {
     let registry = Registry::at(format!("{var_root}/registry"));
     let mirror = Mirror::at(format!("{var_root}/worlds"));
     let eras = mirror::converge::default_era_roots(var_root);
     let epoch_base = mirror::converge::converge(&mirror, &eras)
         .map(|read| read.epoch_base)
         .unwrap_or(0);
-    let mut worlds: Vec<BotWorld> = bots::founding_bots()
+    let mut worlds: Vec<Egregore> = egregores::founding_egregores()
         .into_iter()
-        .map(|spec| BotWorld::genesis(spec, &registry, &mirror))
+        .map(|spec| Egregore::genesis(spec, &registry, &mirror))
         .collect();
     for beat in 0..cycles {
         // TUniversal T = epoch base + this era's beat (07 §1.3).
         let _ = mirror.set_universal_clock(epoch_base + u64::from(beat) + 1);
         let mut newborns = Vec::new();
-        for bot in &mut worlds {
-            if let Some(spec) = bot.cycle(&mirror, &registry) {
+        for egregore in &mut worlds {
+            if let Some(spec) = egregore.cycle(&mirror, &registry) {
                 newborns.push(spec);
             }
         }
         for spec in newborns {
-            worlds.push(BotWorld::genesis(spec, &registry, &mirror));
+            worlds.push(Egregore::genesis(spec, &registry, &mirror));
         }
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — the mirror renders journals + wall, a REFLECTION
         // of the chronicle, never a state change.
         if (u64::from(beat) + 1).is_multiple_of(mirror::journal::YEAR_TICKS) {
-            for bot in &worlds {
+            for egregore in &worlds {
                 let _ = mirror.record_journal(
-                    &bot.spec.world_name,
-                    &bot.world,
-                    &mirror::journal::Voice::of(&bot.spec.civilization),
+                    &egregore.spec.world_name,
+                    &egregore.world,
+                    &mirror::journal::Voice::of(&egregore.spec.civilization),
                 );
             }
         }

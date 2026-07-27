@@ -9,8 +9,8 @@ use cfe::dop::{Resource, ZoneKind};
 use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::StarClass;
 use conductor::{
-    founding_bots, joule_runway_allows, load_bots, run_era, write_default_bots, BotSpec,
-    BotWorld, Policy,
+    founding_egregores, joule_runway_allows, load_egregores, run_era, write_default_egregores, EgregoreSpec,
+    Egregore, Policy,
 };
 use mirror::registry::{Civilization, Registry};
 use mirror::Mirror;
@@ -19,29 +19,29 @@ use std::path::PathBuf;
 
 fn scratch(name: &str) -> PathBuf {
     let dir = std::env::temp_dir().join(format!(
-        "bot-therm-pin-{name}-{}",
+        "egregore-therm-pin-{name}-{}",
         std::process::id()
     ));
     let _ = fs::remove_dir_all(&dir);
     dir
 }
 
-fn banked(bot: &BotWorld, resource: Resource) -> Ratio {
-    bot.world
+fn banked(egregore: &Egregore, resource: Resource) -> Ratio {
+    egregore.world
         .orb()
         .map(|orb| orb.banked_amount(resource))
         .unwrap_or_else(|| ratio(0, 1))
 }
 
-fn kind_count(bot: &BotWorld, kind: ZoneKind) -> usize {
-    bot.world
+fn kind_count(egregore: &Egregore, kind: ZoneKind) -> usize {
+    egregore.world
         .orb()
         .map(|orb| orb.zones.iter().filter(|z| z.kind == kind).count())
         .unwrap_or(0)
 }
 
-fn zones(bot: &BotWorld) -> usize {
-    bot.world.orb().map(|orb| orb.zones.len()).unwrap_or(0)
+fn zones(egregore: &Egregore) -> usize {
+    egregore.world.orb().map(|orb| orb.zones.len()).unwrap_or(0)
 }
 
 /// Thermal genesis is DETERMINISTIC: the same spec founds the same
@@ -50,15 +50,15 @@ fn zones(bot: &BotWorld) -> usize {
 /// receipts seed the beacon) and the pinned path (explicit fields).
 #[test]
 fn thermal_genesis_is_deterministic() {
-    let found = |name: &str, spec: BotSpec| -> BotWorld {
+    let found = |name: &str, spec: EgregoreSpec| -> Egregore {
         let root = scratch(name);
-        BotWorld::genesis(
+        Egregore::genesis(
             spec,
             &Registry::at(root.join("registry")),
             &Mirror::at(root.join("worlds")),
         )
     };
-    let derived = founding_bots()
+    let derived = founding_egregores()
         .into_iter()
         .find(|s| s.star.is_none())
         .expect("a derived (axis-sited) seat is seeded");
@@ -76,7 +76,7 @@ fn thermal_genesis_is_deterministic() {
         "same spec, same star/site receipts, byte-for-byte"
     );
 
-    let pinned = founding_bots()
+    let pinned = founding_egregores()
         .into_iter()
         .find(|s| s.star == Some(StarClass::M))
         .expect("the Frost seat is seeded");
@@ -89,8 +89,8 @@ fn thermal_genesis_is_deterministic() {
     );
 }
 
-/// A default-seeded era is thermally ALIVE: at least one Furnace bot
-/// mints joules through encasement shells, at least one Frost bot
+/// A default-seeded era is thermally ALIVE: at least one Furnace egregore
+/// mints joules through encasement shells, at least one Frost egregore
 /// raises a cryo-lattice array and banks sink — and the thermal state
 /// flows to `state.json` (the mirror pipeline, witnessed end-to-end).
 #[test]
@@ -102,11 +102,11 @@ fn a_default_era_mints_hot_and_banks_cold() {
         .find(|b| {
             kind_count(b, ZoneKind::Encasement) > 0 && banked(b, Resource::Joule) > ratio(0, 1)
         })
-        .expect("a Furnace bot minted joules through its shells");
+        .expect("a Furnace egregore minted joules through its shells");
     let frost = worlds
         .iter()
         .find(|b| kind_count(b, ZoneKind::CryoArray) > 0)
-        .expect("a Frost bot raised a cryo-lattice array");
+        .expect("a Frost egregore raised a cryo-lattice array");
     assert!(
         banked(frost, Resource::Sink) > ratio(0, 1),
         "the Frost banks cold"
@@ -139,7 +139,7 @@ fn the_joule_runway_defers_the_frost() {
     let root = scratch("runway");
     let registry = Registry::at(root.join("registry"));
     let mirror = Mirror::at(root.join("worlds"));
-    let seat = |slug: &str, star: StarClass| BotSpec {
+    let seat = |slug: &str, star: StarClass| EgregoreSpec {
         civilization: Civilization {
             name: slug.to_string(),
             slug: slug.to_string(),
@@ -160,8 +160,8 @@ fn the_joule_runway_defers_the_frost() {
         albedo: Some(ratio(0, 1)),
         orbit: Some(ratio(1, 1)),
     };
-    let mut frost = BotWorld::genesis(seat("stillside", StarClass::M), &registry, &mirror);
-    let mut mesic = BotWorld::genesis(seat("plainside", StarClass::G), &registry, &mirror);
+    let mut frost = Egregore::genesis(seat("stillside", StarClass::M), &registry, &mirror);
+    let mut mesic = Egregore::genesis(seat("plainside", StarClass::G), &registry, &mirror);
     for _ in 0..12 {
         frost.cycle(&mirror, &registry);
         mesic.cycle(&mirror, &registry);
@@ -222,16 +222,16 @@ fn a_thermal_year_reaches_the_wall() {
 }
 
 /// The operator's file: thermal fields round-trip through the seeded
-/// bots.json; files WITHOUT thermal fields (the pre-BOT-THERM shape)
+/// egregores.json; files WITHOUT thermal fields (the pre-BOT-THERM shape)
 /// still load and found thermally-derived worlds — compat held.
 #[test]
 fn old_bots_files_still_load_and_derive() {
     let root = scratch("compat");
     fs::create_dir_all(&root).expect("scratch");
-    let path = root.join("bots.json");
-    write_default_bots(&path).expect("seeds");
-    let seeded = load_bots(&path).expect("loads");
-    assert_eq!(seeded.len(), founding_bots().len());
+    let path = root.join("egregores.json");
+    write_default_egregores(&path).expect("seeds");
+    let seeded = load_egregores(&path).expect("loads");
+    assert_eq!(seeded.len(), founding_egregores().len());
     assert!(
         seeded.iter().any(|s| s.star == Some(StarClass::M)),
         "the Frost seat survives the round-trip"
@@ -259,21 +259,21 @@ fn old_bots_files_still_load_and_derive() {
            "colony":"alight","policy":"steady","x":"3","y":"1/2","z":"-4"}]"#,
     )
     .expect("writes");
-    let specs = load_bots(&legacy).expect("the old shape still loads");
+    let specs = load_egregores(&legacy).expect("the old shape still loads");
     assert!(
         specs[0].star.is_none() && specs[0].albedo.is_none() && specs[0].orbit.is_none(),
         "absent fields stay absent on the spec"
     );
 
     // …and its genesis derives a real sun and siting anyway.
-    let bot = BotWorld::genesis(
+    let egregore = Egregore::genesis(
         specs[0].clone(),
         &Registry::at(root.join("registry")),
         &Mirror::at(root.join("worlds")),
     );
-    assert!(bot.world.star().is_some(), "the derived sun is commissioned");
+    assert!(egregore.world.star().is_some(), "the derived sun is commissioned");
     assert!(
-        bot.world.orb().expect("orb").thermal.is_some(),
+        egregore.world.orb().expect("orb").thermal.is_some(),
         "the derived orbit is sited"
     );
 }

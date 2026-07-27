@@ -3,12 +3,12 @@
 //! Usage:
 //!   conductor [--var var] [--cycles N] [--cadence SECONDS]
 //!
-//! Bot lore lives in `<var>/bots.json` — seeded with the founding
+//! Egregore lore lives in `<var>/egregores.json` — seeded with the founding
 //! NPCs on first run, then the operator's file to edit freely.
 //! `--cycles 0` (default) beats forever at the cadence. Watch live:
 //!   python3 tools/observer.py --watch 2
 
-use conductor::{founding_bots, load_bots, write_default_bots, BotWorld};
+use conductor::{founding_egregores, load_egregores, write_default_egregores, Egregore};
 use mirror::registry::Registry;
 use mirror::Mirror;
 use std::path::PathBuf;
@@ -32,9 +32,16 @@ fn main() {
     }
 
     std::fs::create_dir_all(&var_root).expect("var root");
-    let bots_path = PathBuf::from(&var_root).join("bots.json");
-    write_default_bots(&bots_path).expect("seed bots.json");
-    let specs = load_bots(&bots_path).unwrap_or_else(founding_bots);
+    let egregores_path = PathBuf::from(&var_root).join("egregores.json");
+    // Compat shim: an operator's pre-rename bots.json is honored —
+    // adopted once as egregores.json, never silently ignored.
+    let legacy = PathBuf::from(&var_root).join("bots.json");
+    if !egregores_path.exists() && legacy.exists() {
+        std::fs::rename(&legacy, &egregores_path).expect("adopt legacy bots.json");
+        println!("conductor: adopted legacy bots.json as egregores.json");
+    }
+    write_default_egregores(&egregores_path).expect("seed egregores.json");
+    let specs = load_egregores(&egregores_path).unwrap_or_else(founding_egregores);
 
     let registry = Registry::at(format!("{var_root}/registry"));
     let mirror = Mirror::at(format!("{var_root}/worlds"));
@@ -55,14 +62,14 @@ fn main() {
     }
     let epoch_base = converged.epoch_base;
 
-    let mut worlds: Vec<BotWorld> = specs
+    let mut worlds: Vec<Egregore> = specs
         .into_iter()
-        .map(|spec| BotWorld::genesis(spec, &registry, &mirror))
+        .map(|spec| Egregore::genesis(spec, &registry, &mirror))
         .collect();
     println!(
         "conductor: {} civilizations from {} — {}",
         worlds.len(),
-        bots_path.display(),
+        egregores_path.display(),
         if cycles == 0 {
             format!("beating every {cadence_secs}s (Ctrl-C to stop)")
         } else {
@@ -77,8 +84,8 @@ fn main() {
         // ticks stack on the converged timeline, never restart it.
         let _ = mirror.set_universal_clock(epoch_base + beat);
         let mut newborns = Vec::new();
-        for bot in &mut worlds {
-            if let Some(spec) = bot.cycle(&mirror, &registry) {
+        for egregore in &mut worlds {
+            if let Some(spec) = egregore.cycle(&mirror, &registry) {
                 newborns.push(spec);
             }
         }
@@ -91,16 +98,16 @@ fn main() {
                 spec.world_name,
                 spec.planet,
             );
-            worlds.push(BotWorld::genesis(spec, &registry, &mirror));
+            worlds.push(Egregore::genesis(spec, &registry, &mirror));
         }
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — journals + the Terminal Wall regenerate mirror-side.
         if beat.is_multiple_of(mirror::journal::YEAR_TICKS) {
-            for bot in &worlds {
+            for egregore in &worlds {
                 let _ = mirror.record_journal(
-                    &bot.spec.world_name,
-                    &bot.world,
-                    &mirror::journal::Voice::of(&bot.spec.civilization),
+                    &egregore.spec.world_name,
+                    &egregore.world,
+                    &mirror::journal::Voice::of(&egregore.spec.civilization),
                 );
             }
             println!(

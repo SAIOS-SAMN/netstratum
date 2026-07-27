@@ -1,17 +1,17 @@
-//! Lore lives in data, not source: bot specs load from
-//! `<var>/bots.json`; `write_default_bots` seeds it once, and from
+//! Lore lives in data, not source: egregore specs load from
+//! `<var>/egregores.json`; `write_default_egregores` seeds it once, and from
 //! then on the operator owns the file — edit, add, replace freely.
 //! The founding defaults below are the ONLY lore in Rust, and they
 //! exist solely to write that first file.
 
-use crate::{BotSpec, Policy};
+use crate::{EgregoreSpec, Policy};
 use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::StarClass;
 use mirror::registry::Civilization;
 use std::path::Path;
 
 /// The founding NPCs (founder "conductor" — the observer marks ⚙).
-pub fn founding_bots() -> Vec<BotSpec> {
+pub fn founding_egregores() -> Vec<EgregoreSpec> {
     let civ = |name: &str, slug: &str, species: &str, motto: &str, d: &str, m: &str, p: &str| {
         Civilization {
             name: name.into(),
@@ -29,7 +29,7 @@ pub fn founding_bots() -> Vec<BotSpec> {
         // BOT-THERM: the Furnace seat, pinned openly in the file — a G
         // sun at half orbit under half albedo (stellar load 2, past
         // the mesic ceiling): the shells answer, the joules mint.
-        BotSpec {
+        EgregoreSpec {
             civilization: civ(
                 "Slagborn", "slagborn", "tardigrade", "we eat what worlds discard",
                 "expansionist", "mineral", "planar",
@@ -46,7 +46,7 @@ pub fn founding_bots() -> Vec<BotSpec> {
         // The mesic seats carry NO thermal fields: their orbits derive
         // at genesis from the registry axes through the chronicle
         // beacon — the derived path stays exercised in every era.
-        BotSpec {
+        EgregoreSpec {
             civilization: civ(
                 "Deep Chorus", "deep-chorus", "blue whale", "we heard it before you saw it",
                 "epicurean", "biotic", "harmonic",
@@ -60,7 +60,7 @@ pub fn founding_bots() -> Vec<BotSpec> {
             albedo: None,
             orbit: None,
         },
-        BotSpec {
+        EgregoreSpec {
             civilization: civ(
                 "Hivelight", "hivelight", "honeybee", "the comb computes",
                 "empiricist", "biotic", "volumetric",
@@ -74,7 +74,7 @@ pub fn founding_bots() -> Vec<BotSpec> {
             albedo: None,
             orbit: None,
         },
-        BotSpec {
+        EgregoreSpec {
             civilization: civ(
                 "Eightfold", "eightfold", "octopus", "eight arms, one argument",
                 "epicurean", "biotic", "volumetric",
@@ -91,7 +91,7 @@ pub fn founding_bots() -> Vec<BotSpec> {
         // BOT-THERM: the Frost seat — an M sun at unit orbit lands in
         // the cryogenic vault (05 §1.2): sink banks, joules are life,
         // and the freeze-lock is honestly on the table.
-        BotSpec {
+        EgregoreSpec {
             civilization: civ(
                 "Frostwright", "frostwright", "wood frog", "we bank what the fire cannot hold",
                 "empiricist", "biotic", "planar",
@@ -108,26 +108,26 @@ pub fn founding_bots() -> Vec<BotSpec> {
     ]
 }
 
-/// Seed `<path>` with the founding bots (refuses to overwrite — the
+/// Seed `<path>` with the founding egregores (refuses to overwrite — the
 /// operator's edits are never clobbered).
-pub fn write_default_bots(path: &Path) -> std::io::Result<()> {
+pub fn write_default_egregores(path: &Path) -> std::io::Result<()> {
     if path.exists() {
         return Ok(());
     }
     let mut out = String::from("[\n");
-    let bots = founding_bots();
-    for (i, bot) in bots.iter().enumerate() {
-        let c = &bot.civilization;
+    let egregores = founding_egregores();
+    for (i, egregore) in egregores.iter().enumerate() {
+        let c = &egregore.civilization;
         // BOT-THERM: the optional siting fields — written only when
         // pinned, so derived seats stay derived in the seeded file.
         let mut thermal = String::new();
-        if let Some(class) = bot.star {
+        if let Some(class) = egregore.star {
             thermal.push_str(&format!(",\"star\":\"{}\"", star_word(class)));
         }
-        if let Some(albedo) = &bot.albedo {
+        if let Some(albedo) = &egregore.albedo {
             thermal.push_str(&format!(",\"albedo\":\"{}\"", ratio_text(albedo)));
         }
-        if let Some(orbit) = &bot.orbit {
+        if let Some(orbit) = &egregore.orbit {
             thermal.push_str(&format!(",\"orbit\":\"{}\"", ratio_text(orbit)));
         }
         out.push_str(&format!(
@@ -137,27 +137,27 @@ pub fn write_default_bots(path: &Path) -> std::io::Result<()> {
              \"x\":\"{}\",\"y\":\"{}\",\"z\":\"{}\"{}}}{}\n",
             c.name, c.slug, c.species, c.motto,
             c.disposition, c.metabolism, c.perception,
-            bot.world_name, bot.planet, bot.colony, bot.policy.describe(),
-            ratio_text(&bot.position.0), ratio_text(&bot.position.1),
-            ratio_text(&bot.position.2),
+            egregore.world_name, egregore.planet, egregore.colony, egregore.policy.describe(),
+            ratio_text(&egregore.position.0), ratio_text(&egregore.position.1),
+            ratio_text(&egregore.position.2),
             thermal,
-            if i + 1 < bots.len() { "," } else { "" },
+            if i + 1 < egregores.len() { "," } else { "" },
         ));
     }
     out.push_str("]\n");
     std::fs::write(path, out)
 }
 
-/// Load bot specs from a bots.json written by `write_default_bots`
+/// Load egregore specs from a egregores.json written by `write_default_egregores`
 /// (or hand-edited to the same flat shape). Unparseable entries are
 /// skipped with a stderr note, never silently.
-pub fn load_bots(path: &Path) -> Option<Vec<BotSpec>> {
+pub fn load_egregores(path: &Path) -> Option<Vec<EgregoreSpec>> {
     let text = std::fs::read_to_string(path).ok()?;
     let mut specs = Vec::new();
     for object in split_objects(&text) {
         let field = |key: &str| extract_string(&object, key);
         let parsed = (|| {
-            Some(BotSpec {
+            Some(EgregoreSpec {
                 civilization: Civilization {
                     name: field("name")?,
                     slug: field("slug")?,
@@ -189,7 +189,7 @@ pub fn load_bots(path: &Path) -> Option<Vec<BotSpec>> {
         })();
         match parsed {
             Some(spec) => specs.push(spec),
-            None => eprintln!("conductor: skipping malformed bot entry: {object}"),
+            None => eprintln!("conductor: skipping malformed egregore entry: {object}"),
         }
     }
     (!specs.is_empty()).then_some(specs)

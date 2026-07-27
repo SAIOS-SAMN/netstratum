@@ -3,7 +3,7 @@
 //! end-to-end, research unlocks industry, and a thriving line
 //! speciates — chronicle-chosen, lineage-recorded.
 
-use conductor::{founding_bots, load_bots, run_era, write_default_bots, BotWorld};
+use conductor::{founding_egregores, load_egregores, run_era, write_default_egregores, Egregore};
 use mirror::registry::Registry;
 use mirror::Mirror;
 use std::fs;
@@ -28,15 +28,15 @@ fn an_era_brings_the_board_alive() {
     let worlds = run_era(&var, 12);
     assert!(worlds.len() >= 3);
 
-    for bot in worlds.iter().take(3) {
-        assert!(bot.world.now() >= 12, "the clock advanced");
+    for egregore in worlds.iter().take(3) {
+        assert!(egregore.world.now() >= 12, "the clock advanced");
         assert!(
-            bot.world.chronicle().receipts().len() > 5,
+            egregore.world.chronicle().receipts().len() > 5,
             "{}: receipts accumulated",
-            bot.spec.civilization.slug
+            egregore.spec.civilization.slug
         );
-        assert!(bot.solved > 0, "{}: research confirmed solves", bot.spec.civilization.slug);
-        let world_dir = root.join("worlds").join(&bot.spec.world_name);
+        assert!(egregore.solved > 0, "{}: research confirmed solves", egregore.spec.civilization.slug);
+        let world_dir = root.join("worlds").join(&egregore.spec.world_name);
         assert!(world_dir.join("chronicle.jsonl").exists());
         let solves = fs::read_dir(world_dir.join("solves")).expect("solves dir").count();
         assert!(solves > 0, "solve certificates mirrored");
@@ -87,9 +87,9 @@ fn policies_diverge() {
 fn research_unlocks_industry() {
     let root = scratch("unlock");
     let worlds = run_era(&root.to_string_lossy(), 45);
-    let smelting = worlds.iter().any(|bot| {
-        bot.level >= 3
-            && bot.world.orb().is_some_and(|orb| {
+    let smelting = worlds.iter().any(|egregore| {
+        egregore.level >= 3
+            && egregore.world.orb().is_some_and(|orb| {
                 orb.zones
                     .iter()
                     .any(|z| z.kind == cfe::dop::ZoneKind::Smelter)
@@ -195,13 +195,13 @@ fn a_steward_directive_lands_through_the_leash() {
     let registry = Registry::at(format!("{var}/registry"));
     let mirror = Mirror::at(format!("{var}/worlds"));
 
-    let mut worlds: Vec<BotWorld> = founding_bots()
+    let mut worlds: Vec<Egregore> = founding_egregores()
         .into_iter()
-        .map(|spec| BotWorld::genesis(spec, &registry, &mirror))
+        .map(|spec| Egregore::genesis(spec, &registry, &mirror))
         .collect();
     for _ in 0..2 {
-        for bot in &mut worlds {
-            bot.cycle(&mirror, &registry);
+        for egregore in &mut worlds {
+            egregore.cycle(&mirror, &registry);
         }
     }
 
@@ -217,8 +217,8 @@ fn a_steward_directive_lands_through_the_leash() {
     )
     .expect("queues");
 
-    for bot in &mut worlds {
-        bot.cycle(&mirror, &registry);
+    for egregore in &mut worlds {
+        egregore.cycle(&mirror, &registry);
     }
 
     assert!(inbox.join("applied/000001-zone.json").exists(), "the zone applied");
@@ -257,21 +257,21 @@ fn perception_routes_the_research() {
     assert!(!slagborn.is_empty() && slagborn.iter().all(|n| n.starts_with("forge_")));
 }
 
-/// Lore lives in data: the default bots seed a file the operator
+/// Lore lives in data: the default egregores seed a file the operator
 /// owns; loading it round-trips the specs; a hand-added entry loads.
 #[test]
 fn bots_load_from_the_operators_file() {
-    let root = scratch("bots");
+    let root = scratch("egregores");
     fs::create_dir_all(&root).expect("scratch");
-    let path = root.join("bots.json");
-    write_default_bots(&path).expect("seeds");
-    let loaded = load_bots(&path).expect("loads");
-    assert_eq!(loaded.len(), founding_bots().len());
+    let path = root.join("egregores.json");
+    write_default_egregores(&path).expect("seeds");
+    let loaded = load_egregores(&path).expect("loads");
+    assert_eq!(loaded.len(), founding_egregores().len());
     assert_eq!(loaded[0].civilization.slug, "slagborn");
 
     // Seeding again never clobbers the operator's file.
     let before = fs::read_to_string(&path).expect("read");
-    write_default_bots(&path).expect("no-op");
+    write_default_egregores(&path).expect("no-op");
     assert_eq!(before, fs::read_to_string(&path).expect("read"));
 
     // A hand-added entry loads alongside the defaults.
@@ -283,7 +283,7 @@ fn bots_load_from_the_operators_file() {
            "colony":"alight","policy":"steady"}]"#,
     );
     fs::write(&path, extended).expect("edit");
-    let loaded = load_bots(&path).expect("loads");
-    assert_eq!(loaded.len(), founding_bots().len() + 1);
+    let loaded = load_egregores(&path).expect("loads");
+    assert_eq!(loaded.len(), founding_egregores().len() + 1);
     assert_eq!(loaded.last().expect("fernwake").civilization.name, "Fernwake");
 }
