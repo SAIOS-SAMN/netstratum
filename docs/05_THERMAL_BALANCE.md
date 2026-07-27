@@ -86,7 +86,19 @@ This is an engine-wide arithmetic law (all circular/spherical geometry), not a
 thermal-only rule; it is stated here because the thermal equation is its first
 consumer.
 
-### 1.2 Extreme stellar sources — the Luminal White Hole
+### 1.2 The net-heat ledger
+
+Where local industry adds heat on top of stellar flux:
+
+```
+    Heat_Net = Stellar Radiation + Factory Heat − Radiator Capacity
+```
+
+If `Heat_Net > 0`: manufacturing efficiency drops, structural integrity
+decays, and habitats suffer catastrophic venting. All three terms are exact
+rationals per tick; the ledger accrues like yield (no float, no drift).
+
+### 1.3 Extreme stellar sources — the Luminal White Hole
 
 The master equation's `L` term admits extreme sources. A **Luminal White
 Hole** is the design's ultimate stellar engine: the time-reverse of a black
@@ -112,18 +124,6 @@ gravitational radius `r_g = 2GM/c²` that continuously ejects energy outward at
 
 *(A design energy-source, not an astrophysical claim about real white-hole
 stability.)*
-
-### 1.4 The net-heat ledger
-
-Where local industry adds heat on top of stellar flux:
-
-```
-    Heat_Net = Stellar Radiation + Factory Heat − Radiator Capacity
-```
-
-If `Heat_Net > 0`: manufacturing efficiency drops, structural integrity
-decays, and habitats suffer catastrophic venting. All three terms are exact
-rationals per tick; the ledger accrues like yield (no float, no drift).
 
 ---
 
