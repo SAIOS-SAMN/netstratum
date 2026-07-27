@@ -291,6 +291,63 @@ N5/N6). Details and sequencing in 04 §6.
   shortfall; tags 31/32 byte-exact). The arc played end-to-end:
   freeze-relief by TRADE-1 → capture → absorb cleared the strike with
   the banner → the paid window lapsed nothing → replay MATCHES.
+- **BOT-THERM LANDED** (2026-07-27, coder-node worktree): NPC THERMAL
+  ADOPTION — the autarkies feel the star. Thermal genesis: every bot
+  world founds under a REAL sun — `BotWorld::genesis` commissions the
+  star and sites the planet through the landed THERMAL-1 engine (no
+  engine code touched). Specs carry optional `star`/`albedo`/`orbit`
+  fields (bots.json spellings "g", "m", "red-giant", …); absent fields
+  derive from the registry axes (mineral→Furnace seat, biotic→mesic
+  seat) through the chronicle beacon seeded by the world's OWN genesis
+  receipt digest (CHARTER §9 — no wall clock, no ambient entropy; two
+  foundings are byte-identical, witnessed). Recorded ruling: a Frost
+  seat is never derived — settling the vault is a deliberate act; the
+  seeded default file makes one: Frostwright (wood frog, NEW founding
+  bot) on an M sun at unit orbit (the cryogenic vault), Slagborn pinned
+  to a Furnace seat (G sun, albedo 1/2, half orbit — stellar load 2),
+  the three mesic seats left underived-field so the derived path runs
+  in every era. Thermal temperament in the loop (existing laws held:
+  one build per beat, through the contained actor, never in famine):
+  Furnace bots answer a heat ledger past their shell throughput with
+  an encasement shell FIRST — the joules mint — under two priority
+  rules earned red (below): shells come from SURPLUS (the colony
+  hoards until shell + next extractor are both funded), and industry
+  outranks new settlement (when only the biomass line blocks an
+  unlocked smelter, the rations are held for the forge). Frost bots
+  raise their sink charter (one cryo-lattice array on the founding
+  iron), then hold every further build against the joule runway
+  (`joule_runway_allows`: banked joules ≥ heating_per_zone × (zones+1),
+  exact, boundary-inclusive) — famine avoidance honestly allowed to
+  fail: Frostwright freeze-locks in the default era and the wall calls
+  it RED, legitimate drama, not a bug. Mesic bots' temperament is
+  untouched (their worlds are merely sited now — late-era factory heat
+  can overflow; that is weather, not a law change). CAUGHT RED, CURED:
+  the first full run broke `research_unlocks_industry` — a naive
+  "shell when hot" Furnace bot spent its seed ore at beat 2 and
+  flipped Slagborn from extractor-compounding (10 ext / 6 hab
+  pre-thermal) into a starving habitat city (2 ext / 13 hab, no
+  smelter by beat 45); the surplus-hoard and industry-hold rules are
+  the cure (measured at beat 45: 5 ext / 3 hab / 2 shells / smelter
+  standing / famine-free). Pipeline witnessed
+  end-to-end, nothing re-implemented: star_class flows to state.json
+  (mirror), year boundaries journal the drama (JOURNAL-1): the Frost
+  year reads "RED ALERT — freeze-lock", heating bill 15 exact, 199/100
+  S_cool offered to Furnace traders under the Coherent register; the
+  Furnace year reads Emberkin, 11/4 vented ("the shells want
+  widening"), an exact-rational joule bank.
+  Phase 2 (trade execution against the wants the wall now shows)
+  stays boarded, not landed. bots.json compat: pre-thermal files load
+  unchanged (absent fields = derived seats); an unlawful pinned siting
+  leaves the orb thermally dormant instead of killing the board.
+  Evidence: clippy zero; **134/134 workspace witnesses green** (129
+  baseline + 5 new pins, red-first recorded): thermal genesis
+  deterministic on both derived and pinned paths; a default era mints
+  hot AND banks cold with state.json carrying star_class 7; the joule
+  runway measurably defers the Frost (1 zone vs the mesic control's
+  city) and flips at exactly 1/2 vs 49/100; a thermal year reaches the
+  wall carrying joule-bank/heating-bill/FREEZE-LOCK/S_cool and the
+  Emberkin/Coherent registers; the old bots.json shape still loads and
+  derives.
 
 ## 2. The depth board (02_COLONY_LOOP — game depth before multiplayer)
 

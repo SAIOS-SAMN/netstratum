@@ -28,6 +28,15 @@
 //! file once so even the founding NPCs are operator-editable. NPC
 //! entries carry `founder: "conductor"` — the observer marks them ⚙.
 //!
+//! **THE AUTARKIES FEEL THE STAR (BOT-THERM):** genesis commissions
+//! every bot world's sun and sites its planet — spec-pinned, or
+//! derived from the registry axes through the chronicle beacon (the
+//! civilization's own genesis receipts choose its sky). Furnace-sited
+//! bots answer heat with encasement shells and mint joules;
+//! Frost-sited bots raise a cryo-lattice array, bank sink, and hold
+//! expansion against the joule runway — honestly allowed to
+//! freeze-lock; mesic bots keep their temperament untouched.
+//!
 //! Everything is deterministic: same era length → byte-identical
 //! receipts. HONEST SEAM: worlds live in process memory; reload from
 //! the mirrored chronicle is the G0 persistence seam (coder-02).
@@ -35,6 +44,7 @@
 use cfe::dop::{Resource, ZoneKind};
 use cfe::ipsal::Scope;
 use cfe::ratio::{ratio, Ratio};
+use cfe::thermal::StarClass;
 use cfe::world::World;
 use mirror::registry::{Civilization, Registry, DISPOSITIONS, METABOLISMS, PERCEPTIONS};
 use mirror::{Directive, Disposition, Mirror};
@@ -84,6 +94,14 @@ pub struct BotSpec {
     pub policy: Policy,
     /// The world's spatial coordinate S = (x, y, z) on the 3-torus.
     pub position: (Ratio, Ratio, Ratio),
+    /// BOT-THERM: the world's sun, operator-pinned; `None` derives at
+    /// genesis from the civilization's registry axes, beacon-drawn
+    /// from its own genesis receipts (CHARTER §9 — never wall clock).
+    pub star: Option<StarClass>,
+    /// BOT-THERM: the orbit albedo, pinned; `None` derives (see `star`).
+    pub albedo: Option<Ratio>,
+    /// BOT-THERM: the orbit radius, pinned; `None` derives (see `star`).
+    pub orbit: Option<Ratio>,
 }
 
 /// One live bot world: the sim, its contained actor, its research rung.
@@ -132,6 +150,70 @@ fn hex(bytes: &[u8; 32]) -> String {
     bytes.iter().map(|b| format!("{b:02x}")).collect()
 }
 
+/// BOT-THERM: the Frost runway law — a sub-mesic colony expands only
+/// when its banked joules cover the one-tick heating bill of the
+/// GROWN city (ECON-J, 05 §1.2: `heating_per_zone × (zones + 1)`).
+/// Exact rational comparison: meeting the bill exactly holds the
+/// runway; one grain short refuses.
+pub fn joule_runway_allows(banked_joules: &Ratio, zones: usize) -> bool {
+    *banked_joules >= cfe::dop::heating_per_zone() * ratio(zones as i64 + 1, 1)
+}
+
+/// BOT-THERM: the thermal regime a bot world lives in. The mesic band
+/// is home (temperament unchanged — `None`); above its ceiling the
+/// Furnace laws apply, below its floor the Frost laws. Unsited worlds
+/// carry no regime (the engine's opt-in guard, mirrored here).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Regime {
+    Furnace,
+    Frost,
+}
+
+fn regime(world: &World) -> Option<(Regime, Ratio)> {
+    let class = world.star()?;
+    let site = world.orb()?.thermal.clone()?;
+    let t4 = cfe::thermal::t_eq4(&class.luminosity(), &site.albedo, &site.orbit_r);
+    let (mesic_lo, mesic_hi) = cfe::thermal::SubstrateBand::Mesic.bounds4();
+    if t4 < mesic_lo {
+        Some((Regime::Frost, t4))
+    } else if t4 > mesic_hi {
+        Some((Regime::Furnace, t4))
+    } else {
+        None
+    }
+}
+
+/// BOT-THERM: the axis→regime preference (06 §1) for specs that pin no
+/// siting — a mineral metabolism settles hot (the Furnace mints; 05
+/// §3.1), a biotic one settles mesic. The exact seat inside the regime
+/// is beacon-drawn from the civilization's OWN genesis receipts:
+/// deterministic, replayable, never authored. A Frost seat is never
+/// derived — settling the vault is a deliberate act (the operator's,
+/// or the founding file's, which seeds one).
+fn derived_siting(civilization: &Civilization, beacon: &Beacon) -> (StarClass, Ratio, Ratio) {
+    match civilization.metabolism.as_str() {
+        "mineral" => {
+            // Furnace seats: a G sun at half orbit, stellar loads
+            // 2, 11/5, 12/5 — every one past the mesic ceiling; the
+            // encasement shells will answer.
+            let albedos = [ratio(1, 2), ratio(9, 20), ratio(2, 5)];
+            let drawn = beacon.uniform_index("genesis.furnace.albedo", 3) as usize;
+            (StarClass::G, albedos[drawn].clone(), ratio(1, 2))
+        }
+        _ => {
+            // Mesic seats: stellar loads 1, 9/10, 25/36 — every one
+            // inside the mesic band (05 §2).
+            let seats = [
+                (ratio(0, 1), ratio(1, 1)),
+                (ratio(1, 10), ratio(1, 1)),
+                (ratio(0, 1), ratio(6, 5)),
+            ];
+            let drawn = beacon.uniform_index("genesis.mesic.seat", 3) as usize;
+            (StarClass::G, seats[drawn].0.clone(), seats[drawn].1.clone())
+        }
+    }
+}
+
 impl BotWorld {
     /// Found the era: registry entry (join if present), the colony,
     /// the contained bot actor, the steward entity, and the world's
@@ -153,6 +235,28 @@ impl BotWorld {
             world.grant(actor, scope).expect("grants the bot");
             world.grant(steward, scope).expect("grants the steward");
         }
+        // BOT-THERM: thermal genesis — every bot world founds under a
+        // REAL sun. Spec-pinned fields rule; absent ones derive from
+        // the registry axes, beacon-seeded by the world's own genesis
+        // receipt digest (the chronicle-seeded discipline, CHARTER §9).
+        let digest = world
+            .chronicle()
+            .receipts()
+            .last()
+            .expect("genesis receipts exist")
+            .own
+            .0;
+        let beacon = Beacon::from_digest(digest);
+        let (derived_star, derived_albedo, derived_orbit) =
+            derived_siting(&spec.civilization, &beacon);
+        let class = spec.star.unwrap_or(derived_star);
+        let albedo = spec.albedo.clone().unwrap_or(derived_albedo);
+        let orbit = spec.orbit.clone().unwrap_or(derived_orbit);
+        world.commission_star(class).expect("a fresh world has no sun yet");
+        // An unlawful operator-pinned siting (albedo ≥ 1, orbit ≤ 0)
+        // leaves the orb thermally DORMANT (the engine's opt-in guard)
+        // instead of killing the board; derived seats are always lawful.
+        let _ = world.site_planet(cfe::world::FIRST_ORB, albedo, orbit);
         BotWorld {
             spec,
             world,
@@ -201,7 +305,7 @@ impl BotWorld {
             None
         };
 
-        let wanted: Option<ZoneKind> = industrial.or(match self.spec.policy {
+        let settlement: Option<ZoneKind> = match self.spec.policy {
             Policy::Aggressive => {
                 // One extractor SHORT of the knife-edge: a standing
                 // +1/tick biomass surplus, so industry stays fundable.
@@ -237,7 +341,87 @@ impl BotWorld {
                     None
                 }
             }
-        });
+        };
+
+        // BOT-THERM: thermal temperament. A Furnace-sited bot answers
+        // rising heat with encasement shells BEFORE anything else —
+        // minted joules are what the regime is FOR (05 §1.2); a
+        // Frost-sited bot raises its sink charter (one cryo-lattice
+        // array, 05 §1.4), then holds every further build against the
+        // joule runway — famine avoidance, honestly allowed to fail
+        // (a freeze-lock is legitimate drama, not a bug). Mesic-sited
+        // and unsited bots keep their temperament untouched.
+        let affords = |world: &World, kind: ZoneKind| {
+            kind.cost()
+                .into_iter()
+                .all(|(resource, need)| banked(world, resource) >= need)
+        };
+        let wanted: Option<ZoneKind> = match regime(world) {
+            Some((Regime::Furnace, t4)) => {
+                let shells = zone_count(world, ZoneKind::Encasement) as i64;
+                // Famine-free here (guarded above), so every zone is
+                // active and this factory sum matches the tick law's.
+                let factory = world
+                    .orb()
+                    .map(|orb| {
+                        orb.zones
+                            .iter()
+                            .fold(ratio(0, 1), |sum, zone| sum + zone.kind.factory_heat())
+                    })
+                    .unwrap_or_else(|| ratio(0, 1));
+                let heat_net =
+                    t4 / cfe::thermal::thermal_k() + factory - cfe::dop::radiator_base();
+                let throughput = cfe::dop::encasement_throughput() * ratio(shells, 1);
+                if heat_net > throughput {
+                    // The shell answer: joule collection outranks
+                    // sprawl — raise the next shell, or HOARD the ore
+                    // toward it (expanding deeper into uncaptured heat
+                    // only degrades every yield, 05 §1.2). Shells come
+                    // from SURPLUS: the colony waits until the shell
+                    // AND the next extractor are both funded, so one
+                    // purchase cannot flip its compounding arm.
+                    let iron_for = |kind: ZoneKind| {
+                        kind.cost()
+                            .into_iter()
+                            .find(|(resource, _)| *resource == Resource::Iron)
+                            .map(|(_, need)| need)
+                            .unwrap_or_else(|| ratio(0, 1))
+                    };
+                    let shell_line =
+                        iron_for(ZoneKind::Encasement) + iron_for(ZoneKind::Extractor);
+                    (iron >= shell_line).then_some(ZoneKind::Encasement)
+                } else if can_smelt
+                    && smelters < 3
+                    && iron >= ratio(30, 1)
+                    && bio < ratio(10, 1)
+                {
+                    // Industry outranks new settlement on a Furnace
+                    // seat: when ONLY the biomass line still blocks an
+                    // unlocked smelter, hold the rations for it — a
+                    // habitat spent now would push the forge past the
+                    // horizon again.
+                    industrial.or(match settlement {
+                        Some(ZoneKind::Habitat) => None,
+                        held => held,
+                    })
+                } else {
+                    industrial.or(settlement)
+                }
+            }
+            Some((Regime::Frost, _)) => {
+                if zone_count(world, ZoneKind::CryoArray) == 0 {
+                    // The sink charter: a Frost colony exists to bank
+                    // the cold; its first array is founded on the
+                    // founding iron, before any joule flows.
+                    affords(world, ZoneKind::CryoArray).then_some(ZoneKind::CryoArray)
+                } else if joule_runway_allows(&banked(world, Resource::Joule), total) {
+                    industrial.or(settlement)
+                } else {
+                    None // the runway is short: STOP expanding
+                }
+            }
+            None => industrial.or(settlement),
+        };
         if let (Some(kind), Some(tile)) = (wanted, next_free_tile(world)) {
             let _ = world.zone_as(self.actor, cfe::world::FIRST_ORB, tile, kind);
         }
@@ -459,6 +643,12 @@ impl BotWorld {
                 &self.spec.position.1 + dy,
                 &self.spec.position.2 + dz,
             ),
+            // BOT-THERM: a daughter's seat is never inherited — it is
+            // drawn from her OWN genesis chronicle (the mutated axes
+            // may prefer another regime entirely).
+            star: None,
+            albedo: None,
+            orbit: None,
         })
     }
 
