@@ -1,9 +1,13 @@
-# CLAUDE.md — the coding agent's field guide
+# HANDOFF — the pickup document
 
-You are one of two engineering nodes on Netstratum (CHARTER §10). Read
-this whole file, then `docs/00_CHARTER.md` whole, then
-`docs/BUILD_ORDER.md` — **the ONE carrier of build order; the current
-landing is read there, never inferred, including from this file.**
+**Status:** PROCESS CARRIER (beside `BUILD_ORDER.md` and
+`OPEN_QUESTIONS.md`), for any engineering node joining or resuming
+work. **State is never read here:** the current landing and the landed
+ledger live in `BUILD_ORDER.md`, the ONE carrier. This document
+carries the working knowledge around that state — the discipline, the
+coordination protocol as lived, and the earned gotchas. Refresh the
+dated §9 at each major handoff; everything else changes only when a
+law or habit changes.
 
 ## 1. Reading order (before any change)
 
@@ -90,11 +94,10 @@ free: 42**. Contiguity is not law.
 - **Replay-fact discipline:** the live path and the `replay()` arm must
   make IDENTICAL reads in IDENTICAL order (crisis flags before bank
   moves, etc.). Shared helpers used verbatim by both paths:
-  `settle_debts`, `credit_covenants`, `touch`, `reciprocity_reading`'s
-  outputs via receipts. If a live event needs state replay can't
-  derive, put the fact IN the receipt (the covenant collateral rides
-  the seal receipt so the fidelity curve never re-runs on replay; the
-  bond severance load rides tag 34).
+  `settle_debts`, `credit_covenants`, `touch`. If a live event needs
+  state replay can't derive, put the fact IN the receipt (the covenant
+  collateral rides the seal receipt so the fidelity curve never
+  re-runs on replay; the bond severance load rides tag 34).
 - **Stamps:** receipts appended during `tick()` carry the PRE-walk
   clock value. World-driven resolutions (absorption lapse, bond term
   expiry, covenant release/slash) fire at the tick whose opening `now`
@@ -138,9 +141,9 @@ cargo test -p cfe --test world_<name>                   # one witness file
 printf 'found meridian\n…\nquit\n' | cargo run -p netstratum-cli -- --plain
 ```
 
-The conductor's converge/bot suites drive real archives and take ~3–4
-minutes; the rest is instant. `var/` is runtime state, never tracked,
-never a source of truth.
+The conductor's converge/egregore suites drive real archives and take
+~3–4 minutes; the rest is instant. `var/` is runtime state, never
+tracked, never a source of truth.
 
 ## 8. Compiler-enforced connectivity (expected breakage)
 
@@ -152,7 +155,7 @@ mechanical relay). `engine/mirror/src/converge.rs` and `journal.rs`
 have catch-alls. Adding an `ActionRefused` variant breaks the CLI
 `refuse()` match — the new arm must name the cure.
 
-## 9. Where things stand and what's next (handoff, 2026-07-27)
+## 9. Where things stand and what's next (dated: 2026-07-27)
 
 Landed this arc (see BUILD_ORDER §1b for the evidence blocks): the
 full ideology board — TRADE-1 (transfers, compassion), ABSORB-1
@@ -160,7 +163,10 @@ full ideology board — TRADE-1 (transfers, compassion), ABSORB-1
 love), COVENANT-1 (vitrified escrow + fidelity curve, integrity),
 IDEO-1 (wire entry 41, observer uplink, friction 38, CLI `ideology`).
 Design authority: `docs/09_IDEOLOGY.md` (status LANDED); deferrals:
-OPEN_QUESTIONS Q4.
+OPEN_QUESTIONS Q4. Also landed by the coder node in the same span:
+BOT-THERM (thermal genesis for the egregores), JOURNAL-1 (the
+chronicle feed), the flat-demurrage and mirror-rotation fixes, and the
+egregore/automaton vocabulary (ce5cd64 — "bot" is retired).
 
 Candidate next work (the operator picks; nothing starts without go):
 
@@ -177,9 +183,8 @@ Candidate next work (the operator picks; nothing starts without go):
 3. **TECH-1** (`docs/10_TECH_EMERGENCE.md`, tags 39–40): carries the
    SINK-1 research/throttle gates.
 4. **BOT-THERM phase 2:** trade execution against the wants the wall
-   shows (boarded, not landed) — the egregores' automatons (ce5cd64
-   vocabulary: never "bots") could now use `send`/`absorb`/`bond` and
-   grow real cohesion books.
+   shows (boarded, not landed) — the egregores' automatons could now
+   use `send`/`absorb`/`bond` and grow real cohesion books.
 5. **Depth board D2/D3** (terrain tag 8, spoilage+milestones tag 9)
    and the protocol board N4 (scanner) onward.
 6. **Q4 deferrals** when balance demands them (commensuration table,
@@ -188,12 +193,12 @@ Candidate next work (the operator picks; nothing starts without go):
 ## 10. Session habits that kept this clean
 
 - Read whole files before editing them; the other node's changes land
-  on disk mid-task and Edit calls fail or mislead on stale context.
+  on disk mid-task and edits fail or mislead on stale context.
 - Prefer receipt-anchored asserts in witnesses over hand-computed bank
   totals — parameters retune (flat demurrage changed numbers once).
 - When a witness fails, decide honestly whether the expectation or the
-  engine is wrong before touching either (one witness typo was mine:
-  1/2 + 1/2 asserted as 2).
+  engine is wrong before touching either (one witness typo was the
+  author's: 1/2 + 1/2 asserted as 2).
 - Never edit `docs/05/06/01` to point AT newer docs when a one-way
   reference from the new doc suffices — minimizes collision surface.
 - The commit message is the landing record's twin: what landed, the
