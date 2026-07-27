@@ -135,3 +135,45 @@ succinct interior proofs. Closed for good: any stored mutable "alignment
 score" (the ancestry refusal); tokenized live reputation (09 §3.4 — a
 token snapshot forks SEAL B's truth; NS-7 may anchor covenant *outcomes*,
 never the ratio).
+
+---
+
+## Q4. The ideology board's recorded deferrals (post-landing, 2026-07-27)
+
+The board landed whole (TRADE-1 → IDEO-1, BUILD_ORDER §3). These
+deferrals were recorded in the landing entries; gathered here so each
+carries its lawful way back in.
+
+1. **The commensuration table beyond weight-1.** Every cohesion-book
+   posting weighs all resources at 1 (`commensurate_weight`, the 09 §1
+   placeholder). Reopen trigger: balance shows book-gaming by cheap
+   resources (a diamond gift and an iron gift posting equal compassion).
+   The table stays exact-rational and lands as a ruleset revision, LAW
+   for replay under a version bump — never a silent retune.
+2. **Recency weighting on the books.** The eight counters are cumulative
+   forever; an ancient breach never fades. Reopen path: per-era or
+   windowed READINGS derived at the observer (the derived-never-stored
+   law holds — the counters stay cumulative; only the reading windows).
+   Reopen trigger: balance wants redemption arcs.
+3. **Civilization-scoped composition and the universe audit.** The books
+   are per-orb; a faction's reading is composition over its orbs, and
+   the universe-level sheet (Σ books, Σ entropy_vented incl. friction)
+   joins Q2.3's mesh audit at N6 — checked at consensus, never imposed
+   as an orb law.
+4. **The deferred covenant templates (09 §3.3).** The delivery-quota
+   pact landed as the template; the Compassionate Covenant (auto-routing
+   surplus to crisis-struck neighbours) and the Bond Covenant (severance
+   requires notice, else slash — coupling tag 34's severed flag to a
+   pact condition) await a covenant-conditions landing. Also deferred
+   there: target-side bond severance (v1: the source cuts) and
+   absorption counting toward covenant quotas (v1: deliberate
+   deliveries only — transfers and bond settlements).
+5. **The SINK-1 research/throttle gates — already boarded.** TECH-1
+   (10) is the carrier: sink capture's research gate binds to a
+   crystallized node and the throttle-α policy action lands beside it
+   (10 §5). Nothing to reopen here; the pointer closes the loop opened
+   at the VENT-1 landing.
+6. **The journal reads the books.** The Chronicle Feed (08) may now
+   read the landed cohesion counters and friction receipts mirror-side
+   under its reflection law (09 §6) — a JOURNAL follow-on for the
+   coder node, by relay.

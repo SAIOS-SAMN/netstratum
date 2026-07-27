@@ -1,10 +1,11 @@
 # IDEOLOGY — the dual cohesion ledger (design stage)
 
-**Status:** DESIGN — no ideology mechanic ships before its protocol sections
-and test vectors exist (CHARTER §1). All rates, windows, weights, and curves
-in this document are **placeholder parameters**, not inscribed law — they
-tune at balance time. Build order lives on the ideology board
-(`BUILD_ORDER.md` §3) and is read there, never inferred from here.
+**Status:** LANDED 2026-07-27, whole — the five-landing board (TRADE-1 →
+ABSORB-1 → BOND-1 → COVENANT-1 → IDEO-1, `BUILD_ORDER.md` §3) shipped
+every mechanic here with its protocol sections and witnesses (NS-1 §2.3
+tags 30–38, 41). All rates, windows, weights, and curves remain
+**placeholder parameters** that tune at balance time; the recorded
+deferrals and their reopen paths live at `OPEN_QUESTIONS.md` Q4.
 
 **The founding insight (operator relay, 2026-07-27):** love, compassion,
 morality, and integrity are tradeable structure, not flavour. Just as
