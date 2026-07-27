@@ -93,6 +93,13 @@ impl Mirror {
         world: &World,
     ) -> std::io::Result<()> {
         let dir = self.world_dir(world_name);
+        // ONE CHRONICLE PER WORLD PER ERA (the persist.rs divergence
+        // law, mirror-side): founding names recur across eras, and an
+        // incremental append onto a PRIOR era's file would interleave
+        // two timelines in one chain. A divergent resident chronicle is
+        // rotated aside as a closed sibling world — never clobbered —
+        // and convergence later annexes it as its own timeline.
+        self.rotate_divergent(&dir, world)?;
         fs::create_dir_all(dir.join("inbox"))?;
         fs::create_dir_all(dir.join("solves"))?;
         let planet_dir = dir.join("planets").join(sanitize(planet));
@@ -139,6 +146,47 @@ impl Mirror {
             }
         }
         Ok(())
+    }
+
+    /// The divergence check behind [`Mirror::record`]: compare the
+    /// resident chronicle's line `k` digest against the live world's
+    /// receipt `k` (k = last shared index). Equal ⇒ same timeline
+    /// (incremental append proceeds). Different ⇒ a PRIOR era's world
+    /// lives here: the whole world dir rotates to
+    /// `<name>--closed-<digest8>` (its terminal digest names it).
+    fn rotate_divergent(&self, dir: &std::path::Path, world: &World) -> std::io::Result<()> {
+        let path = dir.join("chronicle.jsonl");
+        let receipts = world.chronicle().receipts();
+        if !path.exists() || receipts.is_empty() {
+            return Ok(());
+        }
+        let text = fs::read_to_string(&path)?;
+        let lines: Vec<&str> = text.lines().filter(|l| !l.trim().is_empty()).collect();
+        if lines.is_empty() {
+            return Ok(());
+        }
+        let check = lines.len().min(receipts.len()) - 1;
+        let resident = lines
+            .get(check)
+            .and_then(|line| json::extract_string(line, "digest"))
+            .unwrap_or_default();
+        let live = hex(&receipts[check].own.0);
+        if resident == live {
+            return Ok(());
+        }
+        let terminal = lines
+            .last()
+            .and_then(|line| json::extract_string(line, "digest"))
+            .unwrap_or_else(|| "unknown".into());
+        let tag: String = terminal.chars().take(8).collect();
+        let base = dir.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
+        let mut closed = dir.with_file_name(format!("{base}--closed-{tag}"));
+        let mut bump = 1u32;
+        while closed.exists() {
+            bump += 1;
+            closed = dir.with_file_name(format!("{base}--closed-{tag}-{bump}"));
+        }
+        fs::rename(dir, closed)
     }
 
     /// Read pending directives, inbox-name ascending (the steward
