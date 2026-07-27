@@ -93,6 +93,21 @@ fn main() {
             );
             worlds.push(BotWorld::genesis(spec, &registry, &mirror));
         }
+        // JOURNAL-1 (08 §3): on year boundaries every civilization
+        // speaks — journals + the Terminal Wall regenerate mirror-side.
+        if beat.is_multiple_of(mirror::journal::YEAR_TICKS) {
+            for bot in &worlds {
+                let _ = mirror.record_journal(
+                    &bot.spec.world_name,
+                    &bot.world,
+                    &mirror::journal::Voice::of(&bot.spec.civilization),
+                );
+            }
+            println!(
+                "beat {beat}: year {} journaled — the wall is fresh (var/worlds/wall.html)",
+                beat / mirror::journal::YEAR_TICKS
+            );
+        }
         if beat.is_multiple_of(10) || (cycles > 0 && beat == cycles) {
             let summary: Vec<String> = worlds
                 .iter()

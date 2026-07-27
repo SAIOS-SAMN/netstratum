@@ -10,4 +10,5 @@ path = "src/main.rs"
 
 [dependencies]
 cfe = { path = "../../engine/cfe" }
+mirror = { path = "../../engine/mirror" }
 num-bigint.workspace = true

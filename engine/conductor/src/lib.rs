@@ -507,6 +507,18 @@ pub fn run_era(var_root: &str, cycles: u32) -> Vec<BotWorld> {
         for spec in newborns {
             worlds.push(BotWorld::genesis(spec, &registry, &mirror));
         }
+        // JOURNAL-1 (08 §3): on year boundaries every civilization
+        // speaks — the mirror renders journals + wall, a REFLECTION
+        // of the chronicle, never a state change.
+        if (u64::from(beat) + 1).is_multiple_of(mirror::journal::YEAR_TICKS) {
+            for bot in &worlds {
+                let _ = mirror.record_journal(
+                    &bot.spec.world_name,
+                    &bot.world,
+                    &mirror::journal::Voice::of(&bot.spec.civilization),
+                );
+            }
+        }
     }
     worlds
 }
