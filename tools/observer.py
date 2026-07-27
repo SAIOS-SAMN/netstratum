@@ -371,10 +371,31 @@ def render_starchart(chart, span, tuniversal):
             if best is None or d < best:
                 nearest, best = other, d
         lines.append(
-            f"  {mark:<3} {name:<28} S=({show(x)}, {show(y)}, {show(z)}) G={show(g)}"
-            + (f"   nearest {nearest} at L1 {show(best)}" if best is not None else "")
+            f"  {mark:<3} {display_name(name):<28} S=({show(x)}, {show(y)}, {show(z)}) G={show(g)}"
+            + (f"   nearest {display_name(nearest)} at L1 {show(best)}"
+               if best is not None else "")
         )
     return "\n".join(lines)
+
+
+def display_name(name):
+    """Display-only beautification — the chart KEY is the identity and
+    never changes. Annexation prefixes compact to era glyphs; the old
+    pre-themed-naming ancestry chains (archived eras only) ellipsize to
+    first…last segment. `07` annex law: names are preserved on disk;
+    only the rendering breathes."""
+    for prefix, glyph in (("var-era1--", "e1·"), ("var-era2--", "e2·"),
+                          ("var--", "v0·")):
+        if name.startswith(prefix):
+            name = glyph + name[len(prefix):]
+            break
+    if len(name) > 28:
+        parts = name.split("-")
+        if len(parts) > 3:
+            name = f"{parts[0]}-{parts[1]}…{parts[-1]}⁽{len(parts) - 3}⁾"
+        if len(name) > 28:
+            name = name[:13] + "…" + name[-13:]
+    return name
 
 
 def observe(var_root, sort_key, plain):
