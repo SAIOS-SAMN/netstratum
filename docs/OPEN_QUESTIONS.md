@@ -107,7 +107,7 @@ morphodynamics" so that love, compassion, morality, and integrity live as
 continuous unitary field transformations over civilization state.
 
 **Verdict: REJECTED as an engine change; the four concepts landed instead
-as the measured dual cohesion ledger** (`08_IDEOLOGY.md`; implementation
+as the measured dual cohesion ledger** (`09_IDEOLOGY.md`; implementation
 on the ideology board, BUILD_ORDER §3). Two load-bearing walls, the Q1
 verdict's shape:
 
@@ -121,10 +121,10 @@ verdict's shape:
    arbitrary physics — the scalar/scored ancestry refusal returning as a
    field.
 
-**Kernels kept (inscribed at 08):** the four concepts themselves —
-dual-entry receipted ledgers with ratios derived at read (08 §1); friction
-as real entropy riding the landed VENT-1 machinery (08 §3.2); ideology
-export as ordinary covenant state machines (08 §3.3).
+**Kernels kept (inscribed at 09):** the four concepts themselves —
+dual-entry receipted ledgers with ratios derived at read (09 §1); friction
+as real entropy riding the landed VENT-1 machinery (09 §3.2); ideology
+export as ordinary covenant state machines (09 §3.3).
 
 **What could reopen this vector, honestly:** an exact-rational, replayable
 DISCRETE dynamic — richer covenant state machines, exact-rational policy
@@ -132,6 +132,6 @@ evolution rules — at which point it is no longer "morphodynamics", just
 more CFE state machinery under the existing laws. For genuinely continuous
 fields, the same door as Q1: a deterministic exact-arithmetic path plus
 succinct interior proofs. Closed for good: any stored mutable "alignment
-score" (the ancestry refusal); tokenized live reputation (08 §3.4 — a
+score" (the ancestry refusal); tokenized live reputation (09 §3.4 — a
 token snapshot forks SEAL B's truth; NS-7 may anchor covenant *outcomes*,
 never the ratio).

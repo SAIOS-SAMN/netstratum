@@ -284,3 +284,6 @@ the outside. The world's physics explains its own ethics.
   (CHARTER §9); exact-rational vocabulary throughout (CHARTER §8).
 - Cross-territory: observer columns land in `engine/mirror` (coder-01) by
   operator relay — the VENT-1 uplink precedent (CHARTER §10).
+- The Chronicle Feed (08, JOURNAL-1) rightly refused to invent an ideology
+  vector; once IDEO-1 lands the feed MAY read the landed cohesion counters
+  mirror-side under its reflection law — rendering, never state.
