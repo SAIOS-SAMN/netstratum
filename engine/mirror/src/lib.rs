@@ -576,6 +576,20 @@ fn render_receipt(receipt: &Receipt) -> String {
                 resource_name(*resource)
             ),
         ),
+        E::OverflowAbsorbed { source_orb, absorber_orb, amount } => (
+            "overflow_absorbed",
+            format!(
+                "{} heat orb {source_orb} → orb {absorber_orb}'s sink",
+                ratio_str(amount)
+            ),
+        ),
+        E::AbsorptionLapsed { debtor_orb, creditor_orb, amount } => (
+            "absorption_lapsed",
+            format!(
+                "{} unpaid orb {debtor_orb} → orb {creditor_orb}",
+                ratio_str(amount)
+            ),
+        ),
     };
     w.field_str("event", name);
     w.field_str("detail", &detail);

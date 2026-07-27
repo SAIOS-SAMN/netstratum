@@ -436,6 +436,67 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 ),
             }
         }
+        Some("absorb") => {
+            let value = words.next().and_then(parse_ratio_arg);
+            let from_word = words.next();
+            let source_name = words.next().map(|word| word.to_string());
+            let absorber = match (words.next(), words.next()) {
+                (Some("into"), Some(planet)) => world
+                    .orbs()
+                    .iter()
+                    .find(|held| held.name == planet)
+                    .map(|held| held.orb_id),
+                _ => Some(*current),
+            };
+            match (value, from_word, source_name) {
+                (Some(value), Some("from"), Some(planet)) => {
+                    let source = world
+                        .orbs()
+                        .iter()
+                        .find(|held| held.name == planet)
+                        .map(|held| held.orb_id);
+                    match (source, absorber) {
+                        (Some(source), Some(absorber)) => {
+                            match world.absorb_as(SOVEREIGN, source, absorber, value.clone()) {
+                                Ok(()) => {
+                                    println!(
+                                        "{} {} overflow absorbed from {} — sink consumed, shed to the void through the absorber's arrays; the reciprocity window opens ({} ticks)",
+                                        style.ok("♻"),
+                                        style.strong(&amount(&value)),
+                                        style.strong(&planet),
+                                        cfe::dop::reciprocity_window()
+                                    );
+                                    if !world
+                                        .orb_by_id(source)
+                                        .map(|held| held.overheat)
+                                        .unwrap_or(false)
+                                        && world.vent_pending_of(source) == cfe::ratio::ratio(0, 1)
+                                    {
+                                        println!(
+                                            "{} the overheat on {} clears — its waste found a home instead of the void",
+                                            style.ok("❄"),
+                                            style.strong(&planet)
+                                        );
+                                    }
+                                }
+                                Err(refusal) => refuse(world, &refusal, style),
+                            }
+                        }
+                        _ => println!(
+                            "{} unknown planet — {} lists them",
+                            style.bad("✗"),
+                            style.strong("planets")
+                        ),
+                    }
+                }
+                _ => println!(
+                    "{} usage: {} (exact fractions) — e.g. {}",
+                    style.bad("✗"),
+                    style.strong("absorb <amount> from <planet> [into <planet>]"),
+                    style.strong("absorb 1/2 from furnace into coldstore")
+                ),
+            }
+        }
         Some("planets") => {
             for orb in world.orbs() {
                 let here = match orb.orb_id == *current {
@@ -585,6 +646,7 @@ fn help(style: &Style) {
         ("raze <tile|r:c>", "demolish a zone for half its cost back — the famine escape hatch"),
         ("chart <planet> [from <p>]", "found a daughter colony: the founding reserves MOVE from the source colony (nothing is minted)"),
         ("send <amt> <res> to <p> [from <p>]", "move banked value between planets — conservation exact; demurrage settles both sides at the touch; a gift covering the one-tick bill relieves famine"),
+        ("absorb <amt> from <p> [into <p>]", "route a hot planet's un-sealed overflow into the absorber's banked sink — emptying it clears the strike; the draw owes the absorber within the reciprocity window or it lapses to the extraction book"),
         ("save · resume <world>", "sync the chronicle to var/worlds/<name>/ (append-only) · resume a saved world at launch"),
         ("planet <name> · planets", "switch the planet cursor · list this world's planets"),
         ("agent <handle>", "register a contained agent (zero grants until you open scopes)"),
@@ -925,6 +987,11 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "a transfer moves a positive amount between two different planets — e.g. {}",
             style.strong("send 5/2 iron to outpost")
         ),
+        ActionRefused::CannotAbsorb { pending } => format!(
+            "only un-sealed overflow absorbs, and {} stands pending — {} shows the thermal read",
+            style.strong(&amount(pending)),
+            style.strong("thermal")
+        ),
     };
     println!("{} {text}", style.bad("✗"));
 }
@@ -1231,6 +1298,18 @@ fn chronicle(world: &World, style: &Style) {
                 "⇄ {} {} moved orb {from_orb} → orb {to_orb} — conservation holds",
                 style.strong(&amount(moved)),
                 resource_name(*resource)
+            ),
+            cfe::dop::ClosureEvent::OverflowAbsorbed {
+                source_orb, absorber_orb, amount: heat,
+            } => format!(
+                "♻ {} overflow absorbed orb {source_orb} → orb {absorber_orb}'s sink — shed through its arrays; the window opens",
+                style.strong(&amount(heat))
+            ),
+            cfe::dop::ClosureEvent::AbsorptionLapsed {
+                debtor_orb, creditor_orb, amount: unpaid,
+            } => format!(
+                "⌛ absorption window lapsed: {} unpaid orb {debtor_orb} → orb {creditor_orb} — posted to the extraction book",
+                style.strong(&amount(unpaid))
             ),
         };
         let tag = receipt

@@ -53,6 +53,9 @@ pub enum ActionRefused {
     /// TRADE-1 — a transfer moves a POSITIVE amount between two
     /// DISTINCT orbs; anything else refuses whole.
     BadTransfer,
+    /// ABSORB-1 — only un-sealed pending overflow absorbs; the refusal
+    /// names exactly what stands.
+    CannotAbsorb { pending: Box<Ratio> },
 }
 
 /// One tick's read: the clock walk, any famines that struck, and any
@@ -67,6 +70,19 @@ pub struct TickOutcome {
     pub overheat_cleared: Vec<u64>,
 }
 
+/// ABSORB-1 (09 §2.4): one open reciprocity window — the source of an
+/// absorption owes the absorber its value within
+/// `dop::reciprocity_window()` ticks of `opened`. Committed state:
+/// opened by OverflowAbsorbed, retired oldest-first by TRADE-1
+/// payments, lapsed by AbsorptionLapsed at the exact stamp.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AbsorptionDebt {
+    pub debtor: u64,
+    pub creditor: u64,
+    pub remainder: Ratio,
+    pub opened: u64,
+}
+
 /// The committed projection — exactly what the chronicle grounds.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Committed {
@@ -74,6 +90,8 @@ pub struct Committed {
     pub entities: Vec<Entity>,
     /// THERMAL-1: the commissioned sun, if any.
     pub star: Option<crate::thermal::StarClass>,
+    /// ABSORB-1: the open reciprocity windows, in opening order.
+    pub debts: Vec<AbsorptionDebt>,
 }
 
 pub struct World {
@@ -89,8 +107,12 @@ pub struct World {
     /// no receipt, no persistence, not committed.
     accrued: Vec<(u64, Resource, Ratio)>,
     /// VENT-1 WORKSPACE, per orb: vented entropy since last settle —
-    /// sealed into the cumulative ledger by `VentSettled` at collect.
+    /// sealed into the cumulative ledger by `VentSettled` at collect,
+    /// or carried into a partner's sink by ABSORB-1.
     vent_pending: Vec<(u64, Ratio)>,
+    /// ABSORB-1: the open reciprocity windows (committed — every
+    /// mutation receipted; replays from receipts alone).
+    debts: Vec<AbsorptionDebt>,
 }
 
 impl World {
@@ -104,6 +126,7 @@ impl World {
             star: None,
             accrued: Vec::new(),
             vent_pending: Vec::new(),
+            debts: Vec::new(),
         }
     }
 
@@ -129,6 +152,7 @@ impl World {
             star: committed.star,
             accrued: Vec::new(),
             vent_pending: Vec::new(),
+            debts: committed.debts,
         }
     }
 
@@ -220,6 +244,16 @@ impl World {
     /// The genesis orb's workspace (single-planet convenience).
     pub fn accrued(&self) -> Vec<(Resource, Ratio)> {
         self.accrued_of(FIRST_ORB)
+    }
+
+    /// ABSORB-1: this orb's un-sealed vented overflow (workspace) —
+    /// what stands absorbable before the void claims it at collect.
+    pub fn vent_pending_of(&self, orb: u64) -> Ratio {
+        self.vent_pending
+            .iter()
+            .find(|(held, _)| *held == orb)
+            .map(|(_, pending)| pending.clone())
+            .unwrap_or_else(|| ratio(0, 1))
     }
 
     pub fn entities(&self) -> &[Entity] {
@@ -488,6 +522,37 @@ impl World {
     pub fn tick(&mut self) -> TickOutcome {
         use crate::dop::{encasement_throughput, joule_leak_per_tick, radiator_base};
         use crate::thermal;
+        // ABSORB-1 (09 §2.4): reciprocity windows expire at their
+        // exact stamp — the unpaid remainder posts to the debtor's
+        // extraction book, receipted (world-driven, the famine shape).
+        {
+            let now = self.clock.now();
+            let window = crate::dop::reciprocity_window();
+            let mut lapsed = Vec::new();
+            self.debts.retain(|debt| match now >= debt.opened + window {
+                true => {
+                    lapsed.push(debt.clone());
+                    false
+                }
+                false => true,
+            });
+            for debt in lapsed {
+                if let Some(held) =
+                    self.orbs.iter_mut().find(|held| held.orb_id == debt.debtor)
+                {
+                    held.extracted_across += debt.remainder.clone();
+                }
+                self.chronicle.append(
+                    ClosureEvent::AbsorptionLapsed {
+                        debtor_orb: debt.debtor,
+                        creditor_orb: debt.creditor,
+                        amount: debt.remainder,
+                    },
+                    now,
+                    vec![],
+                );
+            }
+        }
         let mut struck = Vec::new();
         let mut overheat_struck = Vec::new();
         let mut overheat_cleared = Vec::new();
@@ -865,9 +930,12 @@ impl World {
                 .expect("checked above");
             target.bank(resource, amount.clone());
             if from_crisis {
-                target.drawn_in_crisis += value;
+                target.drawn_in_crisis += value.clone();
             }
         }
+        // ABSORB-1: the payment compensates open reciprocity windows
+        // owed from→to, oldest first.
+        settle_debts(&mut self.debts, &mut self.orbs, from, to, value);
         self.chronicle.append(
             ClosureEvent::ResourceTransferred { from_orb: from, to_orb: to, resource, amount },
             stamp,
@@ -877,12 +945,149 @@ impl World {
         Ok(())
     }
 
+    /// Absorb as the sovereign.
+    pub fn absorb(
+        &mut self,
+        source: u64,
+        absorber: u64,
+        amount: Ratio,
+    ) -> Result<(), ActionRefused> {
+        self.absorb_as(SOVEREIGN, source, absorber, amount)
+    }
+
+    /// ABSORB-1 (05 §1.4, 09 §2.4) — route the source's un-sealed
+    /// overflow into the absorber's banked sink instead of the void:
+    /// `sink_consumed = heat_absorbed = vented_after_shed`, the
+    /// absorber's ledger carrying the shed, the source's staying
+    /// clean. Emptying the pending clears the strike (relief, the
+    /// famine shape — the imbalance may strike anew next tick). The
+    /// draw opens a reciprocity window owed source → absorber; TRADE-1
+    /// payments retire it oldest-first; the unpaid remainder lapses to
+    /// the extraction book. The absorber settles due demurrage at this
+    /// touch; affordability judged on the post-decay sink, computed
+    /// pure — a refusal orphans nothing. Collect scope.
+    pub fn absorb_as(
+        &mut self,
+        actor: u64,
+        source: u64,
+        absorber: u64,
+        amount: Ratio,
+    ) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Collect)?;
+        if self.orbs.is_empty() {
+            return Err(ActionRefused::NoColony);
+        }
+        if source == absorber || amount <= ratio(0, 1) {
+            return Err(ActionRefused::BadTransfer);
+        }
+        if !self.orbs.iter().any(|held| held.orb_id == source) {
+            return Err(ActionRefused::NoSuchOrb { orb: source });
+        }
+        if !self.orbs.iter().any(|held| held.orb_id == absorber) {
+            return Err(ActionRefused::NoSuchOrb { orb: absorber });
+        }
+        let stamp = self.clock.now();
+        let star = self.star;
+        let pending = self.vent_pending_of(source);
+        if amount > pending {
+            return Err(ActionRefused::CannotAbsorb { pending: Box::new(pending) });
+        }
+        {
+            let held = self
+                .orbs
+                .iter()
+                .find(|held| held.orb_id == absorber)
+                .expect("checked above");
+            let decay = demurrage_due(held, star, stamp)
+                .into_iter()
+                .find(|(due, _)| *due == Resource::Sink)
+                .map(|(_, decay)| decay)
+                .unwrap_or_else(|| ratio(0, 1));
+            let have = held.banked_amount(Resource::Sink) - decay;
+            if have < amount {
+                return Err(ActionRefused::CannotAfford {
+                    resource: Resource::Sink,
+                    need: Box::new(amount),
+                    have: Box::new(have),
+                });
+            }
+        }
+        // Crisis reads BEFORE the move — the replay-fact order.
+        let source_crisis = {
+            let held = self.orbs.iter().find(|held| held.orb_id == source).expect("checked");
+            !held.famine.is_empty() || held.overheat
+        };
+        let absorber_crisis = {
+            let held = self.orbs.iter().find(|held| held.orb_id == absorber).expect("checked");
+            !held.famine.is_empty() || held.overheat
+        };
+        let value = amount.clone() * crate::dop::commensurate_weight(Resource::Sink);
+        {
+            let held = self
+                .orbs
+                .iter_mut()
+                .find(|held| held.orb_id == absorber)
+                .expect("checked above");
+            touch(held, star, &mut self.chronicle, stamp);
+            held.bank(Resource::Sink, -amount.clone());
+            held.entropy_vented += amount.clone();
+            if source_crisis {
+                held.given_in_crisis += value.clone();
+            }
+        }
+        if let Some((_, held)) = self
+            .vent_pending
+            .iter_mut()
+            .find(|(held, _)| *held == source)
+        {
+            *held -= amount.clone();
+        }
+        self.vent_pending.retain(|(_, pending)| pending != &ratio(0, 1));
+        if absorber_crisis {
+            let held = self
+                .orbs
+                .iter_mut()
+                .find(|held| held.orb_id == source)
+                .expect("checked above");
+            held.drawn_in_crisis += value;
+        }
+        self.debts.push(AbsorptionDebt {
+            debtor: source,
+            creditor: absorber,
+            remainder: amount.clone(),
+            opened: stamp,
+        });
+        self.chronicle.append(
+            ClosureEvent::OverflowAbsorbed { source_orb: source, absorber_orb: absorber, amount },
+            stamp,
+            vec![actor],
+        );
+        // Emptying the pending relieves the strike, receipted.
+        if self.vent_pending_of(source) == ratio(0, 1) {
+            let held = self
+                .orbs
+                .iter_mut()
+                .find(|held| held.orb_id == source)
+                .expect("checked above");
+            if held.overheat {
+                held.overheat = false;
+                self.chronicle.append(
+                    ClosureEvent::OverheatCleared { orb_id: source },
+                    stamp,
+                    vec![],
+                );
+            }
+        }
+        Ok(())
+    }
+
     /// The committed projection of the live world.
     pub fn committed(&self) -> Committed {
         Committed {
             orbs: self.orbs.clone(),
             entities: self.entities.clone(),
             star: self.star,
+            debts: self.debts.clone(),
         }
     }
 
@@ -952,6 +1157,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut orbs: Vec<ColonyOrb> = Vec::new();
     let mut entities: Vec<Entity> = Vec::new();
     let mut star: Option<crate::thermal::StarClass> = None;
+    let mut debts: Vec<AbsorptionDebt> = Vec::new();
     for receipt in chronicle.receipts() {
         match &receipt.event {
             ClosureEvent::EntityRegistered { entity_id, principal, handle } => {
@@ -1113,13 +1319,67 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     held.bank(*resource, amount.clone());
                     held.last_touch = receipt.stamp;
                     if from_crisis {
+                        held.drawn_in_crisis += value.clone();
+                    }
+                }
+                settle_debts(&mut debts, &mut orbs, *from_orb, *to_orb, value);
+            }
+            // ABSORB-1: the three-way move replays — the absorber's
+            // ledger carries the shed; the window opens; crisis reads
+            // mirror the live order exactly.
+            ClosureEvent::OverflowAbsorbed { source_orb, absorber_orb, amount } => {
+                let source_crisis = orbs
+                    .iter()
+                    .find(|held| held.orb_id == *source_orb)
+                    .map(|held| !held.famine.is_empty() || held.overheat)
+                    .unwrap_or(false);
+                let absorber_crisis = orbs
+                    .iter()
+                    .find(|held| held.orb_id == *absorber_orb)
+                    .map(|held| !held.famine.is_empty() || held.overheat)
+                    .unwrap_or(false);
+                let value =
+                    amount.clone() * crate::dop::commensurate_weight(Resource::Sink);
+                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *absorber_orb)
+                {
+                    held.bank(Resource::Sink, -amount.clone());
+                    held.entropy_vented += amount.clone();
+                    held.last_touch = receipt.stamp;
+                    if source_crisis {
+                        held.given_in_crisis += value.clone();
+                    }
+                }
+                if absorber_crisis {
+                    if let Some(held) =
+                        orbs.iter_mut().find(|held| held.orb_id == *source_orb)
+                    {
                         held.drawn_in_crisis += value;
                     }
+                }
+                debts.push(AbsorptionDebt {
+                    debtor: *source_orb,
+                    creditor: *absorber_orb,
+                    remainder: amount.clone(),
+                    opened: receipt.stamp,
+                });
+            }
+            // ABSORB-1: the lapse replays — extraction posts, the
+            // oldest matching window drops (live emission order).
+            ClosureEvent::AbsorptionLapsed { debtor_orb, creditor_orb, amount } => {
+                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *debtor_orb) {
+                    held.extracted_across += amount.clone();
+                }
+                if let Some(at) = debts.iter().position(|debt| {
+                    debt.debtor == *debtor_orb
+                        && debt.creditor == *creditor_orb
+                        && debt.remainder == *amount
+                }) {
+                    debts.remove(at);
                 }
             }
         }
     }
-    Committed { orbs, entities, star }
+    Committed { orbs, entities, star, debts }
 }
 
 /// SINK-1 (Q2): the demurrage due on one orb's un-vaulted banked
@@ -1168,6 +1428,37 @@ fn touch(
         );
     }
     orb.last_touch = stamp;
+}
+
+/// ABSORB-1 (09 §2.4): a payment from debtor to creditor compensates
+/// open reciprocity windows OLDEST FIRST; each paid portion posts the
+/// debtor's returned book. Shared verbatim by the live path and replay.
+fn settle_debts(
+    debts: &mut Vec<AbsorptionDebt>,
+    orbs: &mut [ColonyOrb],
+    from: u64,
+    to: u64,
+    value: Ratio,
+) {
+    let zero = ratio(0, 1);
+    let mut left = value;
+    for debt in debts.iter_mut() {
+        if left == zero {
+            break;
+        }
+        if debt.debtor != from || debt.creditor != to {
+            continue;
+        }
+        let pay = left.clone().min(debt.remainder.clone());
+        if pay > zero {
+            debt.remainder -= pay.clone();
+            left -= pay.clone();
+            if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == from) {
+                held.returned_across += pay;
+            }
+        }
+    }
+    debts.retain(|debt| debt.remainder != ratio(0, 1));
 }
 
 fn triple_amount(ledger: &[(u64, Resource, Ratio)], orb: u64, resource: Resource) -> Ratio {

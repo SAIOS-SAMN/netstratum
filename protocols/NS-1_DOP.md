@@ -76,6 +76,8 @@ One tag, one meaning, forever; retired codes are never reused.
 | 28 | orb: vent entry (VENT-1/SINK-1) | ratio (entropy_vented) ‖ LE64(last_touch) |
 | 29 | event: DemurrageSettled (SINK-1) | LE64(orb_id) ‖ resource u8 ‖ ratio |
 | 30 | event: ResourceTransferred (TRADE-1) | LE64(from_orb) ‖ LE64(to_orb) ‖ resource u8 ‖ ratio — banked value MOVES (conservation); both orbs settle demurrage at this touch; cohesion-book postings derive from this receipt + the counterparty's receipted crisis state, never stored |
+| 31 | event: OverflowAbsorbed (ABSORB-1) | LE64(source_orb) ‖ LE64(absorber_orb) ‖ ratio — un-sealed overflow into the absorber's banked sink: sink_consumed = heat_absorbed = vented_after_shed (05 §1.4, the absorber's ledger carries the shed); opens a reciprocity window owed source → absorber |
+| 32 | event: AbsorptionLapsed (ABSORB-1) | LE64(debtor_orb) ‖ LE64(creditor_orb) ‖ ratio — a window expired unpaid; the remainder posts to the debtor's extraction book (world-driven, the famine-strike shape) |
 | 10 | event: EntityRegistered (N3) | LE64(entity_id) ‖ LE64(principal) ‖ handle utf8 |
 | 11 | event: ScopeGranted (N3) | LE64(agent) ‖ scope u8 |
 | 12 | event: ScopeRevoked (N3) | LE64(agent) ‖ scope u8 |

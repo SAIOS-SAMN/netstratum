@@ -257,6 +257,41 @@ N5/N6). Details and sequencing in 04 §6.
   second 1/4 relieved with the banner → 100-iron refusal named "have
   10" → self-send refused → replay MATCHES.
 
+- **ABSORB-1 LANDED** (2026-07-27): THE ABSORPTION TRANSACTION — the
+  second ideology-board landing (09, §3 below). `OverflowAbsorbed`
+  (tag 31): a hot orb's UN-SEALED pending overflow routes into a
+  partner's banked sink instead of the void — the 05 §1.4 invariant
+  `sink_consumed = heat_absorbed = vented_after_shed` made inter-orb,
+  the ABSORBER's `entropy_vented` carrying the shed, the source's
+  staying clean; emptying the pending CLEARS the overheat strike
+  (relief, the famine shape — the imbalance may strike anew). THE
+  MORALITY BOOKS OPEN (09 §2.4): every absorption opens a reciprocity
+  window (`reciprocity_window()`, placeholder 8 ticks) owed source →
+  absorber, held as committed `AbsorptionDebt` state (opened by tag 31,
+  retired OLDEST-FIRST by TRADE-1 payments posting `returned_across`,
+  lapsed by `AbsorptionLapsed` tag 32 — world-driven at the exact
+  stamp, the unpaid remainder posting `extracted_across`; returned +
+  extracted sum to the drawn whole). Compensated and uncompensated are
+  ONE mechanic, two outcomes, measured by behavior — the engine judges
+  nothing. The absorber settles due demurrage at the touch,
+  affordability post-decay, computed pure. Tag note: 32 spent here on
+  the lapse; the remaining board candidates renumber (bonds/covenant/
+  friction in 33–38; the orb cohesion entry takes a post-40 tag at
+  IDEO-1 — contiguity is not law; 39–40 stay tech-emergence).
+  Cross-territory (relayed): two mechanical renderer arms in
+  `engine/mirror`. CLI: `absorb <amt> from <planet> [into <planet>]`,
+  ♻/❄ banners, `CannotAbsorb` names the standing pending. Evidence:
+  clippy zero (warnings denied); **134/134 workspace witnesses green**
+  (5 new: the three-way invariant exact across two orbs — 59997/10000
+  sink minus 1, vented 1 on the absorber, source ledger clean at 1/2,
+  strike cleared once; the unpaid window lapses by receipt at exactly
+  stamp 27 = opened 19 + 8; partial absorb leaves the strike standing
+  and oldest-first pay splits the books 1/2 returned + 1/2 extracted =
+  the drawn whole; refusals name the exact pending 5/2 and sink
+  shortfall; tags 31/32 byte-exact). The arc played end-to-end:
+  freeze-relief by TRADE-1 → capture → absorb cleared the strike with
+  the banner → the paid window lapsed nothing → replay MATCHES.
+
 ## 2. The depth board (02_COLONY_LOOP — game depth before multiplayer)
 
 Ruled 2026-07-25: the world must be worth sharing before N6 shares it. These

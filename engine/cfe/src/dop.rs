@@ -27,14 +27,17 @@
 //!   27 ClosureEvent::VentSettled (VENT-1)
 //!   29 ClosureEvent::DemurrageSettled (SINK-1)
 //!   30 ClosureEvent::ResourceTransferred (TRADE-1)
+//!   31 ClosureEvent::OverflowAbsorbed (ABSORB-1)
+//!   32 ClosureEvent::AbsorptionLapsed (ABSORB-1)
 //!   16 Orb header (orb_id ‖ name)
 //!   17 Orb zone entry (tile ‖ kind)
 //!   18 Orb banked entry (resource ‖ ratio)
 //!   19 Orb famine entry (resource)
 //!   26 Orb thermal entry (albedo ‖ orbit_r ‖ overheat u8) — THERMAL-1
 //!   28 Orb vent entry (entropy_vented ratio ‖ LE64 last_touch) — VENT-1/SINK-1
-//!   31–38 RESERVED for the ideology board (09, BUILD_ORDER §3:
-//!         ABSORB-1 → BOND-1 → COVENANT-1 → IDEO-1).
+//!   33–38 RESERVED for the ideology board (09, BUILD_ORDER §3:
+//!         BOND-1 → COVENANT-1 → IDEO-1; the orb cohesion entry takes
+//!         a post-40 tag at IDEO-1 — contiguity is not law).
 //!   39–40 RESERVED for tech emergence (10: TechDiscovered,
 //!         TechLicensed) — next free tag for any OTHER landing is 41.
 
@@ -130,6 +133,13 @@ pub fn demurrage_per_tick() -> Ratio {
 /// Weight 1 for every resource in v1; tunes at balance time.
 pub fn commensurate_weight(_resource: Resource) -> Ratio {
     ratio(1, 1)
+}
+
+/// ABSORB-1 (09 §2.4, placeholder): the reciprocity window in ticks —
+/// a cross-orb draw must be compensated within this span or the
+/// remainder lapses to the debtor's extraction book.
+pub fn reciprocity_window() -> u64 {
+    8
 }
 
 /// The zone kinds, with their ruleset-v1 economics.
@@ -300,6 +310,16 @@ pub enum ClosureEvent {
     /// this receipt and the counterparty's receipted crisis state — a
     /// replay fact, never a judgment call.
     ResourceTransferred { from_orb: u64, to_orb: u64, resource: Resource, amount: Ratio },
+    /// ABSORB-1 (05 §1.4, 09 §2.4) — un-sealed overflow routed into a
+    /// partner's banked sink instead of the void: sink_consumed =
+    /// heat_absorbed = vented_after_shed, the absorber's ledger
+    /// carrying the shed. Opens a reciprocity window owed by the
+    /// source to the absorber.
+    OverflowAbsorbed { source_orb: u64, absorber_orb: u64, amount: Ratio },
+    /// ABSORB-1 (09 §2.4) — a reciprocity window expired unpaid: the
+    /// remainder posts to the debtor's extraction book. World-driven
+    /// at the exact stamp (the famine-strike shape).
+    AbsorptionLapsed { debtor_orb: u64, creditor_orb: u64, amount: Ratio },
 }
 
 impl ClosureEvent {
@@ -399,6 +419,18 @@ impl ClosureEvent {
                 value.push(*resource as u8);
                 ratio::encode(amount, &mut value);
                 tlv::put(30, &value, &mut out);
+            }
+            Self::OverflowAbsorbed { source_orb, absorber_orb, amount } => {
+                let mut value = source_orb.to_le_bytes().to_vec();
+                value.extend_from_slice(&absorber_orb.to_le_bytes());
+                ratio::encode(amount, &mut value);
+                tlv::put(31, &value, &mut out);
+            }
+            Self::AbsorptionLapsed { debtor_orb, creditor_orb, amount } => {
+                let mut value = debtor_orb.to_le_bytes().to_vec();
+                value.extend_from_slice(&creditor_orb.to_le_bytes());
+                ratio::encode(amount, &mut value);
+                tlv::put(32, &value, &mut out);
             }
         }
         out
@@ -503,6 +535,18 @@ impl ClosureEvent {
                 let (amount, _) = ratio::decode(value.get(17..)?)?;
                 Some(Self::ResourceTransferred { from_orb, to_orb, resource, amount })
             }
+            31 => {
+                let source_orb = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let absorber_orb = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let (amount, _) = ratio::decode(value.get(16..)?)?;
+                Some(Self::OverflowAbsorbed { source_orb, absorber_orb, amount })
+            }
+            32 => {
+                let debtor_orb = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let creditor_orb = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let (amount, _) = ratio::decode(value.get(16..)?)?;
+                Some(Self::AbsorptionLapsed { debtor_orb, creditor_orb, amount })
+            }
             _ => None,
         }
     }
@@ -565,6 +609,13 @@ pub struct ColonyOrb {
     pub given_in_crisis: Ratio,
     /// The entropic book of the pair (see `given_in_crisis`).
     pub drawn_in_crisis: Ratio,
+    /// ABSORB-1 (09 §2.4): the morality books — cumulative value
+    /// returned against cross-orb draws inside the reciprocity window,
+    /// and the lapsed remainders. Same deferral as the compassion
+    /// books: committed, replay-rebuilt, wire at IDEO-1.
+    pub returned_across: Ratio,
+    /// The entropic book of the pair (see `returned_across`).
+    pub extracted_across: Ratio,
 }
 
 impl ColonyOrb {
