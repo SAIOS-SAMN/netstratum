@@ -29,7 +29,7 @@ import time
 from fractions import Fraction
 from pathlib import Path
 
-RESOURCES = ["iron", "biomass", "alloy", "diamond"]
+RESOURCES = ["iron", "biomass", "alloy", "diamond", "joule", "sink"]
 
 
 def frac(text):
@@ -51,8 +51,14 @@ def read_jsonl(path):
     with open(path, encoding="utf-8") as stream:
         for line in stream:
             line = line.strip()
-            if line:
+            if not line:
+                continue
+            try:
                 yield json.loads(line)
+            except json.JSONDecodeError:
+                # The torn-tail law (07 §1.2): a killed writer's
+                # NUL/half-written line carries no receipt — skip.
+                continue
 
 
 def chain_linked(chronicle_path):
@@ -138,6 +144,9 @@ def read_worlds(var_root):
                 "depth": depth,
                 "consumed": consumed,
                 "linked": linked,
+                "star": state.get("star_class"),
+                "vented": state.get("entropy_vented", "0"),
+                "syntropy": state.get("syntropy_ratio", "—"),
             }
             for resource in RESOURCES:
                 row[resource] = frac(banked[resource]) if resource in banked else Fraction(0)
@@ -231,16 +240,22 @@ def render(rows, registry, sort_key, plain):
         planet = row["planet"]
         if row["famine"]:
             planet += paint(" ⚠" + ",".join(row["famine"]), "31")
+        star_names = {1: "O", 2: "B", 3: "A", 4: "F", 5: "G", 6: "K", 7: "M",
+                      8: "bd", 9: "wd", 10: "rg", 11: "ns", 12: "wr", 13: "lwh"}
         colony_table.append([
             row["civilization"], row["world"], planet,
             show(row["iron"]), show(row["biomass"]),
             show(row["alloy"]), show(row["diamond"]),
+            show(row["joule"]), show(row["sink"]),
+            star_names.get(row["star"], "—"),
+            str(row["vented"]),
             str(row["zones"]), str(row["clock"]),
             paint("✓", "32") if row["linked"] else paint("✗ BROKEN", "31"),
         ])
     sections = ["SETTLED PLANETS", tabulate(
         ["CIVILIZATION", "WORLD", "PLANET", "IRON", "BIOMASS", "ALLOY",
-         "DIAMOND", "ZONES", "TICKS", "CHAIN"],
+         "DIAMOND", "JOULE", "SINK", "STAR", "VENTED", "ZONES", "TICKS",
+         "CHAIN"],
         colony_table)]
 
     civ_table = [

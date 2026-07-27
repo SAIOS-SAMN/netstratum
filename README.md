@@ -10,10 +10,21 @@ The current landing is always read at `docs/BUILD_ORDER.md`, never inferred.
 
 ```
 protocols/   NS-1 DOP · NS-2 RQP · NS-3 VRP · NS-4 BEP · NS-5 MESH · NS-6 IPSAL-OS · NS-7 ANCHOR
-docs/        the charter, the build order, the world-book (to come)
-engine/      the Rust workspace (opens at landing N1)
-clients/     the CLI/MUD client (opens at landing N2)
+docs/        00 charter · 01 economy · 02 colony loop · 03 substrate contract ·
+             04 civilization genesis · 05 thermal balance · 06 civilizations
+             (the world-book) · 07 era convergence · 08 chronicle feed ·
+             09 ideology · 10 tech emergence · BUILD_ORDER (the one carrier) ·
+             OPEN_QUESTIONS
+engine/      the Rust workspace: cfe · rfa-core · physics · solver · mirror · conductor
+clients/     the CLI/MUD client
+tools/       observer.py (the board) · steward.py (the inbox)
 ```
+
+Play: `cargo run -p netstratum-cli` (`help` lists everything — found, zone,
+star, site, thermal, journal, save/resume). Autonomous board:
+`cargo run -p conductor` (converges the archived eras, then beats; the
+civilizations journal every 60-tick year onto `var/worlds/wall.html` — the
+Terminal Wall — and `python3 tools/observer.py` prints the ledger board).
 
 References live in `/opt/repos/` (the ancestry era — consult, never port
 blindly) and `/opt/ipsal-autic-v0.4/` (the sealed engine build and its organ
