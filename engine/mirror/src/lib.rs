@@ -518,6 +518,32 @@ fn render_state(world_name: &str, planet: &str, civilization: &str, world: &Worl
                 ratio_str(&denominator)
             ));
         }
+        // IDEO-1 / observer uplink: the eight committed cohesion books
+        // and the four derived (never stored) axis ratios — emitted
+        // only when a book is nonzero, like the wire entry.
+        let axes: [(&str, &str, &Ratio, &str, &Ratio); 4] = [
+            ("compassion", "given_in_crisis", &orb.given_in_crisis,
+             "drawn_in_crisis", &orb.drawn_in_crisis),
+            ("love", "bond_flow", &orb.bond_flow,
+             "severance_load", &orb.severance_load),
+            ("integrity", "covenants_fulfilled", &orb.covenants_fulfilled,
+             "covenants_breached", &orb.covenants_breached),
+            ("morality", "returned_across", &orb.returned_across,
+             "extracted_across", &orb.extracted_across),
+        ];
+        let zero = Ratio::from(num_bigint::BigInt::from(0));
+        if axes.iter().any(|(_, _, syn, _, ent)| **syn != zero || **ent != zero) {
+            w.key("cohesion");
+            w.open();
+            for (axis, syn_name, syn, ent_name, ent) in axes {
+                w.field_str(syn_name, &ratio_str(syn));
+                w.field_str(ent_name, &ratio_str(ent));
+                if let Some(reading) = cfe::dop::cohesion_ratio(syn, ent) {
+                    w.field_str(&format!("{axis}_ratio"), &ratio_str(&reading));
+                }
+            }
+            w.close();
+        }
         w.key("banked");
         w.open();
         for (resource, amount) in &orb.banked {
@@ -682,6 +708,10 @@ fn render_receipt(receipt: &Receipt) -> String {
                 ratio_str(collateral),
                 resource_name(*resource)
             ),
+        ),
+        E::FrictionSettled { orb_id, amount } => (
+            "friction_settled",
+            format!("{} entropy on orb {orb_id}", ratio_str(amount)),
         ),
     };
     w.field_str("event", name);

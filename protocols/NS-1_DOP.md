@@ -83,6 +83,8 @@ One tag, one meaning, forever; retired codes are never reused.
 | 35 | event: CovenantSealed (COVENANT-1) | LE64(obligor_orb) ‖ LE64(beneficiary_orb) ‖ resource u8 ‖ ratio (quota) ‖ LE64(window) ‖ ratio (collateral) — the collateral rides the receipt so replay never re-derives the fidelity curve; the lock is a bank withdrawal (the vitrified vault, lossless by construction) |
 | 36 | event: CovenantReleased (COVENANT-1) | LE64(obligor_orb) ‖ LE64(beneficiary_orb) ‖ resource u8 ‖ ratio (collateral) — quota met: collateral home, the stake posts fulfilled (world-driven at the tick boundary; fulfilment wins the deadline tie) |
 | 37 | event: CovenantSlashed (COVENANT-1) | LE64(obligor_orb) ‖ LE64(beneficiary_orb) ‖ resource u8 ‖ ratio (collateral) — deadline passed unmet: BREACH_AND_SLASH to the aggrieved, the stake posts breached |
+| 38 | event: FrictionSettled (IDEO-1) | LE64(orb_id) ‖ ratio (amount) — accrued ideological friction (φ × abs divergence × volume, transfers only) sealed into the mover's entropy_vented at its collect; aligned partners generate no receipt at all |
+| 41 | orb: cohesion entry (IDEO-1) | ratio ×8 in fixed order: given_in_crisis ‖ drawn_in_crisis ‖ bond_flow ‖ severance_load ‖ covenants_fulfilled ‖ covenants_breached ‖ returned_across ‖ extracted_across — emitted only when a book is nonzero (a zero-book orb encodes byte-identical to a pre-ideology one); the four axis ratios DERIVE at read, never stored |
 | 10 | event: EntityRegistered (N3) | LE64(entity_id) ‖ LE64(principal) ‖ handle utf8 |
 | 11 | event: ScopeGranted (N3) | LE64(agent) ‖ scope u8 |
 | 12 | event: ScopeRevoked (N3) | LE64(agent) ‖ scope u8 |

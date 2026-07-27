@@ -35,17 +35,18 @@
 //!   35 ClosureEvent::CovenantSealed (COVENANT-1)
 //!   36 ClosureEvent::CovenantReleased (COVENANT-1)
 //!   37 ClosureEvent::CovenantSlashed (COVENANT-1)
+//!   38 ClosureEvent::FrictionSettled (IDEO-1)
 //!   16 Orb header (orb_id ‖ name)
 //!   17 Orb zone entry (tile ‖ kind)
 //!   18 Orb banked entry (resource ‖ ratio)
 //!   19 Orb famine entry (resource)
 //!   26 Orb thermal entry (albedo ‖ orbit_r ‖ overheat u8) — THERMAL-1
 //!   28 Orb vent entry (entropy_vented ratio ‖ LE64 last_touch) — VENT-1/SINK-1
-//!   38    RESERVED for the ideology board (09, BUILD_ORDER §3:
-//!         IDEO-1 friction; the orb cohesion entry takes a post-40
-//!         tag at IDEO-1 — contiguity is not law).
+//!   41 Orb cohesion entry (the eight books, IDEO-1) — emitted only
+//!      when a book is nonzero; a zero-book orb encodes byte-identical
+//!      to a pre-ideology one.
 //!   39–40 RESERVED for tech emergence (10: TechDiscovered,
-//!         TechLicensed) — next free tag for any OTHER landing is 41.
+//!         TechLicensed) — next free tag for any landing is 42.
 
 use crate::ratio::{self, ratio, Ratio};
 use crate::tlv;
@@ -167,6 +168,26 @@ pub fn collateral_required(fulfilled: &Ratio, breached: &Ratio, quota: &Ratio) -
     let multiplier = (breached.clone() + one.clone()) / (fulfilled.clone() + one);
     let clamped = multiplier.max(ratio(1, 4)).min(ratio(4, 1));
     quota.clone() * clamped
+}
+
+/// IDEO-1 (09 §3.2, placeholder): the ideological friction rate φ —
+/// `ΔS_ideo = φ × abs(reciprocity_A − reciprocity_B) × volume` per
+/// cross-orb transfer. Friction prices DIVERGENCE, not vice: aligned
+/// partners (any alignment) pay exactly zero.
+pub fn friction_rate() -> Ratio {
+    ratio(1, 8)
+}
+
+/// IDEO-1 (09 §2.5): the derived axis reading — syntropic /
+/// (syntropic + entropic), or None when no deed was ever posted. The
+/// ratio DERIVES at read; it is never stored (the syntropy-ratio
+/// precedent).
+pub fn cohesion_ratio(syntropic: &Ratio, entropic: &Ratio) -> Option<Ratio> {
+    let denominator = syntropic.clone() + entropic.clone();
+    match denominator > ratio(0, 1) {
+        true => Some(syntropic.clone() / denominator),
+        false => None,
+    }
 }
 
 /// The zone kinds, with their ruleset-v1 economics.
@@ -395,6 +416,10 @@ pub enum ClosureEvent {
         resource: Resource,
         collateral: Ratio,
     },
+    /// IDEO-1 (09 §3.2) — accrued ideological friction sealed into the
+    /// mover's vented ledger at its collect (the VentSettled shape):
+    /// real entropy, the handling cost of divergent boundary policies.
+    FrictionSettled { orb_id: u64, amount: Ratio },
 }
 
 impl ClosureEvent {
@@ -554,6 +579,11 @@ impl ClosureEvent {
                     &mut out,
                 );
             }
+            Self::FrictionSettled { orb_id, amount } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                ratio::encode(amount, &mut value);
+                tlv::put(38, &value, &mut out);
+            }
         }
         out
     }
@@ -712,6 +742,11 @@ impl ClosureEvent {
                 let (obligor_orb, beneficiary_orb, resource, collateral) = pact_fields(value)?;
                 Some(Self::CovenantSlashed { obligor_orb, beneficiary_orb, resource, collateral })
             }
+            38 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let (amount, _) = ratio::decode(value.get(8..)?)?;
+                Some(Self::FrictionSettled { orb_id, amount })
+            }
             _ => None,
         }
     }
@@ -848,7 +883,33 @@ impl ColonyOrb {
             value.extend_from_slice(&self.last_touch.to_le_bytes());
             tlv::put(28, &value, &mut out);
         }
+        // IDEO-1: the cohesion entry — the eight books in fixed order,
+        // emitted only when a book is nonzero (one state, one
+        // encoding; a zero-book orb stays byte-identical to a
+        // pre-ideology one).
+        let books = self.cohesion_books();
+        if books.iter().any(|book| **book != ratio(0, 1)) {
+            let mut value = Vec::new();
+            for book in books {
+                ratio::encode(book, &mut value);
+            }
+            tlv::put(41, &value, &mut out);
+        }
         out
+    }
+
+    /// IDEO-1: the eight cohesion books in their canonical wire order.
+    fn cohesion_books(&self) -> [&Ratio; 8] {
+        [
+            &self.given_in_crisis,
+            &self.drawn_in_crisis,
+            &self.bond_flow,
+            &self.severance_load,
+            &self.covenants_fulfilled,
+            &self.covenants_breached,
+            &self.returned_across,
+            &self.extracted_across,
+        ]
     }
 
     /// Decode an orb; unknown tags are SKIPPED (SEAL A).
@@ -886,6 +947,24 @@ impl ColonyOrb {
                     orb.entropy_vented = vented;
                     orb.last_touch =
                         u64::from_le_bytes(value.get(used..used + 8)?.try_into().ok()?);
+                }
+                41 => {
+                    let mut at = 0usize;
+                    let mut books = Vec::with_capacity(8);
+                    for _ in 0..8 {
+                        let (book, used) = ratio::decode(value.get(at..)?)?;
+                        books.push(book);
+                        at += used;
+                    }
+                    let mut drain = books.into_iter();
+                    orb.given_in_crisis = drain.next()?;
+                    orb.drawn_in_crisis = drain.next()?;
+                    orb.bond_flow = drain.next()?;
+                    orb.severance_load = drain.next()?;
+                    orb.covenants_fulfilled = drain.next()?;
+                    orb.covenants_breached = drain.next()?;
+                    orb.returned_across = drain.next()?;
+                    orb.extracted_across = drain.next()?;
                 }
                 _ => {}
             }

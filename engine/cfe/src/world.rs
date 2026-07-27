@@ -165,6 +165,9 @@ pub struct World {
     bonds: Vec<Bond>,
     /// COVENANT-1: the open vitrified pacts (committed, same law).
     covenants: Vec<Covenant>,
+    /// IDEO-1 WORKSPACE, per orb: accrued ideological friction since
+    /// the last seal — sealed by `FrictionSettled` at collect.
+    friction_pending: Vec<(u64, Ratio)>,
 }
 
 impl World {
@@ -181,6 +184,7 @@ impl World {
             debts: Vec::new(),
             bonds: Vec::new(),
             covenants: Vec::new(),
+            friction_pending: Vec::new(),
         }
     }
 
@@ -209,6 +213,7 @@ impl World {
             debts: committed.debts,
             bonds: committed.bonds,
             covenants: committed.covenants,
+            friction_pending: Vec::new(),
         }
     }
 
@@ -927,6 +932,24 @@ impl World {
                 vec![actor],
             );
         }
+        // IDEO-1: the accrued ideological friction seals into the same
+        // vented ledger — real entropy, its own receipt.
+        let mut friction = ratio(0, 1);
+        self.friction_pending.retain(|(held_orb, pending)| match *held_orb == orb_id {
+            true => {
+                friction += pending.clone();
+                false
+            }
+            false => true,
+        });
+        if friction > ratio(0, 1) {
+            held.entropy_vented += friction.clone();
+            self.chronicle.append(
+                ClosureEvent::FrictionSettled { orb_id, amount: friction },
+                stamp,
+                vec![actor],
+            );
+        }
         for (resource, amount) in settleable {
             match amount >= ratio(0, 1) {
                 true => {
@@ -1045,6 +1068,24 @@ impl World {
             let held = self.orbs.iter().find(|held| held.orb_id == to).expect("checked");
             !held.famine.is_empty() || held.overheat
         };
+        // IDEO-1 (09 §3.2): friction prices DIVERGENCE, not vice — the
+        // handling overhead of unlike measured boundary policies, read
+        // BEFORE the move, accrued as workspace against the mover and
+        // sealed at its collect. Bonds and absorptions are exempt by
+        // design: the standing loop is the friction-free channel.
+        let divergence = {
+            let reading = |orb: u64| {
+                let held =
+                    self.orbs.iter().find(|held| held.orb_id == orb).expect("checked");
+                reciprocity_reading(held)
+            };
+            let from_reading = reading(from);
+            let to_reading = reading(to);
+            match from_reading >= to_reading {
+                true => from_reading - to_reading,
+                false => to_reading - from_reading,
+            }
+        };
         // The touch, both sides (SINK-1), then the move.
         for orb in [from, to] {
             let held = self
@@ -1079,9 +1120,20 @@ impl World {
         }
         // ABSORB-1: the payment compensates open reciprocity windows
         // owed from→to, oldest first.
-        settle_debts(&mut self.debts, &mut self.orbs, from, to, value);
+        settle_debts(&mut self.debts, &mut self.orbs, from, to, value.clone());
         // COVENANT-1: the delivery credits the open pact on this lane.
         credit_covenants(&mut self.covenants, from, to, resource, &amount);
+        let friction = crate::dop::friction_rate() * divergence * value;
+        if friction > ratio(0, 1) {
+            match self
+                .friction_pending
+                .iter_mut()
+                .find(|(held, _)| *held == from)
+            {
+                Some((_, pending)) => *pending += friction,
+                None => self.friction_pending.push((from, friction)),
+            }
+        }
         self.chronicle.append(
             ClosureEvent::ResourceTransferred { from_orb: from, to_orb: to, resource, amount },
             stamp,
@@ -1979,6 +2031,13 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     covenants.remove(at);
                 }
             }
+            // IDEO-1: sealed friction replays into the vented ledger.
+            ClosureEvent::FrictionSettled { orb_id, amount } => {
+                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                    held.entropy_vented += amount.clone();
+                    held.last_touch = receipt.stamp;
+                }
+            }
         }
     }
     Committed { orbs, entities, star, debts, bonds, covenants }
@@ -2064,6 +2123,17 @@ fn settle_debts(
         }
     }
     debts.retain(|debt| debt.remainder != ratio(0, 1));
+}
+
+/// IDEO-1 (09 §3.2, placeholder ruling): the measured boundary policy
+/// for the friction law — returned/(returned+extracted); EMPTY books
+/// read as 1 (a fresh orb trades frictionless until measured).
+fn reciprocity_reading(orb: &ColonyOrb) -> Ratio {
+    let denominator = orb.returned_across.clone() + orb.extracted_across.clone();
+    match denominator > ratio(0, 1) {
+        true => orb.returned_across.clone() / denominator,
+        false => ratio(1, 1),
+    }
 }
 
 /// COVENANT-1: a deliberate delivery (transfer or bond settlement)

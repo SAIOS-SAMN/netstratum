@@ -717,6 +717,43 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 }
             }
         }
+        Some("ideology") => {
+            match world.orb_by_id(*current) {
+                Some(orb) => {
+                    println!(
+                        "{}  {}",
+                        style.head("IDEOLOGY"),
+                        style.dim("the dual cohesion ledger — deeds, not dials; every ratio derives at read")
+                    );
+                    let axes: [(&str, &str, &Ratio, &str, &Ratio); 4] = [
+                        ("compassion", "gave", &orb.given_in_crisis, "drew", &orb.drawn_in_crisis),
+                        ("love", "streamed", &orb.bond_flow, "dropped", &orb.severance_load),
+                        ("integrity", "honoured", &orb.covenants_fulfilled, "broke", &orb.covenants_breached),
+                        ("morality", "returned", &orb.returned_across, "extracted", &orb.extracted_across),
+                    ];
+                    for (axis, syn_name, syn, ent_name, ent) in axes {
+                        let reading = match cfe::dop::cohesion_ratio(syn, ent) {
+                            Some(value) => format!("ratio {}", style.strong(&amount(&value))),
+                            None => style.dim("no deeds yet"),
+                        };
+                        println!(
+                            "  {:<11} {} {} · {} {} — {}",
+                            axis,
+                            syn_name,
+                            style.strong(&amount(syn)),
+                            ent_name,
+                            style.strong(&amount(ent)),
+                            reading
+                        );
+                    }
+                }
+                None => println!(
+                    "{} no colony yet — {} begins the story",
+                    style.bad("✗"),
+                    style.strong("found <name>")
+                ),
+            }
+        }
         Some("planets") => {
             for orb in world.orbs() {
                 let here = match orb.orb_id == *current {
@@ -870,6 +907,7 @@ fn help(style: &Style) {
         ("bond <rate> <res> to <p> [for <n>]", "seal a standing order: rate/tick streams without per-tick clearing, settled in one receipt at each touch — a term bond expires orderly; severing or defaulting posts the notice load"),
         ("sever <res> to <p> · bonds", "cut a standing bond (the load posts to the cutter) · list the standing orders"),
         ("covenant <q> <res> to <p> within <n>", "vitrify a delivery pact in the Glasskeeper lattice — collateral (priced by your fidelity books, never barred) locks until the quota is delivered (release) or the deadline passes (BREACH_AND_SLASH); `covenants` lists the open pacts"),
+        ("ideology", "the dual cohesion ledger for this planet — the four axes, their books, and the derived readings; divergent trade partners pay a friction entropy tax, aligned ones pay zero"),
         ("save · resume <world>", "sync the chronicle to var/worlds/<name>/ (append-only) · resume a saved world at launch"),
         ("planet <name> · planets", "switch the planet cursor · list this world's planets"),
         ("agent <handle>", "register a contained agent (zero grants until you open scopes)"),
@@ -1593,6 +1631,10 @@ fn chronicle(world: &World, style: &Style) {
                 "⚔ BREACH_AND_SLASH — orb {obligor_orb} broke its word; {} {} forfeits to orb {beneficiary_orb}",
                 style.strong(&amount(collateral)),
                 resource_name(*resource)
+            ),
+            cfe::dop::ClosureEvent::FrictionSettled { orb_id, amount: heat } => format!(
+                "⇋ ideological friction settled: {} entropy on orb {orb_id} — divergence has a handling cost",
+                style.strong(&amount(heat))
             ),
         };
         let tag = receipt

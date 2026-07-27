@@ -416,6 +416,40 @@ N5/N6). Details and sequencing in 04 §6.
   played end-to-end: vitrified → delivered → released; the doomed
   biomass pact slashed on schedule; replay MATCHES.
 
+- **IDEO-1 LANDED** (2026-07-27): THE COHESION SURFACE + IDEOLOGICAL
+  FRICTION — the fifth and FINAL ideology-board landing (09 §2.5,
+  §3.2): the board CLOSES. Opened NO books — read them. (1) The orb
+  cohesion entry (tag 41, the first post-40 tag; 39–40 stay
+  tech-emergence; next free 42): the eight books enter the orb wire in
+  fixed order, emitted ONLY when a book is nonzero — a zero-book orb
+  encodes byte-identical to a pre-ideology one (SEAL A, witnessed).
+  (2) The observer uplink (`state.json`, `engine/mirror` by relay —
+  the VENT-1 precedent): the eight committed counters + the four
+  derived (never stored) axis ratios via the landed `cohesion_ratio`
+  helper. (3) Ideological friction: `ΔS_ideo = φ (placeholder 1/8) ×
+  abs(reciprocity_A − reciprocity_B) × volume` on TRANSFERS only —
+  recorded ruling: bonds and absorptions are EXEMPT by design (the
+  standing loop is the friction-free channel; long-horizon love ducks
+  the tax the way it already ducks demurrage); accrues as workspace
+  against the mover, seals by `FrictionSettled` (tag 38, the
+  VentSettled shape) into `entropy_vented` — real entropy. Friction
+  prices DIVERGENCE, not vice: empty morality books read as 1
+  (placeholder ruling — a fresh orb trades frictionless until
+  measured); aligned partners at ANY alignment generate exactly zero
+  and no receipt. (4) CLI `ideology`: the four axes in words + exact
+  fractions ("compassion gave 3 · drew 0 — ratio 1"), never matrix
+  algebra. Cross-territory (relayed): one renderer arm + the cohesion
+  block in `engine/mirror`. Evidence: clippy zero (warnings denied);
+  **158/158 workspace witnesses green** (5 new: the cohesion entry
+  round-trips byte-exact and the empty ledger costs no bytes; the
+  ratio derives — 1, 1/2, 0, and no-deeds-None; the measured extractor
+  (lapsed window, reading 0) pays exactly φ × 1 × 2 = 1/4 sealed by
+  receipt into its vented ledger, replay MATCHES; two unmeasured orbs
+  generate exactly zero friction and no receipt; tag 38 byte-exact).
+  The arc played end-to-end: absorb → lapse → the divergent transfer →
+  the ideology panel read "compassion ratio 1 · morality ratio 0" on
+  one orb — the engine judged nothing and measured everything.
+
 ## 2. The depth board (02_COLONY_LOOP — game depth before multiplayer)
 
 Ruled 2026-07-25: the world must be worth sharing before N6 shares it. These
