@@ -467,6 +467,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         Some("map") => map(world, style, *current),
         Some("status") => status(world, style, *current),
         Some("chronicle") => chronicle(world, style),
+        Some("journal") => journal_feed(world, style),
         Some("verify") => match world.chronicle().verify_chain() {
             ChainRead::Intact => println!(
                 "{} chain {} — {} receipts, every link re-verified",
@@ -525,6 +526,7 @@ fn help(style: &Style) {
         ("map", "the tile grid"),
         ("status", "colony, ledgers, clock, receipts"),
         ("chronicle", "the world's full receipted history"),
+        ("journal", "the chronicle feed: one entry per completed 60-tick year, newest first"),
         ("verify", "re-check every hash link in the chain"),
         ("replay", "rebuild the world from receipts alone and compare"),
         ("quit", "leave (no disk persistence yet — each launch is a fresh world)"),
@@ -973,6 +975,74 @@ fn zone_lines(orb: &ColonyOrb, style: &Style) {
             kind_name(zone.kind),
             state
         );
+    }
+}
+
+/// JOURNAL-1 (08 §3): the chronicle feed for THIS world, newest first —
+/// a rendering of the chronicle, generated on demand, never state. The
+/// sovereign's session speaks in the reference register (the axes a
+/// registry entry would carry; the CLI world has no registry identity
+/// until the founding dialogue lands).
+fn journal_feed(world: &World, style: &Style) {
+    let Some(orb) = world.orb() else {
+        println!(
+            "{} no colony yet — {} begins the story",
+            style.bad("✗"),
+            style.strong("found <name>")
+        );
+        return;
+    };
+    let voice = mirror::journal::Voice {
+        civilization: orb.name.clone(),
+        disposition: "empiricist".into(),
+        metabolism: "biotic".into(),
+        perception: "planar".into(),
+    };
+    let entries = mirror::journal::journal(&orb.name, world, &voice, mirror::journal::YEAR_TICKS);
+    if entries.is_empty() {
+        println!(
+            "{} no completed year yet — a year is {} ticks; the clock stands at {}",
+            style.dim("…"),
+            style.strong(&mirror::journal::YEAR_TICKS.to_string()),
+            style.strong(&world.now().to_string())
+        );
+        return;
+    }
+    for entry in entries.iter().rev() {
+        let headline = match entry.alert {
+            mirror::journal::Alert::Warning => style.bad(&entry.headline),
+            mirror::journal::Alert::Milestone => style.head(&entry.headline),
+            mirror::journal::Alert::Normal => style.ok(&entry.headline),
+        };
+        println!(
+            "{} {} {}",
+            style.head(&format!("YEAR {}", entry.year)),
+            style.dim(&format!(
+                "cycle {} · {} · {} · {}",
+                entry.cycle, entry.world, entry.archetype, entry.alert.word()
+            )),
+            headline
+        );
+        for line in entry.body.lines() {
+            match line.starts_with("RED") {
+                true => println!("    {}", style.bad(line)),
+                false => println!("    {line}"),
+            }
+        }
+        let economics = &entry.economics;
+        println!(
+            "    {} joules {} · heating bill {} · vented {} · sink {} · zones {} · growth {}",
+            style.dim("▤"),
+            style.strong(&economics.banked_joules),
+            style.strong(&economics.heating_need_year),
+            style.strong(&economics.entropy_vented),
+            style.strong(&economics.banked_sink),
+            style.strong(&economics.zones.to_string()),
+            style.strong(&economics.growth_per_year)
+        );
+        if let Some(request) = &entry.trade_request {
+            println!("    {} {}", style.warn("⇄ trade:"), request);
+        }
     }
 }
 

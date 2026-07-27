@@ -36,6 +36,7 @@ use std::io::Write as _;
 use std::path::PathBuf;
 
 pub mod converge;
+pub mod journal;
 mod json;
 pub mod registry;
 use json::JsonWriter;
@@ -358,7 +359,7 @@ pub(crate) fn sanitize(name: &str) -> String {
 
 /// Exact rendering: integers plain, everything else `p/q` — never a
 /// decimal, never a float.
-fn ratio_str(r: &Ratio) -> String {
+pub(crate) fn ratio_str(r: &Ratio) -> String {
     if r.denom().is_one() {
         r.numer().to_string()
     } else {

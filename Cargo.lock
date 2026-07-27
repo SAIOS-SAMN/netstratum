@@ -114,6 +114,7 @@ name = "netstratum-cli"
 version = "0.1.0"
 dependencies = [
  "cfe",
+ "mirror",
  "num-bigint",
 ]
 
