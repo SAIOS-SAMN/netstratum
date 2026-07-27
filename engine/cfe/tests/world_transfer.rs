@@ -242,7 +242,10 @@ fn demurrage_settles_both_sides_at_the_transfer_touch() {
     assert_eq!(demurrage, 0, "a same-stamp touch pays nothing");
 
     // Four ticks pass; the second transfer touches BOTH warm orbs:
-    // mother decays 7/8 × 1/32 × 4 = 7/64, daughter 1 × 1/32 × 4 = 1/8.
+    // FLAT decay (the denominator-explosion ruling: proportional
+    // banked × (31/32)^n grew canonical denominators without bound,
+    // measured ~2^1100 after 220 live beats): both sides decay
+    // 1/32 × 4 = 1/8 regardless of banked size.
     for _ in 0..4 {
         world.tick();
     }
@@ -263,11 +266,11 @@ fn demurrage_settles_both_sides_at_the_transfer_touch() {
     settled.sort_by_key(|(orb, _)| *orb);
     assert_eq!(
         settled,
-        vec![(FIRST_ORB, ratio(7, 64)), (daughter, ratio(1, 8))],
+        vec![(FIRST_ORB, ratio(1, 8)), (daughter, ratio(1, 8))],
         "both sides settle their exact decay at the one touch"
     );
-    // Mother: 7/8 − 7/64 − 1/8 = 41/64. Daughter: 1 − 1/8 + 1/8 = 1.
-    assert_eq!(banked(&world, FIRST_ORB, Resource::Joule), ratio(41, 64));
+    // Mother: 7/8 − 1/8 − 1/8 = 5/8. Daughter: 1 − 1/8 + 1/8 = 1.
+    assert_eq!(banked(&world, FIRST_ORB, Resource::Joule), ratio(5, 8));
     assert_eq!(banked(&world, daughter, Resource::Joule), ratio(1, 1));
 
     // The furnace stands overheat-STRUCK: both draws left a crisis orb,

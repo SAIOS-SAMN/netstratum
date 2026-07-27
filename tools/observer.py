@@ -56,9 +56,11 @@ def read_jsonl(path):
             try:
                 yield json.loads(line)
             except json.JSONDecodeError:
-                # The torn-tail law (07 §1.2): a killed writer's
-                # NUL/half-written line carries no receipt — skip.
-                continue
+                # The torn-tail law (07 §1.2) + live-read safety: an
+                # unparseable line is a torn or MID-WRITE append. STOP
+                # here — skipping past it would shift the digest chain
+                # and falsely report BROKEN on a healthy live world.
+                return
 
 
 def chain_linked(chronicle_path):

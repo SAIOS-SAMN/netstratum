@@ -319,7 +319,8 @@ fn warm_banked_joules_pay_receipted_demurrage_at_touch() {
     world.collect().expect("collects again");
     let elapsed = world.orb().expect("orb").last_touch - touch;
     assert_eq!(elapsed, 4);
-    // decay = 15/8 × 1/32 × 4 = 15/64, settled by receipt.
+    // FLAT decay = 1/32 × 4 = 1/8 (never proportional — the
+    // denominator-explosion ruling), settled by receipt.
     let decayed = world
         .chronicle()
         .receipts()
@@ -331,7 +332,7 @@ fn warm_banked_joules_pay_receipted_demurrage_at_touch() {
             _ => None,
         })
         .expect("demurrage receipted");
-    assert_eq!(decayed, ratio(15, 64));
+    assert_eq!(decayed, ratio(1, 8));
     // And the whole story still replays.
     let rebuilt = replay(world.chronicle());
     assert_eq!(rebuilt, world.committed(), "replay MATCHES with the dual ledger");
@@ -345,7 +346,7 @@ fn vent_and_demurrage_events_round_trip() {
         ClosureEvent::DemurrageSettled {
             orb_id: 3,
             resource: Resource::Sink,
-            amount: ratio(15, 64),
+            amount: ratio(1, 8),
         },
     ] {
         let bytes = event.wire_bytes();

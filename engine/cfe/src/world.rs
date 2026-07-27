@@ -1398,10 +1398,13 @@ fn demurrage_due(
             for resource in [Resource::Joule, Resource::Sink] {
                 let banked = orb.banked_amount(resource);
                 if banked > ratio(0, 1) {
-                    let decay = (banked.clone()
-                        * crate::dop::demurrage_per_tick()
-                        * elapsed.clone())
-                    .min(banked);
+                    // FLAT-rate decay (the leak/spoilage shape), never
+                    // proportional: banked × (31/32)^n explodes the
+                    // canonical denominator without bound (measured
+                    // live: ~2^1100 after 220 beats). Flat keeps every
+                    // denominator bounded by the rate's.
+                    let decay = (crate::dop::demurrage_per_tick() * elapsed.clone())
+                        .min(banked);
                     due.push((resource, decay));
                 }
             }
