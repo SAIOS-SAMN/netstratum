@@ -97,3 +97,41 @@ recorded so a flat "no" doesn't bury a good tuning lever.
 Closed for good: un-receipted anything (SEAL B — spills are workspace
 until `VentSettled` seals them, which is already the design); the
 terminology rulings (charter §8); section numbering (mechanical).
+
+---
+
+## Q3. Unitary morphodynamics for the ideology axes
+
+**The proposal (operator relay, 2026-07-27).** "Upgrade to unitary
+morphodynamics" so that love, compassion, morality, and integrity live as
+continuous unitary field transformations over civilization state.
+
+**Verdict: REJECTED as an engine change; the four concepts landed instead
+as the measured dual cohesion ledger** (`08_IDEOLOGY.md`; implementation
+on the ideology board, BUILD_ORDER §3). Two load-bearing walls, the Q1
+verdict's shape:
+
+1. **The determinism hazard.** Continuous/unitary transforms imply
+   floating-point field dynamics; IEEE-754 arithmetic is not associative
+   and diverges across CPU/GPU architectures and schedules — fatal to the
+   no-float law (CHARTER §3.2) and to SEAL B byte-exact replay, exactly
+   as Q1's GPU holonomy was.
+2. **The subjectivity hazard.** There is no deterministic CFE transition
+   function for "love" as a continuous field that is not invented,
+   arbitrary physics — the scalar/scored ancestry refusal returning as a
+   field.
+
+**Kernels kept (inscribed at 08):** the four concepts themselves —
+dual-entry receipted ledgers with ratios derived at read (08 §1); friction
+as real entropy riding the landed VENT-1 machinery (08 §3.2); ideology
+export as ordinary covenant state machines (08 §3.3).
+
+**What could reopen this vector, honestly:** an exact-rational, replayable
+DISCRETE dynamic — richer covenant state machines, exact-rational policy
+evolution rules — at which point it is no longer "morphodynamics", just
+more CFE state machinery under the existing laws. For genuinely continuous
+fields, the same door as Q1: a deterministic exact-arithmetic path plus
+succinct interior proofs. Closed for good: any stored mutable "alignment
+score" (the ancestry refusal); tokenized live reputation (08 §3.4 — a
+token snapshot forks SEAL B's truth; NS-7 may anchor covenant *outcomes*,
+never the ratio).
