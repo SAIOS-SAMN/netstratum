@@ -29,11 +29,48 @@ Interference example: a *fold* is not merely "the aeon voice rolled" — it is
 weighed where the aeon voice aligns with a world's own low-coherence phase
 (§4). Deterministic, tick-exact, SEAL B intact.
 
-## 2. The gauge axis G — the played key (the unused dimension)
+## 2. The gauge axis G — the orientation, and the played key
 
 TUniversal is **{S, G, T}**. S (space) and T (time) have been played; **G —
 the gauge/fiber phase — has been zero at genesis everywhere** ("G moves with
-the fiber landings," never landed). G is the **polytonic key**: a
+the fiber landings," never landed).
+
+### 2.0 The orientation law (operator, 2026-07-28)
+
+A bare 3-torus is **recurrent and reversal-symmetric**: every S recurs, and
+a loop returns unchanged (flat holonomy, Ω=0 — the property determinism
+relies on). For SPACE that edgeless wrap is wanted. But it makes a traversal
+and its **parallel-degree reverse** indistinguishable, and a position in a
+later aeon indistinguishable from the same position in an earlier one — and
+*that indistinguishability IS the timing collision* (two eras on the same S
+or the same local T-stamp interleave). Convergence's epoch-shift has been
+*patching* this at the fold seam; the fix is to **orient the geometry so the
+collision cannot form.**
+
+The imposing mechanism — a **twisted torus (oriented fiber bundle)**, both
+pieces already in the engine:
+
+1. **G is the fiber (the twist).** If G ADVANCES along a traversal, a loop in
+   S returns to the same base point at a *different G* — a helix, never a
+   closed circle. Forward and its reverse live on different **G-sheets**;
+   they become distinguishable. That is the orientation.
+2. **The arrow is landed physics.** `physics::FlowEvent::Mint` extends fiber
+   planes **irreversibly** — a minted plane can never be un-minted. G climbs
+   one way only; that one-wayness is the imposed direction a flat torus
+   lacks.
+
+**The bug this names:** genesis pins **G = 0 for every world in every aeon**,
+so all aeons stack at one G-height on one torus → guaranteed recurrence
+collision, which convergence then untangles by hand. **AEON seats each aeon
+at its own G** (the fold advances the fiber — §5): aeon N+1 is a *parallel
+degree* of the torus at higher G, never colliding with aeon N. Convergence
+then stops being a patch — annexation is the trivial reading of which
+G-sheet a world already occupies. The torus stays edgeless in space; the
+fiber makes time orient itself.
+
+### 2.1 G as the played key
+
+Above the aeon-orientation, G within a sheet is the **polytonic key**: a
 civilization's tone, an exact-rational phase wrapped on the torus. AEON
 plays it.
 
@@ -96,7 +133,9 @@ convergence engine was already built for, run forward:
 
 1. On an aeon alignment (or an operator `fold`), the live era is **sealed**
    and **rotated into the archive sequence** (`var/` → the next `var-eraN/`).
-   `EraFolded` (tag 46) receipts it to the universe ledger.
+   `EraFolded` (tag 46) receipts it to the universe ledger **and advances the
+   base G** (§2.0): the new aeon is seated on a fresh G-sheet, so it is a
+   parallel degree of the S-torus and cannot recur into its predecessor.
 2. The next boot **CONVERGES** the sealed era: the four C's read which
    trajectories CONTINUE — thriving, coherent lineages re-annex onto the new
    aeon's chart; those settled in the retirement region (§4) annex as
