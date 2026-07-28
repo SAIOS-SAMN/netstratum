@@ -1,3 +1,9 @@
+# LIFECYCLE — SUPERSEDED (under revision, 2026-07-28)
+
+**This draft is retracted per operator critique: it is terrestrial-LINEAR (scalar ladders, monotone decline), names things by default not by invariant ("daughter", "LIFE-1", "reset"), DESTROYS instead of FOLDS, and leans on shell-script slop. Being re-founded on the engine's actual n-dimensional machinery (the three sovereign axes, the torus, the growing fiber, the four C's) as a polytonic design. Do not implement from this file.**
+
+---
+
 # LIFECYCLE — the timed universe (LIFE-1 spec, design stage)
 
 **Status:** DESIGN — the reset + process lifecycle land immediately (tooling
