@@ -45,8 +45,9 @@
 //!   41 Orb cohesion entry (the eight books, IDEO-1) — emitted only
 //!      when a book is nonzero; a zero-book orb encodes byte-identical
 //!      to a pre-ideology one.
-//!   39–40 RESERVED for tech emergence (10: TechDiscovered,
-//!         TechLicensed) — next free tag for any landing is 42.
+//!   39–40 RESERVED for tech emergence (10: TechDiscovered, TechLicensed).
+//!   42–46 RESERVED for AEON-1 (11: GaugeShifted, Diverged, Confluent,
+//!         StarAged, EraFolded) — next free tag for any landing is 47.
 
 use crate::ratio::{self, ratio, Ratio};
 use crate::tlv;
