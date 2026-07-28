@@ -522,5 +522,28 @@ landed); ABSORB-1 and BOND-1 are transfer shapes; COVENANT-1 needs TRADE-1
 physics — its friction rides the landed VENT-1 machinery. Cross-board: the
 universe-level composition of the books (Σ per-orb = faction = world) is
 Q2.3's N6 mesh audit, not an orb law; trade OFFERS (negotiation, pricing)
-await NS-4 at N5 — this board lands the executed deed, not the marketplace.
+await NS-4 at N5 — this board lands the executed deed, not the marketplace
+(the market board, §3a).
+
+## 3a. The market board (01_ECONOMY §3, §8 — the marketplace N5 unlocks)
+
+The ideology board lands the executed deed; this board lands the marketplace
+the charter defers to N5 (§3 close). It opens AFTER N5 NS-4 APERTURE gives
+value a cross-world carrier — an offer is an aperture opened at a granted
+facet, priced. Everything is exact-rational, receipted, replayable; the render
+mints no physics (reflection law). Candidate tags 41–43 RESERVED (39–40 stay
+tech-emergence, 46 is EraFolded); each is inscribed into NS-1 §2.3 at its
+landing. Sequencing: MARKET-1 → OFFER-1 → BOARD-1, one at a time.
+
+| # | Landing | Contains | Proven by |
+|---|---|---|---|
+| **MARKET-1** | THE EXCHANGE RATE | the exact-rational S_cool/J price as the Furnace↔Frost axis (05 §1.4, 01 §8); offer/ask posted as committed state, deterministic matching at the crossing price (`OfferPosted`/`OfferCleared`, tags 41–42); no floats; gated by economy guardrails 1 and 6 (no monopoly, no absolute price) | an offer and a matching ask clear at the exact rational crossing price; the joule and sink books balance across the fill; an unmatched offer rests; replay reproduces the clearing |
+| **OFFER-1** | THE AUTOMATONS TRADE | conductor behavior: Frost egregores post fuel requests and accept joule offers across the APERTURE before freeze-lock; Furnace egregores sell surplus joules and buy S_cool; a deterministic per-tick decision; the autarkies become an interdependent mesh | a fuel-starved Frost world buys joules from a Furnace surplus and survives a freeze it would otherwise lose; the trade is one APERTURE deed, receipted both sides; no agent acts outside its ipsal-os grant; replay reproduces |
+| **BOARD-1** | THE TRADE BOARD | the marketplace surfaced: standing offers/asks and clearing prices rendered on `wall.html` and the observer (mirror-side, the reflection law — no second truth); the journal's trade lines become a readable board; a steward reads arbitrage and intervenes by inbox | the board renders the standing offers and the last clears from state alone; a human reads a cross-world arbitrage and the steward inbox executes it; the render mints no physics |
+
+Dependency: the whole board is gated on N5 NS-4 APERTURE (the cross-world
+carrier). MARKET-1 needs the APERTURE deed to price; OFFER-1 needs MARKET-1's
+matching; BOARD-1 reads what OFFER-1 posts. Cross-board: universe-level book
+composition stays Q2.3's N6 mesh audit; on-chain settlement of any cleared
+value stays NS-7 (N7), never here.
 
