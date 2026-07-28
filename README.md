@@ -10,7 +10,7 @@ The current landing is always read at `docs/BUILD_ORDER.md`, never inferred.
 Resuming work? `docs/PICKUP.md` is the fast map of the board; `docs/HANDOFF.md` is the working practice around it.
 
 ```
-protocols/   NS-1 DOP · NS-2 RQP · NS-3 VRP · NS-4 MEMBRANE · NS-5 MESH · NS-6 IPSAL-OS · NS-7 ANCHOR
+protocols/   NS-1 DOP · NS-2 RQP · NS-3 VRP · NS-4 APERTURE · NS-5 MESH · NS-6 IPSAL-OS · NS-7 ANCHOR
 docs/        00 charter · 01 economy · 02 colony loop · 03 substrate contract ·
              04 civilization genesis · 05 thermal balance · 06 civilizations
              (the world-book) · 07 era convergence · 08 chronicle feed ·

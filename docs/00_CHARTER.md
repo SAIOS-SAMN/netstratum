@@ -7,7 +7,7 @@ Netstratum is an AI MUD — a text-first, multi-planetary city-building and
 exploration game in the lineage of Cities:Skylines (the intuitive joy of zoning,
 growth, and trade) and Dark Forest (the decentralized, hidden-information
 cosmos) — that is simultaneously the **playable reference implementation of the
-dimensional web**: the NS protocol stack (DOP, RQP, VRP, MEMBRANE, MESH, IPSAL-OS,
+dimensional web**: the NS protocol stack (DOP, RQP, VRP, APERTURE, MESH, IPSAL-OS,
 ANCHOR) specified in Rational Field Algebra (RFA) and executed by the Canonical
 Field Engine (CFE).
 
@@ -68,7 +68,7 @@ here as a standing constraint:
 | NS-1 | **DOP** — Dimensional Object Protocol | Colony, sector, and profile orbs — every game object is a self-contained orb with provenance |
 | NS-2 | **RQP** — Resonance Query Protocol | The scanner: search by structural resonance, not string match |
 | NS-3 | **VRP** — Verification Receipt Protocol | The world chronicle: every action an append-only, parent-linked receipt |
-| NS-4 | **MEMBRANE** — the selective boundary | Sector-map sharing, private trade bubbles, permissioned hand-offs across a permeable membrane |
+| NS-4 | **APERTURE** — the controlled opening | Sector-map sharing and private trade offers, opened at a granted facet (summary → detail → full) |
 | NS-5 | **MESH** — Proof-of-Convergence Consensus | Multi-node world synchronization ("two laptops, one world") |
 | NS-6 | **IPSAL-OS** — Entity Containment | Player, NPC, and bot identity: the profile of every individual inside our internet |
 | NS-7 | **ANCHOR** — WWW3 Settlement Bridge | High-value settlement: minting a rare world, macro-trades, asset ownership anchored to an external chain |
