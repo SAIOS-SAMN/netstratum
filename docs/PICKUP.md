@@ -52,7 +52,7 @@ terminology law — no set-letter glyphs, Furnace never Crucible, no
 
 1–38 and 41 assigned (see `engine/cfe/src/dop.rs` header — the one
 authority); 8–9 reserved (D2 terrain, D3 milestones); 39–40 reserved
-tech emergence; **next free 42**.
+tech emergence (10); 42–46 reserved AEON-1 (11); **next free 47**.
 
 ## 5. Lanes and next work
 
