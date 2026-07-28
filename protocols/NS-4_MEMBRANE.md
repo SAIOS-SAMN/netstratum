@@ -1,4 +1,6 @@
-# NS-4 — BEP: Bubble Exchange Protocol
+# NS-4 — MEMBRANE: the selective boundary
+
+*(Renamed from "BEP / Bubble Exchange Protocol" 2026-07-28: "BEP" collides with Binance BEP-20/BEP-2 token standards — unacceptable overlap given the crypto settlement model at NS-7. A MEMBRANE is a selectively-permeable boundary: sharing a bubble is passing bounded state across it, granted depth = permeability.)*
 
 **Status:** STUB — opens at landing N5. First consumer: sector-map sharing and
 private trade bubbles.

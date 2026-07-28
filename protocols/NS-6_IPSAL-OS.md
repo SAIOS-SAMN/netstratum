@@ -12,7 +12,7 @@ receipt it forges. Agents are citizens, governed by containment, never by
 prohibition (CHARTER §3.4). This is the profile layer the platform vision
 called "a social media profile for each individual inside our internet" —
 at N3 it holds identity and authority; later landings add its presentation
-(the profile orb, NS-1) and its reach (NS-4 sharing, NS-5 presence).
+(the profile orb, NS-1) and its reach (NS-4 membrane sharing, NS-5 presence).
 
 ---
 
