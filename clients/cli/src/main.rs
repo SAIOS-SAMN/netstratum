@@ -1248,6 +1248,16 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "a transfer moves a positive amount between two different planets — e.g. {}",
             style.strong("send 5/2 iron to outpost")
         ),
+        ActionRefused::ElevationBarred { settled, coherent, crossed } => format!(
+            "the climb is barred — {}{}{}; each gate is escapable: settle the books, close a loop this year, cross the void",
+            if *settled { "" } else { "the thermal books stand unsettled; " },
+            if *coherent { "" } else { "no loop closed within the year voice; " },
+            if *crossed { "" } else { "this world has not crossed; " }
+        ),
+        ActionRefused::BadClimb => format!(
+            "a climb moves strictly upward in G — the fiber advances and never retreats; e.g. {}",
+            style.strong("elevate 1/6")
+        ),
         ActionRefused::Shielded { source_shielded, dest_shielded } => format!(
             "the shield holds — {} not met its sun; a people makes the solar leap itself ({} wakes thermal), or it is left to its sky",
             style.strong(match (source_shielded, dest_shielded) {

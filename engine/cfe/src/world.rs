@@ -58,6 +58,14 @@ pub enum ActionRefused {
     /// either direction. The flags name which side stands shielded —
     /// the young are left to make the leap themselves, or not.
     Shielded { source_shielded: bool, dest_shielded: bool },
+    /// ELEVATE-1 (12_UNION §6) — the climb refused, every gate's
+    /// reading named: settle the books, close the loop, cross the
+    /// void. Stagnation is a region, not a sentence — each false here
+    /// is escapable.
+    ElevationBarred { settled: bool, coherent: bool, crossed: bool },
+    /// ELEVATE-1 — a climb moves STRICTLY upward in G (the orientation
+    /// law: the fiber advances and never retreats).
+    BadClimb,
     /// ABSORB-1 — only un-sealed pending overflow absorbs; the refusal
     /// names exactly what stands.
     CannotAbsorb { pending: Box<Ratio> },
@@ -386,6 +394,48 @@ impl World {
             ClosureEvent::Confluent { partner: partner.into(), gauge },
             SOVEREIGN,
         );
+    }
+
+    /// ELEVATE-1 (12_UNION §6) — THE THREE-GATE GAUGE CLIMB, the
+    /// discrete-gauge-morphodynamics ascent (Q3 resolved). An earned,
+    /// receipted rise in G, executed as `GaugeShifted`, gated on three
+    /// exact readings of this world's own chronicle:
+    ///   S — thermodynamic settlement: no famine, no overheat, vent
+    ///       workspace sealed, demurrage current on every orb;
+    ///   T — loop coherence: the colony closed a loop within the last
+    ///       year voice (60 ticks — 11 §1; placeholder constant);
+    ///   G — the crossing: this world entered the union (THRESHOLD-1).
+    /// The climb is monotone in G (the orientation law — time's arrow,
+    /// not a queue): `delta` must be strictly positive. A refusal
+    /// names every gate's reading — the cure, not a verdict.
+    pub fn elevate(&mut self, delta: Ratio) -> Result<(), ActionRefused> {
+        if delta <= ratio(0, 1) {
+            return Err(ActionRefused::BadClimb);
+        }
+        let stamp = self.clock.now();
+        let settled = self.orbs.iter().all(|held| {
+            held.famine.is_empty()
+                && !held.overheat
+                && demurrage_due(held, self.star, stamp)
+                    .iter()
+                    .all(|(_, due)| *due == ratio(0, 1))
+        }) && self
+            .vent_pending
+            .iter()
+            .all(|(_, pending)| *pending == ratio(0, 1));
+        let year_floor = stamp.saturating_sub(60);
+        let coherent = self.chronicle.receipts().iter().any(|receipt| {
+            receipt.stamp >= year_floor
+                && matches!(receipt.event, ClosureEvent::YieldCollected { .. })
+        });
+        let crossed = self.crossed;
+        if !(settled && coherent && crossed) {
+            return Err(ActionRefused::ElevationBarred { settled, coherent, crossed });
+        }
+        let gauge = wrap_gauge(self.gauge.clone() + delta);
+        self.gauge = gauge.clone();
+        self.close(ClosureEvent::GaugeShifted { gauge }, SOVEREIGN);
+        Ok(())
     }
 
     /// AEON-1a (11 §6): the star MOVES in its region — the class
