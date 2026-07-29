@@ -16,6 +16,19 @@ fn banked(world: &World, orb: u64, resource: Resource) -> Ratio {
     world.orb_by_id(orb).expect("orb exists").banked_amount(resource)
 }
 
+/// A founded world whose people know their sun (THRESHOLD-1: the
+/// shield admits only sun-knowing worlds to the aperture). The mesic
+/// seat (stellar load 1) neither leaks nor freezes — the amounts in
+/// these witnesses stay exact.
+fn sunlit(name: &str) -> World {
+    use cfe::thermal::StarClass;
+    let mut world = World::new();
+    world.found(name).expect("founds");
+    world.commission_star(StarClass::G).expect("commissions");
+    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1)).expect("sites");
+    world
+}
+
 fn count<F: Fn(&ClosureEvent) -> bool>(world: &World, pred: F) -> usize {
     world.chronicle().receipts().iter().filter(|r| pred(&r.event)).count()
 }
@@ -25,10 +38,8 @@ fn count<F: Fn(&ClosureEvent) -> bool>(world: &World, pred: F) -> usize {
 /// chronicle, none crossed; the legs share the deal id.
 #[test]
 fn an_aperture_conserves_across_two_worlds() {
-    let mut alpha = World::new();
-    alpha.found("meridian").expect("founds alpha");
-    let mut beta = World::new();
-    beta.found("haven").expect("founds beta");
+    let mut alpha = sunlit("meridian");
+    let mut beta = sunlit("haven");
 
     // Founding reserves give each orb 20 iron. Cross 5 alpha → beta.
     aperture_transfer(
@@ -81,10 +92,8 @@ fn an_aperture_conserves_across_two_worlds() {
 /// Typed refusals, each naming its cure — and no orphan leg on refusal.
 #[test]
 fn an_aperture_refuses_typed() {
-    let mut alpha = World::new();
-    alpha.found("meridian").expect("founds");
-    let mut beta = World::new();
-    beta.found("haven").expect("founds");
+    let mut alpha = sunlit("meridian");
+    let mut beta = sunlit("haven");
 
     // Cannot afford — the exact shortfall named.
     assert_eq!(
@@ -135,10 +144,8 @@ fn an_aperture_refuses_typed() {
 /// banks match the live banks exactly.
 #[test]
 fn both_legs_replay_in_their_own_world() {
-    let mut alpha = World::new();
-    alpha.found("meridian").expect("founds");
-    let mut beta = World::new();
-    beta.found("haven").expect("founds");
+    let mut alpha = sunlit("meridian");
+    let mut beta = sunlit("haven");
     aperture_transfer(
         &mut alpha,
         FIRST_ORB,

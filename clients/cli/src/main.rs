@@ -1248,6 +1248,15 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "a transfer moves a positive amount between two different planets — e.g. {}",
             style.strong("send 5/2 iron to outpost")
         ),
+        ActionRefused::Shielded { source_shielded, dest_shielded } => format!(
+            "the shield holds — {} not met its sun; a people makes the solar leap itself ({} wakes thermal), or it is left to its sky",
+            style.strong(match (source_shielded, dest_shielded) {
+                (true, true) => "neither world has",
+                (true, false) => "this world has",
+                _ => "the far world has",
+            }),
+            style.strong("site")
+        ),
         ActionRefused::CannotAbsorb { pending } => format!(
             "only un-sealed overflow absorbs, and {} stands pending — {} shows the thermal read",
             style.strong(&amount(pending)),

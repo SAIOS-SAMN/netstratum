@@ -49,6 +49,13 @@ legs — double entry across two books.
   amount, an unknown orb on either side, or an unaffordable draw is a
   typed refusal (`BadTransfer` / `NoSuchOrb` / `CannotAfford` naming the
   exact shortfall).
+- **The shield (THRESHOLD-1, 12_UNION §7):** an aperture touches only
+  worlds whose peoples have made the solar leap (TECH-1a) — a pre-solar
+  world is unreachable in EITHER direction (`Shielded`, naming which
+  side stands shielded; a refusal moves nothing anywhere). A world is a
+  star system, so every aperture deed is interstellar by construction:
+  a world's FIRST lawful aperture is its **crossing** into the union —
+  a replay-derived committed reading (`has_crossed`), never a flag.
 
 ## 2. Wire format
 

@@ -53,6 +53,11 @@ pub enum ActionRefused {
     /// TRADE-1 — a transfer moves a POSITIVE amount between two
     /// DISTINCT orbs; anything else refuses whole.
     BadTransfer,
+    /// THRESHOLD-1 (12_UNION §7) — the shield holds: a people that has
+    /// not made the solar leap cannot be reached by aperture, in
+    /// either direction. The flags name which side stands shielded —
+    /// the young are left to make the leap themselves, or not.
+    Shielded { source_shielded: bool, dest_shielded: bool },
     /// ABSORB-1 — only un-sealed pending overflow absorbs; the refusal
     /// names exactly what stands.
     CannotAbsorb { pending: Box<Ratio> },
@@ -143,6 +148,10 @@ pub struct Committed {
     /// TECH-1a: the discovered nodes — (orb, condition, node id) in
     /// discovery order; condition 0 is the kernel solar leap.
     pub techs: Vec<(u64, u8, [u8; 32])>,
+    /// THRESHOLD-1: has this world CROSSED — does its chronicle hold
+    /// an aperture leg? A world is a star system, so any leg is an
+    /// interstellar deed; the first is the crossing (12_UNION §7).
+    pub crossed: bool,
 }
 
 pub struct World {
@@ -174,6 +183,8 @@ pub struct World {
     /// TECH-1a: the discovered nodes (committed — replays from
     /// receipts alone); condition 0 is the kernel solar leap.
     techs: Vec<(u64, u8, [u8; 32])>,
+    /// THRESHOLD-1: the crossing flag (committed, replay-derived).
+    crossed: bool,
 }
 
 impl World {
@@ -192,6 +203,7 @@ impl World {
             covenants: Vec::new(),
             friction_pending: Vec::new(),
             techs: Vec::new(),
+            crossed: false,
         }
     }
 
@@ -222,6 +234,7 @@ impl World {
             covenants: committed.covenants,
             friction_pending: Vec::new(),
             techs: committed.techs,
+            crossed: committed.crossed,
         }
     }
 
@@ -312,6 +325,18 @@ impl World {
     /// TECH-1a: the discovered nodes — (orb, condition, node id).
     pub fn techs(&self) -> &[(u64, u8, [u8; 32])] {
         &self.techs
+    }
+
+    /// THRESHOLD-1: has this world made the CROSSING — its first
+    /// receipted aperture deed? Council eligibility reads here.
+    pub fn has_crossed(&self) -> bool {
+        self.crossed
+    }
+
+    /// THRESHOLD-1: a shielded world is one whose people have not made
+    /// the solar leap — the Watchers' charge, reachable by no aperture.
+    pub fn is_shielded(&self) -> bool {
+        !self.knows_its_sun()
     }
 
     pub fn now(&self) -> u64 {
@@ -1660,6 +1685,7 @@ impl World {
             bonds: self.bonds.clone(),
             covenants: self.covenants.clone(),
             techs: self.techs.clone(),
+            crossed: self.crossed,
         }
     }
 
@@ -1742,6 +1768,16 @@ pub fn aperture_transfer(
     if amount <= ratio(0, 1) {
         return Err(ActionRefused::BadTransfer);
     }
+    // THRESHOLD-1 (12_UNION §7): the shield — an aperture touches only
+    // worlds whose peoples have made the solar leap (TECH-1a). A world
+    // is a star system, so every aperture IS interstellar; the first
+    // lawful one is a world's CROSSING into the union.
+    if !src.knows_its_sun() || !dst.knows_its_sun() {
+        return Err(ActionRefused::Shielded {
+            source_shielded: !src.knows_its_sun(),
+            dest_shielded: !dst.knows_its_sun(),
+        });
+    }
     if !src.orbs.iter().any(|held| held.orb_id == from) {
         return Err(ActionRefused::NoSuchOrb { orb: from });
     }
@@ -1791,6 +1827,9 @@ pub fn aperture_transfer(
         vec![SOVEREIGN],
     );
     dst.relieve_recovered(to);
+    // THRESHOLD-1: the deed IS the crossing, for both worlds.
+    src.crossed = true;
+    dst.crossed = true;
     Ok(())
 }
 
@@ -1810,6 +1849,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut bonds: Vec<Bond> = Vec::new();
     let mut covenants: Vec<Covenant> = Vec::new();
     let mut techs: Vec<(u64, u8, [u8; 32])> = Vec::new();
+    let mut crossed = false;
     for receipt in chronicle.receipts() {
         match &receipt.event {
             ClosureEvent::EntityRegistered { entity_id, principal, handle } => {
@@ -1985,6 +2025,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     held.bank(*resource, -amount.clone());
                     held.last_touch = receipt.stamp;
                 }
+                crossed = true;
             }
             // NS-4 APERTURE: the destination leg replays as a bank
             // credit — value arrived from another world.
@@ -1993,6 +2034,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     held.bank(*resource, amount.clone());
                     held.last_touch = receipt.stamp;
                 }
+                crossed = true;
             }
             // ABSORB-1: the three-way move replays — the absorber's
             // ledger carries the shed; the window opens; crisis reads
@@ -2183,7 +2225,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             }
         }
     }
-    Committed { orbs, entities, star, debts, bonds, covenants, techs }
+    Committed { orbs, entities, star, debts, bonds, covenants, techs, crossed }
 }
 
 /// SINK-1 (Q2): the demurrage due on one orb's un-vaulted banked
