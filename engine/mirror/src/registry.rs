@@ -11,9 +11,15 @@ use std::path::PathBuf;
 
 /// The three genesis axes (World-Book Ch. 2). Free strings validated
 /// at the door — the vocabulary is closed, the registry enforces it.
+/// The vocabulary GROWS append-only under the substrate law (12_UNION
+/// §5a — the tag-registry discipline applied to the axes): SUBSTRATE-1
+/// added `plasmic` (plasma intelligences — current sheets and confined
+/// toroids of the stellar environs) and `umbral` (occlusion-reading —
+/// the syzygial lines that exist where the voices align). A value is
+/// never removed, never renamed.
 pub const DISPOSITIONS: [&str; 3] = ["expansionist", "empiricist", "epicurean"];
-pub const METABOLISMS: [&str; 2] = ["mineral", "biotic"];
-pub const PERCEPTIONS: [&str; 3] = ["planar", "volumetric", "harmonic"];
+pub const METABOLISMS: [&str; 3] = ["mineral", "biotic", "plasmic"];
+pub const PERCEPTIONS: [&str; 4] = ["planar", "volumetric", "harmonic", "umbral"];
 
 /// One civilization: a species-level identity spanning worlds.
 #[derive(Debug, Clone, PartialEq, Eq)]

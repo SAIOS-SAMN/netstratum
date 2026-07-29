@@ -560,7 +560,26 @@ The facet machinery (grant depths, permissions, expiry) stays ahead at N5
 
 Dependency: the carrier gate is OPEN (APERTURE-1 above). MARKET-1 needs the
 APERTURE deed to price; OFFER-1 needs MARKET-1's matching; BOARD-1 reads
-what OFFER-1 posts; the facet grants (N5) refine but do not gate the board. Cross-board: universe-level book
+what OFFER-1 posts; the facet grants (N5) refine but do not gate the board.
+
+## 3b. The union board (12_UNION — the world-book of the new aeon)
+
+Design authority `12_UNION.md` (eight operator rulings, 2026-07-29). NOT a
+sequence — the implementation manifold (12_UNION §9): four entry lanes,
+two confluence nodes, any edge-respecting walk lawful. Tags 49–51 stay the
+market board's; union tags allocate from 52 at each landing.
+
+| Landing | Lane | Status | Contains |
+|---|---|---|---|
+| **SUBSTRATE-1** | C | **LANDED 2026-07-29** | the no-anthropic-gate axis growth (12_UNION §5a): metabolism gains `plasmic` (sites Furnace — the stellar environs), perception gains `umbral` (occlusion-basis, the syzygial lines); APPEND-ONLY (the tag-registry discipline on the axes — never removed, never renamed); no new event tags. Evidence: the vocabulary witness registers a plasmic/umbral line, round-trips whole, and still refuses what was never added |
+| LINEAGE-1 | C | open | typed lineage pointer resolving to a head or EMPTY (headless lawful); lineage-domain reading |
+| AEON-1 | B | open | tags 42–46; G, divergence/confluence, the fold, star aging (spec `11_AEON.md`) |
+| THRESHOLD-1 | A (after APERTURE-1) | open | the receipted crossing; the shield refusals; the Watcher office |
+| BAND-1 | B (after AEON-1) | open | occupancy as a fiber reading; seats; `class` station field |
+| ELEVATE-1 | confluence (AEON-1 + THRESHOLD-1) | open | the three-gate gauge climb (12_UNION §6, Q3 resolved) |
+| COUNCIL-1 | D | open | multilateral covenant; delegation deeds; two measured bypasses |
+| TECH-1 | D | open | tags 39–40; discoveries incl. the solar leap (spec `10_TECH_EMERGENCE.md`) |
+| PLANNER-1 | confluence (COUNCIL-1 + TECH-1) | open | the six planner powers as receipted deeds | Cross-board: universe-level book
 composition stays Q2.3's N6 mesh audit; on-chain settlement of any cleared
 value stays NS-7 (N7), never here.
 

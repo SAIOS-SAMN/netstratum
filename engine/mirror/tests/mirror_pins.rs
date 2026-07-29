@@ -188,6 +188,39 @@ fn the_registry_enforces_the_vocabulary() {
     );
 }
 
+/// SUBSTRATE-1 (12_UNION §5a): the axis vocabulary grows APPEND-ONLY —
+/// `plasmic` metabolism and `umbral` perception register and round-trip
+/// whole; the door still refuses what was never added (the vocabulary
+/// stays closed, it just closed around more).
+#[test]
+fn the_axes_grow_append_only() {
+    let root = scratch("registry-substrate");
+    let registry = Registry::at(&root);
+
+    let mut sheet = humans();
+    sheet.name = "Coronal Choir".into();
+    sheet.slug = "coronal-choir".into();
+    sheet.species = "current sheet".into();
+    sheet.motto = "we are the weather of the star".into();
+    sheet.metabolism = "plasmic".into();
+    sheet.perception = "umbral".into();
+    registry.create(&sheet).expect("the plasmic line registers");
+    assert_eq!(registry.load("coronal-choir"), Some(sheet));
+
+    // Growth is append-only, never a reopening: unknown values still
+    // refuse typed on every axis.
+    let mut wrong = humans();
+    wrong.slug = "etheric".into();
+    wrong.metabolism = "etheric".into();
+    assert_eq!(
+        registry.create(&wrong),
+        Err(RegistryRefused::UnknownAxis {
+            axis: "metabolism",
+            given: "etheric".into()
+        })
+    );
+}
+
 /// The star-chart holds TUniversal{S, G}: exact-rational S = (x, y, z) on
 /// the 3-torus (negative coordinates wrap), the gauge phase rides
 /// along, distance is L1 (NO SQUARING — the L1 law), and the

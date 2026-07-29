@@ -45,11 +45,18 @@ are ONE tensor entry read from two ends; the two ledgers cannot desync
 because they are not two numbers. Comparative advantage arises from biology, making trade
 (N5) natural rather than bolted on.
 
+**SUBSTRATE-1 (12_UNION §5a):** the vocabulary grows append-only —
+**plasmic** joined mineral and biotic (plasma intelligences of the
+stellar environs; sites in the Furnace regime, for the mesic band would
+starve a current sheet). The antisymmetric Delta law holds unchanged: a
+plasmic line's waste heat is a mineral line's smelter draft.
+
 ### 1.3 Axis three — PERCEPTION BASIS (the Hail Mary axis)
 
 Each civilization measures the world in its own frame: **planar** (the 2D
 grid), **volumetric**, **harmonic** (frequency-basis — the civ that speaks
-in music). **Substrate:** a civilization's frame is a coboundary; two civs'
+in music), and — SUBSTRATE-1, append-only — **umbral** (occlusion-basis:
+the syzygial lines read the world by what blocks what; 12_UNION §5a). **Substrate:** a civilization's frame is a coboundary; two civs'
 raw measurements of the same structure differ by coordinate distortion
 only (CONTRACT §1). Translation between frames IS
 `rfa_core::coboundary_reduce` — the H¹ class is what survives translation;

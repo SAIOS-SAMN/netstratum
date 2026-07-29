@@ -192,7 +192,10 @@ fn regime(world: &World) -> Option<(Regime, Ratio)> {
 /// or the founding file's, which seeds one).
 fn derived_siting(civilization: &Civilization, beacon: &Beacon) -> (StarClass, Ratio, Ratio) {
     match civilization.metabolism.as_str() {
-        "mineral" => {
+        // A plasmic metabolism is of the stellar environs (12_UNION
+        // §5a) — it shares the Furnace regime's seats; the mesic band
+        // would starve a current sheet.
+        "mineral" | "plasmic" => {
             // Furnace seats: a G sun at half orbit, stellar loads
             // 2, 11/5, 12/5 — every one past the mesic ceiling; the
             // encasement shells will answer.
