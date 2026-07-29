@@ -271,7 +271,13 @@ make the leap themselves, or not.
 
 - **The var root:** `var-aeon1/` (operator-named), a fresh universe — no
   archived eras converge into it; the old universe's record stands sealed
-  beside it.
+  beside it. **SEEDED AND BOOTED 2026-07-29:** 13 civilizations genesised
+  (0 converged — no baggage); the four founding progenitors seated (one
+  seat each, 28 open); the roster preserved at `seeds/aeon1-egregores.json`
+  (the var stays single-copy by the operator's standing ruling). The
+  pre-solar seeds (Deepmat; Syzygy) use the documented dormant-siting form
+  (albedo 1 — the sky commissioned, never known): 11 worlds carry their
+  solar-leap receipt, those two carry none and stand shielded.
 - **The seed roster:** a new `egregores.json` — the four founding
   progenitors first (one seated per species, 28 seats open), then the
   founding Sovereign civilizations in operator order (file order is genesis
