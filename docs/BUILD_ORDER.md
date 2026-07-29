@@ -578,7 +578,8 @@ market board's; union tags allocate from 52 at each landing.
 | BAND-1 | B (after AEON-1) | open | occupancy as a fiber reading; seats; `class` station field |
 | ELEVATE-1 | confluence (AEON-1 + THRESHOLD-1) | open | the three-gate gauge climb (12_UNION §6, Q3 resolved) |
 | COUNCIL-1 | D | open | multilateral covenant; delegation deeds; two measured bypasses |
-| TECH-1 | D | open | tags 39–40; discoveries incl. the solar leap (spec `10_TECH_EMERGENCE.md`) |
+| **TECH-1a** | D | **LANDED 2026-07-29** | the discovery closure (tag 39, byte-exact) + the KERNEL solar leap: a world's first thermal opt-in receipts that its people know their sun (once per world; the opt-in IS the receipt; `knows_its_sun()` the gating read); pre-solar lawful. Evidence: 4 witnesses green (10 §3a) |
+| TECH-1b | D | open | the crystallized tree: five emergent conditions, heat-law modifiers, SINK-1 research/throttle gates, seeded-synthesis naming (10 §3); tag 40 TechLicensed stays reserved |
 | PLANNER-1 | confluence (COUNCIL-1 + TECH-1) | open | the six planner powers as receipted deeds | Cross-board: universe-level book
 composition stays Q2.3's N6 mesh audit; on-chain settlement of any cleared
 value stays NS-7 (N7), never here.

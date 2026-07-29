@@ -140,6 +140,9 @@ pub struct Committed {
     pub bonds: Vec<Bond>,
     /// COVENANT-1: the open vitrified pacts, in sealing order.
     pub covenants: Vec<Covenant>,
+    /// TECH-1a: the discovered nodes — (orb, condition, node id) in
+    /// discovery order; condition 0 is the kernel solar leap.
+    pub techs: Vec<(u64, u8, [u8; 32])>,
 }
 
 pub struct World {
@@ -168,6 +171,9 @@ pub struct World {
     /// IDEO-1 WORKSPACE, per orb: accrued ideological friction since
     /// the last seal — sealed by `FrictionSettled` at collect.
     friction_pending: Vec<(u64, Ratio)>,
+    /// TECH-1a: the discovered nodes (committed — replays from
+    /// receipts alone); condition 0 is the kernel solar leap.
+    techs: Vec<(u64, u8, [u8; 32])>,
 }
 
 impl World {
@@ -185,6 +191,7 @@ impl World {
             bonds: Vec::new(),
             covenants: Vec::new(),
             friction_pending: Vec::new(),
+            techs: Vec::new(),
         }
     }
 
@@ -214,6 +221,7 @@ impl World {
             bonds: committed.bonds,
             covenants: committed.covenants,
             friction_pending: Vec::new(),
+            techs: committed.techs,
         }
     }
 
@@ -265,11 +273,45 @@ impl World {
             albedo: albedo.clone(),
             orbit_r: orbit_r.clone(),
         });
+        // TECH-1a (12_UNION §5a): a world's FIRST thermal opt-in
+        // receipts the kernel SOLAR LEAP — its people now know their
+        // sun. Once per world, never per orb; the node id is seeded
+        // from the kernel name + the discovering orb (SEAL B).
+        if !self.techs.iter().any(|(_, condition, _)| *condition == 0) {
+            let mut seed = b"tech.kernel.solar-leap".to_vec();
+            seed.extend_from_slice(&orb.to_le_bytes());
+            let node: [u8; 32] = blake3::hash(&seed).into();
+            self.techs.push((orb, 0, node));
+            self.close(
+                ClosureEvent::TechDiscovered {
+                    orb_id: orb,
+                    node,
+                    condition: 0,
+                    modifier: 0,
+                    magnitude: ratio(1, 1),
+                    name: "the solar leap".into(),
+                },
+                SOVEREIGN,
+            );
+        }
         self.close(
             ClosureEvent::PlanetSited { orb_id: orb, albedo, orbit_r },
             SOVEREIGN,
         );
         Ok(())
+    }
+
+    /// TECH-1a: has this world's people made the SOLAR LEAP — do they
+    /// know the powers of their sun? Pre-solar is a lawful state
+    /// (12_UNION §5a); the reading gates licensing and the shield,
+    /// never the world's own life.
+    pub fn knows_its_sun(&self) -> bool {
+        self.techs.iter().any(|(_, condition, _)| *condition == 0)
+    }
+
+    /// TECH-1a: the discovered nodes — (orb, condition, node id).
+    pub fn techs(&self) -> &[(u64, u8, [u8; 32])] {
+        &self.techs
     }
 
     pub fn now(&self) -> u64 {
@@ -1617,6 +1659,7 @@ impl World {
             debts: self.debts.clone(),
             bonds: self.bonds.clone(),
             covenants: self.covenants.clone(),
+            techs: self.techs.clone(),
         }
     }
 
@@ -1766,6 +1809,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut debts: Vec<AbsorptionDebt> = Vec::new();
     let mut bonds: Vec<Bond> = Vec::new();
     let mut covenants: Vec<Covenant> = Vec::new();
+    let mut techs: Vec<(u64, u8, [u8; 32])> = Vec::new();
     for receipt in chronicle.receipts() {
         match &receipt.event {
             ClosureEvent::EntityRegistered { entity_id, principal, handle } => {
@@ -2132,9 +2176,14 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     held.last_touch = receipt.stamp;
                 }
             }
+            // TECH-1a: a discovered node replays into the tech list —
+            // the solar leap (condition 0) among them.
+            ClosureEvent::TechDiscovered { orb_id, node, condition, .. } => {
+                techs.push((*orb_id, *condition, *node));
+            }
         }
     }
-    Committed { orbs, entities, star, debts, bonds, covenants }
+    Committed { orbs, entities, star, debts, bonds, covenants, techs }
 }
 
 /// SINK-1 (Q2): the demurrage due on one orb's un-vaulted banked

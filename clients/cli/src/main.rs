@@ -1636,6 +1636,10 @@ fn chronicle(world: &World, style: &Style) {
                 "⇋ ideological friction settled: {} entropy on orb {orb_id} — divergence has a handling cost",
                 style.strong(&amount(heat))
             ),
+            cfe::dop::ClosureEvent::TechDiscovered { orb_id, name, condition, .. } => format!(
+                "✶ {} — orb {orb_id} (condition {condition}): a technology enters the chronicle",
+                style.strong(name)
+            ),
             cfe::dop::ClosureEvent::ApertureSent {
                 deal, from_orb, resource, amount: moved,
             } => format!(

@@ -650,6 +650,10 @@ fn render_receipt(receipt: &Receipt) -> String {
                 resource_name(*resource)
             ),
         ),
+        E::TechDiscovered { orb_id, condition, name, .. } => (
+            "tech_discovered",
+            format!("{name} — orb {orb_id} condition {condition}"),
+        ),
         E::ApertureSent { deal, from_orb, resource, amount } => (
             "aperture_sent",
             format!(

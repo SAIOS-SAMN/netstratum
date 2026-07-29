@@ -59,6 +59,21 @@ One node per condition kind per orb (idempotent); prerequisites = the
 condition's own history, not a parent-pointer web (parents emerge naturally:
 you cannot survive 8 famine-years without first being cold).
 
+## 3a. TECH-1a LANDED (2026-07-29) — the discovery closure + the solar leap
+
+The first slice: `TechDiscovered` (tag 39) wired byte-exact per §2.2's
+layout, and the union's KERNEL node landed — **the solar leap** (condition
+0, 12_UNION §5a): a world's first thermal opt-in receipts that its people
+now know their sun. The opt-in IS the leap's receipt — once per world,
+never per orb; node id seeded from the kernel name + the discovering orb
+(SEAL B, replay re-derives it); `knows_its_sun()` is the reading that
+THRESHOLD-1 licensing and the shield gate on. Pre-solar is a lawful state:
+an unsited world lives whole and simply carries no leap. Evidence: four
+witnesses (once-per-world, replay+resume, byte-exact round-trip, pre-solar
+lawful). **TECH-1b stays open:** the five crystallized conditions (§3),
+the heat-law modifiers, SINK-1's research/throttle gates, and the
+seeded-synthesis naming — the emergent tree, not the kernel.
+
 ## 4. Deferred, recorded
 
 - **Synergy/shared nodes** (co-discovery across worlds): needs BOND-1's

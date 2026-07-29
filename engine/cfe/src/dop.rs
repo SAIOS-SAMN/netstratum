@@ -45,7 +45,10 @@
 //!   41 Orb cohesion entry (the eight books, IDEO-1) — emitted only
 //!      when a book is nonzero; a zero-book orb encodes byte-identical
 //!      to a pre-ideology one.
-//!   39–40 RESERVED for tech emergence (10: TechDiscovered, TechLicensed).
+//!   39 ClosureEvent::TechDiscovered (TECH-1a — condition 0 the kernel
+//!      solar leap; 1–5 the crystallized nodes, the TECH-1b slice)
+//!   40 RESERVED for TechLicensed (10 §2.2 — blueprint trade, and
+//!      PLANNER-1's licensed leaps).
 //!   42–46 RESERVED for AEON-1 (11: GaugeShifted, Diverged, Confluent,
 //!         StarAged, EraFolded).
 //!   47 ClosureEvent::ApertureSent (NS-4 APERTURE — the source leg)
@@ -426,6 +429,22 @@ pub enum ClosureEvent {
     /// mover's vented ledger at its collect (the VentSettled shape):
     /// real entropy, the handling cost of divergent boundary policies.
     FrictionSettled { orb_id: u64, amount: Ratio },
+    /// TECH-1a (10 §2.2) — a technology node enters the chronicle.
+    /// `condition` 0 is the KERNEL solar leap (12_UNION §5a): a world's
+    /// first thermal opt-in receipts that its people now know their
+    /// sun — the opt-in IS the leap's receipt. Conditions 1–5 are the
+    /// crystallized emergent nodes (10 §3, the TECH-1b slice); the
+    /// node id is the seeded-synthesis hash (SEAL B — replay
+    /// re-derives it), `modifier`/`magnitude` the applied parameter
+    /// (0 ‖ 1/1 for the kernel leap: knowing is not yet a bonus).
+    TechDiscovered {
+        orb_id: u64,
+        node: [u8; 32],
+        condition: u8,
+        modifier: u8,
+        magnitude: Ratio,
+        name: String,
+    },
     /// NS-4 APERTURE (BUILD_ORDER §3a) — the SOURCE leg of a cross-world
     /// value hand-off: banked value LEFT this world's orb for another,
     /// bound to `deal` (the id the destination's `ApertureReceived`
@@ -599,6 +618,15 @@ impl ClosureEvent {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 ratio::encode(amount, &mut value);
                 tlv::put(38, &value, &mut out);
+            }
+            Self::TechDiscovered { orb_id, node, condition, modifier, magnitude, name } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(node);
+                value.push(*condition);
+                value.push(*modifier);
+                ratio::encode(magnitude, &mut value);
+                value.extend_from_slice(name.as_bytes());
+                tlv::put(39, &value, &mut out);
             }
             Self::ApertureSent { deal, from_orb, resource, amount } => {
                 let mut value = deal.to_le_bytes().to_vec();
@@ -776,6 +804,15 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let (amount, _) = ratio::decode(value.get(8..)?)?;
                 Some(Self::FrictionSettled { orb_id, amount })
+            }
+            39 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let node: [u8; 32] = value.get(8..40)?.try_into().ok()?;
+                let condition = *value.get(40)?;
+                let modifier = *value.get(41)?;
+                let (magnitude, used) = ratio::decode(value.get(42..)?)?;
+                let name = String::from_utf8(value.get(42 + used..)?.to_vec()).ok()?;
+                Some(Self::TechDiscovered { orb_id, node, condition, modifier, magnitude, name })
             }
             47 => {
                 let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
