@@ -69,6 +69,15 @@ pub enum ActionRefused {
     /// COUNCIL-1 — a council is three or more DISTINCT orbs, a
     /// positive quota and collateral, a real window, a fresh id.
     BadCouncil,
+    /// PLANNER-1 — delegation settles inside diplomacy: the deed must
+    /// reference an OPEN council in the granting world.
+    NoSuchCouncil { council: u64 },
+    /// PLANNER-1 — the solar leap is NEVER licensed: the young meet
+    /// their sun themselves, or not (the shield's whole meaning).
+    SolarLeapNeverLicensed,
+    /// PLANNER-1 — a licensed leap lands only on a union member: the
+    /// receiving world must have made its crossing (THRESHOLD-1).
+    BelowTheThreshold,
     /// ABSORB-1 — only un-sealed pending overflow absorbs; the refusal
     /// names exactly what stands.
     CannotAbsorb { pending: Box<Ratio> },
@@ -2165,6 +2174,96 @@ pub fn aperture_transfer(
     Ok(())
 }
 
+/// PLANNER-1: what a licensed leap carries — the condition and name
+/// of the technology, the deal id binding both legs, and the open
+/// council the delegation settles inside.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Leap {
+    pub condition: u8,
+    pub name: String,
+    pub deal: u64,
+    pub council: u64,
+}
+
+/// PLANNER-1 (12_UNION §2) — LICENSE A TECHNOLOGY LEAP into another
+/// world: the planner's issuing power, receipted in BOTH chronicles
+/// under one deal (the aperture shape). The deed is council-gated —
+/// it must reference an OPEN council in the granting world (delegation
+/// settles inside diplomacy) — and shield-bounded: the receiving world
+/// must know its sun AND have crossed (a licensed leap lands only on a
+/// union member; below the threshold the young are left to their sky).
+/// The solar leap (condition 0) is NEVER licensed. The leap may be
+/// known or UNKNOWN to the receiver — the name and node arrive with
+/// the deed; a node the receiver already holds refuses idempotent.
+pub fn license_tech(
+    src: &mut World,
+    from: u64,
+    dst: &mut World,
+    to: u64,
+    leap: Leap,
+) -> Result<(), ActionRefused> {
+    let Leap { condition, name, deal, council } = leap;
+    if condition == 0 {
+        return Err(ActionRefused::SolarLeapNeverLicensed);
+    }
+    if !src.councils.iter().any(|pact| pact.council == council) {
+        return Err(ActionRefused::NoSuchCouncil { council });
+    }
+    if dst.is_shielded() {
+        return Err(ActionRefused::Shielded {
+            source_shielded: src.is_shielded(),
+            dest_shielded: true,
+        });
+    }
+    if !dst.crossed {
+        return Err(ActionRefused::BelowTheThreshold);
+    }
+    if !src.orbs.iter().any(|held| held.orb_id == from) {
+        return Err(ActionRefused::NoSuchOrb { orb: from });
+    }
+    if !dst.orbs.iter().any(|held| held.orb_id == to) {
+        return Err(ActionRefused::NoSuchOrb { orb: to });
+    }
+    // The node id is seeded from the licensing deed (SEAL B): the
+    // granting chronicle's own digest never enters — the deal and
+    // condition suffice, so both legs derive the SAME node.
+    let mut seed = b"tech.licensed".to_vec();
+    seed.extend_from_slice(&deal.to_le_bytes());
+    seed.push(condition);
+    let node: [u8; 32] = blake3::hash(&seed).into();
+    if dst.techs.iter().any(|(_, _, held)| *held == node) {
+        return Err(ActionRefused::BadTransfer);
+    }
+    let src_stamp = src.clock.now();
+    let dst_stamp = dst.clock.now();
+    src.chronicle.append(
+        ClosureEvent::TechLicensed {
+            deal,
+            from_orb: from,
+            council,
+            condition,
+            node,
+            name: name.clone(),
+        },
+        src_stamp,
+        vec![SOVEREIGN],
+    );
+    dst.techs.push((to, condition, node));
+    dst.chronicle.append(
+        ClosureEvent::TechDiscovered {
+            orb_id: to,
+            node,
+            condition,
+            modifier: 0,
+            magnitude: ratio(1, 1),
+            name,
+        },
+        dst_stamp,
+        vec![SOVEREIGN],
+    );
+    Ok(())
+}
+
 impl Default for World {
     fn default() -> Self {
         Self::new()
@@ -2616,6 +2715,9 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     }
                 }
             }
+            // PLANNER-1: the issuing deed is a pure record src-side —
+            // the far world's TechDiscovered leg carries the arrival.
+            ClosureEvent::TechLicensed { .. } => {}
             // AEON-1a: every key move replays verbatim — the receipt
             // carries the wrapped value, the last one stands.
             ClosureEvent::GaugeShifted { gauge: key }

@@ -1248,6 +1248,16 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "a transfer moves a positive amount between two different planets — e.g. {}",
             style.strong("send 5/2 iron to outpost")
         ),
+        ActionRefused::NoSuchCouncil { council } => format!(
+            "no open council {} stands — delegation settles inside diplomacy; seal the council first",
+            style.strong(&format!("{council}"))
+        ),
+        ActionRefused::SolarLeapNeverLicensed => {
+            "the solar leap is never licensed — the young meet their sun themselves, or not".into()
+        }
+        ActionRefused::BelowTheThreshold => {
+            "a licensed leap lands only on a union member — the receiving world has not crossed".into()
+        }
         ActionRefused::BadCouncil => format!(
             "a council is three or more distinct planets, a positive quota and collateral, a real window, a fresh id — e.g. {}",
             style.strong("council 1 with base,outpost,haven: 5 iron in 60, stake 3")
@@ -1658,6 +1668,10 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::FrictionSettled { orb_id, amount: heat } => format!(
                 "⇋ ideological friction settled: {} entropy on orb {orb_id} — divergence has a handling cost",
                 style.strong(&amount(heat))
+            ),
+            cfe::dop::ClosureEvent::TechLicensed { deal, council, name, .. } => format!(
+                "⌁ {} licensed out under deal {deal} — sealed through council {council}; the far sky learns",
+                style.strong(name)
             ),
             cfe::dop::ClosureEvent::CouncilSealed { council, members, collateral, .. } => format!(
                 "⚭ council {council} seals — {} members bound alike, {} collateral each; the group over the individual",

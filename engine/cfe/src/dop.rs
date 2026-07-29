@@ -47,8 +47,9 @@
 //!      to a pre-ideology one.
 //!   39 ClosureEvent::TechDiscovered (TECH-1a — condition 0 the kernel
 //!      solar leap; 1–5 the crystallized nodes, the TECH-1b slice)
-//!   40 RESERVED for TechLicensed (10 §2.2 — blueprint trade, and
-//!      PLANNER-1's licensed leaps).
+//!   40 ClosureEvent::TechLicensed (PLANNER-1 — the issuing deed; the
+//!      far world receipts TechDiscovered under the same deal; the
+//!      solar leap is never licensed).
 //!   42 ClosureEvent::GaugeShifted (AEON-1a — the key moves)
 //!   43 ClosureEvent::Diverged (AEON-1a — the cleave, a peer branch)
 //!   44 ClosureEvent::Confluent (AEON-1a — the recombination)
@@ -460,6 +461,21 @@ pub enum ClosureEvent {
     /// parallel degree of the torus that cannot recur into this one.
     /// Nothing is destroyed; the fold is archival by construction.
     EraFolded { era: u64, gauge: Ratio },
+    /// PLANNER-1 (12_UNION §2, 10 §2.2) — a technology LICENSED out of
+    /// this world into another: the planner's issuing deed, the source
+    /// leg of a two-world hand-off (the aperture shape — the far world
+    /// receipts `TechDiscovered` under the same deal). Bound to an
+    /// OPEN council in this world (`council` — delegation settles
+    /// inside diplomacy, 12_UNION §7); the solar leap (condition 0) is
+    /// NEVER licensed — the young meet their sun themselves.
+    TechLicensed {
+        deal: u64,
+        from_orb: u64,
+        council: u64,
+        condition: u8,
+        node: [u8; 32],
+        name: String,
+    },
     /// COUNCIL-1 (12_UNION §7) — a COUNCIL seals: a multilateral
     /// covenant among three or more orbs, every member bound alike —
     /// each locks the same collateral against delivering ≥ quota to
@@ -672,6 +688,15 @@ impl ClosureEvent {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 ratio::encode(amount, &mut value);
                 tlv::put(38, &value, &mut out);
+            }
+            Self::TechLicensed { deal, from_orb, council, condition, node, name } => {
+                let mut value = deal.to_le_bytes().to_vec();
+                value.extend_from_slice(&from_orb.to_le_bytes());
+                value.extend_from_slice(&council.to_le_bytes());
+                value.push(*condition);
+                value.extend_from_slice(node);
+                value.extend_from_slice(name.as_bytes());
+                tlv::put(40, &value, &mut out);
             }
             Self::CouncilSealed { council, resource, quota, window, collateral, members } => {
                 let mut value = council.to_le_bytes().to_vec();
@@ -901,6 +926,15 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let (amount, _) = ratio::decode(value.get(8..)?)?;
                 Some(Self::FrictionSettled { orb_id, amount })
+            }
+            40 => {
+                let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let from_orb = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let council = u64::from_le_bytes(value.get(16..24)?.try_into().ok()?);
+                let condition = *value.get(24)?;
+                let node: [u8; 32] = value.get(25..57)?.try_into().ok()?;
+                let name = String::from_utf8(value.get(57..)?.to_vec()).ok()?;
+                Some(Self::TechLicensed { deal, from_orb, council, condition, node, name })
             }
             52 => {
                 let council = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

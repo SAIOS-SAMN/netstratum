@@ -654,6 +654,12 @@ fn render_receipt(receipt: &Receipt) -> String {
             "tech_discovered",
             format!("{name} — orb {orb_id} condition {condition}"),
         ),
+        E::TechLicensed { deal, from_orb, council, condition, name, .. } => (
+            "tech_licensed",
+            format!(
+                "{name} licensed out — orb {from_orb}, deal {deal}, council {council}, condition {condition}"
+            ),
+        ),
         E::CouncilSealed { council, resource, quota, window, collateral, members } => (
             "council_sealed",
             format!(
