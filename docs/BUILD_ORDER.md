@@ -572,7 +572,7 @@ market board's; union tags allocate from 52 at each landing.
 | Landing | Lane | Status | Contains |
 |---|---|---|---|
 | **SUBSTRATE-1** | C | **LANDED 2026-07-29** | the no-anthropic-gate axis growth (12_UNION §5a): metabolism gains `plasmic` (sites Furnace — the stellar environs), perception gains `umbral` (occlusion-basis, the syzygial lines); APPEND-ONLY (the tag-registry discipline on the axes — never removed, never renamed); no new event tags. Evidence: the vocabulary witness registers a plasmic/umbral line, round-trips whole, and still refuses what was never added |
-| LINEAGE-1 | C | open | typed lineage pointer resolving to a head or EMPTY (headless lawful); lineage-domain reading |
+| **LINEAGE-1** | C | **LANDED 2026-07-29** | `resolve_head` walks the lineage pointer chain to its root — headless lawful (a rootless line resolves to itself), a dangling pointer resolves to the deepest recorded ancestor, a corrupt cycle stops deterministically; `lineage_domain(metabolism, band)` derives the progenitor domain a line elevates toward (thermal/lithic/cryo/mesic/plasmic), never stored, never chosen — no line answers to a planner of an alien physiology. No new event tags. Evidence: the chain/headless/dangling/cycle/domain witness green |
 | AEON-1 | B | open | tags 42–46; G, divergence/confluence, the fold, star aging (spec `11_AEON.md`) |
 | THRESHOLD-1 | A (after APERTURE-1) | open | the receipted crossing; the shield refusals; the Watcher office |
 | BAND-1 | B (after AEON-1) | open | occupancy as a fiber reading; seats; `class` station field |

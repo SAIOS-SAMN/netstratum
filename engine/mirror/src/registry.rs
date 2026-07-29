@@ -143,3 +143,47 @@ impl Registry {
 pub fn slug_of(name: &str) -> String {
     crate::sanitize(name)
 }
+
+/// LINEAGE-1 (12_UNION §5) — the lineage-domain reading: which
+/// progenitor domain a civilization elevates toward, DERIVED from
+/// metabolism + the substrate band its seat lives in (never stored,
+/// never chosen). The four founding domains plus the visible-next
+/// (12_UNION §2, §5a); an unsited line reads by metabolism alone.
+pub fn lineage_domain(
+    metabolism: &str,
+    band: Option<cfe::thermal::SubstrateBand>,
+) -> &'static str {
+    use cfe::thermal::SubstrateBand as Band;
+    match (metabolism, band) {
+        ("plasmic", _) => "plasmic",
+        ("mineral", Some(Band::HyperThermal)) => "thermal",
+        ("mineral", _) => "lithic",
+        ("biotic", Some(Band::Cryogenic)) => "cryo",
+        _ => "mesic",
+    }
+}
+
+impl Registry {
+    /// LINEAGE-1: resolve a civilization's lineage HEAD — the root of
+    /// its pointer chain. A line whose pointer is absent (or dangles
+    /// into the unrecorded past) resolves to the deepest entry that
+    /// EXISTS: headless is a lawful state, not an error (12_UNION §5).
+    /// A corrupt cycle stops deterministically at first revisit.
+    pub fn resolve_head(&self, slug: &str) -> Option<String> {
+        let mut current = self.load(slug)?;
+        let mut visited = vec![current.slug.clone()];
+        while let Some(parent) = &current.lineage {
+            if visited.iter().any(|seen| seen == parent) {
+                break;
+            }
+            match self.load(parent) {
+                Some(ancestor) => {
+                    visited.push(ancestor.slug.clone());
+                    current = ancestor;
+                }
+                None => break,
+            }
+        }
+        Some(current.slug)
+    }
+}

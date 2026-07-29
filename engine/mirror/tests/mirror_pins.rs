@@ -221,6 +221,65 @@ fn the_axes_grow_append_only() {
     );
 }
 
+/// LINEAGE-1 (12_UNION §5): the lineage pointer resolves hop-by-hop to
+/// its HEAD; headless is lawful (a rootless line resolves to itself);
+/// a dangling pointer resolves to the deepest recorded ancestor; a
+/// corrupt cycle stops deterministically. The domain reading derives
+/// from metabolism + band, never stored — no line answers to a planner
+/// of an alien physiology.
+#[test]
+fn a_lineage_resolves_to_its_own_head() {
+    use cfe::thermal::SubstrateBand as Band;
+    use mirror::registry::lineage_domain;
+
+    let root = scratch("registry-lineage");
+    let registry = Registry::at(&root);
+
+    // elder <- branch <- leaf: the chain resolves to the elder.
+    let mut elder = humans();
+    elder.slug = "elder".into();
+    let mut branch = humans();
+    branch.slug = "branch".into();
+    branch.lineage = Some("elder".into());
+    let mut leaf = humans();
+    leaf.slug = "leaf".into();
+    leaf.lineage = Some("branch".into());
+    for line in [&elder, &branch, &leaf] {
+        registry.create(line).expect("registers");
+    }
+    assert_eq!(registry.resolve_head("leaf"), Some("elder".into()));
+    // Headless is LAWFUL: the elder resolves to itself.
+    assert_eq!(registry.resolve_head("elder"), Some("elder".into()));
+
+    // A dangling pointer resolves to the deepest RECORDED ancestor.
+    let mut orphan = humans();
+    orphan.slug = "orphan".into();
+    orphan.lineage = Some("unrecorded-past".into());
+    registry.create(&orphan).expect("registers");
+    assert_eq!(registry.resolve_head("orphan"), Some("orphan".into()));
+
+    // A corrupt cycle stops deterministically, never hangs.
+    let mut ouro = humans();
+    ouro.slug = "ouro".into();
+    ouro.lineage = Some("boros".into());
+    let mut boros = humans();
+    boros.slug = "boros".into();
+    boros.lineage = Some("ouro".into());
+    registry.create(&ouro).expect("registers");
+    registry.create(&boros).expect("registers");
+    assert_eq!(registry.resolve_head("ouro"), Some("boros".into()));
+
+    // The domain reading: metabolism + band, the founding four + the
+    // visible-next; a tardigrade line under a Furnace sun elevates
+    // toward the THERMAL seats — never toward an alien physiology.
+    assert_eq!(lineage_domain("mineral", Some(Band::HyperThermal)), "thermal");
+    assert_eq!(lineage_domain("mineral", None), "lithic");
+    assert_eq!(lineage_domain("biotic", Some(Band::Cryogenic)), "cryo");
+    assert_eq!(lineage_domain("biotic", Some(Band::Mesic)), "mesic");
+    assert_eq!(lineage_domain("biotic", None), "mesic");
+    assert_eq!(lineage_domain("plasmic", Some(Band::HyperThermal)), "plasmic");
+}
+
 /// The star-chart holds TUniversal{S, G}: exact-rational S = (x, y, z) on
 /// the 3-torus (negative coordinates wrap), the gauge phase rides
 /// along, distance is L1 (NO SQUARING — the L1 law), and the
