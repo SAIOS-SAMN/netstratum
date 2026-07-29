@@ -47,7 +47,12 @@
 //!      to a pre-ideology one.
 //!   39–40 RESERVED for tech emergence (10: TechDiscovered, TechLicensed).
 //!   42–46 RESERVED for AEON-1 (11: GaugeShifted, Diverged, Confluent,
-//!         StarAged, EraFolded) — next free tag for any landing is 47.
+//!         StarAged, EraFolded).
+//!   47 ClosureEvent::ApertureSent (NS-4 APERTURE — the source leg)
+//!   48 ClosureEvent::ApertureReceived (NS-4 APERTURE — the dest leg)
+//!   49–51 RESERVED for the market board (BUILD_ORDER §3a: OfferPosted,
+//!         OfferCleared, +1 — renumbered from the colliding 41–43)
+//!         — the next free tag outside reservations is 52.
 
 use crate::ratio::{self, ratio, Ratio};
 use crate::tlv;
@@ -421,6 +426,16 @@ pub enum ClosureEvent {
     /// mover's vented ledger at its collect (the VentSettled shape):
     /// real entropy, the handling cost of divergent boundary policies.
     FrictionSettled { orb_id: u64, amount: Ratio },
+    /// NS-4 APERTURE (BUILD_ORDER §3a) — the SOURCE leg of a cross-world
+    /// value hand-off: banked value LEFT this world's orb for another,
+    /// bound to `deal` (the id the destination's `ApertureReceived`
+    /// carries). Conservation is a property of the PAIR, not of this
+    /// chronicle alone — replay of this world sees only the debit.
+    ApertureSent { deal: u64, from_orb: u64, resource: Resource, amount: Ratio },
+    /// NS-4 APERTURE (BUILD_ORDER §3a) — the DESTINATION leg: banked
+    /// value ARRIVED in this world's orb from another, bound to the same
+    /// `deal`. Replay of this world sees only the credit.
+    ApertureReceived { deal: u64, to_orb: u64, resource: Resource, amount: Ratio },
 }
 
 impl ClosureEvent {
@@ -585,6 +600,20 @@ impl ClosureEvent {
                 ratio::encode(amount, &mut value);
                 tlv::put(38, &value, &mut out);
             }
+            Self::ApertureSent { deal, from_orb, resource, amount } => {
+                let mut value = deal.to_le_bytes().to_vec();
+                value.extend_from_slice(&from_orb.to_le_bytes());
+                value.push(*resource as u8);
+                ratio::encode(amount, &mut value);
+                tlv::put(47, &value, &mut out);
+            }
+            Self::ApertureReceived { deal, to_orb, resource, amount } => {
+                let mut value = deal.to_le_bytes().to_vec();
+                value.extend_from_slice(&to_orb.to_le_bytes());
+                value.push(*resource as u8);
+                ratio::encode(amount, &mut value);
+                tlv::put(48, &value, &mut out);
+            }
         }
         out
     }
@@ -747,6 +776,20 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let (amount, _) = ratio::decode(value.get(8..)?)?;
                 Some(Self::FrictionSettled { orb_id, amount })
+            }
+            47 => {
+                let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let from_orb = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let resource = Resource::from_wire(*value.get(16)?)?;
+                let (amount, _) = ratio::decode(value.get(17..)?)?;
+                Some(Self::ApertureSent { deal, from_orb, resource, amount })
+            }
+            48 => {
+                let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let to_orb = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let resource = Resource::from_wire(*value.get(16)?)?;
+                let (amount, _) = ratio::decode(value.get(17..)?)?;
+                Some(Self::ApertureReceived { deal, to_orb, resource, amount })
             }
             _ => None,
         }

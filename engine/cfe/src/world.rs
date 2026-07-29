@@ -1674,6 +1674,83 @@ impl World {
     }
 }
 
+/// NS-4 APERTURE (BUILD_ORDER §3a) — THE CROSS-WORLD VALUE CARRIER.
+/// Banked value crosses from an orb in ONE world to an orb in ANOTHER,
+/// conservation-exact across the pair, receipted in BOTH chronicles as
+/// a two-legged deed sharing one `deal` id: `ApertureSent` debits the
+/// source, `ApertureReceived` credits the destination. Unlike TRADE-1
+/// (one chronicle proves conservation), no single chronicle proves it
+/// here — the deal id links the legs (double entry across two books).
+/// Both orbs settle due demurrage at the touch (the SINK-1 law) before
+/// value moves; affordability is judged on the source's post-decay
+/// bank, computed pure, so a refusal orphans nothing in either world.
+/// The cross-empire cohesion books (compassion/morality) DO NOT post
+/// here: cross-world reading composes at N5/N6 (09 board law) — an
+/// aperture carries value, never judgment.
+pub fn aperture_transfer(
+    src: &mut World,
+    from: u64,
+    dst: &mut World,
+    to: u64,
+    resource: Resource,
+    amount: Ratio,
+    deal: u64,
+) -> Result<(), ActionRefused> {
+    if amount <= ratio(0, 1) {
+        return Err(ActionRefused::BadTransfer);
+    }
+    if !src.orbs.iter().any(|held| held.orb_id == from) {
+        return Err(ActionRefused::NoSuchOrb { orb: from });
+    }
+    if !dst.orbs.iter().any(|held| held.orb_id == to) {
+        return Err(ActionRefused::NoSuchOrb { orb: to });
+    }
+    let src_stamp = src.clock.now();
+    let dst_stamp = dst.clock.now();
+    // Affordability on the source's post-decay bank — honest at the
+    // stamp, computed pure, so a refusal moves nothing in either world.
+    {
+        let source = src.orbs.iter().find(|held| held.orb_id == from).expect("checked");
+        let decay = demurrage_due(source, src.star, src_stamp)
+            .into_iter()
+            .find(|(due, _)| *due == resource)
+            .map(|(_, decay)| decay)
+            .unwrap_or_else(|| ratio(0, 1));
+        let have = source.banked_amount(resource) - decay;
+        if have < amount {
+            return Err(ActionRefused::CannotAfford {
+                resource,
+                need: Box::new(amount),
+                have: Box::new(have),
+            });
+        }
+    }
+    // The touch (SINK-1) then the debit, in the source world.
+    {
+        let source = src.orbs.iter_mut().find(|held| held.orb_id == from).expect("checked");
+        touch(source, src.star, &mut src.chronicle, src_stamp);
+        source.bank(resource, -amount.clone());
+    }
+    src.chronicle.append(
+        ClosureEvent::ApertureSent { deal, from_orb: from, resource, amount: amount.clone() },
+        src_stamp,
+        vec![SOVEREIGN],
+    );
+    // The touch then the credit, in the destination world.
+    {
+        let target = dst.orbs.iter_mut().find(|held| held.orb_id == to).expect("checked");
+        touch(target, dst.star, &mut dst.chronicle, dst_stamp);
+        target.bank(resource, amount.clone());
+    }
+    dst.chronicle.append(
+        ClosureEvent::ApertureReceived { deal, to_orb: to, resource, amount },
+        dst_stamp,
+        vec![SOVEREIGN],
+    );
+    dst.relieve_recovered(to);
+    Ok(())
+}
+
 impl Default for World {
     fn default() -> Self {
         Self::new()
@@ -1855,6 +1932,23 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 }
                 settle_debts(&mut debts, &mut orbs, *from_orb, *to_orb, value);
                 credit_covenants(&mut covenants, *from_orb, *to_orb, *resource, amount);
+            }
+            // NS-4 APERTURE: the source leg replays as a bank draw —
+            // value left THIS world for another; last_touch anchors at
+            // the deal stamp (the touch settled demurrage separately).
+            ClosureEvent::ApertureSent { from_orb, resource, amount, .. } => {
+                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *from_orb) {
+                    held.bank(*resource, -amount.clone());
+                    held.last_touch = receipt.stamp;
+                }
+            }
+            // NS-4 APERTURE: the destination leg replays as a bank
+            // credit — value arrived from another world.
+            ClosureEvent::ApertureReceived { to_orb, resource, amount, .. } => {
+                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *to_orb) {
+                    held.bank(*resource, amount.clone());
+                    held.last_touch = receipt.stamp;
+                }
             }
             // ABSORB-1: the three-way move replays — the absorber's
             // ledger carries the shed; the window opens; crisis reads

@@ -1636,6 +1636,20 @@ fn chronicle(world: &World, style: &Style) {
                 "⇋ ideological friction settled: {} entropy on orb {orb_id} — divergence has a handling cost",
                 style.strong(&amount(heat))
             ),
+            cfe::dop::ClosureEvent::ApertureSent {
+                deal, from_orb, resource, amount: moved,
+            } => format!(
+                "⎋ {} {} crossed out orb {from_orb} → deal {deal} — the far leg lands in another world",
+                style.strong(&amount(moved)),
+                resource_name(*resource)
+            ),
+            cfe::dop::ClosureEvent::ApertureReceived {
+                deal, to_orb, resource, amount: moved,
+            } => format!(
+                "⎋ {} {} crossed in deal {deal} → orb {to_orb} — value arrived from another world",
+                style.strong(&amount(moved)),
+                resource_name(*resource)
+            ),
         };
         let tag = receipt
             .provenance

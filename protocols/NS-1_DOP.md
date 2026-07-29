@@ -85,6 +85,8 @@ One tag, one meaning, forever; retired codes are never reused.
 | 37 | event: CovenantSlashed (COVENANT-1) | LE64(obligor_orb) ‖ LE64(beneficiary_orb) ‖ resource u8 ‖ ratio (collateral) — deadline passed unmet: BREACH_AND_SLASH to the aggrieved, the stake posts breached |
 | 38 | event: FrictionSettled (IDEO-1) | LE64(orb_id) ‖ ratio (amount) — accrued ideological friction (φ × abs divergence × volume, transfers only) sealed into the mover's entropy_vented at its collect; aligned partners generate no receipt at all |
 | 41 | orb: cohesion entry (IDEO-1) | ratio ×8 in fixed order: given_in_crisis ‖ drawn_in_crisis ‖ bond_flow ‖ severance_load ‖ covenants_fulfilled ‖ covenants_breached ‖ returned_across ‖ extracted_across — emitted only when a book is nonzero (a zero-book orb encodes byte-identical to a pre-ideology one); the four axis ratios DERIVE at read, never stored |
+| 47 | event: ApertureSent (APERTURE-1, NS-4 §2) | LE64(deal) ‖ LE64(from_orb) ‖ resource u8 ‖ ratio (amount) — the SOURCE leg of a cross-world hand-off: banked value LEFT this world, bound to the deal id its far leg carries; replay sees only the debit — pair conservation is an N6 mesh-audit reading, never an orb law |
+| 48 | event: ApertureReceived (APERTURE-1, NS-4 §2) | LE64(deal) ‖ LE64(to_orb) ‖ resource u8 ‖ ratio (amount) — the DESTINATION leg: banked value ARRIVED from another world under the same deal; replay sees only the credit; relieves a famine strike at the 02 §2.4 law |
 | 10 | event: EntityRegistered (N3) | LE64(entity_id) ‖ LE64(principal) ‖ handle utf8 |
 | 11 | event: ScopeGranted (N3) | LE64(agent) ‖ scope u8 |
 | 12 | event: ScopeRevoked (N3) | LE64(agent) ‖ scope u8 |

@@ -650,6 +650,22 @@ fn render_receipt(receipt: &Receipt) -> String {
                 resource_name(*resource)
             ),
         ),
+        E::ApertureSent { deal, from_orb, resource, amount } => (
+            "aperture_sent",
+            format!(
+                "{} {} orb {from_orb} → deal {deal}",
+                ratio_str(amount),
+                resource_name(*resource)
+            ),
+        ),
+        E::ApertureReceived { deal, to_orb, resource, amount } => (
+            "aperture_received",
+            format!(
+                "{} {} deal {deal} → orb {to_orb}",
+                ratio_str(amount),
+                resource_name(*resource)
+            ),
+        ),
         E::OverflowAbsorbed { source_orb, absorber_orb, amount } => (
             "overflow_absorbed",
             format!(

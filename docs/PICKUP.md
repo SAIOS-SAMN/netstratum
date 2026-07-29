@@ -32,6 +32,14 @@ wall regenerate every 60-tick year.
 | the ideology board, whole (coder-02) | TRADE-1 transfers/compassion (30) · ABSORB-1 absorption/morality windows (31–32) · BOND-1 standing bonds/love (33–34) · COVENANT-1 vitrified escrow + fidelity curve/integrity (35–37) · IDEO-1 friction (38) + orb cohesion entry (41) + `ideology` panel — eight books, ratios derived never stored; deferrals at Q4 |
 | BOT-THERM | egregores thermally alive: Furnace mints, Frost banks sink and honestly freeze-locks |
 | renames | Crucible→Furnace · bot→egregore/automaton (NS-6 §5.2) · themed daughter names |
+| APERTURE-1 (2026-07-29) | the cross-world value carrier (NS-4 §1–§3, tags 47–48): two-legged deal-linked deed, demurrage at the touch both sides, per-world replay, pair conservation an N6 reading; the market board's gate is open |
+
+Design authority now also includes `12_UNION.md` (the union world-book,
+eight operator rulings 2026-07-29: bands as space, four progenitor
+species ×8 seats, Watcher/Observer/Sovereign, the lineage law, discrete
+gauge morphodynamics — Q3 resolved, the substrate law, the implementation
+manifold). The implementation task graph lives in the session task list;
+the fresh universe (aeon 1) boots at `--var var-aeon1` when seeded.
 
 Recent defect rulings (regression-pinned): **flat demurrage** (proportional
 decay exploded canonical denominators to ~2^1100 — never proportional);
@@ -50,9 +58,11 @@ terminology law — no set-letter glyphs, Furnace never Crucible, no
 
 ## 4. Wire tag registry state
 
-1–38 and 41 assigned (see `engine/cfe/src/dop.rs` header — the one
-authority); 8–9 reserved (D2 terrain, D3 milestones); 39–40 reserved
-tech emergence (10); 42–46 reserved AEON-1 (11); **next free 47**.
+1–38, 41, and 47–48 assigned (see `engine/cfe/src/dop.rs` header — the
+one authority); 8–9 reserved (D2 terrain, D3 milestones); 39–40 reserved
+tech emergence (10); 42–46 reserved AEON-1 (11); 49–51 reserved the
+market board (§3a — renumbered from the colliding 41–43); **next free
+52** for anything outside those reservations.
 
 ## 5. Lanes and next work
 
