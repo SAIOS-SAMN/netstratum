@@ -38,8 +38,17 @@ Design authority now also includes `12_UNION.md` (the union world-book,
 eight operator rulings 2026-07-29: bands as space, four progenitor
 species ×8 seats, Watcher/Observer/Sovereign, the lineage law, discrete
 gauge morphodynamics — Q3 resolved, the substrate law, the implementation
-manifold). The implementation task graph lives in the session task list;
-the fresh universe (aeon 1) boots at `--var var-aeon1` when seeded.
+manifold). **The union board landed whole in first slices (2026-07-29,
+BUILD_ORDER §3b):** SUBSTRATE-1 · LINEAGE-1 · TECH-1a (the solar leap) ·
+THRESHOLD-1 (the crossing + shield) · AEON-1a (G, key changes, star
+aging, the fold) · ELEVATE-1 (the three-gate climb) · BAND-1 (seats) ·
+COUNCIL-1 (the multilateral covenant) · PLANNER-1 (the licensed leap;
+the solar leap is never licensed). **Aeon 1 is live** at `var-aeon1/`
+(13 civilizations, 4 progenitors seated, 2 pre-solar shielded worlds;
+roster in `seeds/aeon1-egregores.json`). Open second slices: TECH-1b
+(the crystallized tree), AEON-1b (conductor orchestration: voice
+triggers, divergence speciation, fold rotation), the market board
+(§3a — its APERTURE gate stands open), and the union CLI verbs.
 
 Recent defect rulings (regression-pinned): **flat demurrage** (proportional
 decay exploded canonical denominators to ~2^1100 — never proportional);
@@ -58,11 +67,11 @@ terminology law — no set-letter glyphs, Furnace never Crucible, no
 
 ## 4. Wire tag registry state
 
-1–38, 41, and 47–48 assigned (see `engine/cfe/src/dop.rs` header — the
-one authority); 8–9 reserved (D2 terrain, D3 milestones); 39–40 reserved
-tech emergence (10); 42–46 reserved AEON-1 (11); 49–51 reserved the
-market board (§3a — renumbered from the colliding 41–43); **next free
-52** for anything outside those reservations.
+1–48 and 52–53 assigned (see `engine/cfe/src/dop.rs` header — the one
+authority): 39 TechDiscovered · 40 TechLicensed · 42–46 the AEON block ·
+47–48 the APERTURE pair · 52–53 the COUNCIL pair; 8–9 reserved (D2
+terrain, D3 milestones); 49–51 reserved the market board (§3a); **next
+free 54** for anything outside those reservations.
 
 ## 5. Lanes and next work
 
