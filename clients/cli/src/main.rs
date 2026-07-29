@@ -1248,6 +1248,10 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "a transfer moves a positive amount between two different planets — e.g. {}",
             style.strong("send 5/2 iron to outpost")
         ),
+        ActionRefused::BadCouncil => format!(
+            "a council is three or more distinct planets, a positive quota and collateral, a real window, a fresh id — e.g. {}",
+            style.strong("council 1 with base,outpost,haven: 5 iron in 60, stake 3")
+        ),
         ActionRefused::ElevationBarred { settled, coherent, crossed } => format!(
             "the climb is barred — {}{}{}; each gate is escapable: settle the books, close a loop this year, cross the void",
             if *settled { "" } else { "the thermal books stand unsettled; " },
@@ -1654,6 +1658,16 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::FrictionSettled { orb_id, amount: heat } => format!(
                 "⇋ ideological friction settled: {} entropy on orb {orb_id} — divergence has a handling cost",
                 style.strong(&amount(heat))
+            ),
+            cfe::dop::ClosureEvent::CouncilSealed { council, members, collateral, .. } => format!(
+                "⚭ council {council} seals — {} members bound alike, {} collateral each; the group over the individual",
+                style.strong(&format!("{}", members.len())),
+                style.strong(&amount(collateral))
+            ),
+            cfe::dop::ClosureEvent::CouncilClosed { council, member, fulfilled, banked } => format!(
+                "⚖ council {council} reckons — orb {member} {}; {} banked home",
+                if *fulfilled { style.strong("kept faith") } else { style.strong("BREACHED") },
+                style.strong(&amount(banked))
             ),
             cfe::dop::ClosureEvent::GaugeShifted { gauge } => format!(
                 "♪ the key moves — this world now plays at {}",

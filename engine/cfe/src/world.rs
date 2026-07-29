@@ -66,6 +66,9 @@ pub enum ActionRefused {
     /// ELEVATE-1 — a climb moves STRICTLY upward in G (the orientation
     /// law: the fiber advances and never retreats).
     BadClimb,
+    /// COUNCIL-1 — a council is three or more DISTINCT orbs, a
+    /// positive quota and collateral, a real window, a fresh id.
+    BadCouncil,
     /// ABSORB-1 — only un-sealed pending overflow absorbs; the refusal
     /// names exactly what stands.
     CannotAbsorb { pending: Box<Ratio> },
@@ -140,6 +143,24 @@ pub struct Covenant {
     pub window: u64,
 }
 
+/// COUNCIL-1 (12_UNION §7): a multilateral covenant — every member
+/// bound alike, judged together at the boundary.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Council {
+    pub council: u64,
+    pub members: Vec<u64>,
+    pub resource: Resource,
+    pub quota: Ratio,
+    /// Per-member deliveries INTO the council (transfers and bond flow
+    /// to fellow members), member-order matching `members`.
+    pub delivered: Vec<Ratio>,
+    /// The collateral each member locked (the same for all — bound
+    /// alike).
+    pub collateral: Ratio,
+    pub sealed: u64,
+    pub window: u64,
+}
+
 /// The committed projection — exactly what the chronicle grounds.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Committed {
@@ -153,6 +174,8 @@ pub struct Committed {
     pub bonds: Vec<Bond>,
     /// COVENANT-1: the open vitrified pacts, in sealing order.
     pub covenants: Vec<Covenant>,
+    /// COUNCIL-1: the open councils, in sealing order.
+    pub councils: Vec<Council>,
     /// TECH-1a: the discovered nodes — (orb, condition, node id) in
     /// discovery order; condition 0 is the kernel solar leap.
     pub techs: Vec<(u64, u8, [u8; 32])>,
@@ -188,6 +211,8 @@ pub struct World {
     bonds: Vec<Bond>,
     /// COVENANT-1: the open vitrified pacts (committed, same law).
     covenants: Vec<Covenant>,
+    /// COUNCIL-1: the open councils (committed, same law).
+    councils: Vec<Council>,
     /// IDEO-1 WORKSPACE, per orb: accrued ideological friction since
     /// the last seal — sealed by `FrictionSettled` at collect.
     friction_pending: Vec<(u64, Ratio)>,
@@ -214,6 +239,7 @@ impl World {
             debts: Vec::new(),
             bonds: Vec::new(),
             covenants: Vec::new(),
+            councils: Vec::new(),
             friction_pending: Vec::new(),
             techs: Vec::new(),
             crossed: false,
@@ -246,6 +272,7 @@ impl World {
             debts: committed.debts,
             bonds: committed.bonds,
             covenants: committed.covenants,
+            councils: committed.councils,
             friction_pending: Vec::new(),
             techs: committed.techs,
             crossed: committed.crossed,
@@ -394,6 +421,121 @@ impl World {
             ClosureEvent::Confluent { partner: partner.into(), gauge },
             SOVEREIGN,
         );
+    }
+
+    /// COUNCIL-1 (12_UNION §7) — seal a COUNCIL: a multilateral
+    /// covenant among three or more distinct orbs, every member bound
+    /// alike. Each locks the SAME collateral (a bank withdrawal, the
+    /// vitrified-vault law) against delivering ≥ quota to fellow
+    /// members within the window; the reckoning judges all together at
+    /// the boundary — the whole of the group over the needs of the
+    /// individual. Any member unable to lock refuses the WHOLE seal:
+    /// a council that starts unequal never starts.
+    pub fn seal_council(
+        &mut self,
+        council: u64,
+        members: Vec<u64>,
+        resource: Resource,
+        quota: Ratio,
+        window: u64,
+        collateral: Ratio,
+    ) -> Result<(), ActionRefused> {
+        let mut distinct = members.clone();
+        distinct.sort_unstable();
+        distinct.dedup();
+        if distinct.len() < 3
+            || distinct.len() != members.len()
+            || quota <= ratio(0, 1)
+            || collateral <= ratio(0, 1)
+            || window == 0
+            || self.councils.iter().any(|held| held.council == council)
+        {
+            return Err(ActionRefused::BadCouncil);
+        }
+        for member in &members {
+            if !self.orbs.iter().any(|held| held.orb_id == *member) {
+                return Err(ActionRefused::NoSuchOrb { orb: *member });
+            }
+        }
+        // Every member must afford its lock BEFORE any lock happens —
+        // a refusal moves nothing (the aperture discipline).
+        for member in &members {
+            let held = self
+                .orbs
+                .iter()
+                .find(|held| held.orb_id == *member)
+                .expect("checked");
+            let have = held.banked_amount(resource);
+            if have < collateral {
+                return Err(ActionRefused::CannotAfford {
+                    resource,
+                    need: Box::new(collateral.clone()),
+                    have: Box::new(have),
+                });
+            }
+        }
+        for member in &members {
+            let held = self
+                .orbs
+                .iter_mut()
+                .find(|held| held.orb_id == *member)
+                .expect("checked");
+            held.bank(resource, -collateral.clone());
+        }
+        let stamp = self.clock.now();
+        self.councils.push(Council {
+            council,
+            members: members.clone(),
+            resource,
+            quota: quota.clone(),
+            delivered: vec![ratio(0, 1); members.len()],
+            collateral: collateral.clone(),
+            sealed: stamp,
+            window,
+        });
+        self.close(
+            ClosureEvent::CouncilSealed { council, resource, quota, window, collateral, members },
+            SOVEREIGN,
+        );
+        Ok(())
+    }
+
+    /// COUNCIL-1: the open councils.
+    pub fn councils(&self) -> &[Council] {
+        &self.councils
+    }
+
+    /// COUNCIL-1 (12_UNION §7) — the WARRING IMPERIUM reading, derived
+    /// from the landed books and never stored: an orb whose extraction
+    /// runs past double its reciprocity while its breaches outweigh
+    /// its fulfilments has stepped outside the council's protection by
+    /// its own receipted conduct. Thresholds are placeholder
+    /// parameters (the 06 discipline).
+    pub fn is_imperial(&self, orb: u64) -> bool {
+        let Some(held) = self.orbs.iter().find(|held| held.orb_id == orb) else {
+            return false;
+        };
+        held.extracted_across > ratio(0, 1)
+            && held.extracted_across > ratio(2, 1) * held.returned_across.clone()
+            && held.covenants_breached > held.covenants_fulfilled
+    }
+
+    /// COUNCIL-1 (12_UNION §7) — the DIPLOMACY-FAILED reading: how
+    /// many council reckonings this orb has breached, straight from
+    /// the chronicle. The slash is the receipt that unbinds; until it
+    /// exists, the council holds.
+    pub fn council_breaches(&self, orb: u64) -> usize {
+        self.chronicle
+            .receipts()
+            .iter()
+            .filter(|receipt| {
+                matches!(
+                    &receipt.event,
+                    ClosureEvent::CouncilClosed { member, fulfilled: false, .. }
+                        if *member == orb
+                )
+            })
+            .count()
     }
 
     /// ELEVATE-1 (12_UNION §6) — THE THREE-GATE GAUGE CLIMB, the
@@ -876,6 +1018,68 @@ impl World {
                 self.chronicle.append(event, now, vec![]);
                 self.relieve_recovered(recipient);
             }
+            // COUNCIL-1: councils reckon at the BOUNDARY only — all
+            // members judged together (the group over the individual;
+            // no early release, no early slash). A breacher's
+            // collateral divides exactly among the faithful; if every
+            // member breached there is no aggrieved party — each
+            // collateral goes home, the breaches still post.
+            let boundary: Vec<u64> = self
+                .councils
+                .iter()
+                .filter(|pact| now >= pact.sealed + pact.window)
+                .map(|pact| pact.council)
+                .collect();
+            for id in boundary {
+                let at = self
+                    .councils
+                    .iter()
+                    .position(|pact| pact.council == id)
+                    .expect("due above");
+                let pact = self.councils.remove(at);
+                let verdicts: Vec<bool> =
+                    pact.delivered.iter().map(|given| *given >= pact.quota).collect();
+                let faithful = verdicts.iter().filter(|kept| **kept).count() as i64;
+                let breachers = pact.members.len() as i64 - faithful;
+                let share = match faithful {
+                    0 => ratio(0, 1),
+                    _ => pact.collateral.clone() * ratio(breachers, 1) / ratio(faithful, 1),
+                };
+                let weight = crate::dop::commensurate_weight(pact.resource);
+                for (seat, member) in pact.members.iter().enumerate() {
+                    let fulfilled = verdicts[seat];
+                    let banked = match (fulfilled, faithful) {
+                        (true, _) => pact.collateral.clone() + share.clone(),
+                        (false, 0) => pact.collateral.clone(),
+                        (false, _) => ratio(0, 1),
+                    };
+                    let stake = pact.collateral.clone() * weight.clone();
+                    if let Some(held) =
+                        self.orbs.iter_mut().find(|held| held.orb_id == *member)
+                    {
+                        if banked > ratio(0, 1) {
+                            held.bank(pact.resource, banked.clone());
+                        }
+                        match fulfilled {
+                            true => held.covenants_fulfilled += stake,
+                            false => held.covenants_breached += stake,
+                        }
+                    }
+                    self.chronicle.append(
+                        ClosureEvent::CouncilClosed {
+                            council: id,
+                            member: *member,
+                            fulfilled,
+                            banked,
+                        },
+                        now,
+                        vec![],
+                    );
+                    if fulfilled {
+                        self.relieve_recovered(*member);
+                    }
+                }
+            }
         }
         let mut struck = Vec::new();
         let mut overheat_struck = Vec::new();
@@ -1314,6 +1518,7 @@ impl World {
         settle_debts(&mut self.debts, &mut self.orbs, from, to, value.clone());
         // COVENANT-1: the delivery credits the open pact on this lane.
         credit_covenants(&mut self.covenants, from, to, resource, &amount);
+        credit_councils(&mut self.councils, from, to, resource, &amount);
         let friction = crate::dop::friction_rate() * divergence * value;
         if friction > ratio(0, 1) {
             match self
@@ -1523,6 +1728,7 @@ impl World {
             settle_debts(&mut self.debts, &mut self.orbs, source, target, value);
             // COVENANT-1: the stream credits the open pact on this lane.
             credit_covenants(&mut self.covenants, source, target, resource, &pay);
+            credit_councils(&mut self.councils, source, target, resource, &pay);
         }
         if ended {
             self.bonds.remove(at);
@@ -1808,6 +2014,7 @@ impl World {
             debts: self.debts.clone(),
             bonds: self.bonds.clone(),
             covenants: self.covenants.clone(),
+            councils: self.councils.clone(),
             techs: self.techs.clone(),
             crossed: self.crossed,
             gauge: self.gauge.clone(),
@@ -1979,6 +2186,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut debts: Vec<AbsorptionDebt> = Vec::new();
     let mut bonds: Vec<Bond> = Vec::new();
     let mut covenants: Vec<Covenant> = Vec::new();
+    let mut councils: Vec<Council> = Vec::new();
     let mut techs: Vec<(u64, u8, [u8; 32])> = Vec::new();
     let mut crossed = false;
     let mut gauge = ratio(0, 1);
@@ -2148,6 +2356,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 }
                 settle_debts(&mut debts, &mut orbs, *from_orb, *to_orb, value);
                 credit_covenants(&mut covenants, *from_orb, *to_orb, *resource, amount);
+                credit_councils(&mut councils, *from_orb, *to_orb, *resource, amount);
             }
             // NS-4 APERTURE: the source leg replays as a bank draw —
             // value left THIS world for another; last_touch anchors at
@@ -2254,6 +2463,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     }
                     settle_debts(&mut debts, &mut orbs, *source_orb, *target_orb, value);
                     credit_covenants(&mut covenants, *source_orb, *target_orb, *resource, amount);
+                    credit_councils(&mut councils, *source_orb, *target_orb, *resource, amount);
                 }
                 match severed {
                     true => {
@@ -2355,6 +2565,57 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             ClosureEvent::TechDiscovered { orb_id, node, condition, .. } => {
                 techs.push((*orb_id, *condition, *node));
             }
+            // COUNCIL-1: the seal replays whole — every member's lock
+            // withdraws; deliveries re-credit through the transfer and
+            // bond arms above.
+            ClosureEvent::CouncilSealed {
+                council, resource, quota, window, collateral, members,
+            } => {
+                for member in members {
+                    if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *member) {
+                        held.bank(*resource, -collateral.clone());
+                    }
+                }
+                councils.push(Council {
+                    council: *council,
+                    members: members.clone(),
+                    resource: *resource,
+                    quota: quota.clone(),
+                    delivered: vec![ratio(0, 1); members.len()],
+                    collateral: collateral.clone(),
+                    sealed: receipt.stamp,
+                    window: *window,
+                });
+            }
+            // COUNCIL-1: each member's reckoning banks exactly what
+            // the receipt carries; the integrity stake reads from the
+            // sealed council; the council leaves state when its last
+            // member has closed.
+            ClosureEvent::CouncilClosed { council, member, fulfilled, banked } => {
+                if let Some(at) = councils.iter().position(|pact| pact.council == *council) {
+                    let stake = councils[at].collateral.clone()
+                        * crate::dop::commensurate_weight(councils[at].resource);
+                    let resource = councils[at].resource;
+                    if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *member) {
+                        if *banked > ratio(0, 1) {
+                            held.bank(resource, banked.clone());
+                        }
+                        match fulfilled {
+                            true => held.covenants_fulfilled += stake,
+                            false => held.covenants_breached += stake,
+                        }
+                    }
+                    if let Some(seat) =
+                        councils[at].members.iter().position(|held| held == member)
+                    {
+                        councils[at].members.remove(seat);
+                        councils[at].delivered.remove(seat);
+                    }
+                    if councils[at].members.is_empty() {
+                        councils.remove(at);
+                    }
+                }
+            }
             // AEON-1a: every key move replays verbatim — the receipt
             // carries the wrapped value, the last one stands.
             ClosureEvent::GaugeShifted { gauge: key }
@@ -2369,7 +2630,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             }
         }
     }
-    Committed { orbs, entities, star, debts, bonds, covenants, techs, crossed, gauge }
+    Committed { orbs, entities, star, debts, bonds, covenants, councils, techs, crossed, gauge }
 }
 
 /// SINK-1 (Q2): the demurrage due on one orb's un-vaulted banked
@@ -2479,6 +2740,25 @@ fn credit_covenants(
     for pact in covenants.iter_mut() {
         if pact.obligor == from && pact.beneficiary == to && pact.resource == resource {
             pact.delivered += amount.clone();
+        }
+    }
+}
+
+/// COUNCIL-1: a delivery from one member to a FELLOW member credits
+/// the giver's council quota (transfers and bond flow alike — the
+/// covenant precedent, widened to the group).
+fn credit_councils(
+    councils: &mut [Council],
+    from: u64,
+    to: u64,
+    resource: Resource,
+    amount: &Ratio,
+) {
+    for pact in councils.iter_mut() {
+        if pact.resource == resource && pact.members.contains(&to) {
+            if let Some(at) = pact.members.iter().position(|member| *member == from) {
+                pact.delivered[at] += amount.clone();
+            }
         }
     }
 }

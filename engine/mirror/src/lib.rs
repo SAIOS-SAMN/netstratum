@@ -654,6 +654,27 @@ fn render_receipt(receipt: &Receipt) -> String {
             "tech_discovered",
             format!("{name} — orb {orb_id} condition {condition}"),
         ),
+        E::CouncilSealed { council, resource, quota, window, collateral, members } => (
+            "council_sealed",
+            format!(
+                "council {council}: {} members bound alike — {} {} quota, {} collateral, {window} ticks",
+                members.len(),
+                ratio_str(quota),
+                resource_name(*resource),
+                ratio_str(collateral)
+            ),
+        ),
+        E::CouncilClosed { council, member, fulfilled, banked } => (
+            "council_closed",
+            format!(
+                "council {council}: orb {member} {} — {} banked home",
+                match fulfilled {
+                    true => "kept faith",
+                    false => "breached",
+                },
+                ratio_str(banked)
+            ),
+        ),
         E::GaugeShifted { gauge } => {
             ("gauge_shifted", format!("the key moves to {}", ratio_str(gauge)))
         }

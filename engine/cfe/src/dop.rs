@@ -58,7 +58,9 @@
 //!   48 ClosureEvent::ApertureReceived (NS-4 APERTURE — the dest leg)
 //!   49–51 RESERVED for the market board (BUILD_ORDER §3a: OfferPosted,
 //!         OfferCleared, +1 — renumbered from the colliding 41–43)
-//!         — the next free tag outside reservations is 52.
+//!   52 ClosureEvent::CouncilSealed (COUNCIL-1 — the multilateral pact)
+//!   53 ClosureEvent::CouncilClosed (COUNCIL-1 — one member's reckoning)
+//!         — the next free tag outside reservations is 54.
 
 use crate::ratio::{self, ratio, Ratio};
 use crate::tlv;
@@ -458,6 +460,29 @@ pub enum ClosureEvent {
     /// parallel degree of the torus that cannot recur into this one.
     /// Nothing is destroyed; the fold is archival by construction.
     EraFolded { era: u64, gauge: Ratio },
+    /// COUNCIL-1 (12_UNION §7) — a COUNCIL seals: a multilateral
+    /// covenant among three or more orbs, every member bound alike —
+    /// each locks the same collateral against delivering ≥ quota to
+    /// fellow members within the window. The group overtakes the
+    /// individual: the reckoning judges all members together at the
+    /// boundary, never one at a time.
+    CouncilSealed {
+        council: u64,
+        resource: Resource,
+        quota: Ratio,
+        window: u64,
+        collateral: Ratio,
+        members: Vec<u64>,
+    },
+    /// COUNCIL-1 — one member's reckoning at the council boundary:
+    /// `banked` is exactly what returned to this member's bank (its
+    /// own collateral if faithful, plus its share of forfeits; a
+    /// breacher amid faithful members banks zero; if EVERY member
+    /// breached, each banks its collateral home — no aggrieved party,
+    /// the pact dissolves, the books still post). Replay banks the
+    /// carried amount verbatim; the integrity stake reads from the
+    /// sealed council.
+    CouncilClosed { council: u64, member: u64, fulfilled: bool, banked: Ratio },
     /// TECH-1a (10 §2.2) — a technology node enters the chronicle.
     /// `condition` 0 is the KERNEL solar leap (12_UNION §5a): a world's
     /// first thermal opt-in receipts that its people now know their
@@ -647,6 +672,24 @@ impl ClosureEvent {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 ratio::encode(amount, &mut value);
                 tlv::put(38, &value, &mut out);
+            }
+            Self::CouncilSealed { council, resource, quota, window, collateral, members } => {
+                let mut value = council.to_le_bytes().to_vec();
+                value.push(*resource as u8);
+                ratio::encode(quota, &mut value);
+                value.extend_from_slice(&window.to_le_bytes());
+                ratio::encode(collateral, &mut value);
+                for member in members {
+                    value.extend_from_slice(&member.to_le_bytes());
+                }
+                tlv::put(52, &value, &mut out);
+            }
+            Self::CouncilClosed { council, member, fulfilled, banked } => {
+                let mut value = council.to_le_bytes().to_vec();
+                value.extend_from_slice(&member.to_le_bytes());
+                value.push(*fulfilled as u8);
+                ratio::encode(banked, &mut value);
+                tlv::put(53, &value, &mut out);
             }
             Self::GaugeShifted { gauge } => {
                 let mut value = Vec::new();
@@ -858,6 +901,32 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let (amount, _) = ratio::decode(value.get(8..)?)?;
                 Some(Self::FrictionSettled { orb_id, amount })
+            }
+            52 => {
+                let council = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let resource = Resource::from_wire(*value.get(8)?)?;
+                let (quota, used) = ratio::decode(value.get(9..)?)?;
+                let mut at = 9 + used;
+                let window = u64::from_le_bytes(value.get(at..at + 8)?.try_into().ok()?);
+                at += 8;
+                let (collateral, used) = ratio::decode(value.get(at..)?)?;
+                at += used;
+                let rest = value.get(at..)?;
+                if rest.len() % 8 != 0 {
+                    return None;
+                }
+                let members = rest
+                    .chunks_exact(8)
+                    .map(|chunk| u64::from_le_bytes(chunk.try_into().expect("8 bytes")))
+                    .collect();
+                Some(Self::CouncilSealed { council, resource, quota, window, collateral, members })
+            }
+            53 => {
+                let council = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let member = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let fulfilled = *value.get(16)? != 0;
+                let (banked, _) = ratio::decode(value.get(17..)?)?;
+                Some(Self::CouncilClosed { council, member, fulfilled, banked })
             }
             42 => {
                 let (gauge, _) = ratio::decode(value)?;
