@@ -108,6 +108,21 @@ impl Resource {
 }
 
 /// Founding banks the bootstrap reserves (02 §2.1): 20 iron, 10 biomass.
+/// TECH-1b (10 §3): the condition table — the crystallized node's
+/// name, modifier kind, and magnitude per condition. Names are the
+/// table's renderings; the node ID underneath is the seeded-synthesis
+/// hash. One node per condition per orb, idempotent.
+pub fn tech_node_of(condition: u8) -> Option<(&'static str, u8, Ratio)> {
+    match condition {
+        1 => Some(("cryo-resonant insulation", 1, ratio(3, 4))),
+        2 => Some(("overflow discipline", 2, ratio(5, 4))),
+        3 => Some(("lattice deepening", 3, ratio(5, 4))),
+        4 => Some(("radiator doctrine", 4, ratio(5, 4))),
+        5 => Some(("long stores", 5, ratio(1, 2))),
+        _ => None,
+    }
+}
+
 pub fn founding_reserves() -> Vec<(Resource, Ratio)> {
     vec![
         (Resource::Iron, ratio(20, 1)),

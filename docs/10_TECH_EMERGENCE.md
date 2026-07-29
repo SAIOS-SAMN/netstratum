@@ -70,9 +70,30 @@ never per orb; node id seeded from the kernel name + the discovering orb
 THRESHOLD-1 licensing and the shield gate on. Pre-solar is a lawful state:
 an unsited world lives whole and simply carries no leap. Evidence: four
 witnesses (once-per-world, replay+resume, byte-exact round-trip, pre-solar
-lawful). **TECH-1b stays open:** the five crystallized conditions (§3),
-the heat-law modifiers, SINK-1's research/throttle gates, and the
-seeded-synthesis naming — the emergent tree, not the kernel.
+lawful).
+
+## 3b. TECH-1b LANDED (2026-07-29) — the crystallized tree
+
+The emergent tree: at every year-voice boundary each orb's chronicle is
+weighed against the §3 condition table, exactly — famine spans and
+overheat spans summed from strike/relief receipts, vent ratios from
+sealed `VentSettled` vs collected joule yield, surplus and lattice
+readings from committed state. A condition that holds crystallizes its
+node ONCE (idempotent per orb per condition); the node id is the seeded
+synthesis, `BLAKE3(chronicle root at crystallization ‖ orb ‖ condition)`
+— replay re-derives the identical node at the identical tick. All five
+modifiers apply multiplicatively at their landed parameters: heating burn
+×3/4 (insulation) · encasement throughput ×5/4 (discipline) · sink
+capture ×5/4 (deepening) · radiator ×5/4 (doctrine) · demurrage rate ×1/2
+(long stores, threaded through every touch and affordability read).
+Measured: the doctrine's boosted radiator closes a heat_net-1/2 world's
+budget exactly and the overheat CLEARS, while the same node only halves a
+heat_net-1 world's fire — crystallized nodes meet each world where it
+burns; no ladder ordered any of it. `TechLicensed` (tag 40) landed at
+PLANNER-1. **Still open, recorded:** end-to-end arc witnesses for
+Lattice Deepening and Long Stores (their hooks and table entries are
+landed and exercised by shape); the throttle-α policy action (steward
+side); word-table naming beyond the §3 canonical names.
 
 ## 4. Deferred, recorded
 

@@ -567,7 +567,7 @@ impl World {
         let settled = self.orbs.iter().all(|held| {
             held.famine.is_empty()
                 && !held.overheat
-                && demurrage_due(held, self.star, stamp)
+                && demurrage_due(held, self.star, stamp, &ease_of(&self.techs, held.orb_id))
                     .iter()
                     .all(|(_, due)| *due == ratio(0, 1))
         }) && self
@@ -587,6 +587,118 @@ impl World {
         self.gauge = gauge.clone();
         self.close(ClosureEvent::GaugeShifted { gauge }, SOVEREIGN);
         Ok(())
+    }
+
+    /// TECH-1b (10 §3): does a crystallization condition HOLD for this
+    /// orb at this stamp? Every reading is exact and receipt- or
+    /// state-derived — no shadow counters. Thresholds are the table's
+    /// placeholder parameters.
+    fn condition_holds(&self, orb: u64, condition: u8, now: u64) -> bool {
+        let Some(held) = self.orbs.iter().find(|held| held.orb_id == orb) else {
+            return false;
+        };
+        match condition {
+            // Joule famine survived ≥ 8 years TOTAL: closed strike →
+            // relief spans plus any open strike, summed from receipts.
+            1 => {
+                let mut total: u64 = 0;
+                let mut open: Option<u64> = None;
+                for receipt in self.chronicle.receipts() {
+                    match &receipt.event {
+                        ClosureEvent::FamineStruck {
+                            orb_id, resource: Resource::Joule, ..
+                        } if *orb_id == orb => open = open.or(Some(receipt.stamp)),
+                        ClosureEvent::FamineRelieved {
+                            orb_id, resource: Resource::Joule,
+                        } if *orb_id == orb => {
+                            if let Some(struck) = open.take() {
+                                total += receipt.stamp.saturating_sub(struck);
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+                if let Some(struck) = open {
+                    total += now.saturating_sub(struck);
+                }
+                total >= 480
+            }
+            // Overheat held ≥ 4 CONSECUTIVE years: the open strike's
+            // span, receipts alone.
+            2 => {
+                let mut open: Option<u64> = None;
+                for receipt in self.chronicle.receipts() {
+                    match &receipt.event {
+                        ClosureEvent::OverheatStruck { orb_id, .. } if *orb_id == orb => {
+                            open = open.or(Some(receipt.stamp));
+                        }
+                        ClosureEvent::OverheatCleared { orb_id } if *orb_id == orb => {
+                            open = None;
+                        }
+                        _ => {}
+                    }
+                }
+                open.is_some_and(|struck| now.saturating_sub(struck) >= 240)
+            }
+            // Vault sink banked ≥ threshold with zero demurrage due —
+            // a pure state reading at the boundary.
+            3 => {
+                held.banked_amount(Resource::Sink) >= ratio(100, 1)
+                    && demurrage_due(held, self.star, now, &ease_of(&self.techs, orb))
+                        .iter()
+                        .all(|(_, due)| *due == ratio(0, 1))
+            }
+            // High vent ratio sustained: over the last 4 years, sealed
+            // vents outweigh encased joule yield (and vents exist).
+            4 => {
+                let floor = now.saturating_sub(240);
+                let mut vented = ratio(0, 1);
+                let mut encased = ratio(0, 1);
+                for receipt in self.chronicle.receipts() {
+                    if receipt.stamp < floor {
+                        continue;
+                    }
+                    match &receipt.event {
+                        ClosureEvent::VentSettled { orb_id, amount } if *orb_id == orb => {
+                            vented += amount.clone();
+                        }
+                        ClosureEvent::YieldCollected {
+                            orb_id, resource: Resource::Joule, amount,
+                        } if *orb_id == orb => encased += amount.clone(),
+                        _ => {}
+                    }
+                }
+                vented > ratio(0, 1) && vented > encased
+            }
+            // Surplus held: banked joules cover 4× the ANNUAL heating
+            // bill (active zones × per-zone burn × the year voice) —
+            // and the cold is real (a bill exists).
+            5 => {
+                let active = held
+                    .zones
+                    .iter()
+                    .filter(|zone| held.zone_active(zone))
+                    .count() as i64;
+                if active == 0 {
+                    return false;
+                }
+                let bill_year =
+                    crate::dop::heating_per_zone() * ratio(active, 1) * ratio(60, 1);
+                let cold = match (self.star, &held.thermal) {
+                    (Some(class), Some(site)) => {
+                        let t4 = crate::thermal::t_eq4(
+                            &class.luminosity(),
+                            &site.albedo,
+                            &site.orbit_r,
+                        );
+                        t4 < crate::thermal::SubstrateBand::Mesic.bounds4().0
+                    }
+                    _ => false,
+                };
+                cold && held.banked_amount(Resource::Joule) >= ratio(4, 1) * bill_year
+            }
+            _ => false,
+        }
     }
 
     /// AEON-1a (11 §6): the star MOVES in its region — the class
@@ -1110,7 +1222,26 @@ impl World {
         let one = ratio(1, 1);
         let zero = ratio(0, 1);
         let stamp_now = self.clock.now();
+        // TECH-1b: each orb's crystallized boons, read once — [unused,
+        // insulation, discipline, deepening, doctrine, stores].
+        let boons: Vec<(u64, [bool; 6])> = flows
+            .iter()
+            .map(|(orb_id, _)| {
+                let mut held = [false; 6];
+                for (orb, condition, _) in &self.techs {
+                    if orb == orb_id && (*condition as usize) < 6 {
+                        held[*condition as usize] = true;
+                    }
+                }
+                (*orb_id, held)
+            })
+            .collect();
         for (orb_id, active) in &flows {
+            let boon = boons
+                .iter()
+                .find(|(held, _)| held == orb_id)
+                .map(|(_, held)| *held)
+                .unwrap_or([false; 6]);
             // THERMAL-1: the heat law, live only when the sun is
             // commissioned AND this orb is sited (the opt-in guard).
             let holder = self.orbs.iter().find(|held| held.orb_id == *orb_id);
@@ -1131,11 +1262,23 @@ impl World {
                 let factory: Ratio = active
                     .iter()
                     .fold(zero.clone(), |sum, zone| sum + zone.kind.factory_heat());
-                let heat_net = stellar_load + factory - radiator_base();
+                // TECH-1b: the doctrine crystallized — the radiator
+                // sheds at 5/4 (10 §3).
+                let radiator = match boon[4] {
+                    true => radiator_base() * ratio(5, 4),
+                    false => radiator_base(),
+                };
+                let heat_net = stellar_load + factory - radiator;
                 // ECON-J (05 §1.2): heating upkeep on a sub-mesic orb —
                 // every active zone burns joules against the cold.
                 if sub_mesic && !frozen && !active.is_empty() {
-                    let burn = crate::dop::heating_per_zone() * ratio(active.len() as i64, 1);
+                    let mut burn =
+                        crate::dop::heating_per_zone() * ratio(active.len() as i64, 1);
+                    // TECH-1b: insulation crystallized — the cold
+                    // bites at 3/4 (10 §3).
+                    if boon[1] {
+                        burn *= ratio(3, 4);
+                    }
                     accrue(&mut self.accrued, *orb_id, Resource::Joule, -burn);
                 }
                 // SINK-1 (05 §1.4): vault-band headroom is captured as
@@ -1148,8 +1291,13 @@ impl World {
                         .count() as i64;
                     if arrays > 0 {
                         let headroom = -heat_net.clone();
-                        let captured =
-                            headroom.min(crate::dop::sink_throughput() * ratio(arrays, 1));
+                        let mut lattice = crate::dop::sink_throughput() * ratio(arrays, 1);
+                        // TECH-1b: the lattice deepened — capture at
+                        // 5/4 (10 §3).
+                        if boon[3] {
+                            lattice *= ratio(5, 4);
+                        }
+                        let captured = headroom.min(lattice);
                         if captured > zero {
                             accrue(&mut self.accrued, *orb_id, Resource::Sink, captured);
                         }
@@ -1162,7 +1310,12 @@ impl World {
                         .iter()
                         .filter(|zone| zone.kind == ZoneKind::Encasement)
                         .count() as i64;
-                    let throughput = encasement_throughput() * ratio(shells, 1);
+                    let mut throughput = encasement_throughput() * ratio(shells, 1);
+                    // TECH-1b: discipline crystallized — the shells
+                    // encase at 5/4 (10 §3).
+                    if boon[2] {
+                        throughput *= ratio(5, 4);
+                    }
                     let encased = heat_net.clone().min(throughput);
                     if encased > zero {
                         accrue(&mut self.accrued, *orb_id, Resource::Joule, encased.clone());
@@ -1270,6 +1423,57 @@ impl World {
                 }
             }
         }
+        // TECH-1b (10 §2–§3): CRYSTALLIZATION at the year voice — on
+        // each year boundary every orb's chronicle is weighed against
+        // the condition table; a condition that holds crystallizes its
+        // node ONCE (idempotent per orb per condition). The node id is
+        // the seeded synthesis: BLAKE3(latest receipt digest ‖ orb ‖
+        // condition) — the chronicle root at the moment of
+        // crystallization, so replay re-derives the identical node at
+        // the identical tick. No randomness, no external calls.
+        if self.star.is_some() && stamp_now > 0 && stamp_now.is_multiple_of(60) {
+            let candidates: Vec<u64> = self.orbs.iter().map(|held| held.orb_id).collect();
+            for orb in candidates {
+                for condition in 1u8..=5 {
+                    if self
+                        .techs
+                        .iter()
+                        .any(|(held, kind, _)| *held == orb && *kind == condition)
+                    {
+                        continue;
+                    }
+                    if !self.condition_holds(orb, condition, stamp_now) {
+                        continue;
+                    }
+                    let (name, modifier, magnitude) =
+                        crate::dop::tech_node_of(condition).expect("1..=5 tabled");
+                    let mut seed = self
+                        .chronicle
+                        .receipts()
+                        .last()
+                        .expect("a ticking world has receipts")
+                        .own
+                        .0
+                        .to_vec();
+                    seed.extend_from_slice(&orb.to_le_bytes());
+                    seed.push(condition);
+                    let node: [u8; 32] = blake3::hash(&seed).into();
+                    self.techs.push((orb, condition, node));
+                    self.chronicle.append(
+                        ClosureEvent::TechDiscovered {
+                            orb_id: orb,
+                            node,
+                            condition,
+                            modifier,
+                            magnitude,
+                            name: name.into(),
+                        },
+                        stamp_now,
+                        vec![],
+                    );
+                }
+            }
+        }
         let attestations: [Attestation; 3] = [
             self.keepers[0].attest(&self.clock),
             self.keepers[1].attest(&self.clock),
@@ -1318,7 +1522,8 @@ impl World {
         let count = settleable.len();
         // SINK-1 (Q2): receipted demurrage at touch — un-vaulted banked
         // joules/sink decay for the elapsed span, settled openly.
-        touch(held, self.star, &mut self.chronicle, stamp);
+        let ease = ease_of(&self.techs, orb_id);
+        touch(held, self.star, &mut self.chronicle, stamp, &ease);
         // VENT-1: seal the pending vented entropy into the ledger.
         let mut vented = ratio(0, 1);
         self.vent_pending.retain(|(held_orb, pending)| match *held_orb == orb_id {
@@ -1449,7 +1654,7 @@ impl World {
                 .iter()
                 .find(|held| held.orb_id == from)
                 .expect("checked above");
-            let decay = demurrage_due(source, star, stamp)
+            let decay = demurrage_due(source, star, stamp, &ease_of(&self.techs, from))
                 .into_iter()
                 .find(|(due, _)| *due == resource)
                 .map(|(_, decay)| decay)
@@ -1492,12 +1697,13 @@ impl World {
         };
         // The touch, both sides (SINK-1), then the move.
         for orb in [from, to] {
+            let ease = ease_of(&self.techs, orb);
             let held = self
                 .orbs
                 .iter_mut()
                 .find(|held| held.orb_id == orb)
                 .expect("checked above");
-            touch(held, star, &mut self.chronicle, stamp);
+            touch(held, star, &mut self.chronicle, stamp, &ease);
         }
         let value = amount.clone() * crate::dop::commensurate_weight(resource);
         {
@@ -1687,7 +1893,7 @@ impl World {
                 .iter()
                 .find(|held| held.orb_id == source)
                 .expect("bond endpoints exist");
-            let decay = demurrage_due(held, star, stamp)
+            let decay = demurrage_due(held, star, stamp, &ease_of(&self.techs, source))
                 .into_iter()
                 .find(|(due, _)| *due == resource)
                 .map(|(_, decay)| decay)
@@ -1715,7 +1921,8 @@ impl World {
                     .iter_mut()
                     .find(|held| held.orb_id == orb)
                     .expect("bond endpoints exist");
-                touch(held, star, &mut self.chronicle, stamp);
+                let ease = ease_of(&self.techs, orb);
+                touch(held, star, &mut self.chronicle, stamp, &ease);
             }
             {
                 let held = self
@@ -1931,7 +2138,7 @@ impl World {
                 .iter()
                 .find(|held| held.orb_id == absorber)
                 .expect("checked above");
-            let decay = demurrage_due(held, star, stamp)
+            let decay = demurrage_due(held, star, stamp, &ease_of(&self.techs, absorber))
                 .into_iter()
                 .find(|(due, _)| *due == Resource::Sink)
                 .map(|(_, decay)| decay)
@@ -1961,7 +2168,8 @@ impl World {
                 .iter_mut()
                 .find(|held| held.orb_id == absorber)
                 .expect("checked above");
-            touch(held, star, &mut self.chronicle, stamp);
+            let ease = ease_of(&self.techs, absorber);
+            touch(held, star, &mut self.chronicle, stamp, &ease);
             held.bank(Resource::Sink, -amount.clone());
             held.entropy_vented += amount.clone();
             if source_crisis {
@@ -2131,7 +2339,7 @@ pub fn aperture_transfer(
     // stamp, computed pure, so a refusal moves nothing in either world.
     {
         let source = src.orbs.iter().find(|held| held.orb_id == from).expect("checked");
-        let decay = demurrage_due(source, src.star, src_stamp)
+        let decay = demurrage_due(source, src.star, src_stamp, &ease_of(&src.techs, from))
             .into_iter()
             .find(|(due, _)| *due == resource)
             .map(|(_, decay)| decay)
@@ -2148,7 +2356,8 @@ pub fn aperture_transfer(
     // The touch (SINK-1) then the debit, in the source world.
     {
         let source = src.orbs.iter_mut().find(|held| held.orb_id == from).expect("checked");
-        touch(source, src.star, &mut src.chronicle, src_stamp);
+        let ease = ease_of(&src.techs, from);
+        touch(source, src.star, &mut src.chronicle, src_stamp, &ease);
         source.bank(resource, -amount.clone());
     }
     src.chronicle.append(
@@ -2159,7 +2368,8 @@ pub fn aperture_transfer(
     // The touch then the credit, in the destination world.
     {
         let target = dst.orbs.iter_mut().find(|held| held.orb_id == to).expect("checked");
-        touch(target, dst.star, &mut dst.chronicle, dst_stamp);
+        let ease = ease_of(&dst.techs, to);
+        touch(target, dst.star, &mut dst.chronicle, dst_stamp, &ease);
         target.bank(resource, amount.clone());
     }
     dst.chronicle.append(
@@ -2738,10 +2948,21 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
 /// SINK-1 (Q2): the demurrage due on one orb's un-vaulted banked
 /// joules/sink at `stamp` — computed PURE; the caller applies and
 /// receipts (so a refused action never orphans a settlement).
+/// TECH-1b (10 §3): the Long Stores ease — 1/2 once condition 5 has
+/// crystallized for this orb, 1 otherwise. Derived from the tech
+/// list, never stored.
+fn ease_of(techs: &[(u64, u8, [u8; 32])], orb: u64) -> Ratio {
+    match techs.iter().any(|(held, condition, _)| *held == orb && *condition == 5) {
+        true => ratio(1, 2),
+        false => ratio(1, 1),
+    }
+}
+
 fn demurrage_due(
     orb: &ColonyOrb,
     star: Option<crate::thermal::StarClass>,
     stamp: u64,
+    ease: &Ratio,
 ) -> Vec<(Resource, Ratio)> {
     let mut due = Vec::new();
     if let (Some(class), Some(site)) = (star, &orb.thermal) {
@@ -2756,8 +2977,12 @@ fn demurrage_due(
                     // canonical denominator without bound (measured
                     // live: ~2^1100 after 220 beats). Flat keeps every
                     // denominator bounded by the rate's.
-                    let decay = (crate::dop::demurrage_per_tick() * elapsed.clone())
-                        .min(banked);
+                    // TECH-1b: Long Stores eases the rate (×1/2 when
+                    // crystallized; 1 otherwise) — still flat, still
+                    // bounded denominators.
+                    let decay = (crate::dop::demurrage_per_tick() * ease.clone()
+                        * elapsed.clone())
+                    .min(banked);
                     due.push((resource, decay));
                 }
             }
@@ -2774,8 +2999,9 @@ fn touch(
     star: Option<crate::thermal::StarClass>,
     chronicle: &mut Chronicle,
     stamp: u64,
+    ease: &Ratio,
 ) {
-    for (resource, decay) in demurrage_due(orb, star, stamp) {
+    for (resource, decay) in demurrage_due(orb, star, stamp, ease) {
         orb.bank(resource, -decay.clone());
         chronicle.append(
             ClosureEvent::DemurrageSettled { orb_id: orb.orb_id, resource, amount: decay },
