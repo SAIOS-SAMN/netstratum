@@ -152,6 +152,9 @@ pub struct Committed {
     /// an aperture leg? A world is a star system, so any leg is an
     /// interstellar deed; the first is the crossing (12_UNION §7).
     pub crossed: bool,
+    /// AEON-1a: the world's gauge key G — exact rational, wrapped on
+    /// the torus fiber [0, 1). Zero at genesis; moves only by receipt.
+    pub gauge: Ratio,
 }
 
 pub struct World {
@@ -185,6 +188,8 @@ pub struct World {
     techs: Vec<(u64, u8, [u8; 32])>,
     /// THRESHOLD-1: the crossing flag (committed, replay-derived).
     crossed: bool,
+    /// AEON-1a: the gauge key (committed, replay-derived, wrapped).
+    gauge: Ratio,
 }
 
 impl World {
@@ -204,6 +209,7 @@ impl World {
             friction_pending: Vec::new(),
             techs: Vec::new(),
             crossed: false,
+            gauge: ratio(0, 1),
         }
     }
 
@@ -235,6 +241,7 @@ impl World {
             friction_pending: Vec::new(),
             techs: committed.techs,
             crossed: committed.crossed,
+            gauge: committed.gauge,
         }
     }
 
@@ -337,6 +344,73 @@ impl World {
     /// the solar leap — the Watchers' charge, reachable by no aperture.
     pub fn is_shielded(&self) -> bool {
         !self.knows_its_sun()
+    }
+
+    /// AEON-1a: the world's gauge key G — wrapped exact rational on
+    /// the torus fiber. Zero at genesis ("G moves with the fiber
+    /// landings"); every move is a receipt.
+    pub fn gauge(&self) -> &Ratio {
+        &self.gauge
+    }
+
+    /// AEON-1a (11 §2.1): move the key. The value wraps onto [0, 1) —
+    /// the fiber is a circle, not a line; the receipted value is the
+    /// WRAPPED one, so replay never re-derives the wrap.
+    pub fn shift_gauge(&mut self, gauge: Ratio) {
+        let wrapped = wrap_gauge(gauge);
+        self.gauge = wrapped.clone();
+        self.close(ClosureEvent::GaugeShifted { gauge: wrapped }, SOVEREIGN);
+    }
+
+    /// AEON-1a (11 §3): DIVERGENCE — this line cleaves; a peer branch
+    /// departs under `branch`, and this world's own key moves by
+    /// `delta` (the branch takes the opposite phase in ITS chronicle —
+    /// annex, never merge; the caller founds it).
+    pub fn diverge(&mut self, branch: &str, delta: Ratio) {
+        let gauge = wrap_gauge(self.gauge.clone() + delta);
+        self.gauge = gauge.clone();
+        self.close(
+            ClosureEvent::Diverged { branch: branch.into(), gauge },
+            SOVEREIGN,
+        );
+    }
+
+    /// AEON-1a (11 §3): CONFLUENCE — this line combines with a bonded
+    /// partner; the key moves to the interference of both (the caller
+    /// computes the torus midpoint from both chronicles and passes it;
+    /// the receipt carries the wrapped result verbatim).
+    pub fn conflue(&mut self, partner: &str, midpoint: Ratio) {
+        let gauge = wrap_gauge(midpoint);
+        self.gauge = gauge.clone();
+        self.close(
+            ClosureEvent::Confluent { partner: partner.into(), gauge },
+            SOVEREIGN,
+        );
+    }
+
+    /// AEON-1a (11 §6): the star MOVES in its region — the class
+    /// steps, luminosity recomputes, and every sited orbit's T_eq⁴
+    /// shifts at the next tick. Movement, never a rung.
+    pub fn age_star(
+        &mut self,
+        class: crate::thermal::StarClass,
+    ) -> Result<(), ActionRefused> {
+        if self.star.is_none() {
+            return Err(ActionRefused::NoStarCommissioned);
+        }
+        self.star = Some(class);
+        self.close(ClosureEvent::StarAged { class: class as u8 }, SOVEREIGN);
+        Ok(())
+    }
+
+    /// AEON-1a (11 §5): the FOLD — seal this world's part in the
+    /// closing era and seat it on the new aeon's G-sheet (`base` is
+    /// the advanced base gauge). Archival by construction: the receipt
+    /// is the seal; rotation of the var root is the conductor's deed.
+    pub fn seal_fold(&mut self, era: u64, base: Ratio) {
+        let gauge = wrap_gauge(base);
+        self.gauge = gauge.clone();
+        self.close(ClosureEvent::EraFolded { era, gauge }, SOVEREIGN);
     }
 
     pub fn now(&self) -> u64 {
@@ -1686,6 +1760,7 @@ impl World {
             covenants: self.covenants.clone(),
             techs: self.techs.clone(),
             crossed: self.crossed,
+            gauge: self.gauge.clone(),
         }
     }
 
@@ -1841,6 +1916,12 @@ impl Default for World {
 
 /// Replay a chronicle into the committed projection it grounds
 /// (CHARTER SEAL B) — every orb, every entity, from receipts alone.
+/// AEON-1a: wrap a gauge value onto the torus fiber [0, 1) — exact
+/// rational modulo 1, no floats, no drift.
+pub fn wrap_gauge(gauge: Ratio) -> Ratio {
+    gauge.clone() - gauge.floor()
+}
+
 pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut orbs: Vec<ColonyOrb> = Vec::new();
     let mut entities: Vec<Entity> = Vec::new();
@@ -1850,6 +1931,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut covenants: Vec<Covenant> = Vec::new();
     let mut techs: Vec<(u64, u8, [u8; 32])> = Vec::new();
     let mut crossed = false;
+    let mut gauge = ratio(0, 1);
     for receipt in chronicle.receipts() {
         match &receipt.event {
             ClosureEvent::EntityRegistered { entity_id, principal, handle } => {
@@ -2223,9 +2305,21 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             ClosureEvent::TechDiscovered { orb_id, node, condition, .. } => {
                 techs.push((*orb_id, *condition, *node));
             }
+            // AEON-1a: every key move replays verbatim — the receipt
+            // carries the wrapped value, the last one stands.
+            ClosureEvent::GaugeShifted { gauge: key }
+            | ClosureEvent::Diverged { gauge: key, .. }
+            | ClosureEvent::Confluent { gauge: key, .. }
+            | ClosureEvent::EraFolded { gauge: key, .. } => {
+                gauge = key.clone();
+            }
+            // AEON-1a: the star moved in its region.
+            ClosureEvent::StarAged { class } => {
+                star = crate::thermal::StarClass::from_wire(*class);
+            }
         }
     }
-    Committed { orbs, entities, star, debts, bonds, covenants, techs, crossed }
+    Committed { orbs, entities, star, debts, bonds, covenants, techs, crossed, gauge }
 }
 
 /// SINK-1 (Q2): the demurrage due on one orb's un-vaulted banked

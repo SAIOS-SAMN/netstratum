@@ -654,6 +654,22 @@ fn render_receipt(receipt: &Receipt) -> String {
             "tech_discovered",
             format!("{name} — orb {orb_id} condition {condition}"),
         ),
+        E::GaugeShifted { gauge } => {
+            ("gauge_shifted", format!("the key moves to {}", ratio_str(gauge)))
+        }
+        E::Diverged { branch, gauge } => (
+            "diverged",
+            format!("cleaved — branch {branch} departs; the key moves to {}", ratio_str(gauge)),
+        ),
+        E::Confluent { partner, gauge } => (
+            "confluent",
+            format!("combined with {partner}; the key settles at {}", ratio_str(gauge)),
+        ),
+        E::StarAged { class } => ("star_aged", format!("the star moves — class {class}")),
+        E::EraFolded { era, gauge } => (
+            "era_folded",
+            format!("aeon {era} folds; the new sheet seats at {}", ratio_str(gauge)),
+        ),
         E::ApertureSent { deal, from_orb, resource, amount } => (
             "aperture_sent",
             format!(

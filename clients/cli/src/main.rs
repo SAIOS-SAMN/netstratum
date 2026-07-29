@@ -1645,6 +1645,28 @@ fn chronicle(world: &World, style: &Style) {
                 "⇋ ideological friction settled: {} entropy on orb {orb_id} — divergence has a handling cost",
                 style.strong(&amount(heat))
             ),
+            cfe::dop::ClosureEvent::GaugeShifted { gauge } => format!(
+                "♪ the key moves — this world now plays at {}",
+                style.strong(&amount(gauge))
+            ),
+            cfe::dop::ClosureEvent::Diverged { branch, gauge } => format!(
+                "⑂ the line cleaves — {} departs as a peer; our key moves to {}",
+                style.strong(branch),
+                style.strong(&amount(gauge))
+            ),
+            cfe::dop::ClosureEvent::Confluent { partner, gauge } => format!(
+                "⑃ two lines combine — with {}; the key settles at the interference, {}",
+                style.strong(partner),
+                style.strong(&amount(gauge))
+            ),
+            cfe::dop::ClosureEvent::StarAged { class } => format!(
+                "☀ the star moves in its region — class {} now lights every orbit",
+                style.strong(&format!("{class}"))
+            ),
+            cfe::dop::ClosureEvent::EraFolded { era, gauge } => format!(
+                "∞ aeon {era} folds — the universe seats a new sheet at {}",
+                style.strong(&amount(gauge))
+            ),
             cfe::dop::ClosureEvent::TechDiscovered { orb_id, name, condition, .. } => format!(
                 "✶ {} — orb {orb_id} (condition {condition}): a technology enters the chronicle",
                 style.strong(name)

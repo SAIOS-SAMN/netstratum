@@ -49,8 +49,11 @@
 //!      solar leap; 1–5 the crystallized nodes, the TECH-1b slice)
 //!   40 RESERVED for TechLicensed (10 §2.2 — blueprint trade, and
 //!      PLANNER-1's licensed leaps).
-//!   42–46 RESERVED for AEON-1 (11: GaugeShifted, Diverged, Confluent,
-//!         StarAged, EraFolded).
+//!   42 ClosureEvent::GaugeShifted (AEON-1a — the key moves)
+//!   43 ClosureEvent::Diverged (AEON-1a — the cleave, a peer branch)
+//!   44 ClosureEvent::Confluent (AEON-1a — the recombination)
+//!   45 ClosureEvent::StarAged (AEON-1a — the star moves in its region)
+//!   46 ClosureEvent::EraFolded (AEON-1a — the fold; base G advances)
 //!   47 ClosureEvent::ApertureSent (NS-4 APERTURE — the source leg)
 //!   48 ClosureEvent::ApertureReceived (NS-4 APERTURE — the dest leg)
 //!   49–51 RESERVED for the market board (BUILD_ORDER §3a: OfferPosted,
@@ -429,6 +432,32 @@ pub enum ClosureEvent {
     /// mover's vented ledger at its collect (the VentSettled shape):
     /// real entropy, the handling cost of divergent boundary policies.
     FrictionSettled { orb_id: u64, amount: Ratio },
+    /// AEON-1a (11 §2.1) — the world's KEY moved: its gauge phase G,
+    /// an exact rational wrapped on the torus fiber. Progression,
+    /// elevation (12_UNION §6), and crystallized tech all move in G;
+    /// replay takes the receipted value verbatim (already wrapped).
+    GaugeShifted { gauge: Ratio },
+    /// AEON-1a (11 §3) — DIVERGENCE: this line cleaved; a peer branch
+    /// (no parent, no child) departs under `branch`, and THIS world's
+    /// own key moves to `gauge` (the cleave IS a key change). The
+    /// branch founds its own chronicle — annex, never merge.
+    Diverged { branch: String, gauge: Ratio },
+    /// AEON-1a (11 §3) — CONFLUENCE: this line combined with a bonded
+    /// partner line; the key moves to `gauge` (the interference of
+    /// both — the midpoint on the torus). Earned via a sustained bond,
+    /// never free; the hybrid's own chronicle founds separately.
+    Confluent { partner: String, gauge: Ratio },
+    /// AEON-1a (11 §6) — the star MOVED in its region (mass ×
+    /// composition × age): the class steps, luminosity recomputes,
+    /// every bound orbit's T_eq⁴ shifts at the next tick. Movement in
+    /// a region, never a rung on a track.
+    StarAged { class: u8 },
+    /// AEON-1a (11 §5) — the FOLD: the era sealed and rotated into the
+    /// archive sequence; the receipt carries the era ordinal and the
+    /// NEW base gauge — the next aeon seats on its own G-sheet, a
+    /// parallel degree of the torus that cannot recur into this one.
+    /// Nothing is destroyed; the fold is archival by construction.
+    EraFolded { era: u64, gauge: Ratio },
     /// TECH-1a (10 §2.2) — a technology node enters the chronicle.
     /// `condition` 0 is the KERNEL solar leap (12_UNION §5a): a world's
     /// first thermal opt-in receipts that its people now know their
@@ -619,6 +648,31 @@ impl ClosureEvent {
                 ratio::encode(amount, &mut value);
                 tlv::put(38, &value, &mut out);
             }
+            Self::GaugeShifted { gauge } => {
+                let mut value = Vec::new();
+                ratio::encode(gauge, &mut value);
+                tlv::put(42, &value, &mut out);
+            }
+            Self::Diverged { branch, gauge } => {
+                let mut value = Vec::new();
+                ratio::encode(gauge, &mut value);
+                value.extend_from_slice(branch.as_bytes());
+                tlv::put(43, &value, &mut out);
+            }
+            Self::Confluent { partner, gauge } => {
+                let mut value = Vec::new();
+                ratio::encode(gauge, &mut value);
+                value.extend_from_slice(partner.as_bytes());
+                tlv::put(44, &value, &mut out);
+            }
+            Self::StarAged { class } => {
+                tlv::put(45, &[*class], &mut out);
+            }
+            Self::EraFolded { era, gauge } => {
+                let mut value = era.to_le_bytes().to_vec();
+                ratio::encode(gauge, &mut value);
+                tlv::put(46, &value, &mut out);
+            }
             Self::TechDiscovered { orb_id, node, condition, modifier, magnitude, name } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.extend_from_slice(node);
@@ -804,6 +858,26 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let (amount, _) = ratio::decode(value.get(8..)?)?;
                 Some(Self::FrictionSettled { orb_id, amount })
+            }
+            42 => {
+                let (gauge, _) = ratio::decode(value)?;
+                Some(Self::GaugeShifted { gauge })
+            }
+            43 => {
+                let (gauge, used) = ratio::decode(value)?;
+                let branch = String::from_utf8(value.get(used..)?.to_vec()).ok()?;
+                Some(Self::Diverged { branch, gauge })
+            }
+            44 => {
+                let (gauge, used) = ratio::decode(value)?;
+                let partner = String::from_utf8(value.get(used..)?.to_vec()).ok()?;
+                Some(Self::Confluent { partner, gauge })
+            }
+            45 => Some(Self::StarAged { class: *value.first()? }),
+            46 => {
+                let era = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let (gauge, _) = ratio::decode(value.get(8..)?)?;
+                Some(Self::EraFolded { era, gauge })
             }
             39 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
