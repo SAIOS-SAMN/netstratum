@@ -43,6 +43,7 @@ pub fn founding_egregores() -> Vec<EgregoreSpec> {
             star: Some(StarClass::G),
             albedo: Some(ratio(1, 2)),
             orbit: Some(ratio(1, 2)),
+            gauge: None,
         },
         // The mesic seats carry NO thermal fields: their orbits derive
         // at genesis from the registry axes through the chronicle
@@ -60,6 +61,7 @@ pub fn founding_egregores() -> Vec<EgregoreSpec> {
             star: None,
             albedo: None,
             orbit: None,
+            gauge: None,
         },
         EgregoreSpec {
             civilization: civ(
@@ -74,6 +76,7 @@ pub fn founding_egregores() -> Vec<EgregoreSpec> {
             star: None,
             albedo: None,
             orbit: None,
+            gauge: None,
         },
         EgregoreSpec {
             civilization: civ(
@@ -88,6 +91,7 @@ pub fn founding_egregores() -> Vec<EgregoreSpec> {
             star: None,
             albedo: None,
             orbit: None,
+            gauge: None,
         },
         // BOT-THERM: the Frost seat — an M sun at unit orbit lands in
         // the cryogenic vault (05 §1.2): sink banks, joules are life,
@@ -105,6 +109,7 @@ pub fn founding_egregores() -> Vec<EgregoreSpec> {
             star: Some(StarClass::M),
             albedo: Some(ratio(0, 1)),
             orbit: Some(ratio(1, 1)),
+            gauge: None,
         },
     ]
 }
@@ -187,6 +192,7 @@ pub fn load_egregores(path: &Path) -> Option<Vec<EgregoreSpec>> {
                 star: field("star").and_then(|word| parse_star(&word)),
                 albedo: field("albedo").and_then(|v| parse_ratio(&v)),
                 orbit: field("orbit").and_then(|v| parse_ratio(&v)),
+                gauge: field("gauge").and_then(|v| parse_ratio(&v)),
             })
         })();
         match parsed {

@@ -160,6 +160,7 @@ fn the_joule_runway_defers_the_frost() {
         star: Some(star),
         albedo: Some(ratio(0, 1)),
         orbit: Some(ratio(1, 1)),
+        gauge: None,
     };
     let mut frost = Egregore::genesis(seat("stillside", StarClass::M), &registry, &mirror);
     let mut mesic = Egregore::genesis(seat("plainside", StarClass::G), &registry, &mirror);

@@ -98,49 +98,86 @@ fn research_unlocks_industry() {
     assert!(smelting, "an earned rung turned surplus into smelters");
 }
 
-/// SPECIATION: a long era mints at least one daughter — lineage
-/// recorded in the registry, a mutated axis, a new world beating
-/// alongside its parent.
+/// DIVERGENCE (AEON-1b, 11 §3): a long era CLEAVES at least one line
+/// into peer branches — line membership recorded in the registry, one
+/// mutated axis, a new world beating alongside, and the KEYS move:
+/// the origin receipts `Diverged` (+delta) and the branch founds at
+/// the opposite phase — the branches are distinguishable on the G
+/// fiber, never a parent and a child.
 #[test]
-fn a_thriving_line_speciates() {
+fn a_thriving_line_diverges() {
     let root = scratch("speciate");
     let var = root.to_string_lossy().into_owned();
     let worlds = run_era(&var, 60);
     assert!(
         worlds.iter().any(|b| b.spec.civilization.lineage.is_some()),
-        "a daughter joined the board"
+        "a branch joined the board"
     );
 
     let registry = Registry::at(root.join("registry"));
-    let daughters: Vec<_> = registry
+    let branches: Vec<_> = registry
         .list()
         .into_iter()
         .filter(|c| c.lineage.is_some())
         .collect();
-    assert!(!daughters.is_empty(), "lineage recorded in the registry");
+    assert!(!branches.is_empty(), "line membership recorded in the registry");
 
-    for daughter in &daughters {
-        let parent = registry
-            .load(daughter.lineage.as_ref().expect("lineage"))
-            .expect("the parent exists");
+    for branch in &branches {
+        let origin = registry
+            .load(branch.lineage.as_ref().expect("line"))
+            .expect("the origin line exists");
         let mutations = [
-            daughter.disposition != parent.disposition,
-            daughter.metabolism != parent.metabolism,
-            daughter.perception != parent.perception,
+            branch.disposition != origin.disposition,
+            branch.metabolism != origin.metabolism,
+            branch.perception != origin.perception,
         ]
         .iter()
         .filter(|m| **m)
         .count();
-        assert_eq!(mutations, 1, "exactly one axis mutates per speciation");
-        assert!(daughter.species.contains("descendant"));
+        assert_eq!(mutations, 1, "exactly one axis mutates per cleave");
+        // PEERS: the species is the line's, whole — the daughter
+        // suffix is retired (11 §3).
+        assert!(!branch.species.contains("descendant"));
+        assert_eq!(branch.species, origin.species, "one line, one species");
     }
 
-    // The daughter's world is mirrored and beating.
+    // The keys moved: the origin receipts the cleave (+delta) and the
+    // branch world founds at the OPPOSITE phase — never both at zero.
     let newborn = worlds
         .iter()
         .find(|b| b.spec.civilization.lineage.is_some())
         .expect("newborn world");
-    assert!(newborn.world.now() > 0, "the daughter's clock runs");
+    let origin_world = worlds
+        .iter()
+        .find(|b| {
+            Some(&b.spec.civilization.slug)
+                == newborn.spec.civilization.lineage.as_ref()
+        })
+        .expect("the origin beats on");
+    let cleaved = origin_world.world.chronicle().receipts().iter().any(|r| {
+        matches!(
+            &r.event,
+            cfe::dop::ClosureEvent::Diverged { branch, .. }
+                if *branch == newborn.spec.civilization.slug
+        )
+    });
+    assert!(cleaved, "the origin receipted the cleave, naming its peer");
+    assert_ne!(
+        origin_world.world.gauge(),
+        &cfe::ratio::ratio(0, 1),
+        "the origin's key moved"
+    );
+    assert_ne!(
+        newborn.world.gauge(),
+        &cfe::ratio::ratio(0, 1),
+        "the branch founds at its cleaved key"
+    );
+    assert_ne!(
+        origin_world.world.gauge(),
+        newborn.world.gauge(),
+        "opposite phases — the branches never collide on the fiber"
+    );
+    assert!(newborn.world.now() > 0, "the branch's clock runs");
     assert!(root
         .join("worlds")
         .join(&newborn.spec.world_name)

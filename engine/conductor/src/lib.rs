@@ -54,6 +54,76 @@ use solver::{forge_task, solve, Difficulty, SolveRead};
 mod egregores;
 pub use egregores::{founding_egregores, load_egregores, write_default_egregores};
 
+/// AEON-1b (11 §5): THE FOLD — seal the live era and rotate it into
+/// the archive sequence. `EraFolded` (tag 46) appends to the universe
+/// ledger with the NEW base gauge (the next aeon seats on its own
+/// G-sheet — placeholder advance: era/12, wrapped), then the live
+/// `worlds/` and `registry/` move whole into `<base>-era<N>/` beside
+/// the var root. Nothing is destroyed — the fold is archival by
+/// construction; the next boot CONVERGES the sealed era, and the four
+/// C's read which trajectories continue. The roster file STAYS: the
+/// civilizations continue into the new aeon.
+pub fn fold(var_root: &str) -> std::io::Result<(u64, Ratio)> {
+    use cfe::vrp::Chronicle;
+    let root = std::path::PathBuf::from(var_root);
+    let base = root
+        .file_name()
+        .map(|n| n.to_string_lossy().into_owned())
+        .unwrap_or_else(|| "var".into());
+    let parent = match root.parent() {
+        Some(p) if p.as_os_str().is_empty() => std::path::PathBuf::from("."),
+        Some(p) => p.to_path_buf(),
+        None => std::path::PathBuf::from("."),
+    };
+    // The next era ordinal: one past the highest archived.
+    let mut era: u64 = 1;
+    if let Ok(entries) = std::fs::read_dir(&parent) {
+        for entry in entries.filter_map(|e| e.ok()) {
+            let name = entry.file_name().to_string_lossy().into_owned();
+            if let Some(n) = name.strip_prefix(&format!("{base}-era")) {
+                if let Ok(held) = n.parse::<u64>() {
+                    era = era.max(held + 1);
+                }
+            }
+        }
+    }
+    let worlds = root.join("worlds");
+    if !worlds.is_dir() {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            "no live worlds to fold",
+        ));
+    }
+    // Seal: EraFolded onto the universe ledger, base G advanced.
+    let ledger_path = worlds.join("convergence.tlv");
+    let mut ledger = match cfe::persist::load(&ledger_path) {
+        Ok(held) => held,
+        Err(_) => Chronicle::new(),
+    };
+    let gauge = cfe::world::wrap_gauge(ratio(era as i64, 12));
+    let stamp = ledger.receipts().iter().map(|r| r.stamp).max().unwrap_or(0);
+    ledger.append(
+        cfe::dop::ClosureEvent::EraFolded { era, gauge: gauge.clone() },
+        stamp,
+        vec![],
+    );
+    cfe::persist::sync(&ledger, &ledger_path)
+        .map_err(|e| std::io::Error::other(format!("{e:?}")))?;
+    // Rotate: the archive sequence gains the sealed era, whole.
+    let archive = parent.join(format!("{base}-era{era}"));
+    std::fs::create_dir_all(&archive)?;
+    std::fs::rename(&worlds, archive.join("worlds"))?;
+    let registry = root.join("registry");
+    if registry.is_dir() {
+        std::fs::rename(&registry, archive.join("registry"))?;
+    }
+    let roster = root.join("egregores.json");
+    if roster.is_file() {
+        std::fs::copy(&roster, archive.join("bots.json"))?;
+    }
+    Ok((era, gauge))
+}
+
 /// A build temperament — the only thing that differs between egregores.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Policy {
@@ -102,6 +172,9 @@ pub struct EgregoreSpec {
     pub albedo: Option<Ratio>,
     /// BOT-THERM: the orbit radius, pinned; `None` derives (see `star`).
     pub orbit: Option<Ratio>,
+    /// AEON-1b: the world's opening gauge key, wrapped [0, 1); `None`
+    /// founds at zero. A divergence branch carries its cleaved key.
+    pub gauge: Option<Ratio>,
 }
 
 /// One live egregore world: the sim, its contained actor, its research rung.
@@ -223,13 +296,23 @@ impl Egregore {
     /// place on the star-chart.
     pub fn genesis(spec: EgregoreSpec, registry: &Registry, mirror: &Mirror) -> Egregore {
         let _ = registry.create(&spec.civilization);
+        let opening = spec
+            .gauge
+            .clone()
+            .map(cfe::world::wrap_gauge)
+            .unwrap_or_else(|| ratio(0, 1));
         let _ = mirror.chart_world(
             &spec.world_name,
             (&spec.position.0, &spec.position.1, &spec.position.2),
-            &ratio(0, 1), // gauge phase: neutral at genesis; G moves with the fiber landings
+            // AEON-1b: a divergence branch charts at its cleaved key;
+            // everyone else founds neutral and G moves by receipt.
+            &opening,
         );
         let mut world = World::new();
         world.found(&spec.colony).expect("a fresh world founds");
+        if opening != ratio(0, 1) {
+            world.shift_gauge(opening.clone());
+        }
         let automaton = world
             .register_agent(&format!("{}-conductor", spec.civilization.slug))
             .expect("registers");
@@ -544,17 +627,25 @@ impl Egregore {
         }
     }
 
-    /// SPECIATION: at rung 5 with 20 confirmed solves, the parent's
-    /// latest receipt digest mints ONE daughter — a mutated axis, a
-    /// derived name, a new world, the parent's temperament. The
-    /// history chooses; nobody authors the child.
-    fn speciation_step(&mut self, registry: &Registry) -> Option<EgregoreSpec> {
+    /// DIVERGENCE (AEON-1b, 11 §3): at rung 5 with 20 confirmed
+    /// solves — sustained pressure — the line CLEAVES into two PEER
+    /// branches: no parent, no child. The origin's own key moves +delta
+    /// and receipts `Diverged` naming the departing branch; the branch
+    /// founds its own world at the opposite phase (−delta, wrapped).
+    /// The mutation stays chronicle-seeded: the line's own history
+    /// decides where its branches land on the manifold. The lineage
+    /// pointer records LINE membership (LINEAGE-1), never parenthood.
+    fn divergence_step(&mut self, registry: &Registry) -> Option<EgregoreSpec> {
         if self.spawned || self.level < 5 || self.solved < 20 {
             return None;
         }
         let receipt = self.world.chronicle().receipts().last()?;
         let beacon = Beacon::from_digest(receipt.own.0);
         let parent = &self.spec.civilization;
+        // The cleave IS a key change (11 §3): delta in 1/12..=5/12,
+        // beacon-drawn; the branches take opposite gauge phases.
+        let delta = ratio(1 + beacon.uniform_index("diverge.delta", 5) as i64, 12);
+        let origin_key = self.world.gauge().clone();
 
         // Which axis mutates, and to what (never to itself).
         let mutate = |current: &str, options: &[&str], domain: &str| -> String {
@@ -609,11 +700,14 @@ impl Egregore {
             .species
             .strip_suffix(" (descendant)")
             .unwrap_or(&parent.species);
-        let daughter = Civilization {
+        // A PEER, not a child: the species is the LINE's species,
+        // whole — no "(descendant)" suffix, no "child of" (11 §3
+        // retired the daughter).
+        let branch = Civilization {
             name,
             slug: slug.clone(),
-            species: format!("{root_species} (descendant)"),
-            motto: format!("child of {}", parent.name),
+            species: root_species.to_string(),
+            motto: format!("one line, two songs — cleaved from {}", parent.name),
             disposition,
             metabolism,
             perception,
@@ -621,8 +715,11 @@ impl Egregore {
             lineage: Some(parent.slug.clone()),
             station: None,
         };
-        registry.create(&daughter).ok()?;
+        registry.create(&branch).ok()?;
         self.spawned = true;
+        // The origin's key moves and the cleave is receipted, naming
+        // the departing branch (tag 43).
+        self.world.diverge(&slug, delta.clone());
 
         // The daughter settles ADJACENT: parent position plus a small
         // beacon-drawn displacement in the exact rationals per spatial axis (half-unit
@@ -635,7 +732,7 @@ impl Egregore {
             dx = ratio(1, 1);
         }
         Some(EgregoreSpec {
-            civilization: daughter,
+            civilization: branch,
             // Fresh themed world and planet — ancestry is a registry
             // fact and a star-chart adjacency, never a name chain.
             world_name: format!("{head}-{tail}"),
@@ -647,12 +744,14 @@ impl Egregore {
                 &self.spec.position.1 + dy,
                 &self.spec.position.2 + dz,
             ),
-            // BOT-THERM: a daughter's seat is never inherited — it is
-            // drawn from her OWN genesis chronicle (the mutated axes
+            // BOT-THERM: a branch's seat is never inherited — it is
+            // drawn from its OWN genesis chronicle (the mutated axes
             // may prefer another regime entirely).
             star: None,
             albedo: None,
             orbit: None,
+            // The opposite phase of the cleave (11 §3), wrapped.
+            gauge: Some(cfe::world::wrap_gauge(origin_key - delta)),
         })
     }
 
@@ -664,7 +763,7 @@ impl Egregore {
         self.world.tick();
         let _ = self.world.collect_as(self.automaton, cfe::world::FIRST_ORB);
         self.research_step(mirror);
-        let newborn = self.speciation_step(registry);
+        let newborn = self.divergence_step(registry);
         let _ = mirror.record(
             &self.spec.world_name,
             &self.spec.planet,

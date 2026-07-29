@@ -108,8 +108,16 @@ fn closes(program: &Program, task: &Task) -> bool {
         .all(|pair| run(program, &pair.input) == pair.output)
 }
 
+/// FORGE-BOUND: the deterministic search budget — a COUNT of candidate
+/// programs tested, never a clock. Same task, same outcome, bounded
+/// work: a seed whose solution lies past the budget reads Unsolved and
+/// the line rests that beat (measured live: an unbudgeted rung-5 seed
+/// cost 102 s of exhaustive search in one heartbeat).
+pub const SEARCH_BUDGET: usize = 200_000;
+
 /// Enumerative search over programs up to `max_depth` ops drawn from
 /// the general vocabulary plus operators derived from the observation.
+/// Bounded by `SEARCH_BUDGET` candidates, deterministically.
 pub fn solve(task: &Task, max_depth: usize) -> SolveRead {
     let mut vocabulary = vec![
         Op::Rotate90,
@@ -124,9 +132,14 @@ pub fn solve(task: &Task, max_depth: usize) -> SolveRead {
     vocabulary.extend(derived_tiles(task));
 
     // Depth 0: the identity word (a copy task is a lawful task).
+    let mut tested: usize = 0;
     let mut frontier: Vec<Program> = vec![Vec::new()];
     for _depth in 0..=max_depth {
         for program in &frontier {
+            tested += 1;
+            if tested > SEARCH_BUDGET {
+                return SolveRead::Unsolved;
+            }
             if closes(program, task) {
                 let test_output = run(program, &task.test_in);
                 let matches_expected =
@@ -140,9 +153,15 @@ pub fn solve(task: &Task, max_depth: usize) -> SolveRead {
                 };
             }
         }
-        let mut next = Vec::with_capacity(frontier.len() * vocabulary.len());
-        for program in &frontier {
+        // Never materialize past the budget — the frontier a beat
+        // cannot afford to test is a frontier it never builds.
+        let room = SEARCH_BUDGET.saturating_sub(tested) + 1;
+        let mut next = Vec::new();
+        'grow: for program in &frontier {
             for op in &vocabulary {
+                if next.len() >= room {
+                    break 'grow;
+                }
                 let mut extended = program.clone();
                 extended.push(op.clone());
                 next.push(extended);

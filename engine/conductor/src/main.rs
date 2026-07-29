@@ -1,7 +1,7 @@
 //! The conductor binary — the board's heartbeat.
 //!
 //! Usage:
-//!   conductor [--var var] [--cycles N] [--cadence SECONDS]
+//!   conductor [--var var] [--cycles N] [--cadence SECONDS] [--fold]
 //!
 //! Egregore lore lives in `<var>/egregores.json` — seeded with the founding
 //! NPCs on first run, then the operator's file to edit freely.
@@ -17,6 +17,7 @@ fn main() {
     let mut var_root = String::from("var");
     let mut cycles: u64 = 0;
     let mut cadence_secs: u64 = 2;
+    let mut do_fold = false;
     let mut args = std::env::args().skip(1);
     while let Some(flag) = args.next() {
         let mut value = || args.next().expect("flag value");
@@ -24,6 +25,7 @@ fn main() {
             "--var" => var_root = value(),
             "--cycles" => cycles = value().parse().expect("--cycles N"),
             "--cadence" => cadence_secs = value().parse().expect("--cadence SECONDS"),
+            "--fold" => do_fold = true,
             other => {
                 eprintln!("conductor: unknown flag {other}");
                 std::process::exit(2);
@@ -31,6 +33,23 @@ fn main() {
         }
     }
 
+    // AEON-1b (11 §5): the FOLD — seal the live era into the archive
+    // sequence and stop; the next boot converges it onto the new
+    // aeon's G-sheet. Nothing is destroyed.
+    if do_fold {
+        match conductor::fold(&var_root) {
+            Ok((era, gauge)) => {
+                println!(
+                    "conductor: aeon FOLDED — era {era} sealed into {var_root}-era{era}; the new sheet seats at G = {gauge}"
+                );
+                return;
+            }
+            Err(refusal) => {
+                eprintln!("conductor: the fold refused — {refusal}");
+                std::process::exit(1);
+            }
+        }
+    }
     std::fs::create_dir_all(&var_root).expect("var root");
     let egregores_path = PathBuf::from(&var_root).join("egregores.json");
     // Compat shim: an operator's pre-rename bots.json is honored —
@@ -91,7 +110,7 @@ fn main() {
         }
         for spec in newborns {
             println!(
-                "beat {beat}: SPECIATION — {} ({}) descends from {}, settling {}/{}",
+                "beat {beat}: DIVERGENCE — {} ({}) cleaves from the line of {}, settling {}/{}",
                 spec.civilization.name,
                 spec.civilization.species,
                 spec.civilization.lineage.as_deref().unwrap_or("?"),

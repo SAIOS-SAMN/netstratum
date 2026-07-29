@@ -236,9 +236,15 @@ pub fn solve_volume(task: &VolumeTask, max_depth: usize) -> VolumeSolveRead {
             .iter()
             .all(|(input, expected)| &run_volume(program, input) == expected)
     };
+    // FORGE-BOUND: the same deterministic budget as the planar path.
+    let mut tested: usize = 0;
     let mut frontier: Vec<VProgram> = vec![Vec::new()];
     for _depth in 0..=max_depth {
         for program in &frontier {
+            tested += 1;
+            if tested > crate::search::SEARCH_BUDGET {
+                return VolumeSolveRead::Unsolved;
+            }
             if closes(program) {
                 let test_output = run_volume(program, &task.test_in);
                 let matches_expected =
@@ -252,9 +258,13 @@ pub fn solve_volume(task: &VolumeTask, max_depth: usize) -> VolumeSolveRead {
                 };
             }
         }
-        let mut next = Vec::with_capacity(frontier.len() * vocabulary.len());
-        for program in &frontier {
+        let room = crate::search::SEARCH_BUDGET.saturating_sub(tested) + 1;
+        let mut next = Vec::new();
+        'grow: for program in &frontier {
             for op in &vocabulary {
+                if next.len() >= room {
+                    break 'grow;
+                }
                 let mut extended = program.clone();
                 extended.push(op.clone());
                 next.push(extended);
