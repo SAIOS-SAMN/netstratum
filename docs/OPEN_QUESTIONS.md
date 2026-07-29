@@ -126,6 +126,19 @@ dual-entry receipted ledgers with ratios derived at read (09 §1); friction
 as real entropy riding the landed VENT-1 machinery (09 §3.2); ideology
 export as ordinary covenant state machines (09 §3.3).
 
+**Addendum — the terminology resolution (operator ruling, 2026-07-29).**
+The reopening path below was taken, and the vector is RESOLVED without
+re-litigating the verdict: "unitary" stays rejected (continuous unitary
+transforms imply float operator arithmetic — wall 1 stands), but
+**morphodynamics is admitted in discrete form** as **Discrete Gauge
+Morphodynamics** — discrete group actions on the gauge fiber of
+TUniversal{S, G, T}, exact-rational, wrapped on the AEON twisted torus
+(11 §2.0), executed only as receipted `GaugeShifted` deeds (tag 42).
+Elevation is a gauge climb gated on three exact chronicle readings
+(thermodynamic settlement · four-C loop coherence · the interstellar
+crossing) — the full law is `12_UNION.md` §6. The torsion is structural,
+never a continuous field equation; no float leakage, SEAL B intact.
+
 **What could reopen this vector, honestly:** an exact-rational, replayable
 DISCRETE dynamic — richer covenant state machines, exact-rational policy
 evolution rules — at which point it is no longer "morphodynamics", just
