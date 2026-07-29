@@ -150,6 +150,7 @@ fn the_joule_runway_defers_the_frost() {
             perception: "planar".into(),
             founder: "conductor".into(),
             lineage: None,
+            station: None,
         },
         world_name: format!("{slug}-hold"),
         planet: format!("{slug}-p"),

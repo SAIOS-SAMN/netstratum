@@ -23,6 +23,7 @@ pub fn founding_egregores() -> Vec<EgregoreSpec> {
             perception: p.into(),
             founder: "conductor".into(),
             lineage: None,
+            station: None,
         }
     };
     vec![
@@ -168,6 +169,7 @@ pub fn load_egregores(path: &Path) -> Option<Vec<EgregoreSpec>> {
                     perception: field("perception")?,
                     founder: "conductor".into(),
                     lineage: field("lineage"),
+                    station: field("station"),
                 },
                 world_name: field("world")?,
                 planet: field("planet")?,

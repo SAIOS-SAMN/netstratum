@@ -23,6 +23,7 @@ fn main() {
         perception: "planar".into(),
         founder: "operator".into(),
         lineage: None,
+        station: None,
     });
     let _ = registry.create(&Civilization {
         name: "Deep Chorus".into(),
@@ -34,6 +35,7 @@ fn main() {
         perception: "harmonic".into(),
         founder: "operator".into(),
         lineage: None,
+        station: None,
     });
 
     // Humans settle mars, in the sol world: the aggressive opening.

@@ -619,6 +619,7 @@ impl Egregore {
             perception,
             founder: "conductor".into(),
             lineage: Some(parent.slug.clone()),
+            station: None,
         };
         registry.create(&daughter).ok()?;
         self.spawned = true;

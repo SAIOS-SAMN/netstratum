@@ -42,6 +42,7 @@ fn humans() -> Civilization {
         perception: "planar".into(),
         founder: "operator".into(),
         lineage: None,
+        station: None,
     }
 }
 
@@ -272,12 +273,73 @@ fn a_lineage_resolves_to_its_own_head() {
     // The domain reading: metabolism + band, the founding four + the
     // visible-next; a tardigrade line under a Furnace sun elevates
     // toward the THERMAL seats — never toward an alien physiology.
+    // (BAND-1 seat witnesses live in `the_seats_are_space_not_rank`.)
     assert_eq!(lineage_domain("mineral", Some(Band::HyperThermal)), "thermal");
     assert_eq!(lineage_domain("mineral", None), "lithic");
     assert_eq!(lineage_domain("biotic", Some(Band::Cryogenic)), "cryo");
     assert_eq!(lineage_domain("biotic", Some(Band::Mesic)), "mesic");
     assert_eq!(lineage_domain("biotic", None), "mesic");
     assert_eq!(lineage_domain("plasmic", Some(Band::HyperThermal)), "plasmic");
+}
+
+/// BAND-1 (12_UNION §1–§3): seats are SPACE, not rank. A progenitor
+/// species holds 8 seats PER LINEAGE DOMAIN — the ninth mineral-line
+/// claim refuses with the room named full, while a biotic-line seat
+/// still opens (the band grows by domains). An unknown office refuses
+/// typed; a stationless people is the common, lawful state; the seat
+/// round-trips whole.
+#[test]
+fn the_seats_are_space_not_rank() {
+    use mirror::registry::RegistryRefused;
+    let root = scratch("registry-band");
+    let registry = Registry::at(&root);
+
+    // Fill the lithic progenitor room: 8 mineral-line seats.
+    for n in 0..8 {
+        let mut elder = humans();
+        elder.name = format!("Elder {n}");
+        elder.slug = format!("elder-{n}");
+        elder.metabolism = "mineral".into();
+        elder.station = Some("progenitor".into());
+        registry.create(&elder).expect("a seat stands open");
+    }
+    // The ninth: the room is FULL — a room filled, not a rank refused.
+    let mut ninth = humans();
+    ninth.slug = "ninth".into();
+    ninth.metabolism = "mineral".into();
+    ninth.station = Some("progenitor".into());
+    assert_eq!(
+        registry.create(&ninth),
+        Err(RegistryRefused::NoSeatOpen {
+            station: "progenitor".into(),
+            domain: "lithic".into(),
+            held: 8,
+            width: 8,
+        })
+    );
+
+    // A DIFFERENT domain still seats — the band grows by domains.
+    let mut warm = humans();
+    warm.slug = "warm-elder".into();
+    warm.station = Some("progenitor".into());
+    registry.create(&warm).expect("the mesic room stands open");
+    assert_eq!(
+        registry.load("warm-elder").expect("loads").station.as_deref(),
+        Some("progenitor"),
+        "the seat round-trips whole"
+    );
+
+    // An unknown office refuses typed; no station is the common state.
+    let mut odd = humans();
+    odd.slug = "odd".into();
+    odd.station = Some("emperor".into());
+    assert_eq!(
+        registry.create(&odd),
+        Err(RegistryRefused::UnknownStation { given: "emperor".into() })
+    );
+    let mut common = humans();
+    common.slug = "common".into();
+    registry.create(&common).expect("a stationless people registers");
 }
 
 /// The star-chart holds TUniversal{S, G}: exact-rational S = (x, y, z) on

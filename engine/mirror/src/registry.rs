@@ -21,6 +21,27 @@ pub const DISPOSITIONS: [&str; 3] = ["expansionist", "empiricist", "epicurean"];
 pub const METABOLISMS: [&str; 3] = ["mineral", "biotic", "plasmic"];
 pub const PERCEPTIONS: [&str; 4] = ["planar", "volumetric", "harmonic", "umbral"];
 
+/// BAND-1 (12_UNION §2–§3): the class STATIONS — offices in the
+/// union, never ranks. Append-only like the axes. A civilization with
+/// no station is simply a people of the bands (the common, lawful
+/// state).
+pub const STATIONS: [&str; 4] = ["progenitor", "watcher", "observer", "sovereign"];
+
+/// BAND-1 (12_UNION §1): a station's seat width — SPACE AVAILABLE,
+/// not rank. `None` is unbounded (every charter-holding civilization
+/// is a Sovereign). Progenitor width is PER LINEAGE DOMAIN (8 seats
+/// per species, 12_UNION §2 — domains open as substrates elevate, so
+/// the band grows by domains, not by widening). Constants are
+/// placeholder parameters; the fiber-growth reading (capacity as a
+/// function of minted planes) awaits AEON-1b's plane surface.
+pub fn seat_width(station: &str) -> Option<u64> {
+    match station {
+        "progenitor" => Some(8),
+        "watcher" | "observer" => Some(16),
+        _ => None,
+    }
+}
+
 /// One civilization: a species-level identity spanning worlds.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Civilization {
@@ -37,6 +58,9 @@ pub struct Civilization {
     /// The parent civilization's slug, for speciated descendants —
     /// registry-recorded now, receipted at G1 like all identity.
     pub lineage: Option<String>,
+    /// BAND-1: the class station held, if any (12_UNION §2–§3) —
+    /// validated against `STATIONS`, seated only through an open seat.
+    pub station: Option<String>,
 }
 
 /// Typed refusals of registration.
@@ -46,6 +70,12 @@ pub enum RegistryRefused {
     AlreadyRegistered { slug: String },
     /// An axis value outside the closed vocabulary, named.
     UnknownAxis { axis: &'static str, given: String },
+    /// BAND-1 — a station outside the closed office vocabulary.
+    UnknownStation { given: String },
+    /// BAND-1 — the space-available law: the station's seats stand
+    /// full for this lineage domain. Not a rank refused — a room
+    /// filled; the band grows as the universe does.
+    NoSeatOpen { station: String, domain: String, held: u64, width: u64 },
     Io(String),
 }
 
@@ -74,6 +104,33 @@ impl Registry {
                 });
             }
         }
+        // BAND-1: a claimed station must be a known office with an
+        // open seat (the space-available law) — checked at the door.
+        if let Some(station) = &civilization.station {
+            if !STATIONS.contains(&station.as_str()) {
+                return Err(RegistryRefused::UnknownStation { given: station.clone() });
+            }
+            let domain = lineage_domain(&civilization.metabolism, None);
+            if let Some(width) = seat_width(station) {
+                let held = self
+                    .list()
+                    .iter()
+                    .filter(|seated| {
+                        seated.station.as_deref() == Some(station.as_str())
+                            && (station != "progenitor"
+                                || lineage_domain(&seated.metabolism, None) == domain)
+                    })
+                    .count() as u64;
+                if held >= width {
+                    return Err(RegistryRefused::NoSeatOpen {
+                        station: station.clone(),
+                        domain: domain.into(),
+                        held,
+                        width,
+                    });
+                }
+            }
+        }
         let path = self.root.join(format!("{}.json", civilization.slug));
         if path.exists() {
             return Err(RegistryRefused::AlreadyRegistered {
@@ -97,6 +154,9 @@ impl Registry {
         if let Some(lineage) = &civilization.lineage {
             w.field_str("lineage", lineage);
         }
+        if let Some(station) = &civilization.station {
+            w.field_str("station", station);
+        }
         w.close();
         let mut text = w.finish();
         text.push('\n');
@@ -117,6 +177,7 @@ impl Registry {
             perception: extract_string(&text, "perception")?,
             founder: extract_string(&text, "founder").unwrap_or_default(),
             lineage: extract_string(&text, "lineage"),
+            station: extract_string(&text, "station"),
         })
     }
 
