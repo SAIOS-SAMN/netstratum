@@ -615,6 +615,34 @@ verb would violate 11 §3), and world-level `seal_fold` (the board-level
 fold is the conductor's `--fold` / `t0 contract`; the per-world seal
 joins a future per-world fold flow).
 
+## 3a-quater. The second look (2026-07-30) — the summit and the sheets
+
+Two holes found above the wiring audit's floor, both closed:
+
+- **Upward advancement now reaches FRUITION.** The climb had no summit:
+  no deed claimed a seat. `Registry::seat` lands (promotion through the
+  same door as creation — known office, open room, progenitors per
+  domain) and the CLI `ascend <sigil> to <station>` gates it on the
+  world's own receipts (crossed + a receipted climb). Proven live end
+  to end: leap → loop → crossing → `elevate` SUCCEEDS (the key plays at
+  1/6) → the line ASCENDS to a watcher seat. A seat is reached, never
+  appointed — now mechanically true.
+- **Dimensional collapse now separates the sheets.** The fold WROTE the
+  advanced base gauge but convergence never READ it — every aeon
+  stacked at one G-height, the exact recurrence collision 11 §2.0
+  exists to prevent. Wired both ways: convergence seats each annexed
+  era at its sheet (`(N−1)/12` from the era ordinal, the world's own
+  key riding above), and the LIVE aeon geneses on the sheet above every
+  archive (base = archived-count/12). Pinned: two lived-and-folded
+  aeons chart the same world at DIFFERENT G-heights; the third
+  convergence re-creates a live board so the walk continues; only a
+  truly empty root refuses the fold.
+
+Expansion's counter-force (the manifold dual made mechanical): the
+occupancy caps and four-C fold-eligibility remain the recorded open
+half of AEON-1b — expansion is bounded today by seats and the fold,
+not yet by the trajectory reading.
+
 ## 3b. The union board (12_UNION — the world-book of the new aeon)
 
 Design authority `12_UNION.md` (eight operator rulings, 2026-07-29). NOT a

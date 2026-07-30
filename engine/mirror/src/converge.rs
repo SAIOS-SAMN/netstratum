@@ -13,6 +13,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use cfe::dop::ClosureEvent;
+use cfe::world::wrap_gauge;
 use cfe::persist;
 use cfe::ratio::{ratio, Ratio};
 use cfe::tlv;
@@ -200,6 +201,14 @@ pub fn converge(mirror: &Mirror, eras: &[(String, PathBuf)]) -> std::io::Result<
                 gauge: fold.gauge.add(&window.gauge),
             };
             let (x, y, z, g) = project(&placed);
+            // THE SHEET SEATING (11 §5.2, wired 2026-07-30): each
+            // annexed aeon seats on its OWN G-sheet — the era ordinal
+            // fixes the base (era N lived on sheet (N−1)/12, the fold
+            // law's placeholder advance), and the world's own key
+            // rides above it. Without this offset every aeon stacks
+            // at one G-height — the recurrence collision 11 §2.0
+            // exists to prevent.
+            let g = wrap_gauge(g + sheet_base(era));
             let chart_name = format!("{era}--{world}");
             mirror.chart_world(&chart_name, (&x, &y, &z), &g)?;
             write_fiber_card(&mirror.root, &chart_name, &residual)?;
@@ -228,6 +237,18 @@ pub fn converge(mirror: &Mirror, eras: &[(String, PathBuf)]) -> std::io::Result<
 
 /// The terminal window W (07 §2, placeholder — tunes at balance time).
 const TERMINAL_WINDOW: usize = 8;
+
+/// 11 §5.2: the G-sheet an archived era lived on — its ordinal read
+/// from the `<base>-era<N>` name, seated at (N−1)/12 wrapped (the
+/// fold law's placeholder advance). An unnumbered era reads sheet 0.
+fn sheet_base(era: &str) -> Ratio {
+    let ordinal = era
+        .rsplit("-era")
+        .next()
+        .and_then(|n| n.parse::<i64>().ok())
+        .unwrap_or(1);
+    wrap_gauge(ratio(ordinal - 1, 12))
+}
 
 /// CONGRUENCE (07 §2): each decoded event deposits an exact-rational
 /// shear onto the three axes. Unknown events deposited nothing before

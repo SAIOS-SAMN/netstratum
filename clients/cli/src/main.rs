@@ -501,6 +501,59 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 ),
             }
         }
+        // THE ASCENSION (the second-look audit, 2026-07-30): the deed
+        // upward advancement was missing — a line that leapt, crossed,
+        // and climbed can now CLAIM its seat. The world's own receipts
+        // are the evidence (crossed + at least one receipted climb);
+        // the registry checks the room (space, never rank).
+        Some("ascend") => {
+            let target = words.next().map(str::to_string);
+            let station = match (words.next(), words.next()) {
+                (Some("to"), Some(word)) => Some(word.to_string()),
+                _ => None,
+            };
+            match (target, station) {
+                (Some(sigil), Some(station)) => {
+                    if !world.has_crossed() {
+                        println!(
+                            "{} the seat is reached, never appointed — this world has not crossed the void ({} first)",
+                            style.bad("✗"),
+                            style.strong("aperture …")
+                        );
+                        return;
+                    }
+                    if world.gauge() == &cfe::ratio::ratio(0, 1) {
+                        println!(
+                            "{} the seat is reached through the climb — no receipted ascent stands ({} first)",
+                            style.bad("✗"),
+                            style.strong("elevate <delta>")
+                        );
+                        return;
+                    }
+                    let registry = mirror::registry::Registry::at("var/registry");
+                    match registry.seat(&sigil, &station) {
+                        Ok(()) => println!(
+                            "{} {} ASCENDS — the {} seat is taken; a seat reached, never appointed",
+                            style.ok("✶"),
+                            style.strong(&sigil),
+                            style.strong(&station)
+                        ),
+                        Err(mirror::registry::RegistryRefused::NoSeatOpen {
+                            station, domain, held, width,
+                        }) => println!(
+                            "{} the {station} room for the {domain} domain stands FULL ({held}/{width}) — the band grows as the universe does",
+                            style.bad("✗")
+                        ),
+                        Err(refusal) => println!("{} the ascension refused: {refusal:?}", style.bad("✗")),
+                    }
+                }
+                _ => println!(
+                    "{} usage: {}",
+                    style.bad("✗"),
+                    style.strong("ascend <sigil> to <station>")
+                ),
+            }
+        }
         // THE CONSTELLATION (operator ruling 2026-07-30): the base-7
         // stack as this line's own sky — held nodes glow with their
         // voice-names, timers show exact progress, the crown shows
@@ -1723,11 +1776,13 @@ fn help(style: &Style) {
         ("council <id> <res> <quota> <win> <stake> with <p,p,p>", "seal a multilateral covenant — three or more planets bound alike, judged together at the boundary"),
         ("aperture <amt> <res> to <world> deal <n>", "cross banked value into another saved world — two legs, one deal, both chronicles sealed at once"),
         ("license <cond> to <world> via <council> deal <n>", "issue a technology into another world through diplomacy; condition 6 gifts THE CROWN onto a finished base-7 stack"),
+        ("ascend <sigil> to <station>", "claim a station seat for a line whose world has crossed and climbed — the registry checks the room; a seat is reached, never appointed"),
         ("tech", "the constellation: this line's base-7 sky — held nodes with their voice-names, exact progress toward what has not crystallized, the crown's gate"),
         ("elevate <delta> · age <class>", "the union verbs on this world: the three-gate gauge climb (settle · cohere · cross), and the star moving in its region"),
         ("council <id> <res> <quota> <win> <stake> with <p,p,p>", "seal a multilateral covenant — three or more planets bound alike, judged together at the boundary"),
         ("aperture <amt> <res> to <world> deal <n>", "cross banked value into another saved world — two legs, one deal, both chronicles sealed at once"),
         ("license <cond> to <world> via <council> deal <n>", "issue a technology into another world through diplomacy; condition 6 gifts THE CROWN onto a finished base-7 stack"),
+        ("ascend <sigil> to <station>", "claim a station seat for a line whose world has crossed and climbed — the registry checks the room; a seat is reached, never appointed"),
         ("tech", "the constellation: this line's base-7 sky — held nodes with their voice-names, exact progress toward what has not crystallized, the crown's gate"),
         ("terraform <albedo> <orbit>", "the gifted crown (base-7 complete + licensed from tier 0): re-seat a sited planet — the only lawful way an orbit moves"),
         ("npcs [pause|resume|speed <s>]", "the player\'s hand on the autonomous board — pause holds every egregore world, speed sets seconds between beats (0 = flat out); bare npcs shows the state"),

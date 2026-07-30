@@ -838,9 +838,15 @@ pub fn run_era(var_root: &str, cycles: u32) -> Vec<Egregore> {
     let epoch_base = mirror::converge::converge(&mirror, &eras)
         .map(|read| read.epoch_base)
         .unwrap_or(0);
+    // 11 §5.2: the live aeon's G-sheet (see main.rs — same law).
+    let live_base = cfe::world::wrap_gauge(ratio(eras.len() as i64, 12));
     let mut worlds: Vec<Egregore> = egregores::founding_egregores()
         .into_iter()
-        .map(|spec| Egregore::genesis(spec, &registry, &mirror))
+        .map(|mut spec| {
+            let opening = spec.gauge.take().unwrap_or_else(|| ratio(0, 1));
+            spec.gauge = Some(cfe::world::wrap_gauge(opening + live_base.clone()));
+            Egregore::genesis(spec, &registry, &mirror)
+        })
         .collect();
     for beat in 0..cycles {
         // TUniversal T = epoch base + this era's beat (07 §1.3).

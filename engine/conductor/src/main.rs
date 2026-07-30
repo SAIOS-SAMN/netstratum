@@ -81,9 +81,22 @@ fn main() {
     }
     let epoch_base = converged.epoch_base;
 
+    // 11 §5.2 (wired 2026-07-30): the LIVE aeon seats on its own
+    // G-sheet, above every archived one — sheet N/12 with N archived
+    // eras (the fold law's placeholder advance). Spec keys ride above
+    // the base; without this the live board would stack onto the
+    // folded aeons' height and recur.
+    let live_base = cfe::world::wrap_gauge(cfe::ratio::ratio(eras.len() as i64, 12));
     let mut worlds: Vec<Egregore> = specs
         .into_iter()
-        .map(|spec| Egregore::genesis(spec, &registry, &mirror))
+        .map(|mut spec| {
+            let opening = spec
+                .gauge
+                .take()
+                .unwrap_or_else(|| cfe::ratio::ratio(0, 1));
+            spec.gauge = Some(cfe::world::wrap_gauge(opening + live_base.clone()));
+            Egregore::genesis(spec, &registry, &mirror)
+        })
         .collect();
     println!(
         "conductor: {} civilizations from {} — {}",

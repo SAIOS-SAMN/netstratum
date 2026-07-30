@@ -225,6 +225,47 @@ pub fn lineage_domain(
 }
 
 impl Registry {
+    /// BAND-1 fruition (the second-look audit, 2026-07-30): CLAIM a
+    /// STATION SEAT for an existing line — the deed upward advancement
+    /// was missing. Same door as creation: the office must be known,
+    /// the room must stand open (progenitors per lineage domain); the
+    /// card rewrites with the seat taken. Elevation's gates are the
+    /// CALLER's evidence (the world's receipts); the registry checks
+    /// the room.
+    pub fn seat(&self, slug: &str, station: &str) -> Result<(), RegistryRefused> {
+        let mut card = self.load(slug).ok_or_else(|| RegistryRefused::Io(
+            format!("no such line: {slug}"),
+        ))?;
+        if !STATIONS.contains(&station) {
+            return Err(RegistryRefused::UnknownStation { given: station.into() });
+        }
+        let domain = lineage_domain(&card.metabolism, None);
+        if let Some(width) = seat_width(station) {
+            let held = self
+                .list()
+                .iter()
+                .filter(|seated| {
+                    seated.slug != slug
+                        && seated.station.as_deref() == Some(station)
+                        && (station != "progenitor"
+                            || lineage_domain(&seated.metabolism, None) == domain)
+                })
+                .count() as u64;
+            if held >= width {
+                return Err(RegistryRefused::NoSeatOpen {
+                    station: station.into(),
+                    domain: domain.into(),
+                    held,
+                    width,
+                });
+            }
+        }
+        card.station = Some(station.into());
+        let path = self.root.join(format!("{slug}.json"));
+        std::fs::remove_file(&path).map_err(|e| RegistryRefused::Io(e.to_string()))?;
+        self.create(&card)
+    }
+
     /// LINEAGE-1: resolve a civilization's lineage HEAD — the root of
     /// its pointer chain. A line whose pointer is absent (or dangles
     /// into the unrecorded past) resolves to the deepest entry that
