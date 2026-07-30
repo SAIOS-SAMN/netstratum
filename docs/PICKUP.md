@@ -102,8 +102,10 @@ protocol records (N4, coder-03 — in-value codes: Resource::Crystal = 7,
 ZoneKind::Resonator = 7) · 59 LineSucceeded (NOVEL-1, coder-03); 8–9
 reserved (D2 terrain, D3 milestones); 49–51 reserved the market board
 (§3a); 60 GaugeShiftedAt (GAUGE-N, coder-01 — the graded key); 61
-GenesisSealed (G1, coder-03 — the binding axes receipt);
-**next free 62** (WANT-1 candidates hold 62+).
+GenesisSealed (G1, coder-03 — the binding axes receipt); 62–63
+WantStruck/WantRelieved (WANT-1); 64–66 the NS-5 protocol records
+(MESH-1a — mesh head ‖ consilience receipt ‖ mesh refusal, the mesh's
+own framing, never world-chronicle events); **next free 67**.
 
 **The tag-claim convention** (2026-07-30, after a live collision caught
 mid-cadence — 55 claimed twice, the later claimant moved to 60, and the
@@ -115,6 +117,13 @@ forever.
 
 ## 5. Lanes and next work
 
+- **the mesh lane** (operator-ruled 2026-07-30): MESH-1a LANDED — NS-5
+  §1–§3 written whole; `engine/mesh` (`consile` → consilience receipt
+  | typed refusal; the file-exchange carrier, never a socket);
+  witnesses `mesh_consilience.rs` 5 green, red-first honored. Rulings
+  inscribed in `docs/N6_DIRECTIVES.md`: blake3-only at N6, file
+  first, one world. Open: MESH-1b (two-writer arbitration), MESH-1c
+  (TCP adapter, logic-free; multi-world aggregation at N7).
 - **coder-01**: next = Phase 2 cross-world trade (egregores exchanging
   joules/`S_cool` — needs a cross-world carrier; transfers are intra-world
   today) or TECH-1 (`10_TECH_EMERGENCE.md`, opens SINK-1's deferred

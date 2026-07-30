@@ -1,0 +1,9 @@
+[package]
+name = "mesh"
+version = "0.1.0"
+edition = "2021"
+description = "NS-5 MESH — proof-of-convergence consilience: independent replays of one chronicle converge by exact measurement, or refuse typed"
+
+[dependencies]
+cfe = { path = "../cfe" }
+rfa-core = { path = "../rfa-core" }

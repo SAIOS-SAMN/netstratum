@@ -84,7 +84,11 @@
 //!      epistemological [board-side reading, reserved] · 2 resonance ·
 //!      3 novelty)
 //!   63 ClosureEvent::WantRelieved (WANT-1 — the mind fed)
-//!         — the next free tag outside reservations is 64.
+//!   64–66 NS-5 protocol records (mesh head ‖ consilience receipt ‖
+//!         mesh refusal — NS-5 §2, MESH-1a: the mesh's own framing,
+//!         never world-chronicle events; consilience is a read, no
+//!         state changes — the lens law in mesh form)
+//!         — the next free tag outside reservations is 67.
 //!   In-value codes opened at N4 (they ride existing orb tags, no new
 //!   TLV tag): Resource::Crystal = 7 (banked entry, tag 18);
 //!   ZoneKind::Resonator = 7 (zone entry, tag 17).
