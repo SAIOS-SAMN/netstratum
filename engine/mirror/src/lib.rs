@@ -787,6 +787,10 @@ fn render_receipt(receipt: &Receipt) -> String {
             "crystal_drawn",
             format!("{} crystal held the lens open on orb {orb_id}", ratio_str(amount)),
         ),
+        E::LineSucceeded { successor } => (
+            "line_succeeded",
+            format!("{successor} adopts this chronicle as its own substrate"),
+        ),
     };
     w.field_str("event", name);
     w.field_str("detail", &detail);

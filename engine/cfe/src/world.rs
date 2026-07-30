@@ -42,6 +42,10 @@ pub enum ActionRefused {
     NoSuchOrb { orb: u64 },
     /// P1 — a planet name is unique within its world.
     PlanetNameTaken { name: String },
+    /// NOVEL-1 (10 §3c, 07 §3 triage) — succession is the derelict
+    /// door, never a reset button: it refuses while any orb still
+    /// stands unfamished (v1 cascade law: EVERY orb famished).
+    LineStillLiving { orbs: usize, famished: usize },
     /// THERMAL-1 — one sun per world; it is already commissioned.
     StarAlreadyCommissioned,
     /// THERMAL-1 — siting an orbit needs a commissioned sun first.
@@ -2386,6 +2390,43 @@ impl World {
         Ok(crate::query::ScanRead { stamp, probed, hits, refusals })
     }
 
+    /// NOVEL-1 (10 §3c) — the succession deed: a successor line adopts
+    /// this DERELICT world's chronicle as its own substrate (07 §3).
+    /// The refusal is computed pure (a living line refuses, nothing
+    /// moves); on the deed the living tree drops to the world's kernel
+    /// (condition 0 — the sun is known to the WORLD, not to the line)
+    /// and every other node leaves the tree while standing in the
+    /// chronicle forever. The successor's conditions then evaluate
+    /// over the WHOLE inherited chronicle, and its node ids seed from
+    /// roots that contain that history — novel by construction, no new
+    /// crystallizer code: the deposit sheet and the seeded synthesis
+    /// already read this way. Sovereign convenience.
+    pub fn succeed(&mut self, successor: &str) -> Result<(), ActionRefused> {
+        self.succeed_as(SOVEREIGN, successor)
+    }
+
+    /// The contained form. Build scope: succession re-founds the line
+    /// (the founding-class act).
+    pub fn succeed_as(&mut self, actor: u64, successor: &str) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if self.orbs.is_empty() {
+            return Err(ActionRefused::NoColony);
+        }
+        let famished = self.orbs.iter().filter(|held| !held.famine.is_empty()).count();
+        if famished < self.orbs.len() {
+            return Err(ActionRefused::LineStillLiving {
+                orbs: self.orbs.len(),
+                famished,
+            });
+        }
+        self.techs.retain(|(_, condition, _)| *condition == 0);
+        self.close(
+            ClosureEvent::LineSucceeded { successor: successor.to_string() },
+            actor,
+        );
+        Ok(())
+    }
+
     /// Seal a closure with its actor's generation tag (NS-6).
     fn close(&mut self, event: ClosureEvent, actor: u64) {
         let stamp = self.clock.now();
@@ -2800,6 +2841,12 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     held.bank(Resource::Crystal, -amount.clone());
                     held.last_touch = receipt.stamp;
                 }
+            }
+            // NOVEL-1 (10 §3c): the succession boundary replays — the
+            // living tree drops to the world's kernel; the record
+            // stands in the receipts above and below this one.
+            ClosureEvent::LineSucceeded { .. } => {
+                techs.retain(|(_, condition, _)| *condition == 0);
             }
             // ABSORB-1: the three-way move replays — the absorber's
             // ledger carries the shed; the window opens; crisis reads

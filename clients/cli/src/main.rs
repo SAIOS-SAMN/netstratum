@@ -259,6 +259,21 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 ),
             }
         }
+        Some("succeed") => match words.next() {
+            Some(successor) => match world.succeed(successor) {
+                Ok(()) => println!(
+                    "{} the line passes — {} adopts this chronicle as its own substrate; the tree returns to the kernel, the record stands forever",
+                    style.ok("⏚"),
+                    style.strong(successor)
+                ),
+                Err(refusal) => refuse(world, &refusal, style),
+            },
+            None => println!(
+                "{} usage: {} — a successor line adopts a DERELICT world's chronicle (10 §3c)",
+                style.bad("✗"),
+                style.strong("succeed <line>")
+            ),
+        },
         Some("tick") => {
             let count = words
                 .next()
@@ -1797,6 +1812,7 @@ fn help(style: &Style) {
         ("site <albedo> <r>", "site this planet's orbit (exact fractions) — thermal wakes: encase first, only overflow vents"),
         ("thermal", "the thermal read: T_eq⁴, band, overheat, encased joules"),
         ("scan [planet]", "the resonance scanner (draws 1 crystal from THIS planet): finds orbs structurally congruent to the exemplar — same zones under the grid symmetry, same bank, same band; near-misses refuse with their delta whole; bare scan hunts this planet's twins"),
+        ("succeed <line>", "the succession deed (10 §3c): a successor line adopts a DERELICT world's chronicle — refuses while any planet stands unfamished; the living tree drops to the kernel, every discovered node stands in the record forever, and the successor's conditions read the whole inherited history"),
         ("map", "the tile grid"),
         ("status", "colony, ledgers, clock, receipts"),
         ("chronicle", "the world's full receipted history"),
@@ -2167,6 +2183,9 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             style.strong(&amount(have)),
             style.strong("collect"),
             style.strong("raze <tile>")
+        ),
+        ActionRefused::LineStillLiving { orbs, famished } => format!(
+            "this line still lives ({famished} of {orbs} planets famished) — succession is the derelict door, not a reset: only a full cascade admits a successor"
         ),
         ActionRefused::NothingAccrued => format!(
             "nothing to collect — let time pass first: {}",
@@ -2726,6 +2745,10 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::CrystalDrawn { orb_id, amount: drawn } => format!(
                 "◎ {} crystal held the lens open on orb {orb_id} — what was seen left no receipt",
                 style.strong(&amount(drawn))
+            ),
+            cfe::dop::ClosureEvent::LineSucceeded { successor } => format!(
+                "⏚ the line passes — {} adopts this chronicle as its own substrate; the tree returns to the kernel, the record stands",
+                style.strong(successor)
             ),
         };
         let tag = receipt

@@ -95,7 +95,7 @@ Lattice Deepening and Long Stores (their hooks and table entries are
 landed and exercised by shape); the throttle-α policy action (steward
 side); word-table naming beyond the §3 canonical names.
 
-## 3c. The naming law LANDED; the succession law SPECCED (2026-07-30)
+## 3c. The naming law LANDED; the succession law LANDED (2026-07-30)
 
 **Naming landed (§2 law 4, operator ruling):** a node's name is never a
 rung label. `tech_node_name` composes it from word tables — the
@@ -106,21 +106,30 @@ doctrine" on one world, "patient doctrine" on another). The hash is the
 identity; the name is the line's own tongue. You cannot stack names on
 rungs, because no two lines share a chronicle root.
 
-**NOVEL-1 (open — the succession law).** When a line expires and
-another takes its place — the intelligent mushroom succeeding the
-intelligent elephant — the successor does not inherit a tech tree, it
-inherits a CHRONICLE. Its crystallization conditions evaluate over
-receipts that include the predecessor's whole history (the derelict
-recovery door, 07 §3), and its node ids seed from roots that CONTAIN
-that history — so the successor's technology is NOVEL by construction:
-shaped by what came before (the old famines, the old vents, the old
-surpluses are in the deposit sheet), named in the successor's own
-voice, never overwriting a node the predecessor held (ids differ; both
-stand in the chronicle forever). The pre-existing is changed, not
-replaced. Landing needs: the succession deed (a successor line adopting
-a derelict world's chronicle as its own substrate), the deposit sheet
-reading across the succession boundary, and the 07 §3 recovery
-mechanics.
+**NOVEL-1 LANDED (2026-07-30, coder-03) — the succession law.** When a
+line expires and another takes its place — the intelligent mushroom
+succeeding the intelligent elephant — the successor does not inherit a
+tech tree, it inherits a CHRONICLE. The **succession deed**
+(`LineSucceeded`, tag 59; CLI `succeed <line>`): the derelict door,
+never a reset button — it refuses PURE while any orb stands unfamished
+(the 07 §3 triage in its v1 cascade shape: EVERY orb famished; richer
+interrupted-vs-collapsed triage recorded as deferred). On the deed the
+living tree drops to the world's KERNEL — the solar leap is the
+world's own fact, not the line's — and every other node leaves the
+tree while standing in the chronicle forever. The successor's
+conditions then evaluate over receipts that include the predecessor's
+whole history (the deposit sheet walks the one chronicle — no new
+crystallizer code was needed; the engine read this way from TECH-1b's
+first day), and its node ids seed from roots that CONTAIN that history
+plus the deed — NOVEL by construction: shaped by the old famines and
+vents, named in the successor's own voice, never overwriting a node
+the predecessor held. The pre-existing is changed, not replaced.
+Measured (`novel_succession.rs`, 4 witnesses): a living line refuses
+and orphans nothing; the predecessor's insulation stands while the
+successor mints a DIFFERENT insulation from the inherited famine span
+with no new famine-years paid; a second succession mints a third node,
+no root repeating; the deed round-trips byte-exact; replay and resume
+carry the boundary.
 
 ## 3d. TERRA-1 LANDED; SCIENCE-1 SPECCED (2026-07-30)
 

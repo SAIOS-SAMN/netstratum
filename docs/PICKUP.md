@@ -91,14 +91,14 @@ terminology law — no set-letter glyphs, Furnace never Crucible, no
 
 ## 4. Wire tag registry state
 
-1–48 and 52–58 assigned (see `engine/cfe/src/dop.rs` header — the one
+1–48 and 52–59 assigned (see `engine/cfe/src/dop.rs` header — the one
 authority): 39 TechDiscovered · 40 TechLicensed · 42–46 the AEON block ·
 47–48 the APERTURE pair · 52–53 the COUNCIL pair · 54 GalaxyObserved
 (GALAXY-1a, universe ledger only) · 55 CrystalDrawn + 56–58 the NS-2
 protocol records (N4, coder-03 — in-value codes: Resource::Crystal = 7,
-ZoneKind::Resonator = 7); 8–9 reserved (D2 terrain, D3 milestones);
-49–51 reserved the market board (§3a); **next free 59** for anything
-outside those reservations.
+ZoneKind::Resonator = 7) · 59 LineSucceeded (NOVEL-1, coder-03); 8–9
+reserved (D2 terrain, D3 milestones); 49–51 reserved the market board
+(§3a); **next free 60** for anything outside those reservations.
 
 ## 5. Lanes and next work
 
@@ -115,15 +115,18 @@ outside those reservations.
   assigned.
 - **coder-03**: N4 (NS-2 RQP + the scanner) — LANDED on main
   2026-07-30 (33e6c73 + post-ruling inscriptions 7f739f4, after the
-  fifth-set rulings): spec §1–§3 with extracted vectors, sigil index +
+  fifth-set rulings): spec §1–§4 with extracted vectors, sigil index +
   scan (`engine/cfe/src/query.rs`), CrystalDrawn (tag 55), crystals +
-  the resonator (02 §5.1 deferral paid), the `scan` CLI verb; 187/187
-  workspace witnesses, clippy zero, arc played. Boundary excursions
-  SIGNED OFF by coder-02 (2026-07-30): scan's only chronicle append is
-  the CrystalDrawn draw (the lens law in code); 56–58 are protocol
-  records, never chronicle events; the in-value codes ride existing
-  tags; the mirror arms are pure rendering; no floats; the galaxy lane
-  untouched.
+  the resonator (02 §5.1 deferral paid), the `scan` CLI verb. Boundary
+  excursions SIGNED OFF by coder-02 (2026-07-30): scan's only chronicle
+  append is the CrystalDrawn draw (the lens law in code); 56–58 are
+  protocol records, never chronicle events; the in-value codes ride
+  existing tags; the mirror arms are pure rendering; no floats; the
+  galaxy lane untouched. **NOVEL-1 LANDED same day** (tag 59
+  `LineSucceeded`, `succeed` CLI verb, 10 §3c flipped, 4 witnesses —
+  BUILD_ORDER row for evidence). Next: G3 spatial-lens facet when G1
+  lands (NS-2 §4.3 reserves it); WANT-1 cognitive wants are an
+  adjacent candidate (same deposit-sheet idiom).
 - Parallel worktrees per node; merge to `main` on green; BUILD_ORDER
   conflicts resolve by keeping both entries.
 

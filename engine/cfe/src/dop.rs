@@ -67,7 +67,11 @@
 //!         refusal never receipt — the lens law)
 //!   56–58 NS-2 protocol records (query ‖ hit ‖ refusal — NS-2 §2,
 //!         RQP's own framing, never world-chronicle events)
-//!         — the next free tag outside reservations is 59.
+//!   59 ClosureEvent::LineSucceeded (NOVEL-1, 10 §3c — the succession
+//!         deed: a successor line adopts a derelict world's chronicle
+//!         as its own substrate; the living tree drops to the world's
+//!         kernel, the record stands forever)
+//!         — the next free tag outside reservations is 60.
 //!   In-value codes opened at N4 (they ride existing orb tags, no new
 //!   TLV tag): Resource::Crystal = 7 (banked entry, tag 18);
 //!   ZoneKind::Resonator = 7 (zone entry, tag 17).
@@ -620,6 +624,12 @@ pub enum ClosureEvent {
     /// lens open. Deliberately blind to what was asked and what was
     /// seen — query, hit, and refusal never receipt (the lens law).
     CrystalDrawn { orb_id: u64, amount: Ratio },
+    /// NOVEL-1 (10 §3c) — the succession deed: a successor line
+    /// adopted this world's chronicle as its own substrate (the
+    /// derelict door, 07 §3). The living tree drops to the world's
+    /// kernel; every discovered node stands in the record forever —
+    /// the pre-existing is changed, never replaced.
+    LineSucceeded { successor: String },
 }
 
 impl ClosureEvent {
@@ -875,6 +885,9 @@ impl ClosureEvent {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 ratio::encode(amount, &mut value);
                 tlv::put(55, &value, &mut out);
+            }
+            Self::LineSucceeded { successor } => {
+                tlv::put(59, successor.as_bytes(), &mut out);
             }
         }
         out
@@ -1143,6 +1156,10 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let (amount, _) = ratio::decode(value.get(8..)?)?;
                 Some(Self::CrystalDrawn { orb_id, amount })
+            }
+            59 => {
+                let successor = String::from_utf8(value.to_vec()).ok()?;
+                Some(Self::LineSucceeded { successor })
             }
             _ => None,
         }
