@@ -2,7 +2,7 @@
 name = "rfa-core"
 version = "0.1.0"
 edition = "2021"
-description = "Rational Field Algebra core — the antisymmetric relational Delta, cocycle residuals, coherence, H¹ reduction, and the validation gates (exact ℚ, no floats)"
+description = "Rational Field Algebra core — the antisymmetric relational Delta, cocycle residuals, coherence, H¹ reduction, and the validation gates (exact rational arithmetic, no floats)"
 
 [dependencies]
 cfe = { path = "../cfe" }
