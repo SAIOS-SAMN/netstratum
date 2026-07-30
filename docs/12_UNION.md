@@ -266,6 +266,43 @@ stagnation any line may stall (§6); under a slow sun a line is not
 stalled, it is *pacing its world* — the two must never be confused, and
 the reading that distinguishes them is coherence, not tempo.
 
+## 5b. THE WANT — famine speciated by entity (operator ruling, 2026-07-30)
+
+Famine is liberated from the pantry. **The Want is a targeted depletion
+of whatever SUSTAINS an entity** — and what sustains an entity is its
+substrate's own affair (§5a). The landed mechanics already carry the
+physical half (`FamineStruck { resource }` strikes on ANY store: joule
+famine on the Frost, alloy famine at the synthesizer — tag 5 was never
+food-only); this ruling extends the concept to its full spread:
+
+**Metabolic wants (landed shape — the banked stores):**
+mineral lines starve on flux and refining inputs · biotic on nutrients
+and energy · plasmic on field and coronal flow (their "famine" is a
+starving current sheet, and every surface must voice it in the line's
+own register — a machine starves on what feeds machines).
+
+**Cognitive wants (WANT-1, open — famines of the MIND, receipts-derived
+like everything else):**
+- **the epistemological want** — truth-starvation: a line cut off from
+  un-corrupted receipts (broken chains in its reach, quarantined
+  neighbors) reads a deficit of ground truth; coherence degrades.
+- **the resonance want** — isolation: a harmonic line whose aperture
+  and bond links sever is starved of network resonance — a famine of
+  the mind that SPREADS ACROSS WORLDS, because its food was the mesh
+  itself. Measurable today: severed bonds + zero aperture legs in a
+  window.
+- **the novelty want** — stagnation: an empiricist line with no fresh
+  solves and no new receipts in a window starves on signal; the strike
+  is the four-C retirement region read as hunger, and it HALTS
+  crystallization (a starving mind mints no nodes).
+
+The law that binds all of it: a want is a DERIVED reading over receipts
+and committed state, per entity type, never a stored flag — and every
+want is escapable (rescue trade, a re-link, a licensed leap). Landing
+needs: the want table per metabolism/perception, the cognitive strike
+receipts (candidate tags from 55), and the per-register voicing at the
+surfaces.
+
 ## 6. Elevation — discrete gauge morphodynamics (Q3 resolved)
 
 **The terminology ruling (operator, 2026-07-29).** "Unitary morphodynamics"

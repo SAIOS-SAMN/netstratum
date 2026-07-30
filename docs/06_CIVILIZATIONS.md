@@ -123,6 +123,36 @@ against mistaking for a baseline, never as the measure of the others.)*
 
 ---
 
+## 2a. The naming laws (operator rulings, 2026-07-30)
+
+**SIGIL, never slug.** The registry's stable identifier is web jargon
+inherited at G0; the ruling retires it in favor of the house's own
+word, already waiting in NS-2: the **sigil** — a civilization's
+immutable address on the mesh (`sigil:abyssal-vocalis`; NS-2's
+sigil-address lookup becomes literal). The rename is a recorded
+migration (JSON field + struct field, mirror-side), queued like
+Crucible→Furnace; surfaces adopt "sigil" immediately.
+
+**Locality-anchored naming.** A civilization's name must carry its
+PLACE, its MEDIUM, and its MANIFESTATION — never a vague vibe.
+"Deep Chorus" infers sonar and says nothing about where or how; the
+law replaces the register:
+
+| founding name | the critique | locality-anchored successor (proposed) |
+|---|---|---|
+| Deep Chorus | vague sonar-ese | **Abyssal Vocalis** — hadal trench · high-density fluid · low-frequency structural resonance |
+| Hivelight | generic glow | **Vitreous Hex** — silica comb · quartz lattice · optical pulse computation |
+| Slagborn | tells the diet, not the home | **Mantle Anhydro** — crust/mantle boundary · desiccated mineral tun state |
+| Eightfold | counts arms only | **Brine Cortex** — sub-ice ocean · saline convection · distributed arm-borne cognition |
+| Mycelial Weft | close, keep | (already locality-anchored: understory · soil · hyphal network) |
+
+The renames are ROSTER data (a wave edit + registry migration), not
+code; divergence branch naming (the themed heads/tails) must follow
+the same law — the head names the MEDIUM, the tail the MANIFESTATION,
+and future word-tables grow toward locality. Applied at the next
+roster wave; the old names archive with their chronicles (annex law —
+nothing is renamed retroactively in a sealed record).
+
 ## 3. Open rulings for the landing that implements this
 
 - **Band-shift is a chronicle mutation, not a free edit.** Marrow

@@ -742,6 +742,65 @@ impl World {
         }
     }
 
+    /// THE CONSTELLATION (operator ruling 2026-07-30): the base-7
+    /// stack as a per-orb reading for every surface — each condition's
+    /// held state and its PROGRESS toward crystallizing, derived from
+    /// the same deposit sheet the crystallizer reads (never a second
+    /// bookkeeping). Returns (condition, held, progress, threshold):
+    /// the timer conditions report ticks (insulation 480, discipline
+    /// 240); the state conditions and the kernel report 1-of-1 when
+    /// their reading holds; the crown reports base-7 readiness (the
+    /// gift needs the stack, 6 of 6 earned nodes).
+    pub fn constellation(&self, orb: u64) -> Vec<(u8, bool, u64, u64)> {
+        let now = self.clock.now();
+        let deposits = self.crystal_deposits(now);
+        let blank = CrystalDeposit::default();
+        let sheet = deposits
+            .iter()
+            .find(|(held, _)| *held == orb)
+            .map(|(_, sheet)| sheet)
+            .unwrap_or(&blank);
+        (0u8..=6)
+            .map(|condition| {
+                let held = self
+                    .techs
+                    .iter()
+                    .any(|(o, c, _)| *o == orb && *c == condition);
+                let (progress, threshold) = match condition {
+                    0 => (u64::from(self.knows_its_sun()), 1),
+                    1 => {
+                        let open = sheet
+                            .famine_open
+                            .map(|struck| now.saturating_sub(struck))
+                            .unwrap_or(0);
+                        ((sheet.famine_total + open).min(480), 480)
+                    }
+                    2 => (
+                        sheet
+                            .overheat_open
+                            .map(|struck| now.saturating_sub(struck))
+                            .unwrap_or(0)
+                            .min(240),
+                        240,
+                    ),
+                    6 => {
+                        let earned = (0u8..=5)
+                            .filter(|c| {
+                                self.techs.iter().any(|(o, k, _)| *o == orb && k == c)
+                            })
+                            .count() as u64;
+                        (earned, 6)
+                    }
+                    _ => (
+                        u64::from(self.condition_holds(orb, condition, now, sheet)),
+                        1,
+                    ),
+                };
+                (condition, held, progress, threshold)
+            })
+            .collect()
+    }
+
     /// AEON-1a (11 §6): the star MOVES in its region — the class
     /// steps, luminosity recomputes, and every sited orbit's T_eq⁴
     /// shifts at the next tick. Movement, never a rung.

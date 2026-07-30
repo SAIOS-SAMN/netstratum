@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>netstratum observatory</title>
+<style>
+  /* Text-first, cyber-noir — the Terminal Wall's sibling. The GPU is
+     the map; the text is the interface. */
+  :root { --bg:#07090c; --fg:#c8d6d0; --dim:#5c6b66; --hot:#e8734a;
+          --cold:#5ab8d4; --good:#6fd48a; --bad:#e05555; --head:#8be0d0; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg);
+         font:13px/1.5 "SF Mono","Cascadia Mono",Consolas,monospace; }
+  #torus { display:block; width:100vw; height:46vh; cursor:crosshair; }
+  #panels { display:grid; grid-template-columns: 1fr 1fr 1fr;
+            gap:12px; padding:12px; }
+  .panel { border:1px solid #182027; padding:10px 12px; overflow:auto;
+           max-height:44vh; white-space:pre; }
+  h2 { margin:0 0 6px; font-size:12px; letter-spacing:.2em;
+       color:var(--head); font-weight:600; }
+  .dim { color:var(--dim); } .bad { color:var(--bad); }
+  .good { color:var(--good); } .hot { color:var(--hot); }
+  .cold { color:var(--cold); } .strong { font-weight:700; color:#fff; }
+  #legend { position:absolute; top:8px; left:10px; color:var(--dim);
+            pointer-events:none; text-shadow:0 0 4px #000; }
+  #hover { position:absolute; pointer-events:none; color:#fff;
+           text-shadow:0 0 6px #000; display:none; }
+</style>
+</head>
+<body>
+<canvas id="torus"></canvas>
+<div id="legend">NETSTRATUM OBSERVATORY — the 3-torus (edges wrap · G = hue · mass = crowd)</div>
+<div id="hover"></div>
+<div id="panels">
+  <div class="panel" id="board"><h2>THE BOARD</h2><span class="dim">reading…</span></div>
+  <div class="panel" id="stress"><h2>STRESS — THE T0 READ</h2><span class="dim">reading…</span></div>
+  <div class="panel" id="tiers"><h2>THE UNION T0→T3</h2><span class="dim">reading…</span></div>
+</div>
+<script>
+"use strict";
+/* Exact fractions arrive as strings; floats appear ONLY here, at the
+   pixel (the render boundary — the no-float law binds the engine,
+   never the reflection's screen). */
+const F = t => { if (typeof t !== "string") return Number(t||0);
+  const s = t.split("/"); return s.length===2 ? Number(s[0])/Number(s[1]) : Number(t); };
+const esc = t => String(t).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const TIER = st => ({progenitor:"T0", watcher:"T1", observer:"T1", sovereign:"T2"})[st] || "T3";
+
+/* ── data: the mirror's own files, polled ───────────────────────── */
+async function j(path){ const r = await fetch(path); if(!r.ok) throw 0; return r.json(); }
+async function text(path){ const r = await fetch(path); if(!r.ok) throw 0; return r.text(); }
+
+async function readBoard(){
+  const index = await j("/data/index.json");
+  const universe = await j("/data/worlds/universe.json").catch(()=>({span:"64",tuniversal:"—"}));
+  const chartLines = await text("/data/worlds/starchart.json").catch(()=> "");
+  const chart = {};
+  for (const line of chartLines.split("\n")) {
+    const t = line.trim(); if (!t) continue;
+    try { const c = JSON.parse(t); chart[c.world] = c; } catch (e) {}
+  }
+  const registry = {};
+  await Promise.all(index.registry.map(async sig => {
+    registry[sig] = await j(`/data/registry/${sig}.json`).catch(()=>({}));
+  }));
+  const planets = [];
+  await Promise.all(index.worlds.map(async w => {
+    for (const p of w.planets) {
+      const st = await j(`/data/worlds/${w.world}/planets/${p}/state.json`).catch(()=>null);
+      if (st) planets.push(st);
+    }
+  }));
+  return { index, universe, chart, registry, planets };
+}
+
+/* ── the text panels ────────────────────────────────────────────── */
+function renderPanels(d){
+  const tiers = {T0:[],T1:[],T2:[],T3:[]};
+  for (const [sig, card] of Object.entries(d.registry))
+    tiers[TIER(card.station)].push({sig, card});
+  const census = ["T0","T1","T2","T3"].map(t=>`${t} ${tiers[t].length}`).join(" · ");
+  document.getElementById("board").innerHTML =
+    `<h2>THE BOARD</h2>` +
+    `TUniversal <span class="strong">${esc(d.universe.tuniversal)}</span> · span ${esc(d.universe.span)}\n` +
+    `<span class="strong">${Object.keys(d.registry).length}</span> civilizations (${census})\n` +
+    `<span class="strong">${d.index.worlds.length}</span> worlds · ` +
+    `<span class="strong">${d.planets.length}</span> settled planets\n\n` +
+    d.planets.map(p =>
+      `${esc(p.world)}<span class="dim">/${esc(p.planet)}</span> ` +
+      `<span class="dim">t${p.clock} · ${(p.zones||[]).length}z</span>`
+    ).join("\n");
+
+  const stressed = [];
+  for (const p of d.planets) {
+    const flags = [];
+    if ((p.famine||[]).length) flags.push(`<span class="bad">⚠${p.famine.join(",")}</span> <span class="dim">the want strikes</span>`);
+    if (F(p.entropy_vented||"0") > 0) flags.push(`<span class="hot">♨${esc(p.entropy_vented)}</span>`);
+    if (flags.length) stressed.push(`${esc(p.world)}/${esc(p.planet)}  ${flags.join(" ")}`);
+  }
+  document.getElementById("stress").innerHTML = `<h2>STRESS — THE T0 READ</h2>` +
+    (stressed.length ? stressed.join("\n")
+      : `<span class="good">none — the board breathes</span>`) +
+    `\n\n<span class="dim">deeds: t0 move · licensed leap · t0 contract (in the client)</span>`;
+
+  const titles = {T0:"T0 — THE BOARD-MAKERS", T1:"T1 — THE ARCHITECT OBSERVERS",
+                  T2:"T2 — THE RECORD KEEPERS", T3:"T3 — THE BIOSPHERE NODES"};
+  document.getElementById("tiers").innerHTML = `<h2>THE UNION T0→T3</h2>` +
+    ["T0","T1","T2","T3"].map(t =>
+      `<span class="cold">${titles[t]}</span>\n` +
+      (tiers[t].length ? tiers[t].map(({sig,card}) =>
+        `  ${esc(card.name||sig)} <span class="dim">${esc(card.species||"")}</span>`).join("\n")
+        : `  <span class="dim">(no one stands here yet)</span>`)
+    ).join("\n\n");
+}
+
+/* ── the WebGL torus: points wrap, G is hue, crowds glow ────────── */
+const canvas = document.getElementById("torus");
+const gl = canvas.getContext("webgl", { antialias:true });
+const VS = `
+attribute vec3 at; attribute float ag;      // x,y wrapped; z depth; g key
+uniform vec2 pan; uniform float span;
+varying float vg; varying float vz;
+void main(){
+  vec2 p = mod(at.xy - pan, span) / span;   // THE WRAP — edges meet
+  vg = ag; vz = at.z / span;
+  gl_Position = vec4(p*2.0-1.0, 0.0, 1.0);
+  gl_PointSize = 14.0 + 26.0 * (0.5 - abs(vz - 0.5));
+}`;
+const FS = `
+precision mediump float; varying float vg; varying float vz;
+void main(){
+  float d = length(gl_PointCoord - 0.5);
+  if (d > 0.5) discard;
+  float glow = smoothstep(0.5, 0.0, d);
+  // G as hue: 0 = frost-cyan, climbing through violet toward ember.
+  vec3 cold = vec3(0.35, 0.72, 0.83);
+  vec3 warm = vec3(0.91, 0.45, 0.29);
+  vec3 tone = mix(cold, warm, fract(vg));
+  gl_FragColor = vec4(tone, glow * 0.85);   // additive: crowds GLOW
+}`;
+function shader(kind, src){ const s = gl.createShader(kind);
+  gl.shaderSource(s, src); gl.compileShader(s); return s; }
+const prog = gl.createProgram();
+gl.attachShader(prog, shader(gl.VERTEX_SHADER, VS));
+gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, FS));
+gl.linkProgram(prog); gl.useProgram(prog);
+gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+const buffer = gl.createBuffer();
+const atLoc = gl.getAttribLocation(prog, "at");
+const agLoc = gl.getAttribLocation(prog, "ag");
+const panLoc = gl.getUniformLocation(prog, "pan");
+const spanLoc = gl.getUniformLocation(prog, "span");
+
+let points = new Float32Array(0), names = [], span = 64;
+let pan = {x:0, y:0}, dragging = null;
+
+function upload(chart, spanText){
+  span = F(spanText) || 64;
+  names = Object.keys(chart).sort();
+  const data = new Float32Array(names.length * 4);
+  names.forEach((n, i) => {
+    const c = chart[n];
+    data[i*4+0] = F(c.x); data[i*4+1] = F(c.y);
+    data[i*4+2] = F(c.z||"0"); data[i*4+3] = F(c.g||"0");
+  });
+  points = data;
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.bufferData(gl.ARRAY_BUFFER, data, gl.DYNAMIC_DRAW);
+}
+
+function draw(){
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  if (canvas.width !== w || canvas.height !== h){ canvas.width=w; canvas.height=h; }
+  gl.viewport(0,0,w,h);
+  gl.clearColor(0.027,0.035,0.047,1); gl.clear(gl.COLOR_BUFFER_BIT);
+  if (points.length){
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.enableVertexAttribArray(atLoc);
+    gl.vertexAttribPointer(atLoc, 3, gl.FLOAT, false, 16, 0);
+    gl.enableVertexAttribArray(agLoc);
+    gl.vertexAttribPointer(agLoc, 1, gl.FLOAT, false, 16, 12);
+    gl.uniform2f(panLoc, pan.x, pan.y);
+    gl.uniform1f(spanLoc, span);
+    gl.drawArrays(gl.POINTS, 0, points.length/4);
+  }
+  requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+
+canvas.addEventListener("mousedown", e => dragging = {x:e.clientX, y:e.clientY});
+window.addEventListener("mouseup", () => dragging = null);
+const hover = document.getElementById("hover");
+canvas.addEventListener("mousemove", e => {
+  if (dragging){
+    pan.x += (e.clientX - dragging.x) / canvas.clientWidth * span;
+    pan.y -= (e.clientY - dragging.y) / canvas.clientHeight * span;
+    dragging = {x:e.clientX, y:e.clientY};
+  }
+  // Nearest world to the cursor, the wrapped way (L1 in screen space).
+  let best = null, bestD = 28;
+  names.forEach((n, i) => {
+    const wx = ((points[i*4]-pan.x)%span+span)%span / span * canvas.clientWidth;
+    const wy = (1-((points[i*4+1]-pan.y)%span+span)%span / span) * canvas.clientHeight;
+    const d = Math.abs(wx-e.clientX) + Math.abs(wy-e.clientY);
+    if (d < bestD){ best = n; bestD = d; }
+  });
+  if (best){
+    hover.style.display = "block";
+    hover.style.left = (e.clientX+12)+"px"; hover.style.top = (e.clientY-8)+"px";
+    hover.textContent = best;
+  } else hover.style.display = "none";
+});
+
+/* ── the poll loop: --watch, in the browser ─────────────────────── */
+async function tick(){
+  try {
+    const d = await readBoard();
+    renderPanels(d);
+    upload(d.chart, d.universe.span);
+  } catch (e) { /* the window stays calm mid-write; next poll heals */ }
+  setTimeout(tick, 2000);
+}
+tick();
+</script>
+</body>
+</html>

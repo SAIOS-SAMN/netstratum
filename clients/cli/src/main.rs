@@ -283,6 +283,81 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         // conductor polls every beat. Pause holds every egregore world
         // (nothing ticks, nothing ages); speed sets the seconds
         // between beats (0 = flat out).
+        // THE CONSTELLATION (operator ruling 2026-07-30): the base-7
+        // stack as this line's own sky — held nodes glow with their
+        // voice-names, timers show exact progress, the crown shows
+        // its gate. Per-line, never a shared ladder.
+        Some("tech") => {
+            // The voice-names live in the receipts (typed events —
+            // read, never parsed).
+            let mut voices: Vec<(u8, String, u64)> = Vec::new();
+            for receipt in world.chronicle().receipts() {
+                if let cfe::dop::ClosureEvent::TechDiscovered {
+                    orb_id, condition, name, ..
+                } = &receipt.event
+                {
+                    if *orb_id == *current {
+                        voices.push((*condition, name.clone(), receipt.stamp));
+                    }
+                }
+            }
+            let concepts = [
+                "the solar leap", "insulation", "discipline", "deepening",
+                "doctrine", "stores", "the crown (terraforming)",
+            ];
+            println!("{}", style.head("THE CONSTELLATION — this line's own sky"));
+            for (condition, held, progress, threshold) in world.constellation(*current) {
+                let concept = concepts[condition as usize];
+                let voice = voices.iter().find(|(c, _, _)| *c == condition);
+                let line = match (held, voice) {
+                    (true, Some((_, name, stamp))) => format!(
+                        "  {} {:<28} held t{stamp}",
+                        if condition == 6 { style.strong("◆") } else { style.ok("✶") },
+                        style.strong(name)
+                    ),
+                    (true, None) => format!("  {} {concept:<28} held", style.ok("✶")),
+                    (false, _) if threshold > 1 && condition != 6 => {
+                        let filled = ((progress * 12) / threshold) as usize;
+                        format!(
+                            "  {} {:<28} [{}{}] {}/{} ticks",
+                            style.dim("○"),
+                            concept,
+                            "=".repeat(filled),
+                            style.dim(&"—".repeat(12 - filled)),
+                            progress,
+                            threshold
+                        )
+                    }
+                    (false, _) if condition == 6 => format!(
+                        "  {} {:<28} base-7 {}/6 — {}",
+                        style.dim("◇"),
+                        concept,
+                        progress,
+                        if progress >= 6 {
+                            style.strong("the stack stands; the gift awaits tier 0")
+                        } else {
+                            style.dim("earn the stack; the crown is only ever gifted")
+                        }
+                    ),
+                    (false, _) if progress >= threshold => format!(
+                        "  {} {:<28} {}",
+                        style.ok("◉"),
+                        concept,
+                        style.strong("the reading HOLDS — crystallizes at the year voice")
+                    ),
+                    (false, _) => format!(
+                        "  {} {concept:<28} {}",
+                        style.dim("○"),
+                        style.dim("the reading is not yet met")
+                    ),
+                };
+                println!("{line}");
+            }
+            println!(
+                "{}",
+                style.dim("  a missing condition another line holds is a joint-venture prompt — council + aperture + licensed leap")
+            );
+        }
         // TERRA-1: the crown in the hand — re-seat a sited planet's
         // albedo and orbit; only lawful once terraforming is held.
         Some("terraform") => {
@@ -1426,6 +1501,8 @@ fn help(style: &Style) {
         ("ideology", "the dual cohesion ledger for this planet — the four axes, their books, and the derived readings; divergent trade partners pay a friction entropy tax, aligned ones pay zero"),
         ("login [name] · whoami · continue", "the operator menu (prototype, no passwords): many accounts on one machine — login mints/switches, bare login lists, continue resumes your profile\'s last saved world"),
         ("t0 <inbox|move|galaxies|contract|clean>", "the progenitor console (tier 0): inbox streams the upward petitions; move <world> x y z re-charts a sector (the separation deed); galaxies reads the charted skies (13_GALAXY — membership derived, never stored); contract folds the era; clean sweeps --closed-* ruins"),
+        ("tech", "the constellation: this line's base-7 sky — held nodes with their voice-names, exact progress toward what has not crystallized, the crown's gate"),
+        ("tech", "the constellation: this line's base-7 sky — held nodes with their voice-names, exact progress toward what has not crystallized, the crown's gate"),
         ("terraform <albedo> <orbit>", "the gifted crown (base-7 complete + licensed from tier 0): re-seat a sited planet — the only lawful way an orbit moves"),
         ("npcs [pause|resume|speed <s>]", "the player\'s hand on the autonomous board — pause holds every egregore world, speed sets seconds between beats (0 = flat out); bare npcs shows the state"),
         ("civ [seats] · civ new …", "the civ console: seats shows every station\'s room (progenitors per domain, 8 each — space, not rank); civ new <slug> | <Name> | <species> | <motto> | <disp> <metab> <perc> [station] registers a custom line and rosters it for the conductor"),
