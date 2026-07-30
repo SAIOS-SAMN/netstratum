@@ -635,6 +635,13 @@ fn render_receipt(receipt: &Receipt) -> String {
             "galaxy_observed",
             format!("{name} observed by {observer}"),
         ),
+        E::WorldCharted { seed } => (
+            "world_charted",
+            format!(
+                "terrain seed {:02x}{:02x}{:02x}{:02x}",
+                seed[0], seed[1], seed[2], seed[3]
+            ),
+        ),
         E::OverheatStruck { overflow, .. } => {
             ("overheat_struck", format!("overflow {}", ratio_str(overflow)))
         }

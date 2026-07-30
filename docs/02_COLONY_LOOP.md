@@ -68,7 +68,19 @@ nets draw down as `UpkeepSettled`. The workspace stays unreceipted
 
 ### 2.5 Terrain (D3)
 
-The world is charted at founding from a **world seed** (recorded in the
+**LANDED 2026-07-30 (first slice) — the opt-in adaptation.** The deed
+is `survey` (engine `chart_terrain`, tag 8 `WorldCharted`, Build
+scope): it charts a star ONCE, and the seed is the FOUNDING receipt's
+digest (chronicle-seeded, CHARTER §9 — no wall clock, no dice). Opt-in
+per the THERMAL-1 precedent: a star without the receipt reads all
+Standard forever, so no landed witness or live world shifts under the
+ruleset law. v1 multiplies extraction and agriculture (extractor,
+habitat) only; converters and heat-law zones are untouched. `terrain`
+renders the map (· ▲ ░, zones lettered). Auto-chart at founding and
+conductor adoption are the named follow-up after a fixture audit; tag
+9 stays reserved (D3 milestones).
+
+The world is charted from a **world seed** (recorded in the
 chronicle — terrain is deterministic and replays exactly). Tile classes and
 their yield multipliers:
 
@@ -122,7 +134,7 @@ New permanent wire tags (NS-1 §2.3 registry; layouts land with their increments
 | 5 | FamineStruck | a resource's banked+accrued falls below 0 |
 | 6 | FamineRelieved | a dormant resource recovers |
 | 7 | ZoneRazed | a zone is demolished for half cost |
-| 8 | WorldCharted | founding records the terrain seed (D3) |
+| 8 | WorldCharted | the terrain seed, the opt-in deed (D3 — LANDED 2026-07-30; the seed is the founding receipt's digest) |
 | 9 | MilestoneReached | a milestone closes (D4) |
 
 **Replay rule:** costs, upkeep, terrain generation, and multipliers are
@@ -137,7 +149,7 @@ before it applies; constants never change silently under an existing world.
 |---|---|---|---|
 | **D1** | COSTS, UPKEEP, FAMINE | build costs spent from banked; per-tick net flows; famine/dormancy/relief; `raze`; tags 4–7 | build order under scarcity; food-vs-industry balance; crisis triage |
 | **D2** | THE INDUSTRIAL PIPELINE (§5) | alloy + diamond materials; smelter + synthesizer converter zones; multi-resource costs and upkeep | raw expansion vs refining; feeding the chain; when to climb the tier |
-| **D3** | TERRAIN + ADJACENCY | the seeded chart (tag 8); class multipliers; adjacency pair; map renders terrain | reading the map; district planning |
+| **D3** | TERRAIN + ADJACENCY | **first slice LANDED 2026-07-30**: the seeded chart (tag 8, opt-in); class multipliers exact (9/4 · 3/4 witnessed); adjacency pair after terrain (×5/4 seam-fence, ×3/4 noise — witnessed); `survey` + `terrain` verbs. Open: auto-chart at founding + conductor adoption (fixture audit first); D3 milestones (tag 9) | reading the map; district planning |
 | **D4** | SPOILAGE + MILESTONES | biomass decay in the workspace; the goal ladder (tag 9) | collect timing; something to play toward |
 
 Sequencing: D1 first (scarcity is the foundation every other tension leans

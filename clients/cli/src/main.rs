@@ -1350,6 +1350,53 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 ),
             }
         }
+        Some("survey") => match world.chart_terrain() {
+            Ok(seed) => println!(
+                "{} terrain CHARTED — seed {:02x}{:02x}{:02x}{:02x} (the founding receipt's digest, forever); {} reads the map",
+                style.ok("✓"),
+                seed[0], seed[1], seed[2], seed[3],
+                style.strong("terrain")
+            ),
+            Err(refusal) => refuse(world, &refusal, style),
+        },
+        Some("terrain") => match world.terrain_seed() {
+            None => println!(
+                "  uncharted — every tile reads Standard (·) until {} charts the seed (02 §2.5, the opt-in deed)",
+                style.strong("survey")
+            ),
+            Some(seed) => {
+                let zones: Vec<(u16, cfe::dop::ZoneKind)> = world
+                    .orb()
+                    .map(|orb| orb.zones.iter().map(|z| (z.tile, z.kind)).collect())
+                    .unwrap_or_default();
+                println!("{}", style.head("THE CHART — · standard  ▲ rich  ░ barren  (letters: zones)"));
+                for row in 0..8u16 {
+                    let mut line = String::from("  ");
+                    for col in 0..8u16 {
+                        let tile = row * 8 + col;
+                        let glyph = match zones.iter().find(|(t, _)| *t == tile) {
+                            Some((_, kind)) => match kind {
+                                cfe::dop::ZoneKind::Extractor => 'E',
+                                cfe::dop::ZoneKind::Habitat => 'H',
+                                cfe::dop::ZoneKind::Smelter => 'S',
+                                cfe::dop::ZoneKind::Synthesizer => 'Y',
+                                cfe::dop::ZoneKind::Encasement => 'N',
+                                cfe::dop::ZoneKind::CryoArray => 'C',
+                                cfe::dop::ZoneKind::Resonator => 'R',
+                            },
+                            None => cfe::dop::tile_class(&seed, cfe::world::FIRST_ORB, tile).glyph(),
+                        };
+                        line.push(glyph);
+                        line.push(' ');
+                    }
+                    println!("{line}");
+                }
+                println!(
+                    "  {} an extractor beside ▲ runs ×5/4; a habitat beside E runs ×3/4 (02 §2.6)",
+                    style.dim("adjacency:")
+                );
+            }
+        },
         Some("save") => match world.orb() {
             Some(orb) => {
                 let path = std::path::PathBuf::from("var/worlds")
@@ -2507,6 +2554,10 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "this world's sun is already commissioned — one star per world (NS-6 §6); {} shows it",
             style.strong("status")
         ),
+        ActionRefused::TerrainAlreadyCharted => format!(
+            "the terrain is already charted — one seed per star, forever (02 §2.5); {} reads the map",
+            style.strong("terrain")
+        ),
         ActionRefused::NoStarCommissioned => format!(
             "no sun yet — commission one first: {} (O B A F G K M · bd wd rg ns wr lwh)",
             style.strong("star <class>")
@@ -2887,6 +2938,10 @@ fn chronicle(world: &World, style: &Style) {
                 "✧ galaxy {} observed into the chart by {}",
                 style.strong(name),
                 style.dim(observer)
+            ),
+            cfe::dop::ClosureEvent::WorldCharted { seed } => format!(
+                "▲ terrain charted — seed {:02x}{:02x}{:02x}{:02x}; the map is worth reading",
+                seed[0], seed[1], seed[2], seed[3]
             ),
             cfe::dop::ClosureEvent::OverheatStruck { overflow, .. } => format!(
                 "♨ OVERHEAT — overflow {} past encasement; yields degrade 1/(1+overflow)",

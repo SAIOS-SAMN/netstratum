@@ -91,7 +91,8 @@ terminology law — no set-letter glyphs, Furnace never Crucible, no
 
 ## 4. Wire tag registry state
 
-1–48 and 52–59 assigned (see `engine/cfe/src/dop.rs` header — the one
+1–48 (8 landed at D3 2026-07-30 — WorldCharted, the opt-in terrain
+seed; 9 stays reserved for D3 milestones) and 52–59 assigned (see `engine/cfe/src/dop.rs` header — the one
 authority): 39 TechDiscovered · 40 TechLicensed · 42–46 the AEON block ·
 47–48 the APERTURE pair · 52–53 the COUNCIL pair · 54 GalaxyObserved
 (GALAXY-1a, universe ledger only) · 55 CrystalDrawn + 56–58 the NS-2
@@ -124,7 +125,10 @@ forever.
   FUNCTION-1 + SURVEY-1 LANDED 2026-07-30 (operator directive): the
   §4 function reading renders on the observer; the survey step wires
   scan → charter → drill in the egregore cycle (BUILD_ORDER §3b).
-  Next: D2/D3 or as assigned.
+  D3 TERRAIN first slice LANDED 2026-07-30 (02 §2.5–2.6): tag 8, the
+  opt-in seeded chart, exact multiplier + adjacency witnesses,
+  `survey`/`terrain` verbs; open — auto-chart + conductor adoption
+  (fixture audit), tag 9 milestones. Next: as assigned.
 - **coder-03**: N4 (NS-2 RQP + the scanner) — LANDED on main
   2026-07-30 (33e6c73 + post-ruling inscriptions 7f739f4, after the
   fifth-set rulings): spec §1–§4 with extracted vectors, sigil index +

@@ -15,6 +15,8 @@
 //!   5  ClosureEvent::FamineStruck
 //!   6  ClosureEvent::FamineRelieved
 //!   7  ClosureEvent::ZoneRazed
+//!   8  ClosureEvent::WorldCharted (D3 — the terrain seed, the OPT-IN
+//!         deed; 9 stays reserved for D3 milestones)
 //!   10 ClosureEvent::EntityRegistered (N3)
 //!   11 ClosureEvent::ScopeGranted (N3)
 //!   12 ClosureEvent::ScopeRevoked (N3)
@@ -447,6 +449,12 @@ pub enum ClosureEvent {
     FamineRelieved { orb_id: u64, resource: Resource },
     /// A zone demolished for half its cost back.
     ZoneRazed { orb_id: u64, tile: u16 },
+    /// D3 (02 §2.5) — the star's terrain charted: the seed its tile
+    /// classes derive from, pure and forever. The OPT-IN deed (the
+    /// THERMAL-1 precedent): a star without this receipt reads all
+    /// Standard; the seed is the FOUNDING receipt's digest
+    /// (chronicle-seeded, CHARTER §9 — no wall clock, no dice).
+    WorldCharted { seed: [u8; 32] },
     /// N3 — an entity joined this internet: principal 0 = a sovereign
     /// human; nonzero = an agent contained by that principal.
     EntityRegistered { entity_id: u64, principal: u64, handle: String },
@@ -733,6 +741,9 @@ impl ClosureEvent {
                 value.extend_from_slice(&tile.to_le_bytes());
                 tlv::put(7, &value, &mut out);
             }
+            Self::WorldCharted { seed } => {
+                tlv::put(8, seed, &mut out);
+            }
             Self::EntityRegistered { entity_id, principal, handle } => {
                 let mut value = entity_id.to_le_bytes().to_vec();
                 value.extend_from_slice(&principal.to_le_bytes());
@@ -1018,6 +1029,10 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let tile = u16::from_le_bytes(value.get(8..10)?.try_into().ok()?);
                 Some(Self::ZoneRazed { orb_id, tile })
+            }
+            8 => {
+                let seed: [u8; 32] = value.get(..32)?.try_into().ok()?;
+                Some(Self::WorldCharted { seed })
             }
             10 => {
                 let entity_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -1533,3 +1548,48 @@ impl ColonyOrb {
             .all(|(consumed, _)| !self.famine.contains(consumed))
     }
 }
+
+/// D3 (02 §2.5): the tile classes and their yield multipliers. Upkeep
+/// never scales with terrain — rich tiles are strictly better, barren
+/// ones a cost you zone over only when the map forces you.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TileClass {
+    Standard,
+    Rich,
+    Barren,
+}
+
+impl TileClass {
+    pub fn multiplier(&self) -> Ratio {
+        match self {
+            Self::Standard => ratio(1, 1),
+            Self::Rich => ratio(3, 2),
+            Self::Barren => ratio(1, 2),
+        }
+    }
+
+    /// The map glyph (02 §2.5): · standard, ▲ rich, ░ barren.
+    pub fn glyph(&self) -> char {
+        match self {
+            Self::Standard => '·',
+            Self::Rich => '▲',
+            Self::Barren => '░',
+        }
+    }
+}
+
+/// The pure derivation: BLAKE3(seed ‖ LE64 orb ‖ LE16 tile), first
+/// byte mod 64 → ~40 Standard, ~12 Rich, ~12 Barren (02 §2.5 — the
+/// frequencies are approximate by construction, the derivation exact).
+pub fn tile_class(seed: &[u8; 32], orb_id: u64, tile: u16) -> TileClass {
+    let mut hasher = blake3::Hasher::new();
+    hasher.update(seed);
+    hasher.update(&orb_id.to_le_bytes());
+    hasher.update(&tile.to_le_bytes());
+    match hasher.finalize().as_bytes()[0] % 64 {
+        0..=39 => TileClass::Standard,
+        40..=51 => TileClass::Rich,
+        _ => TileClass::Barren,
+    }
+}
+

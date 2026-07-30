@@ -53,6 +53,8 @@ pub enum ActionRefused {
     UnknownAxisValue { axis: u8, code: u8 },
     /// THERMAL-1 — one sun per world; it is already commissioned.
     StarAlreadyCommissioned,
+    /// D3 — one terrain charter per star; the seed is forever.
+    TerrainAlreadyCharted,
     /// THERMAL-1 — siting an orbit needs a commissioned sun first.
     NoStarCommissioned,
     /// THERMAL-1 — the orb is already sited; an orbit does not move.
@@ -235,6 +237,9 @@ pub struct Committed {
     /// G1 (04 §1/§5): the sealed line — the world-side copy of the
     /// binding receipt; None until the axes seal.
     pub genesis: Option<Genesis>,
+    /// D3: the charted terrain seed — None reads all Standard (the
+    /// opt-in law; the seed arrives only by the WorldCharted deed).
+    pub terrain_seed: Option<[u8; 32]>,
 }
 
 /// G1 (04 §1): a civilization's sealed axes, as the world holds them.
@@ -287,6 +292,8 @@ pub struct World {
     gauge: Vec<Ratio>,
     /// G1: the sealed line, if any (04 §1/§5).
     genesis: Option<Genesis>,
+    /// D3: the charted terrain seed (mirror of the receipt).
+    terrain_seed: Option<[u8; 32]>,
 }
 
 impl World {
@@ -310,6 +317,7 @@ impl World {
             crossed: false,
             gauge: vec![ratio(0, 1)],
             genesis: None,
+            terrain_seed: None,
         }
     }
 
@@ -345,6 +353,7 @@ impl World {
             crossed: committed.crossed,
             gauge: committed.gauge,
             genesis: committed.genesis,
+            terrain_seed: committed.terrain_seed,
         }
     }
 
@@ -1434,6 +1443,8 @@ impl World {
         let one = ratio(1, 1);
         let zero = ratio(0, 1);
         let stamp_now = self.clock.now();
+        // D3: the charted seed, read once — uncharted boosts read 1.
+        let terrain = self.terrain_seed;
         // TECH-1b: each orb's crystallized boons, read once — [unused,
         // insulation, discipline, deepening, doctrine, stores].
         let boons: Vec<(u64, [bool; 6])> = flows
@@ -1580,11 +1591,12 @@ impl World {
             if !frozen {
                 for zone in active {
                     let (resource, amount) = zone.kind.yield_per_tick();
+                    let boost = terrain_boost(&terrain, *orb_id, zone, active);
                     accrue(
                         &mut self.accrued,
                         *orb_id,
                         resource,
-                        amount * efficiency.clone(),
+                        amount * efficiency.clone() * boost,
                     );
                     for (resource, amount) in zone.kind.upkeep_per_tick() {
                         accrue(&mut self.accrued, *orb_id, resource, -amount);
@@ -2406,6 +2418,7 @@ impl World {
             crossed: self.crossed,
             gauge: self.gauge.clone(),
             genesis: self.genesis.clone(),
+            terrain_seed: self.terrain_seed,
         }
     }
 
@@ -2631,6 +2644,34 @@ impl World {
     }
 
     /// Seal a closure with its actor's generation tag (NS-6).
+    /// D3 (02 §2.5) — chart the star's terrain: the OPT-IN deed. The
+    /// seed is the FOUNDING receipt's digest (chronicle-seeded,
+    /// CHARTER §9), receipted once as `WorldCharted`; the tile classes
+    /// derive pure from it forever. Build scope — reading the map is
+    /// the surveyor's office. Uncharted stars read all Standard.
+    pub fn chart_terrain(&mut self) -> Result<[u8; 32], ActionRefused> {
+        self.chart_terrain_as(SOVEREIGN)
+    }
+
+    pub fn chart_terrain_as(&mut self, actor: u64) -> Result<[u8; 32], ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if self.terrain_seed.is_some() {
+            return Err(ActionRefused::TerrainAlreadyCharted);
+        }
+        let Some(founding) = self.chronicle.receipts().first() else {
+            return Err(ActionRefused::NoColony);
+        };
+        let seed = founding.own.0;
+        self.close(ClosureEvent::WorldCharted { seed }, actor);
+        self.terrain_seed = Some(seed);
+        Ok(seed)
+    }
+
+    /// D3: the charted seed, if the deed has been done.
+    pub fn terrain_seed(&self) -> Option<[u8; 32]> {
+        self.terrain_seed
+    }
+
     fn close(&mut self, event: ClosureEvent, actor: u64) {
         let stamp = self.clock.now();
         self.chronicle.append(event, stamp, vec![actor]);
@@ -2927,6 +2968,56 @@ pub fn key_distance(a: &[Ratio], b: &[Ratio]) -> Ratio {
     total
 }
 
+/// D3 (02 §2.5–2.6): the terrain-and-adjacency boost on a yield —
+/// tile class first, then the 4-neighborhood: an extractor beside a
+/// rich TILE runs ×5/4 (the seam runs under the fence); a habitat
+/// beside an ACTIVE extractor runs ×3/4 (noise and dust). Upkeep never
+/// scales; converters and heat-law zones are untouched (v1: terrain
+/// speaks to extraction and agriculture — seams and basins). An
+/// uncharted star reads 1 everywhere — the opt-in law.
+fn terrain_boost(
+    seed: &Option<[u8; 32]>,
+    orb_id: u64,
+    zone: &crate::dop::Zone,
+    active: &[crate::dop::Zone],
+) -> Ratio {
+    use crate::dop::{tile_class, TileClass};
+    let Some(seed) = seed else {
+        return ratio(1, 1);
+    };
+    if !matches!(zone.kind, ZoneKind::Extractor | ZoneKind::Habitat) {
+        return ratio(1, 1);
+    }
+    let mut boost = tile_class(seed, orb_id, zone.tile).multiplier();
+    let beside = |tile: u16| -> Vec<u16> {
+        let (row, col) = (tile / 8, tile % 8);
+        let mut out = Vec::new();
+        if row > 0 { out.push(tile - 8); }
+        if row < 7 { out.push(tile + 8); }
+        if col > 0 { out.push(tile - 1); }
+        if col < 7 { out.push(tile + 1); }
+        out
+    };
+    match zone.kind {
+        ZoneKind::Extractor
+            if beside(zone.tile)
+                .into_iter()
+                .any(|t| tile_class(seed, orb_id, t) == TileClass::Rich) =>
+        {
+            boost *= ratio(5, 4);
+        }
+        ZoneKind::Habitat
+            if beside(zone.tile)
+                .into_iter()
+                .any(|t| active.iter().any(|z| z.tile == t && z.kind == ZoneKind::Extractor)) =>
+        {
+            boost *= ratio(3, 4);
+        }
+        _ => {}
+    }
+    boost
+}
+
 pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut orbs: Vec<ColonyOrb> = Vec::new();
     let mut entities: Vec<Entity> = Vec::new();
@@ -2940,6 +3031,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut crossed = false;
     let mut gauge = vec![ratio(0, 1)];
     let mut genesis: Option<Genesis> = None;
+    let mut terrain_seed: Option<[u8; 32]> = None;
     for receipt in chronicle.receipts() {
         match &receipt.event {
             ClosureEvent::EntityRegistered { entity_id, principal, handle } => {
@@ -3039,6 +3131,8 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             }
             // CONVERGE-1 (07 §1): a universe-ledger event — it never
             // enters a world chronicle, and world replay ignores it.
+            // D3: the terrain charter replays — the seed is forever.
+            ClosureEvent::WorldCharted { seed } => terrain_seed = Some(*seed),
             ClosureEvent::EraAnnexed { .. } => {}
             // GALAXY-1 (13_GALAXY §4): a universe-ledger event — it
             // never enters a world chronicle, and world replay ignores
@@ -3430,7 +3524,10 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             }
         }
     }
-    Committed { orbs, entities, star, debts, bonds, covenants, councils, offers, techs, crossed, gauge, genesis }
+    Committed {
+        orbs, entities, star, debts, bonds, covenants, councils, offers, techs, crossed, gauge,
+        genesis, terrain_seed,
+    }
 }
 
 /// SINK-1 (Q2): the demurrage due on one orb's un-vaulted banked
