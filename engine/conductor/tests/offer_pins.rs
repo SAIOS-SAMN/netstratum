@@ -28,6 +28,7 @@ fn seat(sigil: &str, star: StarClass, albedo: (i64, i64), orbit: (i64, i64)) -> 
             name: sigil.to_string(),
             sigil: sigil.to_string(),
             species: "trade witness".into(),
+            clade: String::new(),
             motto: "the crossing feeds".into(),
             disposition: "empiricist".into(),
             metabolism: "biotic".into(),
@@ -127,4 +128,50 @@ fn the_crossing_relieves_the_freeze() {
             "the rescue replays from receipts alone"
         );
     }
+}
+
+#[test]
+fn any_famine_can_ask_the_market() {
+    // BALANCE-1: the famine ask is open-ended — the survey (docs/
+    // BALANCE_NOTES.md) measured 42% struck with a market path for
+    // joule famine ONLY. Two mesic autarkies famish complementarily
+    // (iron-rich/biomass-starved against its opposite), both asks
+    // post, ONE crossing relieves BOTH.
+    let root = scratch("famine-ask");
+    let registry = Registry::at(root.join("registry"));
+    let mirror = Mirror::at(root.join("worlds"));
+    let mut miner = Egregore::genesis(
+        seat("lodemarket", StarClass::G, (1, 4), (1, 1)), &registry, &mirror);
+    let mut grower = Egregore::genesis(
+        seat("mossmarket", StarClass::G, (1, 4), (1, 1)), &registry, &mirror);
+
+    // The miner extracts only (iron banks, biomass drains); the
+    // grower inhabits only (biomass banks, iron drains).
+    miner.world.zone(0, ZoneKind::Extractor).expect("zones");
+    grower.world.zone(0, ZoneKind::Habitat).expect("zones");
+    for world in [&mut miner.world, &mut grower.world] {
+        for _ in 0..200 {
+            world.tick();
+            let _ = world.collect();
+        }
+    }
+    let miner_orb = miner.world.orb().unwrap();
+    let grower_orb = grower.world.orb().unwrap();
+    assert!(miner_orb.famine.contains(&Resource::Biomass), "the miner starves for biomass");
+    assert!(grower_orb.famine.contains(&Resource::Iron), "the grower starves for iron");
+    assert!(miner_orb.banked_amount(Resource::Iron) > ratio(0, 1), "iron to give");
+    assert!(grower_orb.banked_amount(Resource::Biomass) > ratio(0, 1), "biomass to give");
+    let (give, _, want, _) = trade_intent(&miner.world).expect("the miner asks");
+    assert_eq!((give, want), (Resource::Iron, Resource::Biomass));
+    let (give, _, want, _) = trade_intent(&grower.world).expect("the grower asks");
+    assert_eq!((give, want), (Resource::Biomass, Resource::Iron));
+
+    let mut board = vec![miner, grower];
+    let cleared = market_step(&mut board, 1);
+    assert_eq!(cleared.len(), 1, "one crossing clears");
+    assert!(
+        !board[0].world.orb().unwrap().famine.contains(&Resource::Biomass)
+            && !board[1].world.orb().unwrap().famine.contains(&Resource::Iron),
+        "one crossing relieves BOTH famines"
+    );
 }

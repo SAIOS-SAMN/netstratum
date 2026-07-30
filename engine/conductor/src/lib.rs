@@ -147,23 +147,60 @@ pub fn industry_relevant(metabolism: &str, kind: ZoneKind) -> bool {
 pub fn trade_intent(world: &World) -> Option<(Resource, Ratio, Resource, Ratio)> {
     let orb = world.orb()?;
     let half = |amount: Ratio| amount / ratio(2, 1);
-    match regime(world)? {
-        (Regime::Frost, _) => {
-            let starving = orb.famine.contains(&Resource::Joule);
-            let sink = orb.banked_amount(Resource::Sink);
-            (starving && sink > ratio(0, 1)).then(|| {
-                let give = half(sink);
-                (Resource::Sink, give.clone(), Resource::Joule, give)
-            })
-        }
-        (Regime::Furnace, _) => {
-            let joules = orb.banked_amount(Resource::Joule);
-            (joules > ratio(4, 1)).then(|| {
-                let give = half(joules);
-                (Resource::Joule, give.clone(), Resource::Sink, give)
-            })
+    // The regime specials first (niche before behavior — the
+    // FUNCTION-1 order): the Furnace↔Frost fuel axis.
+    if let Some(regime) = regime(world) {
+        match regime {
+            (Regime::Frost, _) => {
+                let starving = orb.famine.contains(&Resource::Joule);
+                let sink = orb.banked_amount(Resource::Sink);
+                if starving && sink > ratio(0, 1) {
+                    let give = half(sink);
+                    return Some((Resource::Sink, give.clone(), Resource::Joule, give));
+                }
+            }
+            (Regime::Furnace, _) => {
+                let joules = orb.banked_amount(Resource::Joule);
+                if joules > ratio(4, 1) {
+                    let give = half(joules);
+                    return Some((Resource::Joule, give.clone(), Resource::Sink, give));
+                }
+            }
         }
     }
+    // THE FAMINE ASK (the balance survey's hot dial, 2026-07-30 —
+    // 42% struck and only joule famine had a market path): ANY
+    // famished line offers half its LARGEST bank for the famined
+    // resource, 1:1 (the held parity; 05 §1.4 rules the real price).
+    if let Some(&famined) = orb.famine.first() {
+        let biggest = Resource::ALL
+            .iter()
+            .filter(|r| **r != famined)
+            .max_by_key(|r| orb.banked_amount(**r))?;
+        let stock = orb.banked_amount(*biggest);
+        if stock > ratio(0, 1) {
+            let give = half(stock);
+            return Some((*biggest, give.clone(), famined, give));
+        }
+        return None;
+    }
+    // THE SURPLUS OFFER: an unfamished line with a deep bank
+    // (> 8, placeholder) offers half of it for its own scarcest —
+    // the counterparty every famine ask needs. Halves only, never
+    // the whole (guardrail 1's spirit).
+    let biggest = Resource::ALL
+        .iter()
+        .max_by_key(|r| orb.banked_amount(**r))?;
+    let stock = orb.banked_amount(*biggest);
+    if stock > ratio(8, 1) {
+        let scarcest = Resource::ALL
+            .iter()
+            .filter(|r| **r != *biggest)
+            .min_by_key(|r| orb.banked_amount(**r))?;
+        let give = half(stock);
+        return Some((*biggest, give.clone(), *scarcest, give));
+    }
+    None
 }
 
 /// OFFER-1a: one market beat over the whole board — post fresh
@@ -939,6 +976,8 @@ impl Egregore {
             name,
             sigil: sigil.clone(),
             species: root_species.to_string(),
+            // The cleave keeps the clade — one line, one taxon.
+            clade: parent.clade.clone(),
             motto: format!("one line, two songs — cleaved from {}", parent.name),
             disposition,
             metabolism,

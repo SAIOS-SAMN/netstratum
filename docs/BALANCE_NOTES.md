@@ -20,10 +20,14 @@ instrument panel the tuning session reads.
 ## The known hot dials (in likely-first order)
 
 1. **Famine pressure (42%)** — either the relief economics are too
-   thin (trade reaches too few) or the clocks too fast. The market
-   relieves only joule famine on sink-holding Frost worlds today;
-   biomass/iron famines have no market path — WANT: intents for every
-   resource pair, or steward relief norms.
+   thin (trade reaches too few) or the clocks too fast. LANDED
+   2026-07-30: the famine ask is open-ended — any famished line
+   offers half its largest bank for the famined resource, and
+   unfamished deep banks (> 8) post surplus for their own scarcest
+   (the counterparty). Regime specials keep first claim. Witness:
+   `any_famine_can_ask_the_market` (two complementary famines, one
+   crossing relieves both). The 1:1 parity still holds for 05 §1.4;
+   remeasure the 42% after the next long run.
 2. **Rung-5 forge cost** — SEARCH_BUDGET 200k is an engine law; the
    DIFFICULTY TABLE (word_len/grids per rung) is the lawful dial if
    beats must cheapen.
