@@ -12,10 +12,10 @@ use std::path::Path;
 
 /// The founding NPCs (founder "conductor" — the observer marks ⚙).
 pub fn founding_egregores() -> Vec<EgregoreSpec> {
-    let civ = |name: &str, slug: &str, species: &str, motto: &str, d: &str, m: &str, p: &str| {
+    let civ = |name: &str, sigil: &str, species: &str, motto: &str, d: &str, m: &str, p: &str| {
         Civilization {
             name: name.into(),
-            slug: slug.into(),
+            sigil: sigil.into(),
             species: species.into(),
             motto: motto.into(),
             disposition: d.into(),
@@ -137,11 +137,11 @@ pub fn write_default_egregores(path: &Path) -> std::io::Result<()> {
             thermal.push_str(&format!(",\"orbit\":\"{}\"", ratio_text(orbit)));
         }
         out.push_str(&format!(
-            "  {{\"name\":\"{}\",\"slug\":\"{}\",\"species\":\"{}\",\"motto\":\"{}\",\
+            "  {{\"name\":\"{}\",\"sigil\":\"{}\",\"species\":\"{}\",\"motto\":\"{}\",\
              \"disposition\":\"{}\",\"metabolism\":\"{}\",\"perception\":\"{}\",\
              \"world\":\"{}\",\"planet\":\"{}\",\"colony\":\"{}\",\"policy\":\"{}\",\
              \"x\":\"{}\",\"y\":\"{}\",\"z\":\"{}\"{}}}{}\n",
-            c.name, c.slug, c.species, c.motto,
+            c.name, c.sigil, c.species, c.motto,
             c.disposition, c.metabolism, c.perception,
             egregore.world_name, egregore.planet, egregore.colony, egregore.policy.describe(),
             ratio_text(&egregore.position.0), ratio_text(&egregore.position.1),
@@ -166,7 +166,7 @@ pub fn load_egregores(path: &Path) -> Option<Vec<EgregoreSpec>> {
             Some(EgregoreSpec {
                 civilization: Civilization {
                     name: field("name")?,
-                    slug: field("slug")?,
+                    sigil: field("sigil").or_else(|| field("slug"))?,
                     species: field("species").unwrap_or_default(),
                     motto: field("motto").unwrap_or_default(),
                     disposition: field("disposition")?,

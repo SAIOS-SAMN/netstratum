@@ -67,7 +67,7 @@ fn the_survey_charters_the_sector_and_the_spent_lens_idles() {
     let spec = EgregoreSpec {
         civilization: Civilization {
             name: "Surveyor".into(),
-            slug: "surveyor".into(),
+            sigil: "surveyor".into(),
             species: "witness".into(),
             motto: "the drill follows the lens".into(),
             disposition: "empiricist".into(),

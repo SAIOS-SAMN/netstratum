@@ -395,7 +395,7 @@ impl Egregore {
         if let Ok(chronicle) = cfe::persist::load(&carrier) {
             let world = World::resume(chronicle);
             if world.orb().is_some() {
-                let handle = format!("{}-conductor", spec.civilization.slug);
+                let handle = format!("{}-conductor", spec.civilization.sigil);
                 let by_handle = |name: &str| {
                     world
                         .committed()
@@ -466,7 +466,7 @@ impl Egregore {
             world.shift_gauge(opening.clone());
         }
         let automaton = world
-            .register_agent(&format!("{}-conductor", spec.civilization.slug))
+            .register_agent(&format!("{}-conductor", spec.civilization.sigil))
             .expect("registers");
         let steward = world.register_agent("steward").expect("registers");
         for scope in [Scope::Build, Scope::Raze, Scope::Collect] {
@@ -918,14 +918,14 @@ impl Egregore {
         for offset in 0..heads.len() * tails.len() {
             let k = (start + offset) % (heads.len() * tails.len());
             let (head, tail) = (heads[k / tails.len()], tails[k % tails.len()]);
-            let slug = format!("{head}{tail}");
-            if registry.load(&slug).is_none() {
-                chosen = Some((slug, head, tail));
+            let sigil = format!("{head}{tail}");
+            if registry.load(&sigil).is_none() {
+                chosen = Some((sigil, head, tail));
                 break;
             }
         }
-        let (slug, head, tail) = chosen?;
-        let mut name = slug.clone();
+        let (sigil, head, tail) = chosen?;
+        let mut name = sigil.clone();
         name[..1].make_ascii_uppercase();
 
         let root_species = parent
@@ -937,21 +937,21 @@ impl Egregore {
         // retired the daughter).
         let branch = Civilization {
             name,
-            slug: slug.clone(),
+            sigil: sigil.clone(),
             species: root_species.to_string(),
             motto: format!("one line, two songs — cleaved from {}", parent.name),
             disposition,
             metabolism,
             perception,
             founder: "conductor".into(),
-            lineage: vec![parent.slug.clone()],
+            lineage: vec![parent.sigil.clone()],
             station: None,
         };
         registry.create(&branch).ok()?;
         self.spawned = true;
         // The origin's key moves and the cleave is receipted, naming
         // the departing branch (tag 43).
-        self.world.diverge(&slug, delta.clone());
+        self.world.diverge(&sigil, delta.clone());
 
         // The daughter settles ADJACENT: parent position plus a small
         // beacon-drawn displacement in the exact rationals per spatial axis (half-unit
@@ -969,7 +969,7 @@ impl Egregore {
             // fact and a star-chart adjacency, never a name chain.
             world_name: format!("{head}-{tail}"),
             planet: format!("{tail}fall"),
-            colony: format!("{slug}-landing"),
+            colony: format!("{sigil}-landing"),
             policy: self.spec.policy,
             position: (
                 &self.spec.position.0 + dx,
@@ -1018,7 +1018,7 @@ impl Egregore {
         let _ = mirror.record(
             &self.spec.world_name,
             &self.spec.planet,
-            &self.spec.civilization.slug,
+            &self.spec.civilization.sigil,
             &self.world,
         );
         newborn
@@ -1047,7 +1047,7 @@ pub fn observe_crossings(
         };
         let creator = galaxy_creator(registry, &egregore.spec.civilization);
         if let Ok(Some(galaxy)) =
-            mirror.observe_galaxy(&egregore.spec.civilization.slug, &creator, (&x, &y, &z), stamp)
+            mirror.observe_galaxy(&egregore.spec.civilization.sigil, &creator, (&x, &y, &z), stamp)
         {
             created.push(galaxy);
         }
@@ -1061,7 +1061,7 @@ pub fn observe_crossings(
 /// line — lawful, 12 §5); else the conductor — tier 0's own operations
 /// ARE the progenitors' deeds, named (12 §2a).
 fn galaxy_creator(registry: &Registry, civilization: &Civilization) -> String {
-    if let Some(head) = registry.resolve_head(&civilization.slug) {
+    if let Some(head) = registry.resolve_head(&civilization.sigil) {
         if registry.load(&head).and_then(|c| c.station).as_deref() == Some("progenitor") {
             return head;
         }
@@ -1074,7 +1074,7 @@ fn galaxy_creator(registry: &Registry, civilization: &Civilization) -> String {
             seated.station.as_deref() == Some("progenitor")
                 && lineage_domain(&seated.metabolism, None) == domain
         })
-        .map(|seated| seated.slug)
+        .map(|seated| seated.sigil)
         .unwrap_or_else(|| "conductor".into())
 }
 

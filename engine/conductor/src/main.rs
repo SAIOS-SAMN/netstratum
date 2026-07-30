@@ -204,7 +204,7 @@ fn main() {
                 .map(|b| {
                     format!(
                         "{}(t{} z{} s{} L{})",
-                        b.spec.civilization.slug,
+                        b.spec.civilization.sigil,
                         b.world.now(),
                         b.world.orb().map(|o| o.zones.len()).unwrap_or(0),
                         b.solved,

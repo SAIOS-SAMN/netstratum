@@ -33,9 +33,9 @@ fn an_era_brings_the_board_alive() {
         assert!(
             egregore.world.chronicle().receipts().len() > 5,
             "{}: receipts accumulated",
-            egregore.spec.civilization.slug
+            egregore.spec.civilization.sigil
         );
-        assert!(egregore.solved > 0, "{}: research confirmed solves", egregore.spec.civilization.slug);
+        assert!(egregore.solved > 0, "{}: research confirmed solves", egregore.spec.civilization.sigil);
         let world_dir = root.join("worlds").join(&egregore.spec.world_name);
         assert!(world_dir.join("chronicle.jsonl").exists());
         let solves = fs::read_dir(world_dir.join("solves")).expect("solves dir").count();
@@ -132,7 +132,7 @@ fn a_thriving_line_diverges() {
     let origin_world = worlds
         .iter()
         .find(|b| {
-            Some(&b.spec.civilization.slug)
+            Some(&b.spec.civilization.sigil)
                 == newborn.spec.civilization.lineage.first()
         })
         .expect("the origin beats on");
@@ -140,7 +140,7 @@ fn a_thriving_line_diverges() {
         matches!(
             &r.event,
             cfe::dop::ClosureEvent::Diverged { branch, .. }
-                if *branch == newborn.spec.civilization.slug
+                if *branch == newborn.spec.civilization.sigil
         )
     });
     assert!(cleaved, "the origin receipted the cleave, naming its peer");
@@ -173,7 +173,7 @@ fn a_thriving_line_diverges() {
     let parent_world = &worlds
         .iter()
         .find(|b| {
-            Some(&b.spec.civilization.slug)
+            Some(&b.spec.civilization.sigil)
                 == newborn.spec.civilization.lineage.first()
         })
         .expect("the parent beats")
@@ -286,7 +286,7 @@ fn bots_load_from_the_operators_file() {
     write_default_egregores(&path).expect("seeds");
     let loaded = load_egregores(&path).expect("loads");
     assert_eq!(loaded.len(), founding_egregores().len());
-    assert_eq!(loaded[0].civilization.slug, "slagborn");
+    assert_eq!(loaded[0].civilization.sigil, "slagborn");
 
     // Seeding again never clobbers the operator's file.
     let before = fs::read_to_string(&path).expect("read");
@@ -296,7 +296,7 @@ fn bots_load_from_the_operators_file() {
     // A hand-added entry loads alongside the defaults.
     let extended = before.replace(
         "]",
-        r#",{"name":"Fernwake","slug":"fernwake","species":"monarch butterfly",
+        r#",{"name":"Fernwake","sigil":"fernwake","species":"monarch butterfly",
            "motto":"drift and arrive","disposition":"epicurean","metabolism":"biotic",
            "perception":"volumetric","world":"lantern-sea","planet":"petal",
            "colony":"alight","policy":"steady"}]"#,

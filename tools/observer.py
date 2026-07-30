@@ -168,7 +168,7 @@ def load_registry(var_root):
         for path in sorted(reg_dir.glob("*.json")):
             try:
                 card = json.loads(path.read_text(encoding="utf-8"))
-                registry[card.get("slug", path.stem)] = card
+                registry[card.get("sigil", card.get("slug", path.stem))] = card
             except json.JSONDecodeError:
                 continue
     return registry

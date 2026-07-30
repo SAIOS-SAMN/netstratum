@@ -16,10 +16,10 @@ fn scratch(name: &str) -> PathBuf {
     dir
 }
 
-fn line(slug: &str, lineage: Vec<&str>) -> Civilization {
+fn line(sigil: &str, lineage: Vec<&str>) -> Civilization {
     Civilization {
-        name: slug.to_uppercase(),
-        slug: slug.into(),
+        name: sigil.to_uppercase(),
+        sigil: sigil.into(),
         species: "witness".into(),
         motto: "we pin the law".into(),
         disposition: "empiricist".into(),
@@ -55,7 +55,7 @@ fn both_parents_round_trip_and_the_old_form_reads_unchanged() {
     // A LINEAGE-1 file (single token) reads as a one-parent list.
     fs::write(
         root.join("elder-child.json"),
-        "{\"name\":\"Elder Child\",\"slug\":\"elder-child\",\"species\":\"w\",\"motto\":\"m\",\"axes\":{\"disposition\":\"empiricist\",\"metabolism\":\"biotic\",\"perception\":\"planar\"},\"founder\":\"conductor\",\"lineage\":\"mother\"}\n",
+        "{\"name\":\"Elder Child\",\"sigil\":\"elder-child\",\"species\":\"w\",\"motto\":\"m\",\"axes\":{\"disposition\":\"empiricist\",\"metabolism\":\"biotic\",\"perception\":\"planar\"},\"founder\":\"conductor\",\"lineage\":\"mother\"}\n",
     )
     .expect("writes the old form");
     let old = registry.load("elder-child").expect("loads");
@@ -64,7 +64,7 @@ fn both_parents_round_trip_and_the_old_form_reads_unchanged() {
 
 /// The primary chain still resolves as LINEAGE-1 did; the DAG read
 /// returns EVERY root — both grandparent lines of a confluent hybrid,
-/// slug-sorted, deterministic.
+/// sigil-sorted, deterministic.
 #[test]
 fn the_hybrid_resolves_to_both_heads() {
     let registry = Registry::at(scratch("dag"));

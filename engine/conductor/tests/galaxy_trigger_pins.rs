@@ -24,7 +24,7 @@ fn scratch(name: &str) -> PathBuf {
 
 fn seeded(
     name: &str,
-    slug: &str,
+    sigil: &str,
     metabolism: &str,
     lineage: Vec<String>,
     world_name: &str,
@@ -33,7 +33,7 @@ fn seeded(
     EgregoreSpec {
         civilization: Civilization {
             name: name.into(),
-            slug: slug.into(),
+            sigil: sigil.into(),
             species: "witness".into(),
             motto: "we pin the law".into(),
             disposition: "expansionist".into(),
@@ -44,8 +44,8 @@ fn seeded(
             station: None,
         },
         world_name: world_name.into(),
-        planet: format!("{slug}-prime"),
-        colony: format!("first-{slug}"),
+        planet: format!("{sigil}-prime"),
+        colony: format!("first-{sigil}"),
         policy: Policy::Steady,
         position,
         star: Some(StarClass::G),
@@ -66,7 +66,7 @@ fn the_crossing_observes_and_the_observation_creates() {
     registry
         .create(&Civilization {
             name: "Tunborn".into(),
-            slug: "tunborn".into(),
+            sigil: "tunborn".into(),
             species: "tardigrade progenitor".into(),
             motto: "the dark between stars is a bed, not a wall".into(),
             disposition: "expansionist".into(),

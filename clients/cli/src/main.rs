@@ -957,7 +957,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         // new` registers the line and appends it to var/egregores.json
         // so the conductor brings it online at its next boot.
         // THE OPERATOR MENU (prototype — no passwords): profiles under
-        // var/operators/<slug>, many accounts on one machine; login
+        // var/operators/<sigil>, many accounts on one machine; login
         // switches, continue resumes the profile's last saved world.
         // THE PROGENITOR CONSOLE (tier 0 — the board-makers' hand):
         // inbox and requests flow UP from the lower dimensions; move
@@ -1189,7 +1189,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 }
                 Some("create") => println!(
                     "creation is the civ console: {}",
-                    style.strong("civ new <slug> | <Name> | <species> | <motto> | <axes> [station]")
+                    style.strong("civ new <sigil> | <Name> | <species> | <motto> | <axes> [station]")
                 ),
                 Some(other) => println!(
                     "{} unknown t0 verb {} — inbox · requests · move · galaxies · contract · clean · create",
@@ -1200,7 +1200,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         }
         Some("login") => match words.next() {
             Some(name) => {
-                let slug = name.to_lowercase().replace(' ', "-");
+                let sigil = name.to_lowercase().replace(' ', "-");
                 // BLOCKER A3: the profile carries a STATION — the
                 // authority the tier-0 verbs check. Passwordless per
                 // ruling; the role is the gate, not the secret.
@@ -1224,7 +1224,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 };
                 let dir = std::path::PathBuf::from("var/operators");
                 let _ = std::fs::create_dir_all(&dir);
-                let profile = dir.join(format!("{slug}.json"));
+                let profile = dir.join(format!("{sigil}.json"));
                 let world = std::fs::read_to_string(&profile)
                     .ok()
                     .and_then(|text| data_field(&text, "world"))
@@ -1233,11 +1233,11 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     &profile,
                     format!("{{\"world\":\"{world}\",\"station\":\"{station}\"}}\n"),
                 );
-                let _ = std::fs::write(dir.join("active"), &slug);
+                let _ = std::fs::write(dir.join("active"), &sigil);
                 println!(
                     "{} logged in as {} [{}] — {} resumes your last saved world",
                     style.ok("✓"),
-                    style.strong(&slug),
+                    style.strong(&sigil),
                     style.strong(&station),
                     style.strong("continue")
                 );
@@ -1250,10 +1250,10 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     println!("{}", style.head("OPERATORS ON THIS MACHINE"));
                     for entry in entries.filter_map(|e| e.ok()) {
                         let name = entry.file_name().to_string_lossy().into_owned();
-                        if let Some(slug) = name.strip_suffix(".json") {
+                        if let Some(sigil) = name.strip_suffix(".json") {
                             listed += 1;
-                            let mark = if slug == active.trim() { " ← active" } else { "" };
-                            println!("  {}{}", style.strong(slug), style.dim(mark));
+                            let mark = if sigil == active.trim() { " ← active" } else { "" };
+                            println!("  {}{}", style.strong(sigil), style.dim(mark));
                         }
                     }
                 }
@@ -1269,17 +1269,17 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             let active = std::fs::read_to_string("var/operators/active").unwrap_or_default();
             match active.trim() {
                 "" => println!("no one — {} first", style.strong("login <name>")),
-                slug => println!("{}", style.strong(slug)),
+                sigil => println!("{}", style.strong(sigil)),
             }
         }
         Some("continue") => {
             let active = std::fs::read_to_string("var/operators/active").unwrap_or_default();
-            let slug = active.trim().to_string();
-            if slug.is_empty() {
+            let sigil = active.trim().to_string();
+            if sigil.is_empty() {
                 println!("{} {} first", style.bad("✗"), style.strong("login <name>"));
                 return;
             }
-            let profile = std::fs::read_to_string(format!("var/operators/{slug}.json"))
+            let profile = std::fs::read_to_string(format!("var/operators/{sigil}.json"))
                 .unwrap_or_default();
             let last = profile
                 .split("\"world\":\"")
@@ -1342,7 +1342,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     );
                     println!(
                         "  create one: {}",
-                        style.strong("civ new <slug> | <Name> | <species> | <motto> | <disp> <metab> <perc> [station]")
+                        style.strong("civ new <sigil> | <Name> | <species> | <motto> | <disp> <metab> <perc> [station]")
                     );
                 }
                 Some("new") => {
@@ -1356,11 +1356,11 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         println!(
                             "{} the form is {}",
                             style.bad("✗"),
-                            style.strong("civ new <slug> | <Name> | <species> | <motto> | <disp> <metab> <perc> [station]")
+                            style.strong("civ new <sigil> | <Name> | <species> | <motto> | <disp> <metab> <perc> [station]")
                         );
                         return;
                     }
-                    let slug = parts[0].to_lowercase().replace(' ', "-");
+                    let sigil = parts[0].to_lowercase().replace(' ', "-");
                     let axis_words: Vec<&str> = parts[4].split_whitespace().collect();
                     if !(3..=4).contains(&axis_words.len()) {
                         println!(
@@ -1372,7 +1372,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     }
                     let newcomer = Civilization {
                         name: parts[1].into(),
-                        slug: slug.clone(),
+                        sigil: sigil.clone(),
                         species: parts[2].into(),
                         motto: parts[3].into(),
                         disposition: axis_words[0].into(),
@@ -1408,8 +1408,8 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             );
                             return;
                         }
-                        Err(RegistryRefused::AlreadyRegistered { slug }) => {
-                            println!("{} {} is already a people — choose a new slug", style.bad("✗"), style.strong(&slug));
+                        Err(RegistryRefused::AlreadyRegistered { sigil }) => {
+                            println!("{} {} is already a people — choose a new sigil", style.bad("✗"), style.strong(&sigil));
                             return;
                         }
                         Err(refusal) => {
@@ -1417,15 +1417,15 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             return;
                         }
                     }
-                    // Seat the world deterministically from the slug —
+                    // Seat the world deterministically from the sigil —
                     // no wall clock, no dice (CHARTER §9's spirit).
-                    let digest: [u8; 32] = blake3::hash(slug.as_bytes()).into();
+                    let digest: [u8; 32] = blake3::hash(sigil.as_bytes()).into();
                     let coord = |at: usize| -> i64 { i64::from(digest[at] % 63) - 31 };
                     let entry = format!(
-                        "  {{\"name\":\"{}\",\"slug\":\"{}\",\"species\":\"{}\",\"motto\":\"{}\",\"disposition\":\"{}\",\"metabolism\":\"{}\",\"perception\":\"{}\",\"world\":\"{}-hearth\",\"planet\":\"{}-prime\",\"colony\":\"first-{}\",\"policy\":\"steady\",\"x\":\"{}\",\"y\":\"{}\",\"z\":\"{}\"{}}}",
-                        newcomer.name, slug, newcomer.species, newcomer.motto,
+                        "  {{\"name\":\"{}\",\"sigil\":\"{}\",\"species\":\"{}\",\"motto\":\"{}\",\"disposition\":\"{}\",\"metabolism\":\"{}\",\"perception\":\"{}\",\"world\":\"{}-hearth\",\"planet\":\"{}-prime\",\"colony\":\"first-{}\",\"policy\":\"steady\",\"x\":\"{}\",\"y\":\"{}\",\"z\":\"{}\"{}}}",
+                        newcomer.name, sigil, newcomer.species, newcomer.motto,
                         newcomer.disposition, newcomer.metabolism, newcomer.perception,
-                        slug, slug, slug,
+                        sigil, sigil, sigil,
                         coord(0), coord(1), coord(2),
                         newcomer
                             .station
@@ -1452,7 +1452,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                 .as_ref()
                                 .map(|s| format!(" ({s} seat taken)"))
                                 .unwrap_or_default(),
-                            slug
+                            sigil
                         ),
                         _ => println!(
                             "{} registered, but var/egregores.json would not append — add the entry by hand",
@@ -2206,7 +2206,7 @@ fn help(style: &Style) {
         ("tech", "the constellation: this line's base-7 sky — held nodes with their voice-names, exact progress toward what has not crystallized, the crown's gate"),
         ("terraform <albedo> <orbit>", "the gifted crown (base-7 complete + licensed from tier 0): re-seat a sited planet — the only lawful way an orbit moves"),
         ("npcs [pause|resume|speed <s>]", "the player\'s hand on the autonomous board — pause holds every egregore world, speed sets seconds between beats (0 = flat out); bare npcs shows the state"),
-        ("civ [seats] · civ new …", "the civ console: seats shows every station\'s room (progenitors per domain, 8 each — space, not rank); civ new <slug> | <Name> | <species> | <motto> | <disp> <metab> <perc> [station] registers a custom line and rosters it for the conductor"),
+        ("civ [seats] · civ new …", "the civ console: seats shows every station\'s room (progenitors per domain, 8 each — space, not rank); civ new <sigil> | <Name> | <species> | <motto> | <disp> <metab> <perc> [station] registers a custom line and rosters it for the conductor"),
         ("save · resume <world>", "sync the chronicle to var/worlds/<name>/ (append-only) · resume a saved world at launch"),
         ("planet <name> · planets", "switch the planet cursor · list this world's planets"),
         ("agent <handle>", "register a contained agent (zero grants until you open scopes)"),

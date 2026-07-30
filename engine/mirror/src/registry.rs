@@ -46,7 +46,7 @@ pub fn seat_width(station: &str) -> Option<u64> {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Civilization {
     pub name: String,
-    pub slug: String,
+    pub sigil: String,
     /// Free text — the encyclopedia grows itself ("blue whale",
     /// "monarch butterfly", "human").
     pub species: String,
@@ -71,7 +71,7 @@ pub struct Civilization {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum RegistryRefused {
     /// The slug already exists — join it, or choose a new name.
-    AlreadyRegistered { slug: String },
+    AlreadyRegistered { sigil: String },
     /// An axis value outside the closed vocabulary, named.
     UnknownAxis { axis: &'static str, given: String },
     /// BAND-1 — a station outside the closed office vocabulary.
@@ -135,17 +135,17 @@ impl Registry {
                 }
             }
         }
-        let path = self.root.join(format!("{}.json", civilization.slug));
+        let path = self.root.join(format!("{}.json", civilization.sigil));
         if path.exists() {
             return Err(RegistryRefused::AlreadyRegistered {
-                slug: civilization.slug.clone(),
+                sigil: civilization.sigil.clone(),
             });
         }
         fs::create_dir_all(&self.root).map_err(|e| RegistryRefused::Io(e.to_string()))?;
         let mut w = JsonWriter::new();
         w.open();
         w.field_str("name", &civilization.name);
-        w.field_str("slug", &civilization.slug);
+        w.field_str("sigil", &civilization.sigil);
         w.field_str("species", &civilization.species);
         w.field_str("motto", &civilization.motto);
         w.key("axes");
@@ -168,12 +168,13 @@ impl Registry {
         Ok(())
     }
 
-    /// Load one entry by slug.
-    pub fn load(&self, slug: &str) -> Option<Civilization> {
-        let text = fs::read_to_string(self.root.join(format!("{slug}.json"))).ok()?;
+    /// Load one entry by sigil.
+    pub fn load(&self, sigil: &str) -> Option<Civilization> {
+        let text = fs::read_to_string(self.root.join(format!("{sigil}.json"))).ok()?;
         Some(Civilization {
             name: extract_string(&text, "name")?,
-            slug: extract_string(&text, "slug")?,
+            sigil: extract_string(&text, "sigil")
+                .or_else(|| extract_string(&text, "slug"))?,
             species: extract_string(&text, "species").unwrap_or_default(),
             motto: extract_string(&text, "motto").unwrap_or_default(),
             disposition: extract_string(&text, "disposition")?,
@@ -207,7 +208,7 @@ impl Registry {
 }
 
 /// Derive a slug the way the mirror sanitizes names.
-pub fn slug_of(name: &str) -> String {
+pub fn sigil_of(name: &str) -> String {
     crate::sanitize(name)
 }
 
@@ -238,9 +239,9 @@ impl Registry {
     /// card rewrites with the seat taken. Elevation's gates are the
     /// CALLER's evidence (the world's receipts); the registry checks
     /// the room.
-    pub fn seat(&self, slug: &str, station: &str) -> Result<(), RegistryRefused> {
-        let mut card = self.load(slug).ok_or_else(|| RegistryRefused::Io(
-            format!("no such line: {slug}"),
+    pub fn seat(&self, sigil: &str, station: &str) -> Result<(), RegistryRefused> {
+        let mut card = self.load(sigil).ok_or_else(|| RegistryRefused::Io(
+            format!("no such line: {sigil}"),
         ))?;
         if !STATIONS.contains(&station) {
             return Err(RegistryRefused::UnknownStation { given: station.into() });
@@ -251,7 +252,7 @@ impl Registry {
                 .list()
                 .iter()
                 .filter(|seated| {
-                    seated.slug != slug
+                    seated.sigil != sigil
                         && seated.station.as_deref() == Some(station)
                         && (station != "progenitor"
                             || lineage_domain(&seated.metabolism, None) == domain)
@@ -267,7 +268,7 @@ impl Registry {
             }
         }
         card.station = Some(station.into());
-        let path = self.root.join(format!("{slug}.json"));
+        let path = self.root.join(format!("{sigil}.json"));
         std::fs::remove_file(&path).map_err(|e| RegistryRefused::Io(e.to_string()))?;
         self.create(&card)
     }
@@ -277,9 +278,9 @@ impl Registry {
     /// into the unrecorded past) resolves to the deepest entry that
     /// EXISTS: headless is a lawful state, not an error (12_UNION §5).
     /// A corrupt cycle stops deterministically at first revisit.
-    pub fn resolve_head(&self, slug: &str) -> Option<String> {
-        let mut current = self.load(slug)?;
-        let mut visited = vec![current.slug.clone()];
+    pub fn resolve_head(&self, sigil: &str) -> Option<String> {
+        let mut current = self.load(sigil)?;
+        let mut visited = vec![current.sigil.clone()];
         // LINEAGE-2: the PRIMARY chain — first parent per hop (append
         // order); the full DAG reads through `resolve_heads`.
         while let Some(parent) = current.lineage.first() {
@@ -288,13 +289,13 @@ impl Registry {
             }
             match self.load(parent) {
                 Some(ancestor) => {
-                    visited.push(ancestor.slug.clone());
+                    visited.push(ancestor.sigil.clone());
                     current = ancestor;
                 }
                 None => break,
             }
         }
-        Some(current.slug)
+        Some(current.sigil)
     }
 
     /// LINEAGE-2 (12 §5): EVERY root of the ancestry DAG — a confluent
@@ -302,11 +303,11 @@ impl Registry {
     /// several heads. A walk's terminus is a head when no unvisited
     /// recorded parent remains: empty lineage, dangling pointers, and
     /// cycles all stop there deterministically. Slug-sorted, deduped.
-    pub fn resolve_heads(&self, slug: &str) -> Vec<String> {
-        let Some(start) = self.load(slug) else {
+    pub fn resolve_heads(&self, sigil: &str) -> Vec<String> {
+        let Some(start) = self.load(sigil) else {
             return Vec::new();
         };
-        let mut visited = vec![start.slug.clone()];
+        let mut visited = vec![start.sigil.clone()];
         let mut frontier = vec![start];
         let mut heads = Vec::new();
         while let Some(current) = frontier.pop() {
@@ -316,13 +317,13 @@ impl Registry {
                     continue;
                 }
                 if let Some(ancestor) = self.load(parent) {
-                    visited.push(ancestor.slug.clone());
+                    visited.push(ancestor.sigil.clone());
                     frontier.push(ancestor);
                     pushed += 1;
                 }
             }
             if pushed == 0 {
-                heads.push(current.slug);
+                heads.push(current.sigil);
             }
         }
         heads.sort();

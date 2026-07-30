@@ -22,11 +22,11 @@ fn scratch(name: &str) -> PathBuf {
     dir
 }
 
-fn seat(slug: &str, star: StarClass, albedo: (i64, i64), orbit: (i64, i64)) -> EgregoreSpec {
+fn seat(sigil: &str, star: StarClass, albedo: (i64, i64), orbit: (i64, i64)) -> EgregoreSpec {
     EgregoreSpec {
         civilization: Civilization {
-            name: slug.to_string(),
-            slug: slug.to_string(),
+            name: sigil.to_string(),
+            sigil: sigil.to_string(),
             species: "trade witness".into(),
             motto: "the crossing feeds".into(),
             disposition: "empiricist".into(),
@@ -36,9 +36,9 @@ fn seat(slug: &str, star: StarClass, albedo: (i64, i64), orbit: (i64, i64)) -> E
             lineage: Vec::new(),
             station: None,
         },
-        world_name: format!("{slug}-hold"),
-        planet: format!("{slug}-p"),
-        colony: format!("{slug}-c"),
+        world_name: format!("{sigil}-hold"),
+        planet: format!("{sigil}-p"),
+        colony: format!("{sigil}-c"),
         policy: Policy::Steady,
         position: (ratio(0, 1), ratio(0, 1), ratio(0, 1)),
         star: Some(star),

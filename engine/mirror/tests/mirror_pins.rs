@@ -34,7 +34,7 @@ fn played_world() -> World {
 fn humans() -> Civilization {
     Civilization {
         name: "Humans".into(),
-        slug: "humans".into(),
+        sigil: "humans".into(),
         species: "human".into(),
         motto: "we go anyway".into(),
         disposition: "empiricist".into(),
@@ -155,7 +155,7 @@ fn directives_round_trip_and_archive() {
 }
 
 /// The registry: create, list, join; the closed axis vocabulary
-/// refuses typed; a duplicate slug refuses typed.
+/// refuses typed; a duplicate sigil refuses typed.
 #[test]
 fn the_registry_enforces_the_vocabulary() {
     let root = scratch("registry");
@@ -172,13 +172,13 @@ fn the_registry_enforces_the_vocabulary() {
     assert_eq!(
         registry.create(&humans()),
         Err(RegistryRefused::AlreadyRegistered {
-            slug: "humans".into()
+            sigil: "humans".into()
         })
     );
 
     // An axis outside the closed vocabulary refuses, naming the axis.
     let mut wrong = humans();
-    wrong.slug = "wrong".into();
+    wrong.sigil = "wrong".into();
     wrong.perception = "psychic".into();
     assert_eq!(
         registry.create(&wrong),
@@ -200,7 +200,7 @@ fn the_axes_grow_append_only() {
 
     let mut sheet = humans();
     sheet.name = "Coronal Choir".into();
-    sheet.slug = "coronal-choir".into();
+    sheet.sigil = "coronal-choir".into();
     sheet.species = "current sheet".into();
     sheet.motto = "we are the weather of the star".into();
     sheet.metabolism = "plasmic".into();
@@ -211,7 +211,7 @@ fn the_axes_grow_append_only() {
     // Growth is append-only, never a reopening: unknown values still
     // refuse typed on every axis.
     let mut wrong = humans();
-    wrong.slug = "etheric".into();
+    wrong.sigil = "etheric".into();
     wrong.metabolism = "etheric".into();
     assert_eq!(
         registry.create(&wrong),
@@ -238,12 +238,12 @@ fn a_lineage_resolves_to_its_own_head() {
 
     // elder <- branch <- leaf: the chain resolves to the elder.
     let mut elder = humans();
-    elder.slug = "elder".into();
+    elder.sigil = "elder".into();
     let mut branch = humans();
-    branch.slug = "branch".into();
+    branch.sigil = "branch".into();
     branch.lineage = vec!["elder".into()];
     let mut leaf = humans();
-    leaf.slug = "leaf".into();
+    leaf.sigil = "leaf".into();
     leaf.lineage = vec!["branch".into()];
     for line in [&elder, &branch, &leaf] {
         registry.create(line).expect("registers");
@@ -254,17 +254,17 @@ fn a_lineage_resolves_to_its_own_head() {
 
     // A dangling pointer resolves to the deepest RECORDED ancestor.
     let mut orphan = humans();
-    orphan.slug = "orphan".into();
+    orphan.sigil = "orphan".into();
     orphan.lineage = vec!["unrecorded-past".into()];
     registry.create(&orphan).expect("registers");
     assert_eq!(registry.resolve_head("orphan"), Some("orphan".into()));
 
     // A corrupt cycle stops deterministically, never hangs.
     let mut ouro = humans();
-    ouro.slug = "ouro".into();
+    ouro.sigil = "ouro".into();
     ouro.lineage = vec!["boros".into()];
     let mut boros = humans();
-    boros.slug = "boros".into();
+    boros.sigil = "boros".into();
     boros.lineage = vec!["ouro".into()];
     registry.create(&ouro).expect("registers");
     registry.create(&boros).expect("registers");
@@ -298,14 +298,14 @@ fn the_seats_are_space_not_rank() {
     for n in 0..8 {
         let mut elder = humans();
         elder.name = format!("Elder {n}");
-        elder.slug = format!("elder-{n}");
+        elder.sigil = format!("elder-{n}");
         elder.metabolism = "mineral".into();
         elder.station = Some("progenitor".into());
         registry.create(&elder).expect("a seat stands open");
     }
     // The ninth: the room is FULL — a room filled, not a rank refused.
     let mut ninth = humans();
-    ninth.slug = "ninth".into();
+    ninth.sigil = "ninth".into();
     ninth.metabolism = "mineral".into();
     ninth.station = Some("progenitor".into());
     assert_eq!(
@@ -320,7 +320,7 @@ fn the_seats_are_space_not_rank() {
 
     // A DIFFERENT domain still seats — the band grows by domains.
     let mut warm = humans();
-    warm.slug = "warm-elder".into();
+    warm.sigil = "warm-elder".into();
     warm.station = Some("progenitor".into());
     registry.create(&warm).expect("the mesic room stands open");
     assert_eq!(
@@ -331,14 +331,14 @@ fn the_seats_are_space_not_rank() {
 
     // An unknown office refuses typed; no station is the common state.
     let mut odd = humans();
-    odd.slug = "odd".into();
+    odd.sigil = "odd".into();
     odd.station = Some("emperor".into());
     assert_eq!(
         registry.create(&odd),
         Err(RegistryRefused::UnknownStation { given: "emperor".into() })
     );
     let mut common = humans();
-    common.slug = "common".into();
+    common.sigil = "common".into();
     registry.create(&common).expect("a stationless people registers");
 }
 

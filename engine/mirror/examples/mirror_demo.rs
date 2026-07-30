@@ -15,7 +15,7 @@ fn main() {
 
     let _ = registry.create(&Civilization {
         name: "Humans".into(),
-        slug: "humans".into(),
+        sigil: "humans".into(),
         species: "human".into(),
         motto: "we go anyway".into(),
         disposition: "empiricist".into(),
@@ -27,7 +27,7 @@ fn main() {
     });
     let _ = registry.create(&Civilization {
         name: "Deep Chorus".into(),
-        slug: "deep-chorus".into(),
+        sigil: "deep-chorus".into(),
         species: "blue whale".into(),
         motto: "we heard it before you saw it".into(),
         disposition: "epicurean".into(),

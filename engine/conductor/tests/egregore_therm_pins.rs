@@ -94,10 +94,10 @@ fn the_joule_runway_defers_the_frost() {
     let root = scratch("runway");
     let registry = Registry::at(root.join("registry"));
     let mirror = Mirror::at(root.join("worlds"));
-    let seat = |slug: &str, star: StarClass| EgregoreSpec {
+    let seat = |sigil: &str, star: StarClass| EgregoreSpec {
         civilization: Civilization {
-            name: slug.to_string(),
-            slug: slug.to_string(),
+            name: sigil.to_string(),
+            sigil: sigil.to_string(),
             species: "wood frog".into(),
             motto: "measured against the cold".into(),
             disposition: "empiricist".into(),
@@ -107,9 +107,9 @@ fn the_joule_runway_defers_the_frost() {
             lineage: Vec::new(),
             station: None,
         },
-        world_name: format!("{slug}-hold"),
-        planet: format!("{slug}-p"),
-        colony: format!("{slug}-c"),
+        world_name: format!("{sigil}-hold"),
+        planet: format!("{sigil}-p"),
+        colony: format!("{sigil}-c"),
         policy: Policy::Aggressive,
         position: (ratio(0, 1), ratio(0, 1), ratio(0, 1)),
         star: Some(star),
@@ -184,7 +184,7 @@ fn old_bots_files_still_load_and_derive() {
     let legacy = root.join("legacy.json");
     fs::write(
         &legacy,
-        r#"[{"name":"Fernwake","slug":"fernwake","species":"monarch butterfly",
+        r#"[{"name":"Fernwake","sigil":"fernwake","species":"monarch butterfly",
            "motto":"drift and arrive","disposition":"epicurean","metabolism":"biotic",
            "perception":"volumetric","world":"lantern-sea","planet":"petal",
            "colony":"alight","policy":"steady","x":"3","y":"1/2","z":"-4"}]"#,
