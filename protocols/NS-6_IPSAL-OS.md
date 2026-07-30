@@ -241,3 +241,31 @@ Codes are the wire enumerator (a permanent NS-1 tag at the star-orb landing);
 values here are placeholder parameters that tune at balance time. `StarClass`
 is descriptive substrate that feeds the exact-rational thermal math — it is
 never itself a game rule in bytecode (SEAL C).
+
+## 8. The lived arc since N3 (recorded 2026-07-30, coder-02)
+
+What grew on this protocol without changing it — the first cut held:
+
+- **Scopes stand at the three inscribed** (`Build`/`Raze`/`Collect`),
+  and TEN mutating verbs now pass their gates (chart, zone, raze,
+  collect, transfer, seal_bond, sever_bond, seal_covenant, absorb,
+  scan — audited 2026-07-30: ten verbs, ten `permitted` checks, zero
+  ungated). The scanner rides Collect; a dedicated scan scope awaits
+  an operator ruling (the N4 deferral).
+- **The sovereign's face at the terminal:** profiles under
+  `var/operators/` — `login <name>` mints or switches, bare `login`
+  lists with the active marked, `whoami`, `continue` resumes the
+  active profile's last saved star. No passwords by design: the
+  containment boundary is the machine, not a credential.
+- **The lived containment:** every egregore star runs its
+  `{slug}-conductor` automaton (three scopes granted at genesis) and a
+  steward draining the inbox — §5.2's two-tier mapping operating on
+  every live star, every beat.
+- **Cross-star identity stays deferred** to N5/N6; PLANNER-1's
+  authorship-attribution deferral rides it.
+- **Open, awaiting operator ruling** (recorded 2026-07-30): whether
+  IPSAL additionally names the translation bridge — today translation
+  is G3's territory (frames as coboundaries, measured loss) and
+  presence is NS-5's; nothing in this protocol claims them. If ruled,
+  the binding lands here and in those chapters together.
+
