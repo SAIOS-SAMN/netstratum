@@ -154,9 +154,9 @@ law replaces the register:
 
 | founding name | the critique | locality-anchored successor (proposed) |
 |---|---|---|
-| Deep Chorus | vague sonar-ese | **Abyssal Vocalis** — hadal trench · high-density fluid · low-frequency structural resonance |
+| Deep Chorus | vague sonar-ese | ~~Abyssal Vocalis~~ **Echowright** (operator-ruled 2026-07-30 — echo-maker, the -wright pattern; the sonar sense the operator asked for) |
 | Hivelight | generic glow | **Vitreous Hex** — silica comb · quartz lattice · optical pulse computation |
-| Slagborn | tells the diet, not the home | **Mantle Anhydro** — crust/mantle boundary · desiccated mineral tun state |
+| Slagborn | tells the diet, not the home | ~~Mantle Anhydro~~ **Slagborn stands** (operator-ruled 2026-07-30 — the proposal is declined; the diet-name keeps) |
 | Eightfold | counts arms only | **Brine Cortex** — sub-ice ocean · saline convection · distributed arm-borne cognition |
 | Mycelial Weft | close, keep | (already locality-anchored: understory · soil · hyphal network) |
 
