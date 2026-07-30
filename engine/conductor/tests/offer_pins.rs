@@ -33,7 +33,7 @@ fn seat(slug: &str, star: StarClass, albedo: (i64, i64), orbit: (i64, i64)) -> E
             metabolism: "biotic".into(),
             perception: "planar".into(),
             founder: "conductor".into(),
-            lineage: None,
+            lineage: Vec::new(),
             station: None,
         },
         world_name: format!("{slug}-hold"),
