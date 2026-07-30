@@ -175,7 +175,12 @@ forever.
   the ladder's law). Specced 2026-07-30: INCURSION-1 (07 §3.1, the
   archived-sheet door), WARDEN-1 (10 §3e, the elder world), MASK-1
   concrete (14 §4, NS-2 seam flagged for coder-03). Register waves 4+
-  await operator naming. Next: as assigned.
+  await operator naming. PRACTICE-1 LANDED 2026-07-31 (tags 68/69,
+next free 70): the five disciplines with exact benefit/friction pairs,
+the rediscovery release + condition-7 re-emergence node, the alignment
+gate on the climb (syntropy ≥ 1/2), genesis adoption by disposition,
+CLI practice/release. The creed-coupling design gap is CLOSED. Next:
+as assigned.
 - **coder-03**: N4 (NS-2 RQP + the scanner) — LANDED on main
   2026-07-30 (33e6c73 + post-ruling inscriptions 7f739f4, after the
   fifth-set rulings): spec §1–§4 with extracted vectors, sigil index +

@@ -92,7 +92,18 @@
 //!         per clock: the yielding hand seals, naming the successor;
 //!         the taking hand's first append cites the seal; authority
 //!         is a mesh WALK of the spine, never a flag)
-//!         — the next free tag outside reservations is 68.
+//!   68 ClosureEvent::PracticeAdopted (PRACTICE-1, 14 §4 — a line
+//!         binds a receipted discipline; the derived creed never
+//!         binds, the practice does)
+//!   69 ClosureEvent::PracticeReleased (PRACTICE-1 — release is a
+//!         REDISCOVERY: barred until new doctrine landed since the
+//!         adoption; emits the condition-7 re-emergence node)
+//!         — the next free tag outside reservations is 70.
+//!   In-value practice codes (append-only): 1 the Fast · 2 the Icon ·
+//!   3 the Vigil · 4 the Hoard · 5 the Athanor (deep-end: adoption
+//!   gated on hardship ≥ 8 receipts). Placeholder names, operator
+//!   renames anytime. Tech condition 7 = re-emergence (the released
+//!   discipline's lesson; window-ease modifier, alignment-gated).
 //!   In-value codes opened at N4 (they ride existing orb tags, no new
 //!   TLV tag): Resource::Crystal = 7 (banked entry, tag 18);
 //!   ZoneKind::Resonator = 7 (zone entry, tag 17).
@@ -178,6 +189,7 @@ pub fn tech_node_name(condition: u8, node: &[u8; 32]) -> String {
         3 => "deepening",
         4 => "doctrine",
         5 => "stores",
+        7 => "re-emergence",
         // TERRA-1: the gifted crown of the base-7 stack — never
         // crystallized locally, only licensed down from tier 0.
         6 => "terraforming",
@@ -799,6 +811,13 @@ pub enum ClosureEvent {
     /// truth and no mechanic reads it where this receipt exists.
     /// Genesis is entry in the bands (04 §6a) — never a tier-0 seat.
     GenesisSealed { civilization: String, disposition: u8, metabolism: u8, perception: u8 },
+    /// PRACTICE-1 (14 §4) — a receipted discipline binds the line:
+    /// one benefit, one friction, exact-rational, on landed hooks.
+    PracticeAdopted { practice: u8 },
+    /// PRACTICE-1 — the rediscovery: lawful only after new doctrine
+    /// landed since adoption; the re-emergence node rides separately
+    /// as TechDiscovered condition 7.
+    PracticeReleased { practice: u8 },
 }
 
 impl ClosureEvent {
@@ -1100,6 +1119,12 @@ impl ClosureEvent {
                 let mut value = vec![*disposition, *metabolism, *perception];
                 value.extend_from_slice(civilization.as_bytes());
                 tlv::put(61, &value, &mut out);
+            }
+            Self::PracticeAdopted { practice } => {
+                tlv::put(68, &[*practice], &mut out);
+            }
+            Self::PracticeReleased { practice } => {
+                tlv::put(69, &[*practice], &mut out);
             }
         }
         out
@@ -1420,6 +1445,8 @@ impl ClosureEvent {
                 let civilization = String::from_utf8(value.get(3..)?.to_vec()).ok()?;
                 Some(Self::GenesisSealed { civilization, disposition, metabolism, perception })
             }
+            68 => Some(Self::PracticeAdopted { practice: *value.first()? }),
+            69 => Some(Self::PracticeReleased { practice: *value.first()? }),
             _ => None,
         }
     }

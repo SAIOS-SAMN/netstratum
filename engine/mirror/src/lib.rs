@@ -730,6 +730,14 @@ fn render_receipt(receipt: &Receipt) -> String {
             "galaxy_observed",
             format!("{name} observed by {observer}"),
         ),
+        E::PracticeAdopted { practice } => (
+            "practice_adopted",
+            format!("discipline {practice} bound by receipt"),
+        ),
+        E::PracticeReleased { practice } => (
+            "practice_released",
+            format!("discipline {practice} released — the lesson re-emerges"),
+        ),
         E::WorldCharted { seed } => (
             "world_charted",
             format!(

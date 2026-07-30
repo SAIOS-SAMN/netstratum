@@ -55,6 +55,18 @@ pub enum ActionRefused {
     StarAlreadyCommissioned,
     /// D3 — one terrain charter per star; the seed is forever.
     TerrainAlreadyCharted,
+    /// PRACTICE-1 — outside the practice vocabulary (1–5).
+    PracticeUnknown { practice: u8 },
+    /// PRACTICE-1 — one adoption per discipline per star.
+    PracticeAlreadyAdopted { practice: u8 },
+    /// PRACTICE-1 — the line does not hold this discipline.
+    PracticeNotHeld { practice: u8 },
+    /// PRACTICE-1 — release is a REDISCOVERY: no new doctrine has
+    /// landed since the adoption; the lesson is unearned.
+    ReleaseUnearned { practice: u8 },
+    /// PRACTICE-1 — the Athanor takes only the tempered: fewer than
+    /// eight hardship receipts stand in this chronicle.
+    AthanorUntempered { hardships: usize },
     /// THERMAL-1 — siting an orbit needs a commissioned sun first.
     NoStarCommissioned,
     /// THERMAL-1 — the orb is already sited; an orbit does not move.
@@ -73,7 +85,7 @@ pub enum ActionRefused {
     /// reading named: settle the books, close the loop, cross the
     /// void. Stagnation is a region, not a sentence — each false here
     /// is escapable.
-    ElevationBarred { settled: bool, coherent: bool, crossed: bool },
+    ElevationBarred { settled: bool, coherent: bool, crossed: bool, aligned: bool },
     /// ELEVATE-1 — a climb moves STRICTLY upward in G (the orientation
     /// law: the fiber advances and never retreats).
     BadClimb,
@@ -247,6 +259,8 @@ pub struct Committed {
     /// D3: the charted terrain seed — None reads all Standard (the
     /// opt-in law; the seed arrives only by the WorldCharted deed).
     pub terrain_seed: Option<[u8; 32]>,
+    /// PRACTICE-1: the receipted disciplines, adoption order.
+    pub practices: Vec<u8>,
 }
 
 /// G1 (04 §1): a civilization's sealed axes, as the world holds them.
@@ -307,6 +321,8 @@ pub struct World {
     genesis: Option<Genesis>,
     /// D3: the charted terrain seed (mirror of the receipt).
     terrain_seed: Option<[u8; 32]>,
+    /// PRACTICE-1: the receipted disciplines (mirror of the receipts).
+    practices: Vec<u8>,
 }
 
 impl World {
@@ -333,6 +349,7 @@ impl World {
             gauge: vec![ratio(0, 1)],
             genesis: None,
             terrain_seed: None,
+            practices: Vec::new(),
         }
     }
 
@@ -371,6 +388,7 @@ impl World {
             gauge: committed.gauge,
             genesis: committed.genesis,
             terrain_seed: committed.terrain_seed,
+            practices: committed.practices,
         }
     }
 
@@ -866,8 +884,18 @@ impl World {
                 && matches!(receipt.event, ClosureEvent::YieldCollected { .. })
         });
         let crossed = self.crossed;
-        if !(settled && coherent && crossed) {
-            return Err(ActionRefused::ElevationBarred { settled, coherent, crossed });
+        // PRACTICE-1 (operator-ruled): an adopted discipline must
+        // stand ALIGNED — the syntropy ratio (09 §2.5, engine read)
+        // holds the floor (placeholder 1/2) or the climb refuses. The
+        // crucible loop: resolve the friction to rise. A line with no
+        // practice, or no deeds posted, stands aligned.
+        let aligned = self.practices.is_empty()
+            || self
+                .syntropy_ratio()
+                .map(|ratio_read| ratio_read >= ratio(1, 2))
+                .unwrap_or(true);
+        if !(settled && coherent && crossed && aligned) {
+            return Err(ActionRefused::ElevationBarred { settled, coherent, crossed, aligned });
         }
         let gauge = wrap_gauge(self.gauge[0].clone() + delta);
         self.gauge[0] = gauge.clone();
@@ -891,7 +919,7 @@ impl World {
         for receipt in &receipts[cursor.min(receipts.len())..] {
             deposit_receipt(&mut sheet, receipt);
         }
-        let floor = now.saturating_sub(240);
+        let floor = now.saturating_sub(self.deposit_window());
         for (_, held) in sheet.iter_mut() {
             held.vented_entries.retain(|(stamp, _)| *stamp >= floor);
             held.encased_entries.retain(|(stamp, _)| *stamp >= floor);
@@ -934,7 +962,7 @@ impl World {
                         .all(|(_, due)| *due == ratio(0, 1))
             }
             4 => {
-                let floor = now.saturating_sub(240);
+                let floor = now.saturating_sub(self.deposit_window());
                 let vented: Ratio = sheet
                     .vented_entries
                     .iter()
@@ -1562,6 +1590,12 @@ impl World {
         let stamp_now = self.clock.now();
         // D3: the charted seed, read once — uncharted boosts read 1.
         let terrain = self.terrain_seed;
+        // PRACTICE-1: the bound disciplines, read once — one benefit,
+        // one friction each (14 §4; constants placeholder).
+        let fast = self.practices.contains(&1);
+        let icon = self.practices.contains(&2);
+        let hoard = self.practices.contains(&4);
+        let athanor = self.practices.contains(&5);
         // TECH-1b: each orb's crystallized boons, read once — [unused,
         // insulation, discipline, deepening, doctrine, stores].
         let boons: Vec<(u64, [bool; 6])> = flows
@@ -1713,14 +1747,40 @@ impl World {
                 for zone in active {
                     let (resource, amount) = crate::dop::zone_yield(zone.kind, metabolism);
                     let boost = terrain_boost(&terrain, *orb_id, zone, active);
+                    let mut yield_factor = ratio(1, 1);
+                    let mut upkeep_factor = ratio(1, 1);
+                    if athanor {
+                        yield_factor *= ratio(5, 4);
+                        upkeep_factor *= ratio(5, 4);
+                    }
+                    match zone.kind {
+                        ZoneKind::Habitat => {
+                            if icon {
+                                yield_factor *= ratio(5, 4);
+                                upkeep_factor *= ratio(2, 1);
+                            }
+                            if fast {
+                                yield_factor *= ratio(3, 4);
+                            }
+                        }
+                        ZoneKind::Extractor if fast => {
+                            upkeep_factor *= ratio(3, 4);
+                        }
+                        ZoneKind::Smelter | ZoneKind::Synthesizer | ZoneKind::Resonator
+                            if hoard =>
+                        {
+                            yield_factor *= ratio(3, 4);
+                        }
+                        _ => {}
+                    }
                     accrue(
                         &mut self.accrued,
                         *orb_id,
                         resource,
-                        amount * efficiency.clone() * boost,
+                        amount * efficiency.clone() * boost * yield_factor.clone(),
                     );
                     for (resource, amount) in crate::dop::zone_upkeep(zone.kind, metabolism) {
-                        accrue(&mut self.accrued, *orb_id, resource, -amount);
+                        accrue(&mut self.accrued, *orb_id, resource, -amount * upkeep_factor.clone());
                     }
                 }
             }
@@ -2079,7 +2139,9 @@ impl World {
         {
             let source = peek(&self.orbs, from)
                 .expect("checked above");
-            let decay = demurrage_due(source, star, stamp, &ease_of(&self.techs, from))
+            // PRACTICE-1 the Hoard: the stores keep — decay halves.
+            let hoard_keep = if self.practices.contains(&4) { ratio(1, 2) } else { ratio(1, 1) };
+            let decay = hoard_keep * demurrage_due(source, star, stamp, &ease_of(&self.techs, from))
                 .into_iter()
                 .find(|(due, _)| *due == resource)
                 .map(|(_, decay)| decay)
@@ -2306,7 +2368,9 @@ impl World {
         let affordable = {
             let held = peek(&self.orbs, source)
                 .expect("bond endpoints exist");
-            let decay = demurrage_due(held, star, stamp, &ease_of(&self.techs, source))
+            // PRACTICE-1 the Hoard: the stores keep — decay halves.
+            let hoard_keep = if self.practices.contains(&4) { ratio(1, 2) } else { ratio(1, 1) };
+            let decay = hoard_keep * demurrage_due(held, star, stamp, &ease_of(&self.techs, source))
                 .into_iter()
                 .find(|(due, _)| *due == resource)
                 .map(|(_, decay)| decay)
@@ -2530,7 +2594,9 @@ impl World {
         {
             let held = peek(&self.orbs, absorber)
                 .expect("checked above");
-            let decay = demurrage_due(held, star, stamp, &ease_of(&self.techs, absorber))
+            // PRACTICE-1 the Hoard: the stores keep — decay halves.
+            let hoard_keep = if self.practices.contains(&4) { ratio(1, 2) } else { ratio(1, 1) };
+            let decay = hoard_keep * demurrage_due(held, star, stamp, &ease_of(&self.techs, absorber))
                 .into_iter()
                 .find(|(due, _)| *due == Resource::Sink)
                 .map(|(_, decay)| decay)
@@ -2622,6 +2688,7 @@ impl World {
             gauge: self.gauge.clone(),
             genesis: self.genesis.clone(),
             terrain_seed: self.terrain_seed,
+            practices: self.practices.clone(),
         }
     }
 
@@ -2703,7 +2770,11 @@ impl World {
         // are never demurraged, so the pre-touch read is the
         // post-decay read): a refusal draws nothing, reads nothing,
         // orphans nothing.
-        let draw = crate::dop::scan_draw();
+        let mut draw = crate::dop::scan_draw();
+        // PRACTICE-1 the Vigil: the lens disciplined — the draw halves.
+        if self.practices.contains(&3) {
+            draw *= ratio(1, 2);
+        }
         let have = paying.banked_amount(Resource::Crystal);
         if have < draw {
             return Err(ActionRefused::CannotAfford {
@@ -2889,6 +2960,147 @@ impl World {
     /// D3: the charted seed, if the deed has been done.
     pub fn terrain_seed(&self) -> Option<[u8; 32]> {
         self.terrain_seed
+    }
+
+    /// PRACTICE-1 (14 §4): the syntropy ratio, 09 §2.5's reading made
+    /// an engine read — syntropic books over the whole, summed across
+    /// orbs; None when no deed ever posted. Derived at call, never
+    /// stored.
+    pub fn syntropy_ratio(&self) -> Option<Ratio> {
+        let zero = ratio(0, 1);
+        let mut syntropic = zero.clone();
+        let mut entropic = zero.clone();
+        for orb in &self.orbs {
+            syntropic += orb.given_in_crisis.clone()
+                + orb.returned_across.clone()
+                + orb.covenants_fulfilled.clone()
+                + orb.bond_flow.clone();
+            entropic += orb.extracted_across.clone()
+                + orb.covenants_breached.clone()
+                + orb.severance_load.clone();
+        }
+        let whole = syntropic.clone() + entropic;
+        if whole == zero {
+            return None;
+        }
+        Some(syntropic / whole)
+    }
+
+    /// PRACTICE-1 — adopt a discipline: one benefit, one friction,
+    /// bound by receipt (the derived creed never binds; the practice
+    /// does). Build scope. The Athanor (5) takes only the tempered —
+    /// eight hardship receipts stand in the chronicle or the door
+    /// refuses.
+    pub fn adopt_practice(&mut self, practice: u8) -> Result<(), ActionRefused> {
+        self.adopt_practice_as(SOVEREIGN, practice)
+    }
+
+    pub fn adopt_practice_as(&mut self, actor: u64, practice: u8) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if !(1..=5).contains(&practice) {
+            return Err(ActionRefused::PracticeUnknown { practice });
+        }
+        if self.practices.contains(&practice) {
+            return Err(ActionRefused::PracticeAlreadyAdopted { practice });
+        }
+        if practice == 5 {
+            let hardships = self
+                .chronicle
+                .receipts()
+                .iter()
+                .filter(|receipt| {
+                    matches!(
+                        receipt.event,
+                        ClosureEvent::FamineStruck { .. }
+                            | ClosureEvent::OverheatStruck { .. }
+                            | ClosureEvent::VentSettled { .. }
+                            | ClosureEvent::DemurrageSettled { .. }
+                    )
+                })
+                .count();
+            if hardships < 8 {
+                return Err(ActionRefused::AthanorUntempered { hardships });
+            }
+        }
+        self.close(ClosureEvent::PracticeAdopted { practice }, actor);
+        self.practices.push(practice);
+        Ok(())
+    }
+
+    /// PRACTICE-1 — release is a REDISCOVERY (operator-ruled): lawful
+    /// only after new doctrine landed since the adoption. A lawful
+    /// release emits the RE-EMERGENCE node (TechDiscovered, condition
+    /// 7) seeded from the chronicle root and the practice — divergent
+    /// and novel per line per moment; its window-ease boon applies
+    /// while alignment holds (the tick reads it).
+    pub fn release_practice(&mut self, practice: u8) -> Result<(), ActionRefused> {
+        self.release_practice_as(SOVEREIGN, practice)
+    }
+
+    pub fn release_practice_as(&mut self, actor: u64, practice: u8) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if !self.practices.contains(&practice) {
+            return Err(ActionRefused::PracticeNotHeld { practice });
+        }
+        let adopted_at = self
+            .chronicle
+            .receipts()
+            .iter()
+            .rposition(|receipt| {
+                matches!(receipt.event, ClosureEvent::PracticeAdopted { practice: held } if held == practice)
+            })
+            .expect("the adoption receipted");
+        let rediscovered = self.chronicle.receipts()[adopted_at..]
+            .iter()
+            .any(|receipt| matches!(receipt.event, ClosureEvent::TechDiscovered { .. }));
+        if !rediscovered {
+            return Err(ActionRefused::ReleaseUnearned { practice });
+        }
+        self.close(ClosureEvent::PracticeReleased { practice }, actor);
+        if let Some(at) = self.practices.iter().position(|held| *held == practice) {
+            self.practices.remove(at);
+        }
+        // The re-emergence: a novel node from the current state.
+        let root = self
+            .chronicle
+            .receipts()
+            .last()
+            .map(|receipt| receipt.own.0)
+            .expect("the release receipted");
+        let mut seed = [0u8; 32];
+        seed.copy_from_slice(&root);
+        seed[0] ^= practice;
+        let name = crate::dop::tech_node_name(7, &seed);
+        self.close(
+            ClosureEvent::TechDiscovered {
+                orb_id: FIRST_ORB,
+                node: seed,
+                condition: 7,
+                modifier: 7,
+                magnitude: ratio(3, 4),
+                name,
+            },
+            actor,
+        );
+        self.techs.push((FIRST_ORB, 7, seed));
+        Ok(())
+    }
+
+    /// PRACTICE-1: the condition window — 240, eased ×3/4 to 180
+    /// while a re-emergence lesson (condition 7) is held AND alignment
+    /// holds (the operator's speed boost to understanding; placeholder
+    /// constants, the syntropy floor at 1/2).
+    fn deposit_window(&self) -> u64 {
+        let relearned = self.techs.iter().any(|(_, condition, _)| *condition == 7);
+        let aligned = self
+            .syntropy_ratio()
+            .map(|ratio_read| ratio_read >= ratio(1, 2))
+            .unwrap_or(true);
+        if relearned && aligned {
+            180
+        } else {
+            240
+        }
     }
 
     fn close(&mut self, event: ClosureEvent, actor: u64) {
@@ -3327,6 +3539,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut gauge = vec![ratio(0, 1)];
     let mut genesis: Option<Genesis> = None;
     let mut terrain_seed: Option<[u8; 32]> = None;
+    let mut practices: Vec<u8> = Vec::new();
     for receipt in chronicle.receipts() {
         match &receipt.event {
             ClosureEvent::EntityRegistered { entity_id, principal, handle } => {
@@ -3428,6 +3641,13 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             // enters a world chronicle, and world replay ignores it.
             // D3: the terrain charter replays — the seed is forever.
             ClosureEvent::WorldCharted { seed } => terrain_seed = Some(*seed),
+            // PRACTICE-1: the disciplines replay in adoption order.
+            ClosureEvent::PracticeAdopted { practice } => practices.push(*practice),
+            ClosureEvent::PracticeReleased { practice } => {
+                if let Some(at) = practices.iter().position(|held| held == practice) {
+                    practices.remove(at);
+                }
+            }
             ClosureEvent::EraAnnexed { .. } => {}
             // MESH-1b (NS-5 §7): authority is the mesh's walk of the
             // spine — the world's committed projection is blind to it
@@ -3833,7 +4053,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     }
     Committed {
         orbs, entities, star, debts, bonds, covenants, councils, offers, techs, wants, crossed,
-        gauge, genesis, terrain_seed,
+        gauge, genesis, terrain_seed, practices,
     }
 }
 

@@ -1595,6 +1595,43 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 ),
             }
         }
+        Some(deed @ ("practice" | "release")) => {
+            let releasing = deed == "release";
+            let code = match words.next() {
+                Some("1") | Some("fast") => Some(1u8),
+                Some("2") | Some("icon") => Some(2),
+                Some("3") | Some("vigil") => Some(3),
+                Some("4") | Some("hoard") => Some(4),
+                Some("5") | Some("athanor") => Some(5),
+                other => {
+                    println!(
+                        "{} name the discipline: {} (got {})",
+                        style.bad("✗"),
+                        style.strong("fast · icon · vigil · hoard · athanor"),
+                        other.unwrap_or("nothing")
+                    );
+                    None
+                }
+            };
+            if let Some(practice) = code {
+                let outcome = if releasing {
+                    world.release_practice(practice)
+                } else {
+                    world.adopt_practice(practice)
+                };
+                match outcome {
+                    Ok(()) if releasing => println!(
+                        "{} discipline RELEASED — the rediscovery earned, the lesson re-emerges (condition 7)",
+                        style.ok("✓")
+                    ),
+                    Ok(()) => println!(
+                        "{} discipline ADOPTED — one benefit, one friction, bound by receipt (14 §4)",
+                        style.ok("✓")
+                    ),
+                    Err(refusal) => refuse(world, &refusal, style),
+                }
+            }
+        }
         Some("survey") => match world.chart_terrain() {
             Ok(seed) => println!(
                 "{} terrain CHARTED — seed {:02x}{:02x}{:02x}{:02x} (the founding receipt's digest, forever); {} reads the map",

@@ -540,6 +540,20 @@ impl Egregore {
             world.grant(automaton, scope).expect("grants the automaton");
             world.grant(steward, scope).expect("grants the steward");
         }
+        // PRACTICE-1 (operator-ruled: NPCs adopt at genesis): the
+        // disposition names the founding discipline — expansionist
+        // keeps the Vigil, epicurean raises the Icon, empiricist keeps
+        // the Fast. Receipted like every deed; the Hoard and the
+        // Athanor are earned choices, never seeded.
+        let founding_practice = match spec.civilization.disposition.as_str() {
+            "expansionist" => Some(3),
+            "epicurean" => Some(2),
+            "empiricist" => Some(1),
+            _ => None,
+        };
+        if let Some(practice) = founding_practice {
+            let _ = world.adopt_practice(practice);
+        }
         // BOT-THERM: thermal genesis — every egregore world founds under a
         // REAL sun. Spec-pinned fields rule; absent ones derive from
         // the registry axes, beacon-seeded by the world's own genesis

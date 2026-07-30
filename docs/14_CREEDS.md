@@ -107,13 +107,27 @@ walks — exactly the way function and tier read today.
   Zero schema, zero storage; a deedless line walks the unwritten way;
   new creeds arise as chronicles diverge. The civs board carries the
   CREED column; the civ view names it beside the lineage walk.
-- **CREED-2 — the couplings.** The one genuinely NEW mechanic class the
-  overlay surfaces: today the axes never touch colony economics (yields
-  and upkeep are zone-law). Species- and creed-coupled ruleset profiles
-  — the lithovore that eats iron and needs no biomass, the Tolerant
-  hazard immunity, the icon-upkeep tax — land as TECH-1b-style
-  modifiers: exact-rational, receipted at adoption, backward-lawful
-  opt-in (the terrain precedent), spec + vectors per coupling.
+- **CREED-2 / PRACTICE-1 — LANDED 2026-07-31** (the metabolism half
+  landed earlier as coder-01's G2). The derived creed never binds; the
+  RECEIPTED PRACTICE does (tags 68/69): one benefit, one friction,
+  exact, per discipline — 1 the Fast (rations ×3/4 / habitat yield
+  ×3/4) · 2 the Icon (habitat yield ×5/4 / life support ×2) · 3 the
+  Vigil (scan draw ×1/2 / +1/8 friction per transfer) · 4 the Hoard
+  (demurrage ×1/2 / converter yields ×3/4) · 5 the Athanor (all yields
+  AND upkeep ×5/4; adoption gated on eight hardship receipts — the
+  deep end takes only the tempered). Operator rulings inscribed:
+  RELEASE IS A REDISCOVERY — barred until new doctrine lands after the
+  adoption, and a lawful release emits the RE-EMERGENCE node
+  (condition 7, seeded from the moment — divergent and novel per line)
+  whose window-ease boon (×3/4) runs while ALIGNMENT holds; alignment
+  is the syntropy ratio ≥ 1/2 (the engine read of 09 §2.5 — the
+  operator's "intelligence alignment", flagged as this chapter's
+  proxy, re-rulable). The climb gains its fourth gate: a practiced
+  line elevates only aligned (ElevationBarred names it). NPCs adopt at
+  genesis by disposition (expansionist→Vigil, epicurean→Icon,
+  empiricist→Fast; the Hoard and Athanor are earned, never seeded);
+  the sovereign hand adopts by the `practice`/`release` verbs. All
+  constants placeholder; names operator-renameable. Five witnesses.
 - **MASK-1 — the lawful veil (specced 2026-07-30).** Mirror-layer
   identity masking; the substrate never lies. The concrete design:
   the VEIL is a receipted deed (`VeilDrawn` / `VeilLifted`, tags at

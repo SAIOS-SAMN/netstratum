@@ -40,6 +40,7 @@ fn the_gates_refuse_typed_and_each_is_escapable() {
             settled: true,
             coherent: false,
             crossed: false,
+            aligned: true,
         })
     );
 
@@ -55,6 +56,7 @@ fn the_gates_refuse_typed_and_each_is_escapable() {
             settled: true,
             coherent: false,
             crossed: true,
+            aligned: true,
         })
     );
 
