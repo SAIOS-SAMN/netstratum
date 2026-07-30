@@ -171,12 +171,14 @@ The landed state, the lanes, and the next-work candidates live in
 `PICKUP.md` §5 and the BUILD_ORDER boards. What lives HERE is the
 honest debt the witnesses have not yet measured:
 
-1. **The interleaving stress witness** (coder-02, red-first-able): two
-   identical-remainder absorption debts on one lane lapsing at
-   different ticks — the replay removal is first-match by
-   pair+remainder, and its order-consistency with live emission is
-   argued, not measured; plus absorb + bond settle + covenant
-   resolution landing on one lane at one stamp.
+1. ~~The interleaving stress witness~~ **STRUCK 2026-07-30** —
+   measured in `world_interleave.rs` (coder-02): the identical-remainder
+   pair distinguishes by the survivor's `opened` stamp mid-flight and
+   replay removes the OLDEST match, matching live; the one-stamp pileup
+   (lapse → bond expiry → covenant slash in one tick prologue, fixed
+   order) replays and resumes identical. The engine held; both first
+   expectations were the witness author's (a tick off-by-one, an
+   overpriced collateral) — the §10 habit, exercised.
 2. **The state.json `cohesion` block content pin** in `mirror_pins`
    (coder-01, relay): the block is emitted mechanically and the
    workspace compiles green, but nothing asserts its bytes.

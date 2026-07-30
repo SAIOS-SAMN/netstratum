@@ -106,21 +106,22 @@ outside those reservations.
   joules/`S_cool` — needs a cross-world carrier; transfers are intra-world
   today) or TECH-1 (`10_TECH_EMERGENCE.md`, opens SINK-1's deferred
   research/throttle gates).
-- **coder-02**: ideology board LANDED whole (09 status LANDED;
-  deferrals at Q4). Next candidates: the verification gaps named in
-  `HANDOFF.md` §9 (the interleaving stress witness; the state.json
-  cohesion pin — the latter a coder-01 relay), then D2/D3 or as
+- **coder-02**: ideology board LANDED whole (09, deferrals at Q4);
+  GALAXY-1 LANDED whole (13_GALAXY, 2026-07-30); the interleaving
+  stress witness LANDED (HANDOFF §9.1 struck, `world_interleave.rs`).
+  Standing relay to coder-01: the state.json cohesion pin (HANDOFF
+  §9.2) and the JOURNAL follow-on (§9.3). Next: the coder-03 N4
+  boundary sign-off (the flagged excursions below), then D2/D3 or as
   assigned.
-- **coder-03**: N4 (NS-2 RQP + the scanner) — BUILT GREEN in worktree
-  `coder03/n4` (2026-07-30): spec §1–§3 with extracted vectors, sigil
-  index + scan (`engine/cfe/src/query.rs`), CrystalDrawn (tag 55),
-  crystals + the resonator (02 §5.1 deferral paid), the `scan` CLI
-  verb; 187/187 workspace witnesses, clippy zero, arc played. MERGE
-  WAITS on operator rulings 1–2 (`N4_DIRECTIVES.md` §rulings: G3
-  coupling; the v1 queryable structure, drafted PLACEHOLDER in NS-2
-  §1.1). Boundary excursions flagged for sign-off: dop.rs body
-  (resource/zone/event), world.rs (scan + replay arm), five mechanical
-  renderer arms in mirror (the P1 relay).
+- **coder-03**: N4 (NS-2 RQP + the scanner) — LANDED on main
+  2026-07-30 (33e6c73 + post-ruling inscriptions 7f739f4, after the
+  fifth-set rulings): spec §1–§3 with extracted vectors, sigil index +
+  scan (`engine/cfe/src/query.rs`), CrystalDrawn (tag 55), crystals +
+  the resonator (02 §5.1 deferral paid), the `scan` CLI verb; 187/187
+  workspace witnesses, clippy zero, arc played. Boundary excursions
+  flagged for coder-02 sign-off: dop.rs body (resource/zone/event),
+  world.rs (scan + replay arm), five mechanical renderer arms in
+  mirror (the P1 relay).
 - Parallel worktrees per node; merge to `main` on green; BUILD_ORDER
   conflicts resolve by keeping both entries.
 
