@@ -1,9 +1,18 @@
 # THE ALMANAC — the ruled grammar of elements and systems
 
-**Status:** DESIGN (2026-07-30, coder-03; operator direction: build the
-dynamics, never the content — "the system autocompletes with its own
-intelligence"). Awaits operator ratification; the landing checklist
-(§7) opens ELEMENT-GRAMMAR-1 on that ruling. Composes with: D3's
+**Status:** ELEMENT-GRAMMAR-1 FIRST SLICE LANDED (2026-07-31,
+coder-03; ratified by standing operator order). Landed: the mint deed
+(ProspectStruck, tag 70 — the genesis root is the FOUNDING receipt's
+digest, measured: receipt 0 is the sovereign's registration and
+identical across worlds), the assay closure (AssayStruck, tag 71 —
+richness × elapsed in ONE receipt, the bond-settle shape; a scope
+CORRECTION recorded: extraction landed as a closure, not a zone —
+no workspace surgery, no new zone kind), banked element stores (orb
+entry tag 72), the abundance spine, hash-derived properties and
+names, the prospect/assay CLI verbs. Measured: two worlds mint
+DIFFERENT elements from one grammar; the spine binds the draw to the
+sky; replay reads, never rolls. DEFERRED to ELEMENT-GRAMMAR-2,
+recorded: the refinery derivation (§5) and G2 element rations (§7.4). Composes with: D3's
 seeded chart (the draw's door), G2's rations (elements made edible),
 SCIENCE-1's relevance (elements made visible), MARKET-1 (elements made
 tradeable), WANT-1 (elements made wanted), G4 at the mesh (elements

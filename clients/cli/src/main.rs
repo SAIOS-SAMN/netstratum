@@ -371,6 +371,57 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 style.strong("succeed <line>")
             ),
         },
+        Some("prospect") => match words.next().and_then(|word| word.parse::<u8>().ok()) {
+            Some(stratum) => match world.prospect(*current, stratum) {
+                Ok(struck) => println!(
+                    "{} {} read from stratum {} — family {}, tier {}, richness {}/tick ({}…)",
+                    style.ok("⛏"),
+                    style.strong(&struck.name),
+                    stratum,
+                    struck.family,
+                    struck.tier,
+                    style.strong(&amount(&struck.richness)),
+                    &hex_prefix(&struck.element)
+                ),
+                Err(refusal) => refuse(world, &refusal, style),
+            },
+            None => println!(
+                "{} usage: {} — read one stratum of what the seed always held",
+                style.bad("✗"),
+                style.strong("prospect <stratum>")
+            ),
+        },
+        Some("assay") => match words.next() {
+            Some(prefix) => {
+                let found = world
+                    .committed()
+                    .prospects
+                    .iter()
+                    .find(|vein| vein.orb == *current && hex_prefix(&vein.element).starts_with(prefix))
+                    .map(|vein| vein.element);
+                match found {
+                    Some(element) => match world.assay(*current, element) {
+                        Ok(drawn) => println!(
+                            "{} {} drawn from the opened vein — one receipt, the whole span",
+                            style.ok("⚖"),
+                            style.strong(&amount(&drawn))
+                        ),
+                        Err(refusal) => refuse(world, &refusal, style),
+                    },
+                    None => println!(
+                        "{} no opened vein here starts with {} — {} lists nothing yet; prospect first",
+                        style.bad("✗"),
+                        style.strong(prefix),
+                        style.strong("status")
+                    ),
+                }
+            }
+            None => println!(
+                "{} usage: {} — draw richness × elapsed from an opened vein",
+                style.bad("✗"),
+                style.strong("assay <element-prefix>")
+            ),
+        },
         Some("genesis") => {
             let civilization = words.next();
             let axes = (
@@ -2573,6 +2624,11 @@ fn scan(world: &mut World, style: &Style, prober: u64, exemplar: u64) {
     }
 }
 
+/// ELEMENT-GRAMMAR-1: the element id's short spoken form.
+fn hex_prefix(element: &[u8; 32]) -> String {
+    element[..4].iter().map(|byte| format!("{byte:02x}")).collect()
+}
+
 /// The near-miss zone-delta word: a kind wire code, 0 = unzoned.
 fn kind_word(code: u8) -> &'static str {
     ZoneKind::from_wire(code).map(kind_name).unwrap_or("empty")
@@ -2839,6 +2895,15 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             style.strong("expansionist|empiricist|epicurean"),
             style.strong("mineral|biotic|plasmic"),
             style.strong("planar|volumetric|harmonic|umbral")
+        ),
+        ActionRefused::StratumProspected { orb, stratum } => format!(
+            "stratum {stratum} on orb {orb} is already read — one stratum, one reading; try the next: {}",
+            style.strong("prospect <stratum>")
+        ),
+        ActionRefused::NoSuchElement { .. } => format!(
+            "no opened vein carries that identity here — {} first, then {} what it names",
+            style.strong("prospect <stratum>"),
+            style.strong("assay <element-prefix>")
         ),
         ActionRefused::NothingAccrued => format!(
             "nothing to collect — let time pass first: {}",
@@ -3493,6 +3558,15 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::GenesisSealed { civilization, .. } => format!(
                 "✶ {} seals its three axes — the binding copy lives HERE; the registry is a cache from this receipt on",
                 style.strong(civilization)
+            ),
+            cfe::dop::ClosureEvent::ProspectStruck { stratum, name, family, tier, .. } => format!(
+                "⛏ {} read from stratum {} (family {family}, tier {tier}) — what the seed always held",
+                style.strong(name),
+                style.strong(&stratum.to_string())
+            ),
+            cfe::dop::ClosureEvent::AssayStruck { amount: drawn, .. } => format!(
+                "⚖ {} drawn from the opened vein — one receipt, the whole span",
+                style.strong(&amount(drawn))
             ),
             cfe::dop::ClosureEvent::HandoffSealed { from, to } => format!(
                 "✍ hand {} yields the pen to hand {} (NS-5 §7)",

@@ -51,6 +51,12 @@ pub enum ActionRefused {
     /// G1 — the axis vocabulary is closed (04 §1, 12 §5a): an unknown
     /// code refuses at the door, naming the axis it offended.
     UnknownAxisValue { axis: u8, code: u8 },
+    /// ELEMENT-GRAMMAR-1 — one stratum, one reading: what the seed
+    /// held is already read.
+    StratumProspected { orb: u64, stratum: u8 },
+    /// ELEMENT-GRAMMAR-1 — no prospect on this orb carries that
+    /// identity; the assay reads only opened veins.
+    NoSuchElement { element: [u8; 32] },
     /// THERMAL-1 — one sun per world; it is already commissioned.
     StarAlreadyCommissioned,
     /// D3 — one terrain charter per star; the seed is forever.
@@ -261,6 +267,9 @@ pub struct Committed {
     pub terrain_seed: Option<[u8; 32]>,
     /// PRACTICE-1: the receipted disciplines, adoption order.
     pub practices: Vec<u8>,
+    /// ELEMENT-GRAMMAR-1 (14 §3): the opened veins — the working
+    /// registry the assay draws against; replay-rebuilt.
+    pub prospects: Vec<Prospected>,
 }
 
 /// G1 (04 §1): a civilization's sealed axes, as the world holds them.
@@ -271,6 +280,21 @@ pub struct Genesis {
     pub disposition: u8,
     pub metabolism: u8,
     pub perception: u8,
+}
+
+/// ELEMENT-GRAMMAR-1 (14 §3): one opened vein — the prospect's
+/// working state. Family, tier, and name live in the receipt (the
+/// chronicle is the full register); the working set carries what the
+/// assay needs.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Prospected {
+    pub orb: u64,
+    pub stratum: u8,
+    pub element: [u8; 32],
+    pub richness: Ratio,
+    /// The last assay's stamp (the prospect's own at opening) — the
+    /// span anchor, the bond-settle shape.
+    pub last_assay: u64,
 }
 
 pub struct World {
@@ -323,6 +347,7 @@ pub struct World {
     terrain_seed: Option<[u8; 32]>,
     /// PRACTICE-1: the receipted disciplines (mirror of the receipts).
     practices: Vec<u8>,
+    prospects: Vec<Prospected>,
 }
 
 impl World {
@@ -350,6 +375,7 @@ impl World {
             genesis: None,
             terrain_seed: None,
             practices: Vec::new(),
+            prospects: Vec::new(),
         }
     }
 
@@ -389,6 +415,7 @@ impl World {
             genesis: committed.genesis,
             terrain_seed: committed.terrain_seed,
             practices: committed.practices,
+            prospects: committed.prospects,
         }
     }
 
@@ -2689,6 +2716,7 @@ impl World {
             genesis: self.genesis.clone(),
             terrain_seed: self.terrain_seed,
             practices: self.practices.clone(),
+            prospects: self.prospects.clone(),
         }
     }
 
@@ -2805,6 +2833,114 @@ impl World {
             .map(|orb| (*orb, crate::dop::translation_survival(basis, basis)))
             .collect();
         Ok(crate::query::ScanRead { stamp, probed, hits, refusals, translations })
+    }
+
+    /// ELEMENT-GRAMMAR-1 (14 §3) — the mint deed: read one stratum of
+    /// what the genesis seed always held. Identity = BLAKE3(receipt
+    /// 0's digest ‖ orb ‖ stratum) — fixed at founding, so a redraw
+    /// cannot re-roll; properties derive from the hash under the
+    /// star's abundance spine; the receipt carries them whole so
+    /// replay reads, never rolls. The mint creates identity, never
+    /// matter (the assay moves matter). Sovereign convenience.
+    pub fn prospect(&mut self, orb: u64, stratum: u8) -> Result<crate::dop::Prospect, ActionRefused> {
+        self.prospect_as(SOVEREIGN, orb, stratum)
+    }
+
+    /// The contained form. Build scope: prospecting opens the world.
+    pub fn prospect_as(
+        &mut self,
+        actor: u64,
+        orb: u64,
+        stratum: u8,
+    ) -> Result<crate::dop::Prospect, ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if self.orb_by_id(orb).is_none() {
+            return Err(ActionRefused::NoSuchOrb { orb });
+        }
+        let Some(class) = self.star else {
+            return Err(ActionRefused::NoStarCommissioned);
+        };
+        if self.prospects.iter().any(|held| held.orb == orb && held.stratum == stratum) {
+            return Err(ActionRefused::StratumProspected { orb, stratum });
+        }
+        // The genesis root is the FOUNDING receipt's digest — receipt
+        // 0 is the sovereign's registration and identical across all
+        // worlds (measured); the founding carries the name, so every
+        // world's seed is its own.
+        let root = self
+            .chronicle
+            .receipts()
+            .iter()
+            .find(|receipt| matches!(receipt.event, ClosureEvent::ColonyFounded { .. }))
+            .expect("a founded world holds its founding")
+            .own
+            .0;
+        let mut seed = root.to_vec();
+        seed.extend_from_slice(&orb.to_le_bytes());
+        seed.push(stratum);
+        let element: [u8; 32] = blake3::hash(&seed).into();
+        let (family, tier, richness) = crate::dop::element_properties(&element, class);
+        let name = crate::dop::element_name(family, &element);
+        let stamp = self.clock.now();
+        self.prospects.push(Prospected {
+            orb,
+            stratum,
+            element,
+            richness: richness.clone(),
+            last_assay: stamp,
+        });
+        self.close(
+            ClosureEvent::ProspectStruck {
+                orb_id: orb,
+                stratum,
+                element,
+                family,
+                tier,
+                richness: richness.clone(),
+                name: name.clone(),
+            },
+            actor,
+        );
+        Ok(crate::dop::Prospect { element, family, tier, richness, name })
+    }
+
+    /// ELEMENT-GRAMMAR-1 (14 §3) — the extraction closure: richness ×
+    /// elapsed banked in ONE receipt (the bond-settle shape). A vein
+    /// with no new span refuses NothingAccrued; an unopened identity
+    /// refuses typed. Sovereign convenience.
+    pub fn assay(&mut self, orb: u64, element: [u8; 32]) -> Result<Ratio, ActionRefused> {
+        self.assay_as(SOVEREIGN, orb, element)
+    }
+
+    /// The contained form. Collect scope: the assay moves banked value.
+    pub fn assay_as(
+        &mut self,
+        actor: u64,
+        orb: u64,
+        element: [u8; 32],
+    ) -> Result<Ratio, ActionRefused> {
+        self.permitted(actor, Scope::Collect)?;
+        if self.orb_by_id(orb).is_none() {
+            return Err(ActionRefused::NoSuchOrb { orb });
+        }
+        let now = self.clock.now();
+        let Some(vein) = self
+            .prospects
+            .iter_mut()
+            .find(|held| held.orb == orb && held.element == element)
+        else {
+            return Err(ActionRefused::NoSuchElement { element });
+        };
+        if now <= vein.last_assay {
+            return Err(ActionRefused::NothingAccrued);
+        }
+        let elapsed = ratio((now - vein.last_assay) as i64, 1);
+        let amount = vein.richness.clone() * elapsed;
+        vein.last_assay = now;
+        let held = peel(&mut self.orbs, orb).expect("judged above");
+        held.bank_element(element, amount.clone());
+        self.close(ClosureEvent::AssayStruck { orb_id: orb, element, amount: amount.clone() }, actor);
+        Ok(amount)
     }
 
     /// G1 (04 §1/§5) — seal the line's three axes as THE binding
@@ -3535,6 +3671,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut techs: Vec<(u64, u8, [u8; 32])> = Vec::new();
     let mut offers: Vec<Offer> = Vec::new();
     let mut wants: Vec<(u64, u8)> = Vec::new();
+    let mut prospects: Vec<Prospected> = Vec::new();
     let mut crossed = false;
     let mut gauge = vec![ratio(0, 1)];
     let mut genesis: Option<Genesis> = None;
@@ -3765,6 +3902,28 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     metabolism: *metabolism,
                     perception: *perception,
                 });
+            }
+            // ELEMENT-GRAMMAR-1: the receipt carries the drawn
+            // properties — replay reads, never rolls.
+            ClosureEvent::ProspectStruck { orb_id, stratum, element, richness, .. } => {
+                prospects.push(Prospected {
+                    orb: *orb_id,
+                    stratum: *stratum,
+                    element: *element,
+                    richness: richness.clone(),
+                    last_assay: receipt.stamp,
+                });
+            }
+            ClosureEvent::AssayStruck { orb_id, element, amount } => {
+                if let Some(vein) = prospects
+                    .iter_mut()
+                    .find(|held| held.orb == *orb_id && held.element == *element)
+                {
+                    vein.last_assay = receipt.stamp;
+                }
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank_element(*element, amount.clone());
+                }
             }
             // ABSORB-1: the three-way move replays — the absorber's
             // ledger carries the shed; the window opens; crisis reads
@@ -4053,7 +4212,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     }
     Committed {
         orbs, entities, star, debts, bonds, covenants, councils, offers, techs, wants, crossed,
-        gauge, genesis, terrain_seed, practices,
+        gauge, genesis, terrain_seed, practices, prospects,
     }
 }
 

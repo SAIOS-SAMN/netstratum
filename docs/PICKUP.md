@@ -107,7 +107,9 @@ WantStruck/WantRelieved (WANT-1); 64–66 the NS-5 protocol records
 (MESH-1a — mesh head ‖ consilience receipt ‖ mesh refusal, the mesh's
 own framing, never world-chronicle events; refusal kinds 5–6 added at
 MESH-1b, additive); 67 HandoffSealed (MESH-1b, NS-5 §7 — one writer
-per clock; world replay blind to it); **next free 68**.
+per clock; world replay blind to it); 70 ProspectStruck + 71
+AssayStruck + 72 the orb elements entry (ELEMENT-GRAMMAR-1,
+coder-03 — the almanac's mint/assay/stores); **next free 73**.
 
 **The tag-claim convention** (2026-07-30, after a live collision caught
 mid-cadence — 55 claimed twice, the later claimant moved to 60, and the

@@ -941,6 +941,16 @@ fn render_receipt(receipt: &Receipt) -> String {
             "handoff_sealed",
             format!("hand {from} yields the pen to hand {to}"),
         ),
+        E::ProspectStruck { orb_id, stratum, name, family, tier, .. } => (
+            "prospect_struck",
+            format!(
+                "{name} read from stratum {stratum} on orb {orb_id} (family {family}, tier {tier}) — what the seed always held"
+            ),
+        ),
+        E::AssayStruck { orb_id, amount, .. } => (
+            "assay_struck",
+            format!("{} drawn from the opened vein on orb {orb_id}", ratio_str(amount)),
+        ),
     };
     w.field_str("event", name);
     w.field_str("detail", &detail);

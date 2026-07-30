@@ -98,7 +98,18 @@
 //!   69 ClosureEvent::PracticeReleased (PRACTICE-1 — release is a
 //!         REDISCOVERY: barred until new doctrine landed since the
 //!         adoption; emits the condition-7 re-emergence node)
-//!         — the next free tag outside reservations is 70.
+//!   70 ClosureEvent::ProspectStruck (ELEMENT-GRAMMAR-1, 14 §3 — the
+//!         mint deed: identity read from what the genesis seed always
+//!         held; properties hash-derived; the receipt carries them so
+//!         replay reads, never re-rolls. Moved 68→70 at the live
+//!         collision with PRACTICE-1: the later claimant moves.)
+//!   71 ClosureEvent::AssayStruck (ELEMENT-GRAMMAR-1, 14 §3 — the
+//!         extraction closure: richness × elapsed banked in ONE
+//!         receipt, the bond-settle shape; the mint creates identity,
+//!         the assay moves matter)
+//!   72 Orb elements entry (element_id[32] ‖ ratio — banked element
+//!         stores, element-id-ascending; SEAL A: old readers skip)
+//!         — the next free tag outside reservations is 73.
 //!   In-value practice codes (append-only): 1 the Fast · 2 the Icon ·
 //!   3 the Vigil · 4 the Hoard · 5 the Athanor (deep-end: adoption
 //!   gated on hardship ≥ 8 receipts). Placeholder names, operator
@@ -373,6 +384,89 @@ pub fn translation_survival(ours: u8, theirs: u8) -> Ratio {
         (4, _) | (_, 4) => ratio(1, 2),
         _ => ratio(3, 4),
     }
+}
+
+/// ELEMENT-GRAMMAR-1 (14 §2): one minted element, as the deed returns
+/// it — identity and the hash-derived properties the receipt carries.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Prospect {
+    pub element: [u8; 32],
+    pub family: u8,
+    pub tier: u8,
+    pub richness: Ratio,
+    pub name: String,
+}
+
+/// ELEMENT-GRAMMAR-1 (14 §4, placeholder weights): the abundance
+/// spine — integer weights per (StarClass, family); families 1 light ·
+/// 2 heavy · 3 volatile · 4 noble. A zero weight NEVER yields (the
+/// spine law, measured). Values are placeholder parameters; the
+/// operator tunes at balance.
+fn spine_bands(class: crate::thermal::StarClass) -> [u32; 4] {
+    use crate::thermal::StarClass as S;
+    match class {
+        S::O | S::B | S::A => [1, 2, 0, 1],
+        S::F | S::G | S::K => [2, 1, 1, 1],
+        S::M | S::BrownDwarf => [1, 0, 2, 1],
+        S::WhiteDwarf | S::RedGiant | S::NeutronStar | S::WolfRayet | S::LuminalWhiteHole => {
+            [0, 2, 1, 2]
+        }
+    }
+}
+
+/// The spine weight as the exact rational the tables speak.
+pub fn spine_weight(class: crate::thermal::StarClass, family: u8) -> Ratio {
+    match (1..=4).contains(&family) {
+        true => ratio(i64::from(spine_bands(class)[family as usize - 1]), 1),
+        false => ratio(0, 1),
+    }
+}
+
+/// ELEMENT-GRAMMAR-1 (14 §2): properties read from the identity hash
+/// by exact modular arithmetic (CHARTER §9 — the draw is a reading of
+/// the seed, never an oracle): family by spine band, tier 1–3,
+/// richness = the family's base over the tier.
+pub fn element_properties(
+    element: &[u8; 32],
+    class: crate::thermal::StarClass,
+) -> (u8, u8, Ratio) {
+    let bands = spine_bands(class);
+    let total: u32 = bands.iter().sum();
+    let mut pick = u32::from(element[1]) % total.max(1);
+    let mut family = 4u8;
+    for (at, weight) in bands.iter().enumerate() {
+        if pick < *weight {
+            family = at as u8 + 1;
+            break;
+        }
+        pick -= weight;
+    }
+    let tier = 1 + (element[2] % 3);
+    let base: i64 = match family {
+        1 => 3,
+        2 => 2,
+        3 => 1,
+        _ => 1,
+    };
+    let richness = ratio(base, i64::from(tier) * 2);
+    (family, tier, richness)
+}
+
+/// The element's name — the naming law (10 §2 law 4) applied to
+/// matter: the family fixes the FORM, the hash draws the voice.
+pub fn element_name(family: u8, element: &[u8; 32]) -> String {
+    let form = match family {
+        1 => "lode",
+        2 => "marrow",
+        3 => "rime",
+        _ => "veil",
+    };
+    const VOICES: [&str; 12] = [
+        "adamant", "pale", "keening", "vaulted", "ember", "tidal",
+        "hollow", "woven", "still", "spiral", "murmured", "resonant",
+    ];
+    let voice = VOICES[(element[0] as usize) % VOICES.len()];
+    format!("{voice} {form}")
 }
 
 /// G1 (04 §1.1, placeholder weights): the disposition's value
@@ -818,6 +912,22 @@ pub enum ClosureEvent {
     /// landed since adoption; the re-emergence node rides separately
     /// as TechDiscovered condition 7.
     PracticeReleased { practice: u8 },
+    /// ELEMENT-GRAMMAR-1 (14 §3) — the mint deed: an element's
+    /// identity read from what the genesis seed always held. The
+    /// receipt CARRIES the hash-derived properties, so replay reads
+    /// and never re-rolls. The mint creates identity, never matter.
+    ProspectStruck {
+        orb_id: u64,
+        stratum: u8,
+        element: [u8; 32],
+        family: u8,
+        tier: u8,
+        richness: Ratio,
+        name: String,
+    },
+    /// ELEMENT-GRAMMAR-1 (14 §3) — the extraction closure: richness ×
+    /// elapsed banked in ONE receipt (the bond-settle shape).
+    AssayStruck { orb_id: u64, element: [u8; 32], amount: Ratio },
 }
 
 impl ClosureEvent {
@@ -1125,6 +1235,22 @@ impl ClosureEvent {
             }
             Self::PracticeReleased { practice } => {
                 tlv::put(69, &[*practice], &mut out);
+            }
+            Self::ProspectStruck { orb_id, stratum, element, family, tier, richness, name } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.push(*stratum);
+                value.extend_from_slice(element);
+                value.push(*family);
+                value.push(*tier);
+                ratio::encode(richness, &mut value);
+                value.extend_from_slice(name.as_bytes());
+                tlv::put(70, &value, &mut out);
+            }
+            Self::AssayStruck { orb_id, element, amount } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(element);
+                ratio::encode(amount, &mut value);
+                tlv::put(71, &value, &mut out);
             }
         }
         out
@@ -1447,6 +1573,22 @@ impl ClosureEvent {
             }
             68 => Some(Self::PracticeAdopted { practice: *value.first()? }),
             69 => Some(Self::PracticeReleased { practice: *value.first()? }),
+            70 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let stratum = *value.get(8)?;
+                let element: [u8; 32] = value.get(9..41)?.try_into().ok()?;
+                let family = *value.get(41)?;
+                let tier = *value.get(42)?;
+                let (richness, used) = ratio::decode(value.get(43..)?)?;
+                let name = String::from_utf8(value.get(43 + used..)?.to_vec()).ok()?;
+                Some(Self::ProspectStruck { orb_id, stratum, element, family, tier, richness, name })
+            }
+            71 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
+                let (amount, _) = ratio::decode(value.get(40..)?)?;
+                Some(Self::AssayStruck { orb_id, element, amount })
+            }
             _ => None,
         }
     }
@@ -1547,6 +1689,10 @@ pub struct ColonyOrb {
     pub covenants_fulfilled: Ratio,
     /// The entropic book of the pair (see `covenants_fulfilled`).
     pub covenants_breached: Ratio,
+    /// ELEMENT-GRAMMAR-1 (14 §2): banked element stores,
+    /// element-id-ascending (canonical order); zero entries dropped.
+    /// Wire: orb entry tag 70 (SEAL A — old readers skip).
+    pub elements: Vec<([u8; 32], Ratio)>,
 }
 
 impl ColonyOrb {
@@ -1595,6 +1741,14 @@ impl ColonyOrb {
             }
             tlv::put(41, &value, &mut out);
         }
+        // ELEMENT-GRAMMAR-1: banked element stores, id-ascending;
+        // zero entries never encode (one state, one encoding) — an
+        // element-less orb stays byte-identical to a pre-almanac one.
+        for (element, amount) in &self.elements {
+            let mut value = element.to_vec();
+            ratio::encode(amount, &mut value);
+            tlv::put(72, &value, &mut out);
+        }
         out
     }
 
@@ -1635,6 +1789,11 @@ impl ColonyOrb {
                 }
                 19 => {
                     orb.famine.push(Resource::from_wire(*value.first()?)?);
+                }
+                72 => {
+                    let element: [u8; 32] = value.get(..32)?.try_into().ok()?;
+                    let (amount, _) = ratio::decode(value.get(32..)?)?;
+                    orb.elements.push((element, amount));
                 }
                 26 => {
                     let (albedo, used) = ratio::decode(value)?;
@@ -1692,6 +1851,28 @@ impl ColonyOrb {
             }
         }
         self.banked.retain(|(_, amount)| amount != &ratio(0, 1));
+    }
+
+    /// ELEMENT-GRAMMAR-1: the banked element read.
+    pub fn element_amount(&self, element: &[u8; 32]) -> Ratio {
+        self.elements
+            .iter()
+            .find(|(held, _)| held == element)
+            .map(|(_, amount)| amount.clone())
+            .unwrap_or_else(|| ratio(0, 1))
+    }
+
+    /// ELEMENT-GRAMMAR-1: the element ledger, the bank's own laws —
+    /// id-ascending canonical order, zero entries dropped.
+    pub fn bank_element(&mut self, element: [u8; 32], amount: Ratio) {
+        match self.elements.iter_mut().find(|(held, _)| *held == element) {
+            Some((_, held)) => *held += amount,
+            None => {
+                self.elements.push((element, amount));
+                self.elements.sort_by_key(|(element, _)| *element);
+            }
+        }
+        self.elements.retain(|(_, amount)| amount != &ratio(0, 1));
     }
 
     /// Is a zone active? Dormant while ANY of its consumed resources
