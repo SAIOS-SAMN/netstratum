@@ -200,7 +200,16 @@ pub fn converge(mirror: &Mirror, eras: &[(String, PathBuf)]) -> std::io::Result<
                 temporal: fold.temporal.add(&window.temporal),
                 gauge: fold.gauge.add(&window.gauge),
             };
-            let (x, y, z, g) = project(&placed);
+            let (x, y, z, _) = project(&placed);
+            // THE ONE G (the alignment seam, 2026-07-30): the chart's
+            // G axis carries the world's KEY — the wrapped exact
+            // rational the AEON law defines — never the four-C
+            // deposit sum (that projection is an event-count reading;
+            // it stays with placement and the fiber card, off this
+            // axis). Before this fix the two dialects shared the axis
+            // and the board read "0 or ~10": genesis keys beside
+            // grant counts.
+            let g = terminal_gauge(&events);
             // THE SHEET SEATING (11 §5.2, wired 2026-07-30): each
             // annexed aeon seats on its OWN G-sheet — the era ordinal
             // fixes the base (era N lived on sheet (N−1)/12, the fold
@@ -237,6 +246,24 @@ pub fn converge(mirror: &Mirror, eras: &[(String, PathBuf)]) -> std::io::Result<
 
 /// The terminal window W (07 §2, placeholder — tunes at balance time).
 const TERMINAL_WINDOW: usize = 8;
+
+/// The world's terminal KEY: the last gauge-carrying receipt's value
+/// (GaugeShifted · Diverged · Confluent · EraFolded — the receipt
+/// carries the wrapped value, the last stands; the replay law,
+/// mirror-side). A chronicle with no key moves reads 0.
+fn terminal_gauge(events: &[ClosureEvent]) -> Ratio {
+    events
+        .iter()
+        .rev()
+        .find_map(|event| match event {
+            ClosureEvent::GaugeShifted { gauge }
+            | ClosureEvent::Diverged { gauge, .. }
+            | ClosureEvent::Confluent { gauge, .. }
+            | ClosureEvent::EraFolded { gauge, .. } => Some(gauge.clone()),
+            _ => None,
+        })
+        .unwrap_or_else(|| ratio(0, 1))
+}
 
 /// 11 §5.2: the G-sheet an archived era lived on — its ordinal read
 /// from the `<base>-era<N>` name, seated at (N−1)/12 wrapped (the

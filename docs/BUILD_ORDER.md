@@ -659,6 +659,23 @@ occupancy caps and four-C fold-eligibility remain the recorded open
 half of AEON-1b — expansion is bounded today by seats and the fold,
 not yet by the trajectory reading.
 
+## 3a-quinque. THE ONE G (the alignment seam, 2026-07-30)
+
+The operator's instrument read the board's G as "binary — 0 or 10,
+nothing between." The law was never binary; the CHART was bilingual:
+genesis entries carried the KEY (the wrapped exact rational of the
+AEON law — 0 before any climb) while annexed entries carried the
+four-C deposit SUM (an event-count projection — ~10 registrations and
+grants), two quantities sharing one axis. Ruled and fixed: the chart's
+G axis carries the KEY alone — the world's terminal gauge receipt
+(GaugeShifted · Diverged · Confluent · EraFolded, last stands) plus
+its era's sheet base; the deposit projection keeps its lawful job
+(four-C placement, the fiber card) OFF the G axis. Recorded plainly
+against the imported analysis: there is no G=10 pole (the fiber wraps
+[0,1) — a G of 10 IS 0, the recurrence collision itself); sheet
+offsets derive from era ordinals, never from a ceiling; ascension
+claims a seat and moves no key.
+
 ## 3b. The union board (12_UNION — the world-book of the new aeon)
 
 Design authority `12_UNION.md` (eight operator rulings, 2026-07-29). NOT a
