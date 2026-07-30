@@ -688,6 +688,20 @@ fn render_receipt(receipt: &Receipt) -> String {
                 ratio_str(banked)
             ),
         ),
+        E::OfferPosted { offer, give, give_amount, want, want_amount, .. } => (
+            "offer_posted",
+            format!(
+                "offer {offer} rests: {} {} for {} {}",
+                ratio_str(give_amount),
+                resource_name(*give),
+                ratio_str(want_amount),
+                resource_name(*want)
+            ),
+        ),
+        E::OfferCleared { offer, deal } => (
+            "offer_cleared",
+            format!("offer {offer} cleared — the crossing filled it (deal {deal})"),
+        ),
         E::GaugeShiftedAt { grade, gauge } => (
             "gauge_shifted_at",
             format!("the key moves at grade {grade} — {}", ratio_str(gauge)),

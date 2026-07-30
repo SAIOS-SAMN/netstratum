@@ -57,8 +57,9 @@
 //!   46 ClosureEvent::EraFolded (AEON-1a — the fold; base G advances)
 //!   47 ClosureEvent::ApertureSent (NS-4 APERTURE — the source leg)
 //!   48 ClosureEvent::ApertureReceived (NS-4 APERTURE — the dest leg)
-//!   49–51 RESERVED for the market board (BUILD_ORDER §3a: OfferPosted,
-//!         OfferCleared, +1 — renumbered from the colliding 41–43)
+//!   49 ClosureEvent::OfferPosted (MARKET-1 — the resting intent)
+//!   50 ClosureEvent::OfferCleared (MARKET-1 — the crossing filled it)
+//!   51 RESERVED for the market board's third (BOARD-1 if it needs one)
 //!   52 ClosureEvent::CouncilSealed (COUNCIL-1 — the multilateral pact)
 //!   53 ClosureEvent::CouncilClosed (COUNCIL-1 — one member's reckoning)
 //!   54 ClosureEvent::GalaxyObserved (GALAXY-1 — universe ledger only)
@@ -533,6 +534,25 @@ pub enum ClosureEvent {
     /// mover's vented ledger at its collect (the VentSettled shape):
     /// real entropy, the handling cost of divergent boundary policies.
     FrictionSettled { orb_id: u64, amount: Ratio },
+    /// MARKET-1 (BUILD_ORDER §3a) — an OFFER posts: this orb stands
+    /// ready to GIVE `give_amount` of `give` for `want_amount` of
+    /// `want`. The price IS the ratio (no absolute price exists —
+    /// guardrail 6); the offer RESTS as committed state until a
+    /// crossing clears it or it is never met. No escrow: affordability
+    /// is judged at the fill, and a stale offer refuses then.
+    OfferPosted {
+        offer: u64,
+        orb_id: u64,
+        give: Resource,
+        give_amount: Ratio,
+        want: Resource,
+        want_amount: Ratio,
+    },
+    /// MARKET-1 — the offer CLEARED: a crossing filled it. The fill's
+    /// amounts live in the aperture legs the `deal` links (deal and
+    /// deal+1 — the two directions); this receipt closes the resting
+    /// intent. Replay removes the offer.
+    OfferCleared { offer: u64, deal: u64 },
     /// GAUGE-N (11 §2.1, wired 2026-07-30) — the key at a GRADE: the
     /// fiber is a graded vector of wrapped keys, not one dial, and
     /// this deed moves (or OPENS — a shift at an unopened grade grows
@@ -854,6 +874,20 @@ impl ClosureEvent {
                 ratio::encode(gauge, &mut value);
                 tlv::put(60, &value, &mut out);
             }
+            Self::OfferPosted { offer, orb_id, give, give_amount, want, want_amount } => {
+                let mut value = offer.to_le_bytes().to_vec();
+                value.extend_from_slice(&orb_id.to_le_bytes());
+                value.push(*give as u8);
+                ratio::encode(give_amount, &mut value);
+                value.push(*want as u8);
+                ratio::encode(want_amount, &mut value);
+                tlv::put(49, &value, &mut out);
+            }
+            Self::OfferCleared { offer, deal } => {
+                let mut value = offer.to_le_bytes().to_vec();
+                value.extend_from_slice(&deal.to_le_bytes());
+                tlv::put(50, &value, &mut out);
+            }
             Self::Diverged { branch, gauge } => {
                 let mut value = Vec::new();
                 ratio::encode(gauge, &mut value);
@@ -1133,6 +1167,21 @@ impl ClosureEvent {
                 let grade = u16::from_le_bytes(value.get(..2)?.try_into().ok()?);
                 let (gauge, _) = ratio::decode(value.get(2..)?)?;
                 Some(Self::GaugeShiftedAt { grade, gauge })
+            }
+            49 => {
+                let offer = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let orb_id = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let give = Resource::from_wire(*value.get(16)?)?;
+                let (give_amount, used) = ratio::decode(value.get(17..)?)?;
+                let at = 17 + used;
+                let want = Resource::from_wire(*value.get(at)?)?;
+                let (want_amount, _) = ratio::decode(value.get(at + 1..)?)?;
+                Some(Self::OfferPosted { offer, orb_id, give, give_amount, want, want_amount })
+            }
+            50 => {
+                let offer = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let deal = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                Some(Self::OfferCleared { offer, deal })
             }
             43 => {
                 let (gauge, used) = ratio::decode(value)?;

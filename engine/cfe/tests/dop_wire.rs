@@ -134,6 +134,16 @@ fn events_round_trip_through_their_wire_records() {
             fulfilled: false,
             banked: ratio(0, 1),
         },
+        ClosureEvent::OfferPosted {
+            offer: 7,
+            orb_id: 1,
+            give: Resource::Joule,
+            give_amount: ratio(9, 2),
+            want: Resource::Sink,
+            want_amount: ratio(9, 2),
+        },
+        ClosureEvent::OfferCleared { offer: 7, deal: 100 },
+        ClosureEvent::GaugeShiftedAt { grade: 2, gauge: ratio(2, 3) },
     ];
     for event in events {
         let bytes = event.wire_bytes();

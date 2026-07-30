@@ -73,6 +73,12 @@ pub enum ActionRefused {
     /// COUNCIL-1 — a council is three or more DISTINCT orbs, a
     /// positive quota and collateral, a real window, a fresh id.
     BadCouncil,
+    /// MARKET-1 — an offer trades two DISTINCT resources in positive
+    /// amounts under a fresh id.
+    BadOffer,
+    /// MARKET-1 — no crossing: the two offers do not meet (wrong
+    /// resources, or the prices never cross).
+    NoCrossing,
     /// PLANNER-1 — delegation settles inside diplomacy: the deed must
     /// reference an OPEN council in the granting world.
     NoSuchCouncil { council: u64 },
@@ -162,6 +168,19 @@ pub struct Covenant {
     pub window: u64,
 }
 
+/// MARKET-1: a resting offer — a receipted intent to trade, no
+/// escrow; the price IS want/give (guardrail 6: no absolute price).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Offer {
+    pub offer: u64,
+    pub orb: u64,
+    pub give: Resource,
+    pub give_amount: Ratio,
+    pub want: Resource,
+    pub want_amount: Ratio,
+    pub posted: u64,
+}
+
 /// COUNCIL-1 (12_UNION §7): a multilateral covenant — every member
 /// bound alike, judged together at the boundary.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -195,6 +214,8 @@ pub struct Committed {
     pub covenants: Vec<Covenant>,
     /// COUNCIL-1: the open councils, in sealing order.
     pub councils: Vec<Council>,
+    /// MARKET-1: the resting offers, in posting order.
+    pub offers: Vec<Offer>,
     /// TECH-1a: the discovered nodes — (orb, condition, node id) in
     /// discovery order; condition 0 is the kernel solar leap.
     pub techs: Vec<(u64, u8, [u8; 32])>,
@@ -233,6 +254,8 @@ pub struct World {
     covenants: Vec<Covenant>,
     /// COUNCIL-1: the open councils (committed, same law).
     councils: Vec<Council>,
+    /// MARKET-1: the resting offers (committed, same law).
+    offers: Vec<Offer>,
     /// IDEO-1 WORKSPACE, per orb: accrued ideological friction since
     /// the last seal — sealed by `FrictionSettled` at collect.
     friction_pending: Vec<(u64, Ratio)>,
@@ -261,6 +284,7 @@ impl World {
             bonds: Vec::new(),
             covenants: Vec::new(),
             councils: Vec::new(),
+            offers: Vec::new(),
             friction_pending: Vec::new(),
             techs: Vec::new(),
             crossed: false,
@@ -294,6 +318,7 @@ impl World {
             bonds: committed.bonds,
             covenants: committed.covenants,
             councils: committed.councils,
+            offers: committed.offers,
             friction_pending: Vec::new(),
             techs: committed.techs,
             crossed: committed.crossed,
@@ -591,6 +616,53 @@ impl World {
     /// COUNCIL-1: the open councils.
     pub fn councils(&self) -> &[Council] {
         &self.councils
+    }
+
+    /// MARKET-1: the resting offers.
+    pub fn offers(&self) -> &[Offer] {
+        &self.offers
+    }
+
+    /// MARKET-1 (BUILD_ORDER §3a): POST an offer — a receipted intent
+    /// to give one resource for another at an exact-rational price
+    /// (want/give — no absolute price exists, guardrail 6). No escrow:
+    /// the fill judges affordability when a crossing clears; an offer
+    /// that outlived its bank refuses THEN, harming no one now. An
+    /// unmatched offer rests.
+    pub fn post_offer(
+        &mut self,
+        orb: u64,
+        give: Resource,
+        give_amount: Ratio,
+        want: Resource,
+        want_amount: Ratio,
+        offer: u64,
+    ) -> Result<(), ActionRefused> {
+        if give == want
+            || give_amount <= ratio(0, 1)
+            || want_amount <= ratio(0, 1)
+            || self.offers.iter().any(|held| held.offer == offer)
+        {
+            return Err(ActionRefused::BadOffer);
+        }
+        if peek(&self.orbs, orb).is_none() {
+            return Err(ActionRefused::NoSuchOrb { orb });
+        }
+        let posted = self.clock.now();
+        self.offers.push(Offer {
+            offer,
+            orb,
+            give,
+            give_amount: give_amount.clone(),
+            want,
+            want_amount: want_amount.clone(),
+            posted,
+        });
+        self.close(
+            ClosureEvent::OfferPosted { offer, orb_id: orb, give, give_amount, want, want_amount },
+            SOVEREIGN,
+        );
+        Ok(())
     }
 
     /// COUNCIL-1 (12_UNION §7) — the WARRING IMPERIUM reading, derived
@@ -2307,6 +2379,7 @@ impl World {
             bonds: self.bonds.clone(),
             covenants: self.covenants.clone(),
             councils: self.councils.clone(),
+            offers: self.offers.clone(),
             techs: self.techs.clone(),
             crossed: self.crossed,
             gauge: self.gauge.clone(),
@@ -2549,6 +2622,78 @@ pub fn aperture_transfer(
     Ok(())
 }
 
+/// MARKET-1 (BUILD_ORDER §3a) — CLEAR A CROSSING: two resting offers
+/// on two worlds meet; the fill happens at the RESTING offer's exact
+/// price (price-time priority: the earlier posted rules; ties break
+/// by lower offer id), moves as TWO aperture pairs (deal and deal+1 —
+/// the two directions, each conservation-exact, shield-checked), and
+/// closes both intents with OfferCleared. Fill = the largest exchange
+/// both intents admit; remainders are not carried — an unfilled
+/// remainder reposts (offers are intents, not escrows).
+pub fn clear_trade(
+    a: &mut World,
+    offer_a: u64,
+    b: &mut World,
+    offer_b: u64,
+    deal: u64,
+) -> Result<(), ActionRefused> {
+    let held_a = a
+        .offers
+        .iter()
+        .find(|held| held.offer == offer_a)
+        .cloned()
+        .ok_or(ActionRefused::BadOffer)?;
+    let held_b = b
+        .offers
+        .iter()
+        .find(|held| held.offer == offer_b)
+        .cloned()
+        .ok_or(ActionRefused::BadOffer)?;
+    // Complementary resources, or no crossing exists.
+    if held_a.give != held_b.want || held_a.want != held_b.give {
+        return Err(ActionRefused::NoCrossing);
+    }
+    // The prices must CROSS: B offers at least what A asks, per unit.
+    // A asks want_a/give_a of Y per X; B gives give_b/want_b of Y per
+    // X. Exact rational comparison, no division by zero (amounts are
+    // positive by posting law).
+    let asks = held_a.want_amount.clone() * held_b.want_amount.clone();
+    let gives = held_b.give_amount.clone() * held_a.give_amount.clone();
+    if gives < asks {
+        return Err(ActionRefused::NoCrossing);
+    }
+    // The resting offer's price rules (price-time priority).
+    let a_rests = (held_a.posted, held_a.offer) <= (held_b.posted, held_b.offer);
+    // Fill x of A's give (X): bounded by both intents.
+    let x = held_a.give_amount.clone().min(held_b.want_amount.clone());
+    // y of B's give (Y) at the resting price.
+    let y = match a_rests {
+        true => x.clone() * held_a.want_amount.clone() / held_a.give_amount.clone(),
+        false => x.clone() * held_b.give_amount.clone() / held_b.want_amount.clone(),
+    };
+    let y = y.min(held_b.give_amount.clone());
+    // The two directions — each an aperture pair, shield-checked,
+    // demurrage-touched, conservation-exact (the landed carrier).
+    aperture_transfer(a, held_a.orb, b, held_b.orb, held_a.give, x, deal)?;
+    aperture_transfer(b, held_b.orb, a, held_a.orb, held_b.give, y, deal + 1)?;
+    // Both intents close; replay removes them.
+    a.offers.retain(|held| held.offer != offer_a);
+    b.offers.retain(|held| held.offer != offer_b);
+    let stamp_a = a.clock.now();
+    a.chronicle.append(
+        ClosureEvent::OfferCleared { offer: offer_a, deal },
+        stamp_a,
+        vec![SOVEREIGN],
+    );
+    let stamp_b = b.clock.now();
+    b.chronicle.append(
+        ClosureEvent::OfferCleared { offer: offer_b, deal },
+        stamp_b,
+        vec![SOVEREIGN],
+    );
+    Ok(())
+}
+
 /// PLANNER-1: what a licensed leap carries — the condition and name
 /// of the technology, the deal id binding both legs, and the open
 /// council the delegation settles inside.
@@ -2684,6 +2829,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut covenants: Vec<Covenant> = Vec::new();
     let mut councils: Vec<Council> = Vec::new();
     let mut techs: Vec<(u64, u8, [u8; 32])> = Vec::new();
+    let mut offers: Vec<Offer> = Vec::new();
     let mut crossed = false;
     let mut gauge = vec![ratio(0, 1)];
     for receipt in chronicle.receipts() {
@@ -3134,6 +3280,23 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             | ClosureEvent::EraFolded { gauge: key, .. } => {
                 gauge[0] = key.clone();
             }
+            // MARKET-1: the intent rests; the clear removes it.
+            ClosureEvent::OfferPosted {
+                offer, orb_id, give, give_amount, want, want_amount,
+            } => {
+                offers.push(Offer {
+                    offer: *offer,
+                    orb: *orb_id,
+                    give: *give,
+                    give_amount: give_amount.clone(),
+                    want: *want,
+                    want_amount: want_amount.clone(),
+                    posted: receipt.stamp,
+                });
+            }
+            ClosureEvent::OfferCleared { offer, .. } => {
+                offers.retain(|held| held.offer != *offer);
+            }
             // GAUGE-N: a graded shift replays verbatim, growing the
             // key when it opens a plane (zeros fill — ground rest).
             ClosureEvent::GaugeShiftedAt { grade, gauge: key } => {
@@ -3149,7 +3312,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             }
         }
     }
-    Committed { orbs, entities, star, debts, bonds, covenants, councils, techs, crossed, gauge }
+    Committed { orbs, entities, star, debts, bonds, covenants, councils, offers, techs, crossed, gauge }
 }
 
 /// SINK-1 (Q2): the demurrage due on one orb's un-vaulted banked

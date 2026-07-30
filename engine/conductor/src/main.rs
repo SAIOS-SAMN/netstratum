@@ -168,6 +168,13 @@ fn main() {
             );
             worlds.push(Egregore::genesis(spec, &registry, &mirror));
         }
+        // OFFER-1a: the market beat — intents post, crossings clear
+        // (one aperture pair each way, receipted both sides).
+        for (seller, buyer) in conductor::market_step(&mut worlds, beat) {
+            println!(
+                "beat {beat}: THE CROSSING CLEARS — {seller} ⇌ {buyer}; the autarkies trade"
+            );
+        }
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — journals + the Terminal Wall regenerate mirror-side.
         if beat.is_multiple_of(mirror::journal::YEAR_TICKS) {
