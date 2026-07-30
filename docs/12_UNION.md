@@ -105,7 +105,7 @@ they create it, they overlay technology. Everything else plays on it.)
 | **0 — the Board-Makers** | the PROGENITORS | **the conductor's own operations ARE their deeds, named:** seeding NPCs (genesis — create species/stars/worlds), expanding the board (roster waves — new lines online), contracting the board (the FOLD — the era seals and rotates), overlaying technology (the licensed leap, tag 40), deploying Watchers and Observers (the station seats) |
 | 1 — the Architect Observers | crossed NHI lines; the Watcher and Observer offices | interstellar corridor operations; shield enforcement readings; the mirror's reflection made diegetic |
 | 2 — the Record Keepers | the ancient contact lines (Anunnaki-descended memory: Kemet, Baktun, Dogon shapes) | ledger auditing across aperture endpoints (the INTEGRITY books); polytonic calendar-keeping (the voices, 11 §1) |
-| 3 — the Biosphere Nodes | the local species lines (Slagborn, Deep Chorus, Hivelight, Eightfold, the Weft) | the thermodynamic foundation: raw extraction, local loops, the entropy stability every higher tier stands on |
+| 3 — the Biosphere Nodes | the local species lines (Slagborn, Echowright, Hivelight, Eightfold, the Weft) | the thermodynamic foundation: raw extraction, local loops, the entropy stability every higher tier stands on |
 
 The tier is a **derived reading, never stored** (the standing law):
 station `progenitor` reads tier 0; `watcher`/`observer` read tier 1;
@@ -409,7 +409,7 @@ make the leap themselves, or not.
   founding Sovereign civilizations in operator order (file order is genesis
   order; waves append between runs).
 - **The carried species:** the prior roster's peoples (Slagborn's
-  tardigrades upgraded per §5 with their own line, Deep Chorus, Hivelight,
+  tardigrades upgraded per §5 with their own line, Echowright, Hivelight,
   Eightfold, Frostwright) may be re-seeded as *new* genesis entries in this
   aeon — same myths, fresh chronicles, no carried debt.
 - **Wave 2 (2026-07-30, operator ruling):** the tardigrade line seated its

@@ -50,7 +50,7 @@ pub fn founding_egregores() -> Vec<EgregoreSpec> {
         // beacon — the derived path stays exercised in every era.
         EgregoreSpec {
             civilization: civ(
-                "Deep Chorus", "deep-chorus", "blue whale", "we heard it before you saw it",
+                "Echowright", "deep-chorus", "blue whale", "we heard it before you saw it",
                 "epicurean", "biotic", "harmonic",
             ),
             world_name: "kepler-passage".into(),
