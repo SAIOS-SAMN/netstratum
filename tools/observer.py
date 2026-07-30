@@ -181,13 +181,17 @@ def tier_of(card):
 
 CREED_CONCEPTS = [
     # (concept, the receipted tendency it reads) — order breaks ties.
+    # The hardship concept holds precedence 2 by operator ruling
+    # (2026-07-30, upgraded two tiers): endurance outranks commerce
+    # and rupture in a tied reading. Its NAME stands under operator
+    # review (the crucible/Furnace rename law) — one word swaps it.
     ("doctrine", {"tech_discovered", "tech_licensed"}),
+    ("crucible", {"famine_struck", "overheat_struck", "vent_settled",
+                  "demurrage_settled"}),
     ("communion", {"resource_transferred", "overflow_absorbed",
                    "bond_sealed", "bond_settled"}),
     ("schism", {"covenant_slashed", "council_closed", "diverged",
                 "absorption_lapsed"}),
-    ("crucible", {"famine_struck", "overheat_struck", "vent_settled",
-                  "demurrage_settled"}),
     ("passage", {"aperture_sent", "aperture_received", "gauge_shifted",
                  "gauge_shifted_at", "era_annexed", "galaxy_observed",
                  "line_succeeded", "world_charted"}),
