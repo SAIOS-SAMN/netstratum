@@ -75,8 +75,11 @@
 //!   60 ClosureEvent::GaugeShiftedAt (GAUGE-N, 11 §2.1 — the graded
 //!         key: moves or opens plane `grade`; plane 0 is the landed
 //!         scalar, tags 42–46 bind to it forever)
-//!         — the next free tag outside reservations is 61 (WANT-1
-//!         candidates hold 61+, BUILD_ORDER §3a-sexies).
+//!   61 ClosureEvent::GenesisSealed (G1, 04 §1/§5 — the three axes
+//!         sealed as the world-chronicle receipt; the registry becomes
+//!         a cache of this receipted truth, never ground truth)
+//!         — the next free tag outside reservations is 62 (WANT-1
+//!         candidates hold 62+, BUILD_ORDER §3a-sexies).
 //!   In-value codes opened at N4 (they ride existing orb tags, no new
 //!   TLV tag): Resource::Crystal = 7 (banked entry, tag 18);
 //!   ZoneKind::Resonator = 7 (zone entry, tag 17).
