@@ -256,9 +256,8 @@ its vectors from the first two-node session, per the N1 law.
 
 Transport security (this is a prototype: the mesh trusts its LAN);
 node identity beyond a name (blake3/provenance only at N6 by ruling —
-ties to NS-6 operator profiles and enters at N7 with ANCHOR); the
-handoff under partition (the yielding node unreachable — ruled at
-MESH-1b with the vectors in hand).
+ties to NS-6 operator profiles and enters at N7 with ANCHOR). The
+handoff under partition was RULED 2026-07-31 — §7.5 carries the law.
 
 ## 7. The receipted handoff (MESH-1b)
 
@@ -359,3 +358,22 @@ its first seal, but the refusal now names the door.
 **Witness.** `pen_pins.rs::the_pen_passes_writes_and_returns` — the
 full arc on one file, the walk green at every station.
 
+
+### 7.5 The partition law (operator ruling 2026-07-31)
+
+Authority on one spine never moves without its seal. An unreachable
+writer STALLS the spine: writes refuse (USURPED, the lawful hand
+named); reads, queries, and consilience measurements continue
+normally. There is no silent mutiny — a successor assuming an
+unsealed pen would put two hands inside one blake3 lineage,
+non-deterministic split-brain, SEAL B broken.
+
+The named escape is the fork the laws already bless (§1 law 3): a
+stranded successor never appends to the primary spine — it DIVERGES,
+openly. A `Diverged { branch, gauge }` record (tags 43/44, the landed
+vocabulary — never a parallel mesh concept) opens the node's own
+branch; local writes accrue there. When the partition heals, the
+branches do not vote on who was right — they MEASURE (§2): exact-zero
+distance confluences (`Confluent { partner, gauge }`); nonzero
+distance stands preserved as typed divergence for the annex path —
+never discarded, never overwritten.

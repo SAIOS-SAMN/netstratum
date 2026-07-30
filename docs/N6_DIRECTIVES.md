@@ -53,6 +53,14 @@ The NS-5 stub is verified against the tree 2026-07-30:
 3. **Scope: one world.** MESH-1a is two independent engine instances
    converging on ONE world's chronicle. Universal multi-world
    aggregation belongs to MESH-1c / N7.
+4. **Partition (2026-07-31): the spine stalls; the escape is an open
+   fork.** Authority never moves without a seal — an unreachable
+   writer leaves its spine read-only (writes refuse USURPED; reads
+   and consilience continue). A stranded successor continues ONLY on
+   an explicit Diverged branch (tags 43/44, the landed vocabulary);
+   healing measures the branches — exact zero confluences, nonzero
+   stands preserved as typed divergence for the annex path. No votes,
+   no elections, no silent mutiny. NS-5 §7.5 carries the law whole.
 
 ## The consilience construction (NS-5 §1, summarized)
 
