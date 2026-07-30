@@ -110,9 +110,11 @@ reserved (D2 terrain, D3 milestones); 49–51 reserved the market board
   GALAXY-1 LANDED whole (13_GALAXY, 2026-07-30); the interleaving
   stress witness LANDED (HANDOFF §9.1 struck, `world_interleave.rs`).
   Standing relay to coder-01: the state.json cohesion pin (HANDOFF
-  §9.2) and the JOURNAL follow-on (§9.3). Next: the coder-03 N4
-  boundary sign-off (the flagged excursions below), then D2/D3 or as
-  assigned.
+  §9.2) and the JOURNAL follow-on (§9.3). N4 boundary sign-off DONE.
+  FUNCTION-1 + SURVEY-1 LANDED 2026-07-30 (operator directive): the
+  §4 function reading renders on the observer; the survey step wires
+  scan → charter → drill in the egregore cycle (BUILD_ORDER §3b).
+  Next: D2/D3 or as assigned.
 - **coder-03**: N4 (NS-2 RQP + the scanner) — LANDED on main
   2026-07-30 (33e6c73 + post-ruling inscriptions 7f739f4, after the
   fifth-set rulings): spec §1–§4 with extracted vectors, sigil index +

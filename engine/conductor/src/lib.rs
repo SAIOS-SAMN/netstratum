@@ -360,6 +360,68 @@ impl Egregore {
     /// during famine, always through the contained actor. Industry is
     /// GATED ON RESEARCH for every temperament: smelters need rung 3,
     /// synthesizers rung 5.
+    /// RQP/FUNCTION wiring (operator directive 2026-07-30): the
+    /// Pathfinder directs the drills. A mature colony (rung 5 — the
+    /// synthesizer tier that can have refined a crystal) pays the
+    /// scan's crystal draw; the CrystalDrawn receipt IS the survey
+    /// record, and placement follows the reading: a single-orb world
+    /// CHARTERS the surveyed sector (P1) and opens its first drill; a
+    /// multi-orb world places the next extractor on the scan's first
+    /// resonant orb with room to grow. Unaffordable or starving, the
+    /// survey idles lawfully and siting draws rule as before.
+    fn survey_step(&mut self) {
+        if self.level < 5 {
+            return;
+        }
+        if self.world.orb().is_none_or(|orb| !orb.famine.is_empty()) {
+            return;
+        }
+        let primary = cfe::world::FIRST_ORB;
+        let Ok(read) = self.world.scan_as(self.automaton, primary, primary) else {
+            return; // no crystal, no survey — the draw gates the lens
+        };
+        let orbs: Vec<u64> = self.world.committed().orbs.iter().map(|o| o.orb_id).collect();
+        if orbs.len() == 1 {
+            // The expansion: the survey confirms the home sigil and
+            // the charter plants its next sector — reserves permitting
+            // (20 iron + 10 biomass move at the charter, P1).
+            if banked(&self.world, Resource::Iron) >= ratio(40, 1)
+                && banked(&self.world, Resource::Biomass) >= ratio(20, 1)
+            {
+                let site_name = format!("{}-survey", self.spec.colony);
+                if let Ok(site) = self.world.chart_as(self.automaton, &site_name, primary) {
+                    let _ = self.world.zone_as(self.automaton, site, 0, ZoneKind::Extractor);
+                }
+            }
+            return;
+        }
+        // Guided drilling: the first resonant hit that is not the
+        // prober and still has room takes the next drill.
+        let room_of = |orb_id: u64| {
+            self.world
+                .orb_by_id(orb_id)
+                .map(|orb| orb.zones.len())
+                .unwrap_or(usize::MAX)
+        };
+        let primary_zones = room_of(primary);
+        let Some(&target) = read
+            .hits
+            .iter()
+            .find(|id| **id != primary && room_of(**id) < primary_zones)
+        else {
+            return;
+        };
+        let taken: Vec<u16> = self
+            .world
+            .orb_by_id(target)
+            .map(|orb| orb.zones.iter().map(|z| z.tile).collect())
+            .unwrap_or_default();
+        let Some(tile) = (0..64u16).find(|t| !taken.contains(t)) else {
+            return;
+        };
+        let _ = self.world.zone_as(self.automaton, target, tile, ZoneKind::Extractor);
+    }
+
     fn build_step(&mut self) {
         let world = &mut self.world;
         if world.orb().is_none_or(|orb| !orb.famine.is_empty()) {
@@ -761,8 +823,14 @@ impl Egregore {
     pub fn cycle(&mut self, mirror: &Mirror, registry: &Registry) -> Option<EgregoreSpec> {
         self.drain_inbox(mirror);
         self.build_step();
+        self.survey_step();
         self.world.tick();
-        let _ = self.world.collect_as(self.automaton, cfe::world::FIRST_ORB);
+        // Every settled orb collects — a chartered survey site left
+        // uncollected would starve at its own upkeep.
+        let orbs: Vec<u64> = self.world.committed().orbs.iter().map(|o| o.orb_id).collect();
+        for orb in orbs {
+            let _ = self.world.collect_as(self.automaton, orb);
+        }
         self.research_step(mirror);
         let newborn = self.divergence_step(registry);
         let _ = mirror.record(
