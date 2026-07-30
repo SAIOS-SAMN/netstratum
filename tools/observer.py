@@ -185,8 +185,14 @@ def aggregate_by_civilization(rows, registry):
             name = "⚙ " + name
         if card.get("lineage"):
             name += " ↳ " + card["lineage"]
+        # 12_UNION §2a: the TIER is a derived reading, never stored —
+        # station progenitor→T0, watcher/observer→T1, sovereign→T2,
+        # stationless→T3 (the biosphere, the common lawful state).
+        tier = {"progenitor": "T0", "watcher": "T1", "observer": "T1",
+                "sovereign": "T2"}.get(card.get("station"), "T3")
         out.append({
             "civilization": name,
+            "tier": tier,
             "species": card.get("species", "?"),
             "axes": "·".join(axes.get(a, "?")[:3] for a in
                              ["disposition", "metabolism", "perception"]),
@@ -261,7 +267,7 @@ def render(rows, registry, sort_key, plain):
         colony_table)]
 
     civ_table = [
-        [agg["civilization"], agg["species"], agg["axes"],
+        [agg["civilization"], agg["tier"], agg["species"], agg["axes"],
          str(agg["worlds"]), str(agg["colonies"]),
          show(agg["iron"]), show(agg["biomass"]),
          show(agg["alloy"]), show(agg["diamond"]),
@@ -270,7 +276,7 @@ def render(rows, registry, sort_key, plain):
         for agg in aggregate_by_civilization(rows, registry)
     ]
     sections += ["", "CIVILIZATIONS", tabulate(
-        ["CIVILIZATION", "SPECIES", "AXES", "WORLDS", "COLONIES", "IRON",
+        ["CIVILIZATION", "TIER", "SPECIES", "AXES", "WORLDS", "COLONIES", "IRON",
          "BIOMASS", "ALLOY", "DIAMOND", "PUZZLES", "DEPTH", "INTELLIGENCE"],
         civ_table)]
     return "\n".join(sections)

@@ -81,6 +81,46 @@ another people's world* passes through diplomacy — unless the receiving
 side is a warring imperium by its own ledger, or diplomacy has failed by
 receipted breach (§7). Planners plan; the council disposes.
 
+## 2a. The tier overlay — progenitors are TIER 0 (operator ruling, 2026-07-30)
+
+The board's vertical reading, overlaid on the bands. **This is not the
+hierarchy the seats forbid** — it is WHO MAKES THE ROOM: Tier 0 creates
+the board everyone else moves on. (An external four-tier sketch placing
+"Archons" above the progenitors was consulted and OVERRIDDEN: in this
+game the progenitors are the top — they contract and expand the board,
+they create it, they overlay technology. Everything else plays on it.)
+
+| Tier | Who | The reading |
+|---|---|---|
+| **0 — the Board-Makers** | the PROGENITORS | **the conductor's own operations ARE their deeds, named:** seeding NPCs (genesis — create species/stars/worlds), expanding the board (roster waves — new lines online), contracting the board (the FOLD — the era seals and rotates), overlaying technology (the licensed leap, tag 40), deploying Watchers and Observers (the station seats) |
+| 1 — the Architect Observers | crossed NHI lines; the Watcher and Observer offices | interstellar corridor operations; shield enforcement readings; the mirror's reflection made diegetic |
+| 2 — the Record Keepers | the ancient contact lines (Anunnaki-descended memory: Kemet, Baktun, Dogon shapes) | ledger auditing across aperture endpoints (the INTEGRITY books); polytonic calendar-keeping (the voices, 11 §1) |
+| 3 — the Biosphere Nodes | the local species lines (Slagborn, Deep Chorus, Hivelight, Eightfold, the Weft) | the thermodynamic foundation: raw extraction, local loops, the entropy stability every higher tier stands on |
+
+The tier is a **derived reading, never stored** (the standing law):
+station `progenitor` reads tier 0; `watcher`/`observer` read tier 1;
+`sovereign` reads tier 2; the stationless read tier 3. Energy and
+coherence flow UP (closed loops fund the three-gate climb); licensing
+and gauge keys flow DOWN (council-gated, shield-bounded). The observer
+board renders the tier column from this reading.
+
+## 2b. The torsion law (operator ruling, 2026-07-30)
+
+**Deterministic at the top, probabilistic at the bottom — where they
+meet in the middle is the union BOUNCE of torsion.** The substrate
+(receipts, chains, wire, the laws) is exact and deterministic, always.
+The floor (local emergence: forge draws, siting draws, divergence
+deltas) is probability-SHAPED but chronicle-seeded — dice whose faces
+are receipts. They meet at the gauge fiber: G's discrete torsion is
+where the exact law and the seeded draw exchange — the bounce. And **no
+grepping anywhere in the system**: no mechanism may work by matching
+rendered strings; readings derive from typed events and committed
+state, renderings are reflections (SEAL C), and a parse of a rendering
+is a second truth (forbidden). Byte-identity likewise lives at the
+SUBSTRATE only — the hash-chained receipt encoding that lets many nodes
+verify one shared history — never demanded of anything above it; the
+universe above the chain is fluid.
+
 ## 3. The middle classes — Watcher, Observer, Sovereign
 
 Between Band I and Band II stand three classes (ruling 2), each an engine

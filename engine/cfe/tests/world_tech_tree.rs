@@ -29,14 +29,14 @@ fn burning(pairs: u16) -> World {
     world
 }
 
-fn node_names(world: &World) -> Vec<String> {
+fn nodes(world: &World) -> Vec<(u8, String)> {
     world
         .chronicle()
         .receipts()
         .iter()
         .filter_map(|receipt| match &receipt.event {
             ClosureEvent::TechDiscovered { condition, name, .. } if *condition > 0 => {
-                Some(name.clone())
+                Some((*condition, name.clone()))
             }
             _ => None,
         })
@@ -57,14 +57,14 @@ fn held_pressure_crystallizes_discipline_beside_the_doctrine() {
             let _ = world.collect();
         }
     }
-    let names = node_names(&world);
+    let held = nodes(&world);
     assert!(
-        names.iter().any(|name| name == "radiator doctrine"),
-        "the vented years crystallize the doctrine first, got {names:?}"
+        held.iter().any(|(condition, name)| *condition == 4 && name.ends_with(" doctrine")),
+        "the vented years crystallize a doctrine first, got {held:?}"
     );
     assert!(
-        names.iter().any(|name| name == "overflow discipline"),
-        "the overheat the doctrine could not cure crystallizes discipline, got {names:?}"
+        held.iter().any(|(condition, name)| *condition == 2 && name.ends_with(" discipline")),
+        "the overheat the doctrine could not cure crystallizes a discipline, got {held:?}"
     );
     assert!(world.orb().expect("orb").overheat, "half-cured is still burning");
 
@@ -76,7 +76,7 @@ fn held_pressure_crystallizes_discipline_beside_the_doctrine() {
         }
     }
     assert_eq!(
-        node_names(&world).iter().filter(|name| *name == "overflow discipline").count(),
+        nodes(&world).iter().filter(|(condition, _)| *condition == 2).count(),
         1,
         "one node per condition per orb, forever"
     );
@@ -104,7 +104,7 @@ fn the_doctrine_cools_the_curable_world() {
         }
     }
     assert!(
-        node_names(&world).iter().any(|name| name == "radiator doctrine"),
+        nodes(&world).iter().any(|(condition, _)| *condition == 4),
         "the vented year crystallizes the doctrine"
     );
     assert!(cleared, "the boosted radiator closes the budget; overheat clears");
@@ -131,8 +131,8 @@ fn survived_cold_crystallizes_insulation() {
         matches!(
             &receipt.event,
             ClosureEvent::TechDiscovered { condition: 1, magnitude, name, .. }
-                if *magnitude == ratio(3, 4) && name == "cryo-resonant insulation"
+                if *magnitude == ratio(3, 4) && name.ends_with(" insulation")
         )
     });
-    assert!(insulated, "eight survived famine-years crystallize insulation");
+    assert!(insulated, "eight survived famine-years crystallize an insulation of this line's own");
 }

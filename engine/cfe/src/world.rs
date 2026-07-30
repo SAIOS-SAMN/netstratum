@@ -1418,7 +1418,7 @@ impl World {
                     if !self.condition_holds(orb, condition, stamp_now, sheet) {
                         continue;
                     }
-                    let (name, modifier, magnitude) =
+                    let (modifier, magnitude) =
                         crate::dop::tech_node_of(condition).expect("1..=5 tabled");
                     let mut seed = self
                         .chronicle
@@ -1431,6 +1431,9 @@ impl World {
                     seed.extend_from_slice(&orb.to_le_bytes());
                     seed.push(condition);
                     let node: [u8; 32] = blake3::hash(&seed).into();
+                    // The name is THIS line's own (10 §2 law 4): drawn
+                    // from the node hash, never a rung label.
+                    let name = crate::dop::tech_node_name(condition, &node);
                     self.techs.push((orb, condition, node));
                     self.chronicle.append(
                         ClosureEvent::TechDiscovered {
@@ -1439,7 +1442,7 @@ impl World {
                             condition,
                             modifier,
                             magnitude,
-                            name: name.into(),
+                            name,
                         },
                         stamp_now,
                         vec![],

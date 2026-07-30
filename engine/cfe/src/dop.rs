@@ -109,18 +109,44 @@ impl Resource {
 
 /// Founding banks the bootstrap reserves (02 §2.1): 20 iron, 10 biomass.
 /// TECH-1b (10 §3): the condition table — the crystallized node's
-/// name, modifier kind, and magnitude per condition. Names are the
-/// table's renderings; the node ID underneath is the seeded-synthesis
-/// hash. One node per condition per orb, idempotent.
-pub fn tech_node_of(condition: u8) -> Option<(&'static str, u8, Ratio)> {
+/// modifier kind and magnitude per condition. MECHANICS only: the
+/// NAME derives from the node hash (`tech_node_name` — the 10 §2
+/// law-4 word tables), so two lines crystallizing the same condition
+/// carry DIFFERENT names. Naming is never stacked on rungs (operator
+/// ruling 2026-07-30): a line's technology is its own, seeded from
+/// its own chronicle root.
+pub fn tech_node_of(condition: u8) -> Option<(u8, Ratio)> {
     match condition {
-        1 => Some(("cryo-resonant insulation", 1, ratio(3, 4))),
-        2 => Some(("overflow discipline", 2, ratio(5, 4))),
-        3 => Some(("lattice deepening", 3, ratio(5, 4))),
-        4 => Some(("radiator doctrine", 4, ratio(5, 4))),
-        5 => Some(("long stores", 5, ratio(1, 2))),
+        1 => Some((1, ratio(3, 4))),
+        2 => Some((2, ratio(5, 4))),
+        3 => Some((3, ratio(5, 4))),
+        4 => Some((4, ratio(5, 4))),
+        5 => Some((5, ratio(1, 2))),
         _ => None,
     }
+}
+
+/// TECH-1b (10 §2, law 4): the node's NAME — a deterministic
+/// word-table composition from the node hash. The condition fixes the
+/// CONCEPT (what the technology does); the hash draws the VOICE (how
+/// this line speaks of it). Flavor at the surface, hash as the
+/// identity underneath — replay re-derives the identical name because
+/// the receipt carries the identical node.
+pub fn tech_node_name(condition: u8, node: &[u8; 32]) -> String {
+    let concept = match condition {
+        1 => "insulation",
+        2 => "discipline",
+        3 => "deepening",
+        4 => "doctrine",
+        5 => "stores",
+        _ => "working",
+    };
+    const VOICES: [&str; 12] = [
+        "resonant", "patient", "vaulted", "keening", "tidal", "ember",
+        "hollow", "woven", "still", "spiral", "murmured", "adamant",
+    ];
+    let voice = VOICES[(node[0] as usize) % VOICES.len()];
+    format!("{voice} {concept}")
 }
 
 pub fn founding_reserves() -> Vec<(Resource, Ratio)> {
