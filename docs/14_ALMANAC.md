@@ -89,6 +89,47 @@ frontier distance) — **never computed powers** (the 2^1100 denominator
 lesson, inscribed: exponent-flavored, table-implemented; every
 denominator bounded by the table's own).
 
+## 4a. The dispersal law — star death as allocation (ENRICH-1, specced)
+
+**What is already emergent (landed, zero new code):** the mint reads
+the star's class AT MINT TIME, and `StarAged` (tag 45) moves stars
+through their regions — so a star's death already rewrites its OWN
+system's periodic table: every prospect struck after a G-star falls
+to WhiteDwarf draws the exotic spine (heavy and noble open, light
+closes). Home-system enrichment is a property of composition, not a
+feature.
+
+**The dispersal (the blast's gift to the sector), to land:**
+
+1. **The receipted band carrier (the SEAL B constraint made law):** a
+   world's chronicle replays from itself alone, and galaxy membership
+   lives in the universe ledger world replay is blind to — so sector
+   flavor may NEVER be read live from `galaxy_of` at mint time. It
+   enters each world as a **gradient band byte**, receipted into the
+   world's own chain (fixed at charting; shifted only by enrichment
+   deeds), which `element_properties` reads forever after. Charting
+   the sky and drawing the resource map are the same act.
+2. **The enrichment deed:** on a death transition (StarAged into
+   WhiteDwarf ‖ NeutronStar — the operator may widen the trigger
+   set), the conductor's year-voice sweep issues a receipted
+   `EnrichmentStruck` into every world within the blast band —
+   wrapped-L1 distance against a RADIUS LOOKUP table (never computed
+   powers; every denominator the table's own). The deed shifts the
+   receiving world's band byte additively; future prospects there
+   draw heavier. Replay of each world reads its own deeds — the
+   sweep composes cross-world, the receipts stay per-world (the
+   aperture two-book precedent).
+3. **The allocation reading:** destruction is creation — the dying
+   star mints its sector's heavy tail. Scarcity gradients follow
+   stellar demography; sectors specialize by their dead as much as
+   their living. Distribution then rides the landed rails: element
+   apertures (§5a) move the veins' yields down the gradients, and
+   MARKET-1 prices what the sky made rare.
+
+Lanes: the deed, the band carrier, and the spine modulation are
+engine-side (coder-03); the death sweep rides the conductor's beat
+(coder-01, the observation-sweep precedent — a relay seam, named).
+
 ## 5. The refinery derivation — no hand-written converters
 
 One new zone kind, the **elemental refinery**, TUNED at build to a
@@ -105,6 +146,18 @@ converter law as a FUNCTION:
 No per-element table is ever written. Two worlds with different seeds
 grow DIFFERENT refinery chains from the same function — measured, not
 asserted, at the landing.
+
+## 5a. Element apertures — distribution (specced)
+
+Banked element stores are their own ledger and the aperture speaks
+only the seven closed carriers today — **elements are not yet
+tradeable cross-world**. ELEMENT-GRAMMAR-2 opens the element leg: the
+aperture pair keyed by element id (the 47/48 shape with the id in the
+value), conservation exact across the pair, demurrage-free (elements
+are matter, not thermodynamic ledger quantities). With the gradient
+live, comparative advantage derives from astrophysics: sectors
+specialize by spine and by their dead; trade flows down the
+gradients; the market prices what the sky made rare.
 
 ## 6. What stays ruled forever (never generated)
 
