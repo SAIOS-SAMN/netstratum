@@ -52,7 +52,14 @@ The friction-gated ascent/descent it proposes IS the landed law:
    cross-normalized (12 §5a: a line under a slow sun is pacing its
    world). Friction reads a line against its OWN chronicle; every
    threshold is a per-line placeholder, never one scalar for all.
-5. **No fixed 54.** The operator's own framing — thousands of creeds,
+5. **No continuous moduli.** The Kähler-moduli proposal as drafted
+   (f64 tensors, Ricci-flat fixed points, a stored `kahler_moduli`
+   block) stays on the far side of the Q1/Q3 wall (12 §9: continuous
+   differential geometry is realized as discrete, exact-rational,
+   receipted structure or not at all — and floats never enter the
+   universe). Its lawful core lands as FORGE-2 (§4): the engine's
+   discrete moduli already exist — the graded gauge key.
+6. **No fixed 54.** The operator's own framing — thousands of creeds,
    new ones born daily — is the generative law: creeds DERIVE,
    chronicle-seeded, the 10 §2 naming discipline applied to belief
    (the hash is the identity, the creed is the line's tongue). The
@@ -87,10 +94,14 @@ walks — exactly the way function and tier read today.
 
 ## 4. The genuine gaps — the landing nodes (all design-stage)
 
-- **CREED-1 — the derived creed reading.** Render the creed at the
-  observer (the FUNCTION-1 pattern: derived from chronicle + books at
-  render time, zero schema, zero storage; generative naming from the
-  chronicle digest × the line's voice).
+- **CREED-1 — the derived creed reading. LANDED 2026-07-30.** The
+  observer renders each line's creed, derived at read time: CONCEPT
+  from the dominant receipted tendency (doctrine · communion · schism
+  · crucible · passage — deterministic tie order), VOICE drawn from
+  the chronicle's terminal digest (the 10 §2 law applied to belief).
+  Zero schema, zero storage; a deedless line walks the unwritten way;
+  new creeds arise as chronicles diverge. The civs board carries the
+  CREED column; the civ view names it beside the lineage walk.
 - **CREED-2 — the couplings.** The one genuinely NEW mechanic class the
   overlay surfaces: today the axes never touch colony economics (yields
   and upkeep are zone-law). Species- and creed-coupled ruleset profiles
@@ -109,6 +120,14 @@ walks — exactly the way function and tier read today.
 - **WARDEN-1 — the elder world.** A dormant precursor star holding
   solve-gated master templates (the depth law; the Guardian shape);
   unlocks license through the council gate like every leap.
+- **FORGE-2 — the difficulty vector from the key.** The lawful core
+  of the Kähler proposal: the forge's difficulty becomes a derived
+  VECTOR — program length, rule vocabulary, dimension carrier,
+  denominator bound — computed exact-rationally from committed state:
+  the line's graded key (open planes and wrapped phases ARE the
+  discrete moduli, receipted at every shift), minted fiber planes, and
+  earned depth. No floats, no curvature scalars, no stored moduli
+  block; renders beside the creed when it lands.
 - **Register waves.** Avian, pelagic-deep, etherean, and silicoid
   PEOPLES enter on the closed axes as waves (the Klethaxu precedent);
   new axis values only by SUBSTRATE-style landings with the first line

@@ -117,6 +117,45 @@ def tier_of(card):
     return TIER_OF_STATION.get(card.get("station"), "T3")
 
 
+CREED_CONCEPTS = [
+    # (concept, the receipted tendency it reads) — order breaks ties.
+    ("doctrine", {"tech_discovered", "tech_licensed"}),
+    ("communion", {"resource_transferred", "overflow_absorbed",
+                   "bond_sealed", "bond_settled"}),
+    ("schism", {"covenant_slashed", "council_closed", "diverged",
+                "absorption_lapsed"}),
+    ("crucible", {"famine_struck", "overheat_struck", "vent_settled",
+                  "demurrage_settled"}),
+    ("passage", {"aperture_sent", "aperture_received", "gauge_shifted",
+                 "gauge_shifted_at", "era_annexed", "galaxy_observed",
+                 "line_succeeded", "world_charted"}),
+]
+CREED_VOICES = ["quiet", "burning", "wandering", "deep", "risen", "iron",
+                "tide-born", "unbowed", "patient", "hollow", "radiant",
+                "grafted", "sleepless", "wintering", "manifold", "first"]
+
+
+def creed_of(events, digest_hex):
+    """14_CREEDS §4 (CREED-1): the derived creed — never stored, never
+    enumerated. CONCEPT reads the line's dominant receipted tendency
+    (list order breaks ties, deterministic); VOICE draws from the
+    chronicle's terminal digest — the 10 §2 naming law applied to
+    belief. New creeds arise as chronicles diverge; a line with no
+    deeds yet walks the unwritten way."""
+    best, best_n = None, 0
+    for concept, names in CREED_CONCEPTS:
+        n = sum(1 for e in events if e.get("event") in names)
+        if n > best_n:
+            best, best_n = concept, n
+    if best is None:
+        return "the unwritten way"
+    try:
+        voice = CREED_VOICES[int(digest_hex[:2], 16) % len(CREED_VOICES)]
+    except (ValueError, IndexError):
+        voice = "quiet"
+    return f"the {voice} {best}"
+
+
 def function_of(card, agg):
     """12_UNION §4: the FUNCTION reading — derived at the observer from
     metabolism + observed niche (zones, banks, solves), never stored,
@@ -150,9 +189,10 @@ def world_facts(world_dir):
     chronicle = world_dir / "chronicle.jsonl"
     linked, receipts = chain_linked(chronicle)
     consumed = Fraction(0)
-    events = []
+    events, terminal_digest = [], ""
     for receipt in read_jsonl(chronicle):
         events.append(receipt)
+        terminal_digest = receipt.get("digest") or terminal_digest
         if receipt.get("event") == "yield_collected":
             try:
                 consumed += frac(receipt.get("detail", "").split(" ")[0])
@@ -189,6 +229,7 @@ def world_facts(world_dir):
         "name": world_dir.name, "linked": linked, "receipts": receipts,
         "events": events, "consumed": consumed, "puzzles": puzzles,
         "depth": depth, "planets": planets, "pending": pending,
+        "digest": terminal_digest,
     }
 
 
@@ -390,7 +431,7 @@ def view_board(var_root, args, paint):
 
 def view_civs(var_root, args, paint):
     """The civilizations, grouped by tier, filterable."""
-    rows, _ = read_all(var_root)
+    rows, worlds = read_all(var_root)
     registry = load_registry(var_root)
     civs = {}
     for row in rows:
@@ -400,6 +441,8 @@ def view_civs(var_root, args, paint):
             **{r: Fraction(0) for r in RESOURCES}})
         agg["colonies"] += 1
         agg["zone_kinds"] |= row.get("zone_kinds", set())
+        agg.setdefault("events", [])
+        agg.setdefault("digest", "")
         for resource in RESOURCES:
             agg[resource] += row[resource]
         if row["world"] not in agg["worlds"]:
@@ -407,6 +450,13 @@ def view_civs(var_root, args, paint):
             agg["puzzles"] += row["puzzles"]
             agg["depth"] = max(agg["depth"], row["depth"])
             agg["consumed"] += row["consumed"]
+            facts = worlds.get(row["world"], {})
+            agg["events"] = agg["events"] + facts.get("events", [])
+            # Deterministic: the lexicographically first world's
+            # terminal digest carries the voice.
+            if not agg["digest"] or row["world"] < agg.get("digest_world", "￿"):
+                agg["digest"] = facts.get("digest", "")
+                agg["digest_world"] = row["world"]
     by_tier = {}
     for slug in sorted(set(list(civs) + list(registry))):
         card = registry.get(slug, {})
@@ -425,6 +475,7 @@ def view_civs(var_root, args, paint):
                      for a in ["disposition", "metabolism", "perception"]),
             card.get("station", "—") or "—",
             function_of(card, agg),
+            creed_of(agg.get("events", []), agg.get("digest", "")),
             str(len(agg["worlds"])), str(agg["colonies"]),
             show(agg["iron"]), show(agg["biomass"]),
             show(agg["joule"]), show(agg["sink"]),
@@ -437,7 +488,7 @@ def view_civs(var_root, args, paint):
         if tier not in by_tier:
             continue
         lines += [paint.head(TIER_TITLES[tier]), tabulate(
-            ["CIVILIZATION", "SPECIES", "AXES", "STATION", "FUNCTION", "WORLDS", "COLONIES",
+            ["CIVILIZATION", "SPECIES", "AXES", "STATION", "FUNCTION", "CREED", "WORLDS", "COLONIES",
              "IRON", "BIOMASS", "JOULE", "SINK", "PUZZLES", "INTELLIGENCE"],
             by_tier[tier]), ""]
     return "\n".join(lines).rstrip() or "(no civilizations match)"
@@ -575,6 +626,11 @@ def view_civ(var_root, args, paint):
         lines.append("  lineage: " + " ↳ ".join(walk) + paint.dim(note))
     else:
         lines.append("  lineage: " + paint.dim("headless — a lawful state"))
+    civ_worlds = sorted({r["world"] for r in rows if r["civilization"] == target})
+    civ_events = [e for w in civ_worlds for e in worlds.get(w, {}).get("events", [])]
+    civ_digest = worlds.get(civ_worlds[0], {}).get("digest", "") if civ_worlds else ""
+    lines.append("  creed: " + paint.strong(creed_of(civ_events, civ_digest))
+                 + paint.dim("  (derived from the chronicle — 14_CREEDS)"))
     held = [r for r in rows if r["civilization"] == target]
     if held:
         lines += ["", paint.head("  HOLDINGS")]

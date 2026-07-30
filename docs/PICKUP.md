@@ -139,7 +139,13 @@ forever.
   corrected and barred (no G=10, no aperture bypass, no spoofed
   receipts, no universal Φ). Open nodes: CREED-1 (derived reading),
   CREED-2 (species/creed-economics couplings — the one new mechanic
-  class), MASK-1, INCURSION-1, WARDEN-1. Next: as assigned.
+  class), MASK-1, INCURSION-1, WARDEN-1, FORGE-2 (the difficulty
+  vector from the graded key — the Kähler proposal's lawful core; the
+  float/continuous form is barred at 14 §2.5). CREED-1 LANDED
+  2026-07-30: the generative creed reading renders on the civs board
+  and the civ view (concept from receipted tendency × voice from the
+  terminal digest — never stored, never enumerated). Next: CREED-2 on
+  the operator's green light.
 - **coder-03**: N4 (NS-2 RQP + the scanner) — LANDED on main
   2026-07-30 (33e6c73 + post-ruling inscriptions 7f739f4, after the
   fifth-set rulings): spec §1–§4 with extracted vectors, sigil index +
