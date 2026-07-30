@@ -592,6 +592,16 @@ fn render_state(world_name: &str, planet: &str, civilization: &str, world: &Worl
     w.finish()
 }
 
+/// WANT-1: the kind table's names (tag 62).
+fn want_name(kind: u8) -> &'static str {
+    match kind {
+        1 => "epistemological",
+        2 => "resonance",
+        3 => "novelty",
+        _ => "unnamed",
+    }
+}
+
 fn render_receipt(receipt: &Receipt) -> String {
     use cfe::dop::ClosureEvent as E;
     let mut w = JsonWriter::new();
@@ -694,6 +704,18 @@ fn render_receipt(receipt: &Receipt) -> String {
                 },
                 ratio_str(banked)
             ),
+        ),
+        E::WantStruck { orb_id, kind, reading } => (
+            "want_struck",
+            format!(
+                "the {} want strikes orb {orb_id} — {} ticks starved",
+                want_name(*kind),
+                ratio_str(reading)
+            ),
+        ),
+        E::WantRelieved { orb_id, kind } => (
+            "want_relieved",
+            format!("the {} want relieved — orb {orb_id}'s mind is fed", want_name(*kind)),
         ),
         E::OfferPosted { offer, give, give_amount, want, want_amount, .. } => (
             "offer_posted",

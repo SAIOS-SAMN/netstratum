@@ -86,6 +86,10 @@ pub enum ActionRefused {
     /// MARKET-1 — no crossing: the two offers do not meet (wrong
     /// resources, or the prices never cross).
     NoCrossing,
+    /// GAUGE-N — a new plane is EARNED: opening grade k needs k
+    /// receipted mints (crystallized/granted nodes, divergences,
+    /// confluences). The count names how far the fiber has grown.
+    PlaneUnearned { grade: u16, mints: u64 },
     /// PLANNER-1 — delegation settles inside diplomacy: the deed must
     /// reference an OPEN council in the granting world.
     NoSuchCouncil { council: u64 },
@@ -226,6 +230,9 @@ pub struct Committed {
     /// TECH-1a: the discovered nodes — (orb, condition, node id) in
     /// discovery order; condition 0 is the kernel solar leap.
     pub techs: Vec<(u64, u8, [u8; 32])>,
+    /// WANT-1: the struck cognitive wants — (orb, kind), replay-
+    /// derived like famine; kinds per the tag-62 table.
+    pub wants: Vec<(u64, u8)>,
     /// THRESHOLD-1: has this world CROSSED — does its chronicle hold
     /// an aperture leg? A world is a star system, so any leg is an
     /// interstellar deed; the first is the crossing (12_UNION §7).
@@ -285,6 +292,8 @@ pub struct World {
     /// TECH-1a: the discovered nodes (committed — replays from
     /// receipts alone); condition 0 is the kernel solar leap.
     techs: Vec<(u64, u8, [u8; 32])>,
+    /// WANT-1: the struck cognitive wants (committed, famine-shaped).
+    wants: Vec<(u64, u8)>,
     /// THRESHOLD-1: the crossing flag (committed, replay-derived).
     crossed: bool,
     /// GAUGE-N: the graded gauge key (committed, replay-derived,
@@ -314,6 +323,7 @@ impl World {
             offers: Vec::new(),
             friction_pending: Vec::new(),
             techs: Vec::new(),
+            wants: Vec::new(),
             crossed: false,
             gauge: vec![ratio(0, 1)],
             genesis: None,
@@ -350,6 +360,7 @@ impl World {
             offers: committed.offers,
             friction_pending: Vec::new(),
             techs: committed.techs,
+            wants: committed.wants,
             crossed: committed.crossed,
             gauge: committed.gauge,
             genesis: committed.genesis,
@@ -528,14 +539,41 @@ impl World {
     /// gap: unopened planes rest at ground); the receipt carries the
     /// wrapped value. Grade 0 through this door is lawful and lands
     /// tag 55; the landed grade-0 deeds keep tag 42.
-    pub fn shift_gauge_at(&mut self, grade: u16, gauge: Ratio) {
-        let wrapped = wrap_gauge(gauge);
+    pub fn shift_gauge_at(&mut self, grade: u16, gauge: Ratio) -> Result<(), ActionRefused> {
         let at = grade as usize;
+        // GAUGE-N refinement (the growth law, 11 §2.1): OPENING a
+        // plane is EARNED — one receipted mint per new dimension. A
+        // mint is dimensional growth already receipted: a crystallized
+        // or granted node (condition ≥ 1), a divergence, a confluence.
+        // Moving an already-open plane stays free.
+        if at >= self.gauge.len() {
+            let mints = self
+                .chronicle
+                .receipts()
+                .iter()
+                .filter(|receipt| {
+                    matches!(
+                        &receipt.event,
+                        ClosureEvent::TechDiscovered { condition: 1.., .. }
+                            | ClosureEvent::Diverged { .. }
+                            | ClosureEvent::Confluent { .. }
+                    )
+                })
+                .count();
+            if at > mints {
+                return Err(ActionRefused::PlaneUnearned {
+                    grade,
+                    mints: mints as u64,
+                });
+            }
+        }
+        let wrapped = wrap_gauge(gauge);
         if self.gauge.len() <= at {
             self.gauge.resize(at + 1, ratio(0, 1));
         }
         self.gauge[at] = wrapped.clone();
         self.close(ClosureEvent::GaugeShiftedAt { grade, gauge: wrapped }, SOVEREIGN);
+        Ok(())
     }
 
     /// AEON-1a (11 §2.1): move the key. The value wraps onto [0, 1) —
@@ -652,6 +690,11 @@ impl World {
     /// MARKET-1: the resting offers.
     pub fn offers(&self) -> &[Offer] {
         &self.offers
+    }
+
+    /// WANT-1: the struck cognitive wants — (orb, kind).
+    pub fn wants(&self) -> &[(u64, u8)] {
+        &self.wants
     }
 
     /// MARKET-1 (BUILD_ORDER §3a): POST an offer — a receipted intent
@@ -812,6 +855,15 @@ impl World {
                     orb_id, resource: Resource::Joule, amount,
                 } if receipt.stamp >= window_floor => {
                     deposit(&mut sheet, *orb_id).encased += amount.clone();
+                }
+                ClosureEvent::ApertureSent { from_orb: orb_id, .. }
+                | ClosureEvent::ApertureReceived { to_orb: orb_id, .. }
+                | ClosureEvent::BondSealed { source_orb: orb_id, .. }
+                | ClosureEvent::BondSettled { source_orb: orb_id, .. } => {
+                    deposit(&mut sheet, *orb_id).last_link = Some(receipt.stamp);
+                }
+                ClosureEvent::TechDiscovered { orb_id, .. } => {
+                    deposit(&mut sheet, *orb_id).last_node = Some(receipt.stamp);
                 }
                 _ => {}
             }
@@ -1649,17 +1701,97 @@ impl World {
         // condition) — the chronicle root at the moment of
         // crystallization, so replay re-derives the identical node at
         // the identical tick. No randomness, no external calls.
-        if self.star.is_some() && stamp_now > 0 && stamp_now.is_multiple_of(60) {
-            // The shear: ONE sweep deposits every orb's readings.
+        if stamp_now > 0 && stamp_now.is_multiple_of(60) {
+            // The shear: ONE sweep deposits every orb's readings —
+            // the crystallizer AND the want check read the same sheet.
             let deposits = self.crystal_deposits(stamp_now);
             let blank = CrystalDeposit::default();
             let candidates: Vec<u64> = self.orbs.iter().map(|held| held.orb_id).collect();
+            // WANT-1 (12_UNION §5b): the cognitive wants, star-
+            // INDEPENDENT (a mind needs no sky to starve) and typed by
+            // the SEALED identity — no seal, no entity type, no want
+            // (pre-G1 worlds are pre-identity, lawfully neutral).
+            if let Some(sealed) = self.genesis.clone() {
+                for orb in &candidates {
+                    let sheet = deposits
+                        .iter()
+                        .find(|(held, _)| held == orb)
+                        .map(|(_, sheet)| sheet)
+                        .unwrap_or(&blank);
+                    // (kind, applies, fed_within, last, window)
+                    let checks: [(u8, bool, Option<u64>, u64); 2] = [
+                        // resonance: a harmonic mind starved of links.
+                        (2, sealed.perception == 3, sheet.last_link, 240),
+                        // novelty: an empiricist mind starved of
+                        // signal (a discovery must EXIST to starve
+                        // for the next).
+                        (3, sealed.disposition == 2, sheet.last_node, 480),
+                    ];
+                    for (kind, applies, last, window) in checks {
+                        if !applies {
+                            continue;
+                        }
+                        let struck = self.wants.iter().any(|(o, k)| o == orb && *k == kind);
+                        match last {
+                            Some(stamp)
+                                if stamp_now.saturating_sub(stamp) >= window && !struck =>
+                            {
+                                let reading =
+                                    ratio(stamp_now.saturating_sub(stamp) as i64, 1);
+                                self.wants.push((*orb, kind));
+                                self.chronicle.append(
+                                    ClosureEvent::WantStruck {
+                                        orb_id: *orb,
+                                        kind,
+                                        reading,
+                                    },
+                                    stamp_now,
+                                    vec![],
+                                );
+                            }
+                            Some(stamp)
+                                if stamp_now.saturating_sub(stamp) >= window => {}
+                            Some(_) if struck => {
+                                // Fed within the window: relieved.
+                                self.wants.retain(|(o, k)| !(o == orb && *k == kind));
+                                self.chronicle.append(
+                                    ClosureEvent::WantRelieved { orb_id: *orb, kind },
+                                    stamp_now,
+                                    vec![],
+                                );
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+            }
+            if self.star.is_none() {
+                // No sky, no crystallization — but the wants above
+                // already spoke.
+                let attestations: [Attestation; 3] = [
+                    self.keepers[0].attest(&self.clock),
+                    self.keepers[1].attest(&self.clock),
+                    self.keepers[2].attest(&self.clock),
+                ];
+                return TickOutcome {
+                    read: self.clock.tick(&attestations),
+                    struck,
+                    overheat_struck,
+                    overheat_cleared,
+                };
+            }
             for orb in candidates {
                 let sheet = deposits
                     .iter()
                     .find(|(held, _)| *held == orb)
                     .map(|(_, sheet)| sheet)
                     .unwrap_or(&blank);
+                // WANT-1: a novelty-struck mind mints no nodes — the
+                // crystallizer rests; relief arrives by licensed leap
+                // (the co-op pressure by design).
+                if self.wants.iter().any(|(o, k)| *o == orb && *k == 3) {
+                    continue;
+                }
                 for condition in 1u8..=5 {
                     if self
                         .techs
@@ -2415,6 +2547,7 @@ impl World {
             councils: self.councils.clone(),
             offers: self.offers.clone(),
             techs: self.techs.clone(),
+            wants: self.wants.clone(),
             crossed: self.crossed,
             gauge: self.gauge.clone(),
             genesis: self.genesis.clone(),
@@ -3028,6 +3161,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut councils: Vec<Council> = Vec::new();
     let mut techs: Vec<(u64, u8, [u8; 32])> = Vec::new();
     let mut offers: Vec<Offer> = Vec::new();
+    let mut wants: Vec<(u64, u8)> = Vec::new();
     let mut crossed = false;
     let mut gauge = vec![ratio(0, 1)];
     let mut genesis: Option<Genesis> = None;
@@ -3492,6 +3626,13 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             | ClosureEvent::EraFolded { gauge: key, .. } => {
                 gauge[0] = key.clone();
             }
+            // WANT-1: the famine shape — strike lists, relief clears.
+            ClosureEvent::WantStruck { orb_id, kind, .. } => {
+                wants.push((*orb_id, *kind));
+            }
+            ClosureEvent::WantRelieved { orb_id, kind } => {
+                wants.retain(|(o, k)| !(o == orb_id && k == kind));
+            }
             // MARKET-1: the intent rests; the clear removes it.
             ClosureEvent::OfferPosted {
                 offer, orb_id, give, give_amount, want, want_amount,
@@ -3525,8 +3666,8 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
         }
     }
     Committed {
-        orbs, entities, star, debts, bonds, covenants, councils, offers, techs, crossed, gauge,
-        genesis, terrain_seed,
+        orbs, entities, star, debts, bonds, covenants, councils, offers, techs, wants, crossed,
+        gauge, genesis, terrain_seed,
     }
 }
 
@@ -3652,6 +3793,12 @@ struct CrystalDeposit {
     overheat_open: Option<u64>,
     vented: Ratio,
     encased: Ratio,
+    /// WANT-1: the last cross-world LINK (aperture leg, bond seal or
+    /// settle) and whether one ever stood — the resonance reading.
+    last_link: Option<u64>,
+    /// WANT-1: the last discovery and whether one ever landed — the
+    /// novelty reading (licensed arrivals count: foreign signal FEEDS).
+    last_node: Option<u64>,
 }
 
 /// PEEL — lift ONE orb out of the field by id: the single hand into

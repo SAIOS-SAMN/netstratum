@@ -80,8 +80,11 @@
 //!   61 ClosureEvent::GenesisSealed (G1, 04 §1/§5 — the three axes
 //!         sealed as the world-chronicle receipt; the registry becomes
 //!         a cache of this receipted truth, never ground truth)
-//!         — the next free tag outside reservations is 62 (WANT-1
-//!         candidates hold 62+, BUILD_ORDER §3a-sexies).
+//!   62 ClosureEvent::WantStruck (WANT-1 — the cognitive want: kind 1
+//!      epistemological [board-side reading, reserved] · 2 resonance ·
+//!      3 novelty)
+//!   63 ClosureEvent::WantRelieved (WANT-1 — the mind fed)
+//!         — the next free tag outside reservations is 64.
 //!   In-value codes opened at N4 (they ride existing orb tags, no new
 //!   TLV tag): Resource::Crystal = 7 (banked entry, tag 18);
 //!   ZoneKind::Resonator = 7 (zone entry, tag 17).
@@ -571,6 +574,19 @@ pub enum ClosureEvent {
     /// mover's vented ledger at its collect (the VentSettled shape):
     /// real entropy, the handling cost of divergent boundary policies.
     FrictionSettled { orb_id: u64, amount: Ratio },
+    /// WANT-1 (12_UNION §5b) — a COGNITIVE want strikes: a famine of
+    /// the mind, derived from the chronicle and the SEALED identity
+    /// (G1 — the entity type is the receipted axes, never the registry
+    /// cache). Kinds: 1 epistemological (truth-starvation — reading
+    /// reserved to the board/mirror side), 2 resonance (isolation — a
+    /// harmonic mind starved of links), 3 novelty (stagnation — an
+    /// empiricist mind starved of signal; crystallization HALTS while
+    /// struck, so relief arrives by licensed leap — the co-op pressure
+    /// by design). `reading` is the measured drought, in ticks.
+    WantStruck { orb_id: u64, kind: u8, reading: Ratio },
+    /// WANT-1 — the want relieved: the mind fed (a new link, a fresh
+    /// discovery). World-driven at the year voice, the famine shape.
+    WantRelieved { orb_id: u64, kind: u8 },
     /// MARKET-1 (BUILD_ORDER §3a) — an OFFER posts: this orb stands
     /// ready to GIVE `give_amount` of `give` for `want_amount` of
     /// `want`. The price IS the ratio (no absolute price exists —
@@ -919,6 +935,17 @@ impl ClosureEvent {
                 ratio::encode(gauge, &mut value);
                 tlv::put(60, &value, &mut out);
             }
+            Self::WantStruck { orb_id, kind, reading } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.push(*kind);
+                ratio::encode(reading, &mut value);
+                tlv::put(62, &value, &mut out);
+            }
+            Self::WantRelieved { orb_id, kind } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.push(*kind);
+                tlv::put(63, &value, &mut out);
+            }
             Self::OfferPosted { offer, orb_id, give, give_amount, want, want_amount } => {
                 let mut value = offer.to_le_bytes().to_vec();
                 value.extend_from_slice(&orb_id.to_le_bytes());
@@ -1221,6 +1248,17 @@ impl ClosureEvent {
                 let grade = u16::from_le_bytes(value.get(..2)?.try_into().ok()?);
                 let (gauge, _) = ratio::decode(value.get(2..)?)?;
                 Some(Self::GaugeShiftedAt { grade, gauge })
+            }
+            62 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let kind = *value.get(8)?;
+                let (reading, _) = ratio::decode(value.get(9..)?)?;
+                Some(Self::WantStruck { orb_id, kind, reading })
+            }
+            63 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let kind = *value.get(8)?;
+                Some(Self::WantRelieved { orb_id, kind })
             }
             49 => {
                 let offer = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

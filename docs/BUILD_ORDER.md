@@ -571,7 +571,7 @@ The facet machinery (grant depths, permissions, expiry) stays ahead at N5
 | # | Landing | Contains | Proven by |
 |---|---|---|---|
 | **MARKET-1 — LANDED 2026-07-30** | THE EXCHANGE RATE | tags 49–50 wired: offers as RESTING receipted intents (no escrow — affordability judges at the fill; the price IS the ratio, guardrail 6); `clear_trade` fills at the RESTING offer's exact price (price-time priority, ties by id), moves as two aperture pairs (deal, deal+1 — shield-checked, conservation-exact both directions), closes both intents; CLI `offer …` / `trade …` verbs; both books replay | witnessed: the 3-iron fill at the resting 1/2 price exactly (the late bidder keeps its surplus); conservation across both resources and both worlds; the unmatched offer rests and replays; NoCrossing moves nothing; the shield guards the fill |
-| **OFFER-1a — LANDED 2026-07-30 (first slice)** | THE AUTOMATONS TRADE | `trade_intent` (pure, regime-read): a joule-starving Frost with banked sink offers S_cool for fuel; a Furnace with surplus (> 4 J, placeholder) offers fuel for S_cool — halves of stock, never the whole (guardrail 1's spirit); v1 price 1:1 (05 §1.4 equilibrium pricing is the open design); `market_step` posts one intent per world (offer id = chronicle length, deterministic) and clears the first crossing per beat; wired into the conductor's heartbeat with the narrator line | OPEN (OFFER-1b): the survive-the-freeze arc witnessed end to end — needs a staged Furnace-surplus + Frost-famine era; today the machinery is engine-witnessed (MARKET-1) and the instinct beats live |
+| **OFFER-1a — LANDED 2026-07-30 (first slice)** | THE AUTOMATONS TRADE | `trade_intent` (pure, regime-read): a joule-starving Frost with banked sink offers S_cool for fuel; a Furnace with surplus (> 4 J, placeholder) offers fuel for S_cool — halves of stock, never the whole (guardrail 1's spirit); v1 price 1:1 (05 §1.4 equilibrium pricing is the open design); `market_step` posts one intent per world (offer id = chronicle length, deterministic) and clears the first crossing per beat; wired into the conductor's heartbeat with the narrator line | **OFFER-1b WITNESSED 2026-07-30**: the survive-the-freeze arc whole — a shelled Furnace banks surplus and forms its intent; an arrayed Frost freeze-locks in joule famine with banked sink and forms its own; ONE market beat clears the crossing, the famine RELIEVES through the fill, the thawed world flows again, both books carry OfferCleared, and replay reproduces the rescue from receipts alone. Still open: 05 §1.4 equilibrium pricing (the design doc is unwritten — the 1:1 parity stays a named placeholder until the operator rules the spec) |
 | **BOARD-1** | THE TRADE BOARD | the marketplace surfaced: standing offers/asks and clearing prices rendered on `wall.html` and the observer (mirror-side, the reflection law — no second truth); the journal's trade lines become a readable board; a steward reads arbitrage and intervenes by inbox | the board renders the standing offers and the last clears from state alone; a human reads a cross-world arbitrage and the steward inbox executes it; the render mints no physics |
 
 Dependency: the carrier gate is OPEN (APERTURE-1 above). MARKET-1 needs the
@@ -689,9 +689,12 @@ key replays and resumes, and `key_distance` reads wrapped L1 across
 keys of ANY dimensionality (resonance/clash, 11 §2.1). CLI `shift
 <grade> <value>` is the progenitor's quantum-state deed; the chart's G
 axis stays grade 0 + sheet base (higher planes are the fiber card's
-country). Open refinement, recorded: plane-opening gated on a
-receipted Mint — growth as EARNED (the manifold dual's syntropic leg),
-not free.
+country). Plane-opening is now EARNED (refined 2026-07-30): opening grade k
+requires k receipted mints — crystallized or granted nodes (condition
+≥ 1), divergences, confluences — `PlaneUnearned` names the fiber's
+true growth otherwise; moving an already-open plane stays free.
+Witnessed: zero mints refuse grade 2; a cleave and a recombination
+open it.
 
 ## 3a-septies. The consoles hardened (2026-07-30, tasks 24–25)
 

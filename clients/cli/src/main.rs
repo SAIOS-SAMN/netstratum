@@ -481,17 +481,19 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             let grade = words.next().and_then(|w| w.parse::<u16>().ok());
             let value = words.next().and_then(parse_ratio_arg);
             match (grade, value) {
-                (Some(grade), Some(value)) => {
-                    world.shift_gauge_at(grade, value);
-                    let key: Vec<String> =
-                        world.key().iter().map(amount).collect();
-                    println!(
-                        "{} the key plays [{}] — {} plane(s) open",
-                        style.ok("♫"),
-                        style.strong(&key.join(", ")),
-                        world.key().len()
-                    );
-                }
+                (Some(grade), Some(value)) => match world.shift_gauge_at(grade, value) {
+                    Ok(()) => {
+                        let key: Vec<String> =
+                            world.key().iter().map(amount).collect();
+                        println!(
+                            "{} the key plays [{}] — {} plane(s) open",
+                            style.ok("♫"),
+                            style.strong(&key.join(", ")),
+                            world.key().len()
+                        );
+                    }
+                    Err(refusal) => refuse(world, &refusal, style),
+                },
                 _ => println!(
                     "{} usage: {} — grade 0 is the landed dial; a higher grade OPENS a plane",
                     style.bad("✗"),
@@ -2592,6 +2594,11 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "the orbit moves only under the crown technology — terraforming is gifted from tier 0, never taken; see {}",
             style.strong("civ seats")
         ),
+        ActionRefused::PlaneUnearned { grade, mints } => format!(
+            "opening grade {} is EARNED — the fiber has grown {} mint(s); crystallize, diverge, or take a licensed leap first",
+            style.strong(&grade.to_string()),
+            style.strong(&mints.to_string())
+        ),
         ActionRefused::BadOffer => format!(
             "an offer trades two DISTINCT resources in positive amounts under a fresh id — e.g. {}",
             style.strong("offer 4 iron for 2 biomass id 1")
@@ -3053,6 +3060,15 @@ fn chronicle(world: &World, style: &Style) {
                 "⚖ council {council} reckons — orb {member} {}; {} banked home",
                 if *fulfilled { style.strong("kept faith") } else { style.strong("BREACHED") },
                 style.strong(&amount(banked))
+            ),
+            cfe::dop::ClosureEvent::WantStruck { orb_id, kind, reading } => format!(
+                "◌ a famine of the MIND — the {} want strikes orb {orb_id} ({} ticks starved); feed it a link or a leap",
+                style.bad(match kind { 2 => "resonance", 3 => "novelty", _ => "unnamed" }),
+                style.strong(&amount(reading))
+            ),
+            cfe::dop::ClosureEvent::WantRelieved { orb_id, kind } => format!(
+                "◍ the {} want relieved — orb {orb_id}'s mind is fed",
+                style.ok(match kind { 2 => "resonance", 3 => "novelty", _ => "unnamed" })
             ),
             cfe::dop::ClosureEvent::OfferPosted { offer, give, give_amount, want, want_amount, .. } => format!(
                 "⇋ offer {offer} RESTS — {} {} for {} {}; the market holds intents, never escrows",

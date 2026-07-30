@@ -95,7 +95,16 @@ fn the_key_grows_planes_and_replays() {
     assert_eq!(world.key().len(), 1, "genesis: one plane, at ground");
 
     world.shift_gauge(ratio(1, 4));
-    world.shift_gauge_at(2, ratio(5, 3));
+    // GROWTH IS EARNED: with no mints, grade 2 refuses, naming the
+    // fiber's true growth.
+    assert!(matches!(
+        world.shift_gauge_at(2, ratio(5, 3)),
+        Err(cfe::world::ActionRefused::PlaneUnearned { grade: 2, mints: 0 })
+    ));
+    // Two mints (a cleave and a recombination) earn two planes.
+    world.diverge("first-song", ratio(1, 12));
+    world.conflue("haven", ratio(1, 4));
+    world.shift_gauge_at(2, ratio(5, 3)).expect("two mints open the surface");
     assert_eq!(world.key().len(), 3, "grade 2 OPENED the surface");
     assert_eq!(world.gauge(), &ratio(1, 4), "grade 0 untouched by the higher plane");
     assert_eq!(world.key()[1], ratio(0, 1), "the skipped plane rests at ground");
