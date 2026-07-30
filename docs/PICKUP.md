@@ -188,8 +188,13 @@ forever.
 next free 70): the five disciplines with exact benefit/friction pairs,
 the rediscovery release + condition-7 re-emergence node, the alignment
 gate on the climb (syntropy ≥ 1/2), genesis adoption by disposition,
-CLI practice/release. The creed-coupling design gap is CLOSED. Next:
-as assigned.
+CLI practice/release. The creed-coupling design gap is CLOSED. WARDEN-1a +
+MASK-1a LANDED 2026-07-31 (tags 74–77, next free 78): the elder's
+reverse shield + depth gate; the veil + its starving toll. OPEN:
+WARDEN-1b (genesis seeding, standing task, template grant),
+MASK-1b (render cloud + the coder-03 NS-2 hit-field seam),
+INCURSION-1 mechanic (the one remaining §3.1 landing — first fold
+prerequisite retired by the test fixture path). Next: INCURSION-1a.
 - **coder-03**: N4 (NS-2 RQP + the scanner) — LANDED on main
   2026-07-30 (33e6c73 + post-ruling inscriptions 7f739f4, after the
   fifth-set rulings): spec §1–§4 with extracted vectors, sigil index +

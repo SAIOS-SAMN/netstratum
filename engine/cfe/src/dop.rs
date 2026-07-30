@@ -109,7 +109,16 @@
 //!         the assay moves matter)
 //!   72 Orb elements entry (element_id[32] ‖ ratio — banked element
 //!         stores, element-id-ascending; SEAL A: old readers skip)
-//!         — the next free tag outside reservations is 73.
+//!   74 ClosureEvent::ElderWarded (WARDEN-1a, 10 §3e — the reverse
+//!         shield seats: the elder star refuses every aperture until
+//!         its gate is solved)
+//!   75 ClosureEvent::WardLifted (WARDEN-1a — the depth gate opened:
+//!         the claiming line's recorded solves reached the ceiling)
+//!   76 ClosureEvent::VeilDrawn (MASK-1a, 14 §4 — the lawful veil:
+//!         clouds renders, never the chronicle)
+//!   77 ClosureEvent::VeilLifted (MASK-1a — by deed, or STARVED when
+//!         the standing joule toll goes unpaid; starved u8)
+//!         — the next free tag outside reservations is 78.
 //!   In-value practice codes (append-only): 1 the Fast · 2 the Icon ·
 //!   3 the Vigil · 4 the Hoard · 5 the Athanor (deep-end: adoption
 //!   gated on hardship ≥ 8 receipts). Placeholder names, operator
@@ -303,6 +312,13 @@ pub fn friction_rate() -> Ratio {
 /// N4 (NS-2 §1.5, placeholder): crystals one scan draws from the
 /// probing orb's bank — the lens's power, spent on the looking, hit or
 /// miss. Judged pure before anything moves.
+/// MASK-1a (14 §4, placeholder): the veil's standing joule toll,
+/// settled at every collect — an unpayable toll lifts the veil by
+/// receipt, never silently.
+pub fn veil_toll() -> Ratio {
+    ratio(1, 4)
+}
+
 pub fn scan_draw() -> Ratio {
     ratio(1, 1)
 }
@@ -928,6 +944,19 @@ pub enum ClosureEvent {
     /// ELEMENT-GRAMMAR-1 (14 §3) — the extraction closure: richness ×
     /// elapsed banked in ONE receipt (the bond-settle shape).
     AssayStruck { orb_id: u64, element: [u8; 32], amount: Ratio },
+    /// WARDEN-1a (10 §3e) — the reverse shield: this star is the
+    /// elder; every aperture refuses until the ward lifts.
+    ElderWarded {},
+    /// WARDEN-1a — the depth gate opened by `claimer`; the elder
+    /// trades from here on (the template grant is WARDEN-1b).
+    WardLifted { claimer: String },
+    /// MASK-1a (14 §4) — the lawful veil: renders cloud, the
+    /// chronicle never lies; a standing joule toll settles at every
+    /// collect.
+    VeilDrawn {},
+    /// MASK-1a — the veil ends: by deed (starved 0) or STARVED by an
+    /// unpayable toll (starved 1), receipted either way.
+    VeilLifted { starved: bool },
 }
 
 impl ClosureEvent {
@@ -1251,6 +1280,17 @@ impl ClosureEvent {
                 value.extend_from_slice(element);
                 ratio::encode(amount, &mut value);
                 tlv::put(71, &value, &mut out);
+            Self::ElderWarded {} => {
+                tlv::put(74, &[], &mut out);
+            }
+            Self::WardLifted { claimer } => {
+                tlv::put(75, claimer.as_bytes(), &mut out);
+            }
+            Self::VeilDrawn {} => {
+                tlv::put(76, &[], &mut out);
+            }
+            Self::VeilLifted { starved } => {
+                tlv::put(77, &[u8::from(*starved)], &mut out);
             }
         }
         out
@@ -1589,6 +1629,12 @@ impl ClosureEvent {
                 let (amount, _) = ratio::decode(value.get(40..)?)?;
                 Some(Self::AssayStruck { orb_id, element, amount })
             }
+            74 => Some(Self::ElderWarded {}),
+            75 => Some(Self::WardLifted {
+                claimer: String::from_utf8(value.to_vec()).ok()?,
+            }),
+            76 => Some(Self::VeilDrawn {}),
+            77 => Some(Self::VeilLifted { starved: *value.first()? != 0 }),
             _ => None,
         }
     }

@@ -730,6 +730,16 @@ fn render_receipt(receipt: &Receipt) -> String {
             "galaxy_observed",
             format!("{name} observed by {observer}"),
         ),
+        E::ElderWarded {} => ("elder_warded", "the reverse shield seats".into()),
+        E::WardLifted { claimer } => (
+            "ward_lifted",
+            format!("the depth gate opened by {claimer}"),
+        ),
+        E::VeilDrawn {} => ("veil_drawn", "the renders cloud; the chronicle never lies".into()),
+        E::VeilLifted { starved } => (
+            "veil_lifted",
+            if *starved { "STARVED — the toll went unpaid".into() } else { "by deed".into() },
+        ),
         E::PracticeAdopted { practice } => (
             "practice_adopted",
             format!("discipline {practice} bound by receipt"),

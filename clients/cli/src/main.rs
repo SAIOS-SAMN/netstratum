@@ -2945,6 +2945,19 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "this world's sun is already commissioned — one star per world (NS-6 §6); {} shows it",
             style.strong("status")
         ),
+        ActionRefused::TheWardHolds => format!(
+            "the elder's reverse shield stands — no aperture reaches a warded star; solve the gate ({})",
+            style.strong("10 §3e")
+        ),
+        ActionRefused::WardOutOfOrder =>
+            "the elder deeds run in order: ward once, lift once, lift only what is warded".to_string(),
+        ActionRefused::DepthBelowCeiling { depth, ceiling } => format!(
+            "the depth gate: {} recorded solves stand, {} required — the ceiling is earned",
+            style.strong(&depth.to_string()),
+            style.strong(&ceiling.to_string())
+        ),
+        ActionRefused::VeilOutOfOrder =>
+            "one veil per star — lift before drawing anew (nothing stacks)".to_string(),
         ActionRefused::PracticeUnknown { practice } => format!(
             "no discipline {} stands in the vocabulary — 1 the Fast · 2 the Icon · 3 the Vigil · 4 the Hoard · 5 the Athanor",
             style.strong(&practice.to_string())
@@ -3360,6 +3373,18 @@ fn chronicle(world: &World, style: &Style) {
                 style.strong(name),
                 style.dim(observer)
             ),
+            cfe::dop::ClosureEvent::ElderWarded {} => 
+                "⛨ the ELDER stands warded — the reverse shield seats".to_string(),
+            cfe::dop::ClosureEvent::WardLifted { claimer } => format!(
+                "⛨ the ward LIFTS — the depth gate opened by {}",
+                style.strong(claimer)
+            ),
+            cfe::dop::ClosureEvent::VeilDrawn {} =>
+                "◐ the VEIL draws — renders cloud, the chronicle never lies".to_string(),
+            cfe::dop::ClosureEvent::VeilLifted { starved } => match starved {
+                true => "◐ the veil LIFTS — STARVED, the toll went unpaid".to_string(),
+                false => "◐ the veil LIFTS — by deed".to_string(),
+            },
             cfe::dop::ClosureEvent::PracticeAdopted { practice } => format!(
                 "⚖ discipline {} ADOPTED — one benefit, one friction, bound by receipt",
                 style.strong(&practice.to_string())

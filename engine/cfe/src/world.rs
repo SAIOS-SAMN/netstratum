@@ -73,6 +73,17 @@ pub enum ActionRefused {
     /// PRACTICE-1 — the Athanor takes only the tempered: fewer than
     /// eight hardship receipts stand in this chronicle.
     AthanorUntempered { hardships: usize },
+    /// WARDEN-1a — the elder's reverse shield: no aperture reaches a
+    /// warded star; solve the gate.
+    TheWardHolds,
+    /// WARDEN-1a — only one elder deed per star, in order: ward once,
+    /// lift once, lift only what is warded.
+    WardOutOfOrder,
+    /// WARDEN-1a — the depth gate: the claimer's recorded depth stands
+    /// below the ceiling.
+    DepthBelowCeiling { depth: u32, ceiling: u32 },
+    /// MASK-1a — one veil per star; lift before drawing anew.
+    VeilOutOfOrder,
     /// THERMAL-1 — siting an orbit needs a commissioned sun first.
     NoStarCommissioned,
     /// THERMAL-1 — the orb is already sited; an orbit does not move.
@@ -270,6 +281,11 @@ pub struct Committed {
     /// ELEMENT-GRAMMAR-1 (14 §3): the opened veins — the working
     /// registry the assay draws against; replay-rebuilt.
     pub prospects: Vec<Prospected>,
+    /// WARDEN-1a: the reverse shield stands (None = not the elder;
+    /// Some(false) = warded; Some(true) = lifted).
+    pub warded: Option<bool>,
+    /// MASK-1a: the veil stands.
+    pub veiled: bool,
 }
 
 /// G1 (04 §1): a civilization's sealed axes, as the world holds them.
@@ -348,6 +364,10 @@ pub struct World {
     /// PRACTICE-1: the receipted disciplines (mirror of the receipts).
     practices: Vec<u8>,
     prospects: Vec<Prospected>,
+    /// WARDEN-1a: the elder's reverse shield (mirror of the receipts).
+    warded: Option<bool>,
+    /// MASK-1a: the veil (mirror of the receipts).
+    veiled: bool,
 }
 
 impl World {
@@ -376,6 +396,8 @@ impl World {
             terrain_seed: None,
             practices: Vec::new(),
             prospects: Vec::new(),
+            warded: None,
+            veiled: false,
         }
     }
 
@@ -416,6 +438,8 @@ impl World {
             terrain_seed: committed.terrain_seed,
             practices: committed.practices,
             prospects: committed.prospects,
+            warded: committed.warded,
+            veiled: committed.veiled,
         }
     }
 
@@ -2017,6 +2041,36 @@ impl World {
         if self.orbs.is_empty() {
             return Err(ActionRefused::NoColony);
         }
+        // MASK-1a: the veil's standing toll settles at the touch — an
+        // unpayable toll LIFTS the veil by receipt, never silently.
+        if self.veiled {
+            let toll = crate::dop::veil_toll();
+            let held_joules = self
+                .orbs
+                .iter()
+                .find(|held| held.orb_id == orb)
+                .map(|held| held.banked_amount(Resource::Joule))
+                .unwrap_or_else(|| ratio(0, 1));
+            if held_joules >= toll {
+                if let Some(held) = peel(&mut self.orbs, orb) {
+                    held.bank(Resource::Joule, -toll.clone());
+                }
+                let stamp = self.clock.now();
+                self.chronicle.append(
+                    ClosureEvent::UpkeepSettled { orb_id: orb, resource: Resource::Joule, amount: toll },
+                    stamp,
+                    vec![actor],
+                );
+            } else {
+                let stamp = self.clock.now();
+                self.chronicle.append(
+                    ClosureEvent::VeilLifted { starved: true },
+                    stamp,
+                    vec![actor],
+                );
+                self.veiled = false;
+            }
+        }
         let held = peel(&mut self.orbs, orb)
             .ok_or(ActionRefused::NoSuchOrb { orb })?;
         let mut settleable: Vec<(Resource, Ratio)> = Vec::new();
@@ -2717,6 +2771,8 @@ impl World {
             terrain_seed: self.terrain_seed,
             practices: self.practices.clone(),
             prospects: self.prospects.clone(),
+            warded: self.warded,
+            veiled: self.veiled,
         }
     }
 
@@ -3222,6 +3278,75 @@ impl World {
         Ok(())
     }
 
+    /// WARDEN-1a (10 §3e) — seat the reverse shield: this star is the
+    /// elder. Refuses every aperture (both directions) until the ward
+    /// lifts; petitions nothing; holds no seat. Once per star.
+    pub fn ward_elder(&mut self) -> Result<(), ActionRefused> {
+        if self.warded.is_some() {
+            return Err(ActionRefused::WardOutOfOrder);
+        }
+        self.close(ClosureEvent::ElderWarded {}, SOVEREIGN);
+        self.warded = Some(false);
+        Ok(())
+    }
+
+    /// WARDEN-1a — lift the ward: the depth gate. The claimer's
+    /// recorded depth (the mirror's solves reading, passed by the
+    /// caller — depth lives mirror-side) must reach the ceiling
+    /// (placeholder 5). The receipt names the claimer; the template
+    /// grant is WARDEN-1b.
+    pub fn lift_ward(&mut self, claimer: &str, depth: u32) -> Result<(), ActionRefused> {
+        if self.warded != Some(false) {
+            return Err(ActionRefused::WardOutOfOrder);
+        }
+        let ceiling = 5;
+        if depth < ceiling {
+            return Err(ActionRefused::DepthBelowCeiling { depth, ceiling });
+        }
+        self.close(ClosureEvent::WardLifted { claimer: claimer.into() }, SOVEREIGN);
+        self.warded = Some(true);
+        Ok(())
+    }
+
+    /// WARDEN-1a: the reverse shield stands.
+    pub fn ward_holds(&self) -> bool {
+        self.warded == Some(false)
+    }
+
+    /// MASK-1a (14 §4) — draw the veil: renders cloud from here on
+    /// (the chronicle never lies; the Watchers read through). A
+    /// standing joule toll settles at every collect; an unpayable
+    /// toll LIFTS the veil by receipt. Build scope.
+    pub fn draw_veil(&mut self) -> Result<(), ActionRefused> {
+        self.draw_veil_as(SOVEREIGN)
+    }
+
+    pub fn draw_veil_as(&mut self, actor: u64) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if self.veiled {
+            return Err(ActionRefused::VeilOutOfOrder);
+        }
+        self.close(ClosureEvent::VeilDrawn {}, actor);
+        self.veiled = true;
+        Ok(())
+    }
+
+    /// MASK-1a — lift the veil by deed (starved false).
+    pub fn lift_veil_as(&mut self, actor: u64) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if !self.veiled {
+            return Err(ActionRefused::VeilOutOfOrder);
+        }
+        self.close(ClosureEvent::VeilLifted { starved: false }, actor);
+        self.veiled = false;
+        Ok(())
+    }
+
+    /// MASK-1a: the veil stands.
+    pub fn is_veiled(&self) -> bool {
+        self.veiled
+    }
+
     /// PRACTICE-1: the condition window — 240, eased ×3/4 to 180
     /// while a re-emergence lesson (condition 7) is held AND alignment
     /// holds (the operator's speed boost to understanding; placeholder
@@ -3274,6 +3399,11 @@ pub fn aperture_transfer(
     // worlds whose peoples have made the solar leap (TECH-1a). A world
     // is a star system, so every aperture IS interstellar; the first
     // lawful one is a world's CROSSING into the union.
+    // WARDEN-1a: the elder's reverse shield — no aperture reaches a
+    // warded star, either direction, until the gate is solved.
+    if src.ward_holds() || dst.ward_holds() {
+        return Err(ActionRefused::TheWardHolds);
+    }
     if !src.knows_its_sun() || !dst.knows_its_sun() {
         return Err(ActionRefused::Shielded {
             source_shielded: !src.knows_its_sun(),
@@ -3677,6 +3807,8 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut genesis: Option<Genesis> = None;
     let mut terrain_seed: Option<[u8; 32]> = None;
     let mut practices: Vec<u8> = Vec::new();
+    let mut warded: Option<bool> = None;
+    let mut veiled = false;
     for receipt in chronicle.receipts() {
         match &receipt.event {
             ClosureEvent::EntityRegistered { entity_id, principal, handle } => {
@@ -3785,6 +3917,10 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     practices.remove(at);
                 }
             }
+            ClosureEvent::ElderWarded {} => warded = Some(false),
+            ClosureEvent::WardLifted { .. } => warded = Some(true),
+            ClosureEvent::VeilDrawn {} => veiled = true,
+            ClosureEvent::VeilLifted { .. } => veiled = false,
             ClosureEvent::EraAnnexed { .. } => {}
             // MESH-1b (NS-5 §7): authority is the mesh's walk of the
             // spine — the world's committed projection is blind to it
@@ -4213,6 +4349,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     Committed {
         orbs, entities, star, debts, bonds, covenants, councils, offers, techs, wants, crossed,
         gauge, genesis, terrain_seed, practices, prospects,
+        gauge, genesis, terrain_seed, practices, warded, veiled,
     }
 }
 

@@ -173,7 +173,16 @@ metabolism relevance table (which conditions/industries exist per
 science), conductor build-step routing, and the venture deed
 (council-bound multi-line licensing).
 
-## 3e. WARDEN-1 — the elder world (specced 2026-07-30, coder-02)
+## 3e. WARDEN-1 — the elder world (specced 2026-07-30; 1a LANDED 2026-07-31)
+
+**WARDEN-1a landed** (tags 74/75): `ward_elder` seats the reverse
+shield — every aperture refuses both directions (`TheWardHolds`)
+until `lift_ward(claimer, depth)` opens the depth gate (ceiling 5,
+placeholder; depth is the mirror's solves reading passed by the
+caller); the lift names its claimer forever; deeds run in order,
+typed. OPEN as WARDEN-1b: the elder's genesis seeding (the roster
+`elder` flag), the standing forge task at FORGE-2a saturation, and
+the template grant through the council gate. The original spec:
 
 The Guardian shape, lawful: ONE dormant precursor star per aeon,
 chartered at genesis but SHIELDED IN REVERSE — it petitions no one,

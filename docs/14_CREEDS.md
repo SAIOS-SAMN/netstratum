@@ -128,6 +128,13 @@ walks — exactly the way function and tier read today.
   empiricist→Fast; the Hoard and Athanor are earned, never seeded);
   the sovereign hand adopts by the `practice`/`release` verbs. All
   constants placeholder; names operator-renameable. Five witnesses.
+- **MASK-1a — LANDED 2026-07-31** (tags 76/77): the veil deed and its
+  standing joule toll (1/4 at every collect, settled as receipted
+  upkeep; an unpayable toll LIFTS the veil by receipt, starved-flagged
+  — never silently); `is_veiled` the reading; typed refusals; replay
+  and resume carry it. OPEN as MASK-1b: the render cloud (the observer
+  mask) and the NS-2 hit-field — the coder-03 seam line stands. The
+  original spec follows.
 - **MASK-1 — the lawful veil (specced 2026-07-30).** Mirror-layer
   identity masking; the substrate never lies. The concrete design:
   the VEIL is a receipted deed (`VeilDrawn` / `VeilLifted`, tags at
