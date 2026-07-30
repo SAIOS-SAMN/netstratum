@@ -372,6 +372,70 @@ impl Egregore {
     /// place on the star-chart.
     pub fn genesis(spec: EgregoreSpec, registry: &Registry, mirror: &Mirror) -> Egregore {
         let _ = registry.create(&spec.civilization);
+        // BLOCKER A1 (the G0 persistence seam, CLOSED 2026-07-30):
+        // the boot RESUMES before it founds. A verifying resume
+        // carrier means this world already lived — its receipts,
+        // techs, famines, keys, and trades continue; a missing or
+        // broken carrier founds fresh (a broken one rotates aside as
+        // the mirror's divergence law already provides). NPC progress
+        // survives every restart without an operator fold.
+        let carrier = mirror.world_dir(&spec.world_name).join("chronicle.tlv");
+        if let Ok(chronicle) = cfe::persist::load(&carrier) {
+            let world = World::resume(chronicle);
+            if world.orb().is_some() {
+                let handle = format!("{}-conductor", spec.civilization.slug);
+                let by_handle = |name: &str| {
+                    world
+                        .committed()
+                        .entities
+                        .iter()
+                        .find(|held| held.handle == name)
+                        .map(|held| held.entity_id)
+                };
+                if let (Some(automaton), Some(steward)) =
+                    (by_handle(&handle), by_handle("steward"))
+                {
+                    let _ = mirror.chart_world(
+                        &spec.world_name,
+                        (&spec.position.0, &spec.position.1, &spec.position.2),
+                        world.gauge(),
+                    );
+                    // The forge state is not yet receipted — it
+                    // reconstructs from the solves artifacts (an
+                    // honest approximation until solves become
+                    // receipts): three confirms promote a rung.
+                    let solved = std::fs::read_dir(
+                        mirror.world_dir(&spec.world_name).join("solves"),
+                    )
+                    .map(|entries| {
+                        entries
+                            .filter_map(|e| e.ok())
+                            .filter(|e| e.path().extension().is_some_and(|x| x == "json"))
+                            .count() as u32
+                    })
+                    .unwrap_or(0);
+                    let level = (1 + solved / 3).min(5);
+                    // One divergence per era: a resumed continuation
+                    // is the same era — the receipt remembers.
+                    let spawned = world.chronicle().receipts().iter().any(|receipt| {
+                        matches!(
+                            receipt.event,
+                            cfe::dop::ClosureEvent::Diverged { .. }
+                        )
+                    });
+                    return Egregore {
+                        spec,
+                        world,
+                        automaton,
+                        steward,
+                        level,
+                        streak: solved % 3,
+                        solved,
+                        spawned,
+                    };
+                }
+            }
+        }
         let opening = spec
             .gauge
             .clone()

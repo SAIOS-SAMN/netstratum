@@ -110,6 +110,30 @@ fn banner(style: &Style) {
 }
 
 
+/// BLOCKER A3: the active profile's station — the authority the
+/// tier-0 verbs check. No login reads as "player" (T3).
+fn active_station() -> String {
+    std::fs::read_to_string("var/operators/active")
+        .ok()
+        .map(|name| name.trim().to_string())
+        .filter(|name| !name.is_empty())
+        .and_then(|name| std::fs::read_to_string(format!("var/operators/{name}.json")).ok())
+        .and_then(|text| data_field(&text, "station"))
+        .unwrap_or_else(|| "player".into())
+}
+
+fn tier0_gate(style: &Style) -> bool {
+    if active_station() == "progenitor" {
+        return true;
+    }
+    println!(
+        "{} a tier-0 deed — the board is made by its makers: {}",
+        style.bad("✗"),
+        style.strong("login <name> as progenitor")
+    );
+    false
+}
+
 /// A minimal reader for the mirror's DATA files (state.json /
 /// registry cards) — the same files the observer reads; data fields,
 /// never prose.
@@ -478,6 +502,9 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         // deed: move (or OPEN) the key at any grade; the whole key
         // renders after.
         Some("shift") => {
+            if !tier0_gate(style) {
+                return;
+            }
             let grade = words.next().and_then(|w| w.parse::<u16>().ok());
             let value = words.next().and_then(parse_ratio_arg);
             match (grade, value) {
@@ -512,7 +539,11 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             },
             None => println!("{} usage: {}", style.bad("✗"), style.strong("elevate <delta>")),
         },
-        Some("age") => match words.next().map(parse_star) {
+        Some("age") => {
+            if !tier0_gate(style) {
+                return;
+            }
+            match words.next().map(parse_star) {
             Some(Some(class)) => match world.age_star(class) {
                 Ok(()) => println!(
                     "{} the star MOVES in its region — every sited orbit's band shifts at the next tick",
@@ -521,7 +552,8 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 Err(refusal) => refuse(world, &refusal, style),
             },
             _ => println!("{} usage: {} — o b a f g k m bd wd rg", style.bad("✗"), style.strong("age <class>")),
-        },
+        }
+        }
         Some("council") => {
             // council <id> <res> <quota> <window> <stake> with <p1>,<p2>,<p3>
             let id = words.next().and_then(|w| w.parse::<u64>().ok());
@@ -606,6 +638,9 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             }
         }
         Some("license") => {
+            if !tier0_gate(style) {
+                return;
+            }
             // license <condition 1..6> to <world> via <council> deal <n>
             let condition = words.next().and_then(|w| w.parse::<u8>().ok());
             let target = match (words.next(), words.next()) {
@@ -917,6 +952,9 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         // stressed sectors — warring factions part in S); contract is
         // the fold; clean sweeps the --closed-* ruins.
         Some("t0") => {
+            if !tier0_gate(style) {
+                return;
+            }
             let verb = words.next();
             match verb {
                 None | Some("inbox") | Some("requests") => {
@@ -1110,18 +1148,44 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         Some("login") => match words.next() {
             Some(name) => {
                 let slug = name.to_lowercase().replace(' ', "-");
+                // BLOCKER A3: the profile carries a STATION — the
+                // authority the tier-0 verbs check. Passwordless per
+                // ruling; the role is the gate, not the secret.
+                let station = match (words.next(), words.next()) {
+                    (Some("as"), Some(word)) => {
+                        let word = word.to_lowercase();
+                        if word != "player"
+                            && !mirror::registry::STATIONS.contains(&word.as_str())
+                        {
+                            println!(
+                                "{} unknown station {} — player or {}",
+                                style.bad("✗"),
+                                style.strong(&word),
+                                style.dim(&mirror::registry::STATIONS.join("/"))
+                            );
+                            return;
+                        }
+                        word
+                    }
+                    _ => "player".to_string(),
+                };
                 let dir = std::path::PathBuf::from("var/operators");
                 let _ = std::fs::create_dir_all(&dir);
                 let profile = dir.join(format!("{slug}.json"));
-                if !profile.exists() {
-                    let _ = std::fs::write(&profile, "{\"world\":\"\"}\n");
-                    println!("{} operator {} minted", style.ok("✓"), style.strong(&slug));
-                }
+                let world = std::fs::read_to_string(&profile)
+                    .ok()
+                    .and_then(|text| data_field(&text, "world"))
+                    .unwrap_or_default();
+                let _ = std::fs::write(
+                    &profile,
+                    format!("{{\"world\":\"{world}\",\"station\":\"{station}\"}}\n"),
+                );
                 let _ = std::fs::write(dir.join("active"), &slug);
                 println!(
-                    "{} logged in as {} — {} resumes your last saved world",
+                    "{} logged in as {} [{}] — {} resumes your last saved world",
                     style.ok("✓"),
                     style.strong(&slug),
+                    style.strong(&station),
                     style.strong("continue")
                 );
             }
@@ -1410,9 +1474,17 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         let active =
                             std::fs::read_to_string("var/operators/active").unwrap_or_default();
                         if !active.trim().is_empty() {
+                            let profile = format!("var/operators/{}.json", active.trim());
+                            let station = std::fs::read_to_string(&profile)
+                                .ok()
+                                .and_then(|text| data_field(&text, "station"))
+                                .unwrap_or_else(|| "player".into());
                             let _ = std::fs::write(
-                                format!("var/operators/{}.json", active.trim()),
-                                format!("{{\"world\":\"{}\"}}\n", orb.name),
+                                &profile,
+                                format!(
+                                    "{{\"world\":\"{}\",\"station\":\"{station}\"}}\n",
+                                    orb.name
+                                ),
                             );
                         }
                         println!(

@@ -710,6 +710,22 @@ open it.
   lives in its process — a direct write would fork the chain; NS-5
   arbitrates, the steward inbox intervenes until then).
 
+## 3a-octies. Beta blockers A1 + A3 CLOSED (2026-07-30)
+
+- **A1 — the board remembers.** Conductor genesis RESUMES before it
+  founds: a verifying `chronicle.tlv` continues the world whole
+  (receipts, techs, keys, trades; agents re-found by handle; the
+  forge state reconstructs from the solves artifacts — an honest
+  approximation until solves become receipts; one-divergence-per-era
+  read from the Diverged receipt). Pinned to the receipted-truth law:
+  the terminal digest continues across a restart — resumption, never
+  a refound; un-receipted ticks honestly do not survive (the
+  workspace invariant applies to time itself); zero ruins rotate.
+- **A3 — the role is the gate.** `login <name> as <station>` binds an
+  authority to the profile (passwordless per ruling); the tier-0
+  verbs (t0 · license · shift · age) check it and refuse with the
+  cure named. Save preserves the station.
+
 ## 3b. The union board (12_UNION — the world-book of the new aeon)
 
 Design authority `12_UNION.md` (eight operator rulings, 2026-07-29). NOT a
