@@ -283,6 +283,31 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         // conductor polls every beat. Pause holds every egregore world
         // (nothing ticks, nothing ages); speed sets the seconds
         // between beats (0 = flat out).
+        // TERRA-1: the crown in the hand — re-seat a sited planet's
+        // albedo and orbit; only lawful once terraforming is held.
+        Some("terraform") => {
+            let albedo = words.next().and_then(parse_ratio_arg);
+            let orbit = words.next().and_then(parse_ratio_arg);
+            match (albedo, orbit) {
+                (Some(albedo), Some(orbit)) => {
+                    match world.terraform(*current, albedo, orbit) {
+                        Ok(()) => {
+                            println!(
+                                "{} the orbit MOVES — the world re-seats under the crown",
+                                style.ok("✓")
+                            );
+                            map(world, style, *current);
+                        }
+                        Err(refusal) => refuse(world, &refusal, style),
+                    }
+                }
+                _ => println!(
+                    "{} usage: {} — exact rationals, 0 ≤ albedo < 1, orbit > 0",
+                    style.bad("✗"),
+                    style.strong("terraform <albedo> <orbit>")
+                ),
+            }
+        }
         Some("npcs") => {
             let control = std::path::PathBuf::from("var/conductor.ctl");
             let (mut paused, mut cadence) = {
@@ -365,6 +390,193 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         // client. `civ` / `civ seats` shows the station console; `civ
         // new` registers the line and appends it to var/egregores.json
         // so the conductor brings it online at its next boot.
+        // THE OPERATOR MENU (prototype — no passwords): profiles under
+        // var/operators/<slug>, many accounts on one machine; login
+        // switches, continue resumes the profile's last saved world.
+        // THE PROGENITOR CONSOLE (tier 0 — the board-makers' hand):
+        // inbox and requests flow UP from the lower dimensions; move
+        // re-charts a world on the torus (the separation deed for
+        // stressed sectors — warring factions part in S); contract is
+        // the fold; clean sweeps the --closed-* ruins.
+        Some("t0") => {
+            let verb = words.next();
+            match verb {
+                None | Some("inbox") | Some("requests") => {
+                    let mirror = mirror::Mirror::at("var/worlds");
+                    let mut total = 0;
+                    if let Ok(entries) = std::fs::read_dir("var/worlds") {
+                        println!("{}", style.head("T0 INBOX — the upward flow"));
+                        for entry in entries.filter_map(|e| e.ok()) {
+                            if !entry.path().is_dir() {
+                                continue;
+                            }
+                            let name = entry.file_name().to_string_lossy().into_owned();
+                            if let Ok(pending) = mirror.pending_directives(&name) {
+                                for petition in pending {
+                                    total += 1;
+                                    println!(
+                                        "  {} ← {} {} (as {})",
+                                        style.strong(&name),
+                                        style.strong(&petition.directive.verb),
+                                        petition.directive.args.join(" "),
+                                        style.dim(&petition.directive.acting_as)
+                                    );
+                                }
+                            }
+                        }
+                    }
+                    if total == 0 {
+                        println!(
+                            "  the inbox stands empty — the lower dimensions petition via {}",
+                            style.dim("tools/steward.py")
+                        );
+                    }
+                    println!(
+                        "  stress readings live on the board: {}",
+                        style.dim("python3 tools/observer.py")
+                    );
+                }
+                Some("move") => {
+                    let target = words.next().map(str::to_string);
+                    let coords: Vec<_> =
+                        words.by_ref().take(3).filter_map(parse_ratio_arg).collect();
+                    match (target, coords.len()) {
+                        (Some(name), 3) => {
+                            let mirror = mirror::Mirror::at("var/worlds");
+                            match mirror.chart_world(
+                                &name,
+                                (&coords[0], &coords[1], &coords[2]),
+                                &cfe::ratio::ratio(0, 1),
+                            ) {
+                                Ok(()) => println!(
+                                    "{} {} MOVED on the torus — stressed sectors part in S; the board breathes",
+                                    style.ok("✓"),
+                                    style.strong(&name)
+                                ),
+                                Err(refusal) => {
+                                    println!("{} move refused: {refusal}", style.bad("✗"))
+                                }
+                            }
+                        }
+                        _ => println!(
+                            "{} usage: {}",
+                            style.bad("✗"),
+                            style.strong("t0 move <world> <x> <y> <z>")
+                        ),
+                    }
+                }
+                Some("contract") => match conductor::fold("var") {
+                    Ok((era, gauge)) => println!(
+                        "{} the board CONTRACTS — era {era} sealed into var-era{era}; the new sheet seats at G = {}",
+                        style.ok("✓"),
+                        style.strong(&amount(&gauge))
+                    ),
+                    Err(refusal) => println!("{} the fold refused — {refusal}", style.bad("✗")),
+                },
+                Some("clean") => {
+                    let mut swept = 0;
+                    if let Ok(entries) = std::fs::read_dir("var/worlds") {
+                        for entry in entries.filter_map(|e| e.ok()) {
+                            let name = entry.file_name().to_string_lossy().into_owned();
+                            if name.contains("--closed-")
+                                && entry.path().is_dir()
+                                && std::fs::remove_dir_all(entry.path()).is_ok()
+                            {
+                                swept += 1;
+                                println!("  swept ruin {}", style.dim(&name));
+                            }
+                        }
+                    }
+                    println!(
+                        "{} {} ruin(s) cleaned — the board holds only the living",
+                        style.ok("✓"),
+                        style.strong(&swept.to_string())
+                    );
+                }
+                Some("create") => println!(
+                    "creation is the civ console: {}",
+                    style.strong("civ new <slug> | <Name> | <species> | <motto> | <axes> [station]")
+                ),
+                Some(other) => println!(
+                    "{} unknown t0 verb {} — inbox · requests · move · contract · clean · create",
+                    style.bad("✗"),
+                    style.strong(other)
+                ),
+            }
+        }
+        Some("login") => match words.next() {
+            Some(name) => {
+                let slug = name.to_lowercase().replace(' ', "-");
+                let dir = std::path::PathBuf::from("var/operators");
+                let _ = std::fs::create_dir_all(&dir);
+                let profile = dir.join(format!("{slug}.json"));
+                if !profile.exists() {
+                    let _ = std::fs::write(&profile, "{\"world\":\"\"}\n");
+                    println!("{} operator {} minted", style.ok("✓"), style.strong(&slug));
+                }
+                let _ = std::fs::write(dir.join("active"), &slug);
+                println!(
+                    "{} logged in as {} — {} resumes your last saved world",
+                    style.ok("✓"),
+                    style.strong(&slug),
+                    style.strong("continue")
+                );
+            }
+            None => {
+                let dir = std::path::PathBuf::from("var/operators");
+                let active = std::fs::read_to_string(dir.join("active")).unwrap_or_default();
+                let mut listed = 0;
+                if let Ok(entries) = std::fs::read_dir(&dir) {
+                    println!("{}", style.head("OPERATORS ON THIS MACHINE"));
+                    for entry in entries.filter_map(|e| e.ok()) {
+                        let name = entry.file_name().to_string_lossy().into_owned();
+                        if let Some(slug) = name.strip_suffix(".json") {
+                            listed += 1;
+                            let mark = if slug == active.trim() { " ← active" } else { "" };
+                            println!("  {}{}", style.strong(slug), style.dim(mark));
+                        }
+                    }
+                }
+                if listed == 0 {
+                    println!(
+                        "no operators yet — {} mints one",
+                        style.strong("login <name>")
+                    );
+                }
+            }
+        },
+        Some("whoami") => {
+            let active = std::fs::read_to_string("var/operators/active").unwrap_or_default();
+            match active.trim() {
+                "" => println!("no one — {} first", style.strong("login <name>")),
+                slug => println!("{}", style.strong(slug)),
+            }
+        }
+        Some("continue") => {
+            let active = std::fs::read_to_string("var/operators/active").unwrap_or_default();
+            let slug = active.trim().to_string();
+            if slug.is_empty() {
+                println!("{} {} first", style.bad("✗"), style.strong("login <name>"));
+                return;
+            }
+            let profile = std::fs::read_to_string(format!("var/operators/{slug}.json"))
+                .unwrap_or_default();
+            let last = profile
+                .split("\"world\":\"")
+                .nth(1)
+                .and_then(|rest| rest.split('\"').next())
+                .unwrap_or("")
+                .to_string();
+            match last.as_str() {
+                "" => println!(
+                    "{} no saved world on this profile yet — {} then {}",
+                    style.bad("✗"),
+                    style.strong("found <name>"),
+                    style.strong("save")
+                ),
+                name => command(world, &format!("resume {name}"), style, current),
+            }
+        }
         Some("civ") => {
             use mirror::registry::{
                 lineage_domain, seat_width, Civilization, Registry, RegistryRefused,
@@ -543,12 +755,23 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     .join(&orb.name)
                     .join("chronicle.tlv");
                 match cfe::persist::sync(world.chronicle(), &path) {
-                    Ok(appended) => println!(
-                        "{} world saved — {} receipt(s) appended to {} (the file only grows)",
-                        style.ok("✓"),
-                        style.strong(&appended.to_string()),
-                        style.dim(&path.display().to_string())
-                    ),
+                    Ok(appended) => {
+                        // The active operator's thread picks up here.
+                        let active =
+                            std::fs::read_to_string("var/operators/active").unwrap_or_default();
+                        if !active.trim().is_empty() {
+                            let _ = std::fs::write(
+                                format!("var/operators/{}.json", active.trim()),
+                                format!("{{\"world\":\"{}\"}}\n", orb.name),
+                            );
+                        }
+                        println!(
+                            "{} world saved — {} receipt(s) appended to {} (the file only grows)",
+                            style.ok("✓"),
+                            style.strong(&appended.to_string()),
+                            style.dim(&path.display().to_string())
+                        )
+                    }
                     Err(refusal) => println!("{} save refused: {refusal:?}", style.bad("✗")),
                 }
             }
@@ -1167,6 +1390,9 @@ fn help(style: &Style) {
         ("sever <res> to <p> · bonds", "cut a standing bond (the load posts to the cutter) · list the standing orders"),
         ("covenant <q> <res> to <p> within <n>", "vitrify a delivery pact in the Glasskeeper lattice — collateral (priced by your fidelity books, never barred) locks until the quota is delivered (release) or the deadline passes (BREACH_AND_SLASH); `covenants` lists the open pacts"),
         ("ideology", "the dual cohesion ledger for this planet — the four axes, their books, and the derived readings; divergent trade partners pay a friction entropy tax, aligned ones pay zero"),
+        ("login [name] · whoami · continue", "the operator menu (prototype, no passwords): many accounts on one machine — login mints/switches, bare login lists, continue resumes your profile\'s last saved world"),
+        ("t0 <inbox|move|contract|clean>", "the progenitor console (tier 0): inbox streams the upward petitions; move <world> x y z re-charts a sector (the separation deed); contract folds the era; clean sweeps --closed-* ruins"),
+        ("terraform <albedo> <orbit>", "the gifted crown (base-7 complete + licensed from tier 0): re-seat a sited planet — the only lawful way an orbit moves"),
         ("npcs [pause|resume|speed <s>]", "the player\'s hand on the autonomous board — pause holds every egregore world, speed sets seconds between beats (0 = flat out); bare npcs shows the state"),
         ("civ [seats] · civ new …", "the civ console: seats shows every station\'s room (progenitors per domain, 8 each — space, not rank); civ new <slug> | <Name> | <species> | <motto> | <disp> <metab> <perc> [station] registers a custom line and rosters it for the conductor"),
         ("save · resume <world>", "sync the chronicle to var/worlds/<name>/ (append-only) · resume a saved world at launch"),
@@ -1519,6 +1745,13 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
         ActionRefused::BelowTheThreshold => {
             "a licensed leap lands only on a union member — the receiving world has not crossed".into()
         }
+        ActionRefused::BaseSevenUnfinished => {
+            "the crown gifts only onto a FINISHED base-7 stack — the solar leap and all five crystallized conditions, earned first".into()
+        }
+        ActionRefused::TerraformUnearned => format!(
+            "the orbit moves only under the crown technology — terraforming is gifted from tier 0, never taken; see {}",
+            style.strong("civ seats")
+        ),
         ActionRefused::BadCouncil => format!(
             "a council is three or more distinct planets, a positive quota and collateral, a real window, a fresh id — e.g. {}",
             style.strong("council 1 with base,outpost,haven: 5 iron in 60, stake 3")

@@ -20,7 +20,15 @@ triggers on their **interference** — an event fires where voices ALIGN, not
 on a lone rollover:
 
 - **tick** (voice 5) — the colony beat (flow, thermal, famine). Landed.
-- **year** = 60t (voice 4) — the planet speaks (journal), growth is read.
+  **Base-1 — the DAILY voice** on the TUniversal scale (operator
+  calibration, 2026-07-30).
+- **week** = 7t — **Base-7, the WEEKLY voice**: the technology-stack
+  rhythm (the base-7 stack — solar leap + five crystallized conditions
+  + the gifted crown — reads against this voice; trigger surface
+  reserved, TERRA-1).
+- **year** = 60t (voice 4) — the planet speaks (journal), growth is
+  read. **Base-60 — the YEARLY voice**: crystallization, star
+  movement, board-scale shifts.
 - **cycle** = 3 600t (voice 3) — a world's divergence/confluence is weighed.
 - **age** = 216 000t (voice 2) — a star moves in its region (§6).
 - **aeon** = 12.96 Mt (voice 1) — the fold (§5).

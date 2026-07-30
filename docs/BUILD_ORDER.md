@@ -562,6 +562,40 @@ Dependency: the carrier gate is OPEN (APERTURE-1 above). MARKET-1 needs the
 APERTURE deed to price; OFFER-1 needs MARKET-1's matching; BOARD-1 reads
 what OFFER-1 posts; the facet grants (N5) refine but do not gate the board.
 
+## 3a-bis. The development ladder (operator direction, 2026-07-30) — tier 0 down to the opposite pole
+
+Four working fronts, walked from the board-makers down to the manifold's
+other cone tip (the exact opposite civilization type):
+
+- **T0 — the progenitor campaign.** The `t0` console grows into the full
+  board-maker game: the inbox as a queue of adjudicable petitions, stress
+  readings promoted from the observer into typed deeds (SEPARATE — `t0
+  move` parts warring factions in S; RELIEVE — a licensed leap or
+  re-seat for stagnation; SEAL — a targeted fold for diplomatic
+  collapse), and the fold played as an act with consequences the next
+  aeon inherits.
+- **T1/T2 — the watcher and keeper loops.** Watchers adjudicate the
+  upward petition flow (grant/refuse aperture and licensing requests
+  under the shield law); Keepers play the ledgers — auditing aperture
+  endpoints against the INTEGRITY books and keeping the polytonic
+  calendar (the base-7 weekly voice is their trigger surface: they SAY
+  when the stack is read).
+- **T3 — the biosphere game.** The landed colony loop plus SCIENCE-1:
+  each line solves ITS OWN science's puzzles toward its own tree, and
+  the joint research venture (council + aperture + licensed leap) is
+  the co-op endgame — incompatible sciences trading solved outputs to
+  advance where neither could alone.
+- **T∞ — the OPPOSITE POLE (the entropic tip of the cone).** The
+  progenitor's exact dual, per the manifold law (12_UNION §2c): where
+  tier 0 creates, expands, and overlays, the opposite pole DISSOLVES
+  lawfully — the unmaker class that plays the entropic leg: claiming
+  derelicts, recycling ruins, absorbing vented heat, riding demurrage —
+  every expansion's bounded counter-force made playable. Design law:
+  the pole is never evil and never destruction-of-record (SEAL B holds;
+  the fold's archival law holds) — it is the side of the spectrum that
+  closes what the other side opens, and the game is complete only when
+  both tips of the cone are in play.
+
 ## 3b. The union board (12_UNION — the world-book of the new aeon)
 
 Design authority `12_UNION.md` (eight operator rulings, 2026-07-29). NOT a
@@ -584,7 +618,12 @@ market board's; union tags allocate from 52 at each landing.
 | **NAMING (10 §2 law 4)** | D | **LANDED 2026-07-30** | node names are never rung labels: `tech_node_name` composes CONCEPT (condition-fixed) × VOICE (node-hash-drawn) — two lines crystallizing the same condition speak of it differently; the hash is the identity, the name is the line's tongue |
 | NOVEL-1 | D | open (specced, 10 §3c) | the succession law: a successor line inherits a CHRONICLE, not a tree — its conditions evaluate over the predecessor's receipts and its nodes seed from roots containing that history; novel by construction, changing the pre-existing without overwriting it; needs the succession deed + 07 §3 derelict recovery |
 | **TIER overlay (12_UNION §2a)** | — | **LANDED 2026-07-30** | progenitors are TIER 0, the board-makers — the conductor's operations named as their deeds (seed/expand/contract/overlay/deploy); tiers 1–3 below (architects · record keepers · biosphere); the tier is a DERIVED reading from station, rendered on the observer, never stored |
-| **PLANNER-1** | confluence (COUNCIL-1 + TECH-1a) | **LANDED 2026-07-29** | the licensed leap (tag 40): `license_tech` issues a technology into another world as a two-legged deal (TechLicensed out / TechDiscovered in — one node, seeded from deal+condition, derived identically on both sides); council-gated (an open council in the granting world — delegation settles inside diplomacy), shield-bounded, receiver must have crossed; **the solar leap is never licensed** (`SolarLeapNeverLicensed` — the young meet their sun themselves); idempotent per deal. The other five planner powers were already receipted deeds: create species (registry+genesis), create stars (`commission_star`), create planets (`chart`), gauge operations (`shift_gauge`), fiber extension (Mint). Deferred, recorded: authorship attribution (WHICH progenitor issued — awaits cross-world identity at N5/N6); unknown-leap unlock mechanics (arrive-sealed) await TECH-1b. Evidence: 3 witnesses green | Cross-board: universe-level book
+| **TERRA-1** | D | **LANDED 2026-07-30** | terraforming as condition 6, the GIFTED CROWN: licenses only onto a complete base-7 stack (solar leap + five crystallized — `BaseSevenUnfinished` refuses); `World::terraform` re-seats a sited planet's albedo/orbit (fresh `PlanetSited`, replay takes the last seat, no new tags); CLI `terraform <A> <r>`; base-1/7/60 TUniversal calibration inscribed at 11 §1. Evidence: the crown witness — unearned orbit refuses, unfinished stack refuses, the gifted crown moves the world across bands, measured in T_eq⁴ |
+| SCIENCE-1 | D | open (specced, 10 §3d) | speciated puzzle science: perception routes the solver (landed); metabolism routes RELEVANCE (a plasmic line carries no forge-of-iron); foreign capability by JOINT RESEARCH VENTURE — council + aperture + licensed leap composed |
+| **PLANNER-1** | confluence (COUNCIL-1 + TECH-1a) | **LANDED 2026-07-29** | the licensed leap (tag 40): `license_tech` issues a technology into another world as a two-legged deal (TechLicensed out / TechDiscovered in — one node, seeded from deal+condition, derived identically on both sides); council-gated (an open council in the granting world — delegation settles inside diplomacy), shield-bounded, receiver must have crossed; **the solar leap is never licensed** (`SolarLeapNeverLicensed` — the young meet their sun themselves); idempotent per deal. The other five planner powers were already receipted deeds: create species (registry+genesis), create stars (`commission_star`), create planets (`chart`), gauge operations (`shift_gauge`), fiber extension (Mint). Deferred, recorded: authorship attribution (WHICH progenitor issued — awaits cross-world identity at N5/N6); unknown-leap unlock mechanics (arrive-sealed) await TECH-1b. Evidence: 3 witnesses green |
+| GALAXY-1 | confluence (THRESHOLD-1 + AEON-1a + PLANNER-1) | open (specced, `13_GALAXY.md`; ruled 2026-07-30) | one universe STRUCTURALLY (one torus, one card, one chart — aeons are G-sheets, never second universes); galaxies are lazy, never a static count — the founding galaxy is the whole charted torus today, and a new galaxy is CREATED by the observation deed (`GalaxyObserved`, tag 54 reserved) when a crossing anchors past every charted reach (L1-wrapped); membership derived at the observer, never stored; the founding galaxy chartered lazily at the landing's first deed; span growth is Mint-class expansion, never contraction. Registry deltas: none — geography, not identity |
+
+Cross-board: universe-level book
 composition stays Q2.3's N6 mesh audit; on-chain settlement of any cleared
 value stays NS-7 (N7), never here.
 

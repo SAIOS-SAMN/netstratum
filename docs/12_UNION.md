@@ -61,6 +61,15 @@ visible from here.
 *(Archon and Agarthan are placeholder names pending operator naming; the
 domains are the binding part.)*
 
+**The fifth seat (operator ruling, 2026-07-30).** The tardigrade line sits
+in the progenitor band from this aeon: **Tunborn** (placeholder name
+pending operator naming), the Slagborn line's OWN head — seated among the
+mineral-domain seats exactly as §5 reads it ("a tardigrade progenitor among
+the Anunnaki-domain seats is the design working, not an anomaly").
+Slagborn's lineage pointer resolves to it; no alien physiology progenerated
+it (ruling 6 holds). The founding four remain the domain heads; Tunborn is
+the first seat filled beside them — the band doing what bands do.
+
 **The progenitor powers (ruling 4).** Progenitors are the **planners**, not
 necessarily the diplomats. Their deeds — all receipted, all conservation-
 lawful, none an edit:
@@ -73,6 +82,7 @@ lawful, none an edit:
 | modify quantum states | a gauge operation on G — a `GaugeShifted` deed (11 §2.1, tag 42); never a continuous field, always a discrete receipted shift (§6) |
 | issue a technology leap | `TechDiscovered` / `TechLicensed` (10, reserved tags 39–40) — a leap may be known or UNKNOWN to the receiving civilization; unknown leaps land as sealed grants the locals must still unlock |
 | create new spaces | extending the fiber — minted planes open room, and band capacity reads the fiber (§1) |
+| create a new galaxy | the observation deed (`GalaxyObserved`, candidate tag 54) — a crossing anchored past every charted reach CREATES the galaxy it observes; the observer's domain progenitor executes the deed (`13_GALAXY.md`, GALAXY-1; ruled 2026-07-30) |
 
 **The delegation law.** A progenitor delegating a planet (or issuing a
 leap into a living civilization's sky) is **council-gated by default** (§7).
@@ -116,9 +126,32 @@ where the exact law and the seeded draw exchange — the bounce. And **no
 grepping anywhere in the system**: no mechanism may work by matching
 rendered strings; readings derive from typed events and committed
 state, renderings are reflections (SEAL C), and a parse of a rendering
-is a second truth (forbidden). Byte-identity likewise lives at the
-SUBSTRATE only — the hash-chained receipt encoding that lets many nodes
-verify one shared history — never demanded of anything above it; the
+is a second truth (forbidden).
+
+## 2c. The manifold dual — syntropy and entropy (operator ruling, 2026-07-30)
+
+Syntropy and entropy are **opposite ends of the same closed, coned
+manifold** — there are no open ends: every expansion on one leg is
+bounded by the opposing force on the other side of the polytonic
+spectrum. This is already the engine's landed physics, now named as its
+geometry: the syntropic arm encases (joules mint, loops close, G
+climbs) and the entropic arm vents (heat disperses, demurrage decays,
+sink absorbs) — two legs of one cone, and neither runs free of the
+other. The market board's Furnace↔Frost axis, the absorb invariant
+(`sink_consumed = heat_absorbed = vented_after_shed`), and the fold
+itself (expansion sealed by contraction) are all readings of the dual.
+
+**The ANTI-MIRROR law.** Cross-node verification is by OPPOSITION,
+never by mirroring: a mirrored record is a second truth (the thing the
+reflection law forbids). The substrate's checks are anti-phase
+invariants — the Delta antisymmetry (`Δ_ij = −Δ_ji`: my waste and your
+food are ONE entry read from two ends), the aperture's two legs (a
+debit whose far leg is its exact credit — the pair sums to ZERO, and
+that zero is the verification), the council reckoning (forfeits and
+returns summing to the locks). Byte-canonical encoding remains ONLY as
+the hashing substrate ("equal values, equal bytes" so digests agree);
+the CHECK a second node performs is never "same bytes as mine" — it is
+"your leg is the exact inverse of mine." Identity by opposition; the
 universe above the chain is fluid.
 
 ## 3. The middle classes — Watcher, Observer, Sovereign
@@ -326,6 +359,12 @@ make the leap themselves, or not.
   tardigrades upgraded per §5 with their own line, Deep Chorus, Hivelight,
   Eightfold, Frostwright) may be re-seeded as *new* genesis entries in this
   aeon — same myths, fresh chronicles, no carried debt.
+- **Wave 2 (2026-07-30, operator ruling):** the tardigrade line seated its
+  own head — **Tunborn** (§2's fifth seat), station progenitor, rostered
+  at `tun-reach` (Furnace-pinned like its line); Slagborn's lineage pointer
+  now resolves to it. The seed roster file `seeds/aeon1-egregores.json`
+  was CREATED this wave — it had been referenced here but never written
+  (`var*/` is git-ignored; the seeds copy is the durable record).
 - **The substrate spread (§5a):** the seed roster should span the
   substrates, not just the flesh — at least one mycelial line, one
   pre-solar line (thermal opt-in withheld at genesis: a people that has

@@ -61,7 +61,9 @@
 //!         OfferCleared, +1 — renumbered from the colliding 41–43)
 //!   52 ClosureEvent::CouncilSealed (COUNCIL-1 — the multilateral pact)
 //!   53 ClosureEvent::CouncilClosed (COUNCIL-1 — one member's reckoning)
-//!         — the next free tag outside reservations is 54.
+//!   54 RESERVED for GALAXY-1 (13_GALAXY §4: GalaxyObserved — the
+//!         observation deed; universe ledger only, inscribed at landing)
+//!         — the next free tag outside reservations is 55.
 
 use crate::ratio::{self, ratio, Ratio};
 use crate::tlv;
@@ -107,7 +109,6 @@ impl Resource {
     ];
 }
 
-/// Founding banks the bootstrap reserves (02 §2.1): 20 iron, 10 biomass.
 /// TECH-1b (10 §3): the condition table — the crystallized node's
 /// modifier kind and magnitude per condition. MECHANICS only: the
 /// NAME derives from the node hash (`tech_node_name` — the 10 §2
@@ -139,6 +140,9 @@ pub fn tech_node_name(condition: u8, node: &[u8; 32]) -> String {
         3 => "deepening",
         4 => "doctrine",
         5 => "stores",
+        // TERRA-1: the gifted crown of the base-7 stack — never
+        // crystallized locally, only licensed down from tier 0.
+        6 => "terraforming",
         _ => "working",
     };
     const VOICES: [&str; 12] = [
@@ -149,6 +153,7 @@ pub fn tech_node_name(condition: u8, node: &[u8; 32]) -> String {
     format!("{voice} {concept}")
 }
 
+/// Founding banks the bootstrap reserves (02 §2.1): 20 iron, 10 biomass.
 pub fn founding_reserves() -> Vec<(Resource, Ratio)> {
     vec![
         (Resource::Iron, ratio(20, 1)),

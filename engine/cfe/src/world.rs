@@ -78,6 +78,12 @@ pub enum ActionRefused {
     /// PLANNER-1 — a licensed leap lands only on a union member: the
     /// receiving world must have made its crossing (THRESHOLD-1).
     BelowTheThreshold,
+    /// TERRA-1 — terraforming is the gifted crown: it licenses only
+    /// onto a COMPLETE base-7 stack (the solar leap + all five
+    /// crystallized conditions, earned by the line itself).
+    BaseSevenUnfinished,
+    /// TERRA-1 — the orbit moves only under the crown technology.
+    TerraformUnearned,
     /// ABSORB-1 — only un-sealed pending overflow absorbs; the refusal
     /// names exactly what stands.
     CannotAbsorb { pending: Box<Ratio> },
@@ -373,6 +379,61 @@ impl World {
     /// TECH-1a: the discovered nodes — (orb, condition, node id).
     pub fn techs(&self) -> &[(u64, u8, [u8; 32])] {
         &self.techs
+    }
+
+    /// TERRA-1: is the BASE-7 stack complete — the solar leap plus
+    /// all five crystallized conditions? Six earned nodes; the gifted
+    /// seventh (terraforming) completes base-7. Derived, never stored.
+    pub fn base_seven_complete(&self) -> bool {
+        (0u8..=5).all(|condition| {
+            self.techs.iter().any(|(_, held, _)| *held == condition)
+        })
+    }
+
+    /// TERRA-1: does this world hold the gifted terraforming node?
+    pub fn can_terraform(&self) -> bool {
+        self.techs.iter().any(|(_, condition, _)| *condition == 6)
+    }
+
+    /// TERRA-1 — TERRAFORM: move a SITED planet between substrate
+    /// bands by re-seating its albedo and orbit — the highest
+    /// technology a civilization can hold, and only ever GIFTED
+    /// (licensed down from tier 0 once the base-7 stack stands).
+    /// Receipted as a fresh PlanetSited — replay takes the last
+    /// seat; the orbit that "does not move" moves only under the
+    /// crown tech.
+    pub fn terraform(
+        &mut self,
+        orb: u64,
+        albedo: Ratio,
+        orbit_r: Ratio,
+    ) -> Result<(), ActionRefused> {
+        use crate::dop::ThermalSite;
+        if !self.can_terraform() {
+            return Err(ActionRefused::TerraformUnearned);
+        }
+        if self.star.is_none() {
+            return Err(ActionRefused::NoStarCommissioned);
+        }
+        let zero = ratio(0, 1);
+        let one = ratio(1, 1);
+        if albedo < zero || albedo >= one || orbit_r <= zero {
+            return Err(ActionRefused::BadSiting);
+        }
+        let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
+        if held.thermal.is_none() {
+            // A first siting is the solar leap's door, not terraform's.
+            return Err(ActionRefused::NoStarCommissioned);
+        }
+        held.thermal = Some(ThermalSite {
+            albedo: albedo.clone(),
+            orbit_r: orbit_r.clone(),
+        });
+        self.close(
+            ClosureEvent::PlanetSited { orb_id: orb, albedo, orbit_r },
+            SOVEREIGN,
+        );
+        Ok(())
     }
 
     /// THRESHOLD-1: has this world made the CROSSING — its first
@@ -2343,6 +2404,11 @@ pub fn license_tech(
     let Leap { condition, name, deal, council } = leap;
     if condition == 0 {
         return Err(ActionRefused::SolarLeapNeverLicensed);
+    }
+    // TERRA-1: the crown licenses only onto a finished base-7 stack —
+    // the gift completes what the line earned; it never substitutes.
+    if condition == 6 && !dst.base_seven_complete() {
+        return Err(ActionRefused::BaseSevenUnfinished);
     }
     if !src.councils.iter().any(|pact| pact.council == council) {
         return Err(ActionRefused::NoSuchCouncil { council });

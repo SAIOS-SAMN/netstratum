@@ -122,6 +122,36 @@ a derelict world's chronicle as its own substrate), the deposit sheet
 reading across the succession boundary, and the 07 §3 recovery
 mechanics.
 
+## 3d. TERRA-1 LANDED; SCIENCE-1 SPECCED (2026-07-30)
+
+**TERRA-1 (landed) — the gifted crown.** Terraforming is condition 6:
+the highest technology a civilization can hold, and the only one that
+is NEVER crystallized locally — it licenses down from tier 0
+(`license_tech`, tag 40) and ONLY onto a complete **base-7 stack**: the
+solar leap plus all five crystallized conditions, earned or granted
+(`BaseSevenUnfinished` refuses an unfinished stack). Under the crown —
+and only under it — the orbit that "does not move" moves:
+`World::terraform` re-seats a sited planet's albedo and orbit
+(receipted as a fresh `PlanetSited`; replay takes the last seat), and
+the world crosses substrate bands. No new wire tags. The TUniversal
+calibration rides 11 §1: base-1 daily · base-7 weekly (the stack's
+rhythm) · base-60 yearly.
+
+**SCIENCE-1 (open) — speciated puzzle science.** A line's puzzle tree
+is its OWN science: perception already routes the solver (volumetric
+lines forge volume tasks, planar lines forge grids — landed), and
+metabolism must route RELEVANCE — a plasmic entity's tree carries no
+forge-of-iron (smelting is meaningless to a current sheet); its
+crystallizations run its own conditions. Foreign capabilities come by
+the **joint research venture**: incompatible sciences cross their
+outputs through the landed machinery composed — a council seals the
+venture, an aperture carries the exchange, a licensed leap (tag 40)
+lands the foreign node. A plasmic line that NEEDS smelted alloy joins
+forces or trades for it; it never fakes the tree. Landing needs: the
+metabolism relevance table (which conditions/industries exist per
+science), conductor build-step routing, and the venture deed
+(council-bound multi-line licensing).
+
 ## 4. Deferred, recorded
 
 - **Synergy/shared nodes** (co-discovery across worlds): needs BOND-1's

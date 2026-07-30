@@ -115,6 +115,7 @@ version = "0.1.0"
 dependencies = [
  "blake3",
  "cfe",
+ "conductor",
  "mirror",
  "num-bigint",
 ]
