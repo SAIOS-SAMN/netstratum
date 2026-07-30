@@ -499,6 +499,22 @@ fn zone_name(k: cfe::dop::ZoneKind) -> &'static str {
     }
 }
 
+/// The base-7 stack's concept words (10 §2: the condition fixes the
+/// CONCEPT; the node hash draws the voice — the uplink carries the
+/// concept, the chronicle carries the voice).
+fn condition_word(condition: u8) -> &'static str {
+    match condition {
+        0 => "solar",
+        1 => "insulation",
+        2 => "discipline",
+        3 => "deepening",
+        4 => "doctrine",
+        5 => "stores",
+        6 => "terraforming",
+        _ => "working",
+    }
+}
+
 fn scope_name(s: cfe::ipsal::Scope) -> &'static str {
     match s {
         cfe::ipsal::Scope::Build => "build",
@@ -596,6 +612,25 @@ fn render_state(world_name: &str, planet: &str, civilization: &str, world: &Worl
                 }
             }
             w.close();
+        }
+        // CONSTEL-1 / observer uplink (the deferred export, paid):
+        // the base-7 stack per orb — condition · held · progress ·
+        // threshold, the crystallizer's OWN deposit-sheet reading
+        // (never a second bookkeeping). Counters up, ratios derived
+        // surface-side; emitted only when something has begun.
+        let constellation = world.constellation(orb.orb_id);
+        if constellation.iter().any(|(_, held, progress, _)| *held || *progress > 0) {
+            w.key("constellation");
+            w.open_array();
+            for (condition, held, progress, threshold) in constellation {
+                w.open();
+                w.field_str("condition", condition_word(condition));
+                w.field_u64("held", u64::from(held));
+                w.field_u64("progress", progress);
+                w.field_u64("threshold", threshold);
+                w.close();
+            }
+            w.close_array();
         }
         w.key("banked");
         w.open();
