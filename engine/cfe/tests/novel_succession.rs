@@ -175,6 +175,43 @@ fn a_second_succession_moves_the_boundary_again() {
 }
 
 #[test]
+fn the_successor_seals_its_own_axes() {
+    // The audit finding closed (G1 × NOVEL-1): the deed releases the
+    // GENESIS with the tree — the mushroom does not eat what the
+    // elephant ate. The predecessor's seal stands in the chronicle
+    // forever (the record law); the LIVING seal is the successor's to
+    // make, entry in the bands, on the inherited world.
+    let mut world = derelict_with_insulation();
+    world
+        .seal_genesis("elephant-line", 1, 2, 1)
+        .expect("the predecessor's axes seal");
+    world.succeed("mycelial-chord").expect("the derelict admits a successor");
+    assert_eq!(
+        world.genesis(),
+        None,
+        "the deed releases the seal — a line's axes never outlive the line"
+    );
+    world
+        .seal_genesis("mycelial-chord", 3, 2, 2)
+        .expect("the successor seals ANEW — one living line per world");
+    assert_eq!(world.genesis().expect("sealed").civilization, "mycelial-chord");
+    // Both seals stand in the chronicle forever; the living one rules.
+    let seals: Vec<String> = world
+        .chronicle()
+        .receipts()
+        .iter()
+        .filter_map(|receipt| match &receipt.event {
+            ClosureEvent::GenesisSealed { civilization, .. } => Some(civilization.clone()),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(seals, vec!["elephant-line".to_string(), "mycelial-chord".to_string()]);
+    assert_eq!(replay(world.chronicle()), world.committed());
+    let resumed = World::resume(world.chronicle().clone());
+    assert_eq!(resumed.genesis(), world.genesis());
+}
+
+#[test]
 fn the_deed_round_trips_byte_exact() {
     let deed = ClosureEvent::LineSucceeded { successor: "mycelial-chord".to_string() };
     let bytes = deed.wire_bytes();

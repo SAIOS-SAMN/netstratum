@@ -2784,6 +2784,11 @@ impl World {
             });
         }
         self.techs.retain(|(_, condition, _)| *condition == 0);
+        // The audit law (G1 × NOVEL-1): a line's axes never outlive
+        // the line — the deed releases the seal; the successor seals
+        // ANEW (entry in the bands). The old seal stands in the
+        // chronicle forever.
+        self.genesis = None;
         self.close(
             ClosureEvent::LineSucceeded { successor: successor.to_string() },
             actor,
@@ -3384,6 +3389,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             // stands in the receipts above and below this one.
             ClosureEvent::LineSucceeded { .. } => {
                 techs.retain(|(_, condition, _)| *condition == 0);
+                genesis = None;
             }
             // G1 (04 §1/§5): the binding copy replays as the sealed
             // line.
