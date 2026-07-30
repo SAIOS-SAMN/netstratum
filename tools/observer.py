@@ -186,7 +186,7 @@ CREED_CONCEPTS = [
     # and rupture in a tied reading. Its NAME stands under operator
     # review (the crucible/Furnace rename law) — one word swaps it.
     ("doctrine", {"tech_discovered", "tech_licensed"}),
-    ("crucible", {"famine_struck", "overheat_struck", "vent_settled",
+    ("hardship", {"famine_struck", "overheat_struck", "vent_settled",
                   "demurrage_settled"}),
     ("communion", {"resource_transferred", "overflow_absorbed",
                    "bond_sealed", "bond_settled"}),
@@ -199,6 +199,13 @@ CREED_CONCEPTS = [
 CREED_VOICES = ["quiet", "burning", "wandering", "deep", "risen", "iron",
                 "tide-born", "unbowed", "patient", "hollow", "radiant",
                 "grafted", "sleepless", "wintering", "manifold", "first"]
+
+
+# The hardship GRADIENT (operator-ruled 2026-07-30): the endured
+# weight selects the word — tempering supports the base, anneal aligns
+# the middle, athanor crowns the deep end. Floors are placeholder
+# parameters; "crucible" is retired from the creed vocabulary.
+HARDSHIP_GRADIENT = [(24, "athanor"), (8, "anneal"), (0, "tempering")]
 
 
 def creed_of(events, digest_hex):
@@ -215,6 +222,8 @@ def creed_of(events, digest_hex):
             best, best_n = concept, n
     if best is None:
         return "the unwritten way"
+    if best == "hardship":
+        best = next(label for floor, label in HARDSHIP_GRADIENT if best_n >= floor)
     try:
         voice = CREED_VOICES[int(digest_hex[:2], 16) % len(CREED_VOICES)]
     except (ValueError, IndexError):

@@ -96,8 +96,13 @@ walks — exactly the way function and tier read today.
 
 - **CREED-1 — the derived creed reading. LANDED 2026-07-30.** The
   observer renders each line's creed, derived at read time: CONCEPT
-  from the dominant receipted tendency (doctrine · communion · schism
-  · crucible · passage — deterministic tie order), VOICE drawn from
+  from the dominant receipted tendency (doctrine · hardship ·
+  communion · schism · passage — precedence order breaks ties;
+  hardship holds tier 2 by operator ruling). The hardship word GRADES
+  by endured weight (operator-ruled 2026-07-30): **tempering** supports
+  the base, **anneal** aligns the middle, **athanor** crowns the deep
+  end — floors are placeholder parameters; "crucible" is retired from
+  the creed vocabulary (the Furnace rename law's shadow). VOICE drawn from
   the chronicle's terminal digest (the 10 §2 law applied to belief).
   Zero schema, zero storage; a deedless line walks the unwritten way;
   new creeds arise as chronicles diverge. The civs board carries the
