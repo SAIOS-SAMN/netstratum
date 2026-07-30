@@ -109,6 +109,30 @@ fn banner(style: &Style) {
     );
 }
 
+
+/// THE FAR WORLD (union wiring, 2026-07-30): cross-world deeds load
+/// the partner from its RESUME carrier (var/worlds/<name>/chronicle.tlv
+/// — CLI-saved worlds carry one; egregore worlds are mirror-only and
+/// refuse with the cure named). After a two-legged deed BOTH sides
+/// sync immediately — conservation is never left half-saved.
+fn far_world(name: &str) -> Result<World, String> {
+    let path = std::path::PathBuf::from("var/worlds").join(name).join("chronicle.tlv");
+    if !path.exists() {
+        return Err(format!(
+            "{name} carries no resume chronicle — cross-world deeds reach CLI-saved worlds (save there first); egregore worlds are mirror-only"
+        ));
+    }
+    cfe::persist::load(&path)
+        .map(World::resume)
+        .map_err(|refusal| format!("{name}'s chronicle refused to verify: {refusal:?}"))
+}
+
+fn sync_world(world: &World) -> Result<usize, String> {
+    let name = world.orb().map(|orb| orb.name.clone()).ok_or("no colony")?;
+    let path = std::path::PathBuf::from("var/worlds").join(&name).join("chronicle.tlv");
+    cfe::persist::sync(world.chronicle(), &path).map_err(|r| format!("{r:?}"))
+}
+
 fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
     let mut words = line.split_whitespace();
     match words.next() {
@@ -303,6 +327,180 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         // conductor polls every beat. Pause holds every egregore world
         // (nothing ticks, nothing ages); speed sets the seconds
         // between beats (0 = flat out).
+        // THE UNION VERBS (wiring audit, 2026-07-30): every landed
+        // deed reachable from the hand.
+        Some("elevate") => match words.next().and_then(parse_ratio_arg) {
+            Some(delta) => match world.elevate(delta) {
+                Ok(()) => println!(
+                    "{} the climb — this world's key now plays at {}",
+                    style.ok("✶"),
+                    style.strong(&amount(world.gauge()))
+                ),
+                Err(refusal) => refuse(world, &refusal, style),
+            },
+            None => println!("{} usage: {}", style.bad("✗"), style.strong("elevate <delta>")),
+        },
+        Some("age") => match words.next().map(parse_star) {
+            Some(Some(class)) => match world.age_star(class) {
+                Ok(()) => println!(
+                    "{} the star MOVES in its region — every sited orbit's band shifts at the next tick",
+                    style.ok("☀")
+                ),
+                Err(refusal) => refuse(world, &refusal, style),
+            },
+            _ => println!("{} usage: {} — o b a f g k m bd wd rg", style.bad("✗"), style.strong("age <class>")),
+        },
+        Some("council") => {
+            // council <id> <res> <quota> <window> <stake> with <p1>,<p2>,<p3>
+            let id = words.next().and_then(|w| w.parse::<u64>().ok());
+            let resource = words.next().and_then(parse_resource);
+            let quota = words.next().and_then(parse_ratio_arg);
+            let window = words.next().and_then(|w| w.parse::<u64>().ok());
+            let stake = words.next().and_then(parse_ratio_arg);
+            let members: Vec<u64> = match (words.next(), words.next()) {
+                (Some("with"), Some(list)) => list
+                    .split(',')
+                    .filter_map(|name| {
+                        world.orbs().iter().find(|held| held.name == name).map(|held| held.orb_id)
+                    })
+                    .collect(),
+                _ => Vec::new(),
+            };
+            match (id, resource, quota, window, stake) {
+                (Some(id), Some(resource), Some(quota), Some(window), Some(stake))
+                    if !members.is_empty() =>
+                {
+                    match world.seal_council(id, members, resource, quota, window, stake) {
+                        Ok(()) => println!(
+                            "{} council {} SEALS — every member bound alike; the reckoning judges all together at the boundary",
+                            style.ok("⚭"),
+                            style.strong(&id.to_string())
+                        ),
+                        Err(refusal) => refuse(world, &refusal, style),
+                    }
+                }
+                _ => println!(
+                    "{} usage: {}",
+                    style.bad("✗"),
+                    style.strong("council <id> <res> <quota> <window> <stake> with <p1>,<p2>,<p3>")
+                ),
+            }
+        }
+        Some("aperture") => {
+            // aperture <amt> <res> to <world> deal <n>
+            let amt = words.next().and_then(parse_ratio_arg);
+            let resource = words.next().and_then(parse_resource);
+            let target = match (words.next(), words.next()) {
+                (Some("to"), Some(name)) => Some(name.to_string()),
+                _ => None,
+            };
+            let deal = match (words.next(), words.next()) {
+                (Some("deal"), Some(n)) => n.parse::<u64>().ok(),
+                _ => None,
+            };
+            match (amt, resource, target, deal) {
+                (Some(amt), Some(resource), Some(target), Some(deal)) => {
+                    match far_world(&target) {
+                        Ok(mut far) => {
+                            match cfe::world::aperture_transfer(
+                                world, *current, &mut far, cfe::world::FIRST_ORB,
+                                resource, amt, deal,
+                            ) {
+                                Ok(()) => {
+                                    let saved = sync_world(world).and(sync_world(&far));
+                                    match saved {
+                                        Ok(_) => println!(
+                                            "{} the aperture OPENS — deal {} crossed the void; both chronicles sealed",
+                                            style.ok("⎋"),
+                                            style.strong(&deal.to_string())
+                                        ),
+                                        Err(err) => println!(
+                                            "{} the deed landed but a sync refused: {err}",
+                                            style.bad("✗")
+                                        ),
+                                    }
+                                }
+                                Err(refusal) => refuse(world, &refusal, style),
+                            }
+                        }
+                        Err(err) => println!("{} {err}", style.bad("✗")),
+                    }
+                }
+                _ => println!(
+                    "{} usage: {}",
+                    style.bad("✗"),
+                    style.strong("aperture <amt> <res> to <world> deal <n>")
+                ),
+            }
+        }
+        Some("license") => {
+            // license <condition 1..6> to <world> via <council> deal <n>
+            let condition = words.next().and_then(|w| w.parse::<u8>().ok());
+            let target = match (words.next(), words.next()) {
+                (Some("to"), Some(name)) => Some(name.to_string()),
+                _ => None,
+            };
+            let council = match (words.next(), words.next()) {
+                (Some("via"), Some(n)) => n.parse::<u64>().ok(),
+                _ => None,
+            };
+            let deal = match (words.next(), words.next()) {
+                (Some("deal"), Some(n)) => n.parse::<u64>().ok(),
+                _ => None,
+            };
+            match (condition, target, council, deal) {
+                (Some(condition), Some(target), Some(council), Some(deal)) => {
+                    let concept = [
+                        "the solar leap", "insulation", "discipline", "deepening",
+                        "doctrine", "stores", "terraforming",
+                    ]
+                    .get(condition as usize)
+                    .copied()
+                    .unwrap_or("working");
+                    match far_world(&target) {
+                        Ok(mut far) => {
+                            let leap = cfe::world::Leap {
+                                condition,
+                                name: format!("granted {concept}"),
+                                deal,
+                                council,
+                            };
+                            match cfe::world::license_tech(
+                                world, *current, &mut far, cfe::world::FIRST_ORB, leap,
+                            ) {
+                                Ok(()) => {
+                                    let saved = sync_world(world).and(sync_world(&far));
+                                    match saved {
+                                        Ok(_) => println!(
+                                            "{} {} LICENSED into {} — the far sky learns; both chronicles sealed{}",
+                                            style.ok("⌁"),
+                                            style.strong(concept),
+                                            style.strong(&target),
+                                            if condition == 6 {
+                                                " — THE CROWN IS GIFTED"
+                                            } else {
+                                                ""
+                                            }
+                                        ),
+                                        Err(err) => println!(
+                                            "{} the deed landed but a sync refused: {err}",
+                                            style.bad("✗")
+                                        ),
+                                    }
+                                }
+                                Err(refusal) => refuse(world, &refusal, style),
+                            }
+                        }
+                        Err(err) => println!("{} {err}", style.bad("✗")),
+                    }
+                }
+                _ => println!(
+                    "{} usage: {}",
+                    style.bad("✗"),
+                    style.strong("license <condition 1..6> to <world> via <council> deal <n>")
+                ),
+            }
+        }
         // THE CONSTELLATION (operator ruling 2026-07-30): the base-7
         // stack as this line's own sky — held nodes glow with their
         // voice-names, timers show exact progress, the crown shows
@@ -1521,7 +1719,15 @@ fn help(style: &Style) {
         ("ideology", "the dual cohesion ledger for this planet — the four axes, their books, and the derived readings; divergent trade partners pay a friction entropy tax, aligned ones pay zero"),
         ("login [name] · whoami · continue", "the operator menu (prototype, no passwords): many accounts on one machine — login mints/switches, bare login lists, continue resumes your profile\'s last saved world"),
         ("t0 <inbox|move|galaxies|contract|clean>", "the progenitor console (tier 0): inbox streams the upward petitions; move <world> x y z re-charts a sector (the separation deed); galaxies reads the charted skies (13_GALAXY — membership derived, never stored); contract folds the era; clean sweeps --closed-* ruins"),
+        ("elevate <delta> · age <class>", "the union verbs on this world: the three-gate gauge climb (settle · cohere · cross), and the star moving in its region"),
+        ("council <id> <res> <quota> <win> <stake> with <p,p,p>", "seal a multilateral covenant — three or more planets bound alike, judged together at the boundary"),
+        ("aperture <amt> <res> to <world> deal <n>", "cross banked value into another saved world — two legs, one deal, both chronicles sealed at once"),
+        ("license <cond> to <world> via <council> deal <n>", "issue a technology into another world through diplomacy; condition 6 gifts THE CROWN onto a finished base-7 stack"),
         ("tech", "the constellation: this line's base-7 sky — held nodes with their voice-names, exact progress toward what has not crystallized, the crown's gate"),
+        ("elevate <delta> · age <class>", "the union verbs on this world: the three-gate gauge climb (settle · cohere · cross), and the star moving in its region"),
+        ("council <id> <res> <quota> <win> <stake> with <p,p,p>", "seal a multilateral covenant — three or more planets bound alike, judged together at the boundary"),
+        ("aperture <amt> <res> to <world> deal <n>", "cross banked value into another saved world — two legs, one deal, both chronicles sealed at once"),
+        ("license <cond> to <world> via <council> deal <n>", "issue a technology into another world through diplomacy; condition 6 gifts THE CROWN onto a finished base-7 stack"),
         ("tech", "the constellation: this line's base-7 sky — held nodes with their voice-names, exact progress toward what has not crystallized, the crown's gate"),
         ("terraform <albedo> <orbit>", "the gifted crown (base-7 complete + licensed from tier 0): re-seat a sited planet — the only lawful way an orbit moves"),
         ("npcs [pause|resume|speed <s>]", "the player\'s hand on the autonomous board — pause holds every egregore world, speed sets seconds between beats (0 = flat out); bare npcs shows the state"),
@@ -1985,12 +2191,21 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "a council is three or more distinct planets, a positive quota and collateral, a real window, a fresh id — e.g. {}",
             style.strong("council 1 with base,outpost,haven: 5 iron in 60, stake 3")
         ),
-        ActionRefused::ElevationBarred { settled, coherent, crossed } => format!(
-            "the climb is barred — {}{}{}; each gate is escapable: settle the books, close a loop this year, cross the void",
-            if *settled { "" } else { "the thermal books stand unsettled; " },
-            if *coherent { "" } else { "no loop closed within the year voice; " },
-            if *crossed { "" } else { "this world has not crossed; " }
-        ),
+        ActionRefused::ElevationBarred { settled, coherent, crossed } => {
+            let gates: Vec<&str> = [
+                (!settled, "the thermal books stand unsettled"),
+                (!coherent, "no loop closed within the year voice"),
+                (!crossed, "this world has not crossed"),
+            ]
+            .iter()
+            .filter(|(barred, _)| *barred)
+            .map(|(_, cure)| *cure)
+            .collect();
+            format!(
+                "the climb is barred — {}; each gate is escapable: settle the books, close a loop this year, cross the void",
+                gates.join("; ")
+            )
+        }
         ActionRefused::BadClimb => format!(
             "a climb moves strictly upward in G — the fiber advances and never retreats; e.g. {}",
             style.strong("elevate 1/6")
