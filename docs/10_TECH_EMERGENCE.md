@@ -90,10 +90,22 @@ Measured: the doctrine's boosted radiator closes a heat_net-1/2 world's
 budget exactly and the overheat CLEARS, while the same node only halves a
 heat_net-1 world's fire — crystallized nodes meet each world where it
 burns; no ladder ordered any of it. `TechLicensed` (tag 40) landed at
-PLANNER-1. **Still open, recorded:** end-to-end arc witnesses for
-Lattice Deepening and Long Stores (their hooks and table entries are
-landed and exercised by shape); the throttle-α policy action (steward
-side); word-table naming beyond the §3 canonical names.
+PLANNER-1. The deepening/long-stores arc witnesses LANDED 2026-07-30
+(coder-03, `world_tech_arcs.rs`): the deepening earned in a fueled
+vault (banked sink 119994/1000 at the boundary, demurrage-free) with
+the composition law measured — capture = min(headroom, boosted
+lattice) still reads the headroom, so the boost binds only beside a
+doctrine-boosted radiator, never minting sink past the physics; the
+long stores earned on four apertured winters (K-band keeper, leaking
+and sub-mesic) with the ease measured ON THE RECEIPT — 32 ticks at
+the halved flat rate settle exactly 1/2. Two laws inscribed by
+measurement along the way: a vault colony runs on FUEL AND STEEL (the
+array's build cost + upkeep struck iron famine at tick 41 in the
+first draft — the ECON-J burn bites beside the lattice), and the
+boundary fires during the call AFTER the round number (the clock
+advances at tick end). **Still open, recorded:** the throttle-α
+policy action (steward side); word-table naming beyond the §3
+canonical names.
 
 ## 3c. The naming law LANDED; the succession law LANDED (2026-07-30)
 
