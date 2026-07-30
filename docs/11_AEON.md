@@ -123,6 +123,28 @@ Neither mints matter from nothing (conservation holds, the P1 charter law);
 each is a walk to a new point, seeded deterministically from the acting
 chronicle digests (CHARTER §9).
 
+### 3.1 The bridge law — BRIDGE-1 (ruled 2026-07-30, design stage)
+
+Confluence is a CROSSING, and the crossing is priced. The two lines
+stand at a wrapped key GAP (GAUGE-N's `key_distance` — L1 across every
+plane, the short way around), and the bridge that closes it produces
+BOTH legs of the manifold dual (12 §2c) in one deed:
+
+- **Venting — the entropic leg.** Recombination releases heat priced by
+  the gap: vented entropy ∝ the wrapped key distance. Clash pays the
+  most, resonance nearly nothing — §2.1's reading made thermodynamic.
+  Receipted through the landed VENT machinery, never silent.
+- **Containment — the syntropic leg.** The resonant remainder ENCASES:
+  the hybrid's opening bank (encased joules / banked sink) — the
+  container the crossing built.
+
+Constants are placeholder parameters. Lands with the confluence
+orchestration (AEON-1b): the conductor computes the midpoint, prices
+the gap, and receipts the vent and the encasement beside the
+`Confluent` deed — spec + vectors together at that landing. LINEAGE-2
+(landed 2026-07-30) carries the ancestry side: the hybrid's registry
+line records BOTH parents, and `resolve_heads` reads every root.
+
 ## 4. A world's arc as trajectory — the four C's, not a decline chain
 
 A world does not march FOUNDED → … → RETIRED. It MOVES through a phase space

@@ -26,7 +26,7 @@ fn seeded(
     name: &str,
     slug: &str,
     metabolism: &str,
-    lineage: Option<String>,
+    lineage: Vec<String>,
     world_name: &str,
     position: (Ratio, Ratio, Ratio),
 ) -> EgregoreSpec {
@@ -73,7 +73,7 @@ fn the_crossing_observes_and_the_observation_creates() {
             metabolism: "mineral".into(),
             perception: "planar".into(),
             founder: "operator".into(),
-            lineage: None,
+            lineage: Vec::new(),
             station: Some("progenitor".into()),
         })
         .expect("the head seats");
@@ -81,11 +81,11 @@ fn the_crossing_observes_and_the_observation_creates() {
     // Two sited worlds: one charted FAR (wrapped-L1 24 from origin —
     // past the founding reach 16), one NEAR (L1 3 — inside it).
     let far = seeded(
-        "Slagborn", "slagborn", "mineral", Some("tunborn".into()),
+        "Slagborn", "slagborn", "mineral", vec!["tunborn".into()],
         "cinder-reach", (ratio(40, 1), ratio(0, 1), ratio(0, 1)),
     );
     let near = seeded(
-        "Deep Chorus", "deep-chorus", "biotic", None,
+        "Deep Chorus", "deep-chorus", "biotic", Vec::new(),
         "kepler-passage", (ratio(1, 1), ratio(1, 1), ratio(1, 1)),
     );
     let mut worlds = vec![

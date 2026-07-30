@@ -41,7 +41,7 @@ fn humans() -> Civilization {
         metabolism: "biotic".into(),
         perception: "planar".into(),
         founder: "operator".into(),
-        lineage: None,
+        lineage: Vec::new(),
         station: None,
     }
 }
@@ -241,10 +241,10 @@ fn a_lineage_resolves_to_its_own_head() {
     elder.slug = "elder".into();
     let mut branch = humans();
     branch.slug = "branch".into();
-    branch.lineage = Some("elder".into());
+    branch.lineage = vec!["elder".into()];
     let mut leaf = humans();
     leaf.slug = "leaf".into();
-    leaf.lineage = Some("branch".into());
+    leaf.lineage = vec!["branch".into()];
     for line in [&elder, &branch, &leaf] {
         registry.create(line).expect("registers");
     }
@@ -255,17 +255,17 @@ fn a_lineage_resolves_to_its_own_head() {
     // A dangling pointer resolves to the deepest RECORDED ancestor.
     let mut orphan = humans();
     orphan.slug = "orphan".into();
-    orphan.lineage = Some("unrecorded-past".into());
+    orphan.lineage = vec!["unrecorded-past".into()];
     registry.create(&orphan).expect("registers");
     assert_eq!(registry.resolve_head("orphan"), Some("orphan".into()));
 
     // A corrupt cycle stops deterministically, never hangs.
     let mut ouro = humans();
     ouro.slug = "ouro".into();
-    ouro.lineage = Some("boros".into());
+    ouro.lineage = vec!["boros".into()];
     let mut boros = humans();
     boros.slug = "boros".into();
-    boros.lineage = Some("ouro".into());
+    boros.lineage = vec!["ouro".into()];
     registry.create(&ouro).expect("registers");
     registry.create(&boros).expect("registers");
     assert_eq!(registry.resolve_head("ouro"), Some("boros".into()));

@@ -104,7 +104,7 @@ fn the_joule_runway_defers_the_frost() {
             metabolism: "biotic".into(),
             perception: "planar".into(),
             founder: "conductor".into(),
-            lineage: None,
+            lineage: Vec::new(),
             station: None,
         },
         world_name: format!("{slug}-hold"),

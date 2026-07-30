@@ -55,9 +55,13 @@ pub struct Civilization {
     pub metabolism: String,
     pub perception: String,
     pub founder: String,
-    /// The parent civilization's slug, for speciated descendants —
-    /// registry-recorded now, receipted at G1 like all identity.
-    pub lineage: Option<String>,
+    /// LINEAGE-2 (12 §5): the parent lines, append order — a DAG,
+    /// never a single thread. Empty = headless-of-record (lawful). A
+    /// divergence branch carries one parent; a confluent hybrid
+    /// carries BOTH. Wire form: space-joined slugs in the one
+    /// `lineage` field — a single-parent write is byte-identical to
+    /// the LINEAGE-1 form, and old files read unchanged.
+    pub lineage: Vec<String>,
     /// BAND-1: the class station held, if any (12_UNION §2–§3) —
     /// validated against `STATIONS`, seated only through an open seat.
     pub station: Option<String>,
@@ -151,8 +155,8 @@ impl Registry {
         w.field_str("perception", &civilization.perception);
         w.close();
         w.field_str("founder", &civilization.founder);
-        if let Some(lineage) = &civilization.lineage {
-            w.field_str("lineage", lineage);
+        if !civilization.lineage.is_empty() {
+            w.field_str("lineage", &civilization.lineage.join(" "));
         }
         if let Some(station) = &civilization.station {
             w.field_str("station", station);
@@ -176,7 +180,9 @@ impl Registry {
             metabolism: extract_string(&text, "metabolism")?,
             perception: extract_string(&text, "perception")?,
             founder: extract_string(&text, "founder").unwrap_or_default(),
-            lineage: extract_string(&text, "lineage"),
+            lineage: extract_string(&text, "lineage")
+                .map(|joined| joined.split_whitespace().map(String::from).collect())
+                .unwrap_or_default(),
             station: extract_string(&text, "station"),
         })
     }
@@ -274,7 +280,9 @@ impl Registry {
     pub fn resolve_head(&self, slug: &str) -> Option<String> {
         let mut current = self.load(slug)?;
         let mut visited = vec![current.slug.clone()];
-        while let Some(parent) = &current.lineage {
+        // LINEAGE-2: the PRIMARY chain — first parent per hop (append
+        // order); the full DAG reads through `resolve_heads`.
+        while let Some(parent) = current.lineage.first() {
             if visited.iter().any(|seen| seen == parent) {
                 break;
             }
@@ -287,5 +295,38 @@ impl Registry {
             }
         }
         Some(current.slug)
+    }
+
+    /// LINEAGE-2 (12 §5): EVERY root of the ancestry DAG — a confluent
+    /// hybrid descends from both parents' lines, so a line may carry
+    /// several heads. A walk's terminus is a head when no unvisited
+    /// recorded parent remains: empty lineage, dangling pointers, and
+    /// cycles all stop there deterministically. Slug-sorted, deduped.
+    pub fn resolve_heads(&self, slug: &str) -> Vec<String> {
+        let Some(start) = self.load(slug) else {
+            return Vec::new();
+        };
+        let mut visited = vec![start.slug.clone()];
+        let mut frontier = vec![start];
+        let mut heads = Vec::new();
+        while let Some(current) = frontier.pop() {
+            let mut pushed = 0;
+            for parent in &current.lineage {
+                if visited.iter().any(|seen| seen == parent) {
+                    continue;
+                }
+                if let Some(ancestor) = self.load(parent) {
+                    visited.push(ancestor.slug.clone());
+                    frontier.push(ancestor);
+                    pushed += 1;
+                }
+            }
+            if pushed == 0 {
+                heads.push(current.slug);
+            }
+        }
+        heads.sort();
+        heads.dedup();
+        heads
     }
 }

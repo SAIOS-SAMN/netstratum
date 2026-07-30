@@ -22,7 +22,7 @@ pub fn founding_egregores() -> Vec<EgregoreSpec> {
             metabolism: m.into(),
             perception: p.into(),
             founder: "conductor".into(),
-            lineage: None,
+            lineage: Vec::new(),
             station: None,
         }
     };
@@ -173,7 +173,9 @@ pub fn load_egregores(path: &Path) -> Option<Vec<EgregoreSpec>> {
                     metabolism: field("metabolism")?,
                     perception: field("perception")?,
                     founder: "conductor".into(),
-                    lineage: field("lineage"),
+                    lineage: field("lineage")
+                        .map(|joined| joined.split_whitespace().map(String::from).collect())
+                        .unwrap_or_default(),
                     station: field("station"),
                 },
                 world_name: field("world")?,

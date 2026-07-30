@@ -224,7 +224,12 @@ the whole union is **lineage-typed**:
 - Divergence and confluence (11 §3) move a line's members on the manifold;
   the lineage pointer follows the chronicle, so a confluent hybrid points
   to BOTH parents' lines and elevates toward whichever domain its
-  metabolism lands in.
+  metabolism lands in. **LINEAGE-2 (landed 2026-07-30):** the registry
+  pointer is an append-only LIST — the ancestry is a DAG, never a single
+  thread; `resolve_heads` reads every root; the single-parent wire form
+  is byte-identical to LINEAGE-1 and old files read unchanged. The
+  crossing's thermodynamics are BRIDGE-1 (11 §3.1, design stage): the
+  key gap prices the venting, the resonant remainder encases.
 
 ## 5a. The substrate law — no anthropic gate
 

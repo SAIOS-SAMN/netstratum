@@ -914,7 +914,7 @@ impl Egregore {
             metabolism,
             perception,
             founder: "conductor".into(),
-            lineage: Some(parent.slug.clone()),
+            lineage: vec![parent.slug.clone()],
             station: None,
         };
         registry.create(&branch).ok()?;

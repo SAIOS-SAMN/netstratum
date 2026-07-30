@@ -759,6 +759,8 @@ market board's; union tags allocate from 52 at each landing.
 
 | SURVEY-1 | wiring (N4 + P1 + conductor) | **LANDED 2026-07-30** (operator directive — the role loop's top edge) | the Pathfinder directs the drills: a rung-5 colony pays the scan's crystal draw in its cycle (`survey_step`); single-orb worlds CHARTER the surveyed sector and open its first drill, multi-orb worlds place the next extractor on the scan's first resonant orb with room; unaffordable or starving, the survey idles lawfully (siting draws rule as before); every settled orb now collects each beat. Twin landing FUNCTION-1: the 12_UNION §4 function reading renders on the observer's civs board, derived never stored. Witness: the survey arc — earned crystal chain (heat-balanced), one draw → one charter → the drill on the surveyed sector → the spent lens idles → replay MATCHES |
 
+| LINEAGE-2 + BRIDGE-1 | C (on LINEAGE-1) | **LINEAGE-2 LANDED 2026-07-30**; BRIDGE-1 open (specced, 11 §3.1) | the DAG de-collapse: the registry lineage pointer is an append-only list (space-joined wire form, byte-identical single-parent, old files read unchanged); `resolve_heads` returns every ancestry root (cycle-safe, dangling-lawful, deterministic); the observer walks the primary chain and marks confluences. BRIDGE-1: the confluence crossing prices its key gap — venting ∝ wrapped key distance (entropic leg), the resonant remainder encases (syntropic leg); lands with AEON-1b's confluence orchestration. Witnesses: 3 (both-parents round-trip + old-form read; both heads resolved; lawful stops) |
+
 Cross-board: universe-level book
 composition stays Q2.3's N6 mesh audit; on-chain settlement of any cleared
 value stays NS-7 (N7), never here.

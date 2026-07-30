@@ -22,7 +22,7 @@ fn main() {
         metabolism: "biotic".into(),
         perception: "planar".into(),
         founder: "operator".into(),
-        lineage: None,
+        lineage: Vec::new(),
         station: None,
     });
     let _ = registry.create(&Civilization {
@@ -34,7 +34,7 @@ fn main() {
         metabolism: "biotic".into(),
         perception: "harmonic".into(),
         founder: "operator".into(),
-        lineage: None,
+        lineage: Vec::new(),
         station: None,
     });
 

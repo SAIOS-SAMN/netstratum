@@ -162,7 +162,7 @@ fn main() {
                 "beat {beat}: DIVERGENCE — {} ({}) cleaves from the line of {}, settling {}/{}",
                 spec.civilization.name,
                 spec.civilization.species,
-                spec.civilization.lineage.as_deref().unwrap_or("?"),
+                spec.civilization.lineage.first().map(String::as_str).unwrap_or("?"),
                 spec.world_name,
                 spec.planet,
             );

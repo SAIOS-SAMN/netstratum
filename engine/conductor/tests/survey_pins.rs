@@ -74,7 +74,7 @@ fn the_survey_charters_the_sector_and_the_spent_lens_idles() {
             metabolism: "biotic".into(),
             perception: "planar".into(),
             founder: "conductor".into(),
-            lineage: None,
+            lineage: Vec::new(),
             station: None,
         },
         world_name: "survey-hearth".into(),

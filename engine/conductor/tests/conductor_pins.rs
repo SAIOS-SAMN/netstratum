@@ -92,7 +92,7 @@ fn a_thriving_line_diverges() {
     let var = root.to_string_lossy().into_owned();
     let worlds = run_era(&var, 45);
     assert!(
-        worlds.iter().any(|b| b.spec.civilization.lineage.is_some()),
+        worlds.iter().any(|b| !b.spec.civilization.lineage.is_empty()),
         "a branch joined the board"
     );
 
@@ -100,13 +100,13 @@ fn a_thriving_line_diverges() {
     let branches: Vec<_> = registry
         .list()
         .into_iter()
-        .filter(|c| c.lineage.is_some())
+        .filter(|c| !c.lineage.is_empty())
         .collect();
     assert!(!branches.is_empty(), "line membership recorded in the registry");
 
     for branch in &branches {
         let origin = registry
-            .load(branch.lineage.as_ref().expect("line"))
+            .load(branch.lineage.first().expect("line"))
             .expect("the origin line exists");
         let mutations = [
             branch.disposition != origin.disposition,
@@ -127,13 +127,13 @@ fn a_thriving_line_diverges() {
     // branch world founds at the OPPOSITE phase — never both at zero.
     let newborn = worlds
         .iter()
-        .find(|b| b.spec.civilization.lineage.is_some())
+        .find(|b| !b.spec.civilization.lineage.is_empty())
         .expect("newborn world");
     let origin_world = worlds
         .iter()
         .find(|b| {
             Some(&b.spec.civilization.slug)
-                == newborn.spec.civilization.lineage.as_ref()
+                == newborn.spec.civilization.lineage.first()
         })
         .expect("the origin beats on");
     let cleaved = origin_world.world.chronicle().receipts().iter().any(|r| {
@@ -174,7 +174,7 @@ fn a_thriving_line_diverges() {
         .iter()
         .find(|b| {
             Some(&b.spec.civilization.slug)
-                == newborn.spec.civilization.lineage.as_ref()
+                == newborn.spec.civilization.lineage.first()
         })
         .expect("the parent beats")
         .spec;

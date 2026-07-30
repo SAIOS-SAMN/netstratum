@@ -128,7 +128,11 @@ forever.
   D3 TERRAIN first slice LANDED 2026-07-30 (02 §2.5–2.6): tag 8, the
   opt-in seeded chart, exact multiplier + adjacency witnesses,
   `survey`/`terrain` verbs; open — auto-chart + conductor adoption
-  (fixture audit), tag 9 milestones. Next: as assigned.
+  (fixture audit), tag 9 milestones. LINEAGE-2 LANDED 2026-07-30 (the
+  ancestry DAG — both parents recorded, `resolve_heads`, old wire form
+  unchanged) with BRIDGE-1 opened (11 §3.1: the confluence crossing
+  prices its key gap — vent ∝ gap, remainder encases; lands with
+  AEON-1b). Next: as assigned.
 - **coder-03**: N4 (NS-2 RQP + the scanner) — LANDED on main
   2026-07-30 (33e6c73 + post-ruling inscriptions 7f739f4, after the
   fifth-set rulings): spec §1–§4 with extracted vectors, sigil index +

@@ -1326,7 +1326,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         metabolism: axis_words[1].into(),
                         perception: axis_words[2].into(),
                         founder: "operator".into(),
-                        lineage: None,
+                        lineage: Vec::new(),
                         station: axis_words.get(3).map(|s| s.to_string()),
                     };
                     match registry.create(&newcomer) {

@@ -557,18 +557,22 @@ def view_civ(var_root, args, paint):
                  f"station {card.get('station', '—') or '—'}")
     if card.get("motto"):
         lines.append(f"  {paint.dim(chr(0x201C) + card['motto'] + chr(0x201D))}")
-    # The lineage walk: hop the pointers to the head (LINEAGE-1's law,
-    # read from the registry data — headless is lawful).
-    walk, seen = [target], set()
+    # The lineage walk (LINEAGE-2): the pointer is a space-joined
+    # LIST — walk the PRIMARY chain (first parent per hop), and mark
+    # the confluences; headless is lawful.
+    walk, seen, confluent = [target], set(), False
     while True:
-        parent = registry.get(walk[-1], {}).get("lineage")
+        parents = (registry.get(walk[-1], {}).get("lineage") or "").split()
+        if len(parents) > 1:
+            confluent = True
+        parent = parents[0] if parents else None
         if not parent or parent in seen or parent not in registry:
             break
         seen.add(walk[-1])
         walk.append(parent)
     if len(walk) > 1:
-        lines.append("  lineage: " + " ↳ ".join(walk)
-                     + paint.dim("  (head: " + walk[-1] + ")"))
+        note = "  (head: " + walk[-1] + (", ⋔ confluent — every root via resolve_heads" if confluent else "") + ")"
+        lines.append("  lineage: " + " ↳ ".join(walk) + paint.dim(note))
     else:
         lines.append("  lineage: " + paint.dim("headless — a lawful state"))
     held = [r for r in rows if r["civilization"] == target]
