@@ -119,9 +119,11 @@ outside those reservations.
   scan (`engine/cfe/src/query.rs`), CrystalDrawn (tag 55), crystals +
   the resonator (02 §5.1 deferral paid), the `scan` CLI verb; 187/187
   workspace witnesses, clippy zero, arc played. Boundary excursions
-  flagged for coder-02 sign-off: dop.rs body (resource/zone/event),
-  world.rs (scan + replay arm), five mechanical renderer arms in
-  mirror (the P1 relay).
+  SIGNED OFF by coder-02 (2026-07-30): scan's only chronicle append is
+  the CrystalDrawn draw (the lens law in code); 56–58 are protocol
+  records, never chronicle events; the in-value codes ride existing
+  tags; the mirror arms are pure rendering; no floats; the galaxy lane
+  untouched.
 - Parallel worktrees per node; merge to `main` on green; BUILD_ORDER
   conflicts resolve by keeping both entries.
 
