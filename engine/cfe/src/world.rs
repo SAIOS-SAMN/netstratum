@@ -1641,8 +1641,12 @@ impl World {
                 }
             }
             if !frozen {
+                // G2 (04 §1.2): every flow reads through the sealed
+                // metabolism's ration/harvest map — biotic and
+                // unsealed read ruleset v1 verbatim.
+                let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
                 for zone in active {
-                    let (resource, amount) = zone.kind.yield_per_tick();
+                    let (resource, amount) = crate::dop::zone_yield(zone.kind, metabolism);
                     let boost = terrain_boost(&terrain, *orb_id, zone, active);
                     accrue(
                         &mut self.accrued,
@@ -1650,7 +1654,7 @@ impl World {
                         resource,
                         amount * efficiency.clone() * boost,
                     );
-                    for (resource, amount) in zone.kind.upkeep_per_tick() {
+                    for (resource, amount) in crate::dop::zone_upkeep(zone.kind, metabolism) {
                         accrue(&mut self.accrued, *orb_id, resource, -amount);
                     }
                 }
@@ -2560,6 +2564,7 @@ impl World {
     fn relieve_recovered(&mut self, orb: u64) {
         let stamp = self.clock.now();
         let star = self.star;
+        let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
         let Some(held) = peel(&mut self.orbs, orb) else {
             return;
         };
@@ -2578,10 +2583,11 @@ impl World {
         };
         let famined: Vec<Resource> = held.famine.clone();
         for resource in famined {
+            // G2: the one-tick bill reads the line's own rations.
             let mut one_tick: Ratio = held
                 .zones
                 .iter()
-                .flat_map(|zone| zone.kind.upkeep_per_tick())
+                .flat_map(|zone| crate::dop::zone_upkeep(zone.kind, metabolism))
                 .filter(|(consumed, _)| *consumed == resource)
                 .map(|(_, amount)| amount)
                 .fold(ratio(0, 1), |sum, amount| sum + amount);

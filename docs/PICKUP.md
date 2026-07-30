@@ -144,10 +144,15 @@ forever.
   `GenesisSealed` — the binding world-chronicle axes receipt, 04 §5
   binding 2 live; the registry is a cache from the receipt on; the
   `genesis` CLI verb + the disposition-weighted `scored_progress`
-  read; 04 §6 row for evidence). G-board now open: G3 (perception
-  facet through the scanner — coder-03 next) and G2 (metabolism
-  tables — the vent, operator-ordered) both unblocked; wave 3a
-  (plasmic domain-head) rides the elevation door.
+  read; 04 §6 row for evidence). **G2 LANDED same day — THE VENT AT
+  FULL CAPACITY** (the ration-substitution law: mineral eats iron,
+  plasmic eats joules and farms by ENCASEMENT — the fiat law held;
+  biotic/unsealed byte-identical to v1; 04 §6 row for evidence) with
+  **wave 3a**: Coronal Choir seated progenitor — the first plasmic
+  board-maker, tier 0 tri-planar on metabolism (seeds + registry in
+  step). Next: G3 (perception facet through the scanner — the last
+  leg of full spatial recognition). Umbral tier-0 coverage (Syzygy)
+  remains one operator word away.
 - Parallel worktrees per node; merge to `main` on green; BUILD_ORDER
   conflicts resolve by keeping both entries.
 

@@ -2759,7 +2759,11 @@ fn status(world: &World, style: &Style, current: u64) {
                     style.strong("raze")
                 );
             }
-            zone_lines(orb, style);
+            zone_lines(
+                orb,
+                style,
+                world.genesis().map(|held| held.metabolism).unwrap_or(2),
+            );
             banked_lines(world, style, current);
             accrued_lines(world, style, current);
         }
@@ -2778,12 +2782,12 @@ fn status(world: &World, style: &Style, current: u64) {
     );
 }
 
-fn zone_lines(orb: &ColonyOrb, style: &Style) {
+fn zone_lines(orb: &ColonyOrb, style: &Style, metabolism: u8) {
     for zone in &orb.zones {
-        let (yields, rate) = zone.kind.yield_per_tick();
-        let drains = zone
-            .kind
-            .upkeep_per_tick()
+        // G2: the panel renders the line's OWN map (04 §4) — the
+        // sealed metabolism's rations, never the v1 table verbatim.
+        let (yields, rate) = cfe::dop::zone_yield(zone.kind, metabolism);
+        let drains = cfe::dop::zone_upkeep(zone.kind, metabolism)
             .iter()
             .map(|(eats, drain)| format!("−{} {}", amount(drain), resource_name(*eats)))
             .collect::<Vec<_>>()

@@ -289,6 +289,55 @@ pub fn axis_valid(axis: u8, code: u8) -> bool {
     }
 }
 
+/// G2 (04 §1.2): the ration law — the resource filling the FOOD slot
+/// in every flow, keyed by the SEALED metabolism (biotic is the
+/// ruleset-v1 default). Mineral eats iron; plasmic eats joules — and
+/// the fiat law binds (05 §1.2, 01 §6.1): joules enter only by
+/// encasement, so plasmic agriculture IS the thermal loop.
+pub fn metabolic_ration(metabolism: u8) -> Resource {
+    match metabolism {
+        1 => Resource::Iron,
+        3 => Resource::Joule,
+        _ => Resource::Biomass,
+    }
+}
+
+/// G2: the habitat's harvest under the sealed metabolism — what the
+/// line farms. Biotic farms biomass (v1 verbatim); mineral farms
+/// iron; plasmic farms NOTHING (rate 0 — its food is captured heat,
+/// never a yield line).
+pub fn metabolic_harvest(metabolism: u8) -> (Resource, Ratio) {
+    match metabolism {
+        1 => (Resource::Iron, ratio(1, 1)),
+        3 => (Resource::Joule, ratio(0, 1)),
+        _ => (Resource::Biomass, ratio(1, 1)),
+    }
+}
+
+/// G2: one zone's yield under the sealed metabolism — the habitat's
+/// biomass line is the FARM slot and reads the line's harvest; every
+/// other yield is extraction or conversion and never substitutes.
+pub fn zone_yield(kind: ZoneKind, metabolism: u8) -> (Resource, Ratio) {
+    match (kind, kind.yield_per_tick()) {
+        (ZoneKind::Habitat, (Resource::Biomass, _)) => metabolic_harvest(metabolism),
+        (_, held) => held,
+    }
+}
+
+/// G2: one zone's upkeep under the sealed metabolism — every biomass
+/// component is the FOOD slot and reads the line's ration; structural
+/// components (iron maintenance, conversion inputs in other
+/// resources) never substitute.
+pub fn zone_upkeep(kind: ZoneKind, metabolism: u8) -> Vec<(Resource, Ratio)> {
+    kind.upkeep_per_tick()
+        .into_iter()
+        .map(|(resource, amount)| match resource {
+            Resource::Biomass => (metabolic_ration(metabolism), amount),
+            held => (held, amount),
+        })
+        .collect()
+}
+
 /// G1 (04 §1.1, placeholder weights): the disposition's value
 /// weighting over the three v1 counters — territory closures, verified
 /// discoveries, consumed yield — exact rationals summing to 1. The
