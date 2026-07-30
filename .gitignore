@@ -2,3 +2,4 @@ target/
 *.tlv
 var*/
 .claude/
+__pycache__/
