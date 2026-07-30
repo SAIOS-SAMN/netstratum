@@ -22,6 +22,20 @@ simulated ecology.
 
 ---
 
+### 0.1 The clade tier (ruled 2026-07-30)
+
+Between species and the axes stands the **clade** — the taxon line:
+free text on the register card, register-only, never a mechanic and
+never the station tier. Biological lines carry their clade (cetacean ·
+cephalopod · hymenopteran · amphibian · teleost · avian · cnidarian ·
+tardigrade · felid…); substrate lines carry the 12 §5a substrate as
+clade (plasmoid · lithic · syzygial · endolithic · fungal ·
+cryo-coherent). A divergence branch keeps its line's clade — one line,
+one taxon; a confluent hybrid's clade is named at its wave. The tier
+ALIGNS lines the axes cannot: Hivelight and the Klethaxu are both
+hymenopteran; the register reads the kinship. **Gastropoda stands
+open** — no snail line yet walks the board; the register awaits it.
+
 ## 1. The roster
 
 Bands from `05_THERMAL_BALANCE.md` §2 (cryogenic 10–100 K · mesic 250–320 K ·

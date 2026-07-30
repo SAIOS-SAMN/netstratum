@@ -705,8 +705,10 @@ def view_civ(var_root, args, paint):
     rows, worlds = read_all(var_root)
     axes = card.get("axes", {})
     lines = [paint.head(f"CIVILIZATION {civ_display(card, target)} [{tier_of(card)}]")]
-    lines.append(f"  species {paint.strong(card.get('species', '?'))} · "
-                 f"axes {'·'.join(axes.get(a, '?') for a in ['disposition', 'metabolism', 'perception'])} · "
+    clade = card.get("clade", "")
+    lines.append(f"  species {paint.strong(card.get('species', '?'))}"
+                 + (f" · clade {clade}" if clade else "")
+                 + f" · axes {'·'.join(axes.get(a, '?') for a in ['disposition', 'metabolism', 'perception'])} · "
                  f"station {card.get('station', '—') or '—'}")
     if card.get("motto"):
         lines.append(f"  {paint.dim(chr(0x201C) + card['motto'] + chr(0x201D))}")

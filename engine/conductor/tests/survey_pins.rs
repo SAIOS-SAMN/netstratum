@@ -69,6 +69,7 @@ fn the_survey_charters_the_sector_and_the_spent_lens_idles() {
             name: "Surveyor".into(),
             sigil: "surveyor".into(),
             species: "witness".into(),
+            clade: String::new(),
             motto: "the drill follows the lens".into(),
             disposition: "empiricist".into(),
             metabolism: "biotic".into(),

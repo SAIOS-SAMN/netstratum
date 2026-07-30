@@ -1374,6 +1374,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         name: parts[1].into(),
                         sigil: sigil.clone(),
                         species: parts[2].into(),
+                        clade: String::new(),
                         motto: parts[3].into(),
                         disposition: axis_words[0].into(),
                         metabolism: axis_words[1].into(),

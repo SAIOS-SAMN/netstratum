@@ -50,6 +50,13 @@ pub struct Civilization {
     /// Free text — the encyclopedia grows itself ("blue whale",
     /// "monarch butterfly", "human").
     pub species: String,
+    /// The CLADE tier (06 register law, ruled 2026-07-30): the taxon
+    /// line between species and the axes — free text, register-only,
+    /// never a mechanic and never the station tier. Biological lines
+    /// carry their clade (cetacean, cephalopod, gastropod,
+    /// hymenopteran…); substrate lines carry the 12 §5a substrate
+    /// (plasmoid, lithic, syzygial…). Empty = unrecorded, lawful.
+    pub clade: String,
     pub motto: String,
     pub disposition: String,
     pub metabolism: String,
@@ -147,6 +154,9 @@ impl Registry {
         w.field_str("name", &civilization.name);
         w.field_str("sigil", &civilization.sigil);
         w.field_str("species", &civilization.species);
+        if !civilization.clade.is_empty() {
+            w.field_str("clade", &civilization.clade);
+        }
         w.field_str("motto", &civilization.motto);
         w.key("axes");
         w.open();
@@ -176,6 +186,7 @@ impl Registry {
             sigil: extract_string(&text, "sigil")
                 .or_else(|| extract_string(&text, "slug"))?,
             species: extract_string(&text, "species").unwrap_or_default(),
+            clade: extract_string(&text, "clade").unwrap_or_default(),
             motto: extract_string(&text, "motto").unwrap_or_default(),
             disposition: extract_string(&text, "disposition")?,
             metabolism: extract_string(&text, "metabolism")?,

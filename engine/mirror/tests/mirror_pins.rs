@@ -36,6 +36,7 @@ fn humans() -> Civilization {
         name: "Humans".into(),
         sigil: "humans".into(),
         species: "human".into(),
+        clade: String::new(),
         motto: "we go anyway".into(),
         disposition: "empiricist".into(),
         metabolism: "biotic".into(),

@@ -21,6 +21,7 @@ fn line(sigil: &str, lineage: Vec<&str>) -> Civilization {
         name: sigil.to_uppercase(),
         sigil: sigil.into(),
         species: "witness".into(),
+        clade: String::new(),
         motto: "we pin the law".into(),
         disposition: "empiricist".into(),
         metabolism: "biotic".into(),

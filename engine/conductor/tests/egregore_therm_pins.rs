@@ -99,6 +99,7 @@ fn the_joule_runway_defers_the_frost() {
             name: sigil.to_string(),
             sigil: sigil.to_string(),
             species: "wood frog".into(),
+            clade: String::new(),
             motto: "measured against the cold".into(),
             disposition: "empiricist".into(),
             metabolism: "biotic".into(),
