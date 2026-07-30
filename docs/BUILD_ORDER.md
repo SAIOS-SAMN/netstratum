@@ -572,7 +572,7 @@ The facet machinery (grant depths, permissions, expiry) stays ahead at N5
 |---|---|---|---|
 | **MARKET-1 — LANDED 2026-07-30** | THE EXCHANGE RATE | tags 49–50 wired: offers as RESTING receipted intents (no escrow — affordability judges at the fill; the price IS the ratio, guardrail 6); `clear_trade` fills at the RESTING offer's exact price (price-time priority, ties by id), moves as two aperture pairs (deal, deal+1 — shield-checked, conservation-exact both directions), closes both intents; CLI `offer …` / `trade …` verbs; both books replay | witnessed: the 3-iron fill at the resting 1/2 price exactly (the late bidder keeps its surplus); conservation across both resources and both worlds; the unmatched offer rests and replays; NoCrossing moves nothing; the shield guards the fill |
 | **OFFER-1a — LANDED 2026-07-30 (first slice)** | THE AUTOMATONS TRADE | `trade_intent` (pure, regime-read): a joule-starving Frost with banked sink offers S_cool for fuel; a Furnace with surplus (> 4 J, placeholder) offers fuel for S_cool — halves of stock, never the whole (guardrail 1's spirit); v1 price 1:1 (05 §1.4 equilibrium pricing is the open design); `market_step` posts one intent per world (offer id = chronicle length, deterministic) and clears the first crossing per beat; wired into the conductor's heartbeat with the narrator line | **OFFER-1b WITNESSED 2026-07-30**: the survive-the-freeze arc whole — a shelled Furnace banks surplus and forms its intent; an arrayed Frost freeze-locks in joule famine with banked sink and forms its own; ONE market beat clears the crossing, the famine RELIEVES through the fill, the thawed world flows again, both books carry OfferCleared, and replay reproduces the rescue from receipts alone. Still open: 05 §1.4 equilibrium pricing (the design doc is unwritten — the 1:1 parity stays a named placeholder until the operator rules the spec) |
-| **BOARD-1** | THE TRADE BOARD | the marketplace surfaced: standing offers/asks and clearing prices rendered on `wall.html` and the observer (mirror-side, the reflection law — no second truth); the journal's trade lines become a readable board; a steward reads arbitrage and intervenes by inbox | the board renders the standing offers and the last clears from state alone; a human reads a cross-world arbitrage and the steward inbox executes it; the render mints no physics |
+| **BOARD-1 — LANDED 2026-07-30** | THE TRADE BOARD | the resting offers export to the state uplink as DATA fields (never prose); the observer gains the `market` view (standing intents per world + crossings-cleared count by event kind) and the observatory gains the TRADE BOARD panel; the render mints no physics, prices stay ratios. Deferred, recorded: the wall.html journal trade lines (JOURNAL voice work) | verified live: a player's resting offer and six autonomous clears render from state alone |
 
 Dependency: the carrier gate is OPEN (APERTURE-1 above). MARKET-1 needs the
 APERTURE deed to price; OFFER-1 needs MARKET-1's matching; BOARD-1 reads
@@ -725,6 +725,20 @@ open it.
   authority to the profile (passwordless per ruling); the tier-0
   verbs (t0 · license · shift · age) check it and refuse with the
   cure named. Save preserves the station.
+
+## 3a-nonies. B1 + B3 + the visible player (2026-07-30)
+
+- **BOARD-1 landed** (row above): the market stopped running invisibly.
+- **The epistemological want reads on the board** (WANT-1 kind 1): a
+  world whose REACH (wrapped L1, placeholder 16 — the frontier's kin)
+  contains broken chains or `--closed-*` ruins reads ◌epistemological
+  on the stress views — truth-starvation as a BOARD reading, by
+  design (worlds cannot see neighbors; the board can). The struck
+  cognitive wants also export to the state uplink and flag on the
+  observatory.
+- **CLI worlds mirror on save** (#37): a player's saved world reflects
+  beside the NPCs (civilization = the sealed line, else the active
+  operator) — testers see their own worlds on every board.
 
 ## 3b. The union board (12_UNION — the world-book of the new aeon)
 

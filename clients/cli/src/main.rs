@@ -1468,6 +1468,25 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 let path = std::path::PathBuf::from("var/worlds")
                     .join(&orb.name)
                     .join("chronicle.tlv");
+                // #37: the saved world becomes VISIBLE — the mirror
+                // reflects it beside the NPCs (civilization = the
+                // sealed line, else the active operator).
+                let civ = world
+                    .genesis()
+                    .map(|g| g.civilization.clone())
+                    .or_else(|| {
+                        std::fs::read_to_string("var/operators/active")
+                            .ok()
+                            .map(|n| n.trim().to_string())
+                            .filter(|n| !n.is_empty())
+                    })
+                    .unwrap_or_else(|| "operator".into());
+                let _ = mirror::Mirror::at("var/worlds").record(
+                    &orb.name,
+                    &orb.name,
+                    &civ,
+                    world,
+                );
                 match cfe::persist::sync(world.chronicle(), &path) {
                     Ok(appended) => {
                         // The active operator's thread picks up here.

@@ -111,6 +111,20 @@ impl JsonWriter {
         self.out.push(']');
     }
 
+    /// A whole array of pre-rendered JSON objects in one stroke —
+    /// the items are already lawful JSON, seated verbatim.
+    pub fn raw_array(&mut self, items: impl Iterator<Item = String>) {
+        self.seat();
+        self.out.push('[');
+        for (i, item) in items.enumerate() {
+            if i > 0 {
+                self.out.push(',');
+            }
+            self.out.push_str(&item);
+        }
+        self.out.push(']');
+    }
+
     pub fn finish(self) -> String {
         self.out
     }

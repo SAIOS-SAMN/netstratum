@@ -507,6 +507,27 @@ fn render_state(world_name: &str, planet: &str, civilization: &str, world: &Worl
     if let Some(class) = world.star() {
         w.field_u64("star_class", class as u8 as u64);
     }
+    // MARKET-1 / observer uplink (BOARD-1): the resting offers, data
+    // fields the boards render — never prose to parse.
+    if !world.offers().is_empty() {
+        w.key("offers");
+        w.raw_array(world.offers().iter().map(|offer| {
+            let mut entry = JsonWriter::new();
+            entry.open();
+            entry.field_u64("offer", offer.offer);
+            entry.field_str("give", resource_name(offer.give));
+            entry.field_str("give_amount", &ratio_str(&offer.give_amount));
+            entry.field_str("want", resource_name(offer.want));
+            entry.field_str("want_amount", &ratio_str(&offer.want_amount));
+            entry.close();
+            entry.finish()
+        }));
+    }
+    // WANT-1 / observer uplink: the struck cognitive wants.
+    if !world.wants().is_empty() {
+        w.key("wants");
+        w.array(world.wants().iter().map(|(_, kind)| want_name(*kind).to_string()));
+    }
     if let Some(orb) = world.orb() {
         w.field_str("colony", &orb.name);
         // VENT-1 / observer uplink: the dual ledger and the derived

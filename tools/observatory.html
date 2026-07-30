@@ -12,7 +12,7 @@
   body { margin:0; background:var(--bg); color:var(--fg);
          font:13px/1.5 "SF Mono","Cascadia Mono",Consolas,monospace; }
   #torus { display:block; width:100vw; height:46vh; cursor:crosshair; }
-  #panels { display:grid; grid-template-columns: 1fr 1fr 1fr;
+  #panels { display:grid; grid-template-columns: 1fr 1fr 1fr 1fr;
             gap:12px; padding:12px; }
   .panel { border:1px solid #182027; padding:10px 12px; overflow:auto;
            max-height:44vh; white-space:pre; }
@@ -33,6 +33,7 @@
 <div id="hover"></div>
 <div id="panels">
   <div class="panel" id="board"><h2>THE BOARD</h2><span class="dim">reading…</span></div>
+  <div class="panel" id="market"><h2>THE TRADE BOARD</h2><span class="dim">reading…</span></div>
   <div class="panel" id="stress"><h2>STRESS — THE T0 READ</h2><span class="dim">reading…</span></div>
   <div class="panel" id="tiers"><h2>THE UNION T0→T3</h2><span class="dim">reading…</span></div>
 </div>
@@ -94,9 +95,20 @@ function renderPanels(d){
   for (const p of d.planets) {
     const flags = [];
     if ((p.famine||[]).length) flags.push(`<span class="bad">⚠${p.famine.join(",")}</span> <span class="dim">the want strikes</span>`);
+    for (const w of (p.wants||[])) flags.push(`<span class="bad">◌${esc(w)}</span> <span class="dim">a famine of the mind</span>`);
     if (F(p.entropy_vented||"0") > 0) flags.push(`<span class="hot">♨${esc(p.entropy_vented)}</span>`);
     if (flags.length) stressed.push(`${esc(p.world)}/${esc(p.planet)}  ${flags.join(" ")}`);
   }
+  const offers = [];
+  for (const p of d.planets)
+    for (const o of (p.offers||[]))
+      offers.push(`${esc(p.world)} <span class="dim">#${o.offer}</span> ` +
+        `<span class="strong">${esc(o.give_amount)}</span> ${esc(o.give)} ` +
+        `<span class="dim">for</span> <span class="strong">${esc(o.want_amount)}</span> ${esc(o.want)}`);
+  document.getElementById("market").innerHTML = `<h2>THE TRADE BOARD</h2>` +
+    (offers.length ? offers.join("\n")
+      : `<span class="dim">no intents rest — the market waits</span>`) +
+    `\n\n<span class="dim">the price is the ratio — no absolute price exists</span>`;
   document.getElementById("stress").innerHTML = `<h2>STRESS — THE T0 READ</h2>` +
     (stressed.length ? stressed.join("\n")
       : `<span class="good">none — the board breathes</span>`) +

@@ -425,7 +425,7 @@ def view_board(var_root, args, paint):
         + ("" if petitions == 0 else "  (t0 inbox in the client)"))
     lines += ["", paint.head("VIEWS"),
               "  " + paint.dim("civs [--tier T0] · worlds · world <name> · civ <slug> · "
-                               "tiers · stress · techs · chart — any view takes --watch N")]
+                               "market · tiers · stress · techs · chart — any view takes --watch N")]
     return "\n".join(lines)
 
 
@@ -668,11 +668,50 @@ def view_tiers(var_root, args, paint):
     return "\n".join(lines)
 
 
+EPISTEMIC_REACH = 16  # placeholder parameter — the frontier's kin
+
+
+def epistemic_reads(var_root, paint):
+    """WANT-1 kind 1 (board-side): truth-starvation — a world whose
+    REACH (wrapped L1 on the chart) contains broken chains or ruins
+    reads the epistemological want. Worlds cannot see neighbors; the
+    board can — this reading lives here by design."""
+    chart = load_starchart(var_root)
+    span, _ = universe_card(var_root)
+    corrupt = []
+    for world_dir in world_dirs(var_root):
+        name = world_dir.name
+        if "--closed-" in name:
+            corrupt.append(name)
+            continue
+        linked, _ = chain_linked(world_dir / "chronicle.jsonl")
+        if not linked:
+            corrupt.append(name)
+    reads = []
+    for name, coords in chart.items():
+        if name in corrupt:
+            continue
+        near = [
+            other for other in corrupt
+            if other in chart
+            and toroidal_l1(coords[:3], chart[other][:3], span) <= EPISTEMIC_REACH
+        ]
+        if near:
+            reads.append(
+                f"{name}  {paint.bad('◌epistemological')} — "
+                f"{len(near)} corrupted chronicle(s) in reach: "
+                + paint.dim(", ".join(display_name(n) for n in near)))
+    return reads
+
+
 def view_stress(var_root, args, paint):
     """The t0 stress read, alone and whole."""
     rows, worlds = read_all(var_root)
     lines = [paint.head("STRESS — the t0 read")]
     any_stress = False
+    for line in epistemic_reads(var_root, paint):
+        any_stress = True
+        lines.append(f"  {line}")
     for row in rows:
         flags = stress_flags(row, paint)
         if flags:
@@ -707,6 +746,34 @@ def view_techs(var_root, args, paint):
     if not found:
         lines.append("  " + paint.dim("nothing crystallized yet — pressure and "
                                       "surplus write this page"))
+    return "\n".join(lines)
+
+
+def view_market(var_root, args, paint):
+    """BOARD-1: the trade board — standing offers from the state
+    uplink (data fields, never prose), clears counted by event kind."""
+    lines = [paint.head("THE TRADE BOARD — resting intents, cleared crossings")]
+    resting = 0
+    for world_dir in world_dirs(var_root):
+        for state in world_facts(world_dir)["planets"]:
+            for offer in state.get("offers", []):
+                resting += 1
+                lines.append(
+                    f"  ⇋ {world_dir.name:<18} offer {offer.get('offer', '?')}: "
+                    f"{paint.strong(offer.get('give_amount', '?'))} {offer.get('give', '?')} "
+                    f"for {paint.strong(offer.get('want_amount', '?'))} {offer.get('want', '?')}"
+                )
+    cleared = 0
+    for world_dir in world_dirs(var_root):
+        cleared += sum(
+            1 for e in world_facts(world_dir)["events"]
+            if e.get("event") == "offer_cleared")
+    if resting == 0:
+        lines.append("  " + paint.dim("no intents rest — the market waits on surplus and want"))
+    lines.append(
+        f"  crossings cleared to date: {paint.strong(str(cleared // 2))}"
+        + paint.dim("  (each clear is two books)"))
+    lines.append(paint.dim("  the price is the ratio — no absolute price exists (guardrail 6)"))
     return "\n".join(lines)
 
 
@@ -764,7 +831,7 @@ def view_chart(var_root, args, paint):
 
 
 VIEWS = {
-    "board": view_board, "civs": view_civs, "worlds": view_worlds,
+    "board": view_board, "civs": view_civs, "worlds": view_worlds, "market": view_market,
     "world": view_world, "civ": view_civ, "tiers": view_tiers,
     "stress": view_stress, "techs": view_techs, "chart": view_chart,
 }
