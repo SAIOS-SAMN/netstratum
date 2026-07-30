@@ -226,16 +226,56 @@ canvas.addEventListener("mousemove", e => {
   } else hover.style.display = "none";
 });
 
-/* ── the poll loop: --watch, in the browser ─────────────────────── */
-async function tick(){
+/* ── the push loop (WEB-1 phase 2): SSE drives; polling is the
+      fallback when the stream drops ─────────────────────────────── */
+let refreshQueued = false;
+async function refresh(){
+  if (refreshQueued) return; refreshQueued = true;
   try {
     const d = await readBoard();
+    lastBoard = d;
     renderPanels(d);
     upload(d.chart, d.universe.span);
-  } catch (e) { /* the window stays calm mid-write; next poll heals */ }
-  setTimeout(tick, 2000);
+  } catch (e) { /* the window stays calm mid-write */ }
+  refreshQueued = false;
 }
-tick();
+let lastBoard = null;
+refresh();
+try {
+  const stream = new EventSource("/stream");
+  stream.addEventListener("tick", refresh);
+  stream.onerror = () => setTimeout(refresh, 2000);
+} catch (e) { setInterval(refresh, 2000); }
+setInterval(refresh, 15000); // the heartbeat floor
+
+/* ── the drill-down (WEB-1 phase 3): click a world on the torus —
+      its panel takes the board's place until dismissed ───────────── */
+canvas.addEventListener("click", e => {
+  let best = null, bestD = 28;
+  names.forEach((n, i) => {
+    const wx = ((points[i*4]-pan.x)%span+span)%span / span * canvas.clientWidth;
+    const wy = (1-((points[i*4+1]-pan.y)%span+span)%span / span) * canvas.clientHeight;
+    const d = Math.abs(wx-e.clientX) + Math.abs(wy-e.clientY);
+    if (d < bestD){ best = n; bestD = d; }
+  });
+  if (!best || !lastBoard) return;
+  const p = lastBoard.planets.find(x => x.world === best);
+  const el = document.getElementById("board");
+  if (!p) { el.innerHTML = `<h2>${esc(best)}</h2><span class="dim">charted, not settled — an annexed or far world</span>`; return; }
+  const stack = (p.constellation||[]);
+  const strip = stack.map(n => n.held ? (n.condition === 6 ? "◆" : "✶")
+    : (n.threshold > 1 && n.condition !== 6 ? `${n.progress}/${n.threshold}` : "○")).join(" ");
+  el.innerHTML = `<h2>WORLD ${esc(p.world)}</h2>` +
+    `planet <span class="strong">${esc(p.planet)}</span> · t${p.clock} · ` +
+    `${(p.zones||[]).length} zone(s)\n` +
+    `civilization <span class="strong">${esc(p.civilization)}</span>\n` +
+    `banked: ${Object.entries(p.banked||{}).map(([k,v])=>`${k} <span class="strong">${esc(v)}</span>`).join(" · ")||"—"}\n` +
+    ((p.famine||[]).length ? `<span class="bad">⚠ famine: ${p.famine.join(", ")}</span>\n` : "") +
+    ((p.wants||[]).length ? `<span class="bad">◌ wants: ${p.wants.map(esc).join(", ")}</span>\n` : "") +
+    (stack.length ? `base-7: ${strip}\n` : "") +
+    `<span class="dim">click empty space to return</span>`;
+  if (bestD >= 28) refresh();
+});
 </script>
 </body>
 </html>

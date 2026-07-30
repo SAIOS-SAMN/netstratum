@@ -8,9 +8,14 @@ served verbatim. One truth, zero translation layers (the reflection
 law over HTTP). The single synthesized route, `/data/index.json`, is a
 directory INDEX rendered as data — a listing, not an endpoint.
 
-READ-ONLY BY CONSTRUCTION: GET only; anything else refuses 405. The
-future push stream (NS-5) will speak NS-1 TLV frames over a socket —
-the house wire, never a third format.
+READ-ONLY BY CONSTRUCTION: GET only; anything else refuses 405.
+
+THE PUSH (WEB-1 phase 2): `/stream` is a Server-Sent-Events feed —
+one `tick` event whenever the mirror moves (mtime watch on the worlds
+root), each carrying the changed paths. The client refetches exactly
+what moved; the payloads themselves stay the mirror's own files
+(state.tlv = the house wire). A socket speaking raw TLV frames
+remains the NS-5 form; SSE is its stdlib-lawful forerunner.
 
 Usage:
   python3 tools/webserve.py [--root var] [--port 8081]
@@ -19,6 +24,7 @@ Usage:
 
 import argparse
 import json
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -55,6 +61,8 @@ class Window(BaseHTTPRequestHandler):
         path = self.path.split("?", 1)[0]
         if path in ("/", "/index.html"):
             return self.send_file(TOOLS / "observatory.html", "text/html")
+        if path == "/stream":
+            return self.stream()
         if path == "/data/index.json":
             body = build_index(self.root).encode()
             return self.send_bytes(body, "application/json")
@@ -72,6 +80,32 @@ class Window(BaseHTTPRequestHandler):
                 return self.send_file(target, kind)
         self.send_response(404)
         self.end_headers()
+
+    def stream(self):
+        """WEB-1 phase 2: the SSE push — a `tick` whenever the mirror
+        moves; the client refetches what changed."""
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream")
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        seen = {}
+        try:
+            while True:
+                changed = []
+                worlds = self.root / "worlds"
+                if worlds.is_dir():
+                    for state in worlds.glob("*/planets/*/state.json"):
+                        stamp = state.stat().st_mtime_ns
+                        if seen.get(state) != stamp:
+                            seen[state] = stamp
+                            changed.append(str(state.relative_to(self.root)))
+                if changed:
+                    body = json.dumps({"changed": changed})
+                    self.wfile.write(f"event: tick\ndata: {body}\n\n".encode())
+                    self.wfile.flush()
+                time.sleep(1)
+        except (BrokenPipeError, ConnectionResetError):
+            return
 
     def do_POST(self):
         # Observation and intervention are different verbs — the
