@@ -133,9 +133,16 @@ forever.
   the conductor's `pen_service` seals yields at beat boundaries and
   polls for the pen's return, the CLI's `pen` verbs ask/yield and
   the walk-checked `far_world` retired the founder guard. Witness
-  `pen_pins`. Open: the partition ruling (#3, recommendation with
-  the operator), MESH-1c (TCP adapter, logic-free; multi-world
-  aggregation at N7), the anti-mirror audit readings (#4, coder-03).
+  `pen_pins`. The partition law RULED 2026-07-31 (NS-5 §7.5,
+  directives ruling 4): the spine stalls, the escape is an open
+  Diverged branch — no votes, no silent mutiny. N6 ACCEPTANCE PROVED
+  2026-07-31 (`engine/mesh/examples/ns5_two_nodes.rs` — every leg its
+  own OS process, state crossing ONLY as chronicle.tlv bytes: the
+  seal carries the pen, drift cures by the tail, CONSILIENCE AT
+  EXACT ZERO, the stale hand stalls, the forged refuses at its
+  break). Open: MESH-1c (TCP adapter, logic-free; multi-world
+  aggregation at N7), the anti-mirror audit readings (#4, coder-03),
+  the quarantine growth (#7), the docs fold (#9) when N6 lands whole.
 - **coder-01**: next = Phase 2 cross-world trade (egregores exchanging
   joules/`S_cool` — needs a cross-world carrier; transfers are intra-world
   today) or TECH-1 (`10_TECH_EMERGENCE.md`, opens SINK-1's deferred
