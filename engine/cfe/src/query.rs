@@ -92,6 +92,10 @@ pub struct ScanRead {
     /// Every resonant orb, bucket order — nothing truncates silently.
     pub hits: Vec<u64>,
     pub refusals: Vec<NearMiss>,
+    /// G3 (NS-2 §4): per-hit translation survival, parallel to `hits`
+    /// — the prober's basis against the candidate's, the loss shown
+    /// never silent. Additive: pre-G3 readers ignore it.
+    pub translations: Vec<(u64, Ratio)>,
 }
 
 /// The eight grid symmetries — the plane group of the square chart,
@@ -338,13 +342,31 @@ pub fn query_record_bytes(address: &Address) -> Vec<u8> {
 }
 
 /// NS-2 §2.3 — the hit record (tag 57): the resonant orb and the
-/// reading's own stamp, ledger-side.
-pub fn hit_record_bytes(orb: u64, stamp: u64) -> Vec<u8> {
+/// reading's own stamp, ledger-side; the translation survival rides
+/// BEHIND the pre-G3 prefix (additive — SEAL A on the wire: an old
+/// reader parses orb ‖ stamp and never needs the tail).
+pub fn hit_record_bytes(orb: u64, stamp: u64, survival: &Ratio) -> Vec<u8> {
     let mut value = orb.to_le_bytes().to_vec();
     value.extend_from_slice(&stamp.to_le_bytes());
+    crate::ratio::encode(survival, &mut value);
     let mut out = Vec::new();
     crate::tlv::put(57, &value, &mut out);
     out
+}
+
+/// G3 (04 §1.3; NS-2 §4) — the cross-frame read, the N5-ready seam:
+/// do two orbs resonate (joint shadows equal — the class survives
+/// translation BY DEFINITION), and how much structure survives OUR
+/// read of THEIR sky? Pure; the loss is the pair's distance, never a
+/// property of either structure alone.
+pub fn translated_read(
+    ours: &ColonyOrb,
+    our_basis: u8,
+    theirs: &ColonyOrb,
+    their_basis: u8,
+) -> (bool, Ratio) {
+    let resonant = orb_sigil(ours).joint == orb_sigil(theirs).joint;
+    (resonant, crate::dop::translation_survival(our_basis, their_basis))
 }
 
 /// NS-2 §2.4 — the refusal record (tag 58): the residual list whole,

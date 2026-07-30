@@ -150,9 +150,15 @@ forever.
   biotic/unsealed byte-identical to v1; 04 §6 row for evidence) with
   **wave 3a**: Coronal Choir seated progenitor — the first plasmic
   board-maker, tier 0 tri-planar on metabolism (seeds + registry in
-  step). Next: G3 (perception facet through the scanner — the last
-  leg of full spatial recognition). Umbral tier-0 coverage (Syzygy)
-  remains one operator word away.
+  step). **G3 LANDED same day — FULL SPATIAL RECOGNITION LIVE**: the
+  sigil reads geometry (S), content (G), and now the perceiving frame
+  — as a READ-time translation law (NS-2 §4.2a, a recorded
+  correction: the sigil is frame-free; frames quotient out and join T
+  outside the key); tag-57 extends additively; `translated_read` is
+  the N5-ready cross-frame seam. The whole G1→G2→G3 ladder closed in
+  one cadence. Next candidates: G4 (the discovery mint — gated on
+  N5/N6), WANT-1 cognitive wants (tags 62+), the umbral seat
+  (Syzygy — one operator word away).
 - Parallel worktrees per node; merge to `main` on green; BUILD_ORDER
   conflicts resolve by keeping both entries.
 

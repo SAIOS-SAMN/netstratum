@@ -11,7 +11,7 @@ use std::io::{self, BufRead, Write};
 
 use cfe::dop::{ColonyOrb, Resource, ZoneKind};
 use cfe::ipsal::Scope;
-use cfe::ratio::Ratio;
+use cfe::ratio::{ratio, Ratio};
 use cfe::vrp::ChainRead;
 use cfe::world::{replay, ActionRefused, World, SOVEREIGN};
 
@@ -2206,10 +2206,24 @@ fn scan(world: &mut World, style: &Style, prober: u64, exemplar: u64) {
                 band_word(read.probed.thermal)
             );
             for hit in &read.hits {
+                let survival = read
+                    .translations
+                    .iter()
+                    .find(|(orb, _)| orb == hit)
+                    .map(|(_, held)| held.clone())
+                    .unwrap_or_else(|| ratio(1, 1));
+                let translated = match survival == ratio(1, 1) {
+                    true => "full structure survives (one frame)".to_string(),
+                    false => format!(
+                        "{} of structure survives your read — build a resonance array to close the gap",
+                        amount(&survival)
+                    ),
+                };
                 println!(
-                    "  {} resonance: {} — the same shape through the lens",
+                    "  {} resonance: {} — the same shape through the lens · {}",
                     style.ok("✓"),
-                    style.strong(&named(*hit))
+                    style.strong(&named(*hit)),
+                    style.dim(&translated)
                 );
             }
             for miss in &read.refusals {

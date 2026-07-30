@@ -291,14 +291,30 @@ with its landing named. The dimensional-collapse warning binds every
 facet forever: projections derive from ONE joint shadow, never from
 independent canonicalizations.
 
-### 4.3 Reserved extensions (recorded, not landed)
+### 4.2a The translation law (G3, LANDED 2026-07-30) — a CORRECTION recorded
 
-- **The perception facet (G3, after G1):** a civilization's perception
-  axis (planar/volumetric/harmonic/umbral) reads the SAME sigil at a
-  granted translation — frames as coboundaries, the translation read
-  with measured loss (04 §6). G3's first consumer is this scanner; the
-  facet extends G, and the loss is carried whole in the refusal (the
-  §1.4 shape).
+The §4.3 reservation drafted perception as a G extension. Landing it
+under the axiom check REFUSED that shape: 04 §1.3's law is that the
+H¹ class IS what survives translation — frames are what
+canonicalization quotients OUT, so the observer's basis joins T
+outside the key: **query by WHAT it is, never by WHEN it was found or
+WHO reads it.** The sigil is frame-free (measured:
+`the_sigil_is_frame_free`).
+
+Translation is a READ-time law instead: every hit annotates with the
+**survival ratio** between the prober's sealed basis and the
+candidate's (`dop::translation_survival` — same basis 1; the 04 §4
+example verbatim, harmonic through a planar eye 3/4; umbral pairs
+1/2; unsealed reads whole; exact rationals, the loss SHOWN never
+silent). The tag-57 hit record extends ADDITIVELY — the survival
+rides behind the pre-G3 prefix; an old reader parses orb ‖ stamp and
+never needs the tail (measured: `the_hit_record_extends_additively`).
+`translated_read` is the pure cross-frame seam, N5-ready: resonance
+is joint equality (the class), survival is the pair's frame distance.
+Local scans read whole (one world, one sealed basis); the cross-frame
+pairing composes at N5/N6 through the same table.
+
+### 4.3 Reserved extensions (recorded, not landed)
 - **The galaxy-region facet (post-GALAXY-1a, post-N4):** scanning by
   charted sky region — derived S-side membership (`galaxy_of`,
   wrapped-L1 to charted centers), never a stored tag. Composes with the

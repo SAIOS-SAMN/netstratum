@@ -338,6 +338,23 @@ pub fn zone_upkeep(kind: ZoneKind, metabolism: u8) -> Vec<(Resource, Ratio)> {
         .collect()
 }
 
+/// G3 (04 §1.3, §4; NS-2 §4, placeholder table): the fraction of
+/// structure surviving a cross-frame read — exact rationals, symmetric
+/// in v1 (the loss prices the DISTANCE between frames). Same basis 1;
+/// the 04 §4 example verbatim (harmonic through a planar eye: 3/4);
+/// umbral reads by occlusion and keeps 1/2 of any other frame; basis
+/// 0 (unsealed) carries no frame claim and reads whole. The loss is
+/// SHOWN, never silent — and never keys a bucket: frames quotient out
+/// of the sigil (the H¹ class IS what survives translation).
+pub fn translation_survival(ours: u8, theirs: u8) -> Ratio {
+    match (ours, theirs) {
+        (0, _) | (_, 0) => ratio(1, 1),
+        (a, b) if a == b => ratio(1, 1),
+        (4, _) | (_, 4) => ratio(1, 2),
+        _ => ratio(3, 4),
+    }
+}
+
 /// G1 (04 §1.1, placeholder weights): the disposition's value
 /// weighting over the three v1 counters — territory closures, verified
 /// discoveries, consumed yield — exact rationals summing to 1. The

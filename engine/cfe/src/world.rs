@@ -2658,7 +2658,16 @@ impl World {
         let stamp = self.chronicle.receipts().last().expect("just closed").stamp;
         let exemplar_orb = self.orb_by_id(exemplar).expect("judged above");
         let (probed, hits, refusals) = crate::query::resonance_read(exemplar_orb, &self.orbs, star);
-        Ok(crate::query::ScanRead { stamp, probed, hits, refusals })
+        // G3 (NS-2 §4): the translation annotation — every candidate
+        // in ONE world shares the line's basis, so the local read
+        // survives whole; the cross-frame pairing composes at N5/N6
+        // through the same table.
+        let basis = self.genesis.as_ref().map(|held| held.perception).unwrap_or(0);
+        let translations = hits
+            .iter()
+            .map(|orb| (*orb, crate::dop::translation_survival(basis, basis)))
+            .collect();
+        Ok(crate::query::ScanRead { stamp, probed, hits, refusals, translations })
     }
 
     /// G1 (04 §1/§5) — seal the line's three axes as THE binding

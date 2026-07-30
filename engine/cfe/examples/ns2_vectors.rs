@@ -43,7 +43,7 @@ fn main() {
     println!("{}", hex(&query_record_bytes(&sigil.address)));
     println!();
     println!("-- tag 57, the hit record (orb 3, stamp 178) --");
-    println!("{}", hex(&hit_record_bytes(3, 178)));
+    println!("{}", hex(&hit_record_bytes(3, 178, &ratio(3, 4))));
     println!();
 
     // The kind-swap near-miss (C(Δ) = 0 while the delta is real) and
