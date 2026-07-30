@@ -144,6 +144,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 Some("synth") | Some("synthesizer") => Some(ZoneKind::Synthesizer),
                 Some("enc") | Some("encasement") => Some(ZoneKind::Encasement),
                 Some("cryo") | Some("cryo-array") => Some(ZoneKind::CryoArray),
+                Some("res") | Some("resonator") => Some(ZoneKind::Resonator),
                 _ => None,
             };
             match (tile, kind) {
@@ -215,6 +216,25 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             }
         }
         Some("thermal") => thermal_line(world, style, *current),
+        Some("scan") => {
+            let exemplar = match words.next() {
+                Some(name) => world
+                    .orbs()
+                    .iter()
+                    .find(|held| held.name == name)
+                    .map(|held| held.orb_id),
+                None => Some(*current),
+            };
+            match exemplar {
+                Some(exemplar) => scan(world, style, *current, exemplar),
+                None => println!(
+                    "{} no planet by that name — {} lists them; bare {} scans for this planet's twins",
+                    style.bad("✗"),
+                    style.strong("planets"),
+                    style.strong("scan")
+                ),
+            }
+        }
         Some("tick") => {
             let count = words
                 .next()
@@ -1488,7 +1508,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
 fn help(style: &Style) {
     let lines = [
         ("found <name>", "establish your colony (banks 20 iron + 10 biomass) — your first receipt"),
-        ("zone <tile|r:c> <kind>", "build — ext: 10 iron → +3/2 iron/t · hab: 5 bio → +1 bio/t · smelt: 15 iron+10 bio → 2 iron+1/2 bio in, +1 alloy/t · synth: 20 alloy+15 bio → 4 alloy+1 bio in, +1/4 diamond/t · enc: 8 iron → encases excess heat as joules"),
+        ("zone <tile|r:c> <kind>", "build — ext: 10 iron → +3/2 iron/t · hab: 5 bio → +1 bio/t · smelt: 15 iron+10 bio → 2 iron+1/2 bio in, +1 alloy/t · synth: 20 alloy+15 bio → 4 alloy+1 bio in, +1/4 diamond/t · enc: 8 iron → encases excess heat as joules · res: 10 alloy+5 diamond → 1/4 diamond in, +1/8 crystal/t"),
         ("tick <n>", "let n ticks pass — active zones net yield−upkeep into the workspace; famine strikes if a store runs dry"),
         ("collect", "settle the workspace against the bank — sealed as receipts; only banked value persists"),
         ("raze <tile|r:c>", "demolish a zone for half its cost back — the famine escape hatch"),
@@ -1515,6 +1535,7 @@ fn help(style: &Style) {
         ("star <class>", "commission the sun (once): O B A F G K M · bd wd rg ns wr lwh — fixes L for every orbit"),
         ("site <albedo> <r>", "site this planet's orbit (exact fractions) — thermal wakes: encase first, only overflow vents"),
         ("thermal", "the thermal read: T_eq⁴, band, overheat, encased joules"),
+        ("scan [planet]", "the resonance scanner (draws 1 crystal from THIS planet): finds orbs structurally congruent to the exemplar — same zones under the grid symmetry, same bank, same band; near-misses refuse with their delta whole; bare scan hunts this planet's twins"),
         ("map", "the tile grid"),
         ("status", "colony, ledgers, clock, receipts"),
         ("chronicle", "the world's full receipted history"),
@@ -1612,6 +1633,100 @@ fn coordinate(tile: u16) -> String {
     format!("{}:{}", tile / GRID, tile % GRID)
 }
 
+/// N4 (NS-2 RQP) — the scanner: the lens beside the mirror. The
+/// CURRENT planet pays the draw; the exemplar's structure is the
+/// query; hits and near-misses render with their deltas whole.
+fn scan(world: &mut World, style: &Style, prober: u64, exemplar: u64) {
+    match world.scan(prober, exemplar) {
+        Ok(read) => {
+            let named = |orb: u64| {
+                world
+                    .orb_by_id(orb)
+                    .map(|held| held.name.clone())
+                    .unwrap_or_else(|| format!("orb {orb}"))
+            };
+            println!(
+                "{} the lens opens on {} — {} crystal drawn, stamp {} (the looking's only receipt)",
+                style.head("◎"),
+                style.strong(&named(exemplar)),
+                style.strong(&amount(&cfe::dop::scan_draw())),
+                read.stamp
+            );
+            println!(
+                "  address: {} zone(s) under the grid symmetry · resources {} · band {}",
+                read.probed.s_canonical.len(),
+                match read.probed.g_resources.is_empty() {
+                    true => "none".to_string(),
+                    false => read
+                        .probed
+                        .g_resources
+                        .iter()
+                        .filter_map(|code| Resource::from_wire(*code))
+                        .map(resource_name)
+                        .collect::<Vec<_>>()
+                        .join("+"),
+                },
+                band_word(read.probed.thermal)
+            );
+            for hit in &read.hits {
+                println!(
+                    "  {} resonance: {} — the same shape through the lens",
+                    style.ok("✓"),
+                    style.strong(&named(*hit))
+                );
+            }
+            for miss in &read.refusals {
+                let mut parts: Vec<String> = Vec::new();
+                for (resource, residual) in &miss.banked_residuals {
+                    parts.push(format!("{} {}", resource_name(*resource), amount(residual)));
+                }
+                for (tile, ours, theirs) in &miss.zone_deltas {
+                    parts.push(format!(
+                        "tile {} ({}) {}↔{}",
+                        tile,
+                        coordinate(*tile),
+                        kind_word(*ours),
+                        kind_word(*theirs)
+                    ));
+                }
+                println!(
+                    "  {} near-miss: {} — delta whole: {} · C(Δ) = {}",
+                    style.bad("✗"),
+                    style.strong(&named(miss.orb)),
+                    parts.join(" · "),
+                    style.strong(&amount(&miss.coherence))
+                );
+            }
+            if read.hits.is_empty() && read.refusals.is_empty() {
+                println!("{}", style.dim("  (nothing resonates — the bucket is empty)"));
+            }
+        }
+        Err(ActionRefused::CannotAfford { resource: Resource::Crystal, need, have }) => println!(
+            "{} scanning draws {} crystal and you have {} — crystals come from a resonator ({})",
+            style.bad("✗"),
+            style.strong(&amount(&need)),
+            style.strong(&amount(&have)),
+            style.strong("zone <tile> res")
+        ),
+        Err(refusal) => refuse(world, &refusal, style),
+    }
+}
+
+/// The near-miss zone-delta word: a kind wire code, 0 = unzoned.
+fn kind_word(code: u8) -> &'static str {
+    ZoneKind::from_wire(code).map(kind_name).unwrap_or("empty")
+}
+
+/// The address band word (NS-2 §2.2 coding).
+fn band_word(code: u8) -> &'static str {
+    match code {
+        1 => "cryogenic",
+        2 => "mesic",
+        3 => "hyperthermal",
+        _ => "unbanded",
+    }
+}
+
 fn kind_name(kind: ZoneKind) -> &'static str {
     match kind {
         ZoneKind::Extractor => "extractor",
@@ -1620,6 +1735,7 @@ fn kind_name(kind: ZoneKind) -> &'static str {
         ZoneKind::Synthesizer => "synthesizer",
         ZoneKind::Encasement => "encasement",
         ZoneKind::CryoArray => "cryo-array",
+        ZoneKind::Resonator => "resonator",
     }
 }
 
@@ -1631,6 +1747,7 @@ fn parse_resource(word: &str) -> Option<Resource> {
         "diamond" => Some(Resource::Diamond),
         "joule" | "joules" => Some(Resource::Joule),
         "sink" => Some(Resource::Sink),
+        "crystal" | "crystals" => Some(Resource::Crystal),
         _ => None,
     }
 }
@@ -1745,6 +1862,7 @@ fn resource_name(resource: Resource) -> &'static str {
         Resource::Diamond => "diamond",
         Resource::Joule => "joule",
         Resource::Sink => "sink",
+        Resource::Crystal => "crystal",
     }
 }
 
@@ -1915,7 +2033,7 @@ fn map(world: &World, style: &Style, current: u64) {
     println!(
         "{}  {}",
         style.head("MAP"),
-        style.dim("E extractor · H habitat · S smelter · Y synthesizer · C encasement · K cryo-array · lowercase = dormant · · empty")
+        style.dim("E extractor · H habitat · S smelter · Y synthesizer · C encasement · K cryo-array · R resonator · lowercase = dormant · · empty")
     );
     print!("     ");
     for col in 0..GRID {
@@ -1935,6 +2053,7 @@ fn map(world: &World, style: &Style, current: u64) {
                     ZoneKind::Synthesizer => "y",
                     ZoneKind::Encasement => "c",
                     ZoneKind::CryoArray => "k",
+                    ZoneKind::Resonator => "r",
                 }),
                 Some(zone) => match zone.kind {
                     ZoneKind::Extractor => style.ok("E"),
@@ -1943,6 +2062,7 @@ fn map(world: &World, style: &Style, current: u64) {
                     ZoneKind::Synthesizer => style.prompt("Y"),
                     ZoneKind::Encasement => style.warn("C"),
                     ZoneKind::CryoArray => style.head("K"),
+                    ZoneKind::Resonator => style.prompt("R"),
                 },
                 None => style.dim("·"),
             };
@@ -2332,6 +2452,10 @@ fn chronicle(world: &World, style: &Style) {
                 "⎋ {} {} crossed in deal {deal} → orb {to_orb} — value arrived from another world",
                 style.strong(&amount(moved)),
                 resource_name(*resource)
+            ),
+            cfe::dop::ClosureEvent::CrystalDrawn { orb_id, amount: drawn } => format!(
+                "◎ {} crystal held the lens open on orb {orb_id} — what was seen left no receipt",
+                style.strong(&amount(drawn))
             ),
         };
         let tag = receipt

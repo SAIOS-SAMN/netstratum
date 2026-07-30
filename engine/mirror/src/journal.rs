@@ -259,6 +259,7 @@ fn resource_word(resource: Resource) -> &'static str {
         Resource::Diamond => "diamond",
         Resource::Joule => "joule",
         Resource::Sink => "sink",
+        Resource::Crystal => "crystal",
     }
 }
 
@@ -270,6 +271,7 @@ fn zone_word(kind: ZoneKind) -> &'static str {
         ZoneKind::Synthesizer => "synthesizer",
         ZoneKind::Encasement => "encasement shell",
         ZoneKind::CryoArray => "cryo-lattice array",
+        ZoneKind::Resonator => "resonator",
     }
 }
 

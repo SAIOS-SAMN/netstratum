@@ -62,7 +62,15 @@
 //!   52 ClosureEvent::CouncilSealed (COUNCIL-1 — the multilateral pact)
 //!   53 ClosureEvent::CouncilClosed (COUNCIL-1 — one member's reckoning)
 //!   54 ClosureEvent::GalaxyObserved (GALAXY-1 — universe ledger only)
-//!         — the next free tag outside reservations is 55.
+//!   55 ClosureEvent::CrystalDrawn (N4 / NS-2 §1.5 — the scanner's
+//!         power draw, the ONE chronicle event of RQP: query, hit, and
+//!         refusal never receipt — the lens law)
+//!   56–58 NS-2 protocol records (query ‖ hit ‖ refusal — NS-2 §2,
+//!         RQP's own framing, never world-chronicle events)
+//!         — the next free tag outside reservations is 59.
+//!   In-value codes opened at N4 (they ride existing orb tags, no new
+//!   TLV tag): Resource::Crystal = 7 (banked entry, tag 18);
+//!   ZoneKind::Resonator = 7 (zone entry, tag 17).
 
 use crate::ratio::{self, ratio, Ratio};
 use crate::tlv;
@@ -83,6 +91,10 @@ pub enum Resource {
     /// SINK-1 (05 §1.4): bankable heat-absorption capacity — captured
     /// from vault-band headroom by cryo-lattice arrays, never passive.
     Sink = 6,
+    /// N4 (NS-2 §1.5, 02 §5.1 — the deferral paid): the resonance
+    /// crystal, the scanner's power source. Produced by the resonator,
+    /// consumed by the lens.
+    Crystal = 7,
 }
 
 impl Resource {
@@ -94,17 +106,19 @@ impl Resource {
             4 => Some(Self::Diamond),
             5 => Some(Self::Joule),
             6 => Some(Self::Sink),
+            7 => Some(Self::Crystal),
             _ => None,
         }
     }
 
-    pub const ALL: [Resource; 6] = [
+    pub const ALL: [Resource; 7] = [
         Self::Iron,
         Self::Biomass,
         Self::Alloy,
         Self::Diamond,
         Self::Joule,
         Self::Sink,
+        Self::Crystal,
     ];
 }
 
@@ -238,6 +252,13 @@ pub fn friction_rate() -> Ratio {
     ratio(1, 8)
 }
 
+/// N4 (NS-2 §1.5, placeholder): crystals one scan draws from the
+/// probing orb's bank — the lens's power, spent on the looking, hit or
+/// miss. Judged pure before anything moves.
+pub fn scan_draw() -> Ratio {
+    ratio(1, 1)
+}
+
 /// IDEO-1 (09 §2.5): the derived axis reading — syntropic /
 /// (syntropic + entropic), or None when no deed was ever posted. The
 /// ratio DERIVES at read; it is never stored (the syntropy-ratio
@@ -268,6 +289,10 @@ pub enum ZoneKind {
     /// radiator headroom as bankable sink. Heat-law yield, like the
     /// shell. The infrastructure gate; research/throttle gates deferred.
     CryoArray = 6,
+    /// N4 converter (NS-2 §1.5, the 02 §5.2 pattern): refines diamond
+    /// into resonance crystals. One synthesizer feeds one resonator on
+    /// the knife edge — diamond nets exactly 0.
+    Resonator = 7,
 }
 
 impl ZoneKind {
@@ -279,6 +304,7 @@ impl ZoneKind {
             4 => Some(Self::Synthesizer),
             5 => Some(Self::Encasement),
             6 => Some(Self::CryoArray),
+            7 => Some(Self::Resonator),
             _ => None,
         }
     }
@@ -298,6 +324,10 @@ impl ZoneKind {
             ],
             Self::Encasement => vec![(Resource::Iron, ratio(8, 1))],
             Self::CryoArray => vec![(Resource::Iron, ratio(10, 1))],
+            Self::Resonator => vec![
+                (Resource::Alloy, ratio(10, 1)),
+                (Resource::Diamond, ratio(5, 1)),
+            ],
         }
     }
 
@@ -312,6 +342,7 @@ impl ZoneKind {
             Self::Synthesizer => (Resource::Diamond, ratio(1, 4)),
             Self::Encasement => (Resource::Joule, ratio(0, 1)),
             Self::CryoArray => (Resource::Sink, ratio(0, 1)),
+            Self::Resonator => (Resource::Crystal, ratio(1, 8)),
         }
     }
 
@@ -331,6 +362,7 @@ impl ZoneKind {
             ],
             Self::Encasement => vec![(Resource::Iron, ratio(1, 4))],
             Self::CryoArray => vec![(Resource::Iron, ratio(1, 4))],
+            Self::Resonator => vec![(Resource::Diamond, ratio(1, 4))],
         }
     }
 
@@ -340,7 +372,7 @@ impl ZoneKind {
     pub fn factory_heat(&self) -> Ratio {
         match self {
             Self::Extractor | Self::Habitat => ratio(1, 4),
-            Self::Smelter | Self::Synthesizer => ratio(1, 1),
+            Self::Smelter | Self::Synthesizer | Self::Resonator => ratio(1, 1),
             Self::Encasement | Self::CryoArray => ratio(0, 1),
         }
     }
@@ -583,6 +615,11 @@ pub enum ClosureEvent {
     /// value ARRIVED in this world's orb from another, bound to the same
     /// `deal`. Replay of this world sees only the credit.
     ApertureReceived { deal: u64, to_orb: u64, resource: Resource, amount: Ratio },
+    /// N4 (NS-2 §1.5) — the scanner's power draw, the ONE chronicle
+    /// event of RQP: crystals left the probing orb's bank to hold the
+    /// lens open. Deliberately blind to what was asked and what was
+    /// seen — query, hit, and refusal never receipt (the lens law).
+    CrystalDrawn { orb_id: u64, amount: Ratio },
 }
 
 impl ClosureEvent {
@@ -833,6 +870,11 @@ impl ClosureEvent {
                 value.push(*resource as u8);
                 ratio::encode(amount, &mut value);
                 tlv::put(48, &value, &mut out);
+            }
+            Self::CrystalDrawn { orb_id, amount } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                ratio::encode(amount, &mut value);
+                tlv::put(55, &value, &mut out);
             }
         }
         out
@@ -1096,6 +1138,11 @@ impl ClosureEvent {
                 let resource = Resource::from_wire(*value.get(16)?)?;
                 let (amount, _) = ratio::decode(value.get(17..)?)?;
                 Some(Self::ApertureReceived { deal, to_orb, resource, amount })
+            }
+            55 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let (amount, _) = ratio::decode(value.get(8..)?)?;
+                Some(Self::CrystalDrawn { orb_id, amount })
             }
             _ => None,
         }

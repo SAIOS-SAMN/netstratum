@@ -471,6 +471,7 @@ fn resource_name(r: cfe::dop::Resource) -> &'static str {
         cfe::dop::Resource::Diamond => "diamond",
         cfe::dop::Resource::Joule => "joule",
         cfe::dop::Resource::Sink => "sink",
+        cfe::dop::Resource::Crystal => "crystal",
     }
 }
 
@@ -482,6 +483,7 @@ fn zone_name(k: cfe::dop::ZoneKind) -> &'static str {
         cfe::dop::ZoneKind::Synthesizer => "synthesizer",
         cfe::dop::ZoneKind::Encasement => "encasement",
         cfe::dop::ZoneKind::CryoArray => "cryo-array",
+        cfe::dop::ZoneKind::Resonator => "resonator",
     }
 }
 
@@ -780,6 +782,10 @@ fn render_receipt(receipt: &Receipt) -> String {
         E::FrictionSettled { orb_id, amount } => (
             "friction_settled",
             format!("{} entropy on orb {orb_id}", ratio_str(amount)),
+        ),
+        E::CrystalDrawn { orb_id, amount } => (
+            "crystal_drawn",
+            format!("{} crystal held the lens open on orb {orb_id}", ratio_str(amount)),
         ),
     };
     w.field_str("event", name);

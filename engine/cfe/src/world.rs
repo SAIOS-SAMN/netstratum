@@ -2333,6 +2333,59 @@ impl World {
         }
     }
 
+    /// N4 (NS-2 RQP) — the scanner: a resonance query over this
+    /// world's orb population through the {S, G} lens. The reading is
+    /// PURE and receipts NOTHING; the one mutation is the crystal draw
+    /// (NS-2 §1.5), which closes FIRST — the lens reads the committed
+    /// world as it stands once open. Sovereign convenience.
+    pub fn scan(&mut self, prober: u64, exemplar: u64) -> Result<crate::query::ScanRead, ActionRefused> {
+        self.scan_as(SOVEREIGN, prober, exemplar)
+    }
+
+    /// The contained form. Collect scope in v1: the draw moves banked
+    /// value, and collect is the scope that moves value into and out of
+    /// a bank — a dedicated scan scope awaits an operator ruling.
+    pub fn scan_as(
+        &mut self,
+        actor: u64,
+        prober: u64,
+        exemplar: u64,
+    ) -> Result<crate::query::ScanRead, ActionRefused> {
+        self.permitted(actor, Scope::Collect)?;
+        if self.orb_by_id(exemplar).is_none() {
+            return Err(ActionRefused::NoSuchOrb { orb: exemplar });
+        }
+        let Some(paying) = self.orb_by_id(prober) else {
+            return Err(ActionRefused::NoSuchOrb { orb: prober });
+        };
+        // Affordability judged PURE before anything moves (crystals
+        // are never demurraged, so the pre-touch read is the
+        // post-decay read): a refusal draws nothing, reads nothing,
+        // orphans nothing.
+        let draw = crate::dop::scan_draw();
+        let have = paying.banked_amount(Resource::Crystal);
+        if have < draw {
+            return Err(ActionRefused::CannotAfford {
+                resource: Resource::Crystal,
+                need: Box::new(draw),
+                have: Box::new(have),
+            });
+        }
+        // The draw closes first, at the touch law (SINK-1): due
+        // demurrage settles, the anchor moves, the crystal leaves.
+        let stamp = self.clock.now();
+        let ease = ease_of(&self.techs, prober);
+        let star = self.star;
+        let held = peel(&mut self.orbs, prober).expect("judged above");
+        touch(held, star, &mut self.chronicle, stamp, &ease);
+        held.bank(Resource::Crystal, -draw.clone());
+        self.close(ClosureEvent::CrystalDrawn { orb_id: prober, amount: draw }, actor);
+        let stamp = self.chronicle.receipts().last().expect("just closed").stamp;
+        let exemplar_orb = self.orb_by_id(exemplar).expect("judged above");
+        let (probed, hits, refusals) = crate::query::resonance_read(exemplar_orb, &self.orbs, star);
+        Ok(crate::query::ScanRead { stamp, probed, hits, refusals })
+    }
+
     /// Seal a closure with its actor's generation tag (NS-6).
     fn close(&mut self, event: ClosureEvent, actor: u64) {
         let stamp = self.clock.now();
@@ -2738,6 +2791,15 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     held.last_touch = receipt.stamp;
                 }
                 crossed = true;
+            }
+            // N4 (NS-2 §1.5): the draw replays as a bank debit and a
+            // touch anchor. The reading it paid for CANNOT replay —
+            // the receipt is deliberately blind to it (the lens law).
+            ClosureEvent::CrystalDrawn { orb_id, amount } => {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank(Resource::Crystal, -amount.clone());
+                    held.last_touch = receipt.stamp;
+                }
             }
             // ABSORB-1: the three-way move replays — the absorber's
             // ledger carries the shed; the window opens; crisis reads
