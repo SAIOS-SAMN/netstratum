@@ -132,7 +132,14 @@ forever.
   ancestry DAG — both parents recorded, `resolve_heads`, old wire form
   unchanged) with BRIDGE-1 opened (11 §3.1: the confluence crossing
   prices its key gap — vent ∝ gap, remainder encases; lands with
-  AEON-1b). Next: as assigned.
+  AEON-1b). The creed manifold ruled and specced (`14_CREEDS.md`,
+  2026-07-30): creeds DERIVE (never a fourth axis, never stored, never
+  a fixed 54 — generative, chronicle-seeded); schism = divergence,
+  reconciliation = confluence + BRIDGE-1; the source's law violations
+  corrected and barred (no G=10, no aperture bypass, no spoofed
+  receipts, no universal Φ). Open nodes: CREED-1 (derived reading),
+  CREED-2 (species/creed-economics couplings — the one new mechanic
+  class), MASK-1, INCURSION-1, WARDEN-1. Next: as assigned.
 - **coder-03**: N4 (NS-2 RQP + the scanner) — LANDED on main
   2026-07-30 (33e6c73 + post-ruling inscriptions 7f739f4, after the
   fifth-set rulings): spec §1–§4 with extracted vectors, sigil index +
