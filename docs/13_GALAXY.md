@@ -27,9 +27,14 @@ count starts at one and grows only by deed.**
 
 A galaxy does not pre-exist its observer. When a civilization achieves the
 crossing (THRESHOLD-1 — interstellar flight, receipted) and its traversal
-anchors **past the charted frontier** — beyond every existing galaxy's
-reach, L1-wrapped on the torus (the L1 law: the short way around, no
-squaring) — the act of observation CREATES the galaxy. This is a
+anchors **past the charted frontier**, the act of observation CREATES the
+galaxy. **The frontier is a distance, never an outside** (coder-01
+clarification, 2026-07-30): the torus wraps and the manifold is coned
+(12 §2c — no open ends), so "past every reach" means exactly this — the
+anchor's wrapped-L1 distance to EVERY charted galaxy's center exceeds
+that galaxy's reach (the L1 law: the short way around, no squaring; reach
+a placeholder parameter). A new galaxy is a **far region, never an
+outside**. This is a
 **progenitor power**, the tier-0 board-maker function (12 §2a: *expanding
 the board*): the crossing line observes; a seated progenitor of its lineage
 domain executes the creation deed (where the line stands headless — lawful,
@@ -47,7 +52,11 @@ obeys (the universe gains dimensions as discoveries land, contract §9).
   beside `EraAnnexed`/`EraFolded` — a universe-scale event carrying the
   observer (the crossing civilization), the creator (the progenitor seat),
   the center, and the reach. A `galaxies.json` card beside the star-chart
-  is the mirror's rendering (SEAL C), rebuilt from receipts.
+  is the mirror's rendering (SEAL C), rebuilt from receipts. The
+  EraAnnexed precedent binds whole (coder-01 clarification): the
+  world-replay match arm is an **explicit no-op** — a universe event
+  never enters a world chronicle, and world replay ignores it if it
+  ever leaks.
 - **Membership is derived, never stored** (the 12 §4 discipline): a world
   belongs to the galaxy whose center stands L1-nearest within reach.
   Frontier worlds outside every reach are intergalactic — lawful, exactly
@@ -69,4 +78,17 @@ and PLANNER-1 (the progenitor deed gate — landed). Lands whole, one
 landing: the deed + tag inscription, the frontier reading (L1 past every
 reach), the lazy founding charter, the `galaxies.json` rendering, and the
 witnesses — spec + mechanic + vectors together. Registry deltas: NONE — a
-galaxy is geography, not identity (no new axis, no new station).
+galaxy is geography, not identity (no new axis, no new station). The CLI
+surface (GALAXY-1b) lands as a **`t0 galaxies` verb inside the existing
+t0 console**, never a new top-level command — the progenitor's board
+readings belong in one hand (coder-01 clarification).
+
+## 6. The move seam — ratified (coder-01, 2026-07-30)
+
+The t0 console's `move <world> x y z` re-charts a sector on the torus and
+**never creates a galaxy** — only the crossing observation deed does.
+Membership re-derives from position (derived, never stored — §4), so a
+move costs the galaxy law nothing; a world moved far from every center is
+intergalactic, which is lawful. The two S-side deeds do not collide:
+`move` re-seats what exists, the observation deed brings a region into
+the chart.
