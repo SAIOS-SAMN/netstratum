@@ -51,7 +51,9 @@ line's own head (12_UNION §2's fifth seat; Slagborn's lineage resolves to
 it) — 2 pre-solar shielded worlds; seed roster in
 `seeds/aeon1-egregores.json`, CREATED 2026-07-30: it had been referenced
 but never written, and `var*/` is git-ignored, so the seeds copy is the
-durable record — keep it appended on every wave). **The galaxy law is
+durable record — SUPERSEDED 2026-07-30 by coder-01's A1: the board
+remembers itself — the machinery re-emits seeds from the live roster,
+hand-mirroring is retired; append waves to var/egregores.json only). **The galaxy law is
 ruled and specced** (`13_GALAXY.md`, 2026-07-30): ONE universe
 structurally; the whole charted torus is the one founding galaxy; new
 galaxies are never a static count — created lazily by the observation
