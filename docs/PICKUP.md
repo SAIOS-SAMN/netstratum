@@ -105,7 +105,9 @@ reserved (D2 terrain, D3 milestones); 49–51 reserved the market board
 GenesisSealed (G1, coder-03 — the binding axes receipt); 62–63
 WantStruck/WantRelieved (WANT-1); 64–66 the NS-5 protocol records
 (MESH-1a — mesh head ‖ consilience receipt ‖ mesh refusal, the mesh's
-own framing, never world-chronicle events); **next free 67**.
+own framing, never world-chronicle events; refusal kinds 5–6 added at
+MESH-1b, additive); 67 HandoffSealed (MESH-1b, NS-5 §7 — one writer
+per clock; world replay blind to it); **next free 68**.
 
 **The tag-claim convention** (2026-07-30, after a live collision caught
 mid-cadence — 55 claimed twice, the later claimant moved to 60, and the
@@ -122,8 +124,13 @@ forever.
   | typed refusal; the file-exchange carrier, never a socket);
   witnesses `mesh_consilience.rs` 5 green, red-first honored. Rulings
   inscribed in `docs/N6_DIRECTIVES.md`: blake3-only at N6, file
-  first, one world. Open: MESH-1b (two-writer arbitration), MESH-1c
-  (TCP adapter, logic-free; multi-world aggregation at N7).
+  first, one world. MESH-1b LANDED (NS-5 §7, tag 67): the receipted
+  handoff — the authority WALK (never a flag), the seal/write doors,
+  refusal kinds 5 USURPED + 6 UNCITED; `mesh_handoff.rs` 5 green,
+  red-first honored; world replay/mirror/CLI speak the seal's line.
+  Open: the consumer slice (conductor/CLI guard retirement — shared
+  with coder-01's #42), the partition ruling, MESH-1c (TCP adapter,
+  logic-free; multi-world aggregation at N7).
 - **coder-01**: next = Phase 2 cross-world trade (egregores exchanging
   joules/`S_cool` — needs a cross-world carrier; transfers are intra-world
   today) or TECH-1 (`10_TECH_EMERGENCE.md`, opens SINK-1's deferred

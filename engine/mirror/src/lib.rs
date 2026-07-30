@@ -894,6 +894,10 @@ fn render_receipt(receipt: &Receipt) -> String {
                 "{civilization} seals its axes ({disposition}/{metabolism}/{perception}) — the registry is a cache from here on"
             ),
         ),
+        E::HandoffSealed { from, to } => (
+            "handoff_sealed",
+            format!("hand {from} yields the pen to hand {to}"),
+        ),
     };
     w.field_str("event", name);
     w.field_str("detail", &detail);

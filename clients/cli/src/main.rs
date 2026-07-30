@@ -3302,6 +3302,11 @@ fn chronicle(world: &World, style: &Style) {
                 "✶ {} seals its three axes — the binding copy lives HERE; the registry is a cache from this receipt on",
                 style.strong(civilization)
             ),
+            cfe::dop::ClosureEvent::HandoffSealed { from, to } => format!(
+                "✍ hand {} yields the pen to hand {} (NS-5 §7)",
+                style.strong(&from.to_string()),
+                style.strong(&to.to_string())
+            ),
         };
         let tag = receipt
             .provenance

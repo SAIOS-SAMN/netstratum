@@ -88,7 +88,11 @@
 //!         mesh refusal — NS-5 §2, MESH-1a: the mesh's own framing,
 //!         never world-chronicle events; consilience is a read, no
 //!         state changes — the lens law in mesh form)
-//!         — the next free tag outside reservations is 67.
+//!   67 ClosureEvent::HandoffSealed (MESH-1b, NS-5 §7 — one writer
+//!         per clock: the yielding hand seals, naming the successor;
+//!         the taking hand's first append cites the seal; authority
+//!         is a mesh WALK of the spine, never a flag)
+//!         — the next free tag outside reservations is 68.
 //!   In-value codes opened at N4 (they ride existing orb tags, no new
 //!   TLV tag): Resource::Crystal = 7 (banked entry, tag 18);
 //!   ZoneKind::Resonator = 7 (zone entry, tag 17).
@@ -657,6 +661,12 @@ pub enum ClosureEvent {
     /// WANT-1 — the want relieved: the mind fed (a new link, a fresh
     /// discovery). World-driven at the year voice, the famine shape.
     WantRelieved { orb_id: u64, kind: u8 },
+    /// MESH-1b (NS-5 §7) — the receipted handoff: the yielding hand
+    /// `from` seals, naming successor `to`. One writer per clock;
+    /// authority derives by the mesh's walk of the spine (never a
+    /// flag, never consulted by any game rule — the world's own
+    /// mechanics are blind to it).
+    HandoffSealed { from: u64, to: u64 },
     /// MARKET-1 (BUILD_ORDER §3a) — an OFFER posts: this orb stands
     /// ready to GIVE `give_amount` of `give` for `want_amount` of
     /// `want`. The price IS the ratio (no absolute price exists —
@@ -1016,6 +1026,11 @@ impl ClosureEvent {
                 value.push(*kind);
                 tlv::put(63, &value, &mut out);
             }
+            Self::HandoffSealed { from, to } => {
+                let mut value = from.to_le_bytes().to_vec();
+                value.extend_from_slice(&to.to_le_bytes());
+                tlv::put(67, &value, &mut out);
+            }
             Self::OfferPosted { offer, orb_id, give, give_amount, want, want_amount } => {
                 let mut value = offer.to_le_bytes().to_vec();
                 value.extend_from_slice(&orb_id.to_le_bytes());
@@ -1329,6 +1344,11 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let kind = *value.get(8)?;
                 Some(Self::WantRelieved { orb_id, kind })
+            }
+            67 => {
+                let from = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let to = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                Some(Self::HandoffSealed { from, to })
             }
             49 => {
                 let offer = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
