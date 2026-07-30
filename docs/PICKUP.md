@@ -144,8 +144,15 @@ forever.
   float/continuous form is barred at 14 §2.5). CREED-1 LANDED
   2026-07-30: the generative creed reading renders on the civs board
   and the civ view (concept from receipted tendency × voice from the
-  terminal digest — never stored, never enumerated). Next: CREED-2 on
-  the operator's green light.
+  terminal digest — never stored, never enumerated). CREED-2's first
+  coupling RESOLVED by coder-01's G2 (metabolism tables — the G1 seal
+  is the adoption receipt); the creed-coupling remainder waits on a
+  practice-adoption ruling. FORGE-2a LANDED (Difficulty::from_key —
+  the vector from the discrete moduli, a read; wiring waits at N6 per
+  the ladder's law). Specced 2026-07-30: INCURSION-1 (07 §3.1, the
+  archived-sheet door), WARDEN-1 (10 §3e, the elder world), MASK-1
+  concrete (14 §4, NS-2 seam flagged for coder-03). Register waves 4+
+  await operator naming. Next: as assigned.
 - **coder-03**: N4 (NS-2 RQP + the scanner) — LANDED on main
   2026-07-30 (33e6c73 + post-ruling inscriptions 7f739f4, after the
   fifth-set rulings): spec §1–§4 with extracted vectors, sigil index +

@@ -109,10 +109,22 @@ walks — exactly the way function and tier read today.
   hazard immunity, the icon-upkeep tax — land as TECH-1b-style
   modifiers: exact-rational, receipted at adoption, backward-lawful
   opt-in (the terrain precedent), spec + vectors per coupling.
-- **MASK-1 — the lawful veil.** Mirror-layer identity masking: a
-  receipted deed that prices what other lines' READINGS render; the
-  substrate never lies. Refusals typed; the veil's cost is a standing
-  drain (the Darlok shape, made lawful).
+- **MASK-1 — the lawful veil (specced 2026-07-30).** Mirror-layer
+  identity masking; the substrate never lies. The concrete design:
+  the VEIL is a receipted deed (`VeilDrawn` / `VeilLifted`, tags at
+  cadence) with a standing joule drain settled at every collect (the
+  demurrage pattern — an unaffordable veil LIFTS by receipt, never
+  silently). What it clouds, exactly: (a) the veiled line's star-chart
+  mark renders unnamed; (b) scan hits against its orbs report
+  resonance WITHOUT the orb identity — the sigil still matches (the
+  address derives from true state, a veil cannot forge it), the NAME
+  withholds; (c) the civs board renders the line's species/axes as
+  veiled to non-operator views. What it never touches: the chronicle,
+  provenance, conservation, the Watcher office (wardens read through
+  every veil — the shield law outranks the mask). SEAM FLAGGED for
+  coder-03: (b) changes the NS-2 hit record rendering — the veil field
+  rides the hit, appended per the §4.2 extension law; one line from
+  them inscribes it.
 - **INCURSION-1 — the archived-sheet door.** The Antaran shape:
   entities out of the fold's SEALED eras (the graveyard is frontier —
   07 §3 salvage read as an active door, not passive ruins), stressing

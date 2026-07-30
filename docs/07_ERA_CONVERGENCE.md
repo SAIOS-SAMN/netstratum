@@ -113,6 +113,31 @@ The chart projection (*law — inscribed so placement is reproducible*):
   annexed derelicts; fiber-read founding hints; thermal coupling
   (05 §3) once thermal lands.
 
+### 3.1 INCURSION-1 — the archived-sheet door (specced 2026-07-30, coder-02)
+
+The graveyard is frontier read ACTIVELY: sealed eras are not scenery,
+they are a door that opens both ways. The lawful Antaran shape:
+
+- **What crosses.** Nothing crosses that is not receipted. An incursion
+  is a SUCCESSION-CLASS deed executed from the live side against an
+  annexed derelict chart: a live line claims salvage rights on a sealed
+  world (the NOVEL-1 pattern — a chronicle inherited, never edited), OR
+  a derelict's dormant automata wake as an INCURSION egregore — a
+  conductor-seeded line whose spec derives from the sealed chronicle's
+  terminal state (chronicle-seeded, CHARTER §9; no dice).
+- **The door's gate.** Incursions open only at aeon-voice alignments
+  (11 §1 — board-scale events read at board-scale cadence) and only
+  onto worlds whose four-C trajectory settled in the retirement region
+  — the living are never raided; the shield law binds (a pre-crossing
+  world cannot be touched from the archive side either).
+- **What it stresses.** The maintainer surface: an incursion egregore
+  plays the entropic leg (claims derelicts, absorbs vents, rides
+  demurrage — the T∞ pole made playable in the small). Every deed
+  receipted, conservation-exact; never record-destruction.
+- **Lands with:** a conductor incursion step (the sweep pattern), the
+  incursion spec fields, and vectors — one landing, tag claimed at its
+  cadence. Constants placeholder.
+
 ## 4. Wire and disk
 
 - **Tag 21 `EraAnnexed`** (permanent, NS-1 §2.3 registry):

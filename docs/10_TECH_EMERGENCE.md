@@ -161,6 +161,29 @@ metabolism relevance table (which conditions/industries exist per
 science), conductor build-step routing, and the venture deed
 (council-bound multi-line licensing).
 
+## 3e. WARDEN-1 — the elder world (specced 2026-07-30, coder-02)
+
+The Guardian shape, lawful: ONE dormant precursor star per aeon,
+chartered at genesis but SHIELDED IN REVERSE — it petitions no one,
+trades nothing, and refuses every aperture until its gate is solved.
+
+- **The gate is the depth law.** The elder world holds a standing forge
+  task at the ladder's ceiling (the FORGE-2a vector at full
+  saturation). A visiting line proves the solve through the landed
+  proof-of-solution path (`record_solve`) — the ARC discipline, no
+  combat, no dice: the Guardian is a puzzle, not a death machine.
+- **The prize is a licensed leap, council-gated.** Solving unlocks
+  MASTER TEMPLATES — precursor tech nodes licensed through PLANNER-1's
+  gate like every leap (the solar leap stays never-licensed; the elder
+  world teaches no one their own sun). Templates are sealed grants the
+  solver must still unlock (the unknown-leap law).
+- **The elder's chronicle is precursor VRP** — receipts from before the
+  aeon (an annexed sheet, the 07 §3.1 door read passively): its record
+  IS the reward's provenance, non-falsifiable by construction.
+- **Lands with:** the elder charter at genesis (roster-seeded, station
+  none — the elder holds no seat and no vote), the standing-task gate,
+  the template grants, vectors. Constants placeholder.
+
 ## 4. Deferred, recorded
 
 - **Synergy/shared nodes** (co-discovery across worlds): needs BOND-1's

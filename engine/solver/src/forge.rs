@@ -49,6 +49,29 @@ impl Difficulty {
     }
 }
 
+impl Difficulty {
+    /// FORGE-2a (14_CREEDS §4): the difficulty VECTOR derived from the
+    /// line's discrete moduli — open gauge planes, crystallized
+    /// doctrine, the crossing. Exact integers in, one deterministic
+    /// rung out; no floats, no curvature, no stored moduli (the graded
+    /// key IS the moduli, receipted at every shift). A READ only: the
+    /// static ladder still drives the live forge until the wiring
+    /// lands (network-rate adjustment at N6, the ladder's own law).
+    /// Every coefficient is a placeholder parameter.
+    pub fn from_key(planes: usize, doctrine: usize, crossed: bool) -> Difficulty {
+        let tier = 1 + (planes.saturating_sub(1)).min(2) as u8;
+        let word_len = (1 + doctrine / 2 + usize::from(crossed)).min(4);
+        let span = (3 + planes.saturating_sub(1)).min(6);
+        Difficulty {
+            tier,
+            word_len,
+            rows: span,
+            cols: span,
+            train_pairs: 2 + usize::from(doctrine >= 3),
+        }
+    }
+}
+
 /// Sample one op for position `slot` of the secret word.
 fn sample_op(beacon: &Beacon, difficulty: &Difficulty, slot: usize) -> Op {
     let symmetries = [
