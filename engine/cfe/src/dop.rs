@@ -71,7 +71,11 @@
 //!         deed: a successor line adopts a derelict world's chronicle
 //!         as its own substrate; the living tree drops to the world's
 //!         kernel, the record stands forever)
-//!         — the next free tag outside reservations is 60.
+//!   60 ClosureEvent::GaugeShiftedAt (GAUGE-N, 11 §2.1 — the graded
+//!         key: moves or opens plane `grade`; plane 0 is the landed
+//!         scalar, tags 42–46 bind to it forever)
+//!         — the next free tag outside reservations is 61 (WANT-1
+//!         candidates hold 61+, BUILD_ORDER §3a-sexies).
 //!   In-value codes opened at N4 (they ride existing orb tags, no new
 //!   TLV tag): Resource::Crystal = 7 (banked entry, tag 18);
 //!   ZoneKind::Resonator = 7 (zone entry, tag 17).

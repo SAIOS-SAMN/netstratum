@@ -98,7 +98,16 @@ authority): 39 TechDiscovered · 40 TechLicensed · 42–46 the AEON block ·
 protocol records (N4, coder-03 — in-value codes: Resource::Crystal = 7,
 ZoneKind::Resonator = 7) · 59 LineSucceeded (NOVEL-1, coder-03); 8–9
 reserved (D2 terrain, D3 milestones); 49–51 reserved the market board
-(§3a); **next free 60** for anything outside those reservations.
+(§3a); 60 GaugeShiftedAt (GAUGE-N, coder-01 — the graded key);
+**next free 61** (WANT-1 candidates hold 61+).
+
+**The tag-claim convention** (2026-07-30, after a live collision caught
+mid-cadence — 55 claimed twice, the later claimant moved to 60, and the
+merge then dropped the header hunk): claim a tag by editing the dop.rs
+header in your FIRST commit of the cadence, before any code uses it;
+the header is the one authority, this section only mirrors it; after
+any merge, verify your header hunk survived. One tag, one meaning,
+forever.
 
 ## 5. Lanes and next work
 
