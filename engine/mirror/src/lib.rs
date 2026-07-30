@@ -113,6 +113,18 @@ impl Mirror {
         fs::write(&tmp, state)?;
         fs::rename(&tmp, planet_dir.join("state.json"))?;
 
+        // MIRROR-TLV (operator directive, 2026-07-30): the COMMITTED
+        // state speaks the house wire — state.tlv is the orb's
+        // canonical NS-1 bytes (equal state, equal bytes), the
+        // machine layer every board may decode natively. JSON stays
+        // strictly a rendering: readings, context, and voices — never
+        // a second truth of the committed orb.
+        if let Some(orb) = world.orb() {
+            let tmp = planet_dir.join("state.tlv.tmp");
+            fs::write(&tmp, orb.wire_bytes())?;
+            fs::rename(&tmp, planet_dir.join("state.tlv"))?;
+        }
+
         // world.json — the container's card: name + settled planets.
         let mut planets: Vec<String> = fs::read_dir(dir.join("planets"))?
             .filter_map(|e| e.ok())
@@ -522,6 +534,23 @@ fn render_state(world_name: &str, planet: &str, civilization: &str, world: &Worl
             entry.close();
             entry.finish()
         }));
+    }
+    // CONSTEL-1 / observer uplink: the base-7 sky — a derived
+    // reading (held/progress/threshold per condition), never stored.
+    if let Some(orb) = world.orb() {
+        w.key("constellation");
+        w.raw_array(world.constellation(orb.orb_id).into_iter().map(
+            |(condition, held, progress, threshold)| {
+                let mut entry = JsonWriter::new();
+                entry.open();
+                entry.field_u64("condition", u64::from(condition));
+                entry.field_u64("held", u64::from(held));
+                entry.field_u64("progress", progress);
+                entry.field_u64("threshold", threshold);
+                entry.close();
+                entry.finish()
+            },
+        ));
     }
     // WANT-1 / observer uplink: the struck cognitive wants.
     if !world.wants().is_empty() {

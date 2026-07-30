@@ -23,7 +23,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
-ALLOWED_SUFFIXES = {".json", ".jsonl", ".html"}
+ALLOWED_SUFFIXES = {".json", ".jsonl", ".html", ".tlv"}
 
 
 def build_index(root):
@@ -67,6 +67,7 @@ class Window(BaseHTTPRequestHandler):
                     and target.is_file()):
                 kind = ("application/json" if target.suffix == ".json"
                         else "text/plain" if target.suffix == ".jsonl"
+                        else "application/octet-stream" if target.suffix == ".tlv"
                         else "text/html")
                 return self.send_file(target, kind)
         self.send_response(404)

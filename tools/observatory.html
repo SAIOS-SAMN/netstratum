@@ -86,10 +86,13 @@ function renderPanels(d){
     `<span class="strong">${Object.keys(d.registry).length}</span> civilizations (${census})\n` +
     `<span class="strong">${d.index.worlds.length}</span> worlds · ` +
     `<span class="strong">${d.planets.length}</span> settled planets\n\n` +
-    d.planets.map(p =>
-      `${esc(p.world)}<span class="dim">/${esc(p.planet)}</span> ` +
-      `<span class="dim">t${p.clock} · ${(p.zones||[]).length}z</span>`
-    ).join("\n");
+    d.planets.map(p => {
+      const stack = (p.constellation||[]);
+      const held = stack.filter(n => n.held).length;
+      const strip = stack.length ? ` <span class="cold">${held}/7✶</span>` : "";
+      return `${esc(p.world)}<span class="dim">/${esc(p.planet)}</span> ` +
+        `<span class="dim">t${p.clock} · ${(p.zones||[]).length}z</span>${strip}`;
+    }).join("\n");
 
   const stressed = [];
   for (const p of d.planets) {

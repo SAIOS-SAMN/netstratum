@@ -66,6 +66,68 @@ def show(fraction):
     return f"{fraction.numerator}/{fraction.denominator}"
 
 
+# ── the house wire (MIRROR-TLV): the committed orb decoded native ───
+# NS-1 TLV: tag u8 ‖ LE32(len) ‖ value; unknown tags SKIP (SEAL A).
+# Ratio: sign u8 ‖ LE32(len) ‖ numer BE ‖ LE32(len) ‖ denom BE.
+
+def tlv_records(data):
+    at = 0
+    while at + 5 <= len(data):
+        tag = data[at]
+        length = int.from_bytes(data[at + 1:at + 5], "little")
+        value = data[at + 5:at + 5 + length]
+        if len(value) < length:
+            return  # torn tail — stop, never guess
+        yield tag, value
+        at += 5 + length
+
+
+def tlv_ratio(value, at=0):
+    sign = value[at]
+    at += 1
+    parts = []
+    for _ in range(2):
+        length = int.from_bytes(value[at:at + 4], "little")
+        at += 4
+        parts.append(int.from_bytes(value[at:at + length], "big") if length else 0)
+        at += length
+    numer, denom = parts
+    if denom == 0:
+        return Fraction(0), at
+    return Fraction(-numer if sign == 1 else numer, denom), at
+
+
+RESOURCE_NAMES = {1: "iron", 2: "biomass", 3: "alloy", 4: "diamond",
+                  5: "joule", 6: "sink"}
+
+
+def decode_orb_tlv(path):
+    """The committed orb from state.tlv — banked, famine, zones,
+    vented — decoded from the canonical bytes. Returns None when no
+    carrier stands (the JSON rendering then carries the display)."""
+    try:
+        data = path.read_bytes()
+    except OSError:
+        return None
+    orb = {"banked": {}, "famine": [], "zones": 0, "vented": Fraction(0)}
+    for tag, value in tlv_records(data):
+        if tag == 17:
+            orb["zones"] += 1
+        elif tag == 18 and len(value) > 1:
+            name = RESOURCE_NAMES.get(value[0])
+            if name:
+                orb["banked"][name], _ = tlv_ratio(value, 1)
+        elif tag == 19 and value:
+            name = RESOURCE_NAMES.get(value[0])
+            if name:
+                orb["famine"].append(name)
+        elif tag == 28:
+            orb["vented"], _ = tlv_ratio(value)
+        # every other tag: skipped whole (SEAL A) — future fields
+        # never break this reader.
+    return orb
+
+
 # ── readers (the mirror's data files — data, never prose) ───────────
 
 def read_jsonl(path):
@@ -218,9 +280,20 @@ def world_facts(world_dir):
             if not state_path.exists():
                 continue
             try:
-                planets.append(json.loads(state_path.read_text(encoding="utf-8")))
+                state = json.loads(state_path.read_text(encoding="utf-8"))
             except json.JSONDecodeError:
                 continue
+            # MIRROR-TLV: the COMMITTED fields prefer the house wire
+            # (state.tlv — canonical bytes); the JSON rendering keeps
+            # the context (clock, civ, star, offers, readings).
+            wire = decode_orb_tlv(planet_dir / "state.tlv")
+            if wire is not None:
+                state["banked"] = {k: show(v) for k, v in wire["banked"].items()}
+                state["famine"] = wire["famine"]
+                state["zones"] = state.get("zones", [])
+                state["_wire_zones"] = wire["zones"]
+                state["entropy_vented"] = show(wire["vented"])
+            planets.append(state)
     pending = 0
     inbox = world_dir / "inbox" / "pending"
     if inbox.is_dir():
@@ -246,7 +319,7 @@ def read_all(var_root):
                 "world": state.get("world", facts["name"]),
                 "planet": state.get("planet", "?"),
                 "clock": state.get("clock", 0),
-                "zones": len(state.get("zones", [])),
+                "zones": state.get("_wire_zones", len(state.get("zones", []))),
                 "zone_kinds": {z.get("kind") for z in state.get("zones", [])},
                 "famine": state.get("famine", []),
                 "puzzles": facts["puzzles"], "depth": facts["depth"],
@@ -575,6 +648,22 @@ def view_world(var_root, args, paint):
                 kinds[zone.get("kind", "?")] = kinds.get(zone.get("kind", "?"), 0) + 1
             lines.append("    zones: " + " · ".join(
                 f"{k}×{v}" for k, v in sorted(kinds.items())))
+    # CONSTEL-1: the base-7 strip from the uplink reading.
+    for state in facts["planets"]:
+        stack = state.get("constellation")
+        if stack:
+            glyphs = []
+            for node in stack:
+                if node.get("held"):
+                    glyphs.append("✶" if node.get("condition") != 6 else "◆")
+                elif node.get("threshold", 1) > 1 and node.get("condition") != 6:
+                    glyphs.append(f"{node.get('progress', 0)}/{node.get('threshold')}")
+                else:
+                    glyphs.append("○")
+            held = sum(1 for n in stack if n.get("held"))
+            lines.append(
+                f"  base-7: {' '.join(glyphs)}  ({held}/7 held)")
+            break
     techs = [e for e in facts["events"] if e.get("event") in
              ("tech_discovered", "tech_licensed")]
     if techs:
