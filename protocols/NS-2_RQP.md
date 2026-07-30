@@ -59,10 +59,9 @@ orb's touch history — none of it keys the lookup. T rides the hit as a
 ledger-side annotation (§1.3): the stamp of the reading's own power
 draw, the one chronicle trace a query leaves.
 
-*(PLACEHOLDER — operator ruling pending, N4_DIRECTIVES ruling 2: this
-v1 queryable structure — zone geometry as S, banked signature + thermal
-class as G — is the recommended first cut. The operator may extend the
-structure; the address grows additively like every wire surface.)*
+*(RULED 2026-07-30 (merge sign-off, ruling 2): this v1 queryable
+structure — zone geometry as S, banked signature + thermal class as
+G — stands as drafted. Extension law in §4.)*
 
 ### 1.2 Resonance
 
@@ -264,3 +263,46 @@ exemplar, B the rot90 twin, C the kind swap, D the once-collected.
    exactly; collect banks it; famine strikes nothing.
 7. **Replay MATCHES** at the end of every arc —
    `assert_eq!(replay(world.chronicle()), world.committed())`.
+
+---
+
+## 4. The queryable structure (ruled 2026-07-30; the extension law)
+
+### 4.1 The v1 cut, ratified
+
+The operator ruled at merge sign-off (ruling 2): the v1 structure
+stands as drafted in §1.1 —
+
+| facet | projection | joint (the exactness) |
+|---|---|---|
+| S | zone geometry, lex-min over the eight grid symmetries | (row, col, kind) tuples under the one winning transform |
+| G | nonzero banked resource SET + thermal class | the full banked ledger, ratio-for-ratio + the class |
+| T | **never in the key** | rides the hit as the draw receipt's stamp |
+
+### 4.2 The extension law
+
+The structure grows ADDITIVELY, the SEAL A discipline applied to the
+address: a new facet appends to the END of the query record (§2.2) and
+to the joint; it never reorders or reinterprets an existing byte. An
+implementation that predates a facet still buckets correctly on the
+prefix it knows — it reports coarser resonance, never wrong resonance.
+Every extension is an operator ruling recorded HERE, one row per facet,
+with its landing named. The dimensional-collapse warning binds every
+facet forever: projections derive from ONE joint shadow, never from
+independent canonicalizations.
+
+### 4.3 Reserved extensions (recorded, not landed)
+
+- **The perception facet (G3, after G1):** a civilization's perception
+  axis (planar/volumetric/harmonic/umbral) reads the SAME sigil at a
+  granted translation — frames as coboundaries, the translation read
+  with measured loss (04 §6). G3's first consumer is this scanner; the
+  facet extends G, and the loss is carried whole in the refusal (the
+  §1.4 shape).
+- **The galaxy-region facet (post-GALAXY-1a, post-N4):** scanning by
+  charted sky region — derived S-side membership (`galaxy_of`,
+  wrapped-L1 to charted centers), never a stored tag. Composes with the
+  N4_DIRECTIVES coordination note; a separate landing, gated on both.
+- **Cross-world resonance (N5/N6):** the mesh carries ADDRESSES, never
+  worlds; consilience at arity ≥ 2 compares joints across chronicles.
+  Nothing in v1's wire changes — the records were framed for this.

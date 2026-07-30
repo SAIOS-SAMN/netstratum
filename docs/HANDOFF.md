@@ -156,6 +156,15 @@ mechanical relay). `engine/mirror/src/converge.rs` and `journal.rs`
 have catch-alls. Adding an `ActionRefused` variant breaks the CLI
 `refuse()` match — the new arm must name the cure.
 
+**Gotcha (CLI planet cursor, inscribed by operator ruling 2026-07-30):**
+`chart` automatically advances the active planet cursor to the newly
+created daughter. Chained `chart` operations must explicitly re-pin the
+source (`chart <name> from <source>`) or each charter drains the
+PREVIOUS daughter's reserves instead of the intended source — leaving a
+row of empty orbs. Found live at the N4 landing: the scanner truthfully
+reported three drained daughters as resonant (empty ≅ empty), which is
+the lens working and the arc broken.
+
 ## 9. Verification gaps on record (dated: 2026-07-27)
 
 The landed state, the lanes, and the next-work candidates live in
