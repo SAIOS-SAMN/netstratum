@@ -96,8 +96,44 @@ fn main() {
         }
     );
 
+    // OPERATOR CONTROLS (2026-07-30 ruling): `<var>/conductor.ctl`,
+    // polled each beat — the player's hand on the autonomous board.
+    //   paused          the beats hold (nothing ticks, nothing ages)
+    //   cadence N       seconds between beats (0 = flat out)
+    // The CLI writes it (`npcs pause|resume|speed N`); hand-editing is
+    // equally lawful. A missing or malformed file reads as defaults.
+    let control_path = PathBuf::from(&var_root).join("conductor.ctl");
+    let read_control = |fallback: u64| -> (bool, u64) {
+        let mut paused = false;
+        let mut cadence = fallback;
+        if let Ok(text) = std::fs::read_to_string(&control_path) {
+            for line in text.lines() {
+                let line = line.trim();
+                if line == "paused" {
+                    paused = true;
+                } else if let Some(word) = line.strip_prefix("cadence ") {
+                    if let Ok(n) = word.trim().parse() {
+                        cadence = n;
+                    }
+                }
+            }
+        }
+        (paused, cadence)
+    };
+
     let mut beat: u64 = 0;
+    let mut announced_pause = false;
     loop {
+        let (paused, cadence) = read_control(cadence_secs);
+        if paused {
+            if !announced_pause {
+                println!("conductor: PAUSED — npcs resume (or edit {}) to continue", control_path.display());
+                announced_pause = true;
+            }
+            std::thread::sleep(std::time::Duration::from_secs(1));
+            continue;
+        }
+        announced_pause = false;
         beat += 1;
         // TUniversal T = epoch base + this era's beat (07 §1.3): live
         // ticks stack on the converged timeline, never restart it.
@@ -153,8 +189,8 @@ fn main() {
         if cycles > 0 && beat >= cycles {
             break;
         }
-        if cadence_secs > 0 {
-            std::thread::sleep(std::time::Duration::from_secs(cadence_secs));
+        if cadence > 0 {
+            std::thread::sleep(std::time::Duration::from_secs(cadence));
         }
     }
     println!("era complete: {beat} heartbeats, {} civilizations live", worlds.len());

@@ -269,7 +269,7 @@ make the leap themselves, or not.
 
 ## 8. Genesis of the new aeon
 
-- **The var root:** `var-aeon1/` (operator-named), a fresh universe — no
+- **The var root:** `var/` (the DEFAULT — the old test universe was deleted by operator ruling 2026-07-30; aeon 1 was promoted from `var-aeon1/`), a fresh universe — no
   archived eras converge into it; the old universe's record stands sealed
   beside it. **SEEDED AND BOOTED 2026-07-29:** 13 civilizations genesised
   (0 converged — no baggage); the four founding progenitors seated (one

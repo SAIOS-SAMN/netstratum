@@ -88,7 +88,12 @@ pub fn default_era_roots(var_root: &str) -> Vec<(String, PathBuf)> {
         }
     }
     eras.sort();
-    eras.push((base, root.join("worlds")));
+    // THE LIVE ROOT NEVER ANNEXES ITSELF (naming ruling, 2026-07-30):
+    // its worlds are already home and already charted by genesis —
+    // self-annexation minted era-qualified ALIASES of living worlds
+    // ("var--<world>" beside "<world>", tripling the board). The fold
+    // (AEON-1b) is the one lawful door from live to archive; only the
+    // archived `<base>-era<N>` roots converge.
     eras
 }
 

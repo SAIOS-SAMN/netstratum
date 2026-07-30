@@ -76,10 +76,13 @@ fn the_archived_timelines_annex_onto_one_axis() {
 
     let mirror = Mirror::at(live.join("worlds"));
     let eras = default_era_roots(live.to_str().expect("utf8 path"));
-    // Discovery finds the sibling eras name-ascending, current root last.
+    // Discovery finds the sibling eras name-ascending — and NEVER the
+    // live root itself (naming ruling, 2026-07-30): self-annexation
+    // minted era-qualified aliases of living worlds; the fold is the
+    // one lawful door from live to archive.
     assert_eq!(
         eras.iter().map(|(name, _)| name.as_str()).collect::<Vec<_>>(),
-        vec!["var-era1", "var-era2", "var"],
+        vec!["var-era1", "var-era2"],
     );
     let read = converge(&mirror, &eras).expect("converges");
     assert_eq!(read.adopted.len(), 2);

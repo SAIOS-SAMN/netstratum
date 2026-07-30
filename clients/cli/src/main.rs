@@ -278,6 +278,265 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             }
             Err(refusal) => refuse(world, &refusal, style),
         },
+        // NPC CONTROLS (2026-07-30 ruling): the player's hand on the
+        // autonomous board — writes var/conductor.ctl, which the
+        // conductor polls every beat. Pause holds every egregore world
+        // (nothing ticks, nothing ages); speed sets the seconds
+        // between beats (0 = flat out).
+        Some("npcs") => {
+            let control = std::path::PathBuf::from("var/conductor.ctl");
+            let (mut paused, mut cadence) = {
+                let mut paused = false;
+                let mut cadence: Option<u64> = None;
+                if let Ok(text) = std::fs::read_to_string(&control) {
+                    for line in text.lines() {
+                        let line = line.trim();
+                        if line == "paused" {
+                            paused = true;
+                        } else if let Some(word) = line.strip_prefix("cadence ") {
+                            cadence = word.trim().parse().ok();
+                        }
+                    }
+                }
+                (paused, cadence)
+            };
+            let verb = words.next();
+            match verb {
+                Some("pause") => paused = true,
+                Some("resume") | Some("start") => paused = false,
+                Some("speed") => match words.next().and_then(|w| w.parse::<u64>().ok()) {
+                    Some(secs) => cadence = Some(secs),
+                    None => {
+                        println!(
+                            "{} speed wants seconds between beats — e.g. {} (0 = flat out)",
+                            style.bad("✗"),
+                            style.strong("npcs speed 5")
+                        );
+                        return;
+                    }
+                },
+                Some(other) => {
+                    println!(
+                        "{} unknown npcs verb {} — pause · resume · speed <seconds>",
+                        style.bad("✗"),
+                        style.strong(other)
+                    );
+                    return;
+                }
+                None => {
+                    println!(
+                        "npc board: {} · cadence {}",
+                        if paused { style.bad("PAUSED") } else { style.ok("beating") },
+                        match cadence {
+                            Some(0) => style.strong("flat out"),
+                            Some(n) => style.strong(&format!("{n}s")),
+                            None => style.dim("conductor default"),
+                        }
+                    );
+                    return;
+                }
+            }
+            let mut text = String::new();
+            if paused {
+                text.push_str("paused\n");
+            }
+            if let Some(secs) = cadence {
+                text.push_str(&format!("cadence {secs}\n"));
+            }
+            match std::fs::write(&control, text) {
+                Ok(()) => println!(
+                    "{} npc board {} — the conductor reads it on its next beat",
+                    style.ok("✓"),
+                    if paused {
+                        style.bad("PAUSED").to_string()
+                    } else {
+                        match cadence {
+                            Some(0) => "beating flat out".into(),
+                            Some(n) => format!("beating every {n}s"),
+                            None => "beating at the conductor's default".into(),
+                        }
+                    }
+                ),
+                Err(refusal) => println!("{} control write refused: {refusal}", style.bad("✗")),
+            }
+        }
+        // THE CIV CONSOLE (2026-07-30 ruling): build a custom
+        // civilization — axes, station, seat checks — from inside the
+        // client. `civ` / `civ seats` shows the station console; `civ
+        // new` registers the line and appends it to var/egregores.json
+        // so the conductor brings it online at its next boot.
+        Some("civ") => {
+            use mirror::registry::{
+                lineage_domain, seat_width, Civilization, Registry, RegistryRefused,
+                DISPOSITIONS, METABOLISMS, PERCEPTIONS, STATIONS,
+            };
+            let registry = Registry::at("var/registry");
+            match words.next() {
+                None | Some("seats") => {
+                    println!("{}", style.head("THE STATION CONSOLE — seats are space, not rank"));
+                    let seated = registry.list();
+                    let domains = ["mesic", "thermal", "cryo", "lithic", "plasmic"];
+                    let mut line = String::from("  progenitor  ");
+                    for domain in domains {
+                        let held = seated
+                            .iter()
+                            .filter(|c| {
+                                c.station.as_deref() == Some("progenitor")
+                                    && lineage_domain(&c.metabolism, None) == domain
+                            })
+                            .count();
+                        line.push_str(&format!("{domain} {held}/8 · "));
+                    }
+                    println!("{}", line.trim_end_matches(" · "));
+                    for station in ["watcher", "observer", "sovereign"] {
+                        let held = seated
+                            .iter()
+                            .filter(|c| c.station.as_deref() == Some(station))
+                            .count();
+                        match seat_width(station) {
+                            Some(width) => println!("  {station}     {held}/{width}"),
+                            None => println!("  {station}   {held} seated — unbounded (every charter-holder)"),
+                        }
+                    }
+                    println!(
+                        "  axes: {} · {} · {}",
+                        style.dim(&DISPOSITIONS.join("/")),
+                        style.dim(&METABOLISMS.join("/")),
+                        style.dim(&PERCEPTIONS.join("/"))
+                    );
+                    println!(
+                        "  stations: {} (a people with no station is the common, lawful state)",
+                        style.dim(&STATIONS.join("/"))
+                    );
+                    println!(
+                        "  create one: {}",
+                        style.strong("civ new <slug> | <Name> | <species> | <motto> | <disp> <metab> <perc> [station]")
+                    );
+                }
+                Some("new") => {
+                    let rest = line
+                        .splitn(3, char::is_whitespace)
+                        .nth(2)
+                        .unwrap_or("")
+                        .trim();
+                    let parts: Vec<&str> = rest.split('|').map(str::trim).collect();
+                    if parts.len() != 5 || parts.iter().any(|p| p.is_empty()) {
+                        println!(
+                            "{} the form is {}",
+                            style.bad("✗"),
+                            style.strong("civ new <slug> | <Name> | <species> | <motto> | <disp> <metab> <perc> [station]")
+                        );
+                        return;
+                    }
+                    let slug = parts[0].to_lowercase().replace(' ', "-");
+                    let axis_words: Vec<&str> = parts[4].split_whitespace().collect();
+                    if !(3..=4).contains(&axis_words.len()) {
+                        println!(
+                            "{} the last field is three axes and an optional station — e.g. {}",
+                            style.bad("✗"),
+                            style.strong("empiricist plasmic umbral progenitor")
+                        );
+                        return;
+                    }
+                    let newcomer = Civilization {
+                        name: parts[1].into(),
+                        slug: slug.clone(),
+                        species: parts[2].into(),
+                        motto: parts[3].into(),
+                        disposition: axis_words[0].into(),
+                        metabolism: axis_words[1].into(),
+                        perception: axis_words[2].into(),
+                        founder: "operator".into(),
+                        lineage: None,
+                        station: axis_words.get(3).map(|s| s.to_string()),
+                    };
+                    match registry.create(&newcomer) {
+                        Ok(()) => {}
+                        Err(RegistryRefused::UnknownAxis { axis, given }) => {
+                            println!(
+                                "{} unknown {axis} {} — the vocabulary is closed (it grows by landing, never by typo)",
+                                style.bad("✗"),
+                                style.strong(&given)
+                            );
+                            return;
+                        }
+                        Err(RegistryRefused::UnknownStation { given }) => {
+                            println!(
+                                "{} unknown station {} — {}",
+                                style.bad("✗"),
+                                style.strong(&given),
+                                style.dim(&STATIONS.join("/"))
+                            );
+                            return;
+                        }
+                        Err(RegistryRefused::NoSeatOpen { station, domain, held, width }) => {
+                            println!(
+                                "{} the {station} room for the {domain} domain stands FULL ({held}/{width}) — a room filled, never a rank refused; the band grows as the universe does",
+                                style.bad("✗")
+                            );
+                            return;
+                        }
+                        Err(RegistryRefused::AlreadyRegistered { slug }) => {
+                            println!("{} {} is already a people — choose a new slug", style.bad("✗"), style.strong(&slug));
+                            return;
+                        }
+                        Err(refusal) => {
+                            println!("{} the registry refused: {refusal:?}", style.bad("✗"));
+                            return;
+                        }
+                    }
+                    // Seat the world deterministically from the slug —
+                    // no wall clock, no dice (CHARTER §9's spirit).
+                    let digest: [u8; 32] = blake3::hash(slug.as_bytes()).into();
+                    let coord = |at: usize| -> i64 { i64::from(digest[at] % 63) - 31 };
+                    let entry = format!(
+                        "  {{\"name\":\"{}\",\"slug\":\"{}\",\"species\":\"{}\",\"motto\":\"{}\",\"disposition\":\"{}\",\"metabolism\":\"{}\",\"perception\":\"{}\",\"world\":\"{}-hearth\",\"planet\":\"{}-prime\",\"colony\":\"first-{}\",\"policy\":\"steady\",\"x\":\"{}\",\"y\":\"{}\",\"z\":\"{}\"{}}}",
+                        newcomer.name, slug, newcomer.species, newcomer.motto,
+                        newcomer.disposition, newcomer.metabolism, newcomer.perception,
+                        slug, slug, slug,
+                        coord(0), coord(1), coord(2),
+                        newcomer
+                            .station
+                            .as_ref()
+                            .map(|s| format!(",\"station\":\"{s}\""))
+                            .unwrap_or_default()
+                    );
+                    let roster = std::path::PathBuf::from("var/egregores.json");
+                    let appended = std::fs::read_to_string(&roster)
+                        .ok()
+                        .and_then(|text| {
+                            let trimmed = text.trim_end();
+                            let body = trimmed.strip_suffix(']')?.trim_end();
+                            let glue = if body.trim_end().ends_with('[') { "\n" } else { ",\n" };
+                            Some(format!("{body}{glue}{entry}\n]\n"))
+                        });
+                    match appended.map(|text| std::fs::write(&roster, text)) {
+                        Some(Ok(())) => println!(
+                            "{} {} registered{} and rostered — the conductor brings the line online at its next boot ({}-hearth awaits)",
+                            style.ok("✓"),
+                            style.strong(&newcomer.name),
+                            newcomer
+                                .station
+                                .as_ref()
+                                .map(|s| format!(" ({s} seat taken)"))
+                                .unwrap_or_default(),
+                            slug
+                        ),
+                        _ => println!(
+                            "{} registered, but var/egregores.json would not append — add the entry by hand",
+                            style.bad("✗")
+                        ),
+                    }
+                }
+                Some(other) => println!(
+                    "{} unknown civ verb {} — {} or {}",
+                    style.bad("✗"),
+                    style.strong(other),
+                    style.strong("civ seats"),
+                    style.strong("civ new …")
+                ),
+            }
+        }
         Some("save") => match world.orb() {
             Some(orb) => {
                 let path = std::path::PathBuf::from("var/worlds")
@@ -908,6 +1167,8 @@ fn help(style: &Style) {
         ("sever <res> to <p> · bonds", "cut a standing bond (the load posts to the cutter) · list the standing orders"),
         ("covenant <q> <res> to <p> within <n>", "vitrify a delivery pact in the Glasskeeper lattice — collateral (priced by your fidelity books, never barred) locks until the quota is delivered (release) or the deadline passes (BREACH_AND_SLASH); `covenants` lists the open pacts"),
         ("ideology", "the dual cohesion ledger for this planet — the four axes, their books, and the derived readings; divergent trade partners pay a friction entropy tax, aligned ones pay zero"),
+        ("npcs [pause|resume|speed <s>]", "the player\'s hand on the autonomous board — pause holds every egregore world, speed sets seconds between beats (0 = flat out); bare npcs shows the state"),
+        ("civ [seats] · civ new …", "the civ console: seats shows every station\'s room (progenitors per domain, 8 each — space, not rank); civ new <slug> | <Name> | <species> | <motto> | <disp> <metab> <perc> [station] registers a custom line and rosters it for the conductor"),
         ("save · resume <world>", "sync the chronicle to var/worlds/<name>/ (append-only) · resume a saved world at launch"),
         ("planet <name> · planets", "switch the planet cursor · list this world's planets"),
         ("agent <handle>", "register a contained agent (zero grants until you open scopes)"),

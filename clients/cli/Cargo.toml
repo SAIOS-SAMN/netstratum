@@ -12,3 +12,4 @@ path = "src/main.rs"
 cfe = { path = "../../engine/cfe" }
 mirror = { path = "../../engine/mirror" }
 num-bigint.workspace = true
+blake3.workspace = true

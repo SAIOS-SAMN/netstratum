@@ -43,9 +43,15 @@ BUILD_ORDER §3b):** SUBSTRATE-1 · LINEAGE-1 · TECH-1a (the solar leap) ·
 THRESHOLD-1 (the crossing + shield) · AEON-1a (G, key changes, star
 aging, the fold) · ELEVATE-1 (the three-gate climb) · BAND-1 (seats) ·
 COUNCIL-1 (the multilateral covenant) · PLANNER-1 (the licensed leap;
-the solar leap is never licensed). **Aeon 1 is live** at `var-aeon1/`
-(13 civilizations, 4 progenitors seated, 2 pre-solar shielded worlds;
-roster in `seeds/aeon1-egregores.json`). Open second slices: TECH-1b
+the solar leap is never licensed). **Aeon 1 is live at the default `var/`**
+(the old test universe deleted by ruling 2026-07-30; 13+ civilizations,
+4 progenitors seated, 2 pre-solar shielded worlds; seed roster in
+`seeds/aeon1-egregores.json`). Operator consoles landed in the CLI:
+`npcs pause|resume|speed N` (writes `var/conductor.ctl`, polled every
+beat) and `civ seats` / `civ new` (custom civilizations with live
+station-seat checks, rostered for the conductor). Convergence no longer
+self-annexes the live root — era-qualified aliases of living worlds are
+gone; only `<base>-eraN` archives converge (the fold is the one door). Open second slices: TECH-1b
 (the crystallized tree), AEON-1b (conductor orchestration: voice
 triggers, divergence speciation, fold rotation), the market board
 (§3a — its APERTURE gate stands open), and the union CLI verbs.
@@ -97,8 +103,11 @@ free 54** for anything outside those reservations.
 - SINK-1 research/throttle gates deferred to TECH-1.
 - `World`→`Star` struct rename debt waits for the multi-planet landing
   (NS-6 §6).
-- `var*/` archives are single-copy (git-ignored); operator declined/hasn't
-  ordered a backup.
+- `var*/` archives are single-copy (git-ignored). The ORIGINAL test
+  universe (124 worlds, its eras, its quarantined ruins) was DELETED by
+  operator ruling 2026-07-30 — "we dont need to maintain any of the old
+  system, it was just a test." Aeon 1 now lives at the default `var/`;
+  its seed roster is `seeds/aeon1-egregores.json`.
 - Era carriers: mirror jsonl (observation) + cfe tlv (resume) coexist by
   design.
 

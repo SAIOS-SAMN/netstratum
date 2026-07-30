@@ -112,8 +112,10 @@ fn closes(program: &Program, task: &Task) -> bool {
 /// programs tested, never a clock. Same task, same outcome, bounded
 /// work: a seed whose solution lies past the budget reads Unsolved and
 /// the line rests that beat (measured live: an unbudgeted rung-5 seed
-/// cost 102 s of exhaustive search in one heartbeat).
-pub const SEARCH_BUDGET: usize = 200_000;
+/// cost 102 s of exhaustive search in one heartbeat). BFS finds real
+/// solutions early — the budget mostly truncates doomed exhaustions,
+/// so it sits low: a beat stays under a second, worst case.
+pub const SEARCH_BUDGET: usize = 20_000;
 
 /// Enumerative search over programs up to `max_depth` ops drawn from
 /// the general vocabulary plus operators derived from the observation.
