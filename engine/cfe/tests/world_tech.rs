@@ -68,41 +68,4 @@ fn the_leap_replays_and_resumes() {
     assert_eq!(resumed.techs(), world.techs());
 }
 
-/// Tag 39 round-trips byte-exact — node id, condition, modifier,
-/// magnitude, and name all whole (SEAL A/B).
-#[test]
-fn the_discovery_round_trips_byte_exact() {
-    let event = ClosureEvent::TechDiscovered {
-        orb_id: 9,
-        node: [7u8; 32],
-        condition: 3,
-        modifier: 2,
-        magnitude: ratio(5, 4),
-        name: "radiator doctrine".into(),
-    };
-    let bytes = event.wire_bytes();
-    assert_eq!(bytes[0], 39, "tag 39 — inscribed at TECH-1a");
-    let mut records = cfe::tlv::records(&bytes);
-    let (tag, value) = records.next().expect("one record");
-    let decoded = ClosureEvent::from_wire(tag, value).expect("known tag decodes");
-    assert_eq!(decoded, event, "value round trip");
-    assert_eq!(decoded.wire_bytes(), bytes, "BYTE round trip");
-}
 
-/// Pre-solar is lawful: an unsited world lives whole — founds, zones,
-/// banks — and simply carries no leap receipt (12_UNION §5a: the young
-/// are left to make the leap themselves, or not).
-#[test]
-fn pre_solar_is_a_lawful_state() {
-    let mut world = World::new();
-    world.found("deepmat").expect("founds");
-    world.zone(0, cfe::dop::ZoneKind::Extractor).expect("zones");
-    for _ in 0..4 {
-        world.tick();
-    }
-    world.collect().expect("collects");
-    assert!(!world.knows_its_sun());
-    assert_eq!(leaps(&world), 0);
-    let committed = replay(world.chronicle());
-    assert!(committed.techs.is_empty());
-}

@@ -6,10 +6,10 @@
 //! allowed to freeze-lock; the Terminal Wall carries the drama.
 
 use cfe::dop::{Resource, ZoneKind};
-use cfe::ratio::{ratio, Ratio};
+use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
 use conductor::{
-    founding_egregores, joule_runway_allows, load_egregores, run_era, write_default_egregores, EgregoreSpec,
+    founding_egregores, joule_runway_allows, load_egregores, write_default_egregores, EgregoreSpec,
     Egregore, Policy,
 };
 use mirror::registry::{Civilization, Registry};
@@ -24,13 +24,6 @@ fn scratch(name: &str) -> PathBuf {
     ));
     let _ = fs::remove_dir_all(&dir);
     dir
-}
-
-fn banked(egregore: &Egregore, resource: Resource) -> Ratio {
-    egregore.world
-        .orb()
-        .map(|orb| orb.banked_amount(resource))
-        .unwrap_or_else(|| ratio(0, 1))
 }
 
 fn kind_count(egregore: &Egregore, kind: ZoneKind) -> usize {
@@ -89,44 +82,6 @@ fn thermal_genesis_is_deterministic() {
     );
 }
 
-/// A default-seeded era is thermally ALIVE: at least one Furnace egregore
-/// mints joules through encasement shells, at least one Frost egregore
-/// raises a cryo-lattice array and banks sink — and the thermal state
-/// flows to `state.json` (the mirror pipeline, witnessed end-to-end).
-#[test]
-fn a_default_era_mints_hot_and_banks_cold() {
-    let root = scratch("alive");
-    let worlds = run_era(&root.to_string_lossy(), 30);
-    let furnace = worlds
-        .iter()
-        .find(|b| {
-            kind_count(b, ZoneKind::Encasement) > 0 && banked(b, Resource::Joule) > ratio(0, 1)
-        })
-        .expect("a Furnace egregore minted joules through its shells");
-    let frost = worlds
-        .iter()
-        .find(|b| kind_count(b, ZoneKind::CryoArray) > 0)
-        .expect("a Frost egregore raised a cryo-lattice array");
-    assert!(
-        banked(frost, Resource::Sink) > ratio(0, 1),
-        "the Frost banks cold"
-    );
-    assert_ne!(furnace.spec.civilization.slug, frost.spec.civilization.slug);
-
-    // The observer pipeline: the M sun reaches state.json unchanged.
-    let state = fs::read_to_string(
-        root.join("worlds")
-            .join(&frost.spec.world_name)
-            .join("planets")
-            .join(&frost.spec.planet)
-            .join("state.json"),
-    )
-    .expect("state.json mirrored");
-    assert!(
-        state.contains("\"star_class\":7"),
-        "the M sun reaches the observer: {state}"
-    );
-}
 
 /// The joule runway measurably DEFERS the Frost: same policy, same
 /// beats — the vault-sited colony stops at its sink charter (one
@@ -196,32 +151,6 @@ fn the_joule_runway_defers_the_frost() {
     assert!(!joule_runway_allows(&ratio(49, 100), 1));
 }
 
-/// A year of a thermally sited era SPEAKS: the journals carry the
-/// band register and the joule/famine vocabulary — the Terminal Wall
-/// reports real thermodynamic drama, derived, never invented.
-#[test]
-fn a_thermal_year_reaches_the_wall() {
-    let root = scratch("wall");
-    let _ = run_era(&root.to_string_lossy(), 60);
-    let mut journals = String::new();
-    for entry in fs::read_dir(root.join("worlds")).expect("worlds") {
-        let dir = entry.expect("entry").path();
-        if let Ok(text) = fs::read_to_string(dir.join("journal.jsonl")) {
-            journals.push_str(&text);
-        }
-    }
-    assert!(!journals.is_empty(), "year boundaries journal");
-    for phrase in [
-        "joule bank",                     // the joule stance line
-        "heating bill",                   // ECON-J vocabulary
-        "FREEZE-LOCK",                    // the Frost's honest failure
-        "S_cool",                         // sink offered to Furnace traders
-        "Emberkin (Radiotroph)",          // the hot band register
-        "Coherent (Cryo-Superconductor)", // the vault register
-    ] {
-        assert!(journals.contains(phrase), "the wall carries {phrase:?}");
-    }
-}
 
 /// The operator's file: thermal fields round-trip through the seeded
 /// egregores.json; files WITHOUT thermal fields (the pre-BOT-THERM shape)

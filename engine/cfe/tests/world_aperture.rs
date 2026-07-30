@@ -172,28 +172,3 @@ fn both_legs_replay_in_their_own_world() {
     assert_eq!(beta_orb.banked_amount(Resource::Iron), beta_live, "dest leg replays");
 }
 
-/// The two legs round-trip their wire records byte-exact (SEAL A).
-#[test]
-fn the_aperture_legs_round_trip_byte_exact() {
-    for event in [
-        ClosureEvent::ApertureSent {
-            deal: 7,
-            from_orb: 1,
-            resource: Resource::Joule,
-            amount: ratio(5, 2),
-        },
-        ClosureEvent::ApertureReceived {
-            deal: 7,
-            to_orb: 2,
-            resource: Resource::Joule,
-            amount: ratio(5, 2),
-        },
-    ] {
-        let bytes = event.wire_bytes();
-        let mut records = cfe::tlv::records(&bytes);
-        let (tag, value) = records.next().expect("one record");
-        let decoded = ClosureEvent::from_wire(tag, value).expect("known tag decodes");
-        assert_eq!(decoded, event, "value round trip");
-        assert_eq!(decoded.wire_bytes(), bytes, "BYTE round trip");
-    }
-}

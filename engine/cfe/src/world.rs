@@ -325,10 +325,7 @@ impl World {
         if albedo < zero || albedo >= one || orbit_r <= zero {
             return Err(ActionRefused::BadSiting);
         }
-        let held = self
-            .orbs
-            .iter_mut()
-            .find(|held| held.orb_id == orb)
+        let held = peel(&mut self.orbs, orb)
             .ok_or(ActionRefused::NoSuchOrb { orb })?;
         if held.thermal.is_some() {
             return Err(ActionRefused::AlreadySited { orb });
@@ -469,10 +466,7 @@ impl World {
         // Every member must afford its lock BEFORE any lock happens —
         // a refusal moves nothing (the aperture discipline).
         for member in &members {
-            let held = self
-                .orbs
-                .iter()
-                .find(|held| held.orb_id == *member)
+            let held = peek(&self.orbs, *member)
                 .expect("checked");
             let have = held.banked_amount(resource);
             if have < collateral {
@@ -484,10 +478,7 @@ impl World {
             }
         }
         for member in &members {
-            let held = self
-                .orbs
-                .iter_mut()
-                .find(|held| held.orb_id == *member)
+            let held = peel(&mut self.orbs, *member)
                 .expect("checked");
             held.bank(resource, -collateral.clone());
         }
@@ -521,7 +512,7 @@ impl World {
     /// its own receipted conduct. Thresholds are placeholder
     /// parameters (the 06 discipline).
     pub fn is_imperial(&self, orb: u64) -> bool {
-        let Some(held) = self.orbs.iter().find(|held| held.orb_id == orb) else {
+        let Some(held) = peek(&self.orbs, orb) else {
             return false;
         };
         held.extracted_across > ratio(0, 1)
@@ -589,90 +580,79 @@ impl World {
         Ok(())
     }
 
-    /// TECH-1b (10 §3): does a crystallization condition HOLD for this
-    /// orb at this stamp? Every reading is exact and receipt- or
-    /// state-derived — no shadow counters. Thresholds are the table's
+    /// TECH-1b (10 §3) — THE CRYSTAL SHEAR: one pass over the
+    /// chronicle deposits every orb's condition readings (famine
+    /// spans, overheat spans, the vent-window sums) — the converge
+    /// deposit idiom, never a rescan per condition per orb. State
+    /// readings (sink, surplus) evaluate directly at the boundary.
+    fn crystal_deposits(&self, now: u64) -> Vec<(u64, CrystalDeposit)> {
+        let window_floor = now.saturating_sub(240);
+        let mut sheet: Vec<(u64, CrystalDeposit)> = Vec::new();
+        fn deposit(sheet: &mut Vec<(u64, CrystalDeposit)>, orb: u64) -> &mut CrystalDeposit {
+            if let Some(at) = sheet.iter().position(|(held, _)| *held == orb) {
+                return &mut sheet[at].1;
+            }
+            sheet.push((orb, CrystalDeposit::default()));
+            &mut sheet.last_mut().expect("just pushed").1
+        }
+        for receipt in self.chronicle.receipts() {
+            match &receipt.event {
+                ClosureEvent::FamineStruck { orb_id, resource: Resource::Joule, .. } => {
+                    let held = deposit(&mut sheet, *orb_id);
+                    held.famine_open = held.famine_open.or(Some(receipt.stamp));
+                }
+                ClosureEvent::FamineRelieved { orb_id, resource: Resource::Joule } => {
+                    let held = deposit(&mut sheet, *orb_id);
+                    if let Some(struck) = held.famine_open.take() {
+                        held.famine_total += receipt.stamp.saturating_sub(struck);
+                    }
+                }
+                ClosureEvent::OverheatStruck { orb_id, .. } => {
+                    let held = deposit(&mut sheet, *orb_id);
+                    held.overheat_open = held.overheat_open.or(Some(receipt.stamp));
+                }
+                ClosureEvent::OverheatCleared { orb_id } => {
+                    deposit(&mut sheet, *orb_id).overheat_open = None;
+                }
+                ClosureEvent::VentSettled { orb_id, amount } if receipt.stamp >= window_floor => {
+                    deposit(&mut sheet, *orb_id).vented += amount.clone();
+                }
+                ClosureEvent::YieldCollected {
+                    orb_id, resource: Resource::Joule, amount,
+                } if receipt.stamp >= window_floor => {
+                    deposit(&mut sheet, *orb_id).encased += amount.clone();
+                }
+                _ => {}
+            }
+        }
+        sheet
+    }
+
+    /// TECH-1b (10 §3): does a condition HOLD, read from the deposit
+    /// sheet + committed state? Thresholds stay the table's
     /// placeholder parameters.
-    fn condition_holds(&self, orb: u64, condition: u8, now: u64) -> bool {
-        let Some(held) = self.orbs.iter().find(|held| held.orb_id == orb) else {
+    fn condition_holds(&self, orb: u64, condition: u8, now: u64, sheet: &CrystalDeposit) -> bool {
+        let Some(held) = peek(&self.orbs, orb) else {
             return false;
         };
         match condition {
-            // Joule famine survived ≥ 8 years TOTAL: closed strike →
-            // relief spans plus any open strike, summed from receipts.
             1 => {
-                let mut total: u64 = 0;
-                let mut open: Option<u64> = None;
-                for receipt in self.chronicle.receipts() {
-                    match &receipt.event {
-                        ClosureEvent::FamineStruck {
-                            orb_id, resource: Resource::Joule, ..
-                        } if *orb_id == orb => open = open.or(Some(receipt.stamp)),
-                        ClosureEvent::FamineRelieved {
-                            orb_id, resource: Resource::Joule,
-                        } if *orb_id == orb => {
-                            if let Some(struck) = open.take() {
-                                total += receipt.stamp.saturating_sub(struck);
-                            }
-                        }
-                        _ => {}
-                    }
-                }
-                if let Some(struck) = open {
-                    total += now.saturating_sub(struck);
-                }
-                total >= 480
+                let open = sheet
+                    .famine_open
+                    .map(|struck| now.saturating_sub(struck))
+                    .unwrap_or(0);
+                sheet.famine_total + open >= 480
             }
-            // Overheat held ≥ 4 CONSECUTIVE years: the open strike's
-            // span, receipts alone.
-            2 => {
-                let mut open: Option<u64> = None;
-                for receipt in self.chronicle.receipts() {
-                    match &receipt.event {
-                        ClosureEvent::OverheatStruck { orb_id, .. } if *orb_id == orb => {
-                            open = open.or(Some(receipt.stamp));
-                        }
-                        ClosureEvent::OverheatCleared { orb_id } if *orb_id == orb => {
-                            open = None;
-                        }
-                        _ => {}
-                    }
-                }
-                open.is_some_and(|struck| now.saturating_sub(struck) >= 240)
-            }
-            // Vault sink banked ≥ threshold with zero demurrage due —
-            // a pure state reading at the boundary.
+            2 => sheet
+                .overheat_open
+                .is_some_and(|struck| now.saturating_sub(struck) >= 240),
             3 => {
                 held.banked_amount(Resource::Sink) >= ratio(100, 1)
                     && demurrage_due(held, self.star, now, &ease_of(&self.techs, orb))
                         .iter()
                         .all(|(_, due)| *due == ratio(0, 1))
             }
-            // High vent ratio sustained: over the last 4 years, sealed
-            // vents outweigh encased joule yield (and vents exist).
-            4 => {
-                let floor = now.saturating_sub(240);
-                let mut vented = ratio(0, 1);
-                let mut encased = ratio(0, 1);
-                for receipt in self.chronicle.receipts() {
-                    if receipt.stamp < floor {
-                        continue;
-                    }
-                    match &receipt.event {
-                        ClosureEvent::VentSettled { orb_id, amount } if *orb_id == orb => {
-                            vented += amount.clone();
-                        }
-                        ClosureEvent::YieldCollected {
-                            orb_id, resource: Resource::Joule, amount,
-                        } if *orb_id == orb => encased += amount.clone(),
-                        _ => {}
-                    }
-                }
-                vented > ratio(0, 1) && vented > encased
-            }
-            // Surplus held: banked joules cover 4× the ANNUAL heating
-            // bill (active zones × per-zone burn × the year voice) —
-            // and the cold is real (a bill exists).
+            4 => sheet.vented > ratio(0, 1) && sheet.vented > sheet.encased,
             5 => {
                 let active = held
                     .zones
@@ -744,7 +724,7 @@ impl World {
     }
 
     pub fn orb_by_id(&self, orb: u64) -> Option<&ColonyOrb> {
-        self.orbs.iter().find(|held| held.orb_id == orb)
+        peek(&self.orbs, orb)
     }
 
     /// This orb's accrued workspace.
@@ -839,10 +819,7 @@ impl World {
         if self.orbs.iter().any(|held| held.name == name) {
             return Err(ActionRefused::PlanetNameTaken { name: name.to_string() });
         }
-        let source_orb = self
-            .orbs
-            .iter_mut()
-            .find(|held| held.orb_id == source)
+        let source_orb = peel(&mut self.orbs, source)
             .ok_or(ActionRefused::NoSuchOrb { orb: source })?;
         for (resource, amount) in founding_reserves() {
             let have = source_orb.banked_amount(resource);
@@ -969,10 +946,7 @@ impl World {
         if self.orbs.is_empty() {
             return Err(ActionRefused::NoColony);
         }
-        let held = self
-            .orbs
-            .iter_mut()
-            .find(|held| held.orb_id == orb)
+        let held = peel(&mut self.orbs, orb)
             .ok_or(ActionRefused::NoSuchOrb { orb })?;
         if held.zones.iter().any(|zone| zone.tile == tile) {
             return Err(ActionRefused::TileAlreadyZoned { tile });
@@ -1009,10 +983,7 @@ impl World {
         if self.orbs.is_empty() {
             return Err(ActionRefused::NoColony);
         }
-        let held = self
-            .orbs
-            .iter_mut()
-            .find(|held| held.orb_id == orb)
+        let held = peel(&mut self.orbs, orb)
             .ok_or(ActionRefused::NoSuchOrb { orb })?;
         let at = held
             .zones
@@ -1110,12 +1081,12 @@ impl World {
                     false => beneficiary,
                 };
                 if let Some(held) =
-                    self.orbs.iter_mut().find(|held| held.orb_id == recipient)
+                    peel(&mut self.orbs, recipient)
                 {
                     held.bank(resource, pact.collateral.clone());
                 }
                 if let Some(held) =
-                    self.orbs.iter_mut().find(|held| held.orb_id == obligor)
+                    peel(&mut self.orbs, obligor)
                 {
                     match fulfilled {
                         true => held.covenants_fulfilled += stake,
@@ -1176,7 +1147,7 @@ impl World {
                     };
                     let stake = pact.collateral.clone() * weight.clone();
                     if let Some(held) =
-                        self.orbs.iter_mut().find(|held| held.orb_id == *member)
+                        peel(&mut self.orbs, *member)
                     {
                         if banked > ratio(0, 1) {
                             held.bank(pact.resource, banked.clone());
@@ -1244,7 +1215,7 @@ impl World {
                 .unwrap_or([false; 6]);
             // THERMAL-1: the heat law, live only when the sun is
             // commissioned AND this orb is sited (the opt-in guard).
-            let holder = self.orbs.iter().find(|held| held.orb_id == *orb_id);
+            let holder = peek(&self.orbs, *orb_id);
             let site = holder.and_then(|held| held.thermal.clone());
             let joule_famined = holder
                 .map(|held| held.famine.contains(&Resource::Joule))
@@ -1334,10 +1305,7 @@ impl World {
                             Some((_, pending)) => *pending += overflow.clone(),
                             None => self.vent_pending.push((*orb_id, overflow.clone())),
                         }
-                        let held = self
-                            .orbs
-                            .iter_mut()
-                            .find(|held| held.orb_id == *orb_id)
+                        let held = peel(&mut self.orbs, *orb_id)
                             .expect("orb exists");
                         if !held.overheat {
                             held.overheat = true;
@@ -1356,10 +1324,7 @@ impl World {
                 t4 = Some(t_eq4);
             }
             if efficiency == one {
-                let held = self
-                    .orbs
-                    .iter_mut()
-                    .find(|held| held.orb_id == *orb_id)
+                let held = peel(&mut self.orbs, *orb_id)
                     .expect("orb exists");
                 if held.overheat {
                     held.overheat = false;
@@ -1432,8 +1397,16 @@ impl World {
         // crystallization, so replay re-derives the identical node at
         // the identical tick. No randomness, no external calls.
         if self.star.is_some() && stamp_now > 0 && stamp_now.is_multiple_of(60) {
+            // The shear: ONE sweep deposits every orb's readings.
+            let deposits = self.crystal_deposits(stamp_now);
+            let blank = CrystalDeposit::default();
             let candidates: Vec<u64> = self.orbs.iter().map(|held| held.orb_id).collect();
             for orb in candidates {
+                let sheet = deposits
+                    .iter()
+                    .find(|(held, _)| *held == orb)
+                    .map(|(_, sheet)| sheet)
+                    .unwrap_or(&blank);
                 for condition in 1u8..=5 {
                     if self
                         .techs
@@ -1442,7 +1415,7 @@ impl World {
                     {
                         continue;
                     }
-                    if !self.condition_holds(orb, condition, stamp_now) {
+                    if !self.condition_holds(orb, condition, stamp_now, sheet) {
                         continue;
                     }
                     let (name, modifier, magnitude) =
@@ -1499,10 +1472,7 @@ impl World {
         if self.orbs.is_empty() {
             return Err(ActionRefused::NoColony);
         }
-        let held = self
-            .orbs
-            .iter_mut()
-            .find(|held| held.orb_id == orb)
+        let held = peel(&mut self.orbs, orb)
             .ok_or(ActionRefused::NoSuchOrb { orb })?;
         let mut settleable: Vec<(Resource, Ratio)> = Vec::new();
         self.accrued.retain(|(owner, resource, amount)| {
@@ -1649,10 +1619,7 @@ impl World {
         // Affordability on the post-decay bank — the books honest at
         // the stamp — computed pure, so a refusal orphans nothing.
         {
-            let source = self
-                .orbs
-                .iter()
-                .find(|held| held.orb_id == from)
+            let source = peek(&self.orbs, from)
                 .expect("checked above");
             let decay = demurrage_due(source, star, stamp, &ease_of(&self.techs, from))
                 .into_iter()
@@ -1670,11 +1637,11 @@ impl World {
         }
         // Crisis reads BEFORE the move — the replay-fact order.
         let from_crisis = {
-            let held = self.orbs.iter().find(|held| held.orb_id == from).expect("checked");
+            let held = peek(&self.orbs, from).expect("checked");
             !held.famine.is_empty() || held.overheat
         };
         let to_crisis = {
-            let held = self.orbs.iter().find(|held| held.orb_id == to).expect("checked");
+            let held = peek(&self.orbs, to).expect("checked");
             !held.famine.is_empty() || held.overheat
         };
         // IDEO-1 (09 §3.2): friction prices DIVERGENCE, not vice — the
@@ -1685,7 +1652,7 @@ impl World {
         let divergence = {
             let reading = |orb: u64| {
                 let held =
-                    self.orbs.iter().find(|held| held.orb_id == orb).expect("checked");
+                    peek(&self.orbs, orb).expect("checked");
                 reciprocity_reading(held)
             };
             let from_reading = reading(from);
@@ -1698,19 +1665,13 @@ impl World {
         // The touch, both sides (SINK-1), then the move.
         for orb in [from, to] {
             let ease = ease_of(&self.techs, orb);
-            let held = self
-                .orbs
-                .iter_mut()
-                .find(|held| held.orb_id == orb)
+            let held = peel(&mut self.orbs, orb)
                 .expect("checked above");
             touch(held, star, &mut self.chronicle, stamp, &ease);
         }
         let value = amount.clone() * crate::dop::commensurate_weight(resource);
         {
-            let source = self
-                .orbs
-                .iter_mut()
-                .find(|held| held.orb_id == from)
+            let source = peel(&mut self.orbs, from)
                 .expect("checked above");
             source.bank(resource, -amount.clone());
             if to_crisis {
@@ -1718,10 +1679,7 @@ impl World {
             }
         }
         {
-            let target = self
-                .orbs
-                .iter_mut()
-                .find(|held| held.orb_id == to)
+            let target = peel(&mut self.orbs, to)
                 .expect("checked above");
             target.bank(resource, amount.clone());
             if from_crisis {
@@ -1888,10 +1846,7 @@ impl World {
         let owed = rate.clone() * ratio(boundary.saturating_sub(anchored) as i64, 1);
         let star = self.star;
         let affordable = {
-            let held = self
-                .orbs
-                .iter()
-                .find(|held| held.orb_id == source)
+            let held = peek(&self.orbs, source)
                 .expect("bond endpoints exist");
             let decay = demurrage_due(held, star, stamp, &ease_of(&self.techs, source))
                 .into_iter()
@@ -1916,28 +1871,19 @@ impl World {
         let value = pay.clone() * crate::dop::commensurate_weight(resource);
         if pay > ratio(0, 1) {
             for orb in [source, target] {
-                let held = self
-                    .orbs
-                    .iter_mut()
-                    .find(|held| held.orb_id == orb)
+                let held = peel(&mut self.orbs, orb)
                     .expect("bond endpoints exist");
                 let ease = ease_of(&self.techs, orb);
                 touch(held, star, &mut self.chronicle, stamp, &ease);
             }
             {
-                let held = self
-                    .orbs
-                    .iter_mut()
-                    .find(|held| held.orb_id == source)
+                let held = peel(&mut self.orbs, source)
                     .expect("bond endpoints exist");
                 held.bank(resource, -pay.clone());
                 held.bond_flow += value.clone();
             }
             {
-                let held = self
-                    .orbs
-                    .iter_mut()
-                    .find(|held| held.orb_id == target)
+                let held = peel(&mut self.orbs, target)
                     .expect("bond endpoints exist");
                 held.bank(resource, pay.clone());
             }
@@ -1949,10 +1895,7 @@ impl World {
         if ended {
             self.bonds.remove(at);
             if load > ratio(0, 1) {
-                let held = self
-                    .orbs
-                    .iter_mut()
-                    .find(|held| held.orb_id == source)
+                let held = peel(&mut self.orbs, source)
                     .expect("bond endpoints exist");
                 held.severance_load += load.clone();
             }
@@ -2027,10 +1970,7 @@ impl World {
         }
         let stamp = self.clock.now();
         let collateral = {
-            let held = self
-                .orbs
-                .iter()
-                .find(|held| held.orb_id == obligor)
+            let held = peek(&self.orbs, obligor)
                 .expect("checked above");
             let required = crate::dop::collateral_required(
                 &held.covenants_fulfilled,
@@ -2048,10 +1988,7 @@ impl World {
             required
         };
         {
-            let held = self
-                .orbs
-                .iter_mut()
-                .find(|held| held.orb_id == obligor)
+            let held = peel(&mut self.orbs, obligor)
                 .expect("checked above");
             held.bank(resource, -collateral.clone());
         }
@@ -2133,10 +2070,7 @@ impl World {
             return Err(ActionRefused::CannotAbsorb { pending: Box::new(pending) });
         }
         {
-            let held = self
-                .orbs
-                .iter()
-                .find(|held| held.orb_id == absorber)
+            let held = peek(&self.orbs, absorber)
                 .expect("checked above");
             let decay = demurrage_due(held, star, stamp, &ease_of(&self.techs, absorber))
                 .into_iter()
@@ -2154,19 +2088,16 @@ impl World {
         }
         // Crisis reads BEFORE the move — the replay-fact order.
         let source_crisis = {
-            let held = self.orbs.iter().find(|held| held.orb_id == source).expect("checked");
+            let held = peek(&self.orbs, source).expect("checked");
             !held.famine.is_empty() || held.overheat
         };
         let absorber_crisis = {
-            let held = self.orbs.iter().find(|held| held.orb_id == absorber).expect("checked");
+            let held = peek(&self.orbs, absorber).expect("checked");
             !held.famine.is_empty() || held.overheat
         };
         let value = amount.clone() * crate::dop::commensurate_weight(Resource::Sink);
         {
-            let held = self
-                .orbs
-                .iter_mut()
-                .find(|held| held.orb_id == absorber)
+            let held = peel(&mut self.orbs, absorber)
                 .expect("checked above");
             let ease = ease_of(&self.techs, absorber);
             touch(held, star, &mut self.chronicle, stamp, &ease);
@@ -2185,10 +2116,7 @@ impl World {
         }
         self.vent_pending.retain(|(_, pending)| pending != &ratio(0, 1));
         if absorber_crisis {
-            let held = self
-                .orbs
-                .iter_mut()
-                .find(|held| held.orb_id == source)
+            let held = peel(&mut self.orbs, source)
                 .expect("checked above");
             held.drawn_in_crisis += value;
         }
@@ -2205,10 +2133,7 @@ impl World {
         );
         // Emptying the pending relieves the strike, receipted.
         if self.vent_pending_of(source) == ratio(0, 1) {
-            let held = self
-                .orbs
-                .iter_mut()
-                .find(|held| held.orb_id == source)
+            let held = peel(&mut self.orbs, source)
                 .expect("checked above");
             if held.overheat {
                 held.overheat = false;
@@ -2243,7 +2168,7 @@ impl World {
     fn relieve_recovered(&mut self, orb: u64) {
         let stamp = self.clock.now();
         let star = self.star;
-        let Some(held) = self.orbs.iter_mut().find(|held| held.orb_id == orb) else {
+        let Some(held) = peel(&mut self.orbs, orb) else {
             return;
         };
         let heating_need: Ratio = match (star, &held.thermal) {
@@ -2535,7 +2460,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 orbs.push(founded);
             }
             ClosureEvent::ColonyCharted { orb_id, source_orb, name } => {
-                if let Some(source) = orbs.iter_mut().find(|held| held.orb_id == *source_orb) {
+                if let Some(source) = peel(&mut orbs, *source_orb) {
                     for (resource, amount) in founding_reserves() {
                         source.bank(resource, -amount);
                     }
@@ -2551,7 +2476,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 orbs.push(daughter);
             }
             ClosureEvent::ZoneBuilt { orb_id, tile, kind } => {
-                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
                     for (resource, cost) in kind.cost() {
                         held.bank(resource, -cost);
                     }
@@ -2560,13 +2485,13 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 }
             }
             ClosureEvent::YieldCollected { orb_id, resource, amount } => {
-                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
                     held.bank(*resource, amount.clone());
                     held.last_touch = receipt.stamp;
                 }
             }
             ClosureEvent::UpkeepSettled { orb_id, resource, amount } => {
-                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
                     held.bank(*resource, -amount.clone());
                     // TRADE-1 truth-update: every settle is a touch —
                     // the demurrage anchor replays for upkeep-only
@@ -2575,19 +2500,19 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 }
             }
             ClosureEvent::FamineStruck { orb_id, resource, drawn } => {
-                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
                     held.bank(*resource, -drawn.clone());
                     held.famine.push(*resource);
                     held.famine.sort();
                 }
             }
             ClosureEvent::FamineRelieved { orb_id, resource } => {
-                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
                     held.famine.retain(|kept| kept != resource);
                 }
             }
             ClosureEvent::ZoneRazed { orb_id, tile } => {
-                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
                     if let Some(at) = held.zones.iter().position(|zone| zone.tile == *tile) {
                         let zone = held.zones.remove(at);
                         for (resource, refund) in zone.kind.raze_refund() {
@@ -2604,7 +2529,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 star = crate::thermal::StarClass::from_wire(*class);
             }
             ClosureEvent::PlanetSited { orb_id, albedo, orbit_r } => {
-                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
                     held.thermal = Some(crate::dop::ThermalSite {
                         albedo: albedo.clone(),
                         orbit_r: orbit_r.clone(),
@@ -2612,25 +2537,25 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 }
             }
             ClosureEvent::OverheatStruck { orb_id, .. } => {
-                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
                     held.overheat = true;
                 }
             }
             ClosureEvent::OverheatCleared { orb_id } => {
-                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
                     held.overheat = false;
                 }
             }
             // VENT-1: the cumulative ledger replays from settlements.
             ClosureEvent::VentSettled { orb_id, amount } => {
-                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
                     held.entropy_vented += amount.clone();
                     held.last_touch = receipt.stamp;
                 }
             }
             // SINK-1: receipted demurrage replays as a bank draw.
             ClosureEvent::DemurrageSettled { orb_id, resource, amount } => {
-                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
                     held.bank(*resource, -amount.clone());
                     held.last_touch = receipt.stamp;
                 }
@@ -2638,25 +2563,21 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             // TRADE-1: the move replays with the SAME crisis reads the
             // live path made — the compassion books are a replay fact.
             ClosureEvent::ResourceTransferred { from_orb, to_orb, resource, amount } => {
-                let from_crisis = orbs
-                    .iter()
-                    .find(|held| held.orb_id == *from_orb)
+                let from_crisis = peek(&orbs, *from_orb)
                     .map(|held| !held.famine.is_empty() || held.overheat)
                     .unwrap_or(false);
-                let to_crisis = orbs
-                    .iter()
-                    .find(|held| held.orb_id == *to_orb)
+                let to_crisis = peek(&orbs, *to_orb)
                     .map(|held| !held.famine.is_empty() || held.overheat)
                     .unwrap_or(false);
                 let value = amount.clone() * crate::dop::commensurate_weight(*resource);
-                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *from_orb) {
+                if let Some(held) = peel(&mut orbs, *from_orb) {
                     held.bank(*resource, -amount.clone());
                     held.last_touch = receipt.stamp;
                     if to_crisis {
                         held.given_in_crisis += value.clone();
                     }
                 }
-                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *to_orb) {
+                if let Some(held) = peel(&mut orbs, *to_orb) {
                     held.bank(*resource, amount.clone());
                     held.last_touch = receipt.stamp;
                     if from_crisis {
@@ -2671,7 +2592,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             // value left THIS world for another; last_touch anchors at
             // the deal stamp (the touch settled demurrage separately).
             ClosureEvent::ApertureSent { from_orb, resource, amount, .. } => {
-                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *from_orb) {
+                if let Some(held) = peel(&mut orbs, *from_orb) {
                     held.bank(*resource, -amount.clone());
                     held.last_touch = receipt.stamp;
                 }
@@ -2680,7 +2601,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             // NS-4 APERTURE: the destination leg replays as a bank
             // credit — value arrived from another world.
             ClosureEvent::ApertureReceived { to_orb, resource, amount, .. } => {
-                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *to_orb) {
+                if let Some(held) = peel(&mut orbs, *to_orb) {
                     held.bank(*resource, amount.clone());
                     held.last_touch = receipt.stamp;
                 }
@@ -2690,19 +2611,15 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             // ledger carries the shed; the window opens; crisis reads
             // mirror the live order exactly.
             ClosureEvent::OverflowAbsorbed { source_orb, absorber_orb, amount } => {
-                let source_crisis = orbs
-                    .iter()
-                    .find(|held| held.orb_id == *source_orb)
+                let source_crisis = peek(&orbs, *source_orb)
                     .map(|held| !held.famine.is_empty() || held.overheat)
                     .unwrap_or(false);
-                let absorber_crisis = orbs
-                    .iter()
-                    .find(|held| held.orb_id == *absorber_orb)
+                let absorber_crisis = peek(&orbs, *absorber_orb)
                     .map(|held| !held.famine.is_empty() || held.overheat)
                     .unwrap_or(false);
                 let value =
                     amount.clone() * crate::dop::commensurate_weight(Resource::Sink);
-                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *absorber_orb)
+                if let Some(held) = peel(&mut orbs, *absorber_orb)
                 {
                     held.bank(Resource::Sink, -amount.clone());
                     held.entropy_vented += amount.clone();
@@ -2713,7 +2630,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 }
                 if absorber_crisis {
                     if let Some(held) =
-                        orbs.iter_mut().find(|held| held.orb_id == *source_orb)
+                        peel(&mut orbs, *source_orb)
                     {
                         held.drawn_in_crisis += value;
                     }
@@ -2728,7 +2645,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             // ABSORB-1: the lapse replays — extraction posts, the
             // oldest matching window drops (live emission order).
             ClosureEvent::AbsorptionLapsed { debtor_orb, creditor_orb, amount } => {
-                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *debtor_orb) {
+                if let Some(held) = peel(&mut orbs, *debtor_orb) {
                     held.extracted_across += amount.clone();
                 }
                 if let Some(at) = debts.iter().position(|debt| {
@@ -2759,13 +2676,13 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             ClosureEvent::BondSettled { source_orb, target_orb, resource, amount, severed, load } => {
                 let value = amount.clone() * crate::dop::commensurate_weight(*resource);
                 if *amount > ratio(0, 1) {
-                    if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *source_orb)
+                    if let Some(held) = peel(&mut orbs, *source_orb)
                     {
                         held.bank(*resource, -amount.clone());
                         held.last_touch = receipt.stamp;
                         held.bond_flow += value.clone();
                     }
-                    if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *target_orb)
+                    if let Some(held) = peel(&mut orbs, *target_orb)
                     {
                         held.bank(*resource, amount.clone());
                         held.last_touch = receipt.stamp;
@@ -2785,7 +2702,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                         }
                         if *load > ratio(0, 1) {
                             if let Some(held) =
-                                orbs.iter_mut().find(|held| held.orb_id == *source_orb)
+                                peel(&mut orbs, *source_orb)
                             {
                                 held.severance_load += load.clone();
                             }
@@ -2812,7 +2729,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 window,
                 collateral,
             } => {
-                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *obligor_orb) {
+                if let Some(held) = peel(&mut orbs, *obligor_orb) {
                     held.bank(*resource, -collateral.clone());
                 }
                 covenants.push(Covenant {
@@ -2830,7 +2747,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 obligor_orb, beneficiary_orb, resource, collateral,
             } => {
                 let stake = collateral.clone() * crate::dop::commensurate_weight(*resource);
-                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *obligor_orb) {
+                if let Some(held) = peel(&mut orbs, *obligor_orb) {
                     held.bank(*resource, collateral.clone());
                     held.covenants_fulfilled += stake;
                 }
@@ -2847,11 +2764,11 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             } => {
                 let stake = collateral.clone() * crate::dop::commensurate_weight(*resource);
                 if let Some(held) =
-                    orbs.iter_mut().find(|held| held.orb_id == *beneficiary_orb)
+                    peel(&mut orbs, *beneficiary_orb)
                 {
                     held.bank(*resource, collateral.clone());
                 }
-                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *obligor_orb) {
+                if let Some(held) = peel(&mut orbs, *obligor_orb) {
                     held.covenants_breached += stake;
                 }
                 if let Some(at) = covenants.iter().position(|pact| {
@@ -2864,7 +2781,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             }
             // IDEO-1: sealed friction replays into the vented ledger.
             ClosureEvent::FrictionSettled { orb_id, amount } => {
-                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
                     held.entropy_vented += amount.clone();
                     held.last_touch = receipt.stamp;
                 }
@@ -2881,7 +2798,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 council, resource, quota, window, collateral, members,
             } => {
                 for member in members {
-                    if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *member) {
+                    if let Some(held) = peel(&mut orbs, *member) {
                         held.bank(*resource, -collateral.clone());
                     }
                 }
@@ -2905,7 +2822,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     let stake = councils[at].collateral.clone()
                         * crate::dop::commensurate_weight(councils[at].resource);
                     let resource = councils[at].resource;
-                    if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *member) {
+                    if let Some(held) = peel(&mut orbs, *member) {
                         if *banked > ratio(0, 1) {
                             held.bank(resource, banked.clone());
                         }
@@ -3035,7 +2952,7 @@ fn settle_debts(
         if pay > zero {
             debt.remainder -= pay.clone();
             left -= pay.clone();
-            if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == from) {
+            if let Some(held) = peel(orbs, from) {
                 held.returned_across += pay;
             }
         }
@@ -3058,6 +2975,29 @@ fn reciprocity_reading(orb: &ColonyOrb) -> Ratio {
 /// from obligor to beneficiary credits the open pact on that lane —
 /// at most one stands per (obligor, beneficiary, resource). Shared
 /// verbatim by the live paths and replay.
+/// TECH-1b: one orb's crystal deposit — accumulated in a single
+/// chronicle sweep (the shear), read at the year boundary.
+#[derive(Default)]
+struct CrystalDeposit {
+    famine_total: u64,
+    famine_open: Option<u64>,
+    overheat_open: Option<u64>,
+    vented: Ratio,
+    encased: Ratio,
+}
+
+/// PEEL — lift ONE orb out of the field by id: the single hand into
+/// the collection (operator ruling 2026-07-30: no cartesian find-scan
+/// repetition; peels and shears where there were iterations).
+fn peel(orbs: &mut [ColonyOrb], orb: u64) -> Option<&mut ColonyOrb> {
+    orbs.iter_mut().find(|held| held.orb_id == orb)
+}
+
+/// PEEK — the read-only peel.
+fn peek(orbs: &[ColonyOrb], orb: u64) -> Option<&ColonyOrb> {
+    orbs.iter().find(|held| held.orb_id == orb)
+}
+
 fn credit_covenants(
     covenants: &mut [Covenant],
     from: u64,

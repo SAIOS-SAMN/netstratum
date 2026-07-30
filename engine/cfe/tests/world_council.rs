@@ -134,31 +134,3 @@ fn when_all_breach_the_pact_dissolves() {
     }
 }
 
-/// Tags 52–53 round-trip byte-exact (SEAL A/B).
-#[test]
-fn the_council_events_round_trip_byte_exact() {
-    for event in [
-        ClosureEvent::CouncilSealed {
-            council: 9,
-            resource: Resource::Joule,
-            quota: ratio(5, 2),
-            window: 60,
-            collateral: ratio(7, 3),
-            members: vec![1, 2, 5],
-        },
-        ClosureEvent::CouncilClosed {
-            council: 9,
-            member: 5,
-            fulfilled: false,
-            banked: ratio(0, 1),
-        },
-    ] {
-        let bytes = event.wire_bytes();
-        let mut records = cfe::tlv::records(&bytes);
-        let (tag, value) = records.next().expect("one record");
-        assert!((52..=53).contains(&tag));
-        let decoded = ClosureEvent::from_wire(tag, value).expect("known tag decodes");
-        assert_eq!(decoded, event, "value round trip");
-        assert_eq!(decoded.wire_bytes(), bytes, "BYTE round trip");
-    }
-}

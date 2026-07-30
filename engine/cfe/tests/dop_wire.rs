@@ -84,11 +84,62 @@ fn events_round_trip_through_their_wire_records() {
         },
         ClosureEvent::FamineRelieved { orb_id: 1, resource: Resource::Biomass },
         ClosureEvent::ZoneRazed { orb_id: 1, tile: 4 },
+        // The union block (tags 39–53), consolidated here — one wire
+        // law, one witness (operator ruling 2026-07-30: no per-landing
+        // round-trip costumes).
+        ClosureEvent::TechDiscovered {
+            orb_id: 9,
+            node: [7u8; 32],
+            condition: 3,
+            modifier: 2,
+            magnitude: ratio(5, 4),
+            name: "radiator doctrine".into(),
+        },
+        ClosureEvent::TechLicensed {
+            deal: 7,
+            from_orb: 1,
+            council: 1,
+            condition: 3,
+            node: [9u8; 32],
+            name: "radiator doctrine".into(),
+        },
+        ClosureEvent::GaugeShifted { gauge: ratio(1, 2) },
+        ClosureEvent::Diverged { branch: "the-severed-chord".into(), gauge: ratio(2, 3) },
+        ClosureEvent::Confluent { partner: "haven".into(), gauge: ratio(5, 6) },
+        ClosureEvent::StarAged { class: 9 },
+        ClosureEvent::EraFolded { era: 3, gauge: ratio(1, 4) },
+        ClosureEvent::ApertureSent {
+            deal: 7,
+            from_orb: 1,
+            resource: Resource::Joule,
+            amount: ratio(5, 2),
+        },
+        ClosureEvent::ApertureReceived {
+            deal: 7,
+            to_orb: 2,
+            resource: Resource::Joule,
+            amount: ratio(5, 2),
+        },
+        ClosureEvent::CouncilSealed {
+            council: 9,
+            resource: Resource::Joule,
+            quota: ratio(5, 2),
+            window: 60,
+            collateral: ratio(7, 3),
+            members: vec![1, 2, 5],
+        },
+        ClosureEvent::CouncilClosed {
+            council: 9,
+            member: 5,
+            fulfilled: false,
+            banked: ratio(0, 1),
+        },
     ];
     for event in events {
         let bytes = event.wire_bytes();
         let (tag, value) = tlv::records(&bytes).next().expect("one record");
         let decoded = ClosureEvent::from_wire(tag, value).expect("known tags decode");
         assert_eq!(decoded, event);
+        assert_eq!(decoded.wire_bytes(), bytes, "equal values, equal bytes");
     }
 }

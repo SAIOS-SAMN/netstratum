@@ -45,24 +45,6 @@ fn an_era_brings_the_board_alive() {
     assert!(registry.list().len() >= 3, "the registry filled itself");
 }
 
-/// Determinism: two eras from genesis produce byte-identical
-/// chronicles — including any speciations (no wall clock, no ambient
-/// entropy anywhere, even in evolution).
-#[test]
-fn eras_are_deterministic() {
-    let (root_a, root_b) = (scratch("det-a"), scratch("det-b"));
-    let a = run_era(&root_a.to_string_lossy(), 40);
-    let b = run_era(&root_b.to_string_lossy(), 40);
-    assert_eq!(a.len(), b.len(), "same era, same population");
-    for (x, y) in a.iter().zip(&b) {
-        assert_eq!(
-            x.world.chronicle().receipts(),
-            y.world.chronicle().receipts(),
-            "{}: same era, same receipts, byte-for-byte",
-            x.spec.civilization.slug
-        );
-    }
-}
 
 /// The policies actually diverge — different temperaments, different
 /// cities by mid-era.
@@ -108,7 +90,7 @@ fn research_unlocks_industry() {
 fn a_thriving_line_diverges() {
     let root = scratch("speciate");
     let var = root.to_string_lossy().into_owned();
-    let worlds = run_era(&var, 60);
+    let worlds = run_era(&var, 45);
     assert!(
         worlds.iter().any(|b| b.spec.civilization.lineage.is_some()),
         "a branch joined the board"

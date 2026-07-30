@@ -113,22 +113,3 @@ fn a_licensed_leap_lands_in_the_far_sky() {
     assert_eq!(resumed.techs(), receiver.techs());
 }
 
-/// Tag 40 round-trips byte-exact (SEAL A/B).
-#[test]
-fn the_license_round_trips_byte_exact() {
-    let event = ClosureEvent::TechLicensed {
-        deal: 7,
-        from_orb: 1,
-        council: 1,
-        condition: 3,
-        node: [9u8; 32],
-        name: "radiator doctrine".into(),
-    };
-    let bytes = event.wire_bytes();
-    assert_eq!(bytes[0], 40, "tag 40 — inscribed at PLANNER-1");
-    let mut records = cfe::tlv::records(&bytes);
-    let (tag, value) = records.next().expect("one record");
-    let decoded = ClosureEvent::from_wire(tag, value).expect("known tag decodes");
-    assert_eq!(decoded, event, "value round trip");
-    assert_eq!(decoded.wire_bytes(), bytes, "BYTE round trip");
-}

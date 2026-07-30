@@ -99,22 +99,3 @@ fn the_fold_seats_a_new_sheet() {
     assert_eq!(replay(world.chronicle()).gauge, ratio(1, 4));
 }
 
-/// Tags 42–46 round-trip byte-exact (SEAL A/B).
-#[test]
-fn the_aeon_events_round_trip_byte_exact() {
-    for event in [
-        ClosureEvent::GaugeShifted { gauge: ratio(1, 2) },
-        ClosureEvent::Diverged { branch: "the-severed-chord".into(), gauge: ratio(2, 3) },
-        ClosureEvent::Confluent { partner: "haven".into(), gauge: ratio(5, 6) },
-        ClosureEvent::StarAged { class: StarClass::RedGiant as u8 },
-        ClosureEvent::EraFolded { era: 3, gauge: ratio(1, 4) },
-    ] {
-        let bytes = event.wire_bytes();
-        let mut records = cfe::tlv::records(&bytes);
-        let (tag, value) = records.next().expect("one record");
-        assert!((42..=46).contains(&tag), "the AEON block");
-        let decoded = ClosureEvent::from_wire(tag, value).expect("known tag decodes");
-        assert_eq!(decoded, event, "value round trip");
-        assert_eq!(decoded.wire_bytes(), bytes, "BYTE round trip");
-    }
-}
