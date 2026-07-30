@@ -305,6 +305,32 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 style.strong("succeed <line>")
             ),
         },
+        Some("genesis") => {
+            let civilization = words.next();
+            let axes = (
+                words.next().and_then(parse_disposition),
+                words.next().and_then(parse_metabolism),
+                words.next().and_then(parse_perception),
+            );
+            match (civilization, axes) {
+                (Some(civilization), (Some(disposition), Some(metabolism), Some(perception))) => {
+                    match world.seal_genesis(civilization, disposition, metabolism, perception) {
+                        Ok(()) => println!(
+                            "{} {} seals its three axes — the binding copy lives in THIS chronicle; the registry is a cache from here on",
+                            style.ok("✶"),
+                            style.strong(civilization)
+                        ),
+                        Err(refusal) => refuse(world, &refusal, style),
+                    }
+                }
+                _ => println!(
+                    "{} usage: {} — e.g. {}",
+                    style.bad("✗"),
+                    style.strong("genesis <civ> <disposition> <metabolism> <perception>"),
+                    style.strong("genesis deep-chorus epicurean biotic harmonic")
+                ),
+            }
+        }
         Some("tick") => {
             let count = words
                 .next()
@@ -1997,6 +2023,7 @@ fn help(style: &Style) {
         ("thermal", "the thermal read: T_eq⁴, band, overheat, encased joules"),
         ("scan [planet]", "the resonance scanner (draws 1 crystal from THIS planet): finds orbs structurally congruent to the exemplar — same zones under the grid symmetry, same bank, same band; near-misses refuse with their delta whole; bare scan hunts this planet's twins"),
         ("succeed <line>", "the succession deed (10 §3c): a successor line adopts a DERELICT world's chronicle — refuses while any planet stands unfamished; the living tree drops to the kernel, every discovered node stands in the record forever, and the successor's conditions read the whole inherited history"),
+        ("genesis <civ> <d> <m> <p>", "G1: seal the line's three axes as THE binding receipt in this world's chronicle (once per world) — dispositions expansionist|empiricist|epicurean · metabolisms mineral|biotic|plasmic · perceptions planar|volumetric|harmonic|umbral; the scored progress read follows the sealed disposition"),
         ("map", "the tile grid"),
         ("status", "colony, ledgers, clock, receipts"),
         ("chronicle", "the world's full receipted history"),
@@ -2176,6 +2203,65 @@ fn scan(world: &mut World, style: &Style, prober: u64, exemplar: u64) {
 /// The near-miss zone-delta word: a kind wire code, 0 = unzoned.
 fn kind_word(code: u8) -> &'static str {
     ZoneKind::from_wire(code).map(kind_name).unwrap_or("empty")
+}
+
+/// G1 (04 §1): the axis vocabulary — words to wire codes and back.
+/// Closed, append-only; the engine validates codes, the CLI speaks
+/// words.
+fn parse_disposition(word: &str) -> Option<u8> {
+    match word {
+        "expansionist" => Some(1),
+        "empiricist" => Some(2),
+        "epicurean" => Some(3),
+        _ => None,
+    }
+}
+
+fn parse_metabolism(word: &str) -> Option<u8> {
+    match word {
+        "mineral" => Some(1),
+        "biotic" => Some(2),
+        "plasmic" => Some(3),
+        _ => None,
+    }
+}
+
+fn parse_perception(word: &str) -> Option<u8> {
+    match word {
+        "planar" => Some(1),
+        "volumetric" => Some(2),
+        "harmonic" => Some(3),
+        "umbral" => Some(4),
+        _ => None,
+    }
+}
+
+fn disposition_name(code: u8) -> &'static str {
+    match code {
+        1 => "expansionist",
+        2 => "empiricist",
+        3 => "epicurean",
+        _ => "unsealed",
+    }
+}
+
+fn metabolism_name(code: u8) -> &'static str {
+    match code {
+        1 => "mineral",
+        2 => "biotic",
+        3 => "plasmic",
+        _ => "unsealed",
+    }
+}
+
+fn perception_name(code: u8) -> &'static str {
+    match code {
+        1 => "planar",
+        2 => "volumetric",
+        3 => "harmonic",
+        4 => "umbral",
+        _ => "unsealed",
+    }
 }
 
 /// The address band word (NS-2 §2.2 coding).
@@ -2370,6 +2456,16 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
         ),
         ActionRefused::LineStillLiving { orbs, famished } => format!(
             "this line still lives ({famished} of {orbs} planets famished) — succession is the derelict door, not a reset: only a full cascade admits a successor"
+        ),
+        ActionRefused::GenesisAlreadySealed => format!(
+            "this world's line is already sealed — one genesis per world; {} shows it",
+            style.strong("status")
+        ),
+        ActionRefused::UnknownAxisValue { axis, code } => format!(
+            "axis {axis} has no value {code} — the vocabulary is closed: dispositions {} · metabolisms {} · perceptions {}",
+            style.strong("expansionist|empiricist|epicurean"),
+            style.strong("mineral|biotic|plasmic"),
+            style.strong("planar|volumetric|harmonic|umbral")
         ),
         ActionRefused::NothingAccrued => format!(
             "nothing to collect — let time pass first: {}",
@@ -2586,6 +2682,16 @@ fn status(world: &World, style: &Style, current: u64) {
                 style.strong(&orb.name),
                 style.dim(&format!("(orb {})", orb.orb_id))
             );
+            if let (Some(genesis), Some(scored)) = (world.genesis(), world.scored_progress()) {
+                println!(
+                    "    ✶ line {} ({}·{}·{}) — scored progress {}",
+                    style.strong(&genesis.civilization),
+                    disposition_name(genesis.disposition),
+                    metabolism_name(genesis.metabolism),
+                    perception_name(genesis.perception),
+                    style.strong(&amount(&scored))
+                );
+            }
             for resource in &orb.famine {
                 println!(
                     "    {} {} famine — its consumers are dormant ({} restocks, {} cuts the drain)",
@@ -2955,6 +3061,10 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::LineSucceeded { successor } => format!(
                 "⏚ the line passes — {} adopts this chronicle as its own substrate; the tree returns to the kernel, the record stands",
                 style.strong(successor)
+            ),
+            cfe::dop::ClosureEvent::GenesisSealed { civilization, .. } => format!(
+                "✶ {} seals its three axes — the binding copy lives HERE; the registry is a cache from this receipt on",
+                style.strong(civilization)
             ),
         };
         let tag = receipt

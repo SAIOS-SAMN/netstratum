@@ -98,8 +98,9 @@ authority): 39 TechDiscovered · 40 TechLicensed · 42–46 the AEON block ·
 protocol records (N4, coder-03 — in-value codes: Resource::Crystal = 7,
 ZoneKind::Resonator = 7) · 59 LineSucceeded (NOVEL-1, coder-03); 8–9
 reserved (D2 terrain, D3 milestones); 49–51 reserved the market board
-(§3a); 60 GaugeShiftedAt (GAUGE-N, coder-01 — the graded key);
-**next free 61** (WANT-1 candidates hold 61+).
+(§3a); 60 GaugeShiftedAt (GAUGE-N, coder-01 — the graded key); 61
+GenesisSealed (G1, coder-03 — the binding axes receipt);
+**next free 62** (WANT-1 candidates hold 62+).
 
 **The tag-claim convention** (2026-07-30, after a live collision caught
 mid-cadence — 55 claimed twice, the later claimant moved to 60, and the
@@ -135,9 +136,14 @@ forever.
   existing tags; the mirror arms are pure rendering; no floats; the
   galaxy lane untouched. **NOVEL-1 LANDED same day** (tag 59
   `LineSucceeded`, `succeed` CLI verb, 10 §3c flipped, 4 witnesses —
-  BUILD_ORDER row for evidence). Next: G3 spatial-lens facet when G1
-  lands (NS-2 §4.3 reserves it); WANT-1 cognitive wants are an
-  adjacent candidate (same deposit-sheet idiom).
+  BUILD_ORDER row for evidence). **G1 LANDED same day** (tag 61
+  `GenesisSealed` — the binding world-chronicle axes receipt, 04 §5
+  binding 2 live; the registry is a cache from the receipt on; the
+  `genesis` CLI verb + the disposition-weighted `scored_progress`
+  read; 04 §6 row for evidence). G-board now open: G3 (perception
+  facet through the scanner — coder-03 next) and G2 (metabolism
+  tables — the vent, operator-ordered) both unblocked; wave 3a
+  (plasmic domain-head) rides the elevation door.
 - Parallel worktrees per node; merge to `main` on green; BUILD_ORDER
   conflicts resolve by keeping both entries.
 

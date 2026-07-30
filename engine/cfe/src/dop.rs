@@ -271,6 +271,32 @@ pub fn scan_draw() -> Ratio {
     ratio(1, 1)
 }
 
+/// G1 (04 §1): the axis vocabulary, closed and append-only (the
+/// registry lists the words; these are their wire codes). Axis 1
+/// disposition (1 expansionist ‖ 2 empiricist ‖ 3 epicurean); axis 2
+/// metabolism (1 mineral ‖ 2 biotic ‖ 3 plasmic); axis 3 perception
+/// (1 planar ‖ 2 volumetric ‖ 3 harmonic ‖ 4 umbral).
+pub fn axis_valid(axis: u8, code: u8) -> bool {
+    match axis {
+        1 | 2 => (1..=3).contains(&code),
+        3 => (1..=4).contains(&code),
+        _ => false,
+    }
+}
+
+/// G1 (04 §1.1, placeholder weights): the disposition's value
+/// weighting over the three v1 counters — territory closures, verified
+/// discoveries, consumed yield — exact rationals summing to 1. The
+/// physics never differs; only which history counts as winning.
+pub fn disposition_weights(disposition: u8) -> Option<[Ratio; 3]> {
+    match disposition {
+        1 => Some([ratio(3, 5), ratio(1, 5), ratio(1, 5)]),
+        2 => Some([ratio(1, 5), ratio(3, 5), ratio(1, 5)]),
+        3 => Some([ratio(1, 5), ratio(1, 5), ratio(3, 5)]),
+        _ => None,
+    }
+}
+
 /// IDEO-1 (09 §2.5): the derived axis reading — syntropic /
 /// (syntropic + entropic), or None when no deed was ever posted. The
 /// ratio DERIVES at read; it is never stored (the syntropy-ratio
@@ -664,6 +690,11 @@ pub enum ClosureEvent {
     /// kernel; every discovered node stands in the record forever —
     /// the pre-existing is changed, never replaced.
     LineSucceeded { successor: String },
+    /// G1 (04 §1/§5) — the three axes sealed as THE binding copy: from
+    /// this receipt on, the registry entry is a cache of receipted
+    /// truth and no mechanic reads it where this receipt exists.
+    /// Genesis is entry in the bands (04 §6a) — never a tier-0 seat.
+    GenesisSealed { civilization: String, disposition: u8, metabolism: u8, perception: u8 },
 }
 
 impl ClosureEvent {
@@ -941,6 +972,11 @@ impl ClosureEvent {
             }
             Self::LineSucceeded { successor } => {
                 tlv::put(59, successor.as_bytes(), &mut out);
+            }
+            Self::GenesisSealed { civilization, disposition, metabolism, perception } => {
+                let mut value = vec![*disposition, *metabolism, *perception];
+                value.extend_from_slice(civilization.as_bytes());
+                tlv::put(61, &value, &mut out);
             }
         }
         out
@@ -1233,6 +1269,13 @@ impl ClosureEvent {
             59 => {
                 let successor = String::from_utf8(value.to_vec()).ok()?;
                 Some(Self::LineSucceeded { successor })
+            }
+            61 => {
+                let disposition = *value.first()?;
+                let metabolism = *value.get(1)?;
+                let perception = *value.get(2)?;
+                let civilization = String::from_utf8(value.get(3..)?.to_vec()).ok()?;
+                Some(Self::GenesisSealed { civilization, disposition, metabolism, perception })
             }
             _ => None,
         }

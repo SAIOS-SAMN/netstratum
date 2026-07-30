@@ -809,6 +809,12 @@ fn render_receipt(receipt: &Receipt) -> String {
             "line_succeeded",
             format!("{successor} adopts this chronicle as its own substrate"),
         ),
+        E::GenesisSealed { civilization, disposition, metabolism, perception } => (
+            "genesis_sealed",
+            format!(
+                "{civilization} seals its axes ({disposition}/{metabolism}/{perception}) — the registry is a cache from here on"
+            ),
+        ),
     };
     w.field_str("event", name);
     w.field_str("detail", &detail);

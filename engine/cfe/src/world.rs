@@ -46,6 +46,11 @@ pub enum ActionRefused {
     /// door, never a reset button: it refuses while any orb still
     /// stands unfamished (v1 cascade law: EVERY orb famished).
     LineStillLiving { orbs: usize, famished: usize },
+    /// G1 — one line per world: the axes seal once.
+    GenesisAlreadySealed,
+    /// G1 — the axis vocabulary is closed (04 §1, 12 §5a): an unknown
+    /// code refuses at the door, naming the axis it offended.
+    UnknownAxisValue { axis: u8, code: u8 },
     /// THERMAL-1 — one sun per world; it is already commissioned.
     StarAlreadyCommissioned,
     /// THERMAL-1 — siting an orbit needs a commissioned sun first.
@@ -227,6 +232,19 @@ pub struct Committed {
     /// exact rationals on the torus fiber, grown only by receipt.
     /// Grade 0 is the landed scalar; genesis is [0].
     pub gauge: Vec<Ratio>,
+    /// G1 (04 §1/§5): the sealed line — the world-side copy of the
+    /// binding receipt; None until the axes seal.
+    pub genesis: Option<Genesis>,
+}
+
+/// G1 (04 §1): a civilization's sealed axes, as the world holds them.
+/// The registry mirrors this; it never grounds it (04 §5 binding 2).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Genesis {
+    pub civilization: String,
+    pub disposition: u8,
+    pub metabolism: u8,
+    pub perception: u8,
 }
 
 pub struct World {
@@ -267,6 +285,8 @@ pub struct World {
     /// GAUGE-N: the graded gauge key (committed, replay-derived,
     /// every plane wrapped; len ≥ 1, grade 0 first).
     gauge: Vec<Ratio>,
+    /// G1: the sealed line, if any (04 §1/§5).
+    genesis: Option<Genesis>,
 }
 
 impl World {
@@ -289,6 +309,7 @@ impl World {
             techs: Vec::new(),
             crossed: false,
             gauge: vec![ratio(0, 1)],
+            genesis: None,
         }
     }
 
@@ -323,6 +344,7 @@ impl World {
             techs: committed.techs,
             crossed: committed.crossed,
             gauge: committed.gauge,
+            genesis: committed.genesis,
         }
     }
 
@@ -2383,6 +2405,7 @@ impl World {
             techs: self.techs.clone(),
             crossed: self.crossed,
             gauge: self.gauge.clone(),
+            genesis: self.genesis.clone(),
         }
     }
 
@@ -2484,6 +2507,90 @@ impl World {
         let exemplar_orb = self.orb_by_id(exemplar).expect("judged above");
         let (probed, hits, refusals) = crate::query::resonance_read(exemplar_orb, &self.orbs, star);
         Ok(crate::query::ScanRead { stamp, probed, hits, refusals })
+    }
+
+    /// G1 (04 §1/§5) — seal the line's three axes as THE binding
+    /// receipt in this world's chronicle. Entry is in the bands
+    /// (04 §6a — never a tier-0 seat); one line per world; the
+    /// refusals are computed pure. From this receipt on, the registry
+    /// entry is a cache and no mechanic reads it. Sovereign
+    /// convenience.
+    pub fn seal_genesis(
+        &mut self,
+        civilization: &str,
+        disposition: u8,
+        metabolism: u8,
+        perception: u8,
+    ) -> Result<(), ActionRefused> {
+        self.seal_genesis_as(SOVEREIGN, civilization, disposition, metabolism, perception)
+    }
+
+    /// The contained form. Build scope: genesis is a founding-class
+    /// act on a founded world.
+    pub fn seal_genesis_as(
+        &mut self,
+        actor: u64,
+        civilization: &str,
+        disposition: u8,
+        metabolism: u8,
+        perception: u8,
+    ) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if self.orbs.is_empty() {
+            return Err(ActionRefused::NoColony);
+        }
+        if self.genesis.is_some() {
+            return Err(ActionRefused::GenesisAlreadySealed);
+        }
+        for (axis, code) in [(1u8, disposition), (2, metabolism), (3, perception)] {
+            if !crate::dop::axis_valid(axis, code) {
+                return Err(ActionRefused::UnknownAxisValue { axis, code });
+            }
+        }
+        self.genesis = Some(Genesis {
+            civilization: civilization.to_string(),
+            disposition,
+            metabolism,
+            perception,
+        });
+        self.close(
+            ClosureEvent::GenesisSealed {
+                civilization: civilization.to_string(),
+                disposition,
+                metabolism,
+                perception,
+            },
+            actor,
+        );
+        Ok(())
+    }
+
+    /// G1: the sealed line, if any.
+    pub fn genesis(&self) -> Option<&Genesis> {
+        self.genesis.as_ref()
+    }
+
+    /// G1 (04 §1.1, §4) — the disposition-weighted progress read:
+    /// derived at read time from the same receipts every line shares
+    /// (territory closures, discoveries, consumed yield), weighted by
+    /// the sealed disposition. None on an unsealed world — no receipt,
+    /// no read (04 §5 binding 2: identity is never law).
+    pub fn scored_progress(&self) -> Option<Ratio> {
+        let genesis = self.genesis.as_ref()?;
+        let weights = crate::dop::disposition_weights(genesis.disposition)?;
+        let mut territory = ratio(0, 1);
+        let mut discovery = ratio(0, 1);
+        let mut consumed = ratio(0, 1);
+        for receipt in self.chronicle.receipts() {
+            match &receipt.event {
+                ClosureEvent::ZoneBuilt { .. } => territory += ratio(1, 1),
+                ClosureEvent::TechDiscovered { .. } => discovery += ratio(1, 1),
+                ClosureEvent::YieldCollected { amount, .. } => consumed += amount.clone(),
+                _ => {}
+            }
+        }
+        let [on_territory, on_discovery, on_consumed] = weights;
+        Some(on_territory * territory + on_discovery * discovery + on_consumed * consumed)
     }
 
     /// NOVEL-1 (10 §3c) — the succession deed: a successor line adopts
@@ -2832,6 +2939,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut offers: Vec<Offer> = Vec::new();
     let mut crossed = false;
     let mut gauge = vec![ratio(0, 1)];
+    let mut genesis: Option<Genesis> = None;
     for receipt in chronicle.receipts() {
         match &receipt.event {
             ClosureEvent::EntityRegistered { entity_id, principal, handle } => {
@@ -3033,6 +3141,16 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             // stands in the receipts above and below this one.
             ClosureEvent::LineSucceeded { .. } => {
                 techs.retain(|(_, condition, _)| *condition == 0);
+            }
+            // G1 (04 §1/§5): the binding copy replays as the sealed
+            // line.
+            ClosureEvent::GenesisSealed { civilization, disposition, metabolism, perception } => {
+                genesis = Some(Genesis {
+                    civilization: civilization.clone(),
+                    disposition: *disposition,
+                    metabolism: *metabolism,
+                    perception: *perception,
+                });
             }
             // ABSORB-1: the three-way move replays — the absorber's
             // ledger carries the shed; the window opens; crisis reads
@@ -3312,7 +3430,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             }
         }
     }
-    Committed { orbs, entities, star, debts, bonds, covenants, councils, offers, techs, crossed, gauge }
+    Committed { orbs, entities, star, debts, bonds, covenants, councils, offers, techs, crossed, gauge, genesis }
 }
 
 /// SINK-1 (Q2): the demurrage due on one orb's un-vaulted banked

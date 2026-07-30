@@ -93,11 +93,14 @@ fn an_unknown_axis_refuses_typed_and_pure() {
 
 #[test]
 fn genesis_needs_a_colony_first() {
+    // The N3 law holds here too: identity precedes the colony — on an
+    // unfounded world the refusal is "no entity", not "no colony"
+    // (containment precedes the world, NS-6 §1.2).
     let mut world = World::new();
     let refusal = world
         .seal_genesis("eager", EXPANSIONIST, BIOTIC, PLANAR)
         .expect_err("entry is in the bands, on a founded world");
-    assert_eq!(refusal, ActionRefused::NoColony);
+    assert_eq!(refusal, ActionRefused::NoSuchEntity { entity: 1 });
 }
 
 #[test]

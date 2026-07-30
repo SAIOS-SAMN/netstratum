@@ -185,7 +185,7 @@ not a landed model.
 
 | # | Landing | Contains | Blocked by |
 |---|---|---|---|
-| **G1** | GENESIS + DISPOSITION | the creation dialogue; genesis receipts; disposition weights + the scored progress read | N-RFA (substrate lands first) |
+| **G1** | GENESIS + DISPOSITION — **LANDED 2026-07-30 (coder-03)** | tag 61 `GenesisSealed`: the three axes sealed as THE binding world-chronicle receipt (§5 binding 2 — the registry is a cache from the receipt on; no mechanic reads it where a receipt exists); entry in the bands (§6a, never a tier-0 seat); once per world; unknown axis codes refuse typed naming the closed vocabulary; disposition weights (placeholder, exact rationals summing to 1 over territory/discovery/consumed) drive `scored_progress` — identical physics, different worth, None unsealed. v1 surface: the `genesis` CLI verb (the §4 creation dialogue composes at the console lanes); the `status` line renders the sealed line + scored read. Evidence: 7 witnesses green (`world_genesis.rs` — seal/replay/resume; re-seal refuses; unknown axis pure; NoSuchEntity precedes NoColony, the N3 law; scored reads diverge 13/5 vs 23/5 exact on one arc; unsealed reads None; tag 61 byte-exact); 209/209 workspace, clippy zero; arc played `--plain` | N-RFA ✓ (substrate landed) |
 | **G2** | METABOLISM TABLES | ruleset v2: per-civ upkeep/yield maps over the shared Delta; the waste↔food seam | G1 |
 | **G3** | PERCEPTION + TRANSLATION | frames as coboundaries; the translation read with measured loss; the harmonic/volumetric bases | G1, N4 (the scanner is the first consumer) |
 | **G4** | THE DISCOVERY MINT | class-equality-across-distinct-frames; trivial-confirmation refusal; Mint irreversibility | G3, N5/N6 (a second, different entity must exist to confirm) |
