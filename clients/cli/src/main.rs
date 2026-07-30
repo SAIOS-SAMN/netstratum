@@ -110,6 +110,15 @@ fn banner(style: &Style) {
 }
 
 
+/// A minimal reader for the mirror's DATA files (state.json /
+/// registry cards) — the same files the observer reads; data fields,
+/// never prose.
+fn data_field(text: &str, key: &str) -> Option<String> {
+    let tag = format!("\"{key}\":\"");
+    let start = text.find(&tag)? + tag.len();
+    text[start..].split('\"').next().map(str::to_string)
+}
+
 /// THE FAR WORLD (union wiring, 2026-07-30): cross-world deeds load
 /// the partner from its RESUME carrier (var/worlds/<name>/chronicle.tlv
 /// — CLI-saved worlds carry one; egregore worlds are mirror-only and
@@ -119,8 +128,30 @@ fn far_world(name: &str) -> Result<World, String> {
     let path = std::path::PathBuf::from("var/worlds").join(name).join("chronicle.tlv");
     if !path.exists() {
         return Err(format!(
-            "{name} carries no resume chronicle — cross-world deeds reach CLI-saved worlds (save there first); egregore worlds are mirror-only"
+            "{name} carries no resume chronicle — cross-world deeds reach CLI-saved worlds (save there first)"
         ));
+    }
+    // THE TWO-WRITER GUARD (task 25): a conductor-owned world carries
+    // a resume carrier now, but its CLOCK lives in the conductor's
+    // process — a direct cross-world write would fork the chain the
+    // moment the next beat appends. Writing reaches egregore worlds
+    // through the steward inbox only, until NS-5 arbitrates.
+    let world_dir = std::path::PathBuf::from("var/worlds").join(name);
+    if let Ok(planets) = std::fs::read_dir(world_dir.join("planets")) {
+        for planet in planets.filter_map(|e| e.ok()) {
+            let Ok(state) = std::fs::read_to_string(planet.path().join("state.json")) else {
+                continue;
+            };
+            if let Some(civ) = data_field(&state, "civilization") {
+                let card = std::fs::read_to_string(format!("var/registry/{civ}.json"))
+                    .unwrap_or_default();
+                if data_field(&card, "founder").as_deref() == Some("conductor") {
+                    return Err(format!(
+                        "{name} beats under the conductor's clock — a direct write would fork its chain; petition through the steward (tools/steward.py), or pause the board and act at the next boot"
+                    ));
+                }
+            }
+        }
     }
     cfe::persist::load(&path)
         .map(World::resume)
@@ -344,6 +375,79 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         // between beats (0 = flat out).
         // THE UNION VERBS (wiring audit, 2026-07-30): every landed
         // deed reachable from the hand.
+        // MARKET-1: post a resting intent; clear a crossing with a
+        // far world (both offers named — the resting price rules).
+        Some("offer") => {
+            // offer <give_amt> <give> for <want_amt> <want> id <n>
+            let give_amount = words.next().and_then(parse_ratio_arg);
+            let give = words.next().and_then(parse_resource);
+            let want_amount = match (words.next(), words.next().and_then(parse_ratio_arg)) {
+                (Some("for"), Some(amt)) => Some(amt),
+                _ => None,
+            };
+            let want = words.next().and_then(parse_resource);
+            let offer = match (words.next(), words.next()) {
+                (Some("id"), Some(n)) => n.parse::<u64>().ok(),
+                _ => None,
+            };
+            match (give_amount, give, want_amount, want, offer) {
+                (Some(ga), Some(g), Some(wa), Some(w), Some(id)) => {
+                    match world.post_offer(*current, g, ga, w, wa, id) {
+                        Ok(()) => println!(
+                            "{} offer {} RESTS on the board — the price is the ratio; a crossing clears it",
+                            style.ok("⇋"),
+                            style.strong(&id.to_string())
+                        ),
+                        Err(refusal) => refuse(world, &refusal, style),
+                    }
+                }
+                _ => println!(
+                    "{} usage: {}",
+                    style.bad("✗"),
+                    style.strong("offer <give_amt> <give> for <want_amt> <want> id <n>")
+                ),
+            }
+        }
+        Some("trade") => {
+            // trade <my_offer> with <world> <their_offer> deal <n>
+            let mine = words.next().and_then(|w| w.parse::<u64>().ok());
+            let target = match (words.next(), words.next()) {
+                (Some("with"), Some(name)) => Some(name.to_string()),
+                _ => None,
+            };
+            let theirs = words.next().and_then(|w| w.parse::<u64>().ok());
+            let deal = match (words.next(), words.next()) {
+                (Some("deal"), Some(n)) => n.parse::<u64>().ok(),
+                _ => None,
+            };
+            match (mine, target, theirs, deal) {
+                (Some(mine), Some(target), Some(theirs), Some(deal)) => match far_world(&target) {
+                    Ok(mut far) => {
+                        match cfe::world::clear_trade(world, mine, &mut far, theirs, deal) {
+                            Ok(()) => {
+                                match sync_world(world).and(sync_world(&far)) {
+                                    Ok(_) => println!(
+                                        "{} the crossing CLEARS — two aperture pairs carried the fill; both chronicles sealed",
+                                        style.ok("⇌")
+                                    ),
+                                    Err(err) => println!(
+                                        "{} the fill landed but a sync refused: {err}",
+                                        style.bad("✗")
+                                    ),
+                                }
+                            }
+                            Err(refusal) => refuse(world, &refusal, style),
+                        }
+                    }
+                    Err(err) => println!("{} {err}", style.bad("✗")),
+                },
+                _ => println!(
+                    "{} usage: {}",
+                    style.bad("✗"),
+                    style.strong("trade <my_offer> with <world> <their_offer> deal <n>")
+                ),
+            }
+        }
         // GAUGE-N: the graded shift — a progenitor's quantum-state
         // deed: move (or OPEN) the key at any grade; the whole key
         // renders after.
@@ -788,38 +892,89 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             let verb = words.next();
             match verb {
                 None | Some("inbox") | Some("requests") => {
+                    // THE PRIORITY INBOX (operator ruling: flagged,
+                    // never spammed): the upward flow aggregates into
+                    // three ranked buckets — a progenitor reads three
+                    // lines, then drills only where the board burns.
                     let mirror = mirror::Mirror::at("var/worlds");
-                    let mut total = 0;
+                    let mut critical: Vec<String> = Vec::new();
+                    let mut petitions: Vec<String> = Vec::new();
                     if let Ok(entries) = std::fs::read_dir("var/worlds") {
-                        println!("{}", style.head("T0 INBOX — the upward flow"));
                         for entry in entries.filter_map(|e| e.ok()) {
                             if !entry.path().is_dir() {
                                 continue;
                             }
                             let name = entry.file_name().to_string_lossy().into_owned();
+                            // CRITICAL: the stress read from the
+                            // mirror's state data (famine, venting).
+                            if let Ok(planets) = std::fs::read_dir(entry.path().join("planets")) {
+                                for planet in planets.filter_map(|e| e.ok()) {
+                                    let Ok(state) = std::fs::read_to_string(
+                                        planet.path().join("state.json"),
+                                    ) else {
+                                        continue;
+                                    };
+                                    let mut flags = Vec::new();
+                                    if !state.contains("\"famine\":[]") {
+                                        flags.push("the want strikes".to_string());
+                                    }
+                                    if let Some(vented) = data_field(&state, "entropy_vented") {
+                                        if vented != "0" {
+                                            flags.push(format!("venting {vented}"));
+                                        }
+                                    }
+                                    if !flags.is_empty() {
+                                        critical.push(format!(
+                                            "{name}/{}: {}",
+                                            planet.file_name().to_string_lossy(),
+                                            flags.join(" · ")
+                                        ));
+                                    }
+                                }
+                            }
+                            // PETITIONS: the steward inbox, per world.
                             if let Ok(pending) = mirror.pending_directives(&name) {
                                 for petition in pending {
-                                    total += 1;
-                                    println!(
-                                        "  {} ← {} {} (as {})",
-                                        style.strong(&name),
-                                        style.strong(&petition.directive.verb),
+                                    petitions.push(format!(
+                                        "{name}: {} {} (as {})",
+                                        petition.directive.verb,
                                         petition.directive.args.join(" "),
-                                        style.dim(&petition.directive.acting_as)
-                                    );
+                                        petition.directive.acting_as
+                                    ));
                                 }
                             }
                         }
                     }
-                    if total == 0 {
-                        println!(
-                            "  the inbox stands empty — the lower dimensions petition via {}",
-                            style.dim("tools/steward.py")
-                        );
+                    // DISPUTES: receipted council breaches, this
+                    // world's chronicle (cross-world reads await the
+                    // mesh).
+                    let disputes: usize = world
+                        .orbs()
+                        .iter()
+                        .map(|held| world.council_breaches(held.orb_id))
+                        .sum();
+                    println!("{}", style.head("T0 INBOX — flagged, never spammed"));
+                    let flag = |count: usize, label: &str| -> String {
+                        match count {
+                            0 => format!("  {} {label}: {}", style.ok("○"), style.dim("clear")),
+                            n => format!("  {} {label}: {}", style.bad("●"), style.strong(&n.to_string())),
+                        }
+                    };
+                    println!("{}", flag(critical.len(), "CRITICAL — sector stress"));
+                    println!("{}", flag(petitions.len(), "PETITIONS — the upward flow"));
+                    println!("{}", flag(disputes, "DISPUTES — receipted breaches (this world)"));
+                    for line in critical.iter().take(8) {
+                        println!("    {} {}", style.bad("⚠"), line);
+                    }
+                    if critical.len() > 8 {
+                        println!("    {} …and {} more (observer: stress)", style.dim("⚠"), critical.len() - 8);
+                    }
+                    for line in petitions.iter().take(8) {
+                        println!("    {} {}", style.strong("✉"), line);
                     }
                     println!(
-                        "  stress readings live on the board: {}",
-                        style.dim("python3 tools/observer.py")
+                        "{}",
+                        style.dim("  deeds: t0 move (separate) · license (relieve) · t0 contract (seal)")
                     );
                 }
                 Some("move") => {
@@ -1812,6 +1967,7 @@ fn help(style: &Style) {
         ("ideology", "the dual cohesion ledger for this planet — the four axes, their books, and the derived readings; divergent trade partners pay a friction entropy tax, aligned ones pay zero"),
         ("login [name] · whoami · continue", "the operator menu (prototype, no passwords): many accounts on one machine — login mints/switches, bare login lists, continue resumes your profile\'s last saved world"),
         ("t0 <inbox|move|galaxies|contract|clean>", "the progenitor console (tier 0): inbox streams the upward petitions; move <world> x y z re-charts a sector (the separation deed); galaxies reads the charted skies (13_GALAXY — membership derived, never stored); contract folds the era; clean sweeps --closed-* ruins"),
+        ("offer … · trade …", "MARKET-1: offer <amt> <res> for <amt> <res> id <n> posts a resting intent (no escrow, no absolute price); trade <mine> with <world> <theirs> deal <n> clears a crossing at the RESTING price via two aperture pairs"),
         ("shift <grade> <value>", "GAUGE-N: move — or open — the key at a grade; the fiber is a graded vector, not one dial (grade 0 stays the landed scalar every law binds to)"),
         ("elevate <delta> · age <class>", "the union verbs on this world: the three-gate gauge climb (settle · cohere · cross), and the star moving in its region"),
         ("council <id> <res> <quota> <win> <stake> with <p,p,p>", "seal a multilateral covenant — three or more planets bound alike, judged together at the boundary"),
@@ -1819,6 +1975,7 @@ fn help(style: &Style) {
         ("license <cond> to <world> via <council> deal <n>", "issue a technology into another world through diplomacy; condition 6 gifts THE CROWN onto a finished base-7 stack"),
         ("ascend <sigil> to <station>", "claim a station seat for a line whose world has crossed and climbed — the registry checks the room; a seat is reached, never appointed"),
         ("tech", "the constellation: this line's base-7 sky — held nodes with their voice-names, exact progress toward what has not crystallized, the crown's gate"),
+        ("offer … · trade …", "MARKET-1: offer <amt> <res> for <amt> <res> id <n> posts a resting intent (no escrow, no absolute price); trade <mine> with <world> <theirs> deal <n> clears a crossing at the RESTING price via two aperture pairs"),
         ("shift <grade> <value>", "GAUGE-N: move — or open — the key at a grade; the fiber is a graded vector, not one dial (grade 0 stays the landed scalar every law binds to)"),
         ("elevate <delta> · age <class>", "the union verbs on this world: the three-gate gauge climb (settle · cohere · cross), and the star moving in its region"),
         ("council <id> <res> <quota> <win> <stake> with <p,p,p>", "seal a multilateral covenant — three or more planets bound alike, judged together at the boundary"),
@@ -2288,6 +2445,13 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "the orbit moves only under the crown technology — terraforming is gifted from tier 0, never taken; see {}",
             style.strong("civ seats")
         ),
+        ActionRefused::BadOffer => format!(
+            "an offer trades two DISTINCT resources in positive amounts under a fresh id — e.g. {}",
+            style.strong("offer 4 iron for 2 biomass id 1")
+        ),
+        ActionRefused::NoCrossing => {
+            "no crossing — the two offers do not meet (wrong resources, or the prices never cross); an unmatched offer rests".into()
+        }
         ActionRefused::BadCouncil => format!(
             "a council is three or more distinct planets, a positive quota and collateral, a real window, a fresh id — e.g. {}",
             style.strong("council 1 with base,outpost,haven: 5 iron in 60, stake 3")
@@ -2728,6 +2892,17 @@ fn chronicle(world: &World, style: &Style) {
                 "⚖ council {council} reckons — orb {member} {}; {} banked home",
                 if *fulfilled { style.strong("kept faith") } else { style.strong("BREACHED") },
                 style.strong(&amount(banked))
+            ),
+            cfe::dop::ClosureEvent::OfferPosted { offer, give, give_amount, want, want_amount, .. } => format!(
+                "⇋ offer {offer} RESTS — {} {} for {} {}; the market holds intents, never escrows",
+                style.strong(&amount(give_amount)),
+                resource_name(*give),
+                style.strong(&amount(want_amount)),
+                resource_name(*want)
+            ),
+            cfe::dop::ClosureEvent::OfferCleared { offer, deal } => format!(
+                "⇌ offer {offer} CLEARED at the crossing — deal {} carries the fill",
+                style.strong(&deal.to_string())
             ),
             cfe::dop::ClosureEvent::GaugeShiftedAt { grade, gauge } => format!(
                 "♫ the key moves at grade {grade} — a tonal plane plays {}",

@@ -570,8 +570,8 @@ The facet machinery (grant depths, permissions, expiry) stays ahead at N5
 
 | # | Landing | Contains | Proven by |
 |---|---|---|---|
-| **MARKET-1** | THE EXCHANGE RATE | the exact-rational S_cool/J price as the Furnace↔Frost axis (05 §1.4, 01 §8); offer/ask posted as committed state, deterministic matching at the crossing price (`OfferPosted`/`OfferCleared`, tags 49–50); no floats; gated by economy guardrails 1 and 6 (no monopoly, no absolute price) | an offer and a matching ask clear at the exact rational crossing price; the joule and sink books balance across the fill; an unmatched offer rests; replay reproduces the clearing |
-| **OFFER-1** | THE AUTOMATONS TRADE | conductor behavior: Frost egregores post fuel requests and accept joule offers across the APERTURE before freeze-lock; Furnace egregores sell surplus joules and buy S_cool; a deterministic per-tick decision; the autarkies become an interdependent mesh | a fuel-starved Frost world buys joules from a Furnace surplus and survives a freeze it would otherwise lose; the trade is one APERTURE deed, receipted both sides; no agent acts outside its ipsal-os grant; replay reproduces |
+| **MARKET-1 — LANDED 2026-07-30** | THE EXCHANGE RATE | tags 49–50 wired: offers as RESTING receipted intents (no escrow — affordability judges at the fill; the price IS the ratio, guardrail 6); `clear_trade` fills at the RESTING offer's exact price (price-time priority, ties by id), moves as two aperture pairs (deal, deal+1 — shield-checked, conservation-exact both directions), closes both intents; CLI `offer …` / `trade …` verbs; both books replay | witnessed: the 3-iron fill at the resting 1/2 price exactly (the late bidder keeps its surplus); conservation across both resources and both worlds; the unmatched offer rests and replays; NoCrossing moves nothing; the shield guards the fill |
+| **OFFER-1a — LANDED 2026-07-30 (first slice)** | THE AUTOMATONS TRADE | `trade_intent` (pure, regime-read): a joule-starving Frost with banked sink offers S_cool for fuel; a Furnace with surplus (> 4 J, placeholder) offers fuel for S_cool — halves of stock, never the whole (guardrail 1's spirit); v1 price 1:1 (05 §1.4 equilibrium pricing is the open design); `market_step` posts one intent per world (offer id = chronicle length, deterministic) and clears the first crossing per beat; wired into the conductor's heartbeat with the narrator line | OPEN (OFFER-1b): the survive-the-freeze arc witnessed end to end — needs a staged Furnace-surplus + Frost-famine era; today the machinery is engine-witnessed (MARKET-1) and the instinct beats live |
 | **BOARD-1** | THE TRADE BOARD | the marketplace surfaced: standing offers/asks and clearing prices rendered on `wall.html` and the observer (mirror-side, the reflection law — no second truth); the journal's trade lines become a readable board; a steward reads arbitrage and intervenes by inbox | the board renders the standing offers and the last clears from state alone; a human reads a cross-world arbitrage and the steward inbox executes it; the render mints no physics |
 
 Dependency: the carrier gate is OPEN (APERTURE-1 above). MARKET-1 needs the
@@ -692,6 +692,20 @@ axis stays grade 0 + sheet base (higher planes are the fiber card's
 country). Open refinement, recorded: plane-opening gated on a
 receipted Mint — growth as EARNED (the manifold dual's syntropic leg),
 not free.
+
+## 3a-septies. The consoles hardened (2026-07-30, tasks 24–25)
+
+- **The priority inbox:** `t0 inbox` aggregates the upward flow into
+  three ranked buckets — CRITICAL (sector stress from the mirror's
+  state data: the want striking, venting), PETITIONS (the steward
+  inbox per world), DISPUTES (receipted council breaches) — three
+  lines for a progenitor, drill-down capped at eight, never spam.
+- **The resume carrier:** every egregore world now syncs an
+  append-only `chronicle.tlv` beside its mirror each beat. The
+  OBSERVING hand can resume a copy; the WRITING hand stays refused at
+  the CLI (the two-writer guard: a conductor-owned world's clock
+  lives in its process — a direct write would fork the chain; NS-5
+  arbitrates, the steward inbox intervenes until then).
 
 ## 3b. The union board (12_UNION — the world-book of the new aeon)
 

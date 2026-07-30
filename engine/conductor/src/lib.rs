@@ -125,6 +125,81 @@ pub fn fold(var_root: &str) -> std::io::Result<(u64, Ratio)> {
     Ok((era, gauge))
 }
 
+/// OFFER-1a (BUILD_ORDER §3a): a world's TRADE INTENT, read pure from
+/// its committed state — the Furnace↔Frost axis (05 §1.4). A Frost
+/// world starving for joules with banked sink offers S_cool for fuel;
+/// a Furnace world with a joule surplus offers fuel for S_cool. The
+/// v1 price is 1:1 (a placeholder parameter — 05 §1.4's equilibrium
+/// pricing is the open design); amounts are halves of the held stock,
+/// never the whole (guardrail 1's spirit: no world corners itself).
+pub fn trade_intent(world: &World) -> Option<(Resource, Ratio, Resource, Ratio)> {
+    let orb = world.orb()?;
+    let half = |amount: Ratio| amount / ratio(2, 1);
+    match regime(world)? {
+        (Regime::Frost, _) => {
+            let starving = orb.famine.contains(&Resource::Joule);
+            let sink = orb.banked_amount(Resource::Sink);
+            (starving && sink > ratio(0, 1)).then(|| {
+                let give = half(sink);
+                (Resource::Sink, give.clone(), Resource::Joule, give)
+            })
+        }
+        (Regime::Furnace, _) => {
+            let joules = orb.banked_amount(Resource::Joule);
+            (joules > ratio(4, 1)).then(|| {
+                let give = half(joules);
+                (Resource::Joule, give.clone(), Resource::Sink, give)
+            })
+        }
+    }
+}
+
+/// OFFER-1a: one market beat over the whole board — post fresh
+/// intents (one open offer per world; the offer id is the chronicle
+/// length at posting, deterministic), then clear the FIRST crossing
+/// (price-time priority inside `clear_trade`). Returns the cleared
+/// pairs (world names) for the narrator line.
+pub fn market_step(worlds: &mut [Egregore], beat: u64) -> Vec<(String, String)> {
+    // Post intents.
+    for egregore in worlds.iter_mut() {
+        if !egregore.world.offers().is_empty() {
+            continue;
+        }
+        if let Some((give, give_amount, want, want_amount)) = trade_intent(&egregore.world) {
+            let offer = egregore.world.chronicle().receipts().len() as u64;
+            let orb = cfe::world::FIRST_ORB;
+            let _ = egregore
+                .world
+                .post_offer(orb, give, give_amount, want, want_amount, offer);
+        }
+    }
+    // Clear crossings, pairwise, first match per beat.
+    let mut cleared = Vec::new();
+    for a in 0..worlds.len() {
+        for b in (a + 1)..worlds.len() {
+            let (left, right) = worlds.split_at_mut(b);
+            let one = &mut left[a];
+            let two = &mut right[0];
+            let (Some(offer_a), Some(offer_b)) = (
+                one.world.offers().first().map(|o| o.offer),
+                two.world.offers().first().map(|o| o.offer),
+            ) else {
+                continue;
+            };
+            let deal = beat * 1_000 + (a as u64) * 10 + b as u64;
+            if cfe::world::clear_trade(&mut one.world, offer_a, &mut two.world, offer_b, deal)
+                .is_ok()
+            {
+                cleared.push((
+                    one.spec.world_name.clone(),
+                    two.spec.world_name.clone(),
+                ));
+            }
+        }
+    }
+    cleared
+}
+
 /// A build temperament — the only thing that differs between egregores.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Policy {
@@ -833,6 +908,19 @@ impl Egregore {
         }
         self.research_step(mirror);
         let newborn = self.divergence_step(registry);
+        // THE RESUME CARRIER (task 25, 2026-07-30): every egregore
+        // world syncs its tlv chronicle beside the mirror — an
+        // append-only resume copy (cfe::persist grows the file, never
+        // rewrites). The player's OBSERVING hand can resume a copy;
+        // the WRITING hand stays refused at the CLI (two writers on
+        // one clock is the split-brain NS-5 exists to arbitrate) —
+        // intervention still goes through the steward inbox.
+        let _ = cfe::persist::sync(
+            self.world.chronicle(),
+            &mirror
+                .world_dir(&self.spec.world_name)
+                .join("chronicle.tlv"),
+        );
         let _ = mirror.record(
             &self.spec.world_name,
             &self.spec.planet,
