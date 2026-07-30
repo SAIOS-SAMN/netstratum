@@ -465,6 +465,40 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         ),
                     }
                 }
+                Some("galaxies") => {
+                    let mirror = mirror::Mirror::at("var/worlds");
+                    let galaxies = mirror.galaxies();
+                    if galaxies.is_empty() {
+                        println!(
+                            "  no galaxy chartered yet — the founding sky is implicit until the first observation deed (13_GALAXY §2)"
+                        );
+                    } else {
+                        println!("{}", style.head("THE CHARTED SKIES — regions of the one torus"));
+                        let worlds = mirror.charted_worlds();
+                        for galaxy in &galaxies {
+                            let members = worlds
+                                .iter()
+                                .filter(|world| mirror.galaxy_of(world).as_deref() == Some(galaxy.name.as_str()))
+                                .count();
+                            println!(
+                                "  {} — center ({}, {}, {}) · reach {} · {} charted worlds",
+                                style.strong(&galaxy.name),
+                                galaxy.center.0,
+                                galaxy.center.1,
+                                galaxy.center.2,
+                                galaxy.reach,
+                                members
+                            );
+                        }
+                        let adrift = worlds.iter().filter(|world| mirror.galaxy_of(world).is_none()).count();
+                        if adrift > 0 {
+                            println!(
+                                "  {} intergalactic worlds stand outside every reach — lawful (13_GALAXY §4)",
+                                style.dim(&adrift.to_string())
+                            );
+                        }
+                    }
+                }
                 Some("contract") => match conductor::fold("var") {
                     Ok((era, gauge)) => println!(
                         "{} the board CONTRACTS — era {era} sealed into var-era{era}; the new sheet seats at G = {}",
@@ -498,7 +532,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     style.strong("civ new <slug> | <Name> | <species> | <motto> | <axes> [station]")
                 ),
                 Some(other) => println!(
-                    "{} unknown t0 verb {} — inbox · requests · move · contract · clean · create",
+                    "{} unknown t0 verb {} — inbox · requests · move · galaxies · contract · clean · create",
                     style.bad("✗"),
                     style.strong(other)
                 ),
@@ -1391,7 +1425,7 @@ fn help(style: &Style) {
         ("covenant <q> <res> to <p> within <n>", "vitrify a delivery pact in the Glasskeeper lattice — collateral (priced by your fidelity books, never barred) locks until the quota is delivered (release) or the deadline passes (BREACH_AND_SLASH); `covenants` lists the open pacts"),
         ("ideology", "the dual cohesion ledger for this planet — the four axes, their books, and the derived readings; divergent trade partners pay a friction entropy tax, aligned ones pay zero"),
         ("login [name] · whoami · continue", "the operator menu (prototype, no passwords): many accounts on one machine — login mints/switches, bare login lists, continue resumes your profile\'s last saved world"),
-        ("t0 <inbox|move|contract|clean>", "the progenitor console (tier 0): inbox streams the upward petitions; move <world> x y z re-charts a sector (the separation deed); contract folds the era; clean sweeps --closed-* ruins"),
+        ("t0 <inbox|move|galaxies|contract|clean>", "the progenitor console (tier 0): inbox streams the upward petitions; move <world> x y z re-charts a sector (the separation deed); galaxies reads the charted skies (13_GALAXY — membership derived, never stored); contract folds the era; clean sweeps --closed-* ruins"),
         ("terraform <albedo> <orbit>", "the gifted crown (base-7 complete + licensed from tier 0): re-seat a sited planet — the only lawful way an orbit moves"),
         ("npcs [pause|resume|speed <s>]", "the player\'s hand on the autonomous board — pause holds every egregore world, speed sets seconds between beats (0 = flat out); bare npcs shows the state"),
         ("civ [seats] · civ new …", "the civ console: seats shows every station\'s room (progenitors per domain, 8 each — space, not rank); civ new <slug> | <Name> | <species> | <motto> | <disp> <metab> <perc> [station] registers a custom line and rosters it for the conductor"),

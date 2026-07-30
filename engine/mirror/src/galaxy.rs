@@ -13,7 +13,7 @@ use cfe::persist;
 use cfe::ratio::{ratio, Ratio};
 use cfe::vrp::Chronicle;
 
-use crate::json::JsonWriter;
+use crate::json::{extract_string, JsonWriter};
 use crate::{ratio_str, sanitize, wrapped_abs, Mirror};
 
 /// A charted galaxy: a named region of the ONE torus — center S in
@@ -86,6 +86,17 @@ impl Mirror {
             .map(|(_, galaxy)| galaxy.name)
     }
 
+    /// Every charted world on the star-chart, chart order — the
+    /// S-side population a galaxy reading sweeps.
+    pub fn charted_worlds(&self) -> Vec<String> {
+        let Ok(text) = fs::read_to_string(self.root.join("starchart.json")) else {
+            return Vec::new();
+        };
+        text.lines()
+            .filter_map(|line| extract_string(line, "world"))
+            .collect()
+    }
+
     /// The observation deed (13_GALAXY §3): the anchor wraps onto the
     /// torus; the FOUNDING galaxy is chartered lazily by the first
     /// deed ever executed; a new galaxy is CREATED only when the
@@ -97,13 +108,14 @@ impl Mirror {
     ///
     /// `observer` is the crossing civilization; `creator` the
     /// progenitor seat executing the deed (12 §2a — the board-maker
-    /// function). The stamp rides the ledger's terminal T; GALAXY-1b
-    /// wires the live universal clock.
+    /// function); `stamp` is the caller's universal T (the conductor's
+    /// clock at the year voice).
     pub fn observe_galaxy(
         &self,
         observer: &str,
         creator: &str,
         anchor: (&Ratio, &Ratio, &Ratio),
+        stamp: u64,
     ) -> std::io::Result<Option<Galaxy>> {
         fs::create_dir_all(&self.root)?;
         let span = self.universe_span();
@@ -116,7 +128,6 @@ impl Mirror {
             false => Chronicle::new(),
         };
         let mut galaxies = self.galaxies();
-        let stamp = ledger.receipts().last().map(|r| r.stamp).unwrap_or(0);
 
         let charter = |ledger: &mut Chronicle, galaxy: &Galaxy| {
             ledger.append(

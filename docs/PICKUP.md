@@ -60,8 +60,11 @@ deed (`GalaxyObserved`, tag 54 — INSCRIBED at GALAXY-1a's landing,
 founding charter, derived membership `galaxy_of`, the `galaxies.json`
 rendering; NS-1 §2.3 row 54; 6 witnesses in `galaxy_pins.rs`; the
 frontier is a DISTANCE — wrapped-L1 to every center vs reach, never an
-outside). GALAXY-1b open: the conductor trigger on the crossing + the
-`t0 galaxies` verb (one hand, coder-01's console). Operator consoles landed in the CLI:
+outside). GALAXY-1b LANDED
+2026-07-30: the observation sweep rides the year voice in the conductor
+(both beat loops), creator resolves through the lineage law, and `t0
+galaxies` reads the charted skies (galaxy board rows: name · center ·
+reach · derived member count · intergalactic tally). Operator consoles landed in the CLI:
 `npcs pause|resume|speed N` (writes `var/conductor.ctl`, polled every
 beat) and `civ seats` / `civ new` (custom civilizations with live
 station-seat checks, rostered for the conductor). Convergence no longer

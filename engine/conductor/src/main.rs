@@ -8,7 +8,7 @@
 //! `--cycles 0` (default) beats forever at the cadence. Watch live:
 //!   python3 tools/observer.py --watch 2
 
-use conductor::{founding_egregores, load_egregores, write_default_egregores, Egregore};
+use conductor::{founding_egregores, load_egregores, observe_crossings, write_default_egregores, Egregore};
 use mirror::registry::Registry;
 use mirror::Mirror;
 use std::path::PathBuf;
@@ -169,6 +169,14 @@ fn main() {
                 "beat {beat}: year {} journaled — the wall is fresh (var/worlds/wall.html)",
                 beat / mirror::journal::YEAR_TICKS
             );
+            // GALAXY-1b: the observation sweep rides the year voice.
+            for galaxy in observe_crossings(&worlds, &registry, &mirror, epoch_base + beat) {
+                println!(
+                    "beat {beat}: OBSERVATION — the galaxy {} enters the chart, reach {}",
+                    galaxy.name,
+                    galaxy.reach
+                );
+            }
         }
         if beat.is_multiple_of(10) || (cycles > 0 && beat == cycles) {
             let summary: Vec<String> = worlds

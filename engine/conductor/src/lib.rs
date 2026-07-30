@@ -46,7 +46,8 @@ use cfe::ipsal::Scope;
 use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::StarClass;
 use cfe::world::World;
-use mirror::registry::{Civilization, Registry, DISPOSITIONS, METABOLISMS, PERCEPTIONS};
+use mirror::galaxy::Galaxy;
+use mirror::registry::{lineage_domain, Civilization, Registry, DISPOSITIONS, METABOLISMS, PERCEPTIONS};
 use mirror::{Directive, Disposition, Mirror};
 use physics::Beacon;
 use solver::{forge_task, solve, Difficulty, SolveRead};
@@ -774,6 +775,59 @@ impl Egregore {
     }
 }
 
+/// GALAXY-1b (13_GALAXY §3, §5): the year-voice observation sweep.
+/// Every crossed, charted world OBSERVES; an anchor past the frontier
+/// creates the galaxy it observes, executed as the progenitor's deed
+/// (12 §2a — the board-maker function). Idempotent by geometry: a
+/// created galaxy encloses its observer, so the next sweep reads
+/// inside-reach and creates nothing.
+pub fn observe_crossings(
+    worlds: &[Egregore],
+    registry: &Registry,
+    mirror: &Mirror,
+    stamp: u64,
+) -> Vec<Galaxy> {
+    let mut created = Vec::new();
+    for egregore in worlds {
+        if !egregore.world.has_crossed() {
+            continue;
+        }
+        let Some(((x, y, z), _)) = mirror.charted_position(&egregore.spec.world_name) else {
+            continue;
+        };
+        let creator = galaxy_creator(registry, &egregore.spec.civilization);
+        if let Ok(Some(galaxy)) =
+            mirror.observe_galaxy(&egregore.spec.civilization.slug, &creator, (&x, &y, &z), stamp)
+        {
+            created.push(galaxy);
+        }
+    }
+    created
+}
+
+/// The creator seat (13_GALAXY §3): the observer's lineage head when
+/// it holds a progenitor seat; else the first seated progenitor of the
+/// observer's domain (the founding head stands creator for a headless
+/// line — lawful, 12 §5); else the conductor — tier 0's own operations
+/// ARE the progenitors' deeds, named (12 §2a).
+fn galaxy_creator(registry: &Registry, civilization: &Civilization) -> String {
+    if let Some(head) = registry.resolve_head(&civilization.slug) {
+        if registry.load(&head).and_then(|c| c.station).as_deref() == Some("progenitor") {
+            return head;
+        }
+    }
+    let domain = lineage_domain(&civilization.metabolism, None);
+    registry
+        .list()
+        .into_iter()
+        .find(|seated| {
+            seated.station.as_deref() == Some("progenitor")
+                && lineage_domain(&seated.metabolism, None) == domain
+        })
+        .map(|seated| seated.slug)
+        .unwrap_or_else(|| "conductor".into())
+}
+
 /// Run one era: CONVERGE the archived eras (07 §1.6), then genesis for
 /// every egregore, then `cycles` heartbeats; daughters born mid-era join the
 /// beat. Returns the live worlds.
@@ -811,6 +865,9 @@ pub fn run_era(var_root: &str, cycles: u32) -> Vec<Egregore> {
                     &mirror::journal::Voice::of(&egregore.spec.civilization),
                 );
             }
+            // GALAXY-1b: the observation sweep rides the year voice
+            // (11 §1 — board-scale shifts read yearly).
+            let _ = observe_crossings(&worlds, &registry, &mirror, epoch_base + u64::from(beat) + 1);
         }
     }
     worlds

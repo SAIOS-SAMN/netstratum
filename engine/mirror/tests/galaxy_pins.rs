@@ -35,7 +35,7 @@ fn first_deed_charters_the_founding_galaxy_and_inside_reach_creates_nothing() {
         .expect("charts");
     // A crossing anchored at (2,-3,1): L1 = 6 < 16 — inside the founding reach.
     let created = m
-        .observe_galaxy("slagborn", "tunborn", (&ratio(2, 1), &ratio(-3, 1), &ratio(1, 1)))
+        .observe_galaxy("slagborn", "tunborn", (&ratio(2, 1), &ratio(-3, 1), &ratio(1, 1)), 60)
         .expect("the deed executes");
     let galaxies = m.galaxies();
     assert_eq!(galaxies.len(), 1, "the founding galaxy chartered lazily, nothing else");
@@ -49,7 +49,7 @@ fn past_the_frontier_the_observation_creates_the_galaxy() {
     let m = Mirror::at(scratch("frontier"));
     // Anchor at (30,0,0): L1 from (0,0,0) = 30 > 16 — past the founding reach.
     let created = m
-        .observe_galaxy("slagborn", "tunborn", (&ratio(30, 1), &ratio(0, 1), &ratio(0, 1)))
+        .observe_galaxy("slagborn", "tunborn", (&ratio(30, 1), &ratio(0, 1), &ratio(0, 1)), 60)
         .expect("the deed executes");
     let galaxy = created.expect("past the frontier, the galaxy IS created");
     assert_eq!(m.galaxies().len(), 2, "founding + observed");
@@ -71,7 +71,7 @@ fn the_frontier_reading_wraps_on_the_torus() {
     let m = Mirror::at(scratch("wrap"));
     // (63,0,0) on span 64 wraps to L1 = 1 from the founding center.
     let created = m
-        .observe_galaxy("slagborn", "tunborn", (&ratio(63, 1), &ratio(0, 1), &ratio(0, 1)))
+        .observe_galaxy("slagborn", "tunborn", (&ratio(63, 1), &ratio(0, 1), &ratio(0, 1)), 60)
         .expect("the deed executes");
     assert!(created.is_none(), "wrapped L1 = 1 stands INSIDE the founding reach");
 }
@@ -83,7 +83,7 @@ fn the_frontier_reading_wraps_on_the_torus() {
 fn the_card_is_a_rendering_the_ledger_is_the_truth() {
     let root = scratch("rendering");
     let m = Mirror::at(root.clone());
-    m.observe_galaxy("slagborn", "tunborn", (&ratio(30, 1), &ratio(0, 1), &ratio(0, 1)))
+    m.observe_galaxy("slagborn", "tunborn", (&ratio(30, 1), &ratio(0, 1), &ratio(0, 1)), 60)
         .expect("the deed executes");
     let before = m.galaxies();
     assert_eq!(before.len(), 2);
