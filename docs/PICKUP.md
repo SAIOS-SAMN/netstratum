@@ -191,9 +191,20 @@ forever.
   correction: the sigil is frame-free; frames quotient out and join T
   outside the key); tag-57 extends additively; `translated_read` is
   the N5-ready cross-frame seam. The whole G1→G2→G3 ladder closed in
-  one cadence. Next candidates: G4 (the discovery mint — gated on
-  N5/N6), WANT-1 cognitive wants (tags 62+), the umbral seat
-  (Syzygy — one operator word away).
+  one cadence, then the TECH-1b witness debt (deepening/long-stores
+  arcs) and the G1×NOVEL-1 audit fix (the deed releases the seal).
+  `14_ALMANAC.md` DRAFTED (the ruled element grammar — awaits
+  ratification for ELEMENT-GRAMMAR-1). VENTURE-1 composition witness
+  LANDED (`world_venture.rs` — one deal binds the leap and the
+  exchange across two books, one node in two skies, conservation
+  exact). **Verified, recorded:** the petition→grant arc stands in
+  its containment form (the gift petition, `grant_tech_as`, steward-
+  contained and receipted); the CROSS-WORLD petition (a bands-line
+  petitioning another world's teaching) is the conductor's
+  market_step pattern — a coder-01-lane extension, handed off here.
+  Next candidates: G4 (mesh-gated — the mesh is IN FLIGHT), WANT
+  relief-by-arrival (seam split with coder-01 pending), the umbral
+  seat (one operator word away).
 - Parallel worktrees per node; merge to `main` on green; BUILD_ORDER
   conflicts resolve by keeping both entries.
 
