@@ -155,36 +155,78 @@ fn far_world(name: &str) -> Result<World, String> {
             "{name} carries no resume chronicle — cross-world deeds reach CLI-saved worlds (save there first)"
         ));
     }
-    // THE TWO-WRITER GUARD (task 25): a conductor-owned world carries
-    // a resume carrier now, but its CLOCK lives in the conductor's
-    // process — a direct cross-world write would fork the chain the
-    // moment the next beat appends. Writing reaches egregore worlds
-    // through the steward inbox only, until NS-5 arbitrates.
+    let chronicle = cfe::persist::load(&path)
+        .map_err(|refusal| format!("{name}'s chronicle refused to verify: {refusal:?}"))?;
+    // MESH-1b (#2): THE WALK RETIRED THE GUARD. A sealed spine names
+    // its one lawful hand; ours writes, any other refuses by name. A
+    // pre-mesh chronicle is lawful for its single writer — so a
+    // conductor world still waits for its first seal (`pen <world>`
+    // asks; the conductor seals at its next beat boundary).
+    match mesh::authority(&chronicle) {
+        Err(violation) => Err(format!("{name}'s spine refuses — {violation:?}")),
+        Ok(Some(hand)) if hand == seat_hand() => {
+            let mut world = World::resume(chronicle);
+            world.hold_pen(Some(hand));
+            Ok(world)
+        }
+        Ok(Some(hand)) if hand == cfe::vrp::CONDUCTOR_HAND => Err(format!(
+            "{name}'s pen is with the conductor — ask with: pen {name}"
+        )),
+        Ok(Some(hand)) => Err(format!(
+            "{name}'s pen is with hand {hand} — one writer per clock (NS-5 law 3)"
+        )),
+        Ok(None) if conductor_founded(name) => Err(format!(
+            "{name} beats under the conductor's clock — ask for the pen with: pen {name}"
+        )),
+        Ok(None) => Ok(World::resume(chronicle)),
+    }
+}
+
+/// Pre-mesh ownership read (the retired guard's honest core): does
+/// this world's registry card name the conductor as founder?
+fn conductor_founded(name: &str) -> bool {
     let world_dir = std::path::PathBuf::from("var/worlds").join(name);
-    if let Ok(planets) = std::fs::read_dir(world_dir.join("planets")) {
-        for planet in planets.filter_map(|e| e.ok()) {
-            let Ok(state) = std::fs::read_to_string(planet.path().join("state.json")) else {
-                continue;
-            };
-            if let Some(civ) = data_field(&state, "civilization") {
-                let card = std::fs::read_to_string(format!("var/registry/{civ}.json"))
-                    .unwrap_or_default();
-                if data_field(&card, "founder").as_deref() == Some("conductor") {
-                    return Err(format!(
-                        "{name} beats under the conductor's clock — a direct write would fork its chain; petition through the steward (tools/steward.py), or pause the board and act at the next boot"
-                    ));
-                }
+    let Ok(planets) = std::fs::read_dir(world_dir.join("planets")) else {
+        return false;
+    };
+    for planet in planets.filter_map(|e| e.ok()) {
+        let Ok(state) = std::fs::read_to_string(planet.path().join("state.json")) else {
+            continue;
+        };
+        if let Some(civ) = data_field(&state, "civilization") {
+            let card =
+                std::fs::read_to_string(format!("var/registry/{civ}.json")).unwrap_or_default();
+            if data_field(&card, "founder").as_deref() == Some("conductor") {
+                return true;
             }
         }
     }
-    cfe::persist::load(&path)
-        .map(World::resume)
-        .map_err(|refusal| format!("{name}'s chronicle refused to verify: {refusal:?}"))
+    false
+}
+
+/// The active profile's name — the seat whose hand signs (MESH-1b).
+fn active_name() -> String {
+    std::fs::read_to_string("var/operators/active")
+        .ok()
+        .map(|name| name.trim().to_string())
+        .filter(|name| !name.is_empty())
+        .unwrap_or_else(|| "player".into())
+}
+
+fn seat_hand() -> u64 {
+    cfe::vrp::hand_of(&active_name())
 }
 
 fn sync_world(world: &World) -> Result<usize, String> {
     let name = world.orb().map(|orb| orb.name.clone()).ok_or("no colony")?;
-    let path = std::path::PathBuf::from("var/worlds").join(&name).join("chronicle.tlv");
+    sync_world_at(world, &name)
+}
+
+/// Sync to a NAMED world dir — a far world's dir is its WORLD name,
+/// not its colony's (the conductor seats them apart; MESH-1b writes
+/// must land where the conductor re-resumes from).
+fn sync_world_at(world: &World, name: &str) -> Result<usize, String> {
+    let path = std::path::PathBuf::from("var/worlds").join(name).join("chronicle.tlv");
     cfe::persist::sync(world.chronicle(), &path).map_err(|r| format!("{r:?}"))
 }
 
@@ -475,7 +517,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     Ok(mut far) => {
                         match cfe::world::clear_trade(world, mine, &mut far, theirs, deal) {
                             Ok(()) => {
-                                match sync_world(world).and(sync_world(&far)) {
+                                match sync_world(world).and(sync_world_at(&far, &target)) {
                                     Ok(_) => println!(
                                         "{} the crossing CLEARS — two aperture pairs carried the fill; both chronicles sealed",
                                         style.ok("⇌")
@@ -624,7 +666,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                 resource, amt, deal,
                             ) {
                                 Ok(()) => {
-                                    let saved = sync_world(world).and(sync_world(&far));
+                                    let saved = sync_world(world).and(sync_world_at(&far, &target));
                                     match saved {
                                         Ok(_) => println!(
                                             "{} the aperture OPENS — deal {} crossed the void; both chronicles sealed",
@@ -689,7 +731,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                 world, *current, &mut far, cfe::world::FIRST_ORB, leap,
                             ) {
                                 Ok(()) => {
-                                    let saved = sync_world(world).and(sync_world(&far));
+                                    let saved = sync_world(world).and(sync_world_at(&far, &target));
                                     match saved {
                                         Ok(_) => println!(
                                             "{} {} LICENSED into {} — the far sky learns; both chronicles sealed{}",
@@ -874,6 +916,76 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 ),
             }
         }
+        // MESH-1b (#2): THE PEN — the receipted handoff's CLI side.
+        // `pen <world>` puts the ask on the conductor's control file;
+        // the seal lands at the next beat boundary and the walk then
+        // names THIS seat the one lawful hand. `pen return <world>`
+        // yields it back; the conductor re-resumes from the receipts.
+        Some("pen") => match words.next() {
+            Some("return") => match words.next() {
+                Some(target) => match far_world(target) {
+                    Ok(mut far) => {
+                        let stamp = far
+                            .chronicle()
+                            .receipts()
+                            .last()
+                            .map(|receipt| receipt.stamp)
+                            .unwrap_or(0);
+                        match mesh::yield_authority(
+                            far.chronicle_mut(),
+                            seat_hand(),
+                            cfe::vrp::CONDUCTOR_HAND,
+                            stamp,
+                        ) {
+                            Ok(sequence) => match sync_world_at(&far, target) {
+                                Ok(_) => println!(
+                                    "{} the pen returns to the conductor (seal {sequence}) — beats resume within a poll",
+                                    style.ok("✔")
+                                ),
+                                Err(err) => println!(
+                                    "{} the seal landed but the sync refused: {err}",
+                                    style.bad("✗")
+                                ),
+                            },
+                            Err(refused) => {
+                                println!("{} the yield refused — {refused:?}", style.bad("✗"))
+                            }
+                        }
+                    }
+                    Err(err) => println!("{} {err}", style.bad("✗")),
+                },
+                None => println!(
+                    "{} usage: {}",
+                    style.bad("✗"),
+                    style.strong("pen return <world>")
+                ),
+            },
+            Some(target) => {
+                let control = std::path::PathBuf::from("var/conductor.ctl");
+                let seat = active_name();
+                let mut text = std::fs::read_to_string(&control).unwrap_or_default();
+                if !text.is_empty() && !text.ends_with('\n') {
+                    text.push('\n');
+                }
+                text.push_str(&format!("yield {target} {seat}\n"));
+                match std::fs::write(&control, text) {
+                    Ok(()) => println!(
+                        "{} the ask is on the board — the conductor seals {} over to {} at its next beat; then your deeds write there directly ({})",
+                        style.ok("✔"),
+                        style.strong(target),
+                        style.strong(&seat),
+                        style.dim("pen return <world> when done")
+                    ),
+                    Err(err) => println!("{} the control file refused: {err}", style.bad("✗")),
+                }
+            }
+            None => println!(
+                "{} usage: {} · {}",
+                style.bad("✗"),
+                style.strong("pen <world>"),
+                style.strong("pen return <world>")
+            ),
+        },
         Some("npcs") => {
             let control = std::path::PathBuf::from("var/conductor.ctl");
             let (mut paused, mut cadence) = {
@@ -928,6 +1040,19 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 }
             }
             let mut text = String::new();
+            // Pending `yield` asks (MESH-1b) and any other lines the
+            // conductor understands survive the rewrite — this verb
+            // owns paused/cadence only.
+            if let Ok(existing) = std::fs::read_to_string(&control) {
+                for line in existing.lines() {
+                    let line = line.trim();
+                    if line == "paused" || line.starts_with("cadence ") || line.is_empty() {
+                        continue;
+                    }
+                    text.push_str(line);
+                    text.push('\n');
+                }
+            }
             if paused {
                 text.push_str("paused\n");
             }
@@ -2185,6 +2310,7 @@ fn help(style: &Style) {
         ("sever <res> to <p> · bonds", "cut a standing bond (the load posts to the cutter) · list the standing orders"),
         ("covenant <q> <res> to <p> within <n>", "vitrify a delivery pact in the Glasskeeper lattice — collateral (priced by your fidelity books, never barred) locks until the quota is delivered (release) or the deadline passes (BREACH_AND_SLASH); `covenants` lists the open pacts"),
         ("ideology", "the dual cohesion ledger for this planet — the four axes, their books, and the derived readings; divergent trade partners pay a friction entropy tax, aligned ones pay zero"),
+        ("pen <world> · pen return <world>", "the receipted handoff (MESH-1b): ask the conductor for a world\'s pen — the seal lands at its next beat and your cross-world deeds write there lawfully; return it when done"),
         ("login [name] · whoami · continue", "the operator menu (prototype, no passwords): many accounts on one machine — login mints/switches, bare login lists, continue resumes your profile\'s last saved world"),
         ("t0 <inbox|move|galaxies|contract|clean>", "the progenitor console (tier 0): inbox streams the upward petitions; move <world> x y z re-charts a sector (the separation deed); galaxies reads the charted skies (13_GALAXY — membership derived, never stored); contract folds the era; clean sweeps --closed-* ruins"),
         ("venture <cond> to <world> via <council> deal <n>", "SCIENCE-1: the joint research venture — incompatible sciences cross their outputs (a council-bound licensed leap, named as what it is)"),
@@ -2717,6 +2843,26 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "this world's sun is already commissioned — one star per world (NS-6 §6); {} shows it",
             style.strong("status")
         ),
+        ActionRefused::PracticeUnknown { practice } => format!(
+            "no discipline {} stands in the vocabulary — 1 the Fast · 2 the Icon · 3 the Vigil · 4 the Hoard · 5 the Athanor",
+            style.strong(&practice.to_string())
+        ),
+        ActionRefused::PracticeAlreadyAdopted { practice } => format!(
+            "discipline {} already binds this line — one adoption per star",
+            style.strong(&practice.to_string())
+        ),
+        ActionRefused::PracticeNotHeld { practice } => format!(
+            "this line does not hold discipline {} — nothing to release",
+            style.strong(&practice.to_string())
+        ),
+        ActionRefused::ReleaseUnearned { practice } => format!(
+            "release is a REDISCOVERY — no new doctrine has landed since discipline {} was adopted; earn the lesson first",
+            style.strong(&practice.to_string())
+        ),
+        ActionRefused::AthanorUntempered { hardships } => format!(
+            "the Athanor takes only the tempered — {} hardship receipts stand, eight are required",
+            style.strong(&hardships.to_string())
+        ),
         ActionRefused::TerrainAlreadyCharted => format!(
             "the terrain is already charted — one seed per star, forever (02 §2.5); {} reads the map",
             style.strong("terrain")
@@ -2771,11 +2917,12 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "a council is three or more distinct planets, a positive quota and collateral, a real window, a fresh id — e.g. {}",
             style.strong("council 1 with base,outpost,haven: 5 iron in 60, stake 3")
         ),
-        ActionRefused::ElevationBarred { settled, coherent, crossed } => {
+        ActionRefused::ElevationBarred { settled, coherent, crossed, aligned } => {
             let gates: Vec<&str> = [
                 (!settled, "the thermal books stand unsettled"),
                 (!coherent, "no loop closed within the year voice"),
                 (!crossed, "this world has not crossed"),
+                (!aligned, "the practiced books stand unaligned — resolve the discipline's friction"),
             ]
             .iter()
             .filter(|(barred, _)| *barred)
@@ -3110,6 +3257,14 @@ fn chronicle(world: &World, style: &Style) {
                 "✧ galaxy {} observed into the chart by {}",
                 style.strong(name),
                 style.dim(observer)
+            ),
+            cfe::dop::ClosureEvent::PracticeAdopted { practice } => format!(
+                "⚖ discipline {} ADOPTED — one benefit, one friction, bound by receipt",
+                style.strong(&practice.to_string())
+            ),
+            cfe::dop::ClosureEvent::PracticeReleased { practice } => format!(
+                "⚖ discipline {} RELEASED — the rediscovery earned; the lesson re-emerges",
+                style.strong(&practice.to_string())
             ),
             cfe::dop::ClosureEvent::WorldCharted { seed } => format!(
                 "▲ terrain charted — seed {:02x}{:02x}{:02x}{:02x}; the map is worth reading",

@@ -51,6 +51,7 @@ use mirror::registry::{lineage_domain, Civilization, Registry, DISPOSITIONS, MET
 use mirror::{Directive, Disposition, Mirror};
 use physics::Beacon;
 use solver::{forge_task, solve, Difficulty, SolveRead};
+use std::path::Path;
 
 mod egregores;
 pub use egregores::{founding_egregores, load_egregores, write_default_egregores};
@@ -219,7 +220,7 @@ pub fn trade_intent(world: &World) -> Option<(Resource, Ratio, Resource, Ratio)>
 pub fn market_step(worlds: &mut [Egregore], beat: u64) -> Vec<(String, String)> {
     // Post intents.
     for egregore in worlds.iter_mut() {
-        if !egregore.world.offers().is_empty() {
+        if egregore.penned || !egregore.world.offers().is_empty() {
             continue;
         }
         if let Some((give, give_amount, want, want_amount)) = trade_intent(&egregore.world) {
@@ -237,6 +238,9 @@ pub fn market_step(worlds: &mut [Egregore], beat: u64) -> Vec<(String, String)> 
             let (left, right) = worlds.split_at_mut(b);
             let one = &mut left[a];
             let two = &mut right[0];
+            if one.penned || two.penned {
+                continue;
+            }
             let (Some(offer_a), Some(offer_b)) = (
                 one.world.offers().first().map(|o| o.offer),
                 two.world.offers().first().map(|o| o.offer),
@@ -326,6 +330,8 @@ pub struct Egregore {
     pub solved: u32,
     /// One daughter per era — speciation is rare, not a flood.
     spawned: bool,
+    /// MESH-1b: the pen is out — beats, saves, and the market wait.
+    pub penned: bool,
 }
 
 fn banked(world: &World, resource: Resource) -> Ratio {
@@ -452,6 +458,21 @@ impl Egregore {
                 if let (Some(automaton), Some(steward)) =
                     (by_handle(&handle), by_handle("steward"))
                 {
+                    // MESH-1b: the walk decides whose pen this is.
+                    // Lawful conductor hand → held and stamped from
+                    // here on; a pen out across a restart STAYS out;
+                    // pre-mesh None stays unheld (law starts at the
+                    // first seal); a violating spine waits penned —
+                    // writes never land on a refused chain.
+                    let mut world = world;
+                    let penned = match mesh::authority(world.chronicle()) {
+                        Ok(Some(hand)) if hand == cfe::vrp::CONDUCTOR_HAND => {
+                            world.hold_pen(Some(cfe::vrp::CONDUCTOR_HAND));
+                            false
+                        }
+                        Ok(Some(_)) | Err(_) => true,
+                        Ok(None) => false,
+                    };
                     let _ = mirror.chart_world(
                         &spec.world_name,
                         (&spec.position.0, &spec.position.1, &spec.position.2),
@@ -489,6 +510,7 @@ impl Egregore {
                         streak: solved % 3,
                         solved,
                         spawned,
+                        penned,
                     };
                 }
             }
@@ -549,6 +571,7 @@ impl Egregore {
             streak: 0,
             solved: 0,
             spawned: false,
+            penned: false,
         }
     }
 
@@ -1070,6 +1093,100 @@ impl Egregore {
         );
         newborn
     }
+}
+
+/// MESH-1b (#2, the consumer slice): the conductor's side of the
+/// receipted handoff. `yield <world> <seat>` lines in the control
+/// file ask for the pen; the beat boundary is the one lawful moment
+/// to seal it over (no beat is mid-flight). Consumed lines leave the
+/// file — a refusal is answered once, never retried forever. Penned
+/// worlds are then polled on their FILE: when the taking hand yields
+/// back, the conductor re-resumes from the receipts (SEAL B — the
+/// file is the world) and beats continue.
+pub fn pen_service(
+    worlds: &mut [Egregore],
+    registry: &Registry,
+    mirror: &Mirror,
+    control_path: &Path,
+    stamp: u64,
+) -> Vec<String> {
+    let mut log = Vec::new();
+    // The yield door.
+    if let Ok(text) = std::fs::read_to_string(control_path) {
+        let mut kept = Vec::new();
+        let mut consumed = false;
+        for line in text.lines() {
+            let words: Vec<&str> = line.split_whitespace().collect();
+            let ["yield", world_name, seat] = words[..] else {
+                kept.push(line.to_string());
+                continue;
+            };
+            consumed = true;
+            let hand = cfe::vrp::hand_of(seat);
+            match worlds
+                .iter_mut()
+                .find(|e| e.spec.world_name == world_name)
+            {
+                Some(egregore) if !egregore.penned => {
+                    match mesh::yield_authority(
+                        egregore.world.chronicle_mut(),
+                        cfe::vrp::CONDUCTOR_HAND,
+                        hand,
+                        stamp,
+                    ) {
+                        Ok(sequence) => {
+                            egregore.world.hold_pen(None);
+                            let _ = cfe::persist::sync(
+                                egregore.world.chronicle(),
+                                &mirror.world_dir(world_name).join("chronicle.tlv"),
+                            );
+                            let _ = mirror.record(
+                                &egregore.spec.world_name,
+                                &egregore.spec.planet,
+                                &egregore.spec.civilization.sigil,
+                                &egregore.world,
+                            );
+                            egregore.penned = true;
+                            log.push(format!(
+                                "HANDOFF — {world_name}: the pen passes to {seat} (seal {sequence}); beats wait"
+                            ));
+                        }
+                        Err(refused) => log.push(format!(
+                            "HANDOFF REFUSED — {world_name}: {refused:?}"
+                        )),
+                    }
+                }
+                Some(_) => log.push(format!(
+                    "HANDOFF REFUSED — {world_name}: the pen is already out"
+                )),
+                None => log.push(format!(
+                    "HANDOFF REFUSED — {world_name}: no such world on this board"
+                )),
+            }
+        }
+        if consumed {
+            let mut out = kept.join("\n");
+            if !out.is_empty() {
+                out.push('\n');
+            }
+            let _ = std::fs::write(control_path, out);
+        }
+    }
+    // The return poll.
+    for egregore in worlds.iter_mut().filter(|e| e.penned) {
+        let carrier = mirror
+            .world_dir(&egregore.spec.world_name)
+            .join("chronicle.tlv");
+        let Ok(chronicle) = cfe::persist::load(&carrier) else {
+            continue;
+        };
+        if mesh::authority(&chronicle) == Ok(Some(cfe::vrp::CONDUCTOR_HAND)) {
+            let name = egregore.spec.world_name.clone();
+            *egregore = Egregore::genesis(egregore.spec.clone(), registry, mirror);
+            log.push(format!("HANDOFF — {name}: the pen returns; beats resume"));
+        }
+    }
+    log
 }
 
 /// GALAXY-1b (13_GALAXY §3, §5): the year-voice observation sweep.

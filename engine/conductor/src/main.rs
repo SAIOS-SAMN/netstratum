@@ -151,8 +151,19 @@ fn main() {
         // TUniversal T = epoch base + this era's beat (07 §1.3): live
         // ticks stack on the converged timeline, never restart it.
         let _ = mirror.set_universal_clock(epoch_base + beat);
+        // MESH-1b (#2): the pen door — yields seal at the beat
+        // boundary; penned worlds wait, and the file poll notices
+        // the pen coming home.
+        for line in conductor::pen_service(
+            &mut worlds, &registry, &mirror, &control_path, epoch_base + beat,
+        ) {
+            println!("beat {beat}: {line}");
+        }
         let mut newborns = Vec::new();
         for egregore in &mut worlds {
+            if egregore.penned {
+                continue;
+            }
             if let Some(spec) = egregore.cycle(&mirror, &registry) {
                 newborns.push(spec);
             }
@@ -178,7 +189,7 @@ fn main() {
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — journals + the Terminal Wall regenerate mirror-side.
         if beat.is_multiple_of(mirror::journal::YEAR_TICKS) {
-            for egregore in &worlds {
+            for egregore in worlds.iter().filter(|e| !e.penned) {
                 let _ = mirror.record_journal(
                     &egregore.spec.world_name,
                     &egregore.world,

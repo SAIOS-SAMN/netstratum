@@ -1069,6 +1069,18 @@ impl World {
         &self.chronicle
     }
 
+    /// MESH-1b: hold or release the writing pen — every internal
+    /// append then carries the hand (the chronicle funnel stamps it).
+    pub fn hold_pen(&mut self, hand: Option<u64>) {
+        self.chronicle.set_hand(hand);
+    }
+
+    /// MESH-1b: the mesh doors (yield, consile) take the chronicle
+    /// mutably. Append-only holds — Chronicle exposes no other write.
+    pub fn chronicle_mut(&mut self) -> &mut Chronicle {
+        &mut self.chronicle
+    }
+
     /// The genesis orb (convenience for the single-planet reads).
     pub fn orb(&self) -> Option<&ColonyOrb> {
         self.orbs.first()

@@ -65,6 +65,7 @@ name = "conductor"
 version = "0.1.0"
 dependencies = [
  "cfe",
+ "mesh",
  "mirror",
  "num-bigint",
  "num-traits",
@@ -124,6 +125,7 @@ dependencies = [
  "blake3",
  "cfe",
  "conductor",
+ "mesh",
  "mirror",
  "num-bigint",
 ]

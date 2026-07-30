@@ -325,3 +325,37 @@ Authority is a WALK of the spine:
    unchanged (the refusal happens before the append).
 5. **The codec.** Tag 67 rides the consolidated NS-1 wire witness
    (`dop_wire.rs`); kinds 5–6 round-trip byte-exact.
+
+### 7.5 The consumer slice (#2, LANDED 2026-07-30 — coder-01)
+
+**The hands.** The conductor writes as hand **1** (`cfe::vrp::
+CONDUCTOR_HAND`). Every other seat derives its hand from its NAME:
+`hand_of(name)` = the first 8 bytes of the name's digest, LE, with
+the reserved values (0, 1) remapping to 2. No hand registry file —
+the name is the registry.
+
+**The funnel.** The chronicle itself holds the pen (`set_hand`, a
+workspace field — never serialized; the receipts' provenance is the
+record). While held, EVERY append stamps the hand at the provenance
+head and cites a seal standing last — so the ~20 engine deeds carry
+the hand through one point, and the walk stays the only judge.
+Pre-stamped provenance (the §7.3 doors) and unheld chronicles pass
+untouched.
+
+**The conductor's door** (`pen_service`, each beat boundary): a
+`yield <world> <seat>` line in `conductor.ctl` asks; the seal lands
+between beats (no beat is mid-flight), the line is consumed, and the
+world is PENNED — beats, saves, journals, and the market all wait.
+The file is then polled: when the walk on the carrier reads hand 1
+again, the conductor re-resumes FROM THE RECEIPTS (SEAL B) and
+beats continue, the taking hand's deeds kept.
+
+**The CLI's side.** `pen <world>` writes the ask; the walk-checked
+`far_world` then loads, holds the pen, and cross-world deeds write
+directly; `pen return <world>` yields back. The old founder-heuristic
+guard is RETIRED — a pre-mesh conductor world still refuses until
+its first seal, but the refusal now names the door.
+
+**Witness.** `pen_pins.rs::the_pen_passes_writes_and_returns` — the
+full arc on one file, the walk green at every station.
+

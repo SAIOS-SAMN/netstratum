@@ -166,10 +166,27 @@ impl Receipt {
     }
 }
 
+/// MESH-1b (NS-5 §7.5): the conductor's hand. Every other seat
+/// derives its hand from its name via `hand_of`; 0 stays unclaimed.
+pub const CONDUCTOR_HAND: u64 = 1;
+
+/// A seat's hand — the first 8 bytes of its name's digest, LE. The
+/// reserved values (0, the conductor's 1) remap to 2; a natural
+/// collision there is astronomically unlikely and lawful if it lands
+/// (two seats sharing a hand share a pen, nothing forks).
+pub fn hand_of(name: &str) -> u64 {
+    let digest = blake3::hash(name.as_bytes());
+    let hand = u64::from_le_bytes(digest.as_bytes()[..8].try_into().expect("8 bytes"));
+    if hand <= CONDUCTOR_HAND { 2 } else { hand }
+}
+
 /// The chronicle: append-only — no removal, no mutation, no reorder.
 #[derive(Debug, Clone, Default)]
 pub struct Chronicle {
     receipts: Vec<Receipt>,
+    /// MESH-1b consumer funnel: the held pen. Workspace only — never
+    /// serialized; the receipts' provenance is the record.
+    hand: Option<u64>,
 }
 
 impl Chronicle {
@@ -183,7 +200,7 @@ impl Chronicle {
     /// across the process boundary because this is the one door back in.
     pub fn from_receipts(receipts: Vec<Receipt>) -> Result<Self, ChainRead> {
         match verify_receipts(&receipts) {
-            ChainRead::Intact => Ok(Self { receipts }),
+            ChainRead::Intact => Ok(Self { receipts, hand: None }),
             broken => Err(broken),
         }
     }
@@ -192,8 +209,36 @@ impl Chronicle {
         &self.receipts
     }
 
+    /// MESH-1b: hold (or release) the pen. While held, every append
+    /// carries the hand — see `append`. The walk in `mesh` stays the
+    /// judge; this is the stamp, not the gate.
+    pub fn set_hand(&mut self, hand: Option<u64>) {
+        self.hand = hand;
+    }
+
+    pub fn hand(&self) -> Option<u64> {
+        self.hand
+    }
+
     /// The one write. Parent link and own digest are computed here.
+    /// A held pen (MESH-1b) stamps the hand at the provenance head
+    /// and cites a seal standing last (NS-5 §7.1); pre-stamped
+    /// provenance (the mesh doors) and unheld chronicles pass
+    /// through untouched.
     pub fn append(&mut self, event: ClosureEvent, stamp: u64, provenance: Vec<u64>) -> &Receipt {
+        let provenance = match self.hand {
+            Some(hand) if provenance.first() != Some(&hand) => {
+                let mut carried = vec![hand];
+                if let Some(last) = self.receipts.last() {
+                    if matches!(last.event, ClosureEvent::HandoffSealed { .. }) {
+                        carried.push(last.sequence);
+                    }
+                }
+                carried.extend(provenance);
+                carried
+            }
+            _ => provenance,
+        };
         let sequence = self.receipts.len() as u64;
         let parent = self
             .receipts

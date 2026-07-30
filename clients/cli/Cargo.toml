@@ -11,6 +11,7 @@ path = "src/main.rs"
 [dependencies]
 cfe = { path = "../../engine/cfe" }
 mirror = { path = "../../engine/mirror" }
+mesh = { path = "../../engine/mesh" }
 conductor = { path = "../../engine/conductor" }
 num-bigint.workspace = true
 blake3.workspace = true
