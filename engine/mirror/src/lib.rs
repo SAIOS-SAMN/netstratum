@@ -688,6 +688,10 @@ fn render_receipt(receipt: &Receipt) -> String {
                 ratio_str(banked)
             ),
         ),
+        E::GaugeShiftedAt { grade, gauge } => (
+            "gauge_shifted_at",
+            format!("the key moves at grade {grade} — {}", ratio_str(gauge)),
+        ),
         E::GaugeShifted { gauge } => {
             ("gauge_shifted", format!("the key moves to {}", ratio_str(gauge)))
         }

@@ -676,6 +676,23 @@ against the imported analysis: there is no G=10 pole (the fiber wraps
 offsets derive from era ordinals, never from a ceiling; ascension
 claims a seat and moves no key.
 
+## 3a-sexies. GAUGE-N (2026-07-30) — from one dial to n planes
+
+The operator's read: "key,value — 2D:2D — we need n-dimensional." The
+substrate always was (the physics Triple carries graded AxisVectors);
+the WORLD's key was the scalar bottleneck. Landed: the key is a graded
+vector of wrapped exact rationals — `GaugeShiftedAt` (tag 60; moved
+off 55 when the scanner claimed it mid-cadence — one tag, one meaning)
+moves or OPENS any grade, skipped planes rest at ground, grade 0 stays
+the landed scalar every law binds to (tags 42–46 untouched), the whole
+key replays and resumes, and `key_distance` reads wrapped L1 across
+keys of ANY dimensionality (resonance/clash, 11 §2.1). CLI `shift
+<grade> <value>` is the progenitor's quantum-state deed; the chart's G
+axis stays grade 0 + sheet base (higher planes are the fiber card's
+country). Open refinement, recorded: plane-opening gated on a
+receipted Mint — growth as EARNED (the manifold dual's syntropic leg),
+not free.
+
 ## 3b. The union board (12_UNION — the world-book of the new aeon)
 
 Design authority `12_UNION.md` (eight operator rulings, 2026-07-29). NOT a

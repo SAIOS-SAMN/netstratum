@@ -91,7 +91,7 @@ fn a_lawful_climb_is_one_receipt_and_replays() {
     world.elevate(ratio(1, 4)).expect("climbs again");
     assert_eq!(shifts(&world), shifts_before + 2, "each step is ONE receipt");
     assert_eq!(world.gauge(), &ratio(1, 2));
-    assert_eq!(replay(world.chronicle()).gauge, ratio(1, 2));
+    assert_eq!(replay(world.chronicle()).gauge[0], ratio(1, 2));
 }
 
 /// The settlement gate: a famine-struck world is barred — and the bar

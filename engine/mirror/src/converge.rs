@@ -259,7 +259,8 @@ fn terminal_gauge(events: &[ClosureEvent]) -> Ratio {
             ClosureEvent::GaugeShifted { gauge }
             | ClosureEvent::Diverged { gauge, .. }
             | ClosureEvent::Confluent { gauge, .. }
-            | ClosureEvent::EraFolded { gauge, .. } => Some(gauge.clone()),
+            | ClosureEvent::EraFolded { gauge, .. }
+            | ClosureEvent::GaugeShiftedAt { grade: 0, gauge } => Some(gauge.clone()),
             _ => None,
         })
         .unwrap_or_else(|| ratio(0, 1))

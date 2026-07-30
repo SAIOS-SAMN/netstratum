@@ -344,6 +344,31 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         // between beats (0 = flat out).
         // THE UNION VERBS (wiring audit, 2026-07-30): every landed
         // deed reachable from the hand.
+        // GAUGE-N: the graded shift — a progenitor's quantum-state
+        // deed: move (or OPEN) the key at any grade; the whole key
+        // renders after.
+        Some("shift") => {
+            let grade = words.next().and_then(|w| w.parse::<u16>().ok());
+            let value = words.next().and_then(parse_ratio_arg);
+            match (grade, value) {
+                (Some(grade), Some(value)) => {
+                    world.shift_gauge_at(grade, value);
+                    let key: Vec<String> =
+                        world.key().iter().map(amount).collect();
+                    println!(
+                        "{} the key plays [{}] — {} plane(s) open",
+                        style.ok("♫"),
+                        style.strong(&key.join(", ")),
+                        world.key().len()
+                    );
+                }
+                _ => println!(
+                    "{} usage: {} — grade 0 is the landed dial; a higher grade OPENS a plane",
+                    style.bad("✗"),
+                    style.strong("shift <grade> <value>")
+                ),
+            }
+        }
         Some("elevate") => match words.next().and_then(parse_ratio_arg) {
             Some(delta) => match world.elevate(delta) {
                 Ok(()) => println!(
@@ -1787,12 +1812,14 @@ fn help(style: &Style) {
         ("ideology", "the dual cohesion ledger for this planet — the four axes, their books, and the derived readings; divergent trade partners pay a friction entropy tax, aligned ones pay zero"),
         ("login [name] · whoami · continue", "the operator menu (prototype, no passwords): many accounts on one machine — login mints/switches, bare login lists, continue resumes your profile\'s last saved world"),
         ("t0 <inbox|move|galaxies|contract|clean>", "the progenitor console (tier 0): inbox streams the upward petitions; move <world> x y z re-charts a sector (the separation deed); galaxies reads the charted skies (13_GALAXY — membership derived, never stored); contract folds the era; clean sweeps --closed-* ruins"),
+        ("shift <grade> <value>", "GAUGE-N: move — or open — the key at a grade; the fiber is a graded vector, not one dial (grade 0 stays the landed scalar every law binds to)"),
         ("elevate <delta> · age <class>", "the union verbs on this world: the three-gate gauge climb (settle · cohere · cross), and the star moving in its region"),
         ("council <id> <res> <quota> <win> <stake> with <p,p,p>", "seal a multilateral covenant — three or more planets bound alike, judged together at the boundary"),
         ("aperture <amt> <res> to <world> deal <n>", "cross banked value into another saved world — two legs, one deal, both chronicles sealed at once"),
         ("license <cond> to <world> via <council> deal <n>", "issue a technology into another world through diplomacy; condition 6 gifts THE CROWN onto a finished base-7 stack"),
         ("ascend <sigil> to <station>", "claim a station seat for a line whose world has crossed and climbed — the registry checks the room; a seat is reached, never appointed"),
         ("tech", "the constellation: this line's base-7 sky — held nodes with their voice-names, exact progress toward what has not crystallized, the crown's gate"),
+        ("shift <grade> <value>", "GAUGE-N: move — or open — the key at a grade; the fiber is a graded vector, not one dial (grade 0 stays the landed scalar every law binds to)"),
         ("elevate <delta> · age <class>", "the union verbs on this world: the three-gate gauge climb (settle · cohere · cross), and the star moving in its region"),
         ("council <id> <res> <quota> <win> <stake> with <p,p,p>", "seal a multilateral covenant — three or more planets bound alike, judged together at the boundary"),
         ("aperture <amt> <res> to <world> deal <n>", "cross banked value into another saved world — two legs, one deal, both chronicles sealed at once"),
@@ -2701,6 +2728,10 @@ fn chronicle(world: &World, style: &Style) {
                 "⚖ council {council} reckons — orb {member} {}; {} banked home",
                 if *fulfilled { style.strong("kept faith") } else { style.strong("BREACHED") },
                 style.strong(&amount(banked))
+            ),
+            cfe::dop::ClosureEvent::GaugeShiftedAt { grade, gauge } => format!(
+                "♫ the key moves at grade {grade} — a tonal plane plays {}",
+                style.strong(&amount(gauge))
             ),
             cfe::dop::ClosureEvent::GaugeShifted { gauge } => format!(
                 "♪ the key moves — this world now plays at {}",

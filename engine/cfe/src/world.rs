@@ -202,9 +202,10 @@ pub struct Committed {
     /// an aperture leg? A world is a star system, so any leg is an
     /// interstellar deed; the first is the crossing (12_UNION §7).
     pub crossed: bool,
-    /// AEON-1a: the world's gauge key G — exact rational, wrapped on
-    /// the torus fiber [0, 1). Zero at genesis; moves only by receipt.
-    pub gauge: Ratio,
+    /// GAUGE-N: the world's gauge KEY — a graded vector of wrapped
+    /// exact rationals on the torus fiber, grown only by receipt.
+    /// Grade 0 is the landed scalar; genesis is [0].
+    pub gauge: Vec<Ratio>,
 }
 
 pub struct World {
@@ -240,8 +241,9 @@ pub struct World {
     techs: Vec<(u64, u8, [u8; 32])>,
     /// THRESHOLD-1: the crossing flag (committed, replay-derived).
     crossed: bool,
-    /// AEON-1a: the gauge key (committed, replay-derived, wrapped).
-    gauge: Ratio,
+    /// GAUGE-N: the graded gauge key (committed, replay-derived,
+    /// every plane wrapped; len ≥ 1, grade 0 first).
+    gauge: Vec<Ratio>,
 }
 
 impl World {
@@ -262,7 +264,7 @@ impl World {
             friction_pending: Vec::new(),
             techs: Vec::new(),
             crossed: false,
-            gauge: ratio(0, 1),
+            gauge: vec![ratio(0, 1)],
         }
     }
 
@@ -452,11 +454,32 @@ impl World {
         !self.knows_its_sun()
     }
 
-    /// AEON-1a: the world's gauge key G — wrapped exact rational on
-    /// the torus fiber. Zero at genesis ("G moves with the fiber
-    /// landings"); every move is a receipt.
+    /// AEON-1a: grade 0 of the key — the landed scalar read; every
+    /// existing caller and law binds here unchanged.
     pub fn gauge(&self) -> &Ratio {
+        &self.gauge[0]
+    }
+
+    /// GAUGE-N: the WHOLE key — the graded vector of wrapped planes.
+    /// Its length is the world's opened dimensionality (derived from
+    /// receipts, never stored beyond them).
+    pub fn key(&self) -> &[Ratio] {
         &self.gauge
+    }
+
+    /// GAUGE-N (11 §2.1): move — or OPEN — the key at a grade. A
+    /// shift at an unopened grade GROWS the vector (zeros fill the
+    /// gap: unopened planes rest at ground); the receipt carries the
+    /// wrapped value. Grade 0 through this door is lawful and lands
+    /// tag 55; the landed grade-0 deeds keep tag 42.
+    pub fn shift_gauge_at(&mut self, grade: u16, gauge: Ratio) {
+        let wrapped = wrap_gauge(gauge);
+        let at = grade as usize;
+        if self.gauge.len() <= at {
+            self.gauge.resize(at + 1, ratio(0, 1));
+        }
+        self.gauge[at] = wrapped.clone();
+        self.close(ClosureEvent::GaugeShiftedAt { grade, gauge: wrapped }, SOVEREIGN);
     }
 
     /// AEON-1a (11 §2.1): move the key. The value wraps onto [0, 1) —
@@ -464,7 +487,7 @@ impl World {
     /// WRAPPED one, so replay never re-derives the wrap.
     pub fn shift_gauge(&mut self, gauge: Ratio) {
         let wrapped = wrap_gauge(gauge);
-        self.gauge = wrapped.clone();
+        self.gauge[0] = wrapped.clone();
         self.close(ClosureEvent::GaugeShifted { gauge: wrapped }, SOVEREIGN);
     }
 
@@ -473,8 +496,8 @@ impl World {
     /// `delta` (the branch takes the opposite phase in ITS chronicle —
     /// annex, never merge; the caller founds it).
     pub fn diverge(&mut self, branch: &str, delta: Ratio) {
-        let gauge = wrap_gauge(self.gauge.clone() + delta);
-        self.gauge = gauge.clone();
+        let gauge = wrap_gauge(self.gauge[0].clone() + delta);
+        self.gauge[0] = gauge.clone();
         self.close(
             ClosureEvent::Diverged { branch: branch.into(), gauge },
             SOVEREIGN,
@@ -487,7 +510,7 @@ impl World {
     /// the receipt carries the wrapped result verbatim).
     pub fn conflue(&mut self, partner: &str, midpoint: Ratio) {
         let gauge = wrap_gauge(midpoint);
-        self.gauge = gauge.clone();
+        self.gauge[0] = gauge.clone();
         self.close(
             ClosureEvent::Confluent { partner: partner.into(), gauge },
             SOVEREIGN,
@@ -639,8 +662,8 @@ impl World {
         if !(settled && coherent && crossed) {
             return Err(ActionRefused::ElevationBarred { settled, coherent, crossed });
         }
-        let gauge = wrap_gauge(self.gauge.clone() + delta);
-        self.gauge = gauge.clone();
+        let gauge = wrap_gauge(self.gauge[0].clone() + delta);
+        self.gauge[0] = gauge.clone();
         self.close(ClosureEvent::GaugeShifted { gauge }, SOVEREIGN);
         Ok(())
     }
@@ -826,7 +849,7 @@ impl World {
     /// is the seal; rotation of the var root is the conductor's deed.
     pub fn seal_fold(&mut self, era: u64, base: Ratio) {
         let gauge = wrap_gauge(base);
-        self.gauge = gauge.clone();
+        self.gauge[0] = gauge.clone();
         self.close(ClosureEvent::EraFolded { era, gauge }, SOVEREIGN);
     }
 
@@ -2635,6 +2658,23 @@ pub fn wrap_gauge(gauge: Ratio) -> Ratio {
     gauge.clone() - gauge.floor()
 }
 
+/// GAUGE-N: wrapped L1 between two graded keys of ANY length — an
+/// unopened plane reads ground (0); the short way around each circle,
+/// summed whole (the L1 law on the fiber). Resonance and clash read
+/// here (11 §2.1).
+pub fn key_distance(a: &[Ratio], b: &[Ratio]) -> Ratio {
+    let zero = ratio(0, 1);
+    let one = ratio(1, 1);
+    let mut total = ratio(0, 1);
+    for at in 0..a.len().max(b.len()) {
+        let held = a.get(at).unwrap_or(&zero);
+        let far = b.get(at).unwrap_or(&zero);
+        let d = wrap_gauge(held.clone() - far.clone());
+        total += d.clone().min(one.clone() - d);
+    }
+    total
+}
+
 pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut orbs: Vec<ColonyOrb> = Vec::new();
     let mut entities: Vec<Entity> = Vec::new();
@@ -2645,7 +2685,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut councils: Vec<Council> = Vec::new();
     let mut techs: Vec<(u64, u8, [u8; 32])> = Vec::new();
     let mut crossed = false;
-    let mut gauge = ratio(0, 1);
+    let mut gauge = vec![ratio(0, 1)];
     for receipt in chronicle.receipts() {
         match &receipt.event {
             ClosureEvent::EntityRegistered { entity_id, principal, handle } => {
@@ -3092,7 +3132,16 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             | ClosureEvent::Diverged { gauge: key, .. }
             | ClosureEvent::Confluent { gauge: key, .. }
             | ClosureEvent::EraFolded { gauge: key, .. } => {
-                gauge = key.clone();
+                gauge[0] = key.clone();
+            }
+            // GAUGE-N: a graded shift replays verbatim, growing the
+            // key when it opens a plane (zeros fill — ground rest).
+            ClosureEvent::GaugeShiftedAt { grade, gauge: key } => {
+                let at = *grade as usize;
+                if gauge.len() <= at {
+                    gauge.resize(at + 1, ratio(0, 1));
+                }
+                gauge[at] = key.clone();
             }
             // AEON-1a: the star moved in its region.
             ClosureEvent::StarAged { class } => {

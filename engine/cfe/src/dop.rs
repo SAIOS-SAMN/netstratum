@@ -529,6 +529,13 @@ pub enum ClosureEvent {
     /// mover's vented ledger at its collect (the VentSettled shape):
     /// real entropy, the handling cost of divergent boundary policies.
     FrictionSettled { orb_id: u64, amount: Ratio },
+    /// GAUGE-N (11 §2.1, wired 2026-07-30) — the key at a GRADE: the
+    /// fiber is a graded vector of wrapped keys, not one dial, and
+    /// this deed moves (or OPENS — a shift at an unopened grade grows
+    /// the key, the tonal dimension the growth law promises) one
+    /// plane. Grade 0 is the landed scalar; tag 42 stays its own
+    /// grade-0 shorthand forever (tags permanent).
+    GaugeShiftedAt { grade: u16, gauge: Ratio },
     /// AEON-1a (11 §2.1) — the world's KEY moved: its gauge phase G,
     /// an exact rational wrapped on the torus fiber. Progression,
     /// elevation (12_UNION §6), and crystallized tech all move in G;
@@ -838,6 +845,11 @@ impl ClosureEvent {
                 ratio::encode(gauge, &mut value);
                 tlv::put(42, &value, &mut out);
             }
+            Self::GaugeShiftedAt { grade, gauge } => {
+                let mut value = grade.to_le_bytes().to_vec();
+                ratio::encode(gauge, &mut value);
+                tlv::put(60, &value, &mut out);
+            }
             Self::Diverged { branch, gauge } => {
                 let mut value = Vec::new();
                 ratio::encode(gauge, &mut value);
@@ -1112,6 +1124,11 @@ impl ClosureEvent {
             42 => {
                 let (gauge, _) = ratio::decode(value)?;
                 Some(Self::GaugeShifted { gauge })
+            }
+            60 => {
+                let grade = u16::from_le_bytes(value.get(..2)?.try_into().ok()?);
+                let (gauge, _) = ratio::decode(value.get(2..)?)?;
+                Some(Self::GaugeShiftedAt { grade, gauge })
             }
             43 => {
                 let (gauge, used) = ratio::decode(value)?;

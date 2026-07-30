@@ -92,7 +92,14 @@ plays it.
   replay reconstructs it; the star-chart's `g` is the mirror rendering.
 - Because the fiber GROWS (Mint adds planes), G is not a fixed dial — new
   tonal dimensions can open at high-value landings. The line becomes a
-  surface, then a volume.
+  surface, then a volume. **GAUGE-N LANDED (2026-07-30):** the key IS a
+  graded vector of wrapped planes — `GaugeShiftedAt` (tag 60) moves or
+  OPENS any grade (zeros fill skipped planes: unopened rests at
+  ground); grade 0 stays the landed scalar every law binds to; the
+  wrapped-L1 `key_distance` reads resonance/clash across keys of any
+  dimensionality. Open refinement, recorded: gating plane-OPENING on a
+  receipted Mint (growth as earned, not free) — today the graded shift
+  itself opens.
 
 ## 3. Lineage as a manifold walk — divergence + confluence
 
