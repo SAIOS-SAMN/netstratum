@@ -3417,6 +3417,10 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             // D3: the terrain charter replays — the seed is forever.
             ClosureEvent::WorldCharted { seed } => terrain_seed = Some(*seed),
             ClosureEvent::EraAnnexed { .. } => {}
+            // MESH-1b (NS-5 §7): authority is the mesh's walk of the
+            // spine — the world's committed projection is blind to it
+            // (the game rules never consult the writing hand).
+            ClosureEvent::HandoffSealed { .. } => {}
             // GALAXY-1 (13_GALAXY §4): a universe-ledger event — it
             // never enters a world chronicle, and world replay ignores
             // it (the EraAnnexed precedent, explicit no-op).

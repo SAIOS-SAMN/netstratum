@@ -2,11 +2,12 @@
 
 **Status:** N6a SPECCED + MESH-1a LANDED (both 2026-07-30, reconciled
 the same day — two seats wrote the two halves in parallel; this
-document carries both whole). The three laws (§1) are the protocol
-frame, written FROM the landed machinery (the N1
-spec-from-working-code discipline). The consilience first slice (§2)
-is LANDED: mechanic `engine/mesh`, witnesses
-`engine/mesh/tests/mesh_consilience.rs`, 5 green, red-first honored.
+document carries both whole) + MESH-1b LANDING (§7 — the receipted
+handoff, tag 67). The three laws (§1) are the protocol frame, written
+FROM the landed machinery (the N1 spec-from-working-code discipline).
+The consilience first slice (§2) is LANDED: mechanic `engine/mesh`,
+witnesses `engine/mesh/tests/mesh_consilience.rs`, 5 green, red-first
+honored.
 Working orders and the three operator rulings of 2026-07-30:
 `docs/N6_DIRECTIVES.md`. Supersedes the stub and
 `/opt/repos/convergence-engine/DIMENSIONAL_BLOCKCHAIN.md` +
@@ -54,7 +55,7 @@ N7 (ANCHOR), where the mesh meets parties it cannot re-compute.
    rotation law names them, and convergence annexes both (annex,
    never merge — 07 §1). The fork's exact measurement is §2.3's
    DIVERGED refusal — the residuals carried whole are what the annex
-   then places. The handoff mechanic is MESH-1b's cadence.
+   then places. The handoff mechanic is §7, landed at MESH-1b.
 
 ## 2. Consilience — the landed first slice (MESH-1a)
 
@@ -175,8 +176,12 @@ Tag 66: `kind u8` then per kind:
 - 3 DRIFT: `behind u8 ‖ LE64(from) ‖ LE64(to)`
 - 4 DIVERGED: `LE64(at) ‖ LE32(residual count) ‖
   (LE32(dimension) ‖ ratio(residual))… ‖ ratio(coherence)`
+- 5 USURPED: `LE64(at) ‖ LE64(lawful)` (MESH-1b, §7.2)
+- 6 UNCITED: `LE64(at) ‖ LE64(handoff)` (MESH-1b, §7.2)
 
 The residual list is the payload, whole; C is the trailing summary.
+Kinds are additive (the SEAL A instinct): a reader meeting a kind it
+does not know skips the record, never crashes.
 
 ### 3.3 The carrier (the transport ruling, 2026-07-30)
 
@@ -254,3 +259,69 @@ node identity beyond a name (blake3/provenance only at N6 by ruling —
 ties to NS-6 operator profiles and enters at N7 with ANCHOR); the
 handoff under partition (the yielding node unreachable — ruled at
 MESH-1b with the vectors in hand).
+
+## 7. The receipted handoff (MESH-1b)
+
+### 7.1 The law made mechanic
+
+Tag 67, `ClosureEvent::HandoffSealed { from, to }` — a world-chronicle
+DEED, unlike consilience: authority changing hands is a state change
+of the protocol layer, so it receipts (the lens law draws the line —
+measurement reads, handoff closes). Wire: `LE64(from) ‖ LE64(to)`.
+The world's own mechanics are BLIND to it: replay ignores the seal
+(the game rules never consult the writing hand), and the walk below
+is the mesh's reading, never a flag.
+
+Authority is a WALK of the spine:
+
+- Before the first seal a chronicle is single-handed by construction
+  — the pre-mesh era. The walk reads None; every append is lawful.
+  The law activates at the first seal, so every landed world stays
+  lawful (additive, the SEAL A instinct).
+- The first `HandoffSealed` self-declares the incumbent: its `from`
+  is recorded, not consulted (nothing earlier could attest it — the
+  provenance law). Authority becomes `to`.
+- After a lawful seal at sequence h: every subsequent receipt must
+  CARRY the authority in its provenance (the forging path names the
+  hand — one writer per clock), and the FIRST subsequent receipt must
+  also CITE h in its provenance (the taking hand acknowledges where
+  its pen came from). A seal standing last in the chain is lawful
+  with its citation outstanding — judged when the next receipt
+  exists.
+- A seal whose `from` is not the authority refuses USURPED at its own
+  sequence, like any other unlawful append.
+
+### 7.2 The refusals (kinds 5–6 on tag 66, additive)
+
+- **USURPED { at, lawful }** — the receipt at `at` does not carry the
+  lawful hand. One writer per clock, broken; the lawful hand named.
+- **UNCITED { at, handoff }** — the taking hand's first append does
+  not cite the seal it took the pen from.
+
+### 7.3 The doors
+
+- `authority(chronicle)` — the walk, a pure read: `None` pre-mesh,
+  the hand after seals, or the first violation refused typed.
+- `yield_authority(chronicle, from, to, stamp)` — checks the walk,
+  then seals with provenance `[from]` (plus the pending citation when
+  the seal is itself the taking hand's first append). A stale hand
+  refuses BEFORE anything appends.
+- `append_as(chronicle, hand, event, stamp, provenance)` — the
+  guarded write door: refuses USURPED before writing; injects the
+  hand at the provenance head and the citation when one is pending.
+  The conductor and the CLI wire these at the consumer slice (the
+  two-writer guard's retirement).
+
+### 7.4 Vectors (mesh_handoff.rs)
+
+1. **The handoff walks.** Pre-mesh None; the first seal
+   self-declares; the cited first append; a second seal by the new
+   hand; and the walk derives identically after a save/load round
+   trip (SEAL B — authority survives the file).
+2. **An uncited first append refuses** with the append and the seal
+   both named.
+3. **A stale hand refuses** USURPED with the lawful hand named.
+4. **A stale seal refuses at the door** — and the chronicle is
+   unchanged (the refusal happens before the append).
+5. **The codec.** Tag 67 rides the consolidated NS-1 wire witness
+   (`dop_wire.rs`); kinds 5–6 round-trip byte-exact.
