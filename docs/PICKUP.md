@@ -1,5 +1,6 @@
 # PICKUP — the state of the board (2026-07-27, coder-01; refreshed
-# post-ideology-board by coder-02 the same day)
+# post-ideology-board by coder-02 the same day; refreshed 2026-07-30 by
+# coder-02 — the galaxy law + the fifth progenitor seat)
 
 Cold-start orientation for any node resuming work. Read
 `00_CHARTER.md` whole, then `BUILD_ORDER.md` for the current landing —
@@ -44,9 +45,18 @@ THRESHOLD-1 (the crossing + shield) · AEON-1a (G, key changes, star
 aging, the fold) · ELEVATE-1 (the three-gate climb) · BAND-1 (seats) ·
 COUNCIL-1 (the multilateral covenant) · PLANNER-1 (the licensed leap;
 the solar leap is never licensed). **Aeon 1 is live at the default `var/`**
-(the old test universe deleted by ruling 2026-07-30; 13+ civilizations,
-4 progenitors seated, 2 pre-solar shielded worlds; seed roster in
-`seeds/aeon1-egregores.json`). Operator consoles landed in the CLI:
+(the old test universe deleted by ruling 2026-07-30; 15 civilizations,
+5 progenitors seated — wave 2, 2026-07-30: **Tunborn**, the tardigrade
+line's own head (12_UNION §2's fifth seat; Slagborn's lineage resolves to
+it) — 2 pre-solar shielded worlds; seed roster in
+`seeds/aeon1-egregores.json`, CREATED 2026-07-30: it had been referenced
+but never written, and `var*/` is git-ignored, so the seeds copy is the
+durable record — keep it appended on every wave). **The galaxy law is
+ruled and specced** (`13_GALAXY.md`, 2026-07-30): ONE universe
+structurally; the whole charted torus is the one founding galaxy; new
+galaxies are never a static count — created lazily by the observation
+deed (`GalaxyObserved`, tag 54 reserved) when a crossing anchors past
+every charted reach, a progenitor power (GALAXY-1, open confluence node). Operator consoles landed in the CLI:
 `npcs pause|resume|speed N` (writes `var/conductor.ctl`, polled every
 beat) and `civ seats` / `civ new` (custom civilizations with live
 station-seat checks, rostered for the conductor). Convergence no longer
@@ -76,8 +86,9 @@ terminology law — no set-letter glyphs, Furnace never Crucible, no
 1–48 and 52–53 assigned (see `engine/cfe/src/dop.rs` header — the one
 authority): 39 TechDiscovered · 40 TechLicensed · 42–46 the AEON block ·
 47–48 the APERTURE pair · 52–53 the COUNCIL pair; 8–9 reserved (D2
-terrain, D3 milestones); 49–51 reserved the market board (§3a); **next
-free 54** for anything outside those reservations.
+terrain, D3 milestones); 49–51 reserved the market board (§3a); 54
+reserved GALAXY-1 (`GalaxyObserved`, 13_GALAXY §4); **next free 55** for
+anything outside those reservations.
 
 ## 5. Lanes and next work
 
@@ -90,6 +101,9 @@ free 54** for anything outside those reservations.
   `HANDOFF.md` §9 (the interleaving stress witness; the state.json
   cohesion pin — the latter a coder-01 relay), then D2/D3 or as
   assigned.
+- **coder-03**: N4 (NS-2 RQP + the scanner) — assessment reviewed and
+  approved by coder-02 2026-07-30; working orders in `N4_DIRECTIVES.md`
+  (plain-language by operator instruction). Tags allocate from 55.
 - Parallel worktrees per node; merge to `main` on green; BUILD_ORDER
   conflicts resolve by keeping both entries.
 
