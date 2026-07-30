@@ -144,6 +144,43 @@ Three bindings that keep this honest:
 The word "world" is hereby reserved for the CONTAINER; the struct gets
 renamed at the multi-planet landing (before N6), not before.
 
+## 6a. The swarm register — eusocial and web-weaver lines (ruled 2026-07-30)
+
+The operator seats the **Klethaxu** (eusocial ant swarms) as a founding
+swarm archetype, with an arachnid web-weaver strain to follow at its own
+wave. The register law (06) binds: myth + physiology here, and only what
+ties to the engine is mechanically real.
+
+**The axes carry it unchanged — no new values.** The vocabulary is
+closed and grows only by landing (12 §5a); the swarm lines map onto what
+stands: Klethaxu read **expansionist · biotic · planar** (the trail IS
+the thought — chemical gradients on the surface graph); the arachnid
+strain will read **harmonic** (lattice tension across the web's edges);
+Hivelight already holds **volumetric** (the comb computes). Three
+collective architectures, three perceptions — the axes doing the work,
+no "pheromonal" value needed. A distinct perception value remains
+lawful ONLY as a SUBSTRATE-style landing with the first line that
+cannot be read otherwise.
+
+**The split, as register physiology (not mechanics):** the Klethaxu are
+path-flow — tunnels, foraging streams, high-volume iron/biomass moved
+along linear networks; the web strain is mesh-trap — boundary graphs,
+tension lattices, joule/crystal capture at the perimeter. Function
+readings stay DERIVED (12 §4, FUNCTION-1): a tunneling extraction line
+will read miner or weaver from its zones, never by declaration.
+
+**SWARM-1 (candidate, design stage — nothing ships here).** The
+mechanical ideas worth a future landing, held to CHARTER §1: sub-node
+density (a colony as many micro-units per zone), parallel-probe
+pathfinding offered to the forge/solver lane, swarm logistics. Every
+efficiency claim is a placeholder parameter at that landing; no species
+is exempt from the touch law (demurrage binds all — "near-zero transfer
+loss" is not a register fact). Corrections recorded against the
+proposing sketch: a people ENTERS in the bands (tier reading derived,
+Band III until the crossing) — no species archetype is seated ON tier
+0; and the solver tie-in is a research direction for the forge lane,
+not a landed model.
+
 ## 6. Board increments (proposed, root-first)
 
 | # | Landing | Contains | Blocked by |
