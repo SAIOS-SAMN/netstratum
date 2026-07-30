@@ -1147,6 +1147,46 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         style.strong(&swept.to_string())
                     );
                 }
+                Some("gift") => {
+                    // t0 gift <world> <condition> — a STRUCTURED
+                    // petition: the conductor executes it as a
+                    // receipted grant at the next beat (crown law
+                    // checked there; the two-book licensing form is
+                    // recorded debt until NS-5 arbitrates).
+                    let target = words.next().map(str::to_string);
+                    let condition = words.next().map(str::to_string);
+                    match (target, condition) {
+                        (Some(target), Some(condition)) => {
+                            let inbox =
+                                std::path::PathBuf::from("var/worlds").join(&target).join("inbox");
+                            let _ = std::fs::create_dir_all(&inbox);
+                            let stamp = std::fs::read_dir(&inbox)
+                                .map(|d| d.count())
+                                .unwrap_or(0);
+                            let body = format!(
+                                "{{\"verb\":\"gift\",\"args\":[\"{condition}\"],\"as\":\"steward\"}}"
+                            );
+                            match std::fs::write(
+                                inbox.join(format!("{stamp:06}-gift.json")),
+                                body,
+                            ) {
+                                Ok(()) => println!(
+                                    "{} the gift PETITIONS {} — the conductor executes at its next beat (the crown law holds there)",
+                                    style.ok("✉"),
+                                    style.strong(&target)
+                                ),
+                                Err(refusal) => {
+                                    println!("{} petition refused: {refusal}", style.bad("✗"))
+                                }
+                            }
+                        }
+                        _ => println!(
+                            "{} usage: {} — condition 6 gifts the crown",
+                            style.bad("✗"),
+                            style.strong("t0 gift <world> <condition 1..6>")
+                        ),
+                    }
+                }
                 Some("create") => println!(
                     "creation is the civ console: {}",
                     style.strong("civ new <slug> | <Name> | <species> | <motto> | <axes> [station]")

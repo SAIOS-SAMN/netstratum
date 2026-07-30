@@ -782,6 +782,15 @@ impl Egregore {
                 None => false,
             },
             ("collect", []) => self.world.collect_as(self.steward, cfe::world::FIRST_ORB).is_ok(),
+            // #40: the t0 gift petition — a receipted grant under
+            // steward containment; the crown law holds in the engine.
+            ("gift", [condition]) => match condition.parse::<u8>() {
+                Ok(condition) => self
+                    .world
+                    .grant_tech_as(self.steward, cfe::world::FIRST_ORB, condition)
+                    .is_ok(),
+                Err(_) => false,
+            },
             _ => false,
         }
     }

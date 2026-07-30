@@ -292,6 +292,10 @@ pub struct World {
     /// TECH-1a: the discovered nodes (committed — replays from
     /// receipts alone); condition 0 is the kernel solar leap.
     techs: Vec<(u64, u8, [u8; 32])>,
+    /// #41 WORKSPACE: the shear cursor — (receipts processed, carried
+    /// sheet). A pure cache over receipts: never committed, never
+    /// persisted; a resumed world rebuilds it at its first boundary.
+    shear_cursor: (usize, Vec<(u64, CrystalDeposit)>),
     /// WANT-1: the struck cognitive wants (committed, famine-shaped).
     wants: Vec<(u64, u8)>,
     /// THRESHOLD-1: the crossing flag (committed, replay-derived).
@@ -324,6 +328,7 @@ impl World {
             friction_pending: Vec::new(),
             techs: Vec::new(),
             wants: Vec::new(),
+            shear_cursor: (0, Vec::new()),
             crossed: false,
             gauge: vec![ratio(0, 1)],
             genesis: None,
@@ -361,6 +366,7 @@ impl World {
             friction_pending: Vec::new(),
             techs: committed.techs,
             wants: committed.wants,
+            shear_cursor: (0, Vec::new()),
             crossed: committed.crossed,
             gauge: committed.gauge,
             genesis: committed.genesis,
@@ -466,6 +472,61 @@ impl World {
     /// TERRA-1: does this world hold the gifted terraforming node?
     pub fn can_terraform(&self) -> bool {
         self.techs.iter().any(|(_, condition, _)| *condition == 6)
+    }
+
+    /// #40 (the petition's executor): GRANT a technology node under
+    /// steward containment — the inbox form of the licensed arrival
+    /// (the two-book licensing pair is recorded debt until NS-5
+    /// arbitrates a true grantor). The crown law holds HERE: condition
+    /// 6 lands only on a complete base-7 stack; the solar leap is
+    /// never granted; one node per condition per orb.
+    pub fn grant_tech_as(
+        &mut self,
+        actor: u64,
+        orb: u64,
+        condition: u8,
+    ) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if condition == 0 {
+            return Err(ActionRefused::SolarLeapNeverLicensed);
+        }
+        if !(1..=6).contains(&condition) {
+            return Err(ActionRefused::BadTransfer);
+        }
+        if condition == 6 && !self.base_seven_complete() {
+            return Err(ActionRefused::BaseSevenUnfinished);
+        }
+        if peek(&self.orbs, orb).is_none() {
+            return Err(ActionRefused::NoSuchOrb { orb });
+        }
+        if self.techs.iter().any(|(o, c, _)| *o == orb && *c == condition) {
+            return Err(ActionRefused::BadTransfer);
+        }
+        let mut seed = b"tech.granted".to_vec();
+        seed.extend_from_slice(&orb.to_le_bytes());
+        seed.push(condition);
+        if let Some(receipt) = self.chronicle.receipts().last() {
+            seed.extend_from_slice(&receipt.own.0);
+        }
+        let node: [u8; 32] = blake3::hash(&seed).into();
+        let name = format!("gifted {}", crate::dop::tech_node_name(condition, &node));
+        self.techs.push((orb, condition, node));
+        let stamp = self.clock.now();
+        let (modifier, magnitude) =
+            crate::dop::tech_node_of(condition).unwrap_or((condition, ratio(1, 1)));
+        self.chronicle.append(
+            ClosureEvent::TechDiscovered {
+                orb_id: orb,
+                node,
+                condition,
+                modifier,
+                magnitude,
+                name,
+            },
+            stamp,
+            vec![actor],
+        );
+        Ok(())
     }
 
     /// TERRA-1 — TERRAFORM: move a SITED planet between substrate
@@ -819,54 +880,31 @@ impl World {
     /// spans, overheat spans, the vent-window sums) — the converge
     /// deposit idiom, never a rescan per condition per orb. State
     /// readings (sink, surplus) evaluate directly at the boundary.
-    fn crystal_deposits(&self, now: u64) -> Vec<(u64, CrystalDeposit)> {
-        let window_floor = now.saturating_sub(240);
-        let mut sheet: Vec<(u64, CrystalDeposit)> = Vec::new();
-        fn deposit(sheet: &mut Vec<(u64, CrystalDeposit)>, orb: u64) -> &mut CrystalDeposit {
-            if let Some(at) = sheet.iter().position(|(held, _)| *held == orb) {
-                return &mut sheet[at].1;
-            }
-            sheet.push((orb, CrystalDeposit::default()));
-            &mut sheet.last_mut().expect("just pushed").1
+    /// #41 — the INCREMENTAL shear: only receipts past the cursor
+    /// deposit; windowed entries prune at each boundary, so the sweep
+    /// stays bounded however old the chronicle grows. The carried
+    /// sheet is a pure cache — same receipts, same sheet as the
+    /// full scan, by construction (both run deposit_receipt).
+    fn crystal_deposits_at(&mut self, now: u64) -> Vec<(u64, CrystalDeposit)> {
+        let (cursor, mut sheet) = std::mem::take(&mut self.shear_cursor);
+        let receipts = self.chronicle.receipts();
+        for receipt in &receipts[cursor.min(receipts.len())..] {
+            deposit_receipt(&mut sheet, receipt);
         }
+        let floor = now.saturating_sub(240);
+        for (_, held) in sheet.iter_mut() {
+            held.vented_entries.retain(|(stamp, _)| *stamp >= floor);
+            held.encased_entries.retain(|(stamp, _)| *stamp >= floor);
+        }
+        self.shear_cursor = (receipts.len(), sheet.clone());
+        sheet
+    }
+
+    fn crystal_deposits(&self, now: u64) -> Vec<(u64, CrystalDeposit)> {
+        let _ = now;
+        let mut sheet: Vec<(u64, CrystalDeposit)> = Vec::new();
         for receipt in self.chronicle.receipts() {
-            match &receipt.event {
-                ClosureEvent::FamineStruck { orb_id, resource: Resource::Joule, .. } => {
-                    let held = deposit(&mut sheet, *orb_id);
-                    held.famine_open = held.famine_open.or(Some(receipt.stamp));
-                }
-                ClosureEvent::FamineRelieved { orb_id, resource: Resource::Joule } => {
-                    let held = deposit(&mut sheet, *orb_id);
-                    if let Some(struck) = held.famine_open.take() {
-                        held.famine_total += receipt.stamp.saturating_sub(struck);
-                    }
-                }
-                ClosureEvent::OverheatStruck { orb_id, .. } => {
-                    let held = deposit(&mut sheet, *orb_id);
-                    held.overheat_open = held.overheat_open.or(Some(receipt.stamp));
-                }
-                ClosureEvent::OverheatCleared { orb_id } => {
-                    deposit(&mut sheet, *orb_id).overheat_open = None;
-                }
-                ClosureEvent::VentSettled { orb_id, amount } if receipt.stamp >= window_floor => {
-                    deposit(&mut sheet, *orb_id).vented += amount.clone();
-                }
-                ClosureEvent::YieldCollected {
-                    orb_id, resource: Resource::Joule, amount,
-                } if receipt.stamp >= window_floor => {
-                    deposit(&mut sheet, *orb_id).encased += amount.clone();
-                }
-                ClosureEvent::ApertureSent { from_orb: orb_id, .. }
-                | ClosureEvent::ApertureReceived { to_orb: orb_id, .. }
-                | ClosureEvent::BondSealed { source_orb: orb_id, .. }
-                | ClosureEvent::BondSettled { source_orb: orb_id, .. } => {
-                    deposit(&mut sheet, *orb_id).last_link = Some(receipt.stamp);
-                }
-                ClosureEvent::TechDiscovered { orb_id, .. } => {
-                    deposit(&mut sheet, *orb_id).last_node = Some(receipt.stamp);
-                }
-                _ => {}
-            }
+            deposit_receipt(&mut sheet, receipt);
         }
         sheet
     }
@@ -895,7 +933,22 @@ impl World {
                         .iter()
                         .all(|(_, due)| *due == ratio(0, 1))
             }
-            4 => sheet.vented > ratio(0, 1) && sheet.vented > sheet.encased,
+            4 => {
+                let floor = now.saturating_sub(240);
+                let vented: Ratio = sheet
+                    .vented_entries
+                    .iter()
+                    .filter(|(stamp, _)| *stamp >= floor)
+                    .map(|(_, amount)| amount.clone())
+                    .sum();
+                let encased: Ratio = sheet
+                    .encased_entries
+                    .iter()
+                    .filter(|(stamp, _)| *stamp >= floor)
+                    .map(|(_, amount)| amount.clone())
+                    .sum();
+                vented > ratio(0, 1) && vented > encased
+            }
             5 => {
                 let active = held
                     .zones
@@ -1706,9 +1759,10 @@ impl World {
         // crystallization, so replay re-derives the identical node at
         // the identical tick. No randomness, no external calls.
         if stamp_now > 0 && stamp_now.is_multiple_of(60) {
-            // The shear: ONE sweep deposits every orb's readings —
-            // the crystallizer AND the want check read the same sheet.
-            let deposits = self.crystal_deposits(stamp_now);
+            // The shear: the INCREMENTAL sweep (#41) — only the new
+            // receipts deposit; the crystallizer AND the want check
+            // read the same carried sheet.
+            let deposits = self.crystal_deposits_at(stamp_now);
             let blank = CrystalDeposit::default();
             let candidates: Vec<u64> = self.orbs.iter().map(|held| held.orb_id).collect();
             // WANT-1 (12_UNION §5b): the cognitive wants, star-
@@ -3192,6 +3246,60 @@ fn terrain_boost(
     boost
 }
 
+/// The ONE deposit rule — shared verbatim by the incremental cursor
+/// and the pure full scan (same receipts, same sheet, by
+/// construction). Window filtering happens at READ (condition 4) and
+/// by pruning; the rule itself deposits everything typed.
+fn deposit_receipt(sheet: &mut Vec<(u64, CrystalDeposit)>, receipt: &crate::vrp::Receipt) {
+    fn deposit(sheet: &mut Vec<(u64, CrystalDeposit)>, orb: u64) -> &mut CrystalDeposit {
+        if let Some(at) = sheet.iter().position(|(held, _)| *held == orb) {
+            return &mut sheet[at].1;
+        }
+        sheet.push((orb, CrystalDeposit::default()));
+        &mut sheet.last_mut().expect("just pushed").1
+    }
+    match &receipt.event {
+        ClosureEvent::FamineStruck { orb_id, resource: Resource::Joule, .. } => {
+            let held = deposit(sheet, *orb_id);
+            held.famine_open = held.famine_open.or(Some(receipt.stamp));
+        }
+        ClosureEvent::FamineRelieved { orb_id, resource: Resource::Joule } => {
+            let held = deposit(sheet, *orb_id);
+            if let Some(struck) = held.famine_open.take() {
+                held.famine_total += receipt.stamp.saturating_sub(struck);
+            }
+        }
+        ClosureEvent::OverheatStruck { orb_id, .. } => {
+            let held = deposit(sheet, *orb_id);
+            held.overheat_open = held.overheat_open.or(Some(receipt.stamp));
+        }
+        ClosureEvent::OverheatCleared { orb_id } => {
+            deposit(sheet, *orb_id).overheat_open = None;
+        }
+        ClosureEvent::VentSettled { orb_id, amount } => {
+            deposit(sheet, *orb_id)
+                .vented_entries
+                .push((receipt.stamp, amount.clone()));
+        }
+        ClosureEvent::YieldCollected { orb_id, resource: Resource::Joule, amount } => {
+            deposit(sheet, *orb_id)
+                .encased_entries
+                .push((receipt.stamp, amount.clone()));
+        }
+        ClosureEvent::ApertureSent { from_orb: orb_id, .. }
+        | ClosureEvent::ApertureReceived { to_orb: orb_id, .. }
+        | ClosureEvent::BondSealed { source_orb: orb_id, .. }
+        | ClosureEvent::BondSettled { source_orb: orb_id, .. } => {
+            deposit(sheet, *orb_id).last_link = Some(receipt.stamp);
+        }
+        ClosureEvent::TechDiscovered { orb_id, .. } => {
+            deposit(sheet, *orb_id).last_node = Some(receipt.stamp);
+        }
+        _ => {}
+    }
+}
+
+
 pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut orbs: Vec<ColonyOrb> = Vec::new();
     let mut entities: Vec<Entity> = Vec::new();
@@ -3828,13 +3936,15 @@ fn reciprocity_reading(orb: &ColonyOrb) -> Ratio {
 /// verbatim by the live paths and replay.
 /// TECH-1b: one orb's crystal deposit — accumulated in a single
 /// chronicle sweep (the shear), read at the year boundary.
-#[derive(Default)]
+#[derive(Default, Clone)]
 struct CrystalDeposit {
     famine_total: u64,
     famine_open: Option<u64>,
     overheat_open: Option<u64>,
-    vented: Ratio,
-    encased: Ratio,
+    /// Windowed entries (stamp, amount) — pruned at each boundary so
+    /// the carried sheet stays bounded (the #41 cursor law).
+    vented_entries: Vec<(u64, Ratio)>,
+    encased_entries: Vec<(u64, Ratio)>,
     /// WANT-1: the last cross-world LINK (aperture leg, bond seal or
     /// settle) and whether one ever stood — the resonance reading.
     last_link: Option<u64>,
