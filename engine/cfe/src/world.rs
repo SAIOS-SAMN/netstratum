@@ -2975,8 +2975,29 @@ pub fn clear_trade(
     let y = y.min(held_b.give_amount.clone());
     // The two directions — each an aperture pair, shield-checked,
     // demurrage-touched, conservation-exact (the landed carrier).
-    aperture_transfer(a, held_a.orb, b, held_b.orb, held_a.give, x, deal)?;
-    aperture_transfer(b, held_b.orb, a, held_a.orb, held_b.give, y, deal + 1)?;
+    aperture_transfer(a, held_a.orb, b, held_b.orb, held_a.give, x.clone(), deal)?;
+    aperture_transfer(b, held_b.orb, a, held_a.orb, held_b.give, y.clone(), deal + 1)?;
+    // AEON-1b (11 §2.1) — RESONANCE AND CLASH: trade across the key
+    // gap costs friction — wrapped L1 across the WHOLE graded key,
+    // times the volume, at φ = 1/8 (placeholder). Aligned partners
+    // (any alignment) pay exactly zero; the antipode pays most. The
+    // heat accrues as workspace on BOTH movers and seals at their
+    // collects (the FrictionSettled shape — divergence has a
+    // handling cost, cross-world now too).
+    let gap = key_distance(a.key(), b.key());
+    if gap > ratio(0, 1) {
+        let heat = gap * (x + y) * ratio(1, 8);
+        for (world, orb) in [(&mut *a, held_a.orb), (&mut *b, held_b.orb)] {
+            match world
+                .friction_pending
+                .iter_mut()
+                .find(|(held, _)| *held == orb)
+            {
+                Some((_, pending)) => *pending += heat.clone(),
+                None => world.friction_pending.push((orb, heat.clone())),
+            }
+        }
+    }
     // Both intents close; replay removes them.
     a.offers.retain(|held| held.offer != offer_a);
     b.offers.retain(|held| held.offer != offer_b);

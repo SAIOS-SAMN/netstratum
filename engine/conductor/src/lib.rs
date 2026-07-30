@@ -125,6 +125,18 @@ pub fn fold(var_root: &str) -> std::io::Result<(u64, Ratio)> {
     Ok((era, gauge))
 }
 
+/// SCIENCE-1 (10 §3d): the RELEVANCE table — which industries exist
+/// in a science's own tree. A plasmic line carries no forge-of-iron
+/// (smelting is meaningless to a current sheet); its advancement
+/// crosses by the joint research venture instead. Placeholder table,
+/// niche-first (the FUNCTION-1 lesson).
+pub fn industry_relevant(metabolism: &str, kind: ZoneKind) -> bool {
+    !matches!(
+        (metabolism, kind),
+        ("plasmic", ZoneKind::Smelter | ZoneKind::Synthesizer)
+    )
+}
+
 /// OFFER-1a (BUILD_ORDER §3a): a world's TRADE INTENT, read pure from
 /// its committed state — the Furnace↔Frost axis (05 §1.4). A Frost
 /// world starving for joules with banked sink offers S_cool for fuel;
@@ -581,13 +593,22 @@ impl Egregore {
         let can_synth = self.level >= 5;
 
         // Unlocked industry takes priority for every temperament —
-        // that is what research is FOR.
+        // that is what research is FOR. SCIENCE-1: only inside the
+        // line's OWN science (relevance table) — a plasmic line never
+        // forges iron; its advancement crosses by joint venture.
+        let metabolism = self.spec.civilization.metabolism.clone();
         let industrial: Option<ZoneKind> = if can_synth
             && alloy >= ratio(20, 1)
             && bio >= ratio(15, 1)
+            && industry_relevant(&metabolism, ZoneKind::Synthesizer)
         {
             Some(ZoneKind::Synthesizer)
-        } else if can_smelt && smelters < 3 && iron >= ratio(30, 1) && bio >= ratio(10, 1) {
+        } else if can_smelt
+            && smelters < 3
+            && iron >= ratio(30, 1)
+            && bio >= ratio(10, 1)
+            && industry_relevant(&metabolism, ZoneKind::Smelter)
+        {
             Some(ZoneKind::Smelter)
         } else {
             None

@@ -7,7 +7,7 @@
 //! the whole book.
 
 use cfe::dop::Resource;
-use cfe::ratio::ratio;
+use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::StarClass;
 use cfe::world::{clear_trade, replay, ActionRefused, World, FIRST_ORB};
 
@@ -100,6 +100,58 @@ fn a_crossing_clears_at_the_resting_price() {
         ratio(23, 1),
         "the fill replays from receipts alone"
     );
+}
+
+/// AEON-1b (11 §2.1): the key gap PRICES the trade — clashing keys
+/// accrue friction workspace on both movers (sealed at collect as
+/// the FrictionSettled shape); aligned keys (any alignment) pay
+/// exactly zero.
+#[test]
+fn clash_pays_friction_alignment_pays_none() {
+    use cfe::dop::ClosureEvent;
+    // Aligned pair (both keys at ground): zero friction.
+    let mut a = sunlit("concord-a");
+    let mut b = sunlit("concord-b");
+    a.post_offer(FIRST_ORB, Resource::Iron, ratio(2, 1), Resource::Biomass, ratio(1, 1), 1)
+        .expect("posts");
+    b.post_offer(FIRST_ORB, Resource::Biomass, ratio(1, 1), Resource::Iron, ratio(2, 1), 2)
+        .expect("posts");
+    clear_trade(&mut a, 1, &mut b, 2, 10).expect("clears");
+    let _ = a.collect();
+    let aligned_friction = a
+        .chronicle()
+        .receipts()
+        .iter()
+        .any(|r| matches!(r.event, ClosureEvent::FrictionSettled { .. }));
+    assert!(!aligned_friction, "alignment pays exactly zero");
+
+    // Clashing pair: one key near the antipode — the gap is real and
+    // the friction seals at the collect.
+    let mut c = sunlit("discord-c");
+    let mut d = sunlit("discord-d");
+    c.shift_gauge(ratio(1, 2));
+    c.post_offer(FIRST_ORB, Resource::Iron, ratio(2, 1), Resource::Biomass, ratio(1, 1), 3)
+        .expect("posts");
+    d.post_offer(FIRST_ORB, Resource::Biomass, ratio(1, 1), Resource::Iron, ratio(2, 1), 4)
+        .expect("posts");
+    clear_trade(&mut c, 3, &mut d, 4, 20).expect("clears");
+    // Accrue something collectable so the collect seals the friction.
+    c.zone(0, cfe::dop::ZoneKind::Extractor).expect("zones");
+    for _ in 0..4 {
+        c.tick();
+    }
+    c.collect().expect("collects");
+    let sealed: Ratio = c
+        .chronicle()
+        .receipts()
+        .iter()
+        .filter_map(|r| match &r.event {
+            ClosureEvent::FrictionSettled { amount, .. } => Some(amount.clone()),
+            _ => None,
+        })
+        .sum();
+    // gap 1/2 (antipode) × volume (2 iron + 1 biomass) × 1/8 = 3/16.
+    assert_eq!(sealed, ratio(3, 16), "the clash pays exactly its gap");
 }
 
 /// No crossing: wrong resources, or prices that never meet — refused

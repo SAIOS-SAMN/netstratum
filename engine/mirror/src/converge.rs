@@ -210,6 +210,15 @@ pub fn converge(mirror: &Mirror, eras: &[(String, PathBuf)]) -> std::io::Result<
             // and the board read "0 or ~10": genesis keys beside
             // grant counts.
             let g = terminal_gauge(&events);
+            // AEON-1b (11 §4): the FOUR-C ELIGIBILITY — a trajectory
+            // settled in the retirement region annexes as a DERELICT
+            // (in the world, on the chart, out of the living walk —
+            // 07 §3's salvage frontier). The placeholder reading:
+            // unrelieved famine strikes outweigh closures in the
+            // residual (low coherence + carried want + null
+            // convergence). Nothing is destroyed; the fiber card
+            // names the state.
+            let derelict = is_derelict(&residual);
             // THE SHEET SEATING (11 §5.2, wired 2026-07-30): each
             // annexed aeon seats on its OWN G-sheet — the era ordinal
             // fixes the base (era N lived on sheet (N−1)/12, the fold
@@ -220,7 +229,7 @@ pub fn converge(mirror: &Mirror, eras: &[(String, PathBuf)]) -> std::io::Result<
             let g = wrap_gauge(g + sheet_base(era));
             let chart_name = format!("{era}--{world}");
             mirror.chart_world(&chart_name, (&x, &y, &z), &g)?;
-            write_fiber_card(&mirror.root, &chart_name, &residual)?;
+            write_fiber_card(&mirror.root, &chart_name, &residual, derelict)?;
             // TUniversal stamp: the world's terminal T on the one axis.
             ledger.append(
                 ClosureEvent::EraAnnexed {
@@ -376,7 +385,33 @@ fn at_grade(grade: usize, amount: Ratio) -> AxisVector {
 
 /// COHESION (07 §2): the residual rides the fiber — a card, a
 /// reflection, never an authority.
-fn write_fiber_card(root: &Path, chart_name: &str, residual: &Triple) -> std::io::Result<()> {
+/// AEON-1b (11 §4, placeholder reading): the retirement region — the
+/// residual's strike component stands positive (unrelieved want) and
+/// outweighs its build component (no growth answered it). Escapable
+/// before the fold (relief, rescue trade); at annexation it is the
+/// four-C verdict.
+fn is_derelict(residual: &Triple) -> bool {
+    let strikes = residual
+        .spatial
+        .components()
+        .first()
+        .cloned()
+        .unwrap_or_else(|| ratio(0, 1));
+    let builds = residual
+        .spatial
+        .components()
+        .get(1)
+        .cloned()
+        .unwrap_or_else(|| ratio(0, 1));
+    strikes > ratio(0, 1) && strikes > builds
+}
+
+fn write_fiber_card(
+    root: &Path,
+    chart_name: &str,
+    residual: &Triple,
+    derelict: bool,
+) -> std::io::Result<()> {
     let dir = root.join("fiber");
     fs::create_dir_all(&dir)?;
     let render = |axis: &AxisVector| -> String {
@@ -389,6 +424,9 @@ fn write_fiber_card(root: &Path, chart_name: &str, residual: &Triple) -> std::io
     let mut w = JsonWriter::new();
     w.open();
     w.field_str("world", chart_name);
+    if derelict {
+        w.field_str("state", "derelict");
+    }
     w.field_str("residual_spatial", &render(&residual.spatial));
     w.field_str("residual_gauge", &render(&residual.gauge));
     w.close();
