@@ -117,6 +117,27 @@ def tier_of(card):
     return TIER_OF_STATION.get(card.get("station"), "T3")
 
 
+def function_of(card, agg):
+    """12_UNION §4: the FUNCTION reading — derived at the observer from
+    metabolism + observed niche (zones, banks, solves), never stored,
+    confers no standing. First match wins (FUNCTION-1 v1 order)."""
+    metabolism = card.get("axes", {}).get("metabolism", "")
+    kinds = agg.get("zone_kinds", set())
+    if metabolism == "plasmic":
+        return "flux-harvester"
+    if metabolism == "mineral":
+        return "miner"
+    if kinds & {"smelter", "synthesizer", "resonator"}:
+        return "weaver"
+    if "cryo-array" in kinds or agg.get("sink", Fraction(0)) > 0:
+        return "sink-banker"
+    if "encasement" in kinds:
+        return "flux-harvester"
+    if agg.get("puzzles", 0) > 0:
+        return "prover"
+    return "sky-condenser"
+
+
 def world_dirs(var_root):
     worlds_dir = Path(var_root) / "worlds"
     if not worlds_dir.is_dir():
@@ -185,6 +206,7 @@ def read_all(var_root):
                 "planet": state.get("planet", "?"),
                 "clock": state.get("clock", 0),
                 "zones": len(state.get("zones", [])),
+                "zone_kinds": {z.get("kind") for z in state.get("zones", [])},
                 "famine": state.get("famine", []),
                 "puzzles": facts["puzzles"], "depth": facts["depth"],
                 "consumed": facts["consumed"], "linked": facts["linked"],
@@ -374,8 +396,10 @@ def view_civs(var_root, args, paint):
     for row in rows:
         agg = civs.setdefault(row["civilization"], {
             "colonies": 0, "puzzles": 0, "depth": 0, "consumed": Fraction(0),
-            "worlds": set(), **{r: Fraction(0) for r in RESOURCES}})
+            "worlds": set(), "zone_kinds": set(),
+            **{r: Fraction(0) for r in RESOURCES}})
         agg["colonies"] += 1
+        agg["zone_kinds"] |= row.get("zone_kinds", set())
         for resource in RESOURCES:
             agg[resource] += row[resource]
         if row["world"] not in agg["worlds"]:
@@ -391,7 +415,8 @@ def view_civs(var_root, args, paint):
             continue
         agg = civs.get(slug, {
             "colonies": 0, "puzzles": 0, "depth": 0, "consumed": Fraction(0),
-            "worlds": set(), **{r: Fraction(0) for r in RESOURCES}})
+            "worlds": set(), "zone_kinds": set(),
+            **{r: Fraction(0) for r in RESOURCES}})
         axes = card.get("axes", {})
         by_tier.setdefault(tier, []).append([
             civ_display(card, slug),
@@ -399,6 +424,7 @@ def view_civs(var_root, args, paint):
             "·".join(axes.get(a, "?")[:3]
                      for a in ["disposition", "metabolism", "perception"]),
             card.get("station", "—") or "—",
+            function_of(card, agg),
             str(len(agg["worlds"])), str(agg["colonies"]),
             show(agg["iron"]), show(agg["biomass"]),
             show(agg["joule"]), show(agg["sink"]),
@@ -411,7 +437,7 @@ def view_civs(var_root, args, paint):
         if tier not in by_tier:
             continue
         lines += [paint.head(TIER_TITLES[tier]), tabulate(
-            ["CIVILIZATION", "SPECIES", "AXES", "STATION", "WORLDS", "COLONIES",
+            ["CIVILIZATION", "SPECIES", "AXES", "STATION", "FUNCTION", "WORLDS", "COLONIES",
              "IRON", "BIOMASS", "JOULE", "SINK", "PUZZLES", "INTELLIGENCE"],
             by_tier[tier]), ""]
     return "\n".join(lines).rstrip() or "(no civilizations match)"

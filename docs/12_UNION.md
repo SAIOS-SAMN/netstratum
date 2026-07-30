@@ -186,7 +186,18 @@ Every species that has made the crossing (§7) and holds worlds. Function
 taxonomy, not caste (ruling 3): each civilization carries a **function
 reading** derived from its metabolism and its worlds' bands — miner,
 flux-harvester, sky-condenser, sink-banker, prover, weaver — the reading is
-derived at the observer, never stored, and confers no standing. Slagborn's
+derived at the observer, never stored, and confers no standing.
+
+**FUNCTION-1 (landed 2026-07-30, operator directive).** The observer
+renders the reading (`observer.py`, the civs board's FUNCTION column),
+derived first-match from metabolism and the observed niche: plasmic →
+flux-harvester · mineral → miner · a conversion web (smelter /
+synthesizer / resonator) → weaver · sink capture (cryo-array or banked
+sink) → sink-banker · the syntropic shell → flux-harvester · earned
+solves → prover · the mesic grazer default → sky-condenser. Derived at
+render time from state.json and the registry axes — zero schema, zero
+storage; the match order is a placeholder parameter, and new niches
+append as their values land (aeric → sky-condenser proper, §5a). Slagborn's
 tardigrades are miners because Furnace rock is what they eat, not because
 anyone assigned them the pit.
 
