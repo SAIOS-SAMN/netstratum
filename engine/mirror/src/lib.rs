@@ -36,6 +36,7 @@ use std::io::Write as _;
 use std::path::PathBuf;
 
 pub mod converge;
+pub mod galaxy;
 pub mod journal;
 mod json;
 pub mod registry;
@@ -627,6 +628,10 @@ fn render_receipt(receipt: &Receipt) -> String {
         E::EraAnnexed { era, world, offset, .. } => (
             "era_annexed",
             format!("{world} of {era} at offset {offset}"),
+        ),
+        E::GalaxyObserved { observer, name, .. } => (
+            "galaxy_observed",
+            format!("{name} observed by {observer}"),
         ),
         E::OverheatStruck { overflow, .. } => {
             ("overheat_struck", format!("overflow {}", ratio_str(overflow)))

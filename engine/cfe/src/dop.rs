@@ -61,8 +61,7 @@
 //!         OfferCleared, +1 — renumbered from the colliding 41–43)
 //!   52 ClosureEvent::CouncilSealed (COUNCIL-1 — the multilateral pact)
 //!   53 ClosureEvent::CouncilClosed (COUNCIL-1 — one member's reckoning)
-//!   54 RESERVED for GALAXY-1 (13_GALAXY §4: GalaxyObserved — the
-//!         observation deed; universe ledger only, inscribed at landing)
+//!   54 ClosureEvent::GalaxyObserved (GALAXY-1 — universe ledger only)
 //!         — the next free tag outside reservations is 55.
 
 use crate::ratio::{self, ratio, Ratio};
@@ -394,6 +393,19 @@ pub enum ClosureEvent {
     /// Lives ONLY in the universe ledger (`convergence.tlv`), never in
     /// a world chronicle; world replay ignores it.
     EraAnnexed { era: String, world: String, terminal: [u8; 32], offset: u64 },
+    /// GALAXY-1 (13_GALAXY §3–§4) — the observation deed: a crossing
+    /// anchored past the frontier (wrapped-L1 to EVERY charted center
+    /// exceeding its reach — a far region, never an outside) CREATES
+    /// the galaxy it observes. Lives ONLY in the universe ledger
+    /// (`convergence.tlv`), never in a world chronicle; world replay
+    /// ignores it.
+    GalaxyObserved {
+        observer: String,
+        creator: String,
+        name: String,
+        center: (Ratio, Ratio, Ratio),
+        reach: Ratio,
+    },
     /// THERMAL-1 (05 §1.2) — overflow exceeded encasement: the sector
     /// overheats; yields degrade by 1/(1+overflow) until cleared.
     /// World-driven (no entity forged it), the famine-strike shape.
@@ -639,6 +651,18 @@ impl ClosureEvent {
                 value.extend_from_slice(world.as_bytes());
                 tlv::put(21, &value, &mut out);
             }
+            Self::GalaxyObserved { observer, creator, name, center, reach } => {
+                let mut value = Vec::new();
+                for text in [observer, creator, name] {
+                    value.extend_from_slice(&(text.len() as u16).to_le_bytes());
+                    value.extend_from_slice(text.as_bytes());
+                }
+                ratio::encode(&center.0, &mut value);
+                ratio::encode(&center.1, &mut value);
+                ratio::encode(&center.2, &mut value);
+                ratio::encode(reach, &mut value);
+                tlv::put(54, &value, &mut out);
+            }
             Self::OverheatStruck { orb_id, overflow } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 ratio::encode(overflow, &mut value);
@@ -880,6 +904,28 @@ impl ClosureEvent {
                 let era = String::from_utf8(value.get(42..42 + era_len)?.to_vec()).ok()?;
                 let world = String::from_utf8(value.get(42 + era_len..)?.to_vec()).ok()?;
                 Some(Self::EraAnnexed { era, world, terminal, offset })
+            }
+            54 => {
+                let mut at = 0usize;
+                let mut take_text = || -> Option<String> {
+                    let len =
+                        u16::from_le_bytes(value.get(at..at + 2)?.try_into().ok()?) as usize;
+                    at += 2;
+                    let text = String::from_utf8(value.get(at..at + len)?.to_vec()).ok()?;
+                    at += len;
+                    Some(text)
+                };
+                let observer = take_text()?;
+                let creator = take_text()?;
+                let name = take_text()?;
+                let (x, used) = ratio::decode(value.get(at..)?)?;
+                at += used;
+                let (y, used) = ratio::decode(value.get(at..)?)?;
+                at += used;
+                let (z, used) = ratio::decode(value.get(at..)?)?;
+                at += used;
+                let (reach, _) = ratio::decode(value.get(at..)?)?;
+                Some(Self::GalaxyObserved { observer, creator, name, center: (x, y, z), reach })
             }
             22 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

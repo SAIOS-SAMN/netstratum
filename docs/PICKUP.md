@@ -55,8 +55,13 @@ durable record — keep it appended on every wave). **The galaxy law is
 ruled and specced** (`13_GALAXY.md`, 2026-07-30): ONE universe
 structurally; the whole charted torus is the one founding galaxy; new
 galaxies are never a static count — created lazily by the observation
-deed (`GalaxyObserved`, tag 54 reserved) when a crossing anchors past
-every charted reach, a progenitor power (GALAXY-1, open confluence node). Operator consoles landed in the CLI:
+deed (`GalaxyObserved`, tag 54 — INSCRIBED at GALAXY-1a's landing,
+2026-07-30: `mirror::galaxy` — the deed `observe_galaxy`, the lazy
+founding charter, derived membership `galaxy_of`, the `galaxies.json`
+rendering; NS-1 §2.3 row 54; 6 witnesses in `galaxy_pins.rs`; the
+frontier is a DISTANCE — wrapped-L1 to every center vs reach, never an
+outside). GALAXY-1b open: the conductor trigger on the crossing + the
+`t0 galaxies` verb (one hand, coder-01's console). Operator consoles landed in the CLI:
 `npcs pause|resume|speed N` (writes `var/conductor.ctl`, polled every
 beat) and `civ seats` / `civ new` (custom civilizations with live
 station-seat checks, rostered for the conductor). Convergence no longer
@@ -85,10 +90,10 @@ terminology law — no set-letter glyphs, Furnace never Crucible, no
 
 1–48 and 52–53 assigned (see `engine/cfe/src/dop.rs` header — the one
 authority): 39 TechDiscovered · 40 TechLicensed · 42–46 the AEON block ·
-47–48 the APERTURE pair · 52–53 the COUNCIL pair; 8–9 reserved (D2
-terrain, D3 milestones); 49–51 reserved the market board (§3a); 54
-reserved GALAXY-1 (`GalaxyObserved`, 13_GALAXY §4); **next free 55** for
-anything outside those reservations.
+47–48 the APERTURE pair · 52–53 the COUNCIL pair · 54 GalaxyObserved
+(GALAXY-1a, universe ledger only); 8–9 reserved (D2 terrain, D3
+milestones); 49–51 reserved the market board (§3a); **next free 55** —
+coder-03's NS-2 allocates from here (N4_DIRECTIVES.md).
 
 ## 5. Lanes and next work
 

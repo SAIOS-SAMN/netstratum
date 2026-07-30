@@ -2593,6 +2593,10 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             // CONVERGE-1 (07 §1): a universe-ledger event — it never
             // enters a world chronicle, and world replay ignores it.
             ClosureEvent::EraAnnexed { .. } => {}
+            // GALAXY-1 (13_GALAXY §4): a universe-ledger event — it
+            // never enters a world chronicle, and world replay ignores
+            // it (the EraAnnexed precedent, explicit no-op).
+            ClosureEvent::GalaxyObserved { .. } => {}
             // THERMAL-1 replay arms.
             ClosureEvent::StarCommissioned { class } => {
                 star = crate::thermal::StarClass::from_wire(*class);

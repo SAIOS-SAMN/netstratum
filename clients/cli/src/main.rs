@@ -2066,6 +2066,11 @@ fn chronicle(world: &World, style: &Style) {
                 style.dim(era),
                 style.strong(world)
             ),
+            cfe::dop::ClosureEvent::GalaxyObserved { observer, name, .. } => format!(
+                "✧ galaxy {} observed into the chart by {}",
+                style.strong(name),
+                style.dim(observer)
+            ),
             cfe::dop::ClosureEvent::OverheatStruck { overflow, .. } => format!(
                 "♨ OVERHEAT — overflow {} past encasement; yields degrade 1/(1+overflow)",
                 style.strong(&amount(overflow))
