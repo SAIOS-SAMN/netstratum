@@ -4348,8 +4348,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     }
     Committed {
         orbs, entities, star, debts, bonds, covenants, councils, offers, techs, wants, crossed,
-        gauge, genesis, terrain_seed, practices, prospects,
-        gauge, genesis, terrain_seed, practices, warded, veiled,
+        gauge, genesis, terrain_seed, practices, prospects, warded, veiled,
     }
 }
 

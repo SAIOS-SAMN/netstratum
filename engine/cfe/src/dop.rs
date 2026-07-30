@@ -1280,6 +1280,7 @@ impl ClosureEvent {
                 value.extend_from_slice(element);
                 ratio::encode(amount, &mut value);
                 tlv::put(71, &value, &mut out);
+            }
             Self::ElderWarded {} => {
                 tlv::put(74, &[], &mut out);
             }
