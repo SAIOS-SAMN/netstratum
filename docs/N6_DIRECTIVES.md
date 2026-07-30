@@ -1,0 +1,113 @@
+# N6 DIRECTIVES — the mesh working orders (2026-07-30, operator-ruled)
+
+Plain language. Scope: the N6 landing (NS-5 MESH, first slice MESH-1a).
+Supersedes nothing; folds into NS-5 and PICKUP when N6 lands whole.
+
+## Review verdict
+
+The NS-5 stub is verified against the tree 2026-07-30:
+
+- `protocols/NS-5_MESH.md` is 19 lines; §1 RFA semantics, §2 wire
+  format, §3 test vectors all read *(unwritten)*. The stub's standing
+  commitments: consilience at arity ≥ 2; receipts the shared spine;
+  forged or drifted state refuses typed; no central server, no global
+  transaction log; first consumer two-node world synchronization.
+- Both ancestors exist at `/opt/repos/convergence-engine/`
+  (DIMENSIONAL_BLOCKCHAIN.md — the two-chain shape; HOW_TO_USE.md —
+  two laptops, sovereign bubbles, the membrane). Carried: independent
+  work, exact measurement, disagreement preserved never voted away.
+  Dropped: the SAIOS vocabulary (retired at NS-6) and Level finality at
+  witness weight > 0.5 — majority is not the house law. The clock
+  already walks by 3-of-3 unanimity (`vrp.rs`); consilience is
+  unanimous or refused, structurally.
+- The ancestor lore correction stands (BUILD_ORDER §1a pin): coherence
+  is SUM-OF-SQUARES in code, not L1; the reference vector measures
+  C = 24, not 8. NS-5's vectors come from OUR code, never the
+  ancestor's prose.
+- Tag registry: the next free tag is **64** (dop.rs header, the one
+  authority — PICKUP §4's "next is 59" note is stale; 60–63 landed as
+  GaugeShiftedAt, GenesisSealed, WantStruck, WantRelieved). NS-2's
+  56–58 set the precedent NS-5 follows: protocol records in the
+  protocol's own framing, never world-chronicle events.
+- The machinery is ready: `vrp::verify_receipts` is public and names
+  the first break; `persist::load` is the one file door (Broken,
+  Malformed, HistoryDiverged refusals landed); `world::replay` is
+  public and yields the whole `Committed` projection; `rfa-core`
+  carries `Delta`, `coherence_functional`, and the residual iterator,
+  exact throughout.
+- `rfa-core` depends on `cfe` (the ratio carrier), so the mesh
+  mechanic CANNOT live in `cfe` without a cycle. It is a NEW crate,
+  `engine/mesh`, depending on both — one module per protocol seam.
+
+## Operator rulings (2026-07-30)
+
+1. **Identity: blake3/provenance only at N6.** No ed25519, no key-pair
+   dependencies enter the wire registry at MESH-1a.
+   Consilience-of-independent-computation over exact-rational state
+   reduction IS the claim of N6. Signature wrappers wait for N7, where
+   external cryptographic identity enters the protocol.
+2. **Transport: file exchange first.** A dumb reader exchanging
+   `chronicle.tlv` segments between directories satisfies SEAL C whole
+   and lets 100% of the consilience logic and vectors witness in pure
+   Rust — no sockets, no flakiness. TCP is a later, logic-free adapter.
+3. **Scope: one world.** MESH-1a is two independent engine instances
+   converging on ONE world's chronicle. Universal multi-world
+   aggregation belongs to MESH-1c / N7.
+
+## The consilience construction (NS-5 §1, summarized)
+
+Two nodes independently replay one world's chronicle and project the
+committed state onto the v1 measured manifold: the graded gauge key
+(grade-ascending) then, per orb ascending by orb id, the banked ledger
+over resource codes 1–7. The union of grades and orbs spans the
+manifold; an absent coordinate reads exactly 0.
+
+The claim "two paths, one position" is a triangle: a 3-node Delta with
+an origin O, Δ(O→A) = node A's projection, Δ(O→B) = node B's
+projection, Δ(A→B) = 0. The cocycle residual over the canonical triple
+is R = B − A per coordinate; `coherence_functional` sums the six
+ordered triples, so C(Δ) = 6·ΣR² — exact, and zero iff every residual
+is zero. Consilience is C(Δ) = 0 exactly; anything else refuses typed
+with the residual list carried whole (N4 directive 5: C is the summary
+scalar, never the payload). Arity ≥ 2 generalizes: n nodes, one shared
+position claimed pairwise; unanimity is the geometry, not a vote.
+
+## Directives
+
+1. **Worktree.** Main holds in-flight uncommitted work
+   (`clients/cli/src/main.rs`, `engine/cfe/src/world.rs`,
+   `engine/conductor/src/lib.rs`). MESH-1a works in
+   `.claude/worktrees/mesh-n6`, branch `mesh/n6`, off main; merge only
+   on green: build, full suite, clippy zero. This landing never edits
+   `world.rs` — `replay` is already public.
+2. **One landing.** Spec + mechanic + vectors together, red-first:
+   NS-5 §1/§2/§3, the `engine/mesh` crate, the dop.rs tag header, and
+   the witnesses land as one unit.
+3. **Tags 64–66 claimed** (dop.rs header, first commit, before code):
+   64 mesh head announcement · 65 consilience receipt · 66 mesh
+   refusal. All three are NS-5 protocol records in NS-5's own framing —
+   they NEVER enter the world chronicle. The measurement is a read;
+   no world state changes; the lens law in mesh form.
+4. **The mechanic.** `engine/mesh`: `receive(bytes, side)` — the
+   ingestion door (frame parse + chain verification; a tampered file
+   refuses Forged with its break named); `consile(a, b)` →
+   `ConsilienceReceipt | MeshRefused` (Drift names the missing range;
+   Diverged names the fork and carries the residuals whole);
+   `head(chronicle)` — the announcement. Wire codecs for 64/65/66
+   round-trip byte-exact and honor SEAL A.
+5. **Exactness.** No floats anywhere. Residuals are exact rationals in
+   canonical form; C(Δ) carries whole.
+6. **The four vectors** (`engine/mesh/tests/mesh_consilience.rs`):
+   (a) two independent replays of one spine consile at exactly zero;
+   (b) a forged file refuses typed, break named; (c) a drifted peer
+   refuses with its missing range, and the tail exchange cures it;
+   (d) divergent histories refuse with the fork sequence and the exact
+   residual list. Plus the codec witness backing §2.
+7. **After landing.** Refresh the PICKUP §4 registry note (64–66
+   claimed, next free 67) and one lane line. Nothing else in PICKUP.
+
+## Flagged, out of scope
+
+- `engine/rfa-core/Cargo.toml`'s description contains a set-letter
+  glyph ("exact ℚ") — a CHARTER §8 terminology-law violation predating
+  this landing. One-line cure, its own commit, not MESH-1a's.
