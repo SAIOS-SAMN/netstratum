@@ -185,20 +185,28 @@ pub fn trade_intent(world: &World) -> Option<(Resource, Ratio, Resource, Ratio)>
         return None;
     }
     // THE SURPLUS OFFER: an unfamished line with a deep bank
-    // (> 8, placeholder) offers half of it for its own scarcest —
-    // the counterparty every famine ask needs. Halves only, never
-    // the whole (guardrail 1's spirit).
+    // (> 8, placeholder) offers half of it — wanting the leanest of
+    // the resources its OWN zones burn (demand grounded in upkeep,
+    // never in an empty slot: the first cut asked for the scarcest
+    // bank outright, and every book filled with alloy asks nothing
+    // answered — measured 2026-07-30). A resting offer blocks new
+    // intents, so wanting one's own upkeep also keeps the resting
+    // ask correct when the famine later strikes that same flow.
     let biggest = Resource::ALL
         .iter()
         .max_by_key(|r| orb.banked_amount(**r))?;
     let stock = orb.banked_amount(*biggest);
     if stock > ratio(8, 1) {
-        let scarcest = Resource::ALL
+        let burns: Vec<Resource> = orb
+            .zones
             .iter()
-            .filter(|r| **r != *biggest)
-            .min_by_key(|r| orb.banked_amount(**r))?;
+            .flat_map(|z| z.kind.upkeep_per_tick())
+            .map(|(resource, _)| resource)
+            .filter(|resource| resource != biggest)
+            .collect();
+        let leanest = burns.iter().min_by_key(|r| orb.banked_amount(**r))?;
         let give = half(stock);
-        return Some((*biggest, give.clone(), *scarcest, give));
+        return Some((*biggest, give.clone(), *leanest, give));
     }
     None
 }
