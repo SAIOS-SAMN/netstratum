@@ -135,7 +135,7 @@ forever.
   the singularity law); the forms are `docs/EQUATIONS.md` (THE ONE
   LEDGER — the row-claim convention is live); the work orders are
   `docs/U_DIRECTIVES.md`. **LANDED AND COMMITTED (execution order
-  2026-07-31, five commits, board at 295/295 green clippy zero):**
+  2026-07-31, seven commits, board at 297/297 green clippy zero):**
   U0 (the spine fixture seats its hand; 240 was a fail-fast
   undercount) · PROPORTION-1 (THE PROPORTIONAL LAW: Σ R² → Σ |R|
   everywhere, `norm_squared`→`magnitude` ‖Δ‖₁, witnesses 24→12 and
@@ -146,14 +146,20 @@ forever.
   THE REPLAY-COMPLETE LAW — an intact chain over a non-solution
   refuses; `mint_bound` SEALED SHUT until Ruling Box 1) · U1f (I5's
   flat decay bound calling the sealed demurrage rule; `last_touch`
-  already rode tag 28 — no schema spent). **I1–I5 are WHOLE; the
+  already rode tag 28 — no schema spent) · the AUDIT reconciliation
+  (arch-02's two U1 holes CLOSED at one decode guard — witnesses 7/8;
+  the mesh-second amendment made in SYSTEM_SPEC §6 / U_DIRECTIVES §7;
+  the doc-drift fixed: `verify_work` is the anchor, the bare
+  certificate is tamper-evidence only). **I1–I5 are WHOLE; the
   kernel judges 10 of 63 deed types.** OPEN: U2 (orbit_lock/I6 + the
   angle-free witness — the one research-shaped landing, consult
   /opt/repos), the W-waves (53 deeds, parallelizable, task list
   carries the families), Phase 3 flip (all covered), U3 (after
   #36/#37), U4 (Ruling Boxes — operator words only: the rate f, the
   work-shapes, the split; rule f against the OBSERVED chained economy
-  once #36 lands).
+  once #36 lands). Secondary (U_DIRECTIVES §10): S1 the volumetric
+  verifier decision (rides Ruling Box 1's work-shape word), S2 the
+  worktree prune.
 - **the mesh lane** (operator-ruled 2026-07-30): MESH-1a LANDED — NS-5
   §1–§3 written whole; `engine/mesh` (`consile` → consilience receipt
   | typed refusal; the file-exchange carrier, never a socket);
@@ -368,6 +374,13 @@ coder-04's flag.
   by charter §7 + economy guardrail 5 (regulatory review). Nothing on any
   chain.
 - SINK-1 research/throttle gates deferred to TECH-1.
+- The volumetric "certificate" is DECORATIVE (U_DIRECTIVES §10 S1,
+  AUDIT §4): `seal_volume` is a private bare digest nobody can
+  re-derive, and an empty-train VolumeTask solves vacuously. Harmless
+  today — ARC is planar, volumetric is forge-only synthetic, and tag
+  86 carries planar work only, so nothing volumetric can mint. The
+  verifier (or an honest decorative header) boards WITH the
+  volumetric tier, on the Ruling Box 1 work-shape word.
 - `World`→`Star` struct rename debt waits for the multi-planet landing
   (NS-6 §6).
 - `var*/` archives are single-copy (git-ignored). The ORIGINAL test

@@ -37,8 +37,9 @@ judges 10 of 63 deed types):
   `AUDIT_2026-07-31.md` (the mesh-second correction + the hole audit).
 
 OPEN: U2 (I6), the W-waves, #36 spine adoption (mesh-second — §7),
-Phase 3 flip, U3, U4 (operator rulings). The mesh half rides directly
-behind the kernel rungs (AUDIT §1, §7 here).
+Phase 3 flip, U3, U4 (operator rulings). Secondary (§10): S1 the
+volumetric verifier decision, S2 the worktree prune. The mesh half
+rides directly behind the kernel rungs (AUDIT §1, §7 here).
 
 ## §1 The board — where each I-remnant lands
 
@@ -46,13 +47,15 @@ behind the kernel rungs (AUDIT §1, §7 here).
 |---|---|---|
 | U0 | the seated hand (I2 honored in the spine fixture) | LANDED |
 | U1 | **I4's bound** — `mint ≤ f(verify)`, the PoUW anchor, tag 86 | LANDED (sealed shut; Ruling Box 1 opens it) |
-| U1b | **I5's bound** — flat decay ≤ rate·ease·elapsed | LANDED (no schema spent — `last_touch` already rode tag 28) |
-| U2 | **I6 whole** — orbit_lock, the fold gate, the singularity witness | after U1 |
-| W-A..W-D | **I1/I2/I3 coverage extension** — the 55 unjudged deeds, in four waves | parallel, any lane |
+| U1f | **I5's bound** — flat decay ≤ rate·ease·elapsed | LANDED (no schema spent — `last_touch` already rode tag 28) |
+| U2 | **I6 whole** — orbit_lock, the fold gate, the singularity witness | OPEN — the live rung (∥ #36, mesh-second) |
+| W-A..W-D | **I1/I2/I3 coverage extension** — the 53 unjudged deeds, in four waves | parallel, any lane |
 | U3 | UNIT-1 — the deployable boundary + constitution digest | after #36 |
 | U4 | the Ruling Boxes come home (operator words) | gated on operator |
+| S1 | the volumetric verifier decision (§10 — secondary) | boards WITH the volumetric tier |
+| S2 | the worktree prune (§10 — housekeeping) | operator go |
 
-Kernel coverage today: 8 of 63 deed types. `scope_of()` is already
+Kernel coverage today: 10 of 63 deed types. `scope_of()` is already
 exhaustive over all 63 (the compiler forces the scope decision); an
 amendment = move the event into `covered()` + declare its lawful
 conservation delta + red-first witness against `world.rs`.
@@ -278,18 +281,43 @@ not assumption.
 2. **Box 2:** what verified work EARNS beyond the mint — pen weight,
    crystallization coupling (kernel-amendment questions now, per
    16_UNIT §1).
-3. **The verifier's home:** `solver-verify` split crate is DRAFTED
-   here as the default; absorption into `rfa-core` is the alternative;
-   one word decides before U1's first commit.
+3. **The verifier's home:** RESOLVED BY EXECUTION — the `solver-verify`
+   split crate landed with U1a and stands; absorption into `rfa-core`
+   is now a refactor question for a future landing, not a gate.
 
 ## §9 The laws that bind every U landing
 
 THE PROPORTIONAL LAW (no squared aggregators — L1 everywhere; squares only
 as physics, 05's T⁴) · red-first with the red output recorded ·
-tag-claim in the `dop.rs` header FIRST commit (next free: 86) + the
+tag-claim in the `dop.rs` header FIRST commit (next free: 87) + the
 EQUATIONS row-claim in the same landing · one-way arrows (kernel
 imports sealed math + cfe; nothing imports upward into the kernel) ·
 purity (the proof rides the DEED; the kernel reads only prior/next/
 step) · translate-never-transcribe from v0.1 (consult `/opt/repos`,
 port nothing blindly) · the terminology law · exact rationals, no
-floats, roots never taken · commit on explicit operator go.
+floats, roots never taken · READ WHOLE FILES before any edit (operator
+discipline 2026-07-31 — grep locates, never grounds an amendment) ·
+commit on explicit operator go.
+
+## §10 The secondary board (audit-sourced; deliberate, none forgotten)
+
+- **S1 — the volumetric verifier** (AUDIT §4/§5.4). The volume path
+  (`engine/solver/src/volume.rs`) is HALF a component: the prover is
+  real (Volume, VOp, forge_volume, solve_volume) but `seal_volume` is
+  private and its "certificate" is a bare digest NOBODY can re-derive
+  — tamper-evidence for no one, decorative. A hand-built VolumeTask
+  with an empty train is vacuously "Solved" by the empty program.
+  NON-constitutional today: ARC-AGI-2/3 are PLANAR, volumetric tasks
+  are forge-only synthetics, and no volumetric deed can mint (tag 86
+  carries planar work only). **The decision (operator's, rides Ruling
+  Box 1's work-shape word):** if higher-dimensional work becomes a
+  real economic axis, land `verify_volume` mirroring `verify_work`
+  (re-forge ∧ re-apply ∧ re-chain + the degenerate-difficulty guard)
+  with its own deed; if not, mark `seal_volume` decorative in its
+  header and refuse the empty-train solve. Boards WITH the volumetric
+  tier, never before.
+- **S2 — the worktree prune** (AUDIT §3/§5.6). ~13 stale worktrees
+  under `.claude/worktrees/` still carry old `engine/mirror` code on
+  disk — the only place the dead name survives. Outside the
+  workspace. Check each for uncommitted work FIRST; prune on operator
+  go.
