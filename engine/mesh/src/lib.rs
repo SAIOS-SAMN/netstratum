@@ -16,6 +16,15 @@
 //! constitution ladder): state is position, the kernel is motion, the
 //! chain is the path. This crate becomes the spine's carrier when the
 //! codec gate lands; nothing here reads or writes a second truth.
+//!
+//! THE SANDBOXED NURSERY (NS-5 §7.6, operator ruling 2026-07-31):
+//! open divergence is lawful; covert divergence is slashed. A
+//! declared fork is a nursery under its own branch coordinates — the
+//! mainline cannot be written from inside it (one value per address,
+//! always), followers never decohere (a branch is addressable, never
+//! a second claim on one address), and re-convergence has one door:
+//! the kernel judges the merge, or the nursery keeps its toys. We
+//! punish the lie, never the disagreement.
 
 use cfe::dop::ClosureEvent;
 use cfe::tlv;

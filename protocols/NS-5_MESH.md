@@ -431,6 +431,29 @@ distance confluences (`Confluent { partner, gauge }`); nonzero
 distance stands preserved as typed divergence for the annex path —
 never discarded, never overwritten.
 
+### 7.6 The sandboxed nursery (operator ruling 2026-07-31)
+
+**Open divergence is lawful; covert divergence is slashed.** A
+declared fork is a NURSERY: a sandboxed branch under its own branch
+coordinates, where a node may play, experiment, and diverge without
+limit — and without consequence to the mainline, because the
+mainline's coordinates cannot be written from a branch. One value per
+address, always: the galaxy is structurally rip-proof from inside any
+nursery, however immature the play.
+
+NPCs and conductors track a nursery KNOWINGLY — branch coordinates
+are addressable, so an egregore can follow a divergence and the
+mainline as two named paths and never decohere on re-convergence:
+following was never a second claim on one address.
+
+Re-convergence has one door: the kernel judges the merge as a lawful
+transition at a mainline coordinate, or the nursery's content stays
+in the nursery. Penalty attaches ONLY to presenting nursery state as
+mainline alignment (the alignment covenant: the pen dies, the work
+dies, the stake dies). We punish the lie, never the disagreement.
+You can play in your nursery; you cannot rip a hole in the galaxy
+from inside it.
+
 ## 8. The bridge entity (RULED 2026-07-31 — spec, lands with MESH-1c)
 
 Cross-world communication is a lawful, scope-bounded BOUNDARY — never
