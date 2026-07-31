@@ -12,7 +12,7 @@ use std::path::PathBuf;
 
 fn scratch(name: &str) -> PathBuf {
     let dir = std::env::temp_dir().join(format!(
-        "mirror-pin-{name}-{}",
+        "ledger-pin-{name}-{}",
         std::process::id()
     ));
     let _ = fs::remove_dir_all(&dir);
@@ -76,26 +76,26 @@ fn the_reflection_is_faithful_and_incremental() {
             .lines()
             .count()
     };
-    let mirrored = lines(&dir);
+    let exported = lines(&dir);
     assert_eq!(
-        mirrored,
+        exported,
         world.chronicle().receipts().len(),
         "every receipt reflected"
     );
 
     book.record("sol", "mars", "humans", &world).expect("re-records");
-    assert_eq!(lines(&dir), mirrored, "no duplicate reflection");
+    assert_eq!(lines(&dir), exported, "no duplicate reflection");
 
     world.zone(1, ZoneKind::Extractor).expect("zones");
     book.record("sol", "mars", "humans", &world).expect("records the delta");
-    assert_eq!(lines(&dir), mirrored + 1, "exactly the delta appended");
+    assert_eq!(lines(&dir), exported + 1, "exactly the delta appended");
 }
 
 /// ONE chronicle per world: the stream lives at the world root, and
 /// line n's parent equals line n−1's digest — the linkage an outside
 /// observer checks without recomputing hashes.
 #[test]
-fn the_mirrored_chain_links_at_world_altitude() {
+fn the_exported_chain_links_at_world_altitude() {
     let root = scratch("chain");
     let book = Ledger::at(&root);
     let world = played_world();
@@ -406,5 +406,5 @@ fn the_snapshot_is_wellformed_and_exact() {
     )
     .expect("read");
     assert_eq!(state.matches('{').count(), state.matches('}').count());
-    assert!(!state.contains("0.5"), "no decimal ever enters the mirror");
+    assert!(!state.contains("0.5"), "no decimal ever enters the export");
 }

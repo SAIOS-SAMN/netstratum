@@ -22,13 +22,13 @@ fn a_recurring_world_name_rotates_the_prior_era_aside() {
     let base = scratch("recur");
     let book = Ledger::at(base.join("worlds"));
 
-    // Era one: found, build, tick — mirrored.
+    // Era one: found, build, tick — recorded.
     let mut era_one = World::new();
     era_one.found("first-landing").expect("founds");
     era_one.zone(0, ZoneKind::Extractor).expect("zones");
     era_one.tick();
     era_one.collect().expect("collects");
-    book.record("amber-veil", "prime", "pin-civ", &era_one).expect("mirrors");
+    book.record("amber-veil", "prime", "pin-civ", &era_one).expect("records");
     let lines_one = fs::read_to_string(base.join("worlds/amber-veil/chronicle.jsonl"))
         .expect("era one chronicle")
         .lines()
@@ -40,7 +40,7 @@ fn a_recurring_world_name_rotates_the_prior_era_aside() {
     era_two.zone(8, ZoneKind::Habitat).expect("zones");
     era_two.tick();
     era_two.collect().expect("collects");
-    book.record("amber-veil", "prime", "pin-civ", &era_two).expect("mirrors");
+    book.record("amber-veil", "prime", "pin-civ", &era_two).expect("records");
 
     // The fresh file carries ONLY era two, byte-consistent.
     let fresh = fs::read_to_string(base.join("worlds/amber-veil/chronicle.jsonl"))
@@ -67,7 +67,7 @@ fn a_recurring_world_name_rotates_the_prior_era_aside() {
     // Same-era re-record still appends incrementally (no rotation).
     era_two.tick();
     era_two.collect().expect("collects again");
-    book.record("amber-veil", "prime", "pin-civ", &era_two).expect("mirrors");
+    book.record("amber-veil", "prime", "pin-civ", &era_two).expect("records");
     let appended = fs::read_to_string(base.join("worlds/amber-veil/chronicle.jsonl"))
         .expect("appended chronicle");
     assert_eq!(appended.lines().count(), era_two.chronicle().receipts().len());

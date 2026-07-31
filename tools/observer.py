@@ -128,7 +128,7 @@ def decode_orb_tlv(path):
     return orb
 
 
-# ── readers (the mirror's data files — data, never prose) ───────────
+# ── readers (the lens's data files — data, never prose) ─────────────
 
 def read_jsonl(path):
     if not path.exists():
@@ -260,7 +260,7 @@ def world_dirs(var_root):
 
 
 def world_facts(world_dir):
-    """Everything one world's mirror carries, gathered once."""
+    """Everything one world's export carries, gathered once."""
     chronicle = world_dir / "chronicle.jsonl"
     linked, receipts = chain_linked(chronicle)
     consumed = Fraction(0)
@@ -985,8 +985,8 @@ def main():
     render_view = VIEWS[args.view]
 
     if not (Path(args.root) / "worlds").is_dir():
-        print(f"(nothing mirrored under {args.root}/worlds yet — play a session "
-              "with the mirror wired, or boot the conductor)")
+        print(f"(nothing exported under {args.root}/worlds yet — play a session "
+              "with the ledger wired, or boot the conductor)")
         return
 
     if args.watch <= 0:

@@ -13,7 +13,7 @@ O(bucket), never a scan of the population); a near-miss refuses with its
 delta whole.
 
 **The lens law (operator ruling 2026-07-30, recorded here):** SEAL B
-replay is the MIRROR — byte-identical reproduction of the committed
+replay is the REPRODUCTION — byte-identical rebuilding of the committed
 world. RQP is the LENS — a pure structural read of the same receipted
 truth. A query mutates nothing, orphans nothing, and never enters the
 world chronicle; only its power draw (§1.5) closes and receipts. The
