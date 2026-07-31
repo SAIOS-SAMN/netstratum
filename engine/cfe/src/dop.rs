@@ -1327,7 +1327,7 @@ impl ClosureEvent {
                     value.extend_from_slice(&(text.len() as u16).to_le_bytes());
                     value.extend_from_slice(text.as_bytes());
                 }
-                tlv::put(79, &value, &mut out);
+                tlv::put(81, &value, &mut out);
             }
             Self::InstrumentForged { orb_id, tech_hash, grade } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
@@ -1686,7 +1686,7 @@ impl ClosureEvent {
             }),
             76 => Some(Self::VeilDrawn {}),
             77 => Some(Self::VeilLifted { starved: *value.first()? != 0 }),
-            79 => {
+            81 => {
                 let mut at = 0usize;
                 let mut take_text = || -> Option<String> {
                     let len =
