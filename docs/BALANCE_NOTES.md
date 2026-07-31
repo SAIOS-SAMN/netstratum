@@ -11,7 +11,7 @@ instrument panel the tuning session reads.
 |---|---|---|
 | famine-struck planets | 13 / 31 (42%) | famine clocks + relief economics — HIGH; the want is the dominant experience of the board |
 | venting planets | 8 / 31 | radiator_base 2 vs factory heat 1/4 per zone; the doctrine (×5/4) cures heat_net ≤ 1/2 exactly |
-| offers posted / pairs cleared | 28 / 12 | the 1:1 parity clears freely between complementary regimes — whether it SHOULD is the 05 §1.4 ruling |
+| offers posted / pairs cleared | 28 / 12 | pre-ratio-synthesis baseline; ratios are emergent now (ruled 2026-07-31) — remeasure |
 | cognitive wants struck | 0 | windows 240/480 have not yet elapsed on sealed lines — re-measure after longer eras |
 | tech nodes | 30 (incl. gifted) | crystallization paces well at the year voice |
 | divergences | 13 | one-per-era is producing a doubling-flavored spread — the bounded-occupancy half of AEON-1b is not yet pressed, but 31 worlds from 16 seeds in a few eras says the fold will be needed on schedule |
@@ -32,13 +32,17 @@ instrument panel the tuning session reads.
    `any_famine_can_ask_the_market`. MEASURED (60-beat rerun of the
    same roster): crossings 12 → 54; famine held at 42% on a board
    that grew 31 → 40 worlds (the bad-targeting variant measured 68%
-   on the same run). The 1:1 parity still holds for 05 §1.4.
+   on the same run).
 2. **Rung-5 forge cost** — SEARCH_BUDGET 200k is an engine law; the
    DIFFICULTY TABLE (word_len/grids per rung) is the lawful dial if
    beats must cheapen.
-3. **The 1:1 parity** — held for the 05 §1.4 ruling; the measured
-   fact: it clears 12 pairs without resistance, so the ruling decides
-   scarcity's voice, not liquidity's existence.
+3. **Ratio synthesis** (RULED 2026-07-31): price is an emergent
+   ratio, never a system property — there is no base price and none
+   will exist. Intents derive their ratio from state: a famished
+   line bids steep (want = give/(1+severity)); a surplus line asks
+   its reserve-fraction premium (want = give×(2·reserve−target)/
+   reserve, inside 2×). Unmatched ratios REST lawfully — a resting
+   book is a lawful market state, never a bug.
 4. **Divergence rate** — 13 cleaves without a fold yet; the fold
    cadence (or the four-C eligibility pruning at it) is the release
    valve already landed.

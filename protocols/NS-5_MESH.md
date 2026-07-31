@@ -377,3 +377,17 @@ branches do not vote on who was right — they MEASURE (§2): exact-zero
 distance confluences (`Confluent { partner, gauge }`); nonzero
 distance stands preserved as typed divergence for the annex path —
 never discarded, never overwritten.
+
+## 8. The bridge entity (RULED 2026-07-31 — spec, lands with MESH-1c)
+
+Cross-world communication is a lawful, scope-bounded BOUNDARY — never
+an un-sandboxed socket. At genesis every world instantiates its own
+IPSAL bridge entity (`BridgeGenesis { bridge_id, scopes,
+generation_tag }` — tag claimed at the landing cadence). The MESH-1c
+TCP adapter is dumb transport only (SEAL C); every remote handshake
+and cross-world interaction TERMINATES at the bridge, which enforces
+containment: read and consile open by default; yield/handoff require
+explicit grant receipts. The bridge is the world's one comms door
+into the shared exchange — the per-world uplink the operator named.
+Seeding is conductor-genesis work (coder-01); the session handshake
+naming the bridge is adapter work (coder-03). One seam, two sides.

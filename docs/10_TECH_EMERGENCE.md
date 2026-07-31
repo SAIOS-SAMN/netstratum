@@ -205,6 +205,45 @@ trades nothing, and refuses every aperture until its gate is solved.
   none — the elder holds no seat and no vote), the standing-task gate,
   the template grants, vectors. Constants placeholder.
 
+## 3f. MANU-1 — the instrument manufacturing deed (RULED 2026-07-31, spec)
+
+Manufacturing is the overlay the stack was missing: **technology +
+understanding + industry**. Industry makes resources; the base-7
+stack makes knowledge; MANU-1 combines them into INSTRUMENTS — and
+instrument grade is where every "how far can it read?" question
+lives from now on.
+
+**The deed.** An orb whose line has crystallized condition k AND
+holds the converter chain (a smelter for grades 1–2, smelter +
+synthesizer for 3+) may FORGE an instrument:
+`InstrumentForged { orb_id, tech_hash, grade }` — receipted,
+per-orb, held like techs (replay rebuilds the held list). The
+instrument's name follows the naming law: concept from its
+condition, voice drawn from its tech-node hash — never a rung label.
+Tag: claimed at the landing cadence from the registry head (68–69
+went to PRACTICE-1; coordinate at commit).
+
+**The scope law.** `EPISTEMIC_REACH = 16` as a global constant is
+STRUCK (non-arbitrary scaling ruling): epistemic scan reach derives
+from the highest instrument grade the orb holds —
+
+    wrapped-L1 reach = BASE_REACH + instrument grade
+
+with BASE_REACH the unaided horizon (the old 16 becomes the g=0
+read). A quantum-radar-grade instrument reads farther because its
+world BUILT it — seeded from its tech nodes, deeded through its
+industry, never granted by a constant. NS-6 scan scope resolves the
+same way: the scanner reads as far as its instrument.
+
+**Costs.** Forging draws the converter chain's resources (alloy for
+the frame, diamond for grade 3+ optics — exact amounts at the
+condition table's cadence, placeholders like every v1 threshold).
+
+**Lands with:** the engine deed + replay arm, the observer/CLI reach
+read (instrument-derived, constant deleted), a forge witness (grade
+gates: no condition → refuses; no chain → refuses), and the NS-6
+scope note. One landing.
+
 ## 4. Deferred, recorded
 
 - **Synergy/shared nodes** (co-discovery across worlds): needs BOND-1's

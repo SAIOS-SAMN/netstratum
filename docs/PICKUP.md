@@ -149,6 +149,18 @@ forever.
   joules/`S_cool` — needs a cross-world carrier; transfers are intra-world
   today) or TECH-1 (`10_TECH_EMERGENCE.md`, opens SINK-1's deferred
   research/throttle gates).
+- **RULINGS LANDED 2026-07-31** (all six answered concrete): price is
+  an emergent ratio (synthesis landed conductor-side — steep famine
+  bids, reserve-fraction premiums, resting books lawful); derelicts
+  SUCCEED (era clock + clade candidate pool + archaeological
+  discount + t0 `SeedCandidate` deed — folds into NOVEL-1,
+  coder-03); scan scope is INSTRUMENT-scoped (MANU-1 spec at 10 §3f
+  — manufacturing = tech + understanding + industry; reach = base +
+  grade; the global constant struck); every world gets an IPSAL
+  bridge entity (NS-5 §8, lands with MESH-1c); aeric = RELEVANCE
+  ENTRY (the AericDeckBand mapping, conductor-side, landed — no
+  third siting axis); T∞ PURGED (layered-wrap: the entropic boundary
+  is an archived fold sheet, the opposite-pole chapter struck).
 - **coder-02**: ideology board LANDED whole (09, deferrals at Q4);
   GALAXY-1 LANDED whole (13_GALAXY, 2026-07-30); the interleaving
   stress witness LANDED (HANDOFF §9.1 struck, `world_interleave.rs`).

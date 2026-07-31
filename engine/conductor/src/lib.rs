@@ -131,6 +131,21 @@ pub fn fold(var_root: &str) -> std::io::Result<(u64, Ratio)> {
 /// (smelting is meaningless to a current sheet); its advancement
 /// crosses by the joint research venture instead. Placeholder table,
 /// niche-first (the FUNCTION-1 lesson).
+/// The AericDeckBand mapping (RELEVANCE ENTRY ruling, 2026-07-31):
+/// an aeric home is a banded COLUMN — cloud-deck mesic over
+/// hyper-thermal depths (12 §5a) — so relevance evaluation reads the
+/// DECK's thermal seat, never the surface's. A reading past the
+/// mesic ceiling displaces to the deck (the ceiling); colder stands
+/// (a frozen giant's deck is honestly frozen). No third siting axis:
+/// geometry stays clean, and every non-aeric body reads unchanged.
+pub fn deck_band4(metabolism: &str, t4: Ratio) -> Ratio {
+    if metabolism != "aeric" {
+        return t4;
+    }
+    let (_, mesic_hi) = cfe::thermal::SubstrateBand::Mesic.bounds4();
+    if t4 > mesic_hi { mesic_hi } else { t4 }
+}
+
 pub fn industry_relevant(metabolism: &str, kind: ZoneKind) -> bool {
     !matches!(
         (metabolism, kind),
@@ -138,41 +153,67 @@ pub fn industry_relevant(metabolism: &str, kind: ZoneKind) -> bool {
     )
 }
 
+/// RATIO SYNTHESIS (ruling 2026-07-31): price is an emergent ratio,
+/// never a system property. The reserve a line considers "enough" —
+/// the denominator of its relaxed ask and the floor of its surplus.
+pub const TARGET_RESERVE: (i64, i64) = (8, 1);
+
+/// A famished line bids STEEP — it gives more than it wants, and
+/// deeper famine bids steeper: want = give / (1 + severity).
+fn steep_want(give: &Ratio, severity: u32) -> Ratio {
+    give.clone() / ratio(1 + severity as i64, 1)
+}
+
+/// A surplus-rich line RELAXES — it asks a premium that emerges from
+/// its own reserve fraction: want = give × (2·reserve − target)/
+/// reserve. Exactly give at the target margin, approaching (never
+/// reaching) 2× as the reserve deepens — so a steep famished bid
+/// (severity ≥ 1 gives 2:1) always crosses it, while flat 1:1 asks
+/// rest lawfully on the book; nothing forces a clear.
+fn relaxed_want(give: &Ratio, reserve: &Ratio) -> Ratio {
+    let target = ratio(TARGET_RESERVE.0, TARGET_RESERVE.1);
+    give.clone() * (ratio(2, 1) * reserve.clone() - target) / reserve.clone()
+}
+
 /// OFFER-1a (BUILD_ORDER §3a): a world's TRADE INTENT, read pure from
-/// its committed state — the Furnace↔Frost axis (05 §1.4). A Frost
-/// world starving for joules with banked sink offers S_cool for fuel;
-/// a Furnace world with a joule surplus offers fuel for S_cool. The
-/// v1 price is 1:1 (a placeholder parameter — 05 §1.4's equilibrium
-/// pricing is the open design); amounts are halves of the held stock,
-/// never the whole (guardrail 1's spirit: no world corners itself).
-pub fn trade_intent(world: &World) -> Option<(Resource, Ratio, Resource, Ratio)> {
+/// its committed state. Ratios derive from the state itself (famine
+/// severity, reserve depth) — there is no base price and none is
+/// needed: no ratio is too high or too low, an unmatched one rests
+/// (ruling 2026-07-31). Amounts are halves of the held stock, never
+/// the whole (guardrail 1's spirit: no world corners itself). The
+/// metabolism rides in for the relevance evaluation (the aeric deck).
+pub fn trade_intent(
+    world: &World,
+    metabolism: &str,
+) -> Option<(Resource, Ratio, Resource, Ratio)> {
     let orb = world.orb()?;
     let half = |amount: Ratio| amount / ratio(2, 1);
+    let severity = orb.famine.len() as u32;
     // The regime specials first (niche before behavior — the
     // FUNCTION-1 order): the Furnace↔Frost fuel axis.
-    if let Some(regime) = regime(world) {
+    if let Some(regime) = regime(world, metabolism) {
         match regime {
             (Regime::Frost, _) => {
                 let starving = orb.famine.contains(&Resource::Joule);
                 let sink = orb.banked_amount(Resource::Sink);
                 if starving && sink > ratio(0, 1) {
                     let give = half(sink);
-                    return Some((Resource::Sink, give.clone(), Resource::Joule, give));
+                    let want = steep_want(&give, severity);
+                    return Some((Resource::Sink, give, Resource::Joule, want));
                 }
             }
             (Regime::Furnace, _) => {
                 let joules = orb.banked_amount(Resource::Joule);
-                if joules > ratio(4, 1) {
-                    let give = half(joules);
-                    return Some((Resource::Joule, give.clone(), Resource::Sink, give));
+                if joules > ratio(TARGET_RESERVE.0, TARGET_RESERVE.1) {
+                    let give = half(joules.clone());
+                    let want = relaxed_want(&give, &joules);
+                    return Some((Resource::Joule, give, Resource::Sink, want));
                 }
             }
         }
     }
-    // THE FAMINE ASK (the balance survey's hot dial, 2026-07-30 —
-    // 42% struck and only joule famine had a market path): ANY
-    // famished line offers half its LARGEST bank for the famined
-    // resource, 1:1 (the held parity; 05 §1.4 rules the real price).
+    // THE FAMINE ASK: ANY famished line offers half its LARGEST bank
+    // for the famined resource, bidding steep with its severity.
     if let Some(&famined) = orb.famine.first() {
         let biggest = Resource::ALL
             .iter()
@@ -181,23 +222,22 @@ pub fn trade_intent(world: &World) -> Option<(Resource, Ratio, Resource, Ratio)>
         let stock = orb.banked_amount(*biggest);
         if stock > ratio(0, 1) {
             let give = half(stock);
-            return Some((*biggest, give.clone(), famined, give));
+            let want = steep_want(&give, severity);
+            return Some((*biggest, give, famined, want));
         }
         return None;
     }
-    // THE SURPLUS OFFER: an unfamished line with a deep bank
-    // (> 8, placeholder) offers half of it — wanting the leanest of
-    // the resources its OWN zones burn (demand grounded in upkeep,
-    // never in an empty slot: the first cut asked for the scarcest
-    // bank outright, and every book filled with alloy asks nothing
-    // answered — measured 2026-07-30). A resting offer blocks new
-    // intents, so wanting one's own upkeep also keeps the resting
-    // ask correct when the famine later strikes that same flow.
+    // THE SURPLUS OFFER: an unfamished line with a reserve past
+    // target offers half of it at its relaxed premium — wanting the
+    // leanest of the resources its OWN zones burn (demand grounded
+    // in upkeep, never in an empty slot — measured 2026-07-30; a
+    // resting offer blocks new intents, so wanting one's own upkeep
+    // keeps the resting ask correct when famine later strikes it).
     let biggest = Resource::ALL
         .iter()
         .max_by_key(|r| orb.banked_amount(**r))?;
     let stock = orb.banked_amount(*biggest);
-    if stock > ratio(8, 1) {
+    if stock > ratio(TARGET_RESERVE.0, TARGET_RESERVE.1) {
         let burns: Vec<Resource> = orb
             .zones
             .iter()
@@ -206,8 +246,9 @@ pub fn trade_intent(world: &World) -> Option<(Resource, Ratio, Resource, Ratio)>
             .filter(|resource| resource != biggest)
             .collect();
         let leanest = burns.iter().min_by_key(|r| orb.banked_amount(**r))?;
-        let give = half(stock);
-        return Some((*biggest, give.clone(), *leanest, give));
+        let give = half(stock.clone());
+        let want = relaxed_want(&give, &stock);
+        return Some((*biggest, give, *leanest, want));
     }
     None
 }
@@ -223,7 +264,9 @@ pub fn market_step(worlds: &mut [Egregore], beat: u64) -> Vec<(String, String)> 
         if egregore.penned || !egregore.world.offers().is_empty() {
             continue;
         }
-        if let Some((give, give_amount, want, want_amount)) = trade_intent(&egregore.world) {
+        if let Some((give, give_amount, want, want_amount)) =
+            trade_intent(&egregore.world, &egregore.spec.civilization.metabolism)
+        {
             let offer = egregore.world.chronicle().receipts().len() as u64;
             let orb = cfe::world::FIRST_ORB;
             let _ = egregore
@@ -381,10 +424,13 @@ enum Regime {
     Frost,
 }
 
-fn regime(world: &World) -> Option<(Regime, Ratio)> {
+fn regime(world: &World, metabolism: &str) -> Option<(Regime, Ratio)> {
     let class = world.star()?;
     let site = world.orb()?.thermal.clone()?;
-    let t4 = cfe::thermal::t_eq4(&class.luminosity(), &site.albedo, &site.orbit_r);
+    let t4 = deck_band4(
+        metabolism,
+        cfe::thermal::t_eq4(&class.luminosity(), &site.albedo, &site.orbit_r),
+    );
     let (mesic_lo, mesic_hi) = cfe::thermal::SubstrateBand::Mesic.bounds4();
     if t4 < mesic_lo {
         Some((Regime::Frost, t4))
@@ -747,7 +793,8 @@ impl Egregore {
                 .into_iter()
                 .all(|(resource, need)| banked(world, resource) >= need)
         };
-        let wanted: Option<ZoneKind> = match regime(world) {
+        let wanted: Option<ZoneKind> =
+            match regime(world, &self.spec.civilization.metabolism) {
             Some((Regime::Furnace, t4)) => {
                 let shells = zone_count(world, ZoneKind::Encasement) as i64;
                 // Famine-free here (guarded above), so every zone is

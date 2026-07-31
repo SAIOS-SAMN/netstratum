@@ -601,16 +601,18 @@ other cone tip (the exact opposite civilization type):
   the joint research venture (council + aperture + licensed leap) is
   the co-op endgame — incompatible sciences trading solved outputs to
   advance where neither could alone.
-- **T∞ — the OPPOSITE POLE (the entropic tip of the cone).** The
-  progenitor's exact dual, per the manifold law (12_UNION §2c): where
-  tier 0 creates, expands, and overlays, the opposite pole DISSOLVES
-  lawfully — the unmaker class that plays the entropic leg: claiming
-  derelicts, recycling ruins, absorbing vented heat, riding demurrage —
-  every expansion's bounded counter-force made playable. Design law:
-  the pole is never evil and never destruction-of-record (SEAL B holds;
-  the fold's archival law holds) — it is the side of the spectrum that
-  closes what the other side opens, and the game is complete only when
-  both tips of the cone are in play.
+- **The ENTROPIC SHEET (layered-wrap ruling, 2026-07-31 — the
+  "opposite pole" chapter is STRUCK; a T∞ appearing anywhere means a
+  manifold layer went unmodeled: infinity is disallowed, the torus
+  wraps finitely).** The entropic boundary is an ARCHIVED FOLD SHEET
+  in the stack (each aeon seats at archived/12, wrapped and finite)
+  — not a pole, not a tip, no cone. The unmaker class plays that
+  sheet's leg: claiming derelicts, recycling ruins, absorbing vented
+  heat, riding demurrage — every expansion's bounded counter-force,
+  wrapping deterministically within exact rational bounds. Design law
+  unchanged: never evil, never destruction-of-record (SEAL B and the
+  fold's archival law hold) — the game is complete when both legs of
+  the manifold are in play on their sheets.
 
 ## 3a-ter. The wiring audit (2026-07-30) — every deed reaches a hand
 

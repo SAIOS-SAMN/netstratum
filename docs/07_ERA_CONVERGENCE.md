@@ -132,8 +132,9 @@ they are a door that opens both ways. The lawful Antaran shape:
   world cannot be touched from the archive side either).
 - **What it stresses.** The maintainer surface: an incursion egregore
   plays the entropic leg (claims derelicts, absorbs vents, rides
-  demurrage — the T∞ pole made playable in the small). Every deed
-  receipted, conservation-exact; never record-destruction.
+  demurrage — the archived fold sheet's side of the manifold made
+  playable in the small; infinity is disallowed, the torus wraps).
+  Every deed receipted, conservation-exact; never record-destruction.
 - **Lands with:** a conductor incursion step (the sweep pattern), the
   incursion spec fields, and vectors — one landing, tag claimed at its
   cadence. Constants placeholder.

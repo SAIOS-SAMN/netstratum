@@ -772,7 +772,18 @@ def view_tiers(var_root, args, paint):
     return "\n".join(lines)
 
 
-EPISTEMIC_REACH = 16  # placeholder parameter — the frontier's kin
+# MANU-1 (ruled 2026-07-31): reach = BASE_REACH + instrument grade —
+# the global constant is struck; the unaided horizon is the g=0 read.
+# Until InstrumentForged receipts land engine-side, every world reads
+# unaided (grade 0) through the same law.
+BASE_REACH = 16
+
+
+def epistemic_reach(state):
+    """The world's scan horizon: base + its highest instrument grade
+    (a data field on state.json once MANU-1's engine deed lands)."""
+    grades = [int(i.get("grade", 0)) for i in state.get("instruments", [])]         if isinstance(state, dict) else []
+    return BASE_REACH + max(grades, default=0)
 
 
 def epistemic_reads(var_root, paint):
@@ -795,10 +806,19 @@ def epistemic_reads(var_root, paint):
     for name, coords in chart.items():
         if name in corrupt:
             continue
+        # MANU-1: this world's OWN horizon — its instruments decide.
+        state = {}
+        for state_path in sorted((Path(var_root) / "worlds" / name / "planets").glob("*/state.json")):
+            try:
+                state = json.loads(state_path.read_text())
+            except (OSError, ValueError):
+                state = {}
+            break
+        reach = epistemic_reach(state)
         near = [
             other for other in corrupt
             if other in chart
-            and toroidal_l1(coords[:3], chart[other][:3], span) <= EPISTEMIC_REACH
+            and toroidal_l1(coords[:3], chart[other][:3], span) <= reach
         ]
         if near:
             reads.append(

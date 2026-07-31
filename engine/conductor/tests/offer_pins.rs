@@ -73,7 +73,7 @@ fn the_crossing_relieves_the_freeze() {
         }
     }
     assert!(
-        trade_intent(&furnace.world).is_some(),
+        trade_intent(&furnace.world, "biotic").is_some(),
         "the surplus Furnace forms its intent (banked joules: {:?})",
         furnace.world.orb().unwrap().banked_amount(Resource::Joule)
     );
@@ -95,7 +95,7 @@ fn the_crossing_relieves_the_freeze() {
         frost.world.orb().unwrap().banked_amount(Resource::Sink) > ratio(0, 1),
         "sink banked before the freeze — something to trade"
     );
-    assert!(trade_intent(&frost.world).is_some(), "the starving Frost forms its intent");
+    assert!(trade_intent(&frost.world, "biotic").is_some(), "the starving Frost forms its intent");
 
     // THE MARKET BEAT: intents post, the crossing clears.
     let mut board = vec![furnace, frost];
@@ -161,9 +161,9 @@ fn any_famine_can_ask_the_market() {
     assert!(grower_orb.famine.contains(&Resource::Iron), "the grower starves for iron");
     assert!(miner_orb.banked_amount(Resource::Iron) > ratio(0, 1), "iron to give");
     assert!(grower_orb.banked_amount(Resource::Biomass) > ratio(0, 1), "biomass to give");
-    let (give, _, want, _) = trade_intent(&miner.world).expect("the miner asks");
+    let (give, _, want, _) = trade_intent(&miner.world, "biotic").expect("the miner asks");
     assert_eq!((give, want), (Resource::Iron, Resource::Biomass));
-    let (give, _, want, _) = trade_intent(&grower.world).expect("the grower asks");
+    let (give, _, want, _) = trade_intent(&grower.world, "biotic").expect("the grower asks");
     assert_eq!((give, want), (Resource::Biomass, Resource::Iron));
 
     let mut board = vec![miner, grower];
