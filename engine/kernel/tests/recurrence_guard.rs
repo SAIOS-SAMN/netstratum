@@ -1,0 +1,253 @@
+//! THE RECURRENCE GUARD — CHARTER §11 rule 5 as a STANDING TEST.
+//!
+//! "The mirror was never illegal, only leashed, which is why accretion
+//! captured it. Vigilance did not save us; a standing test does."
+//! (KERNEL_RELAY §2.3.) This witness mechanizes the review lint at the
+//! same tier as clippy-zero and replay-MATCHES: the mirror-SHAPE fails
+//! the board, not a reviewer's memory.
+//!
+//! What it pins (each check names its law):
+//!
+//! 1. THE DEAD NAME — `engine/mirror` stays deleted; no workspace
+//!    member is ever named mirror again (d606b01).
+//! 2. THE ANTI-MIRROR — `cfe::opposition` stays excised (c7cad9e):
+//!    you do not reconcile what cannot diverge.
+//! 3. RETIRED CODES — tag 65 (the consilience receipt) is never
+//!    reassigned; retired wire codes are never reused.
+//! 4. THE ARROW LAW — the kernel imports the sealed math tier + cfe
+//!    and NOTHING imports upward into it; cfe never imports the
+//!    verifier (the opaque-payload law's cycle guard). The allowed
+//!    sets grow only by amendment: editing this test IS the amendment
+//!    (U2 adds rfa-core to the kernel's set in its own landing).
+//! 5. NO NEW READ-BACK PATH EVER — the ledger/conductor/cli files
+//!    that parse JSON back in are pre-chain Tier-A debts, adopted at
+//!    #36, PINNED BY NAME. A new source file that reads a display
+//!    export back in fails here, named. Exports are write-only
+//!    (§11 rule 2); tests are witnesses and stay out of scope.
+//! 6. THE UPLINK LAW — the mesh carries no file of the eye: no JSON
+//!    token in `engine/mesh/src` (only chain-verified bytes ascend;
+//!    the spine's own store is the chain, not an export).
+//! 7. THE TEETH — the detectors are proven on synthetic violations
+//!    before the clean pass is trusted (a guard that cannot bite is
+//!    the vacuous check this audit exists to kill).
+//!
+//! File I/O lives HERE, in a witness — the kernel itself stays pure.
+
+use std::fs;
+use std::path::{Path, PathBuf};
+
+fn workspace_root() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .and_then(Path::parent)
+        .expect("engine/kernel sits two levels under the root")
+        .to_path_buf()
+}
+
+/// Every `.rs` file under `dir`, recursively.
+fn rust_sources(dir: &Path, found: &mut Vec<PathBuf>) {
+    let Ok(entries) = fs::read_dir(dir) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_dir() {
+            rust_sources(&path, found);
+        } else if path.extension().is_some_and(|e| e == "rs") {
+            found.push(path);
+        }
+    }
+}
+
+/// The dependency names of ONE Cargo.toml's `[dependencies]` section
+/// (dev-dependencies are lawful cargo cycles and stay out of scope).
+fn runtime_deps(manifest: &Path) -> Vec<String> {
+    let text = fs::read_to_string(manifest)
+        .unwrap_or_else(|e| panic!("{manifest:?} reads: {e}"));
+    let mut in_deps = false;
+    let mut deps = Vec::new();
+    for line in text.lines() {
+        let line = line.trim();
+        if line.starts_with('[') {
+            in_deps = line == "[dependencies]";
+            continue;
+        }
+        if in_deps && !line.is_empty() && !line.starts_with('#') {
+            if let Some(name) = line.split(['=', '.']).next() {
+                deps.push(name.trim().to_string());
+            }
+        }
+    }
+    deps
+}
+
+/// The read-back detector: a source that names a JSON artifact AND
+/// reads from disk is a read-back candidate (§11 rule 2's shape).
+fn reads_json_back(source: &str) -> bool {
+    source.contains(".json")
+        && (source.contains("read_to_string") || source.contains("fs::read"))
+}
+
+/// The retired-code detector: a line assigning 65 to a TAG constant.
+fn reassigns_tag_65(source: &str) -> bool {
+    source
+        .lines()
+        .any(|l| l.contains("TAG") && l.contains("= 65"))
+}
+
+#[test]
+fn the_dead_name_stays_dead() {
+    let root = workspace_root();
+    assert!(
+        !root.join("engine/mirror").exists(),
+        "engine/mirror returned from the dead — §11 excised it (d606b01)"
+    );
+    let manifest = fs::read_to_string(root.join("Cargo.toml")).expect("root manifest");
+    let members = manifest
+        .lines()
+        .find(|l| l.trim_start().starts_with("members"))
+        .expect("workspace members line");
+    assert!(
+        !members.contains("mirror"),
+        "a workspace member is named mirror — the dead name is never reused"
+    );
+}
+
+#[test]
+fn the_anti_mirror_stays_excised() {
+    let root = workspace_root();
+    assert!(
+        !root.join("engine/cfe/src/opposition.rs").exists(),
+        "cfe::opposition returned — its checks are kernel I1/I6 now (c7cad9e)"
+    );
+    let cfe_lib = fs::read_to_string(root.join("engine/cfe/src/lib.rs")).expect("cfe lib");
+    assert!(
+        !cfe_lib.contains("mod opposition"),
+        "cfe declares an opposition module — you do not reconcile what cannot diverge"
+    );
+}
+
+#[test]
+fn retired_wire_codes_are_never_reused() {
+    let root = workspace_root();
+    let mut sources = Vec::new();
+    rust_sources(&root.join("engine"), &mut sources);
+    for path in sources {
+        // Witnesses (tests/) may quote the pattern; law code may not.
+        if path.components().any(|c| c.as_os_str() == "tests") {
+            continue;
+        }
+        let text = fs::read_to_string(&path).unwrap_or_default();
+        assert!(
+            !reassigns_tag_65(&text),
+            "{path:?} assigns tag 65 — the consilience receipt is RETIRED (§11); \
+             retired codes are never reused"
+        );
+    }
+}
+
+#[test]
+fn the_arrow_law_holds() {
+    let root = workspace_root();
+    // The kernel's allowed runtime imports. Grows ONLY by amendment —
+    // U2 adds "rfa-core" in its own landing, editing this line.
+    let kernel_allowed = ["cfe", "solver-verify"];
+    for dep in runtime_deps(&root.join("engine/kernel/Cargo.toml")) {
+        assert!(
+            kernel_allowed.contains(&dep.as_str()),
+            "the kernel imports {dep:?} — outside the sealed set {kernel_allowed:?}; \
+             coverage grows by amendment, never silently (§11 clause 2)"
+        );
+    }
+    // Nothing imports upward into the kernel, and cfe never imports
+    // the verifier or the codec at runtime (the opaque-payload law).
+    let cfe_forbidden = ["solver-verify", "kernel", "codec"];
+    for dep in runtime_deps(&root.join("engine/cfe/Cargo.toml")) {
+        assert!(
+            !cfe_forbidden.contains(&dep.as_str()),
+            "cfe imports {dep:?} at runtime — the arrow points one way only"
+        );
+    }
+    // The verifier half sits in the sealed math tier: physics + hashing.
+    let verify_allowed = ["blake3", "physics"];
+    for dep in runtime_deps(&root.join("engine/solver-verify/Cargo.toml")) {
+        assert!(
+            verify_allowed.contains(&dep.as_str()),
+            "solver-verify imports {dep:?} — the sealed math tier imports nothing above it"
+        );
+    }
+}
+
+#[test]
+fn no_new_read_back_path_ever() {
+    let root = workspace_root();
+    // The ADOPTED set — pre-chain Tier-A debts (ledger law modules,
+    // the conductor's adoption seam, the cli's save surface), adopted
+    // at #36. PINNED BY NAME; this list only SHRINKS (#37 deletes the
+    // display half). A new name here is the review conversation §11
+    // rule 5 demands, held in a witness instead of a memory.
+    let adopted = [
+        "engine/ledger/src/journal.rs",
+        "engine/ledger/src/lib.rs",
+        "engine/ledger/src/galaxy.rs",
+        "engine/ledger/src/converge.rs",
+        "engine/ledger/src/registry.rs",
+        "engine/conductor/src/lib.rs",
+        "engine/conductor/src/main.rs",
+        "engine/conductor/src/egregores.rs",
+        "clients/cli/src/main.rs",
+    ];
+    let mut sources = Vec::new();
+    for tier in ["engine", "clients"] {
+        rust_sources(&root.join(tier), &mut sources);
+    }
+    for path in sources {
+        // src-only scope: tests and examples are witnesses/harnesses.
+        let relative = path.strip_prefix(&root).expect("under root");
+        let in_src = relative.components().any(|c| c.as_os_str() == "src");
+        if !in_src {
+            continue;
+        }
+        let text = fs::read_to_string(&path).unwrap_or_default();
+        if reads_json_back(&text) {
+            let name = relative.to_string_lossy().replace('\\', "/");
+            assert!(
+                adopted.contains(&name.as_str()),
+                "{name} reads a JSON artifact back in — a NEW read-back path. \
+                 Exports are write-only (§11 rule 2); the adopted Tier-A set \
+                 never grows. If this is chain adoption, it belongs behind the \
+                 #36 door, not a file parse"
+            );
+        }
+    }
+}
+
+#[test]
+fn the_mesh_carries_no_file_of_the_eye() {
+    let root = workspace_root();
+    let mut sources = Vec::new();
+    rust_sources(&root.join("engine/mesh/src"), &mut sources);
+    assert!(!sources.is_empty(), "the mesh sources exist");
+    for path in sources {
+        let text = fs::read_to_string(&path).unwrap_or_default();
+        assert!(
+            !text.contains("json"),
+            "{path:?} names a JSON artifact — nothing file-borne rides the mesh \
+             (THE UPLINK LAW); only chain-verified bytes ascend"
+        );
+    }
+}
+
+#[test]
+fn the_detectors_have_teeth() {
+    // A guard that cannot bite is a vacuous check. Prove both
+    // detectors on synthetic violations before trusting a clean pass.
+    let read_back = r#"let s = fs::read_to_string("state.json");"#;
+    assert!(reads_json_back(read_back), "the read-back detector must bite");
+    let reuse = "pub const SNEAK_TAG: u8 = 65;";
+    assert!(reassigns_tag_65(reuse), "the retired-code detector must bite");
+    // And the honest negatives: the chain's own store is not an export,
+    // and tag 64/66 stand lawful beside the retired 65.
+    assert!(!reads_json_back(r#"let b = fs::read(&stream_path);"#));
+    assert!(!reassigns_tag_65("pub const MESH_HEAD_TAG: u8 = 64;"));
+}
