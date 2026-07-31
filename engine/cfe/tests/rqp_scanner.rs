@@ -197,7 +197,7 @@ fn the_scan_finds_the_match_and_refuses_the_near_misses_delta_whole() {
     assert_eq!(
         replay(world.chronicle()),
         world.committed(),
-        "the mirror still holds after the lens — replay MATCHES"
+        "the chain still holds after the lens — replay MATCHES"
     );
 }
 

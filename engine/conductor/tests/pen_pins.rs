@@ -53,18 +53,18 @@ fn seat(sigil: &str) -> EgregoreSpec {
 fn the_pen_passes_writes_and_returns() {
     let root = scratch("arc");
     let registry = Registry::at(root.join("registry"));
-    let mirror = Ledger::at(root.join("worlds"));
+    let book = Ledger::at(root.join("worlds"));
     let control = root.join("conductor.ctl");
-    let mut board = vec![Egregore::genesis(seat("penhold"), &registry, &mirror)];
+    let mut board = vec![Egregore::genesis(seat("penhold"), &registry, &book)];
     for _ in 0..3 {
-        board[0].cycle(&mirror, &registry);
+        board[0].cycle(&book, &registry);
     }
     let beats_before = board[0].world.now();
 
     // The ask lands beside paused/cadence lines; only the yield is
     // consumed by the service.
     std::fs::write(&control, "cadence 5\nyield penhold-hold visible-hand\n").unwrap();
-    let log = pen_service(&mut board, &registry, &mirror, &control, 100);
+    let log = pen_service(&mut board, &registry, &book, &control, 100);
     assert!(log.iter().any(|l| l.contains("the pen passes")), "sealed: {log:?}");
     assert!(board[0].penned, "beats wait while the pen is out");
     assert_eq!(
@@ -74,7 +74,7 @@ fn the_pen_passes_writes_and_returns() {
     );
 
     // The taking hand works ON THE FILE — the CLI's exact moves.
-    let carrier = mirror.world_dir("penhold-hold").join("chronicle.tlv");
+    let carrier = book.world_dir("penhold-hold").join("chronicle.tlv");
     let chronicle = cfe::persist::load(&carrier).expect("the sealed spine verifies");
     let hand = hand_of("visible-hand");
     assert_eq!(mesh::authority(&chronicle), Ok(Some(hand)), "the walk names the seat");
@@ -94,7 +94,7 @@ fn the_pen_passes_writes_and_returns() {
     cfe::persist::sync(held.chronicle(), &carrier).expect("synced home");
 
     // The poll notices; the conductor re-resumes FROM the receipts.
-    let log = pen_service(&mut board, &registry, &mirror, &control, 101);
+    let log = pen_service(&mut board, &registry, &book, &control, 101);
     assert!(log.iter().any(|l| l.contains("the pen returns")), "returned: {log:?}");
     assert!(!board[0].penned, "beats resume");
     assert!(
@@ -105,7 +105,7 @@ fn the_pen_passes_writes_and_returns() {
 
     // And the next conductor beat appends lawfully (cites the return
     // seal through the funnel) — the walk stays green.
-    board[0].cycle(&mirror, &registry);
+    board[0].cycle(&book, &registry);
     assert_eq!(
         mesh::authority(board[0].world.chronicle()),
         Ok(Some(CONDUCTOR_HAND)),

@@ -42,10 +42,10 @@ fn the_board_remembers_across_restarts() {
     // Second boot, same roster: the worlds RESUME — clocks continue,
     // nothing re-founds, no divergent resident rotates to a ruin.
     let registry = Registry::at(root.join("registry"));
-    let mirror = Ledger::at(root.join("worlds"));
+    let book = Ledger::at(root.join("worlds"));
     let second: Vec<Egregore> = conductor::founding_egregores()
         .into_iter()
-        .map(|spec| Egregore::genesis(spec, &registry, &mirror))
+        .map(|spec| Egregore::genesis(spec, &registry, &book))
         .collect();
     for egregore in &second {
         let (_, terminal, count) = before

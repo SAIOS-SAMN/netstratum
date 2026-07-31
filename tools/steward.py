@@ -41,7 +41,7 @@ def world_dirs(root):
 
 def next_number(inbox):
     """Directives are numbered; order in the inbox IS the steward's
-    stated order (the mirror reads name-ascending)."""
+    stated order (the ledger reads name-ascending)."""
     highest = 0
     for pool in [inbox, inbox / "applied", inbox / "refused"]:
         if pool.is_dir():
@@ -68,7 +68,7 @@ def cmd_list(root):
 def cmd_send(root, world, verb, args):
     world_dir = Path(root) / world
     if not (world_dir / "world.json").exists():
-        sys.exit(f"steward: no mirrored world '{world}' under {root} "
+        sys.exit(f"steward: no exported world '{world}' under {root} "
                  f"(known: {', '.join(d.name for d in world_dirs(root)) or 'none'})")
     inbox = world_dir / "inbox"
     inbox.mkdir(exist_ok=True)

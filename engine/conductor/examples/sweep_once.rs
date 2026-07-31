@@ -12,12 +12,12 @@ use std::path::Path;
 fn main() {
     let var = std::env::args().nth(1).unwrap_or_else(|| "var".into());
     let registry = Registry::at(format!("{var}/registry"));
-    let mirror = Ledger::at(format!("{var}/worlds"));
+    let book = Ledger::at(format!("{var}/worlds"));
     let specs = load_egregores(Path::new(&format!("{var}/egregores.json")))
         .expect("the roster reads");
     let worlds: Vec<Egregore> = specs
         .into_iter()
-        .map(|spec| Egregore::genesis(spec, &registry, &mirror))
+        .map(|spec| Egregore::genesis(spec, &registry, &book))
         .collect();
     let stamp = worlds
         .iter()
@@ -25,7 +25,7 @@ fn main() {
         .max()
         .unwrap_or(0);
     println!("{} worlds resumed at terminal clock {stamp}", worlds.len());
-    let created = observe_crossings(&worlds, &registry, &mirror, stamp);
+    let created = observe_crossings(&worlds, &registry, &book, stamp);
     if created.is_empty() {
         println!("the sweep observed nothing new — every crossed anchor stands inside a charted reach");
     }
@@ -35,7 +35,7 @@ fn main() {
             galaxy.name, galaxy.reach
         );
     }
-    for galaxy in mirror.galaxies() {
+    for galaxy in book.galaxies() {
         println!("charted: {} at ({}, {}, {})", galaxy.name, galaxy.center.0, galaxy.center.1, galaxy.center.2);
     }
 }

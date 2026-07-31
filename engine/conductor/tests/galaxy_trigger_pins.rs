@@ -60,7 +60,7 @@ fn seeded(
 fn the_crossing_observes_and_the_observation_creates() {
     let root = scratch("sweep");
     let registry = Registry::at(root.join("registry"));
-    let mirror = Ledger::at(root.join("worlds"));
+    let book = Ledger::at(root.join("worlds"));
 
     // The tardigrade head seated first: the far line's creator
     // resolves through its lineage pointer (12 §5).
@@ -91,14 +91,14 @@ fn the_crossing_observes_and_the_observation_creates() {
         "kepler-passage", (ratio(1, 1), ratio(1, 1), ratio(1, 1)),
     );
     let mut worlds = vec![
-        Egregore::genesis(far, &registry, &mirror),
-        Egregore::genesis(near, &registry, &mirror),
+        Egregore::genesis(far, &registry, &book),
+        Egregore::genesis(near, &registry, &book),
     ];
 
     // Before any crossing the sweep observes nothing — not even the
     // founding galaxy charters (13_GALAXY §2: lazy, never pre-tiled).
-    assert!(observe_crossings(&worlds, &registry, &mirror, 60).is_empty());
-    assert!(mirror.galaxies().is_empty());
+    assert!(observe_crossings(&worlds, &registry, &book, 60).is_empty());
+    assert!(book.galaxies().is_empty());
 
     // The first aperture crosses BOTH worlds into the union
     // (THRESHOLD-1), and the next year-voice sweep observes: the far
@@ -112,19 +112,19 @@ fn the_crossing_observes_and_the_observation_creates() {
     .expect("the aperture opens");
     assert!(worlds[0].world.has_crossed() && worlds[1].world.has_crossed());
 
-    let created = observe_crossings(&worlds, &registry, &mirror, 60);
+    let created = observe_crossings(&worlds, &registry, &book, 60);
     assert_eq!(created.len(), 1, "one galaxy observed past the frontier");
     assert_eq!(created[0].name, "slagborn-sky-1");
-    assert_eq!(mirror.galaxies().len(), 2, "the founding + the observed");
+    assert_eq!(book.galaxies().len(), 2, "the founding + the observed");
 
     // Idempotent by geometry: the created galaxy encloses its
     // observer, so the next sweep creates nothing.
-    assert!(observe_crossings(&worlds, &registry, &mirror, 120).is_empty());
-    assert_eq!(mirror.galaxies().len(), 2);
+    assert!(observe_crossings(&worlds, &registry, &book, 120).is_empty());
+    assert_eq!(book.galaxies().len(), 2);
 
     // Membership derives from position, never stored.
-    assert_eq!(mirror.galaxy_of("cinder-reach").as_deref(), Some("slagborn-sky-1"));
-    assert_eq!(mirror.galaxy_of("kepler-passage").as_deref(), Some("the-founding"));
+    assert_eq!(book.galaxy_of("cinder-reach").as_deref(), Some("slagborn-sky-1"));
+    assert_eq!(book.galaxy_of("kepler-passage").as_deref(), Some("the-founding"));
 
     // The creator resolved through the lineage law: the head's seat
     // executed the deed, at the sweep's universal stamp.

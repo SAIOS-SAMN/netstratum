@@ -93,7 +93,7 @@ fn thermal_genesis_is_deterministic() {
 fn the_joule_runway_defers_the_frost() {
     let root = scratch("runway");
     let registry = Registry::at(root.join("registry"));
-    let mirror = Ledger::at(root.join("worlds"));
+    let book = Ledger::at(root.join("worlds"));
     let seat = |sigil: &str, star: StarClass| EgregoreSpec {
         civilization: Civilization {
             name: sigil.to_string(),
@@ -118,11 +118,11 @@ fn the_joule_runway_defers_the_frost() {
         orbit: Some(ratio(1, 1)),
         gauge: None,
     };
-    let mut frost = Egregore::genesis(seat("stillside", StarClass::M), &registry, &mirror);
-    let mut mesic = Egregore::genesis(seat("plainside", StarClass::G), &registry, &mirror);
+    let mut frost = Egregore::genesis(seat("stillside", StarClass::M), &registry, &book);
+    let mut mesic = Egregore::genesis(seat("plainside", StarClass::G), &registry, &book);
     for _ in 0..12 {
-        frost.cycle(&mirror, &registry);
-        mesic.cycle(&mirror, &registry);
+        frost.cycle(&book, &registry);
+        mesic.cycle(&book, &registry);
     }
     assert_eq!(zones(&frost), 1, "the Frost stopped at its sink charter");
     assert_eq!(kind_count(&frost, ZoneKind::CryoArray), 1);

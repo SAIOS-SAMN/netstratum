@@ -23,11 +23,11 @@ Usage:
   python3 tools/observer.py chart              # the star chart
   python3 tools/observer.py <view> --watch 2   # any view, refreshed
 
-Chain check: '✓' means every mirrored receipt's parent digest equals
+Chain check: '✓' means every exported receipt's parent digest equals
 its predecessor's digest with contiguous sequence numbers — splicing,
 deletion, or reordering reads '✗ BROKEN'. (Full BLAKE3 recomputation
 lives in-game via `verify`/`replay`; the chronicle is the authority,
-the mirror is its reflection.)
+the lens is its write-only rendering.)
 """
 
 import argparse
@@ -66,7 +66,7 @@ def show(fraction):
     return f"{fraction.numerator}/{fraction.denominator}"
 
 
-# ── the house wire (MIRROR-TLV): the committed orb decoded native ───
+# ── the house wire (state.tlv; landed as "MIRROR-TLV"): the committed orb decoded native ──
 # NS-1 TLV: tag u8 ‖ LE32(len) ‖ value; unknown tags SKIP (SEAL A).
 # Ratio: sign u8 ‖ LE32(len) ‖ numer BE ‖ LE32(len) ‖ denom BE.
 

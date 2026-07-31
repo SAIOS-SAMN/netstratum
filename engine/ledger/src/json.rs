@@ -1,4 +1,4 @@
-//! A tiny hand-rolled JSON emitter/extractor — the mirror's needs are
+//! A tiny hand-rolled JSON emitter/extractor — the ledger's needs are
 //! flat and known; no serialization framework enters the workspace.
 
 /// Escape a string for a JSON literal.

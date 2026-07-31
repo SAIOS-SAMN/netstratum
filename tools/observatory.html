@@ -47,7 +47,7 @@ const F = t => { if (typeof t !== "string") return Number(t||0);
 const esc = t => String(t).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
 const TIER = st => ({progenitor:"T0", watcher:"T1", observer:"T1", sovereign:"T2"})[st] || "T3";
 
-/* ── data: the mirror's own files, polled ───────────────────────── */
+/* ── data: the lens's own files, polled ─────────────────────────── */
 async function j(path){ const r = await fetch(path); if(!r.ok) throw 0; return r.json(); }
 async function text(path){ const r = await fetch(path); if(!r.ok) throw 0; return r.text(); }
 

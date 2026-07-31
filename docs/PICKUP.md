@@ -86,10 +86,13 @@ timelines in one mirrored file — divergent residents rotate to
 
 Exact rational arithmetic everywhere, no floats, roots never taken (work in
 `T⁴`); receipts are the world (SEAL B), unknown tags skip (SEAL A), adapters
-never hold logic (SEAL C); the mirror reflects, never authors; annex never
-merge; one landing at a time, red-first, spec+mechanic+vectors together;
-terminology law — no set-letter glyphs, Furnace never Crucible, no
-"Goldilocks", egregore/automaton never "bot".
+never hold logic (SEAL C); the lens renders, never authors (§11 — the
+word "mirror" is DEAD as a live name: the layer is the ledger and its
+lens; dated records that speak it are HISTORY, quoted never rewritten);
+annex never merge; one landing at a time, red-first,
+spec+mechanic+vectors together; terminology law — no set-letter
+glyphs, Furnace never Crucible, no "Goldilocks", egregore/automaton
+never "bot".
 
 ## 4. Wire tag registry state
 

@@ -284,7 +284,7 @@ fn parse_star(word: &str) -> Option<StarClass> {
     }
 }
 
-/// The mirror's exact rendering: whole if whole, else p/q.
+/// The lens's exact rendering: whole if whole, else p/q.
 fn ratio_text(r: &Ratio) -> String {
     use num_traits::One;
     if r.denom().is_one() {

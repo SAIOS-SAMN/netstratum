@@ -134,9 +134,11 @@ fn tier0_gate(style: &Style) -> bool {
     false
 }
 
-/// A minimal reader for the mirror's DATA files (state.json /
+/// A minimal reader for the lens's DATA files (state.json /
 /// registry cards) — the same files the observer reads; data fields,
-/// never prose.
+/// never prose. INVENTORIED DEBT (§11 standing test): a display
+/// reading display files — retires when the lens re-serves from the
+/// chain at the ladder's #37; no world state ever enters through it.
 fn data_field(text: &str, key: &str) -> Option<String> {
     let tag = format!("\"{key}\":\"");
     let start = text.find(&tag)? + tag.len();
@@ -145,7 +147,7 @@ fn data_field(text: &str, key: &str) -> Option<String> {
 
 /// THE FAR WORLD (union wiring, 2026-07-30): cross-world deeds load
 /// the partner from its RESUME carrier (var/worlds/<name>/chronicle.tlv
-/// — CLI-saved worlds carry one; egregore worlds are mirror-only and
+/// — CLI-saved worlds carry one; egregore worlds are export-only and
 /// refuse with the cure named). After a two-legged deed BOTH sides
 /// sync immediately — conservation is never left half-saved.
 fn far_world(name: &str) -> Result<World, String> {
@@ -238,7 +240,7 @@ fn charted_position(name: &str) -> (Ratio, Ratio, Ratio) {
     (zero(), zero(), zero())
 }
 
-/// Parse `p/q` or a plain integer (the mirror's exact rendering).
+/// Parse `p/q` or a plain integer (the lens's exact rendering).
 fn parse_ratio_text(text: &str) -> Option<Ratio> {
     use std::str::FromStr;
     let (numer, denom) = match text.split_once('/') {
@@ -1261,7 +1263,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     // never spammed): the upward flow aggregates into
                     // three ranked buckets — a progenitor reads three
                     // lines, then drills only where the board burns.
-                    let mirror = ledger::Ledger::at("var/worlds");
+                    let book = ledger::Ledger::at("var/worlds");
                     let mut critical: Vec<String> = Vec::new();
                     let mut petitions: Vec<String> = Vec::new();
                     if let Ok(entries) = std::fs::read_dir("var/worlds") {
@@ -1271,7 +1273,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             }
                             let name = entry.file_name().to_string_lossy().into_owned();
                             // CRITICAL: the stress read from the
-                            // mirror's state data (famine, venting).
+                            // lens state data (famine, venting).
                             if let Ok(planets) = std::fs::read_dir(entry.path().join("planets")) {
                                 for planet in planets.filter_map(|e| e.ok()) {
                                     let Ok(state) = std::fs::read_to_string(
@@ -1298,7 +1300,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                 }
                             }
                             // PETITIONS: the steward inbox, per world.
-                            if let Ok(pending) = mirror.pending_directives(&name) {
+                            if let Ok(pending) = book.pending_directives(&name) {
                                 for petition in pending {
                                     petitions.push(format!(
                                         "{name}: {} {} (as {})",
@@ -1348,8 +1350,8 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         words.by_ref().take(3).filter_map(parse_ratio_arg).collect();
                     match (target, coords.len()) {
                         (Some(name), 3) => {
-                            let mirror = ledger::Ledger::at("var/worlds");
-                            match mirror.chart_world(
+                            let book = ledger::Ledger::at("var/worlds");
+                            match book.chart_world(
                                 &name,
                                 (&coords[0], &coords[1], &coords[2]),
                                 &cfe::ratio::ratio(0, 1),
@@ -1372,19 +1374,19 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     }
                 }
                 Some("galaxies") => {
-                    let mirror = ledger::Ledger::at("var/worlds");
-                    let galaxies = mirror.galaxies();
+                    let book = ledger::Ledger::at("var/worlds");
+                    let galaxies = book.galaxies();
                     if galaxies.is_empty() {
                         println!(
                             "  no galaxy chartered yet — the founding sky is implicit until the first observation deed (13_GALAXY §2)"
                         );
                     } else {
                         println!("{}", style.head("THE CHARTED SKIES — regions of the one torus"));
-                        let worlds = mirror.charted_worlds();
+                        let worlds = book.charted_worlds();
                         for galaxy in &galaxies {
                             let members = worlds
                                 .iter()
-                                .filter(|world| mirror.galaxy_of(world).as_deref() == Some(galaxy.name.as_str()))
+                                .filter(|world| book.galaxy_of(world).as_deref() == Some(galaxy.name.as_str()))
                                 .count();
                             println!(
                                 "  {} — center ({}, {}, {}) · reach {} · {} charted worlds",
@@ -1396,7 +1398,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                 members
                             );
                         }
-                        let adrift = worlds.iter().filter(|world| mirror.galaxy_of(world).is_none()).count();
+                        let adrift = worlds.iter().filter(|world| book.galaxy_of(world).is_none()).count();
                         if adrift > 0 {
                             println!(
                                 "  {} intergalactic worlds stand outside every reach — lawful (13_GALAXY §4)",
@@ -1845,8 +1847,8 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 let path = std::path::PathBuf::from("var/worlds")
                     .join(&orb.name)
                     .join("chronicle.tlv");
-                // #37: the saved world becomes VISIBLE — the mirror
-                // reflects it beside the NPCs (civilization = the
+                // #37: the saved world becomes VISIBLE — the ledger
+                // exports it beside the NPCs (civilization = the
                 // sealed line, else the active operator).
                 let civ = world
                     .genesis()
@@ -2643,7 +2645,7 @@ fn coordinate(tile: u16) -> String {
     format!("{}:{}", tile / GRID, tile % GRID)
 }
 
-/// N4 (NS-2 RQP) — the scanner: the lens beside the mirror. The
+/// N4 (NS-2 RQP) — the scanner: the lens beside the book. The
 /// CURRENT planet pays the draw; the exemplar's structure is the
 /// query; hits and near-misses render with their deltas whole.
 fn scan(world: &mut World, style: &Style, prober: u64, exemplar: u64) {

@@ -63,7 +63,7 @@ fn banked(world: &World, resource: Resource) -> Ratio {
 fn the_survey_charters_the_sector_and_the_spent_lens_idles() {
     let root = scratch("arc");
     let registry = Registry::at(root.join("registry"));
-    let mirror = Ledger::at(root.join("worlds"));
+    let book = Ledger::at(root.join("worlds"));
     let spec = EgregoreSpec {
         civilization: Civilization {
             name: "Surveyor".into(),
@@ -88,7 +88,7 @@ fn the_survey_charters_the_sector_and_the_spent_lens_idles() {
         orbit: Some(ratio(1, 1)),
         gauge: None,
     };
-    let mut egregore = Egregore::genesis(spec, &registry, &mirror);
+    let mut egregore = Egregore::genesis(spec, &registry, &book);
 
     // Earn the crystal chain the long way (02 §5 / NS-2 §1.5): the
     // extraction floor, four smelters feeding one synthesizer, the
@@ -154,7 +154,7 @@ fn the_survey_charters_the_sector_and_the_spent_lens_idles() {
     // Rung 5 reached (the witness pins the wiring, not the research
     // grind) — one cycle runs the survey arc.
     egregore.level = 5;
-    let _ = egregore.cycle(&mirror, &registry);
+    let _ = egregore.cycle(&book, &registry);
 
     let receipts = egregore.world.chronicle().receipts();
     assert!(
@@ -184,7 +184,7 @@ fn the_survey_charters_the_sector_and_the_spent_lens_idles() {
 
     // The lens is spent: the next cycle's survey idles lawfully — no
     // second charter, no second draw (1/8 a tick regrows too slowly).
-    let _ = egregore.cycle(&mirror, &registry);
+    let _ = egregore.cycle(&book, &registry);
     let draws = egregore
         .world
         .chronicle()
