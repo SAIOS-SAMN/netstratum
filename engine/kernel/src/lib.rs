@@ -30,6 +30,7 @@
 //! that no state semantics ever live outside this function.
 
 use cfe::dop::{ClosureEvent, Resource};
+use cfe::ipsal::Scope;
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::Committed;
 
@@ -62,6 +63,12 @@ pub enum Unlawful {
     /// carrier is a big-int rational); the residual is theirs to read
     /// (shown, never summarized away).
     ConservationBroken { resource: Resource, before: Box<Ratio>, after: Box<Ratio> },
+    /// I2 — the actor is not an entity in `prior`. Identity precedes the
+    /// world (NS-6 §1.2): a deed from no one refuses before any state read.
+    NoSuchEntity { actor: u64 },
+    /// I2 — the actor is an entity but lacks the scope the deed requires.
+    /// Containment: authority is granted, never assumed.
+    NotPermitted { actor: u64, scope: Scope },
     /// THE SEALED DEFAULT — the judge refuses what no invariant covers.
     /// This event has no landed rule; a deed the kernel cannot judge does
     /// NOT enter. Coverage grows by amendment: each landing moves an event
@@ -86,7 +93,8 @@ pub fn lawful(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Un
     if !covered(&step.event) {
         return Err(Unlawful::Unjudged);
     }
-    conservation(prior, next, step)
+    conservation(prior, next, step)?;
+    containment(prior, step)
 }
 
 /// The landed coverage of the invariant set. An event is judged only if
@@ -140,4 +148,72 @@ fn total_banked(state: &Committed, resource: Resource) -> Ratio {
         .iter()
         .map(|orb| orb.banked_amount(resource))
         .fold(ratio(0, 1), |sum, held| sum + held)
+}
+
+/// INVARIANT — containment (I2). An actor-deed's actor must be an entity
+/// in `prior` that holds the scope the deed requires. Identity precedes
+/// the world: a deed from no one refuses before any state is read. A
+/// sovereign holds every scope by construction; an agent holds exactly
+/// its granted scopes. World-driven events (consequences the tick
+/// computes, no actor) carry no scope requirement (`scope_of` = None).
+fn containment(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
+    let Some(scope) = scope_of(&step.event) else {
+        return Ok(());
+    };
+    let entity = prior
+        .entities
+        .iter()
+        .find(|held| held.entity_id == step.actor)
+        .ok_or(Unlawful::NoSuchEntity { actor: step.actor })?;
+    match entity.permits(scope) {
+        true => Ok(()),
+        false => Err(Unlawful::NotPermitted { actor: step.actor, scope }),
+    }
+}
+
+/// The sealed event → scope law (a CFE transition rule extracted into the
+/// kernel). EXHAUSTIVE by design: adding a `ClosureEvent` variant forces a
+/// scope decision here at compile time — the amendment discipline made
+/// structural. `None` = a world-driven consequence with no actor scope, or
+/// a mesh/universe-ledger deed governed by its own law (never a hole: an
+/// uncovered event refuses `Unjudged` before this is consulted). Each arm
+/// is RATIFIED by a red-first witness as its event enters `covered()`
+/// against `world.rs`; today only `ResourceTransferred` (Collect) is
+/// covered and witnessed. The rest are the drafted law, unenforced until
+/// their coverage lands.
+fn scope_of(event: &ClosureEvent) -> Option<Scope> {
+    use ClosureEvent as E;
+    match event {
+        // Build — create or extend the world, or open authority.
+        E::ColonyFounded { .. } | E::ZoneBuilt { .. } | E::WorldCharted { .. }
+        | E::EntityRegistered { .. } | E::ScopeGranted { .. } | E::ScopeRevoked { .. }
+        | E::ColonyCharted { .. } | E::StarCommissioned { .. } | E::PlanetSited { .. }
+        | E::BondSealed { .. } | E::CovenantSealed { .. } | E::CouncilSealed { .. }
+        | E::GaugeShiftedAt { .. } | E::TechLicensed { .. } | E::GenesisSealed { .. }
+        | E::PracticeAdopted { .. } | E::PracticeReleased { .. } | E::ProspectStruck { .. }
+        | E::ElderWarded { .. } | E::VeilDrawn { .. } | E::InstrumentForged { .. }
+        | E::RouteChartered { .. } | E::OfferPosted { .. } | E::LineSucceeded { .. } => {
+            Some(Scope::Build)
+        }
+        // Raze — demolish or lift what was raised.
+        E::ZoneRazed { .. } | E::WardLifted { .. } | E::VeilLifted { .. } => Some(Scope::Raze),
+        // Collect — settle or move banked value.
+        E::YieldCollected { .. } | E::UpkeepSettled { .. } | E::ResourceTransferred { .. }
+        | E::OverflowAbsorbed { .. } | E::BondSettled { .. } | E::CovenantReleased { .. }
+        | E::FrictionSettled { .. } | E::ApertureSent { .. } | E::ApertureReceived { .. }
+        | E::CrystalDrawn { .. } | E::AssayStruck { .. } | E::OfferCleared { .. } => {
+            Some(Scope::Collect)
+        }
+        // None — world-driven consequences (empty provenance), mesh deeds,
+        // and universe-ledger entries: no actor scope. Governed by other
+        // invariants (conservation, decay) or their own protocol law.
+        E::FamineStruck { .. } | E::FamineRelieved { .. } | E::EraAnnexed { .. }
+        | E::GalaxyObserved { .. } | E::OverheatStruck { .. } | E::OverheatCleared { .. }
+        | E::VentSettled { .. } | E::DemurrageSettled { .. } | E::AbsorptionLapsed { .. }
+        | E::CovenantSlashed { .. } | E::WantStruck { .. } | E::WantRelieved { .. }
+        | E::HandoffSealed { .. } | E::GaugeShifted { .. } | E::Diverged { .. }
+        | E::Confluent { .. } | E::StarAged { .. } | E::EraFolded { .. }
+        | E::CouncilClosed { .. } | E::TechDiscovered { .. } | E::IncursionStruck { .. }
+        | E::VoidShare { .. } | E::RouteLapsed { .. } => None,
+    }
 }
