@@ -15,8 +15,9 @@
 //!
 //! Conservation, containment, and exactness are INVARIANTS inside this
 //! function — an unlawful transition is not caught after the fact, it
-//! cannot be constructed. This is why CHARTER §11 dissolves the
-//! anti-mirror: you do not reconcile what cannot diverge.
+//! cannot be constructed. This is why CHARTER §11 dissolves every
+//! reconciliation instrument: you do not reconcile what cannot
+//! diverge.
 //!
 //! **Versioned like the charter.** [`VERSION`] is bumped only by
 //! amendment. Every chain commitment binds the version that judged the

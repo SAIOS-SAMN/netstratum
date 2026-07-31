@@ -179,7 +179,7 @@ Two engineering nodes work this repo. File ownership keeps merges
 conflict-free: **coder-02 (vocabulary node, main tree)** owns `docs/`
 (EXCEPT the substrate contract), `engine/cfe/src/world.rs`, `clients/cli/`.
 **coder-01 (substrate node, worktree)** owns `engine/rfa-core/`,
-`engine/physics/`, `engine/solver/`, `engine/mirror/` (registry +
+`engine/physics/`, `engine/solver/`, `engine/ledger/` (registry +
 observer), `docs/03_SUBSTRATE_CONTRACT.md`, and the workspace `Cargo.toml`
 members line. Runtime state (`var/`) is never tracked; the registry under
 it is a directory of receipted truth, never a source of it (04 §5).
@@ -198,8 +198,9 @@ it. Everything below is those five layers stated as rules.*
 
 **The ban.** Keeping a second machine-readable copy of game state, or
 building tools that reconcile two copies after the fact, is banned.
-The old mirror crate and the opposition module are scheduled for
-deletion under this section.
+The opposition module was deleted under this section (2026-07-31);
+the ledger's display half (the excised crate's lens exports) deletes
+at Step 4 once views serve from the chain.
 
 **The five rules (normative):**
 
@@ -253,9 +254,10 @@ frozen meanwhile):**
   chained state changed only through the inbox. The seeds file is
   genesis input, hashed once at adoption, dead thereafter.
 - **Step 4 — views first, then deletion**: read-only views (observer,
-  wall, journals) serve from the chain BEFORE the mirror crate is
-  deleted — the operator's window never goes dark. Then the mirror
-  crate and the opposition module are removed, not deprecated.
+  wall, journals) serve from the chain BEFORE the ledger's display
+  half is deleted — the operator's window never goes dark. Then the
+  lens exports are removed, not deprecated (the opposition module is
+  already gone, 2026-07-31).
 - **Step 5 — the mesh, last.** Nothing replicates to other nodes —
   code, claims, or documents — until this universe runs on the
   chain. The old mesh spec's consensus claims stand SUPERSEDED until
