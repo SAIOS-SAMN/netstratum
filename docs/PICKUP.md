@@ -124,6 +124,24 @@ forever.
 
 ## 5. Lanes and next work
 
+- **THE UNIT LANE** (operator-ruled 2026-07-31, session with the
+  relay): the kernel is the deployable UNIT — sealed math + physics +
+  control plane, PoUW and PoWC judged at that level. The law is
+  `16_UNIT.md` (incl. §4a the singularity law); the forms are
+  `docs/EQUATIONS.md` (THE ONE LEDGER of equations/algorithms — the
+  row-claim convention is live: a landing inscribing a new equation
+  claims its row there in the same landing); the WORK ORDERS with code
+  specifics are `docs/U_DIRECTIVES.md` (U1 KERNEL-VERIFY next: tag 86,
+  the solver-verify split, the replay-complete law, mint sealed shut
+  until Ruling Box 1). LANDED in-tree this session (UNCOMMITTED,
+  awaiting operator go): U0 (the spine fixture seats its hand — the
+  TRUE board count is **285/285 green**, clippy zero; 240 was a
+  fail-fast undercount) and PROPORTION-1 (THE PROPORTIONAL LAW: Σ R² → Σ |R|
+  everywhere — coherence, conservation measurement, the scanner
+  scalar; `norm_squared`→`magnitude` ‖Δ‖₁; witnesses 24→12 and 29→7;
+  the NS-2 tag-58 wire vector RE-EXTRACTED; kernel CHARTER/
+  SYSTEM_SPEC/NS-2/03 amended — squares survive only as physics, 05's
+  T⁴).
 - **the mesh lane** (operator-ruled 2026-07-30): MESH-1a LANDED — NS-5
   §1–§3 written whole; `engine/mesh` (`consile` → consilience receipt
   | typed refusal; the file-exchange carrier, never a socket);
