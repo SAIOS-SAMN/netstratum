@@ -1,0 +1,8 @@
+[package]
+name = "codec"
+version = "0.1.0"
+edition = "2021"
+description = "CODEC-1 — the committed state's one canonical encoding (schema-versioned; the artifact digests bind; Charter §11 ladder #35)"
+
+[dependencies]
+cfe = { path = "../cfe" }

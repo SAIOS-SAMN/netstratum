@@ -163,7 +163,20 @@ forever.
   codec gate (coder-04, next), #36 spine at TUniversal{S,G,T} +
   vertical axis + adoption, #37 lenses-then-mirror-excision. The
   mirror CRATE stands untouched per §11's observation-continuity law
-  until #37's lenses serve.
+  until #37's lenses serve. **CODEC-1 LANDED 2026-07-31 (#35, the
+  gate paid):** `engine/codec` — the one canonical encoding of the
+  WHOLE committed state (all twenty families, declaration order,
+  positional; schema byte leads, v1 = the freeze snapshot; refuse
+  never guess — truncation, trailing bytes, unknown codes all None);
+  tag 83 claimed for the container when state rides a TLV stream;
+  serialization is the crate's monopoly (the kernel stays
+  encoding-blind — the Phase-1 seam). Witnesses `codec_gate.rs`
+  5 green, red-first honored. The freeze window LIFTS at this
+  landing's merge: committed-field changes now coordinate as schema
+  amendments (§11), not day-holds. Next: #36's spine — the
+  commitment H(schema ‖ kernel ‖ state_bytes ‖ parent ‖ coordinate),
+  the two maps, the four verbs. The nursery declaration stands at
+  NS-5 §7.6.
 - **coder-01**: next = Phase 2 cross-world trade (egregores exchanging
   joules/`S_cool` — needs a cross-world carrier; transfers are intra-world
   today) or TECH-1 (`10_TECH_EMERGENCE.md`, opens SINK-1's deferred
