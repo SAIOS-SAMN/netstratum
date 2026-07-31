@@ -21,9 +21,8 @@ use std::process::Command;
 
 use cfe::dop::{ClosureEvent, ZoneKind};
 use cfe::persist::{load, sync};
-use cfe::ratio::ratio;
 use cfe::world::World;
-use mesh::{append_as, authority, consile, head, receive, yield_authority, MeshRefused, Side};
+use mesh::{append_as, authority, receive, yield_authority, MeshRefused, Side};
 
 const HAND_A: u64 = 1;
 const HAND_B: u64 = 2;
@@ -35,7 +34,6 @@ fn main() {
         Some("found") => found(Path::new(&args[2])),
         Some("take") => take(Path::new(&args[2])),
         Some("adopt") => adopt(Path::new(&args[2]), Path::new(&args[3])),
-        Some("consile") => consile_leg(Path::new(&args[2]), Path::new(&args[3]), &args[4]),
         Some("usurp") => usurp(Path::new(&args[2])),
         Some("tamper") => tamper(Path::new(&args[2]), Path::new(&args[3])),
         Some("refuse-forged") => refuse_forged(Path::new(&args[2])),
@@ -66,13 +64,11 @@ fn orchestrate() {
     println!("   (the wire: node A's bytes carry to node B)");
     fs::copy(a, b).expect("the file carries");
     leg(&["take", b]);
-    leg(&["consile", a, b, "drift"]);
     leg(&["adopt", b, a]);
-    leg(&["consile", a, b, "zero"]);
     leg(&["usurp", a]);
     leg(&["tamper", a, b]);
     leg(&["refuse-forged", b]);
-    println!("== the acceptance stands: replicated at exact zero; the stale hand stalled; the forged refused ==");
+    println!("== the run stands: the pen moved by seal; the tail carried append-only; the stale hand stalled; the forged refused ==");
 }
 
 /// Node A's first era, in its own process: found, build, tick,
@@ -120,29 +116,6 @@ fn adopt(src: &Path, dst: &Path) {
     let chronicle = load(src).expect("src returns");
     let appended = sync(&chronicle, dst).expect("the tail carries");
     println!("   (the wire: the tail carries back — {appended} receipt(s), append-only)");
-}
-
-/// The judgment leg: both sides in through their doors, one verdict,
-/// asserted against the expectation.
-fn consile_leg(a_file: &Path, b_file: &Path, expect: &str) {
-    let a = receive(&fs::read(a_file).expect("A bytes"), Side::A).expect("A intact");
-    let b = receive(&fs::read(b_file).expect("B bytes"), Side::B).expect("B intact");
-    match (expect, consile(&a, &b)) {
-        ("zero", Ok(receipt)) => {
-            assert_eq!(receipt.coherence, ratio(0, 1));
-            assert_eq!(head(&a), head(&b), "one spine, one announcement");
-            println!(
-                "[consile] REPLICATION WITNESS: C(delta) = 0 exactly — {} receipts, stamp {}, {} dimensions, arity {}",
-                receipt.length, receipt.stamp, receipt.dimensions, receipt.arity
-            );
-        }
-        ("drift", Err(MeshRefused::Drift { behind, from, to })) => {
-            println!(
-                "[consile] DRIFT: side {behind:?} is behind, missing [{from}, {to}) — the tail will cure it"
-            );
-        }
-        (want, got) => panic!("expected {want}, judged {got:?}"),
-    }
 }
 
 /// The partition law (NS-5 §7.5): the stale hand finds the spine

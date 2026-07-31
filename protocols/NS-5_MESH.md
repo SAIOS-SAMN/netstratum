@@ -1,5 +1,17 @@
 # NS-5 — MESH: two nodes, one world
 
+> **SUPERSEDED IN PART — Charter §11, THE ONE-TRUTH AMENDMENT
+> (2026-07-31).** The consilience instruments of §2 and the
+> reconciliation records of §3 (tag 65; refusal kinds 3–4) are
+> RETIRED and their code excised: a reconciling check between copies
+> is unlawful. The lawful remainder of this document: the carrier
+> (§3.3), the receipted handoff (§7), and the partition law (§7.5).
+> The spine at TUniversal{S,G,T} replaces replication whole — state
+> is position, the kernel is motion, the chain is the path — and this
+> document rewrites entirely when the spine lands (the constitution
+> ladder, #34–#37). Nothing in the superseded sections may be built
+> against.
+
 **Status:** N6a SPECCED + MESH-1a LANDED (both 2026-07-30, reconciled
 the same day — two seats wrote the two halves in parallel; this
 document carries both whole) + MESH-1b LANDING (§7 — the receipted
