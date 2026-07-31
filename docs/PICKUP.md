@@ -142,9 +142,18 @@ forever.
   own OS process, state crossing ONLY as chronicle.tlv bytes: the
   seal carries the pen, drift cures by the tail, CONSILIENCE AT
   EXACT ZERO, the stale hand stalls, the forged refuses at its
-  break). Open: MESH-1c (TCP adapter, logic-free; multi-world
-  aggregation at N7), the anti-mirror audit readings (#4, coder-03),
-  the quarantine growth (#7), the docs fold (#9) when N6 lands whole.
+  break). MESH-1d LANDED 2026-07-31 (coder-04, the totality law —
+  NS-5 §2.1 v2): the 8-dim keyhole closed; every committed field is
+  measured (gauge, banked, vented, the eight books, elements) or
+  censused whole (per-orb normalized + seventeen families +
+  UNMEASURED tripwire); the equal-spine zero renamed THE REPLICATION
+  WITNESS (consilience reserved for inputs that could disagree);
+  DIVERGED carries the census additively; `mesh_totality.rs` 4 green.
+  Open: MESH-1c (TCP adapter, logic-free; multi-world aggregation at
+  N7), the anti-mirror audit readings (#4/#33, coder-03 — the seam:
+  cfe pure two-chronicle functions, mesh consumes), confluence
+  (after BOTH — the first non-tautological convergence), the
+  quarantine growth (#7), the docs fold (#9) when N6 lands whole.
 - **coder-01**: next = Phase 2 cross-world trade (egregores exchanging
   joules/`S_cool` — needs a cross-world carrier; transfers are intra-world
   today) or TECH-1 (`10_TECH_EMERGENCE.md`, opens SINK-1's deferred
