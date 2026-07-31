@@ -127,7 +127,11 @@
 //!         two-legged, the deal id pairs the books)
 //!   80 ClosureEvent::RouteLapsed (ROUTE-1 — unpaid maintenance; the
 //!         lane dies on THIS book, and a pair needs both sides live)
-//!         — the next free tag outside reservations is 81.
+//!   81 ClosureEvent::IncursionStruck (INCURSION-1a, 07 §3.1 — the
+//!         archived-sheet door: a sealed derelict wakes as an
+//!         incursion line; universe ledger only, the archive never
+//!         edited, the living never raided)
+//!         — the next free tag outside reservations is 82.
 //!   In-value practice codes (append-only): 1 the Fast · 2 the Icon ·
 //!   3 the Vigil · 4 the Hoard · 5 the Athanor (deep-end: adoption
 //!   gated on hardship ≥ 8 receipts). Placeholder names, operator
@@ -966,6 +970,10 @@ pub enum ClosureEvent {
     /// MASK-1a — the veil ends: by deed (starved 0) or STARVED by an
     /// unpayable toll (starved 1), receipted either way.
     VeilLifted { starved: bool },
+    /// INCURSION-1a (07 §3.1) — the door: a sealed derelict continued
+    /// live under a woken line. Universe ledger ONLY; world replay
+    /// ignores it (the EraAnnexed precedent).
+    IncursionStruck { era: String, world: String, line: String },
     /// MANU-1 (10 §3f): an instrument forged — technology +
     /// understanding + industry overlaid; held per-orb like techs.
     InstrumentForged { orb_id: u64, tech_hash: [u8; 32], grade: u8 },
@@ -1308,6 +1316,14 @@ impl ClosureEvent {
             }
             Self::VeilLifted { starved } => {
                 tlv::put(77, &[u8::from(*starved)], &mut out);
+            }
+            Self::IncursionStruck { era, world, line } => {
+                let mut value = Vec::new();
+                for text in [era, world, line] {
+                    value.extend_from_slice(&(text.len() as u16).to_le_bytes());
+                    value.extend_from_slice(text.as_bytes());
+                }
+                tlv::put(79, &value, &mut out);
             }
             Self::InstrumentForged { orb_id, tech_hash, grade } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
@@ -1666,6 +1682,21 @@ impl ClosureEvent {
             }),
             76 => Some(Self::VeilDrawn {}),
             77 => Some(Self::VeilLifted { starved: *value.first()? != 0 }),
+            79 => {
+                let mut at = 0usize;
+                let mut take_text = || -> Option<String> {
+                    let len =
+                        u16::from_le_bytes(value.get(at..at + 2)?.try_into().ok()?) as usize;
+                    at += 2;
+                    let text = String::from_utf8(value.get(at..at + len)?.to_vec()).ok()?;
+                    at += len;
+                    Some(text)
+                };
+                let era = take_text()?;
+                let world = take_text()?;
+                let line = take_text()?;
+                Some(Self::IncursionStruck { era, world, line })
+            }
             78 => Some(Self::InstrumentForged {
                 orb_id: u64::from_le_bytes(value.get(..8)?.try_into().ok()?),
                 tech_hash: value.get(8..40)?.try_into().ok()?,

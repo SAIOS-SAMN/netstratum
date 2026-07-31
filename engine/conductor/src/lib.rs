@@ -1293,6 +1293,139 @@ pub fn pen_service(
     log
 }
 
+/// INCURSION-1a typed refusals (07 §3.1).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum IncursionRefused {
+    /// No sealed carrier stands at that era and world.
+    NoSuchSeal,
+    /// The living are never raided: an orb stands unfamished.
+    TheLivingStand,
+    /// The continuation already walks the live board.
+    AlreadyWoken,
+}
+
+/// INCURSION-1a (07 §3.1): the archived-sheet door. A sealed DERELICT
+/// (every orb famished — the cascade law) is continued LIVE under a
+/// woken line: the sealed chronicle is copied forward (the archive is
+/// never edited), the succession law executes on the continuation
+/// (NOVEL-1 — the tree drops to the kernel, the record stands), fresh
+/// contained agents register, the world charts at a chronicle-seeded
+/// anchor, and the door receipts on the universe ledger
+/// (IncursionStruck — era, world, line). The aeon-voice trigger is
+/// the orchestration's (deferred, recorded); this is the deed in the
+/// operator's and conductor's hand. The woken line plays the entropic
+/// leg (policy Aggressive — the T∞ pole in the small).
+pub fn incursion(
+    era_root: &std::path::Path,
+    world_name: &str,
+    registry: &Registry,
+    mirror: &Mirror,
+    stamp: u64,
+) -> Result<Egregore, IncursionRefused> {
+    let sealed = era_root
+        .join("worlds")
+        .join(world_name)
+        .join("chronicle.tlv");
+    let Ok(chronicle) = cfe::persist::load(&sealed) else {
+        return Err(IncursionRefused::NoSuchSeal);
+    };
+    let mut world = World::resume(chronicle);
+    let orbs = world.committed().orbs;
+    if orbs.is_empty() || orbs.iter().any(|orb| orb.famine.is_empty()) {
+        return Err(IncursionRefused::TheLivingStand);
+    }
+    let woken_world = format!("{world_name}-returned");
+    let live_carrier = mirror.world_dir(&woken_world).join("chronicle.tlv");
+    if live_carrier.exists() {
+        return Err(IncursionRefused::AlreadyWoken);
+    }
+    // The woken line, chronicle-seeded from the terminal digest.
+    let terminal = world
+        .chronicle()
+        .receipts()
+        .last()
+        .map(|receipt| receipt.own.0)
+        .unwrap_or([0u8; 32]);
+    let beacon = Beacon::from_digest(terminal);
+    let name = format!("{world_name} Returned");
+    let sigil = mirror::registry::sigil_of(&name);
+    let civilization = Civilization {
+        name,
+        sigil: sigil.clone(),
+        species: "revenant automaton".into(),
+        clade: "revenant".into(),
+        motto: "we finish what the famine started".into(),
+        disposition: DISPOSITIONS
+            [beacon.uniform_index("incursion.disposition", DISPOSITIONS.len() as u64) as usize]
+            .into(),
+        metabolism: METABOLISMS
+            [beacon.uniform_index("incursion.metabolism", METABOLISMS.len() as u64) as usize]
+            .into(),
+        perception: PERCEPTIONS
+            [beacon.uniform_index("incursion.perception", PERCEPTIONS.len() as u64) as usize]
+            .into(),
+        founder: "conductor".into(),
+        lineage: Vec::new(),
+        station: None,
+    };
+    let _ = registry.create(&civilization);
+    // The succession on the CONTINUATION — the archive stays sealed.
+    world
+        .succeed(&sigil)
+        .map_err(|_| IncursionRefused::TheLivingStand)?;
+    let automaton = world
+        .register_agent(&format!("{sigil}-conductor"))
+        .map_err(|_| IncursionRefused::AlreadyWoken)?;
+    // The canonical steward handle: register it, or reuse the sealed
+    // world's own (genesis resumes by exactly these handles).
+    let steward = match world.register_agent("steward") {
+        Ok(entity) => entity,
+        Err(_) => world
+            .committed()
+            .entities
+            .iter()
+            .find(|held| held.handle == "steward")
+            .map(|held| held.entity_id)
+            .ok_or(IncursionRefused::AlreadyWoken)?,
+    };
+    for scope in [Scope::Build, Scope::Raze, Scope::Collect] {
+        let _ = world.grant(automaton, scope);
+        let _ = world.grant(steward, scope);
+    }
+    // The continuation persists under the woken name; genesis resumes
+    // it as the incursion egregore.
+    let _ = std::fs::create_dir_all(live_carrier.parent().expect("world dir"));
+    let _ = cfe::persist::sync(world.chronicle(), &live_carrier);
+    let coordinate = |axis: &str| -> Ratio {
+        ratio(beacon.uniform_index(axis, 64) as i64, 1)
+    };
+    let spec = EgregoreSpec {
+        civilization,
+        world_name: woken_world.clone(),
+        planet: format!("{sigil}-prime"),
+        colony: format!("first-{sigil}"),
+        policy: Policy::Aggressive,
+        position: (
+            coordinate("incursion.x"),
+            coordinate("incursion.y"),
+            coordinate("incursion.z"),
+        ),
+        star: None,
+        albedo: None,
+        orbit: None,
+        gauge: None,
+    };
+    let egregore = Egregore::genesis(spec, registry, mirror);
+    // The door receipts on the universe ledger (mirror-side, the
+    // GalaxyObserved pattern).
+    let era = era_root
+        .file_name()
+        .map(|held| held.to_string_lossy().into_owned())
+        .unwrap_or_default();
+    let _ = mirror.strike_incursion(&era, world_name, &sigil, stamp);
+    Ok(egregore)
+}
+
 /// GALAXY-1b (13_GALAXY §3, §5): the year-voice observation sweep.
 /// Every crossed, charted world OBSERVES; an anchor past the frontier
 /// creates the galaxy it observes, executed as the progenitor's deed

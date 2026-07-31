@@ -176,6 +176,34 @@ impl Mirror {
         Ok(created)
     }
 
+    /// INCURSION-1a (07 §3.1): the door's receipt on the universe
+    /// ledger — era, world, and the woken line, beside EraAnnexed and
+    /// GalaxyObserved.
+    pub fn strike_incursion(
+        &self,
+        era: &str,
+        world: &str,
+        line: &str,
+        stamp: u64,
+    ) -> std::io::Result<()> {
+        let path = self.ledger_path();
+        let mut ledger = match path.exists() {
+            true => persist::load(&path).map_err(io_error)?,
+            false => Chronicle::new(),
+        };
+        ledger.append(
+            ClosureEvent::IncursionStruck {
+                era: era.into(),
+                world: world.into(),
+                line: line.into(),
+            },
+            stamp,
+            vec![],
+        );
+        persist::sync(&ledger, &path).map_err(io_error)?;
+        Ok(())
+    }
+
     /// The card: one line per galaxy, a REFLECTION of the ledger —
     /// deleting it loses nothing (SEAL C).
     fn render_galaxies_card(&self, galaxies: &[Galaxy]) -> std::io::Result<()> {

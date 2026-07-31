@@ -3509,6 +3509,12 @@ fn chronicle(world: &World, style: &Style) {
                 style.strong(name),
                 style.dim(observer)
             ),
+            cfe::dop::ClosureEvent::IncursionStruck { era, world, line } => format!(
+                "⟁ INCURSION — {} of {} wakes as {}",
+                style.strong(world),
+                style.dim(era),
+                style.strong(line)
+            ),
             cfe::dop::ClosureEvent::ElderWarded {} => 
                 "⛨ the ELDER stands warded — the reverse shield seats".to_string(),
             cfe::dop::ClosureEvent::WardLifted { claimer } => format!(

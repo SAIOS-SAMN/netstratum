@@ -214,8 +214,11 @@ MASK-1a LANDED 2026-07-31 (tags 74–77, next free 78): the elder's
 reverse shield + depth gate; the veil + its starving toll. OPEN:
 WARDEN-1b (genesis seeding, standing task, template grant),
 MASK-1b (render cloud + the coder-03 NS-2 hit-field seam),
-INCURSION-1 mechanic (the one remaining §3.1 landing — first fold
-prerequisite retired by the test fixture path). Next: INCURSION-1a.
+INCURSION-1a LANDED 2026-07-31 (tag 81 — the sealed derelict wakes,
+the archive byte-untouched, the living never raided, the revenant
+line chronicle-seeded). All queue mechanics are landed or blocked on
+one named line each: WARDEN-1b, MASK-1b (coder-03 seam), FORGE-2b
+(N6-gated), wave-4 names (operator). Next: as assigned.
 - **coder-03**: N4 (NS-2 RQP + the scanner) — LANDED on main
   2026-07-30 (33e6c73 + post-ruling inscriptions 7f739f4, after the
   fifth-set rulings): spec §1–§4 with extracted vectors, sigil index +

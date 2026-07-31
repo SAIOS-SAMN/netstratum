@@ -4139,6 +4139,9 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     practices.remove(at);
                 }
             }
+            // INCURSION-1a: a universe-ledger event — world replay
+            // ignores it (the EraAnnexed precedent, explicit no-op).
+            ClosureEvent::IncursionStruck { .. } => {}
             ClosureEvent::ElderWarded {} => warded = Some(false),
             ClosureEvent::WardLifted { .. } => warded = Some(true),
             ClosureEvent::VeilDrawn {} => veiled = true,

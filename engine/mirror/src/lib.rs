@@ -747,6 +747,10 @@ fn render_receipt(receipt: &Receipt) -> String {
             "galaxy_observed",
             format!("{name} observed by {observer}"),
         ),
+        E::IncursionStruck { era, world, line } => (
+            "incursion_struck",
+            format!("{world} of {era} wakes as {line}"),
+        ),
         E::ElderWarded {} => ("elder_warded", "the reverse shield seats".into()),
         E::WardLifted { claimer } => (
             "ward_lifted",

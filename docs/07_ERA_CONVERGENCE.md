@@ -113,7 +113,19 @@ The chart projection (*law — inscribed so placement is reproducible*):
   annexed derelicts; fiber-read founding hints; thermal coupling
   (05 §3) once thermal lands.
 
-### 3.1 INCURSION-1 — the archived-sheet door (specced 2026-07-30, coder-02)
+### 3.1 INCURSION-1 — the archived-sheet door (specced 2026-07-30; 1a LANDED 2026-07-31)
+
+**INCURSION-1a landed** (tag 81 `IncursionStruck`, universe ledger
+only): `conductor::incursion(era_root, world)` wakes a sealed
+DERELICT — the archive is never edited (byte-identical after the
+wake, witnessed); the living are never raided (any unfamished orb
+refuses typed); the sealed chronicle is COPIED forward and continued
+live under the woken line (succession law — the tree drops to the
+kernel, the record rides whole); the revenant line registers
+chronicle-seeded (axes beacon-drawn from the terminal digest, clade
+`revenant`, policy Aggressive — the entropic leg); the door receipts
+era · world · line. One wake per seal. The aeon-voice trigger stays
+the orchestration's (deferred, recorded). The original spec:
 
 The graveyard is frontier read ACTIVELY: sealed eras are not scenery,
 they are a door that opens both ways. The lawful Antaran shape:
