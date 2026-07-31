@@ -87,6 +87,11 @@ pub enum ActionRefused {
     /// PRACTICE-1 — the Athanor takes only the tempered: fewer than
     /// eight hardship receipts stand in this chronicle.
     AthanorUntempered { hardships: usize },
+    /// KERNEL-TAXON — a code outside the ratified vocabularies
+    /// (15 §2–§3): the vocabulary grows by amendment, never by deed.
+    TaxonUnknown { class: u8, clade: u8 },
+    /// KERNEL-TAXON — one seal per star; identity is forever.
+    TaxonAlreadySealed,
     /// WARDEN-1a — the elder's reverse shield: no aperture reaches a
     /// warded star; solve the gate.
     TheWardHolds,
@@ -306,6 +311,9 @@ pub struct Committed {
     pub warded: Option<bool>,
     /// MASK-1a: the veil stands.
     pub veiled: bool,
+    /// KERNEL-TAXON (15 §4): the sealed (class, clade), or None —
+    /// unclassed is lawful until the seal.
+    pub taxon: Option<(u8, u8)>,
 }
 
 /// G1 (04 §1): a civilization's sealed axes, as the world holds them.
@@ -392,6 +400,8 @@ pub struct World {
     warded: Option<bool>,
     /// MASK-1a: the veil (replay of the receipts).
     veiled: bool,
+    /// KERNEL-TAXON: the sealed taxon (replay of the receipt).
+    taxon: Option<(u8, u8)>,
 }
 
 impl World {
@@ -424,6 +434,7 @@ impl World {
             prospects: Vec::new(),
             warded: None,
             veiled: false,
+            taxon: None,
         }
     }
 
@@ -468,6 +479,7 @@ impl World {
             prospects: committed.prospects,
             warded: committed.warded,
             veiled: committed.veiled,
+            taxon: committed.taxon,
         }
     }
 
@@ -2862,6 +2874,7 @@ impl World {
             prospects: self.prospects.clone(),
             warded: self.warded,
             veiled: self.veiled,
+            taxon: self.taxon,
         }
     }
 
@@ -3400,6 +3413,42 @@ impl World {
     /// WARDEN-1a: the reverse shield stands.
     pub fn ward_holds(&self) -> bool {
         self.warded == Some(false)
+    }
+
+    /// KERNEL-TAXON (15 §4) — seal class and clade as identity: once
+    /// per star, in-vocabulary or refused, no value moved. Build
+    /// scope (an identity-class act, the G1 posture). The coverage
+    /// {containment, exactness} enters the constitution at the
+    /// amendment; this deed is lawful now and sealed then.
+    pub fn seal_taxon(&mut self, class: u8, clade: u8) -> Result<(), ActionRefused> {
+        self.seal_taxon_as(SOVEREIGN, class, clade)
+    }
+
+    pub fn seal_taxon_as(
+        &mut self,
+        actor: u64,
+        class: u8,
+        clade: u8,
+    ) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if self.taxon.is_some() {
+            return Err(ActionRefused::TaxonAlreadySealed);
+        }
+        if class == 0
+            || clade == 0
+            || class > crate::dop::class_ceiling()
+            || clade > crate::dop::clade_ceiling()
+        {
+            return Err(ActionRefused::TaxonUnknown { class, clade });
+        }
+        self.close(ClosureEvent::TaxonSealed { class, clade }, actor);
+        self.taxon = Some((class, clade));
+        Ok(())
+    }
+
+    /// KERNEL-TAXON: the sealed taxon, if the deed has been done.
+    pub fn taxon(&self) -> Option<(u8, u8)> {
+        self.taxon
     }
 
     /// MASK-1a (14 §4) — draw the veil: renders cloud from here on
@@ -4072,6 +4121,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut routes: Vec<(u64, Ratio)> = Vec::new();
     let mut warded: Option<bool> = None;
     let mut veiled = false;
+    let mut taxon: Option<(u8, u8)> = None;
     for receipt in chronicle.receipts() {
         match &receipt.event {
             ClosureEvent::EntityRegistered { entity_id, principal, handle } => {
@@ -4187,6 +4237,8 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             ClosureEvent::WardLifted { .. } => warded = Some(true),
             ClosureEvent::VeilDrawn {} => veiled = true,
             ClosureEvent::VeilLifted { .. } => veiled = false,
+            // KERNEL-TAXON: the seal replays — identity is forever.
+            ClosureEvent::TaxonSealed { class, clade } => taxon = Some((*class, *clade)),
             ClosureEvent::EraAnnexed { .. } => {}
             // MESH-1b (NS-5 §7): authority is the mesh's walk of the
             // spine — the world's committed projection is blind to it
@@ -4629,7 +4681,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     Committed {
         orbs, entities, star, debts, bonds, covenants, councils, offers, techs, wants, crossed,
         gauge, genesis, terrain_seed, practices, instruments, routes, prospects, warded,
-        veiled,
+        veiled, taxon,
     }
 }
 

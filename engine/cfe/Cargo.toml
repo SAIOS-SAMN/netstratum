@@ -9,3 +9,8 @@ blake3.workspace = true
 num-bigint.workspace = true
 num-rational.workspace = true
 num-traits.workspace = true
+
+[dev-dependencies]
+# The taxon witness rides the snapshot codec round-trip (dev-only —
+# the runtime stays codec-blind; dev cycles are lawful in cargo).
+codec = { path = "../codec" }

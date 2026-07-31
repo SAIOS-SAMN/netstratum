@@ -757,6 +757,10 @@ fn render_receipt(receipt: &Receipt) -> String {
             "incursion_struck",
             format!("{world} of {era} wakes as {line}"),
         ),
+        E::TaxonSealed { class, clade } => (
+            "taxon_sealed",
+            format!("class {class} · clade {clade} — identity sealed"),
+        ),
         E::ElderWarded {} => ("elder_warded", "the reverse shield seats".into()),
         E::WardLifted { claimer } => (
             "ward_lifted",

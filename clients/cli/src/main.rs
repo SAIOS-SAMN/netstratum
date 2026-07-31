@@ -3116,6 +3116,13 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "the Athanor takes only the tempered — {} hardship receipts stand, eight are required",
             style.strong(&hardships.to_string())
         ),
+        ActionRefused::TaxonUnknown { class, clade } => format!(
+            "no such taxon — class {} · clade {} stands outside the ratified vocabularies (15 §2–§3); the vocabulary grows by amendment, never by deed",
+            style.strong(&class.to_string()),
+            style.strong(&clade.to_string())
+        ),
+        ActionRefused::TaxonAlreadySealed =>
+            "the taxon is already sealed — one seal per star, identity is forever (15 §4)".to_string(),
         ActionRefused::TerrainAlreadyCharted => format!(
             "the terrain is already charted — one seed per star, forever (02 §2.5); {} reads the map",
             style.strong("terrain")
@@ -3516,6 +3523,11 @@ fn chronicle(world: &World, style: &Style) {
                 style.strong(world),
                 style.dim(era),
                 style.strong(line)
+            ),
+            cfe::dop::ClosureEvent::TaxonSealed { class, clade } => format!(
+                "◈ taxon SEALED — class {} · clade {} (identity, forever)",
+                style.strong(&class.to_string()),
+                style.strong(&clade.to_string())
             ),
             cfe::dop::ClosureEvent::ElderWarded {} => 
                 "⛨ the ELDER stands warded — the reverse shield seats".to_string(),

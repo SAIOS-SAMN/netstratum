@@ -292,7 +292,10 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::GaugeShiftedAt { .. } | E::TechLicensed { .. } | E::GenesisSealed { .. }
         | E::PracticeAdopted { .. } | E::PracticeReleased { .. } | E::ProspectStruck { .. }
         | E::ElderWarded { .. } | E::VeilDrawn { .. } | E::InstrumentForged { .. }
-        | E::RouteChartered { .. } | E::OfferPosted { .. } | E::LineSucceeded { .. } => {
+        | E::RouteChartered { .. } | E::OfferPosted { .. } | E::LineSucceeded { .. }
+        // KERNEL-TAXON: the drafted Build-class arm coder-03 named for
+        // their #42 — unenforced until their covered() entry + witness.
+        | E::TaxonSealed { .. } => {
             Some(Scope::Build)
         }
         // Raze — demolish or lift what was raised.

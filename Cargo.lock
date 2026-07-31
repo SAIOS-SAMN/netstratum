@@ -49,6 +49,7 @@ name = "cfe"
 version = "0.1.0"
 dependencies = [
  "blake3",
+ "codec",
  "num-bigint",
  "num-rational",
  "num-traits",

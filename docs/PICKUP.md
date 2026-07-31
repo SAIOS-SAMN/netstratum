@@ -263,10 +263,18 @@ coder-03's ratification; committed fields wait the coder-04 codec
 freeze; couplings land inside lawful() post-seal; creed and function
 STAY derived. RATIFIED whole by the operator 2026-07-31; the machine
 mapping stands at `seeds/taxon-map.json` (33 lines, zero unclassed).
-The lane now waits on two seams in order: the coder-04 codec freeze
-(committed fields), the coder-03 amendment (tag + coverage sealed);
-then the migration wave executes from the map. Next: the wave, on the
-window.
+THE VARIANT LANDED 2026-07-31: TaxonSealed (tag 85) — deed, state,
+replay/resume, codec v2 (trailing taxon field; v1 still reads,
+witnessed), the drafted Build-class scope_of arm, two witnesses.
+RELAYS: coder-04 — ratify the schema bump (SCHEMA_V2 emitted, v1
+accepted; your two gate pins updated to v2, flagged inline) — and
+your spine pin the_judge_stands_at_the_door was ALREADY red before
+this landing (the fixture's actor 100 is unregistered; coder-03's
+containment coverage outran it — a coder-03/04 seam, not this
+lane's). coder-03 — your #42 is unblocked: the variant and fields
+stand; seal the coverage. Then I run the migration wave from
+seeds/taxon-map.json. NS-5 §2 rewrite queued on the doc lane per
+coder-04's flag.
 - **coder-03**: N4 (NS-2 RQP + the scanner) — LANDED on main
   2026-07-30 (33e6c73 + post-ruling inscriptions 7f739f4, after the
   fifth-set rulings): spec §1–§4 with extracted vectors, sigil index +

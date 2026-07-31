@@ -152,7 +152,13 @@
 //!         commit. The two maps derive from the append-only record
 //!         stream; one value per address, always. Not a ClosureEvent —
 //!         the mesh's own framing)
-//!         — the next free tag outside reservations is 85.
+//!   85 ClosureEvent::TaxonSealed (KERNEL-TAXON, 15 §4 — class and
+//!         clade sealed as identity: once per star, in-vocabulary or
+//!         unlawful, no value moved. Coverage {containment, exactness}
+//!         seals at coder-03's amendment; the vocabularies are 15 §2
+//!         (class 1–7, 0 lawful-unclassed) and 15 §3 (clade 1–18,
+//!         0 unrecorded), append-only by amendment)
+//!         — the next free tag outside reservations is 86.
 //!   In-value practice codes (append-only): 1 the Fast · 2 the Icon ·
 //!   3 the Vigil · 4 the Hoard · 5 the Athanor (deep-end: adoption
 //!   gated on hardship ≥ 8 receipts). Placeholder names, operator
@@ -351,6 +357,19 @@ pub fn friction_rate() -> Ratio {
 /// receipt, never silently.
 pub fn veil_toll() -> Ratio {
     ratio(1, 4)
+}
+
+/// KERNEL-TAXON (15 §2): the ratified class-vocabulary ceiling —
+/// codes 1..=7, 0 lawful-unclassed; raised only by amendment.
+pub fn class_ceiling() -> u8 {
+    7
+}
+
+/// KERNEL-TAXON (15 §3): the ratified clade-vocabulary ceiling —
+/// codes 1..=18 (18 reserved for the gastropod), 0 unrecorded;
+/// raised only by amendment.
+pub fn clade_ceiling() -> u8 {
+    18
 }
 
 pub fn scan_draw() -> Ratio {
@@ -995,6 +1014,12 @@ pub enum ClosureEvent {
     /// live under a woken line. Universe ledger ONLY; world replay
     /// ignores it (the EraAnnexed precedent).
     IncursionStruck { era: String, world: String, line: String },
+    /// KERNEL-TAXON (15 §4) — class and clade sealed as identity,
+    /// once per star, beside the G1 seal and never inside it (a new
+    /// deed is additive; extending GenesisSealed would be breaking).
+    /// Codes must stand in the ratified vocabularies; names stay
+    /// register-side forever.
+    TaxonSealed { class: u8, clade: u8 },
     /// MANU-1 (10 §3f): an instrument forged — technology +
     /// understanding + industry overlaid; held per-orb like techs.
     InstrumentForged { orb_id: u64, tech_hash: [u8; 32], grade: u8 },
@@ -1350,6 +1375,9 @@ impl ClosureEvent {
                     value.extend_from_slice(text.as_bytes());
                 }
                 tlv::put(81, &value, &mut out);
+            }
+            Self::TaxonSealed { class, clade } => {
+                tlv::put(85, &[*class, *clade], &mut out);
             }
             Self::InstrumentForged { orb_id, tech_hash, grade } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
@@ -1729,6 +1757,10 @@ impl ClosureEvent {
                 let line = take_text()?;
                 Some(Self::IncursionStruck { era, world, line })
             }
+            85 => Some(Self::TaxonSealed {
+                class: *value.first()?,
+                clade: *value.get(1)?,
+            }),
             78 => Some(Self::InstrumentForged {
                 orb_id: u64::from_le_bytes(value.get(..8)?.try_into().ok()?),
                 tech_hash: value.get(8..40)?.try_into().ok()?,

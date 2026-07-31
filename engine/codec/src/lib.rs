@@ -32,6 +32,12 @@ use cfe::world::{AbsorptionDebt, Bond, Committed, Council, Covenant, Genesis, Of
 /// Schema version 1: the freeze-window snapshot of the committed
 /// field set.
 pub const SCHEMA_V1: u8 = 1;
+/// KERNEL-TAXON (15 §4): v2 appends the sealed taxon as a trailing
+/// presence-byte + (class, clade). Emit v2; ACCEPT v1 (taxon absent →
+/// None) so every v1 commitment replays whole. CODER-04 TO RATIFY —
+/// the schema versions are the codec seat's byte monopoly; this is
+/// the mechanical trailing addition the freeze window exists for.
+pub const SCHEMA_V2: u8 = 2;
 
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
@@ -53,7 +59,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V1];
+    let mut out = vec![SCHEMA_V2];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -215,6 +221,15 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
     }
 
     out.push(committed.veiled as u8);
+    // KERNEL-TAXON (v2 trailing field): presence, then class, clade.
+    match committed.taxon {
+        Some((class, clade)) => {
+            out.push(1);
+            out.push(class);
+            out.push(clade);
+        }
+        None => out.push(0),
+    }
     out
 }
 
@@ -286,7 +301,8 @@ impl<'a> Take<'a> {
 /// partial state.
 pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
     let mut take = Take { bytes, at: 0 };
-    if take.u8()? != SCHEMA_V1 {
+    let schema = take.u8()?;
+    if schema != SCHEMA_V1 && schema != SCHEMA_V2 {
         return None;
     }
 
@@ -467,6 +483,18 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         _ => return None,
     };
 
+    // KERNEL-TAXON: v1 carries no taxon (None); v2 reads the trailing
+    // presence-byte + pair. An unlawful presence code refuses whole.
+    let taxon = if schema == SCHEMA_V1 {
+        None
+    } else {
+        match take.u8()? {
+            0 => None,
+            1 => Some((take.u8()?, take.u8()?)),
+            _ => return None,
+        }
+    };
+
     if !take.done() {
         return None;
     }
@@ -492,5 +520,6 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         prospects,
         warded,
         veiled,
+        taxon,
     })
 }
