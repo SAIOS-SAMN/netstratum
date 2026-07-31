@@ -135,7 +135,12 @@
 //!         archived-sheet door: a sealed derelict wakes as an
 //!         incursion line; universe ledger only, the archive never
 //!         edited, the living never raided)
-//!         — the next free tag outside reservations is 82.
+//!   82 ClosureEvent::VoidShare (MARKET-2 conform, ruled 2026-07-31 —
+//!         the melt as a first-class receipt on the receiving book:
+//!         sent = received + void share; every deal in the universe
+//!         sums to zero under ONE rule; losses are receipted, never
+//!         silent; the judge only sums, never recomputes φ·D)
+//!         — the next free tag outside reservations is 83.
 //!   In-value practice codes (append-only): 1 the Fast · 2 the Icon ·
 //!   3 the Vigil · 4 the Hoard · 5 the Athanor (deep-end: adoption
 //!   gated on hardship ≥ 8 receipts). Placeholder names, operator
@@ -981,6 +986,11 @@ pub enum ClosureEvent {
     /// MANU-1 (10 §3f): an instrument forged — technology +
     /// understanding + industry overlaid; held per-orb like techs.
     InstrumentForged { orb_id: u64, tech_hash: [u8; 32], grade: u8 },
+    /// MARKET-2 (conform ruling): the void's exact share of a hauled
+    /// deal — receipted on the receiving book by the same transition
+    /// that computes the trade. Banks never move on it; it is the
+    /// loss made visible.
+    VoidShare { deal: u64, resource: Resource, amount: Ratio },
     /// ROUTE-1: a lane chartered — this book's leg of the pair.
     RouteChartered { deal: u64, eta: Ratio },
     /// ROUTE-1: the lane lapsed on this book (unpaid maintenance).
@@ -1339,6 +1349,12 @@ impl ClosureEvent {
                 let mut value = deal.to_le_bytes().to_vec();
                 ratio::encode(eta, &mut value);
                 tlv::put(79, &value, &mut out);
+            }
+            Self::VoidShare { deal, resource, amount } => {
+                let mut value = deal.to_le_bytes().to_vec();
+                value.push(*resource as u8);
+                ratio::encode(amount, &mut value);
+                tlv::put(82, &value, &mut out);
             }
             Self::RouteLapsed { deal } => {
                 tlv::put(80, &deal.to_le_bytes(), &mut out);
@@ -1714,6 +1730,12 @@ impl ClosureEvent {
             80 => Some(Self::RouteLapsed {
                 deal: u64::from_le_bytes(value.get(..8)?.try_into().ok()?),
             }),
+            82 => {
+                let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let resource = Resource::from_wire(*value.get(8)?)?;
+                let (amount, _) = ratio::decode(value.get(9..)?)?;
+                Some(Self::VoidShare { deal, resource, amount })
+            }
             _ => None,
         }
     }

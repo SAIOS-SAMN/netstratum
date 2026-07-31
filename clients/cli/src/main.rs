@@ -3535,6 +3535,11 @@ fn chronicle(world: &World, style: &Style) {
                 "⚖ discipline {} RELEASED — the rediscovery earned; the lesson re-emerges",
                 style.strong(&practice.to_string())
             ),
+            cfe::dop::ClosureEvent::VoidShare { deal, amount, .. } => format!(
+                "∅ deal {}: the void took {} in transit — receipted, never silent",
+                deal,
+                style.strong(&format!("{}/{}", amount.numer(), amount.denom()))
+            ),
             cfe::dop::ClosureEvent::RouteChartered { deal, eta } => format!(
                 "⇉ lane {} CHARTERED at η {} — the melt bends around the path",
                 deal,

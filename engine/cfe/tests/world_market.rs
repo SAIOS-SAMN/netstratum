@@ -149,6 +149,19 @@ fn the_gap_melts_the_cargo_and_distance_walls() {
         _ => None,
     });
     assert_eq!(received, Some(ratio(115, 64)), "the receipt speaks what LANDED");
+    // THE CONFORM RULING: the void's share is a first-class receipt
+    // on the receiving book — sent = received + void share; every
+    // deal sums to zero under ONE rule, and the judge only sums.
+    let void_share = d.chronicle().receipts().iter().find_map(|r| match &r.event {
+        ClosureEvent::VoidShare { resource: Resource::Iron, amount, .. } => Some(amount.clone()),
+        _ => None,
+    });
+    assert_eq!(void_share, Some(ratio(13, 64)), "the void's share is receipted, never silent");
+    assert_eq!(
+        ratio(115, 64) + ratio(13, 64),
+        ratio(2, 1),
+        "sent = received + void share — zero-sum stays universal"
+    );
 
     // Distance 64 walls the pair: melt ≥ 1, refused before movement.
     let mut e = sunlit("far-e");

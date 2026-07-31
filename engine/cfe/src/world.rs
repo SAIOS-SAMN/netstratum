@@ -3575,11 +3575,24 @@ fn haul(
         touch(target, dst.star, &mut dst.chronicle, dst_stamp, &ease);
         target.bank(resource, delivered.clone());
     }
+    let void_share = amount - delivered.clone();
     dst.chronicle.append(
         ClosureEvent::ApertureReceived { deal, to_orb: to, resource, amount: delivered },
         dst_stamp,
         vec![SOVEREIGN],
     );
+    // The conform ruling (2026-07-31): the melt is a FIRST-CLASS
+    // receipt on the receiving book — sent = received + void share,
+    // so every deal sums to zero under one rule and the judge only
+    // sums, never recomputes φ·D. Losses are receipted, never
+    // silent. Banks never move on it.
+    if void_share > ratio(0, 1) {
+        dst.chronicle.append(
+            ClosureEvent::VoidShare { deal, resource, amount: void_share },
+            dst_stamp,
+            vec![SOVEREIGN],
+        );
+    }
     dst.relieve_recovered(to);
     // THRESHOLD-1: the deed IS the crossing, for both worlds.
     src.crossed = true;
@@ -4573,6 +4586,9 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             ClosureEvent::InstrumentForged { orb_id, tech_hash, grade } => {
                 instruments.push((*orb_id, *tech_hash, *grade));
             }
+            // MARKET-2 conform: the void's share moves no bank — the
+            // receipt IS the fact; what landed was already credited.
+            ClosureEvent::VoidShare { .. } => {}
             // ROUTE-1: the lane lives and dies by receipt.
             ClosureEvent::RouteChartered { deal, eta } => {
                 routes.push((*deal, eta.clone()));

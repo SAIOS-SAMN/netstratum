@@ -146,6 +146,7 @@ fn events_round_trip_through_their_wire_records() {
         ClosureEvent::GaugeShiftedAt { grade: 2, gauge: ratio(2, 3) },
         ClosureEvent::InstrumentForged { orb_id: 4, tech_hash: [3u8; 32], grade: 3 },
         ClosureEvent::RouteChartered { deal: 9, eta: ratio(3, 8) },
+        ClosureEvent::VoidShare { deal: 9, resource: Resource::Iron, amount: ratio(13, 64) },
         ClosureEvent::RouteLapsed { deal: 9 },
         ClosureEvent::HandoffSealed { from: 1, to: 2 },
     ];
