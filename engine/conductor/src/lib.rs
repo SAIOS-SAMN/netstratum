@@ -458,6 +458,10 @@ pub struct Egregore {
     spawned: bool,
     /// MESH-1b: the pen is out — beats, saves, and the market wait.
     pub penned: bool,
+    /// #36: the world's own chain, held open across beats (opened
+    /// lazily at the first chain; re-opening per beat would re-verify
+    /// the whole stream every cycle — quadratic over a live era).
+    spine: Option<mesh::spine::Spine>,
 }
 
 fn banked(world: &World, resource: Resource) -> Ratio {
@@ -640,6 +644,7 @@ impl Egregore {
                         solved,
                         spawned,
                         penned,
+                        spine: None,
                     };
                 }
             }
@@ -715,6 +720,7 @@ impl Egregore {
             solved: 0,
             spawned: false,
             penned: false,
+            spine: None,
         }
     }
 
@@ -1229,6 +1235,16 @@ impl Egregore {
                 .world_dir(&self.spec.world_name)
                 .join("chronicle.tlv"),
         );
+        // #36 KERNEL-OBSERVED PLAY: the beat chains. The committed
+        // state extends this world's spine at the world clock —
+        // adopted once at first sight (the pre-chain founding stamped
+        // a named debt), extended every beat after, judged=0 stamped
+        // (the hole visible, never hidden; the Phase 3 flip threads
+        // the steps). A penned world skips the beat entirely, so its
+        // spine stalls with its pen (MESH-1b). Best-effort like the
+        // sibling writes at this observed phase: a refused chain
+        // leaves the spine short, a visible stall, never a crash.
+        let _ = self.chain_beat(book);
         let _ = book.record(
             &self.spec.world_name,
             &self.spec.planet,
@@ -1236,6 +1252,38 @@ impl Egregore {
             &self.world,
         );
         newborn
+    }
+
+    /// One beat onto the world's own spine (#36): adopt-or-extend the
+    /// committed state at `{S: charted position, G: base gauge, T:
+    /// world tick}` on the mainline. The tick advanced this cycle, so
+    /// the arrow ascends structurally; the adoption door shuts itself
+    /// after the first pass.
+    fn chain_beat(&mut self, book: &Ledger) -> Result<(), mesh::spine::SpineRefused> {
+        // The handle opens once and holds: the open's full re-verify
+        // is paid at first sight (or on resume, where it re-verifies
+        // the prior life's chain), then every beat is one append.
+        if self.spine.is_none() {
+            self.spine = Some(mesh::spine::Spine::open(
+                book.world_dir(&self.spec.world_name).join("spine"),
+            )?);
+        }
+        let spine = self.spine.as_mut().expect("held or just opened");
+        let bytes = codec::state_bytes(&self.world.committed());
+        let coordinate = mesh::spine::Coordinate {
+            branch: String::new(),
+            s: [
+                self.spec.position.0.clone(),
+                self.spec.position.1.clone(),
+                self.spec.position.2.clone(),
+            ],
+            g: self.world.gauge().clone(),
+            t: self.world.now(),
+        };
+        match spine.head("") {
+            None => spine.adopt(coordinate, &bytes).map(|_| ()),
+            Some(_) => spine.extend(coordinate, &bytes, None).map(|_| ()),
+        }
     }
 }
 

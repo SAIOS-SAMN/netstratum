@@ -267,6 +267,12 @@ impl Spine {
         self.records.iter().find(|record| &record.coordinate == coordinate)
     }
 
+    /// The verified records, in stream order — a LENS over the open
+    /// spine (read-only; every record already recomputed at `open`).
+    pub fn records(&self) -> &[Commitment] {
+        &self.records
+    }
+
     /// The branch's latest commitment.
     pub fn head(&self, branch: &str) -> Option<&Commitment> {
         self.records.iter().rev().find(|record| record.coordinate.branch == branch)
