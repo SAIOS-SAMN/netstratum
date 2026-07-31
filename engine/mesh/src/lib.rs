@@ -33,6 +33,8 @@
 //! awaiting adoption; lens exports are for eyes; the mesh carries
 //! neither, and a peer that offers them is offering nothing.
 
+pub mod spine;
+
 use cfe::dop::ClosureEvent;
 use cfe::tlv;
 use cfe::vrp::{ChainRead, Chronicle, Receipt, RECEIPT_FRAME_TAG};

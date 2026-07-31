@@ -146,7 +146,13 @@
 //!         state, one encoding; a schema bump is a kernel amendment,
 //!         never a silent widening. Not a ClosureEvent — the spine's
 //!         framing when state rides a TLV stream)
-//!         — the next free tag outside reservations is 84.
+//!   84 The spine commitment record (SPINE-1, NS-5 §9 — one position
+//!         on the one clock: coordinate {branch ‖ S ‖ G ‖ T} ‖ schema
+//!         ‖ kernel version ‖ judged ‖ state digest ‖ parent ‖
+//!         commit. The two maps derive from the append-only record
+//!         stream; one value per address, always. Not a ClosureEvent —
+//!         the mesh's own framing)
+//!         — the next free tag outside reservations is 85.
 //!   In-value practice codes (append-only): 1 the Fast · 2 the Icon ·
 //!   3 the Vigil · 4 the Hoard · 5 the Athanor (deep-end: adoption
 //!   gated on hardship ≥ 8 receipts). Placeholder names, operator

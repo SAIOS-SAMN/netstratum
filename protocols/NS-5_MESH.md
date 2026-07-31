@@ -467,3 +467,70 @@ explicit grant receipts. The bridge is the world's one comms door
 into the shared exchange — the per-world uplink the operator named.
 Seeding is conductor-genesis work (coder-01); the session handshake
 naming the bridge is adapter work (coder-03). One seam, two sides.
+
+## 9. THE SPINE (SPINE-1, landed 2026-07-31 — the ladder's #36 spine half)
+
+The chain bound to the real clock. State is position; the kernel is
+motion; the spine is the recorded path — two maps, four verbs, one
+record, mechanized in `engine/mesh::spine`.
+
+### 9.1 The coordinate and the record (tag 84)
+
+A position on the one clock: `{branch ‖ S ‖ G ‖ T}` — `branch` the
+nursery name ("" is the mainline, §7.6), `S` the wrapped torus triple
+(three ratios; zeros until charted), `G` the gauge sheet (a wrapped
+ratio), `T` the attested tick. The spine commitment record binds one
+state to one position, forever:
+
+    commit = BLAKE3( branch ‖ S ‖ G ‖ T ‖ schema ‖ kernel ‖ judged ‖
+                     state_digest ‖ parent )
+
+`schema` is the codec version that shaped the bytes; `kernel` the
+judge version standing when the step was cut; `judged` the admission
+honesty flag (§9.3); `state_digest` = BLAKE3 of the canonical state
+bytes (the store key); `parent` the previous commitment on this
+branch (32 zeros at mainline genesis). Wire: one TLV record, tag 84,
+value = the hashed fields ‖ `commit[32]`; a record whose commit does
+not recompute REFUSES on load.
+
+### 9.2 The two maps and the four verbs
+
+- **The spine map** — coordinate → commitment. Single-valued,
+  append-only, derived from the record stream (`spine.tlv`); T
+  strictly ascends per branch (the arrow — the clock only walks
+  forward), so one value per address is structural, and a duplicate
+  or backward record refuses the whole file on open.
+- **The store** — state_digest → canonical bytes, content-addressed
+  files. A store entry cannot be wrong, only absent; `fetch`
+  re-hashes on every read and a tampered blob refuses FORGED.
+
+The verbs: `resolve(coordinate)` — where the universe stands;
+`fetch(state_digest)` — the geometry, verified on arrival;
+`extend(coordinate, state_bytes, step?)` — the one write, §9.3;
+`branch(from, name)` — the nursery opens: a genesis-copy record at
+the fork position under the new branch name, parent-linked to the
+mainline commitment (the same state entering a new address space —
+the mainline is unwritable from inside it, §7.6).
+
+### 9.3 The judged flag (admission honesty)
+
+`extend` with a `Step` consults the kernel across the seam:
+`kernel::lawful(prior, next, step)` — an `Unlawful` refusal (including
+`Unjudged`, the sealed default) refuses the extend whole, and the
+landed commitment carries `judged = 1`. `extend` without a step is
+lawful at this phase and carries `judged = 0` — the coverage hole
+STAMPED into the record, never hidden (a genesis extend is always
+unjudged: nothing prior exists to judge from; a step offered at
+genesis refuses). When kernel coverage completes (Phase 3), unjudged
+extends retire by amendment. The kernel is consumed, never owned:
+the spine binds `kernel::VERSION` into every commitment; the judge
+never reads the spine.
+
+### 9.4 What replicates
+
+The spine IS the uplink's cargo (the uplink law): peers exchange
+record streams and store blobs — both self-verifying — and nothing
+else. Drift is being behind on one branch (fetch the tail);
+divergence is a declared branch (its own addresses); a second value
+at an occupied address is unregisterable. Replication of the spine
+is #18's transport work; nothing in this section opens a socket.
