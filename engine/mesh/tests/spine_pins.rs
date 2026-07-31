@@ -99,7 +99,7 @@ fn the_spine_walks_and_reloads_whole() {
 
     let genesis = spine.extend(coord(0), &bytes_a, None).expect("genesis").clone();
     assert_eq!(genesis.parent, [0u8; 32], "genesis is parentless");
-    assert_eq!(genesis.schema, codec::SCHEMA_V1);
+    assert_eq!(genesis.schema, codec::SCHEMA_V2, "the record repeats the blob's form");
     assert_eq!(genesis.kernel, kernel::VERSION);
     assert!(!genesis.judged, "genesis is honestly unjudged");
 
@@ -275,4 +275,57 @@ fn the_judge_stands_at_the_door() {
     // The unjudged hole is lawful at this phase — and STAMPED.
     let hole = spine.extend(coord(2), &minting_next, None).expect("admitted unjudged").clone();
     assert!(!hole.judged, "the coverage hole is visible in the record, never hidden");
+}
+
+/// The commitment's schema field speaks the BLOB's leading byte — the
+/// record never misdeclares the form it binds (the codec monopoly:
+/// one component owns the form; the spine repeats it, never asserts
+/// its own).
+#[test]
+fn the_record_speaks_the_blobs_schema() {
+    let root = scratch("schema-truth");
+    let mut spine = Spine::open(&root).expect("opens empty");
+    let bytes = played_state(None);
+    let genesis = spine.extend(coord(0), &bytes, None).expect("genesis").clone();
+    assert_eq!(
+        genesis.schema, bytes[0],
+        "the record's schema is the blob's leading byte, never a constant"
+    );
+    assert_eq!(genesis.schema, codec::SCHEMA_V2, "the codec emits v2 today");
+}
+
+/// THE ADOPTION DOOR (#36): a played, pre-chain world enters the
+/// mainline once — the debt stamped unjudged, never hidden; a second
+/// adoption refuses; and the chained economy continues on top through
+/// the ordinary judged door.
+#[test]
+fn adoption_is_once_and_names_its_debt() {
+    let root = scratch("adoption");
+    let mut spine = Spine::open(&root).expect("opens empty");
+
+    // A world with pre-chain history: its chronicle is the Tier-A
+    // debt. Adoption seats its CURRENT state, judged=0 stamped.
+    let debt = two_orb_state((10, 1), (0, 1));
+    let adopted = spine.adopt(coord(1), &debt).expect("the debt is adopted").clone();
+    assert_eq!(adopted.parent, [0u8; 32], "adoption is the mainline's birth");
+    assert!(!adopted.judged, "the pre-chain debt is stamped unjudged, named never hidden");
+
+    // One truth, one birth: the door shuts behind the first pass.
+    assert!(matches!(
+        spine.adopt(coord(2), &debt).unwrap_err(),
+        SpineRefused::AlreadyAdopted
+    ));
+    // A nursery is born by `branch`, never adopted.
+    assert!(matches!(
+        spine.adopt(branch_coord("nursery", 3), &debt).unwrap_err(),
+        SpineRefused::BranchUnknown { .. }
+    ));
+
+    // Life after adoption: the ordinary JUDGED door carries the
+    // economy — a lawful transfer chains on top of the adopted state.
+    let next = two_orb_state((7, 1), (3, 1));
+    let step = transfer_step(2);
+    let chained = spine.extend(coord(2), &next, Some(&step)).expect("judged").clone();
+    assert!(chained.judged, "the step after adoption is judged, the flag stamped");
+    assert_eq!(chained.parent, adopted.commit, "the path links through the door");
 }

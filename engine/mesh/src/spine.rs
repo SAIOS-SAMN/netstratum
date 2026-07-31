@@ -88,6 +88,9 @@ pub enum SpineRefused {
     BranchTaken { name: String },
     ForkUnknown,
     StateUndecodable,
+    /// A second pass through the adoption door: the mainline already
+    /// stands, and adoption happens once (one truth, one birth).
+    AlreadyAdopted,
     /// A step offered at genesis: nothing prior exists to judge from.
     GenesisJudged,
     StoreMissing,
@@ -295,6 +298,9 @@ impl Spine {
     ) -> Result<&Commitment, SpineRefused> {
         let next = codec::from_state_bytes(state_bytes)
             .ok_or(SpineRefused::StateUndecodable)?;
+        // The record repeats the blob's leading byte — the codec owns
+        // the form; the spine never asserts its own schema constant.
+        let schema = *state_bytes.first().ok_or(SpineRefused::StateUndecodable)?;
         if self.resolve(&coordinate).is_some() {
             return Err(SpineRefused::Occupied);
         }
@@ -331,13 +337,35 @@ impl Spine {
         }
         let record = seal(
             coordinate,
-            codec::SCHEMA_V1,
+            schema,
             kernel::VERSION,
             step.is_some(),
             state,
             parent,
         );
         self.append(record)
+    }
+
+    /// THE ADOPTION DOOR (#36): a pre-chain world enters the mainline
+    /// ONCE — its current state seated as the unjudged genesis, the
+    /// debt stamped `judged = false` (history before the chain is
+    /// NAMED, never hidden). After adoption every step arrives through
+    /// [`Spine::extend`], judged where covered. A second adoption
+    /// refuses: one truth, one birth — re-entry through this door
+    /// would be a mirror made of genesis records.
+    pub fn adopt(
+        &mut self,
+        coordinate: Coordinate,
+        state_bytes: &[u8],
+    ) -> Result<&Commitment, SpineRefused> {
+        if !coordinate.branch.is_empty() {
+            // Nurseries are born by `branch`, never adopted.
+            return Err(SpineRefused::BranchUnknown { name: coordinate.branch });
+        }
+        if self.head("").is_some() {
+            return Err(SpineRefused::AlreadyAdopted);
+        }
+        self.extend(coordinate, state_bytes, None)
     }
 
     /// The nursery opens (NS-5 §7.6/§9.2): a genesis-copy record at
