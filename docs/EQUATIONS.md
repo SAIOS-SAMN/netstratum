@@ -28,6 +28,17 @@ first, never by searching the tree.
    (they are the mathematics of minimization; ours is measurement);
    the L1 forms below are the standing law. Squares and quartics
    survive ONLY as physical law (the T⁴ discipline, T1).
+   **Chapter three (THE MISSED SIXTH, arch-02's coverage audit,
+   2026-07-31):** every document said 63 deed types; the enum held 64,
+   and the remainder arithmetic (58 covered + 5 named = 63) BALANCED —
+   against the wrong total — so a live deed (GaugeShiftedAt) sat
+   silently uncovered, deadlocking the Phase 3 precondition it never
+   appeared in. The lesson: **an arithmetic that checks out against an
+   uncounted universe is the failure mode, not the safeguard.** A
+   count used as law must be DERIVED from the one authority (count
+   the enum, never quote a doc), and a balancing remainder proves
+   nothing unless the total itself was measured. Both drift chapters
+   share the root: restated facts rot; derived facts cannot.
 4. Documents KEEP their equations inline where the mechanic lives
    (spec + mechanic + vectors in one landing stands). This ledger adds
    the map; it strips nothing.
