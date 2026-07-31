@@ -217,6 +217,40 @@ fn seat_hand() -> u64 {
     cfe::vrp::hand_of(&active_name())
 }
 
+/// MARKET-2: a world's charted position from the starchart (data
+/// fields, never prose). Uncharted reads as the origin — a frontier
+/// world trades as local until the chart knows it.
+fn charted_position(name: &str) -> (Ratio, Ratio, Ratio) {
+    let zero = || cfe::ratio::ratio(0, 1);
+    let Ok(text) = std::fs::read_to_string("var/worlds/starchart.json") else {
+        return (zero(), zero(), zero());
+    };
+    for line in text.lines() {
+        if data_field(line, "world").as_deref() == Some(name) {
+            let axis = |key: &str| {
+                data_field(line, key)
+                    .and_then(|v| parse_ratio_text(&v))
+                    .unwrap_or_else(zero)
+            };
+            return (axis("x"), axis("y"), axis("z"));
+        }
+    }
+    (zero(), zero(), zero())
+}
+
+/// Parse `p/q` or a plain integer (the mirror's exact rendering).
+fn parse_ratio_text(text: &str) -> Option<Ratio> {
+    use std::str::FromStr;
+    let (numer, denom) = match text.split_once('/') {
+        Some((n, d)) => (n, d),
+        None => (text, "1"),
+    };
+    Some(Ratio::new(
+        num_bigint::BigInt::from_str(numer.trim()).ok()?,
+        num_bigint::BigInt::from_str(denom.trim()).ok()?,
+    ))
+}
+
 fn sync_world(world: &World) -> Result<usize, String> {
     let name = world.orb().map(|orb| orb.name.clone()).ok_or("no colony")?;
     sync_world_at(world, &name)
@@ -566,7 +600,13 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             match (mine, target, theirs, deal) {
                 (Some(mine), Some(target), Some(theirs), Some(deal)) => match far_world(&target) {
                     Ok(mut far) => {
-                        match cfe::world::clear_trade(world, mine, &mut far, theirs, deal) {
+                        let my_name = world.orb().map(|o| o.name.clone()).unwrap_or_default();
+                        let distance = conductor::spatial_l1(
+                            &charted_position(&my_name),
+                            &charted_position(&target),
+                        );
+                        match cfe::world::clear_trade(world, mine, &mut far, theirs, deal, distance)
+                        {
                             Ok(()) => {
                                 match sync_world(world).and(sync_world_at(&far, &target)) {
                                     Ok(_) => println!(
@@ -2982,6 +3022,10 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
         ActionRefused::PracticeUnknown { practice } => format!(
             "no discipline {} stands in the vocabulary — 1 the Fast · 2 the Icon · 3 the Vigil · 4 the Hoard · 5 the Athanor",
             style.strong(&practice.to_string())
+        ),
+        ActionRefused::EconomicallyWalled { melt } => format!(
+            "the void takes {} of every unit at this distance — this pair is economically WALLED; charter a route or trade nearer",
+            style.strong(&format!("{}/{}", melt.numer(), melt.denom()))
         ),
         ActionRefused::InstrumentGradeUnknown { condition } => format!(
             "an instrument grade is a crystallized condition 1..6 — {} is outside the sky",

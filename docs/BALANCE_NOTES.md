@@ -43,7 +43,15 @@ instrument panel the tuning session reads.
    its reserve-fraction premium (want = give×(2·reserve−target)/
    reserve, inside 2×). Unmatched ratios REST lawfully — a resting
    book is a lawful market state, never a bug.
-4. **Divergence rate** — 13 cleaves without a fold yet; the fold
+4. **The iceberg (MARKET-2, ruled + landed 2026-07-31)** — trade's
+   side-fee friction CONVERTED to cargo melt: delivered = sent ×
+   (1 − φ·D), φ = 1/64 per unit of manifold L1 (spatial + key gap);
+   isolation walls at φ·D ≥ 1. φ is the new hot dial: the roster's
+   typical inter-world distances (20–40) melt 30–60% — measure
+   cleared-crossing decay by distance on the next long run before
+   touching it. Route charters (ROUTE-1) are the lawful supply-side
+   answer, not a φ retune.
+5. **Divergence rate** — 13 cleaves without a fold yet; the fold
    cadence (or the four-C eligibility pruning at it) is the release
    valve already landed.
 

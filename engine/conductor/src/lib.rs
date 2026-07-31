@@ -284,6 +284,9 @@ pub fn market_step(worlds: &mut [Egregore], beat: u64) -> Vec<(String, String)> 
             if one.penned || two.penned {
                 continue;
             }
+            // MARKET-2: the transit's spatial L1 — supply melts with
+            // distance; the engine refuses walled pairs itself.
+            let distance = spatial_l1(&one.spec.position, &two.spec.position);
             let (Some(offer_a), Some(offer_b)) = (
                 one.world.offers().first().map(|o| o.offer),
                 two.world.offers().first().map(|o| o.offer),
@@ -291,8 +294,10 @@ pub fn market_step(worlds: &mut [Egregore], beat: u64) -> Vec<(String, String)> 
                 continue;
             };
             let deal = beat * 1_000 + (a as u64) * 10 + b as u64;
-            if cfe::world::clear_trade(&mut one.world, offer_a, &mut two.world, offer_b, deal)
-                .is_ok()
+            if cfe::world::clear_trade(
+                &mut one.world, offer_a, &mut two.world, offer_b, deal, distance,
+            )
+            .is_ok()
             {
                 cleared.push((
                     one.spec.world_name.clone(),
@@ -1154,6 +1159,16 @@ impl Egregore {
         );
         newborn
     }
+}
+
+/// MARKET-2: plain L1 between two charted positions — the transit
+/// distance the iceberg law melts against.
+pub fn spatial_l1(a: &(Ratio, Ratio, Ratio), b: &(Ratio, Ratio, Ratio)) -> Ratio {
+    let leg = |p: &Ratio, q: &Ratio| {
+        let d = p.clone() - q.clone();
+        if d < ratio(0, 1) { -d } else { d }
+    };
+    leg(&a.0, &b.0) + leg(&a.1, &b.1) + leg(&a.2, &b.2)
 }
 
 /// MESH-1b (#2, the consumer slice): the conductor's side of the

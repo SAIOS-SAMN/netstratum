@@ -7,7 +7,7 @@
 //! the whole book.
 
 use cfe::dop::Resource;
-use cfe::ratio::{ratio, Ratio};
+use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
 use cfe::world::{clear_trade, replay, ActionRefused, World, FIRST_ORB};
 
@@ -68,7 +68,7 @@ fn a_crossing_clears_at_the_resting_price() {
     let biomass_before = furnace.orb().unwrap().banked_amount(Resource::Biomass)
         + frost.orb().unwrap().banked_amount(Resource::Biomass);
 
-    clear_trade(&mut furnace, 7, &mut frost, 9, 100).expect("the crossing clears");
+    clear_trade(&mut furnace, 7, &mut frost, 9, 100, ratio(0, 1)).expect("the crossing clears");
 
     // Fill: x = min(4, 3) = 3 iron; y at the RESTING price (1/2
     // biomass per iron) = 3/2 biomass — the earlier offer ruled, the
@@ -102,31 +102,31 @@ fn a_crossing_clears_at_the_resting_price() {
     );
 }
 
-/// AEON-1b (11 §2.1): the key gap PRICES the trade — clashing keys
-/// accrue friction workspace on both movers (sealed at collect as
-/// the FrictionSettled shape); aligned keys (any alignment) pay
-/// exactly zero.
+/// MARKET-2 (Samuelson iceberg, ruled 2026-07-31 — CONVERTS the
+/// 11 §2.1 side-fee): the manifold gap MELTS the cargo. Aligned,
+/// local pairs deliver whole; a clashing or distant pair's receiver
+/// banks sent × (1 − φ·D), the void's share derivable from the
+/// aperture pair (sent − received); at φ·D ≥ 1 the pair is
+/// economically WALLED by decay physics, refused before movement.
 #[test]
-fn clash_pays_friction_alignment_pays_none() {
+fn the_gap_melts_the_cargo_and_distance_walls() {
     use cfe::dop::ClosureEvent;
-    // Aligned pair (both keys at ground): zero friction.
+    // Aligned local pair: delivered whole.
     let mut a = sunlit("concord-a");
     let mut b = sunlit("concord-b");
     a.post_offer(FIRST_ORB, Resource::Iron, ratio(2, 1), Resource::Biomass, ratio(1, 1), 1)
         .expect("posts");
     b.post_offer(FIRST_ORB, Resource::Biomass, ratio(1, 1), Resource::Iron, ratio(2, 1), 2)
         .expect("posts");
-    clear_trade(&mut a, 1, &mut b, 2, 10).expect("clears");
-    let _ = a.collect();
-    let aligned_friction = a
-        .chronicle()
-        .receipts()
-        .iter()
-        .any(|r| matches!(r.event, ClosureEvent::FrictionSettled { .. }));
-    assert!(!aligned_friction, "alignment pays exactly zero");
+    let b_iron = b.orb().unwrap().banked_amount(Resource::Iron);
+    clear_trade(&mut a, 1, &mut b, 2, 10, ratio(0, 1)).expect("clears");
+    assert_eq!(
+        b.orb().unwrap().banked_amount(Resource::Iron) - b_iron,
+        ratio(2, 1),
+        "alignment at zero distance delivers whole"
+    );
 
-    // Clashing pair: one key near the antipode — the gap is real and
-    // the friction seals at the collect.
+    // Clashing pair at spatial distance 6: melt = (6 + 1/2)/64 = 13/128.
     let mut c = sunlit("discord-c");
     let mut d = sunlit("discord-d");
     c.shift_gauge(ratio(1, 2));
@@ -134,24 +134,38 @@ fn clash_pays_friction_alignment_pays_none() {
         .expect("posts");
     d.post_offer(FIRST_ORB, Resource::Biomass, ratio(1, 1), Resource::Iron, ratio(2, 1), 4)
         .expect("posts");
-    clear_trade(&mut c, 3, &mut d, 4, 20).expect("clears");
-    // Accrue something collectable so the collect seals the friction.
-    c.zone(0, cfe::dop::ZoneKind::Extractor).expect("zones");
-    for _ in 0..4 {
-        c.tick();
-    }
-    c.collect().expect("collects");
-    let sealed: Ratio = c
-        .chronicle()
-        .receipts()
-        .iter()
-        .filter_map(|r| match &r.event {
-            ClosureEvent::FrictionSettled { amount, .. } => Some(amount.clone()),
-            _ => None,
-        })
-        .sum();
-    // gap 1/2 (antipode) × volume (2 iron + 1 biomass) × 1/8 = 3/16.
-    assert_eq!(sealed, ratio(3, 16), "the clash pays exactly its gap");
+    let d_iron = d.orb().unwrap().banked_amount(Resource::Iron);
+    clear_trade(&mut c, 3, &mut d, 4, 20, ratio(6, 1)).expect("clears");
+    // d receives 2 × (1 − 13/128) = 115/64; the void took 13/64.
+    assert_eq!(
+        d.orb().unwrap().banked_amount(Resource::Iron) - d_iron,
+        ratio(115, 64),
+        "the void takes exactly φ·D of the cargo"
+    );
+    let received = d.chronicle().receipts().iter().find_map(|r| match &r.event {
+        ClosureEvent::ApertureReceived { resource: Resource::Iron, amount, .. } => {
+            Some(amount.clone())
+        }
+        _ => None,
+    });
+    assert_eq!(received, Some(ratio(115, 64)), "the receipt speaks what LANDED");
+
+    // Distance 64 walls the pair: melt ≥ 1, refused before movement.
+    let mut e = sunlit("far-e");
+    let mut f = sunlit("far-f");
+    e.post_offer(FIRST_ORB, Resource::Iron, ratio(2, 1), Resource::Biomass, ratio(1, 1), 5)
+        .expect("posts");
+    f.post_offer(FIRST_ORB, Resource::Biomass, ratio(1, 1), Resource::Iron, ratio(2, 1), 6)
+        .expect("posts");
+    let iron_before = e.orb().unwrap().banked_amount(Resource::Iron);
+    assert!(
+        matches!(
+            clear_trade(&mut e, 5, &mut f, 6, 30, ratio(64, 1)),
+            Err(cfe::world::ActionRefused::EconomicallyWalled { .. })
+        ),
+        "decay physics wall the void — no rule needed"
+    );
+    assert_eq!(e.orb().unwrap().banked_amount(Resource::Iron), iron_before, "nothing moved");
 }
 
 /// No crossing: wrong resources, or prices that never meet — refused
@@ -167,7 +181,7 @@ fn no_crossing_no_movement() {
     b.post_offer(FIRST_ORB, Resource::Biomass, ratio(1, 1), Resource::Iron, ratio(2, 1), 2)
         .expect("posts");
     assert_eq!(
-        clear_trade(&mut a, 1, &mut b, 2, 5),
+        clear_trade(&mut a, 1, &mut b, 2, 5, ratio(0, 1)),
         Err(ActionRefused::NoCrossing)
     );
     assert_eq!(a.offers().len(), 1, "the intent still rests");
@@ -178,7 +192,7 @@ fn no_crossing_no_movement() {
     shielded
         .post_offer(FIRST_ORB, Resource::Biomass, ratio(4, 1), Resource::Iron, ratio(2, 1), 3)
         .expect("posts — resting is lawful even under the shield");
-    match clear_trade(&mut a, 1, &mut shielded, 3, 6) {
+    match clear_trade(&mut a, 1, &mut shielded, 3, 6, ratio(0, 1)) {
         Err(ActionRefused::Shielded { .. }) => {}
         other => panic!("the shield must guard the fill, got {other:?}"),
     }

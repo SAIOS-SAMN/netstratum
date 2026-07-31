@@ -61,6 +61,10 @@ pub enum ActionRefused {
     StarAlreadyCommissioned,
     /// D3 — one terrain charter per star; the seed is forever.
     TerrainAlreadyCharted,
+    /// MARKET-2 (Samuelson iceberg, ruled 2026-07-31) — the melt
+    /// fraction reached 1: this pair is economically walled off by
+    /// decay physics, not by rule.
+    EconomicallyWalled { melt: Box<Ratio> },
     /// MANU-1 — an instrument grade is a crystallized condition, 1–6.
     InstrumentGradeUnknown { condition: u8 },
     /// MANU-1 — the line has not crystallized this condition here.
@@ -3465,8 +3469,36 @@ pub fn aperture_transfer(
     amount: Ratio,
     deal: u64,
 ) -> Result<(), ActionRefused> {
+    haul(src, from, dst, to, resource, amount, deal, &ratio(0, 1))
+}
+
+/// MARKET-2 (ruled 2026-07-31): the melt coefficient φ — the fraction
+/// of cargo the void takes per unit of L1 distance (spatial + key).
+/// Space transport consumes its own payload (Samuelson's iceberg);
+/// at melt ≥ 1 trade walls off by decay physics alone.
+pub const MELT_PER_UNIT: (i64, i64) = (1, 64);
+
+/// The one transport body. `melt` is the transit's iceberg fraction:
+/// the sender debits the DISPATCHED amount, the receiver banks and
+/// receipts the DELIVERED amount — the difference is the void's,
+/// derivable from the pair (sent − received = melt·sent), so the
+/// cross-book audit stays exact. Zero melt is the local door.
+#[allow(clippy::too_many_arguments)]
+fn haul(
+    src: &mut World,
+    from: u64,
+    dst: &mut World,
+    to: u64,
+    resource: Resource,
+    amount: Ratio,
+    deal: u64,
+    melt: &Ratio,
+) -> Result<(), ActionRefused> {
     if amount <= ratio(0, 1) {
         return Err(ActionRefused::BadTransfer);
+    }
+    if *melt >= ratio(1, 1) {
+        return Err(ActionRefused::EconomicallyWalled { melt: Box::new(melt.clone()) });
     }
     // THRESHOLD-1 (12_UNION §7): the shield — an aperture touches only
     // worlds whose peoples have made the solar leap (TECH-1a). A world
@@ -3521,15 +3553,18 @@ pub fn aperture_transfer(
         src_stamp,
         vec![SOVEREIGN],
     );
-    // The touch then the credit, in the destination world.
+    // The touch then the credit, in the destination world — the
+    // DELIVERED amount: what the void melted never arrives, and the
+    // receipt speaks only what landed (MARKET-2).
+    let delivered = amount.clone() * (ratio(1, 1) - melt.clone());
     {
         let target = dst.orbs.iter_mut().find(|held| held.orb_id == to).expect("checked");
         let ease = ease_of(&dst.techs, to);
         touch(target, dst.star, &mut dst.chronicle, dst_stamp, &ease);
-        target.bank(resource, amount.clone());
+        target.bank(resource, delivered.clone());
     }
     dst.chronicle.append(
-        ClosureEvent::ApertureReceived { deal, to_orb: to, resource, amount },
+        ClosureEvent::ApertureReceived { deal, to_orb: to, resource, amount: delivered },
         dst_stamp,
         vec![SOVEREIGN],
     );
@@ -3554,6 +3589,7 @@ pub fn clear_trade(
     b: &mut World,
     offer_b: u64,
     deal: u64,
+    distance: Ratio,
 ) -> Result<(), ActionRefused> {
     let held_a = a
         .offers
@@ -3590,31 +3626,19 @@ pub fn clear_trade(
         false => x.clone() * held_b.give_amount.clone() / held_b.want_amount.clone(),
     };
     let y = y.min(held_b.give_amount.clone());
-    // The two directions — each an aperture pair, shield-checked,
-    // demurrage-touched, conservation-exact (the landed carrier).
-    aperture_transfer(a, held_a.orb, b, held_b.orb, held_a.give, x.clone(), deal)?;
-    aperture_transfer(b, held_b.orb, a, held_a.orb, held_b.give, y.clone(), deal + 1)?;
-    // AEON-1b (11 §2.1) — RESONANCE AND CLASH: trade across the key
-    // gap costs friction — wrapped L1 across the WHOLE graded key,
-    // times the volume, at φ = 1/8 (placeholder). Aligned partners
-    // (any alignment) pay exactly zero; the antipode pays most. The
-    // heat accrues as workspace on BOTH movers and seals at their
-    // collects (the FrictionSettled shape — divergence has a
-    // handling cost, cross-world now too).
+    // MARKET-2 (ruled 2026-07-31) — THE ICEBERG: the side-fee
+    // friction CONVERTED into cargo melt (Samuelson). The transit's
+    // melt fraction reads the whole manifold gap — spatial L1 plus
+    // the wrapped key gap (11 §2.1's clash now consumes payload,
+    // never a tertiary sink) — at φ = 1/64 per unit. Delivered =
+    // sent × (1 − φ·D); at φ·D ≥ 1 the pair is economically WALLED
+    // by decay physics (the haul refuses before anything moves).
     let gap = key_distance(a.key(), b.key());
-    if gap > ratio(0, 1) {
-        let heat = gap * (x + y) * ratio(1, 8);
-        for (world, orb) in [(&mut *a, held_a.orb), (&mut *b, held_b.orb)] {
-            match world
-                .friction_pending
-                .iter_mut()
-                .find(|(held, _)| *held == orb)
-            {
-                Some((_, pending)) => *pending += heat.clone(),
-                None => world.friction_pending.push((orb, heat.clone())),
-            }
-        }
-    }
+    let melt = (distance + gap) * ratio(MELT_PER_UNIT.0, MELT_PER_UNIT.1);
+    // The two directions — each an aperture pair, shield-checked,
+    // demurrage-touched; sent − received = the void's exact share.
+    haul(a, held_a.orb, b, held_b.orb, held_a.give, x, deal, &melt)?;
+    haul(b, held_b.orb, a, held_a.orb, held_b.give, y, deal + 1, &melt)?;
     // Both intents close; replay removes them.
     a.offers.retain(|held| held.offer != offer_a);
     b.offers.retain(|held| held.offer != offer_b);
