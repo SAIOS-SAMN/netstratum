@@ -16,7 +16,6 @@
 
 pub mod dop;
 pub mod ipsal;
-pub mod opposition;
 pub mod persist;
 pub mod query;
 pub mod ratio;

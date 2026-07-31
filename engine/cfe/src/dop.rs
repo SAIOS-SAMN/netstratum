@@ -84,10 +84,14 @@
 //!      epistemological [board-side reading, reserved] · 2 resonance ·
 //!      3 novelty)
 //!   63 ClosureEvent::WantRelieved (WANT-1 — the mind fed)
-//!   64–66 NS-5 protocol records (mesh head ‖ consilience receipt ‖
-//!         mesh refusal — NS-5 §2, MESH-1a: the mesh's own framing,
-//!         never world-chronicle events; consilience is a read, no
-//!         state changes — the lens law in mesh form)
+//!   64 NS-5 mesh head (the announcement; MESH-1a, the mesh's own
+//!         framing, never a world-chronicle event)
+//!   65 RETIRED (Charter §11, 2026-07-31 — was the consilience
+//!         receipt, a reconciling check between copies; retired codes
+//!         are never reused)
+//!   66 NS-5 mesh refusal (kinds 1 malformed · 2 forged · 5 usurped ·
+//!         6 uncited stand — single-chain judgments; kinds 3–4
+//!         drift/diverged RETIRED under §11 with tag 65)
 //!   67 ClosureEvent::HandoffSealed (MESH-1b, NS-5 §7 — one writer
 //!         per clock: the yielding hand seals, naming the successor;
 //!         the taking hand's first append cites the seal; authority

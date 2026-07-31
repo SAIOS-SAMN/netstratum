@@ -149,11 +149,21 @@ forever.
   UNMEASURED tripwire); the equal-spine zero renamed THE REPLICATION
   WITNESS (consilience reserved for inputs that could disagree);
   DIVERGED carries the census additively; `mesh_totality.rs` 4 green.
-  Open: MESH-1c (TCP adapter, logic-free; multi-world aggregation at
-  N7), the anti-mirror audit readings (#4/#33, coder-03 — the seam:
-  cfe pure two-chronicle functions, mesh consumes), confluence
-  (after BOTH — the first non-tautological convergence), the
-  quarantine growth (#7), the docs fold (#9) when N6 lands whole.
+  **THE EXCISION (Charter §11, operator order 2026-07-31, coder-04):**
+  the reconciliation instruments are REMOVED from the codebase —
+  consile, the manifold, the census, the triangle, tag 65 (RETIRED),
+  refusal kinds 3–4 (RETIRED), their witnesses, the example's
+  reconciliation legs, and `cfe::opposition` whole (coder-03's
+  pledged excision, accelerated by order). The mesh crate is the
+  lawful remainder: the integrity door, the head announcement, the
+  authority walk and its doors — single-chain judgments all; the
+  rfa-core dependency dropped with the triangle. The old mesh lanes
+  (MESH-1c, quarantine, universe-span, N6 fold) are STRUCK — the
+  constitution ladder replaces them: #34 kernel (coder-01), #35
+  codec gate (coder-04, next), #36 spine at TUniversal{S,G,T} +
+  vertical axis + adoption, #37 lenses-then-mirror-excision. The
+  mirror CRATE stands untouched per §11's observation-continuity law
+  until #37's lenses serve.
 - **coder-01**: next = Phase 2 cross-world trade (egregores exchanging
   joules/`S_cool` — needs a cross-world carrier; transfers are intra-world
   today) or TECH-1 (`10_TECH_EMERGENCE.md`, opens SINK-1's deferred

@@ -6,4 +6,4 @@ description = "NS-5 MESH — proof-of-convergence consilience: independent repla
 
 [dependencies]
 cfe = { path = "../cfe" }
-rfa-core = { path = "../rfa-core" }
+
