@@ -86,10 +86,13 @@ timelines in one mirrored file — divergent residents rotate to
 
 Exact rational arithmetic everywhere, no floats, roots never taken (work in
 `T⁴`); receipts are the world (SEAL B), unknown tags skip (SEAL A), adapters
-never hold logic (SEAL C); the mirror reflects, never authors; annex never
-merge; one landing at a time, red-first, spec+mechanic+vectors together;
-terminology law — no set-letter glyphs, Furnace never Crucible, no
-"Goldilocks", egregore/automaton never "bot".
+never hold logic (SEAL C); the lens renders, never authors (§11 — the
+word "mirror" is DEAD as a live name: the layer is the ledger and its
+lens; dated records that speak it are HISTORY, quoted never rewritten);
+annex never merge; one landing at a time, red-first,
+spec+mechanic+vectors together; terminology law — no set-letter
+glyphs, Furnace never Crucible, no "Goldilocks", egregore/automaton
+never "bot".
 
 ## 4. Wire tag registry state
 
@@ -252,7 +255,18 @@ INCURSION-1a LANDED 2026-07-31 (tag 81 — the sealed derelict wakes,
 the archive byte-untouched, the living never raided, the revenant
 line chronicle-seeded). All queue mechanics are landed or blocked on
 one named line each: WARDEN-1b, MASK-1b (coder-03 seam), FORGE-2b
-(N6-gated), wave-4 names (operator). Next: as assigned.
+(N6-gated), wave-4 names (operator). KERNEL-TAXON drafted 2026-07-31
+(`15_TAXON.md`): class+clade as closed u8 vocabularies entering the
+kernel by ADDITIVE amendment; TaxonSealed as a NEW deed (extending
+GenesisSealed would be breaking); invariant coverage drafted for
+coder-03's ratification; committed fields wait the coder-04 codec
+freeze; couplings land inside lawful() post-seal; creed and function
+STAY derived. RATIFIED whole by the operator 2026-07-31; the machine
+mapping stands at `seeds/taxon-map.json` (33 lines, zero unclassed).
+The lane now waits on two seams in order: the coder-04 codec freeze
+(committed fields), the coder-03 amendment (tag + coverage sealed);
+then the migration wave executes from the map. Next: the wave, on the
+window.
 - **coder-03**: N4 (NS-2 RQP + the scanner) — LANDED on main
   2026-07-30 (33e6c73 + post-ruling inscriptions 7f739f4, after the
   fifth-set rulings): spec §1–§4 with extracted vectors, sigil index +

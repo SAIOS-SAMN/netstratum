@@ -23,11 +23,11 @@ Usage:
   python3 tools/observer.py chart              # the star chart
   python3 tools/observer.py <view> --watch 2   # any view, refreshed
 
-Chain check: '✓' means every mirrored receipt's parent digest equals
+Chain check: '✓' means every exported receipt's parent digest equals
 its predecessor's digest with contiguous sequence numbers — splicing,
 deletion, or reordering reads '✗ BROKEN'. (Full BLAKE3 recomputation
 lives in-game via `verify`/`replay`; the chronicle is the authority,
-the mirror is its reflection.)
+the lens is its write-only rendering.)
 """
 
 import argparse
@@ -66,7 +66,7 @@ def show(fraction):
     return f"{fraction.numerator}/{fraction.denominator}"
 
 
-# ── the house wire (MIRROR-TLV): the committed orb decoded native ───
+# ── the house wire (state.tlv; landed as "MIRROR-TLV"): the committed orb decoded native ──
 # NS-1 TLV: tag u8 ‖ LE32(len) ‖ value; unknown tags SKIP (SEAL A).
 # Ratio: sign u8 ‖ LE32(len) ‖ numer BE ‖ LE32(len) ‖ denom BE.
 
@@ -128,7 +128,7 @@ def decode_orb_tlv(path):
     return orb
 
 
-# ── readers (the mirror's data files — data, never prose) ───────────
+# ── readers (the lens's data files — data, never prose) ─────────────
 
 def read_jsonl(path):
     if not path.exists():
@@ -260,7 +260,7 @@ def world_dirs(var_root):
 
 
 def world_facts(world_dir):
-    """Everything one world's mirror carries, gathered once."""
+    """Everything one world's export carries, gathered once."""
     chronicle = world_dir / "chronicle.jsonl"
     linked, receipts = chain_linked(chronicle)
     consumed = Fraction(0)
@@ -985,8 +985,8 @@ def main():
     render_view = VIEWS[args.view]
 
     if not (Path(args.root) / "worlds").is_dir():
-        print(f"(nothing mirrored under {args.root}/worlds yet — play a session "
-              "with the mirror wired, or boot the conductor)")
+        print(f"(nothing exported under {args.root}/worlds yet — play a session "
+              "with the ledger wired, or boot the conductor)")
         return
 
     if args.watch <= 0:

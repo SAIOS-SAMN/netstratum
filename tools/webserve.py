@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 """webserve.py — the observatory's window: a read-only file server.
 
-THERE IS NO API. The mirror's own files ARE the protocol — the web
+THERE IS NO API. The lens's own files ARE the protocol — the web
 observatory reads the same renderings the terminal observer reads
 (`state.json`, `starchart.json`, `chronicle.jsonl`, `universe.json`),
-served verbatim. One truth, zero translation layers (the reflection
-law over HTTP). The single synthesized route, `/data/index.json`, is a
-directory INDEX rendered as data — a listing, not an endpoint.
+served verbatim. One truth, zero translation layers (write-only
+exports over HTTP — §11 rule 2). The single synthesized route,
+`/data/index.json`, is a directory INDEX rendered as data — a
+listing, not an endpoint.
 
 READ-ONLY BY CONSTRUCTION: GET only; anything else refuses 405.
 
 THE PUSH (WEB-1 phase 2): `/stream` is a Server-Sent-Events feed —
-one `tick` event whenever the mirror moves (mtime watch on the worlds
-root), each carrying the changed paths. The client refetches exactly
-what moved; the payloads themselves stay the mirror's own files
+one `tick` event whenever the lens re-renders (mtime watch on the
+worlds root), each carrying the changed paths. The client refetches
+exactly what moved; the payloads themselves stay the lens's own files
 (state.tlv = the house wire). A socket speaking raw TLV frames
 remains the NS-5 form; SSE is its stdlib-lawful forerunner.
 
@@ -69,7 +70,7 @@ class Window(BaseHTTPRequestHandler):
         if path.startswith("/data/"):
             relative = path[len("/data/"):]
             target = (self.root / relative).resolve()
-            # Stay inside the root; only mirror renderings pass.
+            # Stay inside the root; only lens renderings pass.
             if (self.root.resolve() in target.parents
                     and target.suffix in ALLOWED_SUFFIXES
                     and target.is_file()):
@@ -82,7 +83,7 @@ class Window(BaseHTTPRequestHandler):
         self.end_headers()
 
     def stream(self):
-        """WEB-1 phase 2: the SSE push — a `tick` whenever the mirror
+        """WEB-1 phase 2: the SSE push — a `tick` whenever the lens
         moves; the client refetches what changed."""
         self.send_response(200)
         self.send_header("Content-Type", "text/event-stream")

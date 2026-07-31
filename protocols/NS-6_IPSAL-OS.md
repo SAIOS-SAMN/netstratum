@@ -179,7 +179,7 @@ on boot).
 ## 6. The place hierarchy — star ▷ planet ▷ colony
 
 Distinct from the authority hierarchy (§1, §5) is the **place** hierarchy: the
-containment of *locations*, normative here and mirrored in
+containment of *locations*, normative here and repeated in
 `03_SUBSTRATE_CONTRACT.md` §8.
 
 - A **STAR** (a star system: one sun and the bodies bound to it) is the

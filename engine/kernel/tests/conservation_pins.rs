@@ -5,6 +5,7 @@
 //! it reads two states and a claimed step, touches nothing else.
 
 use cfe::dop::{ClosureEvent, Resource};
+use cfe::ipsal::Scope;
 use cfe::ratio::ratio;
 use cfe::world::{World, FIRST_ORB, SOVEREIGN};
 use kernel::{lawful, Step, Unlawful, VERSION};
@@ -46,6 +47,76 @@ fn the_sealed_default_refuses_the_unjudged() {
         Err(Unlawful::Unjudged),
         "the sealed kernel refuses what it cannot judge"
     );
+}
+
+/// I2 — a transfer (Collect scope) by an agent WITHOUT Collect refuses
+/// NotPermitted; the same agent, once granted, is admitted; the sovereign
+/// (all scopes by construction) always passes; a non-entity refuses
+/// NoSuchEntity before any state is read. The kernel's scope_of(Collect)
+/// for ResourceTransferred is ratified here against world.rs.
+#[test]
+fn containment_gates_the_transfer_by_scope() {
+    let mut world = two_orb_world();
+    let haven = world.orbs()[1].orb_id;
+    let agent = world.register_agent("hand").expect("registers");
+    let prior = world.committed();
+    world
+        .transfer(FIRST_ORB, haven, Resource::Iron, ratio(3, 1))
+        .expect("the move closes");
+    let next = world.committed();
+    let stamp = world.now();
+    let step = |actor: u64| Step {
+        event: ClosureEvent::ResourceTransferred {
+            from_orb: FIRST_ORB,
+            to_orb: haven,
+            resource: Resource::Iron,
+            amount: ratio(3, 1),
+        },
+        actor,
+        stamp,
+    };
+    // The agent lacks Collect: refused, by scope.
+    assert_eq!(
+        lawful(&prior, &next, &step(agent)),
+        Err(Unlawful::NotPermitted { actor: agent, scope: Scope::Collect }),
+        "authority is granted, never assumed"
+    );
+    // The sovereign holds every scope: admitted.
+    assert_eq!(lawful(&prior, &next, &step(SOVEREIGN)), Ok(()));
+    // A non-entity: refused before any state read.
+    assert_eq!(
+        lawful(&prior, &next, &step(999)),
+        Err(Unlawful::NoSuchEntity { actor: 999 }),
+        "identity precedes the world"
+    );
+    // Grant the agent Collect: now admitted.
+    world.grant(agent, Scope::Collect).expect("grants");
+    let granted_prior = world.committed();
+    assert_eq!(lawful(&granted_prior, &next, &step(agent)), Ok(()));
+}
+
+#[test]
+fn exactness_holds_over_the_value_ledgers_and_the_primitive_is_sealed() {
+    // I3 passes on a real played state (every banked value is canonical by
+    // construction), and the kernel CALLS the sealed primitive — witnessed
+    // here so a future non-canonical path (a bad decode) would refuse.
+    let world = two_orb_world();
+    let prior = world.committed();
+    let next = world.committed();
+    let step = Step {
+        // An authority deed carries no value: exactness is vacuous on it
+        // and the deed rides through I3 on the state, not the event.
+        event: ClosureEvent::ScopeGranted { agent: 2, scope: Scope::Collect },
+        actor: SOVEREIGN,
+        stamp: world.now(),
+    };
+    // ScopeGranted is now COVERED (I2 containment + I3 exactness — its full
+    // set): no longer Unjudged. The sovereign holds Build, so it admits.
+    assert_eq!(lawful(&prior, &next, &step), Ok(()), "the authority deed is judged, not skipped");
+    // The sealed canonical primitive: every constructed Ratio is canonical.
+    assert!(cfe::ratio::is_canonical(&ratio(1, 2)));
+    assert!(cfe::ratio::is_canonical(&ratio(2, 4)), "2/4 constructs AS 1/2 — canonical");
+    assert!(cfe::ratio::is_canonical(&ratio(-3, 1)));
 }
 
 #[test]

@@ -309,7 +309,7 @@ pub struct Committed {
 }
 
 /// G1 (04 §1): a civilization's sealed axes, as the world holds them.
-/// The registry mirrors this; it never grounds it (04 §5 binding 2).
+/// The registry caches this; it never grounds it (04 §5 binding 2).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Genesis {
     pub civilization: String,
@@ -379,18 +379,18 @@ pub struct World {
     gauge: Vec<Ratio>,
     /// G1: the sealed line, if any (04 §1/§5).
     genesis: Option<Genesis>,
-    /// D3: the charted terrain seed (mirror of the receipt).
+    /// D3: the charted terrain seed (replay of the receipt).
     terrain_seed: Option<[u8; 32]>,
-    /// PRACTICE-1: the receipted disciplines (mirror of the receipts).
+    /// PRACTICE-1: the receipted disciplines (replay of the receipts).
     practices: Vec<u8>,
-    /// MANU-1: the forged instruments (mirror of the receipts).
+    /// MANU-1: the forged instruments (replay of the receipts).
     instruments: Vec<(u64, [u8; 32], u8)>,
-    /// ROUTE-1: the live lanes (mirror of the receipts).
+    /// ROUTE-1: the live lanes (replay of the receipts).
     routes: Vec<(u64, Ratio)>,
     prospects: Vec<Prospected>,
-    /// WARDEN-1a: the elder's reverse shield (mirror of the receipts).
+    /// WARDEN-1a: the elder's reverse shield (replay of the receipts).
     warded: Option<bool>,
-    /// MASK-1a: the veil (mirror of the receipts).
+    /// MASK-1a: the veil (replay of the receipts).
     veiled: bool,
 }
 
@@ -3380,8 +3380,8 @@ impl World {
     }
 
     /// WARDEN-1a — lift the ward: the depth gate. The claimer's
-    /// recorded depth (the mirror's solves reading, passed by the
-    /// caller — depth lives mirror-side) must reach the ceiling
+    /// recorded depth (the ledger's solves reading, passed by the
+    /// caller — depth lives ledger-side) must reach the ceiling
     /// (placeholder 5). The receipt names the claimer; the template
     /// grant is WARDEN-1b.
     pub fn lift_ward(&mut self, claimer: &str, depth: u32) -> Result<(), ActionRefused> {
@@ -3699,6 +3699,27 @@ impl World {
     }
 }
 
+/// MARKET-2: THE pair's melt fraction — the one producer of the
+/// formula. The transit reads the whole manifold gap (spatial L1 +
+/// the wrapped key gap: 11 §2.1's clash consumes payload, never a
+/// tertiary sink) at φ = 1/64 per unit; the best lane BOTH books
+/// hold (ROUTE-1) suppresses it. At ≥ 1 the pair is economically
+/// WALLED by decay physics.
+pub fn pair_melt(a: &World, b: &World, distance: &Ratio) -> Ratio {
+    let gap = key_distance(a.key(), b.key());
+    let mut melt = (distance.clone() + gap) * ratio(MELT_PER_UNIT.0, MELT_PER_UNIT.1);
+    let best_eta = a
+        .routes
+        .iter()
+        .filter(|(deal, _)| b.routes.iter().any(|(held, _)| held == deal))
+        .map(|(_, eta)| eta.clone())
+        .max();
+    if let Some(eta) = best_eta {
+        melt *= ratio(1, 1) - eta;
+    }
+    melt
+}
+
 /// MARKET-1 (BUILD_ORDER §3a) — CLEAR A CROSSING: two resting offers
 /// on two worlds meet; the fill happens at the RESTING offer's exact
 /// price (price-time priority: the earlier posted rules; ties break
@@ -3750,27 +3771,11 @@ pub fn clear_trade(
         false => x.clone() * held_b.give_amount.clone() / held_b.want_amount.clone(),
     };
     let y = y.min(held_b.give_amount.clone());
-    // MARKET-2 (ruled 2026-07-31) — THE ICEBERG: the side-fee
-    // friction CONVERTED into cargo melt (Samuelson). The transit's
-    // melt fraction reads the whole manifold gap — spatial L1 plus
-    // the wrapped key gap (11 §2.1's clash now consumes payload,
-    // never a tertiary sink) — at φ = 1/64 per unit. Delivered =
-    // sent × (1 − φ·D); at φ·D ≥ 1 the pair is economically WALLED
-    // by decay physics (the haul refuses before anything moves).
-    let gap = key_distance(a.key(), b.key());
-    let mut melt = (distance + gap) * ratio(MELT_PER_UNIT.0, MELT_PER_UNIT.1);
-    // ROUTE-1: the best lane BOTH books hold suppresses the melt —
-    // infrastructure someone paid for, decaying back to raw space
-    // the moment either leg lapses.
-    let best_eta = a
-        .routes
-        .iter()
-        .filter(|(deal, _)| b.routes.iter().any(|(held, _)| held == deal))
-        .map(|(_, eta)| eta.clone())
-        .max();
-    if let Some(eta) = best_eta {
-        melt *= ratio(1, 1) - eta;
-    }
+    // MARKET-2 (ruled 2026-07-31) — THE ICEBERG: delivered = sent ×
+    // (1 − φ·D). ONE producer of the melt number (the conform
+    // ruling's spirit): clear_trade and every profit test read
+    // pair_melt, nothing recomputes the formula.
+    let melt = pair_melt(a, b, &distance);
     // The two directions — each an aperture pair, shield-checked,
     // demurrage-touched; sent − received = the void's exact share.
     haul(a, held_a.orb, b, held_b.orb, held_a.give, x, deal, &melt)?;
@@ -4301,7 +4306,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             }
             // ABSORB-1: the three-way move replays — the absorber's
             // ledger carries the shed; the window opens; crisis reads
-            // mirror the live order exactly.
+            // match the live order exactly.
             ClosureEvent::OverflowAbsorbed { source_orb, absorber_orb, amount } => {
                 let source_crisis = peek(&orbs, *source_orb)
                     .map(|held| !held.famine.is_empty() || held.overheat)

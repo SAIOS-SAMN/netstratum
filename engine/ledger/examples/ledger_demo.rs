@@ -71,5 +71,5 @@ fn main() {
         .record("kepler-passage", "tidefall", "deep-chorus", &tidefall)
         .unwrap();
 
-    println!("registered 2 civilizations, mirrored 2 worlds under {var}");
+    println!("registered 2 civilizations, exported 2 worlds under {var}");
 }

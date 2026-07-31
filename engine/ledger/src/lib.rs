@@ -101,7 +101,7 @@ impl Ledger {
     ) -> std::io::Result<()> {
         let dir = self.world_dir(world_name);
         // ONE CHRONICLE PER WORLD PER ERA (the persist.rs divergence
-        // law, mirror-side): founding names recur across eras, and an
+        // law, ledger-side): founding names recur across eras, and an
         // incremental append onto a PRIOR era's file would interleave
         // two timelines in one chain. A divergent resident chronicle is
         // rotated aside as a closed sibling world — never clobbered —
@@ -119,7 +119,7 @@ impl Ledger {
         fs::write(&tmp, state)?;
         fs::rename(&tmp, planet_dir.join("state.json"))?;
 
-        // MIRROR-TLV (operator directive, 2026-07-30): the COMMITTED
+        // state.tlv (landed as "MIRROR-TLV", 2026-07-30): the COMMITTED
         // state speaks the house wire — state.tlv is the orb's
         // canonical NS-1 bytes (equal state, equal bytes), the
         // machine layer every board may decode natively. JSON stays
@@ -148,7 +148,7 @@ impl Ledger {
         fs::write(&tmp, w.finish())?;
         fs::rename(&tmp, dir.join("world.json"))?;
 
-        // chronicle.jsonl — append receipts beyond what is mirrored.
+        // chronicle.jsonl — append receipts beyond what is exported.
         let path = dir.join("chronicle.jsonl");
         let already = if path.exists() {
             fs::read_to_string(&path)?.lines().count()
@@ -167,7 +167,7 @@ impl Ledger {
         Ok(())
     }
 
-    /// The divergence check behind [`Mirror::record`]: compare the
+    /// The divergence check behind [`Ledger::record`]: compare the
     /// resident chronicle's line `k` digest against the live world's
     /// receipt `k` (k = last shared index). Equal ⇒ same timeline
     /// (incremental append proceeds). Different ⇒ a PRIOR era's world
@@ -467,7 +467,7 @@ fn wrapped_abs(a: &Ratio, b: &Ratio, span: &Ratio) -> Ratio {
     d
 }
 
-/// Parse the mirror's exact rendering back: `p/q` or a plain integer.
+/// Parse the ledger's exact rendering back: `p/q` or a plain integer.
 fn parse_ratio(text: &str) -> Option<Ratio> {
     use num_bigint::BigInt;
     use std::str::FromStr;

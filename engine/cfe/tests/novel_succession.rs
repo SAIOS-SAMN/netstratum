@@ -125,7 +125,7 @@ fn the_successor_inherits_the_chronicle_not_the_tree() {
         "the deed is receipted"
     );
 
-    // The mirror still holds after the lens: replay and resume both
+    // The chain still holds after the lens: replay and resume both
     // rebuild the succession boundary exactly.
     assert_eq!(world.chronicle().verify_chain(), ChainRead::Intact);
     assert_eq!(

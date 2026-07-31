@@ -37,7 +37,7 @@ impl Delta {
         self.fiber
     }
 
-    /// Set the (i, j) relation and its antisymmetric mirror in one
+    /// Set the (i, j) relation and its antisymmetric twin in one
     /// stroke — the only lawful writer (`i == j` refuses: the diagonal
     /// is identically zero).
     ///

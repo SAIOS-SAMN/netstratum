@@ -30,7 +30,7 @@ unanimous or refused, structurally — the house law the world clock
 already keeps (NS-3 §1.3, 3-of-3).
 
 The mesh is how independent engine instances hold ONE universe: not
-by trusting each other, and not by mirroring each other — by
+by trusting each other, and not by copying each other — by
 MEASURING each other. Convergence is the proof; opposition is the
 check; the fold is the merge that never merges.
 
@@ -49,8 +49,8 @@ N7 (ANCHOR), where the mesh meets parties it cannot re-compute.
    node is root; the four C's place every claim. The exact form of
    "reaches the same projection" is §2's consilience measurement,
    landed: C(Δ) = 0 exactly, or refused typed.
-2. **The anti-mirror check (12_UNION §2c).** Cross-node verification
-   is by OPPOSITION, never byte-mirroring: a two-legged deed verifies
+2. **The opposition check (12_UNION §2c).** Cross-node verification
+   is by OPPOSITION, never byte-copying: a two-legged deed verifies
    when the far leg is the exact inverse of the near one (the
    aperture pair summing zero; the council reckoning summing to the
    locks; the Delta antisymmetry). Byte-canonical encoding exists
@@ -63,7 +63,7 @@ N7 (ANCHOR), where the mesh meets parties it cannot re-compute.
    moves by RECEIPTED HANDOFF, never by race: the yielding node seals
    a handoff receipt naming the successor; the taking node's first
    append cites it. A fork (two chains sharing a prefix) is not a
-   catastrophe — it is a DIVERGENCE: both branches live, the mirror's
+   catastrophe — it is a DIVERGENCE: both branches live, the ledger's
    rotation law names them, and convergence annexes both (annex,
    never merge — 07 §1). The fork's exact measurement is §2.3's
    DIVERGED refusal — the residuals carried whole are what the annex
@@ -130,7 +130,7 @@ The cocycle residual over the canonical triple (origin, A, B) is
 ordered triples of the triangle, so **C(Δ) = 6·Σ R_l²** — exact
 rational, and zero iff every residual is zero. Consilience is
 `C(Δ) = 0` EXACTLY. There is no threshold, no tolerance, no vote.
-(The triangle is the anti-mirror law in miniature: the shared-position
+(The triangle is the opposition law in miniature: the shared-position
 claim proves by the residual landing on zero, never by comparing
 bytes.)
 

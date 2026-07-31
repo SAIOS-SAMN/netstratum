@@ -98,7 +98,7 @@ pub fn default_era_roots(var_root: &str) -> Vec<(String, PathBuf)> {
     eras
 }
 
-/// Converge every archived era into the mirror's universe (07 §1):
+/// Converge every archived era into the ledger's universe (07 §1):
 /// verify → quarantine broken → epoch-shift T → place by the four C's →
 /// append `EraAnnexed` to the ledger → chart + fiber cards → persist
 /// the universe card at the final epoch base. Idempotent: worlds
@@ -259,7 +259,7 @@ const TERMINAL_WINDOW: usize = 8;
 /// The world's terminal KEY: the last gauge-carrying receipt's value
 /// (GaugeShifted · Diverged · Confluent · EraFolded — the receipt
 /// carries the wrapped value, the last stands; the replay law,
-/// mirror-side). A chronicle with no key moves reads 0.
+/// ledger-side). A chronicle with no key moves reads 0.
 fn terminal_gauge(events: &[ClosureEvent]) -> Ratio {
     events
         .iter()

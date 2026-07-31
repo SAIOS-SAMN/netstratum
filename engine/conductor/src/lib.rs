@@ -5,7 +5,7 @@
 //! attributed `by#agent` — automation on a leash). Each heartbeat a
 //! world: drains the steward inbox, plays its policy, ticks,
 //! collects, grinds the forge (its OWN latest receipt digest seeds
-//! the puzzle — CHARTER §9), and mirrors everything.
+//! the puzzle — CHARTER §9), and keeps the ledger.
 //!
 //! **TECH IS EARNED (the pyramid loop closed):** smelters unlock at
 //! forge rung 3, synthesizers at rung 5 — for every temperament.
@@ -39,7 +39,7 @@
 //!
 //! Everything is deterministic: same era length → byte-identical
 //! receipts. HONEST SEAM: worlds live in process memory; reload from
-//! the mirrored chronicle is the G0 persistence seam (coder-02).
+//! the exported chronicle is the G0 persistence seam (coder-02).
 
 use cfe::dop::{Resource, ZoneKind};
 use cfe::ipsal::Scope;
@@ -450,7 +450,7 @@ pub fn joule_runway_allows(banked_joules: &Ratio, zones: usize) -> bool {
 /// BOT-THERM: the thermal regime a egregore world lives in. The mesic band
 /// is home (temperament unchanged — `None`); above its ceiling the
 /// Furnace laws apply, below its floor the Frost laws. Unsited worlds
-/// carry no regime (the engine's opt-in guard, mirrored here).
+/// carry no regime (the engine's opt-in guard, repeated here).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Regime {
     Furnace,
@@ -512,16 +512,16 @@ impl Egregore {
     /// Found the era: registry entry (join if present), the colony,
     /// the contained egregore actor, the steward entity, and the world's
     /// place on the star-chart.
-    pub fn genesis(spec: EgregoreSpec, registry: &Registry, mirror: &Ledger) -> Egregore {
+    pub fn genesis(spec: EgregoreSpec, registry: &Registry, book: &Ledger) -> Egregore {
         let _ = registry.create(&spec.civilization);
         // BLOCKER A1 (the G0 persistence seam, CLOSED 2026-07-30):
         // the boot RESUMES before it founds. A verifying resume
         // carrier means this world already lived — its receipts,
         // techs, famines, keys, and trades continue; a missing or
         // broken carrier founds fresh (a broken one rotates aside as
-        // the mirror's divergence law already provides). NPC progress
+        // the ledger's divergence law already provides). NPC progress
         // survives every restart without an operator fold.
-        let carrier = mirror.world_dir(&spec.world_name).join("chronicle.tlv");
+        let carrier = book.world_dir(&spec.world_name).join("chronicle.tlv");
         if let Ok(chronicle) = cfe::persist::load(&carrier) {
             let world = World::resume(chronicle);
             if world.orb().is_some() {
@@ -552,7 +552,7 @@ impl Egregore {
                         Ok(Some(_)) | Err(_) => true,
                         Ok(None) => false,
                     };
-                    let _ = mirror.chart_world(
+                    let _ = book.chart_world(
                         &spec.world_name,
                         (&spec.position.0, &spec.position.1, &spec.position.2),
                         world.gauge(),
@@ -562,7 +562,7 @@ impl Egregore {
                     // honest approximation until solves become
                     // receipts): three confirms promote a rung.
                     let solved = std::fs::read_dir(
-                        mirror.world_dir(&spec.world_name).join("solves"),
+                        book.world_dir(&spec.world_name).join("solves"),
                     )
                     .map(|entries| {
                         entries
@@ -599,7 +599,7 @@ impl Egregore {
             .clone()
             .map(cfe::world::wrap_gauge)
             .unwrap_or_else(|| ratio(0, 1));
-        let _ = mirror.chart_world(
+        let _ = book.chart_world(
             &spec.world_name,
             (&spec.position.0, &spec.position.1, &spec.position.2),
             // AEON-1b: a divergence branch charts at its cleaved key;
@@ -901,13 +901,13 @@ impl Egregore {
     /// Drain the operator's inbox: each directive applies as the
     /// steward entity (scope-checked in-engine) or refuses; archived
     /// either way, never deleted.
-    fn drain_inbox(&mut self, mirror: &Ledger) {
-        let Ok(pending) = mirror.pending_directives(&self.spec.world_name) else {
+    fn drain_inbox(&mut self, book: &Ledger) {
+        let Ok(pending) = book.pending_directives(&self.spec.world_name) else {
             return;
         };
         for item in pending {
             let applied = self.apply_directive(&item.directive);
-            let _ = mirror.archive(
+            let _ = book.archive(
                 &item,
                 if applied {
                     Disposition::Applied
@@ -965,7 +965,7 @@ impl Egregore {
     /// stacked grids, stack operators — while planar and harmonic
     /// civilizations work the planar forge (the harmonic carrier is a
     /// named gap; it lands with its own vocabulary, not as a skin).
-    fn research_step(&mut self, mirror: &Ledger) {
+    fn research_step(&mut self, book: &Ledger) {
         let Some(receipt) = self.world.chronicle().receipts().last() else {
             return;
         };
@@ -1003,7 +1003,7 @@ impl Egregore {
         };
         match solved {
             Some((name, word, cert_hex)) => {
-                let _ = mirror.record_solve(
+                let _ = book.record_solve(
                     &self.spec.world_name,
                     &name,
                     &word,
@@ -1153,8 +1153,8 @@ impl Egregore {
 
     /// One full heartbeat. A speciation returns the newborn's spec —
     /// the era loop gives it a world of its own.
-    pub fn cycle(&mut self, mirror: &Ledger, registry: &Registry) -> Option<EgregoreSpec> {
-        self.drain_inbox(mirror);
+    pub fn cycle(&mut self, book: &Ledger, registry: &Registry) -> Option<EgregoreSpec> {
+        self.drain_inbox(book);
         self.build_step();
         self.survey_step();
         self.world.tick();
@@ -1164,10 +1164,10 @@ impl Egregore {
         for orb in orbs {
             let _ = self.world.collect_as(self.automaton, orb);
         }
-        self.research_step(mirror);
+        self.research_step(book);
         let newborn = self.divergence_step(registry);
         // THE RESUME CARRIER (task 25, 2026-07-30): every egregore
-        // world syncs its tlv chronicle beside the mirror — an
+        // world syncs its tlv chronicle beside the ledger exports — an
         // append-only resume copy (cfe::persist grows the file, never
         // rewrites). The player's OBSERVING hand can resume a copy;
         // the WRITING hand stays refused at the CLI (two writers on
@@ -1175,11 +1175,11 @@ impl Egregore {
         // intervention still goes through the steward inbox.
         let _ = cfe::persist::sync(
             self.world.chronicle(),
-            &mirror
+            &book
                 .world_dir(&self.spec.world_name)
                 .join("chronicle.tlv"),
         );
-        let _ = mirror.record(
+        let _ = book.record(
             &self.spec.world_name,
             &self.spec.planet,
             &self.spec.civilization.sigil,
@@ -1199,6 +1199,148 @@ pub fn spatial_l1(a: &(Ratio, Ratio, Ratio), b: &(Ratio, Ratio, Ratio)) -> Ratio
     leg(&a.0, &b.0) + leg(&a.1, &b.1) + leg(&a.2, &b.2)
 }
 
+/// Two disjoint mutable seats out of one board.
+fn two_mut<T>(slice: &mut [T], i: usize, j: usize) -> (&mut T, &mut T) {
+    assert!(i != j);
+    if i < j {
+        let (left, right) = slice.split_at_mut(j);
+        (&mut left[i], &mut right[0])
+    } else {
+        let (left, right) = slice.split_at_mut(i);
+        (&mut right[0], &mut left[j])
+    }
+}
+
+/// MERCHANT-1 (the MARKET-2 sequence) — THE ARBITRAGE PASS, the
+/// reference model's merchant instinct (layer-2 POLICY over lawful
+/// deeds; SEAM-1 will put a trait boundary here).
+///
+/// v1 law: the merchant is STRICTLY ADDITIVE — it bridges only
+/// pairs the iceberg has WALLED (pair_melt ≥ 1 direct), creating
+/// trade where none could exist and never front-running the open
+/// market. The triangle: A rests give G want Q; B rests give Q
+/// want G; M between them pays Q to A, hauls G, sells to B for Q —
+/// profit iff what comes back exceeds what was paid after BOTH
+/// legs' melt (the operator's test: P_B·(1−φD) > P_A + fees; fees
+/// are ROUTE-1 upkeep, already receipted). One crossing per beat;
+/// a merchant whose second leg refuses HOLDS inventory — that risk
+/// is the trade. Every leg is an ordinary clear_trade: melt, void
+/// share, and both books' receipts all land by the one law.
+pub fn merchant_step(worlds: &mut [Egregore], beat: u64) -> Vec<(String, String, String)> {
+    let one = || ratio(1, 1);
+    let n = worlds.len();
+    for m in 0..n {
+        if worlds[m].penned || !worlds[m].world.offers().is_empty() {
+            continue;
+        }
+        for a in 0..n {
+            if a == m || worlds[a].penned {
+                continue;
+            }
+            for b in 0..n {
+                if b == m || b == a || worlds[b].penned {
+                    continue;
+                }
+                let Some(ask_a) = worlds[a].world.offers().first().cloned() else { continue };
+                let Some(ask_b) = worlds[b].world.offers().first().cloned() else { continue };
+                // The triangle in one quote: B wants what A sells,
+                // and pays in what A asks.
+                if ask_b.want != ask_a.give || ask_b.give != ask_a.want {
+                    continue;
+                }
+                // Strictly additive: the direct pair must be walled.
+                let d_ab = spatial_l1(&worlds[a].spec.position, &worlds[b].spec.position);
+                if cfe::world::pair_melt(&worlds[a].world, &worlds[b].world, &d_ab) < one() {
+                    continue;
+                }
+                let d_am = spatial_l1(&worlds[a].spec.position, &worlds[m].spec.position);
+                let d_mb = spatial_l1(&worlds[m].spec.position, &worlds[b].spec.position);
+                let melt_am = cfe::world::pair_melt(&worlds[a].world, &worlds[m].world, &d_am);
+                let melt_mb = cfe::world::pair_melt(&worlds[m].world, &worlds[b].world, &d_mb);
+                if melt_am >= one() || melt_mb >= one() {
+                    continue;
+                }
+                // The profit test, exact: bought must fill B's ask,
+                // and the quote coming back must exceed the quote
+                // paid — else the caravan stays home.
+                let bought = ask_a.give_amount.clone() * (one() - melt_am);
+                if bought < ask_b.want_amount {
+                    continue;
+                }
+                let back = ask_b.give_amount.clone() * (one() - melt_mb);
+                if back <= ask_a.want_amount {
+                    continue;
+                }
+                let held = worlds[m]
+                    .world
+                    .orb()
+                    .map(|orb| orb.banked_amount(ask_a.want))
+                    .unwrap_or_else(|| ratio(0, 1));
+                if held < ask_a.want_amount {
+                    continue;
+                }
+                // Leg 1: M counters A exactly — fills at A's rest.
+                let counter = worlds[m].world.chronicle().receipts().len() as u64;
+                if worlds[m]
+                    .world
+                    .post_offer(
+                        cfe::world::FIRST_ORB,
+                        ask_a.want,
+                        ask_a.want_amount.clone(),
+                        ask_a.give,
+                        ask_a.give_amount.clone(),
+                        counter,
+                    )
+                    .is_err()
+                {
+                    continue;
+                }
+                let deal = beat * 1_000 + 990;
+                {
+                    let (merchant, seller) = two_mut(worlds, m, a);
+                    if cfe::world::clear_trade(
+                        &mut merchant.world, counter, &mut seller.world, ask_a.offer, deal, d_am,
+                    )
+                    .is_err()
+                    {
+                        continue;
+                    }
+                }
+                // Leg 2: M counters B — fills at B's rest. A refusal
+                // here leaves M holding cargo: merchant risk, lawful.
+                let counter = worlds[m].world.chronicle().receipts().len() as u64;
+                if worlds[m]
+                    .world
+                    .post_offer(
+                        cfe::world::FIRST_ORB,
+                        ask_b.want,
+                        ask_b.want_amount.clone(),
+                        ask_b.give,
+                        ask_b.give_amount.clone(),
+                        counter,
+                    )
+                    .is_err()
+                {
+                    continue;
+                }
+                let (merchant, buyer) = two_mut(worlds, m, b);
+                if cfe::world::clear_trade(
+                    &mut merchant.world, counter, &mut buyer.world, ask_b.offer, deal + 2, d_mb,
+                )
+                .is_ok()
+                {
+                    return vec![(
+                        worlds[m].spec.world_name.clone(),
+                        worlds[a].spec.world_name.clone(),
+                        worlds[b].spec.world_name.clone(),
+                    )];
+                }
+            }
+        }
+    }
+    Vec::new()
+}
+
 /// MESH-1b (#2, the consumer slice): the conductor's side of the
 /// receipted handoff. `yield <world> <seat>` lines in the control
 /// file ask for the pen; the beat boundary is the one lawful moment
@@ -1210,7 +1352,7 @@ pub fn spatial_l1(a: &(Ratio, Ratio, Ratio), b: &(Ratio, Ratio, Ratio)) -> Ratio
 pub fn pen_service(
     worlds: &mut [Egregore],
     registry: &Registry,
-    mirror: &Ledger,
+    book: &Ledger,
     control_path: &Path,
     stamp: u64,
 ) -> Vec<String> {
@@ -1242,9 +1384,9 @@ pub fn pen_service(
                             egregore.world.hold_pen(None);
                             let _ = cfe::persist::sync(
                                 egregore.world.chronicle(),
-                                &mirror.world_dir(world_name).join("chronicle.tlv"),
+                                &book.world_dir(world_name).join("chronicle.tlv"),
                             );
-                            let _ = mirror.record(
+                            let _ = book.record(
                                 &egregore.spec.world_name,
                                 &egregore.spec.planet,
                                 &egregore.spec.civilization.sigil,
@@ -1278,7 +1420,7 @@ pub fn pen_service(
     }
     // The return poll.
     for egregore in worlds.iter_mut().filter(|e| e.penned) {
-        let carrier = mirror
+        let carrier = book
             .world_dir(&egregore.spec.world_name)
             .join("chronicle.tlv");
         let Ok(chronicle) = cfe::persist::load(&carrier) else {
@@ -1286,7 +1428,7 @@ pub fn pen_service(
         };
         if mesh::authority(&chronicle) == Ok(Some(cfe::vrp::CONDUCTOR_HAND)) {
             let name = egregore.spec.world_name.clone();
-            *egregore = Egregore::genesis(egregore.spec.clone(), registry, mirror);
+            *egregore = Egregore::genesis(egregore.spec.clone(), registry, book);
             log.push(format!("HANDOFF — {name}: the pen returns; beats resume"));
         }
     }
@@ -1319,7 +1461,7 @@ pub fn incursion(
     era_root: &std::path::Path,
     world_name: &str,
     registry: &Registry,
-    mirror: &Ledger,
+    book: &Ledger,
     stamp: u64,
 ) -> Result<Egregore, IncursionRefused> {
     let sealed = era_root
@@ -1335,7 +1477,7 @@ pub fn incursion(
         return Err(IncursionRefused::TheLivingStand);
     }
     let woken_world = format!("{world_name}-returned");
-    let live_carrier = mirror.world_dir(&woken_world).join("chronicle.tlv");
+    let live_carrier = book.world_dir(&woken_world).join("chronicle.tlv");
     if live_carrier.exists() {
         return Err(IncursionRefused::AlreadyWoken);
     }
@@ -1415,14 +1557,14 @@ pub fn incursion(
         orbit: None,
         gauge: None,
     };
-    let egregore = Egregore::genesis(spec, registry, mirror);
-    // The door receipts on the universe ledger (mirror-side, the
+    let egregore = Egregore::genesis(spec, registry, book);
+    // The door receipts on the universe ledger (ledger-side, the
     // GalaxyObserved pattern).
     let era = era_root
         .file_name()
         .map(|held| held.to_string_lossy().into_owned())
         .unwrap_or_default();
-    let _ = mirror.strike_incursion(&era, world_name, &sigil, stamp);
+    let _ = book.strike_incursion(&era, world_name, &sigil, stamp);
     Ok(egregore)
 }
 
@@ -1435,7 +1577,7 @@ pub fn incursion(
 pub fn observe_crossings(
     worlds: &[Egregore],
     registry: &Registry,
-    mirror: &Ledger,
+    book: &Ledger,
     stamp: u64,
 ) -> Vec<Galaxy> {
     let mut created = Vec::new();
@@ -1443,12 +1585,12 @@ pub fn observe_crossings(
         if !egregore.world.has_crossed() {
             continue;
         }
-        let Some(((x, y, z), _)) = mirror.charted_position(&egregore.spec.world_name) else {
+        let Some(((x, y, z), _)) = book.charted_position(&egregore.spec.world_name) else {
             continue;
         };
         let creator = galaxy_creator(registry, &egregore.spec.civilization);
         if let Ok(Some(galaxy)) =
-            mirror.observe_galaxy(&egregore.spec.civilization.sigil, &creator, (&x, &y, &z), stamp)
+            book.observe_galaxy(&egregore.spec.civilization.sigil, &creator, (&x, &y, &z), stamp)
         {
             created.push(galaxy);
         }
@@ -1484,9 +1626,9 @@ fn galaxy_creator(registry: &Registry, civilization: &Civilization) -> String {
 /// beat. Returns the live worlds.
 pub fn run_era(var_root: &str, cycles: u32) -> Vec<Egregore> {
     let registry = Registry::at(format!("{var_root}/registry"));
-    let mirror = Ledger::at(format!("{var_root}/worlds"));
+    let book = Ledger::at(format!("{var_root}/worlds"));
     let eras = ledger::converge::default_era_roots(var_root);
-    let epoch_base = ledger::converge::converge(&mirror, &eras)
+    let epoch_base = ledger::converge::converge(&book, &eras)
         .map(|read| read.epoch_base)
         .unwrap_or(0);
     // 11 §5.2: the live aeon's G-sheet (see main.rs — same law).
@@ -1496,27 +1638,27 @@ pub fn run_era(var_root: &str, cycles: u32) -> Vec<Egregore> {
         .map(|mut spec| {
             let opening = spec.gauge.take().unwrap_or_else(|| ratio(0, 1));
             spec.gauge = Some(cfe::world::wrap_gauge(opening + live_base.clone()));
-            Egregore::genesis(spec, &registry, &mirror)
+            Egregore::genesis(spec, &registry, &book)
         })
         .collect();
     for beat in 0..cycles {
         // TUniversal T = epoch base + this era's beat (07 §1.3).
-        let _ = mirror.set_universal_clock(epoch_base + u64::from(beat) + 1);
+        let _ = book.set_universal_clock(epoch_base + u64::from(beat) + 1);
         let mut newborns = Vec::new();
         for egregore in &mut worlds {
-            if let Some(spec) = egregore.cycle(&mirror, &registry) {
+            if let Some(spec) = egregore.cycle(&book, &registry) {
                 newborns.push(spec);
             }
         }
         for spec in newborns {
-            worlds.push(Egregore::genesis(spec, &registry, &mirror));
+            worlds.push(Egregore::genesis(spec, &registry, &book));
         }
         // JOURNAL-1 (08 §3): on year boundaries every civilization
-        // speaks — the mirror renders journals + wall, a REFLECTION
+        // speaks — the lens renders journals + wall, write-only display
         // of the chronicle, never a state change.
         if (u64::from(beat) + 1).is_multiple_of(ledger::journal::YEAR_TICKS) {
             for egregore in &worlds {
-                let _ = mirror.record_journal(
+                let _ = book.record_journal(
                     &egregore.spec.world_name,
                     &egregore.world,
                     &ledger::journal::Voice::of(&egregore.spec.civilization),
@@ -1524,7 +1666,7 @@ pub fn run_era(var_root: &str, cycles: u32) -> Vec<Egregore> {
             }
             // GALAXY-1b: the observation sweep rides the year voice
             // (11 §1 — board-scale shifts read yearly).
-            let _ = observe_crossings(&worlds, &registry, &mirror, epoch_base + u64::from(beat) + 1);
+            let _ = observe_crossings(&worlds, &registry, &book, epoch_base + u64::from(beat) + 1);
         }
     }
     worlds

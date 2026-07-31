@@ -36,6 +36,40 @@ remains open (§7).
 
 ---
 
+## 0b. THE SEALED MATH CORE (the equations are immutable — more than the
+alphabets)
+
+The master equations are not the kernel's to own alone, nor the mesh's —
+they are ONE immutable definition both bind and CALL. The residual `R`, the
+coherence functional `C(Δ)`, `coboundary_reduce`, `orbit_lock`,
+`verify_certificate`, and the evolution operators live in the SEALED MATH
+CORE (the algebra layer — `rfa-core` is the seed; the certificate verifier
+moves in from `solver` at its wiring). Three laws bind it:
+
+1. **One definition, many callers — no invariant codes its own math.** The
+   kernel's I6 CALLS `orbit_lock`; the mesh's consilience CALLS `C(Δ)`; I4
+   CALLS `verify_certificate`. A primitive reimplemented in two places can
+   diverge, and two nodes computing the same input to different results is
+   the death of convergent-consensus. So the equations are called, never
+   copied.
+2. **Version-pinned into the constitution digest.** The math core's version
+   is part of `constitution_digest()` exactly as `kernel::VERSION` is. A
+   changed equation changes the digest — a different universe, caught by
+   the handshake, never a silent divergence.
+3. **Math amendments are BREAKING-ONLY (major bump), always — the equations
+   are MORE immutable than the vocabularies.** A vocabulary change can be
+   ADDITIVE (a new tag; old computations unchanged; minor bump; lawful
+   fork). A math change alters the RESULT of a computation on the SAME
+   inputs — it is inherently breaking, because two nodes on the same
+   alphabet but different equations would compute different `C(Δ)` on
+   identical receipts and diverge silently. That is strictly worse than a
+   changed alphabet (which the digest catches as a different universe). So
+   the math can change ONLY by breaking amendment, never additively.
+
+The kernel is one component of the sealed constitution (kernel invariants +
+the math core + the vocabularies + the derivation rules); all of it is
+version-pinned into one digest, and a node runs all of it unmodifiable.
+
 ## 1. What the kernel is
 
 The kernel is the sole validated update function:
@@ -47,11 +81,13 @@ The kernel is the sole validated update function:
 - **pure, total, no I/O, encoding-blind, network-blind.** It never
   serializes (the codec holds the byte monopoly, so kernel and chain cannot
   disagree about bytes), and it never reads the mesh, the uplink, or any
-  peer state. All arrows point ONE way: `engine/kernel` imports `cfe` only
-  — the audit is grep-simple, and it stays that way by law. The kernel
-  judges MEANING; the codec fixes FORM; the mesh does DISTRIBUTION; none
-  reaches back into the judge. My verbs call `lawful()`; `lawful()` calls
-  nothing of the mesh's.
+  PEER STATE. It DOES bind the sealed math core (§0b) and the state types —
+  that is shared immutable law, not peer state. The audit is grep-simple:
+  **`engine/kernel` imports the sealed set (state types + the algebra
+  core), NEVER the mesh.** All arrows point ONE way — the kernel judges
+  MEANING (calling the sealed math), the codec fixes FORM, the mesh does
+  DISTRIBUTION; none reaches back into the judge. `lawful()` calls the
+  sealed equations; it calls nothing of the mesh's.
 
 The kernel judges ONE step. It never optimizes a global quantity — a global
 property (coherence, stability) is not a per-step fact and cannot enter
@@ -211,6 +247,106 @@ w_e and confidence c_e:
 discarded to a majority. This is convergence-not-consensus: the mesh records
 WHERE in relational space nodes disagree and by what exact rational, not
 merely THAT a vote passed.
+
+## 5a. The two axes — where each half lives (POW++ accounting)
+
+POW++ is two axes, and each splits into a LOCAL half (kernel) and a
+CROSS-NODE half (mesh). The split is forced by network-blindness: the
+kernel judges one node, one step; anything spanning two nodes is the mesh's.
+
+- **Proof of Convergence = I6 (kernel) + consilience (mesh).** Local: the
+  fold gate, `orbit_lock(a,b) = ∅` — a single-state exact check, I6, lands
+  WITH the spine. Cross-node: `C(Δ) = 0` consilience between two chronicles
+  — outside the kernel (a LENS the mesh reads; §3), never enforced in the
+  judge.
+- **Proof of Useful Work = I4's mint-bound (kernel) + work-verification
+  (mesh).** Local: the anchor on I4 — a deed claiming work carries a
+  solver certificate, and the mint may not exceed what `verify_certificate`
+  proves (you cannot mint faster than you produce certified intelligence;
+  anti-inflation and anti-Sybil in one bound). Cross-node: the mesh receive
+  door replays embedded certificates before adopting a spine.
+- **Seam conservation = I1 (kernel) + opposition (mesh).** Local: aperture
+  legs sum zero within one book — one unconditional line (why the
+  void-share ruling mattered). Cross-node: `cfe::opposition` at a merge.
+- **I3 exactness** is the substrate BOTH axes stand on: `C(Δ)=0` must be
+  EXACTLY zero and certificates verify EXACTLY — impossible with floats.
+
+**Definition sealed now; invocation wired at its phase.** The DEFINITIONS
+of `C(Δ)`, `orbit_lock`, and `verify_certificate` belong in the sealed math
+core (§0b) — immutable, version-pinned — from the moment they exist; the
+kernel and mesh CALL them. What lands later is the WIRING: I6 invoking
+`orbit_lock` lands with the spine; I4 invoking `verify_certificate` lands
+on **Ruling Box 1** (what work earns — pen weight, minting rights,
+receipt-coupled crystallization), and requires first MOVING the verifier
+from `engine/solver` into the sealed math core (it is math, not runtime).
+Consilience is never INVOKED by the kernel (cross-node — the kernel is
+network-blind), but its definition `C(Δ)` is the same sealed primitive the
+mesh calls. So: one sealed definition per equation, two callers, wired when
+each caller's phase arrives.
+
+## 5b. The POW++ governance math (the MDC lineage, sealed)
+
+The ordering weight `ω_i` in the evolution equation (§0) is NOT hand-set —
+it is COMPUTED by the sealed governance math, the v0.1 MDC lineage, so no
+node assigns weight by fiat. All exact rational, in the sealed math core:
+
+    ω_e   = weight_e · confidence_e            # effective echelon weight
+    Σ_ω   = Σ_e ω_e
+    H     = 1 − (ω_winner / Σ_ω)               # disagreement entropy
+    stasis    = H ≥ stasis_threshold           # default 1/2
+    transmute = stasis ∧ ∀e: confidence_e < low  # the dimensional wall
+
+Operator score = how much it reduces `C(Δ)` (the gradient enters ONLY as a
+damping hint `ζ∇V`, ζ small — never the driver). At mesh scale the weight
+`ω` becomes the POW++ ordering weight, and the confidence `confidence_e`
+is anchored to certificate-verified work (§5a) — that is the seam where
+proof-of-useful-work enters the governance: you cannot buy weight, you
+earn confidence by proving intelligence, and `verify_certificate` is the
+proof. Until that anchor lands, `confidence` is advisory only (kernel
+CHARTER §1: no canonicalizing weight before cryptographic identity).
+
+## 5c. PoW++ NOT regurgitated PoW — the three guardrails
+
+What makes this proof-of-*work*-plus and not a re-skin of Bitcoin, stated
+as three laws a reviewer checks:
+
+1. **Verification is REPLAY, never a hash race.** Both axes verify by
+   re-execution: convergence replays receipts to `C(Δ)=0`; useful work
+   replays a certificate in O(program length). No node ever burns cycles
+   on throwaway nonces. The security budget is spent on meaningful
+   computation whose result is kept, not on entropy thrown away.
+
+2. **Arbitrary-precision exact rationals, NEVER fixed-width.** The sealed
+   rational (`cfe::ratio::Ratio = BigRational` over big integers) is
+   arbitrary-precision by law. Fixed-width rationals (`i64/u64`) OVERFLOW
+   on accumulated game state and an overflow in consensus math is a chain
+   split — this is the hard-won 2^1100 lesson (proportional decay exploded
+   a denominator past any fixed width; the fix was flat, bounded, AND
+   big-integer). A `Rational64` is a correct principle (exact, GCD-reduced,
+   canonical, cross-multiplied comparison — matching ours) but the WRONG
+   width for consensus over accumulating value. Floats are outlawed (I3);
+   fixed-width rationals are outlawed for the same reason one layer up.
+
+3. **ONE sealed rational, called never copied (§0b).** A second rational
+   implementation — even a correct one — is two definitions that can
+   diverge, which is the death of convergent-consensus. The kernel, the
+   mesh, and the economy all call `cfe::ratio`; none reimplements it. A
+   proposed `pow_kernel/rational.rs` would violate this by construction:
+   the primitive already exists, sealed and arbitrary-precision.
+
+**The hardware/work-shape note (economics, downstream of the kernel).**
+"Recycle old ASICs as the useful-work lattice" is sound in spirit —
+useful computation instead of discarded entropy — but needs one technical
+correction: a Bitcoin SHA-256 ASIC (S9/S19) is hyper-specialized for
+SHA-256 double-hashing ONLY; its gates cannot do matrix multiplication or
+general ZK. So the useful work such hardware can contribute is
+HASH-SHAPED: state-vector hashing, commitment/merkle verification,
+hash-based proofs (STARK-family). Matrix/AI compute needs different
+silicon. The CHOICE of work-shape — hash-based vs proof-based vs
+search-based (our solver certificates today) — determines what hardware
+participates, and it is a real economics ruling (Ruling Box 1 territory,
+what work earns) that the kernel does not make: the kernel only requires
+that whatever the work is, `verify_certificate` checks it by replay.
 
 ## 6. Algorithms (the shapes to witness, red-first)
 

@@ -15,8 +15,9 @@
 //!
 //! Conservation, containment, and exactness are INVARIANTS inside this
 //! function — an unlawful transition is not caught after the fact, it
-//! cannot be constructed. This is why CHARTER §11 dissolves the
-//! anti-mirror: you do not reconcile what cannot diverge.
+//! cannot be constructed. This is why CHARTER §11 dissolves every
+//! reconciliation instrument: you do not reconcile what cannot
+//! diverge.
 //!
 //! **Versioned like the charter.** [`VERSION`] is bumped only by
 //! amendment. Every chain commitment binds the version that judged the
@@ -30,6 +31,7 @@
 //! that no state semantics ever live outside this function.
 
 use cfe::dop::{ClosureEvent, Resource};
+use cfe::ipsal::Scope;
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::Committed;
 
@@ -62,6 +64,20 @@ pub enum Unlawful {
     /// carrier is a big-int rational); the residual is theirs to read
     /// (shown, never summarized away).
     ConservationBroken { resource: Resource, before: Box<Ratio>, after: Box<Ratio> },
+    /// I2 — the actor is not an entity in `prior`. Identity precedes the
+    /// world (NS-6 §1.2): a deed from no one refuses before any state read.
+    NoSuchEntity { actor: u64 },
+    /// I2 — the actor is an entity but lacks the scope the deed requires.
+    /// Containment: authority is granted, never assumed.
+    NotPermitted { actor: u64, scope: Scope },
+    /// I3 — a value in `next` is not a canonical exact rational (coprime,
+    /// positive denominator). Exactness is a TYPE-LEVEL guarantee
+    /// (`BigRational` is canonical by construction, no float ever entered);
+    /// I3 is its sealed declaration and defense-in-depth at the byte
+    /// boundary. The kernel CALLS the sealed `ratio::is_canonical`, never
+    /// defining canonicity itself (the equations are shared, never copied
+    /// — KERNEL CHARTER §0b).
+    NotCanonical,
     /// THE SEALED DEFAULT — the judge refuses what no invariant covers.
     /// This event has no landed rule; a deed the kernel cannot judge does
     /// NOT enter. Coverage grows by amendment: each landing moves an event
@@ -86,16 +102,31 @@ pub fn lawful(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Un
     if !covered(&step.event) {
         return Err(Unlawful::Unjudged);
     }
-    conservation(prior, next, step)
+    conservation(prior, next, step)?;
+    containment(prior, step)?;
+    exactness(next)
 }
 
-/// The landed coverage of the invariant set. An event is judged only if
-/// some invariant governs it; this predicate grows as I2..I6 land (I2
-/// containment and I3 exactness apply to nearly every event, so the
-/// `Unjudged` arm shrinks toward empty as the kernel seals). Today: only
-/// conservation (I1) has landed, and it covers the value-moving deeds.
+/// The landed coverage of the invariant set. An event is judged (not
+/// refused `Unjudged`) only when EVERY invariant that should govern it has
+/// landed — the completeness rule, so partial coverage never admits. The
+/// universal trio I1/I2/I3 is now landed, so events whose full set is
+/// {containment, exactness} — the pure authority deeds, moving no value —
+/// are fully judged. Value-moving deeds beyond the transfer wait on I1's
+/// coverage extension; minting/decaying deeds wait on I4/I5. The set grows
+/// only by witnessed amendment (§11 clause 2); the kernel wires as the live
+/// gate (Phase 3) when this predicate is total (every event covered).
 fn covered(event: &ClosureEvent) -> bool {
-    matches!(event, ClosureEvent::ResourceTransferred { .. })
+    use ClosureEvent as E;
+    matches!(
+        event,
+        // I1 conservation covers the intra-world value move.
+        E::ResourceTransferred { .. }
+        // I2 containment + I3 exactness fully cover the authority deeds
+        // (no value moves, no ratios): registering an agent and opening
+        // or shutting its scopes.
+        | E::EntityRegistered { .. } | E::ScopeGranted { .. } | E::ScopeRevoked { .. }
+    )
 }
 
 /// INVARIANT — conservation. A deed that only MOVES value may not
@@ -140,4 +171,93 @@ fn total_banked(state: &Committed, resource: Resource) -> Ratio {
         .iter()
         .map(|orb| orb.banked_amount(resource))
         .fold(ratio(0, 1), |sum, held| sum + held)
+}
+
+/// INVARIANT — exactness (I3). Every value in `next` is a canonical exact
+/// rational. Exactness is primarily a TYPE-LEVEL guarantee — `Ratio` is
+/// `BigRational`, canonical by construction, and no float exists anywhere
+/// in the codebase — so this passes for every well-typed state; I3 is the
+/// sealed DECLARATION of that law plus defense-in-depth over the value
+/// ledgers (the banked resources and elements most likely to carry a
+/// decoded value). It CALLS the sealed `ratio::is_canonical` (KERNEL
+/// CHARTER §0b: the equation is shared, never reimplemented in the judge).
+fn exactness(next: &Committed) -> Result<(), Unlawful> {
+    for orb in &next.orbs {
+        let banked = orb.banked.iter().map(|(_, amount)| amount);
+        let elements = orb.elements.iter().map(|(_, amount)| amount);
+        for value in banked.chain(elements) {
+            if !cfe::ratio::is_canonical(value) {
+                return Err(Unlawful::NotCanonical);
+            }
+        }
+    }
+    Ok(())
+}
+
+/// INVARIANT — containment (I2). An actor-deed's actor must be an entity
+/// in `prior` that holds the scope the deed requires. Identity precedes
+/// the world: a deed from no one refuses before any state is read. A
+/// sovereign holds every scope by construction; an agent holds exactly
+/// its granted scopes. World-driven events (consequences the tick
+/// computes, no actor) carry no scope requirement (`scope_of` = None).
+fn containment(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
+    let Some(scope) = scope_of(&step.event) else {
+        return Ok(());
+    };
+    let entity = prior
+        .entities
+        .iter()
+        .find(|held| held.entity_id == step.actor)
+        .ok_or(Unlawful::NoSuchEntity { actor: step.actor })?;
+    match entity.permits(scope) {
+        true => Ok(()),
+        false => Err(Unlawful::NotPermitted { actor: step.actor, scope }),
+    }
+}
+
+/// The sealed event → scope law (a CFE transition rule extracted into the
+/// kernel). EXHAUSTIVE by design: adding a `ClosureEvent` variant forces a
+/// scope decision here at compile time — the amendment discipline made
+/// structural. `None` = a world-driven consequence with no actor scope, or
+/// a mesh/universe-ledger deed governed by its own law (never a hole: an
+/// uncovered event refuses `Unjudged` before this is consulted). Each arm
+/// is RATIFIED by a red-first witness as its event enters `covered()`
+/// against `world.rs`; today only `ResourceTransferred` (Collect) is
+/// covered and witnessed. The rest are the drafted law, unenforced until
+/// their coverage lands.
+fn scope_of(event: &ClosureEvent) -> Option<Scope> {
+    use ClosureEvent as E;
+    match event {
+        // Build — create or extend the world, or open authority.
+        E::ColonyFounded { .. } | E::ZoneBuilt { .. } | E::WorldCharted { .. }
+        | E::EntityRegistered { .. } | E::ScopeGranted { .. } | E::ScopeRevoked { .. }
+        | E::ColonyCharted { .. } | E::StarCommissioned { .. } | E::PlanetSited { .. }
+        | E::BondSealed { .. } | E::CovenantSealed { .. } | E::CouncilSealed { .. }
+        | E::GaugeShiftedAt { .. } | E::TechLicensed { .. } | E::GenesisSealed { .. }
+        | E::PracticeAdopted { .. } | E::PracticeReleased { .. } | E::ProspectStruck { .. }
+        | E::ElderWarded { .. } | E::VeilDrawn { .. } | E::InstrumentForged { .. }
+        | E::RouteChartered { .. } | E::OfferPosted { .. } | E::LineSucceeded { .. } => {
+            Some(Scope::Build)
+        }
+        // Raze — demolish or lift what was raised.
+        E::ZoneRazed { .. } | E::WardLifted { .. } | E::VeilLifted { .. } => Some(Scope::Raze),
+        // Collect — settle or move banked value.
+        E::YieldCollected { .. } | E::UpkeepSettled { .. } | E::ResourceTransferred { .. }
+        | E::OverflowAbsorbed { .. } | E::BondSettled { .. } | E::CovenantReleased { .. }
+        | E::FrictionSettled { .. } | E::ApertureSent { .. } | E::ApertureReceived { .. }
+        | E::CrystalDrawn { .. } | E::AssayStruck { .. } | E::OfferCleared { .. } => {
+            Some(Scope::Collect)
+        }
+        // None — world-driven consequences (empty provenance), mesh deeds,
+        // and universe-ledger entries: no actor scope. Governed by other
+        // invariants (conservation, decay) or their own protocol law.
+        E::FamineStruck { .. } | E::FamineRelieved { .. } | E::EraAnnexed { .. }
+        | E::GalaxyObserved { .. } | E::OverheatStruck { .. } | E::OverheatCleared { .. }
+        | E::VentSettled { .. } | E::DemurrageSettled { .. } | E::AbsorptionLapsed { .. }
+        | E::CovenantSlashed { .. } | E::WantStruck { .. } | E::WantRelieved { .. }
+        | E::HandoffSealed { .. } | E::GaugeShifted { .. } | E::Diverged { .. }
+        | E::Confluent { .. } | E::StarAged { .. } | E::EraFolded { .. }
+        | E::CouncilClosed { .. } | E::TechDiscovered { .. } | E::IncursionStruck { .. }
+        | E::VoidShare { .. } | E::RouteLapsed { .. } => None,
+    }
 }

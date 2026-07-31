@@ -1,5 +1,5 @@
 //! THE CHRONICLE FEED (08 — JOURNAL-1): civilizations SPEAK — one
-//! journal entry per completed year, generated mirror-side from the
+//! journal entry per completed year, generated lens-side from the
 //! chronicle + committed state ONLY.
 //!
 //! The laws (08 §1), binding here:
@@ -651,7 +651,7 @@ fn narrate(
 }
 
 /// Render one entry as its journal.jsonl line (08 §3) — flat JSON via
-/// the mirror's own writer, one line, no trailing newline.
+/// the ledger's own writer, one line, no trailing newline.
 pub fn render_entry(entry: &JournalEntry) -> String {
     let mut w = crate::json::JsonWriter::new();
     w.open();
@@ -722,7 +722,7 @@ impl Ledger {
     /// Regenerate the Terminal Wall (08 §3): one static, self-contained
     /// page over every world's journal.jsonl — inline CSS/JS only, no
     /// external requests; content is static, animation is cosmetic.
-    /// Atomic replace, like every mirror card.
+    /// Atomic replace, like every lens card.
     pub fn render_wall(&self) -> std::io::Result<()> {
         let mut cards: Vec<WallCard> = Vec::new();
         if let Ok(entries) = fs::read_dir(&self.root) {

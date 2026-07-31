@@ -61,21 +61,21 @@ fn the_door_wakes_the_derelict_and_only_the_derelict() {
     let root = scratch("door");
     let era = sealed_era(&root);
     let registry = Registry::at(root.join("var/registry"));
-    let mirror = Ledger::at(root.join("var/worlds"));
+    let book = Ledger::at(root.join("var/worlds"));
 
     // The living are never raided.
     assert!(matches!(
-        incursion(&era, "alive", &registry, &mirror, 60),
+        incursion(&era, "alive", &registry, &book, 60),
         Err(IncursionRefused::TheLivingStand)
     ));
     // No seal, no door.
     assert!(matches!(
-        incursion(&era, "never-was", &registry, &mirror, 60),
+        incursion(&era, "never-was", &registry, &book, 60),
         Err(IncursionRefused::NoSuchSeal)
     ));
 
     let sealed_bytes = fs::read(era.join("worlds/doomed/chronicle.tlv")).expect("reads");
-    let woken = incursion(&era, "doomed", &registry, &mirror, 60).expect("the door opens");
+    let woken = incursion(&era, "doomed", &registry, &book, 60).expect("the door opens");
 
     // The archive is NEVER edited — byte-identical after the wake.
     assert_eq!(
@@ -110,7 +110,7 @@ fn the_door_wakes_the_derelict_and_only_the_derelict() {
 
     // One wake per seal.
     assert!(matches!(
-        incursion(&era, "doomed", &registry, &mirror, 61),
+        incursion(&era, "doomed", &registry, &book, 61),
         Err(IncursionRefused::AlreadyWoken)
     ));
 }

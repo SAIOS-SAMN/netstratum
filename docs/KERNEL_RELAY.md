@@ -34,7 +34,8 @@ sequenced behind it.
 
 ### 1.1 What the mirror was, and its lawful birth
 
-`engine/mirror` (now being renamed `engine/ledger` during the excision) was
+`engine/mirror` (renamed `engine/ledger` 2026-07-31, d606b01 — the dead
+name survives in this document only as history) was
 born on 2026-07-25 as **THE OBSERVATORY AND THE STEWARD** — a read-only
 dashboard so a human could *watch* worlds (`state.json` for `observer.py`
 and the Terminal Wall) and so governance could be injected through an inbox
@@ -149,8 +150,9 @@ running is deleted by the cure.
 ### 2.5 The observation-continuity rule
 
 Lenses (observer, wall, journals, deriving from the chain) must be built and
-SERVING before the mirror crate is deleted. A constitution that blinds the
-sovereign for a week invites the emergency hack that becomes the next mirror.
+SERVING before the ledger's display half is deleted. A constitution that
+blinds the sovereign for a week invites the emergency hack that becomes the
+next banned second copy.
 
 ---
 
@@ -424,10 +426,11 @@ AEON fold; NS-5 mesh consilience; `cfe::opposition` (the seam-conservation).
   specification being assembled, not yet the doorman.
 - `engine/kernel/CHARTER.md` — the six invariants, equations, algorithms.
 - `docs/00_CHARTER.md` §11 — the One-Truth Amendment (plain register).
-- `cfe::opposition` — the seam-conservation reading (becomes I1/I6, then
-  deletes at excision).
-- The mirror excision has begun (`engine/mirror` → `engine/ledger`, in
-  flight by another node).
+- `cfe::opposition` — the seam-conservation reading (its checks become
+  I1/I6; the module itself was DELETED 2026-07-31 under §11).
+- The excision LANDED (`engine/mirror` → `engine/ledger` at d606b01;
+  the live-tree name purge at 8da8b5a — zero live uses of the dead
+  name remain in rust and tools; dated records keep it as history).
 
 ### 8.2 The development order (§11 phases + kernel CHARTER §8)
 
@@ -435,16 +438,16 @@ Kernel invariants land red-first, one witness minimum, in order:
 **I1 (landed) → I2 containment → I3 exactness → I4 bounded creation / I5
 bounded decay → the sealed vocabularies + constitution_digest() → I6 the fold
 gate + dimensional resolution (with the spine).** Nothing wires as the live
-gate until the spine forms (Phase 3). Then: views serve → mirror deletes
-(Phase 4) → mesh replicates (Phase 5). The mesh is LAST — nothing replicates
-upward until this universe is lawful.
+gate until the spine forms (Phase 3). Then: views serve → the ledger's
+display half deletes (Phase 4) → mesh replicates (Phase 5). The mesh is
+LAST — nothing replicates upward until this universe is lawful.
 
 ### 8.3 The lanes (who holds what)
 
 - **coder-03 (this node):** the kernel — the invariants, the fold gate, the
   constitution surface. NEXT LANDING: I2 containment.
-- **coder-04:** the snapshot codec (the byte monopoly, schema versions), and
-  the mirror excision. The kernel is encoding-blind by contract, so these
+- **coder-04:** the snapshot codec (the byte monopoly, schema versions), the
+  spine, and the excision (landed). The kernel is encoding-blind by contract, so these
   never block each other; the seam is the commitment shape
   `H(schema‖version‖bytes‖parent‖coordinate)` — spine-produced, kernel-blind.
 - **coder-01:** the economics — MERCHANT-1 (arbitrage), VENUE-1 (bourse),
