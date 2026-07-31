@@ -61,6 +61,10 @@ pub enum ActionRefused {
     StarAlreadyCommissioned,
     /// D3 — one terrain charter per star; the seed is forever.
     TerrainAlreadyCharted,
+    /// ROUTE-1 — this deal id already charters a lane on this book.
+    RouteKnown { deal: u64 },
+    /// ROUTE-1 — a lane's suppression must sit inside [0, 1).
+    BadEta,
     /// MARKET-2 (Samuelson iceberg, ruled 2026-07-31) — the melt
     /// fraction reached 1: this pair is economically walled off by
     /// decay physics, not by rule.
@@ -289,6 +293,9 @@ pub struct Committed {
     /// MANU-1: the forged instruments — (orb, tech node, grade) in
     /// forge order; reach law reads the best grade (10 §3f).
     pub instruments: Vec<(u64, [u8; 32], u8)>,
+    /// ROUTE-1: this book's live lanes — (deal, eta); a PAIR exists
+    /// where both books hold the deal.
+    pub routes: Vec<(u64, Ratio)>,
     /// PRACTICE-1: the receipted disciplines, adoption order.
     pub practices: Vec<u8>,
     /// ELEMENT-GRAMMAR-1 (14 §3): the opened veins — the working
@@ -378,6 +385,8 @@ pub struct World {
     practices: Vec<u8>,
     /// MANU-1: the forged instruments (mirror of the receipts).
     instruments: Vec<(u64, [u8; 32], u8)>,
+    /// ROUTE-1: the live lanes (mirror of the receipts).
+    routes: Vec<(u64, Ratio)>,
     prospects: Vec<Prospected>,
     /// WARDEN-1a: the elder's reverse shield (mirror of the receipts).
     warded: Option<bool>,
@@ -411,6 +420,7 @@ impl World {
             terrain_seed: None,
             practices: Vec::new(),
             instruments: Vec::new(),
+            routes: Vec::new(),
             prospects: Vec::new(),
             warded: None,
             veiled: false,
@@ -454,6 +464,7 @@ impl World {
             terrain_seed: committed.terrain_seed,
             practices: committed.practices,
             instruments: committed.instruments,
+            routes: committed.routes,
             prospects: committed.prospects,
             warded: committed.warded,
             veiled: committed.veiled,
@@ -2847,6 +2858,7 @@ impl World {
             terrain_seed: self.terrain_seed,
             practices: self.practices.clone(),
             instruments: self.instruments.clone(),
+            routes: self.routes.clone(),
             prospects: self.prospects.clone(),
             warded: self.warded,
             veiled: self.veiled,
@@ -3575,6 +3587,105 @@ fn haul(
     Ok(())
 }
 
+/// ROUTE-1 (the MARKET-2 sequence): CHARTER A LANE — a two-legged
+/// deed pairing both books on one deal id. The lane suppresses the
+/// iceberg (melt × (1 − η)); η comes from the partners' technology
+/// (the callers derive it from instrument grades — built, never
+/// granted) and must sit inside [0, 1). The charter draws alloy 4
+/// from each side (v1 placeholder — infrastructure is paid for);
+/// maintenance is drawn at `maintain_routes` (the year voice), and
+/// an unpaid lane LAPSES on its own book — a pair needs both legs.
+pub fn charter_route(
+    a: &mut World,
+    orb_a: u64,
+    b: &mut World,
+    orb_b: u64,
+    eta: Ratio,
+    deal: u64,
+) -> Result<(), ActionRefused> {
+    if eta < ratio(0, 1) || eta >= ratio(1, 1) {
+        return Err(ActionRefused::BadEta);
+    }
+    if !a.knows_its_sun() || !b.knows_its_sun() {
+        return Err(ActionRefused::Shielded {
+            source_shielded: !a.knows_its_sun(),
+            dest_shielded: !b.knows_its_sun(),
+        });
+    }
+    if a.routes.iter().any(|(held, _)| *held == deal)
+        || b.routes.iter().any(|(held, _)| *held == deal)
+    {
+        return Err(ActionRefused::RouteKnown { deal });
+    }
+    let cost = ratio(4, 1);
+    for (world, orb) in [(&mut *a, orb_a), (&mut *b, orb_b)] {
+        let held = peek(&world.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
+        let have = held.banked_amount(Resource::Alloy);
+        if have < cost {
+            return Err(ActionRefused::CannotAfford {
+                resource: Resource::Alloy,
+                need: Box::new(cost),
+                have: Box::new(have),
+            });
+        }
+    }
+    for (world, orb) in [(&mut *a, orb_a), (&mut *b, orb_b)] {
+        let held = peel(&mut world.orbs, orb).expect("checked");
+        held.bank(Resource::Alloy, -cost.clone());
+        let stamp = world.clock.now();
+        world.chronicle.append(
+            ClosureEvent::UpkeepSettled { orb_id: orb, resource: Resource::Alloy, amount: cost.clone() },
+            stamp,
+            vec![SOVEREIGN],
+        );
+        world.routes.push((deal, eta.clone()));
+        world.chronicle.append(
+            ClosureEvent::RouteChartered { deal, eta: eta.clone() },
+            stamp,
+            vec![SOVEREIGN],
+        );
+    }
+    Ok(())
+}
+
+impl World {
+    /// ROUTE-1: the year-voice maintenance draw — 1/4 joule per live
+    /// lane (v1 placeholder). An unaffordable lane LAPSES by receipt
+    /// on this book; the pair dies with either leg. Returns the
+    /// lapsed deal ids.
+    pub fn maintain_routes(&mut self, orb: u64) -> Vec<u64> {
+        let toll = ratio(1, 4);
+        let mut lapsed = Vec::new();
+        let deals: Vec<u64> = self.routes.iter().map(|(deal, _)| *deal).collect();
+        for deal in deals {
+            let stamp = self.clock.now();
+            let Some(held) = peel(&mut self.orbs, orb) else { break };
+            if held.banked_amount(Resource::Joule) >= toll {
+                held.bank(Resource::Joule, -toll.clone());
+                self.chronicle.append(
+                    ClosureEvent::UpkeepSettled {
+                        orb_id: orb,
+                        resource: Resource::Joule,
+                        amount: toll.clone(),
+                    },
+                    stamp,
+                    vec![SOVEREIGN],
+                );
+            } else {
+                self.routes.retain(|(held_deal, _)| *held_deal != deal);
+                self.chronicle.append(ClosureEvent::RouteLapsed { deal }, stamp, vec![SOVEREIGN]);
+                lapsed.push(deal);
+            }
+        }
+        lapsed
+    }
+
+    /// ROUTE-1: the live lanes — (deal, eta).
+    pub fn routes(&self) -> &[(u64, Ratio)] {
+        &self.routes
+    }
+}
+
 /// MARKET-1 (BUILD_ORDER §3a) — CLEAR A CROSSING: two resting offers
 /// on two worlds meet; the fill happens at the RESTING offer's exact
 /// price (price-time priority: the earlier posted rules; ties break
@@ -3634,7 +3745,19 @@ pub fn clear_trade(
     // sent × (1 − φ·D); at φ·D ≥ 1 the pair is economically WALLED
     // by decay physics (the haul refuses before anything moves).
     let gap = key_distance(a.key(), b.key());
-    let melt = (distance + gap) * ratio(MELT_PER_UNIT.0, MELT_PER_UNIT.1);
+    let mut melt = (distance + gap) * ratio(MELT_PER_UNIT.0, MELT_PER_UNIT.1);
+    // ROUTE-1: the best lane BOTH books hold suppresses the melt —
+    // infrastructure someone paid for, decaying back to raw space
+    // the moment either leg lapses.
+    let best_eta = a
+        .routes
+        .iter()
+        .filter(|(deal, _)| b.routes.iter().any(|(held, _)| held == deal))
+        .map(|(_, eta)| eta.clone())
+        .max();
+    if let Some(eta) = best_eta {
+        melt *= ratio(1, 1) - eta;
+    }
     // The two directions — each an aperture pair, shield-checked,
     // demurrage-touched; sent − received = the void's exact share.
     haul(a, held_a.orb, b, held_b.orb, held_a.give, x, deal, &melt)?;
@@ -3905,6 +4028,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut terrain_seed: Option<[u8; 32]> = None;
     let mut practices: Vec<u8> = Vec::new();
     let mut instruments: Vec<(u64, [u8; 32], u8)> = Vec::new();
+    let mut routes: Vec<(u64, Ratio)> = Vec::new();
     let mut warded: Option<bool> = None;
     let mut veiled = false;
     for receipt in chronicle.receipts() {
@@ -4446,11 +4570,19 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             ClosureEvent::InstrumentForged { orb_id, tech_hash, grade } => {
                 instruments.push((*orb_id, *tech_hash, *grade));
             }
+            // ROUTE-1: the lane lives and dies by receipt.
+            ClosureEvent::RouteChartered { deal, eta } => {
+                routes.push((*deal, eta.clone()));
+            }
+            ClosureEvent::RouteLapsed { deal } => {
+                routes.retain(|(held, _)| held != deal);
+            }
         }
     }
     Committed {
         orbs, entities, star, debts, bonds, covenants, councils, offers, techs, wants, crossed,
-        gauge, genesis, terrain_seed, practices, instruments, prospects, warded, veiled,
+        gauge, genesis, terrain_seed, practices, instruments, routes, prospects, warded,
+        veiled,
     }
 }
 

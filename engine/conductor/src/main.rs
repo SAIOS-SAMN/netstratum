@@ -189,6 +189,16 @@ fn main() {
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — journals + the Terminal Wall regenerate mirror-side.
         if beat.is_multiple_of(mirror::journal::YEAR_TICKS) {
+            // ROUTE-1: the year voice draws lane maintenance — an
+            // unpaid lane lapses by receipt and raw space returns.
+            for egregore in worlds.iter_mut().filter(|e| !e.penned) {
+                for deal in egregore.world.maintain_routes(cfe::world::FIRST_ORB) {
+                    println!(
+                        "beat {beat}: LANE {deal} LAPSES on {} — raw space takes the path back",
+                        egregore.spec.world_name
+                    );
+                }
+            }
             for egregore in worlds.iter().filter(|e| !e.penned) {
                 let _ = mirror.record_journal(
                     &egregore.spec.world_name,

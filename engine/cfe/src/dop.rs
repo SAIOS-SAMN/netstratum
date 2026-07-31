@@ -122,7 +122,12 @@
 //!         tech + understanding + industry into a held INSTRUMENT;
 //!         grade = the crystallized condition; scan reach = base +
 //!         grade, the global constant struck)
-//!         — the next free tag outside reservations is 79.
+//!   79 ClosureEvent::RouteChartered (ROUTE-1, MARKET-2 sequence — a
+//!         maintained lane suppresses the melt: φ_route = φ·(1−η);
+//!         two-legged, the deal id pairs the books)
+//!   80 ClosureEvent::RouteLapsed (ROUTE-1 — unpaid maintenance; the
+//!         lane dies on THIS book, and a pair needs both sides live)
+//!         — the next free tag outside reservations is 81.
 //!   In-value practice codes (append-only): 1 the Fast · 2 the Icon ·
 //!   3 the Vigil · 4 the Hoard · 5 the Athanor (deep-end: adoption
 //!   gated on hardship ≥ 8 receipts). Placeholder names, operator
@@ -964,6 +969,10 @@ pub enum ClosureEvent {
     /// MANU-1 (10 §3f): an instrument forged — technology +
     /// understanding + industry overlaid; held per-orb like techs.
     InstrumentForged { orb_id: u64, tech_hash: [u8; 32], grade: u8 },
+    /// ROUTE-1: a lane chartered — this book's leg of the pair.
+    RouteChartered { deal: u64, eta: Ratio },
+    /// ROUTE-1: the lane lapsed on this book (unpaid maintenance).
+    RouteLapsed { deal: u64 },
 }
 
 impl ClosureEvent {
@@ -1305,6 +1314,14 @@ impl ClosureEvent {
                 value.extend_from_slice(tech_hash);
                 value.push(*grade);
                 tlv::put(78, &value, &mut out);
+            }
+            Self::RouteChartered { deal, eta } => {
+                let mut value = deal.to_le_bytes().to_vec();
+                ratio::encode(eta, &mut value);
+                tlv::put(79, &value, &mut out);
+            }
+            Self::RouteLapsed { deal } => {
+                tlv::put(80, &deal.to_le_bytes(), &mut out);
             }
         }
         out
@@ -1653,6 +1670,14 @@ impl ClosureEvent {
                 orb_id: u64::from_le_bytes(value.get(..8)?.try_into().ok()?),
                 tech_hash: value.get(8..40)?.try_into().ok()?,
                 grade: *value.get(40)?,
+            }),
+            79 => {
+                let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let (eta, _) = ratio::decode(value.get(8..)?)?;
+                Some(Self::RouteChartered { deal, eta })
+            }
+            80 => Some(Self::RouteLapsed {
+                deal: u64::from_le_bytes(value.get(..8)?.try_into().ok()?),
             }),
             _ => None,
         }

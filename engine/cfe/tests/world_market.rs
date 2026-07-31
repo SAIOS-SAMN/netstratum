@@ -197,3 +197,74 @@ fn no_crossing_no_movement() {
         other => panic!("the shield must guard the fill, got {other:?}"),
     }
 }
+
+/// ROUTE-1: a chartered lane bends the iceberg — melt × (1 − η) —
+/// and an unpaid lane LAPSES by receipt, raw space returning. The
+/// charter is two-legged (one deal, both books) and replays exactly.
+#[test]
+fn the_lane_bends_the_melt_then_lapses() {
+    use cfe::dop::ClosureEvent;
+    use cfe::world::charter_route;
+    // Both partners pay for infrastructure: the smelting arc banks
+    // the charter's alloy (the world_industry staging).
+    let alloyed = |name: &str| {
+        let mut world = sunlit(name);
+        world.zone(0, cfe::dop::ZoneKind::Extractor).expect("zones");
+        world.zone(1, cfe::dop::ZoneKind::Extractor).expect("zones");
+        world.zone(8, cfe::dop::ZoneKind::Habitat).expect("zones");
+        world.zone(9, cfe::dop::ZoneKind::Habitat).expect("zones");
+        for _ in 0..10 {
+            world.tick();
+        }
+        world.collect().expect("collects");
+        world.zone(16, cfe::dop::ZoneKind::Smelter).expect("the chain stands");
+        for tick in 1..=60 {
+            world.tick();
+            if tick % 10 == 0 {
+                let _ = world.collect();
+            }
+        }
+        world
+    };
+    let mut a = alloyed("waypoint-a");
+    let mut b = alloyed("waypoint-b");
+    charter_route(&mut a, FIRST_ORB, &mut b, FIRST_ORB, ratio(1, 2), 40).expect("charters");
+    assert!(
+        matches!(
+            charter_route(&mut a, FIRST_ORB, &mut b, FIRST_ORB, ratio(1, 2), 40),
+            Err(cfe::world::ActionRefused::RouteKnown { deal: 40 })
+        ),
+        "one charter per deal"
+    );
+    // Distance 16, no gap: raw melt 16/64 = 1/4; the lane halves it
+    // to 1/8 — delivered = 2 × 7/8 = 7/4.
+    a.post_offer(FIRST_ORB, Resource::Iron, ratio(2, 1), Resource::Biomass, ratio(1, 1), 1)
+        .expect("posts");
+    b.post_offer(FIRST_ORB, Resource::Biomass, ratio(1, 1), Resource::Iron, ratio(2, 1), 2)
+        .expect("posts");
+    let b_iron = b.orb().unwrap().banked_amount(Resource::Iron);
+    clear_trade(&mut a, 1, &mut b, 2, 50, ratio(16, 1)).expect("clears");
+    assert_eq!(
+        b.orb().unwrap().banked_amount(Resource::Iron) - b_iron,
+        ratio(7, 4),
+        "the lane bends the melt exactly"
+    );
+    // Starve b's lane: repeated maintenance draws drain the joule
+    // bank until the lapse lands — the pair dies with either leg.
+    let mut lapsed = Vec::new();
+    for _ in 0..64 {
+        lapsed = b.maintain_routes(FIRST_ORB);
+        if !lapsed.is_empty() {
+            break;
+        }
+    }
+    assert_eq!(lapsed, vec![40], "the unpaid lane lapses by receipt");
+    assert!(b.routes().is_empty(), "raw space takes the path back");
+    let receipted = b.chronicle().receipts().iter().any(|r| {
+        matches!(r.event, ClosureEvent::RouteLapsed { deal: 40 })
+    });
+    assert!(receipted);
+    // Replay MATCHES on both books.
+    assert_eq!(cfe::world::replay(a.chronicle()).routes, a.routes());
+    assert_eq!(cfe::world::replay(b.chronicle()).routes, b.routes());
+}

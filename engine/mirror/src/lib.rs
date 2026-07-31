@@ -769,6 +769,14 @@ fn render_receipt(receipt: &Receipt) -> String {
             "instrument_forged",
             format!("orb {orb_id} forges its grade-{grade} instrument — the horizon grows"),
         ),
+        E::RouteChartered { deal, eta } => (
+            "route_chartered",
+            format!("lane {deal} chartered at η {eta} — the path is paid for"),
+        ),
+        E::RouteLapsed { deal } => (
+            "route_lapsed",
+            format!("lane {deal} LAPSES — raw space takes the path back"),
+        ),
         E::WorldCharted { seed } => (
             "world_charted",
             format!(

@@ -1004,6 +1004,56 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 style.strong("forge <condition>")
             ),
         },
+        // ROUTE-1: charter a lane to a far world — infrastructure
+        // that bends the iceberg; η derives from the pair's best
+        // instrument grade (built, never granted).
+        Some("charter") => {
+            let target = words.next().map(str::to_string);
+            let deal = match (words.next(), words.next()) {
+                (Some("deal"), Some(n)) => n.parse::<u64>().ok(),
+                _ => None,
+            };
+            match (target, deal) {
+                (Some(target), Some(deal)) => match far_world(&target) {
+                    Ok(mut far) => {
+                        let best_grade = world
+                            .instruments()
+                            .iter()
+                            .chain(far.instruments().iter())
+                            .map(|(_, _, grade)| *grade)
+                            .max()
+                            .unwrap_or(0);
+                        let eta = ratio(1 + i64::from(best_grade), 8);
+                        match cfe::world::charter_route(
+                            world,
+                            cfe::world::FIRST_ORB,
+                            &mut far,
+                            cfe::world::FIRST_ORB,
+                            eta,
+                            deal,
+                        ) {
+                            Ok(()) => match sync_world(world).and(sync_world_at(&far, &target)) {
+                                Ok(_) => println!(
+                                    "{} the lane CHARTERS — both books sealed; the melt bends",
+                                    style.ok("⇉")
+                                ),
+                                Err(err) => println!(
+                                    "{} the charter landed but a sync refused: {err}",
+                                    style.bad("✗")
+                                ),
+                            },
+                            Err(refusal) => refuse(world, &refusal, style),
+                        }
+                    }
+                    Err(err) => println!("{} {err}", style.bad("✗")),
+                },
+                _ => println!(
+                    "{} usage: {}",
+                    style.bad("✗"),
+                    style.strong("charter <world> deal <n>")
+                ),
+            }
+        }
         Some("terraform") => {
             let albedo = words.next().and_then(parse_ratio_arg);
             let orbit = words.next().and_then(parse_ratio_arg);
@@ -2458,6 +2508,7 @@ fn help(style: &Style) {
         ("sever <res> to <p> · bonds", "cut a standing bond (the load posts to the cutter) · list the standing orders"),
         ("covenant <q> <res> to <p> within <n>", "vitrify a delivery pact in the Glasskeeper lattice — collateral (priced by your fidelity books, never barred) locks until the quota is delivered (release) or the deadline passes (BREACH_AND_SLASH); `covenants` lists the open pacts"),
         ("ideology", "the dual cohesion ledger for this planet — the four axes, their books, and the derived readings; divergent trade partners pay a friction entropy tax, aligned ones pay zero"),
+        ("charter <world> deal <n>", "ROUTE-1: charter a maintained lane — melt × (1−η), η from the pair's best instrument grade; upkeep draws at the year voice, unpaid lanes lapse"),
         ("forge <condition>", "MANU-1: forge an instrument from a crystallized condition + the converter chain (alloy = grade; diamond at 3+) — scan reach = base + best grade"),
         ("pen <world> · pen return <world>", "the receipted handoff (MESH-1b): ask the conductor for a world\'s pen — the seal lands at its next beat and your cross-world deeds write there lawfully; return it when done"),
         ("login [name] · whoami · continue", "the operator menu (prototype, no passwords): many accounts on one machine — login mints/switches, bare login lists, continue resumes your profile\'s last saved world"),
@@ -3023,6 +3074,14 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "no discipline {} stands in the vocabulary — 1 the Fast · 2 the Icon · 3 the Vigil · 4 the Hoard · 5 the Athanor",
             style.strong(&practice.to_string())
         ),
+        ActionRefused::RouteKnown { deal } => format!(
+            "deal {} already charters a lane on this book — one charter per deal",
+            style.strong(&deal.to_string())
+        ),
+        ActionRefused::BadEta => {
+            "a lane's suppression sits inside [0, 1) — raw space is 0, no lane erases the void"
+                .to_string()
+        }
         ActionRefused::EconomicallyWalled { melt } => format!(
             "the void takes {} of every unit at this distance — this pair is economically WALLED; charter a route or trade nearer",
             style.strong(&format!("{}/{}", melt.numer(), melt.denom()))
@@ -3469,6 +3528,15 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::PracticeReleased { practice } => format!(
                 "⚖ discipline {} RELEASED — the rediscovery earned; the lesson re-emerges",
                 style.strong(&practice.to_string())
+            ),
+            cfe::dop::ClosureEvent::RouteChartered { deal, eta } => format!(
+                "⇉ lane {} CHARTERED at η {} — the melt bends around the path",
+                deal,
+                style.strong(&format!("{}/{}", eta.numer(), eta.denom()))
+            ),
+            cfe::dop::ClosureEvent::RouteLapsed { deal } => format!(
+                "⇢ lane {} LAPSES — raw space takes the path back",
+                style.strong(&deal.to_string())
             ),
             cfe::dop::ClosureEvent::InstrumentForged { orb_id, grade, .. } => format!(
                 "⚙ orb {} forges its grade-{} INSTRUMENT — the scan horizon grows",

@@ -294,10 +294,38 @@ pub fn market_step(worlds: &mut [Egregore], beat: u64) -> Vec<(String, String)> 
                 continue;
             };
             let deal = beat * 1_000 + (a as u64) * 10 + b as u64;
-            if cfe::world::clear_trade(
+            let crossed = cfe::world::clear_trade(
                 &mut one.world, offer_a, &mut two.world, offer_b, deal, distance,
             )
-            .is_ok()
+            .is_ok();
+            // ROUTE-1: trade wears the path — a cleared pair with no
+            // common lane charters one when both can pay (η from the
+            // pair's best instrument grade; the melt bends after).
+            if crossed {
+                let paired = one.world.routes().iter().any(|(held, _)| {
+                    two.world.routes().iter().any(|(other, _)| other == held)
+                });
+                if !paired {
+                    let best_grade = one
+                        .world
+                        .instruments()
+                        .iter()
+                        .chain(two.world.instruments().iter())
+                        .map(|(_, _, grade)| *grade)
+                        .max()
+                        .unwrap_or(0);
+                    let eta = ratio(1 + i64::from(best_grade), 8);
+                    let _ = cfe::world::charter_route(
+                        &mut one.world,
+                        cfe::world::FIRST_ORB,
+                        &mut two.world,
+                        cfe::world::FIRST_ORB,
+                        eta,
+                        deal + 2,
+                    );
+                }
+            }
+            if crossed
             {
                 cleared.push((
                     one.spec.world_name.clone(),
