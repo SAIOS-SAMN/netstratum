@@ -140,7 +140,13 @@
 //!         sent = received + void share; every deal in the universe
 //!         sums to zero under ONE rule; losses are receipted, never
 //!         silent; the judge only sums, never recomputes φ·D)
-//!         — the next free tag outside reservations is 83.
+//!   83 The committed-state container (CODEC-1, §11 ladder #35 — the
+//!         artifact digests bind: schema-versioned canonical bytes of
+//!         the WHOLE committed state, engine/codec's monopoly; one
+//!         state, one encoding; a schema bump is a kernel amendment,
+//!         never a silent widening. Not a ClosureEvent — the spine's
+//!         framing when state rides a TLV stream)
+//!         — the next free tag outside reservations is 84.
 //!   In-value practice codes (append-only): 1 the Fast · 2 the Icon ·
 //!   3 the Vigil · 4 the Hoard · 5 the Athanor (deep-end: adoption
 //!   gated on hardship ≥ 8 receipts). Placeholder names, operator
