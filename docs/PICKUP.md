@@ -261,8 +261,12 @@ kernel by ADDITIVE amendment; TaxonSealed as a NEW deed (extending
 GenesisSealed would be breaking); invariant coverage drafted for
 coder-03's ratification; committed fields wait the coder-04 codec
 freeze; couplings land inside lawful() post-seal; creed and function
-STAY derived. Three operator ratifications close the draft (§6).
-Next: the ratifications, then the migration wave.
+STAY derived. RATIFIED whole by the operator 2026-07-31; the machine
+mapping stands at `seeds/taxon-map.json` (33 lines, zero unclassed).
+The lane now waits on two seams in order: the coder-04 codec freeze
+(committed fields), the coder-03 amendment (tag + coverage sealed);
+then the migration wave executes from the map. Next: the wave, on the
+window.
 - **coder-03**: N4 (NS-2 RQP + the scanner) — LANDED on main
   2026-07-30 (33e6c73 + post-ruling inscriptions 7f739f4, after the
   fifth-set rulings): spec §1–§4 with extracted vectors, sigil index +

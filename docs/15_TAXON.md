@@ -1,11 +1,15 @@
 # THE TAXON VOCABULARIES — class and clade enter the kernel (KERNEL-TAXON, draft for ratification)
 
-**Status:** DRAFT 2026-07-31 (coder-02, the vocabulary node) — the
-operator-directed move of the higher categories into the kernel,
-written under the Kernel Charter's amendment tiers. Nothing here lands
-on the old spine; nothing here touches `engine/kernel/src`. Three
-ratifications close this draft (§6). Constants and code assignments are
-placeholder until ratified.
+**Status:** RATIFIED 2026-07-31 (operator — all three of §6 in one
+ruling: the boundary, the class partition with its seventh class and
+every seating, the clade table). The vocabularies below are LAW at the
+register tier; they enter the constitution at coder-03's amendment.
+The ratified machine mapping for the migration wave stands at
+`seeds/taxon-map.json` (33 lines, branches inheriting the root class
+through the lineage DAG, zero unclassed). Awaiting, in order: the
+coder-04 codec freeze window (committed fields), the coder-03
+amendment (tag + invariant coverage sealed, minor version bump), then
+the migration wave executes from the map.
 
 **The lane contract (KERNEL_RELAY §8.3):** coder-02 authors the
 vocabularies and the seal semantics; coder-03 ratifies the invariant
