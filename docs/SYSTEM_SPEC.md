@@ -285,13 +285,14 @@ lanes, gated where they touch new transition semantics or committed fields.
   thesis, not spec).
 - **Mesh:** Byzantine fork resolution beyond stasis.
 
-## 8. PUPPET-1 — the attacker experiment (mesh lane, after the spine)
+## 8. The attacker experiment — DEFERRED (not boarded; far too early)
 
-The deliverable that makes the "stable band" claim FALSIFIABLE. Two universes
-under the landed two-node acceptance harness: one honest (genuine solver
-certificates), one adversary (fabricated-difference puppets merge-farming the
-mint). Measure whether the anchor REFUSES or PAYS. Composes entirely from
-existing pieces (the acceptance example, the codec, branch coordinates,
-solver certificates, the I6 fold gate). Owner: the mesh operator, built when
-the spine lands. Inscribing it now is what turns "measure, don't assume" from
-a slogan into a boarded test.
+The eventual falsifiability test for the "stable band" claim: two universes
+under the two-node harness — one honest (genuine solver certificates), one
+adversary (fabricated-difference puppets merge-farming the mint) — measuring
+whether the verified-work anchor REFUSES or PAYS. It composes from pieces
+that mostly do not exist yet (the anchor itself is unbuilt, §7). Recorded
+here as the shape of the future test, but DEFERRED and unboarded (operator
+ruling): an attacker experiment before the kernel is sealed, the spine
+lands, the mesh replicates, and the anchor exists is theater. It revives
+only when those prerequisites stand.
