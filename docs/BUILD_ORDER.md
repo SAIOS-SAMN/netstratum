@@ -95,6 +95,47 @@ same landing (CHARTER §1); commit on explicit operator go.
   singularity law), `docs/EQUATIONS.md` (THE ONE LEDGER — the
   row-claim convention is live), `docs/U_DIRECTIVES.md` (the unit
   work orders; U1 next, tag 86 reserved there).
+- **U1a LANDED** (2026-07-31, arch-01): THE PROVER/VERIFIER SPLIT —
+  `engine/solver-verify`, the sealed replay half: grid + the ONE apply
+  path, loader, the deterministic forge, the certificate chain, and
+  `objects` (discovered at the split: `Op::Object(ObjOp)` makes the
+  object ops APPLY vocabulary — only the SEARCH is prover-side).
+  `solver` keeps search + volume, re-exports whole; no caller broke.
+  THE OPAQUE-PAYLOAD LAW derived and inscribed (U_DIRECTIVES §2):
+  physics' cfe arrow forbids cfe importing the verifier, so the deed
+  carries proof BYTES under solver-verify's encoding monopoly — the
+  kernel calls `verify_work(&bytes)`, never parses. 285/285, clippy
+  zero.
+- **U1 KERNEL-VERIFY LANDED** (2026-07-31, arch-01): THE PoUW ANCHOR —
+  I4 completes. Tag 86 `DiscoveryMinted` (header-claimed): orb ‖
+  resource ‖ amount ‖ work, the proof riding WHOLE; replay banks it
+  like a yield, the proof is judged at the door. `verify_work` — THE
+  REPLAY-COMPLETE LAW: re-forge (the task IS its digest) ∧ re-apply
+  (every training pair exactly, the honest-withhold law) ∧ re-chain
+  (the certificate re-derives or names its link) — an INTACT chain
+  over a non-solution refuses `TrainingMiss`: the fabricated-render
+  attack is dead. `mint_bound = 0` SEALED SHUT until Ruling Box 1
+  opens the rate by amendment (the mechanism precedes the economics).
+  New refusals `WorkRefused{broken}` + `MintExceedsWork{bound,
+  claimed}`, measurements whole. Evidence: red-first honored — seven
+  pins written against unflipped coverage, six recorded red
+  (`Unjudged`, the sealed default held), the amendment flipped them
+  green; 292/292, clippy zero; EQUATIONS I4 row claimed same landing.
+- **U1f LANDED** (2026-07-31, arch-01): I5 COMPLETES — the decay
+  bound. The kernel CALLS the sealed demurrage rule
+  (`cfe::world::demurrage_due` + `ease_of` made pub — call-not-copy,
+  one computation two judges): decay ≤ min(rate·ease·elapsed, banked),
+  flat, thermally gated; `elapsed` reads the prior orb's `last_touch`,
+  which ALREADY rode the orb wire (tag 28, VENT-1) — the SCHEMA_V3
+  premise died at execution, no schema spent. New refusal
+  `DecayExceedsBound{bound, claimed}`. Evidence: red recorded (the
+  sign-only kernel ADMITTED the excess — the hole measured), then the
+  arm; one witness truth-update recorded (the sign-era "decay of 2
+  admits" pin sat on a starless world — the rule owes nothing there;
+  it now refuses with bound 0 carried, and says so). 295/295, clippy
+  zero; EQUATIONS I5 row claimed. **The kernel now judges 10 of 63
+  deed types with I1–I5 whole; I6 (U2) and the W-waves remain
+  (U_DIRECTIVES §5).**
 
 ## 1. The board
 

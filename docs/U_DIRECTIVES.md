@@ -1,30 +1,44 @@
 # U DIRECTIVES — the unit ladder, the I-remnants woven in
 
-**Status:** DRAFT work orders (2026-07-31). The continuation document
-for the unit lane: every open U-rung with its code specifics, and every
-kernel-invariant remnant (I4's bound, I5's bound, I6 whole, the I1–I3
-coverage extension) woven into the rung that pays it. Cold-start here,
-then `16_UNIT.md` (the law), `EQUATIONS.md` (the forms),
-`engine/kernel/CHARTER.md` (the constitution). The working discipline
-is unchanged: one landing at a time, red-first with recorded output,
-spec + mechanic + vectors together, commit on explicit operator go.
+**Status:** LIVE work orders (ratified by execution order 2026-07-31;
+U0/PROPORTION-1/U1a/U1/U1f LANDED — see §0). The continuation
+document for the unit lane: every open U-rung with its code
+specifics, and every kernel-invariant remnant woven into the rung
+that pays it (I4's bound → U1 LANDED, I5's bound → U1f LANDED, I6
+whole → U2 OPEN, the I1–I3 coverage extension → the W-waves OPEN).
+Cold-start here, then `16_UNIT.md` (the law), `EQUATIONS.md` (the
+forms), `engine/kernel/CHARTER.md` (the constitution). The working
+discipline is unchanged: one landing at a time, red-first with
+recorded output, spec + mechanic + vectors together, commit on
+explicit operator go.
 
-## §0 State at writing (2026-07-31, session end)
+## §0 State (2026-07-31, arch-01 — COMMITTED, board 297/297 green)
 
-Working tree holds, UNCOMMITTED, awaiting operator go:
-- **U0 LANDED in-tree** — the spine judge fixture seats its actors
-  (sovereign + contained hand 100 with Collect); the board's true count
-  surfaced: **285/285 workspace green, clippy zero** (the old 240 was a
-  fail-fast undercount).
-- **PROPORTION-1 LANDED in-tree** — THE PROPORTIONAL LAW: `Σ R²` → `Σ |R|` in
+Landed and committed this session, in order (I1–I5 WHOLE; the kernel
+judges 10 of 63 deed types):
+- **U0** — the spine judge fixture seats its actors (I2 honored); the
+  true board count surfaced (240 was a fail-fast undercount).
+- **PROPORTION-1** — THE PROPORTIONAL LAW: `Σ R²` → `Σ |R|` in
   `rfa_core::{coherence_functional, conservation_measurement}`,
-  `norm_squared` → `magnitude` (‖Δ‖₁), `cfe::query` scalar; witnesses
-  moved 24→12 (RFA vectors, elasticity) and 29→7 (scanner); the tag-58
-  wire vector RE-EXTRACTED from the running engine (`ns2_vectors`
-  example) and inscribed in NS-2 §3; law docs amended (kernel CHARTER
-  §3, SYSTEM_SPEC §0/§4, NS-2, 03_SUBSTRATE_CONTRACT §5).
-- **Docs drafted:** `16_UNIT.md` (the unit law + §4a the singularity
-  law), `EQUATIONS.md` (the one ledger), this file.
+  `norm_squared` → `magnitude` (‖Δ‖₁), the `cfe::query` scalar;
+  witnesses 24→12 and 29→7; the tag-58 wire vector RE-EXTRACTED; law
+  amended (kernel CHARTER §3, SYSTEM_SPEC §0/§4, NS-2, 03 §5). Squares
+  survive only as physics (05 T⁴). The name LINEAR is DEAD.
+- **U1a** — the prover/verifier split (`engine/solver-verify`); THE
+  OPAQUE-PAYLOAD LAW (cfe carries proof bytes, never parses).
+- **U1 (I4)** — the PoUW anchor: tag 86 `DiscoveryMinted`,
+  `verify_work` the replay-complete judge, `mint_bound` sealed shut.
+  Holes A/B (audit §4) closed at landing — witnesses 7/8, the
+  degenerate-difficulty decode guard.
+- **U1f (I5)** — the flat decay bound calling the sealed demurrage
+  rule; `last_touch` already rode tag 28 (no schema spent).
+- **Docs:** `16_UNIT.md` (the unit law + §4a the singularity law),
+  `EQUATIONS.md` (the one ledger), this file, and
+  `AUDIT_2026-07-31.md` (the mesh-second correction + the hole audit).
+
+OPEN: U2 (I6), the W-waves, #36 spine adoption (mesh-second — §7),
+Phase 3 flip, U3, U4 (operator rulings). The mesh half rides directly
+behind the kernel rungs (AUDIT §1, §7 here).
 
 ## §1 The board — where each I-remnant lands
 
@@ -117,35 +131,48 @@ New `Unlawful` arms: `WorkBroken { at_step: usize }` and
 `MintExceedsWork { bound: Box<Ratio>, claimed: Box<Ratio> }` — both
 carry the measurement whole.
 
-**Witnesses (red-first, in order):**
+**Witnesses (red-first, in order) — LANDED, all green
+(`engine/kernel/tests/discovery_pins.rs`, 9 pins):**
 1. valid forged work + ANY positive amount refuses `MintExceedsWork`
    with bound 0 carried — the sealed-shut law is itself witnessed;
 2. a tampered chain refuses `WorkBroken` naming its exact `at_step`;
 3. an intact chain over a program that MISSES one training pair
    refuses — the fabricated-render attack, dead;
 4. a wrong forge_digest refuses (the task is not the one claimed);
-5. zero-amount with valid work admits (the degenerate mint is lawful);
-6. the deed round-trips tag 86 byte-exact; replay MATCHES.
+5. a malformed payload refuses as form (trailing bytes, empty proof);
+6. zero-amount with valid work admits (the degenerate mint is lawful);
+7. **degenerate difficulty refuses as form** — `train_pairs: 0` (an
+   empty training set makes the replay vacuous — HOLE A, audit §4);
+8. **zero-dimension difficulty refuses, never panics** — `rows/cols:
+   0` drove the forge's `Grid::new().expect()` to PANIC in the
+   kernel's call path (HOLE B, audit §4; the totality law). Both
+   close at ONE guard: `decode_work` refuses degenerate difficulty
+   (the refuse-never-guess law extended to degenerate fields);
+9. the deed round-trips tag 86 byte-exact; the work payload
+   round-trips its own encoding.
 
-**EQUATIONS row-claim:** update I4's row status in the same landing.
+**EQUATIONS row-claim:** I4's row claimed LANDED WHOLE in the landing.
 
-## §3 U1b — THE DECAY BOUND (I5 completes)
+## §3 U1f — THE DECAY BOUND (I5 completes) — LANDED 2026-07-31
 
-The bound `decay ≤ rate · ease · elapsed` needs `elapsed = stamp −
-last_touch(orb, resource)`, and the kernel reads only (prior, next,
-step) — so **`last_touch` must enter COMMITTED state**: a trailing
-per-orb map, **SCHEMA_V3** (additive; v1/v2 still decode — the CODEC-1
-convention). This is a schema amendment: coordinate on the codec lane
-per §11 before landing. The existing `DemurrageSettled` wire form is
-UNTOUCHED (one tag, one meaning, forever).
+**THE PREMISE DIED AT EXECUTION:** `last_touch` was ALREADY committed
+— it rides the orb wire (tag 28, the vent entry, VENT-1/SINK-1) and
+the codec commits orbs as wire bytes. NO SCHEMA_V3, no codec-lane
+coordination, no schema spent. (Recorded so the next reader learns
+the lesson: check the wire before pricing an amendment.)
 
-The sealed vocabulary — flat per-resource `rate` table and the `ease`
-read — is RATIFIED FROM `world.rs`'s landed flat-demurrage behavior
-(the regression-pinned ruling: never proportional, the 2^1100 lesson),
-red-first, never invented. Witnesses: exact-at-bound admits; over-bound
-refuses `DecayExceedsBound{bound, claimed}`; elapsed 0 admits only zero
-decay; `last_touch` advances on settle (ratified against `world.rs`);
-v2-state replay still reads whole.
+The landed form: the kernel CALLS the sealed rule —
+`cfe::world::demurrage_due` and `ease_of` made pub (call-not-copy,
+CHARTER §0b; one computation, two judges): `decay ≤ min(rate · ease ·
+elapsed, banked)`, flat, thermally gated; an orb the rule owes
+nothing (no leak, no bank, no elapsed time) bounds at ZERO. New
+refusal `DecayExceedsBound{bound, claimed}`, both sides whole.
+Witnessed in `engine/kernel/tests/decay_pins.rs` (red recorded: the
+sign-only kernel ADMITTED the excess) with one witness truth-update
+in `conservation_pins.rs` (the sign-era "decay of 2 admits" pin sat
+on a starless world — it now refuses with bound 0 carried, and says
+so). `DemurrageSettled`'s wire form untouched (one tag, one meaning,
+forever).
 
 ## §4 U2 — KERNEL-FOLD (I6 whole; the singularity witnessed)
 
@@ -218,24 +245,30 @@ the unit binary founds, plays, SOLVES (one forge grind → certificate),
 and uplinks against a second copy of itself (extend the
 `ns5_two_nodes` pattern); a forged chain refuses at its break.
 
-## §7 Sequencing (with the #36 seam)
+## §7 Sequencing (mesh-second — operator ruling 2026-07-31, AUDIT §1)
 
-    #36 (spine at TUniversal + adoption — coder-04's boarded rung;
-         kernel-OBSERVED play: every deed chained, judged where
-         covered, holes stamped judged=0, never hidden)
-      → U1 (independent of #36 at the kernel level; lands anytime)
-      → U1b (codec-lane coordination for SCHEMA_V3)  ∥  U2 (the fold
-         gate — W-D's fold trio waits on it)
+The mesh is SECONDARY TO THE KERNEL, not last: its door rises directly
+behind the kernel rungs, ahead of the W-wave tail. LANDED this session:
+U0 · PROPORTION-1 · U1a · U1 · U1f (I1–I5 whole).
+
+    [DONE] U0 · PROPORTION-1 · U1a · U1 (I4) · U1f (I5)
+      → U2 (orbit_lock/I6 + the angle-free witness — the one
+         research-shaped rung; consult /opt/repos)
+      ∥ #36 (spine at TUniversal + adoption — the MESH's promoted
+         rung, riding directly behind U1, NOT behind the W-waves;
+         kernel-OBSERVED play, holes stamped judged=0)
       → W-A..W-D  ∥  (parallel, any lane, disjoint families; W-D's
          fold trio lands with/after U2)
-      → Phase 3 flip (Unjudged unreachable — ALL waves + U1b + U2
-         complete → the kernel is the door)
+      ∥ the mesh half — Σ_mesh, re-sync, resonance, the verified-work
+         anchor (the rate rides the kernel's mint_bound once ruled)
+      → Phase 3 flip (Unjudged unreachable — ALL waves + U2 complete
+         → the kernel is the door)
       → U3 (after #36/#37) → U4 (the rulings open the mint)
 
-Calibration note: after #36 + U1 the whole single-player + NPC economy
-runs CHAINED with certificate-bounded minting refusing until ruled —
-measure the synthetic economics there FIRST, then rule `f` against
-observation, not assumption.
+Calibration note: after #36 the whole single-player + NPC economy runs
+CHAINED with certificate-bounded minting refusing until ruled — measure
+the synthetic economics there FIRST, then rule `f` against observation,
+not assumption.
 
 ## §8 The Ruling Boxes (operator words — nothing else blocks)
 

@@ -16,7 +16,8 @@ docs/        00 charter · 01 economy · 02 colony loop · 03 substrate contract
              (the world-book) · 07 era convergence · 08 chronicle feed ·
              09 ideology · 10 tech emergence · BUILD_ORDER (the one carrier) ·
              OPEN_QUESTIONS
-engine/      the Rust workspace: cfe · rfa-core · physics · solver · mirror · conductor
+engine/      the Rust workspace: cfe · kernel · codec · rfa-core · physics ·
+             solver · solver-verify · ledger · mesh · conductor
 clients/     the CLI/MUD client
 tools/       observer.py (the board) · steward.py (the inbox)
 ```

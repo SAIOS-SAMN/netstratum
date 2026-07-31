@@ -135,8 +135,15 @@ gradient of the potential V (v0.1 D.SAMN.2) used ONLY as a damping term
     score(prior, operator)    -> (confidence, orbit_target)   // per echelon
     VERSION: u64                                              // charter-pinned
 
-**Landed / build.** Landed: `lawful`, I1 (transfers), `VERSION`. Build:
-I2–I6, the echelon scoring, the sealed vocabularies + `constitution_digest()`.
+**Landed / build.** Landed: `lawful`, `VERSION`, and I1–I5 WHOLE
+(2026-07-31): I1 conservation (moves + aperture legs + mints/decays),
+I2 containment, I3 exactness, I4 complete with the PoUW anchor —
+`verify_work` the replay-complete judge, `mint_bound` SEALED SHUT
+until Ruling Box 1 (U1, tag 86) — and I5 complete with the flat decay
+bound calling the sealed demurrage rule (U1f). Coverage: 10 of 63
+deed types judged; the rest refuse `Unjudged` (the W-waves,
+U_DIRECTIVES §5). Build: I6 (U2), the echelon scoring, the sealed
+vocabularies + `constitution_digest()`.
 
 ---
 
@@ -265,25 +272,50 @@ resolution (confluence at exact zero, or annex).
 
 ---
 
-## 6. THE DEPENDENCY ORDER (nothing skips)
+## 6. THE DEPENDENCY ORDER (nothing skips) — validity vs build-queue
+
+**The VALIDITY order (what may be TRUSTED before what):**
 
     validator (kernel)  →  node (spine/chain)  →  game (client gated)
         →  convergence (fold gate + mint)  →  mesh (replication + anchor)
 
 Per §11: the kernel seals first (I1→I6 + vocabularies + digest); the spine
-gives it the chain; the client routes through it; convergence lands with the
-spine; the mesh is LAST. Nothing replicates upward until this universe is
-lawful. The economics (coder-01) and the codec (coder-04) run in parallel
-lanes, gated where they touch new transition semantics or committed fields.
+gives it the chain; the client routes through it. Nothing REPLICATES upward
+until this universe is lawful — that is a trust dependency, and it holds.
+
+**The BUILD QUEUE is NOT this order** (operator ruling, mesh-second,
+2026-07-31; `docs/AUDIT_2026-07-31.md` §1). The game is LIVE, so the
+mesh is SECONDARY TO THE KERNEL, not last in line:
+
+    1. KERNEL — seal the judge (I1–I5 LANDED; I6 = U2; the W-waves)
+    2. MESH   — the door rises immediately behind it (#36 spine
+                adoption; `receive` already stands; then Σ_mesh,
+                re-sync, resonance, the verified-work anchor)
+    3. everything else — ABSORBED, never free-standing:
+         into the KERNEL: convergence's fold gate (I6), the PoUW mint
+           bound (I4 via `verify_work`, LANDED U1), coverage extensions
+         into the MESH:   Σ_mesh, admission, the anchor, fork law
+         elsewhere:       client verbs, conductor policy, lenses
+
+This is a POSITIONAL correction, not a law change: the kernel CHARTER
+§5a already dissolves convergence into the I4/I6 seams, and §5 makes
+admission = re-judging under one's own kernel — the mesh half of each
+axis is the SAME unit law re-run on received bytes (16_UNIT §1). The
+economics (the rate) and the codec run in parallel lanes, gated where
+they touch new transition semantics or committed fields.
 
 ## 7. OPEN — the honest map (unchanged, restated per component)
 
-- **Validator/mesh:** the ordering mechanism, BOTH halves. Carrot — the
-  verified-work anchor (proof-of-useful-work), weight earned not assigned,
-  UNBUILT, the load-bearing gap. Stick — the alignment covenant (CHARTER
-  §11): open divergence lawful, covert divergence slashed (pen/work/stake
-  forfeit, reusing `CovenantSlashed`). Carrot and stick are one economy;
-  their three price rulings sit together with the operator.
+- **Validator/mesh:** the ordering mechanism. Carrot — the
+  verified-work anchor (proof-of-useful-work): the KERNEL HALF IS
+  BUILT (U1, 2026-07-31 — `verify_work` replay-complete, the mint
+  bounded, sealed shut at rate zero); the RATE and the mesh half
+  (weight earned not assigned) await Ruling Box 1 and the mesh era —
+  still the load-bearing gap for real value, but now one ruling and
+  one wiring, not a build. Stick — the alignment covenant (CHARTER
+  §11): open divergence lawful, covert divergence slashed (pen/work/
+  stake forfeit, reusing `CovenantSlashed`). Carrot and stick are one
+  economy; their three price rulings sit together with the operator.
 - **Node/mesh:** identity binding — hands are self-declared integers (N7).
   No consensus weight is canonicalizing before it binds (kernel CHARTER §1).
 - **Convergence:** the mint rate + reward split (monetary policy, MEASURED);

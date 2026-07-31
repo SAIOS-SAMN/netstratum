@@ -180,6 +180,44 @@ fn the_zero_mint_with_valid_work_admits() {
 }
 
 #[test]
+fn degenerate_difficulty_refuses_as_form_never_mints() {
+    // HOLE A (audit 2026-07-31 §4): a work payload carries its OWN
+    // difficulty, and an empty training set makes "maps EVERY training
+    // pair" vacuously true — an empty program over train_pairs: 0
+    // would pass the replay and mint for free once the rate opens.
+    // The fix: degenerate difficulty is a FORM refusal at decode (the
+    // opaque-payload law's refuse-never-guess, extended).
+    let mut proof = honest_proof();
+    proof.difficulty.train_pairs = 0;
+    let work = encode_work(&proof).expect("encodes");
+    assert_eq!(
+        lawful(&seated((6, 1)), &seated((7, 1)), &mint_step((1, 1), work)),
+        Err(Unlawful::WorkRefused { broken: WorkBroken::Malformed }),
+        "no training pairs, no verifiable work — refused as form"
+    );
+}
+
+#[test]
+fn zero_dimension_difficulty_refuses_never_panics() {
+    // HOLE B (audit 2026-07-31 §4): rows/cols: 0 drove the forge's
+    // Grid::new(...).expect() to PANIC inside the kernel's call path —
+    // a crafted payload crashing the node (DoS), violating the
+    // kernel's total-never-panics law. The guard refuses it as form,
+    // and the judge stays total.
+    for degenerate in [(0usize, 3usize), (3, 0), (0, 0)] {
+        let mut proof = honest_proof();
+        proof.difficulty.rows = degenerate.0;
+        proof.difficulty.cols = degenerate.1;
+        let work = encode_work(&proof).expect("encodes");
+        assert_eq!(
+            lawful(&seated((6, 1)), &seated((7, 1)), &mint_step((1, 1), work)),
+            Err(Unlawful::WorkRefused { broken: WorkBroken::Malformed }),
+            "a zero dimension refuses as form — the judge never panics"
+        );
+    }
+}
+
+#[test]
 fn the_deed_and_the_payload_round_trip_byte_exact() {
     // The work payload: solver-verify's own encoding monopoly.
     let proof = honest_proof();

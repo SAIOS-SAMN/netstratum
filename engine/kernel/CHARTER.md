@@ -352,7 +352,12 @@ silicon. The CHOICE of work-shape — hash-based vs proof-based vs
 search-based (our solver certificates today) — determines what hardware
 participates, and it is a real economics ruling (Ruling Box 1 territory,
 what work earns) that the kernel does not make: the kernel only requires
-that whatever the work is, `verify_certificate` checks it by replay.
+that whatever the work is, `solver_verify::verify_work` checks it by the
+FULL replay (re-forge ∧ re-apply ∧ re-chain — U1, LANDED). The bare
+`verify_certificate` is tamper-evidence only: it re-derives the chain
+over the same prover-supplied triple and so cannot, alone, tell a
+solution from a fabricated render — the replay-complete law names why
+the anchor is `verify_work`, never the certificate check on its own.
 
 ## 5d. The Syntropic Sink (SSA) — scoping and corrections
 

@@ -210,6 +210,16 @@ pub fn decode_work(bytes: &[u8]) -> Option<WorkProof> {
         cols: r.byte()? as usize,
         train_pairs: r.byte()? as usize,
     };
+    // Refuse DEGENERATE difficulty as form (the refuse-never-guess law
+    // extended to degenerate fields). Two holes close here:
+    //  · train_pairs 0 → the forge yields an empty training set and
+    //    "maps EVERY training pair" is vacuously true (a free mint);
+    //  · rows/cols 0 → the forge's Grid::new(...).expect() PANICS in
+    //    the kernel's call path — the totality law forbids it.
+    // The judge never re-forges a degenerate task: it refuses first.
+    if difficulty.rows == 0 || difficulty.cols == 0 || difficulty.train_pairs == 0 {
+        return None;
+    }
     let op_count = r.u16()?;
     let mut program: Program = Vec::with_capacity(op_count);
     for _ in 0..op_count {

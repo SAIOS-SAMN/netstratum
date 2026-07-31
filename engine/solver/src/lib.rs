@@ -13,8 +13,12 @@
 //!   solver returns `Unsolved` rather than a guess.
 //! - **Every solution is a proof, not an assertion.** A solve emits a
 //!   BLAKE3 parent-linked certificate chain (task → each applied
-//!   transformation → the output grid); `verify` replays it byte-exact.
-//!   Finding a solution is search; checking one is O(program length).
+//!   transformation → the output grid). The certificate is
+//!   TAMPER-evidence (it re-derives the chain over the SAME triple);
+//!   the constitutional work-verifier is `solver_verify::verify_work`,
+//!   which additionally RE-FORGES the task and RE-APPLIES the program
+//!   (THE REPLAY-COMPLETE LAW — an intact chain over a non-solution is
+//!   not a solution). Finding is search; checking is O(program length).
 
 pub mod search;
 pub mod volume;

@@ -112,7 +112,12 @@ own framing, never world-chronicle events; refusal kinds 5–6 added at
 MESH-1b, additive); 67 HandoffSealed (MESH-1b, NS-5 §7 — one writer
 per clock; world replay blind to it); 70 ProspectStruck + 71
 AssayStruck + 72 the orb elements entry (ELEMENT-GRAMMAR-1,
-coder-03 — the almanac's mint/assay/stores); **next free 73**.
+coder-03 — the almanac's mint/assay/stores); 74–77 WARDEN-1a/MASK-1a ·
+81 IncursionStruck · 83 the committed-state container (CODEC-1) · 84
+the spine commitment record (SPINE-1) · 85 TaxonSealed (KERNEL-TAXON)
+· 86 DiscoveryMinted (U1 KERNEL-VERIFY — the PoUW mint, the opaque
+work payload); **next free 87** (the dop.rs header is the one
+authority; this section only mirrors it).
 
 **The tag-claim convention** (2026-07-30, after a live collision caught
 mid-cadence — 55 claimed twice, the later claimant moved to 60, and the
@@ -124,24 +129,31 @@ forever.
 
 ## 5. Lanes and next work
 
-- **THE UNIT LANE** (operator-ruled 2026-07-31, session with the
-  relay): the kernel is the deployable UNIT — sealed math + physics +
-  control plane, PoUW and PoWC judged at that level. The law is
-  `16_UNIT.md` (incl. §4a the singularity law); the forms are
-  `docs/EQUATIONS.md` (THE ONE LEDGER of equations/algorithms — the
-  row-claim convention is live: a landing inscribing a new equation
-  claims its row there in the same landing); the WORK ORDERS with code
-  specifics are `docs/U_DIRECTIVES.md` (U1 KERNEL-VERIFY next: tag 86,
-  the solver-verify split, the replay-complete law, mint sealed shut
-  until Ruling Box 1). LANDED in-tree this session (UNCOMMITTED,
-  awaiting operator go): U0 (the spine fixture seats its hand — the
-  TRUE board count is **285/285 green**, clippy zero; 240 was a
-  fail-fast undercount) and PROPORTION-1 (THE PROPORTIONAL LAW: Σ R² → Σ |R|
-  everywhere — coherence, conservation measurement, the scanner
-  scalar; `norm_squared`→`magnitude` ‖Δ‖₁; witnesses 24→12 and 29→7;
-  the NS-2 tag-58 wire vector RE-EXTRACTED; kernel CHARTER/
-  SYSTEM_SPEC/NS-2/03 amended — squares survive only as physics, 05's
-  T⁴).
+- **THE UNIT LANE** (operator-ruled 2026-07-31, arch-01): the kernel
+  is the deployable UNIT — sealed math + physics + control plane, PoUW
+  and PoWC judged at that level. The law is `16_UNIT.md` (incl. §4a
+  the singularity law); the forms are `docs/EQUATIONS.md` (THE ONE
+  LEDGER — the row-claim convention is live); the work orders are
+  `docs/U_DIRECTIVES.md`. **LANDED AND COMMITTED (execution order
+  2026-07-31, five commits, board at 295/295 green clippy zero):**
+  U0 (the spine fixture seats its hand; 240 was a fail-fast
+  undercount) · PROPORTION-1 (THE PROPORTIONAL LAW: Σ R² → Σ |R|
+  everywhere, `norm_squared`→`magnitude` ‖Δ‖₁, witnesses 24→12 and
+  29→7, the NS-2 tag-58 wire vector re-extracted; squares survive
+  only as physics, 05's T⁴; the word LINEAR is DEAD in the workspace)
+  · U1a (the prover/verifier split — `engine/solver-verify`; THE
+  OPAQUE-PAYLOAD LAW) · U1 KERNEL-VERIFY (tag 86 `DiscoveryMinted`;
+  THE REPLAY-COMPLETE LAW — an intact chain over a non-solution
+  refuses; `mint_bound` SEALED SHUT until Ruling Box 1) · U1f (I5's
+  flat decay bound calling the sealed demurrage rule; `last_touch`
+  already rode tag 28 — no schema spent). **I1–I5 are WHOLE; the
+  kernel judges 10 of 63 deed types.** OPEN: U2 (orbit_lock/I6 + the
+  angle-free witness — the one research-shaped landing, consult
+  /opt/repos), the W-waves (53 deeds, parallelizable, task list
+  carries the families), Phase 3 flip (all covered), U3 (after
+  #36/#37), U4 (Ruling Boxes — operator words only: the rate f, the
+  work-shapes, the split; rule f against the OBSERVED chained economy
+  once #36 lands).
 - **the mesh lane** (operator-ruled 2026-07-30): MESH-1a LANDED — NS-5
   §1–§3 written whole; `engine/mesh` (`consile` → consilience receipt
   | typed refusal; the file-exchange carrier, never a socket);
