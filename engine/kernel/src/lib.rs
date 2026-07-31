@@ -178,6 +178,23 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::GenesisSealed { .. } | E::ProspectStruck { .. } | E::LineSucceeded { .. }
         | E::TechLicensed { .. } | E::InstrumentForged { .. } | E::RouteChartered { .. }
         | E::OfferPosted { .. } | E::BondSealed { .. }
+        // W-C / W-D slice — the BANKED-NEUTRAL world-driven and mesh
+        // deeds. Their `world.rs::replay` arms set a flag, a list, or
+        // are no-ops (no bank); `scope_of` is None (a tick's own
+        // consequence carries no actor scope). Judged by I3 exactness,
+        // conservation and containment vacuous — ratified against the
+        // replay reading in `world_driven_pins.rs`. HELD OUT: the
+        // value-movers of these families (FamineStruck −drawn,
+        // CovenantSlashed +collateral, CouncilClosed +banked → the I1
+        // value slice) and the FOLD TRIO (Confluent/EraAnnexed/
+        // EraFolded → U2d's I6 gate; a fold is never admitted on
+        // exactness alone).
+        | E::FamineRelieved { .. } | E::GalaxyObserved { .. } | E::OverheatStruck { .. }
+        | E::OverheatCleared { .. } | E::VentSettled { .. } | E::AbsorptionLapsed { .. }
+        | E::WantStruck { .. } | E::WantRelieved { .. } | E::HandoffSealed { .. }
+        | E::GaugeShifted { .. } | E::Diverged { .. } | E::StarAged { .. }
+        | E::TechDiscovered { .. } | E::IncursionStruck { .. } | E::VoidShare { .. }
+        | E::RouteLapsed { .. }
     )
 }
 
