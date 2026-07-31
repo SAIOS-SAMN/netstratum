@@ -133,7 +133,7 @@ same landing (CHARTER §1); commit on explicit operator go.
   arm; one witness truth-update recorded (the sign-era "decay of 2
   admits" pin sat on a starless world — the rule owes nothing there;
   it now refuses with bound 0 carried, and says so). 295/295, clippy
-  zero; EQUATIONS I5 row claimed. **The kernel now judges 10 of 63
+  zero; EQUATIONS I5 row claimed. **The kernel now judges 10 of 64
   deed types with I1–I5 whole; I6 (U2) and the W-waves remain
   (U_DIRECTIVES §5).**
 
@@ -850,7 +850,7 @@ market board's; union tags allocate from 52 at each landing.
 
 The unit-lane rungs (U0–U1f, the W-waves) are chronicled in
 `U_DIRECTIVES.md` §1 and `EQUATIONS.md`; this table carries the mesh-second
-lane and the audit rungs beside them. Coverage at the merge: **58 of 63**
+lane and the audit rungs beside them. Coverage at the merge: **59 of 64**
 deeds judged; board 342/342, clippy zero at `5f80464`.
 
 | Landing | Seat | Status | Contains |

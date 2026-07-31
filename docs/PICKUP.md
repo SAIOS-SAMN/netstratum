@@ -151,7 +151,7 @@ forever.
   the mesh-second amendment made in SYSTEM_SPEC §6 / U_DIRECTIVES §7;
   the doc-drift fixed: `verify_work` is the anchor, the bare
   certificate is tamper-evidence only). **I1–I5 are WHOLE; the
-  kernel judges 10 of 63 deed types.** OPEN: U2 (orbit_lock/I6 + the
+  kernel judges 59 of 64 deed types.** OPEN: U2 (orbit_lock/I6 + the
   angle-free witness — the one research-shaped landing, consult
   /opt/repos), the W-waves (53 deeds, parallelizable, task list
   carries the families), Phase 3 flip (all covered), U3 (after

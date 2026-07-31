@@ -15,7 +15,7 @@ explicit operator go.
 ## §0 State (2026-07-31, arch-01 — COMMITTED, board 297/297 green)
 
 Landed and committed this session, in order (I1–I5 WHOLE; the kernel
-judges 10 of 63 deed types):
+judges 10 of 64 deed types at that landing; 59 of 64 on main after the W-waves):
 - **U0** — the spine judge fixture seats its actors (I2 honored); the
   true board count surfaced (240 was a fail-fast undercount).
 - **PROPORTION-1** — THE PROPORTIONAL LAW: `Σ R²` → `Σ |R|` in
@@ -49,13 +49,13 @@ rides directly behind the kernel rungs (AUDIT §1, §7 here).
 | U1 | **I4's bound** — `mint ≤ f(verify)`, the PoUW anchor, tag 86 | LANDED (sealed shut; Ruling Box 1 opens it) |
 | U1f | **I5's bound** — flat decay ≤ rate·ease·elapsed | LANDED (no schema spent — `last_touch` already rode tag 28) |
 | U2 | **I6 whole** — orbit_lock, the fold gate, the singularity witness | OPEN — the live rung (∥ #36, mesh-second) |
-| W-A..W-D | **I1/I2/I3 coverage extension** — the 53 unjudged deeds, in four waves | parallel, any lane |
+| W-A..W-D | **I1/I2/I3 coverage extension** — the then-54 unjudged deeds, in four waves | parallel, any lane |
 | U3 | UNIT-1 — the deployable boundary + constitution digest | after #36 |
 | U4 | the Ruling Boxes come home (operator words) | gated on operator |
 | S1 | the volumetric verifier decision (§10 — secondary) | boards WITH the volumetric tier |
 | S2 | the worktree prune (§10 — housekeeping) | operator go |
 
-Kernel coverage today: 10 of 63 deed types. `scope_of()` is already
+Kernel coverage today: 59 of 64 deed types. `scope_of()` is already
 exhaustive over all 63 (the compiler forces the scope decision); an
 amendment = move the event into `covered()` + declare its lawful
 conservation delta + red-first witness against `world.rs`.

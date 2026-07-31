@@ -143,7 +143,7 @@ gradient of the potential V (v0.1 D.SAMN.2) used ONLY as a damping term
 I2 containment, I3 exactness, I4 complete with the PoUW anchor —
 `verify_work` the replay-complete judge, `mint_bound` SEALED SHUT
 until Ruling Box 1 (U1, tag 86) — and I5 complete with the flat decay
-bound calling the sealed demurrage rule (U1f). Coverage: 10 of 63
+bound calling the sealed demurrage rule (U1f). Coverage: 59 of 64
 deed types judged; the rest refuse `Unjudged` (the W-waves,
 U_DIRECTIVES §5). Build: I6 (U2), the echelon scoring, the sealed
 vocabularies + `constitution_digest()`.
