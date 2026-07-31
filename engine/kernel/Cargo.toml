@@ -1,0 +1,8 @@
+[package]
+name = "kernel"
+version = "0.1.0"
+edition = "2021"
+description = "THE KERNEL (CHARTER §11 rule 3) — lawful(prior, next, step): the one validated update function. Pure, total, no I/O, encoding-blind. Conservation, containment, and exactness are invariants inside it; an unlawful transition cannot be constructed, only refused. Versioned like the charter — changes are amendments."
+
+[dependencies]
+cfe = { path = "../cfe" }
