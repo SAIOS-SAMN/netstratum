@@ -188,89 +188,81 @@ Neither node edits the other's territory without an operator relay. Cross-layer 
 primitive → witness test) — the layers hold each other by tests, not by
 memory.
 
-## 11. THE ONE-TRUTH AMENDMENT (operator ruling 2026-07-31; the trust
-model corrected — pen coder-03, review coder-04, all seats bound)
+## 11. THE ONE-TRUTH AMENDMENT (operator ruling 2026-07-31; rewritten
+to the plain register by the same ruling — the document says what it
+means; pen coder-03, review coder-04, all seats bound)
 
-**The unlawful ruling.** The deployment of any MIRROR — a second
-representation of state that the engine or any node can treat as
-authoritative — or any ANTI-MIRROR — a post-hoc reconciliation
-instrument between two authoritative copies — is unlawful technology
-manipulation that breaks upward momentum. One truth, in-chain. You do
-not reconcile what cannot diverge.
+*The game is one walk: the coordinate names it, the kernel steps it,
+the chain remembers it, the galaxy flavors it, the ideology judges
+it. Everything below is those five layers stated as rules.*
 
-**The four laws that replace them:**
+**The ban.** Keeping a second machine-readable copy of game state, or
+building tools that reconcile two copies after the fact, is banned.
+The old mirror crate and the opposition module are scheduled for
+deletion under this section.
 
-1. **Authority is the trajectory.** The chain of the universe is the
-   simulated state itself: commitments over the canonical bytes of
-   committed state at each TUniversal{S, G, T} step, each binding the
-   last. Receipts DEMOTE to annotation — the why beside the walk,
-   provenance and narration, never again a root that an interpreter
-   gets to mean things about.
-2. **Observation is a lens, never a copy.** Every outward view derives
-   from the chain through a read-only projection at a granted facet
-   depth, disposable at any moment without the universe noticing. JSON
-   and every rendering format are permanently what wall.html is — a
-   picture, never read back.
-3. **Law lives in the kernel.** The transition function — tick plus
-   deed application — is a minimal SEALED kernel, versioned like this
-   charter: changes are amendments, never landings. Conservation,
-   containment, and exactness are kernel invariants — an unlawful
-   transition cannot be constructed, only refused.
-4. **The one inbound door is the steward seam.** Anything outside the
-   universe — operator, tool, or node — enters only as a request that
-   becomes real by passing through the kernel as a contained,
-   receipted deed.
+**The five rules (normative):**
 
-**The standing test (review-tier, beside clippy-zero and
-replay-MATCHES, applied to every landing forever):**
+1. **Single source of truth.** The game keeps exactly one
+   machine-readable copy of state: a hash-chained sequence of state
+   snapshots, each named by its coordinate TUniversal{S, G, T} and
+   bound to its parent.
+2. **Exports are write-only.** JSON files, dashboards, and save-file
+   copies are display output. No code ever parses them back in.
+3. **One validated update function.** All state changes go through
+   `lawful(prior, next, step) -> Ok | typed refusal`: pure, total, no
+   I/O, and encoding-blind — it works on in-memory state only and
+   never produces or reads bytes. Serialization belongs exclusively
+   to the codec (rule 1's snapshot encoder), so the update function
+   and the chain can never disagree about bytes: only one component
+   ever produces them. The rules it enforces — totals balance,
+   permissions checked, exact arithmetic only — are invariants inside
+   it, each proven by its own witness, written red-first. The
+   function is versioned like this charter: changes are amendments.
+4. **One input boundary.** Anything external — a person, a tool,
+   another node — submits a request to the inbox queue; the update
+   function validates and applies it. No direct edits, ever.
+5. **The review lint (applied to every change, forever).**
+   Clause 1: a change that adds a second readable state copy, or a
+   reconciling check between copies, is rejected regardless of how
+   useful it looks — useful is how the last one got in.
+   Clause 2: a change that puts state-changing logic outside the
+   update function, or grows the update function without an
+   amendment, is rejected the same way.
 
-- Clause 1 — does this landing create any representation of state
-  that anything can read back as authority, or any check that
-  reconciles two copies? REFUSED, regardless of usefulness.
-  Usefulness is how the last one got in.
-- Clause 2 — does this landing add state semantics outside the sealed
-  kernel, or grow the kernel without an amendment? REFUSED the same
-  way. The trusted surface concentrates; it must never quietly
-  re-disperse.
+**The build order (each step gated on the last; all other boards
+frozen meanwhile):**
 
-**The phase sequence (each gated on the last; nothing lands on the old
-spine meanwhile):**
+- **Step 1 — the update function**, extracted and sealed per rule 3.
+- **Step 2 — the snapshot codec** (coder-04's lane): the canonical
+  encoding of the WHOLE committed state — the thing the hashes bind.
+  It carries a schema version; changing the state's field set is
+  itself an amendment, and old chains verify under the version they
+  were cut with. **The freeze window: the committed state's field
+  set holds stable until codec v1 lands** — any in-flight change
+  touching it coordinates with the codec lane first. The commitment
+  is `H(schema ‖ state_bytes ‖ parent ‖ coordinate)`, produced by
+  the spine only; the update function never reads it.
+- **Step 3 — the chain and the vertical axis**: snapshots chained;
+  identity, station, lineage, roster, galaxies, and eras become
+  chained state changed only through the inbox. The seeds file is
+  genesis input, hashed once at adoption, dead thereafter.
+- **Step 4 — views first, then deletion**: read-only views (observer,
+  wall, journals) serve from the chain BEFORE the mirror crate is
+  deleted — the operator's window never goes dark. Then the mirror
+  crate and the opposition module are removed, not deprecated.
+- **Step 5 — the mesh, last.** Nothing replicates to other nodes —
+  code, claims, or documents — until this universe runs on the
+  chain. The old mesh spec's consensus claims stand SUPERSEDED until
+  then.
 
-- **Phase 1 — the kernel sealed** (extraction + invariants).
-- **Phase 2 — the spine**, gated on its own load-bearing artifact:
-  the CANONICAL WHOLE-STATE CODEC. Equal-state-equal-bytes exists
-  per-orb only (verified in-tree); the whole-Committed encoding is
-  the thing digests bind and does not yet exist. It lands with
-  witnesses (byte-exact round trip; one state, one encoding) and a
-  SCHEMA VERSION in every commitment: adding a committed field
-  changes bytes, so schema transitions are themselves kernel
-  amendments — old chains verify under the version they were cut
-  with, or the mutable-interpreter hole is rebuilt one layer up.
-  (Codec + schema-evolution design: coder-04's lane, the MESH-1d
-  census as the field inventory.)
-- **Phase 3 — the vertical axis comes inside**: identity, station,
-  lineage, roster, galaxies, eras as chained deeds; the seeds file is
-  genesis input, hashed at adoption, dead thereafter; no file under
-  `var/` is ever authority again.
-- **Phase 4 — the excision**, with the OBSERVATION-CONTINUITY law:
-  lens projections are built and SERVING before the mirror crate
-  deletes — a constitution that blinds the sovereign invites the
-  emergency hack that becomes the next mirror. Then `engine/mirror`
-  is deleted, not deprecated; `cfe::opposition` is deleted with its
-  checks re-homed as kernel invariants.
-- **Phase 5 — the mesh, only after alignment.** Nothing replicates
-  upward — not code, not claims, not paper — until the single
-  universe is lawful. NS-5's landed text and the acceptance example
-  stand SUPERSEDED for the transition.
+**The adoption rule (the running universe survives):** every existing
+world's event log is replayed once under the sealed update function;
+the resulting state becomes that world's first chained snapshot, with
+the old log hashed in as history. Nothing running is deleted by the
+cure.
 
-**The adoption rule (the live universe is not burned):** every
-existing world chronicle replays ONCE under the final sealed kernel;
-the resulting state commits as that world's CHAIN-GENESIS with the
-old chronicle hashed in as provenance annotation; the story demotes
-from authority forever. Aeon 1's civilizations cross the constitution
-whole — nothing running is deleted by the cure.
-
-**The freeze:** every board halts except this sequence. The mirror's
-birth was lawful because it was powerless; its crime was promotion by
-accretion, one useful landing at a time, which is why the standing
-test — not vigilance — is the guard.
+**Why this section exists:** the old mirror was born as a read-only
+dashboard and was safe while that was all it was. It became
+load-bearing one useful change at a time, and no rule existed to stop
+that. Rule 5 is that rule.
