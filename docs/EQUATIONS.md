@@ -144,11 +144,17 @@ the tag-58 wire vector was re-extracted from the running engine.)
 
     Π_G(Δ) = the H¹ projection (strip gauge distortion to the core)
 
-**C4 · The orbit lock.** INSCRIBED (U2 — re-derive from v0.1 `fold.rs`;
-the `≅_RCF` relation LANDED as C4a below).
+**C4 · The orbit lock & the fold gate.** LANDED in rfa-core (U2b) —
+`rfa_core::orbit_lock` + `rfa_core::f_fold_star` (`Operator` = a
+`GL_n⁺(Q)` conjugation `A·Δ·A⁻¹`; each orbit step kept only while
+`verify_conservation` holds; conjugacy tested by the exact C4a
+signature). The kernel-side I6 wiring (fold-class deeds into
+`covered()`) is U2d, still INSCRIBED. Direction (SYSTEM_SPEC §4): a
+lock FORBIDS the fold.
 
     orbit_lock(a, b) := ∃ op ∈ Operators, k ≤ K_max :
                         conservation-valid orbit  op^k(a) ≅_RCF b
+    f_fold_star:  lock ≠ ∅ → TorsionVeto (emit)  ·  lock = ∅ → GaugeFold (lawful)
 
 **C4a · The RCF conjugacy invariant (`≅_RCF`).** LANDED (U2a) —
 `rfa_core::rcf_signature` (exact, the judge) + `rfa_core::rcf_hash`
