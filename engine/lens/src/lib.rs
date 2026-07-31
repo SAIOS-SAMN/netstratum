@@ -12,8 +12,12 @@
 //! wire (`state.tlv`'s bytes) — proving the display's committed half
 //! re-derives from the chain byte-for-byte.
 
+pub mod json;
+pub mod render;
+
 use cfe::world::Committed;
 use mesh::spine::{Spine, SpineRefused};
+use std::path::Path;
 
 /// The typed lens refusal — a projection names what it could not read.
 #[derive(Debug)]
@@ -24,6 +28,8 @@ pub enum LensRefused {
     Spine(SpineRefused),
     /// The head blob did not decode under the codec.
     Undecodable,
+    /// The chronicle refused on load (a broken link names itself).
+    Chronicle(cfe::persist::PersistRefused),
 }
 
 impl From<SpineRefused> for LensRefused {
@@ -45,4 +51,14 @@ pub fn committed(spine: &Spine) -> Result<Committed, LensRefused> {
 pub fn state_tlv(spine: &Spine) -> Result<Option<Vec<u8>>, LensRefused> {
     let state = committed(spine)?;
     Ok(state.orbs.first().map(|orb| orb.wire_bytes()))
+}
+
+/// The replay-grounded projection: rebuild the live World from its
+/// chronicle (`chronicle.tlv` — chain-verified bytes, every link
+/// recomputed on load; the lawful read, never an export). The rich
+/// renderings ([`render::render_state`], journals) project from this
+/// World — the whole display re-derives from the chain.
+pub fn world(chronicle: &Path) -> Result<cfe::world::World, LensRefused> {
+    let chronicle = cfe::persist::load(chronicle).map_err(LensRefused::Chronicle)?;
+    Ok(cfe::world::World::resume(chronicle))
 }

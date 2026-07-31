@@ -117,6 +117,7 @@ name = "ledger"
 version = "0.1.0"
 dependencies = [
  "cfe",
+ "lens",
  "num-bigint",
  "num-traits",
  "physics",
@@ -130,6 +131,8 @@ dependencies = [
  "codec",
  "ledger",
  "mesh",
+ "num-bigint",
+ "num-traits",
 ]
 
 [[package]]

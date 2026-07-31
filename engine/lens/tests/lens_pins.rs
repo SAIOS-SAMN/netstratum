@@ -68,6 +68,35 @@ fn the_display_re_serves_from_the_chain_byte_for_byte() {
     assert_eq!(committed, world.committed(), "the head projection is the played state");
 }
 
+/// The RICH rendering re-serves from the chain: resume the World from
+/// its chronicle (every link recomputed on load), render through the
+/// moved renderer — byte-for-byte the display's state.json. The
+/// display half is deletable whole.
+#[test]
+fn the_rich_rendering_re_serves_from_the_chronicle() {
+    let root = scratch("rich");
+    let world = played_world();
+
+    let book = Ledger::at(root.join("worlds"));
+    book.record("meridian", "meridian-prime", "test-sigil", &world)
+        .expect("the display records");
+    let display = fs::read_to_string(
+        book.world_dir("meridian")
+            .join("planets")
+            .join("meridian-prime")
+            .join("state.json"),
+    )
+    .expect("the export exists");
+
+    // The chronicle is the chain-verified record; the lens resumes
+    // the World from it and renders — no display file consulted.
+    let chronicle_path = root.join("chronicle.tlv");
+    cfe::persist::sync(world.chronicle(), &chronicle_path).expect("syncs");
+    let resumed = lens::world(&chronicle_path).expect("resumes by replay");
+    let projected = lens::render::render_state("meridian", "meridian-prime", "test-sigil", &resumed);
+    assert_eq!(projected, display, "the rich export re-derives byte-for-byte");
+}
+
 #[test]
 fn an_unborn_spine_refuses_typed() {
     let root = scratch("unborn");
