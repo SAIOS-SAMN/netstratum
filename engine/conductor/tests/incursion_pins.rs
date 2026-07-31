@@ -20,7 +20,7 @@ fn scratch(name: &str) -> PathBuf {
 
 /// A sealed era holding one DERELICT (three drills, no hearth — the
 /// famine cascade) and one THRIVING world.
-fn sealed_era(root: &PathBuf) -> PathBuf {
+fn sealed_era(root: &std::path::Path) -> PathBuf {
     let era = root.join("var-era1");
     // The derelict: extractors starve their own crews; every orb
     // famishes and stays famished.
