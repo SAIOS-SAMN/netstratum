@@ -120,8 +120,10 @@ fn covered(event: &ClosureEvent) -> bool {
     use ClosureEvent as E;
     matches!(
         event,
-        // I1 conservation covers the intra-world value move.
-        E::ResourceTransferred { .. }
+        // I1 conservation covers the intra-world move AND the aperture
+        // legs (the convergence seam): a leg debits/credits exactly its
+        // declared amount, the local half of pair conservation.
+        E::ResourceTransferred { .. } | E::ApertureSent { .. } | E::ApertureReceived { .. }
         // I2 containment + I3 exactness fully cover the authority deeds
         // (no value moves, no ratios): registering an agent and opening
         // or shutting its scopes.
@@ -129,36 +131,39 @@ fn covered(event: &ClosureEvent) -> bool {
     )
 }
 
-/// INVARIANT — conservation. A deed that only MOVES value may not
-/// change the total of that value across the world's banks. The
-/// kernel needs no game rule to enforce this: it reads the promise
-/// from the event's shape (a transfer moves, never mints) and checks
-/// the ledgers agree. Mint/burn classes declare their delta in the
-/// event and are judged as their coverage lands (each an amendment).
+/// INVARIANT — conservation. A deed changes the world's total of a
+/// resource by exactly its LAWFUL DELTA and no more: a pure intra-world
+/// move conserves (delta 0 — `from_orb` loses what `to_orb` gains); an
+/// aperture leg debits or credits exactly its declared amount (value that
+/// crossed to or from ANOTHER world). Value minted or burned beyond the
+/// lawful delta refuses with the expected and actual totals whole. The
+/// PAIR-level law (a far leg is the near leg's exact inverse) is the
+/// cross-node opposition (KERNEL CHARTER §5a); the kernel enforces the
+/// LOCAL half — each leg moved exactly what it claimed.
 fn conservation(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Unlawful> {
-    match &step.event {
-        // A pure intra-world move: `from_orb` loses exactly what
-        // `to_orb` gains, so the world's total of `resource` is
-        // invariant across the step. (The cross-empire ideology books
-        // post from this deed; they carry no value and never bear on
-        // conservation.)
-        ClosureEvent::ResourceTransferred { resource, .. } => {
-            let before = total_banked(prior, *resource);
-            let after = total_banked(next, *resource);
-            match before == after {
-                true => Ok(()),
-                false => Err(Unlawful::ConservationBroken {
-                    resource: *resource,
-                    before: Box::new(before),
-                    after: Box::new(after),
-                }),
-            }
-        }
-        // A covered event on which conservation places no constraint
-        // (uncovered events already refused at the `lawful` default arm,
-        // so this is reached only by covered events other invariants
-        // govern). Coverage grows by witnessed amendment — clause 2.
-        _ => Ok(()),
+    use ClosureEvent as E;
+    // The lawful change to the world's total of `resource` for this deed.
+    let (resource, lawful_delta) = match &step.event {
+        E::ResourceTransferred { resource, .. } => (*resource, ratio(0, 1)),
+        // The source leg: value LEFT this world for another (debit).
+        E::ApertureSent { resource, amount, .. } => (*resource, -amount.clone()),
+        // The destination leg: value ARRIVED from another world (credit).
+        E::ApertureReceived { resource, amount, .. } => (*resource, amount.clone()),
+        // A covered event conservation does not constrain (uncovered
+        // events already refused Unjudged; other invariants govern this).
+        // Coverage grows by witnessed amendment — clause 2.
+        _ => return Ok(()),
+    };
+    let before = total_banked(prior, resource);
+    let after = total_banked(next, resource);
+    let expected = before + lawful_delta;
+    match after == expected {
+        true => Ok(()),
+        false => Err(Unlawful::ConservationBroken {
+            resource,
+            before: Box::new(expected), // the lawful total this deed requires
+            after: Box::new(after),     // the total the step actually produced
+        }),
     }
 }
 

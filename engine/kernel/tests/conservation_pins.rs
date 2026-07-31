@@ -119,6 +119,55 @@ fn exactness_holds_over_the_value_ledgers_and_the_primitive_is_sealed() {
     assert!(cfe::ratio::is_canonical(&ratio(-3, 1)));
 }
 
+/// I1 the aperture seam — the convergence merge. A source leg debits the
+/// world's total by EXACTLY its declared amount (value crossed out); a leg
+/// that debits more than it declared refuses. This is the LOCAL half of
+/// pair conservation; the cross-node half (far leg = near leg's inverse)
+/// is the mesh opposition.
+#[test]
+fn the_aperture_leg_conserves_its_exact_declared_amount() {
+    // The kernel check is unit-level: it judges prior/next against the
+    // leg's declared amount, needing no THRESHOLD-1 crossing machinery.
+    // `next` = the source world after a 3-iron debit (value crossed out).
+    let world = two_orb_world();
+    let prior = world.committed();
+    let before = prior
+        .orbs
+        .iter()
+        .map(|orb| orb.banked_amount(Resource::Iron))
+        .fold(ratio(0, 1), |sum, held| sum + held);
+    let mut next = world.committed();
+    next.orbs[0].bank(Resource::Iron, ratio(-3, 1));
+    // The honest source leg: the world's iron fell by exactly 3.
+    let sent = |amount| Step {
+        event: ClosureEvent::ApertureSent {
+            deal: 7,
+            from_orb: FIRST_ORB,
+            resource: Resource::Iron,
+            amount,
+        },
+        actor: SOVEREIGN,
+        stamp: world.now(),
+    };
+    assert_eq!(
+        lawful(&prior, &next, &sent(ratio(3, 1))),
+        Ok(()),
+        "a leg debits exactly what it declares"
+    );
+    // A leg that CLAIMS to send 1 but the state debited 3: the world lost
+    // more than the deed declared — phantom burn at the seam, refused,
+    // lawful total (prior − 1) vs actual (prior − 3) carried whole.
+    assert_eq!(
+        lawful(&prior, &next, &sent(ratio(1, 1))),
+        Err(Unlawful::ConservationBroken {
+            resource: Resource::Iron,
+            before: Box::new(before.clone() - ratio(1, 1)),
+            after: Box::new(before - ratio(3, 1)),
+        }),
+        "the leg moved more than it declared — the seam refuses by measurement"
+    );
+}
+
 #[test]
 fn the_version_is_pinned() {
     // The commitment binds this; an amendment bumps it. Pinned so a
