@@ -59,23 +59,50 @@ N7 (ANCHOR), where the mesh meets parties it cannot re-compute.
 
 ## 2. Consilience — the landed first slice (MESH-1a)
 
-### 2.1 The measured manifold (v1)
+### 2.1 The measured manifold (v2) and the structural census
 
-A node projects a world's committed state (the replay of its
-chronicle, NS-3; SEAL B makes the replay the state) onto an ordered
-vector of exact rationals:
+The v1 8-dimension projection was a keyhole (the coder-04 audit,
+2026-07-31): two states differing only in structure measured C = 0
+with an empty residual list — a difference the instrument could not
+see. v2 closes it with one law:
+
+> **The totality law.** Two committed states are equal IFF the
+> residual list AND the census are both empty. Every committed field
+> is either a rational dimension (measured, residuals whole) or a
+> censused structure (compared whole, exactly, named when it
+> differs). Nothing is invisible.
+
+**The rational dimensions**, enumerated per judgment over the union
+span of the two states (an absent coordinate reads exactly 0):
 
 1. the graded gauge key, grade-ascending (grade 0 first);
-2. then, per orb ascending by orb id, the banked ledger over resource
-   codes 1–7 in code order.
+2. per orb ascending by orb id: the banked ledger over resource codes
+   1–7 in code order; cumulative vented entropy; the eight ideology
+   books in the inscribed order (given_in_crisis, drawn_in_crisis,
+   returned_across, extracted_across, bond_flow, severance_load,
+   covenants_fulfilled, covenants_breached); then the element stores
+   over the union of that orb's element ids, id-ascending.
 
-Two nodes measuring together span the UNION of their grades and orb
-ids; an absent coordinate (an unopened grade, an unfounded orb, an
-unbanked resource) reads exactly 0. The projection is total,
-deterministic, and canonical: one committed state, one point, one
-encoding. Widening the manifold (new dimensions) is a spec extension
-with a new manifold code — never a silent change (the SEAL A instinct
-applied to geometry).
+**The census**, every non-rational committed field compared whole by
+exact equality, named typed when it differs:
+
+- per orb (union-spanned): the orb with its rational fields set aside
+  — name, zones, famine, thermal siting, overheat, last_touch — and
+  an orb present on one side only censuses by its existence;
+- the world families, each whole: entities · star · debts · bonds ·
+  covenants · councils · offers · techs · wants · crossed · genesis ·
+  terrain · instruments · practices · prospects · warded · veiled.
+
+A state difference that neither list carries reports **UNMEASURED**
+(census code 0) — the tripwire: a future committed field that joined
+neither the manifold nor the census is visible, never silent. In
+code the tripwire is the committed state's own exact equality.
+
+Diverged spines whose residuals and census are BOTH empty are two
+histories arriving at one state — the judgment still refuses (the
+spine forked; one writer per clock), but the measurement truthfully
+reads zero difference. That is the confluence precondition the annex
+path consumes.
 
 ### 2.2 The consilience triangle
 
@@ -115,13 +142,18 @@ Unanimity is the geometry.
 3. **No fork, unequal lengths → DRIFT.** The shorter side is BEHIND;
    the refusal names the missing half-open range `[from, to)`. Drift
    is cured by carrying the tail (§3.3) — never by re-voting history.
-4. **Equal spines → the measurement.** Both sides replay
-   INDEPENDENTLY; the triangle closes; C(Δ) measures. Zero issues the
-   consilience receipt (§3.2) recording length, head stamp, head
-   digest, arity, manifold width, and the measured zero. A nonzero C
-   on an equal spine would name a broken engine (SEAL B violated) and
-   refuses as DIVERGED at the head — agreement is MEASURED, never
-   declared.
+4. **Equal spines → THE REPLICATION WITNESS.** Both sides replay
+   INDEPENDENTLY; the triangle closes; C(Δ) measures; zero issues the
+   tag-65 receipt. Named honestly (the coder-04 audit, ruled into the
+   text 2026-07-31): on an equal spine the zero witnesses byte-exact
+   REPLICATION and independent replay determinism (SEAL B) — it is
+   not convergence, because the inputs could not disagree.
+   "Consilience" is reserved for measurements whose inputs could:
+   a diverged pair (§2.3.2), an opposition reading (§1 law 2, the
+   cfe-side instrument), a confluence of branches that did
+   independent work (§7.5). A nonzero C on an equal spine would name
+   a broken engine and refuses as DIVERGED at the head — agreement
+   is MEASURED, never declared.
 
 ### 2.4 The refusal taxonomy
 
@@ -134,7 +166,8 @@ All refusals are typed and carried whole (§3.2):
   chronicle in hand is intact by construction (the one-door law);
   forgery is caught at the boundary, in `receive`.
 - **DRIFT** — same history, less of it (behind side, missing range).
-- **DIVERGED** — forked history (fork sequence, residuals whole, C).
+- **DIVERGED** — forked history: fork sequence, residuals whole, C,
+  and the census (§2.1) — every structural difference named typed.
 
 ### 2.5 Scope
 
@@ -175,7 +208,15 @@ Tag 66: `kind u8` then per kind:
 - 2 FORGED: `side u8 ‖ LE64(at)`
 - 3 DRIFT: `behind u8 ‖ LE64(from) ‖ LE64(to)`
 - 4 DIVERGED: `LE64(at) ‖ LE32(residual count) ‖
-  (LE32(dimension) ‖ ratio(residual))… ‖ ratio(coherence)`
+  (LE32(dimension) ‖ ratio(residual))… ‖ ratio(coherence) ‖
+  LE32(census count) ‖ (census u8 ‖ LE64(id))…` — the census trails
+  the coherence ADDITIVELY (MESH-1d, 2026-07-31): the landed decoder
+  ignored trailing bytes, so a pre-census record decodes census-empty
+  and the record's meaning never moved. Census codes: 0 UNMEASURED ·
+  1 orb (id) · 2 entities · 3 star · 4 debts · 5 bonds · 6 covenants
+  · 7 councils · 8 offers · 9 techs · 10 wants · 11 crossed ·
+  12 genesis · 13 terrain · 14 instruments · 15 practices ·
+  16 prospects · 17 warded · 18 veiled (id is 0 except code 1).
 - 5 USURPED: `LE64(at) ‖ LE64(lawful)` (MESH-1b, §7.2)
 - 6 UNCITED: `LE64(at) ‖ LE64(handoff)` (MESH-1b, §7.2)
 
