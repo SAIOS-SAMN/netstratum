@@ -161,6 +161,23 @@ fn covered(event: &ClosureEvent) -> bool {
         // (no value moves, no ratios): registering an agent and opening
         // or shutting its scopes.
         | E::EntityRegistered { .. } | E::ScopeGranted { .. } | E::ScopeRevoked { .. }
+        // W-A slice-1 — the BANKED-NEUTRAL authority deeds. Each one's
+        // `world.rs::replay` arm touches NO bank (it sets a flag, a
+        // seal, a list: terrain seed, star, planet site, practice,
+        // ward, veil, genesis, prospect, the succession boundary, a
+        // licence record, an instrument, a route, an offer, a bond).
+        // So {I2 containment, I3 exactness} complete them, and
+        // conservation's non-constraint is CORRECT — ratified against
+        // the replay reading in `authority_pins.rs`. The value-moving
+        // "authority" deeds (ColonyFounded/Charted, ZoneBuilt/Razed,
+        // Covenant/Council seals — all move banks) stay held out for
+        // W-A slice-2's I1 arms. TaxonSealed stays coder-03's #42.
+        | E::WorldCharted { .. } | E::StarCommissioned { .. } | E::PlanetSited { .. }
+        | E::PracticeAdopted { .. } | E::PracticeReleased { .. } | E::ElderWarded { .. }
+        | E::VeilDrawn { .. } | E::WardLifted { .. } | E::VeilLifted { .. }
+        | E::GenesisSealed { .. } | E::ProspectStruck { .. } | E::LineSucceeded { .. }
+        | E::TechLicensed { .. } | E::InstrumentForged { .. } | E::RouteChartered { .. }
+        | E::OfferPosted { .. } | E::BondSealed { .. }
     )
 }
 
