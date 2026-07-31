@@ -2,8 +2,11 @@
 name = "mesh"
 version = "0.1.0"
 edition = "2021"
-description = "NS-5 MESH — proof-of-convergence consilience: independent replays of one chronicle converge by exact measurement, or refuse typed"
+description = "NS-5 MESH — the spine at TUniversal{S,G,T} (two maps, four verbs, one record) and the lawful chain remainder: the integrity door, the head announcement, the authority walk"
 
 [dependencies]
 cfe = { path = "../cfe" }
+codec = { path = "../codec" }
+kernel = { path = "../kernel" }
+blake3.workspace = true
 
