@@ -1,0 +1,13 @@
+[package]
+name = "lens"
+version = "0.1.0"
+edition = "2021"
+description = "Read-only projections from the chain (#37): the display re-served from the spine, deletable exports made re-derivable — never a second truth"
+
+[dependencies]
+cfe = { path = "../cfe" }
+codec = { path = "../codec" }
+mesh = { path = "../mesh" }
+
+[dev-dependencies]
+ledger = { path = "../ledger" }
