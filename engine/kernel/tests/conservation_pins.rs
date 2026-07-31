@@ -26,6 +26,29 @@ fn two_orb_world() -> World {
 }
 
 #[test]
+fn the_sealed_default_refuses_the_unjudged() {
+    // The airtight law: a deed with no landed invariant coverage does
+    // NOT enter. A founding is not yet covered by the kernel (only I1 /
+    // transfers is), so the judge refuses it Unjudged — refuse-unknown,
+    // not admit-unknown. Coverage will move it to a judged arm when I2
+    // (containment) lands; until then it is refused, never admitted.
+    let mut world = World::new();
+    world.found("origin").expect("founds");
+    let prior = World::new().committed();
+    let next = world.committed();
+    let step = Step {
+        event: ClosureEvent::ColonyFounded { orb_id: FIRST_ORB, name: "origin".into() },
+        actor: SOVEREIGN,
+        stamp: world.now(),
+    };
+    assert_eq!(
+        lawful(&prior, &next, &step),
+        Err(Unlawful::Unjudged),
+        "the sealed kernel refuses what it cannot judge"
+    );
+}
+
+#[test]
 fn the_version_is_pinned() {
     // The commitment binds this; an amendment bumps it. Pinned so a
     // silent change to the judge cannot pass unnoticed.

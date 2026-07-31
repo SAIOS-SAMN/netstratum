@@ -3,8 +3,26 @@
 **Status:** LAW (ratified 2026-07-31). Governs `engine/kernel`. Subordinate
 to `docs/00_CHARTER.md` §11 (the One-Truth Amendment); this document is its
 Rule 3 made concrete — the invariants, the equations, the algorithms, and
-the order they land. Amendments to this file bump `kernel::VERSION` and are
-charter-tier, never landings.
+the order they land.
+
+**Amendment tiers (or the cadence dies).** Sealing the vocabularies must NOT
+freeze content development behind constitutional process. Two tiers, both
+changing the constitution digest so the handshake still catches every
+difference:
+- **Additive amendment (minor `VERSION` bump):** a new event tag WITH its
+  invariant coverage, or a new closed-vocabulary entry. Content-development
+  cadence rides this tier. Two operators on different additive tiers are
+  simply DIFFERENT UNIVERSES until they match — lawful nurseries to each
+  other; cross-version convergence is a bridge problem, never a silent skip.
+- **Breaking amendment (major `VERSION` bump):** a changed MEANING of an
+  existing rule or field. Rare, charter-tier deliberation.
+
+The protocols named as sealed law (unambiguously): **RFA** (exact-rational
+algebra → I3), **DOP** (NS-1, the object model → schema/vocabulary), **VRP**
+(NS-3, the RECEIPT CHAIN — verification/parent-linking → the commitment
+shape; confirmed VRP, not RQP), and **CFE** (the runtime whose transition
+rules become the invariants). Law seals; mechanism stays in its crate,
+version-pinned.
 
 **Provenance (honest):** the convergence mechanics below are re-derived from
 the v0.1 ancestor `/opt/ipsal-autic-v0.1/repos/convergence-engine`
@@ -26,15 +44,38 @@ The kernel is the sole validated update function:
 
 - **prior, next**: full committed state, in memory.
 - **step**: `{ event, actor, stamp }` — the deed CLAIMING to carry prior to next.
-- **pure, total, no I/O, encoding-blind.** It never serializes; the codec
-  (the spine) holds the byte monopoly, so kernel and chain cannot disagree
-  about bytes. The kernel judges MEANING; the codec fixes FORM.
+- **pure, total, no I/O, encoding-blind, network-blind.** It never
+  serializes (the codec holds the byte monopoly, so kernel and chain cannot
+  disagree about bytes), and it never reads the mesh, the uplink, or any
+  peer state. All arrows point ONE way: `engine/kernel` imports `cfe` only
+  — the audit is grep-simple, and it stays that way by law. The kernel
+  judges MEANING; the codec fixes FORM; the mesh does DISTRIBUTION; none
+  reaches back into the judge. My verbs call `lawful()`; `lawful()` calls
+  nothing of the mesh's.
 
 The kernel judges ONE step. It never optimizes a global quantity — a global
 property (coherence, stability) is not a per-step fact and cannot enter
 `lawful()` without destroying its nature. The design law: **enforce the
 LOCAL invariants whose universal application yields the global band;
 MEASURE the global with a lens; never enforce it in the judge.**
+
+**THE SEALED DEFAULT ARM — refuse-unknown, never admit-unknown.** The
+default arm of the judge REFUSES: a deed no invariant covers does not enter
+(`Unlawful::Unjudged`). Coverage grows by amendment — each landing moves an
+event from the default-refuse arm to an explicit judged arm — and the kernel
+wires as the live gate (§11 Phase 3) only when `Unjudged` is unreachable,
+every event covered. The distinction that guards this forever: **SEAL A is a
+READER's law, never the JUDGE's.** Readers skip unknown TAGS so old software
+survives new content (SEAL A, right and permanent). A judge that skips
+unknown DEEDS is a hole exactly the size of every future tag. Two different
+laws, one word — "unknown" — and conflating them silently rebuilds
+default-admit. (Landed: the flip + witness `the_sealed_default_refuses_the_unjudged`.)
+
+**No consensus weight before cryptographic identity.** Until identity binds
+(N7), any confirmation-weight computation is ADVISORY ONLY — never
+canonicalizing. Weight summed over self-declared integer hands IS the puppet
+web, pre-built by us; this one line forbids a well-meaning seat from
+implementing it early.
 
 ## 2. The invariant set (the whole of the law)
 
@@ -78,6 +119,18 @@ decay collapses canonical denominators without bound).
 residual is REDUCED as gauge, MINTED as a new dimension, or REFUSED — never
 silently discarded. Concretely, a fold (declaring two states the same and
 collapsing them) is lawful only if no orbit-lock binds them (§4).
+
+**The container law (resolves I6 × sealed-schema; codec-side precision is
+the mesh operator's).** I6's emission "mints a new fiber plane," but §11 says
+state-schema changes are amendments — runtime dimension-growth and a sealed
+schema collide UNLESS the schema seals CONTAINERS, not fixed dimensions.
+Inscribe what the tree already does: the gauge key is a VARIABLE-LENGTH
+container inside schema v1, grown only by receipt (`GaugeShiftedAt` opens
+planes); banked elements are likewise a container. So: **the schema seals the
+containers; the fibers grow inside them lawfully at runtime; new container
+KINDS are amendments.** Without this line I6 either shatters the codec gate
+or becomes a schema mutation — the codec is what would break, so its
+byte-level precision belongs to the mesh/codec lane.
 
 Together I1/I4/I5 are the full value law: **value moves conserved, is
 created only by bounded lawful mint, destroyed only by bounded lawful
@@ -209,6 +262,12 @@ minimum, nothing wired as the live gate until the spine forms (§11 Phase 3):
 3. I3 exactness.
 4. I4 bounded creation / I5 bounded decay (the value law completes).
 5. The sealed vocabularies + derivation rules + `constitution_digest()`.
+   **Dependency direction (mesh-operator ruling): manifest-with-witness NOW,
+   invert at Phase 3.** The kernel holds a vocabulary manifest and a witness
+   proves `cfe`'s enums match it; the enums stay in `cfe` for now. The
+   inversion (kernel owns the vocabularies, `cfe` depends up) lands at Phase
+   3, when wiring the gate buys its cost back — the constitution digest makes
+   the sync-witness structural in the meantime.
 6. I6 the fold gate + dimensional resolution (lands with the spine, §11
    Phase 2-3), re-derived red-first from the v0.1 ancestor.
 

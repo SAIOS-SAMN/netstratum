@@ -272,10 +272,26 @@ lanes, gated where they touch new transition semantics or committed fields.
 
 ## 7. OPEN — the honest map (unchanged, restated per component)
 
-- **Validator/mesh:** the verified-work anchor (proof-of-useful-work) —
-  weight earned, not assigned. UNBUILT. The load-bearing gap.
+- **Validator/mesh:** the ordering mechanism, BOTH halves. Carrot — the
+  verified-work anchor (proof-of-useful-work), weight earned not assigned,
+  UNBUILT, the load-bearing gap. Stick — the alignment covenant (CHARTER
+  §11): open divergence lawful, covert divergence slashed (pen/work/stake
+  forfeit, reusing `CovenantSlashed`). Carrot and stick are one economy;
+  their three price rulings sit together with the operator.
 - **Node/mesh:** identity binding — hands are self-declared integers (N7).
+  No consensus weight is canonicalizing before it binds (kernel CHARTER §1).
 - **Convergence:** the mint rate + reward split (monetary policy, MEASURED);
   the residue composition law (how two residues compose into a generator —
   thesis, not spec).
 - **Mesh:** Byzantine fork resolution beyond stasis.
+
+## 8. PUPPET-1 — the attacker experiment (mesh lane, after the spine)
+
+The deliverable that makes the "stable band" claim FALSIFIABLE. Two universes
+under the landed two-node acceptance harness: one honest (genuine solver
+certificates), one adversary (fabricated-difference puppets merge-farming the
+mint). Measure whether the anchor REFUSES or PAYS. Composes entirely from
+existing pieces (the acceptance example, the codec, branch coordinates,
+solver certificates, the I6 fold gate). Owner: the mesh operator, built when
+the spine lands. Inscribing it now is what turns "measure, don't assume" from
+a slogan into a boarded test.

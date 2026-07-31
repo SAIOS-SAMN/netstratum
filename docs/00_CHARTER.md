@@ -267,6 +267,27 @@ the resulting state becomes that world's first chained snapshot, with
 the old log hashed in as history. Nothing running is deleted by the
 cure.
 
+**The nursery law.** A world is born and raised on one node — the nursery
+— and because its commitment shape and its judge are already the mesh's
+own, it is BORN MESH-READY. Joining the mesh is the audience growing: you
+present your chain, peers re-run their identical kernel over every step,
+and admission IS verification. A **puppet universe is precisely a nursery
+that never earned confirmation** — the same vocabulary names the sandbox
+law and the Sybil analysis.
+
+**The alignment covenant (the stick beside the carrot).** The ordering
+mechanism has two halves. The carrot: consensus weight earned by
+certificate-verified genuine difference (proof-of-useful-work — unbuilt,
+the load-bearing gap). The stick, ruled and boarded (NS-5 §7.6): **open
+divergence is lawful; covert divergence is slashed.** A node that forks
+honestly is a lawful nursery; a node that fabricates confirmation and is
+proven to has its pen, its work, and its STAKE forfeited — reusing the
+landed `CovenantSlashed`/forfeit mechanics. The puppet web is made
+expensive by work-anchoring AND ruinous by stake-slashing on proven
+fabrication. The three economics questions — what verified work earns,
+what the stake is, how much slashes — are operator rulings, ruled in one
+sitting because the carrot and the stick are one economy.
+
 **Why this section exists:** the old mirror was born as a read-only
 dashboard and was safe while that was all it was. It became
 load-bearing one useful change at a time, and no rule existed to stop

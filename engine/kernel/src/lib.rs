@@ -62,13 +62,40 @@ pub enum Unlawful {
     /// carrier is a big-int rational); the residual is theirs to read
     /// (shown, never summarized away).
     ConservationBroken { resource: Resource, before: Box<Ratio>, after: Box<Ratio> },
+    /// THE SEALED DEFAULT — the judge refuses what no invariant covers.
+    /// This event has no landed rule; a deed the kernel cannot judge does
+    /// NOT enter. Coverage grows by amendment: each landing moves an event
+    /// from this default-refuse arm to an explicit judged arm, and the
+    /// kernel wires as the live gate (Phase 3) only when `Unjudged` is
+    /// unreachable — every event covered. **SEAL A is a READER's law,
+    /// never the judge's:** readers skip unknown TAGS so old software
+    /// survives new content; a judge that skips unknown DEEDS is a hole
+    /// exactly the size of every future tag. Two laws, one word "unknown"
+    /// — conflating them silently rebuilds default-admit.
+    Unjudged,
 }
 
 /// THE JUDGE. Does `step` lawfully carry `prior` to `next`? Pure,
-/// total, encoding-blind. `Ok(())` admits; `Err(Unlawful)` refuses
-/// with the break whole.
+/// total, encoding-blind, AND network-blind (it reads no mesh, no peer,
+/// no uplink — `engine/kernel` imports `cfe` only; all arrows point one
+/// way). `Ok(())` admits; `Err(Unlawful)` refuses with the break whole.
 pub fn lawful(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Unlawful> {
+    // The sealed default arm (mesh-operator ruling, airtight-critical):
+    // refuse-unknown, not admit-unknown. What no invariant covers does
+    // not enter.
+    if !covered(&step.event) {
+        return Err(Unlawful::Unjudged);
+    }
     conservation(prior, next, step)
+}
+
+/// The landed coverage of the invariant set. An event is judged only if
+/// some invariant governs it; this predicate grows as I2..I6 land (I2
+/// containment and I3 exactness apply to nearly every event, so the
+/// `Unjudged` arm shrinks toward empty as the kernel seals). Today: only
+/// conservation (I1) has landed, and it covers the value-moving deeds.
+fn covered(event: &ClosureEvent) -> bool {
+    matches!(event, ClosureEvent::ResourceTransferred { .. })
 }
 
 /// INVARIANT — conservation. A deed that only MOVES value may not
@@ -96,12 +123,10 @@ fn conservation(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
                 }),
             }
         }
-        // Coverage grows by amendment. An event without a landed
-        // conservation rule is not yet judged HERE — it is admitted by
-        // this invariant and judged by the invariants that do cover it
-        // (containment, exactness — landing next). No event is ever
-        // silently exempt: clause 2 guards that the gap closes only by
-        // witnessed amendment, never by omission.
+        // A covered event on which conservation places no constraint
+        // (uncovered events already refused at the `lawful` default arm,
+        // so this is reached only by covered events other invariants
+        // govern). Coverage grows by witnessed amendment — clause 2.
         _ => Ok(()),
     }
 }
