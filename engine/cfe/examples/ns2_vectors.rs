@@ -47,7 +47,8 @@ fn main() {
     println!();
 
     // The kind-swap near-miss (C(Δ) = 0 while the delta is real) and
-    // the banked near-miss (iron −5, biomass −2, C(Δ) = 29) — the
+    // the banked near-miss (iron −5, biomass −2, C(Δ) = |−5| + |−2| = 7,
+    // the proportional law) — the
     // witness board's measured refusals, re-stated as records.
     let kind_swap = NearMiss {
         orb: 4,
@@ -64,12 +65,12 @@ fn main() {
         ],
         zone_deltas: vec![],
         thermal: (0, 0),
-        coherence: ratio(29, 1),
+        coherence: ratio(7, 1),
     };
     println!("-- tag 58, the refusal record (kind swap: delta real, C(Δ) = 0) --");
     println!("{}", hex(&refusal_record_bytes(&kind_swap)));
     println!();
-    println!("-- tag 58, the refusal record (banked miss: iron −5, biomass −2, C(Δ) = 29) --");
+    println!("-- tag 58, the refusal record (banked miss: iron −5, biomass −2, C(Δ) = 7) --");
     println!("{}", hex(&refusal_record_bytes(&banked_miss)));
     println!();
 

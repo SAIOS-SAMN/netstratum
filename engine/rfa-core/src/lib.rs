@@ -10,9 +10,10 @@
 //! - [`for_each_residual`] — the ONE computation of the cocycle
 //!   condition `R_ijk = Δ_ik − Δ_ij − Δ_jk` over all ordered distinct
 //!   triples. Everything downstream (coherence, gates) composes it.
-//! - [`coherence_functional`] — `C(Δ) = Σ R²` over the exact rationals. `C(Δ) = 0` iff
-//!   the cocycle condition holds; otherwise the residuals name exactly
-//!   what has not converged, and where.
+//! - [`coherence_functional`] — `C(Δ) = Σ |R|` over the exact rationals
+//!   (THE PROPORTIONAL LAW: squares are barred as aggregators of difference).
+//!   `C(Δ) = 0` iff the cocycle condition holds; otherwise the residuals
+//!   name exactly what has not converged, and where.
 //! - [`coboundary_reduce`] — projection onto the canonical H¹
 //!   representative (strips coordinate distortion), then integer
 //!   normalization (lcm of denominators, gcd of numerators): the
@@ -24,6 +25,6 @@ pub mod delta;
 pub mod gates;
 pub mod reduce;
 
-pub use delta::{coherence_functional, for_each_residual, norm_squared, Delta};
+pub use delta::{coherence_functional, for_each_residual, magnitude, Delta};
 pub use gates::{validate_step, GateVerdict, StepBound};
 pub use reduce::coboundary_reduce;

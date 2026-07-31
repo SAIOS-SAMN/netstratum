@@ -72,6 +72,29 @@ same landing (CHARTER §1); commit on explicit operator go.
   the lens leaves ONE receipt; a crystal-less scan refuses pure; replay
   MATCHES; the CLI arc played end-to-end `--plain`. Landed at 194/194
   workspace witnesses.
+- **U0 + PROPORTION-1 LANDED** (2026-07-31, arch-01): the unit lane
+  opens. U0 — the spine judge fixture seats its actors (sovereign +
+  contained hand with exactly Collect; I2 honored), surfacing the
+  board's TRUE count: **285/285 green, clippy zero** (the prior 240 was
+  a fail-fast undercount — cargo stops at the first red binary).
+  PROPORTION-1 — THE PROPORTIONAL LAW (operator ruling; the name
+  LINEAR is DEAD in the workspace, per 12_UNION's no-uni-directional-
+  linearity doctrine): squares are BARRED as aggregators of difference
+  — `coherence_functional` and `conservation_measurement` sum `|R|`,
+  `norm_squared` → `magnitude` (‖Δ‖₁), the scanner scalar likewise;
+  each difference counts exactly its size IN ITS OWN UNITS, natively
+  additive across the fiber's direct sum; squares survive ONLY as
+  physical law (05's T⁴ discipline). Evidence: red-first honored at
+  both flips (witnesses re-pinned 24→12 RFA / 29→7 scanner, red
+  recorded, then green); the tag-58 wire vector RE-EXTRACTED from the
+  running engine (`ns2_vectors`, byte `1d`→`07`) and inscribed in
+  NS-2 §3; law amended in kernel CHARTER §3, SYSTEM_SPEC §0/§4,
+  03_SUBSTRATE_CONTRACT §5; dated records stay quoted (this row's N4
+  neighbor speaks 29 as HISTORY). 285/285, clippy zero. Design
+  authority now also includes `16_UNIT.md` (the unit law + §4a the
+  singularity law), `docs/EQUATIONS.md` (THE ONE LEDGER — the
+  row-claim convention is live), `docs/U_DIRECTIVES.md` (the unit
+  work orders; U1 next, tag 86 reserved there).
 
 ## 1. The board
 

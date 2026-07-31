@@ -181,7 +181,7 @@ fn the_scan_finds_the_match_and_refuses_the_near_misses_delta_whole() {
         "probe minus candidate, the full list — never a truncation"
     );
     assert_eq!(banked_miss.zone_deltas, vec![], "the pattern matches; the bank does not");
-    assert_eq!(banked_miss.coherence, ratio(29, 1), "C(Δ) = 25 + 4, exact");
+    assert_eq!(banked_miss.coherence, ratio(7, 1), "C(Δ) = |−5| + |−2| = 7, exact — the proportional law");
     // The lens law: exactly ONE receipt — the draw; blind to the asking.
     let receipts_after = world.chronicle().receipts().len();
     assert_eq!(receipts_after, receipts_before + 1, "one lens, one receipt");

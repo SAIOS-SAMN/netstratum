@@ -1,7 +1,7 @@
 //! The Delta tensor and the one cocycle-residual computation.
 
 use cfe::ratio::Ratio;
-use num_traits::Zero;
+use num_traits::{Signed, Zero};
 
 /// An antisymmetric relational tensor over exact rational.
 ///
@@ -56,19 +56,20 @@ impl Delta {
     }
 
     /// The conservation measurement — a DISTANCE to the invariant
-    /// surface, not a boolean: `Σ Δ_ii² + Σ_{i<j} (Δ_ij + Δ_ji)²`.
+    /// surface, not a boolean: `Σ |Δ_ii| + Σ_{i<j} |Δ_ij + Δ_ji|`
+    /// (THE PROPORTIONAL LAW: each violation counts exactly its size, in its
+    /// own units — squares are barred as aggregators of difference).
     /// Zero iff antisymmetry and the zero diagonal hold exactly.
     pub fn conservation_measurement(&self) -> Ratio {
         let mut violation = Ratio::zero();
         for i in 0..self.dim {
             for l in 0..self.fiber {
-                let d = &self.entries[i][i][l];
-                violation += d * d;
+                violation += self.entries[i][i][l].abs();
             }
             for j in (i + 1)..self.dim {
                 for l in 0..self.fiber {
                     let sum = &self.entries[i][j][l] + &self.entries[j][i][l];
-                    violation += &sum * &sum;
+                    violation += sum.abs();
                 }
             }
         }
@@ -116,26 +117,35 @@ where
     }
 }
 
-/// The coherence functional: `C(Δ) = Σ R_ijk,l²` over all ordered
+/// The coherence functional: `C(Δ) = Σ |R_ijk,l|` over all ordered
 /// distinct triples. `C(Δ) ≥ 0`, exact rational, and `C(Δ) = 0` iff
 /// `Δ_ik = Δ_ij + Δ_jk` for every triple — the cocycle condition.
+///
+/// THE PROPORTIONAL LAW (operator ruling 2026-07-31): the ancestor's `Σ R²`
+/// is BARRED as an aggregator of difference. Squares are the
+/// mathematics of minimization — a loss shaped to be differentiated
+/// and descended; this lens exists to be READ. L1 keeps the scalar in
+/// the SAME UNITS as its payload, weights each residual exactly its
+/// size, needs no root ever, and keeps the arithmetic lean (squaring
+/// doubles bit-length — the denominator lesson). The zero point — the
+/// only place the LAW judges — is unchanged.
 pub fn coherence_functional(delta: &Delta) -> Ratio {
     let mut c = Ratio::zero();
     for_each_residual(delta, |_i, _j, _k, _l, r| {
-        c += r * r;
+        c += r.abs();
     });
     c
 }
 
-/// `‖Δ‖²` — the sum of squared entries (the magnitude the bounded-step
-/// gate reads).
-pub fn norm_squared(delta: &Delta) -> Ratio {
+/// `‖Δ‖₁` — the sum of entry magnitudes (the L1 mass the bounded-step
+/// gate reads; the proportional law — no square, no root, same units as the
+/// entries).
+pub fn magnitude(delta: &Delta) -> Ratio {
     let mut n = Ratio::zero();
     for i in 0..delta.dim {
         for j in 0..delta.dim {
             for l in 0..delta.fiber {
-                let e = delta.entry(i, j, l);
-                n += e * e;
+                n += delta.entry(i, j, l).abs();
             }
         }
     }

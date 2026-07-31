@@ -8,8 +8,9 @@ use std::fs;
 use std::path::PathBuf;
 
 use cfe::dop::{ClosureEvent, ColonyOrb, Resource};
+use cfe::ipsal::{Entity, Scope};
 use cfe::ratio::{ratio, Ratio};
-use cfe::world::World;
+use cfe::world::{World, SOVEREIGN};
 use mesh::spine::{Coordinate, Spine, SpineRefused};
 
 fn scratch(name: &str) -> PathBuf {
@@ -42,10 +43,22 @@ fn orb(id: u64, iron: (i64, i64)) -> ColonyOrb {
     held
 }
 
-/// A two-orb committed state: iron split `a` / `b`.
+/// A two-orb committed state: iron split `a` / `b`. Identity precedes
+/// the world (I2): the sovereign is seated, and the acting hand (100)
+/// is a contained agent holding exactly Collect — the scope the
+/// transfer deed requires, no more.
 fn two_orb_state(a: (i64, i64), b: (i64, i64)) -> Vec<u8> {
     let mut committed = World::new().committed();
     committed.orbs = vec![orb(1, a), orb(2, b)];
+    committed.entities = vec![
+        Entity { entity_id: SOVEREIGN, handle: "sovereign".into(), principal: None, grants: vec![] },
+        Entity {
+            entity_id: 100,
+            handle: "hand".into(),
+            principal: Some(SOVEREIGN),
+            grants: vec![Scope::Collect],
+        },
+    ];
     codec::state_bytes(&committed)
 }
 

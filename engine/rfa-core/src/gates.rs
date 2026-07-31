@@ -2,15 +2,15 @@
 //! three, and a refusal is TYPED (the gate names what failed and by
 //! how much; nothing fails silently).
 
-use crate::delta::{coherence_functional, norm_squared, Delta};
+use crate::delta::{coherence_functional, magnitude, Delta};
 use cfe::ratio::Ratio;
 use num_traits::Zero;
 
-/// The magnitude bound for one step: the squared norm of the proposed
+/// The magnitude bound for one step: the L1 mass of the proposed
 /// state may not exceed `reference` by more than `epsilon × reference`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct StepBound {
-    /// The reference magnitude (‖Δ‖² of the standing state, or a
+    /// The reference magnitude (‖Δ‖₁ of the standing state, or a
     /// temporal mean the caller carries).
     pub reference: Ratio,
     /// The allowed relative excursion (exact rational, e.g. 1/10).
@@ -45,7 +45,7 @@ pub enum GateVerdict {
 /// Gate order (first refusal wins, most structural first):
 /// 1. **Conservation** — `after` must sit exactly on the invariant
 ///    surface (antisymmetric, zero diagonal).
-/// 2. **Bounded magnitude** — `| ‖after‖² − reference |` must not
+/// 2. **Bounded magnitude** — `| ‖after‖₁ − reference |` must not
 ///    exceed `epsilon × reference`.
 /// 3. **Productivity** — the coherence functional must strictly
 ///    decrease, unless `before` was already fully coherent (C = 0),
@@ -56,11 +56,11 @@ pub fn validate_step(before: &Delta, after: &Delta, bound: &StepBound) -> GateVe
         return GateVerdict::ConservationViolated { violation };
     }
 
-    let magnitude = norm_squared(after);
-    let excursion = if magnitude >= bound.reference {
-        &magnitude - &bound.reference
+    let mass = magnitude(after);
+    let excursion = if mass >= bound.reference {
+        &mass - &bound.reference
     } else {
-        &bound.reference - &magnitude
+        &bound.reference - &mass
     };
     let allowed = &bound.epsilon * &bound.reference;
     if excursion > allowed {

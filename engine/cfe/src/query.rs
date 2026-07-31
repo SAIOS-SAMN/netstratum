@@ -14,6 +14,7 @@
 use crate::dop::{ColonyOrb, Resource};
 use crate::ratio::{ratio, Ratio};
 use crate::thermal::{band_of, t_eq4, StarClass, SubstrateBand};
+use num_traits::Signed;
 use std::collections::BTreeMap;
 
 /// The chart's edge (the 8×8 grid — `clients/cli` renders the same).
@@ -73,8 +74,10 @@ pub struct NearMiss {
     /// (probe class, candidate class) — equal in v1 (the band keys the
     /// bucket); carried so the surface holds if a ruling widens it.
     pub thermal: (u8, u8),
-    /// C(Δ) = Σ R² over the banked residuals — the coherence-functional
-    /// shape (exact rational, zero iff the ledgers agree), computed
+    /// C(Δ) = Σ |R| over the banked residuals — the coherence-functional
+    /// shape (exact rational, zero iff the ledgers agree; THE
+    /// PROPORTIONAL LAW: each residual counts exactly its size, in its own units —
+    /// squares are barred as aggregators of difference), computed
     /// local: cfe carries no rfa-core dependency. THE SUMMARY, never
     /// the payload.
     pub coherence: Ratio,
@@ -311,7 +314,7 @@ fn near_miss(orb: u64, probe: &Joint, candidate: &Joint) -> NearMiss {
     }
     let coherence = banked_residuals
         .iter()
-        .fold(ratio(0, 1), |sum, (_, residual)| sum + residual.clone() * residual.clone());
+        .fold(ratio(0, 1), |sum, (_, residual)| sum + residual.abs());
     NearMiss {
         orb,
         banked_residuals,

@@ -10,7 +10,7 @@
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 use rfa_core::{
-    coherence_functional, for_each_residual, norm_squared, validate_step, Delta, GateVerdict,
+    coherence_functional, for_each_residual, magnitude, validate_step, Delta, GateVerdict,
     StepBound,
 };
 
@@ -43,7 +43,7 @@ fn shock_stress_gated_recovery_convergence() {
     //    jumps 3/2 → 7/2 (torsion +2). The gauge reads non-zero…
     let hit = shocked(ratio(7, 2));
     let stress = coherence_functional(&hit);
-    assert_eq!(stress, ratio(24, 1), "six ordered triples × (±2)²");
+    assert_eq!(stress, ratio(12, 1), "six ordered triples × |±2| — the proportional law");
 
     //    …and the residuals NAME the damaged relation: every firing
     //    triple involves all three entities around the broken 0↔2 leg.
@@ -61,7 +61,7 @@ fn shock_stress_gated_recovery_convergence() {
     //    Each step must pass all three gates (conservation, bounded
     //    magnitude, productivity: stress strictly falls).
     let bound = StepBound {
-        reference: norm_squared(&hit),
+        reference: magnitude(&hit),
         epsilon: ratio(1, 1),
     };
     let path = [ratio(5, 2), ratio(2, 1), ratio(3, 2)]; // Δ02 healing home

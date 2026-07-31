@@ -178,9 +178,15 @@ Read to KNOW the state; never targets the kernel drives.
 
 - **Coherence functional** (the residual measure; zero iff converged):
 
-        C(Δ) = Σ_i R_i^2        (exact rationals; squaring lawful on RFA
-                                 residuals, NOT on torus distance — that
-                                 stays L1, the short way around)
+        C(Δ) = Σ_i |R_i|        (exact rationals; THE PROPORTIONAL LAW —
+                                 operator ruling 2026-07-31, amending the
+                                 earlier squaring clause: squares are
+                                 BARRED as aggregators of difference,
+                                 on residuals as on torus distance — L1
+                                 everywhere, the short way around, each
+                                 difference counted exactly its size in
+                                 its own units; the zero point the law
+                                 judges at is unchanged)
 
 - **Constitution digest** (the link handshake — same universe?):
 

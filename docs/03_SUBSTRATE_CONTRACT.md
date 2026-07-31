@@ -81,8 +81,9 @@ A shock injects torsion into the colony Delta; the visible stress
 gauge is the coherence functional; recovery is a sequence of gated
 convergence steps.
 
-- **Primitive:** `rfa_core::coherence_functional` (`C = Σ R²`, exact rational,
-  zero iff converged — the dashboard number);
+- **Primitive:** `rfa_core::coherence_functional` (`C = Σ |R|`, exact
+  rational, zero iff converged — the dashboard number; the proportional law,
+  operator ruling 2026-07-31);
   `rfa_core::for_each_residual` (WHERE the stress lives, per triple,
   per coordinate); `rfa_core::validate_step` (typed refusals:
   `ConservationViolated`, `MagnitudeDrift`, `Unproductive` — recovery

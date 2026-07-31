@@ -2,15 +2,19 @@
 //!
 //! The vectors derive from the convergence-engine's own semantics
 //! (engine.rs: `for_each_residual` over ALL ordered distinct triples;
-//! `coherence_functional` = Σ R²; `coboundary_reduce` = vertex-0
-//! anchoring + lcm/gcd integer normalization), recomputed by hand
-//! against the lifted loop. Any implementation that reproduces these
-//! values implements the same algebra.
+//! `coboundary_reduce` = vertex-0 anchoring + lcm/gcd integer
+//! normalization), recomputed by hand against the lifted loop. THE
+//! PROPORTIONAL LAW (operator ruling 2026-07-31): the coherence functional
+//! is `C(Δ) = Σ |R|` — the ancestor's Σ R² is BARRED as an aggregator
+//! of difference (squares are the mathematics of minimization; ours is
+//! measurement — each residual counts exactly its size, in its own
+//! units). Any implementation that reproduces these values implements
+//! the same algebra.
 
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 use rfa_core::{
-    coboundary_reduce, coherence_functional, for_each_residual, norm_squared, validate_step,
+    coboundary_reduce, coherence_functional, for_each_residual, magnitude, validate_step,
     Delta, GateVerdict, StepBound,
 };
 
@@ -35,11 +39,11 @@ fn coherent_delta_measures_zero() {
 
 /// VECTOR 2 — the incoherent state: Δ01 = 2, Δ12 = 3, Δ02 = 7. Every
 /// ordered distinct triple of {0,1,2} carries residual ±2 (six
-/// permutations), so C(Δ) = 6 × 4 = 24 exactly.
+/// permutations), so C(Δ) = 6 × |±2| = 12 exactly (the proportional law).
 #[test]
 fn incoherent_delta_measures_its_residual_exactly() {
     let d = delta3(ratio(2, 1), ratio(3, 1), ratio(7, 1));
-    assert_eq!(coherence_functional(&d), ratio(24, 1));
+    assert_eq!(coherence_functional(&d), ratio(12, 1));
     let mut count = 0;
     for_each_residual(&d, |_, _, _, _, r| {
         assert!(r == &ratio(2, 1) || r == &ratio(-2, 1));
@@ -64,7 +68,7 @@ fn constructed_deltas_conserve_exactly() {
 fn a_pure_coboundary_reduces_to_zero() {
     let d = delta3(ratio(1, 1), ratio(1, 2), ratio(3, 2));
     let reduced = coboundary_reduce(&d);
-    assert!(norm_squared(&reduced).is_zero());
+    assert!(magnitude(&reduced).is_zero());
     assert!(reduced.verify_conservation());
 }
 
@@ -125,10 +129,10 @@ fn coboundary_shift_does_not_change_the_class() {
 /// gate refuses typed with its measurement carried whole.
 #[test]
 fn the_three_gates_rule_typed() {
-    let before = delta3(ratio(2, 1), ratio(3, 1), ratio(7, 1)); // C = 24
+    let before = delta3(ratio(2, 1), ratio(3, 1), ratio(7, 1)); // C = 12
     let after = delta3(ratio(2, 1), ratio(3, 1), ratio(6, 1)); // C = 6
     let bound = StepBound {
-        reference: norm_squared(&before),
+        reference: magnitude(&before),
         epsilon: ratio(1, 1),
     };
     match validate_step(&before, &after, &bound) {
@@ -136,13 +140,13 @@ fn the_three_gates_rule_typed() {
             coherence_before,
             coherence_after,
         } => {
-            assert_eq!(coherence_before, ratio(24, 1));
+            assert_eq!(coherence_before, ratio(12, 1));
             assert_eq!(coherence_after, ratio(6, 1));
         }
         other => panic!("expected acceptance, measured {other:?}"),
     }
 
-    // Unproductive: coherence rises 6 → 24.
+    // Unproductive: coherence rises 6 → 12.
     match validate_step(&after, &before, &bound) {
         GateVerdict::Unproductive { .. } => {}
         other => panic!("expected productivity refusal, measured {other:?}"),
@@ -167,7 +171,7 @@ fn the_three_gates_rule_typed() {
 fn the_fixed_point_is_lawful() {
     let d = delta3(ratio(1, 1), ratio(1, 2), ratio(3, 2));
     let bound = StepBound {
-        reference: norm_squared(&d),
+        reference: magnitude(&d),
         epsilon: ratio(1, 1),
     };
     assert!(matches!(

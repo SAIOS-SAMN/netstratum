@@ -103,10 +103,12 @@ carries, per candidate:
 - the **thermal pair** when the classes differ (impossible in v1 — the
   band is in the address — carried in the record so the surface never
   changes when a later ruling widens the bucket);
-- the summary scalar `C(Δ) = Σ R²` over the banked residuals
-  (`rfa_core::coherence_functional` — exact rational, zero iff the
-  ledgers agree). **The scalar is the summary, never the payload**: a
-  consumer that reads only C(Δ) has not read the refusal.
+- the summary scalar `C(Δ) = Σ |R|` over the banked residuals (the
+  coherence-functional shape — exact rational, zero iff the ledgers
+  agree; THE PROPORTIONAL LAW, operator ruling 2026-07-31: each residual
+  counts exactly its size, in its own units — squares are barred as
+  aggregators of difference). **The scalar is the summary, never the
+  payload**: a consumer that reads only C(Δ) has not read the refusal.
 
 An empty bucket is its own typed verdict — `NoResonance`, carrying the
 probed address and nothing else. It is NOT a delta against the whole
@@ -217,9 +219,9 @@ Tag 58, the refusal record — the kind swap (delta real, C(Δ) = 0):
     3a1e000000040000000000000000020a00010215000201000000000000000100000001
 
 Tag 58, the refusal record — the banked miss (iron −5, biomass −2,
-C(Δ) = 25 + 4 = 29):
+C(Δ) = |−5| + |−2| = 7, the proportional law):
 
-    3a2f00000005000000000000000201010100000005010000000102010100000002010000000100000000010000001d0100000001
+    3a2f0000000500000000000000020101010000000501000000010201010000000201000000010000000001000000070100000001
 
 Tag 55, `ClosureEvent::CrystalDrawn` (orb 1, 1 crystal; round-trips
 byte-exact through `from_wire`):
@@ -248,7 +250,7 @@ exemplar, B the rot90 twin, C the kind swap, D the once-collected.
    the delta is real** — the scalar is the summary, never the payload.
    D (B's pattern, collected once at +4 ticks: 1E+1H nets iron +5/4,
    biomass +1/2 per tick) refuses with residuals iron −5, biomass −2
-   whole and C(Δ) = 25 + 4 = 29, exact.
+   whole and C(Δ) = |−5| + |−2| = 7, exact (the proportional law).
 3. **The lens law:** the chronicle before and after the scan differs
    by EXACTLY one receipt — the CrystalDrawn debit, blind to the
    asking; the reading's stamp IS that receipt's stamp.

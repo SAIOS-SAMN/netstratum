@@ -42,15 +42,20 @@ the kernel optimize the equation globally (KERNEL_RELAY §9).
 
 The five per-step invariants (v0.1 `PhiK`, checked every K-step):
 
-    I^(1) magnitude:      ‖Δ‖²
-    I^(2) conservation:   Σ_{i<j}(Δ_ij + Δ_ji)² + Σ_i (Δ_ii)²   (0 = exact)
+    I^(1) magnitude:      ‖Δ‖₁ = Σ |Δ_ij,l|   (the L1 mass — the proportional law)
+    I^(2) conservation:   Σ_{i<j}|Δ_ij + Δ_ji| + Σ_i |Δ_ii|   (0 = exact)
     I^(3) rank:           dim of the relational structure
     I^(4) symmetry class: RCF canonical-form hash (bytes)
     I^(5) stamp:          T_k  (TUniversal coordinate)
 
 Magnitude bound (validation ceiling, v0.1 C7):
 
-    | ‖Δ_{k+1}‖² − ‖F̄‖² |  ≤  ε_mag · ‖F̄‖²      (F̄ = the pre-projection sum)
+    | ‖Δ_{k+1}‖₁ − ‖F̄‖₁ |  ≤  ε_mag · ‖F̄‖₁      (F̄ = the pre-projection sum)
+
+(THE PROPORTIONAL LAW — operator ruling 2026-07-31: the v0.1 squared forms
+are carried into netstratum as L1 — squares are BARRED as aggregators
+of difference; every zero-set is unchanged. Squares survive only as
+physical law — the T⁴ discipline of 05.)
 
 ---
 
@@ -179,7 +184,8 @@ descent-and-emission, bounded both ends.
 **Equations — the core measurements (v0.1, exact).**
 
     residual (cocycle):   R_{ijk,l} = Δ_{ik,l} − Δ_{ij,l} − Δ_{jk,l}
-    coherence functional:  C(Δ) = Σ R²        (0 ⟺ converged; a LENS)
+    coherence functional:  C(Δ) = Σ |R|       (0 ⟺ converged; a LENS;
+                                               the proportional law)
     coboundary reduce:     Π_G(Δ) = H¹ projection (strip distortion to core)
 
 **The dimensional-resolution cycle (replaces gradient descent).**
