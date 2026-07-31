@@ -3720,14 +3720,32 @@ pub fn pair_melt(a: &World, b: &World, distance: &Ratio) -> Ratio {
     melt
 }
 
+/// THE SMELT (ruled 2026-07-31): every FILL lands on the 1/64
+/// lattice the melt law speaks — floor(amount × 64)/64. GCD
+/// reduction alone cannot bound growth: lowest terms themselves grow
+/// when arbitrary rationals multiply through fills and premiums
+/// (measured 2026-07-31: the open no-singles book stalled the beat
+/// by ~6 crossings deep on compounding denominators — the demurrage
+/// precedent at `demurrage_due`, now made a market law). Bounded
+/// lattices keep replay and consilience verification affordable
+/// forever — the POW++ requirement. The shaved dust never leaves the
+/// giver's bank: nothing moves un-receipted, conservation holds by
+/// construction, and a fill smelted to zero refuses whole (dust
+/// never trades).
+pub fn smelt(amount: &Ratio) -> Ratio {
+    let grid = num_bigint::BigInt::from(64);
+    Ratio::new(amount.numer() * &grid / amount.denom(), grid)
+}
+
 /// MARKET-1 (BUILD_ORDER §3a) — CLEAR A CROSSING: two resting offers
 /// on two worlds meet; the fill happens at the RESTING offer's exact
 /// price (price-time priority: the earlier posted rules; ties break
 /// by lower offer id), moves as TWO aperture pairs (deal and deal+1 —
 /// the two directions, each conservation-exact, shield-checked), and
 /// closes both intents with OfferCleared. Fill = the largest exchange
-/// both intents admit; remainders are not carried — an unfilled
-/// remainder reposts (offers are intents, not escrows).
+/// both intents admit, SMELTED to the lattice; remainders are not
+/// carried — an unfilled remainder reposts (offers are intents, not
+/// escrows).
 pub fn clear_trade(
     a: &mut World,
     offer_a: u64,
@@ -3763,14 +3781,19 @@ pub fn clear_trade(
     }
     // The resting offer's price rules (price-time priority).
     let a_rests = (held_a.posted, held_a.offer) <= (held_b.posted, held_b.offer);
-    // Fill x of A's give (X): bounded by both intents.
-    let x = held_a.give_amount.clone().min(held_b.want_amount.clone());
-    // y of B's give (Y) at the resting price.
+    // Fill x of A's give (X): bounded by both intents, SMELTED.
+    let x = smelt(&held_a.give_amount.clone().min(held_b.want_amount.clone()));
+    // y of B's give (Y) at the resting price, SMELTED after the
+    // price multiply (the price is exact; the lattice bounds what
+    // MOVES — the dust stays with the giver).
     let y = match a_rests {
         true => x.clone() * held_a.want_amount.clone() / held_a.give_amount.clone(),
         false => x.clone() * held_b.give_amount.clone() / held_b.want_amount.clone(),
     };
-    let y = y.min(held_b.give_amount.clone());
+    let y = smelt(&y.min(held_b.give_amount.clone()));
+    if x <= ratio(0, 1) || y <= ratio(0, 1) {
+        return Err(ActionRefused::NoCrossing);
+    }
     // MARKET-2 (ruled 2026-07-31) — THE ICEBERG: delivered = sent ×
     // (1 − φ·D). ONE producer of the melt number (the conform
     // ruling's spirit): clear_trade and every profit test read

@@ -158,6 +158,18 @@ pub fn industry_relevant(metabolism: &str, kind: ZoneKind) -> bool {
 /// the denominator of its relaxed ask and the floor of its surplus.
 pub const TARGET_RESERVE: (i64, i64) = (8, 1);
 
+/// The reference model posts in WHOLE LOTS: amounts floor to the
+/// 1/64 grid the melt law already speaks (MELT_PER_UNIT). This is
+/// layer-2 prudence, not law — it keeps every book amount's
+/// denominator a small power of 64, so exact arithmetic stays cheap
+/// across an open, no-singles book (measured 2026-07-31: unquantized
+/// compounding rationals stalled the beat by ~6 crossings deep).
+fn lot(amount: &Ratio) -> Ratio {
+    use num_bigint::BigInt;
+    let grid = BigInt::from(64);
+    Ratio::new(amount.numer() * &grid / amount.denom(), grid)
+}
+
 /// A famished line bids STEEP — it gives more than it wants, and
 /// deeper famine bids steeper: want = give / (1 + severity).
 fn steep_want(give: &Ratio, severity: u32) -> Ratio {
@@ -197,17 +209,21 @@ pub fn trade_intent(
                 let starving = orb.famine.contains(&Resource::Joule);
                 let sink = orb.banked_amount(Resource::Sink);
                 if starving && sink > ratio(0, 1) {
-                    let give = half(sink);
-                    let want = steep_want(&give, severity);
-                    return Some((Resource::Sink, give, Resource::Joule, want));
+                    let give = lot(&half(sink));
+                    let want = lot(&steep_want(&give, severity));
+                    if give > ratio(0, 1) && want > ratio(0, 1) {
+                        return Some((Resource::Sink, give, Resource::Joule, want));
+                    }
                 }
             }
             (Regime::Furnace, _) => {
                 let joules = orb.banked_amount(Resource::Joule);
                 if joules > ratio(TARGET_RESERVE.0, TARGET_RESERVE.1) {
-                    let give = half(joules.clone());
-                    let want = relaxed_want(&give, &joules);
-                    return Some((Resource::Joule, give, Resource::Sink, want));
+                    let give = lot(&half(joules.clone()));
+                    let want = lot(&relaxed_want(&give, &joules));
+                    if give > ratio(0, 1) && want > ratio(0, 1) {
+                        return Some((Resource::Joule, give, Resource::Sink, want));
+                    }
                 }
             }
         }
@@ -221,9 +237,11 @@ pub fn trade_intent(
             .max_by_key(|r| orb.banked_amount(**r))?;
         let stock = orb.banked_amount(*biggest);
         if stock > ratio(0, 1) {
-            let give = half(stock);
-            let want = steep_want(&give, severity);
-            return Some((*biggest, give, famined, want));
+            let give = lot(&half(stock));
+            let want = lot(&steep_want(&give, severity));
+            if give > ratio(0, 1) && want > ratio(0, 1) {
+                return Some((*biggest, give, famined, want));
+            }
         }
         return None;
     }
@@ -246,9 +264,12 @@ pub fn trade_intent(
             .filter(|resource| resource != biggest)
             .collect();
         let leanest = burns.iter().min_by_key(|r| orb.banked_amount(**r))?;
-        let give = half(stock.clone());
-        let want = relaxed_want(&give, &stock);
-        return Some((*biggest, give, *leanest, want));
+        let give = lot(&half(stock.clone()));
+        let want = lot(&relaxed_want(&give, &stock));
+        if give > ratio(0, 1) && want > ratio(0, 1) {
+            return Some((*biggest, give, *leanest, want));
+        }
+        return None;
     }
     None
 }
@@ -259,14 +280,24 @@ pub fn trade_intent(
 /// (price-time priority inside `clear_trade`). Returns the cleared
 /// pairs (world names) for the narrator line.
 pub fn market_step(worlds: &mut [Egregore], beat: u64) -> Vec<(String, String)> {
-    // Post intents.
+    // Post intents. NO SINGLES (ruling 2026-07-31): the book is
+    // open-ended — a fresh intent posts BESIDE what rests; only an
+    // identical pair (same give, same want) holds its place.
     for egregore in worlds.iter_mut() {
-        if egregore.penned || !egregore.world.offers().is_empty() {
+        if egregore.penned {
             continue;
         }
         if let Some((give, give_amount, want, want_amount)) =
             trade_intent(&egregore.world, &egregore.spec.civilization.metabolism)
         {
+            if egregore
+                .world
+                .offers()
+                .iter()
+                .any(|held| held.give == give && held.want == want)
+            {
+                continue;
+            }
             let offer = egregore.world.chronicle().receipts().len() as u64;
             let orb = cfe::world::FIRST_ORB;
             let _ = egregore
@@ -274,8 +305,11 @@ pub fn market_step(worlds: &mut [Egregore], beat: u64) -> Vec<(String, String)> 
                 .post_offer(orb, give, give_amount, want, want_amount, offer);
         }
     }
-    // Clear crossings, pairwise, first match per beat.
+    // Clear crossings: EVERY resting combination on every pair — no
+    // first-match single. Deal ids stride 4 (haul takes deal/deal+1,
+    // the wear-charter deal+2) from a per-beat sequence.
     let mut cleared = Vec::new();
+    let mut seq: u64 = 0;
     for a in 0..worlds.len() {
         for b in (a + 1)..worlds.len() {
             let (left, right) = worlds.split_at_mut(b);
@@ -287,50 +321,66 @@ pub fn market_step(worlds: &mut [Egregore], beat: u64) -> Vec<(String, String)> 
             // MARKET-2: the transit's spatial L1 — supply melts with
             // distance; the engine refuses walled pairs itself.
             let distance = spatial_l1(&one.spec.position, &two.spec.position);
-            let (Some(offer_a), Some(offer_b)) = (
-                one.world.offers().first().map(|o| o.offer),
-                two.world.offers().first().map(|o| o.offer),
-            ) else {
-                continue;
-            };
-            let deal = beat * 1_000 + (a as u64) * 10 + b as u64;
-            let crossed = cfe::world::clear_trade(
-                &mut one.world, offer_a, &mut two.world, offer_b, deal, distance,
-            )
-            .is_ok();
-            // ROUTE-1: trade wears the path — a cleared pair with no
-            // common lane charters one when both can pay (η from the
-            // pair's best instrument grade; the melt bends after).
-            if crossed {
-                let paired = one.world.routes().iter().any(|(held, _)| {
-                    two.world.routes().iter().any(|(other, _)| other == held)
-                });
-                if !paired {
-                    let best_grade = one
-                        .world
-                        .instruments()
-                        .iter()
-                        .chain(two.world.instruments().iter())
-                        .map(|(_, _, grade)| *grade)
-                        .max()
-                        .unwrap_or(0);
-                    let eta = ratio(1 + i64::from(best_grade), 8);
+            let offers_a: Vec<u64> = one.world.offers().iter().map(|o| o.offer).collect();
+            let offers_b: Vec<u64> = two.world.offers().iter().map(|o| o.offer).collect();
+            let mut crossed_here = false;
+            for offer_a in &offers_a {
+                for offer_b in &offers_b {
+                    let deal = beat * 100_000 + seq * 4;
+                    seq += 1;
+                    if cfe::world::clear_trade(
+                        &mut one.world,
+                        *offer_a,
+                        &mut two.world,
+                        *offer_b,
+                        deal,
+                        distance.clone(),
+                    )
+                    .is_ok()
+                    {
+                        crossed_here = true;
+                        cleared.push((
+                            one.spec.world_name.clone(),
+                            two.spec.world_name.clone(),
+                        ));
+                    }
+                }
+            }
+            // ROUTE-1 + NO SINGLES: trade wears the path, and a
+            // better lane ANNEXES the pair — chartered when no lane
+            // stands, or when the pair's technology now supports a
+            // deeper suppression than the best lane held.
+            if crossed_here {
+                let best_held: Option<Ratio> = one
+                    .world
+                    .routes()
+                    .iter()
+                    .filter(|(held, _)| {
+                        two.world.routes().iter().any(|(other, _)| other == held)
+                    })
+                    .map(|(_, eta)| eta.clone())
+                    .max();
+                let best_grade = one
+                    .world
+                    .instruments()
+                    .iter()
+                    .chain(two.world.instruments().iter())
+                    .map(|(_, _, grade)| *grade)
+                    .max()
+                    .unwrap_or(0);
+                let eta = ratio(1 + i64::from(best_grade), 8);
+                if best_held.is_none_or(|held| eta > held) {
+                    let deal = beat * 100_000 + seq * 4;
+                    seq += 1;
                     let _ = cfe::world::charter_route(
                         &mut one.world,
                         cfe::world::FIRST_ORB,
                         &mut two.world,
                         cfe::world::FIRST_ORB,
                         eta,
-                        deal + 2,
+                        deal,
                     );
                 }
-            }
-            if crossed
-            {
-                cleared.push((
-                    one.spec.world_name.clone(),
-                    two.spec.world_name.clone(),
-                ));
             }
         }
     }
@@ -1229,8 +1279,13 @@ fn two_mut<T>(slice: &mut [T], i: usize, j: usize) -> (&mut T, &mut T) {
 pub fn merchant_step(worlds: &mut [Egregore], beat: u64) -> Vec<(String, String, String)> {
     let one = || ratio(1, 1);
     let n = worlds.len();
+    // NO SINGLES (ruling 2026-07-31): every profitable triangle runs
+    // this beat, and a merchant posts BESIDE its resting book — an
+    // unsold leg-2 counter stays on the open market like any offer.
+    let mut crossings = Vec::new();
+    let mut seq: u64 = 0;
     for m in 0..n {
-        if worlds[m].penned || !worlds[m].world.offers().is_empty() {
+        if worlds[m].penned {
             continue;
         }
         for a in 0..n {
@@ -1295,7 +1350,8 @@ pub fn merchant_step(worlds: &mut [Egregore], beat: u64) -> Vec<(String, String,
                 {
                     continue;
                 }
-                let deal = beat * 1_000 + 990;
+                let deal = beat * 100_000 + 90_000 + seq * 4;
+                seq += 1;
                 {
                     let (merchant, seller) = two_mut(worlds, m, a);
                     if cfe::world::clear_trade(
@@ -1323,22 +1379,24 @@ pub fn merchant_step(worlds: &mut [Egregore], beat: u64) -> Vec<(String, String,
                 {
                     continue;
                 }
-                let (merchant, buyer) = two_mut(worlds, m, b);
-                if cfe::world::clear_trade(
-                    &mut merchant.world, counter, &mut buyer.world, ask_b.offer, deal + 2, d_mb,
-                )
-                .is_ok()
-                {
-                    return vec![(
+                let sold = {
+                    let (merchant, buyer) = two_mut(worlds, m, b);
+                    cfe::world::clear_trade(
+                        &mut merchant.world, counter, &mut buyer.world, ask_b.offer, deal + 2, d_mb,
+                    )
+                    .is_ok()
+                };
+                if sold {
+                    crossings.push((
                         worlds[m].spec.world_name.clone(),
                         worlds[a].spec.world_name.clone(),
                         worlds[b].spec.world_name.clone(),
-                    )];
+                    ));
                 }
             }
         }
     }
-    Vec::new()
+    crossings
 }
 
 /// MESH-1b (#2, the consumer slice): the conductor's side of the
