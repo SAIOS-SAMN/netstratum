@@ -53,13 +53,13 @@ fn seat(sigil: &str, star: StarClass, albedo: (i64, i64), orbit: (i64, i64)) -> 
 fn the_crossing_relieves_the_freeze() {
     let root = scratch("freeze");
     let registry = Registry::at(root.join("registry"));
-    let mirror = Ledger::at(root.join("worlds"));
+    let book = Ledger::at(root.join("worlds"));
     // Hand-driven worlds (no policy steps): the pin stages the states
     // the instinct reads, through real physics only.
     let mut furnace = Egregore::genesis(
-        seat("embermarket", StarClass::G, (1, 2), (1, 2)), &registry, &mirror);
+        seat("embermarket", StarClass::G, (1, 2), (1, 2)), &registry, &book);
     let mut frost = Egregore::genesis(
-        seat("rimemarket", StarClass::M, (0, 1), (1, 1)), &registry, &mirror);
+        seat("rimemarket", StarClass::M, (0, 1), (1, 1)), &registry, &book);
 
     // The Furnace banks a surplus: extractor+habitat sustain, a shell
     // encases the overflow into joules, collected each year.
@@ -139,11 +139,11 @@ fn any_famine_can_ask_the_market() {
     // post, ONE crossing relieves BOTH.
     let root = scratch("famine-ask");
     let registry = Registry::at(root.join("registry"));
-    let mirror = Ledger::at(root.join("worlds"));
+    let book = Ledger::at(root.join("worlds"));
     let mut miner = Egregore::genesis(
-        seat("lodemarket", StarClass::G, (1, 4), (1, 1)), &registry, &mirror);
+        seat("lodemarket", StarClass::G, (1, 4), (1, 1)), &registry, &book);
     let mut grower = Egregore::genesis(
-        seat("mossmarket", StarClass::G, (1, 4), (1, 1)), &registry, &mirror);
+        seat("mossmarket", StarClass::G, (1, 4), (1, 1)), &registry, &book);
 
     // The miner extracts only (iron banks, biomass drains); the
     // grower inhabits only (biomass banks, iron drains).

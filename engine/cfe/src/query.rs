@@ -1,4 +1,4 @@
-//! NS-2 RQP — the resonance query (N4). The lens beside the mirror:
+//! NS-2 RQP — the resonance query (N4). The lens beside the ledger:
 //! a PURE structural read of the committed orb population, addressed
 //! by sigil (frame-invariant canonical form), O(bucket), never a scan
 //! of the population. Nothing here mutates and nothing here receipts —

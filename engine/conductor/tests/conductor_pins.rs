@@ -19,7 +19,7 @@ fn scratch(name: &str) -> PathBuf {
 }
 
 /// The board lives: after an era every founding world has receipts, a
-/// linked mirrored chain, and confirmed solves with depth rungs — no
+/// linked booked chain, and confirmed solves with depth rungs — no
 /// human involved.
 #[test]
 fn an_era_brings_the_board_alive() {
@@ -39,7 +39,7 @@ fn an_era_brings_the_board_alive() {
         let world_dir = root.join("worlds").join(&egregore.spec.world_name);
         assert!(world_dir.join("chronicle.jsonl").exists());
         let solves = fs::read_dir(world_dir.join("solves")).expect("solves dir").count();
-        assert!(solves > 0, "solve certificates mirrored");
+        assert!(solves > 0, "solve certificates booked");
     }
     let registry = Registry::at(root.join("registry"));
     assert!(registry.list().len() >= 3, "the registry filled itself");
@@ -169,7 +169,7 @@ fn a_thriving_line_diverges() {
     // THE STAR-CHART: the daughter settled ADJACENT to its parent —
     // charted, exact, displaced but within the half-unit-step reach
     // (dist² ≤ 8, ≠ 0).
-    let mirror = Ledger::at(root.join("worlds"));
+    let book = Ledger::at(root.join("worlds"));
     let parent_world = &worlds
         .iter()
         .find(|b| {
@@ -194,7 +194,7 @@ fn a_thriving_line_diverges() {
 
     // L1 toroidal distance (the L1 law: no squaring) — displaced but
     // within the half-step reach: 0 < L1 ≤ 6 (three axes × 2 max).
-    let l1 = mirror
+    let l1 = book
         .l1_distance(&parent_world.world_name, &newborn.spec.world_name)
         .expect("both charted");
     assert!(!num_traits::Zero::is_zero(&l1), "displaced, never on top");
@@ -212,19 +212,19 @@ fn a_steward_directive_lands_through_the_leash() {
     let root = scratch("steward");
     let var = root.to_string_lossy().into_owned();
     let registry = Registry::at(format!("{var}/registry"));
-    let mirror = Ledger::at(format!("{var}/worlds"));
+    let book = Ledger::at(format!("{var}/worlds"));
 
     let mut worlds: Vec<Egregore> = founding_egregores()
         .into_iter()
-        .map(|spec| Egregore::genesis(spec, &registry, &mirror))
+        .map(|spec| Egregore::genesis(spec, &registry, &book))
         .collect();
     for _ in 0..2 {
         for egregore in &mut worlds {
-            egregore.cycle(&mirror, &registry);
+            egregore.cycle(&book, &registry);
         }
     }
 
-    let inbox = mirror.world_dir("cinder-reach").join("inbox");
+    let inbox = book.world_dir("cinder-reach").join("inbox");
     fs::write(
         inbox.join("000001-zone.json"),
         r#"{"verb":"zone","args":["63","hab"],"as":"steward"}"#,
@@ -237,7 +237,7 @@ fn a_steward_directive_lands_through_the_leash() {
     .expect("queues");
 
     for egregore in &mut worlds {
-        egregore.cycle(&mirror, &registry);
+        egregore.cycle(&book, &registry);
     }
 
     assert!(inbox.join("applied/000001-zone.json").exists(), "the zone applied");

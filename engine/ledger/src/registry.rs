@@ -218,7 +218,7 @@ impl Registry {
     }
 }
 
-/// Derive a slug the way the mirror sanitizes names.
+/// Derive a slug the way the ledger sanitizes names.
 pub fn sigil_of(name: &str) -> String {
     crate::sanitize(name)
 }

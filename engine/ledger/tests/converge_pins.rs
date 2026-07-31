@@ -124,13 +124,13 @@ fn placement_is_a_measurement_not_a_hash() {
     // Converged into two INDEPENDENT live roots → identical coordinates.
     let live_a = base.join("var");
     let live_b = base.join("elsewhere-var");
-    let mirror_a = Ledger::at(live_a.join("worlds"));
-    let mirror_b = Ledger::at(live_b.join("worlds"));
+    let book_a = Ledger::at(live_a.join("worlds"));
+    let book_b = Ledger::at(live_b.join("worlds"));
     let eras_a = vec![("var-era1".to_string(), era1.join("worlds"))];
-    converge(&mirror_a, &eras_a).expect("converges");
-    converge(&mirror_b, &eras_a).expect("converges");
-    let placed_a = mirror_a.charted_position("var-era1--amber").expect("charted");
-    let placed_b = mirror_b.charted_position("var-era1--amber").expect("charted");
+    converge(&book_a, &eras_a).expect("converges");
+    converge(&book_b, &eras_a).expect("converges");
+    let placed_a = book_a.charted_position("var-era1--amber").expect("charted");
+    let placed_b = book_b.charted_position("var-era1--amber").expect("charted");
     assert_eq!(placed_a, placed_b);
 
     // Different loop content → different fiber cards (COHESION, 07 §2):

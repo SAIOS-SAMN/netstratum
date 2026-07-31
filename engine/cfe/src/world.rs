@@ -309,7 +309,7 @@ pub struct Committed {
 }
 
 /// G1 (04 §1): a civilization's sealed axes, as the world holds them.
-/// The registry mirrors this; it never grounds it (04 §5 binding 2).
+/// The registry caches this; it never grounds it (04 §5 binding 2).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Genesis {
     pub civilization: String,
@@ -379,18 +379,18 @@ pub struct World {
     gauge: Vec<Ratio>,
     /// G1: the sealed line, if any (04 §1/§5).
     genesis: Option<Genesis>,
-    /// D3: the charted terrain seed (mirror of the receipt).
+    /// D3: the charted terrain seed (replay of the receipt).
     terrain_seed: Option<[u8; 32]>,
-    /// PRACTICE-1: the receipted disciplines (mirror of the receipts).
+    /// PRACTICE-1: the receipted disciplines (replay of the receipts).
     practices: Vec<u8>,
-    /// MANU-1: the forged instruments (mirror of the receipts).
+    /// MANU-1: the forged instruments (replay of the receipts).
     instruments: Vec<(u64, [u8; 32], u8)>,
-    /// ROUTE-1: the live lanes (mirror of the receipts).
+    /// ROUTE-1: the live lanes (replay of the receipts).
     routes: Vec<(u64, Ratio)>,
     prospects: Vec<Prospected>,
-    /// WARDEN-1a: the elder's reverse shield (mirror of the receipts).
+    /// WARDEN-1a: the elder's reverse shield (replay of the receipts).
     warded: Option<bool>,
-    /// MASK-1a: the veil (mirror of the receipts).
+    /// MASK-1a: the veil (replay of the receipts).
     veiled: bool,
 }
 
@@ -3380,8 +3380,8 @@ impl World {
     }
 
     /// WARDEN-1a — lift the ward: the depth gate. The claimer's
-    /// recorded depth (the mirror's solves reading, passed by the
-    /// caller — depth lives mirror-side) must reach the ceiling
+    /// recorded depth (the ledger's solves reading, passed by the
+    /// caller — depth lives ledger-side) must reach the ceiling
     /// (placeholder 5). The receipt names the claimer; the template
     /// grant is WARDEN-1b.
     pub fn lift_ward(&mut self, claimer: &str, depth: u32) -> Result<(), ActionRefused> {
@@ -4301,7 +4301,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             }
             // ABSORB-1: the three-way move replays — the absorber's
             // ledger carries the shed; the window opens; crisis reads
-            // mirror the live order exactly.
+            // match the live order exactly.
             ClosureEvent::OverflowAbsorbed { source_orb, absorber_orb, amount } => {
                 let source_crisis = peek(&orbs, *source_orb)
                     .map(|held| !held.famine.is_empty() || held.overheat)

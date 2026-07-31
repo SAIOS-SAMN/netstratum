@@ -63,12 +63,12 @@ fn main() {
     let specs = load_egregores(&egregores_path).unwrap_or_else(founding_egregores);
 
     let registry = Registry::at(format!("{var_root}/registry"));
-    let mirror = Ledger::at(format!("{var_root}/worlds"));
+    let book = Ledger::at(format!("{var_root}/worlds"));
 
     // CONVERGE-1 (07 §1.6): converge the archived eras BEFORE genesis —
     // boot adopts the past instead of founding blind beside it.
     let eras = ledger::converge::default_era_roots(&var_root);
-    let converged = ledger::converge::converge(&mirror, &eras).expect("convergence");
+    let converged = ledger::converge::converge(&book, &eras).expect("convergence");
     println!(
         "conductor: converged {} worlds ({} already annexed, {} quarantined) — epoch base {}",
         converged.adopted.len(),
@@ -95,7 +95,7 @@ fn main() {
                 .take()
                 .unwrap_or_else(|| cfe::ratio::ratio(0, 1));
             spec.gauge = Some(cfe::world::wrap_gauge(opening + live_base.clone()));
-            Egregore::genesis(spec, &registry, &mirror)
+            Egregore::genesis(spec, &registry, &book)
         })
         .collect();
     println!(
@@ -150,12 +150,12 @@ fn main() {
         beat += 1;
         // TUniversal T = epoch base + this era's beat (07 §1.3): live
         // ticks stack on the converged timeline, never restart it.
-        let _ = mirror.set_universal_clock(epoch_base + beat);
+        let _ = book.set_universal_clock(epoch_base + beat);
         // MESH-1b (#2): the pen door — yields seal at the beat
         // boundary; penned worlds wait, and the file poll notices
         // the pen coming home.
         for line in conductor::pen_service(
-            &mut worlds, &registry, &mirror, &control_path, epoch_base + beat,
+            &mut worlds, &registry, &book, &control_path, epoch_base + beat,
         ) {
             println!("beat {beat}: {line}");
         }
@@ -164,7 +164,7 @@ fn main() {
             if egregore.penned {
                 continue;
             }
-            if let Some(spec) = egregore.cycle(&mirror, &registry) {
+            if let Some(spec) = egregore.cycle(&book, &registry) {
                 newborns.push(spec);
             }
         }
@@ -177,7 +177,7 @@ fn main() {
                 spec.world_name,
                 spec.planet,
             );
-            worlds.push(Egregore::genesis(spec, &registry, &mirror));
+            worlds.push(Egregore::genesis(spec, &registry, &book));
         }
         // OFFER-1a: the market beat — intents post, crossings clear
         // (one aperture pair each way, receipted both sides).
@@ -187,7 +187,7 @@ fn main() {
             );
         }
         // JOURNAL-1 (08 §3): on year boundaries every civilization
-        // speaks — journals + the Terminal Wall regenerate mirror-side.
+        // speaks — journals + the Terminal Wall regenerate lens-side.
         if beat.is_multiple_of(ledger::journal::YEAR_TICKS) {
             // ROUTE-1: the year voice draws lane maintenance — an
             // unpaid lane lapses by receipt and raw space returns.
@@ -200,7 +200,7 @@ fn main() {
                 }
             }
             for egregore in worlds.iter().filter(|e| !e.penned) {
-                let _ = mirror.record_journal(
+                let _ = book.record_journal(
                     &egregore.spec.world_name,
                     &egregore.world,
                     &ledger::journal::Voice::of(&egregore.spec.civilization),
@@ -211,7 +211,7 @@ fn main() {
                 beat / ledger::journal::YEAR_TICKS
             );
             // GALAXY-1b: the observation sweep rides the year voice.
-            for galaxy in observe_crossings(&worlds, &registry, &mirror, epoch_base + beat) {
+            for galaxy in observe_crossings(&worlds, &registry, &book, epoch_base + beat) {
                 println!(
                     "beat {beat}: OBSERVATION — the galaxy {} enters the chart, reach {}",
                     galaxy.name,

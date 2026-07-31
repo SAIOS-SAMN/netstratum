@@ -802,7 +802,7 @@ pub enum ClosureEvent {
     /// the mind, derived from the chronicle and the SEALED identity
     /// (G1 — the entity type is the receipted axes, never the registry
     /// cache). Kinds: 1 epistemological (truth-starvation — reading
-    /// reserved to the board/mirror side), 2 resonance (isolation — a
+    /// reserved to the board/lens side), 2 resonance (isolation — a
     /// harmonic mind starved of links), 3 novelty (stagnation — an
     /// empiricist mind starved of signal; crystallization HALTS while
     /// struck, so relief arrives by licensed leap — the co-op pressure

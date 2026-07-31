@@ -101,7 +101,7 @@ impl Ledger {
     ) -> std::io::Result<()> {
         let dir = self.world_dir(world_name);
         // ONE CHRONICLE PER WORLD PER ERA (the persist.rs divergence
-        // law, mirror-side): founding names recur across eras, and an
+        // law, ledger-side): founding names recur across eras, and an
         // incremental append onto a PRIOR era's file would interleave
         // two timelines in one chain. A divergent resident chronicle is
         // rotated aside as a closed sibling world — never clobbered —

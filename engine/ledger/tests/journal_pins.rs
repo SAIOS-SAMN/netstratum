@@ -278,14 +278,14 @@ fn the_wall_holds_the_entries_with_only_inline_assets() {
 /// 08 §1.1, the reflection law: the journal is a RENDERING. Deleting
 /// every journal artifact changes no engine state — the chronicle
 /// stays intact, replay still grounds the same committed world, and
-/// the mirrored chronicle bytes never move.
+/// the exported chronicle bytes never move.
 #[test]
 fn a_journal_free_replay_is_unaffected() {
     let root = scratch("rendering-only");
     let book = Ledger::at(&root);
     let world = growth_world();
     let committed = world.committed();
-    book.record("sol", "prime", "humans", &world).expect("mirrors");
+    book.record("sol", "prime", "humans", &world).expect("records");
     let chronicle_path = book.world_dir("sol").join("chronicle.jsonl");
     let chronicle_bytes = fs::read(&chronicle_path).expect("chronicle");
     let receipts = world.chronicle().receipts().len();
@@ -295,7 +295,7 @@ fn a_journal_free_replay_is_unaffected() {
     fs::remove_file(root.join("wall.html")).expect("deletes");
 
     // Nothing moved: no receipt appeared, the chain verifies, replay
-    // grounds the same world, the mirrored stream is byte-identical.
+    // grounds the same world, the exported stream is byte-identical.
     assert_eq!(world.chronicle().receipts().len(), receipts);
     assert_eq!(world.chronicle().verify_chain(), ChainRead::Intact);
     assert_eq!(replay(world.chronicle()), committed);
