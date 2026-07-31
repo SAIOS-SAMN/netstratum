@@ -79,6 +79,7 @@ dependencies = [
  "num-bigint",
  "num-traits",
  "physics",
+ "scribe",
  "solver",
 ]
 
@@ -117,10 +118,10 @@ name = "ledger"
 version = "0.1.0"
 dependencies = [
  "cfe",
- "lens",
  "num-bigint",
  "num-traits",
  "physics",
+ "scribe",
 ]
 
 [[package]]
@@ -133,6 +134,7 @@ dependencies = [
  "mesh",
  "num-bigint",
  "num-traits",
+ "scribe",
 ]
 
 [[package]]
@@ -161,6 +163,7 @@ dependencies = [
  "ledger",
  "mesh",
  "num-bigint",
+ "scribe",
 ]
 
 [[package]]
@@ -223,6 +226,16 @@ dependencies = [
  "num-integer",
  "num-rational",
  "num-traits",
+]
+
+[[package]]
+name = "scribe"
+version = "0.1.0"
+dependencies = [
+ "cfe",
+ "ledger",
+ "lens",
+ "physics",
 ]
 
 [[package]]

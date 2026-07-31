@@ -186,8 +186,16 @@ fn no_new_read_back_path_ever() {
     // at #36. PINNED BY NAME; this list only SHRINKS (#37 deletes the
     // display half). A new name here is the review conversation §11
     // rule 5 demands, held in a witness instead of a memory.
+    // AMENDMENT (the scribe inversion, arch-01): the display writers
+    // moved ABOVE the lens — engine/ledger/src/journal.rs became
+    // engine/scribe/src/journal.rs, and record's two adopted
+    // read-backs (the chronicle-line count, the divergence check)
+    // moved with it into engine/scribe/src/lib.rs. RELOCATED debts,
+    // not new ones: the same reads, the new home; the ledger's own
+    // entry stays for its law reads (universe, starchart, directives).
     let adopted = [
-        "engine/ledger/src/journal.rs",
+        "engine/scribe/src/journal.rs",
+        "engine/scribe/src/lib.rs",
         "engine/ledger/src/lib.rs",
         "engine/ledger/src/galaxy.rs",
         "engine/ledger/src/converge.rs",

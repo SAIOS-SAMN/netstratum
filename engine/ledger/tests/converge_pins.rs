@@ -52,7 +52,7 @@ fn looped_world(colony: &str, ticks: u32) -> World {
 /// Archive one world into an era root, returning its terminal stamp.
 fn archive(era_root: &std::path::Path, world_name: &str, world: &World) -> u64 {
     let book = Ledger::at(era_root.join("worlds"));
-    book.record(world_name, "prime", "pin-civ", world)
+    scribe::record(&book, world_name, "prime", "pin-civ", world)
         .expect("records");
     world
         .chronicle()

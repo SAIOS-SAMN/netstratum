@@ -16,10 +16,12 @@
 //! - [`registry`] — identity: civilizations, stations, sigils;
 //! - [`galaxy`] — the sky: the observation deed, lazy founding.
 //!
-//! **The display (write-only exports, §11 rule 2 — never read back,
-//! deletable at any moment, re-served from the chain at #37):**
-//! - [`Ledger::record`] — the state snapshot + receipt-stream export;
-//! - [`journal`] — the Chronicle Feed renderings.
+//! **The display half MOVED (the #37 inversion): the writers —
+//! record, record_solve, the journals, the wall — live in `scribe`,
+//! ABOVE the lens. This crate is ledger-LAW in fact: it imports no
+//! lens, renders no display, and its own JSON pen (`json::JsonWriter`)
+//! writes only the Tier-A law cards (universe, starchart, registry,
+//! galaxy, fiber).**
 //!
 //! **THE UPLINK LAW (mesh authenticity):** nothing in this crate ever
 //! rides the mesh. Only chain-verified bytes ascend — `chronicle.tlv`
@@ -34,22 +36,34 @@
 //! reads a snapshot back into a world — replay grounds worlds.
 
 use cfe::ratio::Ratio;
-use cfe::world::World;
 use std::fs;
-use std::io::Write as _;
 use std::path::PathBuf;
 
 pub mod converge;
 pub mod galaxy;
-pub mod journal;
-mod json;
+pub mod json;
 pub mod registry;
 use json::JsonWriter;
-use lens::render::{hex, render_receipt, render_state};
-pub(crate) use lens::json::ratio_str;
-/// Re-exported at the #37 split (moved to `lens`); existing callers
-/// (conductor's clock renderings) keep their path.
-pub use lens::render::universal_clock;
+pub(crate) use json::ratio_str;
+
+/// THE UNIVERSAL CLOCK RENDERING — T of TUniversal{S, G, T} as the
+/// six-field base-60 odometer string the law cards carry
+/// (universe.json's `tuniversal`). The law writes its own cards with
+/// its own pen (the inversion dropped the lens dependency); the
+/// lens's display copy renders the same law for the eye.
+pub fn universal_clock(ticks: u64) -> String {
+    let mut fields = [0u64; 6];
+    let mut rest = ticks;
+    for slot in (0..6).rev() {
+        fields[slot] = rest % 60;
+        rest /= 60;
+    }
+    fields
+        .iter()
+        .map(|f| format!("{f:02}"))
+        .collect::<Vec<_>>()
+        .join(":")
+}
 
 /// A steward directive: a requested verb, to be executed by the game
 /// loop AS the steward entity under its granted scopes. The file is a
@@ -91,124 +105,12 @@ impl Ledger {
         self.root.join(sanitize(world))
     }
 
-    /// Reflect one colony: atomically replace the planet's
-    /// `state.json`, refresh `world.json`, append any receipts the
-    /// world's stream does not yet carry. Call after every command;
-    /// appending is incremental.
-    pub fn record(
-        &self,
-        world_name: &str,
-        planet: &str,
-        civilization: &str,
-        world: &World,
-    ) -> std::io::Result<()> {
-        let dir = self.world_dir(world_name);
-        // ONE CHRONICLE PER WORLD PER ERA (the persist.rs divergence
-        // law, ledger-side): founding names recur across eras, and an
-        // incremental append onto a PRIOR era's file would interleave
-        // two timelines in one chain. A divergent resident chronicle is
-        // rotated aside as a closed sibling world — never clobbered —
-        // and convergence later annexes it as its own timeline.
-        self.rotate_divergent(&dir, world)?;
-        fs::create_dir_all(dir.join("inbox"))?;
-        fs::create_dir_all(dir.join("solves"))?;
-        let planet_dir = dir.join("planets").join(sanitize(planet));
-        fs::create_dir_all(&planet_dir)?;
-
-        // state.json — write whole to a sibling, then rename (atomic
-        // on POSIX): a reader never sees a torn snapshot.
-        let state = render_state(world_name, planet, civilization, world);
-        let tmp = planet_dir.join("state.json.tmp");
-        fs::write(&tmp, state)?;
-        fs::rename(&tmp, planet_dir.join("state.json"))?;
-
-        // state.tlv (landed as "MIRROR-TLV", 2026-07-30): the COMMITTED
-        // state speaks the house wire — state.tlv is the orb's
-        // canonical NS-1 bytes (equal state, equal bytes), the
-        // machine layer every board may decode natively. JSON stays
-        // strictly a rendering: readings, context, and voices — never
-        // a second truth of the committed orb.
-        if let Some(orb) = world.orb() {
-            let tmp = planet_dir.join("state.tlv.tmp");
-            fs::write(&tmp, orb.wire_bytes())?;
-            fs::rename(&tmp, planet_dir.join("state.tlv"))?;
-        }
-
-        // world.json — the container's card: name + settled planets.
-        let mut planets: Vec<String> = fs::read_dir(dir.join("planets"))?
-            .filter_map(|e| e.ok())
-            .filter(|e| e.path().is_dir())
-            .map(|e| e.file_name().to_string_lossy().into_owned())
-            .collect();
-        planets.sort();
-        let mut w = JsonWriter::new();
-        w.open();
-        w.field_str("world", world_name);
-        w.key("planets");
-        w.array(planets.into_iter());
-        w.close();
-        let tmp = dir.join("world.json.tmp");
-        fs::write(&tmp, w.finish())?;
-        fs::rename(&tmp, dir.join("world.json"))?;
-
-        // chronicle.jsonl — append receipts beyond what is exported.
-        let path = dir.join("chronicle.jsonl");
-        let already = if path.exists() {
-            fs::read_to_string(&path)?.lines().count()
-        } else {
-            0
-        };
-        let receipts = world.chronicle().receipts();
-        if receipts.len() > already {
-            let mut file = fs::OpenOptions::new().create(true).append(true).open(&path)?;
-            for receipt in &receipts[already..] {
-                let mut line = render_receipt(receipt);
-                line.push('\n');
-                file.write_all(line.as_bytes())?;
-            }
-        }
-        Ok(())
-    }
-
-    /// The divergence check behind [`Ledger::record`]: compare the
-    /// resident chronicle's line `k` digest against the live world's
-    /// receipt `k` (k = last shared index). Equal ⇒ same timeline
-    /// (incremental append proceeds). Different ⇒ a PRIOR era's world
-    /// lives here: the whole world dir rotates to
-    /// `<name>--closed-<digest8>` (its terminal digest names it).
-    fn rotate_divergent(&self, dir: &std::path::Path, world: &World) -> std::io::Result<()> {
-        let path = dir.join("chronicle.jsonl");
-        let receipts = world.chronicle().receipts();
-        if !path.exists() || receipts.is_empty() {
-            return Ok(());
-        }
-        let text = fs::read_to_string(&path)?;
-        let lines: Vec<&str> = text.lines().filter(|l| !l.trim().is_empty()).collect();
-        if lines.is_empty() {
-            return Ok(());
-        }
-        let check = lines.len().min(receipts.len()) - 1;
-        let resident = lines
-            .get(check)
-            .and_then(|line| json::extract_string(line, "digest"))
-            .unwrap_or_default();
-        let live = hex(&receipts[check].own.0);
-        if resident == live {
-            return Ok(());
-        }
-        let terminal = lines
-            .last()
-            .and_then(|line| json::extract_string(line, "digest"))
-            .unwrap_or_else(|| "unknown".into());
-        let tag: String = terminal.chars().take(8).collect();
-        let base = dir.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
-        let mut closed = dir.with_file_name(format!("{base}--closed-{tag}"));
-        let mut bump = 1u32;
-        while closed.exists() {
-            bump += 1;
-            closed = dir.with_file_name(format!("{base}--closed-{tag}-{bump}"));
-        }
-        fs::rename(dir, closed)
+    /// The ledger's root directory — pub for the SCRIBE (the display
+    /// writers above the lens), which pens its wall and journals under
+    /// the same roots the law keeps. Read-only access; the law's own
+    /// writes stay in this crate.
+    pub fn root(&self) -> &std::path::Path {
+        &self.root
     }
 
     /// Read pending directives, inbox-name ascending (the steward
@@ -388,33 +290,13 @@ impl Ledger {
         Some(leg(&ax, &bx) + leg(&ay, &by) + leg(&az, &bz))
     }
 
-    /// Record a proof-of-solution: one JSON file per confirmed task.
-    /// `depth` is the difficulty rung the solve was earned at (the
-    /// observer's DEPTH column reads the maximum).
-    pub fn record_solve(
-        &self,
-        world: &str,
-        task: &str,
-        program: &str,
-        certificate_hex: &str,
-        depth: u32,
-    ) -> std::io::Result<()> {
-        let dir = self.world_dir(world).join("solves");
-        fs::create_dir_all(&dir)?;
-        let mut w = JsonWriter::new();
-        w.open();
-        w.field_str("task", task);
-        w.field_str("program", program);
-        w.field_str("certificate", certificate_hex);
-        w.field_u64("depth", depth as u64);
-        w.close();
-        fs::write(dir.join(format!("{}.json", sanitize(task))), w.finish())
-    }
 }
 
 /// Filesystem-safe names (worlds, planets, civilizations, tasks):
 /// lowercase alphanumerics and dashes, everything else becomes a dash.
-pub(crate) fn sanitize(name: &str) -> String {
+/// Pub: the scribe pens its displays under the same roots the law
+/// keeps — one naming rule, one place.
+pub fn sanitize(name: &str) -> String {
     name.chars()
         .map(|c| {
             let c = c.to_ascii_lowercase();

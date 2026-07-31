@@ -194,7 +194,7 @@ fn main() {
         }
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — journals + the Terminal Wall regenerate lens-side.
-        if beat.is_multiple_of(ledger::journal::YEAR_TICKS) {
+        if beat.is_multiple_of(scribe::journal::YEAR_TICKS) {
             // ROUTE-1: the year voice draws lane maintenance — an
             // unpaid lane lapses by receipt and raw space returns.
             for egregore in worlds.iter_mut().filter(|e| !e.penned) {
@@ -206,15 +206,16 @@ fn main() {
                 }
             }
             for egregore in worlds.iter().filter(|e| !e.penned) {
-                let _ = book.record_journal(
+                let _ = scribe::record_journal(
+                    &book,
                     &egregore.spec.world_name,
                     &egregore.world,
-                    &ledger::journal::Voice::of(&egregore.spec.civilization),
+                    &scribe::journal::Voice::of(&egregore.spec.civilization),
                 );
             }
             println!(
                 "beat {beat}: year {} journaled — the wall is fresh (var/worlds/wall.html)",
-                beat / ledger::journal::YEAR_TICKS
+                beat / scribe::journal::YEAR_TICKS
             );
             // GALAXY-1b: the observation sweep rides the year voice.
             for galaxy in observe_crossings(&worlds, &registry, &book, epoch_base + beat) {

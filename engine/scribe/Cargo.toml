@@ -1,0 +1,11 @@
+[package]
+name = "scribe"
+version = "0.1.0"
+edition = "2021"
+description = "THE SCRIBE — the display WRITERS, above the lens (#37's inversion): journals, the Terminal Wall, the state/chronicle exports, the solve records. Write-only by law (§11 rule 2): everything here is deletable and regenerates from the chain; nothing below ever reads it back."
+
+[dependencies]
+cfe = { path = "../cfe" }
+ledger = { path = "../ledger" }
+lens = { path = "../lens" }
+physics = { path = "../physics" }

@@ -13,3 +13,6 @@ num-traits.workspace = true
 
 [dev-dependencies]
 ledger = { path = "../ledger" }
+# The scribe writes the fixture exports these pins prove deletable —
+# dev-only (a lawful cargo dev-cycle; scribe depends on lens at runtime).
+scribe = { path = "../scribe" }

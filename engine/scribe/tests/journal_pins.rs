@@ -14,7 +14,7 @@ use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
 use cfe::vrp::ChainRead;
 use cfe::world::{replay, World};
-use ledger::journal::{journal, joule_stance, sink_offer, Alert, JouleStance, Voice, YEAR_TICKS};
+use scribe::journal::{journal, joule_stance, sink_offer, Alert, JouleStance, Voice, YEAR_TICKS};
 use ledger::Ledger;
 
 fn scratch(name: &str) -> PathBuf {
@@ -107,8 +107,7 @@ fn the_journal_regenerates_byte_identically() {
     let root = scratch("regen");
     let book = Ledger::at(&root);
     let world = growth_world();
-    let appended = book
-        .record_journal("sol", &world, &voice())
+    let appended = scribe::record_journal(&book, "sol", &world, &voice())
         .expect("records");
     assert_eq!(appended, 2, "two completed years, two entries");
     let path = book.world_dir("sol").join("journal.jsonl");
@@ -116,14 +115,14 @@ fn the_journal_regenerates_byte_identically() {
     let wall_first = fs::read(root.join("wall.html")).expect("wall exists");
 
     // Idempotence: a re-record appends NOTHING.
-    let again = book.record_journal("sol", &world, &voice()).expect("re-records");
+    let again = scribe::record_journal(&book, "sol", &world, &voice()).expect("re-records");
     assert_eq!(again, 0, "no duplicate year, ever");
     assert_eq!(fs::read(&path).expect("read"), first);
 
     // Regeneration: delete everything, regenerate byte-identically.
     fs::remove_file(&path).expect("deletes journal");
     fs::remove_file(root.join("wall.html")).expect("deletes wall");
-    book.record_journal("sol", &world, &voice()).expect("regenerates");
+    scribe::record_journal(&book, "sol", &world, &voice()).expect("regenerates");
     assert_eq!(fs::read(&path).expect("read"), first, "byte-identical journal");
     assert_eq!(
         fs::read(root.join("wall.html")).expect("read"),
@@ -189,7 +188,7 @@ fn growth_math_is_exact() {
     assert_eq!(entries[1].cycle, "00:00:00:00:02:00");
     // No decimal ever enters the feed.
     for entry in &entries {
-        let line = ledger::journal::render_entry(entry);
+        let line = scribe::journal::render_entry(entry);
         assert!(!line.contains("0.5"), "no float rendering: {line}");
     }
 }
@@ -241,11 +240,9 @@ fn surplus_and_deficit_flip_on_the_exact_boundary() {
 fn the_wall_holds_the_entries_with_only_inline_assets() {
     let root = scratch("wall");
     let book = Ledger::at(&root);
-    book
-        .record_journal("sol", &growth_world(), &voice())
+    scribe::record_journal(&book, "sol", &growth_world(), &voice())
         .expect("records");
-    book
-        .record_journal("meridian", &famine_world(), &voice())
+    scribe::record_journal(&book, "meridian", &famine_world(), &voice())
         .expect("records");
     let wall = fs::read_to_string(root.join("wall.html")).expect("wall exists");
 
@@ -285,12 +282,12 @@ fn a_journal_free_replay_is_unaffected() {
     let book = Ledger::at(&root);
     let world = growth_world();
     let committed = world.committed();
-    book.record("sol", "prime", "humans", &world).expect("records");
+    scribe::record(&book, "sol", "prime", "humans", &world).expect("records");
     let chronicle_path = book.world_dir("sol").join("chronicle.jsonl");
     let chronicle_bytes = fs::read(&chronicle_path).expect("chronicle");
     let receipts = world.chronicle().receipts().len();
 
-    book.record_journal("sol", &world, &voice()).expect("journals");
+    scribe::record_journal(&book, "sol", &world, &voice()).expect("journals");
     fs::remove_file(book.world_dir("sol").join("journal.jsonl")).expect("deletes");
     fs::remove_file(root.join("wall.html")).expect("deletes");
 
@@ -320,7 +317,7 @@ fn the_terminology_law_holds_in_the_feed() {
         ("emberhold", furnace_world()),
     ] {
         for entry in journal(world_name, &world, &voice(), YEAR_TICKS) {
-            feed.push_str(&ledger::journal::render_entry(&entry));
+            feed.push_str(&scribe::journal::render_entry(&entry));
             feed.push('\n');
         }
     }
