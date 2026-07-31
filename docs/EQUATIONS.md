@@ -86,10 +86,23 @@ SYSTEM_SPEC §1. Implementation: `physics::beacon`.
 Authority: engine/kernel/CHARTER.md §1–§6. Implementation:
 `kernel::lawful` and its invariant functions.
 
-**I1 · Conservation.** LANDED — `kernel::conservation`.
+**I1 · Conservation, TOTAL.** LANDED WHOLE (the value-law wave,
+operator directive 2026-07-31) — `kernel::conservation` +
+`kernel::lawful_deltas`. Per-resource, every resource, every covered
+deed; an empty declaration holds every bank still (smuggling under a
+neutral deed refuses). THE SIGN LAW rides the declaration: every
+amount non-negative, direction from the DEED (`AmountNotPositive` —
+the negative-transfer/aperture inversion hole is CLOSED). Stateful
+declarations (the council's resource, the razed zone's kind) read
+PRIOR state. Escrow returns hold declaration==effect; INVARIANT
+SHAPE: EscrowTotal + BankedTotal = ConservedState strengthens in a
+named follow-up. AssayStruck held out until the element ledger's
+accounting lands.
 
-    Σ_orb bank(next, r) == Σ_orb bank(prior, r) + lawful_delta(step)
-    (move: 0 · aperture out: −amount · in: +amount · mint: +amount · decay: −amount)
+    ∀ r ∈ Resources:  Σ_orb bank(next, r) == Σ_orb bank(prior, r) + declared(r)
+    declared: move 0 · aperture ∓ · mint + · decay − · upkeep/draw/lock −
+              · escrow-return + · founding = the chartered reserves ·
+              zone = ∓cost/refund vectors · (all amounts ≥ 0, sign-guarded)
 
 **I2 · Containment.** LANDED — `kernel::containment`.
 

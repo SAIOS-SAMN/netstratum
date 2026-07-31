@@ -103,16 +103,21 @@ fn raze_authority_deeds_gate_by_the_raze_scope() {
 }
 
 #[test]
-fn a_value_moving_authority_deed_stays_unjudged_in_this_slice() {
-    // ColonyFounded is a Build deed too — but it MINTS the founding
-    // reserves (world.rs banks them). It moves value, so {I2, I3} do
-    // NOT complete it; it must NOT have entered coverage in slice-1.
-    // The sealed default still holds it out (W-A slice-2, an I1 arm).
+fn a_value_moving_authority_deed_is_held_to_its_charter() {
+    // WITNESS TRUTH-UPDATE (the value-law wave): in slice-1 this pin
+    // held ColonyFounded OUT as Unjudged. Its I1 arm has landed — the
+    // founding declares EXACTLY the chartered reserves, so the same
+    // smuggling attempt (a founding whose next state banks nothing)
+    // now refuses by the STRONGER law: conservation, both totals
+    // carried. The guard's spirit stands — no mint slips through the
+    // authority door — the refusal just got teeth.
     let (world, _agent) = founded_with_agent();
     let minting = ClosureEvent::ColonyFounded { orb_id: 99, name: "smuggler".into() };
-    assert_eq!(
-        judge(&world, &minting, SOVEREIGN),
-        Err(Unlawful::Unjudged),
-        "a value-moving deed is not admitted by the authority slice"
+    assert!(
+        matches!(
+            judge(&world, &minting, SOVEREIGN),
+            Err(Unlawful::ConservationBroken { .. })
+        ),
+        "a founding that does not bank its charter refuses by conservation"
     );
 }

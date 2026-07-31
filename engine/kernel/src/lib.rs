@@ -79,6 +79,14 @@ pub enum Unlawful {
     /// that actually CREATES value. Value leaves only by a lawful,
     /// non-negative decay.
     DecayNotPositive { resource: Resource, amount: Box<Ratio> },
+    /// THE SIGN LAW (the value-law wave): a value-carrying deed
+    /// declared a NEGATIVE amount — a credit wearing a debit's name,
+    /// or the reverse. Every banked movement is non-negative by
+    /// declaration; DIRECTION comes from the deed, never the sign
+    /// (a negative transfer would invert the flow and authorize the
+    /// wrong side; a negative settle would credit through a debit).
+    /// No un-guarded debit/credit path exists.
+    AmountNotPositive { resource: Resource, amount: Box<Ratio> },
     /// I5 — the decay exceeds the sealed demurrage rule's due:
     /// `min(rate · ease · elapsed, banked)`, flat, thermally gated.
     /// Both sides carried whole (what the rule allows, what the deed
@@ -195,53 +203,193 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::GaugeShifted { .. } | E::Diverged { .. } | E::StarAged { .. }
         | E::TechDiscovered { .. } | E::IncursionStruck { .. } | E::VoidShare { .. }
         | E::RouteLapsed { .. }
+        // THE VALUE LAW WAVE (operator directive 2026-07-31): the
+        // value-moving deeds under TOTAL conservation + THE SIGN LAW,
+        // deltas declared per-resource in `lawful_deltas` (the sealed
+        // rules called, stateful reads from prior). Witnessed in
+        // `value_pins.rs`. Tier 1 (single-resource, sign-guarded),
+        // Tier 2 (escrow returns, declaration==effect — the
+        // EscrowTotal + BankedTotal macro-invariant strengthens in a
+        // follow-up), Tier 3 (multi-resource vectors). STILL HELD OUT:
+        // the fold trio (U2d's I6 gate), TaxonSealed (coder-03's #42),
+        // AssayStruck (the element ledger's accounting, the almanac's
+        // follow-up — an element mint is not admitted on
+        // banked-neutrality).
+        | E::UpkeepSettled { .. } | E::CrystalDrawn { .. } | E::OverflowAbsorbed { .. }
+        | E::BondSettled { .. } | E::FamineStruck { .. } | E::CovenantSealed { .. }
+        | E::CouncilSealed { .. } | E::FrictionSettled { .. } | E::OfferCleared { .. }
+        | E::CovenantReleased { .. } | E::CovenantSlashed { .. } | E::CouncilClosed { .. }
+        | E::ColonyFounded { .. } | E::ColonyCharted { .. } | E::ZoneBuilt { .. }
+        | E::ZoneRazed { .. }
     )
 }
 
-/// INVARIANT — conservation. A deed changes the world's total of a
-/// resource by exactly its LAWFUL DELTA and no more: a pure intra-world
-/// move conserves (delta 0 — `from_orb` loses what `to_orb` gains); an
-/// aperture leg debits or credits exactly its declared amount (value that
-/// crossed to or from ANOTHER world). Value minted or burned beyond the
-/// lawful delta refuses with the expected and actual totals whole. The
-/// PAIR-level law (a far leg is the near leg's exact inverse) is the
-/// cross-node opposition (KERNEL CHARTER §5a); the kernel enforces the
-/// LOCAL half — each leg moved exactly what it claimed.
+/// INVARIANT — conservation, TOTAL (the value-law wave, operator
+/// directive 2026-07-31). A deed changes the world's banked totals by
+/// exactly its DECLARED per-resource deltas and nothing else:
+///
+/// ```text
+/// ∀ r ∈ Resources:  total(next, r) == total(prior, r) + declared(r)
+/// ```
+///
+/// Every resource present in either state or in the declaration is
+/// checked — a covered deed with an EMPTY declaration must leave EVERY
+/// bank untouched (a smuggled change under a neutral deed refuses).
+/// Multi-resource deeds (founding reserves, zone costs and refunds)
+/// declare vectors, never a scalar. The PAIR-level law (a far leg is
+/// the near leg's exact inverse) is the cross-node opposition (KERNEL
+/// CHARTER §5a); the kernel enforces the LOCAL half.
 fn conservation(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Unlawful> {
-    use ClosureEvent as E;
-    // The lawful change to the world's total of `resource` for this deed.
-    let (resource, lawful_delta) = match &step.event {
-        E::ResourceTransferred { resource, .. } => (*resource, ratio(0, 1)),
-        // The source leg: value LEFT this world for another (debit).
-        E::ApertureSent { resource, amount, .. } => (*resource, -amount.clone()),
-        // The destination leg: value ARRIVED from another world (credit).
-        E::ApertureReceived { resource, amount, .. } => (*resource, amount.clone()),
-        // A mint: production banked (value CREATED, +). I4 adds the sign
-        // and (at scale) the verified-work bound.
-        E::YieldCollected { resource, amount, .. } => (*resource, amount.clone()),
-        // The discovery mint: value created against verified work
-        // (U1). Conservation holds declaration==effect; I4 holds the
-        // work bound.
-        E::DiscoveryMinted { resource, amount, .. } => (*resource, amount.clone()),
-        // A decay: banked stores lost to demurrage (value DESTROYED, −).
-        // I5 adds the sign and the flat-rate bound.
-        E::DemurrageSettled { resource, amount, .. } => (*resource, -amount.clone()),
-        // A covered event conservation does not constrain (uncovered
-        // events already refused Unjudged; other invariants govern this).
-        // Coverage grows by witnessed amendment — clause 2.
-        _ => return Ok(()),
-    };
-    let before = total_banked(prior, resource);
-    let after = total_banked(next, resource);
-    let expected = before + lawful_delta;
-    match after == expected {
-        true => Ok(()),
-        false => Err(Unlawful::ConservationBroken {
-            resource,
-            before: Box::new(expected), // the lawful total this deed requires
-            after: Box::new(after),     // the total the step actually produced
-        }),
+    let deltas = lawful_deltas(prior, &step.event)?;
+    let mut resources: Vec<Resource> = Vec::new();
+    for (resource, _) in &deltas {
+        if !resources.contains(resource) {
+            resources.push(*resource);
+        }
     }
+    for orb in prior.orbs.iter().chain(next.orbs.iter()) {
+        for (resource, _) in &orb.banked {
+            if !resources.contains(resource) {
+                resources.push(*resource);
+            }
+        }
+    }
+    for resource in resources {
+        let declared = deltas
+            .iter()
+            .filter(|(held, _)| *held == resource)
+            .fold(ratio(0, 1), |sum, (_, delta)| sum + delta.clone());
+        let before = total_banked(prior, resource);
+        let after = total_banked(next, resource);
+        let expected = before + declared;
+        if after != expected {
+            return Err(Unlawful::ConservationBroken {
+                resource,
+                before: Box::new(expected), // the lawful total this deed requires
+                after: Box::new(after),     // the total the step actually produced
+            });
+        }
+    }
+    Ok(())
+}
+
+/// The declared per-resource banked deltas of a deed — the LAWFUL
+/// movement, sign-guarded at the door (THE SIGN LAW: every amount is
+/// non-negative by declaration; direction comes from the DEED). The
+/// sealed rules are CALLED, never copied (founding reserves, zone
+/// costs/refunds — CHARTER §0b). Stateful declarations (the council's
+/// resource, the razed zone's kind) read PRIOR state, never the event.
+/// An event with no arm declares nothing: every bank must hold still.
+fn lawful_deltas(
+    prior: &Committed,
+    event: &ClosureEvent,
+) -> Result<Vec<(Resource, Ratio)>, Unlawful> {
+    use ClosureEvent as E;
+    let non_negative = |resource: Resource, amount: &Ratio| match *amount < ratio(0, 1) {
+        true => Err(Unlawful::AmountNotPositive {
+            resource,
+            amount: Box::new(amount.clone()),
+        }),
+        false => Ok(()),
+    };
+    Ok(match event {
+        // — the moves (net zero), sign-guarded: a negative move would
+        //   invert the flow and authorize the wrong side —
+        E::ResourceTransferred { resource, amount, .. } => {
+            non_negative(*resource, amount)?;
+            Vec::new()
+        }
+        E::BondSettled { resource, amount, .. } => {
+            non_negative(*resource, amount)?;
+            Vec::new()
+        }
+        // ColonyCharted: the founding reserves MOVE source → daughter —
+        // net zero per resource by the sealed rule.
+        E::ColonyCharted { .. } => Vec::new(),
+        // — the aperture legs, sign-guarded (a negative send is a
+        //   receive wearing a send's name) —
+        E::ApertureSent { resource, amount, .. } => {
+            non_negative(*resource, amount)?;
+            vec![(*resource, -amount.clone())]
+        }
+        E::ApertureReceived { resource, amount, .. } => {
+            non_negative(*resource, amount)?;
+            vec![(*resource, amount.clone())]
+        }
+        // — mints (the sign lives at I4, order preserved for the
+        //   landed pins) —
+        E::YieldCollected { resource, amount, .. } => vec![(*resource, amount.clone())],
+        E::DiscoveryMinted { resource, amount, .. } => vec![(*resource, amount.clone())],
+        // — decays (the sign lives at I5, order preserved) —
+        E::DemurrageSettled { resource, amount, .. } => vec![(*resource, -amount.clone())],
+        // — Tier 1: single-resource debits, sign-guarded —
+        E::UpkeepSettled { resource, amount, .. } => {
+            non_negative(*resource, amount)?;
+            vec![(*resource, -amount.clone())]
+        }
+        E::CrystalDrawn { amount, .. } => {
+            non_negative(Resource::Crystal, amount)?;
+            vec![(Resource::Crystal, -amount.clone())]
+        }
+        E::OverflowAbsorbed { amount, .. } => {
+            non_negative(Resource::Sink, amount)?;
+            vec![(Resource::Sink, -amount.clone())]
+        }
+        E::FamineStruck { resource, drawn, .. } => {
+            non_negative(*resource, drawn)?;
+            vec![(*resource, -drawn.clone())]
+        }
+        E::CovenantSealed { resource, collateral, .. } => {
+            non_negative(*resource, collateral)?;
+            vec![(*resource, -collateral.clone())]
+        }
+        // The council locks collateral × EVERY member (multi-orb,
+        // single-resource).
+        E::CouncilSealed { resource, collateral, members, .. } => {
+            non_negative(*resource, collateral)?;
+            vec![(*resource, -(collateral.clone() * ratio(members.len() as i64, 1)))]
+        }
+        // — Tier 2: escrow returns —
+        // INVARIANT SHAPE: EscrowTotal + BankedTotal = ConservedState —
+        // declaration==effect this pass; the stateful escrow
+        // cross-lookup strengthens in a follow-up (operator directive).
+        E::CovenantReleased { resource, collateral, .. }
+        | E::CovenantSlashed { resource, collateral, .. } => {
+            non_negative(*resource, collateral)?;
+            vec![(*resource, collateral.clone())]
+        }
+        // The close is STATEFUL: the resource reads from the PRIOR
+        // sealed council, never the event. An unknown council declares
+        // nothing — a banked change under it refuses.
+        E::CouncilClosed { council, banked, .. } => {
+            match prior.councils.iter().find(|held| held.council == *council) {
+                Some(held) => {
+                    non_negative(held.resource, banked)?;
+                    vec![(held.resource, banked.clone())]
+                }
+                None => Vec::new(),
+            }
+        }
+        // — Tier 3: multi-resource, the sealed rules called never
+        //   copied —
+        // The chartered genesis mint: EXACTLY the founding reserves.
+        E::ColonyFounded { .. } => cfe::dop::founding_reserves(),
+        E::ZoneBuilt { kind, .. } => {
+            kind.cost().into_iter().map(|(resource, cost)| (resource, -cost)).collect()
+        }
+        // The raze refunds the PRIOR zone's kind at the tile (stateful
+        // — the event names only the tile). No zone, no refund.
+        E::ZoneRazed { orb_id, tile } => prior
+            .orbs
+            .iter()
+            .find(|held| held.orb_id == *orb_id)
+            .and_then(|orb| orb.zones.iter().find(|zone| zone.tile == *tile))
+            .map(|zone| zone.kind.raze_refund())
+            .unwrap_or_default(),
+        // No arm: the deed declares NO banked movement — the total
+        // check holds every bank still.
+        _ => Vec::new(),
+    })
 }
 
 /// The world's total banked holding of one resource, summed across

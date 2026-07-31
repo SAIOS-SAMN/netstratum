@@ -77,21 +77,25 @@ fn world_driven_deeds_are_judged_without_a_scope() {
 }
 
 #[test]
-fn a_value_moving_consequence_stays_unjudged() {
-    // FamineStruck is a world-driven deed too — but it DRAWS a bank
-    // (world.rs banks −drawn). It moves value, so exactness alone does
-    // not complete it; it must NOT have entered coverage here. The
-    // sealed default holds it for the I1 value slice.
+fn a_value_moving_consequence_is_held_to_its_declaration() {
+    // WITNESS TRUTH-UPDATE (the value-law wave): this pin held
+    // FamineStruck OUT as Unjudged while the neutral slice landed. Its
+    // I1 arm has landed — the strike declares its exact draw, so the
+    // same smuggling attempt (a strike whose next state draws nothing)
+    // now refuses by the STRONGER law: conservation, both totals
+    // carried. Nothing slipped; the refusal got teeth.
     let world = founded();
     let drawing = ClosureEvent::FamineStruck {
         orb_id: 1,
         resource: Resource::Iron,
         drawn: ratio(1, 1),
     };
-    assert_eq!(
-        judge(&world, &drawing, SOVEREIGN),
-        Err(Unlawful::Unjudged),
-        "a value-drawing consequence is not admitted by the neutral slice"
+    assert!(
+        matches!(
+            judge(&world, &drawing, SOVEREIGN),
+            Err(Unlawful::ConservationBroken { .. })
+        ),
+        "a strike that does not draw its declaration refuses by conservation"
     );
 }
 
