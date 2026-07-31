@@ -212,6 +212,38 @@ discarded to a majority. This is convergence-not-consensus: the mesh records
 WHERE in relational space nodes disagree and by what exact rational, not
 merely THAT a vote passed.
 
+## 5a. The two axes — where each half lives (POW++ accounting)
+
+POW++ is two axes, and each splits into a LOCAL half (kernel) and a
+CROSS-NODE half (mesh). The split is forced by network-blindness: the
+kernel judges one node, one step; anything spanning two nodes is the mesh's.
+
+- **Proof of Convergence = I6 (kernel) + consilience (mesh).** Local: the
+  fold gate, `orbit_lock(a,b) = ∅` — a single-state exact check, I6, lands
+  WITH the spine. Cross-node: `C(Δ) = 0` consilience between two chronicles
+  — outside the kernel (a LENS the mesh reads; §3), never enforced in the
+  judge.
+- **Proof of Useful Work = I4's mint-bound (kernel) + work-verification
+  (mesh).** Local: the anchor on I4 — a deed claiming work carries a
+  solver certificate, and the mint may not exceed what `verify_certificate`
+  proves (you cannot mint faster than you produce certified intelligence;
+  anti-inflation and anti-Sybil in one bound). Cross-node: the mesh receive
+  door replays embedded certificates before adopting a spine.
+- **Seam conservation = I1 (kernel) + opposition (mesh).** Local: aperture
+  legs sum zero within one book — one unconditional line (why the
+  void-share ruling mattered). Cross-node: `cfe::opposition` at a merge.
+- **I3 exactness** is the substrate BOTH axes stand on: `C(Δ)=0` must be
+  EXACTLY zero and certificates verify EXACTLY — impossible with floats.
+
+**Not baked now, and why.** Consilience in the kernel breaks
+network-blindness (the audit `engine/kernel` imports `cfe` only would
+fail). `verify_certificate` in the kernel bakes unwired dead code (solves
+enter no chronicle today) AND breaks the dependency law — the verifier is
+in `engine/solver`; wiring it first requires moving a certificate-verify
+primitive to a shared base. The I4 anchor lands on **Ruling Box 1** (what
+work earns — pen weight, minting rights, receipt-coupled crystallization);
+I6 lands with the spine. Both are named hooks now, wired at their phase.
+
 ## 6. Algorithms (the shapes to witness, red-first)
 
     lawful(prior, next, step):
