@@ -94,8 +94,11 @@ identical kernel; there is no local-vs-network mode.
     resume(chain) -> node           // rebuild head by replay under VERSION
 
 **Landed / build.** Landed: `World`, `replay`, the coordinate, `physics::beacon`
-(ξ). Build: the commitment (coder-04 codec + spine), `advance` as the
-kernel-gated step (Phase 3).
+(ξ), and the commitment (SPINE-1 + #36, 2026-07-31 — `mesh::spine::seal`
+binds schema ‖ kernel::VERSION ‖ state ‖ parent ‖ coordinate; the record
+repeats the blob's leading byte, never a constant). Build: `advance` as
+the kernel-gated step (Phase 3 — per-deed threading rides the flip by
+operator ruling).
 
 ---
 
@@ -260,15 +263,21 @@ would be a mirror made of permission.
       accept | refuse-typed(break named)
 
 **The open anchor (§7, THE gap).** Σ_mesh MEASURES agreement; it does not make
-weight COSTLY to fake. `ω_j` is assigned, not earned. The ordering/Sybil
-resistance — weight = certificate-verified genuine difference
-(proof-of-useful-work) — is UNBUILT. Until it lands the mesh governs
+weight COSTLY to fake. `ω_j` is assigned, not earned. The verification half
+exists (`verify_work`, U1 — LANDED); the ANCHORING of ω to it — weight =
+certificate-verified genuine difference — is UNBUILT and waits on Ruling
+Box 1 + cryptographic identity (N7). Until it lands the mesh governs
 COOPERATING nodes only. This is the load-bearing gap for real value.
 
-**Landed / build.** Landed (in-tree, partial): NS-5 consilience, the
-resume/replication seam, the pen (MESH-1b). Build: Σ_mesh + re-sync +
-resonance as re-derived law; the verified-work anchor; Byzantine fork
-resolution (confluence at exact zero, or annex).
+**Landed / build.** Landed: the single-chain integrity door (`receive`),
+the pen (MESH-1b), the spine + adoption door + kernel-observed play (#36,
+2026-07-31 — every conductor world walks its own chain, judged where
+covered, holes stamped `judged=0`), and **the agreement law whole
+(`mesh::agree`, 2026-07-31): Σ_mesh, the re-sync trigger, resonance m=10 —
+re-derived exact from v0.1; the majority anchor NOT carried (unanimous or
+refused, NS-5 §1)**. Build: the spine uplink (present/receive for
+commitment segments); the ω anchoring (above); Byzantine fork resolution
+(confluence at exact zero, or annex).
 
 ---
 

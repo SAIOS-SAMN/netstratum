@@ -15,7 +15,21 @@
 **Status:** N6a SPECCED + MESH-1a LANDED (both 2026-07-30, reconciled
 the same day — two seats wrote the two halves in parallel; this
 document carries both whole) + MESH-1b LANDING (§7 — the receipted
-handoff, tag 67). The three laws (§1) are the protocol frame, written
+handoff, tag 67).
+
+> **SPINE AMENDMENT (2026-07-31, arch-02).** The spine LANDED and
+> WALKS: SPINE-1 (tag 84, two maps, four verbs) + the #36 rungs — the
+> ADOPTION DOOR (`Spine::adopt`: a pre-chain world enters the mainline
+> once, the debt stamped `judged=0`, a second adoption refuses) and
+> KERNEL-OBSERVED PLAY (every conductor world chains its committed
+> state each beat at {S, G, T-tick}; the record repeats the blob's
+> leading byte — never a schema constant; a penned world's spine
+> stalls with its pen). THE AGREEMENT LAW landed whole as
+> `mesh::agree` (Σ_mesh · re-sync · resonance m=10 — the ancestor's
+> majority finality stays dropped, per this document's own law).
+> The code cites "NS-5 §9" for the spine's chapter; the full rewrite
+> this header promises (spine as replication whole) is OWED and lands
+> with the spine uplink (present/receive for commitment segments). The three laws (§1) are the protocol frame, written
 FROM the landed machinery (the N1 spec-from-working-code discipline).
 The consilience first slice (§2) is LANDED: mechanic `engine/mesh`,
 witnesses `engine/mesh/tests/mesh_consilience.rs`, 5 green, red-first

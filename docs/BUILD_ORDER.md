@@ -846,6 +846,24 @@ market board's; union tags allocate from 52 at each landing.
 
 | LINEAGE-2 + BRIDGE-1 | C (on LINEAGE-1) | **LINEAGE-2 LANDED 2026-07-30**; BRIDGE-1 open (specced, 11 §3.1) | the DAG de-collapse: the registry lineage pointer is an append-only list (space-joined wire form, byte-identical single-parent, old files read unchanged); `resolve_heads` returns every ancestry root (cycle-safe, dangling-lawful, deterministic); the observer walks the primary chain and marks confluences. BRIDGE-1: the confluence crossing prices its key gap — venting ∝ wrapped key distance (entropic leg), the resonant remainder encases (syntropic leg); lands with AEON-1b's confluence orchestration. Witnesses: 3 (both-parents round-trip + old-form read; both heads resolved; lawful stops) |
 
+## 3c. The constitution board (2026-07-31 — the kernel/mesh cadence, two seats)
+
+The unit-lane rungs (U0–U1f, the W-waves) are chronicled in
+`U_DIRECTIVES.md` §1 and `EQUATIONS.md`; this table carries the mesh-second
+lane and the audit rungs beside them. Coverage at the merge: **58 of 63**
+deeds judged; board 342/342, clippy zero at `5f80464`.
+
+| Landing | Seat | Status | Contains |
+|---|---|---|---|
+| **RECURRENCE GUARD** | arch-02 | **LANDED 2026-07-31** (`c088a7b`) | Charter §11 rule 5 as a STANDING TEST (`engine/kernel/tests/recurrence_guard.rs`, 7 witnesses): the dead name stays dead, the anti-mirror stays excised, tag 65 never reused, the arrow law (allowed dep sets grow only by editing the test — amendment made structural), NO NEW READ-BACK PATH EVER (the adopted Tier-A files pinned by name), the uplink law (no JSON in mesh src), the detectors prove their own teeth. Red proven live |
+| **#36 SPINE, whole** | arch-02 | **LANDED 2026-07-31** (`0c10782` + `54cba27`) | schema-truth (the record repeats the blob's leading byte — a fresh-landed defect caught and fixed red-first) · THE ADOPTION DOOR (`Spine::adopt` — one truth, one birth; the pre-chain debt stamped `judged=0`, named never hidden) · KERNEL-OBSERVED PLAY (every conductor world walks its own spine each beat at {S,G,T}; the handle held across beats — O(1) appends; the pen stalls the spine). Per-deed threading DEFERRED TO PHASE 3 by operator ruling |
+| **THE AGREEMENT LAW** | arch-02 | **LANDED 2026-07-31** (`5693ccc`) | `mesh::agree`: Σ_mesh (self seat weight 1 — the ancestor's vacuous zero-denominator arm unrepresentable) · re-sync drift strict at the bound · resonance m=10, the cos-symmetric table taken whole. NOT carried, by law: the majority anchor (unanimous-or-refused, NS-5 §1), the sluice formula (ω assigned/advisory until the PoUW anchoring), the σ fixed-point encoding |
+| **#37 opening + renderers** | arch-02 | **LANDED 2026-07-31** (`a032ca4` + `f2f4fee`) | `engine/lens`: `committed`/`state_tlv`/`world` projections from the chain only; the renderers + `JsonWriter`/`ratio_str` moved whole to `lens::{render,json}` (ledger's display half calls via TEMPORARY shims; the extractor half stays ledger-side as Tier-A law); pins prove state.tlv and state.json re-derive BYTE-FOR-BYTE from spine/chronicle — the display half is deletable. Ahead: the dependency inversion (`scribe` extraction, arch-01, operator directive) |
+| **U2a/U2b + the W-waves** | arch-01 | **MERGED 2026-07-31** (`5f80464`) | the RCF conjugacy invariant + `orbit_lock`/fold gate in rfa-core (the PoWC mechanism); three coverage waves ending in THE VALUE LAW WAVE (`de587cf`): per-resource total conservation, sign guards everywhere (the negative-transfer hole closed), escrow declaration==effect, an empty declaration holds every bank still. Ahead: U2d (fold trio + Δ-bridge + the arrow-law amendment), U2e, then TaxonSealed + AssayStruck close the count |
+| WORKTREE PRUNE | arch-02 | **EXECUTED 2026-07-31** | 12 of 14 stale worktrees removed (all branches merged; two held lockfile drift only). KEPT: `arch01-u2` (live — the scribe branch) and `parallel-agent` (21 uncommitted pre-rename files incl. old `engine/mirror` — the last mirror code on disk; operator decides its fate) |
+| SPINE UPLINK | arch-02 | open (next) | present/receive for tag-84 commitment segments + blob carriage; the peer re-verifies every record and RE-JUDGES judged steps under its own kernel; `ns5_two_nodes` extended to spine exchange. NS-5's promised spine rewrite lands with it |
+| BOX-1 CALIBRATION | arch-02 | open | U_DIRECTIVES §7: the chained economy measured (solves per rung, mint pressure vs the sealed bound, refusals by kind, spine growth) BEFORE the operator rules `f` — the measurement Ruling Box 1 waits on |
+
 Cross-board: universe-level book
 composition stays Q2.3's N6 mesh audit; on-chain settlement of any cleared
 value stays NS-7 (N7), never here.

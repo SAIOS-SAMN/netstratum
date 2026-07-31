@@ -226,7 +226,25 @@ forever.
   mesh and the ledger both: nothing file-borne rides the mesh — only
   chain-verified bytes ascend. The physical ledger/lens crate split
   is #37's opening move, after the law modules shed the path-root
-  coupling.
+  coupling. **ARCH-LANE UPDATE (2026-07-31, arch-02 — the mesh-second
+  cadence, all on main at `5f80464`, 342/342, coverage 58/63):** the
+  RECURRENCE GUARD stands (§11 rule 5 as 7 witnesses in
+  `kernel/tests/recurrence_guard.rs` — dep arrows and the read-back
+  set pinned; editing the test IS the amendment); **#36 is whole**
+  (the adoption door + kernel-observed play — every conductor world
+  walks its own spine at {S,G,T}, `judged=0` stamped, the pen stalls
+  it; per-deed threading deferred to Phase 3 by ruling); THE
+  AGREEMENT LAW is `mesh::agree` (Σ_mesh · re-sync · resonance m=10;
+  no majority anchor, ever); **#37 opened** — `engine/lens` re-serves
+  the display from the chain BYTE-FOR-BYTE (`committed`/`state_tlv`/
+  `world` + the renderers moved to `lens::{render,json}`; ledger
+  calls via temporary shims; the scribe dependency-inversion is
+  arch-01's directive, branch `arch01/scribe`); the worktree prune
+  executed (only `parallel-agent` still carries old mirror code —
+  operator decides). Open on the mesh lane: the SPINE UPLINK
+  (segment exchange, `ns5_two_nodes` extended) and the BOX-1
+  CALIBRATION measurement (U_DIRECTIVES §7 — measured before `f` is
+  ruled). The day's table: `BUILD_ORDER.md` §3c.
 - **coder-01**: next = Phase 2 cross-world trade (egregores exchanging
   joules/`S_cool` — needs a cross-world carrier; transfers are intra-world
   today) or TECH-1 (`10_TECH_EMERGENCE.md`, opens SINK-1's deferred
