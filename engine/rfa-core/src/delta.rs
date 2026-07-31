@@ -55,6 +55,26 @@ impl Delta {
         &self.entries[i][j][l]
     }
 
+    /// Build a Delta from raw `entries[i][j][l]` — the ONLY writer that
+    /// does NOT enforce antisymmetry. It exists for one lawful use: the
+    /// image of a general `GL_n(Q)` conjugation `A·Δ·A⁻¹` (the fold
+    /// gate's orbit), which need not be antisymmetric. The result's
+    /// lawfulness is never assumed — [`verify_conservation`] is the
+    /// check the orbit applies at every step, breaking any orbit whose
+    /// operator left the antisymmetric surface. Panics on a ragged
+    /// tensor (every row `dim` wide, every entry `fiber` deep).
+    pub fn from_entries(entries: Vec<Vec<Vec<Ratio>>>) -> Self {
+        let dim = entries.len();
+        let fiber = entries.first().and_then(|r| r.first()).map_or(0, Vec::len);
+        for row in &entries {
+            assert_eq!(row.len(), dim, "Delta must be square");
+            for cell in row {
+                assert_eq!(cell.len(), fiber, "fiber arity must be uniform");
+            }
+        }
+        Self { dim, fiber, entries }
+    }
+
     /// The conservation measurement — a DISTANCE to the invariant
     /// surface, not a boolean: `Σ |Δ_ii| + Σ_{i<j} |Δ_ij + Δ_ji|`
     /// (THE PROPORTIONAL LAW: each violation counts exactly its size, in its

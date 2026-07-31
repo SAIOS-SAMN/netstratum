@@ -29,21 +29,30 @@ fn two_orb_world() -> World {
 #[test]
 fn the_sealed_default_refuses_the_unjudged() {
     // The airtight law: a deed with no landed invariant coverage does
-    // NOT enter. A founding is not yet covered by the kernel (only I1 /
-    // transfers is), so the judge refuses it Unjudged — refuse-unknown,
-    // not admit-unknown. Coverage will move it to a judged arm when I2
-    // (containment) lands; until then it is refused, never admitted.
-    let mut world = World::new();
-    world.found("origin").expect("founds");
-    let prior = World::new().committed();
-    let next = world.committed();
+    // NOT enter — refuse-unknown, not admit-unknown. WITNESS
+    // TRUTH-UPDATE (the value-law wave): the original example here was
+    // ColonyFounded, which has since entered coverage under its
+    // chartered genesis mint; the pin now rides a deed that is STILL
+    // uncovered by design — a fold (EraAnnexed), which waits on U2d's
+    // I6 orbit-lock gate and is never admitted before it.
+    let world = {
+        let mut world = World::new();
+        world.found("origin").expect("founds");
+        world
+    };
+    let state = world.committed();
     let step = Step {
-        event: ClosureEvent::ColonyFounded { orb_id: FIRST_ORB, name: "origin".into() },
+        event: ClosureEvent::EraAnnexed {
+            era: "era1".into(),
+            world: "origin".into(),
+            terminal: [0u8; 32],
+            offset: 1,
+        },
         actor: SOVEREIGN,
         stamp: world.now(),
     };
     assert_eq!(
-        lawful(&prior, &next, &step),
+        lawful(&state, &state, &step),
         Err(Unlawful::Unjudged),
         "the sealed kernel refuses what it cannot judge"
     );

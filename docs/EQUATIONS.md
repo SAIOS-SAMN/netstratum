@@ -86,10 +86,23 @@ SYSTEM_SPEC §1. Implementation: `physics::beacon`.
 Authority: engine/kernel/CHARTER.md §1–§6. Implementation:
 `kernel::lawful` and its invariant functions.
 
-**I1 · Conservation.** LANDED — `kernel::conservation`.
+**I1 · Conservation, TOTAL.** LANDED WHOLE (the value-law wave,
+operator directive 2026-07-31) — `kernel::conservation` +
+`kernel::lawful_deltas`. Per-resource, every resource, every covered
+deed; an empty declaration holds every bank still (smuggling under a
+neutral deed refuses). THE SIGN LAW rides the declaration: every
+amount non-negative, direction from the DEED (`AmountNotPositive` —
+the negative-transfer/aperture inversion hole is CLOSED). Stateful
+declarations (the council's resource, the razed zone's kind) read
+PRIOR state. Escrow returns hold declaration==effect; INVARIANT
+SHAPE: EscrowTotal + BankedTotal = ConservedState strengthens in a
+named follow-up. AssayStruck held out until the element ledger's
+accounting lands.
 
-    Σ_orb bank(next, r) == Σ_orb bank(prior, r) + lawful_delta(step)
-    (move: 0 · aperture out: −amount · in: +amount · mint: +amount · decay: −amount)
+    ∀ r ∈ Resources:  Σ_orb bank(next, r) == Σ_orb bank(prior, r) + declared(r)
+    declared: move 0 · aperture ∓ · mint + · decay − · upkeep/draw/lock −
+              · escrow-return + · founding = the chartered reserves ·
+              zone = ∓cost/refund vectors · (all amounts ≥ 0, sign-guarded)
 
 **I2 · Containment.** LANDED — `kernel::containment`.
 
@@ -144,10 +157,30 @@ the tag-58 wire vector was re-extracted from the running engine.)
 
     Π_G(Δ) = the H¹ projection (strip gauge distortion to the core)
 
-**C4 · The orbit lock.** INSCRIBED (U2 — re-derive from v0.1 `fold.rs`).
+**C4 · The orbit lock & the fold gate.** LANDED in rfa-core (U2b) —
+`rfa_core::orbit_lock` + `rfa_core::f_fold_star` (`Operator` = a
+`GL_n⁺(Q)` conjugation `A·Δ·A⁻¹`; each orbit step kept only while
+`verify_conservation` holds; conjugacy tested by the exact C4a
+signature). The kernel-side I6 wiring (fold-class deeds into
+`covered()`) is U2d, still INSCRIBED. Direction (SYSTEM_SPEC §4): a
+lock FORBIDS the fold.
 
     orbit_lock(a, b) := ∃ op ∈ Operators, k ≤ K_max :
                         conservation-valid orbit  op^k(a) ≅_RCF b
+    f_fold_star:  lock ≠ ∅ → TorsionVeto (emit)  ·  lock = ∅ → GaugeFold (lawful)
+
+**C4a · The RCF conjugacy invariant (`≅_RCF`).** LANDED (U2a) —
+`rfa_core::rcf_signature` (exact, the judge) + `rfa_core::rcf_hash`
+(blake3 fingerprint, commitment-binding only). Two states are `≅_RCF`
+iff their characteristic matrices `(xI − A)` share invariant factors —
+the Smith-Normal-Form signature over `Q[x]`, computed per fiber layer.
+The angle-free heart of the singularity law (16_UNIT §4a): a frame
+change (`A ↦ PAP⁻¹`) leaves the signature identical, so the fold
+verdict cannot depend on the frame of approach. THE PROPORTIONAL LAW
+does not touch it (a canonical form, not an aggregator of difference);
+blake3, never the ancestor's Keccak.
+
+    A ≅_RCF B  ⟺  invariant_factors(xI − A) = invariant_factors(xI − B)
 
 **C5 · The dimensional-resolution cycle (algorithm).** INSCRIBED.
 Authority: SYSTEM_SPEC §4. unfold (raise a plane, C7-bounded above) →

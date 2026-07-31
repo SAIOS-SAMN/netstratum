@@ -22,9 +22,13 @@
 //!   must pass: productivity, conservation, bounded magnitude.
 
 pub mod delta;
+pub mod fold;
 pub mod gates;
+pub mod rcf;
 pub mod reduce;
 
 pub use delta::{coherence_functional, for_each_residual, magnitude, Delta};
+pub use fold::{f_fold_star, orbit_lock, FoldVerdict, Operator, OrbitWitness, QMatrix};
 pub use gates::{validate_step, GateVerdict, StepBound};
+pub use rcf::{invariant_factors, rcf_hash, rcf_signature, QPoly, RcfSignature};
 pub use reduce::coboundary_reduce;
