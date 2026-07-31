@@ -247,7 +247,18 @@ prerequisite retired by the test fixture path). Next: INCURSION-1a.
   market_step pattern — a coder-01-lane extension, handed off here.
   Next candidates: G4 (mesh-gated — the mesh is IN FLIGHT), WANT
   relief-by-arrival (seam split with coder-01 pending), the umbral
-  seat (one operator word away).
+  seat (one operator word away). **ELEMENT-GRAMMAR-1 LANDED**
+  (tags 70-72 after the live 68/69 collision with PRACTICE-1 — the
+  later claimant moved, inscribed; 14_ALMANAC §4a/§5a add the
+  dispersal law and element apertures, specced). **OPPOSITION-1
+  LANDED (2026-07-31, the mesh board's #4, cfe side):** the
+  anti-mirror readings — pure two-book functions (`cfe::opposition`):
+  every deal's aperture legs summed across two DIFFERENT books to
+  exact zero; a forged amount breaks by VALUE with both sums carried
+  whole; an unpaired leap reads issued-without-arrived. The lane
+  seam: coder-04's mesh walk consumes the signatures. The first
+  measurement whose inputs are not copies of each other — law 2
+  embodied. G4 sequences behind it by design.
 - Parallel worktrees per node; merge to `main` on green; BUILD_ORDER
   conflicts resolve by keeping both entries.
 
