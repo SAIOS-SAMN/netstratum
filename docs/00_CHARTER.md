@@ -233,7 +233,12 @@ deletion under this section.
 **The build order (each step gated on the last; all other boards
 frozen meanwhile):**
 
-- **Step 1 — the update function**, extracted and sealed per rule 3.
+- **Step 1 — the update function**, extracted and sealed per rule 3. Its
+  full law — the six invariants, the equations (coherence functional,
+  constitution digest, commitment, the fold gate), and the convergence
+  algorithm (dimensional resolution, not gradient descent) — is inscribed
+  in `engine/kernel/CHARTER.md`, subordinate to this section and amended
+  charter-tier (bumping `kernel::VERSION`).
 - **Step 2 — the snapshot codec** (coder-04's lane): the canonical
   encoding of the WHOLE committed state — the thing the hashes bind.
   It carries a schema version; changing the state's field set is
