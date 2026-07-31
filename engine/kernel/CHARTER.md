@@ -36,6 +36,40 @@ remains open (§7).
 
 ---
 
+## 0b. THE SEALED MATH CORE (the equations are immutable — more than the
+alphabets)
+
+The master equations are not the kernel's to own alone, nor the mesh's —
+they are ONE immutable definition both bind and CALL. The residual `R`, the
+coherence functional `C(Δ)`, `coboundary_reduce`, `orbit_lock`,
+`verify_certificate`, and the evolution operators live in the SEALED MATH
+CORE (the algebra layer — `rfa-core` is the seed; the certificate verifier
+moves in from `solver` at its wiring). Three laws bind it:
+
+1. **One definition, many callers — no invariant codes its own math.** The
+   kernel's I6 CALLS `orbit_lock`; the mesh's consilience CALLS `C(Δ)`; I4
+   CALLS `verify_certificate`. A primitive reimplemented in two places can
+   diverge, and two nodes computing the same input to different results is
+   the death of convergent-consensus. So the equations are called, never
+   copied.
+2. **Version-pinned into the constitution digest.** The math core's version
+   is part of `constitution_digest()` exactly as `kernel::VERSION` is. A
+   changed equation changes the digest — a different universe, caught by
+   the handshake, never a silent divergence.
+3. **Math amendments are BREAKING-ONLY (major bump), always — the equations
+   are MORE immutable than the vocabularies.** A vocabulary change can be
+   ADDITIVE (a new tag; old computations unchanged; minor bump; lawful
+   fork). A math change alters the RESULT of a computation on the SAME
+   inputs — it is inherently breaking, because two nodes on the same
+   alphabet but different equations would compute different `C(Δ)` on
+   identical receipts and diverge silently. That is strictly worse than a
+   changed alphabet (which the digest catches as a different universe). So
+   the math can change ONLY by breaking amendment, never additively.
+
+The kernel is one component of the sealed constitution (kernel invariants +
+the math core + the vocabularies + the derivation rules); all of it is
+version-pinned into one digest, and a node runs all of it unmodifiable.
+
 ## 1. What the kernel is
 
 The kernel is the sole validated update function:
@@ -47,11 +81,13 @@ The kernel is the sole validated update function:
 - **pure, total, no I/O, encoding-blind, network-blind.** It never
   serializes (the codec holds the byte monopoly, so kernel and chain cannot
   disagree about bytes), and it never reads the mesh, the uplink, or any
-  peer state. All arrows point ONE way: `engine/kernel` imports `cfe` only
-  — the audit is grep-simple, and it stays that way by law. The kernel
-  judges MEANING; the codec fixes FORM; the mesh does DISTRIBUTION; none
-  reaches back into the judge. My verbs call `lawful()`; `lawful()` calls
-  nothing of the mesh's.
+  PEER STATE. It DOES bind the sealed math core (§0b) and the state types —
+  that is shared immutable law, not peer state. The audit is grep-simple:
+  **`engine/kernel` imports the sealed set (state types + the algebra
+  core), NEVER the mesh.** All arrows point ONE way — the kernel judges
+  MEANING (calling the sealed math), the codec fixes FORM, the mesh does
+  DISTRIBUTION; none reaches back into the judge. `lawful()` calls the
+  sealed equations; it calls nothing of the mesh's.
 
 The kernel judges ONE step. It never optimizes a global quantity — a global
 property (coherence, stability) is not a per-step fact and cannot enter
@@ -235,14 +271,18 @@ kernel judges one node, one step; anything spanning two nodes is the mesh's.
 - **I3 exactness** is the substrate BOTH axes stand on: `C(Δ)=0` must be
   EXACTLY zero and certificates verify EXACTLY — impossible with floats.
 
-**Not baked now, and why.** Consilience in the kernel breaks
-network-blindness (the audit `engine/kernel` imports `cfe` only would
-fail). `verify_certificate` in the kernel bakes unwired dead code (solves
-enter no chronicle today) AND breaks the dependency law — the verifier is
-in `engine/solver`; wiring it first requires moving a certificate-verify
-primitive to a shared base. The I4 anchor lands on **Ruling Box 1** (what
-work earns — pen weight, minting rights, receipt-coupled crystallization);
-I6 lands with the spine. Both are named hooks now, wired at their phase.
+**Definition sealed now; invocation wired at its phase.** The DEFINITIONS
+of `C(Δ)`, `orbit_lock`, and `verify_certificate` belong in the sealed math
+core (§0b) — immutable, version-pinned — from the moment they exist; the
+kernel and mesh CALL them. What lands later is the WIRING: I6 invoking
+`orbit_lock` lands with the spine; I4 invoking `verify_certificate` lands
+on **Ruling Box 1** (what work earns — pen weight, minting rights,
+receipt-coupled crystallization), and requires first MOVING the verifier
+from `engine/solver` into the sealed math core (it is math, not runtime).
+Consilience is never INVOKED by the kernel (cross-node — the kernel is
+network-blind), but its definition `C(Δ)` is the same sealed primitive the
+mesh calls. So: one sealed definition per equation, two callers, wired when
+each caller's phase arrives.
 
 ## 6. Algorithms (the shapes to witness, red-first)
 
