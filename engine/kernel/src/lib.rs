@@ -79,6 +79,11 @@ pub enum Unlawful {
     /// that actually CREATES value. Value leaves only by a lawful,
     /// non-negative decay.
     DecayNotPositive { resource: Resource, amount: Box<Ratio> },
+    /// I5 — the decay exceeds the sealed demurrage rule's due:
+    /// `min(rate · ease · elapsed, banked)`, flat, thermally gated.
+    /// Both sides carried whole (what the rule allows, what the deed
+    /// claimed). Value leaves only by the flat law — never faster.
+    DecayExceedsBound { bound: Box<Ratio>, claimed: Box<Ratio> },
     /// I4 — the discovery mint's proof failed the replay (form,
     /// training, output, or chain — the sealed verifier names the
     /// break; the kernel carries it whole, never summarizes).
@@ -125,7 +130,7 @@ pub fn lawful(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Un
     containment(prior, step)?;
     exactness(next)?;
     creation(step)?;
-    decay(step)
+    decay(prior, step)
 }
 
 /// The landed coverage of the invariant set. An event is judged (not
@@ -266,17 +271,51 @@ fn mint_bound(_difficulty: &Difficulty) -> Ratio {
     ratio(0, 1)
 }
 
-/// INVARIANT — bounded decay (I5). Value is destroyed ONLY by a lawful,
+/// INVARIANT — bounded decay (I5), COMPLETE (U1f). Value is destroyed
 /// non-negative decay (a decay that creates value is refused). The
 /// declaration==effect half is conservation (the world total fell by
 /// exactly the declared amount); I5 adds the sign. NAMED SEAM: the decay
 /// is FLAT and denominator-bounded, `decay ≤ rate · ease · elapsed`
 /// (never proportional — the 2^1100 lesson), which fills when the sealed
 /// demurrage rule + `last_touch` join the check.
-fn decay(step: &Step) -> Result<(), Unlawful> {
+fn decay(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
     match &step.event {
-        ClosureEvent::DemurrageSettled { resource, amount, .. } if *amount < ratio(0, 1) => {
-            Err(Unlawful::DecayNotPositive { resource: *resource, amount: Box::new(amount.clone()) })
+        ClosureEvent::DemurrageSettled { orb_id, resource, amount } => {
+            if *amount < ratio(0, 1) {
+                return Err(Unlawful::DecayNotPositive {
+                    resource: *resource,
+                    amount: Box::new(amount.clone()),
+                });
+            }
+            // I5's bound (U1f): THE SEALED DEMURRAGE RULE, called
+            // never copied (CHARTER §0b) — one computation, two
+            // judges. `elapsed` reads the prior orb's `last_touch`,
+            // already committed on the orb wire (tag 28); an orb the
+            // rule owes nothing (no leak, no bank, no time) bounds
+            // at zero, so only the zero decay is lawful there.
+            let due = prior
+                .orbs
+                .iter()
+                .find(|held| held.orb_id == *orb_id)
+                .and_then(|orb| {
+                    cfe::world::demurrage_due(
+                        orb,
+                        prior.star,
+                        step.stamp,
+                        &cfe::world::ease_of(&prior.techs, *orb_id),
+                    )
+                    .into_iter()
+                    .find(|(held, _)| held == resource)
+                    .map(|(_, held)| held)
+                })
+                .unwrap_or_else(|| ratio(0, 1));
+            match *amount <= due {
+                true => Ok(()),
+                false => Err(Unlawful::DecayExceedsBound {
+                    bound: Box::new(due),
+                    claimed: Box::new(amount.clone()),
+                }),
+            }
         }
         _ => Ok(()),
     }

@@ -110,11 +110,15 @@ the rate by amendment.
     mint(step) ≥ 0   ∧   verify_work(work) = Ok(d)   ∧   mint ≤ mint_bound(d)
     no work → no discovery mint; the refusal carries bound and claim whole
 
-**I5 · Bounded decay.** Sign LANDED — `kernel::decay`; the flat bound
-INSCRIBED (awaits the sealed demurrage rule + `last_touch`).
+**I5 · Bounded decay.** LANDED WHOLE (U1f) — `kernel::decay` CALLS
+the sealed rule `cfe::world::demurrage_due` (call-not-copy — one
+computation, two judges). `last_touch` was ALREADY committed on the
+orb wire (tag 28, VENT-1) — no schema was spent; the U_DIRECTIVES §3
+SCHEMA_V3 premise died at execution.
 
-    decay(step) = min( rate · ease · elapsed, held )    // rate FLAT, never
-                                                        // proportional (the 2^1100 lesson)
+    decay ≤ min( rate · ease · elapsed, banked )   // rate FLAT, never
+    elapsed = stamp − last_touch; thermally gated  // proportional (the
+    an un-owed decay refuses, both sides whole     // 2^1100 lesson)
 
 **I6 · The fold gate.** INSCRIBED (U2). Authority: kernel CHARTER §6.
 

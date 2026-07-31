@@ -4699,15 +4699,21 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
 /// receipts (so a refused action never orphans a settlement).
 /// TECH-1b (10 §3): the Long Stores ease — 1/2 once condition 5 has
 /// crystallized for this orb, 1 otherwise. Derived from the tech
-/// list, never stored.
-fn ease_of(techs: &[(u64, u8, [u8; 32])], orb: u64) -> Ratio {
+/// list, never stored. Pub: the kernel CALLS the sealed rule for
+/// I5's bound (call-not-copy, KERNEL CHARTER §0b).
+pub fn ease_of(techs: &[(u64, u8, [u8; 32])], orb: u64) -> Ratio {
     match techs.iter().any(|(held, condition, _)| *held == orb && *condition == 5) {
         true => ratio(1, 2),
         false => ratio(1, 1),
     }
 }
 
-fn demurrage_due(
+/// THE SEALED DEMURRAGE RULE (SINK-1/Q2 + the flat-rate ruling):
+/// what an orb owes at `stamp` — `min(rate · ease · elapsed, banked)`
+/// per leaking resource, FLAT, never proportional (the 2^1100
+/// denominator lesson). Pub: the kernel CALLS this for I5's bound
+/// (call-not-copy) — one rule, one computation, two judges.
+pub fn demurrage_due(
     orb: &ColonyOrb,
     star: Option<crate::thermal::StarClass>,
     stamp: u64,

@@ -198,7 +198,12 @@ fn creation_and_decay_bound_the_value_law_by_declaration_and_sign() {
         Err(Unlawful::MintNotPositive { resource: Resource::Iron, amount: Box::new(ratio(-4, 1)) }),
         "value enters only by a non-negative mint"
     );
-    // I5 decay: the world's iron falls by exactly 2 — a lawful decay.
+    // I5 decay — WITNESS TRUTH-UPDATE (U1f): this pin was written in
+    // the sign-only era, when "the world's iron falls by exactly 2"
+    // admitted. The bound has landed: this world has NO star, so the
+    // sealed demurrage rule owes NOTHING — the same decay now refuses
+    // with the bound carried whole. Value leaves only by the flat
+    // law; an un-owed decay is theft wearing a decay's name.
     let mut decayed = world.committed();
     decayed.orbs[0].bank(Resource::Iron, ratio(-2, 1));
     let demurrage_step = |amount| Step {
@@ -210,7 +215,14 @@ fn creation_and_decay_bound_the_value_law_by_declaration_and_sign() {
         actor: SOVEREIGN,
         stamp: world.now(),
     };
-    assert_eq!(lawful(&prior, &decayed, &demurrage_step(ratio(2, 1))), Ok(()), "a decay of exactly 2 admits");
+    assert_eq!(
+        lawful(&prior, &decayed, &demurrage_step(ratio(2, 1))),
+        Err(Unlawful::DecayExceedsBound {
+            bound: Box::new(ratio(0, 1)),
+            claimed: Box::new(ratio(2, 1)),
+        }),
+        "the rule owes nothing here — the decay refuses, both sides whole"
+    );
     // A "decay" of -2 (creating value): the state HONESTLY rose by 2 (a
     // decay of -2 is a delta of +2), so declaration==effect passes, then
     // the sign refuses.
