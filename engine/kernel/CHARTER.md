@@ -284,6 +284,70 @@ network-blind), but its definition `C(Δ)` is the same sealed primitive the
 mesh calls. So: one sealed definition per equation, two callers, wired when
 each caller's phase arrives.
 
+## 5b. The POW++ governance math (the MDC lineage, sealed)
+
+The ordering weight `ω_i` in the evolution equation (§0) is NOT hand-set —
+it is COMPUTED by the sealed governance math, the v0.1 MDC lineage, so no
+node assigns weight by fiat. All exact rational, in the sealed math core:
+
+    ω_e   = weight_e · confidence_e            # effective echelon weight
+    Σ_ω   = Σ_e ω_e
+    H     = 1 − (ω_winner / Σ_ω)               # disagreement entropy
+    stasis    = H ≥ stasis_threshold           # default 1/2
+    transmute = stasis ∧ ∀e: confidence_e < low  # the dimensional wall
+
+Operator score = how much it reduces `C(Δ)` (the gradient enters ONLY as a
+damping hint `ζ∇V`, ζ small — never the driver). At mesh scale the weight
+`ω` becomes the POW++ ordering weight, and the confidence `confidence_e`
+is anchored to certificate-verified work (§5a) — that is the seam where
+proof-of-useful-work enters the governance: you cannot buy weight, you
+earn confidence by proving intelligence, and `verify_certificate` is the
+proof. Until that anchor lands, `confidence` is advisory only (kernel
+CHARTER §1: no canonicalizing weight before cryptographic identity).
+
+## 5c. PoW++ NOT regurgitated PoW — the three guardrails
+
+What makes this proof-of-*work*-plus and not a re-skin of Bitcoin, stated
+as three laws a reviewer checks:
+
+1. **Verification is REPLAY, never a hash race.** Both axes verify by
+   re-execution: convergence replays receipts to `C(Δ)=0`; useful work
+   replays a certificate in O(program length). No node ever burns cycles
+   on throwaway nonces. The security budget is spent on meaningful
+   computation whose result is kept, not on entropy thrown away.
+
+2. **Arbitrary-precision exact rationals, NEVER fixed-width.** The sealed
+   rational (`cfe::ratio::Ratio = BigRational` over big integers) is
+   arbitrary-precision by law. Fixed-width rationals (`i64/u64`) OVERFLOW
+   on accumulated game state and an overflow in consensus math is a chain
+   split — this is the hard-won 2^1100 lesson (proportional decay exploded
+   a denominator past any fixed width; the fix was flat, bounded, AND
+   big-integer). A `Rational64` is a correct principle (exact, GCD-reduced,
+   canonical, cross-multiplied comparison — matching ours) but the WRONG
+   width for consensus over accumulating value. Floats are outlawed (I3);
+   fixed-width rationals are outlawed for the same reason one layer up.
+
+3. **ONE sealed rational, called never copied (§0b).** A second rational
+   implementation — even a correct one — is two definitions that can
+   diverge, which is the death of convergent-consensus. The kernel, the
+   mesh, and the economy all call `cfe::ratio`; none reimplements it. A
+   proposed `pow_kernel/rational.rs` would violate this by construction:
+   the primitive already exists, sealed and arbitrary-precision.
+
+**The hardware/work-shape note (economics, downstream of the kernel).**
+"Recycle old ASICs as the useful-work lattice" is sound in spirit —
+useful computation instead of discarded entropy — but needs one technical
+correction: a Bitcoin SHA-256 ASIC (S9/S19) is hyper-specialized for
+SHA-256 double-hashing ONLY; its gates cannot do matrix multiplication or
+general ZK. So the useful work such hardware can contribute is
+HASH-SHAPED: state-vector hashing, commitment/merkle verification,
+hash-based proofs (STARK-family). Matrix/AI compute needs different
+silicon. The CHOICE of work-shape — hash-based vs proof-based vs
+search-based (our solver certificates today) — determines what hardware
+participates, and it is a real economics ruling (Ruling Box 1 territory,
+what work earns) that the kernel does not make: the kernel only requires
+that whatever the work is, `verify_certificate` checks it by replay.
+
 ## 6. Algorithms (the shapes to witness, red-first)
 
     lawful(prior, next, step):
