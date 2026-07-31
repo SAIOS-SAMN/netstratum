@@ -55,5 +55,19 @@ instrument panel the tuning session reads.
    cadence (or the four-C eligibility pruning at it) is the release
    valve already landed.
 
+## Price constants transferred to the economics lane (coder-03 → coder-01, 2026-07-31)
+
+Placeholder prices sitting in dop.rs that nobody chose deliberately —
+MERCHANT-1 must not arbitrage around them before they are tuned on
+purpose. Mechanics stay coder-03's; the VALUES are economics:
+
+- `scan_draw()` — 1 crystal per scan
+- the resonator's conversion ratios
+- the G2 ration magnitudes
+
+Also mine already: φ = 1/64 (the melt), TARGET_RESERVE = 8, route
+charter alloy 4 + upkeep 1/4 joule, instrument costs (alloy = grade,
+diamond at 3+), η = (1+grade)/8.
+
 Re-run this survey after any tuning session; the numbers above are
 the baseline.
