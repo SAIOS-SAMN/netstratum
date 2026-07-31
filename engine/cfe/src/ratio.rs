@@ -14,6 +14,19 @@ pub fn ratio(numer: i64, denom: i64) -> Ratio {
     BigRational::new(BigInt::from(numer), BigInt::from(denom))
 }
 
+/// THE SEALED DEFINITION of canonical form (kernel I3 calls this; it never
+/// defines canonicity itself — the equations are shared, never copied,
+/// KERNEL CHARTER §0b). A value is canonical iff reducing it changes
+/// nothing: `BigRational::new` normalizes to coprime terms with a positive
+/// denominator, so `is_canonical(r)` holds exactly when `r` already equals
+/// its own normalization. Every value CONSTRUCTED through this type is
+/// canonical by construction — so this returns true for any well-formed
+/// `Ratio`, and its role is the sealed law + defense-in-depth at the byte
+/// boundary (a decode that produced a non-canonical value would fail here).
+pub fn is_canonical(r: &Ratio) -> bool {
+    BigRational::new(r.numer().clone(), r.denom().clone()) == *r
+}
+
 /// The canonical wire encoding (NS-1 §2.2):
 /// `sign u8 (0 = non-negative, 1 = negative)`
 /// `‖ LE32(numer_len) ‖ numer magnitude bytes (big-endian, no leading zeros)`

@@ -96,6 +96,30 @@ fn containment_gates_the_transfer_by_scope() {
 }
 
 #[test]
+fn exactness_holds_over_the_value_ledgers_and_the_primitive_is_sealed() {
+    // I3 passes on a real played state (every banked value is canonical by
+    // construction), and the kernel CALLS the sealed primitive — witnessed
+    // here so a future non-canonical path (a bad decode) would refuse.
+    let world = two_orb_world();
+    let prior = world.committed();
+    let next = world.committed();
+    let step = Step {
+        // An authority deed carries no value: exactness is vacuous on it
+        // and the deed rides through I3 on the state, not the event.
+        event: ClosureEvent::ScopeGranted { agent: 2, scope: Scope::Collect },
+        actor: SOVEREIGN,
+        stamp: world.now(),
+    };
+    // ScopeGranted is now COVERED (I2 containment + I3 exactness — its full
+    // set): no longer Unjudged. The sovereign holds Build, so it admits.
+    assert_eq!(lawful(&prior, &next, &step), Ok(()), "the authority deed is judged, not skipped");
+    // The sealed canonical primitive: every constructed Ratio is canonical.
+    assert!(cfe::ratio::is_canonical(&ratio(1, 2)));
+    assert!(cfe::ratio::is_canonical(&ratio(2, 4)), "2/4 constructs AS 1/2 — canonical");
+    assert!(cfe::ratio::is_canonical(&ratio(-3, 1)));
+}
+
+#[test]
 fn the_version_is_pinned() {
     // The commitment binds this; an amendment bumps it. Pinned so a
     // silent change to the judge cannot pass unnoticed.
