@@ -144,10 +144,24 @@ the tag-58 wire vector was re-extracted from the running engine.)
 
     Π_G(Δ) = the H¹ projection (strip gauge distortion to the core)
 
-**C4 · The orbit lock.** INSCRIBED (U2 — re-derive from v0.1 `fold.rs`).
+**C4 · The orbit lock.** INSCRIBED (U2 — re-derive from v0.1 `fold.rs`;
+the `≅_RCF` relation LANDED as C4a below).
 
     orbit_lock(a, b) := ∃ op ∈ Operators, k ≤ K_max :
                         conservation-valid orbit  op^k(a) ≅_RCF b
+
+**C4a · The RCF conjugacy invariant (`≅_RCF`).** LANDED (U2a) —
+`rfa_core::rcf_signature` (exact, the judge) + `rfa_core::rcf_hash`
+(blake3 fingerprint, commitment-binding only). Two states are `≅_RCF`
+iff their characteristic matrices `(xI − A)` share invariant factors —
+the Smith-Normal-Form signature over `Q[x]`, computed per fiber layer.
+The angle-free heart of the singularity law (16_UNIT §4a): a frame
+change (`A ↦ PAP⁻¹`) leaves the signature identical, so the fold
+verdict cannot depend on the frame of approach. THE PROPORTIONAL LAW
+does not touch it (a canonical form, not an aggregator of difference);
+blake3, never the ancestor's Keccak.
+
+    A ≅_RCF B  ⟺  invariant_factors(xI − A) = invariant_factors(xI − B)
 
 **C5 · The dimensional-resolution cycle (algorithm).** INSCRIBED.
 Authority: SYSTEM_SPEC §4. unfold (raise a plane, C7-bounded above) →
