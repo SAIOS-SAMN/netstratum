@@ -944,6 +944,26 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         }
         // TERRA-1: the crown in the hand — re-seat a sited planet's
         // albedo and orbit; only lawful once terraforming is held.
+        // MANU-1 (10 §3f): forge an instrument — manufacturing is
+        // technology + understanding + industry; grade = condition,
+        // and the scan horizon reads the best grade held.
+        Some("forge") => match words.next().and_then(|w| w.parse::<u8>().ok()) {
+            Some(condition) => {
+                match world.forge_instrument(cfe::world::FIRST_ORB, condition) {
+                    Ok(()) => println!(
+                        "{} the grade-{} instrument FORGES — the scan horizon grows",
+                        style.ok("⚙"),
+                        style.strong(&condition.to_string())
+                    ),
+                    Err(refusal) => refuse(world, &refusal, style),
+                }
+            }
+            None => println!(
+                "{} usage: {} — grade is a crystallized condition 1..6",
+                style.bad("✗"),
+                style.strong("forge <condition>")
+            ),
+        },
         Some("terraform") => {
             let albedo = words.next().and_then(parse_ratio_arg);
             let orbit = words.next().and_then(parse_ratio_arg);
@@ -2398,6 +2418,7 @@ fn help(style: &Style) {
         ("sever <res> to <p> · bonds", "cut a standing bond (the load posts to the cutter) · list the standing orders"),
         ("covenant <q> <res> to <p> within <n>", "vitrify a delivery pact in the Glasskeeper lattice — collateral (priced by your fidelity books, never barred) locks until the quota is delivered (release) or the deadline passes (BREACH_AND_SLASH); `covenants` lists the open pacts"),
         ("ideology", "the dual cohesion ledger for this planet — the four axes, their books, and the derived readings; divergent trade partners pay a friction entropy tax, aligned ones pay zero"),
+        ("forge <condition>", "MANU-1: forge an instrument from a crystallized condition + the converter chain (alloy = grade; diamond at 3+) — scan reach = base + best grade"),
         ("pen <world> · pen return <world>", "the receipted handoff (MESH-1b): ask the conductor for a world\'s pen — the seal lands at its next beat and your cross-world deeds write there lawfully; return it when done"),
         ("login [name] · whoami · continue", "the operator menu (prototype, no passwords): many accounts on one machine — login mints/switches, bare login lists, continue resumes your profile\'s last saved world"),
         ("t0 <inbox|move|galaxies|contract|clean>", "the progenitor console (tier 0): inbox streams the upward petitions; move <world> x y z re-charts a sector (the separation deed); galaxies reads the charted skies (13_GALAXY — membership derived, never stored); contract folds the era; clean sweeps --closed-* ruins"),
@@ -2962,6 +2983,18 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "no discipline {} stands in the vocabulary — 1 the Fast · 2 the Icon · 3 the Vigil · 4 the Hoard · 5 the Athanor",
             style.strong(&practice.to_string())
         ),
+        ActionRefused::InstrumentGradeUnknown { condition } => format!(
+            "an instrument grade is a crystallized condition 1..6 — {} is outside the sky",
+            style.strong(&condition.to_string())
+        ),
+        ActionRefused::ConditionUncrystallized { condition } => format!(
+            "condition {} has not crystallized here — the understanding comes before the instrument",
+            style.strong(&condition.to_string())
+        ),
+        ActionRefused::ChainIncomplete { needs } => format!(
+            "the converter chain does not stand — this forge needs a {}",
+            style.strong(&format!("{needs:?}"))
+        ),
         ActionRefused::PracticeAlreadyAdopted { practice } => format!(
             "discipline {} already binds this line — one adoption per star",
             style.strong(&practice.to_string())
@@ -3392,6 +3425,11 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::PracticeReleased { practice } => format!(
                 "⚖ discipline {} RELEASED — the rediscovery earned; the lesson re-emerges",
                 style.strong(&practice.to_string())
+            ),
+            cfe::dop::ClosureEvent::InstrumentForged { orb_id, grade, .. } => format!(
+                "⚙ orb {} forges its grade-{} INSTRUMENT — the scan horizon grows",
+                orb_id,
+                style.strong(&grade.to_string())
             ),
             cfe::dop::ClosureEvent::WorldCharted { seed } => format!(
                 "▲ terrain charted — seed {:02x}{:02x}{:02x}{:02x}; the map is worth reading",

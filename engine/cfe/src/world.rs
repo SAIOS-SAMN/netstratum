@@ -61,6 +61,12 @@ pub enum ActionRefused {
     StarAlreadyCommissioned,
     /// D3 — one terrain charter per star; the seed is forever.
     TerrainAlreadyCharted,
+    /// MANU-1 — an instrument grade is a crystallized condition, 1–6.
+    InstrumentGradeUnknown { condition: u8 },
+    /// MANU-1 — the line has not crystallized this condition here.
+    ConditionUncrystallized { condition: u8 },
+    /// MANU-1 — the converter chain does not stand on this orb.
+    ChainIncomplete { needs: ZoneKind },
     /// PRACTICE-1 — outside the practice vocabulary (1–5).
     PracticeUnknown { practice: u8 },
     /// PRACTICE-1 — one adoption per discipline per star.
@@ -276,6 +282,9 @@ pub struct Committed {
     /// D3: the charted terrain seed — None reads all Standard (the
     /// opt-in law; the seed arrives only by the WorldCharted deed).
     pub terrain_seed: Option<[u8; 32]>,
+    /// MANU-1: the forged instruments — (orb, tech node, grade) in
+    /// forge order; reach law reads the best grade (10 §3f).
+    pub instruments: Vec<(u64, [u8; 32], u8)>,
     /// PRACTICE-1: the receipted disciplines, adoption order.
     pub practices: Vec<u8>,
     /// ELEMENT-GRAMMAR-1 (14 §3): the opened veins — the working
@@ -363,6 +372,8 @@ pub struct World {
     terrain_seed: Option<[u8; 32]>,
     /// PRACTICE-1: the receipted disciplines (mirror of the receipts).
     practices: Vec<u8>,
+    /// MANU-1: the forged instruments (mirror of the receipts).
+    instruments: Vec<(u64, [u8; 32], u8)>,
     prospects: Vec<Prospected>,
     /// WARDEN-1a: the elder's reverse shield (mirror of the receipts).
     warded: Option<bool>,
@@ -395,6 +406,7 @@ impl World {
             genesis: None,
             terrain_seed: None,
             practices: Vec::new(),
+            instruments: Vec::new(),
             prospects: Vec::new(),
             warded: None,
             veiled: false,
@@ -437,6 +449,7 @@ impl World {
             genesis: committed.genesis,
             terrain_seed: committed.terrain_seed,
             practices: committed.practices,
+            instruments: committed.instruments,
             prospects: committed.prospects,
             warded: committed.warded,
             veiled: committed.veiled,
@@ -515,6 +528,7 @@ impl World {
         );
         Ok(())
     }
+
 
     /// TECH-1a: has this world's people made the SOLAR LEAP — do they
     /// know the powers of their sun? Pre-solar is a lawful state
@@ -637,6 +651,64 @@ impl World {
             SOVEREIGN,
         );
         Ok(())
+    }
+
+    /// MANU-1 (10 §3f): FORGE AN INSTRUMENT — manufacturing overlays
+    /// technology + understanding + industry. Grade IS the
+    /// crystallized condition; the converter chain must stand (a
+    /// smelter for grades 1–2, smelter + synthesizer for 3+); the
+    /// frame draws alloy = grade, and grade 3+ optics draw one
+    /// diamond (v1 placeholders at the condition table's cadence).
+    /// The scan-reach law reads the best grade held: reach = base +
+    /// grade — never a global constant again.
+    pub fn forge_instrument(&mut self, orb: u64, condition: u8) -> Result<(), ActionRefused> {
+        if condition == 0 || condition > 6 {
+            return Err(ActionRefused::InstrumentGradeUnknown { condition });
+        }
+        let tech_hash = self
+            .techs
+            .iter()
+            .find(|(held, held_condition, _)| *held == orb && *held_condition == condition)
+            .map(|(_, _, node)| *node)
+            .ok_or(ActionRefused::ConditionUncrystallized { condition })?;
+        let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
+        let chain = match condition {
+            1 | 2 => vec![ZoneKind::Smelter],
+            _ => vec![ZoneKind::Smelter, ZoneKind::Synthesizer],
+        };
+        for needs in chain {
+            if !held.zones.iter().any(|zone| zone.kind == needs) {
+                return Err(ActionRefused::ChainIncomplete { needs });
+            }
+        }
+        let mut costs = vec![(Resource::Alloy, ratio(condition as i64, 1))];
+        if condition >= 3 {
+            costs.push((Resource::Diamond, ratio(1, 1)));
+        }
+        for (resource, need) in &costs {
+            let have = held.banked_amount(*resource);
+            if have < *need {
+                return Err(ActionRefused::CannotAfford {
+                    resource: *resource,
+                    need: Box::new(need.clone()),
+                    have: Box::new(have),
+                });
+            }
+        }
+        for (resource, need) in costs {
+            held.bank(resource, -need);
+        }
+        self.instruments.push((orb, tech_hash, condition));
+        self.close(
+            ClosureEvent::InstrumentForged { orb_id: orb, tech_hash, grade: condition },
+            SOVEREIGN,
+        );
+        Ok(())
+    }
+
+    /// MANU-1: the held instruments — (orb, tech node, grade).
+    pub fn instruments(&self) -> &[(u64, [u8; 32], u8)] {
+        &self.instruments
     }
 
     /// THRESHOLD-1: has this world made the CROSSING — its first
@@ -2770,6 +2842,7 @@ impl World {
             genesis: self.genesis.clone(),
             terrain_seed: self.terrain_seed,
             practices: self.practices.clone(),
+            instruments: self.instruments.clone(),
             prospects: self.prospects.clone(),
             warded: self.warded,
             veiled: self.veiled,
@@ -3807,6 +3880,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut genesis: Option<Genesis> = None;
     let mut terrain_seed: Option<[u8; 32]> = None;
     let mut practices: Vec<u8> = Vec::new();
+    let mut instruments: Vec<(u64, [u8; 32], u8)> = Vec::new();
     let mut warded: Option<bool> = None;
     let mut veiled = false;
     for receipt in chronicle.receipts() {
@@ -4344,11 +4418,15 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             ClosureEvent::StarAged { class } => {
                 star = crate::thermal::StarClass::from_wire(*class);
             }
+            // MANU-1: an instrument joined the held list.
+            ClosureEvent::InstrumentForged { orb_id, tech_hash, grade } => {
+                instruments.push((*orb_id, *tech_hash, *grade));
+            }
         }
     }
     Committed {
         orbs, entities, star, debts, bonds, covenants, councils, offers, techs, wants, crossed,
-        gauge, genesis, terrain_seed, practices, prospects, warded, veiled,
+        gauge, genesis, terrain_seed, practices, instruments, prospects, warded, veiled,
     }
 }
 

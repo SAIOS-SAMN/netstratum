@@ -118,7 +118,11 @@
 //!         clouds renders, never the chronicle)
 //!   77 ClosureEvent::VeilLifted (MASK-1a — by deed, or STARVED when
 //!         the standing joule toll goes unpaid; starved u8)
-//!         — the next free tag outside reservations is 78.
+//!   78 ClosureEvent::InstrumentForged (MANU-1, 10 §3f — manufacturing:
+//!         tech + understanding + industry into a held INSTRUMENT;
+//!         grade = the crystallized condition; scan reach = base +
+//!         grade, the global constant struck)
+//!         — the next free tag outside reservations is 79.
 //!   In-value practice codes (append-only): 1 the Fast · 2 the Icon ·
 //!   3 the Vigil · 4 the Hoard · 5 the Athanor (deep-end: adoption
 //!   gated on hardship ≥ 8 receipts). Placeholder names, operator
@@ -957,6 +961,9 @@ pub enum ClosureEvent {
     /// MASK-1a — the veil ends: by deed (starved 0) or STARVED by an
     /// unpayable toll (starved 1), receipted either way.
     VeilLifted { starved: bool },
+    /// MANU-1 (10 §3f): an instrument forged — technology +
+    /// understanding + industry overlaid; held per-orb like techs.
+    InstrumentForged { orb_id: u64, tech_hash: [u8; 32], grade: u8 },
 }
 
 impl ClosureEvent {
@@ -1292,6 +1299,12 @@ impl ClosureEvent {
             }
             Self::VeilLifted { starved } => {
                 tlv::put(77, &[u8::from(*starved)], &mut out);
+            }
+            Self::InstrumentForged { orb_id, tech_hash, grade } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(tech_hash);
+                value.push(*grade);
+                tlv::put(78, &value, &mut out);
             }
         }
         out
@@ -1636,6 +1649,11 @@ impl ClosureEvent {
             }),
             76 => Some(Self::VeilDrawn {}),
             77 => Some(Self::VeilLifted { starved: *value.first()? != 0 }),
+            78 => Some(Self::InstrumentForged {
+                orb_id: u64::from_le_bytes(value.get(..8)?.try_into().ok()?),
+                tech_hash: value.get(8..40)?.try_into().ok()?,
+                grade: *value.get(40)?,
+            }),
             _ => None,
         }
     }

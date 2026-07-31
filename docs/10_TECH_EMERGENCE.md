@@ -205,7 +205,7 @@ trades nothing, and refuses every aperture until its gate is solved.
   none — the elder holds no seat and no vote), the standing-task gate,
   the template grants, vectors. Constants placeholder.
 
-## 3f. MANU-1 — the instrument manufacturing deed (RULED 2026-07-31, spec)
+## 3f. MANU-1 — the instrument manufacturing deed (RULED + LANDED 2026-07-31)
 
 Manufacturing is the overlay the stack was missing: **technology +
 understanding + industry**. Industry makes resources; the base-7
@@ -220,8 +220,7 @@ synthesizer for 3+) may FORGE an instrument:
 per-orb, held like techs (replay rebuilds the held list). The
 instrument's name follows the naming law: concept from its
 condition, voice drawn from its tech-node hash — never a rung label.
-Tag: claimed at the landing cadence from the registry head (68–69
-went to PRACTICE-1; coordinate at commit).
+Tag: 78 (claimed at landing; next free 79).
 
 **The scope law.** `EPISTEMIC_REACH = 16` as a global constant is
 STRUCK (non-arbitrary scaling ruling): epistemic scan reach derives
@@ -239,10 +238,12 @@ same way: the scanner reads as far as its instrument.
 the frame, diamond for grade 3+ optics — exact amounts at the
 condition table's cadence, placeholders like every v1 threshold).
 
-**Lands with:** the engine deed + replay arm, the observer/CLI reach
-read (instrument-derived, constant deleted), a forge witness (grade
-gates: no condition → refuses; no chain → refuses), and the NS-6
-scope note. One landing.
+**LANDED:** tag 78 codec + replay arm + `World::forge_instrument`
+(all three gates witnessed: grade vocabulary, understanding, chain);
+mirror exports `instruments` (orb/grade/node data fields); the
+observer reads per-world horizons (`epistemic_reach`); CLI `forge
+<condition>` verb. Witness `world_manu` + the consolidated wire
+round-trip.
 
 ## 4. Deferred, recorded
 

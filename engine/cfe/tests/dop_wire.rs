@@ -144,6 +144,7 @@ fn events_round_trip_through_their_wire_records() {
         },
         ClosureEvent::OfferCleared { offer: 7, deal: 100 },
         ClosureEvent::GaugeShiftedAt { grade: 2, gauge: ratio(2, 3) },
+        ClosureEvent::InstrumentForged { orb_id: 4, tech_hash: [3u8; 32], grade: 3 },
         ClosureEvent::HandoffSealed { from: 1, to: 2 },
     ];
     for event in events {

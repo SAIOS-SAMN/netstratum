@@ -568,6 +568,23 @@ fn render_state(world_name: &str, planet: &str, civilization: &str, world: &Worl
             },
         ));
     }
+    // MANU-1 / observer uplink: the forged instruments — the reach
+    // law reads the best grade (reach = base + grade, 10 §3f).
+    if !world.instruments().is_empty() {
+        w.key("instruments");
+        w.raw_array(world.instruments().iter().map(|(orb, node, grade)| {
+            let mut entry = JsonWriter::new();
+            entry.open();
+            entry.field_u64("orb", *orb);
+            entry.field_u64("grade", u64::from(*grade));
+            entry.field_str(
+                "node",
+                &format!("{:02x}{:02x}{:02x}{:02x}", node[0], node[1], node[2], node[3]),
+            );
+            entry.close();
+            entry.finish()
+        }));
+    }
     // WANT-1 / observer uplink: the struck cognitive wants.
     if !world.wants().is_empty() {
         w.key("wants");
@@ -747,6 +764,10 @@ fn render_receipt(receipt: &Receipt) -> String {
         E::PracticeReleased { practice } => (
             "practice_released",
             format!("discipline {practice} released — the lesson re-emerges"),
+        ),
+        E::InstrumentForged { orb_id, grade, .. } => (
+            "instrument_forged",
+            format!("orb {orb_id} forges its grade-{grade} instrument — the horizon grows"),
         ),
         E::WorldCharted { seed } => (
             "world_charted",
