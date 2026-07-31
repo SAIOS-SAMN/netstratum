@@ -168,6 +168,61 @@ fn the_aperture_leg_conserves_its_exact_declared_amount() {
     );
 }
 
+/// I4/I5 the value law — a mint raises the world total by exactly its
+/// declared amount (and is non-negative); a decay lowers it by exactly its
+/// declared amount (and is non-negative). A "mint" that destroys value, or
+/// a "decay" that creates it, is a mislabelled deed and refuses by sign.
+#[test]
+fn creation_and_decay_bound_the_value_law_by_declaration_and_sign() {
+    let world = two_orb_world();
+    let prior = world.committed();
+    // I4 mint: the world's iron rises by exactly 4 — a lawful creation.
+    let mut minted = world.committed();
+    minted.orbs[0].bank(Resource::Iron, ratio(4, 1));
+    let yield_step = |amount| Step {
+        event: ClosureEvent::YieldCollected {
+            orb_id: FIRST_ORB,
+            resource: Resource::Iron,
+            amount,
+        },
+        actor: SOVEREIGN,
+        stamp: world.now(),
+    };
+    assert_eq!(lawful(&prior, &minted, &yield_step(ratio(4, 1))), Ok(()), "a mint of exactly 4 admits");
+    // A "mint" of -4 (a burn wearing a mint's name): the state HONESTLY
+    // fell by 4 (so declaration==effect passes), then the sign refuses.
+    let mut burn_as_mint = world.committed();
+    burn_as_mint.orbs[0].bank(Resource::Iron, ratio(-4, 1));
+    assert_eq!(
+        lawful(&prior, &burn_as_mint, &yield_step(ratio(-4, 1))),
+        Err(Unlawful::MintNotPositive { resource: Resource::Iron, amount: Box::new(ratio(-4, 1)) }),
+        "value enters only by a non-negative mint"
+    );
+    // I5 decay: the world's iron falls by exactly 2 — a lawful decay.
+    let mut decayed = world.committed();
+    decayed.orbs[0].bank(Resource::Iron, ratio(-2, 1));
+    let demurrage_step = |amount| Step {
+        event: ClosureEvent::DemurrageSettled {
+            orb_id: FIRST_ORB,
+            resource: Resource::Iron,
+            amount,
+        },
+        actor: SOVEREIGN,
+        stamp: world.now(),
+    };
+    assert_eq!(lawful(&prior, &decayed, &demurrage_step(ratio(2, 1))), Ok(()), "a decay of exactly 2 admits");
+    // A "decay" of -2 (creating value): the state HONESTLY rose by 2 (a
+    // decay of -2 is a delta of +2), so declaration==effect passes, then
+    // the sign refuses.
+    let mut mint_as_decay = world.committed();
+    mint_as_decay.orbs[0].bank(Resource::Iron, ratio(2, 1));
+    assert_eq!(
+        lawful(&prior, &mint_as_decay, &demurrage_step(ratio(-2, 1))),
+        Err(Unlawful::DecayNotPositive { resource: Resource::Iron, amount: Box::new(ratio(-2, 1)) }),
+        "value leaves only by a non-negative decay"
+    );
+}
+
 #[test]
 fn the_version_is_pinned() {
     // The commitment binds this; an amendment bumps it. Pinned so a

@@ -70,6 +70,14 @@ pub enum Unlawful {
     /// I2 — the actor is an entity but lacks the scope the deed requires.
     /// Containment: authority is granted, never assumed.
     NotPermitted { actor: u64, scope: Scope },
+    /// I4 — a mint carried a negative amount: a deed labelled a creation
+    /// that actually DESTROYS value (a burn wearing a mint's name). Value
+    /// enters only by a lawful, non-negative mint.
+    MintNotPositive { resource: Resource, amount: Box<Ratio> },
+    /// I5 — a decay carried a negative amount: a deed labelled a decay
+    /// that actually CREATES value. Value leaves only by a lawful,
+    /// non-negative decay.
+    DecayNotPositive { resource: Resource, amount: Box<Ratio> },
     /// I3 — a value in `next` is not a canonical exact rational (coprime,
     /// positive denominator). Exactness is a TYPE-LEVEL guarantee
     /// (`BigRational` is canonical by construction, no float ever entered);
@@ -104,7 +112,9 @@ pub fn lawful(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Un
     }
     conservation(prior, next, step)?;
     containment(prior, step)?;
-    exactness(next)
+    exactness(next)?;
+    creation(step)?;
+    decay(step)
 }
 
 /// The landed coverage of the invariant set. An event is judged (not
@@ -124,6 +134,9 @@ fn covered(event: &ClosureEvent) -> bool {
         // legs (the convergence seam): a leg debits/credits exactly its
         // declared amount, the local half of pair conservation.
         E::ResourceTransferred { .. } | E::ApertureSent { .. } | E::ApertureReceived { .. }
+        // I4 creation / I5 decay (declaration==effect + sign) fully cover
+        // the mint and the demurrage decay.
+        | E::YieldCollected { .. } | E::DemurrageSettled { .. }
         // I2 containment + I3 exactness fully cover the authority deeds
         // (no value moves, no ratios): registering an agent and opening
         // or shutting its scopes.
@@ -149,6 +162,12 @@ fn conservation(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
         E::ApertureSent { resource, amount, .. } => (*resource, -amount.clone()),
         // The destination leg: value ARRIVED from another world (credit).
         E::ApertureReceived { resource, amount, .. } => (*resource, amount.clone()),
+        // A mint: production banked (value CREATED, +). I4 adds the sign
+        // and (at scale) the verified-work bound.
+        E::YieldCollected { resource, amount, .. } => (*resource, amount.clone()),
+        // A decay: banked stores lost to demurrage (value DESTROYED, −).
+        // I5 adds the sign and the flat-rate bound.
+        E::DemurrageSettled { resource, amount, .. } => (*resource, -amount.clone()),
         // A covered event conservation does not constrain (uncovered
         // events already refused Unjudged; other invariants govern this).
         // Coverage grows by witnessed amendment — clause 2.
@@ -176,6 +195,38 @@ fn total_banked(state: &Committed, resource: Resource) -> Ratio {
         .iter()
         .map(|orb| orb.banked_amount(resource))
         .fold(ratio(0, 1), |sum, held| sum + held)
+}
+
+/// INVARIANT — bounded creation (I4). Value is created ONLY by a lawful
+/// mint, and the mint is non-negative (a mint that destroys value is a
+/// burn mislabelled — refused). The declaration==effect half is
+/// conservation (the world total rose by exactly the declared amount);
+/// I4 adds the sign. NAMED SEAM: at convergence scale the mint is bounded
+/// by verified work — `mint ≤ verify_certificate(work)` — the PoUW anchor
+/// (KERNEL CHARTER §5a), which fills on Ruling Box 1. No fiat (05 §1.2).
+fn creation(step: &Step) -> Result<(), Unlawful> {
+    match &step.event {
+        ClosureEvent::YieldCollected { resource, amount, .. } if *amount < ratio(0, 1) => {
+            Err(Unlawful::MintNotPositive { resource: *resource, amount: Box::new(amount.clone()) })
+        }
+        _ => Ok(()),
+    }
+}
+
+/// INVARIANT — bounded decay (I5). Value is destroyed ONLY by a lawful,
+/// non-negative decay (a decay that creates value is refused). The
+/// declaration==effect half is conservation (the world total fell by
+/// exactly the declared amount); I5 adds the sign. NAMED SEAM: the decay
+/// is FLAT and denominator-bounded, `decay ≤ rate · ease · elapsed`
+/// (never proportional — the 2^1100 lesson), which fills when the sealed
+/// demurrage rule + `last_touch` join the check.
+fn decay(step: &Step) -> Result<(), Unlawful> {
+    match &step.event {
+        ClosureEvent::DemurrageSettled { resource, amount, .. } if *amount < ratio(0, 1) => {
+            Err(Unlawful::DecayNotPositive { resource: *resource, amount: Box::new(amount.clone()) })
+        }
+        _ => Ok(()),
+    }
 }
 
 /// INVARIANT — exactness (I3). Every value in `next` is a canonical exact
