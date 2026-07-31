@@ -255,7 +255,14 @@ INCURSION-1a LANDED 2026-07-31 (tag 81 — the sealed derelict wakes,
 the archive byte-untouched, the living never raided, the revenant
 line chronicle-seeded). All queue mechanics are landed or blocked on
 one named line each: WARDEN-1b, MASK-1b (coder-03 seam), FORGE-2b
-(N6-gated), wave-4 names (operator). Next: as assigned.
+(N6-gated), wave-4 names (operator). KERNEL-TAXON drafted 2026-07-31
+(`15_TAXON.md`): class+clade as closed u8 vocabularies entering the
+kernel by ADDITIVE amendment; TaxonSealed as a NEW deed (extending
+GenesisSealed would be breaking); invariant coverage drafted for
+coder-03's ratification; committed fields wait the coder-04 codec
+freeze; couplings land inside lawful() post-seal; creed and function
+STAY derived. Three operator ratifications close the draft (§6).
+Next: the ratifications, then the migration wave.
 - **coder-03**: N4 (NS-2 RQP + the scanner) — LANDED on main
   2026-07-30 (33e6c73 + post-ruling inscriptions 7f739f4, after the
   fifth-set rulings): spec §1–§4 with extracted vectors, sigil index +
