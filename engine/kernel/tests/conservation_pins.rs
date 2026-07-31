@@ -30,11 +30,12 @@ fn two_orb_world() -> World {
 fn the_sealed_default_refuses_the_unjudged() {
     // The airtight law: a deed with no landed invariant coverage does
     // NOT enter — refuse-unknown, not admit-unknown. WITNESS
-    // TRUTH-UPDATE (the value-law wave): the original example here was
-    // ColonyFounded, which has since entered coverage under its
-    // chartered genesis mint; the pin now rides a deed that is STILL
-    // uncovered by design — a fold (EraAnnexed), which waits on U2d's
-    // I6 orbit-lock gate and is never admitted before it.
+    // TRUTH-UPDATE ×3 (each recorded): ColonyFounded entered at the
+    // value-law wave; EraAnnexed entered at U2d's gauge law. The pin
+    // now rides AssayStruck — uncovered by design until the element
+    // ledger's accounting lands (an element mint is not admitted on
+    // banked-neutrality). When the LAST deed covers, this pin dies
+    // with the sealed default it witnesses: that is the Phase 3 flip.
     let world = {
         let mut world = World::new();
         world.found("origin").expect("founds");
@@ -42,11 +43,10 @@ fn the_sealed_default_refuses_the_unjudged() {
     };
     let state = world.committed();
     let step = Step {
-        event: ClosureEvent::EraAnnexed {
-            era: "era1".into(),
-            world: "origin".into(),
-            terminal: [0u8; 32],
-            offset: 1,
+        event: ClosureEvent::AssayStruck {
+            orb_id: 1,
+            element: [3u8; 32],
+            amount: cfe::ratio::ratio(1, 1),
         },
         actor: SOVEREIGN,
         stamp: world.now(),

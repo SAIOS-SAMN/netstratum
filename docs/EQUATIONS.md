@@ -57,9 +57,12 @@ I1–I6, G1.
 
     Δ_{k+1} = B_S⁻¹( Π_G( F_fold*( Σ_i ω_i N_i( B_S(Δ_k) ) − ζ∇V ) ) ) + ξ_k
 
-**E2 · The singularity law (the angle-free collision).** DRAFT.
-Authority: 16_UNIT §4a (draft) over SYSTEM_SPEC §0. Implementation:
-U2 (the angle-free witness).
+**E2 · The singularity law (the angle-free collision).** LANDED (U2e)
+— `rfa_core::judged_fold` (Π_G then F_fold*) with THE ANGLE-FREE
+WITNESS green (`fold_pins.rs`): the verdict is invariant under every
+permutation frame of the entities and under gauge-coboundary shifts
+of either input; the veto is frame-invariant too. Authority: 16_UNIT
+§4a over SYSTEM_SPEC §0.
 
     B_S⁻¹( Π_G( F_fold*( … B_S(Δ) … ) ) )
     orbit_lock = ∅  →  fold closes to zero (the difference was angle)
@@ -144,9 +147,17 @@ SCHEMA_V3 premise died at execution.
     elapsed = stamp − last_touch; thermally gated  // proportional (the
     an un-owed decay refuses, both sides whole     // 2^1100 lesson)
 
-**I6 · The fold gate.** INSCRIBED (U2). Authority: kernel CHARTER §6.
+**I6 · The fold gate.** KERNEL HALF LANDED (U2d) — `kernel::gauge_law`:
+a fold transition's only lawful LOCAL effect is its declared key move
+(gauge declaration==effect, every grade, every covered deed — a key
+smuggled under a neutral deed refuses `GaugeBroken`). The PAIR half —
+`orbit_lock` between the two MERGING chains via the sealed
+`rfa_core::judged_fold` (C4/C4a, E2) — is the merge site's law
+(converge/mesh admission), the aperture-pair seam pattern: kernel
+enforces the local half, the seam enforces the pair.
 
-    a fold is lawful  ⟺  orbit_lock(a, b) = ∅
+    LOCAL:  next.gauge == declared(prior.gauge, deed)   ∀ grades
+    PAIR:   a fold is lawful  ⟺  orbit_lock(Π_G(a), Π_G(b)) = ∅
 
 ## §3 Convergence — the value engine
 

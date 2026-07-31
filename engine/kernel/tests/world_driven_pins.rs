@@ -40,9 +40,11 @@ fn world_driven_deeds() -> Vec<ClosureEvent> {
         ClosureEvent::RouteLapsed { deal: 1 },
         ClosureEvent::VoidShare { deal: 1, resource: Resource::Iron, amount: ratio(1, 1) },
         // Mesh / universe-ledger deeds (W-D non-fold): no bank, no actor.
+        // WITNESS TRUTH-UPDATE (U2d's gauge law): GaugeShifted and
+        // Diverged DECLARE key moves, so they left this identical-
+        // states fixture — their judgment lives in gauge_pins.rs with
+        // honest next states.
         ClosureEvent::HandoffSealed { from: 1, to: 2 },
-        ClosureEvent::GaugeShifted { gauge: ratio(1, 3) },
-        ClosureEvent::Diverged { branch: "fork".into(), gauge: ratio(1, 4) },
     ]
 }
 
@@ -100,20 +102,26 @@ fn a_value_moving_consequence_is_held_to_its_declaration() {
 }
 
 #[test]
-fn the_fold_trio_stays_unjudged_until_the_gate() {
-    // Confluent / EraAnnexed / EraFolded are banked-neutral at world
-    // replay (gauge/no-op) — but a FOLD is lawful only when the I6
-    // orbit-lock gate says so (U2d). Admitting them on exactness alone
-    // would be a fold with no gate. They stay Unjudged by design.
+fn the_fold_trio_is_judged_by_the_gauge_law() {
+    // WITNESS TRUTH-UPDATE (U2d landed): this pin held the trio OUT as
+    // Unjudged until the I6 gate. The gate's kernel half — THE GAUGE
+    // LAW — has landed: a fold's only lawful local effect is its
+    // declared key move, so the same identical-states fixture that
+    // once read Unjudged now refuses GaugeBroken (the declared move
+    // did not land), a JUDGED verdict with both sides carried. The
+    // lawful-fold admits live in gauge_pins.rs; the pair half
+    // (orbit_lock between merging chains) is the merge seam's law.
     let world = founded();
     for event in [
         ClosureEvent::Confluent { partner: "x".into(), gauge: ratio(1, 1) },
         ClosureEvent::EraFolded { era: 1, gauge: ratio(1, 1) },
     ] {
-        assert_eq!(
-            judge(&world, &event, SOVEREIGN),
-            Err(Unlawful::Unjudged),
-            "a fold waits on the I6 gate, never admitted by exactness: {event:?}"
+        assert!(
+            matches!(
+                judge(&world, &event, SOVEREIGN),
+                Err(Unlawful::GaugeBroken { grade: 0, .. })
+            ),
+            "the fold is JUDGED: its declared key move must land: {event:?}"
         );
     }
 }

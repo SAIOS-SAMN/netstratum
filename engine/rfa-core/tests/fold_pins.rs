@@ -6,7 +6,7 @@
 //! period-1 lock) vetoes it — so an inverted verdict cannot pass.
 
 use cfe::ratio::{ratio, Ratio};
-use rfa_core::{f_fold_star, orbit_lock, FoldVerdict, Operator, Delta};
+use rfa_core::{f_fold_star, judged_fold, orbit_lock, FoldVerdict, Operator, Delta};
 
 fn q(n: i64, d: i64) -> Ratio {
     ratio(n, d)
@@ -108,6 +108,90 @@ fn the_identity_orbit_locks_and_vetoes_the_fold() {
         FoldVerdict::TorsionVeto(witness),
         "a torsion lock forbids the fold — the residue must emit"
     );
+}
+
+/// A permutation frame: relabel the entities by `perm` (a conjugation
+/// P·Δ·P⁻¹ with P the permutation matrix — its inverse is its
+/// transpose). The discrete frame group of a Delta over n entities.
+fn frame(dim: usize, perm: &[usize]) -> Operator {
+    let mut matrix = vec![vec![q(0, 1); dim]; dim];
+    let mut matrix_inv = vec![vec![q(0, 1); dim]; dim];
+    for (from, &to) in perm.iter().enumerate() {
+        matrix[to][from] = q(1, 1);
+        matrix_inv[from][to] = q(1, 1);
+    }
+    Operator { id: 9, matrix, matrix_inv, det_sign_positive: true }
+}
+
+/// Add a coboundary (a pure gauge distortion: Δ_ij += p_j − p_i) to a
+/// Delta — the "angle" a relabeling of potentials introduces.
+fn gauge_shifted(delta: &Delta, potentials: &[Ratio]) -> Delta {
+    let dim = delta.dim();
+    let fiber = delta.fiber();
+    let mut entries = vec![vec![vec![q(0, 1); fiber]; dim]; dim];
+    for (i, row) in entries.iter_mut().enumerate() {
+        for (j, cell) in row.iter_mut().enumerate() {
+            for (l, slot) in cell.iter_mut().enumerate() {
+                *slot = delta.entry(i, j, l) + (&potentials[j] - &potentials[i]);
+            }
+        }
+    }
+    Delta::from_entries(entries)
+}
+
+#[test]
+fn the_angle_free_witness() {
+    // THE SINGULARITY LAW (16_UNIT §4a) as a test: the composed gate's
+    // verdict is INVARIANT to the frame and gauge of approach. The
+    // same pair, presented under every permutation frame of its
+    // entities AND shifted by a gauge coboundary, yields the identical
+    // verdict — fold or veto — because Π_G strips what a relabeling
+    // could remove and the RCF signature is conjugation-invariant.
+    let a = anchor_3();
+    let mut b = Delta::zero(3, 1);
+    b.set_antisym(0, 1, vec![q(2, 1)]);
+    b.set_antisym(1, 2, vec![q(3, 1)]);
+    b.set_antisym(0, 2, vec![q(7, 1)]); // incoherent — genuinely different
+    let ops = vec![shear(3, 0, 1, q(1, 50))];
+    let base = judged_fold(&a, &b, &ops, 10);
+
+    // Every 3-entity permutation frame: the verdict holds.
+    let perms: [[usize; 3]; 6] =
+        [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]];
+    for perm in perms {
+        let f = frame(3, &perm);
+        let fa = f.apply(&a).expect("the frame applies");
+        let fb = f.apply(&b).expect("the frame applies");
+        assert_eq!(
+            judged_fold(&fa, &fb, &ops, 10),
+            base,
+            "the verdict cannot depend on the frame of approach: {perm:?}"
+        );
+    }
+
+    // A gauge coboundary on either input: stripped by Π_G, the
+    // verdict holds.
+    let potentials = [q(0, 1), q(5, 1), q(1, 3)];
+    let shifted_a = gauge_shifted(&a, &potentials);
+    let shifted_b = gauge_shifted(&b, &potentials);
+    assert_eq!(judged_fold(&shifted_a, &b, &ops, 10), base);
+    assert_eq!(judged_fold(&a, &shifted_b, &ops, 10), base);
+    assert_eq!(judged_fold(&shifted_a, &shifted_b, &ops, 10), base);
+
+    // And the self-pair under the identity lock: the verdict is a
+    // veto in EVERY frame alike (no angle un-vetoes a torsion).
+    let id = identity_op(3);
+    let self_base = judged_fold(&a, &a, std::slice::from_ref(&id), 10);
+    assert!(matches!(self_base, FoldVerdict::TorsionVeto(_)));
+    for perm in perms {
+        let f = frame(3, &perm);
+        let fa = f.apply(&a).expect("applies");
+        assert_eq!(
+            judged_fold(&fa, &fa, std::slice::from_ref(&id), 10),
+            self_base,
+            "the veto is frame-invariant too"
+        );
+    }
 }
 
 #[test]

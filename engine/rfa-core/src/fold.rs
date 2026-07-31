@@ -170,3 +170,25 @@ pub fn f_fold_star(
         None => FoldVerdict::GaugeFold,
     }
 }
+
+/// THE COMPOSED GATE (U2e — the singularity pipeline, 16_UNIT §4a):
+/// both states pass through `Π_G` (`coboundary_reduce` — what a
+/// relabeling could remove, is removed) BEFORE the gate judges. This
+/// composition is what makes the verdict ANGLE-FREE: a frame change
+/// (conjugation) leaves the RCF signature identical, and a gauge
+/// shift (an added coboundary) is stripped by the reduction — so the
+/// verdict cannot depend on the frame or gauge of approach. Witnessed
+/// as the angle-free pin in `fold_pins.rs`.
+pub fn judged_fold(
+    a: &Delta,
+    b: &Delta,
+    operators: &[Operator],
+    k_max: usize,
+) -> FoldVerdict {
+    f_fold_star(
+        &crate::reduce::coboundary_reduce(a),
+        &crate::reduce::coboundary_reduce(b),
+        operators,
+        k_max,
+    )
+}

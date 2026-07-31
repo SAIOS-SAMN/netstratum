@@ -262,19 +262,16 @@ fn the_judge_stands_at_the_door() {
     ));
 
     // The sealed default reaches the spine: an uncovered deed refuses.
-    // WITNESS TRUTH-UPDATE (arch-01's value-law wave — the coverage
-    // seam, recorded): the original example, ZoneRazed, entered
-    // coverage, and this fixture's Collect-hand then rightly refused
-    // NotPermitted{Raze} — a JUDGED verdict, not the sealed default.
-    // The pin now rides a deed still uncovered BY DESIGN: a fold
-    // (EraAnnexed), which waits on U2d's I6 orbit-lock gate and is
-    // never admitted before it.
+    // WITNESS TRUTH-UPDATE ×2 (the coverage seam, recorded): ZoneRazed
+    // entered at the value-law wave; EraAnnexed entered at U2d's gauge
+    // law. The pin now rides AssayStruck — uncovered by design until
+    // the element ledger's accounting lands. When the last deed
+    // covers, this pin transforms with the Phase 3 flip.
     let uncovered = kernel::Step {
-        event: ClosureEvent::EraAnnexed {
-            era: "era1".into(),
-            world: "meridian".into(),
-            terminal: [0u8; 32],
-            offset: 1,
+        event: ClosureEvent::AssayStruck {
+            orb_id: 1,
+            element: [3u8; 32],
+            amount: ratio(1, 1),
         },
         actor: 100,
         stamp: 2,

@@ -38,13 +38,14 @@ fn build_deeds() -> Vec<ClosureEvent> {
         ClosureEvent::ElderWarded {},
         ClosureEvent::VeilDrawn {},
         ClosureEvent::RouteChartered { deal: 1, eta: ratio(1, 1) },
-        // THE MISSED SIXTH (arch-02's coverage audit, 2026-07-31): the
-        // enum holds 64 deeds, not the documented 63, and this one —
-        // live at world.rs's graded key shift, a SOVEREIGN Build deed
-        // whose replay resizes the gauge key and touches no bank —
-        // was never counted and never covered. Banked-neutral W-A
-        // shape, beside its covered sibling GaugeShifted.
-        ClosureEvent::GaugeShiftedAt { grade: 1, gauge: ratio(1, 3) },
+        // THE MISSED SIXTH (arch-02's audit) entered coverage here as
+        // GaugeShiftedAt — then U2d's GAUGE LAW landed and outran this
+        // fixture: the deed DECLARES a key move, so judging it with
+        // prior == next rightly refuses GaugeBroken now. WITNESS
+        // TRUTH-UPDATE: its containment stays witnessed by the Build
+        // family here in spirit; its full judgment (the exact resize,
+        // the declared key at its grade) lives in gauge_pins.rs with
+        // an honest next state.
     ]
 }
 

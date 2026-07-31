@@ -79,6 +79,14 @@ pub enum Unlawful {
     /// that actually CREATES value. Value leaves only by a lawful,
     /// non-negative decay.
     DecayNotPositive { resource: Resource, amount: Box<Ratio> },
+    /// THE GAUGE LAW (U2d, I6's kernel half): the state's key moved
+    /// where the deed declared no move, or landed off its declared
+    /// key, or a plane opened or closed undeclared. The first
+    /// differing grade named, both sides carried whole (an absent
+    /// grade reads 0 — ground rest). Every fold transition emits
+    /// exactly its declared structural delta; no state jump is
+    /// special-cased (operator ruling).
+    GaugeBroken { grade: usize, expected: Box<Ratio>, actual: Box<Ratio> },
     /// THE SIGN LAW (the value-law wave): a value-carrying deed
     /// declared a NEGATIVE amount — a credit wearing a debit's name,
     /// or the reverse. Every banked movement is non-negative by
@@ -138,7 +146,66 @@ pub fn lawful(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Un
     containment(prior, step)?;
     exactness(next)?;
     creation(step)?;
-    decay(prior, step)
+    decay(prior, step)?;
+    gauge_law(prior, next, step)
+}
+
+/// THE GAUGE LAW (U2d — I6's kernel half, the Delta-modeling ruling):
+/// every transition's effect on the gauge vector is EXACTLY what the
+/// deed declares — the fold trio moves the key it names, the graded
+/// shift opens exactly its plane, and every other deed holds the
+/// vector still. Declaration == effect, the banked law's shape
+/// applied to the key; no state jump is special-cased. The PAIR half
+/// of I6 — `orbit_lock` between the two MERGING chains — is the merge
+/// site's law (converge/mesh admission calling the sealed
+/// `rfa_core::f_fold_star`): the kernel enforces the LOCAL half, the
+/// seam enforces the pair (the aperture-pair pattern, CHARTER §5a).
+fn gauge_law(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Unlawful> {
+    use ClosureEvent as E;
+    // The declared key effect — ratified against the replay arms.
+    let expected: Vec<Ratio> = match &step.event {
+        // The base-key movers: gauge[0] = the declared key.
+        E::GaugeShifted { gauge }
+        | E::Diverged { gauge, .. }
+        | E::Confluent { gauge, .. }
+        | E::EraFolded { gauge, .. } => {
+            let mut held = prior.gauge.clone();
+            if held.is_empty() {
+                held.push(ratio(0, 1));
+            }
+            held[0] = gauge.clone();
+            held
+        }
+        // The graded shift: the vector grows to grade+1 (zero-fill,
+        // ground rest) and the declared key seats at its grade.
+        E::GaugeShiftedAt { grade, gauge } => {
+            let at = *grade as usize;
+            let mut held = prior.gauge.clone();
+            if held.len() <= at {
+                held.resize(at + 1, ratio(0, 1));
+            }
+            held[at] = gauge.clone();
+            held
+        }
+        // Every other deed declares NO key move: the vector holds
+        // still (EraAnnexed among them — a universe-ledger record
+        // whose pair-half verification is converge's law at the seam).
+        _ => prior.gauge.clone(),
+    };
+    let grades = expected.len().max(next.gauge.len());
+    let zero = ratio(0, 1);
+    for grade in 0..grades {
+        let want = expected.get(grade).unwrap_or(&zero);
+        let got = next.gauge.get(grade).unwrap_or(&zero);
+        if want != got {
+            return Err(Unlawful::GaugeBroken {
+                grade,
+                expected: Box::new(want.clone()),
+                actual: Box::new(got.clone()),
+            });
+        }
+    }
+    Ok(())
 }
 
 /// The landed coverage of the invariant set. An event is judged (not
@@ -194,6 +261,14 @@ fn covered(event: &ClosureEvent) -> bool {
         // GaugeShifted. Without it the Phase 3 flip could never
         // complete: a live deed refusing Unjudged forever.
         | E::GaugeShiftedAt { .. }
+        // U2d — THE FOLD TRIO enters under THE GAUGE LAW (I6's kernel
+        // half): the fold's only lawful local effect is its declared
+        // key move, banks and every undeclared grade held still. The
+        // pair half — orbit_lock between the merging chains via the
+        // sealed rfa_core::f_fold_star — is the merge site's law
+        // (converge/mesh admission), the aperture-pair seam pattern.
+        // Witnessed in gauge_pins.rs.
+        | E::Confluent { .. } | E::EraAnnexed { .. } | E::EraFolded { .. }
         // W-C / W-D slice — the BANKED-NEUTRAL world-driven and mesh
         // deeds. Their `world.rs::replay` arms set a flag, a list, or
         // are no-ops (no bank); `scope_of` is None (a tick's own
