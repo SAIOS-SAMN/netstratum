@@ -12,8 +12,8 @@ use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
 use cfe::world::replay;
 use conductor::{market_step, trade_intent, Egregore, EgregoreSpec, Policy};
-use mirror::registry::{Civilization, Registry};
-use mirror::Mirror;
+use ledger::registry::{Civilization, Registry};
+use ledger::Ledger;
 use std::path::PathBuf;
 
 fn scratch(name: &str) -> PathBuf {
@@ -53,7 +53,7 @@ fn seat(sigil: &str, star: StarClass, albedo: (i64, i64), orbit: (i64, i64)) -> 
 fn the_crossing_relieves_the_freeze() {
     let root = scratch("freeze");
     let registry = Registry::at(root.join("registry"));
-    let mirror = Mirror::at(root.join("worlds"));
+    let mirror = Ledger::at(root.join("worlds"));
     // Hand-driven worlds (no policy steps): the pin stages the states
     // the instinct reads, through real physics only.
     let mut furnace = Egregore::genesis(
@@ -139,7 +139,7 @@ fn any_famine_can_ask_the_market() {
     // post, ONE crossing relieves BOTH.
     let root = scratch("famine-ask");
     let registry = Registry::at(root.join("registry"));
-    let mirror = Mirror::at(root.join("worlds"));
+    let mirror = Ledger::at(root.join("worlds"));
     let mut miner = Egregore::genesis(
         seat("lodemarket", StarClass::G, (1, 4), (1, 1)), &registry, &mirror);
     let mut grower = Egregore::genesis(

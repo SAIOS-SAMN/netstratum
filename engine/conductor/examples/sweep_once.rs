@@ -5,14 +5,14 @@
 //! own receipts.
 
 use conductor::{load_egregores, observe_crossings, Egregore};
-use mirror::registry::Registry;
-use mirror::Mirror;
+use ledger::registry::Registry;
+use ledger::Ledger;
 use std::path::Path;
 
 fn main() {
     let var = std::env::args().nth(1).unwrap_or_else(|| "var".into());
     let registry = Registry::at(format!("{var}/registry"));
-    let mirror = Mirror::at(format!("{var}/worlds"));
+    let mirror = Ledger::at(format!("{var}/worlds"));
     let specs = load_egregores(Path::new(&format!("{var}/egregores.json")))
         .expect("the roster reads");
     let worlds: Vec<Egregore> = specs

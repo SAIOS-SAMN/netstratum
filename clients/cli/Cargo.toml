@@ -10,7 +10,7 @@ path = "src/main.rs"
 
 [dependencies]
 cfe = { path = "../../engine/cfe" }
-mirror = { path = "../../engine/mirror" }
+ledger = { path = "../../engine/ledger" }
 mesh = { path = "../../engine/mesh" }
 conductor = { path = "../../engine/conductor" }
 num-bigint.workspace = true

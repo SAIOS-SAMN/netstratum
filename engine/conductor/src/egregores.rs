@@ -7,7 +7,7 @@
 use crate::{EgregoreSpec, Policy};
 use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::StarClass;
-use mirror::registry::Civilization;
+use ledger::registry::Civilization;
 use std::path::Path;
 
 /// The founding NPCs (founder "conductor" — the observer marks ⚙).

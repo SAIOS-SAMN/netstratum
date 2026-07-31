@@ -7,8 +7,8 @@ use std::path::PathBuf;
 
 use cfe::dop::{ClosureEvent, ZoneKind};
 use cfe::world::World;
-use mirror::converge::{converge, default_era_roots};
-use mirror::Mirror;
+use ledger::converge::{converge, default_era_roots};
+use ledger::Ledger;
 
 fn scratch(name: &str) -> PathBuf {
     let dir = std::env::temp_dir().join(format!(
@@ -49,12 +49,11 @@ fn looped_world(colony: &str, ticks: u32) -> World {
     world
 }
 
-/// Mirror one world into an era root, returning its terminal stamp.
+/// Archive one world into an era root, returning its terminal stamp.
 fn archive(era_root: &std::path::Path, world_name: &str, world: &World) -> u64 {
-    let mirror = Mirror::at(era_root.join("worlds"));
-    mirror
-        .record(world_name, "prime", "pin-civ", world)
-        .expect("mirrors");
+    let book = Ledger::at(era_root.join("worlds"));
+    book.record(world_name, "prime", "pin-civ", world)
+        .expect("records");
     world
         .chronicle()
         .receipts()
@@ -74,7 +73,7 @@ fn the_archived_timelines_annex_onto_one_axis() {
     let t2 = archive(&era2, "moss", &played_world("moss-colony", 6));
     assert!(t1 > 0 && t2 > 0);
 
-    let mirror = Mirror::at(live.join("worlds"));
+    let book = Ledger::at(live.join("worlds"));
     let eras = default_era_roots(live.to_str().expect("utf8 path"));
     // Discovery finds the sibling eras name-ascending — and NEVER the
     // live root itself (naming ruling, 2026-07-30): self-annexation
@@ -84,7 +83,7 @@ fn the_archived_timelines_annex_onto_one_axis() {
         eras.iter().map(|(name, _)| name.as_str()).collect::<Vec<_>>(),
         vec!["var-era1", "var-era2"],
     );
-    let read = converge(&mirror, &eras).expect("converges");
+    let read = converge(&book, &eras).expect("converges");
     assert_eq!(read.adopted.len(), 2);
     assert!(read.quarantined.is_empty());
     // Epoch shift (07 §1.3): eras stack end-to-end, no overlap.
@@ -108,11 +107,11 @@ fn the_archived_timelines_annex_onto_one_axis() {
     // The universe card persisted at the epoch base, odometer rendered.
     let card = fs::read_to_string(live.join("worlds/universe.json")).expect("card");
     assert!(card.contains(&format!("\"ticks\":{}", read.epoch_base)));
-    assert!(card.contains(&mirror::universal_clock(read.epoch_base)));
+    assert!(card.contains(&ledger::universal_clock(read.epoch_base)));
 
     // Spawns read the converged chart (07 §1.6): both worlds charted.
-    assert!(mirror.charted_position("var-era1--amber").is_some());
-    assert!(mirror.charted_position("var-era2--moss").is_some());
+    assert!(book.charted_position("var-era1--amber").is_some());
+    assert!(book.charted_position("var-era2--moss").is_some());
 }
 
 #[test]
@@ -125,8 +124,8 @@ fn placement_is_a_measurement_not_a_hash() {
     // Converged into two INDEPENDENT live roots → identical coordinates.
     let live_a = base.join("var");
     let live_b = base.join("elsewhere-var");
-    let mirror_a = Mirror::at(live_a.join("worlds"));
-    let mirror_b = Mirror::at(live_b.join("worlds"));
+    let mirror_a = Ledger::at(live_a.join("worlds"));
+    let mirror_b = Ledger::at(live_b.join("worlds"));
     let eras_a = vec![("var-era1".to_string(), era1.join("worlds"))];
     converge(&mirror_a, &eras_a).expect("converges");
     converge(&mirror_b, &eras_a).expect("converges");
@@ -172,9 +171,9 @@ fn a_tampered_archive_quarantines_named_and_the_rest_still_annex() {
     fs::write(&path, tampered.join("\n") + "\n").expect("writes");
 
     let live = base.join("var");
-    let mirror = Mirror::at(live.join("worlds"));
+    let book = Ledger::at(live.join("worlds"));
     let eras = vec![("var-era1".to_string(), era1.join("worlds"))];
-    let read = converge(&mirror, &eras).expect("converges");
+    let read = converge(&book, &eras).expect("converges");
     assert_eq!(read.adopted, vec![("var-era1".into(), "clean".into())]);
     assert_eq!(read.quarantined.len(), 1);
     assert_eq!(read.quarantined[0].world, "dirty");
@@ -201,9 +200,9 @@ fn a_torn_tail_annexes_at_the_verified_prefix() {
     fs::write(&path, text).expect("writes");
 
     let live = base.join("var");
-    let mirror = Mirror::at(live.join("worlds"));
+    let book = Ledger::at(live.join("worlds"));
     let eras = vec![("var-era1".to_string(), era1.join("worlds"))];
-    let read = converge(&mirror, &eras).expect("converges");
+    let read = converge(&book, &eras).expect("converges");
     // Annexed at the verified prefix; the tear recorded, not fatal.
     assert_eq!(read.adopted, vec![("var-era1".into(), "torn".into())]);
     assert_eq!(read.torn, vec![("var-era1".into(), "torn".into())]);
@@ -225,14 +224,14 @@ fn convergence_is_idempotent() {
     let era1 = base.join("var-era1");
     archive(&era1, "amber", &played_world("amber-colony", 4));
     let live = base.join("var");
-    let mirror = Mirror::at(live.join("worlds"));
+    let book = Ledger::at(live.join("worlds"));
     let eras = vec![("var-era1".to_string(), era1.join("worlds"))];
 
-    let first = converge(&mirror, &eras).expect("converges");
+    let first = converge(&book, &eras).expect("converges");
     assert_eq!(first.adopted.len(), 1);
     let ledger_once = fs::read(live.join("worlds/convergence.tlv")).expect("ledger");
 
-    let second = converge(&mirror, &eras).expect("converges again");
+    let second = converge(&book, &eras).expect("converges again");
     assert_eq!(second.adopted.len(), 0);
     assert_eq!(second.already, 1);
     assert_eq!(second.epoch_base, first.epoch_base);

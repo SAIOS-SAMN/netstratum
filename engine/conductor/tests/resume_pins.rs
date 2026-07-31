@@ -5,8 +5,8 @@
 //! board to remember itself.
 
 use conductor::{run_era, Egregore};
-use mirror::registry::Registry;
-use mirror::Mirror;
+use ledger::registry::Registry;
+use ledger::Ledger;
 use std::path::PathBuf;
 
 fn scratch(name: &str) -> PathBuf {
@@ -42,7 +42,7 @@ fn the_board_remembers_across_restarts() {
     // Second boot, same roster: the worlds RESUME — clocks continue,
     // nothing re-founds, no divergent resident rotates to a ruin.
     let registry = Registry::at(root.join("registry"));
-    let mirror = Mirror::at(root.join("worlds"));
+    let mirror = Ledger::at(root.join("worlds"));
     let second: Vec<Egregore> = conductor::founding_egregores()
         .into_iter()
         .map(|spec| Egregore::genesis(spec, &registry, &mirror))

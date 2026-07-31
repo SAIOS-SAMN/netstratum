@@ -14,7 +14,7 @@ use cfe::ratio::{ratio, Ratio};
 use cfe::vrp::Chronicle;
 
 use crate::json::{extract_string, JsonWriter};
-use crate::{ratio_str, sanitize, wrapped_abs, Mirror};
+use crate::{ratio_str, sanitize, wrapped_abs, Ledger};
 
 /// A charted galaxy: a named region of the ONE torus — center S in
 /// exact rationals, reach an L1 radius. Reach is a placeholder
@@ -37,7 +37,7 @@ fn io_error<E: std::fmt::Debug>(e: E) -> std::io::Error {
     std::io::Error::other(format!("{e:?}"))
 }
 
-impl Mirror {
+impl Ledger {
     fn ledger_path(&self) -> PathBuf {
         self.root.join("convergence.tlv")
     }

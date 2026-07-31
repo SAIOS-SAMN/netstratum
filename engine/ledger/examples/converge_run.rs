@@ -1,15 +1,15 @@
 //! Run era convergence against a var root (CONVERGE-1, 07):
-//!   cargo run -p mirror --example converge_run -- <var-root>
+//!   cargo run -p ledger --example converge_run -- <var-root>
 //! Idempotent — a second run adopts nothing.
 
-use mirror::converge::{converge, default_era_roots};
-use mirror::Mirror;
+use ledger::converge::{converge, default_era_roots};
+use ledger::Ledger;
 
 fn main() {
     let var_root = std::env::args()
         .nth(1)
         .expect("usage: converge_run <var-root>");
-    let mirror = Mirror::at(format!("{var_root}/worlds"));
+    let book = Ledger::at(format!("{var_root}/worlds"));
     let eras = default_era_roots(&var_root);
     println!(
         "eras discovered: {}",
@@ -18,7 +18,7 @@ fn main() {
             .collect::<Vec<_>>()
             .join(" → ")
     );
-    let read = converge(&mirror, &eras).expect("convergence");
+    let read = converge(&book, &eras).expect("convergence");
     for (era, world) in &read.adopted {
         println!("annexed {era}/{world}");
     }
@@ -31,6 +31,6 @@ fn main() {
         read.already,
         read.quarantined.len(),
         read.epoch_base,
-        mirror::universal_clock(read.epoch_base),
+        ledger::universal_clock(read.epoch_base),
     );
 }

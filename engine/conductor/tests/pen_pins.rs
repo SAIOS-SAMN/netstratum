@@ -12,8 +12,8 @@ use cfe::thermal::StarClass;
 use cfe::vrp::{hand_of, CONDUCTOR_HAND};
 use cfe::world::World;
 use conductor::{pen_service, Egregore, EgregoreSpec, Policy};
-use mirror::registry::{Civilization, Registry};
-use mirror::Mirror;
+use ledger::registry::{Civilization, Registry};
+use ledger::Ledger;
 use std::path::PathBuf;
 
 fn scratch(name: &str) -> PathBuf {
@@ -53,7 +53,7 @@ fn seat(sigil: &str) -> EgregoreSpec {
 fn the_pen_passes_writes_and_returns() {
     let root = scratch("arc");
     let registry = Registry::at(root.join("registry"));
-    let mirror = Mirror::at(root.join("worlds"));
+    let mirror = Ledger::at(root.join("worlds"));
     let control = root.join("conductor.ctl");
     let mut board = vec![Egregore::genesis(seat("penhold"), &registry, &mirror)];
     for _ in 0..3 {

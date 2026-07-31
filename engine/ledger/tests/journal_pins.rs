@@ -14,8 +14,8 @@ use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
 use cfe::vrp::ChainRead;
 use cfe::world::{replay, World};
-use mirror::journal::{journal, joule_stance, sink_offer, Alert, JouleStance, Voice, YEAR_TICKS};
-use mirror::Mirror;
+use ledger::journal::{journal, joule_stance, sink_offer, Alert, JouleStance, Voice, YEAR_TICKS};
+use ledger::Ledger;
 
 fn scratch(name: &str) -> PathBuf {
     let dir = std::env::temp_dir().join(format!(
@@ -105,25 +105,25 @@ fn furnace_world() -> World {
 #[test]
 fn the_journal_regenerates_byte_identically() {
     let root = scratch("regen");
-    let mirror = Mirror::at(&root);
+    let book = Ledger::at(&root);
     let world = growth_world();
-    let appended = mirror
+    let appended = book
         .record_journal("sol", &world, &voice())
         .expect("records");
     assert_eq!(appended, 2, "two completed years, two entries");
-    let path = mirror.world_dir("sol").join("journal.jsonl");
+    let path = book.world_dir("sol").join("journal.jsonl");
     let first = fs::read(&path).expect("journal exists");
     let wall_first = fs::read(root.join("wall.html")).expect("wall exists");
 
     // Idempotence: a re-record appends NOTHING.
-    let again = mirror.record_journal("sol", &world, &voice()).expect("re-records");
+    let again = book.record_journal("sol", &world, &voice()).expect("re-records");
     assert_eq!(again, 0, "no duplicate year, ever");
     assert_eq!(fs::read(&path).expect("read"), first);
 
     // Regeneration: delete everything, regenerate byte-identically.
     fs::remove_file(&path).expect("deletes journal");
     fs::remove_file(root.join("wall.html")).expect("deletes wall");
-    mirror.record_journal("sol", &world, &voice()).expect("regenerates");
+    book.record_journal("sol", &world, &voice()).expect("regenerates");
     assert_eq!(fs::read(&path).expect("read"), first, "byte-identical journal");
     assert_eq!(
         fs::read(root.join("wall.html")).expect("read"),
@@ -189,7 +189,7 @@ fn growth_math_is_exact() {
     assert_eq!(entries[1].cycle, "00:00:00:00:02:00");
     // No decimal ever enters the feed.
     for entry in &entries {
-        let line = mirror::journal::render_entry(entry);
+        let line = ledger::journal::render_entry(entry);
         assert!(!line.contains("0.5"), "no float rendering: {line}");
     }
 }
@@ -240,11 +240,11 @@ fn surplus_and_deficit_flip_on_the_exact_boundary() {
 #[test]
 fn the_wall_holds_the_entries_with_only_inline_assets() {
     let root = scratch("wall");
-    let mirror = Mirror::at(&root);
-    mirror
+    let book = Ledger::at(&root);
+    book
         .record_journal("sol", &growth_world(), &voice())
         .expect("records");
-    mirror
+    book
         .record_journal("meridian", &famine_world(), &voice())
         .expect("records");
     let wall = fs::read_to_string(root.join("wall.html")).expect("wall exists");
@@ -282,16 +282,16 @@ fn the_wall_holds_the_entries_with_only_inline_assets() {
 #[test]
 fn a_journal_free_replay_is_unaffected() {
     let root = scratch("rendering-only");
-    let mirror = Mirror::at(&root);
+    let book = Ledger::at(&root);
     let world = growth_world();
     let committed = world.committed();
-    mirror.record("sol", "prime", "humans", &world).expect("mirrors");
-    let chronicle_path = mirror.world_dir("sol").join("chronicle.jsonl");
+    book.record("sol", "prime", "humans", &world).expect("mirrors");
+    let chronicle_path = book.world_dir("sol").join("chronicle.jsonl");
     let chronicle_bytes = fs::read(&chronicle_path).expect("chronicle");
     let receipts = world.chronicle().receipts().len();
 
-    mirror.record_journal("sol", &world, &voice()).expect("journals");
-    fs::remove_file(mirror.world_dir("sol").join("journal.jsonl")).expect("deletes");
+    book.record_journal("sol", &world, &voice()).expect("journals");
+    fs::remove_file(book.world_dir("sol").join("journal.jsonl")).expect("deletes");
     fs::remove_file(root.join("wall.html")).expect("deletes");
 
     // Nothing moved: no receipt appeared, the chain verifies, replay
@@ -320,7 +320,7 @@ fn the_terminology_law_holds_in_the_feed() {
         ("emberhold", furnace_world()),
     ] {
         for entry in journal(world_name, &world, &voice(), YEAR_TICKS) {
-            feed.push_str(&mirror::journal::render_entry(&entry));
+            feed.push_str(&ledger::journal::render_entry(&entry));
             feed.push('\n');
         }
     }

@@ -4,7 +4,7 @@
 //! never stored; the card is a rendering, the ledger is the truth.
 
 use cfe::ratio::ratio;
-use mirror::Mirror;
+use ledger::Ledger;
 use std::fs;
 use std::path::PathBuf;
 
@@ -18,7 +18,7 @@ fn scratch(name: &str) -> PathBuf {
 /// the board does not open pre-tiled (13_GALAXY §2).
 #[test]
 fn no_galaxy_before_the_first_observation() {
-    let m = Mirror::at(scratch("lazy"));
+    let m = Ledger::at(scratch("lazy"));
     m.chart_world("first-hearth", (&ratio(1, 1), &ratio(1, 1), &ratio(1, 1)), &ratio(0, 1))
         .expect("charts");
     assert!(m.galaxies().is_empty(), "the count starts at zero cards; one galaxy IMPLICIT");
@@ -30,7 +30,7 @@ fn no_galaxy_before_the_first_observation() {
 /// within the charted sky is not discovery (13_GALAXY §3–§4).
 #[test]
 fn first_deed_charters_the_founding_galaxy_and_inside_reach_creates_nothing() {
-    let m = Mirror::at(scratch("founding"));
+    let m = Ledger::at(scratch("founding"));
     m.chart_world("home", (&ratio(0, 1), &ratio(0, 1), &ratio(0, 1)), &ratio(0, 1))
         .expect("charts");
     // A crossing anchored at (2,-3,1): L1 = 6 < 16 — inside the founding reach.
@@ -46,7 +46,7 @@ fn first_deed_charters_the_founding_galaxy_and_inside_reach_creates_nothing() {
 /// the galaxy it observes — the observation law (13_GALAXY §3).
 #[test]
 fn past_the_frontier_the_observation_creates_the_galaxy() {
-    let m = Mirror::at(scratch("frontier"));
+    let m = Ledger::at(scratch("frontier"));
     // Anchor at (30,0,0): L1 from (0,0,0) = 30 > 16 — past the founding reach.
     let created = m
         .observe_galaxy("slagborn", "tunborn", (&ratio(30, 1), &ratio(0, 1), &ratio(0, 1)), 60)
@@ -68,7 +68,7 @@ fn past_the_frontier_the_observation_creates_the_galaxy() {
 /// no squaring).
 #[test]
 fn the_frontier_reading_wraps_on_the_torus() {
-    let m = Mirror::at(scratch("wrap"));
+    let m = Ledger::at(scratch("wrap"));
     // (63,0,0) on span 64 wraps to L1 = 1 from the founding center.
     let created = m
         .observe_galaxy("slagborn", "tunborn", (&ratio(63, 1), &ratio(0, 1), &ratio(0, 1)), 60)
@@ -82,7 +82,7 @@ fn the_frontier_reading_wraps_on_the_torus() {
 #[test]
 fn the_card_is_a_rendering_the_ledger_is_the_truth() {
     let root = scratch("rendering");
-    let m = Mirror::at(root.clone());
+    let m = Ledger::at(root.clone());
     m.observe_galaxy("slagborn", "tunborn", (&ratio(30, 1), &ratio(0, 1), &ratio(0, 1)), 60)
         .expect("the deed executes");
     let before = m.galaxies();

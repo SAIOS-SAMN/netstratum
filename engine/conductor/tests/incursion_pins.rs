@@ -7,8 +7,8 @@ use cfe::dop::{ClosureEvent, ZoneKind};
 use cfe::persist;
 use cfe::world::World;
 use conductor::{incursion, IncursionRefused};
-use mirror::registry::Registry;
-use mirror::Mirror;
+use ledger::registry::Registry;
+use ledger::Ledger;
 use std::fs;
 use std::path::PathBuf;
 
@@ -61,7 +61,7 @@ fn the_door_wakes_the_derelict_and_only_the_derelict() {
     let root = scratch("door");
     let era = sealed_era(&root);
     let registry = Registry::at(root.join("var/registry"));
-    let mirror = Mirror::at(root.join("var/worlds"));
+    let mirror = Ledger::at(root.join("var/worlds"));
 
     // The living are never raided.
     assert!(matches!(

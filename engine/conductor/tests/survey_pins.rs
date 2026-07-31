@@ -10,8 +10,8 @@ use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::StarClass;
 use cfe::world::{replay, ActionRefused, World};
 use conductor::{Egregore, EgregoreSpec, Policy};
-use mirror::registry::{Civilization, Registry};
-use mirror::Mirror;
+use ledger::registry::{Civilization, Registry};
+use ledger::Ledger;
 use std::fs;
 use std::path::PathBuf;
 
@@ -63,7 +63,7 @@ fn banked(world: &World, resource: Resource) -> Ratio {
 fn the_survey_charters_the_sector_and_the_spent_lens_idles() {
     let root = scratch("arc");
     let registry = Registry::at(root.join("registry"));
-    let mirror = Mirror::at(root.join("worlds"));
+    let mirror = Ledger::at(root.join("worlds"));
     let spec = EgregoreSpec {
         civilization: Civilization {
             name: "Surveyor".into(),

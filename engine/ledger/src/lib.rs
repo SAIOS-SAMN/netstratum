@@ -1,31 +1,37 @@
-//! The world mirror (substrate contract §7–§8).
+//! The pre-chain LEDGER of record and its lens (Charter §11 — the
+//! crate formerly named "mirror"; the name died 2026-07-31 by
+//! operator order, and with it the pretense that this was ever one
+//! thing).
 //!
-//! THE TOPOLOGY: a CIVILIZATION (registry identity, spans worlds)
-//! settles COLONIES on PLANETS inside a WORLD — the world is the
-//! simulation container: one clock, one chronicle, one receipt chain,
-//! one future mesh unit. Layout:
+//! WHAT LIVES HERE, honestly inventoried:
 //!
-//! - `var/registry/<civ>.json` — who exists ([`registry::Registry`])
-//! - `var/worlds/<world>/world.json` — the container's own card
-//! - `var/worlds/<world>/chronicle.jsonl` — ONE receipt stream per
-//!   world, append-only, carrying the digest chain and the normative
-//!   TLV event bytes (hex)
-//! - `var/worlds/<world>/planets/<planet>/state.json` — the colony
-//!   snapshot on that planet (atomic replace per write)
-//! - `var/worlds/<world>/inbox/` — steward directives awaiting the
-//!   game loop; applied or refused ones are archived, never deleted
-//! - `var/worlds/<world>/solves/` — proof-of-solution certificates
+//! **The law (pre-chain interim — every file-borne path a Tier-A
+//! debt, adopted in-chain at ladder #36; no NEW read-back path may
+//! ever be added — the §11 standing test):**
+//! - the steward seam ([`Directive`]/[`PendingDirective`]) — the ONE
+//!   lawful inbound door: outside writers touch only `inbox/`, and a
+//!   request becomes real solely through the game loop as a
+//!   receipted, scope-checked NS-6 action;
+//! - [`converge`] — the fold: era annexation, quarantines;
+//! - [`registry`] — identity: civilizations, stations, sigils;
+//! - [`galaxy`] — the sky: the observation deed, lazy founding.
 //!
-//! Two laws:
+//! **The display (write-only exports, §11 rule 2 — never read back,
+//! deletable at any moment, re-served from the chain at #37):**
+//! - [`Ledger::record`] — the state snapshot + receipt-stream export;
+//! - [`journal`] — the Chronicle Feed renderings.
 //!
-//! - **The mirror is a REFLECTION, never an authority.** The chronicle
-//!   in memory is the world; the mirror re-renders it. Nothing ever
-//!   reads state.json back into a world — replay grounds worlds.
-//! - **Observation and intervention are different verbs.** Outside
-//!   readers (the observer) only read. Outside writers (the steward)
-//!   only write to `inbox/`, and a directive becomes real ONLY by
-//!   passing through the game loop as a receipted, scope-checked
-//!   NS-6 action.
+//! **THE UPLINK LAW (mesh authenticity):** nothing in this crate ever
+//! rides the mesh. Only chain-verified bytes ascend — `chronicle.tlv`
+//! today, spine commitments at #15. Exports are for eyes; ledger
+//! files are debts awaiting adoption; the mesh carries neither.
+//!
+//! Layout under `var/`: `registry/<civ>.json` (identity),
+//! `worlds/<world>/world.json` (the card), `chronicle.jsonl` (display
+//! stream), `planets/<planet>/state.json` + `state.tlv` (snapshots),
+//! `inbox/` (the steward door), `solves/` (proof-of-solution
+//! certificates). The chronicle in memory is the world; nothing ever
+//! reads a snapshot back into a world — replay grounds worlds.
 
 use cfe::ratio::Ratio;
 use cfe::vrp::Receipt;
@@ -67,12 +73,12 @@ pub enum Disposition {
     Refused,
 }
 
-pub struct Mirror {
+pub struct Ledger {
     root: PathBuf,
 }
 
-impl Mirror {
-    /// A mirror rooted at `<root>/` (conventionally `var/worlds`).
+impl Ledger {
+    /// The ledger rooted at `<root>/` (conventionally `var/worlds`).
     pub fn at(root: impl Into<PathBuf>) -> Self {
         Self { root: root.into() }
     }

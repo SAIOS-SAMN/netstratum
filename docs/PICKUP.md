@@ -176,7 +176,18 @@ forever.
   amendments (§11), not day-holds. Next: #36's spine — the
   commitment H(schema ‖ kernel ‖ state_bytes ‖ parent ‖ coordinate),
   the two maps, the four verbs. The nursery declaration stands at
-  NS-5 §7.6.
+  NS-5 §7.6. **THE MIRROR NAME DIED 2026-07-31 (operator order,
+  coder-04):** `engine/mirror` → `engine/ledger`, `Mirror` →
+  `Ledger`, zero references to the old name anywhere in the
+  workspace. The crate's honest inventory rides its header: LAW
+  (steward seam, converge, registry, galaxy — pre-chain Tier-A debts,
+  adopted at #36, no new read-back path ever — the §11 standing
+  test) and DISPLAY (record/journal — write-only exports, deletable,
+  re-served from the chain at #37). THE UPLINK LAW inscribed in the
+  mesh and the ledger both: nothing file-borne rides the mesh — only
+  chain-verified bytes ascend. The physical ledger/lens crate split
+  is #37's opening move, after the law modules shed the path-root
+  coupling.
 - **coder-01**: next = Phase 2 cross-world trade (egregores exchanging
   joules/`S_cool` — needs a cross-world carrier; transfers are intra-world
   today) or TECH-1 (`10_TECH_EMERGENCE.md`, opens SINK-1's deferred

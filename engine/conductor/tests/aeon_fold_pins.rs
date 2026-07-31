@@ -63,13 +63,13 @@ fn the_fold_seals_rotates_and_the_next_aeon_converges_it() {
 
     // The next aeon boots and CONVERGES the sealed era: the archived
     // worlds annex onto the new chart — some things continue.
-    let mirror = mirror::Mirror::at(var.join("worlds"));
-    let eras = mirror::converge::default_era_roots(&var_str);
+    let mirror = ledger::Ledger::at(var.join("worlds"));
+    let eras = ledger::converge::default_era_roots(&var_str);
     assert!(
         eras.iter().any(|(name, _)| name == "var-era1"),
         "the archive sequence sees the folded era"
     );
-    let converged = mirror::converge::converge(&mirror, &eras).expect("convergence");
+    let converged = ledger::converge::converge(&mirror, &eras).expect("convergence");
     assert_eq!(
         converged.adopted.len(),
         count,
@@ -96,9 +96,9 @@ fn the_fold_seals_rotates_and_the_next_aeon_converges_it() {
     // G-heights (era 2 carries the advanced sheet base). Without the
     // seating, every aeon stacks at one height — the recurrence
     // collision 11 §2.0 exists to prevent.
-    let mirror3 = mirror::Mirror::at(var.join("worlds"));
-    let eras3 = mirror::converge::default_era_roots(&var_str);
-    mirror::converge::converge(&mirror3, &eras3).expect("third-aeon convergence");
+    let mirror3 = ledger::Ledger::at(var.join("worlds"));
+    let eras3 = ledger::converge::default_era_roots(&var_str);
+    ledger::converge::converge(&mirror3, &eras3).expect("third-aeon convergence");
     let chart = fs::read_to_string(var.join("worlds/starchart.json")).expect("chart");
     let gauge_of = |world: &str| -> String {
         chart

@@ -7,7 +7,7 @@
 use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
 use cfe::world::{World, FIRST_ORB};
-use mirror::Mirror;
+use ledger::Ledger;
 use std::fs;
 
 #[test]
@@ -24,8 +24,8 @@ fn the_constellation_rides_the_uplink_with_its_bytes_pinned() {
     for _ in 0..70 {
         world.tick();
     }
-    let mirror = Mirror::at(&root);
-    mirror
+    let book = Ledger::at(&root);
+    book
         .record("dimlight-hold", "hearth", "test-line", &world)
         .expect("reflects");
     let state = fs::read_to_string(

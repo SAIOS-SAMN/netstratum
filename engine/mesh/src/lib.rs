@@ -25,6 +25,13 @@
 //! a second claim on one address), and re-convergence has one door:
 //! the kernel judges the merge, or the nursery keeps its toys. We
 //! punish the lie, never the disagreement.
+//!
+//! THE UPLINK LAW (operator order 2026-07-31 — mesh authenticity):
+//! nothing file-borne ever rides the mesh. Only chain-verified bytes
+//! ascend — `chronicle.tlv` through the `receive` door today, spine
+//! commitments at the ladder's #36. Ledger files are pre-chain debts
+//! awaiting adoption; lens exports are for eyes; the mesh carries
+//! neither, and a peer that offers them is offering nothing.
 
 use cfe::dop::ClosureEvent;
 use cfe::tlv;

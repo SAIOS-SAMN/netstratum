@@ -8,8 +8,8 @@ use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::StarClass;
 use cfe::world::{aperture_transfer, FIRST_ORB};
 use conductor::{observe_crossings, Egregore, EgregoreSpec, Policy};
-use mirror::registry::{Civilization, Registry};
-use mirror::Mirror;
+use ledger::registry::{Civilization, Registry};
+use ledger::Ledger;
 use std::fs;
 use std::path::PathBuf;
 
@@ -60,7 +60,7 @@ fn seeded(
 fn the_crossing_observes_and_the_observation_creates() {
     let root = scratch("sweep");
     let registry = Registry::at(root.join("registry"));
-    let mirror = Mirror::at(root.join("worlds"));
+    let mirror = Ledger::at(root.join("worlds"));
 
     // The tardigrade head seated first: the far line's creator
     // resolves through its lineage pointer (12 §5).

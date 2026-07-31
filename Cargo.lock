@@ -72,8 +72,8 @@ name = "conductor"
 version = "0.1.0"
 dependencies = [
  "cfe",
+ "ledger",
  "mesh",
- "mirror",
  "num-bigint",
  "num-traits",
  "physics",
@@ -109,6 +109,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "ledger"
+version = "0.1.0"
+dependencies = [
+ "cfe",
+ "num-bigint",
+ "num-traits",
+ "physics",
+]
+
+[[package]]
 name = "libc"
 version = "0.2.189"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -122,24 +132,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "mirror"
-version = "0.1.0"
-dependencies = [
- "cfe",
- "num-bigint",
- "num-traits",
- "physics",
-]
-
-[[package]]
 name = "netstratum-cli"
 version = "0.1.0"
 dependencies = [
  "blake3",
  "cfe",
  "conductor",
+ "ledger",
  "mesh",
- "mirror",
  "num-bigint",
 ]
 

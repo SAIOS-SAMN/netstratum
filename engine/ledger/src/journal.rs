@@ -37,7 +37,7 @@ use std::fs;
 use std::io::Write as _;
 
 use crate::registry::Civilization;
-use crate::{ratio_str, universal_clock, Mirror};
+use crate::{ratio_str, universal_clock, Ledger};
 
 /// A year = 60 ticks (08 §1.5, placeholder) — one field of the
 /// TUniversal base-60 odometer.
@@ -685,7 +685,7 @@ pub fn render_entry(entry: &JournalEntry) -> String {
     w.finish()
 }
 
-impl Mirror {
+impl Ledger {
     /// Reflect one world's journal (08 §3): append the years the file
     /// does not yet carry to `<world>/journal.jsonl` — idempotent (a
     /// re-record appends NOTHING; a deleted file regenerates

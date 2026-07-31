@@ -883,7 +883,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         );
                         return;
                     }
-                    let registry = mirror::registry::Registry::at("var/registry");
+                    let registry = ledger::registry::Registry::at("var/registry");
                     match registry.seat(&sigil, &station) {
                         Ok(()) => println!(
                             "{} {} ASCENDS — the {} seat is taken; a seat reached, never appointed",
@@ -891,7 +891,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             style.strong(&sigil),
                             style.strong(&station)
                         ),
-                        Err(mirror::registry::RegistryRefused::NoSeatOpen {
+                        Err(ledger::registry::RegistryRefused::NoSeatOpen {
                             station, domain, held, width,
                         }) => println!(
                             "{} the {station} room for the {domain} domain stands FULL ({held}/{width}) — the band grows as the universe does",
@@ -1261,7 +1261,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     // never spammed): the upward flow aggregates into
                     // three ranked buckets — a progenitor reads three
                     // lines, then drills only where the board burns.
-                    let mirror = mirror::Mirror::at("var/worlds");
+                    let mirror = ledger::Ledger::at("var/worlds");
                     let mut critical: Vec<String> = Vec::new();
                     let mut petitions: Vec<String> = Vec::new();
                     if let Ok(entries) = std::fs::read_dir("var/worlds") {
@@ -1348,7 +1348,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         words.by_ref().take(3).filter_map(parse_ratio_arg).collect();
                     match (target, coords.len()) {
                         (Some(name), 3) => {
-                            let mirror = mirror::Mirror::at("var/worlds");
+                            let mirror = ledger::Ledger::at("var/worlds");
                             match mirror.chart_world(
                                 &name,
                                 (&coords[0], &coords[1], &coords[2]),
@@ -1372,7 +1372,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     }
                 }
                 Some("galaxies") => {
-                    let mirror = mirror::Mirror::at("var/worlds");
+                    let mirror = ledger::Ledger::at("var/worlds");
                     let galaxies = mirror.galaxies();
                     if galaxies.is_empty() {
                         println!(
@@ -1494,13 +1494,13 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     (Some("as"), Some(word)) => {
                         let word = word.to_lowercase();
                         if word != "player"
-                            && !mirror::registry::STATIONS.contains(&word.as_str())
+                            && !ledger::registry::STATIONS.contains(&word.as_str())
                         {
                             println!(
                                 "{} unknown station {} — player or {}",
                                 style.bad("✗"),
                                 style.strong(&word),
-                                style.dim(&mirror::registry::STATIONS.join("/"))
+                                style.dim(&ledger::registry::STATIONS.join("/"))
                             );
                             return;
                         }
@@ -1584,7 +1584,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             }
         }
         Some("civ") => {
-            use mirror::registry::{
+            use ledger::registry::{
                 lineage_domain, seat_width, Civilization, Registry, RegistryRefused,
                 DISPOSITIONS, METABOLISMS, PERCEPTIONS, STATIONS,
             };
@@ -1858,7 +1858,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             .filter(|n| !n.is_empty())
                     })
                     .unwrap_or_else(|| "operator".into());
-                let _ = mirror::Mirror::at("var/worlds").record(
+                let _ = ledger::Ledger::at("var/worlds").record(
                     &orb.name,
                     &orb.name,
                     &civ,
@@ -3384,27 +3384,27 @@ fn journal_feed(world: &World, style: &Style) {
         );
         return;
     };
-    let voice = mirror::journal::Voice {
+    let voice = ledger::journal::Voice {
         civilization: orb.name.clone(),
         disposition: "empiricist".into(),
         metabolism: "biotic".into(),
         perception: "planar".into(),
     };
-    let entries = mirror::journal::journal(&orb.name, world, &voice, mirror::journal::YEAR_TICKS);
+    let entries = ledger::journal::journal(&orb.name, world, &voice, ledger::journal::YEAR_TICKS);
     if entries.is_empty() {
         println!(
             "{} no completed year yet — a year is {} ticks; the clock stands at {}",
             style.dim("…"),
-            style.strong(&mirror::journal::YEAR_TICKS.to_string()),
+            style.strong(&ledger::journal::YEAR_TICKS.to_string()),
             style.strong(&world.now().to_string())
         );
         return;
     }
     for entry in entries.iter().rev() {
         let headline = match entry.alert {
-            mirror::journal::Alert::Warning => style.bad(&entry.headline),
-            mirror::journal::Alert::Milestone => style.head(&entry.headline),
-            mirror::journal::Alert::Normal => style.ok(&entry.headline),
+            ledger::journal::Alert::Warning => style.bad(&entry.headline),
+            ledger::journal::Alert::Milestone => style.head(&entry.headline),
+            ledger::journal::Alert::Normal => style.ok(&entry.headline),
         };
         println!(
             "{} {} {}",

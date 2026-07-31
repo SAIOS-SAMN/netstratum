@@ -1,12 +1,12 @@
-//! The mirror pins: the reflection is faithful and incremental, the
+//! The ledger pins: the export is faithful and incremental, the
 //! snapshot is atomic-replace, directives round-trip and archive, the
-//! mirrored chain carries checkable digest linkage, and the registry
+//! exported chain carries checkable digest linkage, and the registry
 //! enforces the closed axis vocabulary.
 
 use cfe::dop::ZoneKind;
 use cfe::world::World;
-use mirror::registry::{Civilization, Registry, RegistryRefused};
-use mirror::{Directive, Disposition, Mirror};
+use ledger::registry::{Civilization, Registry, RegistryRefused};
+use ledger::{Directive, Disposition, Ledger};
 use std::fs;
 use std::path::PathBuf;
 
@@ -53,11 +53,11 @@ fn humans() -> Civilization {
 #[test]
 fn the_reflection_is_faithful_and_incremental() {
     let root = scratch("incremental");
-    let mirror = Mirror::at(&root);
+    let book = Ledger::at(&root);
     let mut world = played_world();
-    mirror.record("sol", "mars", "humans", &world).expect("records");
+    book.record("sol", "mars", "humans", &world).expect("records");
 
-    let dir = mirror.world_dir("sol");
+    let dir = book.world_dir("sol");
     let state = fs::read_to_string(dir.join("planets/mars/state.json")).expect("state exists");
     for key in [
         "\"civilization\":\"humans\"",
@@ -83,11 +83,11 @@ fn the_reflection_is_faithful_and_incremental() {
         "every receipt reflected"
     );
 
-    mirror.record("sol", "mars", "humans", &world).expect("re-records");
+    book.record("sol", "mars", "humans", &world).expect("re-records");
     assert_eq!(lines(&dir), mirrored, "no duplicate reflection");
 
     world.zone(1, ZoneKind::Extractor).expect("zones");
-    mirror.record("sol", "mars", "humans", &world).expect("records the delta");
+    book.record("sol", "mars", "humans", &world).expect("records the delta");
     assert_eq!(lines(&dir), mirrored + 1, "exactly the delta appended");
 }
 
@@ -97,12 +97,12 @@ fn the_reflection_is_faithful_and_incremental() {
 #[test]
 fn the_mirrored_chain_links_at_world_altitude() {
     let root = scratch("chain");
-    let mirror = Mirror::at(&root);
+    let book = Ledger::at(&root);
     let world = played_world();
-    mirror.record("sol", "mars", "humans", &world).expect("records");
+    book.record("sol", "mars", "humans", &world).expect("records");
 
     let text =
-        fs::read_to_string(mirror.world_dir("sol").join("chronicle.jsonl")).expect("read");
+        fs::read_to_string(book.world_dir("sol").join("chronicle.jsonl")).expect("read");
     let field = |line: &str, key: &str| {
         let needle = format!("\"{key}\":\"");
         let start = line.find(&needle).expect("field") + needle.len();
@@ -122,11 +122,11 @@ fn the_mirrored_chain_links_at_world_altitude() {
 #[test]
 fn directives_round_trip_and_archive() {
     let root = scratch("directives");
-    let mirror = Mirror::at(&root);
+    let book = Ledger::at(&root);
     let world = played_world();
-    mirror.record("sol", "mars", "humans", &world).expect("records");
+    book.record("sol", "mars", "humans", &world).expect("records");
 
-    let inbox = mirror.world_dir("sol").join("inbox");
+    let inbox = book.world_dir("sol").join("inbox");
     fs::write(
         inbox.join("000001-zone.json"),
         r#"{"verb":"zone","args":["12","ext"],"as":"steward"}"#,
@@ -138,7 +138,7 @@ fn directives_round_trip_and_archive() {
     )
     .expect("writes");
 
-    let pending = mirror.pending_directives("sol").expect("reads");
+    let pending = book.pending_directives("sol").expect("reads");
     assert_eq!(pending.len(), 2);
     assert_eq!(
         pending[0].directive,
@@ -148,11 +148,11 @@ fn directives_round_trip_and_archive() {
             acting_as: "steward".into(),
         }
     );
-    mirror.archive(&pending[0], Disposition::Applied).expect("archives");
-    mirror.archive(&pending[1], Disposition::Refused).expect("archives");
+    book.archive(&pending[0], Disposition::Applied).expect("archives");
+    book.archive(&pending[1], Disposition::Refused).expect("archives");
     assert!(inbox.join("applied/000001-zone.json").exists());
     assert!(inbox.join("refused/000002-collect.json").exists());
-    assert!(mirror.pending_directives("sol").expect("reads").is_empty());
+    assert!(book.pending_directives("sol").expect("reads").is_empty());
 }
 
 /// The registry: create, list, join; the closed axis vocabulary
@@ -232,7 +232,7 @@ fn the_axes_grow_append_only() {
 #[test]
 fn a_lineage_resolves_to_its_own_head() {
     use cfe::thermal::SubstrateBand as Band;
-    use mirror::registry::lineage_domain;
+    use ledger::registry::lineage_domain;
 
     let root = scratch("registry-lineage");
     let registry = Registry::at(&root);
@@ -291,7 +291,7 @@ fn a_lineage_resolves_to_its_own_head() {
 /// round-trips whole.
 #[test]
 fn the_seats_are_space_not_rank() {
-    use mirror::registry::RegistryRefused;
+    use ledger::registry::RegistryRefused;
     let root = scratch("registry-band");
     let registry = Registry::at(&root);
 
@@ -351,12 +351,12 @@ fn the_seats_are_space_not_rank() {
 fn the_starchart_holds_tuniversal_coordinates() {
     use cfe::ratio::ratio;
     let root = scratch("starchart");
-    let mirror = Mirror::at(&root);
-    mirror
+    let book = Ledger::at(&root);
+    book
         .chart_world("sol", (&ratio(0, 1), &ratio(0, 1), &ratio(0, 1)), &ratio(0, 1))
         .expect("charts");
     // Negative coordinates WRAP onto the torus: −7/2 mod 64 = 121/2.
-    mirror
+    book
         .chart_world(
             "kepler-passage",
             (&ratio(-7, 2), &ratio(9, 1), &ratio(63, 1)),
@@ -364,15 +364,15 @@ fn the_starchart_holds_tuniversal_coordinates() {
         )
         .expect("charts");
     assert_eq!(
-        mirror.charted_position("kepler-passage"),
+        book.charted_position("kepler-passage"),
         Some(((ratio(121, 2), ratio(9, 1), ratio(63, 1)), ratio(1, 4)))
     );
     // L1, the short way around: x-leg min(121/2, 64−121/2) = 7/2,
     // y-leg 9, z-leg min(63, 1) = 1 → total 27/2. No squaring.
-    assert_eq!(mirror.l1_distance("sol", "kepler-passage"), Some(ratio(27, 2)));
+    assert_eq!(book.l1_distance("sol", "kepler-passage"), Some(ratio(27, 2)));
 
     // Re-charting moves the world; the entry count stays one.
-    mirror
+    book
         .chart_world(
             "kepler-passage",
             (&ratio(1, 3), &ratio(9, 1), &ratio(0, 1)),
@@ -385,10 +385,10 @@ fn the_starchart_holds_tuniversal_coordinates() {
     assert!(!text.contains("0.33"), "no float ever enters the universe");
 
     // T: the six-field odometer, base 60, tick-derived only.
-    assert_eq!(mirror::universal_clock(0), "00:00:00:00:00:00");
-    assert_eq!(mirror::universal_clock(61), "00:00:00:00:01:01");
-    assert_eq!(mirror::universal_clock(3600), "00:00:00:01:00:00");
-    mirror.set_universal_clock(61).expect("writes the card");
+    assert_eq!(ledger::universal_clock(0), "00:00:00:00:00:00");
+    assert_eq!(ledger::universal_clock(61), "00:00:00:00:01:01");
+    assert_eq!(ledger::universal_clock(3600), "00:00:00:01:00:00");
+    book.set_universal_clock(61).expect("writes the card");
     let card = fs::read_to_string(root.join("universe.json")).expect("card");
     assert!(card.contains("\"tuniversal\":\"00:00:00:00:01:01\""));
 }
@@ -398,11 +398,11 @@ fn the_starchart_holds_tuniversal_coordinates() {
 #[test]
 fn the_snapshot_is_wellformed_and_exact() {
     let root = scratch("wellformed");
-    let mirror = Mirror::at(&root);
+    let book = Ledger::at(&root);
     let world = played_world();
-    mirror.record("sol", "mars", "humans", &world).expect("records");
+    book.record("sol", "mars", "humans", &world).expect("records");
     let state = fs::read_to_string(
-        mirror.world_dir("sol").join("planets/mars/state.json"),
+        book.world_dir("sol").join("planets/mars/state.json"),
     )
     .expect("read");
     assert_eq!(state.matches('{').count(), state.matches('}').count());

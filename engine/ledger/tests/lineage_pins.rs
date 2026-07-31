@@ -6,7 +6,7 @@
 //! read unchanged. resolve_head walks the PRIMARY chain (first parent
 //! per hop); resolve_heads returns every root, deterministically.
 
-use mirror::registry::{Civilization, Registry};
+use ledger::registry::{Civilization, Registry};
 use std::fs;
 use std::path::PathBuf;
 

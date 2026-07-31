@@ -9,8 +9,8 @@
 //!   python3 tools/observer.py --watch 2
 
 use conductor::{founding_egregores, load_egregores, observe_crossings, write_default_egregores, Egregore};
-use mirror::registry::Registry;
-use mirror::Mirror;
+use ledger::registry::Registry;
+use ledger::Ledger;
 use std::path::PathBuf;
 
 fn main() {
@@ -63,12 +63,12 @@ fn main() {
     let specs = load_egregores(&egregores_path).unwrap_or_else(founding_egregores);
 
     let registry = Registry::at(format!("{var_root}/registry"));
-    let mirror = Mirror::at(format!("{var_root}/worlds"));
+    let mirror = Ledger::at(format!("{var_root}/worlds"));
 
     // CONVERGE-1 (07 §1.6): converge the archived eras BEFORE genesis —
     // boot adopts the past instead of founding blind beside it.
-    let eras = mirror::converge::default_era_roots(&var_root);
-    let converged = mirror::converge::converge(&mirror, &eras).expect("convergence");
+    let eras = ledger::converge::default_era_roots(&var_root);
+    let converged = ledger::converge::converge(&mirror, &eras).expect("convergence");
     println!(
         "conductor: converged {} worlds ({} already annexed, {} quarantined) — epoch base {}",
         converged.adopted.len(),
@@ -188,7 +188,7 @@ fn main() {
         }
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — journals + the Terminal Wall regenerate mirror-side.
-        if beat.is_multiple_of(mirror::journal::YEAR_TICKS) {
+        if beat.is_multiple_of(ledger::journal::YEAR_TICKS) {
             // ROUTE-1: the year voice draws lane maintenance — an
             // unpaid lane lapses by receipt and raw space returns.
             for egregore in worlds.iter_mut().filter(|e| !e.penned) {
@@ -203,12 +203,12 @@ fn main() {
                 let _ = mirror.record_journal(
                     &egregore.spec.world_name,
                     &egregore.world,
-                    &mirror::journal::Voice::of(&egregore.spec.civilization),
+                    &ledger::journal::Voice::of(&egregore.spec.civilization),
                 );
             }
             println!(
                 "beat {beat}: year {} journaled — the wall is fresh (var/worlds/wall.html)",
-                beat / mirror::journal::YEAR_TICKS
+                beat / ledger::journal::YEAR_TICKS
             );
             // GALAXY-1b: the observation sweep rides the year voice.
             for galaxy in observe_crossings(&worlds, &registry, &mirror, epoch_base + beat) {

@@ -22,7 +22,7 @@ use num_traits::Zero;
 use physics::{AxisVector, Triple};
 
 use crate::json::{self, JsonWriter};
-use crate::{sanitize, Mirror};
+use crate::{sanitize, Ledger};
 
 /// One archived receipt, reconstructed from a chronicle.jsonl line —
 /// raw event bytes carried whole so verification never needs to decode
@@ -103,8 +103,8 @@ pub fn default_era_roots(var_root: &str) -> Vec<(String, PathBuf)> {
 /// append `EraAnnexed` to the ledger → chart + fiber cards → persist
 /// the universe card at the final epoch base. Idempotent: worlds
 /// already in the ledger are skipped.
-pub fn converge(mirror: &Mirror, eras: &[(String, PathBuf)]) -> std::io::Result<ConvergeRead> {
-    let ledger_path = mirror.root.join("convergence.tlv");
+pub fn converge(book: &Ledger, eras: &[(String, PathBuf)]) -> std::io::Result<ConvergeRead> {
+    let ledger_path = book.root.join("convergence.tlv");
     let mut ledger = match ledger_path.exists() {
         true => persist::load(&ledger_path).map_err(io_error)?,
         false => cfe::vrp::Chronicle::new(),
@@ -228,8 +228,8 @@ pub fn converge(mirror: &Mirror, eras: &[(String, PathBuf)]) -> std::io::Result<
             // exists to prevent.
             let g = wrap_gauge(g + sheet_base(era));
             let chart_name = format!("{era}--{world}");
-            mirror.chart_world(&chart_name, (&x, &y, &z), &g)?;
-            write_fiber_card(&mirror.root, &chart_name, &residual, derelict)?;
+            book.chart_world(&chart_name, (&x, &y, &z), &g)?;
+            write_fiber_card(&book.root, &chart_name, &residual, derelict)?;
             // TUniversal stamp: the world's terminal T on the one axis.
             ledger.append(
                 ClosureEvent::EraAnnexed {
@@ -249,7 +249,7 @@ pub fn converge(mirror: &Mirror, eras: &[(String, PathBuf)]) -> std::io::Result<
     }
     read.epoch_base = offset;
     persist::sync(&ledger, &ledger_path).map_err(io_error)?;
-    mirror.set_universal_clock(offset)?;
+    book.set_universal_clock(offset)?;
     Ok(read)
 }
 

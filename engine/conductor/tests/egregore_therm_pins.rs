@@ -12,8 +12,8 @@ use conductor::{
     founding_egregores, joule_runway_allows, load_egregores, write_default_egregores, EgregoreSpec,
     Egregore, Policy,
 };
-use mirror::registry::{Civilization, Registry};
-use mirror::Mirror;
+use ledger::registry::{Civilization, Registry};
+use ledger::Ledger;
 use std::fs;
 use std::path::PathBuf;
 
@@ -48,7 +48,7 @@ fn thermal_genesis_is_deterministic() {
         Egregore::genesis(
             spec,
             &Registry::at(root.join("registry")),
-            &Mirror::at(root.join("worlds")),
+            &Ledger::at(root.join("worlds")),
         )
     };
     let derived = founding_egregores()
@@ -93,7 +93,7 @@ fn thermal_genesis_is_deterministic() {
 fn the_joule_runway_defers_the_frost() {
     let root = scratch("runway");
     let registry = Registry::at(root.join("registry"));
-    let mirror = Mirror::at(root.join("worlds"));
+    let mirror = Ledger::at(root.join("worlds"));
     let seat = |sigil: &str, star: StarClass| EgregoreSpec {
         civilization: Civilization {
             name: sigil.to_string(),
@@ -201,7 +201,7 @@ fn old_bots_files_still_load_and_derive() {
     let egregore = Egregore::genesis(
         specs[0].clone(),
         &Registry::at(root.join("registry")),
-        &Mirror::at(root.join("worlds")),
+        &Ledger::at(root.join("worlds")),
     );
     assert!(egregore.world.star().is_some(), "the derived sun is commissioned");
     assert!(

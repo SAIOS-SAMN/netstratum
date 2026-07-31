@@ -46,9 +46,9 @@ use cfe::ipsal::Scope;
 use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::StarClass;
 use cfe::world::World;
-use mirror::galaxy::Galaxy;
-use mirror::registry::{lineage_domain, Civilization, Registry, DISPOSITIONS, METABOLISMS, PERCEPTIONS};
-use mirror::{Directive, Disposition, Mirror};
+use ledger::galaxy::Galaxy;
+use ledger::registry::{lineage_domain, Civilization, Registry, DISPOSITIONS, METABOLISMS, PERCEPTIONS};
+use ledger::{Directive, Disposition, Ledger};
 use physics::Beacon;
 use solver::{forge_task, solve, Difficulty, SolveRead};
 use std::path::Path;
@@ -512,7 +512,7 @@ impl Egregore {
     /// Found the era: registry entry (join if present), the colony,
     /// the contained egregore actor, the steward entity, and the world's
     /// place on the star-chart.
-    pub fn genesis(spec: EgregoreSpec, registry: &Registry, mirror: &Mirror) -> Egregore {
+    pub fn genesis(spec: EgregoreSpec, registry: &Registry, mirror: &Ledger) -> Egregore {
         let _ = registry.create(&spec.civilization);
         // BLOCKER A1 (the G0 persistence seam, CLOSED 2026-07-30):
         // the boot RESUMES before it founds. A verifying resume
@@ -901,7 +901,7 @@ impl Egregore {
     /// Drain the operator's inbox: each directive applies as the
     /// steward entity (scope-checked in-engine) or refuses; archived
     /// either way, never deleted.
-    fn drain_inbox(&mut self, mirror: &Mirror) {
+    fn drain_inbox(&mut self, mirror: &Ledger) {
         let Ok(pending) = mirror.pending_directives(&self.spec.world_name) else {
             return;
         };
@@ -965,7 +965,7 @@ impl Egregore {
     /// stacked grids, stack operators — while planar and harmonic
     /// civilizations work the planar forge (the harmonic carrier is a
     /// named gap; it lands with its own vocabulary, not as a skin).
-    fn research_step(&mut self, mirror: &Mirror) {
+    fn research_step(&mut self, mirror: &Ledger) {
         let Some(receipt) = self.world.chronicle().receipts().last() else {
             return;
         };
@@ -1153,7 +1153,7 @@ impl Egregore {
 
     /// One full heartbeat. A speciation returns the newborn's spec —
     /// the era loop gives it a world of its own.
-    pub fn cycle(&mut self, mirror: &Mirror, registry: &Registry) -> Option<EgregoreSpec> {
+    pub fn cycle(&mut self, mirror: &Ledger, registry: &Registry) -> Option<EgregoreSpec> {
         self.drain_inbox(mirror);
         self.build_step();
         self.survey_step();
@@ -1210,7 +1210,7 @@ pub fn spatial_l1(a: &(Ratio, Ratio, Ratio), b: &(Ratio, Ratio, Ratio)) -> Ratio
 pub fn pen_service(
     worlds: &mut [Egregore],
     registry: &Registry,
-    mirror: &Mirror,
+    mirror: &Ledger,
     control_path: &Path,
     stamp: u64,
 ) -> Vec<String> {
@@ -1319,7 +1319,7 @@ pub fn incursion(
     era_root: &std::path::Path,
     world_name: &str,
     registry: &Registry,
-    mirror: &Mirror,
+    mirror: &Ledger,
     stamp: u64,
 ) -> Result<Egregore, IncursionRefused> {
     let sealed = era_root
@@ -1348,7 +1348,7 @@ pub fn incursion(
         .unwrap_or([0u8; 32]);
     let beacon = Beacon::from_digest(terminal);
     let name = format!("{world_name} Returned");
-    let sigil = mirror::registry::sigil_of(&name);
+    let sigil = ledger::registry::sigil_of(&name);
     let civilization = Civilization {
         name,
         sigil: sigil.clone(),
@@ -1435,7 +1435,7 @@ pub fn incursion(
 pub fn observe_crossings(
     worlds: &[Egregore],
     registry: &Registry,
-    mirror: &Mirror,
+    mirror: &Ledger,
     stamp: u64,
 ) -> Vec<Galaxy> {
     let mut created = Vec::new();
@@ -1484,9 +1484,9 @@ fn galaxy_creator(registry: &Registry, civilization: &Civilization) -> String {
 /// beat. Returns the live worlds.
 pub fn run_era(var_root: &str, cycles: u32) -> Vec<Egregore> {
     let registry = Registry::at(format!("{var_root}/registry"));
-    let mirror = Mirror::at(format!("{var_root}/worlds"));
-    let eras = mirror::converge::default_era_roots(var_root);
-    let epoch_base = mirror::converge::converge(&mirror, &eras)
+    let mirror = Ledger::at(format!("{var_root}/worlds"));
+    let eras = ledger::converge::default_era_roots(var_root);
+    let epoch_base = ledger::converge::converge(&mirror, &eras)
         .map(|read| read.epoch_base)
         .unwrap_or(0);
     // 11 §5.2: the live aeon's G-sheet (see main.rs — same law).
@@ -1514,12 +1514,12 @@ pub fn run_era(var_root: &str, cycles: u32) -> Vec<Egregore> {
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — the mirror renders journals + wall, a REFLECTION
         // of the chronicle, never a state change.
-        if (u64::from(beat) + 1).is_multiple_of(mirror::journal::YEAR_TICKS) {
+        if (u64::from(beat) + 1).is_multiple_of(ledger::journal::YEAR_TICKS) {
             for egregore in &worlds {
                 let _ = mirror.record_journal(
                     &egregore.spec.world_name,
                     &egregore.world,
-                    &mirror::journal::Voice::of(&egregore.spec.civilization),
+                    &ledger::journal::Voice::of(&egregore.spec.civilization),
                 );
             }
             // GALAXY-1b: the observation sweep rides the year voice

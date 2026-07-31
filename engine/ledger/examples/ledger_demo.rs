@@ -1,17 +1,17 @@
-//! Register two civilizations and mirror two settled worlds — the
+//! Register two civilizations and export two settled worlds — the
 //! observer/steward smoke fixture at the full topology.
-//! Usage: cargo run -p mirror --example mirror_demo -- <var-root>
+//! Usage: cargo run -p ledger --example ledger_demo -- <var-root>
 //! (writes <var-root>/registry and <var-root>/worlds)
 
 use cfe::dop::ZoneKind;
 use cfe::world::World;
-use mirror::registry::{Civilization, Registry};
-use mirror::Mirror;
+use ledger::registry::{Civilization, Registry};
+use ledger::Ledger;
 
 fn main() {
-    let var = std::env::args().nth(1).expect("usage: mirror_demo <var-root>");
+    let var = std::env::args().nth(1).expect("usage: ledger_demo <var-root>");
     let registry = Registry::at(format!("{var}/registry"));
-    let mirror = Mirror::at(format!("{var}/worlds"));
+    let book = Ledger::at(format!("{var}/worlds"));
 
     let _ = registry.create(&Civilization {
         name: "Humans".into(),
@@ -50,8 +50,8 @@ fn main() {
         mars.tick();
     }
     mars.collect().unwrap();
-    mirror.record("sol", "mars", "humans", &mars).unwrap();
-    mirror
+    book.record("sol", "mars", "humans", &mars).unwrap();
+    book
         .record_solve("sol", "arc_6150a2bd", "rotate180", "deadbeef", 1)
         .unwrap();
 
@@ -67,7 +67,7 @@ fn main() {
         tidefall.tick();
     }
     tidefall.collect_as(rover, cfe::world::FIRST_ORB).unwrap();
-    mirror
+    book
         .record("kepler-passage", "tidefall", "deep-chorus", &tidefall)
         .unwrap();
 

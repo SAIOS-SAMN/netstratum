@@ -4,8 +4,8 @@
 //! speciates — chronicle-chosen, lineage-recorded.
 
 use conductor::{founding_egregores, load_egregores, run_era, write_default_egregores, Egregore};
-use mirror::registry::Registry;
-use mirror::Mirror;
+use ledger::registry::Registry;
+use ledger::Ledger;
 use std::fs;
 use std::path::PathBuf;
 
@@ -169,7 +169,7 @@ fn a_thriving_line_diverges() {
     // THE STAR-CHART: the daughter settled ADJACENT to its parent —
     // charted, exact, displaced but within the half-unit-step reach
     // (dist² ≤ 8, ≠ 0).
-    let mirror = Mirror::at(root.join("worlds"));
+    let mirror = Ledger::at(root.join("worlds"));
     let parent_world = &worlds
         .iter()
         .find(|b| {
@@ -212,7 +212,7 @@ fn a_steward_directive_lands_through_the_leash() {
     let root = scratch("steward");
     let var = root.to_string_lossy().into_owned();
     let registry = Registry::at(format!("{var}/registry"));
-    let mirror = Mirror::at(format!("{var}/worlds"));
+    let mirror = Ledger::at(format!("{var}/worlds"));
 
     let mut worlds: Vec<Egregore> = founding_egregores()
         .into_iter()
