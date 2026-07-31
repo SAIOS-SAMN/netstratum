@@ -348,6 +348,49 @@ participates, and it is a real economics ruling (Ruling Box 1 territory,
 what work earns) that the kernel does not make: the kernel only requires
 that whatever the work is, `verify_certificate` checks it by replay.
 
+## 5d. The Syntropic Sink (SSA) — scoping and corrections
+
+The SSA is proposed as an equilibrium GOVERNOR balancing physical entropy
+`H` (aggregate hash) against useful compute `U`, producing a stabilized
+gradient. Conceptually STRONG and apt-named: it is the syntropy/entropy
+dissipative-structure thesis (§ the value law) applied to network
+difficulty — absorb entropy into finality, not into a difficulty cliff;
+zero-float, deterministic. But it reads AGGREGATE H and U across nodes, so
+its PLACEMENT is the mesh, not the per-step kernel (network-blind). Its
+definition seals into the math core (§0b, version-pinned); the mesh invokes
+it, alongside `Σ_mesh`. It does NOT enter the six invariants. It reaches
+the kernel at ONE existing seam: a ZK proof is a form of work certificate,
+so it enters I4's mint-bound via `verify_certificate` (§5a) — nowhere else.
+
+Three corrections it needs before it is built:
+
+1. **The boundedness is in the NORMALIZATION, not the ratio.** With
+   `S = U/(H+U)`, the stabilized delta `Δg = H(1−S) + U·S = (H²+U²)/(H+U)`.
+   As `H → ∞` this tends to `H` — UNBOUNDED. Only `S ∈ [0,1]` is bounded.
+   So `Δg` is bounded ONLY if `H,U` are pre-normalized to `[0,1]` (the mass-
+   normalization step), which then gives `Δg ∈ [0,1]`. The normalization is
+   load-bearing; the syntropic ratio alone does not prevent runaway. An
+   unbounded `Δg` driving difficulty IS the runaway it claims to stop —
+   state this or the guarantee is false. (Use `S` as the difficulty signal,
+   or normalize first, or bound `Δg` explicitly.)
+
+2. **Arbitrary-precision, never `Rational64`.** The `H²`/`U²` terms are a
+   magnitude explosion — squaring accumulated values overflows fixed-width
+   (`i64`) fast, and overflow in consensus math is a chain split (the 2^1100
+   lesson, sharpened by the squaring). SSA must use `cfe::ratio`
+   (`BigRational`). §5c guardrail 2.
+
+3. **Call the sealed rational, never a `pow_kernel/rational.rs`.** SSA in a
+   crate that reimplements the rational primitive violates §0b by
+   construction. Call `cfe::ratio`. §5c guardrail 3.
+
+ZK note: a ZK proof is a work certificate (asymmetric — expensive to make,
+trivial to verify), so it plugs into `verify_certificate` at I4's seam.
+STARK-family proofs are hash-based (they fit the SHA-256-ASIC work-shape
+above); but the VERIFIER must be exact/deterministic (integer-field or
+hash-based) — a float or non-deterministic pairing verifier splits the
+chain. Verification stays replay/exact; the proof is the scarce resource.
+
 ## 6. Algorithms (the shapes to witness, red-first)
 
     lawful(prior, next, step):
