@@ -15,3 +15,4 @@ mesh = { path = "../../engine/mesh" }
 conductor = { path = "../../engine/conductor" }
 num-bigint.workspace = true
 blake3.workspace = true
+scribe = { path = "../../engine/scribe" }

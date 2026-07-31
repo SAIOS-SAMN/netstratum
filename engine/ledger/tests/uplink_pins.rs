@@ -25,8 +25,7 @@ fn the_constellation_rides_the_uplink_with_its_bytes_pinned() {
         world.tick();
     }
     let book = Ledger::at(&root);
-    book
-        .record("dimlight-hold", "hearth", "test-line", &world)
+    scribe::record(&book, "dimlight-hold", "hearth", "test-line", &world)
         .expect("reflects");
     let state = fs::read_to_string(
         root.join("dimlight-hold/planets/hearth/state.json"),

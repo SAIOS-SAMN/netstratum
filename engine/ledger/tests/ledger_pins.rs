@@ -55,7 +55,7 @@ fn the_reflection_is_faithful_and_incremental() {
     let root = scratch("incremental");
     let book = Ledger::at(&root);
     let mut world = played_world();
-    book.record("sol", "mars", "humans", &world).expect("records");
+    scribe::record(&book, "sol", "mars", "humans", &world).expect("records");
 
     let dir = book.world_dir("sol");
     let state = fs::read_to_string(dir.join("planets/mars/state.json")).expect("state exists");
@@ -83,11 +83,11 @@ fn the_reflection_is_faithful_and_incremental() {
         "every receipt reflected"
     );
 
-    book.record("sol", "mars", "humans", &world).expect("re-records");
+    scribe::record(&book, "sol", "mars", "humans", &world).expect("re-records");
     assert_eq!(lines(&dir), exported, "no duplicate reflection");
 
     world.zone(1, ZoneKind::Extractor).expect("zones");
-    book.record("sol", "mars", "humans", &world).expect("records the delta");
+    scribe::record(&book, "sol", "mars", "humans", &world).expect("records the delta");
     assert_eq!(lines(&dir), exported + 1, "exactly the delta appended");
 }
 
@@ -99,7 +99,7 @@ fn the_exported_chain_links_at_world_altitude() {
     let root = scratch("chain");
     let book = Ledger::at(&root);
     let world = played_world();
-    book.record("sol", "mars", "humans", &world).expect("records");
+    scribe::record(&book, "sol", "mars", "humans", &world).expect("records");
 
     let text =
         fs::read_to_string(book.world_dir("sol").join("chronicle.jsonl")).expect("read");
@@ -124,7 +124,7 @@ fn directives_round_trip_and_archive() {
     let root = scratch("directives");
     let book = Ledger::at(&root);
     let world = played_world();
-    book.record("sol", "mars", "humans", &world).expect("records");
+    scribe::record(&book, "sol", "mars", "humans", &world).expect("records");
 
     let inbox = book.world_dir("sol").join("inbox");
     fs::write(
@@ -400,7 +400,7 @@ fn the_snapshot_is_wellformed_and_exact() {
     let root = scratch("wellformed");
     let book = Ledger::at(&root);
     let world = played_world();
-    book.record("sol", "mars", "humans", &world).expect("records");
+    scribe::record(&book, "sol", "mars", "humans", &world).expect("records");
     let state = fs::read_to_string(
         book.world_dir("sol").join("planets/mars/state.json"),
     )

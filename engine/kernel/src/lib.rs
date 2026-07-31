@@ -186,6 +186,14 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::GenesisSealed { .. } | E::ProspectStruck { .. } | E::LineSucceeded { .. }
         | E::TechLicensed { .. } | E::InstrumentForged { .. } | E::RouteChartered { .. }
         | E::OfferPosted { .. } | E::BondSealed { .. }
+        // THE MISSED SIXTH (arch-02's coverage audit): the enum holds
+        // 64 deeds, not the documented 63 — GaugeShiftedAt (tag 60,
+        // the graded key shift, LIVE at world.rs's shift_gauge_at) was
+        // never counted. Banked-neutral (replay resizes the gauge key,
+        // no bank), Build-scoped beside its covered sibling
+        // GaugeShifted. Without it the Phase 3 flip could never
+        // complete: a live deed refusing Unjudged forever.
+        | E::GaugeShiftedAt { .. }
         // W-C / W-D slice — the BANKED-NEUTRAL world-driven and mesh
         // deeds. Their `world.rs::replay` arms set a flag, a list, or
         // are no-ops (no bank); `scope_of` is None (a tick's own

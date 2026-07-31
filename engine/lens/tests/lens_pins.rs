@@ -35,7 +35,7 @@ fn the_display_re_serves_from_the_chain_byte_for_byte() {
 
     // The display half writes its export (state.tlv beside state.json).
     let book = Ledger::at(root.join("worlds"));
-    book.record("meridian", "meridian-prime", "test-sigil", &world)
+    scribe::record(&book, "meridian", "meridian-prime", "test-sigil", &world)
         .expect("the display records");
     let display = fs::read(
         book.world_dir("meridian")
@@ -78,7 +78,7 @@ fn the_rich_rendering_re_serves_from_the_chronicle() {
     let world = played_world();
 
     let book = Ledger::at(root.join("worlds"));
-    book.record("meridian", "meridian-prime", "test-sigil", &world)
+    scribe::record(&book, "meridian", "meridian-prime", "test-sigil", &world)
         .expect("the display records");
     let display = fs::read_to_string(
         book.world_dir("meridian")

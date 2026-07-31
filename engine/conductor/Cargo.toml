@@ -12,6 +12,7 @@ codec = { path = "../codec" }
 ledger = { path = "../ledger" }
 mesh = { path = "../mesh" }
 physics = { path = "../physics" }
+scribe = { path = "../scribe" }
 solver = { path = "../solver" }
 num-bigint.workspace = true
 num-traits.workspace = true

@@ -1860,7 +1860,8 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             .filter(|n| !n.is_empty())
                     })
                     .unwrap_or_else(|| "operator".into());
-                let _ = ledger::Ledger::at("var/worlds").record(
+                let _ = scribe::record(
+                    &ledger::Ledger::at("var/worlds"),
                     &orb.name,
                     &orb.name,
                     &civ,
@@ -3393,27 +3394,27 @@ fn journal_feed(world: &World, style: &Style) {
         );
         return;
     };
-    let voice = ledger::journal::Voice {
+    let voice = scribe::journal::Voice {
         civilization: orb.name.clone(),
         disposition: "empiricist".into(),
         metabolism: "biotic".into(),
         perception: "planar".into(),
     };
-    let entries = ledger::journal::journal(&orb.name, world, &voice, ledger::journal::YEAR_TICKS);
+    let entries = scribe::journal::journal(&orb.name, world, &voice, scribe::journal::YEAR_TICKS);
     if entries.is_empty() {
         println!(
             "{} no completed year yet — a year is {} ticks; the clock stands at {}",
             style.dim("…"),
-            style.strong(&ledger::journal::YEAR_TICKS.to_string()),
+            style.strong(&scribe::journal::YEAR_TICKS.to_string()),
             style.strong(&world.now().to_string())
         );
         return;
     }
     for entry in entries.iter().rev() {
         let headline = match entry.alert {
-            ledger::journal::Alert::Warning => style.bad(&entry.headline),
-            ledger::journal::Alert::Milestone => style.head(&entry.headline),
-            ledger::journal::Alert::Normal => style.ok(&entry.headline),
+            scribe::journal::Alert::Warning => style.bad(&entry.headline),
+            scribe::journal::Alert::Milestone => style.head(&entry.headline),
+            scribe::journal::Alert::Normal => style.ok(&entry.headline),
         };
         println!(
             "{} {} {}",

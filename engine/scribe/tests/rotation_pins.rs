@@ -1,4 +1,4 @@
-//! The one-chronicle-per-world-per-era law (Ledger::record): a
+//! The one-chronicle-per-world-per-era law (scribe::record): a
 //! divergent resident chronicle is a PRIOR era's world — rotated to a
 //! closed sibling, never clobbered, never appended onto.
 
@@ -28,7 +28,7 @@ fn a_recurring_world_name_rotates_the_prior_era_aside() {
     era_one.zone(0, ZoneKind::Extractor).expect("zones");
     era_one.tick();
     era_one.collect().expect("collects");
-    book.record("amber-veil", "prime", "pin-civ", &era_one).expect("records");
+    scribe::record(&book, "amber-veil", "prime", "pin-civ", &era_one).expect("records");
     let lines_one = fs::read_to_string(base.join("worlds/amber-veil/chronicle.jsonl"))
         .expect("era one chronicle")
         .lines()
@@ -40,7 +40,7 @@ fn a_recurring_world_name_rotates_the_prior_era_aside() {
     era_two.zone(8, ZoneKind::Habitat).expect("zones");
     era_two.tick();
     era_two.collect().expect("collects");
-    book.record("amber-veil", "prime", "pin-civ", &era_two).expect("records");
+    scribe::record(&book, "amber-veil", "prime", "pin-civ", &era_two).expect("records");
 
     // The fresh file carries ONLY era two, byte-consistent.
     let fresh = fs::read_to_string(base.join("worlds/amber-veil/chronicle.jsonl"))
@@ -67,7 +67,7 @@ fn a_recurring_world_name_rotates_the_prior_era_aside() {
     // Same-era re-record still appends incrementally (no rotation).
     era_two.tick();
     era_two.collect().expect("collects again");
-    book.record("amber-veil", "prime", "pin-civ", &era_two).expect("records");
+    scribe::record(&book, "amber-veil", "prime", "pin-civ", &era_two).expect("records");
     let appended = fs::read_to_string(base.join("worlds/amber-veil/chronicle.jsonl"))
         .expect("appended chronicle");
     assert_eq!(appended.lines().count(), era_two.chronicle().receipts().len());

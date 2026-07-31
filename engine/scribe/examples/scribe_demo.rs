@@ -1,6 +1,6 @@
 //! Register two civilizations and export two settled worlds — the
 //! observer/steward smoke fixture at the full topology.
-//! Usage: cargo run -p ledger --example ledger_demo -- <var-root>
+//! Usage: cargo run -p scribe --example scribe_demo -- <var-root>
 //! (writes <var-root>/registry and <var-root>/worlds)
 
 use cfe::dop::ZoneKind;
@@ -50,10 +50,8 @@ fn main() {
         mars.tick();
     }
     mars.collect().unwrap();
-    book.record("sol", "mars", "humans", &mars).unwrap();
-    book
-        .record_solve("sol", "arc_6150a2bd", "rotate180", "deadbeef", 1)
-        .unwrap();
+    scribe::record(&book, "sol", "mars", "humans", &mars).unwrap();
+    scribe::record_solve(&book, "sol", "arc_6150a2bd", "rotate180", "deadbeef", 1).unwrap();
 
     // Deep Chorus settles tidefall, in the kepler-passage world:
     // safe and slow, an agent on a leash.
@@ -67,9 +65,7 @@ fn main() {
         tidefall.tick();
     }
     tidefall.collect_as(rover, cfe::world::FIRST_ORB).unwrap();
-    book
-        .record("kepler-passage", "tidefall", "deep-chorus", &tidefall)
-        .unwrap();
+    scribe::record(&book, "kepler-passage", "tidefall", "deep-chorus", &tidefall).unwrap();
 
     println!("registered 2 civilizations, exported 2 worlds under {var}");
 }

@@ -1059,7 +1059,8 @@ impl Egregore {
         };
         match solved {
             Some((name, word, cert_hex)) => {
-                let _ = book.record_solve(
+                let _ = scribe::record_solve(
+                    book,
                     &self.spec.world_name,
                     &name,
                     &word,
@@ -1245,7 +1246,8 @@ impl Egregore {
         // sibling writes at this observed phase: a refused chain
         // leaves the spine short, a visible stall, never a crash.
         let _ = self.chain_beat(book);
-        let _ = book.record(
+        let _ = scribe::record(
+            book,
             &self.spec.world_name,
             &self.spec.planet,
             &self.spec.civilization.sigil,
@@ -1492,7 +1494,8 @@ pub fn pen_service(
                                 egregore.world.chronicle(),
                                 &book.world_dir(world_name).join("chronicle.tlv"),
                             );
-                            let _ = book.record(
+                            let _ = scribe::record(
+                                book,
                                 &egregore.spec.world_name,
                                 &egregore.spec.planet,
                                 &egregore.spec.civilization.sigil,
@@ -1762,12 +1765,13 @@ pub fn run_era(var_root: &str, cycles: u32) -> Vec<Egregore> {
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — the lens renders journals + wall, write-only display
         // of the chronicle, never a state change.
-        if (u64::from(beat) + 1).is_multiple_of(ledger::journal::YEAR_TICKS) {
+        if (u64::from(beat) + 1).is_multiple_of(scribe::journal::YEAR_TICKS) {
             for egregore in &worlds {
-                let _ = book.record_journal(
+                let _ = scribe::record_journal(
+                    &book,
                     &egregore.spec.world_name,
                     &egregore.world,
-                    &ledger::journal::Voice::of(&egregore.spec.civilization),
+                    &scribe::journal::Voice::of(&egregore.spec.civilization),
                 );
             }
             // GALAXY-1b: the observation sweep rides the year voice
