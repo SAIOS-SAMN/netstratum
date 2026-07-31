@@ -33,6 +33,7 @@
 //! awaiting adoption; lens exports are for eyes; the mesh carries
 //! neither, and a peer that offers them is offering nothing.
 
+pub mod agree;
 pub mod spine;
 
 use cfe::dop::ClosureEvent;
