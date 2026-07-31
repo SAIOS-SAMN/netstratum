@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["engine/cfe", "engine/kernel", "engine/codec", "engine/rfa-core", "engine/physics", "engine/solver", "engine/ledger", "engine/conductor", "engine/mesh", "clients/cli"]
+members = ["engine/cfe", "engine/kernel", "engine/codec", "engine/rfa-core", "engine/physics", "engine/solver", "engine/solver-verify", "engine/ledger", "engine/conductor", "engine/mesh", "clients/cli"]
 
 [workspace.dependencies]
 blake3 = "1.5"

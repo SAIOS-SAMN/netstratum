@@ -4,9 +4,9 @@
 //! maps EVERY training pair exactly. The honest withhold outranks a
 //! fabricated render — `Unsolved` is a lawful reading, a guess is not.
 
-use crate::certificate::SolveCertificate;
-use crate::grid::{run, Grid, Op, Program};
-use crate::loader::Task;
+use solver_verify::certificate::SolveCertificate;
+use solver_verify::grid::{run, Grid, Op, Program};
+use solver_verify::loader::Task;
 
 /// The typed solve reading.
 #[derive(Debug, Clone)]
@@ -88,8 +88,8 @@ fn derived_tiles(task: &Task) -> Vec<Op> {
         return Vec::new();
     }
     let mut ops = Vec::new();
-    for odd_row in crate::grid::TileMirror::ALL {
-        for odd_col in crate::grid::TileMirror::ALL {
+    for odd_row in solver_verify::grid::TileMirror::ALL {
+        for odd_col in solver_verify::grid::TileMirror::ALL {
             ops.push(Op::Tile {
                 down,
                 across,
@@ -130,7 +130,7 @@ pub fn solve(task: &Task, max_depth: usize) -> SolveRead {
         Op::FlipV,
         Op::Transpose,
     ];
-    vocabulary.extend(crate::objects::OBJ_OPS.iter().cloned().map(Op::Object));
+    vocabulary.extend(solver_verify::objects::OBJ_OPS.iter().cloned().map(Op::Object));
     vocabulary.extend(derived_recolors(task));
     vocabulary.extend(derived_tiles(task));
 

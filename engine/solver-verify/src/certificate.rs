@@ -14,8 +14,9 @@ fn hash_grid(hasher: &mut blake3::Hasher, g: &Grid) {
     hasher.update(&g.cells);
 }
 
-/// The one grid-hashing law, shared with the volumetric sealer.
-pub(crate) fn hash_grid_into(hasher: &mut blake3::Hasher, g: &Grid) {
+/// The one grid-hashing law, shared with the volumetric sealer (which
+/// lives prover-side in `solver` — hence pub across the split).
+pub fn hash_grid_into(hasher: &mut blake3::Hasher, g: &Grid) {
     hash_grid(hasher, g);
 }
 

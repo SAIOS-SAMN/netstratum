@@ -220,4 +220,13 @@ version = "0.1.0"
 dependencies = [
  "blake3",
  "physics",
+ "solver-verify",
+]
+
+[[package]]
+name = "solver-verify"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "physics",
 ]

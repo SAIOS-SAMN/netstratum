@@ -45,16 +45,29 @@ conservation delta + red-first witness against `world.rs`.
 
 ## §2 U1 — KERNEL-VERIFY (the PoUW anchor; I4 completes)
 
-**The split (prover free, verifier sealed).** New crate
-`engine/solver-verify` holding exactly what a REPLAY needs and nothing
-a SEARCH needs, moved from `engine/solver`: `grid` (Grid, Op, Program
-and the apply path), `loader` (Task), `forge` (`forge_task`,
-`Difficulty` — deterministic re-derivation from a digest), and
+**The split (prover free, verifier sealed) — LANDED (U1a).** New
+crate `engine/solver-verify` holding exactly what a REPLAY needs and
+nothing a SEARCH needs, moved from `engine/solver`: `grid` (Grid, Op,
+Program and the apply path), `loader` (Task), `forge` (`forge_task`,
+`Difficulty` — deterministic re-derivation from a digest),
 `certificate` (`SolveCertificate`, `seal`, `verify_certificate`,
-`CertificateRead`). `solver` keeps `search`, `objects`, `volume`
-enumeration, depends on `solver-verify`, and re-exports so no caller
-breaks. The kernel imports `cfe` + `solver-verify` ONLY (the one-way
-arrow holds; the kernel stays pure, total, no-I/O).
+`CertificateRead`), AND `objects` — discovered at the split: the `Op`
+vocabulary carries `Op::Object(ObjOp)`, so the object ops are APPLY
+vocabulary, verifier-side; only the SEARCH is prover-side. `solver`
+keeps `search` + `volume`, depends on `solver-verify`, re-exports
+whole so no caller breaks. The kernel imports `cfe` + `solver-verify`
+ONLY (one-way; pure, total, no-I/O).
+
+**THE OPAQUE-PAYLOAD LAW (derived at the split — the arrow forced
+it).** `forge` needs `physics::Beacon` and `physics` imports `cfe`,
+so `cfe` can NEVER import `solver-verify` (a cycle). The deed
+therefore carries the proof as an OPAQUE byte payload at the cfe
+layer, and the work-proof encoding is `solver-verify`'s MONOPOLY —
+the codec-seam pattern restated: one component owns the form, the
+kernel calls `verify_work(&bytes)` and never parses (it stays
+encoding-blind; the sealed math owns both form and meaning of work
+proofs). Refuse never guess: truncation, trailing bytes, unknown
+codes all refuse typed.
 
 **THE REPLAY-COMPLETE LAW (derived this session — do not weaken).**
 `verify_certificate` alone re-derives the HASH CHAIN; it does NOT
@@ -75,11 +88,12 @@ full replay, all three or refuse:
 FIRST commit (the tag-claim convention; 86 verified next-free).**
 
     ClosureEvent::DiscoveryMinted {
-        orb_id, resource, amount,          // the mint itself
-        forge_digest: [u8; 32],            // the task re-derives from this
-        difficulty,                        // the forge key
-        program, output, certificate,      // the proof, riding WHOLE
-    }
+        orb_id, resource, amount,          // the mint itself (cfe-typed)
+        work: Vec<u8>,                     // the proof, riding WHOLE —
+    }                                      // solver-verify's sealed encoding of
+                                           // (forge_digest, difficulty, program,
+                                           //  output, certificate); opaque to cfe
+                                           // per THE OPAQUE-PAYLOAD LAW above
 
 The receipt carries its proof whole — replay under SEAL B re-verifies
 the work forever. NO change to `Step` (the deed is the carrier), NO

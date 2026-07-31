@@ -16,19 +16,22 @@
 //!   transformation → the output grid); `verify` replays it byte-exact.
 //!   Finding a solution is search; checking one is O(program length).
 
-pub mod certificate;
-pub mod forge;
-pub mod grid;
-pub mod loader;
-pub mod objects;
 pub mod search;
 pub mod volume;
 
-pub use certificate::{verify_certificate, CertificateRead, SolveCertificate};
-pub use forge::{forge_task, Difficulty};
-pub use grid::{Grid, Op, Program, TileMirror};
-pub use loader::{load_task, LoadError, Task, TaskPair};
-pub use objects::{background, segment, ObjOp, Object, OBJ_OPS};
+// The verifier half moved to `solver-verify` (the prover/verifier
+// split, U_DIRECTIVES §2): grids + the FULL apply vocabulary (object
+// ops included — a replay must apply every op a program may carry),
+// the loader, the deterministic forge, the certificate chain. Only
+// the SEARCH is prover-side. Re-exported whole so no caller breaks —
+// `solver::grid::run` and the root names both stand.
+pub use solver_verify::{certificate, forge, grid, loader, objects};
+pub use solver_verify::{
+    background, forge_task, load_task, segment, verify_certificate, CertificateRead,
+    Difficulty, Grid, LoadError, ObjOp, Object, Op, Program, SolveCertificate, Task, TaskPair,
+    TileMirror, OBJ_OPS,
+};
+
 pub use search::{solve, SolveRead};
 pub use volume::{
     forge_volume, run_volume, solve_volume, VOp, VolDifficulty, Volume, VolumeSolveRead,

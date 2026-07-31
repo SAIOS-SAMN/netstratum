@@ -10,8 +10,8 @@
 //! ARC corpora are planar, so volumetric tasks are forge-only: the
 //! external 27/960 scoreboard is untouched by anything here.
 
-use crate::certificate::hash_grid_into;
-use crate::grid::{Grid, Op};
+use solver_verify::certificate::hash_grid_into;
+use solver_verify::grid::{Grid, Op};
 use physics::Beacon;
 
 /// A stack of congruent layers, bottom to top.
