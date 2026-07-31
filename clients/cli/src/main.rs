@@ -3466,6 +3466,14 @@ fn chronicle(world: &World, style: &Style) {
                 style.strong(&amount(value)),
                 resource_name(*resource)
             ),
+            cfe::dop::ClosureEvent::DiscoveryMinted {
+                resource, amount: value, work, ..
+            } => format!(
+                "◈ minted {} {} against verified work ({} proof bytes)",
+                style.strong(&amount(value)),
+                resource_name(*resource),
+                work.len()
+            ),
             cfe::dop::ClosureEvent::UpkeepSettled {
                 resource, amount: value, ..
             } => format!(

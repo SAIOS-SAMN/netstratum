@@ -727,6 +727,15 @@ fn render_receipt(receipt: &Receipt) -> String {
             "yield_collected",
             format!("{} {}", ratio_str(amount), resource_name(*resource)),
         ),
+        E::DiscoveryMinted { resource, amount, work, .. } => (
+            "discovery_minted",
+            format!(
+                "{} {} against {} bytes of verified work",
+                ratio_str(amount),
+                resource_name(*resource),
+                work.len()
+            ),
+        ),
         E::UpkeepSettled { resource, amount, .. } => (
             "upkeep_settled",
             format!("{} {}", ratio_str(amount), resource_name(*resource)),

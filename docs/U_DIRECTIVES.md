@@ -30,8 +30,8 @@ Working tree holds, UNCOMMITTED, awaiting operator go:
 
 | rung | pays | status |
 |---|---|---|
-| U0 | the seated hand (I2 honored in the spine fixture) | LANDED in-tree |
-| U1 | **I4's bound** — `mint ≤ f(verify)`, the PoUW anchor, tag 86 | NEXT |
+| U0 | the seated hand (I2 honored in the spine fixture) | LANDED |
+| U1 | **I4's bound** — `mint ≤ f(verify)`, the PoUW anchor, tag 86 | LANDED (sealed shut; Ruling Box 1 opens it) |
 | U1b | **I5's bound** — flat decay ≤ rate·ease·elapsed, `last_touch` (SCHEMA_V3) | after U1 |
 | U2 | **I6 whole** — orbit_lock, the fold gate, the singularity witness | after U1 |
 | W-A..W-D | **I1/I2/I3 coverage extension** — the 55 unjudged deeds, in four waves | parallel, any lane |

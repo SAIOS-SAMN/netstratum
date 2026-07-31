@@ -34,6 +34,7 @@ use cfe::dop::{ClosureEvent, Resource};
 use cfe::ipsal::Scope;
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::Committed;
+use solver_verify::{verify_work, Difficulty, WorkBroken};
 
 /// The kernel version — bumped ONLY by charter amendment. The spine
 /// binds this into every commitment (`H(schema ‖ bytes ‖ parent ‖
@@ -78,6 +79,16 @@ pub enum Unlawful {
     /// that actually CREATES value. Value leaves only by a lawful,
     /// non-negative decay.
     DecayNotPositive { resource: Resource, amount: Box<Ratio> },
+    /// I4 — the discovery mint's proof failed the replay (form,
+    /// training, output, or chain — the sealed verifier names the
+    /// break; the kernel carries it whole, never summarizes).
+    WorkRefused { broken: WorkBroken },
+    /// I4 — the mint exceeds what verified work earns. Both sides
+    /// carried whole (the bound the law allows, the amount claimed).
+    /// While Ruling Box 1 stands unruled the bound is ZERO — the
+    /// mechanism is sealed shut; every positive discovery mint
+    /// refuses HERE, by law, until the operator opens the rate.
+    MintExceedsWork { bound: Box<Ratio>, claimed: Box<Ratio> },
     /// I3 — a value in `next` is not a canonical exact rational (coprime,
     /// positive denominator). Exactness is a TYPE-LEVEL guarantee
     /// (`BigRational` is canonical by construction, no float ever entered);
@@ -137,6 +148,10 @@ fn covered(event: &ClosureEvent) -> bool {
         // I4 creation / I5 decay (declaration==effect + sign) fully cover
         // the mint and the demurrage decay.
         | E::YieldCollected { .. } | E::DemurrageSettled { .. }
+        // U1 — the discovery mint's FULL set is landed: I1
+        // (declaration==effect), I2 (Collect), I3, and I4 whole (sign
+        // + the replay-complete verification + the sealed-shut bound).
+        | E::DiscoveryMinted { .. }
         // I2 containment + I3 exactness fully cover the authority deeds
         // (no value moves, no ratios): registering an agent and opening
         // or shutting its scopes.
@@ -165,6 +180,10 @@ fn conservation(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
         // A mint: production banked (value CREATED, +). I4 adds the sign
         // and (at scale) the verified-work bound.
         E::YieldCollected { resource, amount, .. } => (*resource, amount.clone()),
+        // The discovery mint: value created against verified work
+        // (U1). Conservation holds declaration==effect; I4 holds the
+        // work bound.
+        E::DiscoveryMinted { resource, amount, .. } => (*resource, amount.clone()),
         // A decay: banked stores lost to demurrage (value DESTROYED, −).
         // I5 adds the sign and the flat-rate bound.
         E::DemurrageSettled { resource, amount, .. } => (*resource, -amount.clone()),
@@ -209,8 +228,42 @@ fn creation(step: &Step) -> Result<(), Unlawful> {
         ClosureEvent::YieldCollected { resource, amount, .. } if *amount < ratio(0, 1) => {
             Err(Unlawful::MintNotPositive { resource: *resource, amount: Box::new(amount.clone()) })
         }
+        // U1 — I4 completes on the discovery mint: sign, then the
+        // REPLAY-COMPLETE verification (the kernel hands the opaque
+        // payload to the sealed verifier whole, never parses it),
+        // then the bound. No certificate → no mint; a mint past what
+        // the work earns refuses with both sides carried.
+        ClosureEvent::DiscoveryMinted { resource, amount, work, .. } => {
+            if *amount < ratio(0, 1) {
+                return Err(Unlawful::MintNotPositive {
+                    resource: *resource,
+                    amount: Box::new(amount.clone()),
+                });
+            }
+            let difficulty =
+                verify_work(work).map_err(|broken| Unlawful::WorkRefused { broken })?;
+            let bound = mint_bound(&difficulty);
+            match *amount <= bound {
+                true => Ok(()),
+                false => Err(Unlawful::MintExceedsWork {
+                    bound: Box::new(bound),
+                    claimed: Box::new(amount.clone()),
+                }),
+            }
+        }
         _ => Ok(()),
     }
+}
+
+/// THE MINT BOUND — SEALED SHUT (U_DIRECTIVES §8, Ruling Box 1). The
+/// rate `f`, the admissible work-shapes, and the reward split are
+/// OPERATOR WORDS; until that amendment lands (a kernel VERSION
+/// bump), verified work earns a bound of ZERO and every positive
+/// discovery mint refuses at I4. The mechanism precedes the
+/// economics by law — rule `f` against the observed chained economy,
+/// never assumption.
+fn mint_bound(_difficulty: &Difficulty) -> Ratio {
+    ratio(0, 1)
 }
 
 /// INVARIANT — bounded decay (I5). Value is destroyed ONLY by a lawful,
@@ -304,7 +357,11 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         E::YieldCollected { .. } | E::UpkeepSettled { .. } | E::ResourceTransferred { .. }
         | E::OverflowAbsorbed { .. } | E::BondSettled { .. } | E::CovenantReleased { .. }
         | E::FrictionSettled { .. } | E::ApertureSent { .. } | E::ApertureReceived { .. }
-        | E::CrystalDrawn { .. } | E::AssayStruck { .. } | E::OfferCleared { .. } => {
+        | E::CrystalDrawn { .. } | E::AssayStruck { .. } | E::OfferCleared { .. }
+        // U1: the discovery mint settles banked value against verified
+        // work — Collect, like the yield it banks beside. Ratified by
+        // the U1 witnesses as it enters covered().
+        | E::DiscoveryMinted { .. } => {
             Some(Scope::Collect)
         }
         // None — world-driven consequences (empty provenance), mesh deeds,

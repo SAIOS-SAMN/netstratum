@@ -19,9 +19,11 @@ pub mod forge;
 pub mod grid;
 pub mod loader;
 pub mod objects;
+pub mod work;
 
 pub use certificate::{verify_certificate, CertificateRead, SolveCertificate};
 pub use forge::{forge_task, Difficulty};
 pub use grid::{run, Grid, Op, Program, TileMirror};
 pub use loader::{load_task, LoadError, Task, TaskPair};
 pub use objects::{background, segment, ObjOp, Object, OBJ_OPS};
+pub use work::{decode_work, encode_work, verify_work, WorkBroken, WorkProof, WORK_SCHEMA_V1};

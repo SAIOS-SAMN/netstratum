@@ -107,6 +107,8 @@ name = "kernel"
 version = "0.1.0"
 dependencies = [
  "cfe",
+ "solver",
+ "solver-verify",
 ]
 
 [[package]]

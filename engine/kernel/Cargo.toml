@@ -6,3 +6,12 @@ description = "THE KERNEL (CHARTER §11 rule 3) — lawful(prior, next, step): t
 
 [dependencies]
 cfe = { path = "../cfe" }
+# The sealed verifier half (U1 KERNEL-VERIFY): the kernel CALLS
+# verify_work on the opaque payload, never parses it — the arrow
+# stays one-way (kernel → sealed math; nothing imports upward).
+solver-verify = { path = "../solver-verify" }
+
+[dev-dependencies]
+# The PROVER — dev-only, for the witnesses' honest fixtures (a real
+# solved forge task). The runtime kernel never searches.
+solver = { path = "../solver" }

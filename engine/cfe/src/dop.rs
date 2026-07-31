@@ -158,7 +158,16 @@
 //!         seals at coder-03's amendment; the vocabularies are 15 §2
 //!         (class 1–7, 0 lawful-unclassed) and 15 §3 (clade 1–18,
 //!         0 unrecorded), append-only by amendment)
-//!         — the next free tag outside reservations is 86.
+//!   86 ClosureEvent::DiscoveryMinted (U1 KERNEL-VERIFY,
+//!         U_DIRECTIVES §2 — the PoUW mint: value created ONLY
+//!         against verified work. orb ‖ resource ‖ amount ‖ work,
+//!         where work is the OPAQUE proof payload — solver-verify's
+//!         encoding monopoly (forge digest, difficulty, program,
+//!         output, certificate); the receipt carries its proof whole,
+//!         replay re-verifies forever. Judged by I4's bound arm:
+//!         verify_work(work) = Ok(d) ∧ amount ≤ mint_bound(d);
+//!         mint_bound is SEALED SHUT until Ruling Box 1)
+//!         — the next free tag outside reservations is 87.
 //!   In-value practice codes (append-only): 1 the Fast · 2 the Icon ·
 //!   3 the Vigil · 4 the Hoard · 5 the Athanor (deep-end: adoption
 //!   gated on hardship ≥ 8 receipts). Placeholder names, operator
@@ -1020,6 +1029,13 @@ pub enum ClosureEvent {
     /// Codes must stand in the ratified vocabularies; names stay
     /// register-side forever.
     TaxonSealed { class: u8, clade: u8 },
+    /// U1 KERNEL-VERIFY (U_DIRECTIVES §2): the discovery mint — value
+    /// created ONLY against verified work (the PoUW anchor, I4's
+    /// bound arm). `work` is the OPAQUE proof payload — encoding is
+    /// solver-verify's monopoly (THE OPAQUE-PAYLOAD LAW): cfe carries
+    /// it, never reads it; the kernel hands it to the sealed verifier
+    /// whole. The receipt carries its proof — replay re-verifies.
+    DiscoveryMinted { orb_id: u64, resource: Resource, amount: Ratio, work: Vec<u8> },
     /// MANU-1 (10 §3f): an instrument forged — technology +
     /// understanding + industry overlaid; held per-orb like techs.
     InstrumentForged { orb_id: u64, tech_hash: [u8; 32], grade: u8 },
@@ -1378,6 +1394,11 @@ impl ClosureEvent {
             }
             Self::TaxonSealed { class, clade } => {
                 tlv::put(85, &[*class, *clade], &mut out);
+            }
+            Self::DiscoveryMinted { orb_id, resource, amount, work } => {
+                let mut value = amount_layout(*orb_id, *resource, amount);
+                value.extend_from_slice(work);
+                tlv::put(86, &value, &mut out);
             }
             Self::InstrumentForged { orb_id, tech_hash, grade } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
@@ -1761,6 +1782,16 @@ impl ClosureEvent {
                 class: *value.first()?,
                 clade: *value.get(1)?,
             }),
+            86 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let resource = Resource::from_wire(*value.get(8)?)?;
+                let (amount, used) = ratio::decode(value.get(9..)?)?;
+                // The remainder is the work payload, opaque here by
+                // law — solver-verify owns its form and refuses its
+                // breaks; the TLV length bounds it.
+                let work = value.get(9 + used..)?.to_vec();
+                Some(Self::DiscoveryMinted { orb_id, resource, amount, work })
+            }
             78 => Some(Self::InstrumentForged {
                 orb_id: u64::from_le_bytes(value.get(..8)?.try_into().ok()?),
                 tech_hash: value.get(8..40)?.try_into().ok()?,
