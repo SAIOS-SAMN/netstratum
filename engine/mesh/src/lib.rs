@@ -17,7 +17,7 @@
 //! the claim; transport is bytes between directories — the engine
 //! never opens a socket (SEAL C: the adapter is a file copy).
 
-use cfe::dop::{ClosureEvent, Resource};
+use cfe::dop::{ClosureEvent, ColonyOrb, Resource};
 use cfe::ratio::{self, ratio, Ratio};
 use cfe::tlv;
 use cfe::vrp::{ChainRead, Chronicle, Receipt, RECEIPT_FRAME_TAG};
@@ -30,6 +30,28 @@ pub const MESH_HEAD_TAG: u8 = 64;
 pub const CONSILIENCE_RECEIPT_TAG: u8 = 65;
 /// Tag 66 — the mesh refusal (NS-5 §2.3).
 pub const MESH_REFUSAL_TAG: u8 = 66;
+
+/// The census codes (NS-5 §2.1/§3.2): 0 the totality tripwire, 1 the
+/// orb (id-bearing), then the world families in inscription order.
+pub const CENSUS_UNMEASURED: u8 = 0;
+pub const CENSUS_ORB: u8 = 1;
+pub const CENSUS_ENTITIES: u8 = 2;
+pub const CENSUS_STAR: u8 = 3;
+pub const CENSUS_DEBTS: u8 = 4;
+pub const CENSUS_BONDS: u8 = 5;
+pub const CENSUS_COVENANTS: u8 = 6;
+pub const CENSUS_COUNCILS: u8 = 7;
+pub const CENSUS_OFFERS: u8 = 8;
+pub const CENSUS_TECHS: u8 = 9;
+pub const CENSUS_WANTS: u8 = 10;
+pub const CENSUS_CROSSED: u8 = 11;
+pub const CENSUS_GENESIS: u8 = 12;
+pub const CENSUS_TERRAIN: u8 = 13;
+pub const CENSUS_INSTRUMENTS: u8 = 14;
+pub const CENSUS_PRACTICES: u8 = 15;
+pub const CENSUS_PROSPECTS: u8 = 16;
+pub const CENSUS_WARDED: u8 = 17;
+pub const CENSUS_VEILED: u8 = 18;
 
 /// Which peer of the pair (wire codes: A = 1, B = 2).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -88,8 +110,15 @@ pub enum MeshRefused {
     /// Same history, less of it — the missing range named, half-open.
     Drift { behind: Side, from: u64, to: u64 },
     /// Forked history: the first differing sequence, the residual
-    /// list whole (dimension, B − A), and C(Δ) the summary scalar.
-    Diverged { at: u64, residuals: Vec<(u32, Ratio)>, coherence: Ratio },
+    /// list whole (dimension, B − A), C(Δ) the summary scalar, and
+    /// the structural census — every non-rational difference named
+    /// typed (NS-5 §2.1, the totality law).
+    Diverged {
+        at: u64,
+        residuals: Vec<(u32, Ratio)>,
+        coherence: Ratio,
+        census: Vec<(u8, u64)>,
+    },
     /// NS-5 §7.2 — the receipt at `at` does not carry the lawful
     /// hand: one writer per clock, broken.
     Usurped { at: u64, lawful: u64 },
@@ -174,7 +203,7 @@ impl MeshRefused {
                 value.extend_from_slice(&from.to_le_bytes());
                 value.extend_from_slice(&to.to_le_bytes());
             }
-            Self::Diverged { at, residuals, coherence } => {
+            Self::Diverged { at, residuals, coherence, census } => {
                 value.push(4);
                 value.extend_from_slice(&at.to_le_bytes());
                 value.extend_from_slice(&(residuals.len() as u32).to_le_bytes());
@@ -183,6 +212,13 @@ impl MeshRefused {
                     ratio::encode(residual, &mut value);
                 }
                 ratio::encode(coherence, &mut value);
+                // The census trails ADDITIVELY (NS-5 §3.2, MESH-1d):
+                // the landed decoder ignored trailing bytes.
+                value.extend_from_slice(&(census.len() as u32).to_le_bytes());
+                for (code, id) in census {
+                    value.push(*code);
+                    value.extend_from_slice(&id.to_le_bytes());
+                }
             }
             Self::Usurped { at, lawful } => {
                 value.push(5);
@@ -233,8 +269,29 @@ impl MeshRefused {
                     residuals.push((dimension, residual));
                     cursor += 4 + used;
                 }
-                let (coherence, _) = ratio::decode(value.get(cursor..)?)?;
-                Some(Self::Diverged { at, residuals, coherence })
+                let (coherence, used) = ratio::decode(value.get(cursor..)?)?;
+                cursor += used;
+                // A pre-census record ends here and reads census-empty
+                // (the additive law, NS-5 §3.2).
+                let census = if cursor == value.len() {
+                    Vec::new()
+                } else {
+                    let count =
+                        u32::from_le_bytes(value.get(cursor..cursor + 4)?.try_into().ok()?)
+                            as usize;
+                    cursor += 4;
+                    let mut named = Vec::with_capacity(count);
+                    for _ in 0..count {
+                        let code = *value.get(cursor)?;
+                        let id = u64::from_le_bytes(
+                            value.get(cursor + 1..cursor + 9)?.try_into().ok()?,
+                        );
+                        named.push((code, id));
+                        cursor += 9;
+                    }
+                    named
+                };
+                Some(Self::Diverged { at, residuals, coherence, census })
             }
             5 => {
                 let at = u64::from_le_bytes(value.get(1..9)?.try_into().ok()?);
@@ -311,7 +368,13 @@ pub fn consile(a: &Chronicle, b: &Chronicle) -> Result<ConsilienceReceipt, MeshR
             to: ours.len() as u64,
         });
     }
-    let (position_a, position_b) = positions(a, b);
+    // THE REPLICATION WITNESS (NS-5 §2.3.4): on an equal spine the
+    // zero witnesses byte-exact replication and independent replay
+    // determinism (SEAL B) — never convergence; the inputs could not
+    // disagree. Consilience is reserved for inputs that could.
+    let ours_state = replay(a);
+    let theirs_state = replay(b);
+    let (position_a, position_b) = positions(&ours_state, &theirs_state);
     let dimensions = position_a.len() as u32;
     let coherence = coherence_functional(&triangle(&position_a, &position_b));
     if coherence != ratio(0, 1) {
@@ -330,15 +393,75 @@ pub fn consile(a: &Chronicle, b: &Chronicle) -> Result<ConsilienceReceipt, MeshR
     })
 }
 
-/// The v1 manifold (NS-5 §1.1): both committed states projected onto
-/// the union span — gauge grades first (grade-ascending), then per
-/// orb ascending by orb id the banked ledger over resource codes 1–7.
-/// An absent coordinate reads exactly 0. Total, deterministic,
+/// The v2 rational manifold (NS-5 §2.1): both committed states
+/// projected onto the union span — gauge grades (grade-ascending),
+/// then per orb ascending by orb id: banked 1–7, vented entropy, the
+/// eight ideology books, the element stores over the orb's union
+/// ids. An absent coordinate reads exactly 0. Total, deterministic,
 /// canonical.
-fn positions(a: &Chronicle, b: &Chronicle) -> (Vec<Ratio>, Vec<Ratio>) {
-    let ours = replay(a);
-    let theirs = replay(b);
+fn positions(ours: &Committed, theirs: &Committed) -> (Vec<Ratio>, Vec<Ratio>) {
     let grades = ours.gauge.len().max(theirs.gauge.len());
+    let mut position_a = Vec::new();
+    let mut position_b = Vec::new();
+    for grade in 0..grades {
+        position_a.push(gauge_at(ours, grade));
+        position_b.push(gauge_at(theirs, grade));
+    }
+    for orb_id in orb_union(ours, theirs) {
+        let mine = find_orb(ours, orb_id);
+        let far = find_orb(theirs, orb_id);
+        let mut element_ids: Vec<[u8; 32]> = mine
+            .iter()
+            .chain(far.iter())
+            .flat_map(|orb| orb.elements.iter().map(|(id, _)| *id))
+            .collect();
+        element_ids.sort_unstable();
+        element_ids.dedup();
+        position_a.extend(orb_dimensions(mine, &element_ids));
+        position_b.extend(orb_dimensions(far, &element_ids));
+    }
+    (position_a, position_b)
+}
+
+/// One orb's rational dimensions in the inscribed order (NS-5 §2.1):
+/// banked 1–7, vented entropy, the eight books, then the given
+/// element ids. An absent orb reads 0 everywhere.
+fn orb_dimensions(orb: Option<&ColonyOrb>, element_ids: &[[u8; 32]]) -> Vec<Ratio> {
+    let zero = || ratio(0, 1);
+    let mut dims = Vec::with_capacity(16 + element_ids.len());
+    for code in 1u8..=7 {
+        let resource = Resource::from_wire(code).expect("codes 1-7 are the roster");
+        dims.push(orb.map(|held| held.banked_amount(resource)).unwrap_or_else(zero));
+    }
+    match orb {
+        Some(held) => dims.extend([
+            held.entropy_vented.clone(),
+            held.given_in_crisis.clone(),
+            held.drawn_in_crisis.clone(),
+            held.returned_across.clone(),
+            held.extracted_across.clone(),
+            held.bond_flow.clone(),
+            held.severance_load.clone(),
+            held.covenants_fulfilled.clone(),
+            held.covenants_breached.clone(),
+        ]),
+        None => dims.extend(std::iter::repeat_with(zero).take(9)),
+    }
+    for id in element_ids {
+        dims.push(
+            orb.and_then(|held| {
+                held.elements
+                    .iter()
+                    .find(|(mine, _)| mine == id)
+                    .map(|(_, amount)| amount.clone())
+            })
+            .unwrap_or_else(zero),
+        );
+    }
+    dims
+}
+
+fn orb_union(ours: &Committed, theirs: &Committed) -> Vec<u64> {
     let mut orb_ids: Vec<u64> = ours
         .orbs
         .iter()
@@ -347,33 +470,78 @@ fn positions(a: &Chronicle, b: &Chronicle) -> (Vec<Ratio>, Vec<Ratio>) {
         .collect();
     orb_ids.sort_unstable();
     orb_ids.dedup();
-    let mut position_a = Vec::new();
-    let mut position_b = Vec::new();
-    for grade in 0..grades {
-        position_a.push(gauge_at(&ours, grade));
-        position_b.push(gauge_at(&theirs, grade));
-    }
-    for orb_id in orb_ids {
-        for code in 1u8..=7 {
-            let resource = Resource::from_wire(code).expect("codes 1-7 are the roster");
-            position_a.push(banked_of(&ours, orb_id, resource));
-            position_b.push(banked_of(&theirs, orb_id, resource));
-        }
-    }
-    (position_a, position_b)
+    orb_ids
+}
+
+fn find_orb(committed: &Committed, orb_id: u64) -> Option<&ColonyOrb> {
+    committed.orbs.iter().find(|orb| orb.orb_id == orb_id)
 }
 
 fn gauge_at(committed: &Committed, grade: usize) -> Ratio {
     committed.gauge.get(grade).cloned().unwrap_or_else(|| ratio(0, 1))
 }
 
-fn banked_of(committed: &Committed, orb_id: u64, resource: Resource) -> Ratio {
-    committed
-        .orbs
-        .iter()
-        .find(|orb| orb.orb_id == orb_id)
-        .map(|orb| orb.banked_amount(resource))
-        .unwrap_or_else(|| ratio(0, 1))
+/// The structural census (NS-5 §2.1): every non-rational committed
+/// field compared WHOLE by exact equality — per-orb normalized (the
+/// rational fields set aside), then the world families in code
+/// order. A difference is named typed, never invisible.
+fn take_census(ours: &Committed, theirs: &Committed) -> Vec<(u8, u64)> {
+    let mut named = Vec::new();
+    for orb_id in orb_union(ours, theirs) {
+        match (find_orb(ours, orb_id), find_orb(theirs, orb_id)) {
+            (Some(mine), Some(far)) => {
+                if normalized(mine) != normalized(far) {
+                    named.push((CENSUS_ORB, orb_id));
+                }
+            }
+            // An orb standing on one side only IS structure.
+            _ => named.push((CENSUS_ORB, orb_id)),
+        }
+    }
+    let families = [
+        (CENSUS_ENTITIES, ours.entities != theirs.entities),
+        (CENSUS_STAR, ours.star != theirs.star),
+        (CENSUS_DEBTS, ours.debts != theirs.debts),
+        (CENSUS_BONDS, ours.bonds != theirs.bonds),
+        (CENSUS_COVENANTS, ours.covenants != theirs.covenants),
+        (CENSUS_COUNCILS, ours.councils != theirs.councils),
+        (CENSUS_OFFERS, ours.offers != theirs.offers),
+        (CENSUS_TECHS, ours.techs != theirs.techs),
+        (CENSUS_WANTS, ours.wants != theirs.wants),
+        (CENSUS_CROSSED, ours.crossed != theirs.crossed),
+        (CENSUS_GENESIS, ours.genesis != theirs.genesis),
+        (CENSUS_TERRAIN, ours.terrain_seed != theirs.terrain_seed),
+        (CENSUS_INSTRUMENTS, ours.instruments != theirs.instruments),
+        (CENSUS_PRACTICES, ours.practices != theirs.practices),
+        (CENSUS_PROSPECTS, ours.prospects != theirs.prospects),
+        (CENSUS_WARDED, ours.warded != theirs.warded),
+        (CENSUS_VEILED, ours.veiled != theirs.veiled),
+    ];
+    for (code, differs) in families {
+        if differs {
+            named.push((code, 0));
+        }
+    }
+    named
+}
+
+/// The orb with its measured rationals set aside — what remains is
+/// the structure the census compares whole.
+fn normalized(orb: &ColonyOrb) -> ColonyOrb {
+    let zero = ratio(0, 1);
+    let mut held = orb.clone();
+    held.banked.clear();
+    held.elements.clear();
+    held.entropy_vented = zero.clone();
+    held.given_in_crisis = zero.clone();
+    held.drawn_in_crisis = zero.clone();
+    held.returned_across = zero.clone();
+    held.extracted_across = zero.clone();
+    held.bond_flow = zero.clone();
+    held.severance_load = zero.clone();
+    held.covenants_fulfilled = zero.clone();
+    held.covenants_breached = zero;
+    held
 }
 
 /// The consilience triangle (NS-5 §1.2): Δ(origin→A) = a's position,
@@ -387,19 +555,28 @@ fn triangle(position_a: &[Ratio], position_b: &[Ratio]) -> Delta {
     delta
 }
 
-/// The DIVERGED refusal, measured: every nonzero residual (B − A)
-/// carried whole in dimension order, C(Δ) the trailing summary.
+/// The DIVERGED refusal, measured WHOLE (NS-5 §2.1, the totality
+/// law): every nonzero residual (B − A) in dimension order, C(Δ) the
+/// summary, and the structural census. States unequal with nothing
+/// named report UNMEASURED — the tripwire for a committed field that
+/// joined neither list.
 fn diverged(a: &Chronicle, b: &Chronicle, at: u64) -> MeshRefused {
-    let (position_a, position_b) = positions(a, b);
+    let ours = replay(a);
+    let theirs = replay(b);
+    let (position_a, position_b) = positions(&ours, &theirs);
     let mut residuals = Vec::new();
-    for (dimension, (ours, theirs)) in position_a.iter().zip(&position_b).enumerate() {
-        let residual = theirs - ours;
+    for (dimension, (mine, far)) in position_a.iter().zip(&position_b).enumerate() {
+        let residual = far - mine;
         if residual != ratio(0, 1) {
             residuals.push((dimension as u32, residual));
         }
     }
     let coherence = coherence_functional(&triangle(&position_a, &position_b));
-    MeshRefused::Diverged { at, residuals, coherence }
+    let mut census = take_census(&ours, &theirs);
+    if residuals.is_empty() && census.is_empty() && ours != theirs {
+        census.push((CENSUS_UNMEASURED, 0));
+    }
+    MeshRefused::Diverged { at, residuals, coherence, census }
 }
 
 /// The walk's resting state: the hand that holds the pen (None in the

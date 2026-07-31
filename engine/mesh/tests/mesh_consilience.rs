@@ -55,12 +55,13 @@ fn two_independent_replays_consile_at_exact_zero() {
     let b = receive(&fs::read(&b_path).expect("B bytes"), Side::B).expect("B intact");
     assert_eq!(head(&a), head(&b), "one spine, one announcement");
 
-    let receipt = consile(&a, &b).expect("one spine consiles");
+    let receipt = consile(&a, &b).expect("one spine issues the replication witness");
     assert_eq!(receipt.coherence, ratio(0, 1), "C measured exactly zero");
     assert_eq!(receipt.length, a.receipts().len() as u64);
     assert_eq!(receipt.arity, 2);
-    // The v1 manifold: one gauge grade + one orb x seven resources.
-    assert_eq!(receipt.dimensions, 8);
+    // The v2 manifold: one gauge grade + one orb x (7 banked + vented
+    // + the eight books), no elements banked yet.
+    assert_eq!(receipt.dimensions, 17);
     let spine_head = a.receipts().last().expect("nonempty");
     assert_eq!(receipt.head, spine_head.own.0);
     assert_eq!(receipt.stamp, spine_head.stamp);
@@ -145,11 +146,14 @@ fn divergent_histories_carry_their_residuals_whole() {
     let a = receive(&fs::read(&a_path).expect("A bytes"), Side::A).expect("A intact");
     let b = receive(&fs::read(&b_path).expect("B bytes"), Side::B).expect("B intact");
     let refused = consile(&a, &b).unwrap_err();
-    let MeshRefused::Diverged { at, residuals, coherence } = refused else {
+    let MeshRefused::Diverged { at, residuals, coherence, census } = refused else {
         panic!("divergence must refuse DIVERGED, got {refused:?}");
     };
     assert_eq!(at, fork, "the first differing sequence is named");
     assert!(!residuals.is_empty(), "the disagreement is carried, not discarded");
+    // The totality law: the orb whose STRUCTURE moved (B's new zone,
+    // A's settle stamp) is censused beside the rational residuals.
+    assert_eq!(census, vec![(mesh::CENSUS_ORB, 1)]);
 
     // Ground truth from cfe's own replay, independent of the mesh's
     // projection: every differing banked dimension appears, exactly
@@ -196,6 +200,7 @@ fn the_mesh_records_round_trip_and_unknown_tags_skip() {
             at: 5,
             residuals: vec![(1, ratio(-3, 7)), (4, ratio(9, 2))],
             coherence: ratio(731, 14),
+            census: vec![(mesh::CENSUS_ORB, 1), (mesh::CENSUS_TECHS, 0)],
         },
     ];
 

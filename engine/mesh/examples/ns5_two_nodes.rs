@@ -72,7 +72,7 @@ fn orchestrate() {
     leg(&["usurp", a]);
     leg(&["tamper", a, b]);
     leg(&["refuse-forged", b]);
-    println!("== the acceptance stands: converged at exact zero; the stale hand stalled; the forged refused ==");
+    println!("== the acceptance stands: replicated at exact zero; the stale hand stalled; the forged refused ==");
 }
 
 /// Node A's first era, in its own process: found, build, tick,
@@ -132,7 +132,7 @@ fn consile_leg(a_file: &Path, b_file: &Path, expect: &str) {
             assert_eq!(receipt.coherence, ratio(0, 1));
             assert_eq!(head(&a), head(&b), "one spine, one announcement");
             println!(
-                "[consile] CONSILIENCE: C(delta) = 0 exactly — {} receipts, stamp {}, {} dimensions, arity {}",
+                "[consile] REPLICATION WITNESS: C(delta) = 0 exactly — {} receipts, stamp {}, {} dimensions, arity {}",
                 receipt.length, receipt.stamp, receipt.dimensions, receipt.arity
             );
         }
