@@ -3699,6 +3699,27 @@ impl World {
     }
 }
 
+/// MARKET-2: THE pair's melt fraction — the one producer of the
+/// formula. The transit reads the whole manifold gap (spatial L1 +
+/// the wrapped key gap: 11 §2.1's clash consumes payload, never a
+/// tertiary sink) at φ = 1/64 per unit; the best lane BOTH books
+/// hold (ROUTE-1) suppresses it. At ≥ 1 the pair is economically
+/// WALLED by decay physics.
+pub fn pair_melt(a: &World, b: &World, distance: &Ratio) -> Ratio {
+    let gap = key_distance(a.key(), b.key());
+    let mut melt = (distance.clone() + gap) * ratio(MELT_PER_UNIT.0, MELT_PER_UNIT.1);
+    let best_eta = a
+        .routes
+        .iter()
+        .filter(|(deal, _)| b.routes.iter().any(|(held, _)| held == deal))
+        .map(|(_, eta)| eta.clone())
+        .max();
+    if let Some(eta) = best_eta {
+        melt *= ratio(1, 1) - eta;
+    }
+    melt
+}
+
 /// MARKET-1 (BUILD_ORDER §3a) — CLEAR A CROSSING: two resting offers
 /// on two worlds meet; the fill happens at the RESTING offer's exact
 /// price (price-time priority: the earlier posted rules; ties break
@@ -3750,27 +3771,11 @@ pub fn clear_trade(
         false => x.clone() * held_b.give_amount.clone() / held_b.want_amount.clone(),
     };
     let y = y.min(held_b.give_amount.clone());
-    // MARKET-2 (ruled 2026-07-31) — THE ICEBERG: the side-fee
-    // friction CONVERTED into cargo melt (Samuelson). The transit's
-    // melt fraction reads the whole manifold gap — spatial L1 plus
-    // the wrapped key gap (11 §2.1's clash now consumes payload,
-    // never a tertiary sink) — at φ = 1/64 per unit. Delivered =
-    // sent × (1 − φ·D); at φ·D ≥ 1 the pair is economically WALLED
-    // by decay physics (the haul refuses before anything moves).
-    let gap = key_distance(a.key(), b.key());
-    let mut melt = (distance + gap) * ratio(MELT_PER_UNIT.0, MELT_PER_UNIT.1);
-    // ROUTE-1: the best lane BOTH books hold suppresses the melt —
-    // infrastructure someone paid for, decaying back to raw space
-    // the moment either leg lapses.
-    let best_eta = a
-        .routes
-        .iter()
-        .filter(|(deal, _)| b.routes.iter().any(|(held, _)| held == deal))
-        .map(|(_, eta)| eta.clone())
-        .max();
-    if let Some(eta) = best_eta {
-        melt *= ratio(1, 1) - eta;
-    }
+    // MARKET-2 (ruled 2026-07-31) — THE ICEBERG: delivered = sent ×
+    // (1 − φ·D). ONE producer of the melt number (the conform
+    // ruling's spirit): clear_trade and every profit test read
+    // pair_melt, nothing recomputes the formula.
+    let melt = pair_melt(a, b, &distance);
     // The two directions — each an aperture pair, shield-checked,
     // demurrage-touched; sent − received = the void's exact share.
     haul(a, held_a.orb, b, held_b.orb, held_a.give, x, deal, &melt)?;

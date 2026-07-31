@@ -186,6 +186,12 @@ fn main() {
                 "beat {beat}: THE CROSSING CLEARS — {seller} ⇌ {buyer}; the autarkies trade"
             );
         }
+        // MERCHANT-1: the caravan bridges what the void walled.
+        for (m, a, b) in conductor::merchant_step(&mut worlds, beat) {
+            println!(
+                "beat {beat}: THE CARAVAN — {m} bridges {a} ⇌ {b}; the walled trade flows"
+            );
+        }
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — journals + the Terminal Wall regenerate mirror-side.
         if beat.is_multiple_of(ledger::journal::YEAR_TICKS) {
