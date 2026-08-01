@@ -41,7 +41,7 @@
 
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::Committed;
-use rfa_core::{coboundary_reduce, coherence_functional, Delta};
+use rfa_core::{coboundary_reduce, for_each_residual, Delta};
 
 /// BOND-1: the standing order, `source` → `target` at `rate`/tick.
 pub const CHANNEL_BOND: usize = 0;
@@ -99,6 +99,32 @@ pub enum Resolve {
     LockOn,
 }
 
+/// ONE RESIDUAL, CARRIED WHOLE — `R_ijk,l = Δ_ik,l − Δ_ij,l − Δ_jk,l`
+/// with the triple and coordinate that produced it.
+///
+/// **These are the first formations of symmetry** (operator, 2026-08-01;
+/// `KERNEL_RELAY` §5.3: *the residue forms the symmetry* — frame
+/// differences that compose across many convergences into a genuine
+/// gauge group). Each residual is a candidate generator, and it is
+/// meaningless without its indices: a residual says *these three, on
+/// this coordinate, do not compose, by this much*.
+///
+/// **Summing them destroys them.** `C(Δ) = Σ|R|` is a scalar aggregate,
+/// and `18_TORSION` §2b bars exactly that where the system computes —
+/// L1 survives only at a human lens. Worse, the residue composition
+/// law (the design owed at `KERNEL_RELAY` §7.4) has nothing to compose
+/// if the residuals were already added together, and `EQUATIONS` D3
+/// makes these the source of capacity: *the residue EMITS, D rises by
+/// the plane*. A summed residual cannot emit anything.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Residual {
+    pub i: usize,
+    pub j: usize,
+    pub k: usize,
+    pub l: usize,
+    pub value: Ratio,
+}
+
 /// THE ENTANGLED READ (`18_TORSION` §2f). The capacity side and the
 /// potential side, computed in ONE pass over ONE prior state. They are
 /// not separately obtainable from this module by construction: a
@@ -111,9 +137,10 @@ pub struct EntangledRead {
     /// independent entries (i<j, every channel) still standing after
     /// coboundary reduction. Frame contributes nothing.
     pub capacity: usize,
-    /// The cocycle defect `C(Δ) = Σ|R|` — the potential-side strain,
-    /// naming how far the obligations are from composing.
-    pub defect: Ratio,
+    /// The residual field, WHOLE — every non-composing triple with its
+    /// indices intact. Never pre-summed: these are what emit (D3) and
+    /// what the composition law will compose.
+    pub residuals: Vec<Residual>,
     /// Pairs whose relation was NOT observed. While any stands, the
     /// complex has holes of unknown shape and no capacity may be read
     /// off it.
@@ -128,14 +155,30 @@ impl EntangledRead {
     /// 1. `unknown == 0` — an unresolved absence would let phantom
     ///    topology mint phantom capacity. Discharge every `Unknown` by
     ///    [`Resolve`] first.
-    /// 2. `defect == 0` — `H¹ = Z¹/B¹` is defined on cocycles alone;
-    ///    where the defect is non-zero `Δ ∉ Z¹` and there is no
-    ///    cohomology class for the reduction to land in.
+    /// 2. no residual stands — `H¹ = Z¹/B¹` is defined on cocycles
+    ///    alone; while any triple fails to compose `Δ ∉ Z¹` and there
+    ///    is no cohomology class for the reduction to land in.
     ///
     /// Callers that gate on capacity (Article II standing, Article IV
     /// monotonicity) MUST consult this first.
     pub fn capacity_is_defined(&self) -> bool {
-        self.unknown == 0 && self.defect == ratio(0, 1)
+        self.unknown == 0 && self.residuals.is_empty()
+    }
+
+    /// **LENS ONLY** (`18_TORSION` §2b). The L1 aggregate of the
+    /// residual field, `C(Δ) = Σ|R|`, for reporting to a human. It is
+    /// DERIVED on demand and never stored, because a scalar aggregate
+    /// may not be what the system computes on — the field in
+    /// [`EntangledRead::residuals`] is. Do not gate on this.
+    pub fn defect(&self) -> Ratio {
+        let zero = ratio(0, 1);
+        self.residuals.iter().fold(zero.clone(), |sum, held| {
+            let size = match held.value < zero {
+                true => -held.value.clone(),
+                false => held.value.clone(),
+            };
+            sum + size
+        })
     }
 }
 
@@ -310,7 +353,16 @@ pub fn read_entangled(state: &Committed) -> EntangledRead {
 /// absence.
 pub fn read_entangled_observed(state: &Committed, unknown: usize) -> EntangledRead {
     let delta = project(state);
-    let defect = coherence_functional(&delta);
+    // THE RESIDUAL FIELD, WHOLE. Never `coherence_functional` here —
+    // that sums the field into one scalar and discards which triple
+    // produced each residual, which is the exact place the first
+    // formations of symmetry were being lost (§2b bars the collapse;
+    // D3 needs these to emit; the composition law needs them to
+    // compose). The L1 reading is derived at the lens, on demand.
+    let mut residuals = Vec::new();
+    for_each_residual(&delta, |i, j, k, l, value| {
+        residuals.push(Residual { i, j, k, l, value: value.clone() });
+    });
     let reduced = coboundary_reduce(&delta);
     let zero = ratio(0, 1);
     let mut capacity = 0;
@@ -323,5 +375,5 @@ pub fn read_entangled_observed(state: &Committed, unknown: usize) -> EntangledRe
             }
         }
     }
-    EntangledRead { capacity, defect, unknown }
+    EntangledRead { capacity, residuals, unknown }
 }
