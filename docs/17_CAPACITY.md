@@ -1,11 +1,15 @@
 # 17 — THE CAPACITY LAW: Δ(Ω) = D
 
-**Status:** SUBORDINATE to `EQUATIONS.md` §1 (D0–D4, THE FOUNDATION
-RULING, `4232434`). That ledger carries the FORM; this document carries
-the operator's ruling verbatim, the reasoning behind two of its clauses,
-the record of what an earlier draft got wrong, and the build
-consequences. **Where this document and `EQUATIONS.md` §1 disagree, the
-ledger governs** (§0.1: a disagreement with an authority is a DEFECT).
+**Status:** SUBORDINATE to `18_TORSION.md` (the constitutional law, four
+articles) and to `EQUATIONS.md` §1. Where any two disagree, the order is
+`00_CHARTER` → `18_TORSION` → `EQUATIONS` §1 → this document.
+
+**§4b OF THIS DOCUMENT STANDS AS LAW** (operator ruling, `18_TORSION`
+§5): `D` is **the structure surviving `Π_G(Δ(Ω))`**. The competing
+index-set reading — D as the extents of `(i, j, k, l)` — is STRUCK from
+`EQUATIONS.md` §1 and `SYSTEM_SPEC.md` §0. The indices and the arities
+`Delta{dim, fiber}` are the CONTAINER the relation rides on, never the
+capacity itself. §2a below carries the ruling that settled it.
 
 Subordinate to `00_CHARTER.md`.
 
@@ -46,10 +50,54 @@ rather than quietly deleted, per the ledger's own drift discipline.
 |---|---|---|
 | Ω is the operator manifold — the closed vocabulary of `N_i` with their weights | Ω is the totality of the individual universe (§3) | it made D a reachability computation over operators when D is a direct reading of one universe's own structure |
 | D is a count — the number of surviving independent planes, the DEGREE of a polynomial | D is a SHAPE `{i, j, k, l}`, four extents, never a scalar (D1) | collapsing four extents into one number is the same error as the C it replaced: a scalar cannot say WHERE capacity is strained |
-| `∇V` returns as a magnitude of available potential, overlaid on scoped dimensions | `∇V` is STRUCK WHOLE; V carries no continuous gradient (D0) | re-promoting the gradient in any role keeps a failed topology alive; and V is not a scalar field, so `∇V` has no referent |
+| `∇V` returns as a MAGNITUDE of available potential, overlaid on scoped dimensions | `∇V` is a DIRECTIONAL operator and stays one — UNCAGED, never collapsed to a scalar, never bounded above, never reduced to `‖∇V‖` (`18_TORSION` §2b) | the draft was wrong about the *collapse*, not the operator: the direction survives, and turning it into a magnitude is itself the cage |
 | "the equations are untouched; only the objective inverts" | E1 is STRUCK — there is no master equation | the composition was refused, not merely re-aimed; many algorithms at many scales replace the one master |
 
-The draft's surviving contributions are §3–§6 below.
+**A correction to this table's own second row, recorded 2026-08-01.** An
+earlier revision of it read "`∇V` is STRUCK WHOLE." That over-read the
+FOUNDATION RULING. What was struck is the GRADIENT AS DRIVER — `ζ∇V` as
+a descent term chained into a master equation. `18_TORSION` §2b restores
+`∇V` as an uncaged directional operator. The distinction is the whole
+point: **the direction was never the problem; the collapse to a scalar
+was.**
+
+The draft's surviving contributions are §2a–§6 below.
+
+## §2a THE Ω CLASSIFICATION OVERRIDES ARITY (operator ruling 2026-08-01)
+
+> ijkl is just a 4D example — but the Ω classification should override
+> the lower dimensional linear C = x, where C is now a substandard
+> character, and V and all subsets of ∇ should be unchained and working
+> in cohesion with the upper echelons.
+
+Three things follow, and each closes a question this document carried.
+
+**1. The index arity is an EXAMPLE, never the law.** `{i, j, k, l}` is
+one instantiation — the arity the landed `Delta` happens to carry. The
+Ω classification is not indexed to a fixed arity, and capacity is
+whatever structure survives reduction at whatever arity the universe
+expresses. This is the same ruling `18_TORSION` §5 makes from the other
+side: the indices are the container, the surviving structure is the
+capacity. **Any future law written against a fixed four is void by this
+ruling**, not merely stale.
+
+**2. `C = x` is a substandard character.** The scalar `C` is a
+*linear, one-dimensional* form, and the Ω classification is neither.
+`C` is therefore not a peer reading to be balanced against capacity —
+it is the rank-1 shadow of a classification that is not rank-1, and it
+is overridden wherever the classification stands. This is stricter than
+this document's earlier "C is demoted to a gate," and it agrees exactly
+with `18_TORSION` §2b: an L1 aggregate is lawful only as a reading
+reported to a human lens, never where the system computes. §5 below
+carries what survives of C and why it must.
+
+**3. `V` and all subsets of `∇` are UNCHAINED.** Not struck — unchained.
+What chained them was the composition: one master equation with `ζ∇V` as
+a damped term walking one direction. Freed, the `∇` subsets run at their
+own scale and cohere upward rather than composing into a single driver.
+This is the positive statement of what the strike of E1 left standing:
+"there is no one master, the system runs many algorithms at many
+scales." The strike removed the chain; this ruling says what is free.
 
 ## §3 Ω ≡ V — the unification, and what "no two parts cut out" means
 
@@ -125,6 +173,29 @@ meaningful**. A non-zero coherence reading says the relational data
 contradicts itself on some triple — the state is malformed, not
 "far from done." It refuses, or the inconsistency is receipted. It is
 never scored, never minimized, never descended.
+
+**THE PREDICATE AND THE COLLAPSE ARE DIFFERENT OBJECTS — this resolves
+the apparent conflict with Article I and §2b.** `18_TORSION` §2b bars
+collapsing a directional quantity to a scalar aggregate wherever the
+system computes, and §2a above calls `C = x` a substandard character.
+Both are right, and neither touches what §5 needs, because:
+
+- **the cocycle CONDITION** is a PREDICATE, evaluated per residual and
+  exactly: *is `Δ_ik − Δ_ij − Δ_jk` zero for every triple?* It
+  aggregates nothing, collapses nothing, and has no direction to lose.
+  `rfa_core::for_each_residual` already computes exactly this and
+  already skips zeros — the sealed iterator is the predicate, not the
+  sum.
+- **`C = Σ|R|`** is that predicate's L1 COLLAPSE into one number. It
+  discards which triple broke and by how much, which is precisely the
+  information a lens wants and a judge must not lose.
+
+The predicate is lawful, necessary, and already landed. The collapse is
+the substandard character: barred where the system computes, permitted
+where a reading is reported to a human. **`coherence_functional` is the
+collapse; `for_each_residual` is the predicate.** Wherever this document
+or the ledger says "the coherence reading gates," the predicate is meant
+— never the sum.
 
 This is the kernel's own philosophy applied to the one place a score had
 crept in: the kernel admits or refuses, it never optimizes.
@@ -214,8 +285,19 @@ is a false entry in the ledger.
 deed (the gauge law's shape — declaration == effect, every other index
 held still)." That clause is **UNSATISFIABLE for `i`/`j`/`k`**: no deed
 can raise `i` while holding `j` and `k` still, because all three read one
-bound. Amendment owed to D3: *one EXTENT per deed*, the extents being
-`dim` (carrying i, j, k together) and `fiber` (carrying l).
+bound.
+
+**Strengthened by the §2a ruling, and reframed.** The finding above is
+true of the CONTAINER — `Delta{dim, fiber}` — and the container is not
+the capacity (`18_TORSION` §5). So the conclusion no longer rests on an
+arity argument at all, and holds more simply: **indices are not capacity,
+so no index has a receipt to owe.** Capacity is the structure surviving
+`Π_G(Δ(Ω))`; what is receipted is the opening of genuine irreducible
+structure, which `GaugeShiftedAt` already carries and `PlaneUnearned`
+already guards. The amendment owed to D3 is therefore not "one extent
+per deed" but the removal of the index framing from the growth law
+entirely — growth is receipted against surviving structure, never
+against an index count.
 
 ### 8b. Kernel invariants — YES in principle, NOT YET, and the bump must wait
 
@@ -252,17 +334,26 @@ The relayed answer was to eliminate `ε_mag` and bound growth by a
 
 **The conclusion is right. The apparatus is refused on two grounds.**
 
-1. **The cited authorities do not exist.** `00_CHARTER.md` has no
-   Article I or Article II; no `Θ` form, Eclipse operator, or
-   `Ξ_cosmetic` appears anywhere in the tree. Inscribing invented
-   citations is precisely the drift `EQUATIONS.md` §0 was written to
-   prevent — a restatement with nothing behind it.
-2. **The mechanism already exists under landed names.** "Growth
-   permitted iff a non-zero cohomological defect" IS `orbit_lock ≠ ∅`.
-   "Denied where the shift yields no structural uplift" IS
-   `PlaneUnearned` (landed, `engine/cfe/src/world.rs`). D3 already
-   requires opening grade *k* to carry *k* receipted mints. Nothing new
-   is needed; the law is already topological.
+1. ~~**The cited authorities do not exist.**~~ **WITHDRAWN, same day
+   (`b5456d1`).** This refusal was correct when written and is now
+   false: `18_TORSION.md` landed as law with exactly those four
+   articles, and Article I (Anti-Tensor), Article II (Non-Vacuous
+   Capacity), `Θ`, `S⁺_out`, `Ξ_cosmetic` and the Eclipse all resolve
+   to it. The citations were forward-references to a document being
+   written in parallel, not inventions. **The lesson is not that the
+   refusal was wrong to make** — an unresolvable citation must be
+   refused, or invented authority enters the law unchallenged — **but
+   that concurrent seats can make a correct refusal stale within the
+   hour.** Check for a landing before repeating one.
+2. **The mechanism already exists under landed names — and this half
+   STANDS.** "Growth permitted iff a non-zero cohomological defect" IS
+   `orbit_lock ≠ ∅`. "Denied where the shift yields no structural
+   uplift" IS `PlaneUnearned` (landed, `engine/cfe/src/world.rs`).
+   `18_TORSION` reached the same grounding independently — §2a names
+   `orbit_lock` as already a torsion test, and Article II names
+   `PlaneUnearned` as its own constitutional form. Two readers arriving
+   at the same landed organs from opposite directions is the strongest
+   evidence the articles describe what the algebra already is.
 
 **The real defect is a conflation of units.** E4's `ε_mag` bounds
 `‖Δ‖₁` — an L1 MASS. D3 bounds an EXTENT — a count of indices. These
