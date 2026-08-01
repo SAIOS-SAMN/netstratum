@@ -304,7 +304,8 @@ the transmutation trigger, the mint-rate/split experiment (§7).
 **Responsibility.** The peer network. Replicate chains, re-judge every
 incoming step (admission = verification), aggregate agreement, hold
 disagreement in stasis. NO central authority — a node with granting power
-would be a mirror made of permission.
+would be a SECOND TRUTH made of permission (the figure formerly read "a
+mirror made of permission"; MIRROR is deprecated as a framing, 12 §2c).
 
 **Equations (v0.1 `consensus.rs`, exact).**
 

@@ -13,7 +13,7 @@ graveyard: nothing reads the archives, every run mints fresh founding
 reserves, and any naive merge would interleave same-stamp receipts from
 different timelines — corruption by converging timelines.
 
-**The resolution:** persist **TUniversal{S, G, T}** (the mirror's inscribed
+**The resolution:** persist **TUniversal{S, G, T}** (the LENS's inscribed
 coordinate: S the spatial triple on the 3-torus, G the gauge fiber phase, T
 the universal tick odometer `00:00:00:00:00:00`), and replace blind genesis
 with a boot-time **convergence pass** that adopts every intact archived

@@ -289,4 +289,4 @@ the outside. The world's physics explains its own ethics.
   MIRROR/ANTI-MIRROR deprecated, `12_UNION` §2c.)
 - The Chronicle Feed (08, JOURNAL-1) rightly refused to invent an ideology
   vector; once IDEO-1 lands the feed MAY read the landed cohesion counters
-  mirror-side under its reflection law — rendering, never state.
+  LENS-SIDE under its lens law — rendering, never state.

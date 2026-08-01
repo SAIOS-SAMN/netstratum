@@ -187,6 +187,6 @@ carries its lawful way back in.
    (10 §5). Nothing to reopen here; the pointer closes the loop opened
    at the VENT-1 landing.
 6. **The journal reads the books.** The Chronicle Feed (08) may now
-   read the landed cohesion counters and friction receipts mirror-side
-   under its reflection law (09 §6) — a JOURNAL follow-on for the
-   coder node, by relay.
+   read the landed cohesion counters and friction receipts LENS-SIDE
+   under its lens law (09 §6; MIRROR/ANTI-MIRROR deprecated, 12 §2c) —
+   a JOURNAL follow-on for the coder node, by relay.
