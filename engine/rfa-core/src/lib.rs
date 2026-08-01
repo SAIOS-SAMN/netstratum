@@ -38,4 +38,4 @@ pub use fold::{
 };
 pub use gates::{validate_step, GateVerdict, StepBound};
 pub use rcf::{invariant_factors, rcf_hash, rcf_signature, QPoly, RcfSignature};
-pub use reduce::coboundary_reduce;
+pub use reduce::{coboundary_reduce, holonomies, Holonomy, Support};

@@ -12,7 +12,148 @@ use num_bigint::BigInt;
 use num_integer::Integer;
 use num_traits::{One, Signed, Zero};
 
+/// WHICH RELATIONS ARE PRESENT — the sparse complex's edge set
+/// (operator ruling 2026-08-01: *an absent relation is absent, not
+/// zero*).
+///
+/// [`coboundary_reduce`] assumes a COMPLETE relation: every pair is an
+/// edge, and it anchors the whole reduction at vertex 0. On a complete
+/// graph every cocycle is a coboundary, so the reduction annihilates
+/// everything and `D ≡ 0` — measured in `kernel/tests/bridge_pins.rs`.
+/// Topology needs absent edges: it is the cycles they leave unfilled
+/// that carry `H¹`.
+///
+/// Symmetric by construction — a relation present from `i` to `j` is
+/// present from `j` to `i`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Support {
+    dim: usize,
+    fiber: usize,
+    present: Vec<bool>,
+}
+
+impl Support {
+    /// An empty complex: entities, coordinates, and no edges at all.
+    pub fn new(dim: usize, fiber: usize) -> Self {
+        Self { dim, fiber, present: vec![false; dim * dim * fiber] }
+    }
+
+    fn at(&self, i: usize, j: usize, l: usize) -> usize {
+        (i * self.dim + j) * self.fiber + l
+    }
+
+    /// Mark the relation between `i` and `j` on coordinate `l` PRESENT.
+    /// The diagonal is never an edge (`Δ_ii = 0` is not a relation).
+    pub fn connect(&mut self, i: usize, j: usize, l: usize) {
+        if i == j || i >= self.dim || j >= self.dim || l >= self.fiber {
+            return;
+        }
+        let (a, b) = (self.at(i, j, l), self.at(j, i, l));
+        self.present[a] = true;
+        self.present[b] = true;
+    }
+
+    /// Is this relation an edge of the complex?
+    pub fn has(&self, i: usize, j: usize, l: usize) -> bool {
+        match i >= self.dim || j >= self.dim || l >= self.fiber {
+            true => false,
+            false => self.present[self.at(i, j, l)],
+        }
+    }
+
+    pub fn dim(&self) -> usize {
+        self.dim
+    }
+
+    pub fn fiber(&self) -> usize {
+        self.fiber
+    }
+}
+
+/// ONE INDEPENDENT CYCLE'S HOLONOMY — the charge a loop carries that no
+/// frame can explain. `(i, j)` is the edge that closes the cycle, `l`
+/// its coordinate.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Holonomy {
+    pub i: usize,
+    pub j: usize,
+    pub l: usize,
+    pub value: Ratio,
+}
+
+/// SUPPORT-AWARE REDUCTION — reduce against a spanning FOREST of the
+/// present edges rather than against vertex 0.
+///
+/// This is the same act [`coboundary_reduce`] performs, done honestly on
+/// a sparse complex. A spanning forest is a coboundary by construction:
+/// give each root potential zero and walk, and every forest edge is
+/// exactly `p_j − p_i`. So the forest is THE FRAME, and it explains
+/// away precisely what a frame should. What it cannot explain is every
+/// remaining edge — each one closes exactly one independent cycle, and
+/// the amount by which it disagrees with the forest's potentials is
+/// that cycle's HOLONOMY.
+///
+/// A non-zero holonomy is structure no coordinate change can remove:
+/// it is `∮ ≠ 0`, the topological charge of `18_TORSION` §2d's
+/// holonomic pole, and it is what `D` counts.
+///
+/// Anchoring at vertex 0 was the degenerate case of this that assumed
+/// one component and a complete graph. Exact rational throughout; no
+/// float, no root.
+pub fn holonomies(delta: &Delta, support: &Support) -> Vec<Holonomy> {
+    let dim = delta.dim().min(support.dim());
+    let fiber = delta.fiber().min(support.fiber());
+    let mut found = Vec::new();
+
+    for l in 0..fiber {
+        // Grow a spanning forest, assigning potentials as we walk.
+        let mut potential: Vec<Option<Ratio>> = vec![None; dim];
+        let mut in_forest = vec![false; dim * dim];
+        for root in 0..dim {
+            if potential[root].is_some() {
+                continue;
+            }
+            potential[root] = Some(Ratio::zero());
+            let mut frontier = vec![root];
+            while let Some(here) = frontier.pop() {
+                let base = potential[here].clone().unwrap_or_else(Ratio::zero);
+                for next in 0..dim {
+                    if next == here || !support.has(here, next, l) || potential[next].is_some() {
+                        continue;
+                    }
+                    potential[next] = Some(base.clone() + delta.entry(here, next, l));
+                    in_forest[here * dim + next] = true;
+                    in_forest[next * dim + here] = true;
+                    frontier.push(next);
+                }
+            }
+        }
+        // Every present edge OUTSIDE the forest closes one independent
+        // cycle. Its holonomy is what the forest's frame cannot explain.
+        for i in 0..dim {
+            for j in (i + 1)..dim {
+                if !support.has(i, j, l) || in_forest[i * dim + j] {
+                    continue;
+                }
+                let (Some(from), Some(to)) = (&potential[i], &potential[j]) else {
+                    continue;
+                };
+                let charge = delta.entry(i, j, l).clone() - (to.clone() - from.clone());
+                if !charge.is_zero() {
+                    found.push(Holonomy { i, j, l, value: charge });
+                }
+            }
+        }
+    }
+    found
+}
+
 /// Reduce `delta` to the canonical representative of its H¹ class.
+///
+/// **Assumes a COMPLETE relation.** Anchoring at vertex 0 is only
+/// lawful when every pair is an edge and the graph is one component;
+/// on a sparse complex use [`holonomies`], which anchors per component
+/// against a spanning forest. Kept as the dense case it always was.
 ///
 /// Phase 1 — projection: for every pair `i < j` and coordinate `l`,
 /// `Δ'_ij,l = Δ_ij,l − Δ_0j,l + Δ_0i,l` — subtract the coboundary
