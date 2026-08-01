@@ -212,10 +212,13 @@ station or tradition alters any row.
 - `kernel/CHARTER.md` §3/§4 — the gradient stands struck; §5b's
   operator score reads component semantics.
 - `SYSTEM_SPEC.md` §0 — the foundation is capacity.
-- **New build debt** — `17_CAPACITY.md` (concurrent draft) defines `D`
-  as the structure surviving `Π_G(Δ(Ω))`. That reading and this one
-  must be reconciled by the operator into ONE definition before either
-  is wired. Recorded, not silently merged.
+- **RECONCILED (operator ruling 2026-08-01).** `D` is **the structure
+  surviving `Π_G(Δ(Ω))`** — `17_CAPACITY.md` §4b's reading stands as
+  law. The competing index-set reading (D as the extents of
+  `(i,j,k,l)`) is STRUCK from `EQUATIONS.md` §1 and `SYSTEM_SPEC.md`
+  §0. One definition now stands in all three documents. The indices and
+  the arities `Delta{dim,fiber}` are the CONTAINER the relation rides
+  on, never the capacity itself.
 
 ## §6 BUILD DEBT — what the engine cannot yet express
 

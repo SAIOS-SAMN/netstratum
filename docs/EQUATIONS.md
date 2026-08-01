@@ -105,14 +105,33 @@ never a metric density, never a scalar.
 
     dΩ(D)  =  Θ(V) ∧ dV  +  S⁺_out ∧ S⁺_hol
 
-`D` counts the irreducible degrees standing; `Ω(D)` is the space they
-span. The degrees are carried on the landed index set — `for_each_
-residual` iterates exactly `(i, j, k, l)`, and `Delta { dim, fiber }`
-bounds i/j/k by `dim` and l by `fiber`:
+`D` is **the structure surviving reduction** — RULED 2026-08-01:
 
-    i, j  — RELATIONAL: which entities may stand in relation
-    k     — COMPOSITIONAL: the triples relation composes over
-    l     — FIBER: the planes each relation carries
+    D  =  the structure standing in  Π_G( Δ(Ω) )
+
+`Ω(D)` is the space those surviving degrees span. Frame artifacts
+contribute NOTHING; only structural content counts.
+
+**The index-set reading is STRUCK** (2026-08-01). The indices
+`(i, j, k, l)` that `for_each_residual` iterates, and the arities
+`Delta { dim, fiber }`, are the CONTAINER the relation is carried on —
+they are not D. The distinction is load-bearing: a universe may carry
+enormous arity and near-zero D, when every difference it holds is pure
+frame. That is exactly the dogmatic loop that 18 §3 Article III prices
+at zero — much structure claimed, none surviving reduction. Only the
+ruled reading makes that article coherent.
+
+**Computable today.** `rfa_core::coboundary_reduce` performs the
+scoping; the surviving independent entries ARE the capacity. No new
+mathematics is owed — only a caller.
+
+**D is not a new quantity; three landed things are D under other
+names.** `PhiK I^(3)` ("rank: dim of the relational structure")
+specifies it and nothing reads it. A refused fold "emits the residue as
+a NEW plane (the mint)" — a plane is a dimension, so **the mint IS a
+capacity increment**, and D counts minted planes. `12_UNION` §3 and
+`11_AEON` §7 defer seat widths to "capacity as a live fiber reading
+(minted-plane count)" — a reading that has never existed. It is D.
 
 **∇V IS UNCAGED** (18 §2b). It is a directional operator and is never
 collapsed to `‖∇V‖`, never bounded above, never reduced to a scalar
@@ -125,40 +144,35 @@ reading is reported to a human lens, never where the system computes.
 non-destructive direct sum — no sub-component is discarded or
 truncated, and no guard may be placed on half of it.
 
-**D2 · The capacity law (admission).** INSCRIBED. What the universe
-expresses must have somewhere to live:
+**D2 · Capacity is MEASURED, never allocated.** INSCRIBED. D is a
+READING of the universe's own structure, not a quota anything must fit
+under. Nothing is ever shrunk to meet D, because D is not a container —
+it is what stands once the frame is stripped. A claim of capacity that
+does not survive `Π_G` was never capacity.
 
-    ∀ x ∈ {i, j, k, l}:    ext_x( Δ(V) )  ≤  D_x
+**D3 · The growth law — EMISSION.** INSCRIBED. D rises when structure
+that will not reduce is emitted as a new degree:
 
-Where capacity is insufficient, **the difference is NEVER reduced to
-fit** — capacity grows (D3). This is the inversion the ruling makes:
-the struck frame shrank the content to meet the container; this law
-grows the container to meet the content.
+    orbit_lock ≠ ∅   →   the fold REFUSES; the residue EMITS
+                     →   D rises by the emitted plane, BY RECEIPT
 
-**D3 · The growth law (unfold) — bounded ABOVE.** INSCRIBED.
+Growth is EARNED, never assumed: `GaugeShiftedAt` opens the plane, and
+opening grade k requires k receipted mints (`PlaneUnearned` refuses
+otherwise). **Capacity growth and the discovery mint are ONE event** —
+18 §2d names it `S⁺_out`: egress, strictly positive divergence, no
+trapped interior.
 
-    ext_x( Δ(V) ) > D_x    →    D_x rises to ext_x( Δ(V) ), BY RECEIPT
+**D4 · The contraction law — bounded BELOW at H¹.** INSCRIBED. D falls
+only where reduction shows the content was frame:
 
-One index per deed (the gauge law's shape — declaration == effect,
-every other index held still). Growth is EARNED, never assumed, and the
-landed machinery is already exactly this: `GaugeShiftedAt` opens a
-fiber plane, and opening grade k requires k receipted mints
-(`PlaneUnearned` refuses otherwise); `EntityRegistered` admits an
-entity into i/j/k. Bounded above by the magnitude gate (E4). The law
-names what the deeds already do.
+    D falls only as Π_G strips a coboundary  — never below H¹
+    FORBIDDEN where orbit_lock ≠ ∅            — genuine difference
+                                                keeps its degree
 
-**D4 · The contraction law (fold) — bounded BELOW.** INSCRIBED.
-Capacity falls only where its index carried no irreducible content —
-where reduction shows the content was frame:
-
-    D_x may fall to ext_x( Π_G(Δ(V)) )    — never below
-    FORBIDDEN where orbit_lock ≠ ∅         — genuine difference keeps
-                                             its index
-
-The floor is H¹. A capacity holding genuine difference never contracts:
-that is I6 stated on the capacity axis — *no difference dies without
-account*. D3 and D4 together are the standing law that **everything
-grows or contracts**, both ends bounded, neither end optional.
+That is I6 on the capacity axis — *no difference dies without account*.
+D3 and D4 together are the standing law that **everything grows or
+contracts**, both ends bounded, neither optional; and 18 §3 Article IV
+governs the axis — capacity never retreats outside lawful reduction.
 
 **E2 · The singularity law (the angle-free collision).** LANDED (U2e)
 — `rfa_core::judged_fold` (Π_G then F_fold*) with THE ANGLE-FREE

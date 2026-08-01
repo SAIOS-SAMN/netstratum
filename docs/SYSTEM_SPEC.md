@@ -25,16 +25,19 @@ system runs many algorithms at many scales. The standing law is
 `docs/EQUATIONS.md` §1 (**D0–D4**), summarized here:
 
     V     = the committed state, read WHOLE (indivisible; the totality law)
-    Δ(V)  = the relation V expresses          (`rfa_core::Delta`)
-    D     = { i, j, k, l }                     dimensional capacity, a SHAPE
+    Ω     = the totality of one universe; Δ(Ω) its relation
+    D     = the structure surviving Π_G( Δ(Ω) )        RULED 2026-08-01
 
-    admission:    ∀x ∈ {i,j,k,l}:  ext_x(Δ(V)) ≤ D_x
-    growth:       ext_x(Δ(V)) > D_x  →  D_x rises, BY RECEIPT (bounded above)
-    contraction:  D_x falls only to ext_x(Π_G(Δ(V))) — never below;
-                  FORBIDDEN where orbit_lock ≠ ∅
+    measured:     D is a READING, never a quota — nothing is shrunk to fit
+    growth:       orbit_lock ≠ ∅ → the fold refuses, the residue EMITS,
+                  D rises by the plane, BY RECEIPT (earned, never assumed)
+    contraction:  D falls only as Π_G strips a coboundary — never below
+                  H¹; FORBIDDEN where orbit_lock ≠ ∅
 
-Where capacity is short, the difference is never reduced to fit — the
-capacity grows. Everything grows or contracts, both ends bounded.
+**Capacity growth and the discovery mint are ONE event.** The index set
+`(i,j,k,l)` and the arities `Delta{dim,fiber}` are the CONTAINER, not
+D — that reading is STRUCK. A universe may hold enormous arity and near
+zero D when its differences are all frame.
 
 The v0.1 evolution equation (`engine.rs` T.FOUND.3) is kept below as
 HISTORY only, with its gradient term struck:
