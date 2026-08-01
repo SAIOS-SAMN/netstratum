@@ -1068,3 +1068,81 @@ mints, so the polarity is enforced by a test rather than by prose.
 wired into the kernel as §§10–12 kept urging, this contradiction would
 have been cemented into a judged invariant and bound into `VERSION`
 before anyone noticed the polarity was undecided.
+
+---
+
+## §14 HISTORICAL DRIFT — wordings struck, kept for the record
+
+A correction records what it replaced, because a silently overwritten
+law leaves no evidence it ever misled.
+
+### 14a. `D = 0` — the absolute that could not exist
+
+**Struck 2026-08-01 (operator ruling); Article II rebuilt on the
+elevation by the `ground-floor` landing.**
+
+| where | the struck wording |
+|---|---|
+| `18` §3 Article II | *"A state yielding a vacuous set (`V = 0` or `D = 0`) cannot claim operational authorization or institutional standing."* |
+| `18` §4 execution matrix | *"vacuous closure \| `D = 0` or no occupied capacity"* |
+| `18` §7a kernel-eligible table | *"**Art. II non-vacuous** — `D = 0` holds no standing"* |
+| `rfa-core` | `Extent::is_vacuous()`, testing `coordinates == 0` |
+
+**The ruling:** *"D can never equal 0 in this system — that is an
+absolute which we never should have — otherwise you have no
+dimensions."*
+
+Zero capacity is an ABSOLUTE and this constitution carries none: the
+T∞ purge already barred the reciprocal pole. It also made Article II a
+CLIFF, in a document that refuses cliffs everywhere else — the eclipsed
+entity is *"never barred and never deleted"*, and guardrail 6 holds
+that no actor is ever excluded.
+
+### 14b. THE FLOOR WAS DECLARED AND NEVER COMPUTED — the sharper fault
+
+**Recorded because it is the more instructive failure.** The first
+landing of the ground introduced `Extent::GROUND = 1` and then never
+read it: `capacity()` applied no floor, `is_ground()` tested
+`coordinates == 0`, and the pin that claimed to prove the floor was
+`assert_eq!(Extent::GROUND, 1)` — a constant compared to its own
+literal, which proves nothing about what any state reads. **`D` was in
+the ground while the law said it could not be.** That is exactly the
+failure LAW 8 excises: a term that resonates and computes nothing.
+
+The cure was structural, not another check — a `Degree` type with a
+private field and one constructor, so a below-ground value is not
+refused but UNREPRESENTABLE (the AV-4 shape, §10b).
+
+### 14c. `V` IS NOT FLOORED, AND THAT IS DELIBERATE
+
+The same ruling was read as *"neither pole reads zero"* and extended to
+`V`. **That extension is withdrawn.** The floor is a property of
+EXTENT, never a universal:
+
+- `D` is an extent — a position, an occupancy. A thing that exists
+  occupies at least a point, so zero extent is incoherent for a
+  committed state. That is what earns the floor.
+- `V` is a flow — a rate. A thing that exists need not be moving. Zero
+  flow is ordinary and physically meaningful: it is REST. Flooring `V`
+  would assert that nothing can ever be at rest — perpetual motion
+  written as law.
+
+It would also make `Vacuity::Stasis` (circulation > 0 ∧ `dV ≡ 0`)
+unreachable, and that row exists to be detected and re-volumized, not
+abolished. The same reasoning leaves `rank` unfloored: floor it and
+both `Void` and `Stasis` vanish, collapsing four rows to two.
+
+### 14d. `ΔD(w) = 0` survives the strike
+
+`ΔD` is a DELTA over a window; `D` is a LEVEL. The ground floors the
+level and says nothing about the delta. A window in which capacity was
+flat is an ordinary computable fact — and it is the exact condition the
+loop-trap reading detects. Do not sweep it out with `D = 0`.
+
+### 14e. `§2e`'s traverse test — no target left
+
+The ruling also asked that `18` §2e's VACUOUS test be amended. §2e's
+traverse formalism and the `α ≅ Ω` congruence test had already been
+struck under Article III applied to that document; the `ground-floor`
+landing then recorded `α ≅ Ω` as the GROUND — a traverse with no extent
+is a point, and a point is one dimension, never none.

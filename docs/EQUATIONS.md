@@ -217,25 +217,35 @@ standalone unmonitored variable and the entanglement `Δ(D) ⋈ ∇V` with
 no execution site at all. D4 is that site. A rule with the wrong
 mechanism is remapped, not struck.
 
-**THE LAYER SPLIT IS LOAD-BEARING — `Ξ` is a WINDOW, `lawful()` is a
-STEP.** D4 fires in two places and they must never merge:
+**THE LAYER SPLIT IS LOAD-BEARING — a WINDOW is not a STEP.** D4 fires
+in two places and they must never merge:
 
     PER-STEP (kernel):   a deed that mints carries a non-zero capacity
                          increment, or REFUSES — 18 §2f consequence 2
-                         (no hidden work), §2g's identity form. Local,
+                         (no hidden work), §2g's gap disposition. Local,
                          judgeable, already the pin-6 casualty.
-    OVER A WINDOW (lens + allocation):
-                         Ξ(w) = deeds(w) / (1 + ΔD(w)); the loop trap
-                         deeds(w) > 0 ∧ ΔD(w) = 0. The Eclipse VACATES
-                         the allocation claim; the degree is untouched.
+    OVER A WINDOW (lens): deeds emitted while the rank did not grow —
+                         deeds(w) > 0 ∧ ΔD(w) = 0. The revocation
+                         VACATES the allocation claim; the degree
+                         itself is untouched.
 
-    (Two struck symbols were EXCISED from this block, operator ruling
-    2026-08-01: the scalar allocation score `T_k`, struck by 18 §3 —
-    an article outlawing scalar authority cannot enforce itself with a
-    scalar — and an esoteric masking symbol that never existed in the
-    codebase at all. Nothing in this system is founded on dogma or
-    esoterica; a struck symbol left in a record is still a symbol in
-    the corpus. 18 §3's Eclipse is claim-revocation, not a score.)
+    (`Ξ(w) = deeds(w)/(1 + ΔD(w))` was this row's window arithmetic and
+    is STRUCK — 18 §3 struck the cosmetic meter, together with the
+    scalar allocation score `T_k` and an esoteric masking symbol that
+    never existed in the codebase at all, on one ground: an article
+    outlawing scalar authority cannot enforce itself with a scalar, and
+    `Ξ`/`ΔD` as OBJECTIVES are barred outright. The window READING
+    survives — deeds against rank that did not grow, over the year
+    voice — but it carries no formula in this ledger and no rule may
+    treat it as a target. Recorded, never silently dropped.)
+
+**`ΔD(w) = 0` IS LEGITIMATE AND REACHABLE — do not sweep it out with
+`D = 0`.** They are different objects: `ΔD` is a DELTA over a window,
+`D` is a LEVEL. The ground floors the level (`18` §3 — a committed
+state occupies at least a point), and it says nothing whatever about
+the delta. A window in which capacity was simply flat is an ordinary,
+computable fact and the exact condition this row detects. Flooring the
+delta would abolish the very reading.
 
 Kernel CHARTER §1 forbids the second half in the judge: *a global
 property is not a per-step fact and cannot enter `lawful()` without
@@ -247,11 +257,13 @@ it there.
 **THREE CORRECTIONS to the relayed form** (recorded per the relay law —
 translate, never transcribe; the 17 §8 precedent):
 
-1. **`Ξ → ∞` is REFUSED.** With `ΔD(w) = 0`, `Ξ(w) = deeds(w)/1 =
-   deeds(w)` — a FINITE exact rational. The `1 +` in the denominator
-   exists precisely so the trap stays finite and computable. Infinity
-   is barred by standing ruling (the T∞ purge; 18 §6.4), so a law
-   written against `Ξ → ∞` would have no operand.
+1. **`Ξ → ∞` WAS REFUSED, and the whole meter is now struck.** The
+   relayed form wrote the loop trap as `Ξ → ∞`; with `ΔD(w) = 0` the
+   formula gave `deeds(w)/1` — finite — so the refusal stood on the
+   `1 +` denominator existing precisely to keep the trap computable,
+   infinity being barred by standing ruling (the T∞ purge). 18 §3 has
+   since struck the meter itself, so the correction is kept as record
+   rather than as live law.
 2. **Eclipse strips ALLOCATION, never capacity or standing.** Article
    III is explicit: an eclipsed entity *"still acts, still emits
    receipts, still tells its story — and receives nothing … never
