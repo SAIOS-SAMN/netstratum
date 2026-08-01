@@ -200,7 +200,44 @@ concept made diegetic:
   everything and author nothing, and their whole law is the one the engine
   already keeps: *the mirror reflects, never authors*.
 - **Sovereigns.** The holders of chartered worlds — the `SOVEREIGN`
-  provenance that already signs every world's receipts, made a station. A
+  provenance that already signs every world's receipts, made a station.
+
+### 3a. THE WITNESS — an ACTION inside every station, never a station itself
+
+**Ruled 2026-08-01 (operator).** `witness` is NOT a fifth office and it
+never enters `STATIONS`. It is an **independent action available inside
+each station, which AUTHENTICATES UPWARD.**
+
+    station  =  WHERE a line stands        (a seat, bounded by width)
+    witness  =  what a line DOES from there (an act, available to all)
+
+**The direction is the whole content.** A seat witnesses toward the tier
+above it: a stationless biosphere line authenticates to T1, a watcher or
+observer to T0, a sovereign to the tier that chartered it. Authority does
+not flow down as permission; **authentication flows UP as evidence.** No
+seat is granted standing by the one above it — each earns it by
+presenting something the one above can re-check.
+
+**This is the mesh's own law, made diegetic.** *Admission is
+verification, never trust* — a peer does not accept a claim because of
+who made it, it re-judges the claim under its own kernel. A witness is
+that same act between STATIONS instead of between nodes: the higher seat
+does not take the lower seat's word, it re-runs the evidence. A witness
+that cannot be re-checked is not a witness (the `JudgedWithoutProof`
+shape, one layer up).
+
+**Why an action and not a rank.** A rank is a thing to climb and hold; an
+act is a thing to perform and be measured by. Making witnessing an office
+would create a fifth seat to farm — and Article III LAW 3 already says
+changing form creates nothing. Making it an action means EVERY line can
+authenticate upward regardless of where it sits, including a stationless
+one, and none of them gains a seat by doing so.
+
+**Owed at its landing** (specified here, built later): the deed needs its
+own tag claimed in the `dop.rs` header, an I2 containment arm (who may
+witness for whom), and a red-first witness that an unverifiable claim
+REFUSES. Until the deed lands this is inscribed law with no wiring, and
+it is recorded as such rather than assumed live. A
   Sovereign governs the worlds it founded or was lawfully delegated (§2),
   answers to its council, and is the class from which elevation into a
   progenitor seat is attempted (§6).

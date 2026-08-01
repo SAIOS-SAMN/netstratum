@@ -291,13 +291,13 @@
   "name": "Draco",
   "slug": "draco",
   "species": "coherent of the warm dark",
-  "motto": "we hold the same silence, at a different heat",
+  "motto": "we are seen only when the light is taken",
   "disposition": "epicurean",
   "metabolism": "biotic",
-  "perception": "harmonic",
-  "world": "thermal-choir",
-  "planet": "emberhold",
-  "colony": "long-scale",
+  "perception": "umbral",
+  "world": "eclipse-hold",
+  "planet": "umbra",
+  "colony": "totality",
   "policy": "steady",
   "x": "-11",
   "y": "16",
@@ -305,7 +305,7 @@
   "star": "k",
   "albedo": "1/4",
   "orbit": "3/4",
-  "station": "observer"
+  "station": "sovereign"
  },
  {
   "name": "Darlok",
@@ -325,5 +325,25 @@
   "star": "m",
   "albedo": "1/2",
   "orbit": "1"
+ },
+ {
+  "name": "Pleiadian",
+  "slug": "pleiadian",
+  "species": "the seven who watch",
+  "motto": "we hold the threshold and do not descend",
+  "disposition": "empiricist",
+  "metabolism": "biotic",
+  "perception": "harmonic",
+  "world": "seven-sisters",
+  "planet": "maia",
+  "colony": "threshold-watch",
+  "policy": "steady",
+  "x": "21",
+  "y": "-6",
+  "z": "13",
+  "star": "b",
+  "albedo": "1/4",
+  "orbit": "1",
+  "station": "watcher"
  }
 ]
