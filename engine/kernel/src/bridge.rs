@@ -198,6 +198,79 @@ pub fn project(state: &Committed) -> Delta {
     delta
 }
 
+/// THE REFOLD CERTIFICATE — what the fold took, kept exactly, so the
+/// fold can be undone (operator ruling 2026-08-01: *fold is too flat —
+/// this is folding a BLANKET, not a piece of paper*).
+///
+/// A crease in paper is permanent: the sheet goes flat and the fold
+/// line destroys what was there. A blanket keeps its loft — folding
+/// rearranges it and nothing is lost, so it unfolds whole. The
+/// reduction must be the blanket.
+///
+/// `coboundary_reduce` returns only the core. What it stripped is
+/// simply gone, and that is where **capacity is lost to silly
+/// mistakes**: if a relation was mis-observed — an `Unknown` wrongly
+/// taken as `Absent`, a reach too short — then some of what the fold
+/// discarded as "frame" was structure, and there is no way back to it.
+/// The certificate closes that door: the fold is EXACTLY INVERTIBLE, so
+/// a correction to the observation re-runs the fold instead of having
+/// to re-earn the capacity.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Refold {
+    /// `p_i,l` — the frame potentials anchored at entity 0. The
+    /// coboundary the fold stripped is exactly `p_j − p_i`, which is
+    /// the one shape that carries no structural content (witnessed in
+    /// `bridge_pins`).
+    pub potentials: Vec<Vec<Ratio>>,
+}
+
+/// Fold with a certificate: strip the frame anchored at entity 0 and
+/// KEEP what was stripped. The returned core is the projection before
+/// integer normalization, so the pair is exactly invertible by
+/// [`refold`]. For the canonical scale-normalized representative the
+/// caller still uses the sealed `coboundary_reduce` — this door exists
+/// to make the fold reversible, never to replace it.
+pub fn fold_certified(delta: &Delta) -> (Delta, Refold) {
+    let dim = delta.dim();
+    let fiber = delta.fiber();
+    let potentials: Vec<Vec<Ratio>> = (0..dim)
+        .map(|i| (0..fiber).map(|l| delta.entry(0, i, l).clone()).collect())
+        .collect();
+    let mut core = Delta::zero(dim, fiber);
+    for i in 0..dim {
+        for j in (i + 1)..dim {
+            let coords: Vec<Ratio> = (0..fiber)
+                .map(|l| {
+                    delta.entry(i, j, l).clone() - potentials[j][l].clone()
+                        + potentials[i][l].clone()
+                })
+                .collect();
+            core.set_antisym(i, j, coords);
+        }
+    }
+    (core, Refold { potentials })
+}
+
+/// Undo a certified fold: re-add the frame the fold took. Exact — the
+/// blanket unfolds whole.
+pub fn refold(core: &Delta, cert: &Refold) -> Delta {
+    let dim = core.dim();
+    let fiber = core.fiber();
+    let mut whole = Delta::zero(dim, fiber);
+    for i in 0..dim {
+        for j in (i + 1)..dim {
+            let coords: Vec<Ratio> = (0..fiber)
+                .map(|l| {
+                    core.entry(i, j, l).clone() + cert.potentials[j][l].clone()
+                        - cert.potentials[i][l].clone()
+                })
+                .collect();
+            whole.set_antisym(i, j, coords);
+        }
+    }
+    whole
+}
+
 /// What is KNOWN about the relation between two orbs on one channel,
 /// within ONE committed book.
 ///

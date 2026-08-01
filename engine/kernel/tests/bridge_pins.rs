@@ -10,7 +10,8 @@ use cfe::dop::ColonyOrb;
 use cfe::ratio::ratio;
 use cfe::world::{Bond, Committed, World};
 use kernel::bridge::{
-    observe, project, read_entangled, read_entangled_observed, Observed, CHANNELS, CHANNEL_BOND,
+    fold_certified, observe, project, read_entangled, read_entangled_observed, refold, Observed,
+    CHANNELS, CHANNEL_BOND,
 };
 use rfa_core::{coboundary_reduce, Delta};
 
@@ -166,6 +167,87 @@ fn an_unresolved_absence_refuses_capacity_unverified_absence_would_mint() {
         !unseen.capacity_is_defined(),
         "one unobserved pair is enough — absence must be verified, never assumed"
     );
+}
+
+#[test]
+fn the_fold_unfolds_whole_a_blanket_not_a_crease() {
+    // THE RE-VOLUMIZER. A crease in paper is permanent; a blanket keeps
+    // its loft and unfolds whole. The certified fold keeps exactly what
+    // it stripped, so the original returns byte-for-byte.
+    let mut state = orbs(4);
+    state.bonds = vec![bond(1, 2, 2), bond(2, 3, 7), bond(3, 4, 5), bond(1, 4, 3)];
+    let whole = project(&state);
+
+    let (core, cert) = fold_certified(&whole);
+    let recovered = refold(&core, &cert);
+
+    for i in 0..4 {
+        for j in 0..4 {
+            for l in 0..CHANNELS {
+                assert_eq!(
+                    recovered.entry(i, j, l),
+                    whole.entry(i, j, l),
+                    "the blanket unfolds whole at ({i},{j},{l}) — nothing creased away"
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn what_the_fold_strips_is_exactly_frame_and_nothing_else() {
+    // The stripped part must be a PURE COBOUNDARY — the one shape that
+    // carries no structural content. If the fold ever took more than
+    // this, it would be destroying capacity, which is the loss the
+    // certificate exists to make impossible.
+    let mut state = orbs(3);
+    state.bonds = vec![bond(1, 2, 2), bond(2, 3, 7), bond(1, 3, 3)];
+    let whole = project(&state);
+    let (core, cert) = fold_certified(&whole);
+
+    // stripped = whole − core, rebuilt from the certificate alone.
+    let mut stripped = Delta::zero(3, CHANNELS);
+    for i in 0..3 {
+        for j in (i + 1)..3 {
+            let coords: Vec<_> = (0..CHANNELS)
+                .map(|l| cert.potentials[j][l].clone() - cert.potentials[i][l].clone())
+                .collect();
+            stripped.set_antisym(i, j, coords);
+        }
+    }
+    let reduced_strip = coboundary_reduce(&stripped);
+    for i in 0..3 {
+        for j in 0..3 {
+            for l in 0..CHANNELS {
+                assert_eq!(
+                    *reduced_strip.entry(i, j, l),
+                    ratio(0, 1),
+                    "the stripped part is pure frame — it reduces to nothing"
+                );
+            }
+        }
+    }
+    // And core + stripped is the whole again.
+    assert_eq!(refold(&core, &cert), whole);
+}
+
+#[test]
+fn a_corrected_observation_re_folds_rather_than_re_earning() {
+    // The capacity-loss case the certificate closes. A pair mis-taken
+    // as unrelated, then corrected: the fold re-runs over the corrected
+    // relation and the recovered whole carries the new obligation. No
+    // capacity had to be re-earned, because none was destroyed.
+    let mut state = orbs(3);
+    state.bonds = vec![bond(1, 2, 2), bond(2, 3, 7)];
+    let (core, cert) = fold_certified(&project(&state));
+    assert_eq!(refold(&core, &cert), project(&state));
+
+    // The telescope reaches further: 1→3 was there all along.
+    state.bonds.push(bond(1, 3, 4));
+    let corrected = project(&state);
+    let (core2, cert2) = fold_certified(&corrected);
+    assert_eq!(refold(&core2, &cert2), corrected, "the corrected fold is whole too");
+    assert_ne!(core, core2, "the correction changed the core, as it must");
 }
 
 #[test]
