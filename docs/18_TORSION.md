@@ -1085,10 +1085,19 @@ misreading.**
    than you are using.** Enforced today by ABSENCE: no deed closes a
    plane (`GaugeShiftedAt` opens grades; nothing removes one), and the
    container law makes structure in an unopened plane unrepresentable.
-   **OWED:** the AEON FOLD contracts the board and its only guard is
-   fold-ELIGIBILITY — a policy about quietness, never a check that room
-   ≥ occupancy. Nothing computes the occupancy floor. Recorded as a
-   build debt, not assumed safe.
+   **THE FOLD, GUARDED** (2026-08-02; `kernel::bridge::fold_guard`,
+   pinned in `bridge_pins`). A fold does not shrink `D` — it seats a NEW
+   store — so it is the one operation that could route around the floor:
+   a SELECTIVE carry could land structure in a universe with fewer tones
+   than it occupies, with no plane ever closed and the floor still
+   breached. The fold as built is TOTAL and therefore already safe (the
+   era archives whole, the successor seats at `GROUND`), and
+   `EraFolded { era, gauge }` carries no manifest, so nothing else could
+   check it. The guard holds BOTH offices, since neither alone suffices:
+   **D** — carried structure must keep its tones; **V** — an orb leaves
+   the live universe only into the ARCHIVE, never into nothing, which is
+   I6 on the fold. Four verdicts: `Total`, `CarriedWithinFloor`,
+   `RoomBelowOccupancy`, `StandingDroppedWithoutAccount`.
 
 1. **MONOTONE, NOT DESCENDING.** *Monotone here is order-theoretic —
    NON-DECREASING. It is not the tonal sense: `D` is POLYTONIC (each

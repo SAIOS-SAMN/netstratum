@@ -10,8 +10,8 @@ use cfe::dop::ColonyOrb;
 use cfe::ratio::ratio;
 use cfe::world::{Bond, Committed, World};
 use kernel::bridge::{
-    fold_certified, observe, project, read_entangled, read_entangled_observed, refold, Observed,
-    CHANNELS, CHANNEL_BOND,
+    fold_certified, fold_guard, observe, project, read_entangled, read_entangled_observed,
+    refold, FoldGuard, Observed, CHANNELS, CHANNEL_BOND,
 };
 use rfa_core::{coboundary_reduce, Degree, Delta};
 
@@ -510,4 +510,89 @@ fn the_degree_rises_above_the_ground() {
     // world is polytonic — the chord it holds is what D counts.
     assert!(composed.degree().get() == 1, "the flat world is one tone");
     assert!(degree.get() > 1, "the strained world is polytonic");
+}
+
+// ─── THE FOLD GUARD — the occupancy floor on both offices ───────────
+
+#[test]
+fn a_total_fold_is_lawful_and_carries_nothing() {
+    // The fold as built: the era archived WHOLE, the successor seated
+    // fresh at GROUND. Nothing crosses, so nothing can be under-roomed
+    // and nothing can be dropped.
+    let mut prior = orbs(3);
+    prior.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(1, 3, 9)];
+    assert!(read_entangled(&prior).degree().is_above_ground(), "the era had structure");
+
+    let successor = orbs(0);
+    let archived = vec![1, 2, 3];
+    let verdict = fold_guard(&prior, &successor, &archived);
+    assert_eq!(verdict, FoldGuard::Total, "a whole-era fold carries nothing");
+    assert!(verdict.is_lawful());
+    assert_eq!(
+        read_entangled(&successor).degree(),
+        Degree::GROUND,
+        "and the fresh universe seats on the ground, correctly"
+    );
+}
+
+#[test]
+fn a_fold_that_drops_standing_without_account_refuses() {
+    // V's half. An orb present before, absent after, and ABSENT FROM
+    // THE ARCHIVE has simply ceased. Standing comes from admission and
+    // admission is never revoked — a departure must be into the record,
+    // never into nothing. I6 on the fold: no difference dies without
+    // account.
+    let prior = orbs(3);
+    let successor = orbs(2); // orb 3 gone
+    let verdict = fold_guard(&prior, &successor, &[]); // and unarchived
+    assert_eq!(
+        verdict,
+        FoldGuard::StandingDroppedWithoutAccount { orbs: 1 },
+        "an unarchived disappearance is unaccounted"
+    );
+    assert!(!verdict.is_lawful());
+
+    // Archive it and the same fold is lawful — the orb left into the
+    // record rather than out of existence.
+    assert!(fold_guard(&prior, &successor, &[3]).is_lawful(), "sealed is accounted");
+}
+
+#[test]
+fn a_carry_into_fewer_tones_refuses() {
+    // D's half, and the reason this guard exists. A fold does not
+    // shrink D — it seats a NEW store. So a SELECTIVE carry could land
+    // structure in a universe with fewer tones than it occupies, with
+    // no plane ever closed and the floor still breached.
+    let mut prior = orbs(3);
+    prior.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(1, 3, 9)];
+    let carried_rank = read_entangled(&prior).rank;
+    assert!(carried_rank > 0, "the era carried real circulation");
+
+    // The successor keeps all three orbs and DROPS their obligations —
+    // the structure crossed, the room did not.
+    let successor = orbs(3);
+    assert_eq!(read_entangled(&successor).degree(), Degree::GROUND, "no tones in the successor");
+
+    let verdict = fold_guard(&prior, &successor, &[]);
+    assert_eq!(
+        verdict,
+        FoldGuard::RoomBelowOccupancy { carried_rank, successor_degree: 1 },
+        "carried structure landing in fewer tones than it occupies must refuse"
+    );
+    assert!(!verdict.is_lawful());
+}
+
+#[test]
+fn a_carry_that_keeps_its_tones_admits() {
+    // The lawful carry: the structure crosses and its room crosses with
+    // it. Both floors hold, so the fold admits.
+    let mut prior = orbs(3);
+    prior.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(1, 3, 9)];
+
+    let mut successor = orbs(3);
+    successor.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(1, 3, 9)];
+
+    let verdict = fold_guard(&prior, &successor, &[]);
+    assert_eq!(verdict, FoldGuard::CarriedWithinFloor);
+    assert!(verdict.is_lawful(), "room carried with the structure it holds");
 }

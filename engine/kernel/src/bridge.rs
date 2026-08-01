@@ -564,3 +564,107 @@ pub fn read_entangled_observed(state: &Committed, unknown: usize) -> EntangledRe
     let rank = holonomies(&delta, &support).len();
     EntangledRead { rank, residuals, flows, unknown }
 }
+
+/// THE FOLD GUARD — the occupancy floor, on both offices at once
+/// (operator ruling 2026-08-02).
+///
+/// `18` Article IV clause 0 states the floor: **you cannot have less
+/// room than you are using.** `D ≥ occupancy` binds whenever anything
+/// is in the universe, and within a universe it holds by absence — no
+/// deed closes a plane, so `D` cannot shrink at all.
+///
+/// **THE FOLD IS THE ONE OPERATION THAT COULD ROUTE AROUND THAT**, and
+/// it is why this guard exists. A fold does not shrink `D`; it seats a
+/// NEW universe. So a fold that carried content forward selectively
+/// could land that content in a store with fewer tones than it needs —
+/// no plane was ever closed, and the floor would still be breached.
+///
+/// **The fold as built is TOTAL** and therefore already safe: the era
+/// is archived whole (`conductor::fold` rotates the entire var root)
+/// and the successor seats fresh at `GROUND`. *Nothing is destroyed;
+/// the fold is archival by construction.* This guard exists so that
+/// stays true of every future fold rather than of this one only —
+/// `EraFolded { era, gauge }` carries no manifest, so nothing else
+/// could check it.
+///
+/// **BOTH OFFICES ARE GUARDED, because neither alone is sufficient**
+/// (`12_UNION` §3b, the office dyad):
+///
+/// - **D, the PROGENITOR — room.** Structure that crosses must keep its
+///   tones. A carried pair may not land where fewer grades stand.
+/// - **V, the SOVEREIGN — standing.** Nothing admitted may simply cease.
+///   An orb leaves the live universe only into the archive, never into
+///   nothing. That is I6 on the fold: *no difference dies without
+///   account.*
+///
+/// A total fold passes both trivially — nothing carries, so nothing can
+/// be under-roomed, and everything is archived, so nothing is dropped.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FoldGuard {
+    /// TOTAL — nothing carried forward. The era sealed whole and the
+    /// successor seats fresh. Lawful by construction.
+    Total,
+    /// CARRIED, and both floors hold: the carried structure keeps its
+    /// tones, and every departure is accounted.
+    CarriedWithinFloor,
+    /// REFUSED — carried structure would land in fewer tones than it
+    /// occupies. The D floor is breached.
+    RoomBelowOccupancy { carried_rank: usize, successor_degree: usize },
+    /// REFUSED — an orb present before is absent after AND absent from
+    /// the archive. Something admitted ceased without account.
+    StandingDroppedWithoutAccount { orbs: usize },
+}
+
+impl FoldGuard {
+    /// Only the two lawful shapes admit.
+    pub fn is_lawful(&self) -> bool {
+        matches!(self, FoldGuard::Total | FoldGuard::CarriedWithinFloor)
+    }
+}
+
+/// Judge a fold against the occupancy floor. `archived` names the orbs
+/// the fold sealed into the era record; a TOTAL fold archives every orb
+/// the prior universe held.
+pub fn fold_guard(prior: &Committed, next: &Committed, archived: &[u64]) -> FoldGuard {
+    let held = |state: &Committed| -> Vec<u64> {
+        state.orbs.iter().map(|orb| orb.orb_id).collect()
+    };
+    let before = held(prior);
+    let after = held(next);
+
+    // V's half first: nothing admitted may cease unaccounted. An orb
+    // that left the live universe must appear in the archive.
+    let dropped = before
+        .iter()
+        .filter(|id| !after.contains(id) && !archived.contains(id))
+        .count();
+    if dropped > 0 {
+        return FoldGuard::StandingDroppedWithoutAccount { orbs: dropped };
+    }
+
+    // TOTAL: nothing crossed. Nothing carried can be under-roomed.
+    let carried: Vec<u64> = before.into_iter().filter(|id| after.contains(id)).collect();
+    if carried.is_empty() {
+        return FoldGuard::Total;
+    }
+
+    // D's half: the carried structure must keep its tones. The rank the
+    // carried pairs bore before is the room the successor owes them.
+    let carried_rank = read_entangled(&restrict(prior, &carried)).rank;
+    let successor_degree = read_entangled(next).degree().get();
+    if successor_degree < Degree::above_ground(carried_rank).get() {
+        return FoldGuard::RoomBelowOccupancy { carried_rank, successor_degree };
+    }
+    FoldGuard::CarriedWithinFloor
+}
+
+/// The prior universe seen through only the orbs that crossed — what
+/// the carried structure was, in its own right.
+fn restrict(state: &Committed, keep: &[u64]) -> Committed {
+    let mut cut = state.clone();
+    cut.orbs.retain(|orb| keep.contains(&orb.orb_id));
+    cut.bonds.retain(|b| keep.contains(&b.source) && keep.contains(&b.target));
+    cut.covenants.retain(|c| keep.contains(&c.obligor) && keep.contains(&c.beneficiary));
+    cut.debts.retain(|d| keep.contains(&d.debtor) && keep.contains(&d.creditor));
+    cut
+}
