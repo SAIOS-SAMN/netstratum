@@ -409,9 +409,18 @@ fn covered(event: &ClosureEvent) -> bool {
         // into the element ledger, judged with strict symmetry to the
         // banked ledger — sign-guarded, bounded by the prior vein's
         // richness × elapsed, and zero-invariant for every other deed.
-        // Witnessed in `element_pins.rs`. STILL HELD OUT: TaxonSealed
-        // (coder-03's #42) — the last deed before the Phase 3 flip.
+        // Witnessed in `element_pins.rs`.
         | E::AssayStruck { .. }
+        // THE LAST DEED (operator ruling 2026-08-01, folded to arch-01):
+        // TaxonSealed — class and clade sealed as identity, once per
+        // star (15 §4). {I2 containment (Build), I3 exactness} complete
+        // it; it moves no bank, no element, no key (all three
+        // conservation laws hold vacuously). With this, `covered()` is
+        // TOTAL — every one of the 64 deeds is judged; `Unjudged` is
+        // unreachable via any current deed (the Phase 3 precondition,
+        // witnessed in `taxon_pins.rs`). The sealed default stays as
+        // defense for FUTURE enum additions (refuse-unknown).
+        | E::TaxonSealed { .. }
     )
 }
 
