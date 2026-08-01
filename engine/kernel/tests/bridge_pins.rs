@@ -251,6 +251,57 @@ fn a_corrected_observation_re_folds_rather_than_re_earning() {
 }
 
 #[test]
+fn a_universe_with_an_unclosed_obligation_ring_reads_capacity() {
+    // LET THERE BE LIGHT. A real committed state, read through the
+    // kernel, carrying non-zero D for the first time.
+    //
+    // Four orbs in a ring of standing bonds — 1→2→3→4→1 — and NO
+    // chords: orb 1 and orb 3 have never dealt with each other, orb 2
+    // and orb 4 likewise. Those absences are VERIFIED (one book sees
+    // all its own orbs), so the ring leaves a genuine hole.
+    //
+    // No triple is a filled triangle, so there is no cocycle condition
+    // to fail: the ring IS a cocycle. And walking the loop does not
+    // return where it started, so it is NOT a coboundary. That is
+    // non-trivial H¹ — capacity no change of frame can explain away.
+    let mut state = orbs(4);
+    state.bonds = vec![bond(1, 2, 3), bond(2, 3, 3), bond(3, 4, 3), bond(4, 1, 3)];
+
+    let read = read_entangled(&state);
+    assert!(read.residuals.is_empty(), "no filled triangle: nothing fails to compose");
+    assert_eq!(read.unknown, 0, "one book verifies absence over its own orbs");
+    assert!(read.capacity_is_defined(), "a fully observed cocycle HAS a class");
+    assert_eq!(read.capacity, 1, "one independent cycle, carrying charge: D = 1");
+}
+
+#[test]
+fn a_ring_that_closes_consistently_carries_no_capacity() {
+    // The same ring, but the obligations balance around the loop, so
+    // the walk returns to its origin. Structure is the FAILURE to
+    // close, never the loop itself.
+    let mut state = orbs(4);
+    state.bonds = vec![bond(1, 2, 3), bond(2, 3, 3), bond(3, 4, 3), bond(1, 4, 9)];
+
+    let read = read_entangled(&state);
+    assert!(read.capacity_is_defined());
+    assert_eq!(read.capacity, 0, "3+3+3 = 9: the loop closes, and closure is frame");
+}
+
+#[test]
+fn a_chord_fills_the_triangles_and_the_capacity_becomes_strain() {
+    // Add the missing 1—3 relation to the ring. Now triangles ARE
+    // filled, the cocycle condition applies, and what was clean
+    // topology becomes measurable strain instead — the two readings are
+    // the same fact seen through the support.
+    let mut state = orbs(4);
+    state.bonds = vec![bond(1, 2, 3), bond(2, 3, 3), bond(3, 4, 3), bond(4, 1, 3), bond(1, 3, 1)];
+
+    let read = read_entangled(&state);
+    assert!(!read.residuals.is_empty(), "the chord fills a triangle that does not compose");
+    assert!(!read.capacity_is_defined(), "Δ ∉ Z¹ once a filled triangle fails");
+}
+
+#[test]
 fn the_projection_carries_every_channel() {
     // The fiber arity is the obligation channel — bond, covenant, debt.
     let delta = project(&orbs(2));

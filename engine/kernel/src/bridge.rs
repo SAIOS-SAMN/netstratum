@@ -41,7 +41,7 @@
 
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::Committed;
-use rfa_core::{coboundary_reduce, for_each_residual, Delta};
+use rfa_core::{for_each_residual, holonomies, Delta, Support};
 
 /// BOND-1: the standing order, `source` → `target` at `rate`/tick.
 pub const CHANNEL_BOND: usize = 0;
@@ -194,12 +194,27 @@ impl EntangledRead {
 /// channel, the relation carries the difference. That keeps
 /// antisymmetry meaningful rather than double-counting a settled pair.
 pub fn project(state: &Committed) -> Delta {
+    project_complex(state).0
+}
+
+/// Project committed state onto the SPARSE COMPLEX: the relation AND
+/// its support.
+///
+/// The support is built from the OBLIGATIONS THEMSELVES, never from
+/// which entries came out non-zero. That distinction is the whole point
+/// of sparsity: two orbs that owe each other the same amount net to
+/// zero, and they are still RELATED. Reading support off the values
+/// would put them back in the same bucket as two orbs that have never
+/// dealt with each other — the exact conflation `Observed` exists to
+/// end.
+pub fn project_complex(state: &Committed) -> (Delta, Support) {
     let dim = state.orbs.len();
     let mut delta = Delta::zero(dim, CHANNELS);
+    let mut support = Support::new(dim, CHANNELS);
     if dim < 2 {
         // One orb relates to nothing; zero orbs still less. Both are
         // lawful and both read as no structure.
-        return delta;
+        return (delta, support);
     }
     let seat = |orb: u64| state.orbs.iter().position(|held| held.orb_id == orb);
     let zero = ratio(0, 1);
@@ -209,6 +224,7 @@ pub fn project(state: &Committed) -> Delta {
         if let (Some(i), Some(j)) = (seat(bond.source), seat(bond.target)) {
             if i != j {
                 owed[i][j][CHANNEL_BOND] += bond.rate.clone();
+                support.connect(i, j, CHANNEL_BOND);
             }
         }
     }
@@ -217,6 +233,7 @@ pub fn project(state: &Committed) -> Delta {
             let outstanding = pact.quota.clone() - pact.delivered.clone();
             if i != j && outstanding > zero {
                 owed[i][j][CHANNEL_COVENANT] += outstanding;
+                support.connect(i, j, CHANNEL_COVENANT);
             }
         }
     }
@@ -224,6 +241,7 @@ pub fn project(state: &Committed) -> Delta {
         if let (Some(i), Some(j)) = (seat(debt.debtor), seat(debt.creditor)) {
             if i != j {
                 owed[i][j][CHANNEL_DEBT] += debt.remainder.clone();
+                support.connect(i, j, CHANNEL_DEBT);
             }
         }
     }
@@ -238,7 +256,7 @@ pub fn project(state: &Committed) -> Delta {
             delta.set_antisym(i, j, coords);
         }
     }
-    delta
+    (delta, support)
 }
 
 /// THE REFOLD CERTIFICATE — what the fold took, kept exactly, so the
@@ -352,28 +370,23 @@ pub fn read_entangled(state: &Committed) -> EntangledRead {
 /// [`Resolve::LockOn`] before reading capacity, never by assuming
 /// absence.
 pub fn read_entangled_observed(state: &Committed, unknown: usize) -> EntangledRead {
-    let delta = project(state);
-    // THE RESIDUAL FIELD, WHOLE. Never `coherence_functional` here —
-    // that sums the field into one scalar and discards which triple
-    // produced each residual, which is the exact place the first
-    // formations of symmetry were being lost (§2b bars the collapse;
-    // D3 needs these to emit; the composition law needs them to
-    // compose). The L1 reading is derived at the lens, on demand.
+    let (delta, support) = project_complex(state);
+    // THE RESIDUAL FIELD, WHOLE, over FILLED TRIANGLES ONLY. Never
+    // `coherence_functional` here — that sums the field into one scalar
+    // and discards which triple produced each residual, the exact place
+    // the first formations of symmetry were being lost (§2b bars the
+    // collapse; D3 needs these to emit; the composition law needs them
+    // to compose). And a triple with any absent edge is NOT a triangle:
+    // checking it invents strain from a relation that does not exist,
+    // which is the false gauge collapse.
     let mut residuals = Vec::new();
     for_each_residual(&delta, |i, j, k, l, value| {
-        residuals.push(Residual { i, j, k, l, value: value.clone() });
-    });
-    let reduced = coboundary_reduce(&delta);
-    let zero = ratio(0, 1);
-    let mut capacity = 0;
-    for i in 0..reduced.dim() {
-        for j in (i + 1)..reduced.dim() {
-            for l in 0..reduced.fiber() {
-                if *reduced.entry(i, j, l) != zero {
-                    capacity += 1;
-                }
-            }
+        let filled = support.has(i, j, l) && support.has(j, k, l) && support.has(i, k, l);
+        if filled {
+            residuals.push(Residual { i, j, k, l, value: value.clone() });
         }
-    }
+    });
+    // D — the independent cycles carrying charge no frame explains.
+    let capacity = holonomies(&delta, &support).len();
     EntangledRead { capacity, residuals, unknown }
 }
