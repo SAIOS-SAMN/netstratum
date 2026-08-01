@@ -376,6 +376,28 @@ commitment would assert it was cut under a law that never ran. That is
 the exact failure `judged = 0` exists to prevent — the hole stamped
 visibly rather than hidden.
 
+**AND THE RULE ABOVE WAS HALF A RULE** (corrected 2026-08-01, on the
+merge that landed VERSION 3). It forbade the bump LEADING the judgment
+and said nothing about the judgment leading the bump — which is what
+actually happened: `capacity_law` began refusing `DiscoveryMinted` on a
+non-`Entangled` prior while the constant still read 2, so **the chain
+bound version 2 to steps version 2 would have judged differently.**
+
+Both directions break the SAME guarantee — *a chain segment verifies
+forever under the version that cut it* — and the complete rule is
+symmetric:
+
+> **`VERSION` and the judgment it names change in ONE landing. Neither
+> may lead.** A bump ahead of the law claims a judgment that never ran;
+> a law ahead of the bump signs new judgments with an old name.
+
+The bump to 3 is CORRECT as landed, and it is correct for the reason
+this section set out: the blocker named here — no `Committed → Δ` map,
+so the invariant was unenforceable — is cleared. `kernel::bridge`
+projects the state, `capacity_law` is called from `lawful`, and `Void`,
+`Stasis` and `Unframed` now refuse where version 2 admitted. The
+judgment is real, so the name is honest.
+
 **The lawful sequence:** build `Committed → Δ(V)` · build the extent
 meter (`ext_x` before and after `Π_G`) · witness red-first · take the
 `rfa-core` dependency into the kernel (lawful — rfa-core imports only
@@ -396,8 +418,9 @@ The relayed answer was to eliminate `ε_mag` and bound growth by a
    (`b5456d1`).** This refusal was correct when written and is now
    false: `18_TORSION.md` landed as law with exactly those four
    articles, and Article I (Anti-Tensor), Article II (Non-Vacuous
-   Capacity), `Θ`, the egress reading, `Ξ_cosmetic` and the Eclipse all resolve
-   to it. The citations were forward-references to a document being
+   Capacity), `Θ`, the egress reading, the cosmetic meter and the
+   Eclipse all resolved to it — the meter and the Eclipse have since
+   been struck by 18 §3, and are named here only as history. The citations were forward-references to a document being
    written in parallel, not inventions. **The lesson is not that the
    refusal was wrong to make** — an unresolvable citation must be
    refused, or invented authority enters the law unchallenged — **but
@@ -470,7 +493,9 @@ it: one measurement, one name (`18_TORSION` §2i).
 
 **Consequently, SYNTROPY CONTAINS NO REDUCTION TERM.** Syntropy is
 defined solely by the GROWTH of surviving structure against activity
-spent — `Σ ≈ ΔD / deeds`, the reciprocal reading of Article III's `Ξ`.
+spent — `Σ ≈ ΔD / deeds`. (It was first written here as the reciprocal
+of Article III's cosmetic meter; that meter was struck by 18 §3, and the
+reading stands on its own without it.)
 It is not a second primitive and never gets its own quantity (two
 authorities for one measurement is the drift `EQUATIONS.md` §0 exists to
 prevent). **Any definition of syntropy containing the words reduce,
@@ -575,6 +600,28 @@ angle-free witness). A fork differing only by frame yields
 `orbit_lock = ∅`, emits no plane, and pays nothing. **The angle-free
 property is therefore load-bearing ECONOMICS, not elegance** — if it is
 ever weakened, capacity becomes farmable by re-coordinatization.
+
+**AV-13 · THE DESTRUCTIVE COMMAND IN A SHARED TREE.** Work destroyed by
+a command that never read what it was overwriting.
+*Instances, both real, one each way:* `git add -A` swept a parallel
+node's in-flight refactor into a commit under my name; `git checkout` on
+a shared file discarded a verified two-line change that its author had
+deliberately held back.
+*Defense — and the first formulation covered only half of it:*
+
+> **Any command that rewrites a file's state without reading it first —
+> `add -A`, `checkout`, `restore`, `stash`, `reset`, `clean` — can
+> destroy work you didn't write.**
+>
+> **Never let a command decide the fate of content you did not author.**
+
+`add -A` decides that on the way IN; `checkout` decides it on the way
+OUT, and a revert on a shared file is exactly as destructive as a sweep.
+*The mitigation is one shape for all of them:* **save, operate,
+restore** — and scope every path explicitly, never a wildcard.
+*Recorded because it is the tell:* the loss was recoverable only because
+the author had left a written spec of the change. A spec is what makes
+work survivable when the tree is shared.
 
 ### 10c. The standing test for any new law
 
