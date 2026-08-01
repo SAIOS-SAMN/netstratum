@@ -322,6 +322,73 @@ ruling rather than a derivation: under-paying an owed decay may be a
 lie of the same kind, or lawful forbearance. **Do not convert them
 silently.**
 
+### 2h. THE ECLIPSE LAW — n-directional toroidal co-unions
+
+**An eclipse is a SYZYGY, never a property.** Nothing is "eclipsed"
+full stop. `A` occludes `B` FROM VANTAGE `C` — a three-place relation,
+and the third place is what every occlusion mechanic in this tree has
+been leaving implicit.
+
+**This is landed vocabulary, not new.** `umbral` is one of the four
+perceptions (code 4, SUBSTRATE-1) and `ledger::registry` already
+defines it exactly so: *"occlusion-reading — the syzygial lines that
+exist where the voices align."* The geometry was seated on 2026-07-29;
+only its law is owed.
+
+**THE CO-UNION.** For each vantage the whole splits in two, and both
+halves are held:
+
+    union(v)     — all that is legible from vantage v
+    co-union(v)  — all that is present and NOT legible from v
+    union(v) ⊕ co-union(v)  =  the whole, for every v
+
+**An eclipse MOVES between them; it never deletes.** This is I6 on the
+visibility axis — *no difference dies without account* — and it is what
+makes Article III's promise geometric rather than merely stated. An
+eclipsed entity is not barred and not removed because it is not
+anywhere else: it is in the co-union of the vantages that cannot see
+it, and in the union of any vantage that can. Allocation-zero is
+co-union membership, not deletion.
+
+**n-DIRECTIONAL — every λ-node is a vantage.** There is no privileged
+viewpoint and no single mask. Occluding yourself from one vantage is
+trivial and worth nothing; concealment means occluding from all `n`,
+and the cost of that scales with the capacity you are hiding behind —
+which is exactly the capacity that would have paid you.
+
+**TOROIDAL — the eclipse is transient BY GEOMETRY, not by mercy.** The
+vantages wrap. Rotation brings one around, and the wrap is finite (the
+T∞ purge). So no structure conceals itself permanently: it may hide
+from any vantage, and from every vantage for a time, but not from every
+vantage forever, because the torus turns. **Concealment has a
+half-life, and the half-life is a property of the space rather than of
+any auditor.**
+
+**ARTICLE III STRENGTHENED — the loop's geometric signature.** A
+dogmatic structure is one with full internal consistency and zero
+external legibility: it has co-unioned itself from every vantage while
+continuing to emit. §2e caught it as a traverse whose totality is
+congruent to its origin, and §3 catches it by the window count. This is
+the third and cheapest reading — **self-eclipse across all vantages** —
+and unlike the other two it needs no auditor at all, because rotation
+exposes it on its own. Dogma is not caught; it comes back around.
+
+**FIVE OCCLUSION MECHANICS, ONE LAW OWED.** All landed, none sharing a
+law, all missing the vantage place:
+
+- `umbral` perception (code 4, SUBSTRATE-1) — the occlusion BASIS
+- `VeilDrawn` / `VeilLifted` (tags 76/77, MASK-1a) — the veil and its
+  starving toll
+- `ElderWarded` / `WardLifted` (tags 74/75, WARDEN-1a) — the reverse
+  shield and depth gate
+- `is_shielded` (THRESHOLD-1) — the pre-solar shield, bidirectional
+- `E_occult` (§3 Article III) — the cosmetic mask
+
+Each answers "hidden?" as a predicate on one object. Under this law
+each must answer "hidden FROM WHERE?", and the answers must sum: what
+one vantage cannot see, another can, and nothing is invisible from
+everywhere at once for longer than the wrap allows.
+
 ---
 
 ## §3 THE FOUR ARTICLES
@@ -483,6 +550,14 @@ computation, hiding one behind vocabulary is cosmetic.
    `engine/kernel/tests/discovery_pins.rs:266` — *"The degenerate mint
    is lawful: 0 ≤ bound 0"* — plus its header claim at line 10. Land
    red-first, and the refusal must name both sides.
+3b. **Nothing computes VANTAGE** (§2h). Five landed occlusion mechanics
+   — `umbral` (code 4), `VeilDrawn`/`VeilLifted` (76/77),
+   `ElderWarded`/`WardLifted` (74/75), `is_shielded`, and `E_occult` —
+   each answer "hidden?" as a predicate on one object, with the third
+   place of the syzygy left implicit. Until vantage is a computed term,
+   the co-union cannot be read, Article III's cheapest test
+   (self-eclipse across all vantages) cannot run, and the eclipse's
+   geometric half-life is unenforced.
 4. **Continuous-domain forms need exact realizations.** The exterior
    derivative, the sup over a manifold, `det U* → ∞`, and a real
    principal eigen-axis have no exact-rational form. Infinity is
