@@ -50,7 +50,7 @@ use ledger::galaxy::Galaxy;
 use ledger::registry::{lineage_domain, Civilization, Registry, DISPOSITIONS, METABOLISMS, PERCEPTIONS};
 use ledger::{Directive, Disposition, Ledger};
 use physics::Beacon;
-use solver::{forge_task, solve, Difficulty, SolveRead};
+use solver::{forge_task, solve_consulted, Difficulty, SolveRead};
 use std::path::Path;
 
 mod polities;
@@ -1061,7 +1061,15 @@ impl Polity {
         } else {
             let difficulty = Difficulty::level(self.level);
             let task = forge_task(digest, difficulty);
-            match solve(&task, difficulty.word_len) {
+            // THE SECTOR DOOR is the live forge path. The search only
+            // PROPOSES; nothing crosses until every training pair has
+            // been re-derived exactly, which is the same re-derivation
+            // `verify_work` performs at the kernel. An unproved
+            // candidate reads `Unsolved` and the line simply rests that
+            // beat — so the search inside may become as dirty as it
+            // likes (float scoring, batching, sampled beam) and nothing
+            // downstream changes.
+            match solve_consulted(&task, difficulty.word_len) {
                 SolveRead::Solved {
                     program,
                     matches_expected: Some(true),
