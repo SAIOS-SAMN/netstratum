@@ -179,3 +179,41 @@ fn the_poles_are_complementary_at_fixed_delta_so_shuffling_is_not_growth() {
         "redistribution reads ADMITTED — the verdict classifies, it does not measure growth"
     );
 }
+
+#[test]
+fn shuffling_a_fixed_support_mints_nothing_expansion_is_the_only_growth() {
+    // DIRECTIVE 16 — the growth invariant, enforced on the SUPPORT.
+    //
+    // Two states over the identical edge set, with content re-split
+    // between gradient and circulation. dual_pole may well call both
+    // Entangled — it CLASSIFIES — but no relation was formed, so the
+    // support test refuses the increment. Q·Δ is coordinate gauge, and
+    // gauge never mints.
+    let mut before = Support::new(3, 1);
+    before.connect(0, 1, 0);
+    before.connect(1, 2, 0);
+    before.connect(0, 2, 0);
+
+    let mut shuffled = Support::new(3, 1);
+    shuffled.connect(0, 1, 0);
+    shuffled.connect(1, 2, 0);
+    shuffled.connect(0, 2, 0);
+
+    assert_eq!(
+        shuffled.new_edges_since(&before),
+        Vec::new(),
+        "identical support: no relation formed, ΔD ≡ 0"
+    );
+    assert!(!shuffled.expanded_from(&before), "re-splitting a fixed Δ is not growth");
+
+    // GENUINE WORK: a relation that did not exist now does.
+    let mut grown = Support::new(4, 1);
+    grown.connect(0, 1, 0);
+    grown.connect(1, 2, 0);
+    grown.connect(0, 2, 0);
+    grown.connect(2, 3, 0); // δΔ ≠ 0 — new structure
+
+    let fresh = grown.new_edges_since(&before);
+    assert_eq!(fresh, vec![(2, 3, 0)], "the new relation is NAMED, not counted");
+    assert!(grown.expanded_from(&before), "Support(E') ⊃ Support(E) — this may mint");
+}

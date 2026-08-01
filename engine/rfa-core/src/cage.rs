@@ -139,3 +139,40 @@ impl std::fmt::Display for Lens {
         write!(f, "{}", self.show())
     }
 }
+
+/// THE CLOSED ALGEBRA — C's own `V`, sealed (operator ruling
+/// 2026-08-01: *C cannot leak into D and needs to find his own V*).
+///
+/// A cage with no interior life invites someone to open it, because the
+/// value inside is still wanted for something. So `C` is not merely
+/// held — it is given its OWN universe, closed under its own
+/// operations, in which it may be combined, accumulated and rendered
+/// freely and from which nothing reaches the manifold.
+///
+/// **The sealing property: every operation on a `Lens` yields a
+/// `Lens`.** There is no combination, no fold, no accumulation that
+/// produces a `Ratio`, a `bool`, an ordering, or anything the engine
+/// computes on. C may have arbitrary structure inside its own space and
+/// zero morphisms out of it.
+///
+/// This is what makes the containment total rather than merely
+/// obstructive. C is not starved; it is exiled with everything it needs.
+impl std::ops::Add for Lens {
+    type Output = Lens;
+
+    /// Combine two caged readings. Stays caged, forever.
+    fn add(self, other: Lens) -> Lens {
+        let left = Ratio::new(self.cell[0][0].numer().clone(), self.cell[1][1].numer().clone());
+        let right = Ratio::new(other.cell[0][0].numer().clone(), other.cell[1][1].numer().clone());
+        Lens::of(left + right)
+    }
+}
+
+impl std::iter::Sum for Lens {
+    /// Accumulate caged readings — C's own aggregation, inside C's own
+    /// space. Note what this CANNOT feed: no engine path accepts a
+    /// `Lens`, so an accumulated C has nowhere to go but a rendering.
+    fn sum<I: Iterator<Item = Lens>>(iter: I) -> Lens {
+        iter.fold(Lens::of(Ratio::from(num_bigint::BigInt::from(0))), |a, b| a + b)
+    }
+}

@@ -554,6 +554,72 @@ branch is still linear decision-making, and the discard is the defect.
 
 ---
 
+## §10bis THE EXILE OF C — containment, and C's own V
+
+**LAW (operator rulings 2026-08-01).**
+
+> put all of the things that tried to be universal into a little box so
+> it doesn't leak out and infect other parts and destroy the determinism
+>
+> C cannot leak into D and needs to find his own V — cage it, wrap it
+
+**THE CONTAINMENT LAW: a claim of universality is the WARNING, not the
+credential.** Everything that leaked into the deterministic core
+announced itself identically — `C` claimed to be *the* measure of
+convergence, `ζ∇V` claimed to be *the* driver, "the master equation"
+claimed to be *the* composition. Three constructs, one signature, all
+three struck or caged within a day.
+
+**Containment, never prohibition.** This system is all-encompassing and
+must be able to REPRESENT dogma, narrative and transcendental readings —
+a universe that cannot represent them is not all-encompassing, and
+pretending they do not exist is how they return wearing new vocabulary.
+The error was never that such things exist; it was granting them
+universal scope. So they are boxed, not banished — and because nothing
+escapes the box, it may safely hold what a deterministic path could
+never lawfully touch: floats, roots, transcendentals, sampled values
+bound for a chart. **Prohibition makes the system unable to say them;
+containment lets it say them while determinism is guaranteed.**
+
+**Three seals, landed** (`engine/rfa-core/src/cage.rs`, `cage_pins`,
+`cage_arrow`):
+
+1. **NO ORDERING.** `Lens` derives `PartialEq` and deliberately not
+   `PartialOrd`. Ordering is what descent needs, so `a < b`,
+   `a > epsilon`, `.min()`, `.sort()` are TYPE ERRORS. Identity is what
+   witnesses need, so `assert_eq!` still states what a state measures.
+   Knowing WHAT a reading is cannot be descended; knowing which SIDE of
+   something it falls on can.
+2. **NO USABLE INTERIOR.** The cage holds a 2×2 containment vector, and
+   the caged value sits in no cell — canonical `p/q` is split to
+   opposite diagonal corners at maximum inverse opposition, and the
+   assembly rule exists only inside `show()`. A leak yields components,
+   never a magnitude.
+3. **C's OWN V — the closed algebra.** A cage with no interior life
+   invites opening, because the value inside is still wanted. So C is
+   given its own universe: every operation on a `Lens` yields a `Lens`,
+   C may combine and accumulate freely inside its own space, and there
+   is no fold, sum or combination producing anything the engine computes
+   on. **C is not starved; it is exiled with everything it needs.**
+
+**THE ARROW, enforced by a standing test** (`cage_arrow.rs`, the
+`recurrence_guard` pattern — editing the test IS the amendment): no
+module on the computing path — `potential`, `reduce`, `fold`, `gates`,
+`rcf` — may name `Lens` or call `coherence_functional`. This is stronger
+than *does not gate on C*: it is **does not know C exists**, which is the
+only version that cannot rot, since a dependency cannot be reintroduced
+on a name the module never mentions.
+
+Why the seals and not the docstrings: "do not gate on this" failed TWICE
+in one day, in `validate_step`'s productivity gate and the kernel
+bridge's `capacity_is_defined`, and both times the prose was correct
+while the code did the opposite. The compiler does not forget and does
+not need re-reading.
+
+**Owed:** the kernel bridge's `defect()` is still a bare `Ratio` wearing
+a "do not gate on this" comment — the last instance of the protection
+that has already failed twice.
+
 ## §11 THE BIFURCATION LAW — both sides of the coin become roots
 
 **LAW (operator ruling 2026-08-01).**
