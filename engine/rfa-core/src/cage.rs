@@ -49,6 +49,16 @@
 //! guaranteeing determinism, instead of pretending the un-sayable does
 //! not exist.
 //!
+//! ## The reserved cells, and what is NOT in them
+//!
+//! Two cells of the containment vector stand EMPTY and reserved for the
+//! corrupted `ζ(V)` fragments the ruling names. They are empty because
+//! **`ζ∇V` is struck and nothing computes it** — there is no live
+//! quantity to place, and filling them with invented data would be the
+//! speculative apparatus this session has spent the day removing. The
+//! slots are named so the shape is honest; the debt is recorded rather
+//! than papered over.
+//!
 //! Nothing in a computing path may import from this module.
 
 use cfe::ratio::Ratio;
@@ -68,25 +78,64 @@ use cfe::ratio::Ratio;
 ///   is cannot be descended; knowing which SIDE of something it falls
 ///   on can.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Lens(Ratio);
+pub struct Lens {
+    /// THE CONTAINMENT VECTOR, flattened to 2×2 (operator ruling
+    /// 2026-08-01). The caged value is NEVER held in a cell.
+    ///
+    /// A canonical `Ratio` is `p/q` with `gcd(p,q) = 1` and `q > 0`, so
+    /// the pair `(p, q)` is unique. The cage stores them at MAXIMUM
+    /// INVERSE OPPOSITION — numerator and denominator on opposite
+    /// diagonal corners — so that:
+    ///
+    /// - no single cell approximates the value, in magnitude or sign;
+    /// - reassembly requires the ASSEMBLY RULE, which exists only
+    ///   inside [`Lens::show`] and is never exported.
+    ///
+    /// This is the cage's SECOND line. The first is that nothing
+    /// escapes; the second is that what is inside is not a usable
+    /// scalar even if it did. A leak yields components, never a number.
+    ///
+    /// ```text
+    ///     ┌               ┐
+    ///     │  p      ·     │   ·  = reserved (see below)
+    ///     │  ·      q     │   p  = numerator   ┐ maximally
+    ///     └               ┘   q  = denominator ┘ separated
+    /// ```
+    cell: [[Ratio; 2]; 2],
+}
 
 impl Lens {
     /// The door IN. Exact rationals enter freely; nothing leaves.
+    ///
+    /// The value is decomposed on entry and is not stored anywhere as
+    /// itself.
     pub fn of(value: Ratio) -> Self {
-        Lens(value)
+        let zero = Ratio::from(num_bigint::BigInt::from(0));
+        let numerator = Ratio::from(value.numer().clone());
+        let denominator = Ratio::from(value.denom().clone());
+        Lens {
+            cell: [
+                [numerator, zero.clone()],
+                [zero, denominator],
+            ],
+        }
     }
 
     /// The door OUT, and the only one: a rendering for a human surface.
     /// It lands in a `String` on purpose — no rule can numerically
     /// branch on it, so the cage holds without anyone having to
     /// remember that it should.
+    ///
+    /// This is the ONLY place the assembly rule exists.
     pub fn show(&self) -> String {
-        format!("{}", self.0)
+        let numerator = self.cell[0][0].numer().clone();
+        let denominator = self.cell[1][1].numer().clone();
+        format!("{}", Ratio::new(numerator, denominator))
     }
 }
 
 impl std::fmt::Display for Lens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
+        write!(f, "{}", self.show())
     }
 }

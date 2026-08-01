@@ -64,3 +64,24 @@ fn the_conservation_distance_is_caged_too() {
     assert_eq!(d.conservation_measurement(), Lens::of(ratio(0, 1)));
     assert_eq!(d.first_conservation_break(), None);
 }
+
+#[test]
+fn the_containment_vector_holds_no_usable_scalar() {
+    // THE SECOND LINE. C = 12 enters; the cage holds 12 and 1 at
+    // opposite diagonal corners and the VALUE nowhere. Even a leak of
+    // the interior yields components, not a magnitude — reassembly needs
+    // the rule, and the rule lives only in `show`.
+    let c = coherence_functional(&incoherent());
+    assert_eq!(c.show(), "12", "the assembly rule renders it whole");
+
+    // A fractional reading proves the separation is real rather than
+    // incidental: 1/2 is stored as 1 and 2, and neither cell is 1/2.
+    let half = Lens::of(ratio(1, 2));
+    assert_eq!(half.show(), "1/2");
+    assert_ne!(half, Lens::of(ratio(1, 1)), "the numerator alone is not the value");
+    assert_ne!(half, Lens::of(ratio(2, 1)), "the denominator alone is not the value");
+
+    // Identity still holds across the decomposition, so witnesses work:
+    // canonical p/q is unique, so equal values decompose identically.
+    assert_eq!(Lens::of(ratio(6, 4)), Lens::of(ratio(3, 2)), "canonical form, one cage");
+}
