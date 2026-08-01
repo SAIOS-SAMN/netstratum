@@ -764,6 +764,50 @@ the only elevation available to a quantity whose whole nature is to
 collapse structure: **it cannot measure a universe, but it can watch a
 box.**
 
+### §10ter.b C IS CONSULTED — the resident, not the prisoner
+
+**LAW (operator ruling 2026-08-01).**
+
+> C is the culmination of congruence / coherence / cohesion /
+> conversation / communication / comingling / consilience — he might
+> need the tools inside the containment sector, so he should be
+> CONSULTED, which is why we have C(Δ): it can use any tool in the
+> toolbox to perform those actions without them impacting the external
+> determinism.
+
+**This reframes the containment entirely, and correctly.** Every member
+of that family is a RECONCILIATION — *are these the same? does this hold
+together? can these exchange? do independent lines agree?* — and none of
+them can be answered exactly in the general case. They need search,
+comparison, heuristics, sampling: the whole dirty toolbox.
+
+**So C is not a prisoner in the sector. C is its RESIDENT.** He was
+never banished; he was housed where the tools his work requires already
+live — the same tools that may never touch the outside. `C(Δ)` is the
+knock on that door: a CALL, not a score.
+
+    consult(question, tool) -> Proposal<Exact>
+
+The tool may do anything internally — floats, a GPU kernel, a sampled
+search, an approximation unlawful anywhere else. Only its ANSWER
+crosses, only if exactly representable, and even then only as a guess
+the caller re-derives under its own rules.
+
+**THE LOOP THIS CLOSES, and it is worth naming.** Charter §11 excised
+the reconciliation instruments — consilience, the manifold, the census,
+the triangle — on the ground that a second readable truth is not a
+measurement. That was right *as law*. **They return here as TOOLS, and
+they cannot become a second truth in this room**, because a proposal
+carries no authority: reconciliation that must be re-verified before use
+is ADVICE, and advice is all it was ever fit to be. The instruments were
+not wrong; they were mis-seated. This is their seat.
+
+**Why consultation is safe where scoring was not.** A score is consumed
+as a verdict; a proposal is consumed as a hypothesis. The first grants
+authority to whatever produced it, the second grants none — which is why
+the same quantity that was unlawful as a gate is unremarkable as a
+consultant.
+
 ## §11 THE BIFURCATION LAW — both sides of the coin become roots
 
 **LAW (operator ruling 2026-08-01).**

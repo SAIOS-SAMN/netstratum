@@ -280,3 +280,35 @@ impl<T: Exact> Proposal<T> {
         self.candidate
     }
 }
+
+/// CONSULT THE SECTOR — `C(·)` as a CALL, not a score.
+///
+/// (Operator ruling 2026-08-01.) `C` is the culmination of a whole
+/// family of acts — congruence, coherence, cohesion, conversation,
+/// communication, comingling, consilience — and every one of them is a
+/// RECONCILIATION: *are these the same? does this hold together? can
+/// these exchange? do independent lines agree?* Those questions cannot
+/// be answered exactly in the general case. They need search,
+/// comparison, heuristics, sampling — the whole dirty toolbox.
+///
+/// **So `C` is not a prisoner here. `C` is the RESIDENT**, and this is
+/// the door you knock on. He is CONSULTED rather than banished, because
+/// the tools his work requires are exactly the tools that may never
+/// touch the outside.
+///
+/// `tool` may do ANYTHING internally — floats, a GPU kernel, a sampled
+/// search, an approximation that would be unlawful anywhere else. Only
+/// its ANSWER crosses, only if that answer is [`Exact`], and even then
+/// it crosses as a [`Proposal`] — a guess the caller re-derives under
+/// its own rules. Nothing consultation produces is believed.
+///
+/// **The loop this closes.** Charter §11 excised the reconciliation
+/// instruments — consilience, the manifold, the census, the triangle —
+/// because a second readable truth is not a measurement. They were
+/// right to go as LAW. They return here as TOOLS, and they cannot
+/// become a second truth in this room, because a proposal carries no
+/// authority: reconciliation that must be re-verified to be used is
+/// advice, and advice was all it was ever fit to be.
+pub fn consult<Q, A: Exact>(question: Q, tool: impl FnOnce(Q) -> A) -> Proposal<A> {
+    Proposal::offer(tool(question))
+}

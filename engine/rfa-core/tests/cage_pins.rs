@@ -107,3 +107,25 @@ fn the_door_carries_exact_candidates_and_believes_none_of_them() {
     // exist. The approximation cannot be NAMED at the door, never mind
     // carried through it — the boundary is the type system, not care.
 }
+
+#[test]
+fn c_is_consulted_and_may_use_any_tool_inside() {
+    use rfa_core::cage::consult;
+    // THE TOOL USES FLOATS. Deliberately — this is the whole point of
+    // the sector. A float search runs inside; nothing float crosses.
+    let answer = consult(48u64, |n| {
+        let approx = (n as f64).sqrt();          // unlawful anywhere else
+        let floor = approx.floor() as i64;        // the ANSWER is exact
+        floor
+    });
+    // What comes back is a GUESS, and the caller re-derives it exactly.
+    let candidate = answer.withdraw();
+    assert_eq!(candidate, 6, "the tool proposed 6");
+    assert!(candidate * candidate <= 48 && (candidate + 1) * (candidate + 1) > 48,
+            "and the OUTSIDE verified it exactly — never trusting the float");
+
+    // A consultation that proposes wrongly costs nothing, because
+    // nothing was trusted: verification simply refuses it.
+    let bad = consult(48u64, |_| 7i64).withdraw();
+    assert!(bad * bad > 48, "a wrong proposal is caught by exact re-derivation");
+}

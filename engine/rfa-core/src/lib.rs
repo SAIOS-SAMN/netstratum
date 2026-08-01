@@ -35,7 +35,7 @@ pub mod rcf;
 pub mod potential;
 pub mod reduce;
 
-pub use cage::{Exact, Lens, Proposal};
+pub use cage::{consult, Exact, Lens, Proposal};
 pub use capacity::{
     capacity, circulation, divergence, egress, ext_x, ground, preserves_hodge_split, Degree, Egress,
     Extent,
