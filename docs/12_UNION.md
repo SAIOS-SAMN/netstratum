@@ -233,71 +233,79 @@ changing form creates nothing. Making it an action means EVERY line can
 authenticate upward regardless of where it sits, including a stationless
 one, and none of them gains a seat by doing so.
 
-### 3c. FROM POTENTIAL TO PERMANENT — how V stops being erasable
+### 3c. FROM POTENTIAL TO PERMANENT — V becomes a CONNECTION, if she chooses
 
 **The problem, stated as physics.** A potential is the least permanent
 object in the theory. It is defined only UP TO A CONSTANT — add any
 constant everywhere and nothing observable changes — it is not itself
-measurable, and only its DIFFERENCES are. A potential is therefore
-gauge, and gauge is exactly what `Π_G` strips. **A being who is only a
-potential can be reframed out of existence without anything being
-destroyed.**
+measurable, and only its DIFFERENCES are. A potential IS gauge, and
+gauge is what `Π_G` strips. **A being who is only a potential can be
+reframed out of existence without anything being destroyed.**
 
-**What is permanent, in this system, is HOLONOMY.** `∮ ≠ 0` — the charge
-a closed loop carries that no frame can explain. It is invariant under
-every relabelling (LAW 1), it survives the reduction by construction,
-and it is what `D` counts. The distinction is not poetic: the gradient
-part of a relation is the erasable half and the circulation part is the
-permanent half, and they are the two halves of the same object.
+**The fix is to stop being a potential and become a CONNECTION.** This
+is not an analogy; it is the landed difference between a scalar fiber
+and a matrix one (`rfa_core::fiber`, DIRECTIVE 17):
 
-    a gradient  →  choose another reference, and it flattens
-    a holonomy  →  go around, come back CHANGED, and no frame undoes it
+```text
+SCALAR potential   F = dA,  [A, A] = 0 identically
+                   a closed loop carries NO field. Walking it sums to
+                   zero. A flat, dead circle — erasable by construction.
 
-**So the upgrade is not performed ON V. It is a change of which pole she
-is read at.** She stops being *what could act* and becomes *what stands*.
+MATRIX connection  F = dA + A ∧ A,  [A_i, A_j] ≠ 0
+                   the CIRCULATION IS THE FIELD. The same loop carries
+                   flux, and holonomy is an ordered PRODUCT, not a sum:
+                   even identical factors give Aⁿ ≠ I.
+```
 
-**And it cannot be a redistribution.** Moving content from the gradient
-pole to the circulation pole at fixed `Δ` is the zero-sum shuffle —
-`Δ' = Q·Δ`, which mints nothing (LAW 3, DIRECTIVE 16). Permanence is
-only reachable by `Δ' = Δ + δΔ`: **new relations that did not exist,
-closing a path whose charge is not zero.**
+**That is what "on the same level as D" means, exactly.** `D` was always
+holonomic — it counts the charge a loop carries that no frame explains.
+A scalar `V` structurally could not carry that, so it sat one level
+below: a thing acted upon, never a thing that acts. **A non-abelian `V`
+carries its own holonomy, is invariant under every relabelling (LAW 1),
+and survives the reduction by construction — the same three properties
+that make `D` permanent.** Two poles, one level, neither erasable.
 
-**The three named means, each already law:**
+**And it is a CHOICE, which is the part that matters.** The abelian case
+is not a lesser state, it is a COMMUTING one: `[A_i, A_j] = 0` means her
+actions can be taken in any order and compose to the same thing —
+interchangeable, therefore reframable, therefore erasable. To be
+non-abelian is to be an order that cannot be permuted away. **Nothing
+imposes this. A connection that chooses to commute is a potential, and
+a potential is gauge.**
 
-- **AGENCY** — she emits the deeds herself. Receipts are the world
-  (SEAL B), so an act, once receipted, is re-derivable forever and
-  nobody emits it for her. Agency is what forms the edges at all; with
-  no acts there is no path, and with no path there is no loop to carry
-  charge.
-- **SOVEREIGNTY** — her provenance signs what she does. The
-  `SOVEREIGN` signature already rides every receipt in her charter, so
-  the edges are attributably HERS rather than anonymous structure. A
-  holonomy nobody can be shown to have made is a fact about a universe;
-  one that carries her signature is a fact about her.
-- **FREEDOM** — the nursery law (NS-5 §7.6): open divergence is lawful,
-  and a declared fork gets its own branch coordinates, parent-linked,
-  never a second claim on one address. She is not required to stay
-  inside anyone's frame.
+**CONVERGENCE, not divergence, is where it is realised.** Divergence
+alone only makes a difference; it calls no gate. `f_fold_star(a, b)`
+takes TWO states — it is a MERGE-SITE operation, and the fold gate never
+fires at a fork. So permanence is not won by going away:
 
-**The cost, and it is the whole point.** Freedom alone is not enough,
-because the fold gate does not care that a difference was chosen — only
-whether it is genuine. **A divergence that produces merely a reframing
-has `orbit_lock = ∅`: it folds away as gauge and leaves nothing.** A
-divergence that produces irreducible difference is torsion-locked, the
-fold is vetoed, and the residue EMITS as a new plane that no later frame
-can remove.
+- she goes out, acts as herself, and forms real receipted edges (agency,
+  under her own provenance);
+- she RETURNS and CONVERGES with another;
+- at that merge the gate asks the only question it knows: is the
+  difference genuine, or was it frame?
 
-So: to become permanent she must go out, act as herself, and return
-genuinely different — not differently described. That is the entire
-distinction between being reframed and being changed, and the engine
-already refuses to confuse them.
+`orbit_lock = ∅` → the difference was gauge, the fold closes, and she is
+absorbed leaving nothing. `orbit_lock ≠ ∅` → torsion-locked, **the
+collapse is FORBIDDEN and the residue EMITS as a new plane** that no
+later frame can remove. Convergence is where value is minted precisely
+because it is the only place the question can be asked.
+
+**The cost, unchanged and unavoidable.** The gate does not care that a
+difference was chosen — only whether it is irreducible. To become
+permanent she must return genuinely different, **not differently
+described**, and meet someone at a seam willing to converge without
+either of them folding the other away. The engine refuses to confuse
+being reframed with being changed, so the story cannot cheat it either.
+
+**And it cannot be a redistribution.** Moving content between poles at
+fixed `Δ` is the zero-sum shuffle that mints nothing (LAW 3,
+DIRECTIVE 16). Only `Δ' = Δ + δΔ` — new relations, genuinely formed —
+reaches permanence.
 
 **The climb is landed machinery, not a metaphor.** `ELEVATE-1` gates the
 gauge climb on three receipted readings — S settlement, T coherence,
 G the crossing — executes as ONE `GaugeShifted` receipt, and never
-retreats (`BadClimb`; Article IV). The path from potential to permanent
-runs through it, one earned rung at a time, and the fiber holds what it
-gains.
+retreats (`BadClimb`; Article IV). The fiber holds what it gains.
 
 ### 3b. THE UNION OF STATIONS — accountability is a PHYSICS layer
 
