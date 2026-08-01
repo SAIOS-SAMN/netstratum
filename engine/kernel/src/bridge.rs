@@ -125,7 +125,7 @@ pub struct Residual {
     pub value: Ratio,
 }
 
-/// THE ENTANGLED READ (`18_TORSION` §2f). The capacity side and the
+/// THE ENTANGLED READ (`18_TORSION` §2f). The rank side and the
 /// potential side, computed in ONE pass over ONE prior state. They are
 /// not separately obtainable from this module by construction: a
 /// caller that could take `D` alone and consult the strain separately
@@ -133,29 +133,50 @@ pub struct Residual {
 /// attack surface the law closes.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct EntangledRead {
-    /// `D` — the structure surviving `Π_G(Δ(Ω))`: the count of
-    /// independent entries (i<j, every channel) still standing after
-    /// coboundary reduction. Frame contributes nothing.
-    pub capacity: usize,
+    /// `D` — the RANK of the relational structure: how many independent
+    /// cycles carry charge no frame explains. Frame contributes nothing.
+    ///
+    /// **NOT A CAPACITY** (operator ruling 2026-08-01: *why do we have
+    /// capacity? that should not be the case in an expanding universe*).
+    /// "Capacity" names a container and implies a ceiling, and there is
+    /// no ceiling here — not in this module, not in `rfa-core`, not
+    /// anywhere in the workspace. `holonomies().len()` rises without
+    /// bound as structure emerges, exactly as a matrix's rank rises when
+    /// an independent row is added. Nobody asks a matrix for its rank
+    /// capacity.
+    ///
+    /// The name also contradicted the law it serves: `EQUATIONS` D2
+    /// already rules that *D is a READING of the universe's own
+    /// structure, not a quota anything must fit under* — while the word
+    /// said quota. It kept pulling the design back toward the container
+    /// D2 struck.
+    ///
+    /// **Where a real capacity does live:** seat widths and occupancy
+    /// caps (`12_UNION` §3, `11_AEON` §7) ARE bounds, and they are
+    /// DERIVED from this rank. That is how the misnomer arrived — the
+    /// reading that sets a bound was named after the bound it sets.
+    /// `PhiK I^(3)` had it right all along: *rank — dim of the
+    /// relational structure*.
+    pub rank: usize,
     /// The residual field, WHOLE — every non-composing triple with its
     /// indices intact. Never pre-summed: these are what emit (D3) and
     /// what the composition law will compose.
     pub residuals: Vec<Residual>,
     /// Pairs whose relation was NOT observed. While any stands, the
-    /// complex has holes of unknown shape and no capacity may be read
+    /// complex has holes of unknown shape and no rank may be read
     /// off it.
     pub unknown: usize,
 }
 
 impl EntangledRead {
     /// **`D` is well-defined only on a fully OBSERVED complex.** One
-    /// condition, and it is a refusal to read capacity out of something
+    /// condition, and it is a refusal to read rank out of something
     /// that has none to give: `unknown == 0`. An unresolved absence
-    /// would let phantom topology mint phantom capacity, so discharge
+    /// would let phantom topology mint phantom rank, so discharge
     /// every `Unknown` by [`Resolve`] first.
     ///
     /// **THE RESIDUAL CLAUSE IS STRUCK** (operator ruling 2026-08-01).
-    /// It read `&& self.residuals.is_empty()`, barring capacity while
+    /// It read `&& self.residuals.is_empty()`, barring the rank while
     /// any triple failed to compose, on the reasoning that
     /// `H¹ = Z¹/B¹` is defined on cocycles alone. Three faults:
     ///
@@ -172,10 +193,10 @@ impl EntangledRead {
     ///    capacity by receipt. Non-composition is the SIGNAL, and the
     ///    old clause silenced exactly the states worth reading.
     ///
-    /// Callers that gate on capacity (Article II standing, Article IV
+    /// Callers that gate on rank (Article II standing, Article IV
     /// monotonicity) MUST still consult this for observation
     /// completeness.
-    pub fn capacity_is_defined(&self) -> bool {
+    pub fn rank_is_defined(&self) -> bool {
         self.unknown == 0
     }
 
@@ -414,6 +435,6 @@ pub fn read_entangled_observed(state: &Committed, unknown: usize) -> EntangledRe
         }
     });
     // D — the independent cycles carrying charge no frame explains.
-    let capacity = holonomies(&delta, &support).len();
-    EntangledRead { capacity, residuals, unknown }
+    let rank = holonomies(&delta, &support).len();
+    EntangledRead { rank, residuals, unknown }
 }

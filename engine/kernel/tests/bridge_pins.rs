@@ -41,14 +41,14 @@ fn a_world_that_relates_nothing_carries_no_structure() {
     // structure, and the reading is DEFINED (a zero cocycle defect) —
     // so this is a true zero, not an unmeasurable one.
     let read = read_entangled(&orbs(3));
-    assert_eq!(read.capacity, 0, "no obligations, no surviving structure");
+    assert_eq!(read.rank, 0, "no obligations, no surviving structure");
     assert_eq!(read.defect(), ratio(0, 1), "nothing to fail to compose");
-    assert!(read.capacity_is_defined(), "a zero cocycle IS a cocycle");
+    assert!(read.rank_is_defined(), "a zero cocycle IS a cocycle");
 
     // A lone orb relates to nothing at all, lawfully.
     let read = read_entangled(&orbs(1));
-    assert_eq!(read.capacity, 0);
-    assert!(read.capacity_is_defined());
+    assert_eq!(read.rank, 0);
+    assert!(read.rank_is_defined());
 }
 
 #[test]
@@ -93,8 +93,8 @@ fn obligations_that_compose_carry_no_surviving_structure() {
 
     let read = read_entangled(&state);
     assert_eq!(read.defect(), ratio(0, 1), "5 = 2 + 3: the triangle composes");
-    assert!(read.capacity_is_defined(), "a cocycle has a class to reduce to");
-    assert_eq!(read.capacity, 0, "composing obligation is pure frame");
+    assert!(read.rank_is_defined(), "a cocycle has a class to reduce to");
+    assert_eq!(read.rank, 0, "composing obligation is pure frame");
 }
 
 #[test]
@@ -115,7 +115,7 @@ fn obligations_that_do_not_compose_carry_strain() {
     // error. Non-composition is the SIGNAL; the old clause silenced
     // exactly the states worth reading.
     assert!(
-        read.capacity_is_defined(),
+        read.rank_is_defined(),
         "a fully observed complex is readable whether or not it composes"
     );
     assert!(
@@ -142,7 +142,7 @@ fn obligations_to_unknown_or_self_are_skipped_never_panic() {
     let mut state = orbs(2);
     state.bonds = vec![bond(1, 99, 4), bond(1, 1, 7)];
     let read = read_entangled(&state);
-    assert_eq!(read.capacity, 0);
+    assert_eq!(read.rank, 0);
     assert_eq!(read.defect(), ratio(0, 1));
 }
 
@@ -171,12 +171,12 @@ fn an_unresolved_absence_refuses_capacity_unverified_absence_would_mint() {
 
     let seen = read_entangled(&state);
     assert_eq!(seen.unknown, 0, "one book sees all its own orbs");
-    assert!(seen.capacity_is_defined(), "fully observed cocycle");
+    assert!(seen.rank_is_defined(), "fully observed cocycle");
 
     let unseen = read_entangled_observed(&state, 1);
     assert_eq!(unseen.defect(), seen.defect(), "the strain reading is unchanged");
     assert!(
-        !unseen.capacity_is_defined(),
+        !unseen.rank_is_defined(),
         "one unobserved pair is enough — absence must be verified, never assumed"
     );
 }
@@ -282,8 +282,8 @@ fn a_universe_with_an_unclosed_obligation_ring_reads_capacity() {
     let read = read_entangled(&state);
     assert!(read.residuals.is_empty(), "no filled triangle: nothing fails to compose");
     assert_eq!(read.unknown, 0, "one book verifies absence over its own orbs");
-    assert!(read.capacity_is_defined(), "a fully observed cocycle HAS a class");
-    assert_eq!(read.capacity, 1, "one independent cycle, carrying charge: D = 1");
+    assert!(read.rank_is_defined(), "a fully observed cocycle HAS a class");
+    assert_eq!(read.rank, 1, "one independent cycle, carrying charge: D = 1");
 }
 
 #[test]
@@ -295,8 +295,8 @@ fn a_ring_that_closes_consistently_carries_no_capacity() {
     state.bonds = vec![bond(1, 2, 3), bond(2, 3, 3), bond(3, 4, 3), bond(1, 4, 9)];
 
     let read = read_entangled(&state);
-    assert!(read.capacity_is_defined());
-    assert_eq!(read.capacity, 0, "3+3+3 = 9: the loop closes, and closure is frame");
+    assert!(read.rank_is_defined());
+    assert_eq!(read.rank, 0, "3+3+3 = 9: the loop closes, and closure is frame");
 }
 
 #[test]
@@ -315,7 +315,7 @@ fn a_chord_fills_the_triangles_and_the_capacity_becomes_strain() {
     // universe unreadable. Both readings are the same fact seen through
     // the support, and both are available.
     assert!(
-        read.capacity_is_defined(),
+        read.rank_is_defined(),
         "a filled triangle that fails to compose is still a readable universe"
     );
 }
@@ -333,13 +333,13 @@ fn a_new_orb_grows_the_base_and_never_the_capacity() {
     let mut state = orbs(4);
     state.bonds = vec![bond(1, 2, 3), bond(2, 3, 3), bond(3, 4, 3), bond(4, 1, 3)];
     let before = read_entangled(&state);
-    assert_eq!(before.capacity, 1);
+    assert_eq!(before.rank, 1);
 
     state.orbs.push(ColonyOrb { orb_id: 5, name: "orb5".into(), ..Default::default() });
     let after = read_entangled(&state);
 
-    assert_eq!(after.capacity, before.capacity, "a new vertex is not new capacity");
-    assert!(after.capacity_is_defined(), "and the reading stays defined");
+    assert_eq!(after.rank, before.rank, "a new vertex is not new capacity");
+    assert!(after.rank_is_defined(), "and the reading stays defined");
     assert_eq!(
         observe(&state, 0, 4, CHANNEL_BOND),
         Observed::Absent,
@@ -360,15 +360,15 @@ fn sparsity_makes_relation_rare_and_a_rare_relation_reshapes() {
     let mut state = orbs(5);
     state.bonds = vec![bond(1, 2, 3), bond(2, 3, 3), bond(3, 4, 3), bond(4, 1, 3)];
     let before = read_entangled(&state);
-    assert_eq!(before.capacity, 1, "the ring; orb 5 stands apart");
+    assert_eq!(before.rank, 1, "the ring; orb 5 stands apart");
 
     // Orb 5 forms two relations — deliberate deeds, each one rare.
     state.bonds.push(bond(5, 1, 3));
     state.bonds.push(bond(5, 2, 3));
     let after = read_entangled(&state);
 
-    assert_eq!(after.capacity, 2, "the rare relations closed a second cycle: the shape moved");
-    assert!(after.capacity > before.capacity, "allowed to grow — because a deed formed it");
+    assert_eq!(after.rank, 2, "the rare relations closed a second cycle: the shape moved");
+    assert!(after.rank > before.rank, "allowed to grow — because a deed formed it");
 }
 
 #[test]
@@ -383,7 +383,7 @@ fn reading_capacity_mints_nothing() {
     let once = read_entangled(&state);
     let twice = read_entangled(&state);
 
-    assert_eq!(once.capacity, twice.capacity, "a reading is idempotent");
+    assert_eq!(once.rank, twice.rank, "a reading is idempotent");
     assert_eq!(state, before, "and it moved nothing in the world");
 }
 
