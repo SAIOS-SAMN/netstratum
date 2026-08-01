@@ -98,24 +98,49 @@ of a decomposable object is not a guard — that was the recorded failure
 mode of the struck formulation, which guarded the damped-gradient term while the objective
 leaked through C-scoring.
 
-### 2d. The twin singularities — STRUCK AS ESOTERIC (2026-08-01)
+### 2d. THE SIGN LAW — divergence, egress and ingress
 
-This section named the discovery mint `S⁺_out` and the commitment chain
-`S⁺_hol`, calling them white-hole singularities. **It is struck under
-Article III, applied to this document.**
+**The cosmology is struck; the sign law is LIVE and is stated here.**
 
-The test Article III sets is whether a thing computes. These names
-drove no behaviour: no file read them, no rule branched on them, and
-removing them changes nothing. They renamed two organs that already had
-plain names — `DiscoveryMinted` (tag 86) and `mesh::spine::seal` — in
-vocabulary that made the engine sound larger without making it do more.
-That is the definition of cosmetic non-utility, and a law that taxes it
-elsewhere cannot carry it here.
+The struck half: this section once wrapped two landed organs —
+`DiscoveryMinted` (tag 86) and `mesh::spine::seal` — in invented
+cosmological notation, which made the engine sound larger without making
+it do more. Struck under Article III and PURGED. The symbols are not
+reproduced here: a struck symbol kept alive in a record is still a
+symbol in the corpus.
 
-**What survives, because it computes:** a loop carrying non-zero charge
-is real and is now measured — `rfa_core::holonomies` returns exactly
-those charges, and `∮ ≠ 0` is the ordinary statement that a walk around
-a cycle does not return where it began. It needs no cosmology.
+**THE STRIKE OVER-REACHED BY ONE CLAUSE, corrected 2026-08-01.** It
+recorded that *"no file read them."* Six sites in the sealed math read
+this section as their governing authority for the sign law
+(`capacity.rs` and `reduce.rs`). The cosmology drove nothing; **the sign
+law drove, and still drives, the divergence reading.** Striking the
+whole section left live code citing a dead authority. The law is
+therefore re-homed here, in plain terms.
+
+**THE FORM.** On the relation `Δ` over vertices `V`, the discrete nodal
+divergence is the boundary operator applied at a vertex:
+
+    (div Δ)_i,l  =  Σ_j Δ_ij,l                     `capacity::divergence`
+
+    sign( (div Δ)_i,l )  =  +1   EGRESS   — the vertex sources
+                            −1   INGRESS  — the vertex sinks
+                             0   BALANCED — holonomic; whatever the
+                                            vertex carries, it circulates
+
+**GLOBAL CONSERVATION — the books close.** Antisymmetry (`Δ_ji = −Δ_ij`)
+gives, on every fiber layer:
+
+    Σ_{i ∈ V} (div Δ)_i,l  =  0
+
+so an egress anywhere implies an ingress somewhere. **No relation is
+all-source.** This is Noether's shape (LAW 2) on the pair symmetry, and
+it is why the non-trapping reading is a statement about a BOUNDARY, not
+about an isolated vertex.
+
+**WHAT SURVIVES BECAUSE IT COMPUTES.** A loop carrying non-zero charge
+is real and is measured: `rfa_core::holonomies` returns exactly those
+charges, and `∮ ≠ 0` is the ordinary statement that a walk around a
+cycle does not return where it began. It needs no cosmology.
 
 ### 2e. THE Ω/α UNION — wrapped on λ-nodes, toward D(cohesion)
 
@@ -714,12 +739,48 @@ universe, governs nothing, and may never be a PREMISE the system
 rests on.
 ```
 
-*What it forbids.* **Occult, religion and dogma may never live in the
-kernel, in the sealed math, or in any law document.** Not as mechanism,
-not as vocabulary, not as flavour. This is unconditional and has no
-exception for elegance: a universe whose physics is named after
-someone's cosmology has adopted that cosmology as a premise, whatever
-the intent.
+*What it forbids.* **No term may enter the kernel, the sealed math, or
+any law document AS A PREMISE.** A universe whose physics rests on
+someone's cosmology has adopted that cosmology, whatever the intent.
+
+**THE SCOPE IS USE, NEVER MENTION** (operator ratification 2026-08-01).
+This clause previously read *"may never live in … any law document,"*
+which forbade the law from naming the very entities it governs —
+`12_UNION` and `15_TAXON` name civilizations the seat-width law computes
+on, and under the old wording every such reference was a violation. The
+ban attaches to a term used as a PREMISE, never to a term used as a
+NAME. Naming a governed entity is lawful at every layer.
+
+---
+
+#### THE PREMISE TEST — definitive, two questions, four outcomes
+
+Let `L` be the governing layer (law documents, sealed math, kernel) and
+`C` the content layer.
+
+    T ∈ Premise(L)  ⟺  T is an unprovable assumption REQUIRED for the
+                       correctness of a rule.                  EXCISED
+
+    T ∈ Name(L)     ⟺  T is a label denoting a structural entity
+                       x ∈ Dom(L).                             KEPT
+
+| | **names something the system governs** | **enters as a premise a rule rests on** |
+|---|---|---|
+| **a rule READS it** | **KEPT** — any layer | **EXCISED** from the governing layer |
+| **no rule reads it** | **CONTENT ONLY** — barred from the governing layer | **EXCISED** everywhere |
+
+**Etymology is invariant under semantic evaluation.** Where a term was
+first written down has no bearing on its class. A term drawn from a
+mythology may name a perfectly good structure; a term drawn from
+anywhere at all may smuggle in an agent. Judge only which of those it is
+doing HERE.
+
+**Worked form, not worked examples.** This test is stated abstractly on
+purpose. Indexing it to specific roster entries is what produced the
+layer error below: content gets ruled on, the examples go stale, and a
+reader applying the stale example re-runs a reverted sweep.
+
+---
 
 *What it permits, once there is somewhere to put it.* A civilization
 may develop religion — that is a real thing peoples do, and modelling
@@ -742,21 +803,30 @@ it:
 
 ```text
 TYPE VOCABULARY  — names a STRUCTURE, whatever its etymology.
-    kenoma / pleroma are Greek for EMPTINESS and FULLNESS: an axis a
-    civilization taxonomy may sit on and break into sub-categories.
-    archon is a ruling form (and an Athenian magistrate).
+    A label on an entity, a tier, or an axis the system governs.
     These COMPUTE, or can. KEPT.
 
-RELIGION       — names a DEITY, a worship, or a mystical substance.
-    A claim about agents or forces that no experiment reads.
-    Anunnaki are gods; abzu is a divine realm; vril is an invented
-    life-force asserting a physics that is not physics. EXCISED.
+PREMISE          — asserts an agent, a force, or a mechanism that no
+    rule reads and no experiment can fail. A claim the system would
+    have to BELIEVE for a rule to be correct. EXCISED.
 ```
 
-The test is never how a word sounds or where it was first written down.
-**A term drawn from a mythology may name a perfectly good structure;** a
-term drawn from anywhere at all may smuggle in an agent. Judge which of
-those it is doing here.
+**NO LIVE INSTANCE OF THE PREMISE CLASS STANDS IN THIS TREE.** Recorded
+as the true state rather than illustrated with a stale example: every
+term once cited in this row — `abzu`, `vril`, `kenoma`, `pleroma`,
+`agartha` — was restored as content by the layer correction below and
+computes through `station`. An empty row is a true statement; a wrong
+example is not, and the wrong example is what caused the sweep.
+
+**ANUNNAKI ARE TECHNOLOGISTS, NOT GODS** (operator ratification
+2026-08-01). This row once read *"Anunnaki are gods."* That sentence was
+itself the bleedover it existed to prevent — it imported one culture's
+religious reading of a name this project uses structurally. **`Anunnaki`
+denotes a progenitor-class civilization: a builder tier, a structural
+designation**, carrying `station: progenitor`, which the seat-width law
+computes on. `Archon` names a tier and an Athenian magistracy. Both are
+`Name(L)` under the Premise Test, both are read by a rule, both are
+KEPT.
 
 **THE LAYER ERROR — recorded because it is the most useful mistake in
 this article's history.** This law's first enforcement swept the SEED
@@ -772,9 +842,10 @@ and cut the place it protects.
 
 And those names were never lore-only. `Anunnaki`, `Archon` and
 `Agarthan` each carry `station: progenitor` — a committed field the
-seat-width law computes on. They resonate AND compute, which is the
-standard, and `Anunnaki` names a progenitor-class civilization while
-`Archon` names a tier. Meanwhile `12_UNION` §2a had ALREADY performed
+seat-width law computes on. They are `Name(L)` read by a rule, which the
+Premise Test keeps at any layer. `Anunnaki` names a progenitor-class
+civilization of TECHNOLOGISTS; `Archon` names a tier. Meanwhile
+`12_UNION` §2a had ALREADY performed
 this exact discrimination on that exact word: *"An external four-tier
 sketch placing 'Archons' above the progenitors was consulted and
 OVERRIDDEN."* The project kept the name and refused the imported
@@ -909,6 +980,38 @@ computation, hiding one behind vocabulary is cosmetic.
    and the SNF invariant-factor axis of Article I. **The articles bind
    as written; these are the realizations that satisfy them.**
 
+5. **THE UNWIRED SEALED LAYER — the registry** (operator ratification
+   2026-08-01). Eleven public items in the sealed math and the bridge
+   are landed, witnessed by pins, and consumed by NO `src/` caller.
+   They are not the `GROUND` fault — that was a constant declared and
+   never computed, and these compute and are tested. They are
+   CAPABILITY AWAITING A CALLER, and the absence is recorded here
+   rather than left implied:
+
+   | item | crate | what it waits on |
+   |---|---|---|
+   | `verdict_per_dimension` | kernel::bridge | **its own doc says "THIS belongs in the judge" — and it is not in the judge** |
+   | `rank_is_defined` | kernel::bridge | the Article II / IV gate (debt 5a) |
+   | `fold_certified`, `refold`, `observe`, `occupied_dimensions` | kernel::bridge | the merge site and the observation resolver |
+   | `capacity_anchored` | rfa-core::capacity | kept as the drift record against `capacity` |
+   | `is_pure_circulation` | rfa-core::capacity | THE SIGN LAW's enforcement point (§2d) |
+   | `expanded_from` | rfa-core::reduce | the support-expansion mint rule |
+   | `commutes_with`, `congruate`, `is_identity` | rfa-core::fiber | the non-abelian fiber's caller |
+   | `is_admitted` | rfa-core::boundary | the `Vacuity` gate |
+
+5a. **`rank_is_defined` is a recorded obligation, not enforcement.**
+   Its doc-comment claimed callers "MUST" consult it while no caller
+   existed. The word is downgraded and the obligation stands: the
+   Article II / IV gate consults it when built, because an unresolved
+   absence lets phantom topology mint phantom rank.
+
+6. **THE STANDING CHECK — LAW 8 made mechanical.** The `GROUND` fault
+   (declared, documented, asserted, never computed) was found by
+   sweeping the sealed layer for public items no `src/` code consumes.
+   That sweep is cheap, it would have caught the fault the day it
+   landed, and it is the only mechanical enforcement LAW 8 has. Run it
+   at each landing that touches `rfa-core` or `kernel`.
+
 ---
 
 ## §7 THE DECISION SURFACE — what of this law enters the KERNEL
@@ -947,7 +1050,8 @@ is not a mechanism.
 | **Art. III `Ξ` window** — `deeds/(1+ΔD)` over 60 ticks | spans many steps | `scribe` / `lens` |
 | **Art. III allocation** — topicality `T_k`, the Eclipse | a policy over many actors | conductor / mesh |
 | **§2e traverse congruence** — `α ≅ Ω` | spans a whole chain | `lens` over the spine |
-| **§2c `U*` union**, **§2d white holes** | descriptions of the whole | no code; framing only |
+| **§2c `U*` union** | a description of the whole | no code; framing only |
+| **§2d THE SIGN LAW** — egress / ingress / balanced | a per-vertex reading of one state | `rfa_core::capacity` (`divergence`, `egress`) |
 | **§2j field force** — friction, melt, key gap | already landed OUTSIDE the judge, priced per deed | `cfe/src/world.rs` (2395, 3757, 3986) |
 
 **§2i is a THIRD category** — neither kernel nor lens but a

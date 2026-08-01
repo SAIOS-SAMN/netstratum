@@ -130,7 +130,7 @@ pub struct Holonomy {
 /// that cycle's HOLONOMY.
 ///
 /// A non-zero holonomy is structure no coordinate change can remove:
-/// it is `∮ ≠ 0`, the topological charge of `18_TORSION` §2d's
+/// it is `∮ ≠ 0`, the topological charge of `18_TORSION` §2d's sign law and
 /// holonomic pole, and it is what `D` counts.
 ///
 /// Anchoring at vertex 0 was the degenerate case of this that assumed

@@ -52,19 +52,19 @@
 //! space in which to be. The floor is the POINT: one degree, itself.
 //!
 //! **WHY THE SOURCED POLE IS NOT CAPACITY, measured.** A first attempt
-//! at this ruling folded the divergence (`S⁺_out`) into `D` so that a
+//! at this ruling folded the divergence (the egress reading) into `D` so that a
 //! pure coboundary would read non-zero. It fails: divergence is
 //! GAUGE-DEPENDENT — `div(Δ + grad p) = div(Δ) − n·p` — so a node could
 //! inflate its own capacity by adding a pure coboundary, which is the
 //! forgery this meter exists to refuse. Capacity counts the
 //! gauge-INVARIANT content (circulation) above a floor that is never
 //! zero. The divergence stays a first-class reading ([`egress`]) for
-//! the white-hole law; it is simply not `D`.
+//! THE SIGN LAW; it is simply not `D`.
 //!
-//! Note also that `18_TORSION` §2d grounds `S⁺_out` as *the discovery
-//! mint* and `S⁺_hol` as *the commitment chain* — receipted organs, not
-//! two summands of `Δ`. Reading `S⁺_out` as raw divergence was the
-//! over-reach.
+//! The cosmological naming that once wrapped these two readings is
+//! PURGED (`18_TORSION` §2d): the organs are `DiscoveryMinted` (tag 86)
+//! and `mesh::spine::seal`, they are not summands of `Δ`, and reading
+//! the mint as raw divergence was the over-reach.
 //!
 //! ALTITUDE: this is a READING, not a judge and not an objective
 //! (`18_TORSION`, Ξ/ΔD are readings never objectives). It is `O(dim² ·
@@ -88,8 +88,8 @@ pub struct Extent {
     pub entities: usize,
     /// Fiber layers carrying at least one surviving coordinate.
     pub layers: usize,
-    /// `S⁺_hol` — independent circulation coordinates: pairs `(i < j)`
-    /// × layer carrying holonomy.
+    /// Independent CIRCULATION coordinates: pairs `(i < j)` × layer
+    /// carrying holonomy (`∮ ≠ 0`).
     pub coordinates: usize,
 }
 
@@ -227,9 +227,9 @@ impl Extent {
         self.degree().is_above_ground()
     }
 
-    /// Does the relation carry holonomy — `∮ ≠ 0`, the `S⁺_hol` pole?
-    /// This is the GAUGE-INVARIANT content, and it is what `D` counts
-    /// above the ground.
+    /// Does the relation carry holonomy — `∮ ≠ 0`? This is the
+    /// GAUGE-INVARIANT content, and it is what `D` counts above the
+    /// ground.
     pub fn circulates(&self) -> bool {
         self.coordinates > 0
     }
@@ -274,17 +274,21 @@ pub fn ext_x(delta: &Delta) -> Extent {
 /// is the adjoint of the gradient, so it detects the gradient component
 /// exactly: `Δ` has no gradient part iff `div(Δ) = 0` everywhere.
 ///
-/// **THIS IS THE SIGNED READING, and the sign is the law** (18 §2d):
+/// **THIS IS THE SIGNED READING, and the sign is the law**
+/// (`18_TORSION` §2d, THE SIGN LAW):
 ///
-/// - `div_i > 0` — an EGRESS. The vertex emits more than it absorbs:
-///   a source, `S⁺_out`, "strictly positive divergence, emission only".
-/// - `div_i < 0` — an INGRESS. A trapped interior, which §2d FORBIDS:
-///   the singularity is a white hole, never a black one.
-/// - `div_i = 0` — balanced. Whatever the vertex carries is holonomic,
-///   `S⁺_hol`: it returns what it takes and the content is circulation.
+/// - `div_i > 0` — an EGRESS. The vertex sources: it emits more than it
+///   absorbs.
+/// - `div_i < 0` — an INGRESS. The vertex sinks: it absorbs more than
+///   it emits.
+/// - `div_i = 0` — BALANCED. Whatever the vertex carries circulates —
+///   it returns what it takes, and the content is holonomic.
 ///
-/// Divergence always sums to zero over the vertices (antisymmetry), so
-/// a source anywhere implies an ingress somewhere: the books close.
+/// **The books close.** Antisymmetry (`Δ_ji = −Δ_ij`) gives
+/// `Σ_i div_i,l = 0` on every layer, so an egress anywhere implies an
+/// ingress somewhere and NO RELATION IS ALL-SOURCE. That conservation
+/// is why the reading is a statement about a boundary rather than about
+/// an isolated vertex.
 pub fn divergence(delta: &Delta) -> Vec<Vec<Ratio>> {
     let dim = delta.dim();
     let fiber = delta.fiber();
@@ -300,22 +304,47 @@ pub fn divergence(delta: &Delta) -> Vec<Vec<Ratio>> {
 }
 
 /// The egress census of a relation — how many vertices SOURCE, how many
-/// are trapped, how many are balanced. Counted over any fiber layer
-/// carrying a non-zero divergence at that vertex.
+/// SINK, how many are balanced. Counted over any fiber layer carrying a
+/// non-zero divergence at that vertex (`18_TORSION` §2d, THE SIGN LAW).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Egress {
-    /// `S⁺_out` candidates: `div > 0` on some layer.
+    /// EGRESS vertices: `div > 0` on some layer.
     pub sources: usize,
-    /// Trapped interior: `div < 0` on some layer. §2d forbids these.
+    /// INGRESS vertices: `div < 0` on some layer.
     pub trapped: usize,
-    /// `div = 0` on every layer — purely holonomic at this vertex.
+    /// `div = 0` on every layer — the vertex circulates, sourcing and
+    /// sinking nothing.
     pub balanced: usize,
 }
 
 impl Egress {
-    /// §2d's non-trapping law: a lawful egress has NO trapped interior.
-    pub fn is_white_hole(&self) -> bool {
-        self.trapped == 0
+    /// **Is the relation DIVERGENCE-FREE — `div Δ = 0` at every vertex?**
+    ///
+    /// Equivalently: pure circulation. Nothing sources, nothing sinks,
+    /// and every content is holonomic.
+    ///
+    /// **This replaces a cosmological predicate name that overclaimed
+    /// twice** (operator ratification 2026-08-01). The fault was never
+    /// the borrowed word's provenance — it was LAW 8: the predicate did
+    /// not compute the object it named.
+    ///
+    /// The proof it could not. The books close, `Σ_i div_i = 0`, so
+    /// letting `V⁺ = {i : div_i > 0}` and `V⁻ = {i : div_i < 0}`:
+    ///
+    /// ```text
+    ///     Σ_{V⁺} div_i  =  Σ_{V⁻} |div_i|
+    ///     |V⁻| = 0   ⟹   Σ_{V⁺} div_i = 0   ⟹   |V⁺| = 0
+    /// ```
+    ///
+    /// So `trapped == 0` forces `sources == 0` and every vertex
+    /// balanced. The predicate could never distinguish an emitting
+    /// region from ordinary balanced circulation — an anti-trapped
+    /// configuration does not exist in a closed antisymmetric relation.
+    /// It now carries the name of what it actually decides. (It reads
+    /// both counts rather than `trapped == 0` alone, so the meaning is
+    /// legible without the reader having to re-derive the conservation.)
+    pub fn is_pure_circulation(&self) -> bool {
+        self.sources == 0 && self.trapped == 0
     }
 }
 

@@ -396,7 +396,7 @@ The relayed answer was to eliminate `ε_mag` and bound growth by a
    (`b5456d1`).** This refusal was correct when written and is now
    false: `18_TORSION.md` landed as law with exactly those four
    articles, and Article I (Anti-Tensor), Article II (Non-Vacuous
-   Capacity), `Θ`, `S⁺_out`, `Ξ_cosmetic` and the Eclipse all resolve
+   Capacity), `Θ`, the egress reading, `Ξ_cosmetic` and the Eclipse all resolve
    to it. The citations were forward-references to a document being
    written in parallel, not inventions. **The lesson is not that the
    refusal was wrong to make** — an unresolvable citation must be

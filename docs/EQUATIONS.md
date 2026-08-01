@@ -142,7 +142,7 @@ relational structure, the landed tensor.
 `Ω(D)` indexed by dimensional degrees `D`, driven by the torsion form —
 never a metric density, never a scalar.
 
-    dΩ(D)  =  Θ(V) ∧ dV  +  S⁺_out ∧ S⁺_hol
+    dΩ(D)  =  Θ ∧ dV  +  egress ∧ circulation
 
 `D` is **the structure surviving reduction** — RULED 2026-08-01:
 
@@ -198,7 +198,7 @@ that will not reduce is emitted as a new degree:
 Growth is EARNED, never assumed: `GaugeShiftedAt` opens the plane, and
 opening grade k requires k receipted mints (`PlaneUnearned` refuses
 otherwise). **Capacity growth and the discovery mint are ONE event** —
-18 §2d names it `S⁺_out`: egress, strictly positive divergence, no
+18 §2d THE SIGN LAW names it EGRESS: strictly positive divergence, no
 trapped interior.
 
 **D4 · The revocation law — THE ECLIPSE ANCHOR (floored at H¹).**
@@ -296,7 +296,7 @@ unearned claim is vacated**, both ends bounded, neither optional; and
 operator ruling 2026-07-30; inscribed here 2026-08-01). Syntropy and
 entropy are *opposite ends of one closed, coned manifold — no open
 ends, every expansion on one leg bounded by the opposing force on the
-other*. D3 (emission, `S⁺_out`) is the syntropic leg. This is the SAME
+other*. D3 (emission, the egress reading) is the syntropic leg. This is the SAME
 statement as 18 §2c's `U* = D(V) ⊕ V(D)` read on one axis — the direct
 sum is non-destructive precisely because neither leg runs free of the
 other. The thermal instance is T3, the behavioural instance is S1, and

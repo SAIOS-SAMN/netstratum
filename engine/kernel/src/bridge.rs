@@ -213,9 +213,19 @@ impl EntangledRead {
     ///    capacity by receipt. Non-composition is the SIGNAL, and the
     ///    old clause silenced exactly the states worth reading.
     ///
-    /// Callers that gate on rank (Article II standing, Article IV
-    /// monotonicity) MUST still consult this for observation
-    /// completeness.
+    /// **A RECORDED OBLIGATION, NOT A LANDED MUST** (operator
+    /// ratification 2026-08-01). This read *"callers that gate on rank
+    /// MUST consult this"* — and no caller does; the only non-test
+    /// reference is this definition. A `MUST` with no enforcer reads as
+    /// landed law and is not one, which is the same shape as a constant
+    /// that is declared and never computed.
+    ///
+    /// The obligation stands and is owed: **when Article II standing or
+    /// Article IV monotonicity gets its gate, that gate consults this
+    /// first** — an unresolved absence would let phantom topology mint
+    /// phantom rank. Until the gate exists, this is an available
+    /// reading, recorded in `18_TORSION` §6 as debt rather than
+    /// asserted here as enforcement.
     pub fn rank_is_defined(&self) -> bool {
         self.unknown == 0
     }

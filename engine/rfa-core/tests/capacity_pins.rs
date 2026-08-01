@@ -18,7 +18,7 @@
 //! 8. DIVERGENCE IS ONE PASS — no walk, no basepoint; div is grad's
 //!    adjoint, so it detects the gradient exactly.
 //! 9. THE SIGN IS THE LAW — div > 0 egress, div < 0 trapped interior
-//!    (§2d forbids), div = 0 holonomic.
+//!    (§2d THE SIGN LAW), div = 0 balanced/circulating.
 //! 10. RELABELLING-INVARIANT — Article I made a test.
 
 use rfa_core::capacity::{
@@ -162,7 +162,7 @@ fn divergence_detects_the_gradient_in_one_pass() {
 fn a_closed_loop_is_pure_holonomy_and_non_vacuous() {
     // STATIC STASIS, honestly built: 0→1→2→0, each leg carrying 1.
     // Every vertex balances (dV is empty), yet the loop carries a
-    // non-trivial class — ∮ ≠ 0. This is `S⁺_hol` with no `S⁺_out`
+    // non-trivial class — ∮ ≠ 0. Pure circulation with no source
     // anywhere: motion that takes nothing and leaves nothing, and
     // still is not nothing.
     let loop3 = triangle(q(1, 1), q(1, 1), q(-1, 1));
@@ -172,7 +172,7 @@ fn a_closed_loop_is_pure_holonomy_and_non_vacuous() {
         Egress { sources: 0, trapped: 0, balanced: 3 },
         "a closed loop sources nothing and traps nothing"
     );
-    assert!(census.is_white_hole(), "no trapped interior (§2d)");
+    assert!(census.is_pure_circulation(), "nothing sources, nothing sinks (§2d)");
     assert!(
         capacity(&loop3).circulates(),
         "holonomy alone is non-vacuous — this is what rank ALONE would \
@@ -188,16 +188,13 @@ fn a_closed_loop_is_pure_holonomy_and_non_vacuous() {
 
 #[test]
 fn the_sign_of_divergence_is_the_egress_law() {
-    // §2d: `S⁺_out` is EGRESS — strictly positive divergence, emission
-    // only, NO trapped interior. The sign is the law, and it is the
-    // negative force that survives the flip: a source is admitted, an
-    // ingress is a trapped interior and is forbidden.
+    // §2d THE SIGN LAW: div > 0 is EGRESS (the vertex sources),
+    // div < 0 is INGRESS (the vertex sinks), div = 0 is balanced.
     //
     // Antisymmetry makes the books close, so a source at one vertex
     // implies an ingress at another: no relation is all-source. The
-    // non-trapping law is therefore a statement about a BOUNDARY, not
-    // about an isolated vertex — which is why §2d says "no trapped
-    // INTERIOR region".
+    // sign law is therefore a statement about a BOUNDARY, not about
+    // an isolated vertex: the books close over the whole relation.
     let sourced = triangle(q(1, 1), q(0, 1), q(1, 1)); // vertex 0 emits
     let census = egress(&sourced);
     assert!(census.sources >= 1, "vertex 0 emits — an egress stands");
