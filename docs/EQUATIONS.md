@@ -98,19 +98,32 @@ relational structure, the landed tensor.
   **NOTATION, binding:** `Δ` is THE RELATIONAL TENSOR. It is never a
   Laplacian, and no rule in this ledger takes a Laplacian of anything.
 
-**D1 · D — dimensional capacity.** INSCRIBED. D is the extent of the
-index space in which V may express relation. It is a SHAPE, never a
-scalar — four indices, each an exact non-negative integer, each already
-committed state:
+**D1 · Ω(D) — the capacity space.** INSCRIBED. Superseded in form by
+`18_TORSION.md` §2a (operator ruling 2026-08-01): capacity is the SPACE
+`Ω(D)` indexed by dimensional degrees `D`, driven by the torsion form —
+never a metric density, never a scalar.
 
-    D = { i, j, k, l }
-        i, j  — RELATIONAL extent: which entities may stand in relation
-        k     — COMPOSITIONAL extent: the triples relation composes over
-        l     — FIBER extent: the planes each relation carries
+    dΩ(D)  =  Θ(V) ∧ dV  +  S⁺_out ∧ S⁺_hol
 
-This is the landed index space named as law, not a new one:
-`rfa_core::for_each_residual` iterates exactly `(i, j, k, l)`, and
-`Delta { dim, fiber }` already bounds i/j/k by `dim` and l by `fiber`.
+`D` counts the irreducible degrees standing; `Ω(D)` is the space they
+span. The degrees are carried on the landed index set — `for_each_
+residual` iterates exactly `(i, j, k, l)`, and `Delta { dim, fiber }`
+bounds i/j/k by `dim` and l by `fiber`:
+
+    i, j  — RELATIONAL: which entities may stand in relation
+    k     — COMPOSITIONAL: the triples relation composes over
+    l     — FIBER: the planes each relation carries
+
+**∇V IS UNCAGED** (18 §2b). It is a directional operator and is never
+collapsed to `‖∇V‖`, never bounded above, never reduced to a scalar
+aggregate. This EXTENDS the proportional law rather than reversing it:
+squares were barred as the mathematics of minimization, and L1 was a
+smaller cage of the same kind. Scalar aggregates survive only where a
+reading is reported to a human lens, never where the system computes.
+
+**The union is indecomposable** (18 §2c): `U* = D(V) ⊕ V(D)`, a
+non-destructive direct sum — no sub-component is discarded or
+truncated, and no guard may be placed on half of it.
 
 **D2 · The capacity law (admission).** INSCRIBED. What the universe
 expresses must have somewhere to live:
