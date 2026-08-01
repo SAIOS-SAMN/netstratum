@@ -427,11 +427,37 @@ As `Ξ → 0`, `T_k → α_k · uplift_k` — full allocation. As `Ξ` grows,
 `β` are bounded dynamic parameters (the dynamic parameter law), never
 bare literals.
 
-**The Eclipse.** `E_occult` masks cosmetic non-utility out of every
+**The Eclipse.** The mask holds cosmetic non-utility out of every
 allocation: an eclipsed entity still acts, still emits receipts, still
 tells its story — and receives nothing. It is never barred and never
 deleted (guardrail 6 holds: no actor is ever excluded). It is simply
 not paid.
+
+**`Ξ` AND `ΔD` ARE READINGS, NEVER OBJECTIVES** (operator correction
+2026-08-01). This clause is load-bearing and the article is unsafe
+without it. Nothing in this system may optimize `Ξ`, maximize `ΔD`, or
+treat either as a target to drive:
+
+- A target is a scalar to descend or climb, and **descent is struck**
+  (§1). Optimizing `Ξ` is gradient descent with a capacity mask on —
+  the identical failure in new vocabulary, which is precisely how the
+  struck formulation survived the first time (guarding `ζ∇V` while the
+  objective leaked through C-scoring).
+- A measure used as a target stops measuring: work reshapes itself into
+  whatever the number counts, and `ΔD` becomes a thing to manufacture
+  rather than a thing to observe.
+- **The error has already been made once, here.** This document's
+  author applied `Ξ` to a session's own commits, read `ΔD = 0`, and
+  concluded the work was worthless — collapsing two kinds of
+  contribution into one scalar and discarding the side the scalar could
+  not see. Design work that decides what enters the kernel is not
+  capacity-zero; it is not on that axis at all. Recorded so the next
+  reader does not repeat it.
+
+The article penalises structures that emit while producing nothing.
+It does NOT reward structures that maximise the counter — those are the
+same pathology, and Article III convicts a `ΔD`-farmer exactly as it
+convicts a lore-keeper.
 
 **Consequence, recorded: THIS IS AN ANTI-SYBIL MECHANISM.** A puppet
 civilization generates activity, not capacity. It can forge deeds
@@ -528,3 +554,69 @@ computation, hiding one behind vocabulary is cosmetic.
    index set; max over a finite committed set; a wrapped finite locus;
    and the SNF invariant-factor axis of Article I. **The articles bind
    as written; these are the realizations that satisfy them.**
+
+---
+
+## §7 THE DECISION SURFACE — what of this law enters the KERNEL
+
+This section exists to be READ before anything is built. It sorts every
+claim in this document by the one test that decides kernel membership,
+and it is the intended reading order for that decision.
+
+**THE TEST** (kernel CHARTER §1, KERNEL_RELAY §9 — the trap everyone
+hits): the kernel judges ONE step, locally, exactly, totally. A LOCAL
+per-step fact derivable from `(prior, next, step)` can enter
+`lawful()`. A GLOBAL, dynamical, or over-time property CANNOT, at any
+strength of conviction — *enforce the local invariants whose universal
+application yields the global band; measure the global with a lens;
+never make the kernel optimize a global quantity.*
+
+**THE GROUNDING TEST** (added 2026-08-01 after §2h was struck): a claim
+may be written as law here only with a file and line naming what
+BEHAVIOUR it drives. A doc-comment is not behaviour; a vocabulary entry
+is not a mechanism.
+
+### 7a. KERNEL — local, per-step, admissible in `lawful()`
+
+| claim | why local | what it touches |
+|---|---|---|
+| **§2f entanglement** — no capacity without potential motion | reads `(prior, step)` only | `creation()` in `kernel/src/lib.rs` |
+| **§2g gap disposition** — hold both sides, dispose the gap | one deed, one comparison | `creation()`; new `Unlawful` arm carrying both sides |
+| **Art. IV monotone** — a step may not lower `D` outside lawful reduction | `prior`→`next` comparison | new invariant, the `gauge_law` shape |
+| **Art. II non-vacuous** — `D = 0` holds no standing | property of `prior` | `containment()`, or a new gate beside it |
+| **`D` itself** — the structure surviving `Π_G(Δ(Ω))` | pure function of one state | kernel gains its `rfa-core` dep (anticipated at U_DIRECTIVES §4) |
+
+### 7b. LENS — global or over-time, MUST NOT enter the kernel
+
+| claim | why not local | where it lives |
+|---|---|---|
+| **Art. III `Ξ` window** — `deeds/(1+ΔD)` over 60 ticks | spans many steps | `scribe` / `lens` |
+| **Art. III allocation** — topicality `T_k`, the Eclipse | a policy over many actors | conductor / mesh |
+| **§2e traverse congruence** — `α ≅ Ω` | spans a whole chain | `lens` over the spine |
+| **§2c `U*` union**, **§2d white holes** | descriptions of the whole | no code; framing only |
+
+Putting any 7b row into `lawful()` destroys the kernel's nature. That
+is not a style preference — a judge that reads a window is no longer
+pure, no longer total, and no longer replayable step-by-step.
+
+### 7c. NOT LAW — framing, unbuilt, or struck
+
+- **§2h eclipse/vantage** — STRUCK; ungrounded, needed by nothing.
+- **Luminal, holonomic, egress naming** — useful description of the
+  mint and the chain; drives no behaviour on its own.
+- **`Ξ`/`ΔD` as objectives** — barred outright (Art. III).
+
+### 7d. THE ORDER TO DECIDE IN
+
+`D` (7a row 5) gates the other four kernel rows and both Article III
+readings — nothing above it can be judged until a state can be measured.
+It is one caller over the landed `rfa_core::coboundary_reduce`, and
+§2f binds its shape: **the capacity read and the potential read must
+happen in one pass over one prior state**, or the entanglement is
+broken before it is built.
+
+The remaining open rulings, none of which the author may decide:
+whether `I5`'s decay and the assay bound are entangled seams (§2g);
+what congruence relation `α ≅ Ω` uses (§2e); and whether the breaking
+`VERSION` bump for gap disposition lands alone or with the ARC corpus
+work-shape.
