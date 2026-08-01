@@ -322,6 +322,83 @@ ruling rather than a derivation: under-paying an owed decay may be a
 lie of the same kind, or lawful forbearance. **Do not convert them
 silently.**
 
+### 2i. SYNTROPIC OR ENTROPIC — total classification, no neutral
+
+**Every element is outright syntropic or outright entropic.** There is
+no neutral middle, and the reason is the same one that closed §2g's
+silent gap: **a neutral element is a place where value sits
+unaccounted.** Neutrality is the unaccounted gap one level up.
+
+**Landed three times already, and never made total:**
+
+- thermal — encasement MINTS joules (syntropic), overflow VENTS
+  (entropic); `05 §1.2`, encase-first/vent-overflow.
+- the entropy dual ledger — VENT-1/SINK-1, banked against vented.
+- the eight cohesion books — four syntropic/entropic PAIRS, never
+  single counters: given/drawn, returned/extracted,
+  bond_flow/severance_load, fulfilled/breached (`09`).
+
+**What is owed:** the classification is not TOTAL. Elements exist that
+sit on neither book, and each is an unaccounted place. The enforcement
+is MESH-1d's own shape, already proven on the committed fields: every
+element classified or caught by an **UNMEASURED tripwire**. Nothing
+neutral, nothing silent.
+
+### 2j. THE FIELD, NOT THE COLLISION — value from separation
+
+**The hammer and the anvil** is contact: dissipation, deformation, one
+thing reshaping or destroying the other, irreversibly. That is the
+fold-that-merges — and it is precisely what `orbit_lock` FORBIDS.
+
+**The magnets** are a field: the force acts at a DISTANCE, varies with
+SEPARATION, destroys nothing, and does work on approach AND on
+recession. The energy is in the configuration, never in an impact.
+
+**Value is created by motion in the field between two things, as a
+function of their separation — never by their collision.**
+
+**LANDED THREE TIMES, verified by behaviour:**
+
+- `cfe/src/world.rs:2395` — `friction = friction_rate() * divergence *
+  value`. Friction prices DIVERGENCE; aligned partners at any alignment
+  pay exactly zero. A separation force, already charging.
+- `cfe/src/world.rs:3757` — `pair_melt(a, b, distance)` computes
+  `gap = key_distance(a.key(), b.key())` then
+  `melt = (distance + gap) * MELT_PER_UNIT`. Cost as a function of
+  spatial separation PLUS key separation, and it is THE one producer of
+  the formula.
+- `cfe/src/world.rs:3986` — `key_distance`, wrapped separation across
+  keys of any dimensionality.
+
+**THE BOUNCE IS THE MINT.** `16_UNIT` §4a already carries the image as
+law — *a torsion singularity where two photons bounce together,
+regardless of the angle they come from* — and the mechanism is landed:
+`orbit_lock ≠ ∅` → the fold REFUSES → the residue EMITS as a new plane.
+The two states approach, do not merge, and **the refusal is what
+creates the plane.**
+
+**Why the merge must be forbidden, stated in field terms.** Merging
+destroys the field that was generating the value. Two states collapsed
+into one have no separation left, therefore no force, therefore nothing
+further to create. The fold gate does not protect the states — it
+protects the FIELD BETWEEN them. That is I6 read as physics rather than
+as bookkeeping.
+
+**BOTH LEGS FROM ONE SEPARATION — the template.** BRIDGE-1 (`11 §3.1`)
+already writes the shape §2i needs, though it is **SPECCED, NOT
+LANDED** (BUILD_ORDER carries it open): the confluence crossing prices
+its key gap — venting proportional to the gap is the entropic leg,
+while the resonant remainder encases as the syntropic leg. One
+separation, both books, nothing neutral. That is the magnet with both
+poles, and it is the pattern §2i's total classification should follow.
+
+**FLAG — a live notation collision.** MARKET-2 writes its melt as
+`φ·D` where `D = spatial L1 + wrapped key gap` (BUILD_ORDER §3b), while
+`D` is now dimensional capacity (§1 D1). Two different `D`s in live
+law. The CODE is safe — `pair_melt` names its parameter `distance` —
+but the documents are not. The melt's `D` should be renamed (`σ`, for
+separation) before the two drift into one another.
+
 ### 2h. THE ECLIPSE — STRUCK AS WRITTEN (2026-08-01)
 
 This section claimed an "eclipse law" unifying five occlusion
@@ -594,6 +671,12 @@ is not a mechanism.
 | **Art. III allocation** — topicality `T_k`, the Eclipse | a policy over many actors | conductor / mesh |
 | **§2e traverse congruence** — `α ≅ Ω` | spans a whole chain | `lens` over the spine |
 | **§2c `U*` union**, **§2d white holes** | descriptions of the whole | no code; framing only |
+| **§2j field force** — friction, melt, key gap | already landed OUTSIDE the judge, priced per deed | `cfe/src/world.rs` (2395, 3757, 3986) |
+
+**§2i is a THIRD category** — neither kernel nor lens but a
+CLASSIFICATION obligation on the vocabularies: every element declared
+syntropic or entropic, with an UNMEASURED tripwire for the remainder.
+It binds the codec and the element grammar, not `lawful()`.
 
 Putting any 7b row into `lawful()` destroys the kernel's nature. That
 is not a style preference — a judge that reads a window is no longer
