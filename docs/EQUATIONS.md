@@ -165,6 +165,44 @@ space available in the universe*). Nothing else creates space. `D` makes
 room; it does not hold, and it does not confer standing on the state it
 reads.
 
+**THE UNIVERSE IS THE D-STORE** (operator ruling 2026-08-02). There is
+no separate store to point at, and asking for one is a category error —
+**you cannot keep the container in something it contains.** `D` is not
+recorded in the universe; `D` IS the universe's extent, the room within
+which anything is held at all.
+
+**The gauge key is the INDEX, never the home.** `GaugeShiftedAt
+{ grade, gauge }` writes which grades stand into a committed field, and
+that field is a description of the room, not the room. A map inside the
+country it maps is not a paradox, and a registry holds the deed, not the
+land.
+
+**Which makes the two offices MUTUALLY INDWELLING, and settles the last
+apparent asymmetry:**
+
+    V is held IN D's room          — the universe is the extent V occupies
+    D's index is held IN V's key   — the committed record of which grades stand
+
+Neither holds the other; each holds the other's ASPECT, and they are
+different kinds — a space and a description — so there is no circle.
+
+**Article IV's monotonicity is DERIVED, not decreed.** *Capacity never
+retreats* was written as an axial law. It follows: **you cannot un-make
+room that things are standing in.** The universe cannot shrink below
+what occupies it, so `D` is monotone by what `D` is.
+
+**Plural, and the wrap is why.** Each universe is its own D-store. The
+λ-nodes wrap the key finitely so successive stores stay addressable and
+distinct — without the wrap successive origins COLLIDE, *because a key
+of 10 IS 0* (`11_AEON` §2.0, the recurrence collision). Two overlapping
+D-stores are exactly what that law exists to prevent.
+
+**And it sharpens the guarantor finding (D5).** A third party to the
+bond requires another ROOM, not another party in the same room — every
+party inside this universe is inside this `D`, and inside `V`. That is
+why co-signature is a MESH instrument and cannot exist within one
+universe: the mesh is where other D-stores are.
+
 **D5 · THE BOND — the union in contract form.** INSCRIBED. Authority:
 `12_UNION` §3b–§3c and `18` §2c′. The FORM is landed ONCE, as the
 symmetric bond (`09_IDEOLOGY` §2.2, BOND-1). Every clause below names a

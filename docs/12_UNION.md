@@ -514,6 +514,25 @@ accrues continuously and settles by receipt at touch. Their relation is
 carried on the chain, which is a different thing from being descended
 from it.
 
+**THE UNIVERSE IS THE D-STORE** (ruled 2026-08-02), and it is why the
+two offices dwell in each other rather than owning each other. There is
+no store to point at for `D`, because **you cannot keep the container in
+something it contains**. `D` is not held in the universe; `D` IS the
+universe's room. The gauge key records WHICH grades stand — the index,
+never the home; a registry holds the deed, not the land.
+
+    V is held IN D's room         — the extent V occupies
+    D's index is held IN V's key  — the record of which grades stand
+
+Each holds the other's ASPECT and neither holds the other, which is what
+mutual indwelling means and why no ownership follows from either
+direction. It also earns Article IV without decreeing it: **you cannot
+un-make room that things are standing in.**
+
+Each universe is its own D-store. The λ-node wrap keeps successive
+stores distinct — without it origins collide, *a key of 10 IS 0*
+(`11_AEON` §2.0) — and the mesh is simply where the other rooms are.
+
 **What they make together is neither one's kind.** `D` alone yields
 empty room; `V` alone yields structure with nowhere to stand. The mint
 is their joint issue — a plane WITH content — and it belongs to neither
