@@ -196,3 +196,44 @@ the two proofs from the mesh era into the kernel era, nothing more.
 3. **The verifier's home:** a split `solver-verify` crate (smallest
    surface) vs. absorption into `rfa-core` (one sealed-core crate).
    Drafted here as the split crate; one word decides.
+
+## §7a Rulings recorded (operator, 2026-08-01)
+
+The operator's words on the boxes above, reconciled with THE EMISSION
+LAW as it LANDED (kernel VERSION 1→2, commit 9866781; authority:
+EQUATIONS I4, U_DIRECTIVES §8). Ruling Box 1 is no longer open —
+`mint_bound` is unsealed and `f` is ruled. Recorded here so this ladder
+stays true to the landed kernel, not an earlier assumption.
+
+- **Rate `f` — RULED, ladder-pinned (LANDED).** `f` was ruled against
+  the #17 calibration (evidence commit 5898351), NOT left to assumption:
+  exact ladder integers `f(0..=2)=0` (saturated rungs — free issuance
+  barred), `f(3)=1`, `f(4)=4`, `f(5)=7` (the ≈1.75× inverse-hit-rate
+  step). Defined ON THE LADDER ONLY — an off-ladder difficulty earns
+  zero (a payload never names its own price). L1/ladder terms, no norms,
+  no roots. (Supersedes the earlier "observe first / sealed at zero"
+  reading: the observation happened — the calibration IS the evidence —
+  and the rate is now pinned.)
+- **Reward split — PHASED (LANDED v1, INSCRIBED v2).** **v1: 100% to the
+  solving world** (single-node era — no mesh legs to pay yet). **v2:
+  40/40/20 dual-key** — 40% Prover/Worker, 40% Mesh Verifiers/Router,
+  20% Protocol Reserve — INSCRIBED for the mesh era, lands when the
+  spine carries prover and mesh legs. The split does not open the mint;
+  the mint is already open at v1's 100%.
+- **Work-shapes — forge-only v1, corpus registry v2 (RULED).** v1
+  admits FORGE-ONLY planar synthetic work (deterministic, self-checking;
+  the external scoreboard untouched). v2 admits the ARC corpus through a
+  registry keyed `task_id = SHA256(corpus_input_digest)` — the task's
+  identity is its content, so no forged corpus entry can mint. Higher
+  dimensions (volumetric) stay forge-only until ruled an economic axis
+  (§10 S1, ruling C8).
+- **Beyond the mint (Ruling Box 2) — consensus weight + crystallization
+  (INSCRIBED).** Verified work earns MORE than banked value: it earns
+  **consensus weight** (the pen — heavier judgement in the mesh) and
+  **faster crystallization** (the §1 coupling — solved work sediments
+  the world sooner). Kernel-amendment questions inscribed alongside the
+  v2 split.
+
+**Ruling 3 (the verifier's home) — RESOLVED:** the split `solver-verify`
+crate landed (U1a). The smallest-surface option was taken; `verify_work`
+lives there, importable by the kernel without a cycle.

@@ -341,6 +341,13 @@ commit on explicit operator go.
   with its own deed; if not, mark `seal_volume` decorative in its
   header and refuse the empty-train solve. Boards WITH the volumetric
   tier, never before.
+  **RULED (operator C8, 2026-08-01): DECORATIVE.** v1 is forge-only,
+  ARC-AGI-2/3 are planar, no volumetric deed mints (tag 86 = planar
+  work). `seal_volume` now carries a decorative header
+  (`engine/solver/src/volume.rs`) stating it is not a verifier and its
+  digest carries no economic weight. `verify_volume` is deferred until
+  higher-dimensional work becomes a real economic axis (rides Ruling
+  Box 1's work-shape word).
 - **S2 — the worktree prune** (AUDIT §3/§5.6). ~13 stale worktrees
   under `.claude/worktrees/` still carry old `engine/mirror` code on
   disk — the only place the dead name survives. Outside the
