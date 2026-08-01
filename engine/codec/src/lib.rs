@@ -19,7 +19,7 @@
 //!   None. There is no partial state.
 //!
 //! Serialization is this crate's monopoly (the Phase-1 seam): the
-//! kernel is encoding-blind, the spine consumes these bytes, and no
+//! kernel is encoding-blind, the arbor consumes these bytes, and no
 //! other component in the workspace may produce a second encoding of
 //! committed state.
 

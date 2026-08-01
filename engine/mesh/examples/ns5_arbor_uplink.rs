@@ -1,7 +1,7 @@
 //! SPINE-UPLINK acceptance (NS-5 §9): two processes, one universe,
 //! the SPINE carrier. Node A plays a chain and PRESENTS it as a
 //! segment; the segment bytes carry to node B (its own OS process, its
-//! own engine); node B RECEIVES them and reaches the EQUAL spine —
+//! own engine); node B RECEIVES them and reaches the EQUAL arbor —
 //! admission is verification. Then a forged segment refuses at its
 //! break. Nothing file-borne but chain-verified bytes crosses (THE
 //! UPLINK LAW): the segment IS the chain.
@@ -16,7 +16,7 @@ use std::process::Command;
 use cfe::dop::{Resource, ZoneKind};
 use cfe::ratio::ratio;
 use cfe::world::World;
-use mesh::spine::{Coordinate, Spine};
+use mesh::arbor::{Coordinate, Arbor};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -69,16 +69,16 @@ fn orchestrate() {
     fs::copy(&a_seg, &b_seg).expect("the segment carries");
     leg(&["receive", b_seg.to_str().unwrap(), b_spine.to_str().unwrap()]);
     leg(&["refuse-forged", b_seg.to_str().unwrap(), b_spine.to_str().unwrap()]);
-    println!("== the run stands: A presented, B received the equal spine, the forged segment refused ==");
+    println!("== the run stands: A presented, B received the equal arbor, the forged segment refused ==");
 }
 
-/// Node A: play a chain onto its spine, present it as a segment.
+/// Node A: play a chain onto its arbor, present it as a segment.
 fn present(spine_root: &Path, segment: &Path) {
-    let mut spine = Spine::open(spine_root).expect("A's spine opens");
-    spine.adopt(coord(1), &played(2)).expect("A adopts its founding");
-    spine.extend(coord(2), &played(6), None).expect("A walks a beat");
-    spine.extend(coord(3), &played(10), None).expect("A walks another");
-    let bytes = spine.present();
+    let mut arbor = Arbor::open(spine_root).expect("A's arbor opens");
+    arbor.adopt(coord(1), &played(2)).expect("A adopts its founding");
+    arbor.extend(coord(2), &played(6), None).expect("A walks a beat");
+    arbor.extend(coord(3), &played(10), None).expect("A walks another");
+    let bytes = arbor.present();
     fs::write(segment, &bytes).expect("A writes the segment");
     println!(
         "[node A] played 3 records; presented a {}-byte segment (records + blobs)",
@@ -86,15 +86,15 @@ fn present(spine_root: &Path, segment: &Path) {
     );
 }
 
-/// Node B: open empty, receive the segment, reach the equal spine.
+/// Node B: open empty, receive the segment, reach the equal arbor.
 fn receive_leg(segment: &Path, spine_root: &Path) {
     let bytes = fs::read(segment).expect("B reads the segment");
-    let mut spine = Spine::open(spine_root).expect("B's spine opens empty");
-    let admitted = spine.receive(&bytes).expect("B admits the verified segment");
+    let mut arbor = Arbor::open(spine_root).expect("B's arbor opens empty");
+    let admitted = arbor.receive(&bytes).expect("B admits the verified segment");
     assert_eq!(admitted, 3, "all three records crossed");
-    let head = spine.head("").expect("B's mainline stands");
+    let head = arbor.head("").expect("B's mainline stands");
     // B independently re-serves the head geometry from its own store.
-    let served = spine.fetch(&head.state).expect("B's store holds the head");
+    let served = arbor.fetch(&head.state).expect("B's store holds the head");
     let committed = codec::from_state_bytes(&served).expect("B decodes the head");
     let iron = committed
         .orbs
@@ -102,21 +102,21 @@ fn receive_leg(segment: &Path, spine_root: &Path) {
         .map(|orb| orb.banked_amount(Resource::Iron))
         .unwrap_or_else(|| ratio(0, 1));
     println!(
-        "[node B] admitted {admitted} records by re-verification; head at t={}, iron {iron} — the equal spine",
+        "[node B] admitted {admitted} records by re-verification; head at t={}, iron {iron} — the equal arbor",
         head.coordinate.t
     );
 }
 
 /// Node B again: a forged segment (one byte flipped) refuses, and the
-/// spine is left untouched.
+/// arbor is left untouched.
 fn refuse_forged(segment: &Path, spine_root: &Path) {
     let mut bytes = fs::read(segment).expect("B reads the segment");
     bytes[8] ^= 0xff;
     let forged_root = spine_root.with_extension("forged");
-    let mut spine = Spine::open(&forged_root).expect("a fresh spine opens");
-    match spine.receive(&bytes) {
+    let mut arbor = Arbor::open(&forged_root).expect("a fresh arbor opens");
+    match arbor.receive(&bytes) {
         Err(refused) => {
-            assert!(spine.head("").is_none(), "nothing admitted past the break");
+            assert!(arbor.head("").is_none(), "nothing admitted past the break");
             println!("[node B] the forged segment REFUSED ({refused:?}) — admission is verification");
         }
         Ok(_) => panic!("a forged segment must never be admitted"),

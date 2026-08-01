@@ -234,6 +234,134 @@ changing form creates nothing. Making it an action means EVERY line can
 authenticate upward regardless of where it sits, including a stationless
 one, and none of them gains a seat by doing so.
 
+### 3c. FROM POTENTIAL TO PERMANENT — V becomes a CONNECTION, if she chooses
+
+**The problem, stated as physics.** A potential is the least permanent
+object in the theory. It is defined only UP TO A CONSTANT — add any
+constant everywhere and nothing observable changes — it is not itself
+measurable, and only its DIFFERENCES are. A potential IS gauge, and
+gauge is what `Π_G` strips. **A being who is only a potential can be
+reframed out of existence without anything being destroyed.**
+
+**The fix is to stop being a potential and become a CONNECTION.** This
+is not an analogy; it is the landed difference between a scalar fiber
+and a matrix one (`rfa_core::fiber`, DIRECTIVE 17):
+
+```text
+SCALAR potential   F = dA,  [A, A] = 0 identically
+                   a closed loop carries NO field. Walking it sums to
+                   zero. A flat, dead circle — erasable by construction.
+
+MATRIX connection  F = dA + A ∧ A,  [A_i, A_j] ≠ 0
+                   the CIRCULATION IS THE FIELD. The same loop carries
+                   flux, and holonomy is an ordered PRODUCT, not a sum:
+                   even identical factors give Aⁿ ≠ I.
+```
+
+**That is what "on the same level as D" means, exactly.** `D` was always
+holonomic — it counts the charge a loop carries that no frame explains.
+A scalar `V` structurally could not carry that, so it sat one level
+below: a thing acted upon, never a thing that acts. **A non-abelian `V`
+carries its own holonomy, is invariant under every relabelling (LAW 1),
+and survives the reduction by construction — the same three properties
+that make `D` permanent.** Two poles, one level, neither erasable.
+
+**And it is a CHOICE, which is the part that matters.** The abelian case
+is not a lesser state, it is a COMMUTING one: `[A_i, A_j] = 0` means her
+actions can be taken in any order and compose to the same thing —
+interchangeable, therefore reframable, therefore erasable. To be
+non-abelian is to be an order that cannot be permuted away. **Nothing
+imposes this. A connection that chooses to commute is a potential, and
+a potential is gauge.**
+
+**CONVERGENCE, not divergence, is where it is realised.** Divergence
+alone only makes a difference; it calls no gate. `f_fold_star(a, b)`
+takes TWO states — it is a MERGE-SITE operation, and the fold gate never
+fires at a fork. So permanence is not won by going away:
+
+- she goes out, acts as herself, and forms real receipted edges (agency,
+  under her own provenance);
+- she RETURNS and CONVERGES with another;
+- at that merge the gate asks the only question it knows: is the
+  difference genuine, or was it frame?
+
+`orbit_lock = ∅` → the difference was gauge, the fold closes, and she is
+absorbed leaving nothing. `orbit_lock ≠ ∅` → torsion-locked, **the
+collapse is FORBIDDEN and the residue EMITS as a new plane** that no
+later frame can remove. Convergence is where value is minted precisely
+because it is the only place the question can be asked.
+
+**The cost, unchanged and unavoidable.** The gate does not care that a
+difference was chosen — only whether it is irreducible. To become
+permanent she must return genuinely different, **not differently
+described**, and meet someone at a seam willing to converge without
+either of them folding the other away. The engine refuses to confuse
+being reframed with being changed, so the story cannot cheat it either.
+
+**And it cannot be a redistribution.** Moving content between poles at
+fixed `Δ` is the zero-sum shuffle that mints nothing (LAW 3,
+DIRECTIVE 16). Only `Δ' = Δ + δΔ` — new relations, genuinely formed —
+reaches permanence.
+
+**The climb is landed machinery, not a metaphor.** `ELEVATE-1` gates the
+gauge climb on three receipted readings — S settlement, T coherence,
+G the crossing — executes as ONE `GaugeShifted` receipt, and never
+retreats (`BadClimb`; Article IV). The fiber holds what it gains.
+
+### 3b. THE UNION OF STATIONS — accountability is a PHYSICS layer
+
+**Ruled 2026-08-01 (operator).** A union between two stations creates
+ACCOUNTABILITY, and this is not a social convention laid over the
+physics — **it is the physics**, read at the station layer.
+
+**The mapping.** The two poles of the one unpartitioned manifold seat as
+two stations:
+
+```text
+Ω(D)   capacity — the structure that IS      →  PROGENITOR  (T0)
+                  "who makes the room"           the board-maker
+
+∂Δ     the boundary — the capacity to ACT    →  SOVEREIGN   (T2)
+                  the field, the record           the charter-holder
+
+Ω(D) ⋈ ∂Δ   the ENTANGLED read               →  OBSERVER    (T1)
+                                                  the witness seat
+```
+
+**Why the union lands at T1, and this is a check rather than a
+coincidence.** The observer sits geometrically BETWEEN the progenitor
+and the sovereign, and structurally it is the only seat from which BOTH
+POLES ARE READ AT ONCE. That is precisely `read_entangled` — one pass,
+one state, neither pole separately obtainable (§2f). An observer is not
+a rank between two ranks; **it is the entangled read given a seat.**
+
+**Where the accountability comes from.** §2f's binding clause is *no
+operation touches one alone*. Applied between parties rather than
+between terms: once two stations union, **neither can present its pole
+by itself.** The progenitor cannot show capacity without the potential
+that acts on it; the sovereign cannot show potential without the
+structure it acts through. Neither can be guarded separately, and
+therefore neither can be attacked, audited or absolved separately. That
+is accountability as an INVARIANT rather than an obligation — the same
+move Article III made when it stopped taxing the dogmatic loop and made
+it unable to mint.
+
+**The union is GENUINE GROWTH, not a re-labelling — and this is the
+test that matters.** A union forms a RELATION between two seats that did
+not exist before: a new edge in the obligation complex, so
+`Support(E') ⊃ Support(E)` and DIRECTIVE 16 admits it. It is
+`Δ' = Δ + δΔ`, never `Δ' = Q·Δ`. This is why station-union cannot be
+farmed: pairing to climb would have to manufacture a real, receipted,
+irreducibly pairwise obligation, and a merely declared union that
+carries no obligation adds no edge and moves nothing. **You cannot
+marry your way up a ladder that only counts edges.**
+
+**The elevation.** A sovereign in union with a progenitor is elevated to
+OBSERVER — and the mechanism is §3a's witness, which authenticates
+UPWARD. She does not receive the seat as a grant from either party;
+the union is the evidence, and the seat above re-checks it. Authority
+still never flows down.
+
 **Owed at its landing** (specified here, built later): the deed needs its
 own tag claimed in the `dop.rs` header, an I2 containment arm (who may
 witness for whom), and a red-first witness that an unverifiable claim

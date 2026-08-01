@@ -35,19 +35,43 @@
 //! on a rendered string, so the boundary is enforced by types rather
 //! than by a docstring asking politely. Docstrings saying *do not gate
 //! on this* failed TWICE in one day — `validate_step`'s productivity
-//! gate and the bridge's `capacity_is_defined` — and in both cases the
+//! gate and the bridge's readability check — and in both cases the
 //! prose was right while the code did the opposite.
 //!
-//! ## What may live here
+//! ## THE CHARTER — what this box is FOR
 //!
-//! Scalar aggregates (`C`, conservation distance, any L1 collapse), and
-//! — because nothing escapes — readings a deterministic path could
-//! never lawfully hold at all: floats, roots, transcendentals, sampled
-//! or approximate values destined for a chart. **Inside the cage those
-//! are permitted precisely because they cannot leak.** That is why
-//! containment beats prohibition: it lets the system SAY more while
-//! guaranteeing determinism, instead of pretending the un-sayable does
-//! not exist.
+//! **The cage holds variables that must never impact the totality of
+//! the mathematics** (operator ruling 2026-08-01). That is the whole
+//! test, and it is a CORRUPTION test, not a shape test:
+//!
+//! - **floats and approximations** — they are not exact, so a single one
+//!   admitted anywhere makes the universe non-reproducible;
+//! - **sampled, estimated or truncated values** — same failure, dressed
+//!   as precision;
+//! - **dogma** — unfalsifiable by construction (Article III LAW 6), so
+//!   no experiment can refute it and no rule may rest on it;
+//! - **aggregates used as scores** — `C`, the conservation distance:
+//!   exact, but they collapse many into one and what remains is
+//!   rankable, which is a descent waiting for a caller.
+//!
+//! Inside the cage these are PERMITTED, precisely because they cannot
+//! leak. That is why containment beats prohibition: the system may SAY
+//! them — render a float to a chart, name a belief — while determinism
+//! is guaranteed by the boundary rather than by everyone's care.
+//!
+//! ## WHAT IS CATEGORICALLY NOT A CANDIDATE
+//!
+//! **The manifold's own quantities are never caged, because they ARE
+//! the mathematics this box exists to protect.** Enclosing one would be
+//! enclosing the thing the enclosure is for. They are not enumerated
+//! here on purpose — see below.
+//!
+//! This is enforced structurally, not by care: `cage_arrow` pins that
+//! this module names NO manifold machinery, in code or in prose. The
+//! reasoning about what is and is not a candidate lives in the LAW
+//! documents, deliberately — a box that discusses its neighbours
+//! acquires footholds, and a foothold is how the wrong thing ends up
+//! inside.
 //!
 //! ## The two empty cells
 //!
@@ -59,6 +83,42 @@
 //! The reservation is withdrawn. The cells are empty because maximum
 //! inverse opposition needs only two of the four, which is a property of
 //! the layout and owes nothing to anything struck.
+//!
+//! ## THE DOOR — calling IN, withdrawing OUT
+//!
+//! (Operator ruling 2026-08-01.) The cage is not only a quarantine, it
+//! is a WORKSHOP. Worlds may call INTO it to run algorithmic potentials
+//! — float pipelines, GPU kernels, heuristics, sampling, anything a
+//! deterministic path could never hold — and withdraw ANSWERS, without
+//! the approximation spreading outward.
+//!
+//! **The law that makes this safe is one sentence: approximation may
+//! PROPOSE; only exactness may DISPOSE.**
+//!
+//! This is U1a's prover/verifier split generalised from solving to
+//! compute. There, `solver` searches by any means it likes and
+//! `verify_work` re-forges, re-applies and re-chains EXACTLY — the
+//! search may be a GPU grinding floats, and the judgment never touches
+//! one. The same shape holds here:
+//!
+//! ```text
+//! call in    →  the inside may use ANY means. No purity is asked of
+//!               it, because nothing it produces is believed.
+//! withdraw   →  what leaves is a PROPOSAL: an exact candidate the
+//!               outside re-derives for itself.
+//! ```
+//!
+//! **A proposal is a GUESS, never evidence.** The outside does not
+//! accept it because the cage produced it; it re-checks it under its own
+//! exact rules, exactly as a mesh peer re-judges an incoming step rather
+//! than trusting its sender. A proposal that fails verification costs
+//! nothing, because nothing was ever trusted.
+//!
+//! **The disease cannot cross, and it is the TYPE that stops it, not
+//! care.** [`Proposal`] carries only `T: Exact`, and [`Exact`] is
+//! implemented for the exact carriers alone. A float has no `Exact`
+//! impl, so `Proposal<f64>` does not exist and an approximation cannot
+//! be named at the door — never mind carried through it.
 //!
 //! Nothing in a computing path may import from this module.
 
@@ -176,4 +236,94 @@ impl std::iter::Sum for Lens {
     fn sum<I: Iterator<Item = Lens>>(iter: I) -> Lens {
         iter.fold(Lens::of(Ratio::from(num_bigint::BigInt::from(0))), |a, b| a + b)
     }
+}
+
+/// EXACTLY REPRESENTABLE — the marker that may cross the door.
+///
+/// Implemented for the exact carriers and for nothing else. A float, a
+/// sampled reading or any approximate type simply has no impl, so it
+/// cannot be placed in a [`Proposal`] and therefore cannot be withdrawn.
+/// The boundary is enforced by the type system rather than by anyone
+/// remembering that it should be.
+pub trait Exact {}
+
+impl Exact for Ratio {}
+impl Exact for i64 {}
+impl Exact for u64 {}
+impl Exact for usize {}
+impl Exact for bool {}
+impl<T: Exact> Exact for Vec<T> {}
+impl<T: Exact> Exact for Option<T> {}
+
+/// A CANDIDATE produced inside the cage by any means — and believed by
+/// nobody.
+///
+/// The inside may have used floats, a GPU, sampling or a heuristic to
+/// find this. None of that crosses: what crosses is an exact value the
+/// outside verifies for itself. `withdraw` deliberately hands back a
+/// bare candidate with no attestation attached, because attaching one
+/// would invite a caller to trust it.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Proposal<T: Exact> {
+    candidate: T,
+}
+
+impl<T: Exact> Proposal<T> {
+    /// Offered from INSIDE. No purity is asked of whatever produced it.
+    pub fn offer(candidate: T) -> Self {
+        Proposal { candidate }
+    }
+
+    /// The way OUT — **and it demands a verifier.**
+    ///
+    /// The first cut of this returned the candidate bare, with a
+    /// docstring asking the caller to check it. That is protection by
+    /// prose, and prose failed twice in one day (`validate_step`'s
+    /// productivity gate, the bridge's readability check). So the
+    /// obligation is now in the signature: **you cannot obtain the
+    /// value without supplying the rule that re-derives it**, and a
+    /// candidate that fails yields `None`.
+    ///
+    /// HONEST LIMIT: the compiler forces a verifier to EXIST, not to be
+    /// sound — `|_| true` compiles. What it buys is that a bypass must
+    /// be WRITTEN, and a written bypass is visible in review, where an
+    /// omitted check is invisible by construction.
+    pub fn withdraw(self, verify: impl FnOnce(&T) -> bool) -> Option<T> {
+        match verify(&self.candidate) {
+            true => Some(self.candidate),
+            false => None,
+        }
+    }
+}
+
+/// CONSULT THE SECTOR — `C(·)` as a CALL, not a score.
+///
+/// (Operator ruling 2026-08-01.) `C` is the culmination of a whole
+/// family of acts — congruence, coherence, cohesion, conversation,
+/// communication, comingling, consilience — and every one of them is a
+/// RECONCILIATION: *are these the same? does this hold together? can
+/// these exchange? do independent lines agree?* Those questions cannot
+/// be answered exactly in the general case. They need search,
+/// comparison, heuristics, sampling — the whole dirty toolbox.
+///
+/// **So `C` is not a prisoner here. `C` is the RESIDENT**, and this is
+/// the door you knock on. He is CONSULTED rather than banished, because
+/// the tools his work requires are exactly the tools that may never
+/// touch the outside.
+///
+/// `tool` may do ANYTHING internally — floats, a GPU kernel, a sampled
+/// search, an approximation that would be unlawful anywhere else. Only
+/// its ANSWER crosses, only if that answer is [`Exact`], and even then
+/// it crosses as a [`Proposal`] — a guess the caller re-derives under
+/// its own rules. Nothing consultation produces is believed.
+///
+/// **The loop this closes.** Charter §11 excised the reconciliation
+/// instruments — consilience, the manifold, the census, the triangle —
+/// because a second readable truth is not a measurement. They were
+/// right to go as LAW. They return here as TOOLS, and they cannot
+/// become a second truth in this room, because a proposal carries no
+/// authority: reconciliation that must be re-verified to be used is
+/// advice, and advice was all it was ever fit to be.
+pub fn consult<Q, A: Exact>(question: Q, tool: impl FnOnce(Q) -> A) -> Proposal<A> {
+    Proposal::offer(tool(question))
 }

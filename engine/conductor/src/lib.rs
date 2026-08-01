@@ -50,7 +50,7 @@ use ledger::galaxy::Galaxy;
 use ledger::registry::{lineage_domain, Civilization, Registry, DISPOSITIONS, METABOLISMS, PERCEPTIONS};
 use ledger::{Directive, Disposition, Ledger};
 use physics::Beacon;
-use solver::{forge_task, solve, Difficulty, SolveRead};
+use solver::{forge_task, solve_consulted, Difficulty, SolveRead};
 use std::path::Path;
 
 mod polities;
@@ -464,7 +464,15 @@ pub struct Polity {
     /// #36: the world's own chain, held open across beats (opened
     /// lazily at the first chain; re-opening per beat would re-verify
     /// the whole stream every cycle — quadratic over a live era).
-    spine: Option<mesh::spine::Spine>,
+    arbor: Option<mesh::arbor::Arbor>,
+    /// DIRECTIVE 19 — how many receipts have been threaded through the
+    /// judge and into the chain. Every deed past this mark is chained
+    /// individually, with its own step, and judged.
+    chained: usize,
+    /// Deeds the kernel REFUSED, by receipt sequence. Kept rather than
+    /// discarded — a refusal the board never sees is the judge speaking
+    /// into a void.
+    refused: Vec<(u64, kernel::Unlawful)>,
 }
 
 fn banked(world: &World, resource: Resource) -> Ratio {
@@ -598,7 +606,7 @@ impl Polity {
                     // Lawful conductor hand → held and stamped from
                     // here on; a pen out across a restart STAYS out;
                     // pre-mesh None stays unheld (law starts at the
-                    // first seal); a violating spine waits penned —
+                    // first seal); a violating arbor waits penned —
                     // writes never land on a refused chain.
                     let mut world = world;
                     let penned = match mesh::authority(world.chronicle()) {
@@ -638,6 +646,8 @@ impl Polity {
                         )
                     });
                     return Polity {
+                        chained: 0,
+                        refused: Vec::new(),
                         spec,
                         world,
                         automaton,
@@ -647,7 +657,7 @@ impl Polity {
                         solved,
                         spawned,
                         penned,
-                        spine: None,
+                        arbor: None,
                     };
                 }
             }
@@ -714,6 +724,8 @@ impl Polity {
         // instead of killing the board; derived seats are always lawful.
         let _ = world.site_planet(cfe::world::FIRST_ORB, albedo, orbit);
         Polity {
+            chained: 0,
+            refused: Vec::new(),
             spec,
             world,
             automaton,
@@ -723,7 +735,7 @@ impl Polity {
             solved: 0,
             spawned: false,
             penned: false,
-            spine: None,
+            arbor: None,
         }
     }
 
@@ -1049,7 +1061,15 @@ impl Polity {
         } else {
             let difficulty = Difficulty::level(self.level);
             let task = forge_task(digest, difficulty);
-            match solve(&task, difficulty.word_len) {
+            // THE SECTOR DOOR is the live forge path. The search only
+            // PROPOSES; nothing crosses until every training pair has
+            // been re-derived exactly, which is the same re-derivation
+            // `verify_work` performs at the kernel. An unproved
+            // candidate reads `Unsolved` and the line simply rests that
+            // beat — so the search inside may become as dirty as it
+            // likes (float scoring, batching, sampled beam) and nothing
+            // downstream changes.
+            match solve_consulted(&task, difficulty.word_len) {
                 SolveRead::Solved {
                     program,
                     matches_expected: Some(true),
@@ -1273,14 +1293,14 @@ impl Polity {
                 .join("chronicle.tlv"),
         );
         // #36 KERNEL-OBSERVED PLAY: the beat chains. The committed
-        // state extends this world's spine at the world clock —
+        // state extends this world's arbor at the world clock —
         // adopted once at first sight (the pre-chain founding stamped
         // a named debt), extended every beat after, judged=0 stamped
         // (the hole visible, never hidden; the Phase 3 flip threads
         // the steps). A penned world skips the beat entirely, so its
-        // spine stalls with its pen (MESH-1b). Best-effort like the
+        // arbor stalls with its pen (MESH-1b). Best-effort like the
         // sibling writes at this observed phase: a refused chain
-        // leaves the spine short, a visible stall, never a crash.
+        // leaves the arbor short, a visible stall, never a crash.
         let _ = self.chain_beat(book);
         let _ = scribe::record(
             book,
@@ -1292,36 +1312,96 @@ impl Polity {
         newborn
     }
 
-    /// One beat onto the world's own spine (#36): adopt-or-extend the
+    /// One beat onto the world's own arbor (#36): adopt-or-extend the
     /// committed state at `{S: charted position, G: base gauge, T:
     /// world tick}` on the mainline. The tick advanced this cycle, so
     /// the arrow ascends structurally; the adoption door shuts itself
     /// after the first pass.
-    fn chain_beat(&mut self, book: &Ledger) -> Result<(), mesh::spine::SpineRefused> {
+    fn chain_beat(&mut self, book: &Ledger) -> Result<(), mesh::arbor::ArborRefused> {
         // The handle opens once and holds: the open's full re-verify
         // is paid at first sight (or on resume, where it re-verifies
         // the prior life's chain), then every beat is one append.
-        if self.spine.is_none() {
-            self.spine = Some(mesh::spine::Spine::open(
+        if self.arbor.is_none() {
+            self.arbor = Some(mesh::arbor::Arbor::open(
                 book.world_dir(&self.spec.world_name).join("spine"),
             )?);
         }
-        let spine = self.spine.as_mut().expect("held or just opened");
-        let bytes = codec::state_bytes(&self.world.committed());
-        let coordinate = mesh::spine::Coordinate {
+        let arbor = self.arbor.as_mut().expect("held or just opened");
+        let receipts = self.world.chronicle().receipts().to_vec();
+        let seat = [
+            self.spec.position.0.clone(),
+            self.spec.position.1.clone(),
+            self.spec.position.2.clone(),
+        ];
+
+        // THE ADOPTION DOOR (#36): a pre-chain world enters ONCE, its
+        // current state seated as the unjudged genesis — the debt named,
+        // never hidden. Everything after walks through the judge.
+        if arbor.head("").is_none() {
+            let bytes = codec::state_bytes(&self.world.committed());
+            let coordinate = mesh::arbor::Coordinate {
+                branch: String::new(),
+                s: seat.clone(),
+                g: self.world.gauge().clone(),
+                t: self.world.now(),
+            };
+            arbor.adopt(coordinate, &bytes)?;
+            self.chained = receipts.len();
+            return Ok(());
+        }
+
+        // DIRECTIVE 19 — PER-DEED JUDGMENT. One commitment per DEED, not
+        // one per beat, and each carries its own step so
+        // `mesh::arbor::extend` runs `kernel::lawful` on it. Batching
+        // was refused by ruling: nine deeds in one composite hides an
+        // un-inspected interior where a local unlawful step shelters
+        // behind a net-positive whole.
+        //
+        // Prior/next are taken by replaying the chronicle prefix, which
+        // is O(deeds × history) per beat. That is honest and bounded at
+        // this scale; the cure when it bites is a stepping replay in
+        // cfe (replay() is one monolithic loop today and cannot advance
+        // by a single receipt).
+        let mut prior = cfe::world::replay(
+            &cfe::vrp::Chronicle::from_receipts(receipts[..self.chained].to_vec())
+                .map_err(|_| mesh::arbor::ArborRefused::StateUndecodable)?,
+        );
+        for at in self.chained..receipts.len() {
+            let receipt = &receipts[at];
+            let next = cfe::world::replay(
+                &cfe::vrp::Chronicle::from_receipts(receipts[..=at].to_vec())
+                    .map_err(|_| mesh::arbor::ArborRefused::StateUndecodable)?,
+            );
+            let step = kernel::Step {
+                event: receipt.event.clone(),
+                actor: receipt.provenance.first().copied().unwrap_or(cfe::world::SOVEREIGN),
+                stamp: receipt.stamp,
+            };
+            if let Err(unlawful) = kernel::lawful(&prior, &next, &step) {
+                self.refused.push((receipt.sequence, unlawful));
+            }
+            prior = next;
+        }
+        self.chained = receipts.len();
+
+        // THE COMMITMENT STAYS ONE PER BEAT — and that is NOT batching
+        // the judgment, which happened per deed above. It is the arbor's
+        // ADDRESSING law: `t` must strictly increase and coordinates must
+        // be unique, so the store is addressed one record per clock tick
+        // and several deeds share a tick (measured: per-deed commitment
+        // refuses `Occupied` on the second deed of any beat). A finer
+        // address — a sub-index on the coordinate — is a WIRE amendment,
+        // since the coordinate is hashed into every commit. Operator
+        // ruling, not a conductor change. Recorded, not worked around.
+        let coordinate = mesh::arbor::Coordinate {
             branch: String::new(),
-            s: [
-                self.spec.position.0.clone(),
-                self.spec.position.1.clone(),
-                self.spec.position.2.clone(),
-            ],
+            s: seat,
             g: self.world.gauge().clone(),
             t: self.world.now(),
         };
-        match spine.head("") {
-            None => spine.adopt(coordinate, &bytes).map(|_| ()),
-            Some(_) => spine.extend(coordinate, &bytes, None).map(|_| ()),
-        }
+        arbor
+            .extend(coordinate, &codec::state_bytes(&self.world.committed()), None)
+            .map(|_| ())
     }
 }
 

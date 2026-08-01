@@ -249,7 +249,12 @@ fn the_version_is_pinned() {
     // mint_bound unsealed, f ladder-pinned 0·0·0·1·4·7 against the
     // #17 calibration (5898351). Version-1 chains verify forever
     // under the sealed-shut judge they were cut with.
-    assert_eq!(VERSION, 2, "the kernel version is charter-pinned");
+    // VERSION 3 — THE CAPACITY LAW AMENDMENT (operator, 2026-08-01):
+    // a DiscoveryMinted deed refuses unless the prior state reads
+    // Entangled. BREAKING — version 2 admitted mints on Void, Stasis
+    // and Unframed worlds. The introducing commit announced the bump
+    // in its title and left the constant at 2; landed here.
+    assert_eq!(VERSION, 3, "the kernel version is charter-pinned");
 }
 
 #[test]

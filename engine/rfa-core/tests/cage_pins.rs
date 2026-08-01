@@ -85,3 +85,50 @@ fn the_containment_vector_holds_no_usable_scalar() {
     // canonical p/q is unique, so equal values decompose identically.
     assert_eq!(Lens::of(ratio(6, 4)), Lens::of(ratio(3, 2)), "canonical form, one cage");
 }
+
+#[test]
+fn the_door_carries_exact_candidates_and_believes_none_of_them() {
+    use rfa_core::cage::Proposal;
+    // Something inside may have used a GPU, floats, or a coin flip to
+    // find this. What crosses is exact, and it crosses as a GUESS.
+    let found = Proposal::offer(ratio(22, 7)).withdraw(|c| *c > ratio(3, 1));
+    assert_eq!(found, Some(ratio(22, 7)), "verified, so it crosses");
+
+    // A candidate that fails its own verifier does NOT cross.
+    let refused = Proposal::offer(ratio(1, 9)).withdraw(|c| *c > ratio(3, 1));
+    assert_eq!(refused, None, "unverified proposals do not leave");
+
+    // Structural candidates cross too — a program, a witness, a path.
+    let plan = Proposal::offer(vec![1i64, 4, 9]).withdraw(|p| p.len() == 3);
+    assert_eq!(plan, Some(vec![1, 4, 9]));
+
+    // WHAT CANNOT BE WRITTEN, and is the real content of this pin:
+    //
+    //     Proposal::offer(0.5f64)      // f64: no `Exact` impl
+    //     Proposal::offer(vec![0.5f64])
+    //
+    // A float has no Exact impl, so the type `Proposal<f64>` does not
+    // exist. The approximation cannot be NAMED at the door, never mind
+    // carried through it — the boundary is the type system, not care.
+}
+
+#[test]
+fn c_is_consulted_and_may_use_any_tool_inside() {
+    use rfa_core::cage::consult;
+    // THE TOOL USES FLOATS. Deliberately — this is the whole point of
+    // the sector. A float search runs inside; nothing float crosses.
+    let answer = consult(48u64, |n| {
+        let approx = (n as f64).sqrt();          // unlawful anywhere else
+        let floor = approx.floor() as i64;        // the ANSWER is exact
+        floor
+    });
+    // What comes back is a GUESS, and the caller re-derives it exactly.
+    // The exact rule the OUTSIDE applies — never trusting the float.
+    let exact = |c: &i64| *c * *c <= 48 && (*c + 1) * (*c + 1) > 48;
+    assert_eq!(answer.withdraw(exact), Some(6), "the float proposed 6; exact arithmetic agreed");
+
+    // A consultation that proposes wrongly costs nothing: the same
+    // exact rule refuses it at the door and nothing crosses.
+    assert_eq!(consult(48u64, |_| 7i64).withdraw(exact), None,
+               "a wrong proposal never leaves the sector");
+}

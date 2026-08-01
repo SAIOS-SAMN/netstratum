@@ -142,7 +142,7 @@ relational structure, the landed tensor.
 `Ω(D)` indexed by dimensional degrees `D`, driven by the torsion form —
 never a metric density, never a scalar.
 
-    dΩ(D)  =  Θ ∧ dV  +  egress ∧ circulation
+    dΩ(D)  =  Θ ∧ ∂Δ  +  egress ∧ circulation
 
 `D` is **the structure surviving reduction** — RULED 2026-08-01:
 

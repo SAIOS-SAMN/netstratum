@@ -26,7 +26,7 @@
 //!    (§11 rule 2); tests are witnesses and stay out of scope.
 //! 6. THE UPLINK LAW — the mesh carries no file of the eye: no JSON
 //!    token in `engine/mesh/src` (only chain-verified bytes ascend;
-//!    the spine's own store is the chain, not an export).
+//!    the arbor's own store is the chain, not an export).
 //! 7. THE TEETH — the detectors are proven on synthetic violations
 //!    before the clean pass is trusted (a guard that cannot bite is
 //!    the vacuous check this audit exists to kill).

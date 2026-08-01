@@ -159,13 +159,13 @@ fn far_world(name: &str) -> Result<World, String> {
     }
     let chronicle = cfe::persist::load(&path)
         .map_err(|refusal| format!("{name}'s chronicle refused to verify: {refusal:?}"))?;
-    // MESH-1b (#2): THE WALK RETIRED THE GUARD. A sealed spine names
+    // MESH-1b (#2): THE WALK RETIRED THE GUARD. A sealed arbor names
     // its one lawful hand; ours writes, any other refuses by name. A
     // pre-mesh chronicle is lawful for its single writer — so a
     // conductor world still waits for its first seal (`pen <world>`
     // asks; the conductor seals at its next beat boundary).
     match mesh::authority(&chronicle) {
-        Err(violation) => Err(format!("{name}'s spine refuses — {violation:?}")),
+        Err(violation) => Err(format!("{name}'s arbor refuses — {violation:?}")),
         Ok(Some(hand)) if hand == seat_hand() => {
             let mut world = World::resume(chronicle);
             world.hold_pen(Some(hand));

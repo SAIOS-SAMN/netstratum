@@ -3,7 +3,7 @@
 //! always held (identity + properties hash-derived from receipt 0's
 //! digest ‖ orb ‖ stratum — re-prospecting cannot re-roll); the assay
 //! banks richness × elapsed in ONE receipt (the bond-settle shape);
-//! the spine binds the draw to the sky; two worlds mint DIFFERENT
+//! the arbor binds the draw to the sky; two worlds mint DIFFERENT
 //! elements from ONE grammar; replay MATCHES.
 
 use cfe::dop::{ClosureEvent, ZoneKind};
@@ -64,15 +64,15 @@ fn two_worlds_mint_different_elements_from_one_grammar() {
 
 #[test]
 fn the_spine_binds_the_draw_to_the_sky() {
-    // The abundance spine is exact: across many strata, every family
-    // drawn under a class is one the spine WEIGHTS for that class —
+    // The abundance arbor is exact: across many strata, every family
+    // drawn under a class is one the arbor WEIGHTS for that class —
     // a zero-weighted family never yields (14 §4).
-    let mut world = charted("spine-read", StarClass::M);
+    let mut world = charted("arbor-read", StarClass::M);
     for stratum in 1..=8u8 {
         let struck = world.prospect(FIRST_ORB, stratum).expect("opens");
         assert!(
             cfe::dop::spine_weight(StarClass::M, struck.family) > ratio(0, 1),
-            "family {} drawn under M must carry spine weight",
+            "family {} drawn under M must carry arbor weight",
             struck.family
         );
     }

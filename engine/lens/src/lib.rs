@@ -4,7 +4,7 @@
 //! moment. #37's law is that they must be RE-SERVABLE from the one
 //! truth before the display half deletes (the observation-continuity
 //! rule). This crate is the physical split's first resident: it reads
-//! the spine (and nothing else — no ledger file, no export), decodes
+//! the arbor (and nothing else — no ledger file, no export), decodes
 //! through the codec, and projects. A lens output is disposable and
 //! never read back.
 //!
@@ -16,7 +16,7 @@ pub mod json;
 pub mod render;
 
 use cfe::world::Committed;
-use mesh::spine::{Spine, SpineRefused};
+use mesh::arbor::{Arbor, ArborRefused};
 use std::path::Path;
 
 /// The typed lens refusal — a projection names what it could not read.
@@ -24,32 +24,32 @@ use std::path::Path;
 pub enum LensRefused {
     /// The mainline has no records — nothing to project.
     Unborn,
-    /// The spine refused (open, fetch, or a forged blob).
-    Spine(SpineRefused),
+    /// The arbor refused (open, fetch, or a forged blob).
+    Arbor(ArborRefused),
     /// The head blob did not decode under the codec.
     Undecodable,
     /// The chronicle refused on load (a broken link names itself).
     Chronicle(cfe::persist::PersistRefused),
 }
 
-impl From<SpineRefused> for LensRefused {
-    fn from(refused: SpineRefused) -> Self {
-        LensRefused::Spine(refused)
+impl From<ArborRefused> for LensRefused {
+    fn from(refused: ArborRefused) -> Self {
+        LensRefused::Arbor(refused)
     }
 }
 
 /// The head projection: where the mainline stands, decoded whole.
-pub fn committed(spine: &Spine) -> Result<Committed, LensRefused> {
-    let head = spine.head("").ok_or(LensRefused::Unborn)?;
-    let bytes = spine.fetch(&head.state)?;
+pub fn committed(arbor: &Arbor) -> Result<Committed, LensRefused> {
+    let head = arbor.head("").ok_or(LensRefused::Unborn)?;
+    let bytes = arbor.fetch(&head.state)?;
     codec::from_state_bytes(&bytes).ok_or(LensRefused::Undecodable)
 }
 
 /// The orb's house wire — the same bytes the display's `state.tlv`
 /// carries, re-served from the chain instead of a file. `None` when
 /// the world holds no orb yet (the display writes nothing then too).
-pub fn state_tlv(spine: &Spine) -> Result<Option<Vec<u8>>, LensRefused> {
-    let state = committed(spine)?;
+pub fn state_tlv(arbor: &Arbor) -> Result<Option<Vec<u8>>, LensRefused> {
+    let state = committed(arbor)?;
     Ok(state.orbs.first().map(|orb| orb.wire_bytes()))
 }
 

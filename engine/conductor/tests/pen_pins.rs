@@ -75,7 +75,7 @@ fn the_pen_passes_writes_and_returns() {
 
     // The taking hand works ON THE FILE — the CLI's exact moves.
     let carrier = book.world_dir("penhold-hold").join("chronicle.tlv");
-    let chronicle = cfe::persist::load(&carrier).expect("the sealed spine verifies");
+    let chronicle = cfe::persist::load(&carrier).expect("the sealed arbor verifies");
     let hand = hand_of("visible-hand");
     assert_eq!(mesh::authority(&chronicle), Ok(Some(hand)), "the walk names the seat");
     let mut held = World::resume(chronicle);

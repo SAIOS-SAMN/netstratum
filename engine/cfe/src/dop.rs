@@ -95,7 +95,7 @@
 //!   67 ClosureEvent::HandoffSealed (MESH-1b, NS-5 §7 — one writer
 //!         per clock: the yielding hand seals, naming the successor;
 //!         the taking hand's first append cites the seal; authority
-//!         is a mesh WALK of the spine, never a flag)
+//!         is a mesh WALK of the arbor, never a flag)
 //!   68 ClosureEvent::PracticeAdopted (PRACTICE-1, 14 §4 — a line
 //!         binds a receipted discipline; the derived creed never
 //!         binds, the practice does)
@@ -144,9 +144,9 @@
 //!         artifact digests bind: schema-versioned canonical bytes of
 //!         the WHOLE committed state, engine/codec's monopoly; one
 //!         state, one encoding; a schema bump is a kernel amendment,
-//!         never a silent widening. Not a ClosureEvent — the spine's
+//!         never a silent widening. Not a ClosureEvent — the arbor's
 //!         framing when state rides a TLV stream)
-//!   84 The spine commitment record (SPINE-1, NS-5 §9 — one position
+//!   84 The arbor commitment record (SPINE-1, NS-5 §9 — one position
 //!         on the one clock: coordinate {branch ‖ S ‖ G ‖ T} ‖ schema
 //!         ‖ kernel version ‖ judged ‖ state digest ‖ parent ‖
 //!         commit. The two maps derive from the append-only record
@@ -167,11 +167,11 @@
 //!         replay re-verifies forever. Judged by I4's bound arm:
 //!         verify_work(work) = Ok(d) ∧ amount ≤ mint_bound(d);
 //!         mint_bound is SEALED SHUT until Ruling Box 1)
-//!   87 The spine SEGMENT blob frame (SPINE-UPLINK, NS-5 §9 — a
+//!   87 The arbor SEGMENT blob frame (SPINE-UPLINK, NS-5 §9 — a
 //!         content-addressed geometry carried in a replication
 //!         segment: state[32] ‖ state_bytes; the receiver re-hashes
-//!         on arrival. Segment-only — NEVER stored in spine.tlv).
-//!   88 The spine SEGMENT step frame (SPINE-UPLINK — the proof a
+//!         on arrival. Segment-only — NEVER stored in arbor.tlv).
+//!   88 The arbor SEGMENT step frame (SPINE-UPLINK — the proof a
 //!         JUDGED record's transition was lawful: commit[32] ‖
 //!         actor[8] ‖ stamp[8] ‖ event_bytes; the receiver re-judges
 //!         under its own kernel. Segment-only, carried only for
@@ -485,9 +485,9 @@ pub struct Prospect {
 }
 
 /// ELEMENT-GRAMMAR-1 (14 §4, placeholder weights): the abundance
-/// spine — integer weights per (StarClass, family); families 1 light ·
+/// arbor — integer weights per (StarClass, family); families 1 light ·
 /// 2 heavy · 3 volatile · 4 noble. A zero weight NEVER yields (the
-/// spine law, measured). Values are placeholder parameters; the
+/// arbor law, measured). Values are placeholder parameters; the
 /// operator tunes at balance.
 fn spine_bands(class: crate::thermal::StarClass) -> [u32; 4] {
     use crate::thermal::StarClass as S;
@@ -501,7 +501,7 @@ fn spine_bands(class: crate::thermal::StarClass) -> [u32; 4] {
     }
 }
 
-/// The spine weight as the exact rational the tables speak.
+/// The arbor weight as the exact rational the tables speak.
 pub fn spine_weight(class: crate::thermal::StarClass, family: u8) -> Ratio {
     match (1..=4).contains(&family) {
         true => ratio(i64::from(spine_bands(class)[family as usize - 1]), 1),
@@ -511,7 +511,7 @@ pub fn spine_weight(class: crate::thermal::StarClass, family: u8) -> Ratio {
 
 /// ELEMENT-GRAMMAR-1 (14 §2): properties read from the identity hash
 /// by exact modular arithmetic (CHARTER §9 — the draw is a reading of
-/// the seed, never an oracle): family by spine band, tier 1–3,
+/// the seed, never an oracle): family by arbor band, tier 1–3,
 /// richness = the family's base over the tier.
 pub fn element_properties(
     element: &[u8; 32],
@@ -856,7 +856,7 @@ pub enum ClosureEvent {
     WantRelieved { orb_id: u64, kind: u8 },
     /// MESH-1b (NS-5 §7) — the receipted handoff: the yielding hand
     /// `from` seals, naming successor `to`. One writer per clock;
-    /// authority derives by the mesh's walk of the spine (never a
+    /// authority derives by the mesh's walk of the arbor (never a
     /// flag, never consulted by any game rule — the world's own
     /// mechanics are blind to it).
     HandoffSealed { from: u64, to: u64 },

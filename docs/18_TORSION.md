@@ -176,7 +176,7 @@ cycle does not return where it began. It needs no cosmology.
 
 **The two poles, and only what computes.** `α` is the ORIGIN pole;
 `Ω` is the TOTALITY pole. Both are landed: `α` is `GenesisSealed`
-(tag 61) on the all-zero parent `mesh::spine` writes at the genesis
+(tag 61) on the all-zero parent `mesh::arbor` writes at the genesis
 record; `Ω` is the whole committed state, which is what `Δ(Ω)` projects.
 
 **The union is the walk, not the endpoints.** `Ω ⊕ α` keeps every state
@@ -665,7 +665,7 @@ causality violation, and it mints phantom capacity.
 
 *Landed.* `Observed::Unknown` and the `Resolve` door; the epistemological
 want (WANT-1 kind 1) as truth-starvation by design; Article IV's luminal
-clause; `mesh::spine` extending one commitment at a time.
+clause; `mesh::arbor` extending one commitment at a time.
 
 #### LAW 6 — FALSIFIABILITY AND REPRODUCIBILITY. The method, not a result.
 

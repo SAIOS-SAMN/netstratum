@@ -25,7 +25,7 @@
 //!
 //! **THE UPLINK LAW (mesh authenticity):** nothing in this crate ever
 //! rides the mesh. Only chain-verified bytes ascend — `chronicle.tlv`
-//! today, spine commitments at #15. Exports are for eyes; ledger
+//! today, arbor commitments at #15. Exports are for eyes; ledger
 //! files are debts awaiting adoption; the mesh carries neither.
 //!
 //! Layout under `var/`: `registry/<civ>.json` (identity),

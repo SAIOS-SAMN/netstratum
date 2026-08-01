@@ -174,3 +174,47 @@ pub fn solve(task: &Task, max_depth: usize) -> SolveRead {
     }
     SolveRead::Unsolved
 }
+
+// ── THE SECTOR DOOR ────────────────────────────────────────────────────
+
+/// `SolveRead` is exactly representable — grids, ops and a hash chain,
+/// no float anywhere — so it may cross the cage door.
+impl rfa_core::Exact for SolveRead {}
+
+/// SEARCH, CONSULTED — the first caller of the sector door.
+///
+/// [`solve`] is the dirtiest work this system does: an enumerative sweep
+/// over a vocabulary, bounded only by a candidate budget, with no claim
+/// to purity and every freedom to become heuristic, parallel or
+/// GPU-borne later. That is exactly what the sector is FOR, and this is
+/// the door it goes through.
+///
+/// **Approximation may PROPOSE; only exactness may DISPOSE.** The search
+/// runs inside and proposes a `SolveRead`. It is withdrawn only if the
+/// program it names maps EVERY training pair exactly — the honest
+/// withhold law, one miss and it does not cross. A proposal that fails
+/// is not an error and costs nothing: it reads `Unsolved`, which is what
+/// an unproved solve has always meant here.
+///
+/// Nothing about having come from the search makes a program true. This
+/// re-derivation is the same one `verify_work` step 2 performs later at
+/// the kernel; doing it here means a candidate that could never pass the
+/// judge never leaves the workshop.
+pub fn solve_consulted(task: &Task, max_depth: usize) -> SolveRead {
+    rfa_core::consult((task, max_depth), |(t, d)| solve(t, d))
+        .withdraw(|read| closes_every_training_pair(task, read))
+        .unwrap_or(SolveRead::Unsolved)
+}
+
+/// The exact rule the OUTSIDE applies: re-run the proposed program on
+/// every training pair and demand byte-exact agreement. An `Unsolved`
+/// proposal is lawful and crosses unchanged — it claims nothing.
+fn closes_every_training_pair(task: &Task, read: &SolveRead) -> bool {
+    match read {
+        SolveRead::Unsolved => true,
+        SolveRead::Solved { program, .. } => task
+            .train
+            .iter()
+            .all(|pair| solver_verify::grid::run(program, &pair.input) == pair.output),
+    }
+}

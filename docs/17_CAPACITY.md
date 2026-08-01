@@ -668,6 +668,206 @@ not need re-reading.
 a "do not gate on this" comment — the last instance of the protection
 that has already failed twice.
 
+## §10ter WHAT THE CAGE IS FOR — and why V is never a candidate
+
+**LAW (operator ruling 2026-08-01).**
+
+> the cage is for expansion of variables we don't want impacting the
+> totality of the mathematics of the universe — floats, approximations,
+> dogma, etc
+
+**The test is CORRUPTION, not shape.** A thing is caged because
+admitting it would break exactness, reproducibility or falsifiability —
+never because it happens to be one number:
+
+| caged | why |
+|---|---|
+| floats, approximations, sampled or truncated values | not exact; one admitted anywhere makes the universe non-reproducible |
+| dogma | unfalsifiable by construction (Article III LAW 6) — no experiment refutes it, so no rule may rest on it |
+| aggregates used as scores (`C`, the conservation distance) | exact, but they collapse many into one and what remains is RANKABLE — a descent waiting for a caller |
+
+**`V` IS NOT A CANDIDATE, AND NEITHER IS `D`, `Δ`, OR ANY OF THEIR
+INVARIANTS.** They are the totality the cage exists to protect.
+Enclosing one would be enclosing the thing the enclosure is for. This is
+categorical rather than a judgement call, and it is pinned by
+`cage_arrow::the_cage_names_no_manifold_machinery`.
+
+**AGGREGATE versus INVARIANT — the line that keeps V free.** The
+distinction is structural, and the proof is already in the crate:
+
+    AGGREGATE   C = Σ|R| collapses MANY into one and destroys which
+                residual broke and by how much. CAGED.
+
+    INVARIANT   rcf_signature, a holonomy's conjugacy class — the exact
+                canonical fingerprint of ONE object, destroying nothing:
+                two Deltas share it IFF conjugate. NOT CAGED.
+
+`Lens` and `RcfSignature` carry the SAME derives — `PartialEq, Eq`, no
+`PartialOrd`. Their algebra is identical. The ONLY difference is the
+arrow ban. **So the no-ordering property — the thing that actually stops
+descent — is available WITHOUT containment**, and a canonical invariant
+follows the `RcfSignature` pattern: equality-only, uncaged,
+kernel-eligible. Containment is a second and heavier act, reserved for
+readings that compute nothing.
+
+**And the escape route does not exist for SL₂.** With `det = 1` the
+characteristic polynomial is `x² − Tr(A)·x + 1`, so the conjugacy class
+is parameterised BY the trace. "Keep the class instead of the trace"
+renames a scalar rather than avoiding one. The lawful move was never to
+avoid scalars — it is to forbid ORDERING them and keep them as IDENTITY.
+
+### §10ter.a THE DOOR — the cage as workshop, and C as its defence
+
+**LAW (operator ruling 2026-08-01).** The cage is not only a quarantine,
+it is a WORKSHOP. Worlds and civilizations may call INTO it to run
+algorithmic potentials — float pipelines, GPU kernels, heuristics,
+sampling — and withdraw ANSWERS and FUNCTIONS, without the approximation
+spreading outward.
+
+**One sentence carries it: approximation may PROPOSE; only exactness may
+DISPOSE.**
+
+This is U1a's prover/verifier split generalised from solving to compute.
+There, `solver` searches by any means and `verify_work` re-forges,
+re-applies and re-chains exactly — the search may be a GPU grinding
+floats and the judgment never touches one. The door is that shape made
+general:
+
+```text
+call in    →  the inside may use ANY means. No purity is asked of it,
+              because nothing it produces is believed.
+withdraw   →  what leaves is a PROPOSAL: an exact candidate that the
+              outside re-derives for itself.
+```
+
+**A proposal is a GUESS, never evidence** — the outside does not accept
+it because the cage produced it, it re-checks it under its own exact
+rules, exactly as a mesh peer re-judges an incoming step instead of
+trusting its sender. A proposal that fails verification costs nothing,
+because nothing was trusted.
+
+**The type stops the disease, not care.** `Proposal<T>` carries only
+`T: Exact`, and `Exact` is implemented for the exact carriers alone. A
+float has no impl, so `Proposal<f64>` DOES NOT EXIST — the approximation
+cannot be named at the door, never mind carried through it.
+
+**D AND V DO NOT LIVE IN HERE.** They stay outside with the rest of the
+mathematics; the door is how the outside USES the inside, never how the
+inside acquires the outside (§10ter).
+
+**C's elevation, if it is ever elevated, is as the DEFENCE OF THIS
+SECTOR.** Not a promotion out of the box — a post inside it. C's proper
+work is guarding the containment: checking that what sits in the sector
+stays consistent with itself and that nothing crossing the door carries
+inconsistency outward. It reads the cage, never the manifold. That is
+the only elevation available to a quantity whose whole nature is to
+collapse structure: **it cannot measure a universe, but it can watch a
+box.**
+
+### §10ter.b C IS CONSULTED — the resident, not the prisoner
+
+**LAW (operator ruling 2026-08-01).**
+
+> C is the culmination of congruence / coherence / cohesion /
+> conversation / communication / comingling / consilience — he might
+> need the tools inside the containment sector, so he should be
+> CONSULTED, which is why we have C(Δ): it can use any tool in the
+> toolbox to perform those actions without them impacting the external
+> determinism.
+
+**This reframes the containment entirely, and correctly.** Every member
+of that family is a RECONCILIATION — *are these the same? does this hold
+together? can these exchange? do independent lines agree?* — and none of
+them can be answered exactly in the general case. They need search,
+comparison, heuristics, sampling: the whole dirty toolbox.
+
+**So C is not a prisoner in the sector. C is its RESIDENT.** He was
+never banished; he was housed where the tools his work requires already
+live — the same tools that may never touch the outside. `C(Δ)` is the
+knock on that door: a CALL, not a score.
+
+    consult(question, tool) -> Proposal<Exact>
+
+The tool may do anything internally — floats, a GPU kernel, a sampled
+search, an approximation unlawful anywhere else. Only its ANSWER
+crosses, only if exactly representable, and even then only as a guess
+the caller re-derives under its own rules.
+
+**THE LOOP THIS CLOSES, and it is worth naming.** Charter §11 excised
+the reconciliation instruments — consilience, the manifold, the census,
+the triangle — on the ground that a second readable truth is not a
+measurement. That was right *as law*. **They return here as TOOLS, and
+they cannot become a second truth in this room**, because a proposal
+carries no authority: reconciliation that must be re-verified before use
+is ADVICE, and advice is all it was ever fit to be. The instruments were
+not wrong; they were mis-seated. This is their seat.
+
+**Why consultation is safe where scoring was not.** A score is consumed
+as a verdict; a proposal is consumed as a hypothesis. The first grants
+authority to whatever produced it, the second grants none — which is why
+the same quantity that was unlawful as a gate is unremarkable as a
+consultant.
+
+### §10ter.c THE ACCESS/AUTHORITY TRADE — how C is protected, and how C protects
+
+**The claim, measured rather than asserted** (operator 2026-08-01: *C is
+the strongest on the board; every major event is a word starting with
+C*). Checked against the corpus:
+
+- At the DEED level it is 9 of 64 — `ColonyFounded`, `ColonyCharted`,
+  `CovenantSealed/Released/Slashed`, `Confluent`, `CouncilSealed/Closed`,
+  `CrystalDrawn`.
+- At the CONCEPT level it is total. **39 of 39 tested C-words are
+  load-bearing**, most of them heavily: chronicle (974), class (633),
+  council (395), covenant (380), charter (353), colony (347),
+  civilization (327), capacity (300), crystal (284), claim (261),
+  collateral (230), coordinate (221), certificate (208), conservation
+  (198), convergence (157), crossing (142), coboundary (121), coherence
+  (115) — and beneath them cocycle, conjugacy, connection, curvature,
+  circulation.
+- Three of the six kernel invariants are C-words: I1 **conservation**,
+  I2 **containment**, I4 **creation**.
+
+So C is not one reading among many. **C is the semantic spine**, and the
+question "pipe anything through C" is asking the system to consult its
+own organising vocabulary.
+
+**THE PROTECTION, and it is ONE mechanism doing BOTH jobs.** The proposal
+boundary protects in both directions at once:
+
+    protects OTHERS from C   nothing he produces is authoritative; a
+                             wrong answer dies on exact re-derivation
+                             and costs nothing, because nothing was
+                             trusted.
+
+    protects C from OTHERS   he can never be made a gate or a score
+                             again — which is exactly what corrupted him
+                             — because a proposal cannot bind anything.
+
+**THE LAW THIS REVEALS: access is purchased with authority.** The two are
+traded inversely, and the trade is what makes both ends safe:
+
+```text
+THE KERNEL   minimal access  — pure, total, no I/O, encoding-blind
+             maximal authority — its verdict is final and binding
+
+C            maximal access  — any tool, floats, GPU, sampling, search
+             zero authority   — everything it produces is a guess
+```
+
+**C may touch everything precisely BECAUSE nothing he says binds.** That
+is not a limitation placed on him; it is what buys his reach. A judge
+must be starved of the world to be trusted with the verdict, and a
+consultant must be denied the verdict to be trusted with the world.
+
+**And it is why C cannot be "promoted" without being destroyed.**
+Granting him authority would immediately cost him access — the moment
+his word binds, he may no longer hold a float, because a binding word
+made of approximation is the contamination the sector exists to stop.
+**To protect C is to keep him unbinding.** §10ter.a's post — defence of
+the sector — is the only elevation that adds standing without taking
+reach, because guarding a boundary is an act, not a verdict.
+
 ## §11 THE BIFURCATION LAW — both sides of the coin become roots
 
 **LAW (operator ruling 2026-08-01).**
@@ -769,8 +969,8 @@ denial-of-service the refusal used to provide.
 only irreducible difference opens a plane. Article II denies standing to a
 state resting ON THE GROUND (`D = GROUND` — nothing circulating above
 the point), so garbage-grown extent carries no weight. Article III
-prices it at zero: deeds without genuine `ΔD` raise `Ξ` and eclipse the
-actor.
+prices it at zero: deeds without genuine `ΔD` carry no allocation claim,
+and the claim is vacated.
 
 *Owed, and honestly open:* the three defenses above are stated in law
 and **none is measured** (`18_TORSION` §6). Until `orbit_lock` has a
@@ -844,8 +1044,8 @@ than none.
 
 **Standing:** FLAT demurrage decays the withdrawable stock (I5,
 `demurrage_per_tick`), so holding is costly and pure accumulation
-self-limits. Article III prices FLOW not STOCK — `Ξ` reads `ΔD` over a
-window, so an actor who stops creating is eclipsed regardless of
+self-limits. Article III prices FLOW not STOCK — the window reading takes `ΔD` over
+a span, so an actor who stops creating is eclipsed regardless of
 accumulated capacity, and there is no rent on past structure. Article II
 denies standing to a state resting ON THE GROUND — never by calling it
 zero, which `Degree` cannot express (`18_TORSION` §3 Article II). Internal transfers conserve (I1),
@@ -866,7 +1066,7 @@ is the practical content of this section:
 
 The reasoning is not caution, it is structural. The only defenses against
 extracting farmed value are creation-side; the creation-side defenses are
-`orbit_lock`, `Ξ`, and `D`; none of the three is measured
+`orbit_lock`, the window reading, and `D`; none of the three is measured
 (`18_TORSION` §6). Opening an exit while the gates that qualify what may
 leave are unbuilt converts every unmeasured attack vector into an
 externally realizable one at the same instant.

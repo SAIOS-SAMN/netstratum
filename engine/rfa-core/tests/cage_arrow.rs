@@ -75,3 +75,61 @@ fn the_cage_has_no_exit_to_a_computable_type() {
         "cage.rs derives an ordering — thresholds and descent become expressible again"
     );
 }
+
+/// THE MANIFOLD IS NOT A CANDIDATE (operator ruling 2026-08-01: *V out
+/// of the cage, and never stuck in it again*).
+///
+/// The cage holds what must never impact the totality of the
+/// mathematics — floats, approximations, dogma, aggregates used as
+/// scores. `V`, `D`, `Δ` and their invariants ARE that totality, so
+/// enclosing one would be enclosing the thing the enclosure protects.
+///
+/// This is pinned in the direction the arrow test does not cover.
+/// `cage_arrow`'s other pins stop the computing path from REACHING IN;
+/// this one stops the cage from REACHING OUT. A box that merely
+/// discusses its neighbours acquires footholds, and a foothold is how
+/// the wrong thing ends up inside — so the reasoning about candidacy
+/// lives in the law documents and not in `cage.rs`.
+#[test]
+fn the_cage_names_no_manifold_machinery() {
+    let source = fs::read_to_string("src/cage.rs").expect("cage readable");
+    for term in [
+        "potential_form", "PotentialForm", "dual_pole", "Vacuity",
+        "holonom", "divergence", "Support", "capacity", "ext_x", "Delta",
+    ] {
+        assert!(
+            !source.contains(term),
+            "cage.rs names `{term}` — the manifold is not a candidate for containment, \
+             and naming it here is the foothold that puts it inside"
+        );
+    }
+}
+
+/// `Exact` IS A CLAIM, SO ITS IMPLS ARE PINNED.
+///
+/// The marker is what stops an approximation at the door, and a marker
+/// anyone may implement stops nothing. The sanctioned list is fixed
+/// here: adding an impl means editing this test, which is the amendment.
+#[test]
+fn exact_is_implemented_only_for_exact_carriers() {
+    let source = fs::read_to_string("src/cage.rs").expect("cage readable");
+    let impls: Vec<&str> = source
+        .lines()
+        .filter(|l| l.trim_start().starts_with("impl") && l.contains("Exact for"))
+        .collect();
+    let sanctioned = ["Ratio", "i64", "u64", "usize", "bool", "Vec<T>", "Option<T>"];
+    assert_eq!(impls.len(), sanctioned.len(), "an Exact impl was added or removed: {impls:?}");
+    for name in sanctioned {
+        assert!(
+            impls.iter().any(|l| l.contains(&format!("Exact for {name}"))),
+            "the sanctioned carrier `{name}` lost its Exact impl"
+        );
+    }
+    // And nothing float-shaped may ever carry it.
+    for forbidden in ["f32", "f64"] {
+        assert!(
+            !source.contains(&format!("Exact for {forbidden}")),
+            "`{forbidden}` claims Exact — the door would pass an approximation"
+        );
+    }
+}

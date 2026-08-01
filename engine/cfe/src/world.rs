@@ -3034,7 +3034,7 @@ impl World {
     /// what the genesis seed always held. Identity = BLAKE3(receipt
     /// 0's digest ‖ orb ‖ stratum) — fixed at founding, so a redraw
     /// cannot re-roll; properties derive from the hash under the
-    /// star's abundance spine; the receipt carries them whole so
+    /// star's abundance arbor; the receipt carries them whole so
     /// replay reads, never rolls. The mint creates identity, never
     /// matter (the assay moves matter). Sovereign convenience.
     pub fn prospect(&mut self, orb: u64, stratum: u8) -> Result<crate::dop::Prospect, ActionRefused> {
@@ -4287,7 +4287,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             ClosureEvent::TaxonSealed { class, clade } => taxon = Some((*class, *clade)),
             ClosureEvent::EraAnnexed { .. } => {}
             // MESH-1b (NS-5 §7): authority is the mesh's walk of the
-            // spine — the world's committed projection is blind to it
+            // arbor — the world's committed projection is blind to it
             // (the game rules never consult the writing hand).
             ClosureEvent::HandoffSealed { .. } => {}
             // GALAXY-1 (13_GALAXY §4): a universe-ledger event — it

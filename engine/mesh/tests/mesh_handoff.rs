@@ -25,7 +25,7 @@ fn scratch(name: &str) -> PathBuf {
     dir
 }
 
-/// A pre-mesh spine: three receipts, no seal anywhere — the era every
+/// A pre-mesh arbor: three receipts, no seal anywhere — the era every
 /// landed world lives in today (actor 100's hand, unconstrained).
 fn a_premesh_chronicle() -> Chronicle {
     let mut chronicle = Chronicle::new();
