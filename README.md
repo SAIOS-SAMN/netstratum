@@ -22,6 +22,12 @@ clients/     the CLI/MUD client
 tools/       observer.py (the board) · steward.py (the inbox)
 ```
 
+Set up: `./install.sh` prepares a universe — builds the binaries, seats the NPC
+roster from `seeds/`, founds the worlds with one bounded beat, and exits with
+nothing left running. `./install.sh run` starts the conductor's heartbeat,
+`fresh` wipes and rebuilds, `status` reports what stands; `--help` lists the
+rest. Var roots are single-copy and git-ignored, so `wipe` guards the live one.
+
 Play: `cargo run -p netstratum-cli` (`help` lists everything — found, zone,
 star, site, thermal, journal, save/resume). Autonomous board:
 `cargo run -p conductor` (converges the archived eras, then beats; the
