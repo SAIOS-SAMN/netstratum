@@ -483,6 +483,12 @@ nothing can traverse.
                       `a.commutator(b)`) computes that object over
                       the fiber. The organ is landed.
 
+**SUPERSEDED IN ITS ARROW — read §2k.1 with this table.** The rows
+above are written as though spin were one thing and torsion its
+response. §2k.1 corrects that: they are one object at two scales, the
+residual being the fine reading and rank `D` the coarse one. The
+mapping survives; the direction of the arrow does not.
+
 **THE SINGULARITY AND THE COBOUNDARY TRAP ARE THE SAME FAILURE.** This
 is the load-bearing identification. A pure coboundary
 `Δ_ij = s(i) − s(j)` reduces to zero — `reduce.rs` phase 1 sends
@@ -532,18 +538,105 @@ structure that survives reduction, not in energy spent.
 1. **What traverses.** Value, state, or judgment are three different
    laws with three different conservation obligations, and the lane
    does not pick one. An operator ruling.
-2. **Whether lanes decay.** In ECSK torsion does not propagate — it
-   exists only where spin-carrying matter is and vanishes in vacuum. If
-   the borrow holds that far, a lane's torsion exists only where
-   verified work sits, so lanes fade when the work stops. That would
-   sit naturally beside I5's demurrage, which is suggestive and not a
-   derivation. Recorded, not asserted.
+2. ~~**Whether lanes decay.**~~ **STRUCK — see §2k.1.** This item
+   inferred from non-propagating ECSK torsion that lanes might fade
+   when the work stops. That is not an open question: ARTICLE IV
+   forbids it (rank never retreats), and under the reversed arrow
+   torsion propagates at the chain's own step rate, which Article IV
+   clause 2 already fixes. The item was a rule that would have broken
+   the constitution, and it is withdrawn rather than left open.
 3. **THE ANCHOR IS STILL OPEN.** "Must raise `D`" does not by itself
    make identity costly: a brute-forced solution still raises rank, and
    nothing here prices a second identity. This section rules out
    hashcash and supplies the criterion the replacement must meet. **It
    does not supply the replacement.** Saying otherwise would let the
    shape of the argument stand in for a mechanism that does not exist.
+
+### 2k.1 THE ARROW REVERSES — torsion IS spin, and §2k open item 2 is STRUCK (operator, 2026-08-02)
+
+§2k wrote the arrow as ECSK usually writes it: **spin SOURCES torsion**,
+torsion appearing as a response where spin-carrying matter sits. The
+operator's correction reverses it: **twist the torsion at the fine
+layer and you have the spin.** Not a source relation — an identity
+across scales.
+
+**What is conceded and what is not.** GR is a four-dimensional
+pseudo-Riemannian theory, not a two-dimensional sheet; the rubber sheet
+is a teaching picture. But the picture does hide precisely the degree
+of freedom at issue — it shows a vector ROTATING around a loop
+(curvature) and cannot show a loop FAILING TO CLOSE (torsion) — and the
+torsion-free condition genuinely is a CHOSEN condition on the
+connection, not a derived one. **More usefully: this engine does not
+have to settle the physics.** It has to choose its connection, and the
+choice has consequences that can be named. Three of them, and the third
+corrects a defect.
+
+**1. STRUCTURE CANNOT BE ASSERTED.** Under *sourced-by*, "useful
+structure" is a property that work CARRIES — and a property can be
+claimed, certified, and therefore forged. That smuggles the trust
+problem back in under a new name. Under *identity*, there is no
+separate substance: the structure IS the measured failure to close.
+Computed or absent, with nothing in between and nothing to attest.
+
+**2. THE RESIDUAL IS THE TORSION, AND IT IS ALREADY LANDED.**
+Geometric torsion is the failure of an infinitesimal parallelogram to
+close. `bridge.rs:104` computes
+
+    R_ijk,l = Δ_ik,l − Δ_ij,l − Δ_jk,l
+
+— go `i → k` directly, go `i → j → k` the long way, compare. **The gap
+is the closure failure.** That is not an analogy to torsion; it is the
+same construction. So the two scales are one object:
+
+    FINE    one residual on one triple, one channel     — the SPIN
+    COARSE  rank D: how many independent cycles carry
+            holonomy no frame explains                  — the TORSION
+
+The lane's traversability and the mint's standing therefore read the
+same quantity at two resolutions. One measurement, two uses — which is
+why `18_TORSION` is the correct home for both and why no second
+"usefulness" metric is needed.
+
+**3. TORSION PROPAGATES — and §2k's open item 2 was not an open
+question but a rule that would have BROKEN ARTICLE IV.** §2k flagged
+that in ECSK torsion is non-propagating (algebraically slaved to spin,
+vanishing in vacuum) and inferred that a lane's torsion might fade when
+the work stops. **ARTICLE IV forbids exactly that:** rank never
+retreats, monotone non-decreasing. A lane that faded would be capacity
+retreating.
+
+Under the reversed arrow torsion is not a response to a source; it is
+the fabric's own degree of freedom, and it propagates. **Article IV
+clause 2 already fixes its rate** — *the propagation limit of this
+manifold is one commitment per step … the rate is `c` and `c` is the
+clock.* The constitution has assumed the operator's reading since it
+was written; §2k contradicted it. **Open item 2 is STRUCK, not
+resolved.** A committed non-closure is a permanent feature of the
+complex.
+
+**AND THE NONCE BAR GETS STRONGER, not weaker.** A hash race has
+COMMUTING increments: every attempt independent, order irrelevant, the
+loop always closes. Non-closure is zero by construction. So no rule is
+needed saying nonces do not count — **there is nothing there to
+measure.** The bar is an absence rather than a policy, which is the
+strongest form it can take: a policy can be argued with, and no one can
+lobby for a residual that does not exist.
+
+**WHERE THE 2D OBJECTION LANDS — on this engine, measured.**
+`delta.rs:16` declares `Delta { dim, fiber, entries: Vec<Vec<Vec<Ratio>>> }`
+— entries indexed by PAIRS, and residuals range over TRIPLES. **The
+complex tops out at 2-simplices.** The engine's own structure is flat
+in exactly the way the objection describes, and it is the SAME WALL as
+`19_KERNEL` §5a.1's second wall: orbs project to vertices, so there are
+no higher cells for the twist to live in. Three separate lines — the
+Venn overlap, the traversal lane, and the depth of the torsion — all
+arrive at one wall. Giving orbs extent is what opens room above the
+triangle.
+
+**NOT DERIVED, flagged:** what a 3-cell's non-closure would MEASURE.
+Triangles carry composition failure; what the next degree carries is
+not obvious and must not be guessed, because a cell whose residual has
+no meaning is apparatus rather than law.
 
 ### 2h. THE ECLIPSE — STRUCK AS WRITTEN (2026-08-01)
 
