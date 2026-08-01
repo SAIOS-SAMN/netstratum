@@ -623,6 +623,51 @@ Three corollaries, each earned by getting it wrong first:
    reintroduces the coinage. Refuse the class, never the instance —
    otherwise the refusal is the vector.
 
+#### LAW 9 — OBSERVER INDEPENDENCE. No belief enters the law.
+
+*The physics.* The laws are indifferent to what any observer believes.
+A theory that requires an actor to hold a conviction is not a theory of
+the world; it is a theory of that actor. Physics is the same for the
+devout and the indifferent.
+
+*THE DELINEATION* (operator ruling 2026-08-01), and it is the sharp
+edge of this whole article:
+
+```text
+dogma is a LOW CIVILIZATION HURDLE — a developmental stage a people
+pass through and clear, like famine or scarcity: a PHENOMENON the
+system may model.
+
+dogma is NOT a UNIVERSAL IMPLICATOR — it explains nothing about the
+universe, governs nothing, and may never be a PREMISE the system
+rests on.
+```
+
+*What it forbids.* **Occult, religion and dogma may never live in the
+kernel, in the sealed math, or in any law document.** Not as mechanism,
+not as vocabulary, not as flavour. This is unconditional and has no
+exception for elegance: a universe whose physics is named after
+someone's cosmology has adopted that cosmology as a premise, whatever
+the intent.
+
+*What it permits, once there is somewhere to put it.* A civilization
+may develop religion — that is a real thing peoples do, and modelling
+it is legitimate world-building. It belongs in a CONTENT layer as an
+observed phenomenon: measurable, surmountable, and carrying no
+authority over any rule. The arrow is one-way and never bends upward.
+
+*The present state, recorded honestly.* **There is no theology holding
+space, and therefore there is no lawful home for dogma anywhere in this
+tree today.** That absence is exactly why esoteric vocabulary bled into
+the engine while the kernel was being built — with no container, it
+settled wherever it landed. Until a content layer exists to hold it,
+the correct amount of dogma in this system is ZERO.
+
+*Landed.* The excision of the Gnostic, hollow-earth and ancient-astronaut
+imports from the seed roster; the terminology law; and this article's own
+self-application, which struck three of its own sections for naming
+without computing.
+
 **WHAT THE OLD ARTICLE CAUGHT, NOW DERIVED.** Nothing is lost by the
 strike:
 
@@ -636,6 +681,7 @@ strike:
 | books that do not close | LAW 2 — conservation follows from the symmetry |
 | a second primitive invented for one side of a closed book | LAW 7 — parsimony; the complement is already defined |
 | vocabulary that resonates but denotes nothing | LAW 8 — grounding; a term that computes is kept |
+| a cosmology adopted as a premise | LAW 9 — observer independence; belief is modelled, never assumed |
 
 **THE ANTI-SYBIL CONSEQUENCE SURVIVES AND IS STRONGER**, because it is
 now a derivation rather than a tax. A puppet civilization generates

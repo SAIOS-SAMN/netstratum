@@ -37,12 +37,12 @@ partition needs:
 |---|---|---|
 | 0 | unclassed (lawful — a class arrives by amendment, never by default) | revenants, unratified lines |
 | 1 | biotic-swarm (collective/eusocial/colonial) | Hivelight, Klethaxu, Mycelial Weft, Coralline, Deepmat |
-| 2 | geodic-lithovore (mineral metabolisms, stone-eaters) | Slagborn, Tunborn, Cairnborn, Agarthan |
+| 2 | geodic-lithovore (mineral metabolisms, stone-eaters) | Slagborn, Tunborn, Cairnborn, Chasmolith |
 | 3 | metashifter (veil-native) | none — reserved, the Darlok seat |
-| 4 | telepathic-resonant (alignment/coherence lines) | Syzygy, Archon |
+| 4 | telepathic-resonant (alignment/coherence lines) | Syzygy, Clathrate |
 | 5 | pelagic-aerial (volumetric biotic) | Echowright, Eightfold, Hadal, Aerie, Frostwright |
 | 6 | etherial-field (plasmic/energy) | Coronal Choir, Borealis |
-| 7 | apex-terrestrial (solitary apex) | Lyran, Anunnaki |
+| 7 | apex-terrestrial (solitary apex) | Lyran, Eriduan |
 
 ## 3. The clade vocabulary (proposed, from the live register)
 
