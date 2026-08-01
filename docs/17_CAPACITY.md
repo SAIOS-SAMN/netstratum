@@ -176,24 +176,118 @@ Building it:
   verified capacity contributed rather than assigned
   (`mesh/src/agree.rs:57`) — the load-bearing gap of `SYSTEM_SPEC` §5.
 
-## §8 OPEN — needs the operator's word
+## §8 THE THREE QUESTIONS — resolved 2026-08-01
 
 **CLOSED by the ruling and its clarification (recorded):** Ω's shape
 (§3), the scoping question (§4), D's arity — a shape, not a scalar
 (D1) — and `∇V`'s fate (struck whole, D0).
 
-Still open:
+The three carried questions were answered by relay. Two of the three
+answers do not survive the sealed code, and the relay law binds —
+translate, never transcribe; correct the source's violations rather than
+inscribe them. The resolutions below are what the code supports.
 
-1. **The capacity receipt.** D3 says capacity rises BY RECEIPT, one
-   index per deed. `GaugeShiftedAt` and `EntityRegistered` already
-   carry `l` and `i/j/k` growth. Is any deed owed for a `k`
-   (compositional) rise that neither covers, or is the vocabulary
-   complete as it stands?
-2. **The kernel invariant.** D2–D4 are inscribed in the ledger but are
-   not yet invariants in `engine/kernel/CHARTER.md`. Landing admission
-   and the contraction floor as a kernel-judged invariant is a charter
-   amendment and would bump `kernel::VERSION` 2 → 3. Proposed, not
-   ruled.
-3. **`ε_mag`.** D3's growth is "bounded above by the magnitude gate
-   (E4)", and E4's `ε_mag` has never been named. Growth is unbounded in
-   practice until it is.
+### 8a. `k` growth — NO deed is owed. `k` has no independent extent.
+
+The relayed answer was that a receipted deed is strictly required for
+compositional growth, lest capacity drift through a back door. **The
+premise is false, and the sealed iterator says so:**
+
+```rust
+let n = delta.dim;
+for i in 0..n { for j in 0..n { ... for k in 0..n { ... for l in 0..delta.fiber {
+```
+
+`i`, `j` AND `k` are all bounded by `delta.dim`; only `l` is bounded by
+`fiber`. **D = {i, j, k, l} is four INDICES over exactly TWO independent
+EXTENTS.** `k` is the intermediate vertex of the cocycle triple, drawn
+from the same entity set as `i` and `j` — it is not a degree of freedom
+that can move on its own.
+
+So `k` cannot drift: it cannot rise unless `dim` rises, and `dim` rises
+only through `EntityRegistered`, which is already a receipt. A separate
+`k`-deed would mint a degree of freedom the tensor does not have, and a
+receipt for a movement that cannot occur is worse than no receipt — it
+is a false entry in the ledger.
+
+**The real defect this question surfaces.** D3 states "one index per
+deed (the gauge law's shape — declaration == effect, every other index
+held still)." That clause is **UNSATISFIABLE for `i`/`j`/`k`**: no deed
+can raise `i` while holding `j` and `k` still, because all three read one
+bound. Amendment owed to D3: *one EXTENT per deed*, the extents being
+`dim` (carrying i, j, k together) and `fiber` (carrying l).
+
+### 8b. Kernel invariants — YES in principle, NOT YET, and the bump must wait
+
+The relayed answer was to elevate D2–D4 and execute the VERSION 2→3 bump.
+The direction is right. The sequencing is not, and bumping now would
+damage the chain.
+
+**The blocker is a missing map.** D2–D4 are stated over `Δ(V)`. The
+kernel judges `lawful(prior, next, step)` over `cfe::world::Committed`.
+**No function anywhere in the workspace maps `Committed → Delta.**
+Without it the kernel cannot compute `ext_x(Δ(V))` at all, so the
+invariant is not merely unlanded — it is unenforceable.
+
+**Why the premature bump is harmful.** `VERSION` binds into every
+commitment (E5). Bumping 2→3 to declare an invariant the kernel does not
+actually judge writes a false claim into the chain permanently: every
+commitment would assert it was cut under a law that never ran. That is
+the exact failure `judged = 0` exists to prevent — the hole stamped
+visibly rather than hidden.
+
+**The lawful sequence:** build `Committed → Δ(V)` · build the extent
+meter (`ext_x` before and after `Π_G`) · witness red-first · take the
+`rfa-core` dependency into the kernel (lawful — rfa-core imports only
+`cfe`, so the arrow stays one-way, and `U_DIRECTIVES` §4 already
+anticipates this at U2) · THEN amend the charter and bump VERSION **in
+the same landing that makes the judgment real.**
+
+### 8c. `ε_mag` — struck from D3. The conclusion holds; the apparatus does not.
+
+The relayed answer was to eliminate `ε_mag` and bound growth by a
+"Non-Vacuous Torsion Egress Boundary (S_out⁺)", permitting growth iff
+`∮Θ ≠ 0`, with an "Eclipse operator" denying "cosmetic" shifts, citing
+"Constitutional Law Article I / Article II".
+
+**The conclusion is right. The apparatus is refused on two grounds.**
+
+1. **The cited authorities do not exist.** `00_CHARTER.md` has no
+   Article I or Article II; no `Θ` form, Eclipse operator, or
+   `Ξ_cosmetic` appears anywhere in the tree. Inscribing invented
+   citations is precisely the drift `EQUATIONS.md` §0 was written to
+   prevent — a restatement with nothing behind it.
+2. **The mechanism already exists under landed names.** "Growth
+   permitted iff a non-zero cohomological defect" IS `orbit_lock ≠ ∅`.
+   "Denied where the shift yields no structural uplift" IS
+   `PlaneUnearned` (landed, `engine/cfe/src/world.rs`). D3 already
+   requires opening grade *k* to carry *k* receipted mints. Nothing new
+   is needed; the law is already topological.
+
+**The real defect is a conflation of units.** E4's `ε_mag` bounds
+`‖Δ‖₁` — an L1 MASS. D3 bounds an EXTENT — a count of indices. These
+are different quantities in different units, and D3's clause "bounded
+above by the magnitude gate (E4)" is a category error importing one into
+the other. **Amendment owed to D3:** capacity growth is bounded by the
+earned-mint gate (`orbit_lock ≠ ∅`, `PlaneUnearned` refusing), never by
+a magnitude epsilon. `ε_mag` remains E4's own open question about
+per-step L1 mass — a separate constant, still unnamed.
+
+### 8d. Amendments owed to `EQUATIONS.md` §1 (named, not made here)
+
+1. **D3** — "one index per deed" → "one EXTENT per deed" (§8a).
+2. **D3** — strike "bounded above by the magnitude gate (E4)"; the bound
+   is the earned-mint gate (§8c).
+3. **D1** — record that the four indices carry two independent extents
+   (`dim` for i/j/k, `fiber` for l), so `∀x ∈ {i,j,k,l}` in D2 is two
+   independent constraints, not four.
+
+## §9 OPEN — still needs the operator's word
+
+1. **`ε_mag` itself** (E4, unchanged by §8c): the per-step L1 mass bound
+   has never been named.
+2. **The seat policy.** A worktree per seat is recommended and sound —
+   `git worktree add ../seat-<n>` with committing from the root
+   prohibited while seats are concurrent. Not executed here: another
+   seat is live in the root tree, and restructuring under an active
+   session is how work gets lost. Adopt at a quiet point.
