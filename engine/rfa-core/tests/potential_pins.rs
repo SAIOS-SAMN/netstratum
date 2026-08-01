@@ -2,7 +2,7 @@
 //! lock. `dV` is the DIVERGENCE: canonical, one pass, no traversal.
 
 use cfe::ratio::{ratio, Ratio};
-use rfa_core::{holonomies, potential_form, Delta, Support};
+use rfa_core::{dual_pole, holonomies, potential_form, Delta, Support, Vacuity};
 
 fn edge(d: &mut Delta, s: &mut Support, i: usize, j: usize, v: Ratio) {
     d.set_antisym(i, j, vec![v]);
@@ -100,4 +100,31 @@ fn the_entangled_state_holds_both_poles() {
 fn an_empty_complex_is_vacuous_and_total() {
     assert!(!potential_form(&Delta::zero(0, 1), &Support::new(0, 1)).is_non_vacuous());
     assert_eq!(potential_form(&Delta::zero(3, 1), &Support::new(3, 1)).rank(), 0);
+}
+
+#[test]
+fn the_four_rows_classify_and_only_one_is_admitted() {
+    let flat = Delta::zero(3, 1);
+    let empty = Support::new(3, 1);
+    assert_eq!(dual_pole(0, &potential_form(&flat, &empty)), Vacuity::Void);
+
+    // Structure with no gradient — the row that must be re-volumized.
+    let mut d = Delta::zero(3, 1);
+    let mut s = Support::new(3, 1);
+    edge(&mut d, &mut s, 0, 1, ratio(1, 1));
+    edge(&mut d, &mut s, 1, 2, ratio(1, 1));
+    edge(&mut d, &mut s, 2, 0, ratio(1, 1));
+    let stasis = dual_pole(holonomies(&d, &s).len(), &potential_form(&d, &s));
+    assert_eq!(stasis, Vacuity::Stasis);
+    assert!(!stasis.is_admitted(), "dV cannot be zero — a flat field does no work");
+
+    // Both poles standing.
+    let mut e = Delta::zero(3, 1);
+    let mut t = Support::new(3, 1);
+    edge(&mut e, &mut t, 0, 1, ratio(2, 1));
+    edge(&mut e, &mut t, 1, 2, ratio(3, 1));
+    edge(&mut e, &mut t, 0, 2, ratio(9, 1));
+    let live = dual_pole(holonomies(&e, &t).len(), &potential_form(&e, &t));
+    assert_eq!(live, Vacuity::Entangled);
+    assert!(live.is_admitted());
 }

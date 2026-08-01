@@ -123,3 +123,50 @@ pub fn potential_form(delta: &Delta, support: &Support) -> PotentialForm {
     }
     PotentialForm { flows }
 }
+
+/// THE DUAL-POLE VERDICT (DIRECTIVE 10). The four rows of the
+/// non-vacuity matrix, as one typed reading over ONE state.
+///
+/// **`dV` CANNOT BE ZERO** (operator ruling 2026-08-01). A flat field is
+/// not a lawful state to sit in: without gradient the manifold is static
+/// flat space and any rank it holds is meaningless. This is an
+/// invariant, not a preference.
+///
+/// Note what this verdict does NOT do: it does not discard. Under THE
+/// BIFURCATION LAW a refused state is a ROOT, and [`Vacuity::Stasis`]
+/// names exactly what must be re-volumized — the positions are carried
+/// so the restoration has something to act on. A verdict that returned
+/// only "no" would be the discard the law forbids.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Vacuity {
+    /// Neither pole stands: no structure and no gradient.
+    Void,
+    /// Gradient without structure — nothing to anchor the field to.
+    Unframed,
+    /// Structure with no gradient: pure circulation, doing no work.
+    /// **The state that must be RE-VOLUMIZED**, never merely refused.
+    Stasis,
+    /// Both poles stand. The only admitted row.
+    Entangled,
+}
+
+/// Read both poles of one state at once and classify it.
+///
+/// `rank` is the count of independent charged cycles
+/// (`holonomies(..).len()`); `form` is this module's divergence read.
+/// Neither is consulted alone — the entanglement is the point.
+pub fn dual_pole(rank: usize, form: &PotentialForm) -> Vacuity {
+    match (rank > 0, form.is_non_vacuous()) {
+        (false, false) => Vacuity::Void,
+        (false, true) => Vacuity::Unframed,
+        (true, false) => Vacuity::Stasis,
+        (true, true) => Vacuity::Entangled,
+    }
+}
+
+impl Vacuity {
+    /// Only the entangled row stands.
+    pub fn is_admitted(&self) -> bool {
+        matches!(self, Vacuity::Entangled)
+    }
+}
