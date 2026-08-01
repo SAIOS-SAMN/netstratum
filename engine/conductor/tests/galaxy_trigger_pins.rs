@@ -7,7 +7,7 @@ use cfe::dop::{ClosureEvent, Resource};
 use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::StarClass;
 use cfe::world::{aperture_transfer, FIRST_ORB};
-use conductor::{observe_crossings, Egregore, EgregoreSpec, Policy};
+use conductor::{observe_crossings, Polity, PolitySpec, Policy};
 use ledger::registry::{Civilization, Registry};
 use ledger::Ledger;
 use std::fs;
@@ -29,8 +29,8 @@ fn seeded(
     lineage: Vec<String>,
     world_name: &str,
     position: (Ratio, Ratio, Ratio),
-) -> EgregoreSpec {
-    EgregoreSpec {
+) -> PolitySpec {
+    PolitySpec {
         civilization: Civilization {
             name: name.into(),
             sigil: sigil.into(),
@@ -91,8 +91,8 @@ fn the_crossing_observes_and_the_observation_creates() {
         "kepler-passage", (ratio(1, 1), ratio(1, 1), ratio(1, 1)),
     );
     let mut worlds = vec![
-        Egregore::genesis(far, &registry, &book),
-        Egregore::genesis(near, &registry, &book),
+        Polity::genesis(far, &registry, &book),
+        Polity::genesis(near, &registry, &book),
     ];
 
     // Before any crossing the sweep observes nothing — not even the

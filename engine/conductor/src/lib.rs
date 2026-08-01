@@ -23,19 +23,19 @@
 //! a shared-chronicle sibling planet waits on the multi-colony
 //! engine).
 //!
-//! **LORE LIVES IN DATA, NOT SOURCE:** egregore specs load from
-//! `<var>/egregores.json` when present; `write_default_egregores` seeds that
+//! **LORE LIVES IN DATA, NOT SOURCE:** polity specs load from
+//! `<var>/polities.json` when present; `write_default_polities` seeds that
 //! file once so even the founding NPCs are operator-editable. NPC
 //! entries carry `founder: "conductor"` — the observer marks them ⚙.
 //!
 //! **THE AUTARKIES FEEL THE STAR (BOT-THERM):** genesis commissions
-//! every egregore world's sun and sites its planet — spec-pinned, or
+//! every polity world's sun and sites its planet — spec-pinned, or
 //! derived from the registry axes through the chronicle beacon (the
 //! civilization's own genesis receipts choose its sky). Furnace-sited
-//! egregores answer heat with encasement shells and mint joules;
-//! Frost-sited egregores raise a cryo-lattice array, bank sink, and hold
+//! polities answer heat with encasement shells and mint joules;
+//! Frost-sited polities raise a cryo-lattice array, bank sink, and hold
 //! expansion against the joule runway — honestly allowed to
-//! freeze-lock; mesic egregores keep their temperament untouched.
+//! freeze-lock; mesic polities keep their temperament untouched.
 //!
 //! Everything is deterministic: same era length → byte-identical
 //! receipts. HONEST SEAM: worlds live in process memory; reload from
@@ -53,8 +53,8 @@ use physics::Beacon;
 use solver::{forge_task, solve, Difficulty, SolveRead};
 use std::path::Path;
 
-mod egregores;
-pub use egregores::{founding_egregores, load_egregores, write_default_egregores};
+mod polities;
+pub use polities::{founding_polities, load_polities, write_default_polities};
 
 /// AEON-1b (11 §5): THE FOLD — seal the live era and rotate it into
 /// the archive sequence. `EraFolded` (tag 46) appends to the universe
@@ -119,9 +119,12 @@ pub fn fold(var_root: &str) -> std::io::Result<(u64, Ratio)> {
     if registry.is_dir() {
         std::fs::rename(&registry, archive.join("registry"))?;
     }
-    let roster = root.join("egregores.json");
+    let roster = root.join("polities.json");
     if roster.is_file() {
-        std::fs::copy(&roster, archive.join("bots.json"))?;
+        // The archived copy carries the live name. (It was written as
+        // `bots.json` under two earlier roster names; nothing reads it
+        // back, so the archive name simply tracks the current one.)
+        std::fs::copy(&roster, archive.join("polities.json"))?;
     }
     Ok((era, gauge))
 }
@@ -279,18 +282,18 @@ pub fn trade_intent(
 /// length at posting, deterministic), then clear the FIRST crossing
 /// (price-time priority inside `clear_trade`). Returns the cleared
 /// pairs (world names) for the narrator line.
-pub fn market_step(worlds: &mut [Egregore], beat: u64) -> Vec<(String, String)> {
+pub fn market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
     // Post intents. NO SINGLES (ruling 2026-07-31): the book is
     // open-ended — a fresh intent posts BESIDE what rests; only an
     // identical pair (same give, same want) holds its place.
-    for egregore in worlds.iter_mut() {
-        if egregore.penned {
+    for polity in worlds.iter_mut() {
+        if polity.penned {
             continue;
         }
         if let Some((give, give_amount, want, want_amount)) =
-            trade_intent(&egregore.world, &egregore.spec.civilization.metabolism)
+            trade_intent(&polity.world, &polity.spec.civilization.metabolism)
         {
-            if egregore
+            if polity
                 .world
                 .offers()
                 .iter()
@@ -298,9 +301,9 @@ pub fn market_step(worlds: &mut [Egregore], beat: u64) -> Vec<(String, String)> 
             {
                 continue;
             }
-            let offer = egregore.world.chronicle().receipts().len() as u64;
+            let offer = polity.world.chronicle().receipts().len() as u64;
             let orb = cfe::world::FIRST_ORB;
-            let _ = egregore
+            let _ = polity
                 .world
                 .post_offer(orb, give, give_amount, want, want_amount, offer);
         }
@@ -387,7 +390,7 @@ pub fn market_step(worlds: &mut [Egregore], beat: u64) -> Vec<(String, String)> 
     cleared
 }
 
-/// A build temperament — the only thing that differs between egregores.
+/// A build temperament — the only thing that differs between polities.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Policy {
     /// Two extractors per habitat, expand at the food knife-edge.
@@ -419,7 +422,7 @@ impl Policy {
 
 /// One scripted civilization and where it settles.
 #[derive(Debug, Clone)]
-pub struct EgregoreSpec {
+pub struct PolitySpec {
     pub civilization: Civilization,
     pub world_name: String,
     pub planet: String,
@@ -440,11 +443,11 @@ pub struct EgregoreSpec {
     pub gauge: Option<Ratio>,
 }
 
-/// One live egregore world: the sim, its contained actor, its research rung.
-pub struct Egregore {
-    pub spec: EgregoreSpec,
+/// One live polity world: the sim, its contained actor, its research rung.
+pub struct Polity {
+    pub spec: PolitySpec,
     pub world: World,
-    /// The egregore's contained agent (build/raze/collect granted).
+    /// The polity's contained agent (build/raze/collect granted).
     automaton: u64,
     /// The steward's contained entity (drains the operator's inbox).
     steward: u64,
@@ -501,7 +504,7 @@ pub fn joule_runway_allows(banked_joules: &Ratio, zones: usize) -> bool {
     *banked_joules >= cfe::dop::heating_per_zone() * ratio(zones as i64 + 1, 1)
 }
 
-/// BOT-THERM: the thermal regime a egregore world lives in. The mesic band
+/// BOT-THERM: the thermal regime a polity world lives in. The mesic band
 /// is home (temperament unchanged — `None`); above its ceiling the
 /// Furnace laws apply, below its floor the Frost laws. Unsited worlds
 /// carry no regime (the engine's opt-in guard, repeated here).
@@ -562,11 +565,11 @@ fn derived_siting(civilization: &Civilization, beacon: &Beacon) -> (StarClass, R
     }
 }
 
-impl Egregore {
+impl Polity {
     /// Found the era: registry entry (join if present), the colony,
-    /// the contained egregore actor, the steward entity, and the world's
+    /// the contained polity actor, the steward entity, and the world's
     /// place on the star-chart.
-    pub fn genesis(spec: EgregoreSpec, registry: &Registry, book: &Ledger) -> Egregore {
+    pub fn genesis(spec: PolitySpec, registry: &Registry, book: &Ledger) -> Polity {
         let _ = registry.create(&spec.civilization);
         // BLOCKER A1 (the G0 persistence seam, CLOSED 2026-07-30):
         // the boot RESUMES before it founds. A verifying resume
@@ -634,7 +637,7 @@ impl Egregore {
                             cfe::dop::ClosureEvent::Diverged { .. }
                         )
                     });
-                    return Egregore {
+                    return Polity {
                         spec,
                         world,
                         automaton,
@@ -688,7 +691,7 @@ impl Egregore {
         if let Some(practice) = founding_practice {
             let _ = world.adopt_practice(practice);
         }
-        // BOT-THERM: thermal genesis — every egregore world founds under a
+        // BOT-THERM: thermal genesis — every polity world founds under a
         // REAL sun. Spec-pinned fields rule; absent ones derive from
         // the registry axes, beacon-seeded by the world's own genesis
         // receipt digest (the chronicle-seeded discipline, CHARTER §9).
@@ -710,7 +713,7 @@ impl Egregore {
         // leaves the orb thermally DORMANT (the engine's opt-in guard)
         // instead of killing the board; derived seats are always lawful.
         let _ = world.site_planet(cfe::world::FIRST_ORB, albedo, orbit);
-        Egregore {
+        Polity {
             spec,
             world,
             automaton,
@@ -869,14 +872,14 @@ impl Egregore {
             }
         };
 
-        // BOT-THERM: thermal temperament. A Furnace-sited egregore answers
+        // BOT-THERM: thermal temperament. A Furnace-sited polity answers
         // rising heat with encasement shells BEFORE anything else —
         // minted joules are what the regime is FOR (05 §1.2); a
-        // Frost-sited egregore raises its sink charter (one cryo-lattice
+        // Frost-sited polity raises its sink charter (one cryo-lattice
         // array, 05 §1.4), then holds every further build against the
         // joule runway — famine avoidance, honestly allowed to fail
         // (a freeze-lock is legitimate drama, not a bug). Mesic-sited
-        // and unsited egregores keep their temperament untouched.
+        // and unsited polities keep their temperament untouched.
         let affords = |world: &World, kind: ZoneKind| {
             kind.cost()
                 .into_iter()
@@ -1086,7 +1089,7 @@ impl Egregore {
     /// The mutation stays chronicle-seeded: the line's own history
     /// decides where its branches land on the manifold. The lineage
     /// pointer records LINE membership (LINEAGE-1), never parenthood.
-    fn divergence_step(&mut self, registry: &Registry) -> Option<EgregoreSpec> {
+    fn divergence_step(&mut self, registry: &Registry) -> Option<PolitySpec> {
         if self.spawned || self.level < 5 || self.solved < 20 {
             return None;
         }
@@ -1184,7 +1187,7 @@ impl Egregore {
         if dx == ratio(0, 1) && dy == ratio(0, 1) && dz == ratio(0, 1) {
             dx = ratio(1, 1);
         }
-        Some(EgregoreSpec {
+        Some(PolitySpec {
             civilization: branch,
             // Fresh themed world and planet — ancestry is a registry
             // fact and a star-chart adjacency, never a name chain.
@@ -1210,7 +1213,7 @@ impl Egregore {
 
     /// One full heartbeat. A speciation returns the newborn's spec —
     /// the era loop gives it a world of its own.
-    pub fn cycle(&mut self, book: &Ledger, registry: &Registry) -> Option<EgregoreSpec> {
+    pub fn cycle(&mut self, book: &Ledger, registry: &Registry) -> Option<PolitySpec> {
         self.drain_inbox(book);
         self.build_step();
         self.survey_step();
@@ -1223,7 +1226,7 @@ impl Egregore {
         }
         self.research_step(book);
         let newborn = self.divergence_step(registry);
-        // THE RESUME CARRIER (task 25, 2026-07-30): every egregore
+        // THE RESUME CARRIER (task 25, 2026-07-30): every polity
         // world syncs its tlv chronicle beside the ledger exports — an
         // append-only resume copy (cfe::persist grows the file, never
         // rewrites). The player's OBSERVING hand can resume a copy;
@@ -1326,7 +1329,7 @@ fn two_mut<T>(slice: &mut [T], i: usize, j: usize) -> (&mut T, &mut T) {
 /// a merchant whose second leg refuses HOLDS inventory — that risk
 /// is the trade. Every leg is an ordinary clear_trade: melt, void
 /// share, and both books' receipts all land by the one law.
-pub fn merchant_step(worlds: &mut [Egregore], beat: u64) -> Vec<(String, String, String)> {
+pub fn merchant_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String, String)> {
     let one = || ratio(1, 1);
     let n = worlds.len();
     // NO SINGLES (ruling 2026-07-31): every profitable triangle runs
@@ -1458,7 +1461,7 @@ pub fn merchant_step(worlds: &mut [Egregore], beat: u64) -> Vec<(String, String,
 /// back, the conductor re-resumes from the receipts (SEAL B — the
 /// file is the world) and beats continue.
 pub fn pen_service(
-    worlds: &mut [Egregore],
+    worlds: &mut [Polity],
     registry: &Registry,
     book: &Ledger,
     control_path: &Path,
@@ -1481,27 +1484,27 @@ pub fn pen_service(
                 .iter_mut()
                 .find(|e| e.spec.world_name == world_name)
             {
-                Some(egregore) if !egregore.penned => {
+                Some(polity) if !polity.penned => {
                     match mesh::yield_authority(
-                        egregore.world.chronicle_mut(),
+                        polity.world.chronicle_mut(),
                         cfe::vrp::CONDUCTOR_HAND,
                         hand,
                         stamp,
                     ) {
                         Ok(sequence) => {
-                            egregore.world.hold_pen(None);
+                            polity.world.hold_pen(None);
                             let _ = cfe::persist::sync(
-                                egregore.world.chronicle(),
+                                polity.world.chronicle(),
                                 &book.world_dir(world_name).join("chronicle.tlv"),
                             );
                             let _ = scribe::record(
                                 book,
-                                &egregore.spec.world_name,
-                                &egregore.spec.planet,
-                                &egregore.spec.civilization.sigil,
-                                &egregore.world,
+                                &polity.spec.world_name,
+                                &polity.spec.planet,
+                                &polity.spec.civilization.sigil,
+                                &polity.world,
                             );
-                            egregore.penned = true;
+                            polity.penned = true;
                             log.push(format!(
                                 "HANDOFF — {world_name}: the pen passes to {seat} (seal {sequence}); beats wait"
                             ));
@@ -1528,16 +1531,16 @@ pub fn pen_service(
         }
     }
     // The return poll.
-    for egregore in worlds.iter_mut().filter(|e| e.penned) {
+    for polity in worlds.iter_mut().filter(|e| e.penned) {
         let carrier = book
-            .world_dir(&egregore.spec.world_name)
+            .world_dir(&polity.spec.world_name)
             .join("chronicle.tlv");
         let Ok(chronicle) = cfe::persist::load(&carrier) else {
             continue;
         };
         if mesh::authority(&chronicle) == Ok(Some(cfe::vrp::CONDUCTOR_HAND)) {
-            let name = egregore.spec.world_name.clone();
-            *egregore = Egregore::genesis(egregore.spec.clone(), registry, book);
+            let name = polity.spec.world_name.clone();
+            *polity = Polity::genesis(polity.spec.clone(), registry, book);
             log.push(format!("HANDOFF — {name}: the pen returns; beats resume"));
         }
     }
@@ -1572,7 +1575,7 @@ pub fn incursion(
     registry: &Registry,
     book: &Ledger,
     stamp: u64,
-) -> Result<Egregore, IncursionRefused> {
+) -> Result<Polity, IncursionRefused> {
     let sealed = era_root
         .join("worlds")
         .join(world_name)
@@ -1644,13 +1647,13 @@ pub fn incursion(
         let _ = world.grant(steward, scope);
     }
     // The continuation persists under the woken name; genesis resumes
-    // it as the incursion egregore.
+    // it as the incursion polity.
     let _ = std::fs::create_dir_all(live_carrier.parent().expect("world dir"));
     let _ = cfe::persist::sync(world.chronicle(), &live_carrier);
     let coordinate = |axis: &str| -> Ratio {
         ratio(beacon.uniform_index(axis, 64) as i64, 1)
     };
-    let spec = EgregoreSpec {
+    let spec = PolitySpec {
         civilization,
         world_name: woken_world.clone(),
         planet: format!("{sigil}-prime"),
@@ -1666,7 +1669,7 @@ pub fn incursion(
         orbit: None,
         gauge: None,
     };
-    let egregore = Egregore::genesis(spec, registry, book);
+    let polity = Polity::genesis(spec, registry, book);
     // The door receipts on the universe ledger (ledger-side, the
     // GalaxyObserved pattern).
     let era = era_root
@@ -1674,7 +1677,7 @@ pub fn incursion(
         .map(|held| held.to_string_lossy().into_owned())
         .unwrap_or_default();
     let _ = book.strike_incursion(&era, world_name, &sigil, stamp);
-    Ok(egregore)
+    Ok(polity)
 }
 
 /// GALAXY-1b (13_GALAXY §3, §5): the year-voice observation sweep.
@@ -1684,22 +1687,22 @@ pub fn incursion(
 /// created galaxy encloses its observer, so the next sweep reads
 /// inside-reach and creates nothing.
 pub fn observe_crossings(
-    worlds: &[Egregore],
+    worlds: &[Polity],
     registry: &Registry,
     book: &Ledger,
     stamp: u64,
 ) -> Vec<Galaxy> {
     let mut created = Vec::new();
-    for egregore in worlds {
-        if !egregore.world.has_crossed() {
+    for polity in worlds {
+        if !polity.world.has_crossed() {
             continue;
         }
-        let Some(((x, y, z), _)) = book.charted_position(&egregore.spec.world_name) else {
+        let Some(((x, y, z), _)) = book.charted_position(&polity.spec.world_name) else {
             continue;
         };
-        let creator = galaxy_creator(registry, &egregore.spec.civilization);
+        let creator = galaxy_creator(registry, &polity.spec.civilization);
         if let Ok(Some(galaxy)) =
-            book.observe_galaxy(&egregore.spec.civilization.sigil, &creator, (&x, &y, &z), stamp)
+            book.observe_galaxy(&polity.spec.civilization.sigil, &creator, (&x, &y, &z), stamp)
         {
             created.push(galaxy);
         }
@@ -1731,9 +1734,9 @@ fn galaxy_creator(registry: &Registry, civilization: &Civilization) -> String {
 }
 
 /// Run one era: CONVERGE the archived eras (07 §1.6), then genesis for
-/// every egregore, then `cycles` heartbeats; daughters born mid-era join the
+/// every polity, then `cycles` heartbeats; daughters born mid-era join the
 /// beat. Returns the live worlds.
-pub fn run_era(var_root: &str, cycles: u32) -> Vec<Egregore> {
+pub fn run_era(var_root: &str, cycles: u32) -> Vec<Polity> {
     let registry = Registry::at(format!("{var_root}/registry"));
     let book = Ledger::at(format!("{var_root}/worlds"));
     let eras = ledger::converge::default_era_roots(var_root);
@@ -1742,36 +1745,36 @@ pub fn run_era(var_root: &str, cycles: u32) -> Vec<Egregore> {
         .unwrap_or(0);
     // 11 §5.2: the live aeon's G-sheet (see main.rs — same law).
     let live_base = cfe::world::wrap_gauge(ratio(eras.len() as i64, 12));
-    let mut worlds: Vec<Egregore> = egregores::founding_egregores()
+    let mut worlds: Vec<Polity> = polities::founding_polities()
         .into_iter()
         .map(|mut spec| {
             let opening = spec.gauge.take().unwrap_or_else(|| ratio(0, 1));
             spec.gauge = Some(cfe::world::wrap_gauge(opening + live_base.clone()));
-            Egregore::genesis(spec, &registry, &book)
+            Polity::genesis(spec, &registry, &book)
         })
         .collect();
     for beat in 0..cycles {
         // TUniversal T = epoch base + this era's beat (07 §1.3).
         let _ = book.set_universal_clock(epoch_base + u64::from(beat) + 1);
         let mut newborns = Vec::new();
-        for egregore in &mut worlds {
-            if let Some(spec) = egregore.cycle(&book, &registry) {
+        for polity in &mut worlds {
+            if let Some(spec) = polity.cycle(&book, &registry) {
                 newborns.push(spec);
             }
         }
         for spec in newborns {
-            worlds.push(Egregore::genesis(spec, &registry, &book));
+            worlds.push(Polity::genesis(spec, &registry, &book));
         }
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — the lens renders journals + wall, write-only display
         // of the chronicle, never a state change.
         if (u64::from(beat) + 1).is_multiple_of(scribe::journal::YEAR_TICKS) {
-            for egregore in &worlds {
+            for polity in &worlds {
                 let _ = scribe::record_journal(
                     &book,
-                    &egregore.spec.world_name,
-                    &egregore.world,
-                    &scribe::journal::Voice::of(&egregore.spec.civilization),
+                    &polity.spec.world_name,
+                    &polity.world,
+                    &scribe::journal::Voice::of(&polity.spec.civilization),
                 );
             }
             // GALAXY-1b: the observation sweep rides the year voice

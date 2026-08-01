@@ -4,7 +4,7 @@
 #
 # A universe is ONE directory (its "var root"):
 #
-#   egregores.json   the NPC roster the conductor seats at genesis
+#   polities.json   the NPC roster the conductor seats at genesis
 #   registry/        one file per civilization
 #   worlds/          one directory per world — chronicle, receipts, lens exports
 #   conductor.ctl    the operator control line (paused / cadence N)
@@ -25,9 +25,9 @@
 #
 # Options:
 #   --var ROOT       universe root, repo-relative unless absolute (default: var)
-#   --roster FILE    NPC roster to seat. Default: seeds/aeon1-egregores.json.
+#   --roster FILE    NPC roster to seat. Default: seeds/aeon1-polities.json.
 #                    Pass "founding" to let the conductor write the five
-#                    egregores built into the binary instead.
+#                    polities built into the binary instead.
 #   --no-build       skip cargo build; use whatever already sits in target/
 #   --no-genesis     prepare files only, do not found the worlds
 #   --cadence N      seconds between beats, for `run` (default: 2)
@@ -39,7 +39,7 @@
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DEFAULT_ROSTER="seeds/aeon1-egregores.json"
+DEFAULT_ROSTER="seeds/aeon1-polities.json"
 
 command_name="install"
 var_root="var"
@@ -68,8 +68,8 @@ netstratum install.sh — stand up a clean universe
 
 Options:
   --var ROOT      universe root, repo-relative unless absolute (default: var)
-  --roster FILE   roster to seat (default: seeds/aeon1-egregores.json;
-                  "founding" = the five egregores built into the binary)
+  --roster FILE   roster to seat (default: seeds/aeon1-polities.json;
+                  "founding" = the five polities built into the binary)
   --no-build      skip cargo build
   --no-genesis    prepare files only; do not found the worlds
   --cadence N     seconds between beats, for run (default: 2)
@@ -114,9 +114,12 @@ resolve_root() {
 
 # A directory counts as a universe when it carries any of the three
 # things only the engine writes. `wipe` will not touch anything else.
+# The roster's two earlier names are still recognised: an existing
+# universe must not stop looking like one because the name changed.
 looks_like_universe() {
   local root="$1"
-  [ -e "$root/egregores.json" ] || [ -d "$root/worlds" ] || [ -d "$root/registry" ]
+  [ -e "$root/polities.json" ] || [ -e "$root/egregores.json" ] \
+    || [ -e "$root/bots.json" ] || [ -d "$root/worlds" ] || [ -d "$root/registry" ]
 }
 
 # An empty directory carries no history, so it is safe to remove without
@@ -188,7 +191,7 @@ conductor_bin() {
 }
 
 # Which roster file gets copied in. "founding" means: place nothing, and
-# let the conductor write its own five-egregore default on first boot.
+# let the conductor write its own five-polity default on first boot.
 resolve_roster() {
   if [ "$roster" = "founding" ]; then
     printf 'founding'
@@ -239,12 +242,12 @@ cmd_install() {
   step "Preparing $root"
   mkdir -p "$root"
   if [ "$chosen" = "founding" ]; then
-    say "roster: the five founding egregores (written by the conductor on first boot)"
+    say "roster: the five founding polities (written by the conductor on first boot)"
   else
-    # write_default_egregores refuses to overwrite, so the roster must be
+    # write_default_polities refuses to overwrite, so the roster must be
     # in place BEFORE the conductor's first boot or the defaults win.
-    cp "$chosen" "$root/egregores.json"
-    say "roster: $(roster_entries "$root/egregores.json") civilizations from ${chosen#"$REPO"/}"
+    cp "$chosen" "$root/polities.json"
+    say "roster: $(roster_entries "$root/polities.json") civilizations from ${chosen#"$REPO"/}"
   fi
 
   if [ "$do_genesis" -eq 1 ]; then
@@ -274,7 +277,7 @@ cmd_wipe() {
     return 0
   fi
   looks_like_universe "$root" \
-    || die "$root does not look like a netstratum universe (no egregores.json,
+    || die "$root does not look like a netstratum universe (no polities.json,
        worlds/ or registry/) — refusing to delete it"
 
   local worlds; worlds="$(world_count "$root")"
@@ -314,8 +317,8 @@ cmd_status() {
 
   local worlds; worlds="$(world_count "$root")"
   say "state:        $( [ "$worlds" -gt 0 ] && echo founded || echo "prepared, not founded" )"
-  if [ -f "$root/egregores.json" ]; then
-    say "roster:       $(roster_entries "$root/egregores.json") civilizations"
+  if [ -f "$root/polities.json" ]; then
+    say "roster:       $(roster_entries "$root/polities.json") civilizations"
   else
     say "roster:       none placed (the conductor will write its founding five)"
   fi
@@ -343,7 +346,7 @@ cmd_run() {
 # tracked roster can be brought current deliberately, never silently.
 cmd_export_roster() {
   local root; root="$(resolve_root)"
-  local src="$root/egregores.json"
+  local src="$root/polities.json"
   [ -f "$src" ] || die "no roster at $src"
   local dest="$REPO/$DEFAULT_ROSTER"
   say "source:  $src ($(roster_entries "$src") civilizations)"

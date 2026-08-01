@@ -1,14 +1,24 @@
-//! THE FOLD GATE witnesses (U2b, I6, PoWC) — translated from the v0.1
-//! ancestor `fold.rs` tests and re-witnessed red-first. The law
-//! (SYSTEM_SPEC §4, kernel CHARTER §6, EQUATIONS I6): a fold is lawful
-//! IFF `orbit_lock = ∅`. These pins fix the DIRECTION of that law —
-//! that a shear (no lock) permits the fold while the identity (a
-//! period-1 lock) vetoes it — so an inverted verdict cannot pass.
+//! THE FOLD GATE witnesses (U2b, I6, PoWC) — REWRITTEN under
+//! DIRECTIVE 01 (operator ruling 2026-08-01, the second polarity
+//! ruling). The law:
+//!
+//! ```text
+//! sig(a) ≠ sig(b)               →  TorsionVeto(SignaturesDiffer)
+//! sig(a) = sig(b), no witness   →  TorsionVeto(WitnessAbsent)
+//! sig(a) = sig(b), bad witness  →  TorsionVeto(WitnessInvalid)
+//! sig(a) = sig(b), good witness →  GaugeFold(witness)
+//! ```
+//!
+//! These pins fix the DIRECTION of that law — that a PROVEN genuine
+//! difference is never folded away, and that a fold is permitted only
+//! against a re-walked conjugator — so an inverted verdict cannot pass.
+//! The previous pin set asserted the opposite polarity and is
+//! superseded; the reasoning is recorded in `fold.rs`'s header.
 
 use cfe::ratio::{ratio, Ratio};
 use rfa_core::{
     f_fold_star, judged_fold, orbit_lock, verify_orbit_witness, Delta, FoldVerdict, Operator,
-    OrbitWitness,
+    OrbitWitness, TorsionCause,
 };
 
 fn q(n: i64, d: i64) -> Ratio {
@@ -16,7 +26,8 @@ fn q(n: i64, d: i64) -> Ratio {
 }
 
 /// The anchor: a 3-entity Delta in exact equilibrium (Δ01 = 1,
-/// Δ12 = 1/2, Δ02 = 3/2) — the ancestor's `anchor_3x3`.
+/// Δ12 = 1/2, Δ02 = 3/2) — the ancestor's `anchor_3x3`. A pure
+/// coboundary: it reduces to nothing.
 fn anchor_3() -> Delta {
     let mut d = Delta::zero(3, 1);
     d.set_antisym(0, 1, vec![q(1, 1)]);
@@ -25,7 +36,16 @@ fn anchor_3() -> Delta {
     d
 }
 
-/// A 2-entity anchor (Δ01 = 1) — the ancestor's `anchor_2x2`.
+/// The incoherent 3-entity state (Δ01 = 2, Δ12 = 3, Δ02 = 7): the
+/// triangle does not compose, so structure survives reduction.
+fn incoherent_3() -> Delta {
+    let mut d = Delta::zero(3, 1);
+    d.set_antisym(0, 1, vec![q(2, 1)]);
+    d.set_antisym(1, 2, vec![q(3, 1)]);
+    d.set_antisym(0, 2, vec![q(7, 1)]);
+    d
+}
+
 fn anchor_2() -> Delta {
     let mut d = Delta::zero(2, 1);
     d.set_antisym(0, 1, vec![q(1, 1)]);
@@ -33,7 +53,8 @@ fn anchor_2() -> Delta {
 }
 
 /// A shear operator `I + s·E_{row,col}` and its exact inverse
-/// `I − s·E_{row,col}` (unipotent — det 1). The ancestor's `shear_op`.
+/// (unipotent — det 1). It does NOT preserve antisymmetry, so it
+/// generates no valid walk.
 fn shear(dim: usize, row: usize, col: usize, s: Ratio) -> Operator {
     let mut matrix = vec![vec![q(0, 1); dim]; dim];
     let mut matrix_inv = vec![vec![q(0, 1); dim]; dim];
@@ -55,79 +76,21 @@ fn identity_op(dim: usize) -> Operator {
     Operator { id: 0, matrix: matrix.clone(), matrix_inv: matrix, det_sign_positive: true }
 }
 
-#[test]
-fn a_shear_creates_no_orbit_lock() {
-    // A shear is unipotent — its conjugation does not carry the anchor's
-    // class back onto itself, so no torsion cycle forms (ancestor
-    // test_shear_no_orbit_lock_2x2 / _3x3).
-    let anchor2 = anchor_2();
-    assert_eq!(
-        orbit_lock(&anchor2, &anchor2, &[shear(2, 0, 1, q(1, 10))], 10),
-        None,
-        "a shear must not self-lock the 2×2 anchor"
-    );
-    let anchor3 = anchor_3();
-    assert_eq!(
-        orbit_lock(&anchor3, &anchor3, &[shear(3, 0, 1, q(1, 50))], 10),
-        None,
-        "a shear must not self-lock the 3×3 anchor"
-    );
-}
-
-#[test]
-fn the_shear_fold_is_lawful_gauge() {
-    // No orbit lock among the shear operators → the fold is lawful
-    // (the difference was gauge). The ancestor's f_fold_star returned
-    // identity here (fold permitted); ours reads GaugeFold.
-    let anchor = anchor_3();
-    let ops = vec![
-        shear(3, 0, 1, q(1, 50)),
-        shear(3, 1, 2, q(1, 75)),
-        shear(3, 0, 2, q(1, 100)),
-    ];
-    // Fold the anchor against a shear image of itself: still gauge.
-    let image = ops[0].apply(&anchor).expect("shear applies");
-    assert_eq!(
-        f_fold_star(&anchor, &image, &ops, 10),
-        FoldVerdict::GaugeFold,
-        "a shear difference is gauge — the fold is lawful"
-    );
-}
-
-#[test]
-fn the_identity_orbit_locks_and_vetoes_the_fold() {
-    // The identity operator: A·Δ·A⁻¹ = Δ, so the image shares the
-    // anchor's RCF class at step 1 — a period-1 torsion cycle. Orbit
-    // lock EXISTS, so the fold is VETOED (ancestor
-    // test_identity_operator_self_orbit_lock).
-    let anchor = anchor_2();
-    let id = identity_op(2);
-    let witness = orbit_lock(&anchor, &anchor, std::slice::from_ref(&id), 10)
-        .expect("the identity creates a period-1 lock");
-    assert_eq!(witness.operator_id, 0);
-    assert_eq!(witness.step, 1, "the lock is found at the first conjugation");
-    assert_eq!(
-        f_fold_star(&anchor, &anchor, std::slice::from_ref(&id), 10),
-        FoldVerdict::TorsionVeto(witness),
-        "a torsion lock forbids the fold — the residue must emit"
-    );
-}
-
 /// A permutation frame: relabel the entities by `perm` (a conjugation
 /// P·Δ·P⁻¹ with P the permutation matrix — its inverse is its
-/// transpose). The discrete frame group of a Delta over n entities.
-fn frame(dim: usize, perm: &[usize]) -> Operator {
+/// transpose). Orthogonal, so it PRESERVES antisymmetry. Use only EVEN
+/// permutations: an odd one has det −1 and is not in `GL⁺`.
+fn frame(dim: usize, perm: &[usize], id: usize) -> Operator {
     let mut matrix = vec![vec![q(0, 1); dim]; dim];
     let mut matrix_inv = vec![vec![q(0, 1); dim]; dim];
     for (from, &to) in perm.iter().enumerate() {
         matrix[to][from] = q(1, 1);
         matrix_inv[from][to] = q(1, 1);
     }
-    Operator { id: 9, matrix, matrix_inv, det_sign_positive: true }
+    Operator { id, matrix, matrix_inv, det_sign_positive: true }
 }
 
-/// Add a coboundary (a pure gauge distortion: Δ_ij += p_j − p_i) to a
-/// Delta — the "angle" a relabeling of potentials introduces.
+/// Add a coboundary (a pure gauge distortion: Δ_ij += p_j − p_i).
 fn gauge_shifted(delta: &Delta, potentials: &[Ratio]) -> Delta {
     let dim = delta.dim();
     let fiber = delta.fiber();
@@ -142,181 +105,207 @@ fn gauge_shifted(delta: &Delta, potentials: &[Ratio]) -> Delta {
     Delta::from_entries(entries)
 }
 
-#[test]
-fn the_angle_free_witness() {
-    // THE SINGULARITY LAW (16_UNIT §4a) as a test: the composed gate's
-    // verdict is INVARIANT to the frame and gauge of approach. The
-    // same pair, presented under every permutation frame of its
-    // entities AND shifted by a gauge coboundary, yields the identical
-    // verdict — fold or veto — because Π_G strips what a relabeling
-    // could remove and the RCF signature is conjugation-invariant.
-    let a = anchor_3();
-    let mut b = Delta::zero(3, 1);
-    b.set_antisym(0, 1, vec![q(2, 1)]);
-    b.set_antisym(1, 2, vec![q(3, 1)]);
-    b.set_antisym(0, 2, vec![q(7, 1)]); // incoherent — genuinely different
-    let ops = vec![shear(3, 0, 1, q(1, 50))];
-    let base = judged_fold(&a, &b, &ops, 10);
-
-    // Every 3-entity permutation frame: the verdict holds.
-    let perms: [[usize; 3]; 6] =
-        [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]];
-    for perm in perms {
-        let f = frame(3, &perm);
-        let fa = f.apply(&a).expect("the frame applies");
-        let fb = f.apply(&b).expect("the frame applies");
-        assert_eq!(
-            judged_fold(&fa, &fb, &ops, 10),
-            base,
-            "the verdict cannot depend on the frame of approach: {perm:?}"
-        );
-    }
-
-    // A gauge coboundary on either input: stripped by Π_G, the
-    // verdict holds.
-    let potentials = [q(0, 1), q(5, 1), q(1, 3)];
-    let shifted_a = gauge_shifted(&a, &potentials);
-    let shifted_b = gauge_shifted(&b, &potentials);
-    assert_eq!(judged_fold(&shifted_a, &b, &ops, 10), base);
-    assert_eq!(judged_fold(&a, &shifted_b, &ops, 10), base);
-    assert_eq!(judged_fold(&shifted_a, &shifted_b, &ops, 10), base);
-
-    // And the self-pair under the identity lock: the verdict is a
-    // veto in EVERY frame alike (no angle un-vetoes a torsion).
-    let id = identity_op(3);
-    let self_base = judged_fold(&a, &a, std::slice::from_ref(&id), 10);
-    assert!(matches!(self_base, FoldVerdict::TorsionVeto(_)));
-    for perm in perms {
-        let f = frame(3, &perm);
-        let fa = f.apply(&a).expect("applies");
-        assert_eq!(
-            judged_fold(&fa, &fa, std::slice::from_ref(&id), 10),
-            self_base,
-            "the veto is frame-invariant too"
-        );
-    }
-}
+// ─── THE POLARITY ──────────────────────────────────────────────────────
 
 #[test]
 fn the_polarity_is_pinned_against_inversion() {
-    // THE POLARITY, stated as one pin (2026-08-01). Two doc comments in
-    // fold.rs once said the opposite of the code; the polarity decides
-    // which branch MINTS, so an inversion pays for gauge and refuses
-    // genuine difference. Some(witness) VETOES. None FOLDS.
-    let anchor = anchor_2();
-    let id = identity_op(2);
-    let ops = [id.clone()];
+    // THE LOAD-BEARING PIN (DIRECTIVE 01). Differing invariant factors
+    // are an EXACT PROOF that no conjugation relates the two states —
+    // the difference is genuine structure. It must VETO, and the
+    // residue emits. The prior law folded exactly this case away.
+    let coherent = anchor_3();
+    let incoherent = incoherent_3();
+    let ops = vec![identity_op(3), frame(3, &[1, 2, 0], 9)];
 
-    let witness = orbit_lock(&anchor, &anchor, &ops, 10).expect("the identity locks");
     assert_eq!(
-        f_fold_star(&anchor, &anchor, &ops, 10),
-        FoldVerdict::TorsionVeto(witness),
-        "POLARITY: Some(witness) MUST veto — genuine difference is never folded away"
+        judged_fold(&coherent, &incoherent, &ops, None),
+        FoldVerdict::TorsionVeto(TorsionCause::SignaturesDiffer),
+        "POLARITY: a proven genuine difference is NEVER folded away"
     );
 
-    let shear_ops = [shear(2, 0, 1, q(1, 10))];
-    assert_eq!(orbit_lock(&anchor, &anchor, &shear_ops, 10), None, "no lock");
+    // And the converse half: agreement alone does not fold. A state
+    // against ITSELF has identical signatures, but permission needs a
+    // witness — and with one, it folds.
     assert_eq!(
-        f_fold_star(&anchor, &anchor, &shear_ops, 10),
-        FoldVerdict::GaugeFold,
-        "POLARITY: None MUST fold — an unlocked difference was only gauge"
+        f_fold_star(&coherent, &coherent, &ops, None),
+        FoldVerdict::TorsionVeto(TorsionCause::WitnessAbsent),
+        "POLARITY: no witness, no fold — the default is veto"
+    );
+    let identity_witness = OrbitWitness { operator_id: 0, step: 1 };
+    assert_eq!(
+        f_fold_star(&coherent, &coherent, &ops, Some(&identity_witness)),
+        FoldVerdict::GaugeFold(identity_witness),
+        "a state IS gauge-identical to itself, and the identity proves it"
     );
 }
 
 #[test]
-fn a_presented_witness_verifies_without_searching() {
-    // THE JUDGE'S HALF (U1a's split applied to the fold gate). The
-    // prover searched and found a witness; the judge re-walks only the
-    // path claimed — O(step), no operator sweep, no k_max.
-    let anchor = anchor_2();
-    let id = identity_op(2);
-    let ops = [id];
-    let witness = orbit_lock(&anchor, &anchor, &ops, 10).expect("the identity locks");
-
-    assert!(
-        verify_orbit_witness(&anchor, &anchor, &ops, &witness),
-        "the judge must accept the witness the prover found"
+fn the_default_is_veto_not_fold() {
+    // Absent proof, structure is preserved. An unproved fold destroys
+    // structure irreversibly; an unnecessary veto only emits a residue.
+    let a = incoherent_3();
+    let ops = vec![identity_op(3)];
+    assert_eq!(
+        f_fold_star(&a, &a, &ops, None),
+        FoldVerdict::TorsionVeto(TorsionCause::WitnessAbsent)
     );
+    // An empty operator list cannot prove anything either.
+    assert_eq!(
+        f_fold_star(&a, &a, &[], None),
+        FoldVerdict::TorsionVeto(TorsionCause::WitnessAbsent)
+    );
+}
+
+// ─── THE WITNESS ───────────────────────────────────────────────────────
+
+#[test]
+fn a_valid_conjugator_witness_permits_the_fold() {
+    // The prover searches, finds the frame that carries `a` onto `b`,
+    // and presents it. The judge re-walks that one path and folds.
+    let a = anchor_3();
+    let rotate = frame(3, &[1, 2, 0], 9); // even permutation, det +1
+    let b = rotate.apply(&a).expect("the frame applies");
+    let ops = vec![identity_op(3), rotate];
+
+    let witness = orbit_lock(&a, &b, &ops).expect("the prover finds the conjugator");
+    assert_eq!(witness, OrbitWitness { operator_id: 9, step: 1 });
+    assert!(verify_orbit_witness(&a, &b, &ops, &witness), "the judge re-walks it");
+    assert_eq!(
+        f_fold_star(&a, &b, &ops, Some(&witness)),
+        FoldVerdict::GaugeFold(witness),
+        "a proven frame change IS gauge — the fold is lawful"
+    );
+}
+
+#[test]
+fn the_witness_lands_on_the_tensor_never_on_the_signature() {
+    // THE TAUTOLOGY GUARD — the single most important pin here.
+    //
+    // `a` and `b` are conjugate (same invariant factors) but NOT equal.
+    // The identity operator is perfectly valid and preserves the
+    // signature exactly, so a signature-comparing verifier would ACCEPT
+    // an identity witness for this pair — that was the search fallacy,
+    // one level down. Exact tensor equality refuses it, and only the
+    // real conjugator passes.
+    let a = anchor_3();
+    let rotate = frame(3, &[1, 2, 0], 9);
+    let b = rotate.apply(&a).expect("applies");
+    assert_ne!(a, b, "the pair really is distinct");
+    let ops = vec![identity_op(3), rotate];
+
+    let identity_claim = OrbitWitness { operator_id: 0, step: 1 };
+    assert!(
+        !verify_orbit_witness(&a, &b, &ops, &identity_claim),
+        "the identity preserves the signature but does NOT carry a onto b"
+    );
+    assert_eq!(
+        f_fold_star(&a, &b, &ops, Some(&identity_claim)),
+        FoldVerdict::TorsionVeto(TorsionCause::WitnessInvalid),
+        "a signature-preserving non-conjugator proves nothing"
+    );
+
+    let real_claim = OrbitWitness { operator_id: 9, step: 1 };
+    assert!(verify_orbit_witness(&a, &b, &ops, &real_claim));
 }
 
 #[test]
 fn a_forged_witness_refuses() {
-    // Every unproved claim refuses: an unknown operator, a zero-step
-    // claim (which asserts nothing), and a wrong landing class.
-    let anchor = anchor_2();
-    let id = identity_op(2);
-    let ops = [id];
-    let real = orbit_lock(&anchor, &anchor, &ops, 10).expect("locks");
+    // Every unproved claim refuses, and each refusal is typed.
+    let a = anchor_3();
+    let rotate = frame(3, &[1, 2, 0], 9);
+    let b = rotate.apply(&a).expect("applies");
+    let ops = vec![rotate];
 
-    assert!(
-        !verify_orbit_witness(
-            &anchor, &anchor, &ops,
-            &OrbitWitness { operator_id: 77, step: real.step },
-        ),
-        "an unknown operator id proves nothing"
-    );
-    assert!(
-        !verify_orbit_witness(
-            &anchor, &anchor, &ops,
-            &OrbitWitness { operator_id: real.operator_id, step: 0 },
-        ),
-        "a zero-step claim asserts nothing"
-    );
-
-    // A real operator walked the claimed number of steps, but landing on
-    // a class that is not `b`'s: refused.
-    let other = anchor_3();
-    let shear_ops = [shear(3, 0, 1, q(1, 50))];
-    assert!(
-        !verify_orbit_witness(
-            &other,
-            &{
-                let mut d = Delta::zero(3, 1);
-                d.set_antisym(0, 1, vec![q(9, 1)]);
-                d.set_antisym(1, 2, vec![q(4, 1)]);
-                d.set_antisym(0, 2, vec![q(2, 1)]);
-                d
-            },
-            &shear_ops,
-            &OrbitWitness { operator_id: 1, step: 3 },
-        ),
-        "a walk that does not land on b's class proves nothing"
-    );
+    for forged in [
+        OrbitWitness { operator_id: 77, step: 1 }, // no such operator
+        OrbitWitness { operator_id: 9, step: 0 },  // asserts nothing
+        OrbitWitness { operator_id: 9, step: 2 },  // overshoots the class
+    ] {
+        assert!(!verify_orbit_witness(&a, &b, &ops, &forged), "forged: {forged:?}");
+        assert_eq!(
+            f_fold_star(&a, &b, &ops, Some(&forged)),
+            FoldVerdict::TorsionVeto(TorsionCause::WitnessInvalid)
+        );
+    }
 }
 
 #[test]
-fn absence_cannot_be_witnessed() {
-    // THE ASYMMETRY, pinned. A lock can carry proof; its ABSENCE cannot.
-    // The shear pair has no lock, so `orbit_lock` yields None and there
-    // is no witness to present — and every fabricated witness for that
-    // pair refuses. This is WHY the minting branch must be the lock
-    // branch: only that side can carry a proof a judge can re-check.
-    let anchor = anchor_2();
+fn an_operator_that_leaves_the_antisymmetric_surface_proves_nothing() {
+    // A shear breaks conservation at the first conjugation, so it
+    // generates no valid walk and can witness nothing.
+    let a = anchor_2();
     let shear_ops = [shear(2, 0, 1, q(1, 10))];
-    assert_eq!(orbit_lock(&anchor, &anchor, &shear_ops, 10), None);
-
+    assert_eq!(orbit_lock(&a, &a, &shear_ops), None, "the shear carries a nowhere lawful");
     for step in 1..6 {
-        assert!(
-            !verify_orbit_witness(
-                &anchor, &anchor, &shear_ops,
-                &OrbitWitness { operator_id: 1, step },
-            ),
-            "no fabricated witness can establish a lock that does not exist (step {step})"
-        );
+        assert!(!verify_orbit_witness(
+            &a,
+            &a,
+            &shear_ops,
+            &OrbitWitness { operator_id: 1, step }
+        ));
     }
 }
 
 #[test]
 fn a_broken_operator_generates_no_orbit() {
-    // An operator with det ≤ 0 is not in the group: it generates no
-    // orbit, so it can never lock — the gate stays total, never panics.
-    let anchor = anchor_2();
+    // An operator with det ≤ 0 is not in the group: it applies to
+    // nothing, so it can never witness — the gate stays total.
+    let a = anchor_2();
     let mut bad = identity_op(2);
     bad.det_sign_positive = false;
-    assert!(bad.apply(&anchor).is_none(), "a non-group operator does not apply");
+    assert!(bad.apply(&a).is_none(), "a non-group operator does not apply");
+    assert_eq!(orbit_lock(&a, &a, &[bad.clone()]), None);
+    assert!(!verify_orbit_witness(&a, &a, &[bad], &OrbitWitness { operator_id: 0, step: 1 }));
+}
+
+// ─── ANGLE-FREEDOM ─────────────────────────────────────────────────────
+
+#[test]
+fn the_angle_free_witness() {
+    // THE SINGULARITY LAW (16_UNIT §4a) as a test: the composed gate's
+    // verdict is INVARIANT to the frame and gauge of approach. Π_G
+    // strips what a relabeling could remove, and the RCF signature is
+    // conjugation-invariant, so the verdict cannot depend on how the
+    // pair arrived.
+    let a = anchor_3();
+    let b = incoherent_3();
+    let ops = vec![identity_op(3), frame(3, &[1, 2, 0], 9)];
+    let base = judged_fold(&a, &b, &ops, None);
+    assert_eq!(base, FoldVerdict::TorsionVeto(TorsionCause::SignaturesDiffer));
+
+    // Every EVEN 3-entity permutation frame: the verdict holds.
+    for (n, perm) in [[0, 1, 2], [1, 2, 0], [2, 0, 1]].into_iter().enumerate() {
+        let f = frame(3, &perm, 20 + n);
+        let fa = f.apply(&a).expect("the frame applies");
+        let fb = f.apply(&b).expect("the frame applies");
+        assert_eq!(
+            judged_fold(&fa, &fb, &ops, None),
+            base,
+            "the verdict cannot depend on the frame of approach: {perm:?}"
+        );
+    }
+
+    // A gauge coboundary on either input: stripped by Π_G, verdict holds.
+    let potentials = [q(0, 1), q(5, 1), q(1, 3)];
+    let shifted_a = gauge_shifted(&a, &potentials);
+    let shifted_b = gauge_shifted(&b, &potentials);
+    assert_eq!(judged_fold(&shifted_a, &b, &ops, None), base);
+    assert_eq!(judged_fold(&a, &shifted_b, &ops, None), base);
+    assert_eq!(judged_fold(&shifted_a, &shifted_b, &ops, None), base);
+}
+
+#[test]
+fn a_pure_gauge_pair_agrees_on_signature() {
+    // Two states differing only by a coboundary reduce to the same
+    // representative, so `judged_fold` reaches the witness branch
+    // rather than the exact-proof branch. Gauge is never mistaken for
+    // structure.
+    let base = incoherent_3();
+    let shifted = gauge_shifted(&base, &[q(0, 1), q(5, 1), q(1, 3)]);
+    let ops = vec![identity_op(3)];
     assert_eq!(
-        orbit_lock(&anchor, &anchor, &[bad], 10),
-        None,
-        "no valid orbit → no lock"
+        judged_fold(&base, &shifted, &ops, None),
+        FoldVerdict::TorsionVeto(TorsionCause::WitnessAbsent),
+        "signatures agree (it is only gauge) — what is missing is the proof, not the sameness"
     );
 }

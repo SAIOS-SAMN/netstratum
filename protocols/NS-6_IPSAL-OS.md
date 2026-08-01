@@ -153,27 +153,27 @@ establishment** — at the individual level the threshold is "no principal"; at
 the species/star level it is genuine, demonstrated establishment. An entity
 that answers to a principal is a contained **agent**, never sovereign.
 
-### 5.2 "Egregore" and "automaton" — the autonomous-civilization vocabulary
+### 5.2 "Polity" and "automaton" — the autonomous-civilization vocabulary
 
 "Bot" is retired (operator ruling, 2026-07-27): it imports *mechanical
 servant of a scripter*, false under the citizenship doctrine ("agents are
 citizens; automation on a leash"). The lawful pair, each importing only true
 invariants:
 
-- **EGREGORE** — an autonomous collective will that ARISES FROM a group's
+- **POLITY** — an autonomous collective will that ARISES FROM a group's
   record and acts on its own. The conductor's civilization-players are
-  egregores literally: temperament from the registry axes, voice from the
+  polities literally: temperament from the registry axes, voice from the
   journal fold, character from the cohesion books — constituted by the
   chronicle, scripted by no one. A guild of players acting as one will (N6)
-  is an egregore forming in the original sense.
+  is an polity forming in the original sense.
 - **AUTOMATON** — Greek `αὐτόματος`, "self-willed" (Homer's self-moving
   gates; Talos): crafted operative WITH its own motion, bounded by granted
   scopes. Exactly an NS-6 contained agent — no entity commands it (§5), it
   acts of its own will inside its grants.
 
-The two-tier mapping: the egregore holds the will (sovereign-side); its
+The two-tier mapping: the polity holds the will (sovereign-side); its
 automaton does the receipted labor in-world (`{slug}-conductor`, scoped
-grants). Lore file: `<var>/egregores.json` (legacy `bots.json` adopted once
+grants). Lore file: `<var>/polities.json` (legacy `bots.json` adopted once
 on boot).
 
 ## 6. The place hierarchy — star ▷ planet ▷ colony
@@ -257,7 +257,7 @@ What grew on this protocol without changing it — the first cut held:
   lists with the active marked, `whoami`, `continue` resumes the
   active profile's last saved star. No passwords by design: the
   containment boundary is the machine, not a credential.
-- **The lived containment:** every egregore star runs its
+- **The lived containment:** every polity star runs its
   `{slug}-conductor` automaton (three scopes granted at genesis) and a
   steward draining the inbox — §5.2's two-tier mapping operating on
   every live star, every beat.

@@ -134,7 +134,7 @@ they are a door that opens both ways. The lawful Antaran shape:
   is a SUCCESSION-CLASS deed executed from the live side against an
   annexed derelict chart: a live line claims salvage rights on a sealed
   world (the NOVEL-1 pattern — a chronicle inherited, never edited), OR
-  a derelict's dormant automata wake as an INCURSION egregore — a
+  a derelict's dormant automata wake as an INCURSION polity — a
   conductor-seeded line whose spec derives from the sealed chronicle's
   terminal state (chronicle-seeded, CHARTER §9; no dice).
 - **The door's gate.** Incursions open only at aeon-voice alignments
@@ -142,7 +142,7 @@ they are a door that opens both ways. The lawful Antaran shape:
   onto worlds whose four-C trajectory settled in the retirement region
   — the living are never raided; the shield law binds (a pre-crossing
   world cannot be touched from the archive side either).
-- **What it stresses.** The maintainer surface: an incursion egregore
+- **What it stresses.** The maintainer surface: an incursion polity
   plays the entropic leg (claims derelicts, absorbs vents, rides
   demurrage — the archived fold sheet's side of the manifold made
   playable in the small; infinity is disallowed, the torus wraps).

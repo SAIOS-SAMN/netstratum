@@ -230,6 +230,34 @@ or the ledger says "the coherence reading gates," the predicate is meant
 This is the kernel's own philosophy applied to the one place a score had
 crept in: the kernel admits or refuses, it never optimizes.
 
+**THE CODE CAUGHT UP (DIRECTIVE 03, operator ruling 2026-08-01).** This
+section struck the `C`-gate on 2026-08-01 — and the SAME DAY
+`kernel/src/bridge.rs` landed `capacity_is_defined()`, a predicate
+asserting that `D` is meaningless wherever the defect is non-zero, with
+a doc-comment instructing Article II and Article IV callers to *"consult
+this first."* That is precisely the gatekeeper this section had just
+denied `C` could ever be, re-entering as a method one file away. The
+document was right and the code was the drift.
+
+`capacity_is_defined()` is **DELETED**. The reasons are the ones §5
+already gave and one more from the code itself:
+
+- `coboundary_reduce_over` is TOTAL over any input tensor — it does not
+  test its input, it projects it — so no well-formedness check is
+  required by any operation;
+- the engine never forms the `Z¹/B¹` quotient that would need a cocycle
+  for `H¹` to be defined; it reduces to a canonical representative and
+  reads its extent;
+- **non-composition ROOTS.** A world whose obligations do not compose
+  carries structure and therefore standing. Pinned:
+  `bridge_pins::obligations_that_do_not_compose_carry_strain` now
+  asserts `capacity == 1` where it previously asserted the reading was
+  undefined.
+
+Standing (Article II) is governed EXCLUSIVELY by non-zero post-reduction
+extent, `D > 0`. The defect survives as a reported reading on
+`EntangledRead`, and nothing gates on it.
+
 ## §6 THE LINEAGE — this completes a ruling, it does not reverse one
 
 THE PROPORTIONAL LAW (2026-07-31) barred squares as aggregators, and the
@@ -428,6 +456,17 @@ to be reduced, resolved, approached, scored, or improved toward.** There
 is no lawful path the system walks from `δΔ ≠ 0` toward `δΔ = 0`;
 "reducing cocycle failure" is a descent objective wearing the
 vocabulary of well-formedness, and it is barred.
+
+**SYNTROPY STANDS (operator ruling 2026-08-01).** A rename of this term
+was drafted the same day and is WITHDRAWN; `18_TORSION` §2i carries the
+full reasoning and the definition. In short: syntropy here is **the
+exact inverse arm of entropy in one conserved partition** —
+`syntropy = syntropic / (syntropic + entropic)`, so
+`syntropy + entropy = 1` exactly — and it borrows nothing from any
+external theory. It is landed, it computes, and it GATES
+(`World::syntropy_ratio()`, the 1/2 floor at `world.rs:3495`), so by
+this project's own GROUNDING TEST it stays. No synonym is admitted for
+it: one measurement, one name (`18_TORSION` §2i).
 
 **Consequently, SYNTROPY CONTAINS NO REDUCTION TERM.** Syntropy is
 defined solely by the GROWTH of surviving structure against activity

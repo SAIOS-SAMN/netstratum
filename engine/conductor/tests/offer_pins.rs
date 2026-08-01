@@ -11,7 +11,7 @@ use cfe::dop::{ClosureEvent, Resource, ZoneKind};
 use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
 use cfe::world::replay;
-use conductor::{market_step, trade_intent, Egregore, EgregoreSpec, Policy};
+use conductor::{market_step, trade_intent, Polity, PolitySpec, Policy};
 use ledger::registry::{Civilization, Registry};
 use ledger::Ledger;
 use std::path::PathBuf;
@@ -22,8 +22,8 @@ fn scratch(name: &str) -> PathBuf {
     dir
 }
 
-fn seat(sigil: &str, star: StarClass, albedo: (i64, i64), orbit: (i64, i64)) -> EgregoreSpec {
-    EgregoreSpec {
+fn seat(sigil: &str, star: StarClass, albedo: (i64, i64), orbit: (i64, i64)) -> PolitySpec {
+    PolitySpec {
         civilization: Civilization {
             name: sigil.to_string(),
             sigil: sigil.to_string(),
@@ -56,9 +56,9 @@ fn the_crossing_relieves_the_freeze() {
     let book = Ledger::at(root.join("worlds"));
     // Hand-driven worlds (no policy steps): the pin stages the states
     // the instinct reads, through real physics only.
-    let mut furnace = Egregore::genesis(
+    let mut furnace = Polity::genesis(
         seat("embermarket", StarClass::G, (1, 2), (1, 2)), &registry, &book);
-    let mut frost = Egregore::genesis(
+    let mut frost = Polity::genesis(
         seat("rimemarket", StarClass::M, (0, 1), (1, 1)), &registry, &book);
 
     // The Furnace banks a surplus: extractor+habitat sustain, a shell
@@ -116,15 +116,15 @@ fn the_crossing_relieves_the_freeze() {
     frost.world.tick();
     let _ = frost.world.collect();
     // Both books carry the clear; replay reproduces the rescue.
-    for egregore in &board {
-        let cleared_receipt = egregore.world.chronicle().receipts().iter().any(|r| {
+    for polity in &board {
+        let cleared_receipt = polity.world.chronicle().receipts().iter().any(|r| {
             matches!(r.event, ClosureEvent::OfferCleared { .. })
         });
         assert!(cleared_receipt, "the clear is a receipt in both books");
-        let committed = replay(egregore.world.chronicle());
+        let committed = replay(polity.world.chronicle());
         assert_eq!(
             committed.orbs[0].banked_amount(Resource::Joule),
-            egregore.world.orb().unwrap().banked_amount(Resource::Joule),
+            polity.world.orb().unwrap().banked_amount(Resource::Joule),
             "the rescue replays from receipts alone"
         );
     }
@@ -140,9 +140,9 @@ fn any_famine_can_ask_the_market() {
     let root = scratch("famine-ask");
     let registry = Registry::at(root.join("registry"));
     let book = Ledger::at(root.join("worlds"));
-    let mut miner = Egregore::genesis(
+    let mut miner = Polity::genesis(
         seat("lodemarket", StarClass::G, (1, 4), (1, 1)), &registry, &book);
-    let mut grower = Egregore::genesis(
+    let mut grower = Polity::genesis(
         seat("mossmarket", StarClass::G, (1, 4), (1, 1)), &registry, &book);
 
     // The miner extracts only (iron banks, biomass drains); the

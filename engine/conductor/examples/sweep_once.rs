@@ -4,7 +4,7 @@
 //! sweep. No beats, no research, no state advanced but the sweep's
 //! own receipts.
 
-use conductor::{load_egregores, observe_crossings, Egregore};
+use conductor::{load_polities, observe_crossings, Polity};
 use ledger::registry::Registry;
 use ledger::Ledger;
 use std::path::Path;
@@ -13,11 +13,11 @@ fn main() {
     let var = std::env::args().nth(1).unwrap_or_else(|| "var".into());
     let registry = Registry::at(format!("{var}/registry"));
     let book = Ledger::at(format!("{var}/worlds"));
-    let specs = load_egregores(Path::new(&format!("{var}/egregores.json")))
+    let specs = load_polities(Path::new(&format!("{var}/polities.json")))
         .expect("the roster reads");
-    let worlds: Vec<Egregore> = specs
+    let worlds: Vec<Polity> = specs
         .into_iter()
-        .map(|spec| Egregore::genesis(spec, &registry, &book))
+        .map(|spec| Polity::genesis(spec, &registry, &book))
         .collect();
     let stamp = worlds
         .iter()

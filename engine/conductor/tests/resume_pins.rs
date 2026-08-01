@@ -4,7 +4,7 @@
 //! missing carrier founds fresh. No operator fold required for the
 //! board to remember itself.
 
-use conductor::{run_era, Egregore};
+use conductor::{run_era, Polity};
 use ledger::registry::Registry;
 use ledger::Ledger;
 use std::path::PathBuf;
@@ -43,30 +43,30 @@ fn the_board_remembers_across_restarts() {
     // nothing re-founds, no divergent resident rotates to a ruin.
     let registry = Registry::at(root.join("registry"));
     let book = Ledger::at(root.join("worlds"));
-    let second: Vec<Egregore> = conductor::founding_egregores()
+    let second: Vec<Polity> = conductor::founding_polities()
         .into_iter()
-        .map(|spec| Egregore::genesis(spec, &registry, &book))
+        .map(|spec| Polity::genesis(spec, &registry, &book))
         .collect();
-    for egregore in &second {
+    for polity in &second {
         let (_, terminal, count) = before
             .iter()
-            .find(|(name, _, _)| name == &egregore.spec.world_name)
+            .find(|(name, _, _)| name == &polity.spec.world_name)
             .expect("same roster");
-        let resumed = egregore.world.chronicle().receipts();
+        let resumed = polity.world.chronicle().receipts();
         assert_eq!(
             resumed.len(),
             *count,
             "{} carries its whole receipted history",
-            egregore.spec.world_name
+            polity.spec.world_name
         );
         assert_eq!(
             resumed.last().expect("receipts").own.0,
             *terminal,
             "{} continues the SAME chain — resumption, never a refound",
-            egregore.spec.world_name
+            polity.spec.world_name
         );
         assert!(
-            egregore.world.knows_its_sun(),
+            polity.world.knows_its_sun(),
             "the resumed world remembers its sky"
         );
     }

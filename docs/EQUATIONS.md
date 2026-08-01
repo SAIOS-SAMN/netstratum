@@ -226,8 +226,16 @@ STEP.** D4 fires in two places and they must never merge:
                          judgeable, already the pin-6 casualty.
     OVER A WINDOW (lens + allocation):
                          Ξ(w) = deeds(w) / (1 + ΔD(w)); the loop trap
-                         deeds(w) > 0 ∧ ΔD(w) = 0; T_k → 0; E_occult
-                         masks the ALLOCATION.
+                         deeds(w) > 0 ∧ ΔD(w) = 0. The Eclipse VACATES
+                         the allocation claim; the degree is untouched.
+
+    (Two struck symbols were EXCISED from this block, operator ruling
+    2026-08-01: the scalar allocation score `T_k`, struck by 18 §3 —
+    an article outlawing scalar authority cannot enforce itself with a
+    scalar — and an esoteric masking symbol that never existed in the
+    codebase at all. Nothing in this system is founded on dogma or
+    esoterica; a struck symbol left in a record is still a symbol in
+    the corpus. 18 §3's Eclipse is claim-revocation, not a score.)
 
 Kernel CHARTER §1 forbids the second half in the judge: *a global
 property is not a per-step fact and cannot enter `lawful()` without

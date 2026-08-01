@@ -15,7 +15,7 @@ and exits. This section does not restate its flags; run `--help`.
 
 ```
 ./install.sh --var demo                # prepare a universe (nothing left running)
-./install.sh run --var demo            # the autonomous board (egregores)
+./install.sh run --var demo            # the autonomous board (polities)
 ./install.sh fresh --var demo          # wipe and rebuild
 cargo run -p netstratum-cli            # hands-on world (help lists all)
 python3 tools/observer.py --root var --watch 2   # the ledger board
@@ -23,13 +23,13 @@ python3 tools/webserve.py --root var --port 8081 # the observatory window
 python3 tools/steward.py --root var/worlds       # inject directives
 ```
 
-The one non-obvious law: the roster must sit at `<var>/egregores.json`
-BEFORE the first boot — `write_default_egregores` refuses to overwrite,
-so a late copy loses to the five founding egregores built into the
+The one non-obvious law: the roster must sit at `<var>/polities.json`
+BEFORE the first boot — `write_default_polities` refuses to overwrite,
+so a late copy loses to the five founding polities built into the
 binary. `install.sh` orders it correctly; hand-booting does not.
 
 Conductor boot order: adopt legacy `bots.json` → CONVERGE archived eras
-(idempotent, quarantines named) → genesis egregores → beat. Journals + the
+(idempotent, quarantines named) → genesis polities → beat. Journals + the
 wall regenerate every 60-tick year.
 
 ## 2. Landed (all witnessed; 158/158 green, clippy zero at `22a5995`)
@@ -42,8 +42,8 @@ wall regenerate every 60-tick year.
 | VENT-1 / ECON-J / SINK-1 | entropy dual ledger (`VentSettled`); heating burn + freeze-lock; bankable sink + FLAT demurrage |
 | JOURNAL-1 | the Chronicle Feed: per-year journals + cyber-noir `wall.html`, pure rendering, deterministic |
 | the ideology board, whole (coder-02) | TRADE-1 transfers/compassion (30) · ABSORB-1 absorption/morality windows (31–32) · BOND-1 standing bonds/love (33–34) · COVENANT-1 vitrified escrow + fidelity curve/integrity (35–37) · IDEO-1 friction (38) + orb cohesion entry (41) + `ideology` panel — eight books, ratios derived never stored; deferrals at Q4 |
-| BOT-THERM | egregores thermally alive: Furnace mints, Frost banks sink and honestly freeze-locks |
-| renames | Crucible→Furnace · bot→egregore/automaton (NS-6 §5.2) · themed daughter names |
+| BOT-THERM | polities thermally alive: Furnace mints, Frost banks sink and honestly freeze-locks |
+| renames | Crucible→Furnace · bot→polity/automaton (NS-6 §5.2) · themed daughter names |
 | APERTURE-1 (2026-07-29) | the cross-world value carrier (NS-4 §1–§3, tags 47–48): two-legged deal-linked deed, demurrage at the touch both sides, per-world replay, pair conservation an N6 reading; the market board's gate is open |
 
 Design authority now also includes `12_UNION.md` (the union world-book,
@@ -60,11 +60,11 @@ the solar leap is never licensed). **Aeon 1 is live at the default `var/`**
 5 progenitors seated — wave 2, 2026-07-30: **Tunborn**, the tardigrade
 line's own head (12_UNION §2's fifth seat; Slagborn's lineage resolves to
 it) — 2 pre-solar shielded worlds; seed roster in
-`seeds/aeon1-egregores.json`, CREATED 2026-07-30: it had been referenced
+`seeds/aeon1-polities.json`, CREATED 2026-07-30: it had been referenced
 but never written, and `var*/` is git-ignored, so the seeds copy is the
 durable record — SUPERSEDED 2026-07-30 by coder-01's A1: the board
 remembers itself — the machinery re-emits seeds from the live roster,
-hand-mirroring is retired; append waves to var/egregores.json only). **The galaxy law is
+hand-mirroring is retired; append waves to var/polities.json only). **The galaxy law is
 ruled and specced** (`13_GALAXY.md`, 2026-07-30): ONE universe
 structurally; the whole charted torus is the one founding galaxy; new
 galaxies are never a static count — created lazily by the observation
@@ -102,7 +102,7 @@ word "mirror" is DEAD as a live name: the layer is the ledger and its
 lens; dated records that speak it are HISTORY, quoted never rewritten);
 annex never merge; one landing at a time, red-first,
 spec+mechanic+vectors together; terminology law — no set-letter
-glyphs, Furnace never Crucible, no "Goldilocks", egregore/automaton
+glyphs, Furnace never Crucible, no "Goldilocks", polity/automaton
 never "bot".
 
 ## 4. Wire tag registry state
@@ -256,7 +256,7 @@ forever.
   (segment exchange, `ns5_two_nodes` extended) and the BOX-1
   CALIBRATION measurement (U_DIRECTIVES §7 — measured before `f` is
   ruled). The day's table: `BUILD_ORDER.md` §3c.
-- **coder-01**: next = Phase 2 cross-world trade (egregores exchanging
+- **coder-01**: next = Phase 2 cross-world trade (polities exchanging
   joules/`S_cool` — needs a cross-world carrier; transfers are intra-world
   today) or TECH-1 (`10_TECH_EMERGENCE.md`, opens SINK-1's deferred
   research/throttle gates).
@@ -279,7 +279,7 @@ forever.
   §9.2) and the JOURNAL follow-on (§9.3). N4 boundary sign-off DONE.
   FUNCTION-1 + SURVEY-1 LANDED 2026-07-30 (operator directive): the
   §4 function reading renders on the observer; the survey step wires
-  scan → charter → drill in the egregore cycle (BUILD_ORDER §3b).
+  scan → charter → drill in the polity cycle (BUILD_ORDER §3b).
   D3 TERRAIN first slice LANDED 2026-07-30 (02 §2.5–2.6): tag 8, the
   opt-in seeded chart, exact multiplier + adjacency witnesses,
   `survey`/`terrain` verbs; open — auto-chart + conductor adoption
@@ -416,7 +416,7 @@ coder-04's flag.
   universe (124 worlds, its eras, its quarantined ruins) was DELETED by
   operator ruling 2026-07-30 — "we dont need to maintain any of the old
   system, it was just a test." Aeon 1 now lives at the default `var/`;
-  its seed roster is `seeds/aeon1-egregores.json`.
+  its seed roster is `seeds/aeon1-polities.json`.
 - Era carriers: mirror jsonl (observation) + cfe tlv (resume) coexist by
   design.
 
@@ -586,7 +586,7 @@ These read a rendering as if it were truth:
   an unreceipted `var/operators/<name>.json`, and `tier0_gate` gates
   every tier-0 deed on it.
 - `clients/cli/src/main.rs:1725` — `civ new` appends to
-  `var/egregores.json` by splicing off the trailing `]`: the CLI hand-
+  `var/polities.json` by splicing off the trailing `]`: the CLI hand-
   editing a file the conductor owns. **This is also why the tracked
   `seeds/` roster and the live one diverged** (see §8f).
 - `scribe/src/lib.rs:101` + `journal.rs:707,777` — the append cursor is
@@ -647,8 +647,8 @@ witness, not a ruling.
 
 ### 8f. DOC AND PROTOCOL DRIFT
 
-- **`seeds/aeon1-egregores.json` is NO LONGER the durable roster.** It
-  holds 16 entries; the live `var/egregores.json` holds 20, and seven
+- **`seeds/aeon1-polities.json` is NO LONGER the durable roster.** It
+  holds 16 entries; the live `var/polities.json` holds 20, and seven
   civilizations (Aerie, Borealis, Brine Cortex, Cairnborn, Echowright,
   Hadal, Vitreous Hex) exist ONLY in the git-ignored var. §2 above still
   claims seeds is the durable record; it is not.

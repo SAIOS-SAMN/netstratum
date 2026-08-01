@@ -147,7 +147,7 @@ fn data_field(text: &str, key: &str) -> Option<String> {
 
 /// THE FAR WORLD (union wiring, 2026-07-30): cross-world deeds load
 /// the partner from its RESUME carrier (var/worlds/<name>/chronicle.tlv
-/// — CLI-saved worlds carry one; egregore worlds are export-only and
+/// — CLI-saved worlds carry one; polity worlds are export-only and
 /// refuse with the cure named). After a two-legged deed BOTH sides
 /// sync immediately — conservation is never left half-saved.
 fn far_world(name: &str) -> Result<World, String> {
@@ -549,7 +549,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         },
         // NPC CONTROLS (2026-07-30 ruling): the player's hand on the
         // autonomous board — writes var/conductor.ctl, which the
-        // conductor polls every beat. Pause holds every egregore world
+        // conductor polls every beat. Pause holds every polity world
         // (nothing ticks, nothing ages); speed sets the seconds
         // between beats (0 = flat out).
         // THE UNION VERBS (wiring audit, 2026-07-30): every landed
@@ -1242,7 +1242,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         // THE CIV CONSOLE (2026-07-30 ruling): build a custom
         // civilization — axes, station, seat checks — from inside the
         // client. `civ` / `civ seats` shows the station console; `civ
-        // new` registers the line and appends it to var/egregores.json
+        // new` registers the line and appends it to var/polities.json
         // so the conductor brings it online at its next boot.
         // THE OPERATOR MENU (prototype — no passwords): profiles under
         // var/operators/<sigil>, many accounts on one machine; login
@@ -1722,7 +1722,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             .map(|s| format!(",\"station\":\"{s}\""))
                             .unwrap_or_default()
                     );
-                    let roster = std::path::PathBuf::from("var/egregores.json");
+                    let roster = std::path::PathBuf::from("var/polities.json");
                     let appended = std::fs::read_to_string(&roster)
                         .ok()
                         .and_then(|text| {
@@ -1744,7 +1744,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             sigil
                         ),
                         _ => println!(
-                            "{} registered, but var/egregores.json would not append — add the entry by hand",
+                            "{} registered, but var/polities.json would not append — add the entry by hand",
                             style.bad("✗")
                         ),
                     }
@@ -2535,7 +2535,7 @@ fn help(style: &Style) {
         ("ascend <sigil> to <station>", "claim a station seat for a line whose world has crossed and climbed — the registry checks the room; a seat is reached, never appointed"),
         ("tech", "the constellation: this line's base-7 sky — held nodes with their voice-names, exact progress toward what has not crystallized, the crown's gate"),
         ("terraform <albedo> <orbit>", "the gifted crown (base-7 complete + licensed from tier 0): re-seat a sited planet — the only lawful way an orbit moves"),
-        ("npcs [pause|resume|speed <s>]", "the player\'s hand on the autonomous board — pause holds every egregore world, speed sets seconds between beats (0 = flat out); bare npcs shows the state"),
+        ("npcs [pause|resume|speed <s>]", "the player\'s hand on the autonomous board — pause holds every polity world, speed sets seconds between beats (0 = flat out); bare npcs shows the state"),
         ("civ [seats] · civ new …", "the civ console: seats shows every station\'s room (progenitors per domain, 8 each — space, not rank); civ new <sigil> | <Name> | <species> | <motto> | <disp> <metab> <perc> [station] registers a custom line and rosters it for the conductor"),
         ("save · resume <world>", "sync the chronicle to var/worlds/<name>/ (append-only) · resume a saved world at launch"),
         ("planet <name> · planets", "switch the planet cursor · list this world's planets"),
