@@ -148,21 +148,35 @@ pub struct EntangledRead {
 }
 
 impl EntangledRead {
-    /// **`D` is well-defined only on a fully observed cocycle.** Two
-    /// independent conditions, and both are refusals to read capacity
-    /// out of something that has none to give:
+    /// **`D` is well-defined only on a fully OBSERVED complex.** One
+    /// condition, and it is a refusal to read capacity out of something
+    /// that has none to give: `unknown == 0`. An unresolved absence
+    /// would let phantom topology mint phantom capacity, so discharge
+    /// every `Unknown` by [`Resolve`] first.
     ///
-    /// 1. `unknown == 0` — an unresolved absence would let phantom
-    ///    topology mint phantom capacity. Discharge every `Unknown` by
-    ///    [`Resolve`] first.
-    /// 2. no residual stands — `H¹ = Z¹/B¹` is defined on cocycles
-    ///    alone; while any triple fails to compose `Δ ∉ Z¹` and there
-    ///    is no cohomology class for the reduction to land in.
+    /// **THE RESIDUAL CLAUSE IS STRUCK** (operator ruling 2026-08-01).
+    /// It read `&& self.residuals.is_empty()`, barring capacity while
+    /// any triple failed to compose, on the reasoning that
+    /// `H¹ = Z¹/B¹` is defined on cocycles alone. Three faults:
+    ///
+    /// 1. That reasoning is about cohomology as a QUOTIENT. This engine
+    ///    never forms the quotient — [`rfa_core::holonomies`] reduces
+    ///    against a spanning forest and reads the charge each remaining
+    ///    edge carries. It is TOTAL and needs no cocycle precondition.
+    /// 2. It gave `C` a gate. Structural phrasing (`is_empty`) rather
+    ///    than scalar (`defect == 0`) does not change what it does: a
+    ///    non-composing state was barred from being read.
+    /// 3. It contradicts this module's own header — *a triangle that
+    ///    does not compose is an economic fact, not an error* — and THE
+    ///    BIFURCATION LAW, under which non-composition ROOTS and opens
+    ///    capacity by receipt. Non-composition is the SIGNAL, and the
+    ///    old clause silenced exactly the states worth reading.
     ///
     /// Callers that gate on capacity (Article II standing, Article IV
-    /// monotonicity) MUST consult this first.
+    /// monotonicity) MUST still consult this for observation
+    /// completeness.
     pub fn capacity_is_defined(&self) -> bool {
-        self.unknown == 0 && self.residuals.is_empty()
+        self.unknown == 0
     }
 
     /// **LENS ONLY** (`18_TORSION` §2b). The L1 aggregate of the
@@ -341,14 +355,27 @@ pub fn refold(core: &Delta, cert: &Refold) -> Delta {
 /// cannot see a neighbour's obligations and the mesh must present them
 /// — `read_entangled` reports zero unknowns for exactly this reason,
 /// and `read_entangled_observed` is the door for the mesh case.
+/// **Reads the SUPPORT, never a value** (operator ruling 2026-08-01:
+/// no `==` in deterministic code). This previously decided presence by
+/// `*delta.entry(i, j, channel) != ratio(0, 1)` — comparing a NETTED
+/// value against zero. But `project_complex` nets opposed obligations,
+/// so two orbs owing each other equally net to zero and read ABSENT,
+/// which is exactly the conflation this module's own header names as
+/// fatal: *a dense tensor cannot tell "these two do not relate" from
+/// "these two relate by zero", and that distinction is what carries
+/// topology.* A balanced pair RELATES; erasing its edge deletes a real
+/// cycle and with it real capacity.
+///
+/// Presence is tracked as the obligations are read and consulted here;
+/// it is never recovered afterwards by a comparison.
 pub fn observe(state: &Committed, i: usize, j: usize, channel: usize) -> Observed {
-    let delta = project(state);
-    match delta.dim() > i.max(j) && channel < CHANNELS {
-        false => Observed::Unknown,
-        true => match *delta.entry(i, j, channel) != ratio(0, 1) {
-            true => Observed::Present,
-            false => Observed::Absent,
-        },
+    let (_, support) = project_complex(state);
+    if i >= support.dim() || j >= support.dim() || channel >= CHANNELS {
+        return Observed::Unknown;
+    }
+    match support.has(i, j, channel) {
+        true => Observed::Present,
+        false => Observed::Absent,
     }
 }
 

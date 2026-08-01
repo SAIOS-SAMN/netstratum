@@ -106,9 +106,21 @@ fn obligations_that_do_not_compose_carry_strain() {
 
     let read = read_entangled(&state);
     assert!(read.defect() > ratio(0, 1), "a non-composing triangle carries defect");
+    // NON-COMPOSITION DOES NOT BAR THE READ (operator ruling
+    // 2026-08-01, the struck residual clause). The old law refused to
+    // define capacity here, on the reasoning that Δ ∉ Z¹ leaves no
+    // class to land in. But `holonomies` is TOTAL — it reduces against
+    // a spanning forest and reads what each remaining edge carries —
+    // and a triangle that does not compose is an economic fact, not an
+    // error. Non-composition is the SIGNAL; the old clause silenced
+    // exactly the states worth reading.
     assert!(
-        !read.capacity_is_defined(),
-        "Δ ∉ Z¹ — there is no H¹ class for the reduction to land in"
+        read.capacity_is_defined(),
+        "a fully observed complex is readable whether or not it composes"
+    );
+    assert!(
+        !read.residuals.is_empty(),
+        "and the strain is carried WHOLE, indices intact — never summed away"
     );
 }
 
@@ -298,7 +310,14 @@ fn a_chord_fills_the_triangles_and_the_capacity_becomes_strain() {
 
     let read = read_entangled(&state);
     assert!(!read.residuals.is_empty(), "the chord fills a triangle that does not compose");
-    assert!(!read.capacity_is_defined(), "Δ ∉ Z¹ once a filled triangle fails");
+    // The read STANDS (the struck residual clause, 2026-08-01). Filling
+    // a triangle converts topology into strain; it does not make the
+    // universe unreadable. Both readings are the same fact seen through
+    // the support, and both are available.
+    assert!(
+        read.capacity_is_defined(),
+        "a filled triangle that fails to compose is still a readable universe"
+    );
 }
 
 #[test]
