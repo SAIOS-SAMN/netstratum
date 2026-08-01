@@ -365,7 +365,7 @@ deleted, because the failure is instructive.
 
 What was wrong, verified against the tree:
 
-- **`E_occult` does not exist in the codebase.** Zero occurrences. It
+- **The masking symbol does not exist in the codebase.** Zero occurrences. It
   is a symbol from the relay text, and it was listed beside landed
   deeds as though it were a peer.
 - **`umbral` computes nothing.** It is a `String` on a registry sheet
@@ -563,6 +563,66 @@ proven at all.
 
 ---
 
+#### LAW 7 — PARSIMONY. No new primitive where a complement will do.
+
+*The physics.* Conjugate quantities are not independently postulated.
+Where two readings partition one conserved whole, defining the second as
+the first's complement introduces no new content — and makes their
+relationship arithmetically necessary rather than merely asserted.
+
+*What it forbids.* Inventing a force, a field, or a drive to name
+something that is already the other side of a book that closes. A second
+primitive is a second thing to attack, a second thing to drift, and a
+second place for a claim to hide.
+
+*Landed — syntropy, grounded by inversion:*
+
+```text
+whole     =  syntropic + entropic          one conserved partition
+syntropy  =  syntropic / whole             exact rational
+entropy   =  entropic  / whole  =  1 − syntropy
+
+syntropy + entropy  =  1                   exactly, by construction
+```
+
+Entropy is the MEASURED quantity; syntropy is its complement in the same
+book, and that is the entire content of the word. No force, no field, no
+drive, no second primitive — arithmetic on a partition that already sums
+to a constant, which is why the two readings **can never disagree**. It
+also makes "no neutral middle" arithmetically impossible to violate
+rather than merely forbidden, which is the difference between a law and
+a wish. (`world.rs:3263` computes it; `world.rs:3495` gates on it;
+`dop.rs:576` carries the per-axis form.)
+
+#### LAW 8 — GROUNDING. A term that computes is kept; a term that only resonates is excised.
+
+*The physics.* A name in a theory must denote something an experiment
+reads. Vocabulary that resonates without denoting is not a weak
+hypothesis — it is not a hypothesis.
+
+*What it forbids.* Ornament posing as mechanism. This is the operational
+test the whole article rests on, and it cuts both ways: syntropy is KEPT
+because three files compute and gate on it; the masking symbol was
+EXCISED because nothing read it. **There has never been a directive to
+found any part of this system on dogma or esotericism.**
+
+Three corollaries, each earned by getting it wrong first:
+
+1. **Excision must be TOTAL.** A struck symbol preserved inside its own
+   strike record is still a symbol in the corpus. A strike that keeps
+   the name alive to explain the strike has not removed it — it has
+   given it a permanent home. Keep the instruction, drop the symbol.
+2. **PROVENANCE IS NOT FUNCTION.** `umbral` is the astronomical umbra —
+   the shadow cone of an eclipse, which is OPTICS. It was wrongly
+   grouped with esoterica on the strength of how it sounds. Judge the
+   MECHANISM, never the etymology: the real error in that case was
+   citing a `String` field as though it were a mechanism, not the word
+   itself. Over-correction is its own failure, and a law that cannot
+   distinguish optics from mysticism will cut out working physics.
+3. **REFUSAL MUST BE GENERIC.** A clause refusing a coinage BY NAMING IT
+   reintroduces the coinage. Refuse the class, never the instance —
+   otherwise the refusal is the vector.
+
 **WHAT THE OLD ARTICLE CAUGHT, NOW DERIVED.** Nothing is lost by the
 strike:
 
@@ -574,6 +634,8 @@ strike:
 | farming the counter | LAW 6 — an unfalsifiable target measures nothing |
 | phantom capacity from assumed absence | LAW 5 — a claim outside the light cone |
 | books that do not close | LAW 2 — conservation follows from the symmetry |
+| a second primitive invented for one side of a closed book | LAW 7 — parsimony; the complement is already defined |
+| vocabulary that resonates but denotes nothing | LAW 8 — grounding; a term that computes is kept |
 
 **THE ANTI-SYBIL CONSEQUENCE SURVIVES AND IS STRONGER**, because it is
 now a derivation rather than a tax. A puppet civilization generates
