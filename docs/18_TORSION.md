@@ -176,6 +176,64 @@ The §3 window arithmetic (`Ξ = deeds/(1+ΔD)`) and this congruence test
 measure the same failure from two directions — one counting, one
 topological — and either alone is sufficient to convict.
 
+### 2f. THE ENTANGLEMENT — Δ(D) ⋈ ∇V
+
+**Ruled 2026-08-01: capacity change and potential gradient are
+ENTANGLED, not coupled.** The distinction is the whole force of the
+law. Coupling would be two objects that interact — `Δ(D) = g(∇V)`, a
+function, a bound, a product — and two objects can always be attacked
+one at a time. Entanglement is ONE object:
+
+    Δ(D) ⋈ ∇V     neither term is separately defined, neither is
+                  separately guardable, no operation touches one alone
+
+**Why this is the stronger force.** It moves the anti-dogma law from a
+RECONCILIATION INSTRUMENT to an INVARIANT — from *detect and tax* to
+*cannot be constructed*. That is this system's own strongest principle,
+already stated in the kernel's own header: *"an unlawful transition is
+not caught after the fact, it cannot be constructed … you do not
+reconcile what cannot diverge."* Under entanglement the dogmatic loop
+does not mint and get penalised; **it cannot mint.**
+
+Three consequences, each structural:
+
+1. **No capacity from ritual.** A traverse emitting deeds without
+   moving `∇V` produces no `Δ(D)` — not "is taxed for it." There is no
+   path by which activity alone becomes capacity.
+2. **No hidden work.** Potential motion that registers no capacity is
+   equally unconstructible. Work cannot be done off the books and
+   claimed later.
+3. **No half to guard.** §2c's recorded failure mode — the struck
+   formulation guarded `ζ∇V` while the objective leaked through
+   C-scoring — cannot recur, because there is no half. A guard on half
+   of a decomposable object is not a guard; an entangled object has no
+   halves.
+
+**Grounding — the pattern is landed three times already.** This is not
+a new mechanism but the foundation-level instance of one the engine
+already runs:
+
+- **THE ESCROW LAW** — a covenant lock moves value between banked and
+  escrow, so a bank debit that escrows nothing refuses
+  `ConservationBroken`. Two ledgers entangled; neither moves alone.
+- **THE GAUGE LAW** — declaration == effect on every grade; a key
+  smuggled under a neutral deed refuses `GaugeBroken`.
+- **I4** — `mint ≤ f(verify_work)`. The mint is already entangled with
+  verified work; no certificate, no mint.
+
+**The Sybil consequence.** A puppet cannot forge capacity, because
+forging capacity would require forging potential motion, and potential
+motion is verified work. Sybil resistance therefore follows
+STRUCTURALLY from entanglement plus PoUW, rather than from detection
+after the fact — which is the standing open problem (`KERNEL_RELAY`
+§7.1) answered at the foundation rather than patched at the mesh.
+
+**Build consequence, recorded.** The capacity reading and the potential
+reading must be computed TOGETHER, in one pass, from one prior state.
+A caller that measures `D` and then separately consults `∇V` has
+already broken the entanglement and reintroduced the two-object attack
+surface. This binds §6's first build.
+
 ---
 
 ## §3 THE FOUR ARTICLES
@@ -216,6 +274,13 @@ drops to zero, stripping the entity of all capacity allocation.*
 **This is the load-bearing article.** It is the law that makes
 narrative authority worthless: titles, secrecy, lore and tradition
 carry exactly zero weight against capacity that can be computed.
+
+**FIRST LINE — the loop CANNOT MINT** (§2f, the entanglement). Because
+`Δ(D) ⋈ ∇V` is one object, a traverse that emits deeds without moving
+the potential produces no capacity at all. This is an invariant, not a
+penalty: there is no path by which ritual becomes capacity. Everything
+below is the SECOND line — allocation, for structures that mint
+honestly but accrete cosmetic overhead alongside.
 
 **Ξ_cosmetic, made countable.** In a receipt chain the closed
 zero-gradient loop is exactly measurable, with no new instrument: it is
