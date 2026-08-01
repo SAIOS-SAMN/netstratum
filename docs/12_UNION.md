@@ -55,10 +55,10 @@ visible from here.
 |---|---|---|---|
 | **Lyran** | mesic / biotic (250–320 K) | the Wanderers' shepherds | the warm-world progenitor: life as chemistry in liquid water |
 | **Eriduan** | hyper-thermal / mineral (Furnace) | the Emberkin's elders | backed OUT of the miner role (ruling 3): they keep the *creation* function, not the extraction — the miners-from-above myth retires; the planners-of-the-fire myth stands |
-| **Clathrate** | cryogenic / deep Frost | the Coherent's elders | the cold-world progenitor: order that holds because the cold allows it |
+| **Archon** | cryogenic / deep Frost | the Coherent's elders | the cold-world progenitor: order that holds because the cold allows it |
 | **Chasmolith** | deep rock / mantle (cross-band) | the Marrow's and Glasskeepers' elders | the interior progenitor: the will inside the stone |
 
-*(Clathrate and Chasmolith are placeholder names pending operator naming; the
+*(Archon and Chasmolith are placeholder names pending operator naming; the
 domains are the binding part.)*
 
 **The fifth seat (operator ruling, 2026-07-30).** The tardigrade line sits
@@ -96,7 +96,7 @@ receipted breach (§7). Planners plan; the council disposes.
 The board's vertical reading, overlaid on the bands. **This is not the
 hierarchy the seats forbid** — it is WHO MAKES THE ROOM: Tier 0 creates
 the board everyone else moves on. (An external four-tier sketch placing
-"Clathrates" above the progenitors was consulted and OVERRIDDEN: in this
+"Archons" above the progenitors was consulted and OVERRIDDEN: in this
 game the progenitors are the top — they contract and expand the board,
 they create it, they overlay technology. Everything else plays on it.)
 

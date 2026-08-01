@@ -2135,6 +2135,43 @@ impl World {
 
     /// Collect ONE orb — settle its workspace against its bank;
     /// Collect scope; relief re-checked for that orb.
+    /// THE DISCOVERY MINT (U1, tag 86) — value created against VERIFIED
+    /// WORK, banked on the solving orb.
+    ///
+    /// This is the emitter the PoUW loop was missing. Before it, a
+    /// solved task wrote a file and incremented a counter, and the
+    /// economy never heard of it: cognition proved out and minted
+    /// nothing.
+    ///
+    /// The world PROPOSES; it does not judge. `work` rides WHOLE as the
+    /// opaque payload (THE OPAQUE-PAYLOAD LAW — cfe never parses it),
+    /// and the kernel re-runs `verify_work` at the door plus the ruled
+    /// bound `f(difficulty)`. A caller computes its amount from
+    /// `kernel::mint_bound` so proposer and judge read ONE function.
+    ///
+    /// Collect-scoped, matching `scope_of(DiscoveryMinted)`.
+    pub fn mint_discovery_as(
+        &mut self,
+        actor: u64,
+        orb: u64,
+        resource: Resource,
+        amount: Ratio,
+        work: Vec<u8>,
+    ) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Collect)?;
+        if amount < ratio(0, 1) {
+            return Err(ActionRefused::BadTransfer);
+        }
+        if !self.orbs.iter().any(|held| held.orb_id == orb) {
+            return Err(ActionRefused::NoSuchOrb { orb });
+        }
+        self.close(
+            ClosureEvent::DiscoveryMinted { orb_id: orb, resource, amount, work },
+            actor,
+        );
+        Ok(())
+    }
+
     pub fn collect_as(&mut self, actor: u64, orb: u64) -> Result<usize, ActionRefused> {
         self.permitted(actor, Scope::Collect)?;
         if self.orbs.is_empty() {

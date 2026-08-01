@@ -663,10 +663,35 @@ the engine while the kernel was being built — with no container, it
 settled wherever it landed. Until a content layer exists to hold it,
 the correct amount of dogma in this system is ZERO.
 
-*Landed.* The excision of the Gnostic, hollow-earth and ancient-astronaut
-imports from the seed roster; the terminology law; and this article's own
-self-application, which struck three of its own sections for naming
-without computing.
+**THE CLASS DISTINCTION, and it was got wrong first** (operator
+correction 2026-08-01). Religion is a SEPARATE CLASS OF IRRELEVANCE from
+type vocabulary, and collapsing the two is a category error this
+article's author committed one commit after writing corollary 2 against
+it:
+
+```text
+TYPE VOCABULARY  — names a STRUCTURE, whatever its etymology.
+    kenoma / pleroma are Greek for EMPTINESS and FULLNESS: an axis a
+    civilization taxonomy may sit on and break into sub-categories.
+    archon is a ruling form (and an Athenian magistrate).
+    These COMPUTE, or can. KEPT.
+
+RELIGION       — names a DEITY, a worship, or a mystical substance.
+    A claim about agents or forces that no experiment reads.
+    Anunnaki are gods; abzu is a divine realm; vril is an invented
+    life-force asserting a physics that is not physics. EXCISED.
+```
+
+The test is never how a word sounds or where it was first written down.
+**A term drawn from a mythology may name a perfectly good structure;** a
+term drawn from anywhere at all may smuggle in an agent. Judge which of
+those it is doing here.
+
+*Landed.* The excision of the deities, the divine realm and the invented
+life-force from the seed roster — with the fullness/emptiness type
+vocabulary RESTORED after it was wrongly cut on provenance; the
+terminology law; and this article's own self-application, which struck
+three of its own sections for naming without computing.
 
 **WHAT THE OLD ARTICLE CAUGHT, NOW DERIVED.** Nothing is lost by the
 strike:
