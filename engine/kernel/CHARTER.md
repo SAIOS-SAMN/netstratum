@@ -336,7 +336,7 @@ node assigns weight by fiat. All exact rational, in the sealed math core:
 
 Operator score reads the component semantics (EQUATIONS §3 — congruence,
 coherence, cohesion), which name WHERE capacity is strained and never what
-to shrink; no gradient term survives (`ζ∇V` STRUCK 2026-08-01). At mesh
+to shrink; no gradient term survives (the damped-gradient term STRUCK 2026-08-01). At mesh
 scale the weight
 `ω` becomes the POW++ ordering weight, and the confidence `confidence_e`
 is anchored to certificate-verified work (§5a) — that is the seam where

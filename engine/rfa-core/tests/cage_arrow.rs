@@ -11,7 +11,7 @@ use std::fs;
 /// that is the door in — but must never CONSUME one, name its type, or
 /// depend on it in any way.
 const COMPUTING_PATH: [&str; 5] = [
-    "src/potential.rs",
+    "src/boundary.rs",
     "src/reduce.rs",
     "src/fold.rs",
     "src/gates.rs",

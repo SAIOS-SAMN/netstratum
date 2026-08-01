@@ -14,7 +14,7 @@
 //! - `C(Δ)` claimed to be the measure of convergence, and became a
 //!   scoring gate in `validate_step` and a readability gate in the
 //!   kernel bridge.
-//! - `ζ∇V` claimed to be the driver, was demoted to "a hint", and the
+//! - the damped-gradient term claimed to be the driver, was demoted to "a hint", and the
 //!   objective leaked around it through C-scoring instead.
 //! - "the master equation" claimed to be the one composition, and was
 //!   struck outright.
@@ -49,15 +49,16 @@
 //! guaranteeing determinism, instead of pretending the un-sayable does
 //! not exist.
 //!
-//! ## The reserved cells, and what is NOT in them
+//! ## The two empty cells
 //!
-//! Two cells of the containment vector stand EMPTY and reserved for the
-//! corrupted `ζ(V)` fragments the ruling names. They are empty because
-//! **`ζ∇V` is struck and nothing computes it** — there is no live
-//! quantity to place, and filling them with invented data would be the
-//! speculative apparatus this session has spent the day removing. The
-//! slots are named so the shape is honest; the debt is recorded rather
-//! than papered over.
+//! The off-diagonal cells of the containment vector hold nothing. They
+//! were formerly RESERVED for fragments of the damped-gradient term;
+//! that term is struck, nothing computes it, and **a slot held open for
+//! a struck quantity carries it just as a named symbol would** (operator
+//! ruling 2026-08-01, the same ruling that excised the symbol itself).
+//! The reservation is withdrawn. The cells are empty because maximum
+//! inverse opposition needs only two of the four, which is a property of
+//! the layout and owes nothing to anything struck.
 //!
 //! Nothing in a computing path may import from this module.
 
@@ -97,7 +98,7 @@ pub struct Lens {
     ///
     /// ```text
     ///     ┌               ┐
-    ///     │  p      ·     │   ·  = reserved (see below)
+    ///     │  p      ·     │   ·  = empty (see above)
     ///     │  ·      q     │   p  = numerator   ┐ maximally
     ///     └               ┘   q  = denominator ┘ separated
     /// ```

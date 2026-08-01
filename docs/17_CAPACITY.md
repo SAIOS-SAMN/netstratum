@@ -21,7 +21,7 @@ The formation:
 
 > kick C out entirely as the overall formation and start building
 > around Δ(Ω) = D where D is dimensional capacity overlaid with the
-> maximum potential of ∇V — the equations stay the same, but instead of
+> maximum potential of ∂V — the equations stay the same, but instead of
 > forming around C we are looking at the D capacity and building
 > towards its maximum potential in union with V as a whole — no two
 > parts cut out, and the "descent" is only a uni-directional axial on
@@ -50,14 +50,14 @@ rather than quietly deleted, per the ledger's own drift discipline.
 |---|---|---|
 | Ω is the operator manifold — the closed vocabulary of `N_i` with their weights | Ω is the totality of the individual universe (§3) | it made D a reachability computation over operators when D is a direct reading of one universe's own structure |
 | D is a count — the number of surviving independent planes, the DEGREE of a polynomial | D is a SHAPE `{i, j, k, l}`, four extents, never a scalar (D1) | collapsing four extents into one number is the same error as the C it replaced: a scalar cannot say WHERE capacity is strained |
-| `∇V` returns as a MAGNITUDE of available potential, overlaid on scoped dimensions | `∇V` is a DIRECTIONAL operator and stays one — UNCAGED, never collapsed to a scalar, never bounded above, never reduced to `‖∇V‖` (`18_TORSION` §2b) | the draft was wrong about the *collapse*, not the operator: the direction survives, and turning it into a magnitude is itself the cage |
+| `∂V` returns as a MAGNITUDE of available potential, overlaid on scoped dimensions | `∂V` is a DIRECTIONAL operator and stays one — UNCAGED, never collapsed to a scalar, never bounded above, never reduced to `‖∂V‖` (`18_TORSION` §2b) | the draft was wrong about the *collapse*, not the operator: the direction survives, and turning it into a magnitude is itself the cage |
 | "the equations are untouched; only the objective inverts" | E1 is STRUCK — there is no master equation | the composition was refused, not merely re-aimed; many algorithms at many scales replace the one master |
 
 **A correction to this table's own second row, recorded 2026-08-01.** An
-earlier revision of it read "`∇V` is STRUCK WHOLE." That over-read the
-FOUNDATION RULING. What was struck is the GRADIENT AS DRIVER — `ζ∇V` as
+earlier revision of it read "`∂V` is STRUCK WHOLE." That over-read the
+FOUNDATION RULING. What was struck is the GRADIENT AS DRIVER — the damped-gradient term as
 a descent term chained into a master equation. `18_TORSION` §2b restores
-`∇V` as an uncaged directional operator. The distinction is the whole
+`∂V` as an uncaged directional operator. The distinction is the whole
 point: **the direction was never the problem; the collapse to a scalar
 was.**
 
@@ -67,7 +67,7 @@ The draft's surviving contributions are §2a–§6 below.
 
 > ijkl is just a 4D example — but the Ω classification should override
 > the lower dimensional linear C = x, where C is now a substandard
-> character, and V and all subsets of ∇ should be unchained and working
+> character, and V and all subsets of ∂ should be unchained and working
 > in cohesion with the upper echelons.
 
 Three things follow, and each closes a question this document carried.
@@ -91,9 +91,9 @@ with `18_TORSION` §2b: an L1 aggregate is lawful only as a reading
 reported to a human lens, never where the system computes. §5 below
 carries what survives of C and why it must.
 
-**3. `V` and all subsets of `∇` are UNCHAINED.** Not struck — unchained.
-What chained them was the composition: one master equation with `ζ∇V` as
-a damped term walking one direction. Freed, the `∇` subsets run at their
+**3. `V` and all subsets of `∂` are UNCHAINED.** Not struck — unchained.
+What chained them was the composition: one master equation with the damped-gradient term as
+a damped term walking one direction. Freed, the `∂` subsets run at their
 own scale and cohere upward rather than composing into a single driver.
 This is the positive statement of what the strike of E1 left standing:
 "there is no one master, the system runs many algorithms at many
@@ -118,15 +118,15 @@ landed at MESH-1d (every committed field measured or censused whole, the
 UNMEASURED tripwire standing), restated at the foundation.
 
 The prohibition has teeth because partition is exactly how the previous
-frame failed: it guarded one term (`ζ∇V` demoted to damping) while the
+frame failed: it guarded one term (the damped-gradient term demoted to damping) while the
 objective leaked through another (C-scoring in `SYSTEM_SPEC` §2). A
 guard on half of a partitioned object is not a guard. An unpartitionable
 V has no halves to guard.
 
-## §4 WHY THE REDUCTION SCOPES, AND WHY ∇V COULD NOT HAVE
+## §4 WHY THE REDUCTION SCOPES, AND WHY ∂V COULD NOT HAVE
 
 The operator ruled that coboundary reduction is the scoping of a
-dimension, not `∇V`. The sealed code already performs exactly that
+dimension, not `∂V`. The sealed code already performs exactly that
 scoping, in two phases, and both are scoping acts
 (`engine/rfa-core/src/reduce.rs`):
 
@@ -145,8 +145,8 @@ D4's floor is written `ext_x( Π_G(Δ(V)) )` — the reduction is what says
 how far capacity may fall, because the reduction is what knows which
 extent was frame and which was structure.
 
-**Why `∇V` could not have done this job — the hole the strike closes.**
-A potential is CHOSEN. Had `∇V` scoped the dimensions, structure would
+**Why `∂V` could not have done this job — the hole the strike closes.**
+A potential is CHOSEN. Had `∂V` scoped the dimensions, structure would
 have become an artifact of that choice, and a dimension carrying little
 potential could be scoped OUT of existence silently, with no receipt.
 That is precisely the discard the 2026-08-01 correction was fighting,
@@ -268,7 +268,7 @@ sealed reason sits in `coherence_functional`'s own header:
 
 Descent was already outlawed at the level of the AGGREGATOR in July. It
 survived at the level of the FORMATION — in `SYSTEM_SPEC` §2's sentence
-scoring operators by how much they reduce C, and in E1's `ζ∇V` term.
+scoring operators by how much they reduce C, and in E1's the damped-gradient term term.
 THE FOUNDATION RULING finishes the same ruling one level up. Three
 strikes, one law, seven months apart.
 
@@ -309,7 +309,7 @@ Building it:
 
 **CLOSED by the ruling and its clarification (recorded):** Ω's shape
 (§3), the scoping question (§4), D's arity — a shape, not a scalar
-(D1) — and `∇V`'s fate (struck whole, D0).
+(D1) — and `∂V`'s fate (struck whole, D0).
 
 The three carried questions were answered by relay. Two of the three
 answers do not survive the sealed code, and the relay law binds —
@@ -479,7 +479,7 @@ resolve, minimize, or converge is void by this ruling.**
 ### 10a. Why this is a threat model and not a list of corrections
 
 Descent has now re-entered this constitution **five times in one day,
-under five different words** — `converged`, the C-scoring rule, `ζ∇V` as
+under five different words** — `converged`, the C-scoring rule, the damped-gradient term as
 damping, `Σ = −∂ dim H¹`, and "reducing cocycle failure." Four were
 caught; the fifth was written by this document's own author one
 paragraph after arguing against it.
@@ -510,7 +510,7 @@ transition shrinking `H¹` must REFUSE, never read healthy.
 
 **AV-3 · THE SCALAR COLLAPSE.** A directional or structural quantity
 flattened to one number, which is then available to descend.
-*Instance:* `extent: BigRational`; `C = Σ|R|`; `‖∇V‖`.
+*Instance:* `extent: BigRational`; `C = Σ|R|`; `‖∂V‖`.
 *Defense:* Article I and `18_TORSION` §2b — L1 aggregates are lawful
 only where reported to a human lens. *Witness:* no aggregate crosses
 into a computing path.
@@ -614,7 +614,7 @@ longer exists — physics needs none.
 **THE CONTAINMENT LAW: a claim of universality is the WARNING, not the
 credential.** Everything that leaked into the deterministic core
 announced itself identically — `C` claimed to be *the* measure of
-convergence, `ζ∇V` claimed to be *the* driver, "the master equation"
+convergence, the damped-gradient term claimed to be *the* driver, "the master equation"
 claimed to be *the* composition. Three constructs, one signature, all
 three struck or caged within a day.
 
@@ -1127,7 +1127,7 @@ EXTENT, never a universal:
   would assert that nothing can ever be at rest — perpetual motion
   written as law.
 
-It would also make `Vacuity::Stasis` (circulation > 0 ∧ `dV ≡ 0`)
+It would also make `Vacuity::Stasis` (circulation > 0 ∧ `∂V ≡ 0`)
 unreachable, and that row exists to be detected and re-volumized, not
 abolished. The same reasoning leaves `rank` unfloored: floor it and
 both `Void` and `Stasis` vanish, collapsing four rows to two.

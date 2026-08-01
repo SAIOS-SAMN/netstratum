@@ -1,4 +1,4 @@
-//! THE POTENTIAL 1-FORM — `dV`, uncaged (DIRECTIVE 10, operator ruling
+//! THE POTENTIAL 1-FORM — `∂V`, uncaged (DIRECTIVE 10, operator ruling
 //! 2026-08-01; `18_TORSION` §2b).
 //!
 //! **NO TRAVERSAL. NO BASIS. NO WALK.** (operator correction
@@ -18,7 +18,7 @@
 //! ```text
 //! div(Δ)_i,l  =  Σ_j Δ_ij,l          over the present edges at i
 //!
-//! dV ≡ 0   ⟺   div(Δ) = 0 at every vertex   (Δ is pure circulation)
+//! ∂V ≡ 0   ⟺   div(Δ) = 0 at every vertex   (Δ is pure circulation)
 //! dV ≢ 0   ⟺   some vertex carries net flow
 //! ```
 //!
@@ -29,7 +29,7 @@
 //!
 //! **It is a FORM, never a magnitude.** The divergence is returned
 //! WHOLE as its components with their positions intact. It is never
-//! summed, never normed, never collapsed to `‖∇V‖` — the law bars
+//! summed, never normed, never collapsed to `‖∂V‖` — the law bars
 //! collapsing a directional quantity to a scalar aggregate wherever the
 //! system computes (`18_TORSION` §2b), and a form reduced to one number
 //! is exactly that collapse.
@@ -42,9 +42,9 @@
 //! gradient does no work.
 //!
 //! ```text
-//! circ = 0 ∧ dV ≡ 0   on the ground, still   — refused
+//! circ = 0 ∧ ∂V ≡ 0   on the ground, still   — refused
 //! circ = 0 ∧ dV ≢ 0   unframed potential     — refused
-//! circ > 0 ∧ dV ≡ 0   static stasis          — refused
+//! circ > 0 ∧ ∂V ≡ 0   static stasis          — refused
 //! circ > 0 ∧ dV ≢ 0   entangled              — ADMITTED
 //!
 //! `circ` is the CIRCULATION count — what stands ABOVE the ground —
@@ -61,7 +61,7 @@ use crate::reduce::Support;
 use cfe::ratio::Ratio;
 use num_traits::Zero;
 
-/// ONE COMPONENT of the potential form: the NET FLOW at one vertex on
+/// ONE COMPONENT of the boundary form: the NET FLOW at one vertex on
 /// one coordinate. A position and an exact value, never an aggregate.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Flow {
@@ -70,16 +70,16 @@ pub struct Flow {
     pub value: Ratio,
 }
 
-/// `dV` — the potential form, carried WHOLE as its non-zero components.
+/// `∂V` — the boundary form, carried WHOLE as its non-zero components.
 ///
 /// An empty form is pure circulation: every vertex balances, nothing
 /// sources or sinks, and the field does no work.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
-pub struct PotentialForm {
+pub struct BoundaryForm {
     pub flows: Vec<Flow>,
 }
 
-impl PotentialForm {
+impl BoundaryForm {
     /// **`rank(dV)` — how many positions carry net flow.** Not a
     /// magnitude: two flows of opposite sign at different vertices do
     /// not cancel here, because they are different positions, not
@@ -99,7 +99,7 @@ impl PotentialForm {
     }
 }
 
-/// Derive `dV` from a state and its support — the divergence at every
+/// Derive `∂V` from a state and its support — the divergence at every
 /// vertex, in ONE pass.
 ///
 /// Canonical by construction: no spanning structure is chosen and no
@@ -109,7 +109,7 @@ impl PotentialForm {
 /// vertex exactly.
 ///
 /// Pure and total. An empty complex yields an empty form, lawfully.
-pub fn potential_form(delta: &Delta, support: &Support) -> PotentialForm {
+pub fn boundary_form(delta: &Delta, support: &Support) -> BoundaryForm {
     let dim = delta.dim().min(support.dim());
     let fiber = delta.fiber().min(support.fiber());
     let mut flows = Vec::new();
@@ -127,13 +127,13 @@ pub fn potential_form(delta: &Delta, support: &Support) -> PotentialForm {
             }
         }
     }
-    PotentialForm { flows }
+    BoundaryForm { flows }
 }
 
 /// THE DUAL-POLE VERDICT (DIRECTIVE 10). The four rows of the
 /// non-vacuity matrix, as one typed reading over ONE state.
 ///
-/// **`dV` CANNOT BE ZERO** (operator ruling 2026-08-01). A flat field is
+/// **`∂V` CANNOT BE ZERO** (operator ruling 2026-08-01). A flat field is
 /// not a lawful state to sit in: without gradient the manifold is static
 /// flat space and any rank it holds is meaningless. This is an
 /// invariant, not a preference.
@@ -177,7 +177,7 @@ pub enum Vacuity {
 /// **Growth is `Δ`'s own expansion — a new relation, receipted (D3) —
 /// never a re-split of a fixed `Δ` between poles.** Pinned in
 /// `potential_pins::the_poles_are_complementary_at_fixed_delta_so_shuffling_is_not_growth`.
-pub fn dual_pole(rank: usize, form: &PotentialForm) -> Vacuity {
+pub fn dual_pole(rank: usize, form: &BoundaryForm) -> Vacuity {
     match (rank > 0, form.is_non_vacuous()) {
         (false, false) => Vacuity::Void,
         (false, true) => Vacuity::Unframed,

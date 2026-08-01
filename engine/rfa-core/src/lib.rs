@@ -32,7 +32,7 @@ pub mod fiber;
 pub mod fold;
 pub mod gates;
 pub mod rcf;
-pub mod potential;
+pub mod boundary;
 pub mod reduce;
 
 pub use cage::Lens;
@@ -47,6 +47,6 @@ pub use fold::{
     OrbitWitness, RatMatrix, TorsionCause,
 };
 pub use gates::{validate_step, GateVerdict, StepBound};
-pub use potential::{dual_pole, potential_form, Flow, PotentialForm, Vacuity};
+pub use boundary::{dual_pole, boundary_form, Flow, BoundaryForm, Vacuity};
 pub use rcf::{invariant_factors, rcf_hash, rcf_signature, RatPoly, RcfSignature};
 pub use reduce::{coboundary_reduce, holonomies, Holonomy, Support};

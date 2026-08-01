@@ -42,7 +42,7 @@ zero D when its differences are all frame.
 The v0.1 evolution equation (`engine.rs` T.FOUND.3) is kept below as
 HISTORY only, with its gradient term struck:
 
-    STRUCK:  Δ_{k+1} = B_S⁻¹( Π_G( F_fold*( Σ ω_i N_i( B_S(Δ_k) ) − ζ∇V ) ) ) + ξ_k
+    STRUCK:  Δ_{k+1} = B_S⁻¹( Π_G( F_fold*( Σ ω_i N_i( B_S(Δ_k) ) ) ) ) + ξ_k
 
 Its surviving TERMS remain real machinery and keep their rows — the
 composition is what was refused, not the parts:
@@ -52,7 +52,7 @@ composition is what was refused, not the parts:
 | `B_S`, `B_S⁻¹` | read into the working frame, write back canonical | node | rfa-core basis |
 | `N_i` | the operators — candidate transformations (the DEEDS) | game | `ClosureEvent` |
 | `ω_i = weight_i · confidence_i` | operator weighting (MDC echelons) | validator | §5 |
-| ~~`ζ∇V`~~ | **STRUCK 2026-08-01** — the gradient; a failed topology, never built | — | — |
+| ~~the damped-gradient term~~ | **STRUCK 2026-08-01** — the gradient; a failed topology, never built | — | — |
 | `F_fold*` | the orbit-lock fold gate — forbids collapsing torsion-locked states | convergence | kernel I6 |
 | `Π_G` | gauge projection = `coboundary_reduce` to the H¹ core (the fold) | convergence | rfa-core |
 | `ξ_k` | chronicle-seeded stochastic term — replayable (CHARTER §9) | node | `physics::beacon` |
@@ -155,13 +155,13 @@ effective weight and the disagreement entropy:
 **STRUCK 2026-08-01** (operator ruling; `17_CAPACITY` §10 AV-1, §11):
 
     STRUCK:  Operators are scored by how much they reduce C(Δ).
-    STRUCK:  ζ∇V as a damping term.
+    STRUCK:  the damped-gradient term as a damping term.
 
 The first was THE DESCENT — a greedy minimization of a class-blind
 scalar, and the last place in this document where an objective survived
 after the gradient itself was struck at §0. The guard had been placed on
-`ζ∇V` while the objective leaked through the scoring rule; both are now
-gone. `∇V` is not deleted but UNCAGED — a directional operator, never
+the damped-gradient term while the objective leaked through the scoring rule; both are now
+gone. `∂V` is not deleted but UNCAGED — a directional operator, never
 collapsed to a magnitude, never bounded above (`18_TORSION` §2b).
 
 **No quantity is scored, minimized, or descended.** An operator is

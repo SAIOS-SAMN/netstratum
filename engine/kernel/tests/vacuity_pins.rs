@@ -10,7 +10,7 @@ use cfe::dop::ColonyOrb;
 use cfe::ratio::ratio;
 use cfe::world::{Bond, Committed, World};
 use kernel::bridge::{project_complex, read_entangled};
-use rfa_core::{dual_pole, potential_form, Vacuity};
+use rfa_core::{dual_pole, boundary_form, Vacuity};
 
 fn orbs(n: u64) -> Committed {
     let mut committed = World::new().committed();
@@ -34,7 +34,7 @@ fn bond(source: u64, target: u64, rate: i64) -> Bond {
 
 fn verdict(state: &Committed) -> (usize, usize, Vacuity) {
     let (delta, support) = project_complex(state);
-    let form = potential_form(&delta, &support);
+    let form = boundary_form(&delta, &support);
     let rank = read_entangled(state).rank;
     let seen = dual_pole(rank, &form);
     (rank, form.rank(), seen)
@@ -44,7 +44,7 @@ fn verdict(state: &Committed) -> (usize, usize, Vacuity) {
 fn the_canonical_proof_of_d_above_zero_is_stasis() {
     // THE FINDING. `18_TORSION` §8 proves D > 0 with a four-orb ring of
     // equal bonds. Each orb owes exactly what it is owed, so the
-    // divergence cancels at EVERY vertex and `dV ≡ 0`.
+    // divergence cancels at EVERY vertex and `∂V ≡ 0`.
     //
     // So the simplest state carrying non-zero rank is pure circulation —
     // and pure circulation is precisely the row the dual-pole verdict

@@ -8,7 +8,7 @@ use cfe::dop::ColonyOrb;
 use cfe::ratio::ratio;
 use cfe::world::{Bond, Committed, World};
 use kernel::bridge::{project_complex, read_entangled};
-use rfa_core::{dual_pole, holonomies, potential_form, Vacuity};
+use rfa_core::{dual_pole, holonomies, boundary_form, Vacuity};
 
 fn orbs(n: u64) -> Committed {
     let mut committed = World::new().committed();
@@ -44,7 +44,7 @@ fn ring(n: u64, rate: i64) -> Committed {
 fn poles(state: &Committed) -> (usize, usize, Vacuity) {
     let (delta, support) = project_complex(state);
     let rank = holonomies(&delta, &support).len();
-    let form = potential_form(&delta, &support);
+    let form = boundary_form(&delta, &support);
     (rank, form.rank(), dual_pole(rank, &form))
 }
 

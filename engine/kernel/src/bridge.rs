@@ -42,7 +42,7 @@
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::Committed;
 use rfa_core::{
-    dual_pole, holonomies, potential_form, Degree, Delta, Flow, PotentialForm, Support, Vacuity,
+    dual_pole, holonomies, boundary_form, Degree, Delta, Flow, BoundaryForm, Support, Vacuity,
 };
 
 /// BOND-1: the standing order, `source` → `target` at `rate`/tick.
@@ -177,7 +177,7 @@ pub struct EntangledRead {
     /// indices intact. Never pre-summed: these are what emit (D3) and
     /// what the composition law will compose.
     pub residuals: Vec<Residual>,
-    /// `dV` — the SECOND POLE, carried whole as its non-zero
+    /// `∂V` — the SECOND POLE, carried whole as its non-zero
     /// components: which vertices carry net flow, and how much. Empty
     /// means pure circulation — every vertex balances, nothing sources
     /// or sinks, and the field does no work however large it is.
@@ -249,7 +249,7 @@ impl EntangledRead {
     /// would make `Void` and `Stasis` unreachable and collapse the
     /// four rows to two.
     pub fn verdict(&self) -> Vacuity {
-        dual_pole(self.rank, &PotentialForm { flows: self.flows.clone() })
+        dual_pole(self.rank, &BoundaryForm { flows: self.flows.clone() })
     }
 }
 
@@ -273,13 +273,13 @@ impl EntangledRead {
 pub fn verdict_per_dimension(state: &Committed) -> Vec<Vacuity> {
     let (delta, support) = project_complex(state);
     let charges = holonomies(&delta, &support);
-    let form = potential_form(&delta, &support);
+    let form = boundary_form(&delta, &support);
     (0..CHANNELS)
         .map(|l| {
             let rank = charges.iter().filter(|held| held.l == l).count();
             let flows =
                 form.flows.iter().filter(|flow| flow.l == l).cloned().collect::<Vec<_>>();
-            dual_pole(rank, &PotentialForm { flows })
+            dual_pole(rank, &BoundaryForm { flows })
         })
         .collect()
 }
@@ -549,7 +549,7 @@ pub fn read_entangled_observed(state: &Committed, unknown: usize) -> EntangledRe
     // checking it invents strain from a relation that does not exist,
     // which is the false gauge collapse.
     let residuals = filled_residuals(&delta, &support);
-    let flows = potential_form(&delta, &support).flows;
+    let flows = boundary_form(&delta, &support).flows;
     // D — the independent cycles carrying charge no frame explains.
     let rank = holonomies(&delta, &support).len();
     EntangledRead { rank, residuals, flows, unknown }

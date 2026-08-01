@@ -1,8 +1,8 @@
-//! DIRECTIVE 10 — the potential form and the dual-pole non-vacuity
-//! lock. `dV` is the DIVERGENCE: canonical, one pass, no traversal.
+//! DIRECTIVE 10 — the boundary form and the dual-pole non-vacuity
+//! lock. `∂V` is the DIVERGENCE: canonical, one pass, no traversal.
 
 use cfe::ratio::{ratio, Ratio};
-use rfa_core::{dual_pole, holonomies, potential_form, Delta, Support, Vacuity};
+use rfa_core::{dual_pole, holonomies, boundary_form, Delta, Support, Vacuity};
 
 fn edge(d: &mut Delta, s: &mut Support, i: usize, j: usize, v: Ratio) {
     d.set_antisym(i, j, vec![v]);
@@ -20,15 +20,15 @@ fn pure_circulation_is_vacuous_however_large_its_charge() {
     edge(&mut d, &mut s, 1, 2, ratio(1, 1));
     edge(&mut d, &mut s, 2, 0, ratio(1, 1));
 
-    let form = potential_form(&d, &s);
+    let form = boundary_form(&d, &s);
     assert_eq!(form.rank(), 0, "circulation sources nothing anywhere");
-    assert!(!form.is_non_vacuous(), "dV ≡ 0");
+    assert!(!form.is_non_vacuous(), "∂V ≡ 0");
 }
 
 #[test]
 fn static_stasis_is_rank_without_gradient_and_is_refused() {
     // THE ROW THAT JUSTIFIES DIRECTIVE 10. The same closed loop carries
-    // holonomy — D > 0 — while dV ≡ 0. Rank alone would admit it.
+    // holonomy — D > 0 — while ∂V ≡ 0. Rank alone would admit it.
     let mut d = Delta::zero(3, 1);
     let mut s = Support::new(3, 1);
     edge(&mut d, &mut s, 0, 1, ratio(1, 1));
@@ -36,9 +36,9 @@ fn static_stasis_is_rank_without_gradient_and_is_refused() {
     edge(&mut d, &mut s, 2, 0, ratio(1, 1));
 
     let rank = holonomies(&d, &s);
-    let form = potential_form(&d, &s);
+    let form = boundary_form(&d, &s);
     assert!(!rank.is_empty(), "D > 0 — the loop carries charge no frame explains");
-    assert!(!form.is_non_vacuous(), "dV ≡ 0 — nothing sources or sinks");
+    assert!(!form.is_non_vacuous(), "∂V ≡ 0 — nothing sources or sinks");
     assert!(
         rank.is_empty() || !form.is_non_vacuous(),
         "static stasis: structure with no gradient does no work"
@@ -53,7 +53,7 @@ fn a_source_carries_gradient() {
     edge(&mut d, &mut s, 0, 1, ratio(2, 1));
     edge(&mut d, &mut s, 0, 2, ratio(3, 1));
 
-    let form = potential_form(&d, &s);
+    let form = boundary_form(&d, &s);
     assert!(form.is_non_vacuous());
     assert_eq!(form.rank(), 3, "one source and two sinks all carry net flow");
     let source = form.flows.iter().find(|f| f.at == 0).expect("vertex 0 sources");
@@ -79,8 +79,8 @@ fn the_reading_is_canonical_placement_cannot_flip_it() {
     edge(&mut b, &mut sb, 0, 2, ratio(0, 1));
     edge(&mut b, &mut sb, 1, 2, ratio(0, 1));
 
-    assert!(potential_form(&a, &sa).is_non_vacuous(), "charge on the closing edge");
-    assert!(potential_form(&b, &sb).is_non_vacuous(), "charge on a former forest edge");
+    assert!(boundary_form(&a, &sa).is_non_vacuous(), "charge on the closing edge");
+    assert!(boundary_form(&b, &sb).is_non_vacuous(), "charge on a former forest edge");
 }
 
 #[test]
@@ -93,20 +93,20 @@ fn the_entangled_state_holds_both_poles() {
     edge(&mut d, &mut s, 0, 2, ratio(9, 1));
 
     assert!(!holonomies(&d, &s).is_empty(), "D > 0");
-    assert!(potential_form(&d, &s).is_non_vacuous(), "dV ≢ 0");
+    assert!(boundary_form(&d, &s).is_non_vacuous(), "dV ≢ 0");
 }
 
 #[test]
 fn an_empty_complex_is_vacuous_and_total() {
-    assert!(!potential_form(&Delta::zero(0, 1), &Support::new(0, 1)).is_non_vacuous());
-    assert_eq!(potential_form(&Delta::zero(3, 1), &Support::new(3, 1)).rank(), 0);
+    assert!(!boundary_form(&Delta::zero(0, 1), &Support::new(0, 1)).is_non_vacuous());
+    assert_eq!(boundary_form(&Delta::zero(3, 1), &Support::new(3, 1)).rank(), 0);
 }
 
 #[test]
 fn the_four_rows_classify_and_only_one_is_admitted() {
     let flat = Delta::zero(3, 1);
     let empty = Support::new(3, 1);
-    assert_eq!(dual_pole(0, &potential_form(&flat, &empty)), Vacuity::Void);
+    assert_eq!(dual_pole(0, &boundary_form(&flat, &empty)), Vacuity::Void);
 
     // Structure with no gradient — the row that must be re-volumized.
     let mut d = Delta::zero(3, 1);
@@ -114,7 +114,7 @@ fn the_four_rows_classify_and_only_one_is_admitted() {
     edge(&mut d, &mut s, 0, 1, ratio(1, 1));
     edge(&mut d, &mut s, 1, 2, ratio(1, 1));
     edge(&mut d, &mut s, 2, 0, ratio(1, 1));
-    let stasis = dual_pole(holonomies(&d, &s).len(), &potential_form(&d, &s));
+    let stasis = dual_pole(holonomies(&d, &s).len(), &boundary_form(&d, &s));
     assert_eq!(stasis, Vacuity::Stasis);
     assert!(!stasis.is_admitted(), "dV cannot be zero — a flat field does no work");
 
@@ -124,7 +124,7 @@ fn the_four_rows_classify_and_only_one_is_admitted() {
     edge(&mut e, &mut t, 0, 1, ratio(2, 1));
     edge(&mut e, &mut t, 1, 2, ratio(3, 1));
     edge(&mut e, &mut t, 0, 2, ratio(9, 1));
-    let live = dual_pole(holonomies(&e, &t).len(), &potential_form(&e, &t));
+    let live = dual_pole(holonomies(&e, &t).len(), &boundary_form(&e, &t));
     assert_eq!(live, Vacuity::Entangled);
     assert!(live.is_admitted());
 }
@@ -160,8 +160,8 @@ fn the_poles_are_complementary_at_fixed_delta_so_shuffling_is_not_growth() {
     // Both hold the SAME support — the same relations, the same edges.
     // Only the split between gradient and circulation moved.
     assert_eq!(
-        potential_form(&pure_source, &s).is_non_vacuous(),
-        potential_form(&mixed, &sm).is_non_vacuous(),
+        boundary_form(&pure_source, &s).is_non_vacuous(),
+        boundary_form(&mixed, &sm).is_non_vacuous(),
         "both still source: the gradient pole is not what changed"
     );
     // And the rank pole moved without a single new relation being formed.
@@ -174,7 +174,7 @@ fn the_poles_are_complementary_at_fixed_delta_so_shuffling_is_not_growth() {
     // The dual-pole verdict cannot see the difference, which is why it
     // classifies but must never be read as a growth measure.
     assert_eq!(
-        dual_pole(after, &potential_form(&mixed, &sm)),
+        dual_pole(after, &boundary_form(&mixed, &sm)),
         Vacuity::Entangled,
         "redistribution reads ADMITTED — the verdict classifies, it does not measure growth"
     );
