@@ -40,7 +40,7 @@ fn static_stasis_is_rank_without_gradient_and_is_refused() {
     assert!(!rank.is_empty(), "D > 0 — the loop carries charge no frame explains");
     assert!(!form.is_non_vacuous(), "dV ≡ 0 — nothing sources or sinks");
     assert!(
-        !(!rank.is_empty() && form.is_non_vacuous()),
+        rank.is_empty() || !form.is_non_vacuous(),
         "static stasis: structure with no gradient does no work"
     );
 }

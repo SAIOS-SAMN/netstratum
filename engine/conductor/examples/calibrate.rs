@@ -212,6 +212,17 @@ fn part_a_and_b() {
             0 => 0,
             n => tally.cert_bytes_total / n as usize,
         };
+        // Bound before the call: a `format!` inside `println!` args is a
+        // double format pass, and the width specs above need a finished
+        // string to pad.
+        let refusals = format!(
+            "{}x/{}w/{}o/{}A",
+            tally.refused_exceeds,
+            tally.refused_work,
+            tally.refused_other,
+            tally.admitted_positive
+        );
+        let zeros = format!("{}ok/{}ref", tally.zero_admitted, tally.zero_refused);
         println!(
             "{:<5} {:<5} {:<5} {:<7} {:<9} {:<7} {:<6} {:<11} {}",
             rung,
@@ -221,14 +232,8 @@ fn part_a_and_b() {
             tally.closed_mismatched,
             tally.unsolved,
             avg_cert,
-            format!(
-                "{}x/{}w/{}o/{}A",
-                tally.refused_exceeds,
-                tally.refused_work,
-                tally.refused_other,
-                tally.admitted_positive
-            ),
-            format!("{}ok/{}ref", tally.zero_admitted, tally.zero_refused),
+            refusals,
+            zeros,
         );
 
         grand.solves_honest += tally.solves_honest;

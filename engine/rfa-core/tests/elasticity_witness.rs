@@ -8,7 +8,6 @@
 //! dashboard will render.
 
 use cfe::ratio::{ratio, Ratio};
-use num_traits::Zero;
 use rfa_core::{
     coherence_functional, for_each_residual, magnitude, validate_step, Delta, GateVerdict, Lens,
     StepBound,
