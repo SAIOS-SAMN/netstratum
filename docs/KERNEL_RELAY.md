@@ -298,7 +298,10 @@ a minimum: you keep the minimizer and DISCARD the residual. It is
 uni-directional and LOSSY — convergence-as-projection manufactures agreement
 by destroying difference. That is entropy wearing a syntropy mask, and it
 violates the whole thesis. **REJECTED as the convergence method** (kept only
-as a direction hint). The critical realization: the irreducible residual is
+as a direction hint — and STRUCK ENTIRELY by the operator's 2026-08-01
+foundation ruling, which took the hint with it: no gradient term survives
+anywhere, and the engine is built on dimensional capacity, EQUATIONS §1
+D0–D4). The critical realization: the irreducible residual is
 not error — it is the genuine difference, which the discovery law says is the
 SOURCE of value. It must be promoted, not discarded.
 

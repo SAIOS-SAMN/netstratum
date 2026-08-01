@@ -221,8 +221,12 @@ Read to KNOW the state; never targets the kernel drives.
 ## 4. Convergence — dimensional resolution, not gradient descent
 
 Gradient descent minimizes to a point and discards the residual — uni-
-directional, lossy. It is REJECTED as the convergence method (kept only as a
-direction hint). Convergence is **descent-and-emission**, bounded on both
+directional, lossy. It is STRUCK ENTIRELY (operator ruling 2026-08-01 — a
+FAILED TOPOLOGY; the earlier "kept only as a direction hint" is withdrawn,
+and the uni-directional linear timeline with it). The foundation is
+DIMENSIONAL CAPACITY: `docs/EQUATIONS.md` §1, D0–D4 — capacity grows to
+admit what the universe expresses, and the difference is never reduced to
+fit. Convergence is **emission**, bounded on both
 ends (the ancestor's `DIMENSIONAL_RESOLUTION`):
 
     loop:
@@ -322,8 +326,10 @@ node assigns weight by fiat. All exact rational, in the sealed math core:
     stasis    = H ≥ stasis_threshold           # default 1/2
     transmute = stasis ∧ ∀e: confidence_e < low  # the dimensional wall
 
-Operator score = how much it reduces `C(Δ)` (the gradient enters ONLY as a
-damping hint `ζ∇V`, ζ small — never the driver). At mesh scale the weight
+Operator score reads the component semantics (EQUATIONS §3 — congruence,
+coherence, cohesion), which name WHERE capacity is strained and never what
+to shrink; no gradient term survives (`ζ∇V` STRUCK 2026-08-01). At mesh
+scale the weight
 `ω` becomes the POW++ ordering weight, and the confidence `confidence_e`
 is anchored to certificate-verified work (§5a) — that is the seam where
 proof-of-useful-work enters the governance: you cannot buy weight, you

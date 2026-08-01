@@ -63,14 +63,89 @@ written, wiring unbuilt · **DRAFT** — awaiting ratification.
 
 ---
 
-## §1 The spine — one walk
+## §1 The foundation — D and V
 
-**E1 · The evolution equation (the master).** INSCRIBED (parts landed
-severally — see their rows).
-Authority: SYSTEM_SPEC §0. Implementation: the composition of E2–E6,
-I1–I6, G1.
+**THE FOUNDATION RULING (operator, 2026-08-01).** This engine is built
+on DIMENSIONAL CAPACITY. It is not built on driving a coherence scalar
+to zero, and it never was lawfully: **gradient descent is a FAILED
+TOPOLOGY** — uni-directional, and it discards exactly the information
+the economy is made of. It is STRUCK from the law entirely, not demoted
+to a hint. The uni-directional linear timeline goes with it. `C`
+survives only as the SEMANTICS of the component readings (§3) — never a
+driver, never the frame the engine is built around.
 
-    Δ_{k+1} = B_S⁻¹( Π_G( F_fold*( Σ_i ω_i N_i( B_S(Δ_k) ) − ζ∇V ) ) ) + ξ_k
+**E1 · The evolution equation (the master) — STRUCK** (operator ruling
+2026-08-01; recorded, never silently dropped). Two independent grounds:
+its `ζ∇V` term is the gradient, now struck whole; and "the master
+equation" was itself refused — there is no one master, the system runs
+many algorithms at many scales (§1a, the scale map). Kept as HISTORY:
+
+    STRUCK:  Δ_{k+1} = B_S⁻¹( Π_G( F_fold*( Σ ω_i N_i( B_S(Δ_k) ) − ζ∇V ) ) ) + ξ_k
+                                                                    ^^^^
+                                                     the gradient — struck
+
+**D0 · V — the observed universe.** INSCRIBED. V is the committed state
+read WHOLE: indivisible, unpartitioned, never truncated to a subspace.
+Every local reading feels the whole — the totality law already landed
+this shape at MESH-1d (every committed field measured or censused
+whole, the UNMEASURED tripwire standing). V is not a scalar field over
+ℝ and carries no continuous gradient; what V EXPRESSES is its
+relational structure, the landed tensor.
+
+    V     = the committed state, whole
+    Δ(V)  = the relation V expresses          (`rfa_core::Delta`)
+
+  **NOTATION, binding:** `Δ` is THE RELATIONAL TENSOR. It is never a
+  Laplacian, and no rule in this ledger takes a Laplacian of anything.
+
+**D1 · D — dimensional capacity.** INSCRIBED. D is the extent of the
+index space in which V may express relation. It is a SHAPE, never a
+scalar — four indices, each an exact non-negative integer, each already
+committed state:
+
+    D = { i, j, k, l }
+        i, j  — RELATIONAL extent: which entities may stand in relation
+        k     — COMPOSITIONAL extent: the triples relation composes over
+        l     — FIBER extent: the planes each relation carries
+
+This is the landed index space named as law, not a new one:
+`rfa_core::for_each_residual` iterates exactly `(i, j, k, l)`, and
+`Delta { dim, fiber }` already bounds i/j/k by `dim` and l by `fiber`.
+
+**D2 · The capacity law (admission).** INSCRIBED. What the universe
+expresses must have somewhere to live:
+
+    ∀ x ∈ {i, j, k, l}:    ext_x( Δ(V) )  ≤  D_x
+
+Where capacity is insufficient, **the difference is NEVER reduced to
+fit** — capacity grows (D3). This is the inversion the ruling makes:
+the struck frame shrank the content to meet the container; this law
+grows the container to meet the content.
+
+**D3 · The growth law (unfold) — bounded ABOVE.** INSCRIBED.
+
+    ext_x( Δ(V) ) > D_x    →    D_x rises to ext_x( Δ(V) ), BY RECEIPT
+
+One index per deed (the gauge law's shape — declaration == effect,
+every other index held still). Growth is EARNED, never assumed, and the
+landed machinery is already exactly this: `GaugeShiftedAt` opens a
+fiber plane, and opening grade k requires k receipted mints
+(`PlaneUnearned` refuses otherwise); `EntityRegistered` admits an
+entity into i/j/k. Bounded above by the magnitude gate (E4). The law
+names what the deeds already do.
+
+**D4 · The contraction law (fold) — bounded BELOW.** INSCRIBED.
+Capacity falls only where its index carried no irreducible content —
+where reduction shows the content was frame:
+
+    D_x may fall to ext_x( Π_G(Δ(V)) )    — never below
+    FORBIDDEN where orbit_lock ≠ ∅         — genuine difference keeps
+                                             its index
+
+The floor is H¹. A capacity holding genuine difference never contracts:
+that is I6 stated on the capacity axis — *no difference dies without
+account*. D3 and D4 together are the standing law that **everything
+grows or contracts**, both ends bounded, neither end optional.
 
 **E2 · The singularity law (the angle-free collision).** LANDED (U2e)
 — `rfa_core::judged_fold` (Π_G then F_fold*) with THE ANGLE-FREE
@@ -194,7 +269,28 @@ enforces the local half, the seam enforces the pair.
     LOCAL:  next.gauge == declared(prior.gauge, deed)   ∀ grades
     PAIR:   a fold is lawful  ⟺  orbit_lock(Π_G(a), Π_G(b)) = ∅
 
-## §3 Convergence — the value engine
+## §3 The component readings — the "C package" (semantics, never drivers)
+
+**THE DEMOTION (operator ruling 2026-08-01).** These rows are NOT the
+frame the engine is built around — D and V are (§1). Each is a NAMED
+READING over a component of D's index space, with its own zero and its
+own units. None is minimized. None drives a step. Together they say
+WHERE capacity is strained; they never say what to shrink.
+
+    congruence   over (i, j)      — do relations AGREE where they meet?
+    coherence    over (i, j, k)   — do relations COMPOSE over triples?
+                                    (the reading formerly promoted to
+                                    "the" C — now C2, one member)
+    cohesion     over (l)         — do the fiber planes HOLD together?
+
+The package is not invented here: CONVERGE-1's four-C placement already
+runs congruence and coherence as distinct landed readings (congruence
+deposits onto the three axes, coherence residuals ride the fiber cards
+— 07 §2, `ledger::converge`). The error the ruling corrects is that ONE
+member, collapsed to one scalar, was treated as the object the system
+optimizes. It is one component semantic among several, and it optimizes
+nothing. LANDED today: coherence (C2). INSCRIBED: congruence and
+cohesion as named readings in their own right.
 
 Authority: SYSTEM_SPEC §4, 07_ERA_CONVERGENCE.
 

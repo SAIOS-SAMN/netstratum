@@ -14,21 +14,42 @@ red-first here (the NS-3 precedent). No sandbox code imported.
 
 ---
 
-## 0. THE EVOLUTION EQUATION (the spine all five share)
+## 0. THE FOUNDATION — D AND V (capacity, not descent)
 
-The master equation (v0.1 `engine.rs` T.FOUND.3, "the evolution equation —
-not Markov") — ONE lawful step from Δ_k to Δ_{k+1}:
+**OPERATOR RULING 2026-08-01 — the foundation is DIMENSIONAL CAPACITY.**
+Gradient descent is a FAILED TOPOLOGY: uni-directional, and it discards
+the information the economy is made of. It is STRUCK whole, not demoted
+to a hint, and the uni-directional linear timeline is struck with it.
+"The master equation" is refused with it — there is no one master; the
+system runs many algorithms at many scales. The standing law is
+`docs/EQUATIONS.md` §1 (**D0–D4**), summarized here:
 
-    Δ_{k+1} = B_S⁻¹( Π_G( F_fold*( Σ_i ω_i N_i( B_S(Δ_k) ) − ζ∇V ) ) ) + ξ_k
+    V     = the committed state, read WHOLE (indivisible; the totality law)
+    Δ(V)  = the relation V expresses          (`rfa_core::Delta`)
+    D     = { i, j, k, l }                     dimensional capacity, a SHAPE
 
-Term by term — each is a component of THIS spec:
+    admission:    ∀x ∈ {i,j,k,l}:  ext_x(Δ(V)) ≤ D_x
+    growth:       ext_x(Δ(V)) > D_x  →  D_x rises, BY RECEIPT (bounded above)
+    contraction:  D_x falls only to ext_x(Π_G(Δ(V))) — never below;
+                  FORBIDDEN where orbit_lock ≠ ∅
+
+Where capacity is short, the difference is never reduced to fit — the
+capacity grows. Everything grows or contracts, both ends bounded.
+
+The v0.1 evolution equation (`engine.rs` T.FOUND.3) is kept below as
+HISTORY only, with its gradient term struck:
+
+    STRUCK:  Δ_{k+1} = B_S⁻¹( Π_G( F_fold*( Σ ω_i N_i( B_S(Δ_k) ) − ζ∇V ) ) ) + ξ_k
+
+Its surviving TERMS remain real machinery and keep their rows — the
+composition is what was refused, not the parts:
 
 | term | meaning | component | netstratum |
 |---|---|---|---|
 | `B_S`, `B_S⁻¹` | read into the working frame, write back canonical | node | rfa-core basis |
 | `N_i` | the operators — candidate transformations (the DEEDS) | game | `ClosureEvent` |
 | `ω_i = weight_i · confidence_i` | operator weighting (MDC echelons) | validator | §5 |
-| `ζ∇V` | potential-gradient DAMPING — gradient demoted to a hint, ζ small | validator | — (to build) |
+| ~~`ζ∇V`~~ | **STRUCK 2026-08-01** — the gradient; a failed topology, never built | — | — |
 | `F_fold*` | the orbit-lock fold gate — forbids collapsing torsion-locked states | convergence | kernel I6 |
 | `Π_G` | gauge projection = `coboundary_reduce` to the H¹ core (the fold) | convergence | rfa-core |
 | `ξ_k` | chronicle-seeded stochastic term — replayable (CHARTER §9) | node | `physics::beacon` |

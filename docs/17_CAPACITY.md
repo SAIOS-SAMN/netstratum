@@ -40,6 +40,16 @@ organising quantity cannot see the thing it pays for will, under any
 optimizer, walk away from the payment. Capacity is the class made
 countable, so law and incentive now point the same direction.
 
+**This completes a ruling already begun, and is not a reversal.** THE
+PROPORTIONAL LAW (2026-07-31) barred squares as aggregators, and the
+sealed reason is written in `coherence_functional`'s own header:
+*"Squares are the mathematics of minimization — a loss shaped to be
+differentiated and descended; this lens exists to be READ."* Descent was
+already outlawed at the level of the AGGREGATOR. It survived at the
+level of the FORMATION, in one sentence of `SYSTEM_SPEC.md` §2 that
+scores operators by how much they reduce C. This law finishes the same
+ruling one level up.
+
 ## §3 THE DEMOTION OF C — precise, and narrower than it sounds
 
 **C is struck as THE FORMATION. C is NOT struck as a GATE, and cannot
@@ -66,20 +76,35 @@ had crept in: the kernel admits or refuses, it never optimizes
 
 ## §4 THE FORM
 
-### 4a. Ω — the operator manifold **[DERIVED — ratify or strike]**
+### 4a. Ω — the totality of the individual universe (RULED 2026-08-01)
 
-`Ω` is the closed vocabulary of lawful operator shapes `N_i` together
-with their admissible weights `ω_i = weight_i · confidence_i`. It is the
-whole manifold, never a selected operator: `Δ(Ω)` is the state's
-response to everything the law permits, not to one chosen deed.
+`Ω` is **the totality of one individual universe**: its whole committed
+relational state as a single object. Not an operator vocabulary, not a
+selected subset, not a state-under-transformation. `Δ(Ω)` is the Delta
+of the entire universe.
 
-### 4b. D — dimensional capacity **[DERIVED — ratify or strike]**
+(The first draft read Ω as the operator manifold. That is STRUCK by the
+operator's clarification. The consequence is a simplification: D is not
+a reachability computation over operators, it is a direct reading of one
+universe's own structure.)
 
-    D(Δ)  =  dim span_{H¹} { Π_G( N_i(Δ) ) : N_i ∈ Ω }
+This seats capacity as a **per-unit quantity**, which is what
+`16_UNIT.md` already requires — the kernel is the deployable unit, and
+PoUW/PoWC are judged at that level. Each universe carries one D. That is
+the number units compare, trade, and are weighted by across the mesh.
 
-The number of independent irreducible planes the operator manifold can
-reach from `Δ`, counted modulo gauge. Frame artifacts (`B¹`) contribute
-nothing; only structural content counts.
+### 4b. D — dimensional capacity (the scoped structure)
+
+    Δ(Ω)  =  D          D  =  the structure surviving Π_G( Δ(Ω) )
+
+D is what coboundary reduction leaves standing when the whole universe's
+Delta is scoped (§4c). Frame artifacts contribute nothing; only
+structural content counts.
+
+**This is computable today, from code that already exists.**
+`rfa_core::coboundary_reduce` performs the scoping; `Delta::dim` and
+`Delta::fiber` carry the arity; the surviving independent entries are
+the capacity. No new mathematics is owed — only a caller.
 
 **D is not a new quantity.** Three things already in the law are D
 under other names, and this is the strongest evidence the form is
@@ -94,22 +119,45 @@ right:
   to "capacity as a live fiber reading (minted-plane count)" — a
   reading that has never existed. It is D.
 
-### 4c. The ∇V overlay **[DERIVED — ratify or strike]**
+### 4c. THE SCOPING IS THE REDUCTION, NEVER ∇V (RULED 2026-08-01)
 
-D is not a bare count. Dimensions are not equal: a plane along which
-the potential gradient still has something to give is worth more than a
-spent one. The overlay grades each axis by the maximum potential
-available along it:
+**Coboundary reduction scopes a dimension. `∇V` does not, and must not.**
 
-    c_a  =  sup_{axis a} ‖∇V‖          (the maximum potential of that axis)
+The sealed code already performs the scoping in two phases, and both are
+scoping acts (`engine/rfa-core/src/reduce.rs`, quoted from its header
+and body):
 
-`∇V`'s ROLE INVERTS and this is the load-bearing change. It was demoted
-to damping — "gradient demoted to a hint, ζ small, never the driver."
-It is now re-promoted, but as a MAGNITUDE OF AVAILABLE POTENTIAL, never
-as a direction of travel. It answers *how much is here*, never *which
-way is downhill*. The old guard was placed on this term while descent
-leaked in through the scoring rule; under this law there is no scoring
-rule to leak through.
+1. **Extent** — `Δ'_ij,l = Δ_ij,l − Δ_0j,l + Δ_0i,l`. Anchoring at
+   vertex 0 sends every frame-induced relation to exactly zero; "the
+   surviving entries are the frame-free content." This fixes WHAT the
+   dimension is: gauge vanishes, structure remains.
+2. **Scale** — integer normalization by `lcm(denominators) /
+   gcd(numerators)`, after which "every coordinate becomes an integer
+   and the representative is scale-canonical." This fixes HOW FAR the
+   dimension extends. The scale is derived, never chosen.
+
+Extent and scale together ARE the scope of a dimension, and the
+reduction produces both without ever consulting a potential.
+
+**Why ∇V must be kept out of the scoping — the hole this closes.** `V`
+is a CHOSEN potential. If `∇V` scoped the dimensions, structure would
+become an artifact of that choice, and a dimension carrying little
+potential could be scoped OUT of existence — silently, with no receipt.
+That is precisely the discard the whole 2026-08-01 correction was
+fighting, re-entering through the back door. Under this ruling a
+dimension exists because the algebra found it, not because the potential
+rewarded it.
+
+**What `∇V` does instead.** Its maximum potential is OVERLAID onto
+dimensions the reduction has already scoped — reporting what each still
+offers, never defining or bounding it:
+
+    on each scoped dimension a:   c_a  =  the maximum potential of ∇V on a
+
+`∇V` inverts role: it was damping ("gradient demoted to a hint, ζ small,
+never the driver"), and it returns as a MAGNITUDE OF AVAILABLE
+POTENTIAL. It answers *how much is here*; it never answers *which way*,
+and it never answers *how big the dimension is*.
 
 ### 4d. The polynomial union — "no two parts cut out" **[DERIVED]**
 
