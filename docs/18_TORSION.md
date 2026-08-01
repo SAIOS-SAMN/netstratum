@@ -1079,8 +1079,8 @@ is not a mechanism.
 
 | claim | why not local | where it lives |
 |---|---|---|
-| **Art. III `Ξ` window** — `deeds/(1+ΔD)` over 60 ticks | spans many steps | `scribe` / `lens` |
-| **Art. III allocation** — topicality `T_k`, the Eclipse | a policy over many actors | conductor / mesh |
+| **Art. III window reading** — deeds against rank that did not grow, over 60 ticks | spans many steps | `scribe` / `lens` |
+| **Art. III allocation** — the Eclipse, as claim-revocation | a policy over many actors | conductor / mesh |
 | **§2e traverse congruence** — `α ≅ Ω` | spans a whole chain | `lens` over the spine |
 | **§2c union** — one `Δ`, two complementary projections | a property of one state's algebra, already computed | `rfa_core::boundary` + `capacity` (landed) |
 | **§2d THE SIGN LAW** — egress / ingress / balanced | a per-vertex reading of one state | `rfa_core::capacity` (`divergence`, `egress`) |
