@@ -111,6 +111,7 @@ name = "kernel"
 version = "0.1.0"
 dependencies = [
  "cfe",
+ "rfa-core",
  "solver",
  "solver-verify",
 ]

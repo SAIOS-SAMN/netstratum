@@ -10,6 +10,12 @@ cfe = { path = "../cfe" }
 # verify_work on the opaque payload, never parses it — the arrow
 # stays one-way (kernel → sealed math; nothing imports upward).
 solver-verify = { path = "../solver-verify" }
+# THE BRIDGE (Task #25): the kernel projects committed state onto the
+# relational tensor and calls the sealed reduction. rfa-core stays
+# GAME-BLIND (it imports cfe::ratio only) — the projection lives here,
+# so the arrow remains one-way: kernel → rfa-core → cfe::ratio. The
+# recurrence guard's kernel_allowed set is amended in the same landing.
+rfa-core = { path = "../rfa-core" }
 
 [dev-dependencies]
 # The PROVER — dev-only, for the witnesses' honest fixtures (a real

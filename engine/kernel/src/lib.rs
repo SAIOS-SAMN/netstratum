@@ -30,6 +30,8 @@
 //! CHARTER §11 clause 2 guards that the growth is amendment-shaped and
 //! that no state semantics ever live outside this function.
 
+pub mod bridge;
+
 use cfe::dop::{ClosureEvent, Resource};
 use cfe::ipsal::Scope;
 use cfe::ratio::{ratio, Ratio};

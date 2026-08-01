@@ -151,7 +151,12 @@ fn the_arrow_law_holds() {
     let root = workspace_root();
     // The kernel's allowed runtime imports. Grows ONLY by amendment —
     // U2 adds "rfa-core" in its own landing, editing this line.
-    let kernel_allowed = ["cfe", "solver-verify"];
+    // THE BRIDGE (Task #25, 2026-08-01): rfa-core enters the sealed set
+    // — the amendment this line exists to make structural. The kernel
+    // projects committed state onto the relational tensor and calls
+    // the sealed reduction; rfa-core stays game-blind (cfe::ratio only),
+    // so the arrow is still one-way.
+    let kernel_allowed = ["cfe", "solver-verify", "rfa-core"];
     for dep in runtime_deps(&root.join("engine/kernel/Cargo.toml")) {
         assert!(
             kernel_allowed.contains(&dep.as_str()),
