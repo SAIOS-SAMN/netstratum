@@ -179,9 +179,14 @@ squares were barred as the mathematics of minimization, and L1 was a
 smaller cage of the same kind. Scalar aggregates survive only where a
 reading is reported to a human lens, never where the system computes.
 
-**The union is indecomposable** (18 §2c): `U* = D(V) ⊕ V(D)`, a
-non-destructive direct sum — no sub-component is discarded or
-truncated, and no guard may be placed on half of it.
+**The union is ONE Δ WITH TWO COMPLEMENTARY PROJECTIONS** (18 §2c,
+restated 2026-08-01; the former `U* = D(V) ⊕ V(D)` is STRUCK — nothing
+computed it, and `⊕` named a FREE join where the algebra holds a
+CONSTRAINED one). `D = rank(Δ)` and `∂Δ = boundary(Δ)` are projections
+of one fixed `Δ`, summing to it: neither moves without the other moving
+oppositely. No guard may be placed on half of it because it has no
+halves — which is what the direct-sum form was trying, and failing, to
+assert.
 
 **D2 · Capacity is MEASURED, never allocated.** INSCRIBED. D is a
 READING of the universe's own structure, not a quota anything must fit
@@ -296,9 +301,9 @@ unearned claim is vacated**, both ends bounded, neither optional; and
 operator ruling 2026-07-30; inscribed here 2026-08-01). Syntropy and
 entropy are *opposite ends of one closed, coned manifold — no open
 ends, every expansion on one leg bounded by the opposing force on the
-other*. D3 (emission, the egress reading) is the syntropic leg. This is the SAME
-statement as 18 §2c's `U* = D(V) ⊕ V(D)` read on one axis — the direct
-sum is non-destructive precisely because neither leg runs free of the
+other*. D3 (emission, the egress reading) is the syntropic leg. This is
+the SAME statement as 18 §2c's union read on one axis — the constrained
+join is non-destructive precisely because neither leg runs free of the
 other. The thermal instance is T3, the behavioural instance is S1, and
 no leg of any of them may be read alone (§6).
 
