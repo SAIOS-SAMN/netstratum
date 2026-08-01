@@ -1,8 +1,8 @@
 {
  "_ratified": "2026-07-31 by the operator (15_TAXON §6) — the migration wave seals from this table; class codes per 15 §2, clade codes per 15 §3; branches inherit the root class through the lineage DAG",
  "aerie": {"class": 5, "clade": 15},
- "agarthan": {"class": 2, "clade": 4},
- "anunnaki": {"class": 7, "clade": 2},
+ "chasmolith": {"class": 2, "clade": 4},
+ "eriduan": {"class": 7, "clade": 2},
  "archon": {"class": 4, "clade": 3},
  "basaltvault": {"class": 2, "clade": 4},
  "bloomdeep": {"class": 5, "clade": 7},

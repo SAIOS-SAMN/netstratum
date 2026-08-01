@@ -6,6 +6,13 @@ description = "The heartbeat — autonomous civilizations play their colonies, g
 
 [dependencies]
 cfe = { path = "../cfe" }
+# A1 — CLOSING THE PoUW LOOP (2026-08-01). The conductor is a CLIENT of
+# units (16_UNIT §2), and clients import the kernel. It reads
+# `mint_bound` so the PROPOSER computes the lawful amount from the SAME
+# ruled ladder the judge enforces (call-not-copy, CHARTER §0b), and
+# `solver-verify` to encode the proof the deed carries whole.
+kernel = { path = "../kernel" }
+solver-verify = { path = "../solver-verify" }
 # #36 kernel-observed play: the beat chains its committed state —
 # the codec produces the bytes, the spine records them.
 codec = { path = "../codec" }
