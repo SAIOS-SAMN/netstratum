@@ -167,12 +167,42 @@ over `(i,j,k)` is non-zero, `Δ ∉ Z¹`, so `Δ` has no cohomology class —
 and D4's floor `ext_x(Π_G(Δ(V)))` is then reading a reduction of
 something that has no well-defined class to reduce to.
 
-So the coherence reading is not a progress measure and not a target; it
-is the **well-formedness condition that makes the capacity floor
-meaningful**. A non-zero coherence reading says the relational data
-contradicts itself on some triple — the state is malformed, not
-"far from done." It refuses, or the inconsistency is receipted. It is
-never scored, never minimized, never descended.
+**THIS SECTION'S ORIGINAL CLAIM IS STRUCK (operator ruling 2026-08-01).**
+It said the coherence reading is "the well-formedness condition that
+makes the capacity floor meaningful" — that it GATES. **That is still
+giving `C` a pseudo-function, and it was a regression.** A gatekeeper is
+an agent; `C` has no agency of any kind.
+
+> `C` has zero operational function. It isn't a gauge, it isn't a score,
+> and it doesn't get to act as a gatekeeper.
+
+**What actually holds the ground — three primitives, no `C` anywhere:**
+
+1. **Exact algebraic reduction.** `Π_G(Δ(Ω))` runs on `BigRational`
+   linear systems and is TOTAL — it does not test its input, it projects
+   it. The only question it answers is structural: is a relation a
+   coboundary, or a non-trivial cocycle defect in `H¹`? That is a
+   classification the reduction OUTPUTS, never an evaluation it performs.
+2. **Witness-carried proofs.** Validity is binary and deterministic: a
+   transition carries a valid O(step) `OrbitWitness` or it does not
+   (`verify_orbit_witness`, landed `835d03b`). No scalar is consulted to
+   decide.
+3. **The unpartitioned extent read.** `ext_x` measures before and after
+   reduction. A measurement, never a metric to optimize or descend.
+
+None of the three computes `C`, and no engine path does. My §5 argument
+— that `H¹ = Z¹/B¹` needs cocycles, so something must check — was about
+textbook cohomology as a quotient. **The engine never forms that
+quotient.** It reduces to a canonical representative and reads its
+extent, and `coboundary_reduce` is total on any `Delta`. The gate I
+insisted on is required by no operation, and §11 had already said the
+right thing: non-composition ROOTS, it is not refused. §5 then
+re-introduced the refusal one section later — the contradiction was
+inside this document.
+
+What survives of §5: `C = Σ|R|` is an L1 collapse of a per-residual
+distinction, it discards which triple broke and by how much, and it is
+therefore a LENS reading and nothing else. That is all it ever was.
 
 **THE PREDICATE AND THE COLLAPSE ARE DIFFERENT OBJECTS — this resolves
 the apparent conflict with Article I and §2b.** `18_TORSION` §2b bars

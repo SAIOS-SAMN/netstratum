@@ -189,6 +189,24 @@ forever).
 
 ## §4 U2 — KERNEL-FOLD (I6 whole; the singularity witnessed)
 
+**THE VERIFIER-ONLY BOUNDARY (operator ruling 2026-08-01; amends this
+rung).** The kernel's `rfa-core` dependency is the VERIFIER HALF ONLY.
+`orbit_lock` runs a bounded SEARCH over the operator space to `k_max`;
+the kernel is pure, total and cheap and **must never call it**. The
+split is U1a's, applied to the fold gate:
+
+    prover  (free, may be stochastic, chain-seeded so it stays replayable)
+            orbit_lock(a, b, operators, k_max) -> Option<OrbitWitness>
+    judge   (pure, total, O(step), no search, no k_max)
+            verify_orbit_witness(a, b, operators, &witness) -> bool
+
+`verify_orbit_witness` LANDED 2026-08-01 (`835d03b`, `rfa-core` 9/9
+green). A kernel arm may call it and nothing else from `fold`. Pinned by
+`a_presented_witness_verifies_without_searching`,
+`a_forged_witness_refuses`, and `absence_cannot_be_witnessed` — the last
+being why the MINTING branch must be the lock branch: only a lock can
+carry proof a judge can re-check.
+
 `rfa_core::orbit_lock(a, b, operators, k_max) -> Option<OrbitWitness>`
 re-derived from the v0.1 ancestor's `fold.rs` (`/opt/repos` — consult,
 NEVER port blindly). **TWO translation laws bind the derivation:** the

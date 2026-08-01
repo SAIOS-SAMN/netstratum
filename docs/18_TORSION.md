@@ -470,8 +470,8 @@ itself.
 
 *Any process, narrative, or structure that induces closed zero-gradient
 loops (`∮Θ = 0`) while expanding cosmetic non-utility `Ξ_cosmetic`
-shall suffer immediate total Eclipse. The topicality function `T_k`
-drops to zero, stripping the entity of all capacity allocation.*
+shall suffer immediate total Eclipse: its ALLOCATION CLAIM is VACATED
+from the frame. The claim is revoked; the degree is never destroyed.*
 
 **This is the load-bearing article.** It is the law that makes
 narrative authority worthless: titles, secrecy, lore and tradition
@@ -495,20 +495,47 @@ a window in which deeds were emitted and capacity did not grow.
 
     the loop trap:   deeds(w) > 0  ∧  ΔD(w) = 0
 
-**Topicality, inverse-proportioned.**
+**Topicality — `T_k` IS STRUCK** (operator ruling 2026-08-01):
 
-    T_k  =  α_k · uplift_k / (1 + β_k · Ξ(w))     exact rational, α β bounded
+    STRUCK:  T_k  =  α_k · uplift_k / (1 + β_k · Ξ(w))
 
-As `Ξ → 0`, `T_k → α_k · uplift_k` — full allocation. As `Ξ` grows,
-`T_k → 0` — the entity keeps its lore and loses its capacity. `α` and
-`β` are bounded dynamic parameters (the dynamic parameter law), never
-bare literals.
+`T_k` was a SCALAR SURROGATE — a continuous allocation score with two
+tunable dials, which is the `C`-cage rebuilt under a new name. Every
+property that made C unlawful applies to it unchanged: it collapses
+structure to one number, it can be climbed, and `α`/`β` are exactly the
+"bounded dynamic parameters" a descent needs to be tuned. An article
+written to outlaw scalar authority cannot enforce itself with a scalar.
 
-**The Eclipse.** The mask holds cosmetic non-utility out of every
-allocation: an eclipsed entity still acts, still emits receipts, still
-tells its story — and receives nothing. It is never barred and never
-deleted (guardrail 6 holds: no actor is ever excluded). It is simply
-not paid.
+**The two altitudes, replacing it** (`17_CAPACITY` §13d — law is
+deterministic, dynamics are not, and the kernel never scores):
+
+1. **KERNEL, local and exact, O(step).** A minting deed carries
+   `ΔD > 0`, verified against its witness, or `lawful()` REFUSES it.
+   Per-step, per-deed, binary. No window, no accumulation, no parameter.
+   **This is the whole of what the judge does about cosmetics**, and it
+   is the FIRST LINE above restated as a check the kernel can run.
+2. **LENS, global and windowed, never in the kernel.** `Ξ(w)` is read
+   over the year voice by the observing surface. It informs the
+   allocation FRAME; it never enters `lawful()`, never gates a
+   commitment, and never multiplies anything.
+
+**The Eclipse is CLAIM-REVOCATION, not a score.** When the lens reads
+the loop trap, D4 VACATES the entity's allocation claim from the frame
+(`9bd3b9f`). The act is binary — the claim stands, or it is vacated —
+and it touches nothing else:
+
+- **The degree is preserved.** `D` is never lowered, deleted, or decayed
+  by an Eclipse. Article IV holds (capacity never retreats) and I6 holds
+  (*no difference dies without account*). What is revoked is an
+  ILLEGITIMATE CLAIM ON ALLOCATION, which was never structure.
+- **The actor is preserved.** An eclipsed entity still acts, still emits
+  receipts, still tells its story — and receives nothing. Never barred,
+  never deleted (guardrail 6: no actor is ever excluded). It is simply
+  not paid.
+- **Reversible by construction.** A vacated claim is not a punishment
+  with a duration; the moment the entity opens genuine capacity again,
+  the claim is re-established by the same reading that vacated it.
+  Nothing needs forgiving because nothing was taken.
 
 **`Ξ` AND `ΔD` ARE READINGS, NEVER OBJECTIVES** (operator correction
 2026-08-01). This clause is load-bearing and the article is unsafe
