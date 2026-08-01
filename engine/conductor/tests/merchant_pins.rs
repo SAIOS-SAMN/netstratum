@@ -8,7 +8,7 @@ use cfe::dop::{ClosureEvent, Resource, ZoneKind};
 use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::StarClass;
 use cfe::world::FIRST_ORB;
-use conductor::{merchant_step, Egregore, EgregoreSpec, Policy};
+use conductor::{merchant_step, Polity, PolitySpec, Policy};
 use ledger::registry::{Civilization, Registry};
 use ledger::Ledger;
 use std::path::PathBuf;
@@ -19,8 +19,8 @@ fn scratch(name: &str) -> PathBuf {
     dir
 }
 
-fn seat(sigil: &str, x: i64) -> EgregoreSpec {
-    EgregoreSpec {
+fn seat(sigil: &str, x: i64) -> PolitySpec {
+    PolitySpec {
         civilization: Civilization {
             name: sigil.to_string(),
             sigil: sigil.to_string(),
@@ -46,8 +46,8 @@ fn seat(sigil: &str, x: i64) -> EgregoreSpec {
     }
 }
 
-fn banked(egregore: &Egregore, resource: Resource) -> Ratio {
-    egregore.world.orb().unwrap().banked_amount(resource)
+fn banked(polity: &Polity, resource: Resource) -> Ratio {
+    polity.world.orb().unwrap().banked_amount(resource)
 }
 
 #[test]
@@ -57,9 +57,9 @@ fn the_caravan_bridges_the_walled_pair_at_a_profit() {
     let book = Ledger::at(root.join("worlds"));
     // The geometry: A and B sit 70 apart — walled direct (70/64 ≥ 1);
     // M sits midway, 35 to each (melt 35/64 per leg).
-    let mut miner = Egregore::genesis(seat("lodefar", 0), &registry, &book);
-    let mut grower = Egregore::genesis(seat("mossfar", 70), &registry, &book);
-    let mut caravan = Egregore::genesis(seat("waymid", 35), &registry, &book);
+    let mut miner = Polity::genesis(seat("lodefar", 0), &registry, &book);
+    let mut grower = Polity::genesis(seat("mossfar", 70), &registry, &book);
+    let mut caravan = Polity::genesis(seat("waymid", 35), &registry, &book);
     miner.world.zone(0, ZoneKind::Extractor).expect("zones");
     miner.world.zone(1, ZoneKind::Extractor).expect("zones");
     grower.world.zone(0, ZoneKind::Habitat).expect("zones");
@@ -126,9 +126,9 @@ fn the_caravan_bridges_the_walled_pair_at_a_profit() {
     let root = scratch("no-wall");
     let registry = Registry::at(root.join("registry"));
     let book = Ledger::at(root.join("worlds"));
-    let mut near_a = Egregore::genesis(seat("nearlode", 0), &registry, &book);
-    let mut near_b = Egregore::genesis(seat("nearmoss", 10), &registry, &book);
-    let near_m = Egregore::genesis(seat("nearway", 5), &registry, &book);
+    let mut near_a = Polity::genesis(seat("nearlode", 0), &registry, &book);
+    let mut near_b = Polity::genesis(seat("nearmoss", 10), &registry, &book);
+    let near_m = Polity::genesis(seat("nearway", 5), &registry, &book);
     near_a
         .world
         .post_offer(FIRST_ORB, Resource::Iron, ratio(12, 1), Resource::Biomass, ratio(4, 1), 1)

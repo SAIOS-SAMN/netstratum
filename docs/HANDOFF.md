@@ -142,7 +142,7 @@ cargo test -p cfe --test world_<name>                   # one witness file
 printf 'found meridian\n…\nquit\n' | cargo run -p netstratum-cli -- --plain
 ```
 
-The conductor's converge/egregore suites drive real archives and take
+The conductor's converge/polity suites drive real archives and take
 ~3–4 minutes; the rest is instant. `var/` is runtime state, never
 tracked, never a source of truth.
 

@@ -9,8 +9,8 @@ use cfe::dop::{Resource, ZoneKind};
 use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
 use conductor::{
-    founding_egregores, joule_runway_allows, load_egregores, write_default_egregores, EgregoreSpec,
-    Egregore, Policy,
+    founding_polities, joule_runway_allows, load_polities, write_default_polities, PolitySpec,
+    Polity, Policy,
 };
 use ledger::registry::{Civilization, Registry};
 use ledger::Ledger;
@@ -19,22 +19,22 @@ use std::path::PathBuf;
 
 fn scratch(name: &str) -> PathBuf {
     let dir = std::env::temp_dir().join(format!(
-        "egregore-therm-pin-{name}-{}",
+        "polity-therm-pin-{name}-{}",
         std::process::id()
     ));
     let _ = fs::remove_dir_all(&dir);
     dir
 }
 
-fn kind_count(egregore: &Egregore, kind: ZoneKind) -> usize {
-    egregore.world
+fn kind_count(polity: &Polity, kind: ZoneKind) -> usize {
+    polity.world
         .orb()
         .map(|orb| orb.zones.iter().filter(|z| z.kind == kind).count())
         .unwrap_or(0)
 }
 
-fn zones(egregore: &Egregore) -> usize {
-    egregore.world.orb().map(|orb| orb.zones.len()).unwrap_or(0)
+fn zones(polity: &Polity) -> usize {
+    polity.world.orb().map(|orb| orb.zones.len()).unwrap_or(0)
 }
 
 /// Thermal genesis is DETERMINISTIC: the same spec founds the same
@@ -43,15 +43,15 @@ fn zones(egregore: &Egregore) -> usize {
 /// receipts seed the beacon) and the pinned path (explicit fields).
 #[test]
 fn thermal_genesis_is_deterministic() {
-    let found = |name: &str, spec: EgregoreSpec| -> Egregore {
+    let found = |name: &str, spec: PolitySpec| -> Polity {
         let root = scratch(name);
-        Egregore::genesis(
+        Polity::genesis(
             spec,
             &Registry::at(root.join("registry")),
             &Ledger::at(root.join("worlds")),
         )
     };
-    let derived = founding_egregores()
+    let derived = founding_polities()
         .into_iter()
         .find(|s| s.star.is_none())
         .expect("a derived (axis-sited) seat is seeded");
@@ -69,7 +69,7 @@ fn thermal_genesis_is_deterministic() {
         "same spec, same star/site receipts, byte-for-byte"
     );
 
-    let pinned = founding_egregores()
+    let pinned = founding_polities()
         .into_iter()
         .find(|s| s.star == Some(StarClass::M))
         .expect("the Frost seat is seeded");
@@ -94,7 +94,7 @@ fn the_joule_runway_defers_the_frost() {
     let root = scratch("runway");
     let registry = Registry::at(root.join("registry"));
     let book = Ledger::at(root.join("worlds"));
-    let seat = |sigil: &str, star: StarClass| EgregoreSpec {
+    let seat = |sigil: &str, star: StarClass| PolitySpec {
         civilization: Civilization {
             name: sigil.to_string(),
             sigil: sigil.to_string(),
@@ -118,8 +118,8 @@ fn the_joule_runway_defers_the_frost() {
         orbit: Some(ratio(1, 1)),
         gauge: None,
     };
-    let mut frost = Egregore::genesis(seat("stillside", StarClass::M), &registry, &book);
-    let mut mesic = Egregore::genesis(seat("plainside", StarClass::G), &registry, &book);
+    let mut frost = Polity::genesis(seat("stillside", StarClass::M), &registry, &book);
+    let mut mesic = Polity::genesis(seat("plainside", StarClass::G), &registry, &book);
     for _ in 0..12 {
         frost.cycle(&book, &registry);
         mesic.cycle(&book, &registry);
@@ -154,16 +154,16 @@ fn the_joule_runway_defers_the_frost() {
 
 
 /// The operator's file: thermal fields round-trip through the seeded
-/// egregores.json; files WITHOUT thermal fields (the pre-BOT-THERM shape)
+/// polities.json; files WITHOUT thermal fields (the pre-BOT-THERM shape)
 /// still load and found thermally-derived worlds — compat held.
 #[test]
 fn old_bots_files_still_load_and_derive() {
     let root = scratch("compat");
     fs::create_dir_all(&root).expect("scratch");
-    let path = root.join("egregores.json");
-    write_default_egregores(&path).expect("seeds");
-    let seeded = load_egregores(&path).expect("loads");
-    assert_eq!(seeded.len(), founding_egregores().len());
+    let path = root.join("polities.json");
+    write_default_polities(&path).expect("seeds");
+    let seeded = load_polities(&path).expect("loads");
+    assert_eq!(seeded.len(), founding_polities().len());
     assert!(
         seeded.iter().any(|s| s.star == Some(StarClass::M)),
         "the Frost seat survives the round-trip"
@@ -191,21 +191,21 @@ fn old_bots_files_still_load_and_derive() {
            "colony":"alight","policy":"steady","x":"3","y":"1/2","z":"-4"}]"#,
     )
     .expect("writes");
-    let specs = load_egregores(&legacy).expect("the old shape still loads");
+    let specs = load_polities(&legacy).expect("the old shape still loads");
     assert!(
         specs[0].star.is_none() && specs[0].albedo.is_none() && specs[0].orbit.is_none(),
         "absent fields stay absent on the spec"
     );
 
     // …and its genesis derives a real sun and siting anyway.
-    let egregore = Egregore::genesis(
+    let polity = Polity::genesis(
         specs[0].clone(),
         &Registry::at(root.join("registry")),
         &Ledger::at(root.join("worlds")),
     );
-    assert!(egregore.world.star().is_some(), "the derived sun is commissioned");
+    assert!(polity.world.star().is_some(), "the derived sun is commissioned");
     assert!(
-        egregore.world.orb().expect("orb").thermal.is_some(),
+        polity.world.orb().expect("orb").thermal.is_some(),
         "the derived orbit is sited"
     );
 }

@@ -399,12 +399,12 @@ make the leap themselves, or not.
   archived eras converge into it; the old universe's record stands sealed
   beside it. **SEEDED AND BOOTED 2026-07-29:** 13 civilizations genesised
   (0 converged — no baggage); the four founding progenitors seated (one
-  seat each, 28 open); the roster preserved at `seeds/aeon1-egregores.json`
+  seat each, 28 open); the roster preserved at `seeds/aeon1-polities.json`
   (the var stays single-copy by the operator's standing ruling). The
   pre-solar seeds (Deepmat; Syzygy) use the documented dormant-siting form
   (albedo 1 — the sky commissioned, never known): 11 worlds carry their
   solar-leap receipt, those two carry none and stand shielded.
-- **The seed roster:** a new `egregores.json` — the four founding
+- **The seed roster:** a new `polities.json` — the four founding
   progenitors first (one seated per species, 28 seats open), then the
   founding Sovereign civilizations in operator order (file order is genesis
   order; waves append between runs).
@@ -415,7 +415,7 @@ make the leap themselves, or not.
 - **Wave 2 (2026-07-30, operator ruling):** the tardigrade line seated its
   own head — **Tunborn** (§2's fifth seat), station progenitor, rostered
   at `tun-reach` (Furnace-pinned like its line); Slagborn's lineage pointer
-  now resolves to it. The seed roster file `seeds/aeon1-egregores.json`
+  now resolves to it. The seed roster file `seeds/aeon1-polities.json`
   was CREATED this wave — it had been referenced here but never written
   (`var*/` is git-ignored; the seeds copy is the durable record).
 - **The substrate spread (§5a):** the seed roster should span the

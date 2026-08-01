@@ -3,12 +3,12 @@
 //! Usage:
 //!   conductor [--var var] [--cycles N] [--cadence SECONDS] [--fold]
 //!
-//! Egregore lore lives in `<var>/egregores.json` — seeded with the founding
+//! Polity lore lives in `<var>/polities.json` — seeded with the founding
 //! NPCs on first run, then the operator's file to edit freely.
 //! `--cycles 0` (default) beats forever at the cadence. Watch live:
 //!   python3 tools/observer.py --watch 2
 
-use conductor::{founding_egregores, load_egregores, observe_crossings, write_default_egregores, Egregore};
+use conductor::{founding_polities, load_polities, observe_crossings, write_default_polities, Polity};
 use ledger::registry::Registry;
 use ledger::Ledger;
 use std::path::PathBuf;
@@ -51,16 +51,22 @@ fn main() {
         }
     }
     std::fs::create_dir_all(&var_root).expect("var root");
-    let egregores_path = PathBuf::from(&var_root).join("egregores.json");
-    // Compat shim: an operator's pre-rename bots.json is honored —
-    // adopted once as egregores.json, never silently ignored.
-    let legacy = PathBuf::from(&var_root).join("bots.json");
-    if !egregores_path.exists() && legacy.exists() {
-        std::fs::rename(&legacy, &egregores_path).expect("adopt legacy bots.json");
-        println!("conductor: adopted legacy bots.json as egregores.json");
+    let polities_path = PathBuf::from(&var_root).join("polities.json");
+    // Compat shim: an operator's pre-rename roster is honored — adopted
+    // ONCE as polities.json, never silently ignored, never overwritten.
+    // Two generations of the name are carried, newest first: an
+    // existing universe keeps its roster across both renames without
+    // the operator touching a file.
+    for legacy_name in ["egregores.json", "bots.json"] {
+        let legacy = PathBuf::from(&var_root).join(legacy_name);
+        if !polities_path.exists() && legacy.exists() {
+            std::fs::rename(&legacy, &polities_path)
+                .unwrap_or_else(|_| panic!("adopt legacy {legacy_name}"));
+            println!("conductor: adopted legacy {legacy_name} as polities.json");
+        }
     }
-    write_default_egregores(&egregores_path).expect("seed egregores.json");
-    let specs = load_egregores(&egregores_path).unwrap_or_else(founding_egregores);
+    write_default_polities(&polities_path).expect("seed polities.json");
+    let specs = load_polities(&polities_path).unwrap_or_else(founding_polities);
 
     let registry = Registry::at(format!("{var_root}/registry"));
     let book = Ledger::at(format!("{var_root}/worlds"));
@@ -87,7 +93,7 @@ fn main() {
     // the base; without this the live board would stack onto the
     // folded aeons' height and recur.
     let live_base = cfe::world::wrap_gauge(cfe::ratio::ratio(eras.len() as i64, 12));
-    let mut worlds: Vec<Egregore> = specs
+    let mut worlds: Vec<Polity> = specs
         .into_iter()
         .map(|mut spec| {
             let opening = spec
@@ -95,13 +101,13 @@ fn main() {
                 .take()
                 .unwrap_or_else(|| cfe::ratio::ratio(0, 1));
             spec.gauge = Some(cfe::world::wrap_gauge(opening + live_base.clone()));
-            Egregore::genesis(spec, &registry, &book)
+            Polity::genesis(spec, &registry, &book)
         })
         .collect();
     println!(
         "conductor: {} civilizations from {} — {}",
         worlds.len(),
-        egregores_path.display(),
+        polities_path.display(),
         if cycles == 0 {
             format!("beating every {cadence_secs}s (Ctrl-C to stop)")
         } else {
@@ -160,11 +166,11 @@ fn main() {
             println!("beat {beat}: {line}");
         }
         let mut newborns = Vec::new();
-        for egregore in &mut worlds {
-            if egregore.penned {
+        for polity in &mut worlds {
+            if polity.penned {
                 continue;
             }
-            if let Some(spec) = egregore.cycle(&book, &registry) {
+            if let Some(spec) = polity.cycle(&book, &registry) {
                 newborns.push(spec);
             }
         }
@@ -177,7 +183,7 @@ fn main() {
                 spec.world_name,
                 spec.planet,
             );
-            worlds.push(Egregore::genesis(spec, &registry, &book));
+            worlds.push(Polity::genesis(spec, &registry, &book));
         }
         // OFFER-1a: the market beat — intents post, crossings clear
         // (one aperture pair each way, receipted both sides).
@@ -197,20 +203,20 @@ fn main() {
         if beat.is_multiple_of(scribe::journal::YEAR_TICKS) {
             // ROUTE-1: the year voice draws lane maintenance — an
             // unpaid lane lapses by receipt and raw space returns.
-            for egregore in worlds.iter_mut().filter(|e| !e.penned) {
-                for deal in egregore.world.maintain_routes(cfe::world::FIRST_ORB) {
+            for polity in worlds.iter_mut().filter(|e| !e.penned) {
+                for deal in polity.world.maintain_routes(cfe::world::FIRST_ORB) {
                     println!(
                         "beat {beat}: LANE {deal} LAPSES on {} — raw space takes the path back",
-                        egregore.spec.world_name
+                        polity.spec.world_name
                     );
                 }
             }
-            for egregore in worlds.iter().filter(|e| !e.penned) {
+            for polity in worlds.iter().filter(|e| !e.penned) {
                 let _ = scribe::record_journal(
                     &book,
-                    &egregore.spec.world_name,
-                    &egregore.world,
-                    &scribe::journal::Voice::of(&egregore.spec.civilization),
+                    &polity.spec.world_name,
+                    &polity.world,
+                    &scribe::journal::Voice::of(&polity.spec.civilization),
                 );
             }
             println!(

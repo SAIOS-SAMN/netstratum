@@ -9,7 +9,7 @@ use cfe::dop::{ClosureEvent, Resource, ZoneKind};
 use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::StarClass;
 use cfe::world::{replay, ActionRefused, World};
-use conductor::{Egregore, EgregoreSpec, Policy};
+use conductor::{Polity, PolitySpec, Policy};
 use ledger::registry::{Civilization, Registry};
 use ledger::Ledger;
 use std::fs;
@@ -64,7 +64,7 @@ fn the_survey_charters_the_sector_and_the_spent_lens_idles() {
     let root = scratch("arc");
     let registry = Registry::at(root.join("registry"));
     let book = Ledger::at(root.join("worlds"));
-    let spec = EgregoreSpec {
+    let spec = PolitySpec {
         civilization: Civilization {
             name: "Surveyor".into(),
             sigil: "surveyor".into(),
@@ -88,12 +88,12 @@ fn the_survey_charters_the_sector_and_the_spent_lens_idles() {
         orbit: Some(ratio(1, 1)),
         gauge: None,
     };
-    let mut egregore = Egregore::genesis(spec, &registry, &book);
+    let mut polity = Polity::genesis(spec, &registry, &book);
 
     // Earn the crystal chain the long way (02 §5 / NS-2 §1.5): the
     // extraction floor, four smelters feeding one synthesizer, the
     // resonator refining diamond into the lens's crystal.
-    let world = &mut egregore.world;
+    let world = &mut polity.world;
     // Interleaved E/H — extractors alone starve their own workers.
     for pair in 0..7u16 {
         earned("extractor", world, |w| w.zone(pair, ZoneKind::Extractor));
@@ -153,10 +153,10 @@ fn the_survey_charters_the_sector_and_the_spent_lens_idles() {
 
     // Rung 5 reached (the witness pins the wiring, not the research
     // grind) — one cycle runs the survey arc.
-    egregore.level = 5;
-    let _ = egregore.cycle(&book, &registry);
+    polity.level = 5;
+    let _ = polity.cycle(&book, &registry);
 
-    let receipts = egregore.world.chronicle().receipts();
+    let receipts = polity.world.chronicle().receipts();
     assert!(
         receipts.iter().any(|r| matches!(r.event, ClosureEvent::CrystalDrawn { .. })),
         "the draw receipted — the survey was paid for"
@@ -169,7 +169,7 @@ fn the_survey_charters_the_sector_and_the_spent_lens_idles() {
         })
         .collect();
     assert_eq!(chartered, vec!["first-lens-survey".to_string()], "the sector chartered once");
-    let survey_orb = egregore
+    let survey_orb = polity
         .world
         .committed()
         .orbs
@@ -184,8 +184,8 @@ fn the_survey_charters_the_sector_and_the_spent_lens_idles() {
 
     // The lens is spent: the next cycle's survey idles lawfully — no
     // second charter, no second draw (1/8 a tick regrows too slowly).
-    let _ = egregore.cycle(&book, &registry);
-    let draws = egregore
+    let _ = polity.cycle(&book, &registry);
+    let draws = polity
         .world
         .chronicle()
         .receipts()
@@ -193,7 +193,7 @@ fn the_survey_charters_the_sector_and_the_spent_lens_idles() {
         .filter(|r| matches!(r.event, ClosureEvent::CrystalDrawn { .. }))
         .count();
     assert_eq!(draws, 1, "one survey, one draw");
-    let charters = egregore
+    let charters = polity
         .world
         .chronicle()
         .receipts()
@@ -203,6 +203,6 @@ fn the_survey_charters_the_sector_and_the_spent_lens_idles() {
     assert_eq!(charters, 1, "the expansion is bounded by the draw");
 
     // SEAL B: the whole surveyed world replays.
-    let rebuilt = replay(egregore.world.chronicle());
-    assert_eq!(rebuilt, egregore.world.committed(), "replay MATCHES the surveyed world");
+    let rebuilt = replay(polity.world.chronicle());
+    assert_eq!(rebuilt, polity.world.committed(), "replay MATCHES the surveyed world");
 }

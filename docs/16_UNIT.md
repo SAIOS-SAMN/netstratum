@@ -48,7 +48,7 @@ The kernel CALLS the sealed math, never copies it (CHARTER §0b). The
 arrow direction stays one-way: kernel imports sealed math and cfe;
 spine, mesh, and clients import the kernel; nothing imports upward.
 
-**Outside the unit, by design:** the conductor (the egregore board is a
+**Outside the unit, by design:** the conductor (the polity board is a
 CLIENT of units, not an organ), the ledger's display halves (lenses,
 deletable), tools. The solver's SEARCH half is also outside — see §3.
 

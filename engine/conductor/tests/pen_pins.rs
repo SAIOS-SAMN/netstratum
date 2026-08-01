@@ -11,7 +11,7 @@ use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
 use cfe::vrp::{hand_of, CONDUCTOR_HAND};
 use cfe::world::World;
-use conductor::{pen_service, Egregore, EgregoreSpec, Policy};
+use conductor::{pen_service, Polity, PolitySpec, Policy};
 use ledger::registry::{Civilization, Registry};
 use ledger::Ledger;
 use std::path::PathBuf;
@@ -22,8 +22,8 @@ fn scratch(name: &str) -> PathBuf {
     dir
 }
 
-fn seat(sigil: &str) -> EgregoreSpec {
-    EgregoreSpec {
+fn seat(sigil: &str) -> PolitySpec {
+    PolitySpec {
         civilization: Civilization {
             name: sigil.to_string(),
             sigil: sigil.to_string(),
@@ -55,7 +55,7 @@ fn the_pen_passes_writes_and_returns() {
     let registry = Registry::at(root.join("registry"));
     let book = Ledger::at(root.join("worlds"));
     let control = root.join("conductor.ctl");
-    let mut board = vec![Egregore::genesis(seat("penhold"), &registry, &book)];
+    let mut board = vec![Polity::genesis(seat("penhold"), &registry, &book)];
     for _ in 0..3 {
         board[0].cycle(&book, &registry);
     }

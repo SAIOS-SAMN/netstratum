@@ -19,9 +19,13 @@
 //!   "converged" is struck from this crate — zero says the relations
 //!   compose, never that anything was finished or emptied.
 //! - [`coboundary_reduce`] — projection onto the canonical H¹
-//!   representative (strips coordinate distortion), then integer
-//!   normalization (lcm of denominators, gcd of numerators): the
-//!   irreducible form of the relational state.
+//!   representative of the OBSERVED relation graph (strips coordinate
+//!   distortion), then integer normalization (lcm of denominators, gcd
+//!   of numerators): the irreducible form of the relational state. The
+//!   projection runs over the ACTIVE SUPPORT only (DIRECTIVE 05) — an
+//!   unobserved pair is not a zero-valued relation, it is not a
+//!   relation, and evaluating it as zero both manufactures and destroys
+//!   structure. See [`Support`].
 //! - [`gates`] — the three validation gates every proposed operator
 //!   must pass: productivity, conservation, bounded magnitude.
 
@@ -34,8 +38,8 @@ pub mod reduce;
 pub use delta::{coherence_functional, for_each_residual, magnitude, Delta};
 pub use fold::{
     f_fold_star, judged_fold, orbit_lock, verify_orbit_witness, FoldVerdict, Operator,
-    OrbitWitness, QMatrix,
+    OrbitWitness, QMatrix, TorsionCause,
 };
 pub use gates::{validate_step, GateVerdict, StepBound};
 pub use rcf::{invariant_factors, rcf_hash, rcf_signature, QPoly, RcfSignature};
-pub use reduce::coboundary_reduce;
+pub use reduce::{coboundary_reduce, coboundary_reduce_over, Support};

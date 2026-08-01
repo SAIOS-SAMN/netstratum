@@ -207,7 +207,7 @@ fn no_new_read_back_path_ever() {
         "engine/ledger/src/registry.rs",
         "engine/conductor/src/lib.rs",
         "engine/conductor/src/main.rs",
-        "engine/conductor/src/egregores.rs",
+        "engine/conductor/src/polities.rs",
         "clients/cli/src/main.rs",
     ];
     let mut sources = Vec::new();

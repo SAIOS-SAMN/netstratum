@@ -1,17 +1,17 @@
-//! Lore lives in data, not source: egregore specs load from
-//! `<var>/egregores.json`; `write_default_egregores` seeds it once, and from
+//! Lore lives in data, not source: polity specs load from
+//! `<var>/polities.json`; `write_default_polities` seeds it once, and from
 //! then on the operator owns the file — edit, add, replace freely.
 //! The founding defaults below are the ONLY lore in Rust, and they
 //! exist solely to write that first file.
 
-use crate::{EgregoreSpec, Policy};
+use crate::{PolitySpec, Policy};
 use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::StarClass;
 use ledger::registry::Civilization;
 use std::path::Path;
 
 /// The founding NPCs (founder "conductor" — the observer marks ⚙).
-pub fn founding_egregores() -> Vec<EgregoreSpec> {
+pub fn founding_polities() -> Vec<PolitySpec> {
     let civ = |name: &str, sigil: &str, species: &str, motto: &str, d: &str, m: &str, p: &str| {
         Civilization {
             name: name.into(),
@@ -31,7 +31,7 @@ pub fn founding_egregores() -> Vec<EgregoreSpec> {
         // BOT-THERM: the Furnace seat, pinned openly in the file — a G
         // sun at half orbit under half albedo (stellar load 2, past
         // the mesic ceiling): the shells answer, the joules mint.
-        EgregoreSpec {
+        PolitySpec {
             civilization: civ(
                 "Slagborn", "slagborn", "tardigrade", "we eat what worlds discard",
                 "expansionist", "mineral", "planar",
@@ -49,7 +49,7 @@ pub fn founding_egregores() -> Vec<EgregoreSpec> {
         // The mesic seats carry NO thermal fields: their orbits derive
         // at genesis from the registry axes through the chronicle
         // beacon — the derived path stays exercised in every era.
-        EgregoreSpec {
+        PolitySpec {
             civilization: civ(
                 "Echowright", "deep-chorus", "blue whale", "we heard it before you saw it",
                 "epicurean", "biotic", "harmonic",
@@ -64,7 +64,7 @@ pub fn founding_egregores() -> Vec<EgregoreSpec> {
             orbit: None,
             gauge: None,
         },
-        EgregoreSpec {
+        PolitySpec {
             civilization: civ(
                 "Hivelight", "hivelight", "honeybee", "the comb computes",
                 "empiricist", "biotic", "volumetric",
@@ -79,7 +79,7 @@ pub fn founding_egregores() -> Vec<EgregoreSpec> {
             orbit: None,
             gauge: None,
         },
-        EgregoreSpec {
+        PolitySpec {
             civilization: civ(
                 "Eightfold", "eightfold", "octopus", "eight arms, one argument",
                 "epicurean", "biotic", "volumetric",
@@ -97,7 +97,7 @@ pub fn founding_egregores() -> Vec<EgregoreSpec> {
         // BOT-THERM: the Frost seat — an M sun at unit orbit lands in
         // the cryogenic vault (05 §1.2): sink banks, joules are life,
         // and the freeze-lock is honestly on the table.
-        EgregoreSpec {
+        PolitySpec {
             civilization: civ(
                 "Frostwright", "frostwright", "wood frog", "we bank what the fire cannot hold",
                 "empiricist", "biotic", "planar",
@@ -115,26 +115,26 @@ pub fn founding_egregores() -> Vec<EgregoreSpec> {
     ]
 }
 
-/// Seed `<path>` with the founding egregores (refuses to overwrite — the
+/// Seed `<path>` with the founding polities (refuses to overwrite — the
 /// operator's edits are never clobbered).
-pub fn write_default_egregores(path: &Path) -> std::io::Result<()> {
+pub fn write_default_polities(path: &Path) -> std::io::Result<()> {
     if path.exists() {
         return Ok(());
     }
     let mut out = String::from("[\n");
-    let egregores = founding_egregores();
-    for (i, egregore) in egregores.iter().enumerate() {
-        let c = &egregore.civilization;
+    let polities = founding_polities();
+    for (i, polity) in polities.iter().enumerate() {
+        let c = &polity.civilization;
         // BOT-THERM: the optional siting fields — written only when
         // pinned, so derived seats stay derived in the seeded file.
         let mut thermal = String::new();
-        if let Some(class) = egregore.star {
+        if let Some(class) = polity.star {
             thermal.push_str(&format!(",\"star\":\"{}\"", star_word(class)));
         }
-        if let Some(albedo) = &egregore.albedo {
+        if let Some(albedo) = &polity.albedo {
             thermal.push_str(&format!(",\"albedo\":\"{}\"", ratio_text(albedo)));
         }
-        if let Some(orbit) = &egregore.orbit {
+        if let Some(orbit) = &polity.orbit {
             thermal.push_str(&format!(",\"orbit\":\"{}\"", ratio_text(orbit)));
         }
         out.push_str(&format!(
@@ -144,27 +144,27 @@ pub fn write_default_egregores(path: &Path) -> std::io::Result<()> {
              \"x\":\"{}\",\"y\":\"{}\",\"z\":\"{}\"{}}}{}\n",
             c.name, c.sigil, c.species, c.motto,
             c.disposition, c.metabolism, c.perception,
-            egregore.world_name, egregore.planet, egregore.colony, egregore.policy.describe(),
-            ratio_text(&egregore.position.0), ratio_text(&egregore.position.1),
-            ratio_text(&egregore.position.2),
+            polity.world_name, polity.planet, polity.colony, polity.policy.describe(),
+            ratio_text(&polity.position.0), ratio_text(&polity.position.1),
+            ratio_text(&polity.position.2),
             thermal,
-            if i + 1 < egregores.len() { "," } else { "" },
+            if i + 1 < polities.len() { "," } else { "" },
         ));
     }
     out.push_str("]\n");
     std::fs::write(path, out)
 }
 
-/// Load egregore specs from a egregores.json written by `write_default_egregores`
+/// Load polity specs from a polities.json written by `write_default_polities`
 /// (or hand-edited to the same flat shape). Unparseable entries are
 /// skipped with a stderr note, never silently.
-pub fn load_egregores(path: &Path) -> Option<Vec<EgregoreSpec>> {
+pub fn load_polities(path: &Path) -> Option<Vec<PolitySpec>> {
     let text = std::fs::read_to_string(path).ok()?;
     let mut specs = Vec::new();
     for object in split_objects(&text) {
         let field = |key: &str| extract_string(&object, key);
         let parsed = (|| {
-            Some(EgregoreSpec {
+            Some(PolitySpec {
                 civilization: Civilization {
                     name: field("name")?,
                     sigil: field("sigil").or_else(|| field("slug"))?,
@@ -201,7 +201,7 @@ pub fn load_egregores(path: &Path) -> Option<Vec<EgregoreSpec>> {
         })();
         match parsed {
             Some(spec) => specs.push(spec),
-            None => eprintln!("conductor: skipping malformed egregore entry: {object}"),
+            None => eprintln!("conductor: skipping malformed polity entry: {object}"),
         }
     }
     (!specs.is_empty()).then_some(specs)

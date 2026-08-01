@@ -456,7 +456,7 @@ address, always: the galaxy is structurally rip-proof from inside any
 nursery, however immature the play.
 
 NPCs and conductors track a nursery KNOWINGLY — branch coordinates
-are addressable, so an egregore can follow a divergence and the
+are addressable, so an polity can follow a divergence and the
 mainline as two named paths and never decohere on re-convergence:
 following was never a second claim on one address.
 

@@ -35,17 +35,15 @@ fn bond(source: u64, target: u64, rate: i64) -> Bond {
 #[test]
 fn a_world_that_relates_nothing_carries_no_structure() {
     // Article II's vacuous case, measured: no obligations, no
-    // structure, and the reading is DEFINED (a zero cocycle defect) —
-    // so this is a true zero, not an unmeasurable one.
+    // structure. `D = 0` denies standing — and the reading is always
+    // available (DIRECTIVE 03: the defect is a reading, never a gate).
     let read = read_entangled(&orbs(3));
     assert_eq!(read.capacity, 0, "no obligations, no surviving structure");
     assert_eq!(read.defect, ratio(0, 1), "nothing to fail to compose");
-    assert!(read.capacity_is_defined(), "a zero cocycle IS a cocycle");
 
     // A lone orb relates to nothing at all, lawfully.
     let read = read_entangled(&orbs(1));
     assert_eq!(read.capacity, 0);
-    assert!(read.capacity_is_defined());
 }
 
 #[test]
@@ -90,8 +88,29 @@ fn obligations_that_compose_carry_no_surviving_structure() {
 
     let read = read_entangled(&state);
     assert_eq!(read.defect, ratio(0, 1), "5 = 2 + 3: the triangle composes");
-    assert!(read.capacity_is_defined(), "a cocycle has a class to reduce to");
     assert_eq!(read.capacity, 0, "composing obligation is pure frame");
+}
+
+#[test]
+fn a_tree_of_obligations_carries_no_capacity() {
+    // DIRECTIVE 05, at the bridge. 1→2 and 2→3 are observed; 1→3 is
+    // NOT. That is a spanning tree — E − V + C = 2 − 3 + 1 = 0 — so it
+    // holds no independent cycle and no capacity.
+    //
+    // Before support masking the reduction read the absent (1,3) pair
+    // as a real zero, anchored it at vertex 0, and manufactured a
+    // non-zero survivor: a tree reported capacity 1, and Article II
+    // would have granted standing to a world with no structure.
+    let mut state = orbs(3);
+    state.bonds = vec![bond(1, 2, 2), bond(2, 3, 3)];
+
+    let read = read_entangled(&state);
+    assert_eq!(read.capacity, 0, "an unobserved pair is not a zero-valued relation");
+
+    // Close the cycle with a non-composing direct obligation and the
+    // structure appears — one independent cycle, capacity 1.
+    state.bonds.push(bond(1, 3, 9));
+    assert_eq!(read_entangled(&state).capacity, 1);
 }
 
 #[test]
@@ -103,10 +122,11 @@ fn obligations_that_do_not_compose_carry_strain() {
 
     let read = read_entangled(&state);
     assert!(read.defect > ratio(0, 1), "a non-composing triangle carries defect");
-    assert!(
-        !read.capacity_is_defined(),
-        "Δ ∉ Z¹ — there is no H¹ class for the reduction to land in"
-    );
+
+    // DIRECTIVE 03: the defect is a READING, never a gate. Capacity is
+    // still measured, and non-composition ROOTS — it carries structure
+    // and grants standing rather than being refused as ill-formed.
+    assert_eq!(read.capacity, 1, "the strain IS the capacity, not a disqualification");
 }
 
 #[test]
