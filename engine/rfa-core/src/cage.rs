@@ -83,6 +83,42 @@
 //! slots are named so the shape is honest; the debt is recorded rather
 //! than papered over.
 //!
+//! ## THE DOOR — calling IN, withdrawing OUT
+//!
+//! (Operator ruling 2026-08-01.) The cage is not only a quarantine, it
+//! is a WORKSHOP. Worlds may call INTO it to run algorithmic potentials
+//! — float pipelines, GPU kernels, heuristics, sampling, anything a
+//! deterministic path could never hold — and withdraw ANSWERS, without
+//! the approximation spreading outward.
+//!
+//! **The law that makes this safe is one sentence: approximation may
+//! PROPOSE; only exactness may DISPOSE.**
+//!
+//! This is U1a's prover/verifier split generalised from solving to
+//! compute. There, `solver` searches by any means it likes and
+//! `verify_work` re-forges, re-applies and re-chains EXACTLY — the
+//! search may be a GPU grinding floats, and the judgment never touches
+//! one. The same shape holds here:
+//!
+//! ```text
+//! call in    →  the inside may use ANY means. No purity is asked of
+//!               it, because nothing it produces is believed.
+//! withdraw   →  what leaves is a PROPOSAL: an exact candidate the
+//!               outside re-derives for itself.
+//! ```
+//!
+//! **A proposal is a GUESS, never evidence.** The outside does not
+//! accept it because the cage produced it; it re-checks it under its own
+//! exact rules, exactly as a mesh peer re-judges an incoming step rather
+//! than trusting its sender. A proposal that fails verification costs
+//! nothing, because nothing was ever trusted.
+//!
+//! **The disease cannot cross, and it is the TYPE that stops it, not
+//! care.** [`Proposal`] carries only `T: Exact`, and [`Exact`] is
+//! implemented for the exact carriers alone. A float has no `Exact`
+//! impl, so `Proposal<f64>` does not exist and an approximation cannot
+//! be named at the door — never mind carried through it.
+//!
 //! Nothing in a computing path may import from this module.
 
 use cfe::ratio::Ratio;
@@ -198,5 +234,49 @@ impl std::iter::Sum for Lens {
     /// `Lens`, so an accumulated C has nowhere to go but a rendering.
     fn sum<I: Iterator<Item = Lens>>(iter: I) -> Lens {
         iter.fold(Lens::of(Ratio::from(num_bigint::BigInt::from(0))), |a, b| a + b)
+    }
+}
+
+/// EXACTLY REPRESENTABLE — the marker that may cross the door.
+///
+/// Implemented for the exact carriers and for nothing else. A float, a
+/// sampled reading or any approximate type simply has no impl, so it
+/// cannot be placed in a [`Proposal`] and therefore cannot be withdrawn.
+/// The boundary is enforced by the type system rather than by anyone
+/// remembering that it should be.
+pub trait Exact {}
+
+impl Exact for Ratio {}
+impl Exact for i64 {}
+impl Exact for u64 {}
+impl Exact for usize {}
+impl Exact for bool {}
+impl<T: Exact> Exact for Vec<T> {}
+impl<T: Exact> Exact for Option<T> {}
+
+/// A CANDIDATE produced inside the cage by any means — and believed by
+/// nobody.
+///
+/// The inside may have used floats, a GPU, sampling or a heuristic to
+/// find this. None of that crosses: what crosses is an exact value the
+/// outside verifies for itself. `withdraw` deliberately hands back a
+/// bare candidate with no attestation attached, because attaching one
+/// would invite a caller to trust it.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Proposal<T: Exact> {
+    candidate: T,
+}
+
+impl<T: Exact> Proposal<T> {
+    /// Offered from INSIDE. No purity is asked of whatever produced it.
+    pub fn offer(candidate: T) -> Self {
+        Proposal { candidate }
+    }
+
+    /// The way OUT. What you receive is a GUESS: verify it under your
+    /// own exact rules before any rule reads it. Nothing about having
+    /// come through this door makes it true.
+    pub fn withdraw(self) -> T {
+        self.candidate
     }
 }

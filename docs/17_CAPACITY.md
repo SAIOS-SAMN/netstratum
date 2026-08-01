@@ -716,6 +716,54 @@ is parameterised BY the trace. "Keep the class instead of the trace"
 renames a scalar rather than avoiding one. The lawful move was never to
 avoid scalars — it is to forbid ORDERING them and keep them as IDENTITY.
 
+### §10ter.a THE DOOR — the cage as workshop, and C as its defence
+
+**LAW (operator ruling 2026-08-01).** The cage is not only a quarantine,
+it is a WORKSHOP. Worlds and civilizations may call INTO it to run
+algorithmic potentials — float pipelines, GPU kernels, heuristics,
+sampling — and withdraw ANSWERS and FUNCTIONS, without the approximation
+spreading outward.
+
+**One sentence carries it: approximation may PROPOSE; only exactness may
+DISPOSE.**
+
+This is U1a's prover/verifier split generalised from solving to compute.
+There, `solver` searches by any means and `verify_work` re-forges,
+re-applies and re-chains exactly — the search may be a GPU grinding
+floats and the judgment never touches one. The door is that shape made
+general:
+
+```text
+call in    →  the inside may use ANY means. No purity is asked of it,
+              because nothing it produces is believed.
+withdraw   →  what leaves is a PROPOSAL: an exact candidate that the
+              outside re-derives for itself.
+```
+
+**A proposal is a GUESS, never evidence** — the outside does not accept
+it because the cage produced it, it re-checks it under its own exact
+rules, exactly as a mesh peer re-judges an incoming step instead of
+trusting its sender. A proposal that fails verification costs nothing,
+because nothing was trusted.
+
+**The type stops the disease, not care.** `Proposal<T>` carries only
+`T: Exact`, and `Exact` is implemented for the exact carriers alone. A
+float has no impl, so `Proposal<f64>` DOES NOT EXIST — the approximation
+cannot be named at the door, never mind carried through it.
+
+**D AND V DO NOT LIVE IN HERE.** They stay outside with the rest of the
+mathematics; the door is how the outside USES the inside, never how the
+inside acquires the outside (§10ter).
+
+**C's elevation, if it is ever elevated, is as the DEFENCE OF THIS
+SECTOR.** Not a promotion out of the box — a post inside it. C's proper
+work is guarding the containment: checking that what sits in the sector
+stays consistent with itself and that nothing crossing the door carries
+inconsistency outward. It reads the cage, never the manifold. That is
+the only elevation available to a quantity whose whole nature is to
+collapse structure: **it cannot measure a universe, but it can watch a
+box.**
+
 ## §11 THE BIFURCATION LAW — both sides of the coin become roots
 
 **LAW (operator ruling 2026-08-01).**

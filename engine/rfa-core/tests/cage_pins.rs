@@ -85,3 +85,25 @@ fn the_containment_vector_holds_no_usable_scalar() {
     // canonical p/q is unique, so equal values decompose identically.
     assert_eq!(Lens::of(ratio(6, 4)), Lens::of(ratio(3, 2)), "canonical form, one cage");
 }
+
+#[test]
+fn the_door_carries_exact_candidates_and_believes_none_of_them() {
+    use rfa_core::cage::Proposal;
+    // Something inside may have used a GPU, floats, or a coin flip to
+    // find this. What crosses is exact, and it crosses as a GUESS.
+    let found = Proposal::offer(ratio(22, 7)).withdraw();
+    assert_eq!(found, ratio(22, 7), "the candidate crosses exactly");
+
+    // Structural candidates cross too — a program, a witness, a path.
+    let plan = Proposal::offer(vec![1i64, 4, 9]).withdraw();
+    assert_eq!(plan, vec![1, 4, 9]);
+
+    // WHAT CANNOT BE WRITTEN, and is the real content of this pin:
+    //
+    //     Proposal::offer(0.5f64)      // f64: no `Exact` impl
+    //     Proposal::offer(vec![0.5f64])
+    //
+    // A float has no Exact impl, so the type `Proposal<f64>` does not
+    // exist. The approximation cannot be NAMED at the door, never mind
+    // carried through it — the boundary is the type system, not care.
+}
