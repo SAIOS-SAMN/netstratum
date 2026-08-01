@@ -533,6 +533,21 @@ the false competition and the equilibrium question dissolves — what
 remains is not a balance of powers but a pair that produces only
 together.
 
+**THE REGISTER — the cosmic marriage** (per the `06` law: myth beside
+physiology, and only what ties to the engine is mechanically real). The
+world-book writes the two offices as starseeded lovers — a Progenitor
+who lays down the ground and a Sovereign who lives upon it, come from
+different suns and bound to each other. Their bond is a contract signed
+in the stars and witnessed by the cosmos; what they make together
+belongs to neither house alone, and the universe is their issue.
+
+**What is MECHANICALLY REAL in that sentence, and it is all of the
+load-bearing part:** the contract has terms (`EQUATIONS` D5), the
+signing is receipted (`bond_flow`, a standing order settling at touch),
+the witness is the chain (*admission IS verification* — no party's word
+is taken), and breaking it is priced (`severance_load`). The myth adds
+the suns; the engine already holds the marriage.
+
 **THE TENSION WAS AN ARTIFACT OF PERSONIFICATION, and this dissolves
 it.** Two powers at opposing poles would need an equilibrium negotiated
 between them. There is none to negotiate, because **neither office

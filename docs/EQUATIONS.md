@@ -165,12 +165,55 @@ space available in the universe*). Nothing else creates space. `D` makes
 room; it does not hold, and it does not confer standing on the state it
 reads.
 
-**TOGETHER THEY ARE THE UNION** — two offices, neither outranking the
-other (`12_UNION` §3: *stations of function, not steps of rank*). `D`
-opens nothing without `V`'s receipted work; `V` expresses nothing
-without `D`'s room. Offices do not sum, do not rank and do not
-decompose, which is why this pair carries no operator between them and
-why every arithmetic form of it — `U* = D(V) ⊕ V(D)` — was struck.
+**D5 · THE BOND — the union in contract form.** INSCRIBED. Authority:
+`12_UNION` §3b–§3c and `18` §2c′. The FORM is landed twice already: the
+symmetric bond (`09_IDEOLOGY` §2.2, BOND-1) and the covenant
+(`01` §7 / `09` §2.3, COVENANT-1). Every clause below names a mechanic
+that exists; none of it is new machinery.
+
+    PARTIES        D  PROGENITOR — room          V  SOVEREIGN — substance
+                   different KINDS, separate origins; neither seeded
+                   from the other's line
+
+    FORM           a SYMMETRIC pair of bonds — *the marriage form*.
+                   A single bond is PATRONAGE (one party owning the
+                   other), and *neither is privileged* (09 §2.2). The
+                   non-ranking is this clause, not an ancestry.
+
+    TERMS          D owes room that was EARNED    — `PlaneUnearned`
+                                                    refuses otherwise
+                   V owes work that was RECEIPTED — admission, `lawful()`
+
+    CONSIDERATION  the MINT: a plane WITH content, of neither kind
+                   alone. Neither office can produce it unaided, which
+                   is why growth requires both signatures.
+
+    BREACH         `severance_load` posts against whoever cuts a live
+                   bond without the covenanted notice (09 §2.2). "D
+                   stops and V suffocates; V stops and D freezes" is
+                   this clause, not a metaphor.
+
+    WITNESS        the chain. *Admission IS verification* — a peer
+                   re-judges under its own kernel and takes no party's
+                   word (`00_CHARTER` §11, the nursery law).
+
+    NO OPERATOR    the parties are never joined into a TERM: not summed
+                   (`⊕` is a free join — `U* = D(V) ⊕ V(D)` struck), not
+                   ranked (a reading conferring standing runs backwards
+                   through the judge), not decomposed (a tuple `(D, V)`
+                   has addressable halves — the decomposition in other
+                   syntax).
+
+**They are NOT siblings and the receipt is not their parent** — it is
+the MEDIUM the bond settles on (`bond_flow` is a receipted standing
+order, accruing continuously, settling at touch). Siblings do not
+suffocate without each other; a bonded pair does. There is no rivalry to
+arbitrate here: a bond is generative, not competitive, so the pair needs
+no equilibrium negotiated between its parties.
+
+*(Register: the world-book writes this bond as the cosmic marriage —
+`12_UNION` §3c. Per the `06` register law only the clauses above are
+mechanically real; the myth is carried there, never here.)*
 
 **The index-set reading is STRUCK** (2026-08-01). The indices
 `(i, j, k, l)` that `for_each_residual` iterates, and the arities
