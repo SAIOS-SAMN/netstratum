@@ -1040,7 +1040,9 @@ impl Polity {
                     ..
                 } => {
                     let word: Vec<String> = program.iter().map(|op| op.describe()).collect();
-                    Some((task.name, word.join(" → "), hex(&certificate)))
+                    // The volumetric tier is DECORATIVE (operator C8):
+                    // no volumetric deed mints, so it carries no proof.
+                    Some((task.name, word.join(" → "), hex(&certificate), None))
                 }
                 _ => None,
             }
@@ -1052,16 +1054,47 @@ impl Polity {
                     program,
                     matches_expected: Some(true),
                     certificate,
-                    ..
+                    test_output,
                 } => {
                     let word: Vec<String> = program.iter().map(|op| op.describe()).collect();
-                    Some((task.name, word.join(" → "), hex(&certificate.output)))
+                    let cert_hex = hex(&certificate.output);
+                    // THE PROOF, riding WHOLE (the opaque-payload law):
+                    // the deed carries what the kernel re-runs.
+                    let proof = solver_verify::WorkProof {
+                        forge_digest: digest,
+                        difficulty,
+                        program: program.clone(),
+                        output: test_output,
+                        certificate,
+                    };
+                    Some((
+                        task.name,
+                        word.join(" → "),
+                        cert_hex,
+                        solver_verify::encode_work(&proof).map(|bytes| (bytes, difficulty)),
+                    ))
                 }
                 _ => None,
             }
         };
         match solved {
-            Some((name, word, cert_hex)) => {
+            Some((name, word, cert_hex, proof)) => {
+                // A1 — CLOSE THE PoUW LOOP. Cognition proved out; now it
+                // MINTS. The amount is `kernel::mint_bound` — the ruled
+                // ladder read from the same function the judge enforces,
+                // never a number chosen here.
+                if let Some((work, difficulty)) = proof {
+                    let earned = kernel::mint_bound(&difficulty);
+                    if earned > cfe::ratio::ratio(0, 1) {
+                        let _ = self.world.mint_discovery_as(
+                            self.automaton,
+                            cfe::world::FIRST_ORB,
+                            cfe::dop::Resource::Crystal,
+                            earned,
+                            work,
+                        );
+                    }
+                }
                 let _ = scribe::record_solve(
                     book,
                     &self.spec.world_name,
