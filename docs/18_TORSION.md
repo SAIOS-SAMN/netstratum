@@ -210,9 +210,12 @@ it would make the board-maker a byproduct of what plays on the board.
     MEASUREMENT V  →  Δ(V)  →  rank
                 the reading that REPORTS D, taken through V
 
-**Neither office derives from the other. Both descend from the
-RECEIPT.** That is the common ancestor, and it is why they are peers:
-each answers to the chain, not to its counterpart.
+**Neither office derives from the other.** Both are carried ON the
+receipt — it is the medium their bond settles through, not a parent they
+descend from. They are of different KINDS with separate origins: one is
+room, one is substance. That is why neither ranks the other, and the
+non-ranking comes from a landed mechanic (the symmetric bond,
+`09_IDEOLOGY` §2.2) rather than from an ancestry anyone had to invent.
 
 **THE ORDER, settled** (`12_UNION` §3c carries it whole). Peers with
 nothing above them would leave two powers facing each other; there IS an
@@ -225,8 +228,16 @@ order, and neither office is at its top:
       ↓ grants
     V SOVEREIGN  holds the chartered      D PROGENITOR  makes the room
 
-They are peers because they are SIBLINGS — one parent, neither descended
-from the other. Not a truce between equals; a fact about ancestry.
+They are peers as a BONDED PAIR, never as siblings — different kinds,
+separate origins, and a relation that is conjugal rather than
+fraternal. `09_IDEOLOGY` §2.2 already carries the form and the ruling:
+*a symmetric pair of bonds is the MARRIAGE FORM; a single bond is
+PATRONAGE; neither is privileged.* A one-directional bond would be
+patronage — one office owning the other — which is exactly what a
+`V → D` derivation makes. The receipt is not their parent; it is the
+MEDIUM the bond is carried on, and `severance_load` prices cutting it.
+Siblings do not suffocate without each other; a bonded pair does, and
+the interlock below is that.
 
 **AND NEITHER OFFICE ACTS.** A deed acts. `D` does not decide to open a
 plane — a fold refuses, the residue emits, the plane opens BY RECEIPT.

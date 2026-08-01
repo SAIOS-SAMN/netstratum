@@ -488,10 +488,50 @@ nothing above them. There IS an order, and neither office is at its top.
         (orbs, banks, receipts)     (the fiber, band capacity)
 ```
 
-**The two offices are peers because they are SIBLINGS, not because they
-are balanced.** They share one parent — the receipt — and neither is
-descended from the other. That is the whole of the non-ranking: not a
-truce between equals, a fact about ancestry.
+**THEY ARE NOT SIBLINGS.** An earlier draft made them peers by giving
+them a shared parent — the receipt — and reasoning from common ancestry.
+That was a genealogy invented to solve a ranking problem, and it fails
+its own evidence: **siblings do not suffocate without each other.** The
+interlock below is conjugal, never fraternal, and the two offices are of
+different KINDS with separate origins — one is room, one is substance;
+neither was ever seeded from the other's line.
+
+**THEY ARE A BONDED PAIR, and the engine already carries the form.**
+`09_IDEOLOGY` §2.2, the love/resonance axis, landed at BOND-1:
+
+> *A symmetric pair of bonds is the MARRIAGE FORM; a single bond is
+> PATRONAGE; neither is privileged.*
+
+That is the distinction exactly. A one-directional bond is patronage —
+one party owns the other, which is what a `V → D` derivation would make
+it. The symmetric pair is the marriage form, and *neither is privileged*
+is the non-ranking stated in a LANDED mechanic rather than invented from
+ancestry.
+
+**The receipt is not their parent; it is the MEDIUM they reach each
+other through.** `bond_flow` is a receipted standing order — the bond
+accrues continuously and settles by receipt at touch. Their relation is
+carried on the chain, which is a different thing from being descended
+from it.
+
+**What they make together is neither one's kind.** `D` alone yields
+empty room; `V` alone yields structure with nowhere to stand. The mint
+is their joint issue — a plane WITH content — and it belongs to neither
+office alone, which is why it requires both signatures and why no single
+office can produce it.
+
+**Severance is priced, and that IS the interlock.** `severance_load`
+posts against whoever cuts a live bond without the covenanted notice
+(09 §2.2). So "if `D` stops opening room, `V`'s motion suffocates; if
+`V` stops producing receipted work, `D`'s emission freezes" is not a
+metaphor about dependency — it is the severance law reading on the pair.
+
+**There was never a rivalry to arbitrate.** The tension this section
+kept trying to resolve was imported by treating two bonded offices as
+competitors for authority. A bond is generative, not competitive. Remove
+the false competition and the equilibrium question dissolves — what
+remains is not a balance of powers but a pair that produces only
+together.
 
 **THE TENSION WAS AN ARTIFACT OF PERSONIFICATION, and this dissolves
 it.** Two powers at opposing poles would need an equilibrium negotiated
