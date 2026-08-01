@@ -15,7 +15,7 @@ use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 use rfa_core::{
     coboundary_reduce, coherence_functional, for_each_residual, magnitude, validate_step,
-    Delta, GateVerdict, StepBound,
+    Delta, GateVerdict, Lens, StepBound,
 };
 
 fn delta3(d01: Ratio, d12: Ratio, d02: Ratio) -> Delta {
@@ -31,7 +31,7 @@ fn delta3(d01: Ratio, d12: Ratio, d02: Ratio) -> Delta {
 #[test]
 fn coherent_delta_measures_zero() {
     let d = delta3(ratio(1, 1), ratio(1, 2), ratio(3, 2));
-    assert!(coherence_functional(&d).is_zero());
+    assert_eq!(coherence_functional(&d), Lens::of(ratio(0, 1)));
     let mut fired = false;
     for_each_residual(&d, |_, _, _, _, _| fired = true);
     assert!(!fired, "a coherent Delta yields no residual at all");
@@ -43,7 +43,7 @@ fn coherent_delta_measures_zero() {
 #[test]
 fn incoherent_delta_measures_its_residual_exactly() {
     let d = delta3(ratio(2, 1), ratio(3, 1), ratio(7, 1));
-    assert_eq!(coherence_functional(&d), ratio(12, 1));
+    assert_eq!(coherence_functional(&d), Lens::of(ratio(12, 1)));
     let mut count = 0;
     for_each_residual(&d, |_, _, _, _, r| {
         assert!(r == &ratio(2, 1) || r == &ratio(-2, 1));

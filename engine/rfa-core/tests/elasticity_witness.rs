@@ -10,7 +10,7 @@
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 use rfa_core::{
-    coherence_functional, for_each_residual, magnitude, validate_step, Delta, GateVerdict,
+    coherence_functional, for_each_residual, magnitude, validate_step, Delta, GateVerdict, Lens,
     StepBound,
 };
 
@@ -37,13 +37,13 @@ fn shocked(d02: Ratio) -> Delta {
 fn shock_stress_gated_recovery_convergence() {
     // 1. EQUILIBRIUM — the stress gauge reads exactly zero.
     let colony = equilibrium();
-    assert!(coherence_functional(&colony).is_zero());
+    assert_eq!(coherence_functional(&colony), Lens::of(ratio(0, 1)));
 
     // 2. THE SHOCK — a meteor severs the 0↔2 trade relation: Δ02
     //    jumps 3/2 → 7/2 (torsion +2). The gauge reads non-zero…
     let hit = shocked(ratio(7, 2));
     let stress = coherence_functional(&hit);
-    assert_eq!(stress, ratio(12, 1), "six ordered triples × |±2| — the proportional law");
+    assert_eq!(stress, Lens::of(ratio(12, 1)), "six ordered triples × |±2| — the proportional law");
 
     //    …and the residuals NAME the damaged relation: every firing
     //    triple involves all three entities around the broken 0↔2 leg.
@@ -75,18 +75,17 @@ fn shock_stress_gated_recovery_convergence() {
             GateVerdict::Accepted,
             "a lawful recovery step refused"
         );
-        // C is READ here, and governs nothing. That this path happens to
-        // fall is an OBSERVATION about this path, never a requirement
-        // the gate imposed.
-        let now = coherence_functional(&next);
-        assert!(now < last_stress, "this particular path does fall — observed, not required");
-        last_stress = now;
+        // C is READ here and governs nothing. Note what CANNOT be
+        // written: `now < last_stress` does not compile — `Lens` has no
+        // ordering, so "the path falls" is not even expressible as a
+        // check. That is the cage doing its work.
+        last_stress = coherence_functional(&next);
         current = next;
     }
 
     // 4. CONVERGENCE — home again, exactly: the gauge reads zero and
     //    the recovered colony IS the equilibrium, byte-for-byte.
-    assert!(last_stress.is_zero());
+    assert_eq!(last_stress, Lens::of(ratio(0, 1)));
     assert_eq!(current, equilibrium());
 
     // 5. THE LINEAGE IS NOT BOUND TO C's LANE (operator ruling
@@ -104,9 +103,11 @@ fn shock_stress_gated_recovery_convergence() {
         GateVerdict::Accepted,
         "motion away from C's minimum is lawful — the lineage is n-dimensional"
     );
-    // C still reads the rise. It simply governs nothing.
-    assert!(
-        coherence_functional(&overshoot) > coherence_functional(&current),
-        "C observes the excursion — an inert reading with no agency"
+    // C still READS the excursion — and cannot be asked which is
+    // larger. `>` on a `Lens` is a type error, by design.
+    assert_ne!(
+        coherence_functional(&overshoot),
+        coherence_functional(&current),
+        "C observes the excursion; it cannot rank it"
     );
 }

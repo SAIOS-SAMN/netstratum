@@ -9,7 +9,7 @@
 //! both failures and the fix.
 
 use cfe::ratio::{ratio, Ratio};
-use rfa_core::{coherence_functional, holonomies, Delta, Support};
+use rfa_core::{coherence_functional, holonomies, Delta, Support, Lens};
 
 /// |x| for an exact rational — the holonomy's sign is a basis choice
 /// (see the ring pin); its size and its vanishing are not.
@@ -63,7 +63,7 @@ fn the_dense_reading_invents_strain_from_absent_edges() {
     let (delta, _) = ring();
     assert_ne!(
         coherence_functional(&delta),
-        ratio(0, 1),
+        Lens::of(ratio(0, 1)),
         "dense: phantom residuals from triangles that are not there"
     );
     // Sparse: no triangle is filled, so there is no cocycle condition

@@ -32,7 +32,7 @@ pub mod rcf;
 pub mod potential;
 pub mod reduce;
 
-pub use delta::{coherence_functional, for_each_residual, magnitude, Delta};
+pub use delta::{coherence_functional, for_each_residual, magnitude, Delta, Lens};
 pub use fold::{
     f_fold_star, judged_fold, orbit_lock, verify_orbit_witness, FoldVerdict, Operator,
     OrbitWitness, QMatrix,
