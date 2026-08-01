@@ -234,6 +234,74 @@ A caller that measures `D` and then separately consults `∇V` has
 already broken the entanglement and reintroduced the two-object attack
 surface. This binds §6's first build.
 
+### 2g. WRAP(ENTANGLEMENT) — the kernel as CLOSURE, not door
+
+**The flip.** A door implies an outside pressing in: proposals arrive,
+the judge refuses the bad ones, and the attack surface is the doorway
+itself — unbounded in what may be offered. `wrap(entanglement)` closes
+that surface instead of guarding it. Three moves do it, and all three
+are available in the landed kernel.
+
+**(1) BOUNDS BECOME IDENTITIES — latitude is the attack surface.**
+Today the judge checks inequalities:
+
+    I4:  amount  ≤  mint_bound(difficulty)          ← LATITUDE
+
+Any value from `0` to `f(d)` is admissible, so the deed chooses within
+a permitted range and the range IS the surface. Under entanglement
+there is nothing to choose: the capacity increment is DETERMINED by the
+potential motion, so the lawful relation is identity —
+
+    I4′: amount  ==  mint_bound(difficulty)         ← NO LATITUDE
+
+An entangled pair admits exactly one value. Not "within bounds" but
+"the derived one, or refuse."
+
+**(2) DERIVATION PRECEDES ADMISSION.** The kernel computes the
+entangled pair from `prior` and `step` BEFORE reading what the deed
+claims, then requires identity. The deed never influences what the
+lawful value is; it only matches it or refuses. This is the landed
+declaration==effect shape (the gauge law, the escrow law) raised to the
+capacity/potential seam.
+
+**(3) THE WRAP IS THE ENCLOSURE.** This is why the λ-nodes matter
+beyond bookkeeping. On an unbounded axis a constraint can always be
+escaped by pushing outward — there is always more axis. On a finitely
+wrapped torus there IS no outward: `key_distance` is wrapped L1, a key
+of 10 is 0, and the T∞ purge bars any escape to infinity. The wrap
+turns the entanglement from a CONSTRAINT into an ENCLOSURE. There is no
+inward attack because there is no outside to attack from.
+
+**THE CONSEQUENCE — `lawful()` stops being a filter.** If every
+entangled relation is an identity derived from prior state, then for a
+given `(prior, step)` there is **exactly one lawful `next`**. The
+question stops being "is this next admissible" and becomes "is this
+next THE next." The judge becomes a state transition function, which is
+what it has been converging toward since I1: the admissible state space
+collapses from a range to a point, and a forged state is not refused so
+much as *not constructible*.
+
+**HONEST COST — this is a BREAKING amendment.** Changing `≤` to `==`
+changes the MEANING of an existing rule, which is a major `VERSION`
+bump under this charter's own amendment tiers, and history judged under
+the old rule keeps verifying under it. It is not a free tightening.
+
+**CONCRETE CASUALTY IN LANDED CODE.** `discovery_pins.rs` pin 6 holds
+that *"zero-amount with valid work admits — the degenerate mint is
+lawful."* Under §2f consequence 2 that pin is now WRONG: valid work
+means the potential moved, so a zero declared capacity is exactly
+*hidden work*. The pin must flip red and then be truth-updated. This is
+the entanglement's first real bite on the tree, and it should land
+red-first like any other amendment.
+
+**NOT YET RULED — which pairs are entangled.** I4's mint/work pair is
+the clear case. Whether I5's decay bound (`decay ≤ min(rate·ease·
+elapsed, banked)`) and the assay bound (`amount ≤ richness·elapsed`)
+are likewise entangled — and therefore likewise identities — is an
+operator ruling, not a derivation. Under-paying an owed decay may be a
+lie of the same kind, or may be lawful forbearance. **Do not convert
+them silently.**
+
 ---
 
 ## §3 THE FOUR ARTICLES
@@ -385,6 +453,14 @@ computation, hiding one behind vocabulary is cosmetic.
 3. **The torsion test has no caller.** `orbit_lock` / `f_fold_star`
    are landed and witnessed in `rfa-core` and are invoked nowhere.
    Article I's mandate is unenforced until the merge site calls them.
+3a. **The kernel is still a door, not a closure** (§2g). Its entangled
+   relations are inequalities, so the admissible state space is a range
+   rather than a point. The conversion is a BREAKING amendment (major
+   `VERSION`) and its first casualty is verified present in the tree:
+   `engine/kernel/tests/discovery_pins.rs:266` — *"The degenerate mint
+   is lawful: 0 ≤ bound 0"* — plus its header claim at line 10. Under
+   entanglement a zero-amount mint over valid work is hidden work and
+   must refuse. Land red-first.
 4. **Continuous-domain forms need exact realizations.** The exterior
    derivative, the sup over a manifold, `det U* → ∞`, and a real
    principal eigen-axis have no exact-rational form. Infinity is
