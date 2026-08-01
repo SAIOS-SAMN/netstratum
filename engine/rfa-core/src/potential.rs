@@ -155,6 +155,22 @@ pub enum Vacuity {
 /// `rank` is the count of independent charged cycles
 /// (`holonomies(..).len()`); `form` is this module's divergence read.
 /// Neither is consulted alone — the entanglement is the point.
+///
+/// **THIS CLASSIFIES. IT DOES NOT MEASURE GROWTH** (operator ruling
+/// 2026-08-01: *C is leaking into D and the causality is stasis*).
+///
+/// Where capacity is built as `circulation = Δ − grad(p)`, the two poles
+/// are COMPLEMENTARY PROJECTIONS OF ONE FIXED `Δ`. They are not
+/// independent witnesses — knowing `Δ` and one pole yields the other —
+/// so at fixed `Δ` content moved into circulation is content taken out
+/// of gradient. A state can be made to read `Entangled` by
+/// REDISTRIBUTION alone, forming no new relation and doing no work.
+///
+/// That is stasis wearing growth's clothes, and reading this verdict as
+/// a growth measure is exactly how value gets taken rather than made.
+/// **Growth is `Δ`'s own expansion — a new relation, receipted (D3) —
+/// never a re-split of a fixed `Δ` between poles.** Pinned in
+/// `potential_pins::the_poles_are_complementary_at_fixed_delta_so_shuffling_is_not_growth`.
 pub fn dual_pole(rank: usize, form: &PotentialForm) -> Vacuity {
     match (rank > 0, form.is_non_vacuous()) {
         (false, false) => Vacuity::Void,

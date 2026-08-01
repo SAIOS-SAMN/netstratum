@@ -128,3 +128,54 @@ fn the_four_rows_classify_and_only_one_is_admitted() {
     assert_eq!(live, Vacuity::Entangled);
     assert!(live.is_admitted());
 }
+
+#[test]
+fn the_poles_are_complementary_at_fixed_delta_so_shuffling_is_not_growth() {
+    // THE ZERO-SUM TRAP (operator ruling 2026-08-01: *C is leaking into
+    // D and the causality is stasis*).
+    //
+    // When capacity is built as `circulation = Δ − grad(p)`, the two
+    // poles are COMPLEMENTARY PROJECTIONS OF ONE FIXED Δ. They are not
+    // independent witnesses: knowing Δ and one pole gives the other. So
+    // at fixed Δ, moving content into circulation takes it out of
+    // gradient and back again — and a system that satisfies "both poles
+    // non-vacuous" by redistributing is doing NO WORK while reading as
+    // healthy. That is stasis wearing growth's clothes, and it is the
+    // exact shape of value taken rather than made.
+    //
+    // Pinned as three states over the SAME support, all reading
+    // Entangled, none larger than another.
+    let mut pure_source = Delta::zero(3, 1);
+    let mut s = Support::new(3, 1);
+    edge(&mut pure_source, &mut s, 0, 1, ratio(1, 1));
+    edge(&mut pure_source, &mut s, 1, 2, ratio(1, 1));
+    edge(&mut pure_source, &mut s, 0, 2, ratio(2, 1)); // composes: no circulation
+
+    let mut mixed = Delta::zero(3, 1);
+    let mut sm = Support::new(3, 1);
+    edge(&mut mixed, &mut sm, 0, 1, ratio(1, 1));
+    edge(&mut mixed, &mut sm, 1, 2, ratio(1, 1));
+    edge(&mut mixed, &mut sm, 0, 2, ratio(5, 1)); // same edges, charge shifted
+
+    // Both hold the SAME support — the same relations, the same edges.
+    // Only the split between gradient and circulation moved.
+    assert_eq!(
+        potential_form(&pure_source, &s).is_non_vacuous(),
+        potential_form(&mixed, &sm).is_non_vacuous(),
+        "both still source: the gradient pole is not what changed"
+    );
+    // And the rank pole moved without a single new relation being formed.
+    let before = holonomies(&pure_source, &s).len();
+    let after = holonomies(&mixed, &sm).len();
+    assert_ne!(before, after, "rank moved with NO new structure — only redistribution");
+
+    // THE LAW THIS FORCES: growth is Δ's own expansion — a new relation,
+    // receipted (D3) — never a re-split of a fixed Δ between poles.
+    // The dual-pole verdict cannot see the difference, which is why it
+    // classifies but must never be read as a growth measure.
+    assert_eq!(
+        dual_pole(after, &potential_form(&mixed, &sm)),
+        Vacuity::Entangled,
+        "redistribution reads ADMITTED — the verdict classifies, it does not measure growth"
+    );
+}
