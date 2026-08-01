@@ -23,6 +23,7 @@
 //! is consumed, never owned: `kernel::VERSION` binds into every
 //! commitment; the judge never reads the spine.
 
+use cfe::dop::ClosureEvent;
 use cfe::ratio::{self, Ratio};
 use cfe::tlv;
 use std::collections::{HashMap, HashSet};
@@ -32,6 +33,14 @@ use std::path::{Path, PathBuf};
 
 /// Tag 84 — the spine commitment record (the one authority).
 pub const SPINE_RECORD_TAG: u8 = 84;
+/// Tag 87 — a SEGMENT blob frame (SPINE-UPLINK): `state[32] ‖ bytes`,
+/// carried in a replication segment, re-hashed on arrival. Never
+/// stored in `spine.tlv` — the store already holds blobs by hash.
+pub const SEGMENT_BLOB_TAG: u8 = 87;
+/// Tag 88 — a SEGMENT step frame (SPINE-UPLINK): `commit[32] ‖
+/// actor[8] ‖ stamp[8] ‖ event_bytes`, the proof a JUDGED record's
+/// transition was lawful, re-judged under the receiver's kernel.
+pub const SEGMENT_STEP_TAG: u8 = 88;
 
 /// A position on the one clock (NS-5 §9.1): the nursery branch (""
 /// is the mainline), the wrapped torus triple, the gauge sheet, the
@@ -95,6 +104,16 @@ pub enum SpineRefused {
     GenesisJudged,
     StoreMissing,
     Unlawful(kernel::Unlawful),
+    /// SPINE-UPLINK: a received record claims `judged` but its step
+    /// did not ride the segment — the receiver cannot reproduce the
+    /// kernel verdict, so it will not admit the claim. Admission is
+    /// re-judging, never trust; a judgment you cannot re-run is a
+    /// judgment you do not have.
+    JudgedWithoutProof { frame: usize },
+    /// SPINE-UPLINK: a received record references a blob absent from
+    /// the segment and from the local store — the geometry is unheld,
+    /// the record unverifiable.
+    BlobUnheld { frame: usize },
 }
 
 fn io(error: std::io::Error) -> SpineRefused {
@@ -396,6 +415,204 @@ impl Spine {
             fork.commit,
         );
         self.append(record)
+    }
+
+    /// PRESENT (SPINE-UPLINK, NS-5 §9): this spine as a replication
+    /// SEGMENT — every record (tag 84) followed by each unique
+    /// referenced blob (tag 87, `state ‖ bytes`). Only chain-verified
+    /// bytes ride (THE UPLINK LAW): records recompute, blobs are
+    /// content-addressed. NOTE: a JUDGED record needs its step (tag 88)
+    /// to be re-judged on arrival, and the spine stores NO steps — so a
+    /// spine carrying judged records is not fully presentable through
+    /// this door alone (the Phase-3 seam: per-deed threading brings the
+    /// step storage that makes judged records re-presentable). Today
+    /// every record is `judged = false`, so `present` is complete.
+    pub fn present(&self) -> Vec<u8> {
+        let mut out = Vec::new();
+        for record in &self.records {
+            out.extend_from_slice(&record.wire_bytes());
+        }
+        let mut seen: HashSet<[u8; 32]> = HashSet::new();
+        for record in &self.records {
+            if seen.insert(record.state) {
+                if let Ok(bytes) = self.fetch(&record.state) {
+                    let mut frame = record.state.to_vec();
+                    frame.extend_from_slice(&bytes);
+                    tlv::put(SEGMENT_BLOB_TAG, &frame, &mut out);
+                }
+            }
+        }
+        out
+    }
+
+    /// RECEIVE (SPINE-UPLINK): admit a replication segment onto THIS
+    /// spine. Admission IS verification — the receiver trusts nothing:
+    /// every record must reseal (its commit recomputes), extend this
+    /// spine's own head lawfully (parent links, the arrow ascends, the
+    /// address is fresh), carry a hash-matched blob that decodes as
+    /// committed state, and — if it claims `judged` — re-run
+    /// `kernel::lawful` under this node's kernel from the carried step.
+    /// The first break refuses typed; nothing partial is admitted past
+    /// it. Returns the count admitted.
+    pub fn receive(&mut self, segment: &[u8]) -> Result<usize, SpineRefused> {
+        let mut incoming: Vec<Commitment> = Vec::new();
+        let mut blobs: HashMap<[u8; 32], Vec<u8>> = HashMap::new();
+        let mut steps: HashMap<[u8; 32], kernel::Step> = HashMap::new();
+        for (frame, (tag, value)) in tlv::records(segment).enumerate() {
+            match tag {
+                SPINE_RECORD_TAG => {
+                    let record = Commitment::from_wire(tag, value)
+                        .ok_or(SpineRefused::Malformed { frame })?;
+                    incoming.push(record);
+                }
+                SEGMENT_BLOB_TAG => {
+                    let state: [u8; 32] = value
+                        .get(..32)
+                        .and_then(|s| s.try_into().ok())
+                        .ok_or(SpineRefused::Malformed { frame })?;
+                    let bytes = value[32..].to_vec();
+                    if blake3::hash(&bytes).as_bytes() != &state {
+                        return Err(SpineRefused::Forged { frame });
+                    }
+                    blobs.insert(state, bytes);
+                }
+                SEGMENT_STEP_TAG => {
+                    let commit: [u8; 32] = value
+                        .get(..32)
+                        .and_then(|s| s.try_into().ok())
+                        .ok_or(SpineRefused::Malformed { frame })?;
+                    let actor = u64::from_le_bytes(
+                        value.get(32..40).and_then(|s| s.try_into().ok())
+                            .ok_or(SpineRefused::Malformed { frame })?,
+                    );
+                    let stamp = u64::from_le_bytes(
+                        value.get(40..48).and_then(|s| s.try_into().ok())
+                            .ok_or(SpineRefused::Malformed { frame })?,
+                    );
+                    let (etag, eval) = tlv::records(value.get(48..).unwrap_or_default())
+                        .next()
+                        .ok_or(SpineRefused::Malformed { frame })?;
+                    let event = ClosureEvent::from_wire(etag, eval)
+                        .ok_or(SpineRefused::Malformed { frame })?;
+                    steps.insert(commit, kernel::Step { event, actor, stamp });
+                }
+                // Judge-side: an unknown frame in a segment REFUSES
+                // (never skip — a skipped frame is an unadmitted truth).
+                _ => return Err(SpineRefused::Malformed { frame }),
+            }
+        }
+        let mut admitted = 0usize;
+        for (frame, record) in incoming.into_iter().enumerate() {
+            if self.admit(record, frame, &blobs, &steps)? {
+                admitted += 1;
+            }
+        }
+        Ok(admitted)
+    }
+
+    /// Admit ONE received record onto this spine — the trustless core
+    /// of `receive`, in order (reseal → geometry → chain-extension →
+    /// re-judge → append).
+    fn admit(
+        &mut self,
+        record: Commitment,
+        frame: usize,
+        blobs: &HashMap<[u8; 32], Vec<u8>>,
+        steps: &HashMap<[u8; 32], kernel::Step>,
+    ) -> Result<bool, SpineRefused> {
+        // Idempotent replication: a record I already hold is a no-op
+        // (a peer may re-present its whole spine); the SAME commit at
+        // its address skips, a DIFFERENT commit is a fork attempt.
+        if let Some(existing) = self.resolve(&record.coordinate) {
+            return match existing.commit == record.commit {
+                true => Ok(false),
+                false => Err(SpineRefused::Occupied),
+            };
+        }
+        // 1. Reseal — the commit must recompute from its own fields.
+        let resealed = seal(
+            record.coordinate.clone(),
+            record.schema,
+            record.kernel,
+            record.judged,
+            record.state,
+            record.parent,
+        );
+        if resealed.commit != record.commit {
+            return Err(SpineRefused::Forged { frame });
+        }
+        // 2. Geometry — the blob is held (segment or local store),
+        //    hash-matched, decodes, and its leading byte IS the schema.
+        let state_bytes = match blobs.get(&record.state) {
+            Some(bytes) => bytes.clone(),
+            None => self.fetch(&record.state).map_err(|_| SpineRefused::BlobUnheld { frame })?,
+        };
+        if blake3::hash(&state_bytes).as_bytes() != &record.state {
+            return Err(SpineRefused::Forged { frame });
+        }
+        if state_bytes.first() != Some(&record.schema) {
+            return Err(SpineRefused::Forged { frame });
+        }
+        let next = codec::from_state_bytes(&state_bytes)
+            .ok_or(SpineRefused::StateUndecodable)?;
+        // 3. Chain-extension — the record extends THIS spine's own head.
+        let branch = record.coordinate.branch.clone();
+        let prior_state = self.head(&branch).map(|head| head.state);
+        match self.head(&branch) {
+            Some(head) => {
+                if record.parent != head.commit {
+                    return Err(SpineRefused::Forged { frame });
+                }
+                if record.coordinate.t <= head.coordinate.t {
+                    return Err(SpineRefused::ArrowBroken {
+                        t: record.coordinate.t,
+                        head: head.coordinate.t,
+                    });
+                }
+            }
+            None if branch.is_empty() => {
+                if record.parent != [0u8; 32] {
+                    return Err(SpineRefused::Forged { frame });
+                }
+            }
+            None => {
+                // A branch-birth: the parent is a known local commit and
+                // the record copies the fork's position and state.
+                let fork = self
+                    .records
+                    .iter()
+                    .find(|held| held.commit == record.parent)
+                    .ok_or(SpineRefused::Forged { frame })?;
+                let copies = fork.coordinate.s == record.coordinate.s
+                    && fork.coordinate.g == record.coordinate.g
+                    && fork.coordinate.t == record.coordinate.t
+                    && fork.state == record.state;
+                if !copies {
+                    return Err(SpineRefused::Forged { frame });
+                }
+            }
+        }
+        // 4. Re-judge — a judged record's transition re-runs `lawful`
+        //    under THIS kernel from the carried step, or it is refused:
+        //    a judgment the receiver cannot reproduce is not admitted.
+        if record.judged {
+            let step = steps
+                .get(&record.commit)
+                .ok_or(SpineRefused::JudgedWithoutProof { frame })?;
+            let prior_state = prior_state.ok_or(SpineRefused::GenesisJudged)?;
+            let prior_bytes = self.fetch(&prior_state)?;
+            let prior = codec::from_state_bytes(&prior_bytes)
+                .ok_or(SpineRefused::StateUndecodable)?;
+            kernel::lawful(&prior, &next, step).map_err(SpineRefused::Unlawful)?;
+        }
+        // 5. Admit — write the blob, append the record VERBATIM (its
+        //    commit verified to reseal: the two spines agree byte-exact).
+        let blob = self.blob_path(&record.state);
+        if !blob.exists() {
+            fs::write(&blob, &state_bytes).map_err(io)?;
+        }
+        self.append(record)?;
+        Ok(true)
     }
 
     fn append(&mut self, record: Commitment) -> Result<&Commitment, SpineRefused> {

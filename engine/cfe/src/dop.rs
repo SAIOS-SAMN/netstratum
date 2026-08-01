@@ -167,7 +167,16 @@
 //!         replay re-verifies forever. Judged by I4's bound arm:
 //!         verify_work(work) = Ok(d) ∧ amount ≤ mint_bound(d);
 //!         mint_bound is SEALED SHUT until Ruling Box 1)
-//!         — the next free tag outside reservations is 87.
+//!   87 The spine SEGMENT blob frame (SPINE-UPLINK, NS-5 §9 — a
+//!         content-addressed geometry carried in a replication
+//!         segment: state[32] ‖ state_bytes; the receiver re-hashes
+//!         on arrival. Segment-only — NEVER stored in spine.tlv).
+//!   88 The spine SEGMENT step frame (SPINE-UPLINK — the proof a
+//!         JUDGED record's transition was lawful: commit[32] ‖
+//!         actor[8] ‖ stamp[8] ‖ event_bytes; the receiver re-judges
+//!         under its own kernel. Segment-only, carried only for
+//!         judged records).
+//!         — the next free tag outside reservations is 89.
 //!   In-value practice codes (append-only): 1 the Fast · 2 the Icon ·
 //!   3 the Vigil · 4 the Hoard · 5 the Athanor (deep-end: adoption
 //!   gated on hardship ≥ 8 receipts). Placeholder names, operator
