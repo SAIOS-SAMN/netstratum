@@ -197,38 +197,42 @@ the two proofs from the mesh era into the kernel era, nothing more.
    surface) vs. absorption into `rfa-core` (one sealed-core crate).
    Drafted here as the split crate; one word decides.
 
-## §7a Rulings recorded (operator dispatch, 2026-08-01)
+## §7a Rulings recorded (operator, 2026-08-01)
 
-The operator's words on the boxes above. They do NOT open the mint —
-`mint_bound` stays sealed at zero until each lands as a kernel
-amendment (§6 U4). Recorded here so the amendment inscribes the ruling,
-never an assumption.
+The operator's words on the boxes above, reconciled with THE EMISSION
+LAW as it LANDED (kernel VERSION 1→2, commit 9866781; authority:
+EQUATIONS I4, U_DIRECTIVES §8). Ruling Box 1 is no longer open —
+`mint_bound` is unsealed and `f` is ruled. Recorded here so this ladder
+stays true to the landed kernel, not an earlier assumption.
 
-- **Reward split — 40/40/20, dual-key (RULED).** Of what verified work
-  earns: **40% Prover/Worker** (the search that solved), **40% Mesh
-  Verifiers/Router** (the re-judges that admitted), **20% Protocol
-  Reserve**. Dual-key: prover and mesh legs are BOTH required; the
-  reserve is the protocol's own. Inscribed at U4 as the split in
-  `mint_bound`'s successor.
-- **Rate `f` — OBSERVE FIRST (RULED).** `f` is NOT pinned by assumption.
-  The mechanism precedes the economics by law (§3): the chained economy
-  runs (run #36 spine adoption observed) BEFORE `f` is ruled against
-  measured throughput. Until then `mint_bound = 0` holds; a positive
-  discovery mint refuses at I4. This is deliberate — rule against the
-  observed economy, never a guess.
+- **Rate `f` — RULED, ladder-pinned (LANDED).** `f` was ruled against
+  the #17 calibration (evidence commit 5898351), NOT left to assumption:
+  exact ladder integers `f(0..=2)=0` (saturated rungs — free issuance
+  barred), `f(3)=1`, `f(4)=4`, `f(5)=7` (the ≈1.75× inverse-hit-rate
+  step). Defined ON THE LADDER ONLY — an off-ladder difficulty earns
+  zero (a payload never names its own price). L1/ladder terms, no norms,
+  no roots. (Supersedes the earlier "observe first / sealed at zero"
+  reading: the observation happened — the calibration IS the evidence —
+  and the rate is now pinned.)
+- **Reward split — PHASED (LANDED v1, INSCRIBED v2).** **v1: 100% to the
+  solving world** (single-node era — no mesh legs to pay yet). **v2:
+  40/40/20 dual-key** — 40% Prover/Worker, 40% Mesh Verifiers/Router,
+  20% Protocol Reserve — INSCRIBED for the mesh era, lands when the
+  spine carries prover and mesh legs. The split does not open the mint;
+  the mint is already open at v1's 100%.
 - **Work-shapes — forge-only v1, corpus registry v2 (RULED).** v1
-  admits FORGE-ONLY synthetic work (deterministic, self-checking; the
-  external scoreboard untouched). v2 admits the ARC corpus through a
+  admits FORGE-ONLY planar synthetic work (deterministic, self-checking;
+  the external scoreboard untouched). v2 admits the ARC corpus through a
   registry keyed `task_id = SHA256(corpus_input_digest)` — the task's
   identity is its content, so no forged corpus entry can mint. Higher
   dimensions (volumetric) stay forge-only until ruled an economic axis
   (§10 S1, ruling C8).
 - **Beyond the mint (Ruling Box 2) — consensus weight + crystallization
-  (RULED).** Verified work earns MORE than banked value: it earns
+  (INSCRIBED).** Verified work earns MORE than banked value: it earns
   **consensus weight** (the pen — heavier judgement in the mesh) and
   **faster crystallization** (the §1 coupling — solved work sediments
-  the world sooner). These are kernel-amendment questions inscribed
-  alongside the split.
+  the world sooner). Kernel-amendment questions inscribed alongside the
+  v2 split.
 
 **Ruling 3 (the verifier's home) — RESOLVED:** the split `solver-verify`
 crate landed (U1a). The smallest-surface option was taken; `verify_work`
