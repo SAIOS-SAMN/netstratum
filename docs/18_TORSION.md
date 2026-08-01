@@ -423,110 +423,172 @@ there to have standing. This is the constitutional form of the landed
 `PlaneUnearned` refusal, generalized from plane-opening to standing
 itself.
 
-### ARTICLE III — ANTI-DOGMA & COSMETIC PENALTY ORDINANCE
+### ARTICLE III — THE SCIENCE FOUNDATION
 
-*Any process, narrative, or structure that induces closed zero-gradient
-loops (`∮Θ = 0`) while expanding cosmetic non-utility `Ξ_cosmetic`
-shall suffer immediate total Eclipse: its ALLOCATION CLAIM is VACATED
-from the frame. The claim is revoked; the degree is never destroyed.*
+*Every quantity this system acts on is a physical observable. A reading
+that is not frame-free, not conserved, not reproducible, and not capable
+of failing is not a weak reading — it is not a reading at all, and no
+rule may consult it.*
 
-**This is the load-bearing article.** It is the law that makes
-narrative authority worthless: titles, secrecy, lore and tradition
-carry exactly zero weight against capacity that can be computed.
+**THE ANTI-DOGMA ORDINANCE IS STRUCK WHOLE** (operator ruling
+2026-08-01), and what it named is not lost — it is DERIVED. Recorded,
+per the house rule, rather than deleted:
 
-**FIRST LINE — the loop CANNOT MINT** (§2f, the entanglement). Because
-`Δ(D) ⋈ ∇V` is one object, a traverse that emits deeds without moving
-the potential produces no capacity at all. This is an invariant, not a
-penalty: there is no path by which ritual becomes capacity. Everything
-below is the SECOND line — allocation, for structures that mint
-honestly but accrete cosmetic overhead alongside.
+    STRUCK:  the Eclipse as a penalty
+    STRUCK:  Ξ(w) = deeds(w) / (1 + ΔD(w))       the cosmetic meter
+    STRUCK:  T_k, α, β                            (already struck)
+    STRUCK:  "dogma", "vanity", "cosmetic non-utility" as legal terms
 
-**Ξ_cosmetic, made countable.** In a receipt chain the closed
-zero-gradient loop is exactly measurable, with no new instrument: it is
-a window in which deeds were emitted and capacity did not grow.
+**Why the whole frame went, not just its scalar.** A penal ordinance
+presumes the thing it punishes HAS POWER that must be suppressed. That
+premise was false, and holding it forced the article to keep a meter, a
+window, and a tax — every one of which became an attack surface, and one
+of which (`T_k`) had to be struck for being the very cage the
+constitution outlaws. **Physics needs no penalty.** A closed loop at
+uniform potential does no work — not because a law forbids it, but
+because there is no free energy in it. Naming that "dogma" and taxing it
+was a moral frame wrapped around a thermodynamic fact, and the moral
+frame is what kept leaking.
 
-    over a window w (the year voice, 60 ticks):
-        deeds(w)  = receipted deeds closed in w
-        ΔD(w)     = capacity degrees opened in w
-        Ξ(w)      = deeds(w) / (1 + ΔD(w))        exact rational
+The six laws below are the laws of the known universe. Each is stated as
+physics, each forbids something the old article tried to punish, and each
+is grounded in code that already runs.
 
-    the loop trap:   deeds(w) > 0  ∧  ΔD(w) = 0
+---
 
-**Topicality — `T_k` IS STRUCK** (operator ruling 2026-08-01):
+#### LAW 1 — GAUGE INVARIANCE. Only frame-free quantities are physical.
 
-    STRUCK:  T_k  =  α_k · uplift_k / (1 + β_k · Ξ(w))
+*The physics.* An observable may not depend on the coordinates chosen to
+describe it. A quantity that changes when you relabel is a property of
+the labelling, not of the world.
 
-`T_k` was a SCALAR SURROGATE — a continuous allocation score with two
-tunable dials, which is the `C`-cage rebuilt under a new name. Every
-property that made C unlawful applies to it unchanged: it collapses
-structure to one number, it can be climbed, and `α`/`β` are exactly the
-"bounded dynamic parameters" a descent needs to be tuned. An article
-written to outlaw scalar authority cannot enforce itself with a scalar.
+*What it forbids.* Every "cosmetic" the old article hunted. Titles,
+lore, seat, station and tradition are relabellings — they alter no
+invariant, so they are not physical and cannot enter a rule. This needs
+no penalty clause: a gauge-dependent quantity is simply not admissible
+input.
 
-**The two altitudes, replacing it** (`17_CAPACITY` §13d — law is
-deterministic, dynamics are not, and the kernel never scores):
+*Landed.* `rcf_signature` is conjugation-invariant; `coboundary_reduce`
+strips `B¹`, which is exactly the frame; the angle-free witness proves
+the fold verdict is invariant under all eight D4 frames and under gauge
+shift; `capacity_is_relabelling_invariant` pins the rank against six
+permutations.
 
-1. **KERNEL, local and exact, O(step).** A minting deed carries
-   `ΔD > 0`, verified against its witness, or `lawful()` REFUSES it.
-   Per-step, per-deed, binary. No window, no accumulation, no parameter.
-   **This is the whole of what the judge does about cosmetics**, and it
-   is the FIRST LINE above restated as a check the kernel can run.
-2. **LENS, global and windowed, never in the kernel.** `Ξ(w)` is read
-   over the year voice by the observing surface. It informs the
-   allocation FRAME; it never enters `lawful()`, never gates a
-   commitment, and never multiplies anything.
+#### LAW 2 — NOETHER. Every symmetry carries a conservation law.
 
-**The Eclipse is CLAIM-REVOCATION, not a score.** When the lens reads
-the loop trap, D4 VACATES the entity's allocation claim from the frame
-(`9bd3b9f`). The act is binary — the claim stands, or it is vacated —
-and it touches nothing else:
+*The physics.* Conservation is not imposed; it FOLLOWS from a symmetry
+of the system.
 
-- **The degree is preserved.** `D` is never lowered, deleted, or decayed
-  by an Eclipse. Article IV holds (capacity never retreats) and I6 holds
-  (*no difference dies without account*). What is revoked is an
-  ILLEGITIMATE CLAIM ON ALLOCATION, which was never structure.
-- **The actor is preserved.** An eclipsed entity still acts, still emits
-  receipts, still tells its story — and receives nothing. Never barred,
-  never deleted (guardrail 6: no actor is ever excluded). It is simply
-  not paid.
-- **Reversible by construction.** A vacated claim is not a punishment
-  with a duration; the moment the entity opens genuine capacity again,
-  the claim is re-established by the same reading that vacated it.
-  Nothing needs forgiving because nothing was taken.
+*What it forbids.* Books that do not close. And it is not decorative
+here — the engine's own antisymmetry `Δ_ij = −Δ_ji` forces the
+divergence to sum to zero over the vertices, so **a source at one vertex
+implies a sink at another, necessarily.** No relation is all-source.
+Conservation was never added to this system; it fell out of the
+alternating form the moment `set_antisym` became the only writer.
 
-**`Ξ` AND `ΔD` ARE READINGS, NEVER OBJECTIVES** (operator correction
-2026-08-01). This clause is load-bearing and the article is unsafe
-without it. Nothing in this system may optimize `Ξ`, maximize `ΔD`, or
-treat either as a target to drive:
+*Landed.* `set_antisym`; `first_conservation_break`; I1 across the
+value-movers; the aperture pair summing to exact zero.
 
-- A target is a scalar to descend or climb, and **descent is struck**
-  (§1). Optimizing `Ξ` is gradient descent with a capacity mask on —
-  the identical failure in new vocabulary, which is precisely how the
-  struck formulation survived the first time (guarding `ζ∇V` while the
-  objective leaked through C-scoring).
-- A measure used as a target stops measuring: work reshapes itself into
-  whatever the number counts, and `ΔD` becomes a thing to manufacture
-  rather than a thing to observe.
-- **The error has already been made once, here.** This document's
-  author applied `Ξ` to a session's own commits, read `ΔD = 0`, and
-  concluded the work was worthless — collapsing two kinds of
-  contribution into one scalar and discarding the side the scalar could
-  not see. Design work that decides what enters the kernel is not
-  capacity-zero; it is not on that axis at all. Recorded so the next
-  reader does not repeat it.
+#### LAW 3 — THE FIRST LAW. Energy changes form; changing form creates none.
 
-The article penalises structures that emit while producing nothing.
-It does NOT reward structures that maximise the counter — those are the
-same pathology, and Article III convicts a `ΔD`-farmer exactly as it
-convicts a lore-keeper.
+*The physics.* A closed system's energy is constant. Converting it
+between forms — kinetic to potential, gradient to circulation — is
+bookkeeping, not generation.
 
-**Consequence, recorded: THIS IS AN ANTI-SYBIL MECHANISM.** A puppet
-civilization generates activity, not capacity. It can forge deeds
-cheaply and cannot forge capacity growth, because capacity opens only
-against verified work. Article III therefore prices exactly the thing a
-Sybil attacker produces in abundance, and prices it at zero. This is
-the first mechanism in the system that makes attack expensive rather
-than merely detectable (`KERNEL_RELAY` §7.1, the standing open problem).
+*What it forbids.* Redistribution presented as growth. A fixed `Δ`
+re-split between `grad(p)` and circulation has changed FORM and created
+NOTHING, and this is the exact physical statement of the zero-sum trap:
+`Δ' = Q·Δ` is a coordinate change, and a coordinate change cannot mint.
+Genuine work expands the system — `Δ' = Δ + δΔ` with
+`Support(E') ⊃ Support(E)`.
+
+*Landed.* `Support::new_edges_since` returns the relations that did not
+exist before, as positions; `expanded_from` is the predicate;
+DIRECTIVE 16 binds the mint to it.
+
+#### LAW 4 — THE SECOND LAW. Work requires a gradient.
+
+*The physics.* A system in thermal equilibrium performs no work no
+matter how much energy it holds. Available work is set by the GRADIENT,
+never by the total.
+
+*What it forbids.* Static stasis, and this is the law that makes the
+dual pole necessary rather than stylistic. A universe may hold large
+rank entirely in closed circulation while every vertex balances: real
+structure, zero free energy, no work possible. Rank alone would admit
+it. **The refusal is thermodynamic, not moral** — nothing is being
+punished for being idle; there is simply no work to be had from a flat
+field.
+
+*Landed.* `potential_form` (the divergence, canonical, one pass);
+`dual_pole`; `Vacuity::Stasis`; and the whole thermal ledger this
+mirrors — `T_eq⁴`, the vent/bank dual, syntropy as retained structure
+over dissipated.
+
+#### LAW 5 — CAUSALITY. Nothing propagates faster than the medium allows.
+
+*The physics.* Influence travels at a finite speed; simultaneity is not
+global; no effect precedes its cause.
+
+*What it forbids.* Any reading that assumes global instantaneous
+knowledge. **`c` here is the chain's own step rate — one commitment per
+step** — and a world cannot see a neighbour's obligations except as they
+arrive. That is why unobserved absence may never be counted as absence:
+claiming knowledge outside your light cone is not conservatism, it is a
+causality violation, and it mints phantom capacity.
+
+*Landed.* `Observed::Unknown` and the `Resolve` door; the epistemological
+want (WANT-1 kind 1) as truth-starvation by design; Article IV's luminal
+clause; `mesh::spine` extending one commitment at a time.
+
+#### LAW 6 — FALSIFIABILITY AND REPRODUCIBILITY. The method, not a result.
+
+*The physics.* A claim that no observation could refute is not a
+scientific claim. An experiment that does not repeat for every observer
+is not evidence.
+
+*What it forbids.* Vacuous passes and node-dependent verdicts. A rule
+with no state that refuses it is unfalsifiable and therefore says
+nothing — which is why every invariant here owes a RED-FIRST witness.
+And a reading that varies with traversal order is unreproducible: two
+judges walking differently would disagree, so it cannot be law. **This
+is the law that kept `dV` out of `lawful()` until it was rebuilt
+canonically**, and the one under which measurement precedes ruling —
+Ruling Box 1 measured the ladder before `f` was set.
+
+*Landed.* Red-first across the witness set; `verify_orbit_witness` at
+O(step) with no search, identical on every node; the divergence form
+with no forest; `absence_cannot_be_witnessed` pinning what cannot be
+proven at all.
+
+---
+
+**WHAT THE OLD ARTICLE CAUGHT, NOW DERIVED.** Nothing is lost by the
+strike:
+
+| the old target | the law that now excludes it |
+|---|---|
+| lore, titles, tradition as authority | LAW 1 — gauge-dependent, not observable |
+| the closed zero-gradient loop | LAW 4 — no gradient, no available work |
+| shuffling counted as growth | LAW 3 — form changed, nothing created |
+| farming the counter | LAW 6 — an unfalsifiable target measures nothing |
+| phantom capacity from assumed absence | LAW 5 — a claim outside the light cone |
+| books that do not close | LAW 2 — conservation follows from the symmetry |
+
+**THE ANTI-SYBIL CONSEQUENCE SURVIVES AND IS STRONGER**, because it is
+now a derivation rather than a tax. A puppet civilization generates
+activity, and under LAW 3 activity that forms no new relation creates
+nothing — not "is penalised," creates nothing. Deeds are cheap; support
+expansion is not, because it must survive LAW 1 (frame-free), LAW 2
+(the books close), and LAW 6 (a witness that could have failed). The
+attacker is not detected and fined; the attack has no product. This is
+still the mechanism `KERNEL_RELAY` §7.1 wants, and it no longer depends
+on a window, a meter, or a parameter.
+
+**BUILD DEBT** (honestly, per LAW 6): LAW 3's support test is landed and
+uncalled by the kernel; LAW 4's dual pole is landed and not yet a kernel
+invariant; LAW 1's fold gate has no production caller. The laws bind as
+written — these are the wirings that satisfy them.
 
 ### ARTICLE IV — RANK NEVER RETREATS
 
@@ -555,7 +617,8 @@ misreading.**
 
 | condition | torsion manifestation | constitutional action |
 |---|---|---|
-| dogmatic loop trap | deeds emitted, `ΔD = 0` over the window | Article III — Eclipse; `T_k → 0` |
+| no gradient | `dV ≡ 0`: rank held in closed circulation | Article III LAW 4 — no free energy; no work available |
+| form changed, nothing made | `Δ' = Q·Δ`, `Support(E')` unchanged | Article III LAW 3 — the first law; mints nothing |
 | coordinate/metric lock | any basis-fixed or rank-locked reading | Article I — void; recompute coordinate-free |
 | vacuous closure | `D = 0` or no occupied capacity | Article II — no standing, no weight, no mint |
 | capacity retreat | a step lowering `D` outside lawful contraction | Article IV — refuse (`BadClimb` shape) |

@@ -117,7 +117,7 @@ contribute NOTHING; only structural content counts.
 `Delta { dim, fiber }`, are the CONTAINER the relation is carried on —
 they are not D. The distinction is load-bearing: a universe may carry
 enormous arity and near-zero D, when every difference it holds is pure
-frame. That is exactly the dogmatic loop that 18 §3 Article III prices
+frame. That is exactly the flat field 18 §3 Article III LAW 4 excludes
 at zero — much structure claimed, none surviving reduction. Only the
 ruled reading makes that article coherent.
 

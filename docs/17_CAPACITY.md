@@ -554,6 +554,15 @@ branch is still linear decision-making, and the discard is the defect.
 
 ---
 
+**NOTE (2026-08-01): ARTICLE III IS NOW THE SCIENCE FOUNDATION.** The
+anti-dogma ordinance was struck whole and its targets DERIVED from six
+physical laws. References below to "Article III", the Eclipse and `Ξ`
+are HISTORY, quoted never rewritten, and resolve as: the cosmetic tests
+→ LAW 1 (gauge invariance, not observable); the loop trap → LAW 4 (no
+gradient, no available work); shuffling-as-growth → LAW 3 (the first
+law); phantom capacity → LAW 5 (causality). The Eclipse as a PENALTY no
+longer exists — physics needs none.
+
 ## §10bis THE EXILE OF C — containment, and C's own V
 
 **LAW (operator rulings 2026-08-01).**
