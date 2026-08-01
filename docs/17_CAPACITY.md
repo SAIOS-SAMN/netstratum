@@ -517,3 +517,118 @@ Before a quantity enters the law, it answers all four:
 3. Does the definition contain a reduction word? If yes, AV-1.
 4. Can the judge COMPUTE it today? If no, it is inscribed, never
    invariant, and no `VERSION` moves.
+
+**§10 IS ITSELF AMENDED BY §11.** Where §10 says the cocycle condition
+is a "refusal predicate," read §11: a predicate that discards its false
+branch is still linear decision-making, and the discard is the defect.
+
+---
+
+## §11 THE BIFURCATION LAW — both sides of the coin become roots
+
+**LAW (operator ruling 2026-08-01).**
+
+> in the "old way" you would have an if or iff that is just linear
+> decision making — with the !eq or eq — we now have the ability to take
+> both "sides of the coin" and create n-dimensional tree roots building
+> the base foundation of concrete and stone, rather than sand.
+
+### 11a. What was wrong with the predicate
+
+`if a == b { A } else { B }` evaluates one dimension, yields two
+outcomes, and **keeps one**. The other is discarded. That discard is the
+sand: every branch not taken is difference that died without account,
+which is the exact prohibition of I6.
+
+Descent and boolean refusal are therefore the SAME failure at different
+resolutions. Descent discards continuously by walking downhill; a
+predicate discards discretely by dropping a branch. §10 replaced the
+first with the second and called it a fix. It was an improvement — a
+predicate cannot be farmed the way an objective can — but it did not
+reach the actual error, which is **discarding at all**.
+
+### 11b. The form
+
+A gate does not select. It ROUTES, and both routes persist:
+
+    old:   eq → A            !eq → ⊥            (one survives, one dies)
+    law:   eq → folds        !eq → ROOTS        (both survive; the second
+                                                 opens a dimension)
+
+The `!eq` branch is not a rejection. It is a **root of the next
+dimension** — the point from which structure grows that the current
+degree could not hold. A tree of such roots is n-dimensional by
+construction, and nothing in it was ever thrown away. That is the
+concrete and stone: the foundation is made of what a selecting engine
+would have discarded.
+
+### 11c. This is already landed three times
+
+The law names what the engine does in three places, which is why it can
+be adopted rather than invented:
+
+1. **`orbit_lock` is the pattern, exactly.** `orbit_lock = ∅` → the
+   fold closes, the difference was gauge. `orbit_lock ≠ ∅` → the fold
+   REFUSES **and the residue EMITS as a new plane**. The "no" branch is
+   generative. This is not a gate returning false; it is a bifurcation
+   routing structure, and the refused side is where capacity comes from.
+2. **D3 already forbids the discard by name.** "Where capacity is
+   insufficient, **the difference is NEVER reduced to fit** — capacity
+   grows… the struck frame shrank the content to meet the container;
+   this law grows the container to meet the content."
+3. **The nursery routes divergence instead of refusing it.** A declared
+   fork gets its own branch coordinates rather than a rejection —
+   "re-convergence has one door: the kernel judges the merge, or the
+   nursery keeps its toys."
+
+### 11d. Consequently: cocycle failure is GROWTH, never refusal
+
+`δΔ ≠ 0` says the relations do not compose over the present index space.
+Under §10 that refused. Under D3 it cannot: content exceeding its
+container is precisely the condition that **grows the container**. The
+non-composing triple is evidence that structure exists which the current
+degree cannot express, and the lawful response is to open the degree
+that can hold it — the failure is a root.
+
+So the corrected reading, replacing §10's:
+
+- **NOT:** "a state composes or is refused."
+- **BUT:** "a state composes, or its non-composition is a root and
+  capacity opens by receipt."
+
+### 11e. THE LINE — what still refuses, and why this is not "nothing ever refuses"
+
+The bifurcation law is not the abolition of refusal. It draws a line the
+old binary conflated:
+
+| kind | example | disposition |
+|---|---|---|
+| **FORM — a lie** | a forged commit, a broken parent link, a truncated payload, a claimed judgment with no reproducible step | **REFUSES.** There is no content here to root; there is an assertion that is false. Nothing is discarded because nothing was there. |
+| **CONTENT — an excess** | relations that do not compose, difference that will not fold, a declared divergence | **ROOTS.** Capacity opens by receipt. Refusing this is the discard I6 forbids. |
+
+**Refuse lies. Grow for content.** Every landed refusal in the engine is
+already form-shaped — `Forged`, `Malformed`, `ArrowBroken`,
+`JudgedWithoutProof`, `BlobUnheld` — which is evidence the line is the
+one the code already draws.
+
+### 11f. AV-11 · FORCED GROWTH — the vector this law opens **[DERIVED]**
+
+Stated in §10's own idiom, because a new law owes its own threat entry.
+
+*Vector:* if non-composition roots instead of refusing, an attacker
+floods a node with cheap non-composing garbage to force unbounded
+capacity growth — a denial-of-capacity attack replacing the
+denial-of-service the refusal used to provide.
+
+*Defense, layered:* growth is BY RECEIPT (D3) and gated on
+`orbit_lock ≠ ∅` — mere inconsistency is not irreducible difference, and
+only irreducible difference opens a plane. Article II denies standing to
+vacuous capacity, so garbage-grown extent carries no weight. Article III
+prices it at zero: deeds without genuine `ΔD` raise `Ξ` and eclipse the
+actor.
+
+*Owed, and honestly open:* the three defenses above are stated in law
+and **none is measured** (`18_TORSION` §6). Until `orbit_lock` has a
+caller, AV-11 has no enforcement — it is the first attack vector this
+constitution opens faster than it can close, and that ordering should be
+deliberate rather than discovered.
