@@ -744,3 +744,162 @@ demurrage and Article III make waiting expensive in the meantime.
 signature of capacity growing without earning it, and it is measurable
 by the same meter §12e requires — which is one more reason the meter is
 the first build and not a later one.
+
+**§12 IS AMENDED BY §13.** §12a's "monotone" is corrected to POLYTONIC
+(§13a), and §12b's claim that defence cannot live at the exit is WRONG
+and withdrawn (§13b).
+
+---
+
+## §13 THE LEVELS — polytonic value, the honeypot, inversion, and altitude
+
+**LAW (operator ruling 2026-08-01), four clauses.**
+
+> 1 — upgrade value creation to polytonic.
+> 2 — defense CAN live at an exit; imagine a honeypot scenario: you
+> think you're getting the gold until you try to exit the game.
+> 3 — invert logic and see what answers you get to your own methodology
+> and questions.
+> 4 — why are we even thinking about orbit_lock at this level? orbital
+> mechanics themselves should be stochastic, but the laws of the land
+> are deterministic. Most people get this wrong thinking that if we live
+> in a deterministic universe everything is deterministic — it operates
+> at different levels.
+
+### 13a. POLYTONIC, not monotone — and the error was mine
+
+§12a argued: value accumulates monotonically, therefore a crossing
+exists where withdrawal dominates. **That argument collapsed value to a
+scalar in order to accumulate it — AV-3, committed by the author of
+AV-3, inside the section warning about it.**
+
+Value creation is POLYTONIC. `G` is the gauge KEY; aeons are G-sheets;
+divergence and confluence are KEY CHANGES (AEON-1a). Value stands in
+many keys at once, each with its own centre, and **there is no single
+accumulation curve because there is no single tonal centre to accumulate
+against.** A scalar total across keys is not a larger truth; it is the
+same collapse that made `C` substandard.
+
+What survives of §12a: a crossing may exist PER KEY, where that key is
+externally realizable. What dies: the global crossing, the global total,
+and any defence reasoned from either.
+
+### 13b. THE HONEYPOT — §12b was wrong, and withdrawn
+
+§12b claimed withdrawal-side controls are theatre because value is
+fungible at the exit. **That is refuted by the honeypot, and the
+refutation is structural, not a special case.**
+
+My argument assumed an exit must CLASSIFY — separate farmed value from
+earned value — and correctly concluded it cannot. **An exit does not
+need to classify. It only needs to not pay.** The attacker's strategy is
+disclosed by the attempt to leave: you hold what looks like gold until
+the moment you try to realize it, and realization is where the claim is
+tested against the law rather than against the ledger's arithmetic.
+
+Two properties make this stronger than the creation-side gate, not
+weaker:
+
+1. **It does not require detection.** Creation-side gating must
+   recognize a bad mint AS IT HAPPENS, which needs the meter running in
+   real time. The exit test runs once, in batch, on a claim already
+   made — so it can afford to be exhaustive where a per-step gate cannot.
+2. **It makes attack expensive rather than merely detectable.** The
+   attacker sinks real cost accumulating, and learns the value is
+   unrealizable only after the cost is spent. That is precisely the
+   property `KERNEL_RELAY` §7.1 names as the standing open problem and
+   Article III claims for the Eclipse.
+
+**Consequence for §12e.** The sequencing ruling weakens from *N7 must
+not open before the meter runs* to: **N7 may open only with exhaustive
+provenance re-verification at the boundary** — every unit's creating
+work replays, or it does not leave. The honeypot is the meter's
+substitute at the exit, and it is available now, whereas the meter is
+not. This does NOT license opening N7 today; it moves the precondition
+from an unbuilt measurement to a buildable test.
+
+### 13c. INVERSION AS METHOD — §11 applied to reasoning
+
+The bifurcation law says do not discard the branch not taken. Applied to
+argument rather than to state, that is: **the negation of a claim is a
+root, not a rejection.** Every load-bearing claim in this document owes
+its inverse an examination, and this session is the evidence — inverting
+"defence is creation-side" produced §13b, which is the stronger
+mechanism.
+
+Recorded as standing practice: a law that cannot survive its own
+inversion being rooted is asserted, not derived. This is the reasoning
+counterpart of §11, and it is why §10's threat model is written as
+vectors rather than corrections — a vector is a claim's inverse kept
+alive.
+
+### 13d. THE LEVELS — stochastic dynamics, deterministic law
+
+**The general principle, which is the ruling's fourth clause: a
+deterministic universe does not make every level deterministic.** Law is
+deterministic; the dynamics inside it are not. Conflating the two is how
+a SEARCH ends up inside a JUDGE.
+
+That is exactly the error in treating `orbit_lock` as a kernel-level
+gate, and it was mine throughout §§10–12. `orbit_lock` runs a bounded
+SEARCH — every operator, up to `k_max` conjugations, each step checked
+against the antisymmetric surface. A search is exploratory, its method
+is free, and at scale it is stochastic. **The kernel is pure, total,
+cheap, and must never search.**
+
+**The split already exists and is already the house pattern.** U1a split
+the solver: `solver` SEARCHES (free, non-constitutional), `solver-verify`
+REPLAYS (sealed, what the kernel calls). `orbit_lock` takes the same
+split, and its signature already anticipates it:
+
+    orbit_lock(a, b, operators, k_max) -> Option<OrbitWitness>
+
+The witness carries "the operator id and step at which the lock was
+found." So:
+
+- **Prover side, stochastic and free:** search the operator space for an
+  orbit. Sample it, seed it from the chain (`ξ_k = draw(seed =
+  commit[k−1])` — stochastic AND replayable, which is the whole trick),
+  bound it however the prover likes. Nothing constitutional.
+- **Kernel side, deterministic and cheap:** given `OrbitWitness{op, k}`,
+  conjugate `k` times by `op` and compare RCF signatures. O(k), total,
+  no search, no `k_max`.
+
+**The asymmetry this exposes, and it is load-bearing.** A witness can
+prove a lock EXISTS. **No witness can prove a lock is ABSENT** — absence
+requires exhausting the operator space, which is unbounded in principle
+and unverifiable by a cheap judge. Therefore **the mint must fire on the
+side that can carry a witness**, or minting requires proving a negative.
+This is not a preference; it decides whether the economy is verifiable
+at all.
+
+### 13e. DEFECT FOUND — the orbit_lock polarity is contradicted across authorities
+
+Verifying 13d's claim surfaced a live contradiction in the mint's own
+trigger condition. Inscribed per `EQUATIONS.md` §0.1 (a disagreement
+between authorities is a DEFECT, never shrugged).
+
+| authority | says |
+|---|---|
+| `SYSTEM_SPEC.md` §4 / `EQUATIONS.md` E2 | `orbit_lock ≠ ∅` → FORBID the fold, the residue EMITS as a new plane (the mint). `= ∅` → fold permitted, "the difference was gauge / angle" |
+| `rfa_core::orbit_lock` doc, `fold.rs` | "Returns the operator id and step at which the lock was found (the witness), or **`None` — no lock, the difference is GENUINE**" |
+
+These are opposite. The law says empty means gauge; the sealed code's
+own header says empty means genuine. **The two readings put the mint on
+opposite branches**, and a mint on the wrong branch pays for gauge and
+refuses genuine difference — the sign inversion of AV-2, sitting
+unresolved in the engine's central mechanism.
+
+**Resolution argued from 13d, not from preference.** The mint must carry
+a witness (13d's asymmetry). Under the code-header reading, minting
+fires on `None` and would require proving absence — unverifiable. Under
+the `SYSTEM_SPEC`/`EQUATIONS` reading, minting fires on `Some` and the
+`OrbitWitness` is exactly the proof. **Only one polarity is verifiable,
+so the law's polarity stands and `fold.rs`'s header sentence is the
+defect.** Owed: correct that header, and add a witness pinning which
+branch mints.
+
+**This is why 13d's question was the right one.** Had `orbit_lock` been
+wired into the kernel as §§10–12 kept urging, this contradiction would
+have been cemented into a judged invariant and bound into `VERSION`
+before anyone noticed the polarity was undecided.
