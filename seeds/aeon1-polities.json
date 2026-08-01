@@ -54,7 +54,7 @@
   "star": "m",
   "albedo": "0",
   "orbit": "1",
-  "station": "progenitor"
+  "station": "watcher"
  },
  {
   "name": "Agarthan",
@@ -286,5 +286,44 @@
   "y": "0",
   "z": "0",
   "station": "watcher"
+ },
+ {
+  "name": "Draco",
+  "slug": "draco",
+  "species": "coherent of the warm dark",
+  "motto": "we hold the same silence, at a different heat",
+  "disposition": "epicurean",
+  "metabolism": "biotic",
+  "perception": "harmonic",
+  "world": "thermal-choir",
+  "planet": "emberhold",
+  "colony": "long-scale",
+  "policy": "steady",
+  "x": "-11",
+  "y": "16",
+  "z": "4",
+  "star": "k",
+  "albedo": "1/4",
+  "orbit": "3/4",
+  "station": "observer"
+ },
+ {
+  "name": "Darlok",
+  "slug": "darlok",
+  "species": "veil-native, form unfixed",
+  "motto": "you have already met us",
+  "disposition": "empiricist",
+  "metabolism": "biotic",
+  "perception": "umbral",
+  "world": "shroudmere",
+  "planet": "nowhere-yet",
+  "colony": "first-mask",
+  "policy": "steady",
+  "x": "7",
+  "y": "-19",
+  "z": "11",
+  "star": "m",
+  "albedo": "1/2",
+  "orbit": "1"
  }
 ]

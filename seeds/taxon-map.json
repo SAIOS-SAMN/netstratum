@@ -1,36 +1,143 @@
 {
  "_ratified": "2026-07-31 by the operator (15_TAXON §6) — the migration wave seals from this table; class codes per 15 §2, clade codes per 15 §3; branches inherit the root class through the lineage DAG",
- "aerie": {"class": 5, "clade": 15},
- "agarthan": {"class": 2, "clade": 4},
- "anunnaki": {"class": 7, "clade": 2},
- "archon": {"class": 4, "clade": 3},
- "basaltvault": {"class": 2, "clade": 4},
- "bloomdeep": {"class": 5, "clade": 7},
- "bloomhollow": {"class": 1, "clade": 10},
- "bloomvault": {"class": 4, "clade": 3},
- "borealis": {"class": 6, "clade": 12},
- "cairnborn": {"class": 2, "clade": 4},
- "coralline": {"class": 1, "clade": 11},
- "coronal-choir": {"class": 6, "clade": 12},
- "deep-chorus": {"class": 5, "clade": 6},
- "deepmat": {"class": 1, "clade": 14},
- "eightfold": {"class": 5, "clade": 7},
- "ferndeep": {"class": 5, "clade": 7},
- "forgechoir": {"class": 2, "clade": 5},
- "forgedeep": {"class": 1, "clade": 10},
- "frostwright": {"class": 5, "clade": 9},
- "hadal": {"class": 5, "clade": 16},
- "hivelight": {"class": 1, "clade": 8},
- "klethaxu": {"class": 1, "clade": 8},
- "lyran": {"class": 7, "clade": 1},
- "mycelial-weft": {"class": 1, "clade": 10},
- "reefhum": {"class": 1, "clade": 8},
- "reefreach": {"class": 5, "clade": 9},
- "reefspan": {"class": 1, "clade": 8},
- "slagborn": {"class": 2, "clade": 5},
- "sporechord": {"class": 5, "clade": 6},
- "sporehum": {"class": 6, "clade": 12},
- "syzygy": {"class": 4, "clade": 13},
- "tunborn": {"class": 2, "clade": 5},
- "veinreach": {"class": 2, "clade": 5}
+ "aerie": {
+  "class": 5,
+  "clade": 15
+ },
+ "agarthan": {
+  "class": 2,
+  "clade": 4
+ },
+ "anunnaki": {
+  "class": 7,
+  "clade": 2
+ },
+ "archon": {
+  "class": 4,
+  "clade": 3
+ },
+ "basaltvault": {
+  "class": 2,
+  "clade": 4
+ },
+ "bloomdeep": {
+  "class": 5,
+  "clade": 7
+ },
+ "bloomhollow": {
+  "class": 1,
+  "clade": 10
+ },
+ "bloomvault": {
+  "class": 4,
+  "clade": 3
+ },
+ "borealis": {
+  "class": 6,
+  "clade": 12
+ },
+ "cairnborn": {
+  "class": 2,
+  "clade": 4
+ },
+ "coralline": {
+  "class": 1,
+  "clade": 11
+ },
+ "coronal-choir": {
+  "class": 6,
+  "clade": 12
+ },
+ "darlok": {
+  "class": 3,
+  "clade": 20
+ },
+ "deep-chorus": {
+  "class": 5,
+  "clade": 6
+ },
+ "deepmat": {
+  "class": 1,
+  "clade": 14
+ },
+ "draco": {
+  "class": 4,
+  "clade": 19
+ },
+ "eightfold": {
+  "class": 5,
+  "clade": 7
+ },
+ "ferndeep": {
+  "class": 5,
+  "clade": 7
+ },
+ "forgechoir": {
+  "class": 2,
+  "clade": 5
+ },
+ "forgedeep": {
+  "class": 1,
+  "clade": 10
+ },
+ "frostwright": {
+  "class": 5,
+  "clade": 9
+ },
+ "hadal": {
+  "class": 5,
+  "clade": 16
+ },
+ "hivelight": {
+  "class": 1,
+  "clade": 8
+ },
+ "klethaxu": {
+  "class": 1,
+  "clade": 8
+ },
+ "lyran": {
+  "class": 7,
+  "clade": 1
+ },
+ "mycelial-weft": {
+  "class": 1,
+  "clade": 10
+ },
+ "reefhum": {
+  "class": 1,
+  "clade": 8
+ },
+ "reefreach": {
+  "class": 5,
+  "clade": 9
+ },
+ "reefspan": {
+  "class": 1,
+  "clade": 8
+ },
+ "slagborn": {
+  "class": 2,
+  "clade": 5
+ },
+ "sporechord": {
+  "class": 5,
+  "clade": 6
+ },
+ "sporehum": {
+  "class": 6,
+  "clade": 12
+ },
+ "syzygy": {
+  "class": 4,
+  "clade": 13
+ },
+ "tunborn": {
+  "class": 2,
+  "clade": 5
+ },
+ "veinreach": {
+  "class": 2,
+  "clade": 5
+ }
 }

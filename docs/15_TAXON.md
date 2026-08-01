@@ -38,22 +38,36 @@ partition needs:
 | 0 | unclassed (lawful — a class arrives by amendment, never by default) | revenants, unratified lines |
 | 1 | biotic-swarm (collective/eusocial/colonial) | Hivelight, Klethaxu, Mycelial Weft, Coralline, Deepmat |
 | 2 | geodic-lithovore (mineral metabolisms, stone-eaters) | Slagborn, Tunborn, Cairnborn, Agarthan |
-| 3 | metashifter (veil-native) | none — reserved, the Darlok seat |
-| 4 | telepathic-resonant (alignment/coherence lines) | Syzygy, Archon |
+| 3 | metashifter (veil-native) | Darlok — the seat is FILLED (2026-08-01) |
+| 4 | telepathic-resonant (alignment/coherence lines) | Syzygy, Archon, **Draco** (sub-archetype of Archon — same class, clade 19) |
 | 5 | pelagic-aerial (volumetric biotic) | Echowright, Eightfold, Hadal, Aerie, Frostwright |
 | 6 | etherial-field (plasmic/energy) | Coronal Choir, Borealis |
 | 7 | apex-terrestrial (solitary apex) | Lyran, Anunnaki |
 
 ## 3. The clade vocabulary (proposed, from the live register)
 
-Code 0 = unrecorded (lawful). The seventeen in use, append-only;
-future seats reserve forward (18 gastropod — the register awaits its
-snail):
+Code 0 = unrecorded (lawful). Append-only; future seats reserve
+forward (18 gastropod — the register awaits its snail):
 
 1 felid · 2 humanoid · 3 cryo-coherent · 4 lithic · 5 tardigrade ·
 6 cetacean · 7 cephalopod · 8 hymenopteran · 9 amphibian · 10 fungal ·
 11 cnidarian · 12 plasmoid · 13 syzygial · 14 endolithic · 15 avian ·
-16 teleost · 17 revenant · 18 gastropod (reserved).
+16 teleost · 17 revenant · 18 gastropod (reserved) · **19 draconic** ·
+**20 metashifting**.
+
+**19 draconic — a SUB-ARCHETYPE, not a peer line** (operator ruling
+2026-08-01). The draconic clade seats inside class 4
+(telepathic-resonant), the SAME class the Archon line holds. That is
+what "entangled" means here and it is the structural claim, not a
+flavour note: **one archetype, two expressions.** Class is the shared
+identity; clade is how it is expressed. A draconic line and an Archon
+line are not two peoples who happen to cooperate — they are the same
+coherence-archetype read at two clades, and any mechanic keyed on class
+sees them as one.
+
+**20 metashifting — the Darlok seat, FILLED.** Class 3 (metashifter,
+veil-native) stood reserved and empty since the partition was drafted.
+The clade that seats there is now named, and the class has an occupant.
 
 ## 4. The seal — a NEW deed, deliberately (the amendment-tier argument)
 
