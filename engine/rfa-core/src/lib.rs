@@ -25,6 +25,7 @@
 //! - [`gates`] — the three validation gates every proposed operator
 //!   must pass: productivity, conservation, bounded magnitude.
 
+pub mod cage;
 pub mod delta;
 pub mod fold;
 pub mod gates;
@@ -32,7 +33,8 @@ pub mod rcf;
 pub mod potential;
 pub mod reduce;
 
-pub use delta::{coherence_functional, for_each_residual, magnitude, Delta, Lens};
+pub use cage::Lens;
+pub use delta::{coherence_functional, for_each_residual, magnitude, Delta};
 pub use fold::{
     f_fold_star, judged_fold, orbit_lock, verify_orbit_witness, FoldVerdict, Operator,
     OrbitWitness, QMatrix,

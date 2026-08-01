@@ -1,5 +1,6 @@
 //! The Delta tensor and the one cocycle-residual computation.
 
+use crate::cage::Lens;
 use cfe::ratio::Ratio;
 use num_traits::{Signed, Zero};
 
@@ -116,7 +117,7 @@ impl Delta {
     /// sits from the surface. The engine asks
     /// [`Self::first_conservation_break`] instead, which names a
     /// position rather than a magnitude.
-    pub fn conservation_measurement(&self) -> Ratio {
+    pub fn conservation_measurement(&self) -> Lens {
         let mut violation = Ratio::zero();
         for i in 0..self.dim {
             for l in 0..self.fiber {
@@ -129,7 +130,7 @@ impl Delta {
                 }
             }
         }
-        violation
+        Lens::of(violation)
     }
 
     /// The typed read of the conservation invariant — structural, with
@@ -191,49 +192,7 @@ pub fn coherence_functional(delta: &Delta) -> Lens {
     for_each_residual(delta, |_i, _j, _k, _l, r| {
         c += r.abs();
     });
-    Lens(c)
-}
-
-/// THE CAGE — a reading you may SHOW, and compare for identity, and
-/// nothing else (operator ruling 2026-08-01).
-///
-/// `Lens` deliberately implements `PartialEq` and **not** `PartialOrd`.
-/// That one omission is the whole cage, and it is exact:
-///
-/// - **Ordering is what descent needs.** `c_after < c_before` does not
-///   compile. Neither does `c > epsilon`, nor `c <= bound`, nor
-///   `.min()`, `.max()`, or `.sort()`. Every gate, threshold, penalty
-///   curve and productivity check this session struck is now a TYPE
-///   ERROR rather than a review comment.
-/// - **Identity is what witnesses need.** `assert_eq!(c, Lens::of(..))`
-///   still works, so a pin can state exactly what a state measures.
-///   Knowing WHAT a reading is cannot be descended; knowing which SIDE
-///   of something it falls on can.
-///
-/// Docstrings saying "do not gate on this" failed twice today — once in
-/// `validate_step`'s productivity gate, once in the bridge's
-/// `capacity_is_defined`. The compiler does not forget and does not
-/// need re-reading.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Lens(Ratio);
-
-impl Lens {
-    /// Build a reading — for witnesses stating an expected value.
-    pub fn of(value: Ratio) -> Self {
-        Lens(value)
-    }
-
-    /// Render for a human surface. The ONLY way out of the cage, and it
-    /// lands in a `String`, which no rule can branch on numerically.
-    pub fn show(&self) -> String {
-        format!("{}", self.0)
-    }
-}
-
-impl std::fmt::Display for Lens {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
+    Lens::of(c)
 }
 
 /// `‖Δ‖₁` — the sum of entry magnitudes (the L1 mass the bounded-step
