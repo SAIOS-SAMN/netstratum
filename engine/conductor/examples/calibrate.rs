@@ -111,7 +111,7 @@ fn part_a_and_b() {
     println!("## ({SAMPLES} forged tasks per rung; every honest solve is a would-be mint)");
     println!();
     println!(
-        "{:<5} {:<5} {:<5} {:<7} {:<9} {:<7} {:<6} {:<11} {:<9}",
+        "{:<5} {:<5} {:<5} {:<7} {:<9} {:<7} {:<6} {:<11} {}",
         "rung", "tier", "word", "honest", "mismatch", "unsolv", "cert", "mint@1", "zero-mint"
     );
     println!("{}", "-".repeat(78));
