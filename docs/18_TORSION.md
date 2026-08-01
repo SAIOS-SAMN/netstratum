@@ -214,6 +214,30 @@ it would make the board-maker a byproduct of what plays on the board.
 RECEIPT.** That is the common ancestor, and it is why they are peers:
 each answers to the chain, not to its counterpart.
 
+**THE ORDER, settled** (`12_UNION` §3c carries it whole). Peers with
+nothing above them would leave two powers facing each other; there IS an
+order, and neither office is at its top:
+
+    THE LAW      lawful(prior, next, step) — judges every step,
+                 no office exempt
+      ↓ admits
+    THE RECEIPT  the chain — the sole grant, from which BOTH draw
+      ↓ grants
+    V SOVEREIGN  holds the chartered      D PROGENITOR  makes the room
+
+They are peers because they are SIBLINGS — one parent, neither descended
+from the other. Not a truce between equals; a fact about ancestry.
+
+**AND NEITHER OFFICE ACTS.** A deed acts. `D` does not decide to open a
+plane — a fold refuses, the residue emits, the plane opens BY RECEIPT.
+`V` does not decide to hold — admission commits. Two things that do not
+act cannot compete, which is why no equilibrium needs negotiating
+between them. The bounds are structural on both sides: `PlaneUnearned`
+makes unearned room unmakeable and Article II pays unoccupied room
+nothing; the container law makes structure in an unopened plane
+unrepresentable, since the gauge key is a container grown only by
+receipt.
+
 **The measurement arrow carries no authority**, by this constitution's
 own rule stated one section up — *testimony never outranks its subject*.
 That rule was written to stop `D` conferring standing on `V`; it holds

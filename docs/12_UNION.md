@@ -465,6 +465,61 @@ written to stop `D` conferring standing on `V`, and it holds identically
 in reverse — `rank(Δ(V))` is testimony ABOUT `D` taken through `V`, and
 measuring a room does not make the furniture its architect.
 
+### 3c. THE ORDER — where the two offices actually sit
+
+**Ruled 2026-08-02. This is settled and not reopened.** Peers without an
+order is not a resolution; it leaves two powers facing each other with
+nothing above them. There IS an order, and neither office is at its top.
+
+```text
+              THE LAW — lawful(prior, next, step)
+              judges every step; no office is exempt
+                            │  admits
+                            ▼
+              THE RECEIPT — the chain, the sole grant
+                            │  from which BOTH draw
+              ┌─────────────┴─────────────┐
+              ▼                           ▼
+        V  SOVEREIGN                D  PROGENITOR
+        holds what is chartered     makes the room
+              │  governs                  │  opens
+              ▼                           ▼
+        committed content           planes, grades, board
+        (orbs, banks, receipts)     (the fiber, band capacity)
+```
+
+**The two offices are peers because they are SIBLINGS, not because they
+are balanced.** They share one parent — the receipt — and neither is
+descended from the other. That is the whole of the non-ranking: not a
+truce between equals, a fact about ancestry.
+
+**THE TENSION WAS AN ARTIFACT OF PERSONIFICATION, and this dissolves
+it.** Two powers at opposing poles would need an equilibrium negotiated
+between them. There is none to negotiate, because **neither office
+acts.** A deed acts. `D` does not decide to open a plane — a fold
+refuses, the residue emits, and the plane opens BY RECEIPT. `V` does not
+decide to hold — admission commits. The offices are how we NAME what the
+chain has already done, and two things that do not act cannot compete.
+
+**THE EQUILIBRIUM IS STRUCTURAL, bounded from both sides**, and neither
+bound is a policy anyone administers:
+
+- **`D` cannot run ahead of `V`.** `PlaneUnearned` refuses a grade
+  opened without its receipted mints, so unearned room cannot be made at
+  all; and `18` Article II pays unoccupied room NOTHING, so room made
+  ahead of occupancy earns its maker nothing.
+- **`V` cannot run ahead of `D`.** The container law (kernel CHARTER §2)
+  seals containers, not dimensions: *the gauge key is a variable-length
+  container grown ONLY by receipt.* There is no slot in which to hold
+  structure that no plane has opened. Not refused — unrepresentable.
+
+Room and occupancy therefore track each other by construction. Excess
+room is worthless; excess content is unholdable.
+
+**WHAT EACH OFFICE OWES.** `D` owes room that was earned. `V` owes
+work that was receipted. Both owe the same creditor, and it is neither
+of them.
+
 **NOTATION, recorded once.** `Υ` is `V`'s own letter — upsilon is the
 Greek ancestor of Latin `V`, so the two are one name in two alphabets,
 never two names. Nothing is renamed and nothing is duplicated: the
