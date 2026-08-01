@@ -4,12 +4,12 @@
 //! blindly).
 //!
 //! The one question this module answers: are two rational matrices in
-//! the same `GL_n(Q)` conjugacy class? Two matrices `A` and `PAP⁻¹`
+//! the same `GL_n(Rat)` conjugacy class? Two matrices `A` and `PAP⁻¹`
 //! are the SAME state seen through different frames — a gauge
 //! difference, not a genuine one. The invariant that decides it is the
 //! sequence of invariant factors `d₁ | d₂ | … | dₖ` of the
 //! characteristic matrix `(xI − A)`, computed by its Smith Normal Form
-//! over the polynomial ring `Q[x]`. Same conjugacy class ⟺ same
+//! over the polynomial ring `Rat[x]`. Same conjugacy class ⟺ same
 //! invariant factors, exactly.
 //!
 //! This is the angle-free heart of the singularity law (16_UNIT §4a):
@@ -37,17 +37,17 @@ use crate::delta::Delta;
 use cfe::ratio::Ratio;
 use num_traits::{One, Zero};
 
-// ─── Polynomials over Q ────────────────────────────────────────────────
+// ─── Polynomials over Rat ────────────────────────────────────────────────
 
 /// A polynomial over the exact rationals, `p(x) = Σ coeffs[i]·xⁱ`,
 /// stored low-degree-first and trimmed of trailing zeros (so equal
 /// polynomials have equal `coeffs`).
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct QPoly {
+pub struct RatPoly {
     coeffs: Vec<Ratio>,
 }
 
-impl QPoly {
+impl RatPoly {
     /// The zero polynomial — the empty coefficient list (degree: none).
     pub fn zero() -> Self {
         Self { coeffs: Vec::new() }
@@ -172,7 +172,7 @@ impl QPoly {
         (Self::from_coeffs(quotient), Self::from_coeffs(remainder))
     }
 
-    /// The monic GCD over `Q[x]` (Euclid). Zero stays zero.
+    /// The monic GCD over `Rat[x]` (Euclid). Zero stays zero.
     pub fn gcd(&self, other: &Self) -> Self {
         let mut a = self.clone();
         let mut b = other.clone();
@@ -205,36 +205,36 @@ impl QPoly {
     }
 }
 
-// ─── The characteristic matrix and its Smith Normal Form over Q[x] ─────
+// ─── The characteristic matrix and its Smith Normal Form over Rat[x] ─────
 
-/// An `n×n` matrix of polynomials, `entries[i][j] ∈ Q[x]`.
+/// An `n×n` matrix of polynomials, `entries[i][j] ∈ Rat[x]`.
 struct PolyMatrix {
     dim: usize,
-    entries: Vec<Vec<QPoly>>,
+    entries: Vec<Vec<RatPoly>>,
 }
 
 impl PolyMatrix {
     /// The characteristic matrix `xI − A`: `x − aᵢᵢ` on the diagonal,
     /// `−aᵢⱼ` (a constant polynomial) off it.
     fn characteristic(a: &[Vec<Ratio>], dim: usize) -> Self {
-        let mut entries = vec![vec![QPoly::zero(); dim]; dim];
+        let mut entries = vec![vec![RatPoly::zero(); dim]; dim];
         for (i, row) in entries.iter_mut().enumerate() {
             for (j, cell) in row.iter_mut().enumerate() {
                 *cell = if i == j {
-                    QPoly::x_minus(&a[i][j])
+                    RatPoly::x_minus(&a[i][j])
                 } else {
-                    QPoly::from_coeffs(vec![-a[i][j].clone()])
+                    RatPoly::from_coeffs(vec![-a[i][j].clone()])
                 };
             }
         }
         Self { dim, entries }
     }
 
-    fn get(&self, i: usize, j: usize) -> &QPoly {
+    fn get(&self, i: usize, j: usize) -> &RatPoly {
         &self.entries[i][j]
     }
 
-    fn set(&mut self, i: usize, j: usize, val: QPoly) {
+    fn set(&mut self, i: usize, j: usize, val: RatPoly) {
         self.entries[i][j] = val;
     }
 
@@ -249,7 +249,7 @@ impl PolyMatrix {
     }
 }
 
-/// Smith Normal Form of a polynomial matrix over `Q[x]`: the diagonal
+/// Smith Normal Form of a polynomial matrix over `Rat[x]`: the diagonal
 /// `d₁, …, dₙ` (monic, with `dᵢ | dᵢ₊₁`) to which row/column operations
 /// reduce it. Applied to `xI − A`, these are `A`'s invariant factors.
 ///
@@ -259,7 +259,7 @@ impl PolyMatrix {
 /// loop descends and terminates), and, once cleared, ensure the pivot
 /// divides every remaining entry (else fold a stubborn row in and
 /// repeat). A final GCD pass enforces the divisibility chain.
-fn smith_normal_form(mat: &mut PolyMatrix) -> Vec<QPoly> {
+fn smith_normal_form(mat: &mut PolyMatrix) -> Vec<RatPoly> {
     let n = mat.dim;
     for col in 0..n {
         loop {
@@ -346,7 +346,7 @@ fn smith_normal_form(mat: &mut PolyMatrix) -> Vec<QPoly> {
         }
     }
 
-    let mut diag: Vec<QPoly> = (0..n)
+    let mut diag: Vec<RatPoly> = (0..n)
         .map(|i| {
             let mut d = mat.get(i, i).clone();
             if !d.is_zero() {
@@ -374,17 +374,17 @@ fn smith_normal_form(mat: &mut PolyMatrix) -> Vec<QPoly> {
 /// The RCF signature of a [`Delta`] — its exact conjugacy invariant.
 /// Per fiber layer, the invariant factors (monic, `dᵢ | dᵢ₊₁`, only the
 /// non-trivial degree-≥1 factors kept). Two Deltas share this signature
-/// iff every layer is `GL_n(Q)`-conjugate — the same state through
+/// iff every layer is `GL_n(Rat)`-conjugate — the same state through
 /// different frames.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RcfSignature {
     /// One invariant-factor list per fiber layer, in layer order.
-    pub layers: Vec<Vec<QPoly>>,
+    pub layers: Vec<Vec<RatPoly>>,
 }
 
 /// The invariant factors of one rational `n×n` matrix: `(xI − A)` →
 /// Smith Normal Form → the monic factors of degree ≥ 1.
-pub fn invariant_factors(matrix: &[Vec<Ratio>], dim: usize) -> Vec<QPoly> {
+pub fn invariant_factors(matrix: &[Vec<Ratio>], dim: usize) -> Vec<RatPoly> {
     let mut char_mat = PolyMatrix::characteristic(matrix, dim);
     smith_normal_form(&mut char_mat)
         .into_iter()
@@ -406,7 +406,7 @@ fn layer_matrix(delta: &Delta, l: usize) -> Vec<Vec<Ratio>> {
 
 /// THE CONJUGACY INVARIANT — the exact RCF signature of a Delta,
 /// computed layer by layer. `rcf_signature(a) == rcf_signature(b)` iff
-/// `a` and `b` are the same state up to a frame change (a `GL_n(Q)`
+/// `a` and `b` are the same state up to a frame change (a `GL_n(Rat)`
 /// conjugation on every layer). This is what the fold gate compares:
 /// exact, never a hash.
 pub fn rcf_signature(delta: &Delta) -> RcfSignature {

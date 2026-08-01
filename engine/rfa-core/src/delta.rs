@@ -57,7 +57,7 @@ impl Delta {
 
     /// Build a Delta from raw `entries[i][j][l]` — the ONLY writer that
     /// does NOT enforce antisymmetry. It exists for one lawful use: the
-    /// image of a general `GL_n(Q)` conjugation `A·Δ·A⁻¹` (the fold
+    /// image of a general `GL_n(Rat)` conjugation `A·Δ·A⁻¹` (the fold
     /// gate's orbit), which need not be antisymmetric. The result's
     /// lawfulness is never assumed — [`verify_conservation`] is the
     /// check the orbit applies at every step, breaking any orbit whose

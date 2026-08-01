@@ -27,7 +27,7 @@
 //! lock cannot be witnessed at all without exhausting the operator
 //! space. The minting branch must be the one that carries proof.
 //!
-//! An operator is a `GL_n(Q)` conjugation `A·Δ·A⁻¹`. General
+//! An operator is a `GL_n(Rat)` conjugation `A·Δ·A⁻¹`. General
 //! conjugation need not preserve antisymmetry, so each orbit step is
 //! checked by [`Delta::verify_conservation`]: an operator that leaves
 //! the antisymmetric surface simply does not generate a valid orbit
@@ -41,9 +41,9 @@ use cfe::ratio::Ratio;
 use num_traits::Zero;
 
 /// A square rational matrix, row-major.
-pub type QMatrix = Vec<Vec<Ratio>>;
+pub type RatMatrix = Vec<Vec<Ratio>>;
 
-/// A mesh operator — a `GL_n⁺(Q)` conjugation. Carries its inverse
+/// A mesh operator — a `GL_n⁺(Rat)` conjugation. Carries its inverse
 /// (the caller supplies both; the pair defines the conjugation
 /// `A·Δ·A⁻¹`) and the orientation flag `det(A) > 0`. A non-positive
 /// determinant is not in the group: [`Operator::apply`] refuses it,
@@ -51,8 +51,8 @@ pub type QMatrix = Vec<Vec<Ratio>>;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Operator {
     pub id: usize,
-    pub matrix: QMatrix,
-    pub matrix_inv: QMatrix,
+    pub matrix: RatMatrix,
+    pub matrix_inv: RatMatrix,
     pub det_sign_positive: bool,
 }
 
