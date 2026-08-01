@@ -48,19 +48,7 @@ use solver_verify::{verify_work, Difficulty, WorkBroken};
 /// calibration (evidence commit 5898351). Version-1 history judged
 /// every positive discovery mint refused; it verifies forever under
 /// its own law.
-///
-/// VERSION 3 — DIRECTIVE 04 (operator, 2026-08-01): THE CAPACITY LAW.
-/// `lawful()` now consumes `D = ext_x(Π_G(Δ(Ω)))` on every pass and
-/// refuses a `DiscoveryMinted` deed claimed on a world of `D = 0`
-/// ([`capacity_law`]). This is BREAKING: a mint that version 2 admitted
-/// on a structureless world now refuses `MintWithoutCapacity`.
-/// Version-2 history verifies forever under version 2's law.
-///
-/// The same amendment carries DIRECTIVE 05: `D` is measured over the
-/// ACTIVE SUPPORT of the obligation graph, so the reading itself
-/// changed — a spanning tree of obligations previously read as capacity
-/// 1 and now reads 0.
-pub const VERSION: u64 = 3;
+pub const VERSION: u64 = 2;
 
 /// One proposed transition: the deed that CLAIMS to carry `prior` to
 /// `next`. `event` is what closed, `actor` is who under NS-6
@@ -146,14 +134,6 @@ pub enum Unlawful {
     /// 2026-08-01 — see [`mint_bound`]): ladder-pinned, zero on the
     /// saturated rungs and on every off-ladder shape.
     MintExceedsWork { bound: Box<Ratio>, claimed: Box<Ratio> },
-    /// THE ENTANGLEMENT (DIRECTIVE 04; `18_TORSION` §2f, Article II,
-    /// and §4's execution matrix row *vacuous closure → no standing, no
-    /// weight, NO MINT*). A minting deed was claimed on a world holding
-    /// NO capacity: `D = 0`, no open plane and no surviving relation.
-    /// There is nothing there to have standing, so there is nothing to
-    /// mint against. Both readings carried whole (the house law: the
-    /// refusal names what it measured, never a bare verdict).
-    MintWithoutCapacity { before: usize, after: usize },
     /// I3 — a value in `next` is not a canonical exact rational (coprime,
     /// positive denominator). Exactness is a TYPE-LEVEL guarantee
     /// (`BigRational` is canonical by construction, no float ever entered);
@@ -190,95 +170,9 @@ pub fn lawful(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Un
     containment(prior, step)?;
     exactness(next)?;
     creation(step)?;
-    capacity_law(prior, next, step)?;
     decay(prior, step)?;
     gauge_law(prior, next, step)?;
     element_law(prior, next, step)
-}
-
-/// INVARIANT — THE ENTANGLEMENT (DIRECTIVE 04, operator ruling
-/// 2026-08-01; `18_TORSION` §2f, clearing §6 build debt 2).
-///
-/// The kernel CONSUMES the post-reduction extent
-/// `D = ext_x(Π_G(Δ(Ω)))` on every state transition pass. `D` is read
-/// by [`bridge::read_entangled`], which takes the capacity side and the
-/// potential side in ONE pass over ONE state — a caller that could take
-/// `D` alone and consult the strain separately would have broken the
-/// entanglement and reintroduced the two-object attack surface.
-///
-/// The enforced consequence: a MINTING deed claimed on a world of no
-/// capacity (`D = 0`) refuses. Not "is taxed for it" — refuses. A world
-/// with no open plane and no surviving relation holds no standing, so
-/// it has nothing to mint against.
-///
-/// **WHICH OF DIRECTIVE 04'S TWO RULES THIS IS.** The directive states
-/// its rule twice and differently: the heading enforces `D > 0`, the
-/// body rejects `ΔD = 0`. This is the HEADING's rule, and it is also
-/// Article II and `18_TORSION` §4's execution matrix row (*vacuous
-/// closure | `D = 0` | no standing, no weight, no mint*).
-///
-/// The body's `ΔD > 0` rule is NOT implemented, because it is
-/// unsatisfiable and would end the economy. `D` is read from the
-/// obligation graph (bonds, covenants, debts); a banked mint moves
-/// `orbs[].banked` and touches no obligation, so `ΔD = 0` for EVERY
-/// mint on EVERY world at every capacity level. Requiring `ΔD > 0`
-/// makes `DiscoveryMinted` unreachable and Ruling Box 1's emission
-/// ladder (`f(3)=1`, `f(4)=4`, `f(5)=7`) dead. Measured in
-/// `tests/capacity_entanglement_audit.rs`. To adopt the body's rule
-/// instead, this match becomes
-/// `after.capacity > before.capacity` — and the mint dies with it.
-///
-/// **SCOPE — I4's mint/work pair ONLY.** `18_TORSION` §2g leaves it
-/// explicitly unruled which other seams are entangled ("whether I5's
-/// decay bound and the assay bound are entangled … is an operator
-/// ruling rather than a derivation … **Do not convert them silently**").
-/// So the element assay, the chartered genesis mint, the aperture
-/// receive and the council close are NOT gated here: under-paying an
-/// owed decay may be a lie of the same kind, or lawful forbearance, and
-/// that word has not been said.
-fn capacity_law(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Unlawful> {
-    // Consumed on EVERY pass, not only the minting ones: the reading is
-    // part of judging the step, and taking it conditionally would make
-    // the judge's cost depend on the deed's own claim.
-    let before = bridge::read_entangled(prior);
-    let after = bridge::read_entangled(next);
-    if !mints(&step.event) {
-        return Ok(());
-    }
-    match after.capacity > 0 {
-        true => Ok(()),
-        false => Err(Unlawful::MintWithoutCapacity {
-            before: before.capacity,
-            after: after.capacity,
-        }),
-    }
-}
-
-/// THE WORK-ANCHORED MINT — the one deed this law gates.
-///
-/// `DiscoveryMinted` is the deed that creates value against a CLAIMED
-/// PROOF OF WORK, and it is the exact pair `18_TORSION` §2f names as
-/// the clear entangled case: *"I4 — `mint ≤ f(verify_work)`. The mint is
-/// already entangled with verified work; no certificate, no mint."* It
-/// is also the deed the anti-Sybil consequence is about — *"a puppet
-/// civilization generates activity, not capacity."*
-///
-/// **`YieldCollected` is deliberately NOT gated**, and this scope is
-/// load-bearing rather than cautious. Routine yield is bounded by the
-/// world's own physics (the thermal and yield rules), not by anything
-/// an actor claims; it is production, not a work claim, and it carries
-/// no certificate to be entangled with. Gating it on standing would
-/// stop every colony with no outstanding obligations from collecting
-/// its own output — measured: it refused
-/// `conservation_pins::creation_and_decay_bound_the_value_law_by_declaration_and_sign`,
-/// a two-orb world with no bonds doing ordinary production.
-///
-/// The element assay, the chartered genesis mint, the aperture receive
-/// and the council close are likewise untouched: `18_TORSION` §2g
-/// leaves those seams explicitly unruled and says **"Do not convert
-/// them silently."**
-fn mints(event: &ClosureEvent) -> bool {
-    matches!(event, ClosureEvent::DiscoveryMinted { .. })
 }
 
 /// INVARIANT — element conservation (THE ELEMENT LAW, operator ruling

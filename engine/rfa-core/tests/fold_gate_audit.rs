@@ -1,5 +1,5 @@
-//! REGRESSION PINS for the two faults DIRECTIVE 01 and DIRECTIVE 05
-//! corrected. Each test states a property that must never come back.
+//! REGRESSION PINS for the fault DIRECTIVE 01 corrected. Each test
+//! states a property that must never come back.
 //!
 //! The audit that produced these found the fold gate deciding nothing:
 //! `orbit_lock` walked an orbit comparing `rcf_signature` at each step,
@@ -7,11 +7,16 @@
 //! similarity, so the compared quantity never moved. The verdict
 //! reduced to "did any operator in the caller's list survive one
 //! conjugation", and the polarity was inverted on top of that.
+//!
+//! (The support-masking regressions that once lived here are gone: the
+//! sparse complex landed independently on main with its own witnesses,
+//! and `reduce.rs` is that lane's territory. This file is the fold gate
+//! and nothing else.)
 
 use cfe::ratio::{ratio, Ratio};
 use rfa_core::{
-    coboundary_reduce, coboundary_reduce_over, f_fold_star, judged_fold, rcf_signature, Delta,
-    FoldVerdict, Operator, OrbitWitness, Support, TorsionCause,
+    coboundary_reduce, f_fold_star, judged_fold, rcf_signature, Delta, FoldVerdict, Operator,
+    OrbitWitness, TorsionCause,
 };
 
 fn q(n: i64, d: i64) -> Ratio {
@@ -155,96 +160,17 @@ fn a_proven_genuine_difference_is_vetoed_never_collapsed() {
     }
 }
 
-/// REGRESSION — THE MIRROR ERROR, closed. Two states that reduce to the
-/// same representative are the textbook GAUGE case. The old gate vetoed
-/// them and routed them to the minting branch.
+/// REGRESSION — THE MIRROR ERROR, closed. A state against itself is the
+/// textbook GAUGE case. The old gate vetoed it and routed it to the
+/// minting branch; it now folds, against a witness.
 #[test]
 fn a_gauge_pair_is_never_routed_to_the_minting_branch() {
     let one = triangle(q(2, 1), q(3, 1), q(7, 1));
-    let scaled = triangle(q(20, 1), q(30, 1), q(70, 1));
-    assert_eq!(coboundary_reduce(&one), coboundary_reduce(&scaled));
-
     let ops = vec![identity_op(3)];
-    // Same class, so the verdict is about PROOF, not about structure —
-    // and with the identity presented it folds rather than mints.
     let witness = OrbitWitness { operator_id: 0, step: 1 };
     assert_eq!(
-        judged_fold(&one, &scaled, &ops, Some(&witness)),
-        FoldVerdict::GaugeFold(witness)
-    );
-}
-
-// ─── ACTIVE SUPPORT MASKING (DIRECTIVE 05) ─────────────────────────────
-
-/// REGRESSION. A PATH of relations `0—1—2` with no `0—2` observation is
-/// a tree: `E − V + C = 2 − 3 + 1 = 0`, so it carries no `H¹` at all.
-/// The dense reduction read the absent `(0,2)` entry as a real zero and
-/// manufactured a non-zero survivor at `(1,2)` — capacity 1 out of a
-/// tree. Support masking reads it correctly.
-#[test]
-fn a_tree_of_relations_carries_no_capacity() {
-    let mut d = Delta::zero(3, 1);
-    d.set_antisym(0, 1, vec![q(2, 1)]);
-    d.set_antisym(1, 2, vec![q(3, 1)]);
-    // (0,2) is NOT observed.
-
-    let mut support = Support::none(3, 1);
-    support.mark(0, 1, 0);
-    support.mark(1, 2, 0);
-
-    let reduced = coboundary_reduce_over(&d, &support);
-    for i in 0..3 {
-        for j in 0..3 {
-            assert_eq!(
-                *reduced.entry(i, j, 0),
-                ratio(0, 1),
-                "({i},{j}): a spanning tree is pure frame — nothing may survive"
-            );
-        }
-    }
-}
-
-/// The complement: close the tree into a cycle that does NOT compose,
-/// and exactly one independent entry survives — the cycle rank.
-#[test]
-fn a_closed_cycle_that_does_not_compose_survives_reduction() {
-    let d = triangle(q(2, 1), q(3, 1), q(9, 1));
-    let mut support = Support::none(3, 1);
-    support.mark(0, 1, 0);
-    support.mark(1, 2, 0);
-    support.mark(0, 2, 0);
-
-    let reduced = coboundary_reduce_over(&d, &support);
-    let survivors = (0..3)
-        .flat_map(|i| ((i + 1)..3).map(move |j| (i, j)))
-        .filter(|(i, j)| *reduced.entry(*i, *j, 0) != ratio(0, 1))
-        .count();
-    assert_eq!(survivors, 1, "E − V + C = 3 − 3 + 1 = 1 independent cycle");
-}
-
-/// An observed relation whose VALUE is zero is still structure, and an
-/// explicit support is the only way to say so. This is why the kernel
-/// bridge builds the mask from the obligation lists rather than letting
-/// `Support::of` infer it from non-zero entries.
-#[test]
-fn an_observed_zero_is_not_an_absent_relation() {
-    let mut d = Delta::zero(3, 1);
-    d.set_antisym(0, 1, vec![q(2, 1)]);
-    d.set_antisym(1, 2, vec![q(3, 1)]);
-    d.set_antisym(0, 2, vec![q(0, 1)]); // observed, and it nets to zero
-
-    // Inferred support misses the zero-valued observation: it sees a
-    // tree, and reduces to nothing.
-    assert_eq!(coboundary_reduce(&d), Delta::zero(3, 1));
-
-    // The explicit mask keeps it, and the cycle's defect survives.
-    let mut support = Support::none(3, 1);
-    support.mark(0, 1, 0);
-    support.mark(1, 2, 0);
-    support.mark(0, 2, 0);
-    assert_ne!(
-        coboundary_reduce_over(&d, &support),
-        Delta::zero(3, 1),
-        "0 = 2 + 3 is false: the observed cycle does not compose"
+        f_fold_star(&one, &one, &ops, Some(&witness)),
+        FoldVerdict::GaugeFold(witness),
+        "the identity proves a state is gauge-identical to itself"
     );
 }

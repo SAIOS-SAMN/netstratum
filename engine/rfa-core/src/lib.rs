@@ -43,7 +43,7 @@ pub use delta::{coherence_functional, for_each_residual, magnitude, Delta};
 pub use fiber::{loop_holonomy, plaquette_curvature, MatrixFiber2x2};
 pub use fold::{
     f_fold_star, judged_fold, orbit_lock, verify_orbit_witness, FoldVerdict, Operator,
-    OrbitWitness, RatMatrix,
+    OrbitWitness, RatMatrix, TorsionCause,
 };
 pub use gates::{validate_step, GateVerdict, StepBound};
 pub use potential::{dual_pole, potential_form, Flow, PotentialForm, Vacuity};

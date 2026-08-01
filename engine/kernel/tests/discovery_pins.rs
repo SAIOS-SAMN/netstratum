@@ -14,7 +14,7 @@ use cfe::dop::{ClosureEvent, ColonyOrb, Resource};
 use cfe::ipsal::{Entity, Scope};
 use cfe::ratio::ratio;
 use cfe::tlv;
-use cfe::world::{Bond, Committed, World, SOVEREIGN};
+use cfe::world::{Committed, World, SOVEREIGN};
 use kernel::{lawful, Step, Unlawful};
 use solver::{solve, SolveRead};
 use solver_verify::{
@@ -25,42 +25,14 @@ use solver_verify::{
 const HAND: u64 = 100;
 const DIGEST: [u8; 32] = [7u8; 32];
 
-fn bond(source: u64, target: u64, rate: i64) -> Bond {
-    Bond {
-        source,
-        target,
-        resource: Resource::Iron,
-        rate: ratio(rate, 1),
-        term: 0,
-        sealed: 0,
-        anchored: 0,
-    }
-}
-
-/// A committed state holding `iron` on the minting orb, with the
-/// sovereign seated and the acting hand contained under exactly Collect
-/// — identity precedes the world (I2).
-///
-/// **WITNESS TRUTH-UPDATE (DIRECTIVE 04, 2026-08-01).** This fixture
-/// was a ONE-ORB world, and a lone orb relates to nothing: `D = 0`. It
-/// therefore holds no standing under Article II and, since the capacity
-/// law landed, cannot mint at all — every pin below refused
-/// `MintWithoutCapacity` before the fixture was updated. It now seats
-/// three orbs bound in a NON-COMPOSING obligation cycle (9 ≠ 2 + 3), so
-/// the world carries one independent cycle, `D = 1`, and standing.
-///
-/// The banks are untouched by this: bonds move no value, so every
-/// conservation assertion in this file reads exactly as before.
+/// A one-orb committed state holding `iron`, with the sovereign
+/// seated and the acting hand contained under exactly Collect —
+/// identity precedes the world (I2).
 fn seated(iron: (i64, i64)) -> Committed {
     let mut committed = World::new().committed();
     let mut orb = ColonyOrb { orb_id: 1, name: "assay".into(), ..Default::default() };
     orb.bank(Resource::Iron, ratio(iron.0, iron.1));
-    committed.orbs = vec![
-        orb,
-        ColonyOrb { orb_id: 2, name: "partner".into(), ..Default::default() },
-        ColonyOrb { orb_id: 3, name: "third".into(), ..Default::default() },
-    ];
-    committed.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(1, 3, 9)];
+    committed.orbs = vec![orb];
     committed.entities = vec![
         Entity { entity_id: SOVEREIGN, handle: "sovereign".into(), principal: None, grants: vec![] },
         Entity {
@@ -70,14 +42,6 @@ fn seated(iron: (i64, i64)) -> Committed {
             grants: vec![Scope::Collect],
         },
     ];
-    committed
-}
-
-/// The same world stripped of every obligation: orbs that relate to
-/// nothing. `D = 0`, and Article II denies it standing.
-fn unrelated(iron: (i64, i64)) -> Committed {
-    let mut committed = seated(iron);
-    committed.bonds = Vec::new();
     committed
 }
 
@@ -305,49 +269,6 @@ fn the_zero_mint_with_valid_work_admits() {
     let prior = seated((6, 1));
     let next = seated((6, 1));
     assert_eq!(lawful(&prior, &next, &mint_step((0, 1), work)), Ok(()));
-}
-
-/// THE CAPACITY LAW (DIRECTIVE 04; `18_TORSION` Article II and §4's
-/// execution matrix row *vacuous closure → no standing, no weight, NO
-/// MINT*). A world holding no relational structure cannot mint against
-/// work, however impeccable the proof — there is nothing there to have
-/// standing.
-///
-/// This is the anti-Sybil bite of `18_TORSION` §2f: a puppet
-/// civilization can forge deeds cheaply and cannot forge capacity,
-/// because capacity is the obligation structure it would have to
-/// actually stand inside.
-#[test]
-fn a_world_without_standing_cannot_mint_however_valid_the_work() {
-    let work = encode_work(&honest_proof()).expect("the honest proof encodes");
-    // The SAME impeccable proof that admits at bound 0 on a world with
-    // standing refuses on a world with none.
-    assert_eq!(
-        lawful(&seated((6, 1)), &seated((6, 1)), &mint_step((0, 1), work.clone())),
-        Ok(()),
-        "a world with an independent cycle holds standing"
-    );
-    assert_eq!(
-        lawful(&unrelated((6, 1)), &unrelated((6, 1)), &mint_step((0, 1), work)),
-        Err(Unlawful::MintWithoutCapacity { before: 0, after: 0 }),
-        "D = 0 → no standing, no weight, no mint — both readings carried whole"
-    );
-}
-
-/// The capacity law reads the OBSERVED obligation graph, not the count
-/// of relations (DIRECTIVE 05). A spanning tree of obligations is pure
-/// frame — it carries no independent cycle — so a world can hold plenty
-/// of bonds and still have no standing.
-#[test]
-fn a_tree_of_obligations_grants_no_standing() {
-    let work = encode_work(&honest_proof()).expect("encodes");
-    let mut tree = seated((6, 1));
-    tree.bonds = vec![bond(1, 2, 2), bond(2, 3, 3)]; // a path, not a cycle
-    assert_eq!(
-        lawful(&tree, &tree, &mint_step((0, 1), work)),
-        Err(Unlawful::MintWithoutCapacity { before: 0, after: 0 }),
-        "E − V + C = 0: two bonds, and still no structure to stand on"
-    );
 }
 
 #[test]
