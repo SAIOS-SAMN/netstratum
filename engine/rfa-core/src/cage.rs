@@ -59,6 +59,47 @@
 //! slots are named so the shape is honest; the debt is recorded rather
 //! than papered over.
 //!
+//! ## WHAT DOES **NOT** BELONG HERE — aggregate versus invariant
+//!
+//! (Operator question 2026-08-01: does the holonomy upgrade fit in this
+//! containment? **No — and putting it here would strand exactly what it
+//! was meant to free.**)
+//!
+//! The cage is for AGGREGATES USED AS SCORES. It is not for scalars in
+//! general, and the difference is structural rather than a matter of
+//! size:
+//!
+//! ```text
+//! AGGREGATE   C = Σ|R| — collapses MANY into one and destroys which
+//!             residual broke and by how much. The information is gone,
+//!             and what remains is rankable. CAGED.
+//!
+//! INVARIANT   rcf_signature, a holonomy's conjugacy class — the exact
+//!             canonical fingerprint of ONE object. Destroys nothing:
+//!             two Deltas share it IFF they are conjugate. NOT CAGED.
+//! ```
+//!
+//! **The proof that the line is real is already in this crate.**
+//! [`Lens`] and [`crate::rcf::RcfSignature`] carry the SAME derives —
+//! `PartialEq, Eq` and deliberately no `PartialOrd`. Their algebra is
+//! identical. The only difference between them is `cage_arrow`, which
+//! bars `Lens` from every computing path while `rcf_signature` is called
+//! directly by `orbit_lock`.
+//!
+//! So the no-ordering property — the thing that actually stops descent —
+//! is available WITHOUT containment. **A canonical invariant follows the
+//! `RcfSignature` pattern: equality-only, uncaged, kernel-eligible.**
+//! Containment is a second, heavier act reserved for readings that
+//! compute nothing.
+//!
+//! **A note on SL₂, because the escape route does not exist.** For a
+//! matrix of determinant 1 the characteristic polynomial is
+//! `x² − Tr(A)·x + 1`, so the conjugacy class is essentially
+//! parameterised BY the trace. "Keep the class instead of the trace"
+//! does not avoid a scalar — it renames one. The lawful move was never
+//! to avoid scalars; it is to forbid ORDERING them and to keep them as
+//! IDENTITY. That is what both types already do.
+//!
 //! Nothing in a computing path may import from this module.
 
 use cfe::ratio::Ratio;
