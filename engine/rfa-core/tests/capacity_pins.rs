@@ -195,30 +195,58 @@ fn congruent(delta: &Delta, a: &[Vec<Ratio>]) -> Delta {
 }
 
 #[test]
-fn capacity_is_invariant_under_congruence() {
-    // THE LAWFUL FRAME GROUP. A 2-form's frame change is congruence
-    // A·Δ·Aᵀ, which preserves antisymmetry for EVERY invertible A —
-    // unlike conjugation A·Δ·A⁻¹, which preserves it only when A is
-    // orthogonal (AᵀA = I). Capacity must not move under it: D is a
-    // property of the universe, never of the observer's basis.
-    let base = triangle(q(1, 1), q(1, 1), q(0, 1));
-    let before = capacity(&base);
-
-    // A unipotent shear I + (1/5)·E_01 — det 1, decidedly NOT orthogonal.
+fn congruence_preserves_antisymmetry_but_not_the_additive_class() {
+    // THE TWO-GAUGE FINDING (measured 2026-08-01, DIRECTIVE 06 probe).
+    // Two incompatible gauge groups act on this one tensor:
+    //
+    //   Π_G / coboundary_reduce : the ADDITIVE group of potentials Qⁿ,
+    //                             stripping Δ_ij ↦ Δ_ij + (p_j − p_i)
+    //   Operator / orbit_lock   : a MULTIPLICATIVE matrix group acting
+    //                             on the entity indices
+    //
+    // Congruence A·Δ·Aᵀ is the correct transformation law for an
+    // alternating 2-form and preserves antisymmetry for EVERY
+    // invertible A — that half of DIRECTIVE 06 is sound and is pinned
+    // here. But it MIXES entity indices, and the additive reduction
+    // anchors at vertex 0, so the additive H¹ class is NOT congruence-
+    // invariant.
+    //
+    // The counterexample is the house anchor itself: a PURE COBOUNDARY
+    // (D = 0) is carried by a det-1 shear congruence to a state reading
+    // D = 1. Capacity out of frame alone, with no work done — exactly
+    // the forgery D1 exists to forbid.
+    //
+    // CONSEQUENCE, recorded: congruence cannot be adopted while the
+    // reduction stays additive. Unify the gauge FIRST (one group for
+    // both), then the transformation law follows from it.
     let mut a = vec![vec![q(0, 1); 3]; 3];
     for (i, row) in a.iter_mut().enumerate() {
         row[i] = q(1, 1);
     }
-    a[0][1] = q(1, 5);
+    a[0][1] = q(1, 5); // unipotent shear, det 1, NOT orthogonal
 
-    let framed = congruent(&base, &a);
+    // Half one — SOUND: antisymmetry survives a non-orthogonal frame.
+    let broken = triangle(q(1, 1), q(1, 1), q(0, 1));
+    let framed = congruent(&broken, &a);
     assert!(
         framed.verify_conservation(),
         "congruence must keep the form on the antisymmetric surface"
     );
-    assert_eq!(
-        capacity(&framed),
-        before,
-        "a congruence frame change must not move the capacity reading"
+
+    // Half two — THE BLOCKER: capacity is created out of pure frame.
+    let anchor = anchor_3();
+    assert!(
+        capacity(&anchor).is_vacuous(),
+        "the anchor is a pure coboundary — D = 0 before any frame change"
+    );
+    let framed_anchor = congruent(&anchor, &a);
+    assert!(
+        framed_anchor.verify_conservation(),
+        "the congruent image is still a lawful alternating form"
+    );
+    assert!(
+        !capacity(&framed_anchor).is_vacuous(),
+        "MEASURED: a congruence frame change lifts D from 0 — the additive \
+         class is not congruence-invariant, so the two gauges are not one"
     );
 }
