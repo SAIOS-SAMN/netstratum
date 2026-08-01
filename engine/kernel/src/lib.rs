@@ -744,7 +744,7 @@ fn creation(step: &Step) -> Result<(), Unlawful> {
 /// the v2 40/40/20 prover/mesh/reserve split is INSCRIBED in
 /// U_DIRECTIVES §8 for the mesh era). Saturated rungs are
 /// proof-of-position; the economy lives up the ladder.
-pub fn mint_bound(difficulty: &Difficulty) -> Ratio {
+fn mint_bound(difficulty: &Difficulty) -> Ratio {
     if *difficulty == Difficulty::level(3) {
         return ratio(1, 1);
     }
