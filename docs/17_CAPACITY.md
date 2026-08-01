@@ -250,13 +250,22 @@ Building the capacity meter:
 
 ## §7 OPEN — needs the operator's word
 
-1. **§4a, Ω.** Is Ω the closed operator vocabulary as stated, or does it
-   carry the weights as a manifold with its own geometry? The
-   translation takes the former.
-2. **§4c, the overlay.** `sup ‖∇V‖` per axis is the translation's
-   reading of "maximum potential." A different reading (mean available
-   potential, or potential integrated along the axis) changes the
-   coefficients but not the shape.
+**CLOSED 2026-08-01 by operator clarification (recorded, no longer
+open):** Ω is the totality of the individual universe (§4a), and the
+scoping of a dimension is coboundary reduction, never `∇V` (§4c). Both
+were carried as questions in the first draft and are now ruled.
+
+Still open:
+
+1. **§4b, the arity of D.** `Delta` carries two counts — `dim`
+   (entities) and `fiber` (coordinates per relation). Is D the count of
+   surviving independent PLANES, or the pair (dim, fiber) of the reduced
+   tensor carried whole? The translation takes the former; the latter
+   would make D a vector and the polynomial union richer.
+2. **§4c, the overlay's reading.** "The maximum potential" is read as a
+   supremum of `‖∇V‖` on each scoped dimension. Mean-available or
+   integrated-along-the-axis are the alternative readings; they change
+   the coefficients, not the shape, and none of them scope.
 3. **§4e.** "Maximum dimensions" is read as the TOP-DEGREE part of `U`.
    If it means the full set of maximal axes rather than the single
    leading one, admissible motion widens from one axis to a face.
