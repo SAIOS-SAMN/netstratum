@@ -68,6 +68,21 @@ first, never by searching the tree.
    dual has not simplified the law, it has reversed it** — selection
    rots exactly as a gloss does (chapter four), and it is harder to
    see, because every row it kept is true.
+   **Chapter six (THE CITATION THAT OUTLIVED ITS REFERENT, operator
+   ruling 2026-08-01):** the kernel charter's §5a named `cfe::opposition`
+   as the mesh half of seam conservation while that module had been
+   EXCISED the day before (c7cad9e), with a standing test in
+   `recurrence_guard.rs` forbidding its return — a law document
+   prescribing a mechanism its own test suite refuses to let exist.
+   MIRROR and ANTI-MIRROR are deprecated whole by the same ruling
+   (`12_UNION` §2c); **the lens is the level**, because a lens derives
+   from the one chain and holds no copy, so it has nothing to
+   reconcile. The lesson is specific to THIS ledger's shape: §0.1 makes
+   the sealed code the deepest authority for a LANDED row, so **a row
+   whose implementation has been deleted is not stale, it is FALSE** —
+   it asserts a landing that is not there. Every LANDED row owes a live
+   `crate::fn` that RESOLVES; a citation is a claim, and claims are
+   checked, never remembered.
    All drift chapters share the root: restated facts rot; derived
    facts cannot.
 4. Documents KEEP their equations inline where the mechanic lives
@@ -451,6 +466,14 @@ mesh era opens; the unit law of §2 is what admission re-runs).
 the pair half is an N6 reading. Authority: NS-4 §1–§3.
 
     near leg + far leg = 0 exactly, across two books
+
+**The pair half is REPLAY, never opposition** (operator ruling
+2026-08-01; §0.3 chapter six). `cfe::opposition` is excised and guarded;
+a merging node re-runs the identical kernel over the presented chain
+rather than setting two books against each other — admission IS
+verification (00_CHARTER §11, the nursery law). Any cross-node reading
+is a LENS over the one chain. The two-book equation above is unchanged;
+only its enforcement HOME moved, into kernel I1/I6.
 
 ## §6 Economy and thermal — THE MANIFOLD DUAL (syntropy ∥ entropy)
 

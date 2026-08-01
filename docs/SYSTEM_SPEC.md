@@ -224,8 +224,17 @@ lens-shaped reads (NS-2). Build: the client talks to the local kernel (not
 
 **Observation is a lens, never a copy (§11 rule 2).** Views DERIVE from the
 chain at a granted facet depth, disposable, never read back. The observer,
-wall, and journals rebuild as lens projections BEFORE the mirror deletes
-(the observation-continuity rule).
+wall, and journals rebuild as lens projections BEFORE the ledger's DISPLAY
+HALF deletes (the observation-continuity rule — the operator's window never
+goes dark).
+
+**THE LENS IS THE LEVEL (operator ruling 2026-08-01).** MIRROR and
+ANTI-MIRROR are deprecated as framings whole; `12_UNION` §2c carries the
+ruling and what survives it. `engine/mirror` is already deleted (d606b01)
+and `cfe::opposition` excised (c7cad9e), both held by standing tests in
+`engine/kernel/tests/recurrence_guard.rs`. A lens derives from the one
+chain and holds no copy, so it has nothing to reconcile — which is why it,
+and not opposition, is what §11 leaves standing.
 
 ---
 

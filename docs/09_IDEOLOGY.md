@@ -283,8 +283,10 @@ the outside. The world's physics explains its own ethics.
   1); no absolute ostracism (01 §5 guardrail 6, §3.1's ceiling); nothing
   here draws chance
   (CHARTER §9); exact-rational vocabulary throughout (CHARTER §8).
-- Cross-territory: observer columns land in `engine/mirror` (coder-01) by
-  operator relay — the VENT-1 uplink precedent (CHARTER §10).
+- Cross-territory: observer columns land in `engine/lens` (coder-01) by
+  operator relay — the VENT-1 uplink precedent (CHARTER §10). (`engine/mirror`
+  is deleted and its name never reused — d606b01, the recurrence guard;
+  MIRROR/ANTI-MIRROR deprecated, `12_UNION` §2c.)
 - The Chronicle Feed (08, JOURNAL-1) rightly refused to invent an ideology
   vector; once IDEO-1 lands the feed MAY read the landed cohesion counters
   mirror-side under its reflection law — rendering, never state.

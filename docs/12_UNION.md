@@ -141,18 +141,49 @@ other. The market board's Furnace↔Frost axis, the absorb invariant
 (`sink_consumed = heat_absorbed = vented_after_shed`), and the fold
 itself (expansion sealed by contraction) are all readings of the dual.
 
-**The ANTI-MIRROR law.** Cross-node verification is by OPPOSITION,
-never by mirroring: a mirrored record is a second truth (the thing the
-reflection law forbids). The substrate's checks are anti-phase
-invariants — the Delta antisymmetry (`Δ_ij = −Δ_ji`: my waste and your
-food are ONE entry read from two ends), the aperture's two legs (a
-debit whose far leg is its exact credit — the pair sums to ZERO, and
-that zero is the verification), the council reckoning (forfeits and
-returns summing to the locks). Byte-canonical encoding remains ONLY as
-the hashing substrate ("equal values, equal bytes" so digests agree);
-the CHECK a second node performs is never "same bytes as mine" — it is
-"your leg is the exact inverse of mine." Identity by opposition; the
-universe above the chain is fluid.
+**The ANTI-MIRROR law — DEPRECATED (operator ruling 2026-08-01).**
+MIRROR and ANTI-MIRROR are both struck as framings. **The system
+operates on LENSES at this level.** The ruling ratifies an excision the
+tree had already completed: `engine/mirror` was deleted (d606b01) and
+`cfe::opposition` excised (c7cad9e) under `00_CHARTER` §11, and
+`engine/kernel/tests/recurrence_guard.rs` holds both dead as STANDING
+TESTS — *"the mirror was never illegal, only leashed, which is why
+accretion captured it; vigilance did not save us, a standing test
+did."* The documents lagged the code by a day; this is the correction.
+
+**Why opposition could not stand — the tough half, stated plainly.**
+Verification by opposition still requires TWO records to set against
+each other. §11 rule 5 clause 1 rejects *a reconciling check between
+copies*, and the kernel's own header answers it: **you do not reconcile
+what cannot diverge.** Where the judge makes an unlawful transition
+unconstructible (18 §2f, §2g), there is no second book left to oppose.
+Opposition was a good answer to a question the One-Truth Amendment
+removed. Losing an elegant mechanism to a stronger law is the ordinary
+shape of this constitution, not a defeat.
+
+**What a LENS is, and why it is the level.** A lens DERIVES a view from
+the one chain and holds no copy — so it has nothing to reconcile, and
+no second truth can form inside it. *Observation is a lens, never a
+copy* (`SYSTEM_SPEC` §5; §11 rule 2: exports are write-only). The
+carrier is `engine/lens`; the dead name `engine/mirror` is never reused.
+
+**WHAT SURVIVES UNCHANGED — the invariants were never the framing.**
+Each is landed algebra, and each is now carried by kernel I1/I6 rather
+than by any opposition module:
+
+- the Delta antisymmetry (`Δ_ij = −Δ_ji` — my waste and your food are
+  ONE entry read from two ends): `rfa_core::set_antisym`, and 18 §2a's
+  grounding of `Delta` as an alternating form;
+- the aperture's two legs (a debit whose far leg is its exact credit;
+  the pair sums to ZERO): kernel I1, `EQUATIONS` M1;
+- the council reckoning (forfeits and returns summing to the locks):
+  kernel I1.
+
+Byte-canonical encoding remains ONLY as the hashing substrate ("equal
+values, equal bytes" so digests agree). **What changed is the check's
+HOME, not its content:** it is an invariant inside the one judge, never
+a comparison between two records. The universe above the chain is
+fluid.
 
 ## 3. The middle classes — Watcher, Observer, Sovereign
 
