@@ -377,6 +377,76 @@ witness for whom), and a red-first witness that an unverifiable claim
 REFUSES. Until the deed lands this is inscribed law with no wiring, and
 it is recorded as such rather than assumed live.
 
+### 3b. THE OFFICE DYAD — Progenitor and Sovereign
+
+**Ruled 2026-08-01/02.** The union's two founding offices are not
+stations held by peoples; they are held by the two things the engine is
+made of. `18` §2c′ carries the constitutional form. This is the same
+ruling in the chapter the word *union* comes from.
+
+    PROGENITOR   D   makes room. D3's emission opens a plane, the fiber
+                     grows, and band capacity is a reading of that fiber
+                     (§1). Nothing else creates space.
+
+    SOVEREIGN    V   holds. Its standing comes from ADMISSION — it
+                     passed `lawful()`, it carries receipts, it is in
+                     the chain. No reading confers it; none revokes it.
+
+**D provides the floor, but owns no piece of what moves upon it. V
+expresses the life, but cannot forge the ground beneath it.**
+
+**The offices are this chapter's own.** §2's progenitor power table
+already lists *"create new spaces — extending the fiber; minted planes
+open room, and band capacity reads the fiber"*, which is D3 exactly, and
+§2a's Tier 0 reads *"they contract and expand the board, they create it.
+Everything else plays on it."* The Sovereign is the holder of what is
+chartered, governing what it founded or was lawfully delegated (§3).
+
+**NEITHER OUTRANKS THE OTHER** — §3's own standard, applied one level
+down: *classes are stations of FUNCTION, not steps of rank.* A Watcher
+does not outrank a Sovereign, and the Progenitor does not outrank the
+Sovereign either.
+
+**THE INTERLOCK INVARIANT.** If `D` stops opening room, `V`'s motion
+suffocates. If `V` stops producing receipted work, `D`'s emission
+freezes. Neither office survives the other's silence, and that
+co-dependence is not a rule anyone enforces — it is what the two offices
+being one body means:
+
+1. **`D` cannot revoke `V`'s standing.** The progenitor makes room; it
+   does not un-charter a sovereign. `18` Article II therefore gates
+   ALLOCATION, never standing.
+2. **`V` cannot open room by fiat.** `PlaneUnearned` already refuses it.
+   The sovereign holds; it does not create board.
+3. **Growth requires both** — `D` opens nothing without `V`'s receipted
+   work, `V` expresses nothing without `D`'s room. That is `18` §2f's
+   entanglement with names that say why.
+
+**THE SPAN — `D` runs from `α` to `Ω`** (`18` §2e, THE Ω/α UNION). `α`
+is the origin pole (`GenesisSealed`, the all-zero parent); `Ω` is the
+totality. Where the traverse is a point — `α ≅ Ω` — `D` sits at GROUND
+and the room is one degree, itself. `D` rises exactly as `Ω` separates
+from `α`, which is why `D = rank(Δ(Ω))` and "how far the universe has
+come from its origin" are the same reading. The Progenitor's office IS
+that span: it is the floor stretched between the two poles.
+
+**ZERO-OPERATOR DISCIPLINE.** No algebraic, tensor or product operator
+sits between the two offices. They are not summed (`⊕` is a free join —
+`U*` was struck for it), not ranked (a reading conferring standing on
+its own source runs backwards through the judge), and not decomposed
+(a tuple `(D, V)` is a product type whose halves are addressable, which
+is the decomposition again in different syntax). **Offices do not sum,
+do not rank, and do not decompose** — which is why this relation carries
+no symbol between its terms and never will.
+
+**NOTATION, recorded once.** `Υ` is `V`'s own letter — upsilon is the
+Greek ancestor of Latin `V`, so the two are one name in two alphabets,
+never two names. Nothing is renamed and nothing is duplicated: the
+proper words are **Progenitor** and **Sovereign**, and `D` and `V` are
+the readings those offices govern. `Ω ≡ V` stands untouched
+(`17_CAPACITY` §3): `V` is primitive, and `D` is read downstream —
+`V → Δ(V) → D`, one direction, no return.
+
 ## 4. Band II — the interstellar civilizations
 
 Every species that has made the crossing (§7) and holds worlds. Function

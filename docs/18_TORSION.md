@@ -182,7 +182,24 @@ error.** Each tried to make the two offices COMMENSURABLE:
 
 **Offices do not sum, do not rank, and do not decompose.** That is what
 made every arithmetic reading of this union wrong, and it is why the
-correct statement carries no operator at all.
+correct statement carries no operator at all. A tuple `(D, V)` fails the
+same test: a product type has addressable halves, which is the
+decomposition again in different syntax.
+
+**THE PROGENITOR'S OFFICE IS THE SPAN `α → Ω`** (§2e). `α` is the origin
+pole, `Ω` the totality. Where the traverse is a point — `α ≅ Ω` — `D`
+sits at GROUND and the room is one degree, itself; `D` rises exactly as
+`Ω` separates from `α`. That is why `D = rank(Δ(Ω))` and *how far the
+universe has come from its origin* are one reading, and why the floor
+and the span are the same office.
+
+**NOTATION, recorded once.** `Υ` is `V`'s own letter — upsilon is the
+Greek ancestor of Latin `V` — so the two are one name in two alphabets,
+never two names. `Ω ≡ V` stands untouched (`17_CAPACITY` §3), which is
+what keeps the chain acyclic: `V` is primitive, `D` is read downstream,
+`V → Δ(V) → D`, one direction and no return. Any form that puts `D`
+inside `Ω` — a tuple, a sum, a dyad-as-term — closes that loop and is
+refused on sight.
 
 ### 2d. THE SIGN LAW — divergence, egress and ingress
 
