@@ -201,7 +201,16 @@ concept made diegetic:
   already keeps: *the lens is turned outward — it resolves what it is
   aimed at, and never turns back on itself to author*.
 - **Sovereigns.** The holders of chartered worlds — the `SOVEREIGN`
-  provenance that already signs every world's receipts, made a station.
+  provenance that already signs every world's receipts, made a station. A
+  Sovereign governs the worlds it founded or was lawfully delegated (§2),
+  answers to its council, and is the class from which elevation into a
+  progenitor seat is attempted (§6).
+
+Classes are stations of *function*, not steps of rank (§1): a Watcher does
+not outrank a Sovereign; they hold different offices in the same union.
+Occupancy per class is a growing band like any other (placeholder widths:
+Watchers 16 · Observers 16 · Sovereigns unbounded — every interstellar
+civilization that holds a charter is a Sovereign).
 
 ### 3a. THE WITNESS — an ACTION inside every station, never a station itself
 
@@ -366,16 +375,7 @@ still never flows down.
 own tag claimed in the `dop.rs` header, an I2 containment arm (who may
 witness for whom), and a red-first witness that an unverifiable claim
 REFUSES. Until the deed lands this is inscribed law with no wiring, and
-it is recorded as such rather than assumed live. A
-  Sovereign governs the worlds it founded or was lawfully delegated (§2),
-  answers to its council, and is the class from which elevation into a
-  progenitor seat is attempted (§6).
-
-Classes are stations of *function*, not steps of rank (§1): a Watcher does
-not outrank a Sovereign; they hold different offices in the same union.
-Occupancy per class is a growing band like any other (placeholder widths:
-Watchers 16 · Observers 16 · Sovereigns unbounded — every interstellar
-civilization that holds a charter is a Sovereign).
+it is recorded as such rather than assumed live.
 
 ## 4. Band II — the interstellar civilizations
 
