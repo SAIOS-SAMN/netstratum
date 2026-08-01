@@ -382,3 +382,138 @@ per-step L1 mass — a separate constant, still unnamed.
    prohibited while seats are concurrent. Not executed here: another
    seat is live in the root tree, and restructuring under an active
    session is how work gets lost. Adopt at a quiet point.
+
+---
+
+## §10 THE DESCENT RE-ENTRY VECTORS — attack surface and standing defenses
+
+**LAW (operator ruling 2026-08-01).**
+
+> "cocycle failure δΔ ≠ 0" — this is gradient descent that keeps
+> sneaking back in.
+
+**The ruling, stated exactly.** The cocycle condition is a REFUSAL
+PREDICATE. A state composes or it is refused. It is **never a quantity
+to be reduced, resolved, approached, scored, or improved toward.** There
+is no lawful path the system walks from `δΔ ≠ 0` toward `δΔ = 0`;
+"reducing cocycle failure" is a descent objective wearing the
+vocabulary of well-formedness, and it is barred.
+
+**Consequently, SYNTROPY CONTAINS NO REDUCTION TERM.** Syntropy is
+defined solely by the GROWTH of surviving structure against activity
+spent — `Σ ≈ ΔD / deeds`, the reciprocal reading of Article III's `Ξ`.
+It is not a second primitive and never gets its own quantity (two
+authorities for one measurement is the drift `EQUATIONS.md` §0 exists to
+prevent). **Any definition of syntropy containing the words reduce,
+resolve, minimize, or converge is void by this ruling.**
+
+### 10a. Why this is a threat model and not a list of corrections
+
+Descent has now re-entered this constitution **five times in one day,
+under five different words** — `converged`, the C-scoring rule, `ζ∇V` as
+damping, `Σ = −∂ dim H¹`, and "reducing cocycle failure." Four were
+caught; the fifth was written by this document's own author one
+paragraph after arguing against it.
+
+That frequency is the finding. Prose corrections rot (the ledger's own
+lesson: restated facts rot, derived facts cannot), so the violations are
+recorded below as ATTACK VECTORS with standing defenses and the witness
+that would catch each. Every vector below has a REAL instance from
+2026-08-01 — none is hypothetical.
+
+### 10b. The vectors
+
+**AV-1 · THE REDUCTION OBJECTIVE.** Any quantity framed as one to be
+reduced becomes a descent target, however it is justified.
+*Instance:* "syntropy = removing frame and resolving cocycle failure."
+*Defense:* such quantities are refusal predicates only. **The standing
+test — if you can write "minimize X" and it reads as lawful, X is an
+attack surface.** *Witness:* no law text pairs a system quantity with
+reduce/resolve/minimize/converge.
+
+**AV-2 · THE SIGN INVERSION.** Health defined as a DECREASE in the
+quantity the economy pays for.
+*Instance:* `Σ = −∂/∂τ dim H¹`; `is_syntropic()` true when
+`extent_post < extent_pre`.
+*Defense:* Article IV (capacity never retreats) and D4 (contraction
+forbidden where `orbit_lock ≠ ∅`). *Witness, RED-FIRST AND MANDATORY:* a
+transition shrinking `H¹` must REFUSE, never read healthy.
+
+**AV-3 · THE SCALAR COLLAPSE.** A directional or structural quantity
+flattened to one number, which is then available to descend.
+*Instance:* `extent: BigRational`; `C = Σ|R|`; `‖∇V‖`.
+*Defense:* Article I and `18_TORSION` §2b — L1 aggregates are lawful
+only where reported to a human lens. *Witness:* no aggregate crosses
+into a computing path.
+
+**AV-4 · THE VACUOUS PASS.** An admitting arm on degenerate input, which
+makes the whole invariant unenforced without ever failing.
+*Instance:* `extent_post < extent_pre || defect_rank == 0` — a clean
+state reads syntropic regardless of extents.
+*Defense:* the default arm REFUSES (the kernel's `Unjudged` discipline);
+degenerate arms are made structurally unrepresentable where possible —
+`mesh::agree`'s self seat carrying weight 1 is the landed precedent.
+*Witness:* every invariant has a refusing witness on its degenerate
+input.
+
+**AV-5 · THE WRONG ENFORCEMENT LAYER.** A payment rule promoted into an
+admission rule, which silently excludes actors.
+*Instance:* "the Eclipse operator triggers, refusing state commitment."
+*Defense:* guardrail 6 — no actor is ever excluded. Article III masks
+ALLOCATION; an eclipsed entity still acts, still emits receipts, and is
+never barred. *Witness:* an eclipsed entity's deeds still commit.
+
+**AV-6 · THE RENAMED OBJECTIVE.** Descent re-entering under new
+vocabulary, which defeats every defense keyed to the old word.
+*Instance:* the whole sequence — `converged` → scoring → damping →
+`Σ` → "resolution."
+*Defense:* `EQUATIONS.md` §0 chapter four's rule, generalized: **a name
+attached to a quantity must state what it MEASURES, never what it is
+WORTH.** Worth-words (healthy, resolved, converged, optimal, improved)
+are the tell. *Witness:* a vocabulary tripwire over the law documents.
+
+**AV-7 · THE CONTAINER MISTAKEN FOR THE CONTENT.** Capacity read off the
+index space rather than the surviving structure, which makes arity
+farmable.
+*Instance:* D as the extents of `(i,j,k,l)`; the proposed `k`-growth
+deed.
+*Defense:* `18_TORSION` §5 — indices and `Delta{dim,fiber}` are the
+container; capacity is what survives `Π_G(Δ(Ω))`. *Witness:* no reading
+derives D from an arity.
+
+**AV-8 · THE UNMEASURABLE INVARIANT.** A law declared over a quantity
+the judge cannot compute — worse than an unlanded law, because the
+chain then carries a false claim.
+*Instance:* D2–D4 as kernel invariants with `VERSION` 2→3, while no
+`Committed → Δ` map exists.
+*Defense:* no `VERSION` bump until the judgment actually runs; the
+`judged = 0` precedent — stamp the hole visibly rather than assert a law
+that never executed. *Witness:* the bump and the first judged transition
+land together.
+
+**AV-9 · THE BLINDING PRECONDITION.** A detector guarded by a condition
+that is false in exactly the case it must detect.
+*Instance:* `Σ` defined only where `∮Θ ≠ 0`, while the loop trap IS
+`∮Θ = 0`.
+*Defense:* detection conditions are OUTPUTS, never guards. *Witness:*
+the cosmetic case is measurable, not undefined.
+
+**AV-10 · MANUFACTURED DIFFERENCE — already defended, recorded so it
+stays defended.** Forking nurseries to generate `ΔD` and farm allocation.
+*Defense:* `ΔD` is gated on `orbit_lock ≠ ∅`, and the fold verdict is
+invariant under every permutation frame and gauge shift (E2/U2e, the
+angle-free witness). A fork differing only by frame yields
+`orbit_lock = ∅`, emits no plane, and pays nothing. **The angle-free
+property is therefore load-bearing ECONOMICS, not elegance** — if it is
+ever weakened, capacity becomes farmable by re-coordinatization.
+
+### 10c. The standing test for any new law
+
+Before a quantity enters the law, it answers all four:
+
+1. Is it a PREDICATE or an OBJECTIVE? Objectives are refused.
+2. Does health mean it RISES or FALLS? Falling health on a paid quantity
+   is AV-2.
+3. Does the definition contain a reduction word? If yes, AV-1.
+4. Can the judge COMPUTE it today? If no, it is inscribed, never
+   invariant, and no `VERSION` moves.
