@@ -1,5 +1,5 @@
-//! SPINE-UPLINK pins (NS-5 §9): the replication seam. A spine PRESENTS
-//! itself as a segment; a peer RECEIVES it and reaches an EQUAL spine —
+//! SPINE-UPLINK pins (NS-5 §9): the replication seam. A arbor PRESENTS
+//! itself as a segment; a peer RECEIVES it and reaches an EQUAL arbor —
 //! byte-for-byte, because admission is verification, not trust. A
 //! tampered record refuses at its break; a withheld blob refuses; a
 //! chain that does not extend the receiver's head refuses; and a
@@ -15,8 +15,8 @@ use cfe::ipsal::{Entity, Scope};
 use cfe::ratio::ratio;
 use cfe::tlv;
 use cfe::world::{World, SOVEREIGN};
-use mesh::spine::{
-    Coordinate, Spine, SpineRefused, SEGMENT_STEP_TAG,
+use mesh::arbor::{
+    Coordinate, Arbor, ArborRefused, SEGMENT_STEP_TAG,
 };
 
 fn scratch(name: &str) -> PathBuf {
@@ -69,22 +69,22 @@ fn step_frame(commit: [u8; 32], step: &kernel::Step) -> Vec<u8> {
     out
 }
 
-/// A source spine plays a chain; the presented segment carries a peer
-/// to the IDENTICAL spine, and re-receiving it is idempotent.
+/// A source arbor plays a chain; the presented segment carries a peer
+/// to the IDENTICAL arbor, and re-receiving it is idempotent.
 #[test]
 fn present_and_receive_reach_an_equal_spine() {
     let src_root = scratch("src");
     let dst_root = scratch("dst");
-    let mut src = Spine::open(&src_root).expect("opens");
+    let mut src = Arbor::open(&src_root).expect("opens");
     src.adopt(coord(1), &two_orb_state((10, 1), (0, 1))).expect("adopts");
     src.extend(coord(2), &two_orb_state((7, 1), (3, 1)), None).expect("walks");
     src.extend(coord(3), &two_orb_state((5, 1), (5, 1)), None).expect("walks");
 
     let segment = src.present();
-    let mut dst = Spine::open(&dst_root).expect("opens empty");
+    let mut dst = Arbor::open(&dst_root).expect("opens empty");
     assert_eq!(dst.receive(&segment).expect("admits"), 3, "three records cross");
     assert_eq!(dst.records(), src.records(), "the spines are equal, byte-for-byte");
-    // Idempotent: re-presenting the whole spine admits nothing new.
+    // Idempotent: re-presenting the whole arbor admits nothing new.
     assert_eq!(dst.receive(&segment).expect("idempotent"), 0, "already held, skipped");
     // The store carried too: the head geometry serves on the receiver.
     let head = dst.head("").expect("stands").state;
@@ -97,16 +97,16 @@ fn present_and_receive_reach_an_equal_spine() {
 fn a_tampered_record_refuses_at_its_break() {
     let src_root = scratch("tamper-src");
     let dst_root = scratch("tamper-dst");
-    let mut src = Spine::open(&src_root).expect("opens");
+    let mut src = Arbor::open(&src_root).expect("opens");
     src.adopt(coord(1), &two_orb_state((10, 1), (0, 1))).expect("adopts");
     src.extend(coord(2), &two_orb_state((7, 1), (3, 1)), None).expect("walks");
     let mut segment = src.present();
     // Flip a byte in the record region (the first frame's value).
     segment[8] ^= 0xff;
-    let mut dst = Spine::open(&dst_root).expect("opens");
+    let mut dst = Arbor::open(&dst_root).expect("opens");
     assert!(matches!(
         dst.receive(&segment),
-        Err(SpineRefused::Forged { .. }) | Err(SpineRefused::Malformed { .. })
+        Err(ArborRefused::Forged { .. }) | Err(ArborRefused::Malformed { .. })
     ));
     assert!(dst.head("").is_none(), "nothing admitted past the break");
 }
@@ -116,18 +116,18 @@ fn a_tampered_record_refuses_at_its_break() {
 fn a_withheld_blob_refuses() {
     let src_root = scratch("blob-src");
     let dst_root = scratch("blob-dst");
-    let mut src = Spine::open(&src_root).expect("opens");
+    let mut src = Arbor::open(&src_root).expect("opens");
     src.adopt(coord(1), &two_orb_state((10, 1), (0, 1))).expect("adopts");
     let full = src.present();
     // Keep only the record frame (tag 84), drop the blob frame (87).
     let mut records_only = Vec::new();
     for (tag, value) in tlv::records(&full) {
-        if tag == mesh::spine::SPINE_RECORD_TAG {
+        if tag == mesh::arbor::SPINE_RECORD_TAG {
             tlv::put(tag, value, &mut records_only);
         }
     }
-    let mut dst = Spine::open(&dst_root).expect("opens");
-    assert!(matches!(dst.receive(&records_only), Err(SpineRefused::BlobUnheld { .. })));
+    let mut dst = Arbor::open(&dst_root).expect("opens");
+    assert!(matches!(dst.receive(&records_only), Err(ArborRefused::BlobUnheld { .. })));
 }
 
 /// A segment that does not extend the receiver's head refuses: two
@@ -136,16 +136,16 @@ fn a_withheld_blob_refuses() {
 fn a_foreign_chain_refuses_to_splice() {
     let a_root = scratch("splice-a");
     let b_root = scratch("splice-b");
-    let mut a = Spine::open(&a_root).expect("opens");
+    let mut a = Arbor::open(&a_root).expect("opens");
     a.adopt(coord(1), &two_orb_state((10, 1), (0, 1))).expect("adopts");
 
     // B has its OWN genesis (different state) at the same address.
-    let mut b = Spine::open(&b_root).expect("opens");
+    let mut b = Arbor::open(&b_root).expect("opens");
     b.adopt(coord(1), &two_orb_state((9, 1), (1, 1))).expect("adopts");
 
     // A tries to receive B's segment: B's genesis sits at coord(1),
     // already held by A with a DIFFERENT commit — one value per address.
-    assert!(matches!(a.receive(&b.present()), Err(SpineRefused::Occupied)));
+    assert!(matches!(a.receive(&b.present()), Err(ArborRefused::Occupied)));
 }
 
 /// The trustless core: a JUDGED record is admitted only when its step
@@ -154,7 +154,7 @@ fn a_foreign_chain_refuses_to_splice() {
 #[test]
 fn a_judged_record_is_re_judged_or_refused() {
     let src_root = scratch("judge-src");
-    let mut src = Spine::open(&src_root).expect("opens");
+    let mut src = Arbor::open(&src_root).expect("opens");
     src.adopt(coord(1), &two_orb_state((10, 1), (0, 1))).expect("adopts");
     // A JUDGED extend: the transfer re-runs lawful at the source too.
     let judged = src
@@ -163,23 +163,23 @@ fn a_judged_record_is_re_judged_or_refused() {
         .clone();
     assert!(judged.judged, "the record is judged");
 
-    // present() carries records + blobs but NO step (the spine stores
+    // present() carries records + blobs but NO step (the arbor stores
     // none — the Phase-3 seam): the judged record cannot be re-judged,
     // so the receiver refuses it.
     let base_segment = src.present();
-    let mut dst = Spine::open(scratch("judge-dst1")).expect("opens");
+    let mut dst = Arbor::open(scratch("judge-dst1")).expect("opens");
     assert!(matches!(
         dst.receive(&base_segment),
-        Err(SpineRefused::JudgedWithoutProof { .. })
+        Err(ArborRefused::JudgedWithoutProof { .. })
     ));
 
     // Carry the LAWFUL step alongside: now the receiver re-judges and
-    // admits, reaching the equal spine.
+    // admits, reaching the equal arbor.
     let mut with_step = base_segment.clone();
     with_step.extend_from_slice(&step_frame(judged.commit, &transfer_step(2)));
-    let mut dst2 = Spine::open(scratch("judge-dst2")).expect("opens");
+    let mut dst2 = Arbor::open(scratch("judge-dst2")).expect("opens");
     assert_eq!(dst2.receive(&with_step).expect("re-judged lawful"), 2);
-    assert_eq!(dst2.records(), src.records(), "equal spine after re-judge");
+    assert_eq!(dst2.records(), src.records(), "equal arbor after re-judge");
 
     // Carry an UNLAWFUL step for the same record: the transition is
     // claimed by actor 999, who is no entity in `prior` (I2 —
@@ -196,6 +196,6 @@ fn a_judged_record_is_re_judged_or_refused() {
     };
     let mut with_liar = base_segment.clone();
     with_liar.extend_from_slice(&step_frame(judged.commit, &liar));
-    let mut dst3 = Spine::open(scratch("judge-dst3")).expect("opens");
-    assert!(matches!(dst3.receive(&with_liar), Err(SpineRefused::Unlawful(_))));
+    let mut dst3 = Arbor::open(scratch("judge-dst3")).expect("opens");
+    assert!(matches!(dst3.receive(&with_liar), Err(ArborRefused::Unlawful(_))));
 }

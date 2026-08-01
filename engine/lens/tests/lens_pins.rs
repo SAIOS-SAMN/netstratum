@@ -1,13 +1,13 @@
 //! LENS pins (#37 opening move): the display's committed half
 //! re-serves from the chain byte-for-byte — the export is deletable
-//! because the lens can always re-derive it. An unborn spine refuses
+//! because the lens can always re-derive it. An unborn arbor refuses
 //! typed; nothing here reads a ledger file except to prove the
 //! equivalence.
 
 use cfe::ratio::ratio;
 use cfe::world::World;
 use ledger::Ledger;
-use mesh::spine::{Coordinate, Spine};
+use mesh::arbor::{Coordinate, Arbor};
 use std::fs;
 use std::path::PathBuf;
 
@@ -46,25 +46,25 @@ fn the_display_re_serves_from_the_chain_byte_for_byte() {
     .expect("the export exists");
 
     // The chain holds the same truth: adopt the committed state.
-    let mut spine = Spine::open(root.join("spine")).expect("opens");
+    let mut arbor = Arbor::open(root.join("spine")).expect("opens");
     let coordinate = Coordinate {
         branch: String::new(),
         s: [ratio(0, 1), ratio(0, 1), ratio(0, 1)],
         g: ratio(0, 1),
         t: world.now(),
     };
-    spine
+    arbor
         .adopt(coordinate, &codec::state_bytes(&world.committed()))
         .expect("adopts");
 
     // The lens projects the export's bytes FROM the chain.
-    let projected = lens::state_tlv(&spine)
+    let projected = lens::state_tlv(&arbor)
         .expect("the lens reads")
         .expect("the world holds an orb");
     assert_eq!(projected, display, "the export re-derives byte-for-byte — deletable");
 
     // And the head decodes whole.
-    let committed = lens::committed(&spine).expect("projects");
+    let committed = lens::committed(&arbor).expect("projects");
     assert_eq!(committed, world.committed(), "the head projection is the played state");
 }
 
@@ -100,6 +100,6 @@ fn the_rich_rendering_re_serves_from_the_chronicle() {
 #[test]
 fn an_unborn_spine_refuses_typed() {
     let root = scratch("unborn");
-    let spine = Spine::open(root.join("spine")).expect("opens empty");
-    assert!(matches!(lens::committed(&spine), Err(lens::LensRefused::Unborn)));
+    let arbor = Arbor::open(root.join("spine")).expect("opens empty");
+    assert!(matches!(lens::committed(&arbor), Err(lens::LensRefused::Unborn)));
 }

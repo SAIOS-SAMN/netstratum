@@ -10,7 +10,7 @@
 //! session: node A founds, plays, and seals the handoff → the wire
 //! carries → node B takes the pen with the cited append → drift
 //! measured and cured by the tail → CONSILIENCE AT EXACT ZERO → the
-//! stale hand refuses (the partition law, §7.5: the spine stalls) →
+//! stale hand refuses (the partition law, §7.5: the arbor stalls) →
 //! a forged file refuses with its break named. Every leg asserts its
 //! expectation — a wrong outcome fails the run.
 
@@ -96,7 +96,7 @@ fn found(file: &Path) {
 fn take(file: &Path) {
     let bytes = fs::read(file).expect("B bytes");
     let mut chronicle = receive(&bytes, Side::B).expect("intact through the door");
-    let hand = authority(&chronicle).expect("lawful spine").expect("sealed spine");
+    let hand = authority(&chronicle).expect("lawful arbor").expect("sealed arbor");
     assert_eq!(hand, HAND_B, "the pen arrived with the bytes");
     let stamp = chronicle.receipts().last().map(|r| r.stamp).unwrap_or(0);
     let at = append_as(
@@ -118,7 +118,7 @@ fn adopt(src: &Path, dst: &Path) {
     println!("   (the wire: the tail carries back — {appended} receipt(s), append-only)");
 }
 
-/// The partition law (NS-5 §7.5): the stale hand finds the spine
+/// The partition law (NS-5 §7.5): the stale hand finds the arbor
 /// stalled — USURPED, the lawful hand named, nothing appended.
 fn usurp(file: &Path) {
     let bytes = fs::read(file).expect("bytes");
@@ -135,7 +135,7 @@ fn usurp(file: &Path) {
     assert_eq!(refused, MeshRefused::Usurped { at: held as u64, lawful: HAND_B });
     assert_eq!(chronicle.receipts().len(), held, "nothing appended");
     println!(
-        "[node A] the spine STALLS for hand {HAND_A}: USURPED, lawful hand {HAND_B} — the partition law holds"
+        "[node A] the arbor STALLS for hand {HAND_A}: USURPED, lawful hand {HAND_B} — the partition law holds"
     );
 }
 

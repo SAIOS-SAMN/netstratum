@@ -12,9 +12,9 @@
 //! - the authority walk and its doors (NS-5 §7) — the receipted
 //!   handoff, one writer per clock, deeds ON the chain.
 //!
-//! The spine at TUniversal{S,G,T} replaces replication whole (the
+//! The arbor at TUniversal{S,G,T} replaces replication whole (the
 //! constitution ladder): state is position, the kernel is motion, the
-//! chain is the path. This crate becomes the spine's carrier when the
+//! chain is the path. This crate becomes the arbor's carrier when the
 //! codec gate lands; nothing here reads or writes a second truth.
 //!
 //! THE SANDBOXED NURSERY (NS-5 §7.6, operator ruling 2026-07-31):
@@ -28,13 +28,13 @@
 //!
 //! THE UPLINK LAW (operator order 2026-07-31 — mesh authenticity):
 //! nothing file-borne ever rides the mesh. Only chain-verified bytes
-//! ascend — `chronicle.tlv` through the `receive` door today, spine
+//! ascend — `chronicle.tlv` through the `receive` door today, arbor
 //! commitments at the ladder's #36. Ledger files are pre-chain debts
 //! awaiting adoption; lens exports are for eyes; the mesh carries
 //! neither, and a peer that offers them is offering nothing.
 
 pub mod agree;
-pub mod spine;
+pub mod arbor;
 
 use cfe::dop::ClosureEvent;
 use cfe::tlv;

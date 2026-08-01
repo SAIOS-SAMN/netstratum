@@ -8,7 +8,7 @@
 //!   panics, never hangs;
 //! - **no I/O** — it touches no file, clock, socket, or thread;
 //! - **encoding-blind** — it never produces or reads bytes.
-//!   Serialization is the codec's monopoly (the spine), so the kernel
+//!   Serialization is the codec's monopoly (the arbor), so the kernel
 //!   and the chain can never disagree about bytes: only one component
 //!   ever produces them. The kernel judges MEANING; the codec fixes
 //!   FORM; the two never overlap.
@@ -23,7 +23,7 @@
 //! amendment. Every chain commitment binds the version that judged the
 //! step, so old history verifies under the judge it was cut with — no
 //! future change reinterprets the past. The kernel never reads the
-//! commitment; the spine binds `VERSION` into it.
+//! commitment; the arbor binds `VERSION` into it.
 //!
 //! **Coverage grows by amendment, never silently.** Each event's rules
 //! land as a witnessed addition (one witness per invariant, red-first);
@@ -39,7 +39,7 @@ use cfe::world::Committed;
 use rfa_core::Vacuity;
 use solver_verify::{verify_work, Difficulty, WorkBroken};
 
-/// The kernel version — bumped ONLY by charter amendment. The spine
+/// The kernel version — bumped ONLY by charter amendment. The arbor
 /// binds this into every commitment (`H(schema ‖ bytes ‖ parent ‖
 /// coordinate)` carries the judging version alongside the schema), so
 /// a chain segment is forever verified under the version that cut it.

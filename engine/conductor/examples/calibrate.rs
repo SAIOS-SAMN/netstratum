@@ -21,7 +21,7 @@
 //!      mint always admits. Any other outcome is COUNTED and reported
 //!      — this harness measures, it does not panic.
 //!   C. A BOUNDED REAL ERA — the conductor plays; solves recorded and
-//!      spine growth counted, the board dynamics in miniature.
+//!      arbor growth counted, the board dynamics in miniature.
 //!
 //! Run: `cargo run -p conductor --example calibrate --release`
 
@@ -271,7 +271,7 @@ fn part_a_and_b() {
 }
 
 /// Part C — a bounded real era: the conductor plays a short span; count
-/// the solves it records and the spine records it chains.
+/// the solves it records and the arbor records it chains.
 fn part_c_bounded_era() {
     println!("## PART C — a bounded real era (the board in miniature)");
     println!();
@@ -294,10 +294,10 @@ fn part_c_bounded_era() {
     if let Ok(entries) = std::fs::read_dir(var.join("worlds")) {
         for entry in entries.flatten() {
             let spine_root = entry.path().join("spine");
-            if let Ok(spine) = mesh::spine::Spine::open(&spine_root) {
-                if !spine.records().is_empty() {
+            if let Ok(arbor) = mesh::arbor::Arbor::open(&spine_root) {
+                if !arbor.records().is_empty() {
                     spined_worlds += 1;
-                    spine_records += spine.records().len();
+                    spine_records += arbor.records().len();
                 }
             }
         }
@@ -308,7 +308,7 @@ fn part_c_bounded_era() {
     println!("  solves recorded: {total_solved}");
     println!("  rung reached:    up to level {max_level}");
     println!(
-        "  spine records:   {spine_records} across {spined_worlds} chained worlds \
+        "  arbor records:   {spine_records} across {spined_worlds} chained worlds \
          (judged=0 — observed play)"
     );
     let _ = std::fs::remove_dir_all(&var);

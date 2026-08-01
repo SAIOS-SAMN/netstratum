@@ -418,7 +418,7 @@ pub fn rcf_signature(delta: &Delta) -> RcfSignature {
 
 /// The compact blake3 fingerprint of a Delta's RCF signature — the
 /// same 32 bytes for conjugate states, for COMMITMENT BINDING only
-/// (the spine may carry it). Never a judge: the fold gate compares the
+/// (the arbor may carry it). Never a judge: the fold gate compares the
 /// exact [`RcfSignature`], because a hash is a lossy summary and the
 /// law judges on exact form. blake3, not the ancestor's Keccak (the
 /// house hash; the bytes are netstratum's own, re-witnessed).
