@@ -27,6 +27,7 @@
 
 pub mod cage;
 pub mod delta;
+pub mod fiber;
 pub mod fold;
 pub mod gates;
 pub mod rcf;
@@ -39,6 +40,7 @@ pub use fold::{
     f_fold_star, judged_fold, orbit_lock, verify_orbit_witness, FoldVerdict, Operator,
     OrbitWitness, QMatrix,
 };
+pub use fiber::{loop_holonomy, plaquette_curvature, MatrixFiber2x2};
 pub use gates::{validate_step, GateVerdict, StepBound};
 pub use rcf::{invariant_factors, rcf_hash, rcf_signature, QPoly, RcfSignature};
 pub use potential::{dual_pole, potential_form, Flow, PotentialForm, Vacuity};
