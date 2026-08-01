@@ -465,6 +465,10 @@ pub struct Polity {
     /// lazily at the first chain; re-opening per beat would re-verify
     /// the whole stream every cycle — quadratic over a live era).
     spine: Option<mesh::spine::Spine>,
+    /// DIRECTIVE 19 — how many receipts have been threaded through the
+    /// judge and into the chain. Every deed past this mark is chained
+    /// individually, with its own step, and judged.
+    chained: usize,
 }
 
 fn banked(world: &World, resource: Resource) -> Ratio {
@@ -638,6 +642,7 @@ impl Polity {
                         )
                     });
                     return Polity {
+                        chained: 0,
                         spec,
                         world,
                         automaton,
@@ -714,6 +719,7 @@ impl Polity {
         // instead of killing the board; derived seats are always lawful.
         let _ = world.site_planet(cfe::world::FIRST_ORB, albedo, orbit);
         Polity {
+            chained: 0,
             spec,
             world,
             automaton,
@@ -1307,21 +1313,68 @@ impl Polity {
             )?);
         }
         let spine = self.spine.as_mut().expect("held or just opened");
-        let bytes = codec::state_bytes(&self.world.committed());
-        let coordinate = mesh::spine::Coordinate {
-            branch: String::new(),
-            s: [
-                self.spec.position.0.clone(),
-                self.spec.position.1.clone(),
-                self.spec.position.2.clone(),
-            ],
-            g: self.world.gauge().clone(),
-            t: self.world.now(),
-        };
-        match spine.head("") {
-            None => spine.adopt(coordinate, &bytes).map(|_| ()),
-            Some(_) => spine.extend(coordinate, &bytes, None).map(|_| ()),
+        let receipts = self.world.chronicle().receipts().to_vec();
+        let seat = [
+            self.spec.position.0.clone(),
+            self.spec.position.1.clone(),
+            self.spec.position.2.clone(),
+        ];
+
+        // THE ADOPTION DOOR (#36): a pre-chain world enters ONCE, its
+        // current state seated as the unjudged genesis — the debt named,
+        // never hidden. Everything after walks through the judge.
+        if spine.head("").is_none() {
+            let bytes = codec::state_bytes(&self.world.committed());
+            let coordinate = mesh::spine::Coordinate {
+                branch: String::new(),
+                s: seat.clone(),
+                g: self.world.gauge().clone(),
+                t: self.world.now(),
+            };
+            spine.adopt(coordinate, &bytes)?;
+            self.chained = receipts.len();
+            return Ok(());
         }
+
+        // DIRECTIVE 19 — PER-DEED JUDGMENT. One commitment per DEED, not
+        // one per beat, and each carries its own step so
+        // `mesh::spine::extend` runs `kernel::lawful` on it. Batching
+        // was refused by ruling: nine deeds in one composite hides an
+        // un-inspected interior where a local unlawful step shelters
+        // behind a net-positive whole.
+        //
+        // Prior/next are taken by replaying the chronicle prefix, which
+        // is O(deeds × history) per beat. That is honest and bounded at
+        // this scale; the cure when it bites is a stepping replay in
+        // cfe (replay() is one monolithic loop today and cannot advance
+        // by a single receipt).
+        let mut prior = cfe::world::replay(
+            &cfe::vrp::Chronicle::from_receipts(receipts[..self.chained].to_vec())
+                .map_err(|_| mesh::spine::SpineRefused::StateUndecodable)?,
+        );
+        for at in self.chained..receipts.len() {
+            let receipt = &receipts[at];
+            let next = cfe::world::replay(
+                &cfe::vrp::Chronicle::from_receipts(receipts[..=at].to_vec())
+                    .map_err(|_| mesh::spine::SpineRefused::StateUndecodable)?,
+            );
+            let step = kernel::Step {
+                event: receipt.event.clone(),
+                actor: receipt.provenance.first().copied().unwrap_or(cfe::world::SOVEREIGN),
+                stamp: receipt.stamp,
+            };
+            let coordinate = mesh::spine::Coordinate {
+                branch: String::new(),
+                s: seat.clone(),
+                g: next.gauge.first().cloned().unwrap_or_else(|| cfe::ratio::ratio(0, 1)),
+                t: receipt.stamp,
+            };
+            spine.extend(coordinate, &codec::state_bytes(&next), Some(&step))?;
+            self.chained = at + 1;
+            prior = next;
+        }
+        let _ = prior;
+        Ok(())
     }
 }
 

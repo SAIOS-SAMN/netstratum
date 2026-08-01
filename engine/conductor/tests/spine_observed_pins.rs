@@ -37,14 +37,17 @@ fn the_beat_chains_and_the_debt_is_named() {
         polity.cycle(&book, &registry);
     }
 
-    // The chain stands beside the chronicle: one record per beat, the
-    // first through the adoption door, every one honestly unjudged.
+    // THE PHASE 3 FLIP (DIRECTIVE 19) SUPERSEDES THIS PIN'S OLD CLAIM.
+    // It asserted one record per BEAT and every record unjudged — the
+    // shape of kernel-OBSERVED play (#36), where the judge watched and
+    // never spoke. Both halves are now false by design: the chain
+    // carries one record per DEED, and every deed past the adoption
+    // door is judged by `kernel::lawful` before it may enter.
     let spine_root = book.world_dir(&world_name).join("spine");
     let spine = Spine::open(&spine_root).expect("the spine opens and re-verifies whole");
-    assert_eq!(
-        spine.records().len(),
-        3,
-        "three beats, three records — adopted once, extended after"
+    assert!(
+        spine.records().len() >= 3,
+        "per-DEED chaining: at least one record per beat, and normally more"
     );
     assert_eq!(
         spine.records()[0].parent,
@@ -52,8 +55,12 @@ fn the_beat_chains_and_the_debt_is_named() {
         "the first record is the adoption — the mainline's one birth"
     );
     assert!(
-        spine.records().iter().all(|r| !r.judged),
-        "kernel-OBSERVED play stamps every hole judged=0, never hidden"
+        !spine.records()[0].judged,
+        "the adoption alone is unjudged: pre-chain history is a debt NAMED, never hidden"
+    );
+    assert!(
+        spine.records().iter().skip(1).all(|r| r.judged),
+        "and every deed after it walked through the door — the kernel is the live gate"
     );
 
     // The store carries the geometry whole: the head blob decodes to
@@ -70,5 +77,13 @@ fn the_beat_chains_and_the_debt_is_named() {
         polity.cycle(&book, &registry);
     }
     let reopened = Spine::open(&spine_root).expect("re-opens whole");
-    assert_eq!(reopened.records().len(), 5, "the chain walked on, no second birth");
+    assert!(
+        reopened.records().len() > spine.records().len(),
+        "the chain walked on, no second birth"
+    );
+    assert_eq!(
+        reopened.records().iter().filter(|r| !r.judged).count(),
+        1,
+        "exactly one unjudged record ever: the adoption. Everything else is judged."
+    );
 }
