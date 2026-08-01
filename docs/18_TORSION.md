@@ -818,9 +818,40 @@ it is legitimate world-building. It belongs in a CONTENT layer as an
 observed phenomenon: measurable, surmountable, and carrying no
 authority over any rule. The arrow is one-way and never bends upward.
 
+*THE HOLDING SPACE IS NOW NAMED — dogma is RESERVED, not forbidden*
+(operator ruling 2026-08-02). It has a future mechanic, and naming it
+now is what stops a later node from either inventing it ad hoc or
+believing the vocabulary is barred forever:
+
+> **THE CURSE.** Dogma is what a civilization produces when it meets
+> technology its cognition cannot yet hold. Not a moral failure — a
+> CAPACITY MISMATCH. The line encounters structure whose extent exceeds
+> its own, and where D3 would normally grow the container to meet the
+> content, a cursed line cannot: it forms ritual instead of a plane.
+> Growth stifles, and the ritual is the symptom rather than the cause.
+
+**Why this fits the machinery already standing, exactly.** LAW 9 calls
+dogma a LOW CIVILIZATION HURDLE — a stage cleared, not a truth. The
+curse is that delineation made mechanical: `ext(Δ(V)) > D` is precisely
+"content the container cannot hold", and Article III's loop trap —
+deeds emitted, `ΔD = 0` — is precisely what a ritualising line looks
+like from outside. **The curse needs no new physics. It is the refusal
+of capacity growth, given a cause.**
+
+*Scope when it lands:* a per-world / per-line delimiter — a single
+planet may be cursed while its neighbours are not — so it colours one
+board position rather than the law. Elders dancing in the woods is
+CONTENT; it may never become a premise a rule reads.
+
+*Until it lands, nothing changes.* The reservation is a note about the
+future, not a licence for the present, and it blocks no lane: the
+economy is built on capacity and verified work, and a curse that stifles
+growth is expressible entirely in those terms when someone chooses to
+build it.
+
 *The present state, recorded honestly.* **There is no theology holding
-space, and therefore there is no lawful home for dogma anywhere in this
-tree today.** That absence is exactly why esoteric vocabulary bled into
+space BUILT, and therefore there is no lawful home for dogma anywhere in
+this tree today.** That absence is exactly why esoteric vocabulary bled into
 the engine while the kernel was being built — with no container, it
 settled wherever it landed. Until a content layer exists to hold it,
 the correct amount of dogma in this system is ZERO.
