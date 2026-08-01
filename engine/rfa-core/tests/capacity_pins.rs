@@ -165,3 +165,60 @@ fn the_container_is_not_the_capacity() {
         "arity is not capacity — a wide empty container carries D = 0"
     );
 }
+
+/// `A · Δ · Aᵀ` — CONGRUENCE, the transformation law of an alternating
+/// 2-form. Δ is a 2-form (`18_TORSION` §2a: "already an alternating
+/// form, not a metric tensor"), and a 2-form transforms by congruence,
+/// never by the conjugation `A·Δ·A⁻¹` that acts on endomorphisms.
+#[allow(clippy::needless_range_loop)] // matrix indices read clearest as indices
+fn congruent(delta: &Delta, a: &[Vec<Ratio>]) -> Delta {
+    let n = delta.dim();
+    let mut inter = vec![vec![q(0, 1); n]; n];
+    for i in 0..n {
+        for j in 0..n {
+            for k in 0..n {
+                inter[i][j] += &a[i][k] * delta.entry(k, j, 0);
+            }
+        }
+    }
+    let mut out = Delta::zero(n, 1);
+    for i in 0..n {
+        for j in (i + 1)..n {
+            let mut acc = q(0, 1);
+            for k in 0..n {
+                acc += &inter[i][k] * &a[j][k];
+            }
+            out.set_antisym(i, j, vec![acc]);
+        }
+    }
+    out
+}
+
+#[test]
+fn capacity_is_invariant_under_congruence() {
+    // THE LAWFUL FRAME GROUP. A 2-form's frame change is congruence
+    // A·Δ·Aᵀ, which preserves antisymmetry for EVERY invertible A —
+    // unlike conjugation A·Δ·A⁻¹, which preserves it only when A is
+    // orthogonal (AᵀA = I). Capacity must not move under it: D is a
+    // property of the universe, never of the observer's basis.
+    let base = triangle(q(1, 1), q(1, 1), q(0, 1));
+    let before = capacity(&base);
+
+    // A unipotent shear I + (1/5)·E_01 — det 1, decidedly NOT orthogonal.
+    let mut a = vec![vec![q(0, 1); 3]; 3];
+    for (i, row) in a.iter_mut().enumerate() {
+        row[i] = q(1, 1);
+    }
+    a[0][1] = q(1, 5);
+
+    let framed = congruent(&base, &a);
+    assert!(
+        framed.verify_conservation(),
+        "congruence must keep the form on the antisymmetric surface"
+    );
+    assert_eq!(
+        capacity(&framed),
+        before,
+        "a congruence frame change must not move the capacity reading"
+    );
+}
