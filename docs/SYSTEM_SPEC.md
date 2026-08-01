@@ -275,7 +275,7 @@ residuals** (kernel CHARTER I6, *no difference dies without account*).
 
 **The fold gate F_fold* (I6, v0.1 `fold.rs`).** Before folding a,b:
 
-    orbit_lock(a,b) := ∃ op ∈ Operators, k ≤ K_max :
+    orbit_lock(a,b) := ∃ op ∈ Operators :
                        conservation-valid orbit  op^k(a) ≅_RCF b
     if orbit_lock(a,b) ≠ ∅:  FORBID fold  →  emit the residue as a NEW plane
                              (the mint; the residue's life after)

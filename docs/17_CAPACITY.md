@@ -986,7 +986,7 @@ a SEARCH ends up inside a JUDGE.
 
 That is exactly the error in treating `orbit_lock` as a kernel-level
 gate, and it was mine throughout §§10–12. `orbit_lock` runs a bounded
-SEARCH — every operator, up to `k_max` conjugations, each step checked
+SEARCH — every operator, each application checked
 against the antisymmetric surface. A search is exploratory, its method
 is free, and at scale it is stochastic. **The kernel is pure, total,
 cheap, and must never search.**
@@ -996,7 +996,7 @@ the solver: `solver` SEARCHES (free, non-constitutional), `solver-verify`
 REPLAYS (sealed, what the kernel calls). `orbit_lock` takes the same
 split, and its signature already anticipates it:
 
-    orbit_lock(a, b, operators, k_max) -> Option<OrbitWitness>
+    orbit_lock(a, b, operators) -> Option<OrbitWitness>
 
 The witness carries "the operator id and step at which the lock was
 found." So:
@@ -1007,7 +1007,7 @@ found." So:
   bound it however the prover likes. Nothing constitutional.
 - **Kernel side, deterministic and cheap:** given `OrbitWitness{op, k}`,
   conjugate `k` times by `op` and compare RCF signatures. O(k), total,
-  no search, no `k_max`.
+  no search, no tunable bound.
 
 **The asymmetry this exposes, and it is load-bearing.** A witness can
 prove a lock EXISTS. **No witness can prove a lock is ABSENT** — absence

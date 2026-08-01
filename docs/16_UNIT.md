@@ -154,7 +154,7 @@ replay-MATCHES.
 quantum register enters ONLY in its lawful discrete form. Q3's ruling
 stands (discrete gauge morphodynamics; the unitary/continuous form
 rejected) and 14 §2.5 bars the float form: the frame group is FINITE,
-the orbit test is exact and K_max-bounded, and all stochasticity is
+the orbit test is exact and UNBOUNDED (the tunable bound is struck — DIRECTIVE 01), and all stochasticity is
 the chronicle-seeded beacon ξ_k — replayable, never an oracle. No
 continuous angle exists in the law; "angle" means an element of the
 finite frame group joined with a gauge coboundary, nothing more. And

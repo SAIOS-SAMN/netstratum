@@ -477,7 +477,7 @@ reads Σ_mesh and fires the re-sync trigger.
 
 **ALTITUDE CORRECTION (2026-08-01, `17_CAPACITY` §13d).** Item (3) must
 NOT be read as "the kernel calls `orbit_lock`." `orbit_lock` runs a
-bounded SEARCH over every operator to `k_max`; the kernel is pure,
+SEARCH over every operator (the tunable bound STRUCK, DIRECTIVE 01); the kernel is pure,
 total, cheap, and must never search. The split is the house pattern
 already used at U1a (`solver` searches, `solver-verify` replays):
 
@@ -485,7 +485,7 @@ already used at U1a (`solver` searches, `solver-verify` replays):
   chain (`ξ_k = draw(seed = commit[k−1])`) so it stays replayable;
 - judge side, deterministic and cheap — verify a presented
   `OrbitWitness{operator_id, step}` in O(step) by conjugating and
-  comparing RCF signatures. No search, no `k_max`.
+  comparing the tensors exactly. No search, no tunable bound.
 
 `U_DIRECTIVES` §4's "the kernel gains its `rfa-core` dependency here"
 must be read as the VERIFIER half only. Amendment owed there.

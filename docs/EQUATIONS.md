@@ -502,7 +502,7 @@ signature). The kernel-side I6 wiring (fold-class deeds into
 `covered()`) is U2d, still INSCRIBED. Direction (SYSTEM_SPEC §4): a
 lock FORBIDS the fold.
 
-    orbit_lock(a, b) := ∃ op ∈ Operators, k ≤ K_max :
+    orbit_lock(a, b) := ∃ op ∈ Operators :
                         conservation-valid orbit  op^k(a) ≅_RCF b
     f_fold_star:  lock ≠ ∅ → TorsionVeto (emit)  ·  lock = ∅ → GaugeFold (lawful)
 
