@@ -323,9 +323,12 @@ fn the_struck_symbols_stay_struck() {
 /// live primitive for two days after the crate was deleted. The code
 /// was guarded; the prose was not. This closes that half.
 ///
-/// A mirror holds a copy and can therefore disagree with the chain. A
-/// lens derives and holds nothing. The name may appear ONLY where a
-/// paragraph records its removal.
+/// A LENS OFFERS SOLUTIONS: you turn it ON something to resolve it, and
+/// it returns a reading that did not exist before. A MIRROR RETURNS THE
+/// SELF: it points inward and gives back what was already there. The
+/// copy a mirror must hold is the consequence of that, not its
+/// definition. The name may appear ONLY where a paragraph records its
+/// removal.
 #[test]
 fn no_mirror_in_the_law() {
     let root = workspace_root();
@@ -376,8 +379,9 @@ fn no_mirror_in_the_law() {
     assert!(
         live.is_empty(),
         "a law document names a MIRROR as live (00_CHARTER §3a, THE LENS LAW).\n\
-         A mirror holds a copy and can disagree with the chain; a lens \
-         derives and holds nothing. Use the lens, or record the strike:\n  {}",
+         A lens is turned ON something and resolves it; a mirror is \
+         turned on the SELF and returns what was already there. Use the \
+         lens, or record the strike:\n  {}",
         live.join("\n  ")
     );
 }

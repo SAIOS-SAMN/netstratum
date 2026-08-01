@@ -198,7 +198,8 @@ concept made diegetic:
 - **Observers.** The **lens made diegetic**: the lens law as a
   people. Observers render the boards, the journals, the wall — they read
   everything and author nothing, and their whole law is the one the engine
-  already keeps: *the lens derives, never authors*.
+  already keeps: *the lens is turned outward — it resolves what it is
+  aimed at, and never turns back on itself to author*.
 - **Sovereigns.** The holders of chartered worlds — the `SOVEREIGN`
   provenance that already signs every world's receipts, made a station.
 

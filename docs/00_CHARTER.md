@@ -101,17 +101,30 @@ merit and would stand had that project never existed:
 ## 3a. THE LENS LAW — no mirrors in the infrastructure
 
 **Ruled 2026-08-01. A mirror is banned as a structure and as a word.**
-This system reflects nothing; it DERIVES. The two are not synonyms and
-the difference is the whole of §11.
+The difference is what the instrument is FOR, and which way it points.
 
-- **A MIRROR holds a copy.** It reflects state into a second artifact
-  that then exists independently, and from that moment there are two
-  things that can disagree. Every tool built to reconcile them is a
-  tool built to manage a problem that should not exist.
-- **A LENS holds nothing.** It derives a view from the one chain at
-  read time and is discarded. There is no second copy, so there is
-  nothing to reconcile, nothing to drift, and no reconciliation layer
-  to write.
+- **A LENS OFFERS SOLUTIONS.** You turn a lens ON something to resolve
+  it — it magnifies, focuses, and returns a reading that did not exist
+  before you looked. It points OUTWARD, at an object, and its whole
+  purpose is to produce what was not previously legible. A lens is
+  generative: it answers a question.
+- **A MIRROR RETURNS THE SELF.** You use a mirror to inspect YOURSELF.
+  It points INWARD and gives back exactly what was already there — no
+  new information, by construction, because self-inspection is the one
+  operation that cannot resolve anything. It answers nothing; it
+  confirms.
+
+**This is the dogmatic loop wearing glass.** A system that inspects
+itself and calls the looking work is precisely `α ≅ Ω` — motion that
+returns to its origin, deeds emitted against nothing gained, which
+Article III prices at zero. The mirror is that loop's instrument. The
+lens is how a system looks at something OTHER than itself and comes
+back holding more than it left with.
+
+*The copy is the consequence, not the definition.* Because a mirror
+returns the self, it must hold a second image to return — and from that
+moment there are two things that can disagree, and every reconciler
+after it is a tool built to manage a problem that should not exist.
 
 **Binding:** no crate, module, type, field, or spec primitive in this
 workspace may be a mirror or be named one. Observation is a lens
