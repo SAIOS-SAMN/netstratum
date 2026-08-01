@@ -233,6 +233,60 @@ changing form creates nothing. Making it an action means EVERY line can
 authenticate upward regardless of where it sits, including a stationless
 one, and none of them gains a seat by doing so.
 
+### 3b. THE UNION OF STATIONS — accountability is a PHYSICS layer
+
+**Ruled 2026-08-01 (operator).** A union between two stations creates
+ACCOUNTABILITY, and this is not a social convention laid over the
+physics — **it is the physics**, read at the station layer.
+
+**The mapping.** The two poles of the one unpartitioned manifold seat as
+two stations:
+
+```text
+Ω(D)   capacity — the structure that IS      →  PROGENITOR  (T0)
+                  "who makes the room"           the board-maker
+
+∇V     potential — the capacity to ACT       →  SOVEREIGN   (T2)
+                  the field, the record           the charter-holder
+
+Ω(D) ⋈ ∇V   the ENTANGLED read               →  OBSERVER    (T1)
+                                                  the witness seat
+```
+
+**Why the union lands at T1, and this is a check rather than a
+coincidence.** The observer sits geometrically BETWEEN the progenitor
+and the sovereign, and structurally it is the only seat from which BOTH
+POLES ARE READ AT ONCE. That is precisely `read_entangled` — one pass,
+one state, neither pole separately obtainable (§2f). An observer is not
+a rank between two ranks; **it is the entangled read given a seat.**
+
+**Where the accountability comes from.** §2f's binding clause is *no
+operation touches one alone*. Applied between parties rather than
+between terms: once two stations union, **neither can present its pole
+by itself.** The progenitor cannot show capacity without the potential
+that acts on it; the sovereign cannot show potential without the
+structure it acts through. Neither can be guarded separately, and
+therefore neither can be attacked, audited or absolved separately. That
+is accountability as an INVARIANT rather than an obligation — the same
+move Article III made when it stopped taxing the dogmatic loop and made
+it unable to mint.
+
+**The union is GENUINE GROWTH, not a re-labelling — and this is the
+test that matters.** A union forms a RELATION between two seats that did
+not exist before: a new edge in the obligation complex, so
+`Support(E') ⊃ Support(E)` and DIRECTIVE 16 admits it. It is
+`Δ' = Δ + δΔ`, never `Δ' = Q·Δ`. This is why station-union cannot be
+farmed: pairing to climb would have to manufacture a real, receipted,
+irreducibly pairwise obligation, and a merely declared union that
+carries no obligation adds no edge and moves nothing. **You cannot
+marry your way up a ladder that only counts edges.**
+
+**The elevation.** A sovereign in union with a progenitor is elevated to
+OBSERVER — and the mechanism is §3a's witness, which authenticates
+UPWARD. She does not receive the seat as a grant from either party;
+the union is the evidence, and the seat above re-checks it. Authority
+still never flows down.
+
 **Owed at its landing** (specified here, built later): the deed needs its
 own tag claimed in the `dop.rs` header, an I2 containment arm (who may
 witness for whom), and a red-first witness that an unverifiable claim
