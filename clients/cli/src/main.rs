@@ -3533,6 +3533,11 @@ fn chronicle(world: &World, style: &Style) {
                 style.dim(era),
                 style.strong(line)
             ),
+            cfe::dop::ClosureEvent::StationSeated { line, station } => format!(
+                "◈ station SEATED — {} takes office {} (the seat is now on the chain)",
+                style.strong(line),
+                style.strong(&station.to_string())
+            ),
             cfe::dop::ClosureEvent::TaxonSealed { class, clade } => format!(
                 "◈ taxon SEALED — class {} · clade {} (identity, forever)",
                 style.strong(&class.to_string()),

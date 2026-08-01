@@ -312,8 +312,17 @@ pub struct Committed {
     /// MASK-1a: the veil stands.
     pub veiled: bool,
     /// KERNEL-TAXON (15 §4): the sealed (class, clade), or None —
-    /// unclassed is lawful until the seal.
+    /// unclassed is lawful until the seat.
     pub taxon: Option<(u8, u8)>,
+    /// THE VERTICAL AXIS (tag 89, 2026-08-01): the seats held, as
+    /// (line, station) in seating order. A station GATES AUTHORITY, and
+    /// until this landing it lived only in an editable registry file —
+    /// so who held an office was outside the constitution entirely
+    /// (`KERNEL_RELAY` §1.5). The registry is now a CACHE from the
+    /// receipt on, exactly as `GenesisSealed` made it for the axes.
+    /// One seat per line: re-seating REPLACES, and the chain carries
+    /// the whole history of who sat where.
+    pub stations: Vec<(String, u8)>,
 }
 
 /// G1 (04 §1): a civilization's sealed axes, as the world holds them.
@@ -402,6 +411,8 @@ pub struct World {
     veiled: bool,
     /// KERNEL-TAXON: the sealed taxon (replay of the receipt).
     taxon: Option<(u8, u8)>,
+    /// THE VERTICAL AXIS (tag 89): the seats held, (line, station).
+    stations: Vec<(String, u8)>,
 }
 
 impl World {
@@ -435,6 +446,7 @@ impl World {
             warded: None,
             veiled: false,
             taxon: None,
+            stations: Vec::new(),
         }
     }
 
@@ -480,6 +492,7 @@ impl World {
             warded: committed.warded,
             veiled: committed.veiled,
             taxon: committed.taxon,
+            stations: committed.stations,
         }
     }
 
@@ -2912,6 +2925,7 @@ impl World {
             warded: self.warded,
             veiled: self.veiled,
             taxon: self.taxon,
+            stations: self.stations.clone(),
         }
     }
 
@@ -3504,6 +3518,45 @@ impl World {
         self.close(ClosureEvent::VeilDrawn {}, actor);
         self.veiled = true;
         Ok(())
+    }
+
+    /// THE VERTICAL AXIS (tag 89) — seat a line in an office.
+    ///
+    /// A station GATES AUTHORITY (the tier-0 verbs check it), and until
+    /// this deed existed it lived only in `var/registry/<sigil>.json` —
+    /// a file anyone with a shell could edit. `KERNEL_RELAY` §1.5 named
+    /// the hole exactly: *the game is constitutional; the universe is
+    /// not*. The seat is now receipted and committed, and the registry
+    /// is a CACHE from this receipt on — precisely what `GenesisSealed`
+    /// did for the axes at G1.
+    ///
+    /// Build-scoped. `station` is the BAND-1 vocabulary by index
+    /// (1 progenitor, 2 watcher, 3 observer, 4 sovereign); anything
+    /// else refuses rather than seating a nameless office.
+    pub fn seat_station_as(
+        &mut self,
+        actor: u64,
+        line: &str,
+        station: u8,
+    ) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if station == 0 || station > 4 || line.is_empty() {
+            return Err(ActionRefused::BadTransfer);
+        }
+        self.close(
+            ClosureEvent::StationSeated { line: line.to_string(), station },
+            actor,
+        );
+        match self.stations.iter_mut().find(|(held, _)| held == line) {
+            Some(seat) => seat.1 = station,
+            None => self.stations.push((line.to_string(), station)),
+        }
+        Ok(())
+    }
+
+    /// THE VERTICAL AXIS: the seat a line holds, from the CHAIN.
+    pub fn station_of(&self, line: &str) -> Option<u8> {
+        self.stations.iter().find(|(held, _)| held == line).map(|(_, seat)| *seat)
     }
 
     /// MASK-1a — lift the veil by deed (starved false).
@@ -4159,6 +4212,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut warded: Option<bool> = None;
     let mut veiled = false;
     let mut taxon: Option<(u8, u8)> = None;
+    let mut stations: Vec<(String, u8)> = Vec::new();
     for receipt in chronicle.receipts() {
         match &receipt.event {
             ClosureEvent::EntityRegistered { entity_id, principal, handle } => {
@@ -4285,6 +4339,16 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             ClosureEvent::VeilLifted { .. } => veiled = false,
             // KERNEL-TAXON: the seal replays — identity is forever.
             ClosureEvent::TaxonSealed { class, clade } => taxon = Some((*class, *clade)),
+            // THE VERTICAL AXIS (tag 89): the seat replays from the
+            // receipt, so the registry file stops being the authority
+            // on who holds which office. One seat per line — re-seating
+            // REPLACES, and the chain keeps the whole history of it.
+            ClosureEvent::StationSeated { line, station } => {
+                match stations.iter_mut().find(|(held, _)| held == line) {
+                    Some(seat) => seat.1 = *station,
+                    None => stations.push((line.clone(), *station)),
+                }
+            }
             ClosureEvent::EraAnnexed { .. } => {}
             // MESH-1b (NS-5 §7): authority is the mesh's walk of the
             // arbor — the world's committed projection is blind to it
@@ -4727,7 +4791,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     Committed {
         orbs, entities, star, debts, bonds, covenants, councils, offers, techs, wants, crossed,
         gauge, genesis, terrain_seed, practices, instruments, routes, prospects, warded,
-        veiled, taxon,
+        veiled, taxon, stations,
     }
 }
 

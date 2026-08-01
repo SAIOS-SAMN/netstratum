@@ -38,6 +38,12 @@ pub const SCHEMA_V1: u8 = 1;
 /// the schema versions are the codec seat's byte monopoly; this is
 /// the mechanical trailing addition the freeze window exists for.
 pub const SCHEMA_V2: u8 = 2;
+/// THE VERTICAL AXIS (2026-08-01): v3 appends the SEATS held as a
+/// trailing count + (station byte, length-prefixed line). Emit v3;
+/// ACCEPT v2 and v1 (seats absent → empty, which is the truthful
+/// reading of a world that never seated one). The additive-trailing
+/// shape is the KERNEL-TAXON precedent, unchanged.
+pub const SCHEMA_V3: u8 = 3;
 
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
@@ -59,7 +65,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V2];
+    let mut out = vec![SCHEMA_V3];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -230,6 +236,15 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         }
         None => out.push(0),
     }
+    // THE VERTICAL AXIS (v3 trailing field): seat count, then each as
+    // station byte + length-prefixed line.
+    out.push(u8::try_from(committed.stations.len()).unwrap_or(u8::MAX));
+    for (line, station) in committed.stations.iter().take(usize::from(u8::MAX)) {
+        out.push(*station);
+        let name = line.as_bytes();
+        out.push(u8::try_from(name.len()).unwrap_or(u8::MAX));
+        out.extend_from_slice(&name[..name.len().min(usize::from(u8::MAX))]);
+    }
     out
 }
 
@@ -302,7 +317,7 @@ impl<'a> Take<'a> {
 pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
     let mut take = Take { bytes, at: 0 };
     let schema = take.u8()?;
-    if schema != SCHEMA_V1 && schema != SCHEMA_V2 {
+    if schema != SCHEMA_V1 && schema != SCHEMA_V2 && schema != SCHEMA_V3 {
         return None;
     }
 
@@ -495,6 +510,26 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         }
     };
 
+    // THE VERTICAL AXIS: v1/v2 carry no seats (empty — a world that
+    // never seated one); v3 reads the trailing table. Refuse never
+    // guess: a short or unlawful entry refuses whole.
+    let mut stations: Vec<(String, u8)> = Vec::new();
+    if schema == SCHEMA_V3 {
+        let held = take.u8()?;
+        for _ in 0..held {
+            let station = take.u8()?;
+            if station == 0 || station > 4 {
+                return None;
+            }
+            let len = usize::from(take.u8()?);
+            let mut name = Vec::with_capacity(len);
+            for _ in 0..len {
+                name.push(take.u8()?);
+            }
+            stations.push((String::from_utf8(name).ok()?, station));
+        }
+    }
+
     if !take.done() {
         return None;
     }
@@ -521,5 +556,6 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         warded,
         veiled,
         taxon,
+        stations,
     })
 }

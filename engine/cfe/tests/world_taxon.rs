@@ -61,7 +61,7 @@ fn the_taxon_rides_the_snapshot_and_v1_still_reads() {
     let committed = world.committed();
 
     let bytes = codec::state_bytes(&committed);
-    let back = codec::from_state_bytes(&bytes).expect("v2 reads whole");
+    let back = codec::from_state_bytes(&bytes).expect("v3 reads whole");
     assert_eq!(back, committed, "the taxon rides the snapshot");
     assert_eq!(back.taxon, Some((5, 15)));
 
@@ -72,10 +72,12 @@ fn the_taxon_rides_the_snapshot_and_v1_still_reads() {
         plain.found("plain-hold").expect("founds");
         plain.committed()
     };
-    let v2 = codec::state_bytes(&unsealed);
-    let mut v1 = v2.clone();
+    // v3 now emits BOTH trailing fields — the taxon presence byte and
+    // the seat count — so an old stream drops both to be v1.
+    let current = codec::state_bytes(&unsealed);
+    let mut v1 = current.clone();
     v1[0] = 1; // SCHEMA_V1
-    v1.truncate(v1.len() - 1); // drop the trailing presence byte
+    v1.truncate(v1.len() - 2); // drop the seat count AND the taxon byte
     let old = codec::from_state_bytes(&v1).expect("v1 reads whole");
     assert_eq!(old.taxon, None, "v1 carries no taxon — lawfully unrecorded");
 }

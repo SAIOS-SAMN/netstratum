@@ -318,6 +318,10 @@ pub fn render_receipt(receipt: &Receipt) -> String {
             "taxon_sealed",
             format!("class {class} · clade {clade} — identity sealed"),
         ),
+        E::StationSeated { line, station } => (
+            "station_seated",
+            format!("{line} takes station {station} — the seat enters the chain"),
+        ),
         E::ElderWarded {} => ("elder_warded", "the reverse shield seats".into()),
         E::WardLifted { claimer } => (
             "ward_lifted",

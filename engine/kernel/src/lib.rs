@@ -522,6 +522,12 @@ fn covered(event: &ClosureEvent) -> bool {
         // witnessed in `taxon_pins.rs`). The sealed default stays as
         // defense for FUTURE enum additions (refuse-unknown).
         | E::TaxonSealed { .. }
+        // THE VERTICAL AXIS (tag 89): the seat is banked-neutral — it
+        // moves no value, no element and no key — so {I2 containment,
+        // I3 exactness} complete it. Containment is the whole point:
+        // a station GATES AUTHORITY, so WHO may seat one is the law
+        // that was missing while it lived in an editable file.
+        | E::StationSeated { .. }
     )
 }
 
@@ -965,7 +971,8 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::RouteChartered { .. } | E::OfferPosted { .. } | E::LineSucceeded { .. }
         // KERNEL-TAXON: the drafted Build-class arm coder-03 named for
         // their #42 — unenforced until their covered() entry + witness.
-        | E::TaxonSealed { .. } => {
+        | E::TaxonSealed { .. }
+        | E::StationSeated { .. } => {
             Some(Scope::Build)
         }
         // Raze — demolish or lift what was raised.

@@ -176,7 +176,17 @@
 //!         actor[8] ‖ stamp[8] ‖ event_bytes; the receiver re-judges
 //!         under its own kernel. Segment-only, carried only for
 //!         judged records).
-//!         — the next free tag outside reservations is 89.
+//!   89 ClosureEvent::StationSeated (THE VERTICAL AXIS, 2026-08-01 —
+//!         the seat enters the chain. A station GATES AUTHORITY (the
+//!         tier-0 verbs check it), and it lived only in
+//!         `var/registry/<sigil>.json`, a file anyone with a shell can
+//!         edit. Who holds which office is now a receipted deed and
+//!         committed state; the registry becomes a CACHE from the
+//!         receipt on — the G1 precedent, where GenesisSealed did
+//!         exactly this for the axes. Station codes are the BAND-1
+//!         vocabulary by index: 1 progenitor · 2 watcher · 3 observer
+//!         · 4 sovereign.)
+//!         — the next free tag outside reservations is 90.
 //!   In-value practice codes (append-only): 1 the Fast · 2 the Icon ·
 //!   3 the Vigil · 4 the Hoard · 5 the Athanor (deep-end: adoption
 //!   gated on hardship ≥ 8 receipts). Placeholder names, operator
@@ -1038,6 +1048,17 @@ pub enum ClosureEvent {
     /// Codes must stand in the ratified vocabularies; names stay
     /// register-side forever.
     TaxonSealed { class: u8, clade: u8 },
+    /// THE VERTICAL AXIS (tag 89, 2026-08-01): a line takes an office.
+    ///
+    /// The station GATES AUTHORITY — the tier-0 verbs check it — and it
+    /// lived only in `var/registry/<sigil>.json`, editable by anyone
+    /// with a shell. `KERNEL_RELAY` §1.5 named this exactly: *the game
+    /// is constitutional; the universe is not*. Now the seat is a deed.
+    ///
+    /// `station` is the BAND-1 vocabulary by index (1 progenitor,
+    /// 2 watcher, 3 observer, 4 sovereign); 0 and anything above 4 are
+    /// not offices and the wire refuses them.
+    StationSeated { line: String, station: u8 },
     /// U1 KERNEL-VERIFY (U_DIRECTIVES §2): the discovery mint — value
     /// created ONLY against verified work (the PoUW anchor, I4's
     /// bound arm). `work` is the OPAQUE proof payload — encoding is
@@ -1403,6 +1424,11 @@ impl ClosureEvent {
             }
             Self::TaxonSealed { class, clade } => {
                 tlv::put(85, &[*class, *clade], &mut out);
+            }
+            Self::StationSeated { line, station } => {
+                let mut value = vec![*station];
+                value.extend_from_slice(line.as_bytes());
+                tlv::put(89, &value, &mut out);
             }
             Self::DiscoveryMinted { orb_id, resource, amount, work } => {
                 let mut value = amount_layout(*orb_id, *resource, amount);
@@ -1791,6 +1817,16 @@ impl ClosureEvent {
                 class: *value.first()?,
                 clade: *value.get(1)?,
             }),
+            89 => {
+                let station = *value.first()?;
+                if station == 0 || station > 4 {
+                    return None;
+                }
+                Some(Self::StationSeated {
+                    line: String::from_utf8(value.get(1..)?.to_vec()).ok()?,
+                    station,
+                })
+            }
             86 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let resource = Resource::from_wire(*value.get(8)?)?;
