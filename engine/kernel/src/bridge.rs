@@ -41,7 +41,9 @@
 
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::Committed;
-use rfa_core::{dual_pole, holonomies, potential_form, Delta, Flow, PotentialForm, Support, Vacuity};
+use rfa_core::{
+    dual_pole, holonomies, potential_form, Degree, Delta, Flow, PotentialForm, Support, Vacuity,
+};
 
 /// BOND-1: the standing order, `source` → `target` at `rate`/tick.
 pub const CHANNEL_BOND: usize = 0;
@@ -157,6 +159,19 @@ pub struct EntangledRead {
     /// reading that sets a bound was named after the bound it sets.
     /// `PhiK I^(3)` had it right all along: *rank — dim of the
     /// relational structure*.
+    ///
+    /// **THIS COUNTS WHAT STANDS ABOVE THE GROUND, and it is NOT `D`**
+    /// (operator ruling 2026-08-01, maximal inscription). It is the
+    /// circulation count, and at the floor it reads ZERO — correctly,
+    /// because nothing circulates there. `D` is the ELEVATION, which
+    /// includes the point the state occupies by existing, and it is
+    /// [`EntangledRead::degree`]. Reading this field as `D` is what put
+    /// `D = 0` back into a system whose law says D is never zero.
+    ///
+    /// It stays a raw count because [`rfa_core::dual_pole`] classifies
+    /// on "does anything circulate" — a question about what is ABOVE the
+    /// floor, where zero is the right answer and the floor would only
+    /// blur it.
     pub rank: usize,
     /// The residual field, WHOLE — every non-composing triple with its
     /// indices intact. Never pre-summed: these are what emit (D3) and
@@ -205,10 +220,34 @@ impl EntangledRead {
         self.unknown == 0
     }
 
+    /// **`D` — THE DEGREE, ON THE GROUND** (operator ruling 2026-08-01,
+    /// maximal inscription). The elevation this state stands at: the one
+    /// degree it occupies by existing, plus every independent
+    /// circulation above it.
+    ///
+    /// This is the reading Article II consults, and it **can never
+    /// return zero** — [`rfa_core::Degree`] has no representation for a
+    /// below-ground value. A world with no obligations at all reads
+    /// `Degree::GROUND`, not nothing: it stands on the surface, holds
+    /// its place, and is never deleted.
+    ///
+    /// Use this wherever the question is *how high does this state
+    /// stand*. Use [`EntangledRead::rank`] only where the question is
+    /// *does anything circulate above the floor* — the `dual_pole`
+    /// question.
+    pub fn degree(&self) -> Degree {
+        Degree::above_ground(self.rank)
+    }
+
     /// THE VERDICT — both poles read at once (`rfa_core::dual_pole`).
     /// Only `Entangled` stands: structure WITH gradient. `Stasis` is
     /// rank without flow — a wheel turning against nothing, at any
     /// size.
+    ///
+    /// Classifies on the ABOVE-GROUND circulation, never on the degree:
+    /// every state stands at or above the ground, so a floored reading
+    /// would make `Void` and `Stasis` unreachable and collapse the
+    /// four rows to two.
     pub fn verdict(&self) -> Vacuity {
         dual_pole(self.rank, &PotentialForm { flows: self.flows.clone() })
     }

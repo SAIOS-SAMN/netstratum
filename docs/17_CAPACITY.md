@@ -766,8 +766,9 @@ denial-of-service the refusal used to provide.
 
 *Defense, layered:* growth is BY RECEIPT (D3) and gated on
 `orbit_lock ≠ ∅` — mere inconsistency is not irreducible difference, and
-only irreducible difference opens a plane. Article II denies standing to
-vacuous capacity, so garbage-grown extent carries no weight. Article III
+only irreducible difference opens a plane. Article II denies standing to a
+state resting ON THE GROUND (`D = GROUND` — nothing circulating above
+the point), so garbage-grown extent carries no weight. Article III
 prices it at zero: deeds without genuine `ΔD` raise `Ξ` and eclipse the
 actor.
 
@@ -846,7 +847,8 @@ than none.
 self-limits. Article III prices FLOW not STOCK — `Ξ` reads `ΔD` over a
 window, so an actor who stops creating is eclipsed regardless of
 accumulated capacity, and there is no rent on past structure. Article II
-denies standing to vacuous capacity. Internal transfers conserve (I1),
+denies standing to a state resting ON THE GROUND — never by calling it
+zero, which `Degree` cannot express (`18_TORSION` §3 Article II). Internal transfers conserve (I1),
 so value moving between units is not withdrawal at all.
 
 **The one true exit is N7.** `NS-7_ANCHOR.md` is a 26-line stub, every

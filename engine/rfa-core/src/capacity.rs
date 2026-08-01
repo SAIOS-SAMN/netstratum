@@ -13,9 +13,16 @@
 //!
 //! The indices `(i, j, k, l)` and the arities `Delta{dim, fiber}` are
 //! the CONTAINER the relation rides on — never the capacity. That
-//! reading is STRUCK. A universe may carry enormous arity and near-zero
-//! D when every difference it holds is pure frame, which is exactly the
-//! dogmatic loop Article III prices at zero.
+//! reading is STRUCK. A universe may carry enormous arity and still
+//! stand ON THE GROUND when every difference it holds is pure frame,
+//! which is exactly the dogmatic loop Article III prices at zero.
+//!
+//! **THE ELEVATION.** Two readings, and they answer different
+//! questions. [`Extent::coordinates`] counts the CIRCULATION — what
+//! stands above the floor — and zero is a lawful answer for it.
+//! [`Extent::degree`] is `D` itself, the elevation, and it is
+//! [`Degree`]: `GROUND + circulation`, never zero, with no
+//! representation for a below-ground value.
 //!
 //! **NEVER ONE SCALAR.** [`Extent`] reports per index. `18_TORSION`
 //! §2b bars collapsing a directional quantity to a scalar aggregate
@@ -86,6 +93,99 @@ pub struct Extent {
     pub coordinates: usize,
 }
 
+/// **`D` — THE DEGREE, STANDING ON THE GROUND BY CONSTRUCTION.**
+///
+/// The elevation reading, and the one type any `D` claim must pass
+/// through:
+///
+/// ```text
+///   D > GROUND   ABOVE GROUND — circulation stands above the point
+///   D = GROUND   ON THE GROUND — the point state (α ≅ Ω), at rest
+///   D < GROUND   IN THE GROUND — UNREPRESENTABLE, not merely refused
+/// ```
+///
+/// **WHY A TYPE AND NOT A CHECK** (operator ruling 2026-08-01, maximal
+/// inscription). `Extent::GROUND` was declared, doc-commented and
+/// asserted, and *no computation ever read it*: `ground()` returned all
+/// zeros, `is_ground()` tested `coordinates == 0`, and the pin that
+/// claimed to prove the floor compared the constant to its own literal.
+/// The ruling said D is never zero; the arithmetic still returned zero.
+/// That is the failure `18_TORSION` §2h records and LAW 8 forbids — a
+/// term that resonates but computes nothing.
+///
+/// The floor is now load-bearing:
+///
+/// - the field is **private**, so no caller anywhere can write a value
+///   through it;
+/// - the only constructor is [`Degree::above_ground`], which adds
+///   circulation to `GROUND` — `usize` addition cannot go below its
+///   own start, so underflow is not a case that exists;
+/// - there is no `From<usize>`, no public tuple construction, and
+///   [`Degree::default`] is the GROUND, never zero.
+///
+/// A below-ground degree is therefore not a state the judge refuses at
+/// runtime — it is a state that cannot be built. That is the house's
+/// own standing defense against the vacuous arm (`17_CAPACITY` §10b
+/// AV-4: *degenerate arms are made structurally unrepresentable where
+/// possible*).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Degree(usize);
+
+impl Degree {
+    /// The floor itself: the one degree a committed state occupies by
+    /// existing. `α ≅ Ω` is not nothing — it is a POINT
+    /// (`18_TORSION` §2e), which is one dimension, never none.
+    pub const GROUND: Degree = Degree(Extent::GROUND);
+
+    /// THE ONLY CONSTRUCTOR. The point the state occupies, plus the
+    /// independent circulation standing above it.
+    ///
+    /// `GROUND + circulation` — total, and below-ground is arithmetically
+    /// out of reach rather than guarded against.
+    pub fn above_ground(circulation: usize) -> Self {
+        Degree(Extent::GROUND + circulation)
+    }
+
+    /// The reading as a number, for a lens. Always `≥ GROUND`.
+    pub fn get(self) -> usize {
+        self.0
+    }
+
+    /// How much stands ABOVE the ground — the gauge-invariant
+    /// circulation, which is what grows.
+    pub fn above(self) -> usize {
+        self.0 - Extent::GROUND
+    }
+
+    /// ON THE GROUND: the point state, at rest on the floor. It holds
+    /// its place and its structural existence; it is never deleted and
+    /// never barred. **Article II's operand is this predicate, never a
+    /// zero.**
+    pub fn is_ground(self) -> bool {
+        self.0 == Extent::GROUND
+    }
+
+    /// ABOVE THE GROUND: expanded topological volume carrying
+    /// circulation.
+    pub fn is_above_ground(self) -> bool {
+        self.0 > Extent::GROUND
+    }
+}
+
+impl Default for Degree {
+    /// The default is the GROUND, never zero — a `Degree` that came from
+    /// nowhere still stands on the floor.
+    fn default() -> Self {
+        Degree::GROUND
+    }
+}
+
+impl std::fmt::Display for Degree {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 impl Extent {
     /// **THE GROUND — `D` IS NEVER ZERO** (operator ruling 2026-08-01).
     ///
@@ -100,7 +200,17 @@ impl Extent {
     /// degree, itself. `α ≅ Ω` does not mean nothing — it means the
     /// traverse is a POINT (`18_TORSION` §2e), which is one dimension,
     /// never none.
+    ///
+    /// **This constant is now CONSUMED, not merely declared** — see
+    /// [`Degree`], which is the only way a `D` reading enters the
+    /// system.
     pub const GROUND: usize = 1;
+
+    /// **`D` — the degree this extent stands at.** The point, plus the
+    /// circulation above it. Never zero, by the type's construction.
+    pub fn degree(&self) -> Degree {
+        Degree::above_ground(self.coordinates)
+    }
 
     /// At the GROUND: the state carries no structure above the point.
     /// This REPLACES the former `is_vacuous` — the predicate is the
@@ -109,7 +219,12 @@ impl Extent {
     ///
     /// Article II's operand is this predicate, never a zero.
     pub fn is_ground(&self) -> bool {
-        self.coordinates == 0
+        self.degree().is_ground()
+    }
+
+    /// ABOVE the ground: circulation stands, and it is what grows.
+    pub fn is_above_ground(&self) -> bool {
+        self.degree().is_above_ground()
     }
 
     /// Does the relation carry holonomy — `∮ ≠ 0`, the `S⁺_hol` pole?
@@ -303,7 +418,8 @@ pub fn capacity(delta: &Delta) -> Extent {
 /// equals `c · grad(Ap)`. If `A1` leaves that line, the image of a pure
 /// gradient is NOT a gradient: circulation appears out of frame alone,
 /// and capacity is forged. Measured — a shear with row sums
-/// `(6/5, 1, 1)` carries a `D = 0` coboundary to `D = 3`.
+/// `(6/5, 1, 1)` carries a coboundary standing ON THE GROUND to one
+/// circulating in 3 coordinates.
 ///
 /// **This is the residue of the `f05bec8` mint-leak.** The Hodge flip
 /// removed the anchor, but not this: `1` spans `ker L`, so a
@@ -336,7 +452,15 @@ pub fn capacity_anchored(delta: &Delta) -> Extent {
 }
 
 /// The GROUND extent — what a state carrying nothing above the point
-/// reads. `D` never falls below this (see [`Extent::GROUND`]).
+/// reads.
+///
+/// Its component counts are zero because NOTHING CIRCULATES: no pair
+/// carries holonomy, no entity stands in a surviving relation, no layer
+/// is occupied. That is a statement about what is above the floor.
+///
+/// **Its DEGREE is not zero.** `ground().degree() == Degree::GROUND`,
+/// and that is the reading Article II consults. The state has not
+/// vanished; it stands on the surface holding one degree, itself.
 pub fn ground() -> Extent {
     Extent { entities: 0, layers: 0, coordinates: 0 }
 }

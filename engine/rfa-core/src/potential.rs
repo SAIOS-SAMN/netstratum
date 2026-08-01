@@ -42,10 +42,16 @@
 //! gradient does no work.
 //!
 //! ```text
-//! D = 0 ∧ dV ≡ 0   vacuous void        — refused
-//! D = 0 ∧ dV ≢ 0   unframed potential  — refused
-//! D > 0 ∧ dV ≡ 0   static stasis       — refused
-//! D > 0 ∧ dV ≢ 0   entangled           — ADMITTED
+//! circ = 0 ∧ dV ≡ 0   on the ground, still   — refused
+//! circ = 0 ∧ dV ≢ 0   unframed potential     — refused
+//! circ > 0 ∧ dV ≡ 0   static stasis          — refused
+//! circ > 0 ∧ dV ≢ 0   entangled              — ADMITTED
+//!
+//! `circ` is the CIRCULATION count — what stands ABOVE the ground —
+//! and zero is a lawful answer for it. It is deliberately NOT `D`:
+//! `D` is the elevation, `GROUND + circ`, and it is never zero
+//! (`rfa_core::Degree`). This table once wrote `D = 0`, which is a
+//! value the system cannot express.
 //! ```
 //!
 //! Exact rational throughout: no float, no root, no transcendental.

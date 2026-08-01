@@ -37,7 +37,8 @@ pub mod reduce;
 
 pub use cage::Lens;
 pub use capacity::{
-    capacity, circulation, divergence, egress, ext_x, ground, preserves_hodge_split, Egress, Extent,
+    capacity, circulation, divergence, egress, ext_x, ground, preserves_hodge_split, Degree, Egress,
+    Extent,
 };
 pub use delta::{coherence_functional, for_each_residual, magnitude, Delta};
 pub use fiber::{loop_holonomy, plaquette_curvature, MatrixFiber2x2};

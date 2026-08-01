@@ -3,8 +3,9 @@
 //! Closes `18_TORSION.md` §6.2's first half. What these pin:
 //!
 //! 1. THE PAIRWISE LAW — a Δ built from node-local scalar differences
-//!    is a pure coboundary and reads D = 0 EVERYWHERE. The meter is
-//!    only as real as its feed.
+//!    is a pure coboundary and CIRCULATES NOWHERE. It stands ON THE
+//!    GROUND: its degree reads `Degree::GROUND`, never zero. The meter
+//!    is only as real as its feed.
 //! 2. THE HOUSE FIXTURE IS VACUOUS — `anchor_3`, the canonical
 //!    equilibrium anchor, is itself a coboundary. Recorded, not hidden.
 //! 3. A NON-TRANSITIVE TRIANGLE CARRIES CAPACITY — the positive case.
@@ -22,7 +23,7 @@
 
 use rfa_core::capacity::{
     capacity, capacity_anchored, circulation, divergence, egress, ext_x, ground,
-    preserves_hodge_split, Egress, Extent,
+    preserves_hodge_split, Degree, Egress, Extent,
 };
 use rfa_core::{coboundary_reduce, Delta};
 
@@ -64,7 +65,7 @@ fn from_potentials(potentials: &[Ratio]) -> Delta {
 fn a_pure_coboundary_sources_but_does_not_circulate() {
     // THE PAIRWISE LAW. Δ_ij = p_j − p_i for ANY potential p reduces to
     // exactly zero: Δ'_ij = (p_j−p_i) − (p_j−p_0) + (p_i−p_0) = 0.
-    // A meter fed node-local scalar differences reads D = 0 forever —
+    // A meter fed node-local scalar differences never circulates —
     // working meter, vacuous feed.
     for potentials in [
         vec![q(0, 1), q(1, 1), q(3, 2)],
@@ -77,8 +78,11 @@ fn a_pure_coboundary_sources_but_does_not_circulate() {
         assert!(!read.circulates(), "a pure coboundary carries no holonomy: {read:?}");
         assert_eq!(read.entities, 0, "no entity stands in the circulation");
         assert_eq!(read.layers, 0, "no layer stands in the circulation");
-        // It sits at the GROUND — which is NOT zero (Extent::GROUND).
+        // It sits ON THE GROUND — and the DEGREE proves it, not a
+        // comment: the reading is 1, the floor, never 0.
         assert!(read.is_ground(), "a pure coboundary stands at the floor: {read:?}");
+        assert_eq!(read.degree(), Degree::GROUND);
+        assert_eq!(read.degree().get(), 1, "on the ground reads ONE, never zero");
         assert_eq!(read, ground());
     }
 }
@@ -296,9 +300,86 @@ fn the_container_is_not_the_capacity() {
         "arity is not capacity — a wide empty container sits at the GROUND"
     );
     assert!(capacity(&empty).is_ground());
-    // AND THE GROUND IS NOT ZERO. The floor is the point: a universe
-    // that exists occupies one degree, itself (Extent::GROUND).
-    assert_eq!(Extent::GROUND, 1, "D never reads zero — the ground is the point");
+    // AND THE GROUND IS NOT ZERO — asserted on the READING, not on the
+    // constant. The previous form here was `assert_eq!(Extent::GROUND, 1)`,
+    // which compares a constant to its own literal and proves nothing
+    // about what any state reads; the floor was declared and never
+    // computed. This asserts the reading.
+    assert_eq!(
+        capacity(&empty).degree(),
+        Degree::GROUND,
+        "a wide empty container stands ON the ground, not in it"
+    );
+    assert_eq!(capacity(&empty).degree().get(), 1, "the reading is ONE, never zero");
+}
+
+/// **THE STANDING TRIPWIRE — `D` NEVER READS ZERO, FOR ANY INPUT.**
+///
+/// The floor is a property of every reading, so it is pinned over a
+/// sweep rather than one fixture: empty containers at many arities,
+/// pure coboundaries, genuine cycles, and the raw/anchored/circulation
+/// readings alike. If any future change lets a degree reach zero, this
+/// fails before it reaches the kernel.
+#[test]
+fn no_reading_of_any_shape_ever_falls_below_the_ground() {
+    let mut shapes: Vec<Delta> = Vec::new();
+    // Empty containers across arities — the widest vacuous case.
+    for dim in 0..6usize {
+        for fiber in 1..4usize {
+            shapes.push(Delta::zero(dim, fiber));
+        }
+    }
+    // Pure coboundaries (circulate nowhere) and genuine cycles.
+    shapes.push(from_potentials(&[q(0, 1), q(1, 1), q(3, 2)]));
+    shapes.push(from_potentials(&[q(5, 3), q(-7, 2), q(11, 4), q(0, 1)]));
+    shapes.push(triangle(q(2, 1), q(3, 1), q(9, 1)));
+    shapes.push(triangle(q(1, 1), q(1, 2), q(3, 2)));
+    shapes.push(triangle(q(-5, 1), q(-5, 1), q(3, 1)));
+
+    for (n, delta) in shapes.iter().enumerate() {
+        for (name, read) in [
+            ("capacity", capacity(delta)),
+            ("capacity_anchored", capacity_anchored(delta)),
+            ("ext_x", ext_x(delta)),
+            ("ext_x∘circulation", ext_x(&circulation(delta))),
+        ] {
+            let degree = read.degree();
+            assert!(
+                degree.get() >= Extent::GROUND,
+                "shape {n} via {name}: degree {degree} fell below the ground"
+            );
+            assert!(degree >= Degree::GROUND, "shape {n} via {name}: below the floor");
+            // The two predicates partition the elevation exactly — a
+            // reading is on the ground or above it, never elsewhere.
+            assert_ne!(
+                degree.is_ground(),
+                degree.is_above_ground(),
+                "shape {n} via {name}: elevation must be exactly one of the two"
+            );
+            // `above()` is the circulation, and the floor is the rest.
+            assert_eq!(degree.above(), read.coordinates, "shape {n} via {name}");
+            assert_eq!(degree.get(), Extent::GROUND + read.coordinates);
+        }
+    }
+}
+
+/// The constructor cannot be argued below the floor: every circulation
+/// count, including zero, lands on or above the ground. There is no
+/// other public way to build a `Degree` — the field is private, there
+/// is no `From<usize>`, and `Default` is the GROUND.
+#[test]
+fn the_only_constructor_can_never_yield_a_below_ground_degree() {
+    for circulation_count in 0..64usize {
+        let degree = Degree::above_ground(circulation_count);
+        assert!(degree >= Degree::GROUND);
+        assert_eq!(degree.get(), Extent::GROUND + circulation_count);
+        assert_eq!(degree.above(), circulation_count);
+        assert_eq!(degree.is_ground(), circulation_count == 0);
+        assert_eq!(degree.is_above_ground(), circulation_count > 0);
+    }
+    assert_eq!(Degree::default(), Degree::GROUND, "a Degree from nowhere still stands");
+    assert_eq!(Degree::GROUND.get(), 1);
+    assert_eq!(Degree::GROUND.above(), 0, "nothing circulates at the floor");
 }
 
 /// `A · Δ · Aᵀ` — CONGRUENCE, the transformation law of an alternating
@@ -347,7 +428,7 @@ fn congruence_preserves_antisymmetry_but_not_the_additive_class() {
     // invariant.
     //
     // The counterexample is the house anchor itself: a PURE COBOUNDARY
-    // (D = 0) is carried by a det-1 shear congruence to a state reading
+    // (on the ground) is carried by a det-1 shear congruence to a state reading
     // D = 1. Capacity out of frame alone, with no work done — exactly
     // the forgery D1 exists to forbid.
     //
@@ -422,7 +503,7 @@ fn the_base_group_is_the_constants_stabiliser() {
     // a gradient again only when A1 stays on the constants line. 1
     // spans ker L, so an A that leaves it does not carry potentials to
     // potentials and "pure frame" stops being well defined.
-    let anchor = anchor_3(); // a pure coboundary: D = 0
+    let anchor = anchor_3(); // a pure coboundary: on the ground
     assert!(!capacity(&anchor).circulates());
 
     // (1) A SHEAR — row sums 6/5, 1, 1. NOT constant, NOT lawful.

@@ -123,15 +123,35 @@ moves grade `g`; `key_distance` reads wrapped L1 at any dimensionality.
 **The fiber reading, deferred twice and now built.** `12_UNION` §3
 defers seat widths and `11_AEON` §7 defers occupancy, both explicitly to
 "capacity as a live fiber reading (minted-plane count)." That reading
-exists as of 2026-08-01: `kernel::bridge::read_entangled(&state).rank`.
-Both have waited on it since 2026-07-29 and neither is wired yet.
+exists as of 2026-08-01. Two readings are available and they answer
+different questions — take care which:
+
+    read_entangled(&state).rank       what CIRCULATES above the floor.
+                                      Zero is a lawful answer here.
+    read_entangled(&state).degree()   `D`, the ELEVATION: the point the
+                                      state occupies plus that
+                                      circulation. NEVER zero.
+
+Seat widths and occupancy are bounds DERIVED from structure, so they
+read `.rank`. Anything asking *how high does this state stand* — Article
+II above all — reads `.degree()`. Both have waited since 2026-07-29 and
+neither is wired yet.
+
+**`α ≅ Ω` IS THE GROUND, and that is what the trim left standing.** When
+origin and totality are congruent the traverse has no extent — but a
+traverse with no extent is a POINT, and a point is ONE dimension, never
+none. That is exactly `Degree::GROUND`: the state has not vanished into
+a vacuum, it stands on the surface holding itself. The congruence names
+the floor of the elevation, not a hole beneath it.
 
 **TRIMMED 2026-08-01.** This section previously carried a traverse
 formalism, a per-node summation of `(D(V) ⊕ V(D))`, and a congruence
 test `α ≅ Ω` offered as a second detector for Article III. All of it
 drove no behaviour and none of it named a congruence relation that
 exists, so under Article III applied to this document it is struck. The
-counting test in §3 stands on its own and is computable today.
+counting test in §3 stands on its own and is computable today; the
+GROUND reading above is what survives of the `α ≅ Ω` idea, and it
+survives because it computes.
 
 ### 2f. THE ENTANGLEMENT — Δ(D) ⋈ ∇V
 
@@ -413,15 +433,51 @@ basis, a fixed rank, or a metric projection is void.
 
 ### ARTICLE II — MANDATORY NON-VACUOUS STRUCTURE
 
-*A state yielding a vacuous set (`V = 0` or `D = 0`) cannot claim
-operational authorization or institutional standing.*
+*A state standing ON THE GROUND (`D = GROUND`) holds its place and its
+existence, and claims no allocation. Only a state standing ABOVE the
+ground (`D > GROUND`), carrying circulation, claims operational
+authorization or institutional standing.*
 
-**Exact realization.** Standing requires occupied capacity. A world
-with no open plane and no relation holds no seat, casts no weight, and
-mints nothing — not by penalty but by definition: there is nothing
-there to have standing. This is the constitutional form of the landed
-`PlaneUnearned` refusal, generalized from plane-opening to standing
-itself.
+**THE OWED AMENDMENT, PAID** (operator ruling 2026-08-01). This article
+read *"a state yielding a vacuous set (`V = 0` or `D = 0`)"*. The
+D-IS-NEVER-ZERO ruling struck that operand and said an amendment was
+owed here; this is it. `D = 0` is not a state this system can express,
+so an article keyed on it was keyed on nothing.
+
+**THE ELEVATION, and it is the whole article:**
+
+```text
+    D > GROUND   ABOVE GROUND — circulation stands above the point.
+                 Standing, weight, and the mint are claimable here.
+
+    D = GROUND   ON THE GROUND — the point state (α ≅ Ω), at rest on
+                 the surface. It holds its place, keeps its structural
+                 existence, is never deleted and never barred — and it
+                 is paid nothing. Zero allocation, full existence.
+
+    D < GROUND   IN THE GROUND — UNREPRESENTABLE. Not refused at the
+                 door: it is not a value the type admits.
+```
+
+**Exact realization.** Standing requires circulation above the floor,
+and the operand is a PREDICATE, never a zero: `Degree::is_above_ground`
+(`rfa_core::capacity`). A world with no open plane and no relation casts
+no weight and mints nothing — not by penalty and not by erasure, but
+because nothing circulates in it yet. It has not vanished; it stands on
+the surface at one degree, itself, ready to build upward. This is the
+constitutional form of the landed `PlaneUnearned` refusal, generalized
+from plane-opening to standing itself.
+
+**The floor is STRUCTURAL, not asserted.** `Degree` carries a private
+field and one constructor, `above_ground(circulation) = GROUND +
+circulation`, so no caller can express a below-ground degree and no
+arithmetic can reach one. The constant `Extent::GROUND` was previously
+declared, doc-commented and pinned by comparing it to its own literal
+while every reading still returned zero — the exact "resonates but
+computes nothing" failure LAW 8 excises. It is now consumed by
+`Extent::degree()` and `EntangledRead::degree()`, and pinned on the
+READINGS: `capacity_pins::no_reading_of_any_shape_ever_falls_below_the_ground`
+and `bridge_pins::no_committed_world_ever_reads_below_the_ground`.
 
 ### ARTICLE III — THE SCIENCE FOUNDATION
 
@@ -682,7 +738,7 @@ misreading.**
 | no gradient | `dV ≡ 0`: rank held in closed circulation | Article III LAW 4 — no free energy; no work available |
 | form changed, nothing made | `Δ' = Q·Δ`, `Support(E')` unchanged | Article III LAW 3 — the first law; mints nothing |
 | coordinate/metric lock | any basis-fixed or rank-locked reading | Article I — void; recompute coordinate-free |
-| vacuous closure | `D = 0` or no occupied capacity | Article II — no standing, no weight, no mint |
+| on the ground | `D = GROUND` — nothing circulates above the point | Article II — no standing, no weight, no mint. **The state itself stands**: never deleted, never barred, simply not paid |
 | capacity retreat | a step lowering `D` outside lawful contraction | Article IV — refuse (`BadClimb` shape) |
 | earned emission | a loop's charge growing the rank against verified work | full alignment — maximum allocation |
 
@@ -769,7 +825,7 @@ is not a mechanism.
 | **§2f entanglement** — no capacity without potential motion | reads `(prior, step)` only | `creation()` in `kernel/src/lib.rs` |
 | **§2g gap disposition** — hold both sides, dispose the gap | one deed, one comparison | `creation()`; new `Unlawful` arm carrying both sides |
 | **Art. IV monotone** — a step may not lower the rank outside lawful reduction | `prior`→`next` comparison | new invariant, the `gauge_law` shape |
-| **Art. II non-vacuous** — `D = 0` holds no standing | property of `prior` | `containment()`, or a new gate beside it |
+| **Art. II non-vacuous** — `D = GROUND` holds no standing (`Degree::is_above_ground`, never a zero) | property of `prior` | `containment()`, or a new gate beside it |
 | **`D` itself** — the structure surviving `Π_G(Δ(Ω))` | pure function of one state | kernel gains its `rfa-core` dep (anticipated at U_DIRECTIVES §4) |
 
 ### 7b. LENS — global or over-time, MUST NOT enter the kernel

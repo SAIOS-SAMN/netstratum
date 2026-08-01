@@ -13,7 +13,7 @@ use kernel::bridge::{
     fold_certified, observe, project, read_entangled, read_entangled_observed, refold, Observed,
     CHANNELS, CHANNEL_BOND,
 };
-use rfa_core::{coboundary_reduce, Delta};
+use rfa_core::{coboundary_reduce, Degree, Delta};
 
 fn orbs(n: u64) -> Committed {
     let mut committed = World::new().committed();
@@ -36,19 +36,79 @@ fn bond(source: u64, target: u64, rate: i64) -> Bond {
 }
 
 #[test]
-fn a_world_that_relates_nothing_carries_no_structure() {
-    // Article II's vacuous case, measured: no obligations, no
-    // structure, and the reading is DEFINED (a zero cocycle defect) —
-    // so this is a true zero, not an unmeasurable one.
+fn a_world_that_relates_nothing_stands_on_the_ground() {
+    // Article II's floor case, measured. NOTHING CIRCULATES — rank 0,
+    // correctly, because rank counts what stands ABOVE the floor.
     let read = read_entangled(&orbs(3));
-    assert_eq!(read.rank, 0, "no obligations, no surviving structure");
+    assert_eq!(read.rank, 0, "no obligations, nothing circulating");
     assert!(read.residuals.is_empty(), "nothing to fail to compose");
     assert!(read.rank_is_defined(), "a zero cocycle IS a cocycle");
 
-    // A lone orb relates to nothing at all, lawfully.
+    // AND IT HAS NOT VANISHED. `D` is the ELEVATION, and it reads the
+    // GROUND — the world stands on the surface holding one degree,
+    // itself. This is the reading Article II consults.
+    assert_eq!(read.degree(), Degree::GROUND, "it stands ON the ground, not in it");
+    assert_eq!(read.degree().get(), 1, "D reads ONE at the floor, never zero");
+    assert!(read.degree().is_ground());
+    assert!(!read.degree().is_above_ground());
+
+    // A lone orb relates to nothing at all, lawfully — and still stands.
     let read = read_entangled(&orbs(1));
     assert_eq!(read.rank, 0);
+    assert_eq!(read.degree(), Degree::GROUND, "one orb is still a universe that exists");
     assert!(read.rank_is_defined());
+
+    // Even the EMPTY world stands. There is no world so small that its
+    // degree falls through the floor.
+    let read = read_entangled(&orbs(0));
+    assert_eq!(read.degree(), Degree::GROUND, "the empty world stands on the ground");
+}
+
+/// **THE KERNEL-SIDE TRIPWIRE — `D` never falls through the floor on
+/// any committed world.** The algebra's floor is pinned in
+/// `rfa-core/tests/capacity_pins.rs`; this is the same law asserted
+/// where the kernel actually reads it, across the shapes real play
+/// produces: empty, isolated, trees, composing cycles, non-composing
+/// cycles, and multi-cycle worlds.
+#[test]
+fn no_committed_world_ever_reads_below_the_ground() {
+    let mut worlds: Vec<Committed> = Vec::new();
+    for n in 0..5u64 {
+        worlds.push(orbs(n)); // no obligations at all
+    }
+    // A tree of obligations — pure frame, nothing circulates.
+    let mut tree = orbs(4);
+    tree.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(3, 4, 5)];
+    worlds.push(tree);
+    // A cycle that composes — still frame.
+    let mut composing = orbs(3);
+    composing.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(1, 3, 5)];
+    worlds.push(composing);
+    // A cycle that does not — genuine structure, above the ground.
+    let mut charged = orbs(3);
+    charged.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(1, 3, 9)];
+    worlds.push(charged);
+    // Two independent charged cycles.
+    let mut two_cycles = orbs(4);
+    two_cycles.bonds = vec![
+        bond(1, 2, 2),
+        bond(2, 3, 3),
+        bond(1, 3, 9),
+        bond(1, 4, 4),
+        bond(2, 4, 11),
+    ];
+    worlds.push(two_cycles);
+
+    for (n, state) in worlds.iter().enumerate() {
+        let read = read_entangled(state);
+        let degree = read.degree();
+        assert!(degree >= Degree::GROUND, "world {n}: degree {degree} fell below the ground");
+        assert!(degree.get() >= 1, "world {n}: D read zero");
+        // The elevation partitions exactly, and `above()` is the rank.
+        assert_ne!(degree.is_ground(), degree.is_above_ground(), "world {n}");
+        assert_eq!(degree.above(), read.rank, "world {n}: above-ground IS the rank");
+        assert_eq!(degree.get(), read.rank + 1, "world {n}: D = GROUND + circulation");
+    }
 }
 
 #[test]
