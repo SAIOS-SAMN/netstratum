@@ -241,6 +241,48 @@ pub fn capacity(delta: &Delta) -> Extent {
     ext_x(&circulation(delta))
 }
 
+/// **THE LAWFUL BASE GROUP** — does this congruence preserve the
+/// Hodge split, and therefore the capacity reading?
+///
+/// A base congruence `A·Δ·Aᵀ` preserves `D` **iff `A` maps the
+/// constants to the constants**: `A·1 = c·1` for some `c ≠ 0`, i.e.
+/// every row of `A` sums to the same value.
+///
+/// The derivation is short and it is the whole seal. A gradient is the
+/// matrix `P = 1·pᵀ − p·1ᵀ`, so
+///
+/// ```text
+/// A·P·Aᵀ = (A1)(Ap)ᵀ − (Ap)(A1)ᵀ
+/// ```
+///
+/// which is a gradient again ONLY when `A1 ∈ span(1)`, in which case it
+/// equals `c · grad(Ap)`. If `A1` leaves that line, the image of a pure
+/// gradient is NOT a gradient: circulation appears out of frame alone,
+/// and capacity is forged. Measured — a shear with row sums
+/// `(6/5, 1, 1)` carries a `D = 0` coboundary to `D = 3`.
+///
+/// **This is the residue of the `f05bec8` mint-leak.** The Hodge flip
+/// removed the anchor, but not this: `1` spans `ker L`, so a
+/// transformation that does not preserve the constants does not map
+/// potentials to potentials, and "pure frame" stops being a
+/// well-defined notion under it.
+///
+/// **Volume SURVIVES the restriction.** The condition is `A1 = c·1`,
+/// not `det(A) = 1` — scaling by `c` has constant row sums and
+/// `det = cⁿ`. So the volumetric scaling the expansion law needs is
+/// admitted; only the constants-breaking directions are refused.
+/// Permutations (`c = 1`) are the relabelling subgroup.
+pub fn preserves_hodge_split(matrix: &[Vec<Ratio>]) -> bool {
+    let mut rows = matrix.iter().map(|r| r.iter().fold(Ratio::zero(), |s, x| s + x));
+    let Some(first) = rows.next() else {
+        return true; // the empty matrix moves nothing
+    };
+    if first.is_zero() {
+        return false; // A1 = 0 — the constants are annihilated, not preserved
+    }
+    rows.all(|s| s == first)
+}
+
 /// The former reading, kept for the drift record: `ext_x( Π_G( Δ ) )`
 /// over the ANCHORED representative. Agrees with [`capacity`] on
 /// whether capacity exists, and disagrees on its extent, because the

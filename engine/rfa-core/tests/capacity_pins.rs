@@ -21,7 +21,8 @@
 //! 10. RELABELLING-INVARIANT — Article I made a test.
 
 use rfa_core::capacity::{
-    capacity, capacity_anchored, circulation, divergence, egress, ext_x, Egress, Extent,
+    capacity, capacity_anchored, circulation, divergence, egress, ext_x,
+    preserves_hodge_split, Egress, Extent,
 };
 use rfa_core::{coboundary_reduce, Delta};
 
@@ -372,4 +373,96 @@ fn congruence_preserves_antisymmetry_but_not_the_additive_class() {
         "MEASURED: a congruence frame change lifts D from 0 — the additive \
          class is not congruence-invariant, so the two gauges are not one"
     );
+}
+
+/// `A · Δ · Aᵀ` on the entity indices — the BASE congruence.
+#[allow(clippy::needless_range_loop)]
+fn base_congruence(delta: &Delta, a: &[Vec<Ratio>]) -> Delta {
+    let n = delta.dim();
+    let mut inter = vec![vec![q(0, 1); n]; n];
+    for i in 0..n {
+        for j in 0..n {
+            for k in 0..n {
+                inter[i][j] += &a[i][k] * delta.entry(k, j, 0);
+            }
+        }
+    }
+    let mut out = Delta::zero(n, 1);
+    for i in 0..n {
+        for j in (i + 1)..n {
+            let mut acc = q(0, 1);
+            for k in 0..n {
+                acc += &inter[i][k] * &a[j][k];
+            }
+            out.set_antisym(i, j, vec![acc]);
+        }
+    }
+    out
+}
+
+#[test]
+#[allow(clippy::needless_range_loop)] // matrix indices read clearest as indices
+fn the_base_group_is_the_constants_stabiliser() {
+    // THE RESIDUE OF THE f05bec8 MINT-LEAK, measured and sealed.
+    //
+    // The Hodge flip removed the ANCHOR but not this: a base congruence
+    // preserves capacity iff A·1 = c·1 (every row summing alike),
+    // because grad = 1pᵀ − p1ᵀ maps to (A1)(Ap)ᵀ − (Ap)(A1)ᵀ, which is
+    // a gradient again only when A1 stays on the constants line. 1
+    // spans ker L, so an A that leaves it does not carry potentials to
+    // potentials and "pure frame" stops being well defined.
+    let anchor = anchor_3(); // a pure coboundary: D = 0
+    assert!(capacity(&anchor).is_vacuous());
+
+    // (1) A SHEAR — row sums 6/5, 1, 1. NOT constant, NOT lawful.
+    let mut shear = vec![vec![q(0, 1); 3]; 3];
+    for i in 0..3 {
+        shear[i][i] = q(1, 1);
+    }
+    shear[0][1] = q(1, 5);
+    assert!(
+        !preserves_hodge_split(&shear),
+        "a shear breaks the constants line"
+    );
+    assert!(
+        !capacity(&base_congruence(&anchor, &shear)).is_vacuous(),
+        "MEASURED: the unlawful congruence FORGES capacity from pure \
+         frame — 0 -> 3. This is why the base group must be restricted"
+    );
+
+    // (2) SCALING by 2 — row sums 2,2,2; det = 8. VOLUME SURVIVES.
+    let mut scale = vec![vec![q(0, 1); 3]; 3];
+    for i in 0..3 {
+        scale[i][i] = q(2, 1);
+    }
+    assert!(preserves_hodge_split(&scale), "constant row sums are lawful");
+    assert!(
+        capacity(&base_congruence(&anchor, &scale)).is_vacuous(),
+        "a volumetric scaling must NOT create capacity from frame"
+    );
+
+    // (3) NON-TRIVIAL MIXING, rows all summing to 1 — lawful, and it
+    // genuinely moves the entities (not a permutation, not a scaling).
+    let mix = vec![
+        vec![q(1, 1), q(1, 1), q(-1, 1)],
+        vec![q(-1, 1), q(1, 1), q(1, 1)],
+        vec![q(1, 1), q(-1, 1), q(1, 1)],
+    ];
+    assert!(preserves_hodge_split(&mix));
+    assert!(
+        capacity(&base_congruence(&anchor, &mix)).is_vacuous(),
+        "lawful mixing preserves the vacuous class"
+    );
+
+    // And it preserves a NON-vacuous class too — 1 -> 1, not 1 -> 0.
+    let loop3 = triangle(q(1, 1), q(1, 1), q(-1, 1));
+    assert!(!capacity(&loop3).is_vacuous());
+    assert!(
+        !capacity(&base_congruence(&loop3, &mix)).is_vacuous(),
+        "lawful congruence must not destroy capacity either"
+    );
+
+    // The degenerate refusal: A·1 = 0 annihilates the constants.
+    let zero = vec![vec![q(0, 1); 3]; 3];
+    assert!(!preserves_hodge_split(&zero));
 }
