@@ -668,6 +668,54 @@ not need re-reading.
 a "do not gate on this" comment — the last instance of the protection
 that has already failed twice.
 
+## §10ter WHAT THE CAGE IS FOR — and why V is never a candidate
+
+**LAW (operator ruling 2026-08-01).**
+
+> the cage is for expansion of variables we don't want impacting the
+> totality of the mathematics of the universe — floats, approximations,
+> dogma, etc
+
+**The test is CORRUPTION, not shape.** A thing is caged because
+admitting it would break exactness, reproducibility or falsifiability —
+never because it happens to be one number:
+
+| caged | why |
+|---|---|
+| floats, approximations, sampled or truncated values | not exact; one admitted anywhere makes the universe non-reproducible |
+| dogma | unfalsifiable by construction (Article III LAW 6) — no experiment refutes it, so no rule may rest on it |
+| aggregates used as scores (`C`, the conservation distance) | exact, but they collapse many into one and what remains is RANKABLE — a descent waiting for a caller |
+
+**`V` IS NOT A CANDIDATE, AND NEITHER IS `D`, `Δ`, OR ANY OF THEIR
+INVARIANTS.** They are the totality the cage exists to protect.
+Enclosing one would be enclosing the thing the enclosure is for. This is
+categorical rather than a judgement call, and it is pinned by
+`cage_arrow::the_cage_names_no_manifold_machinery`.
+
+**AGGREGATE versus INVARIANT — the line that keeps V free.** The
+distinction is structural, and the proof is already in the crate:
+
+    AGGREGATE   C = Σ|R| collapses MANY into one and destroys which
+                residual broke and by how much. CAGED.
+
+    INVARIANT   rcf_signature, a holonomy's conjugacy class — the exact
+                canonical fingerprint of ONE object, destroying nothing:
+                two Deltas share it IFF conjugate. NOT CAGED.
+
+`Lens` and `RcfSignature` carry the SAME derives — `PartialEq, Eq`, no
+`PartialOrd`. Their algebra is identical. The ONLY difference is the
+arrow ban. **So the no-ordering property — the thing that actually stops
+descent — is available WITHOUT containment**, and a canonical invariant
+follows the `RcfSignature` pattern: equality-only, uncaged,
+kernel-eligible. Containment is a second and heavier act, reserved for
+readings that compute nothing.
+
+**And the escape route does not exist for SL₂.** With `det = 1` the
+characteristic polynomial is `x² − Tr(A)·x + 1`, so the conjugacy class
+is parameterised BY the trace. "Keep the class instead of the trace"
+renames a scalar rather than avoiding one. The lawful move was never to
+avoid scalars — it is to forbid ORDERING them and keep them as IDENTITY.
+
 ## §11 THE BIFURCATION LAW — both sides of the coin become roots
 
 **LAW (operator ruling 2026-08-01).**

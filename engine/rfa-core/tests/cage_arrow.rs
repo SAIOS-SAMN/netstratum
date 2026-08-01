@@ -75,3 +75,32 @@ fn the_cage_has_no_exit_to_a_computable_type() {
         "cage.rs derives an ordering — thresholds and descent become expressible again"
     );
 }
+
+/// THE MANIFOLD IS NOT A CANDIDATE (operator ruling 2026-08-01: *V out
+/// of the cage, and never stuck in it again*).
+///
+/// The cage holds what must never impact the totality of the
+/// mathematics — floats, approximations, dogma, aggregates used as
+/// scores. `V`, `D`, `Δ` and their invariants ARE that totality, so
+/// enclosing one would be enclosing the thing the enclosure protects.
+///
+/// This is pinned in the direction the arrow test does not cover.
+/// `cage_arrow`'s other pins stop the computing path from REACHING IN;
+/// this one stops the cage from REACHING OUT. A box that merely
+/// discusses its neighbours acquires footholds, and a foothold is how
+/// the wrong thing ends up inside — so the reasoning about candidacy
+/// lives in the law documents and not in `cage.rs`.
+#[test]
+fn the_cage_names_no_manifold_machinery() {
+    let source = fs::read_to_string("src/cage.rs").expect("cage readable");
+    for term in [
+        "potential_form", "PotentialForm", "dual_pole", "Vacuity",
+        "holonom", "divergence", "Support", "capacity", "ext_x", "Delta",
+    ] {
+        assert!(
+            !source.contains(term),
+            "cage.rs names `{term}` — the manifold is not a candidate for containment, \
+             and naming it here is the foothold that puts it inside"
+        );
+    }
+}

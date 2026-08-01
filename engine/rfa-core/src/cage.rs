@@ -35,19 +35,43 @@
 //! on a rendered string, so the boundary is enforced by types rather
 //! than by a docstring asking politely. Docstrings saying *do not gate
 //! on this* failed TWICE in one day — `validate_step`'s productivity
-//! gate and the bridge's `capacity_is_defined` — and in both cases the
+//! gate and the bridge's readability check — and in both cases the
 //! prose was right while the code did the opposite.
 //!
-//! ## What may live here
+//! ## THE CHARTER — what this box is FOR
 //!
-//! Scalar aggregates (`C`, conservation distance, any L1 collapse), and
-//! — because nothing escapes — readings a deterministic path could
-//! never lawfully hold at all: floats, roots, transcendentals, sampled
-//! or approximate values destined for a chart. **Inside the cage those
-//! are permitted precisely because they cannot leak.** That is why
-//! containment beats prohibition: it lets the system SAY more while
-//! guaranteeing determinism, instead of pretending the un-sayable does
-//! not exist.
+//! **The cage holds variables that must never impact the totality of
+//! the mathematics** (operator ruling 2026-08-01). That is the whole
+//! test, and it is a CORRUPTION test, not a shape test:
+//!
+//! - **floats and approximations** — they are not exact, so a single one
+//!   admitted anywhere makes the universe non-reproducible;
+//! - **sampled, estimated or truncated values** — same failure, dressed
+//!   as precision;
+//! - **dogma** — unfalsifiable by construction (Article III LAW 6), so
+//!   no experiment can refute it and no rule may rest on it;
+//! - **aggregates used as scores** — `C`, the conservation distance:
+//!   exact, but they collapse many into one and what remains is
+//!   rankable, which is a descent waiting for a caller.
+//!
+//! Inside the cage these are PERMITTED, precisely because they cannot
+//! leak. That is why containment beats prohibition: the system may SAY
+//! them — render a float to a chart, name a belief — while determinism
+//! is guaranteed by the boundary rather than by everyone's care.
+//!
+//! ## WHAT IS CATEGORICALLY NOT A CANDIDATE
+//!
+//! **The manifold's own quantities are never caged, because they ARE
+//! the mathematics this box exists to protect.** Enclosing one would be
+//! enclosing the thing the enclosure is for. They are not enumerated
+//! here on purpose — see below.
+//!
+//! This is enforced structurally, not by care: `cage_arrow` pins that
+//! this module names NO manifold machinery, in code or in prose. The
+//! reasoning about what is and is not a candidate lives in the LAW
+//! documents, deliberately — a box that discusses its neighbours
+//! acquires footholds, and a foothold is how the wrong thing ends up
+//! inside.
 //!
 //! ## The reserved cells, and what is NOT in them
 //!
@@ -58,47 +82,6 @@
 //! speculative apparatus this session has spent the day removing. The
 //! slots are named so the shape is honest; the debt is recorded rather
 //! than papered over.
-//!
-//! ## WHAT DOES **NOT** BELONG HERE — aggregate versus invariant
-//!
-//! (Operator question 2026-08-01: does the holonomy upgrade fit in this
-//! containment? **No — and putting it here would strand exactly what it
-//! was meant to free.**)
-//!
-//! The cage is for AGGREGATES USED AS SCORES. It is not for scalars in
-//! general, and the difference is structural rather than a matter of
-//! size:
-//!
-//! ```text
-//! AGGREGATE   C = Σ|R| — collapses MANY into one and destroys which
-//!             residual broke and by how much. The information is gone,
-//!             and what remains is rankable. CAGED.
-//!
-//! INVARIANT   rcf_signature, a holonomy's conjugacy class — the exact
-//!             canonical fingerprint of ONE object. Destroys nothing:
-//!             two Deltas share it IFF they are conjugate. NOT CAGED.
-//! ```
-//!
-//! **The proof that the line is real is already in this crate.**
-//! [`Lens`] and [`crate::rcf::RcfSignature`] carry the SAME derives —
-//! `PartialEq, Eq` and deliberately no `PartialOrd`. Their algebra is
-//! identical. The only difference between them is `cage_arrow`, which
-//! bars `Lens` from every computing path while `rcf_signature` is called
-//! directly by `orbit_lock`.
-//!
-//! So the no-ordering property — the thing that actually stops descent —
-//! is available WITHOUT containment. **A canonical invariant follows the
-//! `RcfSignature` pattern: equality-only, uncaged, kernel-eligible.**
-//! Containment is a second, heavier act reserved for readings that
-//! compute nothing.
-//!
-//! **A note on SL₂, because the escape route does not exist.** For a
-//! matrix of determinant 1 the characteristic polynomial is
-//! `x² − Tr(A)·x + 1`, so the conjugacy class is essentially
-//! parameterised BY the trace. "Keep the class instead of the trace"
-//! does not avoid a scalar — it renames one. The lawful move was never
-//! to avoid scalars; it is to forbid ORDERING them and to keep them as
-//! IDENTITY. That is what both types already do.
 //!
 //! Nothing in a computing path may import from this module.
 
