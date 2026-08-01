@@ -1079,8 +1079,22 @@ approaches luminal capacity.*
 **Exact realization — two clauses, and the first kills a
 misreading.**
 
-1. **MONOTONE, NOT DESCENDING.** The axial law is that **capacity never
-   retreats** — monotone non-decreasing in `D`. It is NOT descent along
+0. **THE FLOOR IS OCCUPANCY** (operator ruling 2026-08-02). `GROUND`
+   floors an EMPTY universe at one tone. A universe holding structure
+   that needs `k` tones is floored at `k` — **you cannot have less room
+   than you are using.** Enforced today by ABSENCE: no deed closes a
+   plane (`GaugeShiftedAt` opens grades; nothing removes one), and the
+   container law makes structure in an unopened plane unrepresentable.
+   **OWED:** the AEON FOLD contracts the board and its only guard is
+   fold-ELIGIBILITY — a policy about quietness, never a check that room
+   ≥ occupancy. Nothing computes the occupancy floor. Recorded as a
+   build debt, not assumed safe.
+
+1. **MONOTONE, NOT DESCENDING.** *Monotone here is order-theoretic —
+   NON-DECREASING. It is not the tonal sense: `D` is POLYTONIC (each
+   grade a tone, `11_AEON` §2.0's polytonic key), and this clause says
+   the chord never loses a note, never that the universe stays
+   single-toned.* The axial law is that **capacity never retreats** — monotone non-decreasing in `D`. It is NOT descent along
    a gradient toward a minimum; gradient descent stands STRUCK (a
    failed topology, operator ruling 2026-08-01) and nothing in this
    article revives it. This is `ELEVATE-1`'s "the fiber never retreats"

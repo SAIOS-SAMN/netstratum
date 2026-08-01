@@ -186,10 +186,49 @@ apparent asymmetry:**
 Neither holds the other; each holds the other's ASPECT, and they are
 different kinds — a space and a description — so there is no circle.
 
-**Article IV's monotonicity is DERIVED, not decreed.** *Capacity never
-retreats* was written as an axial law. It follows: **you cannot un-make
-room that things are standing in.** The universe cannot shrink below
-what occupies it, so `D` is monotone by what `D` is.
+**`D` IS POLYTONIC** (ruled 2026-08-02), and this is the tree's own
+vocabulary rather than a new claim: `11_AEON` §2.0 — *G within a sheet
+is the **polytonic key*** — and §2.1 — *new **tonal** dimensions can
+open*. **Each opened grade is a TONE.** So `D` counts tones standing,
+`GROUND = 1` is the single-tone point, and `D > GROUND` is polytonic by
+definition. The fiber was never a stack of numbers; it is a chord.
+
+  **WORD COLLISION, disambiguated once.** Article IV says `D` is
+  *MONOTONE* — order-theoretic, meaning NON-DECREASING, meaning `D`
+  only ever grows. In the tonal register the same root means ONE TONE,
+  which is `D = GROUND`. **Opposite content, one word.** Article IV
+  never says the universe stays single-toned; it says the chord never
+  loses a note. Read *monotone* as non-decreasing everywhere in this
+  ledger, and *monotonal* — one tone — never appears as a synonym.
+
+**Article IV's non-decrease is DERIVED, not decreed.** *Capacity never
+retreats* was written as an axial law. It follows from what `D` is: you
+cannot un-make room that things are standing in.
+
+**THE FLOOR IS OCCUPANCY, NOT THE GROUND** (operator ruling 2026-08-02
+— *if the universe shrinks below the capacity for what is already in
+it, then we have a problem*). `GROUND = 1` is the floor of an EMPTY
+universe. A universe holding structure that needs `k` tones has a floor
+of `k`:
+
+    D  ≥  1            always — a universe that exists occupies a point
+    D  ≥  occupancy    whenever anything is in it — the BINDING floor
+
+**What currently enforces it is ABSENCE, which is stronger than the
+article and weaker than a check.** No deed in the vocabulary closes a
+plane: `GaugeShiftedAt` opens grades and nothing removes one, so within
+a universe `D` cannot shrink at all. The container law completes it from
+the other side — structure in an unopened plane is unrepresentable, not
+refused.
+
+**THE ONE OPERATION THAT COULD VIOLATE IT — recorded as owed.** The AEON
+FOLD contracts the board (`12_UNION` §2a, Tier 0). Its guard today is
+ELIGIBILITY — a world folds only after its trajectory settles in the
+retirement region across an aeon-voice alignment (`11_AEON` §4) — and
+eligibility is a policy about quietness, **not a check that room ≥
+occupancy.** Nothing computes the occupancy floor, so nothing could
+refuse a fold that carried content forward into fewer tones than it
+needs. The invariant is stated here; its witness is unbuilt.
 
 **Plural, and the wrap is why.** Each universe is its own D-store. The
 λ-nodes wrap the key finitely so successive stores stay addressable and
