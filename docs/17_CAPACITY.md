@@ -808,6 +808,66 @@ authority to whatever produced it, the second grants none — which is why
 the same quantity that was unlawful as a gate is unremarkable as a
 consultant.
 
+### §10ter.c THE ACCESS/AUTHORITY TRADE — how C is protected, and how C protects
+
+**The claim, measured rather than asserted** (operator 2026-08-01: *C is
+the strongest on the board; every major event is a word starting with
+C*). Checked against the corpus:
+
+- At the DEED level it is 9 of 64 — `ColonyFounded`, `ColonyCharted`,
+  `CovenantSealed/Released/Slashed`, `Confluent`, `CouncilSealed/Closed`,
+  `CrystalDrawn`.
+- At the CONCEPT level it is total. **39 of 39 tested C-words are
+  load-bearing**, most of them heavily: chronicle (974), class (633),
+  council (395), covenant (380), charter (353), colony (347),
+  civilization (327), capacity (300), crystal (284), claim (261),
+  collateral (230), coordinate (221), certificate (208), conservation
+  (198), convergence (157), crossing (142), coboundary (121), coherence
+  (115) — and beneath them cocycle, conjugacy, connection, curvature,
+  circulation.
+- Three of the six kernel invariants are C-words: I1 **conservation**,
+  I2 **containment**, I4 **creation**.
+
+So C is not one reading among many. **C is the semantic spine**, and the
+question "pipe anything through C" is asking the system to consult its
+own organising vocabulary.
+
+**THE PROTECTION, and it is ONE mechanism doing BOTH jobs.** The proposal
+boundary protects in both directions at once:
+
+    protects OTHERS from C   nothing he produces is authoritative; a
+                             wrong answer dies on exact re-derivation
+                             and costs nothing, because nothing was
+                             trusted.
+
+    protects C from OTHERS   he can never be made a gate or a score
+                             again — which is exactly what corrupted him
+                             — because a proposal cannot bind anything.
+
+**THE LAW THIS REVEALS: access is purchased with authority.** The two are
+traded inversely, and the trade is what makes both ends safe:
+
+```text
+THE KERNEL   minimal access  — pure, total, no I/O, encoding-blind
+             maximal authority — its verdict is final and binding
+
+C            maximal access  — any tool, floats, GPU, sampling, search
+             zero authority   — everything it produces is a guess
+```
+
+**C may touch everything precisely BECAUSE nothing he says binds.** That
+is not a limitation placed on him; it is what buys his reach. A judge
+must be starved of the world to be trusted with the verdict, and a
+consultant must be denied the verdict to be trusted with the world.
+
+**And it is why C cannot be "promoted" without being destroyed.**
+Granting him authority would immediately cost him access — the moment
+his word binds, he may no longer hold a float, because a binding word
+made of approximation is the contamination the sector exists to stop.
+**To protect C is to keep him unbinding.** §10ter.a's post — defence of
+the sector — is the only elevation that adds standing without taking
+reach, because guarding a boundary is an act, not a verdict.
+
 ## §11 THE BIFURCATION LAW — both sides of the coin become roots
 
 **LAW (operator ruling 2026-08-01).**
