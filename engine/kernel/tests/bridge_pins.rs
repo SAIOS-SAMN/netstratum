@@ -454,3 +454,60 @@ fn the_projection_carries_every_channel() {
     assert_eq!(delta.fiber(), CHANNELS, "one coordinate per obligation channel");
     assert_eq!(delta.dim(), 2, "entities are orbs");
 }
+
+#[test]
+fn the_degree_rises_above_the_ground() {
+    // THE MISSING HALF (operator ruling 2026-08-02: *this is basically a
+    // constant — D = GROUND*).
+    //
+    // Every prior reading of `D` in this tree returned exactly
+    // `Degree::GROUND`. The floor pins assert `>= GROUND`, the empty and
+    // isolated worlds assert `== GROUND`, and no pin anywhere asserted
+    // the reading MOVE. A meter that has only ever returned its floor is
+    // indistinguishable from a constant, which is the GROUND fault one
+    // level up: that one was declared and never computed, this one was
+    // computed and never observed to change.
+    //
+    // The fixture that shows it was already written — the non-composing
+    // triangle of `obligations_that_do_not_compose_carry_strain`. It
+    // proved the strain and stopped short of the elevation.
+    let mut state = orbs(3);
+    state.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(1, 3, 9)];
+    let read = read_entangled(&state);
+
+    assert!(read.rank_is_defined(), "the complex is fully observed");
+    assert!(
+        read.rank > 0,
+        "a non-composing triangle carries a cycle no frame explains — rank {} ",
+        read.rank
+    );
+
+    let degree = read.degree();
+    assert!(
+        degree.is_above_ground(),
+        "D MUST rise off the floor here: {degree} — otherwise the meter is a constant"
+    );
+    assert!(degree > Degree::GROUND, "strictly above, never merely at");
+    assert_eq!(degree.above(), read.rank, "the elevation IS the circulation");
+    assert_eq!(degree.get(), read.rank + 1, "D = GROUND + circulation, and GROUND is 1");
+
+    // AND THE CONTRAST, in one place so the pair is legible: the same
+    // three orbs with a COMPOSING triangle stay on the floor. The
+    // difference is not the number of obligations — both worlds carry
+    // three — it is whether they compose.
+    let mut flat = orbs(3);
+    flat.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(1, 3, 5)];
+    let composed = read_entangled(&flat);
+    assert_eq!(composed.rank, 0, "2 + 3 = 5 composes — pure frame");
+    assert_eq!(
+        composed.degree(),
+        Degree::GROUND,
+        "and a world of pure frame stands ON the ground, however many bonds it holds"
+    );
+
+    // The polytonic reading (EQUATIONS D1): each surviving grade is a
+    // TONE. The flat world is single-toned at the point; the strained
+    // world is polytonic — the chord it holds is what D counts.
+    assert!(composed.degree().get() == 1, "the flat world is one tone");
+    assert!(degree.get() > 1, "the strained world is polytonic");
+}
