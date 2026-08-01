@@ -638,6 +638,117 @@ Triangles carry composition failure; what the next degree carries is
 not obvious and must not be guessed, because a cell whose residual has
 no meaning is apparatus rather than law.
 
+### 2m. THE PATH POLYNOMIAL — ordered interlink, causal reach ±1 (operator, 2026-08-02)
+
+> imagine `i j k l` each have a vertical axis that wraps around and
+> could interlink with any of the other `i j k l` in any particular
+> order to form a polynomial that links back one step to a prior or a
+> future polynomial
+
+**Named precisely, this is a PATH ALGEBRA over the complex, graded by
+step, with causal reach ±1.** Paths compose head-to-tail; the algebra is
+non-commutative, which is what makes "in any particular order" carry
+data rather than decorate it; degree is the number of interlinks;
+coefficients are what each link carries; and evaluation along a path is
+holonomy. Not an exotic object — a known one, and the right one.
+
+(*Terminology:* "master equation" is the operator's shorthand here for
+the residual/rank relation. Task #17 stands — there is no single master
+equation, and this section describes a CARRIER, not a new one.)
+
+Four findings against the tree. The first is the sharpest, because it
+is not a feature request.
+
+**FINDING 1 — THE FIBER IS NON-ABELIAN AND THE HOLONOMY IS NOT. This
+split already exists in the tree.**
+
+    reduce.rs:113   pub struct Holonomy { i, j, l, value: Ratio }
+    fiber.rs        MatrixFiber2x2 — matmul, commutator, [A,B] ≠ 0
+
+A `Ratio` **cannot carry order.** Any permutation of the same links
+sums to the same rational, so under the landed reduction every ordering
+of an interlink is the same holonomy, and "in any particular order" is
+not merely unbuilt — it is destroyed by the type. Meanwhile the whole
+non-abelian apparatus sits beside it in `fiber.rs`, unused by the
+reduction.
+
+**So the ordered interlink is not a new requirement. It is closing a
+split the tree already carries:** `Holonomy.value` must become a
+`MatrixFiber2x2`. That is a concrete kernel amendment with a VERSION
+bump, and it is the first thing this section demands.
+
+**FINDING 2 — THE PATH EVALUATOR IS LANDED AND NOTHING BUILDS A PATH.**
+`fiber.rs:156` `loop_holonomy(walk: &[MatrixFiber2x2])` folds an ordered
+walk by `matmul` — exactly the polynomial's evaluation — and has no
+non-test caller. **The polynomial IS the walk.** The engine can evaluate
+one and cannot express one. This is the third organ found landed and
+unwired, after `orbit_lock` (§K3) and the fiber itself.
+
+**FINDING 3 — THE VERTICAL AXIS EXISTS AT THE COMMITMENT LEVEL, NOT THE
+INDEX LEVEL.** `arbor::Coordinate` carries `branch`, the wrapped torus
+triple `s: [Ratio; 3]`, the gauge sheet `g`, and the tick `t` — a
+wrapped vertical axis, landed. But it wraps THE WHOLE STATE. The
+indices `i, j, k` are bare `usize` positions in `Committed::orbs`, and
+a bare index has no axis to wrap.
+
+Giving each index its own wrapped vertical axis is the same ruling as
+"orbs have extent" (`19_KERNEL` §5a.1, wall 2). **That is now a fourth
+line arriving at one wall** — the Venn overlap, the traversal lane, the
+depth of the torsion, and now the per-index axis. The station (tag 89)
+is the vertical axis that landed, but it is seated per LINE, not per
+index.
+
+**FINDING 4 — ±1 IS ALREADY THE LAW, AND IT IS THE LIGHT CONE.** ARTICLE
+IV clause 2: *the propagation limit of this manifold is one commitment
+per step … the rate is `c` and `c` is the clock.* A polynomial reaching
+exactly one step in either direction is not a restriction being
+imposed — it is the propagation limit already ruled. `fold.rs:215`
+returns `OrbitWitness { operator_id, step: 1 }`, so the single-step
+reach is already in the witness type.
+
+**THE FORWARD LINK — the one part that needs care, and it resolves
+without mysticism.**
+
+Backward is a REFERENCE: hash the parent, landed as
+`Commitment.parent`. Forward cannot be a reference — **you cannot hash
+what does not exist yet.** But it can be a CONSTRAINT: an obligation
+binding the next commitment without naming it.
+
+The organ is landed. `CHANNEL_COVENANT` carries *the vitrified pact's
+OUTSTANDING quota, obligor → beneficiary (`quota − delivered`, floored
+at zero)*. **An outstanding covenant is a forward link** — it constrains
+a future state it cannot identify. So:
+
+    backward   REFERENCE   Commitment.parent          landed
+    forward    CONSTRAINT  outstanding covenant       landed
+
+The polynomial is anchored at both ends by organs that already exist,
+and nothing here requires a record to point at the future.
+
+**A POSSIBLE ROUTE THROUGH K3 — flagged for ruling, NOT derived.** If
+forward links are constraints, then two branches carrying the SAME
+outstanding covenant are bound to one another without any merge record:
+the binding lives in the constraint layer rather than the parent layer.
+That is close to the chart-agreement condition, since charts are
+required to agree precisely on their overlaps.
+
+**What it does not do, stated plainly:** it binds two branches without
+MERGING them. No single record results, so it does not by itself
+discharge K3's wall 1 or produce the join record §5a.1 specifies —
+and a shared obligation is weaker than a shared coordinate, since
+nothing forces the two to reconcile what they each hold. It may be the
+better primitive or it may be an adjacent one. **An operator ruling,
+recorded because it is cheap to state and would be expensive to
+discover late.**
+
+**NOT DERIVED, flagged:** whether the path algebra is FREE (every
+ordering admissible) or carries relations (some orderings identified).
+A free algebra grows without bound and every distinct walk is distinct
+structure; relations are what make it finite-dimensional and are also
+how a system quietly stops counting real difference. `18_TORSION`
+forbids ceilings, so the presumption is free — but the presumption is
+not a derivation, and the T∞ purge is the only bound currently ruled.
+
 ### 2h. THE ECLIPSE — STRUCK AS WRITTEN (2026-08-01)
 
 This section claimed an "eclipse law" unifying five occlusion
