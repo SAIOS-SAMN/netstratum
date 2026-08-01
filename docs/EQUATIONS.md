@@ -108,15 +108,20 @@ neutral deed refuses). THE SIGN LAW rides the declaration: every
 amount non-negative, direction from the DEED (`AmountNotPositive` —
 the negative-transfer/aperture inversion hole is CLOSED). Stateful
 declarations (the council's resource, the razed zone's kind) read
-PRIOR state. Escrow returns hold declaration==effect; INVARIANT
-SHAPE: EscrowTotal + BankedTotal = ConservedState strengthens in a
-named follow-up. AssayStruck held out until the element ledger's
-accounting lands.
+PRIOR state. THE ESCROW LAW LANDED (dispatch C7, 2026-08-01):
+conservation reads the CONSERVED total = banked + escrow
+(`kernel::total_escrow`, `kernel::total_conserved`) — a covenant lock
+or return moves collateral BETWEEN the two ledgers, so its declared
+net is ZERO and a bank debit that escrows nothing refuses. Council
+CLOSE is held out: its atomic multi-event settle is per-deed
+threading, gated on the Phase 3 flip.
 
-    ∀ r ∈ Resources:  Σ_orb bank(next, r) == Σ_orb bank(prior, r) + declared(r)
-    declared: move 0 · aperture ∓ · mint + · decay − · upkeep/draw/lock −
-              · escrow-return + · founding = the chartered reserves ·
-              zone = ∓cost/refund vectors · (all amounts ≥ 0, sign-guarded)
+    ∀ r ∈ Resources:  conserved(next, r) == conserved(prior, r) + declared(r)
+      where conserved(s, r) = Σ_orb bank(s, r) + Σ_pact escrow(s, r)
+    declared: move 0 · aperture ∓ · mint + · decay − · upkeep/draw −
+              · covenant lock/return 0 (banked↔escrow) · council close +
+              · founding = the chartered reserves · zone = ∓cost/refund
+              vectors · (all amounts ≥ 0, sign-guarded)
 
 **I2 · Containment.** LANDED — `kernel::containment`.
 

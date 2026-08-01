@@ -396,9 +396,10 @@ fn covered(event: &ClosureEvent) -> bool {
         // deltas declared per-resource in `lawful_deltas` (the sealed
         // rules called, stateful reads from prior). Witnessed in
         // `value_pins.rs`. Tier 1 (single-resource, sign-guarded),
-        // Tier 2 (escrow returns, declaration==effect — the
-        // EscrowTotal + BankedTotal macro-invariant strengthens in a
-        // follow-up), Tier 3 (multi-resource vectors).
+        // Tier 2 (escrow moves under THE ESCROW LAW — conservation reads
+        // banked + escrow, so a covenant lock/return nets ZERO on the
+        // conserved total; council CLOSE held out on Phase 3 threading),
+        // Tier 3 (multi-resource vectors).
         | E::UpkeepSettled { .. } | E::CrystalDrawn { .. } | E::OverflowAbsorbed { .. }
         | E::BondSettled { .. } | E::FamineStruck { .. } | E::CovenantSealed { .. }
         | E::CouncilSealed { .. } | E::FrictionSettled { .. } | E::OfferCleared { .. }
@@ -425,16 +426,24 @@ fn covered(event: &ClosureEvent) -> bool {
 }
 
 /// INVARIANT — conservation, TOTAL (the value-law wave, operator
-/// directive 2026-07-31). A deed changes the world's banked totals by
-/// exactly its DECLARED per-resource deltas and nothing else:
+/// directive 2026-07-31; the escrow strengthening, dispatch C7
+/// 2026-08-01). A deed changes the world's CONSERVED total — banked
+/// PLUS escrowed — by exactly its DECLARED per-resource deltas and
+/// nothing else:
 ///
 /// ```text
-/// ∀ r ∈ Resources:  total(next, r) == total(prior, r) + declared(r)
+/// ∀ r ∈ Resources:  conserved(next, r) == conserved(prior, r) + declared(r)
+///   where conserved(s, r) = banked(s, r) + escrow(s, r)
 /// ```
 ///
-/// Every resource present in either state or in the declaration is
-/// checked — a covered deed with an EMPTY declaration must leave EVERY
-/// bank untouched (a smuggled change under a neutral deed refuses).
+/// The escrow half (`total_escrow`) closes the lock seam: a covenant
+/// seal debits a bank and MUST credit escrow the same collateral (net
+/// declared ZERO) — a debit that escrows nothing no longer passes.
+/// Council CLOSE is held out (its atomic multi-event settle is per-deed
+/// threading, gated on Phase 3). Every resource present in either state,
+/// in a lock, or in the declaration is checked — a covered deed with an
+/// EMPTY declaration must leave the conserved total untouched (a
+/// smuggled change under a neutral deed refuses).
 /// Multi-resource deeds (founding reserves, zone costs and refunds)
 /// declare vectors, never a scalar. The PAIR-level law (a far leg is
 /// the near leg's exact inverse) is the cross-node opposition (KERNEL
@@ -454,13 +463,26 @@ fn conservation(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             }
         }
     }
+    // Escrow-held resources enter the conserved total too: a resource
+    // present ONLY in a lock (no bank holds it) must still be checked —
+    // else a covenant could seal or return unwitnessed.
+    for pact in prior.covenants.iter().chain(next.covenants.iter()) {
+        if !resources.contains(&pact.resource) {
+            resources.push(pact.resource);
+        }
+    }
+    for pact in prior.councils.iter().chain(next.councils.iter()) {
+        if !resources.contains(&pact.resource) {
+            resources.push(pact.resource);
+        }
+    }
     for resource in resources {
         let declared = deltas
             .iter()
             .filter(|(held, _)| *held == resource)
             .fold(ratio(0, 1), |sum, (_, delta)| sum + delta.clone());
-        let before = total_banked(prior, resource);
-        let after = total_banked(next, resource);
+        let before = total_conserved(prior, resource);
+        let after = total_conserved(next, resource);
         let expected = before + declared;
         if after != expected {
             return Err(Unlawful::ConservationBroken {
@@ -539,28 +561,45 @@ fn lawful_deltas(
             non_negative(*resource, drawn)?;
             vec![(*resource, -drawn.clone())]
         }
-        E::CovenantSealed { resource, collateral, .. } => {
+        // The council locks collateral × EVERY member OUT of the banks
+        // and INTO escrow (the sealed council enters `next`) — a move
+        // WITHIN the conserved total, so the declared NET is ZERO. The
+        // sign guard stays at the door. (THE ESCROW LAW.)
+        E::CouncilSealed { resource, collateral, .. } => {
             non_negative(*resource, collateral)?;
-            vec![(*resource, -collateral.clone())]
+            Vec::new()
         }
-        // The council locks collateral × EVERY member (multi-orb,
-        // single-resource).
-        E::CouncilSealed { resource, collateral, members, .. } => {
-            non_negative(*resource, collateral)?;
-            vec![(*resource, -(collateral.clone() * ratio(members.len() as i64, 1)))]
-        }
-        // — Tier 2: escrow returns —
-        // INVARIANT SHAPE: EscrowTotal + BankedTotal = ConservedState —
-        // declaration==effect this pass; the stateful escrow
-        // cross-lookup strengthens in a follow-up (operator directive).
-        E::CovenantReleased { resource, collateral, .. }
+        // — Tier 2: escrow moves (THE ESCROW LAW, strengthened
+        //   2026-08-01) —
+        // A covenant lock/return moves collateral BETWEEN escrow and a
+        // bank: the whole covenant enters `next` on seal (escrow rises by
+        // the collateral) and leaves on release/slash (escrow falls). Now
+        // that conservation reads banked + escrow (`total_conserved`),
+        // the declared NET is ZERO — the bank move is FORCED to equal the
+        // escrow move, or it refuses. A seal that debits a bank without
+        // escrowing the collateral no longer passes. Sign guard at the
+        // door. (Council CLOSE stays declaration==effect on banked — its
+        // multi-event atomic settle is per-deed threading, gated on the
+        // Phase 3 flip; see the CouncilClosed arm.)
+        E::CovenantSealed { resource, collateral, .. }
+        | E::CovenantReleased { resource, collateral, .. }
         | E::CovenantSlashed { resource, collateral, .. } => {
             non_negative(*resource, collateral)?;
-            vec![(*resource, collateral.clone())]
+            Vec::new()
         }
         // The close is STATEFUL: the resource reads from the PRIOR
         // sealed council, never the event. An unknown council declares
         // nothing — a banked change under it refuses.
+        // HELD OUT (the escrow seam): a council reckons at its boundary
+        // as ONE atomic settle — the whole council removed, every member
+        // banked, N `CouncilClosed` events emitted for ONE state
+        // transition. Per-deed escrow discharge (escrow −collateral as
+        // each member's seat closes) needs per-deed threading, which the
+        // operator gated on the Phase 3 flip (arch-02's conductor lane).
+        // Until then the close declares its banked credit and the
+        // council is held constant across the deed's prior→next; the
+        // escrow discharge is conserved at the settle boundary, not
+        // per-event. Covenants (1 deed ↔ 1 escrow move) ARE strengthened.
         E::CouncilClosed { council, banked, .. } => {
             match prior.councils.iter().find(|held| held.council == *council) {
                 Some(held) => {
@@ -601,6 +640,36 @@ fn total_banked(state: &Committed, resource: Resource) -> Ratio {
         .iter()
         .map(|orb| orb.banked_amount(resource))
         .fold(ratio(0, 1), |sum, held| sum + held)
+}
+
+/// THE ESCROW LAW (operator dispatch C7, 2026-08-01). The world's total
+/// ESCROWED holding of one resource — collateral that sits OUT of every
+/// bank, locked in open pacts (COVENANT-1 §7): each covenant locks its
+/// `collateral`; each council locks `collateral` per member. Pure; the
+/// canonical projection carries only open pacts, so the sum is over what
+/// is actually locked.
+fn total_escrow(state: &Committed, resource: Resource) -> Ratio {
+    let covenants = state
+        .covenants
+        .iter()
+        .filter(|pact| pact.resource == resource)
+        .fold(ratio(0, 1), |sum, pact| sum + pact.collateral.clone());
+    let councils = state
+        .councils
+        .iter()
+        .filter(|pact| pact.resource == resource)
+        .fold(ratio(0, 1), |sum, pact| {
+            sum + pact.collateral.clone() * ratio(pact.members.len() as i64, 1)
+        });
+    covenants + councils
+}
+
+/// The CONSERVED quantity — banked PLUS escrowed. A lock moves value
+/// between the two ledgers, never in or out of the world; conservation
+/// reads this total, so a bank debit under a lock must be matched by an
+/// escrow credit (or the reverse), exactly, or the deed refuses.
+fn total_conserved(state: &Committed, resource: Resource) -> Ratio {
+    total_banked(state, resource) + total_escrow(state, resource)
 }
 
 /// INVARIANT — bounded creation (I4). Value is created ONLY by a lawful

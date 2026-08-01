@@ -24,7 +24,7 @@
 use cfe::dop::{founding_reserves, ClosureEvent, ColonyOrb, Resource, ZoneKind};
 use cfe::ipsal::{Entity, Scope};
 use cfe::ratio::{ratio, Ratio};
-use cfe::world::{Committed, Council, World, FIRST_ORB, SOVEREIGN};
+use cfe::world::{Committed, Council, Covenant, World, FIRST_ORB, SOVEREIGN};
 use kernel::{lawful, Step, Unlawful};
 
 const HAND: u64 = 100;
@@ -145,14 +145,28 @@ fn tier1_famine_draws_exactly_without_a_hand() {
     ));
 }
 
+/// One open covenant locking `collateral` iron OUT of orb 1's bank.
+fn covenant(collateral: (i64, i64)) -> Covenant {
+    Covenant {
+        obligor: 1,
+        beneficiary: 2,
+        resource: Resource::Iron,
+        quota: ratio(4, 1),
+        delivered: ratio(0, 1),
+        collateral: ratio(collateral.0, collateral.1),
+        sealed: 0,
+        window: 8,
+    }
+}
+
 #[test]
-fn tier2_covenants_lock_and_return_declared() {
-    // INVARIANT SHAPE: EscrowTotal + BankedTotal = ConservedState —
-    // declaration==effect this pass (the seal debits exactly the
-    // collateral; the release/slash credits exactly the collateral);
-    // the stateful escrow cross-lookup strengthens in a follow-up.
+fn tier2_covenants_lock_and_return_conserve_banked_plus_escrow() {
+    // THE ESCROW LAW (dispatch C7): conservation reads banked + escrow.
+    // A seal moves collateral OUT of a bank and INTO escrow (the covenant
+    // sealed in `next`); a release/slash moves it back and the covenant
+    // leaves. The conserved total never changes — declared NET zero — and
+    // a bank move the escrow does not mirror refuses.
     let prior = seated((6, 1));
-    let sealed = bank_on(&prior, Resource::Iron, ratio(-2, 1));
     let seal = ClosureEvent::CovenantSealed {
         obligor_orb: 1,
         beneficiary_orb: 2,
@@ -161,44 +175,62 @@ fn tier2_covenants_lock_and_return_declared() {
         window: 8,
         collateral: ratio(2, 1),
     };
-    assert_eq!(lawful(&prior, &sealed, &step(seal, SOVEREIGN)), Ok(()));
+    // SEAL: bank −2 AND the covenant enters escrow (+2) → conserved holds.
+    let mut sealed = bank_on(&prior, Resource::Iron, ratio(-2, 1));
+    sealed.covenants = vec![covenant((2, 1))];
+    assert_eq!(lawful(&prior, &sealed, &step(seal.clone(), SOVEREIGN)), Ok(()));
 
-    let released = bank_on(&prior, Resource::Iron, ratio(2, 1));
+    // THE STRENGTHENING: a seal that debits the bank but escrows NOTHING
+    // refuses — the collateral would vanish from the conserved total.
+    // (Before the escrow law this passed on banked-only accounting.)
+    let smuggled = bank_on(&prior, Resource::Iron, ratio(-2, 1));
+    assert!(matches!(
+        lawful(&prior, &smuggled, &step(seal, SOVEREIGN)),
+        Err(Unlawful::ConservationBroken { .. })
+    ));
+
+    // The obligor's collateral sits in escrow: banked 6, escrow 2.
+    let mut locked = seated((6, 1));
+    locked.covenants = vec![covenant((2, 1))];
+    // RELEASE: bank +2 AND the covenant leaves escrow (−2) → conserved
+    // holds. The return is the exact inverse of the lock.
+    let mut released = bank_on(&locked, Resource::Iron, ratio(2, 1));
+    released.covenants = vec![];
     let release = ClosureEvent::CovenantReleased {
         obligor_orb: 1,
         beneficiary_orb: 2,
         resource: Resource::Iron,
         collateral: ratio(2, 1),
     };
-    assert_eq!(lawful(&prior, &released, &step(release, HAND)), Ok(()));
-    // The slash credits the aggrieved the same declared amount
-    // (world-driven, no hand).
-    let slashed = bank_on(&prior, Resource::Iron, ratio(2, 1));
+    assert_eq!(lawful(&locked, &released, &step(release.clone(), HAND)), Ok(()));
+
+    // SLASH: the collateral leaves escrow to the aggrieved's bank — same
+    // conserved total (world-driven, no hand).
+    let mut slashed = bank_on(&locked, Resource::Iron, ratio(2, 1));
+    slashed.covenants = vec![];
     let slash = ClosureEvent::CovenantSlashed {
         obligor_orb: 1,
         beneficiary_orb: 2,
         resource: Resource::Iron,
         collateral: ratio(2, 1),
     };
-    assert_eq!(lawful(&prior, &slashed, &step(slash, 999)), Ok(()));
-    // A release past its declaration refuses.
-    let greedy = bank_on(&prior, Resource::Iron, ratio(3, 1));
-    let release = ClosureEvent::CovenantReleased {
-        obligor_orb: 1,
-        beneficiary_orb: 2,
-        resource: Resource::Iron,
-        collateral: ratio(2, 1),
-    };
+    assert_eq!(lawful(&locked, &slashed, &step(slash, 999)), Ok(()));
+
+    // A release that banks MORE than the covenant escrowed refuses: the
+    // escrow falls by 2, the bank rises by 3 → conserved climbs by 1.
+    let mut greedy = bank_on(&locked, Resource::Iron, ratio(3, 1));
+    greedy.covenants = vec![];
     assert!(matches!(
-        lawful(&prior, &greedy, &step(release, HAND)),
+        lawful(&locked, &greedy, &step(release, HAND)),
         Err(Unlawful::ConservationBroken { .. })
     ));
 }
 
 #[test]
 fn tier2_council_seals_by_member_count_and_closes_from_prior() {
-    // The seal locks collateral × EVERY member (multi-orb,
-    // single-resource): 3 members × 2 iron = 6 iron leaves the banks.
+    // The seal locks collateral × EVERY member OUT of the banks and INTO
+    // escrow (the council sealed in `next`): 3 members × 2 iron = 6 iron
+    // leaves the banks and enters escrow — the conserved total holds.
     let prior = seated((9, 1));
     let seal = ClosureEvent::CouncilSealed {
         council: 7,
@@ -208,10 +240,23 @@ fn tier2_council_seals_by_member_count_and_closes_from_prior() {
         collateral: ratio(2, 1),
         members: vec![1, 2, 3],
     };
-    let sealed = bank_on(&prior, Resource::Iron, ratio(-6, 1));
+    let council = Council {
+        council: 7,
+        members: vec![1, 2, 3],
+        resource: Resource::Iron,
+        quota: ratio(4, 1),
+        delivered: vec![ratio(0, 1), ratio(0, 1), ratio(0, 1)],
+        collateral: ratio(2, 1),
+        sealed: 0,
+        window: 8,
+    };
+    let mut sealed = bank_on(&prior, Resource::Iron, ratio(-6, 1));
+    sealed.councils = vec![council.clone()];
     assert_eq!(lawful(&prior, &sealed, &step(seal.clone(), SOVEREIGN)), Ok(()));
-    // Locking only one member's share under a three-member seal refuses.
-    let partial = bank_on(&prior, Resource::Iron, ratio(-2, 1));
+    // Debiting only one member's share while escrowing the full council
+    // refuses: banks fall 2, escrow rises 6 → the conserved total climbs.
+    let mut partial = bank_on(&prior, Resource::Iron, ratio(-2, 1));
+    partial.councils = vec![council];
     assert!(matches!(
         lawful(&prior, &partial, &step(seal, SOVEREIGN)),
         Err(Unlawful::ConservationBroken { .. })
