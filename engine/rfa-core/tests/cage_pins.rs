@@ -91,12 +91,16 @@ fn the_door_carries_exact_candidates_and_believes_none_of_them() {
     use rfa_core::cage::Proposal;
     // Something inside may have used a GPU, floats, or a coin flip to
     // find this. What crosses is exact, and it crosses as a GUESS.
-    let found = Proposal::offer(ratio(22, 7)).withdraw();
-    assert_eq!(found, ratio(22, 7), "the candidate crosses exactly");
+    let found = Proposal::offer(ratio(22, 7)).withdraw(|c| *c > ratio(3, 1));
+    assert_eq!(found, Some(ratio(22, 7)), "verified, so it crosses");
+
+    // A candidate that fails its own verifier does NOT cross.
+    let refused = Proposal::offer(ratio(1, 9)).withdraw(|c| *c > ratio(3, 1));
+    assert_eq!(refused, None, "unverified proposals do not leave");
 
     // Structural candidates cross too — a program, a witness, a path.
-    let plan = Proposal::offer(vec![1i64, 4, 9]).withdraw();
-    assert_eq!(plan, vec![1, 4, 9]);
+    let plan = Proposal::offer(vec![1i64, 4, 9]).withdraw(|p| p.len() == 3);
+    assert_eq!(plan, Some(vec![1, 4, 9]));
 
     // WHAT CANNOT BE WRITTEN, and is the real content of this pin:
     //
@@ -119,13 +123,12 @@ fn c_is_consulted_and_may_use_any_tool_inside() {
         floor
     });
     // What comes back is a GUESS, and the caller re-derives it exactly.
-    let candidate = answer.withdraw();
-    assert_eq!(candidate, 6, "the tool proposed 6");
-    assert!(candidate * candidate <= 48 && (candidate + 1) * (candidate + 1) > 48,
-            "and the OUTSIDE verified it exactly — never trusting the float");
+    // The exact rule the OUTSIDE applies — never trusting the float.
+    let exact = |c: &i64| *c * *c <= 48 && (*c + 1) * (*c + 1) > 48;
+    assert_eq!(answer.withdraw(exact), Some(6), "the float proposed 6; exact arithmetic agreed");
 
-    // A consultation that proposes wrongly costs nothing, because
-    // nothing was trusted: verification simply refuses it.
-    let bad = consult(48u64, |_| 7i64).withdraw();
-    assert!(bad * bad > 48, "a wrong proposal is caught by exact re-derivation");
+    // A consultation that proposes wrongly costs nothing: the same
+    // exact rule refuses it at the door and nothing crosses.
+    assert_eq!(consult(48u64, |_| 7i64).withdraw(exact), None,
+               "a wrong proposal never leaves the sector");
 }

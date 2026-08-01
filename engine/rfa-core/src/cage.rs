@@ -273,11 +273,25 @@ impl<T: Exact> Proposal<T> {
         Proposal { candidate }
     }
 
-    /// The way OUT. What you receive is a GUESS: verify it under your
-    /// own exact rules before any rule reads it. Nothing about having
-    /// come through this door makes it true.
-    pub fn withdraw(self) -> T {
-        self.candidate
+    /// The way OUT — **and it demands a verifier.**
+    ///
+    /// The first cut of this returned the candidate bare, with a
+    /// docstring asking the caller to check it. That is protection by
+    /// prose, and prose failed twice in one day (`validate_step`'s
+    /// productivity gate, the bridge's readability check). So the
+    /// obligation is now in the signature: **you cannot obtain the
+    /// value without supplying the rule that re-derives it**, and a
+    /// candidate that fails yields `None`.
+    ///
+    /// HONEST LIMIT: the compiler forces a verifier to EXIST, not to be
+    /// sound — `|_| true` compiles. What it buys is that a bypass must
+    /// be WRITTEN, and a written bypass is visible in review, where an
+    /// omitted check is invisible by construction.
+    pub fn withdraw(self, verify: impl FnOnce(&T) -> bool) -> Option<T> {
+        match verify(&self.candidate) {
+            true => Some(self.candidate),
+            false => None,
+        }
     }
 }
 

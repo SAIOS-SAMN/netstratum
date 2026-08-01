@@ -104,3 +104,32 @@ fn the_cage_names_no_manifold_machinery() {
         );
     }
 }
+
+/// `Exact` IS A CLAIM, SO ITS IMPLS ARE PINNED.
+///
+/// The marker is what stops an approximation at the door, and a marker
+/// anyone may implement stops nothing. The sanctioned list is fixed
+/// here: adding an impl means editing this test, which is the amendment.
+#[test]
+fn exact_is_implemented_only_for_exact_carriers() {
+    let source = fs::read_to_string("src/cage.rs").expect("cage readable");
+    let impls: Vec<&str> = source
+        .lines()
+        .filter(|l| l.trim_start().starts_with("impl") && l.contains("Exact for"))
+        .collect();
+    let sanctioned = ["Ratio", "i64", "u64", "usize", "bool", "Vec<T>", "Option<T>"];
+    assert_eq!(impls.len(), sanctioned.len(), "an Exact impl was added or removed: {impls:?}");
+    for name in sanctioned {
+        assert!(
+            impls.iter().any(|l| l.contains(&format!("Exact for {name}"))),
+            "the sanctioned carrier `{name}` lost its Exact impl"
+        );
+    }
+    // And nothing float-shaped may ever carry it.
+    for forbidden in ["f32", "f64"] {
+        assert!(
+            !source.contains(&format!("Exact for {forbidden}")),
+            "`{forbidden}` claims Exact — the door would pass an approximation"
+        );
+    }
+}
