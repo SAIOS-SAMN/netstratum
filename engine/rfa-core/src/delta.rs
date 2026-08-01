@@ -1,5 +1,6 @@
 //! The Delta tensor and the one cocycle-residual computation.
 
+use crate::cage::Lens;
 use cfe::ratio::Ratio;
 use num_traits::{Signed, Zero};
 
@@ -57,7 +58,7 @@ impl Delta {
 
     /// Build a Delta from raw `entries[i][j][l]` — the ONLY writer that
     /// does NOT enforce antisymmetry. It exists for one lawful use: the
-    /// image of a general `GL_n(Q)` conjugation `A·Δ·A⁻¹` (the fold
+    /// image of a general `GL_n(Rat)` conjugation `A·Δ·A⁻¹` (the fold
     /// gate's orbit), which need not be antisymmetric. The result's
     /// lawfulness is never assumed — [`verify_conservation`] is the
     /// check the orbit applies at every step, breaking any orbit whose
@@ -75,12 +76,48 @@ impl Delta {
         Self { dim, fiber, entries }
     }
 
+    /// THE STRUCTURAL BREAK — the first place antisymmetry or the zero
+    /// diagonal fails, named as a POSITION `(i, j, l)`, never as a
+    /// magnitude.
+    ///
+    /// This is the form the engine uses (operator ruling 2026-08-01:
+    /// no `==` in deterministic code — accounting, not identity). It
+    /// asks a structural question and answers with a structural fact:
+    /// WHERE the surface is left. It never forms an aggregate, so there
+    /// is no scalar for a later reader to compare, threshold, or
+    /// descend, and it short-circuits at the first break rather than
+    /// summing the universe to decide a yes/no.
+    ///
+    /// Contrast [`Self::conservation_measurement`], which collapses the
+    /// same question to one number and is a LENS reading only.
+    pub fn first_conservation_break(&self) -> Option<(usize, usize, usize)> {
+        for i in 0..self.dim {
+            for l in 0..self.fiber {
+                if !self.entries[i][i][l].is_zero() {
+                    return Some((i, i, l));
+                }
+            }
+            for j in (i + 1)..self.dim {
+                for l in 0..self.fiber {
+                    if !(&self.entries[i][j][l] + &self.entries[j][i][l]).is_zero() {
+                        return Some((i, j, l));
+                    }
+                }
+            }
+        }
+        None
+    }
+
     /// The conservation measurement — a DISTANCE to the invariant
-    /// surface, not a boolean: `Σ |Δ_ii| + Σ_{i<j} |Δ_ij + Δ_ji|`
-    /// (THE PROPORTIONAL LAW: each violation counts exactly its size, in its
-    /// own units — squares are barred as aggregators of difference).
-    /// Zero iff antisymmetry and the zero diagonal hold exactly.
-    pub fn conservation_measurement(&self) -> Ratio {
+    /// surface: `Σ |Δ_ii| + Σ_{i<j} |Δ_ij + Δ_ji|` (THE PROPORTIONAL
+    /// LAW: each violation counts exactly its size, in its own units).
+    ///
+    /// **LENS READING ONLY.** No engine path decides anything from this
+    /// number; it exists so a human surface can render how far a state
+    /// sits from the surface. The engine asks
+    /// [`Self::first_conservation_break`] instead, which names a
+    /// position rather than a magnitude.
+    pub fn conservation_measurement(&self) -> Lens {
         let mut violation = Ratio::zero();
         for i in 0..self.dim {
             for l in 0..self.fiber {
@@ -93,12 +130,13 @@ impl Delta {
                 }
             }
         }
-        violation
+        Lens::of(violation)
     }
 
-    /// The typed read of the conservation invariant.
+    /// The typed read of the conservation invariant — structural, with
+    /// early exit, forming no aggregate.
     pub fn verify_conservation(&self) -> bool {
-        self.conservation_measurement().is_zero()
+        self.first_conservation_break().is_none()
     }
 }
 
@@ -149,12 +187,12 @@ where
 /// size, needs no root ever, and keeps the arithmetic lean (squaring
 /// doubles bit-length — the denominator lesson). The zero point — the
 /// only place the LAW judges — is unchanged.
-pub fn coherence_functional(delta: &Delta) -> Ratio {
+pub fn coherence_functional(delta: &Delta) -> Lens {
     let mut c = Ratio::zero();
     for_each_residual(delta, |_i, _j, _k, _l, r| {
         c += r.abs();
     });
-    c
+    Lens::of(c)
 }
 
 /// `‖Δ‖₁` — the sum of entry magnitudes (the L1 mass the bounded-step

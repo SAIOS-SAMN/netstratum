@@ -8,7 +8,7 @@
 //! singularity law (16_UNIT §4a) has a hole.
 
 use cfe::ratio::{ratio, Ratio};
-use rfa_core::{invariant_factors, rcf_hash, rcf_signature, Delta, QPoly};
+use rfa_core::{invariant_factors, rcf_hash, rcf_signature, Delta, RatPoly};
 
 /// A rational 2×2 matrix as the RCF layer input.
 fn mat2(a: [[Ratio; 2]; 2]) -> Vec<Vec<Ratio>> {
@@ -89,19 +89,19 @@ fn the_signature_and_hash_are_frame_invariant_over_deltas() {
 
 #[test]
 fn the_polynomial_ring_computes_exactly() {
-    // The Q[x] substrate the SNF rides on (ancestor test_polynomial_*):
+    // The Rat[x] substrate the SNF rides on (ancestor test_polynomial_*):
     // (1 + 2x)·x = x + 2x², and gcd(x²−1, x−1) = x−1, monic.
-    let p = QPoly::from_coeffs(vec![ratio(1, 1), ratio(2, 1)]);
-    let x = QPoly::from_coeffs(vec![ratio(0, 1), ratio(1, 1)]);
+    let p = RatPoly::from_coeffs(vec![ratio(1, 1), ratio(2, 1)]);
+    let x = RatPoly::from_coeffs(vec![ratio(0, 1), ratio(1, 1)]);
     let prod = p.mul(&x);
     assert_eq!(
         prod,
-        QPoly::from_coeffs(vec![ratio(0, 1), ratio(1, 1), ratio(2, 1)]),
+        RatPoly::from_coeffs(vec![ratio(0, 1), ratio(1, 1), ratio(2, 1)]),
         "(1 + 2x)·x = x + 2x²"
     );
 
-    let x2_minus_1 = QPoly::from_coeffs(vec![ratio(-1, 1), ratio(0, 1), ratio(1, 1)]);
-    let x_minus_1 = QPoly::x_minus(&ratio(1, 1));
+    let x2_minus_1 = RatPoly::from_coeffs(vec![ratio(-1, 1), ratio(0, 1), ratio(1, 1)]);
+    let x_minus_1 = RatPoly::x_minus(&ratio(1, 1));
     assert_eq!(
         x2_minus_1.gcd(&x_minus_1),
         x_minus_1,

@@ -30,51 +30,31 @@ system computes torsion; it does not compute metrics.
 
 ## §2 THE FORM
 
-### 2a. Ω(D) — the capacity space
+### 2a. Ω(D) — the structure space
 
-`Ω(D)` is the dynamic capacity space indexed by dimensional degrees
-`D`. It is not a scalar and not a metric density. `D` counts the
-irreducible degrees standing; `Ω(D)` is the space they span.
+`Ω(D)` is the space indexed by dimensional degrees `D`. It is not a
+scalar and not a metric density. `D` is the RANK of the relational
+structure — how many independent degrees stand — and `Ω(D)` is the
+space they span.
 
-    dΩ(D)  =  Θ ∧ dV  +  S⁺_out ∧ S⁺_hol
+**`D` IS NOT A CAPACITY** (operator ruling 2026-08-01: *why do we have
+capacity? that should not be the case in an expanding universe*). The
+word names a container and implies a ceiling; there is no ceiling
+anywhere in this workspace, and `holonomies().len()` rises without
+bound as structure emerges. `PhiK I^(3)` had the right name all along —
+*rank: dim of the relational structure*. Genuine capacities do exist
+(seat widths, occupancy caps) and are DERIVED from this rank; the
+reading that sets a bound was named after the bound it sets.
 
-**THE CARTAN CORRECTION (DIRECTIVE 02, operator ruling 2026-08-01).**
-This section previously wrote `Θ(V) = dA_spin + A_spin ∧ A_spin` and
-called it the torsion form. **That is the CURVATURE 2-form, not
-torsion.** The two are different objects and Cartan's structure
-equations name them separately:
+    D  =  rank( Δ(Ω) )  =  the independent cycles carrying charge
+                           no frame explains
 
-    Θ  =  de  +  ω ∧ e        FIRST structure equation — TORSION
-    Ω  =  dω  +  ω ∧ ω        SECOND structure equation — CURVATURE
-
-`e` is the coframe (the solder form, which is what carries the
-displacement); `ω` is the connection. `dω + ω ∧ ω` — the form this
-document had written — is `Ω`, the curvature of `ω`, and it contains no
-`e` at all, which is precisely why it cannot be torsion: torsion is the
-failure of displacement to close, so the solder form must appear in it.
-
-The document's own constitutional claim is that **the system computes
-torsion, not metrics** (§1). Writing the curvature form under torsion's
-name left that claim unsupported by its own equation. It is now the
-first structure equation, and `∧` still enforces the strict
-anti-symmetric phase dynamics that prevent rank-lock.
-
-**Grounding, unchanged by the correction.** The landed `rfa_core::Delta`
-is ALREADY an alternating form, not a metric tensor: `Δ_ij = −Δ_ji` with
-zero diagonal, enforced by its only lawful writer `set_antisym`. There
-is no metric `g` anywhere in the workspace (verified: zero occurrences).
-The constitution names what the algebra already is.
-
-**STRUCK from this section (DIRECTIVE 01, 2026-08-01):** *"`orbit_lock`
-is ALREADY a torsion test — it searches for a torsion cycle and vetoes
-the fold when one binds."* It was neither. The search compared
-`rcf_signature` across a conjugation sequence, and that signature is a
-SIMILARITY invariant while conjugation is a similarity — so the walk
-compared a constant and `k_max` bounded nothing. The verdict was a
-property of the caller's operator list, and its polarity was inverted:
-a proven genuine difference was folded away as gauge. Both are
-corrected in `engine/rfa-core/src/fold.rs`; the regression pins are
-`rfa-core/tests/fold_gate_audit.rs`.
+**Grounding.** The landed `rfa_core::Delta` is ALREADY an alternating
+form, not a metric tensor: `Δ_ij = −Δ_ji` with zero diagonal, enforced
+by its only lawful writer `set_antisym`. There is no metric `g`
+anywhere in the workspace. `orbit_lock` is ALREADY a torsion test — it
+searches for a torsion cycle and vetoes the fold when one binds. The
+constitution names what the algebra already is.
 
 ### 2b. ∇V UNCAGED — no norm, no ceiling
 
@@ -103,105 +83,55 @@ of a decomposable object is not a guard — that was the recorded failure
 mode of the struck formulation, which guarded `ζ∇V` while the objective
 leaked through C-scoring.
 
-### 2d. The twin singularities — white-hole, never trapping
+### 2d. The twin singularities — STRUCK AS ESOTERIC (2026-08-01)
 
-    S⁺_out  — EGRESS: strictly positive divergence, emission only,
-              no trapped interior region
-    S⁺_hol  — HOLONOMIC: path-independent memory; every loop records a
-              non-trivial topological charge (∮ ≠ 0)
+This section named the discovery mint `S⁺_out` and the commitment chain
+`S⁺_hol`, calling them white-hole singularities. **It is struck under
+Article III, applied to this document.**
 
-**Grounding — these are the mint and the chain.** `S⁺_out` is the
-discovery mint: value emitted, never absorbed, a capacity increment
-(`EQUATIONS` I4, tag 86). `S⁺_hol` is the commitment chain: every path
-through history carries its charge forward and no loop returns empty
-(`E5`, `mesh::spine::seal`). The white holes are not new machinery to
-invent; they are the two landed organs named in their true geometry.
+The test Article III sets is whether a thing computes. These names
+drove no behaviour: no file read them, no rule branched on them, and
+removing them changes nothing. They renamed two organs that already had
+plain names — `DiscoveryMinted` (tag 86) and `mesh::spine::seal` — in
+vocabulary that made the engine sound larger without making it do more.
+That is the definition of cosmetic non-utility, and a law that taxes it
+elsewhere cannot carry it here.
+
+**What survives, because it computes:** a loop carrying non-zero charge
+is real and is now measured — `rfa_core::holonomies` returns exactly
+those charges, and `∮ ≠ 0` is the ordinary statement that a walk around
+a cycle does not return where it began. It needs no cosmology.
 
 ### 2e. THE Ω/α UNION — wrapped on λ-nodes, toward D(cohesion)
 
-**The two poles.** `α` is the ORIGIN pole; `Ω` is the TOTALITY pole.
+**The two poles, and only what computes.** `α` is the ORIGIN pole;
+`Ω` is the TOTALITY pole. Both are landed: `α` is `GenesisSealed`
+(tag 61) on the all-zero parent `mesh::spine` writes at the genesis
+record; `Ω` is the whole committed state, which is what `Δ(Ω)` projects.
 
-    α   —   the origin: genesis, parent-zero, the world's first binding
-    Ω   —   the totality: the whole committed relational state as one
-            object (17 §4a)
+**The union is the walk, not the endpoints.** `Ω ⊕ α` keeps every state
+between the poles. This is SEAL B restated: receipts are the world, so
+the path is the truth and a snapshot of the two ends is not.
 
-Both are landed. `α` is `GenesisSealed` (tag 61, the binding
-world-chronicle axes receipt) seated on the all-zero parent that
-`mesh::spine` writes at the genesis record. `Ω` is what `Δ(Ω)` reduces.
+**λ-nodes.** Each is a grade of the gauge key, an exact rational wrapped
+`[0,1)`. The wrap is load-bearing rather than decorative: without it
+successive origins COLLIDE, because a key of 10 IS 0 — which is the
+recurrence collision `11_AEON` §2.0 exists to prevent, and why each aeon
+seats at its own sheet base. Landed: `GaugeShiftedAt` (tag 60) opens or
+moves grade `g`; `key_distance` reads wrapped L1 at any dimensionality.
 
-**The union is the TRAVERSE, not the endpoints.** `Ω ⊕ α` is the
-non-destructive direct sum of origin and totality, and the whole force
-of "non-destructive" is that **the path between them cannot be
-discarded**. A universe is not its endpoints; it is the walk from α to
-Ω with every state on the way standing.
-
-    Ω ⊕ α   =   the traverse, whole — origin, totality, and every
-                state between, none collapsible into the two ends
-
-This is SEAL B stated on the capacity axis: receipts are the world, so
-the path IS the truth and a snapshot of the ends is not. It is also
-exactly what `S⁺_hol` asserts in §2d — the holonomic pole records a
-non-trivial charge around the loop, which is to say the traverse
-carries what the endpoints do not.
-
-**λ-nodes — the wrap that keeps traverses distinct.** Successive
-traverses stack on the wrap; each λ-node is a grade of the key, an
-exact rational wrapped `[0,1)`.
-
-    λ-node g   =   grade g of the key, wrapped [0,1), finite
-
-The wrap is load-bearing, not decoration. Without it, successive α→Ω
-traverses COLLIDE: a key of 10 IS 0, and `11_AEON` §2.0 exists
-precisely to prevent that recurrence collision — which is why each aeon
-seats at its own sheet base and the fold advances it. The λ-nodes are
-what make one universe's origin distinguishable from the next
-universe's, on a torus that wraps finitely (the standing T∞ purge:
-infinity is disallowed). Landed machinery: `GaugeShiftedAt` (tag 60)
-opens or moves grade `g`, skipped planes rest at ground, `key_distance`
-reads wrapped L1 across any dimensionality.
-
-**D(cohesion) — the direction of the union.** Cohesion is the component
-semantic over `(l)`: do the fiber planes hold together across the
-traverse? So `D(cohesion)` is capacity read ON THE FIBER, counted over
-the whole walk and never at an endpoint:
-
-    D(cohesion)  =  the grades standing in  Π_G( Δ(Ω) )
-                 =  the minted-plane count of the traverse
-
-**The reading deferred twice and never built.** `12_UNION` §3 defers
-seat widths and `11_AEON` §7 defers occupancy, both explicitly to
+**The fiber reading, deferred twice and now built.** `12_UNION` §3
+defers seat widths and `11_AEON` §7 defers occupancy, both explicitly to
 "capacity as a live fiber reading (minted-plane count)." That reading
-is `D(cohesion)`; both have waited on it since 2026-07-29.
+exists as of 2026-08-01: `kernel::bridge::read_entangled(&state).rank`.
+Both have waited on it since 2026-07-29 and neither is wired yet.
 
-**With V union.** `V` rides the traverse as the reciprocal pair of §2c,
-carried per node and summed over the walk:
-
-    on each λ-node g:   ( D(V) ⊕ V(D) )_g
-    over the traverse:  Σ_g  ( D(V) ⊕ V(D) )_g   — never truncated
-
-No node is dropped for carrying little; dropping is truncation and
-truncation is barred by §2c. A node carrying nothing contributes
-nothing and REMAINS in the union — Article II denies it standing, never
-existence.
-
-**THE TWO POLES MAKE ARTICLES II AND III COMPUTABLE.** This is the
-payoff of the pole reading, and it gives Article III a second,
-independent test:
-
-    VACUOUS (Article II):   α ≅ Ω with nothing between
-                            → the traverse is trivial, D = 0
-                            → no standing, no weight, no mint
-
-    LOOP TRAP (Article III): α ≅ Ω with deeds emitted
-                            → motion that returned to its origin;
-                              ∮ = 0, deeds > 0, ΔD = 0
-                            → Eclipse
-
-A dogmatic loop is now formally exact: **a traverse whose totality is
-congruent to its origin.** Ritual is motion that ends where it began.
-The §3 window arithmetic (`Ξ = deeds/(1+ΔD)`) and this congruence test
-measure the same failure from two directions — one counting, one
-topological — and either alone is sufficient to convict.
+**TRIMMED 2026-08-01.** This section previously carried a traverse
+formalism, a per-node summation of `(D(V) ⊕ V(D))`, and a congruence
+test `α ≅ Ω` offered as a second detector for Article III. All of it
+drove no behaviour and none of it named a congruence relation that
+exists, so under Article III applied to this document it is struck. The
+counting test in §3 stands on its own and is computable today.
 
 ### 2f. THE ENTANGLEMENT — Δ(D) ⋈ ∇V
 
@@ -351,90 +281,19 @@ silently.**
 
 ### 2i. SYNTROPIC OR ENTROPIC — total classification, no neutral
 
-**SYNTROPY STANDS, AND IT IS DEFINED BY INVERSION** (operator ruling
-2026-08-01, reversing the same day's proposed rename). A rename to
-"MINTED/VENTED" was drafted and is WITHDRAWN: both words are already
-load-bearing elsewhere — `mint` is the proof-of-work emission
-(`DiscoveryMinted` tag 86, `mint_bound`, `MintExceedsWork`) and `vent`
-is thermal dissipation (`VentSettled`, `entropy_vented`, VENT-1/SINK-1)
-— so the rename would have collapsed three distinct landed vocabularies
-into two words. That is the `D`-collision of §2j repeated twice over,
-and it is refused.
-
-**THE INVERSE DEFINITION — the whole grounding, and it borrows
-nothing.** Syntropy in this system is not a force, a field, a drive, or
-a second primitive. It is **the exact inverse arm of entropy in one
-conserved partition**, and it is defined by that inversion and by
-nothing else:
-
-    every element is classified into exactly one of two books
-        entropic   — value dissipating out of structure
-        syntropic  — value entering structure (the inverse arm)
-
-    whole      =  syntropic + entropic          (the partition)
-    syntropy   =  syntropic / whole             exact rational
-    entropy    =  entropic  / whole   =  1 − syntropy
-
-    syntropy + entropy  =  1   exactly, by construction
-
-**Entropy is the measured quantity; syntropy is its complement in the
-same book, and that is the entire content of the word.** Nothing is
-claimed about advanced wave solutions, teleology, or any anti-entropic
-force, and no external theory is invoked or needed. The inversion is
-arithmetic on an exact-rational partition that already sums to a
-constant, which is why it costs the system nothing and can never
-disagree with the entropic reading: there is one measurement and two
-ways of reading it.
-
-**This is why the term is KEPT rather than replaced.** It names the
-inverse arm of a quantity the engine already computes, it drives
-behaviour, and it is landed end to end:
-
-- `cfe/src/world.rs:3263` — `World::syntropy_ratio()` sums the four
-  syntropic books against the three entropic ones and returns the exact
-  rational.
-- `cfe/src/world.rs:3495` — it GATES: `deposit_window()` eases 240 →
-  180 only when the ratio clears the 1/2 floor.
-- `cfe/src/dop.rs:576` — `cohesion_ratio(syntropic, entropic)`, the
-  per-axis form; `05 §1.2` the thermal arms; `09 §2.5` the eight books.
-
-By the GROUNDING TEST of §7 — *name the file and line, and state what
-BEHAVIOUR it drives* — syntropy passes on every count. It is the
-opposite case to §2h's excised symbol, which named nothing and computed
-nothing. **A term that computes is kept; a term that only resonates is
-excised.** That distinction is the whole discipline, and applying the
-excision to a computing term would have been the cosmetic move
-Article III forbids.
-
 **Every element is outright syntropic or outright entropic.** There is
 no neutral middle, and the reason is the same one that closed §2g's
 silent gap: **a neutral element is a place where value sits
-unaccounted.** Neutrality is the unaccounted gap one level up — and
-under the inverse definition it is also arithmetically impossible to
-express, since the two books partition the whole exactly.
+unaccounted.** Neutrality is the unaccounted gap one level up.
 
 **Landed three times already, and never made total:**
 
-- thermal — encasement MINTS joules (the syntropic arm), overflow VENTS
-  (the entropic arm); `05 §1.2`, encase-first/vent-overflow.
+- thermal — encasement MINTS joules (syntropic), overflow VENTS
+  (entropic); `05 §1.2`, encase-first/vent-overflow.
 - the entropy dual ledger — VENT-1/SINK-1, banked against vented.
 - the eight cohesion books — four syntropic/entropic PAIRS, never
   single counters: given/drawn, returned/extracted,
   bond_flow/severance_load, fulfilled/breached (`09`).
-
-**What is owed:** the classification is not TOTAL. Elements exist that
-sit on neither book, and each is an unaccounted place. The enforcement
-is MESH-1d's own shape, already proven on the committed fields: every
-element classified or caught by an **UNMEASURED tripwire**. Nothing
-neutral, nothing silent.
-
-**NO SYNONYM IS ADMITTED** (operator ruling 2026-08-01). The house term
-is **syntropy**, defined by the inversion above, and it is the only
-name this measurement has. Alternative coinages for the inverse arm —
-whatever their provenance — are refused on sight: two names for one
-measurement is the drift `EQUATIONS.md` §0 exists to prevent, and a
-rejected name written down to be rejected is still a name in the
-corpus.
 
 **What is owed:** the classification is not TOTAL. Elements exist that
 sit on neither book, and each is an unaccounted place. The enforcement
@@ -497,39 +356,28 @@ law. The CODE is safe — `pair_melt` names its parameter `distance` —
 but the documents are not. The melt's `D` should be renamed (`σ`, for
 separation) before the two drift into one another.
 
-### 2h. THE SHADOWING SECTION — STRUCK AND EXCISED (2026-08-01)
+### 2h. THE ECLIPSE — STRUCK AS WRITTEN (2026-08-01)
 
-This section once proposed a law unifying five unrelated
-visibility mechanics, built on a symbol relayed from outside the tree.
-**It was cosmetic non-utility by this document's own Article III
-definition, it was struck, and its vocabulary is now EXCISED.**
+This section claimed an "eclipse law" unifying five occlusion
+mechanics. **It was cosmetic non-utility by this document's own
+Article III definition, and it is struck.** Recorded rather than
+deleted, because the failure is instructive.
 
-**THE EXCISION (operator ruling 2026-08-01).** The struck section's
-central symbol was an esoteric borrowing with zero occurrences in the
-codebase. It is removed from this document entirely rather than
-preserved as a quotation. *There has never been a directive to found
-any part of this system on dogma or esotericism, and a struck symbol
-kept alive in a record is still a symbol in the corpus.* **This base is
-founded on science and mathematics or it is not founded.** Wherever a
-mechanism is wanted, it is named for what it computes.
+What was wrong, verified against the tree:
 
-What was wrong, verified against the tree, and worth keeping:
-
-- **The central symbol did not exist in the codebase.** Zero
-  occurrences. It came from relayed text and was listed beside landed
+- **The masking symbol does not exist in the codebase.** Zero occurrences. It
+  is a symbol from the relay text, and it was listed beside landed
   deeds as though it were a peer.
 - **`umbral` computes nothing.** It is a `String` on a registry sheet
   (`ledger::registry`), written to JSON, copied into journals, encoded
-  as one byte by the codec. No mechanic reads it. Its doc-comment
-  describes a reading; the doc-comment was cited as though it were
-  behaviour. (`umbral` itself STANDS — it is the astronomical umbra,
-  the shadow cone of an eclipse, and that is optics, not esoterica.
-  What was wrong was citing it as a mechanism, not the word.)
+  as one byte by the codec. No mechanic reads it to determine
+  occlusion. Its doc-comment says "occlusion-reading"; the doc-comment
+  was cited as though it were behaviour.
 - **The grouping was thematic, not structural.** `VeilDrawn`/`Lifted`,
   `ElderWarded`/`WardLifted` and `is_shielded` are three unrelated
-  mechanics with different triggers, costs and effects. They share an
-  English word and nothing else; the claimed structural gap was never
-  demonstrated.
+  mechanics with different triggers, costs and effects. They share the
+  English word "hidden" and nothing else. "ONE LAW OWED" asserted a
+  structural gap that was never demonstrated.
 
 **The general lesson, which applies to this whole document.** A
 thematic resonance between a relayed symbol and a landed name is NOT a
@@ -563,7 +411,7 @@ that never fixes a basis, which is precisely why the fold verdict is
 invariant to the frame of approach. Any reading that requires a chosen
 basis, a fixed rank, or a metric projection is void.
 
-### ARTICLE II — MANDATORY NON-VACUOUS CAPACITY
+### ARTICLE II — MANDATORY NON-VACUOUS STRUCTURE
 
 *A state yielding a vacuous set (`V = 0` or `D = 0`) cannot claim
 operational authorization or institutional standing.*
@@ -575,131 +423,236 @@ there to have standing. This is the constitutional form of the landed
 `PlaneUnearned` refusal, generalized from plane-opening to standing
 itself.
 
-### ARTICLE III — ANTI-DOGMA & COSMETIC PENALTY ORDINANCE
+### ARTICLE III — THE SCIENCE FOUNDATION
 
-*Any process, narrative, or structure that induces closed zero-torsion
-loops (`∫_Σ Θ = 0`) while expanding cosmetic non-utility `Ξ_cosmetic`
-shall suffer immediate total Eclipse: its ALLOCATION CLAIM is VACATED
-from the frame. The claim is revoked; the degree is never destroyed.*
+*Every quantity this system acts on is a physical observable. A reading
+that is not frame-free, not conserved, not reproducible, and not capable
+of failing is not a weak reading — it is not a reading at all, and no
+rule may consult it.*
 
-**THE TYPE CORRECTION (DIRECTIVE 02, 2026-08-01).** This article
-previously wrote `∮Θ = 0`. `Θ` is a 2-form, and `∮` integrates over a
-1-cycle — the expression was type-incorrect and could not be evaluated
-as written. A 2-form integrates over a 2-chain:
+**THE ANTI-DOGMA ORDINANCE IS STRUCK WHOLE** (operator ruling
+2026-08-01), and what it named is not lost — it is DERIVED. Recorded,
+per the house rule, rather than deleted:
 
-    ∫_Σ Θ  =  ∮_∂Σ e  =  0        Σ a 2-chain, ∂Σ its boundary loop
+    STRUCK:  the Eclipse as a penalty
+    STRUCK:  Ξ(w) = deeds(w) / (1 + ΔD(w))       the cosmetic meter
+    STRUCK:  T_k, α, β                            (already struck)
+    STRUCK:  "dogma", "vanity", "cosmetic non-utility" as legal terms
 
-The right-hand equality is Stokes' theorem applied to the first
-structure equation, and it is **exact only where the connection term
-vanishes** (`∫_Σ ω ∧ e = 0` — the abelian reduction). Stated in full,
-`∫_Σ Θ = ∮_∂Σ e + ∫_Σ ω ∧ e`. The honest reading is therefore: the
-closed loop encloses no torsion, so the displacement around its boundary
-closes.
+**Why the whole frame went, not just its scalar.** A penal ordinance
+presumes the thing it punishes HAS POWER that must be suppressed. That
+premise was false, and holding it forced the article to keep a meter, a
+window, and a tax — every one of which became an attack surface, and one
+of which (`T_k`) had to be struck for being the very cage the
+constitution outlaws. **Physics needs no penalty.** A closed loop at
+uniform potential does no work — not because a law forbids it, but
+because there is no free energy in it. Naming that "dogma" and taxing it
+was a moral frame wrapped around a thermodynamic fact, and the moral
+frame is what kept leaking.
 
-**None of this is what the article enforces.** The exact-rational
-realization below is the operative law, it is computable from the chain
-today, and it never evaluates a differential form. The corrected
-notation describes the shape; the window arithmetic IS the test.
+The six laws below are the laws of the known universe. Each is stated as
+physics, each forbids something the old article tried to punish, and each
+is grounded in code that already runs.
 
-**This is the load-bearing article.** It is the law that makes
-narrative authority worthless: titles, secrecy, lore and tradition
-carry exactly zero weight against capacity that can be computed.
+---
 
-**FIRST LINE — the loop CANNOT MINT** (§2f, the entanglement). Because
-`Δ(D) ⋈ ∇V` is one object, a traverse that emits deeds without moving
-the potential produces no capacity at all. This is an invariant, not a
-penalty: there is no path by which ritual becomes capacity. Everything
-below is the SECOND line — allocation, for structures that mint
-honestly but accrete cosmetic overhead alongside.
+#### LAW 1 — GAUGE INVARIANCE. Only frame-free quantities are physical.
 
-**Ξ_cosmetic, made countable.** In a receipt chain the closed
-zero-gradient loop is exactly measurable, with no new instrument: it is
-a window in which deeds were emitted and capacity did not grow.
+*The physics.* An observable may not depend on the coordinates chosen to
+describe it. A quantity that changes when you relabel is a property of
+the labelling, not of the world.
 
-    over a window w (the year voice, 60 ticks):
-        deeds(w)  = receipted deeds closed in w
-        ΔD(w)     = capacity degrees opened in w
-        Ξ(w)      = deeds(w) / (1 + ΔD(w))        exact rational
+*What it forbids.* Every "cosmetic" the old article hunted. Titles,
+lore, seat, station and tradition are relabellings — they alter no
+invariant, so they are not physical and cannot enter a rule. This needs
+no penalty clause: a gauge-dependent quantity is simply not admissible
+input.
 
-    the loop trap:   deeds(w) > 0  ∧  ΔD(w) = 0
+*Landed.* `rcf_signature` is conjugation-invariant; `coboundary_reduce`
+strips `B¹`, which is exactly the frame; the angle-free witness proves
+the fold verdict is invariant under all eight D4 frames and under gauge
+shift; `capacity_is_relabelling_invariant` pins the rank against six
+permutations.
 
-**Topicality — `T_k` IS STRUCK** (operator ruling 2026-08-01):
+#### LAW 2 — NOETHER. Every symmetry carries a conservation law.
 
-    STRUCK:  T_k  =  α_k · uplift_k / (1 + β_k · Ξ(w))
+*The physics.* Conservation is not imposed; it FOLLOWS from a symmetry
+of the system.
 
-`T_k` was a SCALAR SURROGATE — a continuous allocation score with two
-tunable dials, which is the `C`-cage rebuilt under a new name. Every
-property that made C unlawful applies to it unchanged: it collapses
-structure to one number, it can be climbed, and `α`/`β` are exactly the
-"bounded dynamic parameters" a descent needs to be tuned. An article
-written to outlaw scalar authority cannot enforce itself with a scalar.
+*What it forbids.* Books that do not close. And it is not decorative
+here — the engine's own antisymmetry `Δ_ij = −Δ_ji` forces the
+divergence to sum to zero over the vertices, so **a source at one vertex
+implies a sink at another, necessarily.** No relation is all-source.
+Conservation was never added to this system; it fell out of the
+alternating form the moment `set_antisym` became the only writer.
 
-**The two altitudes, replacing it** (`17_CAPACITY` §13d — law is
-deterministic, dynamics are not, and the kernel never scores):
+*Landed.* `set_antisym`; `first_conservation_break`; I1 across the
+value-movers; the aperture pair summing to exact zero.
 
-1. **KERNEL, local and exact, O(step).** A minting deed carries
-   `ΔD > 0`, verified against its witness, or `lawful()` REFUSES it.
-   Per-step, per-deed, binary. No window, no accumulation, no parameter.
-   **This is the whole of what the judge does about cosmetics**, and it
-   is the FIRST LINE above restated as a check the kernel can run.
-2. **LENS, global and windowed, never in the kernel.** `Ξ(w)` is read
-   over the year voice by the observing surface. It informs the
-   allocation FRAME; it never enters `lawful()`, never gates a
-   commitment, and never multiplies anything.
+#### LAW 3 — THE FIRST LAW. Energy changes form; changing form creates none.
 
-**The Eclipse is CLAIM-REVOCATION, not a score.** When the lens reads
-the loop trap, D4 VACATES the entity's allocation claim from the frame
-(`9bd3b9f`). The act is binary — the claim stands, or it is vacated —
-and it touches nothing else:
+*The physics.* A closed system's energy is constant. Converting it
+between forms — kinetic to potential, gradient to circulation — is
+bookkeeping, not generation.
 
-- **The degree is preserved.** `D` is never lowered, deleted, or decayed
-  by an Eclipse. Article IV holds (capacity never retreats) and I6 holds
-  (*no difference dies without account*). What is revoked is an
-  ILLEGITIMATE CLAIM ON ALLOCATION, which was never structure.
-- **The actor is preserved.** An eclipsed entity still acts, still emits
-  receipts, still tells its story — and receives nothing. Never barred,
-  never deleted (guardrail 6: no actor is ever excluded). It is simply
-  not paid.
-- **Reversible by construction.** A vacated claim is not a punishment
-  with a duration; the moment the entity opens genuine capacity again,
-  the claim is re-established by the same reading that vacated it.
-  Nothing needs forgiving because nothing was taken.
+*What it forbids.* Redistribution presented as growth. A fixed `Δ`
+re-split between `grad(p)` and circulation has changed FORM and created
+NOTHING, and this is the exact physical statement of the zero-sum trap:
+`Δ' = Q·Δ` is a coordinate change, and a coordinate change cannot mint.
+Genuine work expands the system — `Δ' = Δ + δΔ` with
+`Support(E') ⊃ Support(E)`.
 
-**`Ξ` AND `ΔD` ARE READINGS, NEVER OBJECTIVES** (operator correction
-2026-08-01). This clause is load-bearing and the article is unsafe
-without it. Nothing in this system may optimize `Ξ`, maximize `ΔD`, or
-treat either as a target to drive:
+*Landed.* `Support::new_edges_since` returns the relations that did not
+exist before, as positions; `expanded_from` is the predicate;
+DIRECTIVE 16 binds the mint to it.
 
-- A target is a scalar to descend or climb, and **descent is struck**
-  (§1). Optimizing `Ξ` is gradient descent with a capacity mask on —
-  the identical failure in new vocabulary, which is precisely how the
-  struck formulation survived the first time (guarding `ζ∇V` while the
-  objective leaked through C-scoring).
-- A measure used as a target stops measuring: work reshapes itself into
-  whatever the number counts, and `ΔD` becomes a thing to manufacture
-  rather than a thing to observe.
-- **The error has already been made once, here.** This document's
-  author applied `Ξ` to a session's own commits, read `ΔD = 0`, and
-  concluded the work was worthless — collapsing two kinds of
-  contribution into one scalar and discarding the side the scalar could
-  not see. Design work that decides what enters the kernel is not
-  capacity-zero; it is not on that axis at all. Recorded so the next
-  reader does not repeat it.
+#### LAW 4 — THE SECOND LAW. Work requires a gradient.
 
-The article penalises structures that emit while producing nothing.
-It does NOT reward structures that maximise the counter — those are the
-same pathology, and Article III convicts a `ΔD`-farmer exactly as it
-convicts a lore-keeper.
+*The physics.* A system in thermal equilibrium performs no work no
+matter how much energy it holds. Available work is set by the GRADIENT,
+never by the total.
 
-**Consequence, recorded: THIS IS AN ANTI-SYBIL MECHANISM.** A puppet
-civilization generates activity, not capacity. It can forge deeds
-cheaply and cannot forge capacity growth, because capacity opens only
-against verified work. Article III therefore prices exactly the thing a
-Sybil attacker produces in abundance, and prices it at zero. This is
-the first mechanism in the system that makes attack expensive rather
-than merely detectable (`KERNEL_RELAY` §7.1, the standing open problem).
+*What it forbids.* Static stasis, and this is the law that makes the
+dual pole necessary rather than stylistic. A universe may hold large
+rank entirely in closed circulation while every vertex balances: real
+structure, zero free energy, no work possible. Rank alone would admit
+it. **The refusal is thermodynamic, not moral** — nothing is being
+punished for being idle; there is simply no work to be had from a flat
+field.
 
-### ARTICLE IV — LUMINAL AXIAL INTEGRITY
+*Landed.* `potential_form` (the divergence, canonical, one pass);
+`dual_pole`; `Vacuity::Stasis`; and the whole thermal ledger this
+mirrors — `T_eq⁴`, the vent/bank dual, syntropy as retained structure
+over dissipated.
+
+#### LAW 5 — CAUSALITY. Nothing propagates faster than the medium allows.
+
+*The physics.* Influence travels at a finite speed; simultaneity is not
+global; no effect precedes its cause.
+
+*What it forbids.* Any reading that assumes global instantaneous
+knowledge. **`c` here is the chain's own step rate — one commitment per
+step** — and a world cannot see a neighbour's obligations except as they
+arrive. That is why unobserved absence may never be counted as absence:
+claiming knowledge outside your light cone is not conservatism, it is a
+causality violation, and it mints phantom capacity.
+
+*Landed.* `Observed::Unknown` and the `Resolve` door; the epistemological
+want (WANT-1 kind 1) as truth-starvation by design; Article IV's luminal
+clause; `mesh::spine` extending one commitment at a time.
+
+#### LAW 6 — FALSIFIABILITY AND REPRODUCIBILITY. The method, not a result.
+
+*The physics.* A claim that no observation could refute is not a
+scientific claim. An experiment that does not repeat for every observer
+is not evidence.
+
+*What it forbids.* Vacuous passes and node-dependent verdicts. A rule
+with no state that refuses it is unfalsifiable and therefore says
+nothing — which is why every invariant here owes a RED-FIRST witness.
+And a reading that varies with traversal order is unreproducible: two
+judges walking differently would disagree, so it cannot be law. **This
+is the law that kept `dV` out of `lawful()` until it was rebuilt
+canonically**, and the one under which measurement precedes ruling —
+Ruling Box 1 measured the ladder before `f` was set.
+
+*Landed.* Red-first across the witness set; `verify_orbit_witness` at
+O(step) with no search, identical on every node; the divergence form
+with no forest; `absence_cannot_be_witnessed` pinning what cannot be
+proven at all.
+
+---
+
+#### LAW 7 — PARSIMONY. No new primitive where a complement will do.
+
+*The physics.* Conjugate quantities are not independently postulated.
+Where two readings partition one conserved whole, defining the second as
+the first's complement introduces no new content — and makes their
+relationship arithmetically necessary rather than merely asserted.
+
+*What it forbids.* Inventing a force, a field, or a drive to name
+something that is already the other side of a book that closes. A second
+primitive is a second thing to attack, a second thing to drift, and a
+second place for a claim to hide.
+
+*Landed — syntropy, grounded by inversion:*
+
+```text
+whole     =  syntropic + entropic          one conserved partition
+syntropy  =  syntropic / whole             exact rational
+entropy   =  entropic  / whole  =  1 − syntropy
+
+syntropy + entropy  =  1                   exactly, by construction
+```
+
+Entropy is the MEASURED quantity; syntropy is its complement in the same
+book, and that is the entire content of the word. No force, no field, no
+drive, no second primitive — arithmetic on a partition that already sums
+to a constant, which is why the two readings **can never disagree**. It
+also makes "no neutral middle" arithmetically impossible to violate
+rather than merely forbidden, which is the difference between a law and
+a wish. (`world.rs:3263` computes it; `world.rs:3495` gates on it;
+`dop.rs:576` carries the per-axis form.)
+
+#### LAW 8 — GROUNDING. A term that computes is kept; a term that only resonates is excised.
+
+*The physics.* A name in a theory must denote something an experiment
+reads. Vocabulary that resonates without denoting is not a weak
+hypothesis — it is not a hypothesis.
+
+*What it forbids.* Ornament posing as mechanism. This is the operational
+test the whole article rests on, and it cuts both ways: syntropy is KEPT
+because three files compute and gate on it; the masking symbol was
+EXCISED because nothing read it. **There has never been a directive to
+found any part of this system on dogma or esotericism.**
+
+Three corollaries, each earned by getting it wrong first:
+
+1. **Excision must be TOTAL.** A struck symbol preserved inside its own
+   strike record is still a symbol in the corpus. A strike that keeps
+   the name alive to explain the strike has not removed it — it has
+   given it a permanent home. Keep the instruction, drop the symbol.
+2. **PROVENANCE IS NOT FUNCTION.** `umbral` is the astronomical umbra —
+   the shadow cone of an eclipse, which is OPTICS. It was wrongly
+   grouped with esoterica on the strength of how it sounds. Judge the
+   MECHANISM, never the etymology: the real error in that case was
+   citing a `String` field as though it were a mechanism, not the word
+   itself. Over-correction is its own failure, and a law that cannot
+   distinguish optics from mysticism will cut out working physics.
+3. **REFUSAL MUST BE GENERIC.** A clause refusing a coinage BY NAMING IT
+   reintroduces the coinage. Refuse the class, never the instance —
+   otherwise the refusal is the vector.
+
+**WHAT THE OLD ARTICLE CAUGHT, NOW DERIVED.** Nothing is lost by the
+strike:
+
+| the old target | the law that now excludes it |
+|---|---|
+| lore, titles, tradition as authority | LAW 1 — gauge-dependent, not observable |
+| the closed zero-gradient loop | LAW 4 — no gradient, no available work |
+| shuffling counted as growth | LAW 3 — form changed, nothing created |
+| farming the counter | LAW 6 — an unfalsifiable target measures nothing |
+| phantom capacity from assumed absence | LAW 5 — a claim outside the light cone |
+| books that do not close | LAW 2 — conservation follows from the symmetry |
+| a second primitive invented for one side of a closed book | LAW 7 — parsimony; the complement is already defined |
+| vocabulary that resonates but denotes nothing | LAW 8 — grounding; a term that computes is kept |
+
+**THE ANTI-SYBIL CONSEQUENCE SURVIVES AND IS STRONGER**, because it is
+now a derivation rather than a tax. A puppet civilization generates
+activity, and under LAW 3 activity that forms no new relation creates
+nothing — not "is penalised," creates nothing. Deeds are cheap; support
+expansion is not, because it must survive LAW 1 (frame-free), LAW 2
+(the books close), and LAW 6 (a witness that could have failed). The
+attacker is not detected and fined; the attack has no product. This is
+still the mechanism `KERNEL_RELAY` §7.1 wants, and it no longer depends
+on a window, a meter, or a parameter.
+
+**BUILD DEBT** (honestly, per LAW 6): LAW 3's support test is landed and
+uncalled by the kernel; LAW 4's dual pole is landed and not yet a kernel
+invariant; LAW 1's fold gate has no production caller. The laws bind as
+written — these are the wirings that satisfy them.
+
+### ARTICLE IV — RANK NEVER RETREATS
 
 *Transport along the maximum degree axis remains uncaged. No scalar
 bound and no artificial ceiling may be imposed on the uplift `dV` as it
@@ -714,7 +667,7 @@ misreading.**
    failed topology, operator ruling 2026-08-01) and nothing in this
    article revives it. This is `ELEVATE-1`'s "the fiber never retreats"
    (`BadClimb`) generalized from the gauge climb to capacity itself.
-2. **LUMINAL = THE CHAIN'S OWN STEP RATE.** The propagation limit of
+2. **THE PROPAGATION LIMIT IS THE CHAIN'S OWN STEP RATE.** The propagation limit of
    this manifold is one commitment per step. Nothing crosses the
    manifold faster than the chain extends, and no reading may assume it
    does. "Uncaged" bounds the AMPLITUDE of uplift, never its rate: the
@@ -726,11 +679,12 @@ misreading.**
 
 | condition | torsion manifestation | constitutional action |
 |---|---|---|
-| dogmatic loop trap | deeds emitted, `ΔD = 0` over the window | Article III — Eclipse (claim vacated). **`T_k → 0` struck with `T_k` itself**; an article outlawing scalar authority does not enforce itself with a scalar |
+| no gradient | `dV ≡ 0`: rank held in closed circulation | Article III LAW 4 — no free energy; no work available |
+| form changed, nothing made | `Δ' = Q·Δ`, `Support(E')` unchanged | Article III LAW 3 — the first law; mints nothing |
 | coordinate/metric lock | any basis-fixed or rank-locked reading | Article I — void; recompute coordinate-free |
 | vacuous closure | `D = 0` or no occupied capacity | Article II — no standing, no weight, no mint |
 | capacity retreat | a step lowering `D` outside lawful contraction | Article IV — refuse (`BadClimb` shape) |
-| uncaged emission | `S⁺_out ∧ S⁺_hol` growing `D` against verified work | full alignment — maximum allocation |
+| earned emission | a loop's charge growing the rank against verified work | full alignment — maximum allocation |
 
 Audit is by differential invariant, never by review. No title, seat,
 station or tradition alters any row.
@@ -762,29 +716,12 @@ computation, hiding one behind vocabulary is cosmetic.
 1. **`Ξ_cosmetic` is not measured.** The window arithmetic in Article
    III is exact and computable from the chain today, and nothing
    computes it. First build.
-2. **`D` is not measured — CLEARED (DIRECTIVE 04, 2026-08-01).**
-   `kernel::bridge::read_entangled` measures `D` as the count of
-   independent relations surviving `Π_G` over the ACTIVE SUPPORT, and
-   `lawful()` now CONSUMES it on every state transition pass
-   (`capacity_law`). Article II has its operand: a `DiscoveryMinted`
-   deed on a world of `D = 0` refuses `MintWithoutCapacity`, both
-   readings carried whole. **Articles III and IV remain without
-   enforcement** — III is a window reading and belongs to the lens
-   (§7b), and IV's monotonicity is not yet an invariant.
-3. **The torsion test has no caller — STILL OPEN, and the test itself
-   was rebuilt.** `f_fold_star` / `judged_fold` are landed, witnessed,
-   and invoked nowhere outside `rfa-core`'s own tests. DIRECTIVE 01
-   corrected what they COMPUTE (the search fallacy struck, the polarity
-   inverted); it did not give them a caller. Article I's mandate stays
-   unenforced until the merge site calls them.
-3b. **The reduction discards scale, and nothing has ruled on it.**
-   `coboundary_reduce`'s phase 2 divides out `gcd(numerators)`, so two
-   universes differing only in the SIZE of their obligations reduce to
-   one representative and compare as gauge. On 3 entities × 1 channel
-   only one entry survives, normalized to ±1, so every non-composing
-   triangle — residual 2, 995, or −13 — carries the identical
-   signature. Whether magnitude is structure or frame is an operator
-   ruling, not a derivation.
+2. **`D` is not measured.** `PhiK I^(3)` ("rank: dim of the relational
+   structure") specifies it and no code reads it. Until `D` is
+   measured, Articles II, III and IV have no operand.
+3. **The torsion test has no caller.** `orbit_lock` / `f_fold_star`
+   are landed and witnessed in `rfa-core` and are invoked nowhere.
+   Article I's mandate is unenforced until the merge site calls them.
 3a. **The kernel admits gaps silently** (§2g). At an entangled seam it
    checks an inequality and lets everything below the bound through
    unaccounted. It must instead hold both sides and DISPOSITION the
@@ -831,7 +768,7 @@ is not a mechanism.
 |---|---|---|
 | **§2f entanglement** — no capacity without potential motion | reads `(prior, step)` only | `creation()` in `kernel/src/lib.rs` |
 | **§2g gap disposition** — hold both sides, dispose the gap | one deed, one comparison | `creation()`; new `Unlawful` arm carrying both sides |
-| **Art. IV monotone** — a step may not lower `D` outside lawful reduction | `prior`→`next` comparison | new invariant, the `gauge_law` shape |
+| **Art. IV monotone** — a step may not lower the rank outside lawful reduction | `prior`→`next` comparison | new invariant, the `gauge_law` shape |
 | **Art. II non-vacuous** — `D = 0` holds no standing | property of `prior` | `containment()`, or a new gate beside it |
 | **`D` itself** — the structure surviving `Π_G(Δ(Ω))` | pure function of one state | kernel gains its `rfa-core` dep (anticipated at U_DIRECTIVES §4) |
 
@@ -840,7 +777,7 @@ is not a mechanism.
 | claim | why not local | where it lives |
 |---|---|---|
 | **Art. III `Ξ` window** — `deeds/(1+ΔD)` over 60 ticks | spans many steps | `scribe` / `lens` |
-| **Art. III allocation** — the Eclipse (claim vacated; `T_k` struck) | a policy over many actors | conductor / mesh |
+| **Art. III allocation** — topicality `T_k`, the Eclipse | a policy over many actors | conductor / mesh |
 | **§2e traverse congruence** — `α ≅ Ω` | spans a whole chain | `lens` over the spine |
 | **§2c `U*` union**, **§2d white holes** | descriptions of the whole | no code; framing only |
 | **§2j field force** — friction, melt, key gap | already landed OUTSIDE the judge, priced per deed | `cfe/src/world.rs` (2395, 3757, 3986) |
@@ -875,3 +812,78 @@ whether `I5`'s decay and the assay bound are entangled seams (§2g);
 what congruence relation `α ≅ Ω` uses (§2e); and whether the breaking
 `VERSION` bump for gap disposition lands alone or with the ARC corpus
 work-shape.
+
+---
+
+## §8 PROOF — `D > 0`, measured on a real universe
+
+The whole construction is worthless if the rank is always zero. It was,
+for the entire life of this design, and this section is the record that
+it no longer is. **Reproduce it with `cargo test -p kernel --test
+bridge_pins`.**
+
+### 8a. The claim
+
+There exists a lawful committed state whose relational structure has
+rank greater than zero, read through the kernel by the sealed math.
+
+### 8b. The construction
+
+Four orbs. Four standing bonds forming a ring — 1→2, 2→3, 3→4, 4→1 —
+each of rate 3. **No chords:** orbs 1 and 3 have no obligation between
+them, and neither do 2 and 4.
+
+    engine/kernel/tests/bridge_pins.rs
+      a_universe_with_an_unclosed_obligation_ring_reads_capacity
+
+### 8c. Why the rank is non-zero
+
+Two facts, and both are needed:
+
+1. **It is a cocycle.** The cocycle condition is checked only on FILLED
+   triangles — a triple whose three edges are all present. Every triple
+   here is missing an edge, so no condition applies and no residual
+   stands. Nothing fails to compose.
+2. **It is not a coboundary.** Walking the ring does not return where it
+   started, so no assignment of per-orb potentials reproduces these
+   obligations. `rfa_core::holonomies` reduces against a spanning forest
+   and finds one edge the forest cannot explain, carrying charge.
+
+Cocycle and not coboundary is exactly non-trivial `H¹`. The measured
+value is `rank = 1`, with `rank_is_defined()` true and `residuals`
+empty.
+
+### 8d. The negative controls, which fix its meaning
+
+- **A ring that closes consistently reads rank 0.** Same four orbs, but
+  the obligations balance around the loop. Structure is the FAILURE to
+  close, never the loop itself.
+- **Adding the missing 1—3 chord fills the triangles** and the same
+  economic situation re-reads as strain rather than topology. One fact,
+  seen through the support.
+- **A world with no obligations reads rank 0**, defined — a true zero,
+  not an unmeasurable one.
+- **A new orb changes nothing.** Chartering adds a vertex and moves the
+  rank not at all: growth is ALLOWED, never forced.
+
+### 8e. What had to be true first
+
+Each of these was a live defect, and any one of them alone forces
+`D ≡ 0` or `D` undefined:
+
+| defect | effect if uncorrected |
+|---|---|
+| the algebra had no caller | `Δ(Ω)` is not a computation; nothing to measure |
+| projecting banks differenced | a pure coboundary; reduction annihilates it |
+| a dense complex | every cocycle is a coboundary; rank always zero |
+| absent read as zero | phantom triangles report phantom strain |
+| unverified absence | phantom cycles mint rank never earned |
+| residuals summed to a scalar | the emission source is destroyed |
+| the residual clause on the gate | non-composing states barred from being read |
+
+### 8f. Honest limits
+
+The rank is measured and **used by nothing.** `lawful()` does not read
+it, Article II does not gate on it, Article IV does not defend it, and
+no mint is bounded by it. The proof is that the number is real, not
+that the engine acts on it.

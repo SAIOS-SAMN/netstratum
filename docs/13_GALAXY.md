@@ -52,7 +52,7 @@ obeys (the universe gains dimensions as discoveries land, contract §9).
   beside `EraAnnexed`/`EraFolded` — a universe-scale event carrying the
   observer (the crossing civilization), the creator (the progenitor seat),
   the center, and the reach. A `galaxies.json` card beside the star-chart
-  is the mirror's rendering (SEAL C), rebuilt from receipts. The
+  is the LENS's rendering (SEAL C), rebuilt from receipts. The
   EraAnnexed precedent binds whole (coder-01 clarification): the
   world-replay match arm is an **explicit no-op** — a universe event
   never enters a world chronicle, and world replay ignores it if it

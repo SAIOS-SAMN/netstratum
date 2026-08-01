@@ -29,14 +29,14 @@
 //! ```text
 //! sig(a) ≠ sig(b)  →  TorsionVeto(SignaturesDiffer)
 //!                     EXACT PROOF of non-conjugacy. Different invariant
-//!                     factors mean no element of GL_n(Q) — let alone of
+//!                     factors mean no element of GL_n(Rat) — let alone of
 //!                     the operator subgroup — carries a onto b. The
 //!                     difference is genuine structure. The fold is
 //!                     VETOED and the residue EMITS.
 //!
 //! sig(a) = sig(b)  →  conjugacy is NECESSARY-but-INSUFFICIENT here.
 //!                     Equal invariant factors prove conjugacy in the
-//!                     FULL GL_n(Q); the lawful operators are a subgroup
+//!                     FULL GL_n(Rat); the lawful operators are a subgroup
 //!                     of it, so equality alone does not prove that a
 //!                     LAWFUL frame change relates the two. A presented
 //!                     OrbitWitness must be re-walked:
@@ -60,11 +60,13 @@
 //! proves that THIS operator, walked THIS many times, actually carries
 //! `a` onto `b`.
 //!
-//! An operator is a `GL_n(Q)` conjugation `A·Δ·A⁻¹`. General conjugation
-//! need not preserve antisymmetry, so each step is checked by
-//! [`Delta::verify_conservation`]: an operator that leaves the
+//! An operator is a `GL_n(Rat)` conjugation `A·Δ·A⁻¹`. General
+//! conjugation need not preserve antisymmetry, so each step is checked
+//! by [`Delta::verify_conservation`]: an operator that leaves the
 //! antisymmetric surface generates no valid walk (it breaks off), never
-//! a panic — the gate is total.
+//! a panic — the gate is total. Conjugacy is tested by the EXACT RCF
+//! signature ([`crate::rcf::rcf_signature`]), never a hash (the law
+//! judges on exact form).
 
 use crate::delta::Delta;
 use crate::rcf::rcf_signature;
@@ -72,9 +74,9 @@ use cfe::ratio::Ratio;
 use num_traits::Zero;
 
 /// A square rational matrix, row-major.
-pub type QMatrix = Vec<Vec<Ratio>>;
+pub type RatMatrix = Vec<Vec<Ratio>>;
 
-/// A mesh operator — a `GL_n⁺(Q)` conjugation. Carries its inverse
+/// A mesh operator — a `GL_n⁺(Rat)` conjugation. Carries its inverse
 /// (the caller supplies both; the pair defines the conjugation
 /// `A·Δ·A⁻¹`) and the orientation flag `det(A) > 0`. A non-positive
 /// determinant is not in the group: [`Operator::apply`] refuses it,
@@ -82,8 +84,8 @@ pub type QMatrix = Vec<Vec<Ratio>>;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Operator {
     pub id: usize,
-    pub matrix: QMatrix,
-    pub matrix_inv: QMatrix,
+    pub matrix: RatMatrix,
+    pub matrix_inv: RatMatrix,
     pub det_sign_positive: bool,
 }
 
@@ -158,7 +160,7 @@ pub enum TorsionCause {
     /// so no conjugation of any kind relates the two states. This is
     /// the branch that EMITS — the residue becomes a new plane.
     SignaturesDiffer,
-    /// The states are conjugate in `GL_n(Q)`, but no witness was
+    /// The states are conjugate in `GL_n(Rat)`, but no witness was
     /// presented, so no LAWFUL frame change has been shown to relate
     /// them. Conjugacy unproven; the default is veto.
     WitnessAbsent,
@@ -279,7 +281,7 @@ pub fn f_fold_star(
     witness: Option<&OrbitWitness>,
 ) -> FoldVerdict {
     // O(n³ · fiber), exact, coordinate-free: the invariant-factor
-    // sequences over Q[x]. Different factors = provably non-conjugate.
+    // sequences over Rat[x]. Different factors = provably non-conjugate.
     if rcf_signature(a) != rcf_signature(b) {
         return FoldVerdict::TorsionVeto(TorsionCause::SignaturesDiffer);
     }

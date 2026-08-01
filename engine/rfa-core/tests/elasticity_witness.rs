@@ -10,7 +10,7 @@
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 use rfa_core::{
-    coherence_functional, for_each_residual, magnitude, validate_step, Delta, GateVerdict,
+    coherence_functional, for_each_residual, magnitude, validate_step, Delta, GateVerdict, Lens,
     StepBound,
 };
 
@@ -37,13 +37,13 @@ fn shocked(d02: Ratio) -> Delta {
 fn shock_stress_gated_recovery_convergence() {
     // 1. EQUILIBRIUM — the stress gauge reads exactly zero.
     let colony = equilibrium();
-    assert!(coherence_functional(&colony).is_zero());
+    assert_eq!(coherence_functional(&colony), Lens::of(ratio(0, 1)));
 
     // 2. THE SHOCK — a meteor severs the 0↔2 trade relation: Δ02
     //    jumps 3/2 → 7/2 (torsion +2). The gauge reads non-zero…
     let hit = shocked(ratio(7, 2));
     let stress = coherence_functional(&hit);
-    assert_eq!(stress, ratio(12, 1), "six ordered triples × |±2| — the proportional law");
+    assert_eq!(stress, Lens::of(ratio(12, 1)), "six ordered triples × |±2| — the proportional law");
 
     //    …and the residuals NAME the damaged relation: every firing
     //    triple involves all three entities around the broken 0↔2 leg.
@@ -58,8 +58,9 @@ fn shock_stress_gated_recovery_convergence() {
     assert_eq!(fired, 6);
 
     // 3. GATED RECOVERY — the colony re-equilibrates tick by tick.
-    //    Each step must pass all three gates (conservation, bounded
-    //    magnitude, productivity: stress strictly falls).
+    //    Each step passes the TWO gates: conservation, and the
+    //    two-sided magnitude bound. (The productivity gate is STRUCK —
+    //    see step 5.)
     let bound = StepBound {
         reference: magnitude(&hit),
         epsilon: ratio(1, 1),
@@ -69,39 +70,44 @@ fn shock_stress_gated_recovery_convergence() {
     let mut last_stress = stress;
     for d02 in path {
         let next = shocked(d02);
-        match validate_step(&current, &next, &bound) {
-            GateVerdict::Accepted {
-                coherence_before,
-                coherence_after,
-            } => {
-                assert_eq!(coherence_before, last_stress);
-                assert!(
-                    coherence_after < coherence_before,
-                    "recovery strictly reduces stress"
-                );
-                last_stress = coherence_after;
-            }
-            refused => panic!("a lawful recovery step refused: {refused:?}"),
-        }
+        assert_eq!(
+            validate_step(&current, &next, &bound),
+            GateVerdict::Accepted,
+            "a lawful recovery step refused"
+        );
+        // C is READ here and governs nothing. Note what CANNOT be
+        // written: `now < last_stress` does not compile — `Lens` has no
+        // ordering, so "the path falls" is not even expressible as a
+        // check. That is the cage doing its work.
+        last_stress = coherence_functional(&next);
         current = next;
     }
 
     // 4. CONVERGENCE — home again, exactly: the gauge reads zero and
     //    the recovered colony IS the equilibrium, byte-for-byte.
-    assert!(last_stress.is_zero());
+    assert_eq!(last_stress, Lens::of(ratio(0, 1)));
     assert_eq!(current, equilibrium());
 
-    // 5. THE GATES HAVE TEETH — a "recovery" that overshoots away from
-    //    equilibrium (Δ02: 3/2 → 4) refuses typed as Unproductive.
+    // 5. THE LINEAGE IS NOT BOUND TO C's LANE (operator ruling
+    //    2026-08-01, the struck productivity gate). A step moving AWAY
+    //    from equilibrium (Δ02: 3/2 → 4) is now ACCEPTED. The struck
+    //    gate refused exactly this as `Unproductive`, which confined
+    //    every lineage to one direction along one scalar axis and
+    //    foreclosed every other branch it could open.
+    //
+    //    A scalar being uni-directional is fine FOR THE SCALAR. Binding
+    //    the lineage to it is the fault.
     let overshoot = shocked(ratio(4, 1));
-    match validate_step(&current, &overshoot, &bound) {
-        GateVerdict::Unproductive {
-            coherence_before,
-            coherence_after,
-        } => {
-            assert!(coherence_before.is_zero());
-            assert!(!coherence_after.is_zero());
-        }
-        other => panic!("expected the productivity refusal, measured {other:?}"),
-    }
+    assert_eq!(
+        validate_step(&current, &overshoot, &bound),
+        GateVerdict::Accepted,
+        "motion away from C's minimum is lawful — the lineage is n-dimensional"
+    );
+    // C still READS the excursion — and cannot be asked which is
+    // larger. `>` on a `Lens` is a type error, by design.
+    assert_ne!(
+        coherence_functional(&overshoot),
+        coherence_functional(&current),
+        "C observes the excursion; it cannot rank it"
+    );
 }

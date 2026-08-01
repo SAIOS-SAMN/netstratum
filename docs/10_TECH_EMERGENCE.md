@@ -178,7 +178,7 @@ science), conductor build-step routing, and the venture deed
 **WARDEN-1a landed** (tags 74/75): `ward_elder` seats the reverse
 shield — every aperture refuses both directions (`TheWardHolds`)
 until `lift_ward(claimer, depth)` opens the depth gate (ceiling 5,
-placeholder; depth is the mirror's solves reading passed by the
+placeholder; depth is the lens's solves reading passed by the
 caller); the lift names its claimer forever; deeds run in order,
 typed. OPEN as WARDEN-1b: the elder's genesis seeding (the roster
 `elder` flag), the standing forge task at FORGE-2a saturation, and
@@ -240,7 +240,7 @@ condition table's cadence, placeholders like every v1 threshold).
 
 **LANDED:** tag 78 codec + replay arm + `World::forge_instrument`
 (all three gates witnessed: grade vocabulary, understanding, chain);
-mirror exports `instruments` (orb/grade/node data fields); the
+the lens exports `instruments` (orb/grade/node data fields); the
 observer reads per-world horizons (`epistemic_reach`); CLI `forge
 <condition>` verb. Witness `world_manu` + the consolidated wire
 round-trip.
@@ -254,5 +254,5 @@ round-trip.
 - **Ideology input:** post-IDEO-1, the 09 cohesion counters may enter the
   condition table — read as landed state, never invented here.
 - **Journal integration:** discoveries surface on the Terminal Wall as
-  Milestone entries (mirror-side rendering, JOURNAL-1's law — automatic
+  Milestone entries (LENS-SIDE rendering, JOURNAL-1's law — automatic
   once the receipts exist).

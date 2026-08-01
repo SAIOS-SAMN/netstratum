@@ -15,7 +15,7 @@ use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 use rfa_core::{
     coboundary_reduce, coherence_functional, for_each_residual, magnitude, validate_step,
-    Delta, GateVerdict, StepBound,
+    Delta, GateVerdict, Lens, StepBound,
 };
 
 fn delta3(d01: Ratio, d12: Ratio, d02: Ratio) -> Delta {
@@ -31,7 +31,7 @@ fn delta3(d01: Ratio, d12: Ratio, d02: Ratio) -> Delta {
 #[test]
 fn coherent_delta_measures_zero() {
     let d = delta3(ratio(1, 1), ratio(1, 2), ratio(3, 2));
-    assert!(coherence_functional(&d).is_zero());
+    assert_eq!(coherence_functional(&d), Lens::of(ratio(0, 1)));
     let mut fired = false;
     for_each_residual(&d, |_, _, _, _, _| fired = true);
     assert!(!fired, "a coherent Delta yields no residual at all");
@@ -43,7 +43,7 @@ fn coherent_delta_measures_zero() {
 #[test]
 fn incoherent_delta_measures_its_residual_exactly() {
     let d = delta3(ratio(2, 1), ratio(3, 1), ratio(7, 1));
-    assert_eq!(coherence_functional(&d), ratio(12, 1));
+    assert_eq!(coherence_functional(&d), Lens::of(ratio(12, 1)));
     let mut count = 0;
     for_each_residual(&d, |_, _, _, _, r| {
         assert!(r == &ratio(2, 1) || r == &ratio(-2, 1));
@@ -58,7 +58,7 @@ fn incoherent_delta_measures_its_residual_exactly() {
 fn constructed_deltas_conserve_exactly() {
     let d = delta3(ratio(1042, 1000), ratio(542, 1000), ratio(1584, 1000));
     assert!(d.verify_conservation());
-    assert!(d.conservation_measurement().is_zero());
+    assert_eq!(d.first_conservation_break(), None, "no position breaks the surface");
 }
 
 /// VECTOR 3 — a pure coboundary reduces to ZERO: the coherent state is
@@ -125,32 +125,28 @@ fn coboundary_shift_does_not_change_the_class() {
     );
 }
 
-/// The gates: a productive, conserving, bounded step ACCEPTS; each
-/// gate refuses typed with its measurement carried whole.
+/// The gates: a conserving, bounded step ACCEPTS in EITHER direction
+/// along C; each surviving gate refuses typed with its measurement
+/// carried whole.
 #[test]
-fn the_three_gates_rule_typed() {
+fn the_two_gates_rule_typed() {
     let before = delta3(ratio(2, 1), ratio(3, 1), ratio(7, 1)); // C = 12
     let after = delta3(ratio(2, 1), ratio(3, 1), ratio(6, 1)); // C = 6
     let bound = StepBound {
         reference: magnitude(&before),
         epsilon: ratio(1, 1),
     };
-    match validate_step(&before, &after, &bound) {
-        GateVerdict::Accepted {
-            coherence_before,
-            coherence_after,
-        } => {
-            assert_eq!(coherence_before, ratio(12, 1));
-            assert_eq!(coherence_after, ratio(6, 1));
-        }
-        other => panic!("expected acceptance, measured {other:?}"),
-    }
+    assert_eq!(validate_step(&before, &after, &bound), GateVerdict::Accepted);
 
-    // Unproductive: coherence rises 6 → 12.
-    match validate_step(&after, &before, &bound) {
-        GateVerdict::Unproductive { .. } => {}
-        other => panic!("expected productivity refusal, measured {other:?}"),
-    }
+    // AND THE SAME STEP REVERSED (C rises 6 → 12) is equally lawful.
+    // The struck productivity gate refused this as `Unproductive`,
+    // binding the lineage to one direction on C's axis. C may rise; the
+    // lineage was never travelling C's lane.
+    assert_eq!(
+        validate_step(&after, &before, &bound),
+        GateVerdict::Accepted,
+        "direction along C governs nothing — the lane is struck"
+    );
 
     // Magnitude drift: a tight band refuses a large excursion.
     let tight = StepBound {
@@ -165,8 +161,7 @@ fn the_three_gates_rule_typed() {
     }
 }
 
-/// Holding at full coherence is lawful: C = 0 → C = 0 accepts (the
-/// fixed point is not "unproductive").
+/// Holding still is lawful: a step that changes nothing accepts.
 #[test]
 fn the_fixed_point_is_lawful() {
     let d = delta3(ratio(1, 1), ratio(1, 2), ratio(3, 2));
@@ -174,8 +169,5 @@ fn the_fixed_point_is_lawful() {
         reference: magnitude(&d),
         epsilon: ratio(1, 1),
     };
-    assert!(matches!(
-        validate_step(&d, &d, &bound),
-        GateVerdict::Accepted { .. }
-    ));
+    assert_eq!(validate_step(&d, &d, &bound), GateVerdict::Accepted);
 }
