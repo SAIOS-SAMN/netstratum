@@ -41,7 +41,7 @@
 
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::Committed;
-use rfa_core::{holonomies, Delta, Support};
+use rfa_core::{dual_pole, holonomies, potential_form, Delta, Flow, PotentialForm, Support, Vacuity};
 
 /// BOND-1: the standing order, `source` → `target` at `rate`/tick.
 pub const CHANNEL_BOND: usize = 0;
@@ -162,6 +162,11 @@ pub struct EntangledRead {
     /// indices intact. Never pre-summed: these are what emit (D3) and
     /// what the composition law will compose.
     pub residuals: Vec<Residual>,
+    /// `dV` — the SECOND POLE, carried whole as its non-zero
+    /// components: which vertices carry net flow, and how much. Empty
+    /// means pure circulation — every vertex balances, nothing sources
+    /// or sinks, and the field does no work however large it is.
+    pub flows: Vec<Flow>,
     /// Pairs whose relation was NOT observed. While any stands, the
     /// complex has holes of unknown shape and no rank may be read
     /// off it.
@@ -200,20 +205,12 @@ impl EntangledRead {
         self.unknown == 0
     }
 
-    /// **LENS ONLY** (`18_TORSION` §2b). The L1 aggregate of the
-    /// residual field, `C(Δ) = Σ|R|`, for reporting to a human. It is
-    /// DERIVED on demand and never stored, because a scalar aggregate
-    /// may not be what the system computes on — the field in
-    /// [`EntangledRead::residuals`] is. Do not gate on this.
-    pub fn defect(&self) -> Ratio {
-        let zero = ratio(0, 1);
-        self.residuals.iter().fold(zero.clone(), |sum, held| {
-            let size = match held.value < zero {
-                true => -held.value.clone(),
-                false => held.value.clone(),
-            };
-            sum + size
-        })
+    /// THE VERDICT — both poles read at once (`rfa_core::dual_pole`).
+    /// Only `Entangled` stands: structure WITH gradient. `Stasis` is
+    /// rank without flow — a wheel turning against nothing, at any
+    /// size.
+    pub fn verdict(&self) -> Vacuity {
+        dual_pole(self.rank, &PotentialForm { flows: self.flows.clone() })
     }
 }
 
@@ -471,7 +468,8 @@ pub fn read_entangled_observed(state: &Committed, unknown: usize) -> EntangledRe
     // checking it invents strain from a relation that does not exist,
     // which is the false gauge collapse.
     let residuals = filled_residuals(&delta, &support);
+    let flows = potential_form(&delta, &support).flows;
     // D — the independent cycles carrying charge no frame explains.
     let rank = holonomies(&delta, &support).len();
-    EntangledRead { rank, residuals, unknown }
+    EntangledRead { rank, residuals, flows, unknown }
 }

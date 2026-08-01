@@ -42,7 +42,7 @@ fn a_world_that_relates_nothing_carries_no_structure() {
     // so this is a true zero, not an unmeasurable one.
     let read = read_entangled(&orbs(3));
     assert_eq!(read.rank, 0, "no obligations, no surviving structure");
-    assert_eq!(read.defect(), ratio(0, 1), "nothing to fail to compose");
+    assert!(read.residuals.is_empty(), "nothing to fail to compose");
     assert!(read.rank_is_defined(), "a zero cocycle IS a cocycle");
 
     // A lone orb relates to nothing at all, lawfully.
@@ -92,7 +92,7 @@ fn obligations_that_compose_carry_no_surviving_structure() {
     assert_eq!(*delta.entry(1, 0, CHANNEL_BOND), ratio(-2, 1), "antisymmetric by construction");
 
     let read = read_entangled(&state);
-    assert_eq!(read.defect(), ratio(0, 1), "5 = 2 + 3: the triangle composes");
+    assert!(read.residuals.is_empty(), "5 = 2 + 3: the triangle composes");
     assert!(read.rank_is_defined(), "a cocycle has a class to reduce to");
     assert_eq!(read.rank, 0, "composing obligation is pure frame");
 }
@@ -105,7 +105,7 @@ fn obligations_that_do_not_compose_carry_strain() {
     state.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(1, 3, 9)];
 
     let read = read_entangled(&state);
-    assert!(read.defect() > ratio(0, 1), "a non-composing triangle carries defect");
+    assert!(!read.residuals.is_empty(), "a non-composing triangle carries strain");
     // NON-COMPOSITION DOES NOT BAR THE READ (operator ruling
     // 2026-08-01, the struck residual clause). The old law refused to
     // define capacity here, on the reasoning that Δ ∉ Z¹ leaves no
@@ -143,7 +143,7 @@ fn obligations_to_unknown_or_self_are_skipped_never_panic() {
     state.bonds = vec![bond(1, 99, 4), bond(1, 1, 7)];
     let read = read_entangled(&state);
     assert_eq!(read.rank, 0);
-    assert_eq!(read.defect(), ratio(0, 1));
+    assert!(read.residuals.is_empty());
 }
 
 #[test]
@@ -174,7 +174,7 @@ fn an_unresolved_absence_refuses_capacity_unverified_absence_would_mint() {
     assert!(seen.rank_is_defined(), "fully observed cocycle");
 
     let unseen = read_entangled_observed(&state, 1);
-    assert_eq!(unseen.defect(), seen.defect(), "the strain reading is unchanged");
+    assert_eq!(unseen.residuals, seen.residuals, "the strain field is unchanged");
     assert!(
         !unseen.rank_is_defined(),
         "one unobserved pair is enough — absence must be verified, never assumed"
