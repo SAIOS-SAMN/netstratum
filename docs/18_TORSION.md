@@ -743,11 +743,37 @@ The test is never how a word sounds or where it was first written down.
 term drawn from anywhere at all may smuggle in an agent. Judge which of
 those it is doing here.
 
-*Landed.* The excision of the deities, the divine realm and the invented
-life-force from the seed roster — with the fullness/emptiness type
-vocabulary RESTORED after it was wrongly cut on provenance; the
-terminology law; and this article's own self-application, which struck
-three of its own sections for naming without computing.
+**THE LAYER ERROR — recorded because it is the most useful mistake in
+this article's history.** This law's first enforcement swept the SEED
+ROSTER: three civilizations were renamed for having mythological
+etymologies. **That was the wrong layer, and the sweep was reverted
+whole.**
+
+LAW 9 forbids dogma in the KERNEL and PERMITS modelled phenomena in
+CONTENT. The kernel was already clean — it held none. The roster is the
+content layer, which is exactly where world-building names lawfully
+live. The law was applied backwards: it left the place it governs alone
+and cut the place it protects.
+
+And those names were never lore-only. `Anunnaki`, `Archon` and
+`Agarthan` each carry `station: progenitor` — a committed field the
+seat-width law computes on. They resonate AND compute, which is the
+standard, and `Anunnaki` names a progenitor-class civilization while
+`Archon` names a tier. Meanwhile `12_UNION` §2a had ALREADY performed
+this exact discrimination on that exact word: *"An external four-tier
+sketch placing 'Archons' above the progenitors was consulted and
+OVERRIDDEN."* The project kept the name and refused the imported
+hierarchy — the correct move — and the enforcement sweep then cut the
+name anyway.
+
+**The standing rule this leaves:** enforcement of LAW 9 looks at the
+kernel, the sealed math, and the law documents. A civilization's name is
+not a premise the system rests on, and a name is not evidence of a
+mechanism. Ask what a rule READS, never what a word evokes.
+
+*Landed.* This article's own self-application, which struck three of its
+own sections for naming without computing; the terminology law; and the
+layer correction above.
 
 **WHAT THE OLD ARTICLE CAUGHT, NOW DERIVED.** Nothing is lost by the
 strike:
