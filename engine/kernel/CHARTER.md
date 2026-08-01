@@ -295,9 +295,17 @@ kernel judges one node, one step; anything spanning two nodes is the mesh's.
   proves (you cannot mint faster than you produce certified intelligence;
   anti-inflation and anti-Sybil in one bound). Cross-node: the mesh receive
   door replays embedded certificates before adopting a spine.
-- **Seam conservation = I1 (kernel) + opposition (mesh).** Local: aperture
+- **Seam conservation = I1 (kernel) + REPLAY (mesh).** Local: aperture
   legs sum zero within one book — one unconditional line (why the
-  void-share ruling mattered). Cross-node: `cfe::opposition` at a merge.
+  void-share ruling mattered). Cross-node: **`cfe::opposition` is
+  EXCISED** (c7cad9e), and the ANTI-MIRROR framing that named it is
+  DEPRECATED (operator ruling 2026-08-01; `12_UNION` §2c). Its checks
+  ARE kernel I1/I6 now, and `tests/recurrence_guard.rs` refuses the
+  module's return as a standing test. A merging node does not set two
+  books against each other — it re-runs THIS identical kernel over the
+  presented chain, so **admission IS verification** (§11's nursery
+  law). Any cross-node READING is a lens over the one chain, never a
+  second record: *you do not reconcile what cannot diverge.*
 - **I3 exactness** is the substrate BOTH axes stand on: `C(Δ)=0` must be
   EXACTLY zero and certificates verify EXACTLY — impossible with floats.
 

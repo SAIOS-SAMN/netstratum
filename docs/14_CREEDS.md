@@ -38,14 +38,16 @@ The friction-gated ascent/descent it proposes IS the landed law:
    in the source reads instead as: holds a seat, carries its key.
 2. **No zero-APERTURE transit.** Value moves only by the two-legged
    conserved aperture — the pair sums to zero, and that zero is the
-   verification (the anti-mirror law, 12 §2c). Telepathy is lawful as
+   verification (kernel I1; the ANTI-MIRROR framing that formerly
+   carried this citation is DEPRECATED — 12 §2c — and the invariant
+   moved home to the judge, unchanged). Telepathy is lawful as
    RESONANCE: a small wrapped key gap prices friction low and bridges
    cheap (11 §2.1, §3.1) — proximity in G, never a bypass. Information
    already travels by reading (the lens law, NS-2).
 3. **No spoofed receipts.** The substrate cannot lie: chains are
    hash-linked, provenance is un-branchable, the sigil address derives
    from actual canonical state. A shape-shifter veil is lawful ONLY at
-   the mirror layer — what OTHER lines' readings render — and the veil
+   the LENS layer — what OTHER lines' readings render — and the veil
    is itself a receipted, priced deed (MASK-1, §4). The chronicle
    stays true underneath, always.
 4. **No universal Φ threshold.** The four C's are per-trajectory, never
@@ -135,7 +137,7 @@ walks — exactly the way function and tier read today.
   and resume carry it. OPEN as MASK-1b: the render cloud (the observer
   mask) and the NS-2 hit-field — the coder-03 seam line stands. The
   original spec follows.
-- **MASK-1 — the lawful veil (specced 2026-07-30).** Mirror-layer
+- **MASK-1 — the lawful veil (specced 2026-07-30).** LENS-layer
   identity masking; the substrate never lies. The concrete design:
   the VEIL is a receipted deed (`VeilDrawn` / `VeilLifted`, tags at
   cadence) with a standing joule drain settled at every collect (the

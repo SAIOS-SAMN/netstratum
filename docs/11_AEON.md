@@ -89,7 +89,7 @@ plays it.
   rides the landed L1-wrapped distance, now on the G axis.
 - **Progression MOVES in G.** Divergence, confluence, and crystallized tech
   (10) shift a world's key. `GaugeShifted` (tag 42) receipts the move;
-  replay reconstructs it; the star-chart's `g` is the mirror rendering.
+  replay reconstructs it; the star-chart's `g` is the LENS rendering.
 - Because the fiber GROWS (Mint adds planes), G is not a fixed dial — new
   tonal dimensions can open at high-value landings. The line becomes a
   surface, then a volume. **GAUGE-N LANDED (2026-07-30):** the key IS a
@@ -211,7 +211,7 @@ deterministic and witnessable:
 - `conductor status` — read the heartbeat (`var/state.json`: live worlds,
   aeon voice, occupancy) without attaching.
 - `conductor halt` — **graceful**: an in-process signal handler finishes the
-  current beat, flushes the mirror, seals the tail — no torn tails from
+  current beat, flushes the lens, seals the tail — no torn tails from
   stops.
 - `conductor fold` — trigger the aeon fold (§5) on demand.
 

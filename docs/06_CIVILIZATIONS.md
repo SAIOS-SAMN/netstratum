@@ -144,7 +144,7 @@ inherited at G0; the ruling retires it in favor of the house's own
 word, already waiting in NS-2: the **sigil** — a civilization's
 immutable address on the mesh (`sigil:abyssal-vocalis`; NS-2's
 sigil-address lookup becomes literal). The rename is a recorded
-migration (JSON field + struct field, mirror-side), queued like
+migration (JSON field + struct field, lens-side), queued like
 Crucible→Furnace; surfaces adopt "sigil" immediately.
 
 **Locality-anchored naming.** A civilization's name must carry its

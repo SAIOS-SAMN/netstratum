@@ -28,7 +28,10 @@ Admission = re-judging (SYSTEM_SPEC §5). Consequences:
 3. The mesh keeps exactly what it holds after the excision: transport
    (the file carrier), the integrity door, the head announcement, and
    the authority walk. NO mesh-only state law, ever — a mesh rule the
-   unit cannot judge alone is a mirror made of protocol.
+   unit cannot judge alone is a SECOND TRUTH made of protocol (the
+   figure formerly read "a mirror made of protocol"; MIRROR is
+   deprecated as a framing — 12 §2c — and the plain name is the point:
+   a second machine-readable authority, banned by 00_CHARTER §11).
 
 ## §2 The unit's organs (one binary, six organs)
 

@@ -4,7 +4,6 @@
 
 use crate::delta::{magnitude, Delta};
 use cfe::ratio::Ratio;
-use num_traits::Zero;
 
 /// The magnitude bound for one step: the L1 mass of the proposed
 /// state may not exceed `reference` by more than `epsilon × reference`.

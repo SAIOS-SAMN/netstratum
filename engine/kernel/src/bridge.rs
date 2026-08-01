@@ -214,6 +214,48 @@ impl EntangledRead {
     }
 }
 
+/// THE VERDICT PER DIMENSION — the absolute, witnessed in EVERY one
+/// (operator ruling 2026-08-01: *D must always be greater than 0 and
+/// not in stasis and is entangled with V permanently, witnessed in
+/// every dimension*).
+///
+/// **The aggregate verdict is not this.** `dual_pole` takes the TOTAL
+/// rank and the WHOLE form, so a universe can read `Entangled` on the
+/// sum while no single channel is entangled at all — rank standing in
+/// one dimension, flow standing in another, and neither dimension
+/// carrying both. That is the aggregate lying about the parts, and it is
+/// exactly what a per-dimension witness catches.
+///
+/// **Absolute, not rate.** This is decidable at ONE state: no history,
+/// no limit, no approach. A rate never attains its bound at any step, so
+/// a rate can never be an invariant — it can only be a lens. The
+/// stability reading (support expanding against gradient flattening)
+/// belongs there; THIS belongs in the judge.
+pub fn verdict_per_dimension(state: &Committed) -> Vec<Vacuity> {
+    let (delta, support) = project_complex(state);
+    let charges = holonomies(&delta, &support);
+    let form = potential_form(&delta, &support);
+    (0..CHANNELS)
+        .map(|l| {
+            let rank = charges.iter().filter(|held| held.l == l).count();
+            let flows =
+                form.flows.iter().filter(|flow| flow.l == l).cloned().collect::<Vec<_>>();
+            dual_pole(rank, &PotentialForm { flows })
+        })
+        .collect()
+}
+
+/// Which dimensions carry any relation at all. A channel no deed has
+/// ever used is UNOCCUPIED — it reads `Void`, and that is a fact about
+/// the world's shape rather than a failure of it.
+pub fn occupied_dimensions(state: &Committed) -> Vec<usize> {
+    let (_, support) = project_complex(state);
+    let dim = state.orbs.len();
+    (0..CHANNELS)
+        .filter(|&l| (0..dim).any(|i| (0..dim).any(|j| j != i && support.has(i, j, l))))
+        .collect()
+}
+
 /// Project committed state onto the relational tensor: `Δ(Ω)`.
 ///
 /// Pure and total. Orbs are entities in `Committed::orbs` order;

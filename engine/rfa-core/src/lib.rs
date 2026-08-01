@@ -26,6 +26,7 @@
 //!   must pass: productivity, conservation, bounded magnitude.
 
 pub mod cage;
+pub mod capacity;
 pub mod delta;
 pub mod fiber;
 pub mod fold;
@@ -35,13 +36,16 @@ pub mod potential;
 pub mod reduce;
 
 pub use cage::Lens;
+pub use capacity::{
+    capacity, circulation, divergence, egress, ext_x, preserves_hodge_split, Egress, Extent,
+};
 pub use delta::{coherence_functional, for_each_residual, magnitude, Delta};
+pub use fiber::{loop_holonomy, plaquette_curvature, MatrixFiber2x2};
 pub use fold::{
     f_fold_star, judged_fold, orbit_lock, verify_orbit_witness, FoldVerdict, Operator,
-    OrbitWitness, QMatrix,
+    OrbitWitness, RatMatrix,
 };
-pub use fiber::{loop_holonomy, plaquette_curvature, MatrixFiber2x2};
 pub use gates::{validate_step, GateVerdict, StepBound};
-pub use rcf::{invariant_factors, rcf_hash, rcf_signature, QPoly, RcfSignature};
 pub use potential::{dual_pole, potential_form, Flow, PotentialForm, Vacuity};
+pub use rcf::{invariant_factors, rcf_hash, rcf_signature, RatPoly, RcfSignature};
 pub use reduce::{coboundary_reduce, holonomies, Holonomy, Support};
