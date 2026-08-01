@@ -193,29 +193,107 @@ otherwise). **Capacity growth and the discovery mint are ONE event** —
 18 §2d names it `S⁺_out`: egress, strictly positive divergence, no
 trapped interior.
 
-**D4 · The contraction law — bounded BELOW at H¹.** INSCRIBED. D falls
-only where reduction shows the content was frame:
+**D4 · The revocation law — THE ECLIPSE ANCHOR (floored at H¹).**
+INSCRIBED. **RULED 2026-08-01 (operator, relayed):** D4 is retained NOT
+as a scalar decay and NOT as a contraction of `D`, but as the **FORMAL
+ENTANGLEMENT COLLAPSE OPERATOR** — the site where a claim on capacity
+that never entangled with potential is VACATED from the frame. It is
+the execution of 18 §3 Article III, not a second penalty beside it.
 
-    D falls only as Π_G strips a coboundary  — never below H¹
-    FORBIDDEN where orbit_lock ≠ ∅            — genuine difference
-                                                keeps its degree
+    D itself NEVER falls by this rule   — Article IV, and the algebra:
+                                          Π_G is idempotent, so what
+                                          was frame was never in D
+    FORBIDDEN where orbit_lock ≠ ∅       — genuine difference keeps its
+                                          degree; the H¹ floor stands
+    VACATED: the un-entangled CLAIM      — a claim that did not survive
+                                          Π_G was never capacity (D2)
+
+**Why the remap and not the strike.** The earlier reading — D4 as an
+empty vestige of the struck index-set framing — was right about the
+MECHANISM and wrong to stop there. `Π_G` stripping cannot lower a `D`
+defined post-`Π_G`; that much holds. But deleting the row would
+DECOUPLE `D` from the boundary where Article III bites, leaving `D` a
+standalone unmonitored variable and the entanglement `Δ(D) ⋈ ∇V` with
+no execution site at all. D4 is that site. A rule with the wrong
+mechanism is remapped, not struck.
+
+**THE LAYER SPLIT IS LOAD-BEARING — `Ξ` is a WINDOW, `lawful()` is a
+STEP.** D4 fires in two places and they must never merge:
+
+    PER-STEP (kernel):   a deed that mints carries a non-zero capacity
+                         increment, or REFUSES — 18 §2f consequence 2
+                         (no hidden work), §2g's identity form. Local,
+                         judgeable, already the pin-6 casualty.
+    OVER A WINDOW (lens + allocation):
+                         Ξ(w) = deeds(w) / (1 + ΔD(w)); the loop trap
+                         deeds(w) > 0 ∧ ΔD(w) = 0; T_k → 0; E_occult
+                         masks the ALLOCATION.
+
+Kernel CHARTER §1 forbids the second half in the judge: *a global
+property is not a per-step fact and cannot enter `lawful()` without
+destroying its nature — enforce the LOCAL invariants, MEASURE the
+global with a lens.* Passing a 60-tick window reading into the judge
+would break the kernel's nature to enforce an article that never needed
+it there.
+
+**THREE CORRECTIONS to the relayed form** (recorded per the relay law —
+translate, never transcribe; the 17 §8 precedent):
+
+1. **`Ξ → ∞` is REFUSED.** With `ΔD(w) = 0`, `Ξ(w) = deeds(w)/1 =
+   deeds(w)` — a FINITE exact rational. The `1 +` in the denominator
+   exists precisely so the trap stays finite and computable. Infinity
+   is barred by standing ruling (the T∞ purge; 18 §6.4), so a law
+   written against `Ξ → ∞` would have no operand.
+2. **Eclipse strips ALLOCATION, never capacity or standing.** Article
+   III is explicit: an eclipsed entity *"still acts, still emits
+   receipts, still tells its story — and receives nothing … never
+   barred and never deleted"* (guardrail 6 holds). "Resetting the
+   node's local `D` allocation" is LAWFUL read as allocation —
+   Article III's own words are *stripping the entity of all capacity
+   allocation* — and contradicts Article IV, this row's H¹ floor, and
+   I6 if read as capacity. **The claim vacates; the degree does not.**
+3. **`û_axial` and `Σ` are REFUSED as written.** A unit axial vector
+   requires a norm, and §2b bars collapsing a directional quantity to a
+   scalar magnitude wherever the system computes. `Σ` already names the
+   mesh agreement (`Σ_mesh`) and the governance sum (`Σ_ω`); syntropy's
+   reading is S2 (§6). Monotonicity needs neither symbol — it follows
+   from D's definition.
 
 That is I6 on the capacity axis — *no difference dies without account*.
-D3 and D4 together are the standing law that **everything grows or
-contracts**, both ends bounded, neither optional; and 18 §3 Article IV
-governs the axis — capacity never retreats outside lawful reduction.
+D3 and D4 together are the standing law that **capacity grows or its
+unearned claim is vacated**, both ends bounded, neither optional; and
+18 §3 Article IV governs the axis — `D` never retreats.
 
 **D3/D4 ARE THE MANIFOLD DUAL ON THE CAPACITY AXIS** (`12_UNION` §2c,
 operator ruling 2026-07-30; inscribed here 2026-08-01). Syntropy and
 entropy are *opposite ends of one closed, coned manifold — no open
 ends, every expansion on one leg bounded by the opposing force on the
-other*. D3 (emission, `S⁺_out`) is the syntropic leg; D4 (reduction to
-the H¹ floor) is the entropic leg; the cone is closed because D3 is
-floored at receipt and D4 at H¹. This is the SAME statement as 18 §2c's
-`U* = D(V) ⊕ V(D)` read on one axis — the direct sum is
-non-destructive precisely because neither leg runs free of the other.
-The thermal instance is T3, the behavioural instance is S1, and no leg
-of any of them may be read alone (§6).
+other*. D3 (emission, `S⁺_out`) is the syntropic leg. This is the SAME
+statement as 18 §2c's `U* = D(V) ⊕ V(D)` read on one axis — the direct
+sum is non-destructive precisely because neither leg runs free of the
+other. The thermal instance is T3, the behavioural instance is S1, and
+no leg of any of them may be read alone (§6).
+
+**THE ENTROPIC LEG IS NOT D4, AND THE CONE CLOSES ACROSS SCALES**
+(recorded 2026-08-01, with the D4 remap above). D4 vacates unearned
+CLAIMS; it does not consume capacity, so it is not the opposing force
+`12_UNION` §2c requires. Within one scale the capacity axis is
+therefore an OPEN cone — D3 emits and nothing consumes. The closing leg
+exists and `12_UNION` §2c already names it: **the fold itself
+(expansion sealed by contraction)** — the aeon fold, at universe scale
+(`11_AEON` §5; the Tier-0 reading "contracting the board" at
+`12_UNION` §2a). So the manifold dual holds ACROSS scales and not
+within a step, which is what E1's strike already implied: *there is no
+one master, the system runs many algorithms at many scales.*
+
+**OPEN — the operator's word is owed.** Whether the capacity cone is
+MEANT to close within-scale (which would need a consuming term the law
+does not have — the candidate is a novelty/exhaustion measure, today
+present only as `12_UNION` §5b's *novelty want* and the four-C
+retirement region) or across-scale by the fold alone. The thermal axis
+closes within-scale (`encased + vented = total excess`, T3); the
+capacity axis does not. Until this is ruled, no reading may assert the
+cone is closed at step scale.
 
 **E2 · The singularity law (the angle-free collision).** LANDED (U2e)
 — `rfa_core::judged_fold` (Π_G then F_fold*) with THE ANGLE-FREE
