@@ -21,7 +21,7 @@
 //! 10. RELABELLING-INVARIANT — Article I made a test.
 
 use rfa_core::capacity::{
-    capacity, capacity_anchored, circulation, divergence, egress, ext_x,
+    capacity, capacity_anchored, circulation, divergence, egress, ext_x, ground,
     preserves_hodge_split, Egress, Extent,
 };
 use rfa_core::{coboundary_reduce, Delta};
@@ -61,7 +61,7 @@ fn from_potentials(potentials: &[Ratio]) -> Delta {
 }
 
 #[test]
-fn a_pure_coboundary_has_no_capacity() {
+fn a_pure_coboundary_sources_but_does_not_circulate() {
     // THE PAIRWISE LAW. Δ_ij = p_j − p_i for ANY potential p reduces to
     // exactly zero: Δ'_ij = (p_j−p_i) − (p_j−p_0) + (p_i−p_0) = 0.
     // A meter fed node-local scalar differences reads D = 0 forever —
@@ -73,13 +73,13 @@ fn a_pure_coboundary_has_no_capacity() {
     ] {
         let delta = from_potentials(&potentials);
         let read = capacity(&delta);
-        assert!(
-            read.is_vacuous(),
-            "a pure coboundary must carry NO capacity, read {read:?} \
-             for potentials {potentials:?}"
-        );
-        assert_eq!(read.entities, 0, "no entity stands in a pure frame");
-        assert_eq!(read.layers, 0, "no layer stands in a pure frame");
+        // NO CIRCULATION — the holonomic pole is empty.
+        assert!(!read.circulates(), "a pure coboundary carries no holonomy: {read:?}");
+        assert_eq!(read.entities, 0, "no entity stands in the circulation");
+        assert_eq!(read.layers, 0, "no layer stands in the circulation");
+        // It sits at the GROUND — which is NOT zero (Extent::GROUND).
+        assert!(read.is_ground(), "a pure coboundary stands at the floor: {read:?}");
+        assert_eq!(read, ground());
     }
 }
 
@@ -96,10 +96,12 @@ fn the_equilibrium_anchor_is_a_coboundary() {
         Extent { entities: 3, layers: 1, coordinates: 3 },
         "the raw extent counts what the CONTAINER carries"
     );
-    assert!(
-        capacity(&anchor).is_vacuous(),
-        "the equilibrium anchor is pure frame — D = 0"
-    );
+    let read = capacity(&anchor);
+    assert!(!read.circulates(), "the equilibrium anchor carries no holonomy");
+    assert!(read.is_ground(), "it stands at the GROUND — the floor, never zero");
+    // The divergence is still there and still readable; it is simply
+    // not capacity, because it is gauge-dependent.
+    assert!(egress(&anchor).sources > 0, "the anchor does source — read by egress()");
 }
 
 #[test]
@@ -115,7 +117,7 @@ fn a_non_transitive_triangle_carries_capacity() {
     // about the universe. Same class, honest extent.
     let broken = triangle(q(1, 1), q(1, 1), q(0, 1));
     let read = capacity(&broken);
-    assert!(!read.is_vacuous(), "a non-transitive triangle MUST carry capacity");
+    assert!(read.circulates(), "a non-transitive triangle MUST circulate");
     assert_eq!(
         read,
         Extent { entities: 3, layers: 1, coordinates: 3 },
@@ -124,7 +126,7 @@ fn a_non_transitive_triangle_carries_capacity() {
     // And the anchored reading still AGREES on existence, differing
     // only on extent — the drift is in the representative, never the
     // class.
-    assert!(!capacity_anchored(&broken).is_vacuous());
+    assert!(capacity_anchored(&broken).circulates());
 }
 
 #[test]
@@ -168,9 +170,13 @@ fn a_closed_loop_is_pure_holonomy_and_non_vacuous() {
     );
     assert!(census.is_white_hole(), "no trapped interior (§2d)");
     assert!(
-        !capacity(&loop3).is_vacuous(),
+        capacity(&loop3).circulates(),
         "holonomy alone is non-vacuous — this is what rank ALONE would \
          have admitted, and why the dual pole earns its place"
+    );
+    assert!(
+        egress(&loop3).sources == 0,
+        "and it sources NOTHING — pure holonomy, the mirror of the anchor"
     );
     // The circulation of a div-free form is itself: nothing to strip.
     assert_eq!(circulation(&loop3), loop3);
@@ -284,10 +290,15 @@ fn the_container_is_not_the_capacity() {
     let empty = Delta::zero(8, 4);
     assert_eq!(empty.dim(), 8);
     assert_eq!(empty.fiber(), 4);
-    assert!(
-        capacity(&empty).is_vacuous(),
-        "arity is not capacity — a wide empty container carries D = 0"
+    assert_eq!(
+        capacity(&empty),
+        ground(),
+        "arity is not capacity — a wide empty container sits at the GROUND"
     );
+    assert!(capacity(&empty).is_ground());
+    // AND THE GROUND IS NOT ZERO. The floor is the point: a universe
+    // that exists occupies one degree, itself (Extent::GROUND).
+    assert_eq!(Extent::GROUND, 1, "D never reads zero — the ground is the point");
 }
 
 /// `A · Δ · Aᵀ` — CONGRUENCE, the transformation law of an alternating
@@ -360,8 +371,8 @@ fn congruence_preserves_antisymmetry_but_not_the_additive_class() {
     // Half two — THE BLOCKER: capacity is created out of pure frame.
     let anchor = anchor_3();
     assert!(
-        capacity(&anchor).is_vacuous(),
-        "the anchor is a pure coboundary — D = 0 before any frame change"
+        !capacity(&anchor).circulates(),
+        "the anchor is a pure coboundary — no holonomy before any frame change"
     );
     let framed_anchor = congruent(&anchor, &a);
     assert!(
@@ -369,7 +380,7 @@ fn congruence_preserves_antisymmetry_but_not_the_additive_class() {
         "the congruent image is still a lawful alternating form"
     );
     assert!(
-        !capacity(&framed_anchor).is_vacuous(),
+        capacity(&framed_anchor).circulates(),
         "MEASURED: a congruence frame change lifts D from 0 — the additive \
          class is not congruence-invariant, so the two gauges are not one"
     );
@@ -412,7 +423,7 @@ fn the_base_group_is_the_constants_stabiliser() {
     // spans ker L, so an A that leaves it does not carry potentials to
     // potentials and "pure frame" stops being well defined.
     let anchor = anchor_3(); // a pure coboundary: D = 0
-    assert!(capacity(&anchor).is_vacuous());
+    assert!(!capacity(&anchor).circulates());
 
     // (1) A SHEAR — row sums 6/5, 1, 1. NOT constant, NOT lawful.
     let mut shear = vec![vec![q(0, 1); 3]; 3];
@@ -425,7 +436,7 @@ fn the_base_group_is_the_constants_stabiliser() {
         "a shear breaks the constants line"
     );
     assert!(
-        !capacity(&base_congruence(&anchor, &shear)).is_vacuous(),
+        capacity(&base_congruence(&anchor, &shear)).circulates(),
         "MEASURED: the unlawful congruence FORGES capacity from pure \
          frame — 0 -> 3. This is why the base group must be restricted"
     );
@@ -437,7 +448,7 @@ fn the_base_group_is_the_constants_stabiliser() {
     }
     assert!(preserves_hodge_split(&scale), "constant row sums are lawful");
     assert!(
-        capacity(&base_congruence(&anchor, &scale)).is_vacuous(),
+        !capacity(&base_congruence(&anchor, &scale)).circulates(),
         "a volumetric scaling must NOT create capacity from frame"
     );
 
@@ -450,15 +461,15 @@ fn the_base_group_is_the_constants_stabiliser() {
     ];
     assert!(preserves_hodge_split(&mix));
     assert!(
-        capacity(&base_congruence(&anchor, &mix)).is_vacuous(),
+        !capacity(&base_congruence(&anchor, &mix)).circulates(),
         "lawful mixing preserves the vacuous class"
     );
 
     // And it preserves a NON-vacuous class too — 1 -> 1, not 1 -> 0.
     let loop3 = triangle(q(1, 1), q(1, 1), q(-1, 1));
-    assert!(!capacity(&loop3).is_vacuous());
+    assert!(capacity(&loop3).circulates());
     assert!(
-        !capacity(&base_congruence(&loop3, &mix)).is_vacuous(),
+        capacity(&base_congruence(&loop3, &mix)).circulates(),
         "lawful congruence must not destroy capacity either"
     );
 
