@@ -1,5 +1,5 @@
 //! DIRECTIVE 10 — the boundary form and the dual-pole non-vacuity
-//! lock. `∂V` is the DIVERGENCE: canonical, one pass, no traversal.
+//! lock. `∂Δ` is the DIVERGENCE: canonical, one pass, no traversal.
 
 use cfe::ratio::{ratio, Ratio};
 use rfa_core::{dual_pole, holonomies, boundary_form, Delta, Support, Vacuity};
@@ -22,13 +22,13 @@ fn pure_circulation_is_vacuous_however_large_its_charge() {
 
     let form = boundary_form(&d, &s);
     assert_eq!(form.rank(), 0, "circulation sources nothing anywhere");
-    assert!(!form.is_non_vacuous(), "∂V ≡ 0");
+    assert!(!form.is_non_vacuous(), "∂Δ ≡ 0");
 }
 
 #[test]
 fn static_stasis_is_rank_without_gradient_and_is_refused() {
     // THE ROW THAT JUSTIFIES DIRECTIVE 10. The same closed loop carries
-    // holonomy — D > 0 — while ∂V ≡ 0. Rank alone would admit it.
+    // holonomy — D > 0 — while ∂Δ ≡ 0. Rank alone would admit it.
     let mut d = Delta::zero(3, 1);
     let mut s = Support::new(3, 1);
     edge(&mut d, &mut s, 0, 1, ratio(1, 1));
@@ -38,7 +38,7 @@ fn static_stasis_is_rank_without_gradient_and_is_refused() {
     let rank = holonomies(&d, &s);
     let form = boundary_form(&d, &s);
     assert!(!rank.is_empty(), "D > 0 — the loop carries charge no frame explains");
-    assert!(!form.is_non_vacuous(), "∂V ≡ 0 — nothing sources or sinks");
+    assert!(!form.is_non_vacuous(), "∂Δ ≡ 0 — nothing sources or sinks");
     assert!(
         rank.is_empty() || !form.is_non_vacuous(),
         "static stasis: structure with no gradient does no work"

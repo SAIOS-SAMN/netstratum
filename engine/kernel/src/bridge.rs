@@ -177,7 +177,7 @@ pub struct EntangledRead {
     /// indices intact. Never pre-summed: these are what emit (D3) and
     /// what the composition law will compose.
     pub residuals: Vec<Residual>,
-    /// `∂V` — the SECOND POLE, carried whole as its non-zero
+    /// `∂Δ` — the SECOND POLE, carried whole as its non-zero
     /// components: which vertices carry net flow, and how much. Empty
     /// means pure circulation — every vertex balances, nothing sources
     /// or sinks, and the field does no work however large it is.

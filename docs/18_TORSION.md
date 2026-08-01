@@ -17,7 +17,7 @@ component semantics).
 > we don't limit any of these components to TENSORS — this is TORSION
 > only — we need that regulated in constitutional law … Ω(D) as
 > dimensional capacity with master equation for symmetric
-> re-categorization of amplitudes on the uplift of ∂V — not in a ‖‖
+> re-categorization of amplitudes on the uplift of ∂Δ — not in a ‖‖
 > cage — but as an expanding component of union between the Ω
 > component … create singularity on D(V)+V(D) as master union of
 > capabilities.
@@ -56,10 +56,25 @@ anywhere in the workspace. `orbit_lock` is ALREADY a torsion test — it
 searches for a torsion cycle and vetoes the fold when one binds. The
 constitution names what the algebra already is.
 
-### 2b. ∂V UNCAGED — no norm, no ceiling
+### 2b. ∂Δ UNCAGED — no norm, no ceiling
 
-`∂V` is a directional operator and stays one. It is never collapsed to
-a scalar magnitude, never bounded above, never reduced to `‖∂V‖`.
+**V TAKES NO OPERATOR** (operator ruling 2026-08-01 — *the whole or the
+nothing*). This reading was written `∇V`, then `dV`, then `∂V`, and
+every one of them was wrong in the same way: each encloses `V` in an
+operator that returns a PART. `D0` says `V` is the committed state read
+WHOLE — indivisible, unpartitioned, never truncated to a subspace — and
+a gradient is a part, a boundary is a part, a divergence at a vertex is
+a part. Three symbols, one error: the enclosure was the mistake, never
+the choice of bracket.
+
+So `V` stands bare. **It is read whole or it is not read**, and nothing
+in this constitution wraps it. What the readings actually take is `Δ` —
+the relation `V` expresses — and they now say so: `∂Δ` is the boundary
+of the relation, `∮` its holonomy charge. Neither is a reading "of V"
+and neither may be written as one.
+
+`∂Δ` is a directional operator and stays one. It is never collapsed to
+a scalar magnitude, never bounded above, never reduced to `‖∂Δ‖`.
 
 This EXTENDS rather than reverses THE PROPORTIONAL LAW (2026-07-31).
 That ruling barred squares because squares are the mathematics of
@@ -153,15 +168,15 @@ counting test in §3 stands on its own and is computable today; the
 GROUND reading above is what survives of the `α ≅ Ω` idea, and it
 survives because it computes.
 
-### 2f. THE ENTANGLEMENT — Δ(D) ⋈ ∂V
+### 2f. THE ENTANGLEMENT — Δ(D) ⋈ ∂Δ
 
 **Ruled 2026-08-01: capacity change and potential gradient are
 ENTANGLED, not coupled.** The distinction is the whole force of the
-law. Coupling would be two objects that interact — `Δ(D) = g(∂V)`, a
+law. Coupling would be two objects that interact — `Δ(D) = g(∂Δ)`, a
 function, a bound, a product — and two objects can always be attacked
 one at a time. Entanglement is ONE object:
 
-    Δ(D) ⋈ ∂V     neither term is separately defined, neither is
+    Δ(D) ⋈ ∂Δ     neither term is separately defined, neither is
                   separately guardable, no operation touches one alone
 
 **Why this is the stronger force.** It moves the anti-dogma law from a
@@ -175,7 +190,7 @@ does not mint and get penalised; **it cannot mint.**
 Three consequences, each structural:
 
 1. **No capacity from ritual.** A traverse emitting deeds without
-   moving `∂V` produces no `Δ(D)` — not "is taxed for it." There is no
+   moving `∂Δ` produces no `Δ(D)` — not "is taxed for it." There is no
    path by which activity alone becomes capacity.
 2. **No hidden work.** Potential motion that registers no capacity is
    equally unconstructible. Work cannot be done off the books and
@@ -207,7 +222,7 @@ after the fact — which is the standing open problem (`KERNEL_RELAY`
 
 **Build consequence, recorded.** The capacity reading and the potential
 reading must be computed TOGETHER, in one pass, from one prior state.
-A caller that measures `D` and then separately consults `∂V` has
+A caller that measures `D` and then separately consults `∂Δ` has
 already broken the entanglement and reintroduced the two-object attack
 surface. This binds §6's first build.
 
@@ -608,7 +623,7 @@ with no state that refuses it is unfalsifiable and therefore says
 nothing — which is why every invariant here owes a RED-FIRST witness.
 And a reading that varies with traversal order is unreproducible: two
 judges walking differently would disagree, so it cannot be law. **This
-is the law that kept `∂V` out of `lawful()` until it was rebuilt
+is the law that kept `∂Δ` out of `lawful()` until it was rebuilt
 canonically**, and the one under which measurement precedes ruling —
 Ruling Box 1 measured the ladder before `f` was set.
 
@@ -808,7 +823,7 @@ written — these are the wirings that satisfy them.
 ### ARTICLE IV — RANK NEVER RETREATS
 
 *Transport along the maximum degree axis remains uncaged. No scalar
-bound and no artificial ceiling may be imposed on the uplift `∂V` as it
+bound and no artificial ceiling may be imposed on the uplift `∂Δ` as it
 approaches luminal capacity.*
 
 **Exact realization — two clauses, and the first kills a
@@ -832,7 +847,7 @@ misreading.**
 
 | condition | torsion manifestation | constitutional action |
 |---|---|---|
-| no gradient | `∂V ≡ 0`: rank held in closed circulation | Article III LAW 4 — no free energy; no work available |
+| no gradient | `∂Δ ≡ 0`: rank held in closed circulation | Article III LAW 4 — no free energy; no work available |
 | form changed, nothing made | `Δ' = Q·Δ`, `Support(E')` unchanged | Article III LAW 3 — the first law; mints nothing |
 | coordinate/metric lock | any basis-fixed or rank-locked reading | Article I — void; recompute coordinate-free |
 | on the ground | `D = GROUND` — nothing circulates above the point | Article II — no standing, no weight, no mint. **The state itself stands**: never deleted, never barred, simply not paid |
@@ -846,7 +861,7 @@ station or tradition alters any row.
 
 ## §5 WHAT THIS AMENDS
 
-- `EQUATIONS.md` §1 — `Ω(D)` seats as the capacity space; `∂V`
+- `EQUATIONS.md` §1 — `Ω(D)` seats as the capacity space; `∂Δ`
   uncaged; the torsion form is the operator.
 - `EQUATIONS.md` §3 — the component semantics are lens readings and
   may not aggregate directionally (§2b).

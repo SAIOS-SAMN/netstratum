@@ -1,4 +1,4 @@
-//! THE POTENTIAL 1-FORM — `∂V`, uncaged (DIRECTIVE 10, operator ruling
+//! THE BOUNDARY 1-FORM — `∂Δ`, uncaged (DIRECTIVE 10, operator ruling
 //! 2026-08-01; `18_TORSION` §2b).
 //!
 //! **NO TRAVERSAL. NO BASIS. NO WALK.** (operator correction
@@ -18,7 +18,7 @@
 //! ```text
 //! div(Δ)_i,l  =  Σ_j Δ_ij,l          over the present edges at i
 //!
-//! ∂V ≡ 0   ⟺   div(Δ) = 0 at every vertex   (Δ is pure circulation)
+//! ∂Δ ≡ 0   ⟺   div(Δ) = 0 at every vertex   (Δ is pure circulation)
 //! dV ≢ 0   ⟺   some vertex carries net flow
 //! ```
 //!
@@ -29,7 +29,7 @@
 //!
 //! **It is a FORM, never a magnitude.** The divergence is returned
 //! WHOLE as its components with their positions intact. It is never
-//! summed, never normed, never collapsed to `‖∂V‖` — the law bars
+//! summed, never normed, never collapsed to `‖∂Δ‖` — the law bars
 //! collapsing a directional quantity to a scalar aggregate wherever the
 //! system computes (`18_TORSION` §2b), and a form reduced to one number
 //! is exactly that collapse.
@@ -42,9 +42,9 @@
 //! gradient does no work.
 //!
 //! ```text
-//! circ = 0 ∧ ∂V ≡ 0   on the ground, still   — refused
+//! circ = 0 ∧ ∂Δ ≡ 0   on the ground, still   — refused
 //! circ = 0 ∧ dV ≢ 0   unframed potential     — refused
-//! circ > 0 ∧ ∂V ≡ 0   static stasis          — refused
+//! circ > 0 ∧ ∂Δ ≡ 0   static stasis          — refused
 //! circ > 0 ∧ dV ≢ 0   entangled              — ADMITTED
 //!
 //! `circ` is the CIRCULATION count — what stands ABOVE the ground —
@@ -70,7 +70,7 @@ pub struct Flow {
     pub value: Ratio,
 }
 
-/// `∂V` — the boundary form, carried WHOLE as its non-zero components.
+/// `∂Δ` — the boundary form, carried WHOLE as its non-zero components.
 ///
 /// An empty form is pure circulation: every vertex balances, nothing
 /// sources or sinks, and the field does no work.
@@ -99,7 +99,7 @@ impl BoundaryForm {
     }
 }
 
-/// Derive `∂V` from a state and its support — the divergence at every
+/// Derive `∂Δ` from a state and its support — the divergence at every
 /// vertex, in ONE pass.
 ///
 /// Canonical by construction: no spanning structure is chosen and no
@@ -133,7 +133,7 @@ pub fn boundary_form(delta: &Delta, support: &Support) -> BoundaryForm {
 /// THE DUAL-POLE VERDICT (DIRECTIVE 10). The four rows of the
 /// non-vacuity matrix, as one typed reading over ONE state.
 ///
-/// **`∂V` CANNOT BE ZERO** (operator ruling 2026-08-01). A flat field is
+/// **`∂Δ` CANNOT BE ZERO** (operator ruling 2026-08-01). A flat field is
 /// not a lawful state to sit in: without gradient the manifold is static
 /// flat space and any rank it holds is meaningless. This is an
 /// invariant, not a preference.

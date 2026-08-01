@@ -44,7 +44,7 @@ fn verdict(state: &Committed) -> (usize, usize, Vacuity) {
 fn the_canonical_proof_of_d_above_zero_is_stasis() {
     // THE FINDING. `18_TORSION` §8 proves D > 0 with a four-orb ring of
     // equal bonds. Each orb owes exactly what it is owed, so the
-    // divergence cancels at EVERY vertex and `∂V ≡ 0`.
+    // divergence cancels at EVERY vertex and `∂Δ ≡ 0`.
     //
     // So the simplest state carrying non-zero rank is pure circulation —
     // and pure circulation is precisely the row the dual-pole verdict

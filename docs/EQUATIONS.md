@@ -129,6 +129,14 @@ relational structure, the landed tensor.
   **NOTATION, binding:** `Δ` is THE RELATIONAL TENSOR. It is never a
   Laplacian, and no rule in this ledger takes a Laplacian of anything.
 
+  **`V` IS NEVER ENCLOSED** (operator ruling 2026-08-01, 18 §2b — *the
+  whole or the nothing*). No operator wraps `V` in this ledger. Every
+  operator returns a part, and D0 bars parts of `V`: it is read whole or
+  it is not read. The readings take `Δ`, the relation `V` expresses —
+  `∂Δ` its boundary, `∮` its holonomy charge. The forms `∇V`, `dV` and
+  `∂V` all appeared here and are all STRUCK, together rather than in
+  sequence: they were one error wearing three brackets.
+
 **D1 · Ω(D) — the capacity space.** INSCRIBED. Superseded in form by
 `18_TORSION.md` §2a (operator ruling 2026-08-01): capacity is the SPACE
 `Ω(D)` indexed by dimensional degrees `D`, driven by the torsion form —
@@ -164,8 +172,8 @@ capacity increment**, and D counts minted planes. `12_UNION` §3 and
 `11_AEON` §7 defer seat widths to "capacity as a live fiber reading
 (minted-plane count)" — a reading that has never existed. It is D.
 
-**∂V IS UNCAGED** (18 §2b). It is a directional operator and is never
-collapsed to `‖∂V‖`, never bounded above, never reduced to a scalar
+**∂Δ IS UNCAGED** (18 §2b). It is a directional operator and is never
+collapsed to `‖∂Δ‖`, never bounded above, never reduced to a scalar
 aggregate. This EXTENDS the proportional law rather than reversing it:
 squares were barred as the mathematics of minimization, and L1 was a
 smaller cage of the same kind. Scalar aggregates survive only where a
@@ -213,7 +221,7 @@ empty vestige of the struck index-set framing — was right about the
 MECHANISM and wrong to stop there. `Π_G` stripping cannot lower a `D`
 defined post-`Π_G`; that much holds. But deleting the row would
 DECOUPLE `D` from the boundary where Article III bites, leaving `D` a
-standalone unmonitored variable and the entanglement `Δ(D) ⋈ ∂V` with
+standalone unmonitored variable and the entanglement `Δ(D) ⋈ ∂Δ` with
 no execution site at all. D4 is that site. A rule with the wrong
 mechanism is remapped, not struck.
 
@@ -419,7 +427,7 @@ The charter's parenthetical is RESTORED (kernel CHARTER §2, "Bounded
 creation (syntropy)"): I4 is not merely a ceiling on creation, it is
 the syntropic leg of the value law — *no fiat; joules only by
 encasement* (05 §1.2, 01 §6.1). With I5 it forms the dual, and 18 §2f
-ENTANGLES this leg with verified work (`Δ(D) ⋈ ∂V`): the mint is not
+ENTANGLES this leg with verified work (`Δ(D) ⋈ ∂Δ`): the mint is not
 bounded by work, it is inseparable from it. Read I4 without its
 parenthetical and the value law reads as two ceilings; read with it,
 as one cone (D3/D4, §6).

@@ -161,7 +161,7 @@ The first was THE DESCENT — a greedy minimization of a class-blind
 scalar, and the last place in this document where an objective survived
 after the gradient itself was struck at §0. The guard had been placed on
 the damped-gradient term while the objective leaked through the scoring rule; both are now
-gone. `∂V` is not deleted but UNCAGED — a directional operator, never
+gone. `∂Δ` is not deleted but UNCAGED — a directional operator, never
 collapsed to a magnitude, never bounded above (`18_TORSION` §2b).
 
 **No quantity is scored, minimized, or descended.** An operator is

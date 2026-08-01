@@ -21,7 +21,7 @@ The formation:
 
 > kick C out entirely as the overall formation and start building
 > around Δ(Ω) = D where D is dimensional capacity overlaid with the
-> maximum potential of ∂V — the equations stay the same, but instead of
+> maximum potential of ∂Δ — the equations stay the same, but instead of
 > forming around C we are looking at the D capacity and building
 > towards its maximum potential in union with V as a whole — no two
 > parts cut out, and the "descent" is only a uni-directional axial on
@@ -50,14 +50,14 @@ rather than quietly deleted, per the ledger's own drift discipline.
 |---|---|---|
 | Ω is the operator manifold — the closed vocabulary of `N_i` with their weights | Ω is the totality of the individual universe (§3) | it made D a reachability computation over operators when D is a direct reading of one universe's own structure |
 | D is a count — the number of surviving independent planes, the DEGREE of a polynomial | D is a SHAPE `{i, j, k, l}`, four extents, never a scalar (D1) | collapsing four extents into one number is the same error as the C it replaced: a scalar cannot say WHERE capacity is strained |
-| `∂V` returns as a MAGNITUDE of available potential, overlaid on scoped dimensions | `∂V` is a DIRECTIONAL operator and stays one — UNCAGED, never collapsed to a scalar, never bounded above, never reduced to `‖∂V‖` (`18_TORSION` §2b) | the draft was wrong about the *collapse*, not the operator: the direction survives, and turning it into a magnitude is itself the cage |
+| `∂Δ` returns as a MAGNITUDE of available potential, overlaid on scoped dimensions | `∂Δ` is a DIRECTIONAL operator and stays one — UNCAGED, never collapsed to a scalar, never bounded above, never reduced to `‖∂Δ‖` (`18_TORSION` §2b) | the draft was wrong about the *collapse*, not the operator: the direction survives, and turning it into a magnitude is itself the cage |
 | "the equations are untouched; only the objective inverts" | E1 is STRUCK — there is no master equation | the composition was refused, not merely re-aimed; many algorithms at many scales replace the one master |
 
 **A correction to this table's own second row, recorded 2026-08-01.** An
-earlier revision of it read "`∂V` is STRUCK WHOLE." That over-read the
+earlier revision of it read "`∂Δ` is STRUCK WHOLE." That over-read the
 FOUNDATION RULING. What was struck is the GRADIENT AS DRIVER — the damped-gradient term as
 a descent term chained into a master equation. `18_TORSION` §2b restores
-`∂V` as an uncaged directional operator. The distinction is the whole
+`∂Δ` as an uncaged directional operator. The distinction is the whole
 point: **the direction was never the problem; the collapse to a scalar
 was.**
 
@@ -123,10 +123,10 @@ objective leaked through another (C-scoring in `SYSTEM_SPEC` §2). A
 guard on half of a partitioned object is not a guard. An unpartitionable
 V has no halves to guard.
 
-## §4 WHY THE REDUCTION SCOPES, AND WHY ∂V COULD NOT HAVE
+## §4 WHY THE REDUCTION SCOPES, AND WHY ∂Δ COULD NOT HAVE
 
 The operator ruled that coboundary reduction is the scoping of a
-dimension, not `∂V`. The sealed code already performs exactly that
+dimension, not `∂Δ`. The sealed code already performs exactly that
 scoping, in two phases, and both are scoping acts
 (`engine/rfa-core/src/reduce.rs`):
 
@@ -145,8 +145,8 @@ D4's floor is written `ext_x( Π_G(Δ(V)) )` — the reduction is what says
 how far capacity may fall, because the reduction is what knows which
 extent was frame and which was structure.
 
-**Why `∂V` could not have done this job — the hole the strike closes.**
-A potential is CHOSEN. Had `∂V` scoped the dimensions, structure would
+**Why `∂Δ` could not have done this job — the hole the strike closes.**
+A potential is CHOSEN. Had `∂Δ` scoped the dimensions, structure would
 have become an artifact of that choice, and a dimension carrying little
 potential could be scoped OUT of existence silently, with no receipt.
 That is precisely the discard the 2026-08-01 correction was fighting,
@@ -309,7 +309,7 @@ Building it:
 
 **CLOSED by the ruling and its clarification (recorded):** Ω's shape
 (§3), the scoping question (§4), D's arity — a shape, not a scalar
-(D1) — and `∂V`'s fate (struck whole, D0).
+(D1) — and `∂Δ`'s fate (struck whole, D0).
 
 The three carried questions were answered by relay. Two of the three
 answers do not survive the sealed code, and the relay law binds —
@@ -510,7 +510,7 @@ transition shrinking `H¹` must REFUSE, never read healthy.
 
 **AV-3 · THE SCALAR COLLAPSE.** A directional or structural quantity
 flattened to one number, which is then available to descend.
-*Instance:* `extent: BigRational`; `C = Σ|R|`; `‖∂V‖`.
+*Instance:* `extent: BigRational`; `C = Σ|R|`; `‖∂Δ‖`.
 *Defense:* Article I and `18_TORSION` §2b — L1 aggregates are lawful
 only where reported to a human lens. *Witness:* no aggregate crosses
 into a computing path.
@@ -1127,7 +1127,7 @@ EXTENT, never a universal:
   would assert that nothing can ever be at rest — perpetual motion
   written as law.
 
-It would also make `Vacuity::Stasis` (circulation > 0 ∧ `∂V ≡ 0`)
+It would also make `Vacuity::Stasis` (circulation > 0 ∧ `∂Δ ≡ 0`)
 unreachable, and that row exists to be detected and re-volumized, not
 abolished. The same reasoning leaves `rank` unfloored: floor it and
 both `Void` and `Stasis` vanish, collapsing four rows to two.
