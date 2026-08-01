@@ -52,6 +52,22 @@ first, never by searching the tree.
    summary word attached to an equation is a restatement, and rots like
    one.** Where this ledger names a zero point it states what the zero
    MEASURES, never what the zero is worth.
+   **Chapter five (THE MISSING LEG, 2026-08-01):** this ledger carried
+   the ENTROPIC arm of every dual and left the SYNTROPIC arm in the
+   source documents. §6 held `T1` — the bare `T_eq⁴` equilibrium —
+   while `05` §1.2 had REFUSED that one-armed reading by operator
+   ruling (2026-07-27) and replaced it with the two-armed net-heat
+   ledger, encasement FIRST; the ledger inherited the equation the
+   ruling completed and not the completion. The kernel charter names
+   `I4` *Bounded creation (SYNTROPY)* and `I5` *Bounded decay
+   (ENTROPY)*; both parentheticals were dropped here, so the value law
+   read as a pair of ceilings with no direction. Three landings —
+   VENT-1, SINK-1, IDEO-1 — inscribed equations and claimed no row,
+   which §0.2 owed. Read as arithmetic, §1–§6 was a dissipation engine
+   with bounds on it. The lesson: **a map that inherits one leg of a
+   dual has not simplified the law, it has reversed it** — selection
+   rots exactly as a gloss does (chapter four), and it is harder to
+   see, because every row it kept is true.
    All drift chapters share the root: restated facts rot; derived
    facts cannot.
 4. Documents KEEP their equations inline where the mechanic lives
@@ -174,6 +190,18 @@ D3 and D4 together are the standing law that **everything grows or
 contracts**, both ends bounded, neither optional; and 18 §3 Article IV
 governs the axis — capacity never retreats outside lawful reduction.
 
+**D3/D4 ARE THE MANIFOLD DUAL ON THE CAPACITY AXIS** (`12_UNION` §2c,
+operator ruling 2026-07-30; inscribed here 2026-08-01). Syntropy and
+entropy are *opposite ends of one closed, coned manifold — no open
+ends, every expansion on one leg bounded by the opposing force on the
+other*. D3 (emission, `S⁺_out`) is the syntropic leg; D4 (reduction to
+the H¹ floor) is the entropic leg; the cone is closed because D3 is
+floored at receipt and D4 at H¹. This is the SAME statement as 18 §2c's
+`U* = D(V) ⊕ V(D)` read on one axis — the direct sum is
+non-destructive precisely because neither leg runs free of the other.
+The thermal instance is T3, the behavioural instance is S1, and no leg
+of any of them may be read alone (§6).
+
 **E2 · The singularity law (the angle-free collision).** LANDED (U2e)
 — `rfa_core::judged_fold` (Π_G then F_fold*) with THE ANGLE-FREE
 WITNESS green (`fold_pins.rs`): the verdict is invariant under every
@@ -259,7 +287,7 @@ every other deed holds every element key still. Refusals
     AssayStruck:  amount ≥ 0  ∧  amount ≤ richness · (stamp − last_assay)
     ∀ element e:  total(next, e) == total(prior, e) + declared(e)
 
-**I4 · Bounded creation.** LANDED WHOLE (U1, tag 86) —
+**I4 · Bounded creation (SYNTROPY).** LANDED WHOLE (U1, tag 86) —
 `kernel::creation` + `solver_verify::verify_work` (the
 REPLAY-COMPLETE law: re-forge ∧ re-apply every pair ∧ re-chain; an
 intact hash chain over a non-solution refuses). **THE EMISSION LAW —
@@ -274,7 +302,16 @@ norms, no roots (§0.3 chapter two stands).
      never names its own price)
     no work → no discovery mint; the refusal carries bound and claim whole
 
-**I5 · Bounded decay.** LANDED WHOLE (U1f) — `kernel::decay` CALLS
+The charter's parenthetical is RESTORED (kernel CHARTER §2, "Bounded
+creation (syntropy)"): I4 is not merely a ceiling on creation, it is
+the syntropic leg of the value law — *no fiat; joules only by
+encasement* (05 §1.2, 01 §6.1). With I5 it forms the dual, and 18 §2f
+ENTANGLES this leg with verified work (`Δ(D) ⋈ ∇V`): the mint is not
+bounded by work, it is inseparable from it. Read I4 without its
+parenthetical and the value law reads as two ceilings; read with it,
+as one cone (D3/D4, §6).
+
+**I5 · Bounded decay (ENTROPY).** LANDED WHOLE (U1f) — `kernel::decay` CALLS
 the sealed rule `cfe::world::demurrage_due` (call-not-copy — one
 computation, two judges). `last_touch` was ALREADY committed on the
 orb wire (tag 28, VENT-1) — no schema was spent; the U_DIRECTIVES §3
@@ -415,14 +452,159 @@ the pair half is an N6 reading. Authority: NS-4 §1–§3.
 
     near leg + far leg = 0 exactly, across two books
 
-## §6 Economy and thermal
+## §6 Economy and thermal — THE MANIFOLD DUAL (syntropy ∥ entropy)
 
-**T1 · The thermal master equation.** LANDED — `cfe::thermal`.
-Authority: 05 §1. The combined constant is ONE rational parameter;
-`T_eq⁴` is exact; `T_eq` itself is display-only (roots never taken).
+**THE DUAL IS ONE OBJECT** (`12_UNION` §2c, operator ruling
+2026-07-30). Syntropy and entropy are opposite ends of one closed,
+coned manifold: the syntropic arm ENCASES (joules mint, loops close, G
+climbs), the entropic arm VENTS (heat disperses, demurrage decays, sink
+absorbs), and **neither leg runs free of the other**. The rows below
+are therefore ONE SECTION and not two — splitting them into a thermal
+section and a syntropic section would be exactly the partition 18 §2c
+bars, performed on the map instead of the territory. Every `T`/`S` row
+names both legs or names which leg it is.
+
+**T1 · The thermal equilibrium (the physical leg).** LANDED —
+`cfe::thermal`. Authority: 05 §1. The combined constant is ONE rational
+parameter; `T_eq⁴` is exact; `T_eq` itself is display-only (roots never
+taken). The T⁴ discipline is the ONE survival of squares/quartics as
+physical law (§0.3 chapter two).
 
     T_eq⁴ = L(1−A) / (16πσr²)
+
+**T1 IS NOT THE LEDGER — it is the baseline the ledger sits on.**
+Formerly titled "the thermal master equation" here; the title is
+retired because reading `T_eq⁴` alone is the ONE-ARMED reading that
+05 §1.2 REFUSED by operator ruling 2026-07-27 (*"a design in which
+every excess joule vents to the void discards the residual"*). T3 is
+the ledger.
 
 **T2 · The difficulty vector (FORGE-2a).** LANDED as a read —
 `Difficulty::from_key` (the vector from the discrete moduli; the
 float/continuous form BARRED at 14 §2.5). Wiring N6-gated.
+
+**T3 · The two-armed net-heat ledger — ENCASEMENT FIRST.** LANDED
+(VENT-1 / ECON-J / SINK-1, 2026-07-27). Authority: 05 §1.2.
+Implementation: `cfe::world` (*"the syntropic arm FIRST (05 §1.2)"*).
+
+    Heat_Net = stellar radiation + factory heat − radiator capacity
+    encased  = min( Heat_Net, encasement throughput )   ← SYNTROPIC ARM, FIRST
+    overflow = Heat_Net − encased                       ← ENTROPIC ARM, overflow only
+    encased + vented = total excess                     ← the closure, both books
+    overflow > 0  →  every yield that tick × 1/(1+overflow)
+
+The ORDER is law, not preference: excess is captured into ordered store
+BEFORE anything vents, and only the overflow disperses. *The void is
+the failure mode, never the design.* Encased joules are the commodity
+money of 01 §6.1 — **the mint is the syntropic arm**, which is why I4's
+charter name is *Bounded creation (syntropy)* and why "no fiat" and
+"joules only by encasement" are one rule.
+
+**T4 · The cryo law — the leak and its pole.** LANDED. Authority:
+05 §1.2.
+
+    ACCRUED joules leak 1/8 per tick, floored at zero
+    EXCEPT where T_eq⁴ ≤ 100⁴ K⁴ — the store holds LOSSLESS
+    BANKED (collected, receipted) joules are canonical everywhere, never leak
+
+The Furnace **mints**, the Frost **banks**, and the trade loop closes
+into a circuit — mint → encase → ship cold-ward → vault — with
+entropy-to-void the only true loss. Cryo is the syntropic POLE, not the
+cold end of a line. Zero here MEASURES an exhausted accrual; it never
+means a closed loop (§0.3 chapter four discipline).
+
+**T5 · The sink dual — exporting cold.** LANDED (SINK-1, 2026-07-27;
+research and throttle gates await the tech-tree landing). Authority:
+05 §1.4.
+
+    heat_absorbed  ≤  banked_sink
+    sink_consumed  =  heat_absorbed  =  vented_after_shed
+    captured       =  α · raw excess,   α ∈ [0,1] exact rational
+    (1−α) accrues to the vented ledger, settles as VentSettled — never un-receipted
+
+A dim-star system does not ship a negative substance; it sells **banked
+sink** — the capacity to absorb, in joule-commensurable units. THE
+EARNED-STATE LAW: neither leg is an environmental passive. Raw flux and
+raw void are both worthless until three symmetric gates pass —
+research · infrastructure · throttle. An ungated sector loses 100% of
+excess to entropy. Symmetric decay rides both sides: ACCRUED stores
+leak outside their native band, BANKED stores never leak.
+
+**S1 · The cohesion axis reading (the behavioural dual).** LANDED
+(IDEO-1) — `cfe::dop::cohesion_ratio`. Authority: 09 §1, §2.5.
+
+    axis = syntropic / (syntropic + entropic)     exact rational in [0,1]
+    None when no deed ever posted — the empty book is NOT a credential
+
+    axis          syntropic book (earned)   ◄──►  entropic book (accrued)
+    compassion    given_in_crisis           ◄──►  drawn_in_crisis
+    love          bond_flow                 ◄──►  severance_load
+    integrity     covenants_fulfilled       ◄──►  covenants_breached
+    morality      returned_across           ◄──►  extracted_across
+
+The VENT-1 sheet shape carried onto the social axis — 09 §1 states it
+outright: *"just as `T_eq⁴` governs the physical thermodynamics of a
+sector, the cohesion ledger governs its social thermodynamics."*
+DERIVED at read, never stored. VALUE-weighted, never count-weighted (a
+thousand toy promises must not wash one giant breach). Absence is zero,
+not sin: inaction mints no receipt and reads as an empty syntropic
+book, never as a phantom entropic entry.
+
+**S2 · The syntropy ratio (the whole-world read).** LANDED
+(PRACTICE-1) — `cfe::world::syntropy_ratio`. Authority: 14 §4, 09 §2.5.
+Consumed by the climb gate (`ElevationBarred`) and the condition window.
+
+    syntropy_ratio =  Σ_orb ( given_in_crisis + returned_across
+                              + covenants_fulfilled + bond_flow )
+                   ⁄  ( that sum + Σ_orb ( extracted_across
+                              + covenants_breached + severance_load ) )
+
+    the alignment floor:  aligned  ⟺  syntropy_ratio ≥ 1/2   (placeholder)
+    no practice adopted, or no deed ever posted  →  aligned
+
+**TWO DEFECTS ON THIS ROW — inscribed, not shrugged (§0.1).** Both are
+operator rulings, not derivations; neither is silently corrected here.
+
+1. **`drawn_in_crisis` IS MISSING FROM THE DENOMINATOR.** The sealed
+   sum carries FOUR syntropic books and only THREE entropic ones — the
+   compassion axis contributes its earned book to the numerator while
+   its accrued book (09 §2.1, *distress extraction*) is omitted
+   entirely. The reading is therefore biased upward: a sector that
+   draws from struck partners posts to a book that never lowers the
+   alignment gating its own climb. S1 pairs all four axes; S2 pairs
+   three. One of the two is wrong.
+2. **S2 IS THE AGGREGATE S1 FORBIDS.** 09 §1.3 rules *"no oracle, no
+   single number … the four axes never collapse into one figure — that
+   would be the scalar/scored form the ancestry law refuses, returning
+   through the back door"*, and 09 §3.4.2 refuses *"the single goodness
+   number."* `syntropy_ratio` collapses all four axes into one scalar
+   and TWO rules read it. Either 09's refusal admits a stated exception
+   for the climb gate, or the gate must read a named axis. As written
+   the document and the code contradict.
+
+**S3 · Ideological friction (`ΔS_ideo`).** INSCRIBED. Authority:
+09 §3.2; posts through the landed VENT-1 machinery (accrues as
+workspace, seals by receipt at collect — nothing un-receipted).
+
+    ΔS_ideo = φ · | reciprocity_A − reciprocity_B | · volume    (φ placeholder)
+
+Friction prices DIVERGENCE, not vice: two extractive empires trade with
+each other frictionless. The engine keeps its promise to judge nothing.
+
+**S4 · The Syntropic Sink (SSA) — NOT an invariant, mesh-placed.**
+INSCRIBED with three standing corrections. Authority: kernel CHARTER
+§5d. Recorded here so no landing mistakes it for kernel law: it reads
+AGGREGATE `H` and `U` across nodes, so its placement is the MESH
+(the kernel is network-blind) and it does **not** enter the six
+invariants. It reaches the kernel at exactly ONE seam — a ZK proof is a
+work certificate, so it enters I4's mint-bound via `verify_certificate`.
+
+    S   = U / (H + U)                     the syntropic ratio, ∈ [0,1]
+    Δg  = H(1−S) + U·S = (H² + U²)/(H + U)
+
+    CORRECTION 1: Δg → H as H → ∞ — UNBOUNDED. Boundedness lives in the
+                  NORMALIZATION, never the ratio; pre-normalize H,U to
+                  [0,1] or use S itself as the signal.
+    CORRECTION 2: H²/U² explode fixed width — `cfe::ratio` (BigRational)
+                  only (the 2^1100 lesson, §5c guardrail 2).
+    CORRECTION 3: call the sealed rational; never a second one (§0b).
