@@ -6,11 +6,26 @@
 //! difference. It is lawful ONLY when the difference was a frame change
 //! (gauge) — never when it was genuine. `orbit_lock(a, b)` decides:
 //! is there a mesh operator whose repeated conjugation carries `a`'s
-//! conjugacy class onto `b`'s within `K_max` steps? If so, the two are
-//! the same state seen through a symmetry — the fold is lawful. If not,
-//! the difference is TORSION, genuine; the collapse is forbidden and
-//! the residue must EMIT as a new plane (the singularity's bounce,
-//! 16_UNIT §4a — emission, never annihilation).
+//! conjugacy class onto `b`'s within `k_max` steps — a torsion cycle?
+//! **If so, the lock is a rigid information-bearing bind: the
+//! difference is TORSION, genuine, and the collapse is FORBIDDEN — the
+//! residue must EMIT as a new plane** (the singularity's bounce,
+//! 16_UNIT §4a — emission, never annihilation). **If not, no cycle
+//! binds them: the difference was gauge and the fold is LAWFUL.**
+//!
+//! POLARITY, stated once and load-bearing (corrected 2026-08-01): a
+//! LOCK VETOES, absence of a lock PERMITS. The code, [`FoldVerdict`],
+//! [`f_fold_star`], SYSTEM_SPEC §4 and EQUATIONS E2 have always agreed
+//! on this; two doc comments in this file said the opposite and were
+//! the only drift (the C(Δ)=0 lesson repeating — the sealed code held,
+//! the gloss rotted). The polarity decides which branch MINTS, so an
+//! inversion here pays for gauge and refuses genuine difference.
+//!
+//! Why this polarity is also the only VERIFIABLE one: a lock can carry
+//! a witness ([`OrbitWitness`] — operator id and step, re-checkable in
+//! O(step) by conjugating and comparing signatures), while ABSENCE of a
+//! lock cannot be witnessed at all without exhausting the operator
+//! space. The minting branch must be the one that carries proof.
 //!
 //! An operator is a `GL_n(Q)` conjugation `A·Δ·A⁻¹`. General
 //! conjugation need not preserve antisymmetry, so each orbit step is
@@ -96,9 +111,23 @@ impl Operator {
 /// — a torsion cycle? Each step conjugates and is kept only while it
 /// stays on the antisymmetric surface (an operator that breaks
 /// conservation generates no valid orbit and is abandoned). Conjugacy
-/// is the EXACT RCF signature. Returns the operator id and step at
-/// which the lock was found (the witness), or `None` — no lock, the
-/// difference is genuine.
+/// is the EXACT RCF signature.
+///
+/// `Some(witness)` — a torsion cycle BINDS the two classes: the
+/// difference is genuine, the fold is vetoed, and the residue emits.
+/// The witness (operator id and step) is the proof, re-checkable
+/// without repeating this search.
+///
+/// `None` — no cycle binds them: the difference was GAUGE and the fold
+/// is lawful. (Corrected 2026-08-01: this arm previously read "the
+/// difference is genuine", inverting the mint. See the module header.)
+///
+/// ALTITUDE: this is a SEARCH — every operator, up to `k_max`
+/// conjugations. It is prover-side work and belongs nowhere inside a
+/// judge. The kernel verifies a presented [`OrbitWitness`] in O(step);
+/// it must never run this loop. (The `solver`/`solver-verify` split is
+/// the house precedent: search is free and non-constitutional, replay
+/// is sealed.)
 pub fn orbit_lock(
     a: &Delta,
     b: &Delta,

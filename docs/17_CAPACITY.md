@@ -879,25 +879,44 @@ Verifying 13d's claim surfaced a live contradiction in the mint's own
 trigger condition. Inscribed per `EQUATIONS.md` §0.1 (a disagreement
 between authorities is a DEFECT, never shrugged).
 
-| authority | says |
-|---|---|
-| `SYSTEM_SPEC.md` §4 / `EQUATIONS.md` E2 | `orbit_lock ≠ ∅` → FORBID the fold, the residue EMITS as a new plane (the mint). `= ∅` → fold permitted, "the difference was gauge / angle" |
-| `rfa_core::orbit_lock` doc, `fold.rs` | "Returns the operator id and step at which the lock was found (the witness), or **`None` — no lock, the difference is GENUINE**" |
+**FIRST REPORTED AS "law vs sealed code." THAT WAS WRONG, and reading
+`fold.rs` WHOLE corrected it** — the entry stands as written below
+because the correction is the more useful record.
 
-These are opposite. The law says empty means gauge; the sealed code's
-own header says empty means genuine. **The two readings put the mint on
-opposite branches**, and a mint on the wrong branch pays for gauge and
-refuses genuine difference — the sign inversion of AV-2, sitting
-unresolved in the engine's central mechanism.
+| what | says | verdict |
+|---|---|---|
+| `f_fold_star` — THE CODE | `Some(witness) => TorsionVeto` · `None => GaugeFold` | **CORRECT** |
+| `FoldVerdict` doc | lock ⇒ genuine, collapse FORBIDDEN; no lock ⇒ gauge, fold lawful | **CORRECT** |
+| `SYSTEM_SPEC` §4 / `EQUATIONS` E2 | `≠ ∅` → forbid + emit; `= ∅` → gauge | **CORRECT** |
+| `fold.rs` MODULE HEADER | "If so, the two are the same state seen through a symmetry — the fold is lawful. If not, the difference is TORSION" | **INVERTED** |
+| `orbit_lock` fn doc | "`None` — no lock, the difference is genuine" | **INVERTED** |
 
-**Resolution argued from 13d, not from preference.** The mint must carry
-a witness (13d's asymmetry). Under the code-header reading, minting
-fires on `None` and would require proving absence — unverifiable. Under
-the `SYSTEM_SPEC`/`EQUATIONS` reading, minting fires on `Some` and the
-`OrbitWitness` is exactly the proof. **Only one polarity is verifiable,
-so the law's polarity stands and `fold.rs`'s header sentence is the
-defect.** Owed: correct that header, and add a witness pinning which
-branch mints.
+So there was never a conflict between the law and the engine. **The code
+and the law always agreed; two doc comments in one file said the
+opposite.** That is the C(Δ)=0 lesson repeating exactly — the sealed
+implementation held, and only the gloss rotted. It is also why §13e's
+first framing was itself an instance of the failure it was reporting:
+I compared a comment against a document and called it a defect in the
+engine, without reading the function underneath.
+
+**Why the polarity is nonetheless load-bearing, and why the fix is not
+cosmetic.** It decides which branch MINTS. Had a reader wired the mint
+from those two comments, the economy would have paid for gauge and
+refused genuine difference — AV-2 in the engine's central mechanism,
+introduced from documentation alone.
+
+**Independently confirmed by 13d's asymmetry.** A lock carries a witness
+(`OrbitWitness{operator_id, step}`, re-checkable in O(step)); absence of
+a lock cannot be witnessed without exhausting the operator space. The
+minting branch must be the one that can carry proof — which is `Some`,
+the polarity the code already implements.
+
+**FIXED 2026-08-01.** Both comments corrected in `engine/rfa-core/src/
+fold.rs`, with the polarity stated once in the module header as
+load-bearing, the reason recorded, and the altitude note added (§13d:
+`orbit_lock` is a SEARCH and belongs nowhere inside a judge). `cargo
+check -p rfa-core` clean. Still owed: a witness pinning which branch
+mints, so the polarity is enforced by a test rather than by prose.
 
 **This is why 13d's question was the right one.** Had `orbit_lock` been
 wired into the kernel as §§10–12 kept urging, this contradiction would

@@ -152,9 +152,29 @@ effective weight and the disagreement entropy:
     entropy H = 1 - (ω_winner / Σ_ω)          // v0.1 mdc_entropy
     stasis  = H ≥ threshold                    // default threshold = 1/2
 
-Operators are scored by how much they reduce C(Δ) (§4). `ζ∇V` is the
-gradient of the potential V (v0.1 D.SAMN.2) used ONLY as a damping term
-(ζ small) — never the driver.
+**STRUCK 2026-08-01** (operator ruling; `17_CAPACITY` §10 AV-1, §11):
+
+    STRUCK:  Operators are scored by how much they reduce C(Δ).
+    STRUCK:  ζ∇V as a damping term.
+
+The first was THE DESCENT — a greedy minimization of a class-blind
+scalar, and the last place in this document where an objective survived
+after the gradient itself was struck at §0. The guard had been placed on
+`ζ∇V` while the objective leaked through the scoring rule; both are now
+gone. `∇V` is not deleted but UNCAGED — a directional operator, never
+collapsed to a magnitude, never bounded above (`18_TORSION` §2b).
+
+**No quantity is scored, minimized, or descended.** An operator is
+ADMITTED or it ROOTS: where a proposed step composes, it folds; where it
+does not, the non-composition opens capacity by receipt rather than
+being refused (`17_CAPACITY` §11, THE BIFURCATION LAW). `C` survives
+only as the component semantics, and only as a PREDICATE — the
+per-residual cocycle test, never the L1 sum, which is a lens reading
+(`17_CAPACITY` §5).
+
+Recorded, never silently dropped: the echelon arithmetic above stands as
+the disagreement/stasis reading. It is what the MDC MEASURES. What is
+struck is its use as a selection objective.
 
 **Interface.**
 

@@ -475,6 +475,33 @@ beside `spine.tlv` so `present()` can emit tag-88 frames for them
 only thing that gives `branch` a re-convergence door; (4) a beat that
 reads Σ_mesh and fires the re-sync trigger.
 
+**ALTITUDE CORRECTION (2026-08-01, `17_CAPACITY` §13d).** Item (3) must
+NOT be read as "the kernel calls `orbit_lock`." `orbit_lock` runs a
+bounded SEARCH over every operator to `k_max`; the kernel is pure,
+total, cheap, and must never search. The split is the house pattern
+already used at U1a (`solver` searches, `solver-verify` replays):
+
+- prover side, free and stochastic — find the orbit; seed it from the
+  chain (`ξ_k = draw(seed = commit[k−1])`) so it stays replayable;
+- judge side, deterministic and cheap — verify a presented
+  `OrbitWitness{operator_id, step}` in O(step) by conjugating and
+  comparing RCF signatures. No search, no `k_max`.
+
+`U_DIRECTIVES` §4's "the kernel gains its `rfa-core` dependency here"
+must be read as the VERIFIER half only. Amendment owed there.
+
+**POLARITY DEFECT — FOUND AND FIXED (2026-08-01).** `fold.rs`'s module
+header and `orbit_lock`'s own doc comment both stated the fold gate
+INVERTED (lock found ⇒ fold lawful), against the code, `FoldVerdict`,
+`SYSTEM_SPEC` §4 and `EQUATIONS` E2 — all of which agree a lock VETOES
+and the residue emits. The code was never wrong; only the two glosses
+were, which is the C(Δ)=0 lesson repeating. It matters because the
+polarity decides which branch MINTS: anyone wiring the mint from those
+comments would have paid for gauge and refused genuine difference.
+Corrected in place, `cargo check -p rfa-core` clean. **Owed: a witness
+pinning the minting branch, so the polarity is held by a test and not by
+prose.**
+
 ### 8b. THE ANCHOR AND IDENTITY — constitutional, known, unbuilt
 
 - `mesh/src/agree.rs:57` — peer `weight` arrives ASSIGNED and advisory.
