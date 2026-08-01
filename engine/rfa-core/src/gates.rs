@@ -23,9 +23,13 @@ pub struct StepBound {
 pub enum GateVerdict {
     /// Both gates passed.
     Accepted,
-    /// Conservation refused: antisymmetry / zero-diagonal violated,
-    /// with the distance to the invariant surface.
-    ConservationViolated { violation: Ratio },
+    /// Conservation refused: antisymmetry / zero-diagonal violated.
+    /// Carries the POSITION of the first break `(i, j, l)`, never a
+    /// magnitude — a refusal names WHERE it left the surface, and a
+    /// position cannot be thresholded or descended (operator ruling
+    /// 2026-08-01: accounting, not identity; no `==` in deterministic
+    /// code).
+    ConservationViolated { at: (usize, usize, usize) },
     /// Bounded-magnitude refused: the excursion beyond the reference
     /// exceeded the allowed band.
     MagnitudeDrift { excursion: Ratio, bound: Ratio },
@@ -70,9 +74,8 @@ pub fn validate_step(before: &Delta, after: &Delta, bound: &StepBound) -> GateVe
     // bound is a per-step law and callers hold the pair. Nothing about
     // the prior state gates the step's DIRECTION any more.
     let _ = before;
-    let violation = after.conservation_measurement();
-    if !violation.is_zero() {
-        return GateVerdict::ConservationViolated { violation };
+    if let Some(at) = after.first_conservation_break() {
+        return GateVerdict::ConservationViolated { at };
     }
 
     let mass = magnitude(after);

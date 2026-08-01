@@ -58,7 +58,7 @@ fn incoherent_delta_measures_its_residual_exactly() {
 fn constructed_deltas_conserve_exactly() {
     let d = delta3(ratio(1042, 1000), ratio(542, 1000), ratio(1584, 1000));
     assert!(d.verify_conservation());
-    assert!(d.conservation_measurement().is_zero());
+    assert_eq!(d.first_conservation_break(), None, "no position breaks the surface");
 }
 
 /// VECTOR 3 — a pure coboundary reduces to ZERO: the coherent state is

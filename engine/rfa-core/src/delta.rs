@@ -75,11 +75,47 @@ impl Delta {
         Self { dim, fiber, entries }
     }
 
+    /// THE STRUCTURAL BREAK — the first place antisymmetry or the zero
+    /// diagonal fails, named as a POSITION `(i, j, l)`, never as a
+    /// magnitude.
+    ///
+    /// This is the form the engine uses (operator ruling 2026-08-01:
+    /// no `==` in deterministic code — accounting, not identity). It
+    /// asks a structural question and answers with a structural fact:
+    /// WHERE the surface is left. It never forms an aggregate, so there
+    /// is no scalar for a later reader to compare, threshold, or
+    /// descend, and it short-circuits at the first break rather than
+    /// summing the universe to decide a yes/no.
+    ///
+    /// Contrast [`Self::conservation_measurement`], which collapses the
+    /// same question to one number and is a LENS reading only.
+    pub fn first_conservation_break(&self) -> Option<(usize, usize, usize)> {
+        for i in 0..self.dim {
+            for l in 0..self.fiber {
+                if !self.entries[i][i][l].is_zero() {
+                    return Some((i, i, l));
+                }
+            }
+            for j in (i + 1)..self.dim {
+                for l in 0..self.fiber {
+                    if !(&self.entries[i][j][l] + &self.entries[j][i][l]).is_zero() {
+                        return Some((i, j, l));
+                    }
+                }
+            }
+        }
+        None
+    }
+
     /// The conservation measurement — a DISTANCE to the invariant
-    /// surface, not a boolean: `Σ |Δ_ii| + Σ_{i<j} |Δ_ij + Δ_ji|`
-    /// (THE PROPORTIONAL LAW: each violation counts exactly its size, in its
-    /// own units — squares are barred as aggregators of difference).
-    /// Zero iff antisymmetry and the zero diagonal hold exactly.
+    /// surface: `Σ |Δ_ii| + Σ_{i<j} |Δ_ij + Δ_ji|` (THE PROPORTIONAL
+    /// LAW: each violation counts exactly its size, in its own units).
+    ///
+    /// **LENS READING ONLY.** No engine path decides anything from this
+    /// number; it exists so a human surface can render how far a state
+    /// sits from the surface. The engine asks
+    /// [`Self::first_conservation_break`] instead, which names a
+    /// position rather than a magnitude.
     pub fn conservation_measurement(&self) -> Ratio {
         let mut violation = Ratio::zero();
         for i in 0..self.dim {
@@ -96,9 +132,10 @@ impl Delta {
         violation
     }
 
-    /// The typed read of the conservation invariant.
+    /// The typed read of the conservation invariant — structural, with
+    /// early exit, forming no aggregate.
     pub fn verify_conservation(&self) -> bool {
-        self.conservation_measurement().is_zero()
+        self.first_conservation_break().is_none()
     }
 }
 
