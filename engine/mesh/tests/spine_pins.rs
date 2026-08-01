@@ -261,25 +261,32 @@ fn the_judge_stands_at_the_door() {
         SpineRefused::Unlawful(kernel::Unlawful::ConservationBroken { resource: Resource::Iron, .. })
     ));
 
-    // The sealed default reaches the spine: an uncovered deed refuses.
-    // WITNESS TRUTH-UPDATE ×3 (the coverage seam, recorded): ZoneRazed
-    // entered at the value-law wave; EraAnnexed at U2d's gauge law;
-    // AssayStruck at the element law. The pin now rides TaxonSealed —
-    // the last uncovered deed (coder-03's #42). When it covers, this
-    // pin transforms with the Phase 3 flip.
-    let uncovered = kernel::Step {
+    // A JUDGED refusal reaches the spine and refuses. WITNESS
+    // TRUTH-UPDATE (recorded): this block rode the last-uncovered deed
+    // (ZoneRazed → EraAnnexed → AssayStruck → TaxonSealed) to prove
+    // the sealed default passed through. With coverage now TOTAL (all
+    // 64 deeds judged, kernel `taxon_pins.rs`), there is no Unjudged
+    // deed to carry — so the pin shows the spine carrying a
+    // containment refusal instead: TaxonSealed needs Build, and the
+    // Collect-hand (100) lacks it, so the kernel's NotPermitted rides
+    // the spine to a typed refusal, the verdict never swallowed.
+    let refused = kernel::Step {
         event: ClosureEvent::TaxonSealed { class: 1, clade: 1 },
         actor: 100,
         stamp: 2,
     };
     assert_eq!(
-        spine.extend(coord(2), &lawful_next, Some(&uncovered)).unwrap_err(),
-        SpineRefused::Unlawful(kernel::Unlawful::Unjudged)
+        spine.extend(coord(2), &lawful_next, Some(&refused)).unwrap_err(),
+        SpineRefused::Unlawful(kernel::Unlawful::NotPermitted {
+            actor: 100,
+            scope: cfe::ipsal::Scope::Build,
+        })
     );
 
-    // The unjudged hole is lawful at this phase — and STAMPED.
+    // A step-less extend still stamps judged = false (the pre-chain
+    // adoption shape — no judgment claimed, honestly recorded).
     let hole = spine.extend(coord(2), &minting_next, None).expect("admitted unjudged").clone();
-    assert!(!hole.judged, "the coverage hole is visible in the record, never hidden");
+    assert!(!hole.judged, "no judgment claimed is visible in the record, never hidden");
 }
 
 /// The commitment's schema field speaks the BLOB's leading byte — the

@@ -27,14 +27,16 @@ fn two_orb_world() -> World {
 }
 
 #[test]
-fn the_sealed_default_refuses_the_unjudged() {
-    // The airtight law: a deed with no landed invariant coverage does
-    // NOT enter — refuse-unknown, not admit-unknown. WITNESS
-    // TRUTH-UPDATE ×4 (each recorded): ColonyFounded entered at the
-    // value-law wave; EraAnnexed at U2d's gauge law; AssayStruck at
-    // the element law. The pin now rides TaxonSealed — the LAST
-    // uncovered deed (coder-03's #42). When it covers, this pin dies
-    // with the sealed default it witnesses: that is the Phase 3 flip.
+fn the_last_deed_covered_exhausts_the_sealed_default() {
+    // THE TRANSITION (recorded): this pin rode the last-uncovered deed
+    // through four coverage waves — ColonyFounded (value law),
+    // EraAnnexed (gauge law), AssayStruck (element law), TaxonSealed
+    // (the last). TaxonSealed now COVERS, so `Unjudged` is unreachable
+    // via any current deed. The pin transforms: it witnesses that the
+    // final holdout is judged (admits, prior == next, neutral). The
+    // completeness of all 64 lives in `taxon_pins.rs`; the sealed
+    // default stays in the kernel as refuse-unknown for future
+    // enum additions.
     let world = {
         let mut world = World::new();
         world.found("origin").expect("founds");
@@ -48,8 +50,8 @@ fn the_sealed_default_refuses_the_unjudged() {
     };
     assert_eq!(
         lawful(&state, &state, &step),
-        Err(Unlawful::Unjudged),
-        "the sealed kernel refuses what it cannot judge"
+        Ok(()),
+        "the final holdout is judged — coverage is total"
     );
 }
 

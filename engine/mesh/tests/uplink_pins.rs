@@ -167,7 +167,7 @@ fn a_judged_record_is_re_judged_or_refused() {
     // none — the Phase-3 seam): the judged record cannot be re-judged,
     // so the receiver refuses it.
     let base_segment = src.present();
-    let mut dst = Spine::open(&scratch("judge-dst1")).expect("opens");
+    let mut dst = Spine::open(scratch("judge-dst1")).expect("opens");
     assert!(matches!(
         dst.receive(&base_segment),
         Err(SpineRefused::JudgedWithoutProof { .. })
@@ -177,7 +177,7 @@ fn a_judged_record_is_re_judged_or_refused() {
     // admits, reaching the equal spine.
     let mut with_step = base_segment.clone();
     with_step.extend_from_slice(&step_frame(judged.commit, &transfer_step(2)));
-    let mut dst2 = Spine::open(&scratch("judge-dst2")).expect("opens");
+    let mut dst2 = Spine::open(scratch("judge-dst2")).expect("opens");
     assert_eq!(dst2.receive(&with_step).expect("re-judged lawful"), 2);
     assert_eq!(dst2.records(), src.records(), "equal spine after re-judge");
 
@@ -196,6 +196,6 @@ fn a_judged_record_is_re_judged_or_refused() {
     };
     let mut with_liar = base_segment.clone();
     with_liar.extend_from_slice(&step_frame(judged.commit, &liar));
-    let mut dst3 = Spine::open(&scratch("judge-dst3")).expect("opens");
+    let mut dst3 = Spine::open(scratch("judge-dst3")).expect("opens");
     assert!(matches!(dst3.receive(&with_liar), Err(SpineRefused::Unlawful(_))));
 }
