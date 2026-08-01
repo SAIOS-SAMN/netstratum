@@ -58,8 +58,9 @@ fn shock_stress_gated_recovery_convergence() {
     assert_eq!(fired, 6);
 
     // 3. GATED RECOVERY — the colony re-equilibrates tick by tick.
-    //    Each step must pass all three gates (conservation, bounded
-    //    magnitude, productivity: stress strictly falls).
+    //    Each step passes the TWO gates: conservation, and the
+    //    two-sided magnitude bound. (The productivity gate is STRUCK —
+    //    see step 5.)
     let bound = StepBound {
         reference: magnitude(&hit),
         epsilon: ratio(1, 1),
@@ -69,20 +70,17 @@ fn shock_stress_gated_recovery_convergence() {
     let mut last_stress = stress;
     for d02 in path {
         let next = shocked(d02);
-        match validate_step(&current, &next, &bound) {
-            GateVerdict::Accepted {
-                coherence_before,
-                coherence_after,
-            } => {
-                assert_eq!(coherence_before, last_stress);
-                assert!(
-                    coherence_after < coherence_before,
-                    "recovery strictly reduces stress"
-                );
-                last_stress = coherence_after;
-            }
-            refused => panic!("a lawful recovery step refused: {refused:?}"),
-        }
+        assert_eq!(
+            validate_step(&current, &next, &bound),
+            GateVerdict::Accepted,
+            "a lawful recovery step refused"
+        );
+        // C is READ here, and governs nothing. That this path happens to
+        // fall is an OBSERVATION about this path, never a requirement
+        // the gate imposed.
+        let now = coherence_functional(&next);
+        assert!(now < last_stress, "this particular path does fall — observed, not required");
+        last_stress = now;
         current = next;
     }
 
@@ -91,17 +89,24 @@ fn shock_stress_gated_recovery_convergence() {
     assert!(last_stress.is_zero());
     assert_eq!(current, equilibrium());
 
-    // 5. THE GATES HAVE TEETH — a "recovery" that overshoots away from
-    //    equilibrium (Δ02: 3/2 → 4) refuses typed as Unproductive.
+    // 5. THE LINEAGE IS NOT BOUND TO C's LANE (operator ruling
+    //    2026-08-01, the struck productivity gate). A step moving AWAY
+    //    from equilibrium (Δ02: 3/2 → 4) is now ACCEPTED. The struck
+    //    gate refused exactly this as `Unproductive`, which confined
+    //    every lineage to one direction along one scalar axis and
+    //    foreclosed every other branch it could open.
+    //
+    //    A scalar being uni-directional is fine FOR THE SCALAR. Binding
+    //    the lineage to it is the fault.
     let overshoot = shocked(ratio(4, 1));
-    match validate_step(&current, &overshoot, &bound) {
-        GateVerdict::Unproductive {
-            coherence_before,
-            coherence_after,
-        } => {
-            assert!(coherence_before.is_zero());
-            assert!(!coherence_after.is_zero());
-        }
-        other => panic!("expected the productivity refusal, measured {other:?}"),
-    }
+    assert_eq!(
+        validate_step(&current, &overshoot, &bound),
+        GateVerdict::Accepted,
+        "motion away from C's minimum is lawful — the lineage is n-dimensional"
+    );
+    // C still reads the rise. It simply governs nothing.
+    assert!(
+        coherence_functional(&overshoot) > coherence_functional(&current),
+        "C observes the excursion — an inert reading with no agency"
+    );
 }
