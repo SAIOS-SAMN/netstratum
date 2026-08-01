@@ -103,7 +103,7 @@ they create it, they overlay technology. Everything else plays on it.)
 | Tier | Who | The reading |
 |---|---|---|
 | **0 — the Board-Makers** | the PROGENITORS | **the conductor's own operations ARE their deeds, named:** seeding NPCs (genesis — create species/stars/worlds), expanding the board (roster waves — new lines online), contracting the board (the FOLD — the era seals and rotates), overlaying technology (the licensed leap, tag 40), deploying Watchers and Observers (the station seats) |
-| 1 — the Architect Observers | crossed NHI lines; the Watcher and Observer offices | interstellar corridor operations; shield enforcement readings; the mirror's reflection made diegetic |
+| 1 — the Architect Observers | crossed NHI lines; the Watcher and Observer offices | interstellar corridor operations; shield enforcement readings; the LENS made diegetic |
 | 2 — the Record Keepers | the ancient contact lines (Anunnaki-descended memory: Kemet, Baktun, Dogon shapes) | ledger auditing across aperture endpoints (the INTEGRITY books); polytonic calendar-keeping (the voices, 11 §1) |
 | 3 — the Biosphere Nodes | the local species lines (Slagborn, Echowright, Hivelight, Eightfold, the Weft) | the thermodynamic foundation: raw extraction, local loops, the entropy stability every higher tier stands on |
 
@@ -165,7 +165,7 @@ shape of this constitution, not a defeat.
 the one chain and holds no copy — so it has nothing to reconcile, and
 no second truth can form inside it. *Observation is a lens, never a
 copy* (`SYSTEM_SPEC` §5; §11 rule 2: exports are write-only). The
-carrier is `engine/lens`; the dead name `engine/mirror` is never reused.
+carrier is `engine/lens`; the dead name is EXCISED and never reused.
 
 **WHAT SURVIVES UNCHANGED — the invariants were never the framing.**
 Each is landed algebra, and each is now carried by kernel I1/I6 rather
@@ -195,10 +195,10 @@ concept made diegetic:
   may petition a council on its behalf, and may not act upon it. (The
   register note writes them as the Grigori myth — those who watch the
   young worlds and are forbidden to descend.)
-- **Observers.** The **mirror made diegetic**: the reflection law as a
+- **Observers.** The **lens made diegetic**: the lens law as a
   people. Observers render the boards, the journals, the wall — they read
   everything and author nothing, and their whole law is the one the engine
-  already keeps: *the mirror reflects, never authors*.
+  already keeps: *the lens derives, never authors*.
 - **Sovereigns.** The holders of chartered worlds — the `SOVEREIGN`
   provenance that already signs every world's receipts, made a station.
 

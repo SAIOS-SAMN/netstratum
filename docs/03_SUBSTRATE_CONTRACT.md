@@ -118,7 +118,7 @@ verification (N6), and anchoring (N7) survive untouched.
   routes through the beacon with a named domain tag, and the tag
   appears in the receipt that consumed the draw.
 
-## 7. Observation and governance → the mirror, the observer, the steward
+## 7. Observation and governance → the lens, the observer, the steward
 
 Every console session reflects its civilization to `var/worlds/<civ>/`:
 `state.json` (atomic-replace snapshot), `chronicle.jsonl` (append-only
@@ -127,9 +127,12 @@ receipt stream carrying the digest chain and the normative TLV bytes),
 directives; processed ones archive under `applied/`/`refused/`, never
 deleted). Quantities render exact (`9/2`, never `4.5`).
 
-- **Primitive:** `mirror::Mirror` (`record`, `pending_directives`,
-  `archive`, `record_solve`). The mirror is a REFLECTION, never an
-  authority — nothing reads `state.json` back into a world; replay
+- **Primitive:** `scribe::record` / `scribe::record_solve` for the
+  write side, `ledger::Ledger` (`pending_directives`, `archive`) for the
+  steward inbox. (Formerly `mirror::Mirror`; `engine/mirror` was EXCISED
+  2026-07-31 — d606b01 — and MIRROR is deprecated as a framing whole,
+  12 §2c. A lens derives from the one chain and holds no copy.) The lens
+  is a DERIVATION, never an authority — nothing reads `state.json` back into a world; replay
   grounds worlds. The same stream is the persistence carrier: world =
   replay(chronicle), so save/load and observation are one seam.
 - **Tools:** `tools/observer.py` — read-only by construction;
@@ -142,15 +145,16 @@ deleted). Quantities render exact (`9/2`, never `4.5`).
   an ordinary attributed receipt; the steward never edits state, and
   `revoke` shuts it out instantly.** Signature hardening on directive
   files is a named seam for the first multi-user landing.
-- **Witness:** `mirror_pins.rs` (faithful + incremental reflection,
-  chain linkage in the stream, directive round-trip + archival,
-  exactness in the snapshot).
+- **Witness:** `scribe::journal_pins` / `rotation_pins` (faithful and
+  incremental derivation, chain linkage in the stream) and
+  `ledger_pins` (directive round-trip + archival, exactness in
+  the snapshot). Formerly `mirror_pins.rs`, EXCISED with its crate.
 - **Chartering conserves (P1):** founding a new planet MOVES reserves
   from the source colony and mints nothing — conservation-by-movement
   is a substrate claim, not a rule of thumb. Primitive:
   `world::chart` / `chart_as` (Build scope). Witness:
   `world_planets::chartering_moves_the_reserves_and_mints_nothing`.
-- **coder-02 seam:** the CLI wires `Mirror::record` after each command
+- **coder-02 seam:** the CLI wires `scribe::record` after each command
   and drains `pending_directives` per tick via the `as steward` path;
   the steward entity exists per-world with operator-granted scopes.
 
@@ -200,12 +204,12 @@ colloquially it means *a planet*, never the container.
   `Star` and the path to `stars/<slug>/` at the multi-planet landing,
   before N6 (see NS-6 §6). Code identifiers are untouched until that
   landing.
-- **Primitive:** `mirror::registry::Registry` (`create` with typed
+- **Primitive:** `ledger::registry::Registry` (`create` with typed
   refusals `AlreadyRegistered`/`UnknownAxis`, `load`, `list`);
-  `Mirror::record(world, planet, civilization, &World)` writing
+  `scribe::record(world, planet, civilization, &World)` writing
   `worlds/<world>/world.json` + `planets/<planet>/state.json`;
   directives and solves at world altitude.
-- **Witness:** `mirror_pins.rs` (topology layout, per-world chain,
+- **Witness:** `ledger_pins` (topology layout, per-world chain,
   registry vocabulary enforcement).
 - **coder-02 seam:** founding becomes the character screen — pick or
   create civilization (registry), pick or create star (system), name the

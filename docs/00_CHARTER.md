@@ -98,6 +98,42 @@ merit and would stand had that project never existed:
 5. **INSTANT ONBOARDING.** One command launches the CLI client. No wallet, no
    gas, no invite keys, no bridging. The barrier to entry is typing.
 
+## 3a. THE LENS LAW — no mirrors in the infrastructure
+
+**Ruled 2026-08-01. A mirror is banned as a structure and as a word.**
+This system reflects nothing; it DERIVES. The two are not synonyms and
+the difference is the whole of §11.
+
+- **A MIRROR holds a copy.** It reflects state into a second artifact
+  that then exists independently, and from that moment there are two
+  things that can disagree. Every tool built to reconcile them is a
+  tool built to manage a problem that should not exist.
+- **A LENS holds nothing.** It derives a view from the one chain at
+  read time and is discarded. There is no second copy, so there is
+  nothing to reconcile, nothing to drift, and no reconciliation layer
+  to write.
+
+**Binding:** no crate, module, type, field, or spec primitive in this
+workspace may be a mirror or be named one. Observation is a lens
+(`SYSTEM_SPEC` §3); rendering is a lens; the observer, the wall and the
+journals are lenses. Where a reading is needed, it derives.
+
+**This is the section that was earned rather than reasoned.**
+`engine/mirror` was born a read-only dashboard and was safe while that
+was all it was. It became load-bearing one useful change at a time, and
+no rule existed to stop it — so §11 was written, the crate was EXCISED
+(d606b01), and `cfe::opposition`, the reconciler it had made necessary,
+went with it (c7cad9e). ANTI-MIRROR followed: verification by opposition
+still needs two records to set against each other, which §11 rule 5
+clause 1 forbids outright. *You do not reconcile what cannot diverge.*
+
+**Held by standing tests, never by memory:**
+`recurrence_guard::the_dead_name_stays_dead` keeps the crate and the
+workspace member dead; `recurrence_guard::the_anti_mirror_stays_excised`
+keeps the reconciler dead; `constitution_lint::no_mirror_in_the_law`
+keeps the name out of the specifications. Vigilance did not save us the
+first time; a standing test did.
+
 ## 4. THE PROTOCOL-TO-MECHANIC BINDING MAP
 
 | Spec | Protocol | First game consumer |

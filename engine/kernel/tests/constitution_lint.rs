@@ -315,6 +315,73 @@ fn the_struck_symbols_stay_struck() {
     );
 }
 
+/// THE LENS LAW as a standing test (`00_CHARTER` §3a).
+///
+/// `recurrence_guard` keeps the mirror CRATE dead and the reconciler
+/// excised. Neither watches the specifications — which is exactly how
+/// `03_SUBSTRATE_CONTRACT` went on documenting `mirror::Mirror` as a
+/// live primitive for two days after the crate was deleted. The code
+/// was guarded; the prose was not. This closes that half.
+///
+/// A mirror holds a copy and can therefore disagree with the chain. A
+/// lens derives and holds nothing. The name may appear ONLY where a
+/// paragraph records its removal.
+#[test]
+fn no_mirror_in_the_law() {
+    let root = workspace_root();
+    let mut live = Vec::new();
+    for doc in law_documents(&root) {
+        // BUILD_ORDER and the audit are the LANDING RECORD — they say
+        // what happened under the names it happened under, and
+        // rewriting history is not excision. The law documents are the
+        // scope: what the system IS, not what it did.
+        let name = doc.file_name().unwrap_or_default().to_string_lossy().to_string();
+        // 00_CHARTER carries §3a itself — the article defining the ban
+        // must be able to name what it bans, and §11 keeps the history
+        // of why the rule exists. BUILD_ORDER and the audit are the
+        // LANDING RECORD: they say what happened under the names it
+        // happened under, and rewriting history is not excision.
+        if name == "00_CHARTER.md"
+            || name == "BUILD_ORDER.md"
+            || name.starts_with("AUDIT_")
+            || name == "KERNEL_RELAY.md"
+            || name == "HANDOFF.md"
+            || name == "PICKUP.md"
+            || name.ends_with("_DIRECTIVES.md")
+        {
+            continue;
+        }
+        let text = fs::read_to_string(&doc).unwrap_or_default();
+        let exempt = struck_paragraph_lines(&text);
+        for (n, line) in text.lines().enumerate() {
+            if exempt.contains(&n) {
+                continue;
+            }
+            // STRUCTURE, never the verb. "X mirrors Y" and "mirroring"
+            // are ordinary English and hold nothing; what §3a bans is a
+            // mirror that EXISTS — a crate, a module, a type, or "the
+            // mirror" as a thing in the system. `TileMirror` / FlipH
+            // are lawful geometry: a mirrored GRID is a transform, not
+            // a second truth.
+            let structure = line.contains("engine/mirror")
+                || line.contains("mirror::")
+                || line.contains("the mirror")
+                || (line.contains("Mirror") && !line.contains("TileMirror"));
+            if structure {
+                let rel = doc.strip_prefix(&root).unwrap_or(&doc).display();
+                live.push(format!("{rel}:{}  {}", n + 1, line.trim()));
+            }
+        }
+    }
+    assert!(
+        live.is_empty(),
+        "a law document names a MIRROR as live (00_CHARTER §3a, THE LENS LAW).\n\
+         A mirror holds a copy and can disagree with the chain; a lens \
+         derives and holds nothing. Use the lens, or record the strike:\n  {}",
+        live.join("\n  ")
+    );
+}
+
 #[test]
 fn the_detectors_have_teeth() {
     // A guard that cannot bite is the vacuous check this file exists to
@@ -342,6 +409,18 @@ fn the_detectors_have_teeth() {
     let ex = struck_paragraph_lines(doc);
     assert!(ex.contains(&0) && ex.contains(&1), "the strike paragraph is exempt whole");
     assert!(!ex.contains(&3), "the NEXT paragraph is not exempt");
+
+    // THE LENS LAW detector: structures bite, verbs do not.
+    let bites = |l: &str| {
+        l.contains("engine/mirror")
+            || l.contains("mirror::")
+            || l.contains("the mirror")
+            || (l.contains("Mirror") && !l.contains("TileMirror"))
+    };
+    assert!(bites("- **Primitive:** `mirror::Mirror` (`record`, ...)"), "a mirror STRUCTURE must bite");
+    assert!(bites("the mirror is a REFLECTION, never an authority"), "'the mirror' as a thing must bite");
+    assert!(!bites("external tokens mirror immutable facts"), "the VERB holds nothing and must pass");
+    assert!(!bites("`TileMirror` / FlipH — a mirrored GRID is a transform"), "grid geometry is lawful");
 
     assert!(is_foreign_root("std::collections::HashSet"), "std is foreign");
     assert!(!is_foreign_root("rfa_core::Delta"), "our crates are not foreign");
