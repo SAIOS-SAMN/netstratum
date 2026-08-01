@@ -176,7 +176,8 @@ decay.** I6 is the convergence law: **no difference dies without account.**
 
 Read to KNOW the state; never targets the kernel drives.
 
-- **Coherence functional** (the residual measure; zero iff converged):
+- **Coherence functional** (the cocycle-CONSISTENCY measure; zero iff the
+  differences COMPOSE — never "iff converged", see the correction below):
 
         C(Δ) = Σ_i |R_i|        (exact rationals; THE PROPORTIONAL LAW —
                                  operator ruling 2026-07-31, amending the
@@ -187,6 +188,21 @@ Read to KNOW the state; never targets the kernel drives.
                                  difference counted exactly its size in
                                  its own units; the zero point the law
                                  judges at is unchanged)
+
+  **`C(Δ) = 0` IS NOT "CONVERGED"** (operator correction 2026-08-01).
+  Zero says the relations COMPOSE — `Δ_ik = Δ_ij + Δ_jk` for every
+  triple. That is what the sealed `rfa_core::coherence_functional`
+  states, and all it states. It does NOT say the two states are
+  identical, and it does NOT say difference was spent. The genuine
+  difference is the H¹ class, and `coboundary_reduce` PRESERVES it by
+  construction: it strips the coboundary — the coordinate-frame
+  artifact that was never difference — and what survives IS the cocycle
+  class (`rfa_core::reduce`, the sealed authority). C cannot see that
+  class. A state may read `C(Δ) = 0` and carry a large irreducible
+  core. Calling zero "converged" contradicts **I6 in §2 of this same
+  document** (*no difference dies without account*) and invites the
+  minimization §4 rejects. Reduction removes CONTRADICTION and FRAME.
+  **We never discard residuals.**
 
 - **Constitution digest** (the link handshake — same universe?):
 
@@ -216,7 +232,11 @@ ends (the ancestor's `DIMENSIONAL_RESOLUTION`):
         fold:    project to the irreducible H^1 core (coboundary_reduce);
                  bounded below by the cohomological floor — cannot collapse
                  past H^1.
-        measure: C(Δ). converged if C(Δ) == 0 AND no orbit-lock remains.
+        measure: C(Δ). The cycle RESTS when C(Δ) == 0 AND no orbit-lock
+                 remains — the relations compose, and no torsion binds
+                 the pair. Resting is not emptiness: the H^1 core STANDS
+                 (the floor this loop cannot fold past). What the cycle
+                 removed was contradiction and frame, never difference.
 
 **The fold gate (I6, from the ancestor's `F_fold*`).** Before folding Δa and
 Δb, test for a torsion cycle:

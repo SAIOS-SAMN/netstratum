@@ -82,8 +82,14 @@ gauge is the coherence functional; recovery is a sequence of gated
 convergence steps.
 
 - **Primitive:** `rfa_core::coherence_functional` (`C = Σ |R|`, exact
-  rational, zero iff converged — the dashboard number; the proportional law,
-  operator ruling 2026-07-31);
+  rational, zero iff the COCYCLE CONDITION holds — the differences
+  compose; the dashboard number; the proportional law, operator ruling
+  2026-07-31). **Never read zero as "converged"** (operator correction
+  2026-08-01): zero says the relations compose, not that difference is
+  gone — the H¹ core is invisible to C and survives reduction intact.
+  Here that distinction is the mechanic: recovery drains the TORSION a
+  shock injected, and the colony's own structural difference is not
+  stress and is never drained with it;
   `rfa_core::for_each_residual` (WHERE the stress lives, per triple,
   per coordinate); `rfa_core::validate_step` (typed refusals:
   `ConservationViolated`, `MagnitudeDrift`, `Unproductive` — recovery

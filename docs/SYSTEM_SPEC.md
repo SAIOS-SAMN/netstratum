@@ -194,9 +194,21 @@ descent-and-emission, bounded both ends.
 **Equations — the core measurements (v0.1, exact).**
 
     residual (cocycle):   R_{ijk,l} = Δ_{ik,l} − Δ_{ij,l} − Δ_{jk,l}
-    coherence functional:  C(Δ) = Σ |R|       (0 ⟺ converged; a LENS;
-                                               the proportional law)
-    coboundary reduce:     Π_G(Δ) = H¹ projection (strip distortion to core)
+    coherence functional:  C(Δ) = Σ |R|       (0 ⟺ the COCYCLE CONDITION
+                                               holds — the differences
+                                               COMPOSE; a LENS; the
+                                               proportional law)
+    coboundary reduce:     Π_G(Δ) = H¹ projection (strip the FRAME; the
+                                               core SURVIVES)
+
+**`C(Δ) = 0` never means "converged"** (operator correction 2026-08-01).
+Zero says the relations compose, not that the states are identical and
+not that difference was spent. The genuine difference is the H¹ class:
+`Π_G` strips only the coboundary — the coordinate-frame artifact that
+was never difference — and what survives IS the cocycle class, which C
+cannot see. A state may read zero and carry a large irreducible core.
+Reduction removes CONTRADICTION and FRAME; **we never discard
+residuals** (kernel CHARTER I6, *no difference dies without account*).
 
 **The dimensional-resolution cycle (replaces gradient descent).**
 
@@ -204,7 +216,9 @@ descent-and-emission, bounded both ends.
       unfold:  if transmute(Δ): raise dimensionality (propose N that adds a
                plane); bounded above by the C7 magnitude gate.
       fold:    Δ ← Π_G(F_fold*(Δ)); bounded below by the H¹ floor.
-      measure: C(Δ); done when C(Δ)=0 AND orbit_lock stays ∅.
+      measure: C(Δ); the cycle RESTS when C(Δ)=0 AND orbit_lock stays ∅
+               — relations compose, no torsion binds. Resting is not
+               emptiness: the H¹ core STANDS on the floor below.
 
 **The fold gate F_fold* (I6, v0.1 `fold.rs`).** Before folding a,b:
 

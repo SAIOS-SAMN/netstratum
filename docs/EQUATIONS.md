@@ -37,8 +37,23 @@ first, never by searching the tree.
    uncounted universe is the failure mode, not the safeguard.** A
    count used as law must be DERIVED from the one authority (count
    the enum, never quote a doc), and a balancing remainder proves
-   nothing unless the total itself was measured. Both drift chapters
-   share the root: restated facts rot; derived facts cannot.
+   nothing unless the total itself was measured.
+   **Chapter four (THE ZERO THAT MEANT EMPTY, operator correction
+   2026-08-01):** this ledger glossed `C(Δ) = 0` as "converged", and
+   the kernel charter wrote "zero iff converged" two sections after
+   stating I6 as *no difference dies without account* — a constitution
+   contradicting itself about its own central claim. The sealed code
+   never drifted: `coherence_functional` says zero iff the COCYCLE
+   CONDITION holds, and `coboundary_reduce` says what survives IS the
+   cocycle class. Only the gloss drifted — and a gloss is how a
+   CONSERVATIVE law comes to read as a DESTRUCTIVE one, because
+   "converged" invites minimization and minimization discards exactly
+   the residual the economy mints on. The lesson beyond the fix: **a
+   summary word attached to an equation is a restatement, and rots like
+   one.** Where this ledger names a zero point it states what the zero
+   MEASURES, never what the zero is worth.
+   All drift chapters share the root: restated facts rot; derived
+   facts cannot.
 4. Documents KEEP their equations inline where the mechanic lives
    (spec + mechanic + vectors in one landing stands). This ledger adds
    the map; it strips nothing.
@@ -192,12 +207,31 @@ Authority: SYSTEM_SPEC §4, 07_ERA_CONVERGENCE.
 moved 24 → 12 in the RFA vectors and 29 → 7 in the NS-2 scanner, and
 the tag-58 wire vector was re-extracted from the running engine.)
 
-    C(Δ) = Σ |R|        (0 ⟺ converged; a LENS, never a driver; the
-                         scalar in the SAME UNITS as its payload)
+    C(Δ) = Σ |R|        (0 ⟺ THE COCYCLE CONDITION HOLDS — the
+                         differences COMPOSE; a LENS, never a driver;
+                         the scalar in the SAME UNITS as its payload)
+
+**`C(Δ) = 0` IS NOT "CONVERGED"** (operator correction 2026-08-01 — the
+row's earlier gloss is STRUCK). Zero says the relations compose,
+`Δ_ik = Δ_ij + Δ_jk` for every triple; that is what the sealed
+`rfa_core::coherence_functional` states and all it states. It does NOT
+say the states are identical, and it does NOT say difference was spent.
+Genuine difference is the H¹ class — C3 PRESERVES it by construction
+(see that row) and C cannot see it, so a state may read `C(Δ) = 0` and
+carry a large irreducible core. **We never discard residuals** (I6:
+*no difference dies without account*).
 
 **C3 · The coboundary reduction.** LANDED — `rfa_core::coboundary_reduce`.
+The reduction is CONSERVATIVE, and this row is the reason C2's zero can
+never mean emptiness: it strips ONLY the coboundary — the
+coordinate-frame distortion that was never difference — and what
+survives IS the cocycle class (the sealed `rfa_core::reduce` header
+states exactly this). Two Deltas differing only by a frame reduce to
+the same representative; a PURE coboundary reduces to zero because it
+carried no structural content to begin with. Nothing irreducible is
+ever removed here.
 
-    Π_G(Δ) = the H¹ projection (strip gauge distortion to the core)
+    Π_G(Δ) = the H¹ projection (strip the frame; the core SURVIVES)
 
 **C4 · The orbit lock & the fold gate.** LANDED in rfa-core (U2b) —
 `rfa_core::orbit_lock` + `rfa_core::f_fold_star` (`Operator` = a
@@ -226,8 +260,11 @@ blake3, never the ancestor's Keccak.
 
 **C5 · The dimensional-resolution cycle (algorithm).** INSCRIBED.
 Authority: SYSTEM_SPEC §4. unfold (raise a plane, C7-bounded above) →
-fold (Π_G ∘ F_fold*, H¹-floored below) → measure (done at C(Δ) = 0
-with orbit_lock ∅).
+fold (Π_G ∘ F_fold*, H¹-floored below) → measure. The cycle RESTS at
+`C(Δ) = 0` with `orbit_lock = ∅`: the relations compose and no torsion
+binds the pair. Resting is not emptiness — the H¹ core STANDS on the
+floor the loop cannot fold past. What the cycle removes is
+contradiction and frame; what it cannot reduce, it EMITS (C4).
 
 **C6 · The four-C placement (algorithm).** LANDED (CONVERGE-1).
 Authority: 07 §2. Implementation: `ledger::converge`.

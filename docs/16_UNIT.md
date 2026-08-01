@@ -95,7 +95,12 @@ Proof of Work-Convergence is the fold gate judged locally:
 (consult, never port blindly) into the sealed core, beside the landed
 `coherence_functional` and `coboundary_reduce`. The merge/fold deed
 enters `covered()`; two units converging is both kernels judging the
-same pair of chains — agreement is measured (C(Δ) = 0), never voted.
+same pair of chains — agreement is measured, never voted. What
+`C(Δ) = 0` measures there is CONSISTENCY (the differences compose),
+never sameness: two units can compose perfectly and still hold genuine
+irreducible difference between them, which is precisely the difference
+`orbit_lock` protects and the mint pays for. Reading that zero as
+"converged" would refuse the mint exactly where the value is.
 This is where the two proofs meet: **PoWC decides whether difference
 is genuine; PoUW bounds what minting it earns.**
 

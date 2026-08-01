@@ -9,13 +9,24 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 
 ## 1. Run it
 
+`./install.sh` is the ONE authority for standing a universe up — it
+builds, seats the roster, founds the worlds with a single bounded beat,
+and exits. This section does not restate its flags; run `--help`.
+
 ```
+./install.sh --var demo                # prepare a universe (nothing left running)
+./install.sh run --var demo            # the autonomous board (egregores)
+./install.sh fresh --var demo          # wipe and rebuild
 cargo run -p netstratum-cli            # hands-on world (help lists all)
-cargo run -p conductor -- --cadence 2  # the autonomous board (egregores)
-python3 tools/observer.py --watch 2    # the ledger board
-python3 -m http.server 8080 -d var/worlds   # serve wall.html (the Terminal Wall)
-python3 tools/steward.py               # inject directives into live worlds
+python3 tools/observer.py --root var --watch 2   # the ledger board
+python3 tools/webserve.py --root var --port 8081 # the observatory window
+python3 tools/steward.py --root var/worlds       # inject directives
 ```
+
+The one non-obvious law: the roster must sit at `<var>/egregores.json`
+BEFORE the first boot — `write_default_egregores` refuses to overwrite,
+so a late copy loses to the five founding egregores built into the
+binary. `install.sh` orders it correctly; hand-booting does not.
 
 Conductor boot order: adopt legacy `bots.json` → CONVERGE archived eras
 (idempotent, quarantines named) → genesis egregores → beat. Journals + the
@@ -415,3 +426,221 @@ coder-04's flag.
 pricing · 07 §3 derelict recovery · OPEN_QUESTIONS Q1–Q4
 (rejected-with-reopening-paths). (01 §7's escrow mechanic BUILT as
 COVENANT-1; its cross-boundary NS-7 settlement §7.3 still awaits N7.)
+
+## 8. THE WIRING BOARD — placeholders, stubs, and unwired seams
+
+**Provenance (2026-08-01, four-reader sweep of `engine/`, `clients/`,
+`tools/`, `docs/`, `protocols/`).** §8a is VERIFIED this session against
+the crate manifests and the named lines. §8b–§8f are sweep-reported at
+`file:line` and are accurate to the read but were not each re-verified —
+confirm the line before you land against it. This section is a work
+board, not law: entries leave it by landing or by being struck.
+
+The organising question is the one the charter already asks: is this
+thing a LIVE WIRE (something calls it in production), or a CARRIER
+waiting for one? Most of what follows is built and orphaned, not
+missing.
+
+### 8a. THE UNWIRED KERNEL — the load-bearing finding [VERIFIED]
+
+The judge does not judge. Nothing in production calls `lawful`.
+
+- `engine/kernel` is imported by exactly TWO crates: `mesh` (runtime)
+  and `conductor` (DEV-ONLY, the #17 calibration harness). `cfe`,
+  `ledger`, `lens`, `scribe` and the CLI do not depend on it at all.
+- The one production path to the judge is `mesh::spine::extend(.., step)`
+  — and `conductor/src/lib.rs:1287` passes `None` on every beat. Every
+  commitment the live board writes is stamped `judged = false`.
+- Therefore `spine.rs:429`'s "today every record is `judged = false`" is
+  not a scoping note, it is the whole state of play: `admit`'s step 4
+  (re-run `kernel::lawful` on a received judged record) is dead code in
+  practice, and replication currently re-verifies CHAIN INTEGRITY only.
+- **`engine/rfa-core` has ZERO dependents.** No crate in the workspace
+  lists it. `f_fold_star`/`orbit_lock` (I6's pair half), `validate_step`,
+  `coherence_functional`, `rcf_hash` are all built, witnessed, and
+  connected to nothing. `rcf_hash` documents itself as existing "for
+  COMMITMENT BINDING (the spine may carry it)"; `spine::Commitment`
+  carries no RCF field.
+- `mesh::agree` (Σ_mesh, drift, resonance) likewise has no production
+  consumer — `tests/agree_pins.rs` only.
+- `physics`'s `flow`/`breath`/`witness` organs have no consumer either;
+  downstream crates import `Beacon` and `AxisVector` only.
+
+**The wiring, in dependency order:** (1) a production caller threading
+`Some(&kernel::Step)` into `extend` — this IS the Phase 3 flip, and it
+is what makes `judged = true` records exist at all; (2) step storage
+beside `spine.tlv` so `present()` can emit tag-88 frames for them
+(`spine.rs:424` names this seam); (3) the merge site calling
+`rfa_core::f_fold_star`, which is where I6's pair half lives and the
+only thing that gives `branch` a re-convergence door; (4) a beat that
+reads Σ_mesh and fires the re-sync trigger.
+
+### 8b. THE ANCHOR AND IDENTITY — constitutional, known, unbuilt
+
+- `mesh/src/agree.rs:57` — peer `weight` arrives ASSIGNED and advisory.
+  Live wire: weight = certificate-verified genuine difference (the PoUW
+  anchor). This is SYSTEM_SPEC §5's "load-bearing gap for real value".
+- `mesh/src/lib.rs:253` — "the first seal self-declares its incumbent";
+  authority identity is a bare `u64`, no signature anywhere in the
+  crate. Live wire: cryptographic identity at N7.
+- `mesh/src/agree.rs:17` — fork resolution beyond stasis is the open
+  Byzantine rung; the majority anchor is refused BY LAW, so the
+  replacement door is owed, not optional.
+- `solver/src/volume.rs:202` — `seal_volume` is DECORATIVE by ruling
+  (C8), yet `conductor/src/lib.rs:1031` mints research confirms off
+  `VolumeSolveRead::Solved { certificate }`. Either `verify_volume`
+  lands or that mint arm refuses. **Check this one first — a decorative
+  digest feeding a live mint is the shape U1 was built to close.**
+- `kernel/src/lib.rs:739` — reward split v1 is 100% to the solving
+  world; the v2 40/40/20 prover/mesh/reserve split is inscribed for the
+  mesh era, unwired.
+- `solver-verify/src/forge.rs:41,60` — `Difficulty::level` is a static
+  5-arm table; `from_key` (the network-rate form) is a READ called only
+  from tests. Live wire: mesh-derived rate at N6.
+- `codec/src/lib.rs:38` — `SCHEMA_V2` carries "CODER-04 TO RATIFY" while
+  `state_bytes` already emits v2 unconditionally, and every commitment
+  binds that schema byte. Ratify or revert; do not leave it half-sealed.
+
+### 8c. PLACEHOLDER CONSTANTS THAT PRICE THE ECONOMY
+
+Every one of these is a number nobody chose deliberately
+(`BALANCE_NOTES.md` says so outright). They are not bugs; they are
+undialed. The carrier is a ruleset version bump after a measured
+playtest — the same discipline Ruling Box 1 used for `f`.
+
+- `cfe/src/dop.rs:330` — `commensurate_weight` returns 1/1 for EVERY
+  resource: council stakes, covenant stakes, crisis books and
+  `settle_debts` all weigh a joule like a diamond. The joule-commensurable
+  table is the live wire (09 §1, OPEN_QUESTIONS Q4.1).
+- `cfe/src/dop.rs:321` — `demurrage_per_tick` 1/32, and it is the
+  ceiling the kernel's I5 `DecayExceedsBound` calls through.
+- `cfe/src/thermal.rs:13,20,133` — σ, `thermal_k` (279⁴), and the
+  13-class luminosity table: the module header declares ALL of it
+  placeholder, and it drives band membership → siting admission.
+- `cfe/src/dop.rs:292-316` — the five heat-law parameters (encasement
+  throughput, radiator base, joule leak, heating per zone, sink
+  throughput).
+- `cfe/src/dop.rs:334,341,349,362` — reciprocity window 8, bond notice
+  window 8, the collateral fidelity curve, friction rate 1/8.
+- `cfe/src/dop.rs:487` — the abundance spine's weights, which bound the
+  kernel's own `AssayExceedsVein`.
+- `cfe/src/dop.rs:559` — disposition weights (3/5·1/5·1/5) deciding
+  which history counts as winning.
+- `cfe/src/world.rs:1011,1040,1092,3490` — the year voice 60, the
+  syntropy floor 1/2, the TECH-1b condition thresholds (480/240/100),
+  the practice deposit window.
+- `cfe/src/world.rs:688,3658,3714` — instrument forge costs and the
+  ROUTE-1 charter/toll rates, hard-coded in bodies rather than sited in
+  `dop.rs` beside the other constants.
+- `cfe/src/world.rs:3404` — `lift_ward`'s ceiling 5, with `depth`
+  SUPPLIED BY THE CALLER: an aperture gate trusting an unverified
+  external number. Live wire: the reading taken, not passed.
+- `ledger/src/galaxy.rs:33`, `registry.rs:37`, `converge.rs:257,287` —
+  reach 16, seat widths 8/16, terminal window 8, the /12 G-sheet
+  advance (restated a third time at `conductor/src/lib.rs:105` and
+  `main.rs:89` — one `sheet_advance()` is owed).
+- `scribe/src/journal.rs:46` — `YEAR_TICKS = 60`, gating the year voice,
+  lane maintenance, journals and the galaxy sweep.
+- `conductor/src/lib.rs:159,167,371` — `TARGET_RESERVE` 8, the 1/64 lot
+  grid ("layer-2 prudence, not law" sitting inside the price path), and
+  route η = (1+grade)/8 with no cited law.
+
+### 8d. FILE-BORNE READ-BACKS — §11 rule 2 debts still live
+
+The lens law says views derive from the chain and are never read back.
+These read a rendering as if it were truth:
+
+- `clients/cli/src/main.rs:142` — `data_field` scrapes display files for
+  station, founder, chart position, stress. Self-declared inventoried
+  debt; retires when the lens re-serves from the chain (#37).
+- `clients/cli/src/main.rs:1285` — famine decided by the substring test
+  `!state.contains("\"famine\":[]")` on rendered JSON.
+- `clients/cli/src/main.rs:115` — `active_station` reads authority from
+  an unreceipted `var/operators/<name>.json`, and `tier0_gate` gates
+  every tier-0 deed on it.
+- `clients/cli/src/main.rs:1725` — `civ new` appends to
+  `var/egregores.json` by splicing off the trailing `]`: the CLI hand-
+  editing a file the conductor owns. **This is also why the tracked
+  `seeds/` roster and the live one diverged** (see §8f).
+- `scribe/src/lib.rs:101` + `journal.rs:707,777` — the append cursor is
+  a LINE COUNT of the exported `chronicle.jsonl` / `journal.jsonl`, and
+  the wall is rebuilt by re-parsing the display stream it just wrote.
+- `tools/observer.py:273` — `consumed` is accumulated by splitting the
+  chronicle's `detail` display string, violating that file's own
+  no-grepping law at line 11, and it feeds the INTELLIGENCE ratio.
+- `conductor/src/lib.rs:618` — the forge rung reconstructs on resume by
+  counting `solves/*.json` files (`level = (1 + solved/3).min(5)`), "an
+  honest approximation until solves become receipts". Live carrier: a
+  solve receipt on the world's own chronicle — which is also N7
+  DIRECTIVES' step 1.
+
+### 8e. DEFECTS SURFACED BY THE SWEEP — not placeholders, bugs
+
+Recorded here because the sweep found them; each needs a red-first
+witness, not a ruling.
+
+- `lens/src/render.rs:121` **and** `:204` — the `constellation` key is
+  emitted TWICE into the same object: numeric `condition` at 121,
+  `condition_word` string at 204. Last-key-wins, and the second block is
+  conditional, so the emitted SHAPE changes with progress and every
+  consumer's `condition === 6` test (`observatory.html:266`,
+  `observer.py:671`) can never match. [VERIFIED]
+- `ledger/src/lib.rs:191` — `write_universe_card` hard-codes `span` to
+  `"64"` while `universe_span()` reads that same field as the authority:
+  every clock tick clobbers a non-default span back to 64.
+- `tools/observer.py:311` — petitions are counted from `inbox/pending/`,
+  but the engine writes directives flat into `inbox/`, so "petitions
+  pending upward" is permanently 0.
+- `conductor/src/lib.rs:141` — `deck_band4` branches on
+  `metabolism == "aeric"`, which is not in `METABOLISMS`
+  (`registry.rs:21`): the AericDeckBand law is unreachable.
+- `ledger/src/registry.rs:231` — `lineage_domain` takes a
+  `SubstrateBand` that every call site passes as `None`, so the
+  thermal/cryo halves of the progenitor seat law never fire.
+- `conductor/src/lib.rs:1294` — `spatial_l1` is UNWRAPPED L1 on a torus,
+  used for every melt distance, while `ledger`'s own `l1_distance` wraps.
+- `conductor/src/lib.rs:329,1403` — deal ids are `beat*100_000 + seq*4`
+  with the merchant pass carving `+90_000`: a hand-partitioned namespace
+  that collides past ~22,500 crossings in a beat.
+- `conductor/src/lib.rs:756` — the survey charter gates on
+  `iron >= 40 && biomass >= 20` while the comment two lines up states
+  the charter moves 20 iron + 10 biomass.
+- `cfe/src/vrp.rs:26` — `Timekeeper::attest` ignores `self.id` and always
+  attests, so the 3-of-3 quorum is three identical keepers and
+  `QuorumOpen`/`Refuses` are unreachable.
+- `cfe/src/world.rs:1082` — `crystal_deposits` opens `let _ = now;` and
+  never window-prunes, unlike its sibling `crystal_deposits_at`, so the
+  `constellation()` read can diverge from what actually crystallizes.
+- `cfe/src/world.rs:2002` — WANT-1 kind 1 (epistemological) is in the
+  tag-62 vocabulary with no engine rule: a declared want that can never
+  strike.
+- `tools/observer.py:41,100` — `RESOURCES` stops at `sink`; the engine
+  carries a seventh, `Crystal` (tag 7), so crystal banks are invisible
+  in every observer table and the TLV decode.
+
+### 8f. DOC AND PROTOCOL DRIFT
+
+- **`seeds/aeon1-egregores.json` is NO LONGER the durable roster.** It
+  holds 16 entries; the live `var/egregores.json` holds 20, and seven
+  civilizations (Aerie, Borealis, Brine Cortex, Cairnborn, Echowright,
+  Hadal, Vitreous Hex) exist ONLY in the git-ignored var. §2 above still
+  claims seeds is the durable record; it is not.
+  `./install.sh export-roster` re-emits live → seeds behind a
+  confirmation. [VERIFIED]
+- `protocols/NS-1_DOP.md` §2.3 calls itself "THE NETSTRATUM WIRE TAG
+  REGISTRY (permanent)" but omits tags 8, 9, 51, 55–59, 61, 64–72,
+  74–86. The `dop.rs` header is the one authority and has outrun it.
+- `protocols/NS-5_MESH.md` — §3.2 still specifies tag 65 and refusal
+  kinds 3–4 byte-by-byte in a document whose own header declares them
+  RETIRED; the promised §2/§3 spine rewrite is OWED; and tags 87/88
+  (SPINE-UPLINK segment blob/step) have NO protocol entry at all.
+- `protocols/NS-7_ANCHOR.md` is a 26-line STUB (§1–§3 all `(unwritten)`).
+  `NS-4_APERTURE.md` §4 (the facet ladder) is `(unwritten — N5)`.
+- `kernel/src/lib.rs:327,857` — `covered()` and `scope_of`'s own doc
+  comments still say only `ResourceTransferred` is covered and the rest
+  is "drafted law, unenforced". Coverage is 64/64. A reader of the
+  constitution is told the containment law is inert when it is live.
+- `SYSTEM_SPEC.md` §5 lists the spine uplink under Build (it landed at
+  `1a7b579`); `BUILD_ORDER.md` §3c lists SPINE UPLINK and BOX-1
+  CALIBRATION as open (both landed); several docs still quote coverage
+  59/64 (it is 64/64 since `3c5c994`).

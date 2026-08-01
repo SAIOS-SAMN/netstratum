@@ -3,6 +3,14 @@
 Plain language by operator instruction. Scope: the N4 landing (NS-2 RQP +
 the scanner). Supersedes nothing; folds into NS-2 and PICKUP when N4 lands.
 
+**HISTORY — this document's equations are DATED, not law** (annotated
+2026-08-01; the text below stands unedited per the quoted-never-rewritten
+rule). Two later rulings overtook its `C(Δ)`: THE PROPORTIONAL LAW
+(2026-07-31) struck `Σ R²` for `Σ |R|`, and the zero-point correction
+(2026-08-01) struck "zero iff converged" — zero means the COCYCLE
+CONDITION holds (the differences compose), never that difference is
+gone. Standing forms: `docs/EQUATIONS.md` C2/C3.
+
 ## Review verdict
 
 Coder-03's assessment is verified and approved. Checked against the tree

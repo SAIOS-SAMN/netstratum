@@ -88,8 +88,15 @@ Crises (famine at civilization scale, disasters, war damage) are **torsion
 injections** into the civilization's Delta (CONTRACT §5; randomness
 CONTRACT §6 — every draw routes through `physics::beacon` with a named
 domain tag). The visible stress gauge is
-`rfa_core::coherence_functional` (sum of squared residuals — zero iff
-converged; the substrate contract pins the true reference values).
+`rfa_core::coherence_functional` (`C = Σ |R|` — the sum of residual
+MAGNITUDES; squares were BARRED as aggregators of difference by THE
+PROPORTIONAL LAW, operator ruling 2026-07-31, and this line's earlier
+"sum of squared residuals" is struck with it). Zero iff the COCYCLE
+CONDITION holds — the differences compose — never "iff converged"
+(operator correction 2026-08-01): a civilization may read zero and
+still carry its whole irreducible H¹ core, which is its genuine
+difference and is never drained as stress. The substrate contract pins
+the true reference values.
 Recovery steps must pass `rfa_core::validate_step`'s three typed gates
 (conservation, bounded magnitude, productivity) — a "recovery" that
 doesn't measurably reduce stress refuses. Elasticity (absorbing a shock by

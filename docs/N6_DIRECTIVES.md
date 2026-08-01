@@ -3,6 +3,16 @@
 Plain language. Scope: the N6 landing (NS-5 MESH, first slice MESH-1a).
 Supersedes nothing; folds into NS-5 and PICKUP when N6 lands whole.
 
+**HISTORY — this document's equations are DATED, not law** (annotated
+2026-08-01; text unedited per the quoted-never-rewritten rule). Three
+later rulings overtook it: THE PROPORTIONAL LAW (2026-07-31) struck
+`Σ R²` for `Σ |R|`; the zero-point correction (2026-08-01) struck
+reading `C(Δ) = 0` as sameness — zero means the COCYCLE CONDITION
+holds, and an irreducible H¹ core survives it untouched; and MESH-1d
+renamed the equal-spine zero THE REPLICATION WITNESS, reserving
+"consilience" for inputs that COULD disagree. Standing forms:
+`docs/EQUATIONS.md` C2/C3.
+
 ## Review verdict
 
 The NS-5 stub is verified against the tree 2026-07-30:
