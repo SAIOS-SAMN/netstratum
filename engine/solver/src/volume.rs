@@ -199,6 +199,15 @@ fn hash_volume(hasher: &mut blake3::Hasher, v: &Volume) {
     }
 }
 
+// DECORATIVE (operator ruling C8, 2026-08-01). This seal is a bare
+// digest no third party can re-derive — tamper-evidence for no one — and
+// no volumetric deed can mint (tag 86 carries planar work only). It is
+// NOT a verifier. Volumetric work is forge-only until higher-dimensional
+// work becomes a real economic axis; on that day `verify_volume` lands
+// mirroring `verify_work` (re-forge ∧ re-apply ∧ re-chain + the
+// degenerate-difficulty guard) with its own deed. Until then this digest
+// carries no economic weight and the empty-train solve is not a mint.
+// See docs/U_DIRECTIVES.md §10 S1.
 fn seal_volume(task: &VolumeTask, program: &VProgram, output: &Volume) -> [u8; 32] {
     let mut hasher = blake3::Hasher::new();
     hasher.update(task.name.as_bytes());

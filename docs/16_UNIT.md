@@ -196,3 +196,40 @@ the two proofs from the mesh era into the kernel era, nothing more.
 3. **The verifier's home:** a split `solver-verify` crate (smallest
    surface) vs. absorption into `rfa-core` (one sealed-core crate).
    Drafted here as the split crate; one word decides.
+
+## §7a Rulings recorded (operator dispatch, 2026-08-01)
+
+The operator's words on the boxes above. They do NOT open the mint —
+`mint_bound` stays sealed at zero until each lands as a kernel
+amendment (§6 U4). Recorded here so the amendment inscribes the ruling,
+never an assumption.
+
+- **Reward split — 40/40/20, dual-key (RULED).** Of what verified work
+  earns: **40% Prover/Worker** (the search that solved), **40% Mesh
+  Verifiers/Router** (the re-judges that admitted), **20% Protocol
+  Reserve**. Dual-key: prover and mesh legs are BOTH required; the
+  reserve is the protocol's own. Inscribed at U4 as the split in
+  `mint_bound`'s successor.
+- **Rate `f` — OBSERVE FIRST (RULED).** `f` is NOT pinned by assumption.
+  The mechanism precedes the economics by law (§3): the chained economy
+  runs (run #36 spine adoption observed) BEFORE `f` is ruled against
+  measured throughput. Until then `mint_bound = 0` holds; a positive
+  discovery mint refuses at I4. This is deliberate — rule against the
+  observed economy, never a guess.
+- **Work-shapes — forge-only v1, corpus registry v2 (RULED).** v1
+  admits FORGE-ONLY synthetic work (deterministic, self-checking; the
+  external scoreboard untouched). v2 admits the ARC corpus through a
+  registry keyed `task_id = SHA256(corpus_input_digest)` — the task's
+  identity is its content, so no forged corpus entry can mint. Higher
+  dimensions (volumetric) stay forge-only until ruled an economic axis
+  (§10 S1, ruling C8).
+- **Beyond the mint (Ruling Box 2) — consensus weight + crystallization
+  (RULED).** Verified work earns MORE than banked value: it earns
+  **consensus weight** (the pen — heavier judgement in the mesh) and
+  **faster crystallization** (the §1 coupling — solved work sediments
+  the world sooner). These are kernel-amendment questions inscribed
+  alongside the split.
+
+**Ruling 3 (the verifier's home) — RESOLVED:** the split `solver-verify`
+crate landed (U1a). The smallest-surface option was taken; `verify_work`
+lives there, importable by the kernel without a cycle.
