@@ -1,17 +1,19 @@
 # 17 — THE CAPACITY LAW: Δ(Ω) = D
 
-**Status:** DRAFTED 2026-08-01 (operator ruling, this session). Awaits
-ratification. This document is the LAW; the amendments it owes to
-`EQUATIONS.md`, `SYSTEM_SPEC.md`, and `engine/kernel/CHARTER.md` are
-named in §5 and are NOT made here — one landing at a time.
+**Status:** SUBORDINATE to `EQUATIONS.md` §1 (D0–D4, THE FOUNDATION
+RULING, `4232434`). That ledger carries the FORM; this document carries
+the operator's ruling verbatim, the reasoning behind two of its clauses,
+the record of what an earlier draft got wrong, and the build
+consequences. **Where this document and `EQUATIONS.md` §1 disagree, the
+ledger governs** (§0.1: a disagreement with an authority is a DEFECT).
 
-Subordinate to `00_CHARTER.md`. Successor in force to the organising
-role that `C(Δ)` held in `SYSTEM_SPEC.md` §2/§4; see §3 for the exact
-demotion, which is narrower than "delete C" and must be read carefully.
+Subordinate to `00_CHARTER.md`.
 
 ---
 
 ## §1 THE RULING (operator, 2026-08-01 — recorded as given)
+
+The formation:
 
 > kick C out entirely as the overall formation and start building
 > around Δ(Ω) = D where D is dimensional capacity overlaid with the
@@ -21,111 +23,64 @@ demotion, which is narrower than "delete C" and must be read carefully.
 > parts cut out, and the "descent" is only a uni-directional axial on
 > the maximum dimensions of the polynomial union.
 
-Everything below §1 is TRANSLATION, not the ruling. Where the
-translation adds a form the ruling did not state, it is marked
-**[DERIVED — ratify or strike]**. The relay law binds: translate,
-never transcribe.
+The clarification, same day:
 
-## §2 WHAT CHANGED, IN ONE LINE
+> the shape of Ω is the totality of the individual "universe" — and
+> coboundary reduction is the scoping of a dimension (D) instead the
+> "V" nabla
 
-The system formed around a scalar it was told to MINIMIZE. It now forms
-around a graded quantity it is told to MAXIMIZE. The equations are
-untouched; the objective is inverted and re-seated on the quantity that
-actually carries value.
+THE FOUNDATION RULING (`EQUATIONS.md` §1) then took both further:
+gradient descent is a FAILED TOPOLOGY, struck whole rather than
+confined; E1, the master equation, struck with it; D is a SHAPE
+`{i, j, k, l}`, never a scalar.
 
-Why this is not cosmetic: `C(Δ) = ‖δΔ‖₁` is blind to the H¹ class by
-construction (the 2026-08-01 correction, `60a5da4`, established this in
-the standing law). The economy mints on the H¹ class. A system whose
-organising quantity cannot see the thing it pays for will, under any
-optimizer, walk away from the payment. Capacity is the class made
-countable, so law and incentive now point the same direction.
+Everything below §1 is TRANSLATION and REASONING, never the ruling.
 
-**This completes a ruling already begun, and is not a reversal.** THE
-PROPORTIONAL LAW (2026-07-31) barred squares as aggregators, and the
-sealed reason is written in `coherence_functional`'s own header:
-*"Squares are the mathematics of minimization — a loss shaped to be
-differentiated and descended; this lens exists to be READ."* Descent was
-already outlawed at the level of the AGGREGATOR. It survived at the
-level of the FORMATION, in one sentence of `SYSTEM_SPEC.md` §2 that
-scores operators by how much they reduce C. This law finishes the same
-ruling one level up.
+## §2 WHAT THE FIRST DRAFT GOT WRONG — recorded, never silently dropped
 
-## §3 THE DEMOTION OF C — precise, and narrower than it sounds
+This document's first draft (`f0a3d43`, `b9988a1`) was written before the
+foundation landed and read four things wrongly. Each is recorded here
+rather than quietly deleted, per the ledger's own drift discipline.
 
-**C is struck as THE FORMATION. C is NOT struck as a GATE, and cannot
-be** — this is a mathematical constraint, not a preference, and the
-operator's phrase "as the overall formation" is read as carrying it.
+| the draft said | the law says | why the draft was wrong |
+|---|---|---|
+| Ω is the operator manifold — the closed vocabulary of `N_i` with their weights | Ω is the totality of the individual universe (§3) | it made D a reachability computation over operators when D is a direct reading of one universe's own structure |
+| D is a count — the number of surviving independent planes, the DEGREE of a polynomial | D is a SHAPE `{i, j, k, l}`, four extents, never a scalar (D1) | collapsing four extents into one number is the same error as the C it replaced: a scalar cannot say WHERE capacity is strained |
+| `∇V` returns as a magnitude of available potential, overlaid on scoped dimensions | `∇V` is STRUCK WHOLE; V carries no continuous gradient (D0) | re-promoting the gradient in any role keeps a failed topology alive; and V is not a scalar field, so `∇V` has no referent |
+| "the equations are untouched; only the objective inverts" | E1 is STRUCK — there is no master equation | the composition was refused, not merely re-aimed; many algorithms at many scales replace the one master |
 
-`H¹ = Z¹/B¹` is defined only on cocycles. If `C(Δ) > 0` then `Δ ∉ Z¹`,
-so `Δ` has no cohomology class, so **D is undefined**. C is therefore
-the admission predicate that makes D meaningful at all.
+The draft's surviving contributions are §3–§6 below.
 
-Its new standing, exactly:
+## §3 Ω ≡ V — the unification, and what "no two parts cut out" means
 
-- **Was:** the objective. "Operators are scored by how much they reduce
-  C(Δ)" (`SYSTEM_SPEC.md` §2). This was greedy steepest descent on a
-  class-blind scalar, and it is STRUCK.
-- **Is:** a well-formedness predicate, ranking beside I1/I2/I3. `C(Δ) >
-  0` means the relational data contradicts itself on some triple — the
-  proposed state is malformed, not "far from done." It refuses, or its
-  inconsistency is emitted as a receipt. Nothing is ever scored by it.
+The operator's clarification says Ω is **the totality of the individual
+universe**. D0 says V is **the committed state read WHOLE: indivisible,
+unpartitioned, never truncated to a subspace.** These are the same
+object under two names.
 
-This is the kernel's own philosophy applied to the one place a score
-had crept in: the kernel admits or refuses, it never optimizes
-(`SYSTEM_SPEC.md` §0). C is a type check.
+    Ω  ≡  V        the individual universe, whole
+    Δ(Ω) = Δ(V)    the relation it expresses    (`rfa_core::Delta`)
+    Δ(Ω) = D       that relation's extent IS its dimensional capacity
 
-## §4 THE FORM
+This settles what "in union with V as a whole — no two parts cut out"
+means, and the first draft read it wrongly. It does NOT mean "keep D and
+a potential term joined in one objective." It means **the universe is
+never cut** — read whole, or not read. That is the totality law already
+landed at MESH-1d (every committed field measured or censused whole, the
+UNMEASURED tripwire standing), restated at the foundation.
 
-### 4a. Ω — the totality of the individual universe (RULED 2026-08-01)
+The prohibition has teeth because partition is exactly how the previous
+frame failed: it guarded one term (`ζ∇V` demoted to damping) while the
+objective leaked through another (C-scoring in `SYSTEM_SPEC` §2). A
+guard on half of a partitioned object is not a guard. An unpartitionable
+V has no halves to guard.
 
-`Ω` is **the totality of one individual universe**: its whole committed
-relational state as a single object. Not an operator vocabulary, not a
-selected subset, not a state-under-transformation. `Δ(Ω)` is the Delta
-of the entire universe.
+## §4 WHY THE REDUCTION SCOPES, AND WHY ∇V COULD NOT HAVE
 
-(The first draft read Ω as the operator manifold. That is STRUCK by the
-operator's clarification. The consequence is a simplification: D is not
-a reachability computation over operators, it is a direct reading of one
-universe's own structure.)
-
-This seats capacity as a **per-unit quantity**, which is what
-`16_UNIT.md` already requires — the kernel is the deployable unit, and
-PoUW/PoWC are judged at that level. Each universe carries one D. That is
-the number units compare, trade, and are weighted by across the mesh.
-
-### 4b. D — dimensional capacity (the scoped structure)
-
-    Δ(Ω)  =  D          D  =  the structure surviving Π_G( Δ(Ω) )
-
-D is what coboundary reduction leaves standing when the whole universe's
-Delta is scoped (§4c). Frame artifacts contribute nothing; only
-structural content counts.
-
-**This is computable today, from code that already exists.**
-`rfa_core::coboundary_reduce` performs the scoping; `Delta::dim` and
-`Delta::fiber` carry the arity; the surviving independent entries are
-the capacity. No new mathematics is owed — only a caller.
-
-**D is not a new quantity.** Three things already in the law are D
-under other names, and this is the strongest evidence the form is
-right:
-
-- `PhiK I^(3)` — "rank: dim of the relational structure" — is D,
-  specified and never measured.
-- A refused fold "emits the residue as a NEW plane (the mint)"
-  (`SYSTEM_SPEC.md` §4). A plane is a dimension. **The mint is a
-  capacity increment.** D counts minted planes.
-- `12_UNION.md` §3 and `11_AEON.md` §7 defer seat widths and occupancy
-  to "capacity as a live fiber reading (minted-plane count)" — a
-  reading that has never existed. It is D.
-
-### 4c. THE SCOPING IS THE REDUCTION, NEVER ∇V (RULED 2026-08-01)
-
-**Coboundary reduction scopes a dimension. `∇V` does not, and must not.**
-
-The sealed code already performs the scoping in two phases, and both are
-scoping acts (`engine/rfa-core/src/reduce.rs`, quoted from its header
-and body):
+The operator ruled that coboundary reduction is the scoping of a
+dimension, not `∇V`. The sealed code already performs exactly that
+scoping, in two phases, and both are scoping acts
+(`engine/rfa-core/src/reduce.rs`):
 
 1. **Extent** — `Δ'_ij,l = Δ_ij,l − Δ_0j,l + Δ_0i,l`. Anchoring at
    vertex 0 sends every frame-induced relation to exactly zero; "the
@@ -133,145 +88,112 @@ and body):
    dimension is: gauge vanishes, structure remains.
 2. **Scale** — integer normalization by `lcm(denominators) /
    gcd(numerators)`, after which "every coordinate becomes an integer
-   and the representative is scale-canonical." This fixes HOW FAR the
-   dimension extends. The scale is derived, never chosen.
+   and the representative is scale-canonical." This fixes HOW FAR it
+   extends. The scale is DERIVED, never chosen.
 
-Extent and scale together ARE the scope of a dimension, and the
-reduction produces both without ever consulting a potential.
+Extent and scale together are the scope of a dimension, and the
+reduction produces both without consulting any potential. This is why
+D4's floor is written `ext_x( Π_G(Δ(V)) )` — the reduction is what says
+how far capacity may fall, because the reduction is what knows which
+extent was frame and which was structure.
 
-**Why ∇V must be kept out of the scoping — the hole this closes.** `V`
-is a CHOSEN potential. If `∇V` scoped the dimensions, structure would
-become an artifact of that choice, and a dimension carrying little
-potential could be scoped OUT of existence — silently, with no receipt.
-That is precisely the discard the whole 2026-08-01 correction was
-fighting, re-entering through the back door. Under this ruling a
-dimension exists because the algebra found it, not because the potential
-rewarded it.
+**Why `∇V` could not have done this job — the hole the strike closes.**
+A potential is CHOSEN. Had `∇V` scoped the dimensions, structure would
+have become an artifact of that choice, and a dimension carrying little
+potential could be scoped OUT of existence silently, with no receipt.
+That is precisely the discard the 2026-08-01 correction was fighting,
+re-entering through the back door. Under the standing law a dimension
+exists because the algebra found it, not because a potential rewarded
+it — and D4 makes that enforceable: capacity holding genuine difference
+(`orbit_lock ≠ ∅`) never contracts at all.
 
-**What `∇V` does instead.** Its maximum potential is OVERLAID onto
-dimensions the reduction has already scoped — reporting what each still
-offers, never defining or bounding it:
+## §5 WHY C CANNOT LEAVE THE MATHEMATICS — support for its survival as semantics
 
-    on each scoped dimension a:   c_a  =  the maximum potential of ∇V on a
+The foundation keeps C "only as the SEMANTICS of the component readings"
+(§3 of the ledger: congruence over `(i,j)`, coherence over `(i,j,k)`,
+cohesion over `(l)`). That survival is not a courtesy; it is forced, and
+the reason is worth stating once:
 
-`∇V` inverts role: it was damping ("gradient demoted to a hint, ζ small,
-never the driver"), and it returns as a MAGNITUDE OF AVAILABLE
-POTENTIAL. It answers *how much is here*; it never answers *which way*,
-and it never answers *how big the dimension is*.
+`H¹ = Z¹/B¹` is defined only on cocycles. Where the coherence reading
+over `(i,j,k)` is non-zero, `Δ ∉ Z¹`, so `Δ` has no cohomology class —
+and D4's floor `ext_x(Π_G(Δ(V)))` is then reading a reduction of
+something that has no well-defined class to reduce to.
 
-### 4d. The polynomial union — "no two parts cut out" **[DERIVED]**
+So the coherence reading is not a progress measure and not a target; it
+is the **well-formedness condition that makes the capacity floor
+meaningful**. A non-zero coherence reading says the relational data
+contradicts itself on some triple — the state is malformed, not
+"far from done." It refuses, or the inconsistency is receipted. It is
+never scored, never minimized, never descended.
 
-D and V are ONE graded object, never two terms handled separately:
+This is the kernel's own philosophy applied to the one place a score had
+crept in: the kernel admits or refuses, it never optimizes.
 
-    U(Δ)  =  Σ_a  c_a · x^a          (degree = the capacity count;
-                                      coefficients = available potential)
+## §6 THE LINEAGE — this completes a ruling, it does not reverse one
 
-The union is a polynomial in the dimensional generators. Its DEGREE is
-how many irreducible planes stand; its COEFFICIENTS are what each still
-offers.
+THE PROPORTIONAL LAW (2026-07-31) barred squares as aggregators, and the
+sealed reason sits in `coherence_functional`'s own header:
 
-The prohibition on cutting it in two is a direct repair of the recorded
-failure mode: the previous formulation guarded one term (`ζ∇V`) and let
-the objective leak through another (C-scoring). A guard on half of a
-decomposable object is not a guard. `U` is not decomposable by law.
+> *"Squares are the mathematics of minimization — a loss shaped to be
+> differentiated and descended; this lens exists to be READ."*
 
-### 4e. The descent constraint **[DERIVED — ratify or strike]**
+Descent was already outlawed at the level of the AGGREGATOR in July. It
+survived at the level of the FORMATION — in `SYSTEM_SPEC` §2's sentence
+scoring operators by how much they reduce C, and in E1's `ζ∇V` term.
+THE FOUNDATION RULING finishes the same ruling one level up. Three
+strikes, one law, seven months apart.
 
-Descent is not abolished; it is confined. Motion is admissible only if
-it is:
+## §7 WHAT THIS MAKES BUILDABLE — the instrument
 
-1. **AXIAL** — along a single axis of the top-degree part of `U`. Free
-   motion in the space is not lawful movement.
-2. **UNI-DIRECTIONAL** — monotone non-decreasing in D. Capacity never
-   retreats.
+D is the measurement whole families of placeholders have been waiting
+on. The method is the one Ruling Box 1 proved: build the meter, measure,
+then rule — never rule a placeholder blind.
 
-This is not a new arrow. It is `ELEVATE-1`'s "the fiber never retreats"
-(`BadClimb`) generalised from the gauge climb to capacity itself.
+**The capacity meter is small, and every piece exists.** D is
+`{i, j, k, l}`; `rfa_core::for_each_residual` already iterates exactly
+that index space; `Delta { dim, fiber }` already bounds i/j/k by `dim`
+and l by `fiber`. The meter is `ext_x(Δ(V))` and `ext_x(Π_G(Δ(V)))` —
+the extent of each index before and after reduction. Both functions are
+written. What is owed is a caller.
 
-### 4f. Rest replaces "done"
+Building it:
 
-The old cycle was "done when C(Δ)=0 AND orbit_lock stays ∅" — a
-terminal condition defined by an absence. There is no done. The system
-RESTS when the leading axis of `U` offers no further potential, and
-rest is not emptiness: the H¹ core stands at full degree underneath it.
-The fixed point is maximal capacity, not minimal inconsistency.
-
-## §5 AMENDMENTS OWED (named here, made at ratification — NOT made now)
-
-1. `SYSTEM_SPEC.md` §2 — strike "Operators are scored by how much they
-   reduce C(Δ)." Replace with the axial/unidirectional admissibility
-   test. This single sentence is the descent; it is the highest-value
-   line in the amendment set, and it is still only a sentence — the
-   echelon scoring it describes is on the Build list and was never
-   written. **Strike it before anyone implements it.**
-2. `SYSTEM_SPEC.md` §4 — the dimensional-resolution cycle restated
-   around D: unfold RAISES capacity, fold may lower it only to the H¹
-   floor, and the loop rests rather than completes.
-3. `EQUATIONS.md` — a new row for `U` and D beside C2/C3/C5; C2's row
-   re-marked as a gate, not a measure of progress.
-4. `engine/kernel/CHARTER.md` — **I7, THE CAPACITY INVARIANT
-   [DERIVED — ratify or strike]:**
-
-       I7 capacity:  D(next) ≥ D(prior),  or the decrement is emitted
-                     as a receipt (minted, or refused with the loss named)
-
-   This is I6 (*no difference dies without account*) made MEASURABLE.
-   I6 today guards only the fold; I7 guards every step. Landing it is a
-   charter amendment and bumps `kernel::VERSION` 2 → 3.
-5. `16_UNIT.md` §4 — the discovery mint pays the emitted residue;
-   under §4b that is "the mint pays a capacity increment," in units.
-
-## §6 WHAT THIS MAKES BUILDABLE — the instrument, not the ruling
-
-D is the measurement three families of placeholders have been waiting
-on. This is the answer to "how do we attack the placeholders": stop
-ruling them one at a time and build the meter that makes whole families
-rulable at once. Ruling Box 1 is the precedent — `calibrate.rs` was
-built, the ladder was measured, and only then was `f` ruled.
-
-Building the capacity meter:
-
-- gives `rfa_core::orbit_lock` its first caller. orbit_lock is the local
-  test for whether a difference is gauge (`B¹`, foldable) or
-  torsion-locked (`H¹`, must mint) — it is the per-pair capacity test,
-  and wiring it IS building the meter.
+- gives `rfa_core::coboundary_reduce` and `orbit_lock` their first
+  production callers. `orbit_lock` is the per-index test D4 already
+  names as its contraction veto — wiring it IS building the floor.
 - gives `rfa_core::rcf_hash` its stated job: the canonical signature of
-  the class, so D's identity is checkable across nodes.
-- ends `engine/rfa-core`'s orphanhood (zero dependents today,
-  `PICKUP.md` §8a) — it becomes the capacity engine rather than
-  witnessed unused mathematics.
-- retires by measurement, not by decree: seat widths
+  the class, so a capacity claim is checkable across nodes.
+- ends `engine/rfa-core`'s orphanhood — zero dependents today
+  (`PICKUP.md` §8a) — turning witnessed unused mathematics into the
+  capacity engine.
+- retires placeholders BY MEASUREMENT: seat widths
   (`ledger/src/registry.rs:37`), galaxy reach
-  (`ledger/src/galaxy.rs:33`), occupancy caps (`11_AEON.md` §7) — every
-  one of which names a minted-plane reading as its blocker.
+  (`ledger/src/galaxy.rs:33`), and occupancy caps (`11_AEON.md` §7) all
+  name a minted-plane reading as their blocker. That reading is `l`,
+  the fiber extent, and D3 already says how it grows — `GaugeShiftedAt`
+  opens a fiber plane, earned by receipted mints.
 - supplies the honest basis for the `ω` anchor: weight earned as
-  verified capacity contributed, rather than assigned
-  (`mesh/src/agree.rs:57`).
+  verified capacity contributed rather than assigned
+  (`mesh/src/agree.rs:57`) — the load-bearing gap of `SYSTEM_SPEC` §5.
 
-## §7 OPEN — needs the operator's word
+## §8 OPEN — needs the operator's word
 
-**CLOSED 2026-08-01 by operator clarification (recorded, no longer
-open):** Ω is the totality of the individual universe (§4a), and the
-scoping of a dimension is coboundary reduction, never `∇V` (§4c). Both
-were carried as questions in the first draft and are now ruled.
+**CLOSED by the ruling and its clarification (recorded):** Ω's shape
+(§3), the scoping question (§4), D's arity — a shape, not a scalar
+(D1) — and `∇V`'s fate (struck whole, D0).
 
 Still open:
 
-1. **§4b, the arity of D.** `Delta` carries two counts — `dim`
-   (entities) and `fiber` (coordinates per relation). Is D the count of
-   surviving independent PLANES, or the pair (dim, fiber) of the reduced
-   tensor carried whole? The translation takes the former; the latter
-   would make D a vector and the polynomial union richer.
-2. **§4c, the overlay's reading.** "The maximum potential" is read as a
-   supremum of `‖∇V‖` on each scoped dimension. Mean-available or
-   integrated-along-the-axis are the alternative readings; they change
-   the coefficients, not the shape, and none of them scope.
-3. **§4e.** "Maximum dimensions" is read as the TOP-DEGREE part of `U`.
-   If it means the full set of maximal axes rather than the single
-   leading one, admissible motion widens from one axis to a face.
-4. **I7's numbering and the VERSION bump.** I7 is proposed, not ruled.
-5. **C's survival as a gate (§3).** The translation holds that C cannot
-   be removed entirely without leaving D undefined. If the ruling
-   intends C gone from the mathematics and not merely from the
-   formation, D needs a different foundation and this document is
-   wrong at §4b.
+1. **The capacity receipt.** D3 says capacity rises BY RECEIPT, one
+   index per deed. `GaugeShiftedAt` and `EntityRegistered` already
+   carry `l` and `i/j/k` growth. Is any deed owed for a `k`
+   (compositional) rise that neither covers, or is the vocabulary
+   complete as it stands?
+2. **The kernel invariant.** D2–D4 are inscribed in the ledger but are
+   not yet invariants in `engine/kernel/CHARTER.md`. Landing admission
+   and the contraction floor as a kernel-judged invariant is a charter
+   amendment and would bump `kernel::VERSION` 2 → 3. Proposed, not
+   ruled.
+3. **`ε_mag`.** D3's growth is "bounded above by the magnitude gate
+   (E4)", and E4's `ε_mag` has never been named. Growth is unbounded in
+   practice until it is.
