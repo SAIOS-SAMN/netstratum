@@ -6,7 +6,10 @@
 //! period-1 lock) vetoes it — so an inverted verdict cannot pass.
 
 use cfe::ratio::{ratio, Ratio};
-use rfa_core::{f_fold_star, judged_fold, orbit_lock, FoldVerdict, Operator, Delta};
+use rfa_core::{
+    f_fold_star, judged_fold, orbit_lock, verify_orbit_witness, Delta, FoldVerdict, Operator,
+    OrbitWitness,
+};
 
 fn q(n: i64, d: i64) -> Ratio {
     ratio(n, d)
@@ -190,6 +193,115 @@ fn the_angle_free_witness() {
             judged_fold(&fa, &fa, std::slice::from_ref(&id), 10),
             self_base,
             "the veto is frame-invariant too"
+        );
+    }
+}
+
+#[test]
+fn the_polarity_is_pinned_against_inversion() {
+    // THE POLARITY, stated as one pin (2026-08-01). Two doc comments in
+    // fold.rs once said the opposite of the code; the polarity decides
+    // which branch MINTS, so an inversion pays for gauge and refuses
+    // genuine difference. Some(witness) VETOES. None FOLDS.
+    let anchor = anchor_2();
+    let id = identity_op(2);
+    let ops = [id.clone()];
+
+    let witness = orbit_lock(&anchor, &anchor, &ops, 10).expect("the identity locks");
+    assert_eq!(
+        f_fold_star(&anchor, &anchor, &ops, 10),
+        FoldVerdict::TorsionVeto(witness),
+        "POLARITY: Some(witness) MUST veto — genuine difference is never folded away"
+    );
+
+    let shear_ops = [shear(2, 0, 1, q(1, 10))];
+    assert_eq!(orbit_lock(&anchor, &anchor, &shear_ops, 10), None, "no lock");
+    assert_eq!(
+        f_fold_star(&anchor, &anchor, &shear_ops, 10),
+        FoldVerdict::GaugeFold,
+        "POLARITY: None MUST fold — an unlocked difference was only gauge"
+    );
+}
+
+#[test]
+fn a_presented_witness_verifies_without_searching() {
+    // THE JUDGE'S HALF (U1a's split applied to the fold gate). The
+    // prover searched and found a witness; the judge re-walks only the
+    // path claimed — O(step), no operator sweep, no k_max.
+    let anchor = anchor_2();
+    let id = identity_op(2);
+    let ops = [id];
+    let witness = orbit_lock(&anchor, &anchor, &ops, 10).expect("the identity locks");
+
+    assert!(
+        verify_orbit_witness(&anchor, &anchor, &ops, &witness),
+        "the judge must accept the witness the prover found"
+    );
+}
+
+#[test]
+fn a_forged_witness_refuses() {
+    // Every unproved claim refuses: an unknown operator, a zero-step
+    // claim (which asserts nothing), and a wrong landing class.
+    let anchor = anchor_2();
+    let id = identity_op(2);
+    let ops = [id];
+    let real = orbit_lock(&anchor, &anchor, &ops, 10).expect("locks");
+
+    assert!(
+        !verify_orbit_witness(
+            &anchor, &anchor, &ops,
+            &OrbitWitness { operator_id: 77, step: real.step },
+        ),
+        "an unknown operator id proves nothing"
+    );
+    assert!(
+        !verify_orbit_witness(
+            &anchor, &anchor, &ops,
+            &OrbitWitness { operator_id: real.operator_id, step: 0 },
+        ),
+        "a zero-step claim asserts nothing"
+    );
+
+    // A real operator walked the claimed number of steps, but landing on
+    // a class that is not `b`'s: refused.
+    let other = anchor_3();
+    let shear_ops = [shear(3, 0, 1, q(1, 50))];
+    assert!(
+        !verify_orbit_witness(
+            &other,
+            &{
+                let mut d = Delta::zero(3, 1);
+                d.set_antisym(0, 1, vec![q(9, 1)]);
+                d.set_antisym(1, 2, vec![q(4, 1)]);
+                d.set_antisym(0, 2, vec![q(2, 1)]);
+                d
+            },
+            &shear_ops,
+            &OrbitWitness { operator_id: 1, step: 3 },
+        ),
+        "a walk that does not land on b's class proves nothing"
+    );
+}
+
+#[test]
+fn absence_cannot_be_witnessed() {
+    // THE ASYMMETRY, pinned. A lock can carry proof; its ABSENCE cannot.
+    // The shear pair has no lock, so `orbit_lock` yields None and there
+    // is no witness to present — and every fabricated witness for that
+    // pair refuses. This is WHY the minting branch must be the lock
+    // branch: only that side can carry a proof a judge can re-check.
+    let anchor = anchor_2();
+    let shear_ops = [shear(2, 0, 1, q(1, 10))];
+    assert_eq!(orbit_lock(&anchor, &anchor, &shear_ops, 10), None);
+
+    for step in 1..6 {
+        assert!(
+            !verify_orbit_witness(
+                &anchor, &anchor, &shear_ops,
+                &OrbitWitness { operator_id: 1, step },
+            ),
+            "no fabricated witness can establish a lock that does not exist (step {step})"
         );
     }
 }

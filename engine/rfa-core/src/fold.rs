@@ -169,6 +169,60 @@ pub struct OrbitWitness {
     pub step: usize,
 }
 
+/// THE WITNESS VERIFIER — the JUDGE's half of the split (U1a's pattern
+/// applied to the fold gate: the prover SEARCHES, the judge REPLAYS).
+///
+/// Given a PRESENTED [`OrbitWitness`], re-walk the one path it claims:
+/// conjugate `step` times by the named operator and compare RCF
+/// signatures. **No search, no operator sweep, no `k_max`** — the cost
+/// is O(`step`) conjugations plus one id lookup, and it is the same
+/// arithmetic on every node, so two judges always agree.
+///
+/// This is what a kernel may call. [`orbit_lock`] is what a prover
+/// calls, and a judge must never call it: a bounded search over the
+/// operator space is exploratory work, and the judge is pure, total and
+/// cheap. The prover's search may be stochastic and chain-seeded
+/// (`ξ_k = draw(seed = commit[k−1])`) and stays replayable BECAUSE the
+/// result it presents is a witness this function re-checks exactly.
+///
+/// Returns `false` on every unproved claim: an unknown operator id, a
+/// zero-step claim (which asserts nothing), an operator that leaves the
+/// antisymmetric surface, or a walk that does not land on `b`'s class.
+///
+/// **ABSENCE CANNOT BE WITNESSED.** This verifies that a lock EXISTS.
+/// No witness can establish that no lock exists — that would require
+/// exhausting the operator space — which is why the branch that MINTS
+/// must be the lock branch (`TorsionVeto`), the only one able to carry
+/// proof.
+pub fn verify_orbit_witness(
+    a: &Delta,
+    b: &Delta,
+    operators: &[Operator],
+    witness: &OrbitWitness,
+) -> bool {
+    // A zero-step claim asserts nothing: `a` is trivially its own class.
+    if witness.step == 0 {
+        return false;
+    }
+    let operator = match operators.iter().find(|op| op.id == witness.operator_id) {
+        Some(op) => op,
+        None => return false,
+    };
+    let mut current = a.clone();
+    for _ in 0..witness.step {
+        current = match operator.apply(&current) {
+            Some(next) => next,
+            None => return false,
+        };
+        // Only antisymmetric images are valid orbit elements — the same
+        // law the search applies, applied to the claimed path.
+        if !current.verify_conservation() {
+            return false;
+        }
+    }
+    rcf_signature(&current) == rcf_signature(b)
+}
+
 /// The verdict of the fold gate for a pair `(a, b)`. The law
 /// (SYSTEM_SPEC §4, kernel CHARTER §6, EQUATIONS I6): a fold is lawful
 /// IFF `orbit_lock = ∅`. A torsion cycle is a rigid, information-bearing
