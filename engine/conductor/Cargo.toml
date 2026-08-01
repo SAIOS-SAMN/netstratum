@@ -17,6 +17,13 @@ solver = { path = "../solver" }
 num-bigint.workspace = true
 num-traits.workspace = true
 
+[dev-dependencies]
+# The #17 CALIBRATION harness reaches the kernel judge and the sealed
+# work-verifier directly to measure mint pressure against the bound.
+# Dev-only (the arrow-law guard's own note: dev-deps are lawful).
+kernel = { path = "../kernel" }
+solver-verify = { path = "../solver-verify" }
+
 [[bin]]
 name = "conductor"
 path = "src/main.rs"

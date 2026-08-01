@@ -59,6 +59,31 @@ fn honest_proof() -> WorkProof {
     WorkProof { forge_digest: DIGEST, difficulty, program, output: test_output, certificate }
 }
 
+/// An honest proof at an arbitrary difficulty: a deterministic seed
+/// walk until a task solves with the render matching the forge's own
+/// expected grid (the conductor's criterion — rungs 4/5 miss sometimes:
+/// 75% and 42.5% in the #17 calibration), bounded, never assumed.
+fn honest_proof_with(difficulty: Difficulty) -> WorkProof {
+    for seed in 0u8..40 {
+        let digest = [seed.wrapping_mul(7).wrapping_add(3); 32];
+        let task = forge_task(digest, difficulty);
+        if let SolveRead::Solved { program, test_output, matches_expected, certificate } =
+            solve(&task, difficulty.word_len)
+        {
+            if matches_expected == Some(true) {
+                return WorkProof {
+                    forge_digest: digest,
+                    difficulty,
+                    program,
+                    output: test_output,
+                    certificate,
+                };
+            }
+        }
+    }
+    panic!("no honest solve in 40 seeds at {difficulty:?}")
+}
+
 fn mint_step(amount: (i64, i64), work: Vec<u8>) -> Step {
     Step {
         event: ClosureEvent::DiscoveryMinted {
@@ -74,9 +99,12 @@ fn mint_step(amount: (i64, i64), work: Vec<u8>) -> Step {
 
 #[test]
 fn the_sealed_shut_bound_refuses_every_positive_mint() {
-    // Valid work, honest claim of 1 iron — and the bound is ZERO
-    // until Ruling Box 1 opens the rate. The refusal carries both
-    // sides whole: what the law allows, what the deed claimed.
+    // WITNESS TRUTH-UPDATE (Ruling Box 1, 2026-08-01): this pin was
+    // written in the sealed-shut era, when EVERY positive mint refused
+    // at bound 0. The ruling opened the ladder — and level 1 is a
+    // SATURATED rung (100% hit-rate, #17 calibration), so its bound
+    // stays exactly 0 by the ruled f. The assertion is unchanged; the
+    // reason matured from "unruled" to "ruled zero".
     let work = encode_work(&honest_proof()).expect("the honest proof encodes");
     let prior = seated((6, 1));
     let next = seated((7, 1)); // the claimed mint banked — conservation holds
@@ -86,7 +114,71 @@ fn the_sealed_shut_bound_refuses_every_positive_mint() {
             bound: Box::new(ratio(0, 1)),
             claimed: Box::new(ratio(1, 1)),
         }),
-        "the mechanism precedes the economics: sealed shut, by law"
+        "a saturated rung pays nothing — ruled, not defaulted"
+    );
+}
+
+/// RULING BOX 1 (operator, 2026-08-01 — evidence: the #17 calibration,
+/// commit 5898351). THE EMISSION LAW, ladder-pinned in exact integers
+/// (L1/ladder terms — no norms, no roots, THE PROPORTIONAL LAW):
+/// f(0..=2) = 0 · f(3) = 1 · f(4) = 4 · f(5) = 7. A mint at exactly f
+/// admits; one past f refuses with both sides whole.
+#[test]
+fn the_ruled_rate_pays_the_ladder_exactly() {
+    for (level, f) in [(3u32, 1i64), (4, 4), (5, 7)] {
+        let proof = honest_proof_with(Difficulty::level(level));
+        let work = encode_work(&proof).expect("encodes");
+        let prior = seated((6, 1));
+        // At exactly f: admits (the mint banked — conservation holds).
+        let at_bound = seated((6 + f, 1));
+        assert_eq!(
+            lawful(&prior, &at_bound, &mint_step((f, 1), work.clone())),
+            Ok(()),
+            "level {level}: a mint of exactly f = {f} admits"
+        );
+        // One past f: refuses, the bound and the claim carried whole.
+        let past = seated((6 + f + 1, 1));
+        assert_eq!(
+            lawful(&prior, &past, &mint_step((f + 1, 1), work)),
+            Err(Unlawful::MintExceedsWork {
+                bound: Box::new(ratio(f, 1)),
+                claimed: Box::new(ratio(f + 1, 1)),
+            }),
+            "level {level}: f + 1 refuses with the bound whole"
+        );
+    }
+}
+
+/// The saturated rungs pay ZERO by ruling (100% hit-rate — free
+/// issuance barred), and an OFF-LADDER difficulty earns zero too:
+/// f is defined ON THE LADDER ONLY, so a payload cannot shape a
+/// custom difficulty and name its own price.
+#[test]
+fn saturated_and_off_ladder_work_earns_zero() {
+    for level in 0u32..=2 {
+        let proof = honest_proof_with(Difficulty::level(level));
+        let work = encode_work(&proof).expect("encodes");
+        assert_eq!(
+            lawful(&seated((6, 1)), &seated((7, 1)), &mint_step((1, 1), work)),
+            Err(Unlawful::MintExceedsWork {
+                bound: Box::new(ratio(0, 1)),
+                claimed: Box::new(ratio(1, 1)),
+            }),
+            "level {level} is saturated — it pays nothing"
+        );
+    }
+    // Off-ladder: a REAL solve at a difficulty no rung names (3×4 —
+    // between level 1's 3×3 and level 2's 4×4). It verifies; it earns 0.
+    let off_ladder = Difficulty { tier: 1, word_len: 1, rows: 3, cols: 4, train_pairs: 2 };
+    let proof = honest_proof_with(off_ladder);
+    let work = encode_work(&proof).expect("encodes");
+    assert_eq!(
+        lawful(&seated((6, 1)), &seated((7, 1)), &mint_step((1, 1), work)),
+        Err(Unlawful::MintExceedsWork {
+            bound: Box::new(ratio(0, 1)),
+            claimed: Box::new(ratio(1, 1)),
+        }),
+        "an off-ladder difficulty cannot name its own price"
     );
 }
 

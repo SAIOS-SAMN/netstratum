@@ -74,6 +74,7 @@ version = "0.1.0"
 dependencies = [
  "cfe",
  "codec",
+ "kernel",
  "ledger",
  "mesh",
  "num-bigint",
@@ -81,6 +82,7 @@ dependencies = [
  "physics",
  "scribe",
  "solver",
+ "solver-verify",
 ]
 
 [[package]]
