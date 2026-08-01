@@ -234,73 +234,93 @@ A caller that measures `D` and then separately consults `∇V` has
 already broken the entanglement and reintroduced the two-object attack
 surface. This binds §6's first build.
 
-### 2g. WRAP(ENTANGLEMENT) — the kernel as CLOSURE, not door
+### 2g. WRAP(ENTANGLEMENT) — accounting, not identity
 
-**The flip.** A door implies an outside pressing in: proposals arrive,
-the judge refuses the bad ones, and the attack surface is the doorway
-itself — unbounded in what may be offered. `wrap(entanglement)` closes
-that surface instead of guarding it. Three moves do it, and all three
-are available in the landed kernel.
+**`==` IS STRUCK, and it was the collapse error again** (operator
+correction 2026-08-01). This section first proposed converting the
+bounds to identities — `amount == mint_bound(d)` — to remove latitude.
+That is the same failure as gradient descent, one level down: it
+collapses a two-sided relation to a point and discards whatever
+distinguished the sides. An equality keeps one value and throws the
+difference away. **We never discard residuals**, and the gap between
+what a deed DECLARES and what the state DERIVES is a residual like any
+other. **The law admits no `==` at an entangled seam.**
 
-**(1) BOUNDS BECOME IDENTITIES — latitude is the attack surface.**
-Today the judge checks inequalities:
+**BOTH SIDES ARE HELD.**
 
-    I4:  amount  ≤  mint_bound(difficulty)          ← LATITUDE
+    declared   — what the deed says the capacity moved
+    derived    — what prior state and the potential motion yield
+    the pair   — held WHOLE; their relation is READ, never zeroed
 
-Any value from `0` to `f(d)` is admissible, so the deed chooses within
-a permitted range and the range IS the surface. Under entanglement
-there is nothing to choose: the capacity increment is DETERMINED by the
-potential motion, so the lawful relation is identity —
+**The gap is dispositioned under I6, never by pass/fail.** A difference
+between the sides gets the same three-way disposition every other
+residual gets — *reduced as gauge, minted as a new dimension, or
+refused* — and never silent admission:
 
-    I4′: amount  ==  mint_bound(difficulty)         ← NO LATITUDE
+    gap reduces to frame       →  the sides differed by scope; admit,
+                                  the reduction receipted
+    gap is irreducible         →  it EMITS: a new degree, D rises
+                                  (this is D3 — the mint IS this case)
+    gap cannot be dispositioned →  REFUSE, carrying both sides whole
 
-An entangled pair admits exactly one value. Not "within bounds" but
-"the derived one, or refuse."
+**This is how the surface actually closes: by ACCOUNTING, not by
+identity.** Nothing passes unaccounted. That is strictly stronger than
+`==`, which refuses everything non-identical and learns nothing from
+the refusal — an equality cannot tell a forgery from a discovery,
+because it discards exactly the quantity that distinguishes them.
 
-**(2) DERIVATION PRECEDES ADMISSION.** The kernel computes the
-entangled pair from `prior` and `step` BEFORE reading what the deed
-claims, then requires identity. The deed never influences what the
-lawful value is; it only matches it or refuses. This is the landed
-declaration==effect shape (the gauge law, the escrow law) raised to the
-capacity/potential seam.
+**WHY THIS BRIDGES NON-LINEAR PHASES.** A point constraint cannot cross
+a phase boundary; it can only state the value on one side of it. The
+`f` ladder is the in-system case and it is genuinely non-linear:
+`f(0..2) = 0` — saturated, proof-of-position, free issuance barred —
+then `f(3) = 1` at the marginal threshold, `f(4) = 4`, `f(5) = 7`. The
+interesting behaviour is the CROSSING at rung 3, where a line stops
+proving position and starts earning. At that boundary the declared and
+derived descriptions genuinely differ, and **their relation IS the
+transition.** Hold both sides and the crossing is legible; collapse
+them with an `==` and the phase structure disappears, leaving only
+disconnected values on either side of a wall.
 
-**(3) THE WRAP IS THE ENCLOSURE.** This is why the λ-nodes matter
-beyond bookkeeping. On an unbounded axis a constraint can always be
-escaped by pushing outward — there is always more axis. On a finitely
-wrapped torus there IS no outward: `key_distance` is wrapped L1, a key
-of 10 is 0, and the T∞ purge bars any escape to infinity. The wrap
-turns the entanglement from a CONSTRAINT into an ENCLOSURE. There is no
-inward attack because there is no outside to attack from.
+**(2) DERIVATION PRECEDES ADMISSION** — unchanged and still required.
+The kernel computes its own side from `prior` and `step` BEFORE reading
+what the deed claims. The deed never influences what the derived value
+is; it contributes the other side of a pair, and the pair is then read.
 
-**THE CONSEQUENCE — `lawful()` stops being a filter.** If every
-entangled relation is an identity derived from prior state, then for a
-given `(prior, step)` there is **exactly one lawful `next`**. The
-question stops being "is this next admissible" and becomes "is this
-next THE next." The judge becomes a state transition function, which is
-what it has been converging toward since I1: the admissible state space
-collapses from a range to a point, and a forged state is not refused so
-much as *not constructible*.
+**(3) THE WRAP IS THE ENCLOSURE** — unchanged. On an unbounded axis a
+constraint is escapable by pushing outward; there is always more axis.
+On a finitely wrapped torus there is no outward: `key_distance` is
+wrapped L1, a key of 10 is 0, the T∞ purge bars escape to infinity. The
+wrap is what makes the accounting exhaustive — a gap has nowhere to go
+except into the disposition.
 
-**HONEST COST — this is a BREAKING amendment.** Changing `≤` to `==`
-changes the MEANING of an existing rule, which is a major `VERSION`
-bump under this charter's own amendment tiers, and history judged under
-the old rule keeps verifying under it. It is not a free tightening.
+**THE CONSEQUENCE — `lawful()` is an ACCOUNTANT, not a filter and not a
+point-function.** For a given `(prior, step)` it derives its own side,
+reads the deed's side, and dispositions the difference. The admissible
+space is neither a range (latitude, attackable) nor a point (collapse,
+lossy): it is *every state whose gap is accounted for*. A forgery fails
+because its gap disposes to nothing; a discovery passes because its gap
+EMITS — and the same machinery reads both.
 
-**CONCRETE CASUALTY IN LANDED CODE.** `discovery_pins.rs` pin 6 holds
-that *"zero-amount with valid work admits — the degenerate mint is
-lawful."* Under §2f consequence 2 that pin is now WRONG: valid work
-means the potential moved, so a zero declared capacity is exactly
-*hidden work*. The pin must flip red and then be truth-updated. This is
-the entanglement's first real bite on the tree, and it should land
-red-first like any other amendment.
+**CONCRETE BITE IN LANDED CODE — and now for the right reason.**
+`engine/kernel/tests/discovery_pins.rs:266` holds that *"the degenerate
+mint is lawful: 0 ≤ bound 0"*, with the same claim in the header at
+line 10. Under §2f consequence 2 that stays wrong — valid work means
+the potential moved, so a zero declared capacity is hidden work. But it
+refuses as an UNDISPOSABLE GAP carrying both sides whole, not as a
+failed equality. The distinction matters at the witness: the refusal
+must name what the potential moved and what the deed declared.
+
+**HONEST COST.** Still a meaning change to an existing rule — today the
+gap below the bound passes silently, and under this law it must be
+dispositioned — so a major `VERSION` bump under the amendment tiers,
+with old history verifying under the old rule.
 
 **NOT YET RULED — which pairs are entangled.** I4's mint/work pair is
-the clear case. Whether I5's decay bound (`decay ≤ min(rate·ease·
-elapsed, banked)`) and the assay bound (`amount ≤ richness·elapsed`)
-are likewise entangled — and therefore likewise identities — is an
-operator ruling, not a derivation. Under-paying an owed decay may be a
-lie of the same kind, or may be lawful forbearance. **Do not convert
-them silently.**
+the clear case. Whether I5's decay bound and the assay bound are
+entangled, and so subject to the same disposition, is an operator
+ruling rather than a derivation: under-paying an owed decay may be a
+lie of the same kind, or lawful forbearance. **Do not convert them
+silently.**
 
 ---
 
@@ -453,14 +473,16 @@ computation, hiding one behind vocabulary is cosmetic.
 3. **The torsion test has no caller.** `orbit_lock` / `f_fold_star`
    are landed and witnessed in `rfa-core` and are invoked nowhere.
    Article I's mandate is unenforced until the merge site calls them.
-3a. **The kernel is still a door, not a closure** (§2g). Its entangled
-   relations are inequalities, so the admissible state space is a range
-   rather than a point. The conversion is a BREAKING amendment (major
-   `VERSION`) and its first casualty is verified present in the tree:
+3a. **The kernel admits gaps silently** (§2g). At an entangled seam it
+   checks an inequality and lets everything below the bound through
+   unaccounted. It must instead hold both sides and DISPOSITION the
+   gap — reduce, emit, or refuse carrying both whole. No `==` anywhere;
+   the equality would discard the very quantity that tells a forgery
+   from a discovery. Breaking amendment (major `VERSION`). First bite
+   is verified present in the tree:
    `engine/kernel/tests/discovery_pins.rs:266` — *"The degenerate mint
-   is lawful: 0 ≤ bound 0"* — plus its header claim at line 10. Under
-   entanglement a zero-amount mint over valid work is hidden work and
-   must refuse. Land red-first.
+   is lawful: 0 ≤ bound 0"* — plus its header claim at line 10. Land
+   red-first, and the refusal must name both sides.
 4. **Continuous-domain forms need exact realizations.** The exterior
    derivative, the sup over a manifold, `det U* → ∞`, and a real
    principal eigen-axis have no exact-rational form. Infinity is
