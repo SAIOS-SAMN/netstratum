@@ -339,16 +339,23 @@ fn the_total_check_stops_smuggling_under_neutral_deeds() {
 }
 
 #[test]
-fn assay_stays_out_for_the_element_ledger() {
-    // AssayStruck mints ELEMENT value (a separate ledger the banked
-    // totals never see). Admitting it on banked-neutrality would be an
-    // unguarded element mint — it stays Unjudged until the element
-    // ledger's accounting lands (the almanac's law, a named follow-up).
+fn an_assay_is_bounded_by_its_vein() {
+    // WITNESS TRUTH-UPDATE (the element law landed): this pin held
+    // AssayStruck OUT as Unjudged, because admitting it on
+    // banked-neutrality would be an unguarded element mint. The
+    // element law now judges it with strict symmetry to the banked
+    // ledger — this state carries NO vein, so the bound is zero and
+    // the mint refuses AssayExceedsVein, both sides whole. The full
+    // element witnesses (honest mint, sign, zero-invariance) live in
+    // element_pins.rs.
     let prior = seated((6, 1));
     let assay = ClosureEvent::AssayStruck { orb_id: 1, element: [3u8; 32], amount: ratio(1, 1) };
     assert_eq!(
         lawful(&prior, &prior.clone(), &step(assay, HAND)),
-        Err(Unlawful::Unjudged),
-        "an element mint is not admitted by banked-neutrality"
+        Err(Unlawful::AssayExceedsVein {
+            bound: Box::new(ratio(0, 1)),
+            claimed: Box::new(ratio(1, 1)),
+        }),
+        "no vein, no element yield"
     );
 }
