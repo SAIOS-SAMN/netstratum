@@ -38,11 +38,48 @@ experience, the spec bends and the substrate absorbs the complexity. The
 substrate's law ("valid or rejected, nothing in between") governs state
 transitions, not game design.
 
-## 3. THE INSCRIBED CONSTRAINTS (the Dark Forest post-mortem, as law)
+## 2a. THE SYNTROPIC REGISTER (operator ruling 2026-08-01)
 
-Dark Forest (0xPARC, ~2020) proved decentralized hidden-information worlds are
-possible and then demonstrated five ways they fail. Each failure is inscribed
-here as a standing constraint:
+**This charter is written syntropic, never negentropic.** The distinction
+is exact and not stylistic. *Negentropy* is negative entropy — a good
+defined as the absence of a bad, which makes the bad the primary object
+and the good its shadow. *Syntropy* is a positive quantity in its own
+right: it names what is BUILT, and needs no failure to point at.
+
+Three bindings follow, and they order every section below:
+
+1. **The generative side leads.** What the system MAKES is stated first
+   and stands on its own merit. Refusals, bans, slashes and lints are
+   real and stay — but they are subordinate clauses of a positive law,
+   never the law itself. A rule that can only be stated as a prohibition
+   is a rule that has not yet found its object.
+2. **CONVERGENCE is the frame; divergence is a case within it.** The
+   mesh converges (NS-5, proof-of-convergence); honest forking is a
+   lawful case inside that frame, not the frame's opposite. Where this
+   document must name divergence it names it as the lesser reading —
+   what convergence tolerates, never what the system is organised
+   around.
+3. **A negative assumption carries less weight than a positive
+   measurement.** Where a refusal and a reading disagree about what a
+   state is, the reading governs. The engine measures what is there
+   before it prices what is missing.
+
+**Why this is law and not taste.** The corpus has drifted this way twice
+already and both times it cost real correctness: the value law read as
+two ceilings with no direction until `I4`/`I5` recovered their
+syntropy/entropy names, and capacity was built as a RESIDUE — what
+survives after stripping — until it was rebuilt as the circulation it
+positively is. In both cases the negentropic form was not merely bleak,
+it measured the wrong object. Stating the positive first is how the
+object stays in view.
+
+## 3. THE INSCRIBED CONSTRAINTS (five things this system BUILDS)
+
+Five standing constructions, each stated as what it makes. Dark Forest
+(0xPARC, ~2020) proved decentralized hidden-information worlds are
+possible, and the ways it came apart are the EVIDENCE these five are
+load-bearing — evidence, never the definition. Each stands on its own
+merit and would stand had that project never existed:
 
 1. **PERSISTENCE BY CONSTRUCTION.** The append-only VRP chronicle IS the world
    state. There are no resets, no wipes, no ephemeral beta rounds — a reset is
@@ -196,11 +233,16 @@ means; pen coder-03, review coder-04, all seats bound)
 the chain remembers it, the galaxy flavors it, the ideology judges
 it. Everything below is those five layers stated as rules.*
 
-**The ban.** Keeping a second machine-readable copy of game state, or
-building tools that reconcile two copies after the fact, is banned.
-The opposition module was deleted under this section (2026-07-31);
-the ledger's display half (the excised crate's lens exports) deletes
-at Step 4 once views serve from the chain.
+**THE ONE TRUTH.** The game keeps exactly one machine-readable copy of
+state, and every reading derives from it. That is the whole of this
+section; the prohibition below is its consequence, not its content
+(§2a: a refusal is a subordinate clause of a positive law).
+
+*Consequent:* a second machine-readable copy, or a tool that reconciles
+two copies after the fact, is therefore banned — there is nothing for it
+to be a second OF. The opposition module was deleted under this section
+(2026-07-31); the ledger's display half (the excised crate's lens
+exports) deletes at Step 4 once views serve from the chain.
 
 **The five rules (normative):**
 
@@ -277,12 +319,15 @@ and admission IS verification. A **puppet universe is precisely a nursery
 that never earned confirmation** — the same vocabulary names the sandbox
 law and the Sybil analysis.
 
-**The alignment covenant (the stick beside the carrot).** The ordering
-mechanism has two halves. The carrot: consensus weight earned by
-certificate-verified genuine difference (proof-of-useful-work — unbuilt,
-the load-bearing gap). The stick, ruled and boarded (NS-5 §7.6): **open
-divergence is lawful; covert divergence is slashed.** A node that forks
-honestly is a lawful nursery; a node that fabricates confirmation and is
+**The alignment covenant — WEIGHT IS EARNED (§2a: the generative side
+leads).** The ordering mechanism is one economy read from its positive
+end. **Consensus weight is earned by certificate-verified genuine
+difference** — proof-of-useful-work, the primary half, and the one still
+unbuilt: it is the load-bearing gap precisely BECAUSE it is the half
+that generates. The subordinate half, ruled and boarded (NS-5 §7.6),
+prices fabrication: **honest forking is lawful and expected — a node
+that forks openly is a lawful nursery; only FABRICATED confirmation is
+slashed.** A node that fabricates confirmation and is
 proven to has its pen, its work, and its STAKE forfeited — reusing the
 landed `CovenantSlashed`/forfeit mechanics. The puppet web is made
 expensive by work-anchoring AND ruinous by stake-slashing on proven
