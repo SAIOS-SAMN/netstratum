@@ -55,6 +55,50 @@ pub const CHANNEL_DEBT: usize = 2;
 /// The fiber arity of the projection.
 pub const CHANNELS: usize = 3;
 
+/// WHAT IS KNOWN about a relation (operator ruling 2026-08-01: the
+/// complex is SPARSE — an absent relation is ABSENT, not zero).
+///
+/// Three values, never two. A dense tensor cannot tell "these two do
+/// not relate" from "these two relate by zero", and that distinction is
+/// exactly what carries topology: with every pair present, every
+/// cocycle is a coboundary and `D` collapses (measured in
+/// `bridge_pins`). Sparsity is what lets a cycle exist.
+///
+/// **ABSENCE IS A CLAIM, AND CLAIMS CAN BE WRONG.** This is not
+/// epistemic politeness — it is the forgery gate. A mistaken absence
+/// creates a cycle that is not there, and a phantom cycle carries
+/// phantom holonomy, which reads as capacity that was never earned.
+/// **Unverified absence mints.** So an unobserved pair may never be
+/// counted as absent.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Observed {
+    /// A receipted obligation stands between the pair on this channel.
+    Present,
+    /// VERIFIED absent: the observer's record is complete over this
+    /// pair, and no obligation stands. Within one book this is the
+    /// ordinary case — a world's chronicle is complete over its OWN
+    /// orbs, so silence there is a fact.
+    Absent,
+    /// NOT SEEN. The pair may relate beyond the observer's reach. Never
+    /// counted as `Absent`; it must first be resolved (see [`Resolve`]).
+    /// Across books this is the ordinary case — *worlds cannot see
+    /// neighbours* (WANT-1 kind 1, the epistemological want: a short
+    /// reach reads as truth-starvation, by design).
+    Unknown,
+}
+
+/// How an `Unknown` is discharged before capacity may be read.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Resolve {
+    /// TELESCOPE FURTHER OUT — widen the reach and look again. The
+    /// relation may stand outside the current horizon (reach is a
+    /// wrapped-L1 distance; a short reach hides real structure).
+    Telescope,
+    /// LOCK ON — confirm the absence at the present reach, turning
+    /// `Unknown` into `Absent` by observation rather than assumption.
+    LockOn,
+}
+
 /// THE ENTANGLED READ (`18_TORSION` §2f). The capacity side and the
 /// potential side, computed in ONE pass over ONE prior state. They are
 /// not separately obtainable from this module by construction: a
@@ -70,19 +114,28 @@ pub struct EntangledRead {
     /// The cocycle defect `C(Δ) = Σ|R|` — the potential-side strain,
     /// naming how far the obligations are from composing.
     pub defect: Ratio,
+    /// Pairs whose relation was NOT observed. While any stands, the
+    /// complex has holes of unknown shape and no capacity may be read
+    /// off it.
+    pub unknown: usize,
 }
 
 impl EntangledRead {
-    /// **`D` is well-defined ONLY on cocycles.** `H¹ = Z¹/B¹` is
-    /// defined on cocycles alone; where the defect is non-zero
-    /// `Δ ∉ Z¹` and has no cohomology class for the reduction to land
-    /// in. The capacity reading is then a measurement of a reduction
-    /// of something with no class — reportable, but not `D`.
+    /// **`D` is well-defined only on a fully observed cocycle.** Two
+    /// independent conditions, and both are refusals to read capacity
+    /// out of something that has none to give:
+    ///
+    /// 1. `unknown == 0` — an unresolved absence would let phantom
+    ///    topology mint phantom capacity. Discharge every `Unknown` by
+    ///    [`Resolve`] first.
+    /// 2. `defect == 0` — `H¹ = Z¹/B¹` is defined on cocycles alone;
+    ///    where the defect is non-zero `Δ ∉ Z¹` and there is no
+    ///    cohomology class for the reduction to land in.
     ///
     /// Callers that gate on capacity (Article II standing, Article IV
     /// monotonicity) MUST consult this first.
     pub fn capacity_is_defined(&self) -> bool {
-        self.defect == ratio(0, 1)
+        self.unknown == 0 && self.defect == ratio(0, 1)
     }
 }
 
@@ -145,9 +198,44 @@ pub fn project(state: &Committed) -> Delta {
     delta
 }
 
+/// What is KNOWN about the relation between two orbs on one channel,
+/// within ONE committed book.
+///
+/// A world's chronicle is complete over its own orbs, so silence about
+/// a pair it holds is a VERIFIED absence, not an unobserved one. The
+/// `Unknown` case belongs to the cross-book reading, where a book
+/// cannot see a neighbour's obligations and the mesh must present them
+/// — `read_entangled` reports zero unknowns for exactly this reason,
+/// and `read_entangled_observed` is the door for the mesh case.
+pub fn observe(state: &Committed, i: usize, j: usize, channel: usize) -> Observed {
+    let delta = project(state);
+    match delta.dim() > i.max(j) && channel < CHANNELS {
+        false => Observed::Unknown,
+        true => match *delta.entry(i, j, channel) != ratio(0, 1) {
+            true => Observed::Present,
+            false => Observed::Absent,
+        },
+    }
+}
+
 /// Read the entangled pair from one prior state, in one pass
 /// (`18_TORSION` §2f's binding build constraint).
+///
+/// Single-book reading: every pair among the book's own orbs is
+/// observed, so `unknown` is zero by construction. For a reading that
+/// spans books, carry the unobserved count through
+/// [`read_entangled_observed`].
 pub fn read_entangled(state: &Committed) -> EntangledRead {
+    read_entangled_observed(state, 0)
+}
+
+/// The cross-book door: the same one-pass read, carrying the count of
+/// pairs the observer could NOT see. While `unknown > 0` the complex
+/// has holes of unknown shape and [`EntangledRead::capacity_is_defined`]
+/// refuses — discharge them by [`Resolve::Telescope`] or
+/// [`Resolve::LockOn`] before reading capacity, never by assuming
+/// absence.
+pub fn read_entangled_observed(state: &Committed, unknown: usize) -> EntangledRead {
     let delta = project(state);
     let defect = coherence_functional(&delta);
     let reduced = coboundary_reduce(&delta);
@@ -162,5 +250,5 @@ pub fn read_entangled(state: &Committed) -> EntangledRead {
             }
         }
     }
-    EntangledRead { capacity, defect }
+    EntangledRead { capacity, defect, unknown }
 }

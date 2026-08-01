@@ -9,7 +9,9 @@
 use cfe::dop::ColonyOrb;
 use cfe::ratio::ratio;
 use cfe::world::{Bond, Committed, World};
-use kernel::bridge::{project, read_entangled, CHANNELS, CHANNEL_BOND};
+use kernel::bridge::{
+    observe, project, read_entangled, read_entangled_observed, Observed, CHANNELS, CHANNEL_BOND,
+};
 use rfa_core::{coboundary_reduce, Delta};
 
 fn orbs(n: u64) -> Committed {
@@ -129,6 +131,41 @@ fn obligations_to_unknown_or_self_are_skipped_never_panic() {
     let read = read_entangled(&state);
     assert_eq!(read.capacity, 0);
     assert_eq!(read.defect, ratio(0, 1));
+}
+
+#[test]
+fn a_book_verifies_absence_over_its_own_orbs() {
+    // Within one book the chronicle is COMPLETE over its own orbs, so
+    // silence about a pair it holds is a verified Absent — a fact, not
+    // an assumption. Present is the receipted obligation.
+    let mut state = orbs(3);
+    state.bonds = vec![bond(1, 2, 4)];
+    assert_eq!(observe(&state, 0, 1, CHANNEL_BOND), Observed::Present);
+    assert_eq!(observe(&state, 1, 2, CHANNEL_BOND), Observed::Absent);
+    // Beyond the book's own orbs nothing is claimed — never Absent.
+    assert_eq!(observe(&state, 0, 9, CHANNEL_BOND), Observed::Unknown);
+}
+
+#[test]
+fn an_unresolved_absence_refuses_capacity_unverified_absence_would_mint() {
+    // THE FORGERY GATE. A mistaken absence creates a cycle that is not
+    // there, and a phantom cycle carries phantom holonomy — capacity
+    // that was never earned. So while any pair stands unobserved, the
+    // capacity reading refuses, even though the observed part is a
+    // perfectly good cocycle.
+    let mut state = orbs(3);
+    state.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(1, 3, 5)];
+
+    let seen = read_entangled(&state);
+    assert_eq!(seen.unknown, 0, "one book sees all its own orbs");
+    assert!(seen.capacity_is_defined(), "fully observed cocycle");
+
+    let unseen = read_entangled_observed(&state, 1);
+    assert_eq!(unseen.defect, seen.defect, "the strain reading is unchanged");
+    assert!(
+        !unseen.capacity_is_defined(),
+        "one unobserved pair is enough — absence must be verified, never assumed"
+    );
 }
 
 #[test]
