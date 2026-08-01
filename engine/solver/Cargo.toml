@@ -7,4 +7,7 @@ description = "The ARC solver harness — the cognitive apex: exact grid transfo
 [dependencies]
 blake3.workspace = true
 physics = { path = "../physics" }
+# THE SECTOR DOOR (cage::consult). The search is prover-side and may use
+# any means; what it proposes is withdrawn only through an exact rule.
+rfa-core = { path = "../rfa-core" }
 solver-verify = { path = "../solver-verify" }
