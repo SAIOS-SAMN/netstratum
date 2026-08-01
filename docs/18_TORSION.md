@@ -446,6 +446,105 @@ law. The CODE is safe — `pair_melt` names its parameter `distance` —
 but the documents are not. The melt's `D` should be renamed (`σ`, for
 separation) before the two drift into one another.
 
+### 2k. THE TRAVERSAL LANE — Einstein–Rosen throat, Einstein–Cartan interior (operator, 2026-08-02)
+
+The bond between two interlinking orbs (`19_KERNEL` §5a.1) is a THROAT,
+not a link. This section says what keeps the throat OPEN, and the
+answer carries an economic ruling with it.
+
+**What Einstein–Cartan actually adds, stated plainly.** General
+relativity sets torsion to zero by fiat: the connection is symmetric,
+so it has no antisymmetric part. Einstein–Cartan drops that assumption
+and lets the connection carry one — and that antisymmetric part is
+sourced by intrinsic SPIN, not by mass-energy. The consequence that
+matters here: under mass-energy alone, collapse runs all the way to a
+singularity — a point, where everything that fell in is crushed into no
+structure at all. With torsion sourced by spin, the coupling turns
+repulsive at extreme density and the collapse BOUNCES instead of
+reaching a point.
+
+**Torsion is the thing that keeps a region EXTENDED.** That is the
+entire borrow, and it is why the pair is Einstein–Rosen *plus*
+Einstein–Cartan and not either alone: the bridge supplies the throat,
+and the torsion is what stops the throat pinching to a point that
+nothing can traverse.
+
+**The mapping, and it is exact at the place it has to be:**
+
+    mass-energy       accumulated weight — spent compute. Bulk,
+                      structureless, additive, commuting.
+    intrinsic spin    the irreducible relational structure: the part
+                      of a loop that no frame can undo.
+    TORSION           the COMMUTATOR. Not a metaphor for it —
+                      geometric torsion IS the antisymmetrised part
+                      of the connection, and `fiber.rs:101`
+                      (`commutator`) with `fiber.rs:168`
+                      (`plaquette_curvature`, which returns exactly
+                      `a.commutator(b)`) computes that object over
+                      the fiber. The organ is landed.
+
+**THE SINGULARITY AND THE COBOUNDARY TRAP ARE THE SAME FAILURE.** This
+is the load-bearing identification. A pure coboundary
+`Δ_ij = s(i) − s(j)` reduces to zero — `reduce.rs` phase 1 sends
+exactly that shape there, which is why `bridge.rs` refuses to project
+bank differences. Everything poured in, no invariant out, all of it
+crushed to a point. That is a singularity in the only sense this system
+can mean one, and the system has forbidden it since the bridge landed.
+
+**Which is why nonce-smashing is barred, and barred by a rule that
+already exists.** Bitcoin's race is that failure adopted as a design:
+enormous energy in, and the artifact — a nonce — carries no
+transferable structure and is worth exactly zero the instant it is
+found. Additive, commuting, abelian: `[A,B] = 0`, no torsion, no
+extent, a point. It measures entropic energy dumped. **The same compute
+directed at a task whose artifact carries structure produces a rule
+that survives reduction.** The distinction is not effort and it is not
+sincerity — it is whether anything is left after `Π_G(Δ(Ω))`.
+
+**THE LANE LAW.** A traversal lane is open exactly when the holonomy
+around it is non-trivial. Weight alone commutes, contributes a
+per-node scalar, reduces to zero and leaves `D` unchanged; a lane held
+open by weight alone therefore collapses. A lane held open by structure
+no frame explains stays extended and traversable. `capacity_law`
+(`lib.rs:253`) already refuses a mint without standing on precisely
+this reading — the lane extends it from the mint to the bond.
+
+    a lane held open by weight collapses
+    a lane held open by structure stays traversable
+
+**MEASURED, and favourable.** There is no `nonce`, no `hashrate` and no
+`hashcash` anywhere in `engine/`. `Difficulty` exists but means the
+PUZZLE's shape — `rows`, `cols`, `word_len`, `train_pairs`, `tier` —
+how hard the task is, never how many leading zeros. **The tree has
+never taken the hashcash shape**, so this ruling defends a position
+rather than reversing one.
+
+**WHERE THE TEMPTATION ACTUALLY SITS, and it is one specific gap.**
+`19_KERNEL` §5 records the single missing miner piece: nothing makes
+weight costly to fake — the Sybil and ordering anchor
+(`KERNEL_RELAY` §7.1). Hashcash is the reflexive fix for exactly that
+gap, and it is how a system that never wanted a nonce acquires one.
+**This ruling forecloses it in advance:** the anchor is to be paid in
+structure that survives reduction, not in energy spent.
+
+**NOT DERIVED — three open things, flagged rather than filled:**
+
+1. **What traverses.** Value, state, or judgment are three different
+   laws with three different conservation obligations, and the lane
+   does not pick one. An operator ruling.
+2. **Whether lanes decay.** In ECSK torsion does not propagate — it
+   exists only where spin-carrying matter is and vanishes in vacuum. If
+   the borrow holds that far, a lane's torsion exists only where
+   verified work sits, so lanes fade when the work stops. That would
+   sit naturally beside I5's demurrage, which is suggestive and not a
+   derivation. Recorded, not asserted.
+3. **THE ANCHOR IS STILL OPEN.** "Must raise `D`" does not by itself
+   make identity costly: a brute-forced solution still raises rank, and
+   nothing here prices a second identity. This section rules out
+   hashcash and supplies the criterion the replacement must meet. **It
+   does not supply the replacement.** Saying otherwise would let the
+   shape of the argument stand in for a mechanism that does not exist.
+
 ### 2h. THE ECLIPSE — STRUCK AS WRITTEN (2026-08-01)
 
 This section claimed an "eclipse law" unifying five occlusion

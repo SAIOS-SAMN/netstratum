@@ -117,6 +117,13 @@ weight costly to fake, so the mesh will govern cooperating nodes only
 until it lands (`KERNEL_RELAY` §7.1). That is a mesh-lane rung, and it
 is the honest reason the kernel is *mineable* but not yet *contested*.
 
+**This gap is where a nonce would enter, and it is ruled shut**
+(`18_TORSION` §2k, operator 2026-08-02). Hashcash is the reflexive fix
+for exactly this hole. The anchor must be paid in structure that
+survives reduction, not in energy spent — and that ruling supplies the
+criterion without yet supplying the mechanism, so the gap stays open
+with one door now closed.
+
 ## §5a THE SHAPE POW++ ACTUALLY HAS (operator, 2026-08-02)
 
 §5 read the miner as a line. It is not one.
@@ -212,6 +219,13 @@ absorbing counterpart are load-bearing here in a way they were not in
 `18_TORSION` §2d, where they merely renamed the mint and the chain and
 drove nothing. **Struck there for driving nothing; earned here because
 the join has no mechanism and this supplies one.**
+
+**What keeps the throat open is ruled in `18_TORSION` §2k** — the
+Einstein–Cartan half of the pair. A throat held open by accumulated
+weight pinches to a point; one held open by structure no frame explains
+stays traversable. That section also carries the consequence for
+mining: the coboundary trap and the singularity are the same failure,
+so nonce-smashing is already barred by law the bridge landed.
 
 **Orbs at the overlap have extent — and this one IS derivable.**
 `bridge.rs` §head: *"Entities `(i, j, k)` are ORBS, indexed by position
