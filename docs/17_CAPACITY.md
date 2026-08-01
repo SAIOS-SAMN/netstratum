@@ -631,4 +631,116 @@ actor.
 and **none is measured** (`18_TORSION` §6). Until `orbit_lock` has a
 caller, AV-11 has no enforcement — it is the first attack vector this
 constitution opens faster than it can close, and that ordering should be
-deliberate rather than discovered.
+deliberate rather than discovered. §12 makes that ordering a ruling.
+
+---
+
+## §12 THE WITHDRAWAL BOUNDARY — where monotone value becomes extractable
+
+**LAW (operator ruling 2026-08-01).**
+
+> on every step we increase economic value until value benefits the
+> withdrawal function based on what you consider attack/defense.
+
+### 12a. The mechanism, stated exactly
+
+§11 makes value creation MONOTONE BY CONSTRUCTION. Nothing is discarded,
+every non-composition roots, and capacity never retreats (Article IV).
+Monotone accumulation with an open exit has one guaranteed consequence:
+**there exists a crossing at which withdrawal dominates participation.**
+Past it, the rational actor stops creating and extracts.
+
+This is not a flaw introduced by §11 — it is a property of any economy
+whose internal yield accumulates. §11's contribution is to make the
+accumulation certain, and therefore to make the crossing certain too.
+
+### 12b. Why the defense CANNOT live at the withdrawal function
+
+At the exit, value is FUNGIBLE. A unit minted against genuine
+irreducible difference and a unit farmed through AV-11 are the same
+number in the same bank. **No test applied at withdrawal can separate
+them**, because the difference is in the value's origin, not its form.
+
+Therefore: **withdrawal-side controls are theatre; the defense is
+entirely creation-side.** This is what the engine already believes —
+`verify_work` is replay-complete, `mint_bound` is ladder-pinned and pays
+ZERO on saturated rungs, and `orbit_lock`'s verdict is frame-invariant so
+capacity cannot be re-coordinatized into existence. Every one of those
+is a gate at the moment of creation.
+
+**The consequence for §11 is uncomfortable and must be stated: §11
+LOOSENED the creation gate while every creation-side defense remains
+unmeasured.** Non-composition that once refused now roots. That raises
+the value-creation rate against unbuilt gates, which moves the crossing
+of §12a EARLIER. The bifurcation law is correct and it is expensive.
+
+### 12c. The symmetry that IS available **[DERIVED — ratify or strike]**
+
+One withdrawal-side control is not theatre, because it does not test the
+value — it re-tests the value's PROVENANCE, which the chain already
+carries:
+
+    admission (mesh):     I re-judge every incoming step under my kernel
+    withdrawal (anchor):  I re-judge every outgoing value's creation
+
+Tag 86 carries the work payload WHOLE, and `verify_work` replays it, so
+the provenance of minted value is re-checkable at any later time. The
+mesh's own law — *admission is verification, never trust* — applies
+unchanged at the other boundary. **A unit may leave only if the work
+that created it still replays.**
+
+This does not distinguish farmed-but-lawful capacity from earned
+capacity; nothing at the boundary can. It distinguishes value whose
+creation withstands re-examination from value whose creation does not,
+which is the strongest test available at an exit and is strictly better
+than none.
+
+### 12d. What already defends, and what does not
+
+**Standing:** FLAT demurrage decays the withdrawable stock (I5,
+`demurrage_per_tick`), so holding is costly and pure accumulation
+self-limits. Article III prices FLOW not STOCK — `Ξ` reads `ΔD` over a
+window, so an actor who stops creating is eclipsed regardless of
+accumulated capacity, and there is no rent on past structure. Article II
+denies standing to vacuous capacity. Internal transfers conserve (I1),
+so value moving between units is not withdrawal at all.
+
+**The one true exit is N7.** `NS-7_ANCHOR.md` is a 26-line stub, every
+section `(unwritten)`, gated by charter §7 and economy guardrail 5, with
+nothing on any chain. **Today the system has no withdrawal function, so
+§12a's crossing is theoretical.** It becomes real the moment N7 opens,
+and not before.
+
+### 12e. THE SEQUENCING RULING **[DERIVED — ratify or strike]**
+
+From 12b and 12d together, one hard ordering constraint follows, and it
+is the practical content of this section:
+
+> **N7 SETTLEMENT MUST NOT OPEN BEFORE THE CAPACITY METER RUNS.**
+
+The reasoning is not caution, it is structural. The only defenses against
+extracting farmed value are creation-side; the creation-side defenses are
+`orbit_lock`, `Ξ`, and `D`; none of the three is measured
+(`18_TORSION` §6). Opening an exit while the gates that qualify what may
+leave are unbuilt converts every unmeasured attack vector into an
+externally realizable one at the same instant.
+
+This ruling also settles the ordering AV-11 left open. `orbit_lock`
+needing a caller stopped being a completeness gap the moment §11 landed;
+under §12 it is the precondition for the anchor.
+
+### 12f. AV-12 · THE EXTRACTION CROSSING **[DERIVED]**
+
+*Vector:* an actor accumulates through lawful-but-unmeasured capacity
+growth, waits for the crossing of §12a, and extracts through N7 —
+without ever violating a rule, because the rules that would have
+qualified the value were never running.
+
+*Defense:* the sequencing ruling (§12e) removes the exit until the gates
+exist; §12c re-verifies provenance at the boundary once it does;
+demurrage and Article III make waiting expensive in the meantime.
+
+*The tell to watch for:* rising `D` with flat verified work. That is the
+signature of capacity growing without earning it, and it is measurable
+by the same meter §12e requires — which is one more reason the meter is
+the first build and not a later one.
