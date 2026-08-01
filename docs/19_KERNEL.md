@@ -158,9 +158,11 @@ So the sequence PoW++ actually needs is not "finish the kernel, then
 mesh." It is:
 
 1. the local halves (landed: I4 whole, I6's gauge half);
-2. **the join** — two branches meeting in the arbor, which is a wire
-   amendment (the coordinate is hashed into every commit) and an
-   operator ruling;
+2. **the join** — two branches meeting in the arbor. Measured: `arbor`
+   exposes `extend`, `branch`, `adopt`, `append` and no merge, and
+   `Commitment.parent` is a single `[u8; 32]`. A join needs two, and
+   the coordinate is hashed into every commit, so this is a WIRE
+   AMENDMENT to tag 84 plus an operator ruling — not a coder change;
 3. the overlap law — what two charts must agree on where they meet,
    which is where `orbit_lock` finally gets its caller (#10);
 4. the cross-node halves.
@@ -168,6 +170,77 @@ mesh." It is:
 Step 2 is the one nothing can route around. Compactness maps onto the
 standing T∞ purge — the torus wraps finitely, infinity is disallowed —
 so that constraint is already law. What is missing is the meeting.
+
+### §5a.1 THE BOND AT THE OVERLAP — why a two-parent link is not enough
+
+The minimal join is a record with two parents: git's merge commit, and
+the obvious first answer. **The operator's ruling is that this is a
+paperchain and insufficient, and the reason holds up.**
+
+A two-parent hash link records THAT two branches met. It records
+nothing about WHAT the meeting preserved. For a ledger that only ever
+picks a winner, that is fine — the losing branch is discarded and there
+is nothing to carry. For convergence it is fatal: I6 says *no
+difference dies without account*, and a bare parent pointer accounts
+for nothing. The overlap is not the seam between the content; the
+overlap IS the content.
+
+**So the join record must carry the overlap region, not a pointer to
+it.** Three things, and the engine already computes all three:
+
+    the shared class   what both charts agree on — the part that FOLDS
+                       (orbit_lock = ∅: the difference was gauge)
+    the residues       what each side holds that the other cannot
+                       explain — the part that EMITS as a new plane
+                       (orbit_lock ≠ ∅: the difference is genuine)
+    the transition     how a reading in one chart is read in the other
+                       — the frame change between the patches
+
+The first two are exactly the fold gate's two verdicts. **This is where
+`orbit_lock` finally gets its caller** (#10), and the caller is not an
+afterthought: the fold gate's verdict IS the join's substance. A join
+whose residues are unrecorded is a merge that destroyed difference,
+which the constitution forbids.
+
+**The white/black-hole reading, and what it earns.** An
+Einstein–Rosen bridge is a black hole and a white hole joined at a
+throat: structure enters one side and emerges on the other, and the
+throat is a REGION with its own geometry rather than a line between two
+points. That is the right shape for a join whose content is the
+overlap — and it is why `S⁺_out` (egress, positive divergence) and its
+absorbing counterpart are load-bearing here in a way they were not in
+`18_TORSION` §2d, where they merely renamed the mint and the chain and
+drove nothing. **Struck there for driving nothing; earned here because
+the join has no mechanism and this supplies one.**
+
+**Orbs at the overlap have extent — and this one IS derivable.**
+`bridge.rs` §head: *"Entities `(i, j, k)` are ORBS, indexed by position
+in `Committed::orbs`."* An orb projects to a VERTEX — a 0-cell. A
+`ColonyOrb` is not internally empty (zones, banks, famine, thermal
+site, the compassion and morality books), but the projection keeps none
+of it: interior structure reaches the complex only as the obligations
+it happens to emit.
+
+Two vertices can share an EDGE. **Two vertices cannot share a REGION**,
+because neither has one. So the Venn overlap is not merely unbuilt on
+the current complex — it is *inexpressible* on it, for the same reason
+the arbor's missing merge makes convergence inexpressible on the
+arbor. Two independent walls, one wall each.
+
+Giving orbs extent is therefore not inventing new state. **The state is
+already there and the projection discards it.** An orb whose interior
+coordinates survive projection is a cell with extent, and two such
+cells can intersect in a non-empty subcomplex — which is exactly a
+Venn overlap, and exactly where the shared class, the two residues and
+the transition function have room to live.
+
+**NOT DERIVED, flagged rather than guessed:** the number. "3D/5D" is
+the operator's reading and this document does not derive 3 or 5.
+Usefully, though, it is not arbitrary either — the dimension is a
+CONSEQUENCE of which interior coordinates the projection admits, so it
+becomes measurable the moment that ruling is made rather than needing
+to be picked. Naming a number now, ahead of the ruling, would be the
+§2d failure repeating.
 
 **Not derived, flagged:** whether the overlap condition is Ricci-flatness
 in any load-bearing sense, or whether CY is being used as a shape
