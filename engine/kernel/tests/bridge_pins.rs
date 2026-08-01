@@ -321,6 +321,73 @@ fn a_chord_fills_the_triangles_and_the_capacity_becomes_strain() {
 }
 
 #[test]
+fn a_new_orb_grows_the_base_and_never_the_capacity() {
+    // GROWTH IS ALLOWED, NEVER FORCED (operator ruling 2026-08-01).
+    // Chartering an orb grows the BASE — one more vertex, one more
+    // place a relation could form — and moves capacity not at all. The
+    // base expands; capacity is merely PERMITTED to follow.
+    //
+    // This is the landed chartering law read on the capacity axis:
+    // ColonyCharted MOVES founding reserves between orbs and mints
+    // nothing. A new orb arrives owing no one and owed by no one.
+    let mut state = orbs(4);
+    state.bonds = vec![bond(1, 2, 3), bond(2, 3, 3), bond(3, 4, 3), bond(4, 1, 3)];
+    let before = read_entangled(&state);
+    assert_eq!(before.capacity, 1);
+
+    state.orbs.push(ColonyOrb { orb_id: 5, name: "orb5".into(), ..Default::default() });
+    let after = read_entangled(&state);
+
+    assert_eq!(after.capacity, before.capacity, "a new vertex is not new capacity");
+    assert!(after.capacity_is_defined(), "and the reading stays defined");
+    assert_eq!(
+        observe(&state, 0, 4, CHANNEL_BOND),
+        Observed::Absent,
+        "the newcomer relates to no one, and that absence is VERIFIED"
+    );
+}
+
+#[test]
+fn sparsity_makes_relation_rare_and_a_rare_relation_reshapes() {
+    // SPARSITY → RARITY → MORPHODYNAMISM.
+    //
+    // In a dense complex every pair already relates, so forming a
+    // relation changes nothing and relations are worth nothing. Here
+    // most pairs do NOT relate, so a relation is SCARCE — and a scarce
+    // relation, when it forms, changes the SHAPE. That is where the
+    // morphodynamics live: not in growth being pushed, but in each rare
+    // relation being able to move the topology.
+    let mut state = orbs(5);
+    state.bonds = vec![bond(1, 2, 3), bond(2, 3, 3), bond(3, 4, 3), bond(4, 1, 3)];
+    let before = read_entangled(&state);
+    assert_eq!(before.capacity, 1, "the ring; orb 5 stands apart");
+
+    // Orb 5 forms two relations — deliberate deeds, each one rare.
+    state.bonds.push(bond(5, 1, 3));
+    state.bonds.push(bond(5, 2, 3));
+    let after = read_entangled(&state);
+
+    assert_eq!(after.capacity, 2, "the rare relations closed a second cycle: the shape moved");
+    assert!(after.capacity > before.capacity, "allowed to grow — because a deed formed it");
+}
+
+#[test]
+fn reading_capacity_mints_nothing() {
+    // The allowance is not an act. Reading D is a LENS (18 §3, Article
+    // III's readings-never-objectives clause): it changes no bank, no
+    // key, no obligation, and reading twice reads the same.
+    let mut state = orbs(4);
+    state.bonds = vec![bond(1, 2, 3), bond(2, 3, 3), bond(3, 4, 3), bond(4, 1, 3)];
+    let before = state.clone();
+
+    let once = read_entangled(&state);
+    let twice = read_entangled(&state);
+
+    assert_eq!(once.capacity, twice.capacity, "a reading is idempotent");
+    assert_eq!(state, before, "and it moved nothing in the world");
+}
+
+#[test]
 fn the_projection_carries_every_channel() {
     // The fiber arity is the obligation channel — bond, covenant, debt.
     let delta = project(&orbs(2));
