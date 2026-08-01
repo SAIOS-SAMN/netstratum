@@ -59,8 +59,8 @@ constitution names what the algebra already is.
 ### 2b. ∂Δ UNCAGED — no norm, no ceiling
 
 **V TAKES NO OPERATOR** (operator ruling 2026-08-01 — *the whole or the
-nothing*). This reading was written `∇V`, then `dV`, then `∂V`, and
-every one of them was wrong in the same way: each encloses `V` in an
+nothing*). This reading was written `∇V`, then `dV`, then `∂V`; all
+three forms are STRUCK, and they were wrong in the same way: each encloses `V` in an
 operator that returns a PART. `D0` says `V` is the committed state read
 WHOLE — indivisible, unpartitioned, never truncated to a subspace — and
 a gradient is a part, a boundary is a part, a divergence at a vertex is

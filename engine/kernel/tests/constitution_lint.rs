@@ -1,0 +1,356 @@
+//! THE CONSTITUTIONAL LINT — the law held to the law, mechanically.
+//!
+//! `00_CHARTER` gates CODE three ways: §1 wants a named consumer and
+//! test vectors, §6 wants red-first landings, §11 rule 5 is mechanized
+//! by `recurrence_guard.rs`. **Nothing gated the constitution itself.**
+//! Prose about the law needed no consumer, no witness, and no
+//! obligation to compute — so it became the one unchecked input vector,
+//! and ornamental symbols accreted in it until they were mistaken for
+//! active constraints.
+//!
+//! Every symbol struck on 2026-08-01 lived there and computed nothing.
+//! The test that removed them — Article III LAW 8, *a term that computes
+//! is kept; a term that only resonates is excised* — was written AFTER
+//! them, which is itself the proof that no such test existed. Each was
+//! caught by a person reading carefully, one at a time. Vigilance is
+//! `O(attention)` and degrades under throughput; a standing test is
+//! `O(1)` and does not. This file is the standing test.
+//!
+//! What it pins:
+//!
+//! 1. EVERY CITATION RESOLVES — a `crate::item` reference in a law
+//!    document must name something that exists in `engine/`. This is
+//!    `EQUATIONS` §0.3 chapter six mechanized: *a row whose
+//!    implementation has been deleted is not stale, it is FALSE.* It
+//!    would have caught `cfe::opposition` (a law document prescribing a
+//!    module its own test suite forbade from existing) and `ext_x`
+//!    (`17_CAPACITY` §7 claiming a function was written when it was not).
+//! 2. THE STRUCK STAY STRUCK — a symbol the constitution struck may
+//!    appear ONLY on a line that says so. Records are required (*recorded,
+//!    never silently dropped*); live use is not. This is the vocabulary
+//!    twin of `recurrence_guard`'s dead-name test, and it would have
+//!    caught `EQUATIONS` D4 still computing with `Ξ` after `18` §3
+//!    struck the meter.
+//! 3. THE DETECTORS HAVE TEETH — both are proven on synthetic
+//!    violations before a clean pass is trusted.
+//!
+//! SCOPE, stated honestly. This does NOT verify that every mathematical
+//! symbol maps to an AST node — that needs a symbol registry the tree
+//! does not have, and a lint that floods false positives is a lint that
+//! gets disabled. It verifies the two things that actually went wrong:
+//! citations outliving their referents, and struck vocabulary returning
+//! as live law. The registry version is a larger landing; this one bites
+//! today.
+//!
+//! File I/O lives HERE, in a witness — the kernel itself stays pure.
+
+use std::collections::HashSet;
+use std::fs;
+use std::path::{Path, PathBuf};
+
+fn workspace_root() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .and_then(Path::parent)
+        .expect("engine/kernel sits two levels under the root")
+        .to_path_buf()
+}
+
+/// The governing documents: the law, not the world-book.
+fn law_documents(root: &Path) -> Vec<PathBuf> {
+    let mut out = Vec::new();
+    if let Ok(entries) = fs::read_dir(root.join("docs")) {
+        for e in entries.flatten() {
+            let p = e.path();
+            if p.extension().is_some_and(|x| x == "md") {
+                out.push(p);
+            }
+        }
+    }
+    out.push(root.join("engine/kernel/CHARTER.md"));
+    out.sort();
+    out
+}
+
+/// Every item name declared anywhere in `engine/` — functions (pub or
+/// not; the kernel's invariants are private by design), types, modules,
+/// consts, traits, and enum variants. Generous by intent: over-capturing
+/// only weakens the test, while under-capturing produces false alarms,
+/// and a lint that cries wolf is a lint that gets switched off.
+fn declared_items(root: &Path) -> HashSet<String> {
+    let mut items = HashSet::new();
+    let mut stack = vec![root.join("engine")];
+    while let Some(dir) = stack.pop() {
+        let Ok(entries) = fs::read_dir(&dir) else { continue };
+        for e in entries.flatten() {
+            let p = e.path();
+            if p.is_dir() {
+                if p.file_name().is_some_and(|n| n == "target") {
+                    continue;
+                }
+                stack.push(p);
+            } else if p.extension().is_some_and(|x| x == "rs") {
+                let text = fs::read_to_string(&p).unwrap_or_default();
+                for line in text.lines() {
+                    let t = line.trim();
+                    for kw in ["fn ", "struct ", "enum ", "const ", "type ", "mod ", "trait "] {
+                        if let Some(rest) = t.strip_prefix(kw).or_else(|| {
+                            t.strip_prefix("pub ").and_then(|r| r.strip_prefix(kw))
+                        }) {
+                            let name: String = rest
+                                .chars()
+                                .take_while(|c| c.is_alphanumeric() || *c == '_')
+                                .collect();
+                            if !name.is_empty() {
+                                items.insert(name);
+                            }
+                        }
+                    }
+                    // Enum variants: an indented CamelCase head.
+                    if line.starts_with("    ") {
+                        let head: String = t
+                            .chars()
+                            .take_while(|c| c.is_alphanumeric() || *c == '_')
+                            .collect();
+                        if head.chars().next().is_some_and(char::is_uppercase)
+                            && t[head.len()..].trim_start().starts_with(['{', ',', '('])
+                        {
+                            items.insert(head);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    items
+}
+
+/// Paragraph indices whose text records a strike. Scope is the
+/// PARAGRAPH, never the line: these documents state a strike in a
+/// sentence and then discuss it for several lines, so a line-scoped
+/// exemption would flag a document's own strike record — the one thing
+/// the discipline REQUIRES ("recorded, never silently dropped").
+fn struck_paragraph_lines(text: &str) -> HashSet<usize> {
+    let mut exempt = HashSet::new();
+    let mut start = 0usize;
+    let mut marked = false;
+    let lines: Vec<&str> = text.lines().collect();
+    for (i, line) in lines.iter().enumerate() {
+        if line.trim().is_empty() {
+            if marked {
+                exempt.extend(start..i);
+            }
+            start = i + 1;
+            marked = false;
+        } else if records_a_strike(line) {
+            marked = true;
+        }
+    }
+    if marked {
+        exempt.extend(start..lines.len());
+    }
+    exempt
+}
+
+/// A line that RECORDS a strike rather than asserting live law. The
+/// tree's own discipline requires these ("recorded, never silently
+/// dropped"), so they are exempt by construction — what is barred is
+/// live use, never the record of removal.
+fn records_a_strike(line: &str) -> bool {
+    const MARKERS: [&str; 10] = [
+        "STRUCK", "struck", "EXCISED", "excised", "DEPRECATED", "deprecated", "RETIRED",
+        "formerly", "REMOVED", "withdrawn",
+    ];
+    MARKERS.iter().any(|m| line.contains(m))
+}
+
+/// Roots outside this workspace: the standard library and vendored
+/// crates resolve elsewhere and are not this lint's business.
+fn is_foreign_root(path: &str) -> bool {
+    const FOREIGN: [&str; 9] = [
+        "std", "fs", "core", "alloc", "serde", "blake3", "num_traits", "num_bigint",
+        "num_integer",
+    ];
+    path.split("::")
+        .next()
+        .is_some_and(|r| FOREIGN.contains(&r))
+}
+
+/// Extract backticked `path::item` citations from one line.
+fn citations(line: &str) -> Vec<String> {
+    let mut out = Vec::new();
+    for chunk in line.split('`').skip(1).step_by(2) {
+        let c = chunk.trim();
+        if !c.contains("::") || c.contains(' ') || c.contains('(') {
+            continue;
+        }
+        if c.split("::").all(|seg| {
+            !seg.is_empty() && seg.chars().all(|ch| ch.is_alphanumeric() || ch == '_')
+        }) {
+            out.push(c.to_string());
+        }
+    }
+    out
+}
+
+#[test]
+fn every_citation_in_the_law_resolves() {
+    let root = workspace_root();
+    let items = declared_items(&root);
+    assert!(items.len() > 100, "the item scan found the engine");
+
+    // THE ADOPTED SET — pre-existing unresolved citations, PINNED BY
+    // NAME. This list only ever SHRINKS. A new unresolved citation
+    // fails here, named, with its file and line.
+    //
+    // `mirror::Mirror` and friends: `03_SUBSTRATE_CONTRACT.md` §7/§8
+    // still document the deleted `engine/mirror` crate as a live
+    // primitive. Known, reported, and owned by the substrate node —
+    // it needs an operator relay to fix, not a silent edit from here.
+    // `crate::fn` is EQUATIONS §0.1's own placeholder for "the sealed
+    // implementation", not a citation.
+    // `cfe::opposition` in KERNEL_RELAY: the reasoning narrative that
+    // ARGUED the excision, kept as the record of why. Another lane.
+    let adopted: HashSet<&str> = ["mirror::Mirror", "crate::fn", "cfe::opposition"]
+        .into_iter()
+        .collect();
+
+    let mut unresolved = Vec::new();
+    for doc in law_documents(&root) {
+        let text = fs::read_to_string(&doc).unwrap_or_default();
+        let exempt = struck_paragraph_lines(&text);
+        for (n, line) in text.lines().enumerate() {
+            if exempt.contains(&n) {
+                continue;
+            }
+            for c in citations(line) {
+                if is_foreign_root(&c) || adopted.contains(c.as_str()) {
+                    continue;
+                }
+                let tail = c.rsplit("::").next().unwrap_or(&c);
+                if !items.contains(tail) {
+                    let rel = doc.strip_prefix(&root).unwrap_or(&doc).display();
+                    unresolved.push(format!("{rel}:{}  `{c}`", n + 1));
+                }
+            }
+        }
+    }
+
+    assert!(
+        unresolved.is_empty(),
+        "a law document cites something that does not exist in engine/.\n\
+         A citation is a CLAIM, and a row whose implementation has been \
+         deleted is not stale — it is FALSE (EQUATIONS §0.3 ch.6).\n\
+         Either the code is owed, or the line must record the strike:\n  {}",
+        unresolved.join("\n  ")
+    );
+}
+
+#[test]
+fn the_struck_symbols_stay_struck() {
+    let root = workspace_root();
+
+    // Vocabulary struck by operator ruling. Each may appear ONLY on a
+    // line that records its removal. Live use is the defect this
+    // catches — EQUATIONS D4 went on computing with `Ξ` after `18` §3
+    // struck the meter, and nothing noticed for a day.
+    // `T_k` is deliberately ABSENT. The struck one is Article III's
+    // topicality score; PhiK's `I^(5)` stamp is ALSO written `T_k` and
+    // is live. A token lint cannot separate them, and guarding an
+    // ambiguous token would flag correct law — the false-positive that
+    // gets a lint disabled. Ambiguous vocabulary is out of scope here
+    // and belongs to a symbol registry, if one is ever built.
+    const STRUCK: [(&str, &str); 6] = [
+        ("Ξ", "the cosmetic meter, struck by 18 §3"),
+        ("S⁺_out", "twin-singularity esoterica, struck by 18 §2d"),
+        ("S⁺_hol", "twin-singularity esoterica, struck by 18 §2d"),
+        ("ζ∇V", "the damped-gradient term, struck 2026-08-01"),
+        ("∇V", "V enclosed in a nabla, struck 2026-08-01 (18 §2b)"),
+        ("∂V", "V enclosed in a boundary, struck 2026-08-01 (18 §2b)"),
+    ];
+
+    // ADOPTED, pinned by file:line. Historical records and recorded
+    // REJECTED proposals in `17_CAPACITY`'s audit sections, plus
+    // `KERNEL_RELAY`'s reasoning narrative. Both are another lane's
+    // territory and both are records rather than assertions — but they
+    // lack a marker word, so they are pinned here rather than edited
+    // across a seam. THIS LIST ONLY SHRINKS.
+    let adopted_lines: HashSet<(&str, usize)> = [
+        ("docs/17_CAPACITY.md", 399),
+        ("docs/17_CAPACITY.md", 473),
+        ("docs/17_CAPACITY.md", 772),
+        ("docs/17_CAPACITY.md", 847),
+        ("docs/17_CAPACITY.md", 869),
+    ]
+    .into_iter()
+    .collect();
+
+    let mut live = Vec::new();
+    for doc in law_documents(&root) {
+        let text = fs::read_to_string(&doc).unwrap_or_default();
+        let exempt = struck_paragraph_lines(&text);
+        for (n, line) in text.lines().enumerate() {
+            if exempt.contains(&n) {
+                continue;
+            }
+            for (sym, why) in STRUCK {
+                if line.contains(sym) {
+                    let rel = doc.strip_prefix(&root).unwrap_or(&doc).display();
+                    if adopted_lines.contains(&(rel.to_string().as_str(), n + 1)) {
+                        continue;
+                    }
+                    live.push(format!("{rel}:{}  `{sym}` — {why}", n + 1));
+                }
+            }
+        }
+    }
+
+    assert!(
+        live.is_empty(),
+        "a struck symbol is used as LIVE LAW.\n\
+         Records of a strike are required and exempt; use is not. A \
+         struck symbol left standing in the corpus is still a symbol in \
+         the corpus:\n  {}",
+        live.join("\n  ")
+    );
+}
+
+#[test]
+fn the_detectors_have_teeth() {
+    // A guard that cannot bite is the vacuous check this file exists to
+    // kill. Prove every detector on synthetic input first.
+    assert_eq!(
+        citations("the sealed `rfa_core::coboundary_reduce` performs it"),
+        vec!["rfa_core::coboundary_reduce".to_string()],
+        "the citation extractor must find a real citation"
+    );
+    assert!(
+        citations("see `12_UNION` §2c and the four C's").is_empty(),
+        "a section reference is not a crate path"
+    );
+    assert!(
+        records_a_strike("**`Ξ` is STRUCK** — the cosmetic meter"),
+        "a strike record must be recognised and exempted"
+    );
+    assert!(
+        !records_a_strike("the loop trap is Ξ(w) = deeds(w) / (1 + ΔD(w))"),
+        "live use must NOT be mistaken for a record"
+    );
+    // The paragraph scope: a marker exempts its whole paragraph, and
+    // NOT the next one.
+    let doc = "`Ξ` is STRUCK here\nand discussed on this line too\n\nbut Ξ used here is live\n";
+    let ex = struck_paragraph_lines(doc);
+    assert!(ex.contains(&0) && ex.contains(&1), "the strike paragraph is exempt whole");
+    assert!(!ex.contains(&3), "the NEXT paragraph is not exempt");
+
+    assert!(is_foreign_root("std::collections::HashSet"), "std is foreign");
+    assert!(!is_foreign_root("rfa_core::Delta"), "our crates are not foreign");
+
+    // And the honest negatives: the live operators must never be
+    // mistaken for the struck ones they replaced.
+    let live_line = "`∂Δ` is the boundary of the relation, `∮` its charge";
+    assert!(
+        !live_line.contains("∂V") && !live_line.contains("∇V"),
+        "∂Δ is LIVE and must not collide with the struck ∂V / ∇V"
+    );
+}

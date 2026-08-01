@@ -293,7 +293,9 @@ assumed). Disagreement is held in STASIS (preserved, per-dimension exact
 distance), never voted away.
 
 **Landed / build.** Landed: `coboundary_reduce`, `coherence_functional`,
-CONVERGE-1 (quarantine/torn-tail), `cfe::opposition` (seam), the AEON fold.
+CONVERGE-1 (quarantine/torn-tail), the AEON fold. (`cfe::opposition` was
+listed here as landed; it is EXCISED — c7cad9e — and its checks are
+kernel I1/I6 now.)
 Build (re-derived from v0.1, red-first): the unfold half, F_fold* as I6,
 the transmutation trigger, the mint-rate/split experiment (§7).
 
