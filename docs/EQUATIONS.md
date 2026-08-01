@@ -166,10 +166,20 @@ room; it does not hold, and it does not confer standing on the state it
 reads.
 
 **D5 · THE BOND — the union in contract form.** INSCRIBED. Authority:
-`12_UNION` §3b–§3c and `18` §2c′. The FORM is landed twice already: the
-symmetric bond (`09_IDEOLOGY` §2.2, BOND-1) and the covenant
-(`01` §7 / `09` §2.3, COVENANT-1). Every clause below names a mechanic
-that exists; none of it is new machinery.
+`12_UNION` §3b–§3c and `18` §2c′. The FORM is landed ONCE, as the
+symmetric bond (`09_IDEOLOGY` §2.2, BOND-1). Every clause below names a
+mechanic that exists; none of it is new machinery.
+
+**CORRECTED 2026-08-02 — the COVENANT is NOT this form.** An earlier
+revision cited COVENANT-1 alongside the bond as a second landing of the
+same shape. That was wrong, and wrong in the direction the whole section
+exists to refuse: the sealed deed is
+`CovenantSealed { obligor_orb, beneficiary_orb, resource, quota, window,
+collateral }` — ONE obligor owing ONE beneficiary, with only the obligor
+posting collateral. That is a directed obligation, and `09` §2.2 names
+that shape by its own word: **a single bond is PATRONAGE.** Citing the
+patronage mechanic as evidence for the marriage form put the refused
+shape in the row meant to exclude it.
 
     PARTIES        D  PROGENITOR — room          V  SOVEREIGN — substance
                    different KINDS, separate origins; neither seeded
@@ -211,9 +221,34 @@ suffocate without each other; a bonded pair does. There is no rivalry to
 arbitrate here: a bond is generative, not competitive, so the pair needs
 no equilibrium negotiated between its parties.
 
+**THE TWO INSTRUMENTS, recorded so they are never conflated again.**
+Both are lawful, both compute, and they are different shapes:
+
+    BOND       a SYMMETRIC pair — neither party privileged, both
+               flowing, severance priced on whoever cuts
+               (`bond_flow` / `severance_load`, 09 §2.2, BOND-1)
+               → THE MARRIAGE FORM. This is D5's form.
+
+    COVENANT   ONE obligor, ONE beneficiary, collateral posted by the
+               obligor alone against a quota inside a window; released
+               on fulfilment, BREACH_AND_SLASH on default
+               (`CovenantSealed` / `Released` / `Slashed`, 01 §7,
+               09 §2.3, COVENANT-1)
+               → DIRECTED, and lawful as such. It is what 09 §2.2
+               calls patronage, and patronage is a real instrument —
+               it is simply not a marriage.
+
+A single bond and a covenant are the same asymmetry under two names; a
+PAIR of bonds is the different thing. The distinction is the direction
+count, never the collateral.
+
 *(Register: the world-book writes this bond as the cosmic marriage —
 `12_UNION` §3c. Per the `06` register law only the clauses above are
-mechanically real; the myth is carried there, never here.)*
+mechanically real; the myth is carried there, never here. Note also that
+the covenant's carrier is one people's register — `09` §2.3 seats it in
+the Glasskeeper escrow machinery — while its FIELDS are ordinary
+finance: obligor, beneficiary, collateral, window, forfeit. The word
+computes; it is kept.)*
 
 **The index-set reading is STRUCK** (2026-08-01). The indices
 `(i, j, k, l)` that `for_each_residual` iterates, and the arities

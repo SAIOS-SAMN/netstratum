@@ -118,6 +118,16 @@ covenanted).
 - **`bond_flow`** (the source's syntropic book): cumulative value streamed
   over live bonds. A symmetric pair of bonds is the marriage form; a
   single bond is patronage; neither is privileged.
+
+  **The bond is not the covenant** (recorded 2026-08-02, after the two
+  were conflated in `EQUATIONS` D5). A COVENANT is one obligor owing one
+  beneficiary, with collateral posted by the obligor alone against a
+  quota inside a window (§2.3, COVENANT-1) — a DIRECTED instrument, and
+  the same asymmetry this clause calls patronage. A BOND is a standing
+  flow, and only a symmetric PAIR of them is the marriage form. **The
+  distinction is the direction count, never the collateral.** Both are
+  lawful; they are not interchangeable, and the union's office pair
+  (`12_UNION` §3b–§3c) takes the pair form, never the directed one.
 - **`severance_load`** (the severer's entropic book): the standing rate ×
   the unserved notice window (placeholder) when a bond is cut without the
   covenanted notice. An orderly severance — notice honoured, or bond run
