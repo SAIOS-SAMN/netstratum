@@ -126,6 +126,13 @@ relational structure, the landed tensor.
     V     = the committed state, whole
     Δ(V)  = the relation V expresses          (`rfa_core::Delta`)
 
+  **V IS SOVEREIGN** (operator ruling 2026-08-01; 18 §2c′). Its standing
+  comes from ADMISSION — it passed `lawful()`, it carries receipts, it
+  is in the chain — and no reading confers or revokes it. Every row
+  below that reads `V` is TESTIMONY about `V`, never authority over it:
+  readings price allocation, and standing is the judge's, granted
+  upstream. `V` holds; it does not make room.
+
   **NOTATION, binding:** `Δ` is THE RELATIONAL TENSOR. It is never a
   Laplacian, and no rule in this ledger takes a Laplacian of anything.
 
@@ -150,6 +157,20 @@ never a metric density, never a scalar.
 
 `Ω(D)` is the space those surviving degrees span. Frame artifacts
 contribute NOTHING; only structural content counts.
+
+**D IS THE PROGENITOR** (operator ruling 2026-08-01; 18 §2c′). Its
+office is to MAKE ROOM: D3's emission opens a plane, the fiber grows,
+and band capacity is a reading of that fiber (`12_UNION` §1 — *a band is
+space available in the universe*). Nothing else creates space. `D` makes
+room; it does not hold, and it does not confer standing on the state it
+reads.
+
+**TOGETHER THEY ARE THE UNION** — two offices, neither outranking the
+other (`12_UNION` §3: *stations of function, not steps of rank*). `D`
+opens nothing without `V`'s receipted work; `V` expresses nothing
+without `D`'s room. Offices do not sum, do not rank and do not
+decompose, which is why this pair carries no operator between them and
+why every arithmetic form of it — `U* = D(V) ⊕ V(D)` — was struck.
 
 **The index-set reading is STRUCK** (2026-08-01). The indices
 `(i, j, k, l)` that `for_each_residual` iterates, and the arities

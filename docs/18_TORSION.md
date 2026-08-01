@@ -128,6 +128,62 @@ forward.
 the committed state, whole, upstream of `Δ`; `D` and `∂Δ` are readings
 of `Δ`, not of `V`.
 
+### 2c′. THE UNION PROPER — D PROGENITOR, V SOVEREIGN
+
+**Ruled 2026-08-01.** The section above settles what `D` and `∂Δ` are to
+each other — two projections of one `Δ`. It says nothing about what `D`
+and `V` are to each other, and that relation is the union the name was
+always reaching for. It is not an arithmetic. It is two OFFICES.
+
+    V   SOVEREIGN    holds. Its standing comes from ADMISSION — it
+                     passed `lawful()`, it carries receipts, it is in
+                     the chain. No reading confers it; none revokes it.
+
+    D   PROGENITOR   makes room. D3's emission opens a plane, the fiber
+                     grows, and band capacity is a reading of that fiber
+                     (`12_UNION` §1). Nothing else creates space.
+
+**The roles are `12_UNION`'s own, not a metaphor fitted after the
+fact.** That chapter's progenitor power table lists *"create new spaces
+— extending the fiber; minted planes open room, and band capacity reads
+the fiber"*, which is D3 exactly; and its Tier 0 reading is *"they
+contract and expand the board, they create it. Everything else plays on
+it."* The sovereign is the holder of what is chartered, governing what
+it founded or was lawfully delegated. `D` is the board-maker; `V` is the
+holder.
+
+**NEITHER OUTRANKS THE OTHER**, and `12_UNION` §3 states the standard in
+the document the word comes from: *classes are stations of FUNCTION, not
+steps of rank — a Watcher does not outrank a Sovereign; they hold
+different offices in the same union.*
+
+Three consequences, each structural:
+
+1. **`D` cannot revoke `V`'s standing.** The progenitor makes room; it
+   does not un-charter a sovereign. Article II therefore gates
+   ALLOCATION and never standing — see the amendment there.
+2. **`V` cannot open room by fiat.** `PlaneUnearned` already refuses it.
+   The sovereign holds; it does not create board.
+3. **Growth requires both.** `D` opens nothing without `V`'s receipted
+   work, and `V` expresses nothing without `D`'s room. That is §2f's
+   entanglement with names that say WHY — it was true as algebra and
+   unmotivated as law; under the union it is simply what two offices in
+   one body means.
+
+**WHY THE EARLIER FORMS FAILED, recorded together because they were one
+error.** Each tried to make the two offices COMMENSURABLE:
+
+- `U* = D(V) ⊕ V(D)` SUMMED them — `⊕` is a free join, so either could
+  move alone (struck above).
+- Article II's original standing clause RANKED them — a reading
+  conferring standing on its own source, which runs backwards through
+  the judge (amended below).
+- The traverse formalism (§2e, struck) DECOMPOSED them into endpoints.
+
+**Offices do not sum, do not rank, and do not decompose.** That is what
+made every arithmetic reading of this union wrong, and it is why the
+correct statement carries no operator at all.
+
 ### 2d. THE SIGN LAW — divergence, egress and ingress
 
 **The cosmology is struck; the sign law is LIVE and is stated here.**
@@ -505,8 +561,18 @@ basis, a fixed rank, or a metric projection is void.
 
 *A state standing ON THE GROUND (`D = GROUND`) holds its place and its
 existence, and claims no allocation. Only a state standing ABOVE the
-ground (`D > GROUND`), carrying circulation, claims operational
-authorization or institutional standing.*
+ground (`D > GROUND`), carrying circulation, claims ALLOCATION and
+operational authorization.*
+
+**STANDING IS NOT THIS ARTICLE'S TO GRANT** (the sovereignty amendment,
+operator ruling 2026-08-01; §2c′). A committed state's standing comes
+from ADMISSION — it passed `lawful()`, it carries receipts, it is in the
+chain — and that was granted by the JUDGE, upstream of every reading.
+`D` is a rank: testimony about what `V` expresses. Testimony prices
+allocation; it never confers or revokes the standing of the state it
+testifies about, because a reading that outranks its own source runs
+backwards through the judge. This article gates what a state is PAID and
+what it may OPERATE; it does not gate whether it stands.
 
 **THE OWED AMENDMENT, PAID** (operator ruling 2026-08-01). This article
 read *"a state yielding a vacuous set (`V = 0` or `D = 0`)"*. The
@@ -951,7 +1017,7 @@ misreading.**
 | no gradient | `∂Δ ≡ 0`: rank held in closed circulation | Article III LAW 4 — no free energy; no work available |
 | form changed, nothing made | `Δ' = Q·Δ`, `Support(E')` unchanged | Article III LAW 3 — the first law; mints nothing |
 | coordinate/metric lock | any basis-fixed or rank-locked reading | Article I — void; recompute coordinate-free |
-| on the ground | `D = GROUND` — nothing circulates above the point | Article II — no standing, no weight, no mint. **The state itself stands**: never deleted, never barred, simply not paid |
+| on the ground | `D = GROUND` — nothing circulates above the point | Article II — no allocation, no weight, no mint. **The state itself STANDS**: standing is admission's (§2c′), never a reading's — never deleted, never barred, simply not paid |
 | capacity retreat | a step lowering `D` outside lawful contraction | Article IV — refuse (`BadClimb` shape) |
 | earned emission | a loop's charge growing the rank against verified work | full alignment — maximum allocation |
 
@@ -1072,7 +1138,7 @@ is not a mechanism.
 | **§2f entanglement** — no capacity without potential motion | reads `(prior, step)` only | `creation()` in `kernel/src/lib.rs` |
 | **§2g gap disposition** — hold both sides, dispose the gap | one deed, one comparison | `creation()`; new `Unlawful` arm carrying both sides |
 | **Art. IV monotone** — a step may not lower the rank outside lawful reduction | `prior`→`next` comparison | new invariant, the `gauge_law` shape |
-| **Art. II non-vacuous** — `D = GROUND` holds no standing (`Degree::is_above_ground`, never a zero) | property of `prior` | `containment()`, or a new gate beside it |
+| **Art. II non-vacuous** — `D = GROUND` claims no ALLOCATION (`Degree::is_above_ground`, never a zero; standing is admission's, §2c′) | property of `prior` | `containment()`, or a new gate beside it |
 | **`D` itself** — the structure surviving `Π_G(Δ(Ω))` | pure function of one state | kernel gains its `rfa-core` dep (anticipated at U_DIRECTIVES §4) |
 
 ### 7b. LENS — global or over-time, MUST NOT enter the kernel
