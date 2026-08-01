@@ -28,11 +28,43 @@ const DIGEST: [u8; 32] = [7u8; 32];
 /// A one-orb committed state holding `iron`, with the sovereign
 /// seated and the acting hand contained under exactly Collect —
 /// identity precedes the world (I2).
+/// A world that can EARN — four orbs whose obligations carry both poles.
+///
+/// THE CAPACITY LAW (2026-08-01) refuses a mint on a world with no
+/// standing, so a bare single-orb fixture no longer reaches the I4
+/// arms these pins exist to test. The ring plus a chord gives rank AND
+/// gradient (Entangled): a second independent cycle, and two vertices
+/// that do not balance. Recorded rather than quietly widened — these
+/// pins used to mint on a structureless world, and that is precisely
+/// what the new law forbids.
+fn standing(committed: &mut Committed) {
+    for orb_id in 2..=4u64 {
+        committed.orbs.push(ColonyOrb { orb_id, name: format!("orb{orb_id}"), ..Default::default() });
+    }
+    let bond = |source, target, rate: i64| cfe::world::Bond {
+        source,
+        target,
+        resource: Resource::Iron,
+        rate: ratio(rate, 1),
+        term: 0,
+        sealed: 0,
+        anchored: 0,
+    };
+    committed.bonds = vec![
+        bond(1, 2, 3),
+        bond(2, 3, 3),
+        bond(3, 4, 3),
+        bond(4, 1, 3),
+        bond(1, 3, 1),
+    ];
+}
+
 fn seated(iron: (i64, i64)) -> Committed {
     let mut committed = World::new().committed();
     let mut orb = ColonyOrb { orb_id: 1, name: "assay".into(), ..Default::default() };
     orb.bank(Resource::Iron, ratio(iron.0, iron.1));
     committed.orbs = vec![orb];
+    standing(&mut committed);
     committed.entities = vec![
         Entity { entity_id: SOVEREIGN, handle: "sovereign".into(), principal: None, grants: vec![] },
         Entity {

@@ -36,6 +36,7 @@ use cfe::dop::{ClosureEvent, Resource};
 use cfe::ipsal::Scope;
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::Committed;
+use rfa_core::Vacuity;
 use solver_verify::{verify_work, Difficulty, WorkBroken};
 
 /// The kernel version — bumped ONLY by charter amendment. The spine
@@ -153,6 +154,25 @@ pub enum Unlawful {
     /// exactly the size of every future tag. Two laws, one word "unknown"
     /// — conflating them silently rebuilds default-admit.
     Unjudged,
+    /// **THE CAPACITY LAW** (operator ruling 2026-08-01) — a mint was
+    /// claimed on a world that cannot earn.
+    ///
+    /// `D` is the rank of the relational structure and `dV` is the
+    /// potential across it. Value is created against STRUCTURE WITH A
+    /// GRADIENT, and a world holding neither, or holding one without
+    /// the other, has nothing for work to bite on. The verdict rides
+    /// whole so the refusal says WHICH row failed:
+    ///
+    /// - `Void` — no structure and no gradient: nothing to mint against.
+    /// - `Stasis` — structure, no gradient: a wheel turning against
+    ///   nothing. Real rank, zero free energy, no work available at any
+    ///   size (Article III LAW 4 — work requires a gradient).
+    /// - `Unframed` — gradient, no structure: nothing holds the flow.
+    ///
+    /// The reading is taken from `prior`: the world must ALREADY carry
+    /// what it earns against. A mint banks value; it forms no relation,
+    /// so it cannot bootstrap its own precondition.
+    MintWithoutStanding { verdict: Vacuity },
 }
 
 /// THE JUDGE. Does `step` lawfully carry `prior` to `next`? Pure,
@@ -169,10 +189,53 @@ pub fn lawful(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Un
     conservation(prior, next, step)?;
     containment(prior, step)?;
     exactness(next)?;
+    capacity_law(prior, step)?;
     creation(step)?;
     decay(prior, step)?;
     gauge_law(prior, next, step)?;
     element_law(prior, next, step)
+}
+
+/// **INVARIANT — THE CAPACITY LAW. `D > 0` AND `dV ≠ 0`, or no mint.**
+///
+/// The foundational rule the rest of the engine stands on: value is
+/// created against structure that has somewhere to go. Both poles, or
+/// neither counts.
+///
+/// **Why both, and why neither alone.** `D` alone admits pure
+/// circulation — a balanced ring where every orb owes exactly what it
+/// is owed. That is real rank and zero free energy, and it stays zero
+/// at any size, so a bigger wheel is not a better one (Article III
+/// LAW 4). `dV` alone admits flow with nothing to hold it. Only the
+/// two together are a system that can do work.
+///
+/// **Non-negativity is structural, not checked.** `rank` is a count —
+/// `usize` — so it cannot go below zero by construction, and the flow
+/// VALUES are lawfully signed because Noether requires it: antisymmetry
+/// forces the divergence to sum to zero across the vertices, so a
+/// source at one vertex implies a sink at another. Refusing negative
+/// flow would refuse the sink half of every real gradient. What must
+/// never be zero is the EXISTENCE of each pole, not the sign of a
+/// component.
+///
+/// Read from `prior`, per deed. Pure and total like the rest of the
+/// judge: no history, no window, no rate — a rate never attains its
+/// bound at any single step and so can never be an invariant.
+fn capacity_law(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
+    match &step.event {
+        ClosureEvent::DiscoveryMinted { .. } => {
+            let read = bridge::read_entangled(prior);
+            let verdict = read.verdict();
+            match verdict.is_admitted() {
+                true => Ok(()),
+                false => Err(Unlawful::MintWithoutStanding { verdict }),
+            }
+        }
+        // Every other deed is judged by the invariants above. The
+        // capacity law gates CREATION, not motion: moving value that
+        // already exists needs no gradient to justify it.
+        _ => Ok(()),
+    }
 }
 
 /// INVARIANT — element conservation (THE ELEMENT LAW, operator ruling
