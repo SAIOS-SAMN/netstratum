@@ -29,7 +29,7 @@ pub mod rcf;
 pub mod reduce;
 
 pub use capacity::{
-    capacity, circulation, divergence, egress, ext_x, preserves_hodge_split, Egress, Extent,
+    capacity, circulation, divergence, egress, ext_x, ground, preserves_hodge_split, Egress, Extent,
 };
 pub use delta::{coherence_functional, for_each_residual, magnitude, Delta};
 pub use fold::{f_fold_star, judged_fold, orbit_lock, FoldVerdict, Operator, OrbitWitness, RatMatrix};
