@@ -439,13 +439,39 @@ is the decomposition again in different syntax). **Offices do not sum,
 do not rank, and do not decompose** — which is why this relation carries
 no symbol between its terms and never will.
 
+**NO OFFICE OWNS THE OTHER — the two arrows** (corrected 2026-08-02,
+operator: *how can a sovereign own a progenitor?*). An earlier draft
+wrote "`V` primitive, `D` read downstream" and let that stand as the
+order between them. It cannot: a thing wholly derived from another is
+that other's PROPERTY, not its equal office — and it would make the
+board-maker a byproduct of what plays on the board, which is the union
+inverted.
+
+    ORIGIN       the receipted deed → the office
+                 V's standing: ADMISSION — it passed `lawful()`
+                 D's room:     RECEIPTED MINTS — D3, *D rises BY
+                               RECEIPT*; `GaugeShiftedAt` opens the
+                               plane, `PlaneUnearned` refuses unearned
+
+    MEASUREMENT  V → Δ(V) → rank — the reading that REPORTS D
+
+**Both offices descend from the RECEIPT, neither from the other.** That
+common ancestor is what makes them peers: each answers to the chain, and
+§3's standard holds — stations of function, not steps of rank.
+
+The measurement arrow carries no authority, by the rule already standing
+one document over: *testimony never outranks its subject*. It was
+written to stop `D` conferring standing on `V`, and it holds identically
+in reverse — `rank(Δ(V))` is testimony ABOUT `D` taken through `V`, and
+measuring a room does not make the furniture its architect.
+
 **NOTATION, recorded once.** `Υ` is `V`'s own letter — upsilon is the
 Greek ancestor of Latin `V`, so the two are one name in two alphabets,
 never two names. Nothing is renamed and nothing is duplicated: the
-proper words are **Progenitor** and **Sovereign**, and `D` and `V` are
-the readings those offices govern. `Ω ≡ V` stands untouched
-(`17_CAPACITY` §3): `V` is primitive, and `D` is read downstream —
-`V → Δ(V) → D`, one direction, no return.
+proper words are **Progenitor** and **Sovereign**. `Ω ≡ V` stands
+untouched (`17_CAPACITY` §3); what it bars is putting `D` inside `Ω`'s
+DEFINITION, which would make `D = rank(Δ(Ω))` circular. That is a bar on
+definitions, never a rank between offices.
 
 ## 4. Band II — the interstellar civilizations
 

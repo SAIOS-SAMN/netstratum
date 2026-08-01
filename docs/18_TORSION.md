@@ -193,13 +193,44 @@ sits at GROUND and the room is one degree, itself; `D` rises exactly as
 universe has come from its origin* are one reading, and why the floor
 and the span are the same office.
 
+**TWO ARROWS, AND CONFLATING THEM MAKES A FALSE HIERARCHY** (corrected
+2026-08-02, operator: *how can a sovereign own a progenitor?*). An
+earlier draft of this section wrote "`V` primitive, `D` read downstream"
+and treated that as the standing order. It is not. It is a MEASUREMENT
+path, and reading it as ownership destroys the union — a thing wholly
+derived from another is that other's property, not its equal office, and
+it would make the board-maker a byproduct of what plays on the board.
+
+    ORIGIN      the receipted deed  →  the office
+                V's standing comes from ADMISSION (it passed `lawful()`)
+                D's room comes from RECEIPTED MINTS — D3: *D rises BY
+                RECEIPT*; `GaugeShiftedAt` opens the plane and
+                `PlaneUnearned` refuses an unearned one
+
+    MEASUREMENT V  →  Δ(V)  →  rank
+                the reading that REPORTS D, taken through V
+
+**Neither office derives from the other. Both descend from the
+RECEIPT.** That is the common ancestor, and it is why they are peers:
+each answers to the chain, not to its counterpart.
+
+**The measurement arrow carries no authority**, by this constitution's
+own rule stated one section up — *testimony never outranks its subject*.
+That rule was written to stop `D` conferring standing on `V`; it holds
+identically in reverse. `rank(Δ(V))` is testimony ABOUT `D`, taken
+through `V`; it does not make `V` the author of `D`, any more than
+measuring a room makes the furniture its architect.
+
+**What the acyclicity guard actually guards.** `Ω ≡ V` stands untouched
+(`17_CAPACITY` §3), and what is barred is putting `D` inside `Ω`'s
+DEFINITION — a tuple, a sum, a dyad-as-term — because `D = rank(Δ(Ω))`
+would then be defined through something containing `D`. That is a
+COMPUTATIONAL bar, on definitions. It was never a claim that `V` ranks
+above `D`.
+
 **NOTATION, recorded once.** `Υ` is `V`'s own letter — upsilon is the
 Greek ancestor of Latin `V` — so the two are one name in two alphabets,
-never two names. `Ω ≡ V` stands untouched (`17_CAPACITY` §3), which is
-what keeps the chain acyclic: `V` is primitive, `D` is read downstream,
-`V → Δ(V) → D`, one direction and no return. Any form that puts `D`
-inside `Ω` — a tuple, a sum, a dyad-as-term — closes that loop and is
-refused on sight.
+never two names.
 
 ### 2d. THE SIGN LAW — divergence, egress and ingress
 
