@@ -21,12 +21,14 @@
 //! - [`gates`] — the three validation gates every proposed operator
 //!   must pass: productivity, conservation, bounded magnitude.
 
+pub mod capacity;
 pub mod delta;
 pub mod fold;
 pub mod gates;
 pub mod rcf;
 pub mod reduce;
 
+pub use capacity::{capacity, ext_x, Extent};
 pub use delta::{coherence_functional, for_each_residual, magnitude, Delta};
 pub use fold::{f_fold_star, judged_fold, orbit_lock, FoldVerdict, Operator, OrbitWitness, QMatrix};
 pub use gates::{validate_step, GateVerdict, StepBound};
