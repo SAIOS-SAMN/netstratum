@@ -117,6 +117,64 @@ weight costly to fake, so the mesh will govern cooperating nodes only
 until it lands (`KERNEL_RELAY` §7.1). That is a mesh-lane rung, and it
 is the honest reason the kernel is *mineable* but not yet *contested*.
 
+## §5a THE SHAPE POW++ ACTUALLY HAS (operator, 2026-08-02)
+
+§5 read the miner as a line. It is not one.
+
+> two 2D chains running across one n-dimensional chain — a polynomial
+> made of chains, or a CY manifold made of individual overlapping Venn
+> diagrams
+
+Unpacked against what is landed:
+
+**Two chains, each 2D.** PoUW and PoWC are the two axes, and each
+already splits into a LOCAL half and a CROSS-NODE half (`kernel`
+CHARTER §5a): I4's mint-bound with the mesh's certificate replay; I6's
+fold gate with cross-node agreement. Two axes × two halves is the 2D of
+each chain, and neither is complete with one half.
+
+**Across one n-dimensional structure.** The arbor carries branches, and
+the gauge key carries graded planes. Both are open-ended, so the object
+the two chains run across has no fixed dimension — which is why `D` is
+a rank and not a capacity.
+
+**A polynomial made of chains.** Degree = the standing planes;
+coefficients = what each carries. This is already how `18_TORSION` §2e
+reads the fiber.
+
+**THE HARD PART, and it is a real blocker.** *Overlapping* Venn
+diagrams means the charts INTERSECT. A Calabi-Yau is assembled from
+local patches that agree on their overlaps — the overlaps are the whole
+content, because that is where the transition functions live and where
+compactness is enforced.
+
+**The arbor can fork and cannot JOIN.** There is no merge anywhere in
+`mesh::arbor` — measured. So today the structure is a semilattice: it
+fans outward and never meets. Overlapping charts are not expressible on
+it at all, and neither is convergence, which is the entire value
+thesis.
+
+So the sequence PoW++ actually needs is not "finish the kernel, then
+mesh." It is:
+
+1. the local halves (landed: I4 whole, I6's gauge half);
+2. **the join** — two branches meeting in the arbor, which is a wire
+   amendment (the coordinate is hashed into every commit) and an
+   operator ruling;
+3. the overlap law — what two charts must agree on where they meet,
+   which is where `orbit_lock` finally gets its caller (#10);
+4. the cross-node halves.
+
+Step 2 is the one nothing can route around. Compactness maps onto the
+standing T∞ purge — the torus wraps finitely, infinity is disallowed —
+so that constraint is already law. What is missing is the meeting.
+
+**Not derived, flagged:** whether the overlap condition is Ricci-flatness
+in any load-bearing sense, or whether CY is being used as a shape
+metaphor for compact-with-agreeing-patches. The second is enough to
+justify the join; the first would be a much stronger claim and this
+document does not make it.
+
 ## §6 DOCUMENTATION FOUND OUTDATED
 
 - **`16_UNIT` §2** lists "state semantics — cfe (deeds, orbs, the

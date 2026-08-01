@@ -1,3 +1,30 @@
+//! ══════════════════════════════════════════════════════════════════
+//! ⚠ THIS FILE IS SLATED FOR REFACTOR — READ `docs/20_WORLD_REFACTOR.md`
+//!   BEFORE MODIFYING IT.
+//!
+//! 5001 lines holding THREE unrelated things: 12 state-type
+//! definitions (the kernel's vocabulary), ~100 deed emitters (the
+//! game's proposer), and `replay`'s 113 match arms (THE TRANSITION —
+//! the definition of what every deed MEANS).
+//!
+//! Consequences a modifier should know:
+//!   · `replay` is a SECOND definition of the transition, standing
+//!     beside `kernel::lawful` with nothing forcing them to agree
+//!     (`19_KERNEL` §3). Changing an arm changes what deeds mean, and
+//!     the judge will not notice.
+//!   · The kernel touches this file for exactly THREE items —
+//!     `Committed`, `demurrage_due`, `ease_of`. If you are adding
+//!     something the kernel must read, say so; the seam is thin and
+//!     worth keeping thin.
+//!   · The planned split is `cfe::state` (pure state) ·
+//!     `cfe::replay` (the interpreter) · `cfe::world` (the proposer) ·
+//!     `cfe::rules` (the sealed rules). Land new code where it will
+//!     live, not where it currently compiles.
+//!
+//! `engine/cfe/` is UNOWNED on the lane map. This is the largest shared
+//! file in the tree; coordinate before restructuring it.
+//! ══════════════════════════════════════════════════════════════════
+//!
 //! The world — THE CONTAINER of the topology (04 §5): multiple colony
 //! orbs (planets' settlements) under ONE clock, ONE chronicle, ONE
 //! receipt chain (binding #1 — the world is the replay unit, the mesh
