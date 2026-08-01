@@ -127,6 +127,16 @@ accounting lands.
 
     every value a canonical exact rational (coprime, den > 0); no float exists
 
+**I1e · Element conservation.** LANDED (operator ruling 2026-08-01) —
+`kernel::element_law`: the element ledger judged with strict symmetry
+to `banked`. An assay mints `richness · elapsed` (sign-guarded,
+bounded by the PRIOR vein — deterministic from `(prior, step)`);
+every other deed holds every element key still. Refusals
+`ElementNotPositive` · `AssayExceedsVein` · `ElementBroken`.
+
+    AssayStruck:  amount ≥ 0  ∧  amount ≤ richness · (stamp − last_assay)
+    ∀ element e:  total(next, e) == total(prior, e) + declared(e)
+
 **I4 · Bounded creation.** LANDED WHOLE (U1, tag 86) —
 `kernel::creation` + `solver_verify::verify_work` (the
 REPLAY-COMPLETE law: re-forge ∧ re-apply every pair ∧ re-chain; an

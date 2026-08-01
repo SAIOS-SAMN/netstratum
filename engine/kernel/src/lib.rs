@@ -79,6 +79,22 @@ pub enum Unlawful {
     /// that actually CREATES value. Value leaves only by a lawful,
     /// non-negative decay.
     DecayNotPositive { resource: Resource, amount: Box<Ratio> },
+    /// THE ELEMENT LAW (operator ruling 2026-08-01): the element
+    /// ledger is judged with strict symmetry to the banked ledger. An
+    /// element mint carried a negative amount — value enters the
+    /// element ledger only by a lawful, non-negative assay.
+    ElementNotPositive { element: [u8; 32], amount: Box<Ratio> },
+    /// THE ELEMENT LAW: an assay drew more than the vein's declared
+    /// yield — `amount ≤ richness · elapsed`, both read from the PRIOR
+    /// vein (`Prospected.richness`, `last_assay`); an assay with no
+    /// prior vein yields nothing. Both sides carried whole.
+    AssayExceedsVein { bound: Box<Ratio>, claimed: Box<Ratio> },
+    /// THE ELEMENT LAW: an element total changed where the deed
+    /// declared no change — the ledger's total for one element must
+    /// equal the prior total plus exactly what the deed declares
+    /// (only an assay declares a mint; every other deed holds every
+    /// element key still). The element named, both totals whole.
+    ElementBroken { element: [u8; 32], expected: Box<Ratio>, actual: Box<Ratio> },
     /// THE GAUGE LAW (U2d, I6's kernel half): the state's key moved
     /// where the deed declared no move, or landed off its declared
     /// key, or a plane opened or closed undeclared. The first
@@ -147,7 +163,96 @@ pub fn lawful(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Un
     exactness(next)?;
     creation(step)?;
     decay(prior, step)?;
-    gauge_law(prior, next, step)
+    gauge_law(prior, next, step)?;
+    element_law(prior, next, step)
+}
+
+/// INVARIANT — element conservation (THE ELEMENT LAW, operator ruling
+/// 2026-08-01). The element ledger is judged with strict symmetry to
+/// the banked ledger: an assay mints `richness · elapsed` into a
+/// vein's element — non-negative by declaration, and bounded by the
+/// PRIOR vein's `richness` and `last_assay` (both already committed
+/// state, so the bound is deterministic from `(prior, step)`). Every
+/// other deed declares no element move, so every element total holds
+/// still (a smuggled element mint under any deed refuses).
+fn element_law(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Unlawful> {
+    // The declared element mint for this deed (None = holds still).
+    let declared: Option<([u8; 32], Ratio)> = match &step.event {
+        ClosureEvent::AssayStruck { orb_id, element, amount } => {
+            if *amount < ratio(0, 1) {
+                return Err(Unlawful::ElementNotPositive {
+                    element: *element,
+                    amount: Box::new(amount.clone()),
+                });
+            }
+            // The vein's yield, read from PRIOR state: richness ×
+            // elapsed since its last assay; no vein yields nothing.
+            let bound = prior
+                .prospects
+                .iter()
+                .find(|vein| vein.orb == *orb_id && vein.element == *element)
+                .map(|vein| match step.stamp > vein.last_assay {
+                    true => vein.richness.clone() * ratio((step.stamp - vein.last_assay) as i64, 1),
+                    false => ratio(0, 1),
+                })
+                .unwrap_or_else(|| ratio(0, 1));
+            if *amount > bound {
+                return Err(Unlawful::AssayExceedsVein {
+                    bound: Box::new(bound),
+                    claimed: Box::new(amount.clone()),
+                });
+            }
+            Some((*element, amount.clone()))
+        }
+        _ => None,
+    };
+    // Total-check every element key present in either state or in the
+    // declaration: the total moves by exactly the declared amount.
+    let mut keys: Vec<[u8; 32]> = Vec::new();
+    if let Some((element, _)) = &declared {
+        keys.push(*element);
+    }
+    for orb in prior.orbs.iter().chain(next.orbs.iter()) {
+        for (element, _) in &orb.elements {
+            if !keys.contains(element) {
+                keys.push(*element);
+            }
+        }
+    }
+    for element in keys {
+        let delta = declared
+            .as_ref()
+            .filter(|(held, _)| *held == element)
+            .map(|(_, amount)| amount.clone())
+            .unwrap_or_else(|| ratio(0, 1));
+        let before = total_element(prior, element);
+        let after = total_element(next, element);
+        let expected = before + delta;
+        if after != expected {
+            return Err(Unlawful::ElementBroken {
+                element,
+                expected: Box::new(expected),
+                actual: Box::new(after),
+            });
+        }
+    }
+    Ok(())
+}
+
+/// The world's total holding of one element, summed across every orb
+/// (the element-ledger twin of `total_banked`).
+fn total_element(state: &Committed, element: [u8; 32]) -> Ratio {
+    state
+        .orbs
+        .iter()
+        .map(|orb| {
+            orb.elements
+                .iter()
+                .find(|(held, _)| *held == element)
+                .map(|(_, amount)| amount.clone())
+                .unwrap_or_else(|| ratio(0, 1))
+        })
+        .fold(ratio(0, 1), |sum, held| sum + held)
 }
 
 /// THE GAUGE LAW (U2d — I6's kernel half, the Delta-modeling ruling):
@@ -293,17 +398,20 @@ fn covered(event: &ClosureEvent) -> bool {
         // `value_pins.rs`. Tier 1 (single-resource, sign-guarded),
         // Tier 2 (escrow returns, declaration==effect — the
         // EscrowTotal + BankedTotal macro-invariant strengthens in a
-        // follow-up), Tier 3 (multi-resource vectors). STILL HELD OUT:
-        // the fold trio (U2d's I6 gate), TaxonSealed (coder-03's #42),
-        // AssayStruck (the element ledger's accounting, the almanac's
-        // follow-up — an element mint is not admitted on
-        // banked-neutrality).
+        // follow-up), Tier 3 (multi-resource vectors).
         | E::UpkeepSettled { .. } | E::CrystalDrawn { .. } | E::OverflowAbsorbed { .. }
         | E::BondSettled { .. } | E::FamineStruck { .. } | E::CovenantSealed { .. }
         | E::CouncilSealed { .. } | E::FrictionSettled { .. } | E::OfferCleared { .. }
         | E::CovenantReleased { .. } | E::CovenantSlashed { .. } | E::CouncilClosed { .. }
         | E::ColonyFounded { .. } | E::ColonyCharted { .. } | E::ZoneBuilt { .. }
         | E::ZoneRazed { .. }
+        // THE ELEMENT LAW (operator ruling 2026-08-01): the assay mints
+        // into the element ledger, judged with strict symmetry to the
+        // banked ledger — sign-guarded, bounded by the prior vein's
+        // richness × elapsed, and zero-invariant for every other deed.
+        // Witnessed in `element_pins.rs`. STILL HELD OUT: TaxonSealed
+        // (coder-03's #42) — the last deed before the Phase 3 flip.
+        | E::AssayStruck { .. }
     )
 }
 

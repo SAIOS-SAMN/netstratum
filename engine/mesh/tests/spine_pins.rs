@@ -262,17 +262,13 @@ fn the_judge_stands_at_the_door() {
     ));
 
     // The sealed default reaches the spine: an uncovered deed refuses.
-    // WITNESS TRUTH-UPDATE ×2 (the coverage seam, recorded): ZoneRazed
-    // entered at the value-law wave; EraAnnexed entered at U2d's gauge
-    // law. The pin now rides AssayStruck — uncovered by design until
-    // the element ledger's accounting lands. When the last deed
-    // covers, this pin transforms with the Phase 3 flip.
+    // WITNESS TRUTH-UPDATE ×3 (the coverage seam, recorded): ZoneRazed
+    // entered at the value-law wave; EraAnnexed at U2d's gauge law;
+    // AssayStruck at the element law. The pin now rides TaxonSealed —
+    // the last uncovered deed (coder-03's #42). When it covers, this
+    // pin transforms with the Phase 3 flip.
     let uncovered = kernel::Step {
-        event: ClosureEvent::AssayStruck {
-            orb_id: 1,
-            element: [3u8; 32],
-            amount: ratio(1, 1),
-        },
+        event: ClosureEvent::TaxonSealed { class: 1, clade: 1 },
         actor: 100,
         stamp: 2,
     };
