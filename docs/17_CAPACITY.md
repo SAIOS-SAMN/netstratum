@@ -232,14 +232,14 @@ crept in: the kernel admits or refuses, it never optimizes.
 
 **THE CODE CAUGHT UP (DIRECTIVE 03, operator ruling 2026-08-01).** This
 section struck the `C`-gate on 2026-08-01 — and the SAME DAY
-`kernel/src/bridge.rs` landed `capacity_is_defined()`, a predicate
+`kernel/src/bridge.rs` landed `rank_is_defined()`, a predicate
 asserting that `D` is meaningless wherever the defect is non-zero, with
 a doc-comment instructing Article II and Article IV callers to *"consult
 this first."* That is precisely the gatekeeper this section had just
 denied `C` could ever be, re-entering as a method one file away. The
 document was right and the code was the drift.
 
-`capacity_is_defined()` is **DELETED**. The reasons are the ones §5
+`rank_is_defined()` is **DELETED**. The reasons are the ones §5
 already gave and one more from the code itself:
 
 - `coboundary_reduce_over` is TOTAL over any input tensor — it does not
@@ -707,7 +707,7 @@ on a name the module never mentions.
 
 Why the seals and not the docstrings: "do not gate on this" failed TWICE
 in one day, in `validate_step`'s productivity gate and the kernel
-bridge's `capacity_is_defined`, and both times the prose was correct
+bridge's `rank_is_defined`, and both times the prose was correct
 while the code did the opposite. The compiler does not forget and does
 not need re-reading.
 
