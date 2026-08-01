@@ -140,11 +140,16 @@ every other deed holds every element key still. Refusals
 **I4 · Bounded creation.** LANDED WHOLE (U1, tag 86) —
 `kernel::creation` + `solver_verify::verify_work` (the
 REPLAY-COMPLETE law: re-forge ∧ re-apply every pair ∧ re-chain; an
-intact hash chain over a non-solution refuses). The bound mechanism
-is live and SEALED SHUT: `mint_bound = 0` until Ruling Box 1 opens
-the rate by amendment.
+intact hash chain over a non-solution refuses). **THE EMISSION LAW —
+RULED (Ruling Box 1, operator 2026-08-01; the kernel VERSION 1→2
+amendment; evidence: the #17 calibration, 5898351):** `mint_bound`
+pays the ruled `f` in exact ladder integers — L1/ladder terms, no
+norms, no roots (§0.3 chapter two stands).
 
-    mint(step) ≥ 0   ∧   verify_work(work) = Ok(d)   ∧   mint ≤ mint_bound(d)
+    mint(step) ≥ 0   ∧   verify_work(work) = Ok(d)   ∧   mint ≤ f(d)
+    f on the ladder rungs 0–5:  0 · 0 · 0 · 1 · 4 · 7
+    (saturated rungs pay zero; OFF-LADDER difficulty = 0 — a payload
+     never names its own price)
     no work → no discovery mint; the refusal carries bound and claim whole
 
 **I5 · Bounded decay.** LANDED WHOLE (U1f) — `kernel::decay` CALLS

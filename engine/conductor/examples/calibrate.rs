@@ -13,12 +13,13 @@
 //!      criterion), the certificate work-payload size, and the
 //!      closed-but-mismatched tail (training closed, test render
 //!      diverged — real work that verify_work rightly refuses).
-//!   B. MINT PRESSURE vs THE SEALED BOUND — real certificates encoded
+//!   B. MINT PRESSURE vs THE RULED BOUND — real certificates encoded
 //!      as work payloads, run as DiscoveryMinted through the kernel.
-//!      Every outcome TALLIED by kind, never assumed: at
-//!      `mint_bound = 0` a positive mint should refuse MintExceedsWork
-//!      and a zero mint should admit. Any other outcome is COUNTED and
-//!      reported — this harness measures, it does not panic.
+//!      Every outcome TALLIED by kind, never assumed. Under Ruling
+//!      Box 1 (2026-08-01: f = 0·0·0·1·4·7 on the ladder) a 1-mint
+//!      refuses on the saturated rungs 0–2 and admits on 3–5; a zero
+//!      mint always admits. Any other outcome is COUNTED and reported
+//!      — this harness measures, it does not panic.
 //!   C. A BOUNDED REAL ERA — the conductor plays; solves recorded and
 //!      spine growth counted, the board dynamics in miniature.
 //!
@@ -84,7 +85,8 @@ struct RungTally {
 fn main() {
     println!("# ============================================================");
     println!("# #17 CALIBRATION — PoUW economics, empirical (Ruling Box 1)");
-    println!("# deterministic, seeded; board sealed at mint_bound = 0");
+    println!("# deterministic, seeded; judged under the kernel's ruled f");
+    println!("# (Box 1, 2026-08-01: 0·0·0·1·4·7 on the ladder)");
     println!("# ============================================================");
     println!();
 
@@ -93,9 +95,10 @@ fn main() {
 
     println!();
     println!("# ============================================================");
-    println!("# READING: the mechanism is LIVE and refusing. The SUPPLY per");
-    println!("# rung is the honest-solves column; f(rung) maps supply to");
-    println!("# issuance. Rule f against these densities.");
+    println!("# READING: the SUPPLY per rung is the honest-solves column;");
+    println!("# the ruled f maps supply to issuance — 1-mints refuse on the");
+    println!("# saturated rungs 0-2 and admit on 3-5. Re-run after any");
+    println!("# ladder or rate amendment; the densities are the evidence.");
     println!("# ============================================================");
 }
 
@@ -109,7 +112,7 @@ fn part_a_and_b() {
     println!();
     println!(
         "{:<5} {:<5} {:<5} {:<7} {:<9} {:<7} {:<6} {:<11} {}",
-        "rung", "tier", "word", "honest", "mismatch", "unsolv", "cert", "mint@bound0", "zero-mint"
+        "rung", "tier", "word", "honest", "mismatch", "unsolv", "cert", "mint@1", "zero-mint"
     );
     println!("{}", "-".repeat(78));
 
@@ -163,9 +166,9 @@ fn part_a_and_b() {
             };
             tally.cert_bytes_total += work.len();
 
-            // MINT PRESSURE: a POSITIVE mint against this verified work.
-            // At bound 0 the expected verdict is MintExceedsWork; every
-            // outcome is tallied, none assumed.
+            // MINT PRESSURE: a POSITIVE 1-mint against this verified
+            // work, judged under the ruled f; every outcome is
+            // tallied, none assumed.
             let mut minted = prior.clone();
             if let Some(orb) = minted.orbs.first_mut() {
                 orb.bank(Resource::Iron, ratio(1, 1));
@@ -241,7 +244,8 @@ fn part_a_and_b() {
     }
 
     println!("{}", "-".repeat(78));
-    println!("## legend mint@bound0: x=MintExceedsWork w=WorkRefused o=other-unlawful A=ADMITTED");
+    println!("## legend mint@1: x=MintExceedsWork w=WorkRefused o=other-unlawful A=admitted");
+    println!("## (ruled f: a 1-mint refuses on rungs 0-2 — bound 0 — and admits on 3-5)");
     let attempts = 6 * SAMPLES;
     println!(
         "TOTAL: {} honest solves / {} closed-mismatched / {} unsolved of {} attempts; \
@@ -249,8 +253,8 @@ fn part_a_and_b() {
         grand.solves_honest, grand.closed_mismatched, grand.unsolved, attempts, grand.encode_failed
     );
     println!(
-        "SEAL: positive mints — {} refused MintExceedsWork, {} WorkRefused, {} other, \
-         {} ADMITTED (must be 0). Zero mints — {} admitted, {} refused (must be 0).",
+        "BOUND: positive 1-mints — {} refused MintExceedsWork, {} WorkRefused, {} other, \
+         {} admitted. Zero mints — {} admitted, {} refused.",
         grand.refused_exceeds,
         grand.refused_work,
         grand.refused_other,

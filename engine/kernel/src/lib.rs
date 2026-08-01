@@ -40,7 +40,13 @@ use solver_verify::{verify_work, Difficulty, WorkBroken};
 /// binds this into every commitment (`H(schema ‖ bytes ‖ parent ‖
 /// coordinate)` carries the judging version alongside the schema), so
 /// a chain segment is forever verified under the version that cut it.
-pub const VERSION: u64 = 1;
+///
+/// VERSION 2 — RULING BOX 1 (operator, 2026-08-01): `mint_bound`
+/// unsealed, the emission rate `f` ladder-pinned against the #17
+/// calibration (evidence commit 5898351). Version-1 history judged
+/// every positive discovery mint refused; it verifies forever under
+/// its own law.
+pub const VERSION: u64 = 2;
 
 /// One proposed transition: the deed that CLAIMS to carry `prior` to
 /// `next`. `event` is what closed, `actor` is who under NS-6
@@ -122,9 +128,9 @@ pub enum Unlawful {
     WorkRefused { broken: WorkBroken },
     /// I4 — the mint exceeds what verified work earns. Both sides
     /// carried whole (the bound the law allows, the amount claimed).
-    /// While Ruling Box 1 stands unruled the bound is ZERO — the
-    /// mechanism is sealed shut; every positive discovery mint
-    /// refuses HERE, by law, until the operator opens the rate.
+    /// The bound is the RULED emission rate `f` (Ruling Box 1,
+    /// 2026-08-01 — see [`mint_bound`]): ladder-pinned, zero on the
+    /// saturated rungs and on every off-ladder shape.
     MintExceedsWork { bound: Box<Ratio>, claimed: Box<Ratio> },
     /// I3 — a value in `next` is not a canonical exact rational (coprime,
     /// positive denominator). Exactness is a TYPE-LEVEL guarantee
@@ -642,14 +648,41 @@ fn creation(step: &Step) -> Result<(), Unlawful> {
     }
 }
 
-/// THE MINT BOUND — SEALED SHUT (U_DIRECTIVES §8, Ruling Box 1). The
-/// rate `f`, the admissible work-shapes, and the reward split are
-/// OPERATOR WORDS; until that amendment lands (a kernel VERSION
-/// bump), verified work earns a bound of ZERO and every positive
-/// discovery mint refuses at I4. The mechanism precedes the
-/// economics by law — rule `f` against the observed chained economy,
-/// never assumption.
-fn mint_bound(_difficulty: &Difficulty) -> Ratio {
+/// THE MINT BOUND — RULED (Ruling Box 1, operator 2026-08-01; the
+/// VERSION 1→2 amendment). The emission rate `f` is pinned against
+/// the #17 calibration's measured hit-rates (evidence commit
+/// 5898351: 100% · 100% · 100% · 97.5% · 75% · 42.5%), in exact
+/// integers on the LADDER — L1/ladder terms only, no norms, no roots
+/// (THE PROPORTIONAL LAW):
+///
+/// ```text
+/// f(0) = 0 · f(1) = 0 · f(2) = 0   (saturated — free issuance barred)
+/// f(3) = 1                          (the marginal threshold, 97.5%)
+/// f(4) = 4                          (scarcity tier 1, 75%)
+/// f(5) = 7                          (scarcity tier 2, 42.5% — the
+///                                    ~1.75× inverse-hit-rate step)
+/// ```
+///
+/// `f` is defined ON THE LADDER ONLY: a payload's difficulty either
+/// matches a `Difficulty::level` rung exactly or it earns ZERO — an
+/// off-ladder shape cannot name its own price (the attacker-shaped
+/// hole the #17 audit closed stays closed at the rate too).
+/// Work-shapes v1: planar forge tasks only (structural — `verify_work`
+/// accepts no other form). Reward split v1: 100% to the solving world
+/// (the deed banks on its own orb; no mesh counterparty exists yet;
+/// the v2 40/40/20 prover/mesh/reserve split is INSCRIBED in
+/// U_DIRECTIVES §8 for the mesh era). Saturated rungs are
+/// proof-of-position; the economy lives up the ladder.
+fn mint_bound(difficulty: &Difficulty) -> Ratio {
+    if *difficulty == Difficulty::level(3) {
+        return ratio(1, 1);
+    }
+    if *difficulty == Difficulty::level(4) {
+        return ratio(4, 1);
+    }
+    if *difficulty == Difficulty::level(5) {
+        return ratio(7, 1);
+    }
     ratio(0, 1)
 }
 

@@ -46,12 +46,12 @@ rides directly behind the kernel rungs (AUDIT §1, §7 here).
 | rung | pays | status |
 |---|---|---|
 | U0 | the seated hand (I2 honored in the spine fixture) | LANDED |
-| U1 | **I4's bound** — `mint ≤ f(verify)`, the PoUW anchor, tag 86 | LANDED (sealed shut; Ruling Box 1 opens it) |
+| U1 | **I4's bound** — `mint ≤ f(verify)`, the PoUW anchor, tag 86 | LANDED; **UNSEALED by Ruling Box 1 (2026-08-01)** — f ladder-pinned 0·0·0·1·4·7, kernel VERSION 2 |
 | U1f | **I5's bound** — flat decay ≤ rate·ease·elapsed | LANDED (no schema spent — `last_touch` already rode tag 28) |
 | U2 | **I6 whole** — orbit_lock, the fold gate, the singularity witness | OPEN — the live rung (∥ #36, mesh-second) |
 | W-A..W-D | **I1/I2/I3 coverage extension** — the then-54 unjudged deeds, in four waves | parallel, any lane |
 | U3 | UNIT-1 — the deployable boundary + constitution digest | after #36 |
-| U4 | the Ruling Boxes come home (operator words) | gated on operator |
+| U4 | the Ruling Boxes come home (operator words) | **Box 1 RULED 2026-08-01** (the mint opens — §8); Box 2 open |
 | S1 | the volumetric verifier decision (§10 — secondary) | boards WITH the volumetric tier |
 | S2 | the worktree prune (§10 — housekeeping) | operator go |
 
@@ -129,6 +129,16 @@ task-registry ruling — parked in Ruling Box 1.
     mint_bound(_: &Difficulty) -> Ratio { ratio(0, 1) } // SEALED SHUT —
     // opens ONLY by Ruling Box 1 amendment (rate, shapes, split),
     // bumping kernel::VERSION. Mechanism first, economics by ruling.
+
+**UNSEALED (Ruling Box 1, operator 2026-08-01 — the VERSION 1→2
+amendment; evidence: the #17 calibration, 5898351).** `mint_bound`
+now pays the ruled `f` in exact integers ON THE LADDER ONLY —
+`f(0..=2) = 0` (saturated), `f(3) = 1`, `f(4) = 4`, `f(5) = 7`; an
+off-ladder difficulty earns ZERO (a payload cannot name its own
+price). Red-first: `the_ruled_rate_pays_the_ladder_exactly` (red
+recorded against the sealed judge), `saturated_and_off_ladder_work_
+earns_zero`; the sealed-shut pin truth-updated (level 1's bound is
+STILL 0 — ruled, not defaulted); the VERSION pin moved 1→2.
 
 New `Unlawful` arms: `WorkBroken { at_step: usize }` and
 `MintExceedsWork { bound: Box<Ratio>, claimed: Box<Ratio> }` — both
@@ -275,9 +285,24 @@ not assumption.
 
 ## §8 The Ruling Boxes (operator words — nothing else blocks)
 
-1. **Box 1 (opens `mint_bound`):** the rate `f` per difficulty; the
-   admissible work-shapes (v1 drafted = forge-only; corpus classes
-   need the task-registry word); the reward split.
+1. **Box 1 — RULED (operator, 2026-08-01; landed as the kernel
+   VERSION 1→2 amendment).** Evidence: the #17 calibration
+   (`5898351` — hit-rates 100·100·100·97.5·75·42.5% at rungs 0–5).
+   - **The rate `f`, ladder-pinned in exact integers (L1/ladder
+     terms — no norms, no roots, THE PROPORTIONAL LAW):**
+     `f(0..=2) = 0` (saturated rungs are proof-of-position; free
+     issuance barred) · `f(3) = 1` (the marginal threshold) ·
+     `f(4) = 4` · `f(5) = 7` (the ~1.75× inverse-hit-rate step).
+     Defined ON THE LADDER ONLY — off-ladder difficulty earns zero.
+   - **Work-shapes v1: planar forge tasks only** (structural —
+     `verify_work` accepts no other form). ARC corpus classes await
+     the task-registry word; the volumetric tier stays decorative
+     (S1) until then.
+   - **Reward split v1: 100% to the solving world** (the deed banks
+     on its own orb; no mesh counterparty exists yet). **v2
+     RESERVED, inscribed for the mesh era:** 40% prover · 40% mesh
+     carriers · 20% protocol reserve — wiring unbuilt, opens with
+     the mesh-era ruling, never before.
 2. **Box 2:** what verified work EARNS beyond the mint — pen weight,
    crystallization coupling (kernel-amendment questions now, per
    16_UNIT §1).

@@ -245,7 +245,11 @@ fn creation_and_decay_bound_the_value_law_by_declaration_and_sign() {
 fn the_version_is_pinned() {
     // The commitment binds this; an amendment bumps it. Pinned so a
     // silent change to the judge cannot pass unnoticed.
-    assert_eq!(VERSION, 1, "the kernel version is charter-pinned");
+    // VERSION 2 — THE RULING BOX 1 AMENDMENT (operator, 2026-08-01):
+    // mint_bound unsealed, f ladder-pinned 0·0·0·1·4·7 against the
+    // #17 calibration (5898351). Version-1 chains verify forever
+    // under the sealed-shut judge they were cut with.
+    assert_eq!(VERSION, 2, "the kernel version is charter-pinned");
 }
 
 #[test]
