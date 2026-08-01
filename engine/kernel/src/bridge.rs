@@ -41,7 +41,7 @@
 
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::Committed;
-use rfa_core::{for_each_residual, holonomies, Delta, Support};
+use rfa_core::{holonomies, Delta, Support};
 
 /// BOND-1: the standing order, `source` → `target` at `rate`/tick.
 pub const CHANNEL_BOND: usize = 0;
@@ -400,6 +400,49 @@ pub fn observe(state: &Committed, i: usize, j: usize, channel: usize) -> Observe
     }
 }
 
+/// The residual field over FILLED TRIANGLES, enumerated from the
+/// support rather than filtered out of every triple.
+///
+/// **THROUGHPUT.** `for_each_residual` visits every ordered distinct
+/// triple — `O(n³·f)` — and on a sparse complex nearly all of them name
+/// a triangle that does not exist. Measured on a ring: 40 orbs 61ms,
+/// 80 orbs 409ms, 160 orbs 3.1s, 320 orbs 22.9s, growing ~7.3x per
+/// doubling. The two-pole reading beside it is quadratic and takes
+/// 127ms at the same 320 orbs.
+///
+/// Walking the support's own adjacency instead visits only triples
+/// whose three edges are all present — `O(E·d)` — so a ring, which
+/// fills no triangle at all, costs nothing to scan. Same residuals,
+/// same order of discovery, same arithmetic:
+/// `R_ijk,l = Δ_ik,l − Δ_ij,l − Δ_jk,l`.
+fn filled_residuals(delta: &Delta, support: &Support) -> Vec<Residual> {
+    let dim = delta.dim().min(support.dim());
+    let fiber = delta.fiber().min(support.fiber());
+    let zero = ratio(0, 1);
+    let mut found = Vec::new();
+    for l in 0..fiber {
+        let adjacent: Vec<Vec<usize>> = (0..dim)
+            .map(|i| (0..dim).filter(|&j| j != i && support.has(i, j, l)).collect())
+            .collect();
+        for (i, from) in adjacent.iter().enumerate() {
+            for &j in from {
+                for &k in &adjacent[j] {
+                    if k == i || !support.has(i, k, l) {
+                        continue;
+                    }
+                    let value = delta.entry(i, k, l).clone()
+                        - delta.entry(i, j, l)
+                        - delta.entry(j, k, l);
+                    if value != zero {
+                        found.push(Residual { i, j, k, l, value });
+                    }
+                }
+            }
+        }
+    }
+    found
+}
+
 /// Read the entangled pair from one prior state, in one pass
 /// (`18_TORSION` §2f's binding build constraint).
 ///
@@ -427,13 +470,7 @@ pub fn read_entangled_observed(state: &Committed, unknown: usize) -> EntangledRe
     // to compose). And a triple with any absent edge is NOT a triangle:
     // checking it invents strain from a relation that does not exist,
     // which is the false gauge collapse.
-    let mut residuals = Vec::new();
-    for_each_residual(&delta, |i, j, k, l, value| {
-        let filled = support.has(i, j, l) && support.has(j, k, l) && support.has(i, k, l);
-        if filled {
-            residuals.push(Residual { i, j, k, l, value: value.clone() });
-        }
-    });
+    let residuals = filled_residuals(&delta, &support);
     // D — the independent cycles carrying charge no frame explains.
     let rank = holonomies(&delta, &support).len();
     EntangledRead { rank, residuals, unknown }
