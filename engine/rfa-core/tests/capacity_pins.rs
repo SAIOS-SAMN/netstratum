@@ -10,11 +10,19 @@
 //! 3. A NON-TRANSITIVE TRIANGLE CARRIES CAPACITY — the positive case.
 //! 4. FRAME-FREE — a gauge shift leaves D identical (D1: frame
 //!    artifacts contribute NOTHING).
-//! 5. IDEMPOTENT — capacity(Δ) == capacity(Π_G(Δ)); why D is monotone
-//!    by algebra, not by decree.
+//! 5. IDEMPOTENT — why D is monotone by algebra, not by decree.
 //! 6. CONTAINER ≠ CAPACITY — arity is not D (18 §5).
+//! 7. THE POSITIVE CONSTRUCTION — capacity is the CIRCULATION, built by
+//!    projection, not the residue left after stripping a frame.
+//! 8. DIVERGENCE IS ONE PASS — no walk, no basepoint; div is grad's
+//!    adjoint, so it detects the gradient exactly.
+//! 9. THE SIGN IS THE LAW — div > 0 egress, div < 0 trapped interior
+//!    (§2d forbids), div = 0 holonomic.
+//! 10. RELABELLING-INVARIANT — Article I made a test.
 
-use rfa_core::capacity::{capacity, ext_x, Extent};
+use rfa_core::capacity::{
+    capacity, capacity_anchored, circulation, divergence, egress, ext_x, Egress, Extent,
+};
 use rfa_core::{coboundary_reduce, Delta};
 
 use cfe::ratio::{ratio, Ratio};
@@ -96,18 +104,133 @@ fn the_equilibrium_anchor_is_a_coboundary() {
 #[test]
 fn a_non_transitive_triangle_carries_capacity() {
     // The positive case: Δ02 ≠ Δ01 + Δ12 is a genuine H¹ cocycle
-    // defect — an obligation triangle that does not close. On three
-    // entities exactly one independent coordinate survives Π_G
-    // (rank C(n−1,2) = 1), and it is the (1,2) entry, since anchoring
-    // at vertex 0 sends every relation touching 0 to zero.
+    // defect — an obligation triangle that does not close.
+    //
+    // THE POSITIVE CONSTRUCTION NAMES THE WHOLE CYCLE. The circulation
+    // reading puts all three entities and all three pairs in the
+    // extent, because the class IS carried by the 3-cycle. The former
+    // anchored reading returned {2, 1, 1} — one pair, two entities —
+    // which was an artifact of gauge-fixing at vertex 0, not a fact
+    // about the universe. Same class, honest extent.
     let broken = triangle(q(1, 1), q(1, 1), q(0, 1));
     let read = capacity(&broken);
     assert!(!read.is_vacuous(), "a non-transitive triangle MUST carry capacity");
     assert_eq!(
         read,
-        Extent { entities: 2, layers: 1, coordinates: 1 },
-        "three entities admit exactly one surviving independent coordinate"
+        Extent { entities: 3, layers: 1, coordinates: 3 },
+        "the circulation carries the whole cycle, not one anchored pair"
     );
+    // And the anchored reading still AGREES on existence, differing
+    // only on extent — the drift is in the representative, never the
+    // class.
+    assert!(!capacity_anchored(&broken).is_vacuous());
+}
+
+#[test]
+fn divergence_detects_the_gradient_in_one_pass() {
+    // No walk, no spanning structure, no basepoint. div is the adjoint
+    // of grad, so the gradient component vanishes exactly when the
+    // divergence does. A pure coboundary has a gradient everywhere; a
+    // closed loop has none.
+    let anchor = anchor_3();
+    assert!(
+        divergence(&anchor).iter().any(|row| row.iter().any(|d| *d != q(0, 1))),
+        "a pure gradient must show a non-zero divergence"
+    );
+    let loop3 = triangle(q(1, 1), q(1, 1), q(-1, 1));
+    assert!(
+        divergence(&loop3).iter().all(|row| row.iter().all(|d| *d == q(0, 1))),
+        "a closed loop is divergence-free at every vertex"
+    );
+    // Divergence always sums to zero — antisymmetry closes the books.
+    for delta in [anchor_3(), triangle(q(1, 1), q(1, 1), q(0, 1))] {
+        let total = divergence(&delta)
+            .iter()
+            .fold(q(0, 1), |acc, row| acc + row[0].clone());
+        assert_eq!(total, q(0, 1), "the divergence books close over the vertices");
+    }
+}
+
+#[test]
+fn a_closed_loop_is_pure_holonomy_and_non_vacuous() {
+    // STATIC STASIS, honestly built: 0→1→2→0, each leg carrying 1.
+    // Every vertex balances (dV is empty), yet the loop carries a
+    // non-trivial class — ∮ ≠ 0. This is `S⁺_hol` with no `S⁺_out`
+    // anywhere: motion that takes nothing and leaves nothing, and
+    // still is not nothing.
+    let loop3 = triangle(q(1, 1), q(1, 1), q(-1, 1));
+    let census = egress(&loop3);
+    assert_eq!(
+        census,
+        Egress { sources: 0, trapped: 0, balanced: 3 },
+        "a closed loop sources nothing and traps nothing"
+    );
+    assert!(census.is_white_hole(), "no trapped interior (§2d)");
+    assert!(
+        !capacity(&loop3).is_vacuous(),
+        "holonomy alone is non-vacuous — this is what rank ALONE would \
+         have admitted, and why the dual pole earns its place"
+    );
+    // The circulation of a div-free form is itself: nothing to strip.
+    assert_eq!(circulation(&loop3), loop3);
+}
+
+#[test]
+fn the_sign_of_divergence_is_the_egress_law() {
+    // §2d: `S⁺_out` is EGRESS — strictly positive divergence, emission
+    // only, NO trapped interior. The sign is the law, and it is the
+    // negative force that survives the flip: a source is admitted, an
+    // ingress is a trapped interior and is forbidden.
+    //
+    // Antisymmetry makes the books close, so a source at one vertex
+    // implies an ingress at another: no relation is all-source. The
+    // non-trapping law is therefore a statement about a BOUNDARY, not
+    // about an isolated vertex — which is why §2d says "no trapped
+    // INTERIOR region".
+    let sourced = triangle(q(1, 1), q(0, 1), q(1, 1)); // vertex 0 emits
+    let census = egress(&sourced);
+    assert!(census.sources >= 1, "vertex 0 emits — an egress stands");
+    assert!(
+        census.trapped >= 1,
+        "and the books close: an egress somewhere is an ingress elsewhere"
+    );
+    assert_eq!(
+        census.sources + census.trapped + census.balanced,
+        3,
+        "every vertex is classified exactly once"
+    );
+}
+
+#[test]
+fn capacity_is_relabelling_invariant() {
+    // ARTICLE I made a test. Any reading that requires a chosen basis
+    // is void; the anchored representative depended on which vertex was
+    // labelled 0, the circulation does not. Every permutation of the
+    // entity labels must return the identical extent.
+    let deltas = [
+        anchor_3(),
+        triangle(q(1, 1), q(1, 1), q(0, 1)),
+        triangle(q(1, 1), q(1, 1), q(-1, 1)),
+        triangle(q(-3, 7), q(5, 2), q(1, 9)),
+    ];
+    let perms: [[usize; 3]; 6] =
+        [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]];
+    for delta in deltas {
+        let base = capacity(&delta);
+        for perm in perms {
+            let mut relabelled = Delta::zero(3, 1);
+            for i in 0..3 {
+                for j in (i + 1)..3 {
+                    relabelled.set_antisym(i, j, vec![delta.entry(perm[i], perm[j], 0).clone()]);
+                }
+            }
+            assert_eq!(
+                capacity(&relabelled),
+                base,
+                "capacity must not move when the entities are relabelled: {perm:?}"
+            );
+        }
+    }
 }
 
 #[test]
