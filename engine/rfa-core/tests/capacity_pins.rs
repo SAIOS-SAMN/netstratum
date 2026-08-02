@@ -22,7 +22,7 @@
 //! 10. RELABELLING-INVARIANT — Article I made a test.
 
 use rfa_core::capacity::{
-    capacity, capacity_anchored, circulation, divergence, ext_x, flux, ground,
+    borne, capacity, capacity_anchored, circulation, divergence, ext_x, flux, ground,
     preserves_hodge_split, Degree, Extent, Flux,
 };
 use rfa_core::{coboundary_reduce, Delta};
@@ -554,4 +554,163 @@ fn the_base_group_is_the_constants_stabiliser() {
     // The degenerate refusal: A·1 = 0 annihilates the constants.
     let zero = vec![vec![q(0, 1); 3]; 3];
     assert!(!preserves_hodge_split(&zero));
+}
+
+// ===========================================================================
+// THE BORNE SHARE — SYN-3. `D` says how much room stands; these pin WHO IS
+// STANDING IN IT, and that the answer is not an artifact of the labelling.
+// ===========================================================================
+
+/// A theta graph on 4 entities: the 4-cycle 0-1-2-3-0 plus the chord 0-2.
+/// TWO independent cycles, so a fundamental basis has a real choice to make
+/// — which is exactly the choice `borne` must not depend on.
+fn theta_4(vals: [Ratio; 5]) -> Delta {
+    let mut delta = Delta::zero(4, 1);
+    for (k, (i, j)) in [(0, 1), (1, 2), (2, 3), (3, 0), (0, 2)].iter().enumerate() {
+        delta.set_antisym(*i, *j, vec![vals[k].clone()]);
+    }
+    delta
+}
+
+/// Every permutation of 4 labels.
+fn perms_4() -> Vec<[usize; 4]> {
+    let mut out = Vec::new();
+    for a in 0..4 {
+        for b in 0..4 {
+            for c in 0..4 {
+                for d in 0..4 {
+                    let p = [a, b, c, d];
+                    let mut seen = [false; 4];
+                    for x in p {
+                        seen[x] = true;
+                    }
+                    if seen.iter().all(|s| *s) {
+                        out.push(p);
+                    }
+                }
+            }
+        }
+    }
+    out
+}
+
+fn relabel_4(delta: &Delta, perm: [usize; 4]) -> Delta {
+    let mut out = Delta::zero(4, 1);
+    for i in 0..4 {
+        for j in (i + 1)..4 {
+            out.set_antisym(i, j, vec![delta.entry(perm[i], perm[j], 0).clone()]);
+        }
+    }
+    out
+}
+
+#[test]
+fn the_borne_share_is_relabelling_invariant() {
+    // ARTICLE I, held at ATTRIBUTION. This is the pin the whole shape was
+    // chosen for. The intuitive rule — split a cycle's charge among its
+    // nodes, |c|/N_C — cannot be written, because a fundamental cycle BASIS
+    // is picked by a spanning forest: on this very fixture the cycles read
+    // {0,1,2},{0,2,3} under one labelling and {0,1,2,3},{0,1,2} under
+    // another, so N_C is 3,3 or 4,3 for identical structure and different
+    // entities are paid different amounts for the same world. Only the
+    // cycle-space DIMENSION is invariant, never a chosen basis of it.
+    //
+    // The circulation is the UNIQUE Hodge representative — no forest, no
+    // root — so a share read off it moves with the entities and never
+    // without them. Measured over all 24 relabellings.
+    for delta in [
+        theta_4([q(1, 1), q(2, 1), q(1, 1), q(1, 1), q(-3, 1)]),
+        theta_4([q(-5, 3), q(7, 2), q(0, 1), q(9, 4), q(1, 6)]),
+        theta_4([q(1, 1), q(1, 1), q(1, 1), q(1, 1), q(1, 1)]),
+    ] {
+        let base = borne(&delta);
+        for perm in perms_4() {
+            let got = borne(&relabel_4(&delta, perm));
+            let want: Vec<Ratio> = (0..4).map(|i| base[perm[i]].clone()).collect();
+            assert_eq!(got, want, "the borne share must travel with the entity: {perm:?}");
+        }
+    }
+}
+
+#[test]
+fn the_borne_share_conserves_the_circulation() {
+    // NOTHING IS MINTED AT THE JOIN AND NOTHING FALLS OUT OF IT. Each
+    // relation's magnitude is halved and BOTH halves are handed out, so the
+    // shares sum to exactly the circulation standing in the world. The join
+    // is a distribution, not a reduction — and not a fountain.
+    for delta in [
+        theta_4([q(1, 1), q(2, 1), q(1, 1), q(1, 1), q(-3, 1)]),
+        theta_4([q(-5, 3), q(7, 2), q(0, 1), q(9, 4), q(1, 6)]),
+        anchor_3(),
+        triangle(q(1, 1), q(1, 1), q(-1, 1)),
+    ] {
+        let circ = circulation(&delta);
+        let mut whole = q(0, 1);
+        for i in 0..delta.dim() {
+            for j in (i + 1)..delta.dim() {
+                let v = circ.entry(i, j, 0).clone();
+                whole = whole + if v < q(0, 1) { q(0, 1) - v } else { v };
+            }
+        }
+        let handed: Ratio = borne(&delta).into_iter().fold(q(0, 1), |a, b| a + b);
+        assert_eq!(handed, whole, "every half of every relation must reach an entity");
+    }
+}
+
+#[test]
+fn a_pure_coboundary_bears_nothing() {
+    // FRAME IS NOT WORK. A Δ built from node-local potentials circulates
+    // nowhere, so there is nothing to stand in and no share to draw. This
+    // is the floor of the anti-farming property: mere presence earns zero.
+    for potentials in [
+        vec![q(0, 1), q(1, 1), q(3, 2), q(-2, 5)],
+        vec![q(5, 3), q(-7, 2), q(11, 4), q(0, 1)],
+    ] {
+        let mut delta = Delta::zero(potentials.len(), 1);
+        for i in 0..potentials.len() {
+            for j in (i + 1)..potentials.len() {
+                delta.set_antisym(i, j, vec![&potentials[j] - &potentials[i]]);
+            }
+        }
+        for (i, share) in borne(&delta).into_iter().enumerate() {
+            assert_eq!(share, q(0, 1), "entity {i} bore a share of pure frame");
+        }
+    }
+}
+
+#[test]
+fn no_share_can_be_farmed_by_adding_frame() {
+    // THE ANTI-FARMING PIN. An entity cannot enlarge its own share by
+    // dressing the world in coordinates. `borne` reads the circulation
+    // ONLY, and a gauge shift lands entirely in the gradient summand, so
+    // every share is untouched. Work earns; framing does not.
+    let delta = theta_4([q(1, 1), q(2, 1), q(1, 1), q(1, 1), q(-3, 1)]);
+    let base = borne(&delta);
+
+    let potentials = [q(7, 3), q(-2, 5), q(4, 1), q(19, 6)];
+    let mut shifted = Delta::zero(4, 1);
+    for i in 0..4 {
+        for j in (i + 1)..4 {
+            let gauge = &potentials[j] - &potentials[i];
+            shifted.set_antisym(i, j, vec![delta.entry(i, j, 0) + gauge]);
+        }
+    }
+    assert_eq!(borne(&shifted), base, "a gauge shift must move no entity's share");
+}
+
+#[test]
+fn every_share_is_positive_or_ground() {
+    // SYN-3's REASON FOR OPENING. Allocation existed only as WITHHOLDING —
+    // a refusal, stated negatively. A share is a magnitude: it is never
+    // below the ground, so the rule can only give. What an entity holds up
+    // is stated in its own terms, not as the absence of a penalty.
+    for delta in [
+        theta_4([q(-5, 3), q(7, 2), q(0, 1), q(9, 4), q(1, 6)]),
+        theta_4([q(-1, 1), q(-1, 1), q(-1, 1), q(-1, 1), q(-1, 1)]),
+        triangle(q(-3, 7), q(5, 2), q(1, 9)),
+    ] {
+        for (i, share) in borne(&delta).into_iter().enumerate() {
+            assert!(share >= q(0, 1), "entity {i} drew a negative share: {share}");
+        }
+    }
 }

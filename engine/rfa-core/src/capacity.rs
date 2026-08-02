@@ -447,6 +447,65 @@ pub fn capacity(delta: &Delta) -> Extent {
     ext_x(&circulation(delta))
 }
 
+/// **THE BORNE SHARE** — how much of the circulation each entity holds
+/// up. `D` says how much room stands; this says WHO IS STANDING IN IT.
+///
+/// Every relation carries some of the canonical circulation. Its two
+/// ends bear that magnitude EQUALLY — half each — and an entity's share
+/// is the sum over its own relations:
+///
+/// ```text
+/// borne_i = ½ · Σ_j Σ_l |circulation(Δ)_ij,l|
+/// ```
+///
+/// **Why the relation and not the cycle.** The cycle is the intuitive
+/// unit — charge is a property of a closed loop — but a *fundamental
+/// cycle basis* is chosen by a spanning forest, so the node set
+/// `Nodes(C)` and its size `N_C` MOVE WHEN THE ENTITIES ARE RELABELLED.
+/// Measured on a theta graph: the same charge yields cycles
+/// `{0,1,2},{0,2,3}` under one labelling and `{0,1,2,3},{0,1,2}` under
+/// another, so `|c|/N_C` pays different entities different amounts for
+/// identical structure. Article I voids it. Only the cycle-space
+/// DIMENSION is invariant, never a chosen basis of it. The circulation
+/// is the unique Hodge representative — no forest, no root — so a share
+/// read off IT is basis-free, and this is pinned over every relabelling.
+///
+/// **Why circulation and not the residuals.** `symmetry_foundation`
+/// stands exactly where obligations FAIL to compose. Paying on it would
+/// pay for strain: manufacture an inconsistency, draw a share, do no
+/// work. The circulation is coherent closed content — what actually
+/// composes — so a share can only be earned by structure that holds.
+///
+/// **Conservation.** Each relation's magnitude is split in two and both
+/// halves are handed out, so `Σ_i borne_i` is exactly the total
+/// circulation magnitude. Nothing is minted at the join and nothing
+/// falls out of it.
+///
+/// Exact rationals throughout (I3). A pure coboundary bears nothing —
+/// frame is not work.
+pub fn borne(delta: &Delta) -> Vec<Ratio> {
+    let dim = delta.dim();
+    let fiber = delta.fiber();
+    let circ = circulation(delta);
+    let half = Ratio::new(1.into(), 2.into());
+    let zero = Ratio::from_integer(0.into());
+    (0..dim)
+        .map(|i| {
+            let mut total = zero.clone();
+            for j in 0..dim {
+                if i == j {
+                    continue;
+                }
+                for l in 0..fiber {
+                    let v = circ.entry(i, j, l);
+                    total += if *v < zero { -v } else { v.clone() };
+                }
+            }
+            total * &half
+        })
+        .collect()
+}
+
 /// **THE LAWFUL BASE GROUP** — does this congruence preserve the
 /// Hodge split, and therefore the capacity reading?
 ///
