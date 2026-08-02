@@ -274,6 +274,18 @@ pub fn render_receipt(receipt: &Receipt) -> String {
         // BOOK-1 (19_LENS §16) — the open registry's three deeds. The
         // kind is shown truncated: it is an identity, not a reading, and
         // a full digest in a display line teaches nobody anything.
+        // LIT-1 — the literature deeds. Witness COUNT only: the digests
+        // are the evidence, and a display line is not where evidence is
+        // examined.
+        E::WorkAspired { name, .. } => ("work_aspired", name.clone()),
+        E::WorkClaimed { work, witnesses, .. } => (
+            "work_claimed",
+            format!(
+                "{} on {} chain receipt(s)",
+                &hex(&work.0)[..8],
+                witnesses.len()
+            ),
+        ),
         E::BookMinted { name, kind, .. } => (
             "book_minted",
             format!("{name} ({})", &hex(&kind.0)[..8]),

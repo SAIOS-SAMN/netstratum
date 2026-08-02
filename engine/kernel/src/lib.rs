@@ -992,7 +992,10 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // archiving ALTERS one — both extend or amend the world's
         // structure, neither moves banked value. Drafted law, matching
         // `world::books`' own scope checks.
-        | E::BookMinted { .. } | E::BookArchived { .. } => {
+        | E::BookMinted { .. } | E::BookArchived { .. }
+        // LIT-1: aspiring and claiming both add standing state and
+        // move no banked value. Drafted law, matching world::literature.
+        | E::WorkAspired { .. } | E::WorkClaimed { .. } => {
             Some(Scope::Build)
         }
         // Raze — demolish or lift what was raised.

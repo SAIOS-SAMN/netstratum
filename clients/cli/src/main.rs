@@ -2388,6 +2388,93 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 ),
             }
         }
+        // LIT-1 — the literature's doors. Literacy is DERIVED (a line
+        // that keeps its own books has learned to write), so there is
+        // no verb that grants it.
+        Some("literature") | Some("works") => match world.orb_by_id(*current) {
+            None => println!(
+                "{} no colony yet — {} begins the story",
+                style.bad("✗"),
+                style.strong("found <name>")
+            ),
+            Some(_) => {
+                let literate = world.literate(*current);
+                println!(
+                    "{}  {}",
+                    style.head("LITERATURE"),
+                    match literate {
+                        true => style.dim("this line reads and writes — it may reach for these"),
+                        false => style.dim("not yet literate: keep a book of your own and the works open"),
+                    }
+                );
+                for view in world.literature(*current) {
+                    let standing = match (view.claimed, view.witnesses) {
+                        (true, n) => style.ok(&format!("claimed on {n} receipt(s)")),
+                        (false, _) => style.dim("—"),
+                    };
+                    let reach = match world
+                        .orb_by_id(*current)
+                        .is_some_and(|orb| orb.aspirations.iter().any(|h| h.work == view.work))
+                    {
+                        true => style.strong("reached for"),
+                        false => style.dim("unreached").to_string(),
+                    };
+                    println!("  {:<12} {:<14} {}", view.name, reach, standing);
+                }
+            }
+        },
+        Some("aspire") => {
+            let name = words.collect::<Vec<_>>().join(" ");
+            match world.aspire(*current, &name) {
+                Ok(_) => println!(
+                    "{} this line reaches for {} — the deed still has to be done",
+                    style.ok("✓"),
+                    style.strong(&name)
+                ),
+                Err(refusal) => refuse(world, &refusal, style),
+            }
+        }
+        Some("claim") => {
+            let rest = words.collect::<Vec<_>>();
+            // `claim <work> on <digest> [digest ...]` — the receipts are
+            // the point, so the word `on` separates them from the name.
+            let split = rest.iter().position(|word| *word == "on");
+            match split {
+                Some(at) if at > 0 && at + 1 < rest.len() => {
+                    let name = rest[..at].join(" ");
+                    let mut witnesses = Vec::new();
+                    let mut bad = None;
+                    for word in &rest[at + 1..] {
+                        match resolve_witness(world, word) {
+                            Ok(digest) => witnesses.push(digest),
+                            Err(why) => bad = Some(why),
+                        }
+                    }
+                    match bad {
+                        Some(why) => println!(
+                            "{} {} — {} lists the receipts",
+                            style.bad("✗"),
+                            why,
+                            style.strong("chronicle")
+                        ),
+                        None => match world.claim_work(*current, &name, &witnesses) {
+                            Ok(()) => println!(
+                                "{} {} CLAIMED on {} chain receipt(s) — the citation is verified, the virtue is not scored",
+                                style.ok("✓"),
+                                style.strong(&name),
+                                style.strong(&witnesses.len().to_string())
+                            ),
+                            Err(refusal) => refuse(world, &refusal, style),
+                        },
+                    }
+                }
+                _ => println!(
+                    "{} {} — a claim without receipts is a boast",
+                    style.bad("✗"),
+                    style.strong("claim <work> on <digest> [digest ...]")
+                ),
+            }
+        }
         // BOOK-1 (19_LENS §16) — the open registry's doors. Amounts
         // come BEFORE the name on `post` so a name may hold spaces
         // without the parse turning ambiguous.
@@ -2637,6 +2724,7 @@ fn help(style: &Style) {
         ("bond <rate> <res> to <p> [for <n>]", "seal a standing order: rate/tick streams without per-tick clearing, settled in one receipt at each touch — a term bond expires orderly; severing or defaulting posts the notice load"),
         ("sever <res> to <p> · bonds", "cut a standing bond (the load posts to the cutter) · list the standing orders"),
         ("covenant <q> <res> to <p> within <n>", "vitrify a delivery pact in the Glasskeeper lattice — collateral (priced by your fidelity books, never barred) locks until the quota is delivered (release) or the deadline passes (BREACH_AND_SLASH); `covenants` lists the open pacts"),
+        ("literature · aspire <work> · claim <work> on <digest>", "LIT-1: the works a LITERATE line may reach for — VALOR · HONOR · COURAGE · COMMITMENT. Literacy is DERIVED and never granted: keep a book of your own (`book mint` then `book post`) and the literature opens. Aspiring is free and proves nothing; CLAIMING cites chain receipts, and the law verifies every digest is a receipt this world sealed. It never scores the virtue — a claim without receipts is a boast"),
         ("book · book mint <name> · book post <kept> <lost> <name> · book archive <name>", "BOOK-1: the OPEN registry — a line mints its own kinds of account beside the charter's four. A book is a DUAL ledger (kept against lost) and posts both sides at once. Archiving closes it to WRITING and never to reading: every entry it took stays. A book IS its normalized name, so re-minting one is not a second book, and the charter's four can be neither minted over nor closed"),
         ("ideology", "the dual cohesion ledger for this planet — the four axes, their books, and the derived readings; divergent trade partners pay a friction entropy tax, aligned ones pay zero"),
         ("charter <world> deal <n>", "ROUTE-1: charter a maintained lane — melt × (1−η), η from the pair's best instrument grade; upkeep draws at the year voice, unpaid lanes lapse"),
@@ -3151,6 +3239,37 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
         ActionRefused::BookAlreadyArchived { name } => {
             format!("{} is already closed", style.strong(name))
         }
+        ActionRefused::NoSuchWork { name } => format!(
+            "{} is not a chartered work — the literature is {}; a line invents ACCOUNTS ({}), never the works it reaches for",
+            style.strong(name),
+            style.strong(&cfe::literature::WORKS.join(" · ")),
+            style.strong("book mint")
+        ),
+        ActionRefused::NotLiterate => format!(
+            "this line has not learned to write — keep a book of your own first ({} then {})",
+            style.strong("book mint <name>"),
+            style.strong("book post <kept> <lost> <name>")
+        ),
+        ActionRefused::WorkAlreadyAspired { name } => {
+            format!("{} is already reached for", style.strong(name))
+        }
+        ActionRefused::WorkNotAspired { name } => format!(
+            "{} was never reached for — {} before you claim it",
+            style.strong(name),
+            style.strong("aspire")
+        ),
+        ActionRefused::WorkAlreadyClaimed { name } => format!(
+            "{} is already claimed — evidence is cited once and never swapped after",
+            style.strong(name)
+        ),
+        ActionRefused::ClaimWithoutWitness { name } => format!(
+            "a claim to {} needs CHAIN RECEIPTS — without them it is a boast",
+            style.strong(name)
+        ),
+        ActionRefused::WitnessNotInChronicle { digest } => format!(
+            "receipt {} is not in this world's chronicle — the law verifies the citation",
+            style.strong(&hex(digest)[..8])
+        ),
         ActionRefused::BookPostingNegative => {
             "a book accrues — a negative posting would unwrite history".to_string()
         }
@@ -3642,17 +3761,25 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::ColonyFounded { name, .. } => {
                 format!("⚑ colony {} founded", style.strong(name))
             }
+            // LIT-1 — the literature deeds.
+            cfe::dop::ClosureEvent::WorkAspired { name, .. } => {
+                format!("✍ aspires to {}", style.strong(name))
+            }
+            cfe::dop::ClosureEvent::WorkClaimed { witnesses, .. } => format!(
+                "✍ work CLAIMED on {} chain receipt(s)",
+                style.strong(&witnesses.len().to_string())
+            ),
             // BOOK-1 — the open registry's three deeds.
             cfe::dop::ClosureEvent::BookMinted { name, .. } => {
-                format!("📖 book {} minted", style.strong(name))
+                format!("▤ book {} minted", style.strong(name))
             }
             cfe::dop::ClosureEvent::BookPosted { kept, lost, .. } => format!(
-                "📖 posted {} kept / {} lost",
+                "▤ posted {} kept / {} lost",
                 style.strong(&amount(kept)),
                 amount(lost)
             ),
             cfe::dop::ClosureEvent::BookArchived { .. } => {
-                "📖 book closed to writing (still readable)".to_string()
+                "▤ book closed to writing (still readable)".to_string()
             }
             cfe::dop::ClosureEvent::ZoneBuilt { tile, kind, .. } => format!(
                 "⛏ tile {} ({}) zoned {}",
@@ -4001,6 +4128,39 @@ fn chronicle(world: &World, style: &Style) {
             tag,
             described
         );
+    }
+}
+
+/// Parse the hex an operator typed into raw bytes — a full digest or
+/// any PREFIX of one, since a prefix is what a display shows.
+fn unhex_prefix(word: &str) -> Option<Vec<u8>> {
+    let word = word.trim_start_matches("0x");
+    if word.is_empty() || word.len() > 64 || !word.len().is_multiple_of(2) {
+        return None;
+    }
+    word.as_bytes()
+        .chunks(2)
+        .map(|pair| u8::from_str_radix(std::str::from_utf8(pair).ok()?, 16).ok())
+        .collect()
+}
+
+/// Resolve a typed prefix against the chronicle to the ONE receipt it
+/// names. Zero matches or several are both refused here rather than
+/// guessed at — citing evidence is not a place to be approximately
+/// right, and the world would refuse an unknown digest anyway.
+fn resolve_witness(world: &World, word: &str) -> Result<[u8; 32], String> {
+    let prefix = unhex_prefix(word).ok_or_else(|| format!("{word} is not hex"))?;
+    let matches: Vec<[u8; 32]> = world
+        .chronicle()
+        .receipts()
+        .iter()
+        .map(|receipt| receipt.own.0)
+        .filter(|digest| digest.starts_with(&prefix))
+        .collect();
+    match matches.len() {
+        1 => Ok(matches[0]),
+        0 => Err(format!("no receipt in this chronicle begins {word}")),
+        n => Err(format!("{word} names {n} receipts — type more of the digest")),
     }
 }
 

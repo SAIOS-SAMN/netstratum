@@ -889,3 +889,103 @@ whether a timeline-convergence result is anywhere fed into a motion
 reading. This lane checked its own side and found none — `lens` does not
 import `ledger::converge`, and `Motion` derives only from two `Degree`
 values.
+
+---
+
+## §18 LIT-1 — LITERATURE, and the display rule
+
+*(operator directive 2026-08-02)*
+
+BOOK-1 gave a line accounts of its own making. **Literature is the tier
+above: works a line ASPIRES to, and may claim only with chain receipts
+to show for it.**
+
+```text
+    BOOK         an account a line KEEPS            BOOK-1
+    LITERACY     the line learned to read/write     DERIVED, never stored
+    LITERATURE   a work it may ASPIRE to            LIT-1
+```
+
+### 18a. LITERACY IS DERIVED, AND IS NOT A BASE-7 CONDITION
+
+**A line is literate when it keeps its own books** — when it has MINTED
+one and POSTED to it. Minting alone is not writing; the page is blank.
+Writing is the act, literacy is the reading of that act, and nothing
+stores it.
+
+It is deliberately NOT a crystallized condition. The base-7 stack is
+FULL — conditions 0..=6, the crown gated on the solar leap and all five
+(`10 §3`, `§3b`) — and an eighth would change the base and silently move
+the crown's gate. Literacy needs no slot: it is already implied by
+receipts that exist.
+
+### 18b. ASPIRING IS FREE; CLAIMING COSTS EVIDENCE
+
+```text
+    ASPIRE   a literate line declares a work it reaches for. Proves
+             nothing, and is meant to prove nothing.
+    CLAIM    the line asserts it has DONE the thing, and cites CHAIN
+             RECEIPTS. Every digest is checked against the chronicle.
+```
+
+**The law verifies the CITATION, never the virtue.** It checks that the
+receipts exist and are this world's. It does not score whether the deeds
+amount to valor — **any formula that did would be the struck C-gate
+wearing a new name**, a number standing in for a judgement, which
+`18_TORSION` bars and this tree has removed once already.
+
+A claim without receipts refuses. That is the whole of *deeds if claimed
+need chain receipts*: a claim without evidence is a boast, and the
+chronicle is what separates the two. Cited evidence is deduplicated and
+ordered, so one state has one encoding however it was typed.
+
+### 18c. THE FOUR CHARTERED WORKS
+
+VALOR · HONOR · COURAGE · COMMITMENT, reached *through union and
+otherwise towards stewardship*. A line invents ACCOUNTS (BOOK-1); it
+does not invent the literature it reaches for, so the works are
+chartered and `aspire Glory` refuses.
+
+**`COMMITMENT` collides with a kernel primitive, and that is recorded
+rather than resolved silently.** `18_TORSION` ARTICLE IV clause 2 rules
+that this manifold is *one commitment per step*, and `Commitment.parent`
+is the chain's backward reference. That is the GOVERNING layer; a work a
+civilization aspires to is CONTENT — the same distinction that kept the
+`humans` civilization, the `humanoid` clade and `Human Capital` from
+being renamed when "human" was struck as a SEAT (§1.0), and the same
+verdict Q5 reached for `converged`. Two correct uses in two layers is
+not a defect; a third that conflated them would be.
+
+### 18d. EMOJI ARE OUTLAWED; ANSI COLOUR IS NOT
+
+*(operator ruling 2026-08-02)*
+
+Colour is a property of the TERMINAL and carries no glyph — it degrades
+to plain text and costs a reader nothing. An emoji is a GLYPH whose
+rendering, width and availability vary by font and platform, and it
+breaks column alignment in exactly the surfaces this lane exists to
+keep readable.
+
+**No character from the Emoji blocks (U+1F000 and above) appears in this
+workspace.** Three had entered — `U+1F4D6` in the BOOK-1 chronicle
+rendering, all three mine — and are struck, replaced with `U+25A4`
+(SQUARE WITH HORIZONTAL FILL), already in the CLI's own register.
+
+The BMP dingbats and geometric symbols the CLI has always used are NOT
+emoji and are untouched: `✓ ✗ ⚑ ⛏ ☉ ✍ ▤ ◉` and the box-drawing set.
+They are single-width, font-stable, and predate this ruling.
+
+### 18e. WHAT WAS NOT BUILT, AND WHY
+
+**No new substrate/mesh axis.** The directive raised one as a
+possibility. `04` rules its own constraint: *no genesis axis ships
+before the mechanic that reads it*, and the axis vocabulary is
+append-only under SUBSTRATE-1 (`12_UNION` §5a). LIT-1 needed no axis —
+aspirations are per-orb committed state and the claim is verified
+against the chronicle that already exists. **If an axis is still wanted,
+it now has a mechanic to read it, which is the order `04` requires.**
+
+**No automatic posting from deeds.** What receipts amount to valor is
+not decided here. A line cites its own evidence and the law verifies the
+citation; a declared event-kind-to-work mapping would be the structural
+schema §16e records as absent.

@@ -41,6 +41,26 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
         match &receipt.event {
             // BOOK-1 (19_LENS §16) — the open registry rebuilds from
             // receipts alone, like every other committed ledger here.
+            // LIT-1 — the literature rebuilds from receipts alone.
+            ClosureEvent::WorkAspired { orb_id, work, name } => {
+                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                    held.aspirations.push(crate::literature::Aspiration {
+                        work: *work,
+                        name: name.clone(),
+                        witnesses: Vec::new(),
+                    });
+                    held.aspirations.sort_by_key(|held| held.work);
+                }
+            }
+            ClosureEvent::WorkClaimed { orb_id, work, witnesses } => {
+                if let Some(held) = orbs
+                    .iter_mut()
+                    .find(|held| held.orb_id == *orb_id)
+                    .and_then(|held| held.aspirations.iter_mut().find(|held| held.work == *work))
+                {
+                    held.witnesses = witnesses.clone();
+                }
+            }
             ClosureEvent::BookMinted { orb_id, kind, name } => {
                 if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
                     held.books.push(crate::books::BookAccount {

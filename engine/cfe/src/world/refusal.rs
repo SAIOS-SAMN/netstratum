@@ -171,5 +171,26 @@ pub enum ActionRefused {
     /// unwrite its own history, which is what the chronicle exists to
     /// prevent.
     BookPostingNegative,
+    /// LIT-1 — the works are CHARTERED. A line invents accounts
+    /// (BOOK-1); it does not invent the literature it reaches for.
+    NoSuchWork { name: String },
+    /// LIT-1 — literacy is DERIVED: a line that has not kept its own
+    /// books has not learned to write, and has no business reaching
+    /// for the literature.
+    NotLiterate,
+    /// LIT-1 — one reach per work.
+    WorkAlreadyAspired { name: String },
+    /// LIT-1 — a work is reached for before it is claimed; skipping
+    /// that would let a line claim what it never set out to do.
+    WorkNotAspired { name: String },
+    /// LIT-1 — a claim stands once. Re-citing would let evidence be
+    /// swapped after the fact.
+    WorkAlreadyClaimed { name: String },
+    /// LIT-1 — a claim without receipts is a boast. The chronicle is
+    /// what separates the two.
+    ClaimWithoutWitness { name: String },
+    /// LIT-1 — a cited digest is not a receipt this world sealed. The
+    /// law verifies the CITATION, never the virtue.
+    WitnessNotInChronicle { digest: [u8; 32] },
 }
 

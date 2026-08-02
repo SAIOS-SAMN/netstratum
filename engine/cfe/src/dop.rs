@@ -197,6 +197,7 @@
 //!   ZoneKind::Resonator = 7 (zone entry, tag 17).
 
 use crate::books::{kind_of, BookAccount, BookKind, BookView};
+use crate::literature::{Aspiration, WorkId};
 use crate::ratio::{self, ratio, Ratio};
 use crate::tlv;
 
@@ -772,6 +773,13 @@ pub enum ClosureEvent {
     /// BOOK-1 — an account closed to WRITING. It keeps every entry it
     /// took and stays readable forever (19_LENS §16c).
     BookArchived { orb_id: u64, kind: BookKind },
+    /// LIT-1 — a literate line declares a work it reaches for. Proves
+    /// nothing; costs nothing but the receipt.
+    WorkAspired { orb_id: u64, work: WorkId, name: String },
+    /// LIT-1 — the line CLAIMS the work and cites chain receipts for
+    /// it. The witnesses are receipt digests; an unwitnessed claim
+    /// cannot be made.
+    WorkClaimed { orb_id: u64, work: WorkId, witnesses: Vec<[u8; 32]> },
     ColonyFounded { orb_id: u64, name: String },
     ZoneBuilt { orb_id: u64, tile: u16, kind: ZoneKind },
     YieldCollected { orb_id: u64, resource: Resource, amount: Ratio },
@@ -1475,6 +1483,20 @@ impl ClosureEvent {
                 value.extend_from_slice(&kind.0);
                 tlv::put(93, &value, &mut out);
             }
+            Self::WorkAspired { orb_id, work, name } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&work.0);
+                value.extend_from_slice(name.as_bytes());
+                tlv::put(94, &value, &mut out);
+            }
+            Self::WorkClaimed { orb_id, work, witnesses } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&work.0);
+                for witness in witnesses {
+                    value.extend_from_slice(witness);
+                }
+                tlv::put(95, &value, &mut out);
+            }
             Self::ElderWarded {} => {
                 tlv::put(74, &[], &mut out);
             }
@@ -1883,6 +1905,23 @@ impl ClosureEvent {
                 let kind: [u8; 32] = value.get(8..40)?.try_into().ok()?;
                 Some(Self::BookArchived { orb_id, kind: BookKind(kind) })
             }
+            94 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let work: [u8; 32] = value.get(8..40)?.try_into().ok()?;
+                let name = String::from_utf8(value.get(40..)?.to_vec()).ok()?;
+                Some(Self::WorkAspired { orb_id, work: WorkId(work), name })
+            }
+            95 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let work: [u8; 32] = value.get(8..40)?.try_into().ok()?;
+                let rest = value.get(40..)?;
+                if rest.len() % 32 != 0 {
+                    return None;
+                }
+                let witnesses =
+                    rest.chunks(32).map(|c| c.try_into().ok()).collect::<Option<Vec<_>>>()?;
+                Some(Self::WorkClaimed { orb_id, work: WorkId(work), witnesses })
+            }
             74 => Some(Self::ElderWarded {}),
             75 => Some(Self::WardLifted {
                 claimer: String::from_utf8(value.to_vec()).ok()?,
@@ -2057,6 +2096,10 @@ pub struct ColonyOrb {
     /// presents both through one view. Wire: orb entry tag 90 (SEAL A
     /// — old readers skip an orb's minted books rather than fail).
     pub books: Vec<BookAccount>,
+    /// LIT-1: the works this line reaches for, work-ascending. A work
+    /// carrying witnesses has been CLAIMED. Wire: orb entry tag 91
+    /// (SEAL A — old readers skip).
+    pub aspirations: Vec<Aspiration>,
 }
 
 impl ColonyOrb {
@@ -2124,6 +2167,18 @@ impl ColonyOrb {
             ratio::encode(&account.lost, &mut value);
             value.extend_from_slice(account.name.as_bytes());
             tlv::put(90, &value, &mut out);
+        }
+        // LIT-1: aspirations, work-ascending. A line that reaches for
+        // nothing emits no entry and stays byte-identical to a
+        // pre-LIT-1 orb.
+        for held in &self.aspirations {
+            let mut value = held.work.0.to_vec();
+            value.extend_from_slice(&(held.witnesses.len() as u32).to_le_bytes());
+            for witness in &held.witnesses {
+                value.extend_from_slice(witness);
+            }
+            value.extend_from_slice(held.name.as_bytes());
+            tlv::put(91, &value, &mut out);
         }
         out
     }
@@ -2210,6 +2265,19 @@ impl ColonyOrb {
                     let element: [u8; 32] = value.get(..32)?.try_into().ok()?;
                     let (amount, _) = ratio::decode(value.get(32..)?)?;
                     orb.elements.push((element, amount));
+                }
+                91 => {
+                    let work: [u8; 32] = value.get(..32)?.try_into().ok()?;
+                    let count =
+                        u32::from_le_bytes(value.get(32..36)?.try_into().ok()?) as usize;
+                    let mut witnesses = Vec::with_capacity(count);
+                    for at in 0..count {
+                        let from = 36 + at * 32;
+                        witnesses.push(value.get(from..from + 32)?.try_into().ok()?);
+                    }
+                    let name =
+                        String::from_utf8(value.get(36 + count * 32..)?.to_vec()).ok()?;
+                    orb.aspirations.push(Aspiration { work: WorkId(work), name, witnesses });
                 }
                 90 => {
                     let kind: [u8; 32] = value.get(..32)?.try_into().ok()?;
