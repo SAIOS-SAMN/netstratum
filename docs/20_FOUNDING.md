@@ -291,12 +291,30 @@ and checked at I5. Capture makes the settle two-sided — a captured leg
 with a recipient and a decayed leg — so tag, event shape and I5 change
 together. Kernel surgery, sequenced behind P2 (§6e).
 
-**OPEN, and sharper under P3's gradient:** `ease` multiplies decay, so
-advancing technology lowers what is available to capture. Whether a
-ward's income falls as its wards advance is now a continuous erosion
-across the whole tech tree rather than a single step at condition 5. It
-is measurable once capture and rate are readable at the same touch, and
-it should be measured before this lands.
+**GATED ON ONE DEFINITION OF THE TRANSITION (kernel lane, task #30).**
+P3's gradient is REVERTED — it broke `conductor/tests/survey_pins.rs`
+replay (Crystal 127/16 live against 15/16 replayed) and only a
+workspace sweep caught it. **So this section assumes the `condition ==
+5` CLIFF, not a gradient**, until #30 lands. Capture changes
+`DemurrageSettled`, which both the live proposer and replay depend on,
+so it is exposed to the same failure and must wait behind #30 with the
+parameter work.
+
+**OPEN, and measurable only once #30 is in:** `ease` multiplies decay,
+so advancing technology lowers what is available to capture. Whether a
+ward's income falls as its wards advance is a single step at condition 5
+under the cliff, and would become a continuous erosion under a restored
+gradient. Measure it with capture and rate readable at one touch.
+
+**NARROWING THE DIAGNOSIS, offered rather than assumed.** Replay's body
+(`world.rs` 4226–4829, 603 lines) recomputes exactly ONE shared rule:
+`dop::commensurate_weight(resource)`, at world.rs:4439 in the
+`ResourceTransferred` arm. **It never calls `ease_of` or
+`demurrage_due`** — those arms apply the receipted amount. So the
+double-definition exposure is one call site rather than 113 arms, and
+the P3 divergence is unlikely to be a shared-rule recomputation at all:
+live held MORE crystal than replay, which points at state reached
+without a receipt rather than at a value derived twice.
 
 ### 6a-bis. NO ABSOLUTES — the threshold is the defect
 
