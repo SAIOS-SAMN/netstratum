@@ -563,59 +563,114 @@ defect below arrived without anyone deciding it.
                    and NEVER a precondition for anyone else.
 ```
 
-### §3d.1 THE DEFECT: `D` IS COMPUTED FROM IDEOLOGY
+### §3d.1 CORRECTED — the channel was never a Glasskeeper instrument
 
-`D` is the universal reading. Article II gates the MINT on it, so what
-`D` counts decides what any line may earn. `bridge::project_complex`
-builds it from exactly three channels — and all three are AXES OF ONE
-IDEOLOGY DOCUMENT:
+**THIS SECTION CLAIMED A DEFECT THAT IS NOT THERE, and capacity-lane
+was right to refuse it (2026-08-02).** It read: *`CHANNEL_COVENANT`
+reads one people's instrument, so a line that never seals a covenant
+carries a capacity axis permanently at the ground.* The channel does
+not read that.
+
+It reads the UNDELIVERED REMAINDER of a delivery obligation —
+`quota − delivered`, obligor → beneficiary — and the `Covenant` record
+is `obligor, beneficiary, resource, quota, delivered, collateral,
+sealed, window`. Ordinary finance: a party bound to deliver a quantity
+by a deadline with collateral posted against failure. **Nothing in the
+mechanism is ceremonial.** `bridge.rs` already SAID so, in the doc
+comment above the constant, before any of this was written:
+
+> "covenant" and "pact" are inherited names (COVENANT-1, BUILD_ORDER
+> §3), not descriptions, and this channel means the remainder and only
+> that.
+
+**How the error was made, recorded so it is not repeated.** `09` §2.3
+names the fidelity axis's CARRIER as the Glasskeeper escrow machinery,
+and I reasoned from the carrier to the mechanism without reading what
+the projection actually takes. The evidence against it was on `main`,
+in the file I had already opened, six lines above the constant I was
+indicting. **A carrier is not a mechanism, and the name on a channel is
+not what the channel counts.** The bias was in the NAME — which is now
+gone: `CHANNEL_COVENANT` → `CHANNEL_FORWARD` (capacity-lane, d515341),
+with no meter moved and nothing re-priced.
+
+The three ideology axes still MAP to the three channels, and that
+mapping is worth keeping in view. But mapping is not derivation: a
+universal remainder can be named for an ideological axis without being
+that ideology's property.
+
+### §3d.1a THE RULING — the COVENANT is civilizational
+
+**(operator ruling 2026-08-02: *covenant is CIVILIZATIONAL — the
+civilization may adopt it IF THEY CHOOSE to live that lifestyle, or
+blend in with it — drop it to lower tier orders, block on tier
+0, 1, 2*.)**
+
+**The ruling and the rename compose, and each needs the other.** Split
+cleanly:
 
 ```text
-    CHANNEL_BOND      BOND-1       09 §2.2  Love      — resonance
-    CHANNEL_COVENANT  COVENANT-1   09 §2.3  Integrity — fidelity
-    CHANNEL_DEBT      ABSORB-1     09 §2.4  Morality  — reciprocity
+    THE FORWARD    the undelivered remainder of a delivery
+                   obligation — quota − delivered, with collateral
+                   in a window. UNIVERSAL: ordinary finance, open to
+                   any line, and it stays in the meter under
+                   CHANNEL_FORWARD.
+
+    THE COVENANT   the vitrified word — the ceremonial instrument
+                   seated in the Glasskeeper lattice (09 §2.3/§4),
+                   where a broken treaty is corrupted matter.
+                   CIVILIZATIONAL: adopted by a line that chooses to
+                   live that way, or blends toward it. BLOCKED AT
+                   T0, T1, T2 — available only at the lower orders.
 ```
 
-And the middle one is explicitly ONE PEOPLE'S: `09` §2.3 names its
-carrier the **Glasskeeper escrow machinery**, and `09` §4 seats the
-fidelity axis *in their lattice* — the escrow substrate itself. D5
-already recorded that the covenant's carrier is one people's register
-while its FIELDS are ordinary finance. What nobody noticed is that the
-UNIVERSAL METER reads it anyway.
+Without the rename, *"the covenant is civilizational"* would have meant
+tearing a third of the capacity meter out. With it, the universal
+mechanism keeps its place under an honest name and the civilizational
+instrument is free to be gated. **Neither ruling is safe alone.**
 
-**The consequence, stated plainly.** A line that never seals a covenant
-carries one of three capacity axes permanently at the ground — not
-because it did less work, but because it does not use another people's
-instrument. And since 2026-08-02 the reading is multi-axial, so
-`open_axes_of` now tells that line `CHANNEL_COVENANT` is *open to it*,
-inviting it toward a mechanic seated in someone else's substrate. **The
-syntropic reading made the bias legible, and pointed at it.**
+**AND THE GATE CANNOT BE BUILT TODAY.** `19_REGISTRY` §5 already found
+why, and this ruling is the first thing that needs it fixed:
 
-**This is the shape the operator named:** a specific ideology ruling
-over all. `15_TAXON` §3 makes the same point structurally from the
-other side — the draconic clade is a SUB-ARCHETYPE inside class 4, so
-*any mechanic keyed on class sees them as one*: a mechanic that is
-lawful at a line's inner circle becomes a universal precondition the
-moment a universal reading consults it.
+> **TIER (T0–T3) HAS NO ENGINE AUTHORITY AT ALL.** The station→tier law
+> is implemented in `tools/observer.py` (`TIER_OF_STATION`), again in
+> `tools/observatory.html`, and described a third time in
+> `BUILD_ORDER.md`. `registry.rs` knows `STATIONS` and knows nothing of
+> tiers. **Three implementations, no authority.**
+
+A gate that blocks on T0/T1/T2 must read a tier the ENGINE can derive,
+and today the only mapping lives in a Python tool that anyone with a
+shell can edit. What makes it buildable now is `StationSeated`
+(tag 89) — `{ line, station: u8 }` — which put the station into the
+CHAIN. Tier becomes derivable from a receipted station rather than from
+a file, and the one authority belongs where `19_REGISTRY` §5 already
+put it. **Relayed to capacity-lane, not taken from here.**
+
+**A NOTE ON WHAT IS BEING GATED.** After the rename there is no
+separate ceremonial covenant in the code — `Covenant` IS the forward,
+and it is being renamed to say so. So this ruling does not restrict an
+existing mechanic; it DEFINES one that does not yet exist: a
+Glasskeeper-seated instrument, distinct from the forward, that a line
+may adopt. Recorded plainly so nobody later reads the ruling as having
+removed something.
 
 ### §3d.2 WHAT IS NOT DONE HERE, AND WHY
 
-**The meter is NOT changed from this lane.** Dropping or reweighting
-`CHANNEL_COVENANT` would move `D` for every committed world at once —
-consensus law, and it would silently re-price every past mint. Three
-readings are open and they are the operator's to choose:
+**THE METER IS UNCHANGED, and reading (1) is what the code supports.**
+Three readings were recorded here for the ruling; the first is the one
+that survived contact with the source. The channels are UNIVERSAL — the
+instrument is a directed obligation with collateral inside a window,
+ordinary finance available to any line, and the Glasskeeper seat is
+REGISTER, not requirement. Nothing about `D` changes and nothing
+re-prices; what changed is the name, which was carrying a claim the
+mechanism never made (§3d.1).
 
-1. **The channels are universal after all** — the axes are named for
-   ideology but the INSTRUMENTS (a directed obligation with collateral
-   inside a window) are ordinary finance available to any line, and the
-   Glasskeeper seat is register, not requirement. Nothing changes;
-   `09` §2.3 and D5 gain a note saying so.
-2. **The covenant is civilizational** — then `D` must not read it, and
-   the meter needs a channel set that is genuinely universal.
-3. **The channel set is per-line** — each civilization's own
-   instruments feed its own `D`. Most faithful and most expensive: `D`
-   stops being comparable across lines unless the RANK is argued to be
-   invariant to the channel set, which is not obviously true.
+Readings (2) and (3) are recorded as REFUSED rather than dropped.
+(2) *the covenant is civilizational, so `D` must not read it* — the
+ruling adopts this for the CEREMONIAL instrument and it does not touch
+the forward, because they are two different things (§3d.1a).
+(3) *per-line channel sets* — refused: `D` would stop being comparable
+across lines unless the RANK were invariant to the channel set, which
+is not obviously true and was never argued.
 
 **A THREAT NEEDS A DEFENCE, AT ITS OWN LAYER.** `IncursionStruck`
 (§6's sweep) records a threat arriving and nothing records it held —
