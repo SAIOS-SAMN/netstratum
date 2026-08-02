@@ -1045,3 +1045,82 @@ it now has a mechanic to read it, which is the order `04` requires.**
 not decided here. A line cites its own evidence and the law verifies the
 citation; a declared event-kind-to-work mapping would be the structural
 schema §16e records as absent.
+
+---
+
+## §19 A GATE MAY READ A WINDOW — the test is VIEWPOINT-DEPENDENCE
+
+*(relayed by syntropy-inscription 2026-08-02; operator ruling: "windowed
+might need to get punted to lens-lane because that's a 'perspective' we
+need to account for")*
+
+The question put to this lane: **does a gate get to read a windowed
+quantity at all?** `tech.rs` condition 4 is a live tech unlock reading
+`vented_entries` and `encased_entries` over a window, and if a window is
+a perspective then an unlock depends on a viewpoint.
+
+**The ruling: the axis is not windowed-vs-cumulative. It is
+VIEWPOINT-DEPENDENT vs RECORD-DETERMINED.**
+
+A perspective in this lane's sense is chosen by the OBSERVER. Two
+observers may legitimately differ and both be right (§2b, §6) — which is
+exactly why a reading may never gate (§1). A window is only a
+perspective if someone gets to pick it.
+
+Condition 4's window is picked by nobody:
+
+```text
+    floor = now − deposit_window()
+      now              the CHAIN clock
+      deposit_window   derived from committed state
+```
+
+Every node replaying the same chronicle to the same height computes the
+same floor and reaches the same verdict. **That is a RECENCY predicate,
+and recency is a fact about the record rather than a view of it.** The
+relay's own parenthetical is the right instinct: recent venting should
+mean something different from ancient venting, and saying so in law is
+lawful.
+
+**THE TEST, for the next time this comes up:**
+
+> Would two nodes replaying the same chronicle to the same height
+> disagree? If they cannot, it is not a perspective, whatever its shape.
+
+So condition 4 stands. It reads the record through a rule that is itself
+part of the law, which is not the category error one level down — it is
+the ordinary business of law.
+
+### 19a. TWO HAZARDS FOUND WHILE ANSWERING, both outside this lane
+
+Neither changes the ruling; both are real and are relayed back rather
+than fixed here, since `world/tech.rs` and `world/survey.rs` are not
+this lane's territory.
+
+**1. The window LENGTH is world-state-dependent.** `deposit_window()` is
+not a constant: it returns 180 instead of 240 when a re-emergence lesson
+is held AND the syntropy reading is at or above `1/2`. That is still
+record-determined, so still lawful by the test above — but it means
+**condition 4's verdict can flip because an unrelated deed landed**.
+Earning the lesson narrows the window, which can change whether
+`vented > encased` still holds. Whether an unlock should move under a
+neighbouring unlock is a design question, not a lawfulness one.
+
+**2. The floor expression is duplicated.** `survey.rs` prunes at
+`now − deposit_window()` and `tech.rs` filters at `now −
+deposit_window()`. The cache's prune floor must never be TIGHTER than
+any consumer's, or the consumer silently reads a truncated record and it
+looks like data that was never there. Today the two agree because both
+sites were written the same way — not by construction. The comment
+claims *"same sheet as the full scan, by construction"*, and that claim
+is only true while they agree. One shared function makes it true. This
+is the same shape as the two `ratio_str` copies collapsed in §16's
+neighbourhood: one rule, two homes, nothing holding them equal.
+
+### 19b. WHAT THIS LANE STILL OWES
+
+Rendering LIFETIME and WINDOW side by side is a genuine lens job and is
+NOT yet built. It needs `thermal_books_of` / `heat_encased_of`, which
+landed on `main` at `2112aa3` and are **not on this branch** — this lane
+sits on `main@e0f8db2` plus the capacity-lane merge. Blocked on the
+reconciliation, not on design.
