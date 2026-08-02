@@ -300,11 +300,29 @@ the medium surrounding it.
 
 ```text
     PACE        fast / short  vs  long / hard
-    DIRECTION   outward expansion  vs  inward contraction
+    MOTION      DIVERGING (sources)  vs  CONVERGING (sinks)
     MEDIUM      the accompaniment accelerates or decelerates the motion
-    DECAY       degradation from the origin, over elapsed steps and
-                over distance
+    DECAY       degradation across the separation, over elapsed steps
 ```
+
+**BOTH POLES ARE NAMED** (operator correction 2026-08-02, *invert to
+convergence*). This section first read the motion as `expansion`, a
+signed scalar with the direction taken from its sign — which named a
+TWO-POLE reading after ONE pole and carried the same fact twice.
+Convergence arrived as *negative expansion*.
+
+It is the SAME fault corrected the same day one file away in
+`rfa_core::capacity`, inverted: there a pole was named for its failure
+mode, here for its opposite. `Egress { sources, TRAPPED, balanced }`
+became `Flux { sources, sinks, balanced }`: **divergence sources,
+convergence sinks, and neither is the other's absence.**
+
+**Convergence is a CAPABILITY.** `05 §1.4` — a dim-star system holds the
+rarest resource in a high-flux universe, radiator headroom, and SELLS
+it. The Frost trades convergence. A reading that renders it as shrinkage
+prices a capability as a loss, and `18_TORSION` §2d's own correction
+says why the old framing was wrong: *trapped is convergence MINUS the
+shedding, never convergence itself.*
 
 The ancestor's `|angular_valency − spin| ≤ tolerance` is a threshold
 test, and a threshold test is a photograph of something that is only

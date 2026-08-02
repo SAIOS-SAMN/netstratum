@@ -2,17 +2,23 @@
 //! (`19_LENS` §5, operator correction 2026-08-02).
 //!
 //! **Resonance is not a match against a threshold.** It is the dynamic
-//! rate and boundary function governing how an ORIGINATING VOLUME
-//! expands, contracts, degrades and accelerates over time through the
-//! medium around it. A threshold test is a photograph of something only
+//! rate and boundary function governing how a VOLUME diverges,
+//! converges, degrades and accelerates over time through the medium
+//! around it. A threshold test is a photograph of something only
 //! meaningful as a film.
 //!
 //! ```text
 //!     PACE        fast / short   vs   long / hard
-//!     DIRECTION   outward expansion   vs   inward contraction
+//!     MOTION      DIVERGING (sources)  vs  CONVERGING (sinks)
 //!     MEDIUM      the accompaniment accelerates or decelerates
-//!     DECAY       degradation from the origin, over steps and distance
+//!     DECAY       degradation across the separation, over steps
 //! ```
+//!
+//! **BOTH POLES ARE NAMED** (correction 2026-08-02). Divergence sources;
+//! convergence sinks; neither is the other's absence. Convergence is a
+//! CAPABILITY — `05 §1.4`, the dim-star system sells radiator headroom,
+//! the rarest resource in a high-flux universe — so a reading that
+//! renders it as negative expansion prices a capability as a loss.
 //!
 //! # THE FORM IS DISCRETE, AND THAT IS NOT A COMPROMISE
 //!
@@ -31,14 +37,15 @@
 //! approximated:
 //!
 //! ```text
-//!     expansion      V(k) − V(k−1)          direction preserved
-//!     velocity       expansion per step     the step IS the unit
+//!     motion         V(k) − V(k−1)       the pole, named, with its size
+//!     velocity       motion per step     the step IS the unit
 //!     acceleration   the second difference
 //! ```
 //!
-//! **Direction is the content.** A rate collapsed to a magnitude says
-//! how fast and throws away whether the volume was growing or dying,
-//! which is the one thing a reader needs. Nothing here is collapsed.
+//! **The pole is the content.** A rate collapsed to a magnitude says how
+//! fast and throws away WHICH WAY, which is the one thing a reader
+//! needs. Nothing here is collapsed, and the pole lives in the arm
+//! rather than in a sign.
 //!
 //! # WHAT THIS MODULE DOES NOT DO
 //!
@@ -50,17 +57,65 @@ use cfe::ratio::{ratio, Ratio};
 use num_traits::Signed;
 use rfa_core::capacity::Degree;
 
-/// WHICH WAY A VOLUME IS MOVING. The sign of the motion, kept as a
-/// fact rather than folded into a number.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Direction {
-    /// Growing — the volume pushes outward.
-    Outward,
-    /// Shrinking — the volume is drawn inward.
-    Inward,
+/// **THE MOTION OF A VOLUME — both poles named, neither derived from
+/// the other** (operator correction 2026-08-02, *invert to
+/// convergence*).
+///
+/// This first read `expansion: Ratio` with a `Direction` taken from its
+/// sign, and that was two faults in one field. It named a TWO-POLE
+/// reading after ONE pole — convergence arriving as *negative
+/// expansion* — and it carried the same fact twice, since the direction
+/// was fully determined by the sign.
+///
+/// It is the SAME fault corrected one file away in
+/// `rfa_core::capacity`, inverted — there a pole was named for its
+/// failure mode, here for its opposite. The census read
+/// `Egress { sources, TRAPPED, balanced }` and became
+/// `Flux { sources, sinks, balanced }`:
+///
+/// > *DIVERGENCE SOURCES; CONVERGENCE SINKS. Both are poles of one
+/// > reading and both are named.*
+///
+/// **Convergence is a capability, not a deficit.** `05 §1.4`: a dim-star
+/// system holds the rarest resource in a high-flux universe — radiator
+/// headroom — and SELLS it. The Frost trades convergence. A reading that
+/// renders it as shrinkage prices a capability as a loss.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Motion {
+    /// DIVERGING — the volume sources, pushing outward.
+    Diverging { by: Ratio },
+    /// CONVERGING — the volume sinks, drawing inward. Named in its own
+    /// right, never as an expansion that went negative.
+    Converging { by: Ratio },
     /// Neither. **Not "converged"** — a volume that did not move may be
     /// at rest or may be stuck, and this reading refuses to presume.
+    /// (Note the collision the correction exposed: "converged" as a
+    /// synonym for *finished* is the opposite of CONVERGING as a
+    /// direction. The still arm is not the convergent one.)
     Still,
+}
+
+impl Motion {
+    /// How much moved, unsigned — the pole is in the arm, so the
+    /// magnitude does not have to carry it.
+    pub fn magnitude(&self) -> Ratio {
+        match self {
+            Motion::Diverging { by } | Motion::Converging { by } => by.clone(),
+            Motion::Still => ratio(0, 1),
+        }
+    }
+
+    /// The signed reading, for arithmetic that genuinely needs one
+    /// number: diverging positive, converging negative. **A convenience
+    /// at the edge, never the stored form** — storing it is what named
+    /// the pole after its opposite.
+    pub fn signed(&self) -> Ratio {
+        match self {
+            Motion::Diverging { by } => by.clone(),
+            Motion::Converging { by } => -by.clone(),
+            Motion::Still => ratio(0, 1),
+        }
+    }
 }
 
 /// HOW FAST, IN WHAT SHAPE OF CYCLE.
@@ -132,17 +187,16 @@ impl Medium {
 /// how much was lost — and draws its own conclusion.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Resonance {
-    /// `V(k) − V(k−1)`, signed. The whole motion, direction intact.
-    pub expansion: Ratio,
-    /// Which way.
-    pub direction: Direction,
+    /// `V(k) − V(k−1)` — the pole NAMED, carrying its own size. Not a
+    /// signed scalar: convergence is its own arm, never a negative.
+    pub motion: Motion,
     /// How fast, against the span it took.
     pub pace: Pace,
-    /// The expansion after the medium has had its effect: `expansion · η`.
-    /// Larger than the bare expansion where the medium accelerates.
+    /// The motion after the medium has had its effect, signed for
+    /// arithmetic. Larger in magnitude where the medium accelerates.
     pub modulated: Ratio,
-    /// What the origin lost over this span — decay consumed, carried
-    /// away by distance. Never subtracted from the expansion; a reader
+    /// What was lost across this span — decay consumed, carried by the
+    /// separation. Never subtracted from the motion; a reader
     /// that wants the net can take it, and one that wants both has both.
     pub degradation: Ratio,
 }
@@ -165,34 +219,33 @@ impl Resonance {
         decay_consumed: Ratio,
         distance: Ratio,
     ) -> Self {
-        // The derivative IS the difference — the step is the unit.
-        let expansion = ratio(now.get() as i64, 1) - ratio(origin.get() as i64, 1);
-
-        let direction = match expansion.is_positive() {
-            true => Direction::Outward,
-            false => match expansion.is_negative() {
-                true => Direction::Inward,
-                false => Direction::Still,
+        // The derivative IS the difference — the step is the unit. The
+        // pole is decided once, here, and carried in the arm; nothing
+        // downstream re-derives it from a sign.
+        let change = ratio(now.get() as i64, 1) - ratio(origin.get() as i64, 1);
+        let motion = match change.is_positive() {
+            true => Motion::Diverging { by: change.clone() },
+            false => match change.is_negative() {
+                true => Motion::Converging { by: change.abs() },
+                false => Motion::Still,
             },
         };
 
         // FAST is a large change over few steps; LONG is a small change
         // over many. Compared cross-multiplied so it stays exact and
         // scales with the span rather than against a fixed cut.
-        let magnitude = expansion.abs();
         let span = ratio(steps.max(1) as i64, 1);
-        let pace = match direction {
-            Direction::Still => Pace::Still,
-            _ => match magnitude.clone() > span {
+        let pace = match motion {
+            Motion::Still => Pace::Still,
+            _ => match motion.magnitude() > span {
                 true => Pace::Fast,
                 false => Pace::Long,
             },
         };
 
         Resonance {
-            modulated: expansion.clone() * medium.eta().clone(),
-            expansion,
-            direction,
+            modulated: motion.signed() * medium.eta().clone(),
+            motion,
             pace,
             degradation: decay_consumed * distance,
         }
@@ -200,7 +253,7 @@ impl Resonance {
 
     /// Did the medium change what the motion amounted to?
     pub fn medium_mattered(&self) -> bool {
-        self.modulated != self.expansion
+        self.modulated != self.motion.signed()
     }
 }
 
