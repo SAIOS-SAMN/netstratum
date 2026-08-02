@@ -561,3 +561,70 @@ fn the_retired_vocabulary_stays_retired() {
         live.join("\n  ")
     );
 }
+
+/// C IS OUT OF THE JUDGE AND OUT OF THE LOOP — the arrow law, extended
+/// past `rfa-core` to the two places that actually decide things.
+///
+/// `rfa-core/tests/cage_arrow.rs` holds the arrow inside its own crate:
+/// six computing-path modules may CONSTRUCT a caged reading and must
+/// never CONSUME one. But the crate is not where the world turns. The
+/// JUDGE (`kernel/src`) admits or refuses every deed, and the WORLD
+/// LOOP (`cfe/src/world`) advances the state — and neither was covered
+/// by any arrow test at all.
+///
+/// **The standard is "does not know C exists", not "does not gate on
+/// C".** A module that never names a symbol cannot accidentally grow a
+/// dependency on it; a module that merely declines to branch on one can.
+/// That is the only version of this law that cannot rot.
+///
+/// Editing this test IS the amendment (the `recurrence_guard` shape). A
+/// future author who wants the judge or the loop to consume `C` must
+/// come here and say so, in the open.
+#[test]
+fn c_is_out_of_the_judge_and_out_of_the_loop() {
+    let root = workspace_root();
+    let mut offences = Vec::new();
+    let mut scanned = 0usize;
+    let mut stack = vec![root.join("engine/kernel/src"), root.join("engine/cfe/src/world")];
+    while let Some(dir) = stack.pop() {
+        let Ok(entries) = fs::read_dir(&dir) else { continue };
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_dir() {
+                stack.push(path);
+                continue;
+            }
+            if !path.extension().is_some_and(|x| x == "rs") {
+                continue;
+            }
+            let whole = fs::read_to_string(&path).unwrap_or_default();
+            scanned += 1;
+            // CODE ONLY. The prose deliberately NAMES what it refuses —
+            // `bridge.rs` says "never `coherence_functional` here" — so a
+            // naive scan would fail on the very comment that records the
+            // exile. Strip comments and judge the code.
+            for (n, line) in whole.lines().enumerate() {
+                let t = line.trim_start();
+                if t.starts_with("//") {
+                    continue;
+                }
+                for name in ["coherence_functional", "Lens"] {
+                    if line.contains(name) {
+                        let rel = path.strip_prefix(&root).unwrap_or(&path).display();
+                        offences.push(format!("{rel}:{}  names `{name}`", n + 1));
+                    }
+                }
+            }
+        }
+    }
+    assert!(scanned >= 15, "the arrow scan reached both trees ({scanned} files)");
+    assert!(
+        offences.is_empty(),
+        "C has leaked into the judge or the world loop.\n\
+         C has MAXIMAL ACCESS and ZERO AUTHORITY (`17` §10ter): everything \
+         it produces is a proposal, and a proposal that reaches a gate is \
+         no longer a proposal. The judge must be starved of the world to \
+         be trusted with the verdict:\n  {}",
+        offences.join("\n  ")
+    );
+}
