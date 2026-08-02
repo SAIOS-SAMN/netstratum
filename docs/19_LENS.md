@@ -1091,20 +1091,31 @@ So condition 4 stands. It reads the record through a rule that is itself
 part of the law, which is not the category error one level down — it is
 the ordinary business of law.
 
-### 19a. TWO HAZARDS FOUND WHILE ANSWERING, both outside this lane
+### 19a. TWO FINDINGS WHILE ANSWERING, both outside this lane
 
-Neither changes the ruling; both are real and are relayed back rather
-than fixed here, since `world/tech.rs` and `world/survey.rs` are not
-this lane's territory.
+Neither changes the ruling. The first turned out to be the intent; the
+second stands, and is relayed rather than fixed here since
+`world/tech.rs` and `world/survey.rs` are not this lane's territory.
 
-**1. The window LENGTH is world-state-dependent.** `deposit_window()` is
-not a constant: it returns 180 instead of 240 when a re-emergence lesson
-is held AND the syntropy reading is at or above `1/2`. That is still
-record-determined, so still lawful by the test above — but it means
-**condition 4's verdict can flip because an unrelated deed landed**.
-Earning the lesson narrows the window, which can change whether
-`vented > encased` still holds. Whether an unlock should move under a
-neighbouring unlock is a design question, not a lawfulness one.
+**1. The window LENGTH is world-state-dependent — and that is the
+DIRECTION, not a hazard** (operator ruling 2026-08-03). `deposit_window`
+returns 180 instead of 240 when a re-emergence lesson is held and the
+syntropy reading is at or above `1/2`, so condition 4's verdict can move
+because a neighbouring deed landed. This lane first flagged that as a
+coupling to examine. It is the intent:
+
+> Constants, absolutes and statics are being eliminated in favour of
+> deterministic throughput driven by DYNAMISM (morphodynamics).
+
+A window that changes with the world is not a leak in a static rule — it
+is a rule that has stopped pretending to be static while staying exactly
+as replayable. That is the same reason §5c struck the tolerance constant
+and §16e refused a dialed `θ` on the mint gate: **the objection was never
+to a quantity moving, it was to a quantity being SET.** Derived and
+moving is lawful; dialed and fixed is not.
+
+The test in §19 is unchanged and is what keeps this honest — a window
+may move as much as the record moves, and not one step further.
 
 **2. The floor expression is duplicated.** `survey.rs` prunes at
 `now − deposit_window()` and `tech.rs` filters at `now −
