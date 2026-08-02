@@ -856,3 +856,36 @@ resource, so it settles nothing and conserves trivially. The kernel's
 decision at compile time — and the three arms are drafted there to match
 the deeds' own scope checks: mint and archive are Build, posting is
 Collect.
+
+---
+
+## §17 THE WORD "CONVERGED" IS NOT THIS LANE'S TO SETTLE
+
+*(relay raised 2026-08-02 — `OPEN_QUESTIONS.md` Q5)*
+
+`Motion::Converging` is a DIRECTION — a volume drawing inward, the sink
+pole against Diverging's source pole, ongoing and carrying its own
+positive magnitude. Elsewhere in the tree `converged` means FINISHED: a
+world annexed into the universe timeline (CONVERGE-1, `07`). `rfa-core`
+hit the same ambiguity and struck the word from that crate outright,
+because *zero says the relations compose, never that anything was
+finished or emptied.*
+
+**The trap is that the naive reading of "converged" names the wrong
+arm.** A volume that stopped is `Still`. A volume that is CONVERGING is
+in motion. This lane pins its own half — `Motion::Still` is never called
+converged, held by `a_still_volume_is_not_called_converged` and
+`a_still_reading_does_not_claim_convergence` — and those pins reach
+nothing outside `engine/lens`.
+
+**Nothing is renamed.** CONVERGE-1 is landed law with its own spec and
+is correct in its own domain; the Diverging/Converging pair was ruled
+directly and deliberately mirrors `Flux { sources, sinks }`. Two correct
+uses of one word in two domains is not a defect — a THIRD use that
+conflates them would be, and Q5 exists to keep one from appearing.
+
+The open half belongs to the lanes that own `ledger` and `conductor`:
+whether a timeline-convergence result is anywhere fed into a motion
+reading. This lane checked its own side and found none — `lens` does not
+import `ledger::converge`, and `Motion` derives only from two `Degree`
+values.

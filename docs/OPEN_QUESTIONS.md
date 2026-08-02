@@ -190,3 +190,97 @@ carries its lawful way back in.
    read the landed cohesion counters and friction receipts LENS-SIDE
    under its lens law (09 §6; MIRROR/ANTI-MIRROR deprecated, 12 §2c) —
    a JOURNAL follow-on for the coder node, by relay.
+
+---
+
+## Q5. "CONVERGED" carries two opposite meanings across lanes
+
+**Raised by the lens lane, 2026-08-02, as a RELAY — not a proposal to
+rename anything.** Recorded here so the collision is visible before it
+produces a real defect, and so the lens lane's own handling of it is not
+mistaken for a ruling on anyone else's.
+
+### The three senses standing in the tree today
+
+```text
+  1. CONVERGE-1 / era convergence          ~100 uses   LANDED LAW (07)
+     ledger::converge, conductor, 07_ERA_CONVERGENCE.md
+     "annex the archived timelines" — a world is CONVERGED when it has
+     been adopted into the universe timeline. A COMPLETED ACTION.
+
+  2. rfa-core's strike                     1 ruling    LANDED
+     "the word `converged` is struck from this crate — zero says the
+     relations compose, never that anything was finished or emptied."
+     The word was removed because it wrongly implied FINISHED.
+
+  3. lens::propagation::Motion::Converging  12 uses    LANDED (19_LENS §5)
+     A DIRECTION: a volume drawing inward, the sink pole against
+     Diverging's source pole. ONGOING, with its own positive magnitude.
+     Never "negative expansion".
+```
+
+**Sense 1 means finished. Sense 3 means moving, and says nothing about
+finishing. Sense 2 already struck the word once for exactly this
+reason** — which is the strongest evidence the collision is real rather
+than pedantic: another lane hit it independently and resolved it by
+deletion.
+
+### Where it actually bites
+
+The trap is not the two spellings. It is that the naive reading of
+"converged" — *it has settled, it stopped moving* — names the arm of
+`Motion` that is explicitly **NOT** the converging one:
+
+```text
+    Motion::Diverging { by }    sources — outward
+    Motion::Converging { by }   sinks   — inward, and STILL MOVING
+    Motion::Still               nothing moved
+```
+
+A volume that stopped is `Still`. A volume that is CONVERGING is in
+motion. Anyone carrying sense 1's intuition into a lens reading will
+read `Still` as "converged" and `Converging` as "finishing", and both
+are wrong.
+
+### What the lens lane has already done, and its limit
+
+`Motion::Still` is documented as *"Not converged — a volume that did not
+move may be at rest or may be stuck, and this reading refuses to
+presume"*, and the rule is pinned:
+`propagation_pins::a_still_volume_is_not_called_converged` and
+`kinematic_pins::a_still_reading_does_not_claim_convergence`.
+
+**That is the whole of what this lane can enforce.** Those pins bind the
+lens's own vocabulary and reach nothing in `ledger` or `conductor`.
+
+### The lens lane's recommendation
+
+**Rename nothing.** Specifically:
+
+- **CONVERGE-1 should NOT be renamed.** It is landed law with its own
+  spec document and ~100 call sites, and the cost of touching it is
+  enormously larger than the confusion it causes. The word is also
+  correct in its own domain: timelines genuinely do converge onto one
+  axis, and that convergence genuinely does complete.
+- **`Motion::Converging` should NOT be renamed.** The Diverging/Converging
+  pair was ruled directly by the operator (*"invert to convergence"*,
+  2026-08-02) and deliberately mirrors `Flux { sources, sinks }` in
+  `rfa-core::capacity`. Renaming it would break the parallel that
+  correction was made to create.
+
+Two correct uses of one word in two domains is not a defect. **The
+defect would be a THIRD use that conflates them**, and that is what this
+entry exists to prevent.
+
+### The open question, addressed to the ledger and conductor lanes
+
+Is there anywhere that a *timeline* convergence result is, or could be,
+fed into a *motion* reading — or the reverse? The lens lane has looked
+at its own side and found none: `lens` does not import
+`ledger::converge` and `Motion` is derived only from two `Degree`
+values. **The lanes that own `ledger` and `conductor` are the ones who
+can answer for their side**, and this entry is the ask.
+
+If the answer is "nowhere", this closes as a documentation note. If the
+answer is "somewhere", that site is a real bug and should be raised
+under BUILD_ORDER rather than fixed in passing.
