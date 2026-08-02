@@ -665,3 +665,52 @@ two-sided form becomes EPOCH 1 behaviour, EPOCH 0 keeps the one-sided
 booking every existing receipt was written under, and no historical
 world is re-judged. The wire amendment for the recipient leg is still
 owed — epochs remove the drift risk, not the tag change.
+
+---
+
+## §13 THE ARROW BLOCKS THE PROPOSER — three times now (2026-08-02)
+
+    cfe  ←  physics  ←  solver-verify
+    cfe  ←  rfa-core  ←  kernel
+
+`cfe` is the bottom of the workspace arrow. **Every organ that JUDGES
+sits above it**, so the proposer can never perform a kernel-grade check
+on itself. Measured three separate times, each while trying to fix a
+different defect:
+
+    P2's rate      needs rank D      → bridge is in `kernel`      (§9)
+    the mint bound needs mint_bound  → was in `kernel`
+    the mint proof needs verify_work → solver-verify → physics → cfe
+
+The third was attempted and reverted this session: adding
+`solver-verify` to `cfe` is a **cyclic package dependency**, because
+`physics` depends on `cfe`. An earlier note read only `solver-verify`'s
+direct dependencies and missed it.
+
+### 13a. WHAT THIS SETTLES ABOUT K4
+
+K4's note called the fix *"demoting `world.rs` to a proposer across its
+37 `close()` sites"*. That is not a preference — **it is forced.** No
+amount of local checking can be added to the emitter, because every
+check it would need lives on the wrong side of the arrow. The only
+shapes available are:
+
+1. **INVERT THE FLOW.** The emitter returns a PROPOSED deed and applies
+   nothing; something above `cfe` verifies and admits. This is K4 as
+   written, and the dependency structure is the reason it is the only
+   real option.
+2. **MOVE THE JUDGMENT DOWN.** Relocate `Difficulty`/`verify_work` (and
+   the projection, for standing) beneath `cfe`. That inverts a
+   deliberate design — `rfa-core` is GAME-BLIND by charter and
+   `solver-verify` is the sealed verifier — so it trades one law for
+   another and should not be done to dodge a refactor.
+
+**Option 1, and the 37 sites are the work.** There is no one-commit
+version, and the version I scoped as one commit does not compile.
+
+### 13b. WHAT STAYS OPEN MEANWHILE
+
+`live_gate_defect.rs` holds the measurement: the emitter admits a
+1,000,000-unit mint against `b"not a proof at all"`, the live projection
+hides it, and `replay` grants it. Nothing in this section closes that —
+it explains why the closure is larger than one call site.
