@@ -537,6 +537,106 @@ than difficulty: raising the degree to increase the syntropic state
 would increase nothing, because the state it targets is already whole.
 The generator question is the one worth ruling on.
 
+## §3d THE LAYER LAW — universal, world, civilizational
+
+**(operator question 2026-08-02: *at what layer are you operating, and
+which is a universal law vs world law vs civilizational law?*)**
+
+**THE ANSWER TODAY IS THAT NOTHING SAYS.** Searched the whole corpus:
+there is no universal/world/civilizational taxonomy anywhere. Every law
+document states its mechanic and none states its SCOPE, so a rule's
+reach is inferred from which file it happens to sit in. That is how the
+defect below arrived without anyone deciding it.
+
+```text
+    UNIVERSAL      binds every world and every line, always. The
+                   kernel's invariants, conservation, exactness,
+                   containment, Article II. NOBODY MAY OPT OUT and
+                   nobody may be advantaged by opting in.
+
+    WORLD          binds one committed state: its colonies, zones,
+                   thermal siting, its own chronicle. Another world
+                   may run differently and both are lawful.
+
+    CIVILIZATIONAL binds a LINE — a people's own instruments, seated
+                   in their own substrate and register. Real, lawful,
+                   and NEVER a precondition for anyone else.
+```
+
+### §3d.1 THE DEFECT: `D` IS COMPUTED FROM IDEOLOGY
+
+`D` is the universal reading. Article II gates the MINT on it, so what
+`D` counts decides what any line may earn. `bridge::project_complex`
+builds it from exactly three channels — and all three are AXES OF ONE
+IDEOLOGY DOCUMENT:
+
+```text
+    CHANNEL_BOND      BOND-1       09 §2.2  Love      — resonance
+    CHANNEL_COVENANT  COVENANT-1   09 §2.3  Integrity — fidelity
+    CHANNEL_DEBT      ABSORB-1     09 §2.4  Morality  — reciprocity
+```
+
+And the middle one is explicitly ONE PEOPLE'S: `09` §2.3 names its
+carrier the **Glasskeeper escrow machinery**, and `09` §4 seats the
+fidelity axis *in their lattice* — the escrow substrate itself. D5
+already recorded that the covenant's carrier is one people's register
+while its FIELDS are ordinary finance. What nobody noticed is that the
+UNIVERSAL METER reads it anyway.
+
+**The consequence, stated plainly.** A line that never seals a covenant
+carries one of three capacity axes permanently at the ground — not
+because it did less work, but because it does not use another people's
+instrument. And since 2026-08-02 the reading is multi-axial, so
+`open_axes_of` now tells that line `CHANNEL_COVENANT` is *open to it*,
+inviting it toward a mechanic seated in someone else's substrate. **The
+syntropic reading made the bias legible, and pointed at it.**
+
+**This is the shape the operator named:** a specific ideology ruling
+over all. `15_TAXON` §3 makes the same point structurally from the
+other side — the draconic clade is a SUB-ARCHETYPE inside class 4, so
+*any mechanic keyed on class sees them as one*: a mechanic that is
+lawful at a line's inner circle becomes a universal precondition the
+moment a universal reading consults it.
+
+### §3d.2 WHAT IS NOT DONE HERE, AND WHY
+
+**The meter is NOT changed from this lane.** Dropping or reweighting
+`CHANNEL_COVENANT` would move `D` for every committed world at once —
+consensus law, and it would silently re-price every past mint. Three
+readings are open and they are the operator's to choose:
+
+1. **The channels are universal after all** — the axes are named for
+   ideology but the INSTRUMENTS (a directed obligation with collateral
+   inside a window) are ordinary finance available to any line, and the
+   Glasskeeper seat is register, not requirement. Nothing changes;
+   `09` §2.3 and D5 gain a note saying so.
+2. **The covenant is civilizational** — then `D` must not read it, and
+   the meter needs a channel set that is genuinely universal.
+3. **The channel set is per-line** — each civilization's own
+   instruments feed its own `D`. Most faithful and most expensive: `D`
+   stops being comparable across lines unless the RANK is argued to be
+   invariant to the channel set, which is not obviously true.
+
+**A THREAT NEEDS A DEFENCE, AT ITS OWN LAYER.** `IncursionStruck`
+(§6's sweep) records a threat arriving and nothing records it held —
+and the layer decides what the answer may be: a UNIVERSAL defence binds
+every world equally, a WORLD defence is one state's own posture, and a
+CIVILIZATIONAL defence is a people's instrument that must never become
+a precondition for anyone else's standing. The missing arm cannot be
+designed before its layer is chosen, which is why §6 recorded it
+instead of building it.
+
+**THE WINDOWED READING IS A PERSPECTIVE — RELAYED TO `lens-lane`.**
+`CrystalDeposit`'s `vented_entries` / `encased_entries` are WINDOWED and
+pruned each boundary, while the orb's own books are CUMULATIVE FOREVER.
+A window is a point of view over a permanent record, and this tree
+already has a lane for exactly that: `lens` READS and REPORTS and never
+gates (lane map, 2026-08-02). The cumulative arms belong to the
+committed state; the windowed pair belongs to a lens. Recorded here and
+relayed there rather than moved from this lane — the sheet currently
+feeds a live tech condition, so moving it is a behaviour change and
+that lane's call.
+
 ### §3c.1 THE CONTAINMENT FORMALIZATION REFUSED — recorded
 
 **1. `Standing(C) = min(ReCreation, Vec(C).CapacityFloor)` — REFUSED.**
