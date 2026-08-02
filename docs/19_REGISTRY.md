@@ -1,0 +1,316 @@
+# 19 — THE REGISTRY: one authority per axis, and the expansion law
+
+**Status:** MAP + LAW (2026-08-02). The map half is a survey of what
+actually stands, verified against the tree rather than quoted from other
+documents. The law half answers one question: **how does a vocabulary
+grow when the nodes that use it are distributed and may not agree?**
+
+Subordinate to `00_CHARTER.md`. The tag registry (`dop.rs` header) is
+this document's older sibling and its precedent — one code, one meaning,
+forever.
+
+---
+
+## §1 THE TOOL SURFACE — where C, D and V actually live
+
+Verified by export scan, not by citation. **These names have moved
+before and will again; this section is the map, never the authority.**
+The authority is always the crate.
+
+| letter | module | the callable surface |
+|---|---|---|
+| **C** | `rfa-core/src/cage.rs` | `consult`, `Proposal::{offer,withdraw}`, `Lens::{of,show}`, trait `Exact` |
+| **V** | `rfa-core/src/boundary.rs` | `boundary_form`, `dual_pole`, `Flow`, `BoundaryForm`, `Vacuity` |
+| **D** | `rfa-core/src/capacity.rs` | `capacity`, `circulation`, `divergence`, `egress`, `ext_x`, `ground`, `Degree`, `Extent`, `Egress` |
+| the seam | `kernel/src/bridge.rs` | `project`, `project_complex`, `read_entangled`, `verdict`, `degree`, `rank_is_defined`, `observe`, `fold_certified`, `refold` |
+
+**What the judge actually consults today:** `kernel::lawful` calls
+`capacity_law` (4 sites), reads `Vacuity` (5), and reaches
+`bridge::read_entangled` once. That is the whole of D and V inside the
+kernel. **C is consulted from nowhere in the kernel and must never be** —
+it has zero authority by construction (`17_CAPACITY` §10ter.c).
+
+**Renames already survived, recorded so a reader does not chase a
+ghost.** Each left name is DEAD and appears here only as history: the
+boundary read was formerly `potential_form` (renamed when V took no
+operator); the arbor was formerly the spine; the ledger was formerly a
+name struck whole by Charter §11; and `rank_is_defined` was formerly
+`capacity_is_defined`. Live code answers to the right-hand names only.
+
+## §2 THE CLOSED AXES — one authority each
+
+| axis | authority | values |
+|---|---|---|
+| station | `ledger/src/registry.rs::STATIONS` | progenitor · watcher · observer · sovereign |
+| perception | `ledger/src/registry.rs::PERCEPTIONS` | planar · volumetric · harmonic · umbral |
+| metabolism | `ledger/src/registry.rs::METABOLISMS` | mineral · biotic · plasmic |
+| disposition | `ledger/src/registry.rs::DISPOSITIONS` | expansionist · empiricist · epicurean |
+| class | `15_TAXON.md` §2 → `seeds/taxon-map.json` | codes 0–7 |
+| clade | `15_TAXON.md` §3 → `seeds/taxon-map.json` | codes 0–20 |
+| seat width | `registry.rs::seat_width` | progenitor 8 · watcher/observer 16 · sovereign unbounded |
+
+## §3 THE SECOND-TRUTH REGISTER — axes re-typed away from their authority
+
+An axis re-typed elsewhere is a second readable truth (§11 rule 2), and
+it drifts silently because nothing forces the copies to agree.
+
+- **TIER (T0–T3) HAS NO ENGINE AUTHORITY AT ALL.** The station→tier law
+  is implemented in `tools/observer.py` (`TIER_OF_STATION`), again in
+  `tools/observatory.html`, and described a third time in
+  `BUILD_ORDER.md`. `registry.rs` knows `STATIONS` and knows nothing of
+  tiers. **Three implementations, no authority.** This is the live
+  example of the locality problem and the first thing §5 should fix.
+
+## §4 WARD SCOPE — the axis elders and ancients actually sit on
+
+**CORRECTION TO THIS DOCUMENT'S FIRST DRAFT.** It called this a TENURE
+axis — *how long have you stood*. That was wrong. The operator's
+definition is SCOPE — **what extent do you ward** — and the two are not
+the same reading. Recorded rather than quietly replaced.
+
+### 4a. The three rungs
+
+```text
+ANCIENT   outside a single universe; reads it whole      universal scope
+WATCHER   at the threshold: may read a shielded world's
+          chronicle, may petition, MAY NOT DESCEND       interstellar scope
+ELDER     wards one planet; the reverse shield holds
+          until its gate is solved                       planetary scope
+```
+
+**This is a ladder, not a collision.** `12_UNION` §3 already calls
+watchers "the wardens of pre-interstellar worlds", which read as a
+competitor to elder until the outside seat existed to order them.
+Watchers see further than elders and act less — *forbidden to descend* is
+what makes them the MIDDLE rung. And `ElderWarded` (tag 74) reads as
+*the elder star is warded*: the elder is the WORLD, the watcher is the
+one who wards it. Two ends of one relation, never two names for one job.
+
+### 4b. ANCIENT, defined mechanically — capability, never appointment
+
+> **Anyone with the ability to unlock the progenitor role is an ancient.**
+
+That is an operational definition and it needs no ceremony, no age, and
+no grant. It also removes the mysticism entirely: an ancient is not
+someone who *is* something, but someone who *can do* something, and the
+thing is checkable.
+
+**THE ARROW IS NOT VIOLATED, and this is the whole design.** §3a of
+`12_UNION` binds that authority never flows DOWN as permission — *no seat
+is granted standing by the one above it.* An ancient who could name a
+progenitor would break that. **So an ancient does not grant the SEAT.
+An ancient opens the ROOM.**
+
+    ancient acts on    CAPACITY  — the room progenitors stand in
+    line earns         THE SEAT  — by witnessing upward into that room
+
+Progenitors are already defined as the ones who *make the room everyone
+else moves on* (`12_UNION` §2a, the tier overlay). The ancient is one
+scope further out: **the one who makes the room the progenitors make
+rooms in.** Nothing is handed down; what changes is how much space
+exists to be earned.
+
+### 4c. What this finally retires — seat width gets its operand
+
+`registry.rs::seat_width` returns constants: progenitor 8,
+watcher/observer 16. `12_UNION` §3 calls them *placeholder widths* and
+BAND-1 deferred the real reading to *"capacity as a live fiber reading
+(minted-plane count)"* on 2026-07-29. **It has waited on an operand that
+did not exist. It exists now.**
+
+    seat_width(progenitor)  ←  a reading of D at universal scope
+                               (bridge::degree / read_entangled)
+
+That single wiring collapses three open things into one landing: the
+placeholder retires, BAND-1's deferral is paid, and the ancient's
+capability becomes MEASURABLE rather than declared — because raising D
+requires genuine support expansion under DIRECTIVE 16, and
+`Δ' = Q·Δ` mints nothing. **You cannot talk your way into being an
+ancient; the room only opens for work that actually grew the universe.**
+
+### 4d. Why the outside vantage is real and not metaphysics
+
+An ancient reads a universe from outside THAT universe while standing
+inside the mesh, where universes are units among units (`16_UNIT`: one
+binary, six organs; every peer re-judges every step with its own
+kernel). This preserves `13_GALAXY` §1 — *the frontier is a distance,
+never an outside* — because there is no outside to the manifold; there
+is a level above a single unit, and it is landed.
+
+It also explains why **"an ancient on one planet may not be an ancient
+on another"** is a feature rather than a wrinkle: standing claimed
+elsewhere is RE-JUDGED here under this node's own kernel. That is
+admission-is-verification, unchanged, applied to a seat instead of a
+step.
+
+**And the constraint is the interesting half.** An ancient may rule and
+may not violate: the laws still bind from the outside seat. An authority
+that could overwrite the kernel would not be an ancient, it would be a
+debug console — and the vantage is only worth something because the
+rules hold from up there.
+
+### 4e. WHERE THE ROOM ACTUALLY OPENS — and why it is welded shut today
+
+The band does not grow by widening. `registry.rs::seat_width` is
+documented **per lineage domain** — *"domains open as substrates
+elevate, so the band grows by domains, not by widening"*. So the
+ancient's act is not `8 → 9`. **It is opening a domain, which is a fresh
+room of 8.** That is the mechanical form of *makes the room the
+progenitors make rooms in*, and it needs no new law — only the wire.
+
+**The chain, verified end to end:**
+
+```text
+site (luminosity, albedo, orbit_r)          cfe::query — LIVE
+   → t_eq4          exact K⁴, no roots      cfe::thermal — LIVE
+   → band_of(t_eq4) -> Option<SubstrateBand>  LIVE (used by query,
+                                               scribe::journal, cli)
+   → lineage_domain(metabolism, band)       LIVE
+   → seat_width per domain                  LIVE
+```
+
+**Every link stands. One is cut.** All SEVEN production call sites pass
+`None` as the band:
+
+    registry.rs:124, :132, :260, :269   conductor/lib.rs:1837, :1843
+    clients/cli/src/main.rs:1605
+
+Only `ledger_pins.rs` ever passes a real band, and only to the pure
+function. **Consequence: of five lineage domains, `thermal` and `cryo`
+are unreachable through any door.** `mineral` always reads `lithic` and
+`biotic` always reads `mesic`, because those are the `None` arms. Two
+rooms exist in the code and cannot be entered.
+
+**TWO CORRECTIONS TO THIS SECTION'S DRAFTS (operator, 2026-08-02).**
+Both are struck rather than quietly replaced.
+
+1. *"No path sites a line; every line is unsited forever."* **FALSE.**
+   Every founding polity is sited at genesis and the siting is
+   COMMITTED to the world: `commission_star(class)` and
+   `site_planet(FIRST_ORB, albedo, orbit)` (conductor lib.rs:721,:725).
+2. *"The planet is picked from a draw / placement is random."*
+   **FALSE, and it inverted the law.** The beacon picks among three
+   seats; **all three land in the same thermal outcome.** The draw is
+   orbital detail. **Metabolism is what places a line, deterministically
+   — and metabolism is ON THE CARD.** This is the standing rule (operator,
+   2026-07-31): *orbital mechanics are stochastic, the laws of the land
+   are deterministic.* The drafts read the stochastic half as the law.
+
+**MEASURED, not quoted** (`cfe/tests/siting_determinism.rs`, both pins
+green). Bands are `[lo,hi]` in K⁴; founding uses a G sun:
+
+```text
+band  Cryogenic     1.000e4  .. 1.000e8
+band  Mesic         3.906e9  .. 1.049e10
+band  HyperThermal  1.296e11 .. 5.063e12
+
+furnace seats (mineral|plasmic, orbit 1/2)   1.212e10, 1.333e10, 1.454e10
+                                             ⇒ band = NONE, all three
+mesic seats (biotic)                         6.059e9, 5.453e9, 4.208e9
+                                             ⇒ band = Mesic, all three
+```
+
+**A mineral or plasmic line founds BANDLESS** — above the mesic ceiling,
+and a full order of magnitude BELOW the hyperthermal floor. It sits in
+the gap between bands. The encasement shell is the economic answer to
+that heat (it captures excess heat into joules, `dop.rs:604`), and the
+conductor classifies such a world by `regime()`, not by `band_of`.
+
+**Which narrows the defect honestly.** At FOUNDING, `None` is the
+CORRECT band in every case: biotic reads `mesic` either way, mineral
+genuinely has no band so `lithic` is right, plasmic is metabolism-only.
+**The seven `None` call sites are not wrong at founding.** They are
+wrong only for a world sited OUTSIDE the default regimes — and
+`PolitySpec` can pin star, albedo and orbit, with pinned fields ruling
+over derived ones (lib.rs:718-720; `offer_pins.rs:25` does exactly
+this). A pinned hyperthermal world's line should read `thermal` and
+reads `lithic`.
+
+**So `thermal` and `cryo` are not welded shut by a bug. They are the
+domains no DEFAULT founding reaches** — they require a world sited
+outside the two founding regimes, which today means an explicit spec,
+and in the mesh means a world arrived at rather than founded.
+
+**SUPERSEDED IN PART (operator ruling 2026-08-02, `20_FOUNDING` §4).**
+The paragraph above reported this as settled design. **It is ruled a
+DEFECT.** Every type the game offers must have a viable founding site,
+so a bandless furnace seat and an unfoundable `cryo` are both faults to
+fix, not properties to document. The measurements stand; the verdict
+does not. And because founding becomes an ACQUISITION (`20_FOUNDING`
+§1), lines will routinely stand in bands their metabolism never implied
+— **the seven `None` call sites become wrong in the ordinary case, not
+the edge case, and wiring the band through is load-bearing.**
+
+### 4f. THE BEAT — capability accrues, it is never held
+
+Siting is the START of the reading, never its end. Once a line stands on
+a world, its capability to open a domain runs on the beat: worlds are
+encased, colonized, cooled, and joined. **A civilization does not HAVE a
+substrate band; it occupies one at a beat, and can come to occupy
+another.** This is what *domains open as substrates elevate* already
+said — elevation is a thing that happens over time to a sited line, not
+a property of a card.
+
+**Joining is the sharpest case.** When universes or worlds join, bands
+reachable by NOBODY locally become reachable, and a domain no local
+genesis could have founded opens. `cryo` is the standing example: it
+exists in the vocabulary, no founding draw can reach it, and the first
+one is likely to arrive from somebody else's board. **That is the
+ancient's act in its purest form — the room opens because the universe
+got bigger, and the seats in it are still unearned.**
+
+**Deliberately NOT done here:** siting is a schema change to a stored
+card and to the roster `install.sh` writes before first boot. That is
+the operator's ruling, not a lane's cleanup.
+
+## §5 THE EXPANSION LAW — totality, never locality
+
+**The problem, stated plainly.** `STATIONS` is `[&str; 4]` compiled into
+one crate. A distributed node that needs a fifth value edits its own
+array, and now two nodes hold different vocabularies while both believe
+they hold *the* vocabulary. Nothing detects the divergence; a receipt
+written under one reads as valid-but-different under the other. **A
+locally-extended closed set is the worst of both: it looks authoritative
+and is not.**
+
+**The law, in three tiers.** The system already runs this pattern for
+free content over closed axes (`SYSTEM_SPEC` §3: *species is free text
+over the closed axes*). Made general:
+
+```text
+AXIS      CONSTITUTIONAL. An axis is a dimension of identity the kernel
+          may judge on. Opening one is a charter amendment and a VERSION
+          bump — never a local edit. The set of axes IS the totality.
+
+VALUE     CLAIMED, like a wire tag. One code, one meaning, forever;
+          append-only; the claim lands in the authority named in §2
+          BEFORE any code uses it. A value may never be removed or
+          repurposed, only retired.
+
+CONTENT   FREE. Names, mottos, species prose, world names. No claim, no
+          coordination, no ceiling. This is where a node expresses
+          itself, and where divergence costs nothing.
+```
+
+**Why this answers the distributed case.** Two nodes designing
+independently can disagree about CONTENT without consequence, must
+coordinate on VALUES exactly as they already coordinate on tags, and
+cannot unilaterally invent an AXIS at all. **The blast radius of a
+disagreement is bounded by which tier it lives in**, and the tier is
+visible from where the thing is written down.
+
+**The standing test for any proposed addition:**
+
+1. Is it an OFFICE, an AGE, a SUBSTRATE, a PERCEPTION — or is it a name?
+   A name is content; stop here.
+2. If it is a reading a RULE consults, which existing axis does it sit
+   on? If none, it needs a new axis, which is constitutional.
+3. Does the value already exist under another name on that axis? Two
+   names for one reading is the drift `EQUATIONS` §0 exists to prevent.
+
+**Owed, and named rather than assumed:** the tier axis has no authority
+(§3); ward scope is now opened as law but its operand is cut at seven
+call sites (§4e — *what sites a lineage?* is the one open question);
+and no lint yet checks that a value claimed in a doc exists in its
+crate, the way `constitution_lint` checks that a citation resolves.
+That lint is the mechanical form of this whole document.
