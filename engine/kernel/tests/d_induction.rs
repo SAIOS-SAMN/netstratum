@@ -84,3 +84,46 @@ fn a_reduction_has_no_base_case_which_is_the_bootstrap_deadlock() {
         );
     }
 }
+
+/// **THE TWO INVERSIONS — why both readings above are wrong.**
+///
+/// `rank: empty=0, triangle=1` looks like a measurement. It is an
+/// artifact of computing the homology of a bare 1-complex when the
+/// object is a WRAPPED 3-SPACE carrying a GRADED fiber.
+///
+/// INVERSION 1 · THE SPACE IS NOT COUNTED. The coordinate wraps —
+/// `arbor::Coordinate` carries `s: [Ratio; 3]`, reach is a wrapped-L1
+/// distance, and the T∞ purge exists precisely because the torus wraps
+/// finitely. **A 3-torus has `b₁ = 3` before anything is drawn on it.**
+/// The space does not vanish because the board is empty, so `empty = 0`
+/// is not a reading of `D` — it is a reading of a graph that forgot
+/// what it was drawn on.
+///
+/// INVERSION 2 · THE TRIANGLE IS AN ARTIFACT. On a complex with
+/// 2-cells a triangle BOUNDS: it is the boundary of a face and
+/// contributes nothing to `H₁`. It registered as `1` only because
+/// `Delta` has no 2-cells to fill it (`18_TORSION` §2m: *the complex
+/// tops out at 2-simplices*). **The one non-zero reading measures a
+/// MISSING CELL, not a present cycle.**
+///
+/// So `0` should be `3` and `1` should be `0`, and neither error is
+/// arithmetic — both come from projecting a torus onto a graph.
+#[test]
+fn the_reduction_is_given_no_wrapping_at_all() {
+    // The measurable half of the claim: whatever the right answer is,
+    // the reduction cannot reach it, because nothing hands it the
+    // wrap. `Delta` is dim × dim × fiber and `Support` is presence —
+    // no period, no modulus, no torus.
+    let board = board(3, &[(0, 1), (1, 2), (2, 0)]);
+    let read = read_entangled(&board);
+
+    // The projection carries obligations and nothing about the space
+    // they sit in. If a wrap were ever threaded through, this reading
+    // would change without any obligation changing — which is exactly
+    // the test that should replace this one.
+    assert_eq!(
+        read.rank, 1,
+        "the triangle reads 1 on a graph; on a wrapped space with faces \
+         it reads differently, and the reduction is never told which it is"
+    );
+}

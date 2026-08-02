@@ -971,3 +971,59 @@ them. What changes is that `D` is no longer defined AS that count:
 — §9's proposer/judge split, §14's deadlock, and Article IV's
 enforcement. That is worth one wire amendment rather than three
 workarounds.
+
+### 16d. THE TWO INVERSIONS — §16's own measurement was wrong twice
+
+    rank:  empty = 0    open path = 0    closed triangle = 1
+
+**Neither number is a reading of `D`.** Both come from computing the
+homology of a bare 1-complex when the object is a WRAPPED 3-SPACE
+carrying a GRADED fiber. Measured: `reduce.rs`, `delta.rs` and
+`bridge.rs` contain **no wrapping, no period, no modulus, no torus** —
+the word appears once, in a comment about reach.
+
+**INVERSION 1 · THE SPACE IS NOT COUNTED.** The coordinate wraps:
+`arbor::Coordinate` carries `s: [Ratio; 3]`, reach is a wrapped-L1
+distance, and the T∞ purge exists *because the torus wraps finitely*.
+**A 3-torus has `b₁ = 3` before anything is drawn on it.** The space
+does not vanish because the board is empty. So `empty = 0` is not a
+reading of `D` at all — it is a reading of a graph that forgot what it
+was drawn on. **`D` at genesis is the manifold's, and it is not zero.**
+
+That is why *"`D > 0` with `rank = 0`, progenitor standing"* is not a
+contradiction and never was: `D` comes from the SPACE, `rank` from the
+COMPLEX drawn on it. This lane read them as one number.
+
+**INVERSION 2 · THE TRIANGLE IS AN ARTIFACT.** On a complex with
+2-cells a triangle BOUNDS — it is the boundary of a face and
+contributes nothing to `H₁`. It registered as `1` only because `Delta`
+has no 2-cells to fill it (§2m: *the complex tops out at
+2-simplices*). **The one non-zero reading in §16 measures a MISSING
+CELL, not a present cycle.**
+
+So `0` should be `3` and `1` should be `0`. Neither error is
+arithmetic. Both are the same projection failure that
+`19_KERNEL` §5a.1 found for orb interiors and §3b found for tile
+geometry: **the projection keeps the drawing and discards the space.**
+Third instance, same cause.
+
+**INVERSION 3 · THE GRADING COLLAPSES.** §2m's path algebra is graded
+and a polynomial does not lose its degree when evaluated. Reading `D`
+as one integer collapses that grading — the same scalar collapse as
+`O(1)` for cost and `C(Δ) = Σ|R|` for residuals. **`D` is a graded
+sequence, not a count**, which is what *"D IS POLYTONIC"* already says
+on `main`.
+
+### 16e. WHAT THE FLIP MEANS NOW
+
+`D` INDUCES, and the base case is **the space itself** — the wrapped
+manifold's own homology, which stands before any deed. Steps add what
+is built on it. That is why induction is the right operation: **you do
+not reduce your way to a torus, you begin on one.**
+
+`V` REDUCES, stripped by demurrage, exactly as running.
+
+Neither §16c item 1 ("what occupies?") nor §3b's `z` is open in the way
+this document had them: the base is the manifold, and `z` indexes the
+degree of the grading. **What is owed is threading the wrap into the
+projection** — everything else follows from it.
