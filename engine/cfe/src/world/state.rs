@@ -6,10 +6,10 @@
 //! different shapes do not collide (GROUND §4b -- the parallel-lane
 //! vent).
 
-use crate::dop::{ClosureEvent, ColonyOrb, Resource, Zone};
+use crate::dop::{ColonyOrb, Resource};
 use crate::ipsal::Entity;
 use crate::ratio::Ratio;
-use crate::vrp::{Attestation, Chronicle, TickRead, Timekeeper, WorldClock};
+use crate::vrp::{Chronicle, TickRead, Timekeeper, WorldClock};
 
 /// One tick's read: the clock walk, any famines that struck, and any
 /// overheat transitions (per orb).

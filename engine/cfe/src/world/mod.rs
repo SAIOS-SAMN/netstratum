@@ -16,7 +16,7 @@ use crate::dop::{
 };
 use crate::ipsal::{Entity, Scope};
 use crate::ratio::{ratio, Ratio};
-use crate::vrp::{Attestation, Chronicle, Timekeeper, TickRead, WorldClock};
+use crate::vrp::{Attestation, Chronicle, Timekeeper, WorldClock};
 
 /// The sovereign's entity id — the human at the terminal, registered
 /// at founding.
@@ -49,6 +49,7 @@ pub mod tick;
 pub mod zones;
 pub mod replay;
 pub mod state;
+pub mod stock;
 
 pub use replay::replay;
 pub use state::{
