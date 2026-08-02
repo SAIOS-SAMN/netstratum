@@ -22,7 +22,8 @@
 //! 10. RELABELLING-INVARIANT — Article I made a test.
 
 use rfa_core::capacity::{
-    borne, capacity, capacity_anchored, circulation, circulation_on, divergence, ext_x, flux,
+    borne, borne_axial, capacity, capacity_anchored, circulation, circulation_on, divergence,
+    ext_x, flux,
     ground,
     preserves_hodge_split, Degree, Extent, Flux,
 };
@@ -789,5 +790,63 @@ fn every_share_is_positive_or_ground() {
         for (i, share) in borne(&delta, &support).into_iter().enumerate() {
             assert!(share >= q(0, 1), "entity {i} drew a negative share: {share}");
         }
+    }
+}
+
+#[test]
+fn the_axial_share_distinguishes_worlds_the_scalar_cannot() {
+    // NEVER ONE SCALAR (`18_TORSION` §2b; operator ruling 2026-08-02:
+    // multi-axial on vertices towards uplift). The first landing of the
+    // borne share summed across every coordinate, and a sum cannot tell
+    // a world that stands on ONE axis from one spread across all of
+    // them — which is the only part of the reading an entity can act on.
+    //
+    // Two worlds, one non-transitive triangle each. In the first, all
+    // the circulation stands on coordinate 0. In the second, the same
+    // structure is carried on coordinate 1 instead.
+    let mut narrow = Delta::zero(3, 2);
+    let mut wide = Delta::zero(3, 2);
+    let mut support = Support::new(3, 2);
+    for (i, j) in [(0, 1), (1, 2), (0, 2)] {
+        support.connect(i, j, 0);
+        support.connect(i, j, 1);
+    }
+    // Δ01 = Δ12 = 1, Δ02 = −1 — a triangle that does not compose.
+    for (i, j, v) in [(0, 1, q(1, 1)), (1, 2, q(1, 1)), (0, 2, q(-1, 1))] {
+        narrow.set_antisym(i, j, vec![v.clone(), q(0, 1)]);
+        wide.set_antisym(i, j, vec![q(0, 1), v]);
+    }
+
+    // THE SCALARS AGREE — the collapse cannot separate them.
+    assert_eq!(
+        borne(&narrow, &support),
+        borne(&wide, &support),
+        "the summed reading is blind to WHICH coordinate carries the structure"
+    );
+
+    // THE AXIAL READINGS DO NOT. This is the information the sum destroys.
+    let a = borne_axial(&narrow, &support);
+    let b = borne_axial(&wide, &support);
+    assert_ne!(a, b, "the axial reading separates what the scalar merges");
+    for entity in 0..3 {
+        assert!(a[entity][0] > q(0, 1), "the narrow world stands on coordinate 0");
+        assert_eq!(a[entity][1], q(0, 1), "and coordinate 1 is OPEN to it — the uplift");
+        assert_eq!(b[entity][0], q(0, 1), "the wide world stands on the other axis");
+        assert!(b[entity][1] > q(0, 1));
+    }
+}
+
+#[test]
+fn the_scalar_share_is_exactly_the_l1_of_the_axial() {
+    // The lens form is permitted (`18` §2b allows an L1 at a HUMAN
+    // LENS), and it must be honestly derived from the reading that
+    // computes — never separately calculated, or the two could drift
+    // and the displayed total would stop being the sum of its parts.
+    let (delta, support) = theta_4([q(-5, 3), q(7, 2), q(0, 1), q(9, 4), q(1, 6)]);
+    let axial = borne_axial(&delta, &support);
+    let scalar = borne(&delta, &support);
+    for (entity, axes) in axial.into_iter().enumerate() {
+        let summed = axes.into_iter().fold(q(0, 1), |a, b| a + b);
+        assert_eq!(summed, scalar[entity], "the lens must be the L1 of the parts");
     }
 }

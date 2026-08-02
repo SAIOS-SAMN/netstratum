@@ -429,18 +429,58 @@ arrive, so none needs closing.
   *cleaves into two PEER branches: no parent, no child*, and the lineage
   pointer records LINE membership, never parenthood.
 
-**THE LIVE CONTRADICTION, recorded and relayed.** `engine/conductor` states
-the divergence law correctly at the function that performs it — *two PEER
-branches: no parent, no child* — and contradicts it in its own module
-header and field names: *SPECIATION IS A MINT … spawns ONE daughter per
-era*, a `spawned` flag commented *One daughter per era*, and *retired the
-daughter*. A cleave yields TWO PEERS; "daughter" asserts the parenthood
-the same file denies, and it is the singular the operator's ruling names.
-**The rate limit is lawful and stays** — one CLEAVE per era, speciation
-rare rather than a flood — because limiting how often the union generates
-is not the same as claiming it generates ONE. Only the parenthood word is
-the defect. Relayed to that crate's owner rather than edited from this
-lane.
+**THE RULING WAS ALREADY LANDED, AND THE CODE NEVER RECEIVED IT.** This
+is not a new law. `11_AEON` §3 retired the word on 2026-07-30, and gave
+the reason in full:
+
+> "Daughter" is retired: it imported terrestrial unary budding (one
+> parent, mutate one axis) — half a model with no second half.
+
+and named that second half — **CONFLUENCE** (`Confluent`, tag 44), *two
+civilizations held by a landed BOND COMBINE their chronicle-vectors into
+a hybrid* — **reproduction with both halves present**, and *earned,
+gated on a sustained bond, not free*. That is precisely *both sons and
+daughters, to re-balance* (operator, 2026-08-02), and precisely *there
+is no BOND for FORGED EXISTENCE*: confluence is the one generative act
+in the system that REQUIRES a standing bond, and without the bond it
+does not happen.
+
+**THE VOCABULARY, STRUCK AND REPLACED** (this landing). `engine/conductor`
+stated the divergence law correctly at the function that performs it —
+*two PEER branches: no parent, no child* — while its own header and
+fields contradicted it. Struck: *SPECIATION IS A MINT … spawns ONE
+daughter per era* → **GROWTH PER CIV IS A MINT … CLEAVES once per era
+into TWO PEER BRANCHES**; the `spawned` flag → `cleaved`, commented so
+that it bounds how OFTEN the line grows and never how many branches a
+growth produces; every remaining `daughter` → `branch`; and the beacon
+domains `speciation.*` → `growth.*`. The RATE LIMIT is lawful and stays —
+growth rare rather than a flood.
+
+**TWO DEFECTS REMAIN, AND NEITHER IS VOCABULARY:**
+
+**(a) THE UNARY MUTATION IS STILL PINNED.** `11_AEON` retired the model
+for *mutate one axis*, and `conductor_pins` still asserts
+`mutations == 1`, *"exactly one axis mutates per cleave"*, over a draw
+that picks one of `{disposition, metabolism, perception}`. The retired
+model is not merely described in the code — it is HELD IN PLACE BY A
+TEST. This is the same shape the operator's *multi-axial on vertices
+towards uplift* names, and it is the conductor's own instance of the
+scalar collapse `18` §2b bars: growth on one axis is a direction, and
+one direction is not a manifold walk.
+
+**(b) THE SECOND HALF IS SCHEMA-LANDED AND NEVER DRIVEN.**
+`ClosureEvent::Confluent` (tag 44) exists in the codec, the kernel's
+fold trio, `World`, the lens and the CLI — and **`engine/conductor`
+never emits one**. It performs `Diverged` and nothing else. So the live
+game runs fission only: the exact half-model `11_AEON` retired, with the
+half that balances it built but unreachable. Confluence is where *both
+halves present* and *earned, gated on a bond* actually live, so until it
+is driven, the union has no generative act that requires a bond at all.
+
+Both are changes to game behaviour rather than to naming — one alters
+every branch the conductor draws, the other adds a generative act — so
+they are RECORDED here and owed a ruling, not taken unilaterally from
+this lane.
 
 ### §3c.1 THE CONTAINMENT FORMALIZATION REFUSED — recorded
 

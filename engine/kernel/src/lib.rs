@@ -202,10 +202,17 @@ pub enum Unlawful {
     /// The share is carried, not just the refusal, because it is a
     /// FLOOR AN ORB CAN RISE FROM rather than a penalty to avoid: an orb
     /// reads what it holds, sees the ground, and knows that forming a
-    /// real obligation is what lifts it. `standing` is never negative —
-    /// it is a magnitude — so this states what is missing in the same
-    /// terms that state what is present.
-    MintWithoutOwnStanding { orb: u64, standing: Box<Ratio> },
+    /// real obligation is what lifts it. Every share is a magnitude and
+    /// never negative, so this states what is missing in the same terms
+    /// that state what is present.
+    ///
+    /// **CARRIED PER AXIS, NEVER SUMMED** (operator ruling 2026-08-02:
+    /// *multi-axial on vertices towards uplift*). One share per CHANNEL,
+    /// so the refusal names WHICH DIRECTION is open rather than only how
+    /// short the orb is. A single scalar here would tell an orb it had
+    /// nothing without telling it where to begin, and `18` §2b bars the
+    /// collapse wherever the system computes.
+    MintWithoutOwnStanding { orb: u64, axial: Vec<Ratio> },
 }
 
 /// THE JUDGE. Does `step` lawfully carry `prior` to `next`? Pure,
@@ -288,13 +295,10 @@ fn capacity_law(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
             // state this admits, the world-level reading admitted too —
             // and the free rider, who held nothing and minted on other
             // orbs' structure, no longer passes.
-            let standing = bridge::standing_of(prior, *orb_id);
-            match standing > ratio(0, 1) {
+            let axial = bridge::standing_axial_of(prior, *orb_id);
+            match axial.iter().any(|share| *share > ratio(0, 1)) {
                 true => Ok(()),
-                false => Err(Unlawful::MintWithoutOwnStanding {
-                    orb: *orb_id,
-                    standing: Box::new(standing),
-                }),
+                false => Err(Unlawful::MintWithoutOwnStanding { orb: *orb_id, axial }),
             }
         }
         // Every other deed is judged by the invariants above. The

@@ -608,6 +608,67 @@ pub fn circulation_on(delta: &Delta, support: &Support) -> Delta {
     out
 }
 
+/// **THE BORNE SHARE, AXIS BY AXIS** — how much of the circulation each
+/// entity holds up ON EACH COORDINATE. `D` says how much room stands;
+/// this says WHO IS STANDING IN IT, and IN WHICH DIRECTION.
+///
+/// ```text
+/// borne_i,l = ½ · Σ_{j ~ i} |circulation_on(Δ, S)_ij,l|
+/// ```
+///
+/// **NEVER ONE SCALAR** (`18_TORSION` §2b, operator ruling 2026-08-02:
+/// *this needs to be multi-axial on vertices*). The first landing of
+/// this share summed across every coordinate and returned ONE number
+/// per entity. That is a directional quantity collapsed to a scalar
+/// aggregate, which §2b bars wherever the system computes — and it
+/// erased the only thing an entity can act on. Two entities reading the
+/// same total can stand in completely different worlds:
+///
+/// ```text
+/// borne = 3   as one scalar     — indistinguishable
+///   → (3, 0, 0)  everything on one axis, two axes untouched
+///   → (1, 1, 1)  spread evenly, nowhere to grow cheaply
+/// ```
+///
+/// The aggregate lies about the parts in exactly the way
+/// `verdict_per_dimension` was built to catch: a universe can read
+/// whole on the sum while no single coordinate carries both poles.
+///
+/// **TOWARD UPLIFT.** A coordinate where an entity stands at the ground
+/// is not a deficiency, it is the OPEN DIRECTION — the axis on which a
+/// new relation would earn most. Read per axis, the share stops being a
+/// score and becomes a map of where to grow, which is the whole
+/// difference between a reading that withholds and one that gives
+/// (D6, `18` Article II).
+///
+/// Indexed `[entity][coordinate]`. Exact rationals (I3).
+pub fn borne_axial(delta: &Delta, support: &Support) -> Vec<Vec<Ratio>> {
+    let dim = delta.dim().min(support.dim());
+    let fiber = delta.fiber().min(support.fiber());
+    let circ = circulation_on(delta, support);
+    let half = Ratio::new(1.into(), 2.into());
+    let zero = Ratio::from_integer(0.into());
+    (0..delta.dim())
+        .map(|i| {
+            (0..delta.fiber())
+                .map(|l| {
+                    let mut total = zero.clone();
+                    if i < dim && l < fiber {
+                        for j in 0..dim {
+                            if i == j || !support.has(i, j, l) {
+                                continue;
+                            }
+                            let v = circ.entry(i, j, l);
+                            total += if *v < zero { -v } else { v.clone() };
+                        }
+                    }
+                    total * &half
+                })
+                .collect()
+        })
+        .collect()
+}
+
 /// **THE BORNE SHARE** — how much of the circulation each entity holds
 /// up. `D` says how much room stands; this says WHO IS STANDING IN IT.
 ///
@@ -618,6 +679,15 @@ pub fn circulation_on(delta: &Delta, support: &Support) -> Delta {
 /// ```text
 /// borne_i = ½ · Σ_{j ~ i} Σ_l |circulation_on(Δ, S)_ij,l|
 /// ```
+///
+/// **THIS IS THE LENS FORM — the L1 over [`borne_axial`], and the axial
+/// reading is the one that computes.** `18_TORSION` §2b permits an L1
+/// aggregate at a HUMAN LENS and bars it wherever the system computes,
+/// so this is for display and for totals that must reconcile (the
+/// conservation pin sums it against the whole circulation). **A gate
+/// reads [`borne_axial`]**: collapsing first would hide which
+/// coordinate an entity actually stands on, and that is the only part
+/// of the reading it can act on.
 ///
 /// **Why the relation and not the cycle.** The cycle is the intuitive
 /// unit — charge is a property of a closed loop — but a *fundamental
@@ -650,30 +720,10 @@ pub fn circulation_on(delta: &Delta, support: &Support) -> Delta {
 /// Exact rationals throughout (I3). A pure coboundary bears nothing —
 /// frame is not work.
 pub fn borne(delta: &Delta, support: &Support) -> Vec<Ratio> {
-    let dim = delta.dim().min(support.dim());
-    let fiber = delta.fiber().min(support.fiber());
-    let circ = circulation_on(delta, support);
-    let half = Ratio::new(1.into(), 2.into());
     let zero = Ratio::from_integer(0.into());
-    (0..delta.dim())
-        .map(|i| {
-            let mut total = zero.clone();
-            if i < dim {
-                for j in 0..dim {
-                    if i == j {
-                        continue;
-                    }
-                    for l in 0..fiber {
-                        if !support.has(i, j, l) {
-                            continue;
-                        }
-                        let v = circ.entry(i, j, l);
-                        total += if *v < zero { -v } else { v.clone() };
-                    }
-                }
-            }
-            total * &half
-        })
+    borne_axial(delta, support)
+        .into_iter()
+        .map(|axes| axes.into_iter().fold(zero.clone(), |a, b| a + b))
         .collect()
 }
 

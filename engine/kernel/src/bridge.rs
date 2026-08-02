@@ -41,7 +41,7 @@
 
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::Committed;
-use rfa_core::capacity::borne;
+use rfa_core::capacity::{borne_axial, borne};
 use rfa_core::{
     dual_pole, holonomies, boundary_form, Degree, Delta, Flow, BoundaryForm, Support, Vacuity, Holonomy,};
 
@@ -608,19 +608,75 @@ pub fn borne_by_orb(state: &Committed) -> Vec<(u64, Ratio)> {
         .collect()
 }
 
-/// THE ONE ORB'S STANDING — what this orb holds up of the world's
-/// circulation. An orb the world has never seated stands at the ground,
-/// which is the same answer as an orb seated but holding nothing: in
-/// neither case is there structure to attribute.
+/// **THE STANDING, AXIS BY AXIS** — the reading a GATE consults
+/// (operator ruling 2026-08-02: *multi-axial on vertices towards
+/// uplift*).
+///
+/// One share per CHANNEL — [`CHANNEL_BOND`], [`CHANNEL_COVENANT`],
+/// [`CHANNEL_DEBT`] — never summed. `18_TORSION` §2b bars collapsing a
+/// directional quantity to a scalar wherever the system computes, and
+/// the collapse costs the only thing an orb can act on: two orbs
+/// reading the same total may stand on one channel each or on all
+/// three, and those are different worlds.
+pub fn borne_by_orb_axial(state: &Committed) -> Vec<(u64, Vec<Ratio>)> {
+    let (delta, support) = project_complex(state);
+    let axial = borne_axial(&delta, &support);
+    state
+        .orbs
+        .iter()
+        .enumerate()
+        .map(|(seat, held)| {
+            let share =
+                axial.get(seat).cloned().unwrap_or_else(|| vec![ratio(0, 1); CHANNELS]);
+            (held.orb_id, share)
+        })
+        .collect()
+}
+
+/// THE ONE ORB'S STANDING, PER CHANNEL. An orb the world has never
+/// seated stands at the ground on every channel — the same answer as an
+/// orb seated but holding nothing, because in neither case is there
+/// structure to attribute.
+pub fn standing_axial_of(state: &Committed, orb: u64) -> Vec<Ratio> {
+    borne_by_orb_axial(state)
+        .into_iter()
+        .find(|(id, _)| *id == orb)
+        .map(|(_, share)| share)
+        .unwrap_or_else(|| vec![ratio(0, 1); CHANNELS])
+}
+
+/// **THE OPEN AXES — TOWARD UPLIFT.** The channels on which this orb
+/// stands at the ground.
+///
+/// This is the syntropic half of the reading and the reason it is kept
+/// multi-axial. A channel at the ground is not a deficiency to be
+/// scored; it is the DIRECTION A NEW RELATION WOULD EARN ON. Summed
+/// away, the same orb learns only that it is short. Read per axis, it
+/// learns where to grow — a reading that gives rather than withholds
+/// (`18` Article II).
+///
+/// An orb standing on every channel returns empty: nothing is open
+/// because nothing is unoccupied, which is a full answer and not a
+/// refusal.
+pub fn open_axes_of(state: &Committed, orb: u64) -> Vec<usize> {
+    let ground = ratio(0, 1);
+    standing_axial_of(state, orb)
+        .into_iter()
+        .enumerate()
+        .filter(|(_, share)| *share == ground)
+        .map(|(channel, _)| channel)
+        .collect()
+}
+
+/// THE ONE ORB'S STANDING, AS ONE NUMBER — **the lens form**. The L1
+/// over [`standing_axial_of`], permitted at a human lens and barred
+/// where the system computes (`18` §2b). Totals that must reconcile
+/// read this; GATES READ THE AXIAL FORM.
 ///
 /// Never negative — a share is a magnitude — so this reads as a floor
 /// an orb can rise from, not a penalty it must avoid.
 pub fn standing_of(state: &Committed, orb: u64) -> Ratio {
-    borne_by_orb(state)
-        .into_iter()
-        .find(|(id, _)| *id == orb)
-        .map(|(_, share)| share)
-        .unwrap_or_else(|| ratio(0, 1))
+    standing_axial_of(state, orb).into_iter().fold(ratio(0, 1), |a, b| a + b)
 }
 
 /// The cross-book door: the same one-pass read, carrying the count of

@@ -117,8 +117,10 @@ fn a_thriving_line_diverges() {
         .filter(|m| **m)
         .count();
         assert_eq!(mutations, 1, "exactly one axis mutates per cleave");
-        // PEERS: the species is the line's, whole — the daughter
-        // suffix is retired (11 §3).
+        // PEERS: the species is the line's, whole — the kinship
+        // suffix is retired (11 §3: "Daughter" imported terrestrial
+        // unary budding, one parent mutating one axis, and it is
+        // half a model with no second half).
         assert!(!branch.species.contains("descendant"));
         assert_eq!(branch.species, origin.species, "one line, one species");
     }
@@ -166,7 +168,7 @@ fn a_thriving_line_diverges() {
         .join("chronicle.jsonl")
         .exists());
 
-    // THE STAR-CHART: the daughter settled ADJACENT to its parent —
+    // THE STAR-CHART: the branch settled ADJACENT to its origin —
     // charted, exact, displaced but within the half-unit-step reach
     // (dist² ≤ 8, ≠ 0).
     let book = Ledger::at(root.join("worlds"));
@@ -178,7 +180,7 @@ fn a_thriving_line_diverges() {
         })
         .expect("the parent beats")
         .spec;
-    // THEMED NAMES, NEVER CHAINS: a daughter's world is a fresh
+    // THEMED NAMES, NEVER CHAINS: a branch's world is a fresh
     // two-part themed name — ancestry lives in the lineage field and
     // the star-chart adjacency, not in ever-growing strings.
     assert!(

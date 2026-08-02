@@ -84,7 +84,7 @@ station-seat checks, rostered for the conductor). Convergence no longer
 self-annexes the live root — era-qualified aliases of living worlds are
 gone; only `<base>-eraN` archives converge (the fold is the one door). Open second slices: TECH-1b
 (the crystallized tree), AEON-1b (conductor orchestration: voice
-triggers, divergence speciation, fold rotation), the market board
+triggers, divergence/confluence growth, fold rotation), the market board
 (§3a — its APERTURE gate stands open), and the union CLI verbs.
 
 Recent defect rulings (regression-pinned): **flat demurrage** (proportional

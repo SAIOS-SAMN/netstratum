@@ -205,7 +205,10 @@ fn an_orb_holding_nothing_cannot_mint_on_the_world_s_structure() {
     let seen = lawful(&live, &live, &mint_by(5));
     assert_eq!(
         seen,
-        Err(Unlawful::MintWithoutOwnStanding { orb: 5, standing: Box::new(ratio(0, 1)) }),
+        Err(Unlawful::MintWithoutOwnStanding {
+            orb: 5,
+            axial: vec![ratio(0, 1), ratio(0, 1), ratio(0, 1)],
+        }),
         "an orb holding no obligation may not mint on other orbs' structure"
     );
 
@@ -228,11 +231,28 @@ fn the_refusal_carries_the_share_so_the_floor_can_be_risen_from() {
     live.bonds =
         vec![bond(1, 2, 3), bond(2, 3, 3), bond(3, 4, 3), bond(4, 1, 3), bond(1, 3, 1)];
 
-    let Err(Unlawful::MintWithoutOwnStanding { standing, .. }) = lawful(&live, &live, &mint_by(5))
+    let Err(Unlawful::MintWithoutOwnStanding { axial, .. }) = lawful(&live, &live, &mint_by(5))
     else {
         panic!("orb 5 holds nothing and must be refused on its own standing");
     };
-    assert!(*standing >= ratio(0, 1), "a share is a magnitude, never a debt");
+    // CARRIED PER AXIS, NEVER SUMMED. The refusal names one share per
+    // CHANNEL, so it says WHICH DIRECTION is open rather than only how
+    // short the orb is (`18` §2b bars the collapse where the system
+    // computes; operator ruling 2026-08-02, multi-axial towards uplift).
+    assert_eq!(axial.len(), kernel::bridge::CHANNELS, "one share per channel, never one scalar");
+    for share in &axial {
+        assert!(*share >= ratio(0, 1), "a share is a magnitude, never a debt");
+    }
+    // And every channel is open to it — the refusal is a map, not a score.
+    assert_eq!(
+        kernel::bridge::open_axes_of(&live, 5),
+        vec![
+            kernel::bridge::CHANNEL_BOND,
+            kernel::bridge::CHANNEL_COVENANT,
+            kernel::bridge::CHANNEL_DEBT
+        ],
+        "an orb holding nothing has every direction open to it"
+    );
 
     // THE LIFT IS REAL. Give orb 5 a place in the circulation and the
     // same deed is no longer refused for standing.
