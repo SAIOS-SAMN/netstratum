@@ -127,3 +127,74 @@ knows, pin the remainder red-first.
 **`engine/cfe/` is UNOWNED on the lane map.** `world.rs` is the largest
 shared file in the tree and every lane touches it. This refactor needs
 an owner assigned before it lands, not after.
+
+---
+
+## §7 THE SPLIT IS DONE — on `capacity-lane`, at `666be81` (assessed 2026-08-02)
+
+**This document's §4 is superseded by work that already exists.**
+`capacity-lane` landed *"world.rs becomes an organ: 5,034 lines into
+fifteen files"* with the public surface unchanged and all 481 workspace
+tests passing. Their shape is finer than §4's four-module proposal:
+
+    mod.rs 889 · tick.rs 641 · replay.rs 621 · economy.rs 485
+    accord.rs 409 · core.rs 378 · survey.rs 364 · genesis.rs 342
+    state.rs 296 · tech.rs 287 · refusal.rs 151 · gauge.rs 131
+    thermal.rs 104 · rules.rs 74 · zones.rs 47
+
+`rules.rs` is the cut §4 asked for and could not name: `ease_of` and
+`demurrage_due` in 74 lines, apart from the game. `replay.rs` labels
+THE SECOND DEFINITION as one, which is `19_KERNEL` §3 made structural.
+
+### 7a. THE MERGE, MEASURED
+
+    merge base          b3bf038 (the vertical axis)
+    kernel-lane ahead   27 commits
+    capacity-lane ahead 12 commits
+    textual conflicts   ONE — docs/18_TORSION.md
+
+**The single conflict understates the work.** `capacity-lane` DELETED
+`world.rs`; `kernel-lane` modified it heavily. Git sees add/delete, not
+a conflict, so the merge would silently drop every kernel-lane edit to
+that file. What must be TRANSPLANTED by hand:
+
+    rules.rs      ease_of → epoch dispatch (ease_cliff + ease_gradient)
+                  demurrage_due → gains the `supply` table
+                  standing_supply → new, sealed, serves both judges
+    call sites    13 × ease_of(.., stamp)
+                  12 × demurrage_due(.., &supply) / touch(.., &supply)
+                  6 × the standing_supply snapshot at function head
+                  now spread over economy · tick · genesis · survey · core
+
+**The split makes this EASIER, not harder** — `rules.rs` is 74 lines
+where the monolith was 5,034.
+
+**DIRECTION: kernel-lane moves onto their structure.** They deleted the
+file; rebasing my edits onto the organ is the only merge that preserves
+both. The reverse re-creates the monolith.
+
+### 7b. A DISCREPANCY TO RECONCILE BEFORE MERGING
+
+`capacity-lane` records a measurement that contradicts this lane's
+framing of #30:
+
+> *Replay's body recomputes exactly ONE shared rule —
+> `dop::commensurate_weight(resource)` at `world.rs:4439`. **It never
+> calls `ease_of` or `demurrage_due`** — those arms apply the receipted
+> amount. So the double-definition exposure is one call site rather
+> than 113 arms.*
+
+If replay only replays receipted amounts, live and replay agree by
+construction and changing `ease_of` could not have diverged them. **But
+it did, empirically:** `conductor/tests/survey_pins.rs` failed on
+`d52f3fd` with live `Crystal 127/16` against replay `15/16`, and
+bisection tied it to `ease_of`. Both cannot be right as stated.
+
+Most likely both hold and describe different things — replay may not
+call the rule DIRECTLY while the divergence travels through a
+tick-computed consequence. **Unresolved, and it must be resolved before
+the merge**, because it decides whether #30 is one call site or 113
+arms, and therefore how much of `19_KERNEL` §3 is real work.
+
+The epoch mechanism (`65963b4`) closed the observed divergence either
+way, so nothing is blocked on the answer — only the size of #30 is.
