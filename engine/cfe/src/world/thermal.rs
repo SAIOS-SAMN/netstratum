@@ -83,7 +83,13 @@ impl World {
         held.thermal = Some(ThermalSite {
             albedo: albedo.clone(),
             orbit_r: orbit_r.clone(),
-            theta: theta.clone(), psi: None,
+            theta: theta.clone(),
+            // THE LIVE PATH KEEPS THE INCLINATION. Writing None here
+            // while the RECEIPT carried it made live and replay
+            // disagree in the opposite direction to the earlier drops —
+            // and clippy could not see it, because the binding IS used
+            // (by the receipt). Only replay_fidelity catches this.
+            psi: psi.clone(),
         });
         // TECH-1a (12_UNION §5a): a world's FIRST thermal opt-in
         // receipts the kernel SOLAR LEAP — its people now know their
