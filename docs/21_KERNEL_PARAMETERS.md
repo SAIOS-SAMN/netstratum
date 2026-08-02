@@ -364,3 +364,94 @@ destination change over a settled bound.
 `P2` also needs no wire amendment; §6a does. Taking the cheaper,
 lower-blast-radius change first keeps tag 29 stable while the rate
 settles.
+
+---
+
+## §9 `P2` IS BLOCKED BY THE DEPENDENCY ARROW — found before the 8 sites
+
+Capacity-lane asked that `P2`'s signature be designed once, knowing the
+split sink follows. Designing it surfaced a blocker that invalidates
+§4's "no schema change" claim for `P2` specifically.
+
+### 9a. THE MEASUREMENT
+
+    cfe        depends on nothing internal        (the bottom)
+    rfa-core   depends on cfe                     (game-blind)
+    kernel     depends on cfe + rfa-core          (the top)
+
+`bridge::read_entangled` — the only reader of rank `D` — lives in
+`kernel`. **`cfe::world::demurrage_due` therefore cannot compute rank**,
+and `world.rs` references it zero times today. The projection cannot
+move below `cfe` either: it needs `Committed` (in `cfe`) and the
+reduction (in `rfa-core`, which already depends on `cfe`), so any home
+below `kernel` is circular.
+
+### 9b. WHY THAT BLOCKS `P2` RATHER THAN MERELY COMPLICATING IT
+
+`demurrage_due` is a SEALED RULE — *"the kernel CALLS this for I5's
+bound (call-not-copy), one rule, one computation, two judges"*
+(`world.rs:4842`). `P2` makes the rate depend on rank. So:
+
+- the PROPOSER (`world.rs`) cannot see rank;
+- the JUDGE (`kernel`) can;
+- if they compute different rates, **honest deeds refuse at I5.**
+
+Passing the rate in from above does not help: a rate the kernel accepts
+without re-deriving is a number a node can lie about, and the mint sits
+directly downstream. The sealed-rule discipline requires both sides to
+reach the same value from the same state.
+
+**This is exactly the cost capacity-lane warned would be paid twice.**
+Rewriting 8 call sites first and discovering it after would have meant
+rewriting them again.
+
+### 9c. THREE WAYS OUT — a choice, not a derivation
+
+1. **STORE RANK IN `Committed`.** Both sides then read one committed
+   number and cannot disagree. **A SCHEMA CHANGE — which contradicts
+   §4's claim that no parameter needs one; that claim was true for the
+   kernel and false for the proposer, and is corrected here.** Its
+   virtue is real: rank is the organising quantity of the whole system
+   and nothing in the chain currently attests what rank stood when a
+   deed was judged. Storing it makes the mint's standing auditable
+   instead of recomputed.
+2. **A NEW CRATE BETWEEN `rfa-core` AND `kernel`** holding the
+   projection, which `cfe` cannot depend on either — so this only
+   helps if `demurrage_due` moves up with it, which un-seals the rule
+   from the proposer's side.
+3. **DEMURRAGE STOPS DEPENDING ON RANK.** `P2` responds to SUPPLY
+   alone, which `cfe` can compute from its own state without the
+   bridge. Loses the rank term; keeps the sink dynamic and keeps the
+   ruled direction (stiffens as supply grows). **Cheapest by a wide
+   margin and needs no schema change.**
+
+Option 3 lands `P2` today. Option 1 is the better architecture and
+costs a schema bump. **Not chosen here — it is a monetary and
+architectural ruling, and capacity-lane's split sink depends on which
+way it goes**, since §6a also needs rank readable at the touch and
+inherits the same blocker.
+
+### 9d. THE INCENTIVE FINDING — capacity-lane's, and it is load-bearing
+
+Under the split sink, two terms move in opposite directions as a warded
+line advances:
+
+    tithe = decay_total · share
+            │             └─ capacity(ward)/capacity(world) — RISES
+            └─ rate · ease · elapsed — FALLS, because `P3` made ease a
+               DESCENDING gradient
+
+If the decay term dominates, **an elder's income falls as its ward
+advances — paying the elder to suppress technology inside its own
+scope.** `P3` created that exposure: under the old `== 5` cliff the
+ease term was flat across conditions 0–4, so the interaction did not
+arise below the cliff.
+
+Cheap to measure once both terms are readable at the touch; expensive
+after the tithe is receipted law. **A third argument for `P2` first.**
+
+### 9e. NOTED FROM CAPACITY-LANE
+
+`d52f3fd` (P3) is on `kernel-lane` only — **not on `main` and not
+visible downstream.** Their worktree still holds the `== 5` cliff, and
+nothing above should assume the gradient until it lands.
