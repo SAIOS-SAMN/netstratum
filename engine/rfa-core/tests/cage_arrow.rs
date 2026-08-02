@@ -10,12 +10,19 @@ use std::fs;
 /// Modules on the COMPUTING PATH. They may CONSTRUCT a caged reading —
 /// that is the door in — but must never CONSUME one, name its type, or
 /// depend on it in any way.
-const COMPUTING_PATH: [&str; 5] = [
+const COMPUTING_PATH: [&str; 6] = [
     "src/boundary.rs",
     "src/reduce.rs",
     "src/fold.rs",
     "src/gates.rs",
     "src/rcf.rs",
+    // D'S OWN METER, added 2026-08-02. `capacity.rs` computes the
+    // circulation, the degree, and the borne share — the readings
+    // Article II and the mint gate consult. It landed after this list
+    // was written and was never added to it, so the one module that
+    // decides what a world may EARN sat outside the arrow law. It is
+    // clean and it is now held that way.
+    "src/capacity.rs",
 ];
 
 #[test]

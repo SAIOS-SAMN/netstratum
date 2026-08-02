@@ -62,7 +62,7 @@ pub struct ConvergeRead {
     pub epoch_base: u64,
 }
 
-/// Discover era roots beside `var_root`: every sibling directory named
+/// Discover era roots beside `var_root`: every counterpart directory named
 /// `<base>-era*` (name-ascending — era1 before era2), then the current
 /// root itself LAST (its prior-run worlds are the youngest era). Each
 /// entry is (era name, worlds dir).

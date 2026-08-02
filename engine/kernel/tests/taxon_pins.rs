@@ -125,7 +125,7 @@ fn every_deed() -> Vec<ClosureEvent> {
         E::TaxonSealed { class: 1, clade: 1 },
         E::DiscoveryMinted { orb_id: 1, resource: Resource::Iron, amount: r(1), work: Vec::new() },
         E::InstrumentForged { orb_id: 1, tech_hash: bytes, grade: 1 },
-        E::VoidShare { deal: 1, resource: Resource::Iron, amount: r(1) },
+        E::VoidShare { orb_id: 1, deal: 1, resource: Resource::Iron, amount: r(1) },
         E::RouteChartered { deal: 1, eta: r(0) },
         E::RouteLapsed { deal: 1 },
     ]

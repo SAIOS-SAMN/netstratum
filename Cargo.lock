@@ -137,6 +137,7 @@ dependencies = [
  "mesh",
  "num-bigint",
  "num-traits",
+ "rfa-core",
  "scribe",
 ]
 

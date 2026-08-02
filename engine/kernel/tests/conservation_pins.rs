@@ -11,7 +11,7 @@ use cfe::world::{World, FIRST_ORB, SOVEREIGN};
 use kernel::{lawful, Step, Unlawful, VERSION};
 
 /// A world with two orbs and value banked on the first, ready to move.
-/// The origin earns before it charters (the daughter's founding
+/// The origin earns before it charters (the charted's founding
 /// reserves are 20 iron + 10 biomass), leaving a surplus to transfer.
 fn two_orb_world() -> World {
     let mut world = World::new();

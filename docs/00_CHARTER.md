@@ -153,7 +153,7 @@ first time; a standing test did.
 |---|---|---|
 | NS-1 | **DOP** — Dimensional Object Protocol | Colony, sector, and profile orbs — every game object is a self-contained orb with provenance |
 | NS-2 | **RQP** — Resonance Query Protocol | The scanner: search by structural resonance, not string match |
-| NS-3 | **VRP** — Verification Receipt Protocol | The world chronicle: every action an append-only, parent-linked receipt |
+| NS-3 | **VRP** — Verification Receipt Protocol | The world chronicle: every action an append-only, predecessor-linked receipt |
 | NS-4 | **APERTURE** — the controlled opening | Sector-map sharing and private trade offers, opened at a granted facet (summary → detail → full) |
 | NS-5 | **MESH** — Proof-of-Convergence Consensus | Multi-node world synchronization ("two laptops, one world") |
 | NS-6 | **IPSAL-OS** — Entity Containment | Player, NPC, and bot identity: the profile of every individual inside our internet |
@@ -167,7 +167,7 @@ first time; a standing test did.
   vision), AI-SCIENTISTS (the safety research). Shapes are reference; every
   scalar/scored/capped form is refused.
 - `/opt/ipsal-autic-v0.4/` — the sealed engine build: the chronicle (VRP's
-  working ancestor), the sigil index (RQP's), consilience (MESH's), the TLV
+  working predecessor), the sigil index (RQP's), consilience (MESH's), the TLV
   wire, and `docs/GROUND.md`'s organ map — the DO-NOT-REBUILD gate.
 - **Naming:** SAIOS is retired (external name collision). The sovereign layer
   is **ipsal-os**, here and everywhere forward.
@@ -298,7 +298,7 @@ exports) deletes at Step 4 once views serve from the chain.
 1. **Single source of truth.** The game keeps exactly one
    machine-readable copy of state: a hash-chained sequence of state
    snapshots, each named by its coordinate TUniversal{S, G, T} and
-   bound to its parent.
+   bound to its predecessor.
 2. **Exports are write-only.** JSON files, dashboards, and save-file
    copies are display output. No code ever parses them back in.
 3. **One validated update function.** All state changes go through
@@ -338,7 +338,7 @@ frozen meanwhile):**
   were cut with. **The freeze window: the committed state's field
   set holds stable until codec v1 lands** — any in-flight change
   touching it coordinates with the codec lane first. The commitment
-  is `H(schema ‖ state_bytes ‖ parent ‖ coordinate)`, produced by
+  is `H(schema ‖ state_bytes ‖ predecessor ‖ coordinate)`, produced by
   the spine only; the update function never reads it.
 - **Step 3 — the chain and the vertical axis**: snapshots chained;
   identity, station, lineage, roster, galaxies, and eras become

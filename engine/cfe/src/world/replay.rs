@@ -78,15 +78,15 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                         source.bank(resource, -amount);
                     }
                 }
-                let mut daughter = ColonyOrb {
+                let mut charted = ColonyOrb {
                     orb_id: *orb_id,
                     name: name.clone(),
                     ..ColonyOrb::default()
                 };
                 for (resource, amount) in founding_reserves() {
-                    daughter.bank(resource, amount);
+                    charted.bank(resource, amount);
                 }
-                orbs.push(daughter);
+                orbs.push(charted);
             }
             ClosureEvent::ZoneBuilt { orb_id, tile, kind } => {
                 if let Some(held) = peel(&mut orbs, *orb_id) {
@@ -603,6 +603,14 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             // MARKET-2 conform: the void's share moves no bank — the
             // receipt IS the fact; what landed was already credited.
             ClosureEvent::VoidShare { .. } => {}
+            // D5 — THE SOVEREIGN UNION. A CONSTITUTIONAL deed: it
+            // records that the offices stand in union and moves no
+            // value, no bank, no zone and no key. Replay therefore has
+            // nothing to rebuild from it — the receipt IS the state.
+            // The review horizon is READ from the chronicle on demand
+            // (`World::union_review`), never accumulated here, so
+            // there is no counter to drift.
+            ClosureEvent::SovereignUnionSealed { .. } => {}
             // ROUTE-1: the lane lives and dies by receipt.
             ClosureEvent::RouteChartered { deal, eta } => {
                 routes.push((*deal, eta.clone()));

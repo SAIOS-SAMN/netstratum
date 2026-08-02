@@ -113,7 +113,7 @@ impl Delta {
     /// LAW: each violation counts exactly its size, in its own units).
     ///
     /// **LENS READING ONLY.** No engine path decides anything from this
-    /// number; it exists so a human surface can render how far a state
+    /// number; it exists so an operator surface can render how far a state
     /// sits from the surface. The engine asks
     /// [`Self::first_conservation_break`] instead, which names a
     /// position rather than a magnitude.

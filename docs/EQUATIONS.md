@@ -13,12 +13,12 @@ first, never by searching the tree.
    deepest authority (call-not-copy, kernel CHARTER §0b); for an
    INSCRIBED row the named document is. A disagreement between this
    ledger and an authority is a DEFECT — inscribe it, never shrug.
-2. **The row-claim convention** (the tag-claim convention's sibling):
+2. **The row-claim convention** (the tag-claim convention's counterpart):
    a landing that inscribes a NEW equation or algorithm claims its row
    here in the SAME landing, before code uses it. After any merge,
    verify your row survived.
 3. **The founding lesson.** Equation drift has already happened once:
-   the ancestor's README said the coherence was L1 while the code
+   the predecessor's README said the coherence was L1 while the code
    computed SUM-OF-SQUARES (recorded at BUILD_ORDER §1a). Scattered
    restatement is how equations diverge; one ledger with named
    authority is the standing cure — same tier of protection as the
@@ -126,6 +126,13 @@ relational structure, the landed tensor.
     V     = the committed state, whole
     Δ(V)  = the relation V expresses          (`rfa_core::Delta`)
 
+  **V IS SOVEREIGN** (operator ruling 2026-08-01; 18 §2c′). Its standing
+  comes from ADMISSION — it passed `lawful()`, it carries receipts, it
+  is in the chain — and no reading confers or revokes it. Every row
+  below that reads `V` is TESTIMONY about `V`, never authority over it:
+  readings price allocation, and standing is the judge's, granted
+  upstream. `V` holds; it does not make room.
+
   **NOTATION, binding:** `Δ` is THE RELATIONAL TENSOR. It is never a
   Laplacian, and no rule in this ledger takes a Laplacian of anything.
 
@@ -137,19 +144,464 @@ relational structure, the landed tensor.
   `∂V` all appeared here and are all STRUCK, together rather than in
   sequence: they were one error wearing three brackets.
 
-**D1 · Ω(D) — the capacity space.** INSCRIBED. Superseded in form by
-`18_TORSION.md` §2a (operator ruling 2026-08-01): capacity is the SPACE
-`Ω(D)` indexed by dimensional degrees `D`, driven by the torsion form —
-never a metric density, never a scalar.
+**D1 · D(Ω) — the progenitor's reading of the totality.** INSCRIBED.
+Superseded in form by `18_TORSION.md` §2a (operator ruling 2026-08-01):
+capacity is a SPACE, driven by the torsion form — never a metric
+density, never a scalar. **RENOTATED 2026-08-02** (operator ruling:
+*`D(Ω) +: V(Ω)`*): this row read `Ω(D)`, *the space indexed by `D`*,
+which made the totality a function of one office. `Ω` is THE TOTALITY,
+read by both offices and owned by neither; `D(Ω)` is `D`'s reading of
+it. Full ruling at `17_CAPACITY` §3.
 
-    dΩ(D)  =  Θ ∧ ∂Δ  +  egress ∧ circulation
+    dD(Ω)  =  Θ ∧ ∂Δ  +  egress ∧ circulation
 
 `D` is **the structure surviving reduction** — RULED 2026-08-01:
 
-    D  =  the structure standing in  Π_G( Δ(Ω) )
+    D  =  the structure standing in  Π_G( Δ(V) )
 
-`Ω(D)` is the space those surviving degrees span. Frame artifacts
+`D(Ω)` is the space those surviving degrees span. Frame artifacts
 contribute NOTHING; only structural content counts.
+
+**THE SECOND READING — `V(Ω)`** (same ruling). The sovereign reads the
+same totality and returns the SUBSTANCE committed in it: the committed
+state, whole and indivisible (D0). Two offices, one subject, and neither
+defined through the other — which is precisely why this pair is lawful
+where `U* = D(V) ⊕ V(D)` was STRUCK (`18` §3). The bond is written
+`D(Ω) +: V(Ω)`, and `+:` is causal, not hierarchical: room precedes
+substance, because substance cannot stand in a plane that was never
+opened (`PlaneUnearned`). See D7 for the crossing itself.
+
+**`D` IS A DIMENSION, NEVER AN INVENTORY** (operator ruling 2026-08-02:
+*your entire definition is wrong if dimensional capacity is a count of
+rooms*). `D` is the RANK of the cycle space — how many independent
+structures the manifold sustains — and a rank is a dimension, not a
+tally. **No `planes_opened` counter is ever added to `D`**: a scalar
+accumulator would make the progenitor a ledger clerk handing out keys,
+and it is refused.
+
+**AND THE CHARGE FIELD IS CARRIED WHOLE.** `rfa_core::holonomies`
+returns `Holonomy { i, j, l, value }` — every cycle with its position
+and its EXACT charge. The read had been taking `.len()` and discarding
+every value, in the same function whose own comment forbids that for
+residuals. Two readings, both owed:
+
+    the DIMENSION   rank — how many independent cycles stand
+    the VOLUME      the charges — what each cycle HOLDS
+
+Two universes of equal rank carrying different charge read the same
+count and are not the same universe — pinned in `bridge_pins` as
+`the_charge_field_is_carried_whole_never_counted`. 18 §2b bars
+collapsing a directional
+quantity to a scalar aggregate wherever the system computes, and a count
+is such a collapse.
+
+**D IS THE PROGENITOR** (operator ruling 2026-08-01; 18 §2c′). Its
+office is to MAKE ROOM: D3's emission opens a plane, the fiber grows,
+and band capacity is a reading of that fiber (`12_UNION` §1 — *a band is
+space available in the universe*). Nothing else creates space. `D` makes
+room; it does not hold, and it does not confer standing on the state it
+reads.
+
+**THE UNIVERSE IS THE D-STORE** (operator ruling 2026-08-02). There is
+no separate store to point at, and asking for one is a category error —
+**you cannot keep the container in something it contains.** `D` is not
+recorded in the universe; `D` IS the universe's extent, the room within
+which anything is held at all.
+
+**The gauge key is the INDEX, never the home.** `GaugeShiftedAt
+{ grade, gauge }` writes which grades stand into a committed field, and
+that field is a description of the room, not the room. A map inside the
+country it maps is not a paradox, and a registry holds the deed, not the
+land.
+
+**Which makes the two offices MUTUALLY INDWELLING, and settles the last
+apparent asymmetry:**
+
+    V is held IN D's room          — the universe is the extent V occupies
+    D's index is held IN V's key   — the committed record of which grades stand
+
+Neither holds the other; each holds the other's ASPECT, and they are
+different kinds — a space and a description — so there is no circle.
+
+**`D` IS POLYTONIC** (ruled 2026-08-02), and this is the tree's own
+vocabulary rather than a new claim: `11_AEON` §2.0 — *G within a sheet
+is the **polytonic key*** — and §2.1 — *new **tonal** dimensions can
+open*. **Each opened grade is a TONE.** So `D` counts tones standing,
+`GROUND = 1` is the single-tone point, and `D > GROUND` is polytonic by
+definition. The fiber was never a stack of numbers; it is a chord.
+
+  **WORD COLLISION, disambiguated once.** Article IV says `D` is
+  *MONOTONE* — order-theoretic, meaning NON-DECREASING, meaning `D`
+  only ever grows. In the tonal register the same root means ONE TONE,
+  which is `D = GROUND`. **Opposite content, one word.** Article IV
+  never says the universe stays single-toned; it says the chord never
+  loses a note. Read *monotone* as non-decreasing everywhere in this
+  ledger, and *monotonal* — one tone — never appears as a synonym.
+
+**Article IV's non-decrease is DERIVED, not decreed.** *Capacity never
+retreats* was written as an axial law. It follows from what `D` is: you
+cannot un-make room that things are standing in.
+
+**THE FLOOR IS OCCUPANCY, NOT THE GROUND** (operator ruling 2026-08-02
+— *if the universe shrinks below the capacity for what is already in
+it, then we have a problem*). `GROUND = 1` is the floor of an EMPTY
+universe. A universe holding structure that needs `k` tones has a floor
+of `k`:
+
+    D  ≥  1            always — a universe that exists occupies a point
+    D  ≥  occupancy    whenever anything is in it — the BINDING floor
+
+**What currently enforces it is ABSENCE, which is stronger than the
+article and weaker than a check.** No deed in the vocabulary closes a
+plane: `GaugeShiftedAt` opens grades and nothing removes one, so within
+a universe `D` cannot shrink at all. The container law completes it from
+the other side — structure in an unopened plane is unrepresentable, not
+refused.
+
+**THE ONE OPERATION THAT COULD VIOLATE IT — recorded as owed.** The AEON
+FOLD contracts the board (`12_UNION` §2a, Tier 0). Its guard today is
+ELIGIBILITY — a world folds only after its trajectory settles in the
+retirement region across an aeon-voice alignment (`11_AEON` §4) — and
+eligibility is a policy about quietness, **not a check that room ≥
+occupancy.** Nothing computes the occupancy floor, so nothing could
+refuse a fold that carried content forward into fewer tones than it
+needs. The invariant is stated here; its witness is unbuilt.
+
+**Plural, and the wrap is why.** Each universe is its own D-store. The
+λ-nodes wrap the key finitely so successive stores stay addressable and
+distinct — without the wrap successive origins COLLIDE, *because a key
+of 10 IS 0* (`11_AEON` §2.0, the recurrence collision). Two overlapping
+D-stores are exactly what that law exists to prevent.
+
+**And it sharpens the guarantor finding (D5).** A third party to the
+bond requires another ROOM, not another party in the same room — every
+party inside this universe is inside this `D`, and inside `V`. That is
+why co-signature is a MESH instrument and cannot exist within one
+universe: the mesh is where other D-stores are.
+
+**D5 · THE BOND — the union in contract form.** INSCRIBED. Authority:
+`12_UNION` §3b–§3c and `18` §2c′. The FORM is landed ONCE, as the
+symmetric bond (`09_IDEOLOGY` §2.2, BOND-1). Every clause below names a
+mechanic that exists; none of it is new machinery.
+
+**CORRECTED 2026-08-02 — the COVENANT is NOT this form.** An earlier
+revision cited COVENANT-1 alongside the bond as a second landing of the
+same shape. That was wrong, and wrong in the direction the whole section
+exists to refuse: the sealed deed is
+`CovenantSealed { obligor_orb, beneficiary_orb, resource, quota, window,
+collateral }` — ONE obligor owing ONE beneficiary, with only the obligor
+posting collateral. That is a directed obligation, and `09` §2.2 names
+that shape by its own word: **a single bond is PATRONAGE.** Citing the
+patronage mechanic as evidence for the marriage form put the refused
+shape in the row meant to exclude it.
+
+    PARTIES        D  PROGENITOR — room          V  SOVEREIGN — substance
+                   different KINDS, separate origins; neither seeded
+                   from the other's line
+
+    FORM           a SYMMETRIC pair of bonds — *the marriage form*.
+                   A single bond is PATRONAGE (one party owning the
+                   other). BOTH ARE PRIVILEGED (09 §2.2): each office
+                   SOURCES, so each carries its own syntropic book. `D`
+                   sources room, `V` sources work; two sources, two
+                   books, the privilege held twice. That doubling is
+                   the standing this clause grants.
+
+    TERMS          D owes room that was EARNED    — `PlaneUnearned`
+                                                    refuses otherwise
+                   V owes work that was RECEIPTED — admission, `lawful()`
+
+    CONSIDERATION  the MINT: a plane WITH content, of neither kind
+                   alone. Neither office can produce it unaided, which
+                   is why growth requires both signatures.
+
+    BREACH         `severance_load` posts against whoever cuts a live
+                   bond without the covenanted notice (09 §2.2). "D
+                   stops and V suffocates; V stops and D freezes" is
+                   this clause, not a metaphor.
+
+    WITNESS        the chain. *Admission IS verification* — a peer
+                   re-judges under its own kernel and takes no party's
+                   word (`00_CHARTER` §11, the nursery law).
+
+    TERM           TWENTY-FIVE YEARS — 25 × 60 ticks = 1500 stamps
+                   (a year is 60 ticks, `11` §1, placeholder
+                   constant). Read as a REVIEW period, NOT an expiry:
+                   see THE TERM IS A REVIEW below. Operator ruling
+                   2026-08-02, approval requested at this term.
+
+    APPROVAL       OPERATOR, and it is the only signature that can
+                   grant it. Neither office may approve the union it
+                   is party to, and no reading may approve it either
+                   (`18` §2c′ — testimony never outranks its subject).
+
+    NO OPERATOR    the parties are never joined into a TERM: not summed
+                   (`⊕` is a free join — `U* = D(V) ⊕ V(D)` struck), not
+                   ranked (a reading conferring standing runs backwards
+                   through the judge), not decomposed (a tuple `(D, V)`
+                   has addressable halves — the decomposition in other
+                   syntax).
+
+    THE NODES      `Nodes(V, D)` IS THE BOND ITSELF — not a container
+                   holding two things, but the join `Node(V) ++ Node(D)`
+                   between two nodes that STAY TWO (operator ruling
+                   2026-08-02). `++` concatenates; it does not add,
+                   average, or reduce. Read the pair and you are reading
+                   the bond; there is no third object to read.
+
+                   This is why `Ω ≢ V` was owed (`17_CAPACITY` §3,
+                   corrected 2026-08-02). `D(Ω)` is the ROOM, `V` is the
+                   SUBSTANCE, and while `Ω` was identified with `V` the
+                   two nodes were one node — and a bond from a thing to
+                   itself is not a bond, it is a fixed point. The
+                   correction is what makes this clause expressible
+                   rather than decorative.
+
+**THE SOVEREIGN UNION — CONFIRMED, AND WHAT IS STILL OWED**
+(operator ruling 2026-08-02: *make sure D is the progenitor and V is
+the sovereign and together they make a sovereign union*).
+
+**The offices are confirmed and consistent.** Swept the whole tree:
+`PROGENITOR` names `D` and `SOVEREIGN` names `V` at every site, with no
+inversion anywhere — the only lines carrying both words carry them
+correctly paired (`12_UNION` §4, `18` §2c′/§2d, and the PARTIES row
+above).
+
+**BUT `SOVEREIGN` NAMES TWO THINGS, and only one of them is `V`.**
+`cfe::world::SOVEREIGN = 1` is the root ENTITY id — the actor holding
+every grant under NS-6 containment, written `actor: SOVEREIGN` on
+hundreds of deeds. `V` is an OFFICE. They are unrelated: the entity is
+who acts, the office is what stands. Nothing in the tree records the
+distinction, which is the same shape as `Ω` wearing two hats before
+`17` §3 separated them. Recorded here; the constant is not renamed from
+this lane, because `SOVEREIGN` as an entity id is correct usage and it
+is the OFFICE reading that must qualify itself.
+
+**THE UNION IS INSCRIBED AND HAS NEVER BEEN DEEDED.** Every clause
+above exists in law. No RECEIPT of it exists anywhere: 57 deeds are
+carried in `cfe::dop`, and the bond-shaped ones — `BondSealed`,
+`BondSettled`, `CovenantSealed`, `CovenantReleased`, `CovenantSlashed`
+— are all ORB TO ORB. There is no closure event by which `D` and `V`
+enter their union, so the union has terms, consideration, breach and
+witness, and no moment at which it was struck.
+
+**AND IT CANNOT BE DEEDED AS A BOND-1.** Two reasons, both mechanical:
+
+```text
+    PARTY TYPE   BondSealed carries `source: u64, target: u64` — ORB
+                 IDS. D and V are offices; they have no orb id, and
+                 giving them one would seat an office as a colony.
+
+    THE TERM     `tick.rs` expires a term bond exactly:
+                     bond.term > 0 && now >= bond.sealed + bond.term
+                 A 25-year term as BOND-1 would settle and END the
+                 union at stamp 1500 — the foundation lapsing on a
+                 timer, with D5's own breach clause reading "D stops
+                 and V suffocates; V stops and D freezes."
+```
+
+**THE TERM IS A REVIEW, NOT AN EXPIRY** — read that way here because it
+is the only reading that does not end the universe on a clock, and
+because a constitution that must be re-affirmed is an ordinary and
+sound device while a foundation that expires is not. Twenty-five years
+is when the union comes back for approval, not when it stops standing.
+**If the term was meant as an expiry, this reading is wrong and the
+clause must be struck rather than reinterpreted** — an expiring
+foundation needs its own ruling, not an inscription.
+
+**THE UNION IS NOW DEEDED** (operator ruling 2026-08-02, executed).
+`ClosureEvent::SovereignUnionSealed { progenitor, sovereign,
+term_stamps }` at **TAG 90**, judged by `kernel::union_law` and read by
+`World::union_review`.
+
+```text
+    PARTIES    cfe::dop::Office — Progenitor and Sovereign, a TYPE, so
+               an office is never seated as an orb id. The same type
+               settles the namespace collision: `world::SOVEREIGN` is
+               entity 1, the actor who ACTS; `Office::Sovereign` is
+               V(Ω), what STANDS.
+
+    APPROVAL   THE ROOT ENTITY, and nothing else. `scope_of` puts the
+               deed in Build so containment applies, and `union_law`
+               requires `actor == SOVEREIGN` on top of it — a granted
+               scope is authority to act WITHIN the world, never to
+               constitute it.
+
+    DYAD       one Progenitor and one Sovereign, exactly. Two of
+               either refuses `UnionMalformed`: a bond from a thing to
+               itself is not a bond (§3).
+
+    TERM       UNION_REVIEW_HORIZON = 1500 stamps, and the deed may
+               NOT name its own. A free horizon could be set past any
+               reachable stamp, and the review would become a
+               formality.
+
+    REVIEW     `World::union_review(stamp) -> Option<(sealed_at, due)>`
+               — derived from the chronicle, never stored.
+```
+
+**TAG 90, NOT 0x40.** The directive named `0x40`; tag **64 is already
+the NS-5 mesh head** (MESH-1a, the announcement record). A union
+written there would decode a mesh announcement as a union and a union
+as an announcement. 90 sits past the highest assigned tag (89), so no
+retired meaning is revived either.
+
+**NO `approved_by_operator` FLAG.** The drafted struct carried one. A
+deed is a CLAIM, and a claim asserting its own approval is forgeable by
+whoever constructs it — the kernel would have had nothing to check the
+bool against. I2 containment already binds the actor unforgeably, so
+IDENTITY IS THE SIGNATURE and the flag would have been a hole wearing
+the shape of a guarantee.
+
+**AND THE HORIZON REVIEWS.** Pinned end to end
+(`sovereign_union_pins::the_horizon_reviews_and_never_expires`): past
+stamp `sealed + 1500` the review falls DUE, the union STILL STANDS, and
+the world it stands over is untouched — colony, zones and banks exactly
+as they were. Nothing settles, nothing lapses, no capacity drops.
+
+**They are NOT counterparts and the receipt is not their predecessor** — it is
+the MEDIUM the bond settles on (`bond_flow` is a receipted standing
+order, accruing continuously, settling at touch). Counterparts do not
+suffocate without each other; a bonded pair does. There is no rivalry to
+arbitrate here: a bond is generative, not competitive, so the pair needs
+no equilibrium negotiated between its parties.
+
+**THE TWO INSTRUMENTS, recorded so they are never conflated again.**
+Both are lawful, both compute, and they are different shapes:
+
+    BOND       a SYMMETRIC pair — neither party privileged, both
+               flowing, severance priced on whoever cuts
+               (`bond_flow` / `severance_load`, 09 §2.2, BOND-1)
+               → THE MARRIAGE FORM. This is D5's form.
+
+    COVENANT   ONE obligor, ONE beneficiary, collateral posted by the
+               obligor alone against a quota inside a window; released
+               on fulfilment, BREACH_AND_SLASH on default
+               (`CovenantSealed` / `Released` / `Slashed`, 01 §7,
+               09 §2.3, COVENANT-1)
+               → DIRECTED, and lawful as such. It is what 09 §2.2
+               calls patronage, and patronage is a real instrument —
+               it is simply not a marriage.
+
+A single bond and a covenant are the same asymmetry under two names; a
+PAIR of bonds is the different thing. The distinction is the direction
+count, never the collateral.
+
+*(Register: the world-book writes this bond as the cosmic marriage —
+`12_UNION` §3c. Per the `06` register law only the clauses above are
+mechanically real; the myth is carried there, never here. Note also that
+the covenant's carrier is one people's register — `09` §2.3 seats it in
+the Glasskeeper escrow machinery — while its FIELDS are ordinary
+finance: obligor, beneficiary, collateral, window, forfeit. The word
+computes; it is kept.)*
+
+**D6 · THE BORNE SHARE — who is standing in the room.** INSCRIBED
+2026-08-02 (SYN-3/SYN-4/SYN-5). Authority: `18` Article II. `D` is a
+reading of the whole and names nobody; this attributes it.
+
+```text
+    borne_i = ½ · Σ_{j ~ i} Σ_l |circulation_on(Δ, S)_ij,l|
+```
+
+Every present relation carries some of the canonical circulation, and
+its two ends bear that magnitude EQUALLY. `rfa_core::capacity::borne`;
+keyed to identity by `kernel::bridge::borne_by_orb`.
+
+**THE CYCLE IS THE INTUITIVE UNIT AND IT CANNOT BE WRITTEN.** Charge is
+a property of a closed loop, so the obvious rule splits a cycle's charge
+among its nodes — `|c_C| / N_C`. But a *fundamental cycle basis* is
+picked by a spanning forest, so `Nodes(C)` and `N_C` MOVE WHEN THE
+ENTITIES ARE RELABELLED. Measured on one theta graph carrying one
+charge:
+
+```text
+    labelling [0,1,2,3] → cycles {0,1,2}, {0,2,3}      N_C = 3, 3
+    labelling [1,0,3,2] → cycles {0,1,2,3}, {0,1,2}    N_C = 4, 3
+```
+
+Different entities paid different amounts for the identical world. `I1`
+voids it. Only the cycle-space DIMENSION is invariant, never a chosen
+basis of it — the same hazard `capacity_anchored` carried at vertex 0,
+reappearing one layer up at attribution. The circulation is the UNIQUE
+Hodge representative, so the share is taken there instead, and the
+equal-participation principle is applied at the RELATION, which is where
+it survives relabelling. Pinned over all 24
+(`capacity_pins::the_borne_share_is_relabelling_invariant`).
+
+**IT IS READ ON THE SUPPORT, NOT THE COMPLETE GRAPH.** `circulation`
+solves `p = −div/n`, which treats every absent relation as a real one
+carrying zero. Four entities, ONE relation `0—1 = 1`:
+
+```text
+    complete-graph shares → [½, ½, ¼, ¼]
+```
+
+Entities 2 and 3 hold nothing, owe nothing, are owed nothing, and each
+draw a QUARTER of a relation they are not party to — FARMING BY ABSENCE,
+cheaper than farming strain because it costs nothing at all. The same
+defect inflates the rest: the identical relation reads `0` among two
+entities and `½` among four, so an orb could enlarge every share in the
+world by seating empty orbs beside it. `circulation_on` solves the
+support graph's own Laplacian `L·p = −div` by exact rational elimination
+(`I3`); isolated entities become components of one, bear the ground, and
+move no other share.
+
+**THREE PROPERTIES, EACH PINNED.** *No strain farming* — it pays on the
+circulation, what composes, never on `symmetry_foundation`, which stands
+exactly where composition FAILS; manufacturing an inconsistency draws
+nothing. *No frame farming* — a gauge shift lands wholly in the gradient
+summand, so no share moves; work earns, coordinates do not. *Conserving*
+— both halves of every relation reach an entity, so the shares sum to
+exactly the circulation standing on the support. The join distributes;
+it neither reduces nor mints.
+
+**AND IT IS POSITIVE.** Allocation had existed only as WITHHOLDING — a
+world-level refusal with no orb in it. A share is a magnitude, never
+below the ground, so the rule states what an orb HOLDS rather than what
+it lacks, and the refusal that consumes it carries the share so the
+floor can be risen from (`18` Article II).
+
+**D7 · THE SOLIDIFICATION — the phase transition into state.**
+INSCRIBED 2026-08-02 (operator ruling: *solidify phase transition to
+current "state"*). Authority: `17_CAPACITY` §3a; the general phase law
+is `18` §4.
+
+`Ω` has two phases, and each office reads one of them:
+
+```text
+    PHASE     READING        WHAT CROSSES INTO IT
+    ───────────────────────────────────────────────────────────────
+    ROOM      D(Ω) rises     the plane is EARNED — the residue is
+                             irreducible, so it EMITS and D rises
+                             BY RECEIPT (D3). `PlaneUnearned`
+                             refuses every other route.
+
+    STATE     V(Ω) holds     the deed is ADMITTED — `lawful()`
+                             passes and a receipt is written.
+                             THIS IS THE SOLIDIFICATION.
+```
+
+**THE CROSSING IS RECEIPTED, NEVER CONTINUOUS.** `18` §4 rules that at a
+phase boundary the declared and derived descriptions genuinely differ
+and *their relation IS the transition* — hold both sides and the
+crossing is legible; collapse them with an `==` and the phase structure
+disappears. So the crossing is a DISPOSITION, not a flow. There is no
+partial solidification and no half-committed deed: `kernel::lawful`
+returns admission or refusal and has no third answer, so no value
+strictly between claimed and committed exists to be occupied. This is
+the operator's standing rule that *there is no "half used" — an open
+ended thread without closure* (2026-08-02), read at the foundation.
+
+**ROOM PRECEDES STATE.** Substance never solidifies into a plane that
+was never opened — the `+:` of D1 made mechanical, landed as
+`PlaneUnearned`.
+
+**THE REVERSE CROSSING IS D4's, AND IT HAS A FLOOR.** State does not
+melt back into room unaccounted: D4 is the revocation law, anchored at
+the eclipse and floored at `H¹`, and `D` never falls below `GROUND`
+(`18` Article II — `Degree` has no representation for a below-ground
+value). A phase is reversed by a receipted eclipse or not at all; decay
+alone does not reverse one.
 
 **The index-set reading is STRUCK** (2026-08-01). The indices
 `(i, j, k, l)` that `for_each_residual` iterates, and the arities
@@ -177,7 +629,7 @@ collapsed to `‖∂Δ‖`, never bounded above, never reduced to a scalar
 aggregate. This EXTENDS the proportional law rather than reversing it:
 squares were barred as the mathematics of minimization, and L1 was a
 smaller cage of the same kind. Scalar aggregates survive only where a
-reading is reported to a human lens, never where the system computes.
+reading is reported to an OPERATOR lens, never where the system computes.
 
 **The union is ONE Δ WITH TWO COMPLEMENTARY PROJECTIONS** (18 §2c,
 restated 2026-08-01; the former `U* = D(V) ⊕ V(D)` is STRUCK — nothing
@@ -313,7 +765,8 @@ CLAIMS; it does not consume capacity, so it is not the opposing force
 `12_UNION` §2c requires. Within one scale the capacity axis is
 therefore an OPEN cone — D3 emits and nothing consumes. The closing leg
 exists and `12_UNION` §2c already names it: **the fold itself
-(expansion sealed by contraction)** — the aeon fold, at universe scale
+(expansion SEALED WHOLE, a fresh sheet SEATED)** — the aeon fold, at
+universe scale
 (`11_AEON` §5; the Tier-0 reading "contracting the board" at
 `12_UNION` §2a). So the manifold dual holds ACROSS scales and not
 within a step, which is what E1's strike already implied: *there is no
@@ -336,7 +789,9 @@ of either input; the veto is frame-invariant too. Authority: 16_UNIT
 §4a over SYSTEM_SPEC §0.
 
     B_S⁻¹( Π_G( F_fold*( … B_S(Δ) … ) ) )
-    orbit_lock = ∅  →  fold closes to zero (the difference was angle)
+    orbit_lock = ∅  →  the fold RECOGNISES ONE STATE where two
+                       descriptions stood — the difference was frame,
+                       and frame was never difference
     orbit_lock ≠ ∅  →  the collapse refuses; the residue EMITS as a
                        new plane (the bounce — emission, never
                        annihilation); the verdict is invariant to
@@ -540,7 +995,7 @@ The angle-free heart of the singularity law (16_UNIT §4a): a frame
 change (`A ↦ PAP⁻¹`) leaves the signature identical, so the fold
 verdict cannot depend on the frame of approach. THE PROPORTIONAL LAW
 does not touch it (a canonical form, not an aggregator of difference);
-blake3, never the ancestor's Keccak.
+blake3, never the predecessor's Keccak.
 
     A ≅_RCF B  ⟺  invariant_factors(xI − A) = invariant_factors(xI − B)
 
@@ -576,7 +1031,9 @@ mesh era opens; the unit law of §2 is what admission re-runs).
 **M1 · Pair conservation (the aperture seam).** Local half LANDED (I1);
 the pair half is an N6 reading. Authority: NS-4 §1–§3.
 
-    near leg + far leg = 0 exactly, across two books
+    ONE crossing, carried WHOLE and read from two ends;
+    near leg + far leg = 0 exactly across two books — the zero is
+    each book's PROOF that it carried all of it, never the content
 
 **The pair half is REPLAY, never opposition** (operator ruling
 2026-08-01; §0.3 chapter six). `cfe::opposition` is excised and guarded;
@@ -587,6 +1044,61 @@ is a LENS over the one chain. The two-book equation above is unchanged;
 only its enforcement HOME moved, into kernel I1/I6.
 
 ## §6 Economy and thermal — THE MANIFOLD DUAL (syntropy ∥ entropy)
+
+**THE MISSING-LEG SWEEP (2026-08-02).** Chapter five of §0.3 records
+that this ledger once carried the ENTROPIC arm of every dual and left
+the syntropic arm behind, and states the lesson: *a map that inherits
+one leg of a dual has not simplified the law, it has reversed it.* This
+is that sweep run over the CODE rather than the map.
+
+**FOUR BOOKS WERE ALREADY TWO-ARMED**, and they are the shape to copy:
+`given_in_crisis` / `drawn_in_crisis`, `returned_across` /
+`extracted_across`, `bond_flow` / `severance_load`,
+`covenants_fulfilled` / `covenants_breached`. Every one of them sits on
+the orb, and both arms of each are equals.
+
+**THE THERMAL BOOK WAS ONE-ARMED WHERE IT COUNTED — CLOSED.**
+
+```text
+                        entropic arm         syntropic arm
+    on the ORB          entropy_vented       — NOTHING —
+    (committed, replayed, public, CUMULATIVE FOREVER)
+
+    on the SHEET        vented_entries       encased_entries
+    (pub(super), WINDOWED, pruned each boundary, one tech condition)
+```
+
+Both arms stand on the sheet and are symmetric there. On the orb — the
+permanent, public, committed book — only LOSS was recorded. An orb
+could always be asked what it had shed to the void across its whole
+life, and could never be asked what it had ever KEPT: the gain was
+forgotten as soon as the window moved past it.
+
+Closed by `World::heat_encased_of` and `World::thermal_books_of`
+(`world/economy.rs`), derived from the `YieldCollected { Joule }`
+receipts that already feed `encased_entries` — **no schema spent**, the
+`value_lost_of` shape. The pair is returned as a PAIR and never netted:
+an orb that captured 100 and vented 100 is not the orb that did
+neither, and only two arms tell them apart (`18` §2b). `entropy_vented`
+is untouched — it is bound by 05 §1.4's absorption invariant, and the
+cure for a missing arm is to ADD the arm.
+
+**TWO DEEDS REMAIN ONE-LEGGED, and both want a ruling rather than a
+patch:**
+
+- **`FrictionSettled` (IDEO-1)** — ideological difference COSTS, and it
+  posts to `entropy_vented`. Ideological ALIGNMENT pays nothing: there
+  is no receipt for it. As it stands the economy prices diversity and
+  does not price agreement, which is a disincentive nobody wrote down.
+- **`IncursionStruck` (INCURSION-1a)** — an archived derelict wakes as
+  an incursion line. Nothing receipts an incursion HELD or resolved, so
+  the ledger records the arrival of the threat and never its answer.
+
+Neither is added from this lane: each would be a new deed with new
+economics, and inventing the syntropic half of someone's mechanic is
+how a sweep becomes a redesign.
+
+
 
 **THE DUAL IS ONE OBJECT** (`12_UNION` §2c, operator ruling
 2026-07-30). Syntropy and entropy are opposite ends of one closed,
@@ -653,6 +1165,20 @@ research and throttle gates await the tech-tree landing). Authority:
 
     heat_absorbed  ≤  banked_sink
     sink_consumed  =  heat_absorbed  =  vented_after_shed
+
+**CONVERGENCE IS THE OTHER HALF, AND IT IS A CAPABILITY.** Divergence
+sources; CONVERGENCE sinks. `rfa_core::flux` counts both poles by name —
+`sources`, `sinks`, `balanced` — because absorption is not a fault to be
+detected but the scarce half of the economy: a dim-star system holds
+*the rarest resource in a high-flux universe*, and sells it as `S_cool`.
+The Frost's entire trade is convergence.
+
+**A SINK IS NOT A TRAPPED INTERIOR.** What 18 §2d forbids is convergence
+with NO EGRESS — a closed region that takes and never sheds. The line
+above is exactly why absorption is lawful: `sink_consumed =
+heat_absorbed = vented_after_shed`, so what is taken IS shed, and the
+absorber's own vent ledger carries it. **Trapped is convergence minus
+the shedding, never convergence itself.**
     captured       =  α · raw excess,   α ∈ [0,1] exact rational
     (1−α) accrues to the vented ledger, settles as VentSettled — never un-receipted
 
@@ -709,7 +1235,7 @@ operator rulings, not derivations; neither is silently corrected here.
    three. One of the two is wrong.
 2. **S2 IS THE AGGREGATE S1 FORBIDS.** 09 §1.3 rules *"no oracle, no
    single number … the four axes never collapse into one figure — that
-   would be the scalar/scored form the ancestry law refuses, returning
+   would be the scalar/scored form the provenance law refuses, returning
    through the back door"*, and 09 §3.4.2 refuses *"the single goodness
    number."* `syntropy_ratio` collapses all four axes into one scalar
    and TWO rules read it. Either 09's refusal admits a stated exception

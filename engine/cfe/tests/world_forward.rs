@@ -24,9 +24,9 @@ fn banked(world: &World, orb: u64, resource: Resource) -> Ratio {
         .banked_amount(resource)
 }
 
-/// The plain two-planet economy: mother banks 30 iron / 13 biomass at
-/// stamp 16, charts the daughter (10i 3b | 20i 10b).
-fn mother_and_daughter() -> (World, u64) {
+/// The plain two-planet economy: source banks 30 iron / 13 biomass at
+/// stamp 16, charts the charted (10i 3b | 20i 10b).
+fn source_and_charted() -> (World, u64) {
     let mut world = World::new();
     world.found("meridian").expect("founds");
     world.zone(0, ZoneKind::Extractor).expect("zones");
@@ -35,8 +35,8 @@ fn mother_and_daughter() -> (World, u64) {
         world.tick();
     }
     world.collect().expect("collects");
-    let daughter = world.chart("outpost", FIRST_ORB).expect("charts");
-    (world, daughter)
+    let charted = world.chart("outpost", FIRST_ORB).expect("charts");
+    (world, charted)
 }
 
 /// A fulfilled forward releases exactly: the collateral comes home
@@ -44,31 +44,31 @@ fn mother_and_daughter() -> (World, u64) {
 /// the quota is met, receipted.
 #[test]
 fn a_fulfilled_forward_releases_exactly() {
-    let (mut world, daughter) = mother_and_daughter();
+    let (mut world, charted) = source_and_charted();
     // Empty books: the multiplier is 1 — full collateral, the empty
     // book is not a credential.
     world
-        .seal_forward(FIRST_ORB, daughter, Resource::Iron, ratio(3, 1), 10)
-        .expect("seals"); // @16: locks 3 of the mother's 10 iron
+        .seal_forward(FIRST_ORB, charted, Resource::Iron, ratio(3, 1), 10)
+        .expect("seals"); // @16: locks 3 of the source's 10 iron
     assert_eq!(banked(&world, FIRST_ORB, Resource::Iron), ratio(7, 1));
 
     world
-        .transfer(FIRST_ORB, daughter, Resource::Iron, ratio(2, 1))
+        .transfer(FIRST_ORB, charted, Resource::Iron, ratio(2, 1))
         .expect("delivers two");
     world.tick(); // 2 < 3: nothing resolves
     assert_eq!(world.committed().forwards.len(), 1);
 
     world
-        .transfer(FIRST_ORB, daughter, Resource::Iron, ratio(1, 1))
+        .transfer(FIRST_ORB, charted, Resource::Iron, ratio(1, 1))
         .expect("delivers the third");
     world.tick(); // quota met → RELEASE at this boundary
 
-    let mother = world.orb_by_id(FIRST_ORB).expect("orb");
-    assert_eq!(mother.forwards_fulfilled, ratio(3, 1), "the stake posts");
-    assert_eq!(mother.forwards_breached, ratio(0, 1));
+    let source = world.orb_by_id(FIRST_ORB).expect("orb");
+    assert_eq!(source.forwards_fulfilled, ratio(3, 1), "the stake posts");
+    assert_eq!(source.forwards_breached, ratio(0, 1));
     // 10 − 3 locked − 2 − 1 delivered + 3 released = 7.
     assert_eq!(banked(&world, FIRST_ORB, Resource::Iron), ratio(7, 1));
-    assert_eq!(banked(&world, daughter, Resource::Iron), ratio(23, 1));
+    assert_eq!(banked(&world, charted, Resource::Iron), ratio(23, 1));
     assert!(world.committed().forwards.is_empty());
     let released = world
         .chronicle()
@@ -86,21 +86,21 @@ fn a_fulfilled_forward_releases_exactly() {
 /// breached book.
 #[test]
 fn a_missed_deadline_slashes_to_the_aggrieved() {
-    let (mut world, daughter) = mother_and_daughter();
+    let (mut world, charted) = source_and_charted();
     world
-        .seal_forward(FIRST_ORB, daughter, Resource::Iron, ratio(3, 1), 5)
+        .seal_forward(FIRST_ORB, charted, Resource::Iron, ratio(3, 1), 5)
         .expect("seals"); // @16, deadline at 21
     world
-        .transfer(FIRST_ORB, daughter, Resource::Iron, ratio(1, 1))
+        .transfer(FIRST_ORB, charted, Resource::Iron, ratio(1, 1))
         .expect("delivers one — not enough");
     for _ in 0..6 {
         world.tick(); // the tick opening at now=21 fires the slash
     }
-    let mother = world.orb_by_id(FIRST_ORB).expect("orb");
-    assert_eq!(mother.forwards_breached, ratio(3, 1), "the stake posts");
-    assert_eq!(mother.forwards_fulfilled, ratio(0, 1));
+    let source = world.orb_by_id(FIRST_ORB).expect("orb");
+    assert_eq!(source.forwards_breached, ratio(3, 1), "the stake posts");
+    assert_eq!(source.forwards_fulfilled, ratio(0, 1));
     // The aggrieved holds the delivery AND the forfeit: 20 + 1 + 3.
-    assert_eq!(banked(&world, daughter, Resource::Iron), ratio(24, 1));
+    assert_eq!(banked(&world, charted, Resource::Iron), ratio(24, 1));
     assert!(world.committed().forwards.is_empty());
     let slashed = world
         .chronicle()
@@ -149,16 +149,16 @@ fn the_collateral_curve_reads_the_books() {
 
     // And the engine reads it: fulfil a 3-iron forward, then the next
     // seal locks quota × 1/4.
-    let (mut world, daughter) = mother_and_daughter();
+    let (mut world, charted) = source_and_charted();
     world
-        .seal_forward(FIRST_ORB, daughter, Resource::Iron, ratio(3, 1), 10)
+        .seal_forward(FIRST_ORB, charted, Resource::Iron, ratio(3, 1), 10)
         .expect("seals");
     world
-        .transfer(FIRST_ORB, daughter, Resource::Iron, ratio(3, 1))
+        .transfer(FIRST_ORB, charted, Resource::Iron, ratio(3, 1))
         .expect("delivers whole");
     world.tick(); // releases: fulfilled book = 3
     world
-        .seal_forward(FIRST_ORB, daughter, Resource::Iron, ratio(4, 1), 10)
+        .seal_forward(FIRST_ORB, charted, Resource::Iron, ratio(4, 1), 10)
         .expect("seals again");
     let locked = world
         .chronicle()
@@ -177,10 +177,10 @@ fn the_collateral_curve_reads_the_books() {
 /// absence — the vitrified lock needs no second mechanism.
 #[test]
 fn locked_collateral_cannot_be_spent() {
-    let (mut world, daughter) = mother_and_daughter();
+    let (mut world, charted) = source_and_charted();
     world
-        .seal_forward(FIRST_ORB, daughter, Resource::Iron, ratio(3, 1), 10)
-        .expect("seals"); // mother: 10 − 3 locked = 7
+        .seal_forward(FIRST_ORB, charted, Resource::Iron, ratio(3, 1), 10)
+        .expect("seals"); // source: 10 − 3 locked = 7
     assert_eq!(
         world.zone(16, ZoneKind::Extractor),
         Err(ActionRefused::CannotAfford {
@@ -190,7 +190,7 @@ fn locked_collateral_cannot_be_spent() {
         })
     );
     assert_eq!(
-        world.transfer(FIRST_ORB, daughter, Resource::Iron, ratio(8, 1)),
+        world.transfer(FIRST_ORB, charted, Resource::Iron, ratio(8, 1)),
         Err(ActionRefused::CannotAfford {
             resource: Resource::Iron,
             need: Box::new(ratio(8, 1)),
@@ -203,21 +203,21 @@ fn locked_collateral_cannot_be_spent() {
 /// forward's quota — constancy fulfils the promise.
 #[test]
 fn bond_flow_counts_toward_the_quota() {
-    let (mut world, daughter) = mother_and_daughter();
+    let (mut world, charted) = source_and_charted();
     world
-        .seal_forward(FIRST_ORB, daughter, Resource::Iron, ratio(3, 1), 12)
+        .seal_forward(FIRST_ORB, charted, Resource::Iron, ratio(3, 1), 12)
         .expect("seals"); // @16
     world
-        .seal_bond(FIRST_ORB, daughter, Resource::Iron, ratio(1, 2), 0)
+        .seal_bond(FIRST_ORB, charted, Resource::Iron, ratio(1, 2), 0)
         .expect("seals the bond");
     for _ in 0..6 {
         world.tick();
     }
     world.collect().expect("collects"); // @22: the bond settles 3
     world.tick(); // quota met by the stream → RELEASE
-    let mother = world.orb_by_id(FIRST_ORB).expect("orb");
-    assert_eq!(mother.forwards_fulfilled, ratio(3, 1));
-    assert_eq!(mother.bond_flow, ratio(3, 1), "the stream did the fulfilling");
+    let source = world.orb_by_id(FIRST_ORB).expect("orb");
+    assert_eq!(source.forwards_fulfilled, ratio(3, 1));
+    assert_eq!(source.bond_flow, ratio(3, 1), "the stream did the fulfilling");
     assert!(world.committed().forwards.is_empty());
     assert_eq!(world.committed().bonds.len(), 1, "the bond outlives the pact");
     let rebuilt = replay(world.chronicle());
@@ -229,12 +229,12 @@ fn bond_flow_counts_toward_the_quota() {
 /// named exactly.
 #[test]
 fn forward_refusals_are_typed() {
-    let (mut world, daughter) = mother_and_daughter();
+    let (mut world, charted) = source_and_charted();
     world
-        .seal_forward(FIRST_ORB, daughter, Resource::Iron, ratio(2, 1), 5)
+        .seal_forward(FIRST_ORB, charted, Resource::Iron, ratio(2, 1), 5)
         .expect("seals");
     assert_eq!(
-        world.seal_forward(FIRST_ORB, daughter, Resource::Iron, ratio(1, 1), 5),
+        world.seal_forward(FIRST_ORB, charted, Resource::Iron, ratio(1, 1), 5),
         Err(ActionRefused::ForwardAlreadySealed)
     );
     assert_eq!(
@@ -242,11 +242,11 @@ fn forward_refusals_are_typed() {
         Err(ActionRefused::BadTransfer)
     );
     assert_eq!(
-        world.seal_forward(FIRST_ORB, daughter, Resource::Iron, ratio(0, 1), 5),
+        world.seal_forward(FIRST_ORB, charted, Resource::Iron, ratio(0, 1), 5),
         Err(ActionRefused::BadTransfer)
     );
     assert_eq!(
-        world.seal_forward(FIRST_ORB, daughter, Resource::Biomass, ratio(1, 1), 0),
+        world.seal_forward(FIRST_ORB, charted, Resource::Biomass, ratio(1, 1), 0),
         Err(ActionRefused::BadTransfer)
     );
     assert_eq!(
@@ -255,7 +255,7 @@ fn forward_refusals_are_typed() {
     );
     // Fresh books on biomass: quota 20 wants 20 collateral; 3 stands.
     assert_eq!(
-        world.seal_forward(FIRST_ORB, daughter, Resource::Biomass, ratio(20, 1), 5),
+        world.seal_forward(FIRST_ORB, charted, Resource::Biomass, ratio(20, 1), 5),
         Err(ActionRefused::CannotAfford {
             resource: Resource::Biomass,
             need: Box::new(ratio(20, 1)),

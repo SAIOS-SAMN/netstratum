@@ -502,4 +502,240 @@ impl World {
         held.sort_by_key(|(resource, _)| *resource as u8);
         held
     }
+
+    /// **THE VALUE-LOSS BOOK — derived, never stored** (SYN-1/SYN-2,
+    /// operator ruling 2026-08-02).
+    ///
+    /// What an orb has LOST to holding costs: demurrage decay plus
+    /// upkeep draws, summed from the chronicle in joule-commensurable
+    /// units (09 §1). Before this, value left the universe with no
+    /// record it had ever left — the thermal arm closes its books
+    /// (`encased + vented = total excess`) and the value arm closed
+    /// nothing.
+    ///
+    /// **IT IS NOT `entropy_vented`, and must never be.** That field is
+    /// the SHED-HEAT figure and 05 §1.4's absorption invariant binds it
+    /// exactly: `sink_consumed = heat_absorbed = vented_after_shed`.
+    /// Value decay is a monetary velocity cost, not a thermal loss;
+    /// summing them would corrupt a landed physical measurement, which
+    /// `world_absorb::the_absorption_invariant_measures_across_two_orbs`
+    /// proves by failing the moment they are mixed. The two ledgers
+    /// stay decoupled: physics on one side, economics on the other.
+    ///
+    /// **NO SCHEMA IS SPENT.** `DemurrageSettled { orb_id, .. }` and
+    /// `UpkeepSettled { orb_id, .. }` already carry their orb, so the
+    /// whole book is arithmetic over deeds already receipted — the
+    /// derived-never-stored law (09 §1.2), and the same shape the
+    /// syntropy ratio takes.
+    pub fn value_lost_of(&self, orb: u64) -> Ratio {
+        self.chronicle
+            .receipts()
+            .iter()
+            .fold(ratio(0, 1), |carried, receipt| match &receipt.event {
+                ClosureEvent::DemurrageSettled { orb_id, amount, .. }
+                | ClosureEvent::UpkeepSettled { orb_id, amount, .. } if *orb_id == orb => {
+                    carried + amount.clone()
+                }
+                _ => carried,
+            })
+    }
+
+    /// The same book, per feeder, carried WHOLE rather than summed into
+    /// one figure — which of the two costs took it, and how much. A
+    /// caller that needs the split reads this; a caller that needs the
+    /// total reads [`World::value_lost_of`].
+    pub fn value_lost_split_of(&self, orb: u64) -> (Ratio, Ratio) {
+        self.chronicle.receipts().iter().fold(
+            (ratio(0, 1), ratio(0, 1)),
+            |(decay, upkeep), receipt| match &receipt.event {
+                ClosureEvent::DemurrageSettled { orb_id, amount, .. } if *orb_id == orb => {
+                    (decay + amount.clone(), upkeep)
+                }
+                ClosureEvent::UpkeepSettled { orb_id, amount, .. } if *orb_id == orb => {
+                    (decay, upkeep + amount.clone())
+                }
+                _ => (decay, upkeep),
+            },
+        )
+    }
+
+    /// **THE UNION REVIEW — derived, never stored** (D5, operator
+    /// ruling 2026-08-02). When the sovereign union was struck, and
+    /// whether its review has fallen due at `stamp`.
+    ///
+    /// `Some((sealed_at, due))` if the union stands; `None` if it was
+    /// never struck. **`due` is a REVIEW falling due, NEVER a lapse.**
+    /// Nothing settles, nothing expires, and no capacity is dropped
+    /// when it turns true: a `BOND-1` term ENDS its bond at
+    /// `sealed + term`, and if the union did that, D5's breach clause
+    /// would fire at stamp 1500 — *D stops and V suffocates; V stops
+    /// and D freezes* — and the foundation would lapse on a timer. The
+    /// union stands past the horizon; what falls due is the operator's
+    /// re-approval.
+    ///
+    /// Read from the chronicle on demand, so there is no counter to
+    /// drift and no field to migrate (`09_LEDGER` §1.2). This is the
+    /// consumer that keeps the deed from being a term that only
+    /// resonates (`18` Article III LAW 8).
+    pub fn union_review(&self, stamp: u64) -> Option<(u64, bool)> {
+        self.chronicle
+            .receipts()
+            .iter()
+            .find(|receipt| {
+                matches!(receipt.event, ClosureEvent::SovereignUnionSealed { .. })
+            })
+            .map(|receipt| {
+                let horizon = match &receipt.event {
+                    ClosureEvent::SovereignUnionSealed { term_stamps, .. } => *term_stamps,
+                    _ => crate::dop::UNION_REVIEW_HORIZON,
+                };
+                (receipt.stamp, stamp >= receipt.stamp.saturating_add(horizon))
+            })
+    }
+
+
+    /// **THE HEAT ENCASED — the syntropic arm of the thermal book,
+    /// derived, never stored** (the missing-leg sweep, 2026-08-02).
+    ///
+    /// What an orb has CAPTURED over its whole life: every joule yield
+    /// it collected, which is the encasement arm by this engine's own
+    /// reading — `YieldCollected { resource: Joule }` is exactly what
+    /// feeds `encased_entries` on the crystal sheet.
+    ///
+    /// **WHY IT WAS OWED.** The thermal dual was two-armed in one place
+    /// and one-armed in another. On the SHEET both arms stand and are
+    /// symmetric — `vented_entries` from `VentSettled`, `encased_entries`
+    /// from the joule yield — but both are WINDOWED and pruned at each
+    /// boundary, and both are `pub(super)`, so they answer one tech
+    /// condition and nothing else. On the ORB, which is committed state,
+    /// replayed and public, only `entropy_vented` stands, and it is
+    /// CUMULATIVE FOREVER.
+    ///
+    /// So the permanent public book recorded only LOSS. An orb could
+    /// always be asked what it had shed to the void for its whole life,
+    /// and could not be asked what it had ever kept — the gain was
+    /// forgotten as soon as the window moved past it. That is the
+    /// negentropic shape `EQUATIONS` §0.3 chapter five names: *a map
+    /// that inherits one leg of a dual has not simplified the law, it
+    /// has reversed it.*
+    ///
+    /// **NO SCHEMA IS SPENT.** `YieldCollected { orb_id, resource,
+    /// amount }` already carries its orb, so the whole arm is
+    /// arithmetic over deeds already receipted — the derived-never-stored
+    /// law (`09_LEDGER` §1.2), and the same shape [`Self::value_lost_of`]
+    /// took. `entropy_vented` is NOT touched: it is a landed field bound
+    /// by 05 §1.4's absorption invariant, and the cure for a missing arm
+    /// is to add the arm, never to disturb the one that stands.
+    pub fn heat_encased_of(&self, orb: u64) -> Ratio {
+        self.chronicle
+            .receipts()
+            .iter()
+            .filter_map(|receipt| match &receipt.event {
+                ClosureEvent::YieldCollected { orb_id, resource: Resource::Joule, amount }
+                    if *orb_id == orb =>
+                {
+                    Some(amount.clone())
+                }
+                _ => None,
+            })
+            .fold(ratio(0, 1), |a, b| a + b)
+    }
+
+    /// **THE THERMAL BOOK, BOTH ARMS AT ONCE** — `(encased, vented)`.
+    ///
+    /// Returned as a PAIR and never as a difference or a ratio: a net
+    /// figure is the one-armed reading wearing two arms' clothes, and
+    /// `18` §2b bars collapsing a directional quantity to a scalar
+    /// wherever the system computes. An orb that captured 100 and vented
+    /// 100 is not the same orb as one that captured nothing and vented
+    /// nothing, and only the pair can tell them apart.
+    pub fn thermal_books_of(&self, orb: u64) -> (Ratio, Ratio) {
+        let vented = self
+            .orbs
+            .iter()
+            .find(|held| held.orb_id == orb)
+            .map(|held| held.entropy_vented.clone())
+            .unwrap_or_else(|| ratio(0, 1));
+        (self.heat_encased_of(orb), vented)
+    }
+
+
+    /// **RECIPROCITY — the orb's own measured conduct, surfaced.**
+    ///
+    /// `returned_across / (returned_across + extracted_across)`: of the
+    /// value this orb drew across a boundary, how much it closed the
+    /// loop on. `09` §2.4's measured boundary policy, and the quantity
+    /// `FrictionSettled` is priced from.
+    ///
+    /// **`None` MEANS NO BASIS, and that is the whole point of this
+    /// return type.** The private reading friction uses answers `1/1`
+    /// when an orb has no cross-orb history at all — a sensible default
+    /// for pricing a cost (charge nothing when there is nothing to
+    /// compare), and a TRAP for anything that reads alignment as merit:
+    /// **two orbs that have never traded read as perfectly aligned.**
+    /// Absence would present as agreement, which is the same shape as
+    /// the borne share's farming-by-absence. Here the absence is named
+    /// instead of being dressed as a perfect score.
+    ///
+    /// The private `reciprocity_reading` is NOT changed: friction is
+    /// consensus law and its `1/1` default is correct for pricing. This
+    /// adds a reading; it moves nothing.
+    pub fn reciprocity_of(&self, orb: u64) -> Option<Ratio> {
+        let held = self.orbs.iter().find(|held| held.orb_id == orb)?;
+        let denominator = held.returned_across.clone() + held.extracted_across.clone();
+        match denominator > ratio(0, 1) {
+            true => Some(held.returned_across.clone() / denominator),
+            false => None,
+        }
+    }
+
+    /// **CONVERGENCE — the syntropic arm of `FrictionSettled`,
+    /// derived, never stored.**
+    ///
+    /// ```text
+    ///     convergence(a, b) = 1 − |reciprocity(a) − reciprocity(b)|
+    /// ```
+    ///
+    /// **THE ENGINE ALREADY COMPUTES THIS AND THROWS IT AWAY.** On
+    /// every cross-orb transfer it evaluates
+    /// `divergence = |recip(from) − recip(to)|`, prices friction from
+    /// it, and then:
+    ///
+    /// ```text
+    ///     if friction > 0 { ...receipt... }
+    /// ```
+    ///
+    /// When conduct MATCHES, divergence is zero, friction is zero, and
+    /// nothing is receipted. The syntropic half is calculated and
+    /// destroyed in the same expression, every time, and no caller
+    /// could even ask for it — `reciprocity_reading` was private. That
+    /// is the one-legged dual at its sharpest: not an arm that was
+    /// never built, but one built and discarded on each use.
+    ///
+    /// **Stated positively, as a magnitude.** Convergence is HIGH when
+    /// conduct agrees, rather than friction being ABSENT. "The reward
+    /// for alignment is the absence of a penalty" is the negentropic
+    /// shape this work exists to refuse — good defined as the lack of
+    /// bad.
+    ///
+    /// **`None` when either party has no basis** (see
+    /// [`Self::reciprocity_of`]): two orbs that have never traded have
+    /// nothing to agree ABOUT, and reading that as perfect alignment
+    /// would pay the inert exactly what it pays the reciprocal. This
+    /// reading refuses to; it is a precondition for any rule that ever
+    /// pays on convergence, not a payment itself.
+    ///
+    /// **THIS PAYS NOTHING AND MINTS NOTHING.** Whether convergence
+    /// should EARN is an economic ruling that creates value, and it is
+    /// not taken here (`17_CAPACITY` §3d.3).
+    pub fn convergence_between(&self, a: u64, b: u64) -> Option<Ratio> {
+        let left = self.reciprocity_of(a)?;
+        let right = self.reciprocity_of(b)?;
+        let spread = match left >= right {
+            true => left - right,
+            false => right - left,
+        };
+        Some(ratio(1, 1) - spread)
+    }
+
 }

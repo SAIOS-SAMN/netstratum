@@ -208,9 +208,9 @@ being why the MINTING branch must be the lock branch: only a lock can
 carry proof a judge can re-check.
 
 `rfa_core::orbit_lock(a, b, operators) -> Option<OrbitWitness>`
-re-derived from the v0.1 ancestor's `fold.rs` (`/opt/repos` — consult,
+re-derived from the v0.1 predecessor's `fold.rs` (`/opt/repos` — consult,
 NEVER port blindly). **TWO translation laws bind the derivation:** the
-proportional law (any squared aggregator in the ancestor lands as L1) and
+proportional law (any squared aggregator in the predecessor lands as L1) and
 translate-never-transcribe (the RCF canonical form `≅_RCF` — PhiK
 I^(4)'s hash — is derived as part of this landing). The kernel gains
 its `rfa-core` dependency here (arrow still one-way).
@@ -243,7 +243,7 @@ model). The waves are disjoint deed families — parallel across lanes:
   RouteChartered, OfferPosted, LineSucceeded, ZoneRazed, WardLifted,
   VeilLifted. **CAUTION (derived):** several of these MOVE or CREATE
   value — `ColonyFounded` seeds the founding bank, `ColonyCharted`
-  moves the 20-iron/10-biomass daughter reserves — so each amendment
+  moves the 20-iron/10-biomass charted reserves — so each amendment
   DERIVES its lawful_delta from `world.rs`, and the founding-reserve
   mints need a declared I4 arm (a chartered genesis mint, named, never
   a hole). `TaxonSealed` is coder-03's standing #42 — leave it theirs.

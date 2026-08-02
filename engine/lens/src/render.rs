@@ -348,6 +348,13 @@ pub fn render_receipt(receipt: &Receipt) -> String {
             "void_share",
             format!("deal {deal}: the void's exact share — {} melted in transit", ratio_str(amount)),
         ),
+        E::SovereignUnionSealed { progenitor, sovereign, term_stamps } => (
+            "sovereign union",
+            format!(
+                "the offices stood into union — {progenitor:?} with {sovereign:?}, \
+                 reviewed at {term_stamps} stamps (a horizon, not an expiry)"
+            ),
+        ),
         E::RouteChartered { deal, eta } => (
             "route_chartered",
             format!("lane {deal} chartered at η {eta} — the path is paid for"),

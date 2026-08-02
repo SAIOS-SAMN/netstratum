@@ -394,7 +394,7 @@ fn narrate(
     let mut razed: u64 = 0;
     let mut built_kinds: Vec<&'static str> = Vec::new();
     let mut vented_this_year = zero.clone();
-    let mut daughters: Vec<String> = Vec::new();
+    let mut chartered: Vec<String> = Vec::new();
     let mut registered: u64 = 0;
     for receipt in window {
         match &receipt.event {
@@ -407,7 +407,7 @@ fn narrate(
             }
             ClosureEvent::ZoneRazed { .. } => razed += 1,
             ClosureEvent::VentSettled { amount, .. } => vented_this_year += amount.clone(),
-            ClosureEvent::ColonyCharted { name, .. } => daughters.push(name.clone()),
+            ClosureEvent::ColonyCharted { name, .. } => chartered.push(name.clone()),
             ClosureEvent::EntityRegistered { .. } => registered += 1,
             _ => {}
         }
@@ -552,9 +552,9 @@ fn narrate(
     }
 
     // Expansion and population notes.
-    for daughter in &daughters {
+    for charted in &chartered {
         lines.push(format!(
-            "A daughter colony was charted: {daughter} — the line is seeking space.",
+            "A new colony was chartered: {charted} — the line is seeking space.",
         ));
     }
     if registered > 0 {
@@ -601,7 +601,7 @@ fn narrate(
     let alert = if !famine.is_empty() || freeze_locked || overheat || stance == JouleStance::Deficit
     {
         Alert::Warning
-    } else if built > 0 || !daughters.is_empty() || registered > 0 {
+    } else if built > 0 || !chartered.is_empty() || registered > 0 {
         Alert::Milestone
     } else {
         Alert::Normal

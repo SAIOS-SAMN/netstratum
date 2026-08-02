@@ -103,7 +103,7 @@ plays it.
 
 ## 3. Lineage as a manifold walk — divergence + confluence
 
-"Daughter" is retired: it imported terrestrial unary budding (one parent,
+"Charted" is retired: it imported terrestrial unary budding (one predecessor,
 mutate one axis) — half a model with no second half. Two named events, both
 *positions on the {disposition × metabolism × perception × G} manifold*,
 never a family-tree line:
@@ -142,8 +142,8 @@ Constants are placeholder parameters. Lands with the confluence
 orchestration (AEON-1b): the conductor computes the midpoint, prices
 the gap, and receipts the vent and the encasement beside the
 `Confluent` deed — spec + vectors together at that landing. LINEAGE-2
-(landed 2026-07-30) carries the ancestry side: the hybrid's registry
-line records BOTH parents, and `resolve_heads` reads every root.
+(landed 2026-07-30) carries the provenance side: the hybrid's registry
+line records BOTH predecessors, and `resolve_heads` reads every root.
 
 ## 4. A world's arc as trajectory — the four C's, not a decline chain
 

@@ -149,6 +149,6 @@ fn throughput_the_residual_scan_is_the_ceiling_and_it_is_cubic() {
     // those are, and it is not used to prune yet.
     let read = read_entangled(&ring(40, 3));
     assert_eq!(read.rank, 1, "forty orbs through the full read");
-    assert!(read.residuals.is_empty(), "a ring fills no triangle");
+    assert!(read.symmetry_foundation.is_empty(), "a ring fills no triangle");
     assert!(read.rank_is_defined());
 }

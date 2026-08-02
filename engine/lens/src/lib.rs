@@ -13,7 +13,14 @@
 //! re-derives from the chain byte-for-byte.
 
 pub mod json;
+pub mod kinematic;
+pub mod luminal;
+pub mod observation;
+pub mod observer;
+pub mod peel;
+pub mod propagation;
 pub mod render;
+pub mod standing;
 
 use cfe::world::Committed;
 use mesh::arbor::{Arbor, ArborRefused};

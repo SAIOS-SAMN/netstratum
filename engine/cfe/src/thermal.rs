@@ -1,5 +1,5 @@
 //! The thermal core (05_THERMAL_BALANCE.md §1–§3): the exact-rational
-//! master equation and substrate-band membership.
+//! equilibrium baseline and substrate-band membership.
 //!
 //! **The law (05 §1.1):** the CFE never takes the fourth root and never
 //! approximates. The canonical quantity is `T_eq⁴` — with `L`, albedo `A`,
@@ -22,7 +22,7 @@ pub fn thermal_k() -> Ratio {
     ratio(6_059_221_281, 1)
 }
 
-/// `T_eq⁴ = L (1 − A) K / r²` — the master equation in flux space
+/// `T_eq⁴ = L (1 − A) K / r²` — the equilibrium baseline in flux space
 /// (05 §1.1). Exact for rational inputs; the root is never taken.
 pub fn t_eq4(luminosity: &Ratio, albedo: &Ratio, orbit_r: &Ratio) -> Ratio {
     let one_minus_a = ratio(1, 1) - albedo.clone();

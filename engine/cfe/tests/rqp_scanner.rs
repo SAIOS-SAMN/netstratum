@@ -11,7 +11,7 @@ use cfe::vrp::ChainRead;
 use cfe::world::{replay, ActionRefused, World, FIRST_ORB, SOVEREIGN};
 
 /// The witness board: the genesis prober climbs the whole pipeline to
-/// a banked crystal; four daughters plant the vectors. A (the
+/// a banked crystal; four charted colonies plant the vectors. A (the
 /// exemplar): extractor@(1,2)=10, habitat@(2,5)=21. B (the planted
 /// match): the same pattern under rot90 — extractor@(2,6)=22,
 /// habitat@(5,5)=45, banked equal (charter reserves minus the same
@@ -34,7 +34,7 @@ fn scanner_board() -> (World, u64, u64, u64, u64) {
         world.tick();
     }
     world.collect().expect("the charter fund settles");
-    // The four daughters: 20 iron + 10 biomass move to each.
+    // The four charted colonies: 20 iron + 10 biomass move to each.
     let a = world.chart("planted-a", FIRST_ORB).expect("charters");
     let b = world.chart("planted-b", FIRST_ORB).expect("charters");
     let c = world.chart("planted-c", FIRST_ORB).expect("charters");
@@ -216,9 +216,9 @@ fn an_empty_bucket_is_its_own_verdict_and_the_exemplar_never_matches_itself() {
 fn a_crystalless_scan_refuses_pure_and_orphans_nothing() {
     let mut world = World::new();
     world.found("outpost").expect("founding closes");
-    let daughter = world.chart("bare", FIRST_ORB).expect("the reserve affords one");
+    let charted = world.chart("bare", FIRST_ORB).expect("the reserve affords one");
     let receipts_before = world.chronicle().receipts().len();
-    let refusal = world.scan(FIRST_ORB, daughter).expect_err("no crystals, no lens");
+    let refusal = world.scan(FIRST_ORB, charted).expect_err("no crystals, no lens");
     assert_eq!(
         refusal,
         ActionRefused::CannotAfford {

@@ -4,7 +4,7 @@
 //! Before this module the algebra was an ISLAND: `coboundary_reduce`,
 //! `for_each_residual`, `orbit_lock` and `rcf_signature` were all
 //! landed and witnessed in `rfa-core`, and not one of them had ever run
-//! on a universe. `Δ(Ω)` — "the relation V expresses" (`18_TORSION`
+//! on a universe. `Δ(V)` — "the relation V expresses" (`18_TORSION`
 //! §2a, `EQUATIONS` D0) — was not a computation that existed. This is
 //! that computation.
 //!
@@ -41,9 +41,9 @@
 
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::Committed;
+use rfa_core::capacity::{borne_axial, borne};
 use rfa_core::{
-    dual_pole, holonomies, boundary_form, Degree, Delta, Flow, BoundaryForm, Support, Vacuity,
-};
+    dual_pole, holonomies, boundary_form, Degree, Delta, Flow, BoundaryForm, Support, Vacuity, Holonomy,};
 
 /// BOND-1: the standing order, `source` → `target` at `rate`/tick.
 pub const CHANNEL_BOND: usize = 0;
@@ -122,7 +122,7 @@ pub enum Resolve {
 ///
 /// **Summing them destroys them.** `C(Δ) = Σ|R|` is a scalar aggregate,
 /// and `18_TORSION` §2b bars exactly that where the system computes —
-/// L1 survives only at a human lens. Worse, the residue composition
+/// L1 survives only at an OPERATOR lens. Worse, the residue composition
 /// law (the design owed at `KERNEL_RELAY` §7.4) has nothing to compose
 /// if the residuals were already added together, and `EQUATIONS` D3
 /// makes these the source of capacity: *the residue EMITS, D rises by
@@ -182,10 +182,51 @@ pub struct EntangledRead {
     /// floor, where zero is the right answer and the floor would only
     /// blur it.
     pub rank: usize,
+
+    /// **THE CHARGE FIELD, CARRIED WHOLE — what each cycle HOLDS**
+    /// (operator ruling 2026-08-02: *your entire definition is wrong if
+    /// dimensional capacity is a count of rooms*).
+    ///
+    /// [`Self::rank`] is the DIMENSION of the cycle space — how many
+    /// independent structures the manifold sustains. It is a dimension
+    /// and never an inventory, and that part was sound. What was
+    /// reductionist is that `holonomies()` returns
+    /// `Holonomy { i, j, l, value }` — every cycle with its EXACT
+    /// CHARGE — and this read took `.len()` and discarded every value.
+    ///
+    /// Residuals are carried whole. Flows are carried whole. The
+    /// holonomies were counted, in the same function whose own comment
+    /// forbids that for the symmetry foundation: *"that sums the field into one
+    /// scalar and discards which triple produced each residual."* Two
+    /// poles held, the third collapsed.
+    ///
+    /// **DIMENSION AND VOLUME ARE DIFFERENT READINGS.** The rank says
+    /// how many independent cycles stand; these values say what each
+    /// one carries. A universe with one heavily-charged cycle and one
+    /// with a single faint one read the SAME rank and are not the same
+    /// universe. `18` §2b bars collapsing a directional quantity to a
+    /// scalar aggregate wherever the system computes — a count is such
+    /// a collapse.
+    pub holonomy: Vec<Holonomy>,
     /// The residual field, WHOLE — every non-composing triple with its
     /// indices intact. Never pre-summed: these are what emit (D3) and
     /// what the composition law will compose.
-    pub residuals: Vec<Residual>,
+    /// **THE SYMMETRY FOUNDATION — the ground new structure rises
+    /// from** (operator ruling 2026-08-02, renamed from `residuals`).
+    ///
+    /// These are the triples that do not compose: `Δ_ik ≠ Δ_ij + Δ_jk`.
+    /// Calling the field *residuals* framed it as leftover error
+    /// awaiting containment, when it is the generative input — D3 EMITS
+    /// from exactly here, and the kernel charter says what becomes of
+    /// it: *"the orbit IS the symmetry the residue forms."* This is
+    /// where symmetry comes from, so it is named for that.
+    ///
+    /// The element type stays [`Residual`]: each entry genuinely is the
+    /// per-triple residual of the cocycle condition, which is exact
+    /// mathematics. A field of residuals that CONSTITUTES the
+    /// foundation — the elements keep their name, the field takes its
+    /// own.
+    pub symmetry_foundation: Vec<Residual>,
     /// `∂Δ` — the SECOND POLE, carried whole as its non-zero
     /// components: which vertices carry net flow, and how much. Empty
     /// means pure circulation — every vertex balances, nothing sources
@@ -205,7 +246,7 @@ impl EntangledRead {
     /// every `Unknown` by [`Resolve`] first.
     ///
     /// **THE RESIDUAL CLAUSE IS STRUCK** (operator ruling 2026-08-01).
-    /// It read `&& self.residuals.is_empty()`, barring the rank while
+    /// It read `&& self.symmetry_foundation.is_empty()`, barring the rank while
     /// any triple failed to compose, on the reasoning that
     /// `H¹ = Z¹/B¹` is defined on cocycles alone. Three faults:
     ///
@@ -314,7 +355,7 @@ pub fn occupied_dimensions(state: &Committed) -> Vec<usize> {
         .collect()
 }
 
-/// Project committed state onto the relational tensor: `Δ(Ω)`.
+/// Project committed state onto the relational tensor: `Δ(V)`.
 ///
 /// Pure and total. Orbs are entities in `Committed::orbs` order;
 /// obligations naming an unknown orb are skipped (they relate nothing
@@ -512,7 +553,7 @@ pub fn observe(state: &Committed, i: usize, j: usize, channel: usize) -> Observe
 /// fills no triangle at all, costs nothing to scan. Same residuals,
 /// same order of discovery, same arithmetic:
 /// `R_ijk,l = Δ_ik,l − Δ_ij,l − Δ_jk,l`.
-fn filled_residuals(delta: &Delta, support: &Support) -> Vec<Residual> {
+fn symmetry_foundation(delta: &Delta, support: &Support) -> Vec<Residual> {
     let dim = delta.dim().min(support.dim());
     let fiber = delta.fiber().min(support.fiber());
     let zero = ratio(0, 1);
@@ -551,6 +592,102 @@ pub fn read_entangled(state: &Committed) -> EntangledRead {
     read_entangled_observed(state, 0)
 }
 
+/// **THE STANDING OF EACH ORB** — `D`'s circulation, attributed. `D`
+/// says how much room the world stands in; this says WHO IS STANDING
+/// IN IT, keyed by `orb_id` rather than by seat.
+///
+/// Derived, never stored (`09_LEDGER` §1.2): read from committed state
+/// on demand, so there is no field to drift and no schema to migrate.
+///
+/// **The seat is not the orb.** [`rfa_core::capacity::borne`] answers
+/// per SEAT, and a seat is an index into `state.orbs` — an artifact of
+/// insertion order that changes when an orb is added or removed. An
+/// economy keyed on seats would pay a different orb after any
+/// reseating. The share itself is relabelling-invariant, and this is
+/// where that invariance is spent: the seat is translated back to the
+/// identity before anything economic reads it.
+pub fn borne_by_orb(state: &Committed) -> Vec<(u64, Ratio)> {
+    let (delta, support) = project_complex(state);
+    let shares = borne(&delta, &support);
+    state
+        .orbs
+        .iter()
+        .enumerate()
+        .map(|(seat, held)| (held.orb_id, shares.get(seat).cloned().unwrap_or_else(|| ratio(0, 1))))
+        .collect()
+}
+
+/// **THE STANDING, AXIS BY AXIS** — the reading a GATE consults
+/// (operator ruling 2026-08-02: *multi-axial on vertices towards
+/// uplift*).
+///
+/// One share per CHANNEL — [`CHANNEL_BOND`], [`CHANNEL_FORWARD`],
+/// [`CHANNEL_DEBT`] — never summed. `18_TORSION` §2b bars collapsing a
+/// directional quantity to a scalar wherever the system computes, and
+/// the collapse costs the only thing an orb can act on: two orbs
+/// reading the same total may stand on one channel each or on all
+/// three, and those are different worlds.
+pub fn borne_by_orb_axial(state: &Committed) -> Vec<(u64, Vec<Ratio>)> {
+    let (delta, support) = project_complex(state);
+    let axial = borne_axial(&delta, &support);
+    state
+        .orbs
+        .iter()
+        .enumerate()
+        .map(|(seat, held)| {
+            let share =
+                axial.get(seat).cloned().unwrap_or_else(|| vec![ratio(0, 1); CHANNELS]);
+            (held.orb_id, share)
+        })
+        .collect()
+}
+
+/// THE ONE ORB'S STANDING, PER CHANNEL. An orb the world has never
+/// seated stands at the ground on every channel — the same answer as an
+/// orb seated but holding nothing, because in neither case is there
+/// structure to attribute.
+pub fn standing_axial_of(state: &Committed, orb: u64) -> Vec<Ratio> {
+    borne_by_orb_axial(state)
+        .into_iter()
+        .find(|(id, _)| *id == orb)
+        .map(|(_, share)| share)
+        .unwrap_or_else(|| vec![ratio(0, 1); CHANNELS])
+}
+
+/// **THE OPEN AXES — TOWARD UPLIFT.** The channels on which this orb
+/// stands at the ground.
+///
+/// This is the syntropic half of the reading and the reason it is kept
+/// multi-axial. A channel at the ground is not a deficiency to be
+/// scored; it is the DIRECTION A NEW RELATION WOULD EARN ON. Summed
+/// away, the same orb learns only that it is short. Read per axis, it
+/// learns where to grow — a reading that gives rather than withholds
+/// (`18` Article II).
+///
+/// An orb standing on every channel returns empty: nothing is open
+/// because nothing is unoccupied, which is a full answer and not a
+/// refusal.
+pub fn open_axes_of(state: &Committed, orb: u64) -> Vec<usize> {
+    let ground = ratio(0, 1);
+    standing_axial_of(state, orb)
+        .into_iter()
+        .enumerate()
+        .filter(|(_, share)| *share == ground)
+        .map(|(channel, _)| channel)
+        .collect()
+}
+
+/// THE ONE ORB'S STANDING, AS ONE NUMBER — **the lens form**. The L1
+/// over [`standing_axial_of`], permitted at a human lens and barred
+/// where the system computes (`18` §2b). Totals that must reconcile
+/// read this; GATES READ THE AXIAL FORM.
+///
+/// Never negative — a share is a magnitude — so this reads as a floor
+/// an orb can rise from, not a penalty it must avoid.
+pub fn standing_of(state: &Committed, orb: u64) -> Ratio {
+    standing_axial_of(state, orb).into_iter().fold(ratio(0, 1), |a, b| a + b)
+}
+
 /// The cross-book door: the same one-pass read, carrying the count of
 /// pairs the observer could NOT see. While `unknown > 0` the complex
 /// has holes of unknown shape and [`EntangledRead::capacity_is_defined`]
@@ -567,9 +704,117 @@ pub fn read_entangled_observed(state: &Committed, unknown: usize) -> EntangledRe
     // to compose). And a triple with any absent edge is NOT a triangle:
     // checking it invents strain from a relation that does not exist,
     // which is the false gauge collapse.
-    let residuals = filled_residuals(&delta, &support);
+    let symmetry_foundation = symmetry_foundation(&delta, &support);
     let flows = boundary_form(&delta, &support).flows;
     // D — the independent cycles carrying charge no frame explains.
-    let rank = holonomies(&delta, &support).len();
-    EntangledRead { rank, residuals, flows, unknown }
+    // THE CHARGE FIELD, WHOLE — never `.len()` alone. The rank is its
+    // dimension; the values are what the cycles hold, and both are
+    // readings the caller may need (operator ruling 2026-08-02).
+    let holonomy = holonomies(&delta, &support);
+    let rank = holonomy.len();
+    EntangledRead { rank, holonomy, symmetry_foundation, flows, unknown }
+}
+
+/// THE FOLD GUARD — the occupancy floor, on both offices at once
+/// (operator ruling 2026-08-02).
+///
+/// `18` Article IV clause 1 states the floor: **you cannot have less
+/// room than you are using.** `D ≥ occupancy` binds whenever anything
+/// is in the universe, and within a universe it holds by absence — no
+/// deed closes a plane, so `D` cannot shrink at all.
+///
+/// **THE FOLD IS THE ONE OPERATION THAT COULD ROUTE AROUND THAT**, and
+/// it is why this guard exists. A fold does not shrink `D`; it seats a
+/// NEW universe. So a fold that carried content forward selectively
+/// could land that content in a store with fewer tones than it needs —
+/// no plane was ever closed, and the floor would still be breached.
+///
+/// **The fold as built is TOTAL** and therefore already safe: the era
+/// is archived whole (`conductor::fold` rotates the entire var root)
+/// and the successor seats fresh at `GROUND`. *Nothing is destroyed;
+/// the fold is archival by construction.* This guard exists so that
+/// stays true of every future fold rather than of this one only —
+/// `EraFolded { era, gauge }` carries no manifest, so nothing else
+/// could check it.
+///
+/// **BOTH OFFICES ARE GUARDED, because neither alone is sufficient**
+/// (`12_UNION` §3b, the office dyad):
+///
+/// - **D, the PROGENITOR — room.** Structure that crosses must keep its
+///   tones. A carried pair may not land where fewer grades stand.
+/// - **V, the SOVEREIGN — standing.** Nothing admitted may simply cease.
+///   An orb leaves the live universe only into the archive, never into
+///   nothing. That is I6 on the fold: *no difference dies without
+///   account.*
+///
+/// A total fold passes both trivially — nothing carries, so nothing can
+/// be under-roomed, and everything is archived, so nothing is dropped.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FoldGuard {
+    /// TOTAL — nothing carried forward. The era sealed whole and the
+    /// successor seats fresh. Lawful by construction.
+    Total,
+    /// CARRIED, and both floors hold: the carried structure keeps its
+    /// tones, and every departure is accounted.
+    CarriedWithinFloor,
+    /// REFUSED — carried structure would land in fewer tones than it
+    /// occupies. The D floor is breached.
+    RoomBelowOccupancy { carried_rank: usize, successor_degree: usize },
+    /// REFUSED — an orb present before is absent after AND absent from
+    /// the archive. Something admitted ceased without account.
+    StandingDroppedWithoutAccount { orbs: usize },
+}
+
+impl FoldGuard {
+    /// Only the two lawful shapes admit.
+    pub fn is_lawful(&self) -> bool {
+        matches!(self, FoldGuard::Total | FoldGuard::CarriedWithinFloor)
+    }
+}
+
+/// Judge a fold against the occupancy floor. `archived` names the orbs
+/// the fold sealed into the era record; a TOTAL fold archives every orb
+/// the prior universe held.
+pub fn fold_guard(prior: &Committed, next: &Committed, archived: &[u64]) -> FoldGuard {
+    let held = |state: &Committed| -> Vec<u64> {
+        state.orbs.iter().map(|orb| orb.orb_id).collect()
+    };
+    let before = held(prior);
+    let after = held(next);
+
+    // V's half first: nothing admitted may cease unaccounted. An orb
+    // that left the live universe must appear in the archive.
+    let dropped = before
+        .iter()
+        .filter(|id| !after.contains(id) && !archived.contains(id))
+        .count();
+    if dropped > 0 {
+        return FoldGuard::StandingDroppedWithoutAccount { orbs: dropped };
+    }
+
+    // TOTAL: nothing crossed. Nothing carried can be under-roomed.
+    let carried: Vec<u64> = before.into_iter().filter(|id| after.contains(id)).collect();
+    if carried.is_empty() {
+        return FoldGuard::Total;
+    }
+
+    // D's half: the carried structure must keep its tones. The rank the
+    // carried pairs bore before is the room the successor owes them.
+    let carried_rank = read_entangled(&restrict(prior, &carried)).rank;
+    let successor_degree = read_entangled(next).degree().get();
+    if successor_degree < Degree::above_ground(carried_rank).get() {
+        return FoldGuard::RoomBelowOccupancy { carried_rank, successor_degree };
+    }
+    FoldGuard::CarriedWithinFloor
+}
+
+/// The prior universe seen through only the orbs that crossed — what
+/// the carried structure was, in its own right.
+fn restrict(state: &Committed, keep: &[u64]) -> Committed {
+    let mut cut = state.clone();
+    cut.orbs.retain(|orb| keep.contains(&orb.orb_id));
+    cut.bonds.retain(|b| keep.contains(&b.source) && keep.contains(&b.target));
+    cut.forwards.retain(|c| keep.contains(&c.obligor) && keep.contains(&c.beneficiary));
+    cut.debts.retain(|d| keep.contains(&d.debtor) && keep.contains(&d.creditor));
+    cut
 }

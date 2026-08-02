@@ -26,7 +26,7 @@ impl World {
         Ok(())
     }
     /// THERMAL-1 — site an orb on its orbit (05 §1.1): albedo A and
-    /// radius r enter the master equation; thermal wakes for this orb.
+    /// radius r enter the equilibrium baseline; thermal wakes for this orb.
     pub fn site_planet(
         &mut self,
         orb: u64,

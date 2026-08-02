@@ -118,7 +118,7 @@ verdict's shape:
    as Q1's GPU holonomy was.
 2. **The subjectivity hazard.** There is no deterministic CFE transition
    function for "love" as a continuous field that is not invented,
-   arbitrary physics — the scalar/scored ancestry refusal returning as a
+   arbitrary physics — the scalar/scored provenance refusal returning as a
    field.
 
 **Kernels kept (inscribed at 09):** the four concepts themselves —
@@ -145,7 +145,7 @@ evolution rules — at which point it is no longer "morphodynamics", just
 more CFE state machinery under the existing laws. For genuinely continuous
 fields, the same door as Q1: a deterministic exact-arithmetic path plus
 succinct interior proofs. Closed for good: any stored mutable "alignment
-score" (the ancestry refusal); tokenized live reputation (09 §3.4 — a
+score" (the provenance refusal); tokenized live reputation (09 §3.4 — a
 token snapshot forks SEAL B's truth; NS-7 may anchor covenant *outcomes*,
 never the ratio).
 

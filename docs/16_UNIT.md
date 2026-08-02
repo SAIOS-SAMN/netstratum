@@ -94,7 +94,7 @@ Proof of Work-Convergence is the fold gate judged locally:
                               plane — and ONLY that residue is what
                               the §3 discovery mint may pay.
 
-`orbit_lock` is re-derived RED-FIRST from the v0.1 ancestor's `fold.rs`
+`orbit_lock` is re-derived RED-FIRST from the v0.1 predecessor's `fold.rs`
 (consult, never port blindly) into the sealed core, beside the landed
 `coherence_functional` and `coboundary_reduce`. The merge/fold deed
 enters `covered()`; two units converging is both kernels judging the
@@ -133,7 +133,8 @@ re-dressed on the way out:
    exactly two lawful outcomes:
 
     orbit_lock = ∅   the difference was angle all the way down —
-                     the fold closes to zero; the two paths were one.
+                     the fold RECOGNISES one state; the two paths
+                     were one, and the fold is what says so.
     orbit_lock ≠ ∅   TORSION — the collapse refuses; the encounter
                      EMITS: the residue rises as a NEW plane.
 

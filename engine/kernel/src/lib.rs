@@ -33,10 +33,10 @@
 pub mod bridge;
 pub mod motion;
 
-use cfe::dop::{ClosureEvent, Resource};
+use cfe::dop::{ClosureEvent, Office, Resource, UNION_REVIEW_HORIZON};
 use cfe::ipsal::Scope;
 use cfe::ratio::{ratio, Ratio};
-use cfe::world::Committed;
+use cfe::world::{Committed, SOVEREIGN};
 use rfa_core::Vacuity;
 use solver_verify::{verify_work, Difficulty, WorkBroken};
 
@@ -188,6 +188,57 @@ pub enum Unlawful {
     /// what it earns against. A mint banks value; it forms no relation,
     /// so it cannot bootstrap its own precondition.
     MintWithoutStanding { verdict: Vacuity },
+    /// ARTICLE II, ASKED OF THE MINTER RATHER THAN OF THE WORLD (SYN-4,
+    /// SYN-5). The world stands, but THIS orb holds none of what it
+    /// stands on: its share of the circulation is the ground.
+    ///
+    /// [`Unlawful::MintWithoutStanding`] is a world-level reading and no
+    /// orb appears in it, so it could only ever refuse — and it refused
+    /// the wrong way in both directions. An orb carrying real structure
+    /// was denied because the world's total fell short, and an orb
+    /// carrying none was admitted on structure OTHER orbs had built.
+    /// That second case is the free ride: standing is inherited, never
+    /// earned, and inheritance is not work.
+    ///
+    /// The share is carried, not just the refusal, because it is a
+    /// FLOOR AN ORB CAN RISE FROM rather than a penalty to avoid: an orb
+    /// reads what it holds, sees the ground, and knows that forming a
+    /// real obligation is what lifts it. Every share is a magnitude and
+    /// never negative, so this states what is missing in the same terms
+    /// that state what is present.
+    ///
+    /// **CARRIED PER AXIS, NEVER SUMMED** (operator ruling 2026-08-02:
+    /// *multi-axial on vertices towards uplift*). One share per CHANNEL,
+    /// so the refusal names WHICH DIRECTION is open rather than only how
+    /// short the orb is. A single scalar here would tell an orb it had
+    /// nothing without telling it where to begin, and `18` §2b bars the
+    /// collapse wherever the system computes.
+    MintWithoutOwnStanding { orb: u64, axial: Vec<Ratio> },
+    /// D5 — THE SOVEREIGN UNION was struck by someone other than the
+    /// ROOT ENTITY. The union is the standing the whole world is
+    /// raised on, and no delegate may enter the offices into it: a
+    /// granted scope is authority to act WITHIN the world, never
+    /// authority to constitute it.
+    ///
+    /// **Approval is WHO ACTS, never a field.** An earlier design
+    /// carried `approved_by_operator: bool` on the deed. A deed is a
+    /// CLAIM, and a claim asserting its own approval is forgeable by
+    /// whoever builds it — the kernel would have had nothing to check
+    /// the bool against. I2 containment already binds the actor
+    /// unforgeably, so identity IS the signature.
+    UnionNotStruckByRoot { actor: u64 },
+    /// D5 — the union named the wrong offices. It is `Progenitor` with
+    /// `Sovereign`, exactly once each: two progenitors or two
+    /// sovereigns is not a DYAD, and a dyad is the whole form (`17`
+    /// §3 — two that STAY TWO, neither deriving legitimacy from the
+    /// other).
+    UnionMalformed { progenitor: Office, sovereign: Office },
+    /// D5 — the union declared a review horizon other than the ruled
+    /// one. The term is a REVIEW, not an expiry, and it is fixed at
+    /// [`cfe::dop::UNION_REVIEW_HORIZON`]: a deed free to name its own
+    /// horizon could set it past any reachable stamp and never come up
+    /// for approval at all.
+    UnionTermNotRuled { declared: u64, ruled: u64 },
 }
 
 /// THE JUDGE. Does `step` lawfully carry `prior` to `next`? Pure,
@@ -205,6 +256,7 @@ pub fn lawful(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Un
     containment(prior, step)?;
     exactness(next)?;
     capacity_law(prior, step)?;
+    union_law(step)?;
     creation(step)?;
     decay(prior, step)?;
     gauge_law(prior, next, step)?;
@@ -253,12 +305,27 @@ pub fn lawful(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Un
 /// bound at any single step and so can never be an invariant.
 fn capacity_law(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
     match &step.event {
-        ClosureEvent::DiscoveryMinted { .. } => {
+        ClosureEvent::DiscoveryMinted { orb_id, .. } => {
             let read = bridge::read_entangled(prior);
             let verdict = read.verdict();
-            match verdict.is_admitted() {
+            if !verdict.is_admitted() {
+                return Err(Unlawful::MintWithoutStanding { verdict });
+            }
+            // ARTICLE II, ASKED OF THE MINTER (SYN-4/SYN-5). The world
+            // standing is the free-energy half and stays world-shaped —
+            // a gradient is a property of the whole. The RANK half is
+            // asked personally: what does THIS orb hold up?
+            //
+            // Strictly a narrowing, never a loosening: a share above the
+            // ground requires circulation on the orb's own relations,
+            // which requires a holonomy, which is rank ≥ 1. So every
+            // state this admits, the world-level reading admitted too —
+            // and the free rider, who held nothing and minted on other
+            // orbs' structure, no longer passes.
+            let axial = bridge::standing_axial_of(prior, *orb_id);
+            match axial.iter().any(|share| *share > ratio(0, 1)) {
                 true => Ok(()),
-                false => Err(Unlawful::MintWithoutStanding { verdict }),
+                false => Err(Unlawful::MintWithoutOwnStanding { orb: *orb_id, axial }),
             }
         }
         // Every other deed is judged by the invariants above. The
@@ -266,6 +333,56 @@ fn capacity_law(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
         // already exists needs no gradient to justify it.
         _ => Ok(()),
     }
+}
+
+/// INVARIANT — D5, THE SOVEREIGN UNION (operator ruling 2026-08-02).
+///
+/// The union of the offices `D(Ω)` PROGENITOR and `V(Ω)` SOVEREIGN is
+/// a CONSTITUTIONAL deed: it moves no value, opens no plane and shifts
+/// no key. What it must do is be impossible to strike falsely, and
+/// three things make it so.
+///
+/// **THE ROOT ENTITY, and only it.** A granted scope is authority to
+/// act WITHIN the world; it is never authority to constitute the world.
+/// `scope_of` puts this deed in Build so the ordinary containment
+/// check applies, and that is NECESSARY BUT NOT SUFFICIENT — this arm
+/// additionally requires `actor == SOVEREIGN`, the root entity id.
+/// Approval is WHO ACTS: a bool on the deed would be set by whoever
+/// built it.
+///
+/// **A DYAD, exactly.** One `Progenitor` and one `Sovereign`. Two of
+/// either is not a union of two offices, and `17` §3 makes the pair
+/// the whole form — two that STAY TWO, neither deriving its legitimacy
+/// from the other.
+///
+/// **THE RULED HORIZON.** A deed free to name its own term could set
+/// one past any reachable stamp and never come up for approval, which
+/// would make the review a formality. The term is fixed.
+///
+/// Pure and total like the rest: reads the step only, no clock, no
+/// history — the review FALLS DUE by arithmetic on the receipt's own
+/// stamp, and nothing about it is decided here.
+fn union_law(step: &Step) -> Result<(), Unlawful> {
+    let ClosureEvent::SovereignUnionSealed { progenitor, sovereign, term_stamps } = &step.event
+    else {
+        return Ok(());
+    };
+    if step.actor != SOVEREIGN {
+        return Err(Unlawful::UnionNotStruckByRoot { actor: step.actor });
+    }
+    if *progenitor != Office::Progenitor || *sovereign != Office::Sovereign {
+        return Err(Unlawful::UnionMalformed {
+            progenitor: *progenitor,
+            sovereign: *sovereign,
+        });
+    }
+    if *term_stamps != UNION_REVIEW_HORIZON {
+        return Err(Unlawful::UnionTermNotRuled {
+            declared: *term_stamps,
+            ruled: UNION_REVIEW_HORIZON,
+        });
+    }
+    Ok(())
 }
 
 /// INVARIANT — element conservation (THE ELEMENT LAW, operator ruling
@@ -442,6 +559,13 @@ fn covered(event: &ClosureEvent) -> bool {
         // (no value moves, no ratios): registering an agent and opening
         // or shutting its scopes.
         | E::EntityRegistered { .. } | E::ScopeGranted { .. } | E::ScopeRevoked { .. }
+        // D5 — THE SOVEREIGN UNION. A CONSTITUTIONAL deed: no value
+        // moves, no ratio is carried, no plane opens. I2 containment
+        // covers it and `union_law` adds the three checks the union
+        // needs — the ROOT entity struck it, the parties are a dyad of
+        // two different offices, and the review horizon is the ruled
+        // one. Ratified red-first by `sovereign_union_pins`.
+        | E::SovereignUnionSealed { .. }
         // W-A slice-1 — the BANKED-NEUTRAL authority deeds. Each one's
         // `world.rs::replay` arm touches NO bank (it sets a flag, a
         // seal, a list: terrain seed, star, planet site, practice,
@@ -463,7 +587,7 @@ fn covered(event: &ClosureEvent) -> bool {
         // 64 deeds, not the documented 63 — GaugeShiftedAt (tag 60,
         // the graded key shift, LIVE at world.rs's shift_gauge_at) was
         // never counted. Banked-neutral (replay resizes the gauge key,
-        // no bank), Build-scoped beside its covered sibling
+        // no bank), Build-scoped beside its covered counterpart
         // GaugeShifted. Without it the Phase 3 flip could never
         // complete: a live deed refusing Unjudged forever.
         | E::GaugeShiftedAt { .. }
@@ -632,7 +756,7 @@ fn lawful_deltas(
             non_negative(*resource, amount)?;
             Vec::new()
         }
-        // ColonyCharted: the founding reserves MOVE source → daughter —
+        // ColonyCharted: the founding reserves MOVE source → charted —
         // net zero per resource by the sealed rule.
         E::ColonyCharted { .. } => Vec::new(),
         // — the aperture legs, sign-guarded (a negative send is a
@@ -962,6 +1086,132 @@ fn containment(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
     }
 }
 
+/// **THE LAYER OF A DEED — how far a rule reaches** (`17_CAPACITY` §3d).
+///
+/// Not a documentation convention. In a distributed economy every node
+/// validates independently, so a reach recorded only in prose is a
+/// reach no node can enforce — the honour system does not survive
+/// consensus. This enum is the layer, and [`layer_of`] is the one
+/// authority for it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum Layer {
+    /// Binds every world and every line, always. Nobody may opt out and
+    /// nobody may be advantaged by opting in.
+    Universal,
+    /// Binds one committed state — its colonies, zones, siting, its own
+    /// chronicle. Another world may run differently and both are
+    /// lawful.
+    World,
+    /// Binds a LINE: a people's own instrument, in their own substrate.
+    /// Real and lawful, and NEVER a precondition for anyone else's
+    /// standing.
+    Civilizational,
+}
+
+/// **THE LAYER LAW — EXHAUSTIVE BY DESIGN**, in the shape of
+/// [`scope_of`]: adding a `ClosureEvent` variant forces a LAYER
+/// decision here at compile time. There is no wildcard arm and there
+/// must never be one, because a wildcard is exactly the inference this
+/// function exists to abolish.
+///
+/// **`None` means NOT YET RULED — it does not mean "no layer".** A
+/// false assignment is worse than an absent one, so a genuinely
+/// contested deed answers `None` and a gate consulting this must REFUSE
+/// on it rather than assume a reach — the discipline `scope_of` uses
+/// for a deed with no actor scope and `covered()` for an unjudged
+/// event.
+///
+/// **No deed answers `None` today** (2026-08-02): the three that were
+/// contested were all settled by reading their projections. The
+/// `Option` REMAINS in the signature deliberately — the next deed whose
+/// reach is genuinely undecided needs an honest home that does not
+/// require changing this signature under pressure, which is exactly
+/// when a default would get invented.
+///
+/// The rows are keyed on WHAT THE DEED CARRIES, never on the document
+/// it is described in — a carrier is not a mechanism (`17` §3d.1).
+pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
+    use ClosureEvent as E;
+    match event {
+        // ── CIVILIZATIONAL — keyed on a LINE's own identity ──────────
+        E::GenesisSealed { .. }        // civilization + the three axes
+        | E::TaxonSealed { .. }        // class, clade
+        | E::PracticeAdopted { .. } | E::PracticeReleased { .. }
+        | E::LineSucceeded { .. } | E::StationSeated { .. }
+        | E::Diverged { .. } | E::Confluent { .. }
+        | E::ElderWarded { .. } | E::WardLifted { .. }
+        | E::VeilDrawn { .. } | E::VeilLifted { .. } => Some(Layer::Civilizational),
+
+        // ── UNIVERSAL — the universe, the mesh, or any actor ─────────
+        E::EntityRegistered { .. } | E::ScopeGranted { .. } | E::ScopeRevoked { .. }
+        | E::EraAnnexed { .. } | E::EraFolded { .. } | E::GalaxyObserved { .. }
+        | E::HandoffSealed { .. }
+        | E::ResourceTransferred { .. } | E::ApertureSent { .. } | E::ApertureReceived { .. }
+        | E::DiscoveryMinted { .. } | E::SovereignUnionSealed { .. }
+        // Obligation instruments: ordinary finance, open to any line,
+        // each feeding a D channel. The forward RULING binds the
+        // ceremony, never the remainder (`17` §3d.1a).
+        | E::BondSealed { .. } | E::BondSettled { .. }
+        | E::ForwardSealed { .. } | E::ForwardReleased { .. } | E::ForwardSlashed { .. }
+        | E::OverflowAbsorbed { .. } | E::AbsorptionLapsed { .. }
+        | E::CouncilSealed { .. } | E::CouncilClosed { .. }
+        | E::OfferPosted { .. } | E::OfferCleared { .. }
+        | E::RouteChartered { .. } | E::RouteLapsed { .. }
+        | E::VoidShare { .. } => Some(Layer::Universal),
+
+        // ── WORLD — keyed on an ORB inside one committed state ───────
+        E::ColonyFounded { .. } | E::ColonyCharted { .. } | E::WorldCharted { .. }
+        | E::ZoneBuilt { .. } | E::ZoneRazed { .. }
+        | E::YieldCollected { .. } | E::DemurrageSettled { .. } | E::UpkeepSettled { .. }
+        | E::VentSettled { .. }
+        | E::StarCommissioned { .. } | E::StarAged { .. } | E::PlanetSited { .. }
+        | E::OverheatStruck { .. } | E::OverheatCleared { .. }
+        | E::FamineStruck { .. } | E::FamineRelieved { .. }
+        | E::GaugeShifted { .. } | E::GaugeShiftedAt { .. }
+        | E::ProspectStruck { .. } | E::AssayStruck { .. } | E::CrystalDrawn { .. }
+        | E::InstrumentForged { .. }
+        | E::TechDiscovered { .. } | E::TechLicensed { .. } => Some(Layer::World),
+
+        // ── RULED 2026-08-02 by reading the projection ───────────────
+        // FrictionSettled was contested on the guess that it computed
+        // from 09's ideology axes. IT DOES NOT. The chain is:
+        //   friction   = friction_rate() * divergence * value
+        //   divergence = |reciprocity_reading(from) - reciprocity_reading(to)|
+        //   reciprocity_reading(orb)
+        //              = returned_across / (returned_across + extracted_across)
+        // Two of the orb's OWN measured behavioural books — the same
+        // pair the missing-leg sweep found already two-armed. No creed,
+        // no genesis axis, no class or clade appears anywhere in it.
+        // `09` CALLS it "ideological friction"; the projection prices
+        // UNLIKE CONDUCT, and any line can be reciprocal or not.
+        // Second instance of the §3d.1 trap: a document title is not a
+        // scope, exactly as a carrier is not a mechanism.
+        E::FrictionSettled { .. } => Some(Layer::Universal),
+
+        // ── RULED 2026-08-02 by reading the projection ───────────────
+        // WantStruck/WantRelieved: the whole block is gated on a SEALED
+        // genesis — "no seal, no entity type, no want" — and each kind
+        // on a specific axis: resonance needs perception == 3
+        // (harmonic), novelty needs disposition == 2 (empiricist). A
+        // line with different axes NEVER EXPERIENCES THE MECHANIC. That
+        // is civilizational by the exact criterion: a people's own, and
+        // never a precondition for anyone else's standing.
+        E::WantStruck { .. } | E::WantRelieved { .. } => Some(Layer::Civilizational),
+
+        // IncursionStruck LOOKED like it spanned all three layers,
+        // carrying era, world AND line. It does not, and the puzzle
+        // dissolves on a sharper criterion: A LAYER IS WHAT A DEED
+        // BINDS, NOT WHAT IT MENTIONS. Replay does nothing with it
+        // (`world/replay.rs`: `IncursionStruck { .. } => {}`), no live
+        // path consumes it, and it is universe-ledger only — "the
+        // archive never edited, the living never raided". The world and
+        // line names are the SUBJECT of the record, not keys binding
+        // those entities, exactly as `EraAnnexed` carries a world and
+        // binds none.
+        E::IncursionStruck { .. } => Some(Layer::Universal),
+    }
+}
+
 /// The sealed event → scope law (a CFE transition rule extracted into the
 /// kernel). EXHAUSTIVE by design: adding a `ClosureEvent` variant forces a
 /// scope decision here at compile time — the amendment discipline made
@@ -987,7 +1237,12 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // KERNEL-TAXON: the drafted Build-class arm coder-03 named for
         // their #42 — unenforced until their covered() entry + witness.
         | E::TaxonSealed { .. }
-        | E::StationSeated { .. } => {
+        | E::StationSeated { .. }
+        // D5 — THE SOVEREIGN UNION. Build-class: it opens the standing
+        // the whole world is raised on. The scope is necessary and NOT
+        // sufficient — `union_law` additionally requires the ROOT
+        // entity, because no delegate may strike the union.
+        | E::SovereignUnionSealed { .. } => {
             Some(Scope::Build)
         }
         // Raze — demolish or lift what was raised.

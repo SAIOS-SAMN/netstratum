@@ -21,7 +21,7 @@ instrument.
 **Axis 2 — proof of useful work (the solver lane, landed BESIDE the
 board).** `engine/solver` is PoUW in the one lawful form: finding a
 solution is search (hard); every solution emits a blake3
-parent-linked certificate chain; `verify_certificate` replays it in
+predecessor-linked certificate chain; `verify_certificate` replays it in
 O(program length). "Every solution is a proof, not an assertion."
 Landed, witnessed — and wired to nothing: solves never enter a
 chronicle, sync never verifies work, work earns nothing receipted.
