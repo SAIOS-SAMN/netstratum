@@ -17,6 +17,7 @@ pub mod kinematic;
 pub mod luminal;
 pub mod observer;
 pub mod peel;
+pub mod propagation;
 pub mod render;
 pub mod standing;
 

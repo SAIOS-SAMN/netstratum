@@ -290,95 +290,92 @@ see.
 
 ---
 
-## §5 RESONANCE — motion that is captured, not merely present
+## §5 RESONANCE — PROPAGATION, not a matching threshold
 
-`orbital/resonance.rs` reads capture as a single exact-rational
-comparison: an entity is captured by a manifold when
-`|angular_valency − spin| ≤ tolerance`, with a three-arm typed outcome
-(Captured / Mismatch / Severed) each carrying the difference so the
-reader can introspect rather than being handed a verdict.
+**THE CORRECTION (operator, 2026-08-02), and it reaches the whole
+section.** Resonance is NOT a static match against a threshold. It is
+the dynamic RATE AND BOUNDARY function governing how an originating
+volume expands, contracts, degrades and accelerates over time through
+the medium surrounding it.
 
-Exact rationals, no floats, typed outcome carrying its measurement
-whole — already house-shaped.
+```text
+    PACE        fast / short  vs  long / hard
+    DIRECTION   outward expansion  vs  inward contraction
+    MEDIUM      the accompaniment accelerates or decelerates the motion
+    DECAY       degradation from the origin, over elapsed steps and
+                over distance
+```
 
-### 5a. THE TOLERANCE IS DYNAMIC — and a fixed one would be the defect
+The ancestor's `|angular_valency − spin| ≤ tolerance` is a threshold
+test, and a threshold test is a photograph of something that is only
+meaningful as a film. **What was landed here first — a depth-indexed
+match — is honest and is NOT resonance**; it is renamed to what it does
+(`Alignment`, §13) and resonance is rebuilt as propagation.
 
-**Operator ruling 2026-08-02: the resonance tolerance is DYNAMIC.**
+### 5a. THE PROPAGATION PHYSICS, IN DISCRETE EXACT FORM
 
-This lane first proposed a fixed ruled constant, on the reasoning that
+**The relayed form is continuous and cannot be transcribed:**
+
+```text
+    RELAYED (not exact-rational):
+        V(t) = V0 · exp( ∫ (expand − contract) dt )
+        a(t) = d/dt ( velocity · η_accompaniment )
+        D(t,d) = decay_consumed(t) · distance_from_origin(d)
+```
+
+`exp` is TRANSCENDENTAL and `∫` / `d/dt` are continuous. This substrate
+admits neither: exactness is a type-level guarantee, and **the chain is
+discrete — one commitment per step, which is `c` itself** (LAW 5).
+Transcribing the relayed form would put an approximation into the
+substrate, which is the fault this document has now caught four times.
+
+**The physics survives whole. Steps ARE the clock, so every derivative
+is a difference and every integral is a sum:**
+
+```text
+    VOLUME          the extent standing at a step
+    EXPANSION       V(k) − V(k−1), DIRECTION PRESERVED
+                    positive = outward, negative = inward
+    VELOCITY        expansion per chain step — the step is the unit
+    ACCELERATION    the SECOND difference, modulated by the medium
+    DEGRADATION     decay consumed over elapsed steps × distance
+                    from the origin (wrapped L1, `key_distance`)
+```
+
+Nothing is collapsed to a rate-scalar; the direction survives every
+reading, because *outward* and *inward* are the whole content and a
+magnitude discards exactly that.
+
+### 5b. THE MEDIUM — the accompaniment that speeds or damps
+
+A volume does not propagate through nothing. The surrounding economic
+medium **modulates the velocity**: it either accelerates the motion
+(coherence building) or decelerates it (variance damping). The medium is
+not a metaphor — it is the standing economic surround: what decays, what
+is owed, what capacity stands nearby.
+
+```text
+    η > 1   the accompaniment ACCELERATES — the volume propagates
+            faster than it would alone
+    η = 1   inert — the medium neither helps nor hinders
+    η < 1   the accompaniment DECELERATES — the medium damps
+```
+
+**η is DERIVED, never dialed** (LAW 6), for the reason §5c gives.
+
+### 5c. WHY NO TOLERANCE CONSTANT SURVIVES
+
+The earlier draft here proposed a fixed ruled tolerance, then a
+depth-derived one. **Both are superseded**: under propagation there is no
+threshold at all to set. A reading of resonance reports a PACE, a
+DIRECTION and a DEGRADATION — three quantities carried whole — and never
+a verdict of *matched / not matched*.
+
+That removes the attack surface entirely rather than shrinking it.
 Article III struck `α`/`β` as *"the bounded dynamic parameters a descent
-needs to be tuned."* **That caution was aimed at the wrong risk**, and
-the ancestor's own scale-invariance proof
-(`tests/orbital_scale_invariance.rs`) says why:
-
-> *`L_min = 1/256` is a rational-floor invariant, **NOT a physical
-> magnitude**. Same inputs labeled atomic / planetary / Calabi-Yau
-> produce byte-identical atoms — **the substrate cannot see the label**.*
-
-A FIXED ABSOLUTE tolerance imports a scale into a substrate that refuses
-to have one. The same `ε` means *everything captures* at one magnitude
-and *nothing captures* at another, so a constant tolerance is not
-conservative — it is a hidden unit. **Dynamic is the scale-invariant
-choice, and therefore the correct one.**
-
-**What Article III actually struck, stated precisely.** `α`/`β` were
-free dials on an ALLOCATION SCORE: turn them and change who is paid.
-Two things make a tolerance here a different object:
-
-1. **It governs no allocation.** The lens never gates (§1). Nothing is
-   paid, admitted or refused on a lens reading, so there is no
-   objective to tune toward.
-2. **It is DERIVED, never DIALED** — and this is the binding
-   requirement, from LAW 6 rather than from Article III: *an experiment
-   that does not repeat for every observer is not evidence.* A tolerance
-   a caller passes in makes two observers report different captures from
-   the same state. A tolerance computed from state does not.
-
-```text
-    DIALED   — supplied by a caller.  Two observers, one state, two
-               answers.  NOT REPRODUCIBLE.  Barred by LAW 6.
-
-    DERIVED  — a pure function of committed state.  Moves as the world
-               moves; identical for every observer.  LAWFUL.
-```
-
-The ancestor is DIALED (`check_resonance(entity, manifold, tolerance)`
-takes it as an argument) and must not be transcribed on this point.
-
-### 5b. THE PEEL IS THE TOLERANCE
-
-The derivation needs no new quantity, because the lens already carries
-one: **magnification**.
-
-```text
-    FAR   (Δ_value)   compare H¹ CLASSES         — captured iff the
-                      classes coincide; a discrete equality, no numeric
-                      tolerance exists at this depth
-    MID   (Δ_object)  compare BOUNDARY CONTENT   — tolerance is the
-                      scale of the boundary content itself, relative
-    NEAR  (Δ_cell)    compare EXACT ENTRIES      — tolerance is ZERO;
-                      byte-identity, the strictest reading
-```
-
-**Tolerance is not a number anyone sets — it is which peel you are
-looking through.** Resonance and magnification are the same mechanism
-seen from two sides: to loosen the tolerance is to step back, and to
-tighten it is to approach. That is why the reading stays honest under
-zoom, and why no dial is required anywhere.
-
-Where a relative comparison is needed at MID depth, it is written
-cross-multiplied so it stays exact and division-free, and so both sides
-scale together under `a ↦ λa`:
-
-    |a − b| · den  ≤  num · (|a| + |b|)
-
-**STILL OPEN, and not this lane's to decide alone:** whether the
-observer's own capacity `κ` also narrows the tolerance — a finer
-instrument having a narrower linewidth is physically right and would tie
-resonance to LAW-13's depth bound (§4). Recorded as a question, not
-assumed.
-
----
+needs to be tuned"*; a reading with no parameter has nothing to tune,
+and two observers reading the same chain get the same pace because a
+difference of two committed states is not a matter of opinion.
 
 ## §6 THE APERTURE — per-observer, without belief
 
@@ -545,8 +542,11 @@ The bound is applied BEFORE any work — a shallow observer asking for the
 near view materialises the far view and nothing else. That is the
 laziness of §4, and it caches nothing.
 
-**The peel is the tolerance**, which is how a DYNAMIC tolerance stays
-lawful:
+**The peel indexes ALIGNMENT** — *do these two read the same at this
+distance?* That is a real question and it is NOT resonance (§5).
+`observer::Capture` carries it, and `propagation` re-exports it under
+the name ALIGNMENT to say so plainly. Resonance is a propagation across
+a span, not a comparison at an instant.
 
 ```text
     FAR    compare CLASSES         discrete; no numeric tolerance exists
@@ -554,10 +554,10 @@ lawful:
     NEAR   compare EXACT ENTRIES   tolerance ZERO — byte-identity
 ```
 
-To loosen the tolerance IS to step back; to tighten it IS to approach.
-So it is derived rather than dialed, and **two observers standing in the
-same place always agree** — which LAW 6 requires and a caller-supplied
-`ε` could never give.
+To loosen the alignment test IS to step back; to tighten it IS to
+approach. It is derived rather than dialed, and **two observers standing
+in the same place always agree** — which LAW 6 requires and a
+caller-supplied `ε` could never give.
 
 `Capture` has three arms, and the third matters: **`Silent` is not
 `Mismatch`.** Nothing to compare is an absence of subject, and reporting
@@ -571,7 +571,8 @@ it as a disagreement would be inventing a difference.
 | `luminal` | what emerges at a phase through an aperture | returns a magnitude |
 | `kinematic` | the strain of a twist, per component | collapses to a norm |
 | `standing` | which row a state occupies | gates on it |
-| `observer` | how deep one may see; what reads as resonant | takes a dialed tolerance |
+| `observer` | how deep one may see; ALIGNMENT at a distance | takes a dialed tolerance |
+| `propagation` | RESONANCE — pace, direction, medium, degradation across a span | collapses a rate to a magnitude |
 
 Held by `lens/tests/deletability.rs`: the sealed core names no lens
 crate in any dependency table, the ledger takes no runtime edge, and the
