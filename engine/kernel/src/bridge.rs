@@ -568,7 +568,7 @@ pub fn read_entangled_observed(state: &Committed, unknown: usize) -> EntangledRe
 /// THE FOLD GUARD — the occupancy floor, on both offices at once
 /// (operator ruling 2026-08-02).
 ///
-/// `18` Article IV clause 0 states the floor: **you cannot have less
+/// `18` Article IV clause 1 states the floor: **you cannot have less
 /// room than you are using.** `D ≥ occupancy` binds whenever anything
 /// is in the universe, and within a universe it holds by absence — no
 /// deed closes a plane, so `D` cannot shrink at all.

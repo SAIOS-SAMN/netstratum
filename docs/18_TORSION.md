@@ -1076,10 +1076,10 @@ written — these are the wirings that satisfy them.
 bound and no artificial ceiling may be imposed on the uplift `∂Δ` as it
 approaches luminal capacity.*
 
-**Exact realization — two clauses, and the first kills a
+**Exact realization — three clauses, and the second kills a
 misreading.**
 
-0. **THE FLOOR IS OCCUPANCY** (operator ruling 2026-08-02). `GROUND`
+1. **THE FLOOR IS OCCUPANCY** (operator ruling 2026-08-02). `GROUND`
    floors an EMPTY universe at one tone. A universe holding structure
    that needs `k` tones is floored at `k` — **you cannot have less room
    than you are using.** Enforced today by ABSENCE: no deed closes a
@@ -1099,7 +1099,7 @@ misreading.**
    I6 on the fold. Four verdicts: `Total`, `CarriedWithinFloor`,
    `RoomBelowOccupancy`, `StandingDroppedWithoutAccount`.
 
-1. **MONOTONE, NOT DESCENDING.** *Monotone here is order-theoretic —
+2. **MONOTONE, NOT DESCENDING.** *Monotone here is order-theoretic —
    NON-DECREASING. It is not the tonal sense: `D` is POLYTONIC (each
    grade a tone, `11_AEON` §2.0's polytonic key), and this clause says
    the chord never loses a note, never that the universe stays
@@ -1108,7 +1108,7 @@ misreading.**
    failed topology, operator ruling 2026-08-01) and nothing in this
    article revives it. This is `ELEVATE-1`'s "the fiber never retreats"
    (`BadClimb`) generalized from the gauge climb to capacity itself.
-2. **THE PROPAGATION LIMIT IS THE CHAIN'S OWN STEP RATE.** The propagation limit of
+3. **THE PROPAGATION LIMIT IS THE CHAIN'S OWN STEP RATE.** The propagation limit of
    this manifold is one commitment per step. Nothing crosses the
    manifold faster than the chain extends, and no reading may assume it
    does. "Uncaged" bounds the AMPLITUDE of uplift, never its rate: the
