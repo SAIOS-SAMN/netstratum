@@ -2966,6 +2966,15 @@ fn amount(value: &Ratio) -> String {
 
 fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
     let text = match refusal {
+        // K4: the emitter now refuses BEFORE writing, so these are
+        // reachable from every caller rather than only from the judge.
+        ActionRefused::WorkRefused => {
+            "that payload is not a proof — the work did not verify".to_string()
+        }
+        ActionRefused::MintExceedsWork { bound, claimed } => format!(
+            "the work earns {} — {claimed} was claimed",
+            style.strong(&bound.to_string())
+        ),
         ActionRefused::OffSlot { theta } => format!(
             "{theta} is not a slot — a turn divides into {}, so an orbit sits at \
              k/{} or it does not sit",

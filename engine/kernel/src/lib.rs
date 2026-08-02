@@ -1271,3 +1271,22 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::VoidShare { .. } | E::RouteLapsed { .. } => None,
     }
 }
+
+/// **THE SEALED WARRANT (K4).** The kernel's answer to `cfe`'s
+/// question: what does this payload earn?
+///
+/// This is the one organ that may read a work payload, and it does the
+/// same two things the judge does — `verify_work` then `mint_bound` —
+/// so proposer and judge cannot disagree about what a proof is worth
+/// (CHARTER §0b, call-not-copy).
+///
+/// It closes the live gate WITHOUT breaking the opaque-payload law:
+/// `cfe` still never imports the verifier. It asks; this answers.
+pub struct SealedWarrant;
+
+impl cfe::world::MintWarrant for SealedWarrant {
+    fn earns(&self, work: &[u8]) -> Option<Ratio> {
+        let difficulty = verify_work(work).ok()?;
+        Some(mint_bound(&difficulty))
+    }
+}

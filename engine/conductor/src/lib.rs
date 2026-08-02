@@ -1121,6 +1121,11 @@ impl Polity {
                             cfe::dop::Resource::Crystal,
                             earned,
                             work,
+                            // The emitter now demands a warrant, and the
+                            // kernel's is the only one that reads a
+                            // payload. The bound is checked twice by one
+                            // function: here and at I4.
+                            &kernel::SealedWarrant,
                         );
                     }
                 }

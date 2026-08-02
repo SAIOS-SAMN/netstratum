@@ -208,6 +208,7 @@ impl World {
         resource: Resource,
         amount: Ratio,
         work: Vec<u8>,
+        warrant: &dyn MintWarrant,
     ) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Collect)?;
         if amount < ratio(0, 1) {
@@ -215,6 +216,25 @@ impl World {
         }
         if !self.orbs.iter().any(|held| held.orb_id == orb) {
             return Err(ActionRefused::NoSuchOrb { orb });
+        }
+        // K4 THE LIVE GATE. The emitter cannot VERIFY — the
+        // opaque-payload law bars `cfe` from importing the verifier, and
+        // `recurrence_guard` fails the build on any attempt. So it does
+        // the lawful thing instead: it CALLS BACK to whoever can.
+        //
+        // `cfe` never parses the payload; it hands the bytes to the
+        // warrant and asks what they earn. A caller with no verifier
+        // cannot mint at all, and a caller with one cannot mint past
+        // what the work bounds — checked BEFORE `close`, so a refused
+        // mint leaves no receipt. Previously the judge caught this
+        // afterwards, by which point the chronicle held it and `replay`
+        // granted the value.
+        let bound = warrant.earns(&work).ok_or(ActionRefused::WorkRefused)?;
+        if amount > bound {
+            return Err(ActionRefused::MintExceedsWork {
+                bound: Box::new(bound),
+                claimed: Box::new(amount),
+            });
         }
         self.close(
             ClosureEvent::DiscoveryMinted { orb_id: orb, resource, amount, work },
