@@ -1086,6 +1086,97 @@ fn containment(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
     }
 }
 
+/// **THE LAYER OF A DEED — how far a rule reaches** (`17_CAPACITY` §3d).
+///
+/// Not a documentation convention. In a distributed economy every node
+/// validates independently, so a reach recorded only in prose is a
+/// reach no node can enforce — the honour system does not survive
+/// consensus. This enum is the layer, and [`layer_of`] is the one
+/// authority for it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum Layer {
+    /// Binds every world and every line, always. Nobody may opt out and
+    /// nobody may be advantaged by opting in.
+    Universal,
+    /// Binds one committed state — its colonies, zones, siting, its own
+    /// chronicle. Another world may run differently and both are
+    /// lawful.
+    World,
+    /// Binds a LINE: a people's own instrument, in their own substrate.
+    /// Real and lawful, and NEVER a precondition for anyone else's
+    /// standing.
+    Civilizational,
+}
+
+/// **THE LAYER LAW — EXHAUSTIVE BY DESIGN**, in the shape of
+/// [`scope_of`]: adding a `ClosureEvent` variant forces a LAYER
+/// decision here at compile time. There is no wildcard arm and there
+/// must never be one, because a wildcard is exactly the inference this
+/// function exists to abolish.
+///
+/// **`None` means NOT YET RULED — it does not mean "no layer".** Three
+/// deeds are genuinely contested (`17` §3d.3) and a false assignment
+/// would be worse than an absent one: a gate consulting this must
+/// REFUSE on `None` rather than assume a reach. That is the same
+/// discipline `scope_of` uses for a deed with no actor scope, and the
+/// same discipline `covered()` uses for an unjudged event.
+///
+/// The rows are keyed on WHAT THE DEED CARRIES, never on the document
+/// it is described in — a carrier is not a mechanism (`17` §3d.1).
+pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
+    use ClosureEvent as E;
+    match event {
+        // ── CIVILIZATIONAL — keyed on a LINE's own identity ──────────
+        E::GenesisSealed { .. }        // civilization + the three axes
+        | E::TaxonSealed { .. }        // class, clade
+        | E::PracticeAdopted { .. } | E::PracticeReleased { .. }
+        | E::LineSucceeded { .. } | E::StationSeated { .. }
+        | E::Diverged { .. } | E::Confluent { .. }
+        | E::ElderWarded { .. } | E::WardLifted { .. }
+        | E::VeilDrawn { .. } | E::VeilLifted { .. } => Some(Layer::Civilizational),
+
+        // ── UNIVERSAL — the universe, the mesh, or any actor ─────────
+        E::EntityRegistered { .. } | E::ScopeGranted { .. } | E::ScopeRevoked { .. }
+        | E::EraAnnexed { .. } | E::EraFolded { .. } | E::GalaxyObserved { .. }
+        | E::HandoffSealed { .. }
+        | E::ResourceTransferred { .. } | E::ApertureSent { .. } | E::ApertureReceived { .. }
+        | E::DiscoveryMinted { .. } | E::SovereignUnionSealed { .. }
+        // Obligation instruments: ordinary finance, open to any line,
+        // each feeding a D channel. The covenant RULING binds the
+        // ceremony, never the remainder (`17` §3d.1a).
+        | E::BondSealed { .. } | E::BondSettled { .. }
+        | E::CovenantSealed { .. } | E::CovenantReleased { .. } | E::CovenantSlashed { .. }
+        | E::OverflowAbsorbed { .. } | E::AbsorptionLapsed { .. }
+        | E::CouncilSealed { .. } | E::CouncilClosed { .. }
+        | E::OfferPosted { .. } | E::OfferCleared { .. }
+        | E::RouteChartered { .. } | E::RouteLapsed { .. }
+        | E::VoidShare { .. } => Some(Layer::Universal),
+
+        // ── WORLD — keyed on an ORB inside one committed state ───────
+        E::ColonyFounded { .. } | E::ColonyCharted { .. } | E::WorldCharted { .. }
+        | E::ZoneBuilt { .. } | E::ZoneRazed { .. }
+        | E::YieldCollected { .. } | E::DemurrageSettled { .. } | E::UpkeepSettled { .. }
+        | E::VentSettled { .. }
+        | E::StarCommissioned { .. } | E::StarAged { .. } | E::PlanetSited { .. }
+        | E::OverheatStruck { .. } | E::OverheatCleared { .. }
+        | E::FamineStruck { .. } | E::FamineRelieved { .. }
+        | E::GaugeShifted { .. } | E::GaugeShiftedAt { .. }
+        | E::ProspectStruck { .. } | E::AssayStruck { .. } | E::CrystalDrawn { .. }
+        | E::InstrumentForged { .. }
+        | E::TechDiscovered { .. } | E::TechLicensed { .. } => Some(Layer::World),
+
+        // ── NOT YET RULED — contested, and named rather than guessed ─
+        // FrictionSettled: keyed on an orb, COMPUTED from 09's ideology
+        //   axes, and posting into a universal thermal book.
+        // Want*: reads a line's PERCEPTION axis while striking an orb.
+        // IncursionStruck: carries era, world AND line — keyed on all
+        //   three layers at once.
+        E::FrictionSettled { .. }
+        | E::WantStruck { .. } | E::WantRelieved { .. }
+        | E::IncursionStruck { .. } => None,
+    }
+}
+
 /// The sealed event → scope law (a CFE transition rule extracted into the
 /// kernel). EXHAUSTIVE by design: adding a `ClosureEvent` variant forces a
 /// scope decision here at compile time — the amendment discipline made

@@ -753,9 +753,35 @@ gated by nothing.
   obvious home. A deed that spans layers may be the one shape the
   taxonomy has to grow to hold.
 
-**THE STANDING RULE THIS ESTABLISHES:** a new law declares its layer
-when it lands, in the same landing. A rule whose reach is inferred from
-its filename is a rule nobody decided.
+**THE TABLE ABOVE IS NOT THE AUTHORITY — `kernel::layer_of` IS**
+(operator refusal 2026-08-02: *this is an impossibility — we are
+building a distributed game with a distributed economy, this is a
+farce*).
+
+The refusal was correct and the error was mine. This section first
+ended with a standing rule saying *a new law declares its layer when it
+lands* — an HONOUR SYSTEM. In a distributed economy every node
+validates independently, so a reach recorded only in prose is a reach
+NO NODE CAN ENFORCE: a node that ignores the convention still accepts
+the block, and nothing anywhere disagrees with it. That is precisely
+the failure Article III LAW 8 excises — a term that only resonates —
+and I wrote it into the very section that exists to abolish inference.
+
+The layer is now `kernel::layer_of(event) -> Option<Layer>`, EXHAUSTIVE
+over `ClosureEvent` with NO WILDCARD ARM, in the shape `scope_of` and
+`covered()` already use: **adding a deed BREAKS THE BUILD until
+somebody decides its reach.** The decision is forced by the compiler,
+identical on every node, and part of the judge rather than of the
+documentation. The table above is now a READING of that function, and
+if the two disagree the function is right.
+
+**`None` MEANS NOT YET RULED, and is never a default.** The three
+contested deeds answer `None`, and a gate consulting the layer must
+REFUSE on it rather than assume a reach — the same discipline
+`scope_of` uses for a deed with no actor scope and `covered()` uses for
+an unjudged event. Pinned by `layer_pins`, including a source-reading
+test that fails the moment a wildcard arm appears, verified by
+injecting one.
 
 **A THREAT NEEDS A DEFENCE, AT ITS OWN LAYER.** `IncursionStruck`
 (§6's sweep) records a threat arriving and nothing records it held —
