@@ -22,10 +22,11 @@
 //! 10. RELABELLING-INVARIANT — Article I made a test.
 
 use rfa_core::capacity::{
-    borne, capacity, capacity_anchored, circulation, divergence, ext_x, flux, ground,
+    borne, capacity, capacity_anchored, circulation, circulation_on, divergence, ext_x, flux,
+    ground,
     preserves_hodge_split, Degree, Extent, Flux,
 };
-use rfa_core::{coboundary_reduce, Delta};
+use rfa_core::{coboundary_reduce, Delta, Support};
 
 use cfe::ratio::{ratio, Ratio};
 
@@ -564,12 +565,27 @@ fn the_base_group_is_the_constants_stabiliser() {
 /// A theta graph on 4 entities: the 4-cycle 0-1-2-3-0 plus the chord 0-2.
 /// TWO independent cycles, so a fundamental basis has a real choice to make
 /// — which is exactly the choice `borne` must not depend on.
-fn theta_4(vals: [Ratio; 5]) -> Delta {
+const THETA: [(usize, usize); 5] = [(0, 1), (1, 2), (2, 3), (3, 0), (0, 2)];
+
+fn theta_4(vals: [Ratio; 5]) -> (Delta, Support) {
     let mut delta = Delta::zero(4, 1);
-    for (k, (i, j)) in [(0, 1), (1, 2), (2, 3), (3, 0), (0, 2)].iter().enumerate() {
+    let mut support = Support::new(4, 1);
+    for (k, (i, j)) in THETA.iter().enumerate() {
         delta.set_antisym(*i, *j, vec![vals[k].clone()]);
+        support.connect(*i, *j, 0);
     }
-    delta
+    (delta, support)
+}
+
+/// A complete support on `n` entities — every relation present.
+fn complete(n: usize) -> Support {
+    let mut support = Support::new(n, 1);
+    for i in 0..n {
+        for j in (i + 1)..n {
+            support.connect(i, j, 0);
+        }
+    }
+    support
 }
 
 /// Every permutation of 4 labels.
@@ -594,14 +610,18 @@ fn perms_4() -> Vec<[usize; 4]> {
     out
 }
 
-fn relabel_4(delta: &Delta, perm: [usize; 4]) -> Delta {
+fn relabel_4(delta: &Delta, support: &Support, perm: [usize; 4]) -> (Delta, Support) {
     let mut out = Delta::zero(4, 1);
+    let mut sup = Support::new(4, 1);
     for i in 0..4 {
         for j in (i + 1)..4 {
             out.set_antisym(i, j, vec![delta.entry(perm[i], perm[j], 0).clone()]);
+            if support.has(perm[i], perm[j], 0) {
+                sup.connect(i, j, 0);
+            }
         }
     }
-    out
+    (out, sup)
 }
 
 #[test]
@@ -618,16 +638,67 @@ fn the_borne_share_is_relabelling_invariant() {
     // The circulation is the UNIQUE Hodge representative — no forest, no
     // root — so a share read off it moves with the entities and never
     // without them. Measured over all 24 relabellings.
-    for delta in [
+    for (delta, support) in [
         theta_4([q(1, 1), q(2, 1), q(1, 1), q(1, 1), q(-3, 1)]),
         theta_4([q(-5, 3), q(7, 2), q(0, 1), q(9, 4), q(1, 6)]),
         theta_4([q(1, 1), q(1, 1), q(1, 1), q(1, 1), q(1, 1)]),
     ] {
-        let base = borne(&delta);
+        let base = borne(&delta, &support);
         for perm in perms_4() {
-            let got = borne(&relabel_4(&delta, perm));
+            let (rd, rs) = relabel_4(&delta, &support, perm);
+            let got = borne(&rd, &rs);
             let want: Vec<Ratio> = (0..4).map(|i| base[perm[i]].clone()).collect();
             assert_eq!(got, want, "the borne share must travel with the entity: {perm:?}");
+        }
+    }
+}
+
+#[test]
+fn an_entity_holding_no_relation_bears_nothing() {
+    // FARMING BY ABSENCE — caught before it reached the economy. Read on
+    // the COMPLETE graph, four entities with a single relation 0—1 give
+    // shares [1/2, 1/2, 1/4, 1/4]: entities 2 and 3 hold nothing, owe
+    // nothing, are owed nothing, and each draw a QUARTER of a relation
+    // they are not party to. That is cheaper than farming strain — it
+    // costs nothing whatsoever.
+    //
+    // On the SUPPORT, an isolated entity is its own component: it holds no
+    // relation to sum, so it bears exactly the ground.
+    let mut delta = Delta::zero(4, 1);
+    delta.set_antisym(0, 1, vec![q(1, 1)]);
+    let mut support = Support::new(4, 1);
+    support.connect(0, 1, 0);
+
+    let shares = borne(&delta, &support);
+    assert_eq!(shares[2], q(0, 1), "an entity with no relations drew a share");
+    assert_eq!(shares[3], q(0, 1), "an entity with no relations drew a share");
+}
+
+#[test]
+fn seating_empty_entities_moves_no_share() {
+    // THE SECOND HALF OF THE SAME DEFECT. On the complete graph the very
+    // same relation reads `circ = 0` among two entities and `1/2` among
+    // four, so an orb could enlarge every share in the world simply by
+    // seating empty orbs beside it — dilution mistaken for work.
+    //
+    // Components decouple, so the theta's shares must not move when the
+    // world is widened with entities that hold nothing.
+    let (delta, support) = theta_4([q(1, 1), q(2, 1), q(1, 1), q(1, 1), q(-3, 1)]);
+    let base = borne(&delta, &support);
+
+    for extra in 1..4 {
+        let wide = 4 + extra;
+        let mut big = Delta::zero(wide, 1);
+        let mut big_support = Support::new(wide, 1);
+        for (k, (i, j)) in THETA.iter().enumerate() {
+            big.set_antisym(*i, *j, vec![delta.entry(*i, *j, 0).clone()]);
+            let _ = k;
+            big_support.connect(*i, *j, 0);
+        }
+        let widened = borne(&big, &big_support);
+        assert_eq!(&widened[..4], &base[..], "seating {extra} empty entities moved a share");
+        for (i, share) in widened.iter().enumerate().skip(4) {
+            assert_eq!(*share, q(0, 1), "seated entity {i} drew a share for holding nothing");
         }
     }
 }
@@ -636,23 +707,27 @@ fn the_borne_share_is_relabelling_invariant() {
 fn the_borne_share_conserves_the_circulation() {
     // NOTHING IS MINTED AT THE JOIN AND NOTHING FALLS OUT OF IT. Each
     // relation's magnitude is halved and BOTH halves are handed out, so the
-    // shares sum to exactly the circulation standing in the world. The join
-    // is a distribution, not a reduction — and not a fountain.
-    for delta in [
+    // shares sum to exactly the circulation standing on the support. The
+    // join is a distribution, not a reduction — and not a fountain.
+    let three = complete(3);
+    for (delta, support) in [
         theta_4([q(1, 1), q(2, 1), q(1, 1), q(1, 1), q(-3, 1)]),
         theta_4([q(-5, 3), q(7, 2), q(0, 1), q(9, 4), q(1, 6)]),
-        anchor_3(),
-        triangle(q(1, 1), q(1, 1), q(-1, 1)),
+        (anchor_3(), three.clone()),
+        (triangle(q(1, 1), q(1, 1), q(-1, 1)), three.clone()),
     ] {
-        let circ = circulation(&delta);
+        let circ = circulation_on(&delta, &support);
         let mut whole = q(0, 1);
         for i in 0..delta.dim() {
             for j in (i + 1)..delta.dim() {
+                if !support.has(i, j, 0) {
+                    continue;
+                }
                 let v = circ.entry(i, j, 0).clone();
                 whole = whole + if v < q(0, 1) { q(0, 1) - v } else { v };
             }
         }
-        let handed: Ratio = borne(&delta).into_iter().fold(q(0, 1), |a, b| a + b);
+        let handed: Ratio = borne(&delta, &support).into_iter().fold(q(0, 1), |a, b| a + b);
         assert_eq!(handed, whole, "every half of every relation must reach an entity");
     }
 }
@@ -666,13 +741,14 @@ fn a_pure_coboundary_bears_nothing() {
         vec![q(0, 1), q(1, 1), q(3, 2), q(-2, 5)],
         vec![q(5, 3), q(-7, 2), q(11, 4), q(0, 1)],
     ] {
-        let mut delta = Delta::zero(potentials.len(), 1);
-        for i in 0..potentials.len() {
-            for j in (i + 1)..potentials.len() {
+        let n = potentials.len();
+        let mut delta = Delta::zero(n, 1);
+        for i in 0..n {
+            for j in (i + 1)..n {
                 delta.set_antisym(i, j, vec![&potentials[j] - &potentials[i]]);
             }
         }
-        for (i, share) in borne(&delta).into_iter().enumerate() {
+        for (i, share) in borne(&delta, &complete(n)).into_iter().enumerate() {
             assert_eq!(share, q(0, 1), "entity {i} bore a share of pure frame");
         }
     }
@@ -684,8 +760,8 @@ fn no_share_can_be_farmed_by_adding_frame() {
     // dressing the world in coordinates. `borne` reads the circulation
     // ONLY, and a gauge shift lands entirely in the gradient summand, so
     // every share is untouched. Work earns; framing does not.
-    let delta = theta_4([q(1, 1), q(2, 1), q(1, 1), q(1, 1), q(-3, 1)]);
-    let base = borne(&delta);
+    let (delta, support) = theta_4([q(1, 1), q(2, 1), q(1, 1), q(1, 1), q(-3, 1)]);
+    let base = borne(&delta, &support);
 
     let potentials = [q(7, 3), q(-2, 5), q(4, 1), q(19, 6)];
     let mut shifted = Delta::zero(4, 1);
@@ -695,7 +771,7 @@ fn no_share_can_be_farmed_by_adding_frame() {
             shifted.set_antisym(i, j, vec![delta.entry(i, j, 0) + gauge]);
         }
     }
-    assert_eq!(borne(&shifted), base, "a gauge shift must move no entity's share");
+    assert_eq!(borne(&shifted, &support), base, "a gauge shift must move no entity's share");
 }
 
 #[test]
@@ -704,12 +780,13 @@ fn every_share_is_positive_or_ground() {
     // a refusal, stated negatively. A share is a magnitude: it is never
     // below the ground, so the rule can only give. What an entity holds up
     // is stated in its own terms, not as the absence of a penalty.
-    for delta in [
+    let three = complete(3);
+    for (delta, support) in [
         theta_4([q(-5, 3), q(7, 2), q(0, 1), q(9, 4), q(1, 6)]),
         theta_4([q(-1, 1), q(-1, 1), q(-1, 1), q(-1, 1), q(-1, 1)]),
-        triangle(q(-3, 7), q(5, 2), q(1, 9)),
+        (triangle(q(-3, 7), q(5, 2), q(1, 9)), three.clone()),
     ] {
-        for (i, share) in borne(&delta).into_iter().enumerate() {
+        for (i, share) in borne(&delta, &support).into_iter().enumerate() {
             assert!(share >= q(0, 1), "entity {i} drew a negative share: {share}");
         }
     }
