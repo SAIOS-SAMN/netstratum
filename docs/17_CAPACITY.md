@@ -782,8 +782,23 @@ gated by nothing.
   name and binds no world.
 
 **NOTHING IS CONTESTED TODAY.** All three were settled by reading their
-projections, and none of the three answers matched the guess made from
-its surrounding prose. The `Option` in `layer_of`'s signature stays
+projections.
+
+**AND THE FIRST TELLING OF THIS WAS ITSELF AN OVERCLAIM, corrected
+here.** This section said *none of the three matched the guess made
+from its surrounding prose*, which reads as though the law documents
+were wrong. They were not. `09` §3.2 states the formula exactly —
+*measured reciprocity ratios* — and adds *friction prices divergence,
+not vice; the engine keeps its promise to judge nothing*. `12_UNION`
+§5b names *a harmonic line* and *an empiricist line* outright. `07`
+§3.1 says *universe ledger only* and *the door receipts era · world ·
+line*. **Every body was precise. I read TITLES and CARRIER LINES —
+"Ideological friction", "the carrier is the Glasskeeper escrow
+machinery" — and never the paragraph under them.** The defect was a
+reading habit, not a corpus of bad documents, and saying otherwise
+blamed the record for my shortcut. The headings that actually mislead
+have now been fixed at the source (`09` §2.3, §3.2), and each mechanic
+declares its layer where it is described. The `Option` in `layer_of`'s signature stays
 anyway: the next deed whose reach is genuinely undecided needs an
 honest home that does not require widening the signature under
 pressure, which is exactly the moment a default gets invented.

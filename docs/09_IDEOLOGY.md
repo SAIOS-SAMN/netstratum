@@ -150,7 +150,23 @@ cheaper than churn *by the landed decay laws*, not by decree. Severance
 is a real shock: the target's next heating bill (ECON-J) arrives with the
 inflow gone.
 
-### 2.3 Integrity — the fidelity axis
+### 2.3 Integrity — the fidelity axis · the DECLARATION
+
+**Read the mechanism, not this line.** The sentence below names a
+CARRIER — where the machinery is seated in the world-book — and a
+carrier is not a mechanism. The instrument itself is
+`{obligor, beneficiary, resource, quota, delivered, collateral, sealed,
+window}`: a party bound to deliver a quantity by a deadline with
+collateral posted against failure. Ordinary finance, open to any line,
+and what the capacity meter reads is `quota − delivered` and nothing
+else (`CHANNEL_FORWARD`). Reasoning from this carrier line to the
+mechanism produced a false defect on 2026-08-02.
+
+**LAYER: the DECLARATION is CIVILIZATIONAL; the REMAINDER is
+UNIVERSAL** (§2.4's composition rule; `17_CAPACITY` §3d.1a). A line
+that chooses to live by the vitrified word adopts the covenant and is
+gated at T0/T1/T2. A line that merely owes a delivery uses the forward
+and is gated by nothing.
 
 Coherence between word and deed, measured at the escrow.
 
@@ -187,6 +203,14 @@ closes the loop.
 
 **Declared vs measured (the composition rule):** a sector's *declared*
 policy is a covenant (§2.3's axis); its *measured* policy is this ratio.
+
+**AND THIS DISTINCTION IS THE COVENANT RULING, already latent here**
+(operator ruling 2026-08-02). A DECLARATION is a way of living that a
+line chooses — so the covenant is CIVILIZATIONAL, adopted freely and
+gated at T0/T1/T2. A MEASUREMENT is what a line did — so this ratio,
+and the friction computed from it (§3.2), are UNIVERSAL and bind
+everyone. The two layers were written into this composition rule
+before anyone went looking for them.
 A sector that declares reciprocity and measures extraction needs no
 "liar" flag — its covenant breaches post to the fidelity books. The axes
 compose without a judge.
@@ -212,7 +236,22 @@ is never absolute). The empty-book reading is a parameter; the candidate
 default is full collateral until a history exists — trust is earned, and
 the empty book is not a credential.
 
-### 3.2 Ideological friction (`ΔS_ideo`)
+### 3.2 Friction — the cost of unlike CONDUCT (`ΔS_ideo`) · UNIVERSAL
+
+**The name is a misnomer and it has cost a reader once.** `ΔS_ideo`
+and "ideological friction" say IDEOLOGY; this section's own body says
+the opposite three sentences later — *friction prices divergence, not
+vice… the engine keeps its promise to judge nothing* — and the
+mechanism reads two MEASURED conduct ratios and nothing else. On
+2026-08-02 the kernel lane read this heading, inferred that a people's
+creed was charging a universal ledger, and filed a defect that did not
+exist. **The body was right the whole time; the title was not.** The
+tag `ΔS_ideo` is kept because receipts and prose elsewhere cite it; the
+word "ideological" is not a description.
+
+**LAYER: UNIVERSAL** (`kernel::layer_of`, `17_CAPACITY` §3d). Any line
+can be reciprocal or not — conduct requires no creed — so this binds
+everyone and no ideology is a precondition for it.
 
 A transaction between two orbs whose measured reciprocity ratios diverge
 generates additional entropy:

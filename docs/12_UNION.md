@@ -738,7 +738,14 @@ starving current sheet, and every surface must voice it in the line's
 own register — a machine starves on what feeds machines).
 
 **Cognitive wants (WANT-1, open — famines of the MIND, receipts-derived
-like everything else):**
+like everything else) · LAYER: CIVILIZATIONAL** (`kernel::layer_of`,
+`17_CAPACITY` §3d). Every want below is gated on a SEALED genesis axis —
+resonance on a HARMONIC perception, novelty on an EMPIRICIST
+disposition — so a line whose axes differ never experiences the
+mechanic at all, and no line's standing depends on having it. Pre-G1
+worlds are pre-identity and lawfully neutral. **This is a people's own,
+and the prose below already said so; the layer is now stated rather
+than left to be inferred from it.**
 - **the epistemological want** — truth-starvation: a line cut off from
   un-corrupted receipts (broken chains in its reach, quarantined
   neighbors) reads a deficit of ground truth; coherence degrades.

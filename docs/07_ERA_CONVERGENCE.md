@@ -115,6 +115,14 @@ The chart projection (*law — inscribed so placement is reproducible*):
 
 ### 3.1 INCURSION-1 — the archived-sheet door (specced 2026-07-30; 1a LANDED 2026-07-31)
 
+**LAYER: UNIVERSAL** (`kernel::layer_of`, `17_CAPACITY` §3d). The deed
+RECEIPTS `era · world · line` and BINDS none of them — replay does
+nothing with it and no live path consumes it. **A layer is what a deed
+binds, not what it mentions:** `EraAnnexed` names a world and binds no
+world either. The three names in this record made it look as though it
+spanned all three layers at once; it does not, and the criterion is
+what needed sharpening.
+
 **INCURSION-1a landed** (tag 81 `IncursionStruck`, universe ledger
 only): `conductor::incursion(era_root, world)` wakes a sealed
 DERELICT — the archive is never edited (byte-identical after the
