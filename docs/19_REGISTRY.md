@@ -72,10 +72,10 @@ it drifts silently because nothing forces the copies to agree.
 
   **Exhaustive by construction.** `tier_covers_every_station` walks
   `STATIONS` and fails if any value has no band, so adding a station
-  without ruling on its tier breaks the build. That is the shape
-  syntropy-inscription named from the kernel's layer reading (landed on
-  main at cbb0c8c, not yet merged into this lane — cited by description
-  rather than by symbol, since this worktree cannot verify it).
+  without ruling on its tier breaks the build. That is the
+  `kernel::layer_of` shape syntropy-inscription named — exhaustive over
+  its input with no wildcard, so a new case cannot land without someone
+  deciding its reach.
 
   `holds_a_serving_seat` reads the conflict-of-interest question the
   covenant gate needs: T0/T1/T2 are seated offices that serve everyone;
