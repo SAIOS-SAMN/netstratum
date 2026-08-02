@@ -106,14 +106,21 @@ fn declared_items(root: &Path) -> HashSet<String> {
                             }
                         }
                     }
-                    // Enum variants: an indented CamelCase head.
+                    // Enum variants: an indented CamelCase head. `=` is
+                    // in the follow set because a variant may carry an
+                    // explicit discriminant — `Sovereign = 1,` — and
+                    // without it every discriminant-form variant was
+                    // INVISIBLE to this scan, so a citation to one
+                    // false-failed as unresolved. `ZoneKind::Smelter = 3`
+                    // sat in the same blind spot; `Office::Sovereign` is
+                    // just the first citation that reached for one.
                     if line.starts_with("    ") {
                         let head: String = t
                             .chars()
                             .take_while(|c| c.is_alphanumeric() || *c == '_')
                             .collect();
                         if head.chars().next().is_some_and(char::is_uppercase)
-                            && t[head.len()..].trim_start().starts_with(['{', ',', '('])
+                            && t[head.len()..].trim_start().starts_with(['{', ',', '(', '='])
                         {
                             items.insert(head);
                         }
