@@ -59,7 +59,7 @@ pub const CHANNEL_BOND: usize = 0;
 /// the difference. Nothing in the mechanism is ceremonial — "forward"
 /// and "pact" are inherited names (FORWARD-1, BUILD_ORDER §3), not
 /// descriptions, and this channel means the remainder and only that.
-pub const CHANNEL_COVENANT: usize = 1;
+pub const CHANNEL_FORWARD: usize = 1;
 /// ABSORB-1: the open reciprocity window's remainder, debtor →
 /// creditor.
 pub const CHANNEL_DEBT: usize = 2;
@@ -364,8 +364,8 @@ pub fn project_complex(state: &Committed) -> (Delta, Support) {
         if let (Some(i), Some(j)) = (seat(pact.obligor), seat(pact.beneficiary)) {
             let outstanding = pact.quota.clone() - pact.delivered.clone();
             if i != j && outstanding > zero {
-                owed[i][j][CHANNEL_COVENANT] += outstanding;
-                support.connect(i, j, CHANNEL_COVENANT);
+                owed[i][j][CHANNEL_FORWARD] += outstanding;
+                support.connect(i, j, CHANNEL_FORWARD);
             }
         }
     }
