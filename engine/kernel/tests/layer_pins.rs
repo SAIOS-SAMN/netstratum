@@ -76,6 +76,16 @@ fn a_ceremonial_deed_and_a_universal_one_are_told_apart() {
         Some(Layer::World),
         "a zone is one committed state's own"
     );
+    // RULED by reading the projection, not the prose. `09` calls this
+    // "ideological friction", but friction = rate * divergence * value
+    // where divergence is |Δ| of two orbs' reciprocity readings, and a
+    // reciprocity reading is returned_across / (returned + extracted) —
+    // the orb's OWN measured conduct. No creed appears in the chain.
+    assert_eq!(
+        layer_of(&ClosureEvent::FrictionSettled { orb_id: 1, amount: ratio(1, 1) }),
+        Some(Layer::Universal),
+        "friction prices unlike CONDUCT, which any line can have"
+    );
     assert_eq!(
         layer_of(&ClosureEvent::SovereignUnionSealed {
             progenitor: Office::Progenitor,
@@ -99,7 +109,6 @@ fn not_ruled_is_a_value_and_never_a_default() {
     // grow: a new deed answering None means somebody skipped the
     // decision the exhaustive match forced on them.
     let contested = [
-        ClosureEvent::FrictionSettled { orb_id: 1, amount: ratio(1, 1) },
         ClosureEvent::IncursionStruck {
             era: "e".into(),
             world: "w".into(),

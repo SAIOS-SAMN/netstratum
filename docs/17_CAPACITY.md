@@ -737,13 +737,31 @@ gated by nothing.
 
 **CONTESTED — NOT ASSIGNED, and named rather than guessed:**
 
-- **`FrictionSettled` (IDEO-1)** — keyed on an orb, but COMPUTED from
-  `09`'s four ideology axes, and it posts into `entropy_vented`, a
-  universal thermal book. If the axes are civilizational then a
-  people's ideology is charging a universal ledger, and the answer is
-  not "add the syntropic arm" (task #14) but "move the mechanic". This
-  is the same trap as §3d.1 and it is exactly why that task is blocked
-  on this one.
+- **`FrictionSettled` — RULED UNIVERSAL 2026-08-02, by reading the
+  projection.** It was contested on the guess that it computed from
+  `09`'s ideology axes. It does not. The chain, in full:
+
+```text
+    friction   = friction_rate() · divergence · value
+    divergence = |reciprocity_reading(from) − reciprocity_reading(to)|
+    reciprocity_reading(orb)
+               = returned_across / (returned_across + extracted_across)
+```
+
+  Two of the orb's OWN measured behavioural books — the same pair the
+  missing-leg sweep already found two-armed. No creed, no genesis axis,
+  no class or clade appears anywhere in it. `09` CALLS it *ideological
+  friction*; the projection prices UNLIKE CONDUCT, and any line can be
+  reciprocal or not. **Second instance of the §3d.1 trap: a document
+  title is not a scope, exactly as a carrier is not a mechanism.**
+
+  **And this re-poses the missing arm rather than answering it.**
+  Divergence is `|a − b|`, so matched conduct costs NOTHING — and
+  costing nothing is not the same as earning something. "The reward for
+  convergence is the absence of a penalty" is precisely the negentropic
+  shape struck at the top of this work: good defined as the absence of
+  bad. Whether convergence should PAY is an economic ruling that mints
+  value, and it is not taken from this lane.
 - **`WantStruck` / `WantRelieved` (WANT-1)** — the cognitive want reads
   a line's PERCEPTION axis while striking on an orb. World or
   civilizational depending on which end is load-bearing; the projection

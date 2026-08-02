@@ -1165,14 +1165,27 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::InstrumentForged { .. }
         | E::TechDiscovered { .. } | E::TechLicensed { .. } => Some(Layer::World),
 
+        // ── RULED 2026-08-02 by reading the projection ───────────────
+        // FrictionSettled was contested on the guess that it computed
+        // from 09's ideology axes. IT DOES NOT. The chain is:
+        //   friction   = friction_rate() * divergence * value
+        //   divergence = |reciprocity_reading(from) - reciprocity_reading(to)|
+        //   reciprocity_reading(orb)
+        //              = returned_across / (returned_across + extracted_across)
+        // Two of the orb's OWN measured behavioural books — the same
+        // pair the missing-leg sweep found already two-armed. No creed,
+        // no genesis axis, no class or clade appears anywhere in it.
+        // `09` CALLS it "ideological friction"; the projection prices
+        // UNLIKE CONDUCT, and any line can be reciprocal or not.
+        // Second instance of the §3d.1 trap: a document title is not a
+        // scope, exactly as a carrier is not a mechanism.
+        E::FrictionSettled { .. } => Some(Layer::Universal),
+
         // ── NOT YET RULED — contested, and named rather than guessed ─
-        // FrictionSettled: keyed on an orb, COMPUTED from 09's ideology
-        //   axes, and posting into a universal thermal book.
         // Want*: reads a line's PERCEPTION axis while striking an orb.
         // IncursionStruck: carries era, world AND line — keyed on all
         //   three layers at once.
-        E::FrictionSettled { .. }
-        | E::WantStruck { .. } | E::WantRelieved { .. }
+        E::WantStruck { .. } | E::WantRelieved { .. }
         | E::IncursionStruck { .. } => None,
     }
 }
