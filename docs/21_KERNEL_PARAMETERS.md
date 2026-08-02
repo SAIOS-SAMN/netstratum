@@ -809,3 +809,86 @@ cheapest, not chosen.**
 
 **Until this is ruled, K4's Phase 3 must not flip.** The gate would
 work exactly as designed and stop the economy.
+
+---
+
+## §15 NEW VERDICT — V IS ALREADY IN THE LAW, AND THE PROJECTION MISREADS IT
+
+**§14's diagnosis is withdrawn.** It said the verdict collapses two
+states and needs a new one. Measured, the law already has both.
+
+    boundary.rs:180
+    dual_pole(rank, form) = match (rank > 0, form.is_non_vacuous()) {
+        (false, false) => Void,        // no structure, NO POTENTIAL
+        (false, true)  => Unframed,    // no structure, POTENTIAL STANDS
+        (true,  false) => Stasis,
+        (true,  true)  => Entangled,
+    }
+
+**`form.is_non_vacuous()` IS `V`.** The ruling's requirement — *add V to
+the equation* — is already satisfied. And `Unframed` is exactly the
+state the ruling names `Void::Uninitialized`: structure absent,
+potential present. **No new variant is needed; the existing one is
+unreachable.**
+
+### 15a. THE ACTUAL DEFECT — measured
+
+    orbs=1  rank=0  verdict=Void
+    V side: flows = 0
+    banked entries the world ACTUALLY holds: 2   (Iron 20, Biomass 10)
+
+The world holds real potential and the verdict reads none, so the
+`Unframed` row can never be taken at genesis and every founded world
+falls to `Void`.
+
+**Because `V` is projected from the SAME EDGES as `D`.** `boundary_form`
+reads the obligation complex — bonds, covenants, debts — and so does
+the rank. At genesis there are no obligations, so both are zero
+together, by construction, always.
+
+**That breaks §2f.** The entanglement law requires two poles *witnessed
+in every dimension*. Two readings of one source are not two poles: they
+cannot disagree, so the four-row table degenerates to two rows and the
+Unframed and Stasis rows are dead.
+
+### 15b. THE FIX — no new state, no exemption, no bootstrap window
+
+**`V` must read standing POTENTIAL, not standing obligation.** A
+founded world holding `Iron 20 · Biomass 10` has potential and no
+structure — that is `Unframed` on the table as written. Banked reserves
+are the potential the seed creates (P4), and they are already in
+`Committed`.
+
+Then, with no law changed:
+
+    genesis           Unframed   potential, no structure
+    obligations form  Entangled  both poles stand, the mint admits
+    drained world     Stasis     structure, no potential
+    nothing at all    Void       correctly refused
+
+§14's three shapes are all withdrawn. A genesis window, a split verdict
+and a bootstrap rung were three ways to work around a misprojection.
+
+### 15c. THE MERGE IS REFUSED, and why
+
+The ruling requires verifying **`D > 0` with `rank = 0`** before
+merging. **That is unsatisfiable on this branch**, because here `D` IS
+`rank` — `capacity_law` reads `read.rank` and nothing distinguishes
+them.
+
+It may well be satisfiable on `main`: lens-lane landed *"D IS A
+DIMENSION — the charge field carried whole, never counted"* and *"D IS
+POLYTONIC, and the floor is OCCUPANCY not the ground"*, which is
+precisely the separation the condition assumes. **Refusing the merge
+until that is measured rather than assumed** — merging first and
+checking after is how the last three defects reached the tree.
+
+**What must be measured on `main` before any merge:**
+
+1. Does an `EntangledRead` there expose a `D` distinct from `rank`?
+2. Does `capacity_law` read that `D`, or still `rank`?
+3. On a founded one-orb world, what is the verdict?
+
+If (3) is `Unframed`, the deadlock is already closed on `main` and this
+section is the explanation rather than the fix. If it is still `Void`,
+§15b is the fix and it belongs in the projection.

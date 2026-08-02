@@ -16,6 +16,9 @@ fn a_one_orb_world_can_never_mint() {
     let read = kernel::bridge::read_entangled(&prior);
     let verdict = read.verdict();
     println!("orbs={} rank={} verdict={verdict:?}", prior.orbs.len(), read.rank);
+    println!("V side: flows={} (the potential the verdict reads)", read.flows.len());
+    let banked: usize = prior.orbs.iter().map(|o| o.banked.len()).sum();
+    println!("banked entries the world ACTUALLY holds: {banked}");
 
     assert_eq!(read.rank, 0, "one orb, no relations, no cycles");
     assert!(!verdict.is_admitted(), "so capacity_law refuses every mint on this board");
