@@ -21,7 +21,7 @@ fn derelict_with_insulation() -> World {
     let mut world = World::new();
     world.found("dimlight-hold").expect("founds");
     world.commission_star(StarClass::M).expect("commissions");
-    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1)).expect("sites cold");
+    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None).expect("sites cold");
     world.zone(8, ZoneKind::Habitat).expect("zones");
     for _ in 1..=541u32 {
         world.tick();

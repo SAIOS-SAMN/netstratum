@@ -356,7 +356,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             let orbit_r = words.next().and_then(parse_ratio_arg);
             match (albedo, orbit_r) {
                 (Some(albedo), Some(orbit_r)) => {
-                    match world.site_planet(*current, albedo, orbit_r) {
+                    match world.site_planet(*current, albedo, orbit_r, None) {
                         Ok(()) => {
                             thermal_line(world, style, *current);
                             println!("{} orbit sited — thermal is live for this planet", style.ok("✓"));
@@ -2966,6 +2966,16 @@ fn amount(value: &Ratio) -> String {
 
 fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
     let text = match refusal {
+        ActionRefused::OffSlot { theta } => format!(
+            "{theta} is not a slot — a turn divides into {}, so an orbit sits at \
+             k/{} or it does not sit",
+            cfe::dop::TURN_SLOTS,
+            cfe::dop::TURN_SLOTS
+        ),
+        ActionRefused::OrbitOccupied { orb, slot } => format!(
+            "slot {slot} on that ring is held by {} — two orbs cannot share a place",
+            style.strong(&orb.to_string())
+        ),
         ActionRefused::NoColony => format!(
             "no colony yet — start with {}",
             style.strong("found <name>")

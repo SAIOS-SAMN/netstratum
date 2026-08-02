@@ -722,7 +722,19 @@ impl Polity {
         // An unlawful operator-pinned siting (albedo ≥ 1, orbit ≤ 0)
         // leaves the orb thermally DORMANT (the engine's opt-in guard)
         // instead of killing the board; derived seats are always lawful.
-        let _ = world.site_planet(cfe::world::FIRST_ORB, albedo, orbit);
+        // SITED WITHOUT AN ANGLE, deliberately. Passing ANY slot here
+        // makes conductor/tests/survey_pins.rs fail with a live/replay
+        // divergence in Crystal — measured at slots 0, 1, 7 and 30, so
+        // it is the PRESENCE of the angle and not its value. See
+        // `21_KERNEL_PARAMETERS` §17: the capability is landed and
+        // witnessed, and the conductor does not use it until #30
+        // closes the divergence it exposes.
+        let _ = world.site_planet(
+            cfe::world::FIRST_ORB,
+            albedo,
+            orbit,
+            None,
+        );
         Polity {
             chained: 0,
             refused: Vec::new(),

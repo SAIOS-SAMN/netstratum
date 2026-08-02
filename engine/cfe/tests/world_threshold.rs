@@ -15,7 +15,7 @@ fn sunlit(name: &str) -> World {
     let mut world = World::new();
     world.found(name).expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
-    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1)).expect("sites");
+    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None).expect("sites");
     world
 }
 
@@ -79,7 +79,7 @@ fn the_first_aperture_is_the_crossing() {
     // Shielded first; then haven makes its solar leap...
     assert!(haven.is_shielded());
     haven.commission_star(StarClass::G).expect("commissions");
-    haven.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1)).expect("sites");
+    haven.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None).expect("sites");
     assert!(!haven.is_shielded(), "the leap lifts the shield");
     assert!(!haven.has_crossed(), "knowing the sun is not yet crossing the void");
 

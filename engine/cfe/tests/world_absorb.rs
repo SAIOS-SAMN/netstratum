@@ -40,10 +40,10 @@ fn furnace_and_coldstore() -> (World, u64) {
         .expect("zones the array");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2))
+        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None)
         .expect("sites hot");
     world
-        .site_planet(daughter, ratio(0, 1), ratio(100, 1))
+        .site_planet(daughter, ratio(0, 1), ratio(100, 1), None)
         .expect("sites cold");
     // Tick @16: the furnace mints 15/8 and overflows 1/2 (struck); the
     // array captures 19999/10000 before the unheated daughter's joule
@@ -245,7 +245,7 @@ fn absorption_refuses_typed() {
     let daughter = world.chart("outpost", FIRST_ORB).expect("charts");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2))
+        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None)
         .expect("sites hot");
     // No shell: heat_net 5/2 all overflows on one tick.
     world.tick();

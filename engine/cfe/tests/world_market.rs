@@ -15,7 +15,7 @@ fn sunlit(name: &str) -> World {
     let mut world = World::new();
     world.found(name).expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
-    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1)).expect("sites");
+    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None).expect("sites");
     world
 }
 

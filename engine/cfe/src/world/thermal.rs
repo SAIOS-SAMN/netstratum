@@ -32,10 +32,29 @@ impl World {
         orb: u64,
         albedo: Ratio,
         orbit_r: Ratio,
+        theta: Option<Ratio>,
     ) -> Result<(), ActionRefused> {
         use crate::dop::ThermalSite;
         if self.star.is_none() {
             return Err(ActionRefused::NoStarCommissioned);
+        }
+        // THE PLACEMENT LAW. An angle must sit ON a slot, and no two
+        // orbs may share a place. Together these make collision
+        // DECIDABLE rather than a tolerance — which is the whole point
+        // of a discrete ring.
+        if let Some(turn) = &theta {
+            if !crate::dop::on_slot(turn) {
+                return Err(ActionRefused::OffSlot { theta: Box::new(turn.clone()) });
+            }
+            let slot = crate::dop::slot_of(turn).unwrap_or(0);
+            if let Some(taken) = self.orbs.iter().find(|held| {
+                held.orb_id != orb
+                    && held.thermal.as_ref().is_some_and(|site| {
+                        site.orbit_r == orbit_r && site.theta.as_ref() == Some(turn)
+                    })
+            }) {
+                return Err(ActionRefused::OrbitOccupied { orb: taken.orb_id, slot });
+            }
         }
         let zero = ratio(0, 1);
         let one = ratio(1, 1);
@@ -50,9 +69,7 @@ impl World {
         held.thermal = Some(ThermalSite {
             albedo: albedo.clone(),
             orbit_r: orbit_r.clone(),
-            // Historical siting carries no angle — an orb has a radius
-            // and no place until one is receipted.
-            theta: None,
+            theta: theta.clone(),
         });
         // TECH-1a (12_UNION §5a): a world's FIRST thermal opt-in
         // receipts the kernel SOLAR LEAP — its people now know their
@@ -76,7 +93,7 @@ impl World {
             );
         }
         self.close(
-            ClosureEvent::PlanetSited { orb_id: orb, albedo, orbit_r, theta: None },
+            ClosureEvent::PlanetSited { orb_id: orb, albedo, orbit_r, theta },
             SOVEREIGN,
         );
         Ok(())

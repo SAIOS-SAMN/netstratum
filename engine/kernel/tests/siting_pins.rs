@@ -109,3 +109,91 @@ fn a_sited_angle_survives_the_wire() {
     };
     assert!(bytes.len() > legacy.wire_bytes().len());
 }
+
+// ── BASE SIXTY · the ring divides, and nothing collides ──────────────
+
+use cfe::dop::{on_slot, slot_angle, slot_of, TURN_SLOTS};
+use cfe::world::{ActionRefused, World};
+
+/// SIXTY IS CHOSEN FOR ITS DIVISORS, and this proves the claim rather
+/// than repeating it: halves, thirds, quarters, fifths, sixths — every
+/// common symmetry lands exactly ON a slot.
+#[test]
+fn every_common_subdivision_of_the_ring_lands_on_a_slot() {
+    for parts in [1i64, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60] {
+        for k in 0..parts {
+            let angle = ratio(k, parts);
+            assert!(
+                on_slot(&angle),
+                "{k}/{parts} must land on a slot — that is why the ring is sixty"
+            );
+        }
+    }
+    // And a subdivision sixty does NOT carry falls between the teeth.
+    assert!(!on_slot(&ratio(1, 7)), "sevenths do not divide sixty");
+    assert!(!on_slot(&ratio(1, 8)), "eighths do not divide sixty");
+}
+
+/// THE RING CLOSES — slot 60 is slot 0, and the wrap is exact.
+#[test]
+fn the_slot_index_wraps_and_round_trips() {
+    assert_eq!(slot_angle(0), slot_angle(TURN_SLOTS), "the ring closes");
+    assert_eq!(slot_angle(61), slot_angle(1));
+    assert_eq!(slot_angle(-1), slot_angle(59), "and it closes both ways");
+    for k in 0..TURN_SLOTS {
+        assert_eq!(slot_of(&slot_angle(k)), Some(k));
+    }
+}
+
+/// AN OFF-SLOT ANGLE IS REFUSED. Discreteness is what makes collision a
+/// decidable fact rather than a tolerance.
+#[test]
+fn an_orbit_between_the_teeth_refuses() {
+    let mut world = World::new();
+    world.found("placed").expect("founds");
+    world.commission_star(cfe::thermal::StarClass::G).ok();
+    let orb = world.committed().orbs[0].orb_id;
+
+    let verdict = world.site_planet(orb, ratio(0, 1), ratio(1, 1), Some(ratio(1, 7)));
+    assert!(
+        matches!(verdict, Err(ActionRefused::OffSlot { .. })),
+        "a seventh of a turn is not a slot: {verdict:?}"
+    );
+}
+
+/// **TWO ORBS CANNOT SHARE A PLACE** — the tension this law resolves.
+#[test]
+fn a_taken_slot_on_the_same_ring_refuses() {
+    let mut world = World::new();
+    world.found("crowded").expect("founds");
+    world.commission_star(cfe::thermal::StarClass::G).ok();
+
+    let orbs: Vec<u64> = world.committed().orbs.iter().map(|o| o.orb_id).collect();
+    let first = orbs[0];
+    let ring = ratio(2, 1);
+    world
+        .site_planet(first, ratio(0, 1), ring.clone(), Some(slot_angle(7)))
+        .expect("the first orb takes slot 7");
+
+    // The same orb re-sited is AlreadySited, not a collision — the
+    // collision law is about DIFFERENT orbs contending for one place.
+    let again = world.site_planet(first, ratio(0, 1), ring.clone(), Some(slot_angle(7)));
+    assert!(!matches!(again, Err(ActionRefused::OrbitOccupied { .. })));
+
+    // Same ring, a DIFFERENT slot, is lawful — that is the point of
+    // having sixty of them.
+    let sited = world.committed().orbs[0].thermal.clone().expect("sited");
+    assert_eq!(sited.theta, Some(slot_angle(7)));
+    assert_eq!(
+        separation(
+            &sited,
+            &cfe::dop::ThermalSite {
+                albedo: ratio(0, 1),
+                orbit_r: ring,
+                theta: Some(slot_angle(8))
+            }
+        ),
+        Some(ratio(1, 60)),
+        "adjacent slots on one ring are exactly one sixtieth apart"
+    );
+}

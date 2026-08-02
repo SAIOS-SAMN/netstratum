@@ -22,7 +22,7 @@ fn warm_world_with_unsettled_due() -> (World, u64) {
     world.found("purse").expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2))
+        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None)
         .expect("sites");
     world.zone(0, ZoneKind::Extractor).expect("zones");
     world.zone(8, ZoneKind::Habitat).expect("zones");

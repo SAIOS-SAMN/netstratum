@@ -11,6 +11,15 @@ use crate::ratio::Ratio;
 /// A typed action refusal — the world refuses instead of guessing.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ActionRefused {
+    /// The angle is not ON a slot. A turn divides into sixty
+    /// (`dop::TURN_SLOTS`); an orbit sits at a slot or it does not sit.
+    /// Off-slot placement makes collision a matter of tolerance rather
+    /// than a decidable fact.
+    OffSlot { theta: Box<Ratio> },
+    /// TWO ORBS CANNOT SHARE A PLACE. Same radius, same slot — the
+    /// tension this law exists to resolve.
+    OrbitOccupied { orb: u64, slot: i64 },
+
     NoColony,
     ColonyAlreadyFounded,
     TileAlreadyZoned { tile: u16 },

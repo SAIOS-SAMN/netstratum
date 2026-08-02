@@ -1047,3 +1047,60 @@ Neither §16c item 1 ("what occupies?") nor §3b's `z` is open in the way
 this document had them: the base is the manifold, and `z` indexes the
 degree of the grading. **What is owed is threading the wrap into the
 projection** — everything else follows from it.
+
+---
+
+## §17 BASE SIXTY LANDS — and siting the first orb exposes a divergence
+
+**LANDED:** the ring divides into **sixty** (`dop::TURN_SLOTS`), an
+orbit sits ON a slot or refuses (`OffSlot`), and **two orbs may not
+share a place** (`OrbitOccupied`). Nine witnesses in `siting_pins.rs`;
+145 suites green.
+
+**Sixty is chosen for its divisors and the pin proves it rather than
+repeating it:** every subdivision by 1, 2, 3, 4, 5, 6, 10, 12, 15, 20,
+30 and 60 lands exactly on a slot, and sevenths and eighths do not.
+That is what makes a symmetric layout at many arities exact, and what
+makes collision DECIDABLE rather than a tolerance.
+
+Also landed: `θ` now survives the STATE CONTAINER, not just the event.
+The orb's tag-26 thermal frame gained the same additive-trailing angle
+— **caught by `arbor_observed_pins`, which found the committed snapshot
+dropping a place the live world held.**
+
+### 17a. THE CONDUCTOR DOES NOT SITE WITH AN ANGLE — measured, not shy
+
+Passing ANY slot to the conductor's founding siting makes
+`conductor/tests/survey_pins.rs` fail:
+
+    Crystal   live 239/16    replay 15/16
+    slots tested: 0, 1, 7, 30 — ALL fail, identically
+
+**It is the PRESENCE of the angle, not its value.** Theta itself
+round-trips correctly (both sides read `Some(0)`); what diverges is a
+MINED RESOURCE. The chart is chronicle-seeded, so a longer receipt
+rehashes the chain and redraws the terrain — and a code path that the
+old draw never reached disagrees between live and replay.
+
+**So the angle did not create a bug; it moved the RNG stream and
+uncovered one.** This is #30's duplication with a new and much sharper
+trigger: any receipt whose bytes change can expose a different arm.
+
+**The capability is landed and witnessed; the conductor does not use it
+until #30 closes the divergence.** Using it now would trade a spatial
+feature for a known state corruption, and `survey_pins` is the pin that
+caught the P3 revert too — it is the tree's most sensitive live/replay
+detector and it should stay green.
+
+### 17b. WHAT THIS SAYS ABOUT ADDITIVE-TRAILING
+
+The event amendment (tag 25) is safe: a receipt without an angle is
+byte-identical to its pre-amendment frame, pinned. **But "additive and
+therefore harmless" is false in general here** — the moment a receipt
+ACTUALLY carries the new field, its hash changes, the chain rehashes,
+and every chronicle-seeded derivation downstream moves.
+
+Additive-trailing preserves DECODING. It does not preserve DERIVATION.
+Any amendment that seeds from the chronicle must expect the world to be
+redrawn the first time the field is populated, and that is a ruling
+about worlds, not about the wire.

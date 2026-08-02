@@ -42,7 +42,8 @@
 //!   17 Orb zone entry (tile ‖ kind)
 //!   18 Orb banked entry (resource ‖ ratio)
 //!   19 Orb famine entry (resource)
-//!   26 Orb thermal entry (albedo ‖ orbit_r ‖ overheat u8) — THERMAL-1
+//!   26 Orb thermal entry (albedo ‖ orbit_r ‖ overheat u8 ‖ θ?) —
+//!      THERMAL-1; θ additive-trailing 2026-08-02, absent = unplaced
 //!   28 Orb vent entry (entropy_vented ratio ‖ LE64 last_touch) — VENT-1/SINK-1
 //!   41 Orb cohesion entry (the eight books, IDEO-1) — emitted only
 //!      when a book is nonzero; a zero-book orb encodes byte-identical
@@ -2067,6 +2068,14 @@ impl ColonyOrb {
             ratio::encode(&site.albedo, &mut value);
             ratio::encode(&site.orbit_r, &mut value);
             value.push(self.overheat as u8);
+            // THE ANGLE, additive-trailing on tag 26 (2026-08-02). An
+            // unsited angle writes nothing, so an orb that never had a
+            // place is byte-identical to its pre-amendment frame — and
+            // one that HAS a place keeps it across the state container,
+            // which is what the committed snapshot lost before this.
+            if let Some(turn) = &site.theta {
+                ratio::encode(turn, &mut value);
+            }
             tlv::put(26, &value, &mut out);
         }
         if self.entropy_vented != ratio(0, 1) || self.last_touch != 0 {
@@ -2144,10 +2153,16 @@ impl ColonyOrb {
                 26 => {
                     let (albedo, used) = ratio::decode(value)?;
                     let (orbit_r, used_r) = ratio::decode(value.get(used..)?)?;
-                    // Historical siting carries no angle — an orb has a
-                    // radius and no place until one is receipted.
-                    orb.thermal = Some(ThermalSite { albedo, orbit_r, theta: None });
                     orb.overheat = *value.get(used + used_r)? != 0;
+                    // The trailing angle: absent on every frame written
+                    // before the amendment, and absent means UNPLACED,
+                    // never zero.
+                    let theta = value
+                        .get(used + used_r + 1..)
+                        .filter(|rest| !rest.is_empty())
+                        .and_then(ratio::decode)
+                        .map(|(turn, _)| turn);
+                    orb.thermal = Some(ThermalSite { albedo, orbit_r, theta });
                 }
                 28 => {
                     let (vented, used) = ratio::decode(value)?;
@@ -2278,6 +2293,43 @@ pub fn tile_class(seed: &[u8; 32], orb_id: u64, tile: u16) -> TileClass {
 }
 
 
+
+/// THE ORBITAL SLOTS — a turn divides into SIXTY.
+///
+/// **Base 60, for the reason base 60 has always been used.** It is the
+/// smallest number that divides evenly by 1, 2, 3, 4, 5, 6, 10, 12, 15,
+/// 20, 30 and 60 — twelve exact subdivisions. Halves, thirds, quarters,
+/// fifths and sixths of a ring all land ON a slot, so a system can be
+/// laid out symmetrically at many arities without any angle falling
+/// between the teeth. Sixty is not a rounding: it is the number that
+/// makes the most placements exact.
+///
+/// A slot is `k/60` for `k ∈ 0..60`, and `k = 60` is `k = 0` — the ring
+/// closes.
+pub const TURN_SLOTS: i64 = 60;
+
+/// Is this angle ON a slot? An orbit sits at a slot or it does not sit.
+///
+/// Refusing off-slot angles is what keeps placement DISCRETE, and
+/// discreteness is what makes collision a decidable question rather
+/// than a tolerance.
+pub fn on_slot(theta: &Ratio) -> bool {
+    let scaled = theta.clone() * ratio(TURN_SLOTS, 1);
+    scaled.is_integer() && *theta >= ratio(0, 1) && *theta < ratio(1, 1)
+}
+
+/// The slot index of an angle that is on one.
+pub fn slot_of(theta: &Ratio) -> Option<i64> {
+    on_slot(theta).then(|| {
+        let scaled = theta.clone() * ratio(TURN_SLOTS, 1);
+        scaled.to_integer().try_into().unwrap_or(0)
+    })
+}
+
+/// The angle of a slot, wrapping: `slot(61)` is `slot(1)`.
+pub fn slot_angle(k: i64) -> Ratio {
+    ratio(k.rem_euclid(TURN_SLOTS), TURN_SLOTS)
+}
 
 /// WRAPPED L1 SEPARATION between two sited orbs — the only adjacency
 /// this system can compute exactly.
