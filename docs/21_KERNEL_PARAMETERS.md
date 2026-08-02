@@ -594,3 +594,74 @@ after.
        passed its own pins; only the epoch plumbing is new.
     4. P1, then capacity-lane §6a's split sink, which inherits the same
        protection.
+
+---
+
+## §12 LANDED — the epoch mechanism, P3 and P2 (2026-08-02)
+
+    65963b4  RULESET EPOCHS + P3 re-inscribed
+    39dc3a8  P2 as EPOCH 1
+
+**127 test suites, zero failures**, with both continuous rules live —
+including `conductor/tests/survey_pins.rs`, the pin whose live/replay
+divergence forced the §10 revert.
+
+### 12a. WHAT THE MECHANISM IS
+
+`cfe::epoch::epoch_at(stamp) -> Genesis | Continuous`, activating at
+`CONTINUOUS_FROM = 100_000`. Every sealed rule takes the stamp it is
+evaluated AT and dispatches on it. A deed written under EPOCH 0 is
+judged by EPOCH 0 forever, so `replay` and the live proposer cannot
+disagree even while the rules move.
+
+**Zero wire change, zero schema change, zero rehashing** — the stamp
+was already in the receipt and already inside the frame hash.
+
+### 12b. THE TWO EPOCHED RULES
+
+    ease_of(techs, orb, at)
+      EPOCH 0  ease_cliff       `== 5` → 1/2, else 1/1
+      EPOCH 1  ease_gradient    s = x/(1+|x|), descending, [1/2, 1]
+
+    demurrage_per_tick(supply, at)
+      EPOCH 0  sink_flat        1/32
+      EPOCH 1  sink_by_supply   min(1/4, 1/32·(1 + excess/33))
+
+Both EPOCH 0 functions are marked **never-edit** in the source: past
+receipts depend on them, so changing one would rewrite history's
+meaning. This is the append-only cost of §11d, now concrete.
+
+### 12c. WHY `P2` READS SUPPLY AND NOT RANK — forced, not preferred
+
+§9's blocker stands and the epoch mechanism does not dissolve it. Rank
+lives behind `bridge::read_entangled` in `kernel`, above `cfe`, so the
+proposer structurally cannot read it. `standing_supply` is the sealed
+answer: one public function the kernel calls on `prior.orbs` and the
+proposer calls on its own, so both judges reach one value from one
+state (CHARTER §0b).
+
+### 12d. WHAT IS NOT YET TRUE — stated plainly
+
+1. **`apply()` still does not wrap `judge()`.** #30 part 2 is untouched:
+   `replay`'s 113 arms and the live proposer remain two implementations
+   of one transition. Epochs remove the DRIFT that value changes cause;
+   they do not remove the DUPLICATION. A structural divergence — an arm
+   that does something the judge would not admit — is still possible
+   and still invisible.
+2. **EPOCH 1 has no end-to-end live-vs-replay witness.** Every EPOCH 1
+   pin is unit-level, because no test world reaches stamp `100_000` and
+   driving one there costs 100k ticks. The mechanism is proven at the
+   boundary and by construction; it is not yet proven by a surveyed
+   world crossing it. **Landing #30 part 2 makes that guarantee
+   structural rather than tested**, which is the better fix than a
+   long-running witness.
+3. **`P1` is not epoched.** `mint_bound` still reads only the work's
+   shape. It is the issuance schedule and the last of the four.
+
+### 12e. FOR CAPACITY-LANE
+
+The split sink can now land without replay drift: `DemurrageSettled`'s
+two-sided form becomes EPOCH 1 behaviour, EPOCH 0 keeps the one-sided
+booking every existing receipt was written under, and no historical
+world is re-judged. The wire amendment for the recipient leg is still
+owed — epochs remove the drift risk, not the tag change.
