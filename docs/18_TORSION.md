@@ -1004,6 +1004,75 @@ finds fiber elements belongs in the sector. Same object, two roles,
 separated by the door — and K5 must not be read as importing the
 anything-goes region into committed state.
 
+> ⚠ **THE "WORKSHOP" CONSTRUCTION ABOVE IS WITHDRAWN — see §2n.2.** It
+> sited the sector at the EDGE level, giving every fiber in the complex
+> an approximate twin. A region that covers every edge is not a
+> containment sector; it is a shadow copy of the whole algebra. The
+> two-roles distinction (exact committed value, approximate search)
+> survives and is correct. Its PLACEMENT does not.
+
+### 2n.2 THE SECTOR IS ONE MATRIX, NOT EVERY MATRIX (operator correction, 2026-08-02)
+
+> that means your "matrix" is at the wrong level — and the contained
+> sector has become the entire sector
+
+**Both claims land. §2n.1 sited the quarantine wrongly, and the
+specific error is a conflation of two different 2×2s.**
+
+    THE CONNECTION FIBER          MatrixFiber2x2, fiber.rs
+      one PER EDGE, exact, committed, load-bearing. Carries holonomy,
+      feeds rank D, gates the mint. Its level is the EDGE and that is
+      correct — a connection lives on an edge and belongs nowhere else.
+
+    C's CONTAINMENT MATRIX        the operator's 2026-08-01 ruling
+      ONE, singular, for the whole reading. Approximate, quarantined,
+      diagnostic, gating nothing.
+
+**They are both 2×2. That is a coincidence of ARITY, not an identity**,
+and §2n.1 treated it as one — which is how the sector escaped its
+bounds. If C's residence is the per-edge fiber, then the quarantine is
+wherever fibers are, which is everywhere, and a quarantine that covers
+everything contains nothing.
+
+**This is the same failure this document diagnosed one section
+earlier.** §2n named it for letters: *a letter outliving the quantity
+it was minted for*. Here it is a SHAPE — `2×2` read as an identity
+rather than as a dimension two unrelated objects happen to share.
+
+**RE-READ OF THE ORIGINAL RULING.** The operator wrote *"C is contained
+to **its own** 2×2 matrix"* (2026-08-01). *Its own* is the operative
+phrase and §2n.1 read straight past it. C does not move INTO the
+connection fiber; **C gets a separate, single 2×2 of its own.** That is
+already a bounded containment sector by construction:
+
+    ONE object, not one per edge — so the region cannot grow with the
+    complex, and it is auditable by inspection.
+    ONE door, because there is one object to leave.
+    NOTHING load-bearing inside, because C gates nothing (§2n).
+
+**WHAT CHANGES AND WHAT DOES NOT:**
+
+    UNCHANGED   MatrixFiber2x2 stays per-edge, exact, committed.
+                K5 (#32) is unaffected — it was never about C.
+    UNCHANGED   the two-roles distinction: an exact committed value,
+                an approximate search that proposes it. Correct, and
+                it belongs to the CAGE as a door primitive.
+    CORRECTED   the sector is not "every fiber's workshop". It is one
+                bounded region. C's own 2×2 is one such region; the
+                solver's `consult`/`withdraw` search is another. Every
+                lawful sector is BOUNDED — that is what makes the word
+                mean anything.
+
+**NOT DERIVED, flagged rather than furnished:** what C's four slots
+carry. `C(Δ)` is a scalar today (`Σ|R|`), so a 2×2 residence has four
+positions and three of them are unassigned. Inventing meanings for
+them to justify the shape would be the §2d failure exactly — apparatus
+built to fit a container. **The arity is the operator's; the contents
+are an open ruling.** What IS settled is the containment: one object,
+one door, nothing authoritative inside.
+
+### 2h. THE ECLIPSE — STRUCK AS WRITTEN (2026-08-01)
+
 ### 2h. THE ECLIPSE — STRUCK AS WRITTEN (2026-08-01)
 
 This section claimed an "eclipse law" unifying five occlusion
