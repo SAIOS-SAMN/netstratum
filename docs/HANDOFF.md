@@ -80,7 +80,7 @@ NS-1 + BUILD_ORDER at landing, never before. Contiguity is not law.
   bond spans, demurrage) are WORKSPACE and settle by ONE receipt at a
   touch — the VentSettled shape. `World` workspace fields: `accrued`,
   `vent_pending`, `friction_pending`. Committed families beyond orbs:
-  `debts` (ABSORB-1), `bonds` (BOND-1), `covenants` (COVENANT-1) — all
+  `debts` (ABSORB-1), `bonds` (BOND-1), `covenants` (FORWARD-1) — all
   three live in `Committed`, are cloned by `committed()`, rebuilt by
   `replay()`, and carried by `resume()`. **A new committed family must
   join all four places.**
@@ -95,7 +95,7 @@ NS-1 + BUILD_ORDER at landing, never before. Contiguity is not law.
 - **Replay-fact discipline:** the live path and the `replay()` arm must
   make IDENTICAL reads in IDENTICAL order (crisis flags before bank
   moves, etc.). Shared helpers used verbatim by both paths:
-  `settle_debts`, `credit_covenants`, `touch`. If a live event needs
+  `settle_debts`, `credit_forwards`, `touch`. If a live event needs
   state replay can't derive, put the fact IN the receipt (the covenant
   collateral rides the seal receipt so the fidelity curve never
   re-runs on replay; the bond severance load rides tag 34).
@@ -123,7 +123,7 @@ pre-ideology ones):
 |---|---|---|---|
 | compassion | `given_in_crisis` | `drawn_in_crisis` | transfer/absorb while the counterparty is famine- or overheat-struck, uncleared, at the deed's stamp |
 | love | `bond_flow` | `severance_load` | bond settles only (crisis books belong to deliberate deeds); load = rate × notice on a cut or default, zero on term expiry |
-| integrity | `covenants_fulfilled` | `covenants_breached` | covenant release/slash, VALUE-weighted by collateral stake |
+| integrity | `forwards_fulfilled` | `forwards_breached` | covenant release/slash, VALUE-weighted by collateral stake |
 | morality | `returned_across` | `extracted_across` | reciprocity-window payments / lapses (windows open at absorption) |
 
 One deed may post several axes (a transfer can post compassion, pay

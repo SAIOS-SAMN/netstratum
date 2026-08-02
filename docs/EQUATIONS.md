@@ -285,10 +285,10 @@ symmetric bond (`09_IDEOLOGY` §2.2, BOND-1). Every clause below names a
 mechanic that exists; none of it is new machinery.
 
 **CORRECTED 2026-08-02 — the COVENANT is NOT this form.** An earlier
-revision cited COVENANT-1 alongside the bond as a second landing of the
+revision cited FORWARD-1 alongside the bond as a second landing of the
 same shape. That was wrong, and wrong in the direction the whole section
 exists to refuse: the sealed deed is
-`CovenantSealed { obligor_orb, beneficiary_orb, resource, quota, window,
+`ForwardSealed { obligor_orb, beneficiary_orb, resource, quota, window,
 collateral }` — ONE obligor owing ONE beneficiary, with only the obligor
 posting collateral. That is a directed obligation, and `09` §2.2 names
 that shape by its own word: **a single bond is PATRONAGE.** Citing the
@@ -380,7 +380,7 @@ is the OFFICE reading that must qualify itself.
 **THE UNION IS INSCRIBED AND HAS NEVER BEEN DEEDED.** Every clause
 above exists in law. No RECEIPT of it exists anywhere: 57 deeds are
 carried in `cfe::dop`, and the bond-shaped ones — `BondSealed`,
-`BondSettled`, `CovenantSealed`, `CovenantReleased`, `CovenantSlashed`
+`BondSettled`, `ForwardSealed`, `ForwardReleased`, `ForwardSlashed`
 — are all ORB TO ORB. There is no closure event by which `D` and `V`
 enter their union, so the union has terms, consideration, breach and
 witness, and no moment at which it was struck.
@@ -477,8 +477,8 @@ Both are lawful, both compute, and they are different shapes:
     COVENANT   ONE obligor, ONE beneficiary, collateral posted by the
                obligor alone against a quota inside a window; released
                on fulfilment, BREACH_AND_SLASH on default
-               (`CovenantSealed` / `Released` / `Slashed`, 01 §7,
-               09 §2.3, COVENANT-1)
+               (`ForwardSealed` / `Released` / `Slashed`, 01 §7,
+               09 §2.3, FORWARD-1)
                → DIRECTED, and lawful as such. It is what 09 §2.2
                calls patronage, and patronage is a real instrument —
                it is simply not a marriage.
@@ -1054,7 +1054,7 @@ is that sweep run over the CODE rather than the map.
 **FOUR BOOKS WERE ALREADY TWO-ARMED**, and they are the shape to copy:
 `given_in_crisis` / `drawn_in_crisis`, `returned_across` /
 `extracted_across`, `bond_flow` / `severance_load`,
-`covenants_fulfilled` / `covenants_breached`. Every one of them sits on
+`forwards_fulfilled` / `forwards_breached`. Every one of them sits on
 the orb, and both arms of each are equals.
 
 **THE THERMAL BOOK WAS ONE-ARMED WHERE IT COUNTED — CLOSED.**
@@ -1199,7 +1199,7 @@ leak outside their native band, BANKED stores never leak.
     axis          syntropic book (earned)   ◄──►  entropic book (accrued)
     compassion    given_in_crisis           ◄──►  drawn_in_crisis
     love          bond_flow                 ◄──►  severance_load
-    integrity     covenants_fulfilled       ◄──►  covenants_breached
+    integrity     forwards_fulfilled       ◄──►  forwards_breached
     morality      returned_across           ◄──►  extracted_across
 
 The VENT-1 sheet shape carried onto the social axis — 09 §1 states it
@@ -1215,9 +1215,9 @@ book, never as a phantom entropic entry.
 Consumed by the climb gate (`ElevationBarred`) and the condition window.
 
     syntropy_ratio =  Σ_orb ( given_in_crisis + returned_across
-                              + covenants_fulfilled + bond_flow )
+                              + forwards_fulfilled + bond_flow )
                    ⁄  ( that sum + Σ_orb ( extracted_across
-                              + covenants_breached + severance_load ) )
+                              + forwards_breached + severance_load ) )
 
     the alignment floor:  aligned  ⟺  syntropy_ratio ≥ 1/2   (placeholder)
     no practice adopted, or no deed ever posted  →  aligned

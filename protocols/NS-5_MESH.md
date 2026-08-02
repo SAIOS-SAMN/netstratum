@@ -106,7 +106,7 @@ span of the two states (an absent coordinate reads exactly 0):
    1–7 in code order; cumulative vented entropy; the eight ideology
    books in the inscribed order (given_in_crisis, drawn_in_crisis,
    returned_across, extracted_across, bond_flow, severance_load,
-   covenants_fulfilled, covenants_breached); then the element stores
+   forwards_fulfilled, forwards_breached); then the element stores
    over the union of that orb's element ids, id-ascending.
 
 **The census**, every non-rational committed field compared whole by

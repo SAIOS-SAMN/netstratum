@@ -368,7 +368,7 @@ had asked it.**
 ### 6c. WHERE THIS BINDS
 
 **A name is not a layer.** All three failures came through vocabulary:
-`covenant` sounded moral, `ward` sounded universal, `CHANNEL_COVENANT`
+`covenant` sounded moral, `ward` sounded universal, `CHANNEL_FORWARD`
 sounded ceremonial. §5's tiering already says CONTENT is free — and free
 content must never leak upward into an AXIS by nothing more than
 sounding grand.

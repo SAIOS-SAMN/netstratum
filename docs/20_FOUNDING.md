@@ -579,7 +579,7 @@ carries three genuine pairs, and they are the social ledger:
 
 ```text
 returned_across      ⟷  extracted_across
-covenants_fulfilled  ⟷  covenants_breached
+forwards_fulfilled  ⟷  forwards_breached
 bond_flow            ⟷  severance_load
 ```
 
@@ -935,9 +935,9 @@ RESOURCE     FORWARD    collateralized future delivery: obligor,
 
 **Landed across 29 files, 259 occurrences.** `ClosureEvent::Covenant*`
 became `Forward*`; `struct Covenant` became `Forward`;
-`seal_covenant_as` became `seal_forward_as`; the fidelity books
-`covenants_fulfilled` / `covenants_breached` became `forwards_*`; the
-lens labels moved with them; `COVENANT-1` became `FORWARD-1`.
+`seal_forward_as` became `seal_forward_as`; the fidelity books
+`forwards_fulfilled` / `forwards_breached` became `forwards_*`; the
+lens labels moved with them; `FORWARD-1` became `FORWARD-1`.
 
 **THE WIRE DID NOT MOVE, and that is the property that made this
 lawful.** Tags 35, 36 and 37 carry the same meaning and the same bytes —
@@ -985,8 +985,8 @@ resource     the underlying                   delivered    the fill
 quota        the contract size                sealed       the open
 ```
 
-with a full lifecycle on the wire — `CovenantSealed` (35),
-`CovenantReleased` (36), `CovenantSlashed` (37). **Sealed, filled,
+with a full lifecycle on the wire — `ForwardSealed` (35),
+`ForwardReleased` (36), `ForwardSlashed` (37). **Sealed, filled,
 released, or liquidated.**
 
 **And the margin is already risk-priced.**
@@ -1003,7 +1003,7 @@ running.
 ```text
 SPOT       Offer · post_offer · clear_trade                    LANDED
 FUTURE     Covenant — expiry `window`, margin `collateral`,
-           liquidation CovenantSlashed, physical settlement    LANDED
+           liquidation ForwardSlashed, physical settlement    LANDED
 PERPETUAL  a covenant with NO expiry, held open by a funding
            rate                                                 OWED
 CLAIM      the tokenized wrapper on a deposit (§6h.2)            OWED

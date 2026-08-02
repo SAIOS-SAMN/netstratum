@@ -294,7 +294,7 @@ Backward is a REFERENCE: hash the parent, landed as
 what does not exist yet.** But it can be a CONSTRAINT: an obligation
 binding the next commitment without naming it.
 
-The organ is landed. `CHANNEL_COVENANT` carries the undelivered
+The organ is landed. `CHANNEL_FORWARD` carries the undelivered
 remainder of a standing delivery obligation (`quota − delivered`,
 floored at zero). **An outstanding obligation is a forward link** — it
 constrains a future state it cannot identify.

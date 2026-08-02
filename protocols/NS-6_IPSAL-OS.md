@@ -248,7 +248,7 @@ What grew on this protocol without changing it — the first cut held:
 
 - **Scopes stand at the three inscribed** (`Build`/`Raze`/`Collect`),
   and TEN mutating verbs now pass their gates (chart, zone, raze,
-  collect, transfer, seal_bond, sever_bond, seal_covenant, absorb,
+  collect, transfer, seal_bond, sever_bond, seal_forward, absorb,
   scan — audited 2026-07-30: ten verbs, ten `permitted` checks, zero
   ungated). The scanner rides Collect; a dedicated scan scope awaits
   an operator ruling (the N4 deferral).

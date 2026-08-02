@@ -504,7 +504,7 @@ fn the_retired_vocabulary_stays_retired() {
     // would flag correct text — the false positive that gets a lint
     // switched off (the same reasoning `T_k` is absent from STRUCK).
     // The offices were degendered by hand: V was "she", C was "he".
-    const RETIRED: [(&str, &str); 14] = [
+    const RETIRED: [(&str, &str); 18] = [
         ("daughter", "kin word for a charted colony / branch"),
         ("Daughter", "kin word for a charted colony / branch"),
         ("mother", "kin word for a source colony"),
@@ -519,6 +519,14 @@ fn the_retired_vocabulary_stays_retired() {
         ("Kins\u{68}ip", "the frame itself: this engine has no kin, only lines"),
         ("fami\u{6c}y tree", "a line is a graph, not a tree of kin"),
         ("fami\u{6c}y-tree", "a line is a graph, not a tree of kin"),
+        // The kin FRAME retired on 2026-07-30 kept two adjectives that
+        // the noun list could not see. A union of two distinct origins
+        // is COMPLEMENTARY; a union of like things is LIKE-FOR-LIKE.
+        // Neither needs a marriage or a brotherhood to say it.
+        ("conju\u{67}al", "kin word for a union of two origins"),
+        ("Conju\u{67}al", "kin word for a union of two origins"),
+        ("frater\u{6e}al", "kin word for a union of like things"),
+        ("Frater\u{6e}al", "kin word for a union of like things"),
     ];
 
     let mut live = Vec::new();
