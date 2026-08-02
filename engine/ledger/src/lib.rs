@@ -19,7 +19,7 @@
 //! **The display half MOVED (the #37 inversion): the writers —
 //! record, record_solve, the journals, the wall — live in `scribe`,
 //! ABOVE the lens. This crate is ledger-LAW in fact: it imports no
-//! lens, renders no display, and its own JSON pen (`json::JsonWriter`)
+//! lens, renders no display, and the shared JSON pen (`pen::JsonWriter`)
 //! writes only the Tier-A law cards (universe, starchart, registry,
 //! galaxy, fiber).**
 //!
@@ -41,10 +41,10 @@ use std::path::PathBuf;
 
 pub mod converge;
 pub mod galaxy;
-pub mod json;
+pub mod extract;
 pub mod registry;
-use json::JsonWriter;
-pub(crate) use json::ratio_str;
+use pen::JsonWriter;
+pub(crate) use cfe::ratio::ratio_str;
 
 /// THE UNIVERSAL CLOCK RENDERING — T of TUniversal{S, G, T} as the
 /// six-field base-60 odometer string the law cards carry
@@ -169,7 +169,7 @@ impl Ledger {
     pub fn universe_span(&self) -> Ratio {
         fs::read_to_string(self.root.join("universe.json"))
             .ok()
-            .and_then(|text| json::extract_string(&text, "span"))
+            .and_then(|text| extract::extract_string(&text, "span"))
             .and_then(|s| parse_ratio(&s))
             .unwrap_or_else(|| Ratio::from(num_bigint::BigInt::from(64)))
     }
@@ -225,12 +225,12 @@ impl Ledger {
         if let Ok(text) = fs::read_to_string(&path) {
             for line in text.lines() {
                 if let (Some(name), Some(px), Some(py)) = (
-                    json::extract_string(line, "world"),
-                    json::extract_string(line, "x"),
-                    json::extract_string(line, "y"),
+                    extract::extract_string(line, "world"),
+                    extract::extract_string(line, "x"),
+                    extract::extract_string(line, "y"),
                 ) {
-                    let pz = json::extract_string(line, "z").unwrap_or_else(|| "0".into());
-                    let pg = json::extract_string(line, "g").unwrap_or_else(|| "0".into());
+                    let pz = extract::extract_string(line, "z").unwrap_or_else(|| "0".into());
+                    let pg = extract::extract_string(line, "g").unwrap_or_else(|| "0".into());
                     entries.push((name, [px, py, pz, pg]));
                 }
             }
@@ -265,14 +265,14 @@ impl Ledger {
         let text = fs::read_to_string(self.root.join("starchart.json")).ok()?;
         let slug = sanitize(world);
         for line in text.lines() {
-            if json::extract_string(line, "world").as_deref() == Some(&slug) {
+            if extract::extract_string(line, "world").as_deref() == Some(&slug) {
                 return Some((
                     (
-                        parse_ratio(&json::extract_string(line, "x")?)?,
-                        parse_ratio(&json::extract_string(line, "y")?)?,
-                        parse_ratio(&json::extract_string(line, "z").unwrap_or_else(|| "0".into()))?,
+                        parse_ratio(&extract::extract_string(line, "x")?)?,
+                        parse_ratio(&extract::extract_string(line, "y")?)?,
+                        parse_ratio(&extract::extract_string(line, "z").unwrap_or_else(|| "0".into()))?,
                     ),
-                    parse_ratio(&json::extract_string(line, "g").unwrap_or_else(|| "0".into()))?,
+                    parse_ratio(&extract::extract_string(line, "g").unwrap_or_else(|| "0".into()))?,
                 ));
             }
         }
@@ -339,9 +339,9 @@ fn parse_ratio(text: &str) -> Option<Ratio> {
 /// Minimal directive parsing (flat JSON: `verb`, `args`, `as`). The
 /// game loop re-validates EVERYTHING — this only reads the request.
 fn parse_directive(text: &str) -> Option<Directive> {
-    let verb = json::extract_string(text, "verb")?;
-    let acting_as = json::extract_string(text, "as").unwrap_or_else(|| "steward".into());
-    let args = json::extract_string_array(text, "args").unwrap_or_default();
+    let verb = extract::extract_string(text, "verb")?;
+    let acting_as = extract::extract_string(text, "as").unwrap_or_else(|| "steward".into());
+    let args = extract::extract_string_array(text, "args").unwrap_or_default();
     Some(Directive {
         verb,
         args,

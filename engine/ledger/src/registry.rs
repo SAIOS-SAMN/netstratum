@@ -5,7 +5,8 @@
 //! recorded, displayed, joined; changing no rule today. When G1 lands,
 //! the entry is re-committed as a genesis receipt and becomes binding.
 
-use crate::json::{extract_string, JsonWriter};
+use crate::extract::extract_string;
+use pen::JsonWriter;
 use std::fs;
 use std::path::PathBuf;
 

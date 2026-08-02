@@ -28,7 +28,7 @@
 
 use cfe::world::World;
 use ledger::{sanitize, Ledger};
-use lens::json::JsonWriter;
+use pen::JsonWriter;
 use lens::render::{hex, render_receipt, render_state};
 use std::fs;
 use std::io::Write as _;
@@ -135,7 +135,7 @@ fn rotate_divergent(dir: &std::path::Path, world: &World) -> std::io::Result<()>
     let check = lines.len().min(receipts.len()) - 1;
     let resident = lines
         .get(check)
-        .and_then(|line| ledger::json::extract_string(line, "digest"))
+        .and_then(|line| ledger::extract::extract_string(line, "digest"))
         .unwrap_or_default();
     let live = hex(&receipts[check].own.0);
     if resident == live {
@@ -143,7 +143,7 @@ fn rotate_divergent(dir: &std::path::Path, world: &World) -> std::io::Result<()>
     }
     let terminal = lines
         .last()
-        .and_then(|line| ledger::json::extract_string(line, "digest"))
+        .and_then(|line| ledger::extract::extract_string(line, "digest"))
         .unwrap_or_else(|| "unknown".into());
     let tag: String = terminal.chars().take(8).collect();
     let base = dir.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();

@@ -1,11 +1,45 @@
-//! The JSON EMITTER (#37 — moved whole from the ledger at the split):
-//! rendering primitives for the write-only displays. The extractor
-//! half stays ledger-side — reading flat JSON back is Tier-A
-//! read-back law, never a lens concern. No serialization framework
-//! enters the workspace.
-
-use cfe::ratio::Ratio;
-use num_traits::One;
+//! THE PEN — JSON emitter mechanics, and nothing else.
+//!
+//! One writer, shared by every layer that emits. No serialization
+//! framework enters the workspace.
+//!
+//! # WHY THIS CRATE EXISTS
+//!
+//! There were two of these — `ledger/src/json.rs` and
+//! `lens/src/json.rs` — with eleven duplicated public symbols and 58%
+//! identical text. **The duplication was deliberate, and the reasoning
+//! behind it was sound.** The ledger's own header recorded it:
+//!
+//! > *two small pens, one per layer, neither borrowing the other's —
+//! > the duplication is the price of the one-way arrows, paid knowingly
+//! > (the shim it replaces was the cycle).*
+//!
+//! The constraint is real. The ledger may never depend on a lens — held
+//! by `deletability::the_ledger_never_depends_on_a_lens_at_runtime` —
+//! and a shim BETWEEN two peers is exactly the cycle that was excised.
+//!
+//! **What that reasoning missed is a third option: not between them,
+//! but BELOW them.** A crate with no dependencies at all cannot
+//! participate in a cycle, because a cycle needs an arrow leaving it and
+//! none leaves here. So the arrows stay one-way and the price no longer
+//! has to be paid.
+//!
+//! # WHAT IS NOT HERE, AND WHY
+//!
+//! **The exact-rational text form is NOT here.** It lives beside the
+//! type it governs, at `cfe::ratio::ratio_str` — the rule that says
+//! *integers plain, everything else `p/q`, never a decimal, never a
+//! float* is a fact about `Ratio`, not about JSON. It had drifted into
+//! two copies, which was the one genuine correctness risk in the
+//! duplication: two copies of the rule that keeps floats out of an exact
+//! system.
+//!
+//! **The extractors are NOT here.** Reading flat JSON back is the
+//! ledger's own Tier-A law and stays `ledger::extract`. That seam is
+//! real: for the ledger, JSON is a PERSISTENCE format it reads back; for
+//! a lens it is a write-only projection never read as state
+//! (`19_LENS` §15a). Naming both halves after the format they share is
+//! what let two implementations of one writer look normal.
 
 /// Escape a string for a JSON literal.
 fn escape(s: &str) -> String {
@@ -22,16 +56,6 @@ fn escape(s: &str) -> String {
         }
     }
     out
-}
-
-/// Exact rendering: integers plain, everything else `p/q` — never a
-/// decimal, never a float.
-pub fn ratio_str(r: &Ratio) -> String {
-    if r.denom().is_one() {
-        r.numer().to_string()
-    } else {
-        format!("{}/{}", r.numer(), r.denom())
-    }
 }
 
 /// A writer that tracks comma placement per nesting level. `key()`

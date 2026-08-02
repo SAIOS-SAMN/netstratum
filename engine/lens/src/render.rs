@@ -3,7 +3,8 @@
 //! into display JSON. One producer of every rendering — the ledger's
 //! display half CALLS these; nothing ever parses them back.
 
-use crate::json::{ratio_str, JsonWriter};
+use cfe::ratio::ratio_str;
+use pen::JsonWriter;
 use cfe::ratio::Ratio;
 use cfe::vrp::Receipt;
 use cfe::world::World;

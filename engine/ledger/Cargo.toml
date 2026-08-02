@@ -6,8 +6,9 @@ description = "The pre-chain ledger of record and its lens (Charter §11): the s
 
 [dependencies]
 cfe = { path = "../cfe" }
-# #37: the renderers and the JSON emitter live in the lens; the
-# display half here CALLS them until it moves too.
+pen = { path = "../pen" }
+# The JSON emitter is `pen` — a crate BELOW both this and the lens, so
+# the one-way arrow holds without either borrowing the other's writer.
 physics = { path = "../physics" }
 num-bigint.workspace = true
 num-traits.workspace = true
