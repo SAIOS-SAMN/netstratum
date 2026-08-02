@@ -265,19 +265,131 @@ changes is which tasks get solved — the economic axis, A3.
 
 ---
 
-## §8 WHAT IS OWED BEFORE ANY OF THIS LANDS
+## §8 THE METER IS BUILT, AND IT REFUSES THE RULING — measured 2026-08-02
 
-`17_CAPACITY` §7: *build the meter, measure, then rule.*
+`17_CAPACITY` §7 said *build the meter, measure, then rule.* The meter
+is `engine/conductor/examples/capacity_meter.rs` (a reading — appends
+nothing, judges nothing, changes no law). **It paid for itself on the
+first run, and what it found stops B1–B8 from being instantiated.**
 
-1. **THE CAPACITY METER** — record per world per beat:
-   `verdict_per_dimension`, `rank`, `unknown`, the four axis ratios
-   (not the collapsed one), and candidates actually tested. A reading,
-   like `cost_probe`; zero law change.
-2. **THE MEASUREMENT** — the live spread of capacity across a 44-world
-   board; how many lines read `unknown > 0`; what each axis actually
-   ranges over.
-3. **THEN B1–B8 are ruled against observation** — how Ruling Box 1 and
-   PROPORTION-1 were both settled, and the opposite of how 200 000 was.
+Measured across the same 44-world, 80-cycle board as `REMEDIATIONS` §1:
+
+| reading | result across all 44 lines |
+|---|---|
+| orbs per book | **1** — every book |
+| bonds · covenants · debts | **0 · 0 · 0** — every book |
+| `rank` | **0** — every book |
+| `degree` | `Degree(1)` — GROUND, every book |
+| entangled channels (of 3) | **0** — every book |
+| `unknown` | 0 — every book |
+| love · integrity · morality | **— · — · —** (nothing posted), every book |
+| compassion level | **0** — every book |
+
+### 8a. WHY THE ZERO IS STRUCTURAL, NOT LOW
+
+`project_complex` (`bridge.rs:373-381`) builds the complex over **the
+book's OWN orbs**, edged by bonds, covenants and debts, and returns no
+structure at all when `dim < 2` — *"One orb relates to nothing."*
+
+**Every book has exactly one orb.** So `rank = 0` here is not a small
+reading, it is a **structurally unreachable** one: no arrangement of
+play on the current board can raise it, because the relation the
+reading is made of cannot exist inside a single-orb book.
+
+### 8b. THREE CONSEQUENCES, each load-bearing
+
+1. **`kernel::capacity_law` can never admit a `DiscoveryMinted` on this
+   board.** It gates on `Vacuity::Entangled` (`rank > 0 ∧ flow ≠ 0`) and
+   **nothing is entangled anywhere.** Mints occur today only because the
+   judge runs BESIDE the chain, not inside it — `extend(.., None)` at
+   `conductor/src/lib.rs:1403` (PICKUP §8a's narrow remainder).
+   **Therefore flipping Phase 3 today would halt minting entirely.**
+   That is a Phase-3 precondition nobody has recorded, and it is found
+   here by measurement rather than by argument.
+2. **The ruled envelope evaluates to `β_floor` for every line, forever.**
+   With `ρ_D = 0` universally, `β_floor + β_quantum · ρ_D^D` **is**
+   `β_floor`. Executing the ruling on this board replaces one constant
+   (200 000) with another constant (`β_floor`) and calls it a reading.
+   The form is right; the substrate is absent.
+3. **B4/B5/B6 have no signal either.** No alignment axis has posted on
+   any line, so the ceiling is undefined for all 44 — `None`, which by
+   refuse-never-guess reads as the floor, again.
+
+### 8c. WHAT THIS MAKES THE NEXT WORK
+
+The budget cannot become a reading until the reading becomes reachable.
+Two doors, and the choice is the operator's:
+
+- **(a) MULTI-ORB PLAY.** The conductor never settles a second orb, so
+  no intra-book relation is possible. Capacity becomes reachable the
+  moment a line holds two orbs that bond, covenant or owe.
+- **(b) THE CROSS-BOOK DOOR.** Cross-world APERTURE deals *do* clear
+  (the market is live), so relations exist — they are just not in one
+  book. `read_entangled_observed` + discharging `unknown` via
+  `Telescope`/`LockOn` is exactly the path, and it is the **same door
+  B8 was written for**. The sharing case and the reachability case turn
+  out to be one question.
+
+**Until one lands, `SEARCH_BUDGET` should not be replaced.** Swapping a
+measured-inert constant for an unmeasurable one is not remediation.
+
+---
+
+## §8bis THE RULING AS RECEIVED — inscribed, with five gaps named
+
+**Operator ruling 2026-08-02 (the Ruling Box), recorded as given.** The
+envelope is ACCEPTED and supersedes B-E1's clamp form:
+
+```
+budget = β_floor + β_quantum · ρ_D^D                    with β_cap ≤ 52 060 (B7)
+```
+
+**This form is better than the one it replaces, and the reason is worth
+naming:** `ρ_D^D` has the *same shape as the search space it bounds* —
+the enumeration is `|V|^depth`, and the envelope is extent-per-dimension
+raised to the dimension count. A line may sweep a product no larger than
+the product its own structure sustains. The floor is *added*, not
+clamped, so it can never be competed away.
+
+Five gaps, named rather than filled — filling them silently is the
+failure this lane exists to stop:
+
+1. **B5 `σ_gate` is absent from the Ruling Box** (the table runs
+   B4 → B6). The per-axis alignment threshold has no value and no
+   struck-status. Open.
+2. **`β_ceiling` (B6) has no place in the ruled envelope.**
+   `β_floor + β_quantum · ρ_D^D` carries no alignment term. Does the
+   ceiling multiply the quantum term, cap the total, or gate `β_quantum`?
+   As written, A5 (syntropic) does not enter the arithmetic at all —
+   which would drop the very axis the original ruling asked for.
+3. **B1, B3 and B8 still have no values.** "Exact rational baseline
+   floor", "multiplier scaling candidate search depth" and "universal
+   rational fallback" are *forms*, not values. B7 has a bound
+   (≤ 52 060), not a value. No epoch table can be instantiated from
+   these.
+4. **B1's trigger names a state that cannot exist.** The Ruling Box says
+   the floor applies "when `D = 0`". **`D` is never 0.**
+   `EntangledRead::degree()` is `Degree::above_ground(rank)` =
+   `GROUND + rank` (`bridge.rs:288`, `capacity.rs:138-146`), and the
+   field doc is explicit: *"Reading this field as `D` is what put
+   `D = 0` back into a system whose law says D is never zero."* The
+   condition that actually means *nothing circulates* is **`rank == 0`**.
+   Measured: all 44 lines read `rank 0`, `Degree(1)`.
+5. **`ρ_D^D` keyed on rank alone re-commits the third collapse** — and
+   it is the operator's own ruling of the same day, already sealed at
+   `bridge.rs:176-199`: *"your entire definition is wrong if dimensional
+   capacity is a count of rooms."* `rank` is the DIMENSION of the cycle
+   space; `holonomy` carries each cycle's EXACT CHARGE; *"a universe
+   with one heavily-charged cycle and one with a single faint one read
+   the SAME rank and are not the same universe."* A budget from rank
+   alone hands those two lines identical resource. The meter reports the
+   charge values whole so the ruling can bind them; **B2 needs a volume
+   term, or it discards the pole `18` §2b protects.**
+
+**The pattern across all three collapses now recorded** — aggregate over
+channels, four axes into one scalar, and charge into a count — is one
+law stated three times: *a directional quantity may not be replaced by a
+scalar aggregate wherever the system computes.* §9 is the standing cure.
 
 ---
 
