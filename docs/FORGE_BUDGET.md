@@ -366,7 +366,7 @@ SEARCH_BUDGET — uncap or no cap."* Landed in this lane:
 - `SEARCH_BUDGET = 200_000` **deleted** from `solver/src/search.rs`,
   and with it both truncation branches (`tested > BUDGET`, the `room`
   clamp) in `search::solve` **and** `volume::solve_volume`.
-- Replaced by `pub fn search::frontier(|V|, d) = Σ_{k=0}^{d} |V|^k` —
+- Replaced by `pub fn search::frontier(V, d) = Σ_{k=0}^{d} V^k` —
   the exact exhaustive count, `u128` and saturating. **Because it is
   exact, a budget check against it can never fire**, which is why the
   branches are gone rather than raised.
@@ -380,7 +380,7 @@ suite green, clippy zero, lines still climb to L5.
 
 **MEASURED SIDE-EFFECT — 40 cycles: 59.29 s → 48.24 s, an 18.6 % cut.**
 Removing the clamp exposed that the loop was building the
-depth-`(d+1)` frontier and throwing it away — at `|V| = 37, d = 3`
+depth-`(d+1)` frontier and throwing it away — at `V = 37, d = 3`
 that is **1.87 M programs allocated per call** to be discarded. The
 `room` clamp had been hiding the waste by truncating it. A change meant
 only to delete a constant paid for itself immediately; the cost was
@@ -404,7 +404,7 @@ budget = β_floor + β_quantum · ρ_D^D                    β_cap ≤ 52 060 (B
 ```
 
 **Its instinct is right and is kept:** `ρ_D^D` has *the same shape as
-the space it bounds* — enumeration is `|V|^depth` — and the floor is
+the space it bounds* — enumeration is `V^depth` — and the floor is
 ADDED, not clamped, so it cannot be competed away. The amendment carries
 both properties and fixes what the code refuses.
 
@@ -414,14 +414,14 @@ The search is breadth-first **by depth** (`search.rs:140`). So the
 lawful bound is on depth, and the candidate count is its consequence:
 
 ```
-budget(prior, rung) = frontier( |V|, δ(prior, rung) )
+budget(prior, rung) = frontier( V, δ(prior, rung) )
 
     frontier(V, δ) = Σ_{d=0}^{δ} V^d          the exhaustive sweep to depth δ
 ```
 
 **Every constant dissolves into arithmetic.** Measured by the meter:
 
-| \|V\| | δ=0 | δ=1 | δ=2 | δ=3 |
+| V | δ=0 | δ=1 | δ=2 | δ=3 |
 |---|---|---|---|---|
 | 14 | 1 | 15 | 211 | 2 955 |
 | 21 | 1 | 22 | 463 | 9 724 |
@@ -443,7 +443,7 @@ unknown(prior) > 0   ⇒   δ = 1                                              (
 ```
 
 - **B1 `δ_floor = 1`, unconditionally.** Every line may always sweep the
-  whole vocabulary once. Derived value `1 + |V|` ∈ [15, 38] — not a
+  whole vocabulary once. Derived value `1 + V` ∈ [15, 38] — not a
   chosen number. **Its trigger is `rank == 0`, never `D == 0`:** `D` is
   `GROUND + rank` and is never zero (`bridge.rs:288`,
   `capacity.rs:138-146`; the field doc: *"Reading this field as `D` is
@@ -518,16 +518,16 @@ Reading the depth ladder against `Difficulty::level` and `mint_bound`:
 
 | row | state after amendment |
 |---|---|
-| B1 `δ_floor` | **DERIVED = 1** (`1 + \|V\|` candidates). Trigger corrected to `rank == 0`. |
+| B1 `δ_floor` | **DERIVED = 1** (`1 + V` candidates). Trigger corrected to `rank == 0`. |
 | B2 `ρ_D` | **FORM SETTLED** — per-channel, both poles, charge magnitude. |
 | B3 `β_quantum` | **DERIVED = 1 depth per earned channel.** |
-| B7 `β_cap` | **DERIVED = `frontier(\|V\|, word_len)`.** Not a constant. |
+| B7 `β_cap` | **DERIVED = `frontier(V, word_len)`.** Not a constant. |
 | B8 `ε_unknown` | **DERIVED = `δ_floor`.** |
 | B4 `α_axis` | form settled; **compassion's denominator still open** (§7.6) |
 | B5 `σ_gate` | **STILL OWED** — absent from the received box; one rational in [0,1]. Precedent: the climb gate's 1/2. |
 | **θ_charge** | **NEW, OWED** — the volume threshold. Unmeasurable today (§8: all charge is empty). |
 
-**Two numbers, not eight.** Everything else is now arithmetic on `|V|`
+**Two numbers, not eight.** Everything else is now arithmetic on `V`
 and the rung. And both remaining numbers are **unmeasurable on the
 current board** — §8's finding stands: no line carries charge or a
 posted axis, so `θ_charge` and `σ_gate` cannot be ruled against
@@ -539,6 +539,140 @@ stated three times: *a directional quantity may not be replaced by a
 scalar aggregate wherever the system computes.* §9 is the standing cure.
 
 ---
+
+## §8ter THE CROSS-BOOK READ — LANDED 2026-08-02
+
+Operator ruling: *"open the cross-book read via entanglement."* Landed
+in the kernel, witnessed red-first.
+
+### 8ter.a THE LAW
+
+`project_complex` reads inside ONE book and structurally cannot see a
+relation whose other end is elsewhere. Its complement now exists:
+
+| | `project_complex` | `project_complex_across` |
+|---|---|---|
+| vertices | the book's orbs | **whole books** |
+| edges | bonds · covenants · debts | **shared chartered lanes** |
+| channels | 0 · 1 · 2 | **3 (`CHANNEL_LANE`)** |
+
+`CHANNELS` 3 → 4 is an **additive amendment**: every existing pin
+indexes by NAME, so a new coordinate moves no existing reading.
+The two projections are **complementary, never overlapping** — pinned.
+
+**The substrate was already in the law.** `cfe::world::charter_route`
+(`world.rs:3784-3799`) writes the SAME `deal` into BOTH books, and
+`pair_melt` (`:3850`) already joins on shared deal ids. A lane is the
+one committed, replay-derived relation that spans two worlds. The edge
+value is the best shared `eta` — the law's own reading, called rather
+than re-written.
+
+### 8ter.b THIS IS NOT RECONCILIATION
+
+`recurrence_guard.rs` check 2 keeps `cfe::opposition` excised —
+*"you do not reconcile what cannot diverge."* This does not revive it,
+and the distinction is exact: **reconciliation compares two COPIES of
+one thing to find divergence. A lane is ONE relation with TWO endpoints**,
+each book holding its own leg by its own receipt. Reading it is
+observation, not comparison. `read_entangled_observed`'s own doc already
+named this as the cross-book door; this builds the door it named.
+
+### 8ter.c THE WITNESSES — `kernel/tests/cross_book_pins.rs`, 6 green
+
+The load-bearing one: **a triangle of lanes carries rank 1 across books
+while every one of those same books reads rank 0 alone.** That is the
+whole point of the door — real structure that no single-book projection
+can ever see.
+
+And the entity door is now **refuted by test, not by prose**:
+`a_tree_of_lanes_carries_no_cycle` — a chain A~B~C reads rank 0, because
+holonomy comes from edges OUTSIDE a spanning forest and a forest has
+none. Containment is a tree; that is why projecting entities could never
+have worked (§8d).
+
+### 8ter.d MEASURED ON THE LIVE BOARD — the door is open, the room is empty
+
+```
+books read: 33 · books holding ANY lane: 0 · lane legs: 0
+cross-book rank: 0 · flows: 0 · verdicts: [Void, Void, Void, Void]
+```
+
+**And the cause is one line.** `charter_route` (`world.rs:3772`) draws
+**4 alloy from each side**. No polity banks alloy at all (measured:
+`banked` holds iron, biomass, joule, sink — never alloy). So every
+charter refuses `CannotAfford`, **17 crossings cleared and 0 lanes were
+chartered**, and `conductor/src/lib.rs:378` **swallows the refusal with
+`let _ =`**.
+
+The engine's own law says *a refusal names its cure* — and this refusal
+carries `{ resource: Alloy, need: 4, have: 0 }` and is thrown away. That
+is why the substrate looked structural and was economic.
+
+**Consequently the capacity-driven depth STILL cannot be wired.** With
+`earned = 0` on every line, B-E1 would pin every line at `δ = 1` and
+stop the board climbing past rung 1. The door is built; the room fills
+when a lane can be paid for.
+
+## §8quater WHAT THIS UNLOCKS
+
+The operator's question: *"tell me all features we unlock."* Ranked by
+what becomes possible that was not — each traced to the law that opens.
+
+**Immediately, from the landing itself:**
+
+1. **Capacity becomes REACHABLE.** Rank was structurally 0 for every
+   line; a closed lane loop makes it non-zero. This is the precondition
+   every item below stands on.
+2. **The entity door is closed by test, not opinion** — a whole class of
+   future proposals is refuted once and cheaply.
+3. **`V` is un-caged** — `frontier(V, d)` grows with the vocabulary, and
+   `V` grows with what the observation yields (`derived_recolors`,
+   `derived_tiles`). More seen, more searchable, at the same depth.
+
+**Once a lane can be paid for (the alloy gate, §8ter.d):**
+
+4. **THE MINT GATE BECOMES SATISFIABLE.** `capacity_law` admits
+   `DiscoveryMinted` only on `Vacuity::Entangled`. Today that is
+   unsatisfiable everywhere, so **the Phase-3 flip would halt minting**.
+   Lanes make it satisfiable — **Phase 3 becomes landable**, which is
+   the constitutional milestone the whole ladder points at.
+5. **The capacity-driven budget (B1–B9) becomes instantiable** — depth
+   earned from structure, the search horizon a civilization grows into.
+6. **TRIANGLES BEAT PAIRS — a genuinely new economic incentive.** Two
+   laned worlds are a tree and carry rank 0. **Three mutually laned
+   worlds carry rank 1.** The law pays for CLOSING A LOOP, not for
+   bilateral dependency. Coalitions of three or more become
+   structurally advantaged, and nobody had to write a diplomacy
+   mechanic to get it — it falls out of the cyclomatic reading.
+7. **Trade gains a second, deeper payoff.** A lane was only a melt
+   discount. It is now a topological edge that earns search depth:
+   **your trading partners literally expand your cognitive horizon.**
+   The PoUW economy and the trade economy stop being two games.
+8. **The sharing question becomes live law** — `ε_unknown` (B8) and
+   `Telescope`/`LockOn` stop being hypothetical; a partial observer now
+   has something real to be partial about.
+
+**Downstream, on the same meter:**
+
+9. **Mesh weight EARNED rather than assigned** — `17_CAPACITY` §7 names
+   verified capacity as the honest basis for `mesh/src/agree.rs:57`'s
+   advisory weight, which `SYSTEM_SPEC` §5 calls the load-bearing gap
+   for real value. **One meter serves both; neither should build a
+   second.**
+10. **Placeholders retire by measurement** — seat widths
+    (`registry.rs:37`), galaxy reach (`galaxy.rs:33`) and occupancy caps
+    (`11_AEON` §7) all name a minted-plane reading as their blocker.
+11. **`rfa-core`'s orphanhood ends further** — `holonomies`,
+    `boundary_form` and `dual_pole` gain a second production caller;
+    `17_CAPACITY` §7 wanted exactly this.
+12. **A civilization gets a HORIZON rather than a ceiling** — the thing
+    the flat `200_000` denied. `frontier(V, δ)` has no cap: depth is
+    earned from structure, `V` grows with observation, and the envelope
+    expands geometrically with both.
+
+**Honest limits.** None of 4–12 land until a lane can be chartered
+(§8ter.d), and B5 `σ_gate` / B9 `θ_charge` stay unmeasurable until then.
+The door being open is not the room being full.
 
 ## §9 AXIAL CAPABILITIES
 

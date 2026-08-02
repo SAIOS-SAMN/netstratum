@@ -110,9 +110,9 @@ fn alignment(state: &Committed) -> Alignment {
     }
 }
 
-/// THE DERIVED ENVELOPE — `Σ_{d=0}^{δ} |V|^d`, the exhaustive frontier
+/// THE DERIVED ENVELOPE — `Σ_{d=0}^{δ} V^d`, the exhaustive frontier
 /// to depth `δ`. This is the quantity `B7 β_cap` should BE rather than
-/// approximate: at `|V| = 37, δ = 3` it is 52 060, which is exactly the
+/// approximate: at `V = 37, δ = 3` it is 52 060, which is exactly the
 /// bound the Ruling Box named. The operator's number was already the
 /// derived one.
 fn frontier(vocabulary: u64, depth: u32) -> u64 {
@@ -160,6 +160,9 @@ fn main() {
     println!("{}", "-".repeat(132));
 
     let mut lines: Vec<(String, Alignment)> = Vec::new();
+    // Held for the CROSS-BOOK read — the complex whose vertices are
+    // whole books, which no single-book projection can see.
+    let mut states: Vec<Committed> = Vec::new();
 
     for dir in &paths {
         let carrier = dir.join("chronicle.tlv");
@@ -240,6 +243,7 @@ fn main() {
             println!("{:>21}charge {}", "", values.join(" "));
         }
         lines.push((name_of(dir), align));
+        states.push(state);
     }
 
     println!("\n=== ALIGNMENT — the four axes, never summed ===");
@@ -270,6 +274,36 @@ fn main() {
     println!("lines with a symmetry found.:  {foundation_lines}");
     println!("lines with unknown > 0 (B8):   {unknown_lines}");
 
+    // === THE CROSS-BOOK READ (operator ruling 2026-08-02) ===
+    // The conductor holds the WHOLE roster, so unknown = 0 — that is
+    // Resolve::LockOn, absence confirmed at the present reach, never
+    // assumed.
+    let borrowed: Vec<&Committed> = states.iter().collect();
+    let across = kernel::bridge::read_entangled_across(&borrowed, 0);
+    let across_channels = kernel::bridge::verdict_per_dimension_across(&borrowed);
+    let laned: usize = states.iter().filter(|s| !s.routes.is_empty()).count();
+    let lanes: usize = states.iter().map(|s| s.routes.len()).sum();
+    println!("\n=== CROSS-BOOK (books as vertices, shared lanes as edges) ===");
+    println!("books read:                    {}", states.len());
+    println!("books holding ANY lane:        {laned}");
+    println!("lane legs across all books:    {lanes}");
+    println!("cross-book rank:               {}", across.rank);
+    println!("cross-book flows:              {}", across.flows.len());
+    println!("cross-book symmetry found.:    {}", across.symmetry_foundation.len());
+    println!("cross-book unknown:            {}", across.unknown);
+    println!(
+        "cross-book verdicts:           {:?}",
+        across_channels.iter().map(|v| format!("{v:?}")).collect::<Vec<_>>()
+    );
+    if lanes == 0 {
+        println!(
+            "\n*** NO LANE STANDS ANYWHERE. charter_route (world.rs:3772) draws 4 ALLOY from\n\
+             *** each side, and no polity banks alloy at all — so every charter refuses\n\
+             *** CannotAfford, and conductor/src/lib.rs:378 SWALLOWS it with `let _ =`.\n\
+             *** The cross-book door is built and its substrate is economically empty."
+        );
+    }
+
     let single = substrate.get(&0).copied().unwrap_or(0) + substrate.get(&1).copied().unwrap_or(0);
     if single == read && read > 0 {
         println!(
@@ -281,9 +315,9 @@ fn main() {
 
     // THE DERIVED ENVELOPE TABLE — every quantity B1/B3/B7 needs, as
     // arithmetic rather than as a chosen number.
-    println!("\n=== THE DERIVED ENVELOPE: frontier(|V|, depth) = sum_(d=0..depth) |V|^d ===");
-    println!("|V| = 6 symmetries + 8 obj_ops + <=7 derived recolors + {{0,16}} derived tiles");
-    println!("{:<7} {:>10} {:>10} {:>10} {:>10}", "|V|", "d=0", "d=1", "d=2", "d=3");
+    println!("\n=== THE DERIVED ENVELOPE: frontier(V, depth) = sum_(d=0..depth) V^d ===");
+    println!("V = 6 symmetries + 8 obj_ops + <=7 derived recolors + {{0,16}} derived tiles");
+    println!("{:<7} {:>10} {:>10} {:>10} {:>10}", "V", "d=0", "d=1", "d=2", "d=3");
     for v in [14u64, 21, 30, 37] {
         println!(
             "{:<7} {:>10} {:>10} {:>10} {:>10}",

@@ -108,8 +108,8 @@ fn closes(program: &Program, task: &Task) -> bool {
         .all(|pair| run(program, &pair.input) == pair.output)
 }
 
-/// **THE FRONTIER** — `Σ_{k=0}^{d} |V|^k`, the exhaustive sweep to
-/// depth `d` over a vocabulary of `|V|` operators.
+/// **THE FRONTIER** — `Σ_{k=0}^{d} V^k`, the exhaustive sweep to
+/// depth `d` over a vocabulary of `V` operators.
 ///
 /// **This replaces the flat `SEARCH_BUDGET = 200_000`** (operator
 /// ruling 2026-08-02: *"do not cap rungs and do not set a static
@@ -117,7 +117,7 @@ fn closes(program: &Program, task: &Task) -> bool {
 /// administrative ceiling: `frontier(37, 3) = 52_060` is the exact
 /// exhaustive expansion of the relational substrate at depth 3, and the
 /// constant was a number chosen to sit above it after one observed
-/// 102 s stall. Caging `|V|` behind a constant choked the expansion it
+/// 102 s stall. Caging `V` behind a constant choked the expansion it
 /// was meant to describe.
 ///
 /// **DEPTH IS THE ONLY LEVER NOW.** The bound is `max_depth`, supplied
@@ -172,8 +172,8 @@ pub fn solve(task: &Task, max_depth: usize) -> SolveRead {
             }
         }
         // THE LAST DEPTH GROWS NOTHING. Building the depth-(d+1)
-        // frontier only to discard it cost |V|^(d+1) clones every
-        // call — at |V|=37, max_depth=3 that is 1.87M programs
+        // frontier only to discard it cost V^(d+1) clones every
+        // call — at V=37, max_depth=3 that is 1.87M programs
         // allocated and thrown away. The old `room` clamp hid this by
         // truncating; with the clamp gone it must be said outright.
         if depth == max_depth {

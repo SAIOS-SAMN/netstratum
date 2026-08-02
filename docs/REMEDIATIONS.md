@@ -16,7 +16,7 @@ not finish in ten minutes. Full tables: §1.
 
 **THE FINDING.** The cartesian object is the forge search
 (`solver/src/search.rs:124`) — breadth-first over the vocabulary
-product, |V| 14–37, depth ≤3, ~52 060 candidates, each **re-derived from
+product, V 14–37, depth ≤3, ~52 060 candidates, each **re-derived from
 the raw input**. `peel` and `shear` are the house cures and both exist;
 this is where they were never applied.
 
@@ -152,10 +152,10 @@ The space, measured from the source:
 - vocabulary = 6 symmetries (`search.rs:125-132`) + 8 `OBJ_OPS`
   (`solver-verify/src/objects.rs:147`) + ≤7 derived recolors
   (`search.rs:33`) + 0 or 16 derived tiles (`search.rs:79`,
-  `TileMirror::ALL` is 4 → 4×4) = **|V| between 14 and 37** `[READ]`
+  `TileMirror::ALL` is 4 → 4×4) = **V between 14 and 37** `[READ]`
 - depth = `word_len`, capped at 3 by `Difficulty::level`
   (`solver-verify/src/forge.rs:41`) and 4 by `from_key` (`:61`) `[READ]`
-- full frontier at |V|=37, depth 3 ≈ **52,060 candidate programs**,
+- full frontier at V=37, depth 3 ≈ **52,060 candidate programs**,
   each tested by `closes()` re-running the whole program over every
   training pair `[READ]`
 - `SEARCH_BUDGET = 200_000` (`search.rs:119`) is a candidate count, so
@@ -165,7 +165,7 @@ The space, measured from the source:
 - [ ] **R1 — PREFIX-SHARED EVALUATION (the shear, applied to the search).**
   `closes()` (`search.rs:105`) re-runs the program **from the raw
   input** for every candidate. BFS already holds every prefix in
-  `frontier`; each of a node's |V| children re-derives that node's
+  `frontier`; each of a node's V children re-derives that node's
   entire output before applying its one new op. Carry the intermediate
   grids on the frontier entry and each test becomes **one** op
   application plus a compare. Saving ≈ `word_len`× on the dominant
@@ -184,7 +184,7 @@ The space, measured from the source:
 
 - [ ] **R3 — STREAM THE FRONTIER, DO NOT MATERIALIZE IT.**
   `search.rs:161-173` builds `next: Vec<Program>` holding up to `room`
-  (≈200k) fully-cloned programs, each a heap `Vec<Op>`. At |V|=37,
+  (≈200k) fully-cloned programs, each a heap `Vec<Op>`. At V=37,
   depth 3 that is ~50k allocations per world per beat, ~1.65M per beat
   across a 33-world board. The k-th candidate is addressable
   arithmetically from a mixed-radix counter — **find the k-th

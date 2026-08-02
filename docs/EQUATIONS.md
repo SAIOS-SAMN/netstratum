@@ -981,7 +981,7 @@ comment (a ceiling chosen to stop one observed 102 s stall) and inert,
 since `word_len` 3 enumerates 52 060. **Deleted**, with both truncation
 branches, from `search::solve` and `volume::solve_volume`, per operator
 ruling *"uncap or no cap"*. Authority is now
-`solver::search::frontier(|V|, d)` — LANDED.
+`solver::search::frontier(V, d)` — LANDED.
 
     frontier(V, d) = Σ_{k=0}^{d} V^k          exact, u128, saturating
 
@@ -990,14 +990,14 @@ never fire; the branches are gone rather than raised. **Behaviour
 unchanged at live difficulty** (`frontier ≤ 52 060 < 200 000`), suite
 green. **Measured side-effect: 40 cycles 59.29 s → 48.24 s (−18.6 %)** —
 the clamp had been concealing that the loop built the depth-`(d+1)`
-frontier (1.87 M programs at `|V|=37, d=3`) only to discard it.
+frontier (1.87 M programs at `V=37, d=3`) only to discard it.
 
 **B-E1 · THE BUDGET EQUATION.** DRAFT — **AMENDED 2026-08-02** (operator:
 *"change the ruling"*). **Bound the DEPTH; the candidate count follows.**
 The search is breadth-first by depth (`search.rs:140`), so depth is where
 a lawful bound belongs.
 
-    budget(prior, rung) = frontier( |V|, δ(prior, rung) )
+    budget(prior, rung) = frontier( V, δ(prior, rung) )
 
         frontier(V, δ) = Σ_{d=0}^{δ} V^d           the exhaustive sweep to depth δ
 
@@ -1017,18 +1017,18 @@ exhaustive sweep at the rung's own `word_len`.
 
 | row | symbol | measures | state |
 |---|---|---|---|
-| B1 | `δ_floor` | the depth every line always holds — trigger is **`rank == 0`**, never `D == 0` (`D = GROUND + rank` is never zero) | **DERIVED = 1** (`1+\|V\|` candidates) |
+| B1 | `δ_floor` | the depth every line always holds — trigger is **`rank == 0`**, never `D == 0` (`D = GROUND + rank` is never zero) | **DERIVED = 1** (`1+V` candidates) |
 | B2 | `ρ_D` | per-channel, BOTH POLES, charge as magnitude — never rank alone | **FORM SETTLED** |
 | B3 | `β_quantum` | one DEPTH per earned channel; the exponential comes from `frontier`, not the coefficient | **DERIVED = 1** |
 | B4 | `α_axis` | per-axis standing (compassion·love·integrity·morality), never summed | form settled; compassion's denominator OPEN |
 | B5 | `σ_gate` | the ratio at which the weakest axis opens the full band | **OWED** — absent from the received box |
 | B6 | `β_ceiling` | alignment as a CAP ON DEPTH — `min` over posted axes, never a sum or average | **FORM SETTLED** |
-| B7 | `β_cap` | the candidates no line exceeds | **DERIVED = `frontier(\|V\|, word_len)`** |
+| B7 | `β_cap` | the candidates no line exceeds | **DERIVED = `frontier(V, word_len)`** |
 | B8 | `ε_unknown` | what a cross-book (shared) reading receives | **DERIVED = `δ_floor`** |
 | **B9** | `θ_charge` | the VOLUME threshold a cycle's charge must clear to earn a depth | **NEW, OWED** |
 
 **Two numbers remain, not eight** (`σ_gate`, `θ_charge`); the rest is
-arithmetic on `|V|` and the rung. Both are **unmeasurable on the current
+arithmetic on `V` and the rung. Both are **unmeasurable on the current
 board** — see the reachability finding below.
 
 **ECONOMIC COHERENCE, checkable for the first time.** δ=1 → rungs 0–1 →
@@ -1049,6 +1049,38 @@ all, so **flipping Phase 3 today would halt minting** — an unrecorded
 Phase-3 precondition; and any capacity-derived budget seats every line at
 `δ_floor`, i.e. a constant again. **Do not replace `SEARCH_BUDGET` until
 reachability lands.**
+
+**B-X1 · THE CROSS-BOOK COMPLEX.** LANDED 2026-08-02. Authority:
+`kernel::bridge::{project_complex_across, read_entangled_across,
+verdict_per_dimension_across}`; witnesses `kernel/tests/cross_book_pins.rs`
+(6 green). `docs/FORGE_BUDGET.md` §8ter.
+
+    vertices = whole BOOKS          (project_complex reads orbs in ONE book)
+    i ~ j    ⟺ both books hold the same chartered `deal`
+    value    = max shared eta       (the reading `pair_melt` already takes)
+    channel  = CHANNEL_LANE = 3     (CHANNELS 3 → 4, ADDITIVE: pins index by name)
+
+The two projections are COMPLEMENTARY — channels 0–2 (bond, covenant,
+debt) are intra-book by construction and stay empty here; the lane
+channel stays empty in `project_complex`. Nothing is counted twice.
+
+**NOT reconciliation** (`recurrence_guard` check 2 stands): a lane is
+ONE relation with TWO endpoints, each book holding its own leg by its
+own receipt — observation, not the comparison of two copies.
+
+**THE READING THAT MATTERS:** a TRIANGLE of lanes carries rank 1 across
+books while every one of those books reads rank 0 alone. Structure no
+single-book projection can see. Corollary, pinned: a CHAIN carries rank
+0 — holonomy comes from edges outside a spanning forest and a tree has
+none, which is why projecting the entity containment hierarchy could
+never have raised the rank.
+
+**MEASURED LIVE: 33 books, 0 lanes, rank 0.** `charter_route`
+(`world.rs:3772`) draws 4 alloy per side; no polity banks alloy; every
+charter refuses `CannotAfford`; `conductor/src/lib.rs:378` swallows it
+with `let _ =`. 17 crossings cleared, 0 lanes chartered. The door is
+open and the substrate is economically empty — a refusal that names its
+cure, thrown away.
 
 **TWO STANDING BARS, both already recorded in this ledger and both
 inherited by B-E1:**

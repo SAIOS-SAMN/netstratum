@@ -64,9 +64,9 @@ Vocabulary (`search.rs:125-135`):
 | `OBJ_OPS` | 8 |
 | `derived_recolors` | 0–7 |
 | `derived_tiles` | 0 or 16 (`TileMirror::ALL`² ) |
-| **|V| typical / worst** | **~21 / 37** |
+| **V typical / worst** | **~21 / 37** |
 
-Frontier, exhaustive to depth 3 at |V| = 37:
+Frontier, exhaustive to depth 3 at V = 37:
 
 ```
 1 + 37 + 1369 + 50 653  =  52 060 candidates
@@ -89,7 +89,7 @@ shared:   3 pairs × (1 + 37 + 1369 + 50 653)    =  156 180 op-applications
                                           ratio  =  2.97×
 ```
 
-Every one of a node's |V| children re-derives that node's entire output
+Every one of a node's V children re-derives that node's entire output
 before applying its one new op. **That is the shear, unapplied.**
 
 ---
@@ -180,7 +180,7 @@ enumerated last.**
 The search returns at the **first** match, so enumeration order sets
 the *expected* number of candidates tested. Put the derived ops first.
 
-**Expected effect.** Large and expected-case, not worst-case. At |V|=37
+**Expected effect.** Large and expected-case, not worst-case. At V=37
 the answer currently sits at an arbitrary index in a 50 653-wide
 lexicographic layer; ordering the observation-derived ops into the low
 indices should collapse the expected search to a small fraction of the
@@ -231,7 +231,7 @@ struck*.
 the ≤8 dihedral elements they generate. Having done the counting, the
 payoff at live depth is small:
 
-length-3 words over |V|=37 containing an adjacent geometry pair —
+length-3 words over V=37 containing an adjacent geometry pair —
 
 ```
 positions (1,2) geometry:  6·6·37 = 1332  → 8·37 = 296
