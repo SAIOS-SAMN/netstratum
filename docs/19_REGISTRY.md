@@ -54,12 +54,32 @@ name struck whole by Charter §11; and `rank_is_defined` was formerly
 An axis re-typed elsewhere is a second readable truth (§11 rule 2), and
 it drifts silently because nothing forces the copies to agree.
 
-- **TIER (T0–T3) HAS NO ENGINE AUTHORITY AT ALL.** The station→tier law
-  is implemented in `tools/observer.py` (`TIER_OF_STATION`), again in
-  `tools/observatory.html`, and described a third time in
-  `BUILD_ORDER.md`. `registry.rs` knows `STATIONS` and knows nothing of
-  tiers. **Three implementations, no authority.** This is the live
-  example of the locality problem and the first thing §5 should fix.
+- **TIER — CLOSED 2026-08-03.** It had no engine authority at all: the
+  station→tier law lived in `tools/observer.py` (`TIER_OF_STATION`),
+  again in `tools/observatory.html`, and a third time in prose in
+  `BUILD_ORDER.md`, while `registry.rs` knew `STATIONS` and nothing of
+  tiers. **Three implementations, no authority** — so any gate keyed on
+  tier was advisory, a mapping anyone with a shell could edit.
+
+  `ledger::registry::tier_of` is now that authority, with `Tier` as its
+  vocabulary. Two properties carry the weight:
+
+  **`None` is a refusal, never a default.** An unrecognised station does
+  NOT fall through to `T3`. The common is the ABSENCE of a seat, never
+  the presence of an unreadable one — and the safest-looking band is
+  exactly where an attacker would want an unknown seat to land. A caller
+  that cannot read a tier refuses.
+
+  **Exhaustive by construction.** `tier_covers_every_station` walks
+  `STATIONS` and fails if any value has no band, so adding a station
+  without ruling on its tier breaks the build. That is the shape
+  syntropy-inscription named from the kernel's layer reading (landed on
+  main at cbb0c8c, not yet merged into this lane — cited by description
+  rather than by symbol, since this worktree cannot verify it).
+
+  `holds_a_serving_seat` reads the conflict-of-interest question the
+  covenant gate needs: T0/T1/T2 are seated offices that serve everyone;
+  T3 is the common; an unreadable seat answers neither.
 
 ## §4 SEAT SCOPE — the axis elders and ancients actually sit on
 

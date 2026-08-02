@@ -382,3 +382,34 @@ fn degradation_and_research_move_the_same_term() {
         "an unclean harvest cost nothing"
     );
 }
+
+/// CLEAN HARVEST NEVER TOUCHES THE SUBSTRATE. A draw — however heavy,
+/// however long — moves only `current`. Rate and ceiling are reachable
+/// solely through `degrade`, which is what makes the two clocks two.
+///
+/// This is the stellar case in stock terms: encasement captures heat
+/// into joules and takes nothing from the land, so `r` and `S_max`
+/// stand untouched no matter how hard it runs.
+#[test]
+fn a_clean_draw_never_moves_rate_or_ceiling() {
+    let before = tended();
+    let mut stock = tended();
+    for _ in 0..500 {
+        stock.step(&ratio(9, 1)); // far past regeneration, sustained
+    }
+    assert_eq!(stock.rate, before.rate, "a draw moved the regeneration rate");
+    assert_eq!(stock.ceiling, before.ceiling, "a draw moved the carrying ceiling");
+    assert_eq!(
+        stock.recurring_ceiling(),
+        before.recurring_ceiling(),
+        "over-extraction alone lowered the permanent ceiling — the clocks have merged"
+    );
+    // And the fast clock still forgives it.
+    for _ in 0..200 {
+        stock.step(&ratio(0, 1));
+    }
+    assert!(
+        before.ceiling - stock.current < ratio(1, 10),
+        "the stock did not recover from a clean over-draw"
+    );
+}

@@ -408,3 +408,56 @@ fn the_snapshot_is_wellformed_and_exact() {
     assert_eq!(state.matches('{').count(), state.matches('}').count());
     assert!(!state.contains("0.5"), "no decimal ever enters the export");
 }
+
+/// THE TIER AUTHORITY (19_REGISTRY §3, closed 2026-08-03).
+///
+/// Every station in the closed vocabulary reads a tier. Adding a
+/// station without deciding its band fails HERE rather than silently
+/// landing it in the common — the `kernel::layer_of` shape.
+#[test]
+fn tier_covers_every_station() {
+    use ledger::registry::{tier_of, STATIONS};
+    for station in STATIONS {
+        assert!(
+            tier_of(Some(station)).is_some(),
+            "station {station:?} has no tier — decide its band before seating it"
+        );
+    }
+}
+
+/// The ladder, pinned against the reading that lived in Python.
+#[test]
+fn the_ladder_reads_as_ruled() {
+    use ledger::registry::{tier_of, Tier};
+    assert_eq!(tier_of(Some("progenitor")), Some(Tier::T0));
+    assert_eq!(tier_of(Some("watcher")), Some(Tier::T1));
+    assert_eq!(tier_of(Some("observer")), Some(Tier::T1));
+    assert_eq!(tier_of(Some("sovereign")), Some(Tier::T2));
+    assert_eq!(tier_of(None), Some(Tier::T3), "the common is the absence of a seat");
+}
+
+/// AN UNREADABLE SEAT REFUSES. It must not fall through to the common —
+/// T3 is reached by holding no seat, never by holding an unknown one.
+#[test]
+fn an_unknown_station_refuses_rather_than_defaulting() {
+    use ledger::registry::{tier_of, Tier};
+    assert_eq!(tier_of(Some("glasskeeper")), None, "an unknown seat defaulted");
+    assert_eq!(tier_of(Some("")), None, "an empty seat defaulted");
+    assert_ne!(
+        tier_of(Some("archon")),
+        Some(Tier::T3),
+        "an unreadable seat landed in the common — that is the hole a gate would leak through"
+    );
+}
+
+/// The serving-seat reading: T0/T1/T2 serve everyone, T3 is the common,
+/// and an unreadable seat answers neither.
+#[test]
+fn serving_seats_are_the_seated_offices() {
+    use ledger::registry::holds_a_serving_seat;
+    for seated in ["progenitor", "watcher", "observer", "sovereign"] {
+        assert_eq!(holds_a_serving_seat(Some(seated)), Some(true), "{seated} did not read as seated");
+    }
+    assert_eq!(holds_a_serving_seat(None), Some(false), "the common read as a seated office");
+    assert_eq!(holds_a_serving_seat(Some("nonesuch")), None, "an unknown seat answered a gate");
+}

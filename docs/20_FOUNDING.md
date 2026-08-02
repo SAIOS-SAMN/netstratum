@@ -1156,6 +1156,46 @@ the encasement shell captures stellar heat into joules, and joules mint
 *only* by capture and never by fiat. **"Harvest the star, not the world"
 is not a moral; it is the shape of the bounds.**
 
+### 6j.7 RELAY CORRECTIONS (2026-08-03)
+
+**Three rulings arrived against a file that no longer exists.** The
+bounds were reported as "locked into `world.rs`"; `world.rs` was
+decomposed into a fifteen-file organ on 2026-08-02. Where they actually
+live:
+
+```text
+r·S_max/4, the hard bound     cfe/src/world/stock.rs   recurring_ceiling
+the slow clock                cfe/src/world/stock.rs   degrade
+R(S)                          cfe/src/world/stock.rs   regeneration
+yield × location              cfe/src/world/stock.rs   recurring_value
+the location multiplier       cfe/src/thermal.rs       coverage
+```
+
+**One ruling contradicts its own derivation and the derivation is
+right.** It gives the degradation term as `r_effective = r − δ`
+(subtractive) in prose, and as `(1−δ)r · (1−δ)S_max` in the formula
+immediately above it. **The multiplicative form is the one implemented**,
+because it is the one that yields the quadratic collapse both agree on,
+and because a subtractive rate can go NEGATIVE — a stock that regenerates
+backwards is not a degraded world, it is a broken invariant.
+
+**Adopted as ruled:**
+
+1. **Clean draws never touch the substrate.** Pinned: 500 ticks of
+   sustained over-draw move `current` alone; `rate`, `ceiling` and the
+   recurring ceiling stand unchanged, and the stock still recovers
+   whole. That is the stellar case in stock terms.
+2. **Coverage damage and ceiling damage are separable.** They already
+   are: coverage derives from `t_eq4`, which derives from albedo and
+   orbit, so a climate that relaxes restores coverage — while `degrade`
+   touches `rate` and `ceiling` and nothing restores those.
+3. **Terraforming is not the symmetric inverse.** Substrate hysteresis:
+   fallow ticks return `S(t)` to `S_max` and never return `S_max`
+   itself. **Pinned** — 200 fallow ticks after a 25% degradation leave
+   the recurring ceiling at exactly 9/16. Restoring `S_max` needs
+   explicit work funded by captured stellar energy, and **that mechanic
+   is not built** — named here rather than assumed into existence.
+
 **Owed, and named rather than assumed:** which methods carry a
 degradation term and how large, whether coverage damage is separable
 from ceiling damage, and whether a degraded substrate can be restored by
