@@ -857,6 +857,77 @@ The defensible split, and the one taken here:
     WIRE        left alone. Recorded on the currency pass (#14) so the
                 decision is deliberate rather than forgotten.
 
+### 2n. `C` DEFINED — and the collision audit (2026-08-02)
+
+**In THIS context — the torsion law, the path polynomial, the sector —
+`C` means `C(Δ)`, the coherence functional, and it is a DEMOTED
+HUMAN-LENS SCALAR with no operational function.**
+
+    delta.rs:190   pub fn coherence_functional(delta: &Delta) -> Lens {
+                       let mut c = Ratio::zero();
+                       for_each_residual(delta, |_,_,_,_, r| c += r.abs());
+                       Lens::of(c)
+                   }
+
+Read off the code: **`C(Δ) = Σ|R|`** — the L1 sum of the magnitudes of
+every residual, over exact rationals, returned wrapped in `Lens`. The
+`Lens` wrapper is the same containment discipline as §2m.1's sector: the
+type marks it as a reading, not a rule.
+
+`rfa-core/src/lib.rs:16` states the ruling plainly: ***C HAS NO
+OPERATIONAL FUNCTION** — it is not a score, not a gauge, not a gate, and
+no engine path consults it.* `C(Δ) = 0` says the cocycle condition
+holds and **nothing more**; "converged" is struck from the crate.
+
+**WHY IT IS DEMOTED, and the reason is this document's own law.**
+§2k.1 established that the residual IS the torsion — the closure
+failure, carried with its indices and its sign. `bridge.rs:104` states
+the consequence: *"Summing them destroys them."* `C` is exactly that
+sum. An L1 aggregate discards order, discards sign, and discards the
+triple that produced each term, so **`C` cannot see torsion in
+principle** — the one quantity the engine now organises around is
+precisely the one `C` collapses. Its demotion is not a preference; it
+is a consequence, and it is why `D` replaced it as the organising
+quantity.
+
+**FIVE DISTINCT `C`s ARE LIVE. Measured:**
+
+| symbol | meaning | where | status |
+|---|---|---|---|
+| `C(Δ)` | coherence functional, `Σ\|R\|` | `delta.rs:190` | LENS ONLY, no operational role |
+| `c` | the propagation limit — one commitment per step | ARTICLE IV cl. 2 | LAW. Lowercase, a RATE not a quantity |
+| `C4`, `C5`, `C7` | algorithm labels in the equations ledger | `EQUATIONS` §C5 | a NAMESPACE PREFIX, unrelated to `C(Δ)` |
+| "C in its own 2×2" | the operator's containment ruling | operator, 2026-08-01 | see below |
+| `c_is_consulted…` | a cage test name | `cage_pins.rs` | probable STALE reference to `C(Δ)` |
+
+**On "C is contained to its own 2×2 matrix"** (operator, 2026-08-01):
+read against what landed, this is satisfied — the curvature is computed
+as `plaquette_curvature(a, b) = a.commutator(b)` returning a
+`MatrixFiber2x2` (`fiber.rs:168`), so the quantity lives in the fiber
+rather than as a global scalar. **Flagged, not asserted:** whether the
+ruling meant the coherence `C(Δ)` or the curvature. They are different
+objects that share a letter, and the code letters curvature `F` by
+convention while naming the functional `coherence_functional`.
+
+**DEFECT — THREE DOCUMENTS CONTRADICT THE CODE AND A STANDING LAW.**
+The code sums ABSOLUTE VALUES. These say squares:
+
+    N4_DIRECTIVES:25    "C(Δ) = Σ R²"
+    N6_DIRECTIVES:87    "C(Δ) = 6·ΣR²"
+    KERNEL_RELAY:296    "the coherence functional C(Δ) = Σ R²"
+
+Squares are **barred as aggregators of difference** by THE PROPORTIONAL
+LAW (`rfa-core/src/lib.rs:14`, §2b), so these three do not merely
+disagree with `delta.rs:193` — they state a formula the constitution
+forbids. Correction notes placed at each site; the code is correct and
+is the authority.
+
+This is the second live notation collision this document carries, after
+§2j's two different `D`s. **Both are the same failure mode: a letter
+outliving the quantity it was minted for.** `C` is now demoted, `D` is
+now the organising quantity, and the documents still carry the old
+letters in the old roles.
+
 ### 2h. THE ECLIPSE — STRUCK AS WRITTEN (2026-08-01)
 
 This section claimed an "eclipse law" unifying five occlusion
