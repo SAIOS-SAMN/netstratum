@@ -714,10 +714,17 @@ Backward is a REFERENCE: hash the parent, landed as
 what does not exist yet.** But it can be a CONSTRAINT: an obligation
 binding the next commitment without naming it.
 
-The organ is landed. `CHANNEL_COVENANT` carries *the vitrified pact's
-OUTSTANDING quota, obligor → beneficiary (`quota − delivered`, floored
-at zero)*. **An outstanding covenant is a forward link** — it constrains
-a future state it cannot identify. So:
+The organ is landed. `CHANNEL_COVENANT` carries the undelivered
+remainder of a standing delivery obligation (`quota − delivered`,
+floored at zero). **An outstanding obligation is a forward link** — it
+constrains a future state it cannot identify.
+
+**LAYER WARNING — see §2m.2.** An earlier draft of this passage wrote
+that the covenant *is* the forward link. It is not: the forward link is
+a kernel primitive and the covenant is one game-level instance of it,
+sitting inside the sector. The correction stands; the pairing below is
+between MECHANISMS, and the covenant is cited as evidence the shape is
+implementable rather than as its definition.
 
     backward   REFERENCE   Commitment.parent          landed
     forward    CONSTRAINT  outstanding covenant       landed
@@ -741,13 +748,114 @@ better primitive or it may be an adjacent one. **An operator ruling,
 recorded because it is cheap to state and would be expensive to
 discover late.**
 
-**NOT DERIVED, flagged:** whether the path algebra is FREE (every
-ordering admissible) or carries relations (some orderings identified).
-A free algebra grows without bound and every distinct walk is distinct
-structure; relations are what make it finite-dimensional and are also
-how a system quietly stops counting real difference. `18_TORSION`
-forbids ceilings, so the presumption is free — but the presumption is
-not a derivation, and the T∞ purge is the only bound currently ruled.
+### 2m.1 THE PATH ALGEBRA IS A CONTAINMENT SECTOR (operator, 2026-08-02)
+
+§2m left one question open — whether the path algebra is FREE (every
+ordering admissible, unbounded) or carries RELATIONS (some orderings
+identified, finite-dimensional). **The question dissolves, because the
+bound is a DOOR and not a relation, and the door is already landed.**
+
+**THE SECTOR IS AN EXISTING PATTERN IN THIS TREE, not a new idea.**
+`rfa_core::cage` — `consult(input, f).withdraw(exact_rule)`:
+
+    INSIDE    any tool, any impurity — floats, heuristics, enumerative
+              sweeps, parallelism, GPU. `search.rs:184` calls `solve`
+              *"the dirtiest work this system does … no claim to
+              purity"* and runs it here deliberately.
+    THE DOOR  `withdraw(exact)` — the OUTSIDE re-derives the proposal
+              exactly and refuses it otherwise. A wrong proposal costs
+              nothing and simply never leaves.
+    THE LAW   **Approximation may PROPOSE; only exactness may DISPOSE.**
+    ENFORCED  by the TYPE SYSTEM, not by discipline. `Proposal<f64>`
+              does not exist, because `f64` carries no `Exact` impl —
+              *"the boundary is the type system, not care"*
+              (`cage_pins.rs:112`).
+
+**Applied to the path algebra:** inside the sector it is FREE. Every
+ordering admissible, exploration unbounded, no ceiling — which is what
+ARTICLE IV requires and what relations would have quietly violated.
+At the door, only a path whose holonomy re-derives exactly crosses into
+the committed complex.
+
+    free where it costs nothing        (inside)
+    verified where it counts           (crossing)
+
+So the committed structure stays finite without any ceiling being
+imposed on the exploration. **The open question in §2m was open because
+it looked for the bound in the wrong layer** — it asked what the
+algebra forbids, when the answer is that the algebra forbids nothing
+and the door admits little.
+
+**AND THE DOOR IS THE LAYER BOUNDARY.** This is the second half of the
+operator's ruling, and it corrects §2m's own error — see §2m.2.
+
+### 2m.2 LAYER CORRECTION — the covenant was promoted above its station
+
+§2m wrote: *"An outstanding covenant IS a forward link"*, and listed it
+as the landed organ for a KERNEL-level primitive. **That is a layer
+inversion and it is withdrawn.**
+
+    KERNEL layer   "the next commitment must satisfy P" — a constraint
+                   carried in the record. Encoding-blind, game-blind.
+    GAME layer     "orb A owes orb B this much of this resource by this
+                   tick, with this much collateral posted." One
+                   INSTANCE of such a constraint.
+
+Defining the forward link AS a covenant would make the kernel inherit
+the game's resource enumeration, its collateral rule and its window
+semantics — the game supplying the kernel's vocabulary instead of the
+kernel supplying the game's. `19_KERNEL` §2 measured the kernel's
+dependency on `world.rs` at exactly three items; this would have
+quietly added a fourth and the worst-shaped one.
+
+**Corrected:** the forward link is a kernel primitive. The covenant is
+one game-level instance of it — evidence that the shape is
+implementable, and *not* the definition. The covenant sits INSIDE the
+sector; what crosses the door is the constraint as an exact quantity.
+
+### 2m.3 "COVENANT", DEFINED — and what of it is ceremony
+
+The operator flags the term as carrying religious and dogmatic
+freight. Measured, the mechanism carries none:
+
+    Covenant { obligor, beneficiary, resource, quota,
+               delivered, collateral, sealed, window }
+                                        — `world.rs:245`
+
+**Plainly: one party is bound to deliver a quantity of a resource to
+another by a deadline, with collateral posted against failure.**
+`quota` is what is owed, `delivered` the progress, `collateral` the
+stake, `sealed` the start, `window` the time allowed. Outstanding is
+`quota − delivered`. In ordinary engineering terms it is a
+**collateralized forward delivery obligation with a deadline** — a
+thing every commodities desk trades. `Obligation` is the plain word and
+the accurate one.
+
+**What IS ceremony, and where it came from.** "Covenant", "pact" and
+"vitrified" are inherited from COVENANT-1 and `BUILD_ORDER` §3, not
+minted here — but `bridge.rs` propagated *"the vitrified pact's
+OUTSTANDING quota"* into the kernel's own doc surface without
+challenging it, which is exactly the drift the anti-dogma ordinance
+exists to catch. **Fixed at the source:** `CHANNEL_COVENANT` now states
+the mechanism and records that the names are inherited labels rather
+than descriptions.
+
+**THE RENAME IS MEASURED AND NOT RECOMMENDED YET.** `covenant` appears
+124 times across 7 crates, holds **three wire tags (35 CovenantSealed,
+36 CovenantReleased, 37 CovenantSlashed)** and a codec schema block
+(`codec/src/lib.rs:118`). Renaming it is a BREAKING amendment — major
+VERSION, schema bump, and it touches `world.rs` (unowned, flagged for
+refactor) and `dop.rs` (wire). **Cost is high and mechanical gain is
+zero**, since the wire tag is a number and the struct is a struct.
+
+The defensible split, and the one taken here:
+
+    DOCUMENTS   stop using "covenant" as though it were a PRIMITIVE.
+                It is one instance of a forward constraint. Done here.
+    CODE        the doc surface states the mechanism, not the ceremony.
+                Done in `bridge.rs`.
+    WIRE        left alone. Recorded on the currency pass (#14) so the
+                decision is deliberate rather than forgotten.
 
 ### 2h. THE ECLIPSE — STRUCK AS WRITTEN (2026-08-01)
 
