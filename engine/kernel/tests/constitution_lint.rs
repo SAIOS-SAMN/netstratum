@@ -157,9 +157,12 @@ fn struck_paragraph_lines(text: &str) -> HashSet<usize> {
 /// dropped"), so they are exempt by construction — what is barred is
 /// live use, never the record of removal.
 fn records_a_strike(line: &str) -> bool {
-    const MARKERS: [&str; 16] = [
+    const MARKERS: [&str; 17] = [
         "STRUCK", "struck", "EXCISED", "excised", "DEPRECATED", "deprecated", "RETIRED",
-        "formerly", "REMOVED", "withdrawn",
+        // `retired` lowercase was MISSING while every other marker
+        // carried both cases — found by this file's own vocabulary
+        // lint flagging the sentence that describes the retirement.
+        "retired", "formerly", "REMOVED", "withdrawn",
         // A CORRECTION is a record too. `Ω ≡ V` could only be retired by
         // paragraphs that QUOTE it while retiring it, exactly as a strike
         // record quotes the symbol it strikes.
@@ -457,5 +460,89 @@ fn the_detectors_have_teeth() {
     assert!(
         !live_line.contains("∂V") && !live_line.contains("∇V"),
         "∂Δ is LIVE and must not collide with the struck ∂V / ∇V"
+    );
+}
+
+/// THE RETIRED VOCABULARY STAYS RETIRED — over CODE, not only law.
+///
+/// `the_struck_symbols_stay_struck` reads `law_documents()`, which is
+/// `docs/*.md` plus the kernel charter. It has never opened a `.rs`
+/// file. So a ruling could retire a word in the law and the code would
+/// never hear it, which is exactly what happened:
+///
+/// `11_AEON` §3 retired "Daughter" on 2026-07-30, giving the reason in
+/// full — *it imported terrestrial unary budding (one parent, mutate
+/// one axis) — half a model with no second half*. Three days later the
+/// word still stood in 24 files across `cfe`, `kernel`, `conductor`,
+/// `scribe`, the CLI and six doc files, and a `conductor_pins`
+/// assertion still REQUIRED the retired model (`mutations == 1`).
+/// Nothing was watching, because the only watcher read prose.
+///
+/// **The word was never carrying gender as decoration.** It carried a
+/// REPRODUCTIVE MODEL — one parent, ownership, inheritance without
+/// earning — and this engine refuses all three: the cleave is
+/// peer-to-peer with no parent and no child (`11` §3), lineage records
+/// LINE membership rather than parenthood, and a successor inherits the
+/// chronicle and not the tree (`17` §3c). The vocabulary was smuggling
+/// in the model the law had already refused.
+#[test]
+fn the_retired_vocabulary_stays_retired() {
+    let root = workspace_root();
+
+    // Retired by ruling, with the ruling that retired each.
+    const RETIRED: [(&str, &str); 6] = [
+        ("daughter", "kinship for a charted colony / branch — retired 11 §3"),
+        ("Daughter", "kinship for a charted colony / branch — retired 11 §3"),
+        ("mother", "kinship for a source colony — retired 2026-08-02"),
+        ("Mother", "kinship for a source colony — retired 2026-08-02"),
+        ("speciation", "unary budding by another name — struck 2026-08-02"),
+        ("Speciation", "unary budding by another name — struck 2026-08-02"),
+    ];
+
+    let mut live = Vec::new();
+    let mut scanned = 0usize;
+    let mut stack = vec![root.join("engine"), root.join("clients"), root.join("docs")];
+    while let Some(dir) = stack.pop() {
+        let Ok(entries) = fs::read_dir(&dir) else { continue };
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_dir() {
+                if path.file_name().is_some_and(|n| n == "target") {
+                    continue;
+                }
+                stack.push(path);
+                continue;
+            }
+            let is_source = path.extension().is_some_and(|x| x == "rs" || x == "md");
+            if !is_source {
+                continue;
+            }
+            let text = fs::read_to_string(&path).unwrap_or_default();
+            scanned += 1;
+            let exempt = struck_paragraph_lines(&text);
+            for (n, line) in text.lines().enumerate() {
+                // A record of the retirement, or an operator's own words,
+                // may name the word — use may not.
+                if exempt.contains(&n) || is_relay(line) {
+                    continue;
+                }
+                for (word, why) in RETIRED {
+                    if line.contains(word) {
+                        let rel = path.strip_prefix(&root).unwrap_or(&path).display();
+                        live.push(format!("{rel}:{}  `{word}` — {why}", n + 1));
+                    }
+                }
+            }
+        }
+    }
+
+    assert!(scanned > 100, "the vocabulary scan reached the tree ({scanned} files)");
+    assert!(
+        live.is_empty(),
+        "retired vocabulary is LIVE in the tree.\n\
+         A ruling that retires a word retires it in the CODE too — prose \
+         cannot enforce, which is how \"Daughter\" outlived its own \
+         retirement by three days across 24 files:\n  {}",
+        live.join("\n  ")
     );
 }
