@@ -672,7 +672,7 @@ fn lawful_deltas(
             non_negative(*resource, amount)?;
             Vec::new()
         }
-        // ColonyCharted: the founding reserves MOVE source → daughter —
+        // ColonyCharted: the founding reserves MOVE source → charted —
         // net zero per resource by the sealed rule.
         E::ColonyCharted { .. } => Vec::new(),
         // — the aperture legs, sign-guarded (a negative send is a

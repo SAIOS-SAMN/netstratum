@@ -243,7 +243,7 @@ model). The waves are disjoint deed families — parallel across lanes:
   RouteChartered, OfferPosted, LineSucceeded, ZoneRazed, WardLifted,
   VeilLifted. **CAUTION (derived):** several of these MOVE or CREATE
   value — `ColonyFounded` seeds the founding bank, `ColonyCharted`
-  moves the 20-iron/10-biomass daughter reserves — so each amendment
+  moves the 20-iron/10-biomass charted reserves — so each amendment
   DERIVES its lawful_delta from `world.rs`, and the founding-reserve
   mints need a declared I4 arm (a chartered genesis mint, named, never
   a hole). `TaxonSealed` is coder-03's standing #42 — leave it theirs.

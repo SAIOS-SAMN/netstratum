@@ -43,7 +43,7 @@ wall regenerate every 60-tick year.
 | JOURNAL-1 | the Chronicle Feed: per-year journals + cyber-noir `wall.html`, pure rendering, deterministic |
 | the ideology board, whole (coder-02) | TRADE-1 transfers/compassion (30) · ABSORB-1 absorption/morality windows (31–32) · BOND-1 standing bonds/love (33–34) · COVENANT-1 vitrified escrow + fidelity curve/integrity (35–37) · IDEO-1 friction (38) + orb cohesion entry (41) + `ideology` panel — eight books, ratios derived never stored; deferrals at Q4 |
 | BOT-THERM | polities thermally alive: Furnace mints, Frost banks sink and honestly freeze-locks |
-| renames | Crucible→Furnace · bot→polity/automaton (NS-6 §5.2) · themed daughter names |
+| renames | Crucible→Furnace · bot→polity/automaton (NS-6 §5.2) · themed colony names |
 | APERTURE-1 (2026-07-29) | the cross-world value carrier (NS-4 §1–§3, tags 47–48): two-legged deal-linked deed, demurrage at the touch both sides, per-world replay, pair conservation an N6 reading; the market board's gate is open |
 
 Design authority now also includes `12_UNION.md` (the union world-book,

@@ -187,13 +187,13 @@ N5/N6). Details and sequencing in 04 §6.
   keep terrain's D3 name): MULTI-PLANET WORLDS. `World` now MEANS the
   container (04 §5 naming debt PAID by truth, not rename): multiple colony
   orbs under ONE clock / ONE chronicle (binding #1). CHARTERING (tag 13):
-  a daughter colony's founding reserves MOVE from a source colony's bank —
+  a charted colony's founding reserves MOVE from a source colony's bank —
   conservation holds, chartering mints nothing (the free-bootstrap exploit
   closed at design time). Per-orb workspaces and famine; planet names
   unique per world. Evidence: clippy zero; **77/77 workspace witnesses
   green capped** (chartering conservation; typed refusals incl.
-  PlanetNameTaken/NoSuchOrb; a daughter famine at exactly t=11 never
-  touches the mother; the archipelago replays from receipts alone). CLI:
+  PlanetNameTaken/NoSuchOrb; a charted famine at exactly t=11 never
+  touches the source; the archipelago replays from receipts alone). CLI:
   `chart <planet> [from <p>]`, `planet <name>`, `planets`, per-planet
   status/map, famine banners name the planet. Cross-territory adaptations
   (relayed): mirror/conductor/mirror_demo call sites updated mechanically
@@ -330,8 +330,8 @@ N5/N6). Details and sequencing in 04 §6.
   20 iron stays 20 across the move, books balance both sides; the
   1/4+1/4 biomass gift relieves EXACTLY at the one-tick bill, receipted
   once; crisis posting replays — drawn 2, given 1/2, healthy transfers
-  post nothing; both sides settle demurrage at one touch — 7/64 mother,
-  1/8 daughter by receipt, same-stamp pays zero, 41/64 remains; the
+  post nothing; both sides settle demurrage at one touch — 7/64 source,
+  1/8 charted by receipt, same-stamp pays zero, 41/64 remains; the
   upkeep-only collect anchors last_touch on replay; tag 30 byte-exact).
   The arc played end-to-end: famine struck outpost → 1/4 gift held →
   second 1/4 relieved with the banner → 100-iron refusal named "have
@@ -818,7 +818,7 @@ market board's; union tags allocate from 52 at each landing.
 | **SUBSTRATE-1** | C | **LANDED 2026-07-29** | the no-anthropic-gate axis growth (12_UNION §5a): metabolism gains `plasmic` (sites Furnace — the stellar environs), perception gains `umbral` (occlusion-basis, the syzygial lines); APPEND-ONLY (the tag-registry discipline on the axes — never removed, never renamed); no new event tags. Evidence: the vocabulary witness registers a plasmic/umbral line, round-trips whole, and still refuses what was never added |
 | **LINEAGE-1** | C | **LANDED 2026-07-29** | `resolve_head` walks the lineage pointer chain to its root — headless lawful (a rootless line resolves to itself), a dangling pointer resolves to the deepest recorded ancestor, a corrupt cycle stops deterministically; `lineage_domain(metabolism, band)` derives the progenitor domain a line elevates toward (thermal/lithic/cryo/mesic/plasmic), never stored, never chosen — no line answers to a planner of an alien physiology. No new event tags. Evidence: the chain/headless/dangling/cycle/domain witness green |
 | **AEON-1a** | B | **LANDED 2026-07-29** | the manifold core: tags 42–46 byte-exact; the gauge key G on every world (exact rational wrapped [0,1), zero at genesis, moved only by receipt — the wrap is receipted, never re-derived); divergence/confluence as KEY CHANGES (peer cleave named; interference midpoint caller-computed); the star moves in its region (`age_star` — a reddening G sun shifts every orbit's T_eq⁴ a thousandfold, replayed); the fold receipt (`seal_fold` — era sealed, base G advanced, nothing destroyed). Evidence: 5 witnesses green |
-| AEON-1b | B | open | the conductor orchestration: aeon-voice alignment triggers (11 §1), divergence/confluence replacing daughter speciation, resonance/clash friction on wrapped ΔG, four-C fold-eligibility, var rotation + G-sheet convergence seating (11 §5.2) |
+| AEON-1b | B | open | the conductor orchestration: aeon-voice alignment triggers (11 §1), divergence/confluence replacing charted speciation, resonance/clash friction on wrapped ΔG, four-C fold-eligibility, var rotation + G-sheet convergence seating (11 §5.2) |
 | **THRESHOLD-1** | A (after APERTURE-1) | **LANDED 2026-07-29** | the SHIELD: no aperture reaches a pre-solar world in either direction (typed `Shielded` naming the shielded side; a refusal moves nothing anywhere); the CROSSING: a world is a star system, so a world's first lawful aperture deed crosses BOTH parties into the union — replay-derived (`has_crossed`), resume-carried; `is_shielded` the Watchers' reading. Deferred, recorded: the Watcher SURFACE (shielded-worlds board) renders at BOARD-1 (reflection law); crossing-by-second-star-founding awaits the multi-star charter. Evidence: 2 witnesses (bidirectional refusal moves nothing; leap lifts shield → first aperture crosses both → replay+resume carry it) |
 | **BAND-1** | B | **LANDED 2026-07-29** | the space-available law in the registry: the `station` office field (progenitor/watcher/observer/sovereign — append-only, an office never a rank; stationless is the common lawful state); seat widths as placeholder parameters (progenitor 8 PER LINEAGE DOMAIN — the band grows by domains as substrates elevate; watcher/observer 16; sovereign unbounded); the `NoSeatOpen` refusal names the room, its domain, and its width — a room filled, never a rank refused. Deferred, recorded: capacity as a live fiber reading (minted-plane count) awaits AEON-1b's plane surface. Evidence: the ninth-lithic-seat witness refuses exact while the mesic room seats; unknown office refuses typed; round-trip whole |
 | **ELEVATE-1** | confluence (AEON-1a + THRESHOLD-1) | **LANDED 2026-07-29** | the three-gate gauge climb (12_UNION §6, discrete gauge morphodynamics): `elevate(delta)` executes as ONE `GaugeShifted` receipt, gated on three exact chronicle readings — S settlement (no famine/overheat, vent workspace sealed, demurrage current), T coherence (a loop closed within the year voice, 60 ticks — placeholder constant), G the crossing; refusal names every gate (`ElevationBarred` — each false escapable); the fiber never retreats (`BadClimb`). CLI `elevate` WIRED 2026-07-30 (the wiring audit); four-C trajectory reading (the fuller T gate) still open. Evidence: 3 witnesses green |

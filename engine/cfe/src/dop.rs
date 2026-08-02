@@ -139,7 +139,11 @@
 //!         the melt as a first-class receipt on the receiving book:
 //!         sent = received + void share; every deal in the universe
 //!         sums to zero under ONE rule; losses are receipted, never
-//!         silent; the judge only sums, never recomputes φ·D)
+//!         silent; the judge only sums, never recomputes φ·D.
+//!         `orb_id` ADDED 2026-08-02 (SYN-6): the record named the
+//!         DEAL and never the BEARER, so the melt was receipted and
+//!         credited to NO ONE — visible in aggregate, unattributable
+//!         to any book. Wire: LE64 orb ‖ LE64 deal ‖ resource ‖ ratio)
 //!   83 The committed-state container (CODEC-1, §11 ladder #35 — the
 //!         artifact digests bind: schema-versioned canonical bytes of
 //!         the WHOLE committed state, engine/codec's monopoly; one
@@ -742,7 +746,7 @@ pub enum ClosureEvent {
     ScopeGranted { agent: u64, scope: crate::ipsal::Scope },
     /// N3 — a grant revoked; the agent's next such action refuses.
     ScopeRevoked { agent: u64, scope: crate::ipsal::Scope },
-    /// P1 — a daughter colony charted on a new planet: the founding
+    /// P1 — a charted colony charted on a new planet: the founding
     /// reserves MOVE from the source orb's bank (conservation — a
     /// charter mints nothing).
     ColonyCharted { orb_id: u64, source_orb: u64, name: String },
@@ -1073,7 +1077,18 @@ pub enum ClosureEvent {
     /// deal — receipted on the receiving book by the same transition
     /// that computes the trade. Banks never move on it; it is the
     /// loss made visible.
-    VoidShare { deal: u64, resource: Resource, amount: Ratio },
+    ///
+    /// **`orb_id` ADDED 2026-08-02 (SYN-6, operator approved).** The
+    /// record named the DEAL and never the BEARER, so the melt was
+    /// receipted and credited to no one: a loss visible in the
+    /// aggregate and unattributable to any book. Every other
+    /// value-bearing receipt in this codec carries the orb that bore
+    /// it — `DemurrageSettled`, `UpkeepSettled`, `AssayStruck` — and
+    /// this one alone did not, which is why `World::value_lost_of`
+    /// could account decay and upkeep per orb and had to leave the
+    /// melt out entirely. The field is FIRST, matching the
+    /// `LE64 ‖ …` layout every orb-bearing record already uses.
+    VoidShare { orb_id: u64, deal: u64, resource: Resource, amount: Ratio },
     /// ROUTE-1: a lane chartered — this book's leg of the pair.
     RouteChartered { deal: u64, eta: Ratio },
     /// ROUTE-1: the lane lapsed on this book (unpaid maintenance).
@@ -1446,8 +1461,9 @@ impl ClosureEvent {
                 ratio::encode(eta, &mut value);
                 tlv::put(79, &value, &mut out);
             }
-            Self::VoidShare { deal, resource, amount } => {
-                let mut value = deal.to_le_bytes().to_vec();
+            Self::VoidShare { orb_id, deal, resource, amount } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&deal.to_le_bytes());
                 value.push(*resource as u8);
                 ratio::encode(amount, &mut value);
                 tlv::put(82, &value, &mut out);
@@ -1851,10 +1867,11 @@ impl ClosureEvent {
                 deal: u64::from_le_bytes(value.get(..8)?.try_into().ok()?),
             }),
             82 => {
-                let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
-                let resource = Resource::from_wire(*value.get(8)?)?;
-                let (amount, _) = ratio::decode(value.get(9..)?)?;
-                Some(Self::VoidShare { deal, resource, amount })
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let deal = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let resource = Resource::from_wire(*value.get(16)?)?;
+                let (amount, _) = ratio::decode(value.get(17..)?)?;
+                Some(Self::VoidShare { orb_id, deal, resource, amount })
             }
             _ => None,
         }

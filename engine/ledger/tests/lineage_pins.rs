@@ -38,29 +38,29 @@ fn line(sigil: &str, lineage: Vec<&str>) -> Civilization {
 #[test]
 fn both_parents_round_trip_and_the_old_form_reads_unchanged() {
     let registry = Registry::at(scratch("roundtrip"));
-    registry.create(&line("mother", vec![])).expect("creates");
-    registry.create(&line("father", vec![])).expect("creates");
+    registry.create(&line("first-root", vec![])).expect("creates");
+    registry.create(&line("second-root", vec![])).expect("creates");
     registry
-        .create(&line("hybrid", vec!["mother", "father"]))
+        .create(&line("hybrid", vec!["first-root", "second-root"]))
         .expect("creates the confluent line");
     let held = registry.load("hybrid").expect("loads");
-    assert_eq!(held.lineage, vec!["mother".to_string(), "father".to_string()]);
+    assert_eq!(held.lineage, vec!["first-root".to_string(), "second-root".to_string()]);
 
     // The wire form: one field, space-joined, in append order.
     let root = scratch("wire");
     let registry = Registry::at(root.clone());
-    registry.create(&line("hybrid", vec!["mother", "father"])).expect("creates");
+    registry.create(&line("hybrid", vec!["first-root", "second-root"])).expect("creates");
     let text = fs::read_to_string(root.join("hybrid.json")).expect("reads");
-    assert!(text.contains("\"lineage\":\"mother father\""));
+    assert!(text.contains("\"lineage\":\"first-root second-root\""));
 
     // A LINEAGE-1 file (single token) reads as a one-parent list.
     fs::write(
         root.join("elder-child.json"),
-        "{\"name\":\"Elder Child\",\"sigil\":\"elder-child\",\"species\":\"w\",\"motto\":\"m\",\"axes\":{\"disposition\":\"empiricist\",\"metabolism\":\"biotic\",\"perception\":\"planar\"},\"founder\":\"conductor\",\"lineage\":\"mother\"}\n",
+        "{\"name\":\"Elder Child\",\"sigil\":\"elder-child\",\"species\":\"w\",\"motto\":\"m\",\"axes\":{\"disposition\":\"empiricist\",\"metabolism\":\"biotic\",\"perception\":\"planar\"},\"founder\":\"conductor\",\"lineage\":\"first-root\"}\n",
     )
     .expect("writes the old form");
     let old = registry.load("elder-child").expect("loads");
-    assert_eq!(old.lineage, vec!["mother".to_string()]);
+    assert_eq!(old.lineage, vec!["first-root".to_string()]);
 }
 
 /// The primary chain still resolves as LINEAGE-1 did; the DAG read
@@ -71,13 +71,13 @@ fn the_hybrid_resolves_to_both_heads() {
     let registry = Registry::at(scratch("dag"));
     registry.create(&line("deep-root", vec![])).expect("creates");
     registry.create(&line("far-root", vec![])).expect("creates");
-    registry.create(&line("mother", vec!["deep-root"])).expect("creates");
-    registry.create(&line("father", vec!["far-root"])).expect("creates");
+    registry.create(&line("first-root", vec!["deep-root"])).expect("creates");
+    registry.create(&line("second-root", vec!["far-root"])).expect("creates");
     registry
-        .create(&line("hybrid", vec!["mother", "father"]))
+        .create(&line("hybrid", vec!["first-root", "second-root"]))
         .expect("creates");
 
-    // Primary chain: first parent per hop — mother's line.
+    // Primary chain: first forebear per hop — the first-root line.
     assert_eq!(registry.resolve_head("hybrid").as_deref(), Some("deep-root"));
     // The DAG: both roots, sorted.
     assert_eq!(

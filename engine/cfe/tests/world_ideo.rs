@@ -16,8 +16,8 @@ use cfe::thermal::StarClass;
 use cfe::world::{replay, World, FIRST_ORB, SOVEREIGN};
 
 /// The furnace↔coldstore fixture (the ABSORB-1 shape): ends at stamp
-/// 19 with the mother holding 1 un-sealed pending overflow (struck)
-/// and the daughter banking sink.
+/// 19 with the source holding 1 un-sealed pending overflow (struck)
+/// and the charted banking sink.
 fn furnace_and_coldstore() -> (World, u64) {
     let mut world = World::new();
     world.found("furnace").expect("founds");
@@ -27,29 +27,29 @@ fn furnace_and_coldstore() -> (World, u64) {
         world.tick();
     }
     world.collect().expect("collects");
-    let daughter = world.chart("coldstore", FIRST_ORB).expect("charts");
+    let charted = world.chart("coldstore", FIRST_ORB).expect("charts");
     world.zone(16, ZoneKind::Encasement).expect("zones the shell");
     world
-        .zone_as(SOVEREIGN, daughter, 0, ZoneKind::CryoArray)
+        .zone_as(SOVEREIGN, charted, 0, ZoneKind::CryoArray)
         .expect("zones the array");
     world.commission_star(StarClass::G).expect("commissions");
     world
         .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2))
         .expect("sites hot");
     world
-        .site_planet(daughter, ratio(0, 1), ratio(100, 1))
+        .site_planet(charted, ratio(0, 1), ratio(100, 1))
         .expect("sites cold");
     world.tick();
     world.collect().expect("banks the joules");
     world
-        .transfer(FIRST_ORB, daughter, Resource::Joule, ratio(1, 1))
+        .transfer(FIRST_ORB, charted, Resource::Joule, ratio(1, 1))
         .expect("relieves the freeze");
     world.tick();
     world.tick();
     world
-        .collect_as(SOVEREIGN, daughter)
+        .collect_as(SOVEREIGN, charted)
         .expect("banks the sink");
-    (world, daughter)
+    (world, charted)
 }
 
 /// The orb cohesion entry (tag 41): a zero-book orb emits NO entry —
@@ -98,8 +98,8 @@ fn the_ratio_derives_and_never_stores() {
 /// sealed at its collect into the vented ledger, receipted.
 #[test]
 fn friction_prices_divergence_exactly() {
-    let (mut world, daughter) = furnace_and_coldstore();
-    world.absorb(FIRST_ORB, daughter, ratio(1, 1)).expect("absorbs"); // debt @19
+    let (mut world, charted) = furnace_and_coldstore();
+    world.absorb(FIRST_ORB, charted, ratio(1, 1)).expect("absorbs"); // debt @19
     for _ in 0..9 {
         world.tick(); // the window lapses at now=27: extracted = 1
     }
@@ -111,7 +111,7 @@ fn friction_prices_divergence_exactly() {
     // The extractor (reading 0) moves 2 iron to the fresh reader (1):
     // ΔS_ideo = 1/8 × 1 × 2 = 1/4, on the mover.
     world
-        .transfer(FIRST_ORB, daughter, Resource::Iron, ratio(2, 1))
+        .transfer(FIRST_ORB, charted, Resource::Iron, ratio(2, 1))
         .expect("transfers across the divide");
     let vented_before = world.orb_by_id(FIRST_ORB).expect("orb").entropy_vented.clone();
     world.collect().expect("collects — the seal");
@@ -127,9 +127,9 @@ fn friction_prices_divergence_exactly() {
         })
         .expect("the friction is receipted");
     assert_eq!(sealed, ratio(1, 4), "φ × divergence × volume, exact");
-    let mother = world.orb_by_id(FIRST_ORB).expect("orb");
+    let source = world.orb_by_id(FIRST_ORB).expect("orb");
     // The vented ledger grew by the thermal seal AND the friction.
-    assert!(mother.entropy_vented > vented_before);
+    assert!(source.entropy_vented > vented_before);
     let rebuilt = replay(world.chronicle());
     assert_eq!(rebuilt, world.committed(), "replay MATCHES with the friction");
 }
@@ -146,9 +146,9 @@ fn aligned_partners_generate_exactly_zero() {
         world.tick();
     }
     world.collect().expect("collects");
-    let daughter = world.chart("outpost", FIRST_ORB).expect("charts");
+    let charted = world.chart("outpost", FIRST_ORB).expect("charts");
     world
-        .transfer(FIRST_ORB, daughter, Resource::Iron, ratio(5, 1))
+        .transfer(FIRST_ORB, charted, Resource::Iron, ratio(5, 1))
         .expect("transfers");
     for _ in 0..2 {
         world.tick();

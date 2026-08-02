@@ -116,9 +116,24 @@ fn a_thriving_line_diverges() {
         .iter()
         .filter(|m| **m)
         .count();
-        assert_eq!(mutations, 1, "exactly one axis mutates per cleave");
+        // UNARY UNPINNED (operator ruling 2026-08-02). This asserted
+        // `== 1` — "exactly one axis mutates per cleave" — which HELD
+        // THE RETIRED MODEL IN PLACE BY TEST: `11_AEON` §3 retired
+        // "Charted" precisely for terrestrial unary budding, one
+        // parent MUTATING ONE AXIS, and the pin required exactly that
+        // forever. A test can keep a struck model alive as surely as a
+        // document can.
+        //
+        // The corrected law: a cleave draws a NONEMPTY SUBSET of the
+        // three axes, so it always diverges (never a clone) and may
+        // move on any combination. One axis is now one case among
+        // seven, not the only case.
+        assert!(
+            (1..=3).contains(&mutations),
+            "a cleave moves at least one axis and at most all three, got {mutations}"
+        );
         // PEERS: the species is the line's, whole — the kinship
-        // suffix is retired (11 §3: "Daughter" imported terrestrial
+        // suffix is retired (11 §3: "Charted" imported terrestrial
         // unary budding, one parent mutating one axis, and it is
         // half a model with no second half).
         assert!(!branch.species.contains("descendant"));

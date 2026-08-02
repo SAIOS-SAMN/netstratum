@@ -75,8 +75,8 @@ made sink commensurable; other resources post through a placeholder
 commensuration table, weight 1 in v1).
 
 **Scope from birth:** the books are per-orb so every mechanism lands and
-witnesses single-world — the P1 archipelago is society enough (a mother
-and daughter colony are already distinct books). Civilization-scoped
+witnesses single-world — the P1 archipelago is society enough (a source
+and charted colony are already distinct books). Civilization-scoped
 reading is composition over a faction's orbs, and cross-empire reading
 arrives with the worlds that meet at N5/N6; the machinery is identical,
 only the counterparties multiply.

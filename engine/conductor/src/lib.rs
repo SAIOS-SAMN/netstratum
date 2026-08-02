@@ -1161,16 +1161,38 @@ impl Polity {
             let others: Vec<&&str> = options.iter().filter(|o| **o != current).collect();
             others[beacon.uniform_index(domain, others.len() as u64) as usize].to_string()
         };
-        let axis = beacon.uniform_index("growth.axis", 3);
+        // MULTI-AXIAL (operator ruling 2026-08-02: *unpin unary, and
+        // make it multi-axis*). `11_AEON` §3 retired "Charted" for
+        // importing terrestrial unary budding — ONE PARENT, MUTATE ONE
+        // AXIS — and this draw was still the second half of that: one
+        // of three coordinates moved and the other two were held.
+        //
+        // A cleave is a WALK ON THE MANIFOLD
+        // {disposition × metabolism × perception × G} (11 §3), and a
+        // walk confined to one coordinate at a time is not a walk on a
+        // manifold, it is a walk on its axes. The mask draws a NONEMPTY
+        // SUBSET — 1..=7 over three bits — so every combination is
+        // reachable and the single-axis move survives as one case among
+        // seven rather than as the only case.
+        //
+        // Nonempty by construction: a cleave always diverges, so the
+        // branches can never be clones. `mutate` draws from the options
+        // EXCLUDING the current value, so every flagged axis genuinely
+        // moves.
+        let axes = 1 + beacon.uniform_index("growth.axes", 7);
         let (mut disposition, mut metabolism, mut perception) = (
             parent.disposition.clone(),
             parent.metabolism.clone(),
             parent.perception.clone(),
         );
-        match axis {
-            0 => disposition = mutate(&disposition, &DISPOSITIONS, "growth.disposition"),
-            1 => metabolism = mutate(&metabolism, &METABOLISMS, "growth.metabolism"),
-            _ => perception = mutate(&perception, &PERCEPTIONS, "growth.perception"),
+        if axes & 1 != 0 {
+            disposition = mutate(&disposition, &DISPOSITIONS, "growth.disposition");
+        }
+        if axes & 2 != 0 {
+            metabolism = mutate(&metabolism, &METABOLISMS, "growth.metabolism");
+        }
+        if axes & 4 != 0 {
+            perception = mutate(&perception, &PERCEPTIONS, "growth.perception");
         }
 
         // THEMED NAMING (operator ruling): the child's name derives

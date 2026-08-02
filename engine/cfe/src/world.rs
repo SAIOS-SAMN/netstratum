@@ -7,7 +7,7 @@
 //! The flow model (02 §2.3) runs PER ORB: each tick, every active zone
 //! nets yield − upkeep into its orb's accrued workspace; famine strikes
 //! per orb; `collect` settles one orb. Chartering (P1) founds a
-//! daughter colony by MOVING the founding reserves from a source
+//! charted colony by MOVING the founding reserves from a source
 //! colony's bank — conservation holds; no colony after the first gets
 //! free matter.
 
@@ -1417,13 +1417,13 @@ impl World {
         }
     }
 
-    /// Chart a daughter colony as the sovereign.
+    /// Chart a charted colony as the sovereign.
     pub fn chart(&mut self, name: &str, source: u64) -> Result<u64, ActionRefused> {
         self.chart_as(SOVEREIGN, name, source)
     }
 
-    /// P1 — chart a daughter colony on a new planet: the founding
-    /// reserves MOVE from the source colony's bank to the daughter's.
+    /// P1 — chart a charted colony on a new planet: the founding
+    /// reserves MOVE from the source colony's bank to the charted's.
     /// Conservation holds — chartering mints nothing. Build scope.
     pub fn chart_as(&mut self, actor: u64, name: &str, source: u64) -> Result<u64, ActionRefused> {
         self.permitted(actor, Scope::Build)?;
@@ -1449,15 +1449,15 @@ impl World {
             source_orb.bank(resource, -amount);
         }
         let orb_id = self.orbs.iter().map(|held| held.orb_id).max().unwrap_or(0) + 1;
-        let mut daughter = ColonyOrb {
+        let mut charted = ColonyOrb {
             orb_id,
             name: name.to_string(),
             ..ColonyOrb::default()
         };
         for (resource, amount) in founding_reserves() {
-            daughter.bank(resource, amount);
+            charted.bank(resource, amount);
         }
-        self.orbs.push(daughter);
+        self.orbs.push(charted);
         self.close(
             ClosureEvent::ColonyCharted {
                 orb_id,
@@ -3781,9 +3781,14 @@ fn haul(
     // so every deal sums to zero under one rule and the judge only
     // sums, never recomputes φ·D. Losses are receipted, never
     // silent. Banks never move on it.
+    //
+    // SYN-6 (2026-08-02): the receipt now carries `orb_id` — the
+    // RECEIVING orb, which is the book that bore the melt. Without it
+    // the loss was visible in the aggregate and attributable to no
+    // one, so no per-orb accounting could ever reach it.
     if void_share > ratio(0, 1) {
         dst.chronicle.append(
-            ClosureEvent::VoidShare { deal, resource, amount: void_share },
+            ClosureEvent::VoidShare { orb_id: to, deal, resource, amount: void_share },
             dst_stamp,
             vec![SOVEREIGN],
         );
@@ -4310,15 +4315,15 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                         source.bank(resource, -amount);
                     }
                 }
-                let mut daughter = ColonyOrb {
+                let mut charted = ColonyOrb {
                     orb_id: *orb_id,
                     name: name.clone(),
                     ..ColonyOrb::default()
                 };
                 for (resource, amount) in founding_reserves() {
-                    daughter.bank(resource, amount);
+                    charted.bank(resource, amount);
                 }
-                orbs.push(daughter);
+                orbs.push(charted);
             }
             ClosureEvent::ZoneBuilt { orb_id, tile, kind } => {
                 if let Some(held) = peel(&mut orbs, *orb_id) {

@@ -103,7 +103,7 @@ plays it.
 
 ## 3. Lineage as a manifold walk — divergence + confluence
 
-"Daughter" is retired: it imported terrestrial unary budding (one parent,
+"Charted" is retired: it imported terrestrial unary budding (one parent,
 mutate one axis) — half a model with no second half. Two named events, both
 *positions on the {disposition × metabolism × perception × G} manifold*,
 never a family-tree line:

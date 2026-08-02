@@ -433,14 +433,14 @@ arrive, so none needs closing.
 is not a new law. `11_AEON` §3 retired the word on 2026-07-30, and gave
 the reason in full:
 
-> "Daughter" is retired: it imported terrestrial unary budding (one
+> "Charted" is retired: it imported terrestrial unary budding (one
 > parent, mutate one axis) — half a model with no second half.
 
 and named that second half — **CONFLUENCE** (`Confluent`, tag 44), *two
 civilizations held by a landed BOND COMBINE their chronicle-vectors into
 a hybrid* — **reproduction with both halves present**, and *earned,
 gated on a sustained bond, not free*. That is precisely *both sons and
-daughters, to re-balance* (operator, 2026-08-02), and precisely *there
+charted colonies, to re-balance* (operator, 2026-08-02), and precisely *there
 is no BOND for FORGED EXISTENCE*: confluence is the one generative act
 in the system that REQUIRES a standing bond, and without the bond it
 does not happen.
@@ -449,10 +449,10 @@ does not happen.
 stated the divergence law correctly at the function that performs it —
 *two PEER branches: no parent, no child* — while its own header and
 fields contradicted it. Struck: *SPECIATION IS A MINT … spawns ONE
-daughter per era* → **GROWTH PER CIV IS A MINT … CLEAVES once per era
+charted per era* → **GROWTH PER CIV IS A MINT … CLEAVES once per era
 into TWO PEER BRANCHES**; the `spawned` flag → `cleaved`, commented so
 that it bounds how OFTEN the line grows and never how many branches a
-growth produces; every remaining `daughter` → `branch`; and the beacon
+growth produces; every remaining `charted` → `branch`; and the beacon
 domains `speciation.*` → `growth.*`. The RATE LIMIT is lawful and stays —
 growth rare rather than a flood.
 
@@ -477,10 +477,65 @@ half that balances it built but unreachable. Confluence is where *both
 halves present* and *earned, gated on a bond* actually live, so until it
 is driven, the union has no generative act that requires a bond at all.
 
-Both are changes to game behaviour rather than to naming — one alters
-every branch the conductor draws, the other adds a generative act — so
-they are RECORDED here and owed a ruling, not taken unilaterally from
-this lane.
+**(a) IS NOW CORRECTED** (operator ruling 2026-08-02: *unpin unary, and
+make it multi-axis — pin the correction*). The cleave draws a NONEMPTY
+SUBSET of the three axes (`1..=7` over three bits), so it always
+diverges and may move on any combination; one axis is one case among
+seven rather than the only case. The pin asserts the corrected law —
+`1..=3` axes move — instead of holding the retired model in place.
+
+**(b) REMAINS** and is owed a ruling: adding a generative act is a
+larger change than renaming one, and confluence is the half that
+carries the BOND requirement.
+
+### §3c.2 THE TRIANGLE AND THE POLYNOMIAL — measured
+
+**(operator directive 2026-08-02: *upgrade triangle to polynomial so
+that you increase the syntropic state*.)**
+
+The cocycle residual is DEGREE 3 — `R_ijk,l = Δ_ik,l − Δ_ij,l − Δ_jk,l`
+over FILLED triangles only. The question is what a higher degree would
+add. Measured, on the two cases that should expose it:
+
+```text
+    RING of 4, no chord (obligations round the loop, 1 each)
+        symmetry_foundation (degree 3) = 0     ← the triangle sees nothing
+        rank                           = 1     ← D RISES ANYWAY
+        holonomy                       = 4
+
+    LONG COMPOSITION: Δ₁₄ = 10 against the real path 1→2→3→4 = 3.
+    Δ₁₄ EXISTS, so nothing is invented and no chord is assumed.
+        symmetry_foundation (degree 3) = 0     ← the triangle sees nothing
+        rank                           = 1     ← D RISES ANYWAY
+        holonomy                       = −7    ← exactly 3 − 10
+```
+
+**THE SYNTROPIC STATE IS NOT LOSING ANYTHING HERE.** In both cases the
+degree-3 residual is empty and `D` rises regardless, because `D` is
+`rank(Δ(V))` — the independent cycles carrying charge — and the
+HOLONOMY reads the discrepancy exactly, at any cycle length. The
+capacity that a longer composition failure earns is already earned.
+
+**And a chordless ring must NOT be given a residual.** Testing `Δ₁₃`
+where no relation `1—3` exists would invent strain from a relation that
+does not stand — the false gauge collapse `bridge` already refuses by
+restricting to filled triangles. Raising the degree cannot be allowed
+to smuggle that back in.
+
+**WHAT A POLYNOMIAL DEGREE WOULD ACTUALLY BUY, stated honestly:** not
+capacity, but NAMED GENERATORS. The residual's value is that it carries
+its indices — *these three, on this coordinate, do not compose, by this
+much* — and those are the candidate generators of the symmetry group
+(the residue composition law owed at `KERNEL_RELAY` §7.4). A degree-`n`
+residual would name `n`-ary generators where today only 3-ary ones are
+named, while the holonomy summarises all of them as one charge on one
+edge. That is a real gap and it belongs to the composition law, not to
+`D`.
+
+So the upgrade is **NOT LANDED**, and the reason is measurement rather
+than difficulty: raising the degree to increase the syntropic state
+would increase nothing, because the state it targets is already whole.
+The generator question is the one worth ruling on.
 
 ### §3c.1 THE CONTAINMENT FORMALIZATION REFUSED — recorded
 
