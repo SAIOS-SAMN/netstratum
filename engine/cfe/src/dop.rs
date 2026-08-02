@@ -826,7 +826,13 @@ pub enum ClosureEvent {
     /// `None`, so no rehash and no new tag. (`0x41` was proposed and is
     /// RETIRED under Charter §11 — `recurrence_guard` fails the build
     /// on reuse.)
-    PlanetSited { orb_id: u64, albedo: Ratio, orbit_r: Ratio, theta: Option<Ratio> },
+    PlanetSited {
+        orb_id: u64,
+        albedo: Ratio,
+        orbit_r: Ratio,
+        theta: Option<Ratio>,
+        psi: Option<Ratio>,
+    },
     /// VENT-1 (05 §1.4) — accumulated vented entropy settled into the
     /// orb's cumulative ledger at collect (the yield pattern: one
     /// receipt, no per-tick bloat).
@@ -1223,7 +1229,7 @@ impl ClosureEvent {
             Self::StarCommissioned { class } => {
                 tlv::put(24, &[*class], &mut out);
             }
-            Self::PlanetSited { orb_id, albedo, orbit_r, theta } => {
+            Self::PlanetSited { orb_id, albedo, orbit_r, theta, psi } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 ratio::encode(albedo, &mut value);
                 ratio::encode(orbit_r, &mut value);
@@ -1232,6 +1238,9 @@ impl ClosureEvent {
                 // byte-identical to what it was before the amendment.
                 if let Some(turn) = theta {
                     ratio::encode(turn, &mut value);
+                    if let Some(tilt) = psi {
+                        ratio::encode(tilt, &mut value);
+                    }
                 }
                 tlv::put(25, &value, &mut out);
             }
@@ -1626,12 +1635,17 @@ impl ClosureEvent {
                 // The trailing angle, ABSENT on every receipt written
                 // before the amendment. `None` is not `0`: zero would
                 // put all of history on one ray.
-                let theta = value
-                    .get(8 + used + used_r..)
+                let tail = value.get(8 + used + used_r..).unwrap_or(&[]);
+                let (theta, used_t) = match ratio::decode(tail) {
+                    Some((turn, n)) => (Some(turn), n),
+                    None => (None, 0),
+                };
+                let psi = tail
+                    .get(used_t..)
                     .filter(|rest| !rest.is_empty())
                     .and_then(ratio::decode)
                     .map(|(turn, _)| turn);
-                Some(Self::PlanetSited { orb_id, albedo, orbit_r, theta })
+                Some(Self::PlanetSited { orb_id, albedo, orbit_r, theta, psi })
             }
             27 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -1976,10 +1990,26 @@ pub struct ThermalSite {
     /// all collinear — which is a spatial claim nobody made. An orb
     /// without an angle has a radius and no place.
     ///
-    /// Adjacency is WRAPPED L1 on `(r, θ)`, never Euclidean: plane
+    /// Adjacency is WRAPPED L1 on `(r, θ, ψ)`, never Euclidean: plane
     /// distance needs `cos` and a square root and both are barred
     /// (`18_TORSION` §2b). See [`separation`].
     pub theta: Option<Ratio>,
+    /// **ψ — THE INCLINATION**, the second turn, also `[0, 1) ⊂ ℚ`.
+    ///
+    /// `θ` alone confines every orb to ONE PLANE: a disc around the
+    /// star. `ψ` lifts it out, and `(r, θ, ψ)` is a place in a VOLUME
+    /// rather than on a sheet. That is what lets `Ω` range over the
+    /// galaxy instead of a single orbital plane.
+    ///
+    /// Three wrapped coordinates is also the shape the chain has
+    /// carried all along — `arbor::Coordinate` holds `s: [Ratio; 3]`
+    /// (`19_KERNEL` §3b measured it as an address with no place under
+    /// it). With `ψ` the orb finally inhabits the triple the
+    /// commitment already addresses.
+    ///
+    /// `None` on every frame written before this amendment, and `None`
+    /// means UNINCLINED — not the equator, which `Some(0)` means.
+    pub psi: Option<Ratio>,
 }
 
 /// The colony orb — COMMITTED state only. Unreceipted accrual is
@@ -2075,6 +2105,11 @@ impl ColonyOrb {
             // which is what the committed snapshot lost before this.
             if let Some(turn) = &site.theta {
                 ratio::encode(turn, &mut value);
+                // ψ only after θ — an inclination without a longitude
+                // would be a place with no place to be inclined from.
+                if let Some(tilt) = &site.psi {
+                    ratio::encode(tilt, &mut value);
+                }
             }
             tlv::put(26, &value, &mut out);
         }
@@ -2157,12 +2192,20 @@ impl ColonyOrb {
                     // The trailing angle: absent on every frame written
                     // before the amendment, and absent means UNPLACED,
                     // never zero.
-                    let theta = value
-                        .get(used + used_r + 1..)
+                    // The two trailing turns, each absent on frames
+                    // written before its amendment. Absent is UNPLACED
+                    // and UNINCLINED, never zero.
+                    let tail = value.get(used + used_r + 1..).unwrap_or(&[]);
+                    let (theta, used_t) = match ratio::decode(tail) {
+                        Some((turn, n)) => (Some(turn), n),
+                        None => (None, 0),
+                    };
+                    let psi = tail
+                        .get(used_t..)
                         .filter(|rest| !rest.is_empty())
                         .and_then(ratio::decode)
                         .map(|(turn, _)| turn);
-                    orb.thermal = Some(ThermalSite { albedo, orbit_r, theta });
+                    orb.thermal = Some(ThermalSite { albedo, orbit_r, theta, psi });
                 }
                 28 => {
                     let (vented, used) = ratio::decode(value)?;
@@ -2354,11 +2397,20 @@ pub fn separation(a: &ThermalSite, b: &ThermalSite) -> Option<Ratio> {
     } else {
         b.orbit_r.clone() - a.orbit_r.clone()
     };
-    let raw = if theta_a >= theta_b {
-        theta_a.clone() - theta_b.clone()
-    } else {
-        theta_b.clone() - theta_a.clone()
-    };
-    let angular = raw.clone().min(ratio(1, 1) - raw);
-    Some(radial + angular)
+    let mut total = radial + turn_gap(theta_a, theta_b);
+    // ψ ADDS ITS OWN WRAPPED TERM. Two orbs at one radius and one
+    // longitude are still apart if they are inclined differently —
+    // without this the volume collapses back to a disc.
+    if let (Some(psi_a), Some(psi_b)) = (&a.psi, &b.psi) {
+        total += turn_gap(psi_a, psi_b);
+    }
+    Some(total)
+}
+
+/// The wrapped gap between two turn-fractions — the SHORT WAY ROUND,
+/// which is what makes each angular axis a circle rather than a
+/// segment.
+pub fn turn_gap(a: &Ratio, b: &Ratio) -> Ratio {
+    let raw = if a >= b { a.clone() - b.clone() } else { b.clone() - a.clone() };
+    raw.clone().min(ratio(1, 1) - raw)
 }

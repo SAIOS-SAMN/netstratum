@@ -356,7 +356,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             let orbit_r = words.next().and_then(parse_ratio_arg);
             match (albedo, orbit_r) {
                 (Some(albedo), Some(orbit_r)) => {
-                    match world.site_planet(*current, albedo, orbit_r, None) {
+                    match world.site_planet(*current, albedo, orbit_r, None, None) {
                         Ok(()) => {
                             thermal_line(world, style, *current);
                             println!("{} orbit sited — thermal is live for this planet", style.ok("✓"));
@@ -3607,7 +3607,7 @@ fn chronicle(world: &World, style: &Style) {
                 "☀ sun commissioned — {}",
                 style.strong(star_name(*class))
             ),
-            cfe::dop::ClosureEvent::PlanetSited { orb_id, albedo, orbit_r, theta: _ } => format!(
+            cfe::dop::ClosureEvent::PlanetSited { orb_id, albedo, orbit_r, theta: _, psi: _ } => format!(
                 "◍ orb {} sited — albedo {} at orbit r {}",
                 style.strong(&orb_id.to_string()),
                 amount(albedo),

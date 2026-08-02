@@ -23,7 +23,7 @@ fn leaky_world() -> (World, u64) {
     let mut world = World::new();
     world.found("assay").expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
-    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None).expect("sites");
+    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None, None).expect("sites");
     world.zone(0, ZoneKind::Extractor).expect("zones");
     world.zone(8, ZoneKind::Habitat).expect("zones");
     world.zone(16, ZoneKind::Encasement).expect("zones");

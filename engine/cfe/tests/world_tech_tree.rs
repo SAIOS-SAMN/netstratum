@@ -21,7 +21,7 @@ fn burning(pairs: u16) -> World {
     let mut world = World::new();
     world.found("cinder-reach").expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
-    world.site_planet(FIRST_ORB, ratio(1, 2), ratio(1, 2), None).expect("sites hot");
+    world.site_planet(FIRST_ORB, ratio(1, 2), ratio(1, 2), None, None).expect("sites hot");
     for pair in 0..pairs {
         world.zone(pair, ZoneKind::Extractor).expect("zones");
         world.zone(8 + pair, ZoneKind::Habitat).expect("zones");
@@ -119,7 +119,7 @@ fn survived_cold_crystallizes_insulation() {
     let mut world = World::new();
     world.found("dimlight-hold").expect("founds");
     world.commission_star(StarClass::M).expect("commissions");
-    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None).expect("sites cold");
+    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None, None).expect("sites cold");
     world.zone(8, ZoneKind::Habitat).expect("zones");
     let mut struck = false;
     for _ in 1..=541u32 {

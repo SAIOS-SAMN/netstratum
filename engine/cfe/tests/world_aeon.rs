@@ -66,7 +66,7 @@ fn the_star_moves_in_its_region() {
     let mut world = World::new();
     world.found("emberfall").expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
-    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None).expect("sites");
+    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None, None).expect("sites");
 
     let before = t_eq4(&StarClass::G.luminosity(), &ratio(0, 1), &ratio(1, 1));
     world.age_star(StarClass::RedGiant).expect("the star reddens");

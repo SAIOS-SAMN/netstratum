@@ -50,7 +50,7 @@ fn a_mesic_sol_world_runs_clean() {
     world.found("meridian").expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None)
+        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None, None)
         .expect("sites");
     world.zone(0, ZoneKind::Extractor).expect("zones");
     world.zone(8, ZoneKind::Habitat).expect("zones");
@@ -72,7 +72,7 @@ fn the_furnace_mints_and_only_the_overflow_vents() {
     world.found("furnace").expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None)
+        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None, None)
         .expect("sites");
     world.zone(0, ZoneKind::Extractor).expect("zones");
     world.zone(8, ZoneKind::Habitat).expect("zones");
@@ -139,7 +139,7 @@ fn thermal_refusals_are_typed() {
     let mut world = World::new();
     world.found("refusals").expect("founds");
     assert_eq!(
-        world.site_planet(FIRST_ORB, ratio(1, 2), ratio(1, 1), None),
+        world.site_planet(FIRST_ORB, ratio(1, 2), ratio(1, 1), None, None),
         Err(ActionRefused::NoStarCommissioned)
     );
     world.commission_star(StarClass::K).expect("commissions");
@@ -148,20 +148,20 @@ fn thermal_refusals_are_typed() {
         Err(ActionRefused::StarAlreadyCommissioned)
     );
     assert_eq!(
-        world.site_planet(FIRST_ORB, ratio(1, 1), ratio(1, 1), None),
+        world.site_planet(FIRST_ORB, ratio(1, 1), ratio(1, 1), None, None),
         Err(ActionRefused::BadSiting),
         "albedo must be < 1"
     );
     assert_eq!(
-        world.site_planet(FIRST_ORB, ratio(1, 2), ratio(0, 1), None),
+        world.site_planet(FIRST_ORB, ratio(1, 2), ratio(0, 1), None, None),
         Err(ActionRefused::BadSiting),
         "orbit r must be > 0"
     );
     world
-        .site_planet(FIRST_ORB, ratio(1, 2), ratio(1, 1), None)
+        .site_planet(FIRST_ORB, ratio(1, 2), ratio(1, 1), None, None)
         .expect("sites");
     assert_eq!(
-        world.site_planet(FIRST_ORB, ratio(1, 2), ratio(2, 1), None),
+        world.site_planet(FIRST_ORB, ratio(1, 2), ratio(2, 1), None, None),
         Err(ActionRefused::AlreadySited { orb: FIRST_ORB })
     );
 }
@@ -175,7 +175,7 @@ fn the_thermal_world_replays_and_round_trips() {
     world.found("replayed").expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(1, 4), ratio(1, 2), None)
+        .site_planet(FIRST_ORB, ratio(1, 4), ratio(1, 2), None, None)
         .expect("sites");
     world.zone(0, ZoneKind::Extractor).expect("zones");
     world.zone(16, ZoneKind::Encasement).expect("zones");
@@ -206,7 +206,7 @@ fn the_vent_ledger_conserves_and_seals_at_collect() {
     world.found("books").expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None)
+        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None, None)
         .expect("sites");
     world.zone(0, ZoneKind::Extractor).expect("zones");
     world.zone(8, ZoneKind::Habitat).expect("zones");
@@ -242,7 +242,7 @@ fn a_cold_orb_burns_joules_and_freeze_locks() {
     world.found("frost").expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(100, 1), None)
+        .site_planet(FIRST_ORB, ratio(0, 1), ratio(100, 1), None, None)
         .expect("sites");
     world.zone(0, ZoneKind::Extractor).expect("zones");
     let outcome = world.tick();
@@ -265,7 +265,7 @@ fn the_vault_captures_sink_and_charges_no_demurrage() {
     world.found("vault").expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(100, 1), None)
+        .site_planet(FIRST_ORB, ratio(0, 1), ratio(100, 1), None, None)
         .expect("sites");
     world.zone(0, ZoneKind::CryoArray).expect("zones");
     world.tick();
@@ -303,7 +303,7 @@ fn warm_banked_joules_pay_receipted_demurrage_at_touch() {
     world.found("demurrage").expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None)
+        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None, None)
         .expect("sites");
     world.zone(0, ZoneKind::Extractor).expect("zones");
     world.zone(8, ZoneKind::Habitat).expect("zones");

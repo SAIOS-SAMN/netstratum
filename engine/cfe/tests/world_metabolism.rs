@@ -113,7 +113,7 @@ fn plasmic_agriculture_is_encasement_of_real_heat() {
         .expect("seals");
     world.commission_star(StarClass::O).expect("commissions hot");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None)
+        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None, None)
         .expect("sites in the Furnace regime");
     world.zone(0, ZoneKind::Encasement).expect("the shell is the farm");
     world.zone(1, ZoneKind::Encasement).expect("builds");

@@ -16,7 +16,7 @@ fn charted(name: &str, class: StarClass) -> World {
     let mut world = World::new();
     world.found(name).expect("founds");
     world.commission_star(class).expect("commissions");
-    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None).expect("sites");
+    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None, None).expect("sites");
     world.zone(0, ZoneKind::Extractor).expect("zones");
     world
 }

@@ -19,7 +19,7 @@ fn furnace(ticks: u32) -> World {
     let mut world = World::new();
     world.found("cinder-reach").expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
-    world.site_planet(FIRST_ORB, ratio(1, 2), ratio(1, 2), None).expect("sites hot");
+    world.site_planet(FIRST_ORB, ratio(1, 2), ratio(1, 2), None, None).expect("sites hot");
     world.zone(0, ZoneKind::Extractor).expect("zones");
     world.zone(8, ZoneKind::Habitat).expect("zones");
     world.zone(16, ZoneKind::Encasement).expect("the shell seals the overflow");
@@ -46,7 +46,7 @@ fn lattice_deepening_crystallizes_and_never_outruns_headroom() {
     let mut vault = World::new();
     vault.found("vault-hold").expect("founds");
     vault.commission_star(StarClass::G).expect("commissions");
-    vault.site_planet(FIRST_ORB, ratio(0, 1), ratio(100, 1), None).expect("sites the vault");
+    vault.site_planet(FIRST_ORB, ratio(0, 1), ratio(100, 1), None, None).expect("sites the vault");
     vault.zone(0, ZoneKind::CryoArray).expect("zones");
     aperture_transfer(&mut fuel, FIRST_ORB, &mut vault, FIRST_ORB, Resource::Joule, ratio(45, 1), 78)
         .expect("the fuel crosses");
@@ -108,7 +108,7 @@ fn long_stores_halves_the_decay_measured_on_the_receipt() {
     let mut keep = World::new();
     keep.found("still-larder").expect("founds");
     keep.commission_star(StarClass::K).expect("commissions");
-    keep.site_planet(FIRST_ORB, ratio(0, 1), ratio(2, 1), None).expect("sites cold, leaking");
+    keep.site_planet(FIRST_ORB, ratio(0, 1), ratio(2, 1), None, None).expect("sites cold, leaking");
     keep.zone(0, ZoneKind::Habitat).expect("zones");
     aperture_transfer(&mut fuel, FIRST_ORB, &mut keep, FIRST_ORB, Resource::Joule, ratio(65, 1), 79)
         .expect("the fuel crosses");

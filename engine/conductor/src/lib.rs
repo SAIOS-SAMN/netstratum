@@ -729,12 +729,7 @@ impl Polity {
         // `21_KERNEL_PARAMETERS` §17: the capability is landed and
         // witnessed, and the conductor does not use it until #30
         // closes the divergence it exposes.
-        let _ = world.site_planet(
-            cfe::world::FIRST_ORB,
-            albedo,
-            orbit,
-            None,
-        );
+        let _ = world.site_planet(cfe::world::FIRST_ORB, albedo, orbit, None, None);
         Polity {
             chained: 0,
             refused: Vec::new(),

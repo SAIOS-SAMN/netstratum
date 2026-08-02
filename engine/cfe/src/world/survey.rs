@@ -43,10 +43,10 @@ impl World {
             orbit_r: orbit_r.clone(),
             // Historical siting carries no angle — an orb has a radius
             // and no place until one is receipted.
-            theta: None,
+            theta: None, psi: None,
         });
         self.close(
-            ClosureEvent::PlanetSited { orb_id: orb, albedo, orbit_r, theta: None },
+            ClosureEvent::PlanetSited { orb_id: orb, albedo, orbit_r, theta: None , psi: None },
             SOVEREIGN,
         );
         Ok(())

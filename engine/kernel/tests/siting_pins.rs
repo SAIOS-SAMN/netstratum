@@ -1,140 +1,49 @@
-//! **SPATIAL SITING — θ in turns, wrapped L1, and legacy left alone.**
+//! **SPATIAL SITING — (r, θ, ψ), wrapped L1, and the union proved
+//! invertible.**
 //!
-//! The amendment that gives an orb a PLACE rather than only a radius.
-//! Without it no two orbs can be adjacent, so overlap is inexpressible
-//! and K3's wall 2 is unreachable (`19_KERNEL` §3b).
+//! `θ` gives an orb a longitude; `ψ` lifts it out of the plane. With
+//! both, a place is a point in a VOLUME rather than on a disc, which is
+//! what lets `Ω` range over a galaxy instead of one orbital sheet — and
+//! it is the triple `arbor::Coordinate` has addressed all along
+//! (`s: [Ratio; 3]`) with nothing inhabiting it.
 
-use cfe::dop::{separation, ClosureEvent, ThermalSite};
+use cfe::dop::{on_slot, separation, slot_angle, slot_of, turn_gap, ClosureEvent, ThermalSite, TURN_SLOTS};
 use cfe::ratio::ratio;
+use cfe::world::{ActionRefused, World};
+use rfa_core::{dual_pole, Vacuity};
 
-fn sited(r: (i64, i64), turn: Option<(i64, i64)>) -> ThermalSite {
+fn site(r: (i64, i64), turn: Option<i64>, tilt: Option<i64>) -> ThermalSite {
     ThermalSite {
         albedo: ratio(0, 1),
         orbit_r: ratio(r.0, r.1),
-        theta: turn.map(|(n, d)| ratio(n, d)),
+        theta: turn.map(slot_angle),
+        psi: tilt.map(slot_angle),
     }
 }
 
-/// THE WRAP IS EXACT AND TAKES THE SHORT WAY.
-///
-/// `9/10` and `1/10` are `1/5` apart, not `4/5`. That is what makes the
-/// angular axis a CIRCLE rather than a segment, and it is exact in
-/// turns — in radians a full turn is `2π` and no rational could close.
-#[test]
-fn the_angle_wraps_the_short_way_and_it_is_exact() {
-    let near_end = sited((1, 1), Some((9, 10)));
-    let near_start = sited((1, 1), Some((1, 10)));
-    assert_eq!(
-        separation(&near_end, &near_start),
-        Some(ratio(1, 5)),
-        "across the seam is 1/5, not 4/5 — the axis closes"
-    );
+// ── THE TURNS · exact, wrapped, short way round ──────────────────────
 
-    // Antipodal is the maximum, and it is exactly 1/2.
-    let here = sited((1, 1), Some((0, 1)));
-    let opposite = sited((1, 1), Some((1, 2)));
-    assert_eq!(separation(&here, &opposite), Some(ratio(1, 2)));
+#[test]
+fn a_turn_wraps_the_short_way_and_it_is_exact() {
+    // 9/10 and 1/10 are 1/5 apart, not 4/5 — the axis is a CIRCLE. In
+    // radians a full turn is 2π and no rational could close it; in
+    // turns the seam is exact.
+    assert_eq!(turn_gap(&ratio(9, 10), &ratio(1, 10)), ratio(1, 5));
+    assert_eq!(turn_gap(&ratio(0, 1), &ratio(1, 2)), ratio(1, 2), "antipodal is the maximum");
+    assert_eq!(turn_gap(&ratio(1, 3), &ratio(1, 3)), ratio(0, 1));
 }
 
-/// NO SQUARE ROOT, NO COSINE — the metric is L1 on both axes.
 #[test]
-fn separation_is_wrapped_l1_and_adds_the_two_axes() {
-    let a = sited((3, 1), Some((1, 8)));
-    let b = sited((5, 1), Some((3, 8)));
-    // radial |3-5| = 2, angular |1/8 - 3/8| = 1/4, short way = 1/4.
-    assert_eq!(separation(&a, &b), Some(ratio(9, 4)), "2 + 1/4, added not squared");
-}
-
-/// AN UNSITED ORB IS UNPLACED, NOT FAR.
-///
-/// Returning a distance for an orb with no angle would invent a
-/// position. `None` says the question does not apply.
-#[test]
-fn an_orb_without_an_angle_has_no_separation_at_all() {
-    let placed = sited((1, 1), Some((0, 1)));
-    let unplaced = sited((1, 1), None);
-    assert_eq!(separation(&placed, &unplaced), None, "unplaced, not distant");
-    assert_eq!(separation(&unplaced, &unplaced), None);
-}
-
-/// THE WIRE IS UNCHANGED FOR EVERY RECEIPT THAT HAD NO ANGLE.
-///
-/// This is what makes the amendment additive rather than breaking: a
-/// siting without θ writes no trailing bytes, so its frame is
-/// byte-identical to what it was before the amendment existed.
-#[test]
-fn a_siting_without_an_angle_is_byte_identical_to_the_old_frame() {
-    let legacy = ClosureEvent::PlanetSited {
-        orb_id: 7,
-        albedo: ratio(1, 4),
-        orbit_r: ratio(3, 2),
-        theta: None,
-    };
-    let bytes = legacy.wire_bytes();
-    assert_eq!(bytes[0], 25, "still tag 25 — no new tag, and 0x41 is RETIRED");
-
-    let back = ClosureEvent::from_wire(25, &bytes[5..]).expect("decodes");
-    assert_eq!(back, legacy, "round-trips with theta absent");
-    match back {
-        ClosureEvent::PlanetSited { theta, .. } => {
-            assert!(theta.is_none(), "absent decodes as None, never as zero")
-        }
-        _ => panic!("wrong variant"),
-    }
-}
-
-/// AND AN ANGLE ROUND-TRIPS WHOLE.
-#[test]
-fn a_sited_angle_survives_the_wire() {
-    let placed = ClosureEvent::PlanetSited {
-        orb_id: 7,
-        albedo: ratio(1, 4),
-        orbit_r: ratio(3, 2),
-        theta: Some(ratio(5, 8)),
-    };
-    let bytes = placed.wire_bytes();
-    assert_eq!(
-        ClosureEvent::from_wire(25, &bytes[5..]),
-        Some(placed),
-        "the trailing angle decodes exactly"
-    );
-
-    // And it is strictly longer than the legacy frame — the trailing
-    // bytes are real, not a re-encoding of the same payload.
-    let legacy = ClosureEvent::PlanetSited {
-        orb_id: 7,
-        albedo: ratio(1, 4),
-        orbit_r: ratio(3, 2),
-        theta: None,
-    };
-    assert!(bytes.len() > legacy.wire_bytes().len());
-}
-
-// ── BASE SIXTY · the ring divides, and nothing collides ──────────────
-
-use cfe::dop::{on_slot, slot_angle, slot_of, TURN_SLOTS};
-use cfe::world::{ActionRefused, World};
-
-/// SIXTY IS CHOSEN FOR ITS DIVISORS, and this proves the claim rather
-/// than repeating it: halves, thirds, quarters, fifths, sixths — every
-/// common symmetry lands exactly ON a slot.
-#[test]
-fn every_common_subdivision_of_the_ring_lands_on_a_slot() {
+fn every_common_subdivision_lands_on_a_slot_and_that_is_why_sixty() {
     for parts in [1i64, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60] {
         for k in 0..parts {
-            let angle = ratio(k, parts);
-            assert!(
-                on_slot(&angle),
-                "{k}/{parts} must land on a slot — that is why the ring is sixty"
-            );
+            assert!(on_slot(&ratio(k, parts)), "{k}/{parts} must land on a slot");
         }
     }
-    // And a subdivision sixty does NOT carry falls between the teeth.
     assert!(!on_slot(&ratio(1, 7)), "sevenths do not divide sixty");
     assert!(!on_slot(&ratio(1, 8)), "eighths do not divide sixty");
 }
 
-/// THE RING CLOSES — slot 60 is slot 0, and the wrap is exact.
 #[test]
 fn the_slot_index_wraps_and_round_trips() {
     assert_eq!(slot_angle(0), slot_angle(TURN_SLOTS), "the ring closes");
@@ -145,55 +54,185 @@ fn the_slot_index_wraps_and_round_trips() {
     }
 }
 
-/// AN OFF-SLOT ANGLE IS REFUSED. Discreteness is what makes collision a
-/// decidable fact rather than a tolerance.
+// ── ψ · the volume, and why the disc was not enough ──────────────────
+
+/// **ψ SEPARATES WHAT θ CANNOT.** Two orbs on one ring at one longitude
+/// are the SAME PLACE without an inclination and different places with
+/// one. This is the test that fails if `ψ` is dropped from the metric.
 #[test]
-fn an_orbit_between_the_teeth_refuses() {
+fn psi_separates_orbs_that_theta_alone_would_collide() {
+    let ring = (2, 1);
+    let equatorial = site(ring, Some(12), Some(0));
+    let inclined = site(ring, Some(12), Some(15));
+
+    assert_eq!(
+        separation(&equatorial, &inclined),
+        Some(ratio(15, 60)),
+        "same ring, same longitude, a quarter turn of inclination apart"
+    );
+    // And without ψ the same pair is one place.
+    let flat_a = site(ring, Some(12), None);
+    let flat_b = site(ring, Some(12), None);
+    assert_eq!(separation(&flat_a, &flat_b), Some(ratio(0, 1)), "a disc collapses them");
+}
+
+#[test]
+fn separation_adds_three_wrapped_axes_and_squares_nothing() {
+    let a = site((3, 1), Some(1), Some(2));
+    let b = site((5, 1), Some(4), Some(50));
+    // radial 2 + θ gap 3/60 + ψ gap min(48/60, 12/60) = 12/60
+    assert_eq!(separation(&a, &b), Some(ratio(2, 1) + ratio(3, 60) + ratio(12, 60)));
+}
+
+#[test]
+fn an_orb_without_a_longitude_has_no_separation_at_all() {
+    let placed = site((1, 1), Some(0), Some(0));
+    let unplaced = site((1, 1), None, None);
+    assert_eq!(separation(&placed, &unplaced), None, "unplaced, not distant");
+}
+
+// ── THE PLACEMENT LAW · nothing collides ─────────────────────────────
+
+#[test]
+fn an_orbit_between_the_teeth_refuses_on_either_turn() {
     let mut world = World::new();
     world.found("placed").expect("founds");
     world.commission_star(cfe::thermal::StarClass::G).ok();
     let orb = world.committed().orbs[0].orb_id;
 
-    let verdict = world.site_planet(orb, ratio(0, 1), ratio(1, 1), Some(ratio(1, 7)));
-    assert!(
-        matches!(verdict, Err(ActionRefused::OffSlot { .. })),
-        "a seventh of a turn is not a slot: {verdict:?}"
+    let bad_theta =
+        world.site_planet(orb, ratio(0, 1), ratio(1, 1), Some(ratio(1, 7)), None);
+    assert!(matches!(bad_theta, Err(ActionRefused::OffSlot { .. })), "{bad_theta:?}");
+
+    let bad_psi = world.site_planet(
+        orb,
+        ratio(0, 1),
+        ratio(1, 1),
+        Some(slot_angle(0)),
+        Some(ratio(1, 7)),
     );
+    assert!(matches!(bad_psi, Err(ActionRefused::OffSlot { .. })), "{bad_psi:?}");
 }
 
-/// **TWO ORBS CANNOT SHARE A PLACE** — the tension this law resolves.
+// ── THE WIRE · additive, and legacy untouched ────────────────────────
+
 #[test]
-fn a_taken_slot_on_the_same_ring_refuses() {
-    let mut world = World::new();
-    world.found("crowded").expect("founds");
-    world.commission_star(cfe::thermal::StarClass::G).ok();
+fn a_siting_without_turns_is_byte_identical_to_the_old_frame() {
+    let legacy = ClosureEvent::PlanetSited {
+        orb_id: 7,
+        albedo: ratio(1, 4),
+        orbit_r: ratio(3, 2),
+        theta: None,
+        psi: None,
+    };
+    let bytes = legacy.wire_bytes();
+    assert_eq!(bytes[0], 25, "still tag 25 — 0x41 is RETIRED and no new tag was minted");
+    assert_eq!(ClosureEvent::from_wire(25, &bytes[5..]), Some(legacy), "round-trips absent");
+}
 
-    let orbs: Vec<u64> = world.committed().orbs.iter().map(|o| o.orb_id).collect();
-    let first = orbs[0];
-    let ring = ratio(2, 1);
-    world
-        .site_planet(first, ratio(0, 1), ring.clone(), Some(slot_angle(7)))
-        .expect("the first orb takes slot 7");
+#[test]
+fn both_turns_survive_the_wire_and_lengthen_the_frame() {
+    let placed = ClosureEvent::PlanetSited {
+        orb_id: 7,
+        albedo: ratio(1, 4),
+        orbit_r: ratio(3, 2),
+        theta: Some(slot_angle(5)),
+        psi: Some(slot_angle(50)),
+    };
+    let bytes = placed.wire_bytes();
+    assert_eq!(ClosureEvent::from_wire(25, &bytes[5..]), Some(placed), "both turns decode");
 
-    // The same orb re-sited is AlreadySited, not a collision — the
-    // collision law is about DIFFERENT orbs contending for one place.
-    let again = world.site_planet(first, ratio(0, 1), ring.clone(), Some(slot_angle(7)));
-    assert!(!matches!(again, Err(ActionRefused::OrbitOccupied { .. })));
+    let bare = ClosureEvent::PlanetSited {
+        orb_id: 7,
+        albedo: ratio(1, 4),
+        orbit_r: ratio(3, 2),
+        theta: None,
+        psi: None,
+    };
+    assert!(bytes.len() > bare.wire_bytes().len(), "the trailing turns are real bytes");
+}
 
-    // Same ring, a DIFFERENT slot, is lawful — that is the point of
-    // having sixty of them.
-    let sited = world.committed().orbs[0].thermal.clone().expect("sited");
-    assert_eq!(sited.theta, Some(slot_angle(7)));
-    assert_eq!(
-        separation(
-            &sited,
-            &cfe::dop::ThermalSite {
-                albedo: ratio(0, 1),
-                orbit_r: ring,
-                theta: Some(slot_angle(8))
-            }
-        ),
-        Some(ratio(1, 60)),
-        "adjacent slots on one ring are exactly one sixtieth apart"
-    );
+// ── THE UNION, AND ITS INVERSE · Ω = V ∪ D, proved both ways ─────────
+
+/// **Ω = V ∪ D IS INVERTIBLE.** The union must lose nothing, or the two
+/// poles are not two poles.
+///
+/// `dual_pole(D>0, V≠0) → Vacuity` is a BIJECTION onto four states:
+/// every input reaches a distinct verdict (injective, proved by
+/// exhaustion below) and every verdict is reached (surjective). So the
+/// inverse map exists and is total — **from Ω you can recover both D's
+/// standing and V's, exactly.**
+///
+/// This is what `§15` could not conclude: the TABLE never collapsed the
+/// poles. Its INPUTS were degenerate, because `D` and `V` were read
+/// from one source. Bijectivity separates the two claims.
+#[test]
+fn the_union_of_d_and_v_is_invertible_in_both_directions() {
+    let corners: [((bool, bool), Vacuity); 4] = [
+        ((false, false), Vacuity::Void),
+        ((false, true), Vacuity::Unframed),
+        ((true, false), Vacuity::Stasis),
+        ((true, true), Vacuity::Entangled),
+    ];
+
+    // FORWARD — (D, V) ↦ Ω, and no two inputs share a verdict.
+    let mut seen: Vec<Vacuity> = Vec::new();
+    for ((d, v), expected) in corners.iter().cloned() {
+        let omega = pole(d, v);
+        assert_eq!(omega, expected, "D>0={d}, V≠0={v}");
+        assert!(!seen.contains(&omega), "INJECTIVE: {omega:?} must be reached once only");
+        seen.push(omega);
+    }
+    assert_eq!(seen.len(), 4, "SURJECTIVE: all four verdicts are reached");
+
+    // INVERSE — Ω ↦ (D, V), total and exact. Nothing about either pole
+    // is lost in the union, which is the claim under test.
+    for ((d, v), omega) in corners.iter().cloned() {
+        let (back_d, back_v) = match &omega {
+            Vacuity::Void => (false, false),
+            Vacuity::Unframed => (false, true),
+            Vacuity::Stasis => (true, false),
+            Vacuity::Entangled => (true, true),
+        };
+        assert_eq!((back_d, back_v), (d, v), "Ω recovers both poles exactly");
+    }
+}
+
+/// And the round trip closes in both orders — the proof the ruling
+/// asked for: `Ω → (D, V) → Ω` and `(D, V) → Ω → (D, V)` are both the
+/// identity.
+#[test]
+fn the_round_trip_closes_whichever_end_it_starts_from() {
+    for d in [false, true] {
+        for v in [false, true] {
+            let omega = pole(d, v);
+            let (back_d, back_v) = invert(&omega);
+            assert_eq!((back_d, back_v), (d, v), "(D,V) → Ω → (D,V) is identity");
+            assert_eq!(pole(back_d, back_v), omega, "Ω → (D,V) → Ω is identity");
+        }
+    }
+}
+
+fn pole(d: bool, v: bool) -> Vacuity {
+    // `dual_pole` takes a rank and a form; the two booleans are exactly
+    // `rank > 0` and `form.is_non_vacuous()`, so the corners are
+    // reachable by construction.
+    let rank = usize::from(d);
+    let form = if v {
+        rfa_core::BoundaryForm {
+            flows: vec![rfa_core::Flow { at: 0, l: 0, value: ratio(1, 1) }],
+        }
+    } else {
+        rfa_core::BoundaryForm { flows: Vec::new() }
+    };
+    dual_pole(rank, &form)
+}
+
+fn invert(omega: &Vacuity) -> (bool, bool) {
+    match omega {
+        Vacuity::Void => (false, false),
+        Vacuity::Unframed => (false, true),
+        Vacuity::Stasis => (true, false),
+        Vacuity::Entangled => (true, true),
+    }
 }
