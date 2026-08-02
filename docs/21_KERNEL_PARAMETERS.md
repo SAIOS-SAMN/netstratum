@@ -668,7 +668,14 @@ owed — epochs remove the drift risk, not the tag change.
 
 ---
 
-## §13 THE ARROW BLOCKS THE PROPOSER — three times now (2026-08-02)
+## §13 WHY THE PROPOSER CANNOT VERIFY — corrected twice (2026-08-02)
+
+> **§13's first two answers were both wrong.** It first said the arrow
+> forbids it (accidental), then that the arrow is forced (architectural).
+> The real answer is §13c: an explicit, tested LAW forbids it, and the
+> arrow merely encodes that law. Both earlier readings are kept below
+> because the sequence is the point — a compile error is not a reason,
+> and a dependency graph is not a rationale.
 
     cfe  ←  physics  ←  solver-verify
     cfe  ←  rfa-core  ←  kernel
@@ -714,3 +721,38 @@ version, and the version I scoped as one commit does not compile.
 1,000,000-unit mint against `b"not a proof at all"`, the live projection
 hides it, and `replay` grants it. Nothing in this section closes that —
 it explains why the closure is larger than one call site.
+
+
+### 13c. THE OPAQUE-PAYLOAD LAW — the actual reason
+
+`kernel/tests/recurrence_guard.rs::the_arrow_law_holds` states it:
+
+    // Nothing imports upward into the kernel, and cfe never imports
+    // the verifier or the codec at runtime (the opaque-payload law).
+    let cfe_forbidden = ["solver-verify", "kernel", "codec"];
+
+**`cfe` may not parse a work payload.** The game carries proofs as
+opaque bytes and only the sealed verifier reads them; if the proposer
+could interpret proof structure, the seal would be gone and the game
+would know what a proof is made of.
+
+So the emitter cannot verify — **by charter, not by accident.** The fix
+attempted here (`cfe` → `solver-verify`, `mint_bound` moved down, the
+emitter calling `verify_work`) built and passed its own tests and was
+REVERTED: the guard caught it, which is what the guard is for.
+
+**K4 stays the inversion.** The emitter proposes; something above `cfe`
+verifies and admits. That was K4's original wording and it is right for
+a reason neither earlier reading of §13 had.
+
+### 13d. WHAT SURVIVED — the `ratio` leaf
+
+`cfe::ratio` was 83 self-contained lines, and `physics` imported them
+for `Ratio` alone. That single edge made `physics → cfe`, hence
+`solver-verify → physics → cfe`, and put the state-mutating crate
+beneath the sealed math tier for no stated reason.
+
+Extracted to `engine/ratio` — a leaf with no internal dependencies.
+`cfe` re-exports it so no caller moved. This removes an ACCIDENTAL
+inversion while leaving the DELIBERATE one (§13c) exactly as charter
+requires. 142 suites green.

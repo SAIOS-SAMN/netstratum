@@ -53,7 +53,7 @@ pub fn exhale(carrier: &AxisVector, to_rank: usize) -> Result<Exhaled, BreathErr
 pub fn inhale(exhaled: &Exhaled) -> AxisVector {
     use num_traits::Zero;
     let mut components = exhaled.kept.components().to_vec();
-    components.resize(exhaled.to_rank, cfe::ratio::Ratio::zero());
+    components.resize(exhaled.to_rank, ratio::Ratio::zero());
     components.extend(exhaled.residual.components().iter().cloned());
     AxisVector::from_vec(components)
 }

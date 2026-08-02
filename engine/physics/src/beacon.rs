@@ -13,7 +13,7 @@
 //! the receipt that consumed the draw. No game system rolls its own
 //! randomness.
 
-use cfe::ratio::Ratio;
+use ratio::Ratio;
 use num_bigint::BigInt;
 
 /// A beacon anchored to one chronicle digest (the previous tick's
