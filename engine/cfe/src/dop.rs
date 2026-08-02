@@ -328,11 +328,55 @@ pub fn sink_throughput() -> Ratio {
     ratio(2, 1)
 }
 
-/// SINK-1 (Q2 demurrage, placeholder): the per-elapsed-tick decay rate
-/// on un-vaulted BANKED joules/sink, settled by receipt at touch.
-pub fn demurrage_per_tick() -> Ratio {
+/// P2 (`21_KERNEL_PARAMETERS` §2): the per-elapsed-tick decay rate on
+/// un-vaulted BANKED joules/sink, settled by receipt at touch.
+///
+/// EPOCHED (`cfe::epoch`). EPOCH 0 is the flat `1/32` every existing
+/// receipt was written under; EPOCH 1 reads standing supply, so the
+/// sink stiffens as the economy accumulates instead of holding still
+/// while issuance grows.
+pub fn demurrage_per_tick(supply: &Ratio, at: u64) -> Ratio {
+    match crate::epoch::epoch_at(at) {
+        crate::epoch::Epoch::Genesis => sink_flat(),
+        crate::epoch::Epoch::Continuous => sink_by_supply(supply),
+    }
+}
+
+/// EPOCH 0 — the landed flat rate. **Never edit this function.** Every
+/// receipt stamped before `epoch::CONTINUOUS_FROM` is judged by it.
+fn sink_flat() -> Ratio {
     ratio(1, 32)
 }
+
+/// EPOCH 1 — the sink reads standing supply.
+///
+/// ```text
+/// excess = max(0, supply − SINK_REFERENCE)
+/// rate   = min(1/4, 1/32 · (1 + excess/(SINK_REFERENCE + 1)))
+/// ```
+///
+/// **Supply, not rank.** Rank lives behind `bridge::read_entangled` in
+/// the `kernel` crate, above this one, so `cfe` structurally cannot
+/// read it — and a proposer computing a different rate from the judge
+/// refuses honest deeds at I5 (`21_KERNEL_PARAMETERS` §9). Supply is
+/// computable here, so one value serves both judges.
+///
+/// **Bounded above by `1/4`** (#16 requires a bounded function; an
+/// uncapped rate above `1` would confiscate a whole bank each tick),
+/// and still FLAT in the holding — supply moves the RATE, never the
+/// shape of the decay (the 2^1100 denominator lesson).
+fn sink_by_supply(supply: &Ratio) -> Ratio {
+    let reference = ratio(SINK_REFERENCE, 1);
+    let excess = (supply.clone() - reference.clone()).max(ratio(0, 1));
+    let rate = ratio(1, 32) * (ratio(1, 1) + excess / (reference + ratio(1, 1)));
+    rate.min(ratio(1, 4))
+}
+
+/// P2's reference supply — the banked holding a world carries before
+/// the sink begins to stiffen. Derived from the landed rate rather than
+/// picked: `32` is exactly the amount that fully decays in one tick at
+/// `1/32` (#16 — a parameter with a stated reason, not a magic number).
+const SINK_REFERENCE: i64 = 32;
 
 /// TRADE-1 (09 §1, placeholder): the joule-commensurable weight of a
 /// resource for cohesion-book postings — the commensuration table.

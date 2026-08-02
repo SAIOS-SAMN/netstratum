@@ -893,6 +893,14 @@ fn decay(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
                         // forever, which is what stops `replay` drifting
                         // from the live path when a sealed rule moves.
                         &cfe::world::ease_of(&prior.techs, *orb_id, step.stamp),
+                        // P2: the judge reads standing supply from the
+                        // SAME sealed function the proposer used, on
+                        // `prior`'s own orbs — one computation, two
+                        // judges (CHARTER §0b). A rate the kernel
+                        // accepted without re-deriving would be a number
+                        // a node could lie about, with the mint directly
+                        // downstream.
+                        &cfe::world::standing_supply(&prior.orbs),
                     )
                     .into_iter()
                     .find(|(held, _)| held == resource)

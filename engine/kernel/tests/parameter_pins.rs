@@ -109,8 +109,9 @@ fn p3_a_better_teched_orb_owes_strictly_less() {
     let committed = world.committed();
     let orb = &committed.orbs[0];
 
-    let full = cfe::world::demurrage_due(orb, committed.star, 64, &ratio(1, 1));
-    let halved = cfe::world::demurrage_due(orb, committed.star, 64, &ratio(1, 2));
+    let supply = cfe::world::standing_supply(&committed.orbs);
+    let full = cfe::world::demurrage_due(orb, committed.star, 64, &ratio(1, 1), &supply);
+    let halved = cfe::world::demurrage_due(orb, committed.star, 64, &ratio(1, 2), &supply);
 
     // An unsited orb may owe nothing at all; the claim is comparative
     // and holds either way — it must never owe MORE for holding tech.
@@ -161,4 +162,86 @@ fn p1_the_landed_rungs_are_1_4_7_and_zero_below() {
     for rung in 0..=2 {
         assert_eq!(mint_bound(&Difficulty::level(rung)), ratio(0, 1), "rung {rung} pays nothing");
     }
+}
+
+/// P2 · EPOCH 0 IS THE FLAT RATE, WHATEVER SUPPLY STANDS.
+///
+/// Every existing receipt was written under this. If supply could move
+/// the rate below the boundary, every historical world would settle
+/// differently on replay — which is exactly the failure the epoch
+/// mechanism exists to prevent.
+#[test]
+fn p2_epoch0_ignores_supply_entirely() {
+    let before = cfe::epoch::CONTINUOUS_FROM - 1;
+    for supply in [0i64, 32, 1_000, 1_000_000] {
+        assert_eq!(
+            cfe::dop::demurrage_per_tick(&ratio(supply, 1), before),
+            ratio(1, 32),
+            "EPOCH 0 supply {supply}: the flat rate is history's rate"
+        );
+    }
+}
+
+/// P2 · EPOCH 1 · THE SINK STIFFENS WITH SUPPLY — the mechanical claim.
+///
+/// What the constant could not do: RESPOND. Strictly rising past the
+/// reference, so more standing supply always costs more to hold.
+#[test]
+fn p2_epoch1_the_rate_rises_strictly_with_supply() {
+    let at = cfe::epoch::CONTINUOUS_FROM;
+    let baseline = cfe::dop::demurrage_per_tick(&ratio(0, 1), at);
+    assert_eq!(baseline, ratio(1, 32), "an empty world is charged what it always was");
+
+    // Below the reference nothing stiffens.
+    assert_eq!(cfe::dop::demurrage_per_tick(&ratio(16, 1), at), baseline);
+
+    let mut previous = baseline.clone();
+    for supply in [64i64, 128, 256, 512] {
+        let rate = cfe::dop::demurrage_per_tick(&ratio(supply, 1), at);
+        assert!(rate > previous, "supply {supply}: the sink must stiffen, got {rate}");
+        previous = rate;
+    }
+    assert!(previous > baseline, "the rate moved — the constant is retired");
+}
+
+/// P2 · EPOCH 1 · BOUNDED ABOVE. #16 requires a bounded function; an
+/// uncapped rate above `1` would confiscate a whole bank every tick.
+#[test]
+fn p2_epoch1_never_exceeds_the_declared_ceiling() {
+    let at = cfe::epoch::CONTINUOUS_FROM;
+    for supply in [0i64, 32, 1_000, 1_000_000, i64::MAX / 2] {
+        let rate = cfe::dop::demurrage_per_tick(&ratio(supply, 1), at);
+        assert!(rate <= ratio(1, 4), "supply {supply}: rate {rate} broke the ceiling");
+        assert!(rate >= ratio(1, 32), "supply {supply}: the sink never weakens below baseline");
+    }
+}
+
+/// P2 · THE TWO EPOCHS DISAGREE, which is why the epoch is needed.
+#[test]
+fn p2_the_epochs_diverge_on_an_accumulated_world() {
+    let heavy = ratio(1_000, 1);
+    assert_ne!(
+        cfe::dop::demurrage_per_tick(&heavy, cfe::epoch::CONTINUOUS_FROM),
+        cfe::dop::demurrage_per_tick(&heavy, cfe::epoch::CONTINUOUS_FROM - 1),
+        "an accumulated world is charged differently either side of the boundary"
+    );
+}
+
+/// P2 · ONE SEALED COMPUTATION FOR BOTH JUDGES.
+///
+/// `standing_supply` is the reason a rank-denominated rate was
+/// abandoned (§9): the proposer cannot see rank, but it can see supply,
+/// so both sides reach one value from one state. If this ever diverged,
+/// honest deeds would refuse at I5.
+#[test]
+fn p2_standing_supply_covers_exactly_the_leaking_resources() {
+    let mut world = World::new();
+    world.found("supplied").expect("founds");
+    let committed = world.committed();
+
+    let table = cfe::world::standing_supply(&committed.orbs);
+    let named: Vec<_> = table.iter().map(|(r, _)| *r).collect();
+    assert!(named.contains(&cfe::dop::Resource::Joule), "Joule leaks and must be counted");
+    assert!(named.contains(&cfe::dop::Resource::Sink), "Sink leaks and must be counted");
+    assert_eq!(named.len(), 2, "a resource that does not leak must not move the sink's rate");
 }
