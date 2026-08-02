@@ -387,6 +387,132 @@ live production and replay run the identical judge by construction. The
 relay names this as a requirement; it is a property the kernel has held
 since it was sealed.
 
+## §3c THE LINEAGE LAW — the union carries on in PEERS, and forges nothing
+
+**(operator ruling 2026-08-02: *the union carries on in CHILDREN not
+CHILD; there is no BOND for FORGED EXISTENCE*.)**
+
+**THE RE-CREATION, and it is a PAIR — never a product:**
+
+```text
+    ReCreation(C)  =  D(Ω)|_C  +:  V(Ω)|_C
+
+      D(Ω)|_C  =  GROUND + the circulation on C's OWN relations
+                  (`Degree::above_ground` — structurally never below)
+
+      V(Ω)|_C  =  C's own receipted deeds, standing in the chronicle
+```
+
+Two readings, restricted to `C`, STAYING TWO (§3). Nothing multiplies
+them together, and nothing collapses them into one number.
+
+**NO FORGED BOND, BY CONSTRUCTION RATHER THAN BY RULE.** A line that has
+acted nothing holds no relation, so its restriction is empty and its
+share is the ground — D6 already refuses to pay an entity that holds no
+relation, and §3b already refuses to store a standing anywhere it could
+be handed over. There is no door through which unearned allocation could
+arrive, so none needs closing.
+
+**WHAT IS ALREADY TRUE — measured, not assumed:**
+
+- **The successor inherits THE CHRONICLE, NOT THE TREE.** `World::succeed`
+  leaves the successor *the world's kernel and nothing else*, while the
+  predecessor's famine span and every receipt still stand
+  (`novel_succession::the_successor_inherits_the_chronicle_not_the_tree`).
+  History is inherited; earned structure is not. That IS the containment
+  vector, landed before it was named.
+- **The successor seats at GROUND**, not at the predecessor's degree
+  (`bridge_pins::a_total_fold_is_lawful_and_carries_nothing`).
+- **A departure must be into the record, never into nothing**
+  (`FoldGuard::StandingDroppedWithoutAccount`).
+- **The cleave is ALREADY peer-to-peer.** AEON-1b (`11` §3): the line
+  *cleaves into two PEER branches: no parent, no child*, and the lineage
+  pointer records LINE membership, never parenthood.
+
+**THE LIVE CONTRADICTION, recorded and relayed.** `engine/conductor` states
+the divergence law correctly at the function that performs it — *two PEER
+branches: no parent, no child* — and contradicts it in its own module
+header and field names: *SPECIATION IS A MINT … spawns ONE daughter per
+era*, a `spawned` flag commented *One daughter per era*, and *retired the
+daughter*. A cleave yields TWO PEERS; "daughter" asserts the parenthood
+the same file denies, and it is the singular the operator's ruling names.
+**The rate limit is lawful and stays** — one CLEAVE per era, speciation
+rare rather than a flood — because limiting how often the union generates
+is not the same as claiming it generates ONE. Only the parenthood word is
+the defect. Relayed to that crate's owner rather than edited from this
+lane.
+
+### §3c.1 THE CONTAINMENT FORMALIZATION REFUSED — recorded
+
+**1. `Standing(C) = min(ReCreation, Vec(C).CapacityFloor)` — REFUSED.**
+A `min` against a floor is a CEILING. A floor binds from BELOW and is
+applied with `max`; this expression caps from above and calls the cap a
+floor. `18` §2a refuses ceilings outright — *the word names a container
+and implies a ceiling; there is no ceiling anywhere in this workspace*.
+And the floor is already STRUCTURAL: `Degree` has one constructor,
+`above_ground(circulation) = GROUND + circulation`, so no caller can
+express a below-ground standing and no arithmetic can reach one. There
+is nothing left for a `min` to protect.
+
+**2. `A(C) = 0 ⇒ ReCreation(C) = 0` — REFUSED as written**, and the
+correction is Article II's own words. Zero ALLOCATION is right; zero
+EXISTENCE is not. On the ground a state *holds its place, keeps its
+structural existence, is never deleted and never barred — and it is paid
+nothing. Zero allocation, full existence.* A line that has done no work
+is paid nothing AND stands. The engine already refuses the other
+reading: `FoldGuard::StandingDroppedWithoutAccount` — *a departure must
+be into the record, never into nothing.* **Existence cannot be FORGED;
+it also cannot be REVOKED for idleness.** Both halves are one law, and
+keeping only the first would delete every quiet line in the complex.
+
+**3. `(D(Ω)|_C +: V(Ω)|_C) · A(C)` — REFUSED, twice over.** `+:` joins
+two that STAY TWO (§3); multiplying the join by a scalar treats it as
+ONE multiplicand, which is the pair collapsed into a term — D5's NO
+OPERATOR, and the same defect as `g_syntropy = D ⊗ V` one relay earlier,
+in a different notation. Multiplication needs a value, and the bond is
+not a value. Separately, a factor in `[0,1]` is an ATTENUATOR: it can
+only shrink what it multiplies, which is the shape STRUCK on 2026-08-01
+when the damped-gradient term went. What gates allocation here is the
+RESTRICTION BEING EMPTY, never a coefficient scaling it down.
+
+**4. `Vec(C).TitheSettled` — REFUSED: `Tithe` exists NOWHERE in the
+engine.** Searched the whole tree; there is no such event, field, or
+function. A law row citing it would be FALSE on the day it was written
+(`EQUATIONS` §0.3 ch.6 — *a row whose implementation has been deleted is
+not stale, it is FALSE*), and
+`constitution_lint::every_citation_in_the_law_resolves` would refuse it.
+
+**5. `pub struct ContainmentVector { actions, local_restriction,
+tithe_settled }` — REFUSED AS STORED STATE.** §3b landed this same day:
+nothing per-orb is stored, and the only route to a reading is to project
+the world and restrict. A stored containment vector could disagree with
+the world reading, and the stored one is the lie that gets spent. The
+containment is DERIVED, and `kernel::bridge::standing_of` already IS it.
+
+**6. "Sweep `world.rs` / `colony.rs` and remove any legacy fallback that
+lets a child inherit parent capacity" — NO SUCH FALLBACK EXISTS, and
+`colony.rs` does not exist either.** `engine/cfe/src/` holds `world.rs`,
+`dop.rs`, `ipsal.rs`, `persist.rs`, `query.rs`, `ratio.rs`, `thermal.rs`,
+`tlv.rs`, `vrp.rs` — there is no colony module to sweep. And `World::succeed_as`
+already forbids exactly what the sweep was meant to find:
+
+```text
+    famished < orbs.len()          →  LineStillLiving — a living line
+                                      is never succeeded
+    techs.retain(condition == 0)   →  every EARNED tech dropped; only
+                                      the world's own kernel survives,
+                                      and that is a fact about the
+                                      WORLD, not about the line
+    genesis = None                 →  the seal is RELEASED; the
+                                      successor seals anew
+```
+
+The fold seats the successor at `GROUND`, and the cleave founds each
+branch's own world. There is nothing to excise. **Recorded rather than
+performed** — reporting a sweep that removed nothing would be a false
+report, and this was the one instruction in the relay that could have
+been "carried out" while changing nothing at all.
+
 **WHAT DOES NOT CHANGE: the totality law.** "In union with V as a
 whole — no two parts cut out" never depended on the identity. It is a
 claim about `V` alone — that it is read whole or not read — and `V` is
