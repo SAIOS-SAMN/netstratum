@@ -41,7 +41,7 @@ fn a_world_that_relates_nothing_stands_on_the_ground() {
     // correctly, because rank counts what stands ABOVE the floor.
     let read = read_entangled(&orbs(3));
     assert_eq!(read.rank, 0, "no obligations, nothing circulating");
-    assert!(read.residuals.is_empty(), "nothing to fail to compose");
+    assert!(read.symmetry_foundation.is_empty(), "nothing to fail to compose");
     assert!(read.rank_is_defined(), "a zero cocycle IS a cocycle");
 
     // AND IT HAS NOT VANISHED. `D` is the ELEVATION, and it reads the
@@ -152,7 +152,7 @@ fn obligations_that_compose_carry_no_surviving_structure() {
     assert_eq!(*delta.entry(1, 0, CHANNEL_BOND), ratio(-2, 1), "antisymmetric by construction");
 
     let read = read_entangled(&state);
-    assert!(read.residuals.is_empty(), "5 = 2 + 3: the triangle composes");
+    assert!(read.symmetry_foundation.is_empty(), "5 = 2 + 3: the triangle composes");
     assert!(read.rank_is_defined(), "a cocycle has a class to reduce to");
     assert_eq!(read.rank, 0, "composing obligation is pure frame");
 }
@@ -165,7 +165,7 @@ fn obligations_that_do_not_compose_carry_strain() {
     state.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(1, 3, 9)];
 
     let read = read_entangled(&state);
-    assert!(!read.residuals.is_empty(), "a non-composing triangle carries strain");
+    assert!(!read.symmetry_foundation.is_empty(), "a non-composing triangle carries strain");
     // NON-COMPOSITION DOES NOT BAR THE READ (operator ruling
     // 2026-08-01, the struck residual clause). The old law refused to
     // define capacity here, on the reasoning that Δ ∉ Z¹ leaves no
@@ -179,7 +179,7 @@ fn obligations_that_do_not_compose_carry_strain() {
         "a fully observed complex is readable whether or not it composes"
     );
     assert!(
-        !read.residuals.is_empty(),
+        !read.symmetry_foundation.is_empty(),
         "and the strain is carried WHOLE, indices intact — never summed away"
     );
 }
@@ -203,7 +203,7 @@ fn obligations_to_unknown_or_self_are_skipped_never_panic() {
     state.bonds = vec![bond(1, 99, 4), bond(1, 1, 7)];
     let read = read_entangled(&state);
     assert_eq!(read.rank, 0);
-    assert!(read.residuals.is_empty());
+    assert!(read.symmetry_foundation.is_empty());
 }
 
 #[test]
@@ -234,7 +234,7 @@ fn an_unresolved_absence_refuses_capacity_unverified_absence_would_mint() {
     assert!(seen.rank_is_defined(), "fully observed cocycle");
 
     let unseen = read_entangled_observed(&state, 1);
-    assert_eq!(unseen.residuals, seen.residuals, "the strain field is unchanged");
+    assert_eq!(unseen.symmetry_foundation, seen.symmetry_foundation, "the strain field is unchanged");
     assert!(
         !unseen.rank_is_defined(),
         "one unobserved pair is enough — absence must be verified, never assumed"
@@ -340,7 +340,7 @@ fn a_universe_with_an_unclosed_obligation_ring_reads_capacity() {
     state.bonds = vec![bond(1, 2, 3), bond(2, 3, 3), bond(3, 4, 3), bond(4, 1, 3)];
 
     let read = read_entangled(&state);
-    assert!(read.residuals.is_empty(), "no filled triangle: nothing fails to compose");
+    assert!(read.symmetry_foundation.is_empty(), "no filled triangle: nothing fails to compose");
     assert_eq!(read.unknown, 0, "one book verifies absence over its own orbs");
     assert!(read.rank_is_defined(), "a fully observed cocycle HAS a class");
     assert_eq!(read.rank, 1, "one independent cycle, carrying charge: D = 1");
@@ -369,7 +369,7 @@ fn a_chord_fills_the_triangles_and_the_capacity_becomes_strain() {
     state.bonds = vec![bond(1, 2, 3), bond(2, 3, 3), bond(3, 4, 3), bond(4, 1, 3), bond(1, 3, 1)];
 
     let read = read_entangled(&state);
-    assert!(!read.residuals.is_empty(), "the chord fills a triangle that does not compose");
+    assert!(!read.symmetry_foundation.is_empty(), "the chord fills a triangle that does not compose");
     // The read STANDS (the struck residual clause, 2026-08-01). Filling
     // a triangle converts topology into strain; it does not make the
     // universe unreadable. Both readings are the same fact seen through
