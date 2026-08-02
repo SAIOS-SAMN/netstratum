@@ -222,10 +222,10 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             // live path made — the compassion books are a replay fact.
             ClosureEvent::ResourceTransferred { from_orb, to_orb, resource, amount } => {
                 let from_crisis = peek(&orbs, *from_orb)
-                    .map(|held| in_crisis(held))
+                    .map(in_crisis)
                     .unwrap_or(false);
                 let to_crisis = peek(&orbs, *to_orb)
-                    .map(|held| in_crisis(held))
+                    .map(in_crisis)
                     .unwrap_or(false);
                 let value = amount.clone() * crate::dop::commensurate_weight(*resource);
                 if let Some(held) = peel(&mut orbs, *from_orb) {
@@ -318,10 +318,10 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             // match the live order exactly.
             ClosureEvent::OverflowAbsorbed { source_orb, absorber_orb, amount } => {
                 let source_crisis = peek(&orbs, *source_orb)
-                    .map(|held| in_crisis(held))
+                    .map(in_crisis)
                     .unwrap_or(false);
                 let absorber_crisis = peek(&orbs, *absorber_orb)
-                    .map(|held| in_crisis(held))
+                    .map(in_crisis)
                     .unwrap_or(false);
                 let value =
                     amount.clone() * crate::dop::commensurate_weight(Resource::Sink);

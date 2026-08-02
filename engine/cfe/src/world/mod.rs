@@ -16,7 +16,7 @@ use crate::dop::{
 };
 use crate::ipsal::{Entity, Scope};
 use crate::ratio::{ratio, Ratio};
-use crate::vrp::{Attestation, Chronicle, Timekeeper, TickRead, WorldClock};
+use crate::vrp::{Attestation, Chronicle, Timekeeper, WorldClock};
 
 /// The sovereign's entity id — the operator at the terminal, registered
 /// at founding.
