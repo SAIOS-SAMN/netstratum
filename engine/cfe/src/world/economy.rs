@@ -659,4 +659,83 @@ impl World {
         (self.heat_encased_of(orb), vented)
     }
 
+
+    /// **RECIPROCITY — the orb's own measured conduct, surfaced.**
+    ///
+    /// `returned_across / (returned_across + extracted_across)`: of the
+    /// value this orb drew across a boundary, how much it closed the
+    /// loop on. `09` §2.4's measured boundary policy, and the quantity
+    /// `FrictionSettled` is priced from.
+    ///
+    /// **`None` MEANS NO BASIS, and that is the whole point of this
+    /// return type.** The private reading friction uses answers `1/1`
+    /// when an orb has no cross-orb history at all — a sensible default
+    /// for pricing a cost (charge nothing when there is nothing to
+    /// compare), and a TRAP for anything that reads alignment as merit:
+    /// **two orbs that have never traded read as perfectly aligned.**
+    /// Absence would present as agreement, which is the same shape as
+    /// the borne share's farming-by-absence. Here the absence is named
+    /// instead of being dressed as a perfect score.
+    ///
+    /// The private `reciprocity_reading` is NOT changed: friction is
+    /// consensus law and its `1/1` default is correct for pricing. This
+    /// adds a reading; it moves nothing.
+    pub fn reciprocity_of(&self, orb: u64) -> Option<Ratio> {
+        let held = self.orbs.iter().find(|held| held.orb_id == orb)?;
+        let denominator = held.returned_across.clone() + held.extracted_across.clone();
+        match denominator > ratio(0, 1) {
+            true => Some(held.returned_across.clone() / denominator),
+            false => None,
+        }
+    }
+
+    /// **CONVERGENCE — the syntropic arm of `FrictionSettled`,
+    /// derived, never stored.**
+    ///
+    /// ```text
+    ///     convergence(a, b) = 1 − |reciprocity(a) − reciprocity(b)|
+    /// ```
+    ///
+    /// **THE ENGINE ALREADY COMPUTES THIS AND THROWS IT AWAY.** On
+    /// every cross-orb transfer it evaluates
+    /// `divergence = |recip(from) − recip(to)|`, prices friction from
+    /// it, and then:
+    ///
+    /// ```text
+    ///     if friction > 0 { ...receipt... }
+    /// ```
+    ///
+    /// When conduct MATCHES, divergence is zero, friction is zero, and
+    /// nothing is receipted. The syntropic half is calculated and
+    /// destroyed in the same expression, every time, and no caller
+    /// could even ask for it — `reciprocity_reading` was private. That
+    /// is the one-legged dual at its sharpest: not an arm that was
+    /// never built, but one built and discarded on each use.
+    ///
+    /// **Stated positively, as a magnitude.** Convergence is HIGH when
+    /// conduct agrees, rather than friction being ABSENT. "The reward
+    /// for alignment is the absence of a penalty" is the negentropic
+    /// shape this work exists to refuse — good defined as the lack of
+    /// bad.
+    ///
+    /// **`None` when either party has no basis** (see
+    /// [`Self::reciprocity_of`]): two orbs that have never traded have
+    /// nothing to agree ABOUT, and reading that as perfect alignment
+    /// would pay the inert exactly what it pays the reciprocal. This
+    /// reading refuses to; it is a precondition for any rule that ever
+    /// pays on convergence, not a payment itself.
+    ///
+    /// **THIS PAYS NOTHING AND MINTS NOTHING.** Whether convergence
+    /// should EARN is an economic ruling that creates value, and it is
+    /// not taken here (`17_CAPACITY` §3d.3).
+    pub fn convergence_between(&self, a: u64, b: u64) -> Option<Ratio> {
+        let left = self.reciprocity_of(a)?;
+        let right = self.reciprocity_of(b)?;
+        let spread = match left >= right {
+            true => left - right,
+            false => right - left,
+        };
+        Some(ratio(1, 1) - spread)
+    }
+
 }

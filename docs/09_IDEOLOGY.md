@@ -261,7 +261,34 @@ generates additional entropy:
 ```
 
 posted through the landed VENT-1 machinery — accrues as workspace, seals
-by receipt at collect, nothing un-receipted. The physical reading:
+by receipt at collect, nothing un-receipted.
+
+**THE SYNTROPIC ARM, and why it was invisible** (2026-08-03). Friction
+receipts only when POSITIVE (`if friction > 0`). When conduct MATCHES,
+divergence is zero, friction is zero, and NOTHING IS RECEIPTED — so the
+engine computes the agreement on every cross-orb transfer and destroys
+it in the same expression. Not an arm that was never built: one built
+and discarded on each use, with no caller able to ask for it because
+`reciprocity_reading` was private.
+
+    convergence(a, b) = 1 − |reciprocity(a) − reciprocity(b)|
+
+Surfaced as `World::reciprocity_of` and `World::convergence_between` —
+derived, never stored, and paying nothing. Stated as a MAGNITUDE that
+is high when conduct agrees, rather than as friction being absent:
+*the reward for alignment is the absence of a penalty* is the
+negentropic shape this ledger exists to refuse.
+
+**AND ABSENCE IS NOT AGREEMENT.** The private reading answers `1/1`
+when an orb has no cross-orb history — correct for PRICING a cost, and
+a trap for reading alignment as merit, because **two orbs that have
+never traded would read as perfectly aligned.** The surfaced reading
+answers `None` there instead: they have nothing to agree ABOUT. Any
+future rule that pays on convergence inherits that refusal, and must,
+or it pays the inert exactly what it pays the reciprocal.
+
+**Whether convergence should EARN is an open economic ruling.** It
+mints value, so it is not taken from a reading lane. The physical reading:
 divergent boundary policies genuinely cost handling and verification
 overhead. **Friction prices divergence, not vice:** two extractive
 empires trade with each other frictionless. The engine keeps its promise
