@@ -925,8 +925,21 @@ a constraint to design around. It was a constraint to LIFT:
     0        the solar leap
     1..=5    the five crystallized conditions
     6        the gifted crown — completes the BASE
-    7..=10   THE UPLIFT TIER — one node per chartered work
+    7        NOT A SKY NODE — PRACTICE-1's re-emergence lesson, which
+             "rides separately as TechDiscovered condition 7" and eases
+             `deposit_window` 240 -> 180
+    8..=11   THE UPLIFT TIER — one node per chartered work
 ```
+
+Seven base nodes plus four works is ELEVEN, and `7` is not one of them.
+**The condition FIELD is a shared namespace with two populations** — sky
+nodes and separately-riding ones — and `7` was spoken for by landed law
+before the uplift. A first cut put the works at `7..=10` and so gave one
+number two meanings: `deposit_window` reads `techs` for the lesson while
+the sky claimed the same slot for VALOR. Nothing would have broken
+loudly; a held lesson would simply have rendered as an unreached work
+and the real node would have become invisible. Pinned in
+`the_sky_never_claims_the_re_emergence_slot`.
 
 **The crown's gate does not move, and that is the whole care taken
 here.** It still waits on `0..=5`, still reports a threshold of six, and

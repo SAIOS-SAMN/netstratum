@@ -928,12 +928,15 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     }
                 }
             }
-            // ELEVEN nodes: the base tier as it always was, then one
-            // per chartered work. Indexed by condition, so this array
-            // must stay as long as the stack is wide.
+            // ELEVEN sky nodes: the base tier as it always was, then
+            // one per chartered work. INDEXED BY CONDITION, so slot 7
+            // must be held even though the sky never emits it — and the
+            // array must stay as long as the highest condition, not as
+            // long as the sky.
             let concepts = [
                 "the solar leap", "insulation", "discipline", "deepening",
                 "doctrine", "stores", "the crown (terraforming)",
+                "the re-emergence lesson (rides separately)",
                 "VALOR", "HONOR", "COURAGE", "COMMITMENT",
             ];
             println!("{}", style.head("THE CONSTELLATION — this line's own sky"));
@@ -941,8 +944,8 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 let concept = concepts[condition as usize];
                 // The uplift tier reads from DEEDS, not from timers, so
                 // it renders on its own terms.
-                if condition >= 7 {
-                    if condition == 7 {
+                if condition >= 8 {
+                    if condition == 8 {
                         println!(
                             "  {}",
                             style.dim("— the uplift tier: deeds, claimed on chain receipts —")

@@ -4,23 +4,38 @@
 use super::*;
 use crate::literature::{work_of, WORKS};
 
-/// **THE STACK IS BASE-11** (operator ruling 2026-08-02, *uplift to
-/// base-11*). Eleven nodes, in two tiers:
+/// **THE SKY IS BASE-11** (operator ruling 2026-08-02, *uplift to
+/// base-11*). Eleven nodes, in two tiers, and `7` is not one of them:
 ///
 /// ```text
 ///     0        the solar leap
 ///     1..=5    the five crystallized conditions
 ///     6        the gifted crown — completes the BASE
-///     7..=10   THE UPLIFT TIER — one node per chartered work
+///     7        NOT A SKY NODE — the re-emergence lesson (PRACTICE-1),
+///              which "rides separately as TechDiscovered condition 7"
+///              (`dop.rs`) and eases `deposit_window` 240 -> 180
+///     8..=11   THE UPLIFT TIER — one node per chartered work
 /// ```
 ///
+/// Seven base nodes plus four works is ELEVEN. The condition FIELD is a
+/// shared namespace with two populations — sky nodes and separately
+/// riding ones — and `7` was already spoken for by landed law before
+/// the uplift. A first cut of this ruling put the works at `7..=10` and
+/// so gave one number two meanings: `deposit_window` reads `techs` for
+/// the lesson while the sky claimed the same slot for VALOR, which
+/// would have rendered a held lesson as an unreached work and hidden
+/// the real node entirely.
+///
 /// **The crown's gate does not move.** It still gates on `0..=5` and
-/// still completes base-7; the uplift adds a tier ABOVE it rather than
-/// widening what it waits for. That was the exact risk of changing the
-/// base, and it is why the new slots sit on top instead of among.
-pub const LAST_CONDITION: u8 = 10;
-/// The first node of the uplift tier — `7`, where the works begin.
-pub const FIRST_WORK: u8 = 7;
+/// still completes base-7; the uplift sits ABOVE it rather than
+/// widening what it waits for.
+pub const LAST_CONDITION: u8 = 11;
+/// The first node of the uplift tier — `8`, where the works begin.
+/// `7` is skipped: it belongs to PRACTICE-1 and is not a sky node.
+pub const FIRST_WORK: u8 = 8;
+/// PRACTICE-1's re-emergence lesson. Held in `techs` like a sky node,
+/// rendered in the sky like none — it rides separately by design.
+pub const RE_EMERGENCE: u8 = 7;
 
 impl World {
     /// TERRA-1: does this world hold the gifted terraforming node?
@@ -141,6 +156,7 @@ impl World {
             .map(|(_, sheet)| sheet)
             .unwrap_or(&blank);
         (0u8..=LAST_CONDITION)
+            .filter(|condition| *condition != RE_EMERGENCE)
             .map(|condition| {
                 // The BASE tier is earned into `techs`. The UPLIFT tier
                 // (7..=10) is not granted at all — a work is held when

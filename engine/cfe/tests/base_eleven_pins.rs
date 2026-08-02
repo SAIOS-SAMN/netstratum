@@ -7,7 +7,8 @@
 //!     0        the solar leap
 //!     1..=5    the five crystallized conditions
 //!     6        the gifted crown — completes the BASE
-//!     7..=10   THE UPLIFT TIER — one node per chartered work
+//!     7        NOT A SKY NODE — PRACTICE-1's re-emergence lesson
+//!     8..=11   THE UPLIFT TIER — one node per chartered work
 //! ```
 //!
 //! **The crown's gate does not move.** That was the exact risk of
@@ -39,10 +40,15 @@ fn the_stack_is_base_eleven() {
     let (world, orb) = literate_world();
     let sky = world.constellation(orb);
     assert_eq!(sky.len(), 11, "eleven nodes");
-    assert_eq!(LAST_CONDITION, 10);
-    assert_eq!(FIRST_WORK, 7);
+    assert_eq!(LAST_CONDITION, 11);
+    assert_eq!(FIRST_WORK, 8);
     let seen: Vec<u8> = sky.iter().map(|(condition, ..)| *condition).collect();
-    assert_eq!(seen, (0u8..=10).collect::<Vec<_>>(), "no gaps, in order");
+    // 7 is PRACTICE-1's re-emergence lesson and is NOT a sky node.
+    assert_eq!(
+        seen,
+        vec![0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11],
+        "eleven nodes, and 7 is not one of them"
+    );
 }
 
 /// **THE GATE THAT MUST NOT MOVE.** The crown still waits on `0..=5`
@@ -92,7 +98,7 @@ fn claiming_a_work_does_not_advance_the_crown() {
 fn an_uplift_node_is_held_by_the_claim_itself() {
     let (mut world, orb) = literate_world();
     let witness = a_receipt(&world);
-    let valor = FIRST_WORK; // the charter's order: VALOR first.
+    let valor = FIRST_WORK; // 8 — the charter's order: VALOR first.
     assert_eq!(World::work_at(valor), Some("VALOR"));
 
     let unheld = world.constellation(orb).into_iter().find(|(c, ..)| *c == valor);
@@ -145,4 +151,21 @@ fn base_eleven_needs_the_base_and_every_deed() {
         "deeds do not substitute for the base tier"
     );
     assert!(!world.base_seven_complete());
+}
+
+/// **THE COLLISION THAT WAS CAUGHT.** `7` is PRACTICE-1's re-emergence
+/// lesson — landed law, held in `techs`, and what eases
+/// `deposit_window` from 240 to 180. A first cut of the uplift put
+/// VALOR there, which would have rendered a held lesson as an unreached
+/// work and hidden the real node. The sky must never claim `7`.
+#[test]
+fn the_sky_never_claims_the_re_emergence_slot() {
+    let (world, orb) = literate_world();
+    assert_eq!(cfe::world::survey::RE_EMERGENCE, 7);
+    assert!(
+        world.constellation(orb).iter().all(|(c, ..)| *c != 7),
+        "7 rides separately and is not a sky node"
+    );
+    assert_eq!(World::work_at(7), None, "7 is not a work");
+    assert_eq!(World::work_at(8), Some("VALOR"), "the works begin at 8");
 }
