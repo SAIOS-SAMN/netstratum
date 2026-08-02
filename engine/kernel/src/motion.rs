@@ -47,6 +47,72 @@ pub struct Move {
     /// additive** — a later seating replaces an earlier one, which is
     /// one of the two sources of non-commutativity here.
     pub seats: Vec<(String, u8)>,
+    /// THE ACCUMULATOR AXIS — additive, keyed. Covers every per-orb
+    /// running total `replay` maintains (`entropy_vented`, `bond_flow`,
+    /// the crisis and morality books, `severance_load`, …). Additive,
+    /// therefore COMMUTING.
+    pub books: Vec<(BookKey, Ratio)>,
+    /// THE RECORD AXIS — keyed collections that are INSERTED INTO and
+    /// REMOVED FROM rather than added to (bonds, covenants, councils,
+    /// offers, debts, prospects, instruments, routes). Ordered, and
+    /// NON-COMMUTING: `remove ∘ insert` is not `insert ∘ remove`.
+    pub records: Vec<RecordOp>,
+}
+
+/// An accumulator's address — `(orb, book)`. The book index is opaque
+/// to the algebra on purpose: which concrete field a number belongs to
+/// is the WIRING's business, and the composition law is the algebra's.
+pub type BookKey = (u64, u16);
+
+/// A keyed collection's address — `(kind, id)`.
+pub type RecordKey = (u16, u64);
+
+/// ONE RECORD OPERATION. Not a delta — a record either stands or does
+/// not, so the axis composes by REPLACEMENT and the order is the whole
+/// content.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum RecordOp {
+    /// The record stands, carrying this opaque body. Re-inserting an
+    /// existing key REPLACES it (an amended bond is not a second bond).
+    Insert { key: RecordKey, body: Vec<u8> },
+    /// The record no longer stands.
+    Remove { key: RecordKey },
+}
+
+impl RecordOp {
+    /// The address this operation acts on.
+    pub fn key(&self) -> RecordKey {
+        match self {
+            RecordOp::Insert { key, .. } | RecordOp::Remove { key } => *key,
+        }
+    }
+}
+
+/// HOW AN AXIS COMPOSES — the taxonomy the measurement forced.
+///
+/// Collapsing `replay`'s arms onto this algebra needs the algebra to
+/// SPAN what the arms do. Measured against `world.rs::replay`'s 63
+/// arms, every axis they touch composes in exactly one of two ways,
+/// and which one decides whether that axis commutes:
+///
+/// ```text
+/// ADDITIVE      banked · gauge · the accumulator books
+///               compose by +, and therefore COMMUTE
+/// REPLACEMENT   seats · orb fields · world flags · records
+///               last write stands, and therefore DO NOT COMMUTE
+/// ```
+///
+/// **Non-commutativity is not a property of the system — it is a
+/// property of particular axes**, which is exactly why a move must be
+/// carried per axis and never summed. An algebra that knew only one
+/// law would either forbid reordering everywhere or permit it
+/// everywhere, and both are wrong.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Law {
+    /// Composes by addition. Commutes.
+    Additive,
+    /// Last write stands. Does not commute.
+    Replacement,
 }
 
 /// WHY COMPOSITION DOES NOT COMMUTE — the two sources, both already in
@@ -75,6 +141,8 @@ impl Move {
         self.banked.iter().all(|(_, d)| *d == ratio(0, 1))
             && self.gauge.iter().all(|d| *d == ratio(0, 1))
             && self.seats.is_empty()
+            && self.books.iter().all(|(_, d)| *d == ratio(0, 1))
+            && self.records.is_empty()
     }
 
     /// A single banked move, for construction and witness.
@@ -102,7 +170,13 @@ impl Move {
         Self {
             banked: self.banked.iter().map(|(k, d)| (*k, -d.clone())).collect(),
             gauge: self.gauge.iter().map(|d| -d.clone()).collect(),
+            // Replacement axes have NO additive inverse: restoring a
+            // prior office or re-inserting a removed record is a NEW
+            // move, never an undoing. Dropped so `a ∘ a⁻¹ = e` holds
+            // on exactly the axes where it can.
             seats: Vec::new(),
+            books: self.books.iter().map(|(k, d)| (*k, -d.clone())).collect(),
+            records: Vec::new(),
         }
     }
 
@@ -131,7 +205,21 @@ impl Move {
 
         let mut seats = self.seats.clone();
         seats.extend(next.seats.iter().cloned());
-        Self { banked, gauge, seats }
+
+        let mut books = self.books.clone();
+        for (key, delta) in &next.books {
+            match books.iter_mut().find(|(k, _)| k == key) {
+                Some((_, held)) => *held += delta.clone(),
+                None => books.push((*key, delta.clone())),
+            }
+        }
+        books.sort_by(|a, b| a.0.cmp(&b.0));
+        books.retain(|(_, d)| *d != ratio(0, 1));
+
+        let mut records = self.records.clone();
+        records.extend(next.records.iter().cloned());
+
+        Self { banked, gauge, seats, books, records }
     }
 
     /// THE COMMUTATOR `[a, b] = a ∘ b ∘ a⁻¹ ∘ b⁻¹`, taken in the free
@@ -157,6 +245,12 @@ impl Move {
 pub struct Standing {
     pub banked: Vec<((u64, Resource), Ratio)>,
     pub seats: Vec<(String, u8)>,
+    /// Accumulators. Unlike `banked` these are NOT floored — a book is
+    /// a running total of what happened, and clamping it would erase
+    /// history rather than bound a holding.
+    pub books: Vec<(BookKey, Ratio)>,
+    /// Standing records, ascending by key.
+    pub records: Vec<(RecordKey, Vec<u8>)>,
 }
 
 impl Standing {
@@ -183,7 +277,48 @@ impl Standing {
             }
         }
         seats.sort();
-        Self { banked, seats }
+
+        let mut books = self.books.clone();
+        for (key, delta) in &step.books {
+            match books.iter_mut().find(|(k, _)| k == key) {
+                Some((_, held)) => *held += delta.clone(),
+                None => books.push((*key, delta.clone())),
+            }
+        }
+        books.sort_by(|a, b| a.0.cmp(&b.0));
+
+        // RECORDS APPLY IN ORDER, and the order is the content: an
+        // insert after a remove leaves the record standing, the reverse
+        // leaves it gone.
+        let mut records = self.records.clone();
+        for op in &step.records {
+            match op {
+                RecordOp::Insert { key, body } => {
+                    match records.iter_mut().find(|(k, _)| k == key) {
+                        Some((_, held)) => *held = body.clone(),
+                        None => records.push((*key, body.clone())),
+                    }
+                }
+                RecordOp::Remove { key } => records.retain(|(k, _)| k != key),
+            }
+        }
+        records.sort_by(|a, b| a.0.cmp(&b.0));
+
+        Self { banked, seats, books, records }
+    }
+
+    /// Does a record stand at this address?
+    pub fn record(&self, key: RecordKey) -> Option<&[u8]> {
+        self.records.iter().find(|(k, _)| *k == key).map(|(_, body)| body.as_slice())
+    }
+
+    /// An accumulator's reading.
+    pub fn book(&self, key: BookKey) -> Ratio {
+        self.books
+            .iter()
+            .find(|(k, _)| *k == key)
+            .map(|(_, held)| held.clone())
+            .unwrap_or_else(|| ratio(0, 1))
     }
 
     /// The banked reading on one axis.

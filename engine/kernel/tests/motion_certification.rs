@@ -18,7 +18,10 @@ fn spend(amount: i64) -> Move {
     Move::banked_of(ORB, Resource::Iron, ratio(-amount, 1))
 }
 fn holding(amount: i64) -> Standing {
-    Standing { banked: vec![((ORB, Resource::Iron), ratio(amount, 1))], seats: Vec::new() }
+    Standing {
+        banked: vec![((ORB, Resource::Iron), ratio(amount, 1))],
+        ..Standing::default()
+    }
 }
 
 // ── AXIOM 1 · IDENTITY ────────────────────────────────────────────────
@@ -241,4 +244,130 @@ fn the_envelope_refuses_to_wrap() {
     // An envelope that silently wrapped would report an enormous space
     // as a tiny one, which is worse than refusing to answer.
     assert_eq!(envelope(u64::MAX, 64), None, "overflow refuses rather than lying");
+}
+
+// ── THE RECORD AXIS · insert/remove, and why it cannot commute ────────
+
+use kernel::motion::RecordOp;
+
+const BOND: u16 = 1;
+
+fn insert(id: u64, body: &[u8]) -> Move {
+    Move { records: vec![RecordOp::Insert { key: (BOND, id), body: body.to_vec() }], ..Move::default() }
+}
+fn remove(id: u64) -> Move {
+    Move { records: vec![RecordOp::Remove { key: (BOND, id) }], ..Move::default() }
+}
+
+#[test]
+fn records_do_not_commute_and_the_order_is_the_whole_content() {
+    // The measurement that forced this axis: 18 of replay's 63 arms
+    // touch keyed collections (bonds, covenants, councils, offers…).
+    // A record is not a delta — it stands or it does not — so the
+    // ORDER of insert and remove decides the outcome entirely.
+    let held = Standing::default();
+    let (a, b) = (insert(7, b"terms"), remove(7));
+
+    let insert_then_remove = held.then(&a).then(&b);
+    let remove_then_insert = held.then(&b).then(&a);
+
+    assert_eq!(insert_then_remove.record((BOND, 7)), None, "inserted then removed: gone");
+    assert_eq!(
+        remove_then_insert.record((BOND, 7)),
+        Some(&b"terms"[..]),
+        "removed then inserted: stands"
+    );
+    assert_ne!(insert_then_remove, remove_then_insert, "the record axis does not commute");
+}
+
+#[test]
+fn re_inserting_a_key_replaces_rather_than_duplicates() {
+    // An amended bond is not a second bond. If this ever appended, one
+    // key would hold two bodies and every reader would have to guess.
+    let held = Standing::default();
+    let amended = held.then(&insert(7, b"first")).then(&insert(7, b"amended"));
+    assert_eq!(amended.record((BOND, 7)), Some(&b"amended"[..]), "last write stands");
+    assert_eq!(amended.records.len(), 1, "one key, one record");
+}
+
+#[test]
+fn a_removed_record_leaves_nothing_behind() {
+    let held = Standing::default().then(&insert(1, b"x")).then(&insert(2, b"y"));
+    let after = held.then(&remove(1));
+    assert_eq!(after.record((BOND, 1)), None, "removed");
+    assert_eq!(after.record((BOND, 2)), Some(&b"y"[..]), "and only that one");
+}
+
+// ── THE ACCUMULATOR AXIS · additive, and therefore commuting ──────────
+
+#[test]
+fn books_commute_because_they_are_additive() {
+    // 27 arms touch per-orb running totals (entropy_vented, bond_flow,
+    // the crisis books). They are ACCUMULATORS: additive, so they
+    // commute — and the algebra must say so, or reordering would be
+    // forbidden where it is actually safe.
+    let held = Standing::default();
+    let vented = |n: i64| Move { books: vec![((ORB, 3), ratio(n, 1))], ..Move::default() };
+    let (a, b) = (vented(4), vented(9));
+
+    assert_eq!(held.then(&a).then(&b), held.then(&b).then(&a), "accumulators commute");
+    assert_eq!(held.then(&a).then(&b).book((ORB, 3)), ratio(13, 1), "and they sum");
+    assert!(a.commutes_with(&b), "the commutator agrees");
+}
+
+#[test]
+fn books_are_not_floored_because_they_record_rather_than_hold() {
+    // A bank is floored — you cannot hold less than nothing. A BOOK is
+    // a running total of what happened, and clamping it would erase
+    // history rather than bound a holding. Different law, deliberately.
+    let held = Standing::default();
+    let drawn = Move { books: vec![((ORB, 4), ratio(-6, 1))], ..Move::default() };
+    assert_eq!(held.then(&drawn).book((ORB, 4)), ratio(-6, 1), "a book may go negative");
+
+    // Where a BANK would have floored at zero.
+    assert_eq!(holding(1).then(&spend(6)).held(ORB, Resource::Iron), ratio(0, 1));
+}
+
+// ── THE TAXONOMY · non-commutativity is per-axis, not global ──────────
+
+#[test]
+fn the_two_laws_are_distinguishable_and_that_is_the_point() {
+    // An algebra knowing only one law would either forbid reordering
+    // everywhere or permit it everywhere, and both are wrong. These two
+    // moves touch DIFFERENT axes: one additive, one replacement.
+    let held = Standing::default();
+    let additive = Move { books: vec![((ORB, 1), ratio(5, 1))], ..Move::default() };
+    let replacement = Move { seats: vec![("line".into(), 2)], ..Move::default() };
+
+    // Across different axes, order cannot matter — nothing contends.
+    assert_eq!(
+        held.then(&additive).then(&replacement),
+        held.then(&replacement).then(&additive),
+        "disjoint axes commute regardless of their laws"
+    );
+
+    // Contention on ONE replacement axis is where order bites.
+    let other_seat = Move { seats: vec![("line".into(), 4)], ..Move::default() };
+    assert_ne!(
+        held.then(&replacement).then(&other_seat),
+        held.then(&other_seat).then(&replacement),
+        "same replacement axis, two orders, two outcomes"
+    );
+}
+
+#[test]
+fn the_schedule_covers_every_axis_not_just_the_banked_one() {
+    // The schedule is what makes non-commutativity safe, and it has to
+    // hold for records and seats too — those are where 20 of the 63
+    // arms live.
+    let held = Standing::default();
+    let moves = vec![
+        (Slot { stamp: 5, sequence: 9 }, remove(7)),
+        (Slot { stamp: 5, sequence: 3 }, insert(7, b"terms")),
+    ];
+    let shuffled = vec![moves[1].clone(), moves[0].clone()];
+
+    let one = compose_scheduled(&held, moves);
+    assert_eq!(one, compose_scheduled(&held, shuffled), "arrangement cannot change the outcome");
+    assert_eq!(one.record((BOND, 7)), None, "sequence 3 inserted, sequence 9 removed");
 }
