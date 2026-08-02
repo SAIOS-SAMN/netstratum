@@ -1161,19 +1161,58 @@ is exact-typed and still unverified. **Exactness is a representation
 property; authority is a door property.** `C_bound` holds exact numbers
 that nothing has yet admitted.
 
-**THE GENERAL INVARIANT — boundedness, stated so it does not outlaw a
-landed sector.**
+**THE GENERAL INVARIANT — boundedness, carried per-axis (operator
+correction, 2026-08-02).**
 
-    A sector is lawful iff its state footprint does not scale with the
-    topology it observes — O(1) in |E| and |V|.
+An earlier draft wrote this as `O(1)`. **That is a scalar collapse of a
+multi-axis quantity, in a document whose whole thesis is that scalar
+collapse destroys structure** — the same error as `C(Δ) = Σ|R|`, made
+about complexity instead of about residuals. A single `O(·)` cannot say
+WHICH axis a sector grows in, and which axis it grows in is the entire
+question.
 
-The relay wrote this as *"bounded by a fixed constant, O(1)"*
-absolutely. **Taken literally that outlaws the solver's own sector**,
-which is landed and correct: `solve(task, max_depth)` sweeps
-enumeratively `for _depth in 0..=max_depth`, so its footprint is
-O(budget) — bounded, deliberate, and raisable. What makes it lawful is
-not smallness but that **it does not shadow the graph.** The two
-clauses that follow are exact as relayed and need no softening:
+**Cost is carried as a TUPLE over the axes it actually scales in, never
+as one symbol:**
+
+    O( |V|, |E|, F, δ, τ )
+
+    |V|  orbs — the vertices of the complex
+    |E|  relations — its edges
+    F    fiber arity (CHANNELS = 3 today)
+    δ    depth — path length, search budget, walk degree
+    τ    steps — ticks over which the footprint persists
+
+**TWO DIFFERENT QUANTITIES WERE BEING NAMED BY ONE SYMBOL** (operator,
+2026-08-02). The collapse was not `O(1)` being wrong; it was `O(1)`
+answering a question about STORAGE while being read as a bound on
+EXECUTION:
+
+    STATE FOOTPRINT — the container
+      C_bound's storage. Must not shadow the topology:
+                          ∂Memory / ∂|E|  =  0
+      O(1) in |V|, |E| and F. This is what stops the quarantine
+      inflating as the network grows.
+
+    EXECUTION TRAJECTORY — the work done inside it
+      O(x) for x ∈ {depth, budget, time-horizon}. **Locking this to
+      O(1) flattens the dynamics entirely** — a search that may not
+      scale with depth is not a search. This is where the
+      dimensionality actually lives, and it must stay free.
+
+**So the lawfulness test is per-axis, and it is a topology test rather
+than a size test:** a sector is lawful iff its STORAGE is O(1) in the
+axes it OBSERVES (`|V|`, `|E|`, `F`), while its TRAJECTORY may scale
+freely along its OWN axes (δ, τ), bounded by declared budget rather
+than by law.
+
+The solver's sector sweeps `for _depth in 0..=max_depth` — O(δ) in
+work, O(1) in the graph: lawful, and its high-dimensional search is
+preserved rather than flattened. `C_bound` is O(1) in storage on every
+axis. §2n.1's withdrawn construction was O(|E|) in STORAGE, which is
+exactly the violation. **A single symbol could not have told the three
+apart** — which is the whole argument for carrying the tuple.
+
+The two clauses that follow are exact as relayed:
 
 1. **NO FIBER SHADOWING.** No quarantine, solver or search may
    duplicate a per-edge structure or mirror the topology. This is the
