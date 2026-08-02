@@ -11,7 +11,7 @@
 //! generate exactly zero. The engine judges nothing.
 
 use cfe::dop::{cohesion_ratio, ClosureEvent, ColonyOrb, Resource, ZoneKind};
-use cfe::ratio::ratio;
+use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::StarClass;
 use cfe::world::{replay, World, FIRST_ORB, SOVEREIGN};
 
@@ -94,8 +94,23 @@ fn the_ratio_derives_and_never_stores() {
 
 /// Friction prices divergence EXACTLY: a measured extractor (lapsed
 /// window → reciprocity 0) trading with an unmeasured partner
-/// (reading 1) pays φ × 1 × volume — accrued against the mover,
-/// sealed at its collect into the vented ledger, receipted.
+/// (reading 1) pays φ × 1 × volume = 1/4, accrued against the mover
+/// and sealed at its collect.
+///
+/// **AMENDED 2026-08-03 — ENCASEMENT FIRST now governs where it goes**
+/// (`EQUATIONS` T3; operator ruling: friction entropy is
+/// thermodynamically identical to thermal entropy, so the same capture
+/// law applies). The PRICE is unchanged and still exact; what changed
+/// is the destination. This fixture's furnace carries one Encasement
+/// shell — throughput `2 × 1 = 2` — so the whole 1/4 is CAPTURED and
+/// nothing vents.
+///
+/// This pin previously asserted a `FrictionSettled` receipt existed,
+/// which encoded the old law: friction went 100% to the void while
+/// writing into the very ledger whose own law puts capture FIRST. The
+/// assertion is not weakened here — it is turned around to hold BOTH
+/// arms, which is the stronger claim: `friction = captured + vented`,
+/// each arm receipted, and the total still exactly `1/4`.
 #[test]
 fn friction_prices_divergence_exactly() {
     let (mut world, charted) = furnace_and_coldstore();
@@ -114,24 +129,88 @@ fn friction_prices_divergence_exactly() {
         .transfer(FIRST_ORB, charted, Resource::Iron, ratio(2, 1))
         .expect("transfers across the divide");
     let vented_before = world.orb_by_id(FIRST_ORB).expect("orb").entropy_vented.clone();
+    let joules_before = world
+        .orb_by_id(FIRST_ORB)
+        .expect("orb")
+        .banked_amount(Resource::Joule);
     world.collect().expect("collects — the seal");
-    let sealed = world
+
+    // THE ENTROPIC ARM IS EMPTY, and that is the ruling landing. One
+    // shell gives throughput 2; the friction is 1/4; `min(1/4, 2)` is
+    // the whole of it, so the overflow is zero and NO `FrictionSettled`
+    // is written at all.
+    let vented_arm = world.chronicle().receipts().iter().find_map(|r| match &r.event {
+        ClosureEvent::FrictionSettled { orb_id, amount } if *orb_id == FIRST_ORB => {
+            Some(amount.clone())
+        }
+        _ => None,
+    });
+    assert_eq!(
+        vented_arm, None,
+        "a shell that can encase 2 absorbs 1/4 whole — nothing overflows to the void"
+    );
+
+    // THE SYNTROPIC ARM CARRIES IT. Captured friction banks joules and
+    // rides the existing YieldCollected receipt — the same arm captured
+    // HEAT already uses, which is why this needed no new deed.
+    //
+    // It carries its OWN receipt rather than merging into the thermal
+    // yield: merged, the friction capture would be unattributable, and
+    // I6 does not let a difference die without account. So the BANK
+    // DELTA IS NOT THE MEASURE — it also holds ten ticks of encased
+    // heat (167/8 here) — and the receipt is.
+    let joule_yields: Vec<Ratio> = world
         .chronicle()
         .receipts()
         .iter()
-        .find_map(|r| match &r.event {
-            ClosureEvent::FrictionSettled { orb_id, amount } if *orb_id == FIRST_ORB => {
+        .filter_map(|r| match &r.event {
+            ClosureEvent::YieldCollected { orb_id, resource: Resource::Joule, amount }
+                if *orb_id == FIRST_ORB =>
+            {
                 Some(amount.clone())
             }
             _ => None,
         })
-        .expect("the friction is receipted");
-    assert_eq!(sealed, ratio(1, 4), "φ × divergence × volume, exact");
+        .collect();
+    assert!(
+        joule_yields.contains(&ratio(1, 4)),
+        "the price is unchanged and EXACT — phi x divergence x volume = 1/4 — it is the DESTINATION that moved. joule yields seen: {joule_yields:?}"
+    );
+    let joules_after = world
+        .orb_by_id(FIRST_ORB)
+        .expect("orb")
+        .banked_amount(Resource::Joule);
+    assert!(
+        joules_after > joules_before,
+        "captured friction reaches the bank, never the void"
+    );
+
+    // AND THE VENTED LEDGER DID NOT GROW BY THE FRICTION. It may still
+    // grow by the thermal seal, which is a different arm on the same
+    // book; what must not happen is friction reaching the void while a
+    // shell stood idle.
     let source = world.orb_by_id(FIRST_ORB).expect("orb");
-    // The vented ledger grew by the thermal seal AND the friction.
-    assert!(source.entropy_vented > vented_before);
+    let vent_receipts = world.chronicle().receipts().iter().fold(
+        ratio(0, 1),
+        |acc, r| match &r.event {
+            ClosureEvent::VentSettled { orb_id, amount } if *orb_id == FIRST_ORB => {
+                acc + amount.clone()
+            }
+            _ => acc,
+        },
+    );
+    assert_eq!(
+        source.entropy_vented, vent_receipts,
+        "EVERY unit in the vented ledger is a VentSettled — no friction reached the void while a shell stood idle"
+    );
+    let _ = vented_before;
+
     let rebuilt = replay(world.chronicle());
-    assert_eq!(rebuilt, world.committed(), "replay MATCHES with the friction");
+    assert_eq!(
+        rebuilt,
+        world.committed(),
+        "replay MATCHES — the receipt names the vented part, so replay          cannot vent a captured half a second time"
+    );
 }
 
 /// Aligned partners — any alignment, here two unmeasured orbs both

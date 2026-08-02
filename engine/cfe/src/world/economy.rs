@@ -145,12 +145,72 @@ impl World {
             false => true,
         });
         if friction > ratio(0, 1) {
-            held.entropy_vented += friction.clone();
-            self.chronicle.append(
-                ClosureEvent::FrictionSettled { orb_id, amount: friction },
-                stamp,
-                vec![actor],
-            );
+            // ENCASEMENT FIRST, now obeyed here too (`EQUATIONS` T3,
+            // 05 §1.2; operator ruling 2026-08-03: friction entropy is
+            // thermodynamically identical to thermal entropy — the same
+            // physical currency, so the same capture law).
+            //
+            // This block used to vent 100% straight to the void while
+            // writing into the very ledger whose own law puts capture
+            // FIRST. Heat is encased and only the overflow disperses;
+            // friction declined that arm rather than lacking one.
+            //
+            // NO INVENTED CONSTANT: the shells, their throughput and
+            // the TECH-1b discipline boon are read exactly as the
+            // per-tick heat path reads them.
+            let shells = held
+                .zones
+                .iter()
+                .filter(|zone| held.zone_active(zone) && zone.kind == ZoneKind::Encasement)
+                .count() as i64;
+            let mut throughput = crate::dop::encasement_throughput() * ratio(shells, 1);
+            if self
+                .techs
+                .iter()
+                .any(|(owner, condition, _)| *owner == orb_id && *condition == 2)
+            {
+                throughput *= ratio(5, 4);
+            }
+            let captured = friction.clone().min(throughput);
+            let overflow = friction - captured.clone();
+
+            // THE SYNTROPIC ARM, FIRST. Captured friction is encased
+            // exactly as captured heat is — it banks joules and rides
+            // the existing `YieldCollected` receipt, which is what feeds
+            // `encased_entries` and `heat_encased_of`. No new deed.
+            if captured > ratio(0, 1) {
+                held.bank(Resource::Joule, captured.clone());
+                self.chronicle.append(
+                    ClosureEvent::YieldCollected {
+                        orb_id,
+                        resource: Resource::Joule,
+                        amount: captured,
+                    },
+                    stamp,
+                    vec![actor],
+                );
+            }
+            // THE ENTROPIC ARM: only the overflow vents.
+            //
+            // `FrictionSettled` now carries THE VENTED PART, not the
+            // total — replay does `entropy_vented += amount` verbatim
+            // and must never recompute physics, so a receipt naming the
+            // whole cost would vent the captured half a second time on
+            // every replay. This is the same convention `VentSettled`
+            // already follows: a receipt records what happened to the
+            // ledger it names. The closure still holds and both arms are
+            // receipted — friction = captured (YieldCollected) +
+            // vented (FrictionSettled). Chains cut before this landing
+            // replay unchanged: their receipts say what vented then,
+            // and all of it did.
+            if overflow > ratio(0, 1) {
+                held.entropy_vented += overflow.clone();
+                self.chronicle.append(
+                    ClosureEvent::FrictionSettled { orb_id, amount: overflow },
+                    stamp,
+                    vec![actor],
+                );
+            }
         }
         for (resource, amount) in settleable {
             match amount >= ratio(0, 1) {
