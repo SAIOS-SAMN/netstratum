@@ -96,6 +96,46 @@ before applying its one new op. **That is the shear, unapplied.**
 
 ## §3 THE CHANGES
 
+> ## ⛔ R1 + R3 — BUILT, MEASURED, **STRUCK** (2026-08-02)
+>
+> **The predicted ≈3× did not appear. Measured A/B on one machine state,
+> 40 cycles from one baseline universe:**
+>
+> | build | wall |
+> |---|---|
+> | committed (no R1/R3) | **56.45 s · 55.86 s** |
+> | R1+R3, images collected | 56.96 s |
+> | R1+R3, short-circuited | 56.43 s |
+>
+> **A wash.** The op-count arithmetic in §2 is correct — 464 202 → 156 180
+> applications — and it buys nothing, because **op application is not the
+> bottleneck.** A `Grid` is a heap `Vec<u8>`; carrying images trades
+> cheap re-application on small grids for persistent allocation, and the
+> two cancel.
+>
+> **AND MY OWN 48.24 s FIGURE DOES NOT REPRODUCE.** It was measured
+> BEFORE the 66-commit merge; the same baseline on the same machine now
+> reads ~56.2 s for the *unchanged* code. So the earlier "R1 is a
+> regression" reading was an artefact of comparing across a merge —
+> corrected here rather than left standing. Separately worth noting: the
+> merge itself cost ≈ +17 % per beat.
+>
+> **Reverted.** `search.rs` stands as committed. Shipping complexity for
+> no measured gain is the failure this board exists to catch, and the
+> plan predicting 3× is exactly the kind of claim that has to be measured
+> before it is believed.
+>
+> **KEPT: `solver/tests/search_identity.rs`** — 30 recorded answers
+> spanning every rung, plus determinism and a closes-its-task check. It
+> was written to guard the rewrite and it outlives it: any future change
+> to `solve` now has a pin that catches a substituted program, which is
+> what a property test cannot see.
+>
+> **What this does NOT settle:** where the 94 % actually goes. The
+> op-count model was wrong, so the next move is to PROFILE `solve`
+> (vocabulary construction, `OBJ_OPS` segmentation, allocator) rather
+> than to reason about it again. Recorded as the reopened question.
+
 ### R1 — CARRY THE PREFIX OUTPUTS (the shear) · **land first**
 
 **What.** The BFS already holds every prefix in `frontier`. Store with
