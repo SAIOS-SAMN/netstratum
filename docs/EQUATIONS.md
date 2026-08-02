@@ -354,6 +354,72 @@ the Glasskeeper escrow machinery — while its FIELDS are ordinary
 finance: obligor, beneficiary, collateral, window, forfeit. The word
 computes; it is kept.)*
 
+**D6 · THE BORNE SHARE — who is standing in the room.** INSCRIBED
+2026-08-02 (SYN-3/SYN-4/SYN-5). Authority: `18` Article II. `D` is a
+reading of the whole and names nobody; this attributes it.
+
+```text
+    borne_i = ½ · Σ_{j ~ i} Σ_l |circulation_on(Δ, S)_ij,l|
+```
+
+Every present relation carries some of the canonical circulation, and
+its two ends bear that magnitude EQUALLY. `rfa_core::capacity::borne`;
+keyed to identity by `kernel::bridge::borne_by_orb`.
+
+**THE CYCLE IS THE INTUITIVE UNIT AND IT CANNOT BE WRITTEN.** Charge is
+a property of a closed loop, so the obvious rule splits a cycle's charge
+among its nodes — `|c_C| / N_C`. But a *fundamental cycle basis* is
+picked by a spanning forest, so `Nodes(C)` and `N_C` MOVE WHEN THE
+ENTITIES ARE RELABELLED. Measured on one theta graph carrying one
+charge:
+
+```text
+    labelling [0,1,2,3] → cycles {0,1,2}, {0,2,3}      N_C = 3, 3
+    labelling [1,0,3,2] → cycles {0,1,2,3}, {0,1,2}    N_C = 4, 3
+```
+
+Different entities paid different amounts for the identical world. `I1`
+voids it. Only the cycle-space DIMENSION is invariant, never a chosen
+basis of it — the same hazard `capacity_anchored` carried at vertex 0,
+reappearing one layer up at attribution. The circulation is the UNIQUE
+Hodge representative, so the share is taken there instead, and the
+equal-participation principle is applied at the RELATION, which is where
+it survives relabelling. Pinned over all 24
+(`capacity_pins::the_borne_share_is_relabelling_invariant`).
+
+**IT IS READ ON THE SUPPORT, NOT THE COMPLETE GRAPH.** `circulation`
+solves `p = −div/n`, which treats every absent relation as a real one
+carrying zero. Four entities, ONE relation `0—1 = 1`:
+
+```text
+    complete-graph shares → [½, ½, ¼, ¼]
+```
+
+Entities 2 and 3 hold nothing, owe nothing, are owed nothing, and each
+draw a QUARTER of a relation they are not party to — FARMING BY ABSENCE,
+cheaper than farming strain because it costs nothing at all. The same
+defect inflates the rest: the identical relation reads `0` among two
+entities and `½` among four, so an orb could enlarge every share in the
+world by seating empty orbs beside it. `circulation_on` solves the
+support graph's own Laplacian `L·p = −div` by exact rational elimination
+(`I3`); isolated entities become components of one, bear the ground, and
+move no other share.
+
+**THREE PROPERTIES, EACH PINNED.** *No strain farming* — it pays on the
+circulation, what composes, never on `symmetry_foundation`, which stands
+exactly where composition FAILS; manufacturing an inconsistency draws
+nothing. *No frame farming* — a gauge shift lands wholly in the gradient
+summand, so no share moves; work earns, coordinates do not. *Conserving*
+— both halves of every relation reach an entity, so the shares sum to
+exactly the circulation standing on the support. The join distributes;
+it neither reduces nor mints.
+
+**AND IT IS POSITIVE.** Allocation had existed only as WITHHOLDING — a
+world-level refusal with no orb in it. A share is a magnitude, never
+below the ground, so the rule states what an orb HOLDS rather than what
+it lacks, and the refusal that consumes it carries the share so the
+floor can be risen from (`18` Article II).
+
 **The index-set reading is STRUCK** (2026-08-01). The indices
 `(i, j, k, l)` that `for_each_residual` iterates, and the arities
 `Delta { dim, fiber }`, are the CONTAINER the relation is carried on —

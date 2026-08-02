@@ -701,6 +701,57 @@ computes nothing" failure LAW 8 excises. It is now consumed by
 READINGS: `capacity_pins::no_reading_of_any_shape_ever_falls_below_the_ground`
 and `bridge_pins::no_committed_world_ever_reads_below_the_ground`.
 
+**THE ARTICLE IS ASKED OF THE ORB, NOT ONLY OF THE WORLD** (SYN-4/SYN-5,
+operator ruling 2026-08-02). This article says *a state carrying
+circulation claims ALLOCATION* — and until now nothing could say WHO.
+`capacity_law` read `read_entangled(prior).verdict()`, a reading of the
+whole with no orb anywhere in it, so the article could only ever refuse,
+and it refused in both wrong directions at once: an orb carrying real
+structure was denied because the world's total fell short, and an orb
+carrying NONE was admitted on structure other orbs had built. The second
+is the free ride — standing INHERITED rather than earned, which is
+precisely what a proof-of-useful-work kernel may not leave open.
+
+**THE BORNE SHARE** answers it. `D` says how much room stands; the share
+says who is standing in it (`EQUATIONS` D6):
+
+```text
+    borne_i = ½ · Σ_{j ~ i} Σ_l |circulation_on(Δ, S)_ij,l|
+```
+
+Read on the SUPPORT — the relations that exist — and attributed to the
+two ends of each relation EQUALLY. The free-energy half of the gate
+stays world-shaped, because a gradient is a property of the whole; the
+rank half is now personal. This is strictly a narrowing and never a
+loosening: a share above the ground requires circulation on the orb's
+own relations, which requires a holonomy, which is `rank ≥ 1`, so every
+state it admits the world-level reading admitted already.
+
+**AND IT IS A FLOOR, NOT A SANCTION.** The refusal
+(`MintWithoutOwnStanding`) carries the share itself, which is a
+magnitude and never negative. An orb reads the ground and reads with it
+the way up: form a real obligation. Article II thereby states what an
+orb HOLDS in the same terms it states what an orb LACKS — the article
+gives before it withholds. Pinned end to end in
+`capacity_law_pins::an_orb_holding_nothing_cannot_mint_on_the_world_s_structure`
+and `capacity_law_pins::the_refusal_carries_the_share_so_the_floor_can_be_risen_from`,
+where an orb holding nothing is refused, takes a place in the
+circulation, and passes.
+
+**THE SEAT IS NOT THE ORB.** `borne` answers per SEAT — an index into
+`Committed::orbs`, which is insertion order and nothing more — so
+`bridge::borne_by_orb` translates back to `orb_id` before anything
+economic reads it. An allocation keyed on seats would pay a different
+orb after any reseating: the same class of defect as reading a share off
+a spanning forest, an artifact of bookkeeping spent as value. This is
+where the share's relabelling-invariance is finally spent, and it is
+pinned by reversing the seating
+(`bridge_pins::the_standing_is_keyed_by_identity_and_not_by_seat`).
+
+*Recorded honestly:* `Degree::is_above_ground` remains the world-shaped
+predicate and is still pinned but not gating — the consumer this article
+gained is the per-orb share, not the degree predicate.
+
 ### ARTICLE III — THE SCIENCE FOUNDATION
 
 *Every quantity this system acts on is a physical observable. A reading
