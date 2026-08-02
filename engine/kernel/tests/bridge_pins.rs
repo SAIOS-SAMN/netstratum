@@ -10,8 +10,8 @@ use cfe::dop::ColonyOrb;
 use cfe::ratio::ratio;
 use cfe::world::{Bond, Committed, World};
 use kernel::bridge::{
-    fold_certified, fold_guard, observe, project, read_entangled, read_entangled_observed,
-    refold, FoldGuard, Observed, CHANNELS, CHANNEL_BOND,
+    borne_by_orb, fold_certified, fold_guard, observe, project, read_entangled,
+    read_entangled_observed, refold, standing_of, FoldGuard, Observed, CHANNELS, CHANNEL_BOND,
 };
 use rfa_core::{coboundary_reduce, Degree, Delta};
 
@@ -636,4 +636,46 @@ fn the_charge_field_is_carried_whole_never_counted() {
         assert!(h.i < 3 && h.j < 3, "the charge names where it stands");
         assert!(h.value != ratio(0, 1), "a carried charge is non-zero");
     }
+}
+
+#[test]
+fn the_standing_is_keyed_by_identity_and_not_by_seat() {
+    // THE SEAT IS NOT THE ORB. `borne` answers per SEAT — an index into
+    // `Committed::orbs`, which is insertion order and nothing more. An
+    // economy keyed on seats would pay a DIFFERENT orb after any
+    // reseating, which is the same class of defect as reading a share
+    // off a spanning forest: an artifact of bookkeeping, spent as value.
+    //
+    // The share itself is relabelling-invariant, and this pin is where
+    // that invariance is spent: reseat the world and every orb keeps
+    // exactly what it held.
+    let mut state = orbs(4);
+    state.bonds = vec![bond(1, 2, 3), bond(2, 3, 3), bond(3, 4, 3), bond(4, 1, 3), bond(1, 3, 1)];
+    let before = borne_by_orb(&state);
+
+    // Same world, orbs seated in reverse. Nothing about the obligations
+    // changed — only the order they happen to be stored in.
+    let mut reseated = state.clone();
+    reseated.orbs.reverse();
+    let after = borne_by_orb(&reseated);
+
+    for (orb, share) in &before {
+        let found = after.iter().find(|(id, _)| id == orb).map(|(_, s)| s.clone());
+        assert_eq!(
+            found.as_ref(),
+            Some(share),
+            "orb {orb} was paid differently after a reseating that changed no obligation"
+        );
+    }
+    assert_eq!(before.len(), after.len(), "the same orbs must be answered for");
+}
+
+#[test]
+fn an_orb_the_world_has_never_seated_stands_on_the_ground() {
+    // A share is read from committed state, so an unknown orb is not an
+    // error and not a special case — it holds no obligation, so it holds
+    // up nothing. The ground is the answer, never a refusal to answer.
+    let mut state = orbs(3);
+    state.bonds = vec![bond(1, 2, 3), bond(2, 3, 3), bond(1, 3, 1)];
+    assert_eq!(standing_of(&state, 999), ratio(0, 1), "an unseated orb stands on the ground");
 }

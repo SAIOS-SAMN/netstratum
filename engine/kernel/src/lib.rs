@@ -187,6 +187,25 @@ pub enum Unlawful {
     /// what it earns against. A mint banks value; it forms no relation,
     /// so it cannot bootstrap its own precondition.
     MintWithoutStanding { verdict: Vacuity },
+    /// ARTICLE II, ASKED OF THE MINTER RATHER THAN OF THE WORLD (SYN-4,
+    /// SYN-5). The world stands, but THIS orb holds none of what it
+    /// stands on: its share of the circulation is the ground.
+    ///
+    /// [`Unlawful::MintWithoutStanding`] is a world-level reading and no
+    /// orb appears in it, so it could only ever refuse — and it refused
+    /// the wrong way in both directions. An orb carrying real structure
+    /// was denied because the world's total fell short, and an orb
+    /// carrying none was admitted on structure OTHER orbs had built.
+    /// That second case is the free ride: standing is inherited, never
+    /// earned, and inheritance is not work.
+    ///
+    /// The share is carried, not just the refusal, because it is a
+    /// FLOOR AN ORB CAN RISE FROM rather than a penalty to avoid: an orb
+    /// reads what it holds, sees the ground, and knows that forming a
+    /// real obligation is what lifts it. `standing` is never negative —
+    /// it is a magnitude — so this states what is missing in the same
+    /// terms that state what is present.
+    MintWithoutOwnStanding { orb: u64, standing: Box<Ratio> },
 }
 
 /// THE JUDGE. Does `step` lawfully carry `prior` to `next`? Pure,
@@ -252,12 +271,30 @@ pub fn lawful(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Un
 /// bound at any single step and so can never be an invariant.
 fn capacity_law(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
     match &step.event {
-        ClosureEvent::DiscoveryMinted { .. } => {
+        ClosureEvent::DiscoveryMinted { orb_id, .. } => {
             let read = bridge::read_entangled(prior);
             let verdict = read.verdict();
-            match verdict.is_admitted() {
+            if !verdict.is_admitted() {
+                return Err(Unlawful::MintWithoutStanding { verdict });
+            }
+            // ARTICLE II, ASKED OF THE MINTER (SYN-4/SYN-5). The world
+            // standing is the free-energy half and stays world-shaped —
+            // a gradient is a property of the whole. The RANK half is
+            // asked personally: what does THIS orb hold up?
+            //
+            // Strictly a narrowing, never a loosening: a share above the
+            // ground requires circulation on the orb's own relations,
+            // which requires a holonomy, which is rank ≥ 1. So every
+            // state this admits, the world-level reading admitted too —
+            // and the free rider, who held nothing and minted on other
+            // orbs' structure, no longer passes.
+            let standing = bridge::standing_of(prior, *orb_id);
+            match standing > ratio(0, 1) {
                 true => Ok(()),
-                false => Err(Unlawful::MintWithoutStanding { verdict }),
+                false => Err(Unlawful::MintWithoutOwnStanding {
+                    orb: *orb_id,
+                    standing: Box::new(standing),
+                }),
             }
         }
         // Every other deed is judged by the invariants above. The

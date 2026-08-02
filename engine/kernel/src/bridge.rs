@@ -41,6 +41,7 @@
 
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::Committed;
+use rfa_core::capacity::borne;
 use rfa_core::{
     dual_pole, holonomies, boundary_form, Degree, Delta, Flow, BoundaryForm, Support, Vacuity, Holonomy,};
 
@@ -580,6 +581,46 @@ fn symmetry_foundation(delta: &Delta, support: &Support) -> Vec<Residual> {
 /// [`read_entangled_observed`].
 pub fn read_entangled(state: &Committed) -> EntangledRead {
     read_entangled_observed(state, 0)
+}
+
+/// **THE STANDING OF EACH ORB** — `D`'s circulation, attributed. `D`
+/// says how much room the world stands in; this says WHO IS STANDING
+/// IN IT, keyed by `orb_id` rather than by seat.
+///
+/// Derived, never stored (`09_LEDGER` §1.2): read from committed state
+/// on demand, so there is no field to drift and no schema to migrate.
+///
+/// **The seat is not the orb.** [`rfa_core::capacity::borne`] answers
+/// per SEAT, and a seat is an index into `state.orbs` — an artifact of
+/// insertion order that changes when an orb is added or removed. An
+/// economy keyed on seats would pay a different orb after any
+/// reseating. The share itself is relabelling-invariant, and this is
+/// where that invariance is spent: the seat is translated back to the
+/// identity before anything economic reads it.
+pub fn borne_by_orb(state: &Committed) -> Vec<(u64, Ratio)> {
+    let (delta, support) = project_complex(state);
+    let shares = borne(&delta, &support);
+    state
+        .orbs
+        .iter()
+        .enumerate()
+        .map(|(seat, held)| (held.orb_id, shares.get(seat).cloned().unwrap_or_else(|| ratio(0, 1))))
+        .collect()
+}
+
+/// THE ONE ORB'S STANDING — what this orb holds up of the world's
+/// circulation. An orb the world has never seated stands at the ground,
+/// which is the same answer as an orb seated but holding nothing: in
+/// neither case is there structure to attribute.
+///
+/// Never negative — a share is a magnitude — so this reads as a floor
+/// an orb can rise from, not a penalty it must avoid.
+pub fn standing_of(state: &Committed, orb: u64) -> Ratio {
+    borne_by_orb(state)
+        .into_iter()
+        .find(|(id, _)| *id == orb)
+        .map(|(_, share)| share)
+        .unwrap_or_else(|| ratio(0, 1))
 }
 
 /// The cross-book door: the same one-pass read, carrying the count of
