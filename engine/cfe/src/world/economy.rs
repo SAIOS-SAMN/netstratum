@@ -252,11 +252,11 @@ impl World {
         // Crisis reads BEFORE the move — the replay-fact order.
         let from_crisis = {
             let held = peek(&self.orbs, from).expect("checked");
-            !held.famine.is_empty() || held.overheat
+            in_crisis(held)
         };
         let to_crisis = {
             let held = peek(&self.orbs, to).expect("checked");
-            !held.famine.is_empty() || held.overheat
+            in_crisis(held)
         };
         // IDEO-1 (09 §3.2): friction prices DIVERGENCE, not vice — the
         // handling overhead of unlike measured boundary policies, read
@@ -393,11 +393,11 @@ impl World {
         // Crisis reads BEFORE the move — the replay-fact order.
         let source_crisis = {
             let held = peek(&self.orbs, source).expect("checked");
-            !held.famine.is_empty() || held.overheat
+            in_crisis(held)
         };
         let absorber_crisis = {
             let held = peek(&self.orbs, absorber).expect("checked");
-            !held.famine.is_empty() || held.overheat
+            in_crisis(held)
         };
         let value = amount.clone() * crate::dop::commensurate_weight(Resource::Sink);
         {

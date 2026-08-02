@@ -72,3 +72,28 @@ pub fn demurrage_due(
     due
 }
 
+
+/// CRISIS — one definition, read by BOTH the proposer and replay.
+///
+/// **This rule was written out EIGHT times before it had a name** —
+/// four in the live deeds and four in replay — with comments in both
+/// insisting they must agree ("the move replays with the SAME crisis
+/// reads the live path made"; "crisis reads match the live order
+/// exactly"). Agreement was enforced by copy-paste, which is the same
+/// shape as the double transition definition kernel #30 exists to
+/// remove, at one rule's scale.
+///
+/// It decides whether aid accrues to the syntropic books
+/// (`given_in_crisis`, `returned_across`), so a drift between the two
+/// paths would silently rewrite a civilization's syntropy ratio.
+///
+/// THE ABSOLUTE, recorded and not yet fixed: this is a BOOLEAN over a
+/// degree the engine already computes. `dop.rs:768` degrades yields by
+/// `1/(1+overflow)`, so the intensity exists and is used — while this
+/// reading throws it away. A colony 1% over its radiator budget reads
+/// identically to one 500% over, and aid to a colony at 99% of its
+/// budget counts as nothing at all. Fractionalizing it is task #14;
+/// naming it here is what makes that change safe to make ONCE.
+pub fn in_crisis(orb: &ColonyOrb) -> bool {
+    !orb.famine.is_empty() || orb.overheat
+}

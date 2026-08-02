@@ -33,7 +33,7 @@ pub mod refusal;
 pub mod rules;
 
 pub use refusal::ActionRefused;
-pub use rules::{demurrage_due, ease_of};
+pub use rules::{demurrage_due, ease_of, in_crisis};
 
 
 
