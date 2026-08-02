@@ -1,0 +1,489 @@
+# 20 — THE FOUNDING MARKET
+
+**Status:** LAW (operator ruling, 2026-08-02). Subordinate to
+`00_CHARTER.md`. Supersedes the founding half of
+`04_CIVILIZATION_GENESIS.md` §4 and extends `01_ECONOMY.md` §2.
+
+---
+
+## §0 THE SUPREMACY CLAUSE
+
+> **"My word is stronger than any law or word written down. THIS is the
+> law — if written rules/laws violate this trajectory, then THE LAWS are
+> wrong."**
+
+Inscribed law is a RECORD of rulings, never a source of authority
+against one. Where a document contradicts a standing ruling, **the
+document yields and is struck** — it is not weighed against the ruling
+and it does not get to argue from seniority. Charter §11's one-truth
+discipline still binds the correction: the old text is struck in place
+with its reason, never silently rewritten.
+
+**This clause does not suspend the KERNEL.** A ruling changes what the
+game is; it does not change what a receipt means, and `lawful` still
+refuses an unlawful step from anybody. The operator directs the world;
+the operator does not get a bypass on arithmetic. That is the same
+constraint `19_REGISTRY` §4d puts on the ancient's seat, applied to the
+seat that writes the rulings.
+
+## §1 FOUNDING IS AN ACQUISITION, NEVER A DERIVATION
+
+**The flow, as ruled:**
+
+```text
+1. new user spins up the code
+2. "FOUND NEW CIVILIZATION"
+3. offered a LIST OF TYPES; picks the one most interesting to them
+4. acquires a place to stand — by one of the three paths in §2
+5. the founding TITHE fires (§3) — this is the baseline economy's
+   first transaction, and the economy starts HERE
+```
+
+**What this strikes.** Founding today DERIVES a world from metabolism:
+`derived_siting` draws a star, albedo and orbit from the line's
+metabolism plus a beacon, and commissions it. **That is now the FALLBACK
+for an uncommissioned world, never the mechanism.** A civilization gets
+its world by acquiring one. The derivation survives only as the default
+seed for a universe with nothing yet to buy.
+
+**The choice is the player's, not the schema's.** Type is chosen from a
+list because it is interesting, not assigned because a metabolism
+implied a temperature. The axes of `04` §1 (disposition, metabolism,
+perception) are what the list is drawn FROM; they stop being the thing
+that decides where you land.
+
+## §2 THE THREE ACQUISITION PATHS
+
+### 2a. PURCHASE — a plot, a planet, or a share of one
+
+In a KNOWN universe where civilizations already stand, worlds and parts
+of worlds are for sale. **A share of a planet is a first-class outcome**,
+not a consolation: a planet hosts more than one colony, and buying a
+piece of one is a normal founding.
+
+This rides law that already stands. `01_ECONOMY` §2 seats three lease
+structures, and its **revenue share — zero upfront, a fixed fraction of
+output routed by receipt** — is named there as *the low-barrier entry
+path for new players*. **That is the founding path for a user with no
+capital, and it is the reason this whole section does not violate
+CHARTER §3.5.** The market primitives stand: `cfe::world::post_offer`,
+`cfe::world::offers`, `cfe::world::clear_trade`, `cfe::world::transfer_as`.
+
+### 2b. COMMISSION — pay a progenitor to move stars and suns
+
+If no existing world suits the founder, or none is palatable, **the
+founder pays a PROGENITOR CLASS to build them one** — to move the stars
+and suns and raise a new solar system or world to order. **This must be
+possible.**
+
+This is the progenitor seat doing literally what it is defined to do:
+`12_UNION` §2a seats progenitors as the ones who *make the room everyone
+else moves on*. Commissioning makes that a SERVICE with a price, and it
+gives the 8-seats-per-domain band an economic reason to be scarce.
+
+**The acceptance criterion is VIABILITY (§4), not delivery.** A
+commissioned world that lands its buyer outside every band they can live
+in is not a delivered commission.
+
+### 2c. FALLBACK — the derived seat
+
+A universe with nothing to sell still founds. The derivation of §1 seeds
+it, subject to §4.
+
+## §3 THE TITHE — the economy's genesis transaction
+
+**Founding pays a tithe to the ancients or the elders.** This is the
+first economic event in a civilization's life and the point at which the
+baseline economy starts turning.
+
+**Who receives it follows the ward-scope ladder** (`19_REGISTRY` §4a) —
+the tithe goes to whoever wards the scope the founding lands in:
+
+```text
+founded on an existing planet     → that planet's ELDER   (planetary ward)
+founded into a newly raised world → the ANCIENT           (universal ward)
+```
+
+That rule closes the virgin-universe question rather than leaving it: a
+brand-new world has no elder yet, so its first founding tithes upward to
+the scope that does exist.
+
+**And it makes ward scope pay.** An elder or ancient is no longer a
+title with a vantage — it is a seat with REVENUE, funded by the
+foundings inside its ward. This is what gives an ancient a standing
+reason to open a room (`19_REGISTRY` §4b): more room admits more
+founders, and founders tithe.
+
+**The tithe is IN-GAME VALUE.** It settles in the resources of
+`cfe::dop::Resource`, on the rails `01_ECONOMY` §2 already reserves for
+in-game-currency leases, which *never touch the chain*. **A new player
+still needs no wallet, and the tithe is not pay-to-win** — it buys a
+place to stand, never a rule advantage (`01_ECONOMY` §5.1, §5.2, intact).
+
+**THIS DRAFT'S OWN LINE HERE IS STRUCK** (operator, 2026-08-02). It held
+"the tithe RATE, whether one-time or recurring, who sets it" for an
+operator ruling. **There is no rate to rule.** The tithe is not a
+percentage anybody sets — it is a continuous accrual against real
+holdings, derived at the touch. See §6a, which builds the algorithm
+instead of asking for the number.
+
+## §4 THE VIABILITY LAW — every offered type must be able to flourish
+
+> **"Any civ that can be brought online — new or recurrent — must be
+> accounted for: hot, cold, thermal, plasma. These all need capacity to
+> grow and flourish."**
+
+**If a type appears on the founding list of §1, a viable founding site
+for it must exist and be reachable by §2.** A type the game offers and
+cannot house is a defect in the game, never a hard lesson for the
+player.
+
+**What this strikes, measured rather than asserted** (pins in
+`engine/cfe/tests/siting_determinism.rs`, both green):
+
+```text
+band  Cryogenic     1.000e4  .. 1.000e8   K⁴
+band  Mesic         3.906e9  .. 1.049e10
+band  HyperThermal  1.296e11 .. 5.063e12
+
+derived furnace seats (mineral | plasmic):
+      1.212e10 · 1.333e10 · 1.454e10   ⇒ BAND = NONE, all three
+```
+
+**A mineral or plasmic line derives into the GAP between bands** — past
+the mesic ceiling, an order of magnitude short of the hyperthermal
+floor. It founds into a temperature no substrate is defined for. **Under
+this section that is now a DEFECT and the derived furnace seats are
+struck as a founding default.**
+
+Two things follow, and both are engineering rather than doctrine:
+
+1. **The band set must cover what the game offers.** Three bands leave
+   two uncovered stretches (100–250 K and 320–600 K in temperature).
+   Either the bands close over the offered types or the sites move
+   inside them. **The operand exists; the coverage does not.**
+2. **`cryo` must be foundable.** No derivation reaches a cold world
+   today, so a cold line cannot be founded at all. Under §2 it becomes
+   reachable the ordinary way — purchased, or commissioned from a
+   progenitor — and that is the intended fix, not a widening of the
+   derivation.
+
+**Recurrent lines are covered by the same words.** A civilization
+brought back online is accounted for exactly as a new one: it must land
+somewhere it can live.
+
+## §5 THE PURSE — a civilization's economy, held together
+
+**Ruled 2026-08-02.** A new player needs no WALLET (external, deferred —
+§8), but a civilization needs a **PURSE**: the thing that holds its
+economy together across everything it owns.
+
+**Verified gap:** stores live per-ORB. `Resource` balances hang off
+colony orbs, and **there is no civilization-level economic container in
+the engine at all** — no purse, no treasury, no coffer, zero hits. A
+civilization SPANS worlds (`04` §5) and its economy does not add up
+anywhere.
+
+**THE PURSE IS A READING, NEVER A SECOND VAULT.** A purse that stored
+balances would be a second readable truth over the orbs that already
+hold them — the exact drift Charter §11 exists to prevent, and it would
+break conservation the moment the two disagreed. So:
+
+```text
+purse(line) = the aggregate read across the orbs that line holds,
+              with each orb's due settled at the read's stamp
+```
+
+**THE PURSE IS A PROJECTION, NOT A TOUCH** (ruled 2026-08-02; this
+document's first draft said the opposite and is struck):
+
+```text
+purse(line) = Σ over the line's orbs of ( store − demurrage_due(orb, …) )
+```
+
+**The draft made reading a purse a settling touch that writes receipts.
+That was wrong and would have been expensive** — every status render and
+UI refresh would have written demurrage receipts into the chronicle,
+making the act of LOOKING a chain event. The projection subtracts what
+is DUE without settling it, so the number shown is honest and nothing is
+written. Value is still not hidden from decay: the due is already
+deducted in the reading, and it settles for real at the next genuine
+touch. Vaulted stores keep their exemption unchanged.
+
+**What it makes possible** is everything downstream in this document:
+you cannot tithe, price a commission, or judge a founder's solvency
+until a line's economy adds up to one number.
+
+## §6 THE ALGORITHMS — nothing here is a constant
+
+**Operator rulings, 2026-08-02 (relayed spec + this lane's audit against
+the tree).** §6 formerly listed five "open questions" awaiting a number.
+**That was the wrong shape** — each was a constant standing in for an
+algorithm. The rulings below give the functions. **Two of the four do
+not compute against the engine as specified, and are inscribed with the
+defect named rather than transcribed.**
+
+This is FUNCTION-1 (`12_UNION` §4) applied where the drafts forgot it:
+**readings stay DERIVED, never declared.**
+
+### 6a. THE TITHE — CAPTURE, and decay as its residual
+
+**REWRITTEN SYNTROPIC (operator ruling 2026-08-02). Every prior draft of
+this section is struck.** They built the tithe as a share of
+DESTRUCTION: decay split into a skim and a burn. **That is negentropic —
+it makes loss the primary object and the ward's income its shadow — and
+CHARTER §2a rules it out in terms this section ignored:** *the
+generative side leads; refusals are subordinate clauses of a positive
+law, never the law itself.* §2a also records that this exact drift cost
+real correctness twice before, because *the negentropic form was not
+merely bleak, it measured the wrong object.* It did again here.
+
+**THE ENGINE ALREADY RUNS THE RIGHT PATTERN.** Nothing needs inventing:
+
+```text
+Encasement   "captures excess heat into joules BEFORE anything vents"
+Joule        "minted ONLY by syntropic encasement, never by fiat"
+CryoArray    "captures vault-band headroom as bankable sink, never passive"
+```
+
+**Capture comes first and venting is what capture missed.** The tithe
+takes the same shape.
+
+**THE LAW — a ward CAPTURES; what nothing captures decays.**
+
+```text
+at the touch, in this order:
+
+  captured = what the ward's BUILT capture capacity takes
+             → transferred to the ward purse            ← THE PRIMARY READING
+  decayed  = what no capture reached
+             → destroyed                                 ← the residual
+```
+
+**A ward's income is a positive act, not a levy.** It is earned by
+having BUILT the capacity to capture, exactly as a colony earns joules
+by raising a shell. A ward that builds nothing captures nothing — not
+because it is punished, but because capture is a thing you construct.
+
+**THIS DISSOLVES THE DIVERGENCE RATHER THAN COUNTERWEIGHTING IT.** The
+kernel lane's finding (c0fc819) was that `burned = decay · (1 − share)`
+vanishes as share → 1. **There is no share here.** Capture is bounded by
+BUILT THROUGHPUT — the standing precedent is `encasement_throughput() ×
+shells`, where overflow past throughput vents and the colony must raise
+another shell. **A ward cannot capture everything by accumulating a
+ratio; it can only capture what it built to capture, and building costs
+real resources.** The sink narrows only to the exact extent that
+somebody did the work, which is the outcome the economy should want.
+
+Conservation is unchanged: ΔΣ = −decayed ≤ 0, deflationary at every
+step, and now stable in the limit because throughput is a built quantity
+rather than a ratio with a ceiling of 1.
+
+**CONSTRAINT — capture capacity is not kernel-readable at every scope.**
+`lawful` is pure, total and I/O-free. A ward whose scope IS the world in
+front of the kernel can be verified locally (the ELDER case). **Universal
+scope cannot** (the ANCIENT case) — no single world's kernel sees it, so
+it is a mesh-level computation carried as verified evidence.
+
+**CONSTRAINT — this still amends a landed wire event.**
+`DemurrageSettled` is one-sided today, booked as `[(resource, −amount)]`
+and checked at I5. Capture makes the settle two-sided — a captured leg
+with a recipient and a decayed leg — so tag, event shape and I5 change
+together. Kernel surgery, sequenced behind P2 (§6e).
+
+**OPEN, and sharper under P3's gradient:** `ease` multiplies decay, so
+advancing technology lowers what is available to capture. Whether a
+ward's income falls as its wards advance is now a continuous erosion
+across the whole tech tree rather than a single step at condition 5. It
+is measurable once capture and rate are readable at the same touch, and
+it should be measured before this lands.
+
+### 6a-bis. NO ABSOLUTES — the threshold is the defect
+
+**Operator ruling 2026-08-02, and it generalises a defect the kernel
+lane already paid for.** `ease_of` tested `condition == 5`: four fifths
+of the tech tree bought nothing and condition 5 became a strategy
+target. P3 replaced that cliff with a gradient. **The same defect is
+present wherever THIS document tests a hard boundary**, and it is struck
+in all of them.
+
+```text
+STRUCK, everywhere it appears in this document:
+
+  a hard IN/OUT band test          → a reading that falls off
+  argmax with an equality tie-break → a proportional standing
+  viable / not viable               → how well a type lives here
+  a threshold that flips an outcome → a curve that bends it
+```
+
+**Why this is mechanical and not aesthetic.** A threshold does three
+bad things at once: it makes a hair's difference decide an outcome, it
+creates a strategy target at the boundary, and it renders every state
+short of the boundary indistinguishable from having nothing. Every one
+of those is a measurement error before it is a balance problem.
+
+**The positive form:** every reading in this document is defined
+everywhere in its domain and moves continuously with what it measures.
+Where a hard edge remains it is a PHYSICAL bound (built throughput
+cannot exceed what was built), never a judgement.
+
+### 6b. THE COMMISSION PRICE — NOT COMPUTABLE AS SPECIFIED
+
+**The relayed spec:** `ΔU = G · M · m · |1/r₁ − 1/r₂|`.
+
+**AUDIT — the engine has none of the three terms.** Verified by scan:
+**zero declarations of mass, gravitation, or G anywhere in `engine/`.**
+A star exposes `luminosity()` and nothing else; there is no stellar
+mass, no planetary mass, and `orbit_r` is a bare ratio, not a radius in
+metres. Introducing G also introduces an IRRATIONAL constant into a
+kernel whose first invariant is exact rationals — it could only enter as
+a rational approximation, which is precisely the hidden constant this
+section exists to excise.
+
+**What DOES compute.** The `|1/r₁ − 1/r₂|` factor is exact and available
+today, because `orbit_r` exists and rational reciprocals are exact:
+
+```text
+price(commission) = work_k · | 1/r_current − 1/r_target |
+```
+
+**One scale constant, not three absent quantities.** `thermal_k()` is
+the standing precedent for exactly this kind of scale factor, so
+`work_k` is idiomatic rather than novel. It is honest about being a
+scale, and §7 binds it to become a reading when one exists.
+
+**Still uncovered, and named:** this prices an ORBIT change only. A
+commission that changes albedo, commissions a different star class, or
+raises a system where none stood has no price under this formula. The
+paid service of §2b is broader than the ruling covers.
+
+### 6c. SUBSTRATE COVERAGE — a reading defined everywhere
+
+**The relayed spec** summed Heaviside steps over the three bands. **Two
+defects, and both are the same defect.**
+
+**It returns ZERO exactly where the problem lives.** The bands are
+disjoint and do not cover the line, and a sum of steps over
+non-covering intervals is zero between them:
+
+```text
+T ∈ 320..600 K   → every Θ pair is 0 → Coverage(T) = 0
+the derived furnace seats sit at ~332..347 K
+```
+
+The worlds §4 exists to rescue read zero under it. **The gap was never
+in the lookup mechanism; it is in the bounds, and restating a bucket as
+a sum changes its notation, not its support.** It also introduces
+`BandCapacity(b)` — a fresh literal per bucket, in the section whose
+object is removing literals.
+
+**And the step function IS the absolute struck by §6a-bis.** A world one
+kelvin outside a bound reads nothing at all; a world one kelvin inside
+reads full. That is `condition == 5` again, wearing thermal clothes.
+
+**THE LAW — coverage is a positive reading, defined everywhere on the
+positive line, falling off continuously from each band's core.**
+
+```text
+coverage(T) is defined for every T > 0
+             reads FULL at a band's core
+             DESCENDS with distance from that core
+             is never zero-by-construction, only small
+```
+
+**Three things follow at once.** No temperature is unaccounted, so §7 is
+satisfied. A gap world reads POOR rather than IMPOSSIBLE, so a mineral
+line founding at 332 K is a hard place to live rather than an
+uninhabitable one — which is a game, where the alternative was a defect.
+And `band_of` returning `None` stops being an absolute exclusion: the
+named bands become the REGIONS WHERE COVERAGE IS RICH, never the test
+for whether a world counts.
+
+**Held for the operator:** the falloff's shape. It must be exact
+rational, monotone in distance from the core, and positive everywhere —
+beyond that it is a tuning question, and §7 binds it to read its own
+conditions rather than carry a literal.
+
+### 6d. WARD STANDING — proportional, so ties need no rule
+
+**The relayed spec** was a tuple argmax with two tie-breaks: capacity,
+then earliest founding stamp, then lower line hash. **It is
+deterministic and total, and it is a cliff.** Winner-take-all means a
+hair of capacity flips the entire ward, the boundary becomes a strategy
+target, and every line but one reads as though it held nothing. §6a-bis
+strikes it.
+
+**THE LAW — standing is held in proportion to capture capacity.**
+
+```text
+standing(L, ward) = capacity(L) as a share of the capacity standing
+                    in that ward — a rational in [0,1], for EVERY line
+```
+
+**The tie-break disappears because the cliff did.** Two lines of equal
+capacity hold equal standing; that is the correct answer and it needs no
+rule, no founding stamp and no hash. **A rule that exists only to
+resolve an equality is a sign the equality was made to matter by a
+threshold** — remove the threshold and the special case goes with it.
+
+**Succession stops being an event, as before.** A line's standing falls
+continuously with its capacity, and what it held redistributes to
+whoever holds capacity in that scope. No ceremony, no interregnum, and
+now no discontinuity at the moment of a fall.
+
+**Where a single holder IS required** — one name on a deed, one
+counterparty for a settle — take the greatest standing, and note that
+this is a PRESENTATION of the reading, never the reading itself. The
+underlying quantity stays proportional and the deterministic ordering
+(capacity, then stamp, then hash) survives ONLY as a display
+convention, with no mechanic reading it.
+
+## §7 THE BASE-LEVEL ACCOUNTING LAW
+
+> **"Everything needs accounting for at the microscopic/base level, with
+> algorithms that breathe with the system."**
+
+**Every quantity this economy uses is derived from measured state at the
+finest grain the engine holds, and no quantity is a policy number.** A
+number that cannot be derived is a number that will be wrong the moment
+the system moves, and it will not announce itself when it goes wrong.
+
+**The three tests any economic quantity must pass:**
+
+1. **Does it read the base state?** If it reads an aggregate someone
+   else computed, it is a second truth (Charter §11 rule 2).
+2. **Does it move when the system moves?** A quantity that holds still
+   while the world changes is a constant wearing a function's name.
+3. **Is it exact and replayable?** Rationals only. Two nodes must reach
+   the same value bit-for-bit or it is not a measurement.
+
+**This binds every parameter named `placeholder` in the tree**, and
+`dop::demurrage_per_tick` is the nearest one: a flat rate that should
+itself be a reading. Its shape is right and its value is still a
+constant.
+
+## §8 EXTERNAL WALLETS — deferred, on purpose
+
+External wallet integration is coming and is **NOT** built now. This is
+a prototype; the purse (§5) is internal and sufficient for every
+mechanic in this document. `01_ECONOMY` §5.2 stays intact and unstrained
+— nothing here needs a chain, and the tithe settles in-game because it
+settles in `cfe::dop::Resource`.
+
+## §9 WHAT OPENS
+
+**This section replaces a "what yields" table.** That framing was wrong:
+it read as capping provisions that are already flowing. **Nothing here
+is being closed off — each entry is a place the flow was DAMMED BY A
+CONSTANT, and this document opens it.**
+
+| where | what was damming it | what it opens into |
+|---|---|---|
+| `04` §4 | genesis ends at *"THEN the colony"* | founding continues into acquisition, purse, tithe |
+| `04` §1.2 | plasmic placement implied by metabolism | placement is acquired (§1, §2) |
+| conductor | derived furnace seats as the default | a continuous substrate reading (§6c) |
+| `cfe` | `SubstrateBand` as three windows | a reading defined everywhere (§6c) |
+| `dop` | `demurrage_per_tick` a flat constant | a rate that reads its own conditions (§7) |
+| decay | proceeds to the void | proceeds to the ward (§6a) |
+| stores | per-orb only | the purse as a whole-line reading (§5) |
+| `19` §4e | hot/cold "unreachable by default" | reachable by purchase or commission (§4) |
