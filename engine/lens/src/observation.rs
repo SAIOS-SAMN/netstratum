@@ -51,6 +51,7 @@ use crate::observer::Capacity;
 use crate::peel::{Depth, View};
 use crate::propagation::{Medium, Resonance};
 use crate::standing::Standing;
+use cfe::dop::ColonyOrb;
 use cfe::ratio::Ratio;
 use rfa_core::capacity::{flux, Degree, Flux};
 use rfa_core::{Delta, Support};
@@ -100,6 +101,20 @@ impl<'a> Observation<'a> {
     /// Change instrument.
     pub fn through(mut self, aperture: Aperture) -> Self {
         self.aperture = aperture;
+        self
+    }
+
+    /// **STAND AS A PARTICULAR OBSERVER** — the instrument is DERIVED
+    /// from that observer's own committed books, never handed to it
+    /// (`19_LENS` §16).
+    ///
+    /// This is the difference between a per-observer lens and a lens
+    /// with a per-observer-shaped parameter. [`Self::through`] still
+    /// exists because a caller may legitimately want a stated
+    /// instrument — but an instrument claimed to belong to an observer
+    /// comes from here, where nothing about it is a choice.
+    pub fn seen_by(mut self, orb: &ColonyOrb) -> Self {
+        self.aperture = Aperture::of_orb(orb);
         self
     }
 

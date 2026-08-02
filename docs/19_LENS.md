@@ -381,6 +381,29 @@ is owed, what capacity stands nearby.
 
 **η is DERIVED, never dialed** (LAW 6), for the reason §5c gives.
 
+**WHAT IT IS DERIVED FROM, settled 2026-08-02.** Until now this clause
+was a promise and the code took `retained` and `shed` as arguments, so η
+was dialed by whoever called it — the exact thing the sentence above
+forbids, sitting one file away from the sentence. The pairing that
+grounds it was already in the tree, and it is the thermal law's own
+(`05 §1.2`, encase-first / vent-overflow):
+
+```text
+    RETAINED   banked Joule + banked Sink   what encasement KEPT
+    SHED       entropy_vented (VENT-1)      what overflowed to the VOID
+```
+
+Both are committed state summed across every orb, so the medium is a
+fact about the world rather than an argument about it. A world that
+keeps more than it loses accelerates what propagates through it; one
+bleeding faster than it holds damps. **A world that has vented nothing
+is INERT, not infinitely fast** — the surround has taken nothing away
+yet, and that is a reading rather than a division by zero.
+
+This is what LAW 6 actually asks for: two observers reading one chain
+now derive one η independently, which a passed-in parameter could never
+guarantee no matter how carefully it was documented.
+
 ### 5c. WHY NO TOLERANCE CONSTANT SURVIVES
 
 The earlier draft here proposed a fixed ruled tolerance, then a
@@ -665,3 +688,73 @@ about paper.
 is ever read back AS STATE. The claim as written is stronger than the
 law requires and stronger than the code honours, and a false claim in a
 header is worth fixing even when the code is fine.
+
+---
+
+## §16 THE APERTURE IS EARNED, NOT ASSIGNED
+
+*(operator directive 2026-08-02, "both arms" — the companion to §5b)*
+
+§6 established the aperture as per-observer sensitivity without belief.
+It left the question §6 could not answer: **where does a particular
+observer's aperture come from?** Until now, nowhere. `Aperture` existed,
+nothing carried one, and every reading in the lane was taken through the
+flat instrument. The per-observer half of LAW 9 was written and
+unexercised.
+
+**An assigned aperture is a dialed parameter wearing a per-observer
+name.** If a caller hands an observer its sensitivity, the observer has
+not become distinct; the caller has. That is §5b's fault in the other
+arm, and it fails for the same reason: two callers could grind two
+instruments for one observer.
+
+**So the aperture DERIVES from what that observer has receipted.** The
+metabolism already said where a real one comes from — *tuning toward
+what has actually been observed* — and an orb's cohesion books ARE its
+receipted history of relation. The bias is read from them and nothing
+else.
+
+### 16a. THE HONEST MAPPING, and the limit stated rather than hidden
+
+The eight books are the RELATIONAL axes. The eleven channels are the
+HARMONIC ones. **They are different axes, and there is no faithful 8→11
+correspondence.** Only what genuinely grounds is mapped:
+
+```text
+    h[0]   value / spectral       given_in_crisis + returned_across
+                                  against extracted_across
+    h[3]   adjacency / boundary   bond_flow against severance_load
+    h[4]   higher torsion         covenants_fulfilled against
+                                  covenants_breached
+```
+
+`h[1..2]` (spatial) and `h[5..10]` (the remaining torsion slots) **stay
+FLAT.** Nothing in the books speaks to them. Inventing a correspondence
+to fill eleven slots would fabricate sensitivity an observer never
+earned, which is the same fault as reading an unobserved pair as a zero
+— and it would be undetectable afterwards, because a fabricated weight
+looks exactly like a measured one.
+
+**A book that never posted teaches nothing, and its channel does not
+move. Silence is not a signal of zero.** An observer with no history
+carries the flat instrument, which is the correct reading of *no
+history* rather than a reading of *no sensitivity*.
+
+The limit is pinned, not merely written: a test fails the day someone
+fills the ungrounded channels. That is the difference between a stated
+caveat and an enforced one, and this lane has learned the difference the
+hard way (§9 — a guard nobody has seen fail is not a guard).
+
+### 16b. WHAT THIS COSTS, AND WHY IT IS STILL RIGHT
+
+Three grounded channels out of eleven is a thin instrument, and it would
+be easy to read that as the derivation having mostly failed. It is the
+opposite. **The three that ground are real and the eight that do not are
+honestly empty**, so the aperture reports its own coverage. A full
+eleven-channel instrument built by invention would report nothing about
+coverage at all, and would read as complete while being mostly fiction.
+
+The remaining eight ground when the tree grows books that speak to them
+— spatial and torsional history the substrate does not yet keep. That is
+a measurement waiting on state, which is the lawful way to be
+incomplete.
