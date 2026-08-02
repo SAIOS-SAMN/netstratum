@@ -3454,6 +3454,12 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::ColonyFounded { name, .. } => {
                 format!("⚑ colony {} founded", style.strong(name))
             }
+            cfe::dop::ClosureEvent::SovereignUnionSealed { progenitor, sovereign, term_stamps } => {
+                format!(
+                    "⚭ SOVEREIGN UNION — {progenitor:?} + {sovereign:?}, reviewed at {} stamps (a horizon, never an expiry)",
+                    style.strong(&term_stamps.to_string())
+                )
+            }
             cfe::dop::ClosureEvent::ZoneBuilt { tile, kind, .. } => format!(
                 "⛏ tile {} ({}) zoned {}",
                 style.strong(&tile.to_string()),

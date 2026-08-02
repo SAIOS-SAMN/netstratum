@@ -558,4 +558,39 @@ impl World {
             },
         )
     }
+
+    /// **THE UNION REVIEW — derived, never stored** (D5, operator
+    /// ruling 2026-08-02). When the sovereign union was struck, and
+    /// whether its review has fallen due at `stamp`.
+    ///
+    /// `Some((sealed_at, due))` if the union stands; `None` if it was
+    /// never struck. **`due` is a REVIEW falling due, NEVER a lapse.**
+    /// Nothing settles, nothing expires, and no capacity is dropped
+    /// when it turns true: a `BOND-1` term ENDS its bond at
+    /// `sealed + term`, and if the union did that, D5's breach clause
+    /// would fire at stamp 1500 — *D stops and V suffocates; V stops
+    /// and D freezes* — and the foundation would lapse on a timer. The
+    /// union stands past the horizon; what falls due is the operator's
+    /// re-approval.
+    ///
+    /// Read from the chronicle on demand, so there is no counter to
+    /// drift and no field to migrate (`09_LEDGER` §1.2). This is the
+    /// consumer that keeps the deed from being a term that only
+    /// resonates (`18` Article III LAW 8).
+    pub fn union_review(&self, stamp: u64) -> Option<(u64, bool)> {
+        self.chronicle
+            .receipts()
+            .iter()
+            .find(|receipt| {
+                matches!(receipt.event, ClosureEvent::SovereignUnionSealed { .. })
+            })
+            .map(|receipt| {
+                let horizon = match &receipt.event {
+                    ClosureEvent::SovereignUnionSealed { term_stamps, .. } => *term_stamps,
+                    _ => crate::dop::UNION_REVIEW_HORIZON,
+                };
+                (receipt.stamp, stamp >= receipt.stamp.saturating_add(horizon))
+            })
+    }
+
 }

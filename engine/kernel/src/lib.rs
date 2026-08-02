@@ -33,10 +33,10 @@
 pub mod bridge;
 pub mod motion;
 
-use cfe::dop::{ClosureEvent, Resource};
+use cfe::dop::{ClosureEvent, Office, Resource, UNION_REVIEW_HORIZON};
 use cfe::ipsal::Scope;
 use cfe::ratio::{ratio, Ratio};
-use cfe::world::Committed;
+use cfe::world::{Committed, SOVEREIGN};
 use rfa_core::Vacuity;
 use solver_verify::{verify_work, Difficulty, WorkBroken};
 
@@ -214,6 +214,31 @@ pub enum Unlawful {
     /// nothing without telling it where to begin, and `18` §2b bars the
     /// collapse wherever the system computes.
     MintWithoutOwnStanding { orb: u64, axial: Vec<Ratio> },
+    /// D5 — THE SOVEREIGN UNION was struck by someone other than the
+    /// ROOT ENTITY. The union is the standing the whole world is
+    /// raised on, and no delegate may enter the offices into it: a
+    /// granted scope is authority to act WITHIN the world, never
+    /// authority to constitute it.
+    ///
+    /// **Approval is WHO ACTS, never a field.** An earlier design
+    /// carried `approved_by_operator: bool` on the deed. A deed is a
+    /// CLAIM, and a claim asserting its own approval is forgeable by
+    /// whoever builds it — the kernel would have had nothing to check
+    /// the bool against. I2 containment already binds the actor
+    /// unforgeably, so identity IS the signature.
+    UnionNotStruckByRoot { actor: u64 },
+    /// D5 — the union named the wrong offices. It is `Progenitor` with
+    /// `Sovereign`, exactly once each: two progenitors or two
+    /// sovereigns is not a DYAD, and a dyad is the whole form (`17`
+    /// §3 — two that STAY TWO, neither deriving legitimacy from the
+    /// other).
+    UnionMalformed { progenitor: Office, sovereign: Office },
+    /// D5 — the union declared a review horizon other than the ruled
+    /// one. The term is a REVIEW, not an expiry, and it is fixed at
+    /// [`cfe::dop::UNION_REVIEW_HORIZON`]: a deed free to name its own
+    /// horizon could set it past any reachable stamp and never come up
+    /// for approval at all.
+    UnionTermNotRuled { declared: u64, ruled: u64 },
 }
 
 /// THE JUDGE. Does `step` lawfully carry `prior` to `next`? Pure,
@@ -231,6 +256,7 @@ pub fn lawful(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Un
     containment(prior, step)?;
     exactness(next)?;
     capacity_law(prior, step)?;
+    union_law(step)?;
     creation(step)?;
     decay(prior, step)?;
     gauge_law(prior, next, step)?;
@@ -307,6 +333,56 @@ fn capacity_law(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
         // already exists needs no gradient to justify it.
         _ => Ok(()),
     }
+}
+
+/// INVARIANT — D5, THE SOVEREIGN UNION (operator ruling 2026-08-02).
+///
+/// The union of the offices `D(Ω)` PROGENITOR and `V(Ω)` SOVEREIGN is
+/// a CONSTITUTIONAL deed: it moves no value, opens no plane and shifts
+/// no key. What it must do is be impossible to strike falsely, and
+/// three things make it so.
+///
+/// **THE ROOT ENTITY, and only it.** A granted scope is authority to
+/// act WITHIN the world; it is never authority to constitute the world.
+/// `scope_of` puts this deed in Build so the ordinary containment
+/// check applies, and that is NECESSARY BUT NOT SUFFICIENT — this arm
+/// additionally requires `actor == SOVEREIGN`, the root entity id.
+/// Approval is WHO ACTS: a bool on the deed would be set by whoever
+/// built it.
+///
+/// **A DYAD, exactly.** One `Progenitor` and one `Sovereign`. Two of
+/// either is not a union of two offices, and `17` §3 makes the pair
+/// the whole form — two that STAY TWO, neither deriving its legitimacy
+/// from the other.
+///
+/// **THE RULED HORIZON.** A deed free to name its own term could set
+/// one past any reachable stamp and never come up for approval, which
+/// would make the review a formality. The term is fixed.
+///
+/// Pure and total like the rest: reads the step only, no clock, no
+/// history — the review FALLS DUE by arithmetic on the receipt's own
+/// stamp, and nothing about it is decided here.
+fn union_law(step: &Step) -> Result<(), Unlawful> {
+    let ClosureEvent::SovereignUnionSealed { progenitor, sovereign, term_stamps } = &step.event
+    else {
+        return Ok(());
+    };
+    if step.actor != SOVEREIGN {
+        return Err(Unlawful::UnionNotStruckByRoot { actor: step.actor });
+    }
+    if *progenitor != Office::Progenitor || *sovereign != Office::Sovereign {
+        return Err(Unlawful::UnionMalformed {
+            progenitor: *progenitor,
+            sovereign: *sovereign,
+        });
+    }
+    if *term_stamps != UNION_REVIEW_HORIZON {
+        return Err(Unlawful::UnionTermNotRuled {
+            declared: *term_stamps,
+            ruled: UNION_REVIEW_HORIZON,
+        });
+    }
+    Ok(())
 }
 
 /// INVARIANT — element conservation (THE ELEMENT LAW, operator ruling
@@ -483,6 +559,13 @@ fn covered(event: &ClosureEvent) -> bool {
         // (no value moves, no ratios): registering an agent and opening
         // or shutting its scopes.
         | E::EntityRegistered { .. } | E::ScopeGranted { .. } | E::ScopeRevoked { .. }
+        // D5 — THE SOVEREIGN UNION. A CONSTITUTIONAL deed: no value
+        // moves, no ratio is carried, no plane opens. I2 containment
+        // covers it and `union_law` adds the three checks the union
+        // needs — the ROOT entity struck it, the parties are a dyad of
+        // two different offices, and the review horizon is the ruled
+        // one. Ratified red-first by `sovereign_union_pins`.
+        | E::SovereignUnionSealed { .. }
         // W-A slice-1 — the BANKED-NEUTRAL authority deeds. Each one's
         // `world.rs::replay` arm touches NO bank (it sets a flag, a
         // seal, a list: terrain seed, star, planet site, practice,
@@ -1028,7 +1111,12 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // KERNEL-TAXON: the drafted Build-class arm coder-03 named for
         // their #42 — unenforced until their covered() entry + witness.
         | E::TaxonSealed { .. }
-        | E::StationSeated { .. } => {
+        | E::StationSeated { .. }
+        // D5 — THE SOVEREIGN UNION. Build-class: it opens the standing
+        // the whole world is raised on. The scope is necessary and NOT
+        // sufficient — `union_law` additionally requires the ROOT
+        // entity, because no delegate may strike the union.
+        | E::SovereignUnionSealed { .. } => {
             Some(Scope::Build)
         }
         // Raze — demolish or lift what was raised.

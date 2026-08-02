@@ -409,12 +409,55 @@ is when the union comes back for approval, not when it stops standing.
 clause must be struck rather than reinterpreted** — an expiring
 foundation needs its own ruling, not an inscription.
 
-**WHAT A UNION DEED WOULD OWE, if one is wanted:** a closure event
-whose parties are OFFICES rather than orbs, a term that reviews rather
-than settles, and something that READS it — under Article III LAW 8 a
-receipt nothing consults is a term that only resonates. That is a codec
-tag and a kernel arm, and it is not taken from this lane without the
-ruling.
+**THE UNION IS NOW DEEDED** (operator ruling 2026-08-02, executed).
+`ClosureEvent::SovereignUnionSealed { progenitor, sovereign,
+term_stamps }` at **TAG 90**, judged by `kernel::union_law` and read by
+`World::union_review`.
+
+```text
+    PARTIES    cfe::dop::Office — Progenitor and Sovereign, a TYPE, so
+               an office is never seated as an orb id. The same type
+               settles the namespace collision: `world::SOVEREIGN` is
+               entity 1, the actor who ACTS; `Office::Sovereign` is
+               V(Ω), what STANDS.
+
+    APPROVAL   THE ROOT ENTITY, and nothing else. `scope_of` puts the
+               deed in Build so containment applies, and `union_law`
+               requires `actor == SOVEREIGN` on top of it — a granted
+               scope is authority to act WITHIN the world, never to
+               constitute it.
+
+    DYAD       one Progenitor and one Sovereign, exactly. Two of
+               either refuses `UnionMalformed`: a bond from a thing to
+               itself is not a bond (§3).
+
+    TERM       UNION_REVIEW_HORIZON = 1500 stamps, and the deed may
+               NOT name its own. A free horizon could be set past any
+               reachable stamp, and the review would become a
+               formality.
+
+    REVIEW     `World::union_review(stamp) -> Option<(sealed_at, due)>`
+               — derived from the chronicle, never stored.
+```
+
+**TAG 90, NOT 0x40.** The directive named `0x40`; tag **64 is already
+the NS-5 mesh head** (MESH-1a, the announcement record). A union
+written there would decode a mesh announcement as a union and a union
+as an announcement. 90 sits past the highest assigned tag (89), so no
+retired meaning is revived either.
+
+**NO `approved_by_operator` FLAG.** The drafted struct carried one. A
+deed is a CLAIM, and a claim asserting its own approval is forgeable by
+whoever constructs it — the kernel would have had nothing to check the
+bool against. I2 containment already binds the actor unforgeably, so
+IDENTITY IS THE SIGNATURE and the flag would have been a hole wearing
+the shape of a guarantee.
+
+**AND THE HORIZON REVIEWS.** Pinned end to end
+(`sovereign_union_pins::the_horizon_reviews_and_never_expires`): past
+stamp `sealed + 1500` the review falls DUE, the union STILL STANDS, and
+the world it stands over is untouched — colony, zones and banks exactly
+as they were. Nothing settles, nothing lapses, no capacity drops.
 
 **They are NOT counterparts and the receipt is not their predecessor** — it is
 the MEDIUM the bond settles on (`bond_flow` is a receipted standing
