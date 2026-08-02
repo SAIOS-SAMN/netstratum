@@ -20,6 +20,7 @@
 //!   (THE REPLAY-COMPLETE LAW — an intact chain over a non-solution is
 //!   not a solution). Finding is search; checking is O(program length).
 
+pub mod pair_delta;
 pub mod search;
 pub mod volume;
 
