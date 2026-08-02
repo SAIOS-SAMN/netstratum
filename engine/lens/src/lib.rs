@@ -13,6 +13,7 @@
 //! re-derives from the chain byte-for-byte.
 
 pub mod json;
+pub mod peel;
 pub mod render;
 
 use cfe::world::Committed;
