@@ -290,3 +290,73 @@ document does not make it.
 
 Steps 1–3 are what make the word "kernel" true. Step 4 is what makes it
 load-bearing.
+
+## §3a WHY WE ARE JUDGING AT ALL — and why `-> Committed` is still linear (operator, 2026-08-02)
+
+### 3a.1 The judge exists because the transition is defined twice
+
+    pub fn lawful(prior: &Committed, next: &Committed, step: &Step)
+        -> Result<(), Unlawful>
+
+**It takes `next` as an argument.** Someone else computed the answer and
+the kernel is handed it to grade. That is the defect in the signature —
+§1's test says *not a checker beside the thing that transitions, THE
+definition* — and "judging" is simply the shape a definition takes
+after being demoted to an examiner.
+
+Locally there is nothing to judge: the proposer and the judge are the
+same authority, so the check catches coder bugs, never an adversary.
+Cross-node, what looks like judging is **re-derivation** — the arbor
+already says it (*"Admission is re-judging, never trust; a judgment you
+cannot re-run is a judgment you do not have"*). You do not grade a
+neighbour's claim; you recompute it and compare.
+
+**So #30's target is not "apply wraps judge". It is: the judge
+disappears.** When the signature no longer accepts `next`, the
+duplication is structurally gone and the finish line is testable.
+
+### 3a.2 BUT `-> Committed` IS STILL A LINE
+
+`Result<Committed, Refused>` returns a POINT. One lump state with its
+axes flattened inside it, and no way to read which axes moved or in
+what order. That is the same scalar collapse as `O(1)` for complexity
+and `C(Δ) = Σ|R|` for residuals, made about the transition itself.
+
+**The multi-axial form returns the MOVE, not the resulting point:**
+
+    transition(prior, step) -> Result<Move, Refused>
+    prior ∘ move = next                    (∘ NOT commutative)
+
+`Move` carries the per-axis change — banked per `(orb, resource)`, the
+gauge move, the element move, the station move — rather than a whole
+new world.
+
+**Four reasons this is structural, not stylistic:**
+
+1. **THE MOVE ALREADY EXISTS AND IS THROWN AWAY.** `lib.rs:611`:
+   `lawful_deltas(prior, event) -> Result<Vec<(Resource, Ratio)>, Unlawful>`.
+   That IS the move. `conservation` uses it only to compare against the
+   `next` it was handed, then drops it. `gauge_law` and `element_law`
+   do the same on their axes. **Every deed computes its own move and
+   discards it.**
+2. **MOVES COMPOSE; STATES DO NOT.** Two moves compose into a move; two
+   endpoints compose into nothing. `arbor::Commitment` stores
+   `state: [u8; 32]` — a state HASH. **That is why the arbor cannot
+   join** (`K3` wall 1): you cannot merge two branches by merging their
+   endpoints, but composing their moves is defined. The linear framing
+   and the missing join are ONE defect, not two.
+3. **ORDER BECOMES EXPRESSIBLE.** `a ∘ b ≠ b ∘ a`, and the difference
+   is the commutator — which `18_TORSION` §2k.1 established IS the
+   torsion. A state-valued transition cannot represent that two
+   orderings differ; it hands back two endpoints and the ordering is
+   gone. A move-valued one carries it.
+4. **REFUSAL IS MULTI-AXIAL TOO.** `Unlawful` names ONE break. A deed
+   can fail on several axes at once, and a single-variant refusal
+   reports the first and hides the rest — the same collapse again, on
+   the error side.
+
+**The corrected target.** `transition` returns a `Move`, `replay`'s 113
+arms become callers that compose moves rather than a second
+implementation that rewrites states, and `K3`'s join becomes composition
+rather than a wire amendment. **Not yet built** — recorded so the work
+aims at the right shape.
