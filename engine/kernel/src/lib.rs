@@ -987,13 +987,23 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // KERNEL-TAXON: the drafted Build-class arm coder-03 named for
         // their #42 — unenforced until their covered() entry + witness.
         | E::TaxonSealed { .. }
-        | E::StationSeated { .. } => {
+        | E::StationSeated { .. }
+        // BOOK-1 (19_LENS §16): minting DECLARES a standing account and
+        // archiving ALTERS one — both extend or amend the world's
+        // structure, neither moves banked value. Drafted law, matching
+        // `world::books`' own scope checks.
+        | E::BookMinted { .. } | E::BookArchived { .. } => {
             Some(Scope::Build)
         }
         // Raze — demolish or lift what was raised.
         E::ZoneRazed { .. } | E::WardLifted { .. } | E::VeilLifted { .. } => Some(Scope::Raze),
         // Collect — settle or move banked value.
-        E::YieldCollected { .. } | E::UpkeepSettled { .. } | E::ResourceTransferred { .. }
+        // BOOK-1: a posting moves BOOK value — a dual entry, both sides
+        // at once. It touches no banked resource, so it settles nothing
+        // and conserves trivially; the scope is Collect because it is a
+        // value movement within the orb's own accounts.
+        E::BookPosted { .. }
+        | E::YieldCollected { .. } | E::UpkeepSettled { .. } | E::ResourceTransferred { .. }
         | E::OverflowAbsorbed { .. } | E::BondSettled { .. } | E::CovenantReleased { .. }
         | E::FrictionSettled { .. } | E::ApertureSent { .. } | E::ApertureReceived { .. }
         | E::CrystalDrawn { .. } | E::AssayStruck { .. } | E::OfferCleared { .. }

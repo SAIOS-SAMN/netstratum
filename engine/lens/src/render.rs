@@ -270,6 +270,28 @@ pub fn render_receipt(receipt: &Receipt) -> String {
     w.array(receipt.provenance.iter().map(|p| p.to_string()));
     let (name, detail): (&str, String) = match &receipt.event {
         E::ColonyFounded { name, .. } => ("colony_founded", name.clone()),
+        // BOOK-1 (19_LENS §16) — the open registry's three deeds. The
+        // kind is shown truncated: it is an identity, not a reading, and
+        // a full digest in a display line teaches nobody anything.
+        E::BookMinted { name, kind, .. } => (
+            "book_minted",
+            format!("{name} ({})", &hex(&kind.0)[..8]),
+        ),
+        E::BookPosted { kind, kept, lost, .. } => (
+            "book_posted",
+            format!(
+                "{} kept / {} lost on {}",
+                ratio_str(kept),
+                ratio_str(lost),
+                &hex(&kind.0)[..8]
+            ),
+        ),
+        // Closed to WRITING only — the display says so, because the
+        // word "archived" alone reads as gone (§16c).
+        E::BookArchived { kind, .. } => (
+            "book_archived",
+            format!("{} closed to writing", &hex(&kind.0)[..8]),
+        ),
         E::ZoneBuilt { tile, kind, .. } => ("zone_built", format!("{} @ {tile}", zone_name(*kind))),
         E::YieldCollected { resource, amount, .. } => (
             "yield_collected",

@@ -38,6 +38,7 @@ pub use rules::{demurrage_due, ease_of, in_crisis, standing_supply};
 
 
 pub mod accord;
+pub mod books;
 pub mod core;
 pub mod economy;
 pub mod gauge;

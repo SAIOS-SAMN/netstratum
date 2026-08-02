@@ -147,5 +147,29 @@ pub enum ActionRefused {
     /// COVENANT-1 — one OPEN covenant per (obligor, beneficiary,
     /// resource); a vitrified pact cannot be cancelled, only run out.
     CovenantAlreadySealed,
+    /// BOOK-1 (19_LENS §16) — a book kind is content-addressed over its
+    /// NORMALIZED name, so re-declaring one is not a second book. This
+    /// IS the novelty gate: exact, unthresholded, and it names the book
+    /// already standing rather than a distance.
+    BookAlreadyMinted { name: String },
+    /// BOOK-1 — the charter's four are law, not inventory: they cannot
+    /// be minted over, and they cannot be archived by anyone.
+    CharterBookNotMintable { name: String },
+    /// BOOK-1 (§16c) — closing the covenant book must never be a way to
+    /// stop being measured by it.
+    CharterBookNotArchivable { name: String },
+    /// BOOK-1 — a name that normalizes to nothing addresses nothing.
+    BookNameEmpty,
+    /// BOOK-1 — this orb keeps no such book.
+    NoSuchBook,
+    /// BOOK-1 (§16c) — an archived book is closed to WRITING. It keeps
+    /// every entry it took and stays readable forever.
+    BookClosedToWriting { name: String },
+    /// BOOK-1 — a book already closed cannot be closed again.
+    BookAlreadyArchived { name: String },
+    /// BOOK-1 — a book ACCRUES. A negative posting would let an orb
+    /// unwrite its own history, which is what the chronicle exists to
+    /// prevent.
+    BookPostingNegative,
 }
 

@@ -2966,6 +2966,32 @@ fn amount(value: &Ratio) -> String {
 
 fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
     let text = match refusal {
+        // BOOK-1 (19_LENS §16) — each refusal names what stands rather
+        // than a code, because the reason IS the rule here.
+        ActionRefused::BookAlreadyMinted { name } => format!(
+            "{} is already kept — a book is its normalized name, so re-declaring it is not a second book",
+            style.strong(name)
+        ),
+        ActionRefused::CharterBookNotMintable { name } => format!(
+            "{} is a charter book — law, not inventory",
+            style.strong(name)
+        ),
+        ActionRefused::CharterBookNotArchivable { name } => format!(
+            "{} is a charter book and is closeable by nobody — otherwise it could be closed by whoever it convicts",
+            style.strong(name)
+        ),
+        ActionRefused::BookNameEmpty => "a book needs a name that is not only whitespace".to_string(),
+        ActionRefused::NoSuchBook => "no such book on this orb".to_string(),
+        ActionRefused::BookClosedToWriting { name } => format!(
+            "{} is archived — closed to writing, and still fully readable",
+            style.strong(name)
+        ),
+        ActionRefused::BookAlreadyArchived { name } => {
+            format!("{} is already closed", style.strong(name))
+        }
+        ActionRefused::BookPostingNegative => {
+            "a book accrues — a negative posting would unwrite history".to_string()
+        }
         ActionRefused::NoColony => format!(
             "no colony yet — start with {}",
             style.strong("found <name>")
@@ -3453,6 +3479,18 @@ fn chronicle(world: &World, style: &Style) {
         let described = match &receipt.event {
             cfe::dop::ClosureEvent::ColonyFounded { name, .. } => {
                 format!("⚑ colony {} founded", style.strong(name))
+            }
+            // BOOK-1 — the open registry's three deeds.
+            cfe::dop::ClosureEvent::BookMinted { name, .. } => {
+                format!("📖 book {} minted", style.strong(name))
+            }
+            cfe::dop::ClosureEvent::BookPosted { kept, lost, .. } => format!(
+                "📖 posted {} kept / {} lost",
+                style.strong(&amount(kept)),
+                amount(lost)
+            ),
+            cfe::dop::ClosureEvent::BookArchived { .. } => {
+                "📖 book closed to writing (still readable)".to_string()
             }
             cfe::dop::ClosureEvent::ZoneBuilt { tile, kind, .. } => format!(
                 "⛏ tile {} ({}) zoned {}",

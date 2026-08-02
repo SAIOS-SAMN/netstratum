@@ -41,6 +41,7 @@
 //! (`09 §2.1`–`§2.4`), which is why an open set costs no translation —
 //! the shape was already uniform, only the ENUMERATION was frozen.
 
+use cfe::books::CHARTER_BOOKS;
 use cfe::dop::ColonyOrb;
 use cfe::ratio::{ratio, Ratio};
 
@@ -101,52 +102,40 @@ impl Book {
 
 /// **THE BOOKS AN ORB KEEPS — the single enumeration point.**
 ///
-/// Today the charter's four pairs are fixed fields on `ColonyOrb` with
-/// their wire encoding deferred to IDEO-1, so they are read off by
-/// name here and nowhere else. **When committed state grows a real
-/// registry — books a civilization minted, and the stamp of those it
-/// archived — this function appends it and NOTHING ELSE IN THE LANE
-/// CHANGES.** That is the whole point of the shape: the instrument
-/// below never names a book, so the lane's width follows the
-/// civilization rather than the source code.
+/// **Now fed by the real registry** (`BOOK-1`, cfe `world::books`).
+/// `ColonyOrb::books` presents the charter's four and everything the
+/// civilization minted through one view, so this function names no book
+/// and counts nothing: the lane's width follows the civilization rather
+/// than the source code, which is the whole point of the shape.
 ///
-/// Returned id-ascending, the canonical order this tree uses for every
-/// open ledger.
+/// The charter list comes from `cfe` rather than being repeated here —
+/// cfe is the authority on which books are law, and a second copy of
+/// that list in a reading layer is exactly the kind of drift `19_LENS`
+/// §1a exists to prevent.
+///
+/// Returned in the registry's own canonical order: charter books first,
+/// then minted books kind-ascending.
 pub fn books_of(orb: &ColonyOrb) -> Vec<Book> {
-    let mut books = vec![
-        // TRADE-1 (09 §2.1) — the compassion books.
-        Book {
-            id: BookId::Chartered("TRADE-1"),
-            kept: orb.given_in_crisis.clone(),
-            lost: orb.drawn_in_crisis.clone(),
-            archived: false,
-        },
-        // ABSORB-1 (09 §2.4) — the morality books.
-        Book {
-            id: BookId::Chartered("ABSORB-1"),
-            kept: orb.returned_across.clone(),
-            lost: orb.extracted_across.clone(),
-            archived: false,
-        },
-        // BOND-1 (09 §2.2) — the love books.
-        Book {
-            id: BookId::Chartered("BOND-1"),
-            kept: orb.bond_flow.clone(),
-            lost: orb.severance_load.clone(),
-            archived: false,
-        },
-        // COVENANT-1 (09 §2.3) — the integrity books.
-        Book {
-            id: BookId::Chartered("COVENANT-1"),
-            kept: orb.covenants_fulfilled.clone(),
-            lost: orb.covenants_breached.clone(),
-            archived: false,
-        },
-        // ── civilization-minted books land here, from committed state,
-        //    the day the registry exists. See 19_LENS §16c (relayed).
-    ];
-    books.sort_by(|a, b| a.id.cmp(&b.id));
-    books
+    orb.books()
+        .into_iter()
+        .map(|held| Book {
+            id: match held.chartered {
+                // Unreachable in practice — cfe builds the view and the
+                // list from one array — so this falls back rather than
+                // panicking. A reading never loses a book it cannot
+                // classify; at worst it reads as minted.
+                true => CHARTER_BOOKS
+                    .iter()
+                    .find(|name| **name == held.name)
+                    .copied()
+                    .map_or(BookId::Minted(held.kind.0), BookId::Chartered),
+                false => BookId::Minted(held.kind.0),
+            },
+            kept: held.kept,
+            lost: held.lost,
+            archived: held.archived,
+        })
+        .collect()
 }
 
 /// **THE REGARD — an observer's sensitivity across the books it keeps.**

@@ -767,20 +767,92 @@ the covenant book is closeable by exactly whoever it convicts. That is
 why `BookId` carries `Chartered` against `Minted` rather than being a
 bare identifier.
 
-### 16d. WHAT IS NOT YET BUILT, AND WHOSE IT IS
+### 16d. BOOK-1 — THE REGISTRY, BUILT
 
-The lens side is complete: the set is open, the instrument follows it,
-and both rules above are pinned. **The committed-state half is not
-this lane's to land.** A registry of minted books — the mint event, the
-archive stamp, the replay rule, canonical wire order, and the gate on
-who may mint — is world law living in `cfe`, alongside the element
-stores it would follow (`14 §2`).
+*(operator directive 2026-08-02: take the cfe side)*
 
-Until it exists, `books_of` enumerates the charter's four and the open
-path is exercised by pins rather than by live minting. **The lane is
-ready and not yet fed**, and that is stated here rather than left to be
-discovered.
+The committed-state half is landed. `cfe::books` holds the identity and
+the dual account; `cfe::world::books` holds three deeds and no fourth:
 
-Recorded for whoever holds that territory: a mint gate almost certainly
-wants a measured-novelty test, so a civilization cannot widen its own
-instrument by minting near-duplicate books.
+```text
+    MINT      declare a kind of account         BookMinted    tag 91
+    POST      a DUAL entry, both sides at once  BookPosted    tag 92
+    ARCHIVE   close it to WRITING only          BookArchived  tag 93
+                                    orb registry entry  tag 90
+```
+
+**The specification named tags `0x3E`/`0x3F`. Those are 62 and 63, and
+both are LIVE.** Transcribing them would have corrupted the wire.
+Allocated from genuinely free space instead, verified against both the
+encode and decode tables and against capacity-lane's own allocations.
+
+`ColonyOrb::books` presents the charter four and everything minted
+through ONE view, so a reader never learns which storage a book came
+from. **The charter four are not moved** — they keep their landed fields
+and their landed entry (tag 41, IDEO-1); rewriting sealed state to make
+a uniform container would break every existing chronicle for a tidiness
+that buys nothing.
+
+An orb that minted nothing emits no book entry at all and stays
+byte-identical to a pre-BOOK-1 orb.
+
+### 16e. THE NOVELTY GATE IS IDENTITY, NOT A THRESHOLD
+
+The specification asked for `distance(schema_new, schemas) ≥ θ_novelty`.
+**That is refused, and replaced by something exact.**
+
+A kind is content-addressed over its NORMALIZED name, so two
+declarations that normalize alike ARE one kind. A duplicate does not
+fail a distance test — it is the same book, and the second mint refuses
+naming the one already standing. Case, padding and inner-whitespace
+variants all collapse.
+
+**Why the threshold was refused, the second reason being the decisive
+one:**
+
+1. `θ` is a dialed constant of exactly the shape §5c and Article III
+   strike — *the bounded dynamic parameters a descent needs to be
+   tuned*. A mint gate is the last place a tunable belongs, because
+   whoever tunes it decides who may keep books.
+2. **There is no structural schema to measure a distance over.** A book
+   declares a name and accrues two sides; nothing machine-checkable
+   distinguishes `Valor` from `Valour` except the strings. A "schema
+   distance" could only be string distance — a LINGUISTIC judgment
+   wearing a numeric coat — and it would refuse genuinely distinct books
+   as readily as duplicates.
+
+**What the exact gate does NOT catch, said plainly:** a deliberate
+near-miss such as `valor-2`. No honest test here can, because that IS a
+different name and may well be a different book.
+
+**So deliberate spam is not answered by a gate, and must not be.** It is
+answered by refusing to reward width. `Regard::width` is a READING, and
+§1 rules that nothing optimizes a reading. An orb that mints a thousand
+empty books has a thousand empty books and has bought nothing: an
+unposted book opens no channel at all. A mint COST would bound it
+further; that magnitude is a charter decision and was not taken here.
+
+### 16f. WHAT BOOK-1 REFUSES, AND WHY EACH REFUSAL NAMES ITS REASON
+
+```text
+    BookAlreadyMinted          the gate — names the book already standing
+    CharterBookNotMintable     the four are law, not inventory
+    CharterBookNotArchivable   closeable by nobody (§16c)
+    BookClosedToWriting        archived — and still fully readable
+    BookAlreadyArchived        a closed book closes once
+    BookPostingNegative        a book accrues; history is not unwritten
+    BookNameEmpty              a name that normalizes to nothing
+    NoSuchBook                 this orb keeps no such book
+```
+
+`CharterBookNotArchivable` exists because a charter book has no minted
+account to find, so it would otherwise fall out as `NoSuchBook` — a true
+refusal for a MISLEADING reason. Here the reason IS the rule, so it is
+named.
+
+**Conservation:** a posting moves BOOK value and touches no banked
+resource, so it settles nothing and conserves trivially. The kernel's
+`scope_of` is exhaustive by design — adding an event forces a scope
+decision at compile time — and the three arms are drafted there to match
+the deeds' own scope checks: mint and archive are Build, posting is
+Collect.
