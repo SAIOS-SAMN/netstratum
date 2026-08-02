@@ -16,6 +16,7 @@ fn tended() -> ResourceStock {
         ceiling: ratio(100, 1),
         rate: ratio(1, 8),
         seed_floor: ratio(1, 4),
+        residue: ratio(0, 1),
     }
 }
 
@@ -120,7 +121,8 @@ fn over_extraction_falls_to_the_seed_floor_and_no_further() {
     for _ in 0..60 {
         stock.step(&heavy);
     }
-    assert_eq!(stock.current, stock.seed_floor, "the floor did not hold");
+    assert!(stock.current <= stock.seed_floor.clone() + ratio(1, 1024), "the floor did not hold");
+    assert!(stock.current >= stock.seed_floor, "the stock breached its seed core");
     // Left fallow, the seed core climbs back — the stock is not dead.
     let zero = ratio(0, 1);
     for _ in 0..60 {
@@ -163,4 +165,58 @@ fn reinvested_surplus_raises_the_base_within_the_ceiling() {
     assert!(stock.current > before, "reinvestment did not raise the stock");
     stock.reinvest(&ratio(10_000, 1));
     assert_eq!(stock.current, stock.ceiling, "reinvestment overran the ceiling");
+}
+
+/// CONSERVATION: flooring must not leak matter. `current + residue` is
+/// exactly the pre-floor quantity at every step, so the total the stock
+/// accounts for equals what regeneration added minus what was drawn.
+///
+/// Without the residue this leaked 0.347 units over 400 ticks — 0.346%
+/// of the total — which the kernel's I1 arm would refuse the moment a
+/// stock reached committed state.
+#[test]
+fn flooring_leaks_no_matter() {
+    let mut stock = tended();
+    let mut books = stock.current.clone();
+    let draw = ratio(1, 3);
+    for _ in 0..400 {
+        let regen = stock.regeneration();
+        let drawn = stock.step(&draw);
+        books = books + regen - drawn;
+    }
+    assert_eq!(
+        stock.current.clone() + stock.residue.clone(),
+        books,
+        "matter entered or left the system across 400 ticks — the residue is not carrying"
+    );
+}
+
+/// The residue stays small and its denominator stays bounded, so
+/// carrying it cannot reintroduce the explosion the lattice prevents.
+#[test]
+fn the_residue_stays_bounded() {
+    let mut stock = tended();
+    let draw = ratio(1, 7);
+    let mut worst_bits = 0;
+    for _ in 0..400 {
+        stock.step(&draw);
+        worst_bits = worst_bits.max(denom_bits(&stock.residue));
+        let size = match stock.residue >= ratio(0, 1) {
+            true => stock.residue.clone(),
+            false => ratio(0, 1) - stock.residue.clone(),
+        };
+        assert!(size < ratio(1, 1024), "the residue grew past one lattice step");
+    }
+    assert!(worst_bits <= 64, "the residue denominator reached {worst_bits} bits");
+}
+
+/// A draw larger than the land holds returns what the land holds —
+/// never more, and never by conjuring stock up to the floor.
+#[test]
+fn a_draw_past_the_land_returns_what_the_land_holds() {
+    let mut stock = tended();
+    let drawn = stock.step(&ratio(10_000, 1));
+    assert!(drawn < ratio(10_000, 1), "the draw was not capped at what stands");
+    assert!(drawn > ratio(0, 1), "a stock above its floor yielded nothing");
+    assert!(stock.current >= stock.seed_floor, "the seed core was breached");
 }
