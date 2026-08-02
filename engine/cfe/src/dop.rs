@@ -196,6 +196,7 @@
 //!   TLV tag): Resource::Crystal = 7 (banked entry, tag 18);
 //!   ZoneKind::Resonator = 7 (zone entry, tag 17).
 
+use crate::books::{kind_of, BookAccount, BookKind, BookView};
 use crate::ratio::{self, ratio, Ratio};
 use crate::tlv;
 
@@ -717,6 +718,16 @@ pub struct Zone {
 /// things that chronicle (NS-3 §2.3).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ClosureEvent {
+    /// BOOK-1 (19_LENS §16) — a civilization declared a new kind of
+    /// account. The kind is content-addressed over the normalized name,
+    /// so re-declaring an existing book is not a second book.
+    BookMinted { orb_id: u64, kind: BookKind, name: String },
+    /// BOOK-1 — a DUAL entry: both sides of one account, together.
+    /// There is no single-sided posting deed, by construction.
+    BookPosted { orb_id: u64, kind: BookKind, kept: Ratio, lost: Ratio },
+    /// BOOK-1 — an account closed to WRITING. It keeps every entry it
+    /// took and stays readable forever (19_LENS §16c).
+    BookArchived { orb_id: u64, kind: BookKind },
     ColonyFounded { orb_id: u64, name: String },
     ZoneBuilt { orb_id: u64, tile: u16, kind: ZoneKind },
     YieldCollected { orb_id: u64, resource: Resource, amount: Ratio },
@@ -1402,6 +1413,24 @@ impl ClosureEvent {
                 ratio::encode(amount, &mut value);
                 tlv::put(71, &value, &mut out);
             }
+            Self::BookMinted { orb_id, kind, name } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&kind.0);
+                value.extend_from_slice(name.as_bytes());
+                tlv::put(91, &value, &mut out);
+            }
+            Self::BookPosted { orb_id, kind, kept, lost } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&kind.0);
+                ratio::encode(kept, &mut value);
+                ratio::encode(lost, &mut value);
+                tlv::put(92, &value, &mut out);
+            }
+            Self::BookArchived { orb_id, kind } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&kind.0);
+                tlv::put(93, &value, &mut out);
+            }
             Self::ElderWarded {} => {
                 tlv::put(74, &[], &mut out);
             }
@@ -1792,6 +1821,24 @@ impl ClosureEvent {
                 let (amount, _) = ratio::decode(value.get(40..)?)?;
                 Some(Self::AssayStruck { orb_id, element, amount })
             }
+            91 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let kind: [u8; 32] = value.get(8..40)?.try_into().ok()?;
+                let name = String::from_utf8(value.get(40..)?.to_vec()).ok()?;
+                Some(Self::BookMinted { orb_id, kind: BookKind(kind), name })
+            }
+            92 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let kind: [u8; 32] = value.get(8..40)?.try_into().ok()?;
+                let (kept, used) = ratio::decode(value.get(40..)?)?;
+                let (lost, _) = ratio::decode(value.get(40 + used..)?)?;
+                Some(Self::BookPosted { orb_id, kind: BookKind(kind), kept, lost })
+            }
+            93 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let kind: [u8; 32] = value.get(8..40)?.try_into().ok()?;
+                Some(Self::BookArchived { orb_id, kind: BookKind(kind) })
+            }
             74 => Some(Self::ElderWarded {}),
             75 => Some(Self::WardLifted {
                 claimer: String::from_utf8(value.to_vec()).ok()?,
@@ -1960,6 +2007,12 @@ pub struct ColonyOrb {
     /// element-id-ascending (canonical order); zero entries dropped.
     /// Wire: orb entry tag 70 (SEAL A — old readers skip).
     pub elements: Vec<([u8; 32], Ratio)>,
+    /// BOOK-1 (19_LENS §16): the books this orb MINTED, kind-ascending
+    /// (canonical order). The charter's four are NOT here — they keep
+    /// their landed fields and their landed wire entry; `books()`
+    /// presents both through one view. Wire: orb entry tag 90 (SEAL A
+    /// — old readers skip an orb's minted books rather than fail).
+    pub books: Vec<BookAccount>,
 }
 
 impl ColonyOrb {
@@ -2016,7 +2069,59 @@ impl ColonyOrb {
             ratio::encode(amount, &mut value);
             tlv::put(72, &value, &mut out);
         }
+        // BOOK-1: minted books, kind-ascending. An orb that minted none
+        // stays byte-identical to a pre-BOOK-1 one (one state, one
+        // encoding). The name trails because it is variable-length.
+        for account in &self.books {
+            let mut value = account.kind.0.to_vec();
+            value.extend_from_slice(&account.minted_by.to_le_bytes());
+            value.push(account.archived as u8);
+            ratio::encode(&account.kept, &mut value);
+            ratio::encode(&account.lost, &mut value);
+            value.extend_from_slice(account.name.as_bytes());
+            tlv::put(90, &value, &mut out);
+        }
         out
+    }
+
+    /// **EVERY BOOK THIS ORB KEEPS — charter and minted alike.**
+    ///
+    /// The charter four first in charter order, then minted books
+    /// kind-ascending. A reader never learns which storage a book came
+    /// from, and nothing downstream may special-case the four.
+    pub fn books(&self) -> Vec<BookView> {
+        let chartered = [
+            ("TRADE-1", &self.given_in_crisis, &self.drawn_in_crisis),
+            ("ABSORB-1", &self.returned_across, &self.extracted_across),
+            ("BOND-1", &self.bond_flow, &self.severance_load),
+            ("COVENANT-1", &self.covenants_fulfilled, &self.covenants_breached),
+        ];
+        let mut out: Vec<BookView> = chartered
+            .iter()
+            .map(|(name, kept, lost)| BookView {
+                kind: kind_of(name),
+                name: (*name).to_string(),
+                chartered: true,
+                kept: (*kept).clone(),
+                lost: (*lost).clone(),
+                // A charter book is closeable by nobody (19_LENS §16c).
+                archived: false,
+            })
+            .collect();
+        out.extend(self.books.iter().map(|account| BookView {
+            kind: account.kind,
+            name: account.name.clone(),
+            chartered: false,
+            kept: account.kept.clone(),
+            lost: account.lost.clone(),
+            archived: account.archived,
+        }));
+        out
+    }
+
+    /// The minted account for a kind, if this orb keeps one.
+    pub fn book(&self, kind: BookKind) -> Option<&BookAccount> {
+        self.books.iter().find(|held| held.kind == kind)
     }
 
     /// IDEO-1: the eight cohesion books in their canonical wire order.
@@ -2061,6 +2166,23 @@ impl ColonyOrb {
                     let element: [u8; 32] = value.get(..32)?.try_into().ok()?;
                     let (amount, _) = ratio::decode(value.get(32..)?)?;
                     orb.elements.push((element, amount));
+                }
+                90 => {
+                    let kind: [u8; 32] = value.get(..32)?.try_into().ok()?;
+                    let minted_by = u64::from_le_bytes(value.get(32..40)?.try_into().ok()?);
+                    let archived = *value.get(40)? != 0;
+                    let (kept, used_k) = ratio::decode(value.get(41..)?)?;
+                    let (lost, used_l) = ratio::decode(value.get(41 + used_k..)?)?;
+                    let name =
+                        String::from_utf8(value.get(41 + used_k + used_l..)?.to_vec()).ok()?;
+                    orb.books.push(BookAccount {
+                        kind: BookKind(kind),
+                        name,
+                        minted_by,
+                        kept,
+                        lost,
+                        archived,
+                    });
                 }
                 26 => {
                     let (albedo, used) = ratio::decode(value)?;

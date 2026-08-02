@@ -14,6 +14,7 @@
 //! - `world` — the tick loop binding them: actions close as receipts;
 //!   unreceipted accrual is workspace and never persists.
 
+pub mod books;
 pub mod dop;
 pub mod ipsal;
 pub mod persist;
