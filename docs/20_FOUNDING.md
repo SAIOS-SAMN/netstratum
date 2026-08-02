@@ -737,6 +737,111 @@ whether stocks are per-orb, per-vein or per-world; whether regeneration
 is linear or proportional to the remaining stock; and whether a stock
 can be driven to zero at all, or only asymptotically toward it.
 
+### 6h. DIVERSIFICATION — the periodic table, and the three scales
+
+**Operator ruling 2026-08-02.** Stocks (§6g) are one quantity per
+resource, and the resource vocabulary is seven names. That is not an
+economy with assets in it; it is an economy with seven faucets that now
+regenerate.
+
+**MEASURED — the element grammar exists and is consumed by NOTHING.**
+
+```text
+ColonyOrb.elements : Vec<([u8; 32], Ratio)>     banked, per orb
+element_properties(hash, star) -> (family 1..4, tier 1..3, richness)
+element_name(family, hash)                       every element is NAMED
+spine_bands(StarClass) -> [u32; 4]               abundance BY STAR
+```
+
+Every read of `.elements` in the tree is an encode, a decode, a getter,
+a bank, or the kernel's conservation arm. **No production path consumes
+an element.** They accumulate and do nothing.
+
+**AND `smelt` IS NOT A TRANSFORM.** `smelt(amount)` takes no resource at
+all — it quantizes onto a 1/64 grid so a fill smelted to zero refuses
+whole. The actual industry is a fixed three-link chain with one metal in
+it:
+
+```text
+Iron ──(Smelter)──▶ Alloy ──(Synthesizer)──▶ Diamond
+```
+
+**One metal, in a game whose matter grammar already names families,
+tiers, and their stellar abundance.**
+
+### 6h.1 THE PERIODIC TABLE IS ALREADY SEEDED
+
+`spine_bands` is nucleosynthesis in miniature and it already works:
+
+```text
+O · B · A                    [1, 2, 0, 1]      hot, massive
+F · G · K                    [2, 1, 1, 1]      sun-like
+M · BrownDwarf               [1, 0, 2, 1]      cool, small
+remnants (WD/RG/NS/WR)       [0, 2, 1, 2]      the forges
+```
+
+**A world's matter is drawn from its own star's bands**, exactly as the
+operator's "distribute at world creation" asks — seeded by the star
+class and the element hash, deterministic, replayable, no oracle. Four
+families × three tiers is TWELVE classes standing today. **The expansion
+is to give those classes real periodic identity — group and period, with
+properties that industry can read — not to invent a distribution
+mechanism, which already exists.**
+
+**What makes it an economy rather than a longer list:** different
+elements must smelt to different alloys with different properties, so a
+world's stellar inheritance decides what it can BUILD and therefore what
+it must TRADE for. That is comparative advantage arising from physics
+(`04` §1.2's stated goal) instead of from a table of prices.
+
+### 6h.2 STOCKS ARE WRAPPERS — three scales, named
+
+**A stock is not the asset. It is a claim on one**, and the two must not
+be the same object or a civilization can own only what it physically
+holds.
+
+```text
+MICRO   the DEPOSIT      a vein or seam of one element at one site:
+                         richness, regeneration rate, seed floor (§6g)
+
+MID     the STOCK        a claim ON a deposit — transferable, ownable,
+                         priceable, and separable from the matter
+
+MACRO   the GDP          a civilization's whole productive reading,
+                         aggregated across every deposit it holds a
+                         claim on
+```
+
+**The purse (§5) is the macro reading's ancestor** — it already sums
+banked stores across a line's orbs as a projection with demurrage
+deducted. GDP is that pattern applied to PRODUCTION rather than to
+holdings: what a line's assets generate, not what sits in its banks.
+
+**Why the wrapper matters and is not financial decoration.** Separating
+the claim from the matter is what lets a line invest in a deposit it
+does not sit on, lets a ward hold standing across worlds, and gives
+`§6a`'s capture and `19_REGISTRY` §4b's room-opening something
+transferable to be built from. Without it, ownership and location are
+the same fact and nothing can be financed.
+
+### 6h.3 THE MICROCOSM/MACROCOSM LAW
+
+**Every economic reading must be defined at all three scales, and the
+macro reading must be DERIVED from the micro — never stored beside it.**
+
+A GDP kept as its own number is a second readable truth over the
+deposits that produce it (Charter §11 rule 2), and it will drift the
+moment one deposit moves. The purse already runs this correctly: it is a
+projection, not a vault. **GDP inherits that discipline or it inherits
+the drift.**
+
+**Held for the operator, since these set the table's shape:** how many
+families and tiers the expanded table carries; whether a claim can be
+partial (a share of a deposit) or whole only; and whether GDP reads
+sustainable draw, actual draw, or both — the gap between them being
+precisely the measure of whether a civilization is living within its
+regeneration.
+
 ## §7 THE BASE-LEVEL ACCOUNTING LAW
 
 > **"Everything needs accounting for at the microscopic/base level, with
