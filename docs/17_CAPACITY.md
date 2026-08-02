@@ -672,6 +672,91 @@ the forward, because they are two different things (§3d.1a).
 across lines unless the RANK were invariant to the channel set, which
 is not obviously true and was never argued.
 
+### §3d.3 THE ASSIGNMENT — every deed declared, not inferred
+
+**THE METHOD, and it is the lesson from §3d.1.** A deed's layer is read
+from WHAT IT IS KEYED ON — the fields it carries — never from the prose
+around it or the document it sits in. I assigned `CHANNEL_COVENANT` to
+"civilizational" by reasoning from `09` §2.3's carrier language and
+never read the projection. Every row below names its key.
+
+**CIVILIZATIONAL — keyed on a LINE's own identity.** These bind a
+people and must never become a precondition for anyone else's standing:
+
+```text
+    GenesisSealed      civilization, disposition, metabolism, perception
+    TaxonSealed        class, clade          ← where the draconic clade sits
+    PracticeAdopted    practice              PracticeReleased  practice
+    LineSucceeded      successor
+    StationSeated      line, station
+    Diverged           branch                Confluent         partner
+    ElderWarded        —                     WardLifted        claimer
+    VeilDrawn          —                     VeilLifted        starved
+```
+
+**UNIVERSAL — keyed on the universe, the mesh, or any actor.** Nobody
+opts out and nobody is advantaged by opting in:
+
+```text
+    EntityRegistered · ScopeGranted · ScopeRevoked     any actor (I2)
+    EraAnnexed · EraFolded · GalaxyObserved            era, world
+    HandoffSealed                                      mesh, from → to
+    ResourceTransferred · ApertureSent · ApertureReceived
+                                          conservation binds both legs
+    DiscoveryMinted                        the mint Article II gates
+    SovereignUnionSealed                   the offices themselves
+```
+
+**WORLD — keyed on an ORB inside one committed state:**
+
+```text
+    ColonyFounded · ColonyCharted · WorldCharted · ZoneBuilt · ZoneRazed
+    YieldCollected · DemurrageSettled · UpkeepSettled · VentSettled
+    StarCommissioned · StarAged · PlanetSited · OverheatStruck/Cleared
+    FamineStruck · FamineRelieved · GaugeShifted · GaugeShiftedAt
+    ProspectStruck · AssayStruck · CrystalDrawn · InstrumentForged
+    TechDiscovered · TechLicensed
+```
+
+**UNIVERSAL BY MECHANISM, under the ruled precedent (§3d.1a):** the
+obligation instruments. Each is ordinary finance — a directed
+obligation with terms — open to any line, and each feeds a `D` channel:
+
+```text
+    BondSealed · BondSettled                    CHANNEL_BOND
+    CovenantSealed · Released · Slashed         CHANNEL_FORWARD
+    OverflowAbsorbed · AbsorptionLapsed         CHANNEL_DEBT
+    CouncilSealed · CouncilClosed · OfferPosted · OfferCleared
+    RouteChartered · RouteLapsed · VoidShare
+```
+
+The RULING applies to the ceremony, never to the remainder: a line that
+wishes to live by the vitrified word adopts the covenant and is gated
+at T0/T1/T2; a line that merely owes a delivery uses the forward and is
+gated by nothing.
+
+**CONTESTED — NOT ASSIGNED, and named rather than guessed:**
+
+- **`FrictionSettled` (IDEO-1)** — keyed on an orb, but COMPUTED from
+  `09`'s four ideology axes, and it posts into `entropy_vented`, a
+  universal thermal book. If the axes are civilizational then a
+  people's ideology is charging a universal ledger, and the answer is
+  not "add the syntropic arm" (task #14) but "move the mechanic". This
+  is the same trap as §3d.1 and it is exactly why that task is blocked
+  on this one.
+- **`WantStruck` / `WantRelieved` (WANT-1)** — the cognitive want reads
+  a line's PERCEPTION axis while striking on an orb. World or
+  civilizational depending on which end is load-bearing; the projection
+  needs reading before either is claimed.
+- **`IncursionStruck`** — carries `era, world, line`: it is keyed on
+  ALL THREE layers at once, which is why its defence (task #15) has no
+  obvious home. A deed that spans layers may be the one shape the
+  taxonomy has to grow to hold.
+
+**THE STANDING RULE THIS ESTABLISHES:** a new law declares its layer
+when it lands, in the same landing. A rule whose reach is inferred from
+its filename is a rule nobody decided.
+
 **A THREAT NEEDS A DEFENCE, AT ITS OWN LAYER.** `IncursionStruck`
 (§6's sweep) records a threat arriving and nothing records it held —
 and the layer decides what the answer may be: a UNIVERSAL defence binds
