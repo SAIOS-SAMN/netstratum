@@ -982,9 +982,22 @@ station or tradition alters any row.
 Recorded honestly, per Article III's own standard: naming a gap is
 computation, hiding one behind vocabulary is cosmetic.
 
-1. **`Ξ_cosmetic` is not measured.** The window arithmetic in Article
-   III is exact and computable from the chain today, and nothing
-   computes it. First build.
+1. **CLEARED, and it was pointing at STRUCK law** (lens lane report,
+   2026-08-02). This debt read *"the cosmetic meter is not measured …
+   first build"*. It must not be built: Article III was struck whole
+   and rewritten as THE SCIENCE FOUNDATION, and its own strike list
+   names that meter — `deeds(w)/(1 + ΔD(w))` — together with "cosmetic
+   non-utility" as a legal term. The reasoning is the article's own:
+   *physics needs no penalty; a closed loop at uniform potential does
+   no work, not because a law forbids it but because there is no free
+   energy in it.*
+
+   **LAW 4 now carries that ground**, thermodynamically rather than
+   morally, through `dual_pole` / `Vacuity::Stasis` — landed, and
+   already consulted by `kernel::capacity_law`. Building the window
+   arithmetic would have implemented a corpse. What the lens owed
+   instead was a SURFACE for the row a world stands in, which nothing
+   displayed; that is `lens::standing` (`19_LENS` §12).
 2. **`D` is not measured.** `PhiK I^(3)` ("rank: dim of the relational
    structure") specifies it and no code reads it. Until `D` is
    measured, Articles II, III and IV have no operand.
@@ -1079,7 +1092,7 @@ is not a mechanism.
 
 | claim | why not local | where it lives |
 |---|---|---|
-| **Art. III window reading** — deeds against rank that did not grow, over 60 ticks | spans many steps | `scribe` / `lens` |
+| **Art. III standing surface** — which row a state occupies (Void / Unframed / Stasis / Entangled) | a property of one state, read for display and never gating | `lens::standing` (landed) |
 | **Art. III allocation** — the Eclipse, as claim-revocation | a policy over many actors | conductor / mesh |
 | **§2e traverse congruence** — `α ≅ Ω` | spans a whole chain | `lens` over the spine |
 | **§2c union** — one `Δ`, two complementary projections | a property of one state's algebra, already computed | `rfa_core::boundary` + `capacity` (landed) |

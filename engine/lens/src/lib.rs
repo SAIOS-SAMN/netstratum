@@ -15,8 +15,10 @@
 pub mod json;
 pub mod kinematic;
 pub mod luminal;
+pub mod observer;
 pub mod peel;
 pub mod render;
+pub mod standing;
 
 use cfe::world::Committed;
 use mesh::arbor::{Arbor, ArborRefused};

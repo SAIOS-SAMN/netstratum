@@ -1,7 +1,8 @@
 # 19 — THE LENS LAW: observation, magnification, and motion
 
-**Status:** DESIGN, pending operator ratification (2026-08-02). Nothing
-here is landed. Subordinate to `00_CHARTER.md` and `18_TORSION.md`.
+**Status:** LANDED (2026-08-02). Every reading described here is built
+and pinned; §14 is the inventory. Subordinate to `00_CHARTER.md` and
+`18_TORSION.md`.
 
 **Lane:** `.claude/worktrees/lens-lane`, branch `lens-lane`. Territory:
 `engine/lens/`, `engine/scribe/`. This document is this lane's own; it
@@ -492,3 +493,92 @@ consulted by `kernel::capacity_law`.
 Building the window reading would implement a struck law. It is not
 built. The stale debt is reported to the kernel lane rather than edited
 from here (§8).
+
+---
+
+## §11 KINEMATIC PRESSURE — the strain of a twist
+
+**The layer this system was missing.** `orbit_lock`, `holonomies` and
+the fold gate all detect that a twist IS. Nothing read how hard it
+pushes, so an enormous static structure and one straining to move were
+indistinguishable.
+
+    manifold layer   torsion = the TWIST event
+    kinematic layer  the PRESSURE of that twist — the strain it generates
+
+**The pressure is the curvature, and it was already landed.**
+`rfa_core::fiber` (DIRECTIVE 17) states why a flat fiber could never have
+shown it: with a scalar connection `F = dA` and `[A, A] = 0` identically,
+so a closed loop of scalars is *"a flat, dead circle."* With a matrix
+connection the second term survives — `F = dA + A ∧ A` — and **the
+circulation IS the field**.
+
+| reading | what it says |
+|---|---|
+| `Pressure` | the curvature of a cell, carried whole. Zero is a FACT — these directions commute — never an absence |
+| `PhaseLock::holding_pressure` | how far the accumulated transport sits from having closed: the force required to maintain the lock |
+| `Drift` | how a reading moved between two chain points, per component |
+
+**Two corrections to the ancestor, both deliberate.** `Drift` reports
+**STILL**, never *"Converged"* — a structure that did not move may be at
+rest or may be stuck, and the reading refuses to presume which. And it
+takes two points FROM THE CHAIN and holds neither, because a lens
+keeping its own timeline is a second timeline (§1a).
+
+## §12 THE STANDING SURFACE — which row a state occupies
+
+The kernel refuses a work-anchored mint unless the prior state reads
+`Entangled`, and no surface showed an operator which row anything stood
+in — a refusal arrived with a verdict nobody could have anticipated.
+
+`lens::standing` reads it and carries BOTH poles, so the row is
+explicable rather than pronounced. **`Stasis` is rendered as a state
+wanting re-volumizing, never as a fault**: LAW 4 is explicit that the
+refusal is thermodynamic rather than moral, and a surface that painted
+it as an error would reintroduce the penal frame Article III struck.
+
+## §13 THE OBSERVER — capacity, and the tolerance that is a position
+
+**Capacity bounds depth**, `min(requested, κ)`. A request beyond
+standing is ANSWERED at the depth the observer can hold, never refused.
+The bound is applied BEFORE any work — a shallow observer asking for the
+near view materialises the far view and nothing else. That is the
+laziness of §4, and it caches nothing.
+
+**The peel is the tolerance**, which is how a DYNAMIC tolerance stays
+lawful:
+
+```text
+    FAR    compare CLASSES         discrete; no numeric tolerance exists
+    MID    compare CIRCULATION     relative, cross-multiplied
+    NEAR   compare EXACT ENTRIES   tolerance ZERO — byte-identity
+```
+
+To loosen the tolerance IS to step back; to tighten it IS to approach.
+So it is derived rather than dialed, and **two observers standing in the
+same place always agree** — which LAW 6 requires and a caller-supplied
+`ε` could never give.
+
+`Capture` has three arms, and the third matters: **`Silent` is not
+`Mismatch`.** Nothing to compare is an absence of subject, and reporting
+it as a disagreement would be inventing a difference.
+
+## §14 THE LANE, AS LANDED
+
+| module | reading | never |
+|---|---|---|
+| `peel` | magnification as a depth on the coboundary decomposition | stores a view |
+| `luminal` | what emerges at a phase through an aperture | returns a magnitude |
+| `kinematic` | the strain of a twist, per component | collapses to a norm |
+| `standing` | which row a state occupies | gates on it |
+| `observer` | how deep one may see; what reads as resonant | takes a dialed tolerance |
+
+Held by `lens/tests/deletability.rs`: the sealed core names no lens
+crate in any dependency table, the ledger takes no runtime edge, and the
+one lawful client edge is pinned by SHAPE — a client may render, and may
+never decide on a reading.
+
+**The frequency question is answered outside this lane entirely** (§7a):
+`conductor/examples/consultation.rs` measures the door's withdrawal rate
+by EXPERIMENT. It reflects no committed state and is deletable without
+loss, so it is neither lens nor mirror.
