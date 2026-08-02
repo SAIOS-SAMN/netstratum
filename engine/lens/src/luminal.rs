@@ -85,7 +85,6 @@
 //! than the ancestor, which left it a bare `Q` and trusted the reader.
 
 use crate::peel::View;
-use cfe::dop::ColonyOrb;
 use cfe::ratio::{ratio, Ratio};
 use num_bigint::BigInt;
 use num_traits::{Signed, Zero};
@@ -183,68 +182,6 @@ impl Aperture {
         let weighted = self.channels[channel].clone() * ratio(i64::from(n), 1) + signal;
         self.channels[channel] = weighted / ratio(i64::from(n) + 1, 1);
         self.counts[channel] = n.saturating_add(1);
-    }
-}
-
-impl Aperture {
-    /// **THE APERTURE AN OBSERVER HAS EARNED** — derived from its own
-    /// committed books, never assigned (`19_LENS` §6, §16).
-    ///
-    /// An assigned aperture is a dialed parameter wearing a
-    /// per-observer name. The metabolism already says where a real one
-    /// comes from — *tuning toward what has actually been observed* —
-    /// and an orb's cohesion books ARE its receipted history of
-    /// relation, so the bias is read from them and from nothing else.
-    ///
-    /// **THE HONEST MAPPING, and its limit stated rather than hidden.**
-    /// The eight books are the RELATIONAL axes; the eleven channels are
-    /// the HARMONIC ones. They are different axes and there is no
-    /// faithful 8→11 correspondence, so only what genuinely grounds is
-    /// mapped:
-    ///
-    /// ```text
-    ///     h[0]  value / spectral     given_in_crisis + returned_across
-    ///                                against extracted_across
-    ///     h[3]  adjacency / boundary bond_flow against severance_load
-    ///     h[4]  higher torsion       covenants_fulfilled against
-    ///                                covenants_breached
-    /// ```
-    ///
-    /// `h[1..2]` (spatial) and `h[5..10]` (the remaining torsion slots)
-    /// stay FLAT. Nothing in the books speaks to them, and inventing a
-    /// correspondence to fill eleven slots would be fabricating
-    /// sensitivity an observer never earned — the same fault as reading
-    /// an unobserved pair as a zero.
-    ///
-    /// Each grounded channel is fed through [`Aperture::observe`], so
-    /// the weight is the bounded running average and never a raw ratio.
-    pub fn of_orb(orb: &ColonyOrb) -> Self {
-        let mut aperture = Aperture::flat();
-        // Each pair: what this observer has DONE on that axis, against
-        // what it has undone. A book that stands teaches the channel.
-        for (channel, kept, lost) in [
-            (
-                0usize,
-                orb.given_in_crisis.clone() + orb.returned_across.clone(),
-                orb.extracted_across.clone(),
-            ),
-            (3, orb.bond_flow.clone(), orb.severance_load.clone()),
-            (
-                4,
-                orb.covenants_fulfilled.clone(),
-                orb.covenants_breached.clone(),
-            ),
-        ] {
-            let whole = kept.clone() + lost;
-            if whole != ratio(0, 1) {
-                // The signal is what stands against the whole — an
-                // exact rational in [0, 1], no float, no root.
-                aperture.observe(channel, kept / whole);
-            }
-            // A book that never posted teaches nothing, and the channel
-            // stays where it was. Silence is not a signal of zero.
-        }
-        aperture
     }
 }
 

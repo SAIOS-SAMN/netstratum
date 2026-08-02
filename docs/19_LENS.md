@@ -691,70 +691,96 @@ header is worth fixing even when the code is fine.
 
 ---
 
-## §16 THE APERTURE IS EARNED, NOT ASSIGNED
+## §16 THE BOOKS ARE OPEN — civilizations MINT and ARCHIVE them
 
-*(operator directive 2026-08-02, "both arms" — the companion to §5b)*
+*(operator correction 2026-08-02, superseding this section's first cut)*
 
-§6 established the aperture as per-observer sensitivity without belief.
-It left the question §6 could not answer: **where does a particular
-observer's aperture come from?** Until now, nowhere. `Aperture` existed,
-nothing carried one, and every reading in the lane was taken through the
-flat instrument. The per-observer half of LAW 9 was written and
-unexercised.
+§6 established the aperture as per-observer sensitivity without belief
+and left the question it could not answer: where does a PARTICULAR
+observer's instrument come from? The first answer given here was
+*"from its cohesion books"* — right in spirit, **wrong in two ways that
+both come down to scope.**
 
-**An assigned aperture is a dialed parameter wearing a per-observer
-name.** If a caller hands an observer its sensitivity, the observer has
-not become distinct; the caller has. That is §5b's fault in the other
-arm, and it fails for the same reason: two callers could grind two
-instruments for one observer.
+### 16a. THE TWO FAULTS OF THE FIRST CUT
 
-**So the aperture DERIVES from what that observer has receipted.** The
-metabolism already said where a real one comes from — *tuning toward
-what has actually been observed* — and an orb's cohesion books ARE its
-receipted history of relation. The bias is read from them and nothing
-else.
+**FAULT ONE — a bounded book set.** The instrument read eight NAMED
+struct fields. That made its width a constant of the source code, so a
+civilization could invent an entirely new kind of account and the lens
+would be structurally blind to it until someone edited this crate.
+**Content growth gated on a compile is the wrong scope for a reading
+layer.** Civilizations do not merely USE books; they MINT them, and they
+ARCHIVE them, and the reading must follow that without being told.
 
-### 16a. THE HONEST MAPPING, and the limit stated rather than hidden
+**FAULT TWO — a layer error, and it produced a false limit.** The books
+were welded onto the eleven harmonic channels, and the residue was then
+reported as a limit: *"eight books cannot honestly fill eleven
+channels."* That framing was wrong at the root. The eleven are
+SUBSTRATE — spectral, spatial, adjacency, torsion — fixed because the
+physics is fixed. Books are CONTENT — open, because civilizations make
+them. **Joining a growing content set to a fixed substrate axis is the
+same layer confusion this tree has caught repeatedly**, and the repair
+is not a better mapping but NO mapping.
 
-The eight books are the RELATIONAL axes. The eleven channels are the
-HARMONIC ones. **They are different axes, and there is no faithful 8→11
-correspondence.** Only what genuinely grounds is mapped:
+There was a plainer defect inside it too. The old channel 0 summed
+`given_in_crisis + returned_across` against `extracted_across` — welding
+the compassion pair to the morality pair and orphaning
+`drawn_in_crisis` entirely. **Each book is a DUAL and its two sides
+belong to each other.**
+
+### 16b. THE SHAPE THAT REPLACES IT
 
 ```text
-    h[0]   value / spectral       given_in_crisis + returned_across
-                                  against extracted_across
-    h[3]   adjacency / boundary   bond_flow against severance_load
-    h[4]   higher torsion         covenants_fulfilled against
-                                  covenants_breached
+    APERTURE   11 fixed harmonic channels   SUBSTRATE — physics
+    REGARD     one channel per book kept    CONTENT — civilization
 ```
 
-`h[1..2]` (spatial) and `h[5..10]` (the remaining torsion slots) **stay
-FLAT.** Nothing in the books speaks to them. Inventing a correspondence
-to fill eleven slots would fabricate sensitivity an observer never
-earned, which is the same fault as reading an unobserved pair as a zero
-— and it would be undetectable afterwards, because a fabricated weight
-looks exactly like a measured one.
+Two instruments, two layers, never joined. `Aperture` knows nothing of
+books; `Regard` knows nothing of harmonics. The regard's WIDTH is a fact
+about how many kinds of account an observer has actually kept, and it is
+**bounded by nothing in this crate**.
 
-**A book that never posted teaches nothing, and its channel does not
-move. Silence is not a signal of zero.** An observer with no history
-carries the flat instrument, which is the correct reading of *no
-history* rather than a reading of *no sensitivity*.
+A book is a DUAL LEDGER: what was KEPT against what was LOST on one
+named account. The charter's four (`09 §2.1`–`§2.4`) are all of that
+shape already, which is why opening the set cost no translation — the
+shape was uniform, only the ENUMERATION was frozen.
 
-The limit is pinned, not merely written: a test fails the day someone
-fills the ungrounded channels. That is the difference between a stated
-caveat and an enforced one, and this lane has learned the difference the
-hard way (§9 — a guard nobody has seen fail is not a guard).
+**ONE ENUMERATION POINT.** `books_of` is the single place any book is
+named. When committed state grows a registry, it appends there and
+nothing else in the lane changes, because the instrument never names an
+account.
 
-### 16b. WHAT THIS COSTS, AND WHY IT IS STILL RIGHT
+### 16c. ARCHIVING CLOSES A BOOK TO WRITING, NEVER TO READING
 
-Three grounded channels out of eleven is a thin instrument, and it would
-be easy to read that as the derivation having mostly failed. It is the
-opposite. **The three that ground are real and the eight that do not are
-honestly empty**, so the aperture reports its own coverage. A full
-eleven-channel instrument built by invention would report nothing about
-coverage at all, and would read as complete while being mostly fiction.
+**This is an anti-laundering rule, not bookkeeping.** If archiving
+dropped a book from the reading, the cheapest way to stop being measured
+by your breaches would be to close the book — and the worst-behaved
+civilization would present the cleanest instrument.
 
-The remaining eight ground when the tree grows books that speak to them
-— spatial and torsional history the substrate does not yet keep. That is
-a measurement waiting on state, which is the lawful way to be
-incomplete.
+So an archived book takes no new entries and **keeps every entry it
+took**. Its weight is identical closed or open. What archiving reports
+is that the account will not move again, which is real information and
+not an erasure.
+
+**AND PROVENANCE BOUNDS WHO MAY CLOSE WHAT.** A civilization may archive
+what it MINTED. It may never archive what the CHARTER keeps — otherwise
+the covenant book is closeable by exactly whoever it convicts. That is
+why `BookId` carries `Chartered` against `Minted` rather than being a
+bare identifier.
+
+### 16d. WHAT IS NOT YET BUILT, AND WHOSE IT IS
+
+The lens side is complete: the set is open, the instrument follows it,
+and both rules above are pinned. **The committed-state half is not
+this lane's to land.** A registry of minted books — the mint event, the
+archive stamp, the replay rule, canonical wire order, and the gate on
+who may mint — is world law living in `cfe`, alongside the element
+stores it would follow (`14 §2`).
+
+Until it exists, `books_of` enumerates the charter's four and the open
+path is exercised by pins rather than by live minting. **The lane is
+ready and not yet fed**, and that is stated here rather than left to be
+discovered.
+
+Recorded for whoever holds that territory: a mint gate almost certainly
+wants a measured-novelty test, so a civilization cannot widen its own
+instrument by minting near-duplicate books.

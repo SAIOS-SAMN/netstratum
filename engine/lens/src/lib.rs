@@ -13,6 +13,7 @@
 //! re-derives from the chain byte-for-byte.
 
 pub mod json;
+pub mod books;
 pub mod kinematic;
 pub mod luminal;
 pub mod observation;
