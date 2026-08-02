@@ -37,7 +37,7 @@ pub mod reduce;
 
 pub use cage::{consult, Exact, Lens, Proposal};
 pub use capacity::{
-    capacity, circulation, divergence, egress, ext_x, ground, preserves_hodge_split, Degree, Egress,
+    capacity, circulation, divergence, ext_x, flux, ground, preserves_hodge_split, Degree, Flux,
     Extent,
 };
 pub use delta::{coherence_functional, for_each_residual, magnitude, Delta};

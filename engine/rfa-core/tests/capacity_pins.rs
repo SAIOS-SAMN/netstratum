@@ -22,8 +22,8 @@
 //! 10. RELABELLING-INVARIANT — Article I made a test.
 
 use rfa_core::capacity::{
-    capacity, capacity_anchored, circulation, divergence, egress, ext_x, ground,
-    preserves_hodge_split, Degree, Egress, Extent,
+    capacity, capacity_anchored, circulation, divergence, ext_x, flux, ground,
+    preserves_hodge_split, Degree, Extent, Flux,
 };
 use rfa_core::{coboundary_reduce, Delta};
 
@@ -105,7 +105,7 @@ fn the_equilibrium_anchor_is_a_coboundary() {
     assert!(read.is_ground(), "it stands at the GROUND — the floor, never zero");
     // The divergence is still there and still readable; it is simply
     // not capacity, because it is gauge-dependent.
-    assert!(egress(&anchor).sources > 0, "the anchor does source — read by egress()");
+    assert!(flux(&anchor).sources > 0, "the anchor does source — read by flux()");
 }
 
 #[test]
@@ -166,10 +166,10 @@ fn a_closed_loop_is_pure_holonomy_and_non_vacuous() {
     // anywhere: motion that takes nothing and leaves nothing, and
     // still is not nothing.
     let loop3 = triangle(q(1, 1), q(1, 1), q(-1, 1));
-    let census = egress(&loop3);
+    let census = flux(&loop3);
     assert_eq!(
         census,
-        Egress { sources: 0, trapped: 0, balanced: 3 },
+        Flux { sources: 0, sinks: 0, balanced: 3 },
         "a closed loop sources nothing and traps nothing"
     );
     assert!(census.is_pure_circulation(), "nothing sources, nothing sinks (§2d)");
@@ -179,7 +179,7 @@ fn a_closed_loop_is_pure_holonomy_and_non_vacuous() {
          have admitted, and why the dual pole earns its place"
     );
     assert!(
-        egress(&loop3).sources == 0,
+        flux(&loop3).sources == 0,
         "and it sources NOTHING — pure holonomy, the mirror of the anchor"
     );
     // The circulation of a div-free form is itself: nothing to strip.
@@ -196,14 +196,14 @@ fn the_sign_of_divergence_is_the_egress_law() {
     // sign law is therefore a statement about a BOUNDARY, not about
     // an isolated vertex: the books close over the whole relation.
     let sourced = triangle(q(1, 1), q(0, 1), q(1, 1)); // vertex 0 emits
-    let census = egress(&sourced);
+    let census = flux(&sourced);
     assert!(census.sources >= 1, "vertex 0 emits — an egress stands");
     assert!(
-        census.trapped >= 1,
+        census.sinks >= 1,
         "and the books close: an egress somewhere is an ingress elsewhere"
     );
     assert_eq!(
-        census.sources + census.trapped + census.balanced,
+        census.sources + census.sinks + census.balanced,
         3,
         "every vertex is classified exactly once"
     );

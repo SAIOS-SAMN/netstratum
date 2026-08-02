@@ -42,8 +42,7 @@
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::Committed;
 use rfa_core::{
-    dual_pole, holonomies, boundary_form, Degree, Delta, Flow, BoundaryForm, Support, Vacuity,
-};
+    dual_pole, holonomies, boundary_form, Degree, Delta, Flow, BoundaryForm, Support, Vacuity, Holonomy,};
 
 /// BOND-1: the standing order, `source` → `target` at `rate`/tick.
 pub const CHANNEL_BOND: usize = 0;
@@ -173,10 +172,51 @@ pub struct EntangledRead {
     /// floor, where zero is the right answer and the floor would only
     /// blur it.
     pub rank: usize,
+
+    /// **THE CHARGE FIELD, CARRIED WHOLE — what each cycle HOLDS**
+    /// (operator ruling 2026-08-02: *your entire definition is wrong if
+    /// dimensional capacity is a count of rooms*).
+    ///
+    /// [`Self::rank`] is the DIMENSION of the cycle space — how many
+    /// independent structures the manifold sustains. It is a dimension
+    /// and never an inventory, and that part was sound. What was
+    /// reductionist is that `holonomies()` returns
+    /// `Holonomy { i, j, l, value }` — every cycle with its EXACT
+    /// CHARGE — and this read took `.len()` and discarded every value.
+    ///
+    /// Residuals are carried whole. Flows are carried whole. The
+    /// holonomies were counted, in the same function whose own comment
+    /// forbids that for the symmetry foundation: *"that sums the field into one
+    /// scalar and discards which triple produced each residual."* Two
+    /// poles held, the third collapsed.
+    ///
+    /// **DIMENSION AND VOLUME ARE DIFFERENT READINGS.** The rank says
+    /// how many independent cycles stand; these values say what each
+    /// one carries. A universe with one heavily-charged cycle and one
+    /// with a single faint one read the SAME rank and are not the same
+    /// universe. `18` §2b bars collapsing a directional quantity to a
+    /// scalar aggregate wherever the system computes — a count is such
+    /// a collapse.
+    pub holonomy: Vec<Holonomy>,
     /// The residual field, WHOLE — every non-composing triple with its
     /// indices intact. Never pre-summed: these are what emit (D3) and
     /// what the composition law will compose.
-    pub residuals: Vec<Residual>,
+    /// **THE SYMMETRY FOUNDATION — the ground new structure rises
+    /// from** (operator ruling 2026-08-02, renamed from `residuals`).
+    ///
+    /// These are the triples that do not compose: `Δ_ik ≠ Δ_ij + Δ_jk`.
+    /// Calling the field *residuals* framed it as leftover error
+    /// awaiting containment, when it is the generative input — D3 EMITS
+    /// from exactly here, and the kernel charter says what becomes of
+    /// it: *"the orbit IS the symmetry the residue forms."* This is
+    /// where symmetry comes from, so it is named for that.
+    ///
+    /// The element type stays [`Residual`]: each entry genuinely is the
+    /// per-triple residual of the cocycle condition, which is exact
+    /// mathematics. A field of residuals that CONSTITUTES the
+    /// foundation — the elements keep their name, the field takes its
+    /// own.
+    pub symmetry_foundation: Vec<Residual>,
     /// `∂Δ` — the SECOND POLE, carried whole as its non-zero
     /// components: which vertices carry net flow, and how much. Empty
     /// means pure circulation — every vertex balances, nothing sources
@@ -196,7 +236,7 @@ impl EntangledRead {
     /// every `Unknown` by [`Resolve`] first.
     ///
     /// **THE RESIDUAL CLAUSE IS STRUCK** (operator ruling 2026-08-01).
-    /// It read `&& self.residuals.is_empty()`, barring the rank while
+    /// It read `&& self.symmetry_foundation.is_empty()`, barring the rank while
     /// any triple failed to compose, on the reasoning that
     /// `H¹ = Z¹/B¹` is defined on cocycles alone. Three faults:
     ///
@@ -503,7 +543,7 @@ pub fn observe(state: &Committed, i: usize, j: usize, channel: usize) -> Observe
 /// fills no triangle at all, costs nothing to scan. Same residuals,
 /// same order of discovery, same arithmetic:
 /// `R_ijk,l = Δ_ik,l − Δ_ij,l − Δ_jk,l`.
-fn filled_residuals(delta: &Delta, support: &Support) -> Vec<Residual> {
+fn symmetry_foundation(delta: &Delta, support: &Support) -> Vec<Residual> {
     let dim = delta.dim().min(support.dim());
     let fiber = delta.fiber().min(support.fiber());
     let zero = ratio(0, 1);
@@ -558,9 +598,117 @@ pub fn read_entangled_observed(state: &Committed, unknown: usize) -> EntangledRe
     // to compose). And a triple with any absent edge is NOT a triangle:
     // checking it invents strain from a relation that does not exist,
     // which is the false gauge collapse.
-    let residuals = filled_residuals(&delta, &support);
+    let symmetry_foundation = symmetry_foundation(&delta, &support);
     let flows = boundary_form(&delta, &support).flows;
     // D — the independent cycles carrying charge no frame explains.
-    let rank = holonomies(&delta, &support).len();
-    EntangledRead { rank, residuals, flows, unknown }
+    // THE CHARGE FIELD, WHOLE — never `.len()` alone. The rank is its
+    // dimension; the values are what the cycles hold, and both are
+    // readings the caller may need (operator ruling 2026-08-02).
+    let holonomy = holonomies(&delta, &support);
+    let rank = holonomy.len();
+    EntangledRead { rank, holonomy, symmetry_foundation, flows, unknown }
+}
+
+/// THE FOLD GUARD — the occupancy floor, on both offices at once
+/// (operator ruling 2026-08-02).
+///
+/// `18` Article IV clause 1 states the floor: **you cannot have less
+/// room than you are using.** `D ≥ occupancy` binds whenever anything
+/// is in the universe, and within a universe it holds by absence — no
+/// deed closes a plane, so `D` cannot shrink at all.
+///
+/// **THE FOLD IS THE ONE OPERATION THAT COULD ROUTE AROUND THAT**, and
+/// it is why this guard exists. A fold does not shrink `D`; it seats a
+/// NEW universe. So a fold that carried content forward selectively
+/// could land that content in a store with fewer tones than it needs —
+/// no plane was ever closed, and the floor would still be breached.
+///
+/// **The fold as built is TOTAL** and therefore already safe: the era
+/// is archived whole (`conductor::fold` rotates the entire var root)
+/// and the successor seats fresh at `GROUND`. *Nothing is destroyed;
+/// the fold is archival by construction.* This guard exists so that
+/// stays true of every future fold rather than of this one only —
+/// `EraFolded { era, gauge }` carries no manifest, so nothing else
+/// could check it.
+///
+/// **BOTH OFFICES ARE GUARDED, because neither alone is sufficient**
+/// (`12_UNION` §3b, the office dyad):
+///
+/// - **D, the PROGENITOR — room.** Structure that crosses must keep its
+///   tones. A carried pair may not land where fewer grades stand.
+/// - **V, the SOVEREIGN — standing.** Nothing admitted may simply cease.
+///   An orb leaves the live universe only into the archive, never into
+///   nothing. That is I6 on the fold: *no difference dies without
+///   account.*
+///
+/// A total fold passes both trivially — nothing carries, so nothing can
+/// be under-roomed, and everything is archived, so nothing is dropped.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FoldGuard {
+    /// TOTAL — nothing carried forward. The era sealed whole and the
+    /// successor seats fresh. Lawful by construction.
+    Total,
+    /// CARRIED, and both floors hold: the carried structure keeps its
+    /// tones, and every departure is accounted.
+    CarriedWithinFloor,
+    /// REFUSED — carried structure would land in fewer tones than it
+    /// occupies. The D floor is breached.
+    RoomBelowOccupancy { carried_rank: usize, successor_degree: usize },
+    /// REFUSED — an orb present before is absent after AND absent from
+    /// the archive. Something admitted ceased without account.
+    StandingDroppedWithoutAccount { orbs: usize },
+}
+
+impl FoldGuard {
+    /// Only the two lawful shapes admit.
+    pub fn is_lawful(&self) -> bool {
+        matches!(self, FoldGuard::Total | FoldGuard::CarriedWithinFloor)
+    }
+}
+
+/// Judge a fold against the occupancy floor. `archived` names the orbs
+/// the fold sealed into the era record; a TOTAL fold archives every orb
+/// the prior universe held.
+pub fn fold_guard(prior: &Committed, next: &Committed, archived: &[u64]) -> FoldGuard {
+    let held = |state: &Committed| -> Vec<u64> {
+        state.orbs.iter().map(|orb| orb.orb_id).collect()
+    };
+    let before = held(prior);
+    let after = held(next);
+
+    // V's half first: nothing admitted may cease unaccounted. An orb
+    // that left the live universe must appear in the archive.
+    let dropped = before
+        .iter()
+        .filter(|id| !after.contains(id) && !archived.contains(id))
+        .count();
+    if dropped > 0 {
+        return FoldGuard::StandingDroppedWithoutAccount { orbs: dropped };
+    }
+
+    // TOTAL: nothing crossed. Nothing carried can be under-roomed.
+    let carried: Vec<u64> = before.into_iter().filter(|id| after.contains(id)).collect();
+    if carried.is_empty() {
+        return FoldGuard::Total;
+    }
+
+    // D's half: the carried structure must keep its tones. The rank the
+    // carried pairs bore before is the room the successor owes them.
+    let carried_rank = read_entangled(&restrict(prior, &carried)).rank;
+    let successor_degree = read_entangled(next).degree().get();
+    if successor_degree < Degree::above_ground(carried_rank).get() {
+        return FoldGuard::RoomBelowOccupancy { carried_rank, successor_degree };
+    }
+    FoldGuard::CarriedWithinFloor
+}
+
+/// The prior universe seen through only the orbs that crossed — what
+/// the carried structure was, in its own right.
+fn restrict(state: &Committed, keep: &[u64]) -> Committed {
+    let mut cut = state.clone();
+    cut.orbs.retain(|orb| keep.contains(&orb.orb_id));
+    cut.bonds.retain(|b| keep.contains(&b.source) && keep.contains(&b.target));
+    cut.covenants.retain(|c| keep.contains(&c.obligor) && keep.contains(&c.beneficiary));
+    cut.debts.retain(|d| keep.contains(&d.debtor) && keep.contains(&d.creditor));
+    cut
 }

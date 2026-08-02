@@ -126,6 +126,13 @@ relational structure, the landed tensor.
     V     = the committed state, whole
     Δ(V)  = the relation V expresses          (`rfa_core::Delta`)
 
+  **V IS SOVEREIGN** (operator ruling 2026-08-01; 18 §2c′). Its standing
+  comes from ADMISSION — it passed `lawful()`, it carries receipts, it
+  is in the chain — and no reading confers or revokes it. Every row
+  below that reads `V` is TESTIMONY about `V`, never authority over it:
+  readings price allocation, and standing is the judge's, granted
+  upstream. `V` holds; it does not make room.
+
   **NOTATION, binding:** `Δ` is THE RELATIONAL TENSOR. It is never a
   Laplacian, and no rule in this ledger takes a Laplacian of anything.
 
@@ -150,6 +157,202 @@ never a metric density, never a scalar.
 
 `Ω(D)` is the space those surviving degrees span. Frame artifacts
 contribute NOTHING; only structural content counts.
+
+**`D` IS A DIMENSION, NEVER AN INVENTORY** (operator ruling 2026-08-02:
+*your entire definition is wrong if dimensional capacity is a count of
+rooms*). `D` is the RANK of the cycle space — how many independent
+structures the manifold sustains — and a rank is a dimension, not a
+tally. **No `planes_opened` counter is ever added to `D`**: a scalar
+accumulator would make the progenitor a ledger clerk handing out keys,
+and it is refused.
+
+**AND THE CHARGE FIELD IS CARRIED WHOLE.** `rfa_core::holonomies`
+returns `Holonomy { i, j, l, value }` — every cycle with its position
+and its EXACT charge. The read had been taking `.len()` and discarding
+every value, in the same function whose own comment forbids that for
+residuals. Two readings, both owed:
+
+    the DIMENSION   rank — how many independent cycles stand
+    the VOLUME      the charges — what each cycle HOLDS
+
+Two universes of equal rank carrying different charge read the same
+count and are not the same universe — pinned in `bridge_pins` as
+`the_charge_field_is_carried_whole_never_counted`. 18 §2b bars
+collapsing a directional
+quantity to a scalar aggregate wherever the system computes, and a count
+is such a collapse.
+
+**D IS THE PROGENITOR** (operator ruling 2026-08-01; 18 §2c′). Its
+office is to MAKE ROOM: D3's emission opens a plane, the fiber grows,
+and band capacity is a reading of that fiber (`12_UNION` §1 — *a band is
+space available in the universe*). Nothing else creates space. `D` makes
+room; it does not hold, and it does not confer standing on the state it
+reads.
+
+**THE UNIVERSE IS THE D-STORE** (operator ruling 2026-08-02). There is
+no separate store to point at, and asking for one is a category error —
+**you cannot keep the container in something it contains.** `D` is not
+recorded in the universe; `D` IS the universe's extent, the room within
+which anything is held at all.
+
+**The gauge key is the INDEX, never the home.** `GaugeShiftedAt
+{ grade, gauge }` writes which grades stand into a committed field, and
+that field is a description of the room, not the room. A map inside the
+country it maps is not a paradox, and a registry holds the deed, not the
+land.
+
+**Which makes the two offices MUTUALLY INDWELLING, and settles the last
+apparent asymmetry:**
+
+    V is held IN D's room          — the universe is the extent V occupies
+    D's index is held IN V's key   — the committed record of which grades stand
+
+Neither holds the other; each holds the other's ASPECT, and they are
+different kinds — a space and a description — so there is no circle.
+
+**`D` IS POLYTONIC** (ruled 2026-08-02), and this is the tree's own
+vocabulary rather than a new claim: `11_AEON` §2.0 — *G within a sheet
+is the **polytonic key*** — and §2.1 — *new **tonal** dimensions can
+open*. **Each opened grade is a TONE.** So `D` counts tones standing,
+`GROUND = 1` is the single-tone point, and `D > GROUND` is polytonic by
+definition. The fiber was never a stack of numbers; it is a chord.
+
+  **WORD COLLISION, disambiguated once.** Article IV says `D` is
+  *MONOTONE* — order-theoretic, meaning NON-DECREASING, meaning `D`
+  only ever grows. In the tonal register the same root means ONE TONE,
+  which is `D = GROUND`. **Opposite content, one word.** Article IV
+  never says the universe stays single-toned; it says the chord never
+  loses a note. Read *monotone* as non-decreasing everywhere in this
+  ledger, and *monotonal* — one tone — never appears as a synonym.
+
+**Article IV's non-decrease is DERIVED, not decreed.** *Capacity never
+retreats* was written as an axial law. It follows from what `D` is: you
+cannot un-make room that things are standing in.
+
+**THE FLOOR IS OCCUPANCY, NOT THE GROUND** (operator ruling 2026-08-02
+— *if the universe shrinks below the capacity for what is already in
+it, then we have a problem*). `GROUND = 1` is the floor of an EMPTY
+universe. A universe holding structure that needs `k` tones has a floor
+of `k`:
+
+    D  ≥  1            always — a universe that exists occupies a point
+    D  ≥  occupancy    whenever anything is in it — the BINDING floor
+
+**What currently enforces it is ABSENCE, which is stronger than the
+article and weaker than a check.** No deed in the vocabulary closes a
+plane: `GaugeShiftedAt` opens grades and nothing removes one, so within
+a universe `D` cannot shrink at all. The container law completes it from
+the other side — structure in an unopened plane is unrepresentable, not
+refused.
+
+**THE ONE OPERATION THAT COULD VIOLATE IT — recorded as owed.** The AEON
+FOLD contracts the board (`12_UNION` §2a, Tier 0). Its guard today is
+ELIGIBILITY — a world folds only after its trajectory settles in the
+retirement region across an aeon-voice alignment (`11_AEON` §4) — and
+eligibility is a policy about quietness, **not a check that room ≥
+occupancy.** Nothing computes the occupancy floor, so nothing could
+refuse a fold that carried content forward into fewer tones than it
+needs. The invariant is stated here; its witness is unbuilt.
+
+**Plural, and the wrap is why.** Each universe is its own D-store. The
+λ-nodes wrap the key finitely so successive stores stay addressable and
+distinct — without the wrap successive origins COLLIDE, *because a key
+of 10 IS 0* (`11_AEON` §2.0, the recurrence collision). Two overlapping
+D-stores are exactly what that law exists to prevent.
+
+**And it sharpens the guarantor finding (D5).** A third party to the
+bond requires another ROOM, not another party in the same room — every
+party inside this universe is inside this `D`, and inside `V`. That is
+why co-signature is a MESH instrument and cannot exist within one
+universe: the mesh is where other D-stores are.
+
+**D5 · THE BOND — the union in contract form.** INSCRIBED. Authority:
+`12_UNION` §3b–§3c and `18` §2c′. The FORM is landed ONCE, as the
+symmetric bond (`09_IDEOLOGY` §2.2, BOND-1). Every clause below names a
+mechanic that exists; none of it is new machinery.
+
+**CORRECTED 2026-08-02 — the COVENANT is NOT this form.** An earlier
+revision cited COVENANT-1 alongside the bond as a second landing of the
+same shape. That was wrong, and wrong in the direction the whole section
+exists to refuse: the sealed deed is
+`CovenantSealed { obligor_orb, beneficiary_orb, resource, quota, window,
+collateral }` — ONE obligor owing ONE beneficiary, with only the obligor
+posting collateral. That is a directed obligation, and `09` §2.2 names
+that shape by its own word: **a single bond is PATRONAGE.** Citing the
+patronage mechanic as evidence for the marriage form put the refused
+shape in the row meant to exclude it.
+
+    PARTIES        D  PROGENITOR — room          V  SOVEREIGN — substance
+                   different KINDS, separate origins; neither seeded
+                   from the other's line
+
+    FORM           a SYMMETRIC pair of bonds — *the marriage form*.
+                   A single bond is PATRONAGE (one party owning the
+                   other). BOTH ARE PRIVILEGED (09 §2.2): each office
+                   SOURCES, so each carries its own syntropic book. `D`
+                   sources room, `V` sources work; two sources, two
+                   books, the privilege held twice. That doubling is
+                   the standing this clause grants.
+
+    TERMS          D owes room that was EARNED    — `PlaneUnearned`
+                                                    refuses otherwise
+                   V owes work that was RECEIPTED — admission, `lawful()`
+
+    CONSIDERATION  the MINT: a plane WITH content, of neither kind
+                   alone. Neither office can produce it unaided, which
+                   is why growth requires both signatures.
+
+    BREACH         `severance_load` posts against whoever cuts a live
+                   bond without the covenanted notice (09 §2.2). "D
+                   stops and V suffocates; V stops and D freezes" is
+                   this clause, not a metaphor.
+
+    WITNESS        the chain. *Admission IS verification* — a peer
+                   re-judges under its own kernel and takes no party's
+                   word (`00_CHARTER` §11, the nursery law).
+
+    NO OPERATOR    the parties are never joined into a TERM: not summed
+                   (`⊕` is a free join — `U* = D(V) ⊕ V(D)` struck), not
+                   ranked (a reading conferring standing runs backwards
+                   through the judge), not decomposed (a tuple `(D, V)`
+                   has addressable halves — the decomposition in other
+                   syntax).
+
+**They are NOT siblings and the receipt is not their parent** — it is
+the MEDIUM the bond settles on (`bond_flow` is a receipted standing
+order, accruing continuously, settling at touch). Siblings do not
+suffocate without each other; a bonded pair does. There is no rivalry to
+arbitrate here: a bond is generative, not competitive, so the pair needs
+no equilibrium negotiated between its parties.
+
+**THE TWO INSTRUMENTS, recorded so they are never conflated again.**
+Both are lawful, both compute, and they are different shapes:
+
+    BOND       a SYMMETRIC pair — neither party privileged, both
+               flowing, severance priced on whoever cuts
+               (`bond_flow` / `severance_load`, 09 §2.2, BOND-1)
+               → THE MARRIAGE FORM. This is D5's form.
+
+    COVENANT   ONE obligor, ONE beneficiary, collateral posted by the
+               obligor alone against a quota inside a window; released
+               on fulfilment, BREACH_AND_SLASH on default
+               (`CovenantSealed` / `Released` / `Slashed`, 01 §7,
+               09 §2.3, COVENANT-1)
+               → DIRECTED, and lawful as such. It is what 09 §2.2
+               calls patronage, and patronage is a real instrument —
+               it is simply not a marriage.
+
+A single bond and a covenant are the same asymmetry under two names; a
+PAIR of bonds is the different thing. The distinction is the direction
+count, never the collateral.
+
+*(Register: the world-book writes this bond as the cosmic marriage —
+`12_UNION` §3c. Per the `06` register law only the clauses above are
+mechanically real; the myth is carried there, never here. Note also that
+the covenant's carrier is one people's register — `09` §2.3 seats it in
+the Glasskeeper escrow machinery — while its FIELDS are ordinary
+finance: obligor, beneficiary, collateral, window, forfeit. The word
+computes; it is kept.)*
 
 **The index-set reading is STRUCK** (2026-08-01). The indices
 `(i, j, k, l)` that `for_each_residual` iterates, and the arities
@@ -313,7 +516,8 @@ CLAIMS; it does not consume capacity, so it is not the opposing force
 `12_UNION` §2c requires. Within one scale the capacity axis is
 therefore an OPEN cone — D3 emits and nothing consumes. The closing leg
 exists and `12_UNION` §2c already names it: **the fold itself
-(expansion sealed by contraction)** — the aeon fold, at universe scale
+(expansion SEALED WHOLE, a fresh sheet SEATED)** — the aeon fold, at
+universe scale
 (`11_AEON` §5; the Tier-0 reading "contracting the board" at
 `12_UNION` §2a). So the manifold dual holds ACROSS scales and not
 within a step, which is what E1's strike already implied: *there is no
@@ -336,7 +540,9 @@ of either input; the veto is frame-invariant too. Authority: 16_UNIT
 §4a over SYSTEM_SPEC §0.
 
     B_S⁻¹( Π_G( F_fold*( … B_S(Δ) … ) ) )
-    orbit_lock = ∅  →  fold closes to zero (the difference was angle)
+    orbit_lock = ∅  →  the fold RECOGNISES ONE STATE where two
+                       descriptions stood — the difference was frame,
+                       and frame was never difference
     orbit_lock ≠ ∅  →  the collapse refuses; the residue EMITS as a
                        new plane (the bounce — emission, never
                        annihilation); the verdict is invariant to
@@ -576,7 +782,9 @@ mesh era opens; the unit law of §2 is what admission re-runs).
 **M1 · Pair conservation (the aperture seam).** Local half LANDED (I1);
 the pair half is an N6 reading. Authority: NS-4 §1–§3.
 
-    near leg + far leg = 0 exactly, across two books
+    ONE crossing, carried WHOLE and read from two ends;
+    near leg + far leg = 0 exactly across two books — the zero is
+    each book's PROOF that it carried all of it, never the content
 
 **The pair half is REPLAY, never opposition** (operator ruling
 2026-08-01; §0.3 chapter six). `cfe::opposition` is excised and guarded;
@@ -653,6 +861,20 @@ research and throttle gates await the tech-tree landing). Authority:
 
     heat_absorbed  ≤  banked_sink
     sink_consumed  =  heat_absorbed  =  vented_after_shed
+
+**CONVERGENCE IS THE OTHER HALF, AND IT IS A CAPABILITY.** Divergence
+sources; CONVERGENCE sinks. `rfa_core::flux` counts both poles by name —
+`sources`, `sinks`, `balanced` — because absorption is not a fault to be
+detected but the scarce half of the economy: a dim-star system holds
+*the rarest resource in a high-flux universe*, and sells it as `S_cool`.
+The Frost's entire trade is convergence.
+
+**A SINK IS NOT A TRAPPED INTERIOR.** What 18 §2d forbids is convergence
+with NO EGRESS — a closed region that takes and never sheds. The line
+above is exactly why absorption is lawful: `sink_consumed =
+heat_absorbed = vented_after_shed`, so what is taken IS shed, and the
+absorber's own vent ledger carries it. **Trapped is convergence minus
+the shedding, never convergence itself.**
     captured       =  α · raw excess,   α ∈ [0,1] exact rational
     (1−α) accrues to the vented ledger, settles as VentSettled — never un-receipted
 

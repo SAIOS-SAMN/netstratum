@@ -1360,6 +1360,27 @@ The cure was structural, not another check — a `Degree` type with a
 private field and one constructor, so a below-ground value is not
 refused but UNREPRESENTABLE (the AV-4 shape, §10b).
 
+### 14b3. *neither is privileged* — the levelling form, struck
+
+**Struck 2026-08-02.** `09_IDEOLOGY` §2.2 read *"a symmetric pair of
+bonds is the marriage form; a single bond is patronage; **neither is
+privileged**."* The content was right and the form was negentropic: it
+stated equality as an ABSENCE of privilege, defining the good by
+subtraction, which `00_CHARTER` §2a bars in the document that carries
+§2a.
+
+**What stands now:** both are privileged. `bond_flow` is the SOURCE's
+syntropic book, so each party in a pair sources and each carries its own
+book — two sources, two books, the privilege held twice. Patronage holds
+it once. The carry is positive on both sides, which is what building on
+the syntropic lane means.
+
+**And the correction needed a second pass**, recorded because it is the
+subtler half: the first rewrite stated the new law by narrating the old
+one — *"inverted from…", "the old wording levelled down…", "never
+cancelled"* — so a syntropic ruling was itself written negentropically.
+The law states what IS; the record of what it replaced belongs here.
+
 ### 14c. `V` IS NOT FLOORED, AND THAT IS DELIBERATE
 
 The same ruling was read as *"neither pole reads zero"* and extended to
