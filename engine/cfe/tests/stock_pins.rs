@@ -220,3 +220,84 @@ fn a_draw_past_the_land_returns_what_the_land_holds() {
     assert!(drawn > ratio(0, 1), "a stock above its floor yielded nothing");
     assert!(stock.current >= stock.seed_floor, "the seed core was breached");
 }
+
+/// COVERAGE is defined everywhere — the gap that made a whole class of
+/// world uninhabitable is closed, and the bands are plateaus now.
+#[test]
+fn coverage_is_positive_on_the_whole_line() {
+    use cfe::thermal::{coverage, SubstrateBand};
+    let probes = [
+        ratio(1, 1),                    // frozen dark
+        ratio(50_000, 1),               // inside cryogenic
+        ratio(1_000_000_000, 1),        // between cryo and mesic
+        ratio(6_000_000_000, 1),        // inside mesic
+        ratio(13_000_000_000, 1),       // THE FURNACE GAP — derived seats land here
+        ratio(500_000_000_000, 1),      // inside hyperthermal
+        ratio(90_000_000_000_000, 1),   // past every band
+    ];
+    for t4 in probes {
+        let read = coverage(&t4);
+        assert!(read > ratio(0, 1), "coverage read zero at {t4:?} — the line is not covered");
+        assert!(read <= ratio(1, 1), "coverage ran past one at {t4:?}");
+    }
+    // Inside a band is a PLATEAU, not a peak.
+    let (lo, hi) = SubstrateBand::Mesic.bounds4();
+    assert_eq!(coverage(&lo), ratio(1, 1), "a band edge is not full coverage");
+    assert_eq!(coverage(&hi), ratio(1, 1), "a band edge is not full coverage");
+}
+
+/// The furnace gap reads POOR, never impossible — the defect
+/// 20_FOUNDING §4 named, closed.
+#[test]
+fn the_furnace_gap_is_poor_and_not_impossible() {
+    use cfe::thermal::{band_of, coverage};
+    let seats = [
+        ratio(12_118_000_000i64, 1),
+        ratio(13_330_000_000i64, 1),
+        ratio(14_542_000_000i64, 1),
+    ];
+    for seat in seats {
+        assert_eq!(band_of(&seat), None, "fixture drifted — the seat found a band");
+        let read = coverage(&seat);
+        assert!(read > ratio(0, 1), "a founding seat reads uninhabitable");
+        assert!(read < ratio(1, 1), "a gap seat reads as rich as a band core");
+    }
+}
+
+/// Coverage falls with distance FROM THE NEAREST BAND — not with
+/// temperature. Between two bands it descends into the valley and
+/// climbs the far side, which is the correct shape and was worth
+/// getting wrong once: the first version of this pin assumed monotone
+/// in T⁴ and failed at 100e9, where a world is closer to hyperthermal
+/// than to mesic.
+#[test]
+fn coverage_falls_with_distance_from_the_nearest_band() {
+    use cfe::thermal::coverage;
+    // Walking away from the mesic ceiling, distance strictly grows.
+    let a = coverage(&ratio(11_000_000_000i64, 1));
+    let b = coverage(&ratio(20_000_000_000i64, 1));
+    let c = coverage(&ratio(40_000_000_000i64, 1));
+    assert!(a > b && b > c, "coverage did not fall while distance grew");
+    // And it CLIMBS again approaching the hyperthermal floor.
+    let d = coverage(&ratio(120_000_000_000i64, 1));
+    assert!(d > c, "coverage did not recover approaching the next band");
+}
+
+/// RECURRING VALUE — what a stock yields forever, priced by where it
+/// sits. Two identical deposits on different worlds are worth different
+/// amounts, which is why location is an asset.
+#[test]
+fn recurring_value_prices_the_world_the_stock_sits_on() {
+    use cfe::thermal::coverage;
+    let mut stock = tended();
+    for _ in 0..20 {
+        stock.step(&ratio(0, 1));
+    }
+    let rich = coverage(&ratio(6_000_000_000i64, 1));       // inside mesic
+    let poor = coverage(&ratio(13_330_000_000i64, 1));      // the furnace gap
+    let on_rich = stock.recurring_value(&rich);
+    let on_poor = stock.recurring_value(&poor);
+    assert!(on_rich > on_poor, "location did not price the deposit");
+    assert!(on_poor > ratio(0, 1), "a gap world yields nothing — that is the old defect");
+    assert!(on_rich <= stock.regeneration(), "coverage minted value past regeneration");
+}

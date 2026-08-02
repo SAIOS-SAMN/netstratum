@@ -171,6 +171,30 @@ impl ResourceStock {
         self.current = Self::onto_lattice(&capped);
     }
 
+    /// RECURRING VALUE — what this stock yields per tick, forever,
+    /// on a world of the given thermal `coverage`.
+    ///
+    /// **This is the number a claim is priced on.** A stock's worth is
+    /// not what sits in it; it is what it keeps producing without
+    /// shrinking, and where it sits decides how much of that a
+    /// civilization can actually take. `coverage` comes from
+    /// `cfe::thermal::coverage` and is defined everywhere on the
+    /// positive line, so EVERY world yields something — a gap world
+    /// yields poorly rather than not at all.
+    ///
+    /// ```text
+    /// recurring = regeneration(S) × coverage(T)
+    /// ```
+    ///
+    /// Two worlds holding identical deposits are worth different
+    /// amounts because one of them is somewhere better, which is the
+    /// whole of why location is an asset. It also gives §6h.2's claim
+    /// wrapper something to be a claim ON, and §6h.3's GDP its
+    /// per-deposit term.
+    pub fn recurring_value(&self, coverage: &Ratio) -> Ratio {
+        Self::onto_lattice(&(self.regeneration() * coverage.clone()))
+    }
+
     /// The extraction this stock can support without shrinking — its
     /// sustainable flow, which is exactly its regeneration.
     ///

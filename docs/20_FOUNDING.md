@@ -420,10 +420,49 @@ And `band_of` returning `None` stops being an absolute exclusion: the
 named bands become the REGIONS WHERE COVERAGE IS RICH, never the test
 for whether a world counts.
 
-**Held for the operator:** the falloff's shape. It must be exact
-rational, monotone in distance from the core, and positive everywhere —
-beyond that it is a tuning question, and §7 binds it to read its own
-conditions rather than carry a literal.
+### 6c.1 LANDED — coverage, and the recurring value it prices
+
+**Built 2026-08-02.** `cfe::thermal::coverage(t_eq4) -> Ratio`, defined
+on the whole positive line:
+
+```text
+inside any band      coverage = 1          the bands are PLATEAUS now
+outside every band   1 / (1 + d/scale)     d = K⁴ to the nearest edge
+```
+
+**The scale is derived, not chosen** — `coverage_scale4()` is the width
+of the mesic band, so a world one temperate-band-width outside the
+nearest band reads half. Using a measured span instead of a tuned
+literal is what keeps this a reading under §7.
+
+**Square-free**, so THE PROPORTIONAL LAW is untouched: the difference
+enters to the first power only.
+
+**Its shape is a valley, not a slope, and that is correct.** Between two
+bands coverage descends and then CLIMBS the far side — a world at
+1.2e11 K⁴ is poor because it is far from mesic, and improving because it
+nears hyperthermal. The first pin written for this assumed monotone in
+temperature and failed; the correction is recorded in the test.
+
+**THE RECURRING VALUE.** Coverage is not a habitability score sitting on
+its own — it prices what a deposit yields FOREVER:
+
+```text
+recurring_value(stock, world) = regeneration(S) × coverage(T)
+```
+
+**This is the number a claim is priced on** (§6h.2). A stock's worth is
+not what sits in it but what it keeps producing without shrinking, and
+where it sits decides how much of that is actually reachable. Two worlds
+holding identical deposits are worth different amounts — **which is the
+whole of why location is an asset**, and it gives §6h.3's GDP its
+per-deposit term.
+
+**The gap is closed at the point it mattered.** The derived furnace
+seats (1.21–1.45e10 K⁴) now read poor and non-zero instead of
+uninhabitable, so a mineral or plasmic founding has a real if hard
+economy rather than a defect — §4's viability law satisfied by a reading
+rather than by moving a band edge.
 
 ### 6d. WARD STANDING — proportional, so ties need no rule
 

@@ -285,6 +285,79 @@ got bigger, and the seats in it are still unearned.**
 card and to the roster `install.sh` writes before first boot. That is
 the operator's ruling, not a lane's cleanup.
 
+## §6 THE STATION LAW — every mechanic declares its layer
+
+**Operator ruling 2026-08-02, and it is inscribed because the same
+defect landed three times in one day.**
+
+**THE FAILURE, measured.** The corpus states what every mechanic DOES
+and states no mechanic's REACH. A rule's layer is therefore inferred
+from whichever file it happens to sit in — which is not a decision
+anybody made, and it fails silently in both directions:
+
+```text
+PROMOTED   the covenant   a collateralized delivery contract read as a
+                          moral commitment — struck, renamed FORWARD
+PROMOTED   the ward       a colony shield read as a universal scope
+                          axis — demoted, §4 renamed SEAT SCOPE
+CONSULTED  CHANNEL_       a resource-delivery remainder read as one
+           COVENANT       people's instrument, because of its NAME —
+                          and the universal capacity meter D reads it
+```
+
+The third is the dangerous shape: **a mechanic lawful at a line's own
+level becomes a universal precondition the moment a universal reading
+consults it.** Nothing announced that; the name did the damage.
+
+### 6a. THE LAW
+
+**Every mechanic declares the layer it acts at, and no reading may
+consult a mechanic from a layer above it without saying so.**
+
+```text
+UNIVERSAL      the mesh: units among units. Every peer re-judges with
+               its own kernel. Nothing here may depend on one people's
+               instrument.
+WORLD          one clock, one chronicle, one receipt chain (04 §5) —
+               the replay unit. The ward lives HERE.
+CIVILIZATIONAL one line's own register: its practices, its creeds, its
+               ceremonies. Free, and never a precondition for anyone
+               else.
+```
+
+### 6b. THE TEST, and it is the one that would have caught all three
+
+**Ask of any mechanic: if a line never uses this, what does it lose?**
+
+```text
+nothing but its own option      → CIVILIZATIONAL, correctly placed
+a capacity every line is
+  measured on                   → it has been PROMOTED. Either the
+                                  mechanic is universal after all, or
+                                  the universal reading must stop
+                                  consulting it.
+```
+
+**Applied to `CHANNEL_FORWARD`, the answer came out clean**: a line that
+seals no delivery obligation carries an empty channel, and the mechanic
+is ordinary finance rather than one people's rite — so the channel is
+universal and the register seat was never a requirement. **The audit was
+possible because the question was finally asked. Nothing in the corpus
+had asked it.**
+
+### 6c. WHERE THIS BINDS
+
+**A name is not a layer.** All three failures came through vocabulary:
+`covenant` sounded moral, `ward` sounded universal, `CHANNEL_COVENANT`
+sounded ceremonial. §5's tiering already says CONTENT is free — and free
+content must never leak upward into an AXIS by nothing more than
+sounding grand.
+
+**This section is subordinate to whatever layer taxonomy lands from the
+syntropy lane** (their §3d, in flight). Two lanes writing one law is the
+drift this document exists to prevent; where they disagree, theirs is
+the authority and this reduces to its registry-side application.
+
 ## §5 THE EXPANSION LAW — totality, never locality
 
 **The problem, stated plainly.** `STATIONS` is `[&str; 4]` compiled into
