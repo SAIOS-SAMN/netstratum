@@ -1,157 +1,158 @@
-# R-D5 — the solver is a brute-force enumerator, and that is the defect
+# R-D5/6 — the solver must read geometry, not enumerate programs
 
-**Lane:** `remediations-lane`. **Written:** 2026-08-03.
-**Status:** research directive. Supersedes the R1–R5 optimisation track.
-
-> Operator, 2026-08-02: *"you burned all of your resources churning on
-> something that is unsolvable by your own brute force reasoning where
-> you should have researched new technologies to unlock the higher order
-> of intelligence."*
-
-Upheld. I measured that 99 % of forge time is exhaustive sweeps over
-tasks the solver cannot solve, and I responded by caching those sweeps.
-The measurement was the answer and I treated it as a starting point for
-more of the same. This file is the direction I should have taken from it.
+**Lane:** `remediations-lane`. **Written:** 2026-08-02, rewritten
+2026-08-03 after consulting `/opt/repos/convergence-engine` and
+`/opt/ipsal-autic-v0.1/saios-arc`.
+**Status:** research directive. Closes the R1–R5 optimisation track and
+the 3a–3d search track with it.
 
 ---
 
-## §1 What the solver actually is
+## §0 The incident this file opens with
 
-`solve` enumerates the cartesian product of a 14–37 operator vocabulary
-to depth ≤ 3 and tests every word forward against the training pairs.
-That is generate-and-test. It has no model of the task, learns nothing
-across candidates, and cannot use the structure of a near-miss.
+An out-of-memory kill took down the operator's machine. The cause was
+mine: `solve` was given a `HashSet<Vec<Grid>>` of every distinct image
+tuple reached, cloned in, unbounded. Reverted at `HEAD`; the tree carries
+none of it.
 
-Three consequences, all measured:
+The failure is not incidental to the subject. **Raw images have no
+floor**, so a set of them grows without bound. A cohomology class does
+have a floor — §2. Deduplicating by hashed grid was flat indexing, which
+is precisely what `DIMENSIONAL_RESOLUTION.md` names as the thing that
+destroys the geometry. I built brute force wearing a geometry costume and
+it ran the machine out of memory.
 
-- 30 % of forged tasks are unreachable — no word in the product closes
-  them, so the sweep runs to exhaustion and returns `Unsolved`.
-- Those cases are 99 % of all forge time (81 ms against 31 µs).
-- Every optimisation in the R1–R5 track (buffer reuse, prefix carrying,
-  frontier streaming, vocabulary ordering, memoisation) changes the
-  constant in front of `V^d`. None of them changes `V^d`.
+## §1 The solver imports the relational engine and never calls it
 
-**The system is named for cognition and the cognition is a product
-sweep.** This is precisely the shape ARC exists to defeat.
+```
+engine/solver/src/search.rs:231   impl rfa_core::Exact for SolveRead {}
+engine/solver/src/search.rs:298   rfa_core::consult((task, max_depth), ...)
+```
 
-## §2 The codebase already contains the better method, applied to 2 of 9
+That is the entire use of `rfa-core` in the solver: a marker trait and
+the cage door. Not `Delta`. Not `coboundary_reduce`. Not `holonomies`,
+not the residual field, not H¹.
 
-`derived_recolors` (`search.rs:33`) does not guess a recolor. It reads
-the hue map **off the observation** — for each of seven geometric
-normalisations, it checks whether the pairs are cell-wise consistent and
-extracts the exact mapping. `derived_tiles` (`:79`) reads the tiling
-ratio off the shapes.
+The relational engine sits in the solver's own dependency graph, built
+and witnessed, while the solver enumerates a cartesian product beside it.
 
-That is inversion: *solve for the operator given input and output*,
-rather than propose an operator and check. It costs `O(pairs · cells)`
-where enumeration costs a factor of `V`.
+## §2 What the two consulted repositories say
 
-**It is applied to two operator families out of nine.** The other seven —
-six symmetries and eight object operators — are guessed. And the 30 %
-unreachable cases are exactly where inversion failed and guessing could
-not reach: `derived_tiles` reads the ratio from the **first pair only**,
-so a word that disturbs the shape before tiling leaves the operator
-outside the vocabulary entirely.
+### 2a. `saios-arc` already retired this architecture
 
-The remediation is not a faster sweep. It is to extend the method the
-codebase already proved, and to stop enumerating what can be derived.
+`saios-arc/src/lib.rs` lists, under **retired**:
 
-## §3 Four directions, cheapest first
+- `solve_pair<N, M>` **Compositor::search dispatch**
+- `derivation/*` — `ValueDerivation`, `PositionDerivation`,
+  `GeometricDerivation`, `CardinalityDerivation`, `HomogeneityDerivation`
+  — *"substrate cognition replaces adapter-side rule derivation"*
 
-### 3a. Deduplicate the frontier by IMAGE, not by program
+The retired list is this lane's plan. The search dispatch is netstratum's
+`solve`; the derivation producers are §3c, which I proposed yesterday as
+the fix. They built both, and moved past both.
 
-Two words that produce the same grids are interchangeable for everything
-downstream. The search enumerates **program space**; what matters is
-**state space**, and state space is dramatically smaller:
+**The live path:**
 
-- the six symmetry generators produce at most 8 distinct transforms
-  (the dihedral group), so 216 length-3 geometry words collapse to ≤ 8;
-- composed recolors are a single recolor;
-- many object operators are idempotent (`CropContent` twice is
-  `CropContent`).
+```
+cells → RuntimeDelta → cohomology_class_from_runtime
+      → traverse_for_convergence → BundleEliminator
+```
 
-Keep a set of image-tuples already reached; skip any child whose images
-are already present. This is the peel/shear idea applied correctly —
-collapse by what a thing **is**, not by how it was spelled. It needs no
-new theory, preserves exhaustiveness over reachable states, and shrinks
-the effective branching factor rather than the constant.
+Elimination against a cohomology class. Not enumeration over a product.
+And the entry point is `think_with_walk_backwards` — backward reasoning,
+which §3b proposed and which is already built there.
 
-**Note this subsumes R2 and does it properly**: R2 proposed canonicalising
-geometry words syntactically and measured ~4 %. Deduplicating by image
-catches the same collapse plus every other one, structurally.
+### 2b. `refinement.rs` is what "stacking axioms" means concretely
 
-### 3b. Search backward from the output, and meet in the middle
+`OperatorHypothesis` carries `{ operator_handle, claimed_post_fingerprint }`
+— **a cohomology fingerprint, not a program.** The loop refines one
+hypothesis across the training pairs, and crystallisation is gated on a
+stability witness: *"PathIndependent attraction across at least 2 pairs.
+Mid-process crystallisation refused; only stability-witnessed convergence
+crystallises."*
 
-Most of the vocabulary is invertible: all six symmetries are their own
-group, a bijective recolor inverts, `Rotate90⁻¹ = Rotate270`. Run the
-sweep forward from the input to depth `d/2` and backward from the output
-to depth `d/2`, and join on matching images.
+Each pair constrains the hypothesis. Agreement across pairs is what
+promotes it. That is learning from the observation, and it is the
+opposite of testing 52 060 candidates against it.
 
-`V^d` becomes `2·V^(d/2)`. At `V = 37, d = 3` that is ~52 000 candidates
-against ~450. **This is the exponent, not the constant** — the thing
-every R1–R5 change failed to touch.
+### 2c. `DIMENSIONAL_RESOLUTION.md` gives the governing law
 
-The non-invertible arm (`Tile` expands, `CropLargest` discards) simply
-does not participate in the backward pass; it stays forward-only. A
-partial meet-in-the-middle is still most of the win.
+> Controlled expansion: propose operators that **increase**
+> dimensionality when the residual says the current dimensions are not
+> enough. Controlled collapse: `coboundary_reduce` **projects back** to
+> the irreducible core after every expansion.
+>
+> Expansion bounded by validation gates. Collapse bounded by
+> cohomological projection — **you cannot fold past the irreducible form;
+> the H¹ class is the floor.**
+>
+> The cycle: unfold → fold → measure the residual → unfold again if
+> needed.
 
-### 3c. Derive every operator family that can be derived
+Both bounds matter, and the lower one is why §0 happened. A search over
+raw images is unbounded in both directions. A search over cohomology
+classes cannot fall below H¹, and the residual is what tells it when to
+expand.
 
-Extend `derived_*` to the whole vocabulary:
+## §3 netstratum already holds both halves
 
-- **symmetries** — the shape change alone (`rows×cols` → `cols×rows`)
-  identifies transpose-class operators; a cell-wise check confirms which.
-- **tiles** — read the ratio from **every** pair, not the first, and
-  admit the case where a shape-changing op precedes the tiling.
-- **object operators** — segment both sides and compare component
-  counts; `KeepLargest` and `DeleteLargest` are identifiable from the
-  segmentation, not from trying them.
+| the law needs | netstratum has | where |
+|---|---|---|
+| the relational field `Δ(V)` | `rfa_core::Delta` | `rfa-core` |
+| controlled collapse | `coboundary_reduce` | `rfa-core/src/reduce.rs` |
+| the irreducible core | `holonomies` — H¹ representatives | `rfa-core/src/reduce.rs` |
+| the residual that says "expand" | `symmetry_foundation` — *"the ground new structure rises from"* | `kernel/src/bridge.rs` |
+| both poles of the reading | `dual_pole`, `Flux { sources, sinks, balanced }` | `rfa-core` |
+| a projection from state to `Δ` | `bridge::project_complex` | `kernel` |
 
-Every family moved from guessed to derived removes a factor of `V`.
+The one thing missing is a projection **from a grid pair to a `Δ`** —
+`saios-arc`'s `pair_encoding` / `cells_to_runtime_delta`. Everything the
+convergence cycle needs downstream of that is built, witnessed, and in
+the solver's dependency graph already.
 
-### 3d. Intersect consistent-program sets across pairs (version spaces)
+## §4 The direction
 
-The standard technique for programming-by-example: for each training
-pair compute a compact representation of **all** programs consistent with
-it, then intersect across pairs. The intersection is usually tiny even
-when each individual set is astronomically large.
+**Do not optimise the search. Replace what it searches over.**
 
-This is the principled form of what 3a and 3c approximate, and it is
-where the design should end up. It is also the largest change, so it
-belongs after them.
+1. **Encode the pair as a relation, not a picture.** A grid pair becomes
+   a `Δ` over cell/region entities — `saios-arc::pair_encoding` is the
+   reference. Antisymmetry is the curvature; this is where the geometry
+   enters and where flat hashing loses it.
+2. **Take the cohomology class.** `coboundary_reduce` strips coordinate
+   distortion; what survives is what no frame explains — the invariant
+   the transformation actually is.
+3. **Match classes, not images.** Two pairs of the same task should
+   present the same class. That is the constraint, and it is bounded
+   below by H¹ rather than by a growing set.
+4. **Refine across pairs, crystallise on stability.** One hypothesis,
+   constrained pair by pair, promoted only on a path-independence
+   witness over ≥ 2 pairs.
+5. **Expand only on the residual.** When the class does not resolve, the
+   residual field names which triple failed to compose — that is the
+   signal to unfold a dimension, and it is already computed.
 
-## §4 What must not move
+## §5 What holds unchanged
 
-- **`verify_work` and the certificate.** The judge re-applies the
-  presented program; it never enumerates. Every direction here is
-  prover-side and consensus-free — `FORGE_BUDGET` §1 established that
-  and it still holds.
-- **Determinism.** Same task, same answer, on every machine. All four
-  directions are deterministic; none needs sampling or a clock.
-- **The honest withhold.** `Unsolved` stays a lawful reading. A smarter
-  search must never guess.
+- `verify_work` re-applies a presented program and never enumerates, so
+  all of this stays prover-side and consensus-free.
+- Determinism: exact rationals, no float, no clock, no sampling.
+- The honest withhold: `Unsolved` stays lawful. A solver that reasons
+  must still never guess.
+- **Bounded memory is now a stated requirement, not an assumption.** Any
+  structure that accumulates per candidate must have a named ceiling
+  before it is built.
 
-## §5 Sequencing
+## §6 What was closed to get here
 
-1. **3a (image dedup)** — no new theory, subsumes R2, measurable
-   immediately with `bench_solve`. Note it changes which program is
-   returned, so `search_identity.rs` is re-recorded deliberately.
-2. **3b (bidirectional)** — the exponent. Needs an `Op::invert` returning
-   `Option<Op>`, which is a small addition to the sealed vocabulary.
-3. **3c (derive the rest)** — removes a factor of `V` per family and
-   directly attacks the 30 % unreachable.
-4. **3d (version spaces)** — the principled endpoint.
+- **R1, R2, R3, R4** — struck. Each changed the constant in front of
+  `V^d`; the solve rate never moved off 85/120.
+- **R5** — landed (a 31 % digest-repeat memo), and it caches failures
+  rather than removing them.
+- **3a** — built, measured, reverted. It collapsed 56 % of the frontier
+  and the solve rate still did not move, because deduplication shrinks
+  the search without widening its reach. Then it ran the machine out of
+  memory, for the reason in §0.
 
-Measure each with `bench_solve` (min and spread over samples), reporting
-**solve rate first and time second**. The R1–R5 track optimised time
-while the solve rate never moved off 85/120; a change that lifts the
-solve rate and costs time is a better change than the reverse, because
-an unsolvable draw mints nothing.
-
-## §6 The lesson this file records
-
-I had the measurement that mattered by mid-session — 99 % of the cost is
-tasks that cannot be solved — and spent the rest of the budget making
-those failures cheaper. Making a brute-force search faster is not the
-same problem as not needing one. The measurement said the search was
-inadequate; I read it as saying the search was slow.
+The measurement rule that survives all of it: **solve rate first, time
+second.** Every change in this lane's history improved or preserved time
+and none of them moved 85/120.
