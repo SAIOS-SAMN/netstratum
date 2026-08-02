@@ -40,14 +40,19 @@ Ideology is **measured, never declared and never scored**:
    observer surface, exactly as the syntropy ratio does (the VENT-1
    uplink precedent). The chronicle carries deeds; arithmetic over deeds
    is free and replayable.
-3. **No oracle, no single number.** No rule ever reads a "goodness"
-   scalar. Consequences attach through specific inscribed mechanics (§3),
-   each citing exactly one axis. The four axes never collapse into one
-   figure — that would be the scalar/scored form the ancestry law refuses
-   (CHARTER §5), returning through the back door.
-4. **Absence is zero, not sin.** Apathy — declining to act — is not an
-   event and mints no receipt. It reads as an empty syntropic book, never
-   as a phantom entry in the entropic one.
+3. **Each axis is read in its own units, and named.** Every consequence
+   attaches through a specific inscribed mechanic (§3) that CITES THE
+   ONE AXIS IT READS — compassion is consulted as compassion, fidelity
+   as fidelity, each in the units it accrued. Four axes, four readings,
+   four names. *(Consequently there is no goodness scalar and no oracle:
+   a single figure would have no units to be in, and it is the
+   scalar/scored form the ancestry law refuses — CHARTER §5.)*
+4. **A book records what was DONE.** Every entry grounds in a receipted
+   deed, so a book holds exactly the deeds that happened. An orb that
+   acted little has a small syntropic book; that is the record standing
+   accurately, and a small book is still a book. *(Consequently apathy
+   posts nothing at all — it is no deed, mints no receipt, and reaches
+   the entropic book by no path.)*
 
 ```
             THE DUAL COHESION LEDGER (per orb — eight counters)

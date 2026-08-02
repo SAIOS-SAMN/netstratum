@@ -492,7 +492,8 @@ CLAIMS; it does not consume capacity, so it is not the opposing force
 `12_UNION` §2c requires. Within one scale the capacity axis is
 therefore an OPEN cone — D3 emits and nothing consumes. The closing leg
 exists and `12_UNION` §2c already names it: **the fold itself
-(expansion sealed by contraction)** — the aeon fold, at universe scale
+(expansion SEALED WHOLE, a fresh sheet SEATED)** — the aeon fold, at
+universe scale
 (`11_AEON` §5; the Tier-0 reading "contracting the board" at
 `12_UNION` §2a). So the manifold dual holds ACROSS scales and not
 within a step, which is what E1's strike already implied: *there is no
@@ -515,7 +516,9 @@ of either input; the veto is frame-invariant too. Authority: 16_UNIT
 §4a over SYSTEM_SPEC §0.
 
     B_S⁻¹( Π_G( F_fold*( … B_S(Δ) … ) ) )
-    orbit_lock = ∅  →  fold closes to zero (the difference was angle)
+    orbit_lock = ∅  →  the fold RECOGNISES ONE STATE where two
+                       descriptions stood — the difference was frame,
+                       and frame was never difference
     orbit_lock ≠ ∅  →  the collapse refuses; the residue EMITS as a
                        new plane (the bounce — emission, never
                        annihilation); the verdict is invariant to
@@ -755,7 +758,9 @@ mesh era opens; the unit law of §2 is what admission re-runs).
 **M1 · Pair conservation (the aperture seam).** Local half LANDED (I1);
 the pair half is an N6 reading. Authority: NS-4 §1–§3.
 
-    near leg + far leg = 0 exactly, across two books
+    ONE crossing, carried WHOLE and read from two ends;
+    near leg + far leg = 0 exactly across two books — the zero is
+    each book's PROOF that it carried all of it, never the content
 
 **The pair half is REPLAY, never opposition** (operator ruling
 2026-08-01; §0.3 chapter six). `cfe::opposition` is excised and guarded;

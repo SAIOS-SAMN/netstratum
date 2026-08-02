@@ -139,7 +139,9 @@ climbs) and the entropic arm vents (heat disperses, demurrage decays,
 sink absorbs) — two legs of one cone, and neither runs free of the
 other. The market board's Furnace↔Frost axis, the absorb invariant
 (`sink_consumed = heat_absorbed = vented_after_shed`), and the fold
-itself (expansion sealed by contraction) are all readings of the dual.
+itself (expansion SEALED WHOLE and a fresh sheet SEATED — *nothing is
+destroyed; the fold is archival by construction*) are all readings of
+the dual.
 
 **The ANTI-MIRROR law — DEPRECATED (operator ruling 2026-08-01).**
 MIRROR and ANTI-MIRROR are both struck as framings. **The system
@@ -174,8 +176,10 @@ than by any opposition module:
 - the Delta antisymmetry (`Δ_ij = −Δ_ji` — my waste and your food are
   ONE entry read from two ends): `rfa_core::set_antisym`, and 18 §2a's
   grounding of `Delta` as an alternating form;
-- the aperture's two legs (a debit whose far leg is its exact credit;
-  the pair sums to ZERO): kernel I1, `EQUATIONS` M1;
+- the aperture's two legs — ONE MOVEMENT READ FROM TWO ENDS, exactly as
+  the antisymmetry above: a debit and its far credit are the same
+  crossing seen from each book, and the two books agreeing to zero is
+  how each PROVES it carried the whole of it: kernel I1, `EQUATIONS` M1;
 - the council reckoning (forfeits and returns summing to the locks):
   kernel I1.
 
