@@ -456,6 +456,75 @@ underlying quantity stays proportional and the deterministic ordering
 (capacity, then stamp, then hash) survives ONLY as a display
 convention, with no mechanic reading it.
 
+### 6e. RETENTION — the leak answered with a DEED, not a boundary
+
+**`leaks()` is the weakest reading in the engine, and moving its
+threshold would not fix it.** The defect is not where the line sits. It
+is that one side of the line has nothing to do.
+
+**Measured.** `thermal.rs:69` is `*t_eq4 > cryo_vault_max4()` — a pure
+step. **The same boundary is read THREE times independently:**
+
+```text
+world/rules.rs:51   gates the SEALED demurrage rule
+world/tick.rs:274   gates cryo-array capture of vault headroom
+world/tick.rs:403   gates the accrued-joule leak
+```
+
+**And "vaulted" is not a thing anyone builds — it is a birth
+temperature.** `in_vault = t4 <= cryo_vault_max4()`. A cold world is
+lossless because it is cold.
+
+**THE ASYMMETRY, which is the actual finding.** The one deed that
+captures thermal headroom — the cryo-lattice array — is itself gated on
+already being cold (`tick.rs:274`: `t_eq4 <= cryo_vault_max4()`). **So a
+warm world has NO deed available to improve its retention. Not an
+expensive one. None.** Cold worlds inherit losslessness; warm worlds
+leak forever and may do nothing about it. That is a verdict, not a game,
+and it fails §4's viability law by leaving a whole class of world with
+no path.
+
+**THE PRECEDENT IS ALREADY LANDED, and it is not the cryo array.** The
+covenant's collateral sits in a **vitrified matrix** that *"vaults it
+losslessly by construction"* (`accord.rs:320-327`, `state.rs:56-61`).
+**The engine already knows how to build losslessness.** It is available
+only to locked collateral inside a delivery pact, and nowhere else.
+
+**THE LAW — retention is a positive reading, and it is BUILT.**
+
+```text
+retention(orb) ∈ [0,1] ∩ ℚ   the share of banked stores an orb HOLDS
+
+    inherited   cold position confers retention freely
+    built       vitrification deeds raise it, at a price
+
+decay = banked × (1 − retention) × elapsed      flat, denominators bounded
+```
+
+**Retention is what is held; decay is the residual.** That is CHARTER
+§2a's order — the generative side leads and the loss is its subordinate
+clause — applied where `leaks` had it backwards.
+
+**THE DEED: `vitrify`.** Extend the vitrified matrix from covenant
+collateral to general banked stores as a costed, receipted action. **A
+warm world then BUILDS toward what a cold world was given.** Thermal
+position stops being a verdict and becomes a starting condition with a
+price attached, which is the difference between a penalty and an
+economy.
+
+**What this collapses.** The three duplicate boundary readings become
+one retention reading. The cliff disappears — retention moves
+continuously with temperature, so no world sits one unit of T⁴ from
+owing everything. And §4's viability holds by a DEED rather than by
+relocating a band edge, which is the fix that does not need the bands
+moved at all.
+
+**SEQUENCING.** Retention changes the magnitude of a sealed rule both
+the proposer and the judge read, so it lands behind kernel #30 with the
+rest of the parameter work. **The deed and the reading land together** —
+shipping `vitrify` while `leaks` still gates demurrage would sell a
+world something that does not yet do anything.
+
 ## §7 THE BASE-LEVEL ACCOUNTING LAW
 
 > **"Everything needs accounting for at the microscopic/base level, with
