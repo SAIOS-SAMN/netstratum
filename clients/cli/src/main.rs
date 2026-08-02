@@ -909,10 +909,11 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 ),
             }
         }
-        // THE CONSTELLATION (operator ruling 2026-07-30): the base-7
-        // stack as this line's own sky — held nodes glow with their
-        // voice-names, timers show exact progress, the crown shows
-        // its gate. Per-line, never a shared ladder.
+        // THE CONSTELLATION — this line's own sky, BASE-11 since the
+        // uplift (operator ruling 2026-08-02). Held nodes glow with
+        // their voice-names, timers show exact progress, the crown
+        // shows its gate, and the uplift tier shows the deeds claimed.
+        // Per-line, never a shared ladder.
         Some("tech") => {
             // The voice-names live in the receipts (typed events —
             // read, never parsed).
@@ -927,13 +928,48 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     }
                 }
             }
+            // ELEVEN nodes: the base tier as it always was, then one
+            // per chartered work. Indexed by condition, so this array
+            // must stay as long as the stack is wide.
             let concepts = [
                 "the solar leap", "insulation", "discipline", "deepening",
                 "doctrine", "stores", "the crown (terraforming)",
+                "VALOR", "HONOR", "COURAGE", "COMMITMENT",
             ];
             println!("{}", style.head("THE CONSTELLATION — this line's own sky"));
             for (condition, held, progress, threshold) in world.constellation(*current) {
                 let concept = concepts[condition as usize];
+                // The uplift tier reads from DEEDS, not from timers, so
+                // it renders on its own terms.
+                if condition >= 7 {
+                    if condition == 7 {
+                        println!(
+                            "  {}",
+                            style.dim("— the uplift tier: deeds, claimed on chain receipts —")
+                        );
+                    }
+                    let reached = world
+                        .orb_by_id(*current)
+                        .is_some_and(|orb| {
+                            orb.aspirations.iter().any(|held| {
+                                held.work == cfe::literature::work_of(concept)
+                            })
+                        });
+                    println!(
+                        "  {} {:<28} {}",
+                        match held {
+                            true => style.strong("◆"),
+                            false => style.dim("○"),
+                        },
+                        concept,
+                        match (held, reached) {
+                            (true, _) => style.ok("CLAIMED — a civilizational upgrade"),
+                            (false, true) => style.dim("reached for; the deed still has to be witnessed").to_string(),
+                            (false, false) => style.dim("unreached").to_string(),
+                        }
+                    );
+                    continue;
+                }
                 let voice = voices.iter().find(|(c, _, _)| *c == condition);
                 let line = match (held, voice) {
                     (true, Some((_, name, stamp))) => format!(
@@ -2740,7 +2776,7 @@ fn help(style: &Style) {
         ("aperture <amt> <res> to <world> deal <n>", "cross banked value into another saved world — two legs, one deal, both chronicles sealed at once"),
         ("license <cond> to <world> via <council> deal <n>", "issue a technology into another world through diplomacy; condition 6 gifts THE CROWN onto a finished base-7 stack"),
         ("ascend <sigil> to <station>", "claim a station seat for a line whose world has crossed and climbed — the registry checks the room; a seat is reached, never appointed"),
-        ("tech", "the constellation: this line's base-7 sky — held nodes with their voice-names, exact progress toward what has not crystallized, the crown's gate"),
+        ("tech", "the constellation: this line's base-11 sky — held nodes with their voice-names, exact progress toward what has not crystallized, the crown's gate"),
         ("venture <cond> to <world> via <council> deal <n>", "SCIENCE-1: the joint research venture — incompatible sciences cross their outputs (a council-bound licensed leap, named as what it is)"),
         ("offer … · trade …", "MARKET-1: offer <amt> <res> for <amt> <res> id <n> posts a resting intent (no escrow, no absolute price); trade <mine> with <world> <theirs> deal <n> clears a crossing at the RESTING price via two aperture pairs"),
         ("shift <grade> <value>", "GAUGE-N: move — or open — the key at a grade; the fiber is a graded vector, not one dial (grade 0 stays the landed scalar every law binds to)"),
@@ -2749,7 +2785,7 @@ fn help(style: &Style) {
         ("aperture <amt> <res> to <world> deal <n>", "cross banked value into another saved world — two legs, one deal, both chronicles sealed at once"),
         ("license <cond> to <world> via <council> deal <n>", "issue a technology into another world through diplomacy; condition 6 gifts THE CROWN onto a finished base-7 stack"),
         ("ascend <sigil> to <station>", "claim a station seat for a line whose world has crossed and climbed — the registry checks the room; a seat is reached, never appointed"),
-        ("tech", "the constellation: this line's base-7 sky — held nodes with their voice-names, exact progress toward what has not crystallized, the crown's gate"),
+        ("tech", "the constellation: this line's base-11 sky — held nodes with their voice-names, exact progress toward what has not crystallized, the crown's gate"),
         ("terraform <albedo> <orbit>", "the gifted crown (base-7 complete + licensed from tier 0): re-seat a sited planet — the only lawful way an orbit moves"),
         ("npcs [pause|resume|speed <s>]", "the player\'s hand on the autonomous board — pause holds every polity world, speed sets seconds between beats (0 = flat out); bare npcs shows the state"),
         ("civ [seats] · civ new …", "the civ console: seats shows every station\'s room (progenitors per domain, 8 each — space, not rank); civ new <sigil> | <Name> | <species> | <motto> | <disp> <metab> <perc> [station] registers a custom line and rosters it for the conductor"),

@@ -20,6 +20,18 @@ impl World {
             self.techs.iter().any(|(_, held, _)| *held == condition)
         })
     }
+    /// **THE FULL BASE-11 STACK** (operator ruling 2026-08-02) — the
+    /// base tier complete AND every chartered work claimed on evidence.
+    ///
+    /// [`Self::base_seven_complete`] is deliberately left exactly as it
+    /// landed: the crown's gate does not move, and every law that binds
+    /// to it reads the same thing it always did.
+    pub fn base_eleven_complete(&self, orb: u64) -> bool {
+        self.base_seven_complete()
+            && (crate::world::survey::FIRST_WORK..=crate::world::survey::LAST_CONDITION)
+                .all(|condition| self.work_claimed(orb, condition))
+    }
+
     /// WANT-1: the struck cognitive wants — (orb, kind).
     pub fn wants(&self) -> &[(u64, u8)] {
         &self.wants

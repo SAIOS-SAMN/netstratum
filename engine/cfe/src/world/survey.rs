@@ -2,6 +2,25 @@
 //! terraforming, deposits.
 
 use super::*;
+use crate::literature::{work_of, WORKS};
+
+/// **THE STACK IS BASE-11** (operator ruling 2026-08-02, *uplift to
+/// base-11*). Eleven nodes, in two tiers:
+///
+/// ```text
+///     0        the solar leap
+///     1..=5    the five crystallized conditions
+///     6        the gifted crown — completes the BASE
+///     7..=10   THE UPLIFT TIER — one node per chartered work
+/// ```
+///
+/// **The crown's gate does not move.** It still gates on `0..=5` and
+/// still completes base-7; the uplift adds a tier ABOVE it rather than
+/// widening what it waits for. That was the exact risk of changing the
+/// base, and it is why the new slots sit on top instead of among.
+pub const LAST_CONDITION: u8 = 10;
+/// The first node of the uplift tier — `7`, where the works begin.
+pub const FIRST_WORK: u8 = 7;
 
 impl World {
     /// TERRA-1: does this world hold the gifted terraforming node?
@@ -89,6 +108,29 @@ impl World {
     /// 240); the state conditions and the kernel report 1-of-1 when
     /// their reading holds; the crown reports base-7 readiness (the
     /// gift needs the stack, 6 of 6 earned nodes).
+    /// The chartered work a node of the uplift tier stands for, if it
+    /// is one. `7..=10` map to the charter's order.
+    pub fn work_at(condition: u8) -> Option<&'static str> {
+        match (FIRST_WORK..=LAST_CONDITION).contains(&condition) {
+            true => WORKS.get((condition - FIRST_WORK) as usize).copied(),
+            false => None,
+        }
+    }
+
+    /// Has this line CLAIMED the work this node stands for? Derived
+    /// from the aspiration's witnesses — the evidence IS the node.
+    pub fn work_claimed(&self, orb: u64, condition: u8) -> bool {
+        let Some(name) = World::work_at(condition) else {
+            return false;
+        };
+        let work = work_of(name);
+        self.orb_by_id(orb).is_some_and(|held| {
+            held.aspirations
+                .iter()
+                .any(|held| held.work == work && held.claimed())
+        })
+    }
+
     pub fn constellation(&self, orb: u64) -> Vec<(u8, bool, u64, u64)> {
         let now = self.clock.now();
         let deposits = self.crystal_deposits(now);
@@ -98,12 +140,18 @@ impl World {
             .find(|(held, _)| *held == orb)
             .map(|(_, sheet)| sheet)
             .unwrap_or(&blank);
-        (0u8..=6)
+        (0u8..=LAST_CONDITION)
             .map(|condition| {
-                let held = self
-                    .techs
-                    .iter()
-                    .any(|(o, c, _)| *o == orb && *c == condition);
+                // The BASE tier is earned into `techs`. The UPLIFT tier
+                // (7..=10) is not granted at all — a work is held when
+                // the line CLAIMED it, so the node IS the deed.
+                let held = match condition >= FIRST_WORK {
+                    true => self.work_claimed(orb, condition),
+                    false => self
+                        .techs
+                        .iter()
+                        .any(|(o, c, _)| *o == orb && *c == condition),
+                };
                 let (progress, threshold) = match condition {
                     0 => (u64::from(self.knows_its_sun()), 1),
                     1 => {
@@ -128,6 +176,11 @@ impl World {
                             })
                             .count() as u64;
                         (earned, 6)
+                    }
+                    // THE UPLIFT TIER — one node per chartered work,
+                    // held on a WITNESSED claim. A deed is the upgrade.
+                    held_work if held_work >= FIRST_WORK => {
+                        (u64::from(self.work_claimed(orb, condition)), 1)
                     }
                     _ => (
                         u64::from(self.condition_holds(orb, condition, now, sheet)),

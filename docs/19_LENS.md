@@ -906,18 +906,43 @@ to show for it.**
     LITERATURE   a work it may ASPIRE to            LIT-1
 ```
 
-### 18a. LITERACY IS DERIVED, AND IS NOT A BASE-7 CONDITION
+### 18a. LITERACY IS DERIVED; THE STACK IS BASE-11
 
 **A line is literate when it keeps its own books** — when it has MINTED
 one and POSTED to it. Minting alone is not writing; the page is blank.
 Writing is the act, literacy is the reading of that act, and nothing
 stores it.
 
-It is deliberately NOT a crystallized condition. The base-7 stack is
-FULL — conditions 0..=6, the crown gated on the solar leap and all five
-(`10 §3`, `§3b`) — and an eighth would change the base and silently move
-the crown's gate. Literacy needs no slot: it is already implied by
-receipts that exist.
+Literacy needs no slot in the stack: it is already implied by receipts
+that exist, and a derived reading cannot go stale. It is the DOORWAY to
+the upper tier, not a node in it.
+
+**THE STACK IS NOW BASE-11** (operator ruling 2026-08-02, *uplift to
+base-11*). An earlier draft of this section treated base-7 being full as
+a constraint to design around. It was a constraint to LIFT:
+
+```text
+    0        the solar leap
+    1..=5    the five crystallized conditions
+    6        the gifted crown — completes the BASE
+    7..=10   THE UPLIFT TIER — one node per chartered work
+```
+
+**The crown's gate does not move, and that is the whole care taken
+here.** It still waits on `0..=5`, still reports a threshold of six, and
+`base_seven_complete` is left exactly as it landed so every law binding
+to it reads what it always did. The four new nodes sit ABOVE the crown
+rather than among the nodes it waits for — which is why claiming a deed
+cannot advance the crown by a single step. Pinned in
+`base_eleven_pins.rs`, including that pin specifically.
+
+**A DEED IS THE NODE.** The uplift tier is never granted into `techs`. A
+work is held exactly when it has been CLAIMED on chain receipts, so the
+evidence IS the upgrade: *deeds are accomplishments and civilizational
+upgrades* (operator, 2026-08-02). Reaching for a work is not holding it.
+
+`base_eleven_complete` reads the full stack — the base tier done AND
+every deed witnessed. Deeds do not substitute for the base beneath them.
 
 ### 18b. ASPIRING IS FREE; CLAIMING COSTS EVIDENCE
 
@@ -975,7 +1000,25 @@ The BMP dingbats and geometric symbols the CLI has always used are NOT
 emoji and are untouched: `✓ ✗ ⚑ ⛏ ☉ ✍ ▤ ◉` and the box-drawing set.
 They are single-width, font-stable, and predate this ruling.
 
-### 18e. WHAT WAS NOT BUILT, AND WHY
+### 18e. THE SPACE IS THE POINT
+
+The works were not RECOVERED from anywhere — `courage`, `stewardship`,
+`literacy`, `literature` and `aspire` appear nowhere in any of the 49
+refs, and `valor` only in fixtures this lane wrote. **That was never the
+ask.** The directive was to CREATE SPACE FOR them, and the space is what
+base-11 opens: four slots above the crown, one per chartered work,
+filled by deeds rather than by timers.
+
+### 18f. WHAT IS NOT BUILT YET
+
+**Deeds as tradeable, and deeds sparking uplifts.** A claimed work is an
+accomplishment and a civilizational upgrade today — it holds a node in
+the stack. It is not yet a thing that can be TRADED between lines, and
+nothing yet uses a held deed to spark a further uplift. Both are named
+by the directive and neither is built; the node is the foundation they
+would stand on.
+
+### 18g. WHAT WAS NOT BUILT, AND WHY
 
 **No new substrate/mesh axis.** The directive raised one as a
 possibility. `04` rules its own constraint: *no genesis axis ships
