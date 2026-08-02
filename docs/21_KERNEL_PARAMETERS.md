@@ -512,3 +512,85 @@ failure was mine and the discipline is cheap.
 The attempt is kept at `scratchpad/p2-attempt.patch` (474 lines,
 `P2`'s supply threading through 12 call sites) — it built and passed its
 own pins, and is worth re-applying after #30 rather than re-deriving.
+
+---
+
+## §11 FORWARD: THE UNIFIED TRANSITION + RULESET EPOCHS (operator, 2026-08-02)
+
+The revert in §10 was the wrong instinct — it restored a STEP FUNCTION,
+which is maximally discontinuous, to protect a bifurcated engine. The
+operator's ruling is to forward-engineer the engine instead. Two parts,
+and the second is cheaper than it looks.
+
+### 11a. APPLY WRAPS JUDGE — one transition, zero parallel logic
+
+`replay`'s 113 arms and the live proposer are two implementations of one
+function. **`apply()` becomes a zero-logic wrapper over `judge()`**, so
+a rule evaluated one way live is evaluated the identical way on replay.
+That is #30 cure 1, and §10 is the proof it can no longer be deferred:
+`P1`, `P2` and `P3` all move sealed-rule VALUES, so every one of them
+hits the same wall until this lands.
+
+### 11b. RULESET EPOCHS — and **NO WIRE AMENDMENT IS NEEDED**
+
+The ruling asks for a rule-version stamp on the receipt so historical
+worlds replay faithfully while new ticks run new physics. **Measured,
+the receipt already carries what that requires:**
+
+    Receipt { sequence, stamp, parent, own, event, provenance }
+                         ^^^^^                    — vrp.rs:100
+
+There is no `version` field, and adding one would change `own` — the
+frame hash — on every receipt ever written, breaking every chain in
+existence. **That cost does not have to be paid.** `stamp` is already
+present, already monotone, and already inside the hash.
+
+So the version is not stored, it is **derived**:
+
+    an ACTIVATION TABLE maps stamp → ruleset epoch
+    every sealed rule takes the stamp it is being evaluated AT
+    a receipt is judged under the ruleset in force when it was written
+
+`ease_of(techs, orb, at)` selects the cliff for `at < T₂` and the
+gradient for `at ≥ T₂`. Old receipts replay under old rules and cannot
+diverge; new ticks run the continuous physics. This is the standard
+fork mechanism and it costs **zero wire change, zero schema change, and
+zero rehashing.**
+
+### 11c. WHAT THIS RETIRES — my continuity clauses were the wrong fix
+
+§4 required every dynamic parameter to equal its old literal at genesis
+*"so the amendment is continuous and no live world jumps."* **Under
+ruleset epochs that requirement is unnecessary and is withdrawn.** No
+world jumps because no history is ever re-evaluated under new rules —
+the old rule keeps running on the receipts it governed.
+
+That frees every parameter to take its correct form rather than a form
+bent to meet a legacy value at one point. `P3`'s curve no longer has to
+hit `1/1` and `1/2` exactly; `P1`'s feedback term no longer has to
+collapse to `Base(rung)` at genesis; `P2` no longer needs `1/32` at zero
+supply. **The constraint that shaped three of my translations is gone.**
+
+### 11d. THE ONE COST, STATED PLAINLY
+
+Sealed rules become APPEND-ONLY. A rule is never mutated — a new epoch
+is added beside it, and every prior version stays in the tree forever,
+because some receipt still needs it. `ease_of` will hold the cliff and
+the gradient permanently.
+
+That is how every real chain handles consensus changes and it is the
+correct trade, but it changes the shape of a parameter amendment from
+*edit a number* to *add an epoch*, and the tree grows monotonically with
+the number of rule changes. Worth knowing before the fourth epoch, not
+after.
+
+### 11e. ORDER
+
+    1. #30 — apply wraps judge; the activation table; sealed rules
+             take `at`. Nothing else can land safely first.
+    2. P3 re-inscribed as an epoch (the curve, unconstrained by the
+       legacy endpoints).
+    3. P2 re-applied from `scratchpad/p2-attempt.patch` — it built and
+       passed its own pins; only the epoch plumbing is new.
+    4. P1, then capacity-lane §6a's split sink, which inherits the same
+       protection.
