@@ -679,3 +679,71 @@ fn an_orb_the_world_has_never_seated_stands_on_the_ground() {
     state.bonds = vec![bond(1, 2, 3), bond(2, 3, 3), bond(1, 3, 1)];
     assert_eq!(standing_of(&state, 999), ratio(0, 1), "an unseated orb stands on the ground");
 }
+
+#[test]
+fn standing_is_a_restriction_of_the_world_not_a_local_ledger() {
+    // THE RESTRICTION LAW (`17_CAPACITY` §3b). An orb does not OWN
+    // capacity; it evaluates a restriction of the world-scoped reading,
+    // `D(o) = D(Ω)|_o`. The test of a restriction is that it MOVES when
+    // the world moves, even where the orb's own relations do not.
+    //
+    // Orb 1 holds exactly two relations here — 1-2 and 1-3 — and they
+    // are identical in both worlds, same rates, same channel. A local
+    // ledger would therefore read the same in both.
+    let mut small = orbs(3);
+    small.bonds = vec![bond(1, 2, 3), bond(2, 3, 3), bond(1, 3, 1)];
+    let before = standing_of(&small, 1);
+
+    let mut wider = orbs(4);
+    wider.bonds =
+        vec![bond(1, 2, 3), bond(2, 3, 3), bond(1, 3, 1), bond(2, 4, 5), bond(3, 4, 2)];
+    let after = standing_of(&wider, 1);
+
+    assert_ne!(
+        before, after,
+        "orb 1's standing must move when the WORLD gains structure, even \
+         though orb 1's own relations are untouched — otherwise it is a \
+         local ledger and not a restriction of a world reading"
+    );
+    // Measured: 5/3 in the small world, 15/8 in the wider one.
+    assert_eq!(before, ratio(5, 3));
+    assert_eq!(after, ratio(15, 8));
+
+    // THE SCOPE IS THE COMPONENT, and that is the whole of it. A
+    // structure that shares no relation with orb 1 is not part of the
+    // world orb 1 stands in, and it moves nothing — this is what keeps
+    // the reading from being farmable by strangers, and it is the same
+    // decoupling that makes an isolated orb bear the ground.
+    let mut apart = orbs(6);
+    apart.bonds = vec![
+        bond(1, 2, 3),
+        bond(2, 3, 3),
+        bond(1, 3, 1),
+        bond(4, 5, 7),
+        bond(5, 6, 9),
+        bond(4, 6, 2),
+    ];
+    assert_eq!(
+        standing_of(&apart, 1),
+        before,
+        "a disjoint component must move no share — the restriction is \
+         scoped to the component, never to the whole book"
+    );
+}
+
+#[test]
+fn no_orb_carries_a_capacity_of_its_own() {
+    // DERIVED, NEVER STORED (`09_LEDGER` §1.2), held as a witness rather
+    // than as a promise. `ColonyOrb` has no capacity, standing, or share
+    // field: the ONLY way to an orb's reading is to project the world
+    // and restrict. If a per-orb field were ever added, the two could
+    // disagree, and the stored one would be the lie that gets spent.
+    let mut state = orbs(3);
+    state.bonds = vec![bond(1, 2, 3), bond(2, 3, 3), bond(1, 3, 1)];
+
+    // The orb record is default but for its identity — nothing about
+    // standing is carried on it, and the reading is non-trivial anyway.
+    let bare = ColonyOrb { orb_id: 1, name: "orb1".into(), ..Default::default() };
+    assert_eq!(state.orbs[0], bare, "the orb record carries no standing of its own");
+    assert!(standing_of(&state, 1) > ratio(0, 1), "yet the world reads a standing for it");
+}

@@ -273,6 +273,120 @@ the rollout seams), not the gauge phase `G` (the fiber coordinate on the
 three are live and unrelated; this is the only use that names a
 transition of `Ω`.
 
+## §3b THE RESTRICTION LAW — an orb EVALUATES, it does not OWN
+
+**(operator relay 2026-08-02, the manifold field couple.)**
+
+```text
+    D(o)  =  D(Ω)|_o      an orb reads a RESTRICTION of the
+    V(o)  =  V(Ω)|_o      world reading; it OWNS no capacity
+```
+
+**And it was already true of the code — measured, not asserted.** Orb 1
+holds exactly two relations, `1—2` and `1—3`, identical in two worlds at
+the same rates on the same channel. Its standing reads `5/3` in the
+smaller world and `15/8` once orb 4 joins through 2 and 3. **Orb 1's own
+relations never changed.** A local ledger cannot move; a restriction of
+a world reading must
+(`bridge_pins::standing_is_a_restriction_of_the_world_not_a_local_ledger`).
+
+**THE SCOPE IS THE COMPONENT.** A structure that shares no relation with
+an orb is not part of the world that orb stands in, and moves nothing —
+the disjoint triangle leaves orb 1 at exactly `5/3` (same pin). That is
+what keeps the reading unfarmable by strangers, and it is the same
+decoupling that makes an isolated orb bear the ground (D6).
+
+**NOTHING PER-ORB IS STORED.** `ColonyOrb` carries no capacity, standing
+or share field; the only route to an orb's reading is to project the
+world and restrict (`kernel::bridge::borne_by_orb`). Derived, never
+stored (`09_LEDGER` §1.2) — a stored per-orb capacity could disagree
+with the world reading, and the stored one is the lie that gets spent.
+Witnessed by `bridge_pins::no_orb_carries_a_capacity_of_its_own`.
+
+**WHAT THIS SETTLES.** SYN-4's free ride closed for exactly this reason:
+standing was being INHERITED from a world-level verdict instead of
+RESTRICTED from a world-level field. The restriction is what makes a
+reading personal without making it local.
+
+**THE OBLIGATIONS, IN CONTRACT FORM** (extending `EQUATIONS` D5):
+
+```text
+    SCOPE       Both offices are read at WORLD scope over Ω. Neither
+                is an orb-level holding, and neither is a scalar.
+
+    D(Ω) OWES   room that was EARNED — the residue must EMIT before
+                D rises (D3); `PlaneUnearned` refuses every other
+                route.
+
+    V(Ω) OWES   substance that was RECEIPTED — `lawful()` admission,
+                and nothing enters state by another door (§3a).
+
+    EACH ORB    MAY evaluate `D(Ω)|_o` and `V(Ω)|_o`.
+                MAY NOT own, store, transfer or pledge either.
+                There is no per-orb capacity to assign.
+
+    REMEDY      a restriction that disagrees with the world reading
+                is VOID, not reconciled. There is ONE field; the
+                restriction is derived from it, so a disagreement is
+                a defect in the deriving, never a claim to settle.
+```
+
+### §3b.1 THE FORMALIZATION REFUSED — recorded, never silently dropped
+
+The relay carried the restriction law inside a CONTINUUM formalization.
+The intent lands and is inscribed above; the formalism cannot, and every
+refusal below rests on an already-landed clause rather than on taste.
+
+**1. `D(Ω) = ∫_Ω H_D(x) dΩ` — REFUSED.** There is no measure on `Ω` and
+no density `H_D`. The world is a FINITE relational complex over exact
+rationals (`I3`) — `Delta { dim, fiber }` — with no continuum and no
+`dΩ` to integrate against. And `D` is a RANK, the dimension of the cycle
+space, not the integral of a density: `18` §2a rules that capacity *is
+not a scalar and not a metric density*.
+
+**2. `V(Ω) = ∫_Ω Φ_V(x) dΩ`, "kinetic flow field … modulates velocity"
+— REFUSED.** `EQUATIONS` D0: *V is not a scalar field over ℝ and carries
+no continuous gradient.* `V` is the committed state — a record of
+receipts — and it has no velocity to modulate. `∇V` and `∂V` are STRUCK
+(`18` §2b); a velocity field on `V` is those symbols returning under a
+new word.
+
+**3. `g_syntropy(Ω) = D(Ω) ⊗ V(Ω)` — REFUSED TWICE OVER.** It is a
+METRIC: `18` §2a records that *there is no metric `g` anywhere in the
+workspace*, and `18` §1 that *the system computes torsion; it does not
+compute metrics*. And it joins the offices into ONE TERM with
+addressable halves, which D5's NO OPERATOR clause bars — `U* = D(V) ⊕
+V(D)` was struck as the master union, and `D ⊗ V` is that union in
+another notation. The bond is `D(Ω) +: V(Ω)`: a join of two that STAY
+TWO (§3), never a product.
+
+**4. "Global field integral … removing local step-cliffs or scalar
+cutoffs" — REFUSED.** §3a rules the crossing RECEIPTED, NEVER
+CONTINUOUS: `lawful()` admits or refuses and has no third answer. **The
+step-cliff IS the law.** An integral smooths exactly what the receipt
+discretizes, and a smoothed admission is a half-committed deed — the
+open-ended thread without closure barred the same day.
+
+**5. `Attributed_Charge(o) = |c_C(Ω)| / |Nodes(C ⊂ Ω)|` — REFUSED on
+measurement, for the second time.** Scoping the cycle to `Ω` does not
+remove the defect, because what is being chosen is a cycle BASIS, and
+that choice is global too. One theta graph, one charge:
+
+```text
+    labelling [0,1,2,3] → cycles {0,1,2}, {0,2,3}     N_C = 3, 3
+    labelling [1,0,3,2] → cycles {0,1,2,3}, {0,1,2}   N_C = 4, 3
+```
+
+Different orbs paid differently for the identical world. Only the
+cycle-space DIMENSION is invariant, never a basis of it. D6 carries the
+form that IS invariant, pinned over all 24 relabellings.
+
+**6. Single Transition Engine — ALREADY TRUE; no change is owed.**
+`kernel::lawful` is pure and total and reads no clock and no network, so
+live production and replay run the identical judge by construction. The
+relay names this as a requirement; it is a property the kernel has held
+since it was sealed.
+
 **WHAT DOES NOT CHANGE: the totality law.** "In union with V as a
 whole — no two parts cut out" never depended on the identity. It is a
 claim about `V` alone — that it is read whole or not read — and `V` is
