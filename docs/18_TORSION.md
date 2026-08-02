@@ -1194,10 +1194,27 @@ EXECUTION:
       inflating as the network grows.
 
     EXECUTION TRAJECTORY — the work done inside it
-      O(x) for x ∈ {depth, budget, time-horizon}. **Locking this to
-      O(1) flattens the dynamics entirely** — a search that may not
-      scale with depth is not a search. This is where the
-      dimensionality actually lives, and it must stay free.
+      **O(n^D)** — the VOLUME of the space the work ranges over: side
+      `n` along `D` independent axes. **Locking this to O(1) flattens
+      the dynamics entirely** — a search that may not scale with depth
+      is not a search. This is where the dimensionality actually lives,
+      and it must stay free.
+
+**`O(n^D)`, not a flat budget** (operator ruling 2026-08-02, replacing
+an earlier `O(x)` reading that named a single axis and so collapsed the
+others). A constant work budget rations independently of how much
+structure stands — the same flattening as `C(Δ) = Σ|R|`, applied to
+cost. `D` independent axes of extent `n` enclose `n^D`, and **the
+envelope BREATHES WITH `D`**: rank is earned rather than granted and
+ARTICLE IV holds it monotone, so the envelope widens as the system
+gains dimension and never narrows. That is the re-volumizer — the
+budget is a function of standing rank, not a number chosen in advance.
+
+`n^0 = 1`: no rank, no room — exactly the standing `capacity_law`
+refuses to mint on, so the envelope agrees with the constitution rather
+than contradicting it. Landed and certified as `kernel::motion::envelope`,
+which refuses on overflow rather than wrapping (an envelope that wrapped
+would report an enormous space as a tiny one).
 
 **So the lawfulness test is per-axis, and it is a topology test rather
 than a size test:** a sector is lawful iff its STORAGE is O(1) in the

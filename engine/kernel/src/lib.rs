@@ -31,6 +31,7 @@
 //! that no state semantics ever live outside this function.
 
 pub mod bridge;
+pub mod motion;
 
 use cfe::dop::{ClosureEvent, Resource};
 use cfe::ipsal::Scope;
