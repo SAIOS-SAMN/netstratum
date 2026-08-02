@@ -13,12 +13,12 @@ first, never by searching the tree.
    deepest authority (call-not-copy, kernel CHARTER §0b); for an
    INSCRIBED row the named document is. A disagreement between this
    ledger and an authority is a DEFECT — inscribe it, never shrug.
-2. **The row-claim convention** (the tag-claim convention's sibling):
+2. **The row-claim convention** (the tag-claim convention's counterpart):
    a landing that inscribes a NEW equation or algorithm claims its row
    here in the SAME landing, before code uses it. After any merge,
    verify your row survived.
 3. **The founding lesson.** Equation drift has already happened once:
-   the ancestor's README said the coherence was L1 while the code
+   the predecessor's README said the coherence was L1 while the code
    computed SUM-OF-SQUARES (recorded at BUILD_ORDER §1a). Scattered
    restatement is how equations diverge; one ledger with named
    authority is the standing cure — same tier of protection as the
@@ -144,19 +144,32 @@ relational structure, the landed tensor.
   `∂V` all appeared here and are all STRUCK, together rather than in
   sequence: they were one error wearing three brackets.
 
-**D1 · Ω(D) — the capacity space.** INSCRIBED. Superseded in form by
-`18_TORSION.md` §2a (operator ruling 2026-08-01): capacity is the SPACE
-`Ω(D)` indexed by dimensional degrees `D`, driven by the torsion form —
-never a metric density, never a scalar.
+**D1 · D(Ω) — the progenitor's reading of the totality.** INSCRIBED.
+Superseded in form by `18_TORSION.md` §2a (operator ruling 2026-08-01):
+capacity is a SPACE, driven by the torsion form — never a metric
+density, never a scalar. **RENOTATED 2026-08-02** (operator ruling:
+*`D(Ω) +: V(Ω)`*): this row read `Ω(D)`, *the space indexed by `D`*,
+which made the totality a function of one office. `Ω` is THE TOTALITY,
+read by both offices and owned by neither; `D(Ω)` is `D`'s reading of
+it. Full ruling at `17_CAPACITY` §3.
 
-    dΩ(D)  =  Θ ∧ ∂Δ  +  egress ∧ circulation
+    dD(Ω)  =  Θ ∧ ∂Δ  +  egress ∧ circulation
 
 `D` is **the structure surviving reduction** — RULED 2026-08-01:
 
-    D  =  the structure standing in  Π_G( Δ(Ω) )
+    D  =  the structure standing in  Π_G( Δ(V) )
 
-`Ω(D)` is the space those surviving degrees span. Frame artifacts
+`D(Ω)` is the space those surviving degrees span. Frame artifacts
 contribute NOTHING; only structural content counts.
+
+**THE SECOND READING — `V(Ω)`** (same ruling). The sovereign reads the
+same totality and returns the SUBSTANCE committed in it: the committed
+state, whole and indivisible (D0). Two offices, one subject, and neither
+defined through the other — which is precisely why this pair is lawful
+where `U* = D(V) ⊕ V(D)` was STRUCK (`18` §3). The bond is written
+`D(Ω) +: V(Ω)`, and `+:` is causal, not hierarchical: room precedes
+substance, because substance cannot stand in a plane that was never
+opened (`PlaneUnearned`). See D7 for the crossing itself.
 
 **`D` IS A DIMENSION, NEVER AN INVENTORY** (operator ruling 2026-08-02:
 *your entire definition is wrong if dimensional capacity is a count of
@@ -318,9 +331,24 @@ shape in the row meant to exclude it.
                    has addressable halves — the decomposition in other
                    syntax).
 
-**They are NOT siblings and the receipt is not their parent** — it is
+    THE NODES      `Nodes(V, D)` IS THE BOND ITSELF — not a container
+                   holding two things, but the join `Node(V) ++ Node(D)`
+                   between two nodes that STAY TWO (operator ruling
+                   2026-08-02). `++` concatenates; it does not add,
+                   average, or reduce. Read the pair and you are reading
+                   the bond; there is no third object to read.
+
+                   This is why `Ω ≢ V` was owed (`17_CAPACITY` §3,
+                   corrected 2026-08-02). `D(Ω)` is the ROOM, `V` is the
+                   SUBSTANCE, and while `Ω` was identified with `V` the
+                   two nodes were one node — and a bond from a thing to
+                   itself is not a bond, it is a fixed point. The
+                   correction is what makes this clause expressible
+                   rather than decorative.
+
+**They are NOT counterparts and the receipt is not their predecessor** — it is
 the MEDIUM the bond settles on (`bond_flow` is a receipted standing
-order, accruing continuously, settling at touch). Siblings do not
+order, accruing continuously, settling at touch). Counterparts do not
 suffocate without each other; a bonded pair does. There is no rivalry to
 arbitrate here: a bond is generative, not competitive, so the pair needs
 no equilibrium negotiated between its parties.
@@ -354,6 +382,114 @@ the Glasskeeper escrow machinery — while its FIELDS are ordinary
 finance: obligor, beneficiary, collateral, window, forfeit. The word
 computes; it is kept.)*
 
+**D6 · THE BORNE SHARE — who is standing in the room.** INSCRIBED
+2026-08-02 (SYN-3/SYN-4/SYN-5). Authority: `18` Article II. `D` is a
+reading of the whole and names nobody; this attributes it.
+
+```text
+    borne_i = ½ · Σ_{j ~ i} Σ_l |circulation_on(Δ, S)_ij,l|
+```
+
+Every present relation carries some of the canonical circulation, and
+its two ends bear that magnitude EQUALLY. `rfa_core::capacity::borne`;
+keyed to identity by `kernel::bridge::borne_by_orb`.
+
+**THE CYCLE IS THE INTUITIVE UNIT AND IT CANNOT BE WRITTEN.** Charge is
+a property of a closed loop, so the obvious rule splits a cycle's charge
+among its nodes — `|c_C| / N_C`. But a *fundamental cycle basis* is
+picked by a spanning forest, so `Nodes(C)` and `N_C` MOVE WHEN THE
+ENTITIES ARE RELABELLED. Measured on one theta graph carrying one
+charge:
+
+```text
+    labelling [0,1,2,3] → cycles {0,1,2}, {0,2,3}      N_C = 3, 3
+    labelling [1,0,3,2] → cycles {0,1,2,3}, {0,1,2}    N_C = 4, 3
+```
+
+Different entities paid different amounts for the identical world. `I1`
+voids it. Only the cycle-space DIMENSION is invariant, never a chosen
+basis of it — the same hazard `capacity_anchored` carried at vertex 0,
+reappearing one layer up at attribution. The circulation is the UNIQUE
+Hodge representative, so the share is taken there instead, and the
+equal-participation principle is applied at the RELATION, which is where
+it survives relabelling. Pinned over all 24
+(`capacity_pins::the_borne_share_is_relabelling_invariant`).
+
+**IT IS READ ON THE SUPPORT, NOT THE COMPLETE GRAPH.** `circulation`
+solves `p = −div/n`, which treats every absent relation as a real one
+carrying zero. Four entities, ONE relation `0—1 = 1`:
+
+```text
+    complete-graph shares → [½, ½, ¼, ¼]
+```
+
+Entities 2 and 3 hold nothing, owe nothing, are owed nothing, and each
+draw a QUARTER of a relation they are not party to — FARMING BY ABSENCE,
+cheaper than farming strain because it costs nothing at all. The same
+defect inflates the rest: the identical relation reads `0` among two
+entities and `½` among four, so an orb could enlarge every share in the
+world by seating empty orbs beside it. `circulation_on` solves the
+support graph's own Laplacian `L·p = −div` by exact rational elimination
+(`I3`); isolated entities become components of one, bear the ground, and
+move no other share.
+
+**THREE PROPERTIES, EACH PINNED.** *No strain farming* — it pays on the
+circulation, what composes, never on `symmetry_foundation`, which stands
+exactly where composition FAILS; manufacturing an inconsistency draws
+nothing. *No frame farming* — a gauge shift lands wholly in the gradient
+summand, so no share moves; work earns, coordinates do not. *Conserving*
+— both halves of every relation reach an entity, so the shares sum to
+exactly the circulation standing on the support. The join distributes;
+it neither reduces nor mints.
+
+**AND IT IS POSITIVE.** Allocation had existed only as WITHHOLDING — a
+world-level refusal with no orb in it. A share is a magnitude, never
+below the ground, so the rule states what an orb HOLDS rather than what
+it lacks, and the refusal that consumes it carries the share so the
+floor can be risen from (`18` Article II).
+
+**D7 · THE SOLIDIFICATION — the phase transition into state.**
+INSCRIBED 2026-08-02 (operator ruling: *solidify phase transition to
+current "state"*). Authority: `17_CAPACITY` §3a; the general phase law
+is `18` §4.
+
+`Ω` has two phases, and each office reads one of them:
+
+```text
+    PHASE     READING        WHAT CROSSES INTO IT
+    ───────────────────────────────────────────────────────────────
+    ROOM      D(Ω) rises     the plane is EARNED — the residue is
+                             irreducible, so it EMITS and D rises
+                             BY RECEIPT (D3). `PlaneUnearned`
+                             refuses every other route.
+
+    STATE     V(Ω) holds     the deed is ADMITTED — `lawful()`
+                             passes and a receipt is written.
+                             THIS IS THE SOLIDIFICATION.
+```
+
+**THE CROSSING IS RECEIPTED, NEVER CONTINUOUS.** `18` §4 rules that at a
+phase boundary the declared and derived descriptions genuinely differ
+and *their relation IS the transition* — hold both sides and the
+crossing is legible; collapse them with an `==` and the phase structure
+disappears. So the crossing is a DISPOSITION, not a flow. There is no
+partial solidification and no half-committed deed: `kernel::lawful`
+returns admission or refusal and has no third answer, so no value
+strictly between claimed and committed exists to be occupied. This is
+the operator's standing rule that *there is no "half used" — an open
+ended thread without closure* (2026-08-02), read at the foundation.
+
+**ROOM PRECEDES STATE.** Substance never solidifies into a plane that
+was never opened — the `+:` of D1 made mechanical, landed as
+`PlaneUnearned`.
+
+**THE REVERSE CROSSING IS D4's, AND IT HAS A FLOOR.** State does not
+melt back into room unaccounted: D4 is the revocation law, anchored at
+the eclipse and floored at `H¹`, and `D` never falls below `GROUND`
+(`18` Article II — `Degree` has no representation for a below-ground
+value). A phase is reversed by a receipted eclipse or not at all; decay
+alone does not reverse one.
+
 **The index-set reading is STRUCK** (2026-08-01). The indices
 `(i, j, k, l)` that `for_each_residual` iterates, and the arities
 `Delta { dim, fiber }`, are the CONTAINER the relation is carried on —
@@ -380,7 +516,7 @@ collapsed to `‖∂Δ‖`, never bounded above, never reduced to a scalar
 aggregate. This EXTENDS the proportional law rather than reversing it:
 squares were barred as the mathematics of minimization, and L1 was a
 smaller cage of the same kind. Scalar aggregates survive only where a
-reading is reported to a human lens, never where the system computes.
+reading is reported to an OPERATOR lens, never where the system computes.
 
 **The union is ONE Δ WITH TWO COMPLEMENTARY PROJECTIONS** (18 §2c,
 restated 2026-08-01; the former `U* = D(V) ⊕ V(D)` is STRUCK — nothing
@@ -746,7 +882,7 @@ The angle-free heart of the singularity law (16_UNIT §4a): a frame
 change (`A ↦ PAP⁻¹`) leaves the signature identical, so the fold
 verdict cannot depend on the frame of approach. THE PROPORTIONAL LAW
 does not touch it (a canonical form, not an aggregator of difference);
-blake3, never the ancestor's Keccak.
+blake3, never the predecessor's Keccak.
 
     A ≅_RCF B  ⟺  invariant_factors(xI − A) = invariant_factors(xI − B)
 
@@ -931,7 +1067,7 @@ operator rulings, not derivations; neither is silently corrected here.
    three. One of the two is wrong.
 2. **S2 IS THE AGGREGATE S1 FORBIDS.** 09 §1.3 rules *"no oracle, no
    single number … the four axes never collapse into one figure — that
-   would be the scalar/scored form the ancestry law refuses, returning
+   would be the scalar/scored form the provenance law refuses, returning
    through the back door"*, and 09 §3.4.2 refuses *"the single goodness
    number."* `syntropy_ratio` collapses all four axes into one scalar
    and TWO rules read it. Either 09's refusal admits a stated exception

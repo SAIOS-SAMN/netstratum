@@ -33,7 +33,7 @@ clade (plasmoid · lithic · syzygial · endolithic · fungal ·
 cryo-coherent). A divergence branch keeps its line's clade — one line,
 one taxon; a confluent hybrid's clade is named at its wave. The tier
 ALIGNS lines the axes cannot: Hivelight and the Klethaxu are both
-hymenopteran; the register reads the kinship. **Gastropoda stands
+hymenopteran; the register reads the relation. **Gastropoda stands
 open** — no snail line yet walks the board; the register awaits it.
 
 ## 1. The roster

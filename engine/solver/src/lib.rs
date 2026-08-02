@@ -1,7 +1,7 @@
 //! The ARC solver harness (substrate contract §§1–3's first consumer;
 //! the epistemological pyramid's apex made real).
 //!
-//! Three laws carried from the ancestry (v0.4 doc 17, the no-hardcoding
+//! Three laws carried from the provenance (v0.4 doc 17, the no-hardcoding
 //! law) and the charter:
 //!
 //! - **No hardcoded solutions.** The engine holds a GENERAL vocabulary
@@ -36,7 +36,7 @@ pub use solver_verify::{
     TileMirror, OBJ_OPS,
 };
 
-pub use search::{solve, solve_consulted, SolveRead};
+pub use search::{consult_observed, solve, solve_consulted, Consultation, SolveRead};
 pub use volume::{
     forge_volume, run_volume, solve_volume, VOp, VolDifficulty, Volume, VolumeSolveRead,
     VolumeTask,

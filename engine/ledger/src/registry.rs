@@ -309,7 +309,7 @@ impl Registry {
         Some(current.sigil)
     }
 
-    /// LINEAGE-2 (12 §5): EVERY root of the ancestry DAG — a confluent
+    /// LINEAGE-2 (12 §5): EVERY root of the provenance DAG — a confluent
     /// hybrid descends from both parents' lines, so a line may carry
     /// several heads. A walk's terminus is a head when no unvisited
     /// recorded parent remains: empty lineage, dangling pointers, and

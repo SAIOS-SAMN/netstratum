@@ -1,4 +1,4 @@
-//! THERMAL-1 witnesses (05 §1.1–§1.2): the master equation drives the
+//! THERMAL-1 witnesses (05 §1.1–§1.2): the equilibrium baseline drives the
 //! flow model through the two-armed heat law — encase first, only the
 //! overflow vents — with the opt-in guard, exact numbers end to end.
 

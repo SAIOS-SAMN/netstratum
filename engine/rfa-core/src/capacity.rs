@@ -8,7 +8,7 @@
 //! `17_CAPACITY` §4b, `18_TORSION` §5):
 //!
 //! ```text
-//! D  =  ext_x( Π_G( Δ(Ω) ) )
+//! D  =  ext_x( Π_G( Δ(V) ) )
 //! ```
 //!
 //! The indices `(i, j, k, l)` and the arities `Delta{dim, fiber}` are
@@ -71,7 +71,7 @@
 //! fiber)` over the committed relation and calls no search.
 
 use crate::delta::Delta;
-use crate::reduce::coboundary_reduce;
+use crate::reduce::{coboundary_reduce, Support};
 use cfe::ratio::Ratio;
 use num_traits::{Signed, Zero};
 
@@ -445,6 +445,286 @@ pub fn circulation(delta: &Delta) -> Delta {
 /// Idempotent, because the circulation of a circulation is itself.
 pub fn capacity(delta: &Delta) -> Extent {
     ext_x(&circulation(delta))
+}
+
+/// **THE CIRCULATION ON THE SUPPORT** — the Hodge split taken on the
+/// relations that ACTUALLY EXIST, not on the complete graph.
+///
+/// [`circulation`] solves the complete-graph system `p = −div/n`, which
+/// silently treats every absent relation as a real one carrying zero.
+/// For a READING of the whole that is tolerable; for ATTRIBUTION it is
+/// not, and it fails in two measured ways:
+///
+/// ```text
+/// four entities, ONE relation (0—1 = 1), nothing else:
+///   complete-graph shares -> [1/2, 1/2, 1/4, 1/4]
+/// ```
+///
+/// Entities 2 and 3 hold nothing, owe nothing, and are owed nothing,
+/// and each draws a QUARTER of a relation they are not party to —
+/// FARMING BY ABSENCE, which is worse than farming by strain because it
+/// costs nothing at all. And the same defect inflates the rest: the
+/// identical relation reads `circ_01 = 0` among two entities and `1/2`
+/// among four, so an orb could enlarge every share in the world by
+/// seating empty orbs beside it.
+///
+/// Both vanish here. The potential solves the SUPPORT graph's own
+/// Laplacian system, `L·p = −div`, with `L = deg − adjacency` over
+/// present relations only. Isolated entities form their own components,
+/// carry `p = 0`, and hold no relation to sum — so they bear nothing,
+/// and because components decouple, seating them moves no other share.
+///
+/// `L` is singular by construction (the constants lie in its kernel,
+/// once per component) and that is the gauge freedom itself: `p` is
+/// fixed to zero at one vertex per component, which changes `p` by a
+/// constant there and `grad(p)` not at all. Exact rational elimination
+/// (I3) — no floats, no iteration, no tolerance.
+pub fn circulation_on(delta: &Delta, support: &Support) -> Delta {
+    let dim = delta.dim().min(support.dim());
+    let fiber = delta.fiber().min(support.fiber());
+    let zero = Ratio::from_integer(0.into());
+    let mut out = Delta::zero(delta.dim(), delta.fiber());
+    // One potential per layer; the edges are written once, after, so
+    // every fiber coordinate of a relation is set in a single call.
+    let mut potentials: Vec<Vec<Ratio>> = Vec::with_capacity(fiber);
+
+    for l in 0..fiber {
+        // THE COMPONENTS. Each is its own gauge orbit; an isolated
+        // entity is a component of one and decouples completely.
+        let mut comp = vec![usize::MAX; dim];
+        let mut count = 0;
+        for seed in 0..dim {
+            if comp[seed] != usize::MAX {
+                continue;
+            }
+            comp[seed] = count;
+            let mut stack = vec![seed];
+            while let Some(v) = stack.pop() {
+                for w in 0..dim {
+                    if w != v && support.has(v, w, l) && comp[w] == usize::MAX {
+                        comp[w] = count;
+                        stack.push(w);
+                    }
+                }
+            }
+            count += 1;
+        }
+
+        // THE DIVERGENCE, over present relations only.
+        let div: Vec<Ratio> = (0..dim)
+            .map(|i| {
+                let mut acc = zero.clone();
+                for j in 0..dim {
+                    if i != j && support.has(i, j, l) {
+                        acc += delta.entry(i, j, l);
+                    }
+                }
+                acc
+            })
+            .collect();
+
+        let mut potential = vec![zero.clone(); dim];
+        for c in 0..count {
+            let members: Vec<usize> = (0..dim).filter(|v| comp[*v] == c).collect();
+            if members.len() < 2 {
+                continue; // isolated: p = 0, and it holds nothing anyway
+            }
+            // GAUGE FIXED at the first member: p = 0 there. The
+            // remaining rows are `(L·p)_v = −div_v`.
+            let unknowns = &members[1..];
+            let k = unknowns.len();
+            let mut aug: Vec<Vec<Ratio>> = Vec::with_capacity(k);
+            for &v in unknowns {
+                let mut row = vec![zero.clone(); k + 1];
+                let mut degree = zero.clone();
+                for w in 0..dim {
+                    if w != v && support.has(v, w, l) {
+                        degree += Ratio::from_integer(1.into());
+                        if let Some(idx) = unknowns.iter().position(|u| *u == w) {
+                            row[idx] -= Ratio::from_integer(1.into());
+                        }
+                    }
+                }
+                if let Some(idx) = unknowns.iter().position(|u| *u == v) {
+                    row[idx] += degree;
+                }
+                row[k] = -&div[v];
+                aug.push(row);
+            }
+            // Exact Gauss-Jordan. Any free column is residual gauge and
+            // takes zero — `grad(p)` is unmoved either way.
+            let mut pivot_of = vec![usize::MAX; k];
+            let mut r = 0;
+            for col in 0..k {
+                let Some(hit) = (r..k).find(|row| aug[*row][col] != zero) else {
+                    continue;
+                };
+                aug.swap(r, hit);
+                let lead = aug[r][col].clone();
+                for x in aug[r].iter_mut() {
+                    *x /= &lead;
+                }
+                for other in 0..k {
+                    if other == r {
+                        continue;
+                    }
+                    let factor = aug[other][col].clone();
+                    if factor == zero {
+                        continue;
+                    }
+                    for idx in 0..=k {
+                        let take = &aug[r][idx] * &factor;
+                        aug[other][idx] -= take;
+                    }
+                }
+                pivot_of[col] = r;
+                r += 1;
+                if r == k {
+                    break;
+                }
+            }
+            for (col, &v) in unknowns.iter().enumerate() {
+                potential[v] =
+                    if pivot_of[col] == usize::MAX { zero.clone() } else { aug[pivot_of[col]][k].clone() };
+            }
+        }
+
+        potentials.push(potential);
+    }
+
+    for i in 0..dim {
+        for j in (i + 1)..dim {
+            let coords: Vec<Ratio> = (0..delta.fiber())
+                .map(|l| match l < fiber && support.has(i, j, l) {
+                    // Absent relations carry nothing. This is the whole
+                    // difference from the complete-graph reading.
+                    false => zero.clone(),
+                    true => delta.entry(i, j, l) - (&potentials[l][j] - &potentials[l][i]),
+                })
+                .collect();
+            out.set_antisym(i, j, coords);
+        }
+    }
+    out
+}
+
+/// **THE BORNE SHARE, AXIS BY AXIS** — how much of the circulation each
+/// entity holds up ON EACH COORDINATE. `D` says how much room stands;
+/// this says WHO IS STANDING IN IT, and IN WHICH DIRECTION.
+///
+/// ```text
+/// borne_i,l = ½ · Σ_{j ~ i} |circulation_on(Δ, S)_ij,l|
+/// ```
+///
+/// **NEVER ONE SCALAR** (`18_TORSION` §2b, operator ruling 2026-08-02:
+/// *this needs to be multi-axial on vertices*). The first landing of
+/// this share summed across every coordinate and returned ONE number
+/// per entity. That is a directional quantity collapsed to a scalar
+/// aggregate, which §2b bars wherever the system computes — and it
+/// erased the only thing an entity can act on. Two entities reading the
+/// same total can stand in completely different worlds:
+///
+/// ```text
+/// borne = 3   as one scalar     — indistinguishable
+///   → (3, 0, 0)  everything on one axis, two axes untouched
+///   → (1, 1, 1)  spread evenly, nowhere to grow cheaply
+/// ```
+///
+/// The aggregate lies about the parts in exactly the way
+/// `verdict_per_dimension` was built to catch: a universe can read
+/// whole on the sum while no single coordinate carries both poles.
+///
+/// **TOWARD UPLIFT.** A coordinate where an entity stands at the ground
+/// is not a deficiency, it is the OPEN DIRECTION — the axis on which a
+/// new relation would earn most. Read per axis, the share stops being a
+/// score and becomes a map of where to grow, which is the whole
+/// difference between a reading that withholds and one that gives
+/// (D6, `18` Article II).
+///
+/// Indexed `[entity][coordinate]`. Exact rationals (I3).
+pub fn borne_axial(delta: &Delta, support: &Support) -> Vec<Vec<Ratio>> {
+    let dim = delta.dim().min(support.dim());
+    let fiber = delta.fiber().min(support.fiber());
+    let circ = circulation_on(delta, support);
+    let half = Ratio::new(1.into(), 2.into());
+    let zero = Ratio::from_integer(0.into());
+    (0..delta.dim())
+        .map(|i| {
+            (0..delta.fiber())
+                .map(|l| {
+                    let mut total = zero.clone();
+                    if i < dim && l < fiber {
+                        for j in 0..dim {
+                            if i == j || !support.has(i, j, l) {
+                                continue;
+                            }
+                            let v = circ.entry(i, j, l);
+                            total += if *v < zero { -v } else { v.clone() };
+                        }
+                    }
+                    total * &half
+                })
+                .collect()
+        })
+        .collect()
+}
+
+/// **THE BORNE SHARE** — how much of the circulation each entity holds
+/// up. `D` says how much room stands; this says WHO IS STANDING IN IT.
+///
+/// Every present relation carries some of the canonical circulation.
+/// Its two ends bear that magnitude EQUALLY — half each — and an
+/// entity's share is the sum over its OWN relations:
+///
+/// ```text
+/// borne_i = ½ · Σ_{j ~ i} Σ_l |circulation_on(Δ, S)_ij,l|
+/// ```
+///
+/// **THIS IS THE LENS FORM — the L1 over [`borne_axial`], and the axial
+/// reading is the one that computes.** `18_TORSION` §2b permits an L1
+/// aggregate at a HUMAN LENS and bars it wherever the system computes,
+/// so this is for display and for totals that must reconcile (the
+/// conservation pin sums it against the whole circulation). **A gate
+/// reads [`borne_axial`]**: collapsing first would hide which
+/// coordinate an entity actually stands on, and that is the only part
+/// of the reading it can act on.
+///
+/// **Why the relation and not the cycle.** The cycle is the intuitive
+/// unit — charge is a property of a closed loop — but a *fundamental
+/// cycle basis* is chosen by a spanning forest, so the node set
+/// `Nodes(C)` and its size `N_C` MOVE WHEN THE ENTITIES ARE RELABELLED.
+/// Measured on a theta graph: the same charge yields cycles
+/// `{0,1,2},{0,2,3}` under one labelling and `{0,1,2,3},{0,1,2}` under
+/// another, so `|c|/N_C` pays different entities different amounts for
+/// identical structure. Article I voids it. Only the cycle-space
+/// DIMENSION is invariant, never a chosen basis of it. The circulation
+/// is the unique Hodge representative — no forest, no root — so a share
+/// read off IT is basis-free, and this is pinned over every relabelling.
+///
+/// **Why the support and not the complete graph.** See
+/// [`circulation_on`]: on the complete graph an entity holding NO
+/// relations draws a quarter of a relation it is not party to. A share
+/// is only ever read across relations that exist.
+///
+/// **Why circulation and not the residuals.** `symmetry_foundation`
+/// stands exactly where obligations FAIL to compose. Paying on it would
+/// pay for strain: manufacture an inconsistency, draw a share, do no
+/// work. The circulation is coherent closed content — what actually
+/// composes — so a share can only be earned by structure that holds.
+///
+/// **Conservation.** Each relation's magnitude is split in two and both
+/// halves are handed out, so `Σ_i borne_i` is exactly the total
+/// circulation standing on the support. Nothing is minted at the join
+/// and nothing falls out of it.
+///
+/// Exact rationals throughout (I3). A pure coboundary bears nothing —
+/// frame is not work.
+pub fn borne(delta: &Delta, support: &Support) -> Vec<Ratio> {
+    let zero = Ratio::from_integer(0.into());
+    borne_axial(delta, support)
+        .into_iter()
+        .map(|axes| axes.into_iter().fold(zero.clone(), |a, b| a + b))
+        .collect()
 }
 
 /// **THE LAWFUL BASE GROUP** — does this congruence preserve the

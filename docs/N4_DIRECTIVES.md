@@ -18,13 +18,23 @@ Coder-03's assessment is verified and approved. Checked against the tree
 
 - N4 is unblocked. The only ordering rule is N3-before-N4 (BUILD_ORDER
   line ~74); N3 landed 2026-07-25. No open second slice gates it.
-- The ancestor citation is accurate. `/opt/ipsal-autic-v0.4/iae/src/
+- The predecessor citation is accurate. `/opt/ipsal-autic-v0.4/iae/src/
   reduction/mod.rs` (SIGIL1 block): address = S-canonical × G-canonical
   projections of one frame-invariant form; T excluded from the key,
   kept as the chronicle stamp. CHARTER §8 ratifies this lineage.
-- `rfa_core::coherence_functional` is exact-rational (`C(Δ) = Σ R²` over
-  rationals, zero iff converged). Safe to use. The torus "no squaring"
-  law applies to L1 distance on the star-chart, not to RFA residuals.
+- `rfa_core::coherence_functional` is exact-rational (~~`C(Δ) = Σ R²`~~
+  over rationals, zero iff ~~converged~~). Safe to use. ~~The torus "no
+  squaring" law applies to L1 distance on the star-chart, not to RFA
+  residuals.~~
+  - **CORRECTED 2026-08-02 (`18_TORSION` §2n) — this bullet is wrong on
+    all three counts.** The code sums ABSOLUTE VALUES, not squares:
+    `delta.rs:193` is `c += r.abs()`, i.e. `C(Δ) = Σ|R|`. THE
+    PROPORTIONAL LAW bars squares as aggregators of difference
+    generally (`rfa-core/src/lib.rs:14`), so the exemption claimed in
+    the last sentence does not exist. And "converged" is STRUCK from
+    the crate (operator, 2026-08-01): `C(Δ) = 0` says the cocycle
+    condition holds and nothing more. **`C` also has no operational
+    function** — lens only.
 - Tag registry: 54 is GALAXY-1 (coder-02, reserved in the dop.rs
   header). NS-2 allocates from 55. Acceptance criterion already on the
   board: a structural query finds the planted match and refuses the

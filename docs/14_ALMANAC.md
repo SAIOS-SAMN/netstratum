@@ -140,7 +140,7 @@ converter law as a FUNCTION:
     input:  the element, at a rate derived from (family, tier)
     output: the element's refined form (tier + 1 identity in the
             registry, minted at first refinement — the same seeded
-            synthesis, parent-linked), at richness-scaled yield
+            synthesis, predecessor-linked), at richness-scaled yield
     heat:   converter-hot (the thermal board prices it)
 
 No per-element table is ever written. Two worlds with different seeds

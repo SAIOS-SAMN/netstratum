@@ -46,7 +46,7 @@ Ideology is **measured, never declared and never scored**:
    as fidelity, each in the units it accrued. Four axes, four readings,
    four names. *(Consequently there is no goodness scalar and no oracle:
    a single figure would have no units to be in, and it is the
-   scalar/scored form the ancestry law refuses — CHARTER §5.)*
+   scalar/scored form the provenance law refuses — CHARTER §5.)*
 4. **A book records what was DONE.** Every entry grounds in a receipted
    deed, so a book holds exactly the deeds that happened. An orb that
    acted little has a small syntropic book; that is the record standing
@@ -75,8 +75,8 @@ made sink commensurable; other resources post through a placeholder
 commensuration table, weight 1 in v1).
 
 **Scope from birth:** the books are per-orb so every mechanism lands and
-witnesses single-world — the P1 archipelago is society enough (a mother
-and daughter colony are already distinct books). Civilization-scoped
+witnesses single-world — the P1 archipelago is society enough (a source
+and charted colony are already distinct books). Civilization-scoped
 reading is composition over a faction's orbs, and cross-empire reading
 arrives with the worlds that meet at N5/N6; the machinery is identical,
 only the counterparties multiply.
@@ -246,7 +246,7 @@ physics.
 
 ### 3.4 What is refused here (inscribed)
 
-1. **The stored score** — any mutable "alignment stat" (the ancestry
+1. **The stored score** — any mutable "alignment stat" (the provenance
    refusal; §1 rules the lawful form).
 2. **The single goodness number** — axes never aggregate.
 3. **Tokenized reputation** — no "trust certificate" ERC-1155: the

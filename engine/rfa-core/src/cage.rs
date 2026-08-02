@@ -182,7 +182,7 @@ impl Lens {
         }
     }
 
-    /// The door OUT, and the only one: a rendering for a human surface.
+    /// The door OUT, and the only one: a rendering for an OPERATOR surface.
     /// It lands in a `String` on purpose — no rule can numerically
     /// branch on it, so the cage holds without anyone having to
     /// remember that it should.
@@ -308,7 +308,7 @@ impl<T: Exact> Proposal<T> {
 ///
 /// **So `C` is not a prisoner here. `C` is the RESIDENT**, and this is
 /// the door you knock on. He is CONSULTED rather than banished, because
-/// the tools his work requires are exactly the tools that may never
+/// the tools its work requires are exactly the tools that may never
 /// touch the outside.
 ///
 /// `tool` may do ANYTHING internally — floats, a GPU kernel, a sampled

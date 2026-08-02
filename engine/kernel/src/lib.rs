@@ -31,6 +31,7 @@
 //! that no state semantics ever live outside this function.
 
 pub mod bridge;
+pub mod motion;
 
 use cfe::dop::{ClosureEvent, Resource};
 use cfe::ipsal::Scope;
@@ -187,6 +188,32 @@ pub enum Unlawful {
     /// what it earns against. A mint banks value; it forms no relation,
     /// so it cannot bootstrap its own precondition.
     MintWithoutStanding { verdict: Vacuity },
+    /// ARTICLE II, ASKED OF THE MINTER RATHER THAN OF THE WORLD (SYN-4,
+    /// SYN-5). The world stands, but THIS orb holds none of what it
+    /// stands on: its share of the circulation is the ground.
+    ///
+    /// [`Unlawful::MintWithoutStanding`] is a world-level reading and no
+    /// orb appears in it, so it could only ever refuse — and it refused
+    /// the wrong way in both directions. An orb carrying real structure
+    /// was denied because the world's total fell short, and an orb
+    /// carrying none was admitted on structure OTHER orbs had built.
+    /// That second case is the free ride: standing is inherited, never
+    /// earned, and inheritance is not work.
+    ///
+    /// The share is carried, not just the refusal, because it is a
+    /// FLOOR AN ORB CAN RISE FROM rather than a penalty to avoid: an orb
+    /// reads what it holds, sees the ground, and knows that forming a
+    /// real obligation is what lifts it. Every share is a magnitude and
+    /// never negative, so this states what is missing in the same terms
+    /// that state what is present.
+    ///
+    /// **CARRIED PER AXIS, NEVER SUMMED** (operator ruling 2026-08-02:
+    /// *multi-axial on vertices towards uplift*). One share per CHANNEL,
+    /// so the refusal names WHICH DIRECTION is open rather than only how
+    /// short the orb is. A single scalar here would tell an orb it had
+    /// nothing without telling it where to begin, and `18` §2b bars the
+    /// collapse wherever the system computes.
+    MintWithoutOwnStanding { orb: u64, axial: Vec<Ratio> },
 }
 
 /// THE JUDGE. Does `step` lawfully carry `prior` to `next`? Pure,
@@ -252,12 +279,27 @@ pub fn lawful(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Un
 /// bound at any single step and so can never be an invariant.
 fn capacity_law(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
     match &step.event {
-        ClosureEvent::DiscoveryMinted { .. } => {
+        ClosureEvent::DiscoveryMinted { orb_id, .. } => {
             let read = bridge::read_entangled(prior);
             let verdict = read.verdict();
-            match verdict.is_admitted() {
+            if !verdict.is_admitted() {
+                return Err(Unlawful::MintWithoutStanding { verdict });
+            }
+            // ARTICLE II, ASKED OF THE MINTER (SYN-4/SYN-5). The world
+            // standing is the free-energy half and stays world-shaped —
+            // a gradient is a property of the whole. The RANK half is
+            // asked personally: what does THIS orb hold up?
+            //
+            // Strictly a narrowing, never a loosening: a share above the
+            // ground requires circulation on the orb's own relations,
+            // which requires a holonomy, which is rank ≥ 1. So every
+            // state this admits, the world-level reading admitted too —
+            // and the free rider, who held nothing and minted on other
+            // orbs' structure, no longer passes.
+            let axial = bridge::standing_axial_of(prior, *orb_id);
+            match axial.iter().any(|share| *share > ratio(0, 1)) {
                 true => Ok(()),
-                false => Err(Unlawful::MintWithoutStanding { verdict }),
+                false => Err(Unlawful::MintWithoutOwnStanding { orb: *orb_id, axial }),
             }
         }
         // Every other deed is judged by the invariants above. The
@@ -462,7 +504,7 @@ fn covered(event: &ClosureEvent) -> bool {
         // 64 deeds, not the documented 63 — GaugeShiftedAt (tag 60,
         // the graded key shift, LIVE at world.rs's shift_gauge_at) was
         // never counted. Banked-neutral (replay resizes the gauge key,
-        // no bank), Build-scoped beside its covered sibling
+        // no bank), Build-scoped beside its covered counterpart
         // GaugeShifted. Without it the Phase 3 flip could never
         // complete: a live deed refusing Unjudged forever.
         | E::GaugeShiftedAt { .. }
@@ -631,7 +673,7 @@ fn lawful_deltas(
             non_negative(*resource, amount)?;
             Vec::new()
         }
-        // ColonyCharted: the founding reserves MOVE source → daughter —
+        // ColonyCharted: the founding reserves MOVE source → charted —
         // net zero per resource by the sealed rule.
         E::ColonyCharted { .. } => Vec::new(),
         // — the aperture legs, sign-guarded (a negative send is a
@@ -886,7 +928,21 @@ fn decay(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
                         orb,
                         prior.star,
                         step.stamp,
-                        &cfe::world::ease_of(&prior.techs, *orb_id),
+                        // RULESET EPOCHS (`21_KERNEL_PARAMETERS` §11): the judge
+                        // selects the rule by the stamp the DEED carries,
+                        // not by the rule standing today. A receipt
+                        // written under EPOCH 0 is judged by EPOCH 0
+                        // forever, which is what stops `replay` drifting
+                        // from the live path when a sealed rule moves.
+                        &cfe::world::ease_of(&prior.techs, *orb_id, step.stamp),
+                        // P2: the judge reads standing supply from the
+                        // SAME sealed function the proposer used, on
+                        // `prior`'s own orbs — one computation, two
+                        // judges (CHARTER §0b). A rate the kernel
+                        // accepted without re-deriving would be a number
+                        // a node could lie about, with the mint directly
+                        // downstream.
+                        &cfe::world::standing_supply(&prior.orbs),
                     )
                     .into_iter()
                     .find(|(held, _)| held == resource)

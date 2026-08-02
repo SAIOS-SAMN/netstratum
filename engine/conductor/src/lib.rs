@@ -1,4 +1,4 @@
-//! N-CONDUCTOR + N-LINEAGE — the heartbeat and the family tree.
+//! N-CONDUCTOR + N-LINEAGE — the heartbeat and the lineage graph.
 //!
 //! Scripted civilizations play their colonies autonomously, each
 //! through a CONTAINED AGENT (NS-6: granted scopes, every receipt
@@ -12,15 +12,15 @@
 //! Research depth is the tech tree; surplus funds search; search
 //! unlocks industry; industry funds deeper search.
 //!
-//! **SPECIATION IS A MINT:** a civilization at rung 5 with 20
-//! confirmed solves spawns ONE daughter per era — irreversible
-//! dimensional growth, exactly `physics::FlowEvent::Mint`'s law worn
+//! **GROWTH PER CIV IS A MINT:** a civilization at rung 5 with 20
+//! confirmed solves CLEAVES once per era into TWO PEER BRANCHES —
+//! irreversible dimensional growth, exactly `physics::FlowEvent::Mint`'s law worn
 //! as gameplay. The mutation is chronicle-seeded: the parent's latest
 //! receipt digest draws WHICH axis mutates and what the child is
 //! called — the parent's own history decides what its children
 //! become. Lineage is registry-recorded now, receipted at G1. A
-//! daughter founds a NEW world (binding #1: one chronicle per world —
-//! a shared-chronicle sibling planet waits on the multi-colony
+//! branch founds a NEW world (binding #1: one chronicle per world —
+//! a shared-chronicle counterpart planet waits on the multi-colony
 //! engine).
 //!
 //! **LORE LIVES IN DATA, NOT SOURCE:** polity specs load from
@@ -467,8 +467,10 @@ pub struct Polity {
     streak: u32,
     /// Confirmed solves this era.
     pub solved: u32,
-    /// One daughter per era — speciation is rare, not a flood.
-    spawned: bool,
+    /// One CLEAVE per era — growth is rare, not a flood. The cleave
+    /// yields two PEER branches (11 §3); this bounds how OFTEN the
+    /// line grows, never how many branches a growth produces.
+    cleaved: bool,
     /// MESH-1b: the pen is out — beats, saves, and the market wait.
     pub penned: bool,
     /// #36: the world's own chain, held open across beats (opened
@@ -665,7 +667,7 @@ impl Polity {
                     let level = (1 + solved / 3).min(5);
                     // One divergence per era: a resumed continuation
                     // is the same era — the receipt remembers.
-                    let spawned = world.chronicle().receipts().iter().any(|receipt| {
+                    let cleaved = world.chronicle().receipts().iter().any(|receipt| {
                         matches!(
                             receipt.event,
                             cfe::dop::ClosureEvent::Diverged { .. }
@@ -682,7 +684,7 @@ impl Polity {
                         level,
                         streak: solved % 3,
                         solved,
-                        spawned,
+                        cleaved,
                         penned,
                         arbor: None,
                     };
@@ -761,7 +763,7 @@ impl Polity {
             level: 1,
             streak: 0,
             solved: 0,
-            spawned: false,
+            cleaved: false,
             penned: false,
             arbor: None,
         }
@@ -1171,7 +1173,7 @@ impl Polity {
     /// decides where its branches land on the manifold. The lineage
     /// pointer records LINE membership (LINEAGE-1), never parenthood.
     fn divergence_step(&mut self, registry: &Registry) -> Option<PolitySpec> {
-        if self.spawned || self.level < 5 || self.solved < 20 {
+        if self.cleaved || self.level < 5 || self.solved < 20 {
             return None;
         }
         let receipt = self.world.chronicle().receipts().last()?;
@@ -1187,22 +1189,44 @@ impl Polity {
             let others: Vec<&&str> = options.iter().filter(|o| **o != current).collect();
             others[beacon.uniform_index(domain, others.len() as u64) as usize].to_string()
         };
-        let axis = beacon.uniform_index("speciation.axis", 3);
+        // MULTI-AXIAL (operator ruling 2026-08-02: *unpin unary, and
+        // make it multi-axis*). `11_AEON` §3 retired "Charted" for
+        // importing terrestrial unary budding — ONE PARENT, MUTATE ONE
+        // AXIS — and this draw was still the second half of that: one
+        // of three coordinates moved and the other two were held.
+        //
+        // A cleave is a WALK ON THE MANIFOLD
+        // {disposition × metabolism × perception × G} (11 §3), and a
+        // walk confined to one coordinate at a time is not a walk on a
+        // manifold, it is a walk on its axes. The mask draws a NONEMPTY
+        // SUBSET — 1..=7 over three bits — so every combination is
+        // reachable and the single-axis move survives as one case among
+        // seven rather than as the only case.
+        //
+        // Nonempty by construction: a cleave always diverges, so the
+        // branches can never be clones. `mutate` draws from the options
+        // EXCLUDING the current value, so every flagged axis genuinely
+        // moves.
+        let axes = 1 + beacon.uniform_index("growth.axes", 7);
         let (mut disposition, mut metabolism, mut perception) = (
             parent.disposition.clone(),
             parent.metabolism.clone(),
             parent.perception.clone(),
         );
-        match axis {
-            0 => disposition = mutate(&disposition, &DISPOSITIONS, "speciation.disposition"),
-            1 => metabolism = mutate(&metabolism, &METABOLISMS, "speciation.metabolism"),
-            _ => perception = mutate(&perception, &PERCEPTIONS, "speciation.perception"),
+        if axes & 1 != 0 {
+            disposition = mutate(&disposition, &DISPOSITIONS, "growth.disposition");
+        }
+        if axes & 2 != 0 {
+            metabolism = mutate(&metabolism, &METABOLISMS, "growth.metabolism");
+        }
+        if axes & 4 != 0 {
+            perception = mutate(&perception, &PERCEPTIONS, "growth.perception");
         }
 
         // THEMED NAMING (operator ruling): the child's name derives
         // from the parent's dominant CAPABILITIES — metabolism names
         // the head, perception names the tail. Fresh two-part names,
-        // never concatenations of ancestry (lineage lives in the
+        // never concatenations of provenance (lineage lives in the
         // registry field, not in ever-growing strings).
         let heads: &[&str] = match parent.metabolism.as_str() {
             "mineral" => &["ember", "slag", "basalt", "vein", "cinder", "forge"],
@@ -1215,7 +1239,7 @@ impl Polity {
         };
         // Deterministic collision walk: start at the drawn combo,
         // scan forward; if every themed name is taken, the line waits.
-        let start = beacon.uniform_index("speciation.name", (heads.len() * tails.len()) as u64)
+        let start = beacon.uniform_index("growth.name", (heads.len() * tails.len()) as u64)
             as usize;
         let mut chosen: Option<(String, &str, &str)> = None;
         for offset in 0..heads.len() * tails.len() {
@@ -1237,7 +1261,7 @@ impl Polity {
             .unwrap_or(&parent.species);
         // A PEER, not a child: the species is the LINE's species,
         // whole — no "(descendant)" suffix, no "child of" (11 §3
-        // retired the daughter).
+        // retired the branch).
         let branch = Civilization {
             name,
             sigil: sigil.clone(),
@@ -1253,12 +1277,12 @@ impl Polity {
             station: None,
         };
         registry.create(&branch).ok()?;
-        self.spawned = true;
+        self.cleaved = true;
         // The origin's key moves and the cleave is receipted, naming
         // the departing branch (tag 43).
         self.world.diverge(&sigil, delta.clone());
 
-        // The daughter settles ADJACENT: parent position plus a small
+        // The new branch settles ADJACENT: origin position plus a small
         // beacon-drawn displacement in the exact rationals per spatial axis (half-unit
         // grain, never the zero vector).
         let step = |domain: &str| -> Ratio {
@@ -1270,7 +1294,7 @@ impl Polity {
         }
         Some(PolitySpec {
             civilization: branch,
-            // Fresh themed world and planet — ancestry is a registry
+            // Fresh themed world and planet — provenance is a registry
             // fact and a star-chart adjacency, never a name chain.
             world_name: format!("{head}-{tail}"),
             planet: format!("{tail}fall"),
@@ -1292,7 +1316,7 @@ impl Polity {
         })
     }
 
-    /// One full heartbeat. A speciation returns the newborn's spec —
+    /// One full heartbeat. A growth returns the newborn's spec —
     /// the era loop gives it a world of its own.
     pub fn cycle(&mut self, book: &Ledger, registry: &Registry) -> Option<PolitySpec> {
         self.drain_inbox(book);
@@ -1327,7 +1351,7 @@ impl Polity {
         // (the hole visible, never hidden; the Phase 3 flip threads
         // the steps). A penned world skips the beat entirely, so its
         // arbor stalls with its pen (MESH-1b). Best-effort like the
-        // sibling writes at this observed phase: a refused chain
+        // counterpart writes at this observed phase: a refused chain
         // leaves the arbor short, a visible stall, never a crash.
         let _ = self.chain_beat(book);
         let _ = scribe::record(
@@ -1875,7 +1899,7 @@ fn galaxy_creator(registry: &Registry, civilization: &Civilization) -> String {
 }
 
 /// Run one era: CONVERGE the archived eras (07 §1.6), then genesis for
-/// every polity, then `cycles` heartbeats; daughters born mid-era join the
+/// every polity, then `cycles` heartbeats; branches born mid-era join the
 /// beat. Returns the live worlds.
 pub fn run_era(var_root: &str, cycles: u32) -> Vec<Polity> {
     let registry = Registry::at(format!("{var_root}/registry"));

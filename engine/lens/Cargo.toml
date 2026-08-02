@@ -8,6 +8,12 @@ description = "Read-only projections from the chain (#37): the display re-served
 cfe = { path = "../cfe" }
 codec = { path = "../codec" }
 mesh = { path = "../mesh" }
+# THE PEEL reads the sealed algebra's own decomposition (19_LENS §3):
+# magnification is a DEPTH on `coboundary_reduce`, not a new geometry.
+# The arrow is one-way — rfa-core never reaches back (held by
+# `deletability::no_sealed_crate_depends_on_a_lens`). The peel takes the
+# relation it is GIVEN, so the lens needs no kernel dependency to see.
+rfa-core = { path = "../rfa-core" }
 num-bigint.workspace = true
 num-traits.workspace = true
 

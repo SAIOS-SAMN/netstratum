@@ -157,11 +157,33 @@ fn struck_paragraph_lines(text: &str) -> HashSet<usize> {
 /// dropped"), so they are exempt by construction — what is barred is
 /// live use, never the record of removal.
 fn records_a_strike(line: &str) -> bool {
-    const MARKERS: [&str; 10] = [
+    const MARKERS: [&str; 17] = [
         "STRUCK", "struck", "EXCISED", "excised", "DEPRECATED", "deprecated", "RETIRED",
-        "formerly", "REMOVED", "withdrawn",
+        // `retired` lowercase was MISSING while every other marker
+        // carried both cases — found by this file's own vocabulary
+        // lint flagging the sentence that describes the retirement.
+        "retired", "formerly", "REMOVED", "withdrawn",
+        // A CORRECTION is a record too. `Ω ≡ V` could only be retired by
+        // paragraphs that QUOTE it while retiring it, exactly as a strike
+        // record quotes the symbol it strikes.
+        "CORRECTED", "corrected", "AMENDED", "amended", "RENOTATED", "renotated",
     ];
     MARKERS.iter().any(|m| line.contains(m))
+}
+
+/// A RELAY LINE — a blockquote. These documents use `>` for one thing:
+/// recording an operator ruling verbatim, "as given" (`18` §1). A relay
+/// is a record of what was SAID, never an assertion of law, so a struck
+/// symbol inside one is a quotation — exactly the case the strike
+/// records are already exempt for. `18` §1 has carried `Ω(D)` and
+/// `D(V)+V(D)` since the day it was relayed, and editing an operator's
+/// words to satisfy a lint would be the worse defect.
+///
+/// The scope is deliberately narrow: this exempts QUOTATION, not
+/// commentary. Prose about a relay sits outside the `>` and is judged
+/// like any other law.
+fn is_relay(line: &str) -> bool {
+    line.trim_start().starts_with('>')
 }
 
 /// Roots outside this workspace: the standard library and vendored
@@ -260,8 +282,11 @@ fn the_struck_symbols_stay_struck() {
     // ambiguous token would flag correct law — the false-positive that
     // gets a lint disabled. Ambiguous vocabulary is out of scope here
     // and belongs to a symbol registry, if one is ever built.
-    const STRUCK: [(&str, &str); 6] = [
+    const STRUCK: [(&str, &str); 9] = [
         ("Ξ", "the cosmetic meter, struck by 18 §3"),
+        ("Ω ≡ V", "the room identified with the substance, struck 2026-08-02 (17 §3)"),
+        ("Ω  ≡  V", "the room identified with the substance, struck 2026-08-02 (17 §3)"),
+        ("Ω(D)", "the totality made a function of one office, retired 2026-08-02 (17 §3)"),
         ("S⁺_out", "twin-singularity esoterica, struck by 18 §2d"),
         ("S⁺_hol", "twin-singularity esoterica, struck by 18 §2d"),
         ("ζ∇V", "the damped-gradient term, struck 2026-08-01"),
@@ -290,7 +315,7 @@ fn the_struck_symbols_stay_struck() {
         let text = fs::read_to_string(&doc).unwrap_or_default();
         let exempt = struck_paragraph_lines(&text);
         for (n, line) in text.lines().enumerate() {
-            if exempt.contains(&n) {
+            if exempt.contains(&n) || is_relay(line) {
                 continue;
             }
             for (sym, why) in STRUCK {
@@ -435,5 +460,171 @@ fn the_detectors_have_teeth() {
     assert!(
         !live_line.contains("∂V") && !live_line.contains("∇V"),
         "∂Δ is LIVE and must not collide with the struck ∂V / ∇V"
+    );
+}
+
+/// THE RETIRED VOCABULARY STAYS RETIRED — over CODE, not only law.
+///
+/// `the_struck_symbols_stay_struck` reads `law_documents()`, which is
+/// `docs/*.md` plus the kernel charter. It has never opened a `.rs`
+/// file. So a ruling could retire a word in the law and the code would
+/// never hear it, which is exactly what happened:
+///
+/// `11_AEON` §3 retired "Daughter" on 2026-07-30, giving the reason in
+/// full — *it imported terrestrial unary budding (one parent, mutate
+/// one axis) — half a model with no second half*. Three days later the
+/// word still stood in 24 files across `cfe`, `kernel`, `conductor`,
+/// `scribe`, the CLI and six doc files, and a `conductor_pins`
+/// assertion still REQUIRED the retired model (`mutations == 1`).
+/// Nothing was watching, because the only watcher read prose.
+///
+/// **The word was never carrying gender as decoration.** It carried a
+/// REPRODUCTIVE MODEL — one parent, ownership, inheritance without
+/// earning — and this engine refuses all three: the cleave is
+/// peer-to-peer with no parent and no child (`11` §3), lineage records
+/// LINE membership rather than parenthood, and a successor inherits the
+/// chronicle and not the tree (`17` §3c). The vocabulary was smuggling
+/// in the model the law had already refused.
+#[test]
+fn the_retired_vocabulary_stays_retired() {
+    let root = workspace_root();
+
+    // Retired by ruling, with the ruling that retired each.
+    //
+    // NOUNS ONLY. Gendered PRONOUNS are deliberately absent: a token
+    // lint cannot separate "she" naming a system office from "she"
+    // naming a real person in a relay, and guarding an ambiguous token
+    // would flag correct text — the false positive that gets a lint
+    // switched off (the same reasoning `T_k` is absent from STRUCK).
+    // The offices were degendered by hand: V was "she", C was "he".
+    const RETIRED: [(&str, &str); 14] = [
+        ("daughter", "kin word for a charted colony / branch"),
+        ("Daughter", "kin word for a charted colony / branch"),
+        ("mother", "kin word for a source colony"),
+        ("Mother", "kin word for a source colony"),
+        ("speciation", "unary budding by another name"),
+        ("Speciation", "unary budding by another name"),
+        ("sib\u{6c}ing", "kin word for a counterpart"),
+        ("Sib\u{6c}ing", "kin word for a counterpart"),
+        ("ances\u{74}ry", "kin word for provenance"),
+        ("Ances\u{74}ry", "kin word for provenance"),
+        ("kins\u{68}ip", "the frame itself: this engine has no kin, only lines"),
+        ("Kins\u{68}ip", "the frame itself: this engine has no kin, only lines"),
+        ("fami\u{6c}y tree", "a line is a graph, not a tree of kin"),
+        ("fami\u{6c}y-tree", "a line is a graph, not a tree of kin"),
+    ];
+
+    let mut live = Vec::new();
+    let mut scanned = 0usize;
+    let mut stack = vec![root.join("engine"), root.join("clients"), root.join("docs")];
+    while let Some(dir) = stack.pop() {
+        let Ok(entries) = fs::read_dir(&dir) else { continue };
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_dir() {
+                if path.file_name().is_some_and(|n| n == "target") {
+                    continue;
+                }
+                stack.push(path);
+                continue;
+            }
+            let is_source = path.extension().is_some_and(|x| x == "rs" || x == "md");
+            if !is_source {
+                continue;
+            }
+            let text = fs::read_to_string(&path).unwrap_or_default();
+            scanned += 1;
+            let exempt = struck_paragraph_lines(&text);
+            for (n, line) in text.lines().enumerate() {
+                // A record of the retirement, or an operator's own words,
+                // may name the word — use may not.
+                if exempt.contains(&n) || is_relay(line) {
+                    continue;
+                }
+                for (word, why) in RETIRED {
+                    if line.contains(word) {
+                        let rel = path.strip_prefix(&root).unwrap_or(&path).display();
+                        live.push(format!("{rel}:{}  `{word}` — {why}", n + 1));
+                    }
+                }
+            }
+        }
+    }
+
+    assert!(scanned > 100, "the vocabulary scan reached the tree ({scanned} files)");
+    assert!(
+        live.is_empty(),
+        "retired vocabulary is LIVE in the tree.\n\
+         A ruling that retires a word retires it in the CODE too — prose \
+         cannot enforce, which is how \"Daughter\" outlived its own \
+         retirement by three days across 24 files:\n  {}",
+        live.join("\n  ")
+    );
+}
+
+/// C IS OUT OF THE JUDGE AND OUT OF THE LOOP — the arrow law, extended
+/// past `rfa-core` to the two places that actually decide things.
+///
+/// `rfa-core/tests/cage_arrow.rs` holds the arrow inside its own crate:
+/// six computing-path modules may CONSTRUCT a caged reading and must
+/// never CONSUME one. But the crate is not where the world turns. The
+/// JUDGE (`kernel/src`) admits or refuses every deed, and the WORLD
+/// LOOP (`cfe/src/world`) advances the state — and neither was covered
+/// by any arrow test at all.
+///
+/// **The standard is "does not know C exists", not "does not gate on
+/// C".** A module that never names a symbol cannot accidentally grow a
+/// dependency on it; a module that merely declines to branch on one can.
+/// That is the only version of this law that cannot rot.
+///
+/// Editing this test IS the amendment (the `recurrence_guard` shape). A
+/// future author who wants the judge or the loop to consume `C` must
+/// come here and say so, in the open.
+#[test]
+fn c_is_out_of_the_judge_and_out_of_the_loop() {
+    let root = workspace_root();
+    let mut offences = Vec::new();
+    let mut scanned = 0usize;
+    let mut stack = vec![root.join("engine/kernel/src"), root.join("engine/cfe/src/world")];
+    while let Some(dir) = stack.pop() {
+        let Ok(entries) = fs::read_dir(&dir) else { continue };
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_dir() {
+                stack.push(path);
+                continue;
+            }
+            if !path.extension().is_some_and(|x| x == "rs") {
+                continue;
+            }
+            let whole = fs::read_to_string(&path).unwrap_or_default();
+            scanned += 1;
+            // CODE ONLY. The prose deliberately NAMES what it refuses —
+            // `bridge.rs` says "never `coherence_functional` here" — so a
+            // naive scan would fail on the very comment that records the
+            // exile. Strip comments and judge the code.
+            for (n, line) in whole.lines().enumerate() {
+                let t = line.trim_start();
+                if t.starts_with("//") {
+                    continue;
+                }
+                for name in ["coherence_functional", "Lens"] {
+                    if line.contains(name) {
+                        let rel = path.strip_prefix(&root).unwrap_or(&path).display();
+                        offences.push(format!("{rel}:{}  names `{name}`", n + 1));
+                    }
+                }
+            }
+        }
+    }
+    assert!(scanned >= 15, "the arrow scan reached both trees ({scanned} files)");
+    assert!(
+        offences.is_empty(),
+        "C has leaked into the judge or the world loop.\n\
+         C has MAXIMAL ACCESS and ZERO AUTHORITY (`17` §10ter): everything \
+         it produces is a proposal, and a proposal that reaches a gate is \
+         no longer a proposal. The judge must be starved of the world to \
+         be trusted with the verdict:\n  {}",
+        offences.join("\n  ")
     );
 }

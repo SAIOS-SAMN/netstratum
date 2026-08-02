@@ -35,7 +35,10 @@
 //! is exactly that collapse.
 //!
 //! **THE DUAL-POLE LOCK.** Capacity and potential are the two poles of
-//! one unpartitioned manifold (`Ω ≡ V`), and BOTH must stand
+//! one unpartitioned state — `V`, read whole (`17_CAPACITY` §3; that
+//! section cited `Ω ≡ V` until the identity was corrected 2026-08-02,
+//! and the totality here was always `V`'s, never a second object's) —
+//! and BOTH must stand
 //! non-vacuous. Rank alone is not enough: a universe may hold `D > 0`
 //! entirely in closed circulation while no vertex carries net flow.
 //! That is STATIC STASIS, and it is refused — structure with no

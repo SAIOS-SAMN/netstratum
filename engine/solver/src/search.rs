@@ -218,9 +218,57 @@ impl rfa_core::Exact for SolveRead {}
 /// the kernel; doing it here means a candidate that could never pass the
 /// judge never leaves the workshop.
 pub fn solve_consulted(task: &Task, max_depth: usize) -> SolveRead {
-    rfa_core::consult((task, max_depth), |(t, d)| solve(t, d))
-        .withdraw(|read| closes_every_training_pair(task, read))
-        .unwrap_or(SolveRead::Unsolved)
+    match consult_observed(task, max_depth) {
+        Consultation::Crossed(read) => read,
+        Consultation::Silent => SolveRead::Unsolved,
+        Consultation::Withdrawn => SolveRead::Unsolved,
+    }
+}
+
+/// WHAT HAPPENED AT THE DOOR — three outcomes, not two.
+///
+/// [`solve_consulted`] collapses `Withdrawn` and `Silent` into the same
+/// `Unsolved`, because for a CALLER they are the same: neither crossed,
+/// and neither claims anything. But they are not the same FACT, and the
+/// difference is the only tell for a search that is degrading:
+///
+/// ```text
+///     Crossed    proposed a program; the door re-derived it and it held
+///     Silent     proposed nothing — lawful, claims nothing, costs nothing
+///     Withdrawn  proposed a program that FAILED re-derivation
+/// ```
+///
+/// A degrading search and a genuinely unsolvable task look identical
+/// from outside precisely because that collapse throws `Withdrawn`
+/// away. A rising withdrawal count means approximation is proposing
+/// wrong programs and the door is catching them — which is the door
+/// working, and worth knowing before it stops.
+///
+/// **This records nothing.** It reports one consultation to its caller;
+/// where a FREQUENCY is wanted it is measured by experiment, never
+/// tallied in the live system (`19_LENS` §7a).
+#[derive(Debug, Clone)]
+pub enum Consultation {
+    /// Proposed and verified — it crossed.
+    Crossed(SolveRead),
+    /// Proposed nothing.
+    Silent,
+    /// Proposed a program the door refused.
+    Withdrawn,
+}
+
+/// Consult the sector and keep WHAT HAPPENED, not merely what crossed.
+///
+/// Same door, same law, same re-derivation as [`solve_consulted`] —
+/// this is the one implementation and that one is expressed through it.
+/// Approximation may propose; only exactness may dispose.
+pub fn consult_observed(task: &Task, max_depth: usize) -> Consultation {
+    let proposal = rfa_core::consult((task, max_depth), |(t, d)| solve(t, d));
+    match proposal.withdraw(|read| closes_every_training_pair(task, read)) {
+        Some(SolveRead::Unsolved) => Consultation::Silent,
+        Some(read) => Consultation::Crossed(read),
+        None => Consultation::Withdrawn,
+    }
 }
 
 /// The exact rule the OUTSIDE applies: re-run the proposed program on

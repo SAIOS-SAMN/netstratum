@@ -139,7 +139,7 @@ deleted). Quantities render exact (`9/2`, never `4.5`).
   civilization-centric dashboard (resources, zones, clock, puzzles,
   the intelligence ratio `puzzles / resources-collected`, per-stream
   chain-linkage check that reads `✗ BROKEN` on any splice). 
-  `tools/steward.py` — the master control program on a leash: writes
+  `tools/steward.py` — the steward program, scope-bound: writes
   directive FILES only. **THE STEWARD LAW: a directive becomes real
   ONLY through the game loop as a scope-checked NS-6 action emitting
   an ordinary attributed receipt; the steward never edits state, and

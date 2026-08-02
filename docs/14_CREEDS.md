@@ -87,7 +87,7 @@ walks — exactly the way function and tier read today.
 - **Reconciliation = confluence** (tag 44) priced by **BRIDGE-1**
   (11 §3.1): the key gap prices the venting, the resonant remainder
   encases as the reconciled line's opening bank. **LINEAGE-2** (landed)
-  carries the ancestry: a reconciled creed records BOTH parent creeds,
+  carries the provenance: a reconciled creed records BOTH predecessor creeds,
   and `resolve_heads` reads every root.
 - **The friction gate** is ELEVATE-1's gate 2 read through the creed:
   sustained coherence with the line's own friction receipts settled —

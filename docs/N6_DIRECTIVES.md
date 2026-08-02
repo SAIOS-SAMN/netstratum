@@ -22,7 +22,7 @@ The NS-5 stub is verified against the tree 2026-07-30:
   commitments: consilience at arity ≥ 2; receipts the shared spine;
   forged or drifted state refuses typed; no central server, no global
   transaction log; first consumer two-node world synchronization.
-- Both ancestors exist at `/opt/repos/convergence-engine/`
+- Both predecessors exist at `/opt/repos/convergence-engine/`
   (DIMENSIONAL_BLOCKCHAIN.md — the two-chain shape; HOW_TO_USE.md —
   two laptops, sovereign bubbles, the membrane). Carried: independent
   work, exact measurement, disagreement preserved never voted away.
@@ -30,10 +30,10 @@ The NS-5 stub is verified against the tree 2026-07-30:
   witness weight > 0.5 — majority is not the house law. The clock
   already walks by 3-of-3 unanimity (`vrp.rs`); consilience is
   unanimous or refused, structurally.
-- The ancestor lore correction stands (BUILD_ORDER §1a pin): coherence
+- The predecessor lore correction stands (BUILD_ORDER §1a pin): coherence
   is SUM-OF-SQUARES in code, not L1; the reference vector measures
   C = 24, not 8. NS-5's vectors come from OUR code, never the
-  ancestor's prose.
+  predecessor's prose.
 - Tag registry: the next free tag is **64** (dop.rs header, the one
   authority — PICKUP §4's "next is 59" note is stale; 60–63 landed as
   GaugeShiftedAt, GenesisSealed, WantStruck, WantRelieved). NS-2's
@@ -84,11 +84,21 @@ The claim "two paths, one position" is a triangle: a 3-node Delta with
 an origin O, Δ(O→A) = node A's projection, Δ(O→B) = node B's
 projection, Δ(A→B) = 0. The cocycle residual over the canonical triple
 is R = B − A per coordinate; `coherence_functional` sums the six
-ordered triples, so C(Δ) = 6·ΣR² — exact, and zero iff every residual
-is zero. Consilience is C(Δ) = 0 exactly; anything else refuses typed
+ordered triples, so ~~C(Δ) = 6·ΣR²~~ **C(Δ) = 6·Σ|R|** — exact, and zero
+iff every residual is zero. Consilience is C(Δ) = 0 exactly; anything
+else refuses typed
 with the residual list carried whole (N4 directive 5: C is the summary
 scalar, never the payload). Arity ≥ 2 generalizes: n nodes, one shared
 position claimed pairwise; unanimity is the geometry, not a vote.
+
+**CORRECTED 2026-08-02 (`18_TORSION` §2n).** The formula above read
+`ΣR²`; the code sums ABSOLUTE VALUES (`delta.rs:193`, `c += r.abs()`)
+and THE PROPORTIONAL LAW bars squares as aggregators of difference.
+The multiplier 6 and the zero-iff claim are unaffected — `Σ|R| = 0` iff
+every residual is zero exactly as `ΣR²` would be. The surrounding
+argument therefore stands; only the aggregator was misstated. Note
+also that `C` is LENS-ONLY and gates nothing, which the parenthetical
+("C is the summary scalar, never the payload") already anticipated.
 
 ## Directives
 
