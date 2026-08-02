@@ -928,6 +928,82 @@ outliving the quantity it was minted for.** `C` is now demoted, `D` is
 now the organising quantity, and the documents still carry the old
 letters in the old roles.
 
+### 2n.1 WHERE `C` LIVES — the fiber as workshop, and the one correction (operator, 2026-08-02)
+
+> C needs to be contained in the 2×2 matrix fibre bundle defined where
+> "anything goes" — that's the place where we put approximations,
+> floats, all the things we don't want utilised in a deterministic
+> system
+
+**The quarantine is right and `C` is the correct resident. One
+distinction has to be drawn or it breaks consensus.**
+
+**MEASURED FIRST.** `MatrixFiber2x2` is `[[Ratio; 2]; 2]` and its own
+header says *"Exact rational throughout — no float, no root"*
+(`fiber.rs:25`). It is not a quarantine zone today; it is load-bearing
+committed algebra. `loop_holonomy` and `plaquette_curvature` compute
+over it, and **K5 (#32) proposes to carry it INTO `Holonomy.value`** —
+that is, into the committed reduction that feeds rank `D`, which feeds
+`capacity_law`, which gates minting.
+
+**So if the fiber's CONTENTS became float, two honest nodes would
+compute different `D` from identical state and consensus would fail.**
+That is not a stylistic objection; it is a hard break, and it is
+precisely the class of thing the cage exists to prevent.
+
+**THE DISTINCTION THAT MAKES THE RULING WORK — two roles, one object:**
+
+    THE FIBER AS A COMMITTED TYPE
+      [[Ratio; 2]; 2], exact, deterministic, reproducible by every
+      node. Non-negotiable, because D gates the mint.
+
+    THE FIBER AS A WORKSHOP — "anything goes"
+      where its elements are FOUND. Float BLAS, heuristics, iterative
+      solvers, GPU, parallel search. Exactly where floats belong,
+      because matrix search is the expensive part and none of it is
+      authoritative.
+
+    THE DOOR BETWEEN THEM
+      the cage. **The prover may be approximate; the verifier must be
+      exact.**
+
+**AND THAT PATTERN IS ALREADY LANDED, in the right place.** The fold
+gate is a prover/verifier split today: `orbit_lock` searches for the
+conjugator (*"the prover finds the conjugator"*, `fold_pins.rs:170`)
+and `verify_orbit_witness` *"re-walks the one path it claims"*
+(`fold.rs:224`). The operator's structure has a working precedent
+inside the exact organ it applies to.
+
+**WHAT THIS GIVES `C` — a job it did not have.** §2n established that
+`C` gates nothing and cannot see torsion in principle. Placed inside
+the sector, it acquires the one role it is actually fit for: **a search
+heuristic.** `KERNEL_RELAY` §5.2 struck gradient descent on `C` as a
+CONVERGENCE METHOD, and that strike stands — but a heuristic guiding a
+prover produces nothing authoritative, so the objection does not reach
+it. The sector is what makes the distinction expressible:
+
+    C is BARRED AS A LAW and PERMITTED AS A HINT.
+
+That is a stronger position than "C is vestigial". It is not vestigial;
+it is confined, and confinement is what makes it safe to use.
+
+**ONE GAP MEASURED — the fiber cannot currently cross the door.**
+`cage.rs:248` lists every `Exact` impl: `Ratio`, `i64`, `u64`, `usize`,
+`bool`, `Vec<T>`, `Option<T>`, and `SolveRead`. **`MatrixFiber2x2` has
+no `Exact` impl**, so `Proposal<MatrixFiber2x2>` does not exist and a
+fiber element found by an approximate search has no lawful way out of
+the sector. It plainly qualifies — it is built of `Ratio`s — so this is
+a one-line addition, and `cage_arrow.rs:118` audits every `Exact for`
+impl, which makes granting one a deliberate witnessed act rather than a
+slip. **Correctly guarded; simply not yet done.**
+
+**CONSEQUENCE FOR K5 (#32), recorded so the two rulings do not
+collide.** K5 stands: `Holonomy.value` becomes a `MatrixFiber2x2` and
+that value is EXACT. What this section adds is that the SEARCH which
+finds fiber elements belongs in the sector. Same object, two roles,
+separated by the door — and K5 must not be read as importing the
+anything-goes region into committed state.
+
 ### 2h. THE ECLIPSE — STRUCK AS WRITTEN (2026-08-01)
 
 This section claimed an "eclipse law" unifying five occlusion
