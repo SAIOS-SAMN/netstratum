@@ -20,7 +20,7 @@ fn banked(world: &World, orb: u64, resource: Resource) -> Ratio {
 }
 
 /// The furnace↔coldstore fixture: a hot source (ext+hab+shell at
-/// r=1/2, overflow 1/2 per tick) funds her vault-band charted's
+/// r=1/2, overflow 1/2 per tick) funds its vault-band charted colony's
 /// heating by TRADE-1 (the ECON-J relief law inter-orb); the charted
 /// captures sink. Ends at stamp 19: source holds 1 un-sealed pending
 /// overflow (struck), the charted banks 59997/10000 sink.

@@ -503,7 +503,7 @@ fn covered(event: &ClosureEvent) -> bool {
         // 64 deeds, not the documented 63 — GaugeShiftedAt (tag 60,
         // the graded key shift, LIVE at world.rs's shift_gauge_at) was
         // never counted. Banked-neutral (replay resizes the gauge key,
-        // no bank), Build-scoped beside its covered sibling
+        // no bank), Build-scoped beside its covered counterpart
         // GaugeShifted. Without it the Phase 3 flip could never
         // complete: a live deed refusing Unjudged forever.
         | E::GaugeShiftedAt { .. }

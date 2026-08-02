@@ -94,7 +94,7 @@ Proof of Work-Convergence is the fold gate judged locally:
                               plane — and ONLY that residue is what
                               the §3 discovery mint may pay.
 
-`orbit_lock` is re-derived RED-FIRST from the v0.1 ancestor's `fold.rs`
+`orbit_lock` is re-derived RED-FIRST from the v0.1 predecessor's `fold.rs`
 (consult, never port blindly) into the sealed core, beside the landed
 `coherence_functional` and `coboundary_reduce`. The merge/fold deed
 enters `covered()`; two units converging is both kernels judging the

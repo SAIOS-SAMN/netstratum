@@ -52,7 +52,7 @@ pub fn record(
     // law, scribe-side): founding names recur across eras, and an
     // incremental append onto a PRIOR era's file would interleave
     // two timelines in one chain. A divergent resident chronicle is
-    // rotated aside as a closed sibling world — never clobbered —
+    // rotated aside as a closed counterpart world — never clobbered —
     // and convergence later annexes it as its own timeline.
     rotate_divergent(&dir, world)?;
     fs::create_dir_all(dir.join("inbox"))?;
@@ -60,7 +60,7 @@ pub fn record(
     let planet_dir = dir.join("planets").join(sanitize(planet));
     fs::create_dir_all(&planet_dir)?;
 
-    // state.json — write whole to a sibling, then rename (atomic
+    // state.json — write whole to a counterpart, then rename (atomic
     // on POSIX): a reader never sees a torn snapshot.
     let state = render_state(world_name, planet, civilization, world);
     let tmp = planet_dir.join("state.json.tmp");

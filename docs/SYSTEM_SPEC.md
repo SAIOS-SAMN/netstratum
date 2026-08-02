@@ -1,12 +1,12 @@
 # SYSTEM SPEC — node, validator, game, convergence, mesh
 
 **Status:** WORKING SPEC (2026-07-31). The five components of the distributed
-system, each with its state, its equations (extracted from the v0.1 ancestor
+system, each with its state, its equations (extracted from the v0.1 predecessor
 `convergence-engine`, exact-rational, not paraphrased), its interface, and
 its mapping to the current tree. Subordinate to `docs/00_CHARTER.md` §11 and
 `engine/kernel/CHARTER.md`; reasoning in `docs/KERNEL_RELAY.md`.
 
-Notation: exact rational arithmetic throughout (the ancestor's `Q`,
+Notation: exact rational arithmetic throughout (the predecessor's `Q`,
 netstratum's `Ratio`; NEVER a float). `Δ` is the state as an antisymmetric
 relational tensor; `Δ_{ij,l}` is the entry between i and j on layer l.
 Provenance: v0.1 is AI-generated sandbox — equations are TAKEN, re-witnessed
@@ -121,7 +121,7 @@ identical kernel; there is no local-vs-network mode.
 
 **Landed / build.** Landed: `World`, `replay`, the coordinate, `physics::beacon`
 (ξ), and the commitment (SPINE-1 + #36, 2026-07-31 — `mesh::spine::seal`
-binds schema ‖ kernel::VERSION ‖ state ‖ parent ‖ coordinate; the record
+binds schema ‖ kernel::VERSION ‖ state ‖ predecessor ‖ coordinate; the record
 repeats the blob's leading byte, never a constant). Build: `advance` as
 the kernel-gated step (Phase 3 — per-deed threading rides the flip by
 operator ruling).

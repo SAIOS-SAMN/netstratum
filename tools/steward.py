@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""steward.py — the master control program, on a leash.
+"""steward.py — the steward program, scope-bound.
 
 THE TOPOLOGY: directives target a WORLD (the container with the one
 chronicle); the game loop executes them against the colonies inside.

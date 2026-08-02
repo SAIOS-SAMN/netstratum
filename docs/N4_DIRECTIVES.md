@@ -18,7 +18,7 @@ Coder-03's assessment is verified and approved. Checked against the tree
 
 - N4 is unblocked. The only ordering rule is N3-before-N4 (BUILD_ORDER
   line ~74); N3 landed 2026-07-25. No open second slice gates it.
-- The ancestor citation is accurate. `/opt/ipsal-autic-v0.4/iae/src/
+- The predecessor citation is accurate. `/opt/ipsal-autic-v0.4/iae/src/
   reduction/mod.rs` (SIGIL1 block): address = S-canonical × G-canonical
   projections of one frame-invariant form; T excluded from the key,
   kept as the chronicle stamp. CHARTER §8 ratifies this lineage.

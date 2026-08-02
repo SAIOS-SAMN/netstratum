@@ -14,7 +14,7 @@ fn scratch(name: &str) -> PathBuf {
     let dir = std::env::temp_dir().join(format!("aeon-fold-{name}-{}", std::process::id()));
     let _ = fs::remove_dir_all(&dir);
     // The archive rotates BESIDE the var root — give it a parent of
-    // its own so stray siblings never leak into era discovery.
+    // its own so stray counterparts never leak into era discovery.
     let _ = fs::remove_dir_all(std::env::temp_dir().join(format!(
         "aeon-fold-{name}-{}-holder",
         std::process::id()

@@ -490,13 +490,28 @@ fn the_retired_vocabulary_stays_retired() {
     let root = workspace_root();
 
     // Retired by ruling, with the ruling that retired each.
-    const RETIRED: [(&str, &str); 6] = [
-        ("daughter", "kinship for a charted colony / branch — retired 11 §3"),
-        ("Daughter", "kinship for a charted colony / branch — retired 11 §3"),
-        ("mother", "kinship for a source colony — retired 2026-08-02"),
-        ("Mother", "kinship for a source colony — retired 2026-08-02"),
-        ("speciation", "unary budding by another name — struck 2026-08-02"),
-        ("Speciation", "unary budding by another name — struck 2026-08-02"),
+    //
+    // NOUNS ONLY. Gendered PRONOUNS are deliberately absent: a token
+    // lint cannot separate "she" naming a system office from "she"
+    // naming a real person in a relay, and guarding an ambiguous token
+    // would flag correct text — the false positive that gets a lint
+    // switched off (the same reasoning `T_k` is absent from STRUCK).
+    // The offices were degendered by hand: V was "she", C was "he".
+    const RETIRED: [(&str, &str); 14] = [
+        ("daughter", "kin word for a charted colony / branch"),
+        ("Daughter", "kin word for a charted colony / branch"),
+        ("mother", "kin word for a source colony"),
+        ("Mother", "kin word for a source colony"),
+        ("speciation", "unary budding by another name"),
+        ("Speciation", "unary budding by another name"),
+        ("sib\u{6c}ing", "kin word for a counterpart"),
+        ("Sib\u{6c}ing", "kin word for a counterpart"),
+        ("ances\u{74}ry", "kin word for provenance"),
+        ("Ances\u{74}ry", "kin word for provenance"),
+        ("kins\u{68}ip", "the frame itself: this engine has no kin, only lines"),
+        ("Kins\u{68}ip", "the frame itself: this engine has no kin, only lines"),
+        ("fami\u{6c}y tree", "a line is a graph, not a tree of kin"),
+        ("fami\u{6c}y-tree", "a line is a graph, not a tree of kin"),
     ];
 
     let mut live = Vec::new();

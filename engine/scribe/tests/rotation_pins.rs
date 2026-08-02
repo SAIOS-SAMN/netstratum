@@ -1,6 +1,6 @@
 //! The one-chronicle-per-world-per-era law (scribe::record): a
 //! divergent resident chronicle is a PRIOR era's world — rotated to a
-//! closed sibling, never clobbered, never appended onto.
+//! closed counterpart, never clobbered, never appended onto.
 
 use std::fs;
 use std::path::PathBuf;
@@ -49,14 +49,14 @@ fn a_recurring_world_name_rotates_the_prior_era_aside() {
     assert!(fresh.contains("second-landing"));
     assert!(!fresh.contains("first-landing"));
 
-    // Era one survives whole in a closed sibling — never clobbered.
+    // Era one survives whole in a closed counterpart — never clobbered.
     let closed: Vec<_> = fs::read_dir(base.join("worlds"))
         .expect("worlds dir")
         .filter_map(|e| e.ok())
         .map(|e| e.file_name().to_string_lossy().into_owned())
         .filter(|n| n.starts_with("amber-veil--closed-"))
         .collect();
-    assert_eq!(closed.len(), 1, "one rotated sibling");
+    assert_eq!(closed.len(), 1, "one rotated counterpart");
     let kept = fs::read_to_string(
         base.join("worlds").join(&closed[0]).join("chronicle.jsonl"),
     )

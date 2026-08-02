@@ -13,12 +13,12 @@ first, never by searching the tree.
    deepest authority (call-not-copy, kernel CHARTER §0b); for an
    INSCRIBED row the named document is. A disagreement between this
    ledger and an authority is a DEFECT — inscribe it, never shrug.
-2. **The row-claim convention** (the tag-claim convention's sibling):
+2. **The row-claim convention** (the tag-claim convention's counterpart):
    a landing that inscribes a NEW equation or algorithm claims its row
    here in the SAME landing, before code uses it. After any merge,
    verify your row survived.
 3. **The founding lesson.** Equation drift has already happened once:
-   the ancestor's README said the coherence was L1 while the code
+   the predecessor's README said the coherence was L1 while the code
    computed SUM-OF-SQUARES (recorded at BUILD_ORDER §1a). Scattered
    restatement is how equations diverge; one ledger with named
    authority is the standing cure — same tier of protection as the
@@ -346,9 +346,9 @@ shape in the row meant to exclude it.
                    correction is what makes this clause expressible
                    rather than decorative.
 
-**They are NOT siblings and the receipt is not their parent** — it is
+**They are NOT counterparts and the receipt is not their predecessor** — it is
 the MEDIUM the bond settles on (`bond_flow` is a receipted standing
-order, accruing continuously, settling at touch). Siblings do not
+order, accruing continuously, settling at touch). Counterparts do not
 suffocate without each other; a bonded pair does. There is no rivalry to
 arbitrate here: a bond is generative, not competitive, so the pair needs
 no equilibrium negotiated between its parties.
@@ -882,7 +882,7 @@ The angle-free heart of the singularity law (16_UNIT §4a): a frame
 change (`A ↦ PAP⁻¹`) leaves the signature identical, so the fold
 verdict cannot depend on the frame of approach. THE PROPORTIONAL LAW
 does not touch it (a canonical form, not an aggregator of difference);
-blake3, never the ancestor's Keccak.
+blake3, never the predecessor's Keccak.
 
     A ≅_RCF B  ⟺  invariant_factors(xI − A) = invariant_factors(xI − B)
 
@@ -1067,7 +1067,7 @@ operator rulings, not derivations; neither is silently corrected here.
    three. One of the two is wrong.
 2. **S2 IS THE AGGREGATE S1 FORBIDS.** 09 §1.3 rules *"no oracle, no
    single number … the four axes never collapse into one figure — that
-   would be the scalar/scored form the ancestry law refuses, returning
+   would be the scalar/scored form the provenance law refuses, returning
    through the back door"*, and 09 §3.4.2 refuses *"the single goodness
    number."* `syntropy_ratio` collapses all four axes into one scalar
    and TWO rules read it. Either 09's refusal admits a stated exception

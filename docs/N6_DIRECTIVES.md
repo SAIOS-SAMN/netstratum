@@ -22,7 +22,7 @@ The NS-5 stub is verified against the tree 2026-07-30:
   commitments: consilience at arity ≥ 2; receipts the shared spine;
   forged or drifted state refuses typed; no central server, no global
   transaction log; first consumer two-node world synchronization.
-- Both ancestors exist at `/opt/repos/convergence-engine/`
+- Both predecessors exist at `/opt/repos/convergence-engine/`
   (DIMENSIONAL_BLOCKCHAIN.md — the two-chain shape; HOW_TO_USE.md —
   two laptops, sovereign bubbles, the membrane). Carried: independent
   work, exact measurement, disagreement preserved never voted away.
@@ -30,10 +30,10 @@ The NS-5 stub is verified against the tree 2026-07-30:
   witness weight > 0.5 — majority is not the house law. The clock
   already walks by 3-of-3 unanimity (`vrp.rs`); consilience is
   unanimous or refused, structurally.
-- The ancestor lore correction stands (BUILD_ORDER §1a pin): coherence
+- The predecessor lore correction stands (BUILD_ORDER §1a pin): coherence
   is SUM-OF-SQUARES in code, not L1; the reference vector measures
   C = 24, not 8. NS-5's vectors come from OUR code, never the
-  ancestor's prose.
+  predecessor's prose.
 - Tag registry: the next free tag is **64** (dop.rs header, the one
   authority — PICKUP §4's "next is 59" note is stale; 60–63 landed as
   GaugeShiftedAt, GenesisSealed, WantStruck, WantRelieved). NS-2's

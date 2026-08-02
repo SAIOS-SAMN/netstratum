@@ -1,4 +1,4 @@
-# THERMAL BALANCE — the master equation (design stage)
+# THERMAL BALANCE — the equilibrium baseline (design stage)
 
 **Status:** DESIGN — no thermal mechanic ships before its protocol sections
 and test vectors exist (CHARTER §1). All thresholds, constants, and yields in
@@ -15,7 +15,7 @@ life support, and manufacturing are all bound by the same underlying equation.
 
 ---
 
-## 1. The master equation
+## 1. The equilibrium baseline
 
 Every node (planet, orbital ring, station) at distance `r` from a star of
 luminosity `L` has a baseline thermal state given by Stefan–Boltzmann
@@ -128,7 +128,7 @@ the **syntropic encasement**; cryo is its pole, not the cold end of a line.
 
 ### 1.3 Extreme stellar sources — the Luminal White Hole
 
-The master equation's `L` term admits extreme sources. A **Luminal White
+The equilibrium baseline's `L` term admits extreme sources. A **Luminal White
 Hole** is the design's ultimate stellar engine: the time-reverse of a black
 hole (the Schwarzschild metric under `t → −t`, or outflowing
 Eddington–Finkelstein coordinates), an un-enterable spherical boundary at the

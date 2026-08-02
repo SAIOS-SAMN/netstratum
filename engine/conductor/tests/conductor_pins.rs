@@ -196,7 +196,7 @@ fn a_thriving_line_diverges() {
         .expect("the parent beats")
         .spec;
     // THEMED NAMES, NEVER CHAINS: a branch's world is a fresh
-    // two-part themed name — ancestry lives in the lineage field and
+    // two-part themed name — provenance lives in the lineage field and
     // the star-chart adjacency, not in ever-growing strings.
     assert!(
         !newborn.spec.world_name.contains(&parent_world.world_name),

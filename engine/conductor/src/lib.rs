@@ -1,4 +1,4 @@
-//! N-CONDUCTOR + N-LINEAGE — the heartbeat and the family tree.
+//! N-CONDUCTOR + N-LINEAGE — the heartbeat and the lineage graph.
 //!
 //! Scripted civilizations play their colonies autonomously, each
 //! through a CONTAINED AGENT (NS-6: granted scopes, every receipt
@@ -20,7 +20,7 @@
 //! called — the parent's own history decides what its children
 //! become. Lineage is registry-recorded now, receipted at G1. A
 //! branch founds a NEW world (binding #1: one chronicle per world —
-//! a shared-chronicle sibling planet waits on the multi-colony
+//! a shared-chronicle counterpart planet waits on the multi-colony
 //! engine).
 //!
 //! **LORE LIVES IN DATA, NOT SOURCE:** polity specs load from
@@ -1198,7 +1198,7 @@ impl Polity {
         // THEMED NAMING (operator ruling): the child's name derives
         // from the parent's dominant CAPABILITIES — metabolism names
         // the head, perception names the tail. Fresh two-part names,
-        // never concatenations of ancestry (lineage lives in the
+        // never concatenations of provenance (lineage lives in the
         // registry field, not in ever-growing strings).
         let heads: &[&str] = match parent.metabolism.as_str() {
             "mineral" => &["ember", "slag", "basalt", "vein", "cinder", "forge"],
@@ -1266,7 +1266,7 @@ impl Polity {
         }
         Some(PolitySpec {
             civilization: branch,
-            // Fresh themed world and planet — ancestry is a registry
+            // Fresh themed world and planet — provenance is a registry
             // fact and a star-chart adjacency, never a name chain.
             world_name: format!("{head}-{tail}"),
             planet: format!("{tail}fall"),
@@ -1323,7 +1323,7 @@ impl Polity {
         // (the hole visible, never hidden; the Phase 3 flip threads
         // the steps). A penned world skips the beat entirely, so its
         // arbor stalls with its pen (MESH-1b). Best-effort like the
-        // sibling writes at this observed phase: a refused chain
+        // counterpart writes at this observed phase: a refused chain
         // leaves the arbor short, a visible stall, never a crash.
         let _ = self.chain_beat(book);
         let _ = scribe::record(

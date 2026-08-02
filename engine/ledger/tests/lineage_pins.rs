@@ -1,4 +1,4 @@
-//! LINEAGE-2 pins (12 §5): the ancestry is a DAG, never a single
+//! LINEAGE-2 pins (12 §5): the provenance is a DAG, never a single
 //! thread. The registry pointer is an append-only list — a divergence
 //! branch carries one parent, a confluent hybrid carries BOTH; the
 //! wire form is space-joined slugs in the one `lineage` field, so a

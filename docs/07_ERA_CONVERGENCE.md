@@ -26,7 +26,7 @@ world onto one timeline and one chart — by annexation, never by merge.
 1. **Annex, never merge (SEAL B).** Archived chronicles are sealed — not
    one byte is rewritten, reordered, or deleted. Convergence appends
    `EraAnnexed` receipts (tag 21) to a NEW universe-level ledger
-   (`<root>/convergence.tlv`, cfe chronicle machinery: parent-linked,
+   (`<root>/convergence.tlv`, cfe chronicle machinery: predecessor-linked,
    digest-chained, tamper-refusing). Replay of the present re-derives the
    convergence; history is never touched.
 2. **Verify before adopting.** Each archived world re-verifies through the
@@ -40,7 +40,7 @@ world onto one timeline and one chart — by annexation, never by merge.
    receipt does not persist) the world annexes at its **verified
    prefix** and the tear is recorded in the read. Pure-garbage lines
    carry no receipt data and are skipped — if one ever hid a lost
-   receipt, the chain law breaks at the next parent link and the world
+   receipt, the chain law breaks at the next predecessor link and the world
    quarantines anyway. A content-bearing malformed line anywhere BUT
    the tail is interior corruption: quarantine.
 3. **One T axis by epoch shift.** Eras are sequential, never concurrent, so

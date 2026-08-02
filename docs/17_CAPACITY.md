@@ -434,7 +434,7 @@ is not a new law. `11_AEON` §3 retired the word on 2026-07-30, and gave
 the reason in full:
 
 > "Charted" is retired: it imported terrestrial unary budding (one
-> parent, mutate one axis) — half a model with no second half.
+> predecessor, mutate one axis) — half a model with no second half.
 
 and named that second half — **CONFLUENCE** (`Confluent`, tag 44), *two
 civilizations held by a landed BOND COMBINE their chronicle-vectors into
@@ -1331,8 +1331,8 @@ together? can these exchange? do independent lines agree?* — and none of
 them can be answered exactly in the general case. They need search,
 comparison, heuristics, sampling: the whole dirty toolbox.
 
-**So C is not a prisoner in the sector. C is its RESIDENT.** He was
-never banished; he was housed where the tools his work requires already
+**So C is not a prisoner in the sector. C is its RESIDENT.** It was
+never banished; it was housed where the tools its work requires already
 live — the same tools that may never touch the outside. `C(Δ)` is the
 knock on that door: a CALL, not a score.
 
@@ -1390,8 +1390,8 @@ boundary protects in both directions at once:
                              and costs nothing, because nothing was
                              trusted.
 
-    protects C from OTHERS   he can never be made a gate or a score
-                             again — which is exactly what corrupted him
+    protects C from OTHERS   it can never be made a gate or a score
+                             again — which is exactly what corrupted it
                              — because a proposal cannot bind anything.
 
 **THE LAW THIS REVEALS: access is purchased with authority.** The two are
@@ -1405,16 +1405,16 @@ C            maximal access  — any tool, floats, GPU, sampling, search
              zero authority   — everything it produces is a guess
 ```
 
-**C may touch everything precisely BECAUSE nothing he says binds.** That
-is not a limitation placed on him; it is what buys his reach. A judge
+**C may touch everything precisely BECAUSE nothing it says binds.** That
+is not a limitation placed on it; it is what buys its reach. A judge
 must be starved of the world to be trusted with the verdict, and a
 consultant must be denied the verdict to be trusted with the world.
 
 **And it is why C cannot be "promoted" without being destroyed.**
-Granting him authority would immediately cost him access — the moment
-his word binds, he may no longer hold a float, because a binding word
+Granting it authority would immediately cost it access — the moment
+its word binds, it may no longer hold a float, because a binding word
 made of approximation is the contamination the sector exists to stop.
-**To protect C is to keep him unbinding.** §10ter.a's post — defence of
+**To protect C is to keep it unbinding.** §10ter.a's post — defence of
 the sector — is the only elevation that adds standing without taking
 reach, because guarding a boundary is an act, not a verdict.
 
@@ -1497,7 +1497,7 @@ old binary conflated:
 
 | kind | example | disposition |
 |---|---|---|
-| **FORM — a lie** | a forged commit, a broken parent link, a truncated payload, a claimed judgment with no reproducible step | **REFUSES.** There is no content here to root; there is an assertion that is false. Nothing is discarded because nothing was there. |
+| **FORM — a lie** | a forged commit, a broken predecessor link, a truncated payload, a claimed judgment with no reproducible step | **REFUSES.** There is no content here to root; there is an assertion that is false. Nothing is discarded because nothing was there. |
 | **CONTENT — an excess** | relations that do not compose, difference that will not fold, a declared divergence | **ROOTS.** Capacity opens by receipt. Refusing this is the discard I6 forbids. |
 
 **Refuse lies. Grow for content.** Every landed refusal in the engine is

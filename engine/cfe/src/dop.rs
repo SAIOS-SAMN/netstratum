@@ -778,7 +778,7 @@ pub enum ClosureEvent {
     /// StarClass wire code. Once per world; fixes every orbit's L.
     StarCommissioned { class: u8 },
     /// THERMAL-1 (05 §1.1) — a colony sited on its orbit: albedo A and
-    /// orbit radius r, the orb's terms in the master equation.
+    /// orbit radius r, the orb's terms in the equilibrium baseline.
     PlanetSited { orb_id: u64, albedo: Ratio, orbit_r: Ratio },
     /// VENT-1 (05 §1.4) — accumulated vented entropy settled into the
     /// orb's cumulative ledger at collect (the yield pattern: one
@@ -1910,7 +1910,7 @@ fn amount_fields(value: &[u8]) -> Option<(u64, Resource, Ratio)> {
     Some((orb_id, resource, amount))
 }
 
-/// THERMAL-1 (05 §1.1): a colony's terms in the master equation.
+/// THERMAL-1 (05 §1.1): a colony's terms in the equilibrium baseline.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ThermalSite {
     /// Albedo A, 0 ≤ A < 1.

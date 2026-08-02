@@ -38,7 +38,7 @@ wall regenerate every 60-tick year.
 |---|---|
 | N0–N3, P1, P2, D1, D2 | scaffold · VRP chain · first slice · entities · multi-planet charter · persistence · costs/famine · industry |
 | CONVERGE-1 | era annexation onto TUniversal{S,G,T}; torn-tail law; quarantine; four-C placement |
-| THERMAL-1 | `T_eq⁴` master equation drives the tick; StarClass; encase-first/vent-overflow; opt-in per orb |
+| THERMAL-1 | `T_eq⁴` equilibrium baseline drives the tick; StarClass; encase-first/vent-overflow; opt-in per orb |
 | VENT-1 / ECON-J / SINK-1 | entropy dual ledger (`VentSettled`); heating burn + freeze-lock; bankable sink + FLAT demurrage |
 | JOURNAL-1 | the Chronicle Feed: per-year journals + cyber-noir `wall.html`, pure rendering, deterministic |
 | the ideology board, whole (coder-02) | TRADE-1 transfers/compassion (30) · ABSORB-1 absorption/morality windows (31–32) · BOND-1 standing bonds/love (33–34) · COVENANT-1 vitrified escrow + fidelity curve/integrity (35–37) · IDEO-1 friction (38) + orb cohesion entry (41) + `ideology` panel — eight books, ratios derived never stored; deferrals at Q4 |
@@ -224,7 +224,7 @@ forever.
   5 green, red-first honored. The freeze window LIFTS at this
   landing's merge: committed-field changes now coordinate as schema
   amendments (§11), not day-holds. Next: #36's spine — the
-  commitment H(schema ‖ kernel ‖ state_bytes ‖ parent ‖ coordinate),
+  commitment H(schema ‖ kernel ‖ state_bytes ‖ predecessor ‖ coordinate),
   the two maps, the four verbs. The nursery declaration stands at
   NS-5 §7.6. **THE MIRROR NAME DIED 2026-07-31 (operator order,
   coder-04):** `engine/mirror` → `engine/ledger`, `Mirror` →
@@ -284,7 +284,7 @@ forever.
   opt-in seeded chart, exact multiplier + adjacency witnesses,
   `survey`/`terrain` verbs; open — auto-chart + conductor adoption
   (fixture audit), tag 9 milestones. LINEAGE-2 LANDED 2026-07-30 (the
-  ancestry DAG — both parents recorded, `resolve_heads`, old wire form
+  provenance DAG — both predecessors recorded, `resolve_heads`, old wire form
   unchanged) with BRIDGE-1 opened (11 §3.1: the confluence crossing
   prices its key gap — vent ∝ gap, remainder encases; lands with
   AEON-1b). The creed manifold ruled and specced (`14_CREEDS.md`,
@@ -636,7 +636,7 @@ witness, not a ruling.
   attests, so the 3-of-3 quorum is three identical keepers and
   `QuorumOpen`/`Refuses` are unreachable.
 - `cfe/src/world.rs:1082` — `crystal_deposits` opens `let _ = now;` and
-  never window-prunes, unlike its sibling `crystal_deposits_at`, so the
+  never window-prunes, unlike its counterpart `crystal_deposits_at`, so the
   `constellation()` read can diverge from what actually crystallizes.
 - `cfe/src/world.rs:2002` — WANT-1 kind 1 (epistemological) is in the
   tag-62 vocabulary with no engine rule: a declared want that can never
