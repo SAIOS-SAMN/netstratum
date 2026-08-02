@@ -975,11 +975,22 @@ here so no landing inlines a literal; **valued only by operator ruling**
 (FORGE_BUDGET §7). Per §0.3, each row states what its coefficient
 MEASURES, never what it is worth.
 
-**B0 · `SEARCH_BUDGET` — SUPERSEDED.** `solver/src/search.rs:119`, the
-flat `200_000`. A PLACEHOLDER by its own comment (a ceiling chosen to
-stop one observed 102 s stall), and inert: `word_len` 3 enumerates
-52 060, so it never binds. Belongs on `17_CAPACITY` §7's
-retire-by-measurement list beside seat widths and galaxy reach.
+**B0 · `SEARCH_BUDGET` — DECOMMISSIONED, LANDED 2026-08-02.** Was
+`solver/src/search.rs:119`, the flat `200_000`: a PLACEHOLDER by its own
+comment (a ceiling chosen to stop one observed 102 s stall) and inert,
+since `word_len` 3 enumerates 52 060. **Deleted**, with both truncation
+branches, from `search::solve` and `volume::solve_volume`, per operator
+ruling *"uncap or no cap"*. Authority is now
+`solver::search::frontier(|V|, d)` — LANDED.
+
+    frontier(V, d) = Σ_{k=0}^{d} V^k          exact, u128, saturating
+
+Because the bound IS the exact candidate count, a check against it can
+never fire; the branches are gone rather than raised. **Behaviour
+unchanged at live difficulty** (`frontier ≤ 52 060 < 200 000`), suite
+green. **Measured side-effect: 40 cycles 59.29 s → 48.24 s (−18.6 %)** —
+the clamp had been concealing that the loop built the depth-`(d+1)`
+frontier (1.87 M programs at `|V|=37, d=3`) only to discard it.
 
 **B-E1 · THE BUDGET EQUATION.** DRAFT — **AMENDED 2026-08-02** (operator:
 *"change the ruling"*). **Bound the DEPTH; the candidate count follows.**

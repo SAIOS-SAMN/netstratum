@@ -330,8 +330,66 @@ Two doors, and the choice is the operator's:
   B8 was written for**. The sharing case and the reachability case turn
   out to be one question.
 
-**Until one lands, `SEARCH_BUDGET` should not be replaced.** Swapping a
-measured-inert constant for an unmeasurable one is not remediation.
+### 8d. THE ENTITY DOOR IS CLOSED — refuted, not deferred
+
+The operator's reachability directive (2026-08-02) reads *"Project
+relational entities into Orb topological nodes … so Orbs populate,
+flows illuminate, and symmetry_foundation carries its active charge."*
+The meter reported 3 entities per book against 1 orb, which makes the
+idea natural. **It cannot work, and the reason is structural.** `[READ]`
+
+1. **Entities carry no relation that can close a cycle.** `Entity`
+   (`cfe/src/ipsal.rs:39`) is `{ entity_id, handle, principal:
+   Option<u64>, grants }`. The only entity→entity field is `principal` —
+   containment.
+2. **Containment is a TREE, and a tree has no independent cycles.**
+   `holonomies` (`rfa-core/src/reduce.rs:139-170`) grows a spanning
+   forest and takes its holonomy from *"every present edge OUTSIDE the
+   forest"* — the cyclomatic number. A forest has none by construction,
+   so projecting entities as nodes over `principal` edges yields
+   **`rank = 0` still.**
+3. **The edges are keyed to orbs, not entities.** `Bond.source/target`,
+   `Covenant.obligor/beneficiary`, `AbsorptionDebt.debtor/creditor`
+   (`world.rs:187-228`) are all orb ids. There is no entity-keyed
+   relation for `project_complex` to read even if it wanted to.
+
+**So the substrate is not "in the wrong place" — the cycle-bearing
+relations exist only between orbs, and there is one orb per book.**
+Door (a) or door (b); door (entity) is refuted. Recorded so it is not
+re-proposed.
+
+### 8e. B0 IS DECOMMISSIONED — landed 2026-08-02
+
+Operator ruling: *"do not cap rungs and do not set a static
+SEARCH_BUDGET — uncap or no cap."* Landed in this lane:
+
+- `SEARCH_BUDGET = 200_000` **deleted** from `solver/src/search.rs`,
+  and with it both truncation branches (`tested > BUDGET`, the `room`
+  clamp) in `search::solve` **and** `volume::solve_volume`.
+- Replaced by `pub fn search::frontier(|V|, d) = Σ_{k=0}^{d} |V|^k` —
+  the exact exhaustive count, `u128` and saturating. **Because it is
+  exact, a budget check against it can never fire**, which is why the
+  branches are gone rather than raised.
+- **Depth is now the only lever.** The caller supplies it; the candidate
+  count is its consequence, never a second gate.
+
+**BEHAVIOUR IS UNCHANGED at live difficulty, provably:** `word_len ≤ 3`
+gives `frontier ≤ 52 060 < 200 000`, so the truncation never fired; and
+the last depth's frontier was always discarded unbuilt. Full workspace
+suite green, clippy zero, lines still climb to L5.
+
+**MEASURED SIDE-EFFECT — 40 cycles: 59.29 s → 48.24 s, an 18.6 % cut.**
+Removing the clamp exposed that the loop was building the
+depth-`(d+1)` frontier and throwing it away — at `|V| = 37, d = 3`
+that is **1.87 M programs allocated per call** to be discarded. The
+`room` clamp had been hiding the waste by truncating it. A change meant
+only to delete a constant paid for itself immediately; the cost was
+never in the bound, it was in what the bound concealed.
+
+**Still standing:** the capacity-DRIVEN depth (B1–B9) does **not** land
+until reachability does. With `earned = 0` everywhere, wiring it today
+would pin every line at `δ = 1` and **stop the board climbing past rung
+1 entirely.** The mechanism is in; the reading it should consume is not.
 
 ---
 

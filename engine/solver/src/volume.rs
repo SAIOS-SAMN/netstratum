@@ -245,15 +245,12 @@ pub fn solve_volume(task: &VolumeTask, max_depth: usize) -> VolumeSolveRead {
             .iter()
             .all(|(input, expected)| &run_volume(program, input) == expected)
     };
-    // FORGE-BOUND: the same deterministic budget as the planar path.
-    let mut tested: usize = 0;
+    // FORGE-BOUND: the same DERIVED frontier as the planar path
+    // (`search::frontier`) — depth is the bound, the candidate count is
+    // its consequence. The flat `SEARCH_BUDGET` is decommissioned.
     let mut frontier: Vec<VProgram> = vec![Vec::new()];
-    for _depth in 0..=max_depth {
+    for depth in 0..=max_depth {
         for program in &frontier {
-            tested += 1;
-            if tested > crate::search::SEARCH_BUDGET {
-                return VolumeSolveRead::Unsolved;
-            }
             if closes(program) {
                 let test_output = run_volume(program, &task.test_in);
                 let matches_expected =
@@ -267,13 +264,13 @@ pub fn solve_volume(task: &VolumeTask, max_depth: usize) -> VolumeSolveRead {
                 };
             }
         }
-        let room = crate::search::SEARCH_BUDGET.saturating_sub(tested) + 1;
-        let mut next = Vec::new();
-        'grow: for program in &frontier {
+        // The last depth grows nothing — see `search::solve`.
+        if depth == max_depth {
+            break;
+        }
+        let mut next = Vec::with_capacity(frontier.len() * vocabulary.len());
+        for program in &frontier {
             for op in &vocabulary {
-                if next.len() >= room {
-                    break 'grow;
-                }
                 let mut extended = program.clone();
                 extended.push(op.clone());
                 next.push(extended);

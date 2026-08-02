@@ -108,19 +108,39 @@ fn closes(program: &Program, task: &Task) -> bool {
         .all(|pair| run(program, &pair.input) == pair.output)
 }
 
-/// FORGE-BOUND: the deterministic search budget — a COUNT of candidate
-/// programs tested, never a clock. Same task, same outcome, bounded
-/// work: a seed whose solution lies past the budget reads Unsolved and
-/// the line rests that beat (measured live: an unbudgeted rung-5 seed
-/// cost 102 s of exhaustive search in one heartbeat). This is an
-/// ENGINE LAW — the bound on one beat's forge work — and is NEVER a
-/// test knob (operator ruling 2026-07-30): tests scale their eras,
-/// not the physics.
-pub const SEARCH_BUDGET: usize = 200_000;
+/// **THE FRONTIER** — `Σ_{k=0}^{d} |V|^k`, the exhaustive sweep to
+/// depth `d` over a vocabulary of `|V|` operators.
+///
+/// **This replaces the flat `SEARCH_BUDGET = 200_000`** (operator
+/// ruling 2026-08-02: *"do not cap rungs and do not set a static
+/// SEARCH_BUDGET — uncap or no cap"*). That literal was never an
+/// administrative ceiling: `frontier(37, 3) = 52_060` is the exact
+/// exhaustive expansion of the relational substrate at depth 3, and the
+/// constant was a number chosen to sit above it after one observed
+/// 102 s stall. Caging `|V|` behind a constant choked the expansion it
+/// was meant to describe.
+///
+/// **DEPTH IS THE ONLY LEVER NOW.** The bound is `max_depth`, supplied
+/// by the caller; the candidate count is its consequence, not a second
+/// gate. Because this returns the EXACT number of candidates the sweep
+/// will test, a budget check against it can never fire — which is why
+/// the truncation branch is gone rather than merely raised.
+///
+/// Determinism is unchanged and is what mattered: same task, same
+/// depth, same outcome on every machine. What is gone is the arbitrary
+/// number, not the law (`EQUATIONS` §7 B7 — `β_cap` is DERIVED).
+///
+/// `u128` and saturating throughout: the frontier grows geometrically
+/// and an accounting read must never wrap.
+pub fn frontier(vocabulary: usize, depth: usize) -> u128 {
+    (0..=depth)
+        .map(|k| (vocabulary as u128).saturating_pow(k as u32))
+        .fold(0u128, |sum, term| sum.saturating_add(term))
+}
 
 /// Enumerative search over programs up to `max_depth` ops drawn from
 /// the general vocabulary plus operators derived from the observation.
-/// Bounded by `SEARCH_BUDGET` candidates, deterministically.
+/// **Exhaustive to `max_depth`, uncapped** — see [`frontier`].
 pub fn solve(task: &Task, max_depth: usize) -> SolveRead {
     let mut vocabulary = vec![
         Op::Rotate90,
@@ -135,14 +155,9 @@ pub fn solve(task: &Task, max_depth: usize) -> SolveRead {
     vocabulary.extend(derived_tiles(task));
 
     // Depth 0: the identity word (a copy task is a lawful task).
-    let mut tested: usize = 0;
     let mut frontier: Vec<Program> = vec![Vec::new()];
-    for _depth in 0..=max_depth {
+    for depth in 0..=max_depth {
         for program in &frontier {
-            tested += 1;
-            if tested > SEARCH_BUDGET {
-                return SolveRead::Unsolved;
-            }
             if closes(program, task) {
                 let test_output = run(program, &task.test_in);
                 let matches_expected =
@@ -156,15 +171,17 @@ pub fn solve(task: &Task, max_depth: usize) -> SolveRead {
                 };
             }
         }
-        // Never materialize past the budget — the frontier a beat
-        // cannot afford to test is a frontier it never builds.
-        let room = SEARCH_BUDGET.saturating_sub(tested) + 1;
-        let mut next = Vec::new();
-        'grow: for program in &frontier {
+        // THE LAST DEPTH GROWS NOTHING. Building the depth-(d+1)
+        // frontier only to discard it cost |V|^(d+1) clones every
+        // call — at |V|=37, max_depth=3 that is 1.87M programs
+        // allocated and thrown away. The old `room` clamp hid this by
+        // truncating; with the clamp gone it must be said outright.
+        if depth == max_depth {
+            break;
+        }
+        let mut next = Vec::with_capacity(frontier.len() * vocabulary.len());
+        for program in &frontier {
             for op in &vocabulary {
-                if next.len() >= room {
-                    break 'grow;
-                }
                 let mut extended = program.clone();
                 extended.push(op.clone());
                 next.push(extended);
