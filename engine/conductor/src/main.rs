@@ -280,5 +280,11 @@ fn main() {
             std::thread::sleep(std::time::Duration::from_secs(cadence));
         }
     }
+    let repeat = conductor::PROBE_DIGEST_REPEAT.load(std::sync::atomic::Ordering::Relaxed);
+    let total = conductor::PROBE_DIGEST_TOTAL.load(std::sync::atomic::Ordering::Relaxed);
+    println!(
+        "R5 probe: {repeat}/{total} forge draws reused an unchanged digest ({}%)",
+        repeat * 100 / total.max(1)
+    );
     println!("era complete: {beat} heartbeats, {} civilizations live", worlds.len());
 }

@@ -96,7 +96,56 @@ before applying its one new op. **That is the shear, unapplied.**
 
 ## §3 THE CHANGES
 
-> ## R1b — BUFFER REUSE: LANDED (2026-08-02)
+> ## Where the cost is — measured 2026-08-02, and it is not where the plan said
+
+`engine/solver/examples/bench_solve.rs`, 120 forged tasks across rungs
+3–5, three samples:
+
+| | count | cost | share |
+|---|---|---|---|
+| solved | 85 (70 %) | 2.67 ms | 0.1 % |
+| unsolved | 35 (30 %) | 2.825 s | **99 %** |
+
+Per case that is 31 µs against 81 ms — **a factor of ~2 600.** The whole
+forge cost is the exhaustive sweep over tasks that have no answer in the
+searched vocabulary. A solved task is nearly free.
+
+This single reading settles most of §3:
+
+- **R4 is struck.** Ordering can only shorten the walk to an answer, and
+  answers are 0.1 % of the time. Measured directly anyway: reordering the
+  vocabulary observation-first left the solve rate at exactly 85/120 and
+  the time marginally worse (min 2.695 s against 2.614 s). The premise
+  was sound and the lever is attached to nothing.
+- **R2 is struck for the same reason** — it prunes duplicate candidates
+  inside a sweep whose cost is dominated by sweeps that must complete.
+- **R5 becomes the interesting one**, because an unsolvable task re-drawn
+  from an unchanged digest costs 81 ms to reach the identical `Unsolved`.
+
+### The finding underneath: the forge can outrun its own solver
+
+30 % of forged tasks are unsolvable *by the solver that must solve them*.
+`forge_task` samples a secret word from the tier's families, but the
+solver can only reach a `Tile` or `Recolor` operator if `derived_tiles` /
+`derived_recolors` reconstruct its exact parameters from the observation
+— and `derived_tiles` reads the ratio off the FIRST pair only, so a word
+that disturbs the shape (a tile composed with a rotation, say) leaves the
+operator unreachable and the task closed to the search.
+
+Two costs, and the second is the one that matters:
+
+1. **Compute.** The unreachable cases are 99 % of forge time.
+2. **Economy.** A line drawing an unsolvable task burns the full sweep
+   and mints nothing. At 30 % that is roughly one beat in three spent
+   producing no work, and the line cannot tell the difference between
+   "I was not good enough" and "there was nothing there".
+
+Owed, and it is an operator question because it moves the difficulty
+surface: should the forge emit only tasks its own vocabulary can close,
+should the derived-operator coverage be widened to match the generative
+families, or is an unsolvable draw a lawful part of the ladder?
+
+## R1b — BUFFER REUSE: LANDED (2026-08-02)
 >
 > Operator: *"your heap on the Vec is too small."* Correct, and it is
 > what R1 was missing.
