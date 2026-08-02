@@ -207,7 +207,13 @@ fn an_orb_holding_nothing_cannot_mint_on_the_world_s_structure() {
         seen,
         Err(Unlawful::MintWithoutOwnStanding {
             orb: 5,
-            axial: vec![ratio(0, 1), ratio(0, 1), ratio(0, 1)],
+            // DERIVED, never a literal (remediations-lane 2026-08-02,
+            // the CHANNELS 3 → 4 amendment): the companion assertion at
+            // :242 already reads `axial.len() == CHANNELS`, and this one
+            // spelled the same arity as three zeros. A count used as law
+            // must come from the one authority — `EQUATIONS` §0.3's
+            // chapter three, in miniature.
+            axial: vec![ratio(0, 1); kernel::bridge::CHANNELS],
         }),
         "an orb holding no obligation may not mint on other orbs' structure"
     );
@@ -246,12 +252,11 @@ fn the_refusal_carries_the_share_so_the_floor_can_be_risen_from() {
     // And every channel is open to it — the refusal is a map, not a score.
     assert_eq!(
         kernel::bridge::open_axes_of(&live, 5),
-        vec![
-            kernel::bridge::CHANNEL_BOND,
-            kernel::bridge::CHANNEL_COVENANT,
-            kernel::bridge::CHANNEL_DEBT
-        ],
-        "an orb holding nothing has every direction open to it"
+        (0..kernel::bridge::CHANNELS).collect::<Vec<_>>(),
+        "an orb holding nothing has every direction open to it — EVERY channel, \
+         derived from CHANNELS rather than spelled out, so the lane channel \
+         (and any channel after it) is covered by the claim instead of \
+         silently escaping it"
     );
 
     // THE LIFT IS REAL. Give orb 5 a place in the circulation and the

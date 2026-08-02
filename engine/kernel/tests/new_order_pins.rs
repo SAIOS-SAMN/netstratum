@@ -126,13 +126,23 @@ fn the_open_axes_name_where_this_world_can_still_grow() {
     let state = world.committed();
 
     let axial = standing_axial_of(&state, FIRST_ORB);
-    assert_eq!(axial.len(), 3, "one share per channel, never one scalar");
+    // DERIVED from CHANNELS, never a literal arity (remediations-lane
+    // 2026-08-02, the 3 → 4 lane-channel amendment). A count used as
+    // law comes from the one authority — the companion pin in
+    // capacity_law_pins already read it this way.
+    assert_eq!(
+        axial.len(),
+        kernel::bridge::CHANNELS,
+        "one share per channel, never one scalar"
+    );
     for share in &axial {
         assert!(*share >= ratio(0, 1), "a share is a magnitude, never a debt");
     }
     assert_eq!(
         open_axes_of(&state, FIRST_ORB),
-        vec![CHANNEL_BOND, CHANNEL_COVENANT, CHANNEL_DEBT],
-        "nothing circulates yet, so every direction is still open to it"
+        (0..kernel::bridge::CHANNELS).collect::<Vec<_>>(),
+        "nothing circulates yet, so EVERY direction is still open to it — \
+         derived, so a new channel is covered by the claim rather than \
+         silently escaping it"
     );
 }

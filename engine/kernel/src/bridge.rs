@@ -502,7 +502,8 @@ pub fn project_complex_across(books: &[&Committed]) -> (Delta, Support) {
     (delta, support)
 }
 
-/// The cross-book entangled read — [`read_entangled`]'s sibling over
+/// The cross-book entangled read — the counterpart of
+/// [`read_entangled`], taken over
 /// [`project_complex_across`]. Same poles, same laws, wider complex.
 pub fn read_entangled_across(books: &[&Committed], unknown: usize) -> EntangledRead {
     let (delta, support) = project_complex_across(books);
