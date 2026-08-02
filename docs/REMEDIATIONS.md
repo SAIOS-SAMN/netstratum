@@ -75,6 +75,18 @@ growing, because the roster plateaus and the chronicle does not.
 
 ## §2 THE FORGE SWEEP — the 94 %
 
+> **SUPERSEDED IN PART by `docs/FORGE_REMEDIATION.md` (2026-08-02).**
+> That file is the working plan for R1–R5 and corrects three things
+> read wrong here: R1/R3/R4/R5 are **not** blocked on Ruling Box 1
+> (the search is never re-run by a verifier, `mint_bound` keys off
+> `Difficulty` alone, and the search runs once per world per beat — so
+> speed has no path to the mint rate); **R4 is inert today** because
+> `SEARCH_BUDGET` (200 000) is never reached at `word_len` 3
+> (52 060 candidates), which makes now the free moment to fix it; and
+> **R2 is worth ~4 %** at live depth, not the structural win implied
+> below. The entries stand as findings; take the sequencing from the
+> plan.
+
 `engine/solver/src/search.rs:124` `solve()` is a breadth-first
 enumeration over the **cartesian product of the vocabulary with
 itself, `word_len` deep**. This is precisely the shape the operator
@@ -285,37 +297,36 @@ Recorded so they are not "fixed" by a later reader:
   what makes the forge replayable. R1–R4 change what a candidate
   costs, never what counts as one.
 
-## §8 THE CAVEAT THAT OUTRANKS THE CHECKLIST
+## §8 THE CAVEAT — WITHDRAWN ON EVIDENCE 2026-08-02
 
-**This is a proof-of-work system. R1–R5 make the forge cheaper, and
-the forge is the work.**
+**This section originally read: "This is a proof-of-work system. R1–R5
+make the forge cheaper, and the forge is the work" — and concluded that
+R1–R3 were blocked on Ruling Box 1. That conclusion was wrong, and it
+was wrong because it reasoned from the shape of the system instead of
+reading the consensus path.** Struck rather than rewritten (the history
+law); the correction and its evidence are `docs/FORGE_REMEDIATION.md`
+§1, in one line each:
 
-Cutting the dominant 94 % by a large factor does not merely make the
-game faster — it **deflates the cost of a mint** unless the difficulty
-ladder absorbs the change. The ladder is
-`Difficulty::level` (`solver-verify/src/forge.rs:41`), a static 5-arm
-table PICKUP §8b already flags as unwired, with `from_key` (`:61`, the
-network-rate form) still a read called only from tests.
+- `verify_work` (`solver-verify/src/work.rs:266`) re-applies the
+  **presented** program and never enumerates a candidate, so the search
+  is prover-side and consensus-free;
+- `mint_bound` (`kernel/src/lib.rs:845`) is a table on `Difficulty`
+  alone — not on cost, not on wall-clock, not on which program was
+  found;
+- `research_step` (`conductor/src/lib.rs:1072`) runs the search **once
+  per world per beat** and mints at most once, so a faster search
+  yields the same solve sooner, never more solves.
 
-Therefore:
-
-- [!] **R19 — RULE THE FORGE COST BEFORE CASHING THE FORGE SAVINGS.**
-  Blocked on **Ruling Box 1** (`U_DIRECTIVES` §7, §10 S1 — the rate
-  `f`, the work-shapes, the split), which PICKUP already carries as
-  open and operator-only. The honest sequencing:
-  1. Land **R4** now — it is a defect fix, it costs nothing and
-     changes no economics (same budget, better ordering).
-  2. Land **R1/R3** as *measured* changes and record the new
-     candidates-per-second, **without** touching `SEARCH_BUDGET` or
-     the ladder. Work per beat is then explicitly re-priced by
-     operator word, against a measured number instead of a guess.
-  3. Hold **R2** until 2 is ruled — it changes the *size of the
-     searched space*, which is the difficulty itself.
-  4. **R5** is safe in all orderings: re-deriving an identical answer
-     from identical inputs was never work, it was a treadmill.
+- [x] **R19 — STRUCK.** There is no forge-cost ruling to wait on.
+  R1, R3, R4 and R5 are **unblocked** and sequenced in
+  `FORGE_REMEDIATION.md` §4; R2 is held for the `from_key` wiring at
+  N6 on its own (small) merits. Ruling Box 1 still governs the
+  `level → Difficulty` ladder and the rung→reward table — this lane
+  proposes no change to either.
 
   §3–§6 (R6–R18) carry **no** economic content — they are pure
-  overhead around the work, and none of them need a ruling.
+  overhead around the work, and none of them need a ruling. That part
+  of the original reading stands.
 
 ## §9 CROSS-LANE ALIGNMENT — verified 2026-08-02
 

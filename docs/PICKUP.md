@@ -402,11 +402,21 @@ coder-04's flag.
   worlds and grew ≈2000× in 40 beats, while `chain_beat` is 0.8 % and
   `merchant_step` 4 %. A 120-cycle run does not finish in ten minutes.
   The reusable instrument is `engine/conductor/examples/cost_probe.rs`
-  (opt-in, appends nothing, judges nothing). **R19 is the gate:** the
-  forge IS the proof-of-work, so R1–R3 re-price a mint and are blocked
-  on Ruling Box 1; R4 (the budget starves the observation-derived
-  operators) and R5 (memoize an identical re-derivation) are free of
-  economic content and land first.
+  (opt-in, appends nothing, judges nothing). **The forge plan is
+  `docs/FORGE_REMEDIATION.md`** — and it WITHDREW this lane's own first
+  reading: R19 ("rule the forge cost before cashing the savings") is
+  STRUCK. The search is prover-side (`verify_work` re-applies the
+  presented program and never enumerates), `mint_bound` keys off
+  `Difficulty` alone, and `research_step` runs once per world per beat
+  — so speed has no path to the mint rate and **no forge ruling is
+  owed.** Sequenced: R1+R3 (carry prefix outputs, stream the frontier)
+  behind one byte-identity pin, ~3× on 94 % of the beat; then R4
+  (the observation-derived operators are enumerated LAST, and the
+  budget never bites at `word_len` 3 — so fixing the order is free
+  today and stops being free once `from_key`'s `word_len` 4 is wired);
+  then R5 if the digest-repeat rate justifies a cache. R2 (~4 %) is
+  held for N6. Ruling Box 1 still governs the ladder and the
+  rung→reward table; this lane proposes no change to either.
 - Parallel worktrees per node; merge to `main` on green; BUILD_ORDER
   conflicts resolve by keeping both entries.
 
