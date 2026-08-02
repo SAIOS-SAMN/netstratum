@@ -892,3 +892,82 @@ checking after is how the last three defects reached the tree.
 If (3) is `Unframed`, the deadlock is already closed on `main` and this
 section is the explanation rather than the fix. If it is still `Void`,
 §15b is the fix and it belongs in the projection.
+
+---
+
+## §16 WHAT IS ACTUALLY WRONG — `D` IS A REDUCTION AND THE LAW DEFINES AN INDUCTION
+
+Two symptoms, one cause, both measured (`kernel/tests/d_induction.rs`):
+
+    rank:  empty board = 0   open path = 0   closed triangle = 1
+
+**SYMPTOM 1 — `D` RETREATS.** Discharge one bond and a closed triangle
+becomes an open path: rank falls `1 → 0`. **ARTICLE IV: *capacity never
+retreats, monotone non-decreasing in `D`*.** The implementation
+violates the article on every settled obligation, and nothing tested it
+because nothing tested `D` over time.
+
+**SYMPTOM 2 — `D` HAS NO BASE CASE.** Boards of 1, 2, 3 and 4 orbs
+holding real reserves all read rank `0`. That is §14–15's deadlock: a
+founded world reads `Void` and every mint refuses.
+
+### 16a. THE CAUSE
+
+`rank` is computed by REDUCTION — `holonomies` strips a spanning forest
+from the whole complex and counts what survives. A reduction:
+
+    has NO base case      strip nothing, get nothing → symptom 2
+    has NO monotonicity   it re-reads the whole complex, so it tracks
+                          that complex UP AND DOWN → symptom 1
+
+**An induction has both by construction.** It begins at a base and
+every step only adds. **ARTICLE IV is an induction law**, and it was
+implemented with the one operation that cannot satisfy it.
+
+### 16b. THE FLIP (operator ruling, 2026-08-02) — and it is forced
+
+> flip `D` to induction and apply reduction to `V`, so they balance
+> while creating between syntropy > entropy
+
+    D  INDUCES   base = what OCCUPIES (a founded world occupies, so D
+                 is never 0 while anything stands); steps only add.
+                 Monotone BY CONSTRUCTION — Article IV becomes
+                 structural instead of aspirational, and the deadlock
+                 cannot recur because induction has a base.
+
+    V  REDUCES   potential is what SURVIVES stripping. This already
+                 matches the running mechanism: demurrage IS a
+                 reduction, decay strips potential every tick. V was
+                 the reducible quantity all along and was implemented
+                 by reading the same edges as D.
+
+**They balance because they move oppositely.** `D` accumulates and
+never retreats; `V` is stripped continuously. Minting is the gap where
+accumulation exceeds stripping — syntropy over entropy — rather than a
+threshold either one crosses alone.
+
+**And it repairs §15's finding at the root.** `D` and `V` currently
+read one source, so they cannot disagree and the four-row `dual_pole`
+table degenerates. Under the flip they read different things by
+CONSTRUCTION — one built, one stripped — so `Unframed` and `Stasis`
+become reachable states rather than dead rows.
+
+### 16c. WHAT IS OWED, and it is not small
+
+`holonomies` stays — cycles are real structure and the fold gate needs
+them. What changes is that `D` is no longer defined AS that count:
+
+1. **The base.** What occupies? Orbs are the obvious answer and the
+   measurement supports it, but occupancy at higher degrees (zones,
+   systems) is §3b's `z` question and should be settled with it.
+2. **The step.** What adds to `D`, and is it ever more than one? §2k.1
+   says the residue EMITS a plane — that is the step, and it is already
+   named.
+3. **Where `D` is carried.** An induction accumulates, so it is STATE,
+   not a re-derivation. That is a schema change, and it is the same one
+   §9 wanted for the proposer to see rank.
+
+**Item 3 is the real cost and it resolves three open blockers at once**
+— §9's proposer/judge split, §14's deadlock, and Article IV's
+enforcement. That is worth one wire amendment rather than three
+workarounds.
