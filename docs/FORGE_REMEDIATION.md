@@ -96,7 +96,39 @@ before applying its one new op. **That is the shear, unapplied.**
 
 ## §3 THE CHANGES
 
-> ## ⛔ R1 + R3 — BUILT, MEASURED, **STRUCK** (2026-08-02)
+> ## R1b — BUFFER REUSE: LANDED (2026-08-02)
+>
+> Operator: *"your heap on the Vec is too small."* Correct, and it is
+> what R1 was missing.
+>
+> A grid at live difficulty is 9–16 bytes. `Op::apply` allocated a fresh
+> `Vec<u8>` per call, so the payload was smaller than the allocator
+> bookkeeping, and the sweep does this ~50 000 times per solve.
+>
+> `Op::apply_into(&self, g, out)` now holds the body and `apply` is a
+> wrapper over it — one implementation, two entry points. `search::solve`
+> carries two buffers for the whole sweep instead of allocating per
+> candidate.
+>
+> Measured directly on `solve` (the beat loop swings ±4 % on identical
+> code and cannot resolve this), 120 solves, five samples:
+>
+> | | min | mean | spread |
+> |---|---|---|---|
+> | before | 2.700 s | ~3.70 s | 2.70 – 4.31 s |
+> | after | 2.736 s | **~2.78 s** | **2.74 – 2.85 s** |
+>
+> **The floor did not move; the mean fell ~25 % and the spread collapsed
+> from 1.61 s to 0.12 s.** Allocation churn was not costing throughput at
+> best case — it was causing allocator-pressure variance, and the mean
+> carried the cost of the bad samples. For a loop that runs continuously,
+> that is the number that matters.
+>
+> This also corrects the reading below: the first R1 attempt reused only
+> one of the two buffers it needed, so it measured as a wash. The
+> hypothesis was right and the implementation was half-done.
+>
+> ## ⛔ R1 (prefix images) + R3 (streamed level) — **STRUCK** (2026-08-02)
 >
 > **The predicted ≈3× did not appear. Measured A/B on one machine state,
 > 40 cycles from one baseline universe:**

@@ -108,6 +108,32 @@ fn closes(program: &Program, task: &Task) -> bool {
         .all(|pair| run(program, &pair.input) == pair.output)
 }
 
+/// The same reading, run through ONE reused buffer.
+///
+/// `run` allocates a fresh grid per op; at 3×3 and 4×4 the allocation
+/// costs more than the transformation, and the sweep does this tens of
+/// thousands of times per beat. Same arithmetic, same answer — the
+/// buffer is the only difference, and `closes` above stays as the
+/// allocating reference the witnesses read.
+fn closes_reusing(
+    program: &Program,
+    task: &Task,
+    carry: &mut Grid,
+    scratch: &mut Grid,
+) -> bool {
+    for pair in &task.train {
+        carry.clone_from(&pair.input);
+        for op in program {
+            op.apply_into(carry, scratch);
+            std::mem::swap(carry, scratch);
+        }
+        if *carry != pair.output {
+            return false;
+        }
+    }
+    true
+}
+
 /// **THE FRONTIER** — `Σ_{k=0}^{d} V^k`, the exhaustive sweep to
 /// depth `d` over a vocabulary of `V` operators.
 ///
@@ -154,11 +180,17 @@ pub fn solve(task: &Task, max_depth: usize) -> SolveRead {
     vocabulary.extend(derived_recolors(task));
     vocabulary.extend(derived_tiles(task));
 
+    // ONE SCRATCH BUFFER for the whole sweep. A grid here is 9 to 16
+    // bytes, so a fresh Vec per candidate is mostly allocator
+    // bookkeeping; `apply_into` refills this and keeps the capacity.
+    let mut scratch = Grid { rows: 0, cols: 0, cells: Vec::new() };
+    let mut carry = Grid { rows: 0, cols: 0, cells: Vec::new() };
+
     // Depth 0: the identity word (a copy task is a lawful task).
     let mut frontier: Vec<Program> = vec![Vec::new()];
     for depth in 0..=max_depth {
         for program in &frontier {
-            if closes(program, task) {
+            if closes_reusing(program, task, &mut carry, &mut scratch) {
                 let test_output = run(program, &task.test_in);
                 let matches_expected =
                     task.test_expected.as_ref().map(|want| want == &test_output);
