@@ -360,3 +360,56 @@ arms become callers that compose moves rather than a second
 implementation that rewrites states, and `K3`'s join becomes composition
 rather than a wire amendment. **Not yet built** — recorded so the work
 aims at the right shape.
+
+## §3b THE z,l ON x,y — there is nothing to map between (measured 2026-08-02)
+
+capacity-lane stopped on this: *"wiring `u(x)` from `V(Ω)` conflates two
+index spaces — `V`'s `boundary_form` reads `Δ`'s relational indices,
+while zones live on an 8×8 tile grid, and no mapping between them
+exists."* Measured, it is worse than a missing mapping.
+
+    Zone { tile: u16, kind }        an UNBOUNDED u16. No geometry, no
+                                    maximum, no 8×8 — `zone_as` checks
+                                    only that a tile is not already
+                                    zoned. The grid is an assumption.
+    ThermalSite { albedo, orbit_r } the orb's ONLY spatial fact is a
+                                    scalar RADIUS. No angle, so two
+                                    orbs can share a distance and never
+                                    a place.
+    Delta                           dim = orbs.len(), fiber = CHANNELS
+                                    = 3. No spatial index at all.
+    Coordinate { s: [Ratio; 3] }    a wrapped triple that DOES exist —
+                                    and it is a commitment ADDRESS,
+                                    hashed for uniqueness. Nothing
+                                    derives it from world state.
+
+**There is no `x,y`, no `z`, and no shared space.** One index space
+exists — `(orb, channel)` — and everything else is a scalar. The
+mapping capacity-lane wanted has nothing on the other side.
+
+### 3b.1 THREE RULINGS, in order, each a decision rather than a derivation
+
+1. **DOES `tile` HAVE GEOMETRY?** Give it `(x, y)` and a bound, or
+   declare it a bare label. Cheapest step, and it decides whether an orb
+   can have an INTERIOR at all (`§5a.1` wall 2). Today the code says
+   label; every document says grid.
+2. **DO ORBS HAVE POSITIONS?** `orbit_r` alone cannot express
+   adjacency, so **no two orbs can ever overlap** — that is the root of
+   K3's wall 2, and no amount of work on the complex reaches it. Either
+   siting gains an angle, or orbs gain a coordinate in a shared wrapped
+   space. `Coordinate.s` shows the shape is already affordable; it is
+   simply not a place today.
+3. **WHAT IS `z`?** The reading the measurement supports: **`z` is
+   SCALE.** Relations stand at tile↔tile, orb↔orb and system↔system,
+   and all three would collapse into one `Delta` today because there is
+   one. A STRATIFIED complex — one per scale, with maps between strata
+   — is what `z` would index, and that is #17's multi-scale map rather
+   than a new invention.
+
+**`l` needs nothing.** It is the obligation channel, it works, and it
+is the only coordinate in the system that already does what it says.
+
+**NOT DERIVED:** which of the three is wanted. They are independent
+decisions with different costs — 1 is a type change, 2 is a wire
+amendment, 3 is an architecture. Doing 3 without 2 stratifies a space
+in which nothing can meet.
