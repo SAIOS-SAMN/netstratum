@@ -186,11 +186,18 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             ClosureEvent::StarCommissioned { class } => {
                 star = crate::thermal::StarClass::from_wire(*class);
             }
-            ClosureEvent::PlanetSited { orb_id, albedo, orbit_r } => {
+            ClosureEvent::PlanetSited { orb_id, albedo, orbit_r, theta } => {
                 if let Some(held) = peel(&mut orbs, *orb_id) {
                     held.thermal = Some(crate::dop::ThermalSite {
                         albedo: albedo.clone(),
                         orbit_r: orbit_r.clone(),
+                        // THE ANGLE THE RECEIPT CARRIES — not None.
+                        // Binding it and discarding it would lose an
+                        // orb's PLACE on replay while the live path
+                        // kept it, which is the live/replay divergence
+                        // class all over again. A receipt without an
+                        // angle still yields None, from the receipt.
+                        theta: theta.clone(),
                     });
                 }
             }

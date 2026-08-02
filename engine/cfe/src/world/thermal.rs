@@ -50,6 +50,9 @@ impl World {
         held.thermal = Some(ThermalSite {
             albedo: albedo.clone(),
             orbit_r: orbit_r.clone(),
+            // Historical siting carries no angle — an orb has a radius
+            // and no place until one is receipted.
+            theta: None,
         });
         // TECH-1a (12_UNION §5a): a world's FIRST thermal opt-in
         // receipts the kernel SOLAR LEAP — its people now know their
@@ -73,7 +76,7 @@ impl World {
             );
         }
         self.close(
-            ClosureEvent::PlanetSited { orb_id: orb, albedo, orbit_r },
+            ClosureEvent::PlanetSited { orb_id: orb, albedo, orbit_r, theta: None },
             SOVEREIGN,
         );
         Ok(())

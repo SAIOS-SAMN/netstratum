@@ -3597,7 +3597,7 @@ fn chronicle(world: &World, style: &Style) {
                 "☀ sun commissioned — {}",
                 style.strong(star_name(*class))
             ),
-            cfe::dop::ClosureEvent::PlanetSited { orb_id, albedo, orbit_r } => format!(
+            cfe::dop::ClosureEvent::PlanetSited { orb_id, albedo, orbit_r, theta: _ } => format!(
                 "◍ orb {} sited — albedo {} at orbit r {}",
                 style.strong(&orb_id.to_string()),
                 amount(albedo),

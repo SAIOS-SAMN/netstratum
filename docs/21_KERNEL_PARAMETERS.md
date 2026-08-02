@@ -827,8 +827,9 @@ states and needs a new one. Measured, the law already has both.
 
 **`form.is_non_vacuous()` IS `V`.** The ruling's requirement — *add V to
 the equation* — is already satisfied. And `Unframed` is exactly the
-state the ruling names `Void::Uninitialized`: structure absent,
-potential present. **No new variant is needed; the existing one is
+state the ruling proposes under the name Void-Uninitialized (a NAME
+FROM THE RULING, deliberately not a citation — no such variant exists
+and none is needed): structure absent, potential present. **No new variant is needed; the existing one is
 unreachable.**
 
 ### 15a. THE ACTUAL DEFECT — measured

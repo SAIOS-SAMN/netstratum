@@ -17,11 +17,11 @@ use kernel::bridge::{read_entangled, CHANNEL_BOND};
 fn board(orbs: usize, edges: &[(usize, usize)]) -> Committed {
     let mut state = Committed::default();
     for id in 0..orbs {
-        let mut orb = cfe::dop::ColonyOrb::default();
-        orb.orb_id = id as u64 + 1;
-        orb.banked = vec![(cfe::dop::Resource::Iron, ratio(10, 1))];
-        state.orbs.push(orb);
-        let _ = id;
+        state.orbs.push(cfe::dop::ColonyOrb {
+            orb_id: id as u64 + 1,
+            banked: vec![(cfe::dop::Resource::Iron, ratio(10, 1))],
+            ..Default::default()
+        });
     }
     for (from, to) in edges {
         state.bonds.push(cfe::world::Bond {
