@@ -205,6 +205,10 @@ impl World {
         prober: u64,
         exemplar: u64,
     ) -> Result<crate::query::ScanRead, ActionRefused> {
+        // P2: the standing supply the sink's EPOCH 1 rate reads,
+        // snapshotted BEFORE any orb is peeled — an owned Vec, so no
+        // borrow of `self.orbs` is held across the mutable touch below.
+        let supply = standing_supply(&self.orbs);
         self.permitted(actor, Scope::Collect)?;
         if self.orb_by_id(exemplar).is_none() {
             return Err(ActionRefused::NoSuchOrb { orb: exemplar });
@@ -232,10 +236,10 @@ impl World {
         // The draw closes first, at the touch law (SINK-1): due
         // demurrage settles, the anchor moves, the crystal leaves.
         let stamp = self.clock.now();
-        let ease = ease_of(&self.techs, prober);
+        let ease = ease_of(&self.techs, prober, stamp);
         let star = self.star;
         let held = peel(&mut self.orbs, prober).expect("judged above");
-        touch(held, star, &mut self.chronicle, stamp, &ease);
+        touch(held, star, &mut self.chronicle, stamp, &ease, &supply);
         held.bank(Resource::Crystal, -draw.clone());
         self.close(ClosureEvent::CrystalDrawn { orb_id: prober, amount: draw }, actor);
         let stamp = self.chronicle.receipts().last().expect("just closed").stamp;

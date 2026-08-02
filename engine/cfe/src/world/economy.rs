@@ -57,6 +57,10 @@ impl World {
         self.collect_as(SOVEREIGN, FIRST_ORB)
     }
     pub fn collect_as(&mut self, actor: u64, orb: u64) -> Result<usize, ActionRefused> {
+        // P2: the standing supply the sink's EPOCH 1 rate reads,
+        // snapshotted BEFORE any orb is peeled — an owned Vec, so no
+        // borrow of `self.orbs` is held across the mutable touch below.
+        let supply = standing_supply(&self.orbs);
         self.permitted(actor, Scope::Collect)?;
         if self.orbs.is_empty() {
             return Err(ActionRefused::NoColony);
@@ -111,8 +115,8 @@ impl World {
         let count = settleable.len();
         // SINK-1 (Q2): receipted demurrage at touch — un-vaulted banked
         // joules/sink decay for the elapsed span, settled openly.
-        let ease = ease_of(&self.techs, orb_id);
-        touch(held, self.star, &mut self.chronicle, stamp, &ease);
+        let ease = ease_of(&self.techs, orb_id, stamp);
+        touch(held, self.star, &mut self.chronicle, stamp, &ease, &supply);
         // VENT-1: seal the pending vented entropy into the ledger.
         let mut vented = ratio(0, 1);
         self.vent_pending.retain(|(held_orb, pending)| match *held_orb == orb_id {
@@ -213,6 +217,10 @@ impl World {
         resource: Resource,
         amount: Ratio,
     ) -> Result<(), ActionRefused> {
+        // P2: the standing supply the sink's EPOCH 1 rate reads,
+        // snapshotted BEFORE any orb is peeled — an owned Vec, so no
+        // borrow of `self.orbs` is held across the mutable touch below.
+        let supply = standing_supply(&self.orbs);
         self.permitted(actor, Scope::Collect)?;
         if self.orbs.is_empty() {
             return Err(ActionRefused::NoColony);
@@ -235,7 +243,7 @@ impl World {
                 .expect("checked above");
             // PRACTICE-1 the Hoard: the stores keep — decay halves.
             let hoard_keep = if self.practices.contains(&4) { ratio(1, 2) } else { ratio(1, 1) };
-            let decay = hoard_keep * demurrage_due(source, star, stamp, &ease_of(&self.techs, from))
+            let decay = hoard_keep * demurrage_due(source, star, stamp, &ease_of(&self.techs, from, stamp), &super::rules::standing_supply(&self.orbs))
                 .into_iter()
                 .find(|(due, _)| *due == resource)
                 .map(|(_, decay)| decay)
@@ -278,10 +286,10 @@ impl World {
         };
         // The touch, both sides (SINK-1), then the move.
         for orb in [from, to] {
-            let ease = ease_of(&self.techs, orb);
+            let ease = ease_of(&self.techs, orb, stamp);
             let held = peel(&mut self.orbs, orb)
                 .expect("checked above");
-            touch(held, star, &mut self.chronicle, stamp, &ease);
+            touch(held, star, &mut self.chronicle, stamp, &ease, &supply);
         }
         let value = amount.clone() * crate::dop::commensurate_weight(resource);
         {
@@ -352,6 +360,10 @@ impl World {
         absorber: u64,
         amount: Ratio,
     ) -> Result<(), ActionRefused> {
+        // P2: the standing supply the sink's EPOCH 1 rate reads,
+        // snapshotted BEFORE any orb is peeled — an owned Vec, so no
+        // borrow of `self.orbs` is held across the mutable touch below.
+        let supply = standing_supply(&self.orbs);
         self.permitted(actor, Scope::Collect)?;
         if self.orbs.is_empty() {
             return Err(ActionRefused::NoColony);
@@ -376,7 +388,7 @@ impl World {
                 .expect("checked above");
             // PRACTICE-1 the Hoard: the stores keep — decay halves.
             let hoard_keep = if self.practices.contains(&4) { ratio(1, 2) } else { ratio(1, 1) };
-            let decay = hoard_keep * demurrage_due(held, star, stamp, &ease_of(&self.techs, absorber))
+            let decay = hoard_keep * demurrage_due(held, star, stamp, &ease_of(&self.techs, absorber, stamp), &super::rules::standing_supply(&self.orbs))
                 .into_iter()
                 .find(|(due, _)| *due == Resource::Sink)
                 .map(|(_, decay)| decay)
@@ -403,8 +415,8 @@ impl World {
         {
             let held = peel(&mut self.orbs, absorber)
                 .expect("checked above");
-            let ease = ease_of(&self.techs, absorber);
-            touch(held, star, &mut self.chronicle, stamp, &ease);
+            let ease = ease_of(&self.techs, absorber, stamp);
+            touch(held, star, &mut self.chronicle, stamp, &ease, &supply);
             held.bank(Resource::Sink, -amount.clone());
             held.entropy_vented += amount.clone();
             if source_crisis {
@@ -464,8 +476,16 @@ impl World {
     /// precedent). Ordered by resource so the read is replayable.
     pub fn purse(&self, stamp: u64) -> Vec<(Resource, Ratio)> {
         let mut held: Vec<(Resource, Ratio)> = Vec::new();
+        // P2: standing supply, snapshotted once for the whole reading.
+        let supply = standing_supply(&self.orbs);
         for orb in &self.orbs {
-            let due = demurrage_due(orb, self.star, stamp, &ease_of(&self.techs, orb.orb_id));
+            let due = demurrage_due(
+                orb,
+                self.star,
+                stamp,
+                &ease_of(&self.techs, orb.orb_id, stamp),
+                &supply,
+            );
             for (resource, amount) in &orb.banked {
                 let owed = due
                     .iter()

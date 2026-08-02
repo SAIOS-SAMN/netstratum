@@ -236,7 +236,7 @@ impl World {
                 .expect("bond endpoints exist");
             // PRACTICE-1 the Hoard: the stores keep — decay halves.
             let hoard_keep = if self.practices.contains(&4) { ratio(1, 2) } else { ratio(1, 1) };
-            let decay = hoard_keep * demurrage_due(held, star, stamp, &ease_of(&self.techs, source))
+            let decay = hoard_keep * demurrage_due(held, star, stamp, &ease_of(&self.techs, source, stamp), &standing_supply(&self.orbs))
                 .into_iter()
                 .find(|(due, _)| *due == resource)
                 .map(|(_, decay)| decay)
@@ -257,12 +257,14 @@ impl World {
             return; // nothing streamed, nothing ends — no receipt
         }
         let value = pay.clone() * crate::dop::commensurate_weight(resource);
+        // P2: snapshotted before either endpoint is peeled.
+        let supply = standing_supply(&self.orbs);
         if pay > ratio(0, 1) {
             for orb in [source, target] {
                 let held = peel(&mut self.orbs, orb)
                     .expect("bond endpoints exist");
-                let ease = ease_of(&self.techs, orb);
-                touch(held, star, &mut self.chronicle, stamp, &ease);
+                let ease = ease_of(&self.techs, orb, stamp);
+                touch(held, star, &mut self.chronicle, stamp, &ease, &supply);
             }
             {
                 let held = peel(&mut self.orbs, source)

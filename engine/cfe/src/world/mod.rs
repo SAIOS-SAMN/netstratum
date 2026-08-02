@@ -33,7 +33,7 @@ pub mod refusal;
 pub mod rules;
 
 pub use refusal::ActionRefused;
-pub use rules::{demurrage_due, ease_of, in_crisis};
+pub use rules::{demurrage_due, ease_of, in_crisis, standing_supply};
 
 
 
@@ -221,6 +221,11 @@ fn haul(
     deal: u64,
     melt: &Ratio,
 ) -> Result<(), ActionRefused> {
+    // P2: each world's standing supply, snapshotted before either side
+    // is peeled. A haul crosses two worlds and each sink reads its OWN
+    // supply — a busy world's rate must not be charged to a quiet one.
+    let src_supply = standing_supply(&src.orbs);
+    let dst_supply = standing_supply(&dst.orbs);
     if amount <= ratio(0, 1) {
         return Err(ActionRefused::BadTransfer);
     }
@@ -254,7 +259,7 @@ fn haul(
     // stamp, computed pure, so a refusal moves nothing in either world.
     {
         let source = src.orbs.iter().find(|held| held.orb_id == from).expect("checked");
-        let decay = demurrage_due(source, src.star, src_stamp, &ease_of(&src.techs, from))
+        let decay = demurrage_due(source, src.star, src_stamp, &ease_of(&src.techs, from, src_stamp), &standing_supply(&src.orbs))
             .into_iter()
             .find(|(due, _)| *due == resource)
             .map(|(_, decay)| decay)
@@ -271,8 +276,8 @@ fn haul(
     // The touch (SINK-1) then the debit, in the source world.
     {
         let source = src.orbs.iter_mut().find(|held| held.orb_id == from).expect("checked");
-        let ease = ease_of(&src.techs, from);
-        touch(source, src.star, &mut src.chronicle, src_stamp, &ease);
+        let ease = ease_of(&src.techs, from, src_stamp);
+        touch(source, src.star, &mut src.chronicle, src_stamp, &ease, &src_supply);
         source.bank(resource, -amount.clone());
     }
     src.chronicle.append(
@@ -286,8 +291,8 @@ fn haul(
     let delivered = amount.clone() * (ratio(1, 1) - melt.clone());
     {
         let target = dst.orbs.iter_mut().find(|held| held.orb_id == to).expect("checked");
-        let ease = ease_of(&dst.techs, to);
-        touch(target, dst.star, &mut dst.chronicle, dst_stamp, &ease);
+        let ease = ease_of(&dst.techs, to, dst_stamp);
+        touch(target, dst.star, &mut dst.chronicle, dst_stamp, &ease, &dst_supply);
         target.bank(resource, delivered.clone());
     }
     let void_share = amount - delivered.clone();
@@ -767,8 +772,9 @@ fn touch(
     chronicle: &mut Chronicle,
     stamp: u64,
     ease: &Ratio,
+    supply: &[(Resource, Ratio)],
 ) {
-    for (resource, decay) in demurrage_due(orb, star, stamp, ease) {
+    for (resource, decay) in demurrage_due(orb, star, stamp, ease, supply) {
         orb.bank(resource, -decay.clone());
         chronicle.append(
             ClosureEvent::DemurrageSettled { orb_id: orb.orb_id, resource, amount: decay },

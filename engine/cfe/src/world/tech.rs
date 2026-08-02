@@ -141,7 +141,7 @@ impl World {
                 .is_some_and(|struck| now.saturating_sub(struck) >= 240),
             3 => {
                 held.banked_amount(Resource::Sink) >= ratio(100, 1)
-                    && demurrage_due(held, self.star, now, &ease_of(&self.techs, orb))
+                    && demurrage_due(held, self.star, now, &ease_of(&self.techs, orb, now), &standing_supply(&self.orbs))
                         .iter()
                         .all(|(_, due)| *due == ratio(0, 1))
             }

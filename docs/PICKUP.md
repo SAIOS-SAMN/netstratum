@@ -395,6 +395,32 @@ coder-04's flag.
 - Parallel worktrees per node; merge to `main` on green; BUILD_ORDER
   conflicts resolve by keeping both entries.
 
+## 5a. `world.rs` IS SLATED FOR REFACTOR (2026-08-02, kernel lane)
+
+**Read `docs/20_WORLD_REFACTOR.md` before modifying
+`engine/cfe/src/world.rs`.** The file carries the same banner at its
+head.
+
+5001 lines holding three unrelated things: 12 state-type definitions
+(the kernel's vocabulary), ~100 deed emitters (the game's proposer),
+and `replay`'s 113 match arms — **the transition itself**. The kernel
+touches this file for exactly THREE items (`Committed`,
+`demurrage_due`, `ease_of`), so the seam is already thin and worth
+keeping thin.
+
+The load-bearing consequence (`19_KERNEL` §3): `replay` is a SECOND
+definition of the transition standing beside `kernel::lawful`, with
+nothing forcing them to agree. Changing an arm changes what a deed
+MEANS and the judge does not notice. That is the one defect between
+having a judge and having a kernel.
+
+Planned split (PROPOSED, none of these modules exist yet — see
+`20_WORLD_REFACTOR` §4): a state module, the interpreter, the proposer,
+and the sealed rules, each in its own home. Mechanical, no behaviour
+change. **`engine/cfe/` is
+UNOWNED on the lane map** — the refactor needs an owner assigned before
+it lands.
+
 ## 6. Known dark spots (all deliberate, none forgotten)
 
 - 3 quarantined `--closed-*` corpses in `var/worlds` — real pre-fix

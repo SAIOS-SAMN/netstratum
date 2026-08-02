@@ -27,11 +27,80 @@ use crate::ratio::{ratio, Ratio};
 /// crystallized for this orb, 1 otherwise. Derived from the tech
 /// list, never stored. Pub: the kernel CALLS the sealed rule for
 /// I5's bound (call-not-copy, KERNEL CHARTER §0b).
-pub fn ease_of(techs: &[(u64, u8, [u8; 32])], orb: u64) -> Ratio {
+pub fn ease_of(techs: &[(u64, u8, [u8; 32])], orb: u64, at: u64) -> Ratio {
+    // RULESET EPOCHS (`21_KERNEL_PARAMETERS` §11): the rule is selected
+    // by the stamp the deed carries, so a receipt written under EPOCH 0
+    // is forever judged by EPOCH 0 and `replay` cannot drift from the
+    // live path. Sealed rules are APPEND-ONLY — the cliff below stays
+    // in the tree permanently because past receipts still need it.
+    match crate::epoch::epoch_at(at) {
+        crate::epoch::Epoch::Genesis => ease_cliff(techs, orb),
+        crate::epoch::Epoch::Continuous => ease_gradient(techs, orb),
+    }
+}
+
+/// EPOCH 0 — the landed cliff. **Never edit this function.** Every
+/// receipt stamped before `epoch::CONTINUOUS_FROM` is judged by it, and
+/// changing it would rewrite history's meaning.
+fn ease_cliff(techs: &[(u64, u8, [u8; 32])], orb: u64) -> Ratio {
     match techs.iter().any(|(held, condition, _)| *held == orb && *condition == 5) {
         true => ratio(1, 2),
         false => ratio(1, 1),
     }
+}
+
+/// EPOCH 1 — P3, the continuous rational ease gradient.
+///
+/// The `== 5` cliff made conditions 0 through 4 INDISTINGUISHABLE, so
+/// four fifths of the tech tree bought nothing and condition 5 was a
+/// strategy target. This descends smoothly across the whole tree.
+///
+/// Exact over `BigRational` — the algebraic S-curve `s = x/(1+|x|)`,
+/// no float, no transcendental, no root.
+///
+/// **DIRECTION.** `ease` MULTIPLIES decay (`rate · ease · elapsed`), so
+/// LOWER ease is the reward. A curve saturating toward 1 at high tech
+/// would make advanced technology INCREASE decay; this one descends.
+fn ease_gradient(techs: &[(u64, u8, [u8; 32])], orb: u64) -> Ratio {
+    let condition = techs
+        .iter()
+        .filter(|(held, _, _)| *held == orb)
+        .map(|(_, condition, _)| *condition)
+        .max()
+        .unwrap_or(0);
+
+    let x = ratio(condition as i64 - EASE_THRESHOLD, EASE_SCALE);
+    let s = x.clone() / (ratio(1, 1) + num_traits::Signed::abs(&x));
+    // Floored at 1/2: past the old cliff nothing further is earned, and
+    // an ease of zero would remove the sink entirely, leaving I5
+    // bounding decay at nothing.
+    (ratio(1, 2) - s).clamp(ratio(1, 2), ratio(1, 1))
+}
+
+/// P3's curve centre — the condition at which `ease` equals the EPOCH 0
+/// cliff value `1/2`.
+const EASE_THRESHOLD: i64 = 5;
+/// P3's curve width in condition-steps.
+const EASE_SCALE: i64 = 5;
+
+/// THE STANDING SUPPLY — the world's total banked per LEAKING
+/// resource, which is what P2's EPOCH 1 rate reads
+/// (`21_KERNEL_PARAMETERS` §2).
+///
+/// Sealed and public for the same reason `demurrage_due` is: the
+/// kernel calls it on `prior.orbs` and the proposer on its own, so one
+/// computation serves two judges and neither can disagree about what
+/// supply stood.
+pub fn standing_supply(orbs: &[ColonyOrb]) -> Vec<(Resource, Ratio)> {
+    [Resource::Joule, Resource::Sink]
+        .into_iter()
+        .map(|resource| {
+            let total = orbs
+                .iter()
+                .fold(ratio(0, 1), |sum, held| sum + held.banked_amount(resource));
+            (resource, total)
+        })
+        .collect()
 }
 
 /// THE SEALED DEMURRAGE RULE (SINK-1/Q2 + the flat-rate ruling):
@@ -39,11 +108,19 @@ pub fn ease_of(techs: &[(u64, u8, [u8; 32])], orb: u64) -> Ratio {
 /// per leaking resource, FLAT, never proportional (the 2^1100
 /// denominator lesson). Pub: the kernel CALLS this for I5's bound
 /// (call-not-copy) — one rule, one computation, two judges.
+///
+/// **`supply`** is the world's standing total per leaking resource,
+/// which P2's EPOCH 1 rate reads. Passed PRECOMPUTED rather than
+/// derived inside for two reasons: proposer and judge must reach one
+/// rate from one state, and a settle site holding `&mut ColonyOrb`
+/// cannot also hand out a shared borrow of the slice that orb lives
+/// in. Build it with [`standing_supply`]. Ignored under EPOCH 0.
 pub fn demurrage_due(
     orb: &ColonyOrb,
     star: Option<crate::thermal::StarClass>,
     stamp: u64,
     ease: &Ratio,
+    supply: &[(Resource, Ratio)],
 ) -> Vec<(Resource, Ratio)> {
     let mut due = Vec::new();
     if let (Some(class), Some(site)) = (star, &orb.thermal) {
@@ -61,7 +138,16 @@ pub fn demurrage_due(
                     // TECH-1b: Long Stores eases the rate (×1/2 when
                     // crystallized; 1 otherwise) — still flat, still
                     // bounded denominators.
-                    let decay = (crate::dop::demurrage_per_tick() * ease.clone()
+                    // P2: the RATE now reads standing supply of this
+                    // resource across the world. Still FLAT in the
+                    // holding — supply moves the rate, never the shape.
+                    let standing = supply
+                        .iter()
+                        .find(|(held, _)| *held == resource)
+                        .map(|(_, total)| total.clone())
+                        .unwrap_or_else(|| ratio(0, 1));
+                    let decay = (crate::dop::demurrage_per_tick(&standing, stamp)
+                        * ease.clone()
                         * elapsed.clone())
                     .min(banked);
                     due.push((resource, decay));

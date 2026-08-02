@@ -102,7 +102,7 @@ impl World {
         let settled = self.orbs.iter().all(|held| {
             held.famine.is_empty()
                 && !held.overheat
-                && demurrage_due(held, self.star, stamp, &ease_of(&self.techs, held.orb_id))
+                && demurrage_due(held, self.star, stamp, &ease_of(&self.techs, held.orb_id, stamp), &standing_supply(&self.orbs))
                     .iter()
                     .all(|(_, due)| *due == ratio(0, 1))
         }) && self
