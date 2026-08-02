@@ -413,3 +413,74 @@ is the only coordinate in the system that already does what it says.
 decisions with different costs — 1 is a type change, 2 is a wire
 amendment, 3 is an architecture. Doing 3 without 2 stratifies a space
 in which nothing can meet.
+
+## §3c RELAY ANSWERS — R-D2, the channel arity, and two corrections to the spatial ruling (2026-08-02)
+
+### 3c.1 R-D2 · THE QUORUM — **STRIKE**
+
+Verified: `vrp.rs:26` `attest(&self, clock)` never reads `self`, so
+three seated timekeepers return one answer counted three times.
+`Attestation::Refuses` is constructed only in a test; `QuorumOpen` is
+unreachable.
+
+**Ruled STRIKE, by this document's own LAW 8** — *a term that computes
+is kept; a term that only resonates is excised*. The quorum resonates
+(it reads as consensus) and computes nothing. One writer per clock is
+already NS-5 §7 law, so nothing is lost.
+
+**BUILD is refused for a stated reason:** a real quorum matters in the
+mesh era, and building the mechanism now for a caller that does not
+exist is exactly what LAW 8 bars. It returns when a second attester
+does.
+
+Execution touches `vrp.rs`, `genesis.rs` and `ns3_conformance.rs` in
+`cfe` — shared, and days after a three-way merge. **Ruled here, not
+executed; say the word and it is one commit.**
+
+### 3c.2 THE CHANNEL ARITY — approved, with one pin added
+
+Deriving from `CHANNELS` instead of literal `3`s is right: a structural
+pin that hardcodes arity breaks on every addition and teaches nothing.
+`capacity_law_pins:242` already read it correctly one line above a
+literal that did not, so the file disagreed with itself.
+
+**But deriving EVERYWHERE means nothing can catch an unintended arity
+change.** One literal added, deliberately, in one place:
+`the_channel_arity_is_four_and_changing_it_is_an_amendment`.
+
+**MEASURED WHILE ADDING IT: `CHANNELS` is 3 on this branch.**
+`CHANNEL_LANE` is present on `remediations-lane` and **not merged
+here** — the relay describes it as landed, and it is landed on their
+branch only. The pin asserts 3 today and becomes 4 when their work
+merges, which is the point of having it.
+
+### 3c.3 SPATIAL SITING — two corrections before the amendment can be drafted
+
+**TAG `0x41` IS BARRED.** `0x41` is 65, and tag 65 is RETIRED
+(Charter §11, 2026-07-31 — the consilience receipt).
+`recurrence_guard::retired_wire_codes_are_never_reused` fails the build
+on any reuse. Next free is **90**.
+
+**AND NO NEW TAG IS NEEDED.** Siting already has one: `PlanetSited` is
+**tag 25**, carrying `{ orb_id, albedo, orbit_r }`. Its decoder reads
+three fields and ignores trailing bytes, so `θ` is an ADDITIVE-TRAILING
+extension — the same shape the codec used for the taxon (v2) and the
+seats (v3). No new tag, no rehash, and old receipts stay readable.
+
+**`θ ∈ ℚ` IS ONLY SOUND IN TURNS, NOT RADIANS.** A full turn in radians
+is `2π`, which is irrational, so a rational angle in radians cannot
+express a wrap. **`θ` is a fraction of a TURN, `θ ∈ [0, 1) ⊂ ℚ`**, and
+wrapping is exact.
+
+**ADJACENCY NEEDS A DECLARED METRIC, and it cannot be Euclidean.**
+Distance between `(r₁,θ₁)` and `(r₂,θ₂)` in the plane needs `cos` and a
+square root — both barred (§2b: no roots, THE PROPORTIONAL LAW). The
+system already has the answer it needs: `bridge.rs` records *reach is a
+wrapped-L1 distance*. **Adjacency is wrapped L1 on `(r, θ)`**,
+consistent with the metric already in use, and exact.
+
+**Old receipts carry no `θ`, and it must decode as ABSENT rather than
+zero.** Defaulting to `0` would place every historical orb at one
+angle — all collinear — which is a spatial claim nobody made.
+`theta: Option<Ratio>`, and an orb without one has a radius and no
+place.

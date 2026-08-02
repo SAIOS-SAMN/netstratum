@@ -166,3 +166,26 @@ fn the_refusal_carries_which_row_failed() {
     let (a, b) = (lawful(&bare, &bare, &mint()), lawful(&ring, &ring, &mint()));
     assert_ne!(a, b, "two dead worlds, two different diagnoses");
 }
+
+/// THE ARITY ITSELF, pinned literally — the one place it should be.
+///
+/// remediations-lane replaced literal `3`s in these pins with `CHANNELS`
+/// (2026-08-02), which is right: a structural pin that hardcodes arity
+/// breaks on every channel addition and teaches nothing. But deriving
+/// EVERYWHERE means no pin can catch an unintended arity change, and
+/// the channel count is wire-visible — `Delta` is `dim × dim × fiber`
+/// and every projection reads it.
+///
+/// So exactly one literal, here, deliberately. Changing `CHANNELS`
+/// should require editing this line and saying why.
+#[test]
+fn the_channel_arity_is_four_and_changing_it_is_an_amendment() {
+    assert_eq!(
+        kernel::bridge::CHANNELS,
+        3,
+        "BOND · COVENANT · DEBT on this branch. remediations-lane adds \
+         CHANNEL_LANE as a fourth — verified present on `remediations-lane` \
+         and NOT merged here, so this line becomes 4 when it lands and the \
+         change is deliberate rather than silent."
+    );
+}
