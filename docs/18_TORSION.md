@@ -46,7 +46,7 @@ bound as structure emerges. `PhiK I^(3)` had the right name all along —
 (seat widths, occupancy caps) and are DERIVED from this rank; the
 reading that sets a bound was named after the bound it sets.
 
-    D  =  rank( Δ(Ω) )  =  the independent cycles carrying charge
+    D  =  rank( Δ(V) )  =  the independent cycles carrying charge
                            no frame explains
 
 **Grounding.** The landed `rfa_core::Delta` is ALREADY an alternating
@@ -189,7 +189,7 @@ decomposition again in different syntax.
 **THE PROGENITOR'S OFFICE IS THE SPAN `α → Ω`** (§2e). `α` is the origin
 pole, `Ω` the totality. Where the traverse is a point — `α ≅ Ω` — `D`
 sits at GROUND and the room is one degree, itself; `D` rises exactly as
-`Ω` separates from `α`. That is why `D = rank(Δ(Ω))` and *how far the
+`Ω` separates from `α`. That is why `D = rank(Δ(V))` and *how far the
 universe has come from its origin* are one reading, and why the floor
 and the span are the same office.
 
@@ -259,12 +259,21 @@ identically in reverse. `rank(Δ(V))` is testimony ABOUT `D`, taken
 through `V`; it does not make `V` the author of `D`, any more than
 measuring a room makes the furniture its architect.
 
-**What the acyclicity guard actually guards.** `Ω ≡ V` stands untouched
-(`17_CAPACITY` §3), and what is barred is putting `D` inside `Ω`'s
-DEFINITION — a tuple, a sum, a dyad-as-term — because `D = rank(Δ(Ω))`
-would then be defined through something containing `D`. That is a
-COMPUTATIONAL bar, on definitions. It was never a claim that `V` ranks
-above `D`.
+**What the acyclicity guard actually guards.** What is barred is putting
+`D` inside the DEFINITION of what `Δ` reads — a tuple, a sum, a
+dyad-as-term — because `D = rank(Δ(V))` would then be defined through
+something containing `D`. That is a COMPUTATIONAL bar, on definitions.
+It was never a claim that `V` ranks above `D`.
+
+**AMENDED 2026-08-02 — `Ω ≢ V`.** This paragraph read *"`Ω ≡ V` stands
+untouched"* and cited `17_CAPACITY` §3, which then carried that
+identity. §3 is corrected: `Ω` is the ROOM (`Ω(D)`, the space `D`
+spans, and the `α → Ω` span of the progenitor's office) and `V` is the
+SUBSTANCE. The bar above is unchanged and in fact strengthened — under
+the old identity the guard was porous, because `D = rank(Δ(Ω))` with
+`Ω ≡ V` and `Ω(D)` indexed by `D` produced the forbidden circularity by
+SUBSTITUTION, without any document writing it down. Separating the
+source from the space closes it.
 
 **NOTATION, recorded once.** `Υ` is `V`'s own letter — upsilon is the
 Greek ancestor of Latin `V` — so the two are one name in two alphabets,
@@ -319,7 +328,10 @@ cycle does not return where it began. It needs no cosmology.
 **The two poles, and only what computes.** `α` is the ORIGIN pole;
 `Ω` is the TOTALITY pole. Both are landed: `α` is `GenesisSealed`
 (tag 61) on the all-zero parent `mesh::arbor` writes at the genesis
-record; `Ω` is the whole committed state, which is what `Δ(Ω)` projects.
+record; `Ω` is the TOTALITY OF THE ROOM — the far pole of the
+progenitor's span, not a second name for the committed state
+(`17_CAPACITY` §3, corrected 2026-08-02: `Ω ≢ V`). What `Δ` projects is
+`V`; what `α → Ω` measures is how far the room has opened.
 
 **The union is the walk, not the endpoints.** `Ω ⊕ α` keeps every state
 between the poles. This is SEAL B restated: receipts are the world, so
@@ -1196,7 +1208,7 @@ station or tradition alters any row.
   operator score reads component semantics.
 - `SYSTEM_SPEC.md` §0 — the foundation is capacity.
 - **RECONCILED (operator ruling 2026-08-01).** `D` is **the structure
-  surviving `Π_G(Δ(Ω))`** — `17_CAPACITY.md` §4b's reading stands as
+  surviving `Π_G(Δ(V))`** — `17_CAPACITY.md` §4b's reading stands as
   law. The competing index-set reading (D as the extents of
   `(i,j,k,l)`) is STRUCK from `EQUATIONS.md` §1 and `SYSTEM_SPEC.md`
   §0. One definition now stands in all three documents. The indices and
@@ -1299,7 +1311,7 @@ is not a mechanism.
 | **§2g gap disposition** — hold both sides, dispose the gap | one deed, one comparison | `creation()`; new `Unlawful` arm carrying both sides |
 | **Art. IV monotone** — a step may not lower the rank outside lawful reduction | `prior`→`next` comparison | new invariant, the `gauge_law` shape |
 | **Art. II non-vacuous** — `D = GROUND` claims no ALLOCATION (`Degree::is_above_ground`, never a zero; standing is admission's, §2c′) | property of `prior` | `containment()`, or a new gate beside it |
-| **`D` itself** — the structure surviving `Π_G(Δ(Ω))` | pure function of one state | kernel gains its `rfa-core` dep (anticipated at U_DIRECTIVES §4) |
+| **`D` itself** — the structure surviving `Π_G(Δ(V))` | pure function of one state | kernel gains its `rfa-core` dep (anticipated at U_DIRECTIVES §4) |
 
 ### 7b. LENS — global or over-time, MUST NOT enter the kernel
 
@@ -1403,7 +1415,7 @@ Each of these was a live defect, and any one of them alone forces
 
 | defect | effect if uncorrected |
 |---|---|
-| the algebra had no caller | `Δ(Ω)` is not a computation; nothing to measure |
+| the algebra had no caller | `Δ(V)` is not a computation; nothing to measure |
 | projecting banks differenced | a pure coboundary; reduction annihilates it |
 | a dense complex | every cocycle is a coboundary; rank always zero |
 | absent read as zero | phantom triangles report phantom strain |

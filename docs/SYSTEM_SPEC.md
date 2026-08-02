@@ -25,8 +25,10 @@ system runs many algorithms at many scales. The standing law is
 `docs/EQUATIONS.md` §1 (**D0–D4**), summarized here:
 
     V     = the committed state, read WHOLE (indivisible; the totality law)
-    Ω     = the totality of one universe; Δ(Ω) its relation
-    D     = the structure surviving Π_G( Δ(Ω) )        RULED 2026-08-01
+            — the SUBSTANCE. Δ(V) is the relation it expresses.
+    Ω(D)  = the space D spans — the ROOM, and D's own side.
+            Ω ≢ V: a room is not its furniture      RULED 2026-08-02
+    D     = the structure surviving Π_G( Δ(V) )        RULED 2026-08-01
 
     measured:     D is a READING, never a quota — nothing is shrunk to fit
     growth:       orbit_lock ≠ ∅ → the fold refuses, the residue EMITS,

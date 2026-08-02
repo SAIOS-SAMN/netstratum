@@ -153,7 +153,7 @@ never a metric density, never a scalar.
 
 `D` is **the structure surviving reduction** — RULED 2026-08-01:
 
-    D  =  the structure standing in  Π_G( Δ(Ω) )
+    D  =  the structure standing in  Π_G( Δ(V) )
 
 `Ω(D)` is the space those surviving degrees span. Frame artifacts
 contribute NOTHING; only structural content counts.
@@ -317,6 +317,21 @@ shape in the row meant to exclude it.
                    through the judge), not decomposed (a tuple `(D, V)`
                    has addressable halves — the decomposition in other
                    syntax).
+
+    THE NODES      `Nodes(V, D)` IS THE BOND ITSELF — not a container
+                   holding two things, but the join `Node(V) ++ Node(D)`
+                   between two nodes that STAY TWO (operator ruling
+                   2026-08-02). `++` concatenates; it does not add,
+                   average, or reduce. Read the pair and you are reading
+                   the bond; there is no third object to read.
+
+                   This is why `Ω ≢ V` was owed (`17_CAPACITY` §3,
+                   corrected 2026-08-02). `Ω(D)` is the ROOM, `V` is the
+                   SUBSTANCE, and while `Ω` was identified with `V` the
+                   two nodes were one node — and a bond from a thing to
+                   itself is not a bond, it is a fixed point. The
+                   correction is what makes this clause expressible
+                   rather than decorative.
 
 **They are NOT siblings and the receipt is not their parent** — it is
 the MEDIUM the bond settles on (`bond_flow` is a receipted standing

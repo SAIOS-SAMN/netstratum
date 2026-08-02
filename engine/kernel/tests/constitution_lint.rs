@@ -157,9 +157,13 @@ fn struck_paragraph_lines(text: &str) -> HashSet<usize> {
 /// dropped"), so they are exempt by construction — what is barred is
 /// live use, never the record of removal.
 fn records_a_strike(line: &str) -> bool {
-    const MARKERS: [&str; 10] = [
+    const MARKERS: [&str; 14] = [
         "STRUCK", "struck", "EXCISED", "excised", "DEPRECATED", "deprecated", "RETIRED",
         "formerly", "REMOVED", "withdrawn",
+        // A CORRECTION is a record too. `Ω ≡ V` could only be retired by
+        // paragraphs that QUOTE it while retiring it, exactly as a strike
+        // record quotes the symbol it strikes.
+        "CORRECTED", "corrected", "AMENDED", "amended",
     ];
     MARKERS.iter().any(|m| line.contains(m))
 }
@@ -260,8 +264,10 @@ fn the_struck_symbols_stay_struck() {
     // ambiguous token would flag correct law — the false-positive that
     // gets a lint disabled. Ambiguous vocabulary is out of scope here
     // and belongs to a symbol registry, if one is ever built.
-    const STRUCK: [(&str, &str); 6] = [
+    const STRUCK: [(&str, &str); 8] = [
         ("Ξ", "the cosmetic meter, struck by 18 §3"),
+        ("Ω ≡ V", "the room identified with the substance, struck 2026-08-02 (17 §3)"),
+        ("Ω  ≡  V", "the room identified with the substance, struck 2026-08-02 (17 §3)"),
         ("S⁺_out", "twin-singularity esoterica, struck by 18 §2d"),
         ("S⁺_hol", "twin-singularity esoterica, struck by 18 §2d"),
         ("ζ∇V", "the damped-gradient term, struck 2026-08-01"),

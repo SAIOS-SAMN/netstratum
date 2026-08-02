@@ -4,7 +4,7 @@
 //! Before this module the algebra was an ISLAND: `coboundary_reduce`,
 //! `for_each_residual`, `orbit_lock` and `rcf_signature` were all
 //! landed and witnessed in `rfa-core`, and not one of them had ever run
-//! on a universe. `Δ(Ω)` — "the relation V expresses" (`18_TORSION`
+//! on a universe. `Δ(V)` — "the relation V expresses" (`18_TORSION`
 //! §2a, `EQUATIONS` D0) — was not a computation that existed. This is
 //! that computation.
 //!
@@ -346,7 +346,7 @@ pub fn occupied_dimensions(state: &Committed) -> Vec<usize> {
         .collect()
 }
 
-/// Project committed state onto the relational tensor: `Δ(Ω)`.
+/// Project committed state onto the relational tensor: `Δ(V)`.
 ///
 /// Pure and total. Orbs are entities in `Committed::orbs` order;
 /// obligations naming an unknown orb are skipped (they relate nothing

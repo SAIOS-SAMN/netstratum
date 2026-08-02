@@ -1,11 +1,11 @@
-# 17 — THE CAPACITY LAW: Δ(Ω) = D
+# 17 — THE CAPACITY LAW: Δ(V) = D
 
 **Status:** SUBORDINATE to `18_TORSION.md` (the constitutional law, four
 articles) and to `EQUATIONS.md` §1. Where any two disagree, the order is
 `00_CHARTER` → `18_TORSION` → `EQUATIONS` §1 → this document.
 
 **§4b OF THIS DOCUMENT STANDS AS LAW** (operator ruling, `18_TORSION`
-§5): `D` is **the structure surviving `Π_G(Δ(Ω))`**. The competing
+§5): `D` is **the structure surviving `Π_G(Δ(V))`**. The competing
 index-set reading — D as the extents of `(i, j, k, l)` — is STRUCK from
 `EQUATIONS.md` §1 and `SYSTEM_SPEC.md` §0. The indices and the arities
 `Delta{dim, fiber}` are the CONTAINER the relation rides on, never the
@@ -99,16 +99,89 @@ This is the positive statement of what the strike of E1 left standing:
 "there is no one master, the system runs many algorithms at many
 scales." The strike removed the chain; this ruling says what is free.
 
-## §3 Ω ≡ V — the unification, and what "no two parts cut out" means
+## §3 Ω ≢ V — the room is not the substance
 
-The operator's clarification says Ω is **the totality of the individual
-universe**. D0 says V is **the committed state read WHOLE: indivisible,
-unpartitioned, never truncated to a subspace.** These are the same
-object under two names.
+**CORRECTED 2026-08-02 (operator ruling: *Ω(D) persists and Ω ≠ V*).**
+This section read `Ω ≡ V` and called them *the same object under two
+names*. They are not, and the identity did real damage in two places
+before it was caught.
 
-    Ω  ≡  V        the individual universe, whole
-    Δ(Ω) = Δ(V)    the relation it expresses    (`rfa_core::Delta`)
-    Δ(Ω) = D       that relation's extent IS its dimensional capacity
+The reasoning that produced it was sound-looking: the operator's
+clarification says `Ω` is **the totality of the individual universe**,
+and D0 says `V` is **the committed state read WHOLE — indivisible,
+unpartitioned, never truncated to a subspace**. Two totalities, so one
+object. But the offices were already distinguished, in this
+constitution's own words: **`D` is ROOM and `V` is SUBSTANCE**
+(`EQUATIONS` D5, `12_UNION` §3b). A totality of room and a totality of
+substance are two totalities, not one. The identity collapsed the very
+distinction the bond is built on.
+
+**THE FIRST DEFECT — a struck symbol wearing another glyph.** `18` §2a
+carries `Ω(D)`, the space the surviving degrees span. Under `Ω ≡ V` that
+expression reads, letter for letter, **`V(D)`** — and `V(D)` is STRUCK
+(`U* = D(V) ⊕ V(D)`, `18` §3). The strike survived only because the
+glyph differed from the symbol it had been applied to.
+
+**THE SECOND DEFECT — D defined through its own image.** One glyph was
+carrying both the SOURCE of the relation and the SPACE the reading
+spans, and the identity welded them together:
+
+```text
+    D  =  rank( Δ(Ω) )     Ω read as the SOURCE   — the thing measured
+    Ω(D)                   Ω read as the SPACE    — indexed by D
+    Ω  ≡  V                the identity that made them one glyph
+                           — STRUCK 2026-08-02
+
+    ⇒  D is defined through a space indexed by D.
+```
+
+That is exactly the circularity `12_UNION` §3 and `18` §2c′ bar — and it
+arrived by substitution, without anyone ever writing it down. Separating
+the two readings dissolves it: the SOURCE is `V`, the SPACE is `Ω(D)`,
+and they were never the same object.
+
+**THE RULING, inscribed:**
+
+```text
+    Ω(D)   the ROOM — the space D spans. D's own side, and it
+           PERSISTS: it is what the progenitor opens.
+
+    V      the SUBSTANCE — the committed state, whole, indivisible.
+           The sovereign's own, and never a function of anything.
+
+    Δ(V)   the relation V expresses            (`rfa_core::Delta`)
+
+    D  =  rank( Δ(V) )    the room, MEASURED THROUGH what stands in
+                          it — and measuring a room by its furniture
+                          does not make the furniture the room
+                          (`18` §2c′, the measurement arrow)
+```
+
+**THE OPERAND OF `Δ` IS `V`, ALWAYS.** Wherever earlier text writes
+`Δ` applied to `Ω` it denotes `Δ(V)` and is superseded by this section,
+and every such site in the standing law has been corrected. This is what
+the code has computed from the first day and never anything else:
+`project_complex(state: &Committed)` reads committed state, and there is
+no other input. The notation had drifted from the computation; the
+computation was right.
+
+**`Ω` KEEPS ITS OTHER TWO USES, and both are D-side.** `Ω(D)` is the
+structure space (`18` §2a). `α → Ω` is the SPAN of the progenitor's
+office — `α` the origin pole, `Ω` the totality pole, `D` rising exactly
+as they separate (`18` §2e, `12_UNION` §3). Both are readings of ROOM.
+Neither was ever a name for the committed state.
+
+**NODES(V, D) ARE THE BOND** (operator ruling 2026-08-02). The pair is
+`Node(V) ++ Node(D)` — a JOIN of two nodes that stay two — never a term
+with addressable halves. This is D5's NO OPERATOR clause and it is
+unchanged by the correction above; if anything the correction is what
+makes it expressible, since a bond between an object and itself is not a
+bond. See `EQUATIONS` D5 and `12_UNION` §3c.
+
+**WHAT DOES NOT CHANGE: the totality law.** "In union with V as a
+whole — no two parts cut out" never depended on the identity. It is a
+claim about `V` alone — that it is read whole or not read — and `V` is
+still whole. Everything below stands exactly as landed.
 
 This settles what "in union with V as a whole — no two parts cut out"
 means, and the first draft read it wrongly. It does NOT mean "keep D and
@@ -178,7 +251,7 @@ an agent; `C` has no agency of any kind.
 
 **What actually holds the ground — three primitives, no `C` anywhere:**
 
-1. **Exact algebraic reduction.** `Π_G(Δ(Ω))` runs on `BigRational`
+1. **Exact algebraic reduction.** `Π_G(Δ(V))` runs on `BigRational`
    linear systems and is TOTAL — it does not test its input, it projects
    it. The only question it answers is structural: is a relation a
    coboundary, or a non-trivial cocycle defect in `H¹`? That is a
@@ -350,7 +423,7 @@ true of the CONTAINER — `Delta{dim, fiber}` — and the container is not
 the capacity (`18_TORSION` §5). So the conclusion no longer rests on an
 arity argument at all, and holds more simply: **indices are not capacity,
 so no index has a receipt to owe.** Capacity is the structure surviving
-`Π_G(Δ(Ω))`; what is receipted is the opening of genuine irreducible
+`Π_G(Δ(V))`; what is receipted is the opening of genuine irreducible
 structure, which `GaugeShiftedAt` already carries and `PlaneUnearned`
 already guards. The amendment owed to D3 is therefore not "one extent
 per deed" but the removal of the index framing from the growth law
@@ -572,7 +645,7 @@ farmable.
 *Instance:* D as the extents of `(i,j,k,l)`; the proposed `k`-growth
 deed.
 *Defense:* `18_TORSION` §5 — indices and `Delta{dim,fiber}` are the
-container; capacity is what survives `Π_G(Δ(Ω))`. *Witness:* no reading
+container; capacity is what survives `Π_G(Δ(V))`. *Witness:* no reading
 derives D from an arity.
 
 **AV-8 · THE UNMEASURABLE INVARIANT.** A law declared over a quantity

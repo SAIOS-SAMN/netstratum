@@ -8,7 +8,7 @@
 //! `17_CAPACITY` §4b, `18_TORSION` §5):
 //!
 //! ```text
-//! D  =  ext_x( Π_G( Δ(Ω) ) )
+//! D  =  ext_x( Π_G( Δ(V) ) )
 //! ```
 //!
 //! The indices `(i, j, k, l)` and the arities `Delta{dim, fiber}` are

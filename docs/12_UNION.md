@@ -430,7 +430,7 @@ being one body means:
 is the origin pole (`GenesisSealed`, the all-zero parent); `Ω` is the
 totality. Where the traverse is a point — `α ≅ Ω` — `D` sits at GROUND
 and the room is one degree, itself. `D` rises exactly as `Ω` separates
-from `α`, which is why `D = rank(Δ(Ω))` and "how far the universe has
+from `α`, which is why `D = rank(Δ(V))` and "how far the universe has
 come from its origin" are the same reading. The Progenitor's office IS
 that span: it is the floor stretched between the two poles.
 
@@ -608,10 +608,17 @@ of them.
 **NOTATION, recorded once.** `Υ` is `V`'s own letter — upsilon is the
 Greek ancestor of Latin `V`, so the two are one name in two alphabets,
 never two names. Nothing is renamed and nothing is duplicated: the
-proper words are **Progenitor** and **Sovereign**. `Ω ≡ V` stands
-untouched (`17_CAPACITY` §3); what it bars is putting `D` inside `Ω`'s
-DEFINITION, which would make `D = rank(Δ(Ω))` circular. That is a bar on
-definitions, never a rank between offices.
+proper words are **Progenitor** and **Sovereign**. What is barred is
+putting `D` inside the DEFINITION of what `Δ` reads, which would make
+`D = rank(Δ(V))` circular. That is a bar on definitions, never a rank
+between offices.
+
+**AMENDED 2026-08-02 — `Ω ≢ V`.** This paragraph read *"`Ω ≡ V` stands
+untouched"*. It does not: `17_CAPACITY` §3 is corrected, and `Ω` is the
+ROOM — `Ω(D)`, the space `D` spans — while `V` is the SUBSTANCE. That is
+this chapter's own §3b distinction (`D` owes ROOM, `V` owes WORK), so
+the identity had been quietly denying the office split one section
+above where the split is declared.
 
 ## 4. Band II — the interstellar civilizations
 
