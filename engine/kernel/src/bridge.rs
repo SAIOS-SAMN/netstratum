@@ -42,8 +42,7 @@
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::Committed;
 use rfa_core::{
-    dual_pole, holonomies, boundary_form, Degree, Delta, Flow, BoundaryForm, Support, Vacuity,
-};
+    dual_pole, holonomies, boundary_form, Degree, Delta, Flow, BoundaryForm, Support, Vacuity, Holonomy,};
 
 /// BOND-1: the standing order, `source` → `target` at `rate`/tick.
 pub const CHANNEL_BOND: usize = 0;
@@ -173,6 +172,32 @@ pub struct EntangledRead {
     /// floor, where zero is the right answer and the floor would only
     /// blur it.
     pub rank: usize,
+
+    /// **THE CHARGE FIELD, CARRIED WHOLE — what each cycle HOLDS**
+    /// (operator ruling 2026-08-02: *your entire definition is wrong if
+    /// dimensional capacity is a count of rooms*).
+    ///
+    /// [`Self::rank`] is the DIMENSION of the cycle space — how many
+    /// independent structures the manifold sustains. It is a dimension
+    /// and never an inventory, and that part was sound. What was
+    /// reductionist is that `holonomies()` returns
+    /// `Holonomy { i, j, l, value }` — every cycle with its EXACT
+    /// CHARGE — and this read took `.len()` and discarded every value.
+    ///
+    /// Residuals are carried whole. Flows are carried whole. The
+    /// holonomies were counted, in the same function whose own comment
+    /// forbids that for residuals: *"that sums the field into one
+    /// scalar and discards which triple produced each residual."* Two
+    /// poles held, the third collapsed.
+    ///
+    /// **DIMENSION AND VOLUME ARE DIFFERENT READINGS.** The rank says
+    /// how many independent cycles stand; these values say what each
+    /// one carries. A universe with one heavily-charged cycle and one
+    /// with a single faint one read the SAME rank and are not the same
+    /// universe. `18` §2b bars collapsing a directional quantity to a
+    /// scalar aggregate wherever the system computes — a count is such
+    /// a collapse.
+    pub holonomy: Vec<Holonomy>,
     /// The residual field, WHOLE — every non-composing triple with its
     /// indices intact. Never pre-summed: these are what emit (D3) and
     /// what the composition law will compose.
@@ -561,8 +586,12 @@ pub fn read_entangled_observed(state: &Committed, unknown: usize) -> EntangledRe
     let residuals = filled_residuals(&delta, &support);
     let flows = boundary_form(&delta, &support).flows;
     // D — the independent cycles carrying charge no frame explains.
-    let rank = holonomies(&delta, &support).len();
-    EntangledRead { rank, residuals, flows, unknown }
+    // THE CHARGE FIELD, WHOLE — never `.len()` alone. The rank is its
+    // dimension; the values are what the cycles hold, and both are
+    // readings the caller may need (operator ruling 2026-08-02).
+    let holonomy = holonomies(&delta, &support);
+    let rank = holonomy.len();
+    EntangledRead { rank, holonomy, residuals, flows, unknown }
 }
 
 /// THE FOLD GUARD — the occupancy floor, on both offices at once

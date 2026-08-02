@@ -596,3 +596,44 @@ fn a_carry_that_keeps_its_tones_admits() {
     assert_eq!(verdict, FoldGuard::CarriedWithinFloor);
     assert!(verdict.is_lawful(), "room carried with the structure it holds");
 }
+
+#[test]
+fn the_charge_field_is_carried_whole_never_counted() {
+    // D IS NOT AN INVENTORY (operator ruling 2026-08-02). The rank is
+    // the DIMENSION of the cycle space — how many independent
+    // structures stand — and that is a dimension, never a tally of
+    // rooms. What was reductionist is that the charges were computed
+    // and thrown away: holonomies() returns every cycle with its exact
+    // value, and the read took `.len()`.
+    //
+    // Dimension and volume are different readings, and this pin is the
+    // proof: two worlds of EQUAL RANK carrying DIFFERENT CHARGE.
+    let mut faint = orbs(3);
+    faint.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(1, 3, 6)];
+    let mut heavy = orbs(3);
+    heavy.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(1, 3, 90)];
+
+    let a = read_entangled(&faint);
+    let b = read_entangled(&heavy);
+
+    assert_eq!(a.rank, b.rank, "same dimension — one independent cycle each");
+    assert_eq!(a.degree(), b.degree(), "and therefore the same elevation");
+
+    // The charge field is present and non-empty on both.
+    assert_eq!(a.holonomy.len(), a.rank, "the rank IS the field's dimension");
+    assert!(!a.holonomy.is_empty() && !b.holonomy.is_empty());
+
+    // AND THE WORLDS ARE NOT THE SAME. A count could never say so.
+    assert_ne!(
+        a.holonomy.iter().map(|h| h.value.clone()).collect::<Vec<_>>(),
+        b.holonomy.iter().map(|h| h.value.clone()).collect::<Vec<_>>(),
+        "equal rank, unequal charge — the volume the structure holds \
+         differs, and reading only the count discards exactly that"
+    );
+
+    // Each charge keeps its POSITION too: which pair, which layer.
+    for h in &b.holonomy {
+        assert!(h.i < 3 && h.j < 3, "the charge names where it stands");
+        assert!(h.value != ratio(0, 1), "a carried charge is non-zero");
+    }
+}

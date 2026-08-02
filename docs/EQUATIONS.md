@@ -158,6 +158,30 @@ never a metric density, never a scalar.
 `Ω(D)` is the space those surviving degrees span. Frame artifacts
 contribute NOTHING; only structural content counts.
 
+**`D` IS A DIMENSION, NEVER AN INVENTORY** (operator ruling 2026-08-02:
+*your entire definition is wrong if dimensional capacity is a count of
+rooms*). `D` is the RANK of the cycle space — how many independent
+structures the manifold sustains — and a rank is a dimension, not a
+tally. **No `planes_opened` counter is ever added to `D`**: a scalar
+accumulator would make the progenitor a ledger clerk handing out keys,
+and it is refused.
+
+**AND THE CHARGE FIELD IS CARRIED WHOLE.** `rfa_core::holonomies`
+returns `Holonomy { i, j, l, value }` — every cycle with its position
+and its EXACT charge. The read had been taking `.len()` and discarding
+every value, in the same function whose own comment forbids that for
+residuals. Two readings, both owed:
+
+    the DIMENSION   rank — how many independent cycles stand
+    the VOLUME      the charges — what each cycle HOLDS
+
+Two universes of equal rank carrying different charge read the same
+count and are not the same universe — pinned in `bridge_pins` as
+`the_charge_field_is_carried_whole_never_counted`. 18 §2b bars
+collapsing a directional
+quantity to a scalar aggregate wherever the system computes, and a count
+is such a collapse.
+
 **D IS THE PROGENITOR** (operator ruling 2026-08-01; 18 §2c′). Its
 office is to MAKE ROOM: D3's emission opens a plane, the fiber grows,
 and band capacity is a reading of that fiber (`12_UNION` §1 — *a band is
