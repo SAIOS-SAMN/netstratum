@@ -264,8 +264,11 @@ shape in the row meant to exclude it.
 
     FORM           a SYMMETRIC pair of bonds — *the marriage form*.
                    A single bond is PATRONAGE (one party owning the
-                   other), and *neither is privileged* (09 §2.2). The
-                   non-ranking is this clause, not an ancestry.
+                   other). BOTH ARE PRIVILEGED (09 §2.2): each office
+                   SOURCES, so each carries its own syntropic book. `D`
+                   sources room, `V` sources work; two sources, two
+                   books, the privilege held twice. That doubling is
+                   the standing this clause grants.
 
     TERMS          D owes room that was EARNED    — `PlaneUnearned`
                                                     refuses otherwise

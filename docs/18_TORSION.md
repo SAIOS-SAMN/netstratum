@@ -232,7 +232,10 @@ They are peers as a BONDED PAIR, never as siblings — different kinds,
 separate origins, and a relation that is conjugal rather than
 fraternal. `09_IDEOLOGY` §2.2 already carries the form and the ruling:
 *a symmetric pair of bonds is the MARRIAGE FORM; a single bond is
-PATRONAGE; neither is privileged.* A one-directional bond would be
+PATRONAGE. BOTH ARE PRIVILEGED in the pair* — `bond_flow` is the
+SOURCE's syntropic book, so each office sources and each carries its
+own. Two sources, two books; the privilege is held twice and the carry
+is positive on both sides. A one-directional bond would be
 patronage — one office owning the other — which is exactly what a
 `V → D` derivation makes. The receipt is not their parent; it is the
 MEDIUM the bond is carried on, and `severance_load` prices cutting it.

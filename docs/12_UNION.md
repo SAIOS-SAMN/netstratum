@@ -500,13 +500,20 @@ neither was ever seeded from the other's line.
 `09_IDEOLOGY` §2.2, the love/resonance axis, landed at BOND-1:
 
 > *A symmetric pair of bonds is the MARRIAGE FORM; a single bond is
-> PATRONAGE; neither is privileged.*
+> PATRONAGE. BOTH ARE PRIVILEGED in the pair.*
 
 That is the distinction exactly. A one-directional bond is patronage —
 one party owns the other, which is what a `V → D` derivation would make
-it. The symmetric pair is the marriage form, and *neither is privileged*
-is the non-ranking stated in a LANDED mechanic rather than invented from
-ancestry.
+it. The symmetric pair is the marriage form, and **both are
+privileged**: `bond_flow` is the SOURCE's syntropic book, so each office
+sources and each carries its own. `D` sources room, `V` sources work.
+**Two sources, two books — the privilege is held twice, and that
+doubling is the standing.**
+
+**THE CARRY IS POSITIVE.** This pair is built on the syntropic lane:
+each bond's flow posts to its source's syntropic book, so the pair ADDS
+on both sides. Two live bonds accrue two books, and the union's total
+carry is the sum of what each office streams.
 
 **The receipt is not their parent; it is the MEDIUM they reach each
 other through.** `bond_flow` is a receipted standing order — the bond

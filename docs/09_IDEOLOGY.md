@@ -117,7 +117,11 @@ covenanted).
 
 - **`bond_flow`** (the source's syntropic book): cumulative value streamed
   over live bonds. A symmetric pair of bonds is the marriage form; a
-  single bond is patronage; neither is privileged.
+  single bond is patronage. **BOTH ARE PRIVILEGED in the pair**:
+  `bond_flow` is the SOURCE's syntropic book, so each party sources and
+  each carries its own book. **Two sources, two books — the privilege
+  is held twice.** Patronage holds it once: one party sources, one book
+  stands.
 
   **The bond is not the covenant** (recorded 2026-08-02, after the two
   were conflated in `EQUATIONS` D5). A COVENANT is one obligor owing one
