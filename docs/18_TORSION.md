@@ -1071,7 +1071,120 @@ built to fit a container. **The arity is the operator's; the contents
 are an open ruling.** What IS settled is the containment: one object,
 one door, nothing authoritative inside.
 
-### 2h. THE ECLIPSE — STRUCK AS WRITTEN (2026-08-01)
+**RESOLVED — see §2n.3.** The contents were ruled the same day; the
+"not derived" note above records only that they were not invented here.
+
+### 2n.3 THE CONTAINMENT LAW — `C_bound` inscribed (operator ruling, 2026-08-02)
+
+§2n.2 established the separation. This inscribes it as law, with the
+slot allocation ruled and three corrections made in translation.
+
+**THE TWO STRUCTURES, held apart by law:**
+
+    CONNECTION FIBER    M_e for every edge e ∈ E
+      exact rationals · committed · load-bearing · carries holonomy
+      ∮M · feeds rank D · gates the mint · CARRIES NO CONTAINMENT
+      APPARATUS
+
+    CONTAINMENT MATRIX  C_bound — exactly ONE per reading
+      quarantined · gates nothing · footprint independent of |E| and
+      |V| · isolated from every connection fiber
+
+**THE SLOT ALLOCATION — ruled, and deliberately un-padded:**
+
+    C_bound = ⎡ C(Δ)        δ_search  ⎤
+              ⎣ λ_proposed  0         ⎦
+
+    (0,0)  C(Δ)         the coherence functional, Σ|R| — the lens
+                        scalar of §2n
+    (0,1)  δ_search     the consult/withdraw search-state delta: the
+                        approximate proposed perturbation
+    (1,0)  λ_proposed   the un-admitted error of the proposed step
+    (1,1)  0            EXPLICIT GROUND. Not a slot awaiting meaning —
+                        a declared zero, so no speculative state can
+                        accrete in an empty position.
+
+The explicit zero is what satisfies LAW 8 (§3, line 1350 — *a term that
+computes is kept; a term that only resonates is excised*). An
+unassigned fourth slot is an invitation to invent apparatus to fill it;
+a declared ground is a refusal to.
+
+**CORRECTION 1 — `C(Δ)` IS NOT A CAPACITY READING.** The relayed ruling
+named slot (0,0) *"the primary scalar capacity reading."* Two faults:
+`capacity` is STRUCK vocabulary, replaced by `rank` and carried on the
+currency pass (#14); and the reading is wrong on the merits — capacity
+is `D`, and §2n established that `C` **cannot see** what `D` measures,
+because summing the residuals destroys the torsion they carry. Slot
+(0,0) holds the coherence functional and is named as such. Letting it
+be called a capacity reading would re-admit through a slot label the
+exact conflation `D` was minted to end.
+
+**CORRECTION 2 — `M_e ∈ SL₂` IS NOT AN INVARIANT AND MUST NOT BECOME
+ONE.** The relay writes the connection fiber as `SL₂(ℚ)`. The landed
+type is deliberately weaker (`fiber.rs:31`):
+
+> *Members of `SL₂` satisfy `det = 1`; the type does not enforce it,
+> because the gauge law is a READING (see `is_sl2`) and a refusal names
+> what it found rather than being unconstructible.*
+
+`is_sl2()` returns `bool`. **If membership became a type invariant,
+`is_sl2` could never return false and the refusal it exists to raise
+would be unreachable.** The fiber is `M₂ₓ₂(ℚ)` with `det = 1` as a
+JUDGED READING. Recorded because an invariant is cheap to write into a
+document and expensive to discover later in a type.
+
+**CORRECTION 3 — `λ_residual` RENAMED TO `λ_proposed`. Third notation
+collision.** `Residual { i, j, k, l, value }` is a committed object
+(`bridge.rs:104`), and §2k.1 established it IS the torsion — the
+closure failure carried with its indices. The relay used "residual" for
+*the error of an unadmitted proposal*, which is a different thing
+living on the other side of the door. After §2j's two `D`s and §2n's
+five `C`s, this document does not need a third collision, and the
+proposal-side name is the one that must yield.
+
+**CLARIFICATION — `C_bound` IS A REGISTER, NOT A GROUP ELEMENT.** No
+`matmul`, no `commutator`, no holonomy is taken over it; it is four
+slots written in a square. **NO ALGEBRA MAY BE PERFORMED BETWEEN
+`C_bound` AND ANY CONNECTION FIBER.** That prohibition is what
+mechanically enforces "isolated from the edge fiber" — without it,
+sharing the `2×2` shape is a standing invitation to compute
+`C_bound.commutator(M_e)` and breach the isolation through the type
+system rather than through intent. The shared arity is the hazard
+§2n.2 named; this is the guard against it.
+
+**ON EXACTNESS vs AUTHORITY — an apparent contradiction, resolved.**
+`C_bound` is over exact rationals, yet it is the residence of
+approximation. These do not conflict, and the landed cage shows why:
+floats live inside the CONSULTED CLOSURE (`cage_pins.rs` runs
+`(n as f64).sqrt()` there deliberately), and what the closure returns
+is exact-typed and still unverified. **Exactness is a representation
+property; authority is a door property.** `C_bound` holds exact numbers
+that nothing has yet admitted.
+
+**THE GENERAL INVARIANT — boundedness, stated so it does not outlaw a
+landed sector.**
+
+    A sector is lawful iff its state footprint does not scale with the
+    topology it observes — O(1) in |E| and |V|.
+
+The relay wrote this as *"bounded by a fixed constant, O(1)"*
+absolutely. **Taken literally that outlaws the solver's own sector**,
+which is landed and correct: `solve(task, max_depth)` sweeps
+enumeratively `for _depth in 0..=max_depth`, so its footprint is
+O(budget) — bounded, deliberate, and raisable. What makes it lawful is
+not smallness but that **it does not shadow the graph.** The two
+clauses that follow are exact as relayed and need no softening:
+
+1. **NO FIBER SHADOWING.** No quarantine, solver or search may
+   duplicate a per-edge structure or mirror the topology. This is the
+   clause §2n.1 violated.
+2. **SINGLE POINT OF EGRESS.** One bounded region, one door. `C_bound`
+   may be inspected or discarded whole without invalidating any
+   connection fiber — which is the operational test that the isolation
+   holds.
+
+**STATUS.** `d150497` stands as written. `K5` (#32) is unaffected and
+clean — it was never about `C`. The per-edge fibers remain pure.
 
 ### 2h. THE ECLIPSE — STRUCK AS WRITTEN (2026-08-01)
 
