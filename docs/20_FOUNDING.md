@@ -525,6 +525,110 @@ rest of the parameter work. **The deed and the reading land together** —
 shipping `vitrify` while `leaks` still gates demurrage would sell a
 world something that does not yet do anything.
 
+### 6f. THE TWO-SIDED LAW — every reading needs its inverse
+
+**Operator ruling 2026-08-02, and it generalises §6a, §6c and §6e into
+one defect.** Each of those was a reading that named a LACK and had no
+term for its opposite. The pattern is systemic and it is visible in one
+struct.
+
+**THE ENGINE ALREADY KNOWS HOW TO KEEP TWO-SIDED BOOKS.** `ColonyOrb`
+carries three genuine pairs, and they are the social ledger:
+
+```text
+returned_across      ⟷  extracted_across
+covenants_fulfilled  ⟷  covenants_breached
+bond_flow            ⟷  severance_load
+```
+
+**The physical ledger on the same struct is single-entry:**
+
+```text
+famine: Vec<Resource>    lack, named and receipted   ⟷  (nothing)
+overheat: bool           excess-as-problem, flagged  ⟷  (nothing)
+entropy_vented: Ratio    loss, measured              ⟷  (nothing)
+```
+
+**And the event vocabulary confirms it.** Every thermal or provisioning
+event names a lack or an excess-to-be-shed: `FamineStruck`,
+`FamineRelieved`, `OverheatStruck`, `OverheatCleared`, `VentSettled`,
+`OverflowAbsorbed`, `WantRelieved`. **There is no event for abundance
+arriving.** A colony can be receipted as starving, as overheating, as
+venting and as relieved — never as thriving.
+
+**The word "surplus" appears in the conductor's policy heuristics and in
+the scribe's prose. It appears nowhere in committed state.** The engine
+narrates abundance and does not record it.
+
+### 6f.1 EXPANSION ONE — `overheat` is the wrong TYPE
+
+A `bool` can say *too hot / not*. It cannot say **where on the axis**.
+Thermal state is a position with a direction and a magnitude, and the
+type must be able to hold both.
+
+```text
+STRUCK:    overheat: bool                       one direction, no degree
+EXPANDS TO: a signed thermal displacement       two directions, a magnitude
+```
+
+**This is expansion, not containment** — the fix is a wider type, never
+a tighter guard on a narrow one. And the degree already exists: tag 22
+`OverheatStruck` carries `overflow: Ratio` on the wire, and
+`replay.rs:197` discards it as `{ orb_id, .. }` because the destination
+cannot hold it. **The information is receipted, replayable, and thrown
+away for want of a type.**
+
+### 6f.2 EXPANSION TWO — the cold branch does not exist
+
+`frozen` is computed inside `tick` (`sub_mesic && joule_famined`) and
+discarded at the end of the tick. **There is no `UnderflowStruck`, no
+cold degree, no committed field, no wire tag.** The hot side has two
+events, a flag, a vent mechanism and an absorption market; the cold side
+has a local variable.
+
+The displacement of §6f.1 gives it somewhere to live: **one axis, signed,
+with overflow above and underflow below**, and the freeze-lock becomes a
+region of that reading rather than a boolean recomputed every tick.
+
+### 6f.3 EXPANSION THREE — FAMINE REQUIRES FLOURISH
+
+**This is the one that builds capacity, and it is the reason the other
+two matter.**
+
+`famine` names which resources a colony LACKS. Nothing names which it
+holds in abundance. So the state can express contraction and cannot
+express thriving — and a quantity that cannot be expressed cannot drive
+anything.
+
+```text
+famine:   Vec<Resource>            what is missing      ⟶  dormancy, refusal
+flourish: Vec<(Resource, Ratio)>   what is abundant     ⟶  ???
+```
+
+**The `???` is capacity.** D has no positive driver in committed state.
+Today a colony can only lose dimensions — famine strikes, zones go
+dormant, yields degrade. Nothing in state says a line is thriving, so
+nothing can key growth off it, and capacity is static by construction
+rather than by design.
+
+**With flourish recorded, capacity grows dynamically from measured
+abundance:** a line in sustained surplus converts it into new dimensions
+— the direct mechanism behind `19_REGISTRY` §4b, where an ancient opens
+a ROOM rather than granting a seat, and `20_FOUNDING` §6a, where a ward
+captures with capacity it BUILT. **Both of those laws currently name a
+growth they have no operand for. Flourish is the operand.**
+
+### 6f.4 THE STANDING TEST
+
+**Any reading added to committed state must answer: what is its
+inverse, and is that inverse recorded?** If the reading names a lack,
+the surplus must be nameable in the same terms. If it names a
+displacement in one direction, the type must hold the other.
+
+**A single-entry book measures a system that can only lose.** That is
+the same defect CHARTER §2a records twice already, arriving through the
+type system instead of through prose.
+
 ## §7 THE BASE-LEVEL ACCOUNTING LAW
 
 > **"Everything needs accounting for at the microscopic/base level, with
