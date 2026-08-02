@@ -994,7 +994,26 @@ That is why *"`D > 0` with `rank = 0`, progenitor standing"* is not a
 contradiction and never was: `D` comes from the SPACE, `rank` from the
 COMPLEX drawn on it. This lane read them as one number.
 
-**INVERSION 2 · THE TRIANGLE IS AN ARTIFACT.** On a complex with
+**INVERSION 2 · WITHDRAWN — MEASURED FALSE (2026-08-02).**
+
+    composing triangle rank = 0     non-composing rank = 1
+
+`holonomies` pushes a cycle only `if !charge.is_zero()`, so a triangle
+the forest's frame fully explains is **already discarded**. The flat
+2-cell case needs no amendment; it is in the code.
+
+**And filling the non-flat case would destroy the system's core
+measurement.** A triangle that does not compose carries genuine
+charge — `bridge.rs`'s own header: *a triangle that does not compose is
+an economic fact, not an error*. Zeroing it would erase the residual,
+which `EQUATIONS` D3 makes the source of capacity. Adding a 2-cell does
+not remove that contribution; it RECLASSIFIES it, from an independent
+cycle to CURVATURE on a filled face. Both are non-zero. They are
+different objects, and this document conflated them.
+
+The struck claim follows, kept because the error is instructive:
+
+~~**THE TRIANGLE IS AN ARTIFACT.**~~ On a complex with
 2-cells a triangle BOUNDS — it is the boundary of a face and
 contributes nothing to `H₁`. It registered as `1` only because `Delta`
 has no 2-cells to fill it (§2m: *the complex tops out at

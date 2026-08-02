@@ -127,3 +127,46 @@ fn the_reduction_is_given_no_wrapping_at_all() {
          it reads differently, and the reduction is never told which it is"
     );
 }
+
+/// **DOES A COMPOSING TRIANGLE ALREADY READ ZERO?**
+///
+/// `holonomies` pushes a cycle only `if !charge.is_zero()` — a non-tree
+/// edge that the forest's frame fully explains is already discarded.
+/// If that is so, the "fill the 2-cell" half of inversion 2 is ALREADY
+/// in the code for the flat case, and §16d overstated it.
+#[test]
+fn a_triangle_whose_obligations_compose_carries_no_cycle() {
+    // Rates chosen so the triangle COMPOSES: what 0 owes 2 directly
+    // equals 0→1 plus 1→2. A flat face.
+    let mut composing = board(3, &[]);
+    let bond = |from: u64, to: u64, rate: (i64, i64)| cfe::world::Bond {
+        source: from,
+        target: to,
+        resource: cfe::dop::Resource::Iron,
+        rate: ratio(rate.0, rate.1),
+        term: 0,
+        sealed: 0,
+        anchored: 0,
+    };
+    composing.bonds.push(bond(1, 2, (1, 1)));
+    composing.bonds.push(bond(2, 3, (1, 1)));
+    composing.bonds.push(bond(1, 3, (2, 1))); // 1 + 1 = 2 — it composes
+
+    let flat = read_entangled(&composing).rank;
+
+    // And the same triangle that does NOT compose.
+    let mut warped = board(3, &[]);
+    warped.bonds.push(bond(1, 2, (1, 1)));
+    warped.bonds.push(bond(2, 3, (1, 1)));
+    warped.bonds.push(bond(1, 3, (7, 1))); // 1 + 1 ≠ 7
+
+    let curved = read_entangled(&warped).rank;
+
+    println!("composing triangle rank={flat}   non-composing rank={curved}");
+    assert_eq!(
+        flat, 0,
+        "a triangle the frame explains is ALREADY discarded — the flat 2-cell \
+         case needs no amendment"
+    );
+    assert_eq!(curved, 1, "and a triangle that does not compose carries real charge");
+}
