@@ -293,7 +293,13 @@ the closed case.
 
 ### 5.2 The rejected approach — gradient descent
 
-Driving the coherence functional `C(Δ) = Σ R²` to zero is gradient descent to
+*(Formula corrected 2026-08-02, `18_TORSION` §2n: the functional is
+`C(Δ) = Σ|R|` — `delta.rs:193` sums absolute values, and squares are
+barred as aggregators by THE PROPORTIONAL LAW. **The rejection below is
+unaffected and stands**: driving ANY aggregate of the residuals to zero
+discards them, whichever norm does the aggregating.)*
+
+Driving the coherence functional `C(Δ) = Σ|R|` to zero is gradient descent to
 a minimum: you keep the minimizer and DISCARD the residual. It is
 uni-directional and LOSSY — convergence-as-projection manufactures agreement
 by destroying difference. That is entropy wearing a syntropy mask, and it

@@ -198,7 +198,8 @@ vocabularies + `constitution_digest()`.
 
 ## 3. GAME — the client, the operator surface
 
-**Responsibility.** Where operators (AI or human) act: propose deeds, run the
+**Responsibility.** Where OPERATORS act — organic, synthetic or procedural,
+the seat does not care: propose deeds, run the
 board, defend sovereign states. The game NEVER edits state directly — it
 submits a proposed `N_i` (deed) and the validator judges. This is the §11
 "one input boundary" (the steward seam) generalized to all clients.

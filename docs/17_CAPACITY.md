@@ -88,7 +88,7 @@ it is the rank-1 shadow of a classification that is not rank-1, and it
 is overridden wherever the classification stands. This is stricter than
 this document's earlier "C is demoted to a gate," and it agrees exactly
 with `18_TORSION` §2b: an L1 aggregate is lawful only as a reading
-reported to a human lens, never where the system computes. §5 below
+reported to an OPERATOR lens, never where the system computes. §5 below
 carries what survives of C and why it must.
 
 **3. `V` and all subsets of `∂` are UNCHAINED.** Not struck — unchained.
@@ -725,7 +725,7 @@ Both are right, and neither touches what §5 needs, because:
 
 The predicate is lawful, necessary, and already landed. The collapse is
 the substandard character: barred where the system computes, permitted
-where a reading is reported to a human. **`coherence_functional` is the
+where a reading is reported to an OPERATOR. **`coherence_functional` is the
 collapse; `for_each_residual` is the predicate.** Wherever this document
 or the ledger says "the coherence reading gates," the predicate is meant
 — never the sum.
@@ -735,14 +735,14 @@ crept in: the kernel admits or refuses, it never optimizes.
 
 **THE CODE CAUGHT UP (DIRECTIVE 03, operator ruling 2026-08-01).** This
 section struck the `C`-gate on 2026-08-01 — and the SAME DAY
-`kernel/src/bridge.rs` landed `capacity_is_defined()`, a predicate
+`kernel/src/bridge.rs` landed `rank_is_defined()`, a predicate
 asserting that `D` is meaningless wherever the defect is non-zero, with
 a doc-comment instructing Article II and Article IV callers to *"consult
 this first."* That is precisely the gatekeeper this section had just
 denied `C` could ever be, re-entering as a method one file away. The
 document was right and the code was the drift.
 
-`capacity_is_defined()` is **DELETED**. The reasons are the ones §5
+`rank_is_defined()` is **DELETED**. The reasons are the ones §5
 already gave and one more from the code itself:
 
 - `coboundary_reduce_over` is TOTAL over any input tensor — it does not
@@ -1040,7 +1040,7 @@ transition shrinking `H¹` must REFUSE, never read healthy.
 flattened to one number, which is then available to descend.
 *Instance:* `extent: BigRational`; `C = Σ|R|`; `‖∂Δ‖`.
 *Defense:* Article I and `18_TORSION` §2b — L1 aggregates are lawful
-only where reported to a human lens. *Witness:* no aggregate crosses
+only where reported to an OPERATOR lens. *Witness:* no aggregate crosses
 into a computing path.
 
 **AV-4 · THE VACUOUS PASS.** An admitting arm on degenerate input, which
@@ -1210,7 +1210,7 @@ on a name the module never mentions.
 
 Why the seals and not the docstrings: "do not gate on this" failed TWICE
 in one day, in `validate_step`'s productivity gate and the kernel
-bridge's `capacity_is_defined`, and both times the prose was correct
+bridge's `rank_is_defined`, and both times the prose was correct
 while the code did the opposite. The compiler does not forget and does
 not need re-reading.
 

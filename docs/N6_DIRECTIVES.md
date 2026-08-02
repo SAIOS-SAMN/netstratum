@@ -84,11 +84,21 @@ The claim "two paths, one position" is a triangle: a 3-node Delta with
 an origin O, Δ(O→A) = node A's projection, Δ(O→B) = node B's
 projection, Δ(A→B) = 0. The cocycle residual over the canonical triple
 is R = B − A per coordinate; `coherence_functional` sums the six
-ordered triples, so C(Δ) = 6·ΣR² — exact, and zero iff every residual
-is zero. Consilience is C(Δ) = 0 exactly; anything else refuses typed
+ordered triples, so ~~C(Δ) = 6·ΣR²~~ **C(Δ) = 6·Σ|R|** — exact, and zero
+iff every residual is zero. Consilience is C(Δ) = 0 exactly; anything
+else refuses typed
 with the residual list carried whole (N4 directive 5: C is the summary
 scalar, never the payload). Arity ≥ 2 generalizes: n nodes, one shared
 position claimed pairwise; unanimity is the geometry, not a vote.
+
+**CORRECTED 2026-08-02 (`18_TORSION` §2n).** The formula above read
+`ΣR²`; the code sums ABSOLUTE VALUES (`delta.rs:193`, `c += r.abs()`)
+and THE PROPORTIONAL LAW bars squares as aggregators of difference.
+The multiplier 6 and the zero-iff claim are unaffected — `Σ|R| = 0` iff
+every residual is zero exactly as `ΣR²` would be. The surrounding
+argument therefore stands; only the aggregator was misstated. Note
+also that `C` is LENS-ONLY and gates nothing, which the parenthetical
+("C is the summary scalar, never the payload") already anticipated.
 
 ## Directives
 

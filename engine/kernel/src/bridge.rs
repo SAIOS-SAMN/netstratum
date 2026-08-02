@@ -47,9 +47,18 @@ use rfa_core::{
 
 /// BOND-1: the standing order, `source` → `target` at `rate`/tick.
 pub const CHANNEL_BOND: usize = 0;
-/// COVENANT-1: the vitrified pact's OUTSTANDING quota, obligor →
-/// beneficiary (`quota − delivered`, floored at zero — a fulfilled
-/// pact owes nothing and contributes nothing).
+/// COVENANT-1: the UNDELIVERED REMAINDER of a standing delivery
+/// obligation, obligor → beneficiary (`quota − delivered`, floored at
+/// zero — a fully delivered obligation owes nothing and contributes
+/// nothing).
+///
+/// **What the channel carries, stripped of the spec's vocabulary:** one
+/// party is bound to deliver a quantity of a resource to another by a
+/// deadline, with collateral posted against failure. `quota` is the
+/// amount owed, `delivered` the progress, and the projection carries
+/// the difference. Nothing in the mechanism is ceremonial — "covenant"
+/// and "pact" are inherited names (COVENANT-1, BUILD_ORDER §3), not
+/// descriptions, and this channel means the remainder and only that.
 pub const CHANNEL_COVENANT: usize = 1;
 /// ABSORB-1: the open reciprocity window's remainder, debtor →
 /// creditor.
@@ -113,7 +122,7 @@ pub enum Resolve {
 ///
 /// **Summing them destroys them.** `C(Δ) = Σ|R|` is a scalar aggregate,
 /// and `18_TORSION` §2b bars exactly that where the system computes —
-/// L1 survives only at a human lens. Worse, the residue composition
+/// L1 survives only at an OPERATOR lens. Worse, the residue composition
 /// law (the design owed at `KERNEL_RELAY` §7.4) has nothing to compose
 /// if the residuals were already added together, and `EQUATIONS` D3
 /// makes these the source of capacity: *the residue EMITS, D rises by

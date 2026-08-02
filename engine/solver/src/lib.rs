@@ -36,7 +36,7 @@ pub use solver_verify::{
     TileMirror, OBJ_OPS,
 };
 
-pub use search::{solve, solve_consulted, SolveRead};
+pub use search::{consult_observed, solve, solve_consulted, Consultation, SolveRead};
 pub use volume::{
     forge_volume, run_volume, solve_volume, VOp, VolDifficulty, Volume, VolumeSolveRead,
     VolumeTask,

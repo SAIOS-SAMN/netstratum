@@ -31,6 +31,7 @@
 //! that no state semantics ever live outside this function.
 
 pub mod bridge;
+pub mod motion;
 
 use cfe::dop::{ClosureEvent, Resource};
 use cfe::ipsal::Scope;
@@ -927,7 +928,21 @@ fn decay(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
                         orb,
                         prior.star,
                         step.stamp,
-                        &cfe::world::ease_of(&prior.techs, *orb_id),
+                        // RULESET EPOCHS (`21_KERNEL_PARAMETERS` §11): the judge
+                        // selects the rule by the stamp the DEED carries,
+                        // not by the rule standing today. A receipt
+                        // written under EPOCH 0 is judged by EPOCH 0
+                        // forever, which is what stops `replay` drifting
+                        // from the live path when a sealed rule moves.
+                        &cfe::world::ease_of(&prior.techs, *orb_id, step.stamp),
+                        // P2: the judge reads standing supply from the
+                        // SAME sealed function the proposer used, on
+                        // `prior`'s own orbs — one computation, two
+                        // judges (CHARTER §0b). A rate the kernel
+                        // accepted without re-deriving would be a number
+                        // a node could lie about, with the mint directly
+                        // downstream.
+                        &cfe::world::standing_supply(&prior.orbs),
                     )
                     .into_iter()
                     .find(|(held, _)| held == resource)

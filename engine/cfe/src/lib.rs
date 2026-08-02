@@ -15,6 +15,7 @@
 //!   unreceipted accrual is workspace and never persists.
 
 pub mod dop;
+pub mod epoch;
 pub mod ipsal;
 pub mod persist;
 pub mod query;
