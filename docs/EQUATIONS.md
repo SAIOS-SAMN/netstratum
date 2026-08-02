@@ -837,6 +837,20 @@ research and throttle gates await the tech-tree landing). Authority:
 
     heat_absorbed  ≤  banked_sink
     sink_consumed  =  heat_absorbed  =  vented_after_shed
+
+**CONVERGENCE IS THE OTHER HALF, AND IT IS A CAPABILITY.** Divergence
+sources; CONVERGENCE sinks. `rfa_core::flux` counts both poles by name —
+`sources`, `sinks`, `balanced` — because absorption is not a fault to be
+detected but the scarce half of the economy: a dim-star system holds
+*the rarest resource in a high-flux universe*, and sells it as `S_cool`.
+The Frost's entire trade is convergence.
+
+**A SINK IS NOT A TRAPPED INTERIOR.** What 18 §2d forbids is convergence
+with NO EGRESS — a closed region that takes and never sheds. The line
+above is exactly why absorption is lawful: `sink_consumed =
+heat_absorbed = vented_after_shed`, so what is taken IS shed, and the
+absorber's own vent ledger carries it. **Trapped is convergence minus
+the shedding, never convergence itself.**
     captured       =  α · raw excess,   α ∈ [0,1] exact rational
     (1−α) accrues to the vented ledger, settles as VentSettled — never un-receipted
 

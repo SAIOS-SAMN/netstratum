@@ -307,17 +307,33 @@ pub fn divergence(delta: &Delta) -> Vec<Vec<Ratio>> {
 /// SINK, how many are balanced. Counted over any fiber layer carrying a
 /// non-zero divergence at that vertex (`18_TORSION` §2d, THE SIGN LAW).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Egress {
-    /// EGRESS vertices: `div > 0` on some layer.
+pub struct Flux {
+    /// DIVERGENCE — `div > 0` on some layer. The vertex SOURCES: it
+    /// emits more than it takes. Egress.
     pub sources: usize,
-    /// INGRESS vertices: `div < 0` on some layer.
-    pub trapped: usize,
+    /// CONVERGENCE — `div < 0` on some layer. The vertex SINKS: it
+    /// absorbs more than it emits, and **that is a capability, not a
+    /// fault.**
+    ///
+    /// A sink is the scarce half of the economy. `05` §1.4: a dim-star
+    /// system *"holds the rarest resource in a high-flux universe:
+    /// radiator headroom"*, and sells it as `S_cool` — absorption
+    /// measured in joule-commensurable units. The Frost's entire trade
+    /// is convergence.
+    ///
+    /// **A SINK IS NOT A TRAPPED INTERIOR.** What `18` §2d forbids is
+    /// convergence with NO egress — a closed region that takes and
+    /// never sheds. Absorption is lawful precisely BECAUSE it sheds:
+    /// `sink_consumed = heat_absorbed = vented_after_shed` (`05` §1.4).
+    /// That judgment needs the shed ledger and is not visible in `Δ`
+    /// alone, so this reading reports the pole and never convicts it.
+    pub sinks: usize,
     /// `div = 0` on every layer — the vertex circulates, sourcing and
     /// sinking nothing.
     pub balanced: usize,
 }
 
-impl Egress {
+impl Flux {
     /// **Is the relation DIVERGENCE-FREE — `div Δ = 0` at every vertex?**
     ///
     /// Equivalently: pure circulation. Nothing sources, nothing sinks,
@@ -336,21 +352,23 @@ impl Egress {
     ///     |V⁻| = 0   ⟹   Σ_{V⁺} div_i = 0   ⟹   |V⁺| = 0
     /// ```
     ///
-    /// So `trapped == 0` forces `sources == 0` and every vertex
+    /// So `sinks == 0` forces `sources == 0` and every vertex
     /// balanced. The predicate could never distinguish an emitting
     /// region from ordinary balanced circulation — an anti-trapped
     /// configuration does not exist in a closed antisymmetric relation.
     /// It now carries the name of what it actually decides. (It reads
-    /// both counts rather than `trapped == 0` alone, so the meaning is
+    /// both counts rather than `sinks == 0` alone, so the meaning is
     /// legible without the reader having to re-derive the conservation.)
     pub fn is_pure_circulation(&self) -> bool {
-        self.sources == 0 && self.trapped == 0
+        self.sources == 0 && self.sinks == 0
     }
 }
 
-/// The egress reading (see [`divergence`]).
-pub fn egress(delta: &Delta) -> Egress {
-    let mut census = Egress { sources: 0, trapped: 0, balanced: 0 };
+/// THE FLUX CENSUS — both poles of the divergence, counted and
+/// named: DIVERGENCE sources, CONVERGENCE sinks, and the balanced
+/// circulate. Neither pole is a fault (see [`divergence`]).
+pub fn flux(delta: &Delta) -> Flux {
+    let mut census = Flux { sources: 0, sinks: 0, balanced: 0 };
     for row in divergence(delta) {
         let positive = row.iter().any(|d| d.is_positive());
         let negative = row.iter().any(|d| d.is_negative());
@@ -361,7 +379,7 @@ pub fn egress(delta: &Delta) -> Egress {
                     census.sources += 1;
                 }
                 if negative {
-                    census.trapped += 1;
+                    census.sinks += 1;
                 }
             }
         }
