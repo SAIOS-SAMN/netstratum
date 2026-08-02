@@ -180,3 +180,124 @@ Four decisions are owed, in the order they bite:
 
 Each lands as: red-first witness → rule change → VERSION bump →
 `19_KERNEL` §6 updated. No schema bump on any of the four.
+
+---
+
+## §7 THE MONETARY RULING — landed, blocked, and what each needs (2026-08-02)
+
+The operator ruled all four and cleared `P1`+`P2` to land. **Two of the
+four are discharged; two cannot land in the form given.** Measured
+against the tree, not argued.
+
+### 7a. `P4` — DISCHARGED, no amendment needed
+
+The ruling asks that the seed *operate strictly at `t = 0` and evaluate
+to `0` for all `t > 0`*. **That is already true by construction:**
+`world.rs:1351` refuses a second founding outright
+(`ColonyAlreadyFounded`). There is no `t > 0` branch to zero because
+there is no `t > 0` call.
+
+Pinned rather than amended — `kernel/tests/parameter_pins.rs`:
+`p4_the_seed_cannot_fire_twice`, `p4_founding_is_the_only_unminted_arrival`.
+**Zero VERSION cost.**
+
+### 7b. `P3` — CANNOT LAND. Three separate blocks.
+
+    P3(rung) = 1 / (1 + e^{−k(rung − threshold)})
+
+1. **THE SIGMOID IS NOT COMPUTABLE HERE.** `cfe/src/ratio.rs` exposes
+   `ratio`, `is_canonical`, `encode`, `decode` — and nothing else.
+   There is no `e`, no exponential, no root. A logistic curve is
+   irrational at essentially every point, and `18_TORSION` §2b bars
+   roots and floats outright. This is a **type-level impossibility**,
+   not a preference.
+2. **WRONG DOMAIN.** `P3` is `ease_of(techs, orb)` — a function of an
+   orb's TECH CONDITION that scales `P2`'s decay bound. It has no
+   `rung` argument and never sees the difficulty ladder. The formula
+   as written substitutes the mint's domain for the sink modifier's.
+3. **THE RUNG 0–2 FIX IS ATTACHED TO THE WRONG PARAMETER.** *"Rungs
+   0–2 assigned non-zero baseline values"* is a change to `P1`'s
+   ladder (`mint_bound`), which is what pays rungs. `P3` cannot pay
+   anything — it modifies decay.
+
+**The intent survives all three.** A gradient replacing the `== 5`
+cliff is right and is landable as a **rational ramp** over the tech
+condition — exact, monotone, bounded, and continuous at genesis if
+condition 5 still yields `1/2`. That form needs one word of
+confirmation; the sigmoid does not.
+
+### 7c. `P1` — DIRECTION RULED, FORM BLOCKED
+
+    P1 = Base(rung) · ( Φ_D / (Σ + ε) )
+
+**What is sound and is now settled:** issuance softens as supply grows
+without matching rank. `read_entangled(prior).rank` supplies the rank
+term and is landed. **Confirmed safe:** `capacity_law` admits only
+`Vacuity::Entangled` (`boundary.rs:191`), which requires `D > 0`, so a
+rank-denominated term **can never see a zero denominator** — pinned as
+`p1_capacity_law_refuses_before_any_rank_denominated_term_is_read`.
+
+**What blocks:**
+
+1. **`Φ_D` IS UNDEFINED.** "Dimensional capacity" names no landed
+   quantity. `D` is an integer rank; `Φ_D` is a distinct symbol used
+   without a definition, and an undefined symbol cannot be compiled.
+   The obvious reading is `Φ_D := rank`, but that is a substitution,
+   not a translation, so it is flagged rather than assumed.
+2. **GENESIS CONTINUITY FAILS AS STATED.** The ruling requires
+   `P1 → Base(rung)` as `Σ → 0`. **`Σ` is never 0 in a live world** —
+   `P4` seeds Iron 20 + Biomass 10 at founding, so supply is 30 before
+   any deed is judged. Continuity has to be pinned against the actual
+   genesis state, which is what
+   `p1_the_landed_rungs_are_1_4_7_and_zero_below` exists to hold.
+3. **`ε` IS A FIFTH LITERAL.** An epsilon guarding a division is an
+   undialed number doing load-bearing work in the mint. **A dynamic
+   parameter law that introduces more literals than it retires has
+   retired nothing** — and with `D > 0` guaranteed, the guard `ε`
+   exists to provide is unnecessary.
+4. **UNBOUNDED DENOMINATORS.** Exact-rational division by a running
+   supply total compounds denominators, which is the failure
+   `world.rs:4840` records as *"the 2^1100 denominator lesson."*
+   Whatever form lands must be denominator-bounded by construction.
+
+### 7d. `P2` — DIRECTION RULED, FORM REVERSES A LANDED LESSON
+
+    P2 = Max( 1/32, 1/32 · (Σ / Φ_D) )
+
+1. **THIS MAKES DEMURRAGE PROPORTIONAL.** The sealed rule is
+   deliberately flat: *"`min(rate · ease · elapsed, banked)` per
+   leaking resource, **FLAT, never proportional** (the 2^1100
+   denominator lesson)"* (`world.rs:4840`). Scaling the rate by
+   `Σ/Φ_D` is the exact move that lesson was learned from. **The most
+   serious of the four blocks**, because it reverses a rule the tree
+   arrived at by failure.
+2. **UNBOUNDED ABOVE.** `Max` supplies a floor and no ceiling. A rate
+   exceeding `1` per tick is total confiscation each tick; `min(…,
+   banked)` prevents it going negative but not going punitive. **#16
+   requires a BOUNDED function** — this one is bounded below only.
+3. **`Φ_D = 0` IS REACHABLE HERE.** Unlike `P1`, demurrage is **not**
+   gated by `capacity_law` — an orb with no standing obligations decays
+   exactly like one with many. So the rank denominator can be zero at
+   the moment `P2` is read. Division by zero, in the decay path, on a
+   live world.
+
+### 7e. WHAT IS OWED — one ruling, not four
+
+`P4` is done. `P3`, `P1` and `P2` all reduce to a single question,
+because the same substitution fixes all three:
+
+> **Confirm the constitutional form: rank-denominated feedback carried
+> as a BOUNDED, FLAT ladder — comparison and clamping rather than
+> running division — with `Φ_D := rank`, a declared floor and ceiling
+> on every parameter, and no `ε`.**
+
+That preserves every ruled DIRECTION — mint softens as supply outruns
+rank, decay stiffens, the cliff becomes a ramp, rungs 0–2 may be paid —
+while staying exact, denominator-bounded, defined at `D = 0`, and
+continuous at genesis.
+
+**Not landed pending that word.** `P1` and `P2` price the currency and
+gate the mint on a live game; landing an undefined symbol, an
+unbounded rate and a reachable division by zero would be worse than
+landing nothing. The pins are in place so the amendment is a one-commit
+change once the form is confirmed.
