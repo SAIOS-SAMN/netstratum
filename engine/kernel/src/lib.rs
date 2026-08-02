@@ -1114,12 +1114,19 @@ pub enum Layer {
 /// must never be one, because a wildcard is exactly the inference this
 /// function exists to abolish.
 ///
-/// **`None` means NOT YET RULED — it does not mean "no layer".** Three
-/// deeds are genuinely contested (`17` §3d.3) and a false assignment
-/// would be worse than an absent one: a gate consulting this must
-/// REFUSE on `None` rather than assume a reach. That is the same
-/// discipline `scope_of` uses for a deed with no actor scope, and the
-/// same discipline `covered()` uses for an unjudged event.
+/// **`None` means NOT YET RULED — it does not mean "no layer".** A
+/// false assignment is worse than an absent one, so a genuinely
+/// contested deed answers `None` and a gate consulting this must REFUSE
+/// on it rather than assume a reach — the discipline `scope_of` uses
+/// for a deed with no actor scope and `covered()` for an unjudged
+/// event.
+///
+/// **No deed answers `None` today** (2026-08-02): the three that were
+/// contested were all settled by reading their projections. The
+/// `Option` REMAINS in the signature deliberately — the next deed whose
+/// reach is genuinely undecided needs an honest home that does not
+/// require changing this signature under pressure, which is exactly
+/// when a default would get invented.
 ///
 /// The rows are keyed on WHAT THE DEED CARRIES, never on the document
 /// it is described in — a carrier is not a mechanism (`17` §3d.1).
@@ -1181,12 +1188,27 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // scope, exactly as a carrier is not a mechanism.
         E::FrictionSettled { .. } => Some(Layer::Universal),
 
-        // ── NOT YET RULED — contested, and named rather than guessed ─
-        // Want*: reads a line's PERCEPTION axis while striking an orb.
-        // IncursionStruck: carries era, world AND line — keyed on all
-        //   three layers at once.
-        E::WantStruck { .. } | E::WantRelieved { .. }
-        | E::IncursionStruck { .. } => None,
+        // ── RULED 2026-08-02 by reading the projection ───────────────
+        // WantStruck/WantRelieved: the whole block is gated on a SEALED
+        // genesis — "no seal, no entity type, no want" — and each kind
+        // on a specific axis: resonance needs perception == 3
+        // (harmonic), novelty needs disposition == 2 (empiricist). A
+        // line with different axes NEVER EXPERIENCES THE MECHANIC. That
+        // is civilizational by the exact criterion: a people's own, and
+        // never a precondition for anyone else's standing.
+        E::WantStruck { .. } | E::WantRelieved { .. } => Some(Layer::Civilizational),
+
+        // IncursionStruck LOOKED like it spanned all three layers,
+        // carrying era, world AND line. It does not, and the puzzle
+        // dissolves on a sharper criterion: A LAYER IS WHAT A DEED
+        // BINDS, NOT WHAT IT MENTIONS. Replay does nothing with it
+        // (`world/replay.rs`: `IncursionStruck { .. } => {}`), no live
+        // path consumes it, and it is universe-ledger only — "the
+        // archive never edited, the living never raided". The world and
+        // line names are the SUBJECT of the record, not keys binding
+        // those entities, exactly as `EraAnnexed` carries a world and
+        // binds none.
+        E::IncursionStruck { .. } => Some(Layer::Universal),
     }
 }
 

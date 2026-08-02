@@ -98,24 +98,55 @@ fn a_ceremonial_deed_and_a_universal_one_are_told_apart() {
 }
 
 #[test]
-fn not_ruled_is_a_value_and_never_a_default() {
-    // `None` MEANS NOT YET RULED. Three deeds are genuinely contested
-    // (§3d.3) and a false assignment would be worse than an absent one,
-    // so they answer `None` and any gate consulting the layer must
-    // REFUSE on it rather than assume a reach. Same discipline as
-    // `scope_of`'s None and `covered()`'s Unjudged.
+fn every_deed_the_codec_carries_has_a_ruled_layer() {
+    // ALL THREE CONTESTED DEEDS ARE NOW SETTLED, each by reading its
+    // projection rather than the document describing it:
     //
-    // This pin SHRINKS as the contested three are ruled. It must never
-    // grow: a new deed answering None means somebody skipped the
-    // decision the exhaustive match forced on them.
-    let contested = [
+    //   FrictionSettled  -> Universal      prices unlike CONDUCT
+    //                       (returned_across / returned + extracted)
+    //   Want*            -> Civilizational gated on a SEALED genesis
+    //                       axis; a line without it never experiences
+    //                       the mechanic at all
+    //   IncursionStruck  -> Universal      universe-ledger only; replay
+    //                       does nothing with it and no live path reads
+    //                       it. It MENTIONS a world and a line; it
+    //                       BINDS neither.
+    //
+    // The last one sharpened the criterion, and the sharper one is the
+    // keeper: A LAYER IS WHAT A DEED BINDS, NOT WHAT IT MENTIONS.
+    // `EraAnnexed` carries a world name and binds no world either.
+    for event in [
+        ClosureEvent::FrictionSettled { orb_id: 1, amount: ratio(1, 1) },
+        ClosureEvent::WantStruck { orb_id: 1, kind: 2, reading: ratio(1, 1) },
+        ClosureEvent::WantRelieved { orb_id: 1, kind: 2 },
         ClosureEvent::IncursionStruck {
             era: "e".into(),
             world: "w".into(),
             line: "l".into(),
         },
-    ];
-    for event in contested {
-        assert_eq!(layer_of(&event), None, "{event:?} is contested, not defaulted");
+    ] {
+        assert!(
+            layer_of(&event).is_some(),
+            "{event:?} was ruled — nothing should answer None today"
+        );
     }
+
+    // `Option` STAYS IN THE SIGNATURE even with no member. The next
+    // deed whose reach is genuinely undecided needs an honest home that
+    // does not require widening this signature under pressure — which
+    // is exactly the moment a default gets invented.
+    assert_eq!(
+        layer_of(&ClosureEvent::WantStruck { orb_id: 1, kind: 2, reading: ratio(1, 1) }),
+        Some(Layer::Civilizational),
+        "a want a line cannot have is that line's own mechanic"
+    );
+    assert_eq!(
+        layer_of(&ClosureEvent::IncursionStruck {
+            era: "e".into(),
+            world: "w".into(),
+            line: "l".into()
+        }),
+        Some(Layer::Universal),
+        "a universe-ledger record binds nothing it names"
+    );
 }

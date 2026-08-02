@@ -762,14 +762,31 @@ gated by nothing.
   shape struck at the top of this work: good defined as the absence of
   bad. Whether convergence should PAY is an economic ruling that mints
   value, and it is not taken from this lane.
-- **`WantStruck` / `WantRelieved` (WANT-1)** — the cognitive want reads
-  a line's PERCEPTION axis while striking on an orb. World or
-  civilizational depending on which end is load-bearing; the projection
-  needs reading before either is claimed.
-- **`IncursionStruck`** — carries `era, world, line`: it is keyed on
-  ALL THREE layers at once, which is why its defence (task #15) has no
-  obvious home. A deed that spans layers may be the one shape the
-  taxonomy has to grow to hold.
+- **`WantStruck` / `WantRelieved` — RULED CIVILIZATIONAL.** The whole
+  block is gated on a SEALED genesis — *no seal, no entity type, no
+  want; pre-G1 worlds are pre-identity, lawfully neutral* — and each
+  kind on a specific axis: resonance needs `perception == 3`
+  (harmonic), novelty needs `disposition == 2` (empiricist). **A line
+  with different axes never experiences the mechanic at all**, which is
+  civilizational by the exact criterion.
+
+- **`IncursionStruck` — RULED UNIVERSAL, and it sharpened the
+  criterion.** It looked like it spanned all three layers, carrying
+  `era`, `world` AND `line`. It does not, and the puzzle dissolves on a
+  better question: **A LAYER IS WHAT A DEED BINDS, NOT WHAT IT
+  MENTIONS.** Replay does nothing with it (`world/replay.rs`:
+  `IncursionStruck { .. } => {}`), no live path consumes it, and it is
+  universe-ledger only — *the archive never edited, the living never
+  raided*. The world and line names are the SUBJECT of the record, not
+  keys binding those entities — exactly as `EraAnnexed` carries a world
+  name and binds no world.
+
+**NOTHING IS CONTESTED TODAY.** All three were settled by reading their
+projections, and none of the three answers matched the guess made from
+its surrounding prose. The `Option` in `layer_of`'s signature stays
+anyway: the next deed whose reach is genuinely undecided needs an
+honest home that does not require widening the signature under
+pressure, which is exactly the moment a default gets invented.
 
 **THE TABLE ABOVE IS NOT THE AUTHORITY — `kernel::layer_of` IS**
 (operator refusal 2026-08-02: *this is an impossibility — we are
