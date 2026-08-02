@@ -2349,12 +2349,139 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             reading
                         );
                     }
+                    // BOOK-1: the four above are the CHARTER's. A line
+                    // may mint its own, and a display that showed only
+                    // four would imply the set is closed.
+                    let minted: Vec<_> =
+                        orb.books().into_iter().filter(|held| !held.chartered).collect();
+                    match minted.is_empty() {
+                        true => println!(
+                            "  {}",
+                            style.dim("no minted books — `book mint <name>` opens an account of your own")
+                        ),
+                        false => {
+                            for view in minted {
+                                let reading = match view.standing() {
+                                    Some(value) => format!("ratio {}", style.strong(&amount(&value))),
+                                    None => style.dim("no deeds yet").to_string(),
+                                };
+                                let mark = match view.archived {
+                                    true => style.warn(" (closed)"),
+                                    false => String::new(),
+                                };
+                                println!(
+                                    "  {:<11} kept {} · lost {} — {}{}",
+                                    view.name,
+                                    style.strong(&amount(&view.kept)),
+                                    style.strong(&amount(&view.lost)),
+                                    reading,
+                                    mark
+                                );
+                            }
+                        }
+                    }
                 }
                 None => println!(
                     "{} no colony yet — {} begins the story",
                     style.bad("✗"),
                     style.strong("found <name>")
                 ),
+            }
+        }
+        // BOOK-1 (19_LENS §16) — the open registry's doors. Amounts
+        // come BEFORE the name on `post` so a name may hold spaces
+        // without the parse turning ambiguous.
+        Some("book") | Some("books") => {
+            let sub = words.next();
+            match world.orb_by_id(*current) {
+                None => println!(
+                    "{} no colony yet — {} begins the story",
+                    style.bad("✗"),
+                    style.strong("found <name>")
+                ),
+                Some(_) => match sub {
+                    None | Some("list") => {
+                        println!(
+                            "{}  {}",
+                            style.head("BOOKS"),
+                            style.dim("the charter's four and everything this line minted — one view, no privilege")
+                        );
+                        let orb = world.orb_by_id(*current).expect("checked above");
+                        for view in orb.books() {
+                            let standing = match view.standing() {
+                                Some(value) => format!("standing {}", style.strong(&amount(&value))),
+                                None => style.dim("no entries yet").to_string(),
+                            };
+                            // Pad the PLAIN word before painting it:
+                            // the colour codes count toward a format
+                            // width and would skew the column.
+                            let mark = match (view.chartered, view.archived) {
+                                (true, _) => style.dim(&format!("{:<7}", "charter")),
+                                (false, true) => style.warn(&format!("{:<7}", "closed")),
+                                (false, false) => style.ok(&format!("{:<7}", "minted")),
+                            };
+                            println!(
+                                "  {} {:<22} kept {} · lost {} — {}",
+                                mark,
+                                view.name,
+                                style.strong(&amount(&view.kept)),
+                                style.strong(&amount(&view.lost)),
+                                standing
+                            );
+                        }
+                    }
+                    Some("mint") => {
+                        let name = words.collect::<Vec<_>>().join(" ");
+                        match world.mint_book(*current, &name) {
+                            Ok(_) => println!(
+                                "{} book {} minted — an account of this line's own making",
+                                style.ok("✓"),
+                                style.strong(&name)
+                            ),
+                            Err(refusal) => refuse(world, &refusal, style),
+                        }
+                    }
+                    Some("post") => {
+                        let kept = words.next().and_then(parse_ratio_arg);
+                        let lost = words.next().and_then(parse_ratio_arg);
+                        let name = words.collect::<Vec<_>>().join(" ");
+                        match (kept, lost, name.is_empty()) {
+                            (Some(kept), Some(lost), false) => {
+                                let kind = cfe::books::kind_of(&name);
+                                match world.post_book(*current, kind, kept, lost) {
+                                    Ok(()) => println!(
+                                        "{} posted to {} — both sides at once, as a book is kept",
+                                        style.ok("✓"),
+                                        style.strong(&name)
+                                    ),
+                                    Err(refusal) => refuse(world, &refusal, style),
+                                }
+                            }
+                            _ => println!(
+                                "{} {} — the amounts come first so a name may hold spaces",
+                                style.bad("✗"),
+                                style.strong("book post <kept> <lost> <name>")
+                            ),
+                        }
+                    }
+                    Some("archive") | Some("close") => {
+                        let name = words.collect::<Vec<_>>().join(" ");
+                        match world.archive_book(*current, cfe::books::kind_of(&name)) {
+                            Ok(()) => println!(
+                                "{} {} closed to writing — every entry it took stays readable",
+                                style.ok("✓"),
+                                style.strong(&name)
+                            ),
+                            Err(refusal) => refuse(world, &refusal, style),
+                        }
+                    }
+                    Some(other) => println!(
+                        "{} no such book verb {} — try {}",
+                        style.bad("✗"),
+                        style.strong(other),
+                        style.strong("book · book mint · book post · book archive")
+                    ),
+                },
             }
         }
         Some("planets") => {
@@ -2510,6 +2637,7 @@ fn help(style: &Style) {
         ("bond <rate> <res> to <p> [for <n>]", "seal a standing order: rate/tick streams without per-tick clearing, settled in one receipt at each touch — a term bond expires orderly; severing or defaulting posts the notice load"),
         ("sever <res> to <p> · bonds", "cut a standing bond (the load posts to the cutter) · list the standing orders"),
         ("covenant <q> <res> to <p> within <n>", "vitrify a delivery pact in the Glasskeeper lattice — collateral (priced by your fidelity books, never barred) locks until the quota is delivered (release) or the deadline passes (BREACH_AND_SLASH); `covenants` lists the open pacts"),
+        ("book · book mint <name> · book post <kept> <lost> <name> · book archive <name>", "BOOK-1: the OPEN registry — a line mints its own kinds of account beside the charter's four. A book is a DUAL ledger (kept against lost) and posts both sides at once. Archiving closes it to WRITING and never to reading: every entry it took stays. A book IS its normalized name, so re-minting one is not a second book, and the charter's four can be neither minted over nor closed"),
         ("ideology", "the dual cohesion ledger for this planet — the four axes, their books, and the derived readings; divergent trade partners pay a friction entropy tax, aligned ones pay zero"),
         ("charter <world> deal <n>", "ROUTE-1: charter a maintained lane — melt × (1−η), η from the pair's best instrument grade; upkeep draws at the year voice, unpaid lanes lapse"),
         ("forge <condition>", "MANU-1: forge an instrument from a crystallized condition + the converter chain (alloy = grade; diamond at 3+) — scan reach = base + best grade"),
@@ -2613,6 +2741,40 @@ fn act_as(world: &mut World, actor: u64, rest: &[&str], style: &Style, current: 
             },
             None => println!("{} as <handle> raze <tile>", style.bad("✗")),
         },
+        ["book", "mint", name @ ..] if !name.is_empty() => {
+            match world.mint_book_as(actor, *current, &name.join(" ")) {
+                Ok(_) => println!(
+                    "{} entity {actor} minted a book — receipt tagged to it",
+                    style.ok("✓")
+                ),
+                Err(refusal) => refuse(world, &refusal, style),
+            }
+        }
+        ["book", "post", kept, lost, name @ ..] if !name.is_empty() => {
+            match (parse_ratio_arg(kept), parse_ratio_arg(lost)) {
+                (Some(kept), Some(lost)) => {
+                    let kind = cfe::books::kind_of(&name.join(" "));
+                    match world.post_book_as(actor, *current, kind, kept, lost) {
+                        Ok(()) => println!(
+                            "{} entity {actor} posted a dual entry — receipt tagged to it",
+                            style.ok("✓")
+                        ),
+                        Err(refusal) => refuse(world, &refusal, style),
+                    }
+                }
+                _ => println!("{} as <handle> book post <kept> <lost> <name>", style.bad("✗")),
+            }
+        }
+        ["book", "archive", name @ ..] | ["book", "close", name @ ..] if !name.is_empty() => {
+            let kind = cfe::books::kind_of(&name.join(" "));
+            match world.archive_book_as(actor, *current, kind) {
+                Ok(()) => println!(
+                    "{} entity {actor} closed a book to writing — receipt tagged to it",
+                    style.ok("✓")
+                ),
+                Err(refusal) => refuse(world, &refusal, style),
+            }
+        }
         ["collect"] => match world.collect_as(actor, *current) {
             Ok(count) => println!(
                 "{} entity {actor} collected — {count} receipt(s) tagged to it",
@@ -2623,7 +2785,7 @@ fn act_as(world: &mut World, actor: u64, rest: &[&str], style: &Style, current: 
         _ => println!(
             "{} as <handle> supports: {} — identity changes authority, not vocabulary",
             style.bad("✗"),
-            style.strong("zone · raze · collect")
+            style.strong("zone · raze · collect · book")
         ),
     }
 }
