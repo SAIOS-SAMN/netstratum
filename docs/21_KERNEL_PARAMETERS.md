@@ -756,3 +756,56 @@ Extracted to `engine/ratio` — a leaf with no internal dependencies.
 `cfe` re-exports it so no caller moved. This removes an ACCIDENTAL
 inversion while leaving the DELIBERATE one (§13c) exactly as charter
 requires. 142 suites green.
+
+---
+
+## §14 THE STANDING DEADLOCK — `capacity_law` refuses every mint (verified 2026-08-02)
+
+remediations-lane measured `MintWithoutStanding{Void}` 61 then 68 times
+per 10 beats on the live board. **Verified here rather than accepted**
+(`kernel/tests/standing_reality.rs`), because it is a verdict on this
+lane's own invariant:
+
+    orbs=1  rank=0  verdict=Void      -> is_admitted() == false
+
+### 14a. IT IS A BOOTSTRAP DEADLOCK, not a tuning problem
+
+`capacity_law` admits only `Vacuity::Entangled`, which needs `D > 0`.
+`D` counts independent cycles in the obligation complex. A cycle needs
+relations; relations are bonds, covenants and debts; those are made by
+spending value. **So a world must mint to relate, and must relate to
+mint.** A board of 44 books with one orb each has no obligations at
+all, so it can never leave rank 0 by its own action.
+
+Flipping Phase 3 today would halt minting entirely — the relay's
+warning is exactly right, and this is why.
+
+### 14b. THE DISTINCTION THE VERDICT IS MISSING
+
+`Void` is returned both for *a world with no relations yet* and for *a
+world whose relations carry nothing*. Those are not the same state. The
+first is unformed and ought to be able to start; the second is
+genuinely vacuous and is what the law was written to refuse. Collapsing
+them is what turns a forgery gate into a bootstrap lock.
+
+### 14c. WHAT IS OWED — an operator ruling, not a coder choice
+
+**May a world with no standing obligations mint at all?** Three shapes,
+and this lane will not pick one:
+
+1. **A GENESIS WINDOW.** Early mints are exempt, the way
+   `founding_reserves` already creates value without work (P4). Bounded
+   by receipt count or stamp, so the exemption cannot be farmed.
+2. **SPLIT THE VERDICT.** `Void` for relations-that-carry-nothing,
+   something else for no-relations-yet, and admit only the latter.
+   Requires no new state — the projection already knows which it is.
+3. **DIFFERENT STANDING FOR THE FIRST RUNG.** Rungs 0–2 pay zero today
+   (§2), so an unstanding world could still be allowed to solve them —
+   earning nothing but forming the relations that later mints need.
+
+Option 3 is the only one that costs no exemption and no new verdict:
+the ladder's unpaid rungs become the bootstrap path. **Flagged as the
+cheapest, not chosen.**
+
+**Until this is ruled, K4's Phase 3 must not flip.** The gate would
+work exactly as designed and stop the economy.
