@@ -380,3 +380,74 @@ pub fn compose_scheduled(standing: &Standing, mut moves: Vec<(Slot, Move)>) -> S
 pub fn envelope(n: u64, rank: u32) -> Option<u128> {
     (n as u128).checked_pow(rank)
 }
+
+// ── THE ONLY THING THAT MAKES THIS ALGEBRA REAL ──────────────────────
+
+use cfe::dop::ClosureEvent;
+use cfe::world::Committed;
+
+/// PROJECT a committed world onto a standing — the banked and seat axes
+/// read straight out of real state.
+///
+/// **Without this the algebra is fiction.** A `Move` that cannot be
+/// checked against what the engine actually does is an island, and
+/// `rfa-core` was already that island once (`bridge.rs` §head). Every
+/// law in this module is worth exactly as much as this projection and
+/// [`move_of`] together can reproduce.
+pub fn project(state: &Committed) -> Standing {
+    let mut banked = Vec::new();
+    for orb in &state.orbs {
+        for (resource, held) in &orb.banked {
+            banked.push(((orb.orb_id, *resource), held.clone()));
+        }
+    }
+    banked.sort_by(|a, b| a.0.cmp(&b.0));
+    banked.retain(|(_, held)| *held != ratio(0, 1));
+
+    let mut seats: Vec<(String, u8)> = state.stations.clone();
+    seats.sort();
+
+    Standing { banked, seats, books: Vec::new(), records: Vec::new() }
+}
+
+/// THE MOVE ONE DEED MAKES — `event → Move`.
+///
+/// **DELIBERATELY PARTIAL.** `None` means *this algebra cannot yet
+/// express that deed*, and that is a measurement rather than a hole to
+/// paper over: the honest coverage number is how many events return
+/// `Some` AND reproduce `replay` on a real world, not how many source
+/// lines mention an axis.
+///
+/// Every arm added here must arrive with a witness that applies it to
+/// real committed state and compares against what the engine did
+/// (`motion_certification.rs`). An arm without one is a claim, not a
+/// rule.
+pub fn move_of(event: &ClosureEvent) -> Option<Move> {
+    match event {
+        // A transfer is TWO banked legs. When source and target are the
+        // same orb they share a key, and a Move carrying one key twice
+        // is not canonical — `Standing::then` would apply the legs
+        // SEQUENTIALLY and could floor between them, turning a no-op
+        // into a loss. Built through `then_free`, which merges.
+        ClosureEvent::ResourceTransferred { from_orb, to_orb, resource, amount } => {
+            let out = Move::banked_of(*from_orb, *resource, -amount.clone());
+            let into = Move::banked_of(*to_orb, *resource, amount.clone());
+            Some(out.then_free(&into))
+        }
+        ClosureEvent::StationSeated { line, station } => {
+            Some(Move { seats: vec![(line.clone(), *station)], ..Move::default() })
+        }
+        ClosureEvent::DemurrageSettled { orb_id, resource, amount } => {
+            Some(Move::banked_of(*orb_id, *resource, -amount.clone()))
+        }
+        // YIELD-1: a collection banks what the zones produced. Added
+        // only after a live run showed 0/2 coverage — the deeds a world
+        // actually writes are not the deeds that read well on paper.
+        ClosureEvent::YieldCollected { orb_id, resource, amount } => {
+            Some(Move::banked_of(*orb_id, *resource, amount.clone()))
+        }
+        // NOT YET EXPRESSIBLE. Not a default arm that guesses — an
+        // explicit refusal, so coverage stays measurable.
+        _ => None,
+    }
+}
