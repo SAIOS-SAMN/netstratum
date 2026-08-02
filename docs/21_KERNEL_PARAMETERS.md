@@ -301,3 +301,66 @@ gate the mint on a live game; landing an undefined symbol, an
 unbounded rate and a reachable division by zero would be worse than
 landing nothing. The pins are in place so the amendment is a one-commit
 change once the form is confirmed.
+
+---
+
+## §8 CROSS-LANE COLLISION — `P2` and capacity-lane §6a rewrite one flow
+
+Capacity-lane is landing a founding economy whose tithe rides the
+demurrage rail. It correctly stopped short of the kernel — *"that's
+kernel surgery on a shared crate, so I haven't done it"* — and the lane
+map puts `engine/kernel/` here. This records the collision surface and
+the one economic consequence neither lane has stated.
+
+### 8a. FOUR SHARED ORGANS
+
+    demurrage_due          P2 needs supply+rank; §6a needs the ward
+                           split. One function, one signature change,
+                           two reasons.
+    decay() / I5           P2 moves the BOUND; §6a needs I5 to verify
+                           a two-sided settlement. Same invariant.
+    DemurrageSettled (29)  `{ orb_id, resource, amount }`, encoded via
+                           `amount_layout` — ONE-SIDED, booked as a
+                           pure negative. §6a needs a destination, so
+                           it is a WIRE AMENDMENT. P2 needs none.
+    ease_of                CHANGED at `d52f3fd` (P3): the `== 5` cliff
+                           is now a gradient. Any §6a reasoning
+                           audited against the cliff should be re-read
+                           — the tithe now rides a smooth rate.
+
+### 8b. THE CONSEQUENCE — §6a WEAKENS `P2` EXACTLY AS THE ECONOMY GROWS
+
+§6a's conservation claim is right and its **stability** claim is not.
+
+    tithe   = decay · capacity(ward)/capacity(world)   → TRANSFERRED
+    burned  = decay − tithe                            → DESTROYED
+
+Instantaneously `ΔΣ = −burned ≤ 0`, so the economy is deflationary at
+every step — that much holds. But `burned = decay · (1 − share)`, and
+**`share` rises as wards accumulate capacity.** As `share → 1`,
+`burned → 0`: the sink asymptotically vanishes while `P1` keeps
+issuing.
+
+`P2` exists to be the counterweight to `P1`'s issuance (§3). §6a
+weakens that counterweight in proportion to exactly the quantity that
+grows over a world's life. **The two rulings are individually sound and
+jointly divergent**, and neither document says so.
+
+Not a veto — it is a real mechanism and the ward should earn. It needs
+one of: a floor on `burned` that `share` cannot erode, a `share`
+denominated so it cannot approach 1, or `P2`'s rate stiffening fast
+enough to outrun it (which is what `P2` already does — so the two may
+compose if the rate's response is steeper than `share`'s growth, and
+**that is a measurable question, not a matter of taste**).
+
+### 8c. SEQUENCE — `P2` FIRST, and the reason is mechanical
+
+`P2` changes `demurrage_due`'s RATE; §6a changes its DESTINATION.
+Landing the destination first means the split is verified against a
+rate that is about to move, and the I5 amendment would be written twice.
+Landing `P2` first fixes the rate, after which §6a is a pure
+destination change over a settled bound.
+
+`P2` also needs no wire amendment; §6a does. Taking the cheaper,
+lower-blast-radius change first keeps tag 29 stable while the rate
+settles.
