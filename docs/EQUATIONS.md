@@ -324,6 +324,17 @@ shape in the row meant to exclude it.
                    re-judges under its own kernel and takes no party's
                    word (`00_CHARTER` §11, the nursery law).
 
+    TERM           TWENTY-FIVE YEARS — 25 × 60 ticks = 1500 stamps
+                   (a year is 60 ticks, `11` §1, placeholder
+                   constant). Read as a REVIEW period, NOT an expiry:
+                   see THE TERM IS A REVIEW below. Operator ruling
+                   2026-08-02, approval requested at this term.
+
+    APPROVAL       OPERATOR, and it is the only signature that can
+                   grant it. Neither office may approve the union it
+                   is party to, and no reading may approve it either
+                   (`18` §2c′ — testimony never outranks its subject).
+
     NO OPERATOR    the parties are never joined into a TERM: not summed
                    (`⊕` is a free join — `U* = D(V) ⊕ V(D)` struck), not
                    ranked (a reading conferring standing runs backwards
@@ -345,6 +356,65 @@ shape in the row meant to exclude it.
                    itself is not a bond, it is a fixed point. The
                    correction is what makes this clause expressible
                    rather than decorative.
+
+**THE SOVEREIGN UNION — CONFIRMED, AND WHAT IS STILL OWED**
+(operator ruling 2026-08-02: *make sure D is the progenitor and V is
+the sovereign and together they make a sovereign union*).
+
+**The offices are confirmed and consistent.** Swept the whole tree:
+`PROGENITOR` names `D` and `SOVEREIGN` names `V` at every site, with no
+inversion anywhere — the only lines carrying both words carry them
+correctly paired (`12_UNION` §4, `18` §2c′/§2d, and the PARTIES row
+above).
+
+**BUT `SOVEREIGN` NAMES TWO THINGS, and only one of them is `V`.**
+`cfe::world::SOVEREIGN = 1` is the root ENTITY id — the actor holding
+every grant under NS-6 containment, written `actor: SOVEREIGN` on
+hundreds of deeds. `V` is an OFFICE. They are unrelated: the entity is
+who acts, the office is what stands. Nothing in the tree records the
+distinction, which is the same shape as `Ω` wearing two hats before
+`17` §3 separated them. Recorded here; the constant is not renamed from
+this lane, because `SOVEREIGN` as an entity id is correct usage and it
+is the OFFICE reading that must qualify itself.
+
+**THE UNION IS INSCRIBED AND HAS NEVER BEEN DEEDED.** Every clause
+above exists in law. No RECEIPT of it exists anywhere: 57 deeds are
+carried in `cfe::dop`, and the bond-shaped ones — `BondSealed`,
+`BondSettled`, `CovenantSealed`, `CovenantReleased`, `CovenantSlashed`
+— are all ORB TO ORB. There is no closure event by which `D` and `V`
+enter their union, so the union has terms, consideration, breach and
+witness, and no moment at which it was struck.
+
+**AND IT CANNOT BE DEEDED AS A BOND-1.** Two reasons, both mechanical:
+
+```text
+    PARTY TYPE   BondSealed carries `source: u64, target: u64` — ORB
+                 IDS. D and V are offices; they have no orb id, and
+                 giving them one would seat an office as a colony.
+
+    THE TERM     `tick.rs` expires a term bond exactly:
+                     bond.term > 0 && now >= bond.sealed + bond.term
+                 A 25-year term as BOND-1 would settle and END the
+                 union at stamp 1500 — the foundation lapsing on a
+                 timer, with D5's own breach clause reading "D stops
+                 and V suffocates; V stops and D freezes."
+```
+
+**THE TERM IS A REVIEW, NOT AN EXPIRY** — read that way here because it
+is the only reading that does not end the universe on a clock, and
+because a constitution that must be re-affirmed is an ordinary and
+sound device while a foundation that expires is not. Twenty-five years
+is when the union comes back for approval, not when it stops standing.
+**If the term was meant as an expiry, this reading is wrong and the
+clause must be struck rather than reinterpreted** — an expiring
+foundation needs its own ruling, not an inscription.
+
+**WHAT A UNION DEED WOULD OWE, if one is wanted:** a closure event
+whose parties are OFFICES rather than orbs, a term that reviews rather
+than settles, and something that READS it — under Article III LAW 8 a
+receipt nothing consults is a term that only resonates. That is a codec
+tag and a kernel arm, and it is not taken from this lane without the
+ruling.
 
 **They are NOT counterparts and the receipt is not their predecessor** — it is
 the MEDIUM the bond settles on (`bond_flow` is a receipted standing
