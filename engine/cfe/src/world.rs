@@ -1061,7 +1061,7 @@ impl World {
         let settled = self.orbs.iter().all(|held| {
             held.famine.is_empty()
                 && !held.overheat
-                && demurrage_due(held, self.star, stamp, &ease_of(&self.techs, held.orb_id))
+                && demurrage_due(held, self.star, stamp, &ease_of(&self.techs, held.orb_id, stamp))
                     .iter()
                     .all(|(_, due)| *due == ratio(0, 1))
         }) && self
@@ -1147,7 +1147,7 @@ impl World {
                 .is_some_and(|struck| now.saturating_sub(struck) >= 240),
             3 => {
                 held.banked_amount(Resource::Sink) >= ratio(100, 1)
-                    && demurrage_due(held, self.star, now, &ease_of(&self.techs, orb))
+                    && demurrage_due(held, self.star, now, &ease_of(&self.techs, orb, now))
                         .iter()
                         .all(|(_, due)| *due == ratio(0, 1))
             }
@@ -2267,7 +2267,7 @@ impl World {
         let count = settleable.len();
         // SINK-1 (Q2): receipted demurrage at touch — un-vaulted banked
         // joules/sink decay for the elapsed span, settled openly.
-        let ease = ease_of(&self.techs, orb_id);
+        let ease = ease_of(&self.techs, orb_id, stamp);
         touch(held, self.star, &mut self.chronicle, stamp, &ease);
         // VENT-1: seal the pending vented entropy into the ledger.
         let mut vented = ratio(0, 1);
@@ -2398,7 +2398,7 @@ impl World {
                 .expect("checked above");
             // PRACTICE-1 the Hoard: the stores keep — decay halves.
             let hoard_keep = if self.practices.contains(&4) { ratio(1, 2) } else { ratio(1, 1) };
-            let decay = hoard_keep * demurrage_due(source, star, stamp, &ease_of(&self.techs, from))
+            let decay = hoard_keep * demurrage_due(source, star, stamp, &ease_of(&self.techs, from, stamp))
                 .into_iter()
                 .find(|(due, _)| *due == resource)
                 .map(|(_, decay)| decay)
@@ -2441,7 +2441,7 @@ impl World {
         };
         // The touch, both sides (SINK-1), then the move.
         for orb in [from, to] {
-            let ease = ease_of(&self.techs, orb);
+            let ease = ease_of(&self.techs, orb, stamp);
             let held = peel(&mut self.orbs, orb)
                 .expect("checked above");
             touch(held, star, &mut self.chronicle, stamp, &ease);
@@ -2627,7 +2627,7 @@ impl World {
                 .expect("bond endpoints exist");
             // PRACTICE-1 the Hoard: the stores keep — decay halves.
             let hoard_keep = if self.practices.contains(&4) { ratio(1, 2) } else { ratio(1, 1) };
-            let decay = hoard_keep * demurrage_due(held, star, stamp, &ease_of(&self.techs, source))
+            let decay = hoard_keep * demurrage_due(held, star, stamp, &ease_of(&self.techs, source, stamp))
                 .into_iter()
                 .find(|(due, _)| *due == resource)
                 .map(|(_, decay)| decay)
@@ -2652,7 +2652,7 @@ impl World {
             for orb in [source, target] {
                 let held = peel(&mut self.orbs, orb)
                     .expect("bond endpoints exist");
-                let ease = ease_of(&self.techs, orb);
+                let ease = ease_of(&self.techs, orb, stamp);
                 touch(held, star, &mut self.chronicle, stamp, &ease);
             }
             {
@@ -2853,7 +2853,7 @@ impl World {
                 .expect("checked above");
             // PRACTICE-1 the Hoard: the stores keep — decay halves.
             let hoard_keep = if self.practices.contains(&4) { ratio(1, 2) } else { ratio(1, 1) };
-            let decay = hoard_keep * demurrage_due(held, star, stamp, &ease_of(&self.techs, absorber))
+            let decay = hoard_keep * demurrage_due(held, star, stamp, &ease_of(&self.techs, absorber, stamp))
                 .into_iter()
                 .find(|(due, _)| *due == Resource::Sink)
                 .map(|(_, decay)| decay)
@@ -2880,7 +2880,7 @@ impl World {
         {
             let held = peel(&mut self.orbs, absorber)
                 .expect("checked above");
-            let ease = ease_of(&self.techs, absorber);
+            let ease = ease_of(&self.techs, absorber, stamp);
             touch(held, star, &mut self.chronicle, stamp, &ease);
             held.bank(Resource::Sink, -amount.clone());
             held.entropy_vented += amount.clone();
@@ -3050,7 +3050,7 @@ impl World {
         // The draw closes first, at the touch law (SINK-1): due
         // demurrage settles, the anchor moves, the crystal leaves.
         let stamp = self.clock.now();
-        let ease = ease_of(&self.techs, prober);
+        let ease = ease_of(&self.techs, prober, stamp);
         let star = self.star;
         let held = peel(&mut self.orbs, prober).expect("judged above");
         touch(held, star, &mut self.chronicle, stamp, &ease);
@@ -3705,7 +3705,7 @@ fn haul(
     // stamp, computed pure, so a refusal moves nothing in either world.
     {
         let source = src.orbs.iter().find(|held| held.orb_id == from).expect("checked");
-        let decay = demurrage_due(source, src.star, src_stamp, &ease_of(&src.techs, from))
+        let decay = demurrage_due(source, src.star, src_stamp, &ease_of(&src.techs, from, src_stamp))
             .into_iter()
             .find(|(due, _)| *due == resource)
             .map(|(_, decay)| decay)
@@ -3722,7 +3722,7 @@ fn haul(
     // The touch (SINK-1) then the debit, in the source world.
     {
         let source = src.orbs.iter_mut().find(|held| held.orb_id == from).expect("checked");
-        let ease = ease_of(&src.techs, from);
+        let ease = ease_of(&src.techs, from, src_stamp);
         touch(source, src.star, &mut src.chronicle, src_stamp, &ease);
         source.bank(resource, -amount.clone());
     }
@@ -3737,7 +3737,7 @@ fn haul(
     let delivered = amount.clone() * (ratio(1, 1) - melt.clone());
     {
         let target = dst.orbs.iter_mut().find(|held| held.orb_id == to).expect("checked");
-        let ease = ease_of(&dst.techs, to);
+        let ease = ease_of(&dst.techs, to, dst_stamp);
         touch(target, dst.star, &mut dst.chronicle, dst_stamp, &ease);
         target.bank(resource, delivered.clone());
     }
@@ -4829,12 +4829,67 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
 /// crystallized for this orb, 1 otherwise. Derived from the tech
 /// list, never stored. Pub: the kernel CALLS the sealed rule for
 /// I5's bound (call-not-copy, KERNEL CHARTER §0b).
-pub fn ease_of(techs: &[(u64, u8, [u8; 32])], orb: u64) -> Ratio {
+pub fn ease_of(techs: &[(u64, u8, [u8; 32])], orb: u64, at: u64) -> Ratio {
+    // RULESET EPOCHS (`21_KERNEL_PARAMETERS` §11): the rule is selected
+    // by the stamp the deed carries, so a receipt written under EPOCH 0
+    // is forever judged by EPOCH 0 and `replay` cannot drift from the
+    // live path. Sealed rules are APPEND-ONLY — the cliff below stays
+    // in the tree permanently because past receipts still need it.
+    match crate::epoch::epoch_at(at) {
+        crate::epoch::Epoch::Genesis => ease_cliff(techs, orb),
+        crate::epoch::Epoch::Continuous => ease_gradient(techs, orb),
+    }
+}
+
+/// EPOCH 0 — the landed cliff. **Never edit this function.** Every
+/// receipt stamped before `epoch::CONTINUOUS_FROM` is judged by it, and
+/// changing it would rewrite history's meaning.
+fn ease_cliff(techs: &[(u64, u8, [u8; 32])], orb: u64) -> Ratio {
     match techs.iter().any(|(held, condition, _)| *held == orb && *condition == 5) {
         true => ratio(1, 2),
         false => ratio(1, 1),
     }
 }
+
+/// EPOCH 1 — P3, the continuous rational ease gradient.
+///
+/// The `== 5` cliff made conditions 0 through 4 INDISTINGUISHABLE:
+/// four fifths of the tech tree bought nothing and condition 5 was a
+/// strategy target. This descends smoothly across the whole tree.
+///
+/// Exact over `BigRational` — the algebraic S-curve `s = x/(1+|x|)`,
+/// no float, no transcendental, no root.
+///
+/// **DIRECTION.** `ease` MULTIPLIES decay (`rate · ease · elapsed`), so
+/// LOWER ease is the reward. A curve saturating toward 1 at high tech
+/// would make advanced technology INCREASE decay; this one descends.
+///
+/// It still meets both legacy values (`condition 0 → 1/1`,
+/// `condition 5 → 1/2`), which is no longer REQUIRED — epochs removed
+/// the continuity constraint (§11c) — but is kept because a curve that
+/// agrees with the cliff at its endpoints is easier to reason about
+/// across the boundary.
+fn ease_gradient(techs: &[(u64, u8, [u8; 32])], orb: u64) -> Ratio {
+    let condition = techs
+        .iter()
+        .filter(|(held, _, _)| *held == orb)
+        .map(|(_, condition, _)| *condition)
+        .max()
+        .unwrap_or(0);
+
+    let x = ratio(condition as i64 - EASE_THRESHOLD, EASE_SCALE);
+    let s = x.clone() / (ratio(1, 1) + num_traits::Signed::abs(&x));
+    // Floored at 1/2: past the old cliff nothing further is earned, and
+    // an ease of zero would remove the sink entirely, leaving I5
+    // bounding decay at nothing.
+    (ratio(1, 2) - s).clamp(ratio(1, 2), ratio(1, 1))
+}
+
+/// P3's curve centre — the condition at which `ease` equals the EPOCH 0
+/// cliff value `1/2`.
+const EASE_THRESHOLD: i64 = 5;
+/// P3's curve width in condition-steps.
+const EASE_SCALE: i64 = 5;
 
 /// THE SEALED DEMURRAGE RULE (SINK-1/Q2 + the flat-rate ruling):
 /// what an orb owes at `stamp` — `min(rate · ease · elapsed, banked)`

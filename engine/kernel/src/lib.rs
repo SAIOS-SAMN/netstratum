@@ -886,7 +886,13 @@ fn decay(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
                         orb,
                         prior.star,
                         step.stamp,
-                        &cfe::world::ease_of(&prior.techs, *orb_id),
+                        // RULESET EPOCHS (`21_KERNEL_PARAMETERS` §11): the judge
+                        // selects the rule by the stamp the DEED carries,
+                        // not by the rule standing today. A receipt
+                        // written under EPOCH 0 is judged by EPOCH 0
+                        // forever, which is what stops `replay` drifting
+                        // from the live path when a sealed rule moves.
+                        &cfe::world::ease_of(&prior.techs, *orb_id, step.stamp),
                     )
                     .into_iter()
                     .find(|(held, _)| held == resource)

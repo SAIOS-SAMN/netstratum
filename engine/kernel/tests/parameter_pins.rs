@@ -26,19 +26,72 @@ use cfe::world::{ease_of, World};
 use kernel::mint_bound;
 use solver::Difficulty;
 
-/// P3 · THE ENDPOINTS ARE EXACT — the amendment is continuous.
+/// EPOCH 0 · HISTORY IS UNTOUCHED — the whole point of the mechanism.
 ///
-/// The landed cliff paid `1/2` at condition 5 and `1/1` otherwise. The
-/// gradient must reproduce BOTH exactly, or a live world jumps the
-/// moment it lands. This is the continuity guarantee, tested rather
-/// than asserted in a document.
+/// A deed stamped before the activation point is judged by the rule
+/// that stood when it was written, whatever the rule says today. This
+/// is what stops `replay` drifting from the live path, and it fails
+/// the moment anyone edits `ease_cliff`.
 #[test]
-fn p3_the_gradient_reproduces_both_landed_values_exactly() {
+fn epoch0_deeds_are_still_judged_by_the_cliff() {
+    let before = cfe::epoch::CONTINUOUS_FROM - 1;
     let none: Vec<(u64, u8, [u8; 32])> = vec![];
-    assert_eq!(ease_of(&none, 1), ratio(1, 1), "no tech decays at full rate, as before");
+    assert_eq!(ease_of(&none, 1, before), ratio(1, 1), "no tech: the cliff's own answer");
 
-    let cliff = vec![(1u64, 5u8, [0u8; 32])];
-    assert_eq!(ease_of(&cliff, 1), ratio(1, 2), "condition 5 halves decay, as before");
+    // The cliff's defining property: conditions 0-4 are ALL identical
+    // to holding nothing. Four fifths of the tech tree bought nothing.
+    for condition in 0u8..=4 {
+        let held = vec![(1u64, condition, [0u8; 32])];
+        assert_eq!(
+            ease_of(&held, 1, before),
+            ratio(1, 1),
+            "EPOCH 0 condition {condition} is indistinguishable from no tech — as it always was"
+        );
+    }
+    let at_cliff = vec![(1u64, 5u8, [0u8; 32])];
+    assert_eq!(ease_of(&at_cliff, 1, before), ratio(1, 2), "only condition 5 paid");
+}
+
+/// EPOCH 1 · THE GRADIENT IS LIVE PAST THE BOUNDARY.
+///
+/// The same tech that bought nothing under EPOCH 0 now earns, and the
+/// descent is strict across the whole tree. This is P3 re-inscribed —
+/// the change that broke replay at `d52f3fd`, now landed safely.
+#[test]
+fn epoch1_the_cliff_becomes_a_strict_descent() {
+    let at = cfe::epoch::CONTINUOUS_FROM;
+    let none: Vec<(u64, u8, [u8; 32])> = vec![];
+    let baseline = ease_of(&none, 1, at);
+
+    let mut previous = baseline.clone();
+    for condition in 1u8..=5 {
+        let held = vec![(1u64, condition, [0u8; 32])];
+        let ease = ease_of(&held, 1, at);
+        assert!(ease < previous, "EPOCH 1 condition {condition}: {ease} must beat {previous}");
+        previous = ease;
+    }
+
+    // And EPOCH 0 disagrees at exactly the conditions the cliff flattened
+    // — which is the whole reason the epoch exists.
+    let mid = vec![(1u64, 3u8, [0u8; 32])];
+    assert_ne!(
+        ease_of(&mid, 1, at),
+        ease_of(&mid, 1, cfe::epoch::CONTINUOUS_FROM - 1),
+        "condition 3 earns under EPOCH 1 and did not under EPOCH 0"
+    );
+}
+
+/// EPOCH 1 · MONOTONE AND BOUNDED — tech never punishes, the sink
+/// never vanishes.
+#[test]
+fn epoch1_never_punishes_and_never_removes_the_sink() {
+    let at = cfe::epoch::CONTINUOUS_FROM;
+    for condition in 0u8..=12 {
+        let held = vec![(1u64, condition, [0u8; 32])];
+        let ease = ease_of(&held, 1, at);
+        assert!(ease <= ratio(1, 1), "condition {condition}: tech must never increase decay");
+        assert!(ease >= ratio(1, 2), "condition {condition}: the sink never vanishes");
+    }
 }
 
 
