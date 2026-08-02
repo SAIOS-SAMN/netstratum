@@ -96,19 +96,22 @@ it, subject to §4.
 first economic event in a civilization's life and the point at which the
 baseline economy starts turning.
 
-**Who receives it follows the ward-scope ladder** (`19_REGISTRY` §4a) —
-the tithe goes to whoever wards the scope the founding lands in:
+**Who receives it follows the SEAT-SCOPE ladder** (`19_REGISTRY` §4a).
+**Not the ward** — warding is a colony-level shield an elder happens to
+hold on its own planet, and it names no scope (operator ruling
+2026-08-02). The tithe goes to the seat whose standing covers where the
+founding lands:
 
 ```text
-founded on an existing planet     → that planet's ELDER   (planetary ward)
-founded into a newly raised world → the ANCIENT           (universal ward)
+founded on an existing planet     → that planet's ELDER   (planetary seat)
+founded into a newly raised world → the ANCIENT           (universal seat)
 ```
 
 That rule closes the virgin-universe question rather than leaving it: a
 brand-new world has no elder yet, so its first founding tithes upward to
 the scope that does exist.
 
-**And it makes ward scope pay.** An elder or ancient is no longer a
+**And it makes seat scope pay.** An elder or ancient is no longer a
 title with a vantage — it is a seat with REVENUE, funded by the
 foundings inside its ward. This is what gives an ancient a standing
 reason to open a room (`19_REGISTRY` §4b): more room admits more

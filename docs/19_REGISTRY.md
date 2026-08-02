@@ -61,12 +61,34 @@ it drifts silently because nothing forces the copies to agree.
   tiers. **Three implementations, no authority.** This is the live
   example of the locality problem and the first thing §5 should fix.
 
-## §4 WARD SCOPE — the axis elders and ancients actually sit on
+## §4 SEAT SCOPE — the axis elders and ancients actually sit on
 
-**CORRECTION TO THIS DOCUMENT'S FIRST DRAFT.** It called this a TENURE
-axis — *how long have you stood*. That was wrong. The operator's
-definition is SCOPE — **what extent do you ward** — and the two are not
-the same reading. Recorded rather than quietly replaced.
+**TWO CORRECTIONS TO THIS SECTION'S NAME, both recorded rather than
+quietly replaced.**
+
+1. The first draft called it TENURE — *how long have you stood*. Wrong
+   reading; the axis is extent, not duration.
+2. The second called it WARD SCOPE. **Also wrong, and wrong in a way
+   worth naming: it promoted a menial mechanic into an axis.**
+
+**THE WARD IS COLONY-LEVEL AND STAYS THERE** (operator ruling
+2026-08-02). It is one planetary shield — `World::ward_elder`,
+`World::lift_ward`, `World::ward_holds`, all methods on ONE WORLD, which
+`04` §5 defines as one clock and one chronicle. `ElderWarded` is a
+world-scoped receipt. **The code had it at the right level the whole
+time; these documents lifted it.**
+
+Warding is a thing an elder happens to DO on its own planet. It does not
+name the ladder, and the ladder does not depend on it. The axis is the
+extent a SEAT's standing reaches — which is why `ancient` can sit on it
+without warding anything.
+
+**This is the second time in one day a mechanic was promoted above its
+station here.** The first was the covenant: a collateralized delivery
+contract dressed as a moral commitment, struck and renamed FORWARD.
+Same defect, same cause — the corpus states each mechanic and never
+states its layer, so reach gets inferred from the file a rule sits in.
+That gap is what syntropy-lane's layer taxonomy exists to close.
 
 ### 4a. The three rungs
 
@@ -309,7 +331,7 @@ visible from where the thing is written down.
    names for one reading is the drift `EQUATIONS` §0 exists to prevent.
 
 **Owed, and named rather than assumed:** the tier axis has no authority
-(§3); ward scope is now opened as law but its operand is cut at seven
+(§3); seat scope is now opened as law but its operand is cut at seven
 call sites (§4e — *what sites a lineage?* is the one open question);
 and no lint yet checks that a value claimed in a doc exists in its
 crate, the way `constitution_lint` checks that a citation resolves.
