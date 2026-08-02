@@ -30,12 +30,20 @@ system computes torsion; it does not compute metrics.
 
 ## §2 THE FORM
 
-### 2a. Ω(D) — the structure space
+### 2a. D(Ω) — the progenitor's reading of the totality
 
-`Ω(D)` is the space indexed by dimensional degrees `D`. It is not a
-scalar and not a metric density. `D` is the RANK of the relational
-structure — how many independent degrees stand — and `Ω(D)` is the
-space they span.
+**RENOTATED 2026-08-02** (operator ruling: *`D(Ω) +: V(Ω)`*). This
+section read `Ω(D)` — *the space indexed by dimensional degrees* — which
+made the TOTALITY a function of ONE OFFICE, so `Ω` was at once the thing
+measured and a thing `D` produces. `D(Ω)` reads the other way: `D` OF
+the totality, a READING, and a reading never outranks its subject
+(§2c′). `17_CAPACITY` §3 carries the full ruling and the second office
+reading `V(Ω)` that comes with it.
+
+`Ω` is THE TOTALITY — one universe, whole, read by both offices and
+owned by neither. `D(Ω)` is the ROOM standing in it: not a scalar and
+not a metric density. `D` is the RANK of the relational structure — how
+many independent degrees stand — and `D(Ω)` is the space they span.
 
 **`D` IS NOT A CAPACITY** (operator ruling 2026-08-01: *why do we have
 capacity? that should not be the case in an expanding universe*). The
@@ -267,7 +275,7 @@ It was never a claim that `V` ranks above `D`.
 
 **AMENDED 2026-08-02 — `Ω ≢ V`.** This paragraph read *"`Ω ≡ V` stands
 untouched"* and cited `17_CAPACITY` §3, which then carried that
-identity. §3 is corrected: `Ω` is the ROOM (`Ω(D)`, the space `D`
+identity. §3 is corrected: `Ω` is the TOTALITY and `D(Ω)` is the ROOM (the space `D`
 spans, and the `α → Ω` span of the progenitor's office) and `V` is the
 SUBSTANCE. The bar above is unchanged and in fact strengthened — under
 the old identity the guard was porous, because `D = rank(Δ(Ω))` with
@@ -644,7 +652,7 @@ law and should not be written as law until something requires it.
 ### ARTICLE I — THE ANTI-TENSOR CLAUSE (PURE GEOMETRY MANDATE)
 
 *No regulatory body, algorithm, or actor shall reduce system dynamic
-state mappings to rigid coordinate tensor ranks. All capacity `Ω(D)`
+state mappings to rigid coordinate tensor ranks. All capacity `D(Ω)`
 evaluates solely via pure torsion forms `Θ`. Static metrics are void ab
 initio.*
 
@@ -1200,7 +1208,7 @@ station or tradition alters any row.
 
 ## §5 WHAT THIS AMENDS
 
-- `EQUATIONS.md` §1 — `Ω(D)` seats as the capacity space; `∂Δ`
+- `EQUATIONS.md` §1 — `D(Ω)` seats as the capacity space; `∂Δ`
   uncaged; the torsion form is the operator.
 - `EQUATIONS.md` §3 — the component semantics are lens readings and
   may not aggregate directionally (§2b).

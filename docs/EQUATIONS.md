@@ -144,19 +144,32 @@ relational structure, the landed tensor.
   `∂V` all appeared here and are all STRUCK, together rather than in
   sequence: they were one error wearing three brackets.
 
-**D1 · Ω(D) — the capacity space.** INSCRIBED. Superseded in form by
-`18_TORSION.md` §2a (operator ruling 2026-08-01): capacity is the SPACE
-`Ω(D)` indexed by dimensional degrees `D`, driven by the torsion form —
-never a metric density, never a scalar.
+**D1 · D(Ω) — the progenitor's reading of the totality.** INSCRIBED.
+Superseded in form by `18_TORSION.md` §2a (operator ruling 2026-08-01):
+capacity is a SPACE, driven by the torsion form — never a metric
+density, never a scalar. **RENOTATED 2026-08-02** (operator ruling:
+*`D(Ω) +: V(Ω)`*): this row read `Ω(D)`, *the space indexed by `D`*,
+which made the totality a function of one office. `Ω` is THE TOTALITY,
+read by both offices and owned by neither; `D(Ω)` is `D`'s reading of
+it. Full ruling at `17_CAPACITY` §3.
 
-    dΩ(D)  =  Θ ∧ ∂Δ  +  egress ∧ circulation
+    dD(Ω)  =  Θ ∧ ∂Δ  +  egress ∧ circulation
 
 `D` is **the structure surviving reduction** — RULED 2026-08-01:
 
     D  =  the structure standing in  Π_G( Δ(V) )
 
-`Ω(D)` is the space those surviving degrees span. Frame artifacts
+`D(Ω)` is the space those surviving degrees span. Frame artifacts
 contribute NOTHING; only structural content counts.
+
+**THE SECOND READING — `V(Ω)`** (same ruling). The sovereign reads the
+same totality and returns the SUBSTANCE committed in it: the committed
+state, whole and indivisible (D0). Two offices, one subject, and neither
+defined through the other — which is precisely why this pair is lawful
+where `U* = D(V) ⊕ V(D)` was STRUCK (`18` §3). The bond is written
+`D(Ω) +: V(Ω)`, and `+:` is causal, not hierarchical: room precedes
+substance, because substance cannot stand in a plane that was never
+opened (`PlaneUnearned`). See D7 for the crossing itself.
 
 **`D` IS A DIMENSION, NEVER AN INVENTORY** (operator ruling 2026-08-02:
 *your entire definition is wrong if dimensional capacity is a count of
@@ -326,7 +339,7 @@ shape in the row meant to exclude it.
                    the bond; there is no third object to read.
 
                    This is why `Ω ≢ V` was owed (`17_CAPACITY` §3,
-                   corrected 2026-08-02). `Ω(D)` is the ROOM, `V` is the
+                   corrected 2026-08-02). `D(Ω)` is the ROOM, `V` is the
                    SUBSTANCE, and while `Ω` was identified with `V` the
                    two nodes were one node — and a bond from a thing to
                    itself is not a bond, it is a fixed point. The
@@ -434,6 +447,48 @@ world-level refusal with no orb in it. A share is a magnitude, never
 below the ground, so the rule states what an orb HOLDS rather than what
 it lacks, and the refusal that consumes it carries the share so the
 floor can be risen from (`18` Article II).
+
+**D7 · THE SOLIDIFICATION — the phase transition into state.**
+INSCRIBED 2026-08-02 (operator ruling: *solidify phase transition to
+current "state"*). Authority: `17_CAPACITY` §3a; the general phase law
+is `18` §4.
+
+`Ω` has two phases, and each office reads one of them:
+
+```text
+    PHASE     READING        WHAT CROSSES INTO IT
+    ───────────────────────────────────────────────────────────────
+    ROOM      D(Ω) rises     the plane is EARNED — the residue is
+                             irreducible, so it EMITS and D rises
+                             BY RECEIPT (D3). `PlaneUnearned`
+                             refuses every other route.
+
+    STATE     V(Ω) holds     the deed is ADMITTED — `lawful()`
+                             passes and a receipt is written.
+                             THIS IS THE SOLIDIFICATION.
+```
+
+**THE CROSSING IS RECEIPTED, NEVER CONTINUOUS.** `18` §4 rules that at a
+phase boundary the declared and derived descriptions genuinely differ
+and *their relation IS the transition* — hold both sides and the
+crossing is legible; collapse them with an `==` and the phase structure
+disappears. So the crossing is a DISPOSITION, not a flow. There is no
+partial solidification and no half-committed deed: `kernel::lawful`
+returns admission or refusal and has no third answer, so no value
+strictly between claimed and committed exists to be occupied. This is
+the operator's standing rule that *there is no "half used" — an open
+ended thread without closure* (2026-08-02), read at the foundation.
+
+**ROOM PRECEDES STATE.** Substance never solidifies into a plane that
+was never opened — the `+:` of D1 made mechanical, landed as
+`PlaneUnearned`.
+
+**THE REVERSE CROSSING IS D4's, AND IT HAS A FLOOR.** State does not
+melt back into room unaccounted: D4 is the revocation law, anchored at
+the eclipse and floored at `H¹`, and `D` never falls below `GROUND`
+(`18` Article II — `Degree` has no representation for a below-ground
+value). A phase is reversed by a receipted eclipse or not at all; decay
+alone does not reverse one.
 
 **The index-set reading is STRUCK** (2026-08-01). The indices
 `(i, j, k, l)` that `for_each_residual` iterates, and the arities

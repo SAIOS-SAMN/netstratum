@@ -331,13 +331,13 @@ physics — **it is the physics**, read at the station layer.
 two stations:
 
 ```text
-Ω(D)   capacity — the structure that IS      →  PROGENITOR  (T0)
+D(Ω)   capacity — the structure that IS      →  PROGENITOR  (T0)
                   "who makes the room"           the board-maker
 
 ∂Δ     the boundary — the capacity to ACT    →  SOVEREIGN   (T2)
                   the field, the record           the charter-holder
 
-Ω(D) ⋈ ∂Δ   the ENTANGLED read               →  OBSERVER    (T1)
+D(Ω) ⋈ ∂Δ   the ENTANGLED read               →  OBSERVER    (T1)
                                                   the witness seat
 ```
 
@@ -615,7 +615,7 @@ between offices.
 
 **AMENDED 2026-08-02 — `Ω ≢ V`.** This paragraph read *"`Ω ≡ V` stands
 untouched"*. It does not: `17_CAPACITY` §3 is corrected, and `Ω` is the
-ROOM — `Ω(D)`, the space `D` spans — while `V` is the SUBSTANCE. That is
+ROOM — `D(Ω)`, the space `D` spans — while `V` is the SUBSTANCE. That is
 this chapter's own §3b distinction (`D` owes ROOM, `V` owes WORK), so
 the identity had been quietly denying the office split one section
 above where the split is declared.

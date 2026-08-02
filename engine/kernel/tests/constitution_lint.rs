@@ -157,15 +157,30 @@ fn struck_paragraph_lines(text: &str) -> HashSet<usize> {
 /// dropped"), so they are exempt by construction — what is barred is
 /// live use, never the record of removal.
 fn records_a_strike(line: &str) -> bool {
-    const MARKERS: [&str; 14] = [
+    const MARKERS: [&str; 16] = [
         "STRUCK", "struck", "EXCISED", "excised", "DEPRECATED", "deprecated", "RETIRED",
         "formerly", "REMOVED", "withdrawn",
         // A CORRECTION is a record too. `Ω ≡ V` could only be retired by
         // paragraphs that QUOTE it while retiring it, exactly as a strike
         // record quotes the symbol it strikes.
-        "CORRECTED", "corrected", "AMENDED", "amended",
+        "CORRECTED", "corrected", "AMENDED", "amended", "RENOTATED", "renotated",
     ];
     MARKERS.iter().any(|m| line.contains(m))
+}
+
+/// A RELAY LINE — a blockquote. These documents use `>` for one thing:
+/// recording an operator ruling verbatim, "as given" (`18` §1). A relay
+/// is a record of what was SAID, never an assertion of law, so a struck
+/// symbol inside one is a quotation — exactly the case the strike
+/// records are already exempt for. `18` §1 has carried `Ω(D)` and
+/// `D(V)+V(D)` since the day it was relayed, and editing an operator's
+/// words to satisfy a lint would be the worse defect.
+///
+/// The scope is deliberately narrow: this exempts QUOTATION, not
+/// commentary. Prose about a relay sits outside the `>` and is judged
+/// like any other law.
+fn is_relay(line: &str) -> bool {
+    line.trim_start().starts_with('>')
 }
 
 /// Roots outside this workspace: the standard library and vendored
@@ -264,10 +279,11 @@ fn the_struck_symbols_stay_struck() {
     // ambiguous token would flag correct law — the false-positive that
     // gets a lint disabled. Ambiguous vocabulary is out of scope here
     // and belongs to a symbol registry, if one is ever built.
-    const STRUCK: [(&str, &str); 8] = [
+    const STRUCK: [(&str, &str); 9] = [
         ("Ξ", "the cosmetic meter, struck by 18 §3"),
         ("Ω ≡ V", "the room identified with the substance, struck 2026-08-02 (17 §3)"),
         ("Ω  ≡  V", "the room identified with the substance, struck 2026-08-02 (17 §3)"),
+        ("Ω(D)", "the totality made a function of one office, retired 2026-08-02 (17 §3)"),
         ("S⁺_out", "twin-singularity esoterica, struck by 18 §2d"),
         ("S⁺_hol", "twin-singularity esoterica, struck by 18 §2d"),
         ("ζ∇V", "the damped-gradient term, struck 2026-08-01"),
@@ -296,7 +312,7 @@ fn the_struck_symbols_stay_struck() {
         let text = fs::read_to_string(&doc).unwrap_or_default();
         let exempt = struck_paragraph_lines(&text);
         for (n, line) in text.lines().enumerate() {
-            if exempt.contains(&n) {
+            if exempt.contains(&n) || is_relay(line) {
                 continue;
             }
             for (sym, why) in STRUCK {

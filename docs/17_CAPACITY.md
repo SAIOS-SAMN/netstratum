@@ -117,7 +117,8 @@ substance are two totalities, not one. The identity collapsed the very
 distinction the bond is built on.
 
 **THE FIRST DEFECT — a struck symbol wearing another glyph.** `18` §2a
-carries `Ω(D)`, the space the surviving degrees span. Under `Ω ≡ V` that
+then carried `Ω(D)`, the space the surviving degrees span (that notation
+is itself since RETIRED — see below). Under `Ω ≡ V` that
 expression reads, letter for letter, **`V(D)`** — and `V(D)` is STRUCK
 (`U* = D(V) ⊕ V(D)`, `18` §3). The strike survived only because the
 glyph differed from the symbol it had been applied to.
@@ -137,25 +138,65 @@ spans, and the identity welded them together:
 
 That is exactly the circularity `12_UNION` §3 and `18` §2c′ bar — and it
 arrived by substitution, without anyone ever writing it down. Separating
-the two readings dissolves it: the SOURCE is `V`, the SPACE is `Ω(D)`,
-and they were never the same object.
+the two readings dissolves it: the SOURCE is `V`, the SPACE is the
+progenitor's own reading, and they were never the same object.
 
-**THE RULING, inscribed:**
+**THE RULING, inscribed** — extended the same day by the operator's
+second ruling, *`D(Ω) +: V(Ω)`*. `Ω` is **THE TOTALITY**: the universe
+entire. It is not a reading, and it belongs to no office. Both offices
+read it, each returning its own aspect:
 
 ```text
-    Ω(D)   the ROOM — the space D spans. D's own side, and it
-           PERSISTS: it is what the progenitor opens.
+    Ω             THE TOTALITY — one universe, whole. Read by both
+                  offices, owned by neither.
 
-    V      the SUBSTANCE — the committed state, whole, indivisible.
-           The sovereign's own, and never a function of anything.
+    D(Ω)          THE PROGENITOR'S READING — the ROOM standing in Ω.
+                  =  rank( Δ(V) )
 
-    Δ(V)   the relation V expresses            (`rfa_core::Delta`)
+    V(Ω)          THE SOVEREIGN'S READING — the SUBSTANCE committed
+                  in Ω. The committed state, whole and indivisible.
+
+    Δ(V)          the relation V expresses     (`rfa_core::Delta`)
+
+    D(Ω) +: V(Ω)  THE BOND, in office form.
 
     D  =  rank( Δ(V) )    the room, MEASURED THROUGH what stands in
                           it — and measuring a room by its furniture
                           does not make the furniture the room
                           (`18` §2c′, the measurement arrow)
 ```
+
+**THE NOTATION FLIPPED, AND THE FLIP IS THE POINT.** This section landed
+`Ω(D)` earlier the same day — *the space indexed by `D`*. That reading
+makes the TOTALITY a function of ONE OFFICE: `Ω` becomes at once the
+thing measured and a thing `D` produces, and one office comes to own the
+universe. `D(Ω)` reads the other way — `D` OF the totality, which is a
+READING, and a reading never outranks its subject (`18` §2c′, the
+measurement arrow). `Ω(D)` is RETIRED; every standing site now reads
+`D(Ω)`.
+
+**WHY `V(Ω)` IS NOT THE STRUCK `V(D)`.** The strike of
+`U* = D(V) ⊕ V(D)` (`18` §3) barred each office being defined THROUGH
+THE OTHER. Here both offices are functions of the SAME THIRD THING, so
+neither appears in the other's definition and the circularity has
+nowhere to form. This is the lawful shape the strike left room for — and
+it is expressible ONLY because `Ω ≢ V`. Were `Ω` still `V`, then `V(Ω)`
+would read `V(V)` and `D(Ω)` would read `D(V)`: the struck symbol,
+returned by substitution, exactly as `Ω(D)` returned `V(D)` above. The
+two rulings of this day are one ruling.
+
+**`Ω ≢ V`, RESTATED AND STRENGTHENED.** `V` is a READING of `Ω`, and a
+reading is not its subject. That is now true by the SHAPE of the
+notation rather than by assertion.
+
+**THE ORDER `+:` — ROOM PRECEDES SUBSTANCE.** `++` concatenates two
+sequences symmetrically; `+:` PREPENDS a single element and is
+asymmetric by construction. The asymmetry is CAUSAL, never
+hierarchical: substance cannot stand in a plane that was never opened,
+which is the landed `PlaneUnearned` refusal. Both offices remain
+PRIVILEGED (`EQUATIONS` D5 — each SOURCES, each carries its own book);
+`+:` orders the CROSSING, not the parties, and `18` §2c′ still bars any
+rank between them.
 
 **THE OPERAND OF `Δ` IS `V`, ALWAYS.** Wherever earlier text writes
 `Δ` applied to `Ω` it denotes `Δ(V)` and is superseded by this section,
@@ -165,18 +206,72 @@ the code has computed from the first day and never anything else:
 no other input. The notation had drifted from the computation; the
 computation was right.
 
-**`Ω` KEEPS ITS OTHER TWO USES, and both are D-side.** `Ω(D)` is the
-structure space (`18` §2a). `α → Ω` is the SPAN of the progenitor's
-office — `α` the origin pole, `Ω` the totality pole, `D` rising exactly
-as they separate (`18` §2e, `12_UNION` §3). Both are readings of ROOM.
-Neither was ever a name for the committed state.
+**`α → Ω` IS UNCHANGED.** It is the SPAN of the progenitor's office —
+`α` the origin pole, `Ω` the totality pole, `D` rising exactly as they
+separate (`18` §2e, `12_UNION` §3). `Ω` sits there as the totality, in
+the same sense this section gives it, so the span needed no correction
+in either ruling.
 
 **NODES(V, D) ARE THE BOND** (operator ruling 2026-08-02). The pair is
 `Node(V) ++ Node(D)` — a JOIN of two nodes that stay two — never a term
-with addressable halves. This is D5's NO OPERATOR clause and it is
-unchanged by the correction above; if anything the correction is what
-makes it expressible, since a bond between an object and itself is not a
-bond. See `EQUATIONS` D5 and `12_UNION` §3c.
+with addressable halves. This is D5's NO OPERATOR clause, and the
+correction is what makes it expressible: a bond between an object and
+itself is not a bond. `++` there joins the NODES, which are peers; `+:`
+above orders the READINGS, which are not simultaneous. Both stand, and
+they say different things. See `EQUATIONS` D5 and `12_UNION` §3c.
+
+## §3a THE SOLIDIFICATION — the phase transition into state
+
+**(operator ruling 2026-08-02: *solidify phase transition to current
+"state"*.)**
+
+`18` §4 already carries the phase law in its general form: *a point
+constraint cannot cross a phase boundary; it can only state the value on
+one side of it* — and at the crossing the declared and derived
+descriptions genuinely differ, so **their relation IS the transition**.
+Collapse them with an `==` and the phase structure disappears, leaving
+disconnected values on either side of a wall. That section names the
+crossing on the `f` ladder. This one names the crossing the whole engine
+runs on: `Ω`'s own.
+
+```text
+    PHASE     READING        WHAT CROSSES INTO IT
+    ───────────────────────────────────────────────────────────────
+    ROOM      D(Ω) rises     the plane is EARNED — the residue is
+                             irreducible, so it EMITS and D rises
+                             BY RECEIPT (D3). `PlaneUnearned`
+                             refuses every other route.
+
+    STATE     V(Ω) holds     the deed is ADMITTED — `lawful()`
+                             passes and a receipt is written.
+                             THIS IS THE SOLIDIFICATION.
+```
+
+**THE CROSSING IS RECEIPTED, NEVER CONTINUOUS.** There is no partial
+solidification and no half-committed deed: a claim is admitted and
+becomes state, or it is refused and does not. `kernel::lawful` returns
+admission or refusal and has no third answer, so no value strictly
+between claimed and committed exists to be occupied. This is the
+operator's standing rule that *there is no "half used" — that is an
+open-ended thread without closure* (2026-08-02), read at the foundation
+rather than at the ledger.
+
+**ROOM PRECEDES STATE, AND CANNOT BE SKIPPED.** Substance never
+solidifies into a plane that was never opened. That is `+:` made
+mechanical, and it is already landed as `PlaneUnearned`.
+
+**THE REVERSE CROSSING IS D4's, AND IT HAS A FLOOR.** State does not
+melt back into room unaccounted: D4 is the revocation law, anchored at
+the eclipse and floored at `H¹`, and `D` never falls below `GROUND`
+(`18` Article II — `Degree` has no representation for a below-ground
+value). Solidified state is undone by a receipted eclipse or not at all;
+decay alone does not reverse a phase.
+
+**WHAT THE PHASES ARE NOT.** They are not the build phases (Phase 1/2/3,
+the rollout seams), not the gauge phase `G` (the fiber coordinate on the
+3-torus, `11` §2.1), and not `reduce.rs`'s two algorithm phases. Those
+three are live and unrelated; this is the only use that names a
+transition of `Ω`.
 
 **WHAT DOES NOT CHANGE: the totality law.** "In union with V as a
 whole — no two parts cut out" never depended on the identity. It is a

@@ -26,7 +26,7 @@ system runs many algorithms at many scales. The standing law is
 
     V     = the committed state, read WHOLE (indivisible; the totality law)
             — the SUBSTANCE. Δ(V) is the relation it expresses.
-    Ω(D)  = the space D spans — the ROOM, and D's own side.
+    D(Ω)  = the space D spans — the ROOM, and D's own side.
             Ω ≢ V: a room is not its furniture      RULED 2026-08-02
     D     = the structure surviving Π_G( Δ(V) )        RULED 2026-08-01
 
