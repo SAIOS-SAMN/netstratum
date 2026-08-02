@@ -1309,6 +1309,62 @@ impl World {
             .unwrap_or_else(|| ratio(0, 1))
     }
 
+    /// **THE VALUE-LOSS BOOK — derived, never stored** (SYN-1/SYN-2,
+    /// operator ruling 2026-08-02).
+    ///
+    /// What an orb has LOST to holding costs: demurrage decay plus
+    /// upkeep draws, summed from the chronicle in joule-commensurable
+    /// units (09 §1). Before this, value left the universe with no
+    /// record it had ever left — the thermal arm closes its books
+    /// (`encased + vented = total excess`) and the value arm closed
+    /// nothing.
+    ///
+    /// **IT IS NOT `entropy_vented`, and must never be.** That field is
+    /// the SHED-HEAT figure and 05 §1.4's absorption invariant binds it
+    /// exactly: `sink_consumed = heat_absorbed = vented_after_shed`.
+    /// Value decay is a monetary velocity cost, not a thermal loss;
+    /// summing them would corrupt a landed physical measurement, which
+    /// `world_absorb::the_absorption_invariant_measures_across_two_orbs`
+    /// proves by failing the moment they are mixed. The two ledgers
+    /// stay decoupled: physics on one side, economics on the other.
+    ///
+    /// **NO SCHEMA IS SPENT.** `DemurrageSettled { orb_id, .. }` and
+    /// `UpkeepSettled { orb_id, .. }` already carry their orb, so the
+    /// whole book is arithmetic over deeds already receipted — the
+    /// derived-never-stored law (09 §1.2), and the same shape the
+    /// syntropy ratio takes.
+    pub fn value_lost_of(&self, orb: u64) -> Ratio {
+        self.chronicle
+            .receipts()
+            .iter()
+            .fold(ratio(0, 1), |carried, receipt| match &receipt.event {
+                ClosureEvent::DemurrageSettled { orb_id, amount, .. }
+                | ClosureEvent::UpkeepSettled { orb_id, amount, .. } if *orb_id == orb => {
+                    carried + amount.clone()
+                }
+                _ => carried,
+            })
+    }
+
+    /// The same book, per feeder, carried WHOLE rather than summed into
+    /// one figure — which of the two costs took it, and how much. A
+    /// caller that needs the split reads this; a caller that needs the
+    /// total reads [`World::value_lost_of`].
+    pub fn value_lost_split_of(&self, orb: u64) -> (Ratio, Ratio) {
+        self.chronicle.receipts().iter().fold(
+            (ratio(0, 1), ratio(0, 1)),
+            |(decay, upkeep), receipt| match &receipt.event {
+                ClosureEvent::DemurrageSettled { orb_id, amount, .. } if *orb_id == orb => {
+                    (decay + amount.clone(), upkeep)
+                }
+                ClosureEvent::UpkeepSettled { orb_id, amount, .. } if *orb_id == orb => {
+                    (decay, upkeep + amount.clone())
+                }
+                _ => (decay, upkeep),
+            },
+        )
+    }
+
     pub fn entities(&self) -> &[Entity] {
         &self.entities
     }
