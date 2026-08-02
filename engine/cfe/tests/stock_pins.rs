@@ -301,3 +301,84 @@ fn recurring_value_prices_the_world_the_stock_sits_on() {
     assert!(on_poor > ratio(0, 1), "a gap world yields nothing — that is the old defect");
     assert!(on_rich <= stock.regeneration(), "coverage minted value past regeneration");
 }
+
+/// THE HARD BOUND: no draw exceeds r*Smax/4 without shrinking the
+/// stock, on any world, at any stock level.
+#[test]
+fn recurring_value_never_exceeds_the_ceiling() {
+    use cfe::thermal::coverage;
+    let stock = tended();
+    let ceiling = stock.recurring_ceiling();
+    let rich = coverage(&ratio(6_000_000_000i64, 1));
+    for level in [ratio(1, 1), ratio(25, 1), ratio(50, 1), ratio(75, 1), ratio(99, 1)] {
+        let s = ResourceStock { current: level.clone(), ..tended() };
+        assert!(
+            s.recurring_value(&rich) <= ceiling.clone(),
+            "recurring value passed r*Smax/4 at stock {level:?}"
+        );
+    }
+    // And the peak really is at Smax/2.
+    let mid = ResourceStock { current: ratio(50, 1), ..tended() };
+    assert_eq!(mid.regeneration(), ceiling, "the peak is not at Smax/2");
+}
+
+/// THE FAST CLOCK FORGIVES. Over-extraction empties a stock to its seed
+/// core, and fallow time returns it whole.
+#[test]
+fn over_extraction_is_temporary() {
+    let mut stock = tended();
+    for _ in 0..60 {
+        stock.step(&ratio(2, 1));
+    }
+    assert_eq!(stock.current, stock.seed_floor, "the draw did not empty it");
+    for _ in 0..120 {
+        stock.step(&ratio(0, 1));
+    }
+    assert!(
+        stock.ceiling.clone() - stock.current.clone() < ratio(1, 10),
+        "a fallow stock did not recover — the fast clock must forgive"
+    );
+}
+
+/// THE SLOW CLOCK DOES NOT, AND IT BITES QUADRATICALLY. Degrading the
+/// substrate takes rate AND ceiling, so the recurring ceiling falls by
+/// the square of the loss.
+#[test]
+fn degradation_is_permanent_and_quadratic() {
+    let intact = tended().recurring_ceiling();
+
+    let mut quarter = tended();
+    quarter.degrade(&ratio(1, 4));
+    let after = quarter.recurring_ceiling();
+    // (3/4)^2 = 9/16 of intact, not 3/4.
+    assert_eq!(after, intact.clone() * ratio(9, 16), "the bite is not quadratic");
+    assert!(after < intact.clone() * ratio(3, 4), "a linear loss would have been kinder");
+
+    // Fallow time restores the STOCK and never the ceiling.
+    for _ in 0..200 {
+        quarter.step(&ratio(0, 1));
+    }
+    assert_eq!(
+        quarter.recurring_ceiling(),
+        after,
+        "the slow clock forgave — degradation must not heal with time"
+    );
+    assert!(quarter.current <= quarter.ceiling, "recovery ran past the lowered ceiling");
+}
+
+/// Degradation is ANTI-RESEARCH: it moves the same term research moves,
+/// in the other direction. That is how the cost of a stupid method gets
+/// a number instead of a scolding.
+#[test]
+fn degradation_and_research_move_the_same_term() {
+    let mut a = tended();
+    let mut b = tended();
+    a.research_rate(&ratio(1, 8));
+    b.degrade(&ratio(1, 2));
+    assert!(a.rate > tended().rate, "research did not raise the rate");
+    assert!(b.rate < tended().rate, "degradation did not lower the rate");
+    assert!(
+        b.recurring_ceiling() < tended().recurring_ceiling(),
+        "an unclean harvest cost nothing"
+    );
+}

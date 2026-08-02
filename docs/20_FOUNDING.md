@@ -1055,6 +1055,113 @@ lawful steps, and the cycle check is what stops a claim from being its
 own collateral — the two failure modes that a per-position check alone
 would let through.
 
+### 6j. THE HARVEST LAW — two clocks, and only one forgives
+
+**Operator ruling 2026-08-03. Landed with the bounds measured.**
+
+### 6j.1 THE BOUNDS
+
+```text
+BOUND 1   recurring_value ≤ r · S_max / 4          the hard ceiling
+          R(S) peaks at S = S_max/2; coverage only multiplies by (0,1],
+          so nothing draws more than this without shrinking the stock.
+
+BOUND 2   coverage scales it, measured:
+            mesic core        1.0000    →  100.0% of the ceiling
+            furnace seat      0.6982    →   69.8%
+            deep valley       0.0995    →    9.9%
+            past every band   0.0001    →    0.01%
+
+BOUND 3   the two clocks
+            FAST  60 ticks at 2/tick empties a stock to its seed core;
+                  120 fallow ticks return it WHOLE. Temporary.
+            SLOW  degrading the substrate lowers rate AND ceiling, and
+                  nothing restores them.
+```
+
+### 6j.2 THE COST OF AN UNCLEAN METHOD IS QUADRATIC
+
+The recurring ceiling is `r · S_max / 4`. A method that degrades the
+substrate takes **both** terms, so the ceiling falls by the SQUARE of
+the loss:
+
+```text
+substrate down 10%  →  81.0% of the recurring ceiling, FOREVER
+substrate down 25%  →  56.2%
+substrate down 50%  →  25.0%
+```
+
+**A civilization does not lose what it took. It loses what it could ever
+take again, squared.**
+
+**No penalty is levied and none is needed.** This is the arithmetic of
+the logistic, not a judgement about greed — CHARTER §2a's ruling that
+physics needs no penalty, holding exactly where a moral frame would
+otherwise have been reached for.
+
+### 6j.3 CLEAN AND UNCLEAN, DEFINED WITHOUT A MORAL TERM
+
+```text
+CLEAN     draws S. Leaves r and S_max intact. Costs the FAST clock only.
+UNCLEAN   draws S AND lowers r or S_max. Costs the SLOW clock.
+```
+
+**The distinction is mechanical, not ethical.** Burning a water world's
+hydrosphere for fuel is unclean not because it is wrong but because the
+hydrosphere is what sets that world's ceiling — and on a third channel,
+it moves albedo, which moves `t_eq4`, which moves COVERAGE (§6c.1),
+which multiplies recurring value. **A method can therefore cost on all
+three at once**, and the civilization doing it experiences only "more
+now."
+
+### 6j.4 INTELLIGENCE, AND WHY IT NEEDS NO SCOLDING
+
+`research_rate` RAISES `rate`. `degrade` LOWERS it. **An unclean harvest
+is negative research, measured on the research axis** — the same term,
+the other direction.
+
+That is how *"how stupid can you be"* becomes a number. A civilization
+that degrades its own substrate has failed to model it, and the failure
+is priced in the only currency the engine has: what it can recurrently
+produce. Nothing calls it stupid; its ceiling does.
+
+### 6j.5 GREED, AND THE GENERAL RULE
+
+**Greed is drawing at maximum now.** It is not banned and it is not
+punished. What makes it dangerous is that **from inside a single tick
+the two clocks are indistinguishable** — over-extraction and substrate
+degradation both feel exactly like a larger number this turn, and only
+one of them is forgiven.
+
+> **THE GENERAL RULE.** Every harvest has a fast cost and a slow cost.
+> The fast cost is recoverable and self-announcing: the stock visibly
+> falls. The slow cost is permanent, quadratic, and silent at the moment
+> it is incurred. **Intelligence is the capacity to tell them apart
+> before the slow clock has run.**
+
+### 6j.6 SUN AND PLANET — the asymmetry the engine already encodes
+
+```text
+STELLAR    t_eq4 / thermal_k() per tick. Bounded by luminosity and
+           orbit; does NOT deplete on any timescale the game runs.
+           RATE-limited. There is no unclean way to take it.
+
+PLANETARY  regeneration(S) ≤ r·S_max/4. STOCK-limited, depletable, and
+           degradable on the slow clock.
+```
+
+**The sun is a flow you can only tap faster; the planet is a stock you
+can destroy.** The engine already carries the correct answer to this —
+the encasement shell captures stellar heat into joules, and joules mint
+*only* by capture and never by fiat. **"Harvest the star, not the world"
+is not a moral; it is the shape of the bounds.**
+
+**Owed, and named rather than assumed:** which methods carry a
+degradation term and how large, whether coverage damage is separable
+from ceiling damage, and whether a degraded substrate can be restored by
+deliberate work (terraforming as the inverse of `degrade`) or only ever
+declines.
+
 ## §7 THE BASE-LEVEL ACCOUNTING LAW
 
 > **"Everything needs accounting for at the microscopic/base level, with

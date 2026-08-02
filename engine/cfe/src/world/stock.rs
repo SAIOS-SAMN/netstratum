@@ -171,6 +171,66 @@ impl ResourceStock {
         self.current = Self::onto_lattice(&capped);
     }
 
+    /// THE RECURRING CEILING — the most this stock can EVER yield per
+    /// tick, at any stock level and on the best world.
+    ///
+    /// `R(S) = r·S·(1 − S/S_max)` peaks at `S = S_max/2`, where it
+    /// equals `r·S_max/4`. Coverage only multiplies by something in
+    /// `(0,1]`, so **no civilization on any world can draw more than
+    /// this from this deposit without shrinking it.** It is the hard
+    /// bound on recurring value.
+    pub fn recurring_ceiling(&self) -> Ratio {
+        self.rate.clone() * self.ceiling.clone() / ratio(4, 1)
+    }
+
+    /// THE SLOW CLOCK — an unclean harvest lowers what the land can
+    /// EVER produce, and stopping does not give it back.
+    ///
+    /// **Two clocks, and only one of them forgives.** Drawing above
+    /// regeneration empties a stock, and a stock left fallow climbs
+    /// back to its ceiling — measured, full recovery from the seed
+    /// floor. That is the FAST clock and its cost is temporary. A
+    /// method that degrades the substrate instead lowers `rate` and
+    /// `ceiling` themselves, and nothing restores them.
+    ///
+    /// **THE COST IS QUADRATIC, and this is the whole of the law.**
+    /// The recurring ceiling is `r·S_max/4`, so a loss that takes both
+    /// terms costs its SQUARE:
+    ///
+    /// ```text
+    /// substrate down 10%  →  81.0% of the recurring ceiling, forever
+    /// substrate down 25%  →  56.2%
+    /// substrate down 50%  →  25.0%
+    /// ```
+    ///
+    /// **A civilization does not lose what it took. It loses what it
+    /// could ever take again, squared.** No penalty is levied and none
+    /// is needed — this is the arithmetic of the logistic, not a
+    /// judgement about greed (CHARTER §2a: physics needs no penalty).
+    ///
+    /// **And it is anti-research.** `research_rate` raises `rate`;
+    /// this lowers it. An unclean harvest is negative research measured
+    /// on the research axis, which is how "how stupid can you be" gets
+    /// a number instead of a scolding.
+    pub fn degrade(&mut self, loss: &Ratio) {
+        let one = ratio(1, 1);
+        let zero = ratio(0, 1);
+        let taken = match (loss > &one, loss < &zero) {
+            (true, _) => one.clone(),
+            (_, true) => zero.clone(),
+            _ => loss.clone(),
+        };
+        let kept = one - taken;
+        self.rate = Self::onto_lattice(&(self.rate.clone() * kept.clone()));
+        self.ceiling = Self::onto_lattice(&(self.ceiling.clone() * kept));
+        if self.current > self.ceiling {
+            self.current = self.ceiling.clone();
+        }
+        if self.seed_floor > self.ceiling {
+            self.seed_floor = self.ceiling.clone();
+        }
+    }
+
     /// RECURRING VALUE — what this stock yields per tick, forever,
     /// on a world of the given thermal `coverage`.
     ///
