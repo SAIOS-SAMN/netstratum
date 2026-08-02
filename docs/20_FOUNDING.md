@@ -629,6 +629,114 @@ displacement in one direction, the type must hold the other.
 the same defect CHARTER §2a records twice already, arriving through the
 type system instead of through prose.
 
+### 6g. THE REGENERATING ASSET — the economy has no capital, only faucets
+
+**Operator ruling 2026-08-02.** *"How does the underlying asset
+regenerate itself?"* **Measured answer: there is no underlying asset.**
+
+**Nothing in the engine depletes, and nothing regenerates.** A scan for
+depletion, regeneration, replenishment or exhaustion across `engine/`
+returns no resource-sense hit at all — every match is the scribe
+regenerating display files or famine being relieved. Both halves are
+absent together, and that is the finding.
+
+**The whole production model, measured:**
+
+```text
+ZONES   zone_yield(kind, metabolism) is a CONSTANT per tick, multiplied
+        by efficiency 1/(1+overflow), terrain boost, and tech factors
+        (tick.rs:361-393). No stock is read. No stock is written.
+
+VEINS   an assay mints richness × elapsed. `richness` is set once at
+        ProspectStruck from element_properties and NEVER DECREASES —
+        confirmed across every site that touches it.
+```
+
+**So extraction draws on nothing.** An extractor produces iron forever;
+a vein yields forever at a fixed richness. **"Unbounded extraction"
+is exact, and its consequence is not exhaustion — it is that value
+without scarcity is not an asset.** There is nothing to own, nothing to
+improve, nothing whose condition can change, and therefore nothing worth
+investing in.
+
+**GROWTH IS TERMINAL, and the ceiling is countable.** A colony grows by
+adding zones to an 8×8 grid — 64 tiles — each yielding a constant.
+Fill the grid, apply the multipliers, and growth stops. There is no
+compounding anywhere in the loop.
+
+**AND TECHNOLOGY IS A FLAT MULTIPLIER, NOT A GROWTH MECHANISM.**
+`tech_node_of` is the whole of what research does to output:
+
+```text
+condition 1 → 3/4     condition 4 → 5/4
+condition 2 → 5/4     condition 5 → 1/2   (the demurrage ease)
+condition 3 → 5/4
+```
+
+**Five constants applied to a flow.** Research cannot raise a
+regeneration rate, because there is no rate. It cannot expand a stock,
+because there is no stock. It cannot open a dimension. **It moves a
+faucet's setting once and then is finished** — which is why the tech
+tree bottoms out in strategy targets (§6a-bis) rather than in a
+trajectory.
+
+### 6g.1 THE MISSING PAIR
+
+§6f's law applied to production. The inverse of extraction is not
+conservation and it is not restraint:
+
+```text
+extracted_across  ⟷  (nothing)          the social books are paired;
+                                         the productive ones are not
+EXTRACTION        ⟷  REGENERATION       the missing pair
+```
+
+### 6g.2 THE LAW — a stock that renews, and intelligence that renews it faster
+
+```text
+STOCK        the underlying asset: a quantity extraction DRAWS DOWN
+             and regeneration RESTORES. Owned, improvable, depletable,
+             and therefore worth something.
+
+REGENERATION rate at which a stock restores itself. The positive term
+             extraction has never had.
+
+RESEARCH     raises the REGENERATION RATE — never merely the extraction
+             multiplier. This is what makes intelligence compound.
+
+FLOURISH     surplus (§6f.3) reinvests into stock or into regeneration,
+             so abundance becomes productive base instead of a number
+             that sits.
+```
+
+**Why research must act on regeneration rather than on yield.** A
+multiplier on a flow is a one-time step: it lifts the line and stops.
+**A rise in the regeneration rate raises the ceiling itself**, so the
+same research pays forever and pays more the larger the stock it acts
+on. That is a growth mechanism rather than a bonus, and it is the
+difference between a tech tree and a list of upgrades.
+
+**Why this closes the loop the other sections opened.** §6f.3 asked what
+FLOURISH feeds; the answer is stock and regeneration. §6a asked what a
+ward's capture capacity is BUILT from; the answer is reinvested surplus.
+`19_REGISTRY` §4b asked what opens a ROOM; the answer is a line whose
+regenerating base actually grew. **Three laws were each missing the same
+operand, and it is capital.**
+
+### 6g.3 WHAT THIS DOES NOT SAY
+
+It does not say extraction should be punished, or that scarcity should
+be imposed as a brake. **A stock that regenerates is a MORE generous
+economy than a faucet, not a meaner one** — a faucet is capped at its
+setting forever, while a stock a civilization tends can grow without
+bound. The generative side leads here too (CHARTER §2a): the law names
+what renews, and depletion is what happens when renewal is outrun.
+
+**Held for the operator, since these set the economy's whole shape:**
+whether stocks are per-orb, per-vein or per-world; whether regeneration
+is linear or proportional to the remaining stock; and whether a stock
+can be driven to zero at all, or only asymptotically toward it.
+
 ## §7 THE BASE-LEVEL ACCOUNTING LAW
 
 > **"Everything needs accounting for at the microscopic/base level, with
