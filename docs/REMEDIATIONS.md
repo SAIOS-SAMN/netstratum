@@ -3,6 +3,61 @@
 **Lane:** `remediations-lane` (worktree `.claude/worktrees/remediations-lane`).
 **Opened:** 2026-08-02. **Base:** `main` at `540ac96`.
 
+## §0bis SUMMARY — the board in one page
+
+> A map, never a second authority (`EQUATIONS` §0.1). Restated facts
+> rot; this section holds only **measured numbers** and **pointers**.
+
+**THE MEASUREMENT.** Beat cost at 33 worlds: **1.52 s**, of which
+`research_step` is **94.2 %** (1432.9 ms), `merchant_step` 4.0 %,
+`chain_beat` 0.8 %. The forge search grew **≈2000× in 40 beats**;
+everything else grew 3–13×. An 80-cycle run takes 198 s; 120 cycles does
+not finish in ten minutes. Full tables: §1.
+
+**THE FINDING.** The cartesian object is the forge search
+(`solver/src/search.rs:124`) — breadth-first over the vocabulary
+product, |V| 14–37, depth ≤3, ~52 060 candidates, each **re-derived from
+the raw input**. `peel` and `shear` are the house cures and both exist;
+this is where they were never applied.
+
+**THE THREE DOCUMENTS.**
+
+| file | what it settles |
+|---|---|
+| **this file** | R1–R18, the whole cost surface, each `[MEASURED]` / `[READ]` / `[INFERRED]` |
+| **`FORGE_REMEDIATION.md`** | the plan for the 94 % — R1+R3 (≈3×, outcome-neutral), R4, R5, R2 |
+| **`FORGE_BUDGET.md`** | `SEARCH_BUDGET` as a capacity reading — rows **B0–B8**, the six **axial capabilities** |
+
+**WHAT LANDS WITHOUT A RULING.** R1+R3 behind one byte-identity pin
+(≈3×); then R4; then the find-scans and re-derivations (R7–R13, R17–R18).
+None carry economic content.
+
+**WHAT IS BLOCKED, AND ON WHAT.**
+
+- **R6** (stepping replay) rides `kernel-lane` **11a** — the same
+  refactor as its #30. Do not design a second.
+- **B0–B8** (the budget law) need `kernel-lane` **11a/11b** for the
+  replay axis, and operator words for every value (`FORGE_BUDGET` §7).
+- **R2** waits on the `from_key` wiring at N6 (~4 % today).
+
+**THE STANDING LESSON OF THIS LANE.** Three times a conclusion was
+reached from one axis and stated as if it covered the manifold — from
+the *shape* of PoW rather than the code; from consensus-neutrality
+rather than the six axes; from "leave coefficients unnamed" rather than
+seeing that unnamed is how `200_000` was born. The cure is structural,
+not resolve: **`FORGE_BUDGET` §9's axial capabilities** — a landing
+names which capability it exercised, and satisfying one is never
+satisfying the rest.
+
+**TWO COLLAPSES ALREADY RECORDED AS DEFECTS, both inherited by the
+budget law:** capacity read on the aggregate instead of per channel
+(`bridge.rs:306`), and the four ideology axes collapsed into
+`syntropy_ratio` (`EQUATIONS` §6 **S2**, against `09` §1.3). The
+operator's *"multi-axial coordinated system"* is not a framing applied
+from outside — it is the law's own shape, twice.
+
+---
+
 ## §0 What this file is
 
 The operator's standing question, in the operator's words: find the

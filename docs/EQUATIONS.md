@@ -964,3 +964,57 @@ work certificate, so it enters I4's mint-bound via `verify_certificate`.
     CORRECTION 2: H²/U² explode fixed width — `cfe::ratio` (BigRational)
                   only (the 2^1100 lesson, §5c guardrail 2).
     CORRECTION 3: call the sealed rational; never a second one (§0b).
+
+---
+
+## §7 The forge budget — the search bound as a reading
+
+**ROW CLAIM (remediations-lane, 2026-08-02, §0.2).** Claimed before code
+uses it. Authority: `docs/FORGE_BUDGET.md`. All rows **DRAFT** — named
+here so no landing inlines a literal; **valued only by operator ruling**
+(FORGE_BUDGET §7). Per §0.3, each row states what its coefficient
+MEASURES, never what it is worth.
+
+**B0 · `SEARCH_BUDGET` — SUPERSEDED.** `solver/src/search.rs:119`, the
+flat `200_000`. A PLACEHOLDER by its own comment (a ceiling chosen to
+stop one observed 102 s stall), and inert: `word_len` 3 enumerates
+52 060, so it never binds. Belongs on `17_CAPACITY` §7's
+retire-by-measurement list beside seat widths and galaxy reach.
+
+**B-E1 · THE BUDGET EQUATION.** DRAFT.
+
+    unknown(prior) > 0  ⇒  budget = ε_unknown                      (B8)
+
+    otherwise
+    budget(prior,t) = min( β_cap,
+                           max( β_floor,
+                                ⌊ β_quantum · ρ_D(prior) · β_ceiling(α_axis(prior)) ⌋ ))
+
+| row | symbol | measures | domain |
+|---|---|---|---|
+| B1 | `β_floor` | candidates when capacity is undefined or at ground — the search minimum | ℕ⁺ |
+| B2 | `ρ_D` | the per-dimension capacity verdict as ONE extent without collapsing the shape | a named reading |
+| B3 | `β_quantum` | candidates per unit of `ρ_D` | ℚ⁺ |
+| B4 | `α_axis` | per-axis syntropic standing (compassion·love·integrity·morality), never summed | ℚ⁴∩[0,1]⁴ |
+| B5 | `σ_gate` | the per-axis ratio at which that axis opens its band | ℚ⁴∩[0,1]⁴ |
+| B6 | `β_ceiling` | the alignment vector as one multiplier — order-preserving, never a sum | [0,1]⁴→[0,1] |
+| B7 | `β_cap` | candidates no line exceeds at any capacity | ℕ⁺ |
+| B8 | `ε_unknown` | what a cross-book (shared) capacity reading receives | ℕ⁺ |
+
+**TWO STANDING BARS, both already recorded in this ledger and both
+inherited by B-E1:**
+
+- **B2 may not read the aggregate capacity verdict.** `bridge.rs:306-335`:
+  *"a universe can read `Entangled` on the sum while no single channel
+  is entangled at all."* Read `verdict_per_dimension`.
+- **B4/B6 may not read `syntropy_ratio`.** That is **§6 S2's live
+  defect** — the collapse of four axes into one scalar, against `09`
+  §1.3's *"no oracle, no single number."* A ceiling riding it would add
+  a THIRD reader to an unresolved contradiction. Read the four named
+  axes of `09` §2; morality's ratio is already sealed as
+  `world::reciprocity_reading` (`world.rs:4905`) — call it, never write
+  a second.
+
+**OPEN ROW (FORGE_BUDGET §7.6): compassion has no entropic counterpart**
+in the present sum (`given_in_crisis` stands alone), so its ratio is not
+yet well-formed. Named, not papered over.

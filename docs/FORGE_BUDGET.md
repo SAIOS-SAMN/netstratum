@@ -1,8 +1,9 @@
 # FORGE BUDGET — the search bound as a capacity reading, not a constant
 
-**Lane:** `remediations-lane`. **Written:** 2026-08-02.
-**Status:** DERIVED from operator ruling 2026-08-02 + existing sealed
-law. **Awaits ratification** — §7 lists what only the operator can say.
+**Lane:** `remediations-lane`. **Written:** 2026-08-02, amended same day
+(named coefficients + axial capabilities, operator ruling).
+**Status:** DRAFT for ratification. Rows **B0–B8** claim their place in
+`EQUATIONS.md` §7 under the row-claim convention (§0.2).
 **Supersedes:** `FORGE_REMEDIATION.md` §5's "not proposed: touching
 `SEARCH_BUDGET`."
 
@@ -22,139 +23,159 @@ law. **Awaits ratification** — §7 lists what only the operator can say.
 > the balance to happen between what needs to happen verse what "is easy
 > to have happen".
 
+And on this file's first draft:
+
+> coefficients need names: this is an inefficiency that requires
+> remediations — provide axial capabilities and provide summarization
+
+**That correction is upheld and the first draft was wrong.** It left
+every coefficient unnamed, reasoning that naming them would repeat the
+200 000. Naming is not valuing. A **named** coefficient with an
+unmeasured value is a declared unknown: referenceable, amendable by
+ruling, versionable by epoch, and impossible to inline by accident. An
+**unnamed** one is a hole that the first implementer fills with a
+literal — which is exactly the causal history of 200 000. §4 names them;
+§7 still refuses to value them.
+
 ---
 
-## §2 THE ERROR THIS CORRECTS — mine, and it is the same one twice
+## §2 THE ERROR THIS CORRECTS — mine, and it is the same one three times
 
 `FORGE_REMEDIATION.md` §1 proved the forge search is **consensus-free**
-(`verify_work` re-applies the presented program and never enumerates)
-and concluded from that alone: *"They change neither what verifies nor
-what mints. They do not need Ruling Box 1."*
+and concluded: *"They change neither what verifies nor what mints. They
+do not need Ruling Box 1."* Consensus-neutrality is one axis; I treated
+it as the whole space — the same failure as the commit before it, where
+I reasoned from the *shape* of proof-of-work instead of reading the
+code. Reach one axis, declare the manifold.
 
-**Consensus-neutrality is one axis. I treated it as the whole space.**
-That is the identical failure mode as the commit before it, where I
-reasoned from the *shape* of proof-of-work instead of reading the code:
-reach one axis, declare the manifold. The axes a forge change actually
-crosses:
-
-| axis | question | constant budget | capacity budget |
-|---|---|---|---|
-| consensus | does it verify identically everywhere? | yes | yes (`verify_work` unchanged) |
-| replay | does live equal replay? | yes (nothing read) | **load-bearing — §6** |
-| economic | does it change mint rate? | no | **yes, deliberately** |
-| capacity | does the work match what the civ bears? | **no — the defect** | yes, by construction |
-| syntropic | does it respect the balance law? | **no — unread** | yes, the cap |
-| mesh | is weight earned or assigned? | assigned | earned (`17_CAPACITY` §7) |
-
-The document's own law says this plainly and I walked past it —
-`17_CAPACITY` §13d: *"a deterministic universe does not make every
-level deterministic. Law is deterministic; the dynamics inside it are
-not."* The search's **dynamics** stay free. The **bound** on them is
-law, and law is not a magic number.
+The system's own law says it: `17_CAPACITY` §13d — *"a deterministic
+universe does not make every level deterministic. Law is deterministic;
+the dynamics inside it are not."* §9 is the standing cure: the axes as
+capabilities, each with its own reading and its own refusal, so no
+future landing can satisfy one and claim the rest.
 
 ---
 
 ## §3 WHAT IS WRONG WITH 200 000, precisely
 
-`solver/src/search.rs:119`:
+`solver/src/search.rs:119` — `pub const SEARCH_BUDGET: usize = 200_000;`
 
-```rust
-pub const SEARCH_BUDGET: usize = 200_000;
-```
-
-Its own comment justifies it by one anecdote — *"measured live: an
+Its own comment justifies it by one anecdote: *"measured live: an
 unbudgeted rung-5 seed cost 102 s of exhaustive search in one
-heartbeat"* — so the number is a **ceiling chosen to stop one observed
-stall**, not a reading of anything. Three consequences, all `[READ]`:
+heartbeat."* It is a ceiling chosen to stop one observed stall. Three
+consequences, all `[READ]`:
 
 1. **It prices every civilization identically.** A ground-state line
-   with one orb and a tier-3 elder with a charted lineage get the same
-   200 000 candidates. Capacity — the thing the entire `17_CAPACITY`
-   ruling exists to measure — is not consulted.
-2. **It is inert at live difficulty.** `word_len` 3 enumerates 52 060
-   (`FORGE_REMEDIATION.md` §2), so the bound never binds. It is a
-   ceiling above the roof: it neither paces nor protects.
-3. **It is a placeholder of exactly the class `17_CAPACITY` §7 names
-   for retirement by measurement**, beside seat widths
-   (`ledger/src/registry.rs:37`), galaxy reach
-   (`ledger/src/galaxy.rs:33`) and occupancy caps. It is missing from
-   that list; it belongs on it.
+   with one orb and a tier-3 elder draw the same 200 000.
+2. **It is inert at live difficulty.** `word_len` 3 enumerates 52 060,
+   so the bound never binds — a ceiling above the roof, pacing nothing.
+3. **It belongs on `17_CAPACITY` §7's retire-by-measurement list**
+   beside seat widths (`ledger/src/registry.rs:37`) and galaxy reach
+   (`ledger/src/galaxy.rs:33`), and is missing from it.
 
 ---
 
-## §4 THE FORM
+## §4 THE NAMED COEFFICIENTS — rows B0–B8
 
-> **`17_CAPACITY` §7's method binds here: build the meter, measure, then
-> rule — never rule a placeholder blind.** The shape below is derived so
-> the meter knows what to measure. The coefficients are deliberately
-> left unnamed; naming them before the measurement would repeat the
-> 200 000.
+> **Chapter four's law binds every row** (`EQUATIONS` §0.3): state what
+> the coefficient **measures**, never what it is worth. A name is a
+> handle; a value is a ruling (§7).
+
+| row | symbol | measures | domain | status |
+|---|---|---|---|---|
+| **B0** | `SEARCH_BUDGET` | — superseded — the flat 200 000 at `search.rs:119` | ℕ⁺ | **PLACEHOLDER, struck by this law** |
+| **B1** | `β_floor` | the candidates a line receives when its capacity is undefined or stands at ground — **the search minimum** | ℕ⁺ | DRAFT · unvalued |
+| **B2** | `ρ_D` | how the per-dimension capacity verdict yields ONE extent **without collapsing the shape** | a named reading, not a number | DRAFT · unchosen |
+| **B3** | `β_quantum` | candidates granted per unit of `ρ_D` | ℚ⁺ | DRAFT · unvalued |
+| **B4** | `α_axis` | per-axis syntropic standing — compassion · love · integrity · morality — **never summed** | ℚ⁴ ∩ [0,1]⁴ | DRAFT · unbuilt |
+| **B5** | `σ_gate` | the per-axis ratio at or above which that axis opens its band | ℚ⁴ ∩ [0,1]⁴ | DRAFT · unvalued |
+| **B6** | `β_ceiling` | how the alignment vector becomes one multiplier — order-preserving, **never a sum** | [0,1]⁴ → [0,1] | DRAFT · unchosen |
+| **B7** | `β_cap` | the candidates no line exceeds at any capacity — the latency protection 200 000 was reaching for | ℕ⁺ | DRAFT · unvalued |
+| **B8** | `ε_unknown` | what a line whose capacity reading spans books receives | ℕ⁺ | DRAFT · proposed `≡ β_floor` |
+
+### B-E1 · THE BUDGET EQUATION
 
 ```
-budget(prior, stamp)  =  clamp( FLOOR,  scale(D)·… ,  ceiling(syntropy) )
+unknown(prior) > 0   ⇒   budget = ε_unknown                        (B8)
+
+otherwise
+budget(prior, t) = min( β_cap ,
+                        max( β_floor ,
+                             ⌊ β_quantum · ρ_D(prior) · β_ceiling(α_axis(prior)) ⌋ ) )
 ```
 
-### 4a. THE FLOOR — the search minimum
+Integer by construction (a candidate count). `β_floor ≤ β_cap` is a
+standing obligation on the ruling, not an assertion here.
 
-**Every line always gets a floor.** Non-negotiable, and not politeness:
-without it a ground-state civ can never solve, therefore never mint,
-therefore never build capacity, therefore never leave the ground. A
-capacity-gated budget with no floor is a poverty trap that the capacity
-law would then read as correct.
+### 4a. B1 `β_floor` — why a floor is structural, not politeness
 
-The floor is what a line receives when **capacity is undefined or at
-ground** — §5 is the case that makes this load-bearing, not a corner.
+Without it a ground-state line can never solve → never mint → never
+build capacity → never leave the ground, **and the capacity law would
+then read that trap as correct.** The floor is the term that keeps the
+capacity reading from being self-confirming.
 
-### 4b. THE CAPACITY TERM — and it is a SHAPE, not a scalar
+### 4b. B2 `ρ_D` — read per dimension, never the aggregate
 
-`kernel::bridge::read_entangled(prior)` returns
+`kernel::bridge::read_entangled(prior)` yields
 `EntangledRead { rank, holonomy, symmetry_foundation, flows, unknown }`.
-Two existing readings do the work:
+The gate is `verdict().is_admitted()` — `Vacuity::Entangled`, i.e.
+`rank > 0 ∧ flow ≠ 0` (`rfa-core/src/boundary.rs:147-193`) — **the same
+reading `kernel::capacity_law` already uses to admit a
+`DiscoveryMinted`.** One law, two callers; never a second bookkeeping.
 
-- **the gate:** `verdict().is_admitted()` — `Vacuity::Entangled`, i.e.
-  `rank > 0 ∧ flow ≠ 0` (`rfa-core/src/boundary.rs:147-193`). This is
-  **already** the gate `kernel::capacity_law` uses to admit a
-  `DiscoveryMinted`. The same reading that decides whether a mint is
-  lawful decides whether a line rises above the floor. One law, two
-  callers — never a second bookkeeping.
-- **the extent:** `rank` — the count of independent cycles carrying
-  charge no frame explains.
+**`bridge.rs:306-335` carries the warning that decides B2:** *"a
+universe can read `Entangled` on the sum while no single channel is
+entangled at all — rank standing in one channel, flow in another."*
+`verdict_per_dimension` exists for exactly this. A budget from the
+aggregate would hand full resource to a line entangled nowhere.
+Candidate readings for the ruling: the **count** of channels reading
+`Entangled`; the **minimum** rank across them (strictest — matches
+*"witnessed in every dimension"*); or the **sum** of rank over entangled
+channels only.
 
-**READ IT PER DIMENSION, NEVER ON THE SUM.** `bridge.rs:306-335`
-carries the warning explicitly: *"a universe can read `Entangled` on
-the sum while no single channel is entangled at all — rank standing in
-one channel, flow in another."* `verdict_per_dimension` exists for
-exactly this. A budget derived from the aggregate would hand full
-resource to a line that is entangled nowhere. **This is the operator's
-multi-axial point living inside the capacity reading itself: D is a
-shape (`17_CAPACITY` D1, §8), and collapsing it to one number is the
-collapse `§2b` already bars.**
+### 4c. B4/B5/B6 `α_axis` — FOUR AXES, and why the obvious reading is barred
 
-### 4c. THE SYNTROPIC CEILING — "what needs to happen" vs "what is easy"
+**The first draft proposed riding `World::syntropy_ratio()`. That is
+barred, and the bar is already recorded.** `EQUATIONS` §6 **S2** carries
+the live defect:
 
-`World::syntropy_ratio()` (`cfe/src/world.rs:3314`) is already built and
-already derived-at-call, never stored:
+> *"`syntropy_ratio` collapses all four axes into one scalar and TWO
+> rules read it"* — against `09` §1.3's ruling that *"no oracle, no
+> single number … the four axes never collapse into one figure"* and
+> §3.4.2's refusal of *"the single goodness number."* *"As written the
+> document and the code contradict."*
 
-```
-syntropic = given_in_crisis + returned_across + covenants_fulfilled + bond_flow
-entropic  = extracted_across + covenants_breached + severance_load
-ratio     = syntropic / (syntropic + entropic)        # None when no deed posted
-```
+A budget ceiling riding that ratio would **inherit an unresolved
+contradiction and add a third reader to it.** So `α_axis` reads the four
+named axes of `09` §2 directly, each already computable from committed
+orb fields:
 
-That numerator **is** "what needs to happen" and that denominator's
-second half **is** "what is easy to have happen" — the operator's
-distinction is already the engine's own two columns. The ceiling rides
-the ratio: an extractive line is capped down toward the floor; a line
-carrying its neighbours earns headroom.
+| axis | `09` § | syntropic term | entropic term |
+|---|---|---|---|
+| **compassion** — absorption | 2.1 | `given_in_crisis` | *(none in the current sum)* |
+| **love** — resonance | 2.2 | `bond_flow` | `severance_load` |
+| **integrity** — fidelity | 2.3 | `covenants_fulfilled` | `covenants_breached` |
+| **morality** — reciprocity | 2.4 | `returned_across` | `extracted_across` |
 
-**House precedent exists:** the elevation gate already refuses a climb
-below `syntropy ≥ 1/2` (PRACTICE-1, `world.rs:1051-1057`,
-`docs/09` §2.5). The ceiling is that same alignment law applied to
-resource rather than to rank.
+Morality's ratio is **already built and already sealed** —
+`reciprocity_reading` (`cfe/src/world.rs:4905`) is exactly
+`returned/(returned+extracted)`. Call it; never write a second.
 
-`None` (no deed ever posted) must read as the floor, not as zero and
-not as full — a fresh line has not yet been measured, and the
-refuse-never-guess law says so.
+**Compassion has no entropic counterpart in the present sum**, so its
+ratio is not yet well-formed. Named here as an open row rather than
+papered over — §7.6.
+
+`β_ceiling` must be **order-preserving and must not be a sum**: a sum is
+the collapse `09` §1.3 refuses, re-entering through the ceiling. The
+minimum across axes is the reading that respects the refusal (a line is
+capped by its weakest standing), and it is the natural mirror of B2's
+strictest option.
+
+**The symmetry worth naming:** both sides of B-E1 are multi-axial, and
+both have a recorded defect from collapsing — capacity across `CHANNELS`
+(`bridge.rs:306`), alignment across the four axes (`EQUATIONS` §6 S2).
+The operator's *"multi-axial coordinated system"* is not a framing
+placed on this law from outside; it is the law's own shape, twice.
 
 ---
 
@@ -164,119 +185,165 @@ refuse-never-guess law says so.
 > then?"*
 
 **The law already refuses to guess, and the refusal is the answer.**
+`read_entangled` is single-book (`bridge.rs:574-590`):
 
-`kernel::bridge::read_entangled` is a **single-book** reading. Its own
-doc (`bridge.rs:574-590`):
+> *"every pair among the book's own orbs is observed, so `unknown` is
+> zero by construction. For a reading that spans books, carry the
+> unobserved count through `read_entangled_observed`. … While
+> `unknown > 0` … `capacity_is_defined` refuses — discharge them by
+> `Resolve::Telescope` or `Resolve::LockOn` before reading capacity,
+> **never by assuming absence**."*
 
-> *"Single-book reading: every pair among the book's own orbs is
-> observed, so `unknown` is zero by construction. For a reading that
-> spans books, carry the unobserved count through
-> `read_entangled_observed`. … While `unknown > 0` the complex has holes
-> of unknown shape and `EntangledRead::capacity_is_defined` refuses —
-> discharge them by `Resolve::Telescope` or `Resolve::LockOn` before
-> reading capacity, **never by assuming absence**."*
-
-So, exactly:
-
-1. **A shared arrangement makes cross-book pairs, so `unknown > 0`, so
-   capacity is NOT DEFINED.** The line falls to the **floor** (§4a)
-   until the unknowns are discharged. It is never granted a guessed
-   capacity, and never assumed to have none.
-2. **This closes a real exploit that a naive design would open.** If
-   sharing granted each civ a full capacity reading, then two civs on
-   one planet would draw **twice** the search resource that one civ
-   draws — sharing would *mint budget out of nothing*, and the cheapest
-   strategy would be to fragment into shell civilizations. The `unknown`
-   refusal prevents that structurally rather than by a rule bolted on
-   afterwards.
+1. **Sharing makes cross-book pairs → `unknown > 0` → capacity is NOT
+   DEFINED → the line draws `ε_unknown` (B8)** until discharged. Never a
+   guessed capacity; never an assumed absence.
+2. **This closes an exploit a naive design opens.** If sharing granted
+   each civ a full reading, two civs on one planet would draw **twice**
+   what one draws — sharing would mint budget from nothing, and the
+   cheapest strategy would be fragmenting into shell civilizations. The
+   `unknown` refusal prevents it structurally, not by a bolted-on rule.
 3. **It gives sharing lines a lawful path, not a penalty.**
-   `Resolve::Telescope` (widen the reach and look again) and
-   `Resolve::LockOn` (confirm absence at the present reach by
-   observation) are the two doors. A shared civ that *discharges its
-   reading* gets its capacity honestly and keeps it. The floor is what
-   it lives on meanwhile, which is precisely why the floor cannot be
-   zero.
+   `Resolve::Telescope` (widen the reach, look again) and
+   `Resolve::LockOn` (confirm absence by observation) are the doors. The
+   floor is what a line lives on meanwhile — which is precisely why
+   `β_floor` cannot be zero.
 
-**This is the dynamic production the ruling asks for:** resource is not
-handed out by a constant, it is *read* — and where it cannot be read,
-the system says so and pays the minimum rather than inventing a number.
+**This is the dynamic production the ruling asks for:** resource is
+*read*, and where it cannot be read the system says so and pays the
+minimum rather than inventing a number.
 
 ---
 
-## §6 DETERMINISM — the axis that makes this hard, and its dependency
+## §6 DETERMINISM — the axis that makes this hard
 
-A capacity-derived budget is read from state, and **the moment a rule
-reads state it must read the same state live and on replay.** This is
-not hypothetical: it is `kernel-lane` task **#30**, made concrete by its
-own P3 revert (`df48786`) — *"the transition is defined twice, in
-replay's 113 arms and in the live proposer, and they agree only while
-the shared rules stay still."*
+The moment a rule reads state it must read the same state live and on
+replay. That is `kernel-lane` **#30**, made concrete by its own P3
+revert (`df48786`): *"the transition is defined twice, in replay's 113
+arms and in the live proposer, and they agree only while the shared
+rules stay still."*
 
-Binding constraints on the implementation:
+- **Read `prior` committed state, never live workspace.**
+- **Sealed rule, called not copied** (CHARTER §0b). The 200 000 was a
+  constant precisely so copying it was safe; a derived bound is not.
+- **Ride the ruleset-epoch activation table** (`kernel-lane` 11b:
+  stamp → epoch, derived from the stamp already inside the hash, zero
+  wire change) — else amending B1–B8 later silently rewrites what past
+  beats would have done.
 
-- **Read `prior` committed state, never live workspace.** The budget at
-  stamp *t* must be a pure function of the state the deed is judged
-  against.
-- **Sealed rule, called not copied** (CHARTER §0b) — one computation,
-  every caller. The 200 000 is a constant precisely so it could be
-  copied safely; a derived bound cannot be.
-- **It must ride the ruleset-epoch activation table**
-  (`kernel-lane` 11b: stamp → epoch, version derived from the stamp
-  already inside the hash, zero wire change). Otherwise changing the
-  budget formula later silently rewrites what past beats would have
-  done.
+**BLOCKED ON `kernel-lane` 11a/11b.** Relay owed.
 
-**Therefore this work is BLOCKED ON `kernel-lane` 11a/11b landing**, and
-must not be designed around them. Relay owed.
-
-One thing that is *not* a constraint, and is worth stating so nobody
-adds a guard for it: **`verify_work` never checks how many candidates a
-prover tested.** The budget is prover-side. A node with a different
-budget still verifies every proof identically. What it changes is which
-*tasks get solved*, hence mint rate — which is the economic axis, §7.
+Not a constraint, stated so nobody guards it: **`verify_work` never
+checks how many candidates a prover tested.** The budget is prover-side;
+a node with a different budget verifies every proof identically. What it
+changes is which tasks get solved — the economic axis, A3.
 
 ---
 
-## §7 WHAT ONLY THE OPERATOR CAN SAY
+## §7 WHAT ONLY THE OPERATOR CAN SAY — the rows awaiting a value
 
-Recorded unnamed on purpose (§4's warning):
-
-1. **The floor's value.** What is the search minimum — a candidate
-   count, or itself a reading (e.g. the ground extent)?
-2. **The scale from `rank` to candidates.** Linear, or a ladder like
-   `Difficulty::level`? `rank` is a small integer; candidates are
-   ~10⁴–10⁵.
-3. **The ceiling's shape against syntropy.** Does `ratio ≥ 1/2` open the
-   full band (matching the elevation gate), or is it continuous?
-4. **Whether the budget also re-prices the MINT.** Today `mint_bound`
-   keys off `Difficulty` alone (`kernel/src/lib.rs:845`). If a
-   high-capacity line searches more, it solves more of the *same* rung —
-   does it earn the same, or does capacity enter the reward too? This
-   is Ruling Box 1 territory and this lane proposes nothing.
-5. **Per-dimension aggregation.** §4b says read `verdict_per_dimension`.
-   Is the budget driven by the *count of entangled channels*, the
-   *minimum* across channels (the strictest reading of "witnessed in
-   every dimension"), or something else?
+1. **B1 `β_floor`** — a candidate count, or itself a reading (the ground
+   extent)?
+2. **B2 `ρ_D`** — count of entangled channels, minimum rank across them,
+   or sum over entangled channels only?
+3. **B3 `β_quantum`** — `rank` is a small integer; candidates are
+   10⁴–10⁵. Linear, or a ladder like `Difficulty::level`?
+4. **B5 `σ_gate` / B6 `β_ceiling`** — per-axis thresholds or one shared?
+   Step (matching the climb gate's 1/2) or continuous? Minimum across
+   axes, or another order-preserving non-sum?
+5. **B7 `β_cap`** — and note §8's likely finding: the honest cap may be
+   **below** 52 060, making the bound real for the first time.
+6. **B4 compassion's entropic term** — §4c: compassion has a syntropic
+   term and no entropic counterpart, so its ratio is not well-formed. Is
+   the counterpart `extracted_across` shared with morality, a new
+   committed field, or is compassion read as a level rather than a
+   ratio?
+7. **Does capacity re-price the MINT?** Today `mint_bound` keys off
+   `Difficulty` alone (`kernel/src/lib.rs:845`). If a high-capacity line
+   searches more, it solves more of the *same* rung — same reward, or
+   does capacity enter it? Ruling Box 1 territory; this lane proposes
+   nothing.
 
 ---
 
 ## §8 WHAT IS OWED BEFORE ANY OF THIS LANDS
 
-`17_CAPACITY` §7: *build the meter, measure, then rule.* The meter is
-what this lane can build without an operator word:
+`17_CAPACITY` §7: *build the meter, measure, then rule.*
 
-1. **THE CAPACITY METER.** Instrument a run and record, per world per
-   beat: `verdict_per_dimension`, `rank`, `unknown`, `syntropy_ratio`,
-   and the candidates the search actually tested. Zero law change — a
-   reading, like `cost_probe`.
-2. **THE MEASUREMENT.** Against that, answer with numbers: what is the
-   live spread of capacity across a 44-world board? How many lines read
-   `unknown > 0`? What does the syntropy ratio actually range over?
-3. **THEN the coefficients are ruled against observation**, which is
-   how Ruling Box 1 and PROPORTION-1 were both settled, and is the
-   opposite of how 200 000 was arrived at.
+1. **THE CAPACITY METER** — record per world per beat:
+   `verdict_per_dimension`, `rank`, `unknown`, the four axis ratios
+   (not the collapsed one), and candidates actually tested. A reading,
+   like `cost_probe`; zero law change.
+2. **THE MEASUREMENT** — the live spread of capacity across a 44-world
+   board; how many lines read `unknown > 0`; what each axis actually
+   ranges over.
+3. **THEN B1–B8 are ruled against observation** — how Ruling Box 1 and
+   PROPORTION-1 were both settled, and the opposite of how 200 000 was.
 
-The measurement also settles a question §3.2 raises and cannot answer:
-the bound is inert today, so **the first honest act may be to discover
-the budget should be smaller than 52 060, not larger** — a real bound
-that paces the forge, rather than a ceiling above the roof.
+---
+
+## §9 AXIAL CAPABILITIES
+
+Six axes. Each is a **capability** — a thing the system can read,
+decide and refuse — not a checkbox. A landing satisfies an axis only by
+naming which capability it exercised. **Satisfying one is not
+satisfying the manifold**; §2 is what that error cost twice.
+
+### A1 · CONSENSUS — *does it verify identically everywhere?*
+- **reads** the presented `WorkProof` — nothing else
+- **decides** `Ok(Difficulty)` or refuses
+- **refuses** `WorkBroken::{Malformed, TrainingMiss, OutputMismatch, ChainDiverged}`
+- **owns** no coefficient — **parameter-free by design, and that is the property**
+- **authority** `solver_verify::verify_work` (`work.rs:266`) · **LANDED**
+- **budget's crossing:** none. The search is prover-side; `verify_work`
+  never enumerates a candidate.
+
+### A2 · REPLAY — *does live equal replay?*
+- **reads** `prior` committed state at a stamp
+- **decides** whether a sealed rule yields one value for both paths
+- **refuses** by divergence — silently, which is why it needs a guard
+- **owns** the ruleset-epoch boundary (stamp → epoch)
+- **authority** `kernel-lane` #30 / 11a / 11b · **IN FLIGHT, BLOCKING**
+- **budget's crossing:** total. B-E1 reads state, so it cannot land
+  before this axis holds.
+
+### A3 · ECONOMIC — *does it change what mints, or how much?*
+- **reads** `Difficulty`
+- **decides** `mint_bound` — the rung→reward table (0 · 0 · 0 · 1 · 4 · 7)
+- **refuses** `Unlawful::MintWithoutStanding`
+- **owns** the rung→reward table — **Ruling Box 1, untouched here**
+- **authority** `kernel::mint_bound` (`kernel/src/lib.rs:845`) · **LANDED**
+- **budget's crossing:** indirect but real. Budget changes *which tasks
+  get solved*, hence mint frequency — never mint *amount*.
+
+### A4 · CAPACITY — *does the work match what the line can bear?*
+- **reads** `verdict_per_dimension`, `rank`, `unknown` — **per channel**
+- **decides** floor versus scaled band
+- **refuses** by `unknown > 0` — capacity undefined, discharge by
+  `Telescope` or `LockOn`, never by assuming absence
+- **owns** **B1 `β_floor` · B2 `ρ_D` · B3 `β_quantum` · B8 `ε_unknown`**
+- **authority** `kernel::bridge` · `17_CAPACITY` · **LANDED (unread by the forge)**
+- **budget's crossing:** this axis *is* the ruling. It is the axis the
+  flat constant never consulted at all.
+
+### A5 · SYNTROPIC — *does it respect the balance law?*
+- **reads** the four named axes of `09` §2 — compassion · love ·
+  integrity · morality — **as a vector**
+- **decides** the ceiling multiplier
+- **refuses** collapse to one scalar (`09` §1.3, §3.4.2)
+- **owns** **B4 `α_axis` · B5 `σ_gate` · B6 `β_ceiling`**
+- **authority** `09_IDEOLOGY` §2 · `world::reciprocity_reading`
+  (morality, LANDED) · **the other three axes UNBUILT as ratios**
+- **budget's crossing:** the ceiling. Carries `EQUATIONS` §6 **S2** as an
+  inherited open defect — see §4c; do not add a third reader of the
+  collapsed ratio.
+
+### A6 · MESH-WEIGHT — *is standing earned or assigned?*
+- **reads** verified capacity contributed
+- **decides** peer weight in `Σ_mesh`
+- **refuses** — **nothing today; weight arrives assigned and advisory**
+- **owns** the weight map
+- **authority** `mesh/src/agree.rs:57` · `SYSTEM_SPEC` §5 ·
+  **THE OPEN GAP** (`17_CAPACITY` §7 names capacity as its honest basis)
+- **budget's crossing:** shared basis. A capacity-derived budget and an
+  earned mesh weight read the *same* meter; building §8's meter serves
+  both, and neither should build a second.
