@@ -342,19 +342,31 @@ cmd_run() {
 }
 
 # The live roster drifts as waves are seated; seeds/ is the only copy that
-# git tracks (var*/ is ignored). This re-emits one into the other so the
-# tracked roster can be brought current deliberately, never silently.
+# git tracks (var*/ is ignored). This brings the tracked roster current
+# deliberately, never silently.
+#
+# THE OLD IMPLEMENTATION WAS A `cp` AND IT COULD NOT DO THIS JOB
+# (docs/ENDOWMENTS.md E4, measured 2026-08-03). It read
+# `<root>/polities.json`, which has not existed since 2026-07-30, so it
+# died before doing anything; the live civilizations are in
+# `<root>/registry/`, which it never looked at; and a straight overwrite
+# DELETED the roster-only lines — the three that exist nowhere else.
+# The merge is keyed on `slug`, unions both directions, and refuses any
+# entry it cannot complete from real data, so it lives in Python beside
+# the other tools rather than in brace-counting shell.
 cmd_export_roster() {
   local root; root="$(resolve_root)"
-  local src="$root/polities.json"
-  [ -f "$src" ] || die "no roster at $src"
-  local dest="$REPO/$DEFAULT_ROSTER"
-  say "source:  $src ($(roster_entries "$src") civilizations)"
-  say "dest:    $dest ($(roster_entries "$dest") civilizations)"
-  confirm "Overwrite the git-tracked roster with the live one?" \
-    || die "export cancelled — $dest untouched"
-  cp "$src" "$dest"
-  say "exported — review with 'git diff ${DEFAULT_ROSTER}' before committing"
+  local claim="$REPO/tools/claim_roster.py"
+  [ -f "$claim" ] || die "no claim path at $claim"
+  looks_like_universe "$root" || die "no universe at $root"
+
+  # Dry run first, always: the operator sees what would be claimed,
+  # preserved and refused BEFORE anything is written.
+  python3 "$claim" --var "$root" --roster "$REPO/$DEFAULT_ROSTER" \
+    || die "claim path refused — nothing written"
+  confirm "Merge the live record into the git-tracked roster?" \
+    || die "export cancelled — $REPO/$DEFAULT_ROSTER untouched"
+  python3 "$claim" --var "$root" --roster "$REPO/$DEFAULT_ROSTER" --write
 }
 
 main() {

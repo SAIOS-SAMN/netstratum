@@ -187,14 +187,58 @@ So neither file is a superset and neither can be copied over the other
 without loss. The registry cannot express where a civilization sits; the
 roster cannot express what founded it.
 
-**The shape the claim path must have** (design, settled by the above;
-not yet built): a UNION keyed on `slug` — live-only slugs added,
-durable-only slugs preserved, and on a shared slug the registry's `name`
-taken as the later authority while the seeds' siting fields are kept.
-Registry-only lines will land with EMPTY siting, which must be visible
-rather than defaulted: a fabricated coordinate is a worse record than an
-absent one. A claim that can delete a civilization is not a claim, it is
-a wipe wearing an export's name.
+**The shape the claim path must have** — BUILT 2026-08-03 as
+`tools/claim_roster.py`, with `install.sh export-roster` rewired to call
+it. A UNION keyed on `slug`: live-only slugs added, durable-only slugs
+preserved, and on a shared slug the registry's `name` taken as the later
+authority while the seeds' siting is kept (a deliberate seat is never
+overwritten by an observed one). Dry run by default; `--write` is the
+only thing that touches the roster; it re-reads its own output and
+refuses to write if any durable slug would vanish.
+
+**A CORRECTION TO THIS SECTION'S FIRST DRAFT.** It said registry-only
+lines should "land with EMPTY siting, which must be visible rather than
+defaulted". **That was wrong, and would have produced a claim the engine
+never sees.** `conductor::load_polities` (`polities.rs:161`) takes
+`world`, `planet`, `colony` and `policy` with `?` — an entry missing any
+of them is SKIPPED at load with only a stderr note. An empty-sited entry
+is therefore not a visible gap; it is an invisible one. Pinned
+empirically in `engine/conductor/tests/roster_claim_pins.rs`
+(`an_entry_missing_its_siting_is_silently_dropped_not_refused`): the file
+still loads, the unsited line is simply gone.
+
+The path therefore RECOVERS siting from the live universe —
+`var/worlds/<world>/planets/<planet>/state.json` names its civilization
+slug, and `starchart.json` carries the coordinates — and REFUSES any
+line it still cannot complete, reporting it by name. Refuse, never
+guess: a written claim the engine drops is worse than an absent one,
+because it reads as done.
+
+A claim that can delete a civilization is not a claim, it is a wipe
+wearing an export's name.
+
+### §4a What the path reports today (dry run, 2026-08-03)
+
+    MERGED     16   held by both; 3 renamed (slug held)
+    CLAIMED    14   live lines the roster never recorded
+    PRESERVED   3   roster lines the live universe does not hold
+    REFUSED     3   cannot be completed from real data
+
+**E1 is 17 lines, of which 14 are claimable now and 3 are refused.** The
+three refused — `bloomdeep`, `forgechoir`, `forgedeep` — are a category
+this register had not identified: **cleave children that were registered
+and charted but never founded.** Each carries a `lineage` pointer and
+says so in its own motto (*"one line, two songs — cleaved from
+Ferndeep / Slagborn / Bloomhollow"*), and each has coordinates on
+`starchart.json` (`bloom-deep`, `forge-choir`, `forge-deep`) with no
+world directory behind them.
+
+Those three charted-but-unfounded worlds are the obvious home for the
+three refused lines, and the tool reports the coincidence WITHOUT acting
+on it. The slug-to-world name pattern is not reliable in general —
+`cairnborn` sits on `cairn-field`, `aerie` on `windward-spire`, `hadal`
+on `trench-hold` — so adopting it here would be a guess dressed as a
+measurement. Booked for a ruling, not resolved by inference.
 
 ## §5 CANDIDATES — named, NOT yet verified
 
