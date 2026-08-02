@@ -13,6 +13,13 @@
 //!
 //! Both are replaced below with tests that fail if the mechanic
 //! changes.
+//!
+//! **P3's gradient was REVERTED at `HEAD` — see `21_KERNEL_PARAMETERS`
+//! §10.** It exposed a live/replay divergence in `conductor`'s survey
+//! pin, so the three tests asserting a smooth descent are withdrawn
+//! with it. The endpoint test below holds under the cliff AND under
+//! the gradient, so it stays: it is the continuity guarantee either
+//! way.
 
 use cfe::ratio::ratio;
 use cfe::world::{ease_of, World};
@@ -34,47 +41,7 @@ fn p3_the_gradient_reproduces_both_landed_values_exactly() {
     assert_eq!(ease_of(&cliff, 1), ratio(1, 2), "condition 5 halves decay, as before");
 }
 
-/// P3 · THE CLIFF IS GONE — this is the mechanical claim.
-///
-/// Under the landed rule conditions 0 through 4 were INDISTINGUISHABLE:
-/// every one returned `1/1`, so four fifths of the tech tree bought
-/// nothing and condition 5 was a strategy target. This test fails if
-/// that cliff ever returns.
-#[test]
-fn p3_intermediate_conditions_now_earn_and_did_not_before() {
-    let none: Vec<(u64, u8, [u8; 32])> = vec![];
-    let baseline = ease_of(&none, 1);
 
-    let mut previous = baseline.clone();
-    for condition in 1u8..=5 {
-        let held = vec![(1u64, condition, [0u8; 32])];
-        let ease = ease_of(&held, 1);
-
-        assert!(
-            ease < previous,
-            "condition {condition} must earn strictly more than {}: got {ease} vs {previous}",
-            condition - 1
-        );
-        assert!(ease < baseline, "condition {condition} beats no-tech — the cliff is gone");
-        previous = ease;
-    }
-}
-
-/// P3 · MONOTONE AND BOUNDED ACROSS THE WHOLE DOMAIN.
-///
-/// Two failures this guards: an ease above `1` would decay faster than
-/// the un-teched baseline (technology as a punishment), and an ease of
-/// `0` would remove the sink entirely, leaving I5 bounding decay at
-/// nothing. Runs past the old cliff to prove the clamp holds.
-#[test]
-fn p3_never_punishes_and_never_removes_the_sink() {
-    for condition in 0u8..=12 {
-        let held = vec![(1u64, condition, [0u8; 32])];
-        let ease = ease_of(&held, 1);
-        assert!(ease <= ratio(1, 1), "condition {condition}: tech must never increase decay");
-        assert!(ease >= ratio(1, 2), "condition {condition}: the sink never vanishes");
-    }
-}
 
 /// P3 · THE GRADIENT REACHES DECAY, not just a return value.
 ///

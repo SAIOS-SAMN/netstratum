@@ -455,3 +455,60 @@ after the tithe is receipted law. **A third argument for `P2` first.**
 `d52f3fd` (P3) is on `kernel-lane` only — **not on `main` and not
 visible downstream.** Their worktree still holds the `== 5` cliff, and
 nothing above should assume the gradient until it lands.
+
+---
+
+## §10 `P3` REVERTED — it exposed a live/replay divergence (2026-08-02)
+
+**`P3`'s gradient landed at `d52f3fd` and is reverted at `HEAD`.** It was
+committed after `cargo test -p cfe` and `-p kernel` only, without a
+workspace sweep. The sweep fails:
+
+    conductor/tests/survey_pins.rs:207
+    "replay MATCHES the surveyed world"
+      live:   Crystal 127/16
+      replay: Crystal  15/16
+
+Confirmed by bisection: restoring the `== 5` cliff turns the pin green,
+and the surveyed world holds techs at conditions **0 and 4** — both of
+which the cliff treated identically as `1/1` and the gradient does not.
+
+### 10a. THE FINDING IS WORTH MORE THAN THE FEATURE
+
+This is `19_KERNEL` §3 and task **#30** made concrete. The transition is
+defined twice — `replay`'s 113 arms and the live proposer — and **they
+agree only while the shared rules stay still.** `ease_of` is a sealed
+rule both paths call, and the moment its VALUES changed the two paths
+produced different worlds from the same receipts.
+
+Nothing was wrong with the gradient's arithmetic. The tests that
+exercised it directly all passed, including one that drove it through
+`demurrage_due`. **What failed is that a value change propagated
+differently through two definitions of the same transition** — which is
+precisely the defect #30 exists to close, and it was invisible until a
+sealed rule moved.
+
+### 10b. WHAT THIS COSTS EVERY REMAINING PARAMETER
+
+`P1`, `P2` and `P3` all change sealed-rule VALUES. **Each of them will
+hit this same wall**, and the order is now forced:
+
+    #30 FIRST — derive apply from judge where the judge already knows,
+                pin the pair where it cannot. Until then, any parameter
+                amendment is a coin-flip on whether the two definitions
+                drift.
+
+The parameter work is not blocked on monetary policy any more. It is
+blocked on the kernel having ONE definition of the transition, and that
+is a kernel-lane task that was already on the board.
+
+### 10c. PROCESS
+
+`-p cfe` and `-p kernel` are not a sweep. `world.rs` is shared by
+`conductor`, `ledger`, `scribe` and `lens`, so a rule change there is a
+WORKSPACE change and must be tested as one. Recorded because the
+failure was mine and the discipline is cheap.
+
+The attempt is kept at `scratchpad/p2-attempt.patch` (474 lines,
+`P2`'s supply threading through 12 call sites) — it built and passed its
+own pins, and is worth re-applying after #30 rather than re-deriving.
