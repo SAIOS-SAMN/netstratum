@@ -176,7 +176,7 @@ fn the_torsion_order_is_the_period_of_the_wave() {
 
 #[test]
 fn the_amplitude_is_shown_and_cannot_be_computed_on() {
-    // The exception 18 §2b carves for a human lens, held by the TYPE
+    // The exception 18 §2b carves for an OPERATOR lens, held by the TYPE
     // rather than by anyone's care: the value enters exact and leaves
     // only as text. There is no accessor, no ordering, no comparison —
     // so this pin records that the only door out is `shown()`.

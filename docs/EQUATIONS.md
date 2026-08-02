@@ -177,7 +177,7 @@ collapsed to `‖∂Δ‖`, never bounded above, never reduced to a scalar
 aggregate. This EXTENDS the proportional law rather than reversing it:
 squares were barred as the mathematics of minimization, and L1 was a
 smaller cage of the same kind. Scalar aggregates survive only where a
-reading is reported to a human lens, never where the system computes.
+reading is reported to an OPERATOR lens, never where the system computes.
 
 **The union is ONE Δ WITH TWO COMPLEMENTARY PROJECTIONS** (18 §2c,
 restated 2026-08-01; the former `U* = D(V) ⊕ V(D)` is STRUCK — nothing

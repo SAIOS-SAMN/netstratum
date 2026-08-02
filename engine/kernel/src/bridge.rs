@@ -113,7 +113,7 @@ pub enum Resolve {
 ///
 /// **Summing them destroys them.** `C(Δ) = Σ|R|` is a scalar aggregate,
 /// and `18_TORSION` §2b bars exactly that where the system computes —
-/// L1 survives only at a human lens. Worse, the residue composition
+/// L1 survives only at an OPERATOR lens. Worse, the residue composition
 /// law (the design owed at `KERNEL_RELAY` §7.4) has nothing to compose
 /// if the residuals were already added together, and `EQUATIONS` D3
 /// makes these the source of capacity: *the residue EMITS, D rises by

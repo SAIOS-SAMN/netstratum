@@ -81,7 +81,7 @@ That ruling barred squares because squares are the mathematics of
 minimization — collapsing difference into a scalar to be descended.
 The L1 form was a smaller cage of the same kind. **Any collapse of a
 directional quantity to a scalar aggregate is now barred**; L1 survives
-ONLY where a reading is reported to a human lens, never where the
+ONLY where a reading is reported to an OPERATOR lens, never where the
 system computes.
 
 ### 2c. THE UNION — one Δ, two complementary projections

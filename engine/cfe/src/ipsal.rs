@@ -1,9 +1,9 @@
 //! NS-6 ipsal-os — the entity layer, first cut. Every individual
-//! inside this internet — the human at the terminal, a scripted agent
+//! inside this internet — the operator at the terminal, a scripted agent
 //! — is an entity: an identity, a containment scope, and a generation
 //! tag on every receipt it forges.
 //!
-//! The containment law: a HUMAN (sovereign, no principal) holds every
+//! The containment law: a SOVEREIGN (no principal) holds every
 //! scope by construction. An AGENT holds exactly the scopes its
 //! principal granted, checked at every action, revocable at any time.
 //! Agents are citizens, governed by containment, never by prohibition
@@ -39,7 +39,7 @@ impl Scope {
 pub struct Entity {
     pub entity_id: u64,
     pub handle: String,
-    /// None = sovereign human; Some(id) = an agent contained by that
+    /// None = sovereign operator; Some(id) = an agent contained by that
     /// principal.
     pub principal: Option<u64>,
     /// Granted scopes, ascending (canonical). Meaningful for agents;

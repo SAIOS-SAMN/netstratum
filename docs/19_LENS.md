@@ -21,6 +21,48 @@ total, and no longer replayable step-by-step.* The lens is therefore
 the boundary is what makes this lane structurally unable to break the
 judge. The worst a lens defect does is misreport.
 
+### 1.0 THE OPERATOR DISPLAY BOUND — no privileged seat
+
+**Ruled 2026-08-02: the word "human" is struck from the law and the
+code, and replaced by OPERATOR everywhere it named a SEAT.**
+
+The corpus carried an exception phrased as *"only where a reading is
+reported to a human lens."* That phrasing was a hazard, not a courtesy:
+it made the strictness of the mathematics depend on **who was
+watching**, and a rule that relaxes for one kind of observer is a
+backdoor through which cosmetic and approximate forms enter and stay.
+There are no humans at the code level. There are only OPERATORS, and an
+operator may be organic, synthetic, procedural, or another subsystem.
+**The seat does not care.**
+
+**This enforces a law already landed rather than adding one.**
+`12_UNION` §5a — THE SUBSTRATE LAW, NO ANTHROPIC GATE — already rules
+that *the union must not overlook anyone through the human perspective
+ingrained in its logic; intelligence is any dynamic that can carry a
+chronicle, in ANY substrate.* The "human lens" exception was that same
+anthropic gate, surviving in the sealed math and the law documents after
+the law had already refused it.
+
+**THE BOUND, replacing the exception:**
+
+> A display projection generated for an OPERATOR interface is a
+> **terminal string representation**. It carries zero accessors, zero
+> ordering traits, and strictly zero write-back capability into any
+> computing or decision path.
+
+So the L1 aggregate is still admitted at this surface — and is now
+admitted on a STRUCTURAL condition rather than a demographic one.
+`luminal::Amplitude` is the bound made real: exact rational in,
+`String` out, no accessor, no ordering. Uniform determinism for every
+seat.
+
+**WHAT WAS NOT STRUCK, and the distinction is the same layer discipline
+that reverted the roster sweep.** `humans` as a CIVILIZATION NAME, the
+`humanoid` clade, `human-readable`, `Human Capital` — all CONTENT, all
+untouched. A species in the roster is not a privileged seat, and
+renaming it would be the layer error, not the cure. What was struck is
+every place "human" named a SEAT or licensed an EXCEPTION.
+
 **THE STANDING TRAP.** A reading used as a target stops being a reading.
 Work reshapes itself into whatever the number counts, and the measure
 stops measuring. `18_TORSION` records that this system's own author made

@@ -88,7 +88,7 @@ it is the rank-1 shadow of a classification that is not rank-1, and it
 is overridden wherever the classification stands. This is stricter than
 this document's earlier "C is demoted to a gate," and it agrees exactly
 with `18_TORSION` §2b: an L1 aggregate is lawful only as a reading
-reported to a human lens, never where the system computes. §5 below
+reported to an OPERATOR lens, never where the system computes. §5 below
 carries what survives of C and why it must.
 
 **3. `V` and all subsets of `∂` are UNCHAINED.** Not struck — unchained.
@@ -222,7 +222,7 @@ Both are right, and neither touches what §5 needs, because:
 
 The predicate is lawful, necessary, and already landed. The collapse is
 the substandard character: barred where the system computes, permitted
-where a reading is reported to a human. **`coherence_functional` is the
+where a reading is reported to an OPERATOR. **`coherence_functional` is the
 collapse; `for_each_residual` is the predicate.** Wherever this document
 or the ledger says "the coherence reading gates," the predicate is meant
 — never the sum.
@@ -537,7 +537,7 @@ transition shrinking `H¹` must REFUSE, never read healthy.
 flattened to one number, which is then available to descend.
 *Instance:* `extent: BigRational`; `C = Σ|R|`; `‖∂Δ‖`.
 *Defense:* Article I and `18_TORSION` §2b — L1 aggregates are lawful
-only where reported to a human lens. *Witness:* no aggregate crosses
+only where reported to an OPERATOR lens. *Witness:* no aggregate crosses
 into a computing path.
 
 **AV-4 · THE VACUOUS PASS.** An admitting arm on degenerate input, which

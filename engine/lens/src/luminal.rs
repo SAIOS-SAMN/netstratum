@@ -65,16 +65,24 @@
 //! a scalar aggregate *wherever the system computes*.
 //!
 //! **And this is the one place in the workspace where the law carves an
-//! exception**: L1 survives *"ONLY where a reading is reported to a
-//! human lens, never where the system computes."* The lens IS that
+//! exception**: L1 survives *"ONLY where a reading is reported to an
+//! OPERATOR lens, never where the system computes."* The lens IS that
 //! surface. So an aggregate amplitude is lawful here and nowhere else.
 //!
-//! It is nonetheless CAGED rather than trusted. [`Amplitude`] holds its
-//! value in `rfa_core::Lens`, which admits an exact rational and returns
-//! only a `String` — no accessor, no comparison, no ordering. A caller
-//! may DISPLAY the amplitude and cannot branch on it, so the exception
-//! cannot leak back into a computing path by anyone's oversight. That
-//! is stronger than the ancestor, which left it a bare `Q`.
+//! **THE OPERATOR DISPLAY BOUND** (operator ruling 2026-08-02). The
+//! exception is bound to a SEAT, never to a species. Whoever sits in it
+//! — organic, synthetic, procedural, another subsystem — meets the same
+//! interface, and the bound is identical for all of them:
+//!
+//! > A display projection is a TERMINAL STRING. Zero accessors, zero
+//! > ordering traits, zero write-back into any computing or decision
+//! > path.
+//!
+//! [`Amplitude`] is that bound made structural. It holds its value in
+//! `rfa_core::Lens`: exact rational in, `String` out, no accessor, no
+//! comparison, no ordering. A caller may DISPLAY it and cannot branch on
+//! it, so the exception cannot leak back by anyone's oversight. Stronger
+//! than the ancestor, which left it a bare `Q` and trusted the reader.
 
 use crate::peel::View;
 use cfe::ratio::{ratio, Ratio};
