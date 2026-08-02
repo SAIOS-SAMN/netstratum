@@ -392,6 +392,21 @@ coder-04's flag.
   seam: coder-04's mesh walk consumes the signatures. The first
   measurement whose inputs are not copies of each other — law 2
   embodied. G4 sequences behind it by design.
+- **THE REMEDIATIONS LANE** (opened 2026-08-02, worktree
+  `.claude/worktrees/remediations-lane`, branch `remediations-lane`):
+  the deterministic-cost board. The law is `docs/REMEDIATIONS.md` —
+  nineteen entries (R1–R19) covering the forge sweep, the chained beat,
+  the find-scans, the full re-derivations and the roster products, each
+  marked `[MEASURED]` / `[READ]` / `[INFERRED]`. **The headline is
+  measured, not read:** `research_step` is **94 % of a beat** at 33
+  worlds and grew ≈2000× in 40 beats, while `chain_beat` is 0.8 % and
+  `merchant_step` 4 %. A 120-cycle run does not finish in ten minutes.
+  The reusable instrument is `engine/conductor/examples/cost_probe.rs`
+  (opt-in, appends nothing, judges nothing). **R19 is the gate:** the
+  forge IS the proof-of-work, so R1–R3 re-price a mint and are blocked
+  on Ruling Box 1; R4 (the budget starves the observation-derived
+  operators) and R5 (memoize an identical re-derivation) are free of
+  economic content and land first.
 - Parallel worktrees per node; merge to `main` on green; BUILD_ORDER
   conflicts resolve by keeping both entries.
 
@@ -443,7 +458,23 @@ missing.
 
 ### 8a. THE UNWIRED KERNEL — the load-bearing finding [VERIFIED]
 
-The judge does not judge. Nothing in production calls `lawful`.
+**CORRECTED 2026-08-02 (remediations-lane), against the code.** The two
+sweeping claims below were true when written and are now FALSE; the
+narrow remainder is real and still open. Struck text kept, not rewritten
+(the history law) — read the correction, not the strike.
+
+- ~~The judge does not judge. Nothing in production calls `lawful`.~~
+  **`kernel::lawful` IS called in production**, per deed, every beat, at
+  `conductor/src/lib.rs:1380`, with refusals collected into
+  `self.refused`.
+- ~~`engine/rfa-core` has ZERO dependents.~~ **Two crates depend on it:**
+  `kernel` (`engine/kernel/Cargo.toml:18`) and `solver`
+  (`engine/solver/Cargo.toml:12`).
+- **THE REMAINDER, RESTATED NARROWLY AND STILL OPEN:**
+  `mesh::arbor::extend` is passed `None` at
+  `conductor/src/lib.rs:1403`, so every commitment is still stamped
+  `judged = false`. The judge now runs BESIDE the chain, not INSIDE it.
+  The Phase-3 flip is the live gap; "nothing calls the judge" is not.
 
 - `engine/kernel` is imported by exactly TWO crates: `mesh` (runtime)
   and `conductor` (DEV-ONLY, the #17 calibration harness). `cfe`,
@@ -524,9 +555,13 @@ prose.**
 - `solver-verify/src/forge.rs:41,60` — `Difficulty::level` is a static
   5-arm table; `from_key` (the network-rate form) is a READ called only
   from tests. Live wire: mesh-derived rate at N6.
-- `codec/src/lib.rs:38` — `SCHEMA_V2` carries "CODER-04 TO RATIFY" while
+- ~~`codec/src/lib.rs:38` — `SCHEMA_V2` carries "CODER-04 TO RATIFY" while
   `state_bytes` already emits v2 unconditionally, and every commitment
-  binds that schema byte. Ratify or revert; do not leave it half-sealed.
+  binds that schema byte. Ratify or revert; do not leave it half-sealed.~~
+  **STALE, corrected 2026-08-02 (remediations-lane):** `state_bytes`
+  emits `SCHEMA_V3` (`codec/src/lib.rs:68`) and v1/v2/v3 all decode
+  (`:320`). The only remainder is the orphaned `CODER-04 TO RATIFY`
+  comment still attached to V2 at `:37` — strike the comment.
 
 ### 8c. PLACEHOLDER CONSTANTS THAT PRICE THE ECONOMY
 
@@ -671,3 +706,41 @@ witness, not a ruling.
   `1a7b579`); `BUILD_ORDER.md` §3c lists SPINE UPLINK and BOX-1
   CALIBRATION as open (both landed); several docs still quote coverage
   59/64 (it is 64/64 since `3c5c994`).
+
+## 9. THE LOOSE ENDS SWEEP — 2026-08-02 (remediations-lane)
+
+The board was checked for ends left hanging. What follows is what the
+sweep found, not a restatement of §8.
+
+**Picked up and now carried:** the whole deterministic-cost surface,
+which no lane owned. It is `docs/REMEDIATIONS.md` (R1–R19) and it is
+measured, not asserted. Three §8 entries were overtaken by the code and
+are corrected in place above (§8a's two sweeping claims, §8b's codec
+entry); §8e's duplicate `constellation` key is re-verified STILL LIVE at
+`lens/src/render.rs:121` and `:204`.
+
+**Left open deliberately, each with its one named blocker:**
+
+- R19 / Ruling Box 1 — operator words only. Nothing in the forge's
+  economics moves until the rate `f` and the work-shapes are ruled.
+- R6 — must ride `kernel-lane`'s 11a (`2f40fed`), not a second design.
+- R15 — the whole-state blob per commitment is a WIRE question; no lane
+  changes it alone.
+
+**THE INTEGRATION RISK, named because it is nobody's task.** Four lanes
+sit 18–19 commits behind `main`, and `kernel-lane` is 19 ahead / 19
+behind — fully diverged. `capacity-lane` already gates its `20_FOUNDING`
+§6a on kernel #30, so the coupling is live. A reconciliation pass is
+owed before any of the four lands, and no node currently holds it.
+
+**THE ONE CONVERGENCE WORTH THE BOARD'S ATTENTION.** `kernel-lane`
+reverted P3 (`df48786`) after it exposed a live/replay divergence — *"the
+transition is defined twice, in replay's 113 arms and in the live
+proposer."* Its cure makes `apply()` a zero-logic wrapper over `judge()`.
+That is the SAME restructure the cost board needs to make `replay()`
+steppable (REMEDIATIONS R6). One refactor pays a correctness debt and
+the chained beat's growth term together. Relay owed to `kernel-lane`.
+
+**VOCABULARY COLLISION.** "Peel" now names two unrelated things:
+`lens-lane`'s magnification depth (`4af07c5`) and `cfe::world::peel`,
+the data-access idiom. Recorded before a third reader merges them.
