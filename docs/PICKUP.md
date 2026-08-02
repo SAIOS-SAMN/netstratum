@@ -414,8 +414,10 @@ nothing forcing them to agree. Changing an arm changes what a deed
 MEANS and the judge does not notice. That is the one defect between
 having a judge and having a kernel.
 
-Planned split: `cfe::state` · `cfe::replay` · `cfe::world` ·
-`cfe::rules`. Mechanical, no behaviour change. **`engine/cfe/` is
+Planned split (PROPOSED, none of these modules exist yet — see
+`20_WORLD_REFACTOR` §4): a state module, the interpreter, the proposer,
+and the sealed rules, each in its own home. Mechanical, no behaviour
+change. **`engine/cfe/` is
 UNOWNED on the lane map** — the refactor needs an owner assigned before
 it lands.
 

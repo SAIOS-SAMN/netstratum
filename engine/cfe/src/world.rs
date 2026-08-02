@@ -4830,11 +4830,51 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
 /// list, never stored. Pub: the kernel CALLS the sealed rule for
 /// I5's bound (call-not-copy, KERNEL CHARTER §0b).
 pub fn ease_of(techs: &[(u64, u8, [u8; 32])], orb: u64) -> Ratio {
-    match techs.iter().any(|(held, condition, _)| *held == orb && *condition == 5) {
-        true => ratio(1, 2),
-        false => ratio(1, 1),
-    }
+    // P3 (21_KERNEL_PARAMETERS §7, operator ruling 2026-08-02): the
+    // `== 5` CLIFF becomes a continuous rational gradient. No float, no
+    // transcendental, no root — the algebraic S-curve `s = x/(1+|x|)`
+    // is exact over `BigRational` and monotone everywhere.
+    //
+    // **DIRECTION MATTERS AND THE RELAYED CURVE HAD IT BACKWARDS.**
+    // `ease` MULTIPLIES decay (`rate · ease · elapsed`), so LOWER ease
+    // is the reward. A curve saturating toward 1 at high tech would
+    // make advanced technology INCREASE your decay. This one descends.
+    //
+    // Endpoints are exact, so the amendment is continuous at both
+    // landed values rather than merely near them:
+    //
+    //     condition 0 (no tech) → x = −1 → ease = 1/1   (was 1/1)
+    //     condition 5 (the old cliff) → x = 0 → ease = 1/2   (was 1/2)
+    //
+    // Between them it is a smooth descent instead of a step, so
+    // condition 3 now earns something — which is the whole point of
+    // retiring a cliff that was a strategy target.
+    let condition = techs
+        .iter()
+        .filter(|(held, _, _)| *held == orb)
+        .map(|(_, condition, _)| *condition)
+        .max()
+        .unwrap_or(0);
+
+    // x = (condition − threshold) / scale, both declared beside the curve.
+    let x = ratio(condition as i64 - EASE_THRESHOLD, EASE_SCALE);
+    // s = x / (1 + |x|) ∈ (−1, 1) — the exact algebraic sigmoid.
+    let s = x.clone() / (ratio(1, 1) + num_traits::Signed::abs(&x));
+    let ease = ratio(1, 2) - s;
+
+    // Beyond the old cliff nothing further is earned: condition 5 was
+    // the maximum benefit before and remains so. Floored rather than
+    // left to run, because an ease of zero would remove the sink
+    // entirely and I5 would bound decay at nothing.
+    ease.clamp(ratio(1, 2), ratio(1, 1))
 }
+
+/// P3's curve centre — the condition at which `ease` equals the old
+/// cliff value `1/2`. Declared beside the curve rather than buried in
+/// it (#16: a parameter that hides is a parameter nobody dials).
+const EASE_THRESHOLD: i64 = 5;
+/// P3's curve width in condition-steps.
+const EASE_SCALE: i64 = 5;
 
 /// THE SEALED DEMURRAGE RULE (SINK-1/Q2 + the flat-rate ruling):
 /// what an orb owes at `stamp` — `min(rate · ease · elapsed, banked)`

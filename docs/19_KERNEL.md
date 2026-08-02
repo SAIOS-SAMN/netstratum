@@ -60,8 +60,8 @@ interpreter three coders rewrite weekly … the actual trust root today
 is the git repository plus coder discipline."*
 
 That is the whole distance between what exists (a judge) and a kernel
-(the definition). Two answers to one question is the mirror disease at
-the semantic layer, and §11 rule 3 — *one validated update function* —
+(the definition). Two answers to one question is a second source of
+truth at the semantic layer, and §11 rule 3 — *one validated update function* —
 is not satisfied by a validator that stands beside the updater.
 
 **The cure, in order of preference:**
@@ -214,9 +214,9 @@ Einstein–Rosen bridge is a black hole and a white hole joined at a
 throat: structure enters one side and emerges on the other, and the
 throat is a REGION with its own geometry rather than a line between two
 points. That is the right shape for a join whose content is the
-overlap — and it is why `S⁺_out` (egress, positive divergence) and its
-absorbing counterpart are load-bearing here in a way they were not in
-`18_TORSION` §2d, where they merely renamed the mint and the chain and
+overlap — and it is why the egress/ingress pairing is load-bearing
+here in a way it was not in
+`18_TORSION` §2d, where its symbols merely renamed the mint and the chain and
 drove nothing. **Struck there for driving nothing; earned here because
 the join has no mechanism and this supplies one.**
 
