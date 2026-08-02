@@ -335,60 +335,149 @@ measured-inert constant for an unmeasurable one is not remediation.
 
 ---
 
-## §8bis THE RULING AS RECEIVED — inscribed, with five gaps named
+## §8bis THE RULING, AMENDED — depth is the resource, and the constants dissolve
 
-**Operator ruling 2026-08-02 (the Ruling Box), recorded as given.** The
-envelope is ACCEPTED and supersedes B-E1's clamp form:
+**Operator ruling 2026-08-02 (the Ruling Box) recorded as given, then
+amended on the operator's instruction (*"change the ruling"*) against
+the meter's readings.** The received envelope was:
 
 ```
-budget = β_floor + β_quantum · ρ_D^D                    with β_cap ≤ 52 060 (B7)
+budget = β_floor + β_quantum · ρ_D^D                    β_cap ≤ 52 060 (B7)
 ```
 
-**This form is better than the one it replaces, and the reason is worth
-naming:** `ρ_D^D` has the *same shape as the search space it bounds* —
-the enumeration is `|V|^depth`, and the envelope is extent-per-dimension
-raised to the dimension count. A line may sweep a product no larger than
-the product its own structure sustains. The floor is *added*, not
-clamped, so it can never be competed away.
+**Its instinct is right and is kept:** `ρ_D^D` has *the same shape as
+the space it bounds* — enumeration is `|V|^depth` — and the floor is
+ADDED, not clamped, so it cannot be competed away. The amendment carries
+both properties and fixes what the code refuses.
 
-Five gaps, named rather than filled — filling them silently is the
-failure this lane exists to stop:
+### 8bis.a THE AMENDMENT — bound the DEPTH, and the sum follows
 
-1. **B5 `σ_gate` is absent from the Ruling Box** (the table runs
-   B4 → B6). The per-axis alignment threshold has no value and no
-   struck-status. Open.
-2. **`β_ceiling` (B6) has no place in the ruled envelope.**
-   `β_floor + β_quantum · ρ_D^D` carries no alignment term. Does the
-   ceiling multiply the quantum term, cap the total, or gate `β_quantum`?
-   As written, A5 (syntropic) does not enter the arithmetic at all —
-   which would drop the very axis the original ruling asked for.
-3. **B1, B3 and B8 still have no values.** "Exact rational baseline
-   floor", "multiplier scaling candidate search depth" and "universal
-   rational fallback" are *forms*, not values. B7 has a bound
-   (≤ 52 060), not a value. No epoch table can be instantiated from
-   these.
-4. **B1's trigger names a state that cannot exist.** The Ruling Box says
-   the floor applies "when `D = 0`". **`D` is never 0.**
-   `EntangledRead::degree()` is `Degree::above_ground(rank)` =
-   `GROUND + rank` (`bridge.rs:288`, `capacity.rs:138-146`), and the
-   field doc is explicit: *"Reading this field as `D` is what put
-   `D = 0` back into a system whose law says D is never zero."* The
-   condition that actually means *nothing circulates* is **`rank == 0`**.
-   Measured: all 44 lines read `rank 0`, `Degree(1)`.
-5. **`ρ_D^D` keyed on rank alone re-commits the third collapse** — and
-   it is the operator's own ruling of the same day, already sealed at
-   `bridge.rs:176-199`: *"your entire definition is wrong if dimensional
-   capacity is a count of rooms."* `rank` is the DIMENSION of the cycle
-   space; `holonomy` carries each cycle's EXACT CHARGE; *"a universe
-   with one heavily-charged cycle and one with a single faint one read
-   the SAME rank and are not the same universe."* A budget from rank
-   alone hands those two lines identical resource. The meter reports the
-   charge values whole so the ruling can bind them; **B2 needs a volume
-   term, or it discards the pole `18` §2b protects.**
+The search is breadth-first **by depth** (`search.rs:140`). So the
+lawful bound is on depth, and the candidate count is its consequence:
+
+```
+budget(prior, rung) = frontier( |V|, δ(prior, rung) )
+
+    frontier(V, δ) = Σ_{d=0}^{δ} V^d          the exhaustive sweep to depth δ
+```
+
+**Every constant dissolves into arithmetic.** Measured by the meter:
+
+| \|V\| | δ=0 | δ=1 | δ=2 | δ=3 |
+|---|---|---|---|---|
+| 14 | 1 | 15 | 211 | 2 955 |
+| 21 | 1 | 22 | 463 | 9 724 |
+| 30 | 1 | 31 | 931 | 27 931 |
+| 37 | 1 | **38** | 1 407 | **52 060** |
+
+**`frontier(37, 3) = 52 060` — exactly the bound the Ruling Box named
+for `β_cap`.** The operator's number was already the derived quantity;
+it simply had not been written as one. `β_cap` is therefore not chosen
+at all: **it is the exhaustive sweep at the rung's own `word_len`.**
+
+### 8bis.b THE DEPTH LADDER
+
+```
+δ(prior, rung) = min( word_len(rung) ,  1 + earned(prior) )     capped by alignment (8bis.d)
+                 └─ B7, derived ─┘      └─ B1 ─┘ └─ B2/B3 ─┘
+
+unknown(prior) > 0   ⇒   δ = 1                                              (B8)
+```
+
+- **B1 `δ_floor = 1`, unconditionally.** Every line may always sweep the
+  whole vocabulary once. Derived value `1 + |V|` ∈ [15, 38] — not a
+  chosen number. **Its trigger is `rank == 0`, never `D == 0`:** `D` is
+  `GROUND + rank` and is never zero (`bridge.rs:288`,
+  `capacity.rs:138-146`; the field doc: *"Reading this field as `D` is
+  what put `D = 0` back into a system whose law says D is never zero."*).
+  Measured: all 44 lines read `rank 0`, `Degree(1)`.
+- **B3 `β_quantum` = ONE DEPTH PER EARNED CHANNEL.** The quantum is not
+  a candidate multiplier — it is a depth increment, and the exponential
+  is supplied by `frontier` rather than by the coefficient.
+
+### 8bis.c B2 `ρ_D` — BOTH POLES AND THE CHARGE, never rank alone
+
+The received `ρ_D^D` keyed on rank alone, which re-commits the
+operator's own ruling of the same day (`bridge.rs:176-199`): *"your
+entire definition is wrong if dimensional capacity is a count of
+rooms."* Rank is the DIMENSION of the cycle space; `holonomy` carries
+each cycle's EXACT CHARGE; *"a universe with one heavily-charged cycle
+and one with a single faint one read the SAME rank and are not the same
+universe."* Amended:
+
+```
+earned(prior) = # channels l ∈ 0..CHANNELS such that
+                  verdict_per_dimension(prior)[l] == Entangled     (both poles)
+                  AND  max |holonomy value in l|  ≥  θ_charge      (the volume)
+```
+
+Per channel (never the aggregate — `bridge.rs:306`), both poles (never
+`Entangled` inferred from rank — `boundary.rs:147`), and the charge read
+as a magnitude (never replaced by its count — `18` §2b). **`θ_charge` is
+the one genuinely new coefficient the amendment introduces, and it is a
+VOLUME threshold — precisely the term the received ruling was missing.**
+
+### 8bis.d B4/B5/B6 — alignment enters the arithmetic, as a CAP on depth
+
+The received box had no place for `β_ceiling`, so axis **A5 did not
+enter the arithmetic at all** — dropping the axis the original ruling
+asked for. Amended: alignment caps the depth.
+
+```
+β_ceiling(α_axis) = word_len(rung)   if  weakest(α_axis) ≥ σ_gate
+                  = 1                otherwise          (the no-mint depth)
+
+weakest(α) = min over the axes that have POSTED — never a sum, never an average
+```
+
+`min` is the order-preserving non-sum B6 requires: **a line is capped by
+its weakest standing**, which is the natural mirror of B2's per-channel
+strictness. An axis that has posted nothing is not counted as zero
+(refuse-never-guess); a line with no axis posted reads `weakest = None`
+and takes the floor.
+
+### 8bis.e WHY THIS IS ECONOMICALLY COHERENT — the check the received box could not make
+
+Reading the depth ladder against `Difficulty::level` and `mint_bound`:
+
+| δ | reachable rung | `word_len` | `mint_bound` | requires |
+|---|---|---|---|---|
+| 1 | levels 0–1 | 1 | **0** | nothing — the floor |
+| 2 | levels 2–4 | 2 | 0 · 1 · 4 | **1 earned channel** |
+| 3 | level 5 | 3 | **7** | **2 earned channels** |
+
+- **No poverty trap:** a ground line can always climb rung 1.
+- **No free mint:** minting begins at δ = 2, which requires at least one
+  channel that is `Entangled` *and* carries real charge.
+- **And that is the SAME condition `kernel::capacity_law` already
+  enforces** on `DiscoveryMinted` (`Vacuity::Entangled`). One law, two
+  enforcements, agreeing — the budget stops being a second bookkeeping
+  and becomes the same gate read earlier.
+- `CHANNELS = 3` gives δ ≤ 4, and `word_len` ≤ 3 caps it: the third
+  channel is headroom for rungs not yet forged.
+
+### 8bis.f WHAT REMAINS OWED
+
+| row | state after amendment |
+|---|---|
+| B1 `δ_floor` | **DERIVED = 1** (`1 + \|V\|` candidates). Trigger corrected to `rank == 0`. |
+| B2 `ρ_D` | **FORM SETTLED** — per-channel, both poles, charge magnitude. |
+| B3 `β_quantum` | **DERIVED = 1 depth per earned channel.** |
+| B7 `β_cap` | **DERIVED = `frontier(\|V\|, word_len)`.** Not a constant. |
+| B8 `ε_unknown` | **DERIVED = `δ_floor`.** |
+| B4 `α_axis` | form settled; **compassion's denominator still open** (§7.6) |
+| B5 `σ_gate` | **STILL OWED** — absent from the received box; one rational in [0,1]. Precedent: the climb gate's 1/2. |
+| **θ_charge** | **NEW, OWED** — the volume threshold. Unmeasurable today (§8: all charge is empty). |
+
+**Two numbers, not eight.** Everything else is now arithmetic on `|V|`
+and the rung. And both remaining numbers are **unmeasurable on the
+current board** — §8's finding stands: no line carries charge or a
+posted axis, so `θ_charge` and `σ_gate` cannot be ruled against
+observation until reachability lands (task #15).
 
 **The pattern across all three collapses now recorded** — aggregate over
-channels, four axes into one scalar, and charge into a count — is one
-law stated three times: *a directional quantity may not be replaced by a
+channels, four axes into one scalar, charge into a count — is one law
+stated three times: *a directional quantity may not be replaced by a
 scalar aggregate wherever the system computes.* §9 is the standing cure.
 
 ---

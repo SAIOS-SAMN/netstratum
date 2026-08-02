@@ -2,33 +2,30 @@
 //! `17_CAPACITY` §7 owes: *build the meter, measure, then rule — never
 //! rule a placeholder blind.*
 //!
-//! This is a READING. It appends nothing, writes nothing, judges
-//! nothing, and changes no law. It replays each world's chronicle and
-//! reports the readings that rows **B1–B8** (`docs/FORGE_BUDGET.md`,
-//! `EQUATIONS` §7) need before any of them can be given a value.
+//! A READING. Appends nothing, writes nothing, judges nothing, changes
+//! no law. It replays each world's chronicle and reports what rows
+//! **B1–B8** (`docs/FORGE_BUDGET.md`, `EQUATIONS` §7) need before any of
+//! them can be given a value.
 //!
 //! ```text
 //! cargo run --release -p conductor --example capacity_meter -- <var-root>
 //! ```
 //!
-//! **THREE ANTI-COLLAPSE LAWS BIND THIS OUTPUT**, and it is built to
-//! honour all three rather than to be convenient:
+//! **FOUR ANTI-COLLAPSE LAWS BIND THIS OUTPUT.** It is built to honour
+//! them rather than to be convenient:
 //!
 //! 1. **Per channel, never the aggregate** (`bridge.rs:306-335`) — *"a
 //!    universe can read `Entangled` on the sum while no single channel
-//!    is entangled at all."* So the verdict is reported per channel.
-//! 2. **Dimension is not volume** (operator ruling 2026-08-02,
-//!    `bridge.rs:176-199`) — *"your entire definition is wrong if
-//!    dimensional capacity is a count of rooms."* `rank` counts the
-//!    independent cycles; the holonomy VALUES say what each one carries.
-//!    Both are reported; the charge is never replaced by its count.
-//! 3. **The four axes never collapse** (`09` §1.3, `EQUATIONS` §6 S2) —
-//!    so compassion, love, integrity and morality are reported
-//!    separately and `syntropy_ratio` is deliberately NOT called.
-//!
-//! Reading the output: a line whose `rank` is equal to another's but
-//! whose charge differs is NOT the same line, and a budget that treated
-//! them alike would be the collapse the same ruling struck.
+//!    is entangled at all."*
+//! 2. **Dimension is not volume** (`bridge.rs:176-199`) — *"your entire
+//!    definition is wrong if dimensional capacity is a count of rooms."*
+//!    `rank` counts cycles; `holonomy` values say what each CARRIES.
+//! 3. **Both poles, separately** (`boundary.rs:147`) — `Vacuity` is
+//!    decided by structure AND gradient. Reporting only "admitted"
+//!    hides which pole is missing, and the cure differs: `Stasis`
+//!    (rank, no flow) must be RE-VOLUMIZED; `Void` needs structure.
+//! 4. **The four axes never collapse** (`09` §1.3, `EQUATIONS` §6 S2) —
+//!    so `syntropy_ratio` is deliberately NOT called.
 
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
@@ -36,10 +33,11 @@ use std::path::{Path, PathBuf};
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::Committed;
 use kernel::bridge::{read_entangled, verdict_per_dimension, CHANNELS};
+use solver_verify::forge::Difficulty;
 
-/// One axis ratio, kept in its own name — never summed with another.
-/// `None` when the axis has posted nothing (refuse-never-guess: an
-/// unmeasured axis is not a zero one).
+/// One axis ratio in its own name — never summed with another. `None`
+/// when the axis has posted nothing (refuse-never-guess: an unmeasured
+/// axis is not a zero one).
 fn axis_ratio(syntropic: &Ratio, entropic: &Ratio) -> Option<Ratio> {
     let whole = syntropic.clone() + entropic.clone();
     match whole > ratio(0, 1) {
@@ -55,16 +53,35 @@ fn show(r: &Option<Ratio>) -> String {
     }
 }
 
+fn magnitude(v: &Ratio) -> Ratio {
+    match *v < ratio(0, 1) {
+        true => -v.clone(),
+        false => v.clone(),
+    }
+}
+
 /// The four named axes of `09` §2, each read on its own terms.
-/// **Compassion is deliberately NOT a ratio** — `given_in_crisis`
-/// stands alone with no entropic counterpart in the committed fields
-/// (`FORGE_BUDGET` §7.6, an open row). Reporting it as a LEVEL rather
-/// than forcing a denominator is the honest reading.
+/// **Compassion is deliberately NOT a ratio** — `given_in_crisis` has no
+/// entropic counterpart in the committed fields (`FORGE_BUDGET` §7.6, an
+/// open row). Reported as a LEVEL rather than given a false denominator.
 struct Alignment {
     compassion_level: Ratio,
     love: Option<Ratio>,
     integrity: Option<Ratio>,
     morality: Option<Ratio>,
+}
+
+impl Alignment {
+    /// The WEAKEST standing among the axes that have posted — the
+    /// order-preserving non-sum reading (`B6`). `None` when no axis has
+    /// posted at all. Never an average: an average is the collapse.
+    fn weakest(&self) -> Option<Ratio> {
+        [&self.love, &self.integrity, &self.morality]
+            .into_iter()
+            .flatten()
+            .min()
+            .cloned()
+    }
 }
 
 fn alignment(state: &Committed) -> Alignment {
@@ -85,12 +102,21 @@ fn alignment(state: &Committed) -> Alignment {
         compassion_level: given,
         love: axis_ratio(&bond, &sever),
         integrity: axis_ratio(&kept, &broke),
-        // MORALITY: the same form `world::reciprocity_reading` seals
-        // (`world.rs:4905`), read here across the whole book. When that
+        // MORALITY: the form `world::reciprocity_reading` seals
+        // (`world.rs:4905`), read across the whole book. When that
         // reading is made public this must CALL it, never keep a copy
         // (CHARTER §0b) — recorded as owed, not silently duplicated.
         morality: axis_ratio(&returned, &extracted),
     }
+}
+
+/// THE DERIVED ENVELOPE — `Σ_{d=0}^{δ} |V|^d`, the exhaustive frontier
+/// to depth `δ`. This is the quantity `B7 β_cap` should BE rather than
+/// approximate: at `|V| = 37, δ = 3` it is 52 060, which is exactly the
+/// bound the Ruling Box named. The operator's number was already the
+/// derived one.
+fn frontier(vocabulary: u64, depth: u32) -> u64 {
+    (0..=depth).map(|d| vocabulary.saturating_pow(d)).sum()
 }
 
 fn main() {
@@ -115,27 +141,25 @@ fn main() {
         .collect();
     paths.sort();
 
-    // Tallies — never a verdict, only a census (the harness law: tally
-    // and report, never panic on a measurable outcome).
     let mut entangled_channels: BTreeMap<usize, usize> = BTreeMap::new();
     let mut rank_spread: BTreeMap<usize, usize> = BTreeMap::new();
+    let mut verdict_census: BTreeMap<String, usize> = BTreeMap::new();
+    let mut substrate: BTreeMap<usize, usize> = BTreeMap::new();
     let mut unknown_lines = 0usize;
+    let mut edged_lines = 0usize;
+    let mut foundation_lines = 0usize;
+    let mut flow_lines = 0usize;
     let mut read = 0usize;
 
-    // THE SUBSTRATE of the reading, so a zero explains itself:
-    // `project_complex` (bridge.rs:373) builds the complex over the
-    // book's OWN orbs, edged by bonds | covenants | debts, and returns
-    // no structure at all when `dim < 2`. A rank of 0 beside `orbs 1`
-    // is not a low reading — it is a STRUCTURALLY UNREACHABLE one.
-    let mut substrate: BTreeMap<usize, usize> = BTreeMap::new();
-    let mut edged_lines = 0usize;
-
+    println!("=== PER LINE ===");
     println!(
-        "{:<20} {:>4} {:>4} {:>4} {:>4} {:>5} {:>7} {:>7}  {:<11}  {:>8} {:>9} {:>8} {:>10}",
-        "world", "orbs", "bnd", "cov", "dbt", "rank", "degree", "unknown", "per-channel", "love",
-        "integrity", "morality", "compassion"
+        "{:<19} {:>4} {:>4} {:>4} {:>4} {:>4} {:>4} {:>4} {:>4} {:>5} {:>4} {:>4} {:>4}  {:<20}",
+        "world", "orb", "zon", "ent", "bnd", "cov", "dbt", "off", "rte", "rank", "flow", "fnd",
+        "unk", "per-channel verdict"
     );
-    println!("{}", "-".repeat(130));
+    println!("{}", "-".repeat(132));
+
+    let mut lines: Vec<(String, Alignment)> = Vec::new();
 
     for dir in &paths {
         let carrier = dir.join("chronicle.tlv");
@@ -143,7 +167,7 @@ fn main() {
             continue;
         }
         let Ok(chronicle) = cfe::persist::load(&carrier) else {
-            println!("{:<22} chronicle refused", name_of(dir));
+            println!("{:<19} chronicle refused", name_of(dir));
             continue;
         };
         let state = cfe::world::replay(&chronicle);
@@ -152,84 +176,137 @@ fn main() {
         let per_channel = verdict_per_dimension(&state);
         let live = per_channel.iter().filter(|v| v.is_admitted()).count();
         let align = alignment(&state);
+        let zones: usize = state.orbs.iter().map(|o| o.zones.len()).sum();
 
         read += 1;
         *entangled_channels.entry(live).or_insert(0) += 1;
         *rank_spread.entry(entangled.rank).or_insert(0) += 1;
         *substrate.entry(state.orbs.len()).or_insert(0) += 1;
+        for v in &per_channel {
+            *verdict_census.entry(format!("{v:?}")).or_insert(0) += 1;
+        }
         if entangled.unknown > 0 {
             unknown_lines += 1;
         }
         if !state.bonds.is_empty() || !state.covenants.is_empty() || !state.debts.is_empty() {
             edged_lines += 1;
         }
-
-        // THE CHARGE, PER CHANNEL — the reading `rank` alone discards.
-        let mut charge: Vec<String> = Vec::new();
-        for l in 0..CHANNELS {
-            let held: Vec<&Ratio> = entangled
-                .holonomy
-                .iter()
-                .filter(|h| h.l == l)
-                .map(|h| &h.value)
-                .collect();
-            let admitted = per_channel.get(l).map(|v| v.is_admitted()).unwrap_or(false);
-            charge.push(format!(
-                "{}{}",
-                if admitted { "E" } else { "·" },
-                held.len()
-            ));
+        if !entangled.symmetry_foundation.is_empty() {
+            foundation_lines += 1;
+        }
+        if !entangled.flows.is_empty() {
+            flow_lines += 1;
         }
 
+        // BOTH POLES PER CHANNEL — the verdict names which is missing.
+        let verdicts: Vec<String> = (0..CHANNELS)
+            .map(|l| {
+                let cycles = entangled.holonomy.iter().filter(|h| h.l == l).count();
+                let flows = entangled.flows.iter().filter(|f| f.l == l).count();
+                let v = per_channel
+                    .get(l)
+                    .map(|v| format!("{v:?}"))
+                    .unwrap_or_else(|| "?".into());
+                format!("{}({cycles}/{flows})", &v[..1.min(v.len())])
+            })
+            .collect();
+
         println!(
-            "{:<20} {:>4} {:>4} {:>4} {:>4} {:>5} {:>7} {:>7}  {:<11}  {:>8} {:>9} {:>8} {:>10}",
+            "{:<19} {:>4} {:>4} {:>4} {:>4} {:>4} {:>4} {:>4} {:>4} {:>5} {:>4} {:>4} {:>4}  {:<20}",
             name_of(dir),
             state.orbs.len(),
+            zones,
+            state.entities.len(),
             state.bonds.len(),
             state.covenants.len(),
             state.debts.len(),
+            state.offers.len(),
+            state.routes.len(),
             entangled.rank,
-            format!("{:?}", entangled.degree()),
+            entangled.flows.len(),
+            entangled.symmetry_foundation.len(),
             entangled.unknown,
-            charge.join(" "),
-            show(&align.love),
-            show(&align.integrity),
-            show(&align.morality),
-            align.compassion_level,
+            verdicts.join(" "),
         );
 
-        // The charge VALUES, whole, when any cycle stands — never
-        // summed into one figure (18 §2b).
+        // THE CHARGE, WHOLE — the reading `rank` alone discards
+        // (bridge.rs:176-199). Never summed into one figure.
         if !entangled.holonomy.is_empty() {
             let values: Vec<String> = entangled
                 .holonomy
                 .iter()
-                .map(|h| format!("l{}:{}", h.l, h.value))
+                .map(|h| format!("l{}:{}", h.l, magnitude(&h.value)))
                 .collect();
-            println!("{:>24}charge {}", "", values.join(" "));
+            println!("{:>21}charge {}", "", values.join(" "));
         }
+        lines.push((name_of(dir), align));
+    }
+
+    println!("\n=== ALIGNMENT — the four axes, never summed ===");
+    println!(
+        "{:<19} {:>12} {:>12} {:>12} {:>14} {:>12}",
+        "world", "love", "integrity", "morality", "compassion(lvl)", "weakest"
+    );
+    println!("{}", "-".repeat(88));
+    for (name, a) in &lines {
+        println!(
+            "{:<19} {:>12} {:>12} {:>12} {:>14} {:>12}",
+            name,
+            show(&a.love),
+            show(&a.integrity),
+            show(&a.morality),
+            a.compassion_level,
+            show(&a.weakest()),
+        );
     }
 
     println!("\n=== CENSUS over {read} lines ===");
-    println!("lines with unknown > 0 (cross-book, B8 epsilon_unknown): {unknown_lines}");
-    println!("entangled-channel count -> lines: {entangled_channels:?}");
-    println!("rank -> lines: {rank_spread:?}");
-    println!("orbs per book -> lines: {substrate:?}");
-    println!("lines carrying ANY bond/covenant/debt edge: {edged_lines}");
+    println!("orbs per book -> lines:        {substrate:?}");
+    println!("rank -> lines:                 {rank_spread:?}");
+    println!("entangled-channel count:       {entangled_channels:?}");
+    println!("per-channel verdicts:          {verdict_census:?}");
+    println!("lines with any bond/cov/debt:  {edged_lines}");
+    println!("lines with any FLOW (2nd pole):{flow_lines}");
+    println!("lines with a symmetry found.:  {foundation_lines}");
+    println!("lines with unknown > 0 (B8):   {unknown_lines}");
+
     let single = substrate.get(&0).copied().unwrap_or(0) + substrate.get(&1).copied().unwrap_or(0);
     if single == read && read > 0 {
         println!(
             "\n*** EVERY BOOK HAS < 2 ORBS. project_complex (bridge.rs:377) returns NO STRUCTURE\n\
              *** below dim 2, so rank 0 here is STRUCTURALLY UNREACHABLE, not merely low.\n\
-             *** A capacity-derived budget built on this board seats EVERY line at beta_floor —\n\
-             *** i.e. a constant again. The reading must become reachable before B2/B3 can bind."
+             *** A capacity-derived budget on this board seats EVERY line at the floor."
+        );
+    }
+
+    // THE DERIVED ENVELOPE TABLE — every quantity B1/B3/B7 needs, as
+    // arithmetic rather than as a chosen number.
+    println!("\n=== THE DERIVED ENVELOPE: frontier(|V|, depth) = sum_(d=0..depth) |V|^d ===");
+    println!("|V| = 6 symmetries + 8 obj_ops + <=7 derived recolors + {{0,16}} derived tiles");
+    println!("{:<7} {:>10} {:>10} {:>10} {:>10}", "|V|", "d=0", "d=1", "d=2", "d=3");
+    for v in [14u64, 21, 30, 37] {
+        println!(
+            "{:<7} {:>10} {:>10} {:>10} {:>10}",
+            v,
+            frontier(v, 0),
+            frontier(v, 1),
+            frontier(v, 2),
+            frontier(v, 3)
+        );
+    }
+    println!("\nrung -> word_len (the exhaustive depth), and mint_bound:");
+    for level in 0..=5u32 {
+        let d = Difficulty::level(level);
+        println!(
+            "  level {level}: tier {} word_len {} grid {}x{} pairs {}",
+            d.tier, d.word_len, d.rows, d.cols, d.train_pairs
         );
     }
     println!(
-        "\nB2 rho_D candidates to rule: count-of-entangled-channels | min-rank-across | sum-over-entangled"
+        "\nNOTE: frontier(37,3) = {} — EXACTLY the bound the Ruling Box named for B7.",
+        frontier(37, 3)
     );
-    println!("NOTE: rank is DIMENSION, not volume. Two lines of equal rank and unequal charge");
-    println!("      are not the same line (bridge.rs:176-199). Read the charge rows above.");
+    println!("      beta_cap is therefore DERIVABLE, not chosen: it is the exhaustive sweep.");
 }
 
 fn name_of(dir: &Path) -> String {

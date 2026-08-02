@@ -981,25 +981,63 @@ stop one observed 102 s stall), and inert: `word_len` 3 enumerates
 52 060, so it never binds. Belongs on `17_CAPACITY` §7's
 retire-by-measurement list beside seat widths and galaxy reach.
 
-**B-E1 · THE BUDGET EQUATION.** DRAFT.
+**B-E1 · THE BUDGET EQUATION.** DRAFT — **AMENDED 2026-08-02** (operator:
+*"change the ruling"*). **Bound the DEPTH; the candidate count follows.**
+The search is breadth-first by depth (`search.rs:140`), so depth is where
+a lawful bound belongs.
 
-    unknown(prior) > 0  ⇒  budget = ε_unknown                      (B8)
+    budget(prior, rung) = frontier( |V|, δ(prior, rung) )
 
-    otherwise
-    budget(prior,t) = min( β_cap,
-                           max( β_floor,
-                                ⌊ β_quantum · ρ_D(prior) · β_ceiling(α_axis(prior)) ⌋ ))
+        frontier(V, δ) = Σ_{d=0}^{δ} V^d           the exhaustive sweep to depth δ
 
-| row | symbol | measures | domain |
+        δ = min( β_ceiling(α_axis(prior)),  word_len(rung),  1 + earned(prior) )
+        unknown(prior) > 0   ⇒   δ = δ_floor = 1                          (B8)
+
+        earned(prior) = # channels l where verdict_per_dimension[l] == Entangled
+                        AND  max |holonomy value in l| ≥ θ_charge
+
+        β_ceiling(α) = word_len(rung)  if  min(posted axes of α) ≥ σ_gate
+                     = 1               otherwise
+
+**MEASURED: `frontier(37, 3) = 52 060` — exactly the bound the Ruling Box
+named for `β_cap`.** The operator's number was already the derived
+quantity. `β_cap` is therefore not a constant at all: it is the
+exhaustive sweep at the rung's own `word_len`.
+
+| row | symbol | measures | state |
 |---|---|---|---|
-| B1 | `β_floor` | candidates when capacity is undefined or at ground — the search minimum | ℕ⁺ |
-| B2 | `ρ_D` | the per-dimension capacity verdict as ONE extent without collapsing the shape | a named reading |
-| B3 | `β_quantum` | candidates per unit of `ρ_D` | ℚ⁺ |
-| B4 | `α_axis` | per-axis syntropic standing (compassion·love·integrity·morality), never summed | ℚ⁴∩[0,1]⁴ |
-| B5 | `σ_gate` | the per-axis ratio at which that axis opens its band | ℚ⁴∩[0,1]⁴ |
-| B6 | `β_ceiling` | the alignment vector as one multiplier — order-preserving, never a sum | [0,1]⁴→[0,1] |
-| B7 | `β_cap` | candidates no line exceeds at any capacity | ℕ⁺ |
-| B8 | `ε_unknown` | what a cross-book (shared) capacity reading receives | ℕ⁺ |
+| B1 | `δ_floor` | the depth every line always holds — trigger is **`rank == 0`**, never `D == 0` (`D = GROUND + rank` is never zero) | **DERIVED = 1** (`1+\|V\|` candidates) |
+| B2 | `ρ_D` | per-channel, BOTH POLES, charge as magnitude — never rank alone | **FORM SETTLED** |
+| B3 | `β_quantum` | one DEPTH per earned channel; the exponential comes from `frontier`, not the coefficient | **DERIVED = 1** |
+| B4 | `α_axis` | per-axis standing (compassion·love·integrity·morality), never summed | form settled; compassion's denominator OPEN |
+| B5 | `σ_gate` | the ratio at which the weakest axis opens the full band | **OWED** — absent from the received box |
+| B6 | `β_ceiling` | alignment as a CAP ON DEPTH — `min` over posted axes, never a sum or average | **FORM SETTLED** |
+| B7 | `β_cap` | the candidates no line exceeds | **DERIVED = `frontier(\|V\|, word_len)`** |
+| B8 | `ε_unknown` | what a cross-book (shared) reading receives | **DERIVED = `δ_floor`** |
+| **B9** | `θ_charge` | the VOLUME threshold a cycle's charge must clear to earn a depth | **NEW, OWED** |
+
+**Two numbers remain, not eight** (`σ_gate`, `θ_charge`); the rest is
+arithmetic on `|V|` and the rung. Both are **unmeasurable on the current
+board** — see the reachability finding below.
+
+**ECONOMIC COHERENCE, checkable for the first time.** δ=1 → rungs 0–1 →
+`mint_bound` **0** (no poverty trap, no free mint); δ=2 → rungs 2–4 →
+mint 0·1·4, requires **one** earned channel; δ=3 → rung 5 → mint **7**,
+requires **two**. Minting therefore begins exactly where
+`kernel::capacity_law` already gates it (`Vacuity::Entangled`) — one law,
+two enforcements, agreeing, instead of a second bookkeeping.
+
+**REACHABILITY — MEASURED 2026-08-02, and it blocks instantiation.**
+`capacity_meter` over 44 lines: every book holds **1 orb**, 0 bonds, 0
+covenants, 0 debts; `rank 0`, `Degree(1)`, **all 132 channel verdicts
+read `Void`** (neither pole), zero flows, **zero symmetry foundation**,
+and no alignment axis posted anywhere. `project_complex` (`bridge.rs:377`)
+returns no structure below `dim 2`, so this is **structurally
+unreachable, not low**. Consequences: `capacity_law` can admit no mint at
+all, so **flipping Phase 3 today would halt minting** — an unrecorded
+Phase-3 precondition; and any capacity-derived budget seats every line at
+`δ_floor`, i.e. a constant again. **Do not replace `SEARCH_BUDGET` until
+reachability lands.**
 
 **TWO STANDING BARS, both already recorded in this ledger and both
 inherited by B-E1:**
