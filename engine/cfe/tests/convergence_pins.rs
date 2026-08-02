@@ -109,7 +109,7 @@ fn surfacing_the_reading_moves_no_consensus() {
     // its 1/1 default is correct for pricing a cost; this landing adds
     // a reading and changes nothing that settles. Same discipline as
     // the thermal book: the cure for a missing arm is to ADD the arm.
-    let (mut world, far) = two_colonies();
+    let (world, far) = two_colonies();
     let before = world.orb_by_id(FIRST_ORB).expect("orb").entropy_vented.clone();
     let _ = world.reciprocity_of(FIRST_ORB);
     let _ = world.convergence_between(FIRST_ORB, far);

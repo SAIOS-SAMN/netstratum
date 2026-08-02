@@ -725,7 +725,7 @@ fn the_borne_share_conserves_the_circulation() {
                     continue;
                 }
                 let v = circ.entry(i, j, 0).clone();
-                whole = whole + if v < q(0, 1) { q(0, 1) - v } else { v };
+                whole += if v < q(0, 1) { q(0, 1) - v } else { v };
             }
         }
         let handed: Ratio = borne(&delta, &support).into_iter().fold(q(0, 1), |a, b| a + b);

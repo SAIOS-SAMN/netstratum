@@ -8,7 +8,7 @@
 //!
 //! `heat_encased_of` is that arm, derived from receipts already written.
 
-use cfe::dop::{Resource, ZoneKind};
+use cfe::dop::ZoneKind;
 use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
 use cfe::world::{World, FIRST_ORB, SOVEREIGN};

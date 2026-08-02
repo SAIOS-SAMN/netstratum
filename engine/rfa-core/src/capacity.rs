@@ -500,9 +500,9 @@ pub fn circulation_on(delta: &Delta, support: &Support) -> Delta {
             comp[seed] = count;
             let mut stack = vec![seed];
             while let Some(v) = stack.pop() {
-                for w in 0..dim {
-                    if w != v && support.has(v, w, l) && comp[w] == usize::MAX {
-                        comp[w] = count;
+                for (w, seen) in comp.iter_mut().enumerate().take(dim) {
+                    if w != v && support.has(v, w, l) && *seen == usize::MAX {
+                        *seen = count;
                         stack.push(w);
                     }
                 }
@@ -572,9 +572,10 @@ pub fn circulation_on(delta: &Delta, support: &Support) -> Delta {
                     if factor == zero {
                         continue;
                     }
-                    for idx in 0..=k {
-                        let take = &aug[r][idx] * &factor;
-                        aug[other][idx] -= take;
+                    let taken: Vec<_> =
+                        aug[r].iter().take(k + 1).map(|cell| cell * &factor).collect();
+                    for (cell, take) in aug[other].iter_mut().zip(taken) {
+                        *cell -= take;
                     }
                 }
                 pivot_of[col] = r;
