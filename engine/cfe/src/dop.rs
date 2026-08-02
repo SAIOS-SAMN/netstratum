@@ -2186,13 +2186,50 @@ impl ColonyOrb {
         self.elements.retain(|(_, amount)| amount != &ratio(0, 1));
     }
 
-    /// Is a zone active? Dormant while ANY of its consumed resources
-    /// is famined.
-    pub fn zone_active(&self, zone: &Zone) -> bool {
+    /// How much of one input stands, as a share in `[0, 1]`.
+    ///
+    /// **Binary TODAY** because `famine` is a membership set: a
+    /// resource is famined or it is not. When scarcity carries a degree
+    /// (20_FOUNDING §6f, task #14/#16) this becomes the fraction held
+    /// against the fraction needed, and every reader below turns
+    /// continuous without changing a line.
+    fn availability(&self, resource: &Resource) -> Ratio {
+        match self.famine.contains(resource) {
+            true => ratio(0, 1),
+            false => ratio(1, 1),
+        }
+    }
+
+    /// A zone's VIGOUR — the rate it can run at, in `[0, 1]`.
+    ///
+    /// **THE LAW OF THE MINIMUM.** A process runs at the rate of its
+    /// SCARCEST input, never at the average of them. The obvious
+    /// alternative — the share of inputs that stand — is wrong and
+    /// measurably so: a Synthesizer consumes alloy 4 and biomass 1, so
+    /// an averaged reading would run it at 1/2 with NO ALLOY AT ALL and
+    /// mint diamond out of feedstock it does not hold. **Averaging
+    /// inputs creates matter.** The minimum cannot.
+    ///
+    /// A zone with no upkeep reads full vigour: nothing is scarce.
+    ///
+    /// This reads 0 or 1 today because [`Self::availability`] is
+    /// binary, so it is exactly the old all-or-nothing behaviour — but
+    /// the LAW is now the right one, and it turns fractional the moment
+    /// scarcity does.
+    pub fn zone_vigour(&self, zone: &Zone) -> Ratio {
         zone.kind
             .upkeep_per_tick()
             .iter()
-            .all(|(consumed, _)| !self.famine.contains(consumed))
+            .map(|(consumed, _)| self.availability(consumed))
+            .min()
+            .unwrap_or_else(|| ratio(1, 1))
+    }
+
+    /// Does a zone run at all? The boolean face of [`zone_vigour`],
+    /// kept for callers that genuinely want a yes/no — the journal
+    /// names dormant zones.
+    pub fn zone_active(&self, zone: &Zone) -> bool {
+        self.zone_vigour(zone) > ratio(0, 1)
     }
 }
 

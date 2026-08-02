@@ -904,8 +904,32 @@ only the symbol changed. A tag registry entry may never be repurposed
 code was always called. 534 workspace tests green including the wire
 round-trips, clippy clean, zero `Covenant` occurrences left in code.
 
-**And the name is now free.** Nothing in the engine claims *covenant*,
-so the relational layer can take it when it lands.
+**AND THE NAME IS CONTAINED, NOT RESERVED** (operator ruling
+2026-08-02, correcting this section's first draft). The draft said the
+name was "free for the relational layer to take when it lands." **That
+was wrong in the same way the original naming was.**
+
+A covenant is a moral and relational commitment — an obligation that
+binds because of what a party IS rather than what it delivers. **That is
+dogma-adjacent vocabulary, and it does not get a reserved seat in kernel
+law.** `18_TORSION` THE CURSE holds the standing position: such
+vocabulary is RESERVED rather than forbidden — a thing a civilization
+may produce and be burdened by, never a thing the kernel is founded on.
+
+```text
+STRUCK   covenant as a resource contract        → it is a FORWARD
+STRUCK   covenant as a reserved KERNEL term     → it is CONTAINED
+CONTAINED  covenant as relational/moral vocabulary, available inside
+           the reservation, to a civilization, as content — never as
+           an axis the kernel judges on
+```
+
+**This is `19_REGISTRY` §5's tiering doing its job:** an AXIS is
+constitutional, a VALUE is claimed, and CONTENT is free. Moral
+vocabulary is CONTENT. A civilization may hold covenants, name them,
+build a whole ethics on them — and the kernel neither knows nor judges
+what a covenant is. **The engine measures delivery; it does not measure
+virtue.**
 
 ### 6i.2 A FORWARD IS ALREADY A COLLATERALIZED FUTURE
 
