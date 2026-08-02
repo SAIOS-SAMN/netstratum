@@ -232,6 +232,31 @@ fn main() {
                 );
             }
         }
+        // THE REFUSALS SPEAK (operator ruling 2026-08-02: stop
+        // swallowing them). Both were collected and neither was ever
+        // read: the judge's per-deed verdicts, and the lane charters
+        // that could not be paid for. A refusal names its cure, and a
+        // cure nobody reads is not a cure. Census, never a panic.
+        if beat.is_multiple_of(10) || (cycles > 0 && beat == cycles) {
+            let mut lane_tally: std::collections::BTreeMap<String, usize> =
+                std::collections::BTreeMap::new();
+            let mut judged_tally: std::collections::BTreeMap<String, usize> =
+                std::collections::BTreeMap::new();
+            for polity in worlds.iter_mut() {
+                for refusal in polity.lane_refused.drain(..) {
+                    *lane_tally.entry(format!("{refusal:?}")).or_insert(0) += 1;
+                }
+                for (_, unlawful) in polity.refused.drain(..) {
+                    *judged_tally.entry(format!("{unlawful:?}")).or_insert(0) += 1;
+                }
+            }
+            if !lane_tally.is_empty() {
+                println!("beat {beat}: LANE REFUSED — {lane_tally:?}");
+            }
+            if !judged_tally.is_empty() {
+                println!("beat {beat}: JUDGE REFUSED — {judged_tally:?}");
+            }
+        }
         if beat.is_multiple_of(10) || (cycles > 0 && beat == cycles) {
             let summary: Vec<String> = worlds
                 .iter()

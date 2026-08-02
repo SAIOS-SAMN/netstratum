@@ -613,6 +613,78 @@ is why the substrate looked structural and was economic.
 stop the board climbing past rung 1. The door is built; the room fills
 when a lane can be paid for.
 
+## §8quinquies THE TRIANGLE WAS ONE THEOREM — the correction
+
+**Operator ruling 2026-08-02:** *"triangles are esoteric garbage — we
+can use them in some ways, but the inverse logic needs to stand firm on
+its own — convergence and divergence but convergence should always win —
+the point here is to not limit ourselves to single theorems but to make
+them all work together to balance the universe(S) we create."*
+
+**Upheld. §8quater item 6 over-built on one reading.** I made the
+cyclomatic arm — holonomy, "triangles beat pairs" — the headline
+feature, and a system balanced on one theorem is a system with one
+failure mode. The correction is not that the cycle arm is wrong; it is
+that **it is one arm of a dual, and the other arm was already sealed in
+the code and I never called it.**
+
+### THE ARM I MISSED
+
+`rfa_core::flux` (`capacity.rs:370`) returns
+`Flux { sources, sinks, balanced }` — the boundary pole, censused. It is
+exported, witnessed, and this lane's whole capacity design used
+`holonomies()` and never touched it.
+
+That is the same fault the board has now corrected twice on its own:
+
+- `50e8441` — the census read `Egress { sources, TRAPPED, balanced }`,
+  **a pole named for its failure mode**, corrected to `Flux`:
+  *"DIVERGENCE SOURCES; CONVERGENCE SINKS. Both are poles of one reading
+  and both are named."*
+- `cf5f484` — `Resonance` read motion as `expansion` with a sign,
+  **a pole named for its opposite**, corrected to
+  `Motion::{Diverging{by}, Converging{by}, Still}` — *"its own arm, its
+  own POSITIVE size, never a minus."*
+
+Mine is the third instance: **a dual read through one arm only.** The
+cycle arm answers *what circulates*; the flux arm answers *what sources
+and what sinks*. A budget keyed on cycles alone prices a Frost world —
+which holds *"the rarest resource in a high-flux universe: radiator
+headroom"* and **sells convergence** (05 §1.4) — at zero.
+
+### THE FORM, CORRECTED
+
+`earned` must not require a cycle. **Both arms earn, independently, and
+convergence outranks divergence:**
+
+```
+earned(prior) = earn_cycle(prior)  ⊕  earn_flux(prior)
+
+  earn_cycle : channels whose holonomy clears θ_charge   (what circulates)
+  earn_flux  : channels whose Flux carries SINKS         (what converges)
+
+  and where the two disagree, CONVERGENCE WINS.
+```
+
+Consequences that matter, and they are the point:
+
+- **A PAIR EARNS.** Two laned worlds are a tree — cycle arm 0 — but one
+  sources and one sinks, so the flux arm is non-zero. Bilateral trade
+  stops reading as nothing.
+- **A SINK EARNS ON ITS OWN.** The cold-side economy is a capability,
+  not a deficit, and the law already said so before this lane did.
+- **`Vacuity::Stasis` is named, not merely refused.** Rank without flow
+  is *"a wheel turning against nothing, at any size"* — its own doc says
+  it **must be RE-VOLUMIZED, never merely refused.** A cycle-only
+  budget would have paid that wheel.
+- **Triangles keep a role and lose the throne.** A closed loop is one
+  lawful way to earn, beside sinking and beside sourcing. *"Use them in
+  some ways"* — not build on them.
+
+**`θ_charge` (B9) is therefore not the only threshold owed** — the flux
+arm needs its own reading of *how much* convergence counts, and whether
+`balanced` earns at all. Recorded as owed (§7), not invented here.
+
 ## §8quater WHAT THIS UNLOCKS
 
 The operator's question: *"tell me all features we unlock."* Ranked by

@@ -375,14 +375,24 @@ pub fn market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
                 if best_held.is_none_or(|held| eta > held) {
                     let deal = beat * 100_000 + seq * 4;
                     seq += 1;
-                    let _ = cfe::world::charter_route(
+                    // THE REFUSAL IS CARRIED, NEVER SWALLOWED (operator
+                    // ruling 2026-08-02). `let _ =` here hid the whole
+                    // cross-book economy: measured, 17 crossings cleared
+                    // and 0 lanes chartered, because every charter
+                    // refused CannotAfford{Alloy, need 4, have 0} — and
+                    // no lane means no cross-book capacity reading at
+                    // all. An economic gate read as a topological limit
+                    // for exactly as long as nobody could see it.
+                    if let Err(refusal) = cfe::world::charter_route(
                         &mut one.world,
                         cfe::world::FIRST_ORB,
                         &mut two.world,
                         cfe::world::FIRST_ORB,
                         eta,
                         deal,
-                    );
+                    ) {
+                        one.lane_refused.push(refusal);
+                    }
                 }
             }
         }
@@ -472,7 +482,23 @@ pub struct Polity {
     /// Deeds the kernel REFUSED, by receipt sequence. Kept rather than
     /// discarded — a refusal the board never sees is the judge speaking
     /// into a void.
-    refused: Vec<(u64, kernel::Unlawful)>,
+    /// THE JUDGE'S REFUSALS — per-deed, from `chain_beat`.
+    ///
+    /// **Made public 2026-08-02 (operator ruling: stop swallowing
+    /// refusals).** This was private and NOTHING read it: the kernel has
+    /// been judging every deed every beat and posting its verdicts into
+    /// a field no caller could see. A refusal names its cure, and a cure
+    /// nobody can read is not a cure.
+    pub refused: Vec<(u64, kernel::Unlawful)>,
+    /// THE LANE REFUSALS — why `charter_route` said no.
+    ///
+    /// `conductor/src/lib.rs`'s charter site discarded this with
+    /// `let _ =`, and the consequence was invisible: **17 crossings
+    /// cleared and 0 lanes were chartered** on a measured board, because
+    /// every charter refused `CannotAfford { Alloy, need 4, have 0 }`.
+    /// The cross-book capacity reading has no substrate without lanes,
+    /// so a swallowed economic refusal read as a topological limit.
+    pub lane_refused: Vec<cfe::world::ActionRefused>,
 }
 
 fn banked(world: &World, resource: Resource) -> Ratio {
@@ -648,6 +674,7 @@ impl Polity {
                     return Polity {
                         chained: 0,
                         refused: Vec::new(),
+                        lane_refused: Vec::new(),
                         spec,
                         world,
                         automaton,
@@ -726,6 +753,7 @@ impl Polity {
         Polity {
             chained: 0,
             refused: Vec::new(),
+            lane_refused: Vec::new(),
             spec,
             world,
             automaton,
