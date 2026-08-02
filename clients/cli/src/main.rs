@@ -2427,6 +2427,50 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 ),
             }
         }
+        // GROWTH-1 — the six axes, carried whole. No aggregate: six
+        // readings and no score, because collapsing them is the struck
+        // C-gate under a sixth name.
+        Some("growth") => match world.orb_by_id(*current) {
+            None => println!(
+                "{} no colony yet — {} begins the story",
+                style.bad("✗"),
+                style.strong("found <name>")
+            ),
+            Some(_) => {
+                let growth = world.growth_of(*current);
+                println!(
+                    "{}  {}",
+                    style.head("GROWTH"),
+                    style.dim("what the chain PRODUCED — none of it reachable at stamp 0")
+                );
+                for (axis, sense, reading) in [
+                    ("practice", "TIME      did the writing span real chain time", amount(&growth.practice)),
+                    ("knowledge", "BREADTH   accounts written in", growth.knowledge.to_string()),
+                    ("expertise", "DEPTH     the deepest account's share", amount(&growth.expertise)),
+                    ("wisdom", "TESTING   accounts carrying BOTH sides", amount(&growth.wisdom)),
+                    ("locality", "SCOPE     the line's record that sits here", amount(&growth.locality)),
+                    ("triviality", "EMPTINESS postings that moved nothing", amount(&growth.triviality)),
+                ] {
+                    // Pad the PLAIN word before painting it — colour
+                    // codes count toward a format width and skew the
+                    // column (the same trap as the books display).
+                    println!(
+                        "  {} {} — {}",
+                        style.strong(&format!("{axis:<11}")),
+                        style.dim(sense),
+                        style.strong(&reading)
+                    );
+                }
+                println!(
+                    "  {}",
+                    match (growth.practised(), growth.substantive()) {
+                        (true, true) => style.ok("this line keeps books: it reads and writes"),
+                        (false, _) => style.dim("no practice yet — writing has to SPAN time, not fill one stamp").to_string(),
+                        (true, false) => style.warn("the record spans time and moved nothing"),
+                    }
+                );
+            }
+        },
         // LIT-1 — the literature's doors. Literacy is DERIVED (a line
         // that keeps its own books has learned to write), so there is
         // no verb that grants it.
@@ -2763,6 +2807,7 @@ fn help(style: &Style) {
         ("bond <rate> <res> to <p> [for <n>]", "seal a standing order: rate/tick streams without per-tick clearing, settled in one receipt at each touch — a term bond expires orderly; severing or defaulting posts the notice load"),
         ("sever <res> to <p> · bonds", "cut a standing bond (the load posts to the cutter) · list the standing orders"),
         ("covenant <q> <res> to <p> within <n>", "vitrify a delivery pact in the Glasskeeper lattice — collateral (priced by your fidelity books, never barred) locks until the quota is delivered (release) or the deadline passes (BREACH_AND_SLASH); `covenants` lists the open pacts"),
+        ("growth", "GROWTH-1: the six axes of how a line actually grew — practice (did the writing SPAN chain time), knowledge (breadth), expertise (depth), wisdom (accounts carrying BOTH sides — a line that only ever posted wins has learned nothing), locality (scope), triviality (what moved nothing, the guard that keeps the rest honest). Carried whole; there is no score"),
         ("literature · aspire <work> · claim <work> on <digest>", "LIT-1: the works a LITERATE line may reach for — VALOR · HONOR · COURAGE · COMMITMENT. Literacy is DERIVED and never granted: keep a book of your own (`book mint` then `book post`) and the literature opens. Aspiring is free and proves nothing; CLAIMING cites chain receipts, and the law verifies every digest is a receipt this world sealed. It never scores the virtue — a claim without receipts is a boast"),
         ("book · book mint <name> · book post <kept> <lost> <name> · book archive <name>", "BOOK-1: the OPEN registry — a line mints its own kinds of account beside the charter's four. A book is a DUAL ledger (kept against lost) and posts both sides at once. Archiving closes it to WRITING and never to reading: every entry it took stays. A book IS its normalized name, so re-minting one is not a second book, and the charter's four can be neither minted over nor closed"),
         ("ideology", "the dual cohesion ledger for this planet — the four axes, their books, and the derived readings; divergent trade partners pay a friction entropy tax, aligned ones pay zero"),

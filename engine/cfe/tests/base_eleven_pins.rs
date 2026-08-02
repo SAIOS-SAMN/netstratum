@@ -27,6 +27,15 @@ fn literate_world() -> (World, u64) {
     world
         .post_book(orb, kind, ratio(1, 1), ratio(0, 1))
         .expect("posts");
+    // PRACTICE COSTS TIME (GROWTH-1). A second posting after real chain
+    // distance is what makes this line literate; both at one stamp
+    // would be the leap this fixture used to encode.
+    for _ in 0..4 {
+        world.tick();
+    }
+    world
+        .post_book(orb, kind, ratio(1, 1), ratio(1, 1))
+        .expect("posts again");
     (world, orb)
 }
 

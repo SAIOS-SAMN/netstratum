@@ -27,6 +27,15 @@ fn literate_world() -> (World, u64) {
     world
         .post_book(orb, kind, ratio(1, 1), ratio(0, 1))
         .expect("posts");
+    // PRACTICE COSTS TIME (GROWTH-1). A second posting after real chain
+    // distance is what makes this line literate; both at one stamp
+    // would be the leap this fixture used to encode.
+    for _ in 0..4 {
+        world.tick();
+    }
+    world
+        .post_book(orb, kind, ratio(1, 1), ratio(1, 1))
+        .expect("posts again");
     (world, orb)
 }
 
@@ -36,24 +45,44 @@ fn a_receipt(world: &World) -> [u8; 32] {
 
 // ── LITERACY IS DERIVED ───────────────────────────────────────────────
 
-/// **THE GATE.** Literacy is not granted, awarded or stored — it is the
-/// reading of an act. Minting alone is not writing; posting is.
+/// **THE GATE, AND IT CANNOT BE REACHED AT STAMP 0.** Literacy is not
+/// granted, awarded or stored — it is the reading of a PRACTICE.
+/// Minting is not writing; one posting is not keeping books.
 #[test]
-fn literacy_is_the_reading_of_having_written() {
-    let mut world = founded();
-    let orb = orb_id(&world);
+fn literacy_costs_chain_time_not_keystrokes() {
+    let mut world = World::default();
+    world.found("home").expect("founds");
+    let orb = world.orb().expect("founded").orb_id;
     assert!(!world.literate(orb), "a fresh line keeps no books");
 
     let kind = world.mint_book(orb, "Ledger of Deeds").expect("mints");
-    assert!(
-        !world.literate(orb),
-        "an empty book is not writing — the page is blank"
-    );
+    assert!(!world.literate(orb), "an empty book is not writing");
 
     world
         .post_book(orb, kind, ratio(1, 1), ratio(0, 1))
         .expect("posts");
-    assert!(world.literate(orb), "a line that has written can read");
+    assert!(
+        !world.literate(orb),
+        "ONE posting is not practice — this is the leap that was closed"
+    );
+
+    // A second posting at the SAME stamp still spans nothing.
+    world
+        .post_book(orb, kind, ratio(1, 1), ratio(0, 1))
+        .expect("posts again");
+    assert!(
+        !world.literate(orb),
+        "two postings at one stamp span no time at all"
+    );
+
+    // Only distance in the chain makes it practice.
+    for _ in 0..4 {
+        world.tick();
+    }
+    world
+        .post_book(orb, kind, ratio(0, 1), ratio(1, 1))
+        .expect("posts across time");
+    assert!(world.literate(orb), "writing that SPANS is keeping books");
 }
 
 /// Derived means derived: nothing stores it, so it is a pure function of

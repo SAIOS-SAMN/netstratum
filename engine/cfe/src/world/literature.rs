@@ -18,19 +18,27 @@ use super::*;
 use crate::literature::{is_work, work_named, work_of, Aspiration, WorkId, WorkView};
 
 impl World {
-    /// **LITERACY — DERIVED, NEVER GRANTED.** A line is literate when it
-    /// keeps its own books: it has MINTED one and POSTED to it. Writing
-    /// is the act; this is the reading of that act.
+    /// **LITERACY — DERIVED, NEVER GRANTED, AND IT COSTS TIME.**
+    ///
+    /// A line reads and writes when it KEEPS books — not when it has
+    /// written once. The first cut of this predicate read a single
+    /// posting, and that was a leap: a colony could go from founded to
+    /// literate to a claimed civilizational upgrade in five commands
+    /// with every receipt at stamp 0, while the base tier beneath it
+    /// wanted 480 ticks of famine survived.
+    ///
+    /// So literacy now reads PRACTICE (GROWTH-1): the postings must
+    /// SPAN chain time. One commitment per step (`18_TORSION` ARTICLE
+    /// IV cl. 2) means a span cannot be forged the way a keystroke can.
+    ///
+    /// **This is not a threshold.** It compares practice against ZERO —
+    /// the difference between happened and did not. There is no number
+    /// here to dial.
     ///
     /// Stores nothing, so it cannot go stale and there is no second
-    /// record to disagree with the books. A line that mints a book and
-    /// never writes in it has not learned to write.
+    /// record to disagree with the books.
     pub fn literate(&self, orb: u64) -> bool {
-        self.orb_by_id(orb).is_some_and(|held| {
-            held.books
-                .iter()
-                .any(|book| book.kept != ratio(0, 1) || book.lost != ratio(0, 1))
-        })
+        self.growth_of(orb).practised()
     }
 
     /// Every chartered work, with what this line has done about it.

@@ -39,6 +39,7 @@ pub use rules::{demurrage_due, ease_of, in_crisis, standing_supply};
 
 pub mod accord;
 pub mod books;
+pub mod growth;
 pub mod literature;
 pub mod core;
 pub mod economy;

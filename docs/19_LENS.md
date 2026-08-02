@@ -1135,3 +1135,89 @@ NOT yet built. It needs `thermal_books_of` / `heat_encased_of`, which
 landed on `main` at `2112aa3` and are **not on this branch** — this lane
 sits on `main@e0f8db2` plus the capacity-lane merge. Blocked on the
 reconciliation, not on design.
+
+---
+
+## §20 GROWTH-1 — the six mechanisms, and the anti-leap test
+
+*(operator ruling 2026-08-03: "practice, wisdom, knowledge, expertise,
+locality, triviality — we need these defined as growth mechanisms")*
+
+The question they answer: *how does a line go from primordialism to
+significant civilization without leaps and bounds and skipping
+everything in between?*
+
+**The rule: a rung must measure something the chain PRODUCES, never
+something a line ASSERTS.** `18_TORSION` ARTICLE IV clause 2 rules one
+commitment per step, so a stamp IS elapsed history. A claim can be
+typed; a span cannot be forged.
+
+```text
+    THE TEST: can a line reach this rung at stamp 0?
+              If yes, it is a leap.
+```
+
+### 20a. THE LEAP THAT WAS MEASURED, and it was this lane's
+
+Before GROWTH-1, a colony went from founded to a CLAIMED civilizational
+upgrade in five commands with **every receipt at stamp 0** — and the
+witness cited was receipt #0, the sovereign founder joining, which has
+nothing to do with valor. The base tier beneath it wants 480 ticks of
+famine survived and 240 consecutive ticks of overheat.
+
+The base tier was built from things that cannot be compressed. The
+uplift tier was built from declarations. That was the whole gap.
+
+### 20b. THE SIX AXES, and they are orthogonal
+
+```text
+    PRACTICE     TIME       did the doing span real chain time?
+    KNOWLEDGE    BREADTH    how many distinct accounts are kept?
+    EXPERTISE    DEPTH      how concentrated is the deepest one?
+    WISDOM       TESTING    how much of it has been tested?
+    LOCALITY     SCOPE      how much of the line's record sits here?
+    TRIVIALITY   EMPTINESS  how much of it moved nothing?
+```
+
+**WISDOM is the one worth explaining.** It reads the share of accounts
+carrying BOTH sides — kept AND lost. *A line that has only ever posted
+wins has recorded a great deal and learned nothing.* The dual ledger is
+what makes that measurable, and it is why BOOK-1 made both sides
+structural rather than conventional. That decision paid here.
+
+**TRIVIALITY is the guard that makes the other five honest.** Without
+it every axis is farmable: a thousand empty postings would read as
+practice, breadth and depth alike.
+
+### 20c. NO THRESHOLDS, AND WHY THAT IS POSSIBLE
+
+Every axis is an exact rational or a count, derived and reported whole.
+Nothing in GROWTH-1 compares against a number, so there is nothing to
+dial (ruling 2026-08-03: constants and statics give way to deterministic
+throughput driven by dynamism).
+
+Where a gate needs one, it compares against ZERO — the difference
+between *happened* and *did not*, which is not a dial. `literate` is the
+first and so far only one: **a line reads and writes when its postings
+SPAN time**, not when one posting exists.
+
+**Six readings and no aggregate.** Collapsing them to a single "growth
+score" would be the struck C-gate wearing a sixth name.
+
+### 20d. THE HOLE THE PINS FOUND
+
+The first cut measured practice as the span of POSTINGS. A line could
+post zeros across a long life and read as practised — padding buying
+literacy, the leap re-entering through the axis built to close it. Its
+own pin caught it.
+
+**Only real writing extends the span now.** An empty posting is counted
+by TRIVIALITY and refused by PRACTICE, which is the correct division of
+labour: one reports the padding, the other declines to be fooled by it.
+
+### 20e. WHAT IS STILL A LEAP
+
+`claim` still accepts a SINGLE witness of any age, so a work can be
+claimed the moment a line becomes literate. Practice now gates entry to
+the literature; it does not yet shape what a claim must show. The
+plural-and-spanning witness rule proposed alongside this is NOT built.
