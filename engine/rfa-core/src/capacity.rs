@@ -31,7 +31,7 @@
 //! under a new name. The extent says WHERE structure stands.
 //!
 //! **THE PAIRWISE LAW — the meter's one precondition.** The input must
-//! be irreducibly pairwise (bonds, covenants, absorption debts), so
+//! be irreducibly pairwise (bonds, forwards, absorption debts), so
 //! that non-transitive obligation triangles form genuine `H¹` cocycle
 //! defects. A `Δ` built from node-local scalar differences —
 //! `Δ_ij = p_j − p_i` for any potential `p` — is a PURE COBOUNDARY and

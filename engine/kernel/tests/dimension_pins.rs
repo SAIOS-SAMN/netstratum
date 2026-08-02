@@ -58,7 +58,7 @@ fn the_aggregate_verdict_can_read_admitted_while_no_dimension_is() {
 
     assert_eq!(per[CHANNEL_BOND], Vacuity::Stasis, "bonds: rank without gradient");
     assert_eq!(per[CHANNEL_DEBT], Vacuity::Unframed, "debts: gradient without rank");
-    assert_eq!(per[CHANNEL_COVENANT], Vacuity::Void, "covenants: unoccupied");
+    assert_eq!(per[CHANNEL_COVENANT], Vacuity::Void, "forwards: unoccupied");
     assert!(
         !per.iter().any(|seen| seen.is_admitted()),
         "NOT ONE dimension is admitted on its own"
@@ -88,7 +88,7 @@ fn a_dimension_that_carries_both_poles_is_admitted_on_its_own() {
 fn an_unoccupied_dimension_reads_void_and_that_is_a_shape_not_a_failure() {
     // A channel no deed has ever used carries nothing, and saying so is
     // a fact about the world's shape. A universe that has never sealed
-    // a covenant is not misaligned for it — which is why the floor is
+    // a forward is not misaligned for it — which is why the floor is
     // read per dimension and never as one global gate.
     let mut state = orbs(3);
     state.bonds = vec![bond(1, 2, 4)];

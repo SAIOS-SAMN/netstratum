@@ -1,4 +1,4 @@
-//! COVENANT-1 — THE GLASSKEEPER ESCROW (09_IDEOLOGY §2.3, 01 §7,
+//! FORWARD-1 — THE GLASSKEEPER ESCROW (09_IDEOLOGY §2.3, 01 §7,
 //! BUILD_ORDER §3). The vitrified delivery pact: the obligor locks
 //! collateral (OUT of its bank — the lock gates every spend by
 //! absence, and the vitrified matrix is a lossless vault by
@@ -6,11 +6,11 @@
 //! quota of a resource to the beneficiary within the window.
 //! Deliveries are DELIBERATE deeds (TRADE-1 transfers and BOND-1
 //! settlements). Resolution is world-driven at the tick boundary:
-//! fulfilled releases (collateral home, `covenants_fulfilled` posts
+//! fulfilled releases (collateral home, `forwards_fulfilled` posts
 //! the stake), a passed deadline slashes (collateral to the
-//! aggrieved, `covenants_breached` posts) — fulfilment wins the tie.
+//! aggrieved, `forwards_breached` posts) — fulfilment wins the tie.
 //! The INTEGRITY books are VALUE-weighted: a thousand toy promises
-//! never wash one giant breach. A covenant, once sealed, runs to its
+//! never wash one giant breach. A forward, once sealed, runs to its
 //! end — vitrification means no cancel.
 
 use cfe::dop::{collateral_required, ClosureEvent, Resource, ZoneKind};
@@ -39,16 +39,16 @@ fn mother_and_daughter() -> (World, u64) {
     (world, daughter)
 }
 
-/// A fulfilled covenant releases exactly: the collateral comes home
+/// A fulfilled forward releases exactly: the collateral comes home
 /// and the stake posts the fulfilled book — at the first tick after
 /// the quota is met, receipted.
 #[test]
-fn a_fulfilled_covenant_releases_exactly() {
+fn a_fulfilled_forward_releases_exactly() {
     let (mut world, daughter) = mother_and_daughter();
     // Empty books: the multiplier is 1 — full collateral, the empty
     // book is not a credential.
     world
-        .seal_covenant(FIRST_ORB, daughter, Resource::Iron, ratio(3, 1), 10)
+        .seal_forward(FIRST_ORB, daughter, Resource::Iron, ratio(3, 1), 10)
         .expect("seals"); // @16: locks 3 of the mother's 10 iron
     assert_eq!(banked(&world, FIRST_ORB, Resource::Iron), ratio(7, 1));
 
@@ -56,7 +56,7 @@ fn a_fulfilled_covenant_releases_exactly() {
         .transfer(FIRST_ORB, daughter, Resource::Iron, ratio(2, 1))
         .expect("delivers two");
     world.tick(); // 2 < 3: nothing resolves
-    assert_eq!(world.committed().covenants.len(), 1);
+    assert_eq!(world.committed().forwards.len(), 1);
 
     world
         .transfer(FIRST_ORB, daughter, Resource::Iron, ratio(1, 1))
@@ -64,17 +64,17 @@ fn a_fulfilled_covenant_releases_exactly() {
     world.tick(); // quota met → RELEASE at this boundary
 
     let mother = world.orb_by_id(FIRST_ORB).expect("orb");
-    assert_eq!(mother.covenants_fulfilled, ratio(3, 1), "the stake posts");
-    assert_eq!(mother.covenants_breached, ratio(0, 1));
+    assert_eq!(mother.forwards_fulfilled, ratio(3, 1), "the stake posts");
+    assert_eq!(mother.forwards_breached, ratio(0, 1));
     // 10 − 3 locked − 2 − 1 delivered + 3 released = 7.
     assert_eq!(banked(&world, FIRST_ORB, Resource::Iron), ratio(7, 1));
     assert_eq!(banked(&world, daughter, Resource::Iron), ratio(23, 1));
-    assert!(world.committed().covenants.is_empty());
+    assert!(world.committed().forwards.is_empty());
     let released = world
         .chronicle()
         .receipts()
         .iter()
-        .filter(|r| matches!(r.event, ClosureEvent::CovenantReleased { .. }))
+        .filter(|r| matches!(r.event, ClosureEvent::ForwardReleased { .. }))
         .count();
     assert_eq!(released, 1);
     let rebuilt = replay(world.chronicle());
@@ -88,7 +88,7 @@ fn a_fulfilled_covenant_releases_exactly() {
 fn a_missed_deadline_slashes_to_the_aggrieved() {
     let (mut world, daughter) = mother_and_daughter();
     world
-        .seal_covenant(FIRST_ORB, daughter, Resource::Iron, ratio(3, 1), 5)
+        .seal_forward(FIRST_ORB, daughter, Resource::Iron, ratio(3, 1), 5)
         .expect("seals"); // @16, deadline at 21
     world
         .transfer(FIRST_ORB, daughter, Resource::Iron, ratio(1, 1))
@@ -97,17 +97,17 @@ fn a_missed_deadline_slashes_to_the_aggrieved() {
         world.tick(); // the tick opening at now=21 fires the slash
     }
     let mother = world.orb_by_id(FIRST_ORB).expect("orb");
-    assert_eq!(mother.covenants_breached, ratio(3, 1), "the stake posts");
-    assert_eq!(mother.covenants_fulfilled, ratio(0, 1));
+    assert_eq!(mother.forwards_breached, ratio(3, 1), "the stake posts");
+    assert_eq!(mother.forwards_fulfilled, ratio(0, 1));
     // The aggrieved holds the delivery AND the forfeit: 20 + 1 + 3.
     assert_eq!(banked(&world, daughter, Resource::Iron), ratio(24, 1));
-    assert!(world.committed().covenants.is_empty());
+    assert!(world.committed().forwards.is_empty());
     let slashed = world
         .chronicle()
         .receipts()
         .iter()
         .find_map(|r| match &r.event {
-            ClosureEvent::CovenantSlashed { collateral, .. } => {
+            ClosureEvent::ForwardSlashed { collateral, .. } => {
                 Some((collateral.clone(), r.stamp))
             }
             _ => None,
@@ -147,18 +147,18 @@ fn the_collateral_curve_reads_the_books() {
         "the ceiling holds at 4 × quota — costly, never barred"
     );
 
-    // And the engine reads it: fulfil a 3-iron covenant, then the next
+    // And the engine reads it: fulfil a 3-iron forward, then the next
     // seal locks quota × 1/4.
     let (mut world, daughter) = mother_and_daughter();
     world
-        .seal_covenant(FIRST_ORB, daughter, Resource::Iron, ratio(3, 1), 10)
+        .seal_forward(FIRST_ORB, daughter, Resource::Iron, ratio(3, 1), 10)
         .expect("seals");
     world
         .transfer(FIRST_ORB, daughter, Resource::Iron, ratio(3, 1))
         .expect("delivers whole");
     world.tick(); // releases: fulfilled book = 3
     world
-        .seal_covenant(FIRST_ORB, daughter, Resource::Iron, ratio(4, 1), 10)
+        .seal_forward(FIRST_ORB, daughter, Resource::Iron, ratio(4, 1), 10)
         .expect("seals again");
     let locked = world
         .chronicle()
@@ -166,7 +166,7 @@ fn the_collateral_curve_reads_the_books() {
         .iter()
         .rev()
         .find_map(|r| match &r.event {
-            ClosureEvent::CovenantSealed { collateral, .. } => Some(collateral.clone()),
+            ClosureEvent::ForwardSealed { collateral, .. } => Some(collateral.clone()),
             _ => None,
         })
         .expect("the seal is receipted");
@@ -179,7 +179,7 @@ fn the_collateral_curve_reads_the_books() {
 fn locked_collateral_cannot_be_spent() {
     let (mut world, daughter) = mother_and_daughter();
     world
-        .seal_covenant(FIRST_ORB, daughter, Resource::Iron, ratio(3, 1), 10)
+        .seal_forward(FIRST_ORB, daughter, Resource::Iron, ratio(3, 1), 10)
         .expect("seals"); // mother: 10 − 3 locked = 7
     assert_eq!(
         world.zone(16, ZoneKind::Extractor),
@@ -200,12 +200,12 @@ fn locked_collateral_cannot_be_spent() {
 }
 
 /// BOND-1 composes: a standing bond's settlements count toward the
-/// covenant's quota — constancy fulfils the promise.
+/// forward's quota — constancy fulfils the promise.
 #[test]
 fn bond_flow_counts_toward_the_quota() {
     let (mut world, daughter) = mother_and_daughter();
     world
-        .seal_covenant(FIRST_ORB, daughter, Resource::Iron, ratio(3, 1), 12)
+        .seal_forward(FIRST_ORB, daughter, Resource::Iron, ratio(3, 1), 12)
         .expect("seals"); // @16
     world
         .seal_bond(FIRST_ORB, daughter, Resource::Iron, ratio(1, 2), 0)
@@ -216,46 +216,46 @@ fn bond_flow_counts_toward_the_quota() {
     world.collect().expect("collects"); // @22: the bond settles 3
     world.tick(); // quota met by the stream → RELEASE
     let mother = world.orb_by_id(FIRST_ORB).expect("orb");
-    assert_eq!(mother.covenants_fulfilled, ratio(3, 1));
+    assert_eq!(mother.forwards_fulfilled, ratio(3, 1));
     assert_eq!(mother.bond_flow, ratio(3, 1), "the stream did the fulfilling");
-    assert!(world.committed().covenants.is_empty());
+    assert!(world.committed().forwards.is_empty());
     assert_eq!(world.committed().bonds.len(), 1, "the bond outlives the pact");
     let rebuilt = replay(world.chronicle());
     assert_eq!(rebuilt, world.committed(), "replay MATCHES across the axes");
 }
 
-/// The typed refusals: one open covenant per (obligor, beneficiary,
+/// The typed refusals: one open forward per (obligor, beneficiary,
 /// resource); shape errors refuse whole; the collateral shortfall is
 /// named exactly.
 #[test]
-fn covenant_refusals_are_typed() {
+fn forward_refusals_are_typed() {
     let (mut world, daughter) = mother_and_daughter();
     world
-        .seal_covenant(FIRST_ORB, daughter, Resource::Iron, ratio(2, 1), 5)
+        .seal_forward(FIRST_ORB, daughter, Resource::Iron, ratio(2, 1), 5)
         .expect("seals");
     assert_eq!(
-        world.seal_covenant(FIRST_ORB, daughter, Resource::Iron, ratio(1, 1), 5),
-        Err(ActionRefused::CovenantAlreadySealed)
+        world.seal_forward(FIRST_ORB, daughter, Resource::Iron, ratio(1, 1), 5),
+        Err(ActionRefused::ForwardAlreadySealed)
     );
     assert_eq!(
-        world.seal_covenant(FIRST_ORB, FIRST_ORB, Resource::Iron, ratio(1, 1), 5),
+        world.seal_forward(FIRST_ORB, FIRST_ORB, Resource::Iron, ratio(1, 1), 5),
         Err(ActionRefused::BadTransfer)
     );
     assert_eq!(
-        world.seal_covenant(FIRST_ORB, daughter, Resource::Iron, ratio(0, 1), 5),
+        world.seal_forward(FIRST_ORB, daughter, Resource::Iron, ratio(0, 1), 5),
         Err(ActionRefused::BadTransfer)
     );
     assert_eq!(
-        world.seal_covenant(FIRST_ORB, daughter, Resource::Biomass, ratio(1, 1), 0),
+        world.seal_forward(FIRST_ORB, daughter, Resource::Biomass, ratio(1, 1), 0),
         Err(ActionRefused::BadTransfer)
     );
     assert_eq!(
-        world.seal_covenant(FIRST_ORB, 99, Resource::Iron, ratio(1, 1), 5),
+        world.seal_forward(FIRST_ORB, 99, Resource::Iron, ratio(1, 1), 5),
         Err(ActionRefused::NoSuchOrb { orb: 99 })
     );
     // Fresh books on biomass: quota 20 wants 20 collateral; 3 stands.
     assert_eq!(
-        world.seal_covenant(FIRST_ORB, daughter, Resource::Biomass, ratio(20, 1), 5),
+        world.seal_forward(FIRST_ORB, daughter, Resource::Biomass, ratio(20, 1), 5),
         Err(ActionRefused::CannotAfford {
             resource: Resource::Biomass,
             need: Box::new(ratio(20, 1)),
@@ -266,10 +266,10 @@ fn covenant_refusals_are_typed() {
 
 /// Tags 35–37 round-trip byte-exact (the VENT-1 witness shape).
 #[test]
-fn covenant_events_round_trip_byte_exact() {
+fn forward_events_round_trip_byte_exact() {
     for (event, expected_tag) in [
         (
-            ClosureEvent::CovenantSealed {
+            ClosureEvent::ForwardSealed {
                 obligor_orb: 1,
                 beneficiary_orb: 2,
                 resource: Resource::Iron,
@@ -280,7 +280,7 @@ fn covenant_events_round_trip_byte_exact() {
             35,
         ),
         (
-            ClosureEvent::CovenantReleased {
+            ClosureEvent::ForwardReleased {
                 obligor_orb: 1,
                 beneficiary_orb: 2,
                 resource: Resource::Iron,
@@ -289,7 +289,7 @@ fn covenant_events_round_trip_byte_exact() {
             36,
         ),
         (
-            ClosureEvent::CovenantSlashed {
+            ClosureEvent::ForwardSlashed {
                 obligor_orb: 1,
                 beneficiary_orb: 2,
                 resource: Resource::Joule,

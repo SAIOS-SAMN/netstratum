@@ -57,11 +57,11 @@ impl World {
             for (source, target, resource) in expired {
                 self.settle_bond(source, target, resource, now, vec![], Some(ratio(0, 1)));
             }
-            // COVENANT-1: the vitrified pacts resolve at the boundary —
+            // FORWARD-1: the vitrified pacts resolve at the boundary —
             // fulfilment releases, the passed deadline slashes;
             // fulfilment wins the tie. World-driven, the famine shape.
             let due: Vec<(u64, u64, Resource, bool)> = self
-                .covenants
+                .forwards
                 .iter()
                 .filter_map(|pact| {
                     if pact.delivered >= pact.quota {
@@ -74,14 +74,14 @@ impl World {
                 })
                 .collect();
             for (obligor, beneficiary, resource, fulfilled) in due {
-                let Some(at) = self.covenants.iter().position(|pact| {
+                let Some(at) = self.forwards.iter().position(|pact| {
                     pact.obligor == obligor
                         && pact.beneficiary == beneficiary
                         && pact.resource == resource
                 }) else {
                     continue;
                 };
-                let pact = self.covenants.remove(at);
+                let pact = self.forwards.remove(at);
                 let stake =
                     pact.collateral.clone() * crate::dop::commensurate_weight(resource);
                 let recipient = match fulfilled {
@@ -97,18 +97,18 @@ impl World {
                     peel(&mut self.orbs, obligor)
                 {
                     match fulfilled {
-                        true => held.covenants_fulfilled += stake,
-                        false => held.covenants_breached += stake,
+                        true => held.forwards_fulfilled += stake,
+                        false => held.forwards_breached += stake,
                     }
                 }
                 let event = match fulfilled {
-                    true => ClosureEvent::CovenantReleased {
+                    true => ClosureEvent::ForwardReleased {
                         obligor_orb: obligor,
                         beneficiary_orb: beneficiary,
                         resource,
                         collateral: pact.collateral,
                     },
-                    false => ClosureEvent::CovenantSlashed {
+                    false => ClosureEvent::ForwardSlashed {
                         obligor_orb: obligor,
                         beneficiary_orb: beneficiary,
                         resource,
@@ -161,8 +161,8 @@ impl World {
                             held.bank(pact.resource, banked.clone());
                         }
                         match fulfilled {
-                            true => held.covenants_fulfilled += stake,
-                            false => held.covenants_breached += stake,
+                            true => held.forwards_fulfilled += stake,
+                            false => held.forwards_breached += stake,
                         }
                     }
                     self.chronicle.append(

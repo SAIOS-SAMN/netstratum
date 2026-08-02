@@ -875,7 +875,39 @@ transducer it is a function of stellar inheritance, technique, and
 energy — which is where research finally acts on something other than a
 multiplier (§6g).
 
-### 6i.2 A COVENANT IS ALREADY A COLLATERALIZED FUTURE
+### 6i.1b THE NAME IS STRUCK — covenant was a layer confusion
+
+**Operator ruling 2026-08-02, LANDED.** *Covenant* named a commercial
+delivery contract, which put a collateralized margin position over
+physical resources in the vocabulary of moral and relational commitment.
+**Two layers, one word.**
+
+```text
+RELATIONAL   COVENANT   entity and orb charters: reciprocity, standing,
+                        alignment. NON-TRANSFERABLE obligations.
+                        RESERVED — no code claims this name today.
+
+RESOURCE     FORWARD    collateralized future delivery: obligor,
+                        beneficiary, quota, margin, expiry.
+```
+
+**Landed across 29 files, 259 occurrences.** `ClosureEvent::Covenant*`
+became `Forward*`; `struct Covenant` became `Forward`;
+`seal_covenant_as` became `seal_forward_as`; the fidelity books
+`covenants_fulfilled` / `covenants_breached` became `forwards_*`; the
+lens labels moved with them; `COVENANT-1` became `FORWARD-1`.
+
+**THE WIRE DID NOT MOVE, and that is the property that made this
+lawful.** Tags 35, 36 and 37 carry the same meaning and the same bytes —
+only the symbol changed. A tag registry entry may never be repurposed
+(`19_REGISTRY` §5), and this repurposes nothing: it corrects what the
+code was always called. 534 workspace tests green including the wire
+round-trips, clippy clean, zero `Covenant` occurrences left in code.
+
+**And the name is now free.** Nothing in the engine claims *covenant*,
+so the relational layer can take it when it lands.
+
+### 6i.2 A FORWARD IS ALREADY A COLLATERALIZED FUTURE
 
 **Measured, and this is the finding.** `Covenant` is not covenant-like;
 it is the contract:
@@ -940,9 +972,22 @@ without carrying its usual pathology** — not by capping leverage, but by
 requiring that every position can state, exactly and in matter, what it
 is a claim on.
 
-**Held for the operator:** whether a claim may be re-hypothecated (a
-claim pledged as collateral for another), and if so whether the descent
-law bounds the depth or only requires that it terminate.
+**RE-HYPOTHECATION: BOUNDED, NEVER BANNED** (operator ruling
+2026-08-02). A claim may back a secondary claim, subject to two
+conditions that are both checkable at the door:
+
+```text
+1. TERMINAL      every claim states a walk-able receipt chain ending in
+                 a physical ResourceStock. No termination, no position.
+2. BOUNDED       the descent walk is at most K = 4 links, and a chain
+                 containing a CYCLE (A backs B backs A) refuses.
+```
+
+**Refusal is `UnbackedDerivativeClaim`, at the door.** The depth bound
+is what stops a leverage cascade from being assembled out of individually
+lawful steps, and the cycle check is what stops a claim from being its
+own collateral — the two failure modes that a per-position check alone
+would let through.
 
 ## §7 THE BASE-LEVEL ACCOUNTING LAW
 

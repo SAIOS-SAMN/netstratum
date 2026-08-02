@@ -176,8 +176,8 @@ pub fn render_state(world_name: &str, planet: &str, civilization: &str, world: &
              "drawn_in_crisis", &orb.drawn_in_crisis),
             ("love", "bond_flow", &orb.bond_flow,
              "severance_load", &orb.severance_load),
-            ("integrity", "covenants_fulfilled", &orb.covenants_fulfilled,
-             "covenants_breached", &orb.covenants_breached),
+            ("integrity", "forwards_fulfilled", &orb.forwards_fulfilled,
+             "forwards_breached", &orb.forwards_breached),
             ("morality", "returned_across", &orb.returned_across,
              "extracted_across", &orb.extracted_across),
         ];
@@ -512,8 +512,8 @@ pub fn render_receipt(receipt: &Receipt) -> String {
                 }
             ),
         ),
-        E::CovenantSealed { obligor_orb, beneficiary_orb, resource, quota, window, collateral } => (
-            "covenant_sealed",
+        E::ForwardSealed { obligor_orb, beneficiary_orb, resource, quota, window, collateral } => (
+            "forward_sealed",
             format!(
                 "{} {} orb {obligor_orb} → orb {beneficiary_orb} in {window} (collateral {})",
                 ratio_str(quota),
@@ -521,16 +521,16 @@ pub fn render_receipt(receipt: &Receipt) -> String {
                 ratio_str(collateral)
             ),
         ),
-        E::CovenantReleased { obligor_orb, beneficiary_orb, resource, collateral } => (
-            "covenant_released",
+        E::ForwardReleased { obligor_orb, beneficiary_orb, resource, collateral } => (
+            "forward_released",
             format!(
                 "{} {} home to orb {obligor_orb} (pact with orb {beneficiary_orb})",
                 ratio_str(collateral),
                 resource_name(*resource)
             ),
         ),
-        E::CovenantSlashed { obligor_orb, beneficiary_orb, resource, collateral } => (
-            "covenant_slashed",
+        E::ForwardSlashed { obligor_orb, beneficiary_orb, resource, collateral } => (
+            "forward_slashed",
             format!(
                 "{} {} forfeit orb {obligor_orb} → orb {beneficiary_orb}",
                 ratio_str(collateral),

@@ -1,14 +1,14 @@
-//! ACCORDS — bonds, covenants, councils, severance.
+//! ACCORDS — bonds, forwards, councils, severance.
 //!
 //! The syntropic books (given_in_crisis, returned_across,
-//! covenants_fulfilled) and the entropic ones (extracted_across,
-//! covenants_breached, severance_load) are written here.
+//! forwards_fulfilled) and the entropic ones (extracted_across,
+//! forwards_breached, severance_load) are written here.
 
 use super::*;
 
 impl World {
     /// COUNCIL-1 (12_UNION §7) — seal a COUNCIL: a multilateral
-    /// covenant among three or more distinct orbs, every member bound
+    /// forward among three or more distinct orbs, every member bound
     /// alike. Each locks the SAME collateral (a bank withdrawal, the
     /// vitrified-vault law) against delivering ≥ quota to fellow
     /// members within the window; the reckoning judges all together at
@@ -278,8 +278,8 @@ impl World {
                 held.bank(resource, pay.clone());
             }
             settle_debts(&mut self.debts, &mut self.orbs, source, target, value);
-            // COVENANT-1: the stream credits the open pact on this lane.
-            credit_covenants(&mut self.covenants, source, target, resource, &pay);
+            // FORWARD-1: the stream credits the open pact on this lane.
+            credit_forwards(&mut self.forwards, source, target, resource, &pay);
             credit_councils(&mut self.councils, source, target, resource, &pay);
         }
         if ended {
@@ -308,8 +308,8 @@ impl World {
             self.relieve_recovered(target);
         }
     }
-    /// Seal a covenant as the sovereign.
-    pub fn seal_covenant(
+    /// Seal a forward as the sovereign.
+    pub fn seal_forward(
         &mut self,
         obligor: u64,
         beneficiary: u64,
@@ -317,9 +317,9 @@ impl World {
         quota: Ratio,
         window: u64,
     ) -> Result<(), ActionRefused> {
-        self.seal_covenant_as(SOVEREIGN, obligor, beneficiary, resource, quota, window)
+        self.seal_forward_as(SOVEREIGN, obligor, beneficiary, resource, quota, window)
     }
-    /// COVENANT-1 (01 §7, 09 §2.3) — seal a vitrified delivery pact:
+    /// FORWARD-1 (01 §7, 09 §2.3) — seal a vitrified delivery pact:
     /// the obligor locks collateral (the fidelity curve prices it —
     /// `dop::collateral_required`, the guardrail-6 ceiling holding)
     /// against delivering ≥ quota within the window. The lock is a
@@ -327,7 +327,7 @@ impl World {
     /// vitrified matrix vaults it losslessly by construction. Once
     /// sealed, the pact runs to release or slash — no cancel. One
     /// open pact per (obligor, beneficiary, resource). Collect scope.
-    pub fn seal_covenant_as(
+    pub fn seal_forward_as(
         &mut self,
         actor: u64,
         obligor: u64,
@@ -349,20 +349,20 @@ impl World {
         if !self.orbs.iter().any(|held| held.orb_id == beneficiary) {
             return Err(ActionRefused::NoSuchOrb { orb: beneficiary });
         }
-        if self.covenants.iter().any(|held| {
+        if self.forwards.iter().any(|held| {
             held.obligor == obligor
                 && held.beneficiary == beneficiary
                 && held.resource == resource
         }) {
-            return Err(ActionRefused::CovenantAlreadySealed);
+            return Err(ActionRefused::ForwardAlreadySealed);
         }
         let stamp = self.clock.now();
         let collateral = {
             let held = peek(&self.orbs, obligor)
                 .expect("checked above");
             let required = crate::dop::collateral_required(
-                &held.covenants_fulfilled,
-                &held.covenants_breached,
+                &held.forwards_fulfilled,
+                &held.forwards_breached,
                 &quota,
             );
             let have = held.banked_amount(resource);
@@ -380,7 +380,7 @@ impl World {
                 .expect("checked above");
             held.bank(resource, -collateral.clone());
         }
-        self.covenants.push(Covenant {
+        self.forwards.push(Forward {
             obligor,
             beneficiary,
             resource,
@@ -391,7 +391,7 @@ impl World {
             window,
         });
         self.chronicle.append(
-            ClosureEvent::CovenantSealed {
+            ClosureEvent::ForwardSealed {
                 obligor_orb: obligor,
                 beneficiary_orb: beneficiary,
                 resource,
@@ -404,8 +404,8 @@ impl World {
         );
         Ok(())
     }
-    /// COVENANT-1: the open vitrified pacts.
-    pub fn covenants(&self) -> &[Covenant] {
-        &self.covenants
+    /// FORWARD-1: the open vitrified pacts.
+    pub fn forwards(&self) -> &[Forward] {
+        &self.forwards
     }
 }

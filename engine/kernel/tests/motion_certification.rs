@@ -262,7 +262,7 @@ fn remove(id: u64) -> Move {
 #[test]
 fn records_do_not_commute_and_the_order_is_the_whole_content() {
     // The measurement that forced this axis: 18 of replay's 63 arms
-    // touch keyed collections (bonds, covenants, councils, offers…).
+    // touch keyed collections (bonds, forwards, councils, offers…).
     // A record is not a delta — it stands or it does not — so the
     // ORDER of insert and remove decides the outcome entirely.
     let held = Standing::default();

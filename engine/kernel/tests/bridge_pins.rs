@@ -449,7 +449,7 @@ fn reading_capacity_mints_nothing() {
 
 #[test]
 fn the_projection_carries_every_channel() {
-    // The fiber arity is the obligation channel — bond, covenant, debt.
+    // The fiber arity is the obligation channel — bond, forward, debt.
     let delta = project(&orbs(2));
     assert_eq!(delta.fiber(), CHANNELS, "one coordinate per obligation channel");
     assert_eq!(delta.dim(), 2, "entities are orbs");

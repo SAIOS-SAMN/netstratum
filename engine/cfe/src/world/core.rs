@@ -36,7 +36,7 @@ impl World {
         };
         held.extracted_across > ratio(0, 1)
             && held.extracted_across > ratio(2, 1) * held.returned_across.clone()
-            && held.covenants_breached > held.covenants_fulfilled
+            && held.forwards_breached > held.forwards_fulfilled
     }
     /// AEON-1a (11 §5): the FOLD — seal this world's part in the
     /// closing era and seat it on the new aeon's G-sheet (`base` is
@@ -230,7 +230,7 @@ impl World {
             star: self.star,
             debts: self.debts.clone(),
             bonds: self.bonds.clone(),
-            covenants: self.covenants.clone(),
+            forwards: self.forwards.clone(),
             councils: self.councils.clone(),
             offers: self.offers.clone(),
             techs: self.techs.clone(),
@@ -359,10 +359,10 @@ impl World {
         for orb in &self.orbs {
             syntropic += orb.given_in_crisis.clone()
                 + orb.returned_across.clone()
-                + orb.covenants_fulfilled.clone()
+                + orb.forwards_fulfilled.clone()
                 + orb.bond_flow.clone();
             entropic += orb.extracted_across.clone()
-                + orb.covenants_breached.clone()
+                + orb.forwards_breached.clone()
                 + orb.severance_load.clone();
         }
         let whole = syntropic.clone() + entropic;

@@ -20,7 +20,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut star: Option<crate::thermal::StarClass> = None;
     let mut debts: Vec<AbsorptionDebt> = Vec::new();
     let mut bonds: Vec<Bond> = Vec::new();
-    let mut covenants: Vec<Covenant> = Vec::new();
+    let mut forwards: Vec<Forward> = Vec::new();
     let mut councils: Vec<Council> = Vec::new();
     let mut techs: Vec<(u64, u8, [u8; 32])> = Vec::new();
     let mut offers: Vec<Offer> = Vec::new();
@@ -243,7 +243,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     }
                 }
                 settle_debts(&mut debts, &mut orbs, *from_orb, *to_orb, value);
-                credit_covenants(&mut covenants, *from_orb, *to_orb, *resource, amount);
+                credit_forwards(&mut forwards, *from_orb, *to_orb, *resource, amount);
                 credit_councils(&mut councils, *from_orb, *to_orb, *resource, amount);
             }
             // NS-4 APERTURE: the source leg replays as a bank draw —
@@ -394,7 +394,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                         held.last_touch = receipt.stamp;
                     }
                     settle_debts(&mut debts, &mut orbs, *source_orb, *target_orb, value);
-                    credit_covenants(&mut covenants, *source_orb, *target_orb, *resource, amount);
+                    credit_forwards(&mut forwards, *source_orb, *target_orb, *resource, amount);
                     credit_councils(&mut councils, *source_orb, *target_orb, *resource, amount);
                 }
                 match severed {
@@ -425,9 +425,9 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     }
                 }
             }
-            // COVENANT-1: the pact replays whole — the seal receipt
+            // FORWARD-1: the pact replays whole — the seal receipt
             // carries the priced collateral (the curve never re-runs).
-            ClosureEvent::CovenantSealed {
+            ClosureEvent::ForwardSealed {
                 obligor_orb,
                 beneficiary_orb,
                 resource,
@@ -438,7 +438,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 if let Some(held) = peel(&mut orbs, *obligor_orb) {
                     held.bank(*resource, -collateral.clone());
                 }
-                covenants.push(Covenant {
+                forwards.push(Forward {
                     obligor: *obligor_orb,
                     beneficiary: *beneficiary_orb,
                     resource: *resource,
@@ -449,23 +449,23 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     window: *window,
                 });
             }
-            ClosureEvent::CovenantReleased {
+            ClosureEvent::ForwardReleased {
                 obligor_orb, beneficiary_orb, resource, collateral,
             } => {
                 let stake = collateral.clone() * crate::dop::commensurate_weight(*resource);
                 if let Some(held) = peel(&mut orbs, *obligor_orb) {
                     held.bank(*resource, collateral.clone());
-                    held.covenants_fulfilled += stake;
+                    held.forwards_fulfilled += stake;
                 }
-                if let Some(at) = covenants.iter().position(|pact| {
+                if let Some(at) = forwards.iter().position(|pact| {
                     pact.obligor == *obligor_orb
                         && pact.beneficiary == *beneficiary_orb
                         && pact.resource == *resource
                 }) {
-                    covenants.remove(at);
+                    forwards.remove(at);
                 }
             }
-            ClosureEvent::CovenantSlashed {
+            ClosureEvent::ForwardSlashed {
                 obligor_orb, beneficiary_orb, resource, collateral,
             } => {
                 let stake = collateral.clone() * crate::dop::commensurate_weight(*resource);
@@ -475,14 +475,14 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     held.bank(*resource, collateral.clone());
                 }
                 if let Some(held) = peel(&mut orbs, *obligor_orb) {
-                    held.covenants_breached += stake;
+                    held.forwards_breached += stake;
                 }
-                if let Some(at) = covenants.iter().position(|pact| {
+                if let Some(at) = forwards.iter().position(|pact| {
                     pact.obligor == *obligor_orb
                         && pact.beneficiary == *beneficiary_orb
                         && pact.resource == *resource
                 }) {
-                    covenants.remove(at);
+                    forwards.remove(at);
                 }
             }
             // IDEO-1: sealed friction replays into the vented ledger.
@@ -533,8 +533,8 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                             held.bank(resource, banked.clone());
                         }
                         match fulfilled {
-                            true => held.covenants_fulfilled += stake,
-                            false => held.covenants_breached += stake,
+                            true => held.forwards_fulfilled += stake,
+                            false => held.forwards_breached += stake,
                         }
                     }
                     if let Some(seat) =
@@ -613,7 +613,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
         }
     }
     Committed {
-        orbs, entities, star, debts, bonds, covenants, councils, offers, techs, wants, crossed,
+        orbs, entities, star, debts, bonds, forwards, councils, offers, techs, wants, crossed,
         gauge, genesis, terrain_seed, practices, instruments, routes, prospects, warded,
         veiled, taxon, stations,
     }

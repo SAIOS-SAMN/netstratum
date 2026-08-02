@@ -34,9 +34,9 @@
 //!   33 ClosureEvent::BondSealed (BOND-1)
 //!   34 ClosureEvent::BondSettled (BOND-1 — settlement AND severance:
 //!      the severed flag + load ride the one settle receipt)
-//!   35 ClosureEvent::CovenantSealed (COVENANT-1)
-//!   36 ClosureEvent::CovenantReleased (COVENANT-1)
-//!   37 ClosureEvent::CovenantSlashed (COVENANT-1)
+//!   35 ClosureEvent::ForwardSealed (FORWARD-1)
+//!   36 ClosureEvent::ForwardReleased (FORWARD-1)
+//!   37 ClosureEvent::ForwardSlashed (FORWARD-1)
 //!   38 ClosureEvent::FrictionSettled (IDEO-1)
 //!   16 Orb header (orb_id ‖ name)
 //!   17 Orb zone entry (tile ‖ kind)
@@ -400,7 +400,7 @@ pub fn bond_notice_window() -> u64 {
     8
 }
 
-/// COVENANT-1 (09 §3.1, placeholder curve): collateral scales by the
+/// FORWARD-1 (09 §3.1, placeholder curve): collateral scales by the
 /// obligor's fidelity books — quota × (breached + 1)/(fulfilled + 1),
 /// clamped to [1/4, 4]. The empty book is not a credential (full
 /// collateral until history exists); the ceiling is the guardrail-6
@@ -860,12 +860,12 @@ pub enum ClosureEvent {
         severed: bool,
         load: Ratio,
     },
-    /// COVENANT-1 (01 §7, 09 §2.3) — a vitrified delivery pact sealed:
+    /// FORWARD-1 (01 §7, 09 §2.3) — a vitrified delivery pact sealed:
     /// the obligor locks `collateral` (out of its bank, the vault by
     /// construction) against delivering ≥ `quota` of `resource` to the
     /// beneficiary within `window` ticks. The collateral rides the
     /// receipt so replay never re-derives the fidelity curve.
-    CovenantSealed {
+    ForwardSealed {
         obligor_orb: u64,
         beneficiary_orb: u64,
         resource: Resource,
@@ -873,19 +873,19 @@ pub enum ClosureEvent {
         window: u64,
         collateral: Ratio,
     },
-    /// COVENANT-1 — the quota was met: the collateral returns home and
-    /// the stake posts `covenants_fulfilled`. World-driven at the tick
+    /// FORWARD-1 — the quota was met: the collateral returns home and
+    /// the stake posts `forwards_fulfilled`. World-driven at the tick
     /// boundary (fulfilment wins the deadline tie).
-    CovenantReleased {
+    ForwardReleased {
         obligor_orb: u64,
         beneficiary_orb: u64,
         resource: Resource,
         collateral: Ratio,
     },
-    /// COVENANT-1 — the deadline passed unmet: BREACH_AND_SLASH — the
+    /// FORWARD-1 — the deadline passed unmet: BREACH_AND_SLASH — the
     /// collateral forfeits to the aggrieved and the stake posts
-    /// `covenants_breached`.
-    CovenantSlashed {
+    /// `forwards_breached`.
+    ForwardSlashed {
         obligor_orb: u64,
         beneficiary_orb: u64,
         resource: Resource,
@@ -982,7 +982,7 @@ pub enum ClosureEvent {
         name: String,
     },
     /// COUNCIL-1 (12_UNION §7) — a COUNCIL seals: a multilateral
-    /// covenant among three or more orbs, every member bound alike —
+    /// forward among three or more orbs, every member bound alike —
     /// each locks the same collateral against delivering ≥ quota to
     /// fellow members within the window. The group overtakes the
     /// individual: the reckoning judges all members together at the
@@ -1266,7 +1266,7 @@ impl ClosureEvent {
                 ratio::encode(load, &mut value);
                 tlv::put(34, &value, &mut out);
             }
-            Self::CovenantSealed {
+            Self::ForwardSealed {
                 obligor_orb,
                 beneficiary_orb,
                 resource,
@@ -1282,14 +1282,14 @@ impl ClosureEvent {
                 ratio::encode(collateral, &mut value);
                 tlv::put(35, &value, &mut out);
             }
-            Self::CovenantReleased { obligor_orb, beneficiary_orb, resource, collateral } => {
+            Self::ForwardReleased { obligor_orb, beneficiary_orb, resource, collateral } => {
                 tlv::put(
                     36,
                     &pact_layout(*obligor_orb, *beneficiary_orb, *resource, collateral),
                     &mut out,
                 );
             }
-            Self::CovenantSlashed { obligor_orb, beneficiary_orb, resource, collateral } => {
+            Self::ForwardSlashed { obligor_orb, beneficiary_orb, resource, collateral } => {
                 tlv::put(
                     37,
                     &pact_layout(*obligor_orb, *beneficiary_orb, *resource, collateral),
@@ -1666,7 +1666,7 @@ impl ClosureEvent {
                 let window =
                     u64::from_le_bytes(value.get(17 + used..25 + used)?.try_into().ok()?);
                 let (collateral, _) = ratio::decode(value.get(25 + used..)?)?;
-                Some(Self::CovenantSealed {
+                Some(Self::ForwardSealed {
                     obligor_orb,
                     beneficiary_orb,
                     resource,
@@ -1677,11 +1677,11 @@ impl ClosureEvent {
             }
             36 => {
                 let (obligor_orb, beneficiary_orb, resource, collateral) = pact_fields(value)?;
-                Some(Self::CovenantReleased { obligor_orb, beneficiary_orb, resource, collateral })
+                Some(Self::ForwardReleased { obligor_orb, beneficiary_orb, resource, collateral })
             }
             37 => {
                 let (obligor_orb, beneficiary_orb, resource, collateral) = pact_fields(value)?;
-                Some(Self::CovenantSlashed { obligor_orb, beneficiary_orb, resource, collateral })
+                Some(Self::ForwardSlashed { obligor_orb, beneficiary_orb, resource, collateral })
             }
             38 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -1993,13 +1993,13 @@ pub struct ColonyOrb {
     pub bond_flow: Ratio,
     /// The entropic book of the pair (see `bond_flow`).
     pub severance_load: Ratio,
-    /// COVENANT-1 (09 §2.3): the integrity books — VALUE-weighted
-    /// stakes of covenants released and slashed (a thousand toy
+    /// FORWARD-1 (09 §2.3): the integrity books — VALUE-weighted
+    /// stakes of forwards released and slashed (a thousand toy
     /// promises never wash one giant breach). Same deferral:
     /// committed, replay-rebuilt, wire at IDEO-1.
-    pub covenants_fulfilled: Ratio,
-    /// The entropic book of the pair (see `covenants_fulfilled`).
-    pub covenants_breached: Ratio,
+    pub forwards_fulfilled: Ratio,
+    /// The entropic book of the pair (see `forwards_fulfilled`).
+    pub forwards_breached: Ratio,
     /// ELEMENT-GRAMMAR-1 (14 §2): banked element stores,
     /// element-id-ascending (canonical order); zero entries dropped.
     /// Wire: orb entry tag 70 (SEAL A — old readers skip).
@@ -2070,8 +2070,8 @@ impl ColonyOrb {
             &self.drawn_in_crisis,
             &self.bond_flow,
             &self.severance_load,
-            &self.covenants_fulfilled,
-            &self.covenants_breached,
+            &self.forwards_fulfilled,
+            &self.forwards_breached,
             &self.returned_across,
             &self.extracted_across,
         ]
@@ -2131,8 +2131,8 @@ impl ColonyOrb {
                     orb.drawn_in_crisis = drain.next()?;
                     orb.bond_flow = drain.next()?;
                     orb.severance_load = drain.next()?;
-                    orb.covenants_fulfilled = drain.next()?;
-                    orb.covenants_breached = drain.next()?;
+                    orb.forwards_fulfilled = drain.next()?;
+                    orb.forwards_breached = drain.next()?;
                     orb.returned_across = drain.next()?;
                     orb.extracted_across = drain.next()?;
                 }

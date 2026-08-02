@@ -27,7 +27,7 @@ use cfe::dop::{ColonyOrb, Resource};
 use cfe::ipsal::{Entity, Scope};
 use cfe::ratio::{self, Ratio};
 use cfe::thermal::StarClass;
-use cfe::world::{AbsorptionDebt, Bond, Committed, Council, Covenant, Genesis, Offer, Prospected};
+use cfe::world::{AbsorptionDebt, Bond, Committed, Council, Forward, Genesis, Offer, Prospected};
 
 /// Schema version 1: the freeze-window snapshot of the committed
 /// field set.
@@ -115,16 +115,16 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         put_u64(&mut out, bond.anchored);
     }
 
-    put_u32(&mut out, committed.covenants.len() as u32);
-    for covenant in &committed.covenants {
-        put_u64(&mut out, covenant.obligor);
-        put_u64(&mut out, covenant.beneficiary);
-        out.push(covenant.resource as u8);
-        ratio::encode(&covenant.quota, &mut out);
-        ratio::encode(&covenant.delivered, &mut out);
-        ratio::encode(&covenant.collateral, &mut out);
-        put_u64(&mut out, covenant.sealed);
-        put_u64(&mut out, covenant.window);
+    put_u32(&mut out, committed.forwards.len() as u32);
+    for forward in &committed.forwards {
+        put_u64(&mut out, forward.obligor);
+        put_u64(&mut out, forward.beneficiary);
+        out.push(forward.resource as u8);
+        ratio::encode(&forward.quota, &mut out);
+        ratio::encode(&forward.delivered, &mut out);
+        ratio::encode(&forward.collateral, &mut out);
+        put_u64(&mut out, forward.sealed);
+        put_u64(&mut out, forward.window);
     }
 
     put_u32(&mut out, committed.councils.len() as u32);
@@ -371,9 +371,9 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         });
     }
 
-    let mut covenants = Vec::new();
+    let mut forwards = Vec::new();
     for _ in 0..take.u32()? {
-        covenants.push(Covenant {
+        forwards.push(Forward {
             obligor: take.u64()?,
             beneficiary: take.u64()?,
             resource: take.resource()?,
@@ -540,7 +540,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         star,
         debts,
         bonds,
-        covenants,
+        forwards,
         councils,
         offers,
         techs,
