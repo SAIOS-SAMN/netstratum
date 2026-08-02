@@ -25,6 +25,25 @@ pub enum SolveRead {
     Unsolved,
 }
 
+/// **THE DERIVATION LIMIT, and it is why ~30 % of forged tasks are
+/// unreachable** (measured 2026-08-03, 35 of 120).
+///
+/// Both derivations below compute `seen = prefix(input)` and compare it
+/// against `output` directly. That derives an operator ONLY when it is
+/// the LAST op of the word, with at most one geometric op before it.
+///
+/// `forge_task` composes freely, so at `word_len` 3 a word like
+/// `[Recolor, Rotate90, Tile]` or `[Tile, Recolor, FlipH]` leaves its
+/// specific hue permutation or tiling outside the vocabulary entirely —
+/// and no search depth reaches an operator that is not there. This is a
+/// REACHABILITY limit, not a search-budget one; every optimisation to
+/// the sweep leaves it exactly where it is.
+///
+/// The cure is to invert the trailing ops before deriving: for each
+/// short candidate suffix, apply its inverse to the output and run the
+/// derivation against that. Bounded work, and it extends what is here
+/// rather than replacing it.
+///
 /// Derive candidate recolor maps from the training pairs: for each
 /// geometric normalization prefix (identity + the six symmetries), if
 /// every pair reads cell-wise consistent between `prefix(input)` and
@@ -74,28 +93,67 @@ fn derived_recolors(task: &Task) -> Vec<Op> {
     found
 }
 
-/// Derive candidate tilings from the first pair's shape ratio —
-/// structure read off the observation, parameters searched generally.
+/// Derive candidate tilings from the shape ratio — structure read off
+/// the observation, parameters searched generally.
+///
+/// **Reads EVERY pair, and under the same seven geometric prefixes
+/// `derived_recolors` uses.** Both fixes close the same reachability
+/// gap: the forge composes its secret word freely, so a `Tile` may sit
+/// AFTER a shape-changing op. A 4×5 input rotated to 5×4 and then tiled
+/// 3×2 gives a 15×8 output, and 15/4 is not an integer — so a ratio
+/// taken from the raw input dimensions of the first pair alone finds
+/// nothing, the tile operator never enters the vocabulary, and no depth
+/// of search can reach it.
+///
+/// A ratio must hold on EVERY pair to be admitted; one pair agreeing is
+/// a coincidence of that sample.
 fn derived_tiles(task: &Task) -> Vec<Op> {
-    let first = &task.train[0];
-    let (ir, ic) = (first.input.rows, first.input.cols);
-    let (or, oc) = (first.output.rows, first.output.cols);
-    if or % ir != 0 || oc % ic != 0 {
-        return Vec::new();
-    }
-    let (down, across) = (or / ir, oc / ic);
-    if down * across <= 1 || down > 6 || across > 6 {
-        return Vec::new();
-    }
-    let mut ops = Vec::new();
-    for odd_row in solver_verify::grid::TileMirror::ALL {
-        for odd_col in solver_verify::grid::TileMirror::ALL {
-            ops.push(Op::Tile {
-                down,
-                across,
-                odd_row,
-                odd_col,
-            });
+    let prefixes: [Option<Op>; 7] = [
+        None,
+        Some(Op::Rotate90),
+        Some(Op::Rotate180),
+        Some(Op::Rotate270),
+        Some(Op::FlipH),
+        Some(Op::FlipV),
+        Some(Op::Transpose),
+    ];
+    let mut ops: Vec<Op> = Vec::new();
+    for prefix in &prefixes {
+        // The ratio this prefix implies, required to agree on every pair.
+        let mut ratio: Option<(usize, usize)> = None;
+        let mut holds = true;
+        for pair in &task.train {
+            let seen = match prefix {
+                None => pair.input.clone(),
+                Some(op) => op.apply(&pair.input),
+            };
+            let (ir, ic) = (seen.rows, seen.cols);
+            let (or, oc) = (pair.output.rows, pair.output.cols);
+            if ir == 0 || ic == 0 || or % ir != 0 || oc % ic != 0 {
+                holds = false;
+                break;
+            }
+            let here = (or / ir, oc / ic);
+            match ratio {
+                None => ratio = Some(here),
+                Some(held) if held == here => {}
+                Some(_) => {
+                    holds = false;
+                    break;
+                }
+            }
+        }
+        let Some((down, across)) = ratio.filter(|_| holds) else { continue };
+        if down * across <= 1 || down > 6 || across > 6 {
+            continue;
+        }
+        for odd_row in solver_verify::grid::TileMirror::ALL {
+            for odd_col in solver_verify::grid::TileMirror::ALL {
+                let op = Op::Tile { down, across, odd_row, odd_col };
+                if !ops.contains(&op) {
+                    ops.push(op);
+                }
+            }
         }
     }
     ops

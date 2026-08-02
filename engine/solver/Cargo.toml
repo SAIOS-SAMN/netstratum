@@ -9,9 +9,5 @@ blake3.workspace = true
 physics = { path = "../physics" }
 # THE SECTOR DOOR (cage::consult). The search is prover-side and may use
 # any means; what it proposes is withdrawn only through an exact rule.
-# R-D6: the pair encoder builds an rfa_core::Delta, whose entries are
-# cfe::ratio::Ratio. Already transitive through rfa-core; named here
-# because this crate now constructs them directly.
-cfe = { path = "../cfe" }
 rfa-core = { path = "../rfa-core" }
 solver-verify = { path = "../solver-verify" }
