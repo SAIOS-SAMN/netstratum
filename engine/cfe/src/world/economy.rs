@@ -593,4 +593,70 @@ impl World {
             })
     }
 
+
+    /// **THE HEAT ENCASED — the syntropic arm of the thermal book,
+    /// derived, never stored** (the missing-leg sweep, 2026-08-02).
+    ///
+    /// What an orb has CAPTURED over its whole life: every joule yield
+    /// it collected, which is the encasement arm by this engine's own
+    /// reading — `YieldCollected { resource: Joule }` is exactly what
+    /// feeds `encased_entries` on the crystal sheet.
+    ///
+    /// **WHY IT WAS OWED.** The thermal dual was two-armed in one place
+    /// and one-armed in another. On the SHEET both arms stand and are
+    /// symmetric — `vented_entries` from `VentSettled`, `encased_entries`
+    /// from the joule yield — but both are WINDOWED and pruned at each
+    /// boundary, and both are `pub(super)`, so they answer one tech
+    /// condition and nothing else. On the ORB, which is committed state,
+    /// replayed and public, only `entropy_vented` stands, and it is
+    /// CUMULATIVE FOREVER.
+    ///
+    /// So the permanent public book recorded only LOSS. An orb could
+    /// always be asked what it had shed to the void for its whole life,
+    /// and could not be asked what it had ever kept — the gain was
+    /// forgotten as soon as the window moved past it. That is the
+    /// negentropic shape `EQUATIONS` §0.3 chapter five names: *a map
+    /// that inherits one leg of a dual has not simplified the law, it
+    /// has reversed it.*
+    ///
+    /// **NO SCHEMA IS SPENT.** `YieldCollected { orb_id, resource,
+    /// amount }` already carries its orb, so the whole arm is
+    /// arithmetic over deeds already receipted — the derived-never-stored
+    /// law (`09_LEDGER` §1.2), and the same shape [`Self::value_lost_of`]
+    /// took. `entropy_vented` is NOT touched: it is a landed field bound
+    /// by 05 §1.4's absorption invariant, and the cure for a missing arm
+    /// is to add the arm, never to disturb the one that stands.
+    pub fn heat_encased_of(&self, orb: u64) -> Ratio {
+        self.chronicle
+            .receipts()
+            .iter()
+            .filter_map(|receipt| match &receipt.event {
+                ClosureEvent::YieldCollected { orb_id, resource: Resource::Joule, amount }
+                    if *orb_id == orb =>
+                {
+                    Some(amount.clone())
+                }
+                _ => None,
+            })
+            .fold(ratio(0, 1), |a, b| a + b)
+    }
+
+    /// **THE THERMAL BOOK, BOTH ARMS AT ONCE** — `(encased, vented)`.
+    ///
+    /// Returned as a PAIR and never as a difference or a ratio: a net
+    /// figure is the one-armed reading wearing two arms' clothes, and
+    /// `18` §2b bars collapsing a directional quantity to a scalar
+    /// wherever the system computes. An orb that captured 100 and vented
+    /// 100 is not the same orb as one that captured nothing and vented
+    /// nothing, and only the pair can tell them apart.
+    pub fn thermal_books_of(&self, orb: u64) -> (Ratio, Ratio) {
+        let vented = self
+            .orbs
+            .iter()
+            .find(|held| held.orb_id == orb)
+            .map(|held| held.entropy_vented.clone())
+            .unwrap_or_else(|| ratio(0, 1));
+        (self.heat_encased_of(orb), vented)
+    }
+
 }

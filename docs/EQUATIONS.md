@@ -1045,6 +1045,61 @@ only its enforcement HOME moved, into kernel I1/I6.
 
 ## §6 Economy and thermal — THE MANIFOLD DUAL (syntropy ∥ entropy)
 
+**THE MISSING-LEG SWEEP (2026-08-02).** Chapter five of §0.3 records
+that this ledger once carried the ENTROPIC arm of every dual and left
+the syntropic arm behind, and states the lesson: *a map that inherits
+one leg of a dual has not simplified the law, it has reversed it.* This
+is that sweep run over the CODE rather than the map.
+
+**FOUR BOOKS WERE ALREADY TWO-ARMED**, and they are the shape to copy:
+`given_in_crisis` / `drawn_in_crisis`, `returned_across` /
+`extracted_across`, `bond_flow` / `severance_load`,
+`covenants_fulfilled` / `covenants_breached`. Every one of them sits on
+the orb, and both arms of each are equals.
+
+**THE THERMAL BOOK WAS ONE-ARMED WHERE IT COUNTED — CLOSED.**
+
+```text
+                        entropic arm         syntropic arm
+    on the ORB          entropy_vented       — NOTHING —
+    (committed, replayed, public, CUMULATIVE FOREVER)
+
+    on the SHEET        vented_entries       encased_entries
+    (pub(super), WINDOWED, pruned each boundary, one tech condition)
+```
+
+Both arms stand on the sheet and are symmetric there. On the orb — the
+permanent, public, committed book — only LOSS was recorded. An orb
+could always be asked what it had shed to the void across its whole
+life, and could never be asked what it had ever KEPT: the gain was
+forgotten as soon as the window moved past it.
+
+Closed by `World::heat_encased_of` and `World::thermal_books_of`
+(`world/economy.rs`), derived from the `YieldCollected { Joule }`
+receipts that already feed `encased_entries` — **no schema spent**, the
+`value_lost_of` shape. The pair is returned as a PAIR and never netted:
+an orb that captured 100 and vented 100 is not the orb that did
+neither, and only two arms tell them apart (`18` §2b). `entropy_vented`
+is untouched — it is bound by 05 §1.4's absorption invariant, and the
+cure for a missing arm is to ADD the arm.
+
+**TWO DEEDS REMAIN ONE-LEGGED, and both want a ruling rather than a
+patch:**
+
+- **`FrictionSettled` (IDEO-1)** — ideological difference COSTS, and it
+  posts to `entropy_vented`. Ideological ALIGNMENT pays nothing: there
+  is no receipt for it. As it stands the economy prices diversity and
+  does not price agreement, which is a disincentive nobody wrote down.
+- **`IncursionStruck` (INCURSION-1a)** — an archived derelict wakes as
+  an incursion line. Nothing receipts an incursion HELD or resolved, so
+  the ledger records the arrival of the threat and never its answer.
+
+Neither is added from this lane: each would be a new deed with new
+economics, and inventing the syntropic half of someone's mechanic is
+how a sweep becomes a redesign.
+
+
+
 **THE DUAL IS ONE OBJECT** (`12_UNION` §2c, operator ruling
 2026-07-30). Syntropy and entropy are opposite ends of one closed,
 coned manifold: the syntropic arm ENCASES (joules mint, loops close, G
