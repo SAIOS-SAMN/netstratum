@@ -601,3 +601,67 @@ never decide on a reading.
 `conductor/examples/consultation.rs` measures the door's withdrawal rate
 by EXPERIMENT. It reflects no committed state and is deletable without
 loss, so it is neither lens nor mirror.
+
+---
+
+## §15 READING IS NOT UNI-DIRECTIONAL — the observation is a POSITION
+
+**Operator correction 2026-08-02.** This lane's first shape was one
+arrow: chain → arm → display, with each arm wired separately toward the
+same linear end. **That is a journal** — digital paper, written once and
+read front to back. A functioning system does not read that way.
+
+> *Readings will come from ANY OF THE ARMS, not a single linear journal.*
+
+So an observation is not a record produced one way. It is a **POSITION**
+— a depth, a phase, an aperture and a standing, held together — and from
+that one position every arm derives on demand:
+
+```text
+                           ┌──────────────┐
+                   ┌───────┤  STANDING    ├───────┐
+                   │       └──────────────┘       │
+           ┌───────┴──────┐              ┌─────────┴────┐
+      ─────┤   THE PEEL   ├──────────────┤    FLUX      ├─────
+           └───────┬──────┘  OBSERVATION └─────────┬────┘
+                   │       (depth · phase ·        │
+           ┌───────┴──────┐ aperture · capacity)   │
+           │   LUMINAL    ├────────────────────────┘
+           └──────────────┘
+
+       no arm is the entrance; every arm is reachable from any other
+```
+
+**Why this is not a record, structurally.** `Observation` holds BORROWED
+references plus four scalars naming where the observer stands. It holds
+no reading. Every arm computes when asked and is discarded — so the type
+cannot become a second image (§1a) and cannot become a cache (§4),
+**because there is nowhere in it to put one.** That is also what makes
+the multi-directionality free: asking for one arm computes one arm, and
+standing at a position costs nothing until a question is asked of it.
+
+Pinned by `observation_pins::every_arm_is_reachable_from_one_position_and_none_is_the_entrance`
+— five arms entered in arbitrary order from one position, then re-entered
+in reverse, giving identical answers because there is no accumulated
+state to depend on the order.
+
+**It composes all it likes and still never gates.** An observation
+answers questions and decides nothing.
+
+### 15a. THE JOURNAL IS PAPER — which settles the read-back question
+
+`engine/scribe` reads its own `journal.jsonl` back in six places, and its
+header claims it never does. Under the uni-directional reading that
+looked like a second source of truth.
+
+**It is not, because the journal is not a record of state — it is
+paper.** It carries no multi-dimensional ratios and drives no
+compensatory action; it is a rendering, and re-reading a rendering is
+not re-reading the world. §11 rule 2 bars parsing an export back **as
+state**; counting lines of paper to know where to append is bookkeeping
+about paper.
+
+**What the header should say** is the narrower true thing: nothing here
+is ever read back AS STATE. The claim as written is stronger than the
+law requires and stronger than the code honours, and a false claim in a
+header is worth fixing even when the code is fine.
