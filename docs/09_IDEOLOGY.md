@@ -287,8 +287,65 @@ answers `None` there instead: they have nothing to agree ABOUT. Any
 future rule that pays on convergence inherits that refusal, and must,
 or it pays the inert exactly what it pays the reciprocal.
 
-**Whether convergence should EARN is an open economic ruling.** It
-mints value, so it is not taken from a reading lane. The physical reading:
+### 3.2a FRICTION VENTS WHOLE — a landed law it does not obey
+
+**(operator ruling 2026-08-03: *if friction creates a force for
+divergence, we must capture the energy output in re-convergence or
+consilience*.)**
+
+**The gap, verified.** Friction posts its entire amount to the void:
+
+```rust
+    if friction > ratio(0, 1) {
+        held.entropy_vented += friction.clone();   // 100%, no capture
+```
+
+**And `EQUATIONS` T3 already rules the opposite** for the very ledger
+it posts into — *THE TWO-ARMED NET-HEAT LEDGER, ENCASEMENT FIRST*:
+
+```text
+    encased = min( Heat_Net, encasement throughput )  ← SYNTROPIC, FIRST
+    vented  = the overflow
+```
+
+Heat is CAPTURED and only the remainder vents. Friction writes into
+`entropy_vented` while skipping the capture step that book's own law
+puts first. It is not that friction lacks a syntropic arm by oversight
+— **it declines a landed one.**
+
+**The shape this implies, with no invented constant.** Friction IS
+entropy, entropy is captured by ENCASEMENT, and an orb's encasement
+throughput is already computed for heat. The same path serves:
+
+```text
+    friction  = rate · divergence · value
+    captured  = min( friction, encasement throughput )   → banks Sink
+    vented    = friction − captured                      → the overflow
+```
+
+No new resource, no new schema, no new parameter — the existing
+machinery applied to a mechanic that stepped around it.
+
+**ON "CONSILIENCE", precisely.** The word is lawful here in its
+RESERVED sense only. Every reconciliation instrument was EXCISED
+(`AUDIT_2026-07-31`: *consilience, the manifold, the census, the
+triangle — tag 65 retired; nothing in the mesh reads or reconciles a
+second copy*), and MESH-1d reserved the term for **inputs that COULD
+disagree**. Two independent conduct records that could have diverged
+and did not are exactly that. So capture may be measured AS
+consilience; it may never be routed THROUGH a reconciler.
+
+**NOT LANDED — it moves value.** Capture re-prices: value that left the
+universe would instead bank as `Sink`. The absorption invariant is not
+in the way (friction contributes zero to `world_absorb`'s fixture,
+where neither orb has a reciprocity basis), so the change is
+mechanically available. What it needs is the ruling that friction-
+entropy is encasable in the same sense thermal entropy is — a physics
+claim, and the operator's to make.
+
+**Whether convergence should additionally EARN remains open** and is a
+separate question: capture RECOVERS what was already spent;
+earning CREATES. The first is conservation, the second is a mint. The physical reading:
 divergent boundary policies genuinely cost handling and verification
 overhead. **Friction prices divergence, not vice:** two extractive
 empires trade with each other frictionless. The engine keeps its promise
