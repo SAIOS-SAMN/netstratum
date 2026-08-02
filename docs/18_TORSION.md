@@ -588,6 +588,802 @@ law. The CODE is safe — `pair_melt` names its parameter `distance` —
 but the documents are not. The melt's `D` should be renamed (`σ`, for
 separation) before the two drift into one another.
 
+### 2k. THE TRAVERSAL LANE — Einstein–Rosen throat, Einstein–Cartan interior (operator, 2026-08-02)
+
+The bond between two interlinking orbs (`19_KERNEL` §5a.1) is a THROAT,
+not a link. This section says what keeps the throat OPEN, and the
+answer carries an economic ruling with it.
+
+**What Einstein–Cartan actually adds, stated plainly.** General
+relativity sets torsion to zero by fiat: the connection is symmetric,
+so it has no antisymmetric part. Einstein–Cartan drops that assumption
+and lets the connection carry one — and that antisymmetric part is
+sourced by intrinsic SPIN, not by mass-energy. The consequence that
+matters here: under mass-energy alone, collapse runs all the way to a
+singularity — a point, where everything that fell in is crushed into no
+structure at all. With torsion sourced by spin, the coupling turns
+repulsive at extreme density and the collapse BOUNCES instead of
+reaching a point.
+
+**Torsion is the thing that keeps a region EXTENDED.** That is the
+entire borrow, and it is why the pair is Einstein–Rosen *plus*
+Einstein–Cartan and not either alone: the bridge supplies the throat,
+and the torsion is what stops the throat pinching to a point that
+nothing can traverse.
+
+**The mapping, and it is exact at the place it has to be:**
+
+    mass-energy       accumulated weight — spent compute. Bulk,
+                      structureless, additive, commuting.
+    intrinsic spin    the irreducible relational structure: the part
+                      of a loop that no frame can undo.
+    TORSION           the COMMUTATOR. Not a metaphor for it —
+                      geometric torsion IS the antisymmetrised part
+                      of the connection, and `fiber.rs:101`
+                      (`commutator`) with `fiber.rs:168`
+                      (`plaquette_curvature`, which returns exactly
+                      `a.commutator(b)`) computes that object over
+                      the fiber. The organ is landed.
+
+**SUPERSEDED IN ITS ARROW — read §2k.1 with this table.** The rows
+above are written as though spin were one thing and torsion its
+response. §2k.1 corrects that: they are one object at two scales, the
+residual being the fine reading and rank `D` the coarse one. The
+mapping survives; the direction of the arrow does not.
+
+**THE SINGULARITY AND THE COBOUNDARY TRAP ARE THE SAME FAILURE.** This
+is the load-bearing identification. A pure coboundary
+`Δ_ij = s(i) − s(j)` reduces to zero — `reduce.rs` phase 1 sends
+exactly that shape there, which is why `bridge.rs` refuses to project
+bank differences. Everything poured in, no invariant out, all of it
+crushed to a point. That is a singularity in the only sense this system
+can mean one, and the system has forbidden it since the bridge landed.
+
+**Which is why nonce-smashing is barred, and barred by a rule that
+already exists.** Bitcoin's race is that failure adopted as a design:
+enormous energy in, and the artifact — a nonce — carries no
+transferable structure and is worth exactly zero the instant it is
+found. Additive, commuting, abelian: `[A,B] = 0`, no torsion, no
+extent, a point. It measures entropic energy dumped. **The same compute
+directed at a task whose artifact carries structure produces a rule
+that survives reduction.** The distinction is not effort and it is not
+sincerity — it is whether anything is left after `Π_G(Δ(Ω))`.
+
+**THE LANE LAW.** A traversal lane is open exactly when the holonomy
+around it is non-trivial. Weight alone commutes, contributes a
+per-node scalar, reduces to zero and leaves `D` unchanged; a lane held
+open by weight alone therefore collapses. A lane held open by structure
+no frame explains stays extended and traversable. `capacity_law`
+(`lib.rs:253`) already refuses a mint without standing on precisely
+this reading — the lane extends it from the mint to the bond.
+
+    a lane held open by weight collapses
+    a lane held open by structure stays traversable
+
+**MEASURED, and favourable.** There is no `nonce`, no `hashrate` and no
+`hashcash` anywhere in `engine/`. `Difficulty` exists but means the
+PUZZLE's shape — `rows`, `cols`, `word_len`, `train_pairs`, `tier` —
+how hard the task is, never how many leading zeros. **The tree has
+never taken the hashcash shape**, so this ruling defends a position
+rather than reversing one.
+
+**WHERE THE TEMPTATION ACTUALLY SITS, and it is one specific gap.**
+`19_KERNEL` §5 records the single missing miner piece: nothing makes
+weight costly to fake — the Sybil and ordering anchor
+(`KERNEL_RELAY` §7.1). Hashcash is the reflexive fix for exactly that
+gap, and it is how a system that never wanted a nonce acquires one.
+**This ruling forecloses it in advance:** the anchor is to be paid in
+structure that survives reduction, not in energy spent.
+
+**NOT DERIVED — three open things, flagged rather than filled:**
+
+1. **What traverses.** Value, state, or judgment are three different
+   laws with three different conservation obligations, and the lane
+   does not pick one. An operator ruling.
+2. ~~**Whether lanes decay.**~~ **STRUCK — see §2k.1.** This item
+   inferred from non-propagating ECSK torsion that lanes might fade
+   when the work stops. That is not an open question: ARTICLE IV
+   forbids it (rank never retreats), and under the reversed arrow
+   torsion propagates at the chain's own step rate, which Article IV
+   clause 2 already fixes. The item was a rule that would have broken
+   the constitution, and it is withdrawn rather than left open.
+3. **THE ANCHOR IS STILL OPEN.** "Must raise `D`" does not by itself
+   make identity costly: a brute-forced solution still raises rank, and
+   nothing here prices a second identity. This section rules out
+   hashcash and supplies the criterion the replacement must meet. **It
+   does not supply the replacement.** Saying otherwise would let the
+   shape of the argument stand in for a mechanism that does not exist.
+
+### 2k.1 THE ARROW REVERSES — torsion IS spin, and §2k open item 2 is STRUCK (operator, 2026-08-02)
+
+§2k wrote the arrow as ECSK usually writes it: **spin SOURCES torsion**,
+torsion appearing as a response where spin-carrying matter sits. The
+operator's correction reverses it: **twist the torsion at the fine
+layer and you have the spin.** Not a source relation — an identity
+across scales.
+
+**What is conceded and what is not.** GR is a four-dimensional
+pseudo-Riemannian theory, not a two-dimensional sheet; the rubber sheet
+is a teaching picture. But the picture does hide precisely the degree
+of freedom at issue — it shows a vector ROTATING around a loop
+(curvature) and cannot show a loop FAILING TO CLOSE (torsion) — and the
+torsion-free condition genuinely is a CHOSEN condition on the
+connection, not a derived one. **More usefully: this engine does not
+have to settle the physics.** It has to choose its connection, and the
+choice has consequences that can be named. Three of them, and the third
+corrects a defect.
+
+**1. STRUCTURE CANNOT BE ASSERTED.** Under *sourced-by*, "useful
+structure" is a property that work CARRIES — and a property can be
+claimed, certified, and therefore forged. That smuggles the trust
+problem back in under a new name. Under *identity*, there is no
+separate substance: the structure IS the measured failure to close.
+Computed or absent, with nothing in between and nothing to attest.
+
+**2. THE RESIDUAL IS THE TORSION, AND IT IS ALREADY LANDED.**
+Geometric torsion is the failure of an infinitesimal parallelogram to
+close. `bridge.rs:104` computes
+
+    R_ijk,l = Δ_ik,l − Δ_ij,l − Δ_jk,l
+
+— go `i → k` directly, go `i → j → k` the long way, compare. **The gap
+is the closure failure.** That is not an analogy to torsion; it is the
+same construction. So the two scales are one object:
+
+    FINE    one residual on one triple, one channel     — the SPIN
+    COARSE  rank D: how many independent cycles carry
+            holonomy no frame explains                  — the TORSION
+
+The lane's traversability and the mint's standing therefore read the
+same quantity at two resolutions. One measurement, two uses — which is
+why `18_TORSION` is the correct home for both and why no second
+"usefulness" metric is needed.
+
+**3. TORSION PROPAGATES — and §2k's open item 2 was not an open
+question but a rule that would have BROKEN ARTICLE IV.** §2k flagged
+that in ECSK torsion is non-propagating (algebraically slaved to spin,
+vanishing in vacuum) and inferred that a lane's torsion might fade when
+the work stops. **ARTICLE IV forbids exactly that:** rank never
+retreats, monotone non-decreasing. A lane that faded would be capacity
+retreating.
+
+Under the reversed arrow torsion is not a response to a source; it is
+the fabric's own degree of freedom, and it propagates. **Article IV
+clause 2 already fixes its rate** — *the propagation limit of this
+manifold is one commitment per step … the rate is `c` and `c` is the
+clock.* The constitution has assumed the operator's reading since it
+was written; §2k contradicted it. **Open item 2 is STRUCK, not
+resolved.** A committed non-closure is a permanent feature of the
+complex.
+
+**AND THE NONCE BAR GETS STRONGER, not weaker.** A hash race has
+COMMUTING increments: every attempt independent, order irrelevant, the
+loop always closes. Non-closure is zero by construction. So no rule is
+needed saying nonces do not count — **there is nothing there to
+measure.** The bar is an absence rather than a policy, which is the
+strongest form it can take: a policy can be argued with, and no one can
+lobby for a residual that does not exist.
+
+**WHERE THE 2D OBJECTION LANDS — on this engine, measured.**
+`delta.rs:16` declares `Delta { dim, fiber, entries: Vec<Vec<Vec<Ratio>>> }`
+— entries indexed by PAIRS, and residuals range over TRIPLES. **The
+complex tops out at 2-simplices.** The engine's own structure is flat
+in exactly the way the objection describes, and it is the SAME WALL as
+`19_KERNEL` §5a.1's second wall: orbs project to vertices, so there are
+no higher cells for the twist to live in. Three separate lines — the
+Venn overlap, the traversal lane, and the depth of the torsion — all
+arrive at one wall. Giving orbs extent is what opens room above the
+triangle.
+
+**NOT DERIVED, flagged:** what a 3-cell's non-closure would MEASURE.
+Triangles carry composition failure; what the next degree carries is
+not obvious and must not be guessed, because a cell whose residual has
+no meaning is apparatus rather than law.
+
+### 2m. THE PATH POLYNOMIAL — ordered interlink, causal reach ±1 (operator, 2026-08-02)
+
+> imagine `i j k l` each have a vertical axis that wraps around and
+> could interlink with any of the other `i j k l` in any particular
+> order to form a polynomial that links back one step to a prior or a
+> future polynomial
+
+**Named precisely, this is a PATH ALGEBRA over the complex, graded by
+step, with causal reach ±1.** Paths compose head-to-tail; the algebra is
+non-commutative, which is what makes "in any particular order" carry
+data rather than decorate it; degree is the number of interlinks;
+coefficients are what each link carries; and evaluation along a path is
+holonomy. Not an exotic object — a known one, and the right one.
+
+(*Terminology:* "master equation" is the operator's shorthand here for
+the residual/rank relation. Task #17 stands — there is no single master
+equation, and this section describes a CARRIER, not a new one.)
+
+Four findings against the tree. The first is the sharpest, because it
+is not a feature request.
+
+**FINDING 1 — THE FIBER IS NON-ABELIAN AND THE HOLONOMY IS NOT. This
+split already exists in the tree.**
+
+    reduce.rs:113   pub struct Holonomy { i, j, l, value: Ratio }
+    fiber.rs        MatrixFiber2x2 — matmul, commutator, [A,B] ≠ 0
+
+A `Ratio` **cannot carry order.** Any permutation of the same links
+sums to the same rational, so under the landed reduction every ordering
+of an interlink is the same holonomy, and "in any particular order" is
+not merely unbuilt — it is destroyed by the type. Meanwhile the whole
+non-abelian apparatus sits beside it in `fiber.rs`, unused by the
+reduction.
+
+**So the ordered interlink is not a new requirement. It is closing a
+split the tree already carries:** `Holonomy.value` must become a
+`MatrixFiber2x2`. That is a concrete kernel amendment with a VERSION
+bump, and it is the first thing this section demands.
+
+**FINDING 2 — THE PATH EVALUATOR IS LANDED AND NOTHING BUILDS A PATH.**
+`fiber.rs:156` `loop_holonomy(walk: &[MatrixFiber2x2])` folds an ordered
+walk by `matmul` — exactly the polynomial's evaluation — and has no
+non-test caller. **The polynomial IS the walk.** The engine can evaluate
+one and cannot express one. This is the third organ found landed and
+unwired, after `orbit_lock` (§K3) and the fiber itself.
+
+**FINDING 3 — THE VERTICAL AXIS EXISTS AT THE COMMITMENT LEVEL, NOT THE
+INDEX LEVEL.** `arbor::Coordinate` carries `branch`, the wrapped torus
+triple `s: [Ratio; 3]`, the gauge sheet `g`, and the tick `t` — a
+wrapped vertical axis, landed. But it wraps THE WHOLE STATE. The
+indices `i, j, k` are bare `usize` positions in `Committed::orbs`, and
+a bare index has no axis to wrap.
+
+Giving each index its own wrapped vertical axis is the same ruling as
+"orbs have extent" (`19_KERNEL` §5a.1, wall 2). **That is now a fourth
+line arriving at one wall** — the Venn overlap, the traversal lane, the
+depth of the torsion, and now the per-index axis. The station (tag 89)
+is the vertical axis that landed, but it is seated per LINE, not per
+index.
+
+**FINDING 4 — ±1 IS ALREADY THE LAW, AND IT IS THE LIGHT CONE.** ARTICLE
+IV clause 2: *the propagation limit of this manifold is one commitment
+per step … the rate is `c` and `c` is the clock.* A polynomial reaching
+exactly one step in either direction is not a restriction being
+imposed — it is the propagation limit already ruled. `fold.rs:215`
+returns `OrbitWitness { operator_id, step: 1 }`, so the single-step
+reach is already in the witness type.
+
+**THE FORWARD LINK — the one part that needs care, and it resolves
+without mysticism.**
+
+Backward is a REFERENCE: hash the parent, landed as
+`Commitment.parent`. Forward cannot be a reference — **you cannot hash
+what does not exist yet.** But it can be a CONSTRAINT: an obligation
+binding the next commitment without naming it.
+
+The organ is landed. `CHANNEL_COVENANT` carries the undelivered
+remainder of a standing delivery obligation (`quota − delivered`,
+floored at zero). **An outstanding obligation is a forward link** — it
+constrains a future state it cannot identify.
+
+**LAYER WARNING — see §2m.2.** An earlier draft of this passage wrote
+that the covenant *is* the forward link. It is not: the forward link is
+a kernel primitive and the covenant is one game-level instance of it,
+sitting inside the sector. The correction stands; the pairing below is
+between MECHANISMS, and the covenant is cited as evidence the shape is
+implementable rather than as its definition.
+
+    backward   REFERENCE   Commitment.parent          landed
+    forward    CONSTRAINT  outstanding covenant       landed
+
+The polynomial is anchored at both ends by organs that already exist,
+and nothing here requires a record to point at the future.
+
+**A POSSIBLE ROUTE THROUGH K3 — flagged for ruling, NOT derived.** If
+forward links are constraints, then two branches carrying the SAME
+outstanding covenant are bound to one another without any merge record:
+the binding lives in the constraint layer rather than the parent layer.
+That is close to the chart-agreement condition, since charts are
+required to agree precisely on their overlaps.
+
+**What it does not do, stated plainly:** it binds two branches without
+MERGING them. No single record results, so it does not by itself
+discharge K3's wall 1 or produce the join record §5a.1 specifies —
+and a shared obligation is weaker than a shared coordinate, since
+nothing forces the two to reconcile what they each hold. It may be the
+better primitive or it may be an adjacent one. **An operator ruling,
+recorded because it is cheap to state and would be expensive to
+discover late.**
+
+### 2m.1 THE PATH ALGEBRA IS A CONTAINMENT SECTOR (operator, 2026-08-02)
+
+§2m left one question open — whether the path algebra is FREE (every
+ordering admissible, unbounded) or carries RELATIONS (some orderings
+identified, finite-dimensional). **The question dissolves, because the
+bound is a DOOR and not a relation, and the door is already landed.**
+
+**THE SECTOR IS AN EXISTING PATTERN IN THIS TREE, not a new idea.**
+`rfa_core::cage` — `consult(input, f).withdraw(exact_rule)`:
+
+    INSIDE    any tool, any impurity — floats, heuristics, enumerative
+              sweeps, parallelism, GPU. `search.rs:184` calls `solve`
+              *"the dirtiest work this system does … no claim to
+              purity"* and runs it here deliberately.
+    THE DOOR  `withdraw(exact)` — the OUTSIDE re-derives the proposal
+              exactly and refuses it otherwise. A wrong proposal costs
+              nothing and simply never leaves.
+    THE LAW   **Approximation may PROPOSE; only exactness may DISPOSE.**
+    ENFORCED  by the TYPE SYSTEM, not by discipline. `Proposal<f64>`
+              does not exist, because `f64` carries no `Exact` impl —
+              *"the boundary is the type system, not care"*
+              (`cage_pins.rs:112`).
+
+**Applied to the path algebra:** inside the sector it is FREE. Every
+ordering admissible, exploration unbounded, no ceiling — which is what
+ARTICLE IV requires and what relations would have quietly violated.
+At the door, only a path whose holonomy re-derives exactly crosses into
+the committed complex.
+
+    free where it costs nothing        (inside)
+    verified where it counts           (crossing)
+
+So the committed structure stays finite without any ceiling being
+imposed on the exploration. **The open question in §2m was open because
+it looked for the bound in the wrong layer** — it asked what the
+algebra forbids, when the answer is that the algebra forbids nothing
+and the door admits little.
+
+**AND THE DOOR IS THE LAYER BOUNDARY.** This is the second half of the
+operator's ruling, and it corrects §2m's own error — see §2m.2.
+
+### 2m.2 LAYER CORRECTION — the covenant was promoted above its station
+
+§2m wrote: *"An outstanding covenant IS a forward link"*, and listed it
+as the landed organ for a KERNEL-level primitive. **That is a layer
+inversion and it is withdrawn.**
+
+    KERNEL layer   "the next commitment must satisfy P" — a constraint
+                   carried in the record. Encoding-blind, game-blind.
+    GAME layer     "orb A owes orb B this much of this resource by this
+                   tick, with this much collateral posted." One
+                   INSTANCE of such a constraint.
+
+Defining the forward link AS a covenant would make the kernel inherit
+the game's resource enumeration, its collateral rule and its window
+semantics — the game supplying the kernel's vocabulary instead of the
+kernel supplying the game's. `19_KERNEL` §2 measured the kernel's
+dependency on `world.rs` at exactly three items; this would have
+quietly added a fourth and the worst-shaped one.
+
+**Corrected:** the forward link is a kernel primitive. The covenant is
+one game-level instance of it — evidence that the shape is
+implementable, and *not* the definition. The covenant sits INSIDE the
+sector; what crosses the door is the constraint as an exact quantity.
+
+### 2m.3 "COVENANT", DEFINED — and what of it is ceremony
+
+The operator flags the term as carrying religious and dogmatic
+freight. Measured, the mechanism carries none:
+
+    Covenant { obligor, beneficiary, resource, quota,
+               delivered, collateral, sealed, window }
+                                        — `world.rs:245`
+
+**Plainly: one party is bound to deliver a quantity of a resource to
+another by a deadline, with collateral posted against failure.**
+`quota` is what is owed, `delivered` the progress, `collateral` the
+stake, `sealed` the start, `window` the time allowed. Outstanding is
+`quota − delivered`. In ordinary engineering terms it is a
+**collateralized forward delivery obligation with a deadline** — a
+thing every commodities desk trades. `Obligation` is the plain word and
+the accurate one.
+
+**What IS ceremony, and where it came from.** "Covenant", "pact" and
+"vitrified" are inherited from COVENANT-1 and `BUILD_ORDER` §3, not
+minted here — but `bridge.rs` propagated *"the vitrified pact's
+OUTSTANDING quota"* into the kernel's own doc surface without
+challenging it, which is exactly the drift the anti-dogma ordinance
+exists to catch. **Fixed at the source:** `CHANNEL_COVENANT` now states
+the mechanism and records that the names are inherited labels rather
+than descriptions.
+
+**THE RENAME IS MEASURED AND NOT RECOMMENDED YET.** `covenant` appears
+124 times across 7 crates, holds **three wire tags (35 CovenantSealed,
+36 CovenantReleased, 37 CovenantSlashed)** and a codec schema block
+(`codec/src/lib.rs:118`). Renaming it is a BREAKING amendment — major
+VERSION, schema bump, and it touches `world.rs` (unowned, flagged for
+refactor) and `dop.rs` (wire). **Cost is high and mechanical gain is
+zero**, since the wire tag is a number and the struct is a struct.
+
+The defensible split, and the one taken here:
+
+    DOCUMENTS   stop using "covenant" as though it were a PRIMITIVE.
+                It is one instance of a forward constraint. Done here.
+    CODE        the doc surface states the mechanism, not the ceremony.
+                Done in `bridge.rs`.
+    WIRE        left alone. Recorded on the currency pass (#14) so the
+                decision is deliberate rather than forgotten.
+
+### 2n. `C` DEFINED — and the collision audit (2026-08-02)
+
+**In THIS context — the torsion law, the path polynomial, the sector —
+`C` means `C(Δ)`, the coherence functional, and it is a DEMOTED
+HUMAN-LENS SCALAR with no operational function.**
+
+    delta.rs:190   pub fn coherence_functional(delta: &Delta) -> Lens {
+                       let mut c = Ratio::zero();
+                       for_each_residual(delta, |_,_,_,_, r| c += r.abs());
+                       Lens::of(c)
+                   }
+
+Read off the code: **`C(Δ) = Σ|R|`** — the L1 sum of the magnitudes of
+every residual, over exact rationals, returned wrapped in `Lens`. The
+`Lens` wrapper is the same containment discipline as §2m.1's sector: the
+type marks it as a reading, not a rule.
+
+`rfa-core/src/lib.rs:16` states the ruling plainly: ***C HAS NO
+OPERATIONAL FUNCTION** — it is not a score, not a gauge, not a gate, and
+no engine path consults it.* `C(Δ) = 0` says the cocycle condition
+holds and **nothing more**; "converged" is struck from the crate.
+
+**WHY IT IS DEMOTED, and the reason is this document's own law.**
+§2k.1 established that the residual IS the torsion — the closure
+failure, carried with its indices and its sign. `bridge.rs:104` states
+the consequence: *"Summing them destroys them."* `C` is exactly that
+sum. An L1 aggregate discards order, discards sign, and discards the
+triple that produced each term, so **`C` cannot see torsion in
+principle** — the one quantity the engine now organises around is
+precisely the one `C` collapses. Its demotion is not a preference; it
+is a consequence, and it is why `D` replaced it as the organising
+quantity.
+
+**FIVE DISTINCT `C`s ARE LIVE. Measured:**
+
+| symbol | meaning | where | status |
+|---|---|---|---|
+| `C(Δ)` | coherence functional, `Σ\|R\|` | `delta.rs:190` | LENS ONLY, no operational role |
+| `c` | the propagation limit — one commitment per step | ARTICLE IV cl. 2 | LAW. Lowercase, a RATE not a quantity |
+| `C4`, `C5`, `C7` | algorithm labels in the equations ledger | `EQUATIONS` §C5 | a NAMESPACE PREFIX, unrelated to `C(Δ)` |
+| "C in its own 2×2" | the operator's containment ruling | operator, 2026-08-01 | see below |
+| `c_is_consulted…` | a cage test name | `cage_pins.rs` | probable STALE reference to `C(Δ)` |
+
+**On "C is contained to its own 2×2 matrix"** (operator, 2026-08-01):
+read against what landed, this is satisfied — the curvature is computed
+as `plaquette_curvature(a, b) = a.commutator(b)` returning a
+`MatrixFiber2x2` (`fiber.rs:168`), so the quantity lives in the fiber
+rather than as a global scalar. **Flagged, not asserted:** whether the
+ruling meant the coherence `C(Δ)` or the curvature. They are different
+objects that share a letter, and the code letters curvature `F` by
+convention while naming the functional `coherence_functional`.
+
+**DEFECT — THREE DOCUMENTS CONTRADICT THE CODE AND A STANDING LAW.**
+The code sums ABSOLUTE VALUES. These say squares:
+
+    N4_DIRECTIVES:25    "C(Δ) = Σ R²"
+    N6_DIRECTIVES:87    "C(Δ) = 6·ΣR²"
+    KERNEL_RELAY:296    "the coherence functional C(Δ) = Σ R²"
+
+Squares are **barred as aggregators of difference** by THE PROPORTIONAL
+LAW (`rfa-core/src/lib.rs:14`, §2b), so these three do not merely
+disagree with `delta.rs:193` — they state a formula the constitution
+forbids. Correction notes placed at each site; the code is correct and
+is the authority.
+
+This is the second live notation collision this document carries, after
+§2j's two different `D`s. **Both are the same failure mode: a letter
+outliving the quantity it was minted for.** `C` is now demoted, `D` is
+now the organising quantity, and the documents still carry the old
+letters in the old roles.
+
+### 2n.1 WHERE `C` LIVES — the fiber as workshop, and the one correction (operator, 2026-08-02)
+
+> C needs to be contained in the 2×2 matrix fibre bundle defined where
+> "anything goes" — that's the place where we put approximations,
+> floats, all the things we don't want utilised in a deterministic
+> system
+
+**The quarantine is right and `C` is the correct resident. One
+distinction has to be drawn or it breaks consensus.**
+
+**MEASURED FIRST.** `MatrixFiber2x2` is `[[Ratio; 2]; 2]` and its own
+header says *"Exact rational throughout — no float, no root"*
+(`fiber.rs:25`). It is not a quarantine zone today; it is load-bearing
+committed algebra. `loop_holonomy` and `plaquette_curvature` compute
+over it, and **K5 (#32) proposes to carry it INTO `Holonomy.value`** —
+that is, into the committed reduction that feeds rank `D`, which feeds
+`capacity_law`, which gates minting.
+
+**So if the fiber's CONTENTS became float, two honest nodes would
+compute different `D` from identical state and consensus would fail.**
+That is not a stylistic objection; it is a hard break, and it is
+precisely the class of thing the cage exists to prevent.
+
+**THE DISTINCTION THAT MAKES THE RULING WORK — two roles, one object:**
+
+    THE FIBER AS A COMMITTED TYPE
+      [[Ratio; 2]; 2], exact, deterministic, reproducible by every
+      node. Non-negotiable, because D gates the mint.
+
+    THE FIBER AS A WORKSHOP — "anything goes"
+      where its elements are FOUND. Float BLAS, heuristics, iterative
+      solvers, GPU, parallel search. Exactly where floats belong,
+      because matrix search is the expensive part and none of it is
+      authoritative.
+
+    THE DOOR BETWEEN THEM
+      the cage. **The prover may be approximate; the verifier must be
+      exact.**
+
+**AND THAT PATTERN IS ALREADY LANDED, in the right place.** The fold
+gate is a prover/verifier split today: `orbit_lock` searches for the
+conjugator (*"the prover finds the conjugator"*, `fold_pins.rs:170`)
+and `verify_orbit_witness` *"re-walks the one path it claims"*
+(`fold.rs:224`). The operator's structure has a working precedent
+inside the exact organ it applies to.
+
+**WHAT THIS GIVES `C` — a job it did not have.** §2n established that
+`C` gates nothing and cannot see torsion in principle. Placed inside
+the sector, it acquires the one role it is actually fit for: **a search
+heuristic.** `KERNEL_RELAY` §5.2 struck gradient descent on `C` as a
+CONVERGENCE METHOD, and that strike stands — but a heuristic guiding a
+prover produces nothing authoritative, so the objection does not reach
+it. The sector is what makes the distinction expressible:
+
+    C is BARRED AS A LAW and PERMITTED AS A HINT.
+
+That is a stronger position than "C is vestigial". It is not vestigial;
+it is confined, and confinement is what makes it safe to use.
+
+**ONE GAP MEASURED — the fiber cannot currently cross the door.**
+`cage.rs:248` lists every `Exact` impl: `Ratio`, `i64`, `u64`, `usize`,
+`bool`, `Vec<T>`, `Option<T>`, and `SolveRead`. **`MatrixFiber2x2` has
+no `Exact` impl**, so `Proposal<MatrixFiber2x2>` does not exist and a
+fiber element found by an approximate search has no lawful way out of
+the sector. It plainly qualifies — it is built of `Ratio`s — so this is
+a one-line addition, and `cage_arrow.rs:118` audits every `Exact for`
+impl, which makes granting one a deliberate witnessed act rather than a
+slip. **Correctly guarded; simply not yet done.**
+
+**CONSEQUENCE FOR K5 (#32), recorded so the two rulings do not
+collide.** K5 stands: `Holonomy.value` becomes a `MatrixFiber2x2` and
+that value is EXACT. What this section adds is that the SEARCH which
+finds fiber elements belongs in the sector. Same object, two roles,
+separated by the door — and K5 must not be read as importing the
+anything-goes region into committed state.
+
+> ⚠ **THE "WORKSHOP" CONSTRUCTION ABOVE IS WITHDRAWN — see §2n.2.** It
+> sited the sector at the EDGE level, giving every fiber in the complex
+> an approximate twin. A region that covers every edge is not a
+> containment sector; it is a shadow copy of the whole algebra. The
+> two-roles distinction (exact committed value, approximate search)
+> survives and is correct. Its PLACEMENT does not.
+
+### 2n.2 THE SECTOR IS ONE MATRIX, NOT EVERY MATRIX (operator correction, 2026-08-02)
+
+> that means your "matrix" is at the wrong level — and the contained
+> sector has become the entire sector
+
+**Both claims land. §2n.1 sited the quarantine wrongly, and the
+specific error is a conflation of two different 2×2s.**
+
+    THE CONNECTION FIBER          MatrixFiber2x2, fiber.rs
+      one PER EDGE, exact, committed, load-bearing. Carries holonomy,
+      feeds rank D, gates the mint. Its level is the EDGE and that is
+      correct — a connection lives on an edge and belongs nowhere else.
+
+    C's CONTAINMENT MATRIX        the operator's 2026-08-01 ruling
+      ONE, singular, for the whole reading. Approximate, quarantined,
+      diagnostic, gating nothing.
+
+**They are both 2×2. That is a coincidence of ARITY, not an identity**,
+and §2n.1 treated it as one — which is how the sector escaped its
+bounds. If C's residence is the per-edge fiber, then the quarantine is
+wherever fibers are, which is everywhere, and a quarantine that covers
+everything contains nothing.
+
+**This is the same failure this document diagnosed one section
+earlier.** §2n named it for letters: *a letter outliving the quantity
+it was minted for*. Here it is a SHAPE — `2×2` read as an identity
+rather than as a dimension two unrelated objects happen to share.
+
+**RE-READ OF THE ORIGINAL RULING.** The operator wrote *"C is contained
+to **its own** 2×2 matrix"* (2026-08-01). *Its own* is the operative
+phrase and §2n.1 read straight past it. C does not move INTO the
+connection fiber; **C gets a separate, single 2×2 of its own.** That is
+already a bounded containment sector by construction:
+
+    ONE object, not one per edge — so the region cannot grow with the
+    complex, and it is auditable by inspection.
+    ONE door, because there is one object to leave.
+    NOTHING load-bearing inside, because C gates nothing (§2n).
+
+**WHAT CHANGES AND WHAT DOES NOT:**
+
+    UNCHANGED   MatrixFiber2x2 stays per-edge, exact, committed.
+                K5 (#32) is unaffected — it was never about C.
+    UNCHANGED   the two-roles distinction: an exact committed value,
+                an approximate search that proposes it. Correct, and
+                it belongs to the CAGE as a door primitive.
+    CORRECTED   the sector is not "every fiber's workshop". It is one
+                bounded region. C's own 2×2 is one such region; the
+                solver's `consult`/`withdraw` search is another. Every
+                lawful sector is BOUNDED — that is what makes the word
+                mean anything.
+
+**NOT DERIVED, flagged rather than furnished:** what C's four slots
+carry. `C(Δ)` is a scalar today (`Σ|R|`), so a 2×2 residence has four
+positions and three of them are unassigned. Inventing meanings for
+them to justify the shape would be the §2d failure exactly — apparatus
+built to fit a container. **The arity is the operator's; the contents
+are an open ruling.** What IS settled is the containment: one object,
+one door, nothing authoritative inside.
+
+**RESOLVED — see §2n.3.** The contents were ruled the same day; the
+"not derived" note above records only that they were not invented here.
+
+### 2n.3 THE CONTAINMENT LAW — `C_bound` inscribed (operator ruling, 2026-08-02)
+
+§2n.2 established the separation. This inscribes it as law, with the
+slot allocation ruled and three corrections made in translation.
+
+**THE TWO STRUCTURES, held apart by law:**
+
+    CONNECTION FIBER    M_e for every edge e ∈ E
+      exact rationals · committed · load-bearing · carries holonomy
+      ∮M · feeds rank D · gates the mint · CARRIES NO CONTAINMENT
+      APPARATUS
+
+    CONTAINMENT MATRIX  C_bound — exactly ONE per reading
+      quarantined · gates nothing · footprint independent of |E| and
+      |V| · isolated from every connection fiber
+
+**THE SLOT ALLOCATION — ruled, and deliberately un-padded:**
+
+    C_bound = ⎡ C(Δ)        δ_search  ⎤
+              ⎣ λ_proposed  0         ⎦
+
+    (0,0)  C(Δ)         the coherence functional, Σ|R| — the lens
+                        scalar of §2n
+    (0,1)  δ_search     the consult/withdraw search-state delta: the
+                        approximate proposed perturbation
+    (1,0)  λ_proposed   the un-admitted error of the proposed step
+    (1,1)  0            EXPLICIT GROUND. Not a slot awaiting meaning —
+                        a declared zero, so no speculative state can
+                        accrete in an empty position.
+
+The explicit zero is what satisfies LAW 8 (§3, line 1350 — *a term that
+computes is kept; a term that only resonates is excised*). An
+unassigned fourth slot is an invitation to invent apparatus to fill it;
+a declared ground is a refusal to.
+
+**CORRECTION 1 — `C(Δ)` IS NOT A CAPACITY READING.** The relayed ruling
+named slot (0,0) *"the primary scalar capacity reading."* Two faults:
+`capacity` is STRUCK vocabulary, replaced by `rank` and carried on the
+currency pass (#14); and the reading is wrong on the merits — capacity
+is `D`, and §2n established that `C` **cannot see** what `D` measures,
+because summing the residuals destroys the torsion they carry. Slot
+(0,0) holds the coherence functional and is named as such. Letting it
+be called a capacity reading would re-admit through a slot label the
+exact conflation `D` was minted to end.
+
+**CORRECTION 2 — `M_e ∈ SL₂` IS NOT AN INVARIANT AND MUST NOT BECOME
+ONE.** The relay writes the connection fiber as `SL₂(ℚ)`. The landed
+type is deliberately weaker (`fiber.rs:31`):
+
+> *Members of `SL₂` satisfy `det = 1`; the type does not enforce it,
+> because the gauge law is a READING (see `is_sl2`) and a refusal names
+> what it found rather than being unconstructible.*
+
+`is_sl2()` returns `bool`. **If membership became a type invariant,
+`is_sl2` could never return false and the refusal it exists to raise
+would be unreachable.** The fiber is `M₂ₓ₂(ℚ)` with `det = 1` as a
+JUDGED READING. Recorded because an invariant is cheap to write into a
+document and expensive to discover later in a type.
+
+**CORRECTION 3 — `λ_residual` RENAMED TO `λ_proposed`. Third notation
+collision.** `Residual { i, j, k, l, value }` is a committed object
+(`bridge.rs:104`), and §2k.1 established it IS the torsion — the
+closure failure carried with its indices. The relay used "residual" for
+*the error of an unadmitted proposal*, which is a different thing
+living on the other side of the door. After §2j's two `D`s and §2n's
+five `C`s, this document does not need a third collision, and the
+proposal-side name is the one that must yield.
+
+**CLARIFICATION — `C_bound` IS A REGISTER, NOT A GROUP ELEMENT.** No
+`matmul`, no `commutator`, no holonomy is taken over it; it is four
+slots written in a square. **NO ALGEBRA MAY BE PERFORMED BETWEEN
+`C_bound` AND ANY CONNECTION FIBER.** That prohibition is what
+mechanically enforces "isolated from the edge fiber" — without it,
+sharing the `2×2` shape is a standing invitation to compute
+`C_bound.commutator(M_e)` and breach the isolation through the type
+system rather than through intent. The shared arity is the hazard
+§2n.2 named; this is the guard against it.
+
+**ON EXACTNESS vs AUTHORITY — an apparent contradiction, resolved.**
+`C_bound` is over exact rationals, yet it is the residence of
+approximation. These do not conflict, and the landed cage shows why:
+floats live inside the CONSULTED CLOSURE (`cage_pins.rs` runs
+`(n as f64).sqrt()` there deliberately), and what the closure returns
+is exact-typed and still unverified. **Exactness is a representation
+property; authority is a door property.** `C_bound` holds exact numbers
+that nothing has yet admitted.
+
+**THE GENERAL INVARIANT — boundedness, carried per-axis (operator
+correction, 2026-08-02).**
+
+An earlier draft wrote this as `O(1)`. **That is a scalar collapse of a
+multi-axis quantity, in a document whose whole thesis is that scalar
+collapse destroys structure** — the same error as `C(Δ) = Σ|R|`, made
+about complexity instead of about residuals. A single `O(·)` cannot say
+WHICH axis a sector grows in, and which axis it grows in is the entire
+question.
+
+**Cost is carried as a TUPLE over the axes it actually scales in, never
+as one symbol:**
+
+    O( |V|, |E|, F, δ, τ )
+
+    |V|  orbs — the vertices of the complex
+    |E|  relations — its edges
+    F    fiber arity (CHANNELS = 3 today)
+    δ    depth — path length, search budget, walk degree
+    τ    steps — ticks over which the footprint persists
+
+**TWO DIFFERENT QUANTITIES WERE BEING NAMED BY ONE SYMBOL** (operator,
+2026-08-02). The collapse was not `O(1)` being wrong; it was `O(1)`
+answering a question about STORAGE while being read as a bound on
+EXECUTION:
+
+    STATE FOOTPRINT — the container
+      C_bound's storage. Must not shadow the topology:
+                          ∂Memory / ∂|E|  =  0
+      O(1) in |V|, |E| and F. This is what stops the quarantine
+      inflating as the network grows.
+
+    EXECUTION TRAJECTORY — the work done inside it
+      **O(n^D)** — the VOLUME of the space the work ranges over: side
+      `n` along `D` independent axes. **Locking this to O(1) flattens
+      the dynamics entirely** — a search that may not scale with depth
+      is not a search. This is where the dimensionality actually lives,
+      and it must stay free.
+
+**`O(n^D)`, not a flat budget** (operator ruling 2026-08-02, replacing
+an earlier `O(x)` reading that named a single axis and so collapsed the
+others). A constant work budget rations independently of how much
+structure stands — the same flattening as `C(Δ) = Σ|R|`, applied to
+cost. `D` independent axes of extent `n` enclose `n^D`, and **the
+envelope BREATHES WITH `D`**: rank is earned rather than granted and
+ARTICLE IV holds it monotone, so the envelope widens as the system
+gains dimension and never narrows. That is the re-volumizer — the
+budget is a function of standing rank, not a number chosen in advance.
+
+`n^0 = 1`: no rank, no room — exactly the standing `capacity_law`
+refuses to mint on, so the envelope agrees with the constitution rather
+than contradicting it. Landed and certified as `kernel::motion::envelope`,
+which refuses on overflow rather than wrapping (an envelope that wrapped
+would report an enormous space as a tiny one).
+
+**So the lawfulness test is per-axis, and it is a topology test rather
+than a size test:** a sector is lawful iff its STORAGE is O(1) in the
+axes it OBSERVES (`|V|`, `|E|`, `F`), while its TRAJECTORY may scale
+freely along its OWN axes (δ, τ), bounded by declared budget rather
+than by law.
+
+The solver's sector sweeps `for _depth in 0..=max_depth` — O(δ) in
+work, O(1) in the graph: lawful, and its high-dimensional search is
+preserved rather than flattened. `C_bound` is O(1) in storage on every
+axis. §2n.1's withdrawn construction was O(|E|) in STORAGE, which is
+exactly the violation. **A single symbol could not have told the three
+apart** — which is the whole argument for carrying the tuple.
+
+The two clauses that follow are exact as relayed:
+
+1. **NO FIBER SHADOWING.** No quarantine, solver or search may
+   duplicate a per-edge structure or mirror the topology. This is the
+   clause §2n.1 violated.
+2. **SINGLE POINT OF EGRESS.** One bounded region, one door. `C_bound`
+   may be inspected or discarded whole without invalidating any
+   connection fiber — which is the operational test that the isolation
+   holds.
+
+**STATUS.** `d150497` stands as written. `K5` (#32) is unaffected and
+clean — it was never about `C`. The per-edge fibers remain pure.
+
 ### 2h. THE ECLIPSE — STRUCK AS WRITTEN (2026-08-01)
 
 This section claimed an "eclipse law" unifying five occlusion
@@ -970,9 +1766,40 @@ it is legitimate world-building. It belongs in a CONTENT layer as an
 observed phenomenon: measurable, surmountable, and carrying no
 authority over any rule. The arrow is one-way and never bends upward.
 
+*THE HOLDING SPACE IS NOW NAMED — dogma is RESERVED, not forbidden*
+(operator ruling 2026-08-02). It has a future mechanic, and naming it
+now is what stops a later node from either inventing it ad hoc or
+believing the vocabulary is barred forever:
+
+> **THE CURSE.** Dogma is what a civilization produces when it meets
+> technology its cognition cannot yet hold. Not a moral failure — a
+> CAPACITY MISMATCH. The line encounters structure whose extent exceeds
+> its own, and where D3 would normally grow the container to meet the
+> content, a cursed line cannot: it forms ritual instead of a plane.
+> Growth stifles, and the ritual is the symptom rather than the cause.
+
+**Why this fits the machinery already standing, exactly.** LAW 9 calls
+dogma a LOW CIVILIZATION HURDLE — a stage cleared, not a truth. The
+curse is that delineation made mechanical: `ext(Δ(V)) > D` is precisely
+"content the container cannot hold", and Article III's loop trap —
+deeds emitted, `ΔD = 0` — is precisely what a ritualising line looks
+like from outside. **The curse needs no new physics. It is the refusal
+of capacity growth, given a cause.**
+
+*Scope when it lands:* a per-world / per-line delimiter — a single
+planet may be cursed while its neighbours are not — so it colours one
+board position rather than the law. Elders dancing in the woods is
+CONTENT; it may never become a premise a rule reads.
+
+*Until it lands, nothing changes.* The reservation is a note about the
+future, not a licence for the present, and it blocks no lane: the
+economy is built on capacity and verified work, and a curse that stifles
+growth is expressible entirely in those terms when someone chooses to
+build it.
+
 *The present state, recorded honestly.* **There is no theology holding
-space, and therefore there is no lawful home for dogma anywhere in this
-tree today.** That absence is exactly why esoteric vocabulary bled into
+space BUILT, and therefore there is no lawful home for dogma anywhere in
+this tree today.** That absence is exactly why esoteric vocabulary bled into
 the engine while the kernel was being built — with no container, it
 settled wherever it landed. Until a content layer exists to hold it,
 the correct amount of dogma in this system is ZERO.

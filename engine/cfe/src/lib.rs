@@ -16,6 +16,7 @@
 
 pub mod books;
 pub mod dop;
+pub mod epoch;
 pub mod ipsal;
 pub mod persist;
 pub mod query;
