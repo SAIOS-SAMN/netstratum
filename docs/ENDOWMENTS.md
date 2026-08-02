@@ -26,77 +26,118 @@ taken) or by being STRUCK (ruled not owed) — never by going quiet.
 
 ---
 
-## §1 E1 — TWENTY CIVILIZATIONS HAVE NO DURABLE RECORD
+## §0 THE IDENTITY KEY — settled first, because every other row depends on it
+
+**`slug` is the identity. `name` is mutable display.** Measured
+2026-08-03: every seeds entry carries `slug`, every registry file carries
+`slug`, and the registry's `slug` equals its filename in ALL 33 cases.
+
+This was not assumed — it was tested, and the first pass of this register
+got it wrong by comparing on `name`. A name-keyed comparison reported
+20 unrecorded civilizations and 6 missing ones. A slug-keyed comparison
+reports **17 unrecorded and 3 never-seated**, because three of the
+"missing" and three of the "new" are the same three lines under their
+renames. The corrected figures stand below; the superseded ones are left
+visible in this paragraph rather than quietly swapped, because the
+mistake is the lesson: **comparing civilizations by display name
+manufactures deaths and births that never happened.**
+
+Any claim path keys on `slug` (task #3). Nothing keys on `name` or on
+filename-minus-extension without checking `slug` first.
+
+## §1 E1 — SEVENTEEN CIVILIZATIONS HAVE NO DURABLE RECORD
 
 **Severity: highest. This is single-copy data loss exposure, today.**
 
 The durable, git-tracked roster is `seeds/aeon1-polities.json` — 19
-civilizations. The live record is `var/registry/*.json` — 33
-civilizations. `var*/` is git-ignored and single-copy by standing note
-(`PICKUP.md` §6).
+lines. The live record is `var/registry/*.json` — 33 lines. `var*/` is
+git-ignored and single-copy by standing note (`PICKUP.md` §6).
 
-**Twenty civilizations exist ONLY in the git-ignored directory:**
+**Seventeen slugs exist ONLY in the git-ignored directory:**
 
-    Aerie · Basaltvault · Bloomdeep · Bloomhollow · Bloomvault
-    Borealis · Brine Cortex · Cairnborn · Echowright · Ferndeep
-    Forgechoir · Forgedeep · Hadal · Reefhum · Reefreach
-    Reefspan · Sporechord · Sporehum · Veinreach · Vitreous Hex
+    aerie · basaltvault · bloomdeep · bloomhollow · bloomvault
+    borealis · cairnborn · ferndeep · forgechoir · forgedeep
+    hadal · reefhum · reefreach · reefspan · sporechord
+    sporehum · veinreach
 
-Five were founded by `operator` (Aerie, Borealis, Cairnborn, Hadal, and
-Aerie's siblings); the rest by `conductor`. Each carries species, clade,
-motto and the three axes — real content, not placeholders.
+Four were founded by `operator` (Aerie, Borealis, Cairnborn, Hadal); the
+rest by `conductor`. Each carries species, clade, motto and the three
+axes — real content, not placeholders.
 
-**If `var/` is lost, twenty civilizations are gone.** There is no second
-copy anywhere in the repository.
+**If `var/` is lost, seventeen civilizations are gone.** There is no
+second copy anywhere in the repository.
 
-Measured 2026-08-03:
+Measured 2026-08-03 (note the key — `slug`, never `name`):
 
     python3 - <<'PY'
-    import json,glob
-    s=json.load(open('seeds/aeon1-polities.json'))
-    sn={p.get('civilization') or p.get('name') for p in s}
-    reg={json.load(open(f)).get('name') for f in glob.glob('var/registry/*.json')}
-    print(len(sn), len(reg), sorted(reg-sn))
+    import json,glob,os
+    sd={p['slug'] for p in json.load(open('seeds/aeon1-polities.json'))}
+    rg={json.load(open(f))['slug'] for f in glob.glob('var/registry/*.json')}
+    print(len(rg-sd), sorted(rg-sd))
     PY
 
 **Owed:** a claim path that MERGES live into durable (§4 E4 explains why
 the existing one cannot do it). Not yet built — this register is the
 first half of the debt.
 
-## §2 E2 — THREE REGISTRY FILES ARE NAMED FOR THE WRONG CIVILIZATION
+## §2 E2 — THE SEED ROSTER STILL CARRIES THREE PRE-RENAME NAMES
 
-The sigil rename (`06_CIVILIZATIONS.md` §2a — *slug → sigil, a recorded
-migration … applied at the next roster wave, never retroactively*) was
-applied to the `name` field and NOT to the filename:
+**Downgraded from "wrong identity" to "stale display name" by §0's
+measurement.** The identity was never at risk; the slug held on both
+sides. What diverged is the name:
 
-| file | name inside |
+| slug (the identity, agreeing) | seeds `name` | registry `name` |
+|---|---|---|
+| `eightfold` | Eightfold | **Brine Cortex** |
+| `deep-chorus` | Deep Chorus | **Echowright** |
+| `hivelight` | Hivelight | **Vitreous Hex** |
+
+This is the sigil rename (`06_CIVILIZATIONS.md` §2a — *slug → sigil, a
+recorded migration … applied at the next roster wave, never
+retroactively*) landing in the live registry and never reaching the
+durable roster. The law said "at the next roster wave"; the wave carried
+the live side only.
+
+**What it still costs.** Nothing structural — but any tool that compares
+these two files on `name` (which is the obvious thing to write, and what
+this register did first) reports three deaths and three births that
+never happened. The defect is now a documented trap rather than a
+corruption. The cure rides the §4 claim path: on a shared slug, the
+registry's `name` is the later authority.
+
+## §3 E3 — THREE SEEDED LINES WERE NEVER SEATED — RESOLVED 2026-08-03
+
+**Darlok · Draco · Pleiadian** stand in the durable roster with no
+registry entry and no world directory (`shroudmere`, `eclipse-hold`,
+`seven-sisters` are all absent from `var/worlds/`).
+
+**Not folded, not renamed, not lost — never seated.** The dates settle
+it:
+
+| event | when |
 |---|---|
-| `var/registry/eightfold.json` | **Brine Cortex** |
-| `var/registry/deep-chorus.json` | **Echowright** |
-| `var/registry/hivelight.json` | **Vitreous Hex** |
+| live registry written | 2026-07-30 22:57 |
+| `var/worlds/` last changed | 2026-07-31 00:33 |
+| Darlok + Draco enter the roster (`66b5f8c`) | **2026-08-01 20:52** |
+| Pleiadian enters the roster (`64739af`) | **2026-08-01 21:03** |
 
-**Why this is an endowment and not cosmetics.** A naive comparison reads
-Eightfold, Deep Chorus and Hivelight as DELETED and Brine Cortex,
-Echowright and Vitreous Hex as NEW. Three renames masquerade as three
-deaths and three births, and the lineage law (`12_UNION` §2) hangs off
-line identity. Any migration run against the slugs — including the
-export in §4 — carries the wrong identity forward.
+All three were added to the durable roster a day and a half AFTER the
+live universe was founded and last run. The roster is seated at genesis
+and `write_default_polities` refuses to overwrite (`PICKUP.md` §1), so
+nothing has ever seated them.
 
-The rename is half-applied: the migration was recorded as law and never
-finished in the files.
+**This is the endowment running the OTHER WAY, and it is the one the
+charge names most literally.** E1 is value the live universe holds and
+the record has never claimed. E3 is standing the record grants and the
+live universe has never taken: three chartered lines — an `observer`
+seat (Draco), a `watcher` seat (Pleiadian), and an unstationed
+`umbral` line (Darlok) — sitting unclaimed because the universe has not
+been re-seated since they were written.
 
-## §3 E3 — THREE SEEDED LINES HAVE NO LIVE ENTRY
-
-**Darlok · Draco · Pleiadian** stand in the durable roster and have no
-`var/registry/` entry at all. (Deep Chorus, Eightfold and Hivelight also
-appear absent, but those are §2's renames, not absences — the
-distinction is exactly what §2 costs us.)
-
-Not yet determined, and NOT guessed here: whether these three were never
-seated, were seated and folded, or were renamed by a wave this register
-has not found. **The record cannot currently answer it**, which is
-itself the finding. Resolving it needs the chronicle read, not the
-roster — booked as the next measurement on this lane.
+**Owed:** seating the three, which is a universe operation and not a
+document edit. Booked separately from the claim path; it needs the
+operator's word on whether the live universe is re-seated or the three
+wait for the next genesis.
 
 ## §4 E4 — THE CLAIM PATH IS INOPERABLE, AND DESTRUCTIVE IF REPAIRED NAIVELY
 
@@ -119,21 +160,41 @@ Three independent defects:
    universe.
 2. **It reads the wrong file.** The live civilizations are in
    `var/registry/*.json`, not `polities.json`. Even given a roster to
-   read, the twenty lines of §1 would not ride it.
+   read, the seventeen lines of §1 would not ride it.
 3. **It is `cp`, not a merge.** A straight overwrite DELETES the three
-   §3 lines from the durable record, and — through §2's stale slugs —
-   would rewrite three renames as three replacements.
+   §3 lines from the durable record — and those are the three that exist
+   ONLY there, so the deletion is total. It also drops the seeds-side
+   siting fields (`world`, `planet`, `star`, `x/y/z`, `colony`, `policy`)
+   that the registry does not carry, since the two files are not the
+   same schema.
 
 **Consequence for `PICKUP.md` §8f:** its `[VERIFIED]` claim that "the
 live `var/polities.json` holds 20" cannot be true as written; that file
 has not existed since at least 2026-07-30. The §8f row is corrected on
 this lane, quoted as history, never silently rewritten.
 
-**The shape the claim path must have** (design, not yet built): a UNION
-keyed on line IDENTITY rather than filename — live entries added,
-durable-only entries preserved, renames resolved as renames. A claim
-that can delete a civilization is not a claim, it is a wipe wearing an
-export's name.
+**THE TWO FILES ARE NOT THE SAME SCHEMA** — measured 2026-08-03, and it
+is the constraint that decides the claim path's shape:
+
+    seeds only     world · planet · star · albedo · orbit · x/y/z ·
+                   colony · policy · station        (the SITING)
+    registry only  clade · founder                  (the LINEAGE)
+    both           slug · name · species · motto ·
+                   disposition · metabolism · perception
+                   (flat in seeds, nested under `axes` in the registry)
+
+So neither file is a superset and neither can be copied over the other
+without loss. The registry cannot express where a civilization sits; the
+roster cannot express what founded it.
+
+**The shape the claim path must have** (design, settled by the above;
+not yet built): a UNION keyed on `slug` — live-only slugs added,
+durable-only slugs preserved, and on a shared slug the registry's `name`
+taken as the later authority while the seeds' siting fields are kept.
+Registry-only lines will land with EMPTY siting, which must be visible
+rather than defaulted: a fabricated coordinate is a worse record than an
+absent one. A claim that can delete a civilization is not a claim, it is
+a wipe wearing an export's name.
 
 ## §5 CANDIDATES — named, NOT yet verified
 
