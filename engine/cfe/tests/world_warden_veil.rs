@@ -120,3 +120,35 @@ fn a_funded_veil_pays_its_toll_and_stands() {
     let resumed = World::resume(world.chronicle().clone());
     assert_eq!(resumed.committed(), world.committed(), "resume carries the veil");
 }
+
+/// WARDEN-1b: the gate is one named rule, not a literal buried in a
+/// deed. If the value moves, it moves in one place.
+#[test]
+fn the_ward_gate_is_single_sourced() {
+    assert_eq!(cfe::world::ward_gate_depth(), 5, "the gate moved");
+    let mut world = World::new();
+    world.found("gate").expect("founds");
+    world.commission_star(StarClass::G).expect("star");
+    world.ward_elder().expect("wards");
+    let short = cfe::world::ward_gate_depth() - 1;
+    assert!(world.lift_ward("claimer", short).is_err(), "a short claim lifted the ward");
+    assert!(world.lift_ward("claimer", cfe::world::ward_gate_depth()).is_ok(), "the gate refused a full claim");
+}
+
+/// The approach to the gate is MEASURED, so four fifths of the work
+/// reads as four fifths instead of as nothing (20_FOUNDING §6a-bis).
+#[test]
+fn ward_progress_is_a_reading_not_a_cliff() {
+    use cfe::ratio::ratio;
+    let gate = cfe::world::ward_gate_depth();
+    assert_eq!(cfe::world::ward_progress(0), ratio(0, 1), "an untouched gate reads nonzero");
+    assert_eq!(cfe::world::ward_progress(gate), ratio(1, 1), "a solved gate reads short");
+    assert_eq!(cfe::world::ward_progress(gate + 9), ratio(1, 1), "progress ran past one");
+    let mut last = ratio(0, 1);
+    for depth in 1..gate {
+        let now = cfe::world::ward_progress(depth);
+        assert!(now > last, "progress did not rise at depth {depth}");
+        assert!(now < ratio(1, 1), "partial depth read as solved at {depth}");
+        last = now;
+    }
+}

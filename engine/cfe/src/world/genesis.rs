@@ -257,7 +257,7 @@ impl World {
         if self.warded != Some(false) {
             return Err(ActionRefused::WardOutOfOrder);
         }
-        let ceiling = 5;
+        let ceiling = super::rules::ward_gate_depth();
         if depth < ceiling {
             return Err(ActionRefused::DepthBelowCeiling { depth, ceiling });
         }
