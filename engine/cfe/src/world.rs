@@ -3331,6 +3331,39 @@ impl World {
         Some(syntropic / whole)
     }
 
+    /// 20_FOUNDING §5 — THE PURSE: a line's economy read whole across
+    /// every orb it holds.
+    ///
+    /// **A PROJECTION, NEVER A SETTLING TOUCH.** What each orb OWES in
+    /// demurrage is deducted from the reading and NOTHING IS WRITTEN.
+    /// Looking at a purse is not a chain event, so a status render
+    /// costs no receipts; the due settles for real at the next genuine
+    /// touch (the SINK-1 law, unchanged). Value is still not hidden
+    /// from decay — the due is already subtracted in what you see.
+    /// Vaulted stores keep their exemption because `demurrage_due`
+    /// grants it. Derived at call, never stored (the syntropy-ratio
+    /// precedent). Ordered by resource so the read is replayable.
+    pub fn purse(&self, stamp: u64) -> Vec<(Resource, Ratio)> {
+        let mut held: Vec<(Resource, Ratio)> = Vec::new();
+        for orb in &self.orbs {
+            let due = demurrage_due(orb, self.star, stamp, &ease_of(&self.techs, orb.orb_id));
+            for (resource, amount) in &orb.banked {
+                let owed = due
+                    .iter()
+                    .find(|(r, _)| r == resource)
+                    .map(|(_, d)| d.clone())
+                    .unwrap_or_else(|| ratio(0, 1));
+                let net = amount.clone() - owed;
+                match held.iter_mut().find(|(r, _)| r == resource) {
+                    Some((_, sum)) => *sum += net,
+                    None => held.push((*resource, net)),
+                }
+            }
+        }
+        held.sort_by_key(|(resource, _)| *resource as u8);
+        held
+    }
+
     /// PRACTICE-1 — adopt a discipline: one benefit, one friction,
     /// bound by receipt (the derived creed never binds; the practice
     /// does). Build scope. The Athanor (5) takes only the tempered —
