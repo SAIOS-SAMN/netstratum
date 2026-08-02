@@ -88,7 +88,7 @@ it is the rank-1 shadow of a classification that is not rank-1, and it
 is overridden wherever the classification stands. This is stricter than
 this document's earlier "C is demoted to a gate," and it agrees exactly
 with `18_TORSION` §2b: an L1 aggregate is lawful only as a reading
-reported to a human lens, never where the system computes. §5 below
+reported to an OPERATOR lens, never where the system computes. §5 below
 carries what survives of C and why it must.
 
 **3. `V` and all subsets of `∂` are UNCHAINED.** Not struck — unchained.
@@ -222,7 +222,7 @@ Both are right, and neither touches what §5 needs, because:
 
 The predicate is lawful, necessary, and already landed. The collapse is
 the substandard character: barred where the system computes, permitted
-where a reading is reported to a human. **`coherence_functional` is the
+where a reading is reported to an OPERATOR. **`coherence_functional` is the
 collapse; `for_each_residual` is the predicate.** Wherever this document
 or the ledger says "the coherence reading gates," the predicate is meant
 — never the sum.
@@ -537,7 +537,7 @@ transition shrinking `H¹` must REFUSE, never read healthy.
 flattened to one number, which is then available to descend.
 *Instance:* `extent: BigRational`; `C = Σ|R|`; `‖∂Δ‖`.
 *Defense:* Article I and `18_TORSION` §2b — L1 aggregates are lawful
-only where reported to a human lens. *Witness:* no aggregate crosses
+only where reported to an OPERATOR lens. *Witness:* no aggregate crosses
 into a computing path.
 
 **AV-4 · THE VACUOUS PASS.** An admitting arm on degenerate input, which
@@ -1359,6 +1359,27 @@ failure LAW 8 excises: a term that resonates and computes nothing.
 The cure was structural, not another check — a `Degree` type with a
 private field and one constructor, so a below-ground value is not
 refused but UNREPRESENTABLE (the AV-4 shape, §10b).
+
+### 14b3. *neither is privileged* — the levelling form, struck
+
+**Struck 2026-08-02.** `09_IDEOLOGY` §2.2 read *"a symmetric pair of
+bonds is the marriage form; a single bond is patronage; **neither is
+privileged**."* The content was right and the form was negentropic: it
+stated equality as an ABSENCE of privilege, defining the good by
+subtraction, which `00_CHARTER` §2a bars in the document that carries
+§2a.
+
+**What stands now:** both are privileged. `bond_flow` is the SOURCE's
+syntropic book, so each party in a pair sources and each carries its own
+book — two sources, two books, the privilege held twice. Patronage holds
+it once. The carry is positive on both sides, which is what building on
+the syntropic lane means.
+
+**And the correction needed a second pass**, recorded because it is the
+subtler half: the first rewrite stated the new law by narrating the old
+one — *"inverted from…", "the old wording levelled down…", "never
+cancelled"* — so a syntropic ruling was itself written negentropically.
+The law states what IS; the record of what it replaced belongs here.
 
 ### 14c. `V` IS NOT FLOORED, AND THAT IS DELIBERATE
 

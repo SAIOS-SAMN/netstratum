@@ -1,5 +1,5 @@
 //! The conductor pins: an era is deterministic, the board comes alive
-//! without a human, policies diverge, the steward leash closes
+//! unattended, policies diverge, the steward leash closes
 //! end-to-end, research unlocks industry, and a thriving line
 //! speciates — chronicle-chosen, lineage-recorded.
 
@@ -20,7 +20,7 @@ fn scratch(name: &str) -> PathBuf {
 
 /// The board lives: after an era every founding world has receipts, a
 /// linked booked chain, and confirmed solves with depth rungs — no
-/// human involved.
+/// operator involved.
 #[test]
 fn an_era_brings_the_board_alive() {
     let root = scratch("alive");

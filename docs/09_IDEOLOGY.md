@@ -40,14 +40,19 @@ Ideology is **measured, never declared and never scored**:
    observer surface, exactly as the syntropy ratio does (the VENT-1
    uplink precedent). The chronicle carries deeds; arithmetic over deeds
    is free and replayable.
-3. **No oracle, no single number.** No rule ever reads a "goodness"
-   scalar. Consequences attach through specific inscribed mechanics (§3),
-   each citing exactly one axis. The four axes never collapse into one
-   figure — that would be the scalar/scored form the ancestry law refuses
-   (CHARTER §5), returning through the back door.
-4. **Absence is zero, not sin.** Apathy — declining to act — is not an
-   event and mints no receipt. It reads as an empty syntropic book, never
-   as a phantom entry in the entropic one.
+3. **Each axis is read in its own units, and named.** Every consequence
+   attaches through a specific inscribed mechanic (§3) that CITES THE
+   ONE AXIS IT READS — compassion is consulted as compassion, fidelity
+   as fidelity, each in the units it accrued. Four axes, four readings,
+   four names. *(Consequently there is no goodness scalar and no oracle:
+   a single figure would have no units to be in, and it is the
+   scalar/scored form the ancestry law refuses — CHARTER §5.)*
+4. **A book records what was DONE.** Every entry grounds in a receipted
+   deed, so a book holds exactly the deeds that happened. An orb that
+   acted little has a small syntropic book; that is the record standing
+   accurately, and a small book is still a book. *(Consequently apathy
+   posts nothing at all — it is no deed, mints no receipt, and reaches
+   the entropic book by no path.)*
 
 ```
             THE DUAL COHESION LEDGER (per orb — eight counters)
@@ -117,7 +122,21 @@ covenanted).
 
 - **`bond_flow`** (the source's syntropic book): cumulative value streamed
   over live bonds. A symmetric pair of bonds is the marriage form; a
-  single bond is patronage; neither is privileged.
+  single bond is patronage. **BOTH ARE PRIVILEGED in the pair**:
+  `bond_flow` is the SOURCE's syntropic book, so each party sources and
+  each carries its own book. **Two sources, two books — the privilege
+  is held twice.** Patronage holds it once: one party sources, one book
+  stands.
+
+  **The bond is not the covenant** (recorded 2026-08-02, after the two
+  were conflated in `EQUATIONS` D5). A COVENANT is one obligor owing one
+  beneficiary, with collateral posted by the obligor alone against a
+  quota inside a window (§2.3, COVENANT-1) — a DIRECTED instrument, and
+  the same asymmetry this clause calls patronage. A BOND is a standing
+  flow, and only a symmetric PAIR of them is the marriage form. **The
+  distinction is the direction count, never the collateral.** Both are
+  lawful; they are not interchangeable, and the union's office pair
+  (`12_UNION` §3b–§3c) takes the pair form, never the directed one.
 - **`severance_load`** (the severer's entropic book): the standing rate ×
   the unserved notice window (placeholder) when a bond is cut without the
   covenanted notice. An orderly severance — notice honoured, or bond run

@@ -182,7 +182,7 @@ impl Lens {
         }
     }
 
-    /// The door OUT, and the only one: a rendering for a human surface.
+    /// The door OUT, and the only one: a rendering for an OPERATOR surface.
     /// It lands in a `String` on purpose — no rule can numerically
     /// branch on it, so the cage holds without anyone having to
     /// remember that it should.

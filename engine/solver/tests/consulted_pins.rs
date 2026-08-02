@@ -55,3 +55,46 @@ fn an_unsolved_proposal_crosses_and_claims_nothing() {
     // Depth 0 cannot close a rung-3 task; the search honestly says so.
     assert!(matches!(solve_consulted(&t, 0), SolveRead::Unsolved));
 }
+
+/// THE THREE OUTCOMES — `solve_consulted` collapses Withdrawn and Silent
+/// into one `Unsolved` for its callers, and `consult_observed` keeps the
+/// difference. It is the only tell for a degrading search: a proposal
+/// that FAILED re-derivation and a search that found nothing look
+/// identical once collapsed.
+#[test]
+fn the_door_keeps_what_happened_not_only_what_crossed() {
+    use solver::{consult_observed, Consultation};
+
+    let t = forge_task([31u8; 32], Difficulty::level(3));
+
+    // A real consultation lands in exactly one arm.
+    let seen = consult_observed(&t, Difficulty::level(3).word_len);
+    match &seen {
+        Consultation::Crossed(SolveRead::Solved { program, .. }) => {
+            // If it crossed, it MUST close every training pair — the
+            // door's whole law.
+            assert!(t
+                .train
+                .iter()
+                .all(|p| solver_verify::grid::run(program, &p.input) == p.output));
+        }
+        Consultation::Crossed(SolveRead::Unsolved) => {
+            panic!("Crossed must never carry an Unsolved — that is Silent");
+        }
+        Consultation::Silent | Consultation::Withdrawn => {}
+    }
+
+    // And the collapsed form agrees with the observed one, so the two
+    // can never drift: one implementation, two readings of it.
+    let collapsed = solve_consulted(&t, Difficulty::level(3).word_len);
+    match (&seen, &collapsed) {
+        (Consultation::Crossed(SolveRead::Solved { .. }), SolveRead::Solved { .. }) => {}
+        (Consultation::Silent, SolveRead::Unsolved) => {}
+        (Consultation::Withdrawn, SolveRead::Unsolved) => {}
+        other => panic!("observed and collapsed disagree: {other:?}"),
+    }
+
+    // A zero-depth search proposes nothing: SILENT, never Withdrawn.
+    // Nothing was refused, because nothing was offered.
+    assert!(matches!(consult_observed(&t, 0), Consultation::Silent));
+}

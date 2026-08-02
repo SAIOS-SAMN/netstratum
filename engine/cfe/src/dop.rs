@@ -780,7 +780,7 @@ pub enum ClosureEvent {
     /// (chronicle-seeded, CHARTER §9 — no wall clock, no dice).
     WorldCharted { seed: [u8; 32] },
     /// N3 — an entity joined this internet: principal 0 = a sovereign
-    /// human; nonzero = an agent contained by that principal.
+    /// operator; nonzero = an agent contained by that principal.
     EntityRegistered { entity_id: u64, principal: u64, handle: String },
     /// N3 — a principal granted an agent one action scope.
     ScopeGranted { agent: u64, scope: crate::ipsal::Scope },

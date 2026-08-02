@@ -133,7 +133,8 @@ re-dressed on the way out:
    exactly two lawful outcomes:
 
     orbit_lock = ∅   the difference was angle all the way down —
-                     the fold closes to zero; the two paths were one.
+                     the fold RECOGNISES one state; the two paths
+                     were one, and the fold is what says so.
     orbit_lock ≠ ∅   TORSION — the collapse refuses; the encounter
                      EMITS: the residue rises as a NEW plane.
 

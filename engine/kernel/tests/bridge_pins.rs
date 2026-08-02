@@ -10,8 +10,8 @@ use cfe::dop::ColonyOrb;
 use cfe::ratio::ratio;
 use cfe::world::{Bond, Committed, World};
 use kernel::bridge::{
-    fold_certified, observe, project, read_entangled, read_entangled_observed, refold, Observed,
-    CHANNELS, CHANNEL_BOND,
+    fold_certified, fold_guard, observe, project, read_entangled, read_entangled_observed,
+    refold, FoldGuard, Observed, CHANNELS, CHANNEL_BOND,
 };
 use rfa_core::{coboundary_reduce, Degree, Delta};
 
@@ -41,7 +41,7 @@ fn a_world_that_relates_nothing_stands_on_the_ground() {
     // correctly, because rank counts what stands ABOVE the floor.
     let read = read_entangled(&orbs(3));
     assert_eq!(read.rank, 0, "no obligations, nothing circulating");
-    assert!(read.residuals.is_empty(), "nothing to fail to compose");
+    assert!(read.symmetry_foundation.is_empty(), "nothing to fail to compose");
     assert!(read.rank_is_defined(), "a zero cocycle IS a cocycle");
 
     // AND IT HAS NOT VANISHED. `D` is the ELEVATION, and it reads the
@@ -152,7 +152,7 @@ fn obligations_that_compose_carry_no_surviving_structure() {
     assert_eq!(*delta.entry(1, 0, CHANNEL_BOND), ratio(-2, 1), "antisymmetric by construction");
 
     let read = read_entangled(&state);
-    assert!(read.residuals.is_empty(), "5 = 2 + 3: the triangle composes");
+    assert!(read.symmetry_foundation.is_empty(), "5 = 2 + 3: the triangle composes");
     assert!(read.rank_is_defined(), "a cocycle has a class to reduce to");
     assert_eq!(read.rank, 0, "composing obligation is pure frame");
 }
@@ -165,7 +165,7 @@ fn obligations_that_do_not_compose_carry_strain() {
     state.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(1, 3, 9)];
 
     let read = read_entangled(&state);
-    assert!(!read.residuals.is_empty(), "a non-composing triangle carries strain");
+    assert!(!read.symmetry_foundation.is_empty(), "a non-composing triangle carries strain");
     // NON-COMPOSITION DOES NOT BAR THE READ (operator ruling
     // 2026-08-01, the struck residual clause). The old law refused to
     // define capacity here, on the reasoning that Δ ∉ Z¹ leaves no
@@ -179,7 +179,7 @@ fn obligations_that_do_not_compose_carry_strain() {
         "a fully observed complex is readable whether or not it composes"
     );
     assert!(
-        !read.residuals.is_empty(),
+        !read.symmetry_foundation.is_empty(),
         "and the strain is carried WHOLE, indices intact — never summed away"
     );
 }
@@ -203,7 +203,7 @@ fn obligations_to_unknown_or_self_are_skipped_never_panic() {
     state.bonds = vec![bond(1, 99, 4), bond(1, 1, 7)];
     let read = read_entangled(&state);
     assert_eq!(read.rank, 0);
-    assert!(read.residuals.is_empty());
+    assert!(read.symmetry_foundation.is_empty());
 }
 
 #[test]
@@ -234,7 +234,7 @@ fn an_unresolved_absence_refuses_capacity_unverified_absence_would_mint() {
     assert!(seen.rank_is_defined(), "fully observed cocycle");
 
     let unseen = read_entangled_observed(&state, 1);
-    assert_eq!(unseen.residuals, seen.residuals, "the strain field is unchanged");
+    assert_eq!(unseen.symmetry_foundation, seen.symmetry_foundation, "the strain field is unchanged");
     assert!(
         !unseen.rank_is_defined(),
         "one unobserved pair is enough — absence must be verified, never assumed"
@@ -340,7 +340,7 @@ fn a_universe_with_an_unclosed_obligation_ring_reads_capacity() {
     state.bonds = vec![bond(1, 2, 3), bond(2, 3, 3), bond(3, 4, 3), bond(4, 1, 3)];
 
     let read = read_entangled(&state);
-    assert!(read.residuals.is_empty(), "no filled triangle: nothing fails to compose");
+    assert!(read.symmetry_foundation.is_empty(), "no filled triangle: nothing fails to compose");
     assert_eq!(read.unknown, 0, "one book verifies absence over its own orbs");
     assert!(read.rank_is_defined(), "a fully observed cocycle HAS a class");
     assert_eq!(read.rank, 1, "one independent cycle, carrying charge: D = 1");
@@ -369,7 +369,7 @@ fn a_chord_fills_the_triangles_and_the_capacity_becomes_strain() {
     state.bonds = vec![bond(1, 2, 3), bond(2, 3, 3), bond(3, 4, 3), bond(4, 1, 3), bond(1, 3, 1)];
 
     let read = read_entangled(&state);
-    assert!(!read.residuals.is_empty(), "the chord fills a triangle that does not compose");
+    assert!(!read.symmetry_foundation.is_empty(), "the chord fills a triangle that does not compose");
     // The read STANDS (the struck residual clause, 2026-08-01). Filling
     // a triangle converts topology into strain; it does not make the
     // universe unreadable. Both readings are the same fact seen through
@@ -453,4 +453,187 @@ fn the_projection_carries_every_channel() {
     let delta = project(&orbs(2));
     assert_eq!(delta.fiber(), CHANNELS, "one coordinate per obligation channel");
     assert_eq!(delta.dim(), 2, "entities are orbs");
+}
+
+#[test]
+fn the_degree_rises_above_the_ground() {
+    // THE MISSING HALF (operator ruling 2026-08-02: *this is basically a
+    // constant — D = GROUND*).
+    //
+    // Every prior reading of `D` in this tree returned exactly
+    // `Degree::GROUND`. The floor pins assert `>= GROUND`, the empty and
+    // isolated worlds assert `== GROUND`, and no pin anywhere asserted
+    // the reading MOVE. A meter that has only ever returned its floor is
+    // indistinguishable from a constant, which is the GROUND fault one
+    // level up: that one was declared and never computed, this one was
+    // computed and never observed to change.
+    //
+    // The fixture that shows it was already written — the non-composing
+    // triangle of `obligations_that_do_not_compose_carry_strain`. It
+    // proved the strain and stopped short of the elevation.
+    let mut state = orbs(3);
+    state.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(1, 3, 9)];
+    let read = read_entangled(&state);
+
+    assert!(read.rank_is_defined(), "the complex is fully observed");
+    assert!(
+        read.rank > 0,
+        "a non-composing triangle carries a cycle no frame explains — rank {} ",
+        read.rank
+    );
+
+    let degree = read.degree();
+    assert!(
+        degree.is_above_ground(),
+        "D MUST rise off the floor here: {degree} — otherwise the meter is a constant"
+    );
+    assert!(degree > Degree::GROUND, "strictly above, never merely at");
+    assert_eq!(degree.above(), read.rank, "the elevation IS the circulation");
+    assert_eq!(degree.get(), read.rank + 1, "D = GROUND + circulation, and GROUND is 1");
+
+    // AND THE CONTRAST, in one place so the pair is legible: the same
+    // three orbs with a COMPOSING triangle stay on the floor. The
+    // difference is not the number of obligations — both worlds carry
+    // three — it is whether they compose.
+    let mut flat = orbs(3);
+    flat.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(1, 3, 5)];
+    let composed = read_entangled(&flat);
+    assert_eq!(composed.rank, 0, "2 + 3 = 5 composes — pure frame");
+    assert_eq!(
+        composed.degree(),
+        Degree::GROUND,
+        "and a world of pure frame stands ON the ground, however many bonds it holds"
+    );
+
+    // The polytonic reading (EQUATIONS D1): each surviving grade is a
+    // TONE. The flat world is single-toned at the point; the strained
+    // world is polytonic — the chord it holds is what D counts.
+    assert!(composed.degree().get() == 1, "the flat world is one tone");
+    assert!(degree.get() > 1, "the strained world is polytonic");
+}
+
+// ─── THE FOLD GUARD — the occupancy floor on both offices ───────────
+
+#[test]
+fn a_total_fold_is_lawful_and_carries_nothing() {
+    // The fold as built: the era archived WHOLE, the successor seated
+    // fresh at GROUND. Nothing crosses, so nothing can be under-roomed
+    // and nothing can be dropped.
+    let mut prior = orbs(3);
+    prior.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(1, 3, 9)];
+    assert!(read_entangled(&prior).degree().is_above_ground(), "the era had structure");
+
+    let successor = orbs(0);
+    let archived = vec![1, 2, 3];
+    let verdict = fold_guard(&prior, &successor, &archived);
+    assert_eq!(verdict, FoldGuard::Total, "a whole-era fold carries nothing");
+    assert!(verdict.is_lawful());
+    assert_eq!(
+        read_entangled(&successor).degree(),
+        Degree::GROUND,
+        "and the fresh universe seats on the ground, correctly"
+    );
+}
+
+#[test]
+fn a_fold_that_drops_standing_without_account_refuses() {
+    // V's half. An orb present before, absent after, and ABSENT FROM
+    // THE ARCHIVE has simply ceased. Standing comes from admission and
+    // admission is never revoked — a departure must be into the record,
+    // never into nothing. I6 on the fold: no difference dies without
+    // account.
+    let prior = orbs(3);
+    let successor = orbs(2); // orb 3 gone
+    let verdict = fold_guard(&prior, &successor, &[]); // and unarchived
+    assert_eq!(
+        verdict,
+        FoldGuard::StandingDroppedWithoutAccount { orbs: 1 },
+        "an unarchived disappearance is unaccounted"
+    );
+    assert!(!verdict.is_lawful());
+
+    // Archive it and the same fold is lawful — the orb left into the
+    // record rather than out of existence.
+    assert!(fold_guard(&prior, &successor, &[3]).is_lawful(), "sealed is accounted");
+}
+
+#[test]
+fn a_carry_into_fewer_tones_refuses() {
+    // D's half, and the reason this guard exists. A fold does not
+    // shrink D — it seats a NEW store. So a SELECTIVE carry could land
+    // structure in a universe with fewer tones than it occupies, with
+    // no plane ever closed and the floor still breached.
+    let mut prior = orbs(3);
+    prior.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(1, 3, 9)];
+    let carried_rank = read_entangled(&prior).rank;
+    assert!(carried_rank > 0, "the era carried real circulation");
+
+    // The successor keeps all three orbs and DROPS their obligations —
+    // the structure crossed, the room did not.
+    let successor = orbs(3);
+    assert_eq!(read_entangled(&successor).degree(), Degree::GROUND, "no tones in the successor");
+
+    let verdict = fold_guard(&prior, &successor, &[]);
+    assert_eq!(
+        verdict,
+        FoldGuard::RoomBelowOccupancy { carried_rank, successor_degree: 1 },
+        "carried structure landing in fewer tones than it occupies must refuse"
+    );
+    assert!(!verdict.is_lawful());
+}
+
+#[test]
+fn a_carry_that_keeps_its_tones_admits() {
+    // The lawful carry: the structure crosses and its room crosses with
+    // it. Both floors hold, so the fold admits.
+    let mut prior = orbs(3);
+    prior.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(1, 3, 9)];
+
+    let mut successor = orbs(3);
+    successor.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(1, 3, 9)];
+
+    let verdict = fold_guard(&prior, &successor, &[]);
+    assert_eq!(verdict, FoldGuard::CarriedWithinFloor);
+    assert!(verdict.is_lawful(), "room carried with the structure it holds");
+}
+
+#[test]
+fn the_charge_field_is_carried_whole_never_counted() {
+    // D IS NOT AN INVENTORY (operator ruling 2026-08-02). The rank is
+    // the DIMENSION of the cycle space — how many independent
+    // structures stand — and that is a dimension, never a tally of
+    // rooms. What was reductionist is that the charges were computed
+    // and thrown away: holonomies() returns every cycle with its exact
+    // value, and the read took `.len()`.
+    //
+    // Dimension and volume are different readings, and this pin is the
+    // proof: two worlds of EQUAL RANK carrying DIFFERENT CHARGE.
+    let mut faint = orbs(3);
+    faint.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(1, 3, 6)];
+    let mut heavy = orbs(3);
+    heavy.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(1, 3, 90)];
+
+    let a = read_entangled(&faint);
+    let b = read_entangled(&heavy);
+
+    assert_eq!(a.rank, b.rank, "same dimension — one independent cycle each");
+    assert_eq!(a.degree(), b.degree(), "and therefore the same elevation");
+
+    // The charge field is present and non-empty on both.
+    assert_eq!(a.holonomy.len(), a.rank, "the rank IS the field's dimension");
+    assert!(!a.holonomy.is_empty() && !b.holonomy.is_empty());
+
+    // AND THE WORLDS ARE NOT THE SAME. A count could never say so.
+    assert_ne!(
+        a.holonomy.iter().map(|h| h.value.clone()).collect::<Vec<_>>(),
+        b.holonomy.iter().map(|h| h.value.clone()).collect::<Vec<_>>(),
+        "equal rank, unequal charge — the volume the structure holds \
+         differs, and reading only the count discards exactly that"
+    );
+
+    // Each charge keeps its POSITION too: which pair, which layer.
+    for h in &b.holonomy {
+        assert!(h.i < 3 && h.j < 3, "the charge names where it stands");
+        assert!(h.value != ratio(0, 1), "a carried charge is non-zero");
+    }
 }

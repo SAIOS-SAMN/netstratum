@@ -15,7 +15,7 @@
 //!   `C(Δ) = 0` iff the cocycle condition holds — that and nothing more.
 //!   **C HAS NO OPERATIONAL FUNCTION** (operator ruling 2026-08-01): it
 //!   is not a score, not a gauge, not a gate, and no engine path
-//!   consults it. It is an L1 collapse for a HUMAN LENS only. The word
+//!   consults it. It is an L1 collapse for an OPERATOR LENS only. The word
 //!   "converged" is struck from this crate — zero says the relations
 //!   compose, never that anything was finished or emptied.
 //! - [`coboundary_reduce`] — projection onto the canonical H¹
@@ -37,7 +37,7 @@ pub mod reduce;
 
 pub use cage::{consult, Exact, Lens, Proposal};
 pub use capacity::{
-    capacity, circulation, divergence, egress, ext_x, ground, preserves_hodge_split, Degree, Egress,
+    capacity, circulation, divergence, ext_x, flux, ground, preserves_hodge_split, Degree, Flux,
     Extent,
 };
 pub use delta::{coherence_functional, for_each_residual, magnitude, Delta};

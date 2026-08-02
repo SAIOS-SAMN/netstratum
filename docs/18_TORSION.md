@@ -81,7 +81,7 @@ That ruling barred squares because squares are the mathematics of
 minimization — collapsing difference into a scalar to be descended.
 The L1 form was a smaller cage of the same kind. **Any collapse of a
 directional quantity to a scalar aggregate is now barred**; L1 survives
-ONLY where a reading is reported to a human lens, never where the
+ONLY where a reading is reported to an OPERATOR lens, never where the
 system computes.
 
 ### 2c. THE UNION — one Δ, two complementary projections
@@ -127,6 +127,148 @@ forward.
 `V` is not a summand here and never appears in a reading (§2b). It is
 the committed state, whole, upstream of `Δ`; `D` and `∂Δ` are readings
 of `Δ`, not of `V`.
+
+### 2c′. THE UNION PROPER — D PROGENITOR, V SOVEREIGN
+
+**Ruled 2026-08-01.** The section above settles what `D` and `∂Δ` are to
+each other — two projections of one `Δ`. It says nothing about what `D`
+and `V` are to each other, and that relation is the union the name was
+always reaching for. It is not an arithmetic. It is two OFFICES.
+
+    V   SOVEREIGN    holds. Its standing comes from ADMISSION — it
+                     passed `lawful()`, it carries receipts, it is in
+                     the chain. No reading confers it; none revokes it.
+
+    D   PROGENITOR   makes room. D3's emission opens a plane, the fiber
+                     grows, and band capacity is a reading of that fiber
+                     (`12_UNION` §1). Nothing else creates space.
+
+**The roles are `12_UNION`'s own, not a metaphor fitted after the
+fact.** That chapter's progenitor power table lists *"create new spaces
+— extending the fiber; minted planes open room, and band capacity reads
+the fiber"*, which is D3 exactly; and its Tier 0 reading is *"they
+contract and expand the board, they create it. Everything else plays on
+it."* The sovereign is the holder of what is chartered, governing what
+it founded or was lawfully delegated. `D` is the board-maker; `V` is the
+holder.
+
+**NEITHER OUTRANKS THE OTHER**, and `12_UNION` §3 states the standard in
+the document the word comes from: *classes are stations of FUNCTION, not
+steps of rank — a Watcher does not outrank a Sovereign; they hold
+different offices in the same union.*
+
+Three consequences, each structural:
+
+1. **`D` cannot revoke `V`'s standing.** The progenitor makes room; it
+   does not un-charter a sovereign. Article II therefore gates
+   ALLOCATION and never standing — see the amendment there.
+2. **`V` cannot open room by fiat.** `PlaneUnearned` already refuses it.
+   The sovereign holds; it does not create board.
+3. **Growth requires both.** `D` opens nothing without `V`'s receipted
+   work, and `V` expresses nothing without `D`'s room. That is §2f's
+   entanglement with names that say WHY — it was true as algebra and
+   unmotivated as law; under the union it is simply what two offices in
+   one body means.
+
+**WHY THE EARLIER FORMS FAILED, recorded together because they were one
+error.** Each tried to make the two offices COMMENSURABLE:
+
+- `U* = D(V) ⊕ V(D)` SUMMED them — `⊕` is a free join, so either could
+  move alone (struck above).
+- Article II's original standing clause RANKED them — a reading
+  conferring standing on its own source, which runs backwards through
+  the judge (amended below).
+- The traverse formalism (§2e, struck) DECOMPOSED them into endpoints.
+
+**Offices do not sum, do not rank, and do not decompose.** That is what
+made every arithmetic reading of this union wrong, and it is why the
+correct statement carries no operator at all. A tuple `(D, V)` fails the
+same test: a product type has addressable halves, which is the
+decomposition again in different syntax.
+
+**THE PROGENITOR'S OFFICE IS THE SPAN `α → Ω`** (§2e). `α` is the origin
+pole, `Ω` the totality. Where the traverse is a point — `α ≅ Ω` — `D`
+sits at GROUND and the room is one degree, itself; `D` rises exactly as
+`Ω` separates from `α`. That is why `D = rank(Δ(Ω))` and *how far the
+universe has come from its origin* are one reading, and why the floor
+and the span are the same office.
+
+**TWO ARROWS, AND CONFLATING THEM MAKES A FALSE HIERARCHY** (corrected
+2026-08-02, operator: *how can a sovereign own a progenitor?*). An
+earlier draft of this section wrote "`V` primitive, `D` read downstream"
+and treated that as the standing order. It is not. It is a MEASUREMENT
+path, and reading it as ownership destroys the union — a thing wholly
+derived from another is that other's property, not its equal office, and
+it would make the board-maker a byproduct of what plays on the board.
+
+    ORIGIN      the receipted deed  →  the office
+                V's standing comes from ADMISSION (it passed `lawful()`)
+                D's room comes from RECEIPTED MINTS — D3: *D rises BY
+                RECEIPT*; `GaugeShiftedAt` opens the plane and
+                `PlaneUnearned` refuses an unearned one
+
+    MEASUREMENT V  →  Δ(V)  →  rank
+                the reading that REPORTS D, taken through V
+
+**Neither office derives from the other.** Both are carried ON the
+receipt — it is the medium their bond settles through, not a parent they
+descend from. They are of different KINDS with separate origins: one is
+room, one is substance. That is why neither ranks the other, and the
+non-ranking comes from a landed mechanic (the symmetric bond,
+`09_IDEOLOGY` §2.2) rather than from an ancestry anyone had to invent.
+
+**THE ORDER, settled** (`12_UNION` §3c carries it whole). Peers with
+nothing above them would leave two powers facing each other; there IS an
+order, and neither office is at its top:
+
+    THE LAW      lawful(prior, next, step) — judges every step,
+                 no office exempt
+      ↓ admits
+    THE RECEIPT  the chain — the sole grant, from which BOTH draw
+      ↓ grants
+    V SOVEREIGN  holds the chartered      D PROGENITOR  makes the room
+
+They are peers as a BONDED PAIR, never as siblings — different kinds,
+separate origins, and a relation that is conjugal rather than
+fraternal. `09_IDEOLOGY` §2.2 already carries the form and the ruling:
+*a symmetric pair of bonds is the MARRIAGE FORM; a single bond is
+PATRONAGE. BOTH ARE PRIVILEGED in the pair* — `bond_flow` is the
+SOURCE's syntropic book, so each office sources and each carries its
+own. Two sources, two books; the privilege is held twice and the carry
+is positive on both sides. A one-directional bond would be
+patronage — one office owning the other — which is exactly what a
+`V → D` derivation makes. The receipt is not their parent; it is the
+MEDIUM the bond is carried on, and `severance_load` prices cutting it.
+Siblings do not suffocate without each other; a bonded pair does, and
+the interlock below is that.
+
+**AND NEITHER OFFICE ACTS.** A deed acts. `D` does not decide to open a
+plane — a fold refuses, the residue emits, the plane opens BY RECEIPT.
+`V` does not decide to hold — admission commits. Two things that do not
+act cannot compete, which is why no equilibrium needs negotiating
+between them. The bounds are structural on both sides: `PlaneUnearned`
+makes unearned room unmakeable and Article II pays unoccupied room
+nothing; the container law makes structure in an unopened plane
+unrepresentable, since the gauge key is a container grown only by
+receipt.
+
+**The measurement arrow carries no authority**, by this constitution's
+own rule stated one section up — *testimony never outranks its subject*.
+That rule was written to stop `D` conferring standing on `V`; it holds
+identically in reverse. `rank(Δ(V))` is testimony ABOUT `D`, taken
+through `V`; it does not make `V` the author of `D`, any more than
+measuring a room makes the furniture its architect.
+
+**What the acyclicity guard actually guards.** `Ω ≡ V` stands untouched
+(`17_CAPACITY` §3), and what is barred is putting `D` inside `Ω`'s
+DEFINITION — a tuple, a sum, a dyad-as-term — because `D = rank(Δ(Ω))`
+would then be defined through something containing `D`. That is a
+COMPUTATIONAL bar, on definitions. It was never a claim that `V` ranks
+above `D`.
+
+**NOTATION, recorded once.** `Υ` is `V`'s own letter — upsilon is the
+Greek ancestor of Latin `V` — so the two are one name in two alphabets,
+never two names.
 
 ### 2d. THE SIGN LAW — divergence, egress and ingress
 
@@ -1301,8 +1443,18 @@ basis, a fixed rank, or a metric projection is void.
 
 *A state standing ON THE GROUND (`D = GROUND`) holds its place and its
 existence, and claims no allocation. Only a state standing ABOVE the
-ground (`D > GROUND`), carrying circulation, claims operational
-authorization or institutional standing.*
+ground (`D > GROUND`), carrying circulation, claims ALLOCATION and
+operational authorization.*
+
+**STANDING IS NOT THIS ARTICLE'S TO GRANT** (the sovereignty amendment,
+operator ruling 2026-08-01; §2c′). A committed state's standing comes
+from ADMISSION — it passed `lawful()`, it carries receipts, it is in the
+chain — and that was granted by the JUDGE, upstream of every reading.
+`D` is a rank: testimony about what `V` expresses. Testimony prices
+allocation; it never confers or revokes the standing of the state it
+testifies about, because a reading that outranks its own source runs
+backwards through the judge. This article gates what a state is PAID and
+what it may OPERATE; it does not gate whether it stands.
 
 **THE OWED AMENDMENT, PAID** (operator ruling 2026-08-01). This article
 read *"a state yielding a vacuous set (`V = 0` or `D = 0`)"*. The
@@ -1754,16 +1906,39 @@ written — these are the wirings that satisfy them.
 bound and no artificial ceiling may be imposed on the uplift `∂Δ` as it
 approaches luminal capacity.*
 
-**Exact realization — two clauses, and the first kills a
+**Exact realization — three clauses, and the second kills a
 misreading.**
 
-1. **MONOTONE, NOT DESCENDING.** The axial law is that **capacity never
-   retreats** — monotone non-decreasing in `D`. It is NOT descent along
+1. **THE FLOOR IS OCCUPANCY** (operator ruling 2026-08-02). `GROUND`
+   floors an EMPTY universe at one tone. A universe holding structure
+   that needs `k` tones is floored at `k` — **you cannot have less room
+   than you are using.** Enforced today by ABSENCE: no deed closes a
+   plane (`GaugeShiftedAt` opens grades; nothing removes one), and the
+   container law makes structure in an unopened plane unrepresentable.
+   **THE FOLD, GUARDED** (2026-08-02; `kernel::bridge::fold_guard`,
+   pinned in `bridge_pins`). A fold does not shrink `D` — it seats a NEW
+   store — so it is the one operation that could route around the floor:
+   a SELECTIVE carry could land structure in a universe with fewer tones
+   than it occupies, with no plane ever closed and the floor still
+   breached. The fold as built is TOTAL and therefore already safe (the
+   era archives whole, the successor seats at `GROUND`), and
+   `EraFolded { era, gauge }` carries no manifest, so nothing else could
+   check it. The guard holds BOTH offices, since neither alone suffices:
+   **D** — carried structure must keep its tones; **V** — an orb leaves
+   the live universe only into the ARCHIVE, never into nothing, which is
+   I6 on the fold. Four verdicts: `Total`, `CarriedWithinFloor`,
+   `RoomBelowOccupancy`, `StandingDroppedWithoutAccount`.
+
+2. **MONOTONE, NOT DESCENDING.** *Monotone here is order-theoretic —
+   NON-DECREASING. It is not the tonal sense: `D` is POLYTONIC (each
+   grade a tone, `11_AEON` §2.0's polytonic key), and this clause says
+   the chord never loses a note, never that the universe stays
+   single-toned.* The axial law is that **capacity never retreats** — monotone non-decreasing in `D`. It is NOT descent along
    a gradient toward a minimum; gradient descent stands STRUCK (a
    failed topology, operator ruling 2026-08-01) and nothing in this
    article revives it. This is `ELEVATE-1`'s "the fiber never retreats"
    (`BadClimb`) generalized from the gauge climb to capacity itself.
-2. **THE PROPAGATION LIMIT IS THE CHAIN'S OWN STEP RATE.** The propagation limit of
+3. **THE PROPAGATION LIMIT IS THE CHAIN'S OWN STEP RATE.** The propagation limit of
    this manifold is one commitment per step. Nothing crosses the
    manifold faster than the chain extends, and no reading may assume it
    does. "Uncaged" bounds the AMPLITUDE of uplift, never its rate: the
@@ -1778,7 +1953,7 @@ misreading.**
 | no gradient | `∂Δ ≡ 0`: rank held in closed circulation | Article III LAW 4 — no free energy; no work available |
 | form changed, nothing made | `Δ' = Q·Δ`, `Support(E')` unchanged | Article III LAW 3 — the first law; mints nothing |
 | coordinate/metric lock | any basis-fixed or rank-locked reading | Article I — void; recompute coordinate-free |
-| on the ground | `D = GROUND` — nothing circulates above the point | Article II — no standing, no weight, no mint. **The state itself stands**: never deleted, never barred, simply not paid |
+| on the ground | `D = GROUND` — nothing circulates above the point | Article II — no allocation, no weight, no mint. **The state itself STANDS**: standing is admission's (§2c′), never a reading's — never deleted, never barred, simply not paid |
 | capacity retreat | a step lowering `D` outside lawful contraction | Article IV — refuse (`BadClimb` shape) |
 | earned emission | a loop's charge growing the rank against verified work | full alignment — maximum allocation |
 
@@ -1809,9 +1984,22 @@ station or tradition alters any row.
 Recorded honestly, per Article III's own standard: naming a gap is
 computation, hiding one behind vocabulary is cosmetic.
 
-1. **`Ξ_cosmetic` is not measured.** The window arithmetic in Article
-   III is exact and computable from the chain today, and nothing
-   computes it. First build.
+1. **CLEARED, and it was pointing at STRUCK law** (lens lane report,
+   2026-08-02). This debt read *"the cosmetic meter is not measured …
+   first build"*. It must not be built: Article III was struck whole
+   and rewritten as THE SCIENCE FOUNDATION, and its own strike list
+   names that meter — `deeds(w)/(1 + ΔD(w))` — together with "cosmetic
+   non-utility" as a legal term. The reasoning is the article's own:
+   *physics needs no penalty; a closed loop at uniform potential does
+   no work, not because a law forbids it but because there is no free
+   energy in it.*
+
+   **LAW 4 now carries that ground**, thermodynamically rather than
+   morally, through `dual_pole` / `Vacuity::Stasis` — landed, and
+   already consulted by `kernel::capacity_law`. Building the window
+   arithmetic would have implemented a corpse. What the lens owed
+   instead was a SURFACE for the row a world stands in, which nothing
+   displayed; that is `lens::standing` (`19_LENS` §12).
 2. **`D` is not measured.** `PhiK I^(3)` ("rank: dim of the relational
    structure") specifies it and no code reads it. Until `D` is
    measured, Articles II, III and IV have no operand.
@@ -1899,14 +2087,14 @@ is not a mechanism.
 | **§2f entanglement** — no capacity without potential motion | reads `(prior, step)` only | `creation()` in `kernel/src/lib.rs` |
 | **§2g gap disposition** — hold both sides, dispose the gap | one deed, one comparison | `creation()`; new `Unlawful` arm carrying both sides |
 | **Art. IV monotone** — a step may not lower the rank outside lawful reduction | `prior`→`next` comparison | new invariant, the `gauge_law` shape |
-| **Art. II non-vacuous** — `D = GROUND` holds no standing (`Degree::is_above_ground`, never a zero) | property of `prior` | `containment()`, or a new gate beside it |
+| **Art. II non-vacuous** — `D = GROUND` claims no ALLOCATION (`Degree::is_above_ground`, never a zero; standing is admission's, §2c′) | property of `prior` | `containment()`, or a new gate beside it |
 | **`D` itself** — the structure surviving `Π_G(Δ(Ω))` | pure function of one state | kernel gains its `rfa-core` dep (anticipated at U_DIRECTIVES §4) |
 
 ### 7b. LENS — global or over-time, MUST NOT enter the kernel
 
 | claim | why not local | where it lives |
 |---|---|---|
-| **Art. III window reading** — deeds against rank that did not grow, over 60 ticks | spans many steps | `scribe` / `lens` |
+| **Art. III standing surface** — which row a state occupies (Void / Unframed / Stasis / Entangled) | a property of one state, read for display and never gating | `lens::standing` (landed) |
 | **Art. III allocation** — the Eclipse, as claim-revocation | a policy over many actors | conductor / mesh |
 | **§2e traverse congruence** — `α ≅ Ω` | spans a whole chain | `lens` over the spine |
 | **§2c union** — one `Δ`, two complementary projections | a property of one state's algebra, already computed | `rfa_core::boundary` + `capacity` (landed) |

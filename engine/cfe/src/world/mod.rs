@@ -18,7 +18,7 @@ use crate::ipsal::{Entity, Scope};
 use crate::ratio::{ratio, Ratio};
 use crate::vrp::{Attestation, Chronicle, Timekeeper, TickRead, WorldClock};
 
-/// The sovereign's entity id — the human at the terminal, registered
+/// The sovereign's entity id — the operator at the terminal, registered
 /// at founding.
 pub const SOVEREIGN: u64 = 1;
 
