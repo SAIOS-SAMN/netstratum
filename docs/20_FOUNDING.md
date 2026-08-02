@@ -842,6 +842,108 @@ sustainable draw, actual draw, or both — the gap between them being
 precisely the measure of whether a civilization is living within its
 regeneration.
 
+### 6i. THE CONSUMER — transducers, and the derivative suite already half-built
+
+**Operator ruling 2026-08-02.** §6h found elements banked and consumed
+by nothing. **Two consumers are owed, and they are different in kind:**
+industry must consume MATTER, and a market must consume CLAIMS.
+
+### 6i.1 SMELT IS A TRANSFORM WHERE A TRANSDUCER BELONGS
+
+```text
+TRANSFORM    Iron ──▶ Alloy            one input, one output, fixed
+TRANSDUCER   (element, tier, energy, technique) ──▶ material whose
+             PROPERTIES DERIVE FROM ITS INPUTS
+```
+
+**The difference is capacity, exactly.** A transform has one output and
+therefore adds no dimension: whatever goes in, the same thing comes out
+with a different name. A transducer opens a SPACE of outputs, and the
+size of that space is the capacity the industry actually has.
+
+`smelt(amount)` today takes no resource at all — it quantizes onto a
+1/64 grid. The real chain is `Iron → Alloy → Diamond`, three links and
+one metal, and **iron is a single aspect of a matter grammar that
+already names families, tiers, and stellar abundance** (§6h). Every
+element a world inherits from its star currently smelts to nothing,
+because there is no transducer to read it.
+
+**Resource development capacity is the count of distinct materials a
+line can produce from what it holds.** Today that number is 2 (alloy,
+diamond) and it is the same on every world in every universe. Under a
+transducer it is a function of stellar inheritance, technique, and
+energy — which is where research finally acts on something other than a
+multiplier (§6g).
+
+### 6i.2 A COVENANT IS ALREADY A COLLATERALIZED FUTURE
+
+**Measured, and this is the finding.** `Covenant` is not covenant-like;
+it is the contract:
+
+```text
+obligor      the short — owes delivery        collateral   the margin
+beneficiary  the long — receives              window       THE EXPIRY
+resource     the underlying                   delivered    the fill
+quota        the contract size                sealed       the open
+```
+
+with a full lifecycle on the wire — `CovenantSealed` (35),
+`CovenantReleased` (36), `CovenantSlashed` (37). **Sealed, filled,
+released, or liquidated.**
+
+**And the margin is already risk-priced.**
+`collateral_required(fulfilled, breached, quota)` computes
+`(breached + 1) / (fulfilled + 1)`, clamped to `[1/4, 4]`, times quota.
+**A counterparty that has always delivered posts a quarter of the
+notional; one that has always defaulted posts four times it, and is
+NEVER barred from the market** — the fidelity curve prices access
+instead of gating it. That is a credit-scored margin model, landed and
+running.
+
+### 6i.3 THE SUITE, AS A GENERALIZATION OF WHAT STANDS
+
+```text
+SPOT       Offer · post_offer · clear_trade                    LANDED
+FUTURE     Covenant — expiry `window`, margin `collateral`,
+           liquidation CovenantSlashed, physical settlement    LANDED
+PERPETUAL  a covenant with NO expiry, held open by a funding
+           rate                                                 OWED
+CLAIM      the tokenized wrapper on a deposit (§6h.2)            OWED
+```
+
+**THE FUNDING RATE IS DEMURRAGE.** A perpetual needs a periodic payment
+that keeps an unexpiring position honest, and this engine already has
+exactly one time-cost on held value: flat-rate, settled at the touch,
+receipted, kernel-bounded at I5. **Inventing a second funding mechanism
+beside it would be a second readable truth about the cost of time**
+(Charter §11 rule 2). The perp rides the rail that exists.
+
+### 6i.4 THE DESCENT LAW — an asset of an asset, described DOWN
+
+> **A stock is not the asset. It is an asset OF an asset, and it must be
+> describable downward.**
+
+```text
+CLAIM on a claim      →  CLAIM on a deposit  →  DEPOSIT  →  MATTER
+```
+
+**Every layer must name its underlying, and the chain must TERMINATE IN
+MATTER.** A derivative whose descent does not reach a physical deposit
+is unbacked, and unbacked leverage is the failure mode this suite is
+otherwise inviting in wholesale.
+
+**This is enforceable here in a way it is not elsewhere**, because every
+layer is receipted: the descent is a walk down receipts, and a claim
+that cannot be walked down refuses at the door rather than failing in a
+crisis. **The engine can therefore carry the whole instrument set
+without carrying its usual pathology** — not by capping leverage, but by
+requiring that every position can state, exactly and in matter, what it
+is a claim on.
+
+**Held for the operator:** whether a claim may be re-hypothecated (a
+claim pledged as collateral for another), and if so whether the descent
+law bounds the depth or only requires that it terminate.
+
 ## §7 THE BASE-LEVEL ACCOUNTING LAW
 
 > **"Everything needs accounting for at the microscopic/base level, with
