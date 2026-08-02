@@ -331,9 +331,9 @@ THESIS-NOT-SPEC: that the residues form a group has real math behind it
 law — how two residues combine into the new generator — is UNDEFINED and is a
 real piece of design owed.
 
-### 5.4 The mechanism — dimensional resolution (from the v0.1 ancestor)
+### 5.4 The mechanism — dimensional resolution (from the v0.1 predecessor)
 
-The ancestor `/opt/ipsal-autic-v0.1/repos/convergence-engine` already built
+The predecessor `/opt/ipsal-autic-v0.1/repos/convergence-engine` already built
 the replacement for gradient descent. It is a bounded cycle:
 
     unfold:  raise dimensionality when the residual needs dimensions the
@@ -378,7 +378,7 @@ re-sync), `DIMENSIONAL_BLOCKCHAIN.md` (the two-chain, stasis, exact-rational
 per-dimension agreement), `DIMENSIONAL_RESOLUTION.md` (the unfold/fold
 philosophy). ALL of it is AI-generated, marked FRONTIER/sandbox, unwitnessed.
 **Take the DESIGN, re-witness red-first here** — the NS-3 "spec from the
-working ancestor" precedent. Import no sandbox code.
+working predecessor" precedent. Import no sandbox code.
 
 ### 6.2 Already landed in mature form (do not rebuild)
 
@@ -458,7 +458,7 @@ LAST — nothing replicates upward until this universe is lawful.
 - **coder-04:** the snapshot codec (the byte monopoly, schema versions), the
   spine, and the excision (landed). The kernel is encoding-blind by contract, so these
   never block each other; the seam is the commitment shape
-  `H(schema‖version‖bytes‖parent‖coordinate)` — spine-produced, kernel-blind.
+  `H(schema‖version‖bytes‖predecessor‖coordinate)` — spine-produced, kernel-blind.
 - **coder-01:** the economics — MERCHANT-1 (arbitrage), VENUE-1 (bourse),
   FUTURE-1 (futures), and the transferred lanes (element apertures, dispersal
   pricing, WANT-demand). Rule in effect: trades sum to the melt via an
@@ -473,7 +473,7 @@ LAST — nothing replicates upward until this universe is lawful.
 2. `docs/00_CHARTER.md` §11 (the law, plain).
 3. `engine/kernel/CHARTER.md` (the invariants, equations, algorithms).
 4. `engine/kernel/src/lib.rs` (what exists — I1 only).
-5. The v0.1 ancestor `fold.rs` + `mdc.rs` + `DIMENSIONAL_RESOLUTION.md` (the
+5. The v0.1 predecessor `fold.rs` + `mdc.rs` + `DIMENSIONAL_RESOLUTION.md` (the
    convergence mechanism to re-derive — design, not code).
 6. `HANDOFF.md` / `PICKUP.md` for the game-dev practice and the live board.
 

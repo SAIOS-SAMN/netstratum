@@ -6,7 +6,7 @@ documents. The law half answers one question: **how does a vocabulary
 grow when the nodes that use it are distributed and may not agree?**
 
 Subordinate to `00_CHARTER.md`. The tag registry (`dop.rs` header) is
-this document's older sibling and its precedent — one code, one meaning,
+this document's older counterpart and its precedent — one code, one meaning,
 forever.
 
 ---

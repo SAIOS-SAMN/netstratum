@@ -38,7 +38,7 @@ fn world_driven_deeds() -> Vec<ClosureEvent> {
         ClosureEvent::WantRelieved { orb_id: 1, kind: 1 },
         ClosureEvent::StarAged { class: 5 },
         ClosureEvent::RouteLapsed { deal: 1 },
-        ClosureEvent::VoidShare { deal: 1, resource: Resource::Iron, amount: ratio(1, 1) },
+        ClosureEvent::VoidShare { orb_id: 1, deal: 1, resource: Resource::Iron, amount: ratio(1, 1) },
         // Mesh / universe-ledger deeds (W-D non-fold): no bank, no actor.
         // WITNESS TRUTH-UPDATE (U2d's gauge law): GaugeShifted and
         // Diverged DECLARE key moves, so they left this identical-

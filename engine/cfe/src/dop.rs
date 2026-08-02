@@ -140,7 +140,11 @@
 //!         the melt as a first-class receipt on the receiving book:
 //!         sent = received + void share; every deal in the universe
 //!         sums to zero under ONE rule; losses are receipted, never
-//!         silent; the judge only sums, never recomputes φ·D)
+//!         silent; the judge only sums, never recomputes φ·D.
+//!         `orb_id` ADDED 2026-08-02 (SYN-6): the record named the
+//!         DEAL and never the BEARER, so the melt was receipted and
+//!         credited to NO ONE — visible in aggregate, unattributable
+//!         to any book. Wire: LE64 orb ‖ LE64 deal ‖ resource ‖ ratio)
 //!   83 The committed-state container (CODEC-1, §11 ladder #35 — the
 //!         artifact digests bind: schema-versioned canonical bytes of
 //!         the WHOLE committed state, engine/codec's monopoly; one
@@ -196,9 +200,61 @@
 //!   In-value codes opened at N4 (they ride existing orb tags, no new
 //!   TLV tag): Resource::Crystal = 7 (banked entry, tag 18);
 //!   ZoneKind::Resonator = 7 (zone entry, tag 17).
+//!   90 ClosureEvent::SovereignUnionSealed (D5 — THE SOVEREIGN
+//!         UNION: the offices D(Ω) PROGENITOR and V(Ω) SOVEREIGN
+//!         entered into union under a 25-year REVIEW HORIZON.
+//!         Parties are OFFICES, never orb ids — seating an office as
+//!         a colony reduces a global field to a local node. A bonded
+//!         DYAD: neither party derives its legitimacy from the other
+//!         (17 §3 — both are readings of Ω, neither defined through
+//!         the other). Ruled 2026-08-02.
+//!         NOT 0x40: tag 64 is the NS-5 mesh head, and a collision
+//!         there would decode a mesh announcement as a union.)
 
 use crate::ratio::{self, ratio, Ratio};
 use crate::tlv;
+
+/// THE TWO OFFICES (`EQUATIONS` D5, `18` §2c′) as a TYPE, so the office
+/// can never be confused with the root ENTITY. `world::SOVEREIGN` is
+/// `entity_id = 1` — the actor holding every grant under NS-6
+/// containment — while `Office::Sovereign` is `V(Ω)`: what STANDS, not
+/// who ACTS. The collision was undocumented until 2026-08-02; this type
+/// is the disambiguation, so no reader has to infer which sovereign a
+/// line means.
+///
+/// A BONDED DYAD, never a hierarchy: neither office derives its
+/// legitimacy from the other (`17` §3 — both are readings of `Ω`,
+/// neither defined through the other; D5 — both are PRIVILEGED).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum Office {
+    /// `D(Ω)` — the PROGENITOR. Makes the room; owes room that was
+    /// EARNED (`PlaneUnearned` refuses otherwise).
+    Progenitor = 0,
+    /// `V(Ω)` — the SOVEREIGN. Holds the substance; owes work that was
+    /// RECEIPTED (admission by `lawful()`).
+    Sovereign = 1,
+}
+
+impl Office {
+    /// The wire byte, and the only lawful reading of one.
+    pub fn from_wire(byte: u8) -> Option<Self> {
+        match byte {
+            0 => Some(Self::Progenitor),
+            1 => Some(Self::Sovereign),
+            _ => None,
+        }
+    }
+}
+
+/// THE RULED REVIEW HORIZON — 25 years at 60 ticks a year (`11` §1).
+///
+/// **A REVIEW, NEVER AN EXPIRY** (operator ruling 2026-08-02). A
+/// `BOND-1` term SETTLES and ENDS at `sealed + term`; were the union
+/// deeded that way, D5's breach clause would fire at stamp 1500 — *D
+/// stops and V suffocates; V stops and D freezes* — and the foundation
+/// would lapse on a timer. The union STANDS past this mark. What falls
+/// due is the operator's re-approval, and nothing else.
+pub const UNION_REVIEW_HORIZON: u64 = 1500;
 
 /// The resources of the first slice.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -787,7 +843,7 @@ pub enum ClosureEvent {
     ScopeGranted { agent: u64, scope: crate::ipsal::Scope },
     /// N3 — a grant revoked; the agent's next such action refuses.
     ScopeRevoked { agent: u64, scope: crate::ipsal::Scope },
-    /// P1 — a daughter colony charted on a new planet: the founding
+    /// P1 — a charted colony charted on a new planet: the founding
     /// reserves MOVE from the source orb's bank (conservation — a
     /// charter mints nothing).
     ColonyCharted { orb_id: u64, source_orb: u64, name: String },
@@ -819,13 +875,14 @@ pub enum ClosureEvent {
     /// StarClass wire code. Once per world; fixes every orbit's L.
     StarCommissioned { class: u8 },
     /// THERMAL-1 (05 §1.1) — a colony sited on its orbit: albedo A and
-    /// orbit radius r, the orb's terms in the master equation.
-    /// THERMAL-1, extended 2026-08-02 with `theta` — a fraction of a
-    /// TURN, `[0, 1) ⊂ ℚ`. ADDITIVE-TRAILING on tag 25: the decoder
-    /// reads three fields and a receipt without the fourth yields
-    /// `None`, so no rehash and no new tag. (`0x41` was proposed and is
-    /// RETIRED under Charter §11 — `recurrence_guard` fails the build
-    /// on reuse.)
+    /// orbit radius r, the orb's terms in the equilibrium baseline.
+    ///
+    /// Extended 2026-08-02 with `theta` (longitude) and `psi`
+    /// (inclination), each a fraction of a TURN, `[0, 1) ⊂ ℚ`. Both are
+    /// ADDITIVE-TRAILING on tag 25: the decoder reads three fields and a
+    /// receipt without the rest yields `None`, so no rehash and no new
+    /// tag. (`0x41` was proposed and is RETIRED under Charter §11 —
+    /// `recurrence_guard` fails the build on reuse.)
     PlanetSited {
         orb_id: u64,
         albedo: Ratio,
@@ -1130,7 +1187,39 @@ pub enum ClosureEvent {
     /// deal — receipted on the receiving book by the same transition
     /// that computes the trade. Banks never move on it; it is the
     /// loss made visible.
-    VoidShare { deal: u64, resource: Resource, amount: Ratio },
+    ///
+    /// **`orb_id` ADDED 2026-08-02 (SYN-6, operator approved).** The
+    /// record named the DEAL and never the BEARER, so the melt was
+    /// receipted and credited to no one: a loss visible in the
+    /// aggregate and unattributable to any book. Every other
+    /// value-bearing receipt in this codec carries the orb that bore
+    /// it — `DemurrageSettled`, `UpkeepSettled`, `AssayStruck` — and
+    /// this one alone did not, which is why `World::value_lost_of`
+    /// could account decay and upkeep per orb and had to leave the
+    /// melt out entirely. The field is FIRST, matching the
+    /// `LE64 ‖ …` layout every orb-bearing record already uses.
+    VoidShare { orb_id: u64, deal: u64, resource: Resource, amount: Ratio },
+    /// D5 — **THE SOVEREIGN UNION**, struck. The offices `D(Ω)`
+    /// PROGENITOR and `V(Ω)` SOVEREIGN enter their union under a
+    /// REVIEW HORIZON.
+    ///
+    /// **PARTIES ARE OFFICES, NEVER ORB IDS.** `BondSealed` carries
+    /// `source: u64, target: u64` — colony ids — and seating an office
+    /// there would reduce a global field to a local node. Both offices
+    /// are named explicitly so the deed is self-describing and so a
+    /// malformed union (two progenitors, two sovereigns) is REFUSABLE
+    /// rather than merely unlikely.
+    ///
+    /// **NO `approved_by_operator` FLAG.** An earlier design carried
+    /// one. A deed is a CLAIM, and a claim that asserts its own
+    /// approval is forgeable by whoever constructs it — the kernel
+    /// would have nothing to check the bool against. Approval is
+    /// established by WHO ACTS: I2 containment already binds the actor
+    /// to the root entity, unforgeably, and that is the signature.
+    ///
+    /// `term_stamps` is a REVIEW horizon, never an expiry: nothing
+    /// settles and nothing lapses when it falls due.
+    SovereignUnionSealed { progenitor: Office, sovereign: Office, term_stamps: u64 },
     /// ROUTE-1: a lane chartered — this book's leg of the pair.
     RouteChartered { deal: u64, eta: Ratio },
     /// ROUTE-1: the lane lapsed on this book (unpaid maintenance).
@@ -1512,11 +1601,17 @@ impl ClosureEvent {
                 ratio::encode(eta, &mut value);
                 tlv::put(79, &value, &mut out);
             }
-            Self::VoidShare { deal, resource, amount } => {
-                let mut value = deal.to_le_bytes().to_vec();
+            Self::VoidShare { orb_id, deal, resource, amount } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&deal.to_le_bytes());
                 value.push(*resource as u8);
                 ratio::encode(amount, &mut value);
                 tlv::put(82, &value, &mut out);
+            }
+            Self::SovereignUnionSealed { progenitor, sovereign, term_stamps } => {
+                let mut value = vec![*progenitor as u8, *sovereign as u8];
+                value.extend_from_slice(&term_stamps.to_le_bytes());
+                tlv::put(90, &value, &mut out);
             }
             Self::RouteLapsed { deal } => {
                 tlv::put(80, &deal.to_le_bytes(), &mut out);
@@ -1929,11 +2024,18 @@ impl ClosureEvent {
             80 => Some(Self::RouteLapsed {
                 deal: u64::from_le_bytes(value.get(..8)?.try_into().ok()?),
             }),
+            90 => {
+                let progenitor = Office::from_wire(*value.first()?)?;
+                let sovereign = Office::from_wire(*value.get(1)?)?;
+                let term_stamps = u64::from_le_bytes(value.get(2..10)?.try_into().ok()?);
+                Some(Self::SovereignUnionSealed { progenitor, sovereign, term_stamps })
+            }
             82 => {
-                let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
-                let resource = Resource::from_wire(*value.get(8)?)?;
-                let (amount, _) = ratio::decode(value.get(9..)?)?;
-                Some(Self::VoidShare { deal, resource, amount })
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let deal = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let resource = Resource::from_wire(*value.get(16)?)?;
+                let (amount, _) = ratio::decode(value.get(17..)?)?;
+                Some(Self::VoidShare { orb_id, deal, resource, amount })
             }
             _ => None,
         }
@@ -1972,7 +2074,7 @@ fn amount_fields(value: &[u8]) -> Option<(u64, Resource, Ratio)> {
     Some((orb_id, resource, amount))
 }
 
-/// THERMAL-1 (05 §1.1): a colony's terms in the master equation.
+/// THERMAL-1 (05 §1.1): a colony's terms in the equilibrium baseline.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ThermalSite {
     /// Albedo A, 0 ≤ A < 1.

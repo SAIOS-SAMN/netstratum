@@ -56,7 +56,7 @@ under sustained pressure or surplus. No two worlds need share a tree.
 | surplus held (banked ≥ 4× heating bill, 8 years) | Long Stores | DemurrageEase 1/2 |
 
 One node per condition kind per orb (idempotent); prerequisites = the
-condition's own history, not a parent-pointer web (parents emerge naturally:
+condition's own history, not a predecessor-pointer web (predecessors emerge naturally:
 you cannot survive 8 famine-years without first being cold).
 
 ## 3a. TECH-1a LANDED (2026-07-29) — the discovery closure + the solar leap

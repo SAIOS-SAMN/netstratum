@@ -308,7 +308,7 @@ impl<T: Exact> Proposal<T> {
 ///
 /// **So `C` is not a prisoner here. `C` is the RESIDENT**, and this is
 /// the door you knock on. He is CONSULTED rather than banished, because
-/// the tools his work requires are exactly the tools that may never
+/// the tools its work requires are exactly the tools that may never
 /// touch the outside.
 ///
 /// `tool` may do ANYTHING internally — floats, a GPU kernel, a sampled

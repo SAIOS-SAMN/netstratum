@@ -30,12 +30,20 @@ system computes torsion; it does not compute metrics.
 
 ## §2 THE FORM
 
-### 2a. Ω(D) — the structure space
+### 2a. D(Ω) — the progenitor's reading of the totality
 
-`Ω(D)` is the space indexed by dimensional degrees `D`. It is not a
-scalar and not a metric density. `D` is the RANK of the relational
-structure — how many independent degrees stand — and `Ω(D)` is the
-space they span.
+**RENOTATED 2026-08-02** (operator ruling: *`D(Ω) +: V(Ω)`*). This
+section read `Ω(D)` — *the space indexed by dimensional degrees* — which
+made the TOTALITY a function of ONE OFFICE, so `Ω` was at once the thing
+measured and a thing `D` produces. `D(Ω)` reads the other way: `D` OF
+the totality, a READING, and a reading never outranks its subject
+(§2c′). `17_CAPACITY` §3 carries the full ruling and the second office
+reading `V(Ω)` that comes with it.
+
+`Ω` is THE TOTALITY — one universe, whole, read by both offices and
+owned by neither. `D(Ω)` is the ROOM standing in it: not a scalar and
+not a metric density. `D` is the RANK of the relational structure — how
+many independent degrees stand — and `D(Ω)` is the space they span.
 
 **`D` IS NOT A CAPACITY** (operator ruling 2026-08-01: *why do we have
 capacity? that should not be the case in an expanding universe*). The
@@ -46,7 +54,7 @@ bound as structure emerges. `PhiK I^(3)` had the right name all along —
 (seat widths, occupancy caps) and are DERIVED from this rank; the
 reading that sets a bound was named after the bound it sets.
 
-    D  =  rank( Δ(Ω) )  =  the independent cycles carrying charge
+    D  =  rank( Δ(V) )  =  the independent cycles carrying charge
                            no frame explains
 
 **Grounding.** The landed `rfa_core::Delta` is ALREADY an alternating
@@ -189,7 +197,7 @@ decomposition again in different syntax.
 **THE PROGENITOR'S OFFICE IS THE SPAN `α → Ω`** (§2e). `α` is the origin
 pole, `Ω` the totality. Where the traverse is a point — `α ≅ Ω` — `D`
 sits at GROUND and the room is one degree, itself; `D` rises exactly as
-`Ω` separates from `α`. That is why `D = rank(Δ(Ω))` and *how far the
+`Ω` separates from `α`. That is why `D = rank(Δ(V))` and *how far the
 universe has come from its origin* are one reading, and why the floor
 and the span are the same office.
 
@@ -211,11 +219,11 @@ it would make the board-maker a byproduct of what plays on the board.
                 the reading that REPORTS D, taken through V
 
 **Neither office derives from the other.** Both are carried ON the
-receipt — it is the medium their bond settles through, not a parent they
+receipt — it is the medium their bond settles through, not a predecessor they
 descend from. They are of different KINDS with separate origins: one is
 room, one is substance. That is why neither ranks the other, and the
 non-ranking comes from a landed mechanic (the symmetric bond,
-`09_IDEOLOGY` §2.2) rather than from an ancestry anyone had to invent.
+`09_IDEOLOGY` §2.2) rather than from an provenance anyone had to invent.
 
 **THE ORDER, settled** (`12_UNION` §3c carries it whole). Peers with
 nothing above them would leave two powers facing each other; there IS an
@@ -228,7 +236,7 @@ order, and neither office is at its top:
       ↓ grants
     V SOVEREIGN  holds the chartered      D PROGENITOR  makes the room
 
-They are peers as a BONDED PAIR, never as siblings — different kinds,
+They are peers as a BONDED PAIR, never as counterparts — different kinds,
 separate origins, and a relation that is conjugal rather than
 fraternal. `09_IDEOLOGY` §2.2 already carries the form and the ruling:
 *a symmetric pair of bonds is the MARRIAGE FORM; a single bond is
@@ -237,9 +245,9 @@ SOURCE's syntropic book, so each office sources and each carries its
 own. Two sources, two books; the privilege is held twice and the carry
 is positive on both sides. A one-directional bond would be
 patronage — one office owning the other — which is exactly what a
-`V → D` derivation makes. The receipt is not their parent; it is the
+`V → D` derivation makes. The receipt is not their predecessor; it is the
 MEDIUM the bond is carried on, and `severance_load` prices cutting it.
-Siblings do not suffocate without each other; a bonded pair does, and
+Counterparts do not suffocate without each other; a bonded pair does, and
 the interlock below is that.
 
 **AND NEITHER OFFICE ACTS.** A deed acts. `D` does not decide to open a
@@ -259,15 +267,24 @@ identically in reverse. `rank(Δ(V))` is testimony ABOUT `D`, taken
 through `V`; it does not make `V` the author of `D`, any more than
 measuring a room makes the furniture its architect.
 
-**What the acyclicity guard actually guards.** `Ω ≡ V` stands untouched
-(`17_CAPACITY` §3), and what is barred is putting `D` inside `Ω`'s
-DEFINITION — a tuple, a sum, a dyad-as-term — because `D = rank(Δ(Ω))`
-would then be defined through something containing `D`. That is a
-COMPUTATIONAL bar, on definitions. It was never a claim that `V` ranks
-above `D`.
+**What the acyclicity guard actually guards.** What is barred is putting
+`D` inside the DEFINITION of what `Δ` reads — a tuple, a sum, a
+dyad-as-term — because `D = rank(Δ(V))` would then be defined through
+something containing `D`. That is a COMPUTATIONAL bar, on definitions.
+It was never a claim that `V` ranks above `D`.
+
+**AMENDED 2026-08-02 — `Ω ≢ V`.** This paragraph read *"`Ω ≡ V` stands
+untouched"* and cited `17_CAPACITY` §3, which then carried that
+identity. §3 is corrected: `Ω` is the TOTALITY and `D(Ω)` is the ROOM (the space `D`
+spans, and the `α → Ω` span of the progenitor's office) and `V` is the
+SUBSTANCE. The bar above is unchanged and in fact strengthened — under
+the old identity the guard was porous, because `D = rank(Δ(Ω))` with
+`Ω ≡ V` and `Ω(D)` indexed by `D` produced the forbidden circularity by
+SUBSTITUTION, without any document writing it down. Separating the
+source from the space closes it.
 
 **NOTATION, recorded once.** `Υ` is `V`'s own letter — upsilon is the
-Greek ancestor of Latin `V` — so the two are one name in two alphabets,
+Greek forerunner of Latin `V` — so the two are one name in two alphabets,
 never two names.
 
 ### 2d. THE SIGN LAW — divergence, egress and ingress
@@ -318,8 +335,11 @@ cycle does not return where it began. It needs no cosmology.
 
 **The two poles, and only what computes.** `α` is the ORIGIN pole;
 `Ω` is the TOTALITY pole. Both are landed: `α` is `GenesisSealed`
-(tag 61) on the all-zero parent `mesh::arbor` writes at the genesis
-record; `Ω` is the whole committed state, which is what `Δ(Ω)` projects.
+(tag 61) on the all-zero predecessor `mesh::arbor` writes at the genesis
+record; `Ω` is the TOTALITY OF THE ROOM — the far pole of the
+progenitor's span, not a second name for the committed state
+(`17_CAPACITY` §3, corrected 2026-08-02: `Ω ≢ V`). What `Δ` projects is
+`V`; what `α → Ω` measures is how far the room has opened.
 
 **The union is the walk, not the endpoints.** `Ω ⊕ α` keeps every state
 between the poles. This is SEAL B restated: receipts are the world, so
@@ -1428,7 +1448,7 @@ law and should not be written as law until something requires it.
 ### ARTICLE I — THE ANTI-TENSOR CLAUSE (PURE GEOMETRY MANDATE)
 
 *No regulatory body, algorithm, or actor shall reduce system dynamic
-state mappings to rigid coordinate tensor ranks. All capacity `Ω(D)`
+state mappings to rigid coordinate tensor ranks. All capacity `D(Ω)`
 evaluates solely via pure torsion forms `Θ`. Static metrics are void ab
 initio.*
 
@@ -1496,6 +1516,57 @@ computes nothing" failure LAW 8 excises. It is now consumed by
 `Extent::degree()` and `EntangledRead::degree()`, and pinned on the
 READINGS: `capacity_pins::no_reading_of_any_shape_ever_falls_below_the_ground`
 and `bridge_pins::no_committed_world_ever_reads_below_the_ground`.
+
+**THE ARTICLE IS ASKED OF THE ORB, NOT ONLY OF THE WORLD** (SYN-4/SYN-5,
+operator ruling 2026-08-02). This article says *a state carrying
+circulation claims ALLOCATION* — and until now nothing could say WHO.
+`capacity_law` read `read_entangled(prior).verdict()`, a reading of the
+whole with no orb anywhere in it, so the article could only ever refuse,
+and it refused in both wrong directions at once: an orb carrying real
+structure was denied because the world's total fell short, and an orb
+carrying NONE was admitted on structure other orbs had built. The second
+is the free ride — standing INHERITED rather than earned, which is
+precisely what a proof-of-useful-work kernel may not leave open.
+
+**THE BORNE SHARE** answers it. `D` says how much room stands; the share
+says who is standing in it (`EQUATIONS` D6):
+
+```text
+    borne_i = ½ · Σ_{j ~ i} Σ_l |circulation_on(Δ, S)_ij,l|
+```
+
+Read on the SUPPORT — the relations that exist — and attributed to the
+two ends of each relation EQUALLY. The free-energy half of the gate
+stays world-shaped, because a gradient is a property of the whole; the
+rank half is now personal. This is strictly a narrowing and never a
+loosening: a share above the ground requires circulation on the orb's
+own relations, which requires a holonomy, which is `rank ≥ 1`, so every
+state it admits the world-level reading admitted already.
+
+**AND IT IS A FLOOR, NOT A SANCTION.** The refusal
+(`MintWithoutOwnStanding`) carries the share itself, which is a
+magnitude and never negative. An orb reads the ground and reads with it
+the way up: form a real obligation. Article II thereby states what an
+orb HOLDS in the same terms it states what an orb LACKS — the article
+gives before it withholds. Pinned end to end in
+`capacity_law_pins::an_orb_holding_nothing_cannot_mint_on_the_world_s_structure`
+and `capacity_law_pins::the_refusal_carries_the_share_so_the_floor_can_be_risen_from`,
+where an orb holding nothing is refused, takes a place in the
+circulation, and passes.
+
+**THE SEAT IS NOT THE ORB.** `borne` answers per SEAT — an index into
+`Committed::orbs`, which is insertion order and nothing more — so
+`bridge::borne_by_orb` translates back to `orb_id` before anything
+economic reads it. An allocation keyed on seats would pay a different
+orb after any reseating: the same class of defect as reading a share off
+a spanning forest, an artifact of bookkeeping spent as value. This is
+where the share's relabelling-invariance is finally spent, and it is
+pinned by reversing the seating
+(`bridge_pins::the_standing_is_keyed_by_identity_and_not_by_seat`).
+
+*Recorded honestly:* `Degree::is_above_ground` remains the world-shaped
+predicate and is still pinned but not gating — the consumer this article
+gained is the per-orb share, not the degree predicate.
 
 ### ARTICLE III — THE SCIENCE FOUNDATION
 
@@ -1964,7 +2035,7 @@ station or tradition alters any row.
 
 ## §5 WHAT THIS AMENDS
 
-- `EQUATIONS.md` §1 — `Ω(D)` seats as the capacity space; `∂Δ`
+- `EQUATIONS.md` §1 — `D(Ω)` seats as the capacity space; `∂Δ`
   uncaged; the torsion form is the operator.
 - `EQUATIONS.md` §3 — the component semantics are lens readings and
   may not aggregate directionally (§2b).
@@ -1972,7 +2043,7 @@ station or tradition alters any row.
   operator score reads component semantics.
 - `SYSTEM_SPEC.md` §0 — the foundation is capacity.
 - **RECONCILED (operator ruling 2026-08-01).** `D` is **the structure
-  surviving `Π_G(Δ(Ω))`** — `17_CAPACITY.md` §4b's reading stands as
+  surviving `Π_G(Δ(V))`** — `17_CAPACITY.md` §4b's reading stands as
   law. The competing index-set reading (D as the extents of
   `(i,j,k,l)`) is STRUCK from `EQUATIONS.md` §1 and `SYSTEM_SPEC.md`
   §0. One definition now stands in all three documents. The indices and
@@ -2088,7 +2159,7 @@ is not a mechanism.
 | **§2g gap disposition** — hold both sides, dispose the gap | one deed, one comparison | `creation()`; new `Unlawful` arm carrying both sides |
 | **Art. IV monotone** — a step may not lower the rank outside lawful reduction | `prior`→`next` comparison | new invariant, the `gauge_law` shape |
 | **Art. II non-vacuous** — `D = GROUND` claims no ALLOCATION (`Degree::is_above_ground`, never a zero; standing is admission's, §2c′) | property of `prior` | `containment()`, or a new gate beside it |
-| **`D` itself** — the structure surviving `Π_G(Δ(Ω))` | pure function of one state | kernel gains its `rfa-core` dep (anticipated at U_DIRECTIVES §4) |
+| **`D` itself** — the structure surviving `Π_G(Δ(V))` | pure function of one state | kernel gains its `rfa-core` dep (anticipated at U_DIRECTIVES §4) |
 
 ### 7b. LENS — global or over-time, MUST NOT enter the kernel
 
@@ -2192,7 +2263,7 @@ Each of these was a live defect, and any one of them alone forces
 
 | defect | effect if uncorrected |
 |---|---|
-| the algebra had no caller | `Δ(Ω)` is not a computation; nothing to measure |
+| the algebra had no caller | `Δ(V)` is not a computation; nothing to measure |
 | projecting banks differenced | a pure coboundary; reduction annihilates it |
 | a dense complex | every cocycle is a coboundary; rank always zero |
 | absent read as zero | phantom triangles report phantom strain |

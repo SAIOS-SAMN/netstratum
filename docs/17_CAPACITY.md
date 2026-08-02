@@ -1,11 +1,11 @@
-# 17 — THE CAPACITY LAW: Δ(Ω) = D
+# 17 — THE CAPACITY LAW: Δ(V) = D
 
 **Status:** SUBORDINATE to `18_TORSION.md` (the constitutional law, four
 articles) and to `EQUATIONS.md` §1. Where any two disagree, the order is
 `00_CHARTER` → `18_TORSION` → `EQUATIONS` §1 → this document.
 
 **§4b OF THIS DOCUMENT STANDS AS LAW** (operator ruling, `18_TORSION`
-§5): `D` is **the structure surviving `Π_G(Δ(Ω))`**. The competing
+§5): `D` is **the structure surviving `Π_G(Δ(V))`**. The competing
 index-set reading — D as the extents of `(i, j, k, l)` — is STRUCK from
 `EQUATIONS.md` §1 and `SYSTEM_SPEC.md` §0. The indices and the arities
 `Delta{dim, fiber}` are the CONTAINER the relation rides on, never the
@@ -99,16 +99,835 @@ This is the positive statement of what the strike of E1 left standing:
 "there is no one master, the system runs many algorithms at many
 scales." The strike removed the chain; this ruling says what is free.
 
-## §3 Ω ≡ V — the unification, and what "no two parts cut out" means
+## §3 Ω ≢ V — the room is not the substance
 
-The operator's clarification says Ω is **the totality of the individual
-universe**. D0 says V is **the committed state read WHOLE: indivisible,
-unpartitioned, never truncated to a subspace.** These are the same
-object under two names.
+**CORRECTED 2026-08-02 (operator ruling: *Ω(D) persists and Ω ≠ V*).**
+This section read `Ω ≡ V` and called them *the same object under two
+names*. They are not, and the identity did real damage in two places
+before it was caught.
 
-    Ω  ≡  V        the individual universe, whole
-    Δ(Ω) = Δ(V)    the relation it expresses    (`rfa_core::Delta`)
-    Δ(Ω) = D       that relation's extent IS its dimensional capacity
+The reasoning that produced it was sound-looking: the operator's
+clarification says `Ω` is **the totality of the individual universe**,
+and D0 says `V` is **the committed state read WHOLE — indivisible,
+unpartitioned, never truncated to a subspace**. Two totalities, so one
+object. But the offices were already distinguished, in this
+constitution's own words: **`D` is ROOM and `V` is SUBSTANCE**
+(`EQUATIONS` D5, `12_UNION` §3b). A totality of room and a totality of
+substance are two totalities, not one. The identity collapsed the very
+distinction the bond is built on.
+
+**THE FIRST DEFECT — a struck symbol wearing another glyph.** `18` §2a
+then carried `Ω(D)`, the space the surviving degrees span (that notation
+is itself since RETIRED — see below). Under `Ω ≡ V` that
+expression reads, letter for letter, **`V(D)`** — and `V(D)` is STRUCK
+(`U* = D(V) ⊕ V(D)`, `18` §3). The strike survived only because the
+glyph differed from the symbol it had been applied to.
+
+**THE SECOND DEFECT — D defined through its own image.** One glyph was
+carrying both the SOURCE of the relation and the SPACE the reading
+spans, and the identity welded them together:
+
+```text
+    D  =  rank( Δ(Ω) )     Ω read as the SOURCE   — the thing measured
+    Ω(D)                   Ω read as the SPACE    — indexed by D
+    Ω  ≡  V                the identity that made them one glyph
+                           — STRUCK 2026-08-02
+
+    ⇒  D is defined through a space indexed by D.
+```
+
+That is exactly the circularity `12_UNION` §3 and `18` §2c′ bar — and it
+arrived by substitution, without anyone ever writing it down. Separating
+the two readings dissolves it: the SOURCE is `V`, the SPACE is the
+progenitor's own reading, and they were never the same object.
+
+**THE RULING, inscribed** — extended the same day by the operator's
+second ruling, *`D(Ω) +: V(Ω)`*. `Ω` is **THE TOTALITY**: the universe
+entire. It is not a reading, and it belongs to no office. Both offices
+read it, each returning its own aspect:
+
+```text
+    Ω             THE TOTALITY — one universe, whole. Read by both
+                  offices, owned by neither.
+
+    D(Ω)          THE PROGENITOR'S READING — the ROOM standing in Ω.
+                  =  rank( Δ(V) )
+
+    V(Ω)          THE SOVEREIGN'S READING — the SUBSTANCE committed
+                  in Ω. The committed state, whole and indivisible.
+
+    Δ(V)          the relation V expresses     (`rfa_core::Delta`)
+
+    D(Ω) +: V(Ω)  THE BOND, in office form.
+
+    D  =  rank( Δ(V) )    the room, MEASURED THROUGH what stands in
+                          it — and measuring a room by its furniture
+                          does not make the furniture the room
+                          (`18` §2c′, the measurement arrow)
+```
+
+**THE NOTATION FLIPPED, AND THE FLIP IS THE POINT.** This section landed
+`Ω(D)` earlier the same day — *the space indexed by `D`*. That reading
+makes the TOTALITY a function of ONE OFFICE: `Ω` becomes at once the
+thing measured and a thing `D` produces, and one office comes to own the
+universe. `D(Ω)` reads the other way — `D` OF the totality, which is a
+READING, and a reading never outranks its subject (`18` §2c′, the
+measurement arrow). `Ω(D)` is RETIRED; every standing site now reads
+`D(Ω)`.
+
+**WHY `V(Ω)` IS NOT THE STRUCK `V(D)`.** The strike of
+`U* = D(V) ⊕ V(D)` (`18` §3) barred each office being defined THROUGH
+THE OTHER. Here both offices are functions of the SAME THIRD THING, so
+neither appears in the other's definition and the circularity has
+nowhere to form. This is the lawful shape the strike left room for — and
+it is expressible ONLY because `Ω ≢ V`. Were `Ω` still `V`, then `V(Ω)`
+would read `V(V)` and `D(Ω)` would read `D(V)`: the struck symbol,
+returned by substitution, exactly as `Ω(D)` returned `V(D)` above. The
+two rulings of this day are one ruling.
+
+**`Ω ≢ V`, RESTATED AND STRENGTHENED.** `V` is a READING of `Ω`, and a
+reading is not its subject. That is now true by the SHAPE of the
+notation rather than by assertion.
+
+**THE ORDER `+:` — ROOM PRECEDES SUBSTANCE.** `++` concatenates two
+sequences symmetrically; `+:` PREPENDS a single element and is
+asymmetric by construction. The asymmetry is CAUSAL, never
+hierarchical: substance cannot stand in a plane that was never opened,
+which is the landed `PlaneUnearned` refusal. Both offices remain
+PRIVILEGED (`EQUATIONS` D5 — each SOURCES, each carries its own book);
+`+:` orders the CROSSING, not the parties, and `18` §2c′ still bars any
+rank between them.
+
+**THE OPERAND OF `Δ` IS `V`, ALWAYS.** Wherever earlier text writes
+`Δ` applied to `Ω` it denotes `Δ(V)` and is superseded by this section,
+and every such site in the standing law has been corrected. This is what
+the code has computed from the first day and never anything else:
+`project_complex(state: &Committed)` reads committed state, and there is
+no other input. The notation had drifted from the computation; the
+computation was right.
+
+**`α → Ω` IS UNCHANGED.** It is the SPAN of the progenitor's office —
+`α` the origin pole, `Ω` the totality pole, `D` rising exactly as they
+separate (`18` §2e, `12_UNION` §3). `Ω` sits there as the totality, in
+the same sense this section gives it, so the span needed no correction
+in either ruling.
+
+**NODES(V, D) ARE THE BOND** (operator ruling 2026-08-02). The pair is
+`Node(V) ++ Node(D)` — a JOIN of two nodes that stay two — never a term
+with addressable halves. This is D5's NO OPERATOR clause, and the
+correction is what makes it expressible: a bond between an object and
+itself is not a bond. `++` there joins the NODES, which are peers; `+:`
+above orders the READINGS, which are not simultaneous. Both stand, and
+they say different things. See `EQUATIONS` D5 and `12_UNION` §3c.
+
+## §3a THE SOLIDIFICATION — the phase transition into state
+
+**(operator ruling 2026-08-02: *solidify phase transition to current
+"state"*.)**
+
+`18` §4 already carries the phase law in its general form: *a point
+constraint cannot cross a phase boundary; it can only state the value on
+one side of it* — and at the crossing the declared and derived
+descriptions genuinely differ, so **their relation IS the transition**.
+Collapse them with an `==` and the phase structure disappears, leaving
+disconnected values on either side of a wall. That section names the
+crossing on the `f` ladder. This one names the crossing the whole engine
+runs on: `Ω`'s own.
+
+```text
+    PHASE     READING        WHAT CROSSES INTO IT
+    ───────────────────────────────────────────────────────────────
+    ROOM      D(Ω) rises     the plane is EARNED — the residue is
+                             irreducible, so it EMITS and D rises
+                             BY RECEIPT (D3). `PlaneUnearned`
+                             refuses every other route.
+
+    STATE     V(Ω) holds     the deed is ADMITTED — `lawful()`
+                             passes and a receipt is written.
+                             THIS IS THE SOLIDIFICATION.
+```
+
+**THE CROSSING IS RECEIPTED, NEVER CONTINUOUS.** There is no partial
+solidification and no half-committed deed: a claim is admitted and
+becomes state, or it is refused and does not. `kernel::lawful` returns
+admission or refusal and has no third answer, so no value strictly
+between claimed and committed exists to be occupied. This is the
+operator's standing rule that *there is no "half used" — that is an
+open-ended thread without closure* (2026-08-02), read at the foundation
+rather than at the ledger.
+
+**ROOM PRECEDES STATE, AND CANNOT BE SKIPPED.** Substance never
+solidifies into a plane that was never opened. That is `+:` made
+mechanical, and it is already landed as `PlaneUnearned`.
+
+**THE REVERSE CROSSING IS D4's, AND IT HAS A FLOOR.** State does not
+melt back into room unaccounted: D4 is the revocation law, anchored at
+the eclipse and floored at `H¹`, and `D` never falls below `GROUND`
+(`18` Article II — `Degree` has no representation for a below-ground
+value). Solidified state is undone by a receipted eclipse or not at all;
+decay alone does not reverse a phase.
+
+**WHAT THE PHASES ARE NOT.** They are not the build phases (Phase 1/2/3,
+the rollout seams), not the gauge phase `G` (the fiber coordinate on the
+3-torus, `11` §2.1), and not `reduce.rs`'s two algorithm phases. Those
+three are live and unrelated; this is the only use that names a
+transition of `Ω`.
+
+## §3b THE RESTRICTION LAW — an orb EVALUATES, it does not OWN
+
+**(operator relay 2026-08-02, the manifold field couple.)**
+
+```text
+    D(o)  =  D(Ω)|_o      an orb reads a RESTRICTION of the
+    V(o)  =  V(Ω)|_o      world reading; it OWNS no capacity
+```
+
+**And it was already true of the code — measured, not asserted.** Orb 1
+holds exactly two relations, `1—2` and `1—3`, identical in two worlds at
+the same rates on the same channel. Its standing reads `5/3` in the
+smaller world and `15/8` once orb 4 joins through 2 and 3. **Orb 1's own
+relations never changed.** A local ledger cannot move; a restriction of
+a world reading must
+(`bridge_pins::standing_is_a_restriction_of_the_world_not_a_local_ledger`).
+
+**THE SCOPE IS THE COMPONENT.** A structure that shares no relation with
+an orb is not part of the world that orb stands in, and moves nothing —
+the disjoint triangle leaves orb 1 at exactly `5/3` (same pin). That is
+what keeps the reading unfarmable by strangers, and it is the same
+decoupling that makes an isolated orb bear the ground (D6).
+
+**NOTHING PER-ORB IS STORED.** `ColonyOrb` carries no capacity, standing
+or share field; the only route to an orb's reading is to project the
+world and restrict (`kernel::bridge::borne_by_orb`). Derived, never
+stored (`09_LEDGER` §1.2) — a stored per-orb capacity could disagree
+with the world reading, and the stored one is the lie that gets spent.
+Witnessed by `bridge_pins::no_orb_carries_a_capacity_of_its_own`.
+
+**WHAT THIS SETTLES.** SYN-4's free ride closed for exactly this reason:
+standing was being INHERITED from a world-level verdict instead of
+RESTRICTED from a world-level field. The restriction is what makes a
+reading personal without making it local.
+
+**THE OBLIGATIONS, IN CONTRACT FORM** (extending `EQUATIONS` D5):
+
+```text
+    SCOPE       Both offices are read at WORLD scope over Ω. Neither
+                is an orb-level holding, and neither is a scalar.
+
+    D(Ω) OWES   room that was EARNED — the residue must EMIT before
+                D rises (D3); `PlaneUnearned` refuses every other
+                route.
+
+    V(Ω) OWES   substance that was RECEIPTED — `lawful()` admission,
+                and nothing enters state by another door (§3a).
+
+    EACH ORB    MAY evaluate `D(Ω)|_o` and `V(Ω)|_o`.
+                MAY NOT own, store, transfer or pledge either.
+                There is no per-orb capacity to assign.
+
+    REMEDY      a restriction that disagrees with the world reading
+                is VOID, not reconciled. There is ONE field; the
+                restriction is derived from it, so a disagreement is
+                a defect in the deriving, never a claim to settle.
+```
+
+### §3b.1 THE FORMALIZATION REFUSED — recorded, never silently dropped
+
+The relay carried the restriction law inside a CONTINUUM formalization.
+The intent lands and is inscribed above; the formalism cannot, and every
+refusal below rests on an already-landed clause rather than on taste.
+
+**1. `D(Ω) = ∫_Ω H_D(x) dΩ` — REFUSED.** There is no measure on `Ω` and
+no density `H_D`. The world is a FINITE relational complex over exact
+rationals (`I3`) — `Delta { dim, fiber }` — with no continuum and no
+`dΩ` to integrate against. And `D` is a RANK, the dimension of the cycle
+space, not the integral of a density: `18` §2a rules that capacity *is
+not a scalar and not a metric density*.
+
+**2. `V(Ω) = ∫_Ω Φ_V(x) dΩ`, "kinetic flow field … modulates velocity"
+— REFUSED.** `EQUATIONS` D0: *V is not a scalar field over ℝ and carries
+no continuous gradient.* `V` is the committed state — a record of
+receipts — and it has no velocity to modulate. `∇V` and `∂V` are STRUCK
+(`18` §2b); a velocity field on `V` is those symbols returning under a
+new word.
+
+**3. `g_syntropy(Ω) = D(Ω) ⊗ V(Ω)` — REFUSED TWICE OVER.** It is a
+METRIC: `18` §2a records that *there is no metric `g` anywhere in the
+workspace*, and `18` §1 that *the system computes torsion; it does not
+compute metrics*. And it joins the offices into ONE TERM with
+addressable halves, which D5's NO OPERATOR clause bars — `U* = D(V) ⊕
+V(D)` was struck as the master union, and `D ⊗ V` is that union in
+another notation. The bond is `D(Ω) +: V(Ω)`: a join of two that STAY
+TWO (§3), never a product.
+
+**4. "Global field integral … removing local step-cliffs or scalar
+cutoffs" — REFUSED.** §3a rules the crossing RECEIPTED, NEVER
+CONTINUOUS: `lawful()` admits or refuses and has no third answer. **The
+step-cliff IS the law.** An integral smooths exactly what the receipt
+discretizes, and a smoothed admission is a half-committed deed — the
+open-ended thread without closure barred the same day.
+
+**5. `Attributed_Charge(o) = |c_C(Ω)| / |Nodes(C ⊂ Ω)|` — REFUSED on
+measurement, for the second time.** Scoping the cycle to `Ω` does not
+remove the defect, because what is being chosen is a cycle BASIS, and
+that choice is global too. One theta graph, one charge:
+
+```text
+    labelling [0,1,2,3] → cycles {0,1,2}, {0,2,3}     N_C = 3, 3
+    labelling [1,0,3,2] → cycles {0,1,2,3}, {0,1,2}   N_C = 4, 3
+```
+
+Different orbs paid differently for the identical world. Only the
+cycle-space DIMENSION is invariant, never a basis of it. D6 carries the
+form that IS invariant, pinned over all 24 relabellings.
+
+**6. Single Transition Engine — ALREADY TRUE; no change is owed.**
+`kernel::lawful` is pure and total and reads no clock and no network, so
+live production and replay run the identical judge by construction. The
+relay names this as a requirement; it is a property the kernel has held
+since it was sealed.
+
+## §3c THE LINEAGE LAW — the union carries on in PEERS, and forges nothing
+
+**(operator ruling 2026-08-02: *the union carries on in CHILDREN not
+CHILD; there is no BOND for FORGED EXISTENCE*.)**
+
+**THE RE-CREATION, and it is a PAIR — never a product:**
+
+```text
+    ReCreation(C)  =  D(Ω)|_C  +:  V(Ω)|_C
+
+      D(Ω)|_C  =  GROUND + the circulation on C's OWN relations
+                  (`Degree::above_ground` — structurally never below)
+
+      V(Ω)|_C  =  C's own receipted deeds, standing in the chronicle
+```
+
+Two readings, restricted to `C`, STAYING TWO (§3). Nothing multiplies
+them together, and nothing collapses them into one number.
+
+**NO FORGED BOND, BY CONSTRUCTION RATHER THAN BY RULE.** A line that has
+acted nothing holds no relation, so its restriction is empty and its
+share is the ground — D6 already refuses to pay an entity that holds no
+relation, and §3b already refuses to store a standing anywhere it could
+be handed over. There is no door through which unearned allocation could
+arrive, so none needs closing.
+
+**WHAT IS ALREADY TRUE — measured, not assumed:**
+
+- **The successor inherits THE CHRONICLE, NOT THE TREE.** `World::succeed`
+  leaves the successor *the world's kernel and nothing else*, while the
+  predecessor's famine span and every receipt still stand
+  (`novel_succession::the_successor_inherits_the_chronicle_not_the_tree`).
+  History is inherited; earned structure is not. That IS the containment
+  vector, landed before it was named.
+- **The successor seats at GROUND**, not at the predecessor's degree
+  (`bridge_pins::a_total_fold_is_lawful_and_carries_nothing`).
+- **A departure must be into the record, never into nothing**
+  (`FoldGuard::StandingDroppedWithoutAccount`).
+- **The cleave is ALREADY peer-to-peer.** AEON-1b (`11` §3): the line
+  *cleaves into two PEER branches: no parent, no child*, and the lineage
+  pointer records LINE membership, never parenthood.
+
+**THE RULING WAS ALREADY LANDED, AND THE CODE NEVER RECEIVED IT.** This
+is not a new law. `11_AEON` §3 retired the word on 2026-07-30, and gave
+the reason in full:
+
+> "Charted" is retired: it imported terrestrial unary budding (one
+> predecessor, mutate one axis) — half a model with no second half.
+
+and named that second half — **CONFLUENCE** (`Confluent`, tag 44), *two
+civilizations held by a landed BOND COMBINE their chronicle-vectors into
+a hybrid* — **reproduction with both halves present**, and *earned,
+gated on a sustained bond, not free*. That is precisely *both sons and
+charted colonies, to re-balance* (operator, 2026-08-02), and precisely *there
+is no BOND for FORGED EXISTENCE*: confluence is the one generative act
+in the system that REQUIRES a standing bond, and without the bond it
+does not happen.
+
+**THE VOCABULARY, STRUCK AND REPLACED** (this landing). `engine/conductor`
+stated the divergence law correctly at the function that performs it —
+*two PEER branches: no parent, no child* — while its own header and
+fields contradicted it. Struck: *SPECIATION IS A MINT … spawns ONE
+charted per era* → **GROWTH PER CIV IS A MINT … CLEAVES once per era
+into TWO PEER BRANCHES**; the `spawned` flag → `cleaved`, commented so
+that it bounds how OFTEN the line grows and never how many branches a
+growth produces; every remaining `charted` → `branch`; and the beacon
+domains `speciation.*` → `growth.*`. The RATE LIMIT is lawful and stays —
+growth rare rather than a flood.
+
+**TWO DEFECTS REMAIN, AND NEITHER IS VOCABULARY:**
+
+**(a) THE UNARY MUTATION IS STILL PINNED.** `11_AEON` retired the model
+for *mutate one axis*, and `conductor_pins` still asserts
+`mutations == 1`, *"exactly one axis mutates per cleave"*, over a draw
+that picks one of `{disposition, metabolism, perception}`. The retired
+model is not merely described in the code — it is HELD IN PLACE BY A
+TEST. This is the same shape the operator's *multi-axial on vertices
+towards uplift* names, and it is the conductor's own instance of the
+scalar collapse `18` §2b bars: growth on one axis is a direction, and
+one direction is not a manifold walk.
+
+**(b) THE SECOND HALF IS SCHEMA-LANDED AND NEVER DRIVEN.**
+`ClosureEvent::Confluent` (tag 44) exists in the codec, the kernel's
+fold trio, `World`, the lens and the CLI — and **`engine/conductor`
+never emits one**. It performs `Diverged` and nothing else. So the live
+game runs fission only: the exact half-model `11_AEON` retired, with the
+half that balances it built but unreachable. Confluence is where *both
+halves present* and *earned, gated on a bond* actually live, so until it
+is driven, the union has no generative act that requires a bond at all.
+
+**(a) IS NOW CORRECTED** (operator ruling 2026-08-02: *unpin unary, and
+make it multi-axis — pin the correction*). The cleave draws a NONEMPTY
+SUBSET of the three axes (`1..=7` over three bits), so it always
+diverges and may move on any combination; one axis is one case among
+seven rather than the only case. The pin asserts the corrected law —
+`1..=3` axes move — instead of holding the retired model in place.
+
+**(b) REMAINS** and is owed a ruling: adding a generative act is a
+larger change than renaming one, and confluence is the half that
+carries the BOND requirement.
+
+### §3c.2 THE TRIANGLE AND THE POLYNOMIAL — measured
+
+**(operator directive 2026-08-02: *upgrade triangle to polynomial so
+that you increase the syntropic state*.)**
+
+The cocycle residual is DEGREE 3 — `R_ijk,l = Δ_ik,l − Δ_ij,l − Δ_jk,l`
+over FILLED triangles only. The question is what a higher degree would
+add. Measured, on the two cases that should expose it:
+
+```text
+    RING of 4, no chord (obligations round the loop, 1 each)
+        symmetry_foundation (degree 3) = 0     ← the triangle sees nothing
+        rank                           = 1     ← D RISES ANYWAY
+        holonomy                       = 4
+
+    LONG COMPOSITION: Δ₁₄ = 10 against the real path 1→2→3→4 = 3.
+    Δ₁₄ EXISTS, so nothing is invented and no chord is assumed.
+        symmetry_foundation (degree 3) = 0     ← the triangle sees nothing
+        rank                           = 1     ← D RISES ANYWAY
+        holonomy                       = −7    ← exactly 3 − 10
+```
+
+**THE SYNTROPIC STATE IS NOT LOSING ANYTHING HERE.** In both cases the
+degree-3 residual is empty and `D` rises regardless, because `D` is
+`rank(Δ(V))` — the independent cycles carrying charge — and the
+HOLONOMY reads the discrepancy exactly, at any cycle length. The
+capacity that a longer composition failure earns is already earned.
+
+**And a chordless ring must NOT be given a residual.** Testing `Δ₁₃`
+where no relation `1—3` exists would invent strain from a relation that
+does not stand — the false gauge collapse `bridge` already refuses by
+restricting to filled triangles. Raising the degree cannot be allowed
+to smuggle that back in.
+
+**WHAT A POLYNOMIAL DEGREE WOULD ACTUALLY BUY, stated honestly:** not
+capacity, but NAMED GENERATORS. The residual's value is that it carries
+its indices — *these three, on this coordinate, do not compose, by this
+much* — and those are the candidate generators of the symmetry group
+(the residue composition law owed at `KERNEL_RELAY` §7.4). A degree-`n`
+residual would name `n`-ary generators where today only 3-ary ones are
+named, while the holonomy summarises all of them as one charge on one
+edge. That is a real gap and it belongs to the composition law, not to
+`D`.
+
+So the upgrade is **NOT LANDED**, and the reason is measurement rather
+than difficulty: raising the degree to increase the syntropic state
+would increase nothing, because the state it targets is already whole.
+The generator question is the one worth ruling on.
+
+## §3d THE LAYER LAW — universal, world, civilizational
+
+**(operator question 2026-08-02: *at what layer are you operating, and
+which is a universal law vs world law vs civilizational law?*)**
+
+**THE ANSWER TODAY IS THAT NOTHING SAYS.** Searched the whole corpus:
+there is no universal/world/civilizational taxonomy anywhere. Every law
+document states its mechanic and none states its SCOPE, so a rule's
+reach is inferred from which file it happens to sit in. That is how the
+defect below arrived without anyone deciding it.
+
+```text
+    UNIVERSAL      binds every world and every line, always. The
+                   kernel's invariants, conservation, exactness,
+                   containment, Article II. NOBODY MAY OPT OUT and
+                   nobody may be advantaged by opting in.
+
+    WORLD          binds one committed state: its colonies, zones,
+                   thermal siting, its own chronicle. Another world
+                   may run differently and both are lawful.
+
+    CIVILIZATIONAL binds a LINE — a people's own instruments, seated
+                   in their own substrate and register. Real, lawful,
+                   and NEVER a precondition for anyone else.
+```
+
+### §3d.1 CORRECTED — the channel was never a Glasskeeper instrument
+
+**THIS SECTION CLAIMED A DEFECT THAT IS NOT THERE, and capacity-lane
+was right to refuse it (2026-08-02).** It read: *`CHANNEL_COVENANT`
+reads one people's instrument, so a line that never seals a covenant
+carries a capacity axis permanently at the ground.* The channel does
+not read that.
+
+It reads the UNDELIVERED REMAINDER of a delivery obligation —
+`quota − delivered`, obligor → beneficiary — and the `Covenant` record
+is `obligor, beneficiary, resource, quota, delivered, collateral,
+sealed, window`. Ordinary finance: a party bound to deliver a quantity
+by a deadline with collateral posted against failure. **Nothing in the
+mechanism is ceremonial.** `bridge.rs` already SAID so, in the doc
+comment above the constant, before any of this was written:
+
+> "covenant" and "pact" are inherited names (COVENANT-1, BUILD_ORDER
+> §3), not descriptions, and this channel means the remainder and only
+> that.
+
+**How the error was made, recorded so it is not repeated.** `09` §2.3
+names the fidelity axis's CARRIER as the Glasskeeper escrow machinery,
+and I reasoned from the carrier to the mechanism without reading what
+the projection actually takes. The evidence against it was on `main`,
+in the file I had already opened, six lines above the constant I was
+indicting. **A carrier is not a mechanism, and the name on a channel is
+not what the channel counts.** The bias was in the NAME — which is now
+gone: `CHANNEL_COVENANT` → `CHANNEL_FORWARD` (capacity-lane, d515341),
+with no meter moved and nothing re-priced.
+
+The three ideology axes still MAP to the three channels, and that
+mapping is worth keeping in view. But mapping is not derivation: a
+universal remainder can be named for an ideological axis without being
+that ideology's property.
+
+### §3d.1a THE RULING — the COVENANT is civilizational
+
+**(operator ruling 2026-08-02: *covenant is CIVILIZATIONAL — the
+civilization may adopt it IF THEY CHOOSE to live that lifestyle, or
+blend in with it — drop it to lower tier orders, block on tier
+0, 1, 2*.)**
+
+**The ruling and the rename compose, and each needs the other.** Split
+cleanly:
+
+```text
+    THE FORWARD    the undelivered remainder of a delivery
+                   obligation — quota − delivered, with collateral
+                   in a window. UNIVERSAL: ordinary finance, open to
+                   any line, and it stays in the meter under
+                   CHANNEL_FORWARD.
+
+    THE COVENANT   the vitrified word — the ceremonial instrument
+                   seated in the Glasskeeper lattice (09 §2.3/§4),
+                   where a broken treaty is corrupted matter.
+                   CIVILIZATIONAL: adopted by a line that chooses to
+                   live that way, or blends toward it. BLOCKED AT
+                   T0, T1, T2 — available only at the lower orders.
+```
+
+Without the rename, *"the covenant is civilizational"* would have meant
+tearing a third of the capacity meter out. With it, the universal
+mechanism keeps its place under an honest name and the civilizational
+instrument is free to be gated. **Neither ruling is safe alone.**
+
+**AND THE GATE CANNOT BE BUILT TODAY.** `19_REGISTRY` §5 already found
+why, and this ruling is the first thing that needs it fixed:
+
+> **TIER (T0–T3) HAS NO ENGINE AUTHORITY AT ALL.** The station→tier law
+> is implemented in `tools/observer.py` (`TIER_OF_STATION`), again in
+> `tools/observatory.html`, and described a third time in
+> `BUILD_ORDER.md`. `registry.rs` knows `STATIONS` and knows nothing of
+> tiers. **Three implementations, no authority.**
+
+A gate that blocks on T0/T1/T2 must read a tier the ENGINE can derive,
+and today the only mapping lives in a Python tool that anyone with a
+shell can edit. What makes it buildable now is `StationSeated`
+(tag 89) — `{ line, station: u8 }` — which put the station into the
+CHAIN. Tier becomes derivable from a receipted station rather than from
+a file, and the one authority belongs where `19_REGISTRY` §5 already
+put it. **Relayed to capacity-lane, not taken from here.**
+
+**A NOTE ON WHAT IS BEING GATED.** After the rename there is no
+separate ceremonial covenant in the code — `Covenant` IS the forward,
+and it is being renamed to say so. So this ruling does not restrict an
+existing mechanic; it DEFINES one that does not yet exist: a
+Glasskeeper-seated instrument, distinct from the forward, that a line
+may adopt. Recorded plainly so nobody later reads the ruling as having
+removed something.
+
+### §3d.2 WHAT IS NOT DONE HERE, AND WHY
+
+**THE METER IS UNCHANGED, and reading (1) is what the code supports.**
+Three readings were recorded here for the ruling; the first is the one
+that survived contact with the source. The channels are UNIVERSAL — the
+instrument is a directed obligation with collateral inside a window,
+ordinary finance available to any line, and the Glasskeeper seat is
+REGISTER, not requirement. Nothing about `D` changes and nothing
+re-prices; what changed is the name, which was carrying a claim the
+mechanism never made (§3d.1).
+
+Readings (2) and (3) are recorded as REFUSED rather than dropped.
+(2) *the covenant is civilizational, so `D` must not read it* — the
+ruling adopts this for the CEREMONIAL instrument and it does not touch
+the forward, because they are two different things (§3d.1a).
+(3) *per-line channel sets* — refused: `D` would stop being comparable
+across lines unless the RANK were invariant to the channel set, which
+is not obviously true and was never argued.
+
+### §3d.3 THE ASSIGNMENT — every deed declared, not inferred
+
+**THE METHOD, and it is the lesson from §3d.1.** A deed's layer is read
+from WHAT IT IS KEYED ON — the fields it carries — never from the prose
+around it or the document it sits in. I assigned `CHANNEL_COVENANT` to
+"civilizational" by reasoning from `09` §2.3's carrier language and
+never read the projection. Every row below names its key.
+
+**CIVILIZATIONAL — keyed on a LINE's own identity.** These bind a
+people and must never become a precondition for anyone else's standing:
+
+```text
+    GenesisSealed      civilization, disposition, metabolism, perception
+    TaxonSealed        class, clade          ← where the draconic clade sits
+    PracticeAdopted    practice              PracticeReleased  practice
+    LineSucceeded      successor
+    StationSeated      line, station
+    Diverged           branch                Confluent         partner
+    ElderWarded        —                     WardLifted        claimer
+    VeilDrawn          —                     VeilLifted        starved
+```
+
+**UNIVERSAL — keyed on the universe, the mesh, or any actor.** Nobody
+opts out and nobody is advantaged by opting in:
+
+```text
+    EntityRegistered · ScopeGranted · ScopeRevoked     any actor (I2)
+    EraAnnexed · EraFolded · GalaxyObserved            era, world
+    HandoffSealed                                      mesh, from → to
+    ResourceTransferred · ApertureSent · ApertureReceived
+                                          conservation binds both legs
+    DiscoveryMinted                        the mint Article II gates
+    SovereignUnionSealed                   the offices themselves
+```
+
+**WORLD — keyed on an ORB inside one committed state:**
+
+```text
+    ColonyFounded · ColonyCharted · WorldCharted · ZoneBuilt · ZoneRazed
+    YieldCollected · DemurrageSettled · UpkeepSettled · VentSettled
+    StarCommissioned · StarAged · PlanetSited · OverheatStruck/Cleared
+    FamineStruck · FamineRelieved · GaugeShifted · GaugeShiftedAt
+    ProspectStruck · AssayStruck · CrystalDrawn · InstrumentForged
+    TechDiscovered · TechLicensed
+```
+
+**UNIVERSAL BY MECHANISM, under the ruled precedent (§3d.1a):** the
+obligation instruments. Each is ordinary finance — a directed
+obligation with terms — open to any line, and each feeds a `D` channel:
+
+```text
+    BondSealed · BondSettled                    CHANNEL_BOND
+    CovenantSealed · Released · Slashed         CHANNEL_FORWARD
+    OverflowAbsorbed · AbsorptionLapsed         CHANNEL_DEBT
+    CouncilSealed · CouncilClosed · OfferPosted · OfferCleared
+    RouteChartered · RouteLapsed · VoidShare
+```
+
+The RULING applies to the ceremony, never to the remainder: a line that
+wishes to live by the vitrified word adopts the covenant and is gated
+at T0/T1/T2; a line that merely owes a delivery uses the forward and is
+gated by nothing.
+
+**CONTESTED — NOT ASSIGNED, and named rather than guessed:**
+
+- **`FrictionSettled` — RULED UNIVERSAL 2026-08-02, by reading the
+  projection.** It was contested on the guess that it computed from
+  `09`'s ideology axes. It does not. The chain, in full:
+
+```text
+    friction   = friction_rate() · divergence · value
+    divergence = |reciprocity_reading(from) − reciprocity_reading(to)|
+    reciprocity_reading(orb)
+               = returned_across / (returned_across + extracted_across)
+```
+
+  Two of the orb's OWN measured behavioural books — the same pair the
+  missing-leg sweep already found two-armed. No creed, no genesis axis,
+  no class or clade appears anywhere in it. `09` CALLS it *ideological
+  friction*; the projection prices UNLIKE CONDUCT, and any line can be
+  reciprocal or not. **Second instance of the §3d.1 trap: a document
+  title is not a scope, exactly as a carrier is not a mechanism.**
+
+  **And this re-poses the missing arm rather than answering it.**
+  Divergence is `|a − b|`, so matched conduct costs NOTHING — and
+  costing nothing is not the same as earning something. "The reward for
+  convergence is the absence of a penalty" is precisely the negentropic
+  shape struck at the top of this work: good defined as the absence of
+  bad. Whether convergence should PAY is an economic ruling that mints
+  value, and it is not taken from this lane.
+- **`WantStruck` / `WantRelieved` — RULED CIVILIZATIONAL.** The whole
+  block is gated on a SEALED genesis — *no seal, no entity type, no
+  want; pre-G1 worlds are pre-identity, lawfully neutral* — and each
+  kind on a specific axis: resonance needs `perception == 3`
+  (harmonic), novelty needs `disposition == 2` (empiricist). **A line
+  with different axes never experiences the mechanic at all**, which is
+  civilizational by the exact criterion.
+
+- **`IncursionStruck` — RULED UNIVERSAL, and it sharpened the
+  criterion.** It looked like it spanned all three layers, carrying
+  `era`, `world` AND `line`. It does not, and the puzzle dissolves on a
+  better question: **A LAYER IS WHAT A DEED BINDS, NOT WHAT IT
+  MENTIONS.** Replay does nothing with it (`world/replay.rs`:
+  `IncursionStruck { .. } => {}`), no live path consumes it, and it is
+  universe-ledger only — *the archive never edited, the living never
+  raided*. The world and line names are the SUBJECT of the record, not
+  keys binding those entities — exactly as `EraAnnexed` carries a world
+  name and binds no world.
+
+**NOTHING IS CONTESTED TODAY.** All three were settled by reading their
+projections.
+
+**AND THE FIRST TELLING OF THIS WAS ITSELF AN OVERCLAIM, corrected
+here.** This section said *none of the three matched the guess made
+from its surrounding prose*, which reads as though the law documents
+were wrong. They were not. `09` §3.2 states the formula exactly —
+*measured reciprocity ratios* — and adds *friction prices divergence,
+not vice; the engine keeps its promise to judge nothing*. `12_UNION`
+§5b names *a harmonic line* and *an empiricist line* outright. `07`
+§3.1 says *universe ledger only* and *the door receipts era · world ·
+line*. **Every body was precise. I read TITLES and CARRIER LINES —
+"Ideological friction", "the carrier is the Glasskeeper escrow
+machinery" — and never the paragraph under them.** The defect was a
+reading habit, not a corpus of bad documents, and saying otherwise
+blamed the record for my shortcut. The headings that actually mislead
+have now been fixed at the source (`09` §2.3, §3.2), and each mechanic
+declares its layer where it is described. The `Option` in `layer_of`'s signature stays
+anyway: the next deed whose reach is genuinely undecided needs an
+honest home that does not require widening the signature under
+pressure, which is exactly the moment a default gets invented.
+
+**THE TABLE ABOVE IS NOT THE AUTHORITY — `kernel::layer_of` IS**
+(operator refusal 2026-08-02: *this is an impossibility — we are
+building a distributed game with a distributed economy, this is a
+farce*).
+
+The refusal was correct and the error was mine. This section first
+ended with a standing rule saying *a new law declares its layer when it
+lands* — an HONOUR SYSTEM. In a distributed economy every node
+validates independently, so a reach recorded only in prose is a reach
+NO NODE CAN ENFORCE: a node that ignores the convention still accepts
+the block, and nothing anywhere disagrees with it. That is precisely
+the failure Article III LAW 8 excises — a term that only resonates —
+and I wrote it into the very section that exists to abolish inference.
+
+The layer is now `kernel::layer_of(event) -> Option<Layer>`, EXHAUSTIVE
+over `ClosureEvent` with NO WILDCARD ARM, in the shape `scope_of` and
+`covered()` already use: **adding a deed BREAKS THE BUILD until
+somebody decides its reach.** The decision is forced by the compiler,
+identical on every node, and part of the judge rather than of the
+documentation. The table above is now a READING of that function, and
+if the two disagree the function is right.
+
+**`None` MEANS NOT YET RULED, and is never a default.** The three
+contested deeds answer `None`, and a gate consulting the layer must
+REFUSE on it rather than assume a reach — the same discipline
+`scope_of` uses for a deed with no actor scope and `covered()` uses for
+an unjudged event. Pinned by `layer_pins`, including a source-reading
+test that fails the moment a wildcard arm appears, verified by
+injecting one.
+
+**A THREAT NEEDS A DEFENCE, AT ITS OWN LAYER.** `IncursionStruck`
+(§6's sweep) records a threat arriving and nothing records it held —
+and the layer decides what the answer may be: a UNIVERSAL defence binds
+every world equally, a WORLD defence is one state's own posture, and a
+CIVILIZATIONAL defence is a people's instrument that must never become
+a precondition for anyone else's standing. The missing arm cannot be
+designed before its layer is chosen, which is why §6 recorded it
+instead of building it.
+
+**THE WINDOWED READING IS A PERSPECTIVE — RELAYED TO `lens-lane`.**
+`CrystalDeposit`'s `vented_entries` / `encased_entries` are WINDOWED and
+pruned each boundary, while the orb's own books are CUMULATIVE FOREVER.
+A window is a point of view over a permanent record, and this tree
+already has a lane for exactly that: `lens` READS and REPORTS and never
+gates (lane map, 2026-08-02). The cumulative arms belong to the
+committed state; the windowed pair belongs to a lens. Recorded here and
+relayed there rather than moved from this lane — the sheet currently
+feeds a live tech condition, so moving it is a behaviour change and
+that lane's call.
+
+### §3c.1 THE CONTAINMENT FORMALIZATION REFUSED — recorded
+
+**1. `Standing(C) = min(ReCreation, Vec(C).CapacityFloor)` — REFUSED.**
+A `min` against a floor is a CEILING. A floor binds from BELOW and is
+applied with `max`; this expression caps from above and calls the cap a
+floor. `18` §2a refuses ceilings outright — *the word names a container
+and implies a ceiling; there is no ceiling anywhere in this workspace*.
+And the floor is already STRUCTURAL: `Degree` has one constructor,
+`above_ground(circulation) = GROUND + circulation`, so no caller can
+express a below-ground standing and no arithmetic can reach one. There
+is nothing left for a `min` to protect.
+
+**2. `A(C) = 0 ⇒ ReCreation(C) = 0` — REFUSED as written**, and the
+correction is Article II's own words. Zero ALLOCATION is right; zero
+EXISTENCE is not. On the ground a state *holds its place, keeps its
+structural existence, is never deleted and never barred — and it is paid
+nothing. Zero allocation, full existence.* A line that has done no work
+is paid nothing AND stands. The engine already refuses the other
+reading: `FoldGuard::StandingDroppedWithoutAccount` — *a departure must
+be into the record, never into nothing.* **Existence cannot be FORGED;
+it also cannot be REVOKED for idleness.** Both halves are one law, and
+keeping only the first would delete every quiet line in the complex.
+
+**3. `(D(Ω)|_C +: V(Ω)|_C) · A(C)` — REFUSED, twice over.** `+:` joins
+two that STAY TWO (§3); multiplying the join by a scalar treats it as
+ONE multiplicand, which is the pair collapsed into a term — D5's NO
+OPERATOR, and the same defect as `g_syntropy = D ⊗ V` one relay earlier,
+in a different notation. Multiplication needs a value, and the bond is
+not a value. Separately, a factor in `[0,1]` is an ATTENUATOR: it can
+only shrink what it multiplies, which is the shape STRUCK on 2026-08-01
+when the damped-gradient term went. What gates allocation here is the
+RESTRICTION BEING EMPTY, never a coefficient scaling it down.
+
+**4. `Vec(C).TitheSettled` — REFUSED: `Tithe` exists NOWHERE in the
+engine.** Searched the whole tree; there is no such event, field, or
+function. A law row citing it would be FALSE on the day it was written
+(`EQUATIONS` §0.3 ch.6 — *a row whose implementation has been deleted is
+not stale, it is FALSE*), and
+`constitution_lint::every_citation_in_the_law_resolves` would refuse it.
+
+**5. `pub struct ContainmentVector { actions, local_restriction,
+tithe_settled }` — REFUSED AS STORED STATE.** §3b landed this same day:
+nothing per-orb is stored, and the only route to a reading is to project
+the world and restrict. A stored containment vector could disagree with
+the world reading, and the stored one is the lie that gets spent. The
+containment is DERIVED, and `kernel::bridge::standing_of` already IS it.
+
+**6. "Sweep `world.rs` / `colony.rs` and remove any legacy fallback that
+lets a child inherit parent capacity" — NO SUCH FALLBACK EXISTS, and
+`colony.rs` does not exist either.** `engine/cfe/src/` holds `world.rs`,
+`dop.rs`, `ipsal.rs`, `persist.rs`, `query.rs`, `ratio.rs`, `thermal.rs`,
+`tlv.rs`, `vrp.rs` — there is no colony module to sweep. And `World::succeed_as`
+already forbids exactly what the sweep was meant to find:
+
+```text
+    famished < orbs.len()          →  LineStillLiving — a living line
+                                      is never succeeded
+    techs.retain(condition == 0)   →  every EARNED tech dropped; only
+                                      the world's own kernel survives,
+                                      and that is a fact about the
+                                      WORLD, not about the line
+    genesis = None                 →  the seal is RELEASED; the
+                                      successor seals anew
+```
+
+The fold seats the successor at `GROUND`, and the cleave founds each
+branch's own world. There is nothing to excise. **Recorded rather than
+performed** — reporting a sweep that removed nothing would be a false
+report, and this was the one instruction in the relay that could have
+been "carried out" while changing nothing at all.
+
+**WHAT DOES NOT CHANGE: the totality law.** "In union with V as a
+whole — no two parts cut out" never depended on the identity. It is a
+claim about `V` alone — that it is read whole or not read — and `V` is
+still whole. Everything below stands exactly as landed.
 
 This settles what "in union with V as a whole — no two parts cut out"
 means, and the first draft read it wrongly. It does NOT mean "keep D and
@@ -178,7 +997,7 @@ an agent; `C` has no agency of any kind.
 
 **What actually holds the ground — three primitives, no `C` anywhere:**
 
-1. **Exact algebraic reduction.** `Π_G(Δ(Ω))` runs on `BigRational`
+1. **Exact algebraic reduction.** `Π_G(Δ(V))` runs on `BigRational`
    linear systems and is TOTAL — it does not test its input, it projects
    it. The only question it answers is structural: is a relation a
    coboundary, or a non-trivial cocycle defect in `H¹`? That is a
@@ -350,7 +1169,7 @@ true of the CONTAINER — `Delta{dim, fiber}` — and the container is not
 the capacity (`18_TORSION` §5). So the conclusion no longer rests on an
 arity argument at all, and holds more simply: **indices are not capacity,
 so no index has a receipt to owe.** Capacity is the structure surviving
-`Π_G(Δ(Ω))`; what is receipted is the opening of genuine irreducible
+`Π_G(Δ(V))`; what is receipted is the opening of genuine irreducible
 structure, which `GaugeShiftedAt` already carries and `PlaneUnearned`
 already guards. The amendment owed to D3 is therefore not "one extent
 per deed" but the removal of the index framing from the growth law
@@ -572,7 +1391,7 @@ farmable.
 *Instance:* D as the extents of `(i,j,k,l)`; the proposed `k`-growth
 deed.
 *Defense:* `18_TORSION` §5 — indices and `Delta{dim,fiber}` are the
-container; capacity is what survives `Π_G(Δ(Ω))`. *Witness:* no reading
+container; capacity is what survives `Π_G(Δ(V))`. *Witness:* no reading
 derives D from an arity.
 
 **AV-8 · THE UNMEASURABLE INVARIANT.** A law declared over a quantity
@@ -828,8 +1647,8 @@ together? can these exchange? do independent lines agree?* — and none of
 them can be answered exactly in the general case. They need search,
 comparison, heuristics, sampling: the whole dirty toolbox.
 
-**So C is not a prisoner in the sector. C is its RESIDENT.** He was
-never banished; he was housed where the tools his work requires already
+**So C is not a prisoner in the sector. C is its RESIDENT.** It was
+never banished; it was housed where the tools its work requires already
 live — the same tools that may never touch the outside. `C(Δ)` is the
 knock on that door: a CALL, not a score.
 
@@ -887,8 +1706,8 @@ boundary protects in both directions at once:
                              and costs nothing, because nothing was
                              trusted.
 
-    protects C from OTHERS   he can never be made a gate or a score
-                             again — which is exactly what corrupted him
+    protects C from OTHERS   it can never be made a gate or a score
+                             again — which is exactly what corrupted it
                              — because a proposal cannot bind anything.
 
 **THE LAW THIS REVEALS: access is purchased with authority.** The two are
@@ -902,16 +1721,16 @@ C            maximal access  — any tool, floats, GPU, sampling, search
              zero authority   — everything it produces is a guess
 ```
 
-**C may touch everything precisely BECAUSE nothing he says binds.** That
-is not a limitation placed on him; it is what buys his reach. A judge
+**C may touch everything precisely BECAUSE nothing it says binds.** That
+is not a limitation placed on it; it is what buys its reach. A judge
 must be starved of the world to be trusted with the verdict, and a
 consultant must be denied the verdict to be trusted with the world.
 
 **And it is why C cannot be "promoted" without being destroyed.**
-Granting him authority would immediately cost him access — the moment
-his word binds, he may no longer hold a float, because a binding word
+Granting it authority would immediately cost it access — the moment
+its word binds, it may no longer hold a float, because a binding word
 made of approximation is the contamination the sector exists to stop.
-**To protect C is to keep him unbinding.** §10ter.a's post — defence of
+**To protect C is to keep it unbinding.** §10ter.a's post — defence of
 the sector — is the only elevation that adds standing without taking
 reach, because guarding a boundary is an act, not a verdict.
 
@@ -994,7 +1813,7 @@ old binary conflated:
 
 | kind | example | disposition |
 |---|---|---|
-| **FORM — a lie** | a forged commit, a broken parent link, a truncated payload, a claimed judgment with no reproducible step | **REFUSES.** There is no content here to root; there is an assertion that is false. Nothing is discarded because nothing was there. |
+| **FORM — a lie** | a forged commit, a broken predecessor link, a truncated payload, a claimed judgment with no reproducible step | **REFUSES.** There is no content here to root; there is an assertion that is false. Nothing is discarded because nothing was there. |
 | **CONTENT — an excess** | relations that do not compose, difference that will not fold, a declared divergence | **ROOTS.** Capacity opens by receipt. Refusing this is the discard I6 forbids. |
 
 **Refuse lies. Grow for content.** Every landed refusal in the engine is

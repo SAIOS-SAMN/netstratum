@@ -46,7 +46,7 @@ Ideology is **measured, never declared and never scored**:
    as fidelity, each in the units it accrued. Four axes, four readings,
    four names. *(Consequently there is no goodness scalar and no oracle:
    a single figure would have no units to be in, and it is the
-   scalar/scored form the ancestry law refuses — CHARTER §5.)*
+   scalar/scored form the provenance law refuses — CHARTER §5.)*
 4. **A book records what was DONE.** Every entry grounds in a receipted
    deed, so a book holds exactly the deeds that happened. An orb that
    acted little has a small syntropic book; that is the record standing
@@ -75,8 +75,8 @@ made sink commensurable; other resources post through a placeholder
 commensuration table, weight 1 in v1).
 
 **Scope from birth:** the books are per-orb so every mechanism lands and
-witnesses single-world — the P1 archipelago is society enough (a mother
-and daughter colony are already distinct books). Civilization-scoped
+witnesses single-world — the P1 archipelago is society enough (a source
+and charted colony are already distinct books). Civilization-scoped
 reading is composition over a faction's orbs, and cross-empire reading
 arrives with the worlds that meet at N5/N6; the machinery is identical,
 only the counterparties multiply.
@@ -150,7 +150,23 @@ cheaper than churn *by the landed decay laws*, not by decree. Severance
 is a real shock: the target's next heating bill (ECON-J) arrives with the
 inflow gone.
 
-### 2.3 Integrity — the fidelity axis
+### 2.3 Integrity — the fidelity axis · the DECLARATION
+
+**Read the mechanism, not this line.** The sentence below names a
+CARRIER — where the machinery is seated in the world-book — and a
+carrier is not a mechanism. The instrument itself is
+`{obligor, beneficiary, resource, quota, delivered, collateral, sealed,
+window}`: a party bound to deliver a quantity by a deadline with
+collateral posted against failure. Ordinary finance, open to any line,
+and what the capacity meter reads is `quota − delivered` and nothing
+else (`CHANNEL_FORWARD`). Reasoning from this carrier line to the
+mechanism produced a false defect on 2026-08-02.
+
+**LAYER: the DECLARATION is CIVILIZATIONAL; the REMAINDER is
+UNIVERSAL** (§2.4's composition rule; `17_CAPACITY` §3d.1a). A line
+that chooses to live by the vitrified word adopts the covenant and is
+gated at T0/T1/T2. A line that merely owes a delivery uses the forward
+and is gated by nothing.
 
 Coherence between word and deed, measured at the escrow.
 
@@ -187,6 +203,14 @@ closes the loop.
 
 **Declared vs measured (the composition rule):** a sector's *declared*
 policy is a covenant (§2.3's axis); its *measured* policy is this ratio.
+
+**AND THIS DISTINCTION IS THE COVENANT RULING, already latent here**
+(operator ruling 2026-08-02). A DECLARATION is a way of living that a
+line chooses — so the covenant is CIVILIZATIONAL, adopted freely and
+gated at T0/T1/T2. A MEASUREMENT is what a line did — so this ratio,
+and the friction computed from it (§3.2), are UNIVERSAL and bind
+everyone. The two layers were written into this composition rule
+before anyone went looking for them.
 A sector that declares reciprocity and measures extraction needs no
 "liar" flag — its covenant breaches post to the fidelity books. The axes
 compose without a judge.
@@ -212,7 +236,22 @@ is never absolute). The empty-book reading is a parameter; the candidate
 default is full collateral until a history exists — trust is earned, and
 the empty book is not a credential.
 
-### 3.2 Ideological friction (`ΔS_ideo`)
+### 3.2 Friction — the cost of unlike CONDUCT (`ΔS_ideo`) · UNIVERSAL
+
+**The name is a misnomer and it has cost a reader once.** `ΔS_ideo`
+and "ideological friction" say IDEOLOGY; this section's own body says
+the opposite three sentences later — *friction prices divergence, not
+vice… the engine keeps its promise to judge nothing* — and the
+mechanism reads two MEASURED conduct ratios and nothing else. On
+2026-08-02 the kernel lane read this heading, inferred that a people's
+creed was charging a universal ledger, and filed a defect that did not
+exist. **The body was right the whole time; the title was not.** The
+tag `ΔS_ideo` is kept because receipts and prose elsewhere cite it; the
+word "ideological" is not a description.
+
+**LAYER: UNIVERSAL** (`kernel::layer_of`, `17_CAPACITY` §3d). Any line
+can be reciprocal or not — conduct requires no creed — so this binds
+everyone and no ideology is a precondition for it.
 
 A transaction between two orbs whose measured reciprocity ratios diverge
 generates additional entropy:
@@ -222,7 +261,34 @@ generates additional entropy:
 ```
 
 posted through the landed VENT-1 machinery — accrues as workspace, seals
-by receipt at collect, nothing un-receipted. The physical reading:
+by receipt at collect, nothing un-receipted.
+
+**THE SYNTROPIC ARM, and why it was invisible** (2026-08-03). Friction
+receipts only when POSITIVE (`if friction > 0`). When conduct MATCHES,
+divergence is zero, friction is zero, and NOTHING IS RECEIPTED — so the
+engine computes the agreement on every cross-orb transfer and destroys
+it in the same expression. Not an arm that was never built: one built
+and discarded on each use, with no caller able to ask for it because
+`reciprocity_reading` was private.
+
+    convergence(a, b) = 1 − |reciprocity(a) − reciprocity(b)|
+
+Surfaced as `World::reciprocity_of` and `World::convergence_between` —
+derived, never stored, and paying nothing. Stated as a MAGNITUDE that
+is high when conduct agrees, rather than as friction being absent:
+*the reward for alignment is the absence of a penalty* is the
+negentropic shape this ledger exists to refuse.
+
+**AND ABSENCE IS NOT AGREEMENT.** The private reading answers `1/1`
+when an orb has no cross-orb history — correct for PRICING a cost, and
+a trap for reading alignment as merit, because **two orbs that have
+never traded would read as perfectly aligned.** The surfaced reading
+answers `None` there instead: they have nothing to agree ABOUT. Any
+future rule that pays on convergence inherits that refusal, and must,
+or it pays the inert exactly what it pays the reciprocal.
+
+**Whether convergence should EARN is an open economic ruling.** It
+mints value, so it is not taken from a reading lane. The physical reading:
 divergent boundary policies genuinely cost handling and verification
 overhead. **Friction prices divergence, not vice:** two extractive
 empires trade with each other frictionless. The engine keeps its promise
@@ -246,7 +312,7 @@ physics.
 
 ### 3.4 What is refused here (inscribed)
 
-1. **The stored score** — any mutable "alignment stat" (the ancestry
+1. **The stored score** — any mutable "alignment stat" (the provenance
    refusal; §1 rules the lawful form).
 2. **The single goodness number** — axes never aggregate.
 3. **Tokenized reputation** — no "trust certificate" ERC-1155: the

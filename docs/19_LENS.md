@@ -441,7 +441,7 @@ per-index difference; it may not carry its length.
 
 **The general rule for this lane:** the ancestor's SHAPES are reference;
 every scalar, scored, or capped form is refused. That is the charter's
-standing instruction on ancestry, and this document is bound by it.
+standing instruction on provenance, and this document is bound by it.
 
 ### 7a. A HARNESS IS NOT A MIRROR — and it is where frequencies live
 

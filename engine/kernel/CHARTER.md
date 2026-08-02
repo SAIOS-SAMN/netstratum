@@ -39,7 +39,7 @@ remains open (§7).
 ## 0b. THE SEALED MATH CORE (the equations are immutable — more than the
 alphabets)
 
-The master equations are not the kernel's to own alone, nor the mesh's —
+The governing equations are not the kernel's to own alone, nor the mesh's —
 they are ONE immutable definition both bind and CALL. The residual `R`, the
 coherence functional `C(Δ)`, `coboundary_reduce`, `orbit_lock`,
 `verify_certificate`, and the evolution operators live in the SEALED MATH

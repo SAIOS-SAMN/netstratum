@@ -21,10 +21,10 @@ fn banked(world: &World, orb: u64, resource: Resource) -> Ratio {
         .banked_amount(resource)
 }
 
-/// The plain two-planet economy (no star): mother runs ext+hab for 16
-/// ticks, banks 30 iron / 13 biomass, charts the daughter (10i 3b |
+/// The plain two-planet economy (no star): source runs ext+hab for 16
+/// ticks, banks 30 iron / 13 biomass, charts the charted (10i 3b |
 /// 20i 10b). Ends at stamp 16.
-fn mother_and_daughter() -> (World, u64) {
+fn source_and_charted() -> (World, u64) {
     let mut world = World::new();
     world.found("meridian").expect("founds");
     world.zone(0, ZoneKind::Extractor).expect("zones");
@@ -33,27 +33,27 @@ fn mother_and_daughter() -> (World, u64) {
         world.tick();
     }
     world.collect().expect("collects");
-    let daughter = world.chart("outpost", FIRST_ORB).expect("charts");
-    (world, daughter)
+    let charted = world.chart("outpost", FIRST_ORB).expect("charts");
+    (world, charted)
 }
 
 /// A bond streams n ticks and settles the exact accumulated span in
 /// ONE receipt at the touch — the demurrage anchor shape.
 #[test]
 fn a_bond_streams_and_settles_in_one_receipt() {
-    let (mut world, daughter) = mother_and_daughter();
+    let (mut world, charted) = source_and_charted();
     world
-        .seal_bond(FIRST_ORB, daughter, Resource::Iron, ratio(1, 2), 0)
+        .seal_bond(FIRST_ORB, charted, Resource::Iron, ratio(1, 2), 0)
         .expect("seals"); // @16, open-ended
     for _ in 0..6 {
         world.tick();
     }
-    world.collect().expect("collects the mother"); // @22: the touch
+    world.collect().expect("collects the source"); // @22: the touch
 
-    // owed = 1/2 × 6 = 3, one receipt: mother 10 + 15/2 − 3 = 29/2,
-    // daughter 20 + 3 = 23.
+    // owed = 1/2 × 6 = 3, one receipt: source 10 + 15/2 − 3 = 29/2,
+    // charted 20 + 3 = 23.
     assert_eq!(banked(&world, FIRST_ORB, Resource::Iron), ratio(29, 2));
-    assert_eq!(banked(&world, daughter, Resource::Iron), ratio(23, 1));
+    assert_eq!(banked(&world, charted, Resource::Iron), ratio(23, 1));
     let settles: Vec<Ratio> = world
         .chronicle()
         .receipts()
@@ -87,31 +87,31 @@ fn severing_mid_winter_drops_the_partner() {
         world.tick();
     }
     world.collect().expect("collects");
-    let daughter = world.chart("coldstore", FIRST_ORB).expect("charts");
+    let charted = world.chart("coldstore", FIRST_ORB).expect("charts");
     world.zone(16, ZoneKind::Encasement).expect("zones the shell");
     world
-        .zone_as(SOVEREIGN, daughter, 0, ZoneKind::CryoArray)
+        .zone_as(SOVEREIGN, charted, 0, ZoneKind::CryoArray)
         .expect("zones the array");
     world.commission_star(StarClass::G).expect("commissions");
     world
         .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None, None)
         .expect("sites hot");
     world
-        .site_planet(daughter, ratio(0, 1), ratio(100, 1), None, None)
+        .site_planet(charted, ratio(0, 1), ratio(100, 1), None, None)
         .expect("sites cold");
     world.tick(); // @16: the furnace mints; the cold orb's joule famine strikes
     world.collect().expect("banks the joules"); // @17
     world
-        .transfer(FIRST_ORB, daughter, Resource::Joule, ratio(1, 1))
+        .transfer(FIRST_ORB, charted, Resource::Joule, ratio(1, 1))
         .expect("relieves the freeze");
     // The heating lifeline: 1/4 joule per tick, open-ended.
     world
-        .seal_bond(FIRST_ORB, daughter, Resource::Joule, ratio(1, 4), 0)
+        .seal_bond(FIRST_ORB, charted, Resource::Joule, ratio(1, 4), 0)
         .expect("seals the lifeline"); // @17
     world.tick();
     world.tick();
     world.collect().expect("collects"); // @19: bond settles 1/2
-    assert_eq!(banked(&world, daughter, Resource::Joule), ratio(3, 2));
+    assert_eq!(banked(&world, charted, Resource::Joule), ratio(3, 2));
     assert_eq!(
         world.orb_by_id(FIRST_ORB).expect("orb").bond_flow,
         ratio(1, 2)
@@ -119,7 +119,7 @@ fn severing_mid_winter_drops_the_partner() {
 
     // The cut, mid-winter: load = rate × notice window = 1/4 × 8 = 2.
     world
-        .sever_bond(FIRST_ORB, daughter, Resource::Joule)
+        .sever_bond(FIRST_ORB, charted, Resource::Joule)
         .expect("severs");
     assert_eq!(
         world.orb_by_id(FIRST_ORB).expect("orb").severance_load,
@@ -135,7 +135,7 @@ fn severing_mid_winter_drops_the_partner() {
         struck |= outcome
             .struck
             .iter()
-            .any(|(orb, resource)| *orb == daughter && *resource == Resource::Joule);
+            .any(|(orb, resource)| *orb == charted && *resource == Resource::Joule);
     }
     assert!(struck, "the next heating bills arrive with the inflow gone");
     let rebuilt = replay(world.chronicle());
@@ -147,9 +147,9 @@ fn severing_mid_winter_drops_the_partner() {
 /// book untouched — leaving is not a sin.
 #[test]
 fn an_orderly_term_bond_expires_posting_nothing() {
-    let (mut world, daughter) = mother_and_daughter();
+    let (mut world, charted) = source_and_charted();
     world
-        .seal_bond(FIRST_ORB, daughter, Resource::Iron, ratio(1, 2), 4)
+        .seal_bond(FIRST_ORB, charted, Resource::Iron, ratio(1, 2), 4)
         .expect("seals for a term"); // @16, expires at 20
     world.tick();
     world.tick();
@@ -186,10 +186,10 @@ fn an_orderly_term_bond_expires_posting_nothing() {
 /// mid-winter cut.
 #[test]
 fn an_insolvent_settle_breaks_the_bond_as_default() {
-    let (mut world, daughter) = mother_and_daughter();
+    let (mut world, charted) = source_and_charted();
     // Rate 4/tick against a 10-iron bank and 5/4-iron income: doomed.
     world
-        .seal_bond(FIRST_ORB, daughter, Resource::Iron, ratio(4, 1), 0)
+        .seal_bond(FIRST_ORB, charted, Resource::Iron, ratio(4, 1), 0)
         .expect("seals beyond its means"); // @16
     for _ in 0..4 {
         world.tick();
@@ -203,7 +203,7 @@ fn an_insolvent_settle_breaks_the_bond_as_default() {
         "the default posts rate × notice = 4 × 8"
     );
     assert_eq!(banked(&world, FIRST_ORB, Resource::Iron), ratio(0, 1));
-    assert_eq!(banked(&world, daughter, Resource::Iron), ratio(35, 1));
+    assert_eq!(banked(&world, charted, Resource::Iron), ratio(35, 1));
     assert!(world.committed().bonds.is_empty());
     let defaulted = world
         .chronicle()
@@ -225,12 +225,12 @@ fn an_insolvent_settle_breaks_the_bond_as_default() {
 /// errors refuse whole; no phantom orbs; severing what never stood.
 #[test]
 fn bond_refusals_are_typed() {
-    let (mut world, daughter) = mother_and_daughter();
+    let (mut world, charted) = source_and_charted();
     world
-        .seal_bond(FIRST_ORB, daughter, Resource::Iron, ratio(1, 2), 0)
+        .seal_bond(FIRST_ORB, charted, Resource::Iron, ratio(1, 2), 0)
         .expect("seals");
     assert_eq!(
-        world.seal_bond(FIRST_ORB, daughter, Resource::Iron, ratio(1, 4), 0),
+        world.seal_bond(FIRST_ORB, charted, Resource::Iron, ratio(1, 4), 0),
         Err(ActionRefused::BondAlreadySealed)
     );
     assert_eq!(
@@ -238,7 +238,7 @@ fn bond_refusals_are_typed() {
         Err(ActionRefused::BadTransfer)
     );
     assert_eq!(
-        world.seal_bond(FIRST_ORB, daughter, Resource::Iron, ratio(0, 1), 0),
+        world.seal_bond(FIRST_ORB, charted, Resource::Iron, ratio(0, 1), 0),
         Err(ActionRefused::BadTransfer)
     );
     assert_eq!(
@@ -246,7 +246,7 @@ fn bond_refusals_are_typed() {
         Err(ActionRefused::NoSuchOrb { orb: 99 })
     );
     assert_eq!(
-        world.sever_bond(FIRST_ORB, daughter, Resource::Biomass),
+        world.sever_bond(FIRST_ORB, charted, Resource::Biomass),
         Err(ActionRefused::NoSuchBond)
     );
 }

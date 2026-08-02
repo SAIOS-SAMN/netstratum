@@ -18,8 +18,8 @@ use cfe::world::{replay, World, FIRST_ORB, SOVEREIGN};
 
 /// The furnace↔coldstore fixture, verbatim from `world_absorb.rs`
 /// (tests cannot share modules; the twin is deliberate): ends at
-/// stamp 19 — mother holds 1 un-sealed pending overflow (struck),
-/// the daughter banks 59997/10000 sink.
+/// stamp 19 — source holds 1 un-sealed pending overflow (struck),
+/// the charted banks 59997/10000 sink.
 fn furnace_and_coldstore() -> (World, u64) {
     let mut world = World::new();
     world.found("furnace").expect("founds");
@@ -29,29 +29,29 @@ fn furnace_and_coldstore() -> (World, u64) {
         world.tick();
     }
     world.collect().expect("collects"); // 30 iron, 13 biomass @16
-    let daughter = world.chart("coldstore", FIRST_ORB).expect("charts");
+    let charted = world.chart("coldstore", FIRST_ORB).expect("charts");
     world.zone(16, ZoneKind::Encasement).expect("zones the shell");
     world
-        .zone_as(SOVEREIGN, daughter, 0, ZoneKind::CryoArray)
+        .zone_as(SOVEREIGN, charted, 0, ZoneKind::CryoArray)
         .expect("zones the array");
     world.commission_star(StarClass::G).expect("commissions");
     world
         .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None, None)
         .expect("sites hot");
     world
-        .site_planet(daughter, ratio(0, 1), ratio(100, 1), None, None)
+        .site_planet(charted, ratio(0, 1), ratio(100, 1), None, None)
         .expect("sites cold");
     world.tick();
     world.collect().expect("banks the joules"); // @17: seals vent 1/2
     world
-        .transfer(FIRST_ORB, daughter, Resource::Joule, ratio(1, 1))
+        .transfer(FIRST_ORB, charted, Resource::Joule, ratio(1, 1))
         .expect("relieves the freeze");
     world.tick(); // @17: thawed — captures, burns 1/4
     world.tick(); // @18
     world
-        .collect_as(SOVEREIGN, daughter)
+        .collect_as(SOVEREIGN, charted)
         .expect("banks the sink"); // @19
-    (world, daughter)
+    (world, charted)
 }
 
 fn lapse_stamps(world: &World) -> Vec<(u64, Ratio, u64)> {
@@ -76,14 +76,14 @@ fn lapse_stamps(world: &World) -> Vec<(u64, Ratio, u64)> {
 /// carried through resume.
 #[test]
 fn identical_remainders_lapse_in_emission_order() {
-    let (mut world, daughter) = furnace_and_coldstore();
+    let (mut world, charted) = furnace_and_coldstore();
     world
-        .absorb(FIRST_ORB, daughter, ratio(1, 2))
+        .absorb(FIRST_ORB, charted, ratio(1, 2))
         .expect("absorbs half"); // debt A @19 → lapses 27
     world.tick(); // @20 — the standing strike keeps venting
     world.tick(); // @21
     world
-        .absorb(FIRST_ORB, daughter, ratio(1, 2))
+        .absorb(FIRST_ORB, charted, ratio(1, 2))
         .expect("absorbs the same again"); // debt B @21 → lapses 29
     let debts = world.committed().debts;
     assert_eq!(debts.len(), 2, "two windows stand open");
@@ -141,15 +141,15 @@ fn identical_remainders_lapse_in_emission_order() {
 /// state from the identical order.
 #[test]
 fn three_resolutions_share_one_lane_and_one_stamp() {
-    let (mut world, daughter) = furnace_and_coldstore();
+    let (mut world, charted) = furnace_and_coldstore();
     world
-        .absorb(FIRST_ORB, daughter, ratio(1, 1))
+        .absorb(FIRST_ORB, charted, ratio(1, 1))
         .expect("absorbs"); // debt @19 → lapses 27
     world
-        .seal_bond(FIRST_ORB, daughter, Resource::Biomass, ratio(1, 8), 8)
+        .seal_bond(FIRST_ORB, charted, Resource::Biomass, ratio(1, 8), 8)
         .expect("seals the term bond"); // @19 → expires orderly at 27
     world
-        .seal_covenant(FIRST_ORB, daughter, Resource::Iron, ratio(1, 1), 8)
+        .seal_covenant(FIRST_ORB, charted, Resource::Iron, ratio(1, 1), 8)
         .expect("seals the pact"); // @19, undelivered → slashes at 27
 
     for _ in 0..8 {

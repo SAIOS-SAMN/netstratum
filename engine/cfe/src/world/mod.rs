@@ -7,7 +7,7 @@
 //! The flow model (02 §2.3) runs PER ORB: each tick, every active zone
 //! nets yield − upkeep into its orb's accrued workspace; famine strikes
 //! per orb; `collect` settles one orb. Chartering (P1) founds a
-//! daughter colony by MOVING the founding reserves from a source
+//! charted colony by MOVING the founding reserves from a source
 //! colony's bank — conservation holds; no colony after the first gets
 //! free matter.
 
@@ -307,7 +307,7 @@ fn haul(
     // silent. Banks never move on it.
     if void_share > ratio(0, 1) {
         dst.chronicle.append(
-            ClosureEvent::VoidShare { deal, resource, amount: void_share },
+            ClosureEvent::VoidShare { orb_id: to, deal, resource, amount: void_share },
             dst_stamp,
             vec![SOVEREIGN],
         );

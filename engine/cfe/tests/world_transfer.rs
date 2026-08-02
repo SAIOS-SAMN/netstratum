@@ -25,15 +25,15 @@ fn banked(world: &World, orb: u64, resource: Resource) -> Ratio {
 fn a_transfer_conserves_and_refuses_typed() {
     let mut world = World::new();
     world.found("meridian").expect("founds");
-    let daughter = world.chart("outpost", FIRST_ORB).expect("charts");
+    let charted = world.chart("outpost", FIRST_ORB).expect("charts");
 
-    // The daughter holds the moved founding reserves; send 5 iron back.
+    // The charted holds the moved founding reserves; send 5 iron back.
     world
-        .transfer(daughter, FIRST_ORB, Resource::Iron, ratio(5, 1))
+        .transfer(charted, FIRST_ORB, Resource::Iron, ratio(5, 1))
         .expect("transfers");
-    assert_eq!(banked(&world, daughter, Resource::Iron), ratio(15, 1));
+    assert_eq!(banked(&world, charted, Resource::Iron), ratio(15, 1));
     assert_eq!(banked(&world, FIRST_ORB, Resource::Iron), ratio(5, 1));
-    let total = banked(&world, daughter, Resource::Iron)
+    let total = banked(&world, charted, Resource::Iron)
         + banked(&world, FIRST_ORB, Resource::Iron);
     assert_eq!(total, ratio(20, 1), "conservation: the world minted nothing");
 
@@ -48,7 +48,7 @@ fn a_transfer_conserves_and_refuses_typed() {
 
     // Refusals, typed with the exact shortfall.
     assert_eq!(
-        world.transfer(daughter, FIRST_ORB, Resource::Iron, ratio(100, 1)),
+        world.transfer(charted, FIRST_ORB, Resource::Iron, ratio(100, 1)),
         Err(ActionRefused::CannotAfford {
             resource: Resource::Iron,
             need: Box::new(ratio(100, 1)),
@@ -56,34 +56,34 @@ fn a_transfer_conserves_and_refuses_typed() {
         })
     );
     assert_eq!(
-        world.transfer(daughter, daughter, Resource::Iron, ratio(1, 1)),
+        world.transfer(charted, charted, Resource::Iron, ratio(1, 1)),
         Err(ActionRefused::BadTransfer)
     );
     assert_eq!(
-        world.transfer(daughter, FIRST_ORB, Resource::Iron, ratio(0, 1)),
+        world.transfer(charted, FIRST_ORB, Resource::Iron, ratio(0, 1)),
         Err(ActionRefused::BadTransfer)
     );
     assert_eq!(
-        world.transfer(daughter, FIRST_ORB, Resource::Iron, ratio(-1, 1)),
+        world.transfer(charted, FIRST_ORB, Resource::Iron, ratio(-1, 1)),
         Err(ActionRefused::BadTransfer)
     );
     assert_eq!(
-        world.transfer(daughter, 99, Resource::Iron, ratio(1, 1)),
+        world.transfer(charted, 99, Resource::Iron, ratio(1, 1)),
         Err(ActionRefused::NoSuchOrb { orb: 99 })
     );
 
     // Neither orb stands in crisis: the compassion books stay empty.
-    for orb in [FIRST_ORB, daughter] {
+    for orb in [FIRST_ORB, charted] {
         let held = world.orb_by_id(orb).expect("orb");
         assert_eq!(held.given_in_crisis, ratio(0, 1));
         assert_eq!(held.drawn_in_crisis, ratio(0, 1));
     }
 }
 
-/// The crisis fixture: a mother economy runs 16 clean ticks, charts a
-/// daughter, and the daughter's lone extractor starves its biomass at
+/// The crisis fixture: a source economy runs 16 clean ticks, charts a
+/// charted, and the charted's lone extractor starves its biomass at
 /// exactly tick 21 (10 − t/2 < 0). No star — no thermal arm at all.
-fn starved_daughter() -> (World, u64) {
+fn starved_charted() -> (World, u64) {
     let mut world = World::new();
     world.found("meridian").expect("founds");
     world.zone(0, ZoneKind::Extractor).expect("zones");
@@ -91,21 +91,21 @@ fn starved_daughter() -> (World, u64) {
     for _ in 0..16 {
         world.tick();
     }
-    world.collect().expect("collects"); // mother banks 30 iron, 13 biomass
-    let daughter = world.chart("outpost", FIRST_ORB).expect("charts");
+    world.collect().expect("collects"); // source banks 30 iron, 13 biomass
+    let charted = world.chart("outpost", FIRST_ORB).expect("charts");
     world
-        .zone_as(cfe::world::SOVEREIGN, daughter, 0, ZoneKind::Extractor)
-        .expect("zones the daughter");
+        .zone_as(cfe::world::SOVEREIGN, charted, 0, ZoneKind::Extractor)
+        .expect("zones the charted");
     let mut struck = false;
     for _ in 0..21 {
         let outcome = world.tick();
         struck |= outcome
             .struck
             .iter()
-            .any(|(orb, resource)| *orb == daughter && *resource == Resource::Biomass);
+            .any(|(orb, resource)| *orb == charted && *resource == Resource::Biomass);
     }
-    assert!(struck, "the daughter's biomass famine strikes on schedule");
-    (world, daughter)
+    assert!(struck, "the charted's biomass famine strikes on schedule");
+    (world, charted)
 }
 
 /// Compassion is the famine-relief mechanic made inter-orb: a gift
@@ -114,25 +114,25 @@ fn starved_daughter() -> (World, u64) {
 /// exact.
 #[test]
 fn a_transfer_into_famine_relieves_at_the_law() {
-    let (mut world, daughter) = starved_daughter();
+    let (mut world, charted) = starved_charted();
 
     // A gift of 1/4 biomass: below the extractor's 1/2 one-tick
     // upkeep — the famine holds.
     world
-        .transfer(FIRST_ORB, daughter, Resource::Biomass, ratio(1, 4))
+        .transfer(FIRST_ORB, charted, Resource::Biomass, ratio(1, 4))
         .expect("gives");
     assert!(world
-        .orb_by_id(daughter)
+        .orb_by_id(charted)
         .expect("orb")
         .famine
         .contains(&Resource::Biomass));
 
     // The second 1/4 reaches the bill: relief fires, receipted once.
     world
-        .transfer(FIRST_ORB, daughter, Resource::Biomass, ratio(1, 4))
+        .transfer(FIRST_ORB, charted, Resource::Biomass, ratio(1, 4))
         .expect("gives again");
     assert!(!world
-        .orb_by_id(daughter)
+        .orb_by_id(charted)
         .expect("orb")
         .famine
         .contains(&Resource::Biomass));
@@ -144,17 +144,17 @@ fn a_transfer_into_famine_relieves_at_the_law() {
             matches!(
                 r.event,
                 ClosureEvent::FamineRelieved { orb_id, resource: Resource::Biomass }
-                    if orb_id == daughter
+                    if orb_id == charted
             )
         })
         .count();
     assert_eq!(relieved, 1);
 
-    // Both gifts landed while the daughter stood struck: the mother's
+    // Both gifts landed while the charted stood struck: the source's
     // syntropic book holds exactly 1/2 (weight 1 in v1).
-    let mother = world.orb_by_id(FIRST_ORB).expect("orb");
-    assert_eq!(mother.given_in_crisis, ratio(1, 2));
-    assert_eq!(mother.drawn_in_crisis, ratio(0, 1));
+    let source = world.orb_by_id(FIRST_ORB).expect("orb");
+    assert_eq!(source.given_in_crisis, ratio(1, 2));
+    assert_eq!(source.drawn_in_crisis, ratio(0, 1));
 }
 
 /// The posting rule is deterministic — a replay fact: drawing FROM a
@@ -163,21 +163,21 @@ fn a_transfer_into_famine_relieves_at_the_law() {
 /// whole ledger replays from receipts alone.
 #[test]
 fn crisis_posting_is_a_replay_fact() {
-    let (mut world, daughter) = starved_daughter();
+    let (mut world, charted) = starved_charted();
 
-    // Draw 2 banked iron OUT of the struck daughter: distress
-    // extraction — the mother's entropic book posts exactly 2.
+    // Draw 2 banked iron OUT of the struck charted: distress
+    // extraction — the source's entropic book posts exactly 2.
     world
-        .transfer(daughter, FIRST_ORB, Resource::Iron, ratio(2, 1))
+        .transfer(charted, FIRST_ORB, Resource::Iron, ratio(2, 1))
         .expect("draws");
     assert_eq!(
         world.orb_by_id(FIRST_ORB).expect("orb").drawn_in_crisis,
         ratio(2, 1)
     );
 
-    // Relieve the daughter with one 1/2 biomass gift.
+    // Relieve the charted with one 1/2 biomass gift.
     world
-        .transfer(FIRST_ORB, daughter, Resource::Biomass, ratio(1, 2))
+        .transfer(FIRST_ORB, charted, Resource::Biomass, ratio(1, 2))
         .expect("gives");
     assert_eq!(
         world.orb_by_id(FIRST_ORB).expect("orb").given_in_crisis,
@@ -186,12 +186,12 @@ fn crisis_posting_is_a_replay_fact() {
 
     // Healthy↔healthy now: no book moves.
     world
-        .transfer(FIRST_ORB, daughter, Resource::Iron, ratio(1, 1))
+        .transfer(FIRST_ORB, charted, Resource::Iron, ratio(1, 1))
         .expect("transfers");
-    let mother = world.orb_by_id(FIRST_ORB).expect("orb");
-    assert_eq!(mother.given_in_crisis, ratio(1, 2));
-    assert_eq!(mother.drawn_in_crisis, ratio(2, 1));
-    let held = world.orb_by_id(daughter).expect("orb");
+    let source = world.orb_by_id(FIRST_ORB).expect("orb");
+    assert_eq!(source.given_in_crisis, ratio(1, 2));
+    assert_eq!(source.drawn_in_crisis, ratio(2, 1));
+    let held = world.orb_by_id(charted).expect("orb");
     assert_eq!(held.given_in_crisis, ratio(0, 1));
     assert_eq!(held.drawn_in_crisis, ratio(0, 1));
 
@@ -214,14 +214,14 @@ fn demurrage_settles_both_sides_at_the_transfer_touch() {
         world.tick();
     }
     world.collect().expect("collects"); // 30 iron, 13 biomass
-    let daughter = world.chart("coldstore", FIRST_ORB).expect("charts");
+    let charted = world.chart("coldstore", FIRST_ORB).expect("charts");
     world.zone(16, ZoneKind::Encasement).expect("zones the shell");
     world.commission_star(StarClass::G).expect("commissions");
     world
         .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None, None)
         .expect("sites the furnace");
     world
-        .site_planet(daughter, ratio(0, 1), ratio(1, 2), None, None)
+        .site_planet(charted, ratio(0, 1), ratio(1, 2), None, None)
         .expect("sites the store");
 
     // One furnace tick mints 15/8 joules (the THERMAL-1 arithmetic).
@@ -231,7 +231,7 @@ fn demurrage_settles_both_sides_at_the_transfer_touch() {
 
     // Transfer at the same stamp as the collect: elapsed 0 — no decay.
     world
-        .transfer(FIRST_ORB, daughter, Resource::Joule, ratio(1, 1))
+        .transfer(FIRST_ORB, charted, Resource::Joule, ratio(1, 1))
         .expect("transfers");
     let demurrage = world
         .chronicle()
@@ -250,7 +250,7 @@ fn demurrage_settles_both_sides_at_the_transfer_touch() {
         world.tick();
     }
     world
-        .transfer(FIRST_ORB, daughter, Resource::Joule, ratio(1, 8))
+        .transfer(FIRST_ORB, charted, Resource::Joule, ratio(1, 8))
         .expect("transfers again");
     let mut settled: Vec<(u64, Ratio)> = world
         .chronicle()
@@ -266,17 +266,17 @@ fn demurrage_settles_both_sides_at_the_transfer_touch() {
     settled.sort_by_key(|(orb, _)| *orb);
     assert_eq!(
         settled,
-        vec![(FIRST_ORB, ratio(1, 8)), (daughter, ratio(1, 8))],
+        vec![(FIRST_ORB, ratio(1, 8)), (charted, ratio(1, 8))],
         "both sides settle their exact decay at the one touch"
     );
-    // Mother: 7/8 − 1/8 − 1/8 = 5/8. Daughter: 1 − 1/8 + 1/8 = 1.
+    // Source: 7/8 − 1/8 − 1/8 = 5/8. Charted: 1 − 1/8 + 1/8 = 1.
     assert_eq!(banked(&world, FIRST_ORB, Resource::Joule), ratio(5, 8));
-    assert_eq!(banked(&world, daughter, Resource::Joule), ratio(1, 1));
+    assert_eq!(banked(&world, charted, Resource::Joule), ratio(1, 1));
 
     // The furnace stands overheat-STRUCK: both draws left a crisis orb,
-    // so the daughter's entropic book holds exactly 1 + 1/8.
+    // so the charted's entropic book holds exactly 1 + 1/8.
     assert_eq!(
-        world.orb_by_id(daughter).expect("orb").drawn_in_crisis,
+        world.orb_by_id(charted).expect("orb").drawn_in_crisis,
         ratio(9, 8)
     );
 

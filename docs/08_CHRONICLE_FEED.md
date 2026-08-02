@@ -40,7 +40,7 @@ become readable — and therefore economically actionable intelligence.
 | banked sink + vault band | offering absorption capacity to Furnace traders |
 | zone mix + growth (receipts this year) | what they BUILT; growth rate as exact `p/q` per year |
 | registry axes (disposition/metabolism/perception) + StarClass/band | leisure & culture flavor (digest-seeded variants) |
-| chartered daughters / entities registered | expansion, population notes, "seeking space" |
+| chartered colonies / entities registered | expansion, population notes, "seeking space" |
 
 Trade requests derive: joule deficit → seeking fuel; high sink → selling
 `S_cool`; famine → seeking the famined resource. Alert levels: Normal

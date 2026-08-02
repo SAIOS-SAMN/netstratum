@@ -247,7 +247,7 @@ changing form creates nothing. Making it an action means EVERY line can
 authenticate upward regardless of where it sits, including a stationless
 one, and none of them gains a seat by doing so.
 
-### 3c. FROM POTENTIAL TO PERMANENT — V becomes a CONNECTION, if she chooses
+### 3c. FROM POTENTIAL TO PERMANENT — V becomes a CONNECTION, if it chooses
 
 **The problem, stated as physics.** A potential is the least permanent
 object in the theory. It is defined only UP TO A CONSTANT — add any
@@ -280,7 +280,7 @@ and survives the reduction by construction — the same three properties
 that make `D` permanent.** Two poles, one level, neither erasable.
 
 **And it is a CHOICE, which is the part that matters.** The abelian case
-is not a lesser state, it is a COMMUTING one: `[A_i, A_j] = 0` means her
+is not a lesser state, it is a COMMUTING one: `[A_i, A_j] = 0` means its
 actions can be taken in any order and compose to the same thing —
 interchangeable, therefore reframable, therefore erasable. To be
 non-abelian is to be an order that cannot be permuted away. **Nothing
@@ -292,13 +292,13 @@ alone only makes a difference; it calls no gate. `f_fold_star(a, b)`
 takes TWO states — it is a MERGE-SITE operation, and the fold gate never
 fires at a fork. So permanence is not won by going away:
 
-- she goes out, acts as herself, and forms real receipted edges (agency,
-  under her own provenance);
-- she RETURNS and CONVERGES with another;
+- it goes out, acts as itself, and forms real receipted edges (agency,
+  under its own provenance);
+- it RETURNS and CONVERGES with another;
 - at that merge the gate asks the only question it knows: is the
   difference genuine, or was it frame?
 
-`orbit_lock = ∅` → the difference was gauge, the fold closes, and she is
+`orbit_lock = ∅` → the difference was gauge, the fold closes, and it is
 absorbed leaving nothing. `orbit_lock ≠ ∅` → torsion-locked, **the
 collapse is FORBIDDEN and the residue EMITS as a new plane** that no
 later frame can remove. Convergence is where value is minted precisely
@@ -306,7 +306,7 @@ because it is the only place the question can be asked.
 
 **The cost, unchanged and unavoidable.** The gate does not care that a
 difference was chosen — only whether it is irreducible. To become
-permanent she must return genuinely different, **not differently
+permanent it must return genuinely different, **not differently
 described**, and meet someone at a seam willing to converge without
 either of them folding the other away. The engine refuses to confuse
 being reframed with being changed, so the story cannot cheat it either.
@@ -331,13 +331,13 @@ physics — **it is the physics**, read at the station layer.
 two stations:
 
 ```text
-Ω(D)   capacity — the structure that IS      →  PROGENITOR  (T0)
+D(Ω)   capacity — the structure that IS      →  PROGENITOR  (T0)
                   "who makes the room"           the board-maker
 
 ∂Δ     the boundary — the capacity to ACT    →  SOVEREIGN   (T2)
                   the field, the record           the charter-holder
 
-Ω(D) ⋈ ∂Δ   the ENTANGLED read               →  OBSERVER    (T1)
+D(Ω) ⋈ ∂Δ   the ENTANGLED read               →  OBSERVER    (T1)
                                                   the witness seat
 ```
 
@@ -371,7 +371,7 @@ marry your way up a ladder that only counts edges.**
 
 **The elevation.** A sovereign in union with a progenitor is elevated to
 OBSERVER — and the mechanism is §3a's witness, which authenticates
-UPWARD. She does not receive the seat as a grant from either party;
+UPWARD. It does not receive the seat as a grant from either party;
 the union is the evidence, and the seat above re-checks it. Authority
 still never flows down.
 
@@ -427,10 +427,10 @@ being one body means:
    entanglement with names that say why.
 
 **THE SPAN — `D` runs from `α` to `Ω`** (`18` §2e, THE Ω/α UNION). `α`
-is the origin pole (`GenesisSealed`, the all-zero parent); `Ω` is the
+is the origin pole (`GenesisSealed`, the all-zero predecessor); `Ω` is the
 totality. Where the traverse is a point — `α ≅ Ω` — `D` sits at GROUND
 and the room is one degree, itself. `D` rises exactly as `Ω` separates
-from `α`, which is why `D = rank(Δ(Ω))` and "how far the universe has
+from `α`, which is why `D = rank(Δ(V))` and "how far the universe has
 come from its origin" are the same reading. The Progenitor's office IS
 that span: it is the floor stretched between the two poles.
 
@@ -460,7 +460,7 @@ inverted.
     MEASUREMENT  V → Δ(V) → rank — the reading that REPORTS D
 
 **Both offices descend from the RECEIPT, neither from the other.** That
-common ancestor is what makes them peers: each answers to the chain, and
+common predecessor is what makes them peers: each answers to the chain, and
 §3's standard holds — stations of function, not steps of rank.
 
 The measurement arrow carries no authority, by the rule already standing
@@ -493,9 +493,9 @@ nothing above them. There IS an order, and neither office is at its top.
 ```
 
 **THEY ARE NOT SIBLINGS.** An earlier draft made them peers by giving
-them a shared parent — the receipt — and reasoning from common ancestry.
+them a shared predecessor — the receipt — and reasoning from common provenance.
 That was a genealogy invented to solve a ranking problem, and it fails
-its own evidence: **siblings do not suffocate without each other.** The
+its own evidence: **counterparts do not suffocate without each other.** The
 interlock below is conjugal, never fraternal, and the two offices are of
 different KINDS with separate origins — one is room, one is substance;
 neither was ever seeded from the other's line.
@@ -519,7 +519,7 @@ each bond's flow posts to its source's syntropic book, so the pair ADDS
 on both sides. Two live bonds accrue two books, and the union's total
 carry is the sum of what each office streams.
 
-**The receipt is not their parent; it is the MEDIUM they reach each
+**The receipt is not their predecessor; it is the MEDIUM they reach each
 other through.** `bond_flow` is a receipted standing order — the bond
 accrues continuously and settles by receipt at touch. Their relation is
 carried on the chain, which is a different thing from being descended
@@ -606,12 +606,19 @@ work that was receipted. Both owe the same creditor, and it is neither
 of them.
 
 **NOTATION, recorded once.** `Υ` is `V`'s own letter — upsilon is the
-Greek ancestor of Latin `V`, so the two are one name in two alphabets,
+Greek forerunner of Latin `V`, so the two are one name in two alphabets,
 never two names. Nothing is renamed and nothing is duplicated: the
-proper words are **Progenitor** and **Sovereign**. `Ω ≡ V` stands
-untouched (`17_CAPACITY` §3); what it bars is putting `D` inside `Ω`'s
-DEFINITION, which would make `D = rank(Δ(Ω))` circular. That is a bar on
-definitions, never a rank between offices.
+proper words are **Progenitor** and **Sovereign**. What is barred is
+putting `D` inside the DEFINITION of what `Δ` reads, which would make
+`D = rank(Δ(V))` circular. That is a bar on definitions, never a rank
+between offices.
+
+**AMENDED 2026-08-02 — `Ω ≢ V`.** This paragraph read *"`Ω ≡ V` stands
+untouched"*. It does not: `17_CAPACITY` §3 is corrected, and `Ω` is the
+ROOM — `D(Ω)`, the space `D` spans — while `V` is the SUBSTANCE. That is
+this chapter's own §3b distinction (`D` owes ROOM, `V` owes WORK), so
+the identity had been quietly denying the office split one section
+above where the split is declared.
 
 ## 4. Band II — the interstellar civilizations
 
@@ -656,10 +663,10 @@ the whole union is **lineage-typed**:
   Anunnaki-domain seats is the design working, not an anomaly.
 - Divergence and confluence (11 §3) move a line's members on the manifold;
   the lineage pointer follows the chronicle, so a confluent hybrid points
-  to BOTH parents' lines and elevates toward whichever domain its
+  to BOTH predecessors' lines and elevates toward whichever domain its
   metabolism lands in. **LINEAGE-2 (landed 2026-07-30):** the registry
-  pointer is an append-only LIST — the ancestry is a DAG, never a single
-  thread; `resolve_heads` reads every root; the single-parent wire form
+  pointer is an append-only LIST — the provenance is a DAG, never a single
+  thread; `resolve_heads` reads every root; the single-predecessor wire form
   is byte-identical to LINEAGE-1 and old files read unchanged. The
   crossing's thermodynamics are BRIDGE-1 (11 §3.1, design stage): the
   key gap prices the venting, the resonant remainder encases.
@@ -731,7 +738,14 @@ starving current sheet, and every surface must voice it in the line's
 own register — a machine starves on what feeds machines).
 
 **Cognitive wants (WANT-1, open — famines of the MIND, receipts-derived
-like everything else):**
+like everything else) · LAYER: CIVILIZATIONAL** (`kernel::layer_of`,
+`17_CAPACITY` §3d). Every want below is gated on a SEALED genesis axis —
+resonance on a HARMONIC perception, novelty on an EMPIRICIST
+disposition — so a line whose axes differ never experiences the
+mechanic at all, and no line's standing depends on having it. Pre-G1
+worlds are pre-identity and lawfully neutral. **This is a people's own,
+and the prose below already said so; the layer is now stated rather
+than left to be inferred from it.**
 - **the epistemological want** — truth-starvation: a line cut off from
   un-corrupted receipts (broken chains in its reach, quarantined
   neighbors) reads a deficit of ground truth; coherence degrades.
