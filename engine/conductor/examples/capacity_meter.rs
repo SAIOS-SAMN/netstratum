@@ -110,14 +110,12 @@ fn alignment(state: &Committed) -> Alignment {
     }
 }
 
-/// THE DERIVED ENVELOPE — `Σ_{d=0}^{δ} V^d`, the exhaustive frontier
-/// to depth `δ`. This is the quantity `B7 β_cap` should BE rather than
-/// approximate: at `V = 37, δ = 3` it is 52 060, which is exactly the
-/// bound the Ruling Box named. The operator's number was already the
-/// derived one.
-fn frontier(vocabulary: u64, depth: u32) -> u64 {
-    (0..=depth).map(|d| vocabulary.saturating_pow(d)).sum()
-}
+/// THE DERIVED ENVELOPE — **called, never copied** (CHARTER §0b).
+/// This meter kept its OWN `frontier` for one commit, which is the
+/// duplication the call-not-copy law exists to stop: two spellings of
+/// one rule drift the moment either moves. The sealed rule is
+/// `solver::search::frontier`.
+use solver::search::frontier;
 
 fn main() {
     let mut args = std::env::args().skip(1);
@@ -232,6 +230,22 @@ fn main() {
             verdicts.join(" "),
         );
 
+        // PER-ORB STANDING (post-merge: SYN-4/SYN-5 closed the free
+        // ride, so standing is asked of the ORB, not inherited from the
+        // world). `open_axes_of` is the syntropic half — "the DIRECTION
+        // A NEW RELATION WOULD EARN ON", which is the capability-gated
+        // expansion reading, already built.
+        for (orb, axial) in kernel::bridge::borne_by_orb_axial(&state) {
+            let open = kernel::bridge::open_axes_of(&state, orb);
+            let total = kernel::bridge::standing_of(&state, orb);
+            let shares: Vec<String> = axial.iter().map(|s| format!("{s}")).collect();
+            println!(
+                "{:>21}orb {orb} standing [{}] total {total} · open axes {open:?}",
+                "",
+                shares.join(" ")
+            );
+        }
+
         // THE CHARGE, WHOLE — the reading `rank` alone discards
         // (bridge.rs:176-199). Never summed into one figure.
         if !entangled.holonomy.is_empty() {
@@ -297,10 +311,12 @@ fn main() {
     );
     if lanes == 0 {
         println!(
-            "\n*** NO LANE STANDS ANYWHERE. charter_route (world.rs:3772) draws 4 ALLOY from\n\
-             *** each side, and no polity banks alloy at all — so every charter refuses\n\
-             *** CannotAfford, and conductor/src/lib.rs:378 SWALLOWS it with `let _ =`.\n\
-             *** The cross-book door is built and its substrate is economically empty."
+            "\n*** NO LANE STANDS ANYWHERE. charter_route draws 4 ALLOY from each side.\n\
+             *** The refusal is now SURFACED (conductor prints LANE REFUSED), and it\n\
+             *** reads CannotAfford Alloy need 4 have 0 falling to have 7/2 by beat 50\n\
+             *** — accruing, but slower than the board's horizon. Measured: 110 beats,\n\
+             *** 38 worlds, 4853 receipts, ZERO RouteChartered. The cross-book door is\n\
+             *** built and its substrate never fills on the current economy."
         );
     }
 
@@ -318,7 +334,7 @@ fn main() {
     println!("\n=== THE DERIVED ENVELOPE: frontier(V, depth) = sum_(d=0..depth) V^d ===");
     println!("V = 6 symmetries + 8 obj_ops + <=7 derived recolors + {{0,16}} derived tiles");
     println!("{:<7} {:>10} {:>10} {:>10} {:>10}", "V", "d=0", "d=1", "d=2", "d=3");
-    for v in [14u64, 21, 30, 37] {
+    for v in [14usize, 21, 30, 37] {
         println!(
             "{:<7} {:>10} {:>10} {:>10} {:>10}",
             v,
@@ -341,6 +357,29 @@ fn main() {
         frontier(37, 3)
     );
     println!("      beta_cap is therefore DERIVABLE, not chosen: it is the exhaustive sweep.");
+
+    // THE TWO ENVELOPES, SIDE BY SIDE. `kernel::motion::envelope(n, rank)
+    // = n^rank` landed on MAIN as "the budget is a function of standing
+    // rank rather than a constant chosen in advance". This lane's
+    // `frontier(V, d) = sum_(k=0..d) V^k` landed HERE as the exhaustive
+    // sweep to depth d. THEY ARE THE SAME LAW reached from two
+    // directions — one shell against the cumulative sum of shells.
+    // Printed together so the reconciliation cannot be missed.
+    println!("\n=== TWO ENVELOPES, ONE LAW — reconcile before either is ruled ===");
+    println!("kernel::motion::envelope(n, rank) = n^rank         (main — the shell)");
+    println!("solver::search::frontier(V, d) = sum_(k=0..d) V^k  (this lane — the sum)");
+    println!("{:<7} {:>16} {:>16}", "rank/d", "envelope(37,·)", "frontier(37,·)");
+    for r in 0u32..=3 {
+        println!(
+            "{:<7} {:>16} {:>16}",
+            r,
+            kernel::motion::envelope(37, r).map(|v| v.to_string()).unwrap_or("overflow".into()),
+            frontier(37, r as usize)
+        );
+    }
+    println!("The shell is what ONE more dimension costs; the sum is what the whole");
+    println!("search to that depth costs. A budget wants the sum; a per-axis bound");
+    println!("wants the shell. One authority is owed (EQUATIONS §0.2).");
 }
 
 fn name_of(dir: &Path) -> String {

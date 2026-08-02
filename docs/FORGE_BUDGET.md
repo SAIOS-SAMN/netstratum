@@ -393,6 +393,74 @@ would pin every line at `δ = 1` and **stop the board climbing past rung
 
 ---
 
+## §8sexies THE SPREAD MEASURED — there is no spread (task #2, post-merge)
+
+Re-run after merging main (66 commits, incl. per-orb standing —
+`borne_by_orb_axial`, `open_axes_of`, `MintWithoutOwnStanding`, which did
+not exist at this lane's base). **Fresh universe, 110 beats, 38 worlds,
+4 853 receipts.**
+
+| reading | result |
+|---|---|
+| orbs per book | **1** — all 38 |
+| `rank` | **0** — all 38 |
+| per-channel verdicts | **`Void` ×4** — all 38 |
+| per-orb standing `[bond cov debt lane]` | **`[0 0 0 0]`, total 0 — every orb** |
+| `open_axes_of` | **`[0,1,2,3]`** — every channel open, every orb |
+| `RouteChartered` receipts | **0** — in the entire chronicle |
+| cross-book rank | **0** |
+| alignment axes | nothing posted, any line |
+
+**THE ANSWER TO "MEASURE THE SPREAD" IS THAT THERE IS NONE.** Not a low
+distribution — a constant. Zero variance across every line, every
+channel, every orb, for 110 beats. **B1–B9 cannot be fitted to this:
+every coefficient would be fitted to a single point.** `17_CAPACITY` §7's
+*measure, then rule* is satisfiable only when the meter has something to
+distinguish, and it does not.
+
+### 8sexies.a THE JUDGE AGREES, STEADILY
+
+With the refusals surfaced, per 10 beats: `MintWithoutStanding { Void }`
+×61, ×68, ×57, ×55 — **flat through beat 60.** Not a warm-up. The kernel
+refuses every mint, continuously, for the reason the meter reads.
+
+Also steady: `DecayExceedsBound { bound: 0, claimed: 1/32 }` ×10–18 per
+10 beats — demurrage is being refused too (task #20).
+
+### 8sexies.b THE ALLOY GATE IS A RATE, NOT A WALL — corrected
+
+§8ter.d said no polity banks alloy. **Sharper, measured:** the lane
+refusals decay 7 → 6 → 3 → 1 as the board ages, and at beat 50 one world
+reads `have: 7/2` against `need: 4`. **Alloy accrues — just slower than
+the board's horizon**, and the charter windows (a crossing must clear
+that beat) grow rarer as they do. So it is a *timing* defect, not an
+absolute one: the gate is 1/2 alloy from opening and the opportunity to
+use it is thinning at the same time.
+
+That reframes task #19: the cure is not necessarily "seed alloy" but
+**why the two curves cross the wrong way** — which is squarely the
+capability-gated-expansion question (R-D4), not a resource top-up.
+
+### 8sexies.c TWO ENVELOPES, ONE LAW — a convergence the merge revealed
+
+`kernel::motion::envelope(n, rank) = n^rank` landed on **main** as *"the
+budget is a function of standing rank rather than a constant chosen in
+advance"* — replacing a flat bound, for the same reason this lane struck
+`SEARCH_BUDGET`. Two nodes reached one law from opposite ends:
+
+| rank / d | `envelope(37,·)` — the shell | `frontier(37,·)` — the sum |
+|---|---|---|
+| 0 | 1 | 1 |
+| 1 | 37 | 38 |
+| 2 | 1 369 | 1 407 |
+| 3 | 50 653 | 52 060 |
+
+`frontier(V,d) = Σ_{k≤d} envelope(V,k)` **exactly.** The shell is what one
+more dimension costs; the sum is what the whole search to that depth
+costs. A search budget wants the sum; a per-axis bound wants the shell.
+**One authority is owed** (`EQUATIONS` §0.2) — recorded, not resolved
+unilaterally, because `motion::envelope` is kernel-lane's.
+
 ## §8bis THE RULING, AMENDED — depth is the resource, and the constants dissolve
 
 **Operator ruling 2026-08-02 (the Ruling Box) recorded as given, then
