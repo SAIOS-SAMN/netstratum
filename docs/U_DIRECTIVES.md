@@ -366,6 +366,34 @@ commit on explicit operator go.
   digest carries no economic weight. `verify_volume` is deferred until
   higher-dimensional work becomes a real economic axis (rides Ruling
   Box 1's work-shape word).
+  **CLOSED WHOLE 2026-08-03 (cognition lane) — the ruling's SECOND
+  clause, which had not landed.** C8 said two things: mark the seal
+  decorative *and* refuse the empty-train solve. Only the header
+  landed; the vacuous solve stood for two days, and the header had
+  reframed it ("the empty-train solve is not a mint") rather than
+  obeyed it. Measured red-first, the hole was WIDER than the audit
+  recorded — two failure modes, not one:
+  - `solve_volume` returned `Solved` on an empty train (the vacuity
+    the audit named): `train.iter().all(..)` is true over no pairs,
+    so the empty program closes nothing and claims everything.
+  - `solve` (PLANAR) did not vacuously solve — it **panicked**,
+    `derived_tiles` indexing `task.train[0]` unguarded
+    (`search.rs`). A totality violation of the same class as audit
+    HOLE B, in the prover half, never recorded. Non-constitutional
+    (the kernel's `decode_work` refuses `train_pairs: 0`, and
+    `load_task` refuses an empty train at the file door) — but
+    `Task`'s fields are `pub`, so any in-process caller constructing
+    a task reached it.
+  Both close at the guard shape HOLE A/B used: an empty training set
+  reads `Unsolved` — the honest withhold, nothing to close means
+  nothing proved. The guard is repeated at the SECTOR DOOR
+  (`closes_every_training_pair`) on purpose: the door's law is
+  vacuously true over no pairs, and it is what "only exactness may
+  dispose" rests on, so it refuses the shape whoever proposes it.
+  Witnesses (red proven live, 3 pins): `an_empty_training_set_never_
+  solves` planar (`harness_pins`) and volumetric (`volume_pins`),
+  `an_empty_training_set_never_crosses_the_door` (`consulted_pins`).
+  Board 625/625, clippy zero in both solver crates.
 - **S2 — the worktree prune** (AUDIT §3/§5.6). ~13 stale worktrees
   under `.claude/worktrees/` still carry old `engine/mirror` code on
   disk — the only place the dead name survives. Outside the

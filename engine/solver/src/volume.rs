@@ -206,7 +206,9 @@ fn hash_volume(hasher: &mut blake3::Hasher, v: &Volume) {
 // work becomes a real economic axis; on that day `verify_volume` lands
 // mirroring `verify_work` (re-forge ∧ re-apply ∧ re-chain + the
 // degenerate-difficulty guard) with its own deed. Until then this digest
-// carries no economic weight and the empty-train solve is not a mint.
+// carries no economic weight. The empty-train solve is no longer merely
+// "not a mint" — it is REFUSED at `solve_volume` (the ruling's second
+// clause; it had been left unlanded while this header landed alone).
 // See docs/U_DIRECTIVES.md §10 S1.
 fn seal_volume(task: &VolumeTask, program: &VProgram, output: &Volume) -> [u8; 32] {
     let mut hasher = blake3::Hasher::new();
@@ -233,6 +235,14 @@ fn seal_volume(task: &VolumeTask, program: &VProgram, output: &Volume) -> [u8; 3
 /// ONLY if it closes every training pair exactly. The honest withhold
 /// stands.
 pub fn solve_volume(task: &VolumeTask, max_depth: usize) -> VolumeSolveRead {
+    // THE VACUOUS SOLVE, REFUSED (operator ruling C8, U_DIRECTIVES §10
+    // S1 — the ruling's second clause, landing beside the decorative
+    // seal). `closes` is true over no pairs, so the empty program closed
+    // an empty train at depth 0 and read Solved. Nothing was proved;
+    // the honest withhold stands.
+    if task.train.is_empty() {
+        return VolumeSolveRead::Unsolved;
+    }
     let mut vocabulary: Vec<VOp> = SYMMETRIES
         .iter()
         .map(|op| VOp::PerLayer(op.clone()))

@@ -56,6 +56,27 @@ fn an_unsolved_proposal_crosses_and_claims_nothing() {
     assert!(matches!(solve_consulted(&t, 0), SolveRead::Unsolved));
 }
 
+/// THE DOOR IS NOT VACUOUSLY SATISFIABLE (operator ruling C8,
+/// U_DIRECTIVES §10 S1). The door's law — re-run the program on every
+/// training pair and demand exact agreement — is TRUE OVER NO PAIRS.
+/// So an empty-train proposal would cross on a technicality, and the
+/// door is precisely what "only exactness may dispose" rests on. With
+/// nothing to re-derive, nothing may cross claiming Solved.
+#[test]
+fn an_empty_training_set_never_crosses_the_door() {
+    use solver::{consult_observed, Consultation};
+
+    let t = solver_verify::loader::Task {
+        name: "constructed-empty-train".into(),
+        train: Vec::new(),
+        test_in: solver_verify::grid::Grid::new(2, 2, vec![1, 2, 3, 4]).expect("well-formed"),
+        test_expected: None,
+    };
+    assert!(matches!(solve_consulted(&t, 0), SolveRead::Unsolved));
+    // Silent, never Crossed: nothing was proposed, so nothing was refused.
+    assert!(matches!(consult_observed(&t, 3), Consultation::Silent));
+}
+
 /// THE THREE OUTCOMES — `solve_consulted` collapses Withdrawn and Silent
 /// into one `Unsolved` for its callers, and `consult_observed` keeps the
 /// difference. It is the only tell for a degrading search: a proposal

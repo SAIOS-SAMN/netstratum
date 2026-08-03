@@ -114,6 +114,24 @@ fn an_unreachable_task_reads_unsolved() {
     assert!(matches!(solve(&task, 3), SolveRead::Unsolved));
 }
 
+/// THE VACUOUS SOLVE, REFUSED (operator ruling C8, U_DIRECTIVES §10 S1).
+/// An empty training set proves nothing, so the empty program "closes"
+/// it vacuously — `train.iter().all(..)` is true over no pairs. That is
+/// a solve claim nobody earned. The honest withhold outranks it: with
+/// nothing to close, there is no solution to report.
+#[test]
+fn an_empty_training_set_never_solves() {
+    let task = Task {
+        name: "constructed-empty-train".into(),
+        train: Vec::new(),
+        test_in: grid(2, 2, &[1, 2, 3, 4]),
+        test_expected: None,
+    };
+    // Depth 0 is the sharp case: the frontier IS the empty program.
+    assert!(matches!(solve(&task, 0), SolveRead::Unsolved));
+    assert!(matches!(solve(&task, 3), SolveRead::Unsolved));
+}
+
 /// A tampered certificate names the diverged link.
 #[test]
 fn a_tampered_certificate_diverges_typed() {

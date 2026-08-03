@@ -122,6 +122,16 @@ pub const SEARCH_BUDGET: usize = 200_000;
 /// the general vocabulary plus operators derived from the observation.
 /// Bounded by `SEARCH_BUDGET` candidates, deterministically.
 pub fn solve(task: &Task, max_depth: usize) -> SolveRead {
+    // THE VACUOUS SOLVE, REFUSED (operator ruling C8, U_DIRECTIVES §10
+    // S1). With no training pair, `closes` is true over nothing and the
+    // empty program would "solve" at depth 0 — a claim nobody earned.
+    // The honest withhold is the lawful reading: nothing to close means
+    // nothing proved. This guard is also the TOTALITY guard — the
+    // derived-operator path reads `train[0]` and an empty train drove it
+    // to panic in-process, the same class as audit HOLE B.
+    if task.train.is_empty() {
+        return SolveRead::Unsolved;
+    }
     let mut vocabulary = vec![
         Op::Rotate90,
         Op::Rotate180,
@@ -260,6 +270,13 @@ pub fn consult_observed(task: &Task, max_depth: usize) -> Consultation {
 fn closes_every_training_pair(task: &Task, read: &SolveRead) -> bool {
     match read {
         SolveRead::Unsolved => true,
+        // A claim of Solved over NO training pairs is vacuously true
+        // under `all` — the door would pass it on a technicality, and
+        // the door is what "only exactness may dispose" rests on. The
+        // guard lives here as well as in `solve` deliberately: nothing
+        // about having come from the search makes a program true, so
+        // the door refuses this shape whoever proposes it.
+        SolveRead::Solved { .. } if task.train.is_empty() => false,
         SolveRead::Solved { program, .. } => task
             .train
             .iter()

@@ -100,6 +100,23 @@ fn an_unreachable_volume_reads_unsolved() {
     ));
 }
 
+/// THE VACUOUS SOLVE, REFUSED (operator ruling C8, U_DIRECTIVES §10 S1).
+/// The ruling had two clauses — mark the seal decorative AND refuse the
+/// empty-train solve. This pins the second: with no training pair to
+/// close, the empty program closes nothing, and `Solved` is a claim
+/// nobody earned.
+#[test]
+fn an_empty_training_set_never_solves() {
+    let task = solver::VolumeTask {
+        name: "constructed-empty-train".into(),
+        train: Vec::new(),
+        test_in: volume(vec![vec![1, 2, 3, 4], vec![5, 6, 7, 8]], 2, 2),
+        test_expected: None,
+    };
+    assert!(matches!(solve_volume(&task, 0), VolumeSolveRead::Unsolved));
+    assert!(matches!(solve_volume(&task, 3), VolumeSolveRead::Unsolved));
+}
+
 /// Provenance: the volumetric name carries the volf_ prefix, layer
 /// depth, and word length — an observer separates volumetric solves
 /// from planar ones by name alone.
