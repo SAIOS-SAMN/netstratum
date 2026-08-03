@@ -11,9 +11,28 @@ pub struct Grid {
     pub cells: Vec<u8>,
 }
 
+/// The lawful hue ladder: 0–9 inclusive. Wire law, not a preference —
+/// two operators in the sealed math index ten-slot tables by hue
+/// (`Op::Recolor`'s `[u8; 10]`, `objects::background`'s `[usize; 10]`),
+/// so a hue past the ladder is an out-of-bounds panic INSIDE the judge.
+pub const HUES: u8 = 10;
+
 impl Grid {
+    /// The one door. Dimensions must be non-degenerate, the cell count
+    /// must match, and EVERY hue must sit on the ladder.
+    ///
+    /// The hue check was added 2026-08-04: the type documented "hues
+    /// 0–9" and never enforced it, leaving the invariant to whichever
+    /// caller remembered — the loader did, the wire did not. Under
+    /// work-shapes v1 no wire-borne grid ever reached an operator, so
+    /// nothing had gone wrong yet; the corpus registry (v2) ends that
+    /// by carrying task content in the payload. Refuse never guess: a
+    /// hue past the ladder is not clamped, it is not a grid.
     pub fn new(rows: usize, cols: usize, cells: Vec<u8>) -> Option<Self> {
         if rows == 0 || cols == 0 || cells.len() != rows * cols {
+            return None;
+        }
+        if cells.iter().any(|&hue| hue >= HUES) {
             return None;
         }
         Some(Self { rows, cols, cells })

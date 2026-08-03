@@ -217,7 +217,9 @@ pub fn decode_work(bytes: &[u8]) -> Option<WorkProof> {
     //  · rows/cols 0 → the forge's Grid::new(...).expect() PANICS in
     //    the kernel's call path — the totality law forbids it.
     // The judge never re-forges a degenerate task: it refuses first.
-    if difficulty.rows == 0 || difficulty.cols == 0 || difficulty.train_pairs == 0 {
+    // The condition now carries a NAME (`Difficulty::lawful`) so the
+    // v2 corpus decode path calls the same law instead of restating it.
+    if !difficulty.lawful() {
         return None;
     }
     let op_count = r.u16()?;

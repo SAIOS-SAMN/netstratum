@@ -47,6 +47,24 @@ impl Difficulty {
             _ => Difficulty { tier: 3, word_len: 3, rows: 4, cols: 4, train_pairs: 3 },
         }
     }
+
+    /// THE DEGENERACY LAW, given a name (2026-08-04).
+    ///
+    /// [`forge_task`] PANICS on a degenerate rung — `rows`/`cols` of 0
+    /// drive `Grid::new(..).expect(..)` — and the fields are `pub`, so
+    /// the type cannot refuse them at construction. The guard therefore
+    /// lives at every decode door, and it lived as an inline condition
+    /// inside `decode_work` alone: correct, but unnamed, so a SECOND
+    /// decode path (work-shapes v2, the corpus registry) could forget
+    /// it and reopen audit HOLE B. One name, called by every door.
+    ///
+    /// `word_len: 0` is LAWFUL and deliberately admitted — the empty
+    /// secret word is the identity task, and a copy task is a task.
+    /// `train_pairs: 0` is not: a replay over no pairs proves nothing
+    /// (the vacuity closed in `98ccbbe`).
+    pub fn lawful(&self) -> bool {
+        self.rows > 0 && self.cols > 0 && self.train_pairs > 0
+    }
 }
 
 impl Difficulty {

@@ -394,6 +394,34 @@ commit on explicit operator go.
   solves` planar (`harness_pins`) and volumetric (`volume_pins`),
   `an_empty_training_set_never_crosses_the_door` (`consulted_pins`).
   Board 625/625, clippy zero in both solver crates.
+- **S3 — THE INVARIANT THAT LIVED IN ITS CALLERS** (cognition lane,
+  measured 2026-08-04 sweeping the class S1 exposed). `Grid` documents
+  "hues 0–9" in its own type comment and `Grid::new` never enforced it.
+  The loader enforced it separately (`loader.rs`), which is the tell:
+  the invariant lived in whichever caller remembered, so every door
+  that was not the loader stood open. Two panics follow an
+  out-of-range hue, both in SEALED MATH the kernel calls through
+  `verify_work`: `Op::Recolor`'s `map[h as usize]` on a `[u8; 10]`
+  (`grid.rs`) and `objects::background`'s `counts[cell as usize]` on a
+  `[usize; 10]` (`objects.rs`).
+  **Not reachable under v1, and that is a property of the SHAPE, not
+  of the code.** Work-shapes v1 is forge-only, so every grid
+  `verify_work` feeds to `run` comes from the forge (hues sampled
+  `uniform_index(.., 10)`), and the wire-carried output grid is only
+  compared and hashed, never applied. **Work-shapes v2 ends this**: a
+  corpus task cannot be re-derived from a digest, so its content must
+  ride in the payload — the moment wire-borne grids reach `run`, both
+  panics are reachable inside the judge. CLOSED AHEAD OF v2 at the one
+  door: `Grid::new` refuses any hue ≥ `HUES` (10). Refuse never guess —
+  not clamped, not a grid. 3 pins, `solver-verify/tests/hue_pins.rs`.
+  Same sweep, second finding: `forge_task` panics on a degenerate
+  `Difficulty` and the fields are `pub`, so the guard can only live at
+  the doors — and it lived as an INLINE condition inside `decode_work`
+  alone. Now named `Difficulty::lawful()` so v2's corpus decode path
+  calls the law instead of restating it (restating is how HOLE B
+  happened). `word_len: 0` is deliberately admitted: the empty secret
+  word is the identity task, and a copy task is a task.
+  Board 629/629, clippy zero in both solver crates.
 - **S2 — the worktree prune** (AUDIT §3/§5.6). ~13 stale worktrees
   under `.claude/worktrees/` still carry old `engine/mirror` code on
   disk — the only place the dead name survives. Outside the
