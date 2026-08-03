@@ -186,6 +186,15 @@ fn main() {
                     "beat {beat}: THE JUDGE REFUSES — {world_name}: deed {sequence} is unlawful ({unlawful:?}); the deed stands, the verdict is on record"
                 );
             }
+            // THE CAPACITY LAW, from the other side: work proved and
+            // certified, payment lawfully withheld. Named because a
+            // silent withholding looks exactly like a line that never
+            // solved anything.
+            for (stamp, verdict) in polity.unreported_withheld() {
+                println!(
+                    "beat {beat}: WORK UNPAID — {world_name}: a solve at t{stamp} earns nothing; the world holds no standing ({verdict})"
+                );
+            }
         }
         for spec in newborns {
             println!(

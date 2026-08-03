@@ -46,21 +46,23 @@ fn the_verdicts_are_readable_and_each_is_announced_once() {
         println!("  deed {sequence}: {unlawful:?}");
     }
 
-    // THE MEASUREMENT, RECORDED (2026-08-03, first run of this pin):
-    // eight beats of FOUNDING play drew TWO refusals, both
-    // `MintWithoutStanding { verdict: Void }` — the VERSION 3 capacity
-    // law. The proposer mints discovery on a world the judge reads as
-    // Void, and `world.rs::replay` banks it regardless, because replay
-    // is still the live transition. This assertion exists to keep that
-    // fact from going quiet: when the proposer learns to ask the
-    // capacity law before it mints, this line goes red and whoever
-    // lands the fix TRUTH-UPDATES it — it is not deleted, it is
-    // rewritten to say the board now proposes only what the judge
-    // admits.
+    // TRUTH-UPDATED 2026-08-04, exactly as the previous text instructed.
+    //
+    // As first measured (2026-08-03): eight beats of FOUNDING play drew
+    // TWO refusals, both `MintWithoutStanding { verdict: Void }`. The
+    // proposer minted into a world the judge reads as Void and `replay`
+    // banked it, because replay is still the live transition.
+    //
+    // The proposer now asks the capacity law FIRST — the same two
+    // functions `kernel::capacity_law` calls — so it no longer proposes
+    // what the judge would refuse, and this count is ZERO. The old
+    // assertion (`!refusals().is_empty()`) went red on the very run
+    // that fixed it, which is what it was written to do.
     assert!(
-        !polity.refusals().is_empty(),
-        "founding play still proposes deeds the judge refuses — if this is \
-         green, the proposer was fixed: truth-update this pin, do not delete it"
+        polity.refusals().is_empty(),
+        "the board proposes only what the judge admits — a refusal here means \
+         the proposer and the judge have drifted apart again: {:?}",
+        polity.refusals()
     );
 
     // The announcement law: every verdict on the record is unreported
@@ -81,4 +83,57 @@ fn the_verdicts_are_readable_and_each_is_announced_once() {
         refusals,
         "the cursor moved, the record did not"
     );
+}
+
+/// THE WORK IS STILL DONE — it is simply not PAID.
+///
+/// The capacity law does not stop a line from solving; it stops the
+/// solve from minting. That distinction has to be visible, because a
+/// silently unpaid solve is indistinguishable from a line that never
+/// solved anything — and the first version of this fix would have made
+/// the whole PoUW economy look idle rather than barred.
+#[test]
+fn a_withheld_mint_is_recorded_not_swallowed() {
+    let root = scratch("withheld");
+    let var = root.to_string_lossy().into_owned();
+    let registry = Registry::at(format!("{var}/registry"));
+    let book = Ledger::at(format!("{var}/worlds"));
+
+    let spec = founding_polities().into_iter().next().expect("a founding spec");
+    let mut polity = Polity::genesis(spec, &registry, &book);
+    for _ in 0..8 {
+        polity.cycle(&book, &registry);
+    }
+
+    let withheld = polity.withheld_mints().len();
+    println!("MEASURED: {withheld} withheld mints over 8 beats");
+    for (stamp, verdict) in polity.withheld_mints() {
+        println!("  t{stamp}: {verdict}");
+    }
+
+    // The same two deeds that used to be refused BY THE JUDGE are now
+    // withheld BY THE PROPOSER, on the same reading.
+    assert!(
+        !polity.withheld_mints().is_empty(),
+        "founding play proves work it cannot yet be paid for — if this is \
+         empty, either the line stopped solving or standing became reachable \
+         on the founding board; both are news, so measure before editing"
+    );
+    assert!(
+        polity.withheld_mints().iter().all(|(_, why)| why == "Void"),
+        "a founding world holds no pairwise obligation at all, so the reading \
+         is Void — not Stasis, not Unframed: {:?}",
+        polity.withheld_mints()
+    );
+
+    // The solve itself still landed: work proved, payment withheld.
+    assert!(
+        polity.solved > 0,
+        "the line still solves — the law bars the mint, never the work"
+    );
+
+    // Announce-once, same law as the refusals.
+    assert_eq!(polity.unreported_withheld().len(), withheld);
+    assert!(polity.unreported_withheld().is_empty());
+    assert_eq!(polity.withheld_mints().len(), withheld, "the record stands");
 }
