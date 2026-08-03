@@ -475,6 +475,15 @@ pub struct Polity {
     /// discarded — a refusal the board never sees is the judge speaking
     /// into a void.
     refused: Vec<(u64, kernel::Unlawful)>,
+    /// How many refusals the board has already been TOLD. The record
+    /// above is permanent; this is only the narrator's place in it, so
+    /// a refusal is announced once per process and kept forever.
+    /// Workspace state, like `chained`: a RESUMED world restarts both
+    /// at 0 and re-judges its whole chronicle on the next beat, so a
+    /// pre-existing refusal is announced again in the new process. That
+    /// is honest — the judge met the deed again — and it is the same
+    /// re-verification `chained: 0` already performs.
+    reported: usize,
 }
 
 fn banked(world: &World, resource: Resource) -> Ratio {
@@ -650,6 +659,7 @@ impl Polity {
                     return Polity {
                         chained: 0,
                         refused: Vec::new(),
+                        reported: 0,
                         spec,
                         world,
                         automaton,
@@ -728,6 +738,7 @@ impl Polity {
         Polity {
             chained: 0,
             refused: Vec::new(),
+            reported: 0,
             spec,
             world,
             automaton,
@@ -1426,6 +1437,30 @@ impl Polity {
         arbor
             .extend(coordinate, &codec::state_bytes(&self.world.committed()), None)
             .map(|_| ())
+    }
+
+    /// DIRECTIVE 19 — every deed this world's judge REFUSED, by receipt
+    /// sequence, in the order it met them. The record is permanent and
+    /// nothing prunes it: the chronicle keeps the deed, this keeps the
+    /// verdict.
+    ///
+    /// A refusal here does NOT mean the deed was undone. `world.rs`'s
+    /// `replay` is still the live transition (the Phase 3 flip demotes
+    /// it to proposer, `U_DIRECTIVES` §5), so a refused deed stands in
+    /// the chronicle with the judge on record against it. That gap is
+    /// the whole reason this must be visible rather than counted.
+    pub fn refusals(&self) -> &[(u64, kernel::Unlawful)] {
+        &self.refused
+    }
+
+    /// The refusals the board has not been told about yet. Reading them
+    /// marks them told — the RECORD stays whole above; only the
+    /// narrator's cursor moves, so each refusal is announced once
+    /// instead of every beat thereafter.
+    pub fn unreported_refusals(&mut self) -> &[(u64, kernel::Unlawful)] {
+        let from = self.reported.min(self.refused.len());
+        self.reported = self.refused.len();
+        &self.refused[from..]
     }
 }
 
