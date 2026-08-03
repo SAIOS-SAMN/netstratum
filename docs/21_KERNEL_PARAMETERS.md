@@ -232,10 +232,23 @@ confirmation; the sigmoid does not.
 
 **What is sound and is now settled:** issuance softens as supply grows
 without matching rank. `read_entangled(prior).rank` supplies the rank
-term and is landed. **Confirmed safe:** `capacity_law` admits only
+term and is landed. ~~**Confirmed safe:** `capacity_law` admits only
 `Vacuity::Entangled` (`boundary.rs:191`), which requires `D > 0`, so a
 rank-denominated term **can never see a zero denominator** — pinned as
-`p1_capacity_law_refuses_before_any_rank_denominated_term_is_read`.
+`p1_capacity_law_refuses_before_any_rank_denominated_term_is_read`.~~
+**THAT GUARANTEE IS WITHDRAWN** (operator ruling 2026-08-04): the
+capacity law is struck, so nothing now refuses a deed for reading
+`rank == 0`, and the pin went with it.
+
+**A NEW BLOCKER, INHERITED FROM THE STRIKE.** `rank` is the circulation
+count and zero is a lawful value for it — a world holding no obligation
+cycle reads zero, and after the strike that world is free to mint. Any
+`P1` denominated on `rank` therefore MUST carry its own guard; it can no
+longer borrow one from the judge. Note the near-miss in vocabulary: `D`
+(`rfa_core::Degree`) is floored at `GROUND = 1` and is never zero, while
+`rank` is what stands ABOVE that floor and is frequently zero. A form
+written against "D" and implemented against `rank` divides by zero on
+the first quiet world.
 
 **What blocks:**
 

@@ -510,15 +510,6 @@ pub struct Polity {
     /// is honest — the judge met the deed again — and it is the same
     /// re-verification `chained: 0` already performs.
     reported: usize,
-    /// Mints the PROPOSER withheld because the capacity law would have
-    /// refused them — `(stamp, the verdict that withheld it)`. The
-    /// mirror of `refused`: that one records deeds the judge caught
-    /// after the fact, this one records deeds never proposed. A board
-    /// that shows neither cannot tell a lawful economy from a barred
-    /// one.
-    withheld: Vec<(u64, String)>,
-    /// The narrator's place in `withheld`, same law as `reported`.
-    reported_withheld: usize,
 }
 
 fn banked(world: &World, resource: Resource) -> Ratio {
@@ -695,8 +686,6 @@ impl Polity {
                         chained: 0,
                         refused: Vec::new(),
                         reported: 0,
-                        withheld: Vec::new(),
-                        reported_withheld: 0,
                         spec,
                         world,
                         automaton,
@@ -776,8 +765,6 @@ impl Polity {
             chained: 0,
             refused: Vec::new(),
             reported: 0,
-            withheld: Vec::new(),
-            reported_withheld: 0,
             spec,
             world,
             automaton,
@@ -1156,59 +1143,27 @@ impl Polity {
                 // ladder read from the same function the judge enforces,
                 // never a number chosen here.
                 if let Some((work, difficulty)) = proof {
+                    // THE MINT'S ONE ANCHOR (kernel VERSION 4). The
+                    // amount is `kernel::mint_bound` — the ruled ladder
+                    // read from the same function the judge enforces,
+                    // never a number chosen here — and the proof rides
+                    // the deed whole, so `verify_work` re-forges,
+                    // re-applies and re-chains it forever.
+                    //
+                    // The capacity-law gate that stood here is STRUCK
+                    // (operator ruling 2026-08-04): identity is pegged
+                    // to entity and is recycled WITHOUT bonds, so a
+                    // standing test read off relational structure
+                    // refused the lawful recycled line by construction.
                     let earned = kernel::mint_bound(&difficulty);
                     if earned > cfe::ratio::ratio(0, 1) {
-                        // THE CAPACITY LAW, ASKED BEFORE THE DEED
-                        // (kernel VERSION 3). The rate was already read
-                        // from the judge's own `mint_bound`; STANDING
-                        // was not read at all, so the proposer minted
-                        // into worlds the constitution bars and
-                        // `replay` banked it — the judge refusing
-                        // afterwards into a record nobody read.
-                        //
-                        // Call-not-copy (CHARTER §0b): these are the
-                        // SAME two functions `kernel::capacity_law`
-                        // calls, in the same order, so the proposer
-                        // cannot drift from the judge. Both gates, or
-                        // the mint is withheld:
-                        //   1. the WORLD reads `Entangled` — structure
-                        //      and flow both standing;
-                        //   2. this ORB holds some of that structure
-                        //      itself (else `MintWithoutOwnStanding` —
-                        //      the free rider minting on other orbs'
-                        //      relations).
-                        //
-                        // A withheld mint is not a lost solve. The
-                        // certificate is still recorded below: the line
-                        // proved its work and is simply not paid for it
-                        // yet, which is what the law says.
-                        let committed = self.world.committed();
-                        let verdict =
-                            kernel::bridge::read_entangled(&committed).verdict();
-                        let axial = kernel::bridge::standing_axial_of(
-                            &committed,
+                        let _ = self.world.mint_discovery_as(
+                            self.automaton,
                             cfe::world::FIRST_ORB,
+                            cfe::dop::Resource::Crystal,
+                            earned,
+                            work,
                         );
-                        let holds_own =
-                            axial.iter().any(|share| *share > cfe::ratio::ratio(0, 1));
-                        match verdict.is_admitted() && holds_own {
-                            true => {
-                                let _ = self.world.mint_discovery_as(
-                                    self.automaton,
-                                    cfe::world::FIRST_ORB,
-                                    cfe::dop::Resource::Crystal,
-                                    earned,
-                                    work,
-                                );
-                            }
-                            false => self.withheld.push((
-                                self.world.now(),
-                                match verdict.is_admitted() {
-                                    false => format!("{verdict:?}"),
-                                    true => "NoOwnStanding".to_string(),
-                                },
-                            )),
-                        }
                     }
                 }
                 let _ = scribe::record_solve(
@@ -1546,21 +1501,6 @@ impl Polity {
         &self.refused[from..]
     }
 
-    /// Mints this world proved but did not take, because the capacity
-    /// law would have refused them — `(stamp, verdict)`. A solve behind
-    /// each one: the work was done and certified, the payment was not
-    /// lawful.
-    pub fn withheld_mints(&self) -> &[(u64, String)] {
-        &self.withheld
-    }
-
-    /// The withheld mints the board has not been told about yet.
-    /// Announce-once, same law as [`Polity::unreported_refusals`].
-    pub fn unreported_withheld(&mut self) -> &[(u64, String)] {
-        let from = self.reported_withheld.min(self.withheld.len());
-        self.reported_withheld = self.withheld.len();
-        &self.withheld[from..]
-    }
 }
 
 /// MARKET-2: plain L1 between two charted positions — the transit

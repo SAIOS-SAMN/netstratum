@@ -8,7 +8,7 @@ use cfe::dop::ColonyOrb;
 use cfe::ratio::ratio;
 use cfe::world::{Bond, Committed, World};
 use kernel::bridge::{project_complex, read_entangled};
-use rfa_core::{dual_pole, holonomies, boundary_form, Vacuity};
+use rfa_core::{holonomies, boundary_form};
 
 fn orbs(n: u64) -> Committed {
     let mut committed = World::new().committed();
@@ -41,11 +41,15 @@ fn ring(n: u64, rate: i64) -> Committed {
 /// only. `read_entangled` also collects residuals, which is `O(n³·f)`;
 /// these pins separate the two costs deliberately (see the throughput
 /// pin).
-fn poles(state: &Committed) -> (usize, usize, Vacuity) {
+///
+/// Returns `(rank, flows)`. It once also returned the four-row verdict;
+/// the classification is struck (operator ruling 2026-08-04) and the
+/// two poles say strictly more than the row name did.
+fn poles(state: &Committed) -> (usize, usize) {
     let (delta, support) = project_complex(state);
     let rank = holonomies(&delta, &support).len();
     let form = boundary_form(&delta, &support);
-    (rank, form.rank(), dual_pole(rank, &form))
+    (rank, form.rank())
 }
 
 #[test]
@@ -59,10 +63,10 @@ fn a_ring_of_forty_is_still_rank_one_size_does_not_make_structure() {
     // circle. Rank comes from independent cycles, never from size, and
     // no amount of throughput around a loop changes the verdict.
     for n in [4u64, 10, 40, 100] {
-        let (rank, flows, seen) = poles(&ring(n, 3));
+        let (rank, flows) = poles(&ring(n, 3));
         assert_eq!(rank, 1, "a ring of {n} carries exactly one cycle");
         assert_eq!(flows, 0, "and nets to zero at every one of {n} vertices");
-        assert_eq!(seen, Vacuity::Stasis, "circulation at any size is still stasis");
+        // Rank without flow: a wheel turning against nothing, at any size.
     }
 }
 
@@ -76,10 +80,10 @@ fn rank_grows_with_independent_relations_never_with_size() {
     for k in 0..9u64 {
         state.bonds.push(bond(1, 4 + 4 * k, 1));
     }
-    let (rank, flows, seen) = poles(&state);
+    let (rank, flows) = poles(&state);
     assert_eq!(rank, 10, "nine chords, nine more cycles: 10x the rank");
     assert!(flows > 0, "and the chords unbalance vertices: dV ≢ 0");
-    assert_eq!(seen, Vacuity::Entangled, "structure AND gradient — admitted");
+    // Rank AND flow both standing, on the same forty orbs.
 }
 
 #[test]
@@ -95,10 +99,10 @@ fn ten_disjoint_rings_read_rank_ten_and_are_all_still_stasis() {
             state.bonds.push(bond(base + i, base + (i + 1) % 4, 3));
         }
     }
-    let (rank, flows, seen) = poles(&state);
+    let (rank, flows) = poles(&state);
     assert_eq!(rank, 10, "one independent cycle per component");
     assert_eq!(flows, 0, "every wheel balanced");
-    assert_eq!(seen, Vacuity::Stasis, "ten times the circulation is still circulation");
+    // Ten times the circulation is still circulation: no flow anywhere.
 }
 
 #[test]
@@ -109,14 +113,17 @@ fn permanence_once_entangled_further_relations_keep_it_admitted() {
     // adding structure.
     let mut state = ring(40, 3);
     state.bonds.push(bond(1, 7, 1));
-    let (rank_at_entry, _, entered) = poles(&state);
-    assert_eq!(entered, Vacuity::Entangled, "one asymmetric relation lifts stasis");
+    let (rank_at_entry, flows_at_entry) = poles(&state);
+    assert!(
+        rank_at_entry > 0 && flows_at_entry > 0,
+        "one asymmetric relation puts flow on a ring that had none"
+    );
 
     let mut rank_was = rank_at_entry;
     for k in 0..8u64 {
         state.bonds.push(bond(2 + k, 20 + k, 1));
-        let (rank, _, seen) = poles(&state);
-        assert_eq!(seen, Vacuity::Entangled, "still admitted after {} additions", k + 1);
+        let (rank, flows) = poles(&state);
+        assert!(flows > 0, "flow persists after {} additions", k + 1);
         assert!(rank >= rank_was, "and the rank never retreats");
         rank_was = rank;
     }
@@ -127,10 +134,9 @@ fn throughput_the_pole_reading_is_quadratic_and_scales() {
     // The two-pole reading is `O(n²·f)` — a forest walk plus a scan of
     // the remaining edges. Four hundred orbs and four hundred
     // obligations complete comfortably, which is 100x the §8 ring.
-    let (rank, flows, seen) = poles(&ring(400, 3));
+    let (rank, flows) = poles(&ring(400, 3));
     assert_eq!(rank, 1);
     assert_eq!(flows, 0);
-    assert_eq!(seen, Vacuity::Stasis);
 }
 
 #[test]

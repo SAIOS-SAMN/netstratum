@@ -1552,7 +1552,20 @@ gives before it withholds. Pinned end to end in
 `capacity_law_pins::an_orb_holding_nothing_cannot_mint_on_the_world_s_structure`
 and `capacity_law_pins::the_refusal_carries_the_share_so_the_floor_can_be_risen_from`,
 where an orb holding nothing is refused, takes a place in the
-circulation, and passes.
+circulation, and passes. (Both pins are since STRUCK with the article —
+see the record below.)
+
+> **STRUCK — the article, its refusal and both pins** (operator ruling
+> 2026-08-04). `capacity_law`, `MintWithoutOwnStanding` and
+> `capacity_law_pins` are removed; the two citations above no longer
+> resolve and are kept as the record of what was witnessed. The ruling:
+> *identity is pegged to entity, and identity gets recycled without
+> bonds*. Article II asked an orb what RELATIONS it held, and a
+> recycled identity lawfully holds none — so the floor it offered as
+> "the way up" was unreachable for exactly the lines that most needed
+> it. What survives untouched is the mint's real anchor: `verify_work`
+> re-forges, re-applies and re-chains, and `mint_bound` caps the
+> ladder.
 
 **THE SEAT IS NOT THE ORB.** `borne` answers per SEAT — an index into
 `Committed::orbs`, which is insertion order and nothing more — so
@@ -1668,7 +1681,23 @@ field.
 *Landed.* `potential_form` (the divergence, canonical, one pass);
 `dual_pole`; `Vacuity::Stasis`; and the whole thermal ledger this
 mirrors — `T_eq⁴`, the vent/bank dual, syntropy as retained structure
-over dissipated.
+over dissipated. (`dual_pole` and `Vacuity::Stasis` are since STRUCK —
+see the record below; the divergence and the ledger stand.)
+
+> **STRUCK IN PART** (operator ruling 2026-08-04). `dual_pole` and
+> `Vacuity::Stasis` are removed from the engine; the two citations
+> above are kept as the record of what once carried this law. The
+> DIVERGENCE reading stands — `boundary_form` is landed, canonical and
+> first-class for THE SIGN LAW — and so does the thermal ledger. What
+> is gone is the CLASSIFICATION of a state into four rows and the mint
+> gate it fed: *identity is pegged to entity, and identity gets
+> recycled without bonds*, so a row read off relations judged a
+> recycled line for holding what it lawfully cannot.
+>
+> LAW 4's physics is untouched — no work is available from a flat
+> field, and that remains true whether or not anything classifies it.
+> What is withdrawn is the claim that a judge should REFUSE a deed on
+> that reading.
 
 #### LAW 5 — CAUSALITY. Nothing propagates faster than the medium allows.
 

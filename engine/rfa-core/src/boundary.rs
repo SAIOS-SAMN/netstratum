@@ -34,28 +34,30 @@
 //! system computes (`18_TORSION` §2b), and a form reduced to one number
 //! is exactly that collapse.
 //!
-//! **THE DUAL-POLE LOCK.** Capacity and potential are the two poles of
-//! one unpartitioned state — `V`, read whole (`17_CAPACITY` §3; that
-//! section cited `Ω ≡ V` until the identity was corrected 2026-08-02,
-//! and the totality here was always `V`'s, never a second object's) —
-//! and BOTH must stand
-//! non-vacuous. Rank alone is not enough: a universe may hold `D > 0`
-//! entirely in closed circulation while no vertex carries net flow.
-//! That is STATIC STASIS, and it is refused — structure with no
-//! gradient does no work.
+//! **THE DUAL-POLE LOCK IS STRUCK** (operator ruling 2026-08-04). This
+//! module classified a state on two poles — circulation and net flow —
+//! into four rows (`Void`, `Unframed`, `Stasis`, `Entangled`), and the
+//! kernel refused a work-anchored mint on any row but the last. Both
+//! the type and its verdict are removed.
 //!
-//! ```text
-//! circ = 0 ∧ ∂Δ ≡ 0   on the ground, still   — refused
-//! circ = 0 ∧ dV ≢ 0   unframed potential     — refused
-//! circ > 0 ∧ ∂Δ ≡ 0   static stasis          — refused
-//! circ > 0 ∧ dV ≢ 0   entangled              — ADMITTED
+//! **The ruling, in the operator's terms:** *identity is pegged to
+//! entity, and identity gets recycled without bonds.* The classification
+//! read standing off RELATIONS — bonds, covenants, absorption debts —
+//! and so demanded of a world precisely what a recycled identity does
+//! not carry. NOVEL-1 succession and INCURSION-1a both produce a line
+//! owing nothing and owed nothing by design; the lock refused it for
+//! being what it lawfully is.
 //!
-//! `circ` is the CIRCULATION count — what stands ABOVE the ground —
-//! and zero is a lawful answer for it. It is deliberately NOT `D`:
-//! `D` is the elevation, `GROUND + circ`, and it is never zero
-//! (`rfa_core::Degree`). This table once wrote `D = 0`, which is a
-//! value the system cannot express.
-//! ```
+//! Measured before the ruling (`harness-lane`, 2026-08-04): the admitted
+//! row needed a three-orb obligation triangle that does NOT compose, a
+//! shape no world the game produces can form — 60 beats of the live
+//! board gave 374 solves, 0 mints, 124 withheld.
+//!
+//! **What remains here is the reading, which was never the problem.**
+//! [`boundary_form`] is `∂Δ` carried whole, and the divergence is a
+//! first-class reading for THE SIGN LAW (`18_TORSION` §2d) and the
+//! object `capacity.rs` splits against to build the circulation. A
+//! reading is not a gate; removing the gate does not touch it.
 //!
 //! Exact rational throughout: no float, no root, no transcendental.
 
@@ -133,65 +135,3 @@ pub fn boundary_form(delta: &Delta, support: &Support) -> BoundaryForm {
     BoundaryForm { flows }
 }
 
-/// THE DUAL-POLE VERDICT (DIRECTIVE 10). The four rows of the
-/// non-vacuity matrix, as one typed reading over ONE state.
-///
-/// **`∂Δ` CANNOT BE ZERO** (operator ruling 2026-08-01). A flat field is
-/// not a lawful state to sit in: without gradient the manifold is static
-/// flat space and any rank it holds is meaningless. This is an
-/// invariant, not a preference.
-///
-/// Note what this verdict does NOT do: it does not discard. Under THE
-/// BIFURCATION LAW a refused state is a ROOT, and [`Vacuity::Stasis`]
-/// names exactly what must be re-volumized — the positions are carried
-/// so the restoration has something to act on. A verdict that returned
-/// only "no" would be the discard the law forbids.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Vacuity {
-    /// Neither pole stands: no structure and no gradient.
-    Void,
-    /// Gradient without structure — nothing to anchor the field to.
-    Unframed,
-    /// Structure with no gradient: pure circulation, doing no work.
-    /// **The state that must be RE-VOLUMIZED**, never merely refused.
-    Stasis,
-    /// Both poles stand. The only admitted row.
-    Entangled,
-}
-
-/// Read both poles of one state at once and classify it.
-///
-/// `rank` is the count of independent charged cycles
-/// (`holonomies(..).len()`); `form` is this module's divergence read.
-/// Neither is consulted alone — the entanglement is the point.
-///
-/// **THIS CLASSIFIES. IT DOES NOT MEASURE GROWTH** (operator ruling
-/// 2026-08-01: *C is leaking into D and the causality is stasis*).
-///
-/// Where capacity is built as `circulation = Δ − grad(p)`, the two poles
-/// are COMPLEMENTARY PROJECTIONS OF ONE FIXED `Δ`. They are not
-/// independent witnesses — knowing `Δ` and one pole yields the other —
-/// so at fixed `Δ` content moved into circulation is content taken out
-/// of gradient. A state can be made to read `Entangled` by
-/// REDISTRIBUTION alone, forming no new relation and doing no work.
-///
-/// That is stasis wearing growth's clothes, and reading this verdict as
-/// a growth measure is exactly how value gets taken rather than made.
-/// **Growth is `Δ`'s own expansion — a new relation, receipted (D3) —
-/// never a re-split of a fixed `Δ` between poles.** Pinned in
-/// `potential_pins::the_poles_are_complementary_at_fixed_delta_so_shuffling_is_not_growth`.
-pub fn dual_pole(rank: usize, form: &BoundaryForm) -> Vacuity {
-    match (rank > 0, form.is_non_vacuous()) {
-        (false, false) => Vacuity::Void,
-        (false, true) => Vacuity::Unframed,
-        (true, false) => Vacuity::Stasis,
-        (true, true) => Vacuity::Entangled,
-    }
-}
-
-impl Vacuity {
-    /// Only the entangled row stands.
-    pub fn is_admitted(&self) -> bool {
-        matches!(self, Vacuity::Entangled)
-    }
-}

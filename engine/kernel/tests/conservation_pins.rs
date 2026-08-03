@@ -254,7 +254,15 @@ fn the_version_is_pinned() {
     // Entangled. BREAKING — version 2 admitted mints on Void, Stasis
     // and Unframed worlds. The introducing commit announced the bump
     // in its title and left the constant at 2; landed here.
-    assert_eq!(VERSION, 3, "the kernel version is charter-pinned");
+    // VERSION 4 — THE CAPACITY LAW IS REMOVED (operator, 2026-08-04):
+    // identity is pegged to entity and is recycled WITHOUT bonds, so a
+    // standing test read off relational structure refused the lawful
+    // recycled line by construction. BREAKING in the LOOSENING
+    // direction — every state version 3 refused as MintWithoutStanding
+    // or MintWithoutOwnStanding is now judged on the mint's real
+    // anchor alone (verify_work + mint_bound). Version-3 chains verify
+    // forever under the judge that cut them.
+    assert_eq!(VERSION, 4, "the kernel version is charter-pinned");
 }
 
 #[test]

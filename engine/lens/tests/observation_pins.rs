@@ -29,14 +29,20 @@ fn every_arm_is_reachable_from_one_position_and_none_is_the_entrance() {
     let here = Observation::at(&d, &s).depth(Depth::Mid);
 
     // Entered in an arbitrary order — each derives independently.
+    // (The STANDING arm was struck with the four-row classification,
+    // operator ruling 2026-08-04; the circulation it reported is read
+    // off the degree arm, which is where it always came from.)
     let flux = here.flux();
     let luminal = here.luminal();
-    let standing = here.standing();
     let view = here.view();
     let degree = here.degree();
 
-    assert!(standing.circulation > 0, "structure stands");
-    assert_eq!(degree.above(), standing.circulation, "the arms agree");
+    assert!(degree.above() > 0, "structure stands above the ground");
+    assert_eq!(
+        degree.above(),
+        view.materialised(),
+        "the arms agree: what the peel materialises is what stands above the floor"
+    );
     assert_eq!(view.depth(), Depth::Mid);
     assert!(!luminal.amplitude.shown().is_empty());
     assert_eq!(flux.sources + flux.sinks + flux.balanced, 3, "every vertex censused");
@@ -46,7 +52,7 @@ fn every_arm_is_reachable_from_one_position_and_none_is_the_entrance() {
     let again = Observation::at(&d, &s).depth(Depth::Mid);
     assert_eq!(again.degree(), degree);
     assert_eq!(again.view(), view);
-    assert_eq!(again.standing(), standing);
+    assert_eq!(again.flux(), flux);
 }
 
 #[test]
@@ -58,7 +64,7 @@ fn a_position_holds_no_reading_so_it_cannot_go_stale() {
     let here = Observation::at(&d, &s).depth(Depth::Near);
 
     let first = here.view();
-    let _elsewhere = here.standing();
+    let _elsewhere = here.flux();
     let _more = here.luminal();
     let again = here.view();
     assert_eq!(first, again, "no arm disturbs another");
@@ -72,7 +78,7 @@ fn moving_the_position_moves_the_readings_that_depend_on_it() {
     // PHASE moves the luminal and nothing structural.
     let turned = base.clone().phase(Phase::at(q(3, 1)));
     assert_ne!(base.luminal().wavelength, turned.luminal().wavelength);
-    assert_eq!(base.standing(), turned.standing(), "the row is not an angle");
+    assert_eq!(base.flux(), turned.flux(), "the structure is not an angle");
     assert_eq!(base.degree(), turned.degree());
 
     // APERTURE moves what is manifest and nothing geometric.
@@ -89,12 +95,12 @@ fn moving_the_position_moves_the_readings_that_depend_on_it() {
     assert!(near.view().materialised() > far.view().materialised(),
         "the near view carries its own size: {} vs {}",
         near.view().materialised(), far.view().materialised());
-    assert_eq!(base.standing(), far.standing(), "the row is not a distance");
-    assert_eq!(near.standing(), far.standing());
+    assert_eq!(base.flux(), far.flux(), "the structure is not a distance");
+    assert_eq!(near.flux(), far.flux());
 }
 
 #[test]
-fn standing_bounds_the_position_it_does_not_refuse_it() {
+fn held_capacity_bounds_the_position_it_does_not_refuse_it() {
     let (d, s) = built(q(2, 1), q(3, 1), q(9, 1));
     let shallow = Observation::at(&d, &s)
         .depth(Depth::Near)
@@ -105,7 +111,7 @@ fn standing_bounds_the_position_it_does_not_refuse_it() {
     // The other arms still answer — a shallow observer is not a blind
     // one, it simply resolves less.
     assert!(shallow.degree().get() >= 1);
-    assert_eq!(shallow.standing().circulation, 1);
+    assert_eq!(shallow.degree().above(), 1, "one charge stands above the floor");
 }
 
 #[test]
