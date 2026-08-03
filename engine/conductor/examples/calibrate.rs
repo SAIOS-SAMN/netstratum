@@ -183,9 +183,9 @@ fn part_a_and_b() {
                 actor: SOVEREIGN,
                 stamp: 1,
             };
-            match kernel::lawful(&prior, &minted, &positive) {
-                Err(kernel::Unlawful::MintExceedsWork { .. }) => tally.refused_exceeds += 1,
-                Err(kernel::Unlawful::WorkRefused { .. }) => tally.refused_work += 1,
+            match kernel::admits(&prior, &minted, &positive) {
+                Err(kernel::Refused::MintExceedsWork { .. }) => tally.refused_exceeds += 1,
+                Err(kernel::Refused::WorkRefused { .. }) => tally.refused_work += 1,
                 Err(_) => tally.refused_other += 1,
                 Ok(()) => tally.admitted_positive += 1,
             }
@@ -202,7 +202,7 @@ fn part_a_and_b() {
                 actor: SOVEREIGN,
                 stamp: 1,
             };
-            match kernel::lawful(&prior, &prior, &zero) {
+            match kernel::admits(&prior, &prior, &zero) {
                 Ok(()) => tally.zero_admitted += 1,
                 Err(_) => tally.zero_refused += 1,
             }

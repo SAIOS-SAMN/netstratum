@@ -474,7 +474,7 @@ pub struct Polity {
     /// Deeds the kernel REFUSED, by receipt sequence. Kept rather than
     /// discarded — a refusal the board never sees is the judge speaking
     /// into a void.
-    refused: Vec<(u64, kernel::Unlawful)>,
+    refused: Vec<(u64, kernel::Refused)>,
 }
 
 fn banked(world: &World, resource: Resource) -> Ratio {
@@ -1413,7 +1413,7 @@ impl Polity {
                 actor: receipt.provenance.first().copied().unwrap_or(cfe::world::SOVEREIGN),
                 stamp: receipt.stamp,
             };
-            if let Err(unlawful) = kernel::lawful(&prior, &next, &step) {
+            if let Err(unlawful) = kernel::admits(&prior, &next, &step) {
                 self.refused.push((receipt.sequence, unlawful));
             }
             prior = next;

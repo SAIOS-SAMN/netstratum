@@ -127,7 +127,7 @@ relational structure, the landed tensor.
     Δ(V)  = the relation V expresses          (`rfa_core::Delta`)
 
   **V IS SOVEREIGN** (operator ruling 2026-08-01; 18 §2c′). Its standing
-  comes from ADMISSION — it passed `lawful()`, it carries receipts, it
+  comes from ADMISSION — it passed `admits()`, it carries receipts, it
   is in the chain — and no reading confers or revokes it. Every row
   below that reads `V` is TESTIMONY about `V`, never authority over it:
   readings price allocation, and standing is the judge's, granted
@@ -309,7 +309,7 @@ shape in the row meant to exclude it.
 
     TERMS          D owes room that was EARNED    — `PlaneUnearned`
                                                     refuses otherwise
-                   V owes work that was RECEIPTED — admission, `lawful()`
+                   V owes work that was RECEIPTED — admission, `admits()`
 
     CONSIDERATION  the MINT: a plane WITH content, of neither kind
                    alone. Neither office can produce it unaided, which
@@ -411,7 +411,7 @@ foundation needs its own ruling, not an inscription.
 
 **THE UNION IS NOW DEEDED** (operator ruling 2026-08-02, executed).
 `ClosureEvent::SovereignUnionSealed { progenitor, sovereign,
-term_stamps }` at **TAG 90**, judged by `kernel::union_law` and read by
+term_stamps }` at **TAG 90**, judged by `kernel::union` and read by
 `World::union_review`.
 
 ```text
@@ -422,7 +422,7 @@ term_stamps }` at **TAG 90**, judged by `kernel::union_law` and read by
                V(Ω), what STANDS.
 
     APPROVAL   THE ROOT ENTITY, and nothing else. `scope_of` puts the
-               deed in Build so containment applies, and `union_law`
+               deed in Build so containment applies, and `union`
                requires `actor == SOVEREIGN` on top of it — a granted
                scope is authority to act WITHIN the world, never to
                constitute it.
@@ -576,7 +576,7 @@ is `18` §4.
                              BY RECEIPT (D3). `PlaneUnearned`
                              refuses every other route.
 
-    STATE     V(Ω) holds     the deed is ADMITTED — `lawful()`
+    STATE     V(Ω) holds     the deed is ADMITTED — `admits()`
                              passes and a receipt is written.
                              THIS IS THE SOLIDIFICATION.
 ```
@@ -586,7 +586,7 @@ phase boundary the declared and derived descriptions genuinely differ
 and *their relation IS the transition* — hold both sides and the
 crossing is legible; collapse them with an `==` and the phase structure
 disappears. So the crossing is a DISPOSITION, not a flow. There is no
-partial solidification and no half-committed deed: `kernel::lawful`
+partial solidification and no half-committed deed: `kernel::admits`
 returns admission or refusal and has no third answer, so no value
 strictly between claimed and committed exists to be occupied. This is
 the operator's standing rule that *there is no "half used" — an open
@@ -713,7 +713,7 @@ computable fact and the exact condition this row detects. Flooring the
 delta would abolish the very reading.
 
 Kernel CHARTER §1 forbids the second half in the judge: *a global
-property is not a per-step fact and cannot enter `lawful()` without
+property is not a per-step fact and cannot enter `admits()` without
 destroying its nature — enforce the LOCAL invariants, MEASURE the
 global with a lens.* Passing a 60-tick window reading into the judge
 would break the kernel's nature to enforce an article that never needed
@@ -824,7 +824,7 @@ SYSTEM_SPEC §1. Implementation: `physics::beacon`.
 ## §2 The kernel — the judge (`lawful` is the conjunction)
 
 Authority: engine/kernel/CHARTER.md §1–§6. Implementation:
-`kernel::lawful` and its invariant functions.
+`kernel::admits` and its invariant functions.
 
 **I1 · Conservation, TOTAL.** LANDED WHOLE (the value-law wave,
 operator directive 2026-07-31) — `kernel::conservation` +
@@ -859,7 +859,7 @@ threading, gated on the Phase 3 flip.
     every value a canonical exact rational (coprime, den > 0); no float exists
 
 **I1e · Element conservation.** LANDED (operator ruling 2026-08-01) —
-`kernel::element_law`: the element ledger judged with strict symmetry
+`kernel::element_move`: the element ledger judged with strict symmetry
 to `banked`. An assay mints `richness · elapsed` (sign-guarded,
 bounded by the PRIOR vein — deterministic from `(prior, step)`);
 every other deed holds every element key still. Refusals
@@ -902,7 +902,7 @@ SCHEMA_V3 premise died at execution.
     elapsed = stamp − last_touch; thermally gated  // proportional (the
     an un-owed decay refuses, both sides whole     // 2^1100 lesson)
 
-**I6 · The fold gate.** KERNEL HALF LANDED (U2d) — `kernel::gauge_law`:
+**I6 · The fold gate.** KERNEL HALF LANDED (U2d) — `kernel::gauge_move`:
 a fold transition's only lawful LOCAL effect is its declared key move
 (gauge declaration==effect, every grade, every covered deed — a key
 smuggled under a neutral deed refuses `GaugeBroken`). The PAIR half —

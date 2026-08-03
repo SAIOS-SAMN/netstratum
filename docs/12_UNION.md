@@ -393,7 +393,7 @@ ruling in the chapter the word *union* comes from.
                      (§1). Nothing else creates space.
 
     SOVEREIGN    V   holds. Its standing comes from ADMISSION — it
-                     passed `lawful()`, it carries receipts, it is in
+                     passed `admits()`, it carries receipts, it is in
                      the chain. No reading confers it; none revokes it.
 
 **D provides the floor, but owns no piece of what moves upon it. V
@@ -452,7 +452,7 @@ board-maker a byproduct of what plays on the board, which is the union
 inverted.
 
     ORIGIN       the receipted deed → the office
-                 V's standing: ADMISSION — it passed `lawful()`
+                 V's standing: ADMISSION — it passed `admits()`
                  D's room:     RECEIPTED MINTS — D3, *D rises BY
                                RECEIPT*; `GaugeShiftedAt` opens the
                                plane, `PlaneUnearned` refuses unearned

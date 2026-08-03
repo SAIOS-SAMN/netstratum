@@ -15,7 +15,7 @@ amends no other lane's law.
 A lens **reads and reports**. It never gates.
 
 That is not a style preference — it is constitutional. `18_TORSION` §7b
-places the over-time and global readings outside `lawful()` and gives
+places the over-time and global readings outside `admits()` and gives
 the reason: *a judge that reads a window is no longer pure, no longer
 total, and no longer replayable step-by-step.* The lens is therefore
 **forbidden** in the kernel rather than merely permitted outside it, and
@@ -481,7 +481,7 @@ There is no third option in which a lens keeps count.
 
 ## §8 WHAT THIS LANE DOES NOT TOUCH
 
-- `lawful()` and everything in `engine/kernel/src` — kernel lane.
+- `admits()` and everything in `engine/kernel/src` — kernel lane.
 - `engine/rfa-core/` — kernel lane. The lens CONSUMES `coboundary_reduce`,
   `holonomies`, `Delta`, `Vacuity`; it does not modify them.
 - `18_TORSION`, `17_CAPACITY`, `EQUATIONS`, `kernel/CHARTER.md` — kernel
@@ -503,7 +503,7 @@ explicitly, and its reasoning is that *physics needs no penalty — a
 closed loop at uniform potential does no work, not because a law forbids
 it but because there is no free energy in it.* LAW 4 now carries that
 ground, via `dual_pole` / `Vacuity::Stasis`, already landed and already
-consulted by `kernel::capacity_law`.
+consulted by `kernel::standing`.
 
 Building the window reading would implement a struck law. It is not
 built. The stale debt is reported to the kernel lane rather than edited

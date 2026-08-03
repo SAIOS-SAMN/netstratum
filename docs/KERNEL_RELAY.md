@@ -120,7 +120,7 @@ truth" mysticism was rejected). The five normative rules:
 1. **Single source of truth** — one hash-chained sequence of state snapshots.
 2. **Exports are write-only** — JSON/dashboards are display; nothing parses
    them back in.
-3. **One validated update function** — the kernel; `lawful(prior,next,step)`.
+3. **One validated update function** — the kernel; `admits(prior,next,step)`.
 4. **One input boundary** — the steward inbox; external actors submit
    requests, the kernel validates and applies.
 5. **The review lint** — reject any change that adds a second readable state
@@ -428,7 +428,7 @@ AEON fold; NS-5 mesh consilience; `cfe::opposition` (the seam-conservation).
 
 ### 8.1 What is landed
 
-- `engine/kernel` — the crate: `lawful(prior,next,step)`, `VERSION=1`,
+- `engine/kernel` — the crate: `admits(prior,next,step)`, `VERSION=1`,
   `Step`, `Unlawful`, invariant **I1 conservation** (transfers only), 3
   witnesses. Built and tested STANDALONE — **not yet wired as the gate**;
   `world.rs` still applies deeds without consulting it. The kernel is the
@@ -464,7 +464,7 @@ LAST — nothing replicates upward until this universe is lawful.
   pricing, WANT-demand). Rule in effect: trades sum to the melt via an
   explicit **void-share receipt** so zero-sum stays universal (I1 is one
   unconditional line, no per-deed-type cases). New transition semantics land
-  INSIDE `lawful()` after I-invariants seal.
+  INSIDE `admits()` after I-invariants seal.
 - **coder-02:** the charter/register, the vocabulary node.
 
 ### 8.4 Reading order for a cold start
@@ -490,7 +490,7 @@ and the spine. Nothing on the old spine lands meanwhile.
 
 The kernel judges ONE step, locally, exactly, totally. Coherence, stability,
 the convergence band — these are GLOBAL, dynamical, over-time properties.
-They cannot enter `lawful()` without destroying its nature. The design law,
+They cannot enter `admits()` without destroying its nature. The design law,
 repeated because it is the trap everyone hits: **enforce the LOCAL invariants
 whose universal application yields the global band; MEASURE the global with a
 lens; NEVER make the kernel optimize a global quantity.** The fold gate (I6)

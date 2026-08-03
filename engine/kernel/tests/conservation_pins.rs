@@ -8,7 +8,7 @@ use cfe::dop::{ClosureEvent, Resource};
 use cfe::ipsal::Scope;
 use cfe::ratio::ratio;
 use cfe::world::{World, FIRST_ORB, SOVEREIGN};
-use kernel::{lawful, Step, Unlawful, VERSION};
+use kernel::{lawful, Step, Refused, VERSION};
 
 /// A world with two orbs and value banked on the first, ready to move.
 /// The origin earns before it charters (the charted's founding
@@ -49,7 +49,7 @@ fn the_last_deed_covered_exhausts_the_sealed_default() {
         stamp: world.now(),
     };
     assert_eq!(
-        lawful(&state, &state, &step),
+        admits(&state, &state, &step),
         Ok(()),
         "the final holdout is judged — coverage is total"
     );
@@ -83,22 +83,22 @@ fn containment_gates_the_transfer_by_scope() {
     };
     // The agent lacks Collect: refused, by scope.
     assert_eq!(
-        lawful(&prior, &next, &step(agent)),
-        Err(Unlawful::NotPermitted { actor: agent, scope: Scope::Collect }),
+        admits(&prior, &next, &step(agent)),
+        Err(Refused::NotPermitted { actor: agent, scope: Scope::Collect }),
         "authority is granted, never assumed"
     );
     // The sovereign holds every scope: admitted.
-    assert_eq!(lawful(&prior, &next, &step(SOVEREIGN)), Ok(()));
+    assert_eq!(admits(&prior, &next, &step(SOVEREIGN)), Ok(()));
     // A non-entity: refused before any state read.
     assert_eq!(
-        lawful(&prior, &next, &step(999)),
-        Err(Unlawful::NoSuchEntity { actor: 999 }),
+        admits(&prior, &next, &step(999)),
+        Err(Refused::NoSuchEntity { actor: 999 }),
         "identity precedes the world"
     );
     // Grant the agent Collect: now admitted.
     world.grant(agent, Scope::Collect).expect("grants");
     let granted_prior = world.committed();
-    assert_eq!(lawful(&granted_prior, &next, &step(agent)), Ok(()));
+    assert_eq!(admits(&granted_prior, &next, &step(agent)), Ok(()));
 }
 
 #[test]
@@ -118,7 +118,7 @@ fn exactness_holds_over_the_value_ledgers_and_the_primitive_is_sealed() {
     };
     // ScopeGranted is now COVERED (I2 containment + I3 exactness — its full
     // set): no longer Unjudged. The sovereign holds Build, so it admits.
-    assert_eq!(lawful(&prior, &next, &step), Ok(()), "the authority deed is judged, not skipped");
+    assert_eq!(admits(&prior, &next, &step), Ok(()), "the authority deed is judged, not skipped");
     // The sealed canonical primitive: every constructed Ratio is canonical.
     assert!(cfe::ratio::is_canonical(&ratio(1, 2)));
     assert!(cfe::ratio::is_canonical(&ratio(2, 4)), "2/4 constructs AS 1/2 — canonical");
@@ -156,7 +156,7 @@ fn the_aperture_leg_conserves_its_exact_declared_amount() {
         stamp: world.now(),
     };
     assert_eq!(
-        lawful(&prior, &next, &sent(ratio(3, 1))),
+        admits(&prior, &next, &sent(ratio(3, 1))),
         Ok(()),
         "a leg debits exactly what it declares"
     );
@@ -164,8 +164,8 @@ fn the_aperture_leg_conserves_its_exact_declared_amount() {
     // more than the deed declared — phantom burn at the seam, refused,
     // lawful total (prior − 1) vs actual (prior − 3) carried whole.
     assert_eq!(
-        lawful(&prior, &next, &sent(ratio(1, 1))),
-        Err(Unlawful::ConservationBroken {
+        admits(&prior, &next, &sent(ratio(1, 1))),
+        Err(Refused::ConservationBroken {
             resource: Resource::Iron,
             before: Box::new(before.clone() - ratio(1, 1)),
             after: Box::new(before - ratio(3, 1)),
@@ -194,14 +194,14 @@ fn creation_and_decay_bound_the_value_law_by_declaration_and_sign() {
         actor: SOVEREIGN,
         stamp: world.now(),
     };
-    assert_eq!(lawful(&prior, &minted, &yield_step(ratio(4, 1))), Ok(()), "a mint of exactly 4 admits");
+    assert_eq!(admits(&prior, &minted, &yield_step(ratio(4, 1))), Ok(()), "a mint of exactly 4 admits");
     // A "mint" of -4 (a burn wearing a mint's name): the state HONESTLY
     // fell by 4 (so declaration==effect passes), then the sign refuses.
     let mut burn_as_mint = world.committed();
     burn_as_mint.orbs[0].bank(Resource::Iron, ratio(-4, 1));
     assert_eq!(
-        lawful(&prior, &burn_as_mint, &yield_step(ratio(-4, 1))),
-        Err(Unlawful::MintNotPositive { resource: Resource::Iron, amount: Box::new(ratio(-4, 1)) }),
+        admits(&prior, &burn_as_mint, &yield_step(ratio(-4, 1))),
+        Err(Refused::MintNotPositive { resource: Resource::Iron, amount: Box::new(ratio(-4, 1)) }),
         "value enters only by a non-negative mint"
     );
     // I5 decay — WITNESS TRUTH-UPDATE (U1f): this pin was written in
@@ -222,8 +222,8 @@ fn creation_and_decay_bound_the_value_law_by_declaration_and_sign() {
         stamp: world.now(),
     };
     assert_eq!(
-        lawful(&prior, &decayed, &demurrage_step(ratio(2, 1))),
-        Err(Unlawful::DecayExceedsBound {
+        admits(&prior, &decayed, &demurrage_step(ratio(2, 1))),
+        Err(Refused::DecayExceedsBound {
             bound: Box::new(ratio(0, 1)),
             claimed: Box::new(ratio(2, 1)),
         }),
@@ -235,8 +235,8 @@ fn creation_and_decay_bound_the_value_law_by_declaration_and_sign() {
     let mut mint_as_decay = world.committed();
     mint_as_decay.orbs[0].bank(Resource::Iron, ratio(2, 1));
     assert_eq!(
-        lawful(&prior, &mint_as_decay, &demurrage_step(ratio(-2, 1))),
-        Err(Unlawful::DecayNotPositive { resource: Resource::Iron, amount: Box::new(ratio(-2, 1)) }),
+        admits(&prior, &mint_as_decay, &demurrage_step(ratio(-2, 1))),
+        Err(Refused::DecayNotPositive { resource: Resource::Iron, amount: Box::new(ratio(-2, 1)) }),
         "value leaves only by a non-negative decay"
     );
 }
@@ -277,7 +277,7 @@ fn an_honest_transfer_is_admitted() {
         stamp: world.now(),
     };
     assert_eq!(
-        lawful(&prior, &next, &step),
+        admits(&prior, &next, &step),
         Ok(()),
         "value moved, total unchanged — the judge admits"
     );
@@ -322,8 +322,8 @@ fn a_minting_transfer_refuses_with_the_residual_whole() {
         stamp: world.now(),
     };
     assert_eq!(
-        lawful(&prior, &next, &step),
-        Err(Unlawful::ConservationBroken {
+        admits(&prior, &next, &step),
+        Err(Refused::ConservationBroken {
             resource: Resource::Iron,
             before: Box::new(before.clone()),
             after: Box::new(after.clone()),

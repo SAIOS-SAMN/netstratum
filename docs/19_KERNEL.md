@@ -51,7 +51,7 @@ agree.**
 
 - `cfe::world::replay` has **113 match arms** saying what each deed
   DOES to state.
-- `kernel::lawful` has seven invariants saying what a deed MAY do.
+- `kernel::admits` has seven invariants saying what a deed MAY do.
 
 Neither derives from the other. A deed's meaning can change in `replay`
 without `lawful` noticing, and has: `KERNEL_RELAY` §1.4 recorded the
@@ -68,7 +68,7 @@ is not satisfied by a validator that stands beside the updater.
 
 1. **Derive apply from judge.** `lawful` already computes the lawful
    per-resource deltas (`lawful_deltas`), the lawful gauge move
-   (`gauge_law`), the lawful element move (`element_law`). Where the
+   (`gauge_move`), the lawful element move (`element_move`). Where the
    judge already knows the answer, the applier should USE that answer
    rather than recompute it. Every place it does is one fewer chance to
    disagree.
@@ -107,7 +107,7 @@ Read as a miner, the core is already complete in shape:
                      ∧ re-chain; an intact chain over a non-solution
                      refuses
     bound the pay    mint_bound — the ruled ladder f, exact integers
-    require standing capacity_law — D > 0 and dV ≠ 0, or no mint
+    require standing standing — D > 0 and dV ≠ 0, or no mint
     commit           the arbor: one record, parent-linked, the judging
                      VERSION bound into the commitment
 
@@ -270,7 +270,7 @@ document does not make it.
   list should name the interpreter as its own organ, or the split in
   §4 should make the claim true.
 - **The `VERSION 3` defect is CLOSED.** `lib.rs` described a
-  `capacity_law` that did not exist; it landed at `bd99c4b` and the
+  `standing` that did not exist; it landed at `bd99c4b` and the
   label now means what it says.
 - **Struck vocabulary is still live** in `17_CAPACITY.md`,
   `18_TORSION.md` and `EQUATIONS.md` — the anti-dogma ordinance's
@@ -336,7 +336,7 @@ new world.
 1. **THE MOVE ALREADY EXISTS AND IS THROWN AWAY.** `lib.rs:611`:
    `lawful_deltas(prior, event) -> Result<Vec<(Resource, Ratio)>, Unlawful>`.
    That IS the move. `conservation` uses it only to compare against the
-   `next` it was handed, then drops it. `gauge_law` and `element_law`
+   `next` it was handed, then drops it. `gauge_move` and `element_move`
    do the same on their axes. **Every deed computes its own move and
    discards it.**
 2. **MOVES COMPOSE; STATES DO NOT.** Two moves compose into a move; two

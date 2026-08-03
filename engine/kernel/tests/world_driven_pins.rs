@@ -17,7 +17,7 @@
 use cfe::dop::{ClosureEvent, Resource};
 use cfe::ratio::ratio;
 use cfe::world::{World, SOVEREIGN};
-use kernel::{lawful, Step, Unlawful};
+use kernel::{lawful, Step, Refused};
 
 fn founded() -> World {
     let mut world = World::new();
@@ -48,10 +48,10 @@ fn world_driven_deeds() -> Vec<ClosureEvent> {
     ]
 }
 
-fn judge(world: &World, event: &ClosureEvent, actor: u64) -> Result<(), Unlawful> {
+fn judge(world: &World, event: &ClosureEvent, actor: u64) -> Result<(), Refused> {
     let state = world.committed();
     let step = Step { event: event.clone(), actor, stamp: world.now() };
-    lawful(&state, &state, &step)
+    admits(&state, &state, &step)
 }
 
 #[test]
@@ -95,7 +95,7 @@ fn a_value_moving_consequence_is_held_to_its_declaration() {
     assert!(
         matches!(
             judge(&world, &drawing, SOVEREIGN),
-            Err(Unlawful::ConservationBroken { .. })
+            Err(Refused::ConservationBroken { .. })
         ),
         "a strike that does not draw its declaration refuses by conservation"
     );
@@ -119,7 +119,7 @@ fn the_fold_trio_is_judged_by_the_gauge_law() {
         assert!(
             matches!(
                 judge(&world, &event, SOVEREIGN),
-                Err(Unlawful::GaugeBroken { grade: 0, .. })
+                Err(Refused::GaugeBroken { grade: 0, .. })
             ),
             "the fold is JUDGED: its declared key move must land: {event:?}"
         );

@@ -31,7 +31,7 @@ ruleset bump.
 
 ### P1 · `mint_bound` — THE PRICE OF COGNITION
 
-    kernel/lib.rs:845          drives: Unlawful::MintExceedsWork (I4)
+    kernel/lib.rs:845          drives: Refused::MintExceedsWork (I4)
 
     level 3  →  1/1
     level 4  →  4/1
@@ -59,7 +59,7 @@ feedback term.
 
 ### P2 · `demurrage_per_tick` — THE SINK
 
-    cfe/dop.rs:321             drives: Unlawful::DecayExceedsBound (I5)
+    cfe/dop.rs:321             drives: Refused::DecayExceedsBound (I5)
     reached through            cfe::world::demurrage_due
 
     1/32 per elapsed tick
@@ -232,7 +232,7 @@ confirmation; the sigmoid does not.
 
 **What is sound and is now settled:** issuance softens as supply grows
 without matching rank. `read_entangled(prior).rank` supplies the rank
-term and is landed. **Confirmed safe:** `capacity_law` admits only
+term and is landed. **Confirmed safe:** `standing` admits only
 `Vacuity::Entangled` (`boundary.rs:191`), which requires `D > 0`, so a
 rank-denominated term **can never see a zero denominator** — pinned as
 `p1_capacity_law_refuses_before_any_rank_denominated_term_is_read`.
@@ -276,7 +276,7 @@ rank-denominated term **can never see a zero denominator** — pinned as
    banked)` prevents it going negative but not going punitive. **#16
    requires a BOUNDED function** — this one is bounded below only.
 3. **`Φ_D = 0` IS REACHABLE HERE.** Unlike `P1`, demurrage is **not**
-   gated by `capacity_law` — an orb with no standing obligations decays
+   gated by `standing` — an orb with no standing obligations decays
    exactly like one with many. So the rank denominator can be zero at
    the moment `P2` is read. Division by zero, in the decay path, on a
    live world.
@@ -759,7 +759,7 @@ requires. 142 suites green.
 
 ---
 
-## §14 THE STANDING DEADLOCK — `capacity_law` refuses every mint (verified 2026-08-02)
+## §14 THE STANDING DEADLOCK — `standing` refuses every mint (verified 2026-08-02)
 
 remediations-lane measured `MintWithoutStanding{Void}` 61 then 68 times
 per 10 beats on the live board. **Verified here rather than accepted**
@@ -770,7 +770,7 @@ lane's own invariant:
 
 ### 14a. IT IS A BOOTSTRAP DEADLOCK, not a tuning problem
 
-`capacity_law` admits only `Vacuity::Entangled`, which needs `D > 0`.
+`standing` admits only `Vacuity::Entangled`, which needs `D > 0`.
 `D` counts independent cycles in the obligation complex. A cycle needs
 relations; relations are bonds, covenants and debts; those are made by
 spending value. **So a world must mint to relate, and must relate to
@@ -874,7 +874,7 @@ and a bootstrap rung were three ways to work around a misprojection.
 
 The ruling requires verifying **`D > 0` with `rank = 0`** before
 merging. **That is unsatisfiable on this branch**, because here `D` IS
-`rank` — `capacity_law` reads `read.rank` and nothing distinguishes
+`rank` — `standing` reads `read.rank` and nothing distinguishes
 them.
 
 It may well be satisfiable on `main`: lens-lane landed *"D IS A
@@ -887,7 +887,7 @@ checking after is how the last three defects reached the tree.
 **What must be measured on `main` before any merge:**
 
 1. Does an `EntangledRead` there expose a `D` distinct from `rank`?
-2. Does `capacity_law` read that `D`, or still `rank`?
+2. Does `standing` read that `D`, or still `rank`?
 3. On a founded one-orb world, what is the verdict?
 
 If (3) is `Unframed`, the deadlock is already closed on `main` and this

@@ -1,6 +1,6 @@
 //! Does the deadlock survive main's per-orb standing?
 //!
-//! `21_KERNEL_PARAMETERS` §14–15 measured `capacity_law` refusing every
+//! `21_KERNEL_PARAMETERS` §14–15 measured `standing` refusing every
 //! mint because a one-orb world reads `rank = 0` and `Vacuity::Void`.
 //! main then replaced the world-wide `Entangled` gate with a PER-ORB
 //! reading — `standing_of(state, orb)` and `MintWithoutOwnStanding`.
@@ -9,7 +9,7 @@
 use cfe::dop::{ClosureEvent, Resource};
 use cfe::ratio::ratio;
 use cfe::world::{World, SOVEREIGN};
-use kernel::{bridge, lawful, Step, Unlawful};
+use kernel::{bridge, lawful, Step, Refused};
 
 #[test]
 fn what_a_founded_world_now_reads() {
@@ -33,7 +33,7 @@ fn what_a_founded_world_now_reads() {
         actor: SOVEREIGN,
         stamp: 1,
     };
-    let verdict = lawful(&prior, &prior, &step);
+    let verdict = admits(&prior, &prior, &step);
     println!("mint verdict = {verdict:?}");
 
     // THE CLAIM UNDER TEST, either way: is a founded world still barred
@@ -42,7 +42,7 @@ fn what_a_founded_world_now_reads() {
     // main's per-orb narrowing is never reached on a fresh world. The
     // deadlock stands under the older variant name.
     assert!(
-        matches!(verdict, Err(Unlawful::MintWithoutStanding { .. })),
+        matches!(verdict, Err(Refused::MintWithoutStanding { .. })),
         "a founded world is still barred from minting: {verdict:?}"
     );
     assert_eq!(bridge::standing_of(&prior, orb), ratio(0, 1), "and holds no standing of its own");
@@ -52,7 +52,7 @@ fn what_a_founded_world_now_reads() {
 ///
 /// main added `MintWithoutOwnStanding` — the free-rider gate, asking
 /// what THIS orb holds up rather than what the world does. It is
-/// strictly a narrowing, and correct. But `capacity_law` checks the
+/// strictly a narrowing, and correct. But `standing` checks the
 /// world verdict FIRST and returns on failure, so an orb can only be
 /// refused for its OWN standing on a world that already has some.
 ///
@@ -83,7 +83,7 @@ fn the_free_rider_gate_needs_a_world_that_already_stands() {
             stamp: 1,
         };
         assert!(
-            matches!(lawful(&prior, &prior, &step), Err(Unlawful::MintWithoutStanding { .. })),
+            matches!(admits(&prior, &prior, &step), Err(Refused::MintWithoutStanding { .. })),
             "orb {orb} is refused by the WORLD gate, not its own"
         );
     }

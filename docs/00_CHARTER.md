@@ -302,7 +302,7 @@ exports) deletes at Step 4 once views serve from the chain.
 2. **Exports are write-only.** JSON files, dashboards, and save-file
    copies are display output. No code ever parses them back in.
 3. **One validated update function.** All state changes go through
-   `lawful(prior, next, step) -> Ok | typed refusal`: pure, total, no
+   `admits(prior, next, step) -> Ok | typed refusal`: pure, total, no
    I/O, and encoding-blind — it works on in-memory state only and
    never produces or reads bytes. Serialization belongs exclusively
    to the codec (rule 1's snapshot encoder), so the update function

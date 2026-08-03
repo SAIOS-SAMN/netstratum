@@ -234,7 +234,7 @@ fn the_envelope_is_the_volume_and_it_breathes_with_rank() {
 #[test]
 fn rank_zero_is_the_degenerate_point_and_that_is_the_vacuity_case() {
     // n^0 = 1 — a single point, no volume. That is exactly the standing
-    // capacity_law refuses to mint on (Vacuity, D = 0): the envelope
+    // standing refuses to mint on (Vacuity, D = 0): the envelope
     // agrees with the constitution rather than contradicting it.
     assert_eq!(envelope(1_000_000, 0), Some(1), "no rank, no room");
 }

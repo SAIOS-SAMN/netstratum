@@ -144,7 +144,7 @@ and `V` are to each other, and that relation is the union the name was
 always reaching for. It is not an arithmetic. It is two OFFICES.
 
     V   SOVEREIGN    holds. Its standing comes from ADMISSION — it
-                     passed `lawful()`, it carries receipts, it is in
+                     passed `admits()`, it carries receipts, it is in
                      the chain. No reading confers it; none revokes it.
 
     D   PROGENITOR   makes room. D3's emission opens a plane, the fiber
@@ -210,7 +210,7 @@ derived from another is that other's property, not its equal office, and
 it would make the board-maker a byproduct of what plays on the board.
 
     ORIGIN      the receipted deed  →  the office
-                V's standing comes from ADMISSION (it passed `lawful()`)
+                V's standing comes from ADMISSION (it passed `admits()`)
                 D's room comes from RECEIPTED MINTS — D3: *D rises BY
                 RECEIPT*; `GaugeShiftedAt` opens the plane and
                 `PlaneUnearned` refuses an unearned one
@@ -502,7 +502,7 @@ wrapped L1, a key of 10 is 0, the T∞ purge bars escape to infinity. The
 wrap is what makes the accounting exhaustive — a gap has nowhere to go
 except into the disposition.
 
-**THE CONSEQUENCE — `lawful()` is an ACCOUNTANT, not a filter and not a
+**THE CONSEQUENCE — `admits()` is an ACCOUNTANT, not a filter and not a
 point-function.** For a given `(prior, step)` it derives its own side,
 reads the deed's side, and dispositions the difference. The admissible
 space is neither a range (latitude, attackable) nor a point (collapse,
@@ -673,7 +673,7 @@ sincerity — it is whether anything is left after `Π_G(Δ(Ω))`.
 around it is non-trivial. Weight alone commutes, contributes a
 per-node scalar, reduces to zero and leaves `D` unchanged; a lane held
 open by weight alone therefore collapses. A lane held open by structure
-no frame explains stays extended and traversable. `capacity_law`
+no frame explains stays extended and traversable. `standing`
 (`lib.rs:253`) already refuses a mint without standing on precisely
 this reading — the lane extends it from the mint to the bond.
 
@@ -1106,7 +1106,7 @@ header says *"Exact rational throughout — no float, no root"*
 committed algebra. `loop_holonomy` and `plaquette_curvature` compute
 over it, and **K5 (#32) proposes to carry it INTO `Holonomy.value`** —
 that is, into the committed reduction that feeds rank `D`, which feeds
-`capacity_law`, which gates minting.
+`standing`, which gates minting.
 
 **So if the fiber's CONTENTS became float, two honest nodes would
 compute different `D` from identical state and consensus would fail.**
@@ -1372,7 +1372,7 @@ ARTICLE IV holds it monotone, so the envelope widens as the system
 gains dimension and never narrows. That is the re-volumizer — the
 budget is a function of standing rank, not a number chosen in advance.
 
-`n^0 = 1`: no rank, no room — exactly the standing `capacity_law`
+`n^0 = 1`: no rank, no room — exactly the standing `standing`
 refuses to mint on, so the envelope agrees with the constitution rather
 than contradicting it. Landed and certified as `kernel::motion::envelope`,
 which refuses on overflow rather than wrapping (an envelope that wrapped
@@ -1468,7 +1468,7 @@ operational authorization.*
 
 **STANDING IS NOT THIS ARTICLE'S TO GRANT** (the sovereignty amendment,
 operator ruling 2026-08-01; §2c′). A committed state's standing comes
-from ADMISSION — it passed `lawful()`, it carries receipts, it is in the
+from ADMISSION — it passed `admits()`, it carries receipts, it is in the
 chain — and that was granted by the JUDGE, upstream of every reading.
 `D` is a rank: testimony about what `V` expresses. Testimony prices
 allocation; it never confers or revokes the standing of the state it
@@ -1520,7 +1520,7 @@ and `bridge_pins::no_committed_world_ever_reads_below_the_ground`.
 **THE ARTICLE IS ASKED OF THE ORB, NOT ONLY OF THE WORLD** (SYN-4/SYN-5,
 operator ruling 2026-08-02). This article says *a state carrying
 circulation claims ALLOCATION* — and until now nothing could say WHO.
-`capacity_law` read `read_entangled(prior).verdict()`, a reading of the
+`standing` read `read_entangled(prior).verdict()`, a reading of the
 whole with no orb anywhere in it, so the article could only ever refuse,
 and it refused in both wrong directions at once: an orb carrying real
 structure was denied because the world's total fell short, and an orb
@@ -1697,7 +1697,7 @@ with no state that refuses it is unfalsifiable and therefore says
 nothing — which is why every invariant here owes a RED-FIRST witness.
 And a reading that varies with traversal order is unreproducible: two
 judges walking differently would disagree, so it cannot be law. **This
-is the law that kept `∂Δ` out of `lawful()` until it was rebuilt
+is the law that kept `∂Δ` out of `admits()` until it was rebuilt
 canonically**, and the one under which measurement precedes ruling —
 Ruling Box 1 measured the ladder before `f` was set.
 
@@ -2067,7 +2067,7 @@ computation, hiding one behind vocabulary is cosmetic.
 
    **LAW 4 now carries that ground**, thermodynamically rather than
    morally, through `dual_pole` / `Vacuity::Stasis` — landed, and
-   already consulted by `kernel::capacity_law`. Building the window
+   already consulted by `kernel::standing`. Building the window
    arithmetic would have implemented a corpse. What the lens owed
    instead was a SURFACE for the row a world stands in, which nothing
    displayed; that is `lens::standing` (`19_LENS` §12).
@@ -2141,7 +2141,7 @@ and it is the intended reading order for that decision.
 **THE TEST** (kernel CHARTER §1, KERNEL_RELAY §9 — the trap everyone
 hits): the kernel judges ONE step, locally, exactly, totally. A LOCAL
 per-step fact derivable from `(prior, next, step)` can enter
-`lawful()`. A GLOBAL, dynamical, or over-time property CANNOT, at any
+`admits()`. A GLOBAL, dynamical, or over-time property CANNOT, at any
 strength of conviction — *enforce the local invariants whose universal
 application yields the global band; measure the global with a lens;
 never make the kernel optimize a global quantity.*
@@ -2151,13 +2151,13 @@ may be written as law here only with a file and line naming what
 BEHAVIOUR it drives. A doc-comment is not behaviour; a vocabulary entry
 is not a mechanism.
 
-### 7a. KERNEL — local, per-step, admissible in `lawful()`
+### 7a. KERNEL — local, per-step, admissible in `admits()`
 
 | claim | why local | what it touches |
 |---|---|---|
 | **§2f entanglement** — no capacity without potential motion | reads `(prior, step)` only | `creation()` in `kernel/src/lib.rs` |
 | **§2g gap disposition** — hold both sides, dispose the gap | one deed, one comparison | `creation()`; new `Unlawful` arm carrying both sides |
-| **Art. IV monotone** — a step may not lower the rank outside lawful reduction | `prior`→`next` comparison | new invariant, the `gauge_law` shape |
+| **Art. IV monotone** — a step may not lower the rank outside lawful reduction | `prior`→`next` comparison | new invariant, the `gauge_move` shape |
 | **Art. II non-vacuous** — `D = GROUND` claims no ALLOCATION (`Degree::is_above_ground`, never a zero; standing is admission's, §2c′) | property of `prior` | `containment()`, or a new gate beside it |
 | **`D` itself** — the structure surviving `Π_G(Δ(V))` | pure function of one state | kernel gains its `rfa-core` dep (anticipated at U_DIRECTIVES §4) |
 
@@ -2175,9 +2175,9 @@ is not a mechanism.
 **§2i is a THIRD category** — neither kernel nor lens but a
 CLASSIFICATION obligation on the vocabularies: every element declared
 syntropic or entropic, with an UNMEASURED tripwire for the remainder.
-It binds the codec and the element grammar, not `lawful()`.
+It binds the codec and the element grammar, not `admits()`.
 
-Putting any 7b row into `lawful()` destroys the kernel's nature. That
+Putting any 7b row into `admits()` destroys the kernel's nature. That
 is not a style preference — a judge that reads a window is no longer
 pure, no longer total, and no longer replayable step-by-step.
 
@@ -2273,7 +2273,7 @@ Each of these was a live defect, and any one of them alone forces
 
 ### 8f. Honest limits
 
-The rank is measured and **used by nothing.** `lawful()` does not read
+The rank is measured and **used by nothing.** `admits()` does not read
 it, Article II does not gate on it, Article IV does not defend it, and
 no mint is bounded by it. The proof is that the number is real, not
 that the engine acts on it.

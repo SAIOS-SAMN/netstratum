@@ -13,7 +13,7 @@ use cfe::dop::{ClosureEvent, ColonyOrb, Resource, ZoneKind};
 use cfe::ipsal::{Entity, Scope};
 use cfe::ratio::ratio;
 use cfe::world::{Committed, World, SOVEREIGN};
-use kernel::{lawful, Step, Unlawful};
+use kernel::{lawful, Step, Refused};
 
 fn seated() -> Committed {
     let mut committed = World::new().committed();
@@ -37,16 +37,16 @@ fn taxon_sealed_gates_by_the_build_scope() {
     // it. The sovereign holds Build: admitted (prior == next, neutral).
     let state = seated();
     let seal = ClosureEvent::TaxonSealed { class: 1, clade: 1 };
-    assert_eq!(lawful(&state, &state, &step(seal.clone(), SOVEREIGN)), Ok(()));
+    assert_eq!(admits(&state, &state, &step(seal.clone(), SOVEREIGN)), Ok(()));
     // A bare agent lacks Build: refused by containment.
     assert_eq!(
-        lawful(&state, &state, &step(seal.clone(), 100)),
-        Err(Unlawful::NotPermitted { actor: 100, scope: Scope::Build }),
+        admits(&state, &state, &step(seal.clone(), 100)),
+        Err(Refused::NotPermitted { actor: 100, scope: Scope::Build }),
     );
     // A deed from no one: refused before any state read.
     assert_eq!(
-        lawful(&state, &state, &step(seal, 999)),
-        Err(Unlawful::NoSuchEntity { actor: 999 }),
+        admits(&state, &state, &step(seal, 999)),
+        Err(Refused::NoSuchEntity { actor: 999 }),
     );
 }
 
@@ -144,10 +144,10 @@ fn coverage_is_total_the_sealed_default_is_unreachable() {
     assert_eq!(deeds.len(), 64, "one instance of every ClosureEvent variant");
     let state = seated();
     for event in deeds {
-        let verdict = lawful(&state, &state, &step(event.clone(), SOVEREIGN));
+        let verdict = admits(&state, &state, &step(event.clone(), SOVEREIGN));
         assert_ne!(
             verdict,
-            Err(Unlawful::Unjudged),
+            Err(Refused::Unjudged),
             "coverage hole — {event:?} refuses Unjudged; every deed must be judged"
         );
     }

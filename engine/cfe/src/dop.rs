@@ -231,7 +231,7 @@ pub enum Office {
     /// EARNED (`PlaneUnearned` refuses otherwise).
     Progenitor = 0,
     /// `V(Ω)` — the SOVEREIGN. Holds the substance; owes work that was
-    /// RECEIPTED (admission by `lawful()`).
+    /// RECEIPTED (admission by `admits()`).
     Sovereign = 1,
 }
 

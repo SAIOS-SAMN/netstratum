@@ -24,8 +24,8 @@ The authority is always the crate.
 | **D** | `rfa-core/src/capacity.rs` | `capacity`, `circulation`, `divergence`, `egress`, `ext_x`, `ground`, `Degree`, `Extent`, `Egress` |
 | the seam | `kernel/src/bridge.rs` | `project`, `project_complex`, `read_entangled`, `verdict`, `degree`, `rank_is_defined`, `observe`, `fold_certified`, `refold` |
 
-**What the judge actually consults today:** `kernel::lawful` calls
-`capacity_law` (4 sites), reads `Vacuity` (5), and reaches
+**What the judge actually consults today:** `kernel::admits` calls
+`standing` (4 sites), reads `Vacuity` (5), and reaches
 `bridge::read_entangled` once. That is the whole of D and V inside the
 kernel. **C is consulted from nowhere in the kernel and must never be** —
 it has zero authority by construction (`17_CAPACITY` §10ter.c).

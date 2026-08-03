@@ -2,7 +2,7 @@
 //! the multi-axial transition, its inversion axiom, and the schedule
 //! that makes non-commutative composition safe across nodes.
 //!
-//! **WHY THIS EXISTS.** `lawful(prior, next, step)` accepts `next` and
+//! **WHY THIS EXISTS.** `admits(prior, next, step)` accepts `next` and
 //! returns `Ok(())`: the transition is computed elsewhere and the
 //! kernel grades it. Returning `Committed` instead would fix the
 //! duplication and keep the LINEARITY — a whole world is a POINT, with

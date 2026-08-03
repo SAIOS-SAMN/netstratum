@@ -8,7 +8,7 @@ use cfe::dop::{ClosureEvent, ColonyOrb, Resource};
 use cfe::ipsal::{Entity, Scope};
 use cfe::ratio::ratio;
 use cfe::world::{Bond, Committed, World, SOVEREIGN};
-use kernel::{lawful, Step, Unlawful};
+use kernel::{lawful, Step, Refused};
 use rfa_core::Vacuity;
 
 const HAND: u64 = 100;
@@ -64,8 +64,8 @@ fn a_world_with_nothing_cannot_mint() {
     // to be done against, and the refusal names the row.
     let bare = world(3);
     assert_eq!(
-        lawful(&bare, &bare, &mint()),
-        Err(Unlawful::MintWithoutStanding { verdict: Vacuity::Void }),
+        admits(&bare, &bare, &mint()),
+        Err(Refused::MintWithoutStanding { verdict: Vacuity::Void }),
         "a world holding no relations at all mints nothing"
     );
 }
@@ -85,8 +85,8 @@ fn a_perfectly_circulating_world_cannot_mint() {
     ring.bonds = vec![bond(1, 2, 3), bond(2, 3, 3), bond(3, 4, 3), bond(4, 1, 3)];
 
     assert_eq!(
-        lawful(&ring, &ring, &mint()),
-        Err(Unlawful::MintWithoutStanding { verdict: Vacuity::Stasis }),
+        admits(&ring, &ring, &mint()),
+        Err(Refused::MintWithoutStanding { verdict: Vacuity::Stasis }),
         "structure with no gradient does no work — at any size"
     );
 }
@@ -99,8 +99,8 @@ fn flow_with_nothing_holding_it_cannot_mint() {
     chain.bonds = vec![bond(1, 2, 3), bond(2, 3, 3)];
 
     assert_eq!(
-        lawful(&chain, &chain, &mint()),
-        Err(Unlawful::MintWithoutStanding { verdict: Vacuity::Unframed }),
+        admits(&chain, &chain, &mint()),
+        Err(Refused::MintWithoutStanding { verdict: Vacuity::Unframed }),
         "gradient with no structure mints nothing either"
     );
 }
@@ -119,14 +119,14 @@ fn a_world_carrying_both_poles_may_mint() {
     // DIFFERENT law — and that separation is the point: standing and
     // proof are judged independently, so a refusal never conflates
     // "this world cannot earn" with "this claim is false".
-    let seen = lawful(&live, &live, &mint());
+    let seen = admits(&live, &live, &mint());
     assert!(
-        !matches!(seen, Err(Unlawful::MintWithoutStanding { .. })),
+        !matches!(seen, Err(Refused::MintWithoutStanding { .. })),
         "structure WITH gradient may earn — standing is not what stops it"
     );
     assert_eq!(
         seen,
-        Err(Unlawful::WorkRefused { broken: solver_verify::WorkBroken::Malformed }),
+        Err(Refused::WorkRefused { broken: solver_verify::WorkBroken::Malformed }),
         "it refuses on the empty proof instead, which is the next law along"
     );
 }
@@ -150,7 +150,7 @@ fn the_law_gates_creation_never_motion() {
         actor: HAND,
         stamp: 1,
     };
-    assert_eq!(lawful(&ring, &ring, &move_it), Ok(()), "motion is not creation");
+    assert_eq!(admits(&ring, &ring, &move_it), Ok(()), "motion is not creation");
 }
 
 #[test]
@@ -163,7 +163,7 @@ fn the_refusal_carries_which_row_failed() {
     let mut ring = world(4);
     ring.bonds = vec![bond(1, 2, 3), bond(2, 3, 3), bond(3, 4, 3), bond(4, 1, 3)];
 
-    let (a, b) = (lawful(&bare, &bare, &mint()), lawful(&ring, &ring, &mint()));
+    let (a, b) = (admits(&bare, &bare, &mint()), admits(&ring, &ring, &mint()));
     assert_ne!(a, b, "two dead worlds, two different diagnoses");
 }
 
@@ -202,10 +202,10 @@ fn an_orb_holding_nothing_cannot_mint_on_the_world_s_structure() {
     );
 
     // Orb 5 holds nothing, so it stands on the ground and mints nothing.
-    let seen = lawful(&live, &live, &mint_by(5));
+    let seen = admits(&live, &live, &mint_by(5));
     assert_eq!(
         seen,
-        Err(Unlawful::MintWithoutOwnStanding {
+        Err(Refused::MintWithoutOwnStanding {
             orb: 5,
             axial: vec![ratio(0, 1), ratio(0, 1), ratio(0, 1)],
         }),
@@ -216,7 +216,7 @@ fn an_orb_holding_nothing_cannot_mint_on_the_world_s_structure() {
     // it falls through to the next law along. The rule narrows onto the
     // free rider without touching the orb that did the work.
     assert!(
-        !matches!(lawful(&live, &live, &mint_by(1)), Err(Unlawful::MintWithoutOwnStanding { .. })),
+        !matches!(admits(&live, &live, &mint_by(1)), Err(Refused::MintWithoutOwnStanding { .. })),
         "the orb carrying the structure keeps its standing"
     );
 }
@@ -231,7 +231,7 @@ fn the_refusal_carries_the_share_so_the_floor_can_be_risen_from() {
     live.bonds =
         vec![bond(1, 2, 3), bond(2, 3, 3), bond(3, 4, 3), bond(4, 1, 3), bond(1, 3, 1)];
 
-    let Err(Unlawful::MintWithoutOwnStanding { axial, .. }) = lawful(&live, &live, &mint_by(5))
+    let Err(Refused::MintWithoutOwnStanding { axial, .. }) = admits(&live, &live, &mint_by(5))
     else {
         panic!("orb 5 holds nothing and must be refused on its own standing");
     };
@@ -263,7 +263,7 @@ fn the_refusal_carries_the_share_so_the_floor_can_be_risen_from() {
         "an orb that takes a place in the circulation rises off the ground"
     );
     assert!(
-        !matches!(lawful(&live, &live, &mint_by(5)), Err(Unlawful::MintWithoutOwnStanding { .. })),
+        !matches!(admits(&live, &live, &mint_by(5)), Err(Refused::MintWithoutOwnStanding { .. })),
         "having risen, the orb is no longer refused for standing"
     );
 }

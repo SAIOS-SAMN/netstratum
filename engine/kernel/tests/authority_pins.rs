@@ -18,7 +18,7 @@ use cfe::dop::ClosureEvent;
 use cfe::ipsal::Scope;
 use cfe::ratio::ratio;
 use cfe::world::{World, SOVEREIGN};
-use kernel::{lawful, Step, Unlawful};
+use kernel::{lawful, Step, Refused};
 
 /// A founded world (sovereign auto-registered, holds every scope) plus
 /// a bare agent holding NOTHING — the containment test material.
@@ -57,12 +57,12 @@ fn raze_deeds() -> Vec<ClosureEvent> {
     ]
 }
 
-fn judge(world: &World, event: &ClosureEvent, actor: u64) -> Result<(), Unlawful> {
+fn judge(world: &World, event: &ClosureEvent, actor: u64) -> Result<(), Refused> {
     // Banked-neutral: prior and next carry the SAME banks; the deed is
     // judged by scope and exactness, not by a value delta.
     let state = world.committed();
     let step = Step { event: event.clone(), actor, stamp: world.now() };
-    lawful(&state, &state, &step)
+    admits(&state, &state, &step)
 }
 
 #[test]
@@ -79,13 +79,13 @@ fn build_authority_deeds_gate_by_the_build_scope() {
         // A bare agent lacks Build: refused by containment.
         assert_eq!(
             judge(&world, &event, agent),
-            Err(Unlawful::NotPermitted { actor: agent, scope: Scope::Build }),
+            Err(Refused::NotPermitted { actor: agent, scope: Scope::Build }),
             "authority is granted, never assumed: {event:?}"
         );
         // A deed from no one refuses before any state read.
         assert_eq!(
             judge(&world, &event, 999),
-            Err(Unlawful::NoSuchEntity { actor: 999 }),
+            Err(Refused::NoSuchEntity { actor: 999 }),
             "identity precedes the world: {event:?}"
         );
     }
@@ -98,7 +98,7 @@ fn raze_authority_deeds_gate_by_the_raze_scope() {
         assert_eq!(judge(&world, &event, SOVEREIGN), Ok(()), "sovereign razes: {event:?}");
         assert_eq!(
             judge(&world, &event, agent),
-            Err(Unlawful::NotPermitted { actor: agent, scope: Scope::Raze }),
+            Err(Refused::NotPermitted { actor: agent, scope: Scope::Raze }),
             "the lift needs Raze, granted: {event:?}"
         );
     }
@@ -124,7 +124,7 @@ fn a_value_moving_authority_deed_is_held_to_its_charter() {
     assert!(
         matches!(
             judge(&world, &minting, SOVEREIGN),
-            Err(Unlawful::ConservationBroken { .. })
+            Err(Refused::ConservationBroken { .. })
         ),
         "a founding that does not bank its charter refuses by conservation"
     );

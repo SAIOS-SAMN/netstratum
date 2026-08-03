@@ -13,7 +13,7 @@ use cfe::dop::{ClosureEvent, ColonyOrb};
 use cfe::ipsal::Entity;
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::{Committed, Prospected, World, SOVEREIGN};
-use kernel::{lawful, Step, Unlawful};
+use kernel::{lawful, Step, Refused};
 
 const ELEMENT: [u8; 32] = [3u8; 32];
 
@@ -57,7 +57,7 @@ fn an_honest_assay_mints_exactly_the_vein_yield() {
     // richness 2 × elapsed (4 − 1 = 3) = 6, minted into the element.
     let prior = with_vein((2, 1), 1);
     let next = banked_element(&prior, ELEMENT, ratio(6, 1));
-    assert_eq!(lawful(&prior, &next, &assay((6, 1), 4)), Ok(()));
+    assert_eq!(admits(&prior, &next, &assay((6, 1), 4)), Ok(()));
 }
 
 #[test]
@@ -67,8 +67,8 @@ fn an_assay_past_the_vein_yield_refuses_bounded() {
     let prior = with_vein((2, 1), 1);
     let greedy = banked_element(&prior, ELEMENT, ratio(7, 1));
     assert_eq!(
-        lawful(&prior, &greedy, &assay((7, 1), 4)),
-        Err(Unlawful::AssayExceedsVein {
+        admits(&prior, &greedy, &assay((7, 1), 4)),
+        Err(Refused::AssayExceedsVein {
             bound: Box::new(ratio(6, 1)),
             claimed: Box::new(ratio(7, 1)),
         }),
@@ -81,8 +81,8 @@ fn a_negative_assay_refuses_by_sign() {
     let prior = with_vein((2, 1), 1);
     let inverted = banked_element(&prior, ELEMENT, ratio(-6, 1));
     assert_eq!(
-        lawful(&prior, &inverted, &assay((-6, 1), 4)),
-        Err(Unlawful::ElementNotPositive {
+        admits(&prior, &inverted, &assay((-6, 1), 4)),
+        Err(Refused::ElementNotPositive {
             element: ELEMENT,
             amount: Box::new(ratio(-6, 1)),
         }),
@@ -98,8 +98,8 @@ fn an_assay_with_no_vein_yields_nothing() {
     prior.prospects.clear();
     let claimed = banked_element(&prior, ELEMENT, ratio(6, 1));
     assert_eq!(
-        lawful(&prior, &claimed, &assay((6, 1), 4)),
-        Err(Unlawful::AssayExceedsVein {
+        admits(&prior, &claimed, &assay((6, 1), 4)),
+        Err(Refused::AssayExceedsVein {
             bound: Box::new(ratio(0, 1)),
             claimed: Box::new(ratio(6, 1)),
         }),
@@ -120,8 +120,8 @@ fn an_element_change_under_a_neutral_deed_refuses() {
         stamp: 4,
     };
     assert_eq!(
-        lawful(&prior, &smuggled, &neutral),
-        Err(Unlawful::ElementBroken {
+        admits(&prior, &smuggled, &neutral),
+        Err(Refused::ElementBroken {
             element: ELEMENT,
             expected: Box::new(ratio(0, 1)),
             actual: Box::new(ratio(6, 1)),

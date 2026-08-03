@@ -8,7 +8,7 @@
 
 use cfe::dop::{ClosureEvent, ZoneKind};
 use cfe::world::World;
-use kernel::{lawful, Step, Unlawful};
+use kernel::{lawful, Step, Refused};
 
 fn seat(line: &str, station: u8, actor: u64) -> Step {
     Step {
@@ -100,7 +100,7 @@ fn the_kernel_judges_who_may_seat() {
 
     // The sovereign holds every scope by construction.
     assert_eq!(
-        lawful(&prior, &next, &seat("mantle-anhydro", 1, cfe::world::SOVEREIGN)),
+        admits(&prior, &next, &seat("mantle-anhydro", 1, cfe::world::SOVEREIGN)),
         Ok(()),
         "the sovereign may seat"
     );
@@ -108,8 +108,8 @@ fn the_kernel_judges_who_may_seat() {
     // A stranger is not an entity in prior at all — identity precedes
     // the world, so the deed refuses before any state is read.
     assert_eq!(
-        lawful(&prior, &next, &seat("mantle-anhydro", 1, 4242)),
-        Err(Unlawful::NoSuchEntity { actor: 4242 }),
+        admits(&prior, &next, &seat("mantle-anhydro", 1, 4242)),
+        Err(Refused::NoSuchEntity { actor: 4242 }),
         "a deed from no one seats no one"
     );
 }
