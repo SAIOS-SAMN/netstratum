@@ -1045,6 +1045,36 @@ only its enforcement HOME moved, into kernel I1/I6.
 
 ## §6 Economy and thermal — THE MANIFOLD DUAL (syntropy ∥ entropy)
 
+**THE TWO BOOKS ARE NOW SYMMETRIC** (operator ruling 2026-08-03:
+*ensure you have the inverse of divergence in convergence, and
+entropy_vented into syntropy_contained*).
+
+```text
+    ColonyOrb.entropy_vented      what the orb SHED to the void      tag 28
+    ColonyOrb.syntropy_contained  what the orb KEPT                  tag 20
+```
+
+Both stored on the orb, both cumulative and never pruned, both
+replayed. The sweep below closed the reading gap with a derived
+accessor; this closes the STRUCTURAL one. **No amount of deriving fixes
+an asymmetry where one arm is a stored field and the other is not** —
+an orb could be asked what it had lost forever and only be computed at
+for what it had kept.
+
+`syntropy_contained` books every contained joule, whether the excess
+arrived from a star or from friction: the same currency either way
+(§3.2a). It is emitted only when nonzero, so a world that has contained
+nothing stays byte-identical to a pre-syntropy one and no chain is
+re-priced by the field's arrival. **It must equal
+`World::heat_encased_of`** — the stored book and the derived reading
+are pinned against each other, so drift is a test failure rather than a
+silent divergence.
+
+And the same shape now holds on the relational axis: `FrictionSettled`
+prices DIVERGENCE, and `World::convergence_between` reads its inverse
+(`09` §3.2). Each entropic arm in this ledger now has a syntropic one
+of equal standing.
+
 **THE MISSING-LEG SWEEP (2026-08-02).** Chapter five of §0.3 records
 that this ledger once carried the ENTROPIC arm of every dual and left
 the syntropic arm behind, and states the lesson: *a map that inherits

@@ -180,6 +180,7 @@ impl World {
             // `encased_entries` and `heat_encased_of`. No new deed.
             if captured > ratio(0, 1) {
                 held.bank(Resource::Joule, captured.clone());
+                held.syntropy_contained += captured.clone();
                 self.chronicle.append(
                     ClosureEvent::YieldCollected {
                         orb_id,
@@ -216,6 +217,14 @@ impl World {
             match amount >= ratio(0, 1) {
                 true => {
                     held.bank(resource, amount.clone());
+                    // THE SYNTROPIC BOOK — the inverse of
+                    // entropy_vented. A joule yield IS an encased joule
+                    // (the crystal sheet already reads it that way), so
+                    // containing one books it. Mirrored verbatim in
+                    // `replay`.
+                    if resource == Resource::Joule {
+                        held.syntropy_contained += amount.clone();
+                    }
                     self.chronicle.append(
                         ClosureEvent::YieldCollected { orb_id, resource, amount },
                         stamp,

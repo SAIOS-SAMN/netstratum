@@ -11,7 +11,7 @@
 use cfe::dop::{Resource, ZoneKind};
 use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
-use cfe::world::{World, FIRST_ORB, SOVEREIGN};
+use cfe::world::{replay, World, FIRST_ORB, SOVEREIGN};
 
 /// A HOT colony with an ENCASEMENT shell — the capture zone. `Encasement`
 /// is what yields `Resource::Joule`, and a joule yield collected is
@@ -113,4 +113,71 @@ fn the_landed_loss_arm_is_not_disturbed() {
         before,
         "reading the new arm moves nothing — both are derived reads"
     );
+}
+
+#[test]
+fn the_two_books_are_symmetric_and_both_stored() {
+    // THE ASYMMETRY CLOSED (operator ruling 2026-08-03). `entropy_vented`
+    // has always been a stored orb field — cumulative, replayed, public.
+    // The capture arm lived in a pruned window on the crystal sheet and,
+    // later, in a derived reader. An orb could be asked what it had lost
+    // forever and never what it had KEPT.
+    //
+    // `syntropy_contained` is now its exact inverse: same shape, same
+    // lifetime, same book.
+    let mut world = furnace();
+    for _ in 0..40 {
+        world.tick();
+    }
+    world.collect_as(SOVEREIGN, FIRST_ORB).expect("collects");
+
+    let orb = world.orb_by_id(FIRST_ORB).expect("orb");
+    assert!(
+        orb.syntropy_contained > ratio(0, 1),
+        "a shelled furnace contained joules: {}",
+        orb.syntropy_contained
+    );
+
+    // THE STORED BOOK EQUALS THE DERIVED READING. Storing something
+    // derivable is only honest if drift is a test failure rather than a
+    // silent divergence, so the two are pinned against each other.
+    assert_eq!(
+        orb.syntropy_contained,
+        world.heat_encased_of(FIRST_ORB),
+        "the stored book and the derived reading must never disagree"
+    );
+}
+
+#[test]
+fn the_syntropic_book_replays_exactly() {
+    // A FIELD IS ONLY REAL IF REPLAY REBUILDS IT. The live path and
+    // `replay` book the contained joule from the same rule; if they
+    // ever differ, two nodes holding the same chain hold different
+    // states, which is the one thing the chain exists to prevent.
+    let mut world = furnace();
+    for _ in 0..40 {
+        world.tick();
+    }
+    world.collect_as(SOVEREIGN, FIRST_ORB).expect("collects");
+    let rebuilt = replay(world.chronicle());
+    assert_eq!(rebuilt, world.committed(), "replay MATCHES with the syntropic book");
+    assert_eq!(
+        rebuilt.orbs[0].syntropy_contained,
+        world.orb_by_id(FIRST_ORB).expect("orb").syntropy_contained,
+        "and the book itself rebuilt, not merely the rest of the state"
+    );
+}
+
+#[test]
+fn an_orb_that_contained_nothing_encodes_nothing() {
+    // ONE STATE, ONE ENCODING. The entry is emitted only when nonzero,
+    // so a world that has contained nothing stays byte-identical to a
+    // pre-syntropy one and no chain is re-priced by the field's arrival.
+    let mut bare = World::new();
+    bare.found("meridian").expect("founds");
+    let orb = bare.orb_by_id(FIRST_ORB).expect("orb");
+    assert_eq!(orb.syntropy_contained, ratio(0, 1), "nothing contained yet");
+
+    let rebuilt = replay(bare.chronicle());
+    assert_eq!(rebuilt, bare.committed(), "and it round-trips as zero");
 }

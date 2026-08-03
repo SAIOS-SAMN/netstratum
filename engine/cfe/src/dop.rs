@@ -43,6 +43,12 @@
 //!   18 Orb banked entry (resource ‖ ratio)
 //!   19 Orb famine entry (resource)
 //!   26 Orb thermal entry (albedo ‖ orbit_r ‖ overheat u8) — THERMAL-1
+//!   20 Orb syntropy entry (syntropy_contained ratio) — THE INVERSE OF
+//!         TAG 28. What the orb has CONTAINED across its whole life:
+//!         every joule encased, whether the excess came from a star or
+//!         from friction (both are the same currency, operator ruling
+//!         2026-08-03). Emitted only when nonzero, so an orb that has
+//!         contained nothing stays byte-identical to a pre-syntropy one.
 //!   28 Orb vent entry (entropy_vented ratio ‖ LE64 last_touch) — VENT-1/SINK-1
 //!   41 Orb cohesion entry (the eight books, IDEO-1) — emitted only
 //!      when a book is nonzero; a zero-book orb encodes byte-identical
@@ -2068,7 +2074,31 @@ pub struct ColonyOrb {
     /// THERMAL-1: currently overheating (overflow > 0)?
     pub overheat: bool,
     /// VENT-1: cumulative vented entropy, settled by receipt.
+    /// **THE ENTROPIC BOOK** — what this orb has SHED to the void
+    /// across its whole life. Cumulative, never pruned.
     pub entropy_vented: Ratio,
+    /// **THE SYNTROPIC BOOK — the exact inverse of
+    /// [`Self::entropy_vented`]** (operator ruling 2026-08-03).
+    ///
+    /// What this orb has CONTAINED: every joule encased, whether the
+    /// excess arrived from a star or from friction — the same currency
+    /// either way. Cumulative and never pruned, so the two books are
+    /// finally symmetric.
+    ///
+    /// **Why it had to be a FIELD and not only a reading.** The loss
+    /// arm has always been a stored orb field, replayed and public,
+    /// while the capture arm lived either in a pruned window on the
+    /// crystal sheet or in a derived reader. An orb could always be
+    /// asked what it had lost forever and never what it had kept. That
+    /// asymmetry is the negentropic shape this work exists to refuse,
+    /// and no amount of deriving fixes it while one side is stored and
+    /// the other is not.
+    ///
+    /// It must equal `World::heat_encased_of` for the same orb — the
+    /// stored book and the derived reading are pinned against each
+    /// other, so drift between them is a test failure rather than a
+    /// silent divergence.
+    pub syntropy_contained: Ratio,
     /// SINK-1: the stamp of the last settle (demurrage anchor).
     pub last_touch: u64,
     /// TRADE-1 (09 §2.1): the compassion books — cumulative
@@ -2134,6 +2164,11 @@ impl ColonyOrb {
             ratio::encode(&site.orbit_r, &mut value);
             value.push(self.overheat as u8);
             tlv::put(26, &value, &mut out);
+        }
+        if self.syntropy_contained != ratio(0, 1) {
+            let mut value = Vec::new();
+            ratio::encode(&self.syntropy_contained, &mut value);
+            tlv::put(20, &value, &mut out);
         }
         if self.entropy_vented != ratio(0, 1) || self.last_touch != 0 {
             let mut value = Vec::new();
@@ -2212,6 +2247,10 @@ impl ColonyOrb {
                     let (orbit_r, used_r) = ratio::decode(value.get(used..)?)?;
                     orb.thermal = Some(ThermalSite { albedo, orbit_r });
                     orb.overheat = *value.get(used + used_r)? != 0;
+                }
+                20 => {
+                    let (contained, _) = ratio::decode(value)?;
+                    orb.syntropy_contained = contained;
                 }
                 28 => {
                     let (vented, used) = ratio::decode(value)?;

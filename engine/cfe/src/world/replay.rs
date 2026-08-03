@@ -100,6 +100,15 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             ClosureEvent::YieldCollected { orb_id, resource, amount } => {
                 if let Some(held) = peel(&mut orbs, *orb_id) {
                     held.bank(*resource, amount.clone());
+                    // THE SYNTROPIC BOOK — the inverse of entropy_vented.
+                    // A joule yield IS an encased joule (the crystal
+                    // sheet already reads it that way), so containing
+                    // one books it, whether the excess came from a star
+                    // or from friction. Replay must mirror the live path
+                    // EXACTLY or the two states diverge on a field.
+                    if *resource == Resource::Joule {
+                        held.syntropy_contained += amount.clone();
+                    }
                     held.last_touch = receipt.stamp;
                 }
             }
