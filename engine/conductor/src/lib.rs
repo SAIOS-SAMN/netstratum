@@ -141,6 +141,32 @@ pub fn fold(var_root: &str) -> std::io::Result<(u64, Ratio)> {
 /// mesic ceiling displaces to the deck (the ceiling); colder stands
 /// (a frozen giant's deck is honestly frozen). No third siting axis:
 /// geometry stays clean, and every non-aeric body reads unchanged.
+///
+/// **UNREACHABLE AS WIRED — measured 2026-08-03, declared here rather
+/// than quietly repaired.** This tests the METABOLISM axis, and no
+/// metabolism is or can be `"aeric"`: the vocabulary is closed at
+/// `["mineral", "biotic", "plasmic"]`
+/// (`ledger::registry::METABOLISMS`), and `12_UNION` §5a lists aeric as
+/// a SUBSTRATE — a lineage line that is itself *biotic*, distinguished
+/// by living in a gas giant's banded column. Substrates live in the
+/// `clade` field, not the metabolism axis, which is exactly why the
+/// same table says `plasmic` "needs the third metabolism value" and
+/// aeric does not. Both call sites (`regime`, `trade_intent`) pass a
+/// metabolism, so the early return fires for every civilization alive
+/// and the ruling has never once applied.
+///
+/// It is not fixed here because the fix is not this lane's to choose.
+/// The reading has two plausible homes and they are not equivalent:
+/// the civilization's `clade` (but the clade vocabulary is a CLOSED u8
+/// set ratified by the operator at `15_TAXON` §3, and `aeric` is not in
+/// it — adding it is an amendment), or the WORLD's own body (a gas
+/// giant is a place, and §5a calls the giants of every world its
+/// holdings — which would make this a siting property, not an axis
+/// read at all). Measured on the live board: 33 registry cards, zero
+/// carrying an aeric substrate under any spelling.
+///
+/// Pinned by `the_aeric_deck_band_is_unreachable_today` — the day a
+/// real aeric reading is wired, that pin goes red and is truth-updated.
 pub fn deck_band4(metabolism: &str, t4: Ratio) -> Ratio {
     if metabolism != "aeric" {
         return t4;
