@@ -1104,3 +1104,84 @@ Additive-trailing preserves DECODING. It does not preserve DERIVATION.
 Any amendment that seeds from the chronicle must expect the world to be
 redrawn the first time the field is populated, and that is a ruling
 about worlds, not about the wire.
+
+---
+
+## §18 THE DEADLOCK DOES NOT EXIST — §14, §15 and §16 RETRACTED (measured 2026-08-03)
+
+**`D` is already never zero, and the bootstrap path already runs.**
+Both were true before §14 was written. The error was mine and it is
+one substitution: **I read `rank` as `D`.**
+
+    bridge.rs:172   "THIS COUNTS WHAT STANDS ABOVE THE GROUND,
+                     and it is NOT `D`"
+    bridge.rs:283   degree() = Degree::above_ground(rank)
+                    "can never return zero"
+
+Measured on a founded world: `degree = Degree(1)`, `rank = 0`. **`D`
+reads ONE at the floor.** The operator's standing requirement that
+`D > 0` was satisfied by the landed design; §14–16 diagnosed a
+zero that was never there.
+
+### 18a. THE MINT GATE READS `rank` DELIBERATELY
+
+`verdict()` uses `rank`, not `degree()`, and says why in its own doc:
+
+> *Classifies on the ABOVE-GROUND circulation, never on the degree:
+> every state stands at or above the ground, so a floored reading would
+> make `Void` and `Stasis` unreachable and collapse the four rows to
+> two.*
+
+An attempt to ground the verdict was made this session and reverted: it
+produced exactly that collapse, three `capacity_law_pins` went red, and
+the author of `verdict()` had already foreseen and refused it.
+
+### 18b. THE BOOTSTRAP PATH, MEASURED STEP BY STEP
+
+    found                orbs=1  degree=1  rank=0  V=0    Void
+    self-bond            REFUSED — BadTransfer. One orb cannot relate;
+                         a relation needs two.
+    chart a second orb   Ok(2) — FREE OF THE MINT, paid from the seed
+    bond a → b           Ok(())
+                         orbs=2  degree=1  rank=0  V=2    Unframed
+    chart a third        REFUSED — CannotAfford { Iron, need 20, have 0 }
+
+**The founding seed pays for exactly one charter.** A cycle needs three
+orbs, so `Entangled` is not reachable from the seed alone — and the way
+past that is PRODUCTION, not minting: zone extractors, tick, collect,
+charter again, bond into a ring.
+
+**Nothing in that chain requires a mint.** §14's *"a world must mint to
+relate and relate to mint"* is false. Relations are bought with the
+seed and then with what the zones make; the mint is for cognition, and
+it is the LAST rung of the economy rather than its entry.
+
+### 18c. WHAT IS WITHDRAWN
+
+    §14   the bootstrap deadlock            — no deadlock exists
+    §14c  three shapes to resolve it        — nothing to resolve
+    §15   "V is misread by the projection"  — V reads correctly; the
+                                              verdict asks about
+                                              CIRCULATION, and a world
+                                              with reserves and no
+                                              obligations genuinely has
+                                              none
+    §16   "D is a reduction, Article IV
+          needs an induction"               — `degree()` IS the
+                                              induction: GROUND plus
+                                              measured circulation, and
+                                              it was landed before the
+                                              section claiming it was
+                                              missing
+
+**§16's `rank` retreat measurement stands as fact** — discharge a bond
+and `rank` falls — but it is not an Article IV breach, because Article
+IV governs `D`, and `D` is `degree()`, which cannot fall below the
+ground.
+
+### 18d. THE LESSON, WHICH IS NOT ABOUT THIS FEATURE
+
+Five sections of law were written on one unchecked substitution, and
+the file being reasoned about carried a comment saying, in capitals,
+that the substitution was wrong. **Reading the doc comment on the field
+would have cost one command and saved all of it.**
