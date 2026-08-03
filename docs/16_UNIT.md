@@ -236,6 +236,28 @@ stays true to the landed kernel, not an earlier assumption.
   identity is its content, so no forged corpus entry can mint. Higher
   dimensions (volumetric) stay forge-only until ruled an economic axis
   (§10 S1, ruling C8).
+  **v2 VERIFICATION LANDED 2026-08-04** (cognition lane; the mechanism
+  in `U_DIRECTIVES` §2a). Two corrections the landing forced, recorded
+  here because this is the ruling's own text:
+  1. **Identity is not admission.** Content-addressing proves WHICH
+     task was solved, never that it was one of ours — a miner may
+     author a trivial task, hash it honestly, solve it honestly and
+     mint. The clause is completed by an admissible SET: a static
+     Merkle tree over the corpus with its root pinned as an invariant
+     constant, and the payload carrying an inclusion path the judge
+     recomputes. Zero I/O, so the kernel stays pure.
+  2. **The hash is BLAKE3, not SHA-256.** Every other digest in the
+     system is BLAKE3 and the sealed tier depends on `blake3` alone;
+     adding SHA-2 there would put a second hash primitive in sealed
+     math against §0b. Implemented in BLAKE3 and FLAGGED for the
+     operator — corpus work mints nothing until the kernel lands its
+     rate arm, so the text can still be corrected either way.
+
+  The rate itself is RELAYED to the kernel lane (`mint_bound` is its
+  file): the operator ruled a fixed premium rational for an
+  `AdmissibleCorpus` arm, reflecting the measured 3.4% corpus solve
+  rate against the ladder's 42–100%. Until it lands, a valid v2 claim
+  verifies and earns zero — the intended decoupling.
 - **Beyond the mint (Ruling Box 2) — consensus weight + crystallization
   (INSCRIBED).** Verified work earns MORE than banked value: it earns
   **consensus weight** (the pen — heavier judgement in the mesh) and

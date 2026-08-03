@@ -15,6 +15,7 @@
 //! `kernel`, and `conductor` point down at it; nothing here points up.
 
 pub mod certificate;
+pub mod corpus;
 pub mod forge;
 pub mod grid;
 pub mod loader;
@@ -22,8 +23,16 @@ pub mod objects;
 pub mod work;
 
 pub use certificate::{verify_certificate, CertificateRead, SolveCertificate};
+pub use corpus::{
+    inclusion_path, merkle_root, task_digest, verify_inclusion, PathStep, CORPUS_ROOT,
+};
 pub use forge::{forge_task, Difficulty};
 pub use grid::{run, Grid, Op, Program, TileMirror};
 pub use loader::{load_task, LoadError, Task, TaskPair};
 pub use objects::{background, segment, ObjOp, Object, OBJ_OPS};
 pub use work::{decode_work, encode_work, verify_work, WorkBroken, WorkProof, WORK_SCHEMA_V1};
+pub use work::{
+    canonical_name, decode_corpus_work, encode_corpus_work, verify_corpus_work,
+    verify_corpus_work_against, verify_work_class,
+    CorpusProof, WorkClass, WORK_SCHEMA_V2_CORPUS,
+};

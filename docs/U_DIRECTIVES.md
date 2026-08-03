@@ -115,7 +115,8 @@ FIRST commit (the tag-claim convention; 86 verified next-free).**
 The receipt carries its proof whole — replay under SEAL B re-verifies
 the work forever. NO change to `Step` (the deed is the carrier), NO
 schema change (event-only; `banked` is already committed) — U1 touches
-no codec bytes. **v1 work-shape: FORGE TASKS ONLY** (re-derivable from
+no codec bytes. **v2 CORPUS WORK LANDED 2026-08-04** — see §2a below.
+**v1 work-shape: FORGE TASKS ONLY** (re-derivable from
 the digest, chronicle-seeded). Corpus classes (ARC-2 files) need a
 task-registry ruling — parked in Ruling Box 1.
 
@@ -165,6 +166,103 @@ carry the measurement whole.
    round-trips its own encoding.
 
 **EQUATIONS row-claim:** I4's row claimed LANDED WHOLE in the landing.
+
+## §2a WORK-SHAPES v2 — THE CORPUS REGISTRY (LANDED 2026-08-04, cognition lane)
+
+Operator ruling 2026-08-04, executing `16_UNIT` §7a's corpus clause.
+Verification landed WHOLE in `solver-verify`; the economics are relayed
+to the kernel lane and corpus work earns ZERO until they land — the U1
+precedent exactly (mechanism first, price by amendment).
+
+**THE PROBLEM v1 NEVER HAD.** A forge task re-derives from its digest,
+so the judge needs nothing but the digest to know the task is real. A
+corpus task is OBSERVED CONTENT — it cannot be re-derived, so it must
+ride in the payload, and the judge must then answer a question v1 never
+asked: *is this a real task, or one the miner wrote?*
+
+**Content-addressing does not answer it.** `task_id = H(content)`
+proves WHICH task was solved, never that the task was ADMISSIBLE. A
+miner may author a trivial task, hash it honestly, solve it honestly,
+seal an intact chain, and mint. The ruling's rationale — "the task's
+identity is its content, so no forged corpus entry can mint" — holds
+only once an admissible SET exists; identity alone is not admission.
+
+**THE MECHANISM (operator ruling).** A static Merkle tree over the
+admissible corpus, its root pinned as an invariant constant
+(`corpus::CORPUS_ROOT`). A payload carries its `task_id` and the
+inclusion path; the judge recomputes the root from leaf + path and
+compares. Pure arithmetic over 32-byte digests — no corpus, no
+filesystem, nothing the kernel could not do in a vacuum. A forged
+task's path collapses.
+
+**Derived over `arc_real_pairs`**: 960 files, 960 loaded, 960 DISTINCT
+task_ids, all 960 inclusion paths verified at derivation
+(`solver-verify/examples/corpus_root.rs` re-derives and prints the
+constant; I/O lives in the example and never in the sealed crate).
+
+| leg | check | refusal |
+|---|---|---|
+| 1 re-hash | carried task hashes to the claimed `task_id` | `TaskIdMismatch` |
+| 2 **admit** | inclusion path resolves to `CORPUS_ROOT` | `NotAdmissible` |
+| 3 re-apply | every training pair exactly, then test input → claimed output | `TrainingMiss{pair}` / `OutputMismatch` |
+| 4 re-chain | the certificate re-derives Intact | `ChainDiverged{at_step}` |
+
+Leg 2 is the new one and the whole point. Legs are ordered
+cheapest-and-most-decisive first, so an inadmissible payload never
+costs a replay.
+
+**WHAT THE JUDGE CANNOT CHECK, stated rather than hidden.** A corpus
+task's held-out answer is not carried and not derivable, so leg 3
+proves the program CLOSES THE TRAINING PAIRS and renders the claimed
+output — never that the output is CORRECT. That is not a defect in the
+judge; it is the actual ARC problem. Measured on this corpus: of 34
+programs that closed training, 33 matched the held-out answer and one
+did not, so **~3% of closures are confidently wrong**. That is the
+fabrication surface a corpus rate would buy, and it is why the rate is
+an economics ruling rather than a mechanical one.
+
+**Wire law.** Schema bytes are APPEND-ONLY. v1 is byte-identical and
+untouched: `WORK_SCHEMA_V1 = 1`, `WORK_SCHEMA_V2_CORPUS = 2`, dispatch
+on the leading byte, an unknown byte refuses. The op table and the
+certificate encoding were EXTRACTED to one shared definition rather
+than copied — two copies of a wire table is how they drift. The
+`Difficulty::lawful` vacuity guard has a v2 equivalent: `train_len == 0`
+refuses as form, so `98ccbbe`'s hole cannot reopen in the new shape.
+
+**Names and identity.** `task_digest` covers the OBSERVABLE task only —
+every training pair, then the test input. The filename is excluded (it
+is provenance, not content) and `test_expected` is excluded (the
+held-out answer never rides in a proof, and for real corpus work may
+not be known). The certificate needs a name, so both halves derive the
+same canonical one from the task_id — a miner cannot vary it.
+
+**RELAYED TO THE KERNEL LANE (its file, not this lane's):**
+1. `mint_bound` gains an `AdmissibleCorpus` arm — the operator ruled a
+   fixed premium rational reflecting the 3.4% solve rate. Until it
+   lands, corpus work verifies and earns nothing.
+2. The kernel should call `verify_work_class`, not `verify_work`: only
+   the former can express corpus work, whose identity is a task_id and
+   not a ladder rung. `verify_work` is unchanged and refuses a corpus
+   payload `UnsupportedShape` rather than mispricing it.
+3. **Root placement.** The ruling puts `CORPUS_ROOT` in the kernel; it
+   is implemented in the sealed tier because THE OPAQUE-PAYLOAD LAW
+   forbids the kernel parsing a payload, and the inclusion check needs
+   the parsed path. `verify_corpus_work_against(bytes, &root)` exists
+   as the seam: hoisting the constant into `engine/kernel` and passing
+   it down is a one-parameter change that keeps the kernel
+   encoding-blind.
+4. **THE HASH IS BLAKE3; the inscribed text says SHA256.** `16_UNIT`
+   §7a reads `task_id = SHA256(corpus_input_digest)`. Every other
+   digest in this system is BLAKE3 and `solver-verify`'s only hash
+   dependency is `blake3`; adding SHA-2 puts a second hash primitive in
+   the sealed tier, against §0b's one-definition law. Implemented in
+   BLAKE3 and FLAGGED — nothing mints corpus work until the rate lands,
+   so this is the moment to correct it if SHA-256 was meant literally.
+
+Witnesses: 13 pins, `solver-verify/tests/corpus_pins.rs`, load-bearing
+one `a_self_authored_task_refuses` (honest hash + honest solve + intact
+chain + no membership = nothing earned, including the borrowed-path
+variant). Board 642/642, clippy zero in both solver crates.
 
 ## §3 U1f — THE DECAY BOUND (I5 completes) — LANDED 2026-07-31
 
