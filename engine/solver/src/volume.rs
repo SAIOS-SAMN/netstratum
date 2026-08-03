@@ -8,7 +8,32 @@
 //! attempts these tasks (the conductor routes by perception).
 //!
 //! ARC corpora are planar, so volumetric tasks are forge-only: the
-//! external 27/960 scoreboard is untouched by anything here.
+//! external scoreboard is untouched by anything here.
+//!
+//! THE SCOREBOARD, RE-MEASURED 2026-08-04 (cognition lane). This header
+//! read "the external 27/960 scoreboard" and that figure was wrong in
+//! BOTH terms — it paired a numerator from one measurement with a
+//! denominator from another. Its two sources, from the landing that
+//! introduced it (`bee6cc7`, 2026-07-26):
+//!
+//!   official ARC-AGI-2 JSON, via `examples/solve_arc2`, official
+//!   scoring (EVERY held-out test must match):
+//!       training     1000 attempted ·  28 closed ·  27 confirmed
+//!       evaluation    120 attempted ·   0 closed ·   0 confirmed
+//!   pair-format corpus, via `examples/solve_corpus`:
+//!       960 files in `arc_real_pairs` — never the 27's denominator
+//!
+//! Re-measured on the pair corpus at depth 3: **960 attempted · 34
+//! closed training · 33 confirmed**; 1243-task `arc_full_corpus`, same
+//! depth: 35 closed · 34 confirmed. Depth is a parameter of the reading
+//! and the old claim named none — on `arc_real_pairs`, depth 1 confirms
+//! 24 and depth 2 confirms 32.
+//!
+//! The official JSON dataset is NOT on disk in this environment, so the
+//! 27 and the evaluation 0 cannot be reproduced here; they are quoted
+//! from the landing, not re-derived. **The evaluation zero is the honest
+//! number the pyramid exists to move** — forge solves are the economy,
+//! never benchmark progress.
 
 use solver_verify::certificate::hash_grid_into;
 use solver_verify::grid::{Grid, Op};
