@@ -185,10 +185,25 @@ impl Ledger {
     }
 
     fn write_universe_card(&self, ticks: u64) -> std::io::Result<()> {
+        // THE SPAN IS CARRIED FORWARD, NOT RE-ASSERTED. This card is
+        // rewritten on EVERY clock advance (`set_universal_clock`, once
+        // per beat), and `universe_span` reads this same field as the
+        // authority — `chart_world` wraps every coordinate against it
+        // and `l1_distance` measures with it. A hard-coded "64" here
+        // therefore restored the default geometry one tick after anyone
+        // set another, silently, while the reader kept treating the
+        // field as truth. The first write seeds the default; every
+        // rewrite preserves what stands, verbatim — a value this
+        // function cannot parse is still not this function's to
+        // rewrite.
+        let span = fs::read_to_string(self.root.join("universe.json"))
+            .ok()
+            .and_then(|text| json::extract_string(&text, "span"))
+            .unwrap_or_else(|| "64".into());
         let mut w = JsonWriter::new();
         w.open();
         w.field_str("topology", "torus");
-        w.field_str("span", "64");
+        w.field_str("span", &span);
         w.field_str("tuniversal", &universal_clock(ticks));
         w.field_u64("ticks", ticks);
         w.field_str(
