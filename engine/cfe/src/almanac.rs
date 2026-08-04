@@ -7,23 +7,35 @@
 //! elements of the same family are unrelated draws, so nothing recurs
 //! and nothing can be predicted from position.
 //!
-//! **THE LINE AND THE LANE** (operator ruling 2026-08-04: *open up
-//! lane/line on elements — periodicity*). The two axes of a periodic
-//! table, and they mean different things:
+//! **FIVE AXES** (operator ruling 2026-08-04: *increase to more axis*).
+//! A table of period and group alone is a 2D construct — the same shape
+//! struck twice already, at the Merkle root and at the census. An
+//! element sits in a cell of FIVE, and each axis DECIDES something no
+//! other one can:
 //!
-//!   LINE (the period, the row)  — DEPTH. Which stratum an element
-//!                                 sits at, and therefore the PRESSURE
-//!                                 at which it refines. Rises with the
-//!                                 line.
-//!   LANE (the group, the column) — CHARACTER. Properties RECUR along a
-//!                                 lane: every element in a lane
-//!                                 refines the same way and compounds
-//!                                 by the same rule, whatever its line.
+//!   LINE  (period)     DEPTH — the stratum, and so the PRESSURE the
+//!                      element demands before it refines. 1..=7.
+//!   LANE  (group)      CHARACTER — how much it BINDS. Properties RECUR
+//!                      along a lane at every line. 1..=8.
+//!   SHELL (geometry)   ARITY — how MANY bind at once. This is what
+//!                      makes a compound n-ary instead of a pair, and
+//!                      it is the axis that reaches the irreducibly
+//!                      multi-party case pairs cannot express.
+//!   PHASE (state)      THERMAL LOCALITY — which `SubstrateBand` the
+//!                      element is workable in. A second locality,
+//!                      independent of the star's depth: the star says
+//!                      how DEEP, the orbit says how HOT.
+//!   SPIN  (chirality)  HANDEDNESS — two compounds of identical
+//!                      composition and opposite spin are DIFFERENT
+//!                      gems. It distinguishes what nothing else can.
 //!
-//! That recurrence is the whole point of a periodic table — it lets a
-//! civilization that has refined one element in a lane PREDICT the next,
-//! and prediction is what makes discovery cumulative rather than a
-//! lottery.
+//! Recurrence along the lane is still the load-bearing property — it
+//! lets a civilization that has refined one element PREDICT the next,
+//! which is what makes discovery cumulative rather than a lottery. The
+//! other axes multiply the space that prediction ranges over: the cell
+//! count is `LINES · LANES · SHELLS · PHASES · SPINS`, and a compound
+//! must agree on shell and phase while saturating on lane, so the
+//! reachable gem set grows with every axis rather than with size alone.
 //!
 //! **EVERYTHING HERE IS A DERIVATION.** Pure, total, exact-rational, no
 //! I/O and no deed. It reads an element id, a star and an orb, and
@@ -41,6 +53,17 @@ pub const LANES: u8 = 8;
 /// How many lines stand. The line is depth; the deepest is the most
 /// pressured and the rarest.
 pub const LINES: u8 = 7;
+/// Binding GEOMETRIES. The shell fixes how many elements enter one
+/// compound — arity `1 + shell`, so 2..=5 bodies.
+pub const SHELLS: u8 = 4;
+/// Workable STATES, one per `SubstrateBand` plus the refractory that
+/// works in any of them.
+pub const PHASES: u8 = 4;
+/// Handedness. Two, and it is not a scale.
+pub const SPINS: u8 = 2;
+
+/// Every cell the table carries — the product of all five axes.
+pub const CELLS: u32 = (LINES as u32) * (LANES as u32) * (SHELLS as u32) * (PHASES as u32) * (SPINS as u32);
 
 /// WHERE AN ELEMENT SITS, and what that implies.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -55,19 +78,38 @@ pub struct Periodic {
     /// How many of its own lane an element BINDS when it compounds —
     /// the lane's recurring valence, identical for every line.
     pub binds: u8,
+    /// The binding GEOMETRY. `1..=SHELLS`.
+    pub shell: u8,
+    /// How many elements enter a compound of this geometry: `1 + shell`,
+    /// so 2 bodies at shell 1 and 5 at shell 4. A compound above two is
+    /// irreducibly not a pair.
+    pub arity: u8,
+    /// The workable STATE. `1..=PHASES`; `PHASES` is the refractory,
+    /// workable in every band.
+    pub phase: u8,
+    /// Handedness, `0` or `1`. Not an ordering.
+    pub spin: u8,
 }
 
 /// Read an element's position. Pure: the same id always reads the same
 /// cell, so the table is stable across every world that meets it.
 pub fn periodic_of(element: &[u8; 32]) -> Periodic {
-    // Bytes 3 and 4 are unused by `dop::element_properties` (which
-    // reads 1 and 2), so the table is independent of the landed
-    // family/tier draw rather than a re-slicing of it.
+    // Bytes 3..=7 are unused by `dop::element_properties` (which reads
+    // 1 and 2), so the table is independent of the landed family/tier
+    // draw rather than a re-slicing of it. One byte per axis, so no two
+    // axes are correlated by construction.
     let line = 1 + (element[3] % LINES);
     let lane = 1 + (element[4] % LANES);
+    let shell = 1 + (element[5] % SHELLS);
+    let phase = 1 + (element[6] % PHASES);
+    let spin = element[7] % SPINS;
     Periodic {
         line,
         lane,
+        shell,
+        arity: 1 + shell,
+        phase,
+        spin,
         // Pressure rises with depth: line 1 refines at 1/7, line 7 at 1.
         refines_at: ratio(i64::from(line), i64::from(LINES)),
         // The lane's valence recurs: 1..=4, and lanes 5..=8 mirror
@@ -132,48 +174,94 @@ pub fn refines(element: &[u8; 32], stratum: u8, class: StarClass) -> bool {
     local_to(element, class) && pressure(stratum, class) >= periodic_of(element).refines_at
 }
 
-/// **COMPOSITION** — two refined elements COMPOUND into a gem.
+/// **WORKABLE** — is this element's phase reachable in that band?
 ///
-/// The rule is the lane's, not the pair's: two elements compound only
-/// when their binds SATURATE — `binds(a) + binds(b) == LANES/2 + 1` —
-/// which is why the table is periodic. Any two elements from the same
-/// pair of lanes compound alike, whatever their lines, so a
-/// civilization that has made one gem KNOWS the recipe for a family of
-/// them.
-pub fn compounds(a: &[u8; 32], b: &[u8; 32]) -> bool {
-    let (pa, pb) = (periodic_of(a), periodic_of(b));
-    u16::from(pa.binds) + u16::from(pb.binds) == u16::from(LANES / 2 + 1)
+/// The star says how DEEP a system runs; the orbit says how HOT the orb
+/// is. They are independent, and an element needs both: present by line
+/// and workable by phase. The refractory phase (`PHASES`) works in every
+/// band, which is what keeps a shallow cold world from being barren.
+pub fn workable_in(element: &[u8; 32], band: crate::thermal::SubstrateBand) -> bool {
+    let phase = periodic_of(element).phase;
+    if phase == PHASES {
+        return true;
+    }
+    let wants = match band {
+        crate::thermal::SubstrateBand::Cryogenic => 1,
+        crate::thermal::SubstrateBand::Mesic => 2,
+        crate::thermal::SubstrateBand::HyperThermal => 3,
+    };
+    phase == wants
 }
 
-/// The gem two elements make — content-addressed, so the SAME pair
-/// always names the same gem and a "new" gem is new by its identity
-/// rather than by anyone's say-so.
+/// **COMPOSITION** — n elements COMPOUND into a gem.
 ///
-/// Order-free: `gem(a, b) == gem(b, a)`, because a compound is not a
-/// direction.
-pub fn gem_of(a: &[u8; 32], b: &[u8; 32]) -> Option<[u8; 32]> {
-    if !compounds(a, b) {
+/// Three conditions, one per axis that participates, and the arity is
+/// what makes this more than a pair:
+///
+///   SHELL  every element shares the geometry, and the count entering
+///          equals its `arity`. A shell-2 compound takes THREE bodies
+///          and is irreducibly not a pair — the multi-party case the
+///          pairwise projection cannot express.
+///   PHASE  every element is workable in the same state. Matter that
+///          cannot coexist does not bond.
+///   LANE   the binds SATURATE across the whole set:
+///          `Σ binds == arity · (LANES/2 + 1) / 2`, the n-body form of
+///          the two-body saturation.
+///
+/// The rule stays the LANES', not the members' — any set drawn from the
+/// same lanes compounds alike whatever their lines, so one recipe names
+/// a family of gems.
+pub fn compounds(elements: &[[u8; 32]]) -> bool {
+    let Some(first) = elements.first().map(periodic_of) else {
+        return false;
+    };
+    if elements.len() != usize::from(first.arity) {
+        return false;
+    }
+    let read: Vec<Periodic> = elements.iter().map(periodic_of).collect();
+    if read.iter().any(|p| p.shell != first.shell || p.phase != first.phase) {
+        return false;
+    }
+    let sum: u32 = read.iter().map(|p| u32::from(p.binds)).sum();
+    let saturation = u32::from(first.arity) * u32::from(LANES / 2 + 1);
+    sum * 2 == saturation
+}
+
+/// The gem a set makes — content-addressed, so the SAME set always
+/// names the same gem and a "new" gem is new by its identity rather
+/// than by anyone's say-so.
+///
+/// Order-free: the members are sorted before hashing, because a
+/// compound is not a sequence. **Spin is NOT order-free** — the set's
+/// spin parity enters the digest, so two compounds of identical
+/// composition and opposite handedness are different gems. That is the
+/// axis earning its place.
+pub fn gem_of(elements: &[[u8; 32]]) -> Option<[u8; 32]> {
+    if !compounds(elements) {
         return None;
     }
-    let (low, high) = match a <= b {
-        true => (a, b),
-        false => (b, a),
-    };
+    let mut sorted: Vec<[u8; 32]> = elements.to_vec();
+    sorted.sort_unstable();
+    let parity: u8 = elements
+        .iter()
+        .map(|e| periodic_of(e).spin)
+        .fold(0u8, |a, b| a ^ b);
     let mut hasher = blake3::Hasher::new();
-    hasher.update(b"netstratum.almanac.gem.v1");
-    hasher.update(low);
-    hasher.update(high);
+    hasher.update(b"netstratum.almanac.gem.v2");
+    hasher.update(&[parity]);
+    for member in &sorted {
+        hasher.update(member);
+    }
     Some(*hasher.finalize().as_bytes())
 }
 
 /// **KNOWLEDGE** — the depth a gem is worth.
 ///
-/// A compound made of deep elements is harder-won than a shallow one,
-/// so the knowledge it carries is the SUM of its lines. This is the
-/// seam a discovery deed would price against; it mints nothing on its
-/// own.
-pub fn knowledge_of(a: &[u8; 32], b: &[u8; 32]) -> Option<u16> {
-    compounds(a, b).then(|| {
-        u16::from(periodic_of(a).line) + u16::from(periodic_of(b).line)
-    })
+/// The sum of the members' lines, so a compound of deep elements
+/// carries more than a shallow one, and a WIDER compound carries more
+/// than a narrow one at the same depth — arity is earned too. No
+/// compound, no knowledge: `None`, never a zero.
+pub fn knowledge_of(elements: &[[u8; 32]]) -> Option<u16> {
+    compounds(elements)
+        .then(|| elements.iter().map(|e| u16::from(periodic_of(e).line)).sum())
 }
