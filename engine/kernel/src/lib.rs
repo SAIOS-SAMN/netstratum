@@ -85,7 +85,59 @@ use solver_verify::{verify_work, Difficulty, WorkBroken};
 /// the two could not collide, and the merge lands both rather than
 /// letting one bump overwrite the other. A chain cut under 3 verifies
 /// forever under the judge that cut it.
-pub const VERSION: u64 = 5;
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 5, patch: 0 };
+
+/// The judge's version, as it rides the wire.
+///
+/// **`x.y.z`, and `major = 0` because this is a prototype** (operator
+/// ruling 2026-08-04: *knock version down to x.x.x — we are still
+/// prototyping*). The five linear amendments become `0.1.0 … 0.5.0`,
+/// so the count is preserved in `minor` and the leading `0` says
+/// plainly that nothing here has promised stability yet.
+///
+/// **What each field means, so the next bump is not a judgement call:**
+///
+/// ```text
+/// major  reserved for the first stable judge. Still 0.
+/// minor  a LAW change — the judge admits or refuses something it did
+///        not before. Every amendment so far is one of these.
+/// patch  a change that cannot alter any verdict: a refusal's wording,
+///        a split of one rule into named parts, a faster read.
+/// ```
+///
+/// The split of D4 into [`d4a_resolution`], [`d4b_standing_claim`] and
+/// [`d4c_increment`] is the first `patch`-shaped change: three named
+/// rules where there was one, judging identically.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Version {
+    pub major: u16,
+    pub minor: u16,
+    pub patch: u16,
+}
+
+impl Version {
+    /// The wire form. Packed so ORDER IS PRESERVED — a later version is
+    /// a larger `u64`, which is what a peer comparing two commitments
+    /// needs and all it needs.
+    ///
+    /// The wire field stays `u64` and `Commitment.kernel` is untouched,
+    /// so this is not a wire amendment. Chains cut under the linear
+    /// versions 1–5 carry those small integers and still compare BELOW
+    /// every packed version, which is true and is the ordering we want:
+    /// they were cut by an earlier judge.
+    pub const fn code(self) -> u64 {
+        ((self.major as u64) << 32) | ((self.minor as u64) << 16) | self.patch as u64
+    }
+}
+
+impl std::fmt::Display for Version {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}.{}.{}", self.major, self.minor, self.patch)
+    }
+}
+
+/// The packed judge version bound into every commitment.
+pub const VERSION: u64 = KERNEL_VERSION.code();
 
 /// One proposed transition: the deed that CLAIMS to carry `prior` to
 /// `next`. `event` is what closed, `actor` is who under NS-6
@@ -321,45 +373,79 @@ fn revocation_law(
     };
     let before = bridge::read_entangled(prior);
     let after = bridge::read_entangled(next);
-    // 1. The phantom-rank gate. An unresolved absence is not a zero.
-    if !before.rank_is_defined() || !after.rank_is_defined() {
-        return Err(Unlawful::RankUndefined {
+
+    d4a_resolution(&before, &after)?;
+    match d4b_standing_claim(&before) {
+        Claim::None => Ok(()),
+        Claim::Standing(was) => d4c_increment(was, after.degree().above()),
+    }
+}
+
+/// **D4a — THE RESOLUTION GATE.** An unresolved absence is not a zero.
+///
+/// `rank_is_defined` stood unused since it was written, its own header
+/// warning that an unresolved absence *"would let phantom topology mint
+/// phantom rank"*, with `18_TORSION` §6 recording it as DEBT rather
+/// than enforcement. D4 computes an increment OVER that rank, so the
+/// debt came due: asked FIRST, before anything is compared.
+fn d4a_resolution(before: &bridge::EntangledRead, after: &bridge::EntangledRead) -> Result<(), Unlawful> {
+    match before.rank_is_defined() && after.rank_is_defined() {
+        true => Ok(()),
+        false => Err(Unlawful::RankUndefined {
             unknown_before: before.unknown,
             unknown_after: after.unknown,
-        });
+        }),
     }
-    // 2. IS THERE A CLAIM TO VACATE AT ALL?
-    //
-    // D4 vacates *a claim that did not survive `Π_G`* — and where
-    // NOTHING circulates, no capacity claim was ever made. A line
-    // holding no relations is not claiming capacity and failing; it is
-    // claiming none.
-    //
-    // **This narrowing was forced by measurement, at the merge.** D4
-    // first landed binding every `DiscoveryMinted`, and a 60-beat era
-    // then refused 48 of 55 mints, every one reading `was: 0, now: 0`.
-    // That is the SAME defect the capacity law was struck for the same
-    // day — *identity is pegged to entity, and identity gets recycled
-    // without bonds* — reached by a different route. A mint banks
-    // value and adds no relation, so `ΔD` is zero by construction on
-    // any world holding nothing, and the gate refused the lawful
-    // recycled line exactly as its predecessor did.
-    //
-    // **THE GAP THIS EXPOSES, recorded rather than papered over.**
-    // EQUATIONS D3 asserts *capacity growth and the discovery mint are
-    // ONE event*. In this engine they are two: the mint banks value,
-    // and a plane is opened separately by `GaugeShiftedAt`. Until a
-    // deed exists that claims capacity as it mints, D4 can only bind
-    // where a claim already stands. Owed to the operator.
-    let (was, now) = (before.degree().above(), after.degree().above());
-    if was == 0 {
-        return Ok(());
+}
+
+/// What D4b found: whether there is a capacity claim here to judge.
+enum Claim {
+    /// Nothing circulates. No claim was made, so none can be vacated.
+    None,
+    /// A claim stands, carrying the circulation it stands on.
+    Standing(usize),
+}
+
+/// **D4b — IS THERE A CLAIM TO VACATE AT ALL?**
+///
+/// D4 vacates *a claim that did not survive `Π_G`*, and where NOTHING
+/// circulates no capacity claim was ever made. A line holding no
+/// relations is not claiming capacity and failing; it is claiming none.
+///
+/// **This gate was forced by measurement.** D4 first landed binding
+/// every `DiscoveryMinted`, and a 60-beat era refused 48 of 55 mints,
+/// each reading `was: 0, now: 0`. That is the SAME defect the capacity
+/// law was struck for the same day — *identity is pegged to entity, and
+/// identity gets recycled without bonds* — reached by another route: a
+/// mint banks value and adds no relation, so `ΔD` is zero by
+/// construction on any world holding nothing.
+///
+/// **THE GAP THIS EXPOSES, recorded rather than papered over.**
+/// EQUATIONS D3 asserts *capacity growth and the discovery mint are ONE
+/// event*. In this engine they are two — the mint banks value, a plane
+/// opens separately by `GaugeShiftedAt`. Until a deed claims capacity
+/// as it mints, D4 can only bind where a claim already stands. Owed to
+/// the operator.
+fn d4b_standing_claim(before: &bridge::EntangledRead) -> Claim {
+    match before.degree().above() {
+        0 => Claim::None,
+        was => Claim::Standing(was),
     }
+}
+
+/// **D4c — THE INCREMENT.** A standing claim grows, or it vacates.
+///
+/// Read on the CIRCULATION — what stands above the floor — never on the
+/// full `Degree`, which includes the ground and would make the
+/// comparison vacuous exactly the way the struck `D > 0` gate was: a
+/// floor decides nothing.
+///
+/// The refusal IS the vacating. Nothing here writes, and `Degree` has
+/// no below-ground representation to write into even if it did —
+/// Article IV, the `H¹` floor. The claim vacates; the degree does not.
+fn d4c_increment(was: usize, now: usize) -> Result<(), Unlawful> {
     match now > was {
         true => Ok(()),
-        // The claim is vacated by refusal. `D` is untouched — nothing
-        // here writes, and `Degree` has no below-ground representation
-        // to write even if it did.
         false => Err(Unlawful::MintWithoutCapacityIncrement { was, now }),
     }
 }

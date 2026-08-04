@@ -48,6 +48,29 @@ impl Difficulty {
         }
     }
 
+    /// **DOES THE LADDER STILL RISE ABOVE `level`?**
+    ///
+    /// Read from the ladder itself: a rung climbs while the next rung
+    /// is a DIFFERENT rung. [`Difficulty::level`]'s catch-all arm makes
+    /// every level at or above the top structurally identical, so
+    /// equality IS saturation and needs no constant to say so.
+    ///
+    /// **This replaces `level < 5` at its call sites** (operator ruling
+    /// 2026-08-04). That constant was not even the real bound — it
+    /// restated the ladder's own saturation as a magic number, and a
+    /// number restating a structure is a second truth that can drift
+    /// from it. Add a rung to `level` and every caller follows; nothing
+    /// needs to be told.
+    /// **Compared against SATURATION, not against the next rung.** The
+    /// first derivation asked `level(n+1) != level(n)` and was wrong at
+    /// the bottom: rungs 0 and 1 are deliberately the same opening
+    /// rung, so it read "nothing above me" at the very start of the
+    /// ladder. A plateau is not a ceiling. The saturated rung is
+    /// whatever the catch-all arm returns, so ask for it directly.
+    pub fn climbs(level: u32) -> bool {
+        Difficulty::level(level) != Difficulty::level(u32::MAX)
+    }
+
     /// THE DEGENERACY LAW, given a name (2026-08-04).
     ///
     /// [`forge_task`] PANICS on a degenerate rung — `rows`/`cols` of 0

@@ -8,7 +8,7 @@ use cfe::dop::{ClosureEvent, Resource};
 use cfe::ipsal::Scope;
 use cfe::ratio::ratio;
 use cfe::world::{World, FIRST_ORB, SOVEREIGN};
-use kernel::{lawful, Step, Unlawful, VERSION};
+use kernel::{lawful, Step, Unlawful, KERNEL_VERSION, VERSION};
 
 /// A world with two orbs and value banked on the first, ready to move.
 /// The origin earns before it charters (the charted's founding
@@ -264,7 +264,21 @@ fn the_version_is_pinned() {
     //    over a RESOLVED rank reading.
     // Minted on separate branches for separate reasons; 4 was skipped
     // on main so the two could not collide, and both are kept.
-    assert_eq!(VERSION, 5, "the kernel version is charter-pinned");
+    // x.y.z, major 0 — a PROTOTYPE judge (operator ruling 2026-08-04).
+    // The five linear amendments become 0.1.0 .. 0.5.0, so the count
+    // survives in `minor` and the leading 0 says nothing has promised
+    // stability yet.
+    //   minor  a LAW change — the judge admits or refuses what it did
+    //          not before. Every amendment so far is one of these.
+    //   patch  a change that cannot alter a verdict.
+    // 0.5.0 carries BOTH of the day's amendments: the capacity law
+    // removed (harness), and D4 the revocation law (cognition).
+    assert_eq!(KERNEL_VERSION.to_string(), "0.5.0", "the judge is version-pinned");
+    assert_eq!(VERSION, KERNEL_VERSION.code(), "the wire carries the packed form");
+    // ORDER IS PRESERVED: a chain cut under the old linear versions
+    // compares BELOW every packed one, which is true — an earlier judge
+    // cut it.
+    assert!(VERSION > 5, "the packed form orders above the linear era");
 }
 
 #[test]

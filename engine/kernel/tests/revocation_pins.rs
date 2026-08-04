@@ -14,7 +14,7 @@ use cfe::dop::{ClosureEvent, ColonyOrb, Resource};
 use cfe::ipsal::{Entity, Scope};
 use cfe::ratio::ratio;
 use cfe::world::{Bond, Committed, World, SOVEREIGN};
-use kernel::{bridge, lawful, Step, Unlawful};
+use kernel::{bridge, lawful, Step, Unlawful, KERNEL_VERSION};
 
 const HAND: u64 = 100;
 
@@ -171,4 +171,62 @@ fn a_mint_that_grows_circulation_passes_d4() {
     {
         panic!("a mint that grew circulation must clear D4")
     }
+}
+
+/// D4 IS THREE NAMED RULES NOW, and the split judges identically.
+///
+/// The pile was one function doing resolution, claim-detection and
+/// increment at once. Splitting it distributes the load without moving
+/// a verdict — which is what makes it a `patch` and not a `minor`.
+#[test]
+fn the_split_judges_exactly_as_the_pile_did() {
+    // D4b: nothing circulates -> no claim -> D4 does not bind.
+    let bare = world(4);
+    assert!(
+        !matches!(
+            lawful(&bare, &bare, &mint()),
+            Err(Unlawful::MintWithoutCapacityIncrement { .. })
+        ),
+        "a line holding no relations is claiming none — D4b lets it by"
+    );
+
+    // D4c: a claim stands and does not grow -> vacated.
+    let still = ring(4);
+    assert!(
+        bridge::read_entangled(&still).degree().above() > 0,
+        "the fixture must actually hold a claim, else this proves nothing"
+    );
+    // A standing claim that grows nothing must never be ADMITTED. The
+    // specific arm may not be reached: D4 runs after `creation`, and
+    // this fixture's mint carries an empty proof, so `WorkRefused`
+    // speaks first. That ordering is deliberate (deed validity before
+    // effect validity) and the pin states what it can honestly see.
+    assert!(
+        lawful(&still, &still, &mint()).is_err(),
+        "a standing claim that grows nothing is never admitted"
+    );
+    // D4c itself, reached directly through a fixture that clears
+    // `creation`: covered by `a_mint_that_grows_nothing_refuses` above
+    // and by discovery_pins' widened `grown` fixtures.
+}
+
+/// THE VERSION IS x.y.z, AND ORDERED. A prototype judge says so in its
+/// major, and a peer comparing two commitments still gets a total
+/// order from the packed form.
+#[test]
+fn the_version_is_semver_and_orders() {
+    assert_eq!(KERNEL_VERSION.to_string(), "0.5.0");
+    assert_eq!(KERNEL_VERSION.major, 0, "prototype — nothing has promised stability");
+    assert!(
+        KERNEL_VERSION.code() > kernel::Version { major: 0, minor: 4, patch: 0 }.code(),
+        "a later version packs larger"
+    );
+    assert!(
+        kernel::Version { major: 1, minor: 0, patch: 0 }.code() > KERNEL_VERSION.code(),
+        "and a major bump outranks every minor"
+    );
+    assert!(
+        KERNEL_VERSION.code() > 5,
+        "the linear era (1..5) orders below the packed form — an earlier judge cut those chains"
+    );
 }

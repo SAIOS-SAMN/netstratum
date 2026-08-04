@@ -844,7 +844,11 @@ impl Polity {
     /// resonant orb with room to grow. Unaffordable or starving, the
     /// survey idles lawfully and siting draws rule as before.
     fn survey_step(&mut self) {
-        if self.level < 5 {
+        // THE TOP OF THE LADDER, DERIVED (operator ruling 2026-08-04):
+        // a line surveys once nothing above it differs. `Difficulty::
+        // climbs` reads that off the ladder instead of restating its
+        // length as a constant.
+        if Difficulty::climbs(self.level) {
             return;
         }
         if self.world.orb().is_none_or(|orb| !orb.famine.is_empty()) {
@@ -1262,7 +1266,10 @@ impl Polity {
                 );
                 self.solved += 1;
                 self.streak += 1;
-                if self.streak >= 3 && self.level < 5 {
+                // Promote while the ladder still rises above this rung
+                // — derived, never a constant. Add a rung to
+                // `Difficulty::level` and the climb follows on its own.
+                if self.streak >= 3 && Difficulty::climbs(self.level) {
                     self.level += 1;
                     self.streak = 0;
                 }
@@ -1280,7 +1287,9 @@ impl Polity {
     /// decides where its branches land on the manifold. The lineage
     /// pointer records LINE membership (LINEAGE-1), never parenthood.
     fn divergence_step(&mut self, registry: &Registry) -> Option<PolitySpec> {
-        if self.cleaved || self.level < 5 || self.solved < 20 {
+        // Divergence waits for the TOP of the ladder — derived from
+        // the ladder, not from a remembered 5.
+        if self.cleaved || Difficulty::climbs(self.level) || self.solved < 20 {
             return None;
         }
         let receipt = self.world.chronicle().receipts().last()?;
