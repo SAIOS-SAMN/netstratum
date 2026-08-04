@@ -20,6 +20,7 @@ pub mod observer;
 pub mod peel;
 pub mod propagation;
 pub mod render;
+pub mod revocation;
 pub mod standing;
 
 use cfe::world::Committed;

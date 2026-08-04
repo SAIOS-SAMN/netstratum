@@ -659,7 +659,48 @@ otherwise). **Capacity growth and the discovery mint are ONE event** —
 trapped interior.
 
 **D4 · The revocation law — THE ECLIPSE ANCHOR (floored at H¹).**
-INSCRIBED. **RULED 2026-08-01 (operator, relayed):** D4 is retained NOT
+**LANDED WHOLE 2026-08-04 (operator ruling: "implement D4 — bring it to
+life"), kernel VERSION 3 → 5.** Both halves stand, and the layer split
+below is honoured in code:
+
+    PER-STEP (kernel)     `kernel::revocation_law`, called from
+                          `lawful` AFTER `creation` — a deed that mints
+                          carries a strictly positive capacity
+                          increment, or refuses
+                          `Unlawful::MintWithoutCapacityIncrement`.
+    OVER A WINDOW (lens)  `lens::revocation::Revocation` — deeds(w) > 0
+                          ∧ ΔD(w) = 0 reads `Claim::Vacated`. Reports,
+                          never gates; delete it and the judge is
+                          unchanged.
+
+**THE PHANTOM-RANK GATE IS NOW DUE, and D4 is what made it due.**
+`EntangledRead::rank_is_defined` had stood unused since it was written,
+its own header warning that an unresolved absence *"would let phantom
+topology mint phantom rank"*, and `18_TORSION` §6 recorded it as DEBT
+rather than enforcement. D4 computes its increment OVER that rank, so an
+unresolved reading is no longer merely unfortunate — it is a mint
+surface. `revocation_law` asks it FIRST, before any increment is
+compared, and refuses `Unlawful::RankUndefined` carrying both unknown
+counts. An unresolved absence is not a zero.
+
+**Ordering, recorded as the diagnostics choice it is.** D4 runs after
+`creation` so a malformed payload is named `WorkRefused` rather than
+misreported as a capacity failure, and so every fixture that tests the
+work law still reaches it. The two are ENTANGLED (`Δ(D) ⋈ ∂Δ`), not
+ranked — the law fixes that both must hold, never which speaks first.
+
+**THE PIN-6 CASUALTY CAME DUE, exactly as this row predicted.** The
+landing broke twelve pins. Nine were the ordering above and recovered
+untouched. Three were real: the VERSION pin (bumped, and 4 SKIPPED
+because the harness lane claimed it on its own branch — two meanings for
+one version is the hazard the tag-claim convention exists to prevent);
+and two mint pins whose fixtures grew no circulation. Those were WIDENED
+rather than struck — they test the rate and the bound, not the capacity
+law, so the fixture moved to let them reach the arm they exist to test,
+exactly as `standing` was widened when the capacity law landed. Nothing
+was deleted to make the law fit.
+
+**RULED 2026-08-01 (operator, relayed):** D4 is retained NOT
 as a scalar decay and NOT as a contraction of `D`, but as the **FORMAL
 ENTANGLEMENT COLLAPSE OPERATOR** — the site where a claim on capacity
 that never entangled with potential is VACATED from the frame. It is

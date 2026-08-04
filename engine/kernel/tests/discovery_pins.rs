@@ -77,6 +77,31 @@ fn seated(iron: (i64, i64)) -> Committed {
     committed
 }
 
+/// The same world with ONE MORE independent cycle — the `next` state
+/// for any pin whose mint must ADMIT.
+///
+/// **D4 (VERSION 5) forced this, exactly as the capacity law forced
+/// `standing` before it.** A mint now carries a strictly positive
+/// capacity increment or refuses, so a `next` that differs from `prior`
+/// only in banked value grows no circulation and vacates its own claim.
+/// These pins test the RATE and the BOUND, not the capacity law, so the
+/// fixture is widened to let them reach the arm they exist to test —
+/// recorded rather than quietly widened, the same way `standing` was.
+fn grown(iron: (i64, i64)) -> Committed {
+    let mut committed = seated(iron);
+    // A second chord: one more independent cycle than `seated` holds.
+    committed.bonds.push(cfe::world::Bond {
+        source: 2,
+        target: 4,
+        resource: Resource::Iron,
+        rate: ratio(1, 1),
+        term: 0,
+        sealed: 0,
+        anchored: 0,
+    });
+    committed
+}
+
 /// An HONEST proof: a real level-1 forge task, really solved, really
 /// sealed. The prover (dev-dependency only) searches; the fixture
 /// carries the result.
@@ -162,7 +187,8 @@ fn the_ruled_rate_pays_the_ladder_exactly() {
         let work = encode_work(&proof).expect("encodes");
         let prior = seated((6, 1));
         // At exactly f: admits (the mint banked — conservation holds).
-        let at_bound = seated((6 + f, 1));
+        // D4: the admitting state also GROWS, or the claim vacates.
+        let at_bound = grown((6 + f, 1));
         assert_eq!(
             lawful(&prior, &at_bound, &mint_step((f, 1), work.clone())),
             Ok(()),
@@ -299,7 +325,12 @@ fn the_zero_mint_with_valid_work_admits() {
     // (nothing banked); the deed and its proof enter the record.
     let work = encode_work(&honest_proof()).expect("encodes");
     let prior = seated((6, 1));
-    let next = seated((6, 1));
+    // D4 (VERSION 5): the degenerate mint is still lawful, but a mint
+    // that grows no circulation vacates its claim — so the admitting
+    // case now grows. EQUATIONS D4 named this pin its casualty in
+    // advance ("already the pin-6 casualty"); the intent survives, the
+    // fixture moved.
+    let next = grown((6, 1));
     assert_eq!(lawful(&prior, &next, &mint_step((0, 1), work)), Ok(()));
 }
 

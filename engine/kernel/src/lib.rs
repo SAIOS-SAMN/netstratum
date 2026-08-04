@@ -64,7 +64,19 @@ use solver_verify::{verify_work, Difficulty, WorkBroken};
 /// steps that version 2 would have judged differently — the one thing
 /// this constant exists to prevent. Version-2 history verifies forever
 /// under version 2's law.
-pub const VERSION: u64 = 3;
+/// VERSION 5 — **D4, THE REVOCATION LAW LANDS** (operator ruling
+/// 2026-08-04). A `DiscoveryMinted` deed now refuses unless it carries
+/// a strictly positive capacity increment, and unless the rank reading
+/// that increment is computed over is RESOLVED. Breaking: version 3
+/// admitted mints that grew no circulation. See [`revocation_law`].
+///
+/// **4 IS DELIBERATELY SKIPPED.** The harness lane's vacuity removal
+/// claimed VERSION 4 on its own branch (`c537e0a`), which has not
+/// reached `main`. Two different meanings for one version is a wire
+/// hazard of exactly the kind the tag-claim convention exists to
+/// prevent, so this landing takes 5 and says why rather than racing for
+/// 4. Whichever merges first, neither number is ambiguous.
+pub const VERSION: u64 = 5;
 
 /// One proposed transition: the deed that CLAIMS to carry `prior` to
 /// `next`. `event` is what closed, `actor` is who under NS-6
@@ -89,6 +101,20 @@ pub enum Unlawful {
     /// carrier is a big-int rational); the residual is theirs to read
     /// (shown, never summarized away).
     ConservationBroken { resource: Resource, before: Box<Ratio>, after: Box<Ratio> },
+    /// **D4** — a mint whose capacity increment is zero or negative:
+    /// the claim on capacity never entangled with potential, so it is
+    /// VACATED (EQUATIONS D4). Both readings carried whole — the
+    /// circulation standing above the ground before and after.
+    ///
+    /// `D` is NOT lowered by this refusal. The claim vacates; the
+    /// degree does not (Article IV, and this row's `H¹` floor).
+    MintWithoutCapacityIncrement { was: usize, now: usize },
+    /// **D4** — the rank reading is not resolved, so no increment over
+    /// it can be trusted. An unresolved absence is not a zero: without
+    /// this, phantom topology mints phantom rank
+    /// (`EntangledRead::rank_is_defined`, `18_TORSION` §6's debt, now
+    /// due). Both unknown counts carried.
+    RankUndefined { unknown_before: usize, unknown_after: usize },
     /// I2 — the actor is not an entity in `prior`. Identity precedes the
     /// world (NS-6 §1.2): a deed from no one refuses before any state read.
     NoSuchEntity { actor: u64 },
@@ -258,9 +284,96 @@ pub fn lawful(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Un
     capacity_law(prior, step)?;
     union_law(step)?;
     creation(step)?;
+    // D4 AFTER `creation`, deliberately. `creation` judges the DEED —
+    // its proof and its bound; D4 judges the deed's EFFECT on the
+    // world. Ordering effect after validity means a malformed payload
+    // is named `WorkRefused`, not misreported as a capacity failure,
+    // and the work law stays reachable by every fixture that tests it.
+    // The two are entangled (`Δ(D) ⋈ ∂Δ`), not ranked — the law fixes
+    // that both must hold, never which speaks first, so this is a
+    // diagnostics choice and is recorded as one.
+    revocation_law(prior, next, step)?;
     decay(prior, step)?;
     gauge_law(prior, next, step)?;
     element_law(prior, next, step)
+}
+
+/// **INVARIANT — D4, THE REVOCATION LAW. The eclipse anchor, floored
+/// at `H¹`.** (EQUATIONS D4, INSCRIBED; RULED 2026-08-01; LANDED
+/// 2026-08-04.)
+///
+/// D4 is **not** a scalar decay and **not** a contraction of `D`. It is
+/// the FORMAL ENTANGLEMENT COLLAPSE OPERATOR: the site where a claim on
+/// capacity that never entangled with potential is VACATED from the
+/// frame. It executes `18` §3 Article III; it is not a second penalty
+/// beside it.
+///
+/// ```text
+/// D itself NEVER falls by this rule   Article IV, and the algebra:
+///                                     Π_G is idempotent, so what was
+///                                     frame was never in D
+/// FORBIDDEN where orbit_lock ≠ ∅      genuine difference keeps its
+///                                     degree; the H¹ floor stands
+/// VACATED: the un-entangled CLAIM     a claim that did not survive
+///                                     Π_G was never capacity (D2)
+/// ```
+///
+/// **THE CLAIM VACATES; THE DEGREE DOES NOT.** That is why D4 is
+/// expressible as a kernel invariant at all: `lawful` REFUSES, it never
+/// mutates. Refusing the deed IS the vacating of its claim, and no code
+/// path here can lower a `Degree` — which would violate Article IV and
+/// this row's own floor.
+///
+/// **THE LAYER SPLIT IS LOAD-BEARING — a WINDOW is not a STEP.** D4
+/// fires in two places and they must never merge. This is the PER-STEP
+/// half: *a deed that mints carries a non-zero capacity increment, or
+/// refuses* (`18` §2f consequence 2 — no hidden work). The OVER-A-
+/// WINDOW half (`deeds(w) > 0 ∧ ΔD(w) = 0`) is a LENS reading and
+/// gates nothing; it lives in `lens::revocation` and must never be
+/// hoisted into the judge. A rate never attains its bound at any single
+/// step, so a window can never be an invariant.
+///
+/// **THE PHANTOM-RANK GATE, now due.** `EntangledRead::rank_is_defined`
+/// has existed unused, its own header warning that an unresolved
+/// absence *"would let phantom topology mint phantom rank"*, and
+/// `18_TORSION` §6 recorded it as DEBT rather than enforcement. D4
+/// gates a mint on a rank-derived increment, which makes that debt due:
+/// without this check the increment is computed over an incomplete
+/// reading and phantom topology satisfies the test. It is asked FIRST,
+/// before any increment is compared.
+///
+/// The increment is read on the CIRCULATION — `Degree::above`, the
+/// gauge-invariant part that grows — never on `Degree::get`, which
+/// includes the ground and would make the comparison vacuous exactly
+/// the way the struck `D > 0` gate was (a floor cannot decide).
+fn revocation_law(
+    prior: &Committed,
+    next: &Committed,
+    step: &Step,
+) -> Result<(), Unlawful> {
+    let ClosureEvent::DiscoveryMinted { .. } = &step.event else {
+        // D4 binds the MINT. Motion of value that already exists makes
+        // no capacity claim, so there is no claim to vacate.
+        return Ok(());
+    };
+    let before = bridge::read_entangled(prior);
+    let after = bridge::read_entangled(next);
+    // 1. The phantom-rank gate. An unresolved absence is not a zero.
+    if !before.rank_is_defined() || !after.rank_is_defined() {
+        return Err(Unlawful::RankUndefined {
+            unknown_before: before.unknown,
+            unknown_after: after.unknown,
+        });
+    }
+    // 2. The increment, on the circulation above the floor.
+    let (was, now) = (before.degree().above(), after.degree().above());
+    match now > was {
+        true => Ok(()),
+        // The claim is vacated by refusal. `D` is untouched — nothing
+        // here writes, and `Degree` has no below-ground representation
+        // to write even if it did.
+        false => Err(Unlawful::MintWithoutCapacityIncrement { was, now }),
+    }
 }
 
 /// **INVARIANT — THE CAPACITY LAW. Circulation ABOVE THE GROUND, and
