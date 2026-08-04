@@ -71,8 +71,8 @@ fn the_cohesion_entry_round_trips_and_zero_books_encode_nothing() {
     orb.drawn_in_crisis = ratio(1, 1);
     orb.bond_flow = ratio(15, 1);
     orb.severance_load = ratio(2, 1);
-    orb.covenants_fulfilled = ratio(3, 1);
-    orb.covenants_breached = ratio(3, 4);
+    orb.forwards_fulfilled = ratio(3, 1);
+    orb.forwards_breached = ratio(3, 4);
     orb.returned_across = ratio(1, 2);
     orb.extracted_across = ratio(1, 4);
     let bytes = orb.wire_bytes();

@@ -54,19 +54,61 @@ name struck whole by Charter §11; and `rank_is_defined` was formerly
 An axis re-typed elsewhere is a second readable truth (§11 rule 2), and
 it drifts silently because nothing forces the copies to agree.
 
-- **TIER (T0–T3) HAS NO ENGINE AUTHORITY AT ALL.** The station→tier law
-  is implemented in `tools/observer.py` (`TIER_OF_STATION`), again in
-  `tools/observatory.html`, and described a third time in
-  `BUILD_ORDER.md`. `registry.rs` knows `STATIONS` and knows nothing of
-  tiers. **Three implementations, no authority.** This is the live
-  example of the locality problem and the first thing §5 should fix.
+- **TIER — CLOSED 2026-08-03.** It had no engine authority at all: the
+  station→tier law lived in `tools/observer.py` (`TIER_OF_STATION`),
+  again in `tools/observatory.html`, and a third time in prose in
+  `BUILD_ORDER.md`, while `registry.rs` knew `STATIONS` and nothing of
+  tiers. **Three implementations, no authority** — so any gate keyed on
+  tier was advisory, a mapping anyone with a shell could edit.
 
-## §4 WARD SCOPE — the axis elders and ancients actually sit on
+  `ledger::registry::tier_of` is now that authority, with `Tier` as its
+  vocabulary. Two properties carry the weight:
 
-**CORRECTION TO THIS DOCUMENT'S FIRST DRAFT.** It called this a TENURE
-axis — *how long have you stood*. That was wrong. The operator's
-definition is SCOPE — **what extent do you ward** — and the two are not
-the same reading. Recorded rather than quietly replaced.
+  **`None` is a refusal, never a default.** An unrecognised station does
+  NOT fall through to `T3`. The common is the ABSENCE of a seat, never
+  the presence of an unreadable one — and the safest-looking band is
+  exactly where an attacker would want an unknown seat to land. A caller
+  that cannot read a tier refuses.
+
+  **Exhaustive by construction.** `tier_covers_every_station` walks
+  `STATIONS` and fails if any value has no band, so adding a station
+  without ruling on its tier breaks the build. That is the
+  `kernel::layer_of` shape syntropy-inscription named — exhaustive over
+  its input with no wildcard, so a new case cannot land without someone
+  deciding its reach.
+
+  `holds_a_serving_seat` reads the conflict-of-interest question the
+  covenant gate needs: T0/T1/T2 are seated offices that serve everyone;
+  T3 is the common; an unreadable seat answers neither.
+
+## §4 SEAT SCOPE — the axis elders and ancients actually sit on
+
+**TWO CORRECTIONS TO THIS SECTION'S NAME, both recorded rather than
+quietly replaced.**
+
+1. The first draft called it TENURE — *how long have you stood*. Wrong
+   reading; the axis is extent, not duration.
+2. The second called it WARD SCOPE. **Also wrong, and wrong in a way
+   worth naming: it promoted a menial mechanic into an axis.**
+
+**THE WARD IS COLONY-LEVEL AND STAYS THERE** (operator ruling
+2026-08-02). It is one planetary shield — `World::ward_elder`,
+`World::lift_ward`, `World::ward_holds`, all methods on ONE WORLD, which
+`04` §5 defines as one clock and one chronicle. `ElderWarded` is a
+world-scoped receipt. **The code had it at the right level the whole
+time; these documents lifted it.**
+
+Warding is a thing an elder happens to DO on its own planet. It does not
+name the ladder, and the ladder does not depend on it. The axis is the
+extent a SEAT's standing reaches — which is why `ancient` can sit on it
+without warding anything.
+
+**This is the second time in one day a mechanic was promoted above its
+station here.** The first was the covenant: a collateralized delivery
+contract dressed as a moral commitment, struck and renamed FORWARD.
+Same defect, same cause — the corpus states each mechanic and never
+states its layer, so reach gets inferred from the file a rule sits in.
+That gap is what syntropy-lane's layer taxonomy exists to close.
 
 ### 4a. The three rungs
 
@@ -263,6 +305,79 @@ got bigger, and the seats in it are still unearned.**
 card and to the roster `install.sh` writes before first boot. That is
 the operator's ruling, not a lane's cleanup.
 
+## §6 THE STATION LAW — every mechanic declares its layer
+
+**Operator ruling 2026-08-02, and it is inscribed because the same
+defect landed three times in one day.**
+
+**THE FAILURE, measured.** The corpus states what every mechanic DOES
+and states no mechanic's REACH. A rule's layer is therefore inferred
+from whichever file it happens to sit in — which is not a decision
+anybody made, and it fails silently in both directions:
+
+```text
+PROMOTED   the covenant   a collateralized delivery contract read as a
+                          moral commitment — struck, renamed FORWARD
+PROMOTED   the ward       a colony shield read as a universal scope
+                          axis — demoted, §4 renamed SEAT SCOPE
+CONSULTED  CHANNEL_       a resource-delivery remainder read as one
+           COVENANT       people's instrument, because of its NAME —
+                          and the universal capacity meter D reads it
+```
+
+The third is the dangerous shape: **a mechanic lawful at a line's own
+level becomes a universal precondition the moment a universal reading
+consults it.** Nothing announced that; the name did the damage.
+
+### 6a. THE LAW
+
+**Every mechanic declares the layer it acts at, and no reading may
+consult a mechanic from a layer above it without saying so.**
+
+```text
+UNIVERSAL      the mesh: units among units. Every peer re-judges with
+               its own kernel. Nothing here may depend on one people's
+               instrument.
+WORLD          one clock, one chronicle, one receipt chain (04 §5) —
+               the replay unit. The ward lives HERE.
+CIVILIZATIONAL one line's own register: its practices, its creeds, its
+               ceremonies. Free, and never a precondition for anyone
+               else.
+```
+
+### 6b. THE TEST, and it is the one that would have caught all three
+
+**Ask of any mechanic: if a line never uses this, what does it lose?**
+
+```text
+nothing but its own option      → CIVILIZATIONAL, correctly placed
+a capacity every line is
+  measured on                   → it has been PROMOTED. Either the
+                                  mechanic is universal after all, or
+                                  the universal reading must stop
+                                  consulting it.
+```
+
+**Applied to `CHANNEL_FORWARD`, the answer came out clean**: a line that
+seals no delivery obligation carries an empty channel, and the mechanic
+is ordinary finance rather than one people's rite — so the channel is
+universal and the register seat was never a requirement. **The audit was
+possible because the question was finally asked. Nothing in the corpus
+had asked it.**
+
+### 6c. WHERE THIS BINDS
+
+**A name is not a layer.** All three failures came through vocabulary:
+`covenant` sounded moral, `ward` sounded universal, `CHANNEL_FORWARD`
+sounded ceremonial. §5's tiering already says CONTENT is free — and free
+content must never leak upward into an AXIS by nothing more than
+sounding grand.
+
+**This section is subordinate to whatever layer taxonomy lands from the
+syntropy lane** (their §3d, in flight). Two lanes writing one law is the
+drift this document exists to prevent; where they disagree, theirs is
+the authority and this reduces to its registry-side application.
+
 ## §5 THE EXPANSION LAW — totality, never locality
 
 **The problem, stated plainly.** `STATIONS` is `[&str; 4]` compiled into
@@ -309,7 +424,7 @@ visible from where the thing is written down.
    names for one reading is the drift `EQUATIONS` §0 exists to prevent.
 
 **Owed, and named rather than assumed:** the tier axis has no authority
-(§3); ward scope is now opened as law but its operand is cut at seven
+(§3); seat scope is now opened as law but its operand is cut at seven
 call sites (§4e — *what sites a lineage?* is the one open question);
 and no lint yet checks that a value claimed in a doc exists in its
 crate, the way `constitution_lint` checks that a citation resolves.

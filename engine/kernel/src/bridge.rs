@@ -47,7 +47,7 @@ use rfa_core::{
 
 /// BOND-1: the standing order, `source` → `target` at `rate`/tick.
 pub const CHANNEL_BOND: usize = 0;
-/// COVENANT-1: the UNDELIVERED REMAINDER of a standing delivery
+/// FORWARD-1: the UNDELIVERED REMAINDER of a standing delivery
 /// obligation, obligor → beneficiary (`quota − delivered`, floored at
 /// zero — a fully delivered obligation owes nothing and contributes
 /// nothing).
@@ -56,10 +56,10 @@ pub const CHANNEL_BOND: usize = 0;
 /// party is bound to deliver a quantity of a resource to another by a
 /// deadline, with collateral posted against failure. `quota` is the
 /// amount owed, `delivered` the progress, and the projection carries
-/// the difference. Nothing in the mechanism is ceremonial — "covenant"
-/// and "pact" are inherited names (COVENANT-1, BUILD_ORDER §3), not
+/// the difference. Nothing in the mechanism is ceremonial — "forward"
+/// and "pact" are inherited names (FORWARD-1, BUILD_ORDER §3), not
 /// descriptions, and this channel means the remainder and only that.
-pub const CHANNEL_COVENANT: usize = 1;
+pub const CHANNEL_FORWARD: usize = 1;
 /// ABSORB-1: the open reciprocity window's remainder, debtor →
 /// creditor.
 pub const CHANNEL_DEBT: usize = 2;
@@ -401,12 +401,12 @@ pub fn project_complex(state: &Committed) -> (Delta, Support) {
             }
         }
     }
-    for pact in &state.covenants {
+    for pact in &state.forwards {
         if let (Some(i), Some(j)) = (seat(pact.obligor), seat(pact.beneficiary)) {
             let outstanding = pact.quota.clone() - pact.delivered.clone();
             if i != j && outstanding > zero {
-                owed[i][j][CHANNEL_COVENANT] += outstanding;
-                support.connect(i, j, CHANNEL_COVENANT);
+                owed[i][j][CHANNEL_FORWARD] += outstanding;
+                support.connect(i, j, CHANNEL_FORWARD);
             }
         }
     }
@@ -621,7 +621,7 @@ pub fn borne_by_orb(state: &Committed) -> Vec<(u64, Ratio)> {
 /// (operator ruling 2026-08-02: *multi-axial on vertices towards
 /// uplift*).
 ///
-/// One share per CHANNEL — [`CHANNEL_BOND`], [`CHANNEL_COVENANT`],
+/// One share per CHANNEL — [`CHANNEL_BOND`], [`CHANNEL_FORWARD`],
 /// [`CHANNEL_DEBT`] — never summed. `18_TORSION` §2b bars collapsing a
 /// directional quantity to a scalar wherever the system computes, and
 /// the collapse costs the only thing an orb can act on: two orbs
@@ -814,7 +814,7 @@ fn restrict(state: &Committed, keep: &[u64]) -> Committed {
     let mut cut = state.clone();
     cut.orbs.retain(|orb| keep.contains(&orb.orb_id));
     cut.bonds.retain(|b| keep.contains(&b.source) && keep.contains(&b.target));
-    cut.covenants.retain(|c| keep.contains(&c.obligor) && keep.contains(&c.beneficiary));
+    cut.forwards.retain(|c| keep.contains(&c.obligor) && keep.contains(&c.beneficiary));
     cut.debts.retain(|d| keep.contains(&d.debtor) && keep.contains(&d.creditor));
     cut
 }

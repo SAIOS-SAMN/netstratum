@@ -42,6 +42,70 @@ pub fn seat_width(station: &str) -> Option<u64> {
     }
 }
 
+/// THE TIER — the vertical band a station sits in (12_UNION §2a).
+///
+/// A DERIVED reading, never stored. The station is the committed fact;
+/// the tier is what it means.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum Tier {
+    /// THE BOARD-MAKERS — progenitors.
+    T0,
+    /// THE ARCHITECT OBSERVERS — watchers and observers.
+    T1,
+    /// THE RECORD KEEPERS — sovereigns.
+    T2,
+    /// THE BIOSPHERE NODES — the common, lawful state. Reached by
+    /// holding no seat, never by holding an unrecognised one.
+    T3,
+}
+
+/// The station → tier reading, and THE ENGINE AUTHORITY for it.
+///
+/// **This existed three times and nowhere that counted.** `12_UNION`
+/// §2a rules the tier a derived reading; the derivation lived in
+/// `tools/observer.py`, again in `tools/observatory.html`, and a third
+/// time in prose in `BUILD_ORDER.md`, while this crate knew
+/// [`STATIONS`] and knew nothing of tiers (`19_REGISTRY` §3). Any gate
+/// keyed on tier was therefore advisory — a mapping anyone with a shell
+/// could edit — which is no gate at all.
+///
+/// **`None` is a REFUSAL, not a default.** An unrecognised station does
+/// NOT fall through to `T3`: the common is the absence of a seat, never
+/// the presence of an unreadable one. A caller that cannot read a tier
+/// must refuse rather than assume the safest-looking band, because the
+/// safest-looking band is exactly the one an attacker would want an
+/// unknown seat to land in.
+///
+/// **Exhaustive by construction.** Every value in [`STATIONS`] is named
+/// here, and `tier_covers_every_station` fails the build if a station
+/// is added without deciding its band — the `kernel::layer_of` shape,
+/// where adding a case breaks compilation until someone rules on it.
+pub fn tier_of(station: Option<&str>) -> Option<Tier> {
+    match station {
+        // The common: no seat held. This is the ONLY road to T3.
+        None => Some(Tier::T3),
+        Some("progenitor") => Some(Tier::T0),
+        Some("watcher") | Some("observer") => Some(Tier::T1),
+        Some("sovereign") => Some(Tier::T2),
+        // Unreadable seat — the caller refuses. Never a silent T3.
+        Some(_) => None,
+    }
+}
+
+/// Is this line seated in an office that serves everyone?
+///
+/// T0, T1 and T2 are the board-makers, the architect observers and the
+/// record keepers. **A seated office may not adopt one people's
+/// lifestyle instrument** — a conflict-of-interest reading, not a
+/// hierarchy one (operator ruling 2026-08-02, relayed via
+/// syntropy-inscription).
+///
+/// Returns `None` when the tier cannot be read, so a gate refuses
+/// instead of guessing.
+pub fn holds_a_serving_seat(station: Option<&str>) -> Option<bool> {
+    tier_of(station).map(|tier| matches!(tier, Tier::T0 | Tier::T1 | Tier::T2))
+}
+
 /// One civilization: a species-level identity spanning worlds.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Civilization {

@@ -380,8 +380,8 @@ impl World {
         // ABSORB-1: the payment compensates open reciprocity windows
         // owed from→to, oldest first.
         settle_debts(&mut self.debts, &mut self.orbs, from, to, value.clone());
-        // COVENANT-1: the delivery credits the open pact on this lane.
-        credit_covenants(&mut self.covenants, from, to, resource, &amount);
+        // FORWARD-1: the delivery credits the open pact on this lane.
+        credit_forwards(&mut self.forwards, from, to, resource, &amount);
         credit_councils(&mut self.councils, from, to, resource, &amount);
         let friction = crate::dop::friction_rate() * divergence * value;
         if friction > ratio(0, 1) {

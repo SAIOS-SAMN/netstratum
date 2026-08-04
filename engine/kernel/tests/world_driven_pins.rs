@@ -9,7 +9,7 @@
 //! conservation's non-constraint is CORRECT (ratified against the
 //! replay reading). They are judged by I3 exactness alone. The
 //! value-moving members of these families (FamineStruck −drawn,
-//! CovenantSlashed +collateral, CouncilClosed +banked) stay held out
+//! ForwardSlashed +collateral, CouncilClosed +banked) stay held out
 //! for the I1 value slice; the FOLD TRIO (Confluent/EraAnnexed/
 //! EraFolded) stays held out for U2d's I6 gate — a fold must be
 //! orbit-lock-judged, never admitted on exactness alone.

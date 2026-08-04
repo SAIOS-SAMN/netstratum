@@ -11,7 +11,7 @@
 //! judged by WHO may do it (Build/Raze scope) and that the state stays
 //! exact, never by a value delta it does not carry. Value-moving
 //! "authority" deeds (ColonyFounded/Charted, ZoneBuilt/Razed,
-//! Covenant/Council seals — all move banks) are W-A slice-2, gated on
+//! Forward/Council seals — all move banks) are W-A slice-2, gated on
 //! their I1 arms; they are NOT admitted here.
 
 use cfe::dop::ClosureEvent;

@@ -58,6 +58,75 @@ impl SubstrateBand {
     }
 }
 
+/// The falloff length for [`coverage`], in `K⁴`.
+///
+/// **Derived, not chosen.** It is the width of the mesic band — the
+/// span a temperate world already occupies — so a world one band-width
+/// outside the nearest band reads half coverage. Using a measured span
+/// rather than a tuned literal is what keeps this a reading (§7 of
+/// `20_FOUNDING`).
+pub fn coverage_scale4() -> Ratio {
+    let (lo, hi) = SubstrateBand::Mesic.bounds4();
+    hi - lo
+}
+
+/// COVERAGE — how well a world at `t_eq4` supports substrate, as an
+/// exact rational in `(0, 1]`, DEFINED EVERYWHERE on the positive line.
+///
+/// **This replaces a wall with a slope.** [`band_of`] answers whether a
+/// world falls inside one of three disjoint windows, so a world one
+/// K⁴ outside a bound reads NOTHING while one K⁴ inside reads
+/// everything — and the three windows do not cover the line, leaving
+/// 320–600 K supported by nothing at all. The derived furnace seats
+/// (mineral and plasmic foundings) land in that gap, which made a whole
+/// class of world uninhabitable by construction rather than by design
+/// (`20_FOUNDING` §4, §6c).
+///
+/// The bands remain, as the regions where coverage is RICH:
+///
+/// ```text
+/// inside any band          coverage = 1        a plateau, not a peak
+/// outside every band       1 / (1 + d/scale)   d = K⁴ to the nearest edge
+/// ```
+///
+/// **Monotone in distance, strictly positive everywhere, and free of
+/// squares** — the difference enters to the first power only, so THE
+/// PROPORTIONAL LAW is untouched (`EQUATIONS` ch.2: squares are barred
+/// as aggregators of difference; quartics survive only as physical law,
+/// and `T⁴` is already the carrier here).
+///
+/// A gap world now reads POOR rather than IMPOSSIBLE, which is a game
+/// where the alternative was a defect.
+pub fn coverage(t_eq4: &Ratio) -> Ratio {
+    let zero = ratio(0, 1);
+    let one = ratio(1, 1);
+    let mut nearest: Option<Ratio> = None;
+    for band in [
+        SubstrateBand::Cryogenic,
+        SubstrateBand::Mesic,
+        SubstrateBand::HyperThermal,
+    ] {
+        let (lo, hi) = band.bounds4();
+        let gap = if *t_eq4 < lo {
+            lo - t_eq4.clone()
+        } else if *t_eq4 > hi {
+            t_eq4.clone() - hi
+        } else {
+            return one;
+        };
+        nearest = Some(match nearest {
+            Some(held) if held <= gap => held,
+            _ => gap,
+        });
+    }
+    match nearest {
+        Some(distance) if distance > zero => {
+            one.clone() / (one + distance / coverage_scale4())
+        }
+        _ => one,
+    }
+}
+
 /// THERMAL-1, the cryo law (05 §1.2): at or below this `T⁴` the store
 /// is a lossless vault — the cryogenic band's ceiling, `100⁴ K⁴`.
 pub fn cryo_vault_max4() -> Ratio {

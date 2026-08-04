@@ -24,7 +24,7 @@ use cfe::ratio::ratio;
 use cfe::world::{World, FIRST_ORB};
 use kernel::bridge::{
     open_axes_of, project_complex, read_entangled, standing_axial_of, CHANNEL_BOND,
-    CHANNEL_COVENANT, CHANNEL_DEBT,
+    CHANNEL_FORWARD, CHANNEL_DEBT,
 };
 use rfa_core::Degree;
 
@@ -66,7 +66,7 @@ fn a_bond_sealed_in_the_new_order_reaches_d_on_the_bond_channel() {
     assert_eq!(state.bonds.len(), 1, "V carries the standing order");
 
     // AND IT ARRIVES ON THE RIGHT AXIS. `project_complex` seats bonds on
-    // CHANNEL_BOND; a bond leaking onto the covenant or debt channel
+    // CHANNEL_BOND; a bond leaking onto the forward or debt channel
     // would still read as "some structure" on a summed meter, which is
     // exactly why the reading is per-axis.
     let (delta, support) = project_complex(&state);
@@ -77,7 +77,7 @@ fn a_bond_sealed_in_the_new_order_reaches_d_on_the_bond_channel() {
         ratio(1, 2),
         "and it carries the sealed rate, exactly"
     );
-    assert!(!support.has(i, j, CHANNEL_COVENANT), "a bond is not a covenant");
+    assert!(!support.has(i, j, CHANNEL_FORWARD), "a bond is not a forward");
     assert!(!support.has(i, j, CHANNEL_DEBT), "a bond is not a debt");
 }
 
@@ -132,7 +132,7 @@ fn the_open_axes_name_where_this_world_can_still_grow() {
     }
     assert_eq!(
         open_axes_of(&state, FIRST_ORB),
-        vec![CHANNEL_BOND, CHANNEL_COVENANT, CHANNEL_DEBT],
+        vec![CHANNEL_BOND, CHANNEL_FORWARD, CHANNEL_DEBT],
         "nothing circulates yet, so every direction is still open to it"
     );
 }

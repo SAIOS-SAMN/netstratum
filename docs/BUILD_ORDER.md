@@ -460,9 +460,9 @@ N5/N6). Details and sequencing in 04 §6.
   lifeline sealed → streamed at the touch → severed → the coldstore
   froze again → replay MATCHES.
 
-- **COVENANT-1 LANDED** (2026-07-27): THE GLASSKEEPER ESCROW — the
+- **FORWARD-1 LANDED** (2026-07-27): THE GLASSKEEPER ESCROW — the
   fourth ideology-board landing (09 §2.3, 01 §7 first cut, §3 below).
-  The vitrified delivery pact (tags 35–37: CovenantSealed / Released /
+  The vitrified delivery pact (tags 35–37: ForwardSealed / Released /
   Slashed): the obligor locks collateral OUT of its bank — the lock
   gates every spend by ABSENCE (no second mechanism), and the lattice
   vaults it losslessly by construction — against "deliver ≥ quota
@@ -471,8 +471,8 @@ N5/N6). Details and sequencing in 04 §6.
   Resolution is world-driven at the tick boundary (the famine shape):
   fulfilment releases home, the passed deadline slashes to the
   aggrieved — fulfilment wins the tie; vitrification means NO CANCEL.
-  THE INTEGRITY BOOKS OPEN, VALUE-weighted (`covenants_fulfilled` /
-  `covenants_breached` post the collateral stake — wash-trading closed
+  THE INTEGRITY BOOKS OPEN, VALUE-weighted (`forwards_fulfilled` /
+  `forwards_breached` post the collateral stake — wash-trading closed
   as designed). The fidelity curve landed (`collateral_required`,
   placeholder): quota × (breached+1)/(fulfilled+1) clamped [1/4, 4] —
   the empty book is not a credential (full collateral), the ceiling is
@@ -492,7 +492,7 @@ N5/N6). Details and sequencing in 04 §6.
   1/4 and ceiling 4× clamped, receipt-verified; locked collateral
   refuses zone AND transfer with "have 7"; BOND-1 composes — the
   stream fulfils the quota and the bond outlives the pact; refusals
-  typed incl. CovenantAlreadySealed; tags 35–37 byte-exact). The arc
+  typed incl. ForwardAlreadySealed; tags 35–37 byte-exact). The arc
   played end-to-end: vitrified → delivered → released; the doomed
   biomass pact slashed on schedule; replay MATCHES.
 
@@ -592,12 +592,12 @@ untouched); each is inscribed into NS-1 §2.3 only at its landing.
 | **TRADE-1** | THE TRANSFER SUBSTRATE | orb-to-orb transfer of banked resources within one world (`ResourceTransferred`, tag 30 — the chartering conservation precedent, tag 13); demurrage settles both sides at touch (SINK-1 law); opens the COMPASSION books (`given_in_crisis` / `drawn_in_crisis` — posting iff the counterparty is famine- or overheat-struck, uncleared, at the deed's stamp); CLI `send` | a transfer moves exactly what leaves and the two orbs' books balance; a transfer into a famine-struck orb relieves at the 02 §2.4 law and posts to the giver's crisis book exactly; a draw FROM a struck orb posts to the taker's entropic book; replay reproduces the ledger |
 | **ABSORB-1** | THE ABSORPTION TRANSACTION | routed overflow: a hot orb vents into a partner's banked sink instead of the void (`OverflowAbsorbed`, tag 31); the 05 §1.4 invariant `sink_consumed = heat_absorbed = vented_after_shed` becomes inter-orb; compensated and uncompensated forms; opens the MORALITY books (`returned_across` / `extracted_across`, the reciprocity window `W`); CLI `absorb` | the three-way invariant measures exact across two orbs; absorbing a struck partner's overflow clears its strike and posts compassion; an uncompensated dump posts to the dumper's extraction book at window expiry, exactly; replay reproduces |
 | **BOND-1** | STANDING BONDS | the standing order (`BondSealed`/`BondSevered`, tags 32–33): continuous per-tick flow, workspace-accrued, settled by ONE receipt at touch anchored on `last_touch` (the demurrage shape, tag 29); insolvent settlement breaks the bond as a receipted default; opens the LOVE books (`bond_flow` / `severance_load` — orderly severance posts NOTHING); CLI `bond` / `sever` | a bond streams n ticks and settles the exact accumulated value in one receipt; severing mid-winter drops the standing load on the partner's next heating bill, measured; an orderly severance posts zero; replay reproduces |
-| **COVENANT-1** | THE GLASSKEEPER ESCROW | 01 §7 first cut (`CovenantSealed`/`CovenantReleased`/`CovenantSlashed`, tags 34–36): exact-rational conditions over chronicle data, collateral lock, release / BREACH_AND_SLASH; opens the INTEGRITY books (`covenants_fulfilled` / `covenants_breached`, VALUE-weighted — the wash-trading exploit closed at design); collateral requirement scales by the fidelity ratio with the guardrail-6 ceiling; the 09 §3.3 covenant templates; CLI `covenant` | a fulfilled covenant releases exactly and posts its stake; a breach slashes exactly and posts its stake; the collateral curve reads the derived ratio only; a zero-fidelity orb pays the ceiling and is never barred; replay reproduces |
+| **FORWARD-1** | THE GLASSKEEPER ESCROW | 01 §7 first cut (`ForwardSealed`/`ForwardReleased`/`ForwardSlashed`, tags 34–36): exact-rational conditions over chronicle data, collateral lock, release / BREACH_AND_SLASH; opens the INTEGRITY books (`forwards_fulfilled` / `forwards_breached`, VALUE-weighted — the wash-trading exploit closed at design); collateral requirement scales by the fidelity ratio with the guardrail-6 ceiling; the 09 §3.3 covenant templates; CLI `covenant` | a fulfilled covenant releases exactly and posts its stake; a breach slashes exactly and posts its stake; the collateral curve reads the derived ratio only; a zero-fidelity orb pays the ceiling and is never barred; replay reproduces |
 | **IDEO-1** | THE COHESION SURFACE + FRICTION | opens NO books — reads them: the eight counters committed (orb cohesion entry, tag 38), four ratios derived (never stored) on the observer surface (`state.json`, coder-01 relay — the VENT-1 uplink precedent); ideological friction `ΔS_ideo = φ × abs(reciprocity_A − reciprocity_B) × volume` accrued as workspace and sealed by receipt (`FrictionSettled`, tag 37, the VentSettled shape) — friction prices DIVERGENCE, not vice; CLI `ideology` panel, fractions whole | the ratios derive from replay alone and match the committed counters; divergent partners generate exactly the friction entropy and aligned partners (any alignment) exactly zero; tag 37/38 round-trip byte-exact; state.json carries counters, never ratios |
 
-Sequencing: TRADE-1 → ABSORB-1 → BOND-1 → COVENANT-1 → IDEO-1, one landing
+Sequencing: TRADE-1 → ABSORB-1 → BOND-1 → FORWARD-1 → IDEO-1, one landing
 at a time under the standing law. TRADE-1 has no new dependency (P1 + SINK-1
-landed); ABSORB-1 and BOND-1 are transfer shapes; COVENANT-1 needs TRADE-1
+landed); ABSORB-1 and BOND-1 are transfer shapes; FORWARD-1 needs TRADE-1
 (collateral must move); IDEO-1 is a surface over landed deeds and mints no
 physics — its friction rides the landed VENT-1 machinery. Cross-board: the
 universe-level composition of the books (Σ per-orb = faction = world) is

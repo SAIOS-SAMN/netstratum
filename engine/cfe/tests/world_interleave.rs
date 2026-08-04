@@ -6,7 +6,7 @@
 //!    pair+remainder — measured here to take the OLDEST, exactly as
 //!    live emission does, including at the mid-flight point where
 //!    only the surviving debt's `opened` stamp can tell them apart.
-//! 2. Absorb lapse + bond settle + covenant resolution landing on ONE
+//! 2. Absorb lapse + bond settle + forward resolution landing on ONE
 //!    lane at ONE stamp: three world-driven resolutions in a single
 //!    tick prologue — replay and resume rebuild the same state from
 //!    the same receipt order.
@@ -135,7 +135,7 @@ fn identical_remainders_lapse_in_emission_order() {
 }
 
 /// HANDOFF §9.1, second claim. One lane, one stamp: the reciprocity
-/// lapse, the term bond's orderly expiry, and the covenant slash all
+/// lapse, the term bond's orderly expiry, and the forward slash all
 /// resolve inside a single tick prologue at 27 — three world-driven
 /// receipts in one breath. Replay and resume rebuild the identical
 /// state from the identical order.
@@ -149,7 +149,7 @@ fn three_resolutions_share_one_lane_and_one_stamp() {
         .seal_bond(FIRST_ORB, charted, Resource::Biomass, ratio(1, 8), 8)
         .expect("seals the term bond"); // @19 → expires orderly at 27
     world
-        .seal_covenant(FIRST_ORB, charted, Resource::Iron, ratio(1, 1), 8)
+        .seal_forward(FIRST_ORB, charted, Resource::Iron, ratio(1, 1), 8)
         .expect("seals the pact"); // @19, undelivered → slashes at 27
 
     for _ in 0..8 {
@@ -157,15 +157,15 @@ fn three_resolutions_share_one_lane_and_one_stamp() {
     }
     assert_eq!(world.committed().debts.len(), 1);
     assert_eq!(world.committed().bonds.len(), 1);
-    assert_eq!(world.committed().covenants.len(), 1);
+    assert_eq!(world.committed().forwards.len(), 1);
 
     world.tick(); // 27: lapse + expiry + slash, one prologue
     assert!(world.committed().debts.is_empty());
     assert!(world.committed().bonds.is_empty());
-    assert!(world.committed().covenants.is_empty());
+    assert!(world.committed().forwards.is_empty());
 
     // All three receipts stand at stamp 27, in the prologue's fixed
-    // emission order: lapse → bond settle → covenant slash.
+    // emission order: lapse → bond settle → forward slash.
     let at_27: Vec<&'static str> = world
         .chronicle()
         .receipts()
@@ -174,7 +174,7 @@ fn three_resolutions_share_one_lane_and_one_stamp() {
         .filter_map(|r| match &r.event {
             ClosureEvent::AbsorptionLapsed { .. } => Some("lapse"),
             ClosureEvent::BondSettled { .. } => Some("bond"),
-            ClosureEvent::CovenantSlashed { .. } => Some("slash"),
+            ClosureEvent::ForwardSlashed { .. } => Some("slash"),
             _ => None,
         })
         .collect();
@@ -187,7 +187,7 @@ fn three_resolutions_share_one_lane_and_one_stamp() {
         ratio(1, 1)
     );
     assert!(
-        world.orb_by_id(FIRST_ORB).expect("orb").covenants_breached > ratio(0, 1),
+        world.orb_by_id(FIRST_ORB).expect("orb").forwards_breached > ratio(0, 1),
         "the breach posted"
     );
 

@@ -496,7 +496,7 @@ nothing above them. There IS an order, and neither office is at its top.
 them a shared predecessor — the receipt — and reasoning from common provenance.
 That was a genealogy invented to solve a ranking problem, and it fails
 its own evidence: **counterparts do not suffocate without each other.** The
-interlock below is conjugal, never fraternal, and the two offices are of
+interlock below is COMPLEMENTARY, never LIKE-FOR-LIKE, and the two offices are of
 different KINDS with separate origins — one is room, one is substance;
 neither was ever seeded from the other's line.
 
@@ -811,7 +811,7 @@ imposes.
 ## 7. The diplomacy law — at this level, conversation rules
 
 For space-faring civilizations the **council covenant** governs: a
-multilateral covenant (the COVENANT-1 machinery extended past two parties)
+multilateral covenant (the FORWARD-1 machinery extended past two parties)
 among the seated civilizations of a band or region. The whole of the group
 overtakes the needs of the individual — collateral, quota, and release
 conditions bind every member alike, and delegation deeds (§2) settle inside

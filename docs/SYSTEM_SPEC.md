@@ -396,7 +396,7 @@ they touch new transition semantics or committed fields.
   still the load-bearing gap for real value, but now one ruling and
   one wiring, not a build. Stick — the alignment covenant (CHARTER
   §11): open divergence lawful, covert divergence slashed (pen/work/
-  stake forfeit, reusing `CovenantSlashed`). Carrot and stick are one
+  stake forfeit, reusing `ForwardSlashed`). Carrot and stick are one
   economy; their three price rulings sit together with the operator.
 - **Node/mesh:** identity binding — hands are self-declared integers (N7).
   No consensus weight is canonicalizing before it binds (kernel CHARTER §1).

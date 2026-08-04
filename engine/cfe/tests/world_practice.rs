@@ -125,11 +125,11 @@ fn an_unaligned_practice_bars_the_climb() {
     let mut world = World::new();
     world.found("unaligned").expect("founds");
     world.adopt_practice(4).expect("adopts the Hoard");
-    // A breached covenant posts entropic weight with nothing syntropic
+    // A breached forward posts entropic weight with nothing syntropic
     // beside it: ratio 0 < 1/2.
     world
-        .seal_covenant(FIRST_ORB, FIRST_ORB, Resource::Iron, ratio(1, 1), 4)
-        .err(); // self-covenant may refuse — the books path below suffices
+        .seal_forward(FIRST_ORB, FIRST_ORB, Resource::Iron, ratio(1, 1), 4)
+        .err(); // self-forward may refuse — the books path below suffices
     // Simpler entropic weight: an absorption debt lapsing.
     // (Direct book arithmetic through the landed deeds is exercised in
     // world_absorb; here the gate reading alone is pinned.)

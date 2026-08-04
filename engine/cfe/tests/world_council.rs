@@ -1,4 +1,4 @@
-//! COUNCIL-1 — THE MULTILATERAL COVENANT (12_UNION §7). Three or more
+//! COUNCIL-1 — THE MULTILATERAL FORWARD (12_UNION §7). Three or more
 //! orbs bound alike: each locks the same collateral against
 //! delivering ≥ quota to fellow members within the window; the
 //! reckoning judges ALL members together at the boundary — the whole
@@ -37,7 +37,7 @@ fn a_council_that_starts_unequal_never_starts() {
     assert_eq!(
         world.seal_council(1, vec![FIRST_ORB, b], Resource::Iron, ratio(2, 1), 10, ratio(3, 1)),
         Err(ActionRefused::BadCouncil),
-        "two is a covenant, not a council"
+        "two is a forward, not a council"
     );
     assert_eq!(
         world.seal_council(1, vec![FIRST_ORB, b, b], Resource::Iron, ratio(2, 1), 10, ratio(3, 1)),
@@ -97,7 +97,7 @@ fn the_reckoning_judges_all_together() {
         .count();
     assert_eq!(closes, 3, "every member's reckoning is its own receipt");
     let held = world.orb_by_id(c).expect("orb");
-    assert_eq!(held.covenants_breached, ratio(3, 1), "the stake posts breached");
+    assert_eq!(held.forwards_breached, ratio(3, 1), "the stake posts breached");
     assert_eq!(world.council_breaches(c), 1, "diplomacy failed — once, counted");
     assert_eq!(world.council_breaches(b), 0);
     assert!(!world.is_imperial(c), "one breach is not an imperium");
@@ -107,7 +107,7 @@ fn the_reckoning_judges_all_together() {
     let committed = replay(world.chronicle());
     let replayed = committed.orbs.iter().find(|o| o.orb_id == c).expect("orb");
     assert_eq!(replayed.banked_amount(Resource::Iron), ratio(7, 1));
-    assert_eq!(replayed.covenants_breached, ratio(3, 1));
+    assert_eq!(replayed.forwards_breached, ratio(3, 1));
     assert!(committed.councils.is_empty());
 }
 
@@ -127,7 +127,7 @@ fn when_all_breach_the_pact_dissolves() {
     assert_eq!(iron(&world, c), ratio(8, 1));
     for orb in [FIRST_ORB, b, c] {
         assert_eq!(
-            world.orb_by_id(orb).expect("orb").covenants_breached,
+            world.orb_by_id(orb).expect("orb").forwards_breached,
             ratio(3, 1),
             "the books forget nothing"
         );

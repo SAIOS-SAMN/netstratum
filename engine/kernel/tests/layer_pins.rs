@@ -50,7 +50,7 @@ fn the_layer_law_has_no_wildcard_arm() {
 
 #[test]
 fn a_ceremonial_deed_and_a_universal_one_are_told_apart() {
-    // THE RULED CASE (§3d.1a). The covenant RULING binds the CEREMONY;
+    // THE RULED CASE (§3d.1a). The forward RULING binds the CEREMONY;
     // the forward mechanism it was confused with is ordinary finance
     // open to any line, and stays universal. Both readings survive in
     // one table only because the layer is per-DEED and computed.
@@ -60,7 +60,7 @@ fn a_ceremonial_deed_and_a_universal_one_are_told_apart() {
         "class and clade are a line's own identity — the draconic seat"
     );
     assert_eq!(
-        layer_of(&ClosureEvent::CovenantSealed {
+        layer_of(&ClosureEvent::ForwardSealed {
             obligor_orb: 1,
             beneficiary_orb: 2,
             resource: Resource::Iron,

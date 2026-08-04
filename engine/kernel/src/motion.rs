@@ -53,7 +53,7 @@ pub struct Move {
     /// therefore COMMUTING.
     pub books: Vec<(BookKey, Ratio)>,
     /// THE RECORD AXIS — keyed collections that are INSERTED INTO and
-    /// REMOVED FROM rather than added to (bonds, covenants, councils,
+    /// REMOVED FROM rather than added to (bonds, forwards, councils,
     /// offers, debts, prospects, instruments, routes). Ordered, and
     /// NON-COMMUTING: `remove ∘ insert` is not `insert ∘ remove`.
     pub records: Vec<RecordOp>,

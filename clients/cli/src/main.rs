@@ -2233,7 +2233,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 }
             }
         }
-        Some("covenant") => {
+        Some("forward") => {
             let quota = words.next().and_then(parse_ratio_arg);
             let resource = words.next().and_then(parse_resource);
             let to_word = words.next();
@@ -2262,11 +2262,11 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         .map(|held| held.orb_id);
                     match (beneficiary, obligor) {
                         (Some(beneficiary), Some(obligor)) => {
-                            match world.seal_covenant_as(
+                            match world.seal_forward_as(
                                 SOVEREIGN, obligor, beneficiary, resource, quota.clone(), window,
                             ) {
                                 Ok(()) => println!(
-                                    "{} covenant vitrified: {} {} owed to {} within {} ticks — the collateral sits in the lattice until the word is kept or broken",
+                                    "{} forward vitrified: {} {} owed to {} within {} ticks — the collateral sits in the lattice until the word is kept or broken",
                                     style.ok("⛨"),
                                     style.strong(&amount(&quota)),
                                     resource_name(resource),
@@ -2286,16 +2286,16 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 _ => println!(
                     "{} usage: {} — e.g. {}",
                     style.bad("✗"),
-                    style.strong("covenant <quota> <resource> to <planet> within <ticks> [from <planet>]"),
-                    style.strong("covenant 3 iron to outpost within 10")
+                    style.strong("forward <quota> <resource> to <planet> within <ticks> [from <planet>]"),
+                    style.strong("forward 3 iron to outpost within 10")
                 ),
             }
         }
-        Some("covenants") => {
-            match world.covenants().is_empty() {
-                true => println!("{}", style.dim("(no open covenants)")),
+        Some("forwards") => {
+            match world.forwards().is_empty() {
+                true => println!("{}", style.dim("(no open forwards)")),
                 false => {
-                    for pact in world.covenants() {
+                    for pact in world.forwards() {
                         let obligor = world
                             .orb_by_id(pact.obligor)
                             .map(|held| held.name.clone())
@@ -2331,7 +2331,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     let axes: [(&str, &str, &Ratio, &str, &Ratio); 4] = [
                         ("compassion", "gave", &orb.given_in_crisis, "drew", &orb.drawn_in_crisis),
                         ("love", "streamed", &orb.bond_flow, "dropped", &orb.severance_load),
-                        ("integrity", "honoured", &orb.covenants_fulfilled, "broke", &orb.covenants_breached),
+                        ("integrity", "honoured", &orb.forwards_fulfilled, "broke", &orb.forwards_breached),
                         ("morality", "returned", &orb.returned_across, "extracted", &orb.extracted_across),
                     ];
                     for (axis, syn_name, syn, ent_name, ent) in axes {
@@ -2509,7 +2509,7 @@ fn help(style: &Style) {
         ("absorb <amt> from <p> [into <p>]", "route a hot planet's un-sealed overflow into the absorber's banked sink — emptying it clears the strike; the draw owes the absorber within the reciprocity window or it lapses to the extraction book"),
         ("bond <rate> <res> to <p> [for <n>]", "seal a standing order: rate/tick streams without per-tick clearing, settled in one receipt at each touch — a term bond expires orderly; severing or defaulting posts the notice load"),
         ("sever <res> to <p> · bonds", "cut a standing bond (the load posts to the cutter) · list the standing orders"),
-        ("covenant <q> <res> to <p> within <n>", "vitrify a delivery pact in the Glasskeeper lattice — collateral (priced by your fidelity books, never barred) locks until the quota is delivered (release) or the deadline passes (BREACH_AND_SLASH); `covenants` lists the open pacts"),
+        ("forward <q> <res> to <p> within <n>", "vitrify a delivery pact in the Glasskeeper lattice — collateral (priced by your fidelity books, never barred) locks until the quota is delivered (release) or the deadline passes (BREACH_AND_SLASH); `forwards` lists the open pacts"),
         ("ideology", "the dual cohesion ledger for this planet — the four axes, their books, and the derived readings; divergent trade partners pay a friction entropy tax, aligned ones pay zero"),
         ("charter <world> deal <n>", "ROUTE-1: charter a maintained lane — melt × (1−η), η from the pair's best instrument grade; upkeep draws at the year voice, unpaid lanes lapse"),
         ("forge <condition>", "MANU-1: forge an instrument from a crystallized condition + the converter chain (alloy = grade; diamond at 3+) — scan reach = base + best grade"),
@@ -2520,7 +2520,7 @@ fn help(style: &Style) {
         ("offer … · trade …", "MARKET-1: offer <amt> <res> for <amt> <res> id <n> posts a resting intent (no escrow, no absolute price); trade <mine> with <world> <theirs> deal <n> clears a crossing at the RESTING price via two aperture pairs"),
         ("shift <grade> <value>", "GAUGE-N: move — or open — the key at a grade; the fiber is a graded vector, not one dial (grade 0 stays the landed scalar every law binds to)"),
         ("elevate <delta> · age <class>", "the union verbs on this world: the three-gate gauge climb (settle · cohere · cross), and the star moving in its region"),
-        ("council <id> <res> <quota> <win> <stake> with <p,p,p>", "seal a multilateral covenant — three or more planets bound alike, judged together at the boundary"),
+        ("council <id> <res> <quota> <win> <stake> with <p,p,p>", "seal a multilateral forward — three or more planets bound alike, judged together at the boundary"),
         ("aperture <amt> <res> to <world> deal <n>", "cross banked value into another saved world — two legs, one deal, both chronicles sealed at once"),
         ("license <cond> to <world> via <council> deal <n>", "issue a technology into another world through diplomacy; condition 6 gifts THE CROWN onto a finished base-7 stack"),
         ("ascend <sigil> to <station>", "claim a station seat for a line whose world has crossed and climbed — the registry checks the room; a seat is reached, never appointed"),
@@ -2529,7 +2529,7 @@ fn help(style: &Style) {
         ("offer … · trade …", "MARKET-1: offer <amt> <res> for <amt> <res> id <n> posts a resting intent (no escrow, no absolute price); trade <mine> with <world> <theirs> deal <n> clears a crossing at the RESTING price via two aperture pairs"),
         ("shift <grade> <value>", "GAUGE-N: move — or open — the key at a grade; the fiber is a graded vector, not one dial (grade 0 stays the landed scalar every law binds to)"),
         ("elevate <delta> · age <class>", "the union verbs on this world: the three-gate gauge climb (settle · cohere · cross), and the star moving in its region"),
-        ("council <id> <res> <quota> <win> <stake> with <p,p,p>", "seal a multilateral covenant — three or more planets bound alike, judged together at the boundary"),
+        ("council <id> <res> <quota> <win> <stake> with <p,p,p>", "seal a multilateral forward — three or more planets bound alike, judged together at the boundary"),
         ("aperture <amt> <res> to <world> deal <n>", "cross banked value into another saved world — two legs, one deal, both chronicles sealed at once"),
         ("license <cond> to <world> via <council> deal <n>", "issue a technology into another world through diplomacy; condition 6 gifts THE CROWN onto a finished base-7 stack"),
         ("ascend <sigil> to <station>", "claim a station seat for a line whose world has crossed and climbed — the registry checks the room; a seat is reached, never appointed"),
@@ -3220,9 +3220,9 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "no bond stands there — {} lists the standing orders",
             style.strong("bonds")
         ),
-        ActionRefused::CovenantAlreadySealed => format!(
-            "an open covenant already stands on that lane — a vitrified pact cannot be cancelled, only fulfilled or slashed ({} lists them)",
-            style.strong("covenants")
+        ActionRefused::ForwardAlreadySealed => format!(
+            "an open forward already stands on that lane — a vitrified pact cannot be cancelled, only fulfilled or slashed ({} lists them)",
+            style.strong("forwards")
         ),
     };
     println!("{} {text}", style.bad("✗"));
@@ -3663,22 +3663,22 @@ fn chronicle(world: &World, style: &Style) {
                     style.strong(&amount(load))
                 ),
             },
-            cfe::dop::ClosureEvent::CovenantSealed {
+            cfe::dop::ClosureEvent::ForwardSealed {
                 obligor_orb, beneficiary_orb, resource, quota, window, collateral,
             } => format!(
-                "⛨ covenant vitrified: {} {} owed orb {obligor_orb} → orb {beneficiary_orb} within {window} ticks — {} collateral locked in the lattice",
+                "⛨ forward vitrified: {} {} owed orb {obligor_orb} → orb {beneficiary_orb} within {window} ticks — {} collateral locked in the lattice",
                 style.strong(&amount(quota)),
                 resource_name(*resource),
                 style.strong(&amount(collateral))
             ),
-            cfe::dop::ClosureEvent::CovenantReleased {
+            cfe::dop::ClosureEvent::ForwardReleased {
                 obligor_orb, resource, collateral, ..
             } => format!(
-                "⛨ covenant fulfilled — {} {} collateral returns to orb {obligor_orb}; the word held",
+                "⛨ forward fulfilled — {} {} collateral returns to orb {obligor_orb}; the word held",
                 style.strong(&amount(collateral)),
                 resource_name(*resource)
             ),
-            cfe::dop::ClosureEvent::CovenantSlashed {
+            cfe::dop::ClosureEvent::ForwardSlashed {
                 obligor_orb, beneficiary_orb, resource, collateral, ..
             } => format!(
                 "⚔ BREACH_AND_SLASH — orb {obligor_orb} broke its word; {} {} forfeits to orb {beneficiary_orb}",

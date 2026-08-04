@@ -1,7 +1,7 @@
 # IDEOLOGY — the dual cohesion ledger (design stage)
 
 **Status:** LANDED 2026-07-27, whole — the five-landing board (TRADE-1 →
-ABSORB-1 → BOND-1 → COVENANT-1 → IDEO-1, `BUILD_ORDER.md` §3) shipped
+ABSORB-1 → BOND-1 → FORWARD-1 → IDEO-1, `BUILD_ORDER.md` §3) shipped
 every mechanic here with its protocol sections and witnesses (NS-1 §2.3
 tags 30–38, 41). All rates, windows, weights, and curves remain
 **placeholder parameters** that tune at balance time; the recorded
@@ -61,7 +61,7 @@ Ideology is **measured, never declared and never scored**:
    ──────────────────────────────────────────────────────────────────────
    compassion         given_in_crisis        ◄──►  drawn_in_crisis
    love (resonance)   bond_flow              ◄──►  severance_load
-   integrity          covenants_fulfilled    ◄──►  covenants_breached
+   integrity          forwards_fulfilled    ◄──►  forwards_breached
    morality           returned_across        ◄──►  extracted_across
 
           every entry grounds in a receipt · every ratio derives at read
@@ -131,7 +131,7 @@ covenanted).
   **The bond is not the covenant** (recorded 2026-08-02, after the two
   were conflated in `EQUATIONS` D5). A COVENANT is one obligor owing one
   beneficiary, with collateral posted by the obligor alone against a
-  quota inside a window (§2.3, COVENANT-1) — a DIRECTED instrument, and
+  quota inside a window (§2.3, FORWARD-1) — a DIRECTED instrument, and
   the same asymmetry this clause calls patronage. A BOND is a standing
   flow, and only a symmetric PAIR of them is the marriage form. **The
   distinction is the direction count, never the collateral.** Both are
@@ -174,8 +174,8 @@ The carrier is the Glasskeeper escrow machinery (01 §7): covenants with
 exact-rational conditions over chronicle data, collateral locked in the
 vitrified matrix, release on fulfilment, `BREACH_AND_SLASH` on breach.
 
-- **`covenants_fulfilled`** += the collateral-at-stake value on release.
-- **`covenants_breached`** += the collateral-at-stake value on slash.
+- **`forwards_fulfilled`** += the collateral-at-stake value on release.
+- **`forwards_breached`** += the collateral-at-stake value on slash.
 
 **Value-weighted, never count-weighted (inscribed ruling):** a thousand
 toy promises must not wash one giant breach — the wash-trading exploit is
@@ -394,7 +394,7 @@ shippable artifact):
 - **the Bond Covenant** — severance requires the notice period, else
   slash.
 
-All placeholder terms; each is ordinary COVENANT-1 machinery, no new
+All placeholder terms; each is ordinary FORWARD-1 machinery, no new
 physics.
 
 ### 3.4 What is refused here (inscribed)

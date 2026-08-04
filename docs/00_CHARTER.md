@@ -378,7 +378,7 @@ prices fabrication: **honest forking is lawful and expected — a node
 that forks openly is a lawful nursery; only FABRICATED confirmation is
 slashed.** A node that fabricates confirmation and is
 proven to has its pen, its work, and its STAKE forfeited — reusing the
-landed `CovenantSlashed`/forfeit mechanics. The puppet web is made
+landed `ForwardSlashed`/forfeit mechanics. The puppet web is made
 expensive by work-anchoring AND ruinous by stake-slashing on proven
 fabrication. The three economics questions — what verified work earns,
 what the stake is, how much slashes — are operator rulings, ruled in one

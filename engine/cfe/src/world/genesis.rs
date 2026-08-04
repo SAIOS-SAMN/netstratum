@@ -16,7 +16,7 @@ impl World {
             vent_pending: Vec::new(),
             debts: Vec::new(),
             bonds: Vec::new(),
-            covenants: Vec::new(),
+            forwards: Vec::new(),
             councils: Vec::new(),
             offers: Vec::new(),
             friction_pending: Vec::new(),
@@ -61,7 +61,7 @@ impl World {
             vent_pending: Vec::new(),
             debts: committed.debts,
             bonds: committed.bonds,
-            covenants: committed.covenants,
+            forwards: committed.forwards,
             councils: committed.councils,
             offers: committed.offers,
             friction_pending: Vec::new(),
@@ -257,7 +257,7 @@ impl World {
         if self.warded != Some(false) {
             return Err(ActionRefused::WardOutOfOrder);
         }
-        let ceiling = 5;
+        let ceiling = super::rules::ward_gate_depth();
         if depth < ceiling {
             return Err(ActionRefused::DepthBelowCeiling { depth, ceiling });
         }

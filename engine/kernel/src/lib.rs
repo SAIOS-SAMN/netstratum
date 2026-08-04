@@ -688,7 +688,7 @@ fn covered(event: &ClosureEvent) -> bool {
         // conservation's non-constraint is CORRECT — ratified against
         // the replay reading in `authority_pins.rs`. The value-moving
         // "authority" deeds (ColonyFounded/Charted, ZoneBuilt/Razed,
-        // Covenant/Council seals — all move banks) stay held out for
+        // Forward/Council seals — all move banks) stay held out for
         // W-A slice-2's I1 arms. TaxonSealed stays coder-03's #42.
         | E::WorldCharted { .. } | E::StarCommissioned { .. } | E::PlanetSited { .. }
         | E::PracticeAdopted { .. } | E::PracticeReleased { .. } | E::ElderWarded { .. }
@@ -719,7 +719,7 @@ fn covered(event: &ClosureEvent) -> bool {
         // conservation and containment vacuous — ratified against the
         // replay reading in `world_driven_pins.rs`. HELD OUT: the
         // value-movers of these families (FamineStruck −drawn,
-        // CovenantSlashed +collateral, CouncilClosed +banked → the I1
+        // ForwardSlashed +collateral, CouncilClosed +banked → the I1
         // value slice) and the FOLD TRIO (Confluent/EraAnnexed/
         // EraFolded → U2d's I6 gate; a fold is never admitted on
         // exactness alone).
@@ -735,13 +735,13 @@ fn covered(event: &ClosureEvent) -> bool {
         // rules called, stateful reads from prior). Witnessed in
         // `value_pins.rs`. Tier 1 (single-resource, sign-guarded),
         // Tier 2 (escrow moves under THE ESCROW LAW — conservation reads
-        // banked + escrow, so a covenant lock/return nets ZERO on the
+        // banked + escrow, so a forward lock/return nets ZERO on the
         // conserved total; council CLOSE held out on Phase 3 threading),
         // Tier 3 (multi-resource vectors).
         | E::UpkeepSettled { .. } | E::CrystalDrawn { .. } | E::OverflowAbsorbed { .. }
-        | E::BondSettled { .. } | E::FamineStruck { .. } | E::CovenantSealed { .. }
+        | E::BondSettled { .. } | E::FamineStruck { .. } | E::ForwardSealed { .. }
         | E::CouncilSealed { .. } | E::FrictionSettled { .. } | E::OfferCleared { .. }
-        | E::CovenantReleased { .. } | E::CovenantSlashed { .. } | E::CouncilClosed { .. }
+        | E::ForwardReleased { .. } | E::ForwardSlashed { .. } | E::CouncilClosed { .. }
         | E::ColonyFounded { .. } | E::ColonyCharted { .. } | E::ZoneBuilt { .. }
         | E::ZoneRazed { .. }
         // THE ELEMENT LAW (operator ruling 2026-08-01): the assay mints
@@ -780,7 +780,7 @@ fn covered(event: &ClosureEvent) -> bool {
 ///   where conserved(s, r) = banked(s, r) + escrow(s, r)
 /// ```
 ///
-/// The escrow half (`total_escrow`) closes the lock seam: a covenant
+/// The escrow half (`total_escrow`) closes the lock seam: a forward
 /// seal debits a bank and MUST credit escrow the same collateral (net
 /// declared ZERO) — a debit that escrows nothing no longer passes.
 /// Council CLOSE is held out (its atomic multi-event settle is per-deed
@@ -809,8 +809,8 @@ fn conservation(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
     }
     // Escrow-held resources enter the conserved total too: a resource
     // present ONLY in a lock (no bank holds it) must still be checked —
-    // else a covenant could seal or return unwitnessed.
-    for pact in prior.covenants.iter().chain(next.covenants.iter()) {
+    // else a forward could seal or return unwitnessed.
+    for pact in prior.forwards.iter().chain(next.forwards.iter()) {
         if !resources.contains(&pact.resource) {
             resources.push(pact.resource);
         }
@@ -915,8 +915,8 @@ fn lawful_deltas(
         }
         // — Tier 2: escrow moves (THE ESCROW LAW, strengthened
         //   2026-08-01) —
-        // A covenant lock/return moves collateral BETWEEN escrow and a
-        // bank: the whole covenant enters `next` on seal (escrow rises by
+        // A forward lock/return moves collateral BETWEEN escrow and a
+        // bank: the whole forward enters `next` on seal (escrow rises by
         // the collateral) and leaves on release/slash (escrow falls). Now
         // that conservation reads banked + escrow (`total_conserved`),
         // the declared NET is ZERO — the bank move is FORCED to equal the
@@ -925,9 +925,9 @@ fn lawful_deltas(
         // door. (Council CLOSE stays declaration==effect on banked — its
         // multi-event atomic settle is per-deed threading, gated on the
         // Phase 3 flip; see the CouncilClosed arm.)
-        E::CovenantSealed { resource, collateral, .. }
-        | E::CovenantReleased { resource, collateral, .. }
-        | E::CovenantSlashed { resource, collateral, .. } => {
+        E::ForwardSealed { resource, collateral, .. }
+        | E::ForwardReleased { resource, collateral, .. }
+        | E::ForwardSlashed { resource, collateral, .. } => {
             non_negative(*resource, collateral)?;
             Vec::new()
         }
@@ -943,7 +943,7 @@ fn lawful_deltas(
         // Until then the close declares its banked credit and the
         // council is held constant across the deed's prior→next; the
         // escrow discharge is conserved at the settle boundary, not
-        // per-event. Covenants (1 deed ↔ 1 escrow move) ARE strengthened.
+        // per-event. Forwards (1 deed ↔ 1 escrow move) ARE strengthened.
         E::CouncilClosed { council, banked, .. } => {
             match prior.councils.iter().find(|held| held.council == *council) {
                 Some(held) => {
@@ -988,13 +988,13 @@ fn total_banked(state: &Committed, resource: Resource) -> Ratio {
 
 /// THE ESCROW LAW (operator dispatch C7, 2026-08-01). The world's total
 /// ESCROWED holding of one resource — collateral that sits OUT of every
-/// bank, locked in open pacts (COVENANT-1 §7): each covenant locks its
+/// bank, locked in open pacts (FORWARD-1 §7): each forward locks its
 /// `collateral`; each council locks `collateral` per member. Pure; the
 /// canonical projection carries only open pacts, so the sum is over what
 /// is actually locked.
 fn total_escrow(state: &Committed, resource: Resource) -> Ratio {
-    let covenants = state
-        .covenants
+    let forwards = state
+        .forwards
         .iter()
         .filter(|pact| pact.resource == resource)
         .fold(ratio(0, 1), |sum, pact| sum + pact.collateral.clone());
@@ -1005,7 +1005,7 @@ fn total_escrow(state: &Committed, resource: Resource) -> Ratio {
         .fold(ratio(0, 1), |sum, pact| {
             sum + pact.collateral.clone() * ratio(pact.members.len() as i64, 1)
         });
-    covenants + councils
+    forwards + councils
 }
 
 /// The CONSERVED quantity — banked PLUS escrowed. A lock moves value
@@ -1262,10 +1262,10 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::ResourceTransferred { .. } | E::ApertureSent { .. } | E::ApertureReceived { .. }
         | E::DiscoveryMinted { .. } | E::SovereignUnionSealed { .. }
         // Obligation instruments: ordinary finance, open to any line,
-        // each feeding a D channel. The covenant RULING binds the
+        // each feeding a D channel. The forward RULING binds the
         // ceremony, never the remainder (`17` §3d.1a).
         | E::BondSealed { .. } | E::BondSettled { .. }
-        | E::CovenantSealed { .. } | E::CovenantReleased { .. } | E::CovenantSlashed { .. }
+        | E::ForwardSealed { .. } | E::ForwardReleased { .. } | E::ForwardSlashed { .. }
         | E::OverflowAbsorbed { .. } | E::AbsorptionLapsed { .. }
         | E::CouncilSealed { .. } | E::CouncilClosed { .. }
         | E::OfferPosted { .. } | E::OfferCleared { .. }
@@ -1342,7 +1342,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         E::ColonyFounded { .. } | E::ZoneBuilt { .. } | E::WorldCharted { .. }
         | E::EntityRegistered { .. } | E::ScopeGranted { .. } | E::ScopeRevoked { .. }
         | E::ColonyCharted { .. } | E::StarCommissioned { .. } | E::PlanetSited { .. }
-        | E::BondSealed { .. } | E::CovenantSealed { .. } | E::CouncilSealed { .. }
+        | E::BondSealed { .. } | E::ForwardSealed { .. } | E::CouncilSealed { .. }
         | E::GaugeShiftedAt { .. } | E::TechLicensed { .. } | E::GenesisSealed { .. }
         | E::PracticeAdopted { .. } | E::PracticeReleased { .. } | E::ProspectStruck { .. }
         | E::ElderWarded { .. } | E::VeilDrawn { .. } | E::InstrumentForged { .. }
@@ -1362,7 +1362,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         E::ZoneRazed { .. } | E::WardLifted { .. } | E::VeilLifted { .. } => Some(Scope::Raze),
         // Collect — settle or move banked value.
         E::YieldCollected { .. } | E::UpkeepSettled { .. } | E::ResourceTransferred { .. }
-        | E::OverflowAbsorbed { .. } | E::BondSettled { .. } | E::CovenantReleased { .. }
+        | E::OverflowAbsorbed { .. } | E::BondSettled { .. } | E::ForwardReleased { .. }
         | E::FrictionSettled { .. } | E::ApertureSent { .. } | E::ApertureReceived { .. }
         | E::CrystalDrawn { .. } | E::AssayStruck { .. } | E::OfferCleared { .. }
         // U1: the discovery mint settles banked value against verified
@@ -1377,7 +1377,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         E::FamineStruck { .. } | E::FamineRelieved { .. } | E::EraAnnexed { .. }
         | E::GalaxyObserved { .. } | E::OverheatStruck { .. } | E::OverheatCleared { .. }
         | E::VentSettled { .. } | E::DemurrageSettled { .. } | E::AbsorptionLapsed { .. }
-        | E::CovenantSlashed { .. } | E::WantStruck { .. } | E::WantRelieved { .. }
+        | E::ForwardSlashed { .. } | E::WantStruck { .. } | E::WantRelieved { .. }
         | E::HandoffSealed { .. } | E::GaugeShifted { .. } | E::Diverged { .. }
         | E::Confluent { .. } | E::StarAged { .. } | E::EraFolded { .. }
         | E::CouncilClosed { .. } | E::TechDiscovered { .. } | E::IncursionStruck { .. }

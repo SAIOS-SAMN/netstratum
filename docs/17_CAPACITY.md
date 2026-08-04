@@ -566,7 +566,7 @@ defect below arrived without anyone deciding it.
 ### §3d.1 CORRECTED — the channel was never a Glasskeeper instrument
 
 **THIS SECTION CLAIMED A DEFECT THAT IS NOT THERE, and capacity-lane
-was right to refuse it (2026-08-02).** It read: *`CHANNEL_COVENANT`
+was right to refuse it (2026-08-02).** It read: *`CHANNEL_FORWARD`
 reads one people's instrument, so a line that never seals a covenant
 carries a capacity axis permanently at the ground.* The channel does
 not read that.
@@ -579,7 +579,7 @@ by a deadline with collateral posted against failure. **Nothing in the
 mechanism is ceremonial.** `bridge.rs` already SAID so, in the doc
 comment above the constant, before any of this was written:
 
-> "covenant" and "pact" are inherited names (COVENANT-1, BUILD_ORDER
+> "covenant" and "pact" are inherited names (FORWARD-1, BUILD_ORDER
 > §3), not descriptions, and this channel means the remainder and only
 > that.
 
@@ -590,7 +590,7 @@ the projection actually takes. The evidence against it was on `main`,
 in the file I had already opened, six lines above the constant I was
 indicting. **A carrier is not a mechanism, and the name on a channel is
 not what the channel counts.** The bias was in the NAME — which is now
-gone: `CHANNEL_COVENANT` → `CHANNEL_FORWARD` (capacity-lane, d515341),
+gone: `CHANNEL_FORWARD` → `CHANNEL_FORWARD` (capacity-lane, d515341),
 with no meter moved and nothing re-priced.
 
 The three ideology axes still MAP to the three channels, and that
@@ -676,7 +676,7 @@ is not obviously true and was never argued.
 
 **THE METHOD, and it is the lesson from §3d.1.** A deed's layer is read
 from WHAT IT IS KEYED ON — the fields it carries — never from the prose
-around it or the document it sits in. I assigned `CHANNEL_COVENANT` to
+around it or the document it sits in. I assigned `CHANNEL_FORWARD` to
 "civilizational" by reasoning from `09` §2.3's carrier language and
 never read the projection. Every row below names its key.
 
@@ -724,7 +724,7 @@ obligation with terms — open to any line, and each feeds a `D` channel:
 
 ```text
     BondSealed · BondSettled                    CHANNEL_BOND
-    CovenantSealed · Released · Slashed         CHANNEL_FORWARD
+    ForwardSealed · Released · Slashed         CHANNEL_FORWARD
     OverflowAbsorbed · AbsorptionLapsed         CHANNEL_DEBT
     CouncilSealed · CouncilClosed · OfferPosted · OfferCleared
     RouteChartered · RouteLapsed · VoidShare
@@ -1681,7 +1681,7 @@ the strongest on the board; every major event is a word starting with
 C*). Checked against the corpus:
 
 - At the DEED level it is 9 of 64 — `ColonyFounded`, `ColonyCharted`,
-  `CovenantSealed/Released/Slashed`, `Confluent`, `CouncilSealed/Closed`,
+  `ForwardSealed/Released/Slashed`, `Confluent`, `CouncilSealed/Closed`,
   `CrystalDrawn`.
 - At the CONCEPT level it is total. **39 of 39 tested C-words are
   load-bearing**, most of them heavily: chronicle (974), class (633),
@@ -1701,7 +1701,7 @@ own organising vocabulary.
 **THE PROTECTION, and it is ONE mechanism doing BOTH jobs.** The proposal
 boundary protects in both directions at once:
 
-    protects OTHERS from C   nothing he produces is authoritative; a
+    protects OTHERS from C   nothing it produces is authoritative; a
                              wrong answer dies on exact re-derivation
                              and costs nothing, because nothing was
                              trusted.

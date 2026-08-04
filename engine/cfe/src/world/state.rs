@@ -6,10 +6,10 @@
 //! different shapes do not collide (GROUND §4b -- the parallel-lane
 //! vent).
 
-use crate::dop::{ClosureEvent, ColonyOrb, Resource, Zone};
+use crate::dop::{ColonyOrb, Resource};
 use crate::ipsal::Entity;
 use crate::ratio::Ratio;
-use crate::vrp::{Attestation, Chronicle, TickRead, Timekeeper, WorldClock};
+use crate::vrp::{Chronicle, TickRead, Timekeeper, WorldClock};
 
 /// One tick's read: the clock walk, any famines that struck, and any
 /// overheat transitions (per orb).
@@ -53,14 +53,14 @@ pub struct Bond {
     pub anchored: u64,
 }
 
-/// COVENANT-1 (01 §7, 09 §2.3): one vitrified delivery pact — the
+/// FORWARD-1 (01 §7, 09 §2.3): one vitrified delivery pact — the
 /// obligor's `collateral` sits OUT of its bank (the lock gates every
 /// spend by absence; the matrix is a lossless vault by construction)
 /// until `delivered ≥ quota` releases it home or the passed deadline
 /// slashes it to the beneficiary. Committed state; every mutation
 /// receipted; replays from receipts alone.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Covenant {
+pub struct Forward {
     pub obligor: u64,
     pub beneficiary: u64,
     pub resource: Resource,
@@ -85,7 +85,7 @@ pub struct Offer {
     pub posted: u64,
 }
 
-/// COUNCIL-1 (12_UNION §7): a multilateral covenant — every member
+/// COUNCIL-1 (12_UNION §7): a multilateral forward — every member
 /// bound alike, judged together at the boundary.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Council {
@@ -114,8 +114,8 @@ pub struct Committed {
     pub debts: Vec<AbsorptionDebt>,
     /// BOND-1: the standing orders, in sealing order.
     pub bonds: Vec<Bond>,
-    /// COVENANT-1: the open vitrified pacts, in sealing order.
-    pub covenants: Vec<Covenant>,
+    /// FORWARD-1: the open vitrified pacts, in sealing order.
+    pub forwards: Vec<Forward>,
     /// COUNCIL-1: the open councils, in sealing order.
     pub councils: Vec<Council>,
     /// MARKET-1: the resting offers, in posting order.
@@ -216,8 +216,8 @@ pub struct World {
     pub(super) debts: Vec<AbsorptionDebt>,
     /// BOND-1: the standing orders (committed, same law).
     pub(super) bonds: Vec<Bond>,
-    /// COVENANT-1: the open vitrified pacts (committed, same law).
-    pub(super) covenants: Vec<Covenant>,
+    /// FORWARD-1: the open vitrified pacts (committed, same law).
+    pub(super) forwards: Vec<Forward>,
     /// COUNCIL-1: the open councils (committed, same law).
     pub(super) councils: Vec<Council>,
     /// MARKET-1: the resting offers (committed, same law).
@@ -271,7 +271,7 @@ pub struct Leap {
     pub council: u64,
 }
 
-/// COVENANT-1: a deliberate delivery (transfer or bond settlement)
+/// FORWARD-1: a deliberate delivery (transfer or bond settlement)
 /// from obligor to beneficiary credits the open pact on that lane —
 /// at most one stands per (obligor, beneficiary, resource). Shared
 /// verbatim by the live paths and replay.

@@ -248,7 +248,7 @@ fn the_refusal_carries_the_share_so_the_floor_can_be_risen_from() {
         kernel::bridge::open_axes_of(&live, 5),
         vec![
             kernel::bridge::CHANNEL_BOND,
-            kernel::bridge::CHANNEL_COVENANT,
+            kernel::bridge::CHANNEL_FORWARD,
             kernel::bridge::CHANNEL_DEBT
         ],
         "an orb holding nothing has every direction open to it"

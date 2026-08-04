@@ -144,8 +144,8 @@ pub enum ActionRefused {
     BondAlreadySealed,
     /// BOND-1 — no bond stands on this (source, target, resource).
     NoSuchBond,
-    /// COVENANT-1 — one OPEN covenant per (obligor, beneficiary,
+    /// FORWARD-1 — one OPEN forward per (obligor, beneficiary,
     /// resource); a vitrified pact cannot be cancelled, only run out.
-    CovenantAlreadySealed,
+    ForwardAlreadySealed,
 }
 

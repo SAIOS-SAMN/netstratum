@@ -363,7 +363,7 @@ model). The waves are disjoint deed families — parallel across lanes:
 
 - **W-A, the authority deeds (~24, {I2, I3}):** ColonyFounded,
   ZoneBuilt, WorldCharted, ColonyCharted, StarCommissioned,
-  PlanetSited, BondSealed, CovenantSealed, CouncilSealed,
+  PlanetSited, BondSealed, ForwardSealed, CouncilSealed,
   GaugeShiftedAt, TechLicensed, GenesisSealed, PracticeAdopted/
   Released, ProspectStruck, ElderWarded, VeilDrawn, InstrumentForged,
   RouteChartered, OfferPosted, LineSucceeded, ZoneRazed, WardLifted,
@@ -374,11 +374,11 @@ model). The waves are disjoint deed families — parallel across lanes:
   mints need a declared I4 arm (a chartered genesis mint, named, never
   a hole). `TaxonSealed` is coder-03's standing #42 — leave it theirs.
 - **W-B, the value movers (~8, {I1, I2, I3}):** UpkeepSettled,
-  OverflowAbsorbed, BondSettled, CovenantReleased, FrictionSettled,
+  OverflowAbsorbed, BondSettled, ForwardReleased, FrictionSettled,
   CrystalDrawn, AssayStruck, OfferCleared.
 - **W-C, the world-driven consequences (~14, {I1 + sign/bound}):**
   FamineStruck/Relieved, VentSettled, OverheatStruck/Cleared,
-  AbsorptionLapsed, CovenantSlashed, WantStruck/Relieved, StarAged,
+  AbsorptionLapsed, ForwardSlashed, WantStruck/Relieved, StarAged,
   TechDiscovered, RouteLapsed, VoidShare, IncursionStruck.
 - **W-D, the mesh/universe deeds (~8, protocol-law + I6-gated):**
   EraAnnexed, GalaxyObserved, HandoffSealed, GaugeShifted, Diverged,

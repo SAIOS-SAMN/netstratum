@@ -57,11 +57,11 @@ impl World {
             for (source, target, resource) in expired {
                 self.settle_bond(source, target, resource, now, vec![], Some(ratio(0, 1)));
             }
-            // COVENANT-1: the vitrified pacts resolve at the boundary —
+            // FORWARD-1: the vitrified pacts resolve at the boundary —
             // fulfilment releases, the passed deadline slashes;
             // fulfilment wins the tie. World-driven, the famine shape.
             let due: Vec<(u64, u64, Resource, bool)> = self
-                .covenants
+                .forwards
                 .iter()
                 .filter_map(|pact| {
                     if pact.delivered >= pact.quota {
@@ -74,14 +74,14 @@ impl World {
                 })
                 .collect();
             for (obligor, beneficiary, resource, fulfilled) in due {
-                let Some(at) = self.covenants.iter().position(|pact| {
+                let Some(at) = self.forwards.iter().position(|pact| {
                     pact.obligor == obligor
                         && pact.beneficiary == beneficiary
                         && pact.resource == resource
                 }) else {
                     continue;
                 };
-                let pact = self.covenants.remove(at);
+                let pact = self.forwards.remove(at);
                 let stake =
                     pact.collateral.clone() * crate::dop::commensurate_weight(resource);
                 let recipient = match fulfilled {
@@ -97,18 +97,18 @@ impl World {
                     peel(&mut self.orbs, obligor)
                 {
                     match fulfilled {
-                        true => held.covenants_fulfilled += stake,
-                        false => held.covenants_breached += stake,
+                        true => held.forwards_fulfilled += stake,
+                        false => held.forwards_breached += stake,
                     }
                 }
                 let event = match fulfilled {
-                    true => ClosureEvent::CovenantReleased {
+                    true => ClosureEvent::ForwardReleased {
                         obligor_orb: obligor,
                         beneficiary_orb: beneficiary,
                         resource,
                         collateral: pact.collateral,
                     },
-                    false => ClosureEvent::CovenantSlashed {
+                    false => ClosureEvent::ForwardSlashed {
                         obligor_orb: obligor,
                         beneficiary_orb: beneficiary,
                         resource,
@@ -161,8 +161,8 @@ impl World {
                             held.bank(pact.resource, banked.clone());
                         }
                         match fulfilled {
-                            true => held.covenants_fulfilled += stake,
-                            false => held.covenants_breached += stake,
+                            true => held.forwards_fulfilled += stake,
+                            false => held.forwards_breached += stake,
                         }
                     }
                     self.chronicle.append(
@@ -184,7 +184,11 @@ impl World {
         let mut struck = Vec::new();
         let mut overheat_struck = Vec::new();
         let mut overheat_cleared = Vec::new();
-        let flows: Vec<(u64, Vec<Zone>)> = self
+        // A zone runs at its VIGOUR — the share of its inputs that
+        // stand — never all-or-nothing (20_FOUNDING §6a-bis). Zones at
+        // zero vigour drop out; the rest carry their reading with them
+        // so every downstream sum is weighted rather than counted.
+        let flows: Vec<(u64, Vec<(Zone, Ratio)>)> = self
             .orbs
             .iter()
             .map(|orb| {
@@ -192,8 +196,8 @@ impl World {
                     orb.orb_id,
                     orb.zones
                         .iter()
-                        .filter(|zone| orb.zone_active(zone))
-                        .cloned()
+                        .map(|zone| (zone.clone(), orb.zone_vigour(zone)))
+                        .filter(|(_, vigour)| *vigour > ratio(0, 1))
                         .collect(),
                 )
             })
@@ -246,9 +250,11 @@ impl World {
                 let sub_mesic = t_eq4 < thermal::SubstrateBand::Mesic.bounds4().0;
                 frozen = sub_mesic && joule_famined;
                 let stellar_load = t_eq4.clone() / thermal::thermal_k();
-                let factory: Ratio = active
-                    .iter()
-                    .fold(zero.clone(), |sum, zone| sum + zone.kind.factory_heat());
+                // Weighted: a zone running at half its inputs runs its
+                // furnace at half.
+                let factory: Ratio = active.iter().fold(zero.clone(), |sum, (zone, vigour)| {
+                    sum + zone.kind.factory_heat() * vigour.clone()
+                });
                 // TECH-1b: the doctrine crystallized — the radiator
                 // sheds at 5/4 (10 §3).
                 let radiator = match boon[4] {
@@ -259,8 +265,10 @@ impl World {
                 // ECON-J (05 §1.2): heating upkeep on a sub-mesic orb —
                 // every active zone burns joules against the cold.
                 if sub_mesic && !frozen && !active.is_empty() {
-                    let mut burn =
-                        crate::dop::heating_per_zone() * ratio(active.len() as i64, 1);
+                    let running: Ratio = active
+                        .iter()
+                        .fold(zero.clone(), |sum, (_, vigour)| sum + vigour.clone());
+                    let mut burn = crate::dop::heating_per_zone() * running;
                     // TECH-1b: insulation crystallized — the cold
                     // bites at 3/4 (10 §3).
                     if boon[1] {
@@ -272,13 +280,13 @@ impl World {
                 // bankable sink by active cryo-lattice arrays — the
                 // infrastructure gate (research/throttle gates deferred).
                 if !frozen && heat_net < zero && t_eq4 <= thermal::cryo_vault_max4() {
-                    let arrays = active
+                    let arrays: Ratio = active
                         .iter()
-                        .filter(|zone| zone.kind == ZoneKind::CryoArray)
-                        .count() as i64;
-                    if arrays > 0 {
+                        .filter(|(zone, _)| zone.kind == ZoneKind::CryoArray)
+                        .fold(zero.clone(), |sum, (_, vigour)| sum + vigour.clone());
+                    if arrays > zero {
                         let headroom = -heat_net.clone();
-                        let mut lattice = crate::dop::sink_throughput() * ratio(arrays, 1);
+                        let mut lattice = crate::dop::sink_throughput() * arrays;
                         // TECH-1b: the lattice deepened — capture at
                         // 5/4 (10 §3).
                         if boon[3] {
@@ -293,11 +301,11 @@ impl World {
                 if !frozen && heat_net > zero {
                     // The syntropic arm FIRST (05 §1.2): shells encase
                     // up to their throughput; joules accrue as yield.
-                    let shells = active
+                    let shells: Ratio = active
                         .iter()
-                        .filter(|zone| zone.kind == ZoneKind::Encasement)
-                        .count() as i64;
-                    let mut throughput = encasement_throughput() * ratio(shells, 1);
+                        .filter(|(zone, _)| zone.kind == ZoneKind::Encasement)
+                        .fold(zero.clone(), |sum, (_, vigour)| sum + vigour.clone());
+                    let mut throughput = encasement_throughput() * shells;
                     // TECH-1b: discipline crystallized — the shells
                     // encase at 5/4 (10 §3).
                     if boon[2] {
@@ -357,9 +365,10 @@ impl World {
                 // metabolism's ration/harvest map — biotic and
                 // unsealed read ruleset v1 verbatim.
                 let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
-                for zone in active {
+                let standing: Vec<Zone> = active.iter().map(|(zone, _)| zone.clone()).collect();
+                for (zone, vigour) in active {
                     let (resource, amount) = crate::dop::zone_yield(zone.kind, metabolism);
-                    let boost = terrain_boost(&terrain, *orb_id, zone, active);
+                    let boost = terrain_boost(&terrain, *orb_id, zone, &standing);
                     let mut yield_factor = ratio(1, 1);
                     let mut upkeep_factor = ratio(1, 1);
                     if athanor {
@@ -390,10 +399,16 @@ impl World {
                         &mut self.accrued,
                         *orb_id,
                         resource,
-                        amount * efficiency.clone() * boost * yield_factor.clone(),
+                        amount * efficiency.clone() * boost * yield_factor.clone() * vigour.clone(),
                     );
+                    // A zone drawing half its inputs consumes half.
                     for (resource, amount) in crate::dop::zone_upkeep(zone.kind, metabolism) {
-                        accrue(&mut self.accrued, *orb_id, resource, -amount * upkeep_factor.clone());
+                        accrue(
+                            &mut self.accrued,
+                            *orb_id,
+                            resource,
+                            -amount * upkeep_factor.clone() * vigour.clone(),
+                        );
                     }
                 }
             }

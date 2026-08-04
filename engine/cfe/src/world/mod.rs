@@ -16,7 +16,7 @@ use crate::dop::{
 };
 use crate::ipsal::{Entity, Scope};
 use crate::ratio::{ratio, Ratio};
-use crate::vrp::{Attestation, Chronicle, Timekeeper, TickRead, WorldClock};
+use crate::vrp::{Attestation, Chronicle, Timekeeper, WorldClock};
 
 /// The sovereign's entity id — the operator at the terminal, registered
 /// at founding.
@@ -33,7 +33,9 @@ pub mod refusal;
 pub mod rules;
 
 pub use refusal::ActionRefused;
-pub use rules::{demurrage_due, ease_of, in_crisis, standing_supply};
+pub use rules::{
+    demurrage_due, ease_of, in_crisis, standing_supply, ward_gate_depth, ward_progress,
+};
 
 
 
@@ -49,10 +51,11 @@ pub mod tick;
 pub mod zones;
 pub mod replay;
 pub mod state;
+pub mod stock;
 
 pub use replay::replay;
 pub use state::{
-    AbsorptionDebt, Bond, Committed, Council, Covenant, Genesis, Leap, Offer, Prospected,
+    AbsorptionDebt, Bond, Committed, Council, Forward, Genesis, Leap, Offer, Prospected,
     TickOutcome, World,
 };
 // Internal to the organ — never re-exported (GROUND §3 invariant 1:
@@ -839,14 +842,14 @@ fn peek(orbs: &[ColonyOrb], orb: u64) -> Option<&ColonyOrb> {
     orbs.iter().find(|held| held.orb_id == orb)
 }
 
-fn credit_covenants(
-    covenants: &mut [Covenant],
+fn credit_forwards(
+    forwards: &mut [Forward],
     from: u64,
     to: u64,
     resource: Resource,
     amount: &Ratio,
 ) {
-    for pact in covenants.iter_mut() {
+    for pact in forwards.iter_mut() {
         if pact.obligor == from && pact.beneficiary == to && pact.resource == resource {
             pact.delivered += amount.clone();
         }
@@ -855,7 +858,7 @@ fn credit_covenants(
 
 /// COUNCIL-1: a delivery from one member to a FELLOW member credits
 /// the giver's council quota (transfers and bond flow alike — the
-/// covenant precedent, widened to the group).
+/// forward precedent, widened to the group).
 fn credit_councils(
     councils: &mut [Council],
     from: u64,

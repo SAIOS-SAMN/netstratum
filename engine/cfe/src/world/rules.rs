@@ -183,3 +183,38 @@ pub fn demurrage_due(
 pub fn in_crisis(orb: &ColonyOrb) -> bool {
     !orb.famine.is_empty() || orb.overheat
 }
+
+/// WARDEN-1b — the depth a claimer must reach to lift an elder's
+/// reverse shield.
+///
+/// **A placeholder, named and single-sourced.** It was the bare
+/// literal `5` inside `lift_ward`, where nothing could find it and
+/// nothing could tune it. The value is unchanged; what changed is that
+/// it is now one rule with one name, and §7's binding applies to it
+/// visibly: it becomes a READING when it has an operand — the star's
+/// own difficulty, or the elder's capacity — rather than staying a
+/// constant nobody can see.
+pub fn ward_gate_depth() -> u32 {
+    5
+}
+
+/// How far a claimer stands toward lifting a ward, in `[0, 1]`.
+///
+/// **The shield itself stays binary and that is correct** — a barrier
+/// is sealed or it is open, and a partially sealed shield would leak
+/// value through a gate nobody solved. What was wrong is that the work
+/// toward it was INVISIBLE: a claimer at depth 4 of 5 had done four
+/// fifths of the work and could read nothing back, which is the
+/// strategy-target defect of 20_FOUNDING §6a-bis applied to the ward.
+///
+/// This measures the approach without weakening the barrier. It gates
+/// nothing today; it is the operand a partial-credit mechanic would
+/// need, and the reading a lens can show so a line knows where it
+/// stands.
+pub fn ward_progress(depth: u32) -> Ratio {
+    let gate = ward_gate_depth();
+    match depth >= gate {
+        true => ratio(1, 1),
+        false => ratio(i64::from(depth), i64::from(gate.max(1))),
+    }
+}
