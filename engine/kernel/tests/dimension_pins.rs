@@ -88,3 +88,33 @@ fn occupancy_reads_the_support_not_the_values() {
     );
     assert_eq!(occupied_dimensions(&state), vec![CHANNEL_BOND]);
 }
+
+/// **THE ARITY ITSELF, pinned literally — the one place it should be.**
+///
+/// RESTORED 2026-08-04 at the integration audit. remediations-lane
+/// replaced literal channel counts in these pins with `CHANNELS`, which
+/// is right: a structural pin that hardcodes arity breaks on every
+/// channel addition and teaches nothing. But deriving EVERYWHERE means
+/// no pin can catch an unintended arity change, and the channel count
+/// is wire-visible — `Delta` is `dim × dim × fiber` and every
+/// projection reads it. So exactly one literal, here, deliberately.
+///
+/// **It lived in `capacity_law_pins.rs` and I deleted that file for its
+/// LAW, taking this guard with it — which is the collateral the pin
+/// existed to prevent.** Its author wrote that the count "becomes 4
+/// when [CHANNEL_LANE] lands and the change is deliberate rather than
+/// silent." That merge landed in this same integration, so the change
+/// was made silently, exactly once, by the deletion. Recorded rather
+/// than quietly corrected.
+///
+/// Changing `CHANNELS` should require editing this line and saying why.
+#[test]
+fn the_channel_arity_is_four_and_changing_it_is_an_amendment() {
+    assert_eq!(
+        kernel::bridge::CHANNELS,
+        4,
+        "BOND · FORWARD · DEBT · LANE. Was 3; remediations-lane added \
+         CHANNEL_LANE as the fourth and it landed 2026-08-04. A fifth \
+         channel edits this line and says why."
+    );
+}

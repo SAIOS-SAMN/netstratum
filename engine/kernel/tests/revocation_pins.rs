@@ -230,3 +230,28 @@ fn the_version_is_semver_and_orders() {
         "the linear era (1..5) orders below the packed form — an earlier judge cut those chains"
     );
 }
+
+/// **THE JUDGE GATES CREATION, NEVER MOTION** — restored 2026-08-04.
+///
+/// Written for the capacity law and deleted with it, but the law it
+/// states outlived its author: value that already exists may MOVE
+/// through a world that could not mint in it. D4 carries the same rule
+/// now (`d4_binds_creation_and_leaves_motion_alone` checks D4's own
+/// arms; this checks the WHOLE judge, which is the stronger claim and
+/// why it is worth having back).
+#[test]
+fn the_judge_gates_creation_never_motion() {
+    let mut ring = ring(4);
+    ring.orbs[0].bank(cfe::dop::Resource::Iron, ratio(10, 1));
+    let move_it = Step {
+        event: ClosureEvent::ResourceTransferred {
+            from_orb: 1,
+            to_orb: 2,
+            resource: cfe::dop::Resource::Iron,
+            amount: ratio(0, 1),
+        },
+        actor: HAND,
+        stamp: 1,
+    };
+    assert_eq!(admits(&ring, &ring, &move_it), Ok(()), "motion is not creation");
+}
