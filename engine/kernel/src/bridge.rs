@@ -63,8 +63,25 @@ pub const CHANNEL_FORWARD: usize = 1;
 /// ABSORB-1: the open reciprocity window's remainder, debtor →
 /// creditor.
 pub const CHANNEL_DEBT: usize = 2;
-/// The fiber arity of the projection.
-pub const CHANNELS: usize = 3;
+/// ROUTE-1: the chartered LANE, `eta` — **the one CROSS-BOOK channel**
+/// (operator ruling 2026-08-02: *"open the cross-book read via
+/// entanglement"*).
+///
+/// Channels 0–2 are intra-book by construction: `Bond`, `Covenant` and
+/// `AbsorptionDebt` are all keyed on orb ids inside one book. A LANE is
+/// the opposite — `cfe::world::charter_route` writes the SAME `deal`
+/// into BOTH books (`world.rs:3784-3799`), so a shared deal id is a
+/// committed, replay-derived relation spanning two worlds. It is the
+/// only one there is.
+///
+/// The two projections are therefore COMPLEMENTARY, never overlapping:
+/// [`project_complex`] fills 0–2 and leaves this empty;
+/// [`project_complex_across`] fills only this. Nothing is counted twice.
+pub const CHANNEL_LANE: usize = 3;
+/// The fiber arity of the projection. **Additive amendment 2026-08-02**
+/// (3 → 4, the lane channel): every pin indexes by NAME, so a new
+/// channel adds a coordinate and moves no existing reading.
+pub const CHANNELS: usize = 4;
 
 /// WHAT IS KNOWN about a relation (operator ruling 2026-08-01: the
 /// complex is SPARSE — an absent relation is ABSENT, not zero).
@@ -430,6 +447,89 @@ pub fn project_complex(state: &Committed) -> (Delta, Support) {
         }
     }
     (delta, support)
+}
+
+/// **THE CROSS-BOOK COMPLEX** — one vertex per BOOK, edged by the lanes
+/// they share (operator ruling 2026-08-02).
+///
+/// [`project_complex`] reads inside one book and cannot see a relation
+/// whose other end is elsewhere. This reads the complementary half: the
+/// vertices are whole worlds, and `i ~ j` exactly when both books hold
+/// the same chartered `deal`. The edge value is the lane's `eta` —
+/// signed by book order so the tensor stays antisymmetric, which is the
+/// same discipline [`project_complex`] uses for a directed obligation.
+///
+/// **THIS IS NOT RECONCILIATION** and does not revive `cfe::opposition`
+/// (CHARTER §11, `recurrence_guard.rs` check 2). Reconciliation compares
+/// two COPIES of one thing to find divergence — *"you do not reconcile
+/// what cannot diverge."* A lane is ONE relation with TWO endpoints,
+/// each book holding its own leg by its own receipt. Reading it is
+/// observation, not comparison, and `read_entangled_observed`'s own doc
+/// already names this as the cross-book door.
+///
+/// **`unknown` is the caller's honesty.** Pass the count of book-pairs
+/// this observer could NOT see. A conductor holding the whole roster
+/// passes 0 — that is `Resolve::LockOn`, absence confirmed at the
+/// present reach. An observer holding a subset must carry its blindness
+/// or the rank it reads is a phantom (`bridge.rs` §ABSENCE IS A CLAIM).
+pub fn project_complex_across(books: &[&Committed]) -> (Delta, Support) {
+    let dim = books.len();
+    let mut delta = Delta::zero(dim, CHANNELS);
+    let mut support = Support::new(dim, CHANNELS);
+    if dim < 2 {
+        // One book relates to nothing across a boundary it is alone on.
+        return (delta, support);
+    }
+    for i in 0..dim {
+        for j in (i + 1)..dim {
+            // The shared lane: the BEST suppression both books hold, the
+            // same reading `cfe::world::pair_melt` takes (call the law's
+            // shape, never a second one).
+            let shared = books[i]
+                .routes
+                .iter()
+                .filter(|(deal, _)| books[j].routes.iter().any(|(held, _)| held == deal))
+                .map(|(_, eta)| eta.clone())
+                .max();
+            if let Some(eta) = shared {
+                let mut coords = vec![ratio(0, 1); CHANNELS];
+                coords[CHANNEL_LANE] = eta;
+                delta.set_antisym(i, j, coords);
+                support.connect(i, j, CHANNEL_LANE);
+            }
+        }
+    }
+    (delta, support)
+}
+
+/// The cross-book entangled read — the counterpart of
+/// [`read_entangled`], taken over
+/// [`project_complex_across`]. Same poles, same laws, wider complex.
+pub fn read_entangled_across(books: &[&Committed], unknown: usize) -> EntangledRead {
+    let (delta, support) = project_complex_across(books);
+    let symmetry_foundation = symmetry_foundation(&delta, &support);
+    let flows = boundary_form(&delta, &support).flows;
+    let holonomy = holonomies(&delta, &support);
+    let rank = holonomy.len();
+    EntangledRead { rank, holonomy, symmetry_foundation, flows, unknown }
+}
+
+/// The per-dimension verdict on the CROSS-BOOK complex — the same
+/// anti-collapse law [`verdict_per_dimension`] enforces, applied to the
+/// wider read. Never the aggregate: a roster can read `Entangled` on
+/// the sum while no single channel is.
+pub fn verdict_per_dimension_across(books: &[&Committed]) -> Vec<Vacuity> {
+    let (delta, support) = project_complex_across(books);
+    let charges = holonomies(&delta, &support);
+    let form = boundary_form(&delta, &support);
+    (0..CHANNELS)
+        .map(|l| {
+            let rank = charges.iter().filter(|held| held.l == l).count();
+            let flows =
+                form.flows.iter().filter(|flow| flow.l == l).cloned().collect::<Vec<_>>();
+            dual_pole(rank, &BoundaryForm { flows })
+        })
+        .collect()
 }
 
 /// THE REFOLD CERTIFICATE — what the fold took, kept exactly, so the

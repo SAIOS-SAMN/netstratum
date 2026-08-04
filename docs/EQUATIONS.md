@@ -1339,3 +1339,138 @@ work certificate, so it enters I4's mint-bound via `verify_certificate`.
     CORRECTION 2: H²/U² explode fixed width — `cfe::ratio` (BigRational)
                   only (the 2^1100 lesson, §5c guardrail 2).
     CORRECTION 3: call the sealed rational; never a second one (§0b).
+
+---
+
+## §7 The forge budget — the search bound as a reading
+
+**ROW CLAIM (remediations-lane, 2026-08-02, §0.2).** Claimed before code
+uses it. Authority: `docs/FORGE_BUDGET.md`. All rows **DRAFT** — named
+here so no landing inlines a literal; **valued only by operator ruling**
+(FORGE_BUDGET §7). Per §0.3, each row states what its coefficient
+MEASURES, never what it is worth.
+
+**B0 · `SEARCH_BUDGET` — DECOMMISSIONED, LANDED 2026-08-02.** Was
+`solver/src/search.rs:119`, the flat `200_000`: a PLACEHOLDER by its own
+comment (a ceiling chosen to stop one observed 102 s stall) and inert,
+since `word_len` 3 enumerates 52 060. **Deleted**, with both truncation
+branches, from `search::solve` and `volume::solve_volume`, per operator
+ruling *"uncap or no cap"*. Authority is now
+`solver::search::frontier(V, d)` — LANDED.
+
+    frontier(V, d) = Σ_{k=0}^{d} V^k          exact, u128, saturating
+
+Because the bound IS the exact candidate count, a check against it can
+never fire; the branches are gone rather than raised. **Behaviour
+unchanged at live difficulty** (`frontier ≤ 52 060 < 200 000`), suite
+green. **Measured side-effect: 40 cycles 59.29 s → 48.24 s (−18.6 %)** —
+the clamp had been concealing that the loop built the depth-`(d+1)`
+frontier (1.87 M programs at `V=37, d=3`) only to discard it.
+
+**B-E1 · THE BUDGET EQUATION.** DRAFT — **AMENDED 2026-08-02** (operator:
+*"change the ruling"*). **Bound the DEPTH; the candidate count follows.**
+The search is breadth-first by depth (`search.rs:140`), so depth is where
+a lawful bound belongs.
+
+    budget(prior, rung) = frontier( V, δ(prior, rung) )
+
+        frontier(V, δ) = Σ_{d=0}^{δ} V^d           the exhaustive sweep to depth δ
+
+        δ = min( β_ceiling(α_axis(prior)),  word_len(rung),  1 + earned(prior) )
+        unknown(prior) > 0   ⇒   δ = δ_floor = 1                          (B8)
+
+        earned(prior) = # channels l where verdict_per_dimension[l] == Entangled
+                        AND  max |holonomy value in l| ≥ θ_charge
+
+        β_ceiling(α) = word_len(rung)  if  min(posted axes of α) ≥ σ_gate
+                     = 1               otherwise
+
+**MEASURED: `frontier(37, 3) = 52 060` — exactly the bound the Ruling Box
+named for `β_cap`.** The operator's number was already the derived
+quantity. `β_cap` is therefore not a constant at all: it is the
+exhaustive sweep at the rung's own `word_len`.
+
+| row | symbol | measures | state |
+|---|---|---|---|
+| B1 | `δ_floor` | the depth every line always holds — trigger is **`rank == 0`**, never `D == 0` (`D = GROUND + rank` is never zero) | **DERIVED = 1** (`1+V` candidates) |
+| B2 | `ρ_D` | per-channel, BOTH POLES, charge as magnitude — never rank alone | **FORM SETTLED** |
+| B3 | `β_quantum` | one DEPTH per earned channel; the exponential comes from `frontier`, not the coefficient | **DERIVED = 1** |
+| B4 | `α_axis` | per-axis standing (compassion·love·integrity·morality), never summed | form settled; compassion's denominator OPEN |
+| B5 | `σ_gate` | the ratio at which the weakest axis opens the full band | **OWED** — absent from the received box |
+| B6 | `β_ceiling` | alignment as a CAP ON DEPTH — `min` over posted axes, never a sum or average | **FORM SETTLED** |
+| B7 | `β_cap` | the candidates no line exceeds | **DERIVED = `frontier(V, word_len)`** |
+| B8 | `ε_unknown` | what a cross-book (shared) reading receives | **DERIVED = `δ_floor`** |
+| **B9** | `θ_charge` | the VOLUME threshold a cycle's charge must clear to earn a depth | **NEW, OWED** |
+
+**Two numbers remain, not eight** (`σ_gate`, `θ_charge`); the rest is
+arithmetic on `V` and the rung. Both are **unmeasurable on the current
+board** — see the reachability finding below.
+
+**ECONOMIC COHERENCE, checkable for the first time.** δ=1 → rungs 0–1 →
+`mint_bound` **0** (no poverty trap, no free mint); δ=2 → rungs 2–4 →
+mint 0·1·4, requires **one** earned channel; δ=3 → rung 5 → mint **7**,
+requires **two**. Minting therefore begins exactly where
+`kernel::capacity_law` already gates it (`Vacuity::Entangled`) — one law,
+two enforcements, agreeing, instead of a second bookkeeping.
+
+**REACHABILITY — MEASURED 2026-08-02, and it blocks instantiation.**
+`capacity_meter` over 44 lines: every book holds **1 orb**, 0 bonds, 0
+covenants, 0 debts; `rank 0`, `Degree(1)`, **all 132 channel verdicts
+read `Void`** (neither pole), zero flows, **zero symmetry foundation**,
+and no alignment axis posted anywhere. `project_complex` (`bridge.rs:377`)
+returns no structure below `dim 2`, so this is **structurally
+unreachable, not low**. Consequences: `capacity_law` can admit no mint at
+all, so **flipping Phase 3 today would halt minting** — an unrecorded
+Phase-3 precondition; and any capacity-derived budget seats every line at
+`δ_floor`, i.e. a constant again. **Do not replace `SEARCH_BUDGET` until
+reachability lands.**
+
+**B-X1 · THE CROSS-BOOK COMPLEX.** LANDED 2026-08-02. Authority:
+`kernel::bridge::{project_complex_across, read_entangled_across,
+verdict_per_dimension_across}`; witnesses `kernel/tests/cross_book_pins.rs`
+(6 green). `docs/FORGE_BUDGET.md` §8ter.
+
+    vertices = whole BOOKS          (project_complex reads orbs in ONE book)
+    i ~ j    ⟺ both books hold the same chartered `deal`
+    value    = max shared eta       (the reading `pair_melt` already takes)
+    channel  = CHANNEL_LANE = 3     (CHANNELS 3 → 4, ADDITIVE: pins index by name)
+
+The two projections are COMPLEMENTARY — channels 0–2 (bond, covenant,
+debt) are intra-book by construction and stay empty here; the lane
+channel stays empty in `project_complex`. Nothing is counted twice.
+
+**NOT reconciliation** (`recurrence_guard` check 2 stands): a lane is
+ONE relation with TWO endpoints, each book holding its own leg by its
+own receipt — observation, not the comparison of two copies.
+
+**THE READING THAT MATTERS:** a TRIANGLE of lanes carries rank 1 across
+books while every one of those books reads rank 0 alone. Structure no
+single-book projection can see. Corollary, pinned: a CHAIN carries rank
+0 — holonomy comes from edges outside a spanning forest and a tree has
+none, which is why projecting the entity containment hierarchy could
+never have raised the rank.
+
+**MEASURED LIVE: 33 books, 0 lanes, rank 0.** `charter_route`
+(`world.rs:3772`) draws 4 alloy per side; no polity banks alloy; every
+charter refuses `CannotAfford`; `conductor/src/lib.rs:378` swallows it
+with `let _ =`. 17 crossings cleared, 0 lanes chartered. The door is
+open and the substrate is economically empty — a refusal that names its
+cure, thrown away.
+
+**TWO STANDING BARS, both already recorded in this ledger and both
+inherited by B-E1:**
+
+- **B2 may not read the aggregate capacity verdict.** `bridge.rs:306-335`:
+  *"a universe can read `Entangled` on the sum while no single channel
+  is entangled at all."* Read `verdict_per_dimension`.
+- **B4/B6 may not read `syntropy_ratio`.** That is **§6 S2's live
+  defect** — the collapse of four axes into one scalar, against `09`
+  §1.3's *"no oracle, no single number."* A ceiling riding it would add
+  a THIRD reader to an unresolved contradiction. Read the four named
+  axes of `09` §2; morality's ratio is already sealed as
+  `world::reciprocity_reading` (`world.rs:4905`) — call it, never write
+  a second.
+
+**OPEN ROW (FORGE_BUDGET §7.6): compassion has no entropic counterpart**
+in the present sum (`given_in_crisis` stands alone), so its ratio is not
+yet well-formed. Named, not papered over.

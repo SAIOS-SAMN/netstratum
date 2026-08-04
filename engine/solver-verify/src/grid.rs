@@ -43,13 +43,31 @@ impl Grid {
     }
 
     fn from_fn(rows: usize, cols: usize, f: impl Fn(usize, usize) -> u8) -> Grid {
-        let mut cells = Vec::with_capacity(rows * cols);
+        let mut out = Grid { rows: 0, cols: 0, cells: Vec::new() };
+        out.fill_from(rows, cols, f);
+        out
+    }
+
+    /// Refill this grid in place, REUSING its existing allocation.
+    ///
+    /// A grid at live difficulty is 3×3 to 4×4 — nine to sixteen bytes.
+    /// Allocating a fresh `Vec` for each is almost pure allocator
+    /// overhead: the payload is smaller than the bookkeeping. Any caller
+    /// that produces many grids in a loop should hold one buffer and
+    /// refill it, which is what this exists for.
+    ///
+    /// `clear` keeps the capacity, so the second and later calls on the
+    /// same buffer allocate nothing.
+    pub fn fill_from(&mut self, rows: usize, cols: usize, f: impl Fn(usize, usize) -> u8) {
+        self.cells.clear();
+        self.cells.reserve(rows * cols);
         for r in 0..rows {
             for c in 0..cols {
-                cells.push(f(r, c));
+                self.cells.push(f(r, c));
             }
         }
-        Grid { rows, cols, cells }
+        self.rows = rows;
+        self.cols = cols;
     }
 }
 
@@ -152,44 +170,60 @@ impl Op {
     }
 
     /// Apply — exact by construction.
+    ///
+    /// Allocates a fresh grid. A caller applying ops in a tight loop
+    /// should use [`Op::apply_into`] with one reused buffer instead;
+    /// this is the same computation, called not copied.
     pub fn apply(&self, g: &Grid) -> Grid {
+        let mut out = Grid { rows: 0, cols: 0, cells: Vec::new() };
+        self.apply_into(g, &mut out);
+        out
+    }
+
+    /// Apply, writing into a caller-held buffer that keeps its
+    /// allocation between calls.
+    ///
+    /// Identical arithmetic to [`Op::apply`] — this IS its body, and
+    /// `apply` is the wrapper. At live grid sizes the allocation costs
+    /// more than the transformation, so a search testing tens of
+    /// thousands of candidates wants this form.
+    pub fn apply_into(&self, g: &Grid, out: &mut Grid) {
         match self {
-            Op::Rotate90 => {
-                Grid::from_fn(g.cols, g.rows, |r, c| g.at(g.rows - 1 - c, r))
+            Op::Recolor(map) => {
+                out.cells.clear();
+                out.cells.reserve(g.cells.len());
+                out.cells.extend(g.cells.iter().map(|&h| map[h as usize]));
+                out.rows = g.rows;
+                out.cols = g.cols;
             }
-            Op::Rotate180 => Grid::from_fn(g.rows, g.cols, |r, c| {
-                g.at(g.rows - 1 - r, g.cols - 1 - c)
-            }),
-            Op::Rotate270 => {
-                Grid::from_fn(g.cols, g.rows, |r, c| g.at(c, g.cols - 1 - r))
+            // The object operators segment the grid and build their own
+            // result; they are the costly arm and there are only eight,
+            // so they keep the allocating path.
+            Op::Object(op) => *out = op.apply(g),
+            Op::Rotate90 => out.fill_from(g.cols, g.rows, |r, c| g.at(g.rows - 1 - c, r)),
+            Op::Rotate180 => {
+                out.fill_from(g.rows, g.cols, |r, c| g.at(g.rows - 1 - r, g.cols - 1 - c))
             }
-            Op::FlipH => Grid::from_fn(g.rows, g.cols, |r, c| g.at(r, g.cols - 1 - c)),
-            Op::FlipV => Grid::from_fn(g.rows, g.cols, |r, c| g.at(g.rows - 1 - r, c)),
-            Op::Transpose => Grid::from_fn(g.cols, g.rows, |r, c| g.at(c, r)),
-            Op::Recolor(map) => Grid {
-                rows: g.rows,
-                cols: g.cols,
-                cells: g.cells.iter().map(|&h| map[h as usize]).collect(),
-            },
-            Op::Object(op) => op.apply(g),
-            Op::Tile {
-                down,
-                across,
-                odd_row,
-                odd_col,
-            } => Grid::from_fn(g.rows * down, g.cols * across, |r, c| {
-                let (tile_r, mut rr) = (r / g.rows, r % g.rows);
-                let (tile_c, mut cc) = (c / g.cols, c % g.cols);
-                if tile_r % 2 == 1 {
-                    odd_row.apply(&mut rr, &mut cc, g.rows, g.cols);
-                }
-                if tile_c % 2 == 1 {
-                    odd_col.apply(&mut rr, &mut cc, g.rows, g.cols);
-                }
-                g.at(rr, cc)
-            }),
+            Op::Rotate270 => out.fill_from(g.cols, g.rows, |r, c| g.at(c, g.cols - 1 - r)),
+            Op::FlipH => out.fill_from(g.rows, g.cols, |r, c| g.at(r, g.cols - 1 - c)),
+            Op::FlipV => out.fill_from(g.rows, g.cols, |r, c| g.at(g.rows - 1 - r, c)),
+            Op::Transpose => out.fill_from(g.cols, g.rows, |r, c| g.at(c, r)),
+            Op::Tile { down, across, odd_row, odd_col } => {
+                out.fill_from(g.rows * down, g.cols * across, |r, c| {
+                    let (tile_r, mut rr) = (r / g.rows, r % g.rows);
+                    let (tile_c, mut cc) = (c / g.cols, c % g.cols);
+                    if tile_r % 2 == 1 {
+                        odd_row.apply(&mut rr, &mut cc, g.rows, g.cols);
+                    }
+                    if tile_c % 2 == 1 {
+                        odd_col.apply(&mut rr, &mut cc, g.rows, g.cols);
+                    }
+                    g.at(rr, cc)
+                })
+            }
         }
     }
+
 }
 
 /// A program: an ordered word over the vocabulary, applied left to

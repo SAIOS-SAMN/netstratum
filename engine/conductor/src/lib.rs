@@ -282,6 +282,9 @@ pub fn trade_intent(
 /// length at posting, deterministic), then clear the FIRST crossing
 /// (price-time priority inside `clear_trade`). Returns the cleared
 /// pairs (world names) for the narrator line.
+pub static PROBE_DIGEST_REPEAT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+pub static PROBE_DIGEST_TOTAL: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+
 pub fn market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
     // Post intents. NO SINGLES (ruling 2026-07-31): the book is
     // open-ended — a fresh intent posts BESIDE what rests; only an
@@ -375,14 +378,24 @@ pub fn market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
                 if best_held.is_none_or(|held| eta > held) {
                     let deal = beat * 100_000 + seq * 4;
                     seq += 1;
-                    let _ = cfe::world::charter_route(
+                    // THE REFUSAL IS CARRIED, NEVER SWALLOWED (operator
+                    // ruling 2026-08-02). `let _ =` here hid the whole
+                    // cross-book economy: measured, 17 crossings cleared
+                    // and 0 lanes chartered, because every charter
+                    // refused CannotAfford{Alloy, need 4, have 0} — and
+                    // no lane means no cross-book capacity reading at
+                    // all. An economic gate read as a topological limit
+                    // for exactly as long as nobody could see it.
+                    if let Err(refusal) = cfe::world::charter_route(
                         &mut one.world,
                         cfe::world::FIRST_ORB,
                         &mut two.world,
                         cfe::world::FIRST_ORB,
                         eta,
                         deal,
-                    );
+                    ) {
+                        one.lane_refused.push(refusal);
+                    }
                 }
             }
         }
@@ -474,7 +487,31 @@ pub struct Polity {
     /// Deeds the kernel REFUSED, by receipt sequence. Kept rather than
     /// discarded — a refusal the board never sees is the judge speaking
     /// into a void.
-    refused: Vec<(u64, kernel::Unlawful)>,
+    /// THE JUDGE'S REFUSALS — per-deed, from `chain_beat`.
+    ///
+    /// **Made public 2026-08-02 (operator ruling: stop swallowing
+    /// refusals).** This was private and NOTHING read it: the kernel has
+    /// been judging every deed every beat and posting its verdicts into
+    /// a field no caller could see. A refusal names its cure, and a cure
+    /// nobody can read is not a cure.
+    pub refused: Vec<(u64, kernel::Unlawful)>,
+    /// THE LANE REFUSALS — why `charter_route` said no.
+    ///
+    /// `conductor/src/lib.rs`'s charter site discarded this with
+    /// `let _ =`, and the consequence was invisible: **17 crossings
+    /// cleared and 0 lanes were chartered** on a measured board, because
+    /// every charter refused `CannotAfford { Alloy, need 4, have 0 }`.
+    /// The cross-book capacity reading has no substrate without lanes,
+    /// so a swallowed economic refusal read as a topological limit.
+    pub lane_refused: Vec<cfe::world::ActionRefused>,
+    /// R5 — the forge memo. `solve` is pure: same digest, same
+    /// difficulty, same answer. Measured 2026-08-02: 31 % of forge draws
+    /// reuse an unchanged digest, and 99 % of forge time is the
+    /// exhaustive sweep over tasks with no answer in the vocabulary — so
+    /// a third of the board's compute was re-deriving identical
+    /// `Unsolved` readings. One entry is enough: the repeat is always
+    /// "unchanged since last beat".
+    last_forge: Option<([u8; 32], usize, SolveRead)>,
 }
 
 fn banked(world: &World, resource: Resource) -> Ratio {
@@ -650,6 +687,8 @@ impl Polity {
                     return Polity {
                         chained: 0,
                         refused: Vec::new(),
+                        lane_refused: Vec::new(),
+                        last_forge: None,
                         spec,
                         world,
                         automaton,
@@ -728,6 +767,8 @@ impl Polity {
         Polity {
             chained: 0,
             refused: Vec::new(),
+            lane_refused: Vec::new(),
+            last_forge: None,
             spec,
             world,
             automaton,
@@ -1043,6 +1084,14 @@ impl Polity {
             return;
         };
         let digest = receipt.own.0;
+        // R5 probe: how often is the forge re-drawn from a digest that
+        // has not moved? An unchanged digest re-forges the identical
+        // task and re-runs the identical sweep for the identical answer
+        // — 81 ms when that answer is Unsolved.
+        if self.last_forge.as_ref().is_some_and(|(held, _, _)| *held == digest) {
+            PROBE_DIGEST_REPEAT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        }
+        PROBE_DIGEST_TOTAL.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         let solved = if self.spec.civilization.perception == "volumetric" {
             let difficulty = solver::VolDifficulty::level(self.level);
             let task = solver::forge_volume(digest, difficulty);
@@ -1082,7 +1131,22 @@ impl Polity {
             // beat — so the search inside may become as dirty as it
             // likes (float scoring, batching, sampled beam) and nothing
             // downstream changes.
-            match solve_consulted(&task, difficulty.word_len) {
+            // The memo, or the search. Same inputs, same answer — the
+            // door the purity of `solve` opens.
+            let read = match self.last_forge.take() {
+                Some((held, depth, cached))
+                    if held == digest && depth == difficulty.word_len =>
+                {
+                    self.last_forge = Some((held, depth, cached.clone()));
+                    cached
+                }
+                _ => {
+                    let fresh = solve_consulted(&task, difficulty.word_len);
+                    self.last_forge = Some((digest, difficulty.word_len, fresh.clone()));
+                    fresh
+                }
+            };
+            match read {
                 SolveRead::Solved {
                     program,
                     matches_expected: Some(true),
