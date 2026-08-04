@@ -67,11 +67,12 @@ fn a_solving_line_mints_against_its_own_verified_work() {
     }
     let solved: u32 = worlds.iter().map(|p| p.solved).sum();
     let spent: u64 = worlds.iter().map(|p| p.spent).sum();
+    let swept: u64 = worlds.iter().map(|p| p.swept).sum();
     let growth = worlds.iter().filter(|p| p.trajectory == conductor::Trajectory::Growth).count();
     let stagnation = worlds.iter().filter(|p| p.trajectory == conductor::Trajectory::Stagnation).count();
     let decline = worlds.iter().filter(|p| p.trajectory == conductor::Trajectory::Decline).count();
     println!("MEASURED over 60 beats: {solved} solves, {minted} mints, earned {earned_total}");
-    println!("MEASURED spend: {spent} candidates  |  trajectories at close: growth {growth}, stagnation {stagnation}, decline {decline}");
+    println!("MEASURED spend: {spent} read-candidates + {swept} sweep-invocations  |  trajectories at close: growth {growth}, stagnation {stagnation}, decline {decline}");
 
     assert!(
         minted > 0,

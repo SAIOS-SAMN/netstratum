@@ -50,7 +50,7 @@ use ledger::galaxy::Galaxy;
 use ledger::registry::{lineage_domain, Civilization, Registry, DISPOSITIONS, METABOLISMS, PERCEPTIONS};
 use ledger::{Directive, Disposition, Ledger};
 use physics::Beacon;
-use solver::{forge_task, propose_measured, Difficulty, Hunger, Need, SolveRead};
+use solver::{forge_task, propose_measured, solve_consulted, Difficulty, Hunger, Need, SolveRead};
 use std::path::Path;
 
 mod polities;
@@ -438,22 +438,54 @@ pub enum Trajectory {
     /// struck closes 200/200 — matching an exhaustive sweep at 8
     /// candidates per task against up to 200,000.
     Stagnation,
-    /// Struck, and STILL closing nothing. CONTRACT — do not escalate.
-    /// The struck→long-starved step measured EXACTLY ZERO extra yield
-    /// at rungs 3 and 4 (identical closures, identical cost), and at
-    /// rung 5 it bought one more confirmed closure and one more FALSE
-    /// one. Deeper hunger past this point buys fabrication as readily
-    /// as work.
+    /// Struck, and STILL closing nothing. The READING has failed, so
+    /// stop reading and EXHAUST instead — this is where the sweep earns
+    /// its keep and the only place it does.
+    ///
+    /// Two measurements put it here rather than at a deeper hunger.
+    /// First, deeper hunger is worthless: struck→long-starved bought
+    /// EXACTLY ZERO extra yield at rungs 3 and 4, and at rung 5 bought
+    /// one more confirmed closure and one more FALSE one. Second, the
+    /// sweep is worth something precisely where the reach is not — at
+    /// rungs 4 and 5 it confirms 122 and 86 against the reach's 77 and
+    /// 54. Those are the tasks composed through intermediate states no
+    /// observation motivates: solved by exhaustion, not by reading.
     Decline,
 }
 
+/// HOW a line searches. Both paths are live; neither is deprecated.
+///
+/// They are not competitors — they fail in different places. The reach
+/// MATCHES an exhaustive sweep exactly at rung 3 (200/199/1) at 8
+/// candidates against up to 200,000, and loses only at rungs 4-5, where
+/// the answer needs composition through states the observation cannot
+/// name. So the engine reads first and exhausts only when reading has
+/// demonstrably run out — which is what makes exhaustion affordable at
+/// all.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SearchPath {
+    /// Derivation-first: the observation names the operator, the need
+    /// orders the reach. ~66x the energy per candidate on the live
+    /// board.
+    Reach,
+    /// Exhaustive composition, bounded by `SEARCH_BUDGET`. Finds what
+    /// no reading motivates, and costs four orders of magnitude more.
+    Sweep,
+}
+
 impl Trajectory {
-    /// The reach this trajectory buys.
+    /// WHICH PATH this trajectory searches by.
+    pub fn path(&self) -> SearchPath {
+        match self {
+            Trajectory::Growth | Trajectory::Stagnation => SearchPath::Reach,
+            Trajectory::Decline => SearchPath::Sweep,
+        }
+    }
+
+    /// The reach this trajectory buys, when it is reading. Unused on
+    /// the sweep path, which has no need to order.
     pub fn need(&self, starved: u64) -> Need {
         match self {
-            // Contraction and growth both rest on the cheap reach; the
-            // difference between them is what happens NEXT, not what is
-            // spent now.
             Trajectory::Growth | Trajectory::Decline => Need::sated(),
             Trajectory::Stagnation => Need::struck(Hunger::Novelty, starved),
         }
@@ -566,9 +598,15 @@ pub struct Polity {
     /// Beats since this line last closed a task — what it hands the
     /// hunger when it reaches. A real duration, never a constant.
     pub starved: u64,
-    /// Candidate programs this line has spent, cumulative. The S of
-    /// W/S; the board can read its own yield without instrumentation.
+    /// Candidate programs this line has spent on the READ path,
+    /// cumulative. The S of W/S; the board reads its own yield without
+    /// instrumentation.
     pub spent: u64,
+    /// Times this line fell back to the EXHAUST path. Counted as
+    /// invocations, not candidates: the sweep reports no count and is
+    /// bounded by `SEARCH_BUDGET`, so folding it into `spent` would
+    /// mix a measured number with a bound and ruin both yields.
+    pub swept: u64,
     /// Deeds the kernel REFUSED, by receipt sequence. Kept rather than
     /// discarded — a refusal the board never sees is the judge speaking
     /// into a void.
@@ -761,6 +799,7 @@ impl Polity {
                         trajectory: Trajectory::Growth,
                         starved: 0,
                         spent: 0,
+                        swept: 0,
                         spec,
                         world,
                         automaton,
@@ -843,6 +882,7 @@ impl Polity {
             trajectory: Trajectory::Growth,
             starved: 0,
             spent: 0,
+            swept: 0,
             spec,
             world,
             automaton,
@@ -1205,10 +1245,27 @@ impl Polity {
             // cites. `SEARCH_BUDGET` still stands behind this as the
             // per-beat ceiling that keeps one heartbeat bounded; it is
             // no longer what DECIDES the spend.
-            let need = self.trajectory.need(self.starved);
-            let proposal = propose_measured(&task, &need);
-            self.spent = self.spent.saturating_add(proposal.tested as u64);
-            match proposal.read {
+            // BOTH PATHS ARE LIVE. Read first; exhaust only where
+            // reading has demonstrably failed, which is the only place
+            // the sweep is worth its four orders of magnitude.
+            let read = match self.trajectory.path() {
+                SearchPath::Reach => {
+                    let need = self.trajectory.need(self.starved);
+                    let proposal = propose_measured(&task, &need);
+                    self.spent = self.spent.saturating_add(proposal.tested as u64);
+                    proposal.read
+                }
+                SearchPath::Sweep => {
+                    // The sweep reports no candidate count, so its cost
+                    // is recorded as INVOCATIONS bounded by
+                    // `SEARCH_BUDGET` rather than folded into `spent`.
+                    // Mixing a counted number with a bounded one would
+                    // make both yields meaningless.
+                    self.swept = self.swept.saturating_add(1);
+                    solve_consulted(&task, difficulty.word_len)
+                }
+            };
+            match read {
                 SolveRead::Solved {
                     program,
                     matches_expected: Some(true),
