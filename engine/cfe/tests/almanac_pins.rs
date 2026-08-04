@@ -301,3 +301,87 @@ fn a_shrinking_orbit_blows_the_denominator_which_is_the_old_scar() {
     }
     assert!(last > 30, "and it grows fast: {last} digits at r = 1/10^16");
 }
+
+// ── HEAT, AMPLIFIED BY DISTANCE, WITHOUT IRRATIONALITY ───────────────
+
+use cfe::almanac::{grained_ceiling4, grained_t_eq4, orbit_on_grain, ORBIT_GRAIN};
+
+#[test]
+fn heat_is_amplified_by_closeness_and_still_varies_across_the_grain() {
+    // The law must keep its whole point: nearer is fiercer, and the
+    // range is not flattened by quantising.
+    let sun = cfe::thermal::StarClass::G.luminosity();
+    let near = grained_t_eq4(&sun, &ratio(0, 1), &ratio(1, 4));
+    let mid = grained_t_eq4(&sun, &ratio(0, 1), &ratio(1, 1));
+    let far = grained_t_eq4(&sun, &ratio(0, 1), &ratio(4, 1));
+    assert!(near > mid && mid > far, "closer is hotter, still");
+    assert!(near > far * ratio(100, 1), "and the amplification is steep, not token");
+}
+
+#[test]
+fn the_denominator_cannot_run_away_however_small_the_orbit() {
+    // THE SCAR, closed. Ungrained, r = 1/10^k blew past 30 digits by
+    // k = 16. Grained, every orbit's denominator is ORBIT_GRAIN, so
+    // the heat's denominator is bounded no matter what is asked for.
+    let hottest = cfe::thermal::StarClass::O.luminosity();
+    let mut widest = 0usize;
+    for k in [1u32, 4, 8, 16, 32] {
+        let asked = ratio(1, 10i64.pow(k.min(18)));
+        let on_grain = orbit_on_grain(&asked);
+        // The invariant is DIVIDES, not equals: `Ratio::new` reduces,
+        // so 2/64 is 1/32. Bounded by the grain is the claim, and it is
+        // the one that bounds the arithmetic.
+        let grain = num_bigint::BigInt::from(ORBIT_GRAIN);
+        assert_eq!(
+            grain.clone() % on_grain.denom().clone(),
+            num_bigint::BigInt::from(0),
+            "every grained orbit's denominator divides the grain: {on_grain}"
+        );
+        let t = grained_t_eq4(&hottest, &ratio(0, 1), &asked);
+        widest = widest.max(t.numer().to_string().len() + t.denom().to_string().len());
+    }
+    assert!(widest < 30, "the figure stays holdable: {widest} digits at the widest");
+}
+
+#[test]
+fn the_ceiling_is_derived_and_a_lawful_orbit_cannot_pass_it() {
+    // No chosen bound on temperature: the ceiling falls out of the
+    // luminosity table and the grain, and nothing grained exceeds it.
+    let ceiling = grained_ceiling4();
+    for class in [
+        cfe::thermal::StarClass::O,
+        cfe::thermal::StarClass::B,
+        cfe::thermal::StarClass::G,
+        cfe::thermal::StarClass::M,
+    ] {
+        for orbit in [ratio(1, 1000000), ratio(1, 64), ratio(1, 2), ratio(9, 1)] {
+            let t = grained_t_eq4(&class.luminosity(), &ratio(0, 1), &orbit);
+            assert!(t <= ceiling, "{class:?} at {orbit} stays under the derived ceiling");
+        }
+    }
+    // And the closure now has no reachable Beyond: the grained ceiling
+    // IS the top of the named line.
+    let hottest = grained_t_eq4(
+        &cfe::thermal::StarClass::O.luminosity(),
+        &ratio(0, 1),
+        &ratio(0, 1),
+    );
+    assert_ne!(
+        region_of(&hottest, &orbit_on_grain(&ratio(0, 1))),
+        ThermalRegion::Beyond,
+        "with the grain, the open arm is unreachable"
+    );
+}
+
+#[test]
+fn a_sub_grain_orbit_is_not_a_nearer_orbit_it_is_not_an_orbit() {
+    // Flooring, then lifting zero to one step. An orbit inside the
+    // first grain does not get to be closer than the closest.
+    let inside = orbit_on_grain(&ratio(1, 100000));
+    let first = orbit_on_grain(&ratio(1, ORBIT_GRAIN));
+    assert_eq!(inside, first, "everything inside the first step IS the first step");
+    assert_eq!(orbit_on_grain(&ratio(0, 1)), first, "including nothing at all");
+    // Above the grain it floors, never rounds up — no orbit is moved
+    // closer to the star than it was asked to be.
+    assert!(orbit_on_grain(&ratio(3, 2)) <= ratio(3, 2));
+}

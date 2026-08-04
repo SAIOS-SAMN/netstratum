@@ -383,3 +383,66 @@ pub fn workable_at(element: &[u8; 32], t_eq4: &Ratio, r_min: &Ratio) -> bool {
             | (3, ThermalRegion::Torrid | ThermalRegion::HyperThermal | ThermalRegion::Incandescent)
     )
 }
+
+/// **THE ORBIT GRAIN** — the lattice a lawful orbit sits on.
+///
+/// The heat law is `t_eq4 = L(1-a)k / r²`, so an orb's heat is
+/// AMPLIFIED BY ITS DISTANCE: the closer the orbit the fiercer the
+/// star, and the whole range lives in that division. The division is
+/// also where irrationality enters, in two forms this engine has met
+/// before:
+///
+///   UNBOUNDED VALUE       `r -> 0` sends the temperature past every
+///                         named region and past the T∞ purge with it.
+///   UNBOUNDED DENOMINATOR `r = 1/10^k` yields a denominator around
+///                         `10^(2k)` — the blowup that killed
+///                         proportional demurrage at ~2^1100.
+///
+/// **The engine already answers this, one layer down.** The melt law
+/// posts in whole lots on a `1/64` grid *"so exact arithmetic stays
+/// cheap"* — measured, after unquantized compounding rationals stalled
+/// a beat six crossings deep. An orbit is the same kind of quantity and
+/// takes the same discipline: **distance is quantised, so the division
+/// can never manufacture a figure the system cannot hold.**
+///
+/// This is NOT a chosen bound on temperature. Nothing caps the heat
+/// directly; the grain caps the DENOMINATOR, and a floor of one grain
+/// follows because a lawful orbit is at least one step out. The ceiling
+/// is then derived rather than declared — see [`grained_ceiling4`].
+pub const ORBIT_GRAIN: i64 = 64;
+
+/// Snap an orbit to the grain, never below one step.
+///
+/// Flooring rather than rounding, and then lifting a zero to one grain:
+/// an orbit inside the first step is not a nearer orbit, it is not an
+/// orbit. Exact throughout — the result's denominator is always
+/// `ORBIT_GRAIN`, whatever went in.
+pub fn orbit_on_grain(orbit_r: &Ratio) -> Ratio {
+    use num_bigint::BigInt;
+    let grid = BigInt::from(ORBIT_GRAIN);
+    let stepped = orbit_r.numer() * &grid / orbit_r.denom();
+    let at_least_one = if stepped < BigInt::from(1) { BigInt::from(1) } else { stepped };
+    Ratio::new(at_least_one, grid)
+}
+
+/// **THE DERIVED CEILING** — the hottest a grained orbit can be.
+///
+/// The brightest class, zero albedo, one grain out. No number is chosen
+/// here: it falls out of the luminosity table and the grain, both of
+/// which already exist.
+pub fn grained_ceiling4() -> Ratio {
+    crate::thermal::t_eq4(
+        &crate::thermal::StarClass::O.luminosity(),
+        &ratio(0, 1),
+        &orbit_on_grain(&ratio(0, 1)),
+    )
+}
+
+/// The heat an orb takes from its star, with distance quantised.
+///
+/// Identical to `thermal::t_eq4` in every respect but one: the orbit is
+/// put on the grain first, so the amplification by distance is as fierce
+/// as the physics allows and as bounded as the arithmetic requires.
+pub fn grained_t_eq4(luminosity: &Ratio, albedo: &Ratio, orbit_r: &Ratio) -> Ratio {
+    crate::thermal::t_eq4(luminosity, albedo, &orbit_on_grain(orbit_r))
+}
