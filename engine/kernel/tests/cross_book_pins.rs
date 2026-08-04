@@ -22,10 +22,9 @@
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::Committed;
 use kernel::bridge::{
-    project_complex_across, read_entangled_across, verdict_per_dimension_across, CHANNELS,
+    project_complex_across, read_entangled_across, poles_per_dimension_across, CHANNELS,
     CHANNEL_LANE,
 };
-use rfa_core::Vacuity;
 
 /// A committed book holding exactly the lanes named. Everything else
 /// stays at its default — the lane channel is what is under test.
@@ -104,12 +103,14 @@ fn the_channels_stay_complementary() {
 }
 
 #[test]
-fn a_lone_book_relates_to_nothing_and_the_verdict_says_void() {
+fn a_lone_book_relates_to_nothing_and_neither_pole_stands() {
     let a = book_with_lanes(&[(1, ratio(1, 8))]);
     let read = read_entangled_across(&[&a], 0);
     assert_eq!(read.rank, 0, "one book has no boundary to relate across");
-    let per = verdict_per_dimension_across(&[&a]);
-    assert_eq!(per[CHANNEL_LANE], Vacuity::Void, "neither pole — and it says so");
+    // The VERDICT form is struck with the vacuity removal; the poles
+    // themselves are still the fact worth pinning.
+    let per = poles_per_dimension_across(&[&a]);
+    assert_eq!(per[CHANNEL_LANE], (0, 0), "neither pole — and it says so");
 }
 
 #[test]

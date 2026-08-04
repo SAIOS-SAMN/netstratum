@@ -47,6 +47,11 @@ pub use fold::{
     OrbitWitness, RatMatrix, TorsionCause,
 };
 pub use gates::{validate_step, GateVerdict, StepBound};
-pub use boundary::{dual_pole, boundary_form, Flow, BoundaryForm, Vacuity};
+// THE FOUR-ROW CLASSIFICATION IS STRUCK (operator ruling 2026-08-04):
+// `Vacuity` and `dual_pole` are gone with the capacity law that was
+// their only gate. The BOUNDARY FORM stays — the divergence is a
+// first-class reading for THE SIGN LAW and is what `capacity.rs` splits
+// against.
+pub use boundary::{boundary_form, Flow, BoundaryForm};
 pub use rcf::{invariant_factors, rcf_hash, rcf_signature, RatPoly, RcfSignature};
 pub use reduce::{coboundary_reduce, holonomies, Holonomy, Support};

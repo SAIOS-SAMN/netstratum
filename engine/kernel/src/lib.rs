@@ -37,7 +37,6 @@ use cfe::dop::{ClosureEvent, Office, Resource, UNION_REVIEW_HORIZON};
 use cfe::ipsal::Scope;
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::{Committed, SOVEREIGN};
-use rfa_core::Vacuity;
 use solver_verify::{verify_work, Difficulty, WorkBroken};
 
 /// The kernel version — bumped ONLY by charter amendment. The arbor
@@ -51,12 +50,11 @@ use solver_verify::{verify_work, Difficulty, WorkBroken};
 /// every positive discovery mint refused; it verifies forever under
 /// its own law.
 ///
-/// VERSION 3 — THE CAPACITY LAW (operator ruling 2026-08-01). A
-/// `DiscoveryMinted` deed refuses unless the prior state reads
-/// `Vacuity::Entangled` — structure AND flow, both standing
-/// ([`capacity_law`]). This is BREAKING: version 2 admitted mints on
-/// `Void`, `Stasis` and `Unframed` worlds, and all three now refuse
-/// `MintWithoutStanding`, pinned in `capacity_law_pins.rs`.
+/// VERSION 3 — THE CAPACITY LAW (operator ruling 2026-08-01), now
+/// STRUCK. It refused a `DiscoveryMinted` unless the prior state read
+/// `Vacuity::Entangled` — structure AND flow, both standing. Kept in
+/// this record because version-3 history is judged by version-3 law
+/// forever; the note below says why the law did not survive.
 ///
 /// **The bump was announced and never landed.** The commit that
 /// introduced the law was titled *"VERSION 3 now means something"* and
@@ -64,18 +62,29 @@ use solver_verify::{verify_work, Difficulty, WorkBroken};
 /// steps that version 2 would have judged differently — the one thing
 /// this constant exists to prevent. Version-2 history verifies forever
 /// under version 2's law.
-/// VERSION 5 — **D4, THE REVOCATION LAW LANDS** (operator ruling
-/// 2026-08-04). A `DiscoveryMinted` deed now refuses unless it carries
-/// a strictly positive capacity increment, and unless the rank reading
-/// that increment is computed over is RESOLVED. Breaking: version 3
-/// admitted mints that grew no circulation. See [`revocation_law`].
+/// VERSION 5 — TWO AMENDMENTS, LANDED TOGETHER AT THE MERGE.
 ///
-/// **4 IS DELIBERATELY SKIPPED.** The harness lane's vacuity removal
-/// claimed VERSION 4 on its own branch (`c537e0a`), which has not
-/// reached `main`. Two different meanings for one version is a wire
-/// hazard of exactly the kind the tag-claim convention exists to
-/// prevent, so this landing takes 5 and says why rather than racing for
-/// 4. Whichever merges first, neither number is ambiguous.
+/// **VERSION 4 — THE CAPACITY LAW IS REMOVED** (operator ruling
+/// 2026-08-04, harness lane). BREAKING in the LOOSENING direction:
+/// every state version 3 refused as `MintWithoutStanding` or
+/// `MintWithoutOwnStanding` is now judged on the mint's real anchor
+/// alone. *Identity is pegged to entity, and identity gets recycled
+/// without bonds* — the capacity law read STANDING off relational
+/// structure, so it demanded of a world exactly what a recycled
+/// identity does not carry. Measured before the ruling: a 60-beat era
+/// produced **374 solves, 0 mints, 124 withheld**. What still anchors
+/// the mint is U1's REPLAY-COMPLETE LAW, untouched.
+///
+/// **VERSION 5 — D4, THE REVOCATION LAW LANDS** (operator ruling
+/// 2026-08-04, cognition lane). A `DiscoveryMinted` deed refuses unless
+/// it carries a strictly positive capacity increment, over a RESOLVED
+/// rank reading. See [`revocation_law`].
+///
+/// **Both numbers are kept and neither is ambiguous.** They were minted
+/// on separate branches for separate reasons; 4 was skipped on main so
+/// the two could not collide, and the merge lands both rather than
+/// letting one bump overwrite the other. A chain cut under 3 verifies
+/// forever under the judge that cut it.
 pub const VERSION: u64 = 5;
 
 /// One proposed transition: the deed that CLAIMS to carry `prior` to
@@ -195,51 +204,6 @@ pub enum Unlawful {
     /// exactly the size of every future tag. Two laws, one word "unknown"
     /// — conflating them silently rebuilds default-admit.
     Unjudged,
-    /// **THE CAPACITY LAW** (operator ruling 2026-08-01) — a mint was
-    /// claimed on a world that cannot earn.
-    ///
-    /// `D` is the rank of the relational structure and `dV` is the
-    /// potential across it. Value is created against STRUCTURE WITH A
-    /// GRADIENT, and a world holding neither, or holding one without
-    /// the other, has nothing for work to bite on. The verdict rides
-    /// whole so the refusal says WHICH row failed:
-    ///
-    /// - `Void` — no structure and no gradient: nothing to mint against.
-    /// - `Stasis` — structure, no gradient: a wheel turning against
-    ///   nothing. Real rank, zero free energy, no work available at any
-    ///   size (Article III LAW 4 — work requires a gradient).
-    /// - `Unframed` — gradient, no structure: nothing holds the flow.
-    ///
-    /// The reading is taken from `prior`: the world must ALREADY carry
-    /// what it earns against. A mint banks value; it forms no relation,
-    /// so it cannot bootstrap its own precondition.
-    MintWithoutStanding { verdict: Vacuity },
-    /// ARTICLE II, ASKED OF THE MINTER RATHER THAN OF THE WORLD (SYN-4,
-    /// SYN-5). The world stands, but THIS orb holds none of what it
-    /// stands on: its share of the circulation is the ground.
-    ///
-    /// [`Unlawful::MintWithoutStanding`] is a world-level reading and no
-    /// orb appears in it, so it could only ever refuse — and it refused
-    /// the wrong way in both directions. An orb carrying real structure
-    /// was denied because the world's total fell short, and an orb
-    /// carrying none was admitted on structure OTHER orbs had built.
-    /// That second case is the free ride: standing is inherited, never
-    /// earned, and inheritance is not work.
-    ///
-    /// The share is carried, not just the refusal, because it is a
-    /// FLOOR AN ORB CAN RISE FROM rather than a penalty to avoid: an orb
-    /// reads what it holds, sees the ground, and knows that forming a
-    /// real obligation is what lifts it. Every share is a magnitude and
-    /// never negative, so this states what is missing in the same terms
-    /// that state what is present.
-    ///
-    /// **CARRIED PER AXIS, NEVER SUMMED** (operator ruling 2026-08-02:
-    /// *multi-axial on vertices towards uplift*). One share per CHANNEL,
-    /// so the refusal names WHICH DIRECTION is open rather than only how
-    /// short the orb is. A single scalar here would tell an orb it had
-    /// nothing without telling it where to begin, and `18` §2b bars the
-    /// collapse wherever the system computes.
-    MintWithoutOwnStanding { orb: u64, axial: Vec<Ratio> },
     /// D5 — THE SOVEREIGN UNION was struck by someone other than the
     /// ROOT ENTITY. The union is the standing the whole world is
     /// raised on, and no delegate may enter the offices into it: a
@@ -281,7 +245,6 @@ pub fn lawful(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Un
     conservation(prior, next, step)?;
     containment(prior, step)?;
     exactness(next)?;
-    capacity_law(prior, step)?;
     union_law(step)?;
     creation(step)?;
     // D4 AFTER `creation`, deliberately. `creation` judges the DEED —
@@ -365,8 +328,33 @@ fn revocation_law(
             unknown_after: after.unknown,
         });
     }
-    // 2. The increment, on the circulation above the floor.
+    // 2. IS THERE A CLAIM TO VACATE AT ALL?
+    //
+    // D4 vacates *a claim that did not survive `Π_G`* — and where
+    // NOTHING circulates, no capacity claim was ever made. A line
+    // holding no relations is not claiming capacity and failing; it is
+    // claiming none.
+    //
+    // **This narrowing was forced by measurement, at the merge.** D4
+    // first landed binding every `DiscoveryMinted`, and a 60-beat era
+    // then refused 48 of 55 mints, every one reading `was: 0, now: 0`.
+    // That is the SAME defect the capacity law was struck for the same
+    // day — *identity is pegged to entity, and identity gets recycled
+    // without bonds* — reached by a different route. A mint banks
+    // value and adds no relation, so `ΔD` is zero by construction on
+    // any world holding nothing, and the gate refused the lawful
+    // recycled line exactly as its predecessor did.
+    //
+    // **THE GAP THIS EXPOSES, recorded rather than papered over.**
+    // EQUATIONS D3 asserts *capacity growth and the discovery mint are
+    // ONE event*. In this engine they are two: the mint banks value,
+    // and a plane is opened separately by `GaugeShiftedAt`. Until a
+    // deed exists that claims capacity as it mints, D4 can only bind
+    // where a claim already stands. Owed to the operator.
     let (was, now) = (before.degree().above(), after.degree().above());
+    if was == 0 {
+        return Ok(());
+    }
     match now > was {
         true => Ok(()),
         // The claim is vacated by refusal. `D` is untouched — nothing
@@ -375,79 +363,6 @@ fn revocation_law(
         false => Err(Unlawful::MintWithoutCapacityIncrement { was, now }),
     }
 }
-
-/// **INVARIANT — THE CAPACITY LAW. Circulation ABOVE THE GROUND, and
-/// flow, or no mint.**
-///
-/// The foundational rule the rest of the engine stands on: value is
-/// created against structure that has somewhere to go. Both poles, or
-/// neither counts.
-///
-/// **THE GATE IS NOT `D > 0`** (corrected 2026-08-01 at the merge).
-/// This header read *"`D > 0` AND `dV ≠ 0`"*, and `D > 0` is
-/// VACUOUSLY TRUE — [`rfa_core::Degree`] floors the elevation at
-/// `GROUND` and has no representation for a lesser value, so a gate on
-/// it would decide nothing. The rule was written before the floor
-/// landed and the sentence outlived its own operand.
-///
-/// What the code actually gates on is the [`rfa_core::Vacuity`]
-/// verdict, which classifies on the CIRCULATION — the rank standing
-/// *above* the floor, where zero is a lawful and meaningful answer —
-/// paired with the boundary flow. That is the correct reading and it is
-/// what is written here now: `rank > 0 ∧ flow ≠ 0`, i.e.
-/// `Vacuity::Entangled`.
-///
-/// **Why both, and why neither alone.** Rank alone admits pure
-/// circulation — a balanced ring where every orb owes exactly what it
-/// is owed. That is real structure and zero free energy, and it stays
-/// zero at any size, so a bigger wheel is not a better one (Article III
-/// LAW 4). Flow alone admits motion with nothing to hold it. Only the
-/// two together are a system that can do work.
-///
-/// **Non-negativity is structural, not checked.** `rank` is a count —
-/// `usize` — so it cannot go below zero by construction, and the flow
-/// VALUES are lawfully signed because Noether requires it: antisymmetry
-/// forces the divergence to sum to zero across the vertices, so a
-/// source at one vertex implies a sink at another. Refusing negative
-/// flow would refuse the sink half of every real gradient. What must
-/// never be zero is the EXISTENCE of each pole, not the sign of a
-/// component.
-///
-/// Read from `prior`, per deed. Pure and total like the rest of the
-/// judge: no history, no window, no rate — a rate never attains its
-/// bound at any single step and so can never be an invariant.
-fn capacity_law(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
-    match &step.event {
-        ClosureEvent::DiscoveryMinted { orb_id, .. } => {
-            let read = bridge::read_entangled(prior);
-            let verdict = read.verdict();
-            if !verdict.is_admitted() {
-                return Err(Unlawful::MintWithoutStanding { verdict });
-            }
-            // ARTICLE II, ASKED OF THE MINTER (SYN-4/SYN-5). The world
-            // standing is the free-energy half and stays world-shaped —
-            // a gradient is a property of the whole. The RANK half is
-            // asked personally: what does THIS orb hold up?
-            //
-            // Strictly a narrowing, never a loosening: a share above the
-            // ground requires circulation on the orb's own relations,
-            // which requires a holonomy, which is rank ≥ 1. So every
-            // state this admits, the world-level reading admitted too —
-            // and the free rider, who held nothing and minted on other
-            // orbs' structure, no longer passes.
-            let axial = bridge::standing_axial_of(prior, *orb_id);
-            match axial.iter().any(|share| *share > ratio(0, 1)) {
-                true => Ok(()),
-                false => Err(Unlawful::MintWithoutOwnStanding { orb: *orb_id, axial }),
-            }
-        }
-        // Every other deed is judged by the invariants above. The
-        // capacity law gates CREATION, not motion: moving value that
-        // already exists needs no gradient to justify it.
-        _ => Ok(()),
-    }
-}
-
 /// INVARIANT — D5, THE SOVEREIGN UNION (operator ruling 2026-08-02).
 ///
 /// The union of the offices `D(Ω)` PROGENITOR and `V(Ω)` SOVEREIGN is

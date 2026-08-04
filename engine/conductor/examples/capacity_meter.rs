@@ -32,7 +32,7 @@ use std::path::{Path, PathBuf};
 
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::Committed;
-use kernel::bridge::{read_entangled, verdict_per_dimension, CHANNELS};
+use kernel::bridge::{poles_per_dimension, read_entangled, CHANNELS};
 use solver_verify::forge::Difficulty;
 
 /// One axis ratio in its own name — never summed with another. `None`
@@ -174,8 +174,11 @@ fn main() {
         let state = cfe::world::replay(&chronicle);
 
         let entangled = read_entangled(&state);
-        let per_channel = verdict_per_dimension(&state);
-        let live = per_channel.iter().filter(|v| v.is_admitted()).count();
+        // The per-channel VERDICT is struck with the vacuity removal;
+        // the poles it collapsed are still measurable, and a meter
+        // wants the measurement rather than the judgement anyway.
+        let per_channel = poles_per_dimension(&state);
+        let live = per_channel.iter().filter(|(rank, flows)| *rank > 0 && *flows > 0).count();
         let align = alignment(&state);
         let zones: usize = state.orbs.iter().map(|o| o.zones.len()).sum();
 
@@ -183,8 +186,14 @@ fn main() {
         *entangled_channels.entry(live).or_insert(0) += 1;
         *rank_spread.entry(entangled.rank).or_insert(0) += 1;
         *substrate.entry(state.orbs.len()).or_insert(0) += 1;
-        for v in &per_channel {
-            *verdict_census.entry(format!("{v:?}")).or_insert(0) += 1;
+        for (rank, flows) in &per_channel {
+            let row = match (*rank > 0, *flows > 0) {
+                (false, false) => "neither pole",
+                (true, false) => "rank, no flow",
+                (false, true) => "flow, no rank",
+                (true, true) => "both poles",
+            };
+            *verdict_census.entry(row.to_string()).or_insert(0) += 1;
         }
         if entangled.unknown > 0 {
             unknown_lines += 1;
@@ -294,7 +303,7 @@ fn main() {
     // assumed.
     let borrowed: Vec<&Committed> = states.iter().collect();
     let across = kernel::bridge::read_entangled_across(&borrowed, 0);
-    let across_channels = kernel::bridge::verdict_per_dimension_across(&borrowed);
+    let across_channels = kernel::bridge::poles_per_dimension_across(&borrowed);
     let laned: usize = states.iter().filter(|s| !s.routes.is_empty()).count();
     let lanes: usize = states.iter().map(|s| s.routes.len()).sum();
     println!("\n=== CROSS-BOOK (books as vertices, shared lanes as edges) ===");

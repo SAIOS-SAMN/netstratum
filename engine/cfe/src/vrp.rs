@@ -17,12 +17,40 @@ pub enum Attestation {
 }
 
 /// A timekeeper reads the clock and attests its exact successor.
+///
+/// **THE SEATED QUORUM IS UNANIMOUS BY CONSTRUCTION — a placeholder,
+/// declared 2026-08-03, not a law being enforced.** A world seats three
+/// keepers and its tick asks all three (`world/tick.rs`, the one
+/// production caller). They share ONE clock in ONE process, `attest`
+/// consults nothing but that clock, and so the three answers are always
+/// identical: `TickRead::QuorumOpen` is unreachable through this
+/// method, and the live clock always walks. `id` is carried and never
+/// read for the same reason — there is nothing yet for keepers to
+/// differ ABOUT.
+///
+/// This is an absent SOURCE, not an absent judgment. The tick law lives
+/// in [`WorldClock::tick`], which refuses 2-of-3, a skip and a replay on
+/// the attestations it is handed, exactly as NS-3 §3.1 vectors it —
+/// witnessed by `the_clock_refuses_partial_skip_and_replay`
+/// (NS-3 §4 conformance clause c) and pinned as a placeholder by
+/// `the_seated_keepers_cannot_disagree_today`, both in
+/// `tests/ns3_conformance.rs`.
+///
+/// Keepers become real parties when identity does — NS-5's separate
+/// processes, NS-7's cryptographic identity. Until then: do not read a
+/// live quorum here, and do not invent one. A rule picking which keeper
+/// refuses would be authored physics, which is exactly what the
+/// scalar/scored provenance refusal bars.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Timekeeper {
     pub id: u8,
 }
 
 impl Timekeeper {
+    /// Reads the clock, attests its exact successor. Deliberately total
+    /// and deliberately blind to `self.id` — see the type's note: one
+    /// process gives three keepers one input, so the honest answer is
+    /// the same answer.
     pub fn attest(&self, clock: &WorldClock) -> Attestation {
         Attestation::Attests {
             next: clock.now() + 1,

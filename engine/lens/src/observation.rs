@@ -50,10 +50,9 @@ use crate::luminal::{emerge, Aperture, Luminal, Phase};
 use crate::observer::Capacity;
 use crate::peel::{Depth, View};
 use crate::propagation::{Medium, Resonance};
-use crate::standing::Standing;
 use cfe::ratio::Ratio;
 use rfa_core::capacity::{flux, Degree, Flux};
-use rfa_core::{Delta, Support};
+use rfa_core::{holonomies, Delta, Support};
 
 /// WHERE AN OBSERVER STANDS, and everything reachable from there.
 ///
@@ -121,10 +120,11 @@ impl<'a> Observation<'a> {
         crate::observer::observe(self.delta, self.support, self.depth, &self.capacity)
     }
 
-    /// ARM — the standing. Which row this state occupies.
-    pub fn standing(&self) -> Standing {
-        Standing::of(self.delta, self.support)
-    }
+    // THE STANDING ARM IS GONE (operator ruling 2026-08-04): it
+    // rendered which of four rows a state occupied, and both the rows
+    // and the mint gate they fed are struck. What it uniquely offered —
+    // the circulation count — is still reachable through the peel arm
+    // below, so no reading was lost with it.
 
     /// ARM — the flux census. What sources, what sinks, what balances.
     /// **Divergence sources; convergence sinks** — both poles named.
@@ -147,7 +147,11 @@ impl<'a> Observation<'a> {
         match self.view() {
             View::Far(degree) => degree,
             View::Mid(charges) => Degree::above_ground(charges.len()),
-            View::Near(_) => Degree::above_ground(self.standing().circulation),
+            // The circulation count, read directly rather than through
+            // the struck standing arm — the same number it computed.
+            View::Near(_) => {
+                Degree::above_ground(holonomies(self.delta, self.support).len())
+            }
         }
     }
 

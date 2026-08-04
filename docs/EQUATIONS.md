@@ -1410,7 +1410,7 @@ board** — see the reachability finding below.
 `mint_bound` **0** (no poverty trap, no free mint); δ=2 → rungs 2–4 →
 mint 0·1·4, requires **one** earned channel; δ=3 → rung 5 → mint **7**,
 requires **two**. Minting therefore begins exactly where
-`kernel::capacity_law` already gates it (`Vacuity::Entangled`) — one law,
+`kernel::capacity_law` (STRUCK 2026-08-04, the vacuity removal) already gates it (`Vacuity::Entangled` (STRUCK 2026-08-04, the vacuity removal)) — one law,
 two enforcements, agreeing, instead of a second bookkeeping.
 
 **REACHABILITY — MEASURED 2026-08-02, and it blocks instantiation.**

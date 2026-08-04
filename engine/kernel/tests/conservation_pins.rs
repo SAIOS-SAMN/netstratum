@@ -254,14 +254,16 @@ fn the_version_is_pinned() {
     // Entangled. BREAKING — version 2 admitted mints on Void, Stasis
     // and Unframed worlds. The introducing commit announced the bump
     // in its title and left the constant at 2; landed here.
-    // VERSION 5 — D4, THE REVOCATION LAW (operator, 2026-08-04):
-    // a DiscoveryMinted deed refuses unless it carries a strictly
-    // positive capacity increment, over a RESOLVED rank reading.
-    // BREAKING — version 3 admitted mints that grew no circulation.
-    // 4 IS DELIBERATELY SKIPPED: the harness lane's vacuity removal
-    // claimed it on its own branch and that has not reached main.
-    // Two meanings for one version is the hazard the tag-claim
-    // convention exists to prevent, so this landing took 5 and said so.
+    // VERSION 5 — TWO AMENDMENTS LANDED TOGETHER AT THE MERGE.
+    // 4: the capacity law REMOVED (harness lane) — breaking in the
+    //    loosening direction; a recycled identity carries no bonds, so
+    //    a standing test read off relational structure refused the
+    //    lawful recycled line by construction.
+    // 5: D4, the revocation law (cognition lane) — a DiscoveryMinted
+    //    deed refuses without a strictly positive capacity increment,
+    //    over a RESOLVED rank reading.
+    // Minted on separate branches for separate reasons; 4 was skipped
+    // on main so the two could not collide, and both are kept.
     assert_eq!(VERSION, 5, "the kernel version is charter-pinned");
 }
 

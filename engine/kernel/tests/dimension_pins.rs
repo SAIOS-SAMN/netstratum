@@ -1,18 +1,29 @@
-//! WITNESSED IN EVERY DIMENSION — the absolute, and why the aggregate
-//! could not carry it.
+//! WHICH DIMENSIONS CARRY A RELATION AT ALL.
 //!
-//! The verdict must hold per dimension, not on the sum. These pins
-//! measure a state where the SUM reads admitted while no single
-//! dimension is.
+//! **This file used to pin the per-dimension VERDICT** — that the
+//! four-row classification had to hold in every channel rather than on
+//! the sum, because a universe could read admitted in aggregate while
+//! no single dimension was (bonds lending rank to debts, debts lending
+//! flow back). Those pins went with the law they guarded: the
+//! classification and its mint gate are struck (operator ruling
+//! 2026-08-04 — identity is pegged to entity and is recycled without
+//! bonds, so a standing test read off relations refused the lawful
+//! recycled line by construction).
+//!
+//! The aggregation hazard they recorded is worth carrying forward in
+//! words even though nothing now classifies: **a reading summed across
+//! channels can hold a property no channel holds.** Anything that later
+//! reads per-world structure should be measured per channel first.
+//!
+//! What remains testable here is the plain shape question:
+//! [`occupied_dimensions`] — which channels any deed has ever used.
 
 use cfe::dop::ColonyOrb;
 use cfe::ratio::ratio;
 use cfe::world::{AbsorptionDebt, Bond, Committed, World};
 use kernel::bridge::{
-    occupied_dimensions, read_entangled, verdict_per_dimension, CHANNEL_BOND, CHANNEL_FORWARD,
-    CHANNEL_DEBT,
+    occupied_dimensions, project_complex, CHANNEL_BOND, CHANNEL_DEBT,
 };
-use rfa_core::Vacuity;
 
 fn orbs(n: u64) -> Committed {
     let mut committed = World::new().committed();
@@ -39,95 +50,41 @@ fn debt(debtor: u64, creditor: u64, remainder: i64) -> AbsorptionDebt {
 }
 
 #[test]
-fn the_aggregate_verdict_can_read_admitted_while_no_dimension_is() {
-    // THE HOLE, measured. Bonds form a balanced ring — rank, no flow,
-    // so that dimension is in STASIS. Debts form an open pair — flow,
-    // no cycle, so that dimension is UNFRAMED. Neither carries both
-    // poles, and neither is admitted.
-    //
-    // But the aggregate sums them: rank comes from bonds, flow comes
-    // from debts, and `dual_pole` on the totals reads ENTANGLED. The
-    // sum is admitted while every part of it is dead — one dimension
-    // lending its rank to another that lends back its flow.
-    let mut state = orbs(4);
-    state.bonds = vec![bond(1, 2, 3), bond(2, 3, 3), bond(3, 4, 3), bond(4, 1, 3)];
-    state.debts = vec![debt(1, 2, 5)];
-
-    let whole = read_entangled(&state);
-    let per = verdict_per_dimension(&state);
-
-    assert_eq!(per[CHANNEL_BOND], Vacuity::Stasis, "bonds: rank without gradient");
-    assert_eq!(per[CHANNEL_DEBT], Vacuity::Unframed, "debts: gradient without rank");
-    assert_eq!(per[CHANNEL_FORWARD], Vacuity::Void, "forwards: unoccupied");
-    assert!(
-        !per.iter().any(|seen| seen.is_admitted()),
-        "NOT ONE dimension is admitted on its own"
-    );
-    // And the aggregate borrowed across them. Whatever the summed
-    // verdict says, it is not a statement about any dimension.
-    assert!(
-        whole.rank > 0 && !whole.flows.is_empty(),
-        "the sum holds both poles only because two dead dimensions each supplied one"
-    );
-}
-
-#[test]
-fn a_dimension_that_carries_both_poles_is_admitted_on_its_own() {
-    // The honest case. The bond channel alone holds a ring plus a
-    // chord: a second cycle AND unbalanced vertices, both poles in the
-    // same dimension. It stands without borrowing from anywhere.
-    let mut state = orbs(4);
-    state.bonds =
-        vec![bond(1, 2, 3), bond(2, 3, 3), bond(3, 4, 3), bond(4, 1, 3), bond(1, 3, 1)];
-
-    let per = verdict_per_dimension(&state);
-    assert_eq!(per[CHANNEL_BOND], Vacuity::Entangled, "one dimension, both poles, on its own");
-}
-
-#[test]
-fn an_unoccupied_dimension_reads_void_and_that_is_a_shape_not_a_failure() {
+fn an_unused_channel_is_unoccupied_and_that_is_a_shape_not_a_failure() {
     // A channel no deed has ever used carries nothing, and saying so is
-    // a fact about the world's shape. A universe that has never sealed
-    // a forward is not misaligned for it — which is why the floor is
-    // read per dimension and never as one global gate.
+    // a fact about the world's shape. A universe that has never sealed a
+    // covenant is not deficient for it.
     let mut state = orbs(3);
     state.bonds = vec![bond(1, 2, 4)];
 
     assert_eq!(occupied_dimensions(&state), vec![CHANNEL_BOND], "one channel in use");
-    let per = verdict_per_dimension(&state);
-    assert_eq!(per[CHANNEL_FORWARD], Vacuity::Void);
-    assert_eq!(per[CHANNEL_DEBT], Vacuity::Void);
 }
 
 #[test]
-fn the_floor_is_a_classification_never_a_score() {
-    // THE ANTI-ABSOLUTISM PIN. The reading returns an enum per
-    // dimension — it does not rank states, order them, or produce a
-    // number any rule could maximise, and it never says WHICH relation
-    // to form. Two worlds three orders of magnitude apart in obligation
-    // size land on the same row: the row carries no ordering to climb.
-    let mut small = orbs(3);
-    small.bonds = vec![bond(1, 2, 1), bond(2, 3, 1), bond(1, 3, 5)];
-    let mut large = orbs(3);
-    large.bonds = vec![bond(1, 2, 900), bond(2, 3, 900), bond(1, 3, 4000)];
-
-    let (a, b) = (verdict_per_dimension(&small), verdict_per_dimension(&large));
-    assert_eq!(a[CHANNEL_BOND], b[CHANNEL_BOND], "same row, wildly different magnitudes");
-}
-
-#[test]
-fn the_reading_is_absolute_decidable_at_one_state_with_no_history() {
-    // ABSOLUTE, NOT RATE. The verdict is a function of ONE committed
-    // state: no prior, no window, no limit being approached — which is
-    // what lets it be an invariant at all. A rate never attains its
-    // bound at any single step, so a rate can only ever be a lens.
+fn every_channel_a_deed_touched_is_occupied() {
     let mut state = orbs(4);
-    state.bonds =
-        vec![bond(1, 2, 3), bond(2, 3, 3), bond(3, 4, 3), bond(4, 1, 3), bond(1, 3, 1)];
+    state.bonds = vec![bond(1, 2, 3), bond(2, 3, 3)];
+    state.debts = vec![debt(1, 2, 5)];
 
-    assert_eq!(
-        verdict_per_dimension(&state),
-        verdict_per_dimension(&state),
-        "same state, same verdict, no history consulted"
+    let occupied = occupied_dimensions(&state);
+    assert!(occupied.contains(&CHANNEL_BOND), "bonds stand");
+    assert!(occupied.contains(&CHANNEL_DEBT), "debts stand");
+    assert_eq!(occupied.len(), 2, "and nothing else: {occupied:?}");
+}
+
+#[test]
+fn occupancy_reads_the_support_not_the_values() {
+    // A relation carrying ZERO is still a relation — the support says
+    // the pair relates, and that is the distinction sparsity exists to
+    // carry (an absent relation is ABSENT, never a zero). A reading that
+    // confused the two would erase exactly the topology `D` counts.
+    let mut state = orbs(3);
+    state.bonds = vec![bond(1, 2, 0)];
+
+    let (_, support) = project_complex(&state);
+    assert!(
+        support.has(0, 1, CHANNEL_BOND),
+        "the pair relates even though the obligation is zero"
     );
+    assert_eq!(occupied_dimensions(&state), vec![CHANNEL_BOND]);
 }

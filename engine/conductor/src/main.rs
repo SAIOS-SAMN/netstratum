@@ -173,6 +173,19 @@ fn main() {
             if let Some(spec) = polity.cycle(&book, &registry) {
                 newborns.push(spec);
             }
+            // DIRECTIVE 19: the judge speaks on the board. Every deed
+            // `kernel::lawful` refused this beat is named here, once —
+            // the verdict stays on the polity's permanent record either
+            // way. The deed still STANDS in the chronicle: `replay` is
+            // the live transition until the Phase 3 flip demotes it
+            // (U_DIRECTIVES §5), so this line reports a judge overruled
+            // by a proposer, which is exactly the gap worth seeing.
+            let world_name = polity.spec.world_name.clone();
+            for (sequence, unlawful) in polity.unreported_refusals() {
+                println!(
+                    "beat {beat}: THE JUDGE REFUSES — {world_name}: deed {sequence} is unlawful ({unlawful:?}); the deed stands, the verdict is on record"
+                );
+            }
         }
         for spec in newborns {
             println!(

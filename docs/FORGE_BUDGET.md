@@ -118,15 +118,15 @@ capacity reading from being self-confirming.
 
 `kernel::bridge::read_entangled(prior)` yields
 `EntangledRead { rank, holonomy, symmetry_foundation, flows, unknown }`.
-The gate is `verdict().is_admitted()` — `Vacuity::Entangled`, i.e.
+The gate is `verdict().is_admitted()` — `Vacuity::Entangled` (STRUCK 2026-08-04, the vacuity removal), i.e.
 `rank > 0 ∧ flow ≠ 0` (`rfa-core/src/boundary.rs:147-193`) — **the same
-reading `kernel::capacity_law` already uses to admit a
+reading `kernel::capacity_law` (STRUCK 2026-08-04, the vacuity removal) already uses to admit a
 `DiscoveryMinted`.** One law, two callers; never a second bookkeeping.
 
 **`bridge.rs:306-335` carries the warning that decides B2:** *"a
 universe can read `Entangled` on the sum while no single channel is
 entangled at all — rank standing in one channel, flow in another."*
-`verdict_per_dimension` exists for exactly this. A budget from the
+`verdict_per_dimension` (STRUCK 2026-08-04, the vacuity removal) exists for exactly this. A budget from the
 aggregate would hand full resource to a line entangled nowhere.
 Candidate readings for the ruling: the **count** of channels reading
 `Entangled`; the **minimum** rank across them (strictest — matches
@@ -298,8 +298,8 @@ reading is made of cannot exist inside a single-orb book.
 
 ### 8b. THREE CONSEQUENCES, each load-bearing
 
-1. **`kernel::capacity_law` can never admit a `DiscoveryMinted` on this
-   board.** It gates on `Vacuity::Entangled` (`rank > 0 ∧ flow ≠ 0`) and
+1. **`kernel::capacity_law` (STRUCK 2026-08-04, the vacuity removal) can never admit a `DiscoveryMinted` on this
+   board.** It gates on `Vacuity::Entangled` (STRUCK 2026-08-04, the vacuity removal) (`rank > 0 ∧ flow ≠ 0`) and
    **nothing is entangled anywhere.** Mints occur today only because the
    judge runs BESIDE the chain, not inside it — `extend(.., None)` at
    `conductor/src/lib.rs:1403` (PICKUP §8a's narrow remainder).
@@ -575,8 +575,8 @@ Reading the depth ladder against `Difficulty::level` and `mint_bound`:
 - **No poverty trap:** a ground line can always climb rung 1.
 - **No free mint:** minting begins at δ = 2, which requires at least one
   channel that is `Entangled` *and* carries real charge.
-- **And that is the SAME condition `kernel::capacity_law` already
-  enforces** on `DiscoveryMinted` (`Vacuity::Entangled`). One law, two
+- **And that is the SAME condition `kernel::capacity_law` (STRUCK 2026-08-04, the vacuity removal) already
+  enforces** on `DiscoveryMinted` (`Vacuity::Entangled` (STRUCK 2026-08-04, the vacuity removal)). One law, two
   enforcements, agreeing — the budget stops being a second bookkeeping
   and becomes the same gate read earlier.
 - `CHANNELS = 3` gives δ ≤ 4, and `word_len` ≤ 3 caps it: the third
@@ -741,7 +741,7 @@ Consequences that matter, and they are the point:
   stops reading as nothing.
 - **A SINK EARNS ON ITS OWN.** The cold-side economy is a capability,
   not a deficit, and the law already said so before this lane did.
-- **`Vacuity::Stasis` is named, not merely refused.** Rank without flow
+- **`Vacuity::Stasis` (STRUCK 2026-08-04, the vacuity removal) is named, not merely refused.** Rank without flow
   is *"a wheel turning against nothing, at any size"* — its own doc says
   it **must be RE-VOLUMIZED, never merely refused.** A cycle-only
   budget would have paid that wheel.
@@ -772,7 +772,7 @@ what becomes possible that was not — each traced to the law that opens.
 **Once a lane can be paid for (the alloy gate, §8ter.d):**
 
 4. **THE MINT GATE BECOMES SATISFIABLE.** `capacity_law` admits
-   `DiscoveryMinted` only on `Vacuity::Entangled`. Today that is
+   `DiscoveryMinted` only on `Vacuity::Entangled` (STRUCK 2026-08-04, the vacuity removal). Today that is
    unsatisfiable everywhere, so **the Phase-3 flip would halt minting**.
    Lanes make it satisfiable — **Phase 3 becomes landable**, which is
    the constitutional milestone the whole ladder points at.
@@ -803,7 +803,7 @@ what becomes possible that was not — each traced to the law that opens.
     (`registry.rs:37`), galaxy reach (`galaxy.rs:33`) and occupancy caps
     (`11_AEON` §7) all name a minted-plane reading as their blocker.
 11. **`rfa-core`'s orphanhood ends further** — `holonomies`,
-    `boundary_form` and `dual_pole` gain a second production caller;
+    `boundary_form` and `dual_pole` (STRUCK 2026-08-04, the vacuity removal) gain a second production caller;
     `17_CAPACITY` §7 wanted exactly this.
 12. **A civilization gets a HORIZON rather than a ceiling** — the thing
     the flat `200_000` denied. `frontier(V, δ)` has no cap: depth is
@@ -842,14 +842,14 @@ satisfying the manifold**; §2 is what that error cost twice.
 ### A3 · ECONOMIC — *does it change what mints, or how much?*
 - **reads** `Difficulty`
 - **decides** `mint_bound` — the rung→reward table (0 · 0 · 0 · 1 · 4 · 7)
-- **refuses** `Unlawful::MintWithoutStanding`
+- **refuses** `Unlawful::MintWithoutStanding` (STRUCK 2026-08-04, the vacuity removal)
 - **owns** the rung→reward table — **Ruling Box 1, untouched here**
 - **authority** `kernel::mint_bound` (`kernel/src/lib.rs:845`) · **LANDED**
 - **budget's crossing:** indirect but real. Budget changes *which tasks
   get solved*, hence mint frequency — never mint *amount*.
 
 ### A4 · CAPACITY — *does the work match what the line can bear?*
-- **reads** `verdict_per_dimension`, `rank`, `unknown` — **per channel**
+- **reads** `verdict_per_dimension` (STRUCK 2026-08-04, the vacuity removal), `rank`, `unknown` — **per channel**
 - **decides** floor versus scaled band
 - **refuses** by `unknown > 0` — capacity undefined, discharge by
   `Telescope` or `LockOn`, never by assuming absence

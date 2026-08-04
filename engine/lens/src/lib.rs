@@ -21,7 +21,16 @@ pub mod peel;
 pub mod propagation;
 pub mod render;
 pub mod revocation;
-pub mod standing;
+// THE STANDING SURFACE IS GONE (operator ruling 2026-08-04, the vacuity
+// removal). It rendered which of four rows a structure occupied, and it
+// existed by its own header BECAUSE the kernel gated a mint on that row.
+// With the gate struck it would have been a reading nothing acts on,
+// which is the LAW 8 failure the removal was correcting — so it went
+// with the law rather than outliving it.
+//
+// `revocation` above is NOT its replacement and does not revive it: it
+// reads D4's window (deeds emitted while nothing grew) off `holonomies`
+// alone, never off the struck dual-pole verdict.
 
 use cfe::world::Committed;
 use mesh::arbor::{Arbor, ArborRefused};

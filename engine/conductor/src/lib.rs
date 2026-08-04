@@ -141,6 +141,32 @@ pub fn fold(var_root: &str) -> std::io::Result<(u64, Ratio)> {
 /// mesic ceiling displaces to the deck (the ceiling); colder stands
 /// (a frozen giant's deck is honestly frozen). No third siting axis:
 /// geometry stays clean, and every non-aeric body reads unchanged.
+///
+/// **UNREACHABLE AS WIRED — measured 2026-08-03, declared here rather
+/// than quietly repaired.** This tests the METABOLISM axis, and no
+/// metabolism is or can be `"aeric"`: the vocabulary is closed at
+/// `["mineral", "biotic", "plasmic"]`
+/// (`ledger::registry::METABOLISMS`), and `12_UNION` §5a lists aeric as
+/// a SUBSTRATE — a lineage line that is itself *biotic*, distinguished
+/// by living in a gas giant's banded column. Substrates live in the
+/// `clade` field, not the metabolism axis, which is exactly why the
+/// same table says `plasmic` "needs the third metabolism value" and
+/// aeric does not. Both call sites (`regime`, `trade_intent`) pass a
+/// metabolism, so the early return fires for every civilization alive
+/// and the ruling has never once applied.
+///
+/// It is not fixed here because the fix is not this lane's to choose.
+/// The reading has two plausible homes and they are not equivalent:
+/// the civilization's `clade` (but the clade vocabulary is a CLOSED u8
+/// set ratified by the operator at `15_TAXON` §3, and `aeric` is not in
+/// it — adding it is an amendment), or the WORLD's own body (a gas
+/// giant is a place, and §5a calls the giants of every world its
+/// holdings — which would make this a siting property, not an axis
+/// read at all). Measured on the live board: 33 registry cards, zero
+/// carrying an aeric substrate under any spelling.
+///
+/// Pinned by `the_aeric_deck_band_is_unreachable_today` — the day a
+/// real aeric reading is wired, that pin goes red and is truth-updated.
 pub fn deck_band4(metabolism: &str, t4: Ratio) -> Ratio {
     if metabolism != "aeric" {
         return t4;
@@ -511,7 +537,27 @@ pub struct Polity {
     /// a third of the board's compute was re-deriving identical
     /// `Unsolved` readings. One entry is enough: the repeat is always
     /// "unchanged since last beat".
-    last_forge: Option<([u8; 32], usize, SolveRead)>,
+    ///
+    /// **KEYED ON THE WHOLE `Difficulty`, not on `word_len`** (defect
+    /// found at the 2026-08-04 integration, measured). The key was
+    /// `(digest, word_len)`, and `Difficulty::level(3)` and `level(4)`
+    /// BOTH carry `word_len: 2` while differing in tier, rows and cols.
+    /// So a line promoting 3 → 4 on an unchanged digest hit the memo and
+    /// was handed the level-3 solve, which the conductor then shipped as
+    /// a level-4 proof: the judge re-forged level 4, re-ran the program
+    /// and got a different grid — `WorkRefused { OutputMismatch }`, a
+    /// mint the proposer emitted and the judge refused. The task IS the
+    /// whole difficulty, so the key must be too.
+    last_forge: Option<([u8; 32], Difficulty, SolveRead)>,
+    /// How many refusals the board has already been TOLD. The record
+    /// above is permanent; this is only the narrator's place in it, so
+    /// a refusal is announced once per process and kept forever.
+    /// Workspace state, like `chained`: a RESUMED world restarts both
+    /// at 0 and re-judges its whole chronicle on the next beat, so a
+    /// pre-existing refusal is announced again in the new process. That
+    /// is honest — the judge met the deed again — and it is the same
+    /// re-verification `chained: 0` already performs.
+    reported: usize,
 }
 
 fn banked(world: &World, resource: Resource) -> Ratio {
@@ -689,6 +735,7 @@ impl Polity {
                         refused: Vec::new(),
                         lane_refused: Vec::new(),
                         last_forge: None,
+                        reported: 0,
                         spec,
                         world,
                         automaton,
@@ -769,6 +816,7 @@ impl Polity {
             refused: Vec::new(),
             lane_refused: Vec::new(),
             last_forge: None,
+            reported: 0,
             spec,
             world,
             automaton,
@@ -1134,15 +1182,15 @@ impl Polity {
             // The memo, or the search. Same inputs, same answer — the
             // door the purity of `solve` opens.
             let read = match self.last_forge.take() {
-                Some((held, depth, cached))
-                    if held == digest && depth == difficulty.word_len =>
+                Some((held, held_difficulty, cached))
+                    if held == digest && held_difficulty == difficulty =>
                 {
-                    self.last_forge = Some((held, depth, cached.clone()));
+                    self.last_forge = Some((held, held_difficulty, cached.clone()));
                     cached
                 }
                 _ => {
                     let fresh = solve_consulted(&task, difficulty.word_len);
-                    self.last_forge = Some((digest, difficulty.word_len, fresh.clone()));
+                    self.last_forge = Some((digest, difficulty, fresh.clone()));
                     fresh
                 }
             };
@@ -1181,6 +1229,18 @@ impl Polity {
                 // ladder read from the same function the judge enforces,
                 // never a number chosen here.
                 if let Some((work, difficulty)) = proof {
+                    // THE MINT'S ONE ANCHOR (kernel VERSION 4). The
+                    // amount is `kernel::mint_bound` — the ruled ladder
+                    // read from the same function the judge enforces,
+                    // never a number chosen here — and the proof rides
+                    // the deed whole, so `verify_work` re-forges,
+                    // re-applies and re-chains it forever.
+                    //
+                    // The capacity-law gate that stood here is STRUCK
+                    // (operator ruling 2026-08-04): identity is pegged
+                    // to entity and is recycled WITHOUT bonds, so a
+                    // standing test read off relational structure
+                    // refused the lawful recycled line by construction.
                     let earned = kernel::mint_bound(&difficulty);
                     if earned > cfe::ratio::ratio(0, 1) {
                         let _ = self.world.mint_discovery_as(
@@ -1502,6 +1562,31 @@ impl Polity {
             .extend(coordinate, &codec::state_bytes(&self.world.committed()), None)
             .map(|_| ())
     }
+
+    /// DIRECTIVE 19 — every deed this world's judge REFUSED, by receipt
+    /// sequence, in the order it met them. The record is permanent and
+    /// nothing prunes it: the chronicle keeps the deed, this keeps the
+    /// verdict.
+    ///
+    /// A refusal here does NOT mean the deed was undone. `world.rs`'s
+    /// `replay` is still the live transition (the Phase 3 flip demotes
+    /// it to proposer, `U_DIRECTIVES` §5), so a refused deed stands in
+    /// the chronicle with the judge on record against it. That gap is
+    /// the whole reason this must be visible rather than counted.
+    pub fn refusals(&self) -> &[(u64, kernel::Unlawful)] {
+        &self.refused
+    }
+
+    /// The refusals the board has not been told about yet. Reading them
+    /// marks them told — the RECORD stays whole above; only the
+    /// narrator's cursor moves, so each refusal is announced once
+    /// instead of every beat thereafter.
+    pub fn unreported_refusals(&mut self) -> &[(u64, kernel::Unlawful)] {
+        let from = self.reported.min(self.refused.len());
+        self.reported = self.refused.len();
+        &self.refused[from..]
+    }
+
 }
 
 /// MARKET-2: plain L1 between two charted positions — the transit

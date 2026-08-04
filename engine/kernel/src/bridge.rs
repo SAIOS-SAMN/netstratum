@@ -43,7 +43,7 @@ use cfe::ratio::{ratio, Ratio};
 use cfe::world::Committed;
 use rfa_core::capacity::{borne_axial, borne};
 use rfa_core::{
-    dual_pole, holonomies, boundary_form, Degree, Delta, Flow, BoundaryForm, Support, Vacuity, Holonomy,};
+    holonomies, boundary_form, Degree, Delta, Flow, Support, Holonomy,};
 
 /// BOND-1: the standing order, `source` → `target` at `rate`/tick.
 pub const CHANNEL_BOND: usize = 0;
@@ -194,10 +194,11 @@ pub struct EntangledRead {
     /// [`EntangledRead::degree`]. Reading this field as `D` is what put
     /// `D = 0` back into a system whose law says D is never zero.
     ///
-    /// It stays a raw count because [`rfa_core::dual_pole`] classifies
-    /// on "does anything circulate" — a question about what is ABOVE the
-    /// floor, where zero is the right answer and the floor would only
-    /// blur it.
+    /// It stays a raw count because the question it answers is "does
+    /// anything circulate" — about what is ABOVE the floor, where zero
+    /// is the right answer and the floor would only blur it. (The
+    /// four-row classification that once consumed it is struck —
+    /// operator ruling 2026-08-04.)
     pub rank: usize,
 
     /// **THE CHARGE FIELD, CARRIED WHOLE — what each cycle HOLDS**
@@ -310,56 +311,13 @@ impl EntangledRead {
     ///
     /// Use this wherever the question is *how high does this state
     /// stand*. Use [`EntangledRead::rank`] only where the question is
-    /// *does anything circulate above the floor* — the `dual_pole`
-    /// question.
+    /// *does anything circulate above the floor*.
     pub fn degree(&self) -> Degree {
         Degree::above_ground(self.rank)
     }
 
-    /// THE VERDICT — both poles read at once (`rfa_core::dual_pole`).
-    /// Only `Entangled` stands: structure WITH gradient. `Stasis` is
-    /// rank without flow — a wheel turning against nothing, at any
-    /// size.
-    ///
-    /// Classifies on the ABOVE-GROUND circulation, never on the degree:
-    /// every state stands at or above the ground, so a floored reading
-    /// would make `Void` and `Stasis` unreachable and collapse the
-    /// four rows to two.
-    pub fn verdict(&self) -> Vacuity {
-        dual_pole(self.rank, &BoundaryForm { flows: self.flows.clone() })
-    }
 }
 
-/// THE VERDICT PER DIMENSION — the absolute, witnessed in EVERY one
-/// (operator ruling 2026-08-01: *D must always be greater than 0 and
-/// not in stasis and is entangled with V permanently, witnessed in
-/// every dimension*).
-///
-/// **The aggregate verdict is not this.** `dual_pole` takes the TOTAL
-/// rank and the WHOLE form, so a universe can read `Entangled` on the
-/// sum while no single channel is entangled at all — rank standing in
-/// one dimension, flow standing in another, and neither dimension
-/// carrying both. That is the aggregate lying about the parts, and it is
-/// exactly what a per-dimension witness catches.
-///
-/// **Absolute, not rate.** This is decidable at ONE state: no history,
-/// no limit, no approach. A rate never attains its bound at any step, so
-/// a rate can never be an invariant — it can only be a lens. The
-/// stability reading (support expanding against gradient flattening)
-/// belongs there; THIS belongs in the judge.
-pub fn verdict_per_dimension(state: &Committed) -> Vec<Vacuity> {
-    let (delta, support) = project_complex(state);
-    let charges = holonomies(&delta, &support);
-    let form = boundary_form(&delta, &support);
-    (0..CHANNELS)
-        .map(|l| {
-            let rank = charges.iter().filter(|held| held.l == l).count();
-            let flows =
-                form.flows.iter().filter(|flow| flow.l == l).cloned().collect::<Vec<_>>();
-            dual_pole(rank, &BoundaryForm { flows })
-        })
-        .collect()
-}
 
 /// Which dimensions carry any relation at all. A channel no deed has
 /// ever used is UNOCCUPIED — it reads `Void`, and that is a fact about
@@ -514,20 +472,49 @@ pub fn read_entangled_across(books: &[&Committed], unknown: usize) -> EntangledR
     EntangledRead { rank, holonomy, symmetry_foundation, flows, unknown }
 }
 
-/// The per-dimension verdict on the CROSS-BOOK complex — the same
-/// anti-collapse law [`verdict_per_dimension`] enforces, applied to the
-/// wider read. Never the aggregate: a roster can read `Entangled` on
-/// the sum while no single channel is.
-pub fn verdict_per_dimension_across(books: &[&Committed]) -> Vec<Vacuity> {
+/// Per-channel RANK and FLOW for ONE book — the surviving half of the
+/// struck `verdict_per_dimension`.
+///
+/// The four-row verdict over these two numbers was the struck
+/// authority; the numbers themselves are facts about the complex and
+/// the anti-collapse law still holds over them: a book can carry rank
+/// in one channel and flow in another and stand in NEITHER, which the
+/// aggregate would hide.
+pub fn poles_per_dimension(state: &Committed) -> Vec<(usize, usize)> {
+    let (delta, support) = project_complex(state);
+    let charges = holonomies(&delta, &support);
+    let form = boundary_form(&delta, &support);
+    (0..CHANNELS)
+        .map(|l| {
+            let rank = charges.iter().filter(|held| held.l == l).count();
+            let flows = form.flows.iter().filter(|flow| flow.l == l).count();
+            (rank, flows)
+        })
+        .collect()
+}
+
+/// Per-channel RANK and FLOW on the CROSS-BOOK complex.
+///
+/// **The verdict form of this reading is STRUCK** (operator ruling
+/// 2026-08-04, the vacuity removal): it returned `Vacuity` per channel,
+/// and the whole dual-pole verdict vocabulary went with the gate that
+/// consumed it. The single-book `verdict_per_dimension` went the same
+/// way.
+///
+/// What survives is the MEASUREMENT the verdict was collapsing — the
+/// cross-book lane's real contribution. Rank and flow per channel are
+/// facts about the complex; only the four-row judgement over them was
+/// the struck authority. Composed at the merge rather than deleting one
+/// lane's work to honour another's.
+pub fn poles_per_dimension_across(books: &[&Committed]) -> Vec<(usize, usize)> {
     let (delta, support) = project_complex_across(books);
     let charges = holonomies(&delta, &support);
     let form = boundary_form(&delta, &support);
     (0..CHANNELS)
         .map(|l| {
             let rank = charges.iter().filter(|held| held.l == l).count();
-            let flows =
-                form.flows.iter().filter(|flow| flow.l == l).cloned().collect::<Vec<_>>();
-            dual_pole(rank, &BoundaryForm { flows })
+            let flows = form.flows.iter().filter(|flow| flow.l == l).count();
+            (rank, flows)
         })
         .collect()
 }

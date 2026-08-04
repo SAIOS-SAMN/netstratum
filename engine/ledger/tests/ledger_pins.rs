@@ -393,6 +393,55 @@ fn the_starchart_holds_tuniversal_coordinates() {
     assert!(card.contains("\"tuniversal\":\"00:00:00:00:01:01\""));
 }
 
+/// THE SPAN SURVIVES THE CLOCK. `universe.json`'s span is the authority
+/// `universe_span` reads — `chart_world` wraps against it and
+/// `l1_distance` measures with it — and the clock rewrites that card
+/// every beat. It hard-coded "64" on every rewrite, so a universe of
+/// any other size was silently restored to the default one tick after
+/// it was set, while every reader went on trusting the field.
+///
+/// RED, recorded (2026-08-03, before the fix): the span read back as
+/// 64 immediately after the clock advanced, and the wrap below put the
+/// world at 121/2 — the 64-torus answer — instead of 25/2.
+#[test]
+fn the_span_survives_a_clock_advance() {
+    use cfe::ratio::ratio;
+    let root = scratch("span");
+    let book = Ledger::at(&root);
+    book
+        .chart_world("sol", (&ratio(0, 1), &ratio(0, 1), &ratio(0, 1)), &ratio(0, 1))
+        .expect("charts, seeding the card at the default span");
+    assert_eq!(book.universe_span(), ratio(64, 1), "the default seeds once");
+
+    // A universe of another size, set on the card the reader trusts.
+    let card = fs::read_to_string(root.join("universe.json")).expect("card");
+    fs::write(
+        root.join("universe.json"),
+        card.replace("\"span\":\"64\"", "\"span\":\"16\""),
+    )
+    .expect("rewrites the span");
+    assert_eq!(book.universe_span(), ratio(16, 1));
+
+    // The clock walks — the geometry must not move under it.
+    book.set_universal_clock(1).expect("advances the clock");
+    assert_eq!(
+        book.universe_span(),
+        ratio(16, 1),
+        "the clock carries the span forward; it does not re-assert the default"
+    );
+
+    // And the carried span is the one the wrap actually uses: −7/2 mod
+    // 16 = 25/2, not the 64-torus's 121/2.
+    book
+        .chart_world("kepler-passage", (&ratio(-7, 2), &ratio(1, 1), &ratio(0, 1)), &ratio(0, 1))
+        .expect("charts");
+    assert_eq!(
+        book.charted_position("kepler-passage").map(|(s, _)| s.0),
+        Some(ratio(25, 2)),
+        "the world wraps on the span that stands, not on the default"
+    );
+}
+
 /// Exactness discipline holds through the topology: fractions render
 /// p/q, never decimals; the snapshot stays balanced JSON.
 #[test]

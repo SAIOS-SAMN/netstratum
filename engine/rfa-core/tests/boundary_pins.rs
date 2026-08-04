@@ -1,8 +1,16 @@
-//! DIRECTIVE 10 — the boundary form and the dual-pole non-vacuity
-//! lock. `∂Δ` is the DIVERGENCE: canonical, one pass, no traversal.
+//! DIRECTIVE 10 — the boundary form. `∂Δ` is the DIVERGENCE:
+//! canonical, one pass, no traversal.
+//!
+//! **The dual-pole LOCK is struck** (operator ruling 2026-08-04): the
+//! four-row classification and the mint gate it fed are removed —
+//! identity is pegged to entity and is recycled without bonds, so a
+//! standing test read off relations refused the lawful recycled line.
+//! The READING stays and is pinned here: the divergence is first-class
+//! for THE SIGN LAW and is what `capacity.rs` splits against. These
+//! witnesses now measure the poles without classifying them.
 
 use cfe::ratio::{ratio, Ratio};
-use rfa_core::{dual_pole, holonomies, boundary_form, Delta, Support, Vacuity};
+use rfa_core::{holonomies, boundary_form, Delta, Support};
 
 fn edge(d: &mut Delta, s: &mut Support, i: usize, j: usize, v: Ratio) {
     d.set_antisym(i, j, vec![v]);
@@ -10,25 +18,11 @@ fn edge(d: &mut Delta, s: &mut Support, i: usize, j: usize, v: Ratio) {
 }
 
 #[test]
-fn pure_circulation_is_vacuous_however_large_its_charge() {
-    // A triangle whose obligations run in a closed loop: 0→1→2→0, each
-    // carrying 1. Every vertex balances, so no vertex sources or sinks
-    // and dV is EMPTY — even though real value circulates.
-    let mut d = Delta::zero(3, 1);
-    let mut s = Support::new(3, 1);
-    edge(&mut d, &mut s, 0, 1, ratio(1, 1));
-    edge(&mut d, &mut s, 1, 2, ratio(1, 1));
-    edge(&mut d, &mut s, 2, 0, ratio(1, 1));
-
-    let form = boundary_form(&d, &s);
-    assert_eq!(form.rank(), 0, "circulation sources nothing anywhere");
-    assert!(!form.is_non_vacuous(), "∂Δ ≡ 0");
-}
-
-#[test]
-fn static_stasis_is_rank_without_gradient_and_is_refused() {
-    // THE ROW THAT JUSTIFIES DIRECTIVE 10. The same closed loop carries
-    // holonomy — D > 0 — while ∂Δ ≡ 0. Rank alone would admit it.
+fn rank_without_gradient_is_a_real_state_and_reads_as_one() {
+    // A closed loop carries holonomy — D > 0 — while ∂Δ ≡ 0. The two
+    // poles are genuinely independent readings, which is what made the
+    // struck classification possible in the first place; the readings
+    // themselves were never the problem and are pinned here.
     let mut d = Delta::zero(3, 1);
     let mut s = Support::new(3, 1);
     edge(&mut d, &mut s, 0, 1, ratio(1, 1));
@@ -39,10 +33,6 @@ fn static_stasis_is_rank_without_gradient_and_is_refused() {
     let form = boundary_form(&d, &s);
     assert!(!rank.is_empty(), "D > 0 — the loop carries charge no frame explains");
     assert!(!form.is_non_vacuous(), "∂Δ ≡ 0 — nothing sources or sinks");
-    assert!(
-        rank.is_empty() || !form.is_non_vacuous(),
-        "static stasis: structure with no gradient does no work"
-    );
 }
 
 #[test]
@@ -84,8 +74,9 @@ fn the_reading_is_canonical_placement_cannot_flip_it() {
 }
 
 #[test]
-fn the_entangled_state_holds_both_poles() {
-    // D > 0 AND dV ≢ 0 — the only admitted row.
+fn a_state_can_hold_both_poles_at_once() {
+    // D > 0 AND dV ≢ 0. Once the only admitted row; now simply a state
+    // that carries both readings, which no longer gates anything.
     let mut d = Delta::zero(3, 1);
     let mut s = Support::new(3, 1);
     edge(&mut d, &mut s, 0, 1, ratio(2, 1));
@@ -103,33 +94,6 @@ fn an_empty_complex_is_vacuous_and_total() {
 }
 
 #[test]
-fn the_four_rows_classify_and_only_one_is_admitted() {
-    let flat = Delta::zero(3, 1);
-    let empty = Support::new(3, 1);
-    assert_eq!(dual_pole(0, &boundary_form(&flat, &empty)), Vacuity::Void);
-
-    // Structure with no gradient — the row that must be re-volumized.
-    let mut d = Delta::zero(3, 1);
-    let mut s = Support::new(3, 1);
-    edge(&mut d, &mut s, 0, 1, ratio(1, 1));
-    edge(&mut d, &mut s, 1, 2, ratio(1, 1));
-    edge(&mut d, &mut s, 2, 0, ratio(1, 1));
-    let stasis = dual_pole(holonomies(&d, &s).len(), &boundary_form(&d, &s));
-    assert_eq!(stasis, Vacuity::Stasis);
-    assert!(!stasis.is_admitted(), "dV cannot be zero — a flat field does no work");
-
-    // Both poles standing.
-    let mut e = Delta::zero(3, 1);
-    let mut t = Support::new(3, 1);
-    edge(&mut e, &mut t, 0, 1, ratio(2, 1));
-    edge(&mut e, &mut t, 1, 2, ratio(3, 1));
-    edge(&mut e, &mut t, 0, 2, ratio(9, 1));
-    let live = dual_pole(holonomies(&e, &t).len(), &boundary_form(&e, &t));
-    assert_eq!(live, Vacuity::Entangled);
-    assert!(live.is_admitted());
-}
-
-#[test]
 fn the_poles_are_complementary_at_fixed_delta_so_shuffling_is_not_growth() {
     // THE ZERO-SUM TRAP (operator ruling 2026-08-01: *C is leaking into
     // D and the causality is stasis*).
@@ -143,8 +107,8 @@ fn the_poles_are_complementary_at_fixed_delta_so_shuffling_is_not_growth() {
     // healthy. That is stasis wearing growth's clothes, and it is the
     // exact shape of value taken rather than made.
     //
-    // Pinned as three states over the SAME support, all reading
-    // Entangled, none larger than another.
+    // Pinned as two states over the SAME support, neither larger than
+    // the other.
     let mut pure_source = Delta::zero(3, 1);
     let mut s = Support::new(3, 1);
     edge(&mut pure_source, &mut s, 0, 1, ratio(1, 1));
@@ -171,12 +135,14 @@ fn the_poles_are_complementary_at_fixed_delta_so_shuffling_is_not_growth() {
 
     // THE LAW THIS FORCES: growth is Δ's own expansion — a new relation,
     // receipted (D3) — never a re-split of a fixed Δ between poles.
-    // The dual-pole verdict cannot see the difference, which is why it
-    // classifies but must never be read as a growth measure.
-    assert_eq!(
-        dual_pole(after, &boundary_form(&mixed, &sm)),
-        Vacuity::Entangled,
-        "redistribution reads ADMITTED — the verdict classifies, it does not measure growth"
+    // Both poles read alive on the redistributed state while nothing was
+    // built, which is why no reading over a FIXED Δ can ever be a growth
+    // measure. It was the struck classification's deepest flaw and it
+    // outlives it: whatever replaces a standing test must read the
+    // SUPPORT, not the split.
+    assert!(
+        after > 0 && boundary_form(&mixed, &sm).is_non_vacuous(),
+        "redistribution alone leaves both poles standing — it did no work"
     );
 }
 
@@ -185,10 +151,9 @@ fn shuffling_a_fixed_support_mints_nothing_expansion_is_the_only_growth() {
     // DIRECTIVE 16 — the growth invariant, enforced on the SUPPORT.
     //
     // Two states over the identical edge set, with content re-split
-    // between gradient and circulation. dual_pole may well call both
-    // Entangled — it CLASSIFIES — but no relation was formed, so the
-    // support test refuses the increment. Q·Δ is coordinate gauge, and
-    // gauge never mints.
+    // between gradient and circulation. Both read alive on either pole,
+    // but no relation was formed, so the support test refuses the
+    // increment. Q·Δ is coordinate gauge, and gauge never mints.
     let mut before = Support::new(3, 1);
     before.connect(0, 1, 0);
     before.connect(1, 2, 0);
