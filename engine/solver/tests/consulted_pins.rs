@@ -32,10 +32,13 @@ fn what_crosses_maps_every_training_pair_exactly() {
     // THE HONEST WITHHOLD LAW at the door. Whatever comes out, if it
     // claims Solved, it has been re-derived against every pair — by the
     // OUTSIDE, never on the search's word.
-    for seed in [3u8, 11, 29] {
+    let seeds = [3u8, 11, 29];
+    let mut crossed = 0;
+    for seed in seeds {
         let t = task(seed);
         if let SolveRead::Solved { program, .. } = solve_consulted(&t, Difficulty::level(3).word_len)
         {
+            crossed += 1;
             for (n, pair) in t.train.iter().enumerate() {
                 assert_eq!(
                     run(&program, &pair.input),
@@ -45,6 +48,14 @@ fn what_crosses_maps_every_training_pair_exactly() {
             }
         }
     }
+    // COVERAGE (added 2026-08-04). Every assertion above lives inside an
+    // `if let`, so if no seed ever crossed the door this test passed
+    // while checking nothing — the door's whole law unexercised. A test
+    // that cannot reach the path is not testing it.
+    assert!(
+        crossed > 0,
+        "no seed crossed the sector door — the law under test never ran"
+    );
 }
 
 #[test]

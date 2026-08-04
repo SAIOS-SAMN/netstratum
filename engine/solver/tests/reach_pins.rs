@@ -190,18 +190,56 @@ fn derivation_withholds_where_the_sweep_stumbled() {
         &[grid(3, 3, &[1, 0, 0, 0, 2, 0, 0, 0, 3])],
         grid(3, 3, &[4, 0, 0, 0, 5, 0, 0, 0, 6]),
     );
-    let swept = solve(&task, 3);
-    let proposed = propose(&task, &Need::struck(Hunger::Novelty, 480));
-    // Whatever each reads, the proposer NEVER claims a solve it cannot
-    // re-derive — that is the only invariant that matters here.
-    if let SolveRead::Solved { program, .. } = &proposed {
-        for pair in &task.train {
-            assert_eq!(
-                solver_verify::grid::run(program, &pair.input),
-                pair.output,
-                "a proposal that crosses must close every pair"
-            );
+    // MEASURED, not hoped: the sweep closes this by exhaustion — and
+    // with a DIFFERENT word than the one forged (`gravity_down →
+    // flip_v`), because the verifier is the authority and any program
+    // that closes counts. The derived reach withholds.
+    assert!(
+        matches!(
+            solve(&task, 3),
+            SolveRead::Solved { matches_expected: Some(true), .. }
+        ),
+        "the sweep reaches this one by exhaustion — if it stopped, the \
+         baseline moved and this pin's premise is gone"
+    );
+    assert!(
+        matches!(
+            propose(&task, &Need::struck(Hunger::Novelty, 480)),
+            SolveRead::Unsolved
+        ),
+        "derivation withholds here: no observation motivates the \
+         intermediate frame. IF THIS NOW SOLVES, the derivation improved \
+         — that is good news, and this pin should be retired deliberately \
+         rather than loosened"
+    );
+}
+
+/// THE INVARIANT THAT OUTRANKS THE TRADE. Whatever the proposer reads,
+/// a `Solved` it returns must close every training pair — the honest
+/// withhold law, checked over tasks it actually solves.
+#[test]
+fn what_the_proposer_claims_it_can_re_derive() {
+    let cases = [
+        (vec![Op::Rotate90], grid(2, 3, &[1, 2, 3, 4, 5, 6])),
+        (vec![Op::FlipH], grid(2, 2, &[1, 2, 0, 1])),
+        (vec![Op::Rotate180], grid(3, 2, &[1, 2, 3, 4, 5, 6])),
+    ];
+    let mut crossed = 0;
+    for (word, input) in &cases {
+        let task = task_from(word, std::slice::from_ref(input), input.clone());
+        if let SolveRead::Solved { program, .. } =
+            propose(&task, &Need::struck(Hunger::Resonance, 240))
+        {
+            crossed += 1;
+            for pair in &task.train {
+                assert_eq!(
+                    solver_verify::grid::run(&program, &pair.input),
+                    pair.output,
+                    "a proposal that crosses must close every pair"
+                );
+            }
         }
     }
-    let _ = swept; // the sweep's reading is the baseline, not a law
+    // COVERAGE: without this the loop above can assert nothing and pass.
+    assert_eq!(crossed, cases.len(), "every case here is derivable");
 }
