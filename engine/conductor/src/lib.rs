@@ -50,7 +50,7 @@ use ledger::galaxy::Galaxy;
 use ledger::registry::{lineage_domain, Civilization, Registry, DISPOSITIONS, METABOLISMS, PERCEPTIONS};
 use ledger::{Directive, Disposition, Ledger};
 use physics::Beacon;
-use solver::{forge_task, solve_consulted, Difficulty, SolveRead};
+use solver::{forge_task, propose_consulted, Difficulty, Hunger, Need, SolveRead};
 use std::path::Path;
 
 mod polities;
@@ -548,7 +548,7 @@ pub struct Polity {
     /// and got a different grid — `WorkRefused { OutputMismatch }`, a
     /// mint the proposer emitted and the judge refused. The task IS the
     /// whole difficulty, so the key must be too.
-    last_forge: Option<([u8; 32], Difficulty, SolveRead)>,
+    last_forge: Option<([u8; 32], Difficulty, Need, SolveRead)>,
     /// How many refusals the board has already been TOLD. The record
     /// above is permanent; this is only the narrator's place in it, so
     /// a refusal is announced once per process and kept forever.
@@ -1131,6 +1131,110 @@ impl Polity {
     /// stacked grids, stack operators — while planar and harmonic
     /// civilizations work the planar forge (the harmonic carrier is a
     /// named gap; it lands with its own vocabulary, not as a skin).
+    /// **WHAT THIS LINE IS STARVED FOR** — a CHARACTER's hunger, read
+    /// from its own history.
+    ///
+    /// **Derived, never stored** (`09_LEDGER` §1.2's law, applied to a
+    /// person instead of a book). No deed, no tag, no schema, no kernel
+    /// arm: hunger is a reading of the chronicle this line already
+    /// wrote, so two characters differ without a wire amendment.
+    ///
+    /// WANT-1 strikes its wants on an ORB — a PLACE starves. That is
+    /// the right law for a world and the wrong one for a person, and it
+    /// is why two characters with the same grants were identical by
+    /// construction: `Entity` carries `entity_id`, `handle`,
+    /// `principal`, `grants` and nothing it could differ in. This reads
+    /// the same two hungers off the actor's own deeds instead.
+    ///
+    /// ```text
+    ///   Novelty     nothing DISCOVERED lately — the line has stopped
+    ///               finding, and reaches for what MAKES structure
+    ///   Resonance   nothing LINKED lately — the line has stopped
+    ///               relating, and reaches for what RELATES
+    /// ```
+    ///
+    /// The hunger steers the reach; it never steers what is accepted.
+    /// The sector door still re-derives every proposal, so a starving
+    /// mind looking in a different order costs the judge nothing.
+    fn hunger(&self) -> Need {
+        let now = self.world.now();
+        let receipts = self.world.chronicle().receipts();
+        let since = |matches: &dyn Fn(&cfe::dop::ClosureEvent) -> bool| -> u64 {
+            receipts
+                .iter()
+                .rev()
+                .find(|r| matches(&r.event))
+                .map_or(now, |r| now.saturating_sub(r.stamp))
+        };
+        let found = since(&|e| {
+            matches!(
+                e,
+                cfe::dop::ClosureEvent::DiscoveryMinted { .. }
+                    | cfe::dop::ClosureEvent::TechDiscovered { .. }
+            )
+        });
+        let linked = since(&|e| {
+            matches!(
+                e,
+                cfe::dop::ClosureEvent::BondSealed { .. }
+                    | cfe::dop::ClosureEvent::BondSettled { .. }
+                    | cfe::dop::ClosureEvent::ResourceTransferred { .. }
+            )
+        });
+        // **HUNGER IS RELATIVE TO THE LINE'S OWN RHYTHM**, not to a
+        // borrowed constant.
+        //
+        // This first read inherited WANT-1's orb windows — novelty 480,
+        // resonance 240 — and they are the wrong SCALE for a person: a
+        // 60-beat era never reaches either, so every character was
+        // permanently sated, searched at depth 1, and the live board's
+        // earnings fell 268 -> 53. That was the constant, not the
+        // design.
+        //
+        // A line is starved when it has gone longer without finding
+        // than it usually takes it to find — `since > now / finds`,
+        // written as a product so the arithmetic stays exact integers.
+        // A line that has NEVER found is starved from the start.
+        //
+        // Scale-free by construction: it reads the same at 60 beats and
+        // 6000, and it introduces no number to tune. The two windows it
+        // replaces are gone rather than re-picked.
+        let count = |matches: &dyn Fn(&cfe::dop::ClosureEvent) -> bool| -> u64 {
+            receipts.iter().filter(|r| matches(&r.event)).count() as u64
+        };
+        let is_find = |e: &cfe::dop::ClosureEvent| {
+            matches!(
+                e,
+                cfe::dop::ClosureEvent::DiscoveryMinted { .. }
+                    | cfe::dop::ClosureEvent::TechDiscovered { .. }
+            )
+        };
+        let is_link = |e: &cfe::dop::ClosureEvent| {
+            matches!(
+                e,
+                cfe::dop::ClosureEvent::BondSealed { .. }
+                    | cfe::dop::ClosureEvent::BondSettled { .. }
+                    | cfe::dop::ClosureEvent::ResourceTransferred { .. }
+            )
+        };
+        let stalled = |since: u64, deeds: u64| match deeds {
+            0 => now > 0,
+            n => since.saturating_mul(n) > now,
+        };
+        let mut hungers = Vec::new();
+        if stalled(found, count(&is_find)) {
+            hungers.push(Hunger::Novelty);
+        }
+        if stalled(linked, count(&is_link)) {
+            hungers.push(Hunger::Resonance);
+        }
+        let starved_for = match hungers.is_empty() {
+            true => 0,
+            false => found.max(linked),
+        };
+        Need { hungers, starved_for }
+    }
+
     fn research_step(&mut self, book: &Ledger) {
         let Some(receipt) = self.world.chronicle().receipts().last() else {
             return;
@@ -1140,7 +1244,7 @@ impl Polity {
         // has not moved? An unchanged digest re-forges the identical
         // task and re-runs the identical sweep for the identical answer
         // — 81 ms when that answer is Unsolved.
-        if self.last_forge.as_ref().is_some_and(|(held, _, _)| *held == digest) {
+        if self.last_forge.as_ref().is_some_and(|(held, _, _, _)| *held == digest) {
             PROBE_DIGEST_REPEAT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         }
         PROBE_DIGEST_TOTAL.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
@@ -1184,17 +1288,31 @@ impl Polity {
             // likes (float scoring, batching, sampled beam) and nothing
             // downstream changes.
             // The memo, or the search. Same inputs, same answer — the
-            // door the purity of `solve` opens.
+            // door the purity of `propose` opens.
+            //
+            // **THE NEED IS PART OF THE KEY.** The answer now depends on
+            // what the line is starved for, so a memo keyed without it
+            // would hand a hungry mind the answer its sated self found —
+            // the same staleness that shipped a level-3 solve as a
+            // level-4 proof this morning, one field further along.
+            let need = self.hunger();
             let read = match self.last_forge.take() {
-                Some((held, held_difficulty, cached))
-                    if held == digest && held_difficulty == difficulty =>
+                Some((held, held_difficulty, held_need, cached))
+                    if held == digest && held_difficulty == difficulty && held_need == need =>
                 {
-                    self.last_forge = Some((held, held_difficulty, cached.clone()));
+                    self.last_forge = Some((held, held_difficulty, held_need, cached.clone()));
                     cached
                 }
                 _ => {
-                    let fresh = solve_consulted(&task, difficulty.word_len);
-                    self.last_forge = Some((digest, difficulty, fresh.clone()));
+                    // THE LIVE BOARD THINKS BY NEED (operator ruling
+                    // 2026-08-04). Was `solve_consulted` — the sweep
+                    // through the door, identical for every mind in
+                    // every era. Now the ACTING LINE's own hunger
+                    // orders its reach, so two characters on one board
+                    // search differently. Same door, same law: nothing
+                    // crosses that does not close.
+                    let fresh = propose_consulted(&task, &need);
+                    self.last_forge = Some((digest, difficulty, need.clone(), fresh.clone()));
                     fresh
                 }
             };

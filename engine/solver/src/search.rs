@@ -462,6 +462,25 @@ pub fn propose(task: &Task, need: &Need) -> SolveRead {
     propose_measured(task, need).read
 }
 
+/// THE PROPOSER, THROUGH THE SECTOR DOOR — what the live board calls.
+///
+/// The same law [`solve_consulted`] runs under: approximation may
+/// PROPOSE, only exactness may DISPOSE. A proposal is withdrawn unless
+/// the program it names maps EVERY training pair exactly, re-derived by
+/// the OUTSIDE rather than taken on the search's word.
+///
+/// The need shapes what is reached for; it never shapes what is
+/// accepted. A starving mind may look in a different order and compose
+/// deeper, and still nothing crosses that does not close — which is why
+/// letting hunger steer the search costs the judge nothing.
+pub fn propose_consulted(task: &Task, need: &Need) -> SolveRead {
+    let proposal = rfa_core::consult((task, need), |(t, n)| propose(t, n));
+    match proposal.withdraw(|read| closes_every_training_pair(task, read)) {
+        Some(read) => read,
+        None => SolveRead::Unsolved,
+    }
+}
+
 // ── THE SECTOR DOOR ────────────────────────────────────────────────────
 
 /// `SolveRead` is exactly representable — grids, ops and a hash chain,
