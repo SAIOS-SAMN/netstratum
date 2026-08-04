@@ -243,3 +243,67 @@ fn what_the_proposer_claims_it_can_re_derive() {
     // COVERAGE: without this the loop above can assert nothing and pass.
     assert_eq!(crossed, cases.len(), "every case here is derivable");
 }
+
+/// **THE OPENING IS MEASURABLE, AND THE MEASURE NEVER MISLEADS.**
+///
+/// Measured over the 960-task corpus (`examples/the_opening.rs`): where
+/// the residual `Σ|R|` ranks the derived reach, the candidate that
+/// reduces it MOST is a closer — 25 of 25, zero counterexamples, and
+/// zero tasks closed while reducing nothing.
+///
+/// That is what makes picking lawful instead of trying: the door can
+/// report a MAGNITUDE (the ancestry's `AcceptResult { coherence_
+/// reduction }`) rather than a bool, and derivation can choose the way
+/// to go rather than search for it.
+///
+/// This pins the property on constructed cases so a change to `derive`
+/// that breaks the ranking is caught here rather than in a corpus run.
+#[test]
+fn the_largest_opening_is_the_closer() {
+    let cases = [
+        (vec![Op::Rotate90], grid(2, 3, &[1, 2, 3, 4, 5, 6])),
+        (vec![Op::FlipV], grid(3, 2, &[1, 2, 3, 4, 5, 6])),
+        (vec![Op::Transpose], grid(2, 2, &[7, 1, 2, 8])),
+    ];
+    let residual = |program: &[Op], task: &Task| -> u64 {
+        task.train
+            .iter()
+            .map(|pair| {
+                let seen = solver_verify::grid::run(&program.to_vec(), &pair.input);
+                match seen.rows == pair.output.rows && seen.cols == pair.output.cols {
+                    false => (seen.cells.len() + pair.output.cells.len()) as u64,
+                    true => seen
+                        .cells
+                        .iter()
+                        .zip(&pair.output.cells)
+                        .filter(|(a, b)| a != b)
+                        .count() as u64,
+                }
+            })
+            .sum()
+    };
+    let mut ranked = 0;
+    for (word, input) in &cases {
+        let task = task_from(word, std::slice::from_ref(input), input.clone());
+        let start = residual(&[], &task);
+        let reach = derive(&task);
+        let mut seen: Vec<(u64, bool)> = reach
+            .iter()
+            .map(|c| {
+                let after = residual(std::slice::from_ref(&c.op), &task);
+                (start.saturating_sub(after), after == 0)
+            })
+            .collect();
+        if seen.iter().all(|(gain, _)| *gain == 0) {
+            continue; // blind here; the corpus run reports how often
+        }
+        seen.sort_by(|a, b| b.0.cmp(&a.0));
+        assert!(
+            seen[0].1,
+            "the largest opening was not a closer — the measure misled, \
+             and picking by it would lose this task"
+        );
+        ranked += 1;
+    }
+    assert!(ranked > 0, "no case ranked — this pin proved nothing");
+}
