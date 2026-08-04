@@ -50,6 +50,51 @@ fn triad() -> Committed {
     state
 }
 
+/// DOES THE LIVE BOARD UNFOLD NOW? The mechanism was wired into the
+/// beat; this asks whether autonomous lines actually open planes.
+fn live_board(beats: u32) {
+    let mut root = std::env::temp_dir();
+    root.push(format!("netstratum-unfold-live-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&root).expect("scratch");
+    let mut worlds = conductor::run_era(&root.to_string_lossy(), beats);
+    // Driven explicitly: the unfold is not in the beat (see
+    // `Polity::unfold` — wiring it there broke a replay pin).
+    for p in worlds.iter_mut() {
+        while p.unfold() {}
+    }
+    println!("\nTHE LIVE BOARD — {beats} beats, after wiring the unfold into the beat");
+    println!("   {:<26} {:>7} {:>9} {:>5} {:>5}", "world", "grades", "unfolded", "D", "V");
+    let (mut grades, mut opened) = (0usize, 0u64);
+    for p in &worlds {
+        let committed = p.world.committed();
+        let read = read_entangled(&committed);
+        let g = p.world.key().len();
+        grades += g;
+        opened += p.unfolded;
+        println!(
+            "   {:<26} {:>7} {:>9} {:>5} {:>5}",
+            &p.spec.world_name[..p.spec.world_name.len().min(26)],
+            g,
+            p.unfolded,
+            read.degree().get(),
+            read.flows.len()
+        );
+    }
+    println!("   {:<26} {:>7} {:>9}", "— totals —", grades, opened);
+    match opened > 0 {
+        true => println!(
+            "\n   THE BOARD UNFOLDS. {opened} planes opened across {} lines, where\n   \
+             before this the count was zero for every era ever run.",
+            worlds.len()
+        ),
+        false => println!(
+            "\n   STILL FLAT — no line opened a plane. Either no mint was earned in\n   \
+             {beats} beats, or the wiring does not reach."
+        ),
+    }
+}
+
 fn main() {
     println!("THE UNFOLD — the fiber opens; does D follow?\n");
     println!("   obligations held FIXED (one non-composing triad on 3 orbs)");
@@ -112,6 +157,8 @@ fn main() {
     println!("\nREADING");
     println!("   1 open grade  → D {d_one}");
     println!("   8 open grades → D {d_many}");
+    live_board(30);
+
     match d_many > d_one {
         true => println!(
             "\n   D FOLLOWS THE UNFOLD. Opening planes raises the extent, and the\n   \

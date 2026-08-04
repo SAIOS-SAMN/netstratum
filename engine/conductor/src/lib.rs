@@ -510,6 +510,10 @@ pub struct Polity {
     /// judge and into the chain. Every deed past this mark is chained
     /// individually, with its own step, and judged.
     chained: usize,
+    /// Planes this line has OPENED — the unfold, one per earned mint.
+    /// The fiber's grade count is `world.key().len()`; this counts the
+    /// openings that got it there.
+    pub unfolded: u64,
     /// Deeds the kernel REFUSED, by receipt sequence. Kept rather than
     /// discarded — a refusal the board never sees is the judge speaking
     /// into a void.
@@ -733,6 +737,7 @@ impl Polity {
                     return Polity {
                         chained: 0,
                         refused: Vec::new(),
+                        unfolded: 0,
                         lane_refused: Vec::new(),
                         last_forge: None,
                         reported: 0,
@@ -814,6 +819,7 @@ impl Polity {
         Polity {
             chained: 0,
             refused: Vec::new(),
+            unfolded: 0,
             lane_refused: Vec::new(),
             last_forge: None,
             reported: 0,
@@ -1421,6 +1427,53 @@ impl Polity {
             // The opposite phase of the cleave (11 §3), wrapped.
             gauge: Some(cfe::world::wrap_gauge(origin_key - delta)),
         })
+    }
+
+    /// THE UNFOLD (GAUGE-N, `11` §2.1) — a line OPENS the plane it has
+    /// already EARNED.
+    ///
+    /// **NOT CALLED FROM `cycle`, and that is a hold rather than a
+    /// design.** Wiring it into the beat made
+    /// `survey_pins::the_survey_charters_the_sector_and_the_spent_lens_idles`
+    /// fail on `replay MATCHES the surveyed world` — the live world and
+    /// the replay of its own chronicle disagreed by exactly 7 crystal.
+    /// The GaugeShiftedAt deed itself replays correctly (the key is
+    /// identical on both sides); what moves is downstream of the
+    /// chronicle gaining a receipt. Until that is understood this stays
+    /// caller-driven, because a proposer that breaks SEAL B is worse
+    /// than one that never expands.
+    ///
+    /// The mechanism was landed and had exactly two callers: a cfe test
+    /// and the operator's CLI verb. No autonomous line had ever opened
+    /// a plane, so every live world sat at genesis `[0]` forever while
+    /// its earned mints piled up unspent. The era FOLD (the
+    /// contraction) ran every era; the unfold (the expansion) ran never.
+    ///
+    /// **The earning rule is NOT restated here.** `shift_gauge_at`
+    /// refuses `PlaneUnearned` when the grade outruns the receipted
+    /// mints — one plane per `TechDiscovered { condition: 1.. }`,
+    /// `Diverged` or `Confluent`. This asks it and takes the refusal;
+    /// copying the filter would be two definitions of one law
+    /// (CHARTER §0b).
+    ///
+    /// **The plane's value is CHRONICLE-SEEDED**, never chosen: drawn
+    /// from the world's own terminal digest, so replay re-derives it
+    /// exactly and no wall clock enters (CHARTER §9).
+    pub fn unfold(&mut self) -> bool {
+        let Some(receipt) = self.world.chronicle().receipts().last() else {
+            return false;
+        };
+        let beacon = Beacon::from_digest(receipt.own.0);
+        // The next grade above what already stands.
+        let next = self.world.key().len();
+        let value = ratio(beacon.uniform_index("unfold.plane", 12) as i64, 12);
+        match self.world.shift_gauge_at(next as u16, value) {
+            Ok(()) => {
+                self.unfolded = self.unfolded.saturating_add(1);
+                true
+            }
+            Err(_) => false,
+        }
     }
 
     /// One full heartbeat. A growth returns the newborn's spec —
