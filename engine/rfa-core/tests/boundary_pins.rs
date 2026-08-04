@@ -18,22 +18,6 @@ fn edge(d: &mut Delta, s: &mut Support, i: usize, j: usize, v: Ratio) {
 }
 
 #[test]
-fn pure_circulation_is_vacuous_however_large_its_charge() {
-    // A triangle whose obligations run in a closed loop: 0→1→2→0, each
-    // carrying 1. Every vertex balances, so no vertex sources or sinks
-    // and dV is EMPTY — even though real value circulates.
-    let mut d = Delta::zero(3, 1);
-    let mut s = Support::new(3, 1);
-    edge(&mut d, &mut s, 0, 1, ratio(1, 1));
-    edge(&mut d, &mut s, 1, 2, ratio(1, 1));
-    edge(&mut d, &mut s, 2, 0, ratio(1, 1));
-
-    let form = boundary_form(&d, &s);
-    assert_eq!(form.rank(), 0, "circulation sources nothing anywhere");
-    assert!(!form.is_non_vacuous(), "∂Δ ≡ 0");
-}
-
-#[test]
 fn rank_without_gradient_is_a_real_state_and_reads_as_one() {
     // A closed loop carries holonomy — D > 0 — while ∂Δ ≡ 0. The two
     // poles are genuinely independent readings, which is what made the

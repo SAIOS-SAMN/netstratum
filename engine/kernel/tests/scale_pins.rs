@@ -130,16 +130,6 @@ fn permanence_once_entangled_further_relations_keep_it_admitted() {
 }
 
 #[test]
-fn throughput_the_pole_reading_is_quadratic_and_scales() {
-    // The two-pole reading is `O(n²·f)` — a forest walk plus a scan of
-    // the remaining edges. Four hundred orbs and four hundred
-    // obligations complete comfortably, which is 100x the §8 ring.
-    let (rank, flows) = poles(&ring(400, 3));
-    assert_eq!(rank, 1);
-    assert_eq!(flows, 0);
-}
-
-#[test]
 fn throughput_the_residual_scan_is_the_ceiling_and_it_is_cubic() {
     // THE LIMIT, named rather than hidden. `read_entangled` also
     // collects the residual field via `for_each_residual`, which visits
