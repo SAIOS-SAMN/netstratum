@@ -58,7 +58,7 @@ rides directly behind the kernel rungs (AUDIT §1, §7 here).
 Kernel coverage today: 59 of 64 deed types. `scope_of()` is already
 exhaustive over all 63 (the compiler forces the scope decision); an
 amendment = move the event into `covered()` + declare its lawful
-conservation delta + red-first witness against `world.rs`.
+conservation delta + red-first witness against `cfe::world`.
 
 ## §2 U1 — KERNEL-VERIFY (the PoUW anchor; I4 completes)
 
@@ -358,7 +358,7 @@ witness, not consilience.
 
 The completeness rule stands: an event enters `covered()` only when
 EVERY invariant that should govern it has landed. Each amendment is
-RATIFIED against `world.rs` red-first (the `conservation_pins.rs`
+RATIFIED against `cfe::world` red-first (the `conservation_pins.rs`
 model). The waves are disjoint deed families — parallel across lanes:
 
 - **W-A, the authority deeds (~24, {I2, I3}):** ColonyFounded,
@@ -370,7 +370,7 @@ model). The waves are disjoint deed families — parallel across lanes:
   VeilLifted. **CAUTION (derived):** several of these MOVE or CREATE
   value — `ColonyFounded` seeds the founding bank, `ColonyCharted`
   moves the 20-iron/10-biomass charted reserves — so each amendment
-  DERIVES its lawful_delta from `world.rs`, and the founding-reserve
+  DERIVES its lawful_delta from `cfe::world`, and the founding-reserve
   mints need a declared I4 arm (a chartered genesis mint, named, never
   a hole). `TaxonSealed` is coder-03's standing #42 — leave it theirs.
 - **W-B, the value movers (~8, {I1, I2, I3}):** UpkeepSettled,
@@ -385,7 +385,7 @@ model). The waves are disjoint deed families — parallel across lanes:
   Confluent, EraFolded, CouncilClosed — the fold-class trio waits on
   U2; the rest ride their protocol law.
 
-Phase 3 (the kernel as the LIVE gate — `world.rs` demoted to proposer,
+Phase 3 (the kernel as the LIVE gate — `cfe::world` demoted to proposer,
 refuse-unknown live) flips ONLY when `Unjudged` is unreachable.
 
 ## §6 U3 — UNIT-1 (the deployable boundary)

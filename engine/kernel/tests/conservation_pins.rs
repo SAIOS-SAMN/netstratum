@@ -59,7 +59,7 @@ fn the_last_deed_covered_exhausts_the_sealed_default() {
 /// NotPermitted; the same agent, once granted, is admitted; the sovereign
 /// (all scopes by construction) always passes; a non-entity refuses
 /// NoSuchEntity before any state is read. The kernel's scope_of(Collect)
-/// for ResourceTransferred is ratified here against world.rs.
+/// for ResourceTransferred is ratified here against `cfe::world`.
 #[test]
 fn containment_gates_the_transfer_by_scope() {
     let mut world = two_orb_world();

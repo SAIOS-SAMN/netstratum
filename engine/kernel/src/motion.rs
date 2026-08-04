@@ -91,8 +91,9 @@ impl RecordOp {
 /// HOW AN AXIS COMPOSES — the taxonomy the measurement forced.
 ///
 /// Collapsing `replay`'s arms onto this algebra needs the algebra to
-/// SPAN what the arms do. Measured against `world.rs::replay`'s 63
-/// arms, every axis they touch composes in exactly one of two ways,
+/// SPAN what the arms do. Measured against `world/replay.rs`'s arms —
+/// **63 of them when this was measured; `replay` carries 71 today, so
+/// the eight added since are NOT covered by the claim below** — every axis they touch composes in exactly one of two ways,
 /// and which one decides whether that axis commutes:
 ///
 /// ```text
@@ -124,7 +125,7 @@ pub enum Law {
 ///    loses the remainder, the second does not. Every clamped axis is
 ///    non-commutative by construction.
 /// 2. **REPLACEMENT.** A seat is not a delta; the last seating stands
-///    (`world.rs` STATION-1). Ordering two seatings of one line gives
+///    (`cfe::world` STATION-1). Ordering two seatings of one line gives
 ///    two different offices.
 ///
 /// Additive unclamped axes (the gauge) DO commute. Non-commutativity

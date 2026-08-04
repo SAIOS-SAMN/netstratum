@@ -1487,7 +1487,7 @@ none, which is why projecting the entity containment hierarchy could
 never have raised the rank.
 
 **MEASURED LIVE: 33 books, 0 lanes, rank 0.** `charter_route`
-(`world.rs:3772`) draws 4 alloy per side; no polity banks alloy; every
+(`world/mod.rs::charter_route`) draws 4 alloy per side; no polity banks alloy; every
 charter refuses `CannotAfford`; `conductor/src/lib.rs:378` swallows it
 with `let _ =`. 17 crossings cleared, 0 lanes chartered. The door is
 open and the substrate is economically empty — a refusal that names its
@@ -1504,7 +1504,7 @@ inherited by B-E1:**
   §1.3's *"no oracle, no single number."* A ceiling riding it would add
   a THIRD reader to an unresolved contradiction. Read the four named
   axes of `09` §2; morality's ratio is already sealed as
-  `world::reciprocity_reading` (`world.rs:4905`) — call it, never write
+  `world::reciprocity_reading` (`world/mod.rs`) — call it, never write
   a second.
 
 **OPEN ROW (FORGE_BUDGET §7.6): compassion has no entropic counterpart**

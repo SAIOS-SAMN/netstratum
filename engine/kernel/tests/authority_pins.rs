@@ -1,7 +1,7 @@
 //! W-A slice-1 — the banked-neutral authority deeds enter coverage
 //! (the I1/I2/I3 coverage campaign, U_DIRECTIVES §5). Red-first.
 //!
-//! These deeds carry AUTHORITY, not value: their `world.rs::replay`
+//! These deeds carry AUTHORITY, not value: their `world/replay.rs`
 //! arms touch no bank (they set a flag, a seal, a list — terrain seed,
 //! star, practice, ward, veil, route, offer, bond, genesis, prospect,
 //! instrument, the succession boundary, a licence record). So the

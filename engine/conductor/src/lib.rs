@@ -1621,8 +1621,8 @@ impl Polity {
     /// nothing prunes it: the chronicle keeps the deed, this keeps the
     /// verdict.
     ///
-    /// A refusal here does NOT mean the deed was undone. `world.rs`'s
-    /// `replay` is still the live transition (the Phase 3 flip demotes
+    /// A refusal here does NOT mean the deed was undone.
+    /// `world/replay.rs` is still the live transition (the Phase 3 flip demotes
     /// it to proposer, `U_DIRECTIVES` §5), so a refused deed stands in
     /// the chronicle with the judge on record against it. That gap is
     /// the whole reason this must be visible rather than counted.

@@ -134,7 +134,7 @@ is not a mechanism.
 | **§2e traverse congruence** — `α ≅ Ω` | spans a whole chain | `lens` over the spine |
 | **§2c union** — one `Δ`, two complementary projections | a property of one state's algebra, already computed | `rfa_core::boundary` + `capacity` (landed) |
 | **§2d THE SIGN LAW** — egress / ingress / balanced | a per-vertex reading of one state | `rfa_core::capacity` (`divergence`, `egress`) |
-| **§2j field force** — friction, melt, key gap | already landed OUTSIDE the judge, priced per deed | `cfe/src/world.rs` (2395, 3757, 3986) |
+| **§2j field force** — friction, melt, key gap | already landed OUTSIDE the judge, priced per deed | `cfe/src/world/` (`economy.rs::transfer_as`, `mod.rs::pair_melt`, `mod.rs::key_distance`) |
 
 **§2i is a THIRD category** — neither kernel nor lens but a
 CLASSIFICATION obligation on the vocabularies: every element declared

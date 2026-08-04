@@ -30,8 +30,8 @@ before trusting any count below it.**
 `cfe/src/world/books.rs:151`, replayed at `world/replay.rs:77`, read by
 `world/growth.rs:27`, reachable from the CLI at `clients/cli/src/
 main.rs:2621` and `:2929`). `kernel::admits` therefore answers
-`Refused::Unjudged` for it. Its siblings `BookMinted` and
-`BookArchived` are both covered; only the posting was skipped.
+`Refused::Unjudged` for it. The other two Book deeds — `BookMinted` and
+`BookArchived` — are both covered; only the posting was skipped.
 
 **The totality pin cannot see it.** `kernel/tests/taxon_pins.rs`
 asserts the kernel is total by enumerating a HAND LIST of 64 variants.

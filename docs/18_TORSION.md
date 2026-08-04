@@ -363,7 +363,7 @@ drive, no second primitive — arithmetic on a partition that already sums
 to a constant, which is why the two readings **can never disagree**. It
 also makes "no neutral middle" arithmetically impossible to violate
 rather than merely forbidden, which is the difference between a law and
-a wish. (`world.rs:3263` computes it; `world.rs:3495` gates on it;
+a wish. (`world/core.rs::syntropy_ratio` computes it; the climb gates on it;
 `dop.rs:576` carries the per-axis form.)
 
 #### LAW 8 — GROUNDING. A term that computes is kept; a term that only resonates is excised.

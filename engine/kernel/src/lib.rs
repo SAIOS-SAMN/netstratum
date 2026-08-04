@@ -595,7 +595,7 @@ fn covered(event: &ClosureEvent) -> bool {
         // one. Ratified red-first by `sovereign_union_pins`.
         | E::SovereignUnionSealed { .. }
         // W-A slice-1 — the BANKED-NEUTRAL authority deeds. Each one's
-        // `world.rs::replay` arm touches NO bank (it sets a flag, a
+        // `world/replay.rs` arm touches NO bank (it sets a flag, a
         // seal, a list: terrain seed, star, planet site, practice,
         // ward, veil, genesis, prospect, the succession boundary, a
         // licence record, an instrument, a route, an offer, a bond).
@@ -613,7 +613,7 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::OfferPosted { .. } | E::BondSealed { .. }
         // THE MISSED SIXTH (arch-02's coverage audit): the enum holds
         // 64 deeds, not the documented 63 — GaugeShiftedAt (tag 60,
-        // the graded key shift, LIVE at world.rs's shift_gauge_at) was
+        // the graded key shift, LIVE at world/gauge.rs's shift_gauge_at) was
         // never counted. Banked-neutral (replay resizes the gauge key,
         // no bank), Build-scoped beside its covered counterpart
         // GaugeShifted. Without it the Phase 3 flip could never
@@ -628,7 +628,7 @@ fn covered(event: &ClosureEvent) -> bool {
         // Witnessed in gauge_pins.rs.
         | E::Confluent { .. } | E::EraAnnexed { .. } | E::EraFolded { .. }
         // W-C / W-D slice — the BANKED-NEUTRAL world-driven and mesh
-        // deeds. Their `world.rs::replay` arms set a flag, a list, or
+        // deeds. Their `world/replay.rs` arms set a flag, a list, or
         // are no-ops (no bank); `scope_of` is None (a tick's own
         // consequence carries no actor scope). Judged by I3 exactness,
         // conservation and containment vacuous — ratified against the
@@ -1247,7 +1247,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
 /// a mesh/universe-ledger deed governed by its own law (never a hole: an
 /// uncovered event refuses `Unjudged` before this is consulted). Each arm
 /// is RATIFIED by a red-first witness as its event enters `covered()`
-/// against `world.rs`; today only `ResourceTransferred` (Collect) is
+/// against `cfe::world`; today only `ResourceTransferred` (Collect) is
 /// covered and witnessed. The rest are the drafted law, unenforced until
 /// their coverage lands.
 fn scope_of(event: &ClosureEvent) -> Option<Scope> {

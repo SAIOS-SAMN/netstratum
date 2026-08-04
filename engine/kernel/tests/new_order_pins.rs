@@ -1,7 +1,7 @@
 //! THE NEW ORDER — the two offices and the BOND, read through the
 //! module split rather than through a hand-built `Committed`.
 //!
-//! `world.rs` was one 5,034-line file and is now `world/` — fifteen
+//! `world.rs` was one 5,034-line file and is now `world/` — nineteen
 //! organs: `accord` seals the bonds, `state` holds them, `replay`
 //! rebuilds them, `tick` expires them, `economy` settles them,
 //! `refusal` refuses them. Every pin the offices already had constructs

@@ -310,8 +310,8 @@ under the cliff, and would become a continuous erosion under a restored
 gradient. Measure it with capture and rate readable at one touch.
 
 **NARROWING THE DIAGNOSIS, offered rather than assumed.** Replay's body
-(`world.rs` 4226–4829, 603 lines) recomputes exactly ONE shared rule:
-`dop::commensurate_weight(resource)`, at world.rs:4439 in the
+(`world/replay.rs`) recomputes exactly ONE shared rule:
+`dop::commensurate_weight(resource)`, in `world/replay.rs` in the
 `ResourceTransferred` arm. **It never calls `ease_of` or
 `demurrage_due`** — those arms apply the receipted amount. So the
 double-definition exposure is one call site rather than 113 arms, and

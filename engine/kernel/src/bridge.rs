@@ -70,7 +70,7 @@ pub const CHANNEL_DEBT: usize = 2;
 /// Channels 0–2 are intra-book by construction: `Bond`, `Covenant` and
 /// `AbsorptionDebt` are all keyed on orb ids inside one book. A LANE is
 /// the opposite — `cfe::world::charter_route` writes the SAME `deal`
-/// into BOTH books (`world.rs:3784-3799`), so a shared deal id is a
+/// into BOTH books (`world/mod.rs::charter_route`), so a shared deal id is a
 /// committed, replay-derived relation spanning two worlds. It is the
 /// only one there is.
 ///

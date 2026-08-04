@@ -30,7 +30,7 @@ fn minted_world() -> (World, cfe::world::Committed) {
 
 /// DEFECT 1 · THE EMITTER NEVER VERIFIES THE WORK.
 ///
-/// `mint_discovery_as` (`world.rs:2193`) checks scope, sign and orb
+/// `mint_discovery_as` (`world/core.rs`) checks scope, sign and orb
 /// existence, then closes. It does not call `verify_work`, so any byte
 /// string is accepted as a proof of cognition — and the amount is
 /// unchecked against `mint_bound`, so the figure is arbitrary.
@@ -77,7 +77,7 @@ fn defect_the_kernel_refuses_a_deed_the_chronicle_already_holds() {
 ///
 /// The live projection does not apply the mint, so `committed()` looks
 /// untouched and the hole is invisible from the live path. `replay`
-/// DOES apply it (`world.rs:4337`), and the chronicle is what survives
+/// DOES apply it (`world/replay.rs`), and the chronicle is what survives
 /// a restart, a resume, or any other node reading the chain.
 ///
 /// So the million units are not hypothetical: they exist for every

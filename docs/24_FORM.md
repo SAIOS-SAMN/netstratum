@@ -559,15 +559,15 @@ function of their separation — never by their collision.**
 
 **LANDED THREE TIMES, verified by behaviour:**
 
-- `cfe/src/world.rs:2395` — `friction = friction_rate() * divergence *
+- `cfe/src/world/economy.rs` — `friction = friction_rate() * divergence *
   value`. Friction prices DIVERGENCE; aligned partners at any alignment
   pay exactly zero. A separation force, already charging.
-- `cfe/src/world.rs:3757` — `pair_melt(a, b, distance)` computes
+- `cfe/src/world/mod.rs` — `pair_melt(a, b, distance)` computes
   `gap = key_distance(a.key(), b.key())` then
   `melt = (distance + gap) * MELT_PER_UNIT`. Cost as a function of
   spatial separation PLUS key separation, and it is THE one producer of
   the formula.
-- `cfe/src/world.rs:3986` — `key_distance`, wrapped separation across
+- `cfe/src/world/mod.rs` — `key_distance`, wrapped separation across
   keys of any dimensionality.
 
 **THE BOUNCE IS THE MINT.** `16_UNIT` §4a already carries the image as
@@ -615,7 +615,7 @@ Defining the forward link AS a covenant would make the kernel inherit
 the game's resource enumeration, its collateral rule and its window
 semantics — the game supplying the kernel's vocabulary instead of the
 kernel supplying the game's. `19_KERNEL` §2 measured the kernel's
-dependency on `world.rs` at exactly three items; this would have
+dependency on `cfe::world` at exactly three items; this would have
 quietly added a fourth and the worst-shaped one.
 
 **Corrected:** the forward link is a kernel primitive. The covenant is
@@ -630,7 +630,7 @@ freight. Measured, the mechanism carries none:
 
     Covenant { obligor, beneficiary, resource, quota,
                delivered, collateral, sealed, window }
-                                        — `world.rs:245`
+                                        — `world/state.rs::Offer`
 
 **Plainly: one party is bound to deliver a quantity of a resource to
 another by a deadline, with collateral posted against failure.**
@@ -654,7 +654,7 @@ than descriptions.
 124 times across 7 crates, holds **three wire tags (35 ForwardSealed,
 36 ForwardReleased, 37 ForwardSlashed)** and a codec schema block
 (`codec/src/lib.rs:118`). Renaming it is a BREAKING amendment — major
-VERSION, schema bump, and it touches `world.rs` (unowned, flagged for
+VERSION, schema bump, and it touches `cfe::world` (unowned, flagged for
 refactor) and `dop.rs` (wire). **Cost is high and mechanical gain is
 zero**, since the wire tag is a number and the struct is a struct.
 

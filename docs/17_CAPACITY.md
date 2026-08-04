@@ -902,7 +902,7 @@ containment is DERIVED, and `kernel::bridge::standing_of` already IS it.
 
 **6. "Sweep `world.rs` / `colony.rs` and remove any legacy fallback that
 lets a child inherit parent capacity" — NO SUCH FALLBACK EXISTS, and
-`colony.rs` does not exist either.** `engine/cfe/src/` holds `world.rs`,
+`colony.rs` does not exist either.** `engine/cfe/src/` holds `world/`,
 `dop.rs`, `ipsal.rs`, `persist.rs`, `query.rs`, `ratio.rs`, `thermal.rs`,
 `tlv.rs`, `vrp.rs` — there is no colony module to sweep. And `World::succeed_as`
 already forbids exactly what the sweep was meant to find:
@@ -1248,7 +1248,7 @@ The relayed answer was to eliminate `ε_mag` and bound growth by a
 2. **The mechanism already exists under landed names — and this half
    STANDS.** "Growth permitted iff a non-zero cohomological defect" IS
    `orbit_lock ≠ ∅`. "Denied where the shift yields no structural
-   uplift" IS `PlaneUnearned` (landed, `engine/cfe/src/world.rs`).
+   uplift" IS `PlaneUnearned` (landed, `engine/cfe/src/world/`).
    `18_TORSION` reached the same grounding independently — §2a names
    `orbit_lock` as already a torsion test, and Article II names
    `PlaneUnearned` as its own constitutional form. Two readers arriving
@@ -1306,7 +1306,7 @@ exact inverse arm of entropy in one conserved partition** —
 `syntropy = syntropic / (syntropic + entropic)`, so
 `syntropy + entropy = 1` exactly — and it borrows nothing from any
 external theory. It is landed, it computes, and it GATES
-(`World::syntropy_ratio()`, the 1/2 floor at `world.rs:3495`), so by
+(`World::syntropy_ratio()`, the 1/2 floor — `world/core.rs`), so by
 this project's own GROUNDING TEST it stays. No synonym is admitted for
 it: one measurement, one name (`18_TORSION` §2i).
 

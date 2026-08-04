@@ -131,7 +131,7 @@ fn p3_a_better_teched_orb_owes_strictly_less() {
 /// P4 · THE SEED FIRES ONCE — the ruling is already satisfied.
 ///
 /// *"Operates strictly at `t = 0` and evaluates to `0` for all
-/// `t > 0`"* holds by construction: `world.rs:1351` refuses a second
+/// `t > 0`"* holds by construction: `world/genesis.rs::found` refuses a second
 /// founding. This fails if that refusal is ever relaxed.
 #[test]
 fn p4_the_seed_cannot_fire_twice() {

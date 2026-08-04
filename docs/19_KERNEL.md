@@ -77,7 +77,13 @@ is not satisfied by a validator that stands beside the updater.
    Expensive but honest, and it makes disagreement a build failure
    rather than a discovery.
 
-## §4 `world.rs` IS THREE FILES WEARING ONE NAME
+## §4 ~~`world.rs` IS THREE FILES WEARING ONE NAME~~ — **THE SPLIT LANDED**
+
+**Confirmed by measurement 2026-08-04:** `engine/cfe/src/world.rs` does
+not exist. `engine/cfe/src/world/` holds 19 files (6,860 lines, largest
+`mod.rs` at 903), and the three things this section separates now live
+apart. The analysis is kept because it is WHY the split has the shape it
+has; its tense is historical. Step 1 of the ladder below is DONE.
 
 5001 lines, and the composition is not one thing grown large — it is
 three unrelated things stacked:

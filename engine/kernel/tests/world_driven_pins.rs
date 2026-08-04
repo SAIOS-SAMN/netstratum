@@ -2,7 +2,7 @@
 //! enter coverage (the coverage campaign, U_DIRECTIVES §5). Red-first.
 //!
 //! These deeds are consequences the tick computes (no actor) or
-//! universe/mesh-ledger entries — their `world.rs::replay` arms set a
+//! universe/mesh-ledger entries — their `world/replay.rs` arms set a
 //! flag, a list, or are outright no-ops, touching NO bank. So
 //! `scope_of` is `None` (containment carries no requirement — a
 //! world-driven consequence is not attributed to a hand) and

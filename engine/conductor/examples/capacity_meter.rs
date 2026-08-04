@@ -102,8 +102,8 @@ fn alignment(state: &Committed) -> Alignment {
         compassion_level: given,
         love: axis_ratio(&bond, &sever),
         integrity: axis_ratio(&kept, &broke),
-        // MORALITY: the form `world::reciprocity_reading` seals
-        // (`world.rs:4905`), read across the whole book. When that
+        // MORALITY: the form `world/mod.rs::reciprocity_reading`
+        // seals, read across the whole book. When that
         // reading is made public this must CALL it, never keep a copy
         // (CHARTER §0b) — recorded as owed, not silently duplicated.
         morality: axis_ratio(&returned, &extracted),
