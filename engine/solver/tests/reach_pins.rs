@@ -252,7 +252,7 @@ fn what_the_proposer_claims_it_can_re_derive() {
 /// zero tasks closed while reducing nothing.
 ///
 /// That is what makes picking lawful instead of trying: the door can
-/// report a MAGNITUDE (the ancestry's `AcceptResult { coherence_
+/// report a MAGNITUDE (the predecessor's `AcceptResult { coherence_
 /// reduction }`) rather than a bool, and derivation can choose the way
 /// to go rather than search for it.
 ///

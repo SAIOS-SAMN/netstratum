@@ -11,7 +11,7 @@
 //! them, which is search — the thing that should not be needed if the
 //! layer is deterministic.
 //!
-//! The ancestry already answers this. `convergence-engine`'s thinking
+//! The predecessor engine already answers this. `convergence-engine`'s thinking
 //! module does not gate, it MEASURES: `AcceptResult::Accepted {
 //! coherence_reduction }`, `NonCongruent { conflict_magnitude }`,
 //! `NoImprovement { delta_coherence }` — a magnitude, never a verdict.
