@@ -1224,6 +1224,10 @@ impl Polity {
             return;
         };
         let digest = receipt.own.0;
+        // CAPTURED BEFORE THE BEAT MOVES ANYTHING. Promotion reads both,
+        // and reading either afterwards would be vacuous: a close always
+        // advances the trajectory to Growth.
+        let trajectory_before = self.trajectory;
         let solved = if self.spec.civilization.perception == "volumetric" {
             let difficulty = solver::VolDifficulty::level(self.level);
             let task = solver::forge_volume(digest, difficulty);
@@ -1281,6 +1285,8 @@ impl Polity {
                 polity.spent = polity.spent.saturating_add(proposal.tested as u64);
                 proposal.read
             };
+            // WHICH PATH ACTUALLY PAID FOR THIS BEAT — captured before
+            // the trajectory advances, because promotion reads it.
             let read = match self.mode {
                 SearchMode::Uncoupled => {
                     self.swept = self.swept.saturating_add(1);
@@ -1376,7 +1382,38 @@ impl Polity {
                 // reached with.
                 self.trajectory = self.trajectory.advance(true);
                 self.starved = 0;
-                if self.streak >= 3 && self.level < 5 {
+                // D CLIMBS WHEN THE RUNG IS MASTERED — coupled, not
+                // counted. The old rule was `streak >= 3 && level < 5`:
+                // two chosen constants, one counting confirms while
+                // ignoring what they COST, the other an absolute
+                // ceiling.
+                //
+                // The couple: D (the rung, an extent) advances only on
+                // expenditure of V (the reach, a rate), and the signal
+                // that a rung is finished is that it stopped costing —
+                // a close off the CHEAP reach. A close that needed
+                // hunger or exhaustion says the line is at its limit
+                // and holds, however many it strings together.
+                //
+                // The ceiling is DERIVED, never chosen: a line climbs
+                // while the ladder still differentiates, and stops
+                // where `Difficulty::level` saturates and the next rung
+                // is the same task at the same price. That reads the
+                // ladder instead of asserting its length, so extending
+                // the ladder extends the climb with no edit here.
+                // PATH-AGNOSTIC BY CONSTRUCTION. The first cut tested
+                // `path_used == Reach`, which silently broke the
+                // uncoupled control: that path never reaches, so it
+                // could never promote, never left rung 1, and earned
+                // exactly zero. The signal is not WHICH path paid, it
+                // is whether the line was ALREADY closing — sustained
+                // productivity at this rung. In coupled mode Growth
+                // implies the cheap reach anyway, so this subsumes the
+                // path test rather than weakening it.
+                let mastered = trajectory_before == Trajectory::Growth;
+                let ladder_still_climbs =
+                    Difficulty::level(self.level + 1) != Difficulty::level(self.level);
+                if mastered && ladder_still_climbs {
                     self.level += 1;
                     self.streak = 0;
                 }
