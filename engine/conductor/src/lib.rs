@@ -50,7 +50,7 @@ use ledger::galaxy::Galaxy;
 use ledger::registry::{lineage_domain, Civilization, Registry, DISPOSITIONS, METABOLISMS, PERCEPTIONS};
 use ledger::{Directive, Disposition, Ledger};
 use physics::Beacon;
-use solver::{forge_task, solve_consulted, Difficulty, SolveRead};
+use solver::{forge_task, propose_measured, Difficulty, Hunger, Need, SolveRead};
 use std::path::Path;
 
 mod polities;
@@ -416,6 +416,69 @@ pub fn market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
     cleared
 }
 
+/// WHERE A LINE IS GOING — read from its own measured yield, never set
+/// by a constant.
+///
+/// `SEARCH_BUDGET` bounds one heartbeat so a single beat cannot run
+/// away; it was never a statement about whether spending is WORTH it.
+/// This is. Every branch below cites a number from
+/// `solver/examples/forge_reach.rs`, measured over 200 forged tasks per
+/// rung on rungs 3–5 — the rungs that actually pay, since
+/// `mint_bound` f(0..=2) = 0.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Trajectory {
+    /// The cheap reach is closing work. STAY THERE. Yield per candidate
+    /// is highest at sated on every rung — 51/2, 17 and 13 against
+    /// struck's 199/8, 11 and 9. Spending more while the cheap reach
+    /// pays is buying what you already have.
+    Growth,
+    /// Spending and closing nothing. NECESSITY OPENS THE REACH, and it
+    /// is worth a great deal: the marginal yield of the sated→struck
+    /// step measured 97/4, 13/2 and 7 at rungs 3, 4 and 5. At rung 3
+    /// struck closes 200/200 — matching an exhaustive sweep at 8
+    /// candidates per task against up to 200,000.
+    Stagnation,
+    /// Struck, and STILL closing nothing. CONTRACT — do not escalate.
+    /// The struck→long-starved step measured EXACTLY ZERO extra yield
+    /// at rungs 3 and 4 (identical closures, identical cost), and at
+    /// rung 5 it bought one more confirmed closure and one more FALSE
+    /// one. Deeper hunger past this point buys fabrication as readily
+    /// as work.
+    Decline,
+}
+
+impl Trajectory {
+    /// The reach this trajectory buys.
+    pub fn need(&self, starved: u64) -> Need {
+        match self {
+            // Contraction and growth both rest on the cheap reach; the
+            // difference between them is what happens NEXT, not what is
+            // spent now.
+            Trajectory::Growth | Trajectory::Decline => Need::sated(),
+            Trajectory::Stagnation => Need::struck(Hunger::Novelty, starved),
+        }
+    }
+
+    /// Advance on the beat's outcome. A close returns any line to
+    /// growth — including one in decline, which is what makes the
+    /// contraction recoverable rather than a trap.
+    pub fn advance(self, closed: bool) -> Trajectory {
+        match (self, closed) {
+            (_, true) => Trajectory::Growth,
+            (Trajectory::Growth, false) => Trajectory::Stagnation,
+            (Trajectory::Stagnation | Trajectory::Decline, false) => Trajectory::Decline,
+        }
+    }
+
+    pub fn describe(&self) -> &'static str {
+        match self {
+            Trajectory::Growth => "growth",
+            Trajectory::Stagnation => "stagnation",
+            Trajectory::Decline => "decline",
+        }
+    }
+}
+
 /// A build temperament — the only thing that differs between polities.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Policy {
@@ -497,6 +560,15 @@ pub struct Polity {
     /// judge and into the chain. Every deed past this mark is chained
     /// individually, with its own step, and judged.
     chained: usize,
+    /// WHERE THIS LINE IS GOING, read from its own outcomes and used
+    /// to decide what the next beat's search may spend.
+    pub trajectory: Trajectory,
+    /// Beats since this line last closed a task — what it hands the
+    /// hunger when it reaches. A real duration, never a constant.
+    pub starved: u64,
+    /// Candidate programs this line has spent, cumulative. The S of
+    /// W/S; the board can read its own yield without instrumentation.
+    pub spent: u64,
     /// Deeds the kernel REFUSED, by receipt sequence. Kept rather than
     /// discarded — a refusal the board never sees is the judge speaking
     /// into a void.
@@ -686,6 +758,9 @@ impl Polity {
                         chained: 0,
                         refused: Vec::new(),
                         reported: 0,
+                        trajectory: Trajectory::Growth,
+                        starved: 0,
+                        spent: 0,
                         spec,
                         world,
                         automaton,
@@ -765,6 +840,9 @@ impl Polity {
             chained: 0,
             refused: Vec::new(),
             reported: 0,
+            trajectory: Trajectory::Growth,
+            starved: 0,
+            spent: 0,
             spec,
             world,
             automaton,
@@ -1119,7 +1197,18 @@ impl Polity {
             // beat — so the search inside may become as dirty as it
             // likes (float scoring, batching, sampled beam) and nothing
             // downstream changes.
-            match solve_consulted(&task, difficulty.word_len) {
+            //
+            // THE REACH IS COUPLED TO THE LINE'S OWN TRAJECTORY, never
+            // to a constant. What it spends is decided by whether
+            // spending has been PAYING — see `Trajectory::read`, and
+            // `examples/forge_reach.rs` for the numbers each branch
+            // cites. `SEARCH_BUDGET` still stands behind this as the
+            // per-beat ceiling that keeps one heartbeat bounded; it is
+            // no longer what DECIDES the spend.
+            let need = self.trajectory.need(self.starved);
+            let proposal = propose_measured(&task, &need);
+            self.spent = self.spent.saturating_add(proposal.tested as u64);
+            match proposal.read {
                 SolveRead::Solved {
                     program,
                     matches_expected: Some(true),
@@ -1187,12 +1276,23 @@ impl Polity {
                 );
                 self.solved += 1;
                 self.streak += 1;
+                // THE COUPLING CLOSES HERE. A close returns the line to
+                // growth from wherever it was, and clears the hunger it
+                // reached with.
+                self.trajectory = self.trajectory.advance(true);
+                self.starved = 0;
                 if self.streak >= 3 && self.level < 5 {
                     self.level += 1;
                     self.streak = 0;
                 }
             }
-            None => self.streak = 0,
+            None => {
+                self.streak = 0;
+                // Growth → stagnation → decline, one step per barren
+                // beat. What each state SPENDS is `Trajectory::need`.
+                self.trajectory = self.trajectory.advance(false);
+                self.starved = self.starved.saturating_add(1);
+            }
         }
     }
 
