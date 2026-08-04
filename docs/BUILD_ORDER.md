@@ -868,3 +868,49 @@ Cross-board: universe-level book
 composition stays Q2.3's N6 mesh audit; on-chain settlement of any cleared
 value stays NS-7 (N7), never here.
 
+---
+
+## THE DEFINITION LAW (lens-lane ruling, 2026-08-05)
+
+> **A definition COMPILES. Only a receipt PERSISTS.**
+> No file may say what EXISTS; a file may only say what HAPPENED.
+
+Issued on the operator's order — *we can't have JSON files hanging
+around our Rust codebase; make a ruling on your lane* — and grounded in
+a law the tree already carried: §11 rule 2, *views derive from the
+chain, disposable, never read back*, enforced by
+`engine/kernel/tests/recurrence_guard.rs` against an adopted debt list
+that never grows. `conductor/src/polities.rs` was ON that list. The
+ruling pays the debt rather than inventing a new rule.
+
+**Struck.** `var/polities.json` and every path that wrote, seeded,
+adopted, archived, spliced or parsed it: `load_polities`,
+`write_default_polities`, the brace-counting `split_objects` /
+`extract_string` / `parse_star` / `parse_ratio` readers, the
+`egregores.json`→`bots.json` legacy-adoption shim, the CLI's
+`civ new` append-by-string-surgery, `seeds/aeon1-polities.json`,
+`seeds/taxon-map.json`, and `tools/claim_roster.py` (the tool whose
+whole job was merging the live record into the struck file).
+
+**Kept.** Chronicles, spines, receipts, `.tlv` segments and registry
+cards. Those record what happened; the law never touched them.
+
+**Standing.** `conductor::roster(&registry)` = the compiled founding
+lines ∪ every registered line, with world, planet, colony and placement
+DERIVED from the sigil. `civ new` registers and stops; there is nothing
+left for a file to hold and nothing left to drift.
+
+**Two truths cost a landed ruling before this.** `12_UNION` §2 seated
+the tardigrade line in the progenitor band; the seed file carried it,
+the built-in defaults did not, and a rebuilt `var` booted the defaults —
+so a board ran five lines, all T3, with the whole progenitor band absent
+from play. That is the failure the ruling exists to make unreachable.
+
+**Six lines are held out pending an operator ruling** — Lyran, Anunnaki,
+Archon, Agarthan, Draco, Pleiadian. They fail two standing laws at once:
+the operator ordered the occult out of the build (striking `Anunnaki`
+from `18_TORSION` by name), and `06_CIVILIZATIONS` §2a's
+locality-anchored naming law requires a name to carry its PLACE, MEDIUM
+and MANIFESTATION. They held five of the eight station seats, so the
+**observer band is EMPTY** until one is renamed or a lawful line takes
+the seat. Stated, not hidden.

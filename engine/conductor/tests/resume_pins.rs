@@ -26,7 +26,7 @@ fn the_board_remembers_across_restarts() {
     // digest. (Un-receipted ticks honestly do not survive a restart —
     // the workspace invariant applies to time itself; the clock
     // reinstates at the last receipt's stamp.)
-    let before: Vec<(String, [u8; 32], usize)> = first
+    let before: Vec<(String, [u8; 32], usize, bool)> = first
         .iter()
         .map(|e| {
             let last = e.world.chronicle().receipts().last().expect("receipts");
@@ -34,6 +34,21 @@ fn the_board_remembers_across_restarts() {
                 e.spec.world_name.clone(),
                 last.own.0,
                 e.world.chronicle().receipts().len(),
+                // THE SOLAR LEAP IS CAPTURED, NOT ASSUMED (2026-08-05).
+                // This pin used to assert every resumed world knows its
+                // sun outright. That is a property of the ROSTER — of
+                // whether five beats happen to be enough for each line —
+                // not of resumption, and it went red the moment THE
+                // DEFINITION LAW compiled the fuller roster in: a line
+                // that had not made the leap by beat 5 was read as a
+                // world that FORGOT its sky.
+                //
+                // The law here is PRESERVATION: whatever a world knew,
+                // it still knows after a restart. So the reading is
+                // taken before and compared after, and a line still
+                // climbing is no longer mistaken for a line that lost
+                // something.
+                e.world.knows_its_sun(),
             )
         })
         .collect();
@@ -48,9 +63,9 @@ fn the_board_remembers_across_restarts() {
         .map(|spec| Polity::genesis(spec, &registry, &book))
         .collect();
     for polity in &second {
-        let (_, terminal, count) = before
+        let (_, terminal, count, knew_its_sun) = before
             .iter()
-            .find(|(name, _, _)| name == &polity.spec.world_name)
+            .find(|(name, _, _, _)| name == &polity.spec.world_name)
             .expect("same roster");
         let resumed = polity.world.chronicle().receipts();
         assert_eq!(
@@ -65,11 +80,21 @@ fn the_board_remembers_across_restarts() {
             "{} continues the SAME chain — resumption, never a refound",
             polity.spec.world_name
         );
-        assert!(
+        assert_eq!(
             polity.world.knows_its_sun(),
-            "the resumed world remembers its sky"
+            *knew_its_sun,
+            "{} did not remember its sky across the restart",
+            polity.spec.world_name
         );
     }
+    // AND THE CLAIM IS NOT VACUOUS. Preservation of "knew nothing" is
+    // no evidence of anything, so at least one line must actually have
+    // made the solar leap for the comparison above to have content.
+    assert!(
+        before.iter().any(|(_, _, _, knew)| *knew),
+        "no line made the solar leap in this era — the preservation \
+         check above would be comparing false against false"
+    );
     // No ruins: resumption never rotated a divergent resident.
     let ruins = std::fs::read_dir(root.join("worlds"))
         .map(|entries| {

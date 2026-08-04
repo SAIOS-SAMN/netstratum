@@ -1281,8 +1281,8 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         // THE CIV CONSOLE (2026-07-30 ruling): build a custom
         // civilization — axes, station, seat checks — from inside the
         // client. `civ` / `civ seats` shows the station console; `civ
-        // new` registers the line and appends it to var/polities.json
-        // so the conductor brings it online at its next boot.
+        // new` registers the line; the conductor derives its world from
+        // the registry card at its next boot (THE DEFINITION LAW).
         // THE OPERATOR MENU (prototype — no passwords): profiles under
         // var/operators/<sigil>, many accounts on one machine; login
         // switches, continue resumes the profile's last saved world.
@@ -1745,48 +1745,24 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             return;
                         }
                     }
-                    // Seat the world deterministically from the sigil —
-                    // no wall clock, no dice (CHARTER §9's spirit).
-                    let digest: [u8; 32] = blake3::hash(sigil.as_bytes()).into();
-                    let coord = |at: usize| -> i64 { i64::from(digest[at] % 63) - 31 };
-                    let entry = format!(
-                        "  {{\"name\":\"{}\",\"sigil\":\"{}\",\"species\":\"{}\",\"motto\":\"{}\",\"disposition\":\"{}\",\"metabolism\":\"{}\",\"perception\":\"{}\",\"world\":\"{}-hearth\",\"planet\":\"{}-prime\",\"colony\":\"first-{}\",\"policy\":\"steady\",\"x\":\"{}\",\"y\":\"{}\",\"z\":\"{}\"{}}}",
-                        newcomer.name, sigil, newcomer.species, newcomer.motto,
-                        newcomer.disposition, newcomer.metabolism, newcomer.perception,
-                        sigil, sigil, sigil,
-                        coord(0), coord(1), coord(2),
+                    // THE DEFINITION LAW (conductor::polities): registering
+                    // IS the whole act. This used to splice a JSON entry
+                    // onto var/polities.json by stripping the trailing
+                    // `]` — a second, unreceipted definition of the line,
+                    // written by string surgery. The conductor now derives
+                    // the world, planet, colony and placement from the
+                    // sigil at boot, so the registry card is sufficient.
+                    println!(
+                        "{} {} registered{} — the conductor brings the line online at its next boot ({}-hearth awaits)",
+                        style.ok("✓"),
+                        style.strong(&newcomer.name),
                         newcomer
                             .station
                             .as_ref()
-                            .map(|s| format!(",\"station\":\"{s}\""))
-                            .unwrap_or_default()
+                            .map(|s| format!(" ({s} seat taken)"))
+                            .unwrap_or_default(),
+                        sigil
                     );
-                    let roster = std::path::PathBuf::from("var/polities.json");
-                    let appended = std::fs::read_to_string(&roster)
-                        .ok()
-                        .and_then(|text| {
-                            let trimmed = text.trim_end();
-                            let body = trimmed.strip_suffix(']')?.trim_end();
-                            let glue = if body.trim_end().ends_with('[') { "\n" } else { ",\n" };
-                            Some(format!("{body}{glue}{entry}\n]\n"))
-                        });
-                    match appended.map(|text| std::fs::write(&roster, text)) {
-                        Some(Ok(())) => println!(
-                            "{} {} registered{} and rostered — the conductor brings the line online at its next boot ({}-hearth awaits)",
-                            style.ok("✓"),
-                            style.strong(&newcomer.name),
-                            newcomer
-                                .station
-                                .as_ref()
-                                .map(|s| format!(" ({s} seat taken)"))
-                                .unwrap_or_default(),
-                            sigil
-                        ),
-                        _ => println!(
-                            "{} registered, but var/polities.json would not append — add the entry by hand",
-                            style.bad("✗")
-                        ),
-                    }
                 }
                 Some(other) => println!(
                     "{} unknown civ verb {} — {} or {}",

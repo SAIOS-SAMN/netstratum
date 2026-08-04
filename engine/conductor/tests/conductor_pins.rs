@@ -3,7 +3,7 @@
 //! end-to-end, research unlocks industry, and a thriving line
 //! speciates — chronicle-chosen, lineage-recorded.
 
-use conductor::{founding_polities, load_polities, run_era, write_default_polities, Polity};
+use conductor::{founding_polities, run_era, Polity};
 use ledger::registry::Registry;
 use ledger::Ledger;
 use std::fs;
@@ -318,44 +318,35 @@ fn perception_routes_the_research() {
     assert!(!slagborn.is_empty() && slagborn.iter().all(|n| n.starts_with("forge_")));
 }
 
-/// Lore lives in data: the default polities seed a file the operator
-/// owns; loading it round-trips the specs; a hand-added entry loads.
+/// **THE ROSTER IS THE COMPILED ROSTER** — the inverse of the pin this
+/// replaces, which read *"lore lives in data: the default polities seed
+/// a file the operator owns"*. THE DEFINITION LAW struck that creed:
+/// a definition compiles, only a receipt persists.
+///
+/// The lines it named still stand, and they are checked BY IDENTITY,
+/// never by position — the earlier version read `loaded[0]` and broke
+/// the moment the fifth seat was added ahead of it.
 #[test]
-fn bots_load_from_the_operators_file() {
-    let root = scratch("polities");
-    fs::create_dir_all(&root).expect("scratch");
-    let path = root.join("polities.json");
-    write_default_polities(&path).expect("seeds");
-    let loaded = load_polities(&path).expect("loads");
-    assert_eq!(loaded.len(), founding_polities().len());
-    // BY IDENTITY, NEVER BY POSITION. This read `loaded[0]` and broke
-    // the moment the fifth seat was added ahead of it — a roster is
-    // DATA, and a pin that indexes data asserts the order of a list
-    // rather than the law it carries.
+fn the_roster_carries_the_tardigrade_line_and_its_head() {
+    let founding = founding_polities();
     assert!(
-        loaded.iter().any(|p| p.civilization.sigil == "slagborn"),
-        "the tardigrade line stands in the seeded roster"
+        founding.iter().any(|p| p.civilization.sigil == "slagborn"),
+        "the tardigrade line stands in the roster"
     );
     assert!(
-        loaded.iter().any(|p| p.civilization.sigil == "tunborn"),
+        founding.iter().any(|p| p.civilization.sigil == "tunborn"),
         "and so does its head — the fifth seat, 12_UNION §2"
     );
-
-    // Seeding again never clobbers the operator's file.
-    let before = fs::read_to_string(&path).expect("read");
-    write_default_polities(&path).expect("no-op");
-    assert_eq!(before, fs::read_to_string(&path).expect("read"));
-
-    // A hand-added entry loads alongside the defaults.
-    let extended = before.replace(
-        "]",
-        r#",{"name":"Fernwake","sigil":"fernwake","species":"monarch butterfly",
-           "motto":"drift and arrive","disposition":"epicurean","metabolism":"biotic",
-           "perception":"volumetric","world":"lantern-sea","planet":"petal",
-           "colony":"alight","policy":"steady"}]"#,
+    // Two readings of a compiled roster are the same roster. The struck
+    // path could not promise this: a second boot re-read a file the
+    // first boot had written, and anything could have edited it between.
+    assert_eq!(
+        founding.len(),
+        founding_polities().len(),
+        "the roster does not change between readings"
     );
-    fs::write(&path, extended).expect("edit");
-    let loaded = load_polities(&path).expect("loads");
-    assert_eq!(loaded.len(), founding_polities().len() + 1);
-    assert_eq!(loaded.last().expect("fernwake").civilization.name, "Fernwake");
+    assert!(
+        founding.iter().all(|p| p.civilization.founder == "conductor"),
+        "every compiled line is founded by the conductor, not by an editor"
+    );
 }

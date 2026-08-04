@@ -204,6 +204,11 @@ fn no_new_read_back_path_ever() {
     // moved with it into engine/scribe/src/lib.rs. RELOCATED debts,
     // not new ones: the same reads, the new home; the ledger's own
     // entry stays for its law reads (universe, starchart, directives).
+    // THE DEFINITION LAW paid one of these off (2026-08-05):
+    // `engine/conductor/src/polities.rs` left this list because its
+    // roster read-back was STRUCK, not relocated. The list is allowed to
+    // shrink — "never grows" is the law, and a debt retired is the only
+    // lawful way off it.
     let adopted = [
         "engine/scribe/src/journal.rs",
         "engine/scribe/src/lib.rs",
@@ -213,7 +218,6 @@ fn no_new_read_back_path_ever() {
         "engine/ledger/src/registry.rs",
         "engine/conductor/src/lib.rs",
         "engine/conductor/src/main.rs",
-        "engine/conductor/src/polities.rs",
         "clients/cli/src/main.rs",
     ];
     let mut sources = Vec::new();

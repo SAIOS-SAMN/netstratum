@@ -1,3 +1,13 @@
+> **SUPERSEDED IN PART, 2026-08-05 — THE DEFINITION LAW.** Everything
+> below concerning `seeds/aeon1-polities.json`, `var/polities.json`,
+> `tools/claim_roster.py`, `load_polities` and `write_default_polities`
+> describes machinery that is STRUCK. The roster compiles
+> (`conductor::polities`); a registered line reaches the board through
+> its registry card, not through a file. The E1/E4 drift this chapter
+> inventories cannot recur, because there is no second roster to drift
+> from. The measurements and the reasoning are kept as the record of WHY
+> the ruling was made.
+
 # ENDOWMENTS — standing we are entitled to and have not claimed
 
 **Status:** LIVE register (record lane, opened 2026-08-03). Operator
@@ -199,13 +209,19 @@ refuses to write if any durable slug would vanish.
 **A CORRECTION TO THIS SECTION'S FIRST DRAFT.** It said registry-only
 lines should "land with EMPTY siting, which must be visible rather than
 defaulted". **That was wrong, and would have produced a claim the engine
-never sees.** `conductor::load_polities` (`polities.rs:161`) takes
-`world`, `planet`, `colony` and `policy` with `?` — an entry missing any
-of them is SKIPPED at load with only a stderr note. An empty-sited entry
-is therefore not a visible gap; it is an invisible one. Pinned
-empirically in `engine/conductor/tests/roster_claim_pins.rs`
-(`an_entry_missing_its_siting_is_silently_dropped_not_refused`): the file
-still loads, the unsited line is simply gone.
+never sees.** The loader took `world`, `planet`, `colony` and `policy`
+with `?` — an entry missing any of them was SKIPPED at load with only a
+stderr note. An empty-sited entry was therefore not a visible gap; it
+was an invisible one, pinned empirically at the time by
+`an_entry_missing_its_siting_is_silently_dropped_not_refused`.
+
+**Both the loader and that pin are STRUCK** (THE DEFINITION LAW,
+2026-08-05). The failure mode is gone with them: siting is no longer
+carried by a file that can omit it, it is DERIVED from the sigil, so
+there is no missing-field path left to drop a line silently. The
+paragraph is kept because the reasoning is what justified the ruling —
+a silent drop is worse than a refusal, and the fix was to remove the
+thing that could drop.
 
 The path therefore RECOVERS siting from the live universe —
 `var/worlds/<world>/planets/<planet>/state.json` names its civilization

@@ -24,7 +24,7 @@
 //! engine).
 //!
 //! **LORE LIVES IN DATA, NOT SOURCE:** polity specs load from
-//! `<var>/polities.json` when present; `write_default_polities` seeds that
+//! the COMPILED roster (THE DEFINITION LAW — `polities.rs`); nothing
 //! file once so even the founding NPCs are operator-editable. NPC
 //! entries carry `founder: "conductor"` — the observer marks them ⚙.
 //!
@@ -58,7 +58,7 @@ use solver::{
 use std::path::Path;
 
 mod polities;
-pub use polities::{founding_polities, load_polities, write_default_polities};
+pub use polities::{founding_polities, registered_polities, roster};
 
 /// AEON-1b (11 §5): THE FOLD — seal the live era and rotate it into
 /// the archive sequence. `EraFolded` (tag 46) appends to the universe
@@ -123,13 +123,9 @@ pub fn fold(var_root: &str) -> std::io::Result<(u64, Ratio)> {
     if registry.is_dir() {
         std::fs::rename(&registry, archive.join("registry"))?;
     }
-    let roster = root.join("polities.json");
-    if roster.is_file() {
-        // The archived copy carries the live name. (It was written as
-        // `bots.json` under two earlier roster names; nothing reads it
-        // back, so the archive name simply tracks the current one.)
-        std::fs::copy(&roster, archive.join("polities.json"))?;
-    }
+    // THE DEFINITION LAW: no roster file is archived, because none
+    // exists. The era's roster is the roster the binary that sealed it
+    // was compiled with — recorded by the commit, not by a copy.
     Ok((era, gauge))
 }
 
