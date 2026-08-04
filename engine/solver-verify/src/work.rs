@@ -27,7 +27,6 @@
 //! odd_col (TileMirror: 0 None · 1 Rows · 2 Cols · 3 Both).
 
 use crate::certificate::{verify_certificate, CertificateRead, SolveCertificate};
-use crate::corpus::CORPUS_ROOT;
 use crate::forge::{forge_task, Difficulty};
 use crate::grid::{run, Grid, Op, Program, TileMirror};
 use crate::loader::{Task, TaskPair};
@@ -46,13 +45,15 @@ pub const WORK_SCHEMA_V1: u8 = 1;
 
 /// Work-shapes v2 — CORPUS work (operator ruling 2026-08-04). A corpus
 /// task is observed content and cannot be re-derived from a digest, so
-/// it rides WHOLE, carrying its admissibility proof with it.
+/// it rides WHOLE. It carried an admissibility proof for one morning;
+/// the Merkle mechanism was struck the same day (see `crate::corpus`)
+/// and the payload no longer carries a path.
 pub const WORK_SCHEMA_V2_CORPUS: u8 = 2;
 
 /// Work-shapes v3 — VOLUMETRIC work (operator ruling 2026-08-04,
 /// lifting C8's deferral). Forge-only and re-derivable like v1, so the
 /// payload carries only the digest, the rung, the word and the proof —
-/// no task content, no admissibility path.
+/// no task content at all.
 pub const WORK_SCHEMA_V3_VOLUME: u8 = 3;
 
 /// The decoded proof: everything the replay needs, nothing else.
@@ -65,8 +66,8 @@ pub struct WorkProof {
     pub certificate: SolveCertificate,
 }
 
-/// A CORPUS proof (schema v2): the task rides whole, with the proof
-/// that it belongs to the admissible set.
+/// A CORPUS proof (schema v2): the task rides whole, because observed
+/// content cannot be re-derived from a digest.
 ///
 /// The task's NAME is not carried. It is not content (see
 /// [`crate::corpus::task_digest`]), and the certificate needs a name to
@@ -76,9 +77,10 @@ pub struct WorkProof {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CorpusProof {
     /// The content digest — `corpus::task_digest(train, test_in)`.
+    /// Binds the payload to the task it claims. It does NOT admit the
+    /// task: identity is not admission, and the Merkle admission
+    /// mechanism was struck 2026-08-04 (see `corpus.rs`).
     pub task_id: [u8; 32],
-    /// The Merkle path from this leaf to the pinned root.
-    pub inclusion: Vec<crate::corpus::PathStep>,
     /// The observed task, riding whole: it cannot be re-derived.
     pub train: Vec<TaskPair>,
     pub test_in: Grid,
@@ -105,8 +107,13 @@ pub struct VolumeProof {
 pub enum WorkClass {
     /// Forge work: re-derivable, priced on the ladder by `mint_bound`.
     Forge(Difficulty),
-    /// Corpus work: admissible, replayed, and OFF the ladder entirely.
-    AdmissibleCorpus { task_id: [u8; 32] },
+    /// Corpus work: replayed and OFF the ladder entirely.
+    ///
+    /// Renamed from `AdmissibleCorpus` when the Merkle admission
+    /// mechanism was struck (2026-08-04) — the old name CLAIMED an
+    /// admission this judge no longer performs, and a name that
+    /// overclaims is the vacuity THE MOTION clause 6 forbids.
+    Corpus { task_id: [u8; 32] },
     /// Volumetric work: re-derivable like forge work, but on its OWN
     /// ladder — a volumetric rung is not a planar rung and must never
     /// be priced as one (the two `level(n)` tables are different
@@ -144,11 +151,6 @@ pub enum WorkBroken {
     /// The payload is internally inconsistent: it names one task and
     /// carries another.
     TaskIdMismatch,
-    /// v2 — the task_id is not in the admissible corpus: its inclusion
-    /// path does not resolve to the pinned root. THE FORGED-TASK
-    /// REFUSAL — an honestly-hashed, honestly-solved task that nobody
-    /// authorized still earns nothing.
-    NotAdmissible,
     /// The payload is a well-formed shape this judge cannot price. Not
     /// a malformation — a SHAPE the caller has not been taught. Today:
     /// corpus work reaching `verify_work`, whose return type can only
@@ -312,11 +314,10 @@ pub fn encode_work(proof: &WorkProof) -> Option<Vec<u8>> {
 pub fn encode_corpus_work(proof: &CorpusProof) -> Option<Vec<u8>> {
     let mut out = vec![WORK_SCHEMA_V2_CORPUS];
     out.extend_from_slice(&proof.task_id);
-    put_u16(proof.inclusion.len(), &mut out)?;
-    for step in &proof.inclusion {
-        out.push(u8::from(step.counterpart_is_left));
-        out.extend_from_slice(&step.counterpart);
-    }
+    // The inclusion path was struck 2026-08-04 with the Merkle root.
+    // v2 payloads from the one morning that shape existed do not decode
+    // under this schema and were never emitted by anything — no
+    // conductor arm builds corpus work, and no chain carries one.
     put_u16(proof.train.len(), &mut out)?;
     for pair in &proof.train {
         put_grid(&pair.input, &mut out)?;
@@ -577,19 +578,6 @@ pub fn decode_corpus_work(bytes: &[u8]) -> Option<CorpusProof> {
         return None;
     }
     let task_id = r.digest()?;
-    let path_len = r.u16()?;
-    let mut inclusion = Vec::with_capacity(path_len);
-    for _ in 0..path_len {
-        let counterpart_is_left = match r.byte()? {
-            0 => false,
-            1 => true,
-            _ => return None, // the direction bit is exact, never truthy
-        };
-        inclusion.push(crate::corpus::PathStep {
-            counterpart: r.digest()?,
-            counterpart_is_left,
-        });
-    }
     let train_len = r.u16()?;
     // THE VACUITY, refused for the new shape too (98ccbbe's law): a
     // replay over no training pair proves nothing, and "maps EVERY
@@ -613,7 +601,6 @@ pub fn decode_corpus_work(bytes: &[u8]) -> Option<CorpusProof> {
     }
     Some(CorpusProof {
         task_id,
-        inclusion,
         train,
         test_in,
         program,
@@ -641,55 +628,43 @@ pub fn verify_work_class(bytes: &[u8]) -> Result<WorkClass, WorkBroken> {
     }
 }
 
-/// THE CORPUS JUDGE (work-shapes v2). Four legs, all or refuse:
+/// THE CORPUS JUDGE (work-shapes v2). Three legs, all or refuse:
 ///
 ///   1. **re-hash** — the carried task hashes to the claimed `task_id`;
 ///      a payload that names one task and carries another refuses.
-///   2. **admit** — the inclusion path resolves to [`CORPUS_ROOT`].
-///      THIS IS THE NEW LEG, and the one v1 never needed: it is what
-///      stops a miner authoring their own trivial task, hashing it
-///      honestly, solving it honestly, and minting.
-///   3. **re-apply** — the program maps EVERY training pair exactly and
+///   2. **re-apply** — the program maps EVERY training pair exactly and
 ///      the test input to the claimed output (the honest-withhold law).
-///   4. **re-chain** — the certificate re-derives Intact.
+///   3. **re-chain** — the certificate re-derives Intact.
 ///
-/// **What this CANNOT check, stated plainly.** A corpus task's held-out
-/// answer is not carried and not derivable, so leg 3 proves the program
-/// closes the TRAINING pairs and renders the claimed output — never
-/// that the output is CORRECT. That gap is not a defect in the judge;
-/// it is the actual ARC problem, and the reason a corpus rate is an
-/// economics question rather than a mechanical one. Measured on this
-/// corpus: of 34 programs that closed training, 33 matched the held-out
-/// answer and one did not — so roughly 3% of closures are confidently
-/// wrong, and that is the fabrication surface a corpus rate buys.
+/// **THE ADMIT LEG WAS STRUCK 2026-08-04** (operator ruling: no Merkle
+/// trees). It checked an inclusion path against a pinned root, which is
+/// a static enumeration AND an authority — see `crate::corpus` for the
+/// reasoning kept whole. Its replacement is a PREDICATE, not a list: a
+/// claim is admissible when the BASE vocabulary provably fails the task
+/// at depth `d` and the candidate closes it, both halves replayable
+/// with the machinery already here.
+///
+/// **So this judge does NOT admit, and must not be read as if it did.**
+/// It proves a payload is internally consistent and that the program
+/// closes the carried task. Whether the task is one anybody authorized
+/// is a question it no longer asks — lawfully, because corpus work has
+/// no rate either: THE MOTION clause 4 makes imported content a
+/// BENCHMARK and never a mint source. It carries no seed, it can be
+/// authored, and its held-out answer is not checkable by the judge.
+///
+/// **What this CANNOT check, stated plainly and unchanged by the
+/// strike.** A corpus task's held-out answer is not carried and not
+/// derivable, so leg 2 proves the program closes the TRAINING pairs and
+/// renders the claimed output — never that the output is CORRECT.
+/// Measured: of 34 programs that closed training, 33 matched the
+/// held-out answer and one did not, so ~3% of closures are confidently
+/// wrong. That was the fabrication surface a corpus rate would have
+/// bought, and it is now one more reason there is no such rate.
 pub fn verify_corpus_work(bytes: &[u8]) -> Result<WorkClass, WorkBroken> {
-    verify_corpus_work_against(bytes, &CORPUS_ROOT)
-}
-
-/// The corpus judge against a NAMED root.
-///
-/// [`verify_corpus_work`] is this against [`CORPUS_ROOT`]. The root is a
-/// parameter for two reasons, both structural rather than cosmetic:
-/// the operator's ruling places the constant in the kernel, and this is
-/// the seam that lets it be hoisted there without the kernel ever
-/// parsing a payload (THE OPAQUE-PAYLOAD LAW holds — the kernel would
-/// pass a 32-byte constant down, not read bytes); and a corpus
-/// amendment can be verified against the incoming root before it is
-/// pinned. Tests use it to exercise the legs BEYOND admissibility,
-/// which the pinned root would otherwise short-circuit.
-pub fn verify_corpus_work_against(
-    bytes: &[u8],
-    root: &[u8; 32],
-) -> Result<WorkClass, WorkBroken> {
     let proof = decode_corpus_work(bytes).ok_or(WorkBroken::Malformed)?;
     // 1. Re-hash: identity is content, so recompute it from content.
     if crate::corpus::task_digest(&proof.train, &proof.test_in) != proof.task_id {
         return Err(WorkBroken::TaskIdMismatch);
-    }
-    // 2. Admit: pure arithmetic against the pinned root — no corpus,
-    //    no filesystem, nothing the kernel could not do in a vacuum.
-    if !crate::corpus::verify_inclusion(&proof.task_id, &proof.inclusion, root) {
-        return Err(WorkBroken::NotAdmissible);
     }
     // The task, reconstructed exactly as the prover must have built it.
     let task = Task {
@@ -698,7 +673,7 @@ pub fn verify_corpus_work_against(
         test_in: proof.test_in.clone(),
         test_expected: None,
     };
-    // 3. Re-apply.
+    // 2. Re-apply.
     for (pair, held) in task.train.iter().enumerate() {
         if run(&proof.program, &held.input) != held.output {
             return Err(WorkBroken::TrainingMiss { pair });
@@ -707,9 +682,9 @@ pub fn verify_corpus_work_against(
     if run(&proof.program, &task.test_in) != proof.output {
         return Err(WorkBroken::OutputMismatch);
     }
-    // 4. Re-chain.
+    // 3. Re-chain.
     match verify_certificate(&proof.certificate, &task, &proof.program, &proof.output) {
-        CertificateRead::Intact => Ok(WorkClass::AdmissibleCorpus { task_id: proof.task_id }),
+        CertificateRead::Intact => Ok(WorkClass::Corpus { task_id: proof.task_id }),
         CertificateRead::Diverged { at_step } => Err(WorkBroken::ChainDiverged { at_step }),
     }
 }

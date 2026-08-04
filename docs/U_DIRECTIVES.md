@@ -187,29 +187,57 @@ seal an intact chain, and mint. The ruling's rationale — "the task's
 identity is its content, so no forged corpus entry can mint" — holds
 only once an admissible SET exists; identity alone is not admission.
 
-**THE MECHANISM (operator ruling).** A static Merkle tree over the
-admissible corpus, its root pinned as an invariant constant
-(`corpus::CORPUS_ROOT`). A payload carries its `task_id` and the
-inclusion path; the judge recomputes the root from leaf + path and
-compares. Pure arithmetic over 32-byte digests — no corpus, no
-filesystem, nothing the kernel could not do in a vacuum. A forged
-task's path collapses.
+**THE MECHANISM — STRUCK 2026-08-04, the same day it landed**
+(operator ruling: the engine must be able to FORGE NEW CORPUS, and NO
+MERKLE TREES). Recorded here rather than deleted, because the reasoning
+that produced it was half right and the half that survives is
+load-bearing.
 
-**Derived over `arc_real_pairs`**: 960 files, 960 loaded, 960 DISTINCT
-task_ids, all 960 inclusion paths verified at derivation
-(`solver-verify/examples/corpus_root.rs` re-derives and prints the
-constant; I/O lives in the example and never in the sealed crate).
+*What it was.* A static Merkle tree over the admissible corpus, its root
+pinned as an invariant constant, derived over `arc_real_pairs` (960
+files, 960 distinct task_ids, every inclusion path verified at
+derivation). A payload carried its `task_id` and an inclusion path; the
+judge recomputed the root from leaf + path. Four legs — re-hash, ADMIT,
+re-apply, re-chain.
+
+*Why it went.* A pinned root is a static ENUMERATION — a finite well,
+where the ruling asks for an open one — and it is an AUTHORITY, a
+constant deciding what counts, which is a second machine-readable truth
+of the kind `00_CHARTER` §11 excised the mirror for. It also cannot move
+at mesh speed: every node must carry the same root, and changing it is a
+kernel VERSION amendment.
+
+*What survives, and it is the finding not the answer.* `task_id =
+H(content)` proves WHICH task was solved and never that the task was
+admissible — **identity is not admission**. That stands. So does
+`task_digest`, the v2 payload carrying task content (observed content
+still cannot be re-derived), the BLAKE3 decision, `Grid::new`'s hue
+refusal, and `Difficulty::lawful`.
+
+*What replaces it: a PREDICATE, not a list.* A claim is admissible when
+the BASE vocabulary provably FAILS the task at depth `d` and the
+candidate closes it — both halves replayable with machinery
+`verify_work` already has. No root, no constant, no authority, and it
+moves as fast as the mesh. Until it lands the corpus judge does not
+admit at all, which is lawful: corpus work has no rate, and THE MOTION
+clause 4 makes imported content a BENCHMARK and never a mint source.
+
+*Nothing in `engine/kernel` changed.* The constant was never hoisted
+into the judge — `verify_corpus_work_against(bytes, &root)` kept it a
+parameter — and that seam is why the strike stayed inside one crate.
+
+The judge is now three legs:
 
 | leg | check | refusal |
 |---|---|---|
 | 1 re-hash | carried task hashes to the claimed `task_id` | `TaskIdMismatch` |
-| 2 **admit** | inclusion path resolves to `CORPUS_ROOT` | `NotAdmissible` |
-| 3 re-apply | every training pair exactly, then test input → claimed output | `TrainingMiss{pair}` / `OutputMismatch` |
-| 4 re-chain | the certificate re-derives Intact | `ChainDiverged{at_step}` |
+| 2 re-apply | every training pair exactly, then test input → claimed output | `TrainingMiss{pair}` / `OutputMismatch` |
+| 3 re-chain | the certificate re-derives Intact | `ChainDiverged{at_step}` |
 
-Leg 2 is the new one and the whole point. Legs are ordered
-cheapest-and-most-decisive first, so an inadmissible payload never
-costs a replay.
+The class an admitted corpus solve used to report was renamed to
+`WorkClass::Corpus` in the strike (the old name carried the word
+"admissible"): it claimed an admission the judge no longer performs, and
+a name that overclaims is the vacuity THE MOTION clause 6 forbids.
 
 **WHAT THE JUDGE CANNOT CHECK, stated rather than hidden.** A corpus
 task's held-out answer is not carried and not derivable, so leg 3

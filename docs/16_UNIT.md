@@ -242,10 +242,16 @@ stays true to the landed kernel, not an earlier assumption.
   1. **Identity is not admission.** Content-addressing proves WHICH
      task was solved, never that it was one of ours — a miner may
      author a trivial task, hash it honestly, solve it honestly and
-     mint. The clause is completed by an admissible SET: a static
-     Merkle tree over the corpus with its root pinned as an invariant
-     constant, and the payload carrying an inclusion path the judge
-     recomputes. Zero I/O, so the kernel stays pure.
+     mint. **The admissible-set answer is STRUCK** (operator ruling
+     2026-08-04, same day: the engine must be able to FORGE NEW CORPUS,
+     and no Merkle trees). A pinned root is a static enumeration and an
+     authority; it also cannot move at mesh speed. The FINDING stands —
+     identity is not admission — and its replacement is a PREDICATE:
+     admissible when the base vocabulary provably fails the task at
+     depth `d` and the candidate closes it, both halves replayable.
+     Until it lands the corpus judge does not admit at all, which is
+     lawful because corpus work has no rate: THE MOTION clause 4 makes
+     imported content a BENCHMARK, never a mint source.
   2. **The hash is BLAKE3, not SHA-256.** Every other digest in the
      system is BLAKE3 and the sealed tier depends on `blake3` alone;
      adding SHA-2 there would put a second hash primitive in sealed
