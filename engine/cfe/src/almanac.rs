@@ -265,3 +265,121 @@ pub fn knowledge_of(elements: &[[u8; 32]]) -> Option<u16> {
     compounds(elements)
         .then(|| elements.iter().map(|e| u16::from(periodic_of(e).line)).sum())
 }
+
+// ─────────────────────────────────────────────────────────────────────
+// THE THERMAL CLOSURE
+// ─────────────────────────────────────────────────────────────────────
+
+/// **THE THERMAL LINE, CLOSED** (operator ruling 2026-08-04: *thermal
+/// is open ended — needs closure*).
+///
+/// `thermal::band_of` returns `Option<SubstrateBand>` and answers NONE
+/// in four places, which the tree's own witnesses already record
+/// (`blue_o_star_at_one_unit_exceeds_every_band`,
+/// `band_boundaries_are_exact_and_inclusive`): below the cryogenic
+/// floor, between cryogenic and mesic, between mesic and hyperthermal,
+/// and above hyperthermal with no ceiling at all.
+///
+/// A `None` is not a temperature. Every orb HAS one, so a reading that
+/// declines to name it is a hole in the vocabulary rather than a
+/// refusal — and the phase axis above needs a total answer, since an
+/// element must be workable SOMEWHERE.
+///
+/// This closes the line by NAMING the uncovered stretches. It changes
+/// no admission: `SubstrateBand` and `band_of` are untouched and still
+/// rule siting. The three bands appear here unchanged, with the gaps
+/// between them given names instead of silence.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum ThermalRegion {
+    /// Below the cryogenic floor. The deepest cold, and a place — not
+    /// an absence.
+    Quenched,
+    /// 10 K – 100 K.
+    Cryogenic,
+    /// 100 K – 250 K. The gap `band_of` answered NONE for.
+    Sublime,
+    /// 250 K – 320 K.
+    Mesic,
+    /// 320 K – 600 K. The second silent gap.
+    Torrid,
+    /// 600 K – 1500 K.
+    HyperThermal,
+    /// Above 1500 K and up to the ceiling.
+    Incandescent,
+    /// **ABOVE THE CEILING — the open end that closure forbids.**
+    /// Reachable today because `site_planet` admits ANY positive orbit
+    /// and `t_eq4 = L(1-a)k / r²` grows without bound as `r` shrinks.
+    /// Naming it does not close it; only an orbit floor does. See
+    /// [`ceiling4`].
+    Beyond,
+}
+
+/// **THE CEILING** — the hottest a lawful siting may reach, given a
+/// floor on the orbit.
+///
+/// There is no ceiling today because there is no orbit floor: the
+/// siting law refuses `orbit_r <= 0` and admits everything above it, so
+/// `1/10^k` is lawful for any `k` and the temperature it implies has no
+/// bound. The T∞ purge barred the reciprocal pole — *infinity is
+/// disallowed, the torus wraps finitely* — and this axis still runs to
+/// it.
+///
+/// A second cost rides the same hole, and it is the one this tree has
+/// already been burned by: `t_eq4` divides by `r²`, so an orbit of
+/// `1/10^k` yields an exact rational with a denominator around
+/// `10^(2k)`. That is the DENOMINATOR BLOWUP that killed proportional
+/// demurrage at ~2^1100 and forced the flat law.
+///
+/// Given a floor `r_min`, the ceiling is the brightest class at zero
+/// albedo sitting there. Stated as a function rather than a constant
+/// because **choosing `r_min` is a ruling, not a derivation.**
+pub fn ceiling4(r_min: &Ratio) -> Ratio {
+    crate::thermal::t_eq4(
+        &crate::thermal::StarClass::O.luminosity(),
+        &ratio(0, 1),
+        r_min,
+    )
+}
+
+/// Read the region of a temperature. **TOTAL** — every `t_eq4` names a
+/// region, and that is the closure.
+pub fn region_of(t_eq4: &Ratio, r_min: &Ratio) -> ThermalRegion {
+    use crate::thermal::SubstrateBand as B;
+    let (cryo_lo, cryo_hi) = B::Cryogenic.bounds4();
+    let (mesic_lo, mesic_hi) = B::Mesic.bounds4();
+    let (hyper_lo, hyper_hi) = B::HyperThermal.bounds4();
+    match t_eq4 {
+        t if *t < cryo_lo => ThermalRegion::Quenched,
+        t if *t <= cryo_hi => ThermalRegion::Cryogenic,
+        t if *t < mesic_lo => ThermalRegion::Sublime,
+        t if *t <= mesic_hi => ThermalRegion::Mesic,
+        t if *t < hyper_lo => ThermalRegion::Torrid,
+        t if *t <= hyper_hi => ThermalRegion::HyperThermal,
+        t if *t <= ceiling4(r_min) => ThermalRegion::Incandescent,
+        _ => ThermalRegion::Beyond,
+    }
+}
+
+/// Is an element workable at this temperature? The total form of
+/// [`workable_in`], answering for every orb rather than only for those
+/// that happen to land inside a band.
+///
+/// The refractory phase works in any NAMED region. Nothing is workable
+/// `Beyond` — matter above the ceiling is not a place to do chemistry,
+/// and that arm exists to be UNREACHABLE once an orbit floor lands.
+pub fn workable_at(element: &[u8; 32], t_eq4: &Ratio, r_min: &Ratio) -> bool {
+    let region = region_of(t_eq4, r_min);
+    if region == ThermalRegion::Beyond {
+        return false;
+    }
+    let phase = periodic_of(element).phase;
+    if phase == PHASES {
+        return true;
+    }
+    matches!(
+        (phase, region),
+        (1, ThermalRegion::Quenched | ThermalRegion::Cryogenic | ThermalRegion::Sublime)
+            | (2, ThermalRegion::Mesic)
+            | (3, ThermalRegion::Torrid | ThermalRegion::HyperThermal | ThermalRegion::Incandescent)
+    )
+}

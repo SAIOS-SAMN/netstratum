@@ -199,3 +199,105 @@ fn knowledge_is_the_depth_and_the_width_that_were_won() {
 
     assert!(knowledge_of(&[at(1, 1, 1, 1, 0)]).is_none(), "no compound, no knowledge");
 }
+
+// ── THE THERMAL CLOSURE ──────────────────────────────────────────────
+
+use cfe::almanac::{ceiling4, region_of, workable_at, ThermalRegion};
+use cfe::thermal::{band_of, t_eq4};
+
+/// A generous orbit floor for the pins. Choosing the real one is a
+/// ruling; these only need A floor to read against.
+fn r_min() -> cfe::ratio::Ratio {
+    ratio(1, 10)
+}
+
+#[test]
+fn the_band_reading_is_open_in_four_places_and_the_region_closes_it() {
+    // The four silences `band_of` answers, each now a named place.
+    let holes = [
+        (ratio(1, 1), ThermalRegion::Quenched, "below the cryogenic floor"),
+        (ratio(200_000_000, 1), ThermalRegion::Sublime, "between cryogenic and mesic"),
+        (ratio(20_000_000_000, 1), ThermalRegion::Torrid, "between mesic and hyperthermal"),
+        (ratio(6_000_000_000_000, 1), ThermalRegion::Incandescent, "above hyperthermal"),
+    ];
+    for (t, region, why) in holes {
+        assert_eq!(band_of(&t), None, "band_of is silent here: {why}");
+        assert_eq!(region_of(&t, &r_min()), region, "the region names it: {why}");
+    }
+}
+
+#[test]
+fn the_three_bands_are_carried_through_unchanged() {
+    // Closure must not MOVE admission — every temperature that had a
+    // band still reads the same place.
+    for (t, region) in [
+        (ratio(10_000, 1), ThermalRegion::Cryogenic),
+        (ratio(3_906_250_000, 1), ThermalRegion::Mesic),
+        (ratio(10_485_760_000, 1), ThermalRegion::Mesic),
+        (ratio(129_600_000_000, 1), ThermalRegion::HyperThermal),
+    ] {
+        assert!(band_of(&t).is_some(), "this had a band");
+        assert_eq!(region_of(&t, &r_min()), region, "and keeps its place");
+    }
+}
+
+#[test]
+fn the_region_is_total_where_the_band_is_not() {
+    // Totality is the closure. Walk the line by orders of magnitude and
+    // count how often each reading declines to answer.
+    let mut silent = 0;
+    let mut t = ratio(1, 1);
+    for _ in 0..20 {
+        if band_of(&t).is_none() {
+            silent += 1;
+        }
+        // region_of is total by type — there is no None to count.
+        let _ = region_of(&t, &r_min());
+        t = t * ratio(10, 1);
+    }
+    assert!(silent > 0, "the band reading is genuinely open, not hypothetically");
+    assert_eq!(
+        region_of(&ratio(0, 1), &r_min()),
+        ThermalRegion::Quenched,
+        "even absolute zero names a place"
+    );
+}
+
+#[test]
+fn the_top_is_open_until_an_orbit_floor_lands() {
+    // THE MEASURED HOLE. `site_planet` refuses `orbit_r <= 0` and
+    // admits everything above, so a lawful siting can exceed ANY
+    // ceiling by shrinking the orbit.
+    let hottest = cfe::thermal::StarClass::O.luminosity();
+    let ceiling = ceiling4(&r_min());
+    // A lawful orbit one order smaller than the floor already passes it.
+    let beyond = t_eq4(&hottest, &ratio(0, 1), &ratio(1, 100));
+    assert!(beyond > ceiling, "a lawful siting outruns the ceiling");
+    assert_eq!(
+        region_of(&beyond, &r_min()),
+        ThermalRegion::Beyond,
+        "and the closure NAMES it rather than pretending otherwise"
+    );
+    // Nothing is workable there — the arm exists to become unreachable.
+    let refractory = at(1, 1, 1, PHASES, 0);
+    assert!(!workable_at(&refractory, &beyond, &r_min()), "no chemistry above the ceiling");
+    assert!(workable_at(&refractory, &ratio(3_906_250_000, 1), &r_min()), "and plenty below");
+}
+
+#[test]
+fn a_shrinking_orbit_blows_the_denominator_which_is_the_old_scar() {
+    // The same hole costs twice. `t_eq4` divides by r², so an orbit of
+    // 1/10^k yields a denominator around 10^(2k) — the exact-rational
+    // blowup that killed proportional demurrage at ~2^1100 and forced
+    // the flat law.
+    let hottest = cfe::thermal::StarClass::O.luminosity();
+    let mut last = 0usize;
+    for k in [1u32, 4, 8, 16] {
+        let r = ratio(1, 10i64.pow(k));
+        let t = t_eq4(&hottest, &ratio(0, 1), &r);
+        let digits = t.numer().to_string().len() + t.denom().to_string().len();
+        assert!(digits > last, "k={k}: the figure grows with every order");
+        last = digits;
+    }
+    assert!(last > 30, "and it grows fast: {last} digits at r = 1/10^16");
+}
