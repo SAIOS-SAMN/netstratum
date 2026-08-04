@@ -453,6 +453,27 @@ pub enum Trajectory {
     Decline,
 }
 
+/// WHICH REGIME a board runs under — the three paths, held together so
+/// they can be measured against each other rather than argued about.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum SearchMode {
+    /// COUPLED — the trajectory routes. Read while reading pays,
+    /// escalate the hunger on stagnation, exhaust only on decline.
+    #[default]
+    Coupled,
+    /// UNCOUPLED — always exhaust. The original path, and the control
+    /// every other number is read against.
+    Uncoupled,
+    /// **V ∪ D** — the union. Every task gets BOTH: read first, and
+    /// exhaust whenever the reading did not close. Not a router — a
+    /// dyad, neither path deriving its standing from the other, and the
+    /// closure set is the union of what each can reach alone.
+    ///
+    /// It should find everything either finds, and pay both costs to do
+    /// it. Whether that is worth it is what the benchmark answers.
+    Union,
+}
+
 /// HOW a line searches. Both paths are live; neither is deprecated.
 ///
 /// They are not competitors — they fail in different places. The reach
@@ -592,6 +613,9 @@ pub struct Polity {
     /// judge and into the chain. Every deed past this mark is chained
     /// individually, with its own step, and judged.
     chained: usize,
+    /// WHICH REGIME this line searches under. Set by the era runner so
+    /// the three paths can be benchmarked against one another.
+    pub mode: SearchMode,
     /// WHERE THIS LINE IS GOING, read from its own outcomes and used
     /// to decide what the next beat's search may spend.
     pub trajectory: Trajectory,
@@ -796,6 +820,7 @@ impl Polity {
                         chained: 0,
                         refused: Vec::new(),
                         reported: 0,
+                        mode: SearchMode::default(),
                         trajectory: Trajectory::Growth,
                         starved: 0,
                         spent: 0,
@@ -879,6 +904,7 @@ impl Polity {
             chained: 0,
             refused: Vec::new(),
             reported: 0,
+            mode: SearchMode::default(),
             trajectory: Trajectory::Growth,
             starved: 0,
             spent: 0,
@@ -1245,25 +1271,37 @@ impl Polity {
             // cites. `SEARCH_BUDGET` still stands behind this as the
             // per-beat ceiling that keeps one heartbeat bounded; it is
             // no longer what DECIDES the spend.
-            // BOTH PATHS ARE LIVE. Read first; exhaust only where
-            // reading has demonstrably failed, which is the only place
-            // the sweep is worth its four orders of magnitude.
-            let read = match self.trajectory.path() {
-                SearchPath::Reach => {
-                    let need = self.trajectory.need(self.starved);
-                    let proposal = propose_measured(&task, &need);
-                    self.spent = self.spent.saturating_add(proposal.tested as u64);
-                    proposal.read
-                }
-                SearchPath::Sweep => {
-                    // The sweep reports no candidate count, so its cost
-                    // is recorded as INVOCATIONS bounded by
-                    // `SEARCH_BUDGET` rather than folded into `spent`.
-                    // Mixing a counted number with a bounded one would
-                    // make both yields meaningless.
+            // THE THREE PATHS. Each spends differently and each is
+            // counted separately: read-candidates are MEASURED, sweep
+            // invocations are BOUNDED by `SEARCH_BUDGET`, and blending
+            // the two would ruin both yields.
+            let reach = |polity: &mut Self| {
+                let need = polity.trajectory.need(polity.starved);
+                let proposal = propose_measured(&task, &need);
+                polity.spent = polity.spent.saturating_add(proposal.tested as u64);
+                proposal.read
+            };
+            let read = match self.mode {
+                SearchMode::Uncoupled => {
                     self.swept = self.swept.saturating_add(1);
                     solve_consulted(&task, difficulty.word_len)
                 }
+                SearchMode::Coupled => match self.trajectory.path() {
+                    SearchPath::Reach => reach(self),
+                    SearchPath::Sweep => {
+                        self.swept = self.swept.saturating_add(1);
+                        solve_consulted(&task, difficulty.word_len)
+                    }
+                },
+                // V ∪ D: read, and exhaust whenever the reading did not
+                // close. Both costs paid; the closure set is the union.
+                SearchMode::Union => match reach(self) {
+                    closed @ SolveRead::Solved { .. } => closed,
+                    SolveRead::Unsolved => {
+                        self.swept = self.swept.saturating_add(1);
+                        solve_consulted(&task, difficulty.word_len)
+                    }
+                },
             };
             match read {
                 SolveRead::Solved {
@@ -2116,6 +2154,12 @@ fn galaxy_creator(registry: &Registry, civilization: &Civilization) -> String {
 /// every polity, then `cycles` heartbeats; branches born mid-era join the
 /// beat. Returns the live worlds.
 pub fn run_era(var_root: &str, cycles: u32) -> Vec<Polity> {
+    run_era_with(var_root, cycles, SearchMode::default())
+}
+
+/// The era runner, under a named search regime — the seam the
+/// three-path benchmark drives.
+pub fn run_era_with(var_root: &str, cycles: u32, mode: SearchMode) -> Vec<Polity> {
     let registry = Registry::at(format!("{var_root}/registry"));
     let book = Ledger::at(format!("{var_root}/worlds"));
     let eras = ledger::converge::default_era_roots(var_root);
@@ -2129,7 +2173,9 @@ pub fn run_era(var_root: &str, cycles: u32) -> Vec<Polity> {
         .map(|mut spec| {
             let opening = spec.gauge.take().unwrap_or_else(|| ratio(0, 1));
             spec.gauge = Some(cfe::world::wrap_gauge(opening + live_base.clone()));
-            Polity::genesis(spec, &registry, &book)
+            let mut polity = Polity::genesis(spec, &registry, &book);
+            polity.mode = mode;
+            polity
         })
         .collect();
     for beat in 0..cycles {
@@ -2142,7 +2188,9 @@ pub fn run_era(var_root: &str, cycles: u32) -> Vec<Polity> {
             }
         }
         for spec in newborns {
-            worlds.push(Polity::genesis(spec, &registry, &book));
+            let mut polity = Polity::genesis(spec, &registry, &book);
+            polity.mode = mode;
+            worlds.push(polity);
         }
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — the lens renders journals + wall, write-only display
