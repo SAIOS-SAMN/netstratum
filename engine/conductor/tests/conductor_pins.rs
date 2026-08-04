@@ -97,12 +97,27 @@ fn a_thriving_line_diverges() {
     );
 
     let registry = Registry::at(root.join("registry"));
+    // **LINEAGE IS MEMBERSHIP, NOT PARENTHOOD** (LINEAGE-1). A SEEDED
+    // line may carry its own head's slug and share its axes exactly —
+    // Slagborn stands in the Tunborn line and is not a cleave of it.
+    // This filtered on `!lineage.is_empty()` and so counted the seeded
+    // line as a branch, then demanded it differ from its own head.
+    //
+    // Caught 2026-08-04 when the fifth seat was added to the fallback
+    // roster and Slagborn gained the lineage the law always gave it.
+    // The pin was reading the field, not the event: a CLEAVE is what
+    // `divergence_step` produces at runtime, so the seeded roster is
+    // what must be excluded to find one.
+    let seeded: Vec<String> = conductor::founding_polities()
+        .iter()
+        .map(|p| p.civilization.sigil.clone())
+        .collect();
     let branches: Vec<_> = registry
         .list()
         .into_iter()
-        .filter(|c| !c.lineage.is_empty())
+        .filter(|c| !c.lineage.is_empty() && !seeded.contains(&c.sigil))
         .collect();
-    assert!(!branches.is_empty(), "line membership recorded in the registry");
+    assert!(!branches.is_empty(), "a cleave was recorded in the registry");
 
     for branch in &branches {
         let origin = registry
@@ -142,9 +157,15 @@ fn a_thriving_line_diverges() {
 
     // The keys moved: the origin receipts the cleave (+delta) and the
     // branch world founds at the OPPOSITE phase — never both at zero.
+    // Same distinction as above: a SEEDED line carries its head's slug
+    // and never cleaved. Only a runtime branch has a `Diverged` receipt
+    // to find.
     let newborn = worlds
         .iter()
-        .find(|b| !b.spec.civilization.lineage.is_empty())
+        .find(|b| {
+            !b.spec.civilization.lineage.is_empty()
+                && !seeded.contains(&b.spec.civilization.sigil)
+        })
         .expect("newborn world");
     let origin_world = worlds
         .iter()
@@ -259,8 +280,12 @@ fn a_steward_directive_lands_through_the_leash() {
 
     assert!(inbox.join("applied/000001-zone.json").exists(), "the zone applied");
     assert!(inbox.join("refused/000002-smite.json").exists(), "the smite refused");
+    let acting = worlds
+        .iter()
+        .position(|p| p.spec.civilization.sigil == "slagborn")
+        .expect("the acting line stands");
     assert!(
-        worlds[0]
+        worlds[acting]
             .world
             .orb()
             .expect("orb")
@@ -303,7 +328,18 @@ fn bots_load_from_the_operators_file() {
     write_default_polities(&path).expect("seeds");
     let loaded = load_polities(&path).expect("loads");
     assert_eq!(loaded.len(), founding_polities().len());
-    assert_eq!(loaded[0].civilization.sigil, "slagborn");
+    // BY IDENTITY, NEVER BY POSITION. This read `loaded[0]` and broke
+    // the moment the fifth seat was added ahead of it — a roster is
+    // DATA, and a pin that indexes data asserts the order of a list
+    // rather than the law it carries.
+    assert!(
+        loaded.iter().any(|p| p.civilization.sigil == "slagborn"),
+        "the tardigrade line stands in the seeded roster"
+    );
+    assert!(
+        loaded.iter().any(|p| p.civilization.sigil == "tunborn"),
+        "and so does its head — the fifth seat, 12_UNION §2"
+    );
 
     // Seeding again never clobbers the operator's file.
     let before = fs::read_to_string(&path).expect("read");

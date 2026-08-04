@@ -150,3 +150,59 @@ fn an_entry_missing_its_siting_is_silently_dropped_not_refused() {
         "a claim written without siting is a claim the engine never sees"
     );
 }
+
+/// **THE FIFTH SEAT IS IN THE FALLBACK ROSTER** (`12_UNION` §2,
+/// operator ruling 2026-07-30).
+///
+/// The seed file has carried Tunborn at `station: progenitor` since the
+/// ruling. The BUILT-IN defaults did not — and they are what a board
+/// boots with whenever `<var>/polities.json` is absent, which
+/// `write_default_polities` then refuses to overwrite. That is not a
+/// rare path; it is the path a rebuilt var takes.
+///
+/// Measured 2026-08-04 on the live var: five lines, every one
+/// `station: None`, every one T3, and the entire progenitor band absent
+/// from play — so a landed ruling had no expression on the board it
+/// governs. This pins the allocation so the fallback cannot drift from
+/// the law again.
+#[test]
+fn the_fallback_roster_seats_the_tardigrade_progenitor() {
+    let founding = conductor::founding_polities();
+
+    let tunborn = founding
+        .iter()
+        .find(|p| p.civilization.name == "Tunborn")
+        .expect("the fifth seat must exist in the fallback roster");
+    assert_eq!(
+        tunborn.civilization.station.as_deref(),
+        Some("progenitor"),
+        "the tardigrade line's head sits in the progenitor band"
+    );
+    assert_eq!(
+        ledger::registry::tier_of(tunborn.civilization.station.as_deref()),
+        Some(ledger::registry::Tier::T0),
+        "a progenitor reads T0 — the seat is the tier, derived not asserted"
+    );
+
+    let slagborn = founding
+        .iter()
+        .find(|p| p.civilization.name == "Slagborn")
+        .expect("Slagborn stands");
+    assert_eq!(
+        slagborn.civilization.lineage,
+        vec!["tunborn".to_string()],
+        "the line resolves to its own head, or the lineage law reads nothing"
+    );
+
+    // AND THE BAND IS NOT EMPTY. The failure this pin exists for was
+    // not a wrong station on one line — it was a board with no seated
+    // office at all, where every tier gate was unexercisable.
+    let seated = founding
+        .iter()
+        .filter(|p| p.civilization.station.is_some())
+        .count();
+    assert!(
+        seated > 0,
+        "a fallback board with no seat cannot exercise one tier law it carries"
+    );
+}

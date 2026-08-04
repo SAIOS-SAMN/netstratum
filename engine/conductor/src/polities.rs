@@ -12,7 +12,15 @@ use std::path::Path;
 
 /// The founding NPCs (founder "conductor" — the observer marks ⚙).
 pub fn founding_polities() -> Vec<PolitySpec> {
-    let civ = |name: &str, sigil: &str, species: &str, motto: &str, d: &str, m: &str, p: &str| {
+    let seated = |name: &str,
+                  sigil: &str,
+                  species: &str,
+                  motto: &str,
+                  d: &str,
+                  m: &str,
+                  p: &str,
+                  station: Option<&str>,
+                  lineage: &[&str]| {
         Civilization {
             name: name.into(),
             sigil: sigil.into(),
@@ -23,18 +31,58 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             metabolism: m.into(),
             perception: p.into(),
             founder: "conductor".into(),
-            lineage: Vec::new(),
-            station: None,
+            lineage: lineage.iter().map(|s| (*s).into()).collect(),
+            station: station.map(|s| s.into()),
         }
+    };
+    let civ = |name: &str, sigil: &str, species: &str, motto: &str, d: &str, m: &str, p: &str| {
+        seated(name, sigil, species, motto, d, m, p, None, &[])
     };
     vec![
         // BOT-THERM: the Furnace seat, pinned openly in the file — a G
         // sun at half orbit under half albedo (stellar load 2, past
         // the mesic ceiling): the shells answer, the joules mint.
+        // **THE FIFTH SEAT** (`12_UNION` §2, operator ruling 2026-07-30):
+        // *the tardigrade line sits in the progenitor band from this
+        // aeon — Tunborn, the Slagborn line's OWN head.*
+        //
+        // **This roster contradicted that landed ruling.** The seed file
+        // has carried Tunborn at `station: progenitor` since the ruling;
+        // these built-in defaults did not, and they are what a board
+        // boots with when `<var>/polities.json` is absent —
+        // `write_default_polities` refuses to overwrite, so the fallback
+        // is not a rare path, it is the path a rebuilt var takes. A
+        // board running the fallback therefore ran the tardigrade line
+        // with NO head and no seat above it: five lines, all
+        // `station: None`, all T3, and the whole progenitor band
+        // structurally absent from play.
+        //
+        // Measured 2026-08-04: the live var had exactly that shape.
         PolitySpec {
-            civilization: civ(
+            civilization: seated(
+                "Tunborn", "tunborn", "tardigrade progenitor",
+                "the dark between stars is a bed, not a wall",
+                "expansionist", "mineral", "planar",
+                Some("progenitor"), &[],
+            ),
+            world_name: "tun-reach".into(),
+            planet: "husk".into(),
+            colony: "first-wake".into(),
+            policy: Policy::Steady,
+            position: (ratio(2, 1), ratio(-3, 1), ratio(1, 1)),
+            star: Some(StarClass::G),
+            albedo: Some(ratio(1, 2)),
+            orbit: Some(ratio(1, 2)),
+            gauge: None,
+        },
+        PolitySpec {
+            civilization: seated(
                 "Slagborn", "slagborn", "tardigrade", "we eat what worlds discard",
                 "expansionist", "mineral", "planar",
+                // The line RESOLVES to its head. Without this the
+                // lineage law has nothing to read and Slagborn is a
+                // tardigrade line with no origin.
+                None, &["tunborn"],
             ),
             world_name: "cinder-reach".into(),
             planet: "bask".into(),
