@@ -1245,7 +1245,7 @@ impl Polity {
                     // to entity and is recycled WITHOUT bonds, so a
                     // standing test read off relational structure
                     // refused the lawful recycled line by construction.
-                    let earned = kernel::mint_bound(&difficulty);
+                    let earned = kernel::mint_bound(difficulty.rung());
                     if earned > cfe::ratio::ratio(0, 1) {
                         let _ = self.world.mint_discovery_as(
                             self.automaton,

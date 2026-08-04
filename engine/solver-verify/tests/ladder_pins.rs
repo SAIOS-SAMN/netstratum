@@ -75,3 +75,44 @@ fn the_volumetric_ladder_saturates_on_the_same_shape() {
     assert_eq!(VolDifficulty::level(5), VolDifficulty::level(6));
     assert_ne!(VolDifficulty::level(4), VolDifficulty::level(5));
 }
+
+/// **THE RUNG IS THE PRICING KEY, AND THE MATRIX IS NOT.**
+///
+/// Every ladder shape reports its position; anything off the ladder
+/// reports none. That `None` is the anti-self-pricing defence — a
+/// payload that invents a convenient shape is off-ladder and prices at
+/// zero, exactly as when the whole struct was matched.
+#[test]
+fn every_ladder_shape_knows_its_rung_and_nothing_else_does() {
+    for level in 0..=Difficulty::top() {
+        assert_eq!(
+            Difficulty::level(level).rung(),
+            Some(if level == 1 { 0 } else { level }),
+            "rung {level} reports its own position (0 and 1 are one opening rung)"
+        );
+    }
+    // A shape the ladder never issued: off-ladder, so it prices zero.
+    let invented = Difficulty { rows: 9, cols: 9, ..Difficulty::level(5) };
+    assert_eq!(invented.rung(), None, "an invented shape is on no rung");
+
+    // And the sharp case: the ATTACKER shape — a level-5 tier and word
+    // length with a trivial grid, which is what naming your own price
+    // would look like.
+    let cheap = Difficulty { rows: 1, cols: 1, ..Difficulty::level(5) };
+    assert_eq!(cheap.rung(), None, "a cheap shape wearing a hard rung's tier is off-ladder");
+}
+
+/// The volumetric ladder answers the same question with no field in
+/// common — which is the whole reason a POSITION is the right key and
+/// a shape is not.
+#[test]
+fn the_volumetric_ladder_reports_positions_too() {
+    for level in 0..=VolDifficulty::top() {
+        assert!(
+            VolDifficulty::level(level).rung().is_some(),
+            "volumetric rung {level} reports a position"
+        );
+    }
+    let invented = VolDifficulty { layers: 9, ..VolDifficulty::level(4) };
+    assert_eq!(invented.rung(), None, "off-ladder in three dimensions too");
+}

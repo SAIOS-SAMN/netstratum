@@ -153,14 +153,14 @@ fn p4_the_seed_cannot_fire_twice() {
 /// at genesis.
 #[test]
 fn p1_the_landed_rungs_are_1_4_7_and_zero_below() {
-    assert_eq!(mint_bound(&Difficulty::level(3)), ratio(1, 1));
-    assert_eq!(mint_bound(&Difficulty::level(4)), ratio(4, 1));
-    assert_eq!(mint_bound(&Difficulty::level(5)), ratio(7, 1));
+    assert_eq!(mint_bound(Difficulty::level(3).rung()), ratio(1, 1));
+    assert_eq!(mint_bound(Difficulty::level(4).rung()), ratio(4, 1));
+    assert_eq!(mint_bound(Difficulty::level(5).rung()), ratio(7, 1));
 
     // MEASURED, not endorsed: the bottom rungs pay nothing, so verified
     // cognition at rung 0-2 earns absolute zero (§5 decision 2, owed).
     for rung in 0..=2 {
-        assert_eq!(mint_bound(&Difficulty::level(rung)), ratio(0, 1), "rung {rung} pays nothing");
+        assert_eq!(mint_bound(Difficulty::level(rung).rung()), ratio(0, 1), "rung {rung} pays nothing");
     }
 }
 

@@ -1043,7 +1043,7 @@ fn creation(step: &Step) -> Result<(), Unlawful> {
             }
             let difficulty =
                 verify_work(work).map_err(|broken| Unlawful::WorkRefused { broken })?;
-            let bound = mint_bound(&difficulty);
+            let bound = mint_bound(difficulty.rung());
             match *amount <= bound {
                 true => Ok(()),
                 false => Err(Unlawful::MintExceedsWork {
@@ -1071,27 +1071,36 @@ fn creation(step: &Step) -> Result<(), Unlawful> {
 ///                                    ~1.75× inverse-hit-rate step)
 /// ```
 ///
-/// `f` is defined ON THE LADDER ONLY: a payload's difficulty either
-/// matches a `Difficulty::level` rung exactly or it earns ZERO — an
-/// off-ladder shape cannot name its own price (the attacker-shaped
-/// hole the #17 audit closed stays closed at the rate too).
+/// `f` is defined ON THE LADDER ONLY: a payload's shape either matches
+/// a ladder rung exactly or it earns ZERO — an off-ladder shape cannot
+/// name its own price (the attacker-shaped hole the #17 audit closed
+/// stays closed at the rate too).
+///
+/// **PRICED ON THE RUNG, NOT THE SHAPE** (operator ruling 2026-08-04:
+/// *`Grid` should fall out, because we aren't building a matrix*). This
+/// took `&Difficulty` and matched the whole struct — so `rows` and
+/// `cols`, the dimensions of an ARC grid, were part of the judge's
+/// price lookup. THE MOTION clause 5 forbids exactly that: *ARC is a
+/// TYPE of work, not the only type.* The exact-match defence is
+/// unchanged and now lives in `Difficulty::rung`, which is where the
+/// shape belongs; the judge is handed a POSITION. One pricing path now
+/// serves every work class, planar and volumetric alike, instead of
+/// each new class needing its own.
 /// Work-shapes v1: planar forge tasks only (structural — `verify_work`
 /// accepts no other form). Reward split v1: 100% to the solving world
 /// (the deed banks on its own orb; no mesh counterparty exists yet;
 /// the v2 40/40/20 prover/mesh/reserve split is INSCRIBED in
 /// U_DIRECTIVES §8 for the mesh era). Saturated rungs are
 /// proof-of-position; the economy lives up the ladder.
-pub fn mint_bound(difficulty: &Difficulty) -> Ratio {
-    if *difficulty == Difficulty::level(3) {
-        return ratio(1, 1);
+pub fn mint_bound(rung: Option<u32>) -> Ratio {
+    match rung {
+        Some(3) => ratio(1, 1),
+        Some(4) => ratio(4, 1),
+        Some(5) => ratio(7, 1),
+        // Saturated rungs pay zero by ruling, and OFF-LADDER pays zero
+        // because a payload never names its own price.
+        _ => ratio(0, 1),
     }
-    if *difficulty == Difficulty::level(4) {
-        return ratio(4, 1);
-    }
-    if *difficulty == Difficulty::level(5) {
-        return ratio(7, 1);
-    }
-    ratio(0, 1)
 }
 
 /// INVARIANT — bounded decay (I5), COMPLETE (U1f). Value is destroyed

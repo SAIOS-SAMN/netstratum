@@ -142,6 +142,26 @@ impl VolDifficulty {
         }
     }
 
+    /// The top rung of the volumetric ladder, derived.
+    pub fn top() -> u32 {
+        (0..)
+            .find(|&n| VolDifficulty::level(n) == VolDifficulty::level(u32::MAX))
+            .unwrap_or(0)
+    }
+
+    /// **WHICH VOLUMETRIC RUNG THIS SHAPE IS** — the counterpart of
+    /// [`crate::forge::Difficulty::rung`], and the reason a rung is the
+    /// right pricing key at all.
+    ///
+    /// Volumetric and planar shapes share NO fields — one carries
+    /// `layers`, the other does not — but they share the idea of a
+    /// POSITION on a ladder. Price the position and one function serves
+    /// both classes; price the shape and every new work class needs its
+    /// own parallel pricing path, which is what was happening.
+    pub fn rung(&self) -> Option<u32> {
+        (0..=VolDifficulty::top()).find(|&n| VolDifficulty::level(n) == *self)
+    }
+
     /// THE DEGENERACY LAW, volumetric — the counterpart of
     /// [`crate::forge::Difficulty::lawful`], named for the same reason.
     ///
