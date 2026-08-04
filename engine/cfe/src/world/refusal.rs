@@ -86,9 +86,9 @@ pub enum ActionRefused {
     /// PRACTICE-1 — release is a REDISCOVERY: no new doctrine has
     /// landed since the adoption; the lesson is unearned.
     ReleaseUnearned { practice: u8 },
-    /// PRACTICE-1 — the Athanor takes only the tempered: fewer than
+    /// PRACTICE-1 — the Overdrive takes only the tempered: fewer than
     /// eight hardship receipts stand in this chronicle.
-    AthanorUntempered { hardships: usize },
+    OverdriveUntempered { hardships: usize },
     /// KERNEL-TAXON — a code outside the ratified vocabularies
     /// (15 §2–§3): the vocabulary grows by amendment, never by deed.
     TaxonUnknown { class: u8, clade: u8 },

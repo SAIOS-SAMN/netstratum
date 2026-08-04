@@ -199,8 +199,8 @@
 //!         vocabulary by index: 1 progenitor · 2 watcher · 3 observer
 //!         · 4 sovereign.)
 //!         — the next free tag outside reservations is 90.
-//!   In-value practice codes (append-only): 1 the Fast · 2 the Icon ·
-//!   3 the Vigil · 4 the Hoard · 5 the Athanor (deep-end: adoption
+//!   In-value practice codes (append-only): 1 the Austerity · 2 the Showpiece ·
+//!   3 the Restraint · 4 the Hoard · 5 the Overdrive (deep-end: adoption
 //!   gated on hardship ≥ 8 receipts). Placeholder names, operator
 //!   renames anytime. Tech condition 7 = re-emergence (the released
 //!   discipline's lesson; window-ease modifier, alignment-gated).

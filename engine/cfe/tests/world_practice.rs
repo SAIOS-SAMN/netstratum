@@ -2,7 +2,7 @@
 //! binds — the receipted practice does. One benefit, one friction,
 //! exact; release is a REDISCOVERY that emits the re-emergence node;
 //! an adopted discipline gates the climb through alignment; the
-//! Athanor takes only the tempered.
+//! Overdrive takes only the tempered.
 
 use cfe::dop::{ClosureEvent, Resource, ZoneKind};
 use cfe::ratio::{ratio, Ratio};
@@ -17,7 +17,7 @@ fn banked(world: &World, resource: Resource) -> Ratio {
 }
 
 /// The door refuses typed: unknown code, double adoption, and the
-/// Athanor before eight hardships.
+/// Overdrive before eight hardships.
 #[test]
 fn the_door_refuses_typed() {
     let mut world = World::new();
@@ -26,14 +26,14 @@ fn the_door_refuses_typed() {
         world.adopt_practice(9),
         Err(ActionRefused::PracticeUnknown { practice: 9 })
     ));
-    world.adopt_practice(2).expect("adopts the Icon");
+    world.adopt_practice(2).expect("adopts the Showpiece");
     assert!(matches!(
         world.adopt_practice(2),
         Err(ActionRefused::PracticeAlreadyAdopted { practice: 2 })
     ));
     assert!(matches!(
         world.adopt_practice(5),
-        Err(ActionRefused::AthanorUntempered { hardships: 0 })
+        Err(ActionRefused::OverdriveUntempered { hardships: 0 })
     ));
     assert!(matches!(
         world.release_practice(4),
@@ -41,7 +41,7 @@ fn the_door_refuses_typed() {
     ));
 }
 
-/// The Icon, exact: habitat yield ×5/4, habitat upkeep ×2 — and
+/// The Showpiece, exact: habitat yield ×5/4, habitat upkeep ×2 — and
 /// nothing else moves (the extractor runs the v1 numbers).
 #[test]
 fn the_icon_prices_exactly() {
@@ -117,7 +117,7 @@ fn release_is_a_rediscovery_and_the_lesson_re_emerges() {
     assert_eq!(resumed.committed(), world.committed(), "resume carries it");
 }
 
-/// The crucible loop: a practiced line whose entropic books outweigh
+/// The alignment loop: a practiced line whose entropic books outweigh
 /// its syntropic ones stands UNALIGNED — the climb refuses naming the
 /// fourth gate.
 #[test]

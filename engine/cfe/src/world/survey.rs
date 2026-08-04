@@ -293,7 +293,7 @@ impl World {
         // post-decay read): a refusal draws nothing, reads nothing,
         // orphans nothing.
         let mut draw = crate::dop::scan_draw();
-        // PRACTICE-1 the Vigil: the lens disciplined — the draw halves.
+        // PRACTICE-1 the Restraint: the lens disciplined — the draw halves.
         if self.practices.contains(&3) {
             draw *= ratio(1, 2);
         }

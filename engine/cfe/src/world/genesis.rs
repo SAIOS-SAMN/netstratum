@@ -118,7 +118,7 @@ impl World {
         // PRACTICE-1 (operator-ruled): an adopted discipline must
         // stand ALIGNED — the syntropy ratio (09 §2.5, engine read)
         // holds the floor (placeholder 1/2) or the climb refuses. The
-        // crucible loop: resolve the friction to rise. A line with no
+        // alignment loop: resolve the friction to rise. A line with no
         // practice, or no deeds posted, stands aligned.
         let aligned = self.practices.is_empty()
             || self

@@ -1800,16 +1800,16 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         Some(deed @ ("practice" | "release")) => {
             let releasing = deed == "release";
             let code = match words.next() {
-                Some("1") | Some("fast") => Some(1u8),
-                Some("2") | Some("icon") => Some(2),
-                Some("3") | Some("vigil") => Some(3),
+                Some("1") | Some("austerity") => Some(1u8),
+                Some("2") | Some("showpiece") => Some(2),
+                Some("3") | Some("restraint") => Some(3),
                 Some("4") | Some("hoard") => Some(4),
-                Some("5") | Some("athanor") => Some(5),
+                Some("5") | Some("overdrive") => Some(5),
                 other => {
                     println!(
                         "{} name the discipline: {} (got {})",
                         style.bad("✗"),
-                        style.strong("fast · icon · vigil · hoard · athanor"),
+                        style.strong("austerity · showpiece · restraint · hoard · overdrive"),
                         other.unwrap_or("nothing")
                     );
                     None
@@ -3484,7 +3484,7 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
         ActionRefused::VeilOutOfOrder =>
             "one veil per star — lift before drawing anew (nothing stacks)".to_string(),
         ActionRefused::PracticeUnknown { practice } => format!(
-            "no discipline {} stands in the vocabulary — 1 the Fast · 2 the Icon · 3 the Vigil · 4 the Hoard · 5 the Athanor",
+            "no discipline {} stands in the vocabulary — 1 the Austerity · 2 the Showpiece · 3 the Restraint · 4 the Hoard · 5 the Overdrive",
             style.strong(&practice.to_string())
         ),
         ActionRefused::RouteKnown { deal } => format!(
@@ -3523,8 +3523,8 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "release is a REDISCOVERY — no new doctrine has landed since discipline {} was adopted; earn the lesson first",
             style.strong(&practice.to_string())
         ),
-        ActionRefused::AthanorUntempered { hardships } => format!(
-            "the Athanor takes only the tempered — {} hardship receipts stand, eight are required",
+        ActionRefused::OverdriveUntempered { hardships } => format!(
+            "the Overdrive takes only the tempered — {} hardship receipts stand, eight are required",
             style.strong(&hardships.to_string())
         ),
         ActionRefused::TaxonUnknown { class, clade } => format!(

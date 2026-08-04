@@ -941,9 +941,9 @@ impl Polity {
         }
         // PRACTICE-1 (operator-ruled: NPCs adopt at genesis): the
         // disposition names the founding discipline — expansionist
-        // keeps the Vigil, epicurean raises the Icon, empiricist keeps
-        // the Fast. Receipted like every deed; the Hoard and the
-        // Athanor are earned choices, never seeded.
+        // keeps the Restraint, epicurean raises the Showpiece, empiricist keeps
+        // the Austerity. Receipted like every deed; the Hoard and the
+        // Overdrive are earned choices, never seeded.
         let founding_practice = match spec.civilization.disposition.as_str() {
             "expansionist" => Some(3),
             "epicurean" => Some(2),
