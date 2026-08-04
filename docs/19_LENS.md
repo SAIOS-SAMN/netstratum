@@ -540,17 +540,34 @@ rest or may be stuck, and the reading refuses to presume which. And it
 takes two points FROM THE CHAIN and holds neither, because a lens
 keeping its own timeline is a second timeline (§1a).
 
-## §12 THE STANDING SURFACE — which row a state occupies
+## §12 THE STANDING SURFACE — REMOVED 2026-08-04
 
-The kernel refuses a work-anchored mint unless the prior state reads
-`Entangled`, and no surface showed an operator which row anything stood
-in — a refusal arrived with a verdict nobody could have anticipated.
+This section specified `lens::standing`, a surface rendering which of
+four rows (`Void` / `Unframed` / `Stasis` / `Entangled`) a structure
+occupied. Both the surface and the law it explained are struck by
+operator ruling: *identity is pegged to entity, and identity gets
+recycled without bonds*, so a standing test read off relational
+structure refused the lawful recycled line by construction.
 
-`lens::standing` reads it and carries BOTH poles, so the row is
-explicable rather than pronounced. **`Stasis` is rendered as a state
-wanting re-volumizing, never as a fault**: LAW 4 is explicit that the
-refusal is thermodynamic rather than moral, and a surface that painted
-it as an error would reintroduce the penal frame Article III struck.
+The section's own justification is why it could not outlive the law. As
+written: *the kernel refuses a work-anchored mint unless the prior state
+reads `Entangled`, and no surface showed an operator which row anything
+stood in — a refusal arrived with a verdict nobody could have
+anticipated.* With no refusal to anticipate, a row nobody acts on is a
+reading that computes nothing, which is the LAW 8 failure this corpus
+has already recorded twice.
+
+**What the section got right, and what any successor must keep.**
+`Stasis` was rendered as a state WANTING re-volumizing, never as a
+fault — LAW 4's refusal is thermodynamic rather than moral, and a
+surface painting idleness as error would reintroduce the penal frame
+Article III struck. Whatever surface next reports structure must carry
+that discipline forward, and must carry BOTH poles so a reading is
+explicable rather than pronounced.
+
+The `Observation` composition (§15) is untouched: its standing ARM is
+gone, and the circulation that arm reported is still read through the
+degree arm, where it always came from.
 
 ## §13 THE OBSERVER — capacity, and the tolerance that is a position
 

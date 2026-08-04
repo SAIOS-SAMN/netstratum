@@ -2218,6 +2218,20 @@ It would also make `Vacuity::Stasis` (circulation > 0 ∧ `∂Δ ≡ 0`)
 unreachable, and that row exists to be detected and re-volumized, not
 abolished. The same reasoning leaves `rank` unfloored: floor it and
 both `Void` and `Stasis` vanish, collapsing four rows to two.
+(The four rows are since STRUCK — see the record below; the reasoning
+about the floor stands, its row names no longer resolve to code.)
+
+> **THE FOUR ROWS ARE STRUCK** (operator ruling 2026-08-04). `Vacuity`,
+> `dual_pole` and the capacity law they gated are removed from the
+> engine; the paragraph above is kept as the record of why the floor
+> was reasoned about that way, and its row names no longer resolve to
+> code. The reasoning about `D`'s floor and `V`'s rest STANDS — it was
+> never about the classification. The ruling: *identity is pegged to
+> entity, and identity gets recycled without bonds*, so a standing test
+> read off relational structure refused the lawful recycled line by
+> construction (NOVEL-1 succession, INCURSION-1a). Measured before the
+> strike: a succeeded world read `Void` before and after, and 60 beats
+> of the live board gave 374 solves, 0 mints, 124 withheld.
 
 ### 14d. `ΔD(w) = 0` survives the strike
 

@@ -1,9 +1,32 @@
 //! A1 — THE PoUW LOOP, END TO END.
 //!
-//! Before this, an NPC that solved a task wrote a file and incremented
-//! a counter: cognition proved out and the economy never heard of it.
+//! Before A1, an NPC that solved a task wrote a file and incremented a
+//! counter: cognition proved out and the economy never heard of it.
 //! This pin drives a real era and measures whether a `DiscoveryMinted`
 //! receipt reaches a real chronicle.
+//!
+//! **THE HISTORY THIS FILE CARRIES, because it is the whole argument
+//! for the ruling that ends it:**
+//!
+//! - A1 (2026-08-01) closed the loop and this pin passed.
+//! - It passed VACUOUSLY. The proposer never asked the judge, and
+//!   `replay` — still the live transition — banked mints that
+//!   `kernel::lawful` had refused as `MintWithoutStanding`.
+//! - 2026-08-04: the proposer was taught to ask first, and the board
+//!   went to **374 solves, 0 mints, 124 withheld** over 60 beats. The
+//!   capacity law required `Vacuity::Entangled`, which needed a
+//!   three-orb obligation triangle that does not compose — a shape no
+//!   world the game produces can form.
+//! - 2026-08-04, operator ruling: **the capacity law is struck.**
+//!   *Identity is pegged to entity, and identity gets recycled without
+//!   bonds* — so a standing test read off bonds refused the lawful
+//!   recycled line by construction (measured: a succeeded world reads
+//!   `Void` before and after succession).
+//!
+//! So this pin returns to asserting what A1 always meant, and it is no
+//! longer vacuous: the mint's anchor is `verify_work` (re-forge,
+//! re-apply, re-chain) with `mint_bound` capping the ladder, and NOTHING
+//! now stands between a proved solve and its payment.
 
 use std::path::PathBuf;
 
@@ -21,9 +44,9 @@ fn scratch(name: &str) -> PathBuf {
 #[test]
 fn a_solving_line_mints_against_its_own_verified_work() {
     // Run the board long enough for a line to climb off the saturated
-    // rungs. `f(0..=2) = 0` by the Emission Law — proof-of-position
-    // pays nothing — so nothing should mint until a world reaches rung
-    // 3, and then it earns exactly the ruled ladder.
+    // rungs. `f(0..=2) = 0` by the Emission Law — proof-of-position pays
+    // nothing — so nothing mints until a world reaches rung 3, and then
+    // it earns exactly the ruled ladder.
     let root = scratch("loop");
     let var = root.to_string_lossy().into_owned();
     let worlds = run_era(&var, 60);
@@ -31,7 +54,6 @@ fn a_solving_line_mints_against_its_own_verified_work() {
     let mut minted = 0usize;
     let mut earned_total = cfe::ratio::ratio(0, 1);
     let mut carried_proof = 0usize;
-
     for polity in &worlds {
         for receipt in polity.world.chronicle().receipts() {
             if let ClosureEvent::DiscoveryMinted { amount, work, .. } = &receipt.event {
@@ -43,11 +65,13 @@ fn a_solving_line_mints_against_its_own_verified_work() {
             }
         }
     }
+    let solved: u32 = worlds.iter().map(|p| p.solved).sum();
+    println!("MEASURED over 60 beats: {solved} solves, {minted} mints, earned {earned_total}");
 
     assert!(
         minted > 0,
-        "no line minted in 60 beats — the PoUW loop is still open: NPCs solve and the \
-         economy never hears of it"
+        "no line minted in 60 beats — the PoUW loop is open again: NPCs solve \
+         and the economy never hears of it ({solved} solves went unpaid)"
     );
     assert_eq!(
         carried_proof, minted,
@@ -56,6 +80,20 @@ fn a_solving_line_mints_against_its_own_verified_work() {
     assert!(
         earned_total > cfe::ratio::ratio(0, 1),
         "the ladder paid: cognition became value"
+    );
+
+    // THE JUDGE AGREES. The mints above are not merely unblocked, they
+    // are LAWFUL under the version that judged them — the removal
+    // loosened the law, and this pin is where that claim is checked
+    // rather than assumed.
+    let refused: usize = worlds.iter().map(|p| p.refusals().len()).sum();
+    assert_eq!(
+        refused, 0,
+        "a mint the judge refuses reached a chronicle: {:?}",
+        worlds
+            .iter()
+            .flat_map(|p| p.refusals())
+            .collect::<Vec<_>>()
     );
 }
 
@@ -69,15 +107,28 @@ fn the_saturated_rungs_pay_nothing_even_when_solved() {
     let var = root.to_string_lossy().into_owned();
     let worlds = run_era(&var, 60);
 
+    let mut examined = 0usize;
     for polity in &worlds {
         for receipt in polity.world.chronicle().receipts() {
             if let ClosureEvent::DiscoveryMinted { amount, .. } = &receipt.event {
+                examined += 1;
                 assert!(
                     *amount > cfe::ratio::ratio(0, 1),
-                    "a zero-amount mint reached the chronicle — the saturated rungs must \
-                     emit nothing at all, not a deed worth nothing"
+                    "a zero-amount mint reached the chronicle — the saturated rungs \
+                     must emit nothing at all, not a deed worth nothing"
                 );
             }
         }
     }
+    println!("MEASURED: {examined} mints examined");
+
+    // COVERAGE, STATED. This check walks the mints; over an empty set it
+    // passes without deciding anything, which is exactly how it went
+    // quietly vacuous while the capacity law barred the economy. It now
+    // fails rather than passing on nothing.
+    assert!(
+        examined > 0,
+        "no mint was examined — this check decided nothing, which is a \
+         measurement failure and not a passing test"
+    );
 }

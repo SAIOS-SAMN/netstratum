@@ -153,6 +153,54 @@ fn the_joule_runway_defers_the_frost() {
 }
 
 
+/// THE AERIC DECK BAND IS UNREACHABLE — pinned, not repaired.
+///
+/// `deck_band4` clamps a reading to the mesic ceiling for an `"aeric"`
+/// home (the RELEVANCE ENTRY ruling, 2026-07-31), but it tests the
+/// METABOLISM axis and no metabolism can be aeric: the vocabulary is
+/// closed at mineral/biotic/plasmic, and `12_UNION` §5a lists aeric as a
+/// SUBSTRATE — a line that is itself biotic, living in a gas giant's
+/// banded column. Substrates live in `clade`, whose vocabulary is a
+/// closed u8 set (`15_TAXON` §3) that does not carry aeric either.
+///
+/// So the ruling has never applied to anything. This pin records that
+/// as a KNOWN gap rather than letting the dead branch read as landed
+/// law. It goes red the day the reading is wired to a field that can
+/// actually say aeric — truth-update it then, and delete the clamp
+/// assertion below, not this test.
+#[test]
+fn the_aeric_deck_band_is_unreachable_today() {
+    use ledger::registry::METABOLISMS;
+    // A reading DEFINITIONALLY past the mesic ceiling — derived from
+    // the band itself, never a hand-picked constant. (Measured
+    // 2026-08-03: the ceiling is 10_485_760_000 in T⁴ terms, and a
+    // guessed "big number" of 10_000_000_000 sat under it — the guess
+    // would have made every assertion below pass vacuously.)
+    let (_, mesic_hi) = cfe::thermal::SubstrateBand::Mesic.bounds4();
+    let scorching = mesic_hi.clone() * ratio(2, 1);
+    for metabolism in METABOLISMS {
+        assert_eq!(
+            conductor::deck_band4(metabolism, scorching.clone()),
+            scorching,
+            "no metabolism in the closed vocabulary reads as aeric, so \
+             the deck band never clamps: {metabolism}"
+        );
+    }
+    // The clamp itself is real code and works — it simply has no
+    // caller that can reach it. Handed the string directly, it does
+    // displace to the ceiling.
+    assert_eq!(
+        conductor::deck_band4("aeric", scorching.clone()),
+        mesic_hi,
+        "the mapping is correct; only its input is unreachable"
+    );
+    assert!(
+        !METABOLISMS.contains(&"aeric"),
+        "the day aeric enters the metabolism vocabulary, this pin is the \
+         place that says the wiring question was decided"
+    );
+}
+
 /// The operator's file: thermal fields round-trip through the seeded
 /// polities.json; files WITHOUT thermal fields (the pre-BOT-THERM shape)
 /// still load and found thermally-derived worlds — compat held.

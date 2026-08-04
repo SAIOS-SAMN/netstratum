@@ -107,9 +107,16 @@ Read as a miner, the core is already complete in shape:
                      ∧ re-chain; an intact chain over a non-solution
                      refuses
     bound the pay    mint_bound — the ruled ladder f, exact integers
-    require standing capacity_law — D > 0 and dV ≠ 0, or no mint
     commit           the arbor: one record, parent-linked, the judging
                      VERSION bound into the commitment
+
+The ladder once carried a fifth rung between the bound and the commit —
+`require standing: capacity_law — D > 0 and dV ≠ 0, or no mint`. It is
+REMOVED (operator ruling 2026-08-04, kernel VERSION 3 → 4): *identity is
+pegged to entity, and identity gets recycled without bonds*, so a
+standing test read off relational structure refused the lawful recycled
+line by construction. Verified work remains the mint's one anchor, which
+is what the first two rungs already are.
 
 Every one of those exists and runs. What a miner additionally needs,
 and does not yet have, is the ORDERING/Sybil anchor: nothing makes

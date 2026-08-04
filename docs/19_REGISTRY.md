@@ -20,15 +20,28 @@ The authority is always the crate.
 | letter | module | the callable surface |
 |---|---|---|
 | **C** | `rfa-core/src/cage.rs` | `consult`, `Proposal::{offer,withdraw}`, `Lens::{of,show}`, trait `Exact` |
-| **V** | `rfa-core/src/boundary.rs` | `boundary_form`, `dual_pole`, `Flow`, `BoundaryForm`, `Vacuity` |
+| **V** | `rfa-core/src/boundary.rs` | `boundary_form`, `Flow`, `BoundaryForm` — `dual_pole` and `Vacuity` REMOVED 2026-08-04 |
 | **D** | `rfa-core/src/capacity.rs` | `capacity`, `circulation`, `divergence`, `egress`, `ext_x`, `ground`, `Degree`, `Extent`, `Egress` |
 | the seam | `kernel/src/bridge.rs` | `project`, `project_complex`, `read_entangled`, `verdict`, `degree`, `rank_is_defined`, `observe`, `fold_certified`, `refold` |
 
-**What the judge actually consults today:** `kernel::lawful` calls
-`capacity_law` (4 sites), reads `Vacuity` (5), and reaches
-`bridge::read_entangled` once. That is the whole of D and V inside the
-kernel. **C is consulted from nowhere in the kernel and must never be** —
-it has zero authority by construction (`17_CAPACITY` §10ter.c).
+**What the judge actually consults today (CORRECTED 2026-08-04):**
+nothing. The capacity law is REMOVED by operator ruling — *identity is
+pegged to entity, and identity gets recycled without bonds* — and with
+it `Vacuity`, `dual_pole`, `MintWithoutStanding` and
+`MintWithoutOwnStanding`. `kernel::lawful` no longer reaches D or V at
+all. The bridge still PROJECTS (`project`, `project_complex`,
+`read_entangled`, `borne_axial`) and the readings stand for lenses;
+they simply gate nothing.
+
+The previous entry read: *`kernel::lawful` calls `capacity_law` (4
+sites), reads `Vacuity` (5), and reaches `bridge::read_entangled` once.
+That is the whole of D and V inside the kernel.* Kept as the record of
+what the judge consulted under VERSION 3.
+
+**C is consulted from nowhere in the kernel and must never be** — it has
+zero authority by construction (`17_CAPACITY` §10ter.c). That is now
+true of D and V inside the judge as well, though for a different reason:
+C was barred, these were withdrawn.
 
 **Renames already survived, recorded so a reader does not chase a
 ghost.** Each left name is DEAD and appears here only as history: the

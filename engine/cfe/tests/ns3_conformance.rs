@@ -6,7 +6,7 @@
 use cfe::dop::ClosureEvent;
 use cfe::vrp::{
     receipt_digest, verify_receipts, Attestation, ChainRead, Chronicle, Receipt, ReceiptHash,
-    TickRead, WorldClock,
+    TickRead, Timekeeper, WorldClock,
 };
 
 fn hash_from_hex(hex: &str) -> ReceiptHash {
@@ -108,6 +108,47 @@ fn the_clock_refuses_partial_skip_and_replay() {
     ]);
     assert!(matches!(replay, TickRead::QuorumOpen { .. }));
     assert_eq!(clock.now(), 1, "the clock cannot replay");
+}
+
+#[test]
+fn the_seated_keepers_cannot_disagree_today() {
+    // THE PLACEHOLDER, PINNED (2026-08-03). The test above proves the
+    // tick LAW: handed 2-of-3, a skip or a replay, the clock refuses.
+    // This one records what the live world actually hands it. Three
+    // seated keepers share one clock in one process and `attest` reads
+    // nothing else, so the production quorum is unanimous BY
+    // CONSTRUCTION and the live clock always walks.
+    //
+    // Pinned so the vacuity reads as a known placeholder and never as
+    // an enforced quorum. Keepers become real parties when identity
+    // does (NS-5 processes, NS-7 identity); on that day this pin goes
+    // red and is TRUTH-UPDATED, not deleted.
+    let clock = WorldClock::new();
+    let seated = [
+        Timekeeper { id: 0 },
+        Timekeeper { id: 1 },
+        Timekeeper { id: 2 },
+    ];
+    let answers: Vec<Attestation> = seated.iter().map(|keeper| keeper.attest(&clock)).collect();
+    assert!(
+        answers.iter().all(|answer| *answer == answers[0]),
+        "three keepers, one clock, one input — the answers cannot differ today"
+    );
+    assert_eq!(
+        answers[0],
+        Attestation::Attests { next: 1 },
+        "a keeper attests the EXACT successor, never a jump"
+    );
+
+    // The consequence at the world: the clock walks every tick, and
+    // `QuorumOpen` never reaches a caller through the seated path.
+    let mut world = cfe::world::World::new();
+    let outcome = world.tick();
+    assert_eq!(
+        outcome.read,
+        TickRead::Ticked { now: 1 },
+        "the seated quorum is unanimous, so the world clock always walks"
+    );
 }
 
 #[test]

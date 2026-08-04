@@ -38,7 +38,12 @@ import time
 from fractions import Fraction
 from pathlib import Path
 
-RESOURCES = ["iron", "biomass", "alloy", "diamond", "joule", "sink"]
+# The seven resources, in wire-code order (cfe::dop::Resource). CRYSTAL
+# is code 7 — the resonance crystal, and the resource the PoUW mint pays
+# into (`DiscoveryMinted`, tag 86, banks Resource::Crystal). It was
+# missing here, so the one economic output of verified work was invisible
+# on every board this file renders.
+RESOURCES = ["iron", "biomass", "alloy", "diamond", "joule", "sink", "crystal"]
 STAR_NAMES = {1: "O", 2: "B", 3: "A", 4: "F", 5: "G", 6: "K", 7: "M",
               8: "bd", 9: "wd", 10: "rg", 11: "ns", 12: "wr", 13: "lwh"}
 TIER_OF_STATION = {"progenitor": "T0", "watcher": "T1", "observer": "T1",
@@ -97,8 +102,11 @@ def tlv_ratio(value, at=0):
     return Fraction(-numer if sign == 1 else numer, denom), at
 
 
+# The in-value codes (dop.rs: Resource = 1..=7). Crystal rides the
+# EXISTING banked entry (tag 18) — no new TLV tag — so a decoder that
+# stops at 6 silently drops crystal banks instead of failing.
 RESOURCE_NAMES = {1: "iron", 2: "biomass", 3: "alloy", 4: "diamond",
-                  5: "joule", 6: "sink"}
+                  5: "joule", 6: "sink", 7: "crystal"}
 
 
 def decode_orb_tlv(path):
@@ -307,10 +315,18 @@ def world_facts(world_dir):
                 state["_wire_zones"] = wire["zones"]
                 state["entropy_vented"] = show(wire["vented"])
             planets.append(state)
+    # THE STEWARD DOOR IS FLAT. Directives are written straight into
+    # `inbox/` and archived into `inbox/applied/` or `inbox/refused/`
+    # (ledger::Ledger::pending_directives / archive) — there is no
+    # `inbox/pending/` and never was, so this counted a directory that
+    # cannot exist and "petitions pending upward" read 0 forever, on the
+    # dashboard and in the stress view both. Count the files the engine
+    # actually reads: *.json at the inbox root, archives excluded by
+    # being directories.
     pending = 0
-    inbox = world_dir / "inbox" / "pending"
+    inbox = world_dir / "inbox"
     if inbox.is_dir():
-        pending = sum(1 for p in inbox.iterdir() if p.suffix == ".json")
+        pending = sum(1 for p in inbox.iterdir() if p.is_file() and p.suffix == ".json")
     return {
         "name": world_dir.name, "linked": linked, "receipts": receipts,
         "events": events, "consumed": consumed, "puzzles": puzzles,
@@ -564,7 +580,7 @@ def view_civs(var_root, args, paint):
             creed_of(agg.get("events", []), agg.get("digest", "")),
             str(len(agg["worlds"])), str(agg["colonies"]),
             show(agg["iron"]), show(agg["biomass"]),
-            show(agg["joule"]), show(agg["sink"]),
+            show(agg["joule"]), show(agg["sink"]), show(agg["crystal"]),
             str(agg["puzzles"]),
             show(Fraction(agg["puzzles"]) / agg["consumed"])
             if agg["consumed"] > 0 else "—",
@@ -575,7 +591,7 @@ def view_civs(var_root, args, paint):
             continue
         lines += [paint.head(TIER_TITLES[tier]), tabulate(
             ["CIVILIZATION", "SPECIES", "AXES", "STATION", "FUNCTION", "CREED", "WORLDS", "COLONIES",
-             "IRON", "BIOMASS", "JOULE", "SINK", "PUZZLES", "INTELLIGENCE"],
+             "IRON", "BIOMASS", "JOULE", "SINK", "CRYSTAL", "PUZZLES", "INTELLIGENCE"],
             by_tier[tier]), ""]
     return "\n".join(lines).rstrip() or "(no civilizations match)"
 
@@ -600,14 +616,15 @@ def view_worlds(var_root, args, paint):
             row["civilization"], row["world"], planet,
             show(row["iron"]), show(row["biomass"]),
             show(row["alloy"]), show(row["diamond"]),
-            show(row["joule"]), show(row["sink"]),
+            show(row["joule"]), show(row["sink"]), show(row["crystal"]),
             STAR_NAMES.get(row["star"], "—"),
             str(row["zones"]), str(row["clock"]),
             paint.good("✓") if row["linked"] else paint.bad("✗ BROKEN"),
         ])
     return "\n".join([paint.head("SETTLED PLANETS"), tabulate(
         ["CIVILIZATION", "WORLD", "PLANET", "IRON", "BIOMASS", "ALLOY",
-         "DIAMOND", "JOULE", "SINK", "STAR", "ZONES", "TICKS", "CHAIN"],
+         "DIAMOND", "JOULE", "SINK", "CRYSTAL", "STAR", "ZONES", "TICKS",
+         "CHAIN"],
         table)])
 
 
