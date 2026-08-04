@@ -705,15 +705,30 @@ playtest — the same discipline Ruling Box 1 used for `f`.
   kernel's own `AssayExceedsVein`.
 - `cfe/src/dop.rs:559` — disposition weights (3/5·1/5·1/5) deciding
   which history counts as winning.
-- `cfe/src/world.rs:1011,1040,1092,3490` — the year voice 60, the
-  syntropy floor 1/2, the TECH-1b condition thresholds (480/240/100),
-  the practice deposit window.
-- `cfe/src/world.rs:688,3658,3714` — instrument forge costs and the
-  ROUTE-1 charter/toll rates, hard-coded in bodies rather than sited in
-  `dop.rs` beside the other constants.
-- `cfe/src/world.rs:3404` — `lift_ward`'s ceiling 5, with `depth`
-  SUPPLIED BY THE CALLER: an aperture gate trusting an unverified
-  external number. Live wire: the reading taken, not passed.
+- `engine/cfe/src/world/` — the year voice 60, the syntropy floor 1/2,
+  the TECH-1b condition thresholds (480/240/100), the practice deposit
+  window. (Line numbers struck 2026-08-04: see the note closing §8c.)
+- `engine/cfe/src/world/` — instrument forge costs and the ROUTE-1
+  charter/toll rates (`terraform`, `aperture_transfer`, `haul`),
+  hard-coded in bodies rather than sited in `dop.rs` beside the other
+  constants.
+- `engine/cfe/src/world/genesis.rs` — `lift_ward`'s ceiling 5, with
+  `depth` SUPPLIED BY THE CALLER: an aperture gate trusting an
+  unverified external number. Live wire: the reading taken, not passed.
+  (Cited here as `world.rs:3404`; the constant actually sat at 3490 in
+  the pre-split monolith — the drift that prompted the §8c note.)
+
+**WHY EVERY LINE NUMBER IN §8c AND §8e IS STRUCK (2026-08-04).** These
+cited `cfe/src/world.rs`, which has not existed since `666be81` split
+5,034 lines into `world/`. Resolving them mechanically was ATTEMPTED
+and REFUSED: read against the pre-split monolith, the numbers do not
+land where the entries say they do. `1011` is inside a `CouncilClosed`
+match, not "the year voice 60"; `1040` is demurrage/vent logic, not
+"the syntropy floor"; `lift_ward`'s ceiling is at 3490, cited as 3404.
+**They had already drifted BEFORE the split** — the file kept growing
+underneath them. Rewriting them to new line numbers would have laundered
+wrong pointers into confident-looking ones, so the entries now name
+SYMBOLS, which do not drift. Cite a symbol or a law, never a line.
 - `ledger/src/galaxy.rs:33`, `registry.rs:37`, `converge.rs:257,287` —
   reach 16, seat widths 8/16, terminal window 8, the /12 G-sheet
   advance (restated a third time at `conductor/src/lib.rs:105` and
@@ -827,10 +842,11 @@ witness, not a ruling.
   which keeper refuses would be authored physics."* `tick` is total over
   any attestation triple, so `QuorumOpen` is reachable by a caller. The
   live quorum arrives with real processes at N7.
-- `cfe/src/world.rs:1082` — `crystal_deposits` opens `let _ = now;` and
-  never window-prunes, unlike its counterpart `crystal_deposits_at`, so the
-  `constellation()` read can diverge from what actually crystallizes.
-- `cfe/src/world.rs:2002` — WANT-1 kind 1 (epistemological) is in the
+- `engine/cfe/src/world/survey.rs` — `crystal_deposits` opens
+  `let _ = now;` and never window-prunes, unlike its counterpart
+  `crystal_deposits_at`, so the `constellation()` read can diverge from
+  what actually crystallizes.
+- `engine/cfe/src/world/` — WANT-1 kind 1 (epistemological) is in the
   tag-62 vocabulary with no engine rule: a declared want that can never
   strike.
 - ~~`tools/observer.py:41,100` — `RESOURCES` stops at `sink`~~ **CLOSED**
