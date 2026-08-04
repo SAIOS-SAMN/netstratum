@@ -1884,6 +1884,13 @@ is Article III's loop trap: deeds emitted with `ΔD = 0`. That is a
 capacity mismatch and it is fully expressible in D3/D4's own terms. It
 needs no new physics, no agent, and no name drawn from anywhere.
 
+**Reserved as a future cognitive-lane mechanic** (operator ruling
+2026-08-04, restoring the build-order seat the 2026-08-02 reservation
+held): state transitions where `ext(Δ(V)) > D` trigger local Article III
+loop traps (`ΔD = 0`) without expanding system capacity. A measurable
+structural state, and a seat held open for the cognitive lane to build
+on — not a story element, and not a premise any rule reads.
+
 **THE CLASS DISTINCTION, and it was got wrong first** (operator
 correction 2026-08-01). Religion is a SEPARATE CLASS OF IRRELEVANCE from
 type vocabulary, and collapsing the two is a category error this

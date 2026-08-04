@@ -50,7 +50,11 @@ use ledger::galaxy::Galaxy;
 use ledger::registry::{lineage_domain, Civilization, Registry, DISPOSITIONS, METABOLISMS, PERCEPTIONS};
 use ledger::{Directive, Disposition, Ledger};
 use physics::Beacon;
-use solver::{forge_task, propose_consulted, Difficulty, Hunger, Need, SolveRead};
+use solver::{
+    forge_task, propose_consulted, propose_measured, solve_consulted, Difficulty, Hunger, Need,
+    SolveRead,
+};
+
 use std::path::Path;
 
 mod polities;
@@ -429,6 +433,142 @@ pub fn market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
     cleared
 }
 
+/// WHERE A LINE IS GOING — read from its own measured yield, never set
+/// by a constant.
+///
+/// `SEARCH_BUDGET` bounds one heartbeat so a single beat cannot run
+/// away; it was never a statement about whether spending is WORTH it.
+/// This is. Every branch below cites a number from
+/// `solver/examples/forge_reach.rs`, measured over 200 forged tasks per
+/// rung on rungs 3–5 — the rungs that actually pay, since
+/// `mint_bound` f(0..=2) = 0.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Trajectory {
+    /// The cheap reach is closing work. STAY THERE. Yield per candidate
+    /// is highest at sated on every rung — 51/2, 17 and 13 against
+    /// struck's 199/8, 11 and 9. Spending more while the cheap reach
+    /// pays is buying what you already have.
+    Growth,
+    /// Spending and closing nothing. NECESSITY OPENS THE REACH, and it
+    /// is worth a great deal: the marginal yield of the sated→struck
+    /// step measured 97/4, 13/2 and 7 at rungs 3, 4 and 5. At rung 3
+    /// struck closes 200/200 — matching an exhaustive sweep at 8
+    /// candidates per task against up to 200,000.
+    Stagnation,
+    /// Struck, and STILL closing nothing. The READING has failed, so
+    /// stop reading and EXHAUST instead — this is where the sweep earns
+    /// its keep and the only place it does.
+    ///
+    /// Two measurements put it here rather than at a deeper hunger.
+    /// First, deeper hunger is worthless: struck→long-starved bought
+    /// EXACTLY ZERO extra yield at rungs 3 and 4, and at rung 5 bought
+    /// one more confirmed closure and one more FALSE one. Second, the
+    /// sweep is worth something precisely where the reach is not — at
+    /// rungs 4 and 5 it confirms 122 and 86 against the reach's 77 and
+    /// 54. Those are the tasks composed through intermediate states no
+    /// observation motivates: solved by exhaustion, not by reading.
+    Decline,
+}
+
+/// WHICH REGIME a board runs under — the three paths, held together so
+/// they can be measured against each other rather than argued about.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum SearchMode {
+    /// COUPLED — the trajectory routes. Read while reading pays,
+    /// escalate the hunger on stagnation, exhaust only on decline.
+    #[default]
+    Coupled,
+    /// UNCOUPLED — always exhaust. The original path, and the control
+    /// every other number is read against.
+    Uncoupled,
+    /// **V ∪ D** — the union. Every task gets BOTH: read first, and
+    /// exhaust whenever the reading did not close. Not a router — a
+    /// dyad, neither path deriving its standing from the other, and the
+    /// closure set is the union of what each can reach alone.
+    ///
+    /// It should find everything either finds, and pay both costs to do
+    /// it. Whether that is worth it is what the benchmark answers.
+    Union,
+}
+
+/// HOW a line searches. Both paths are live; neither is deprecated.
+///
+/// They are not competitors — they fail in different places. The reach
+/// MATCHES an exhaustive sweep exactly at rung 3 (200/199/1) at 8
+/// candidates against up to 200,000, and loses only at rungs 4-5, where
+/// the answer needs composition through states the observation cannot
+/// name. So the engine reads first and exhausts only when reading has
+/// demonstrably run out — which is what makes exhaustion affordable at
+/// all.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SearchPath {
+    /// Derivation-first: the observation names the operator, the need
+    /// orders the reach. ~66x the energy per candidate on the live
+    /// board.
+    Reach,
+    /// Exhaustive composition, bounded by `SEARCH_BUDGET`. Finds what
+    /// no reading motivates, and costs four orders of magnitude more.
+    Sweep,
+}
+
+impl Trajectory {
+    /// WHICH PATH this trajectory searches by.
+    pub fn path(&self) -> SearchPath {
+        match self {
+            Trajectory::Growth | Trajectory::Stagnation => SearchPath::Reach,
+            Trajectory::Decline => SearchPath::Sweep,
+        }
+    }
+
+    /// The reach this trajectory buys, when it is reading. Unused on
+    /// the sweep path, which has no need to order.
+    pub fn need(&self, starved: u64) -> Need {
+        self.need_of(Vec::new(), starved)
+    }
+
+    /// **THE TRAJECTORY DECIDES WHETHER; THE LINE DECIDES WHICH.**
+    ///
+    /// Composed at the 2026-08-04 merge. This lane's trajectory answers
+    /// *is spending paying* — a homeostatic reading, measured, and it
+    /// is what stops a paying line from buying reach it already has.
+    /// It cannot answer WHAT the line is short of, and its own
+    /// `need` could only ever say Novelty.
+    ///
+    /// `Polity::hunger` answers that half: it reads the line's own
+    /// chronicle rhythm for BOTH hungers — starved of signal, starved
+    /// of links — so two lines stagnating for different reasons reach
+    /// for different families. Empty `measured` falls back to Novelty,
+    /// which is this lane's original behaviour exactly.
+    pub fn need_of(&self, measured: Vec<Hunger>, starved: u64) -> Need {
+        match self {
+            Trajectory::Growth | Trajectory::Decline => Need::sated(),
+            Trajectory::Stagnation => match measured.is_empty() {
+                true => Need::struck(Hunger::Novelty, starved),
+                false => Need { hungers: measured, starved_for: starved },
+            },
+        }
+    }
+
+    /// Advance on the beat's outcome. A close returns any line to
+    /// growth — including one in decline, which is what makes the
+    /// contraction recoverable rather than a trap.
+    pub fn advance(self, closed: bool) -> Trajectory {
+        match (self, closed) {
+            (_, true) => Trajectory::Growth,
+            (Trajectory::Growth, false) => Trajectory::Stagnation,
+            (Trajectory::Stagnation | Trajectory::Decline, false) => Trajectory::Decline,
+        }
+    }
+
+    pub fn describe(&self) -> &'static str {
+        match self {
+            Trajectory::Growth => "growth",
+            Trajectory::Stagnation => "stagnation",
+            Trajectory::Decline => "decline",
+        }
+    }
+}
+
 /// A build temperament — the only thing that differs between polities.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Policy {
@@ -510,6 +650,24 @@ pub struct Polity {
     /// judge and into the chain. Every deed past this mark is chained
     /// individually, with its own step, and judged.
     chained: usize,
+    /// WHICH REGIME this line searches under. Set by the era runner so
+    /// the three paths can be benchmarked against one another.
+    pub mode: SearchMode,
+    /// WHERE THIS LINE IS GOING, read from its own outcomes and used
+    /// to decide what the next beat's search may spend.
+    pub trajectory: Trajectory,
+    /// Beats since this line last closed a task — what it hands the
+    /// hunger when it reaches. A real duration, never a constant.
+    pub starved: u64,
+    /// Candidate programs this line has spent on the READ path,
+    /// cumulative. The S of W/S; the board reads its own yield without
+    /// instrumentation.
+    pub spent: u64,
+    /// Times this line fell back to the EXHAUST path. Counted as
+    /// invocations, not candidates: the sweep reports no count and is
+    /// bounded by `SEARCH_BUDGET`, so folding it into `spent` would
+    /// mix a measured number with a bound and ruin both yields.
+    pub swept: u64,
     /// Deeds the kernel REFUSED, by receipt sequence. Kept rather than
     /// discarded — a refusal the board never sees is the judge speaking
     /// into a void.
@@ -737,6 +895,11 @@ impl Polity {
                         lane_refused: Vec::new(),
                         last_forge: None,
                         reported: 0,
+                        mode: SearchMode::default(),
+                        trajectory: Trajectory::Growth,
+                        starved: 0,
+                        spent: 0,
+                        swept: 0,
                         spec,
                         world,
                         automaton,
@@ -825,6 +988,11 @@ impl Polity {
             lane_refused: Vec::new(),
             last_forge: None,
             reported: 0,
+            mode: SearchMode::default(),
+            trajectory: Trajectory::Growth,
+            starved: 0,
+            spent: 0,
+            swept: 0,
             spec,
             world,
             automaton,
@@ -1248,14 +1416,11 @@ impl Polity {
             return;
         };
         let digest = receipt.own.0;
-        // R5 probe: how often is the forge re-drawn from a digest that
-        // has not moved? An unchanged digest re-forges the identical
-        // task and re-runs the identical sweep for the identical answer
-        // — 81 ms when that answer is Unsolved.
-        if self.last_forge.as_ref().is_some_and(|(held, _, _, _)| *held == digest) {
-            PROBE_DIGEST_REPEAT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-        }
-        PROBE_DIGEST_TOTAL.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        // CAPTURED BEFORE THE BEAT MOVES ANYTHING. Promotion reads both,
+        // and reading either afterwards would be vacuous: a close always
+        // advances the trajectory to Growth.
+        let trajectory_before = self.trajectory;
+
         let solved = if self.spec.civilization.perception == "volumetric" {
             let difficulty = solver::VolDifficulty::level(self.level);
             let task = solver::forge_volume(digest, difficulty);
@@ -1295,34 +1460,48 @@ impl Polity {
             // beat — so the search inside may become as dirty as it
             // likes (float scoring, batching, sampled beam) and nothing
             // downstream changes.
-            // The memo, or the search. Same inputs, same answer — the
-            // door the purity of `propose` opens.
             //
-            // **THE NEED IS PART OF THE KEY.** The answer now depends on
-            // what the line is starved for, so a memo keyed without it
-            // would hand a hungry mind the answer its sated self found —
-            // the same staleness that shipped a level-3 solve as a
-            // level-4 proof this morning, one field further along.
-            let need = self.hunger();
-            let read = match self.last_forge.take() {
-                Some((held, held_difficulty, held_need, cached))
-                    if held == digest && held_difficulty == difficulty && held_need == need =>
-                {
-                    self.last_forge = Some((held, held_difficulty, held_need, cached.clone()));
-                    cached
+            // THE REACH IS COUPLED TO THE LINE'S OWN TRAJECTORY, never
+            // to a constant. What it spends is decided by whether
+            // spending has been PAYING — see `Trajectory::read`, and
+            // `examples/forge_reach.rs` for the numbers each branch
+            // cites. `SEARCH_BUDGET` still stands behind this as the
+            // per-beat ceiling that keeps one heartbeat bounded; it is
+            // no longer what DECIDES the spend.
+            // THE THREE PATHS. Each spends differently and each is
+            // counted separately: read-candidates are MEASURED, sweep
+            // invocations are BOUNDED by `SEARCH_BUDGET`, and blending
+            // the two would ruin both yields.
+            let reach = |polity: &mut Self| {
+                let need = polity.trajectory.need_of(polity.hunger().hungers, polity.starved);
+                let proposal = propose_measured(&task, &need);
+                polity.spent = polity.spent.saturating_add(proposal.tested as u64);
+                proposal.read
+            };
+            // WHICH PATH ACTUALLY PAID FOR THIS BEAT — captured before
+            // the trajectory advances, because promotion reads it.
+            let read = match self.mode {
+                SearchMode::Uncoupled => {
+                    self.swept = self.swept.saturating_add(1);
+                    solve_consulted(&task, difficulty.word_len)
                 }
-                _ => {
-                    // THE LIVE BOARD THINKS BY NEED (operator ruling
-                    // 2026-08-04). Was `solve_consulted` — the sweep
-                    // through the door, identical for every mind in
-                    // every era. Now the ACTING LINE's own hunger
-                    // orders its reach, so two characters on one board
-                    // search differently. Same door, same law: nothing
-                    // crosses that does not close.
-                    let fresh = propose_consulted(&task, &need);
-                    self.last_forge = Some((digest, difficulty, need.clone(), fresh.clone()));
-                    fresh
-                }
+                SearchMode::Coupled => match self.trajectory.path() {
+                    SearchPath::Reach => reach(self),
+                    SearchPath::Sweep => {
+                        self.swept = self.swept.saturating_add(1);
+                        solve_consulted(&task, difficulty.word_len)
+                    }
+                },
+                // V ∪ D: read, and exhaust whenever the reading did not
+                // close. Both costs paid; the closure set is the union.
+                SearchMode::Union => match reach(self) {
+                    closed @ SolveRead::Solved { .. } => closed,
+                    SolveRead::Unsolved => {
+                        self.swept = self.swept.saturating_add(1);
+                        solve_consulted(&task, difficulty.word_len)
+                    }
+                },
+
             };
             match read {
                 SolveRead::Solved {
@@ -1397,15 +1576,55 @@ impl Polity {
                 );
                 self.solved += 1;
                 self.streak += 1;
-                // Promote while the ladder still rises above this rung
-                // — derived, never a constant. Add a rung to
-                // `Difficulty::level` and the climb follows on its own.
-                if self.streak >= 3 && Difficulty::climbs(self.level) {
+                // THE COUPLING CLOSES HERE. A close returns the line to
+                // growth from wherever it was, and clears the hunger it
+                // reached with.
+                self.trajectory = self.trajectory.advance(true);
+                self.starved = 0;
+                // D CLIMBS WHEN THE RUNG IS MASTERED — coupled, not
+                // counted. The old rule was `streak >= 3 && level < 5`:
+                // two chosen constants, one counting confirms while
+                // ignoring what they COST, the other an absolute
+                // ceiling.
+                //
+                // The couple: D (the rung, an extent) advances only on
+                // expenditure of V (the reach, a rate), and the signal
+                // that a rung is finished is that it stopped costing —
+                // a close off the CHEAP reach. A close that needed
+                // hunger or exhaustion says the line is at its limit
+                // and holds, however many it strings together.
+                //
+                // The ceiling is DERIVED, never chosen: a line climbs
+                // while the ladder still differentiates, and stops
+                // where `Difficulty::level` saturates and the next rung
+                // is the same task at the same price. That reads the
+                // ladder instead of asserting its length, so extending
+                // the ladder extends the climb with no edit here.
+                // PATH-AGNOSTIC BY CONSTRUCTION. The first cut tested
+                // `path_used == Reach`, which silently broke the
+                // uncoupled control: that path never reaches, so it
+                // could never promote, never left rung 1, and earned
+                // exactly zero. The signal is not WHICH path paid, it
+                // is whether the line was ALREADY closing — sustained
+                // productivity at this rung. In coupled mode Growth
+                // implies the cheap reach anyway, so this subsumes the
+                // path test rather than weakening it.
+                let mastered = trajectory_before == Trajectory::Growth;
+                let ladder_still_climbs =
+                    Difficulty::level(self.level + 1) != Difficulty::level(self.level);
+                if mastered && ladder_still_climbs {
+
                     self.level += 1;
                     self.streak = 0;
                 }
             }
-            None => self.streak = 0,
+            None => {
+                self.streak = 0;
+                // Growth → stagnation → decline, one step per barren
+                // beat. What each state SPENDS is `Trajectory::need`.
+                self.trajectory = self.trajectory.advance(false);
+                self.starved = self.starved.saturating_add(1);
+            }
         }
     }
 
@@ -2174,6 +2393,12 @@ fn galaxy_creator(registry: &Registry, civilization: &Civilization) -> String {
 /// every polity, then `cycles` heartbeats; branches born mid-era join the
 /// beat. Returns the live worlds.
 pub fn run_era(var_root: &str, cycles: u32) -> Vec<Polity> {
+    run_era_with(var_root, cycles, SearchMode::default())
+}
+
+/// The era runner, under a named search regime — the seam the
+/// three-path benchmark drives.
+pub fn run_era_with(var_root: &str, cycles: u32, mode: SearchMode) -> Vec<Polity> {
     let registry = Registry::at(format!("{var_root}/registry"));
     let book = Ledger::at(format!("{var_root}/worlds"));
     let eras = ledger::converge::default_era_roots(var_root);
@@ -2187,7 +2412,9 @@ pub fn run_era(var_root: &str, cycles: u32) -> Vec<Polity> {
         .map(|mut spec| {
             let opening = spec.gauge.take().unwrap_or_else(|| ratio(0, 1));
             spec.gauge = Some(cfe::world::wrap_gauge(opening + live_base.clone()));
-            Polity::genesis(spec, &registry, &book)
+            let mut polity = Polity::genesis(spec, &registry, &book);
+            polity.mode = mode;
+            polity
         })
         .collect();
     for beat in 0..cycles {
@@ -2200,7 +2427,9 @@ pub fn run_era(var_root: &str, cycles: u32) -> Vec<Polity> {
             }
         }
         for spec in newborns {
-            worlds.push(Polity::genesis(spec, &registry, &book));
+            let mut polity = Polity::genesis(spec, &registry, &book);
+            polity.mode = mode;
+            worlds.push(polity);
         }
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — the lens renders journals + wall, write-only display
