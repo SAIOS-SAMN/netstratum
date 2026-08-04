@@ -253,7 +253,7 @@ fn the_region_is_total_where_the_band_is_not() {
         }
         // region_of is total by type — there is no None to count.
         let _ = region_of(&t, &r_min());
-        t = t * ratio(10, 1);
+        t *= ratio(10, 1);
     }
     assert!(silent > 0, "the band reading is genuinely open, not hypothetically");
     assert_eq!(
