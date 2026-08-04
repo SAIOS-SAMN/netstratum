@@ -32,6 +32,10 @@ use crate::forge::{forge_task, Difficulty};
 use crate::grid::{run, Grid, Op, Program, TileMirror};
 use crate::loader::{Task, TaskPair};
 use crate::objects::ObjOp;
+use crate::volume::{
+    forge_volume, run_volume, verify_volume_certificate, VOp, VProgram, VolDifficulty, Volume,
+    VolumeCertificate, VolumeCertificateRead,
+};
 
 /// The work-proof wire schema. A bump is an amendment.
 ///
@@ -44,6 +48,12 @@ pub const WORK_SCHEMA_V1: u8 = 1;
 /// task is observed content and cannot be re-derived from a digest, so
 /// it rides WHOLE, carrying its admissibility proof with it.
 pub const WORK_SCHEMA_V2_CORPUS: u8 = 2;
+
+/// Work-shapes v3 — VOLUMETRIC work (operator ruling 2026-08-04,
+/// lifting C8's deferral). Forge-only and re-derivable like v1, so the
+/// payload carries only the digest, the rung, the word and the proof —
+/// no task content, no admissibility path.
+pub const WORK_SCHEMA_V3_VOLUME: u8 = 3;
 
 /// The decoded proof: everything the replay needs, nothing else.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -77,6 +87,17 @@ pub struct CorpusProof {
     pub certificate: SolveCertificate,
 }
 
+/// A VOLUMETRIC proof (schema v3): forge-only, so the task is named by
+/// its digest and rung and re-derived rather than carried.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct VolumeProof {
+    pub forge_digest: [u8; 32],
+    pub difficulty: VolDifficulty,
+    pub program: VProgram,
+    pub output: Volume,
+    pub certificate: VolumeCertificate,
+}
+
 /// What a verified payload turned out to BE. v1 returns a ladder rung;
 /// corpus work has no rung — its identity is its task_id — so the judge
 /// reports the class and the kernel prices it.
@@ -86,6 +107,11 @@ pub enum WorkClass {
     Forge(Difficulty),
     /// Corpus work: admissible, replayed, and OFF the ladder entirely.
     AdmissibleCorpus { task_id: [u8; 32] },
+    /// Volumetric work: re-derivable like forge work, but on its OWN
+    /// ladder — a volumetric rung is not a planar rung and must never
+    /// be priced as one (the two `level(n)` tables are different
+    /// shapes, and confusing them would pay 3-D work at 2-D rates).
+    Volumetric(VolDifficulty),
 }
 
 /// The canonical task name for corpus work — lowercase hex of the
@@ -192,31 +218,63 @@ fn put_grid(g: &Grid, out: &mut Vec<u8>) -> Option<()> {
 /// The ONE program encoding, shared by every schema. Extracted when v2
 /// landed: a second copy of the op table is a second definition of wire
 /// law, and two definitions drift.
+fn put_op(op: &Op, out: &mut Vec<u8>) -> Option<()> {
+    match op {
+        Op::Rotate90 => out.push(1),
+        Op::Rotate180 => out.push(2),
+        Op::Rotate270 => out.push(3),
+        Op::FlipH => out.push(4),
+        Op::FlipV => out.push(5),
+        Op::Transpose => out.push(6),
+        Op::Recolor(map) => {
+            out.push(7);
+            out.extend_from_slice(map);
+        }
+        Op::Object(obj) => {
+            out.push(8);
+            out.push(objop_code(obj));
+        }
+        Op::Tile { down, across, odd_row, odd_col } => {
+            out.push(9);
+            out.push(u8::try_from(*down).ok()?);
+            out.push(u8::try_from(*across).ok()?);
+            out.push(mirror_code(*odd_row));
+            out.push(mirror_code(*odd_col));
+        }
+    }
+    Some(())
+}
+
 fn put_program(program: &Program, out: &mut Vec<u8>) -> Option<()> {
     put_u16(program.len(), out)?;
     for op in program {
+        put_op(op, out)?;
+    }
+    Some(())
+}
+
+fn put_volume(v: &Volume, out: &mut Vec<u8>) -> Option<()> {
+    put_u16(v.depth(), out)?;
+    for layer in v.layers() {
+        put_grid(layer, out)?;
+    }
+    Some(())
+}
+
+/// The volumetric op table — wire law, append-only, one code one
+/// meaning forever: 1 PerLayer + a planar op · 2 FlipStack ·
+/// 3 CycleLayers. `PerLayer` nests the PLANAR table rather than
+/// restating it, so the two can never drift apart.
+fn put_vprogram(program: &VProgram, out: &mut Vec<u8>) -> Option<()> {
+    put_u16(program.len(), out)?;
+    for op in program {
         match op {
-            Op::Rotate90 => out.push(1),
-            Op::Rotate180 => out.push(2),
-            Op::Rotate270 => out.push(3),
-            Op::FlipH => out.push(4),
-            Op::FlipV => out.push(5),
-            Op::Transpose => out.push(6),
-            Op::Recolor(map) => {
-                out.push(7);
-                out.extend_from_slice(map);
+            VOp::PerLayer(planar) => {
+                out.push(1);
+                put_op(planar, out)?;
             }
-            Op::Object(obj) => {
-                out.push(8);
-                out.push(objop_code(obj));
-            }
-            Op::Tile { down, across, odd_row, odd_col } => {
-                out.push(9);
-                out.push(u8::try_from(*down).ok()?);
-                out.push(u8::try_from(*across).ok()?);
-                out.push(mirror_code(*odd_row));
-                out.push(mirror_code(*odd_col));
-            }
+            VOp::FlipStack => out.push(2),
+            VOp::CycleLayers => out.push(3),
         }
     }
     Some(())
@@ -297,27 +355,53 @@ impl<'a> Reader<'a> {
         let cells = self.take(rows.checked_mul(cols)?)?.to_vec();
         Grid::new(rows, cols, cells)
     }
-    /// The ONE program decoding, shared by every schema — the mirror of
-    /// `put_program`. Unknown op codes refuse.
+    /// The ONE op decoding, shared by every schema and by the
+    /// volumetric `PerLayer`. Unknown codes refuse.
+    fn op(&mut self) -> Option<Op> {
+        Some(match self.byte()? {
+            1 => Op::Rotate90,
+            2 => Op::Rotate180,
+            3 => Op::Rotate270,
+            4 => Op::FlipH,
+            5 => Op::FlipV,
+            6 => Op::Transpose,
+            7 => Op::Recolor(self.take(10)?.try_into().ok()?),
+            8 => Op::Object(objop_from(self.byte()?)?),
+            9 => Op::Tile {
+                down: self.byte()? as usize,
+                across: self.byte()? as usize,
+                odd_row: mirror_from(self.byte()?)?,
+                odd_col: mirror_from(self.byte()?)?,
+            },
+            _ => return None,
+        })
+    }
     fn program(&mut self) -> Option<Program> {
         let op_count = self.u16()?;
         let mut program: Program = Vec::with_capacity(op_count);
         for _ in 0..op_count {
+            program.push(self.op()?);
+        }
+        Some(program)
+    }
+    fn volume(&mut self) -> Option<Volume> {
+        let depth = self.u16()?;
+        let mut layers = Vec::with_capacity(depth);
+        for _ in 0..depth {
+            layers.push(self.grid()?);
+        }
+        // `Volume::new` refuses an empty stack and incongruent layers —
+        // the carrier's own law, not restated here.
+        Volume::new(layers)
+    }
+    fn vprogram(&mut self) -> Option<VProgram> {
+        let op_count = self.u16()?;
+        let mut program: VProgram = Vec::with_capacity(op_count);
+        for _ in 0..op_count {
             program.push(match self.byte()? {
-                1 => Op::Rotate90,
-                2 => Op::Rotate180,
-                3 => Op::Rotate270,
-                4 => Op::FlipH,
-                5 => Op::FlipV,
-                6 => Op::Transpose,
-                7 => Op::Recolor(self.take(10)?.try_into().ok()?),
-                8 => Op::Object(objop_from(self.byte()?)?),
-                9 => Op::Tile {
-                    down: self.byte()? as usize,
-                    across: self.byte()? as usize,
-                    odd_row: mirror_from(self.byte()?)?,
-                    odd_col: mirror_from(self.byte()?)?,
-                },
+                1 => VOp::PerLayer(self.op()?),
+                2 => VOp::FlipStack,
+                3 => VOp::CycleLayers,
                 _ => return None,
             });
         }
@@ -374,6 +458,116 @@ pub fn decode_work(bytes: &[u8]) -> Option<WorkProof> {
         output,
         certificate,
     })
+}
+
+/// Encode a VOLUMETRIC proof (schema v3).
+pub fn encode_volume_work(proof: &VolumeProof) -> Option<Vec<u8>> {
+    let mut out = vec![WORK_SCHEMA_V3_VOLUME];
+    out.extend_from_slice(&proof.forge_digest);
+    let d = proof.difficulty;
+    out.push(u8::try_from(d.layers).ok()?);
+    out.push(u8::try_from(d.word_len).ok()?);
+    out.push(u8::try_from(d.rows).ok()?);
+    out.push(u8::try_from(d.cols).ok()?);
+    out.push(u8::try_from(d.train_pairs).ok()?);
+    put_vprogram(&proof.program, &mut out)?;
+    put_volume(&proof.output, &mut out)?;
+    out.extend_from_slice(&proof.certificate.genesis);
+    put_u16(proof.certificate.steps.len(), &mut out)?;
+    for step in &proof.certificate.steps {
+        out.extend_from_slice(step);
+    }
+    out.extend_from_slice(&proof.certificate.output);
+    Some(out)
+}
+
+/// Decode a VOLUMETRIC proof (schema v3) — the FORM only.
+pub fn decode_volume_work(bytes: &[u8]) -> Option<VolumeProof> {
+    let mut r = Reader { bytes, at: 0 };
+    if r.byte()? != WORK_SCHEMA_V3_VOLUME {
+        return None;
+    }
+    let forge_digest = r.digest()?;
+    let difficulty = VolDifficulty {
+        layers: r.byte()? as usize,
+        word_len: r.byte()? as usize,
+        rows: r.byte()? as usize,
+        cols: r.byte()? as usize,
+        train_pairs: r.byte()? as usize,
+    };
+    // THE VACUITY, REFUSED AS FORM — before the forge is ever called,
+    // so the degenerate case is not merely guarded but unreachable.
+    // `train_pairs: 0` is the exploitable one: "maps EVERY training
+    // pair" is vacuously true over none, which is a free mint. The
+    // zero dimensions are the totality half — they PANIC the forge.
+    if !difficulty.lawful() {
+        return None;
+    }
+    let program = r.vprogram()?;
+    let output = r.volume()?;
+    let genesis = r.digest()?;
+    let step_count = r.u16()?;
+    let mut steps = Vec::with_capacity(step_count);
+    for _ in 0..step_count {
+        steps.push(r.digest()?);
+    }
+    let cert_output = r.digest()?;
+    if r.at != bytes.len() {
+        return None;
+    }
+    Some(VolumeProof {
+        forge_digest,
+        difficulty,
+        program,
+        output,
+        certificate: VolumeCertificate { genesis, steps, output: cert_output },
+    })
+}
+
+/// THE VOLUMETRIC JUDGE (work-shapes v3). The REPLAY-COMPLETE LAW in
+/// three dimensions — every leg or refuse:
+///
+///   1. **re-forge** — the task IS its digest under this rung, pure and
+///      deterministic, no external data ever. Volumetric work is
+///      forge-only, so this single leg does what corpus v2 needed a
+///      Merkle root and an inclusion path to do.
+///   2. **re-apply** — the program maps EVERY training pair exactly and
+///      the test input to the claimed output; the forge's own
+///      `test_expected` must agree. One miss refuses — the honest
+///      withhold, never a guess.
+///   3. **re-chain** — the certificate re-derives Intact, naming its
+///      break otherwise. This is the leg C8 correctly said did not
+///      exist: the old `seal_volume` was a bare digest no third party
+///      could re-derive.
+///
+/// The degeneracy guard sits in `decode_volume_work`, so leg 1 never
+/// receives a rung that could panic it or make leg 2 vacuous.
+pub fn verify_volume_work(bytes: &[u8]) -> Result<WorkClass, WorkBroken> {
+    let proof = decode_volume_work(bytes).ok_or(WorkBroken::Malformed)?;
+    // 1. Re-forge.
+    let task = forge_volume(proof.forge_digest, proof.difficulty);
+    // 2. Re-apply.
+    for (pair, (input, expected)) in task.train.iter().enumerate() {
+        if &run_volume(&proof.program, input) != expected {
+            return Err(WorkBroken::TrainingMiss { pair });
+        }
+    }
+    let produced = run_volume(&proof.program, &task.test_in);
+    if produced != proof.output {
+        return Err(WorkBroken::OutputMismatch);
+    }
+    if let Some(expected) = &task.test_expected {
+        if &produced != expected {
+            return Err(WorkBroken::OutputMismatch);
+        }
+    }
+    // 3. Re-chain.
+    match verify_volume_certificate(&proof.certificate, &task, &proof.program, &proof.output) {
+        VolumeCertificateRead::Intact => Ok(WorkClass::Volumetric(proof.difficulty)),
+        VolumeCertificateRead::Diverged { at_step } => {
+            Err(WorkBroken::ChainDiverged { at_step })
+        }
+    }
 }
 
 /// Decode a CORPUS proof (schema v2) — the FORM only.
@@ -442,6 +636,7 @@ pub fn verify_work_class(bytes: &[u8]) -> Result<WorkClass, WorkBroken> {
     match bytes.first() {
         Some(&WORK_SCHEMA_V1) => verify_work(bytes).map(WorkClass::Forge),
         Some(&WORK_SCHEMA_V2_CORPUS) => verify_corpus_work(bytes),
+        Some(&WORK_SCHEMA_V3_VOLUME) => verify_volume_work(bytes),
         _ => Err(WorkBroken::Malformed),
     }
 }
@@ -528,7 +723,10 @@ pub fn verify_corpus_work_against(
 /// something it is not — the caller has simply not been taught the
 /// shape yet. [`verify_work_class`] is the taught entry point.
 pub fn verify_work(bytes: &[u8]) -> Result<Difficulty, WorkBroken> {
-    if bytes.first() == Some(&WORK_SCHEMA_V2_CORPUS) {
+    if matches!(
+        bytes.first(),
+        Some(&WORK_SCHEMA_V2_CORPUS) | Some(&WORK_SCHEMA_V3_VOLUME)
+    ) {
         return Err(WorkBroken::UnsupportedShape);
     }
     let proof = decode_work(bytes).ok_or(WorkBroken::Malformed)?;

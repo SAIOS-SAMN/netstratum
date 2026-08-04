@@ -20,6 +20,7 @@ pub mod forge;
 pub mod grid;
 pub mod loader;
 pub mod objects;
+pub mod volume;
 pub mod work;
 
 pub use certificate::{verify_certificate, CertificateRead, SolveCertificate};
@@ -30,9 +31,17 @@ pub use forge::{forge_task, Difficulty};
 pub use grid::{run, Grid, Op, Program, TileMirror};
 pub use loader::{load_task, LoadError, Task, TaskPair};
 pub use objects::{background, segment, ObjOp, Object, OBJ_OPS};
+pub use volume::{
+    forge_volume, run_volume, verify_volume_certificate, VOp, VProgram, VolDifficulty, Volume,
+    VolumeCertificate, VolumeCertificateRead, VolumeTask,
+};
 pub use work::{decode_work, encode_work, verify_work, WorkBroken, WorkProof, WORK_SCHEMA_V1};
 pub use work::{
     canonical_name, decode_corpus_work, encode_corpus_work, verify_corpus_work,
     verify_corpus_work_against, verify_work_class,
     CorpusProof, WorkClass, WORK_SCHEMA_V2_CORPUS,
+};
+pub use work::{
+    decode_volume_work, encode_volume_work, verify_volume_work, VolumeProof,
+    WORK_SCHEMA_V3_VOLUME,
 };

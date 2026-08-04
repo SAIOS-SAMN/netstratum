@@ -457,7 +457,46 @@ commit on explicit operator go.
   with its own deed; if not, mark `seal_volume` decorative in its
   header and refuse the empty-train solve. Boards WITH the volumetric
   tier, never before.
-  **RULED (operator C8, 2026-08-01): DECORATIVE.** v1 is forge-only,
+  **THE DEFERRAL IS LIFTED — `verify_volume` LANDED 2026-08-04**
+  (operator ruling: volumetric work is a real economic axis; THE
+  MOTION's clause 6, *nothing vacuous*, says a decorative seal does not
+  stand — it earns a real verifier or it goes). C8's reading below is
+  kept as the record of what was true for three days.
+  Work-shapes **v3**, `WORK_SCHEMA_V3_VOLUME = 3`. The prover/verifier
+  split mirrors U1a: the replay half moved to
+  `solver-verify/src/volume.rs` (carrier, apply path, forge, degeneracy
+  law, certificate); `solver` keeps only `solve_volume`, the search.
+  - **`seal_volume` is GONE, not re-homed.** C8 was right that a bare
+    digest nobody can re-derive is tamper-evidence for no one. Its
+    replacement, `VolumeCertificate`, is parent-linked over
+    observation → word → output and NAMES its diverged link. Keeping a
+    decorative seal beside a real one is how a verifier gets called
+    with the wrong one.
+  - **Strictly simpler than corpus v2**, for a structural reason:
+    volumetric tasks are FORGE-ONLY and re-derive from their digest, so
+    the judge needs no admissible set at all — one re-forge leg does
+    what corpus work needed a whole admission mechanism to attempt.
+  - **The vacuity is unreachable, not merely guarded.**
+    `VolDifficulty::lawful` refuses a degenerate rung at DECODE, before
+    the forge runs: `train_pairs: 0` is the exploitable one (a free
+    mint, since "maps every pair" is vacuously true over none), and
+    zero dimensions are the totality half (they PANIC the forge).
+    `word_len: 0` stays lawful — the empty word is the identity task.
+  - **Its own ladder.** `WorkClass::Volumetric(VolDifficulty)` is
+    reported separately from `Forge(Difficulty)`: a volumetric rung is
+    not a planar rung and pricing 3-D work at 2-D rates would be a
+    category error the type now prevents.
+  - RELAYED: the volumetric deed needs **tag 91** (cfe's registry), a
+    `mint_bound` arm for the volumetric ladder (kernel lane), and the
+    conductor's volumetric arm must build and carry a `VolumeProof`
+    instead of passing `None` (harness lane). One mechanical call-site
+    adaptation was made in `conductor/src/lib.rs` — the journal takes
+    `certificate.output` now that the seal is a chain — and relayed.
+  - 10 pins, `solver-verify/tests/volume_verify_pins.rs`. Board
+    660/660, clippy zero in both solver crates.
+
+  **RULED (operator C8, 2026-08-01): DECORATIVE — SUPERSEDED above.**
+  v1 is forge-only,
   ARC-AGI-2/3 are planar, no volumetric deed mints (tag 86 = planar
   work). `seal_volume` now carries a decorative header
   (`engine/solver/src/volume.rs`) stating it is not a verifier and its

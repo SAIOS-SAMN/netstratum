@@ -1054,9 +1054,20 @@ impl Polity {
                     ..
                 } => {
                     let word: Vec<String> = program.iter().map(|op| op.describe()).collect();
-                    // The volumetric tier is DECORATIVE (operator C8):
-                    // no volumetric deed mints, so it carries no proof.
-                    Some((task.name, word.join(" → "), hex(&certificate), None))
+                    // MECHANICAL ADAPTATION (cognition lane, 2026-08-04,
+                    // relayed): `seal_volume`'s bare digest became a real
+                    // parent-linked `VolumeCertificate`, so the journal
+                    // takes its output link. Nothing else here changed.
+                    //
+                    // STILL OWED, and the harness lane's to land: this arm
+                    // passes `None` as the proof because C8 made volumetric
+                    // work decorative. That deferral is LIFTED — the
+                    // verifier exists (`verify_volume_work`, schema v3).
+                    // The arm should now build a `VolumeProof` and carry it,
+                    // exactly as the planar arm builds a `WorkProof`. It
+                    // waits on a deed tag (91, cfe's registry) and a
+                    // `mint_bound` arm for the volumetric ladder.
+                    Some((task.name, word.join(" → "), hex(&certificate.output), None))
                 }
                 _ => None,
             }

@@ -326,7 +326,7 @@ fn v1_is_untouched_and_the_shapes_never_confuse() {
         verify_work(&v1_bytes),
         verify_work_class(&v1_bytes).map(|c| match c {
             WorkClass::Forge(d) => d,
-            WorkClass::AdmissibleCorpus { .. } => unreachable!("v1 is never corpus"),
+            other => unreachable!("v1 is forge work, never {other:?}"),
         }),
         "one implementation, two readings — the doors cannot drift"
     );
