@@ -954,7 +954,7 @@ was wrong in the same way the original naming was.**
 A covenant is a moral and relational commitment — an obligation that
 binds because of what a party IS rather than what it delivers. **That is
 dogma-adjacent vocabulary, and it does not get a reserved seat in kernel
-law.** `18_TORSION` THE CURSE holds the standing position: such
+law.** `18_TORSION` THE RESERVATION holds the standing position: such
 vocabulary is RESERVED rather than forbidden — a thing a civilization
 may produce and be burdened by, never a thing the kernel is founded on.
 

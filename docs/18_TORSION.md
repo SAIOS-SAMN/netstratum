@@ -1867,49 +1867,22 @@ reader applying the stale example re-runs a reverted sweep.
 
 ---
 
-*What it permits, once there is somewhere to put it.* A civilization
-may develop religion — that is a real thing peoples do, and modelling
-it is legitimate world-building. It belongs in a CONTENT layer as an
-observed phenomenon: measurable, surmountable, and carrying no
-authority over any rule. The arrow is one-way and never bends upward.
+**THE RESERVATION — vocabulary of this class is content, never a
+premise** (operator ruling 2026-08-02; the theological framing removed
+2026-08-04 on the ruling *clear this file of anything non-science
+fact*). A civilization may produce belief, obligation, or moral
+vocabulary; that is a modelled phenomenon and it belongs to a CONTENT
+layer, measurable and carrying authority over no rule. The arrow is
+one-way and never bends upward. Nothing of the kind is a premise the
+kernel rests on, and until a content layer exists to hold it the
+correct amount in this system is ZERO.
 
-*THE HOLDING SPACE IS NOW NAMED — dogma is RESERVED, not forbidden*
-(operator ruling 2026-08-02). It has a future mechanic, and naming it
-now is what stops a later node from either inventing it ad hoc or
-believing the vocabulary is barred forever:
-
-> **THE CURSE.** Dogma is what a civilization produces when it meets
-> technology its cognition cannot yet hold. Not a moral failure — a
-> CAPACITY MISMATCH. The line encounters structure whose extent exceeds
-> its own, and where D3 would normally grow the container to meet the
-> content, a cursed line cannot: it forms ritual instead of a plane.
-> Growth stifles, and the ritual is the symptom rather than the cause.
-
-**Why this fits the machinery already standing, exactly.** LAW 9 calls
-dogma a LOW CIVILIZATION HURDLE — a stage cleared, not a truth. The
-curse is that delineation made mechanical: `ext(Δ(V)) > D` is precisely
-"content the container cannot hold", and Article III's loop trap —
-deeds emitted, `ΔD = 0` — is precisely what a ritualising line looks
-like from outside. **The curse needs no new physics. It is the refusal
-of capacity growth, given a cause.**
-
-*Scope when it lands:* a per-world / per-line delimiter — a single
-planet may be cursed while its neighbours are not — so it colours one
-board position rather than the law. Elders dancing in the woods is
-CONTENT; it may never become a premise a rule reads.
-
-*Until it lands, nothing changes.* The reservation is a note about the
-future, not a licence for the present, and it blocks no lane: the
-economy is built on capacity and verified work, and a curse that stifles
-growth is expressible entirely in those terms when someone chooses to
-build it.
-
-*The present state, recorded honestly.* **There is no theology holding
-space BUILT, and therefore there is no lawful home for dogma anywhere in
-this tree today.** That absence is exactly why esoteric vocabulary bled into
-the engine while the kernel was being built — with no container, it
-settled wherever it landed. Until a content layer exists to hold it,
-the correct amount of dogma in this system is ZERO.
+**The mechanic this reserves, stated in capacity terms and nothing
+else.** A line whose content exceeds its own extent — `ext(Δ(V)) > D` —
+cannot grow a plane to hold it, and what that looks like from outside
+is Article III's loop trap: deeds emitted with `ΔD = 0`. That is a
+capacity mismatch and it is fully expressible in D3/D4's own terms. It
+needs no new physics, no agent, and no name drawn from anywhere.
 
 **THE CLASS DISTINCTION, and it was got wrong first** (operator
 correction 2026-08-01). Religion is a SEPARATE CLASS OF IRRELEVANCE from
@@ -1927,46 +1900,20 @@ PREMISE          — asserts an agent, a force, or a mechanism that no
     have to BELIEVE for a rule to be correct. EXCISED.
 ```
 
-**NO LIVE INSTANCE OF THE PREMISE CLASS STANDS IN THIS TREE.** Recorded
-as the true state rather than illustrated with a stale example: every
-term once cited in this row — `abzu`, `vril`, `kenoma`, `pleroma`,
-`agartha` — was restored as content by the layer correction below and
-computes through `station`. An empty row is a true statement; a wrong
-example is not, and the wrong example is what caused the sweep.
+**NO LIVE INSTANCE OF THE PREMISE CLASS STANDS IN THIS TREE.**
+Recorded as the true state rather than illustrated. An empty row is a
+true statement; a worked example goes stale and a reader applying a
+stale example re-runs a reverted sweep. The examples that once stood
+here were removed 2026-08-04 — they were the non-science content this
+article exists to keep OUT of the governing layer, and a law document
+listing them was the article failing its own test.
 
-**ANUNNAKI ARE TECHNOLOGISTS, NOT GODS** (operator ratification
-2026-08-01). This row once read *"Anunnaki are gods."* That sentence was
-itself the bleedover it existed to prevent — it imported one culture's
-religious reading of a name this project uses structurally. **`Anunnaki`
-denotes a progenitor-class civilization: a builder tier, a structural
-designation**, carrying `station: progenitor`, which the seat-width law
-computes on. `Archon` names a tier and an Athenian magistracy. Both are
-`Name(L)` under the Premise Test, both are read by a rule, both are
-KEPT.
-
-**THE LAYER ERROR — recorded because it is the most useful mistake in
-this article's history.** This law's first enforcement swept the SEED
-ROSTER: three civilizations were renamed for having mythological
-etymologies. **That was the wrong layer, and the sweep was reverted
-whole.**
-
-LAW 9 forbids dogma in the KERNEL and PERMITS modelled phenomena in
-CONTENT. The kernel was already clean — it held none. The roster is the
-content layer, which is exactly where world-building names lawfully
-live. The law was applied backwards: it left the place it governs alone
-and cut the place it protects.
-
-And those names were never lore-only. `Anunnaki`, `Archon` and
-`Agarthan` each carry `station: progenitor` — a committed field the
-seat-width law computes on. They are `Name(L)` read by a rule, which the
-Premise Test keeps at any layer. `Anunnaki` names a progenitor-class
-civilization of TECHNOLOGISTS; `Archon` names a tier. Meanwhile
-`12_UNION` §2a had ALREADY performed
-this exact discrimination on that exact word: *"An external four-tier
-sketch placing 'Archons' above the progenitors was consulted and
-OVERRIDDEN."* The project kept the name and refused the imported
-hierarchy — the correct move — and the enforcement sweep then cut the
-name anyway.
+**The layer correction, kept without its examples.** This law's first
+enforcement was applied to the CONTENT layer and reverted whole. LAW 9
+forbids premises in the KERNEL and permits modelled phenomena in
+CONTENT; the sweep left the place it governs alone and cut the place it
+protects. A name carried on a committed field that a rule computes on
+is `Name(L)` and is kept at any layer.
 
 **The standing rule this leaves:** enforcement of LAW 9 looks at the
 kernel, the sealed math, and the law documents. A civilization's name is
