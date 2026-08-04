@@ -23,8 +23,8 @@ fn at(line: u8, lane: u8, shell: u8, phase: u8, spin: u8) -> [u8; 32] {
 fn the_table_is_stable_and_total_across_every_axis() {
     for b in 0..=255u8 {
         let mut id = [0u8; 32];
-        for slot in 3..=7 {
-            id[slot] = b;
+        for slot in id.iter_mut().take(8).skip(3) {
+            *slot = b;
         }
         let p = periodic_of(&id);
         assert!((1..=LINES).contains(&p.line));
