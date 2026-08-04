@@ -54,7 +54,7 @@
   "star": "m",
   "albedo": "0",
   "orbit": "1",
-  "station": "watcher"
+  "station": "sovereign"
  },
  {
   "name": "Agarthan",
@@ -74,7 +74,7 @@
   "star": "m",
   "albedo": "1/2",
   "orbit": "2",
-  "station": "progenitor"
+  "station": "sovereign"
  },
  {
   "name": "Tunborn",
@@ -114,7 +114,8 @@
   "z": "0",
   "star": "g",
   "albedo": "1/2",
-  "orbit": "1/2"
+  "orbit": "1/2",
+  "station": "sovereign"
  },
  {
   "name": "Deep Chorus",
@@ -285,7 +286,7 @@
   "x": "12",
   "y": "0",
   "z": "0",
-  "station": "watcher"
+  "station": "sovereign"
  },
  {
   "name": "Draco",
@@ -345,5 +346,111 @@
   "albedo": "1/4",
   "orbit": "1",
   "station": "watcher"
+ },
+ {
+  "name": "Psilon",
+  "slug": "psilon",
+  "species": "the thinking swarm of Mentar",
+  "clade": "cerebral",
+  "motto": "we learned the sky before we left the ground",
+  "disposition": "empiricist",
+  "metabolism": "biotic",
+  "perception": "volumetric",
+  "world": "mentar-arc",
+  "planet": "lens",
+  "colony": "first-lens",
+  "policy": "steady",
+  "x": "-24",
+  "y": "7",
+  "z": "19",
+  "station": "progenitor"
+ },
+ {
+  "name": "Meklar",
+  "slug": "meklar",
+  "species": "the fused of iron and thought",
+  "clade": "cybernetic",
+  "motto": "the body was the first machine; we merely continued",
+  "disposition": "empiricist",
+  "metabolism": "mineral",
+  "perception": "planar",
+  "world": "meklar-forge",
+  "planet": "chassis",
+  "colony": "cold-assembly",
+  "policy": "industry",
+  "x": "27",
+  "y": "31",
+  "z": "-8",
+  "station": "progenitor"
+ },
+ {
+  "name": "Bulrathi",
+  "slug": "bulrathi",
+  "species": "the heavy-world bear",
+  "clade": "ursine",
+  "motto": "gravity taught us patience; it taught you nothing",
+  "disposition": "expansionist",
+  "metabolism": "biotic",
+  "perception": "planar",
+  "world": "ursa-deep",
+  "planet": "weight",
+  "colony": "longwinter",
+  "policy": "aggressive",
+  "x": "-17",
+  "y": "-28",
+  "z": "23"
+ },
+ {
+  "name": "Trilarian",
+  "slug": "trilarian",
+  "species": "the singing tide",
+  "clade": "aquatic",
+  "motto": "every current returns; that is the whole of our law",
+  "disposition": "epicurean",
+  "metabolism": "biotic",
+  "perception": "harmonic",
+  "world": "trilar-deep",
+  "planet": "thermocline",
+  "colony": "tidechoir",
+  "policy": "steady",
+  "x": "36",
+  "y": "12",
+  "z": "-14"
+ },
+ {
+  "name": "Elerian",
+  "slug": "elerian",
+  "species": "the psionic watchers",
+  "clade": "elerian",
+  "motto": "we heard you deciding before you decided",
+  "disposition": "empiricist",
+  "metabolism": "biotic",
+  "perception": "umbral",
+  "world": "elerian-veil",
+  "planet": "silence",
+  "colony": "quiet-hall",
+  "policy": "steady",
+  "x": "-33",
+  "y": "18",
+  "z": "-21",
+  "station": "watcher"
+ },
+ {
+  "name": "Orion",
+  "slug": "orion",
+  "species": "the guardian that kept the record",
+  "clade": "syzygial",
+  "motto": "we did not rule the throne; we wrote down who tried",
+  "disposition": "empiricist",
+  "metabolism": "plasmic",
+  "perception": "volumetric",
+  "world": "orion-throne",
+  "planet": "ledger",
+  "colony": "the-keeping",
+  "policy": "steady",
+  "x": "0",
+  "y": "44",
+  "z": "38",
+  "station": "sovereign"
  }
 ]
