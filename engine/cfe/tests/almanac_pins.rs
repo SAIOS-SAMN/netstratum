@@ -35,7 +35,7 @@ fn the_table_is_stable_and_total_across_every_axis() {
         assert_eq!(p.arity, 1 + p.shell, "arity follows the shell");
         assert_eq!(p, periodic_of(&id), "the same id reads the same cell");
     }
-    assert_eq!(CELLS, 7 * 8 * 4 * 4 * 2, "five axes, multiplied");
+    assert_eq!(CELLS, 7 * 10 * 4 * 4 * 2, "five axes, multiplied");
 }
 
 #[test]
@@ -69,8 +69,8 @@ fn every_axis_decides_something_no_other_can() {
     assert!(!workable_in(&at(3, 2, 2, 1, 0), SubstrateBand::Mesic));
     // SPIN moves the GEM and nothing before it — same composition,
     // opposite handedness, different identity.
-    let left = [at(1, 1, 1, 1, 0), at(1, 4, 1, 1, 0)];
-    let right = [at(1, 1, 1, 1, 0), at(1, 4, 1, 1, 1)];
+    let left = [at(1, 1, 1, 1, 0), at(1, 5, 1, 1, 0)];
+    let right = [at(1, 1, 1, 1, 0), at(1, 5, 1, 1, 1)];
     assert!(compounds(&left) && compounds(&right), "spin does not gate the bond");
     assert_ne!(
         gem_of(&left).expect("compounds"),
@@ -124,50 +124,92 @@ fn refinement_needs_the_pressure_the_line_demands() {
 
 #[test]
 fn a_compound_can_be_wider_than_a_pair_which_is_the_multi_party_case() {
-    // Shell 2 takes THREE bodies. Saturation is arity * (LANES/2+1) / 2
-    // = 3 * 5 / 2, so the binds must sum to 15/2 — impossible in whole
-    // numbers, and the shell therefore admits no 3-body compound at
-    // this LANES. Recorded rather than tuned away: the arity axis is
-    // real, and which arities can saturate is a property of LANES.
-    let ternary = [at(1, 1, 2, 1, 0), at(1, 4, 2, 1, 0), at(1, 2, 2, 1, 0)];
+    // **THE WIDENING PAYS OUT HERE.** Saturation is
+    // `arity * (LANES/2 + 1) / 2`. At LANES = 8 that was `arity * 5 / 2`,
+    // whole only for EVEN arities — so no three-body compound could
+    // saturate, and the previous landing had to record that hole. At
+    // LANES = 10 it is `arity * 3`, and every arity 2..=5 is reachable.
+    //
+    // Shell 2 takes THREE bodies; the binds must sum to 9.
+    let ternary = [at(1, 1, 2, 1, 0), at(1, 3, 2, 1, 0), at(1, 5, 2, 1, 0)];
     assert_eq!(ternary.len(), 3, "shell 2 wants three");
-    assert!(!compounds(&ternary), "15/2 is not reachable in whole binds");
+    assert!(compounds(&ternary), "1 + 3 + 5 = 9 saturates at arity 3");
+    assert!(gem_of(&ternary).is_some(), "and the three-body compound names a gem");
 
-    // Shell 3 takes FOUR: saturation 4 * 5 / 2 = 10, and 1+4+1+4 = 10.
+    // It is irreducibly NOT a pair: no two of its members compound.
+    for pair in [[ternary[0], ternary[1]], [ternary[0], ternary[2]], [ternary[1], ternary[2]]] {
+        assert!(!compounds(&pair), "a pairwise projection cannot express it");
+    }
+
+    // Shell 3 takes FOUR: saturation 4 * 3 = 12, and 1 + 5 + 1 + 5 = 12.
     let quaternary = [
         at(1, 1, 3, 1, 0),
-        at(1, 4, 3, 1, 0),
+        at(1, 5, 3, 1, 0),
         at(2, 1, 3, 1, 0),
-        at(2, 4, 3, 1, 0),
+        at(2, 5, 3, 1, 0),
     ];
-    assert!(compounds(&quaternary), "four bodies, binds saturate at 10");
+    assert!(compounds(&quaternary), "four bodies, binds saturate at 12");
     assert!(gem_of(&quaternary).is_some(), "and it names a gem");
+
+    // Shell 4 takes FIVE — the widest the table admits — needing 15.
+    let quinary = [
+        at(1, 1, 4, 1, 0),
+        at(1, 2, 4, 1, 0),
+        at(1, 3, 4, 1, 0),
+        at(1, 4, 4, 1, 0),
+        at(1, 5, 4, 1, 0),
+    ];
+    assert!(compounds(&quinary), "1+2+3+4+5 = 15 saturates at arity 5");
 
     // Arity is enforced: the same four at shell 1 are not a compound.
     let wrong_arity = [
         at(1, 1, 1, 1, 0),
-        at(1, 4, 1, 1, 0),
+        at(1, 5, 1, 1, 0),
         at(2, 1, 1, 1, 0),
-        at(2, 4, 1, 1, 0),
+        at(2, 5, 1, 1, 0),
     ];
     assert!(!compounds(&wrong_arity), "shell 1 takes two, not four");
 }
 
 #[test]
+fn the_lane_width_is_derived_and_not_preferred() {
+    // WHY 10. Saturation `arity * (LANES/2 + 1) / 2` is whole for every
+    // arity exactly when `LANES/2 + 1` is even — that is, when
+    // `LANES = 2 (mod 4)`. This is the pin that would fail if someone
+    // widened the table to 12 by eye.
+    assert_eq!(LANES % 4, 2, "the width admits every arity");
+    for width in [8u32, 12, 16] {
+        let odd_arity_whole = (3 * (width / 2 + 1)) % 2 == 0;
+        assert!(!odd_arity_whole, "width {width} strands the three-body compound");
+    }
+    for arity in 2..=(1 + u32::from(SHELLS)) {
+        assert_eq!(
+            (arity * (u32::from(LANES) / 2 + 1)) % 2,
+            0,
+            "arity {arity} saturates in whole binds at LANES = {LANES}"
+        );
+    }
+    // And the binds still fold at the half, which is what makes the
+    // lane periodic rather than a ramp.
+    assert_eq!(periodic_of(&at(1, 1, 1, 1, 0)).binds, periodic_of(&at(1, LANES, 1, 1, 0)).binds);
+    assert_eq!(periodic_of(&at(1, LANES / 2, 1, 1, 0)).binds, LANES / 2, "the peak is the half");
+}
+
+#[test]
 fn composition_agrees_on_shell_and_phase_and_the_gem_is_order_free() {
     let a = at(1, 1, 1, 2, 0);
-    let b = at(1, 4, 1, 2, 0);
+    let b = at(1, 5, 1, 2, 0);
     assert!(compounds(&[a, b]), "1 + 4 saturates at arity 2");
     assert!(!compounds(&[a, a]), "1 + 1 does not");
 
     // Mismatched geometry and mismatched state both refuse.
-    assert!(!compounds(&[a, at(1, 4, 2, 2, 0)]), "shells must agree");
-    assert!(!compounds(&[a, at(1, 4, 1, 3, 0)]), "phases must agree");
+    assert!(!compounds(&[a, at(1, 5, 2, 2, 0)]), "shells must agree");
+    assert!(!compounds(&[a, at(1, 5, 1, 3, 0)]), "phases must agree");
 
     // The recurrence: the same lane pair compounds at ANY lines.
     for line_a in 1..=LINES {
         for line_b in 1..=LINES {
-            assert!(compounds(&[at(line_a, 1, 1, 2, 0), at(line_b, 4, 1, 2, 0)]));
+            assert!(compounds(&[at(line_a, 1, 1, 2, 0), at(line_b, 5, 1, 2, 0)]));
         }
     }
 
@@ -180,8 +222,8 @@ fn composition_agrees_on_shell_and_phase_and_the_gem_is_order_free() {
 
 #[test]
 fn knowledge_is_the_depth_and_the_width_that_were_won() {
-    let shallow = knowledge_of(&[at(1, 1, 1, 1, 0), at(1, 4, 1, 1, 0)]).expect("compounds");
-    let deep = knowledge_of(&[at(7, 1, 1, 1, 0), at(7, 4, 1, 1, 0)]).expect("compounds");
+    let shallow = knowledge_of(&[at(1, 1, 1, 1, 0), at(1, 5, 1, 1, 0)]).expect("compounds");
+    let deep = knowledge_of(&[at(7, 1, 1, 1, 0), at(7, 5, 1, 1, 0)]).expect("compounds");
     assert_eq!(shallow, 2);
     assert_eq!(deep, 14);
     assert!(deep > shallow, "depth is won");
@@ -190,9 +232,9 @@ fn knowledge_is_the_depth_and_the_width_that_were_won() {
     // two, because arity is earned.
     let wide = knowledge_of(&[
         at(1, 1, 3, 1, 0),
-        at(1, 4, 3, 1, 0),
+        at(1, 5, 3, 1, 0),
         at(1, 1, 3, 1, 0),
-        at(1, 4, 3, 1, 0),
+        at(1, 5, 3, 1, 0),
     ])
     .expect("compounds");
     assert!(wide > shallow, "a wider compound carries more: {wide} vs {shallow}");
@@ -205,12 +247,6 @@ fn knowledge_is_the_depth_and_the_width_that_were_won() {
 use cfe::almanac::{ceiling4, region_of, workable_at, ThermalRegion};
 use cfe::thermal::{band_of, t_eq4};
 
-/// A generous orbit floor for the pins. Choosing the real one is a
-/// ruling; these only need A floor to read against.
-fn r_min() -> cfe::ratio::Ratio {
-    ratio(1, 10)
-}
-
 #[test]
 fn the_band_reading_is_open_in_four_places_and_the_region_closes_it() {
     // The four silences `band_of` answers, each now a named place.
@@ -222,7 +258,7 @@ fn the_band_reading_is_open_in_four_places_and_the_region_closes_it() {
     ];
     for (t, region, why) in holes {
         assert_eq!(band_of(&t), None, "band_of is silent here: {why}");
-        assert_eq!(region_of(&t, &r_min()), region, "the region names it: {why}");
+        assert_eq!(region_of(&t), region, "the region names it: {why}");
     }
 }
 
@@ -237,7 +273,7 @@ fn the_three_bands_are_carried_through_unchanged() {
         (ratio(129_600_000_000, 1), ThermalRegion::HyperThermal),
     ] {
         assert!(band_of(&t).is_some(), "this had a band");
-        assert_eq!(region_of(&t, &r_min()), region, "and keeps its place");
+        assert_eq!(region_of(&t), region, "and keeps its place");
     }
 }
 
@@ -252,12 +288,12 @@ fn the_region_is_total_where_the_band_is_not() {
             silent += 1;
         }
         // region_of is total by type — there is no None to count.
-        let _ = region_of(&t, &r_min());
+        let _ = region_of(&t);
         t *= ratio(10, 1);
     }
     assert!(silent > 0, "the band reading is genuinely open, not hypothetically");
     assert_eq!(
-        region_of(&ratio(0, 1), &r_min()),
+        region_of(&ratio(0, 1)),
         ThermalRegion::Quenched,
         "even absolute zero names a place"
     );
@@ -269,19 +305,19 @@ fn the_top_is_open_until_an_orbit_floor_lands() {
     // admits everything above, so a lawful siting can exceed ANY
     // ceiling by shrinking the orbit.
     let hottest = cfe::thermal::StarClass::O.luminosity();
-    let ceiling = ceiling4(&r_min());
+    let ceiling = ceiling4();
     // A lawful orbit one order smaller than the floor already passes it.
     let beyond = t_eq4(&hottest, &ratio(0, 1), &ratio(1, 100));
     assert!(beyond > ceiling, "a lawful siting outruns the ceiling");
     assert_eq!(
-        region_of(&beyond, &r_min()),
+        region_of(&beyond),
         ThermalRegion::Beyond,
         "and the closure NAMES it rather than pretending otherwise"
     );
     // Nothing is workable there — the arm exists to become unreachable.
     let refractory = at(1, 1, 1, PHASES, 0);
-    assert!(!workable_at(&refractory, &beyond, &r_min()), "no chemistry above the ceiling");
-    assert!(workable_at(&refractory, &ratio(3_906_250_000, 1), &r_min()), "and plenty below");
+    assert!(!workable_at(&refractory, &beyond), "no chemistry above the ceiling");
+    assert!(workable_at(&refractory, &ratio(3_906_250_000, 1)), "and plenty below");
 }
 
 #[test]
@@ -304,7 +340,7 @@ fn a_shrinking_orbit_blows_the_denominator_which_is_the_old_scar() {
 
 // ── HEAT, AMPLIFIED BY DISTANCE, WITHOUT IRRATIONALITY ───────────────
 
-use cfe::almanac::{grained_ceiling4, grained_t_eq4, orbit_on_grain, ORBIT_GRAIN};
+use cfe::almanac::{grained_t_eq4, orbit_on_grain, ORBIT_GRAIN};
 
 #[test]
 fn heat_is_amplified_by_closeness_and_still_varies_across_the_grain() {
@@ -347,7 +383,7 @@ fn the_denominator_cannot_run_away_however_small_the_orbit() {
 fn the_ceiling_is_derived_and_a_lawful_orbit_cannot_pass_it() {
     // No chosen bound on temperature: the ceiling falls out of the
     // luminosity table and the grain, and nothing grained exceeds it.
-    let ceiling = grained_ceiling4();
+    let ceiling = ceiling4();
     for class in [
         cfe::thermal::StarClass::O,
         cfe::thermal::StarClass::B,
@@ -367,7 +403,7 @@ fn the_ceiling_is_derived_and_a_lawful_orbit_cannot_pass_it() {
         &ratio(0, 1),
     );
     assert_ne!(
-        region_of(&hottest, &orbit_on_grain(&ratio(0, 1))),
+        region_of(&hottest),
         ThermalRegion::Beyond,
         "with the grain, the open arm is unreachable"
     );
