@@ -37,7 +37,7 @@
 //! nowhere in it to put one.
 //!
 //! That is also what makes the multi-directionality free rather than
-//! expensive: asking for one arm computes exactly one arm. Standing at a
+//! expensive: asking for one arm computes exactly one arm. The standing reading at a
 //! position costs nothing until a question is asked of it.
 //!
 //! # WHAT IT STILL MAY NOT DO
@@ -46,10 +46,13 @@
 //! questions and decides nothing, and a caller that branches on one has
 //! made a reading load-bearing.
 
+use crate::books::Regard;
 use crate::luminal::{emerge, Aperture, Luminal, Phase};
 use crate::observer::Capacity;
 use crate::peel::{Depth, View};
 use crate::propagation::{Medium, Resonance};
+use cfe::dop::ColonyOrb;
+
 use cfe::ratio::Ratio;
 use rfa_core::capacity::{flux, Degree, Flux};
 use rfa_core::{holonomies, Delta, Support};
@@ -66,6 +69,8 @@ pub struct Observation<'a> {
     phase: Phase,
     aperture: Aperture,
     capacity: Capacity,
+    /// Borrowed. The instrument derives from it; it is never copied.
+    observer: Option<&'a ColonyOrb>,
 }
 
 impl<'a> Observation<'a> {
@@ -79,6 +84,7 @@ impl<'a> Observation<'a> {
             phase: Phase::direct(),
             aperture: Aperture::flat(),
             capacity: Capacity::full(),
+            observer: None,
         }
     }
 
@@ -102,10 +108,32 @@ impl<'a> Observation<'a> {
         self
     }
 
+    /// **STAND AS A PARTICULAR OBSERVER.** Holds a BORROW, never a
+    /// derived instrument — the regard is ground at read time from that
+    /// observer's own committed books (`19_LENS` §16).
+    ///
+    /// Storing the ground instrument here would have been a reading
+    /// retained on the position, which §1a forbids for the same reason
+    /// it forbids every cache: two things that can disagree.
+    pub fn seen_by(mut self, orb: &'a ColonyOrb) -> Self {
+        self.observer = Some(orb);
+        self
+    }
+
     /// Set what this observer can hold.
     pub fn holding(mut self, capacity: Capacity) -> Self {
         self.capacity = capacity;
         self
+    }
+
+    /// The instrument this position looks through — the ELEVEN fixed
+    /// harmonic channels of the substrate. A position parameter, read
+    /// back plainly like [`Self::granted`]; it is not a reading.
+    ///
+    /// Books never reach it (`19_LENS` §16a): naming an observer widens
+    /// its [`Self::regard`] and leaves this untouched.
+    pub fn instrument(&self) -> &Aperture {
+        &self.aperture
     }
 
     /// The depth actually granted — `min(requested, κ)`.
@@ -152,6 +180,18 @@ impl<'a> Observation<'a> {
             View::Near(_) => {
                 Degree::above_ground(holonomies(self.delta, self.support).len())
             }
+        }
+    }
+
+    /// ARM — the regard. This observer's sensitivity across the OPEN
+    /// set of books it keeps, derived from committed state on demand.
+    ///
+    /// An observer that has not been named keeps no books, and the
+    /// empty regard is the correct reading of that — not a zeroed one.
+    pub fn regard(&self) -> Regard {
+        match self.observer {
+            Some(orb) => Regard::of_orb(orb),
+            None => Regard::flat(),
         }
     }
 

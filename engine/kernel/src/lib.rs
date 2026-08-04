@@ -37,7 +37,7 @@ use cfe::dop::{ClosureEvent, Office, Resource, UNION_REVIEW_HORIZON};
 use cfe::ipsal::Scope;
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::{Committed, SOVEREIGN};
-use solver_verify::{verify_work, Difficulty, WorkBroken};
+use solver_verify::{verify_work, WorkBroken};
 
 /// The kernel version — bumped ONLY by charter amendment. The arbor
 /// binds this into every commitment (`H(schema ‖ bytes ‖ parent ‖
@@ -682,6 +682,14 @@ fn covered(event: &ClosureEvent) -> bool {
         // two different offices, and the review horizon is the ruled
         // one. Ratified red-first by `sovereign_union_pins`.
         | E::SovereignUnionSealed { .. }
+        // BOOK-1 (19_LENS §16): minting DECLARES a standing account and
+        // archiving ALTERS one — both extend or amend the world's
+        // structure, neither moves banked value. Matches
+        // `world::books`' own scope checks.
+        | E::BookMinted { .. } | E::BookArchived { .. }
+        // LIT-1: aspiring and claiming both add standing state and move
+        // no banked value. Matches `world::literature`.
+        | E::WorkAspired { .. } | E::WorkClaimed { .. }
         // W-A slice-1 — the BANKED-NEUTRAL authority deeds. Each one's
         // `world.rs::replay` arm touches NO bank (it sets a flag, a
         // seal, a list: terrain seed, star, planet site, practice,
@@ -1262,6 +1270,11 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // ── CIVILIZATIONAL — keyed on a LINE's own identity ──────────
         E::GenesisSealed { .. }        // civilization + the three axes
         | E::TaxonSealed { .. }        // class, clade
+        // BOOK-1 / LIT-1: a line's own accounts and what it reaches
+        // for. Both are keyed on the LINE's identity, never on a place
+        // — the layer law is declared per deed, never inferred.
+        | E::BookMinted { .. } | E::BookPosted { .. } | E::BookArchived { .. }
+        | E::WorkAspired { .. } | E::WorkClaimed { .. }
         | E::PracticeAdopted { .. } | E::PracticeReleased { .. }
         | E::LineSucceeded { .. } | E::StationSeated { .. }
         | E::Diverged { .. } | E::Confluent { .. }
@@ -1368,13 +1381,26 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // the whole world is raised on. The scope is necessary and NOT
         // sufficient — `union` additionally requires the ROOT
         // entity, because no delegate may strike the union.
-        | E::SovereignUnionSealed { .. } => {
+        | E::SovereignUnionSealed { .. }        // BOOK-1 (19_LENS §16): minting DECLARES a standing account and
+        // archiving ALTERS one — both extend or amend the world's
+        // structure, neither moves banked value. Drafted law, matching
+        // `world::books`' own scope checks.
+        | E::BookMinted { .. } | E::BookArchived { .. }
+        // LIT-1: aspiring and claiming both add standing state and
+        // move no banked value. Drafted law, matching world::literature.
+        | E::WorkAspired { .. } | E::WorkClaimed { .. } => {
+
             Some(Scope::Build)
         }
         // Raze — demolish or lift what was raised.
         E::ZoneRazed { .. } | E::WardLifted { .. } | E::VeilLifted { .. } => Some(Scope::Raze),
         // Collect — settle or move banked value.
-        E::YieldCollected { .. } | E::UpkeepSettled { .. } | E::ResourceTransferred { .. }
+        // BOOK-1: a posting moves BOOK value — a dual entry, both sides
+        // at once. It touches no banked resource, so it settles nothing
+        // and conserves trivially; the scope is Collect because it is a
+        // value movement within the orb's own accounts.
+        E::BookPosted { .. }
+        | E::YieldCollected { .. } | E::UpkeepSettled { .. } | E::ResourceTransferred { .. }
         | E::OverflowAbsorbed { .. } | E::BondSettled { .. } | E::ForwardReleased { .. }
         | E::FrictionSettled { .. } | E::ApertureSent { .. } | E::ApertureReceived { .. }
         | E::CrystalDrawn { .. } | E::AssayStruck { .. } | E::OfferCleared { .. }

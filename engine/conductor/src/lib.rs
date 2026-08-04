@@ -1474,9 +1474,28 @@ impl Polity {
             // the two would ruin both yields.
             let reach = |polity: &mut Self| {
                 let need = polity.trajectory.need_of(polity.hunger().hungers, polity.starved);
+                // THE MEMO, restored into the coupled path (remediations
+                // R5). `propose` is pure: same digest, same difficulty,
+                // same need, same answer. Keyed on all three — a
+                // need-blind key hands a hungry mind its sated self's
+                // answer, which is the staleness that shipped a level-3
+                // solve as a level-4 proof.
+                if let Some((held, held_d, held_need, cached)) = polity.last_forge.clone() {
+                    if held == digest && held_d == difficulty && held_need == need {
+                        PROBE_DIGEST_REPEAT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                        return cached;
+                    }
+                }
+                // COST IS MEASURED, then the proposal crosses THE SECTOR
+                // DOOR. `propose_measured` alone would skip it: the
+                // reach may look in any order it likes, but nothing
+                // crosses that does not re-derive against every training
+                // pair. Measure inside, dispose outside.
                 let proposal = propose_measured(&task, &need);
                 polity.spent = polity.spent.saturating_add(proposal.tested as u64);
-                proposal.read
+                let read = propose_consulted(&task, &need);
+                polity.last_forge = Some((digest, difficulty, need, read.clone()));
+                read
             };
             // WHICH PATH ACTUALLY PAID FOR THIS BEAT — captured before
             // the trajectory advances, because promotion reads it.

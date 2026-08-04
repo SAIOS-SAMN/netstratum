@@ -8,7 +8,7 @@ use cfe::dop::{ClosureEvent, Resource};
 use cfe::ipsal::Scope;
 use cfe::ratio::ratio;
 use cfe::world::{World, FIRST_ORB, SOVEREIGN};
-use kernel::{admits, Step, Refused, KERNEL_VERSION, VERSION};
+use kernel::{admits, Step, Refused, KERNEL_VERSION, Version, VERSION};
 
 /// A world with two orbs and value banked on the first, ready to move.
 /// The origin earns before it charters (the charted's founding

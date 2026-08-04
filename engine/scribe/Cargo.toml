@@ -8,4 +8,5 @@ description = "THE SCRIBE — the display WRITERS, above the lens (#37's inversi
 cfe = { path = "../cfe" }
 ledger = { path = "../ledger" }
 lens = { path = "../lens" }
+pen = { path = "../pen" }
 physics = { path = "../physics" }

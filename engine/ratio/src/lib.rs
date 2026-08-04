@@ -81,3 +81,18 @@ fn trimmed(bytes: Vec<u8>) -> Vec<u8> {
     let lead = bytes.iter().take_while(|byte| **byte == 0).count();
     bytes[lead..].to_vec()
 }
+
+/// **THE CANONICAL TEXT FORM OF AN EXACT RATIONAL.** Integers plain,
+/// everything else `p/q` — never a decimal, never a float.
+///
+/// It lives here, beside the type it governs, because that is what it
+/// is a fact about. It previously existed as two byte-identical copies
+/// in `ledger/src/json.rs` and `lens/src/json.rs`, and two copies of
+/// the rule that keeps floats out of an exact system is the one thing
+/// in that duplication that could actually have gone wrong.
+pub fn ratio_str(r: &Ratio) -> String {
+    match r.denom() == &num_bigint::BigInt::from(1) {
+        true => r.numer().to_string(),
+        false => format!("{}/{}", r.numer(), r.denom()),
+    }
+}

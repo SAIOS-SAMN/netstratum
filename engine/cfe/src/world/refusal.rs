@@ -165,6 +165,51 @@ pub enum ActionRefused {
     NoSuchBond,
     /// FORWARD-1 — one OPEN forward per (obligor, beneficiary,
     /// resource); a vitrified pact cannot be cancelled, only run out.
-    ForwardAlreadySealed,
+    ForwardAlreadySealed,    /// BOOK-1 (19_LENS §16) — a book kind is content-addressed over its
+    /// NORMALIZED name, so re-declaring one is not a second book. This
+    /// IS the novelty gate: exact, unthresholded, and it names the book
+    /// already standing rather than a distance.
+    BookAlreadyMinted { name: String },
+    /// BOOK-1 — the charter's four are law, not inventory: they cannot
+    /// be minted over, and they cannot be archived by anyone.
+    CharterBookNotMintable { name: String },
+    /// BOOK-1 (§16c) — closing the covenant book must never be a way to
+    /// stop being measured by it.
+    CharterBookNotArchivable { name: String },
+    /// BOOK-1 — a name that normalizes to nothing addresses nothing.
+    BookNameEmpty,
+    /// BOOK-1 — this orb keeps no such book.
+    NoSuchBook,
+    /// BOOK-1 (§16c) — an archived book is closed to WRITING. It keeps
+    /// every entry it took and stays readable forever.
+    BookClosedToWriting { name: String },
+    /// BOOK-1 — a book already closed cannot be closed again.
+    BookAlreadyArchived { name: String },
+    /// BOOK-1 — a book ACCRUES. A negative posting would let an orb
+    /// unwrite its own history, which is what the chronicle exists to
+    /// prevent.
+    BookPostingNegative,
+    /// LIT-1 — the works are CHARTERED. A line invents accounts
+    /// (BOOK-1); it does not invent the literature it reaches for.
+    NoSuchWork { name: String },
+    /// LIT-1 — literacy is DERIVED: a line that has not kept its own
+    /// books has not learned to write, and has no business reaching
+    /// for the literature.
+    NotLiterate,
+    /// LIT-1 — one reach per work.
+    WorkAlreadyAspired { name: String },
+    /// LIT-1 — a work is reached for before it is claimed; skipping
+    /// that would let a line claim what it never set out to do.
+    WorkNotAspired { name: String },
+    /// LIT-1 — a claim stands once. Re-citing would let evidence be
+    /// swapped after the fact.
+    WorkAlreadyClaimed { name: String },
+    /// LIT-1 — a claim without receipts is a boast. The chronicle is
+    /// what separates the two.
+    ClaimWithoutWitness { name: String },
+    /// LIT-1 — a cited digest is not a receipt this world sealed. The
+    /// law verifies the CITATION, never the virtue.
+    WitnessNotInChronicle { digest: [u8; 32] },
+
 }
 
