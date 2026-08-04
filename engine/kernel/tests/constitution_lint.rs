@@ -609,7 +609,7 @@ fn c_is_out_of_the_judge_and_out_of_the_loop() {
                 stack.push(path);
                 continue;
             }
-            if !path.extension().is_some_and(|x| x == "rs") {
+            if path.extension().is_none_or(|x| x != "rs") {
                 continue;
             }
             let whole = fs::read_to_string(&path).unwrap_or_default();

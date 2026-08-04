@@ -1,0 +1,20 @@
+[package]
+name = "ratio"
+version = "0.1.0"
+edition = "2021"
+
+# THE LEAF. Exact rational arithmetic and nothing else — no game, no
+# state, no I/O. It sits BELOW every other crate on purpose.
+#
+# It used to live inside `cfe`, which meant `physics` (needing only
+# `Ratio`) had to depend on `cfe`, which put `cfe` at the bottom of the
+# workspace arrow. That pinned the state-mutating crate beneath every
+# judging organ, so the proposer could never verify anything — the mint
+# emitter could not call `verify_work` or `mint_bound` because both sat
+# above it (K4, `21_KERNEL_PARAMETERS` §13).
+#
+# 83 lines were carrying that inversion.
+[dependencies]
+num-bigint.workspace = true
+num-rational.workspace = true
+num-traits.workspace = true

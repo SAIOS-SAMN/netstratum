@@ -11,7 +11,7 @@
 //! - A1 (2026-08-01) closed the loop and this pin passed.
 //! - It passed VACUOUSLY. The proposer never asked the judge, and
 //!   `replay` — still the live transition — banked mints that
-//!   `kernel::lawful` had refused as `MintWithoutStanding`.
+//!   `kernel::admits` had refused as `MintWithoutStanding`.
 //! - 2026-08-04: the proposer was taught to ask first, and the board
 //!   went to **374 solves, 0 mints, 124 withheld** over 60 beats. The
 //!   capacity law required `Vacuity::Entangled`, which needed a

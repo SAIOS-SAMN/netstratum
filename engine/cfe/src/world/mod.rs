@@ -35,7 +35,9 @@ pub mod rules;
 pub use refusal::ActionRefused;
 pub use rules::{
     demurrage_due, ease_of, in_crisis, standing_supply, ward_gate_depth, ward_progress,
+    MintWarrant, NoWarrant,
 };
+
 
 
 

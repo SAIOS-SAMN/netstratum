@@ -42,7 +42,9 @@
 //!   17 Orb zone entry (tile ‖ kind)
 //!   18 Orb banked entry (resource ‖ ratio)
 //!   19 Orb famine entry (resource)
-//!   26 Orb thermal entry (albedo ‖ orbit_r ‖ overheat u8) — THERMAL-1
+//!   26 Orb thermal entry (albedo ‖ orbit_r ‖ overheat u8 ‖ θ?) —
+//!      THERMAL-1; θ additive-trailing 2026-08-02, absent = unplaced
+
 //!   20 Orb syntropy entry (syntropy_contained ratio) — THE INVERSE OF
 //!         TAG 28. What the orb has CONTAINED across its whole life:
 //!         every joule encased, whether the excess came from a star or
@@ -236,7 +238,7 @@ pub enum Office {
     /// EARNED (`PlaneUnearned` refuses otherwise).
     Progenitor = 0,
     /// `V(Ω)` — the SOVEREIGN. Holds the substance; owes work that was
-    /// RECEIPTED (admission by `lawful()`).
+    /// RECEIPTED (admission by `admits()`).
     Sovereign = 1,
 }
 
@@ -881,7 +883,20 @@ pub enum ClosureEvent {
     StarCommissioned { class: u8 },
     /// THERMAL-1 (05 §1.1) — a colony sited on its orbit: albedo A and
     /// orbit radius r, the orb's terms in the equilibrium baseline.
-    PlanetSited { orb_id: u64, albedo: Ratio, orbit_r: Ratio },
+    ///
+    /// Extended 2026-08-02 with `theta` (longitude) and `psi`
+    /// (inclination), each a fraction of a TURN, `[0, 1) ⊂ ℚ`. Both are
+    /// ADDITIVE-TRAILING on tag 25: the decoder reads three fields and a
+    /// receipt without the rest yields `None`, so no rehash and no new
+    /// tag. (`0x41` was proposed and is RETIRED under Charter §11 —
+    /// `recurrence_guard` fails the build on reuse.)
+    PlanetSited {
+        orb_id: u64,
+        albedo: Ratio,
+        orbit_r: Ratio,
+        theta: Option<Ratio>,
+        psi: Option<Ratio>,
+    },
     /// VENT-1 (05 §1.4) — accumulated vented entropy settled into the
     /// orb's cumulative ledger at collect (the yield pattern: one
     /// receipt, no per-tick bloat).
@@ -1310,10 +1325,19 @@ impl ClosureEvent {
             Self::StarCommissioned { class } => {
                 tlv::put(24, &[*class], &mut out);
             }
-            Self::PlanetSited { orb_id, albedo, orbit_r } => {
+            Self::PlanetSited { orb_id, albedo, orbit_r, theta, psi } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 ratio::encode(albedo, &mut value);
                 ratio::encode(orbit_r, &mut value);
+                // TRAILING and OPTIONAL: an unsited angle writes no
+                // bytes at all, so a receipt that never had one is
+                // byte-identical to what it was before the amendment.
+                if let Some(turn) = theta {
+                    ratio::encode(turn, &mut value);
+                    if let Some(tilt) = psi {
+                        ratio::encode(tilt, &mut value);
+                    }
+                }
                 tlv::put(25, &value, &mut out);
             }
             Self::VentSettled { orb_id, amount } => {
@@ -1709,8 +1733,21 @@ impl ClosureEvent {
             25 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let (albedo, used) = ratio::decode(value.get(8..)?)?;
-                let (orbit_r, _) = ratio::decode(value.get(8 + used..)?)?;
-                Some(Self::PlanetSited { orb_id, albedo, orbit_r })
+                let (orbit_r, used_r) = ratio::decode(value.get(8 + used..)?)?;
+                // The trailing angle, ABSENT on every receipt written
+                // before the amendment. `None` is not `0`: zero would
+                // put all of history on one ray.
+                let tail = value.get(8 + used + used_r..).unwrap_or(&[]);
+                let (theta, used_t) = match ratio::decode(tail) {
+                    Some((turn, n)) => (Some(turn), n),
+                    None => (None, 0),
+                };
+                let psi = tail
+                    .get(used_t..)
+                    .filter(|rest| !rest.is_empty())
+                    .and_then(ratio::decode)
+                    .map(|(turn, _)| turn);
+                Some(Self::PlanetSited { orb_id, albedo, orbit_r, theta, psi })
             }
             27 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -2051,6 +2088,37 @@ pub struct ThermalSite {
     pub albedo: Ratio,
     /// Orbit radius r > 0, in the star's units.
     pub orbit_r: Ratio,
+    /// THE ANGLE — a fraction of a TURN, `θ ∈ [0, 1) ⊂ ℚ`.
+    ///
+    /// **Turns, never radians.** A full turn in radians is `2π`, which
+    /// is irrational, so a rational angle in radians cannot express a
+    /// wrap. In turns the wrap is exact: `θ ≡ θ (mod 1)`.
+    ///
+    /// **`None` on every receipt written before this amendment.**
+    /// Defaulting to `0` would place every historical orb on one ray —
+    /// all collinear — which is a spatial claim nobody made. An orb
+    /// without an angle has a radius and no place.
+    ///
+    /// Adjacency is WRAPPED L1 on `(r, θ, ψ)`, never Euclidean: plane
+    /// distance needs `cos` and a square root and both are barred
+    /// (`18_TORSION` §2b). See [`separation`].
+    pub theta: Option<Ratio>,
+    /// **ψ — THE INCLINATION**, the second turn, also `[0, 1) ⊂ ℚ`.
+    ///
+    /// `θ` alone confines every orb to ONE PLANE: a disc around the
+    /// star. `ψ` lifts it out, and `(r, θ, ψ)` is a place in a VOLUME
+    /// rather than on a sheet. That is what lets `Ω` range over the
+    /// galaxy instead of a single orbital plane.
+    ///
+    /// Three wrapped coordinates is also the shape the chain has
+    /// carried all along — `arbor::Coordinate` holds `s: [Ratio; 3]`
+    /// (`19_KERNEL` §3b measured it as an address with no place under
+    /// it). With `ψ` the orb finally inhabits the triple the
+    /// commitment already addresses.
+    ///
+    /// `None` on every frame written before this amendment, and `None`
+    /// means UNINCLINED — not the equator, which `Some(0)` means.
+    pub psi: Option<Ratio>,
 }
 
 /// The colony orb — COMMITTED state only. Unreceipted accrual is
@@ -2163,6 +2231,19 @@ impl ColonyOrb {
             ratio::encode(&site.albedo, &mut value);
             ratio::encode(&site.orbit_r, &mut value);
             value.push(self.overheat as u8);
+            // THE ANGLE, additive-trailing on tag 26 (2026-08-02). An
+            // unsited angle writes nothing, so an orb that never had a
+            // place is byte-identical to its pre-amendment frame — and
+            // one that HAS a place keeps it across the state container,
+            // which is what the committed snapshot lost before this.
+            if let Some(turn) = &site.theta {
+                ratio::encode(turn, &mut value);
+                // ψ only after θ — an inclination without a longitude
+                // would be a place with no place to be inclined from.
+                if let Some(tilt) = &site.psi {
+                    ratio::encode(tilt, &mut value);
+                }
+            }
             tlv::put(26, &value, &mut out);
         }
         if self.syntropy_contained != ratio(0, 1) {
@@ -2245,8 +2326,24 @@ impl ColonyOrb {
                 26 => {
                     let (albedo, used) = ratio::decode(value)?;
                     let (orbit_r, used_r) = ratio::decode(value.get(used..)?)?;
-                    orb.thermal = Some(ThermalSite { albedo, orbit_r });
                     orb.overheat = *value.get(used + used_r)? != 0;
+                    // The trailing angle: absent on every frame written
+                    // before the amendment, and absent means UNPLACED,
+                    // never zero.
+                    // The two trailing turns, each absent on frames
+                    // written before its amendment. Absent is UNPLACED
+                    // and UNINCLINED, never zero.
+                    let tail = value.get(used + used_r + 1..).unwrap_or(&[]);
+                    let (theta, used_t) = match ratio::decode(tail) {
+                        Some((turn, n)) => (Some(turn), n),
+                        None => (None, 0),
+                    };
+                    let psi = tail
+                        .get(used_t..)
+                        .filter(|rest| !rest.is_empty())
+                        .and_then(ratio::decode)
+                        .map(|(turn, _)| turn);
+                    orb.thermal = Some(ThermalSite { albedo, orbit_r, theta, psi });
                 }
                 20 => {
                     let (contained, _) = ratio::decode(value)?;
@@ -2417,3 +2514,82 @@ pub fn tile_class(seed: &[u8; 32], orb_id: u64, tile: u16) -> TileClass {
     }
 }
 
+
+
+/// THE ORBITAL SLOTS — a turn divides into SIXTY.
+///
+/// **Base 60, for the reason base 60 has always been used.** It is the
+/// smallest number that divides evenly by 1, 2, 3, 4, 5, 6, 10, 12, 15,
+/// 20, 30 and 60 — twelve exact subdivisions. Halves, thirds, quarters,
+/// fifths and sixths of a ring all land ON a slot, so a system can be
+/// laid out symmetrically at many arities without any angle falling
+/// between the teeth. Sixty is not a rounding: it is the number that
+/// makes the most placements exact.
+///
+/// A slot is `k/60` for `k ∈ 0..60`, and `k = 60` is `k = 0` — the ring
+/// closes.
+pub const TURN_SLOTS: i64 = 60;
+
+/// Is this angle ON a slot? An orbit sits at a slot or it does not sit.
+///
+/// Refusing off-slot angles is what keeps placement DISCRETE, and
+/// discreteness is what makes collision a decidable question rather
+/// than a tolerance.
+pub fn on_slot(theta: &Ratio) -> bool {
+    let scaled = theta.clone() * ratio(TURN_SLOTS, 1);
+    scaled.is_integer() && *theta >= ratio(0, 1) && *theta < ratio(1, 1)
+}
+
+/// The slot index of an angle that is on one.
+pub fn slot_of(theta: &Ratio) -> Option<i64> {
+    on_slot(theta).then(|| {
+        let scaled = theta.clone() * ratio(TURN_SLOTS, 1);
+        scaled.to_integer().try_into().unwrap_or(0)
+    })
+}
+
+/// The angle of a slot, wrapping: `slot(61)` is `slot(1)`.
+pub fn slot_angle(k: i64) -> Ratio {
+    ratio(k.rem_euclid(TURN_SLOTS), TURN_SLOTS)
+}
+
+/// WRAPPED L1 SEPARATION between two sited orbs — the only adjacency
+/// this system can compute exactly.
+///
+/// ```text
+/// d = |r₁ − r₂| + min(|θ₁ − θ₂|, 1 − |θ₁ − θ₂|)
+/// ```
+///
+/// The angular term takes the SHORT WAY ROUND, which is what makes the
+/// space a circle rather than a segment: `θ = 9/10` and `θ = 1/10` are
+/// `1/5` apart, not `4/5`.
+///
+/// `None` means the orb has a radius and no place, so no separation is
+/// defined — an unsited orb is not "far", it is UNPLACED, and reporting
+/// a distance would invent one.
+pub fn separation(a: &ThermalSite, b: &ThermalSite) -> Option<Ratio> {
+    let (Some(theta_a), Some(theta_b)) = (&a.theta, &b.theta) else {
+        return None;
+    };
+    let radial = if a.orbit_r >= b.orbit_r {
+        a.orbit_r.clone() - b.orbit_r.clone()
+    } else {
+        b.orbit_r.clone() - a.orbit_r.clone()
+    };
+    let mut total = radial + turn_gap(theta_a, theta_b);
+    // ψ ADDS ITS OWN WRAPPED TERM. Two orbs at one radius and one
+    // longitude are still apart if they are inclined differently —
+    // without this the volume collapses back to a disc.
+    if let (Some(psi_a), Some(psi_b)) = (&a.psi, &b.psi) {
+        total += turn_gap(psi_a, psi_b);
+    }
+    Some(total)
+}
+
+/// The wrapped gap between two turn-fractions — the SHORT WAY ROUND,
+/// which is what makes each angular axis a circle rather than a
+/// segment.
+pub fn turn_gap(a: &Ratio, b: &Ratio) -> Ratio {
+    let raw = if a >= b { a.clone() - b.clone() } else { b.clone() - a.clone() };
+    raw.clone().min(ratio(1, 1) - raw)
+}

@@ -434,7 +434,7 @@ touches this file for exactly THREE items (`Committed`,
 keeping thin.
 
 The load-bearing consequence (`19_KERNEL` §3): `replay` is a SECOND
-definition of the transition standing beside `kernel::lawful`, with
+definition of the transition standing beside `kernel::admits`, with
 nothing forcing them to agree. Changing an arm changes what a deed
 MEANS and the judge does not notice. That is the one defect between
 having a judge and having a kernel.
@@ -520,7 +520,7 @@ narrow remainder is real and still open. Struck text kept, not rewritten
   commitment the live board writes is stamped `judged = false`.
 - Therefore `spine.rs:429`'s "today every record is `judged = false`" is
   not a scoping note, it is the whole state of play: `admit`'s step 4
-  (re-run `kernel::lawful` on a received judged record) is dead code in
+  (re-run `kernel::admits` on a received judged record) is dead code in
   practice, and replication currently re-verifies CHAIN INTEGRITY only.
 - **`engine/rfa-core` has ZERO dependents.** No crate in the workspace
   lists it. `f_fold_star`/`orbit_lock` (I6's pair half), `validate_step`,

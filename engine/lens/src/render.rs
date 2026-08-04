@@ -375,7 +375,7 @@ pub fn render_receipt(receipt: &Receipt) -> String {
         }
         E::OverheatCleared { .. } => ("overheat_cleared", String::new()),
         E::StarCommissioned { class } => ("star_commissioned", format!("class {class}")),
-        E::PlanetSited { orb_id, albedo, orbit_r } => (
+        E::PlanetSited { orb_id, albedo, orbit_r, theta: _, psi: _ } => (
             "planet_sited",
             format!("orb {orb_id} A={} r={}", ratio_str(albedo), ratio_str(orbit_r)),
         ),

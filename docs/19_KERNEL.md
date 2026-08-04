@@ -51,7 +51,7 @@ agree.**
 
 - `cfe::world::replay` has **113 match arms** saying what each deed
   DOES to state.
-- `kernel::lawful` has seven invariants saying what a deed MAY do.
+- `kernel::admits` has seven invariants saying what a deed MAY do.
 
 Neither derives from the other. A deed's meaning can change in `replay`
 without `lawful` noticing, and has: `KERNEL_RELAY` §1.4 recorded the
@@ -68,7 +68,7 @@ is not satisfied by a validator that stands beside the updater.
 
 1. **Derive apply from judge.** `lawful` already computes the lawful
    per-resource deltas (`lawful_deltas`), the lawful gauge move
-   (`gauge_law`), the lawful element move (`element_law`). Where the
+   (`gauge_move`), the lawful element move (`element_move`). Where the
    judge already knows the answer, the applier should USE that answer
    rather than recompute it. Every place it does is one fewer chance to
    disagree.
@@ -107,6 +107,8 @@ Read as a miner, the core is already complete in shape:
                      ∧ re-chain; an intact chain over a non-solution
                      refuses
     bound the pay    mint_bound — the ruled ladder f, exact integers
+    require standing standing — D > 0 and dV ≠ 0, or no mint
+
     commit           the arbor: one record, parent-linked, the judging
                      VERSION bound into the commitment
 
@@ -277,7 +279,7 @@ document does not make it.
   list should name the interpreter as its own organ, or the split in
   §4 should make the claim true.
 - **The `VERSION 3` defect is CLOSED.** `lib.rs` described a
-  `capacity_law` that did not exist; it landed at `bd99c4b` and the
+  `standing` that did not exist; it landed at `bd99c4b` and the
   label now means what it says.
 - **Struck vocabulary is still live** in `17_CAPACITY.md`,
   `18_TORSION.md` and `EQUATIONS.md` — the anti-dogma ordinance's
@@ -343,7 +345,7 @@ new world.
 1. **THE MOVE ALREADY EXISTS AND IS THROWN AWAY.** `lib.rs:611`:
    `lawful_deltas(prior, event) -> Result<Vec<(Resource, Ratio)>, Unlawful>`.
    That IS the move. `conservation` uses it only to compare against the
-   `next` it was handed, then drops it. `gauge_law` and `element_law`
+   `next` it was handed, then drops it. `gauge_move` and `element_move`
    do the same on their axes. **Every deed computes its own move and
    discards it.**
 2. **MOVES COMPOSE; STATES DO NOT.** Two moves compose into a move; two
@@ -367,3 +369,127 @@ arms become callers that compose moves rather than a second
 implementation that rewrites states, and `K3`'s join becomes composition
 rather than a wire amendment. **Not yet built** — recorded so the work
 aims at the right shape.
+
+## §3b THE z,l ON x,y — there is nothing to map between (measured 2026-08-02)
+
+capacity-lane stopped on this: *"wiring `u(x)` from `V(Ω)` conflates two
+index spaces — `V`'s `boundary_form` reads `Δ`'s relational indices,
+while zones live on an 8×8 tile grid, and no mapping between them
+exists."* Measured, it is worse than a missing mapping.
+
+    Zone { tile: u16, kind }        an UNBOUNDED u16. No geometry, no
+                                    maximum, no 8×8 — `zone_as` checks
+                                    only that a tile is not already
+                                    zoned. The grid is an assumption.
+    ThermalSite { albedo, orbit_r } the orb's ONLY spatial fact is a
+                                    scalar RADIUS. No angle, so two
+                                    orbs can share a distance and never
+                                    a place.
+    Delta                           dim = orbs.len(), fiber = CHANNELS
+                                    = 3. No spatial index at all.
+    Coordinate { s: [Ratio; 3] }    a wrapped triple that DOES exist —
+                                    and it is a commitment ADDRESS,
+                                    hashed for uniqueness. Nothing
+                                    derives it from world state.
+
+**There is no `x,y`, no `z`, and no shared space.** One index space
+exists — `(orb, channel)` — and everything else is a scalar. The
+mapping capacity-lane wanted has nothing on the other side.
+
+### 3b.1 THREE RULINGS, in order, each a decision rather than a derivation
+
+1. **DOES `tile` HAVE GEOMETRY?** Give it `(x, y)` and a bound, or
+   declare it a bare label. Cheapest step, and it decides whether an orb
+   can have an INTERIOR at all (`§5a.1` wall 2). Today the code says
+   label; every document says grid.
+2. **DO ORBS HAVE POSITIONS?** `orbit_r` alone cannot express
+   adjacency, so **no two orbs can ever overlap** — that is the root of
+   K3's wall 2, and no amount of work on the complex reaches it. Either
+   siting gains an angle, or orbs gain a coordinate in a shared wrapped
+   space. `Coordinate.s` shows the shape is already affordable; it is
+   simply not a place today.
+3. **WHAT IS `z`?** The reading the measurement supports: **`z` is
+   SCALE.** Relations stand at tile↔tile, orb↔orb and system↔system,
+   and all three would collapse into one `Delta` today because there is
+   one. A STRATIFIED complex — one per scale, with maps between strata
+   — is what `z` would index, and that is #17's multi-scale map rather
+   than a new invention.
+
+**`l` needs nothing.** It is the obligation channel, it works, and it
+is the only coordinate in the system that already does what it says.
+
+**NOT DERIVED:** which of the three is wanted. They are independent
+decisions with different costs — 1 is a type change, 2 is a wire
+amendment, 3 is an architecture. Doing 3 without 2 stratifies a space
+in which nothing can meet.
+
+## §3c RELAY ANSWERS — R-D2, the channel arity, and two corrections to the spatial ruling (2026-08-02)
+
+### 3c.1 R-D2 · THE QUORUM — **STRIKE**
+
+Verified: `vrp.rs:26` `attest(&self, clock)` never reads `self`, so
+three seated timekeepers return one answer counted three times.
+`Attestation::Refuses` is constructed only in a test; `QuorumOpen` is
+unreachable.
+
+**Ruled STRIKE, by this document's own LAW 8** — *a term that computes
+is kept; a term that only resonates is excised*. The quorum resonates
+(it reads as consensus) and computes nothing. One writer per clock is
+already NS-5 §7 law, so nothing is lost.
+
+**BUILD is refused for a stated reason:** a real quorum matters in the
+mesh era, and building the mechanism now for a caller that does not
+exist is exactly what LAW 8 bars. It returns when a second attester
+does.
+
+Execution touches `vrp.rs`, `genesis.rs` and `ns3_conformance.rs` in
+`cfe` — shared, and days after a three-way merge. **Ruled here, not
+executed; say the word and it is one commit.**
+
+### 3c.2 THE CHANNEL ARITY — approved, with one pin added
+
+Deriving from `CHANNELS` instead of literal `3`s is right: a structural
+pin that hardcodes arity breaks on every addition and teaches nothing.
+`capacity_law_pins:242` already read it correctly one line above a
+literal that did not, so the file disagreed with itself.
+
+**But deriving EVERYWHERE means nothing can catch an unintended arity
+change.** One literal added, deliberately, in one place:
+`the_channel_arity_is_four_and_changing_it_is_an_amendment`.
+
+**MEASURED WHILE ADDING IT: `CHANNELS` is 3 on this branch.**
+`CHANNEL_LANE` is present on `remediations-lane` and **not merged
+here** — the relay describes it as landed, and it is landed on their
+branch only. The pin asserts 3 today and becomes 4 when their work
+merges, which is the point of having it.
+
+### 3c.3 SPATIAL SITING — two corrections before the amendment can be drafted
+
+**TAG `0x41` IS BARRED.** `0x41` is 65, and tag 65 is RETIRED
+(Charter §11, 2026-07-31 — the consilience receipt).
+`recurrence_guard::retired_wire_codes_are_never_reused` fails the build
+on any reuse. Next free is **90**.
+
+**AND NO NEW TAG IS NEEDED.** Siting already has one: `PlanetSited` is
+**tag 25**, carrying `{ orb_id, albedo, orbit_r }`. Its decoder reads
+three fields and ignores trailing bytes, so `θ` is an ADDITIVE-TRAILING
+extension — the same shape the codec used for the taxon (v2) and the
+seats (v3). No new tag, no rehash, and old receipts stay readable.
+
+**`θ ∈ ℚ` IS ONLY SOUND IN TURNS, NOT RADIANS.** A full turn in radians
+is `2π`, which is irrational, so a rational angle in radians cannot
+express a wrap. **`θ` is a fraction of a TURN, `θ ∈ [0, 1) ⊂ ℚ`**, and
+wrapping is exact.
+
+**ADJACENCY NEEDS A DECLARED METRIC, and it cannot be Euclidean.**
+Distance between `(r₁,θ₁)` and `(r₂,θ₂)` in the plane needs `cos` and a
+square root — both barred (§2b: no roots, THE PROPORTIONAL LAW). The
+system already has the answer it needs: `bridge.rs` records *reach is a
+wrapped-L1 distance*. **Adjacency is wrapped L1 on `(r, θ)`**,
+consistent with the metric already in use, and exact.
+
+**Old receipts carry no `θ`, and it must decode as ABSENT rather than
+zero.** Defaulting to `0` would place every historical orb at one
+angle — all collinear — which is a spatial claim nobody made.
+`theta: Option<Ratio>`, and an orb without one has a radius and no
+place.

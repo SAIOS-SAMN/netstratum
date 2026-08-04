@@ -19,7 +19,7 @@ fn the_constellation_rides_the_uplink_with_its_bytes_pinned() {
     let mut world = World::new();
     world.found("dimlight-hold").expect("founds");
     world.commission_star(StarClass::M).expect("commissions");
-    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1)).expect("sites cold");
+    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None, None).expect("sites cold");
     world.zone(8, cfe::dop::ZoneKind::Habitat).expect("zones");
     for _ in 0..70 {
         world.tick();

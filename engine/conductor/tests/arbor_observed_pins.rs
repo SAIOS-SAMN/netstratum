@@ -42,7 +42,7 @@ fn the_beat_chains_and_the_debt_is_named() {
     // shape of kernel-OBSERVED play (#36), where the judge watched and
     // never spoke. Both halves are now false by design: the chain
     // carries one record per DEED, and every deed past the adoption
-    // door is judged by `kernel::lawful` before it may enter.
+    // door is judged by `kernel::admits` before it may enter.
     let spine_root = book.world_dir(&world_name).join("spine");
     let arbor = Arbor::open(&spine_root).expect("the arbor opens and re-verifies whole");
     // NOT one record per beat. Per-DEED chaining means a beat that
@@ -62,7 +62,7 @@ fn the_beat_chains_and_the_debt_is_named() {
     // The RECORDS carry judged=false because the commitment is one per
     // beat, and a beat's record has no single step to name. That is the
     // arbor's addressing law, not an unjudged economy: DIRECTIVE 19 runs
-    // `kernel::lawful` on every deed individually before the beat
+    // `kernel::admits` on every deed individually before the beat
     // commits (see `Polity::refused`). Per-deed COMMITMENT — and so a
     // judged=true stamp per deed — waits on a coordinate sub-index,
     // which is a wire amendment.

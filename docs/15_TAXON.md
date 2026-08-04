@@ -15,7 +15,7 @@ the migration wave executes from the map.
 vocabularies and the seal semantics; coder-03 ratifies the invariant
 coverage and seals it into the constitution digest (additive tier);
 coder-04's codec freeze window gates the committed fields; ruleset
-couplings land inside `lawful()` after the I-invariants seal.
+couplings land inside `admits()` after the I-invariants seal.
 
 ## 1. The boundary — what moves, what stays
 
@@ -103,7 +103,7 @@ lands only WITH its coverage):**
    table (one receipted deed each, operator provenance).
 5. Re-anchoring — function/creed derivations read sealed codes; the
    scanner gains the taxon facet by NS-2 §4.2 (one appended row).
-6. Couplings — taxon-keyed ruleset rows land inside `lawful()`, one
+6. Couplings — taxon-keyed ruleset rows land inside `admits()`, one
    per landing with vectors (the G2 pattern).
 7. #19 unblocks — the archetype expansion seeds with codes at genesis.
 

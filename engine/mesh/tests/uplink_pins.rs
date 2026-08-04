@@ -197,5 +197,5 @@ fn a_judged_record_is_re_judged_or_refused() {
     let mut with_liar = base_segment.clone();
     with_liar.extend_from_slice(&step_frame(judged.commit, &liar));
     let mut dst3 = Arbor::open(scratch("judge-dst3")).expect("opens");
-    assert!(matches!(dst3.receive(&with_liar), Err(ArborRefused::Unlawful(_))));
+    assert!(matches!(dst3.receive(&with_liar), Err(ArborRefused::Refused(_))));
 }

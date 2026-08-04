@@ -14,7 +14,7 @@ use cfe::dop::{ClosureEvent, Resource, ZoneKind};
 use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
 use cfe::world::{World, FIRST_ORB, SOVEREIGN};
-use kernel::{lawful, Step, Unlawful};
+use kernel::{admits, Step, Refused};
 
 /// The thermal_flow fixture, re-played to the pre-decay point: a G
 /// star, a leaking site (albedo 0, orbit 1/2), 15/8 joules banked at
@@ -23,7 +23,7 @@ fn leaky_world() -> (World, u64) {
     let mut world = World::new();
     world.found("assay").expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
-    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2)).expect("sites");
+    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None, None).expect("sites");
     world.zone(0, ZoneKind::Extractor).expect("zones");
     world.zone(8, ZoneKind::Habitat).expect("zones");
     world.zone(16, ZoneKind::Encasement).expect("zones");
@@ -53,7 +53,7 @@ fn the_exact_due_admits_and_the_excess_refuses_both_sides_whole() {
     next.orbs[0].bank(Resource::Joule, -ratio(1, 8));
     // The exact due at elapsed 4: 1/32 × 1 × 4 = 1/8 — admitted.
     assert_eq!(
-        lawful(&prior, &next, &decay_step((1, 8), touch + 4)),
+        admits(&prior, &next, &decay_step((1, 8), touch + 4)),
         Ok(()),
         "the sealed rule's own answer is lawful"
     );
@@ -61,8 +61,8 @@ fn the_exact_due_admits_and_the_excess_refuses_both_sides_whole() {
     let mut greedy = prior.clone();
     greedy.orbs[0].bank(Resource::Joule, -ratio(5, 32));
     assert_eq!(
-        lawful(&prior, &greedy, &decay_step((5, 32), touch + 4)),
-        Err(Unlawful::DecayExceedsBound {
+        admits(&prior, &greedy, &decay_step((5, 32), touch + 4)),
+        Err(Refused::DecayExceedsBound {
             bound: Box::new(ratio(1, 8)),
             claimed: Box::new(ratio(5, 32)),
         }),
@@ -75,13 +75,13 @@ fn at_elapsed_zero_only_the_zero_decay_is_lawful() {
     let (world, touch) = leaky_world();
     let prior = world.committed();
     // No time has passed: the zero decay admits…
-    assert_eq!(lawful(&prior, &prior.clone(), &decay_step((0, 1), touch)), Ok(()));
+    assert_eq!(admits(&prior, &prior.clone(), &decay_step((0, 1), touch)), Ok(()));
     // …and ANY positive decay refuses with bound zero carried.
     let mut next = prior.clone();
     next.orbs[0].bank(Resource::Joule, -ratio(1, 32));
     assert_eq!(
-        lawful(&prior, &next, &decay_step((1, 32), touch)),
-        Err(Unlawful::DecayExceedsBound {
+        admits(&prior, &next, &decay_step((1, 32), touch)),
+        Err(Refused::DecayExceedsBound {
             bound: Box::new(ratio(0, 1)),
             claimed: Box::new(ratio(1, 32)),
         }),
@@ -96,8 +96,8 @@ fn the_sign_law_still_stands_beneath_the_bound() {
     let mut next = prior.clone();
     next.orbs[0].bank(Resource::Joule, ratio(1, 8));
     assert_eq!(
-        lawful(&prior, &next, &decay_step((-1, 8), touch + 4)),
-        Err(Unlawful::DecayNotPositive {
+        admits(&prior, &next, &decay_step((-1, 8), touch + 4)),
+        Err(Refused::DecayNotPositive {
             resource: Resource::Joule,
             amount: Box::new(ratio(-1, 8)),
         }),

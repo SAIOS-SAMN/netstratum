@@ -258,7 +258,7 @@ fn the_judge_stands_at_the_door() {
         .unwrap_err();
     assert!(matches!(
         refused,
-        ArborRefused::Unlawful(kernel::Unlawful::ConservationBroken { resource: Resource::Iron, .. })
+        ArborRefused::Refused(kernel::Refused::ConservationBroken { resource: Resource::Iron, .. })
     ));
 
     // A JUDGED refusal reaches the arbor and refuses. WITNESS
@@ -277,7 +277,7 @@ fn the_judge_stands_at_the_door() {
     };
     assert_eq!(
         arbor.extend(coord(2), &lawful_next, Some(&refused)).unwrap_err(),
-        ArborRefused::Unlawful(kernel::Unlawful::NotPermitted {
+        ArborRefused::Refused(kernel::Refused::NotPermitted {
             actor: 100,
             scope: cfe::ipsal::Scope::Build,
         })

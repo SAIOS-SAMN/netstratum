@@ -2,7 +2,7 @@
 //! the multi-axial transition, its inversion axiom, and the schedule
 //! that makes non-commutative composition safe across nodes.
 //!
-//! **WHY THIS EXISTS.** `lawful(prior, next, step)` accepts `next` and
+//! **WHY THIS EXISTS.** `admits(prior, next, step)` accepts `next` and
 //! returns `Ok(())`: the transition is computed elsewhere and the
 //! kernel grades it. Returning `Committed` instead would fix the
 //! duplication and keep the LINEARITY — a whole world is a POINT, with
@@ -191,7 +191,7 @@ impl Move {
                 None => banked.push((*key, delta.clone())),
             }
         }
-        banked.sort_by(|a, b| a.0.cmp(&b.0));
+        banked.sort_by_key(|entry| entry.0);
         banked.retain(|(_, d)| *d != ratio(0, 1));
 
         let width = self.gauge.len().max(next.gauge.len());
@@ -213,7 +213,7 @@ impl Move {
                 None => books.push((*key, delta.clone())),
             }
         }
-        books.sort_by(|a, b| a.0.cmp(&b.0));
+        books.sort_by_key(|entry| entry.0);
         books.retain(|(_, d)| *d != ratio(0, 1));
 
         let mut records = self.records.clone();
@@ -266,7 +266,7 @@ impl Standing {
                 None => banked.push((*key, delta.clone().max(ratio(0, 1)))),
             }
         }
-        banked.sort_by(|a, b| a.0.cmp(&b.0));
+        banked.sort_by_key(|entry| entry.0);
         banked.retain(|(_, held)| *held != ratio(0, 1));
 
         let mut seats = self.seats.clone();
@@ -285,7 +285,7 @@ impl Standing {
                 None => books.push((*key, delta.clone())),
             }
         }
-        books.sort_by(|a, b| a.0.cmp(&b.0));
+        books.sort_by_key(|entry| entry.0);
 
         // RECORDS APPLY IN ORDER, and the order is the content: an
         // insert after a remove leaves the record standing, the reverse
@@ -302,7 +302,7 @@ impl Standing {
                 RecordOp::Remove { key } => records.retain(|(k, _)| k != key),
             }
         }
-        records.sort_by(|a, b| a.0.cmp(&b.0));
+        records.sort_by_key(|entry| entry.0);
 
         Self { banked, seats, books, records }
     }
@@ -401,7 +401,7 @@ pub fn project(state: &Committed) -> Standing {
             banked.push(((orb.orb_id, *resource), held.clone()));
         }
     }
-    banked.sort_by(|a, b| a.0.cmp(&b.0));
+    banked.sort_by_key(|entry| entry.0);
     banked.retain(|(_, held)| *held != ratio(0, 1));
 
     let mut seats: Vec<(String, u8)> = state.stations.clone();

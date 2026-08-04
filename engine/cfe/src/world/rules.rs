@@ -218,3 +218,36 @@ pub fn ward_progress(depth: u32) -> Ratio {
         false => ratio(i64::from(depth), i64::from(gate.max(1))),
     }
 }
+
+/// **THE MINT WARRANT (K4).** What a payload EARNS, answered by
+/// somebody who may read it.
+///
+/// `cfe` may not import the verifier — the opaque-payload law, enforced
+/// by `kernel/tests/recurrence_guard.rs::the_arrow_law_holds`. Proofs
+/// are opaque bytes to the game and only the sealed verifier reads
+/// them; a proposer that could interpret proof structure would break
+/// the seal.
+///
+/// So the emitter does not verify: it ASKS. This trait is the callback,
+/// and it keeps the arrow intact — `cfe` defines the question, whoever
+/// sits above it answers.
+///
+/// `None` means the payload is not a proof. The emitter refuses BEFORE
+/// closing, so a bad mint never reaches the chronicle.
+pub trait MintWarrant {
+    /// What this payload earns, or `None` if it is not a proof.
+    fn earns(&self, work: &[u8]) -> Option<Ratio>;
+}
+
+/// The warrant that admits nothing — for callers with no verifier.
+///
+/// Not a convenience: it is the DEFAULT POSTURE. A caller that cannot
+/// verify must not be able to mint, and this makes that the shape of
+/// the type rather than a rule someone remembers.
+pub struct NoWarrant;
+
+impl MintWarrant for NoWarrant {
+    fn earns(&self, _work: &[u8]) -> Option<Ratio> {
+        None
+    }
+}

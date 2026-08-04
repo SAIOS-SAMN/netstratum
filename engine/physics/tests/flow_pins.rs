@@ -2,7 +2,7 @@
 //! on the netstratum carrier. Any implementation that holds all five
 //! implements the same physics.
 
-use cfe::ratio::ratio;
+use ratio::ratio;
 use num_traits::Zero;
 use physics::{
     exhale, inhale, step_witness, Axis, AxisFlow, AxisVector, BreathError, CapacityRead,

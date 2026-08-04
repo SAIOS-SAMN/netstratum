@@ -242,14 +242,14 @@ runs on: `Ω`'s own.
                              BY RECEIPT (D3). `PlaneUnearned`
                              refuses every other route.
 
-    STATE     V(Ω) holds     the deed is ADMITTED — `lawful()`
+    STATE     V(Ω) holds     the deed is ADMITTED — `admits()`
                              passes and a receipt is written.
                              THIS IS THE SOLIDIFICATION.
 ```
 
 **THE CROSSING IS RECEIPTED, NEVER CONTINUOUS.** There is no partial
 solidification and no half-committed deed: a claim is admitted and
-becomes state, or it is refused and does not. `kernel::lawful` returns
+becomes state, or it is refused and does not. `kernel::admits` returns
 admission or refusal and has no third answer, so no value strictly
 between claimed and committed exists to be occupied. This is the
 operator's standing rule that *there is no "half used" — that is an
@@ -318,7 +318,7 @@ reading personal without making it local.
                 D rises (D3); `PlaneUnearned` refuses every other
                 route.
 
-    V(Ω) OWES   substance that was RECEIPTED — `lawful()` admission,
+    V(Ω) OWES   substance that was RECEIPTED — `admits()` admission,
                 and nothing enters state by another door (§3a).
 
     EACH ORB    MAY evaluate `D(Ω)|_o` and `V(Ω)|_o`.
@@ -362,7 +362,7 @@ TWO (§3), never a product.
 
 **4. "Global field integral … removing local step-cliffs or scalar
 cutoffs" — REFUSED.** §3a rules the crossing RECEIPTED, NEVER
-CONTINUOUS: `lawful()` admits or refuses and has no third answer. **The
+CONTINUOUS: `admits()` admits or refuses and has no third answer. **The
 step-cliff IS the law.** An integral smooths exactly what the receipt
 discretizes, and a smoothed admission is a half-committed deed — the
 open-ended thread without closure barred the same day.
@@ -382,7 +382,7 @@ cycle-space DIMENSION is invariant, never a basis of it. D6 carries the
 form that IS invariant, pinned over all 24 relabellings.
 
 **6. Single Transition Engine — ALREADY TRUE; no change is owed.**
-`kernel::lawful` is pure and total and reads no clock and no network, so
+`kernel::admits` is pure and total and reads no clock and no network, so
 live production and replay run the identical judge by construction. The
 relay names this as a requirement; it is a property the kernel has held
 since it was sealed.
@@ -1183,7 +1183,7 @@ The direction is right. The sequencing is not, and bumping now would
 damage the chain.
 
 **The blocker is a missing map.** D2–D4 are stated over `Δ(V)`. The
-kernel judges `lawful(prior, next, step)` over `cfe::world::Committed`.
+kernel judges `admits(prior, next, step)` over `cfe::world::Committed`.
 **No function anywhere in the workspace maps `Committed → Delta.**
 Without it the kernel cannot compute `ext_x(Δ(V))` at all, so the
 invariant is not merely unlanded — it is unenforceable.
@@ -1198,7 +1198,7 @@ visibly rather than hidden.
 **AND THE RULE ABOVE WAS HALF A RULE** (corrected 2026-08-01, on the
 merge that landed VERSION 3). It forbade the bump LEADING the judgment
 and said nothing about the judgment leading the bump — which is what
-actually happened: `capacity_law` began refusing `DiscoveryMinted` on a
+actually happened: `standing` began refusing `DiscoveryMinted` on a
 non-`Entangled` prior while the constant still read 2, so **the chain
 bound version 2 to steps version 2 would have judged differently.**
 
@@ -1213,7 +1213,7 @@ symmetric:
 The bump to 3 is CORRECT as landed, and it is correct for the reason
 this section set out: the blocker named here — no `Committed → Δ` map,
 so the invariant was unenforceable — is cleared. `kernel::bridge`
-projects the state, `capacity_law` is called from `lawful`, and `Void`,
+projects the state, `standing` is called from `lawful`, and `Void`,
 `Stasis` and `Unframed` now refuse where version 2 admitted. The
 judgment is real, so the name is honest.
 

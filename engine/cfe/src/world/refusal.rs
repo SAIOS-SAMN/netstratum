@@ -11,6 +11,25 @@ use crate::ratio::Ratio;
 /// A typed action refusal — the world refuses instead of guessing.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ActionRefused {
+    /// K4 THE LIVE GATE: the payload is not a proof. The emitter asks a
+    /// `MintWarrant` what the work earns and refuses BEFORE closing, so
+    /// an unverifiable payload never reaches the chronicle. Previously
+    /// the kernel refused it afterwards, by which point the receipt
+    /// stood and `replay` granted the value.
+    WorkRefused,
+    /// K4: the amount exceeds what the verified work earns. Bounded at
+    /// the emitter, both sides carried.
+    MintExceedsWork { bound: Box<Ratio>, claimed: Box<Ratio> },
+
+    /// The angle is not ON a slot. A turn divides into sixty
+    /// (`dop::TURN_SLOTS`); an orbit sits at a slot or it does not sit.
+    /// Off-slot placement makes collision a matter of tolerance rather
+    /// than a decidable fact.
+    OffSlot { theta: Box<Ratio> },
+    /// TWO ORBS CANNOT SHARE A PLACE. Same radius, same slot — the
+    /// tension this law exists to resolve.
+    OrbitOccupied { orb: u64, slot: i64 },
+
     NoColony,
     ColonyAlreadyFounded,
     TileAlreadyZoned { tile: u16 },

@@ -6,7 +6,7 @@ description = "Netstratum physics — event-driven exact kinematics on the RFA c
 
 [dependencies]
 blake3.workspace = true
-cfe = { path = "../cfe" }
+ratio = { path = "../ratio" }
 num-bigint.workspace = true
 num-rational.workspace = true
 num-traits.workspace = true

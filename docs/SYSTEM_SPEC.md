@@ -61,7 +61,7 @@ composition is what was refused, not the parts:
 
 **The kernel is this equation's judge, not its driver.** The game proposes
 `N_i` (a deed); the validator scores and weights; convergence gates the fold;
-the node stamps and chains. `lawful(prior, next, step)` is the check that a
+the node stamps and chains. `admits(prior, next, step)` is the check that a
 proposed `Δ_{k+1}` is a legal image of `Δ_k` under one term of this equation.
 The equation GENERATES candidates; the kernel ADMITS or REFUSES. Never does
 the kernel optimize the equation globally (KERNEL_RELAY §9).

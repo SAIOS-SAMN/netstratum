@@ -195,11 +195,18 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             ClosureEvent::StarCommissioned { class } => {
                 star = crate::thermal::StarClass::from_wire(*class);
             }
-            ClosureEvent::PlanetSited { orb_id, albedo, orbit_r } => {
+            ClosureEvent::PlanetSited { orb_id, albedo, orbit_r, theta, psi } => {
                 if let Some(held) = peel(&mut orbs, *orb_id) {
                     held.thermal = Some(crate::dop::ThermalSite {
                         albedo: albedo.clone(),
                         orbit_r: orbit_r.clone(),
+                        // BOTH TURNS FROM THE RECEIPT — never None.
+                        // Binding one and discarding it loses an orb's
+                        // PLACE on replay while the live path keeps it,
+                        // which is the live/replay divergence class.
+                        // Clippy caught this twice here, once per turn.
+                        theta: theta.clone(),
+                        psi: psi.clone(),
                     });
                 }
             }
@@ -231,10 +238,10 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             // live path made — the compassion books are a replay fact.
             ClosureEvent::ResourceTransferred { from_orb, to_orb, resource, amount } => {
                 let from_crisis = peek(&orbs, *from_orb)
-                    .map(|held| in_crisis(held))
+                    .map(in_crisis)
                     .unwrap_or(false);
                 let to_crisis = peek(&orbs, *to_orb)
-                    .map(|held| in_crisis(held))
+                    .map(in_crisis)
                     .unwrap_or(false);
                 let value = amount.clone() * crate::dop::commensurate_weight(*resource);
                 if let Some(held) = peel(&mut orbs, *from_orb) {
@@ -327,10 +334,10 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             // match the live order exactly.
             ClosureEvent::OverflowAbsorbed { source_orb, absorber_orb, amount } => {
                 let source_crisis = peek(&orbs, *source_orb)
-                    .map(|held| in_crisis(held))
+                    .map(in_crisis)
                     .unwrap_or(false);
                 let absorber_crisis = peek(&orbs, *absorber_orb)
-                    .map(|held| in_crisis(held))
+                    .map(in_crisis)
                     .unwrap_or(false);
                 let value =
                     amount.clone() * crate::dop::commensurate_weight(Resource::Sink);

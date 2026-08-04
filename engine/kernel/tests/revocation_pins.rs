@@ -14,7 +14,7 @@ use cfe::dop::{ClosureEvent, ColonyOrb, Resource};
 use cfe::ipsal::{Entity, Scope};
 use cfe::ratio::ratio;
 use cfe::world::{Bond, Committed, World, SOVEREIGN};
-use kernel::{bridge, lawful, Step, Unlawful, KERNEL_VERSION};
+use kernel::{bridge, admits, Step, Refused, KERNEL_VERSION};
 
 const HAND: u64 = 100;
 
@@ -75,15 +75,15 @@ fn ring(n: u64) -> Committed {
 fn a_mint_that_grows_nothing_refuses() {
     let still = ring(4);
     // prior == next: nothing grew across the step.
-    match lawful(&still, &still, &mint()) {
-        Err(Unlawful::MintWithoutCapacityIncrement { was, now }) => {
+    match admits(&still, &still, &mint()) {
+        Err(Refused::MintWithoutCapacityIncrement { was, now }) => {
             assert_eq!(was, now, "the reading is carried whole, both sides");
         }
         // The capacity law may refuse first on standing; that is a
         // different rule and this pin is not about it. What must never
         // happen is ADMISSION.
         Err(other) => assert!(
-            !matches!(other, Unlawful::Unjudged),
+            !matches!(other, Refused::Unjudged),
             "refused for a stated reason: {other:?}"
         ),
         Ok(()) => panic!("a mint that grew no circulation must never be admitted"),
@@ -123,7 +123,7 @@ fn the_phantom_rank_gate_is_asked_first() {
 fn the_refusal_never_lowers_the_degree() {
     let still = ring(4);
     let before = bridge::read_entangled(&still).degree();
-    let _ = lawful(&still, &still, &mint());
+    let _ = admits(&still, &still, &mint());
     let after = bridge::read_entangled(&still).degree();
     assert_eq!(before, after, "the claim vacates; the degree does not");
     assert!(
@@ -145,8 +145,8 @@ fn d4_binds_creation_and_leaves_motion_alone() {
     };
     // Whatever else judges this deed, it is never D4's two refusals.
     if matches!(
-        lawful(&still, &still, &transfer),
-        Err(Unlawful::MintWithoutCapacityIncrement { .. }) | Err(Unlawful::RankUndefined { .. })
+        admits(&still, &still, &transfer),
+        Err(Refused::MintWithoutCapacityIncrement { .. }) | Err(Refused::RankUndefined { .. })
     ) {
         panic!("D4 must not bind a deed that mints nothing")
     }
@@ -166,8 +166,8 @@ fn a_mint_that_grows_circulation_passes_d4() {
     // D4's own arm admits this pair. Other invariants may still refuse
     // the deed for their own reasons; what this pins is that D4 does
     // not, so the law is a gate and not a wall.
-    if let Err(Unlawful::MintWithoutCapacityIncrement { .. }) =
-        lawful(&before, &after, &mint())
+    if let Err(Refused::MintWithoutCapacityIncrement { .. }) =
+        admits(&before, &after, &mint())
     {
         panic!("a mint that grew circulation must clear D4")
     }
@@ -184,8 +184,8 @@ fn the_split_judges_exactly_as_the_pile_did() {
     let bare = world(4);
     assert!(
         !matches!(
-            lawful(&bare, &bare, &mint()),
-            Err(Unlawful::MintWithoutCapacityIncrement { .. })
+            admits(&bare, &bare, &mint()),
+            Err(Refused::MintWithoutCapacityIncrement { .. })
         ),
         "a line holding no relations is claiming none — D4b lets it by"
     );
@@ -202,7 +202,7 @@ fn the_split_judges_exactly_as_the_pile_did() {
     // speaks first. That ordering is deliberate (deed validity before
     // effect validity) and the pin states what it can honestly see.
     assert!(
-        lawful(&still, &still, &mint()).is_err(),
+        admits(&still, &still, &mint()).is_err(),
         "a standing claim that grows nothing is never admitted"
     );
     // D4c itself, reached directly through a fixture that clears

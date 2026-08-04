@@ -174,7 +174,7 @@ fn main() {
                 newborns.push(spec);
             }
             // DIRECTIVE 19: the judge speaks on the board. Every deed
-            // `kernel::lawful` refused this beat is named here, once —
+            // `kernel::admits` refused this beat is named here, once —
             // the verdict stays on the polity's permanent record either
             // way. The deed still STANDS in the chronicle: `replay` is
             // the live transition until the Phase 3 flip demotes it

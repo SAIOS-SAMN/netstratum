@@ -1,10 +1,10 @@
 //! THE KERNEL — the one validated update function (CHARTER §11 rule 3).
 //!
-//! `lawful(prior, next, step)` judges whether ONE step lawfully carries
+//! `admits(prior, next, step)` judges whether ONE step lawfully carries
 //! the universe from `prior` to `next`. It is:
 //!
 //! - **pure** — same inputs, same verdict, forever;
-//! - **total** — every input returns `Ok` or a typed `Unlawful`, never
+//! - **total** — every input returns `Ok` or a typed `Refused`, never
 //!   panics, never hangs;
 //! - **no I/O** — it touches no file, clock, socket, or thread;
 //! - **encoding-blind** — it never produces or reads bytes.
@@ -155,7 +155,7 @@ pub struct Step {
 /// never a scalar). An `Ok(())` from [`lawful`] is the transition
 /// admitted.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Unlawful {
+pub enum Refused {
     /// A value-conserving step changed the total of a resource across
     /// the world's banks — value was minted or burned where the deed
     /// promised only to MOVE it. Both totals carried (boxed — the
@@ -256,6 +256,7 @@ pub enum Unlawful {
     /// exactly the size of every future tag. Two laws, one word "unknown"
     /// — conflating them silently rebuilds default-admit.
     Unjudged,
+
     /// D5 — THE SOVEREIGN UNION was struck by someone other than the
     /// ROOT ENTITY. The union is the standing the whole world is
     /// raised on, and no delegate may enter the offices into it: a
@@ -286,18 +287,19 @@ pub enum Unlawful {
 /// THE JUDGE. Does `step` lawfully carry `prior` to `next`? Pure,
 /// total, encoding-blind, AND network-blind (it reads no mesh, no peer,
 /// no uplink — `engine/kernel` imports `cfe` only; all arrows point one
-/// way). `Ok(())` admits; `Err(Unlawful)` refuses with the break whole.
-pub fn lawful(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Unlawful> {
+/// way). `Ok(())` admits; `Err(Refused)` refuses with the break whole.
+pub fn admits(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Refused> {
     // The sealed default arm (mesh-operator ruling, airtight-critical):
     // refuse-unknown, not admit-unknown. What no invariant covers does
     // not enter.
     if !covered(&step.event) {
-        return Err(Unlawful::Unjudged);
+        return Err(Refused::Unjudged);
     }
     conservation(prior, next, step)?;
     containment(prior, step)?;
     exactness(next)?;
-    union_law(step)?;
+    union(step)?;
+
     creation(step)?;
     // D4 AFTER `creation`, deliberately. `creation` judges the DEED —
     // its proof and its bound; D4 judges the deed's EFFECT on the
@@ -309,8 +311,8 @@ pub fn lawful(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Un
     // diagnostics choice and is recorded as one.
     revocation_law(prior, next, step)?;
     decay(prior, step)?;
-    gauge_law(prior, next, step)?;
-    element_law(prior, next, step)
+    gauge_move(prior, next, step)?;
+    element_move(prior, next, step)
 }
 
 /// **INVARIANT — D4, THE REVOCATION LAW. The eclipse anchor, floored
@@ -365,7 +367,7 @@ fn revocation_law(
     prior: &Committed,
     next: &Committed,
     step: &Step,
-) -> Result<(), Unlawful> {
+) -> Result<(), Refused> {
     let ClosureEvent::DiscoveryMinted { .. } = &step.event else {
         // D4 binds the MINT. Motion of value that already exists makes
         // no capacity claim, so there is no claim to vacate.
@@ -388,10 +390,10 @@ fn revocation_law(
 /// phantom rank"*, with `18_TORSION` §6 recording it as DEBT rather
 /// than enforcement. D4 computes an increment OVER that rank, so the
 /// debt came due: asked FIRST, before anything is compared.
-fn d4a_resolution(before: &bridge::EntangledRead, after: &bridge::EntangledRead) -> Result<(), Unlawful> {
+fn d4a_resolution(before: &bridge::EntangledRead, after: &bridge::EntangledRead) -> Result<(), Refused> {
     match before.rank_is_defined() && after.rank_is_defined() {
         true => Ok(()),
-        false => Err(Unlawful::RankUndefined {
+        false => Err(Refused::RankUndefined {
             unknown_before: before.unknown,
             unknown_after: after.unknown,
         }),
@@ -443,10 +445,10 @@ fn d4b_standing_claim(before: &bridge::EntangledRead) -> Claim {
 /// The refusal IS the vacating. Nothing here writes, and `Degree` has
 /// no below-ground representation to write into even if it did —
 /// Article IV, the `H¹` floor. The claim vacates; the degree does not.
-fn d4c_increment(was: usize, now: usize) -> Result<(), Unlawful> {
+fn d4c_increment(was: usize, now: usize) -> Result<(), Refused> {
     match now > was {
         true => Ok(()),
-        false => Err(Unlawful::MintWithoutCapacityIncrement { was, now }),
+        false => Err(Refused::MintWithoutCapacityIncrement { was, now }),
     }
 }
 /// INVARIANT — D5, THE SOVEREIGN UNION (operator ruling 2026-08-02).
@@ -476,22 +478,22 @@ fn d4c_increment(was: usize, now: usize) -> Result<(), Unlawful> {
 /// Pure and total like the rest: reads the step only, no clock, no
 /// history — the review FALLS DUE by arithmetic on the receipt's own
 /// stamp, and nothing about it is decided here.
-fn union_law(step: &Step) -> Result<(), Unlawful> {
+fn union(step: &Step) -> Result<(), Refused> {
     let ClosureEvent::SovereignUnionSealed { progenitor, sovereign, term_stamps } = &step.event
     else {
         return Ok(());
     };
     if step.actor != SOVEREIGN {
-        return Err(Unlawful::UnionNotStruckByRoot { actor: step.actor });
+        return Err(Refused::UnionNotStruckByRoot { actor: step.actor });
     }
     if *progenitor != Office::Progenitor || *sovereign != Office::Sovereign {
-        return Err(Unlawful::UnionMalformed {
+        return Err(Refused::UnionMalformed {
             progenitor: *progenitor,
             sovereign: *sovereign,
         });
     }
     if *term_stamps != UNION_REVIEW_HORIZON {
-        return Err(Unlawful::UnionTermNotRuled {
+        return Err(Refused::UnionTermNotRuled {
             declared: *term_stamps,
             ruled: UNION_REVIEW_HORIZON,
         });
@@ -507,12 +509,12 @@ fn union_law(step: &Step) -> Result<(), Unlawful> {
 /// state, so the bound is deterministic from `(prior, step)`). Every
 /// other deed declares no element move, so every element total holds
 /// still (a smuggled element mint under any deed refuses).
-fn element_law(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Unlawful> {
+fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Refused> {
     // The declared element mint for this deed (None = holds still).
     let declared: Option<([u8; 32], Ratio)> = match &step.event {
         ClosureEvent::AssayStruck { orb_id, element, amount } => {
             if *amount < ratio(0, 1) {
-                return Err(Unlawful::ElementNotPositive {
+                return Err(Refused::ElementNotPositive {
                     element: *element,
                     amount: Box::new(amount.clone()),
                 });
@@ -529,7 +531,7 @@ fn element_law(prior: &Committed, next: &Committed, step: &Step) -> Result<(), U
                 })
                 .unwrap_or_else(|| ratio(0, 1));
             if *amount > bound {
-                return Err(Unlawful::AssayExceedsVein {
+                return Err(Refused::AssayExceedsVein {
                     bound: Box::new(bound),
                     claimed: Box::new(amount.clone()),
                 });
@@ -561,7 +563,7 @@ fn element_law(prior: &Committed, next: &Committed, step: &Step) -> Result<(), U
         let after = total_element(next, element);
         let expected = before + delta;
         if after != expected {
-            return Err(Unlawful::ElementBroken {
+            return Err(Refused::ElementBroken {
                 element,
                 expected: Box::new(expected),
                 actual: Box::new(after),
@@ -597,7 +599,7 @@ fn total_element(state: &Committed, element: [u8; 32]) -> Ratio {
 /// site's law (converge/mesh admission calling the sealed
 /// `rfa_core::f_fold_star`): the kernel enforces the LOCAL half, the
 /// seam enforces the pair (the aperture-pair pattern, CHARTER §5a).
-fn gauge_law(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Unlawful> {
+fn gauge_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Refused> {
     use ClosureEvent as E;
     // The declared key effect — ratified against the replay arms.
     let expected: Vec<Ratio> = match &step.event {
@@ -635,7 +637,7 @@ fn gauge_law(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Unl
         let want = expected.get(grade).unwrap_or(&zero);
         let got = next.gauge.get(grade).unwrap_or(&zero);
         if want != got {
-            return Err(Unlawful::GaugeBroken {
+            return Err(Refused::GaugeBroken {
                 grade,
                 expected: Box::new(want.clone()),
                 actual: Box::new(got.clone()),
@@ -675,7 +677,7 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::EntityRegistered { .. } | E::ScopeGranted { .. } | E::ScopeRevoked { .. }
         // D5 — THE SOVEREIGN UNION. A CONSTITUTIONAL deed: no value
         // moves, no ratio is carried, no plane opens. I2 containment
-        // covers it and `union_law` adds the three checks the union
+        // covers it and `union` adds the three checks the union
         // needs — the ROOT entity struck it, the parties are a dyad of
         // two different offices, and the review horizon is the ruled
         // one. Ratified red-first by `sovereign_union_pins`.
@@ -793,7 +795,7 @@ fn covered(event: &ClosureEvent) -> bool {
 /// declare vectors, never a scalar. The PAIR-level law (a far leg is
 /// the near leg's exact inverse) is the cross-node opposition (KERNEL
 /// CHARTER §5a); the kernel enforces the LOCAL half.
-fn conservation(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Unlawful> {
+fn conservation(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Refused> {
     let deltas = lawful_deltas(prior, &step.event)?;
     let mut resources: Vec<Resource> = Vec::new();
     for (resource, _) in &deltas {
@@ -830,7 +832,7 @@ fn conservation(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
         let after = total_conserved(next, resource);
         let expected = before + declared;
         if after != expected {
-            return Err(Unlawful::ConservationBroken {
+            return Err(Refused::ConservationBroken {
                 resource,
                 before: Box::new(expected), // the lawful total this deed requires
                 after: Box::new(after),     // the total the step actually produced
@@ -850,10 +852,10 @@ fn conservation(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
 fn lawful_deltas(
     prior: &Committed,
     event: &ClosureEvent,
-) -> Result<Vec<(Resource, Ratio)>, Unlawful> {
+) -> Result<Vec<(Resource, Ratio)>, Refused> {
     use ClosureEvent as E;
     let non_negative = |resource: Resource, amount: &Ratio| match *amount < ratio(0, 1) {
-        true => Err(Unlawful::AmountNotPositive {
+        true => Err(Refused::AmountNotPositive {
             resource,
             amount: Box::new(amount.clone()),
         }),
@@ -1024,10 +1026,10 @@ fn total_conserved(state: &Committed, resource: Resource) -> Ratio {
 /// I4 adds the sign. NAMED SEAM: at convergence scale the mint is bounded
 /// by verified work — `mint ≤ verify_certificate(work)` — the PoUW anchor
 /// (KERNEL CHARTER §5a), which fills on Ruling Box 1. No fiat (05 §1.2).
-fn creation(step: &Step) -> Result<(), Unlawful> {
+fn creation(step: &Step) -> Result<(), Refused> {
     match &step.event {
         ClosureEvent::YieldCollected { resource, amount, .. } if *amount < ratio(0, 1) => {
-            Err(Unlawful::MintNotPositive { resource: *resource, amount: Box::new(amount.clone()) })
+            Err(Refused::MintNotPositive { resource: *resource, amount: Box::new(amount.clone()) })
         }
         // U1 — I4 completes on the discovery mint: sign, then the
         // REPLAY-COMPLETE verification (the kernel hands the opaque
@@ -1036,17 +1038,18 @@ fn creation(step: &Step) -> Result<(), Unlawful> {
         // the work earns refuses with both sides carried.
         ClosureEvent::DiscoveryMinted { resource, amount, work, .. } => {
             if *amount < ratio(0, 1) {
-                return Err(Unlawful::MintNotPositive {
+                return Err(Refused::MintNotPositive {
                     resource: *resource,
                     amount: Box::new(amount.clone()),
                 });
             }
             let difficulty =
-                verify_work(work).map_err(|broken| Unlawful::WorkRefused { broken })?;
+                verify_work(work).map_err(|broken| Refused::WorkRefused { broken })?;
             let bound = mint_bound(difficulty.rung());
+
             match *amount <= bound {
                 true => Ok(()),
-                false => Err(Unlawful::MintExceedsWork {
+                false => Err(Refused::MintExceedsWork {
                     bound: Box::new(bound),
                     claimed: Box::new(amount.clone()),
                 }),
@@ -1110,11 +1113,11 @@ pub fn mint_bound(rung: Option<u32>) -> Ratio {
 /// is FLAT and denominator-bounded, `decay ≤ rate · ease · elapsed`
 /// (never proportional — the 2^1100 lesson), which fills when the sealed
 /// demurrage rule + `last_touch` join the check.
-fn decay(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
+fn decay(prior: &Committed, step: &Step) -> Result<(), Refused> {
     match &step.event {
         ClosureEvent::DemurrageSettled { orb_id, resource, amount } => {
             if *amount < ratio(0, 1) {
-                return Err(Unlawful::DecayNotPositive {
+                return Err(Refused::DecayNotPositive {
                     resource: *resource,
                     amount: Box::new(amount.clone()),
                 });
@@ -1157,7 +1160,7 @@ fn decay(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
                 .unwrap_or_else(|| ratio(0, 1));
             match *amount <= due {
                 true => Ok(()),
-                false => Err(Unlawful::DecayExceedsBound {
+                false => Err(Refused::DecayExceedsBound {
                     bound: Box::new(due),
                     claimed: Box::new(amount.clone()),
                 }),
@@ -1175,13 +1178,13 @@ fn decay(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
 /// ledgers (the banked resources and elements most likely to carry a
 /// decoded value). It CALLS the sealed `ratio::is_canonical` (KERNEL
 /// CHARTER §0b: the equation is shared, never reimplemented in the judge).
-fn exactness(next: &Committed) -> Result<(), Unlawful> {
+fn exactness(next: &Committed) -> Result<(), Refused> {
     for orb in &next.orbs {
         let banked = orb.banked.iter().map(|(_, amount)| amount);
         let elements = orb.elements.iter().map(|(_, amount)| amount);
         for value in banked.chain(elements) {
             if !cfe::ratio::is_canonical(value) {
-                return Err(Unlawful::NotCanonical);
+                return Err(Refused::NotCanonical);
             }
         }
     }
@@ -1194,7 +1197,7 @@ fn exactness(next: &Committed) -> Result<(), Unlawful> {
 /// sovereign holds every scope by construction; an agent holds exactly
 /// its granted scopes. World-driven events (consequences the tick
 /// computes, no actor) carry no scope requirement (`scope_of` = None).
-fn containment(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
+fn containment(prior: &Committed, step: &Step) -> Result<(), Refused> {
     let Some(scope) = scope_of(&step.event) else {
         return Ok(());
     };
@@ -1202,10 +1205,10 @@ fn containment(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
         .entities
         .iter()
         .find(|held| held.entity_id == step.actor)
-        .ok_or(Unlawful::NoSuchEntity { actor: step.actor })?;
+        .ok_or(Refused::NoSuchEntity { actor: step.actor })?;
     match entity.permits(scope) {
         true => Ok(()),
-        false => Err(Unlawful::NotPermitted { actor: step.actor, scope }),
+        false => Err(Refused::NotPermitted { actor: step.actor, scope }),
     }
 }
 
@@ -1363,7 +1366,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::StationSeated { .. }
         // D5 — THE SOVEREIGN UNION. Build-class: it opens the standing
         // the whole world is raised on. The scope is necessary and NOT
-        // sufficient — `union_law` additionally requires the ROOT
+        // sufficient — `union` additionally requires the ROOT
         // entity, because no delegate may strike the union.
         | E::SovereignUnionSealed { .. } => {
             Some(Scope::Build)
@@ -1392,5 +1395,24 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::Confluent { .. } | E::StarAged { .. } | E::EraFolded { .. }
         | E::CouncilClosed { .. } | E::TechDiscovered { .. } | E::IncursionStruck { .. }
         | E::VoidShare { .. } | E::RouteLapsed { .. } => None,
+    }
+}
+
+/// **THE SEALED WARRANT (K4).** The kernel's answer to `cfe`'s
+/// question: what does this payload earn?
+///
+/// This is the one organ that may read a work payload, and it does the
+/// same two things the judge does — `verify_work` then `mint_bound` —
+/// so proposer and judge cannot disagree about what a proof is worth
+/// (CHARTER §0b, call-not-copy).
+///
+/// It closes the live gate WITHOUT breaking the opaque-payload law:
+/// `cfe` still never imports the verifier. It asks; this answers.
+pub struct SealedWarrant;
+
+impl cfe::world::MintWarrant for SealedWarrant {
+    fn earns(&self, work: &[u8]) -> Option<Ratio> {
+        let difficulty = verify_work(work).ok()?;
+        Some(mint_bound(difficulty.rung()))
     }
 }

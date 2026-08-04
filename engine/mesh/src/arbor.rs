@@ -113,7 +113,7 @@ pub enum ArborRefused {
     /// A step offered at genesis: nothing prior exists to judge from.
     GenesisJudged,
     StoreMissing,
-    Unlawful(kernel::Unlawful),
+    Refused(kernel::Refused),
     /// SPINE-UPLINK: a received record claims `judged` but its step
     /// did not ride the segment — the receiver cannot reproduce the
     /// kernel verdict, so it will not admit the claim. Admission is
@@ -351,7 +351,7 @@ impl Arbor {
                     let prior_bytes = self.fetch(&head.state)?;
                     let prior = codec::from_state_bytes(&prior_bytes)
                         .ok_or(ArborRefused::StateUndecodable)?;
-                    kernel::lawful(&prior, &next, step).map_err(ArborRefused::Unlawful)?;
+                    kernel::admits(&prior, &next, step).map_err(ArborRefused::Refused)?;
                 }
                 head.commit
             }
@@ -461,7 +461,7 @@ impl Arbor {
     /// arbor's own head lawfully (parent links, the arrow ascends, the
     /// address is fresh), carry a hash-matched blob that decodes as
     /// committed state, and — if it claims `judged` — re-run
-    /// `kernel::lawful` under this node's kernel from the carried step.
+    /// `kernel::admits` under this node's kernel from the carried step.
     /// The first break refuses typed; nothing partial is admitted past
     /// it. Returns the count admitted.
     pub fn receive(&mut self, segment: &[u8]) -> Result<usize, ArborRefused> {
@@ -613,7 +613,7 @@ impl Arbor {
             let prior_bytes = self.fetch(&prior_state)?;
             let prior = codec::from_state_bytes(&prior_bytes)
                 .ok_or(ArborRefused::StateUndecodable)?;
-            kernel::lawful(&prior, &next, step).map_err(ArborRefused::Unlawful)?;
+            kernel::admits(&prior, &next, step).map_err(ArborRefused::Refused)?;
         }
         // 5. Admit — write the blob, append the record VERBATIM (its
         //    commit verified to reseal: the two spines agree byte-exact).

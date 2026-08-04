@@ -25,7 +25,7 @@ use cfe::dop::{founding_reserves, ClosureEvent, ColonyOrb, Resource, ZoneKind};
 use cfe::ipsal::{Entity, Scope};
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::{Committed, Council, Forward, World, FIRST_ORB, SOVEREIGN};
-use kernel::{lawful, Step, Unlawful};
+use kernel::{admits, Step, Refused};
 
 const HAND: u64 = 100;
 
@@ -66,19 +66,19 @@ fn tier1_upkeep_settles_exactly_signed() {
     };
     // The exact declared debit admits.
     let next = bank_on(&prior, Resource::Iron, ratio(-2, 1));
-    assert_eq!(lawful(&prior, &next, &step(upkeep(ratio(2, 1)), HAND)), Ok(()));
+    assert_eq!(admits(&prior, &next, &step(upkeep(ratio(2, 1)), HAND)), Ok(()));
     // A debit past the declaration refuses with both totals whole.
     let greedy = bank_on(&prior, Resource::Iron, ratio(-3, 1));
     assert!(matches!(
-        lawful(&prior, &greedy, &step(upkeep(ratio(2, 1)), HAND)),
-        Err(Unlawful::ConservationBroken { resource: Resource::Iron, .. })
+        admits(&prior, &greedy, &step(upkeep(ratio(2, 1)), HAND)),
+        Err(Refused::ConservationBroken { resource: Resource::Iron, .. })
     ));
     // THE SIGN LAW: a negative settle is a credit wearing a debit's
     // name — refused outright, before any total is read.
     let inverted = bank_on(&prior, Resource::Iron, ratio(2, 1));
     assert_eq!(
-        lawful(&prior, &inverted, &step(upkeep(ratio(-2, 1)), HAND)),
-        Err(Unlawful::AmountNotPositive {
+        admits(&prior, &inverted, &step(upkeep(ratio(-2, 1)), HAND)),
+        Err(Refused::AmountNotPositive {
             resource: Resource::Iron,
             amount: Box::new(ratio(-2, 1)),
         }),
@@ -99,8 +99,8 @@ fn tier1_the_transfer_and_aperture_sign_holes_close() {
         amount: ratio(-3, 1),
     };
     assert_eq!(
-        lawful(&prior, &prior.clone(), &step(inverted_move, HAND)),
-        Err(Unlawful::AmountNotPositive {
+        admits(&prior, &prior.clone(), &step(inverted_move, HAND)),
+        Err(Refused::AmountNotPositive {
             resource: Resource::Iron,
             amount: Box::new(ratio(-3, 1)),
         }),
@@ -116,8 +116,8 @@ fn tier1_the_transfer_and_aperture_sign_holes_close() {
     };
     let credited = bank_on(&prior, Resource::Iron, ratio(1, 1));
     assert_eq!(
-        lawful(&prior, &credited, &step(inverted_leg, HAND)),
-        Err(Unlawful::AmountNotPositive {
+        admits(&prior, &credited, &step(inverted_leg, HAND)),
+        Err(Refused::AmountNotPositive {
             resource: Resource::Iron,
             amount: Box::new(ratio(-1, 1)),
         })
@@ -133,15 +133,15 @@ fn tier1_famine_draws_exactly_without_a_hand() {
         ClosureEvent::FamineStruck { orb_id: 1, resource: Resource::Iron, drawn }
     };
     let next = bank_on(&prior, Resource::Iron, ratio(-1, 1));
-    assert_eq!(lawful(&prior, &next, &step(famine(ratio(1, 1)), 999)), Ok(()));
+    assert_eq!(admits(&prior, &next, &step(famine(ratio(1, 1)), 999)), Ok(()));
     let overdraw = bank_on(&prior, Resource::Iron, ratio(-2, 1));
     assert!(matches!(
-        lawful(&prior, &overdraw, &step(famine(ratio(1, 1)), 999)),
-        Err(Unlawful::ConservationBroken { resource: Resource::Iron, .. })
+        admits(&prior, &overdraw, &step(famine(ratio(1, 1)), 999)),
+        Err(Refused::ConservationBroken { resource: Resource::Iron, .. })
     ));
     assert!(matches!(
-        lawful(&prior, &prior.clone(), &step(famine(ratio(-1, 1)), 999)),
-        Err(Unlawful::AmountNotPositive { .. })
+        admits(&prior, &prior.clone(), &step(famine(ratio(-1, 1)), 999)),
+        Err(Refused::AmountNotPositive { .. })
     ));
 }
 
@@ -178,15 +178,15 @@ fn tier2_forwards_lock_and_return_conserve_banked_plus_escrow() {
     // SEAL: bank −2 AND the forward enters escrow (+2) → conserved holds.
     let mut sealed = bank_on(&prior, Resource::Iron, ratio(-2, 1));
     sealed.forwards = vec![forward((2, 1))];
-    assert_eq!(lawful(&prior, &sealed, &step(seal.clone(), SOVEREIGN)), Ok(()));
+    assert_eq!(admits(&prior, &sealed, &step(seal.clone(), SOVEREIGN)), Ok(()));
 
     // THE STRENGTHENING: a seal that debits the bank but escrows NOTHING
     // refuses — the collateral would vanish from the conserved total.
     // (Before the escrow law this passed on banked-only accounting.)
     let smuggled = bank_on(&prior, Resource::Iron, ratio(-2, 1));
     assert!(matches!(
-        lawful(&prior, &smuggled, &step(seal, SOVEREIGN)),
-        Err(Unlawful::ConservationBroken { .. })
+        admits(&prior, &smuggled, &step(seal, SOVEREIGN)),
+        Err(Refused::ConservationBroken { .. })
     ));
 
     // The obligor's collateral sits in escrow: banked 6, escrow 2.
@@ -202,7 +202,7 @@ fn tier2_forwards_lock_and_return_conserve_banked_plus_escrow() {
         resource: Resource::Iron,
         collateral: ratio(2, 1),
     };
-    assert_eq!(lawful(&locked, &released, &step(release.clone(), HAND)), Ok(()));
+    assert_eq!(admits(&locked, &released, &step(release.clone(), HAND)), Ok(()));
 
     // SLASH: the collateral leaves escrow to the aggrieved's bank — same
     // conserved total (world-driven, no hand).
@@ -214,15 +214,15 @@ fn tier2_forwards_lock_and_return_conserve_banked_plus_escrow() {
         resource: Resource::Iron,
         collateral: ratio(2, 1),
     };
-    assert_eq!(lawful(&locked, &slashed, &step(slash, 999)), Ok(()));
+    assert_eq!(admits(&locked, &slashed, &step(slash, 999)), Ok(()));
 
     // A release that banks MORE than the forward escrowed refuses: the
     // escrow falls by 2, the bank rises by 3 → conserved climbs by 1.
     let mut greedy = bank_on(&locked, Resource::Iron, ratio(3, 1));
     greedy.forwards = vec![];
     assert!(matches!(
-        lawful(&locked, &greedy, &step(release, HAND)),
-        Err(Unlawful::ConservationBroken { .. })
+        admits(&locked, &greedy, &step(release, HAND)),
+        Err(Refused::ConservationBroken { .. })
     ));
 }
 
@@ -252,14 +252,14 @@ fn tier2_council_seals_by_member_count_and_closes_from_prior() {
     };
     let mut sealed = bank_on(&prior, Resource::Iron, ratio(-6, 1));
     sealed.councils = vec![council.clone()];
-    assert_eq!(lawful(&prior, &sealed, &step(seal.clone(), SOVEREIGN)), Ok(()));
+    assert_eq!(admits(&prior, &sealed, &step(seal.clone(), SOVEREIGN)), Ok(()));
     // Debiting only one member's share while escrowing the full council
     // refuses: banks fall 2, escrow rises 6 → the conserved total climbs.
     let mut partial = bank_on(&prior, Resource::Iron, ratio(-2, 1));
     partial.councils = vec![council];
     assert!(matches!(
-        lawful(&prior, &partial, &step(seal, SOVEREIGN)),
-        Err(Unlawful::ConservationBroken { .. })
+        admits(&prior, &partial, &step(seal, SOVEREIGN)),
+        Err(Refused::ConservationBroken { .. })
     ));
 
     // The close is STATEFUL: the resource is read from the PRIOR sealed
@@ -282,7 +282,7 @@ fn tier2_council_seals_by_member_count_and_closes_from_prior() {
         banked: ratio(2, 1),
     };
     let closed = bank_on(&with_council, Resource::Iron, ratio(2, 1));
-    assert_eq!(lawful(&with_council, &closed, &step(close, 999)), Ok(()));
+    assert_eq!(admits(&with_council, &closed, &step(close, 999)), Ok(()));
     // An UNKNOWN council declares nothing: any banked change refuses.
     let ghost_close = ClosureEvent::CouncilClosed {
         council: 99,
@@ -292,8 +292,8 @@ fn tier2_council_seals_by_member_count_and_closes_from_prior() {
     };
     let smuggled = bank_on(&with_council, Resource::Iron, ratio(2, 1));
     assert!(matches!(
-        lawful(&with_council, &smuggled, &step(ghost_close, 999)),
-        Err(Unlawful::ConservationBroken { .. })
+        admits(&with_council, &smuggled, &step(ghost_close, 999)),
+        Err(Refused::ConservationBroken { .. })
     ));
 }
 
@@ -316,13 +316,13 @@ fn tier3_the_genesis_mint_is_chartered_exactly() {
     }
     founded.orbs = vec![orb];
     let deed = ClosureEvent::ColonyFounded { orb_id: FIRST_ORB, name: "origin".into() };
-    assert_eq!(lawful(&prior, &founded, &step(deed.clone(), SOVEREIGN)), Ok(()));
+    assert_eq!(admits(&prior, &founded, &step(deed.clone(), SOVEREIGN)), Ok(()));
     // A founding that mints one iron beyond the charter refuses.
     let mut greedy = founded.clone();
     greedy.orbs[0].bank(Resource::Iron, ratio(1, 1));
     assert!(matches!(
-        lawful(&prior, &greedy, &step(deed, SOVEREIGN)),
-        Err(Unlawful::ConservationBroken { resource: Resource::Iron, .. })
+        admits(&prior, &greedy, &step(deed, SOVEREIGN)),
+        Err(Refused::ConservationBroken { resource: Resource::Iron, .. })
     ));
 }
 
@@ -338,14 +338,14 @@ fn tier3_zones_pay_their_cost_and_refund_from_prior() {
     let next = world.committed();
     let build = ClosureEvent::ZoneBuilt { orb_id: FIRST_ORB, tile: 0, kind: ZoneKind::Extractor };
     assert_eq!(
-        lawful(&prior, &next, &step(build.clone(), SOVEREIGN)),
+        admits(&prior, &next, &step(build.clone(), SOVEREIGN)),
         Ok(()),
         "the live zone closure re-judges lawful"
     );
     // Underpaying the cost refuses per-resource.
     assert!(matches!(
-        lawful(&prior, &prior.clone(), &step(build, SOVEREIGN)),
-        Err(Unlawful::ConservationBroken { .. })
+        admits(&prior, &prior.clone(), &step(build, SOVEREIGN)),
+        Err(Refused::ConservationBroken { .. })
     ));
 
     // The raze refunds FROM THE PRIOR ZONE (stateful — the event names
@@ -355,7 +355,7 @@ fn tier3_zones_pay_their_cost_and_refund_from_prior() {
     let razed_next = world.committed();
     let raze = ClosureEvent::ZoneRazed { orb_id: FIRST_ORB, tile: 0 };
     assert_eq!(
-        lawful(&razed_prior, &razed_next, &step(raze.clone(), SOVEREIGN)),
+        admits(&razed_prior, &razed_next, &step(raze.clone(), SOVEREIGN)),
         Ok(()),
         "the live raze closure re-judges lawful"
     );
@@ -364,8 +364,8 @@ fn tier3_zones_pay_their_cost_and_refund_from_prior() {
     let mut ghost_refund = razed_next.clone();
     ghost_refund.orbs[0].bank(Resource::Iron, ratio(5, 1));
     assert!(matches!(
-        lawful(&razed_next, &ghost_refund, &step(raze, SOVEREIGN)),
-        Err(Unlawful::ConservationBroken { .. })
+        admits(&razed_next, &ghost_refund, &step(raze, SOVEREIGN)),
+        Err(Refused::ConservationBroken { .. })
     ));
 }
 
@@ -378,8 +378,8 @@ fn the_total_check_stops_smuggling_under_neutral_deeds() {
     let smuggled = bank_on(&prior, Resource::Iron, ratio(1, 1));
     let neutral = ClosureEvent::OverheatCleared { orb_id: 1 };
     assert!(matches!(
-        lawful(&prior, &smuggled, &step(neutral, 999)),
-        Err(Unlawful::ConservationBroken { resource: Resource::Iron, .. })
+        admits(&prior, &smuggled, &step(neutral, 999)),
+        Err(Refused::ConservationBroken { resource: Resource::Iron, .. })
     ));
 }
 
@@ -396,8 +396,8 @@ fn an_assay_is_bounded_by_its_vein() {
     let prior = seated((6, 1));
     let assay = ClosureEvent::AssayStruck { orb_id: 1, element: [3u8; 32], amount: ratio(1, 1) };
     assert_eq!(
-        lawful(&prior, &prior.clone(), &step(assay, HAND)),
-        Err(Unlawful::AssayExceedsVein {
+        admits(&prior, &prior.clone(), &step(assay, HAND)),
+        Err(Refused::AssayExceedsVein {
             bound: Box::new(ratio(0, 1)),
             claimed: Box::new(ratio(1, 1)),
         }),

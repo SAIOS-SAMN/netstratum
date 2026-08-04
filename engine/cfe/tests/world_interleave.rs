@@ -36,10 +36,10 @@ fn furnace_and_coldstore() -> (World, u64) {
         .expect("zones the array");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2))
+        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None, None)
         .expect("sites hot");
     world
-        .site_planet(charted, ratio(0, 1), ratio(100, 1))
+        .site_planet(charted, ratio(0, 1), ratio(100, 1), None, None)
         .expect("sites cold");
     world.tick();
     world.collect().expect("banks the joules"); // @17: seals vent 1/2

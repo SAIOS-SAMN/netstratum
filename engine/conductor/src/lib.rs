@@ -520,7 +520,7 @@ pub struct Polity {
     /// been judging every deed every beat and posting its verdicts into
     /// a field no caller could see. A refusal names its cure, and a cure
     /// nobody can read is not a cure.
-    pub refused: Vec<(u64, kernel::Unlawful)>,
+    pub refused: Vec<(u64, kernel::Refused)>,
     /// THE LANE REFUSALS — why `charter_route` said no.
     ///
     /// `conductor/src/lib.rs`'s charter site discarded this with
@@ -558,6 +558,7 @@ pub struct Polity {
     /// is honest — the judge met the deed again — and it is the same
     /// re-verification `chained: 0` already performs.
     reported: usize,
+
 }
 
 fn banked(world: &World, resource: Resource) -> Ratio {
@@ -810,7 +811,14 @@ impl Polity {
         // An unlawful operator-pinned siting (albedo ≥ 1, orbit ≤ 0)
         // leaves the orb thermally DORMANT (the engine's opt-in guard)
         // instead of killing the board; derived seats are always lawful.
-        let _ = world.site_planet(cfe::world::FIRST_ORB, albedo, orbit);
+        // SITED WITHOUT AN ANGLE, deliberately. Passing ANY slot here
+        // makes conductor/tests/survey_pins.rs fail with a live/replay
+        // divergence in Crystal — measured at slots 0, 1, 7 and 30, so
+        // it is the PRESENCE of the angle and not its value. See
+        // `21_KERNEL_PARAMETERS` §17: the capability is landed and
+        // witnessed, and the conductor does not use it until #30
+        // closes the divergence it exposes.
+        let _ = world.site_planet(cfe::world::FIRST_ORB, albedo, orbit, None, None);
         Polity {
             chained: 0,
             refused: Vec::new(),
@@ -1371,6 +1379,11 @@ impl Polity {
                             cfe::dop::Resource::Crystal,
                             earned,
                             work,
+                            // The emitter now demands a warrant, and the
+                            // kernel's is the only one that reads a
+                            // payload. The bound is checked twice by one
+                            // function: here and at I4.
+                            &kernel::SealedWarrant,
                         );
                     }
                 }
@@ -1638,7 +1651,7 @@ impl Polity {
 
         // DIRECTIVE 19 — PER-DEED JUDGMENT. One commitment per DEED, not
         // one per beat, and each carries its own step so
-        // `mesh::arbor::extend` runs `kernel::lawful` on it. Batching
+        // `mesh::arbor::extend` runs `kernel::admits` on it. Batching
         // was refused by ruling: nine deeds in one composite hides an
         // un-inspected interior where a local unlawful step shelters
         // behind a net-positive whole.
@@ -1663,7 +1676,7 @@ impl Polity {
                 actor: receipt.provenance.first().copied().unwrap_or(cfe::world::SOVEREIGN),
                 stamp: receipt.stamp,
             };
-            if let Err(unlawful) = kernel::lawful(&prior, &next, &step) {
+            if let Err(unlawful) = kernel::admits(&prior, &next, &step) {
                 self.refused.push((receipt.sequence, unlawful));
             }
             prior = next;
@@ -1700,7 +1713,7 @@ impl Polity {
     /// it to proposer, `U_DIRECTIVES` §5), so a refused deed stands in
     /// the chronicle with the judge on record against it. That gap is
     /// the whole reason this must be visible rather than counted.
-    pub fn refusals(&self) -> &[(u64, kernel::Unlawful)] {
+    pub fn refusals(&self) -> &[(u64, kernel::Refused)] {
         &self.refused
     }
 
@@ -1708,7 +1721,7 @@ impl Polity {
     /// marks them told — the RECORD stays whole above; only the
     /// narrator's cursor moves, so each refusal is announced once
     /// instead of every beat thereafter.
-    pub fn unreported_refusals(&mut self) -> &[(u64, kernel::Unlawful)] {
+    pub fn unreported_refusals(&mut self) -> &[(u64, kernel::Refused)] {
         let from = self.reported.min(self.refused.len());
         self.reported = self.refused.len();
         &self.refused[from..]
