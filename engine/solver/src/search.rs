@@ -4,6 +4,8 @@
 //! maps EVERY training pair exactly. The honest withhold outranks a
 //! fabricated render — `Unsolved` is a lawful reading, a guess is not.
 
+use crate::derive::derive;
+use crate::need::Need;
 use solver_verify::certificate::SolveCertificate;
 use solver_verify::grid::{run, Grid, Op, Program};
 use solver_verify::loader::Task;
@@ -118,9 +120,29 @@ fn closes(program: &Program, task: &Task) -> bool {
 /// not the physics.
 pub const SEARCH_BUDGET: usize = 200_000;
 
+/// THE SWEEP — SUPERSEDED (operator ruling 2026-08-04: *never
+/// enumerate*). Kept as the measured baseline, not as the intended
+/// path; [`propose`] is the ruled proposer.
+///
 /// Enumerative search over programs up to `max_depth` ops drawn from
 /// the general vocabulary plus operators derived from the observation.
 /// Bounded by `SEARCH_BUDGET` candidates, deterministically.
+///
+/// **Why it was struck.** It sweeps a fixed vocabulary identically for
+/// every mind in every era, reading nothing about what the civilization
+/// lacks — the definition of brute force. Measured on the 960-task
+/// corpus it also saturates: confirmed stops at 33 from depth 3, and
+/// depth 4 buys ONLY overfitting (37 closed, still 33 confirmed — four
+/// false closures where there had been one). Its marginal product is
+/// negative past depth 3.
+///
+/// **What it still buys, stated honestly.** It composes over the whole
+/// vocabulary, so it can pass through intermediate states that no
+/// observation motivates, and it finds 7 tasks the derived reach does
+/// not (33 confirmed vs 26). Those are exactly the solves that are not
+/// derivable — reached by exhaustion rather than by reading. Whether
+/// the economy should pay for them is the operator's call; the numbers
+/// are in `examples/reach_vs_sweep.rs`.
 pub fn solve(task: &Task, max_depth: usize) -> SolveRead {
     // THE VACUOUS SOLVE, REFUSED (operator ruling C8, U_DIRECTIVES §10
     // S1). With no training pair, `closes` is true over nothing and the
@@ -183,6 +205,147 @@ pub fn solve(task: &Task, max_depth: usize) -> SolveRead {
         frontier = next;
     }
     SolveRead::Unsolved
+}
+
+// ── THE NEED-DRIVEN PROPOSER (operator ruling 2026-08-04) ─────────────
+
+/// What a proposal cost, so "we stopped enumerating" is a measurement
+/// rather than a claim.
+#[derive(Debug, Clone)]
+pub struct Proposal {
+    pub read: SolveRead,
+    /// Candidate programs actually tested.
+    pub tested: usize,
+    /// Operators the observation supported — the whole reach.
+    pub reach: usize,
+}
+
+/// THE PROPOSER. The observation supplies the reach; the need orders it;
+/// exactness decides.
+///
+/// This replaces the sweep. [`solve`] enumerated the cross-product of a
+/// fixed vocabulary to a fixed depth, bounded only by a 200,000
+/// candidate budget. Here the candidates are DERIVED from what changed
+/// between input and output ([`crate::derive`]), so a typical task
+/// offers a handful rather than a hundred thousand, and composition is
+/// bounded by what the mind is starved for rather than by a constant.
+///
+/// The need never extends the reach — [`Need::prefers`] reorders it and
+/// [`Need::compose_limit`] says how deep it will compose. An operator
+/// the observation does not support is never proposed, whatever the
+/// mind wants, because wanting a thing is not evidence of it.
+pub fn propose_measured(task: &Task, need: &Need) -> Proposal {
+    // The vacuity law holds here as everywhere: nothing to close means
+    // nothing proved (98ccbbe).
+    if task.train.is_empty() {
+        return Proposal { read: SolveRead::Unsolved, tested: 0, reach: 0 };
+    }
+
+    let first_reach = derive(task).len();
+    let mut tested = 0usize;
+    let seal = |program: &Program, tested: usize| {
+        let test_output = run(program, &task.test_in);
+        let matches_expected = task.test_expected.as_ref().map(|want| want == &test_output);
+        let certificate = SolveCertificate::seal(task, program, &test_output);
+        Proposal {
+            read: SolveRead::Solved {
+                program: program.clone(),
+                test_output,
+                matches_expected,
+                certificate,
+            },
+            tested,
+            reach: first_reach,
+        }
+    };
+
+    // The identity word: a copy task is a lawful task, and costs one
+    // test rather than a depth-0 frontier.
+    tested += 1;
+    if closes(&Vec::new(), task) {
+        return seal(&Vec::new(), tested);
+    }
+
+    // RE-DERIVATION AT EACH STEP. The reach is not computed once and
+    // then composed over — that would still be a sweep, just a shorter
+    // one, and it misses every operator that only becomes visible after
+    // a prefix moves the frame (gravity reads as nothing until the grid
+    // is turned the right way up).
+    //
+    // Instead, after each applied operator the RESIDUAL is re-derived:
+    // the training inputs are advanced through the program so far, and
+    // the observation is asked again — *what remains to be done?* The
+    // mind looks at what is still wrong and reaches for the operator
+    // that answers it.
+    let mut frontier: Vec<Program> = vec![Vec::new()];
+    for _step in 0..need.compose_limit() {
+        let mut next: Vec<Program> = Vec::new();
+        for program in &frontier {
+            for op in ordered_reach(&residual(task, program), need) {
+                let mut extended = program.clone();
+                extended.push(op);
+                tested += 1;
+                if closes(&extended, task) {
+                    return seal(&extended, tested);
+                }
+                next.push(extended);
+            }
+        }
+        if next.is_empty() {
+            break;
+        }
+        frontier = next;
+    }
+    Proposal { read: SolveRead::Unsolved, tested, reach: first_reach }
+}
+
+/// THE RESIDUAL — what is still wrong after the program so far.
+///
+/// Each training input is advanced through the program; the outputs are
+/// untouched. Deriving on this asks "what remains?" rather than "what
+/// did the whole task need?", which is what lets an operator be found
+/// whose precondition only appears mid-composition.
+fn residual(task: &Task, program: &Program) -> Task {
+    if program.is_empty() {
+        return task.clone();
+    }
+    Task {
+        name: task.name.clone(),
+        train: task
+            .train
+            .iter()
+            .map(|pair| solver_verify::loader::TaskPair {
+                input: run(program, &pair.input),
+                output: pair.output.clone(),
+            })
+            .collect(),
+        test_in: run(program, &task.test_in),
+        test_expected: task.test_expected.clone(),
+    }
+}
+
+/// The reach the observation supports, ordered by what the mind lacks.
+/// Preferred families first, derivation order preserved inside each
+/// group — a stable partition, never a score.
+fn ordered_reach(task: &Task, need: &Need) -> Vec<Op> {
+    let reach = derive(task);
+    let mut ordered: Vec<Op> = reach
+        .iter()
+        .filter(|c| need.prefers(c.family))
+        .map(|c| c.op.clone())
+        .collect();
+    ordered.extend(
+        reach
+            .iter()
+            .filter(|c| !need.prefers(c.family))
+            .map(|c| c.op.clone()),
+    );
+    ordered
+}
+
+/// The proposer's reading alone, for callers that do not want the cost.
+pub fn propose(task: &Task, need: &Need) -> SolveRead {
+    propose_measured(task, need).read
 }
 
 // ── THE SECTOR DOOR ────────────────────────────────────────────────────

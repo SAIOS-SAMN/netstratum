@@ -20,6 +20,8 @@
 //!   (THE REPLAY-COMPLETE LAW — an intact chain over a non-solution is
 //!   not a solution). Finding is search; checking is O(program length).
 
+pub mod derive;
+pub mod need;
 pub mod search;
 pub mod volume;
 
@@ -36,7 +38,12 @@ pub use solver_verify::{
     TileMirror, OBJ_OPS,
 };
 
-pub use search::{consult_observed, solve, solve_consulted, Consultation, SolveRead};
+pub use derive::{derive, Candidate};
+pub use need::{Family, Hunger, Need};
+pub use search::{
+    consult_observed, propose, propose_measured, solve, solve_consulted, Consultation, Proposal,
+    SolveRead,
+};
 pub use volume::{
     forge_volume, run_volume, solve_volume, VOp, VolDifficulty, Volume, VolumeSolveRead,
     VolumeTask,
