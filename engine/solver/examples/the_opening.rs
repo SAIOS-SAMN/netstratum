@@ -109,7 +109,7 @@ fn main() {
         // DOES THE MEASURE RANK? Take the largest opening; is it a
         // closer, when any closer exists?
         if any_closes && !reducing.is_empty() {
-            openings.sort_by(|a, b| b.0.cmp(&a.0));
+            openings.sort_by_key(|(gain, _)| std::cmp::Reverse(*gain));
             let best = openings[0].0;
             let winners: Vec<&(u64, bool)> =
                 openings.iter().filter(|(g, _)| *g == best).collect();

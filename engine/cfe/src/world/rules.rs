@@ -237,6 +237,41 @@ pub fn ward_progress(depth: u32) -> Ratio {
 pub trait MintWarrant {
     /// What this payload earns, or `None` if it is not a proof.
     fn earns(&self, work: &[u8]) -> Option<Ratio>;
+
+    /// **THE ESCROW CHECK — would the judge ADMIT this deed?**
+    ///
+    /// `earns` answers what a payload is WORTH. It cannot answer
+    /// whether the deed will stand, because most of the law is a
+    /// property of the TRANSITION — D4 reads the capacity increment
+    /// across `prior → next`, and conservation reads both totals. A
+    /// warrant that only prices the work leaves every transition-shaped
+    /// invariant to be discovered afterwards, by which point the
+    /// chronicle already holds the deed.
+    ///
+    /// That is exactly what was measured: a 60-beat era put mints
+    /// carrying `MintWithoutCapacityIncrement` into the record, and the
+    /// judge refused them where nobody could take them back.
+    ///
+    /// So the emitter ESCROWS: it builds the state the deed WOULD
+    /// produce, asks here whether that transition stands, and settles
+    /// only on yes. `cfe` still parses nothing and imports no judge —
+    /// it hands over two committed states and the event, and whoever
+    /// can judge, judges.
+    ///
+    /// Default `false`: a warrant that cannot answer must not be able
+    /// to settle. The same posture `NoWarrant` takes on `earns`, for
+    /// the same reason — the restrictive answer is the shape of the
+    /// type, not a rule someone remembers.
+    fn admits(
+        &self,
+        _prior: &crate::world::Committed,
+        _next: &crate::world::Committed,
+        _event: &crate::dop::ClosureEvent,
+        _actor: u64,
+        _stamp: u64,
+    ) -> bool {
+        false
+    }
 }
 
 /// The warrant that admits nothing — for callers with no verifier.

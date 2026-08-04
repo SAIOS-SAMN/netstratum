@@ -1441,4 +1441,22 @@ impl cfe::world::MintWarrant for SealedWarrant {
         let difficulty = verify_work(work).ok()?;
         Some(mint_bound(difficulty.rung()))
     }
+
+    /// THE ESCROW CHECK, answered by the judge itself — `admits` is the
+    /// same function the door runs, not a copy of its reasoning
+    /// (CHARTER §0b, call-not-copy). So a deed the emitter settles is
+    /// one the judge has already accepted on the identical inputs, and
+    /// proposer/judge drift on the mint path is not caught late — it is
+    /// unreachable.
+    fn admits(
+        &self,
+        prior: &cfe::world::Committed,
+        next: &cfe::world::Committed,
+        event: &cfe::dop::ClosureEvent,
+        actor: u64,
+        stamp: u64,
+    ) -> bool {
+        let step = Step { event: event.clone(), actor, stamp };
+        crate::admits(prior, next, &step).is_ok()
+    }
 }

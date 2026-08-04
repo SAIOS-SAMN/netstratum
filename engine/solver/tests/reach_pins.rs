@@ -297,7 +297,7 @@ fn the_largest_opening_is_the_closer() {
         if seen.iter().all(|(gain, _)| *gain == 0) {
             continue; // blind here; the corpus run reports how often
         }
-        seen.sort_by(|a, b| b.0.cmp(&a.0));
+        seen.sort_by_key(|(gain, _)| std::cmp::Reverse(*gain));
         assert!(
             seen[0].1,
             "the largest opening was not a closer — the measure misled, \

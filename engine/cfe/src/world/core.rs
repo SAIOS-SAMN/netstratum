@@ -248,10 +248,30 @@ impl World {
                 claimed: Box::new(amount),
             });
         }
-        self.close(
-            ClosureEvent::DiscoveryMinted { orb_id: orb, resource, amount, work },
-            actor,
-        );
+        // THE ESCROW. The deed is built, the state it WOULD produce is
+        // built, and the judge is asked — all before anything is
+        // closed. `earns` above priced the work; this asks whether the
+        // TRANSITION stands, which is where D4 and conservation live.
+        //
+        // A mint that fails here leaves no receipt and moves no value:
+        // it was never in the record to take back. Previously the judge
+        // met these deeds afterwards, and a 60-beat era banked mints it
+        // then refused — the drift the escrow makes unreachable rather
+        // than merely visible.
+        let event = ClosureEvent::DiscoveryMinted { orb_id: orb, resource, amount, work };
+        let prior = self.committed();
+        let mut candidate = prior.clone();
+        if let Some(held) = candidate.orbs.iter_mut().find(|held| held.orb_id == orb) {
+            held.bank(resource, match &event {
+                ClosureEvent::DiscoveryMinted { amount, .. } => amount.clone(),
+                _ => ratio(0, 1),
+            });
+        }
+        let stamp = self.now();
+        if !warrant.admits(&prior, &candidate, &event, actor, stamp) {
+            return Err(ActionRefused::WorkRefused);
+        }
+        self.close(event, actor);
         Ok(())
     }
     /// The committed projection of the live world.

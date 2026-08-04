@@ -120,3 +120,81 @@ fn the_warrant_and_the_judge_read_one_ladder() {
         let _ = kernel::mint_bound(difficulty.rung());
     }
 }
+
+/// **THE ESCROW — the emitter asks whether the TRANSITION stands, not
+/// only what the payload is worth.**
+///
+/// `earns` closed the payload half of the gate: an unverifiable proof
+/// never reaches the chronicle. It could not close the other half,
+/// because most of the law is a property of the TRANSITION — D4 reads
+/// the capacity increment across `prior → next`, conservation reads
+/// both totals — and the emitter had no `next` to offer.
+///
+/// So a mint could carry a real proof, price correctly, and still be a
+/// deed the judge refuses. Measured: a 60-beat era put mints carrying
+/// `MintWithoutCapacityIncrement` into the record, where the judge met
+/// them too late to take them back.
+///
+/// The emitter now builds the state the deed WOULD produce and asks the
+/// judge before closing. This pins the half that matters: not that the
+/// mint is refused — it was refused before — but that **no receipt is
+/// left behind**, which is the whole difference between catching drift
+/// and making it unreachable.
+#[test]
+fn a_deed_the_judge_refuses_leaves_no_receipt() {
+    let (mut world, orb) = founded();
+    let before = world.committed();
+
+    // An HONEST payload is not enough: this world grows no circulation,
+    // so D4 vacates the claim. The proof would price fine; the
+    // TRANSITION is what fails.
+    let verdict = world.mint_discovery_as(
+        SOVEREIGN,
+        orb,
+        Resource::Iron,
+        ratio(0, 1),
+        GARBAGE.to_vec(),
+        &kernel::SealedWarrant,
+    );
+    assert!(verdict.is_err(), "a deed the judge would refuse must not settle");
+
+    assert_eq!(
+        world
+            .chronicle()
+            .receipts()
+            .iter()
+            .filter(|r| matches!(r.event, ClosureEvent::DiscoveryMinted { .. }))
+            .count(),
+        0,
+        "ESCROW: a refused transition leaves no receipt — it was never in the record"
+    );
+    assert_eq!(
+        replay(world.chronicle()).orbs,
+        before.orbs,
+        "and replay grants nothing, because nothing was written"
+    );
+}
+
+/// **THE WARRANT'S DEFAULT IS REFUSAL, on both questions.**
+///
+/// `NoWarrant` cannot price a payload and cannot judge a transition. A
+/// caller holding one must not be able to settle either way — the
+/// restrictive answer is the shape of the type rather than a rule
+/// somebody remembers.
+#[test]
+fn a_caller_that_cannot_judge_cannot_settle() {
+    use cfe::world::MintWarrant;
+    let (world, _) = founded();
+    let committed = world.committed();
+    let event = ClosureEvent::DiscoveryMinted {
+        orb_id: committed.orbs[0].orb_id,
+        resource: Resource::Iron,
+        amount: ratio(0, 1),
+        work: Vec::new(),
+    };
+    assert!(
+        !NoWarrant.admits(&committed, &committed, &event, SOVEREIGN, 0),
+        "a warrant that cannot judge must answer NO, not yes-by-default"
+    );
+    assert!(NoWarrant.earns(GARBAGE).is_none(), "and it prices nothing");
+}
