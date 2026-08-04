@@ -18,7 +18,7 @@
 
 use cfe::ratio::{ratio, Ratio};
 use rfa_core::capacity::circulation_on;
-use rfa_core::{ext_x, holonomies, Delta, Support};
+use rfa_core::{boundary_form, ext_x, holonomies, Delta, Support};
 
 fn edge(d: &mut Delta, s: &mut Support, i: usize, j: usize, l: usize, v: Ratio) {
     let fiber = d.fiber();
@@ -30,6 +30,14 @@ fn edge(d: &mut Delta, s: &mut Support, i: usize, j: usize, l: usize, v: Ratio) 
 
 fn degree(d: &Delta, s: &Support) -> usize {
     ext_x(&circulation_on(d, s)).degree().get()
+}
+
+/// **V — the flow reading**, support-aware like `degree` above:
+/// `rank(∂Δ)`, the number of POSITIONS carrying net flow. Zero is
+/// lawful and means REST; it is deliberately not floored, where D is
+/// floored at GROUND. Two individuals, two zeros.
+fn v_rank(d: &Delta, s: &Support) -> usize {
+    boundary_form(d, s).rank()
 }
 
 /// A complete relation on `n` entities over `f` channels, valued so no
@@ -57,19 +65,39 @@ fn main() {
 
     // ── 1. unbounded above, along the ENTITY axis ────────────────────
     println!("1. THE ENTITY AXIS — one channel, more entities");
-    println!("   {:>8} {:>10} {:>8} {:>14}", "entities", "relations", "D", "ceiling 1+C(n,2)");
+    println!(
+        "   {:>8} {:>10} {:>6} {:>14} {:>6} {:>12}",
+        "entities", "relations", "D", "D ceil 1+C(n,2)", "V", "V ceil n*f"
+    );
     for n in 3..=9usize {
         let (d, s) = saturated(n, 1);
-        let ceiling = 1 + n * (n - 1) / 2;
-        println!("   {:>8} {:>10} {:>8} {:>14}", n, n * (n - 1) / 2, degree(&d, &s), ceiling);
+        println!(
+            "   {:>8} {:>10} {:>6} {:>14} {:>6} {:>12}",
+            n,
+            n * (n - 1) / 2,
+            degree(&d, &s),
+            1 + n * (n - 1) / 2,
+            v_rank(&d, &s),
+            n
+        );
     }
 
     // ── 2. the CHANNEL axis ──────────────────────────────────────────
     println!("\n2. THE CHANNEL AXIS — four entities, more channels");
-    println!("   {:>8} {:>8} {:>18}", "channels", "D", "ceiling 1+C(4,2)*f");
+    println!(
+        "   {:>8} {:>6} {:>18} {:>6} {:>10}",
+        "channels", "D", "D ceil 1+C(4,2)*f", "V", "V ceil 4*f"
+    );
     for f in 1..=5usize {
         let (d, s) = saturated(4, f);
-        println!("   {:>8} {:>8} {:>18}", f, degree(&d, &s), 1 + 6 * f);
+        println!(
+            "   {:>8} {:>6} {:>18} {:>6} {:>10}",
+            f,
+            degree(&d, &s),
+            1 + 6 * f,
+            v_rank(&d, &s),
+            4 * f
+        );
     }
 
     // ── 3. ANY VARIATION OF COMBINATIONS ─────────────────────────────
@@ -81,7 +109,7 @@ fn main() {
         ("4-cycle       (0-1,1-2,2-3,3-0)", &[(0, 1), (1, 2), (2, 3), (3, 0)]),
         ("triangle+tail (0-1,1-2,2-0,2-3)", &[(0, 1), (1, 2), (2, 0), (2, 3)]),
     ];
-    println!("   {:<34} {:>6} {:>6}", "arrangement", "rank", "D");
+    println!("   {:<34} {:>6} {:>6} {:>6}", "arrangement", "rank", "D", "V");
     for (label, edges) in shapes {
         let mut d = Delta::zero(4, 1);
         let mut s = Support::new(4, 1);
@@ -89,10 +117,11 @@ fn main() {
             edge(&mut d, &mut s, *i, *j, 0, ratio(2 + k as i64 * 3, 1));
         }
         println!(
-            "   {:<34} {:>6} {:>6}",
+            "   {:<34} {:>6} {:>6} {:>6}",
             label,
             holonomies(&d, &s).len(),
-            degree(&d, &s)
+            degree(&d, &s),
+            v_rank(&d, &s)
         );
     }
 
@@ -100,7 +129,7 @@ fn main() {
     println!("\n4. NEVER INFINITE");
     let (d, s) = saturated(9, 3);
     let reached = degree(&d, &s);
-    println!("   9 entities x 3 channels reaches D = {reached}");
+    println!("   9 entities x 3 channels reaches D = {reached}, V = {}", v_rank(&d, &s));
     println!("   the reading is a COUNT of surviving coordinates — bounded by");
     println!("   C(n,2)*f, which is finite for any finite state. There is no");
     println!("   arithmetic path to an unbounded value: `Degree` wraps a usize");
@@ -114,7 +143,22 @@ fn main() {
     let (c, sc) = saturated(4, 1);
     let (e, se) = saturated(4, 5);
     let climbs_channels = degree(&e, &se) > degree(&c, &sc);
-    println!("   climbs on entities : {climbs_entities}");
-    println!("   climbs on channels : {climbs_channels}");
-    println!("   finite always      : true by construction (a count, not a limit)");
+    println!("   D climbs on entities : {climbs_entities}");
+    println!("   D climbs on channels : {climbs_channels}");
+    println!("   finite always        : true by construction (a count, not a limit)");
+
+    // THE RATES, side by side. D is bounded by C(n,2)*f and V by n*f,
+    // so they do not scale together — the couple pulls apart as a world
+    // grows, and a single collapsed number could not show it.
+    println!("\n   D grows QUADRATICALLY in entities, V LINEARLY:");
+    println!("   {:>8} {:>6} {:>6} {:>10}", "entities", "D", "V", "D per V");
+    for n in [3usize, 5, 7, 9] {
+        let (d, s) = saturated(n, 1);
+        let (dd, vv) = (degree(&d, &s), v_rank(&d, &s));
+        let per = match vv {
+            0 => "—".to_string(),
+            _ => format!("{}", cfe::ratio::ratio(dd as i64, vv as i64)),
+        };
+        println!("   {:>8} {:>6} {:>6} {:>10}", n, dd, vv, per);
+    }
 }
