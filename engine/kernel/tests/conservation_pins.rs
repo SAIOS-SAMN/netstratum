@@ -278,7 +278,14 @@ fn the_version_is_pinned() {
     // ORDER IS PRESERVED: a chain cut under the old linear versions
     // compares BELOW every packed one, which is true — an earlier judge
     // cut it.
-    assert!(VERSION > 5, "the packed form orders above the linear era");
+    // The packed form orders above the linear era (1..5) — what a
+    // peer comparing two commitments needs. Asserted against the
+    // last linear version rather than a literal, so it stays a claim
+    // about ORDER and cannot become constant-true.
+    assert!(
+        KERNEL_VERSION.code() > Version { major: 0, minor: 0, patch: 5 }.code(),
+        "a packed version orders above the linear era it succeeded"
+    );
 }
 
 #[test]

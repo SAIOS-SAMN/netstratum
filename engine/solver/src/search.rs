@@ -474,11 +474,28 @@ pub fn propose(task: &Task, need: &Need) -> SolveRead {
 /// deeper, and still nothing crosses that does not close — which is why
 /// letting hunger steer the search costs the judge nothing.
 pub fn propose_consulted(task: &Task, need: &Need) -> SolveRead {
-    let proposal = rfa_core::consult((task, need), |(t, n)| propose(t, n));
-    match proposal.withdraw(|read| closes_every_training_pair(task, read)) {
-        Some(read) => read,
-        None => SolveRead::Unsolved,
-    }
+    propose_consulted_measured(task, need).read
+}
+
+/// THE DOOR AND THE COST IN ONE PASS.
+///
+/// A caller that wants both must not run the proposer twice — the
+/// integration did exactly that for one commit, measuring with
+/// [`propose_measured`] and then disposing with [`propose_consulted`],
+/// which doubled the live board's search for no change in verdict.
+///
+/// **The cost is a MEASUREMENT; only the CLAIM goes through the door.**
+/// Candidates tested is a fact about work already done, true whether or
+/// not anything crossed — offering it to the door would be asking
+/// exactness to verify an expenditure. What the door judges is the
+/// read, exactly as [`propose_consulted`] judges it.
+pub fn propose_consulted_measured(task: &Task, need: &Need) -> Proposal {
+    let measured = propose_measured(task, need);
+    let (tested, reach) = (measured.tested, measured.reach);
+    let read = rfa_core::Proposal::offer(measured.read)
+        .withdraw(|read| closes_every_training_pair(task, read))
+        .unwrap_or(SolveRead::Unsolved);
+    Proposal { read, tested, reach }
 }
 
 // ── THE SECTOR DOOR ────────────────────────────────────────────────────

@@ -51,7 +51,7 @@ use ledger::registry::{lineage_domain, Civilization, Registry, DISPOSITIONS, MET
 use ledger::{Directive, Disposition, Ledger};
 use physics::Beacon;
 use solver::{
-    forge_task, propose_consulted, propose_measured, solve_consulted, Difficulty, Hunger, Need,
+    forge_task, propose_consulted_measured, solve_consulted, Difficulty, Hunger, Need,
     SolveRead,
 };
 
@@ -1491,11 +1491,11 @@ impl Polity {
                 // reach may look in any order it likes, but nothing
                 // crosses that does not re-derive against every training
                 // pair. Measure inside, dispose outside.
-                let proposal = propose_measured(&task, &need);
+                let proposal = propose_consulted_measured(&task, &need);
                 polity.spent = polity.spent.saturating_add(proposal.tested as u64);
-                let read = propose_consulted(&task, &need);
-                polity.last_forge = Some((digest, difficulty, need, read.clone()));
-                read
+                polity.last_forge =
+                    Some((digest, difficulty, need, proposal.read.clone()));
+                proposal.read
             };
             // WHICH PATH ACTUALLY PAID FOR THIS BEAT — captured before
             // the trajectory advances, because promotion reads it.
