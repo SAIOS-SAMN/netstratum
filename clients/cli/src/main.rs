@@ -1427,19 +1427,27 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             "{} {}\n     {}",
                             style.bad("✗"),
                             style.strong("t0 mint <axis> <sigil> <word> <channel>:<p>/<q> ..."),
-                            style.dim("e.g. t0 mint class ⌘ covenantal 1:7/4 2:7/4   (channels: 1 yield · 2 upkeep · 3 survey)")
+                            style.dim("e.g. t0 mint class ⌘ covenantal 1:7/4 2:7/4   (axes: 1 disposition · 2 metabolism · 3 perception · 4 class · 5 clade · 6 practice; channels: 1 yield · 2 upkeep · 3 survey; no axis mints an OFFICE)")
                         )
                     };
                     let axis_word = words.next();
                     let sigil = words.next().unwrap_or("");
                     let word = words.next().unwrap_or("");
+                    // The axis is proven at THIS door: an unknown code or
+                    // word never reaches the verb (29_CONSTRUCTION).
                     let Some(axis) = axis_word.and_then(|w| {
-                        w.parse::<u8>().ok().or(match w {
-                            "disposition" => Some(1), "metabolism" => Some(2),
-                            "perception" => Some(3), "class" => Some(4),
-                            "clade" => Some(5), "practice" => Some(6),
-                            _ => None,
-                        })
+                        w.parse::<u8>()
+                            .ok()
+                            .and_then(cfe::vocabulary::Axis::from_code)
+                            .or(match w {
+                                "disposition" => Some(cfe::vocabulary::Axis::Disposition),
+                                "metabolism" => Some(cfe::vocabulary::Axis::Metabolism),
+                                "perception" => Some(cfe::vocabulary::Axis::Perception),
+                                "class" => Some(cfe::vocabulary::Axis::Class),
+                                "clade" => Some(cfe::vocabulary::Axis::Clade),
+                                "practice" => Some(cfe::vocabulary::Axis::Practice),
+                                _ => None,
+                            })
                     }) else {
                         usage();
                         return;
@@ -1498,7 +1506,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                 style.ok("✓"),
                                 sigil,
                                 style.strong(word),
-                                style.strong(&axis.to_string()),
+                                style.strong(&axis.code().to_string()),
                                 style.strong(&code.to_string())
                             );
                         }
@@ -3884,17 +3892,14 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
                 _ => "sovereign",
             })
         ),
-        // 28_VOCABULARY §5-§7 — the four mint gates. Each names the way
+        // 28_VOCABULARY §5-§7 — the three mint gates. Each names the way
         // up as well as the wall: the article gives before it withholds.
+        // The unknown-axis arm died at the `Axis` door (29_CONSTRUCTION);
+        // this verb's own parse carries that guidance now.
         ActionRefused::MintWithoutStanding { line } => format!(
             "{} holds no progenitor seat — minting is a TIER 0 power ({}), the office that makes the board others play on",
             style.strong(line),
             style.dim("12_UNION ruling 4")
-        ),
-        ActionRefused::VocabularyAxisUnknown { axis } => format!(
-            "no vocabulary {} — {} (there is no axis for an OFFICE: minting one would let a seat manufacture the seat that judges it)",
-            style.strong(&axis.to_string()),
-            style.dim("1 disposition · 2 metabolism · 3 perception · 4 class · 5 clade · 6 practice")
         ),
         ActionRefused::BindingUnlawful => format!(
             "the binding does not TRADE — it needs one BENEFIT and one FRICTION, every factor in [1/4, 4], every channel one the engine computes ({}). A class that is strictly better than its neighbours is not a class",

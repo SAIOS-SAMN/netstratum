@@ -383,8 +383,11 @@ impl World {
     /// **THE VOCABULARY MINT** (tag 90, `28_VOCABULARY` §5–§7).
     ///
     /// A T0 progenitor adds an entry to a vocabulary, and the board
-    /// grows a class of entity that no coder wrote. Four gates, each
-    /// refusing typed.
+    /// grows a class of entity that no coder wrote. Three gates, each
+    /// refusing typed — the fourth died at the door: the axis is a
+    /// [`crate::vocabulary::Axis`], so an unknown axis cannot be
+    /// constructed (29_CONSTRUCTION), and there is still no variant for
+    /// STATIONS (§10) — the enum simply does not hold one.
     ///
     /// **The code is DERIVED here, never accepted.** The caller does not
     /// pass one: the lawful value is `ceiling(axis) + 1` read from the
@@ -394,7 +397,7 @@ impl World {
     pub fn mint_vocabulary(
         &mut self,
         line: &str,
-        axis: u8,
+        axis: crate::vocabulary::Axis,
         sigil: &str,
         word: crate::dop::Name,
         binding: Vec<(u8, crate::ratio::Ratio)>,
@@ -405,7 +408,7 @@ impl World {
         &mut self,
         actor: u64,
         line: &str,
-        axis: u8,
+        axis: crate::vocabulary::Axis,
         sigil: &str,
         word: crate::dop::Name,
         binding: Vec<(u8, crate::ratio::Ratio)>,
@@ -419,18 +422,13 @@ impl World {
             return Err(ActionRefused::MintWithoutStanding { line: line.to_string() });
         }
 
-        // GATE 2 — THE AXIS EXISTS.
-        let Some(on) = vocab::Axis::from_code(axis) else {
-            return Err(ActionRefused::VocabularyAxisUnknown { axis });
-        };
-
-        // GATE 3 — THE BINDING TRADES (§4a).
+        // GATE 2 — THE BINDING TRADES (§4a).
         if !vocab::binding_trades(&binding) {
             return Err(ActionRefused::BindingUnlawful);
         }
 
-        // GATE 4 — NOVELTY (§6), measured on the canonical mechanism.
-        let standing = vocab::fold(self.chronicle(), on);
+        // GATE 3 — NOVELTY (§6), measured on the canonical mechanism.
+        let standing = vocab::fold(self.chronicle(), axis);
         let shape = vocab::canonical(&binding);
         if let Some(twin) = standing
             .iter()
@@ -450,7 +448,9 @@ impl World {
         let code = standing.iter().map(|entry| entry.code).max().unwrap_or(0) + 1;
         self.close(
             ClosureEvent::VocabularyMinted {
-                axis,
+                // The wire keeps the u8 code — the receipt is readable
+                // without the enum, and the encoding is unchanged.
+                axis: axis.code(),
                 code,
                 sigil: sigil.to_string(),
                 word: word.to_string(),

@@ -104,11 +104,13 @@ pub enum ActionRefused {
     /// 28_VOCABULARY §5 — minting is a TIER 0 power (`12_UNION` ruling
     /// 4: progenitors *create the board everyone else plays on*). The
     /// line named holds no progenitor seat in this chronicle.
+    ///
+    /// The unknown-axis arm that once followed died at the door
+    /// (29_CONSTRUCTION): the verb takes [`crate::vocabulary::Axis`],
+    /// so no unknown axis can be constructed — and there is still no
+    /// variant for STATIONS, because offices change by amendment alone
+    /// (§10); the enum simply does not hold one.
     MintWithoutStanding { line: String },
-    /// 28_VOCABULARY §7 — no such vocabulary. Note there is no axis for
-    /// STATIONS: minting an office would let a T0 seat manufacture the
-    /// seat that gates it, so offices change by amendment alone (§10).
-    VocabularyAxisUnknown { axis: u8 },
     /// 28_VOCABULARY §4a — the binding does not TRADE: it must carry at
     /// least one benefit and at least one friction, every factor inside
     /// the bounds, every channel one the engine already computes. A
