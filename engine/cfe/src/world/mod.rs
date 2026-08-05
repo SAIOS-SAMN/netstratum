@@ -482,13 +482,13 @@ pub fn clear_trade(
         .iter()
         .find(|held| held.offer == offer_a)
         .cloned()
-        .ok_or(ActionRefused::BadOffer)?;
+        .ok_or(ActionRefused::NoSuchOffer { offer: offer_a })?;
     let held_b = b
         .offers
         .iter()
         .find(|held| held.offer == offer_b)
         .cloned()
-        .ok_or(ActionRefused::BadOffer)?;
+        .ok_or(ActionRefused::NoSuchOffer { offer: offer_b })?;
     // Complementary resources, or no crossing exists.
     if held_a.give != held_b.want || held_a.want != held_b.give {
         return Err(ActionRefused::NoCrossing);

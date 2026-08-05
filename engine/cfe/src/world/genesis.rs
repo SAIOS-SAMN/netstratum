@@ -92,12 +92,12 @@ impl World {
     ///       year voice (60 ticks — 11 §1; placeholder constant);
     ///   G — the crossing: this world entered the union (THRESHOLD-1).
     /// The climb is monotone in G (the orientation law — time's arrow,
-    /// not a queue): `delta` must be strictly positive. A refusal
-    /// names every gate's reading — the cure, not a verdict.
-    pub fn elevate(&mut self, delta: Ratio) -> Result<(), ActionRefused> {
-        if delta <= ratio(0, 1) {
-            return Err(ActionRefused::BadClimb);
-        }
+    /// not a queue): `delta` is a [`crate::dop::Positive`], so a flat
+    /// or backward climb is unrepresentable and the old `BadClimb` arm
+    /// is dead (29_CONSTRUCTION). A refusal names every gate's
+    /// reading — the cure, not a verdict.
+    pub fn elevate(&mut self, delta: crate::dop::Positive) -> Result<(), ActionRefused> {
+        let delta = delta.value().clone();
         let stamp = self.clock.now();
         let settled = self.orbs.iter().all(|held| {
             held.famine.is_empty()
@@ -353,7 +353,7 @@ impl World {
     /// the old range check is dead (29_CONSTRUCTION C1).
     pub fn seat_station(
         &mut self,
-        line: &str,
+        line: crate::dop::Name,
         station: crate::dop::Station,
     ) -> Result<(), ActionRefused> {
         self.seat_station_as(SOVEREIGN, line, station)
@@ -361,16 +361,14 @@ impl World {
     pub fn seat_station_as(
         &mut self,
         actor: u64,
-        line: &str,
+        line: crate::dop::Name,
         station: crate::dop::Station,
     ) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Build)?;
-        // The band range is unrepresentable off-vocabulary now — a
-        // `Station` IS one of the four offices. The nameless line keeps
-        // a refusal, honestly named at last.
-        if line.is_empty() {
-            return Err(ActionRefused::LineUnnamed);
-        }
+        // Both shapes are unrepresentable now — a `Station` IS one of
+        // the four offices, and a `Name` cannot be empty, so the dead
+        // `LineUnnamed` arm has no case left to catch (29_CONSTRUCTION).
+        let line = line.as_str();
         let station = station.as_wire();
         self.close(
             ClosureEvent::StationSeated { line: line.to_string(), station },
@@ -398,7 +396,7 @@ impl World {
         line: &str,
         axis: u8,
         sigil: &str,
-        word: &str,
+        word: crate::dop::Name,
         binding: Vec<(u8, crate::ratio::Ratio)>,
     ) -> Result<u8, ActionRefused> {
         self.mint_vocabulary_as(SOVEREIGN, line, axis, sigil, word, binding)
@@ -409,7 +407,7 @@ impl World {
         line: &str,
         axis: u8,
         sigil: &str,
-        word: &str,
+        word: crate::dop::Name,
         binding: Vec<(u8, crate::ratio::Ratio)>,
     ) -> Result<u8, ActionRefused> {
         use crate::vocabulary as vocab;
@@ -440,11 +438,12 @@ impl World {
         {
             return Err(ActionRefused::MintNotNovel { like: twin.code });
         }
-        if word.is_empty()
-            || standing.iter().any(|entry| {
-                entry.word == word || (!sigil.is_empty() && entry.sigil == sigil)
-            })
-        {
+        // The empty word died at the `Name` door; only the collision
+        // FACT remains — a mark that names two things defines neither.
+        let word = word.as_str();
+        if standing.iter().any(|entry| {
+            entry.word == word || (!sigil.is_empty() && entry.sigil == sigil)
+        }) {
             return Err(ActionRefused::MintNameTaken { word: word.to_string() });
         }
 

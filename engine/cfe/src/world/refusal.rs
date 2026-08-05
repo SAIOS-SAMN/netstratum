@@ -142,8 +142,6 @@ pub enum ActionRefused {
     /// Licensing asked for a node outside the crystallized tier and the
     /// crown — derived from `node_kind`, never a magic range.
     NodeUnlicensable { condition: u8 },
-    /// A seat needs a named line.
-    LineUnnamed,
     /// THRESHOLD-1 (12_UNION §7) — the shield holds: a people that has
     /// not made the solar leap cannot be reached by aperture, in
     /// either direction. The flags name which side stands shielded —
@@ -154,15 +152,18 @@ pub enum ActionRefused {
     /// void. Stagnation is a region, not a sentence — each false here
     /// is escapable.
     ElevationBarred { settled: bool, coherent: bool, crossed: bool, aligned: bool },
-    /// ELEVATE-1 — a climb moves STRICTLY upward in G (the orientation
-    /// law: the fiber advances and never retreats).
-    BadClimb,
-    /// COUNCIL-1 — a council is three or more DISTINCT orbs, a
-    /// positive quota and collateral, a real window, a fresh id.
-    BadCouncil,
-    /// MARKET-1 — an offer trades two DISTINCT resources in positive
-    /// amounts under a fresh id.
-    BadOffer,
+    /// COUNCIL-1 — this id already seals a council on this book. The
+    /// SHAPE half of the dead `BadCouncil` (short or repeated members,
+    /// non-positive quota or collateral, a zero window) is
+    /// unrepresentable now — `Among`, `Positive` and `Window` proved
+    /// it at the doors; the fresh-id FACT keeps its own name.
+    CouncilKnown { council: u64 },
+    /// MARKET-1 — this id already rests on the board. The dead
+    /// `BadOffer`'s shape half (reflexive trade, non-positive amounts)
+    /// died at the `Exchange` and `Positive` doors.
+    OfferKnown { offer: u64 },
+    /// MARKET-1 — no offer with this id rests on this book.
+    NoSuchOffer { offer: u64 },
     /// MARKET-1 — no crossing: the two offers do not meet (wrong
     /// resources, or the prices never cross).
     NoCrossing,

@@ -9,7 +9,7 @@
 //! readings — warring imperium, diplomacy failed — are DERIVED from
 //! receipts, never stored flags.
 
-use cfe::dop::{ClosureEvent, Resource};
+use cfe::dop::{among, positive, window, ClosureEvent, Resource};
 use cfe::ratio::ratio;
 use cfe::world::{replay, ActionRefused, World, FIRST_ORB};
 
@@ -29,24 +29,23 @@ fn iron(world: &World, orb: u64) -> cfe::ratio::Ratio {
     world.orb_by_id(orb).expect("orb").banked_amount(Resource::Iron)
 }
 
-/// The seal refuses whole: under three members, duplicate members, a
-/// poor member — and a refusal moves nothing anywhere.
+/// The unequal shapes cannot even be constructed — `Among` refuses a
+/// short or repeated membership at the door (29_CONSTRUCTION), and a
+/// member that cannot stake refuses the WHOLE seal, moving nothing.
 #[test]
 fn a_council_that_starts_unequal_never_starts() {
     let (mut world, b, c) = archipelago();
-    assert_eq!(
-        world.seal_council(1, vec![FIRST_ORB, b], Resource::Iron, ratio(2, 1), 10, ratio(3, 1)),
-        Err(ActionRefused::BadCouncil),
+    assert!(
+        cfe::dop::Among::new(vec![FIRST_ORB, b]).is_none(),
         "two is a forward, not a council"
     );
-    assert_eq!(
-        world.seal_council(1, vec![FIRST_ORB, b, b], Resource::Iron, ratio(2, 1), 10, ratio(3, 1)),
-        Err(ActionRefused::BadCouncil),
+    assert!(
+        cfe::dop::Among::new(vec![FIRST_ORB, b, b]).is_none(),
         "a member seats once"
     );
     // A member that cannot stake refuses the WHOLE seal.
     assert_eq!(
-        world.seal_council(1, vec![FIRST_ORB, b, c], Resource::Iron, ratio(2, 1), 10, ratio(7, 1)),
+        world.seal_council(1, among(&[FIRST_ORB, b, c]), Resource::Iron, positive(2, 1), window(10), positive(7, 1)),
         Err(ActionRefused::CannotAfford {
             resource: Resource::Iron,
             need: Box::new(ratio(7, 1)),
@@ -65,7 +64,7 @@ fn a_council_that_starts_unequal_never_starts() {
 fn the_reckoning_judges_all_together() {
     let (mut world, b, c) = archipelago();
     world
-        .seal_council(1, vec![FIRST_ORB, b, c], Resource::Iron, ratio(2, 1), 10, ratio(3, 1))
+        .seal_council(1, among(&[FIRST_ORB, b, c]), Resource::Iron, positive(2, 1), window(10), positive(3, 1))
         .expect("seals");
     // Every lock drawn: 3 from each.
     assert_eq!(iron(&world, FIRST_ORB), ratio(3, 1));
@@ -117,7 +116,7 @@ fn the_reckoning_judges_all_together() {
 fn when_all_breach_the_pact_dissolves() {
     let (mut world, b, c) = archipelago();
     world
-        .seal_council(2, vec![FIRST_ORB, b, c], Resource::Iron, ratio(2, 1), 5, ratio(3, 1))
+        .seal_council(2, among(&[FIRST_ORB, b, c]), Resource::Iron, positive(2, 1), window(5), positive(3, 1))
         .expect("seals");
     for _ in 0..6 {
         world.tick();

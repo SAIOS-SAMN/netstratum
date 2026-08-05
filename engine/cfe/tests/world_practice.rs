@@ -132,7 +132,7 @@ fn an_unaligned_practice_bars_the_climb() {
     // Simpler entropic weight: an absorption debt lapsing.
     // (Direct book arithmetic through the landed deeds is exercised in
     // world_absorb; here the gate reading alone is pinned.)
-    match world.elevate(ratio(1, 8)) {
+    match world.elevate(positive(1, 8)) {
         Err(ActionRefused::ElevationBarred { aligned, .. }) => {
             // With no deeds posted the line stands aligned — the bar
             // here comes from the other gates; aligned must be TRUE.

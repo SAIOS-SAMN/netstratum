@@ -4,7 +4,7 @@
 //! leg lands as an ordinary clear_trade (melt, void share, both
 //! books receipted). No wall → the caravan stays home.
 
-use cfe::dop::{ClosureEvent, Resource, ZoneKind};
+use cfe::dop::{exchange, positive, ClosureEvent, Resource, ZoneKind};
 use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::StarClass;
 use cfe::world::FIRST_ORB;
@@ -82,11 +82,11 @@ fn the_caravan_bridges_the_walled_pair_at_a_profit() {
     // biomass for 4 iron. Direct they are WALLED.
     miner
         .world
-        .post_offer(FIRST_ORB, Resource::Iron, ratio(12, 1), Resource::Biomass, ratio(4, 1), 1)
+        .post_offer(FIRST_ORB, exchange(Resource::Iron, Resource::Biomass), positive(12, 1), positive(4, 1), 1)
         .expect("posts");
     grower
         .world
-        .post_offer(FIRST_ORB, Resource::Biomass, ratio(12, 1), Resource::Iron, ratio(4, 1), 2)
+        .post_offer(FIRST_ORB, exchange(Resource::Biomass, Resource::Iron), positive(12, 1), positive(4, 1), 2)
         .expect("posts");
 
     let stake_biomass = banked(&caravan, Resource::Biomass);
@@ -131,11 +131,11 @@ fn the_caravan_bridges_the_walled_pair_at_a_profit() {
     let near_m = Polity::genesis(seat("nearway", 5), &registry, &book);
     near_a
         .world
-        .post_offer(FIRST_ORB, Resource::Iron, ratio(12, 1), Resource::Biomass, ratio(4, 1), 1)
+        .post_offer(FIRST_ORB, exchange(Resource::Iron, Resource::Biomass), positive(12, 1), positive(4, 1), 1)
         .expect("posts");
     near_b
         .world
-        .post_offer(FIRST_ORB, Resource::Biomass, ratio(12, 1), Resource::Iron, ratio(4, 1), 2)
+        .post_offer(FIRST_ORB, exchange(Resource::Biomass, Resource::Iron), positive(12, 1), positive(4, 1), 2)
         .expect("posts");
     let mut near = vec![near_a, near_b, near_m];
     assert!(merchant_step(&mut near, 8).is_empty(), "no wall, no caravan — strictly additive");

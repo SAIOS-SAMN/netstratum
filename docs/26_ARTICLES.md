@@ -218,7 +218,8 @@ misreading.**
    a gradient toward a minimum; gradient descent stands STRUCK (a
    failed topology, operator ruling 2026-08-01) and nothing in this
    article revives it. This is `ELEVATE-1`'s "the fiber never retreats"
-   (`BadClimb`) generalized from the gauge climb to capacity itself.
+   (the `Positive` door on the climb's delta — 29_CONSTRUCTION)
+   generalized from the gauge climb to capacity itself.
 3. **THE PROPAGATION LIMIT IS THE CHAIN'S OWN STEP RATE.** The propagation limit of
    this manifold is one commitment per step. Nothing crosses the
    manifold faster than the chain extends, and no reading may assume it
@@ -235,7 +236,7 @@ misreading.**
 | form changed, nothing made | `Δ' = Q·Δ`, `Support(E')` unchanged | Article III LAW 3 — the first law; mints nothing |
 | coordinate/metric lock | any basis-fixed or rank-locked reading | Article I — void; recompute coordinate-free |
 | on the ground | `D = GROUND` — nothing circulates above the point | Article II — no allocation, no weight, no mint. **The state itself STANDS**: standing is admission's (§2c′), never a reading's — never deleted, never barred, simply not paid |
-| capacity retreat | a step lowering `D` outside lawful contraction | Article IV — refuse (`BadClimb` shape) |
+| capacity retreat | a step lowering `D` outside lawful contraction | Article IV — unrepresentable at the door (the climb's delta is `Positive` by construction) |
 | earned emission | a loop's charge growing the rank against verified work | full alignment — maximum allocation |
 
 Audit is by differential invariant, never by review. No title, seat,

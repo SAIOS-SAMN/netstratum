@@ -332,9 +332,16 @@ pub fn market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
             }
             let offer = polity.world.chronicle().receipts().len() as u64;
             let orb = cfe::world::FIRST_ORB;
+            let (Some(pair), Some(give_amount), Some(want_amount)) = (
+                cfe::dop::Exchange::new(give, want),
+                cfe::dop::Positive::new(give_amount),
+                cfe::dop::Positive::new(want_amount),
+            ) else {
+                continue;
+            };
             let _ = polity
                 .world
-                .post_offer(orb, give, give_amount, want, want_amount, offer);
+                .post_offer(orb, pair, give_amount, want_amount, offer);
         }
     }
     // Clear crossings: EVERY resting combination on every pair — no
@@ -2164,17 +2171,19 @@ pub fn merchant_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String, S
                     continue;
                 }
                 // Leg 1: M counters A exactly — fills at A's rest.
+                // The doors hold by posting law (the resting offer
+                // already proved them); a None here skips the caravan.
                 let counter = worlds[m].world.chronicle().receipts().len() as u64;
+                let (Some(pair), Some(give_amount), Some(want_amount)) = (
+                    cfe::dop::Exchange::new(ask_a.want, ask_a.give),
+                    cfe::dop::Positive::new(ask_a.want_amount.clone()),
+                    cfe::dop::Positive::new(ask_a.give_amount.clone()),
+                ) else {
+                    continue;
+                };
                 if worlds[m]
                     .world
-                    .post_offer(
-                        cfe::world::FIRST_ORB,
-                        ask_a.want,
-                        ask_a.want_amount.clone(),
-                        ask_a.give,
-                        ask_a.give_amount.clone(),
-                        counter,
-                    )
+                    .post_offer(cfe::world::FIRST_ORB, pair, give_amount, want_amount, counter)
                     .is_err()
                 {
                     continue;
@@ -2194,16 +2203,16 @@ pub fn merchant_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String, S
                 // Leg 2: M counters B — fills at B's rest. A refusal
                 // here leaves M holding cargo: merchant risk, lawful.
                 let counter = worlds[m].world.chronicle().receipts().len() as u64;
+                let (Some(pair), Some(give_amount), Some(want_amount)) = (
+                    cfe::dop::Exchange::new(ask_b.want, ask_b.give),
+                    cfe::dop::Positive::new(ask_b.want_amount.clone()),
+                    cfe::dop::Positive::new(ask_b.give_amount.clone()),
+                ) else {
+                    continue;
+                };
                 if worlds[m]
                     .world
-                    .post_offer(
-                        cfe::world::FIRST_ORB,
-                        ask_b.want,
-                        ask_b.want_amount.clone(),
-                        ask_b.give,
-                        ask_b.give_amount.clone(),
-                        counter,
-                    )
+                    .post_offer(cfe::world::FIRST_ORB, pair, give_amount, want_amount, counter)
                     .is_err()
                 {
                     continue;

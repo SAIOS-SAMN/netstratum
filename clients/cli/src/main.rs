@@ -588,7 +588,19 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             };
             match (give_amount, give, want_amount, want, offer) {
                 (Some(ga), Some(g), Some(wa), Some(w), Some(id)) => {
-                    match world.post_offer(*current, g, ga, w, wa, id) {
+                    let (Some(pair), Some(ga), Some(wa)) = (
+                        cfe::dop::Exchange::new(g, w),
+                        cfe::dop::Positive::new(ga),
+                        cfe::dop::Positive::new(wa),
+                    ) else {
+                        println!(
+                            "{} an offer trades two DISTINCT resources in positive amounts — e.g. {}",
+                            style.bad("✗"),
+                            style.strong("offer 4 iron for 2 biomass id 1")
+                        );
+                        return;
+                    };
+                    match world.post_offer(*current, pair, ga, wa, id) {
                         Ok(()) => println!(
                             "{} offer {} RESTS on the board — the price is the ratio; a crossing clears it",
                             style.ok("⇋"),
@@ -693,7 +705,11 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 ),
             }
         }
-        Some("elevate") => match words.next().and_then(parse_ratio_arg) {
+        Some("elevate") => match words
+            .next()
+            .and_then(parse_ratio_arg)
+            .and_then(cfe::dop::Positive::new)
+        {
             Some(delta) => match world.elevate(delta) {
                 Ok(()) => println!(
                     "{} the climb — this world's key now plays at {}",
@@ -702,7 +718,11 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 ),
                 Err(refusal) => refuse(world, &refusal, style),
             },
-            None => println!("{} usage: {}", style.bad("✗"), style.strong("elevate <delta>")),
+            None => println!(
+                "{} a climb moves strictly upward in G — usage: {}",
+                style.bad("✗"),
+                style.strong("elevate <delta>")
+            ),
         },
         Some("age") => {
             if !tier0_gate(style) {
@@ -739,6 +759,19 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 (Some(id), Some(resource), Some(quota), Some(window), Some(stake))
                     if !members.is_empty() =>
                 {
+                    let (Some(members), Some(quota), Some(window), Some(stake)) = (
+                        cfe::dop::Among::new(members),
+                        cfe::dop::Positive::new(quota),
+                        cfe::dop::Window::new(window),
+                        cfe::dop::Positive::new(stake),
+                    ) else {
+                        println!(
+                            "{} a council is three or more distinct planets, a positive quota and collateral, a real window — e.g. {}",
+                            style.bad("✗"),
+                            style.strong("council 1 with base,outpost,haven: 5 iron in 60, stake 3")
+                        );
+                        return;
+                    };
                     match world.seal_council(id, members, resource, quota, window, stake) {
                         Ok(()) => println!(
                             "{} council {} SEALS — every member bound alike; the reckoning judges all together at the boundary",
@@ -1453,7 +1486,11 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     // The seat is read from the CHAIN, and the line is the
                     // operator's own. The engine refuses if it is not T0.
                     let line = active_line().unwrap_or_else(|| String::from("operator"));
-                    match world.mint_vocabulary(&line, axis, sigil, word, binding) {
+                    let Some(word_name) = cfe::dop::Name::new(word) else {
+                        println!("{} a minted word must not be empty", style.bad("✗"));
+                        return;
+                    };
+                    match world.mint_vocabulary(&line, axis, sigil, word_name, binding) {
                         Ok(code) => {
                             *current = world.now();
                             println!(
@@ -1892,7 +1929,11 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             );
                         }
                     }
-                    match world.seat_station_as(cfe::world::SOVEREIGN, sigil, station) {
+                    let Some(line) = cfe::dop::Name::new(sigil) else {
+                        println!("{} a seat needs a named line", style.bad("✗"));
+                        return;
+                    };
+                    match world.seat_station_as(cfe::world::SOVEREIGN, line, station) {
                         Ok(()) => {}
                         Err(refusal) => {
                             refuse(world, &refusal, style);
@@ -3864,7 +3905,6 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "condition {} is not licensable — only the crystallized tier and the crown license down (derived from the vocabulary, never a range)",
             style.strong(&condition.to_string())
         ),
-        ActionRefused::LineUnnamed => "a seat needs a named line".to_string(),
         ActionRefused::NoSuchCouncil { council } => format!(
             "no open council {} stands — delegation settles inside diplomacy; seal the council first",
             style.strong(&format!("{council}"))
@@ -3887,16 +3927,21 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             style.strong(&grade.to_string()),
             style.strong(&mints.to_string())
         ),
-        ActionRefused::BadOffer => format!(
-            "an offer trades two DISTINCT resources in positive amounts under a fresh id — e.g. {}",
-            style.strong("offer 4 iron for 2 biomass id 1")
+        ActionRefused::OfferKnown { offer } => format!(
+            "offer {} already rests on the board — a fresh intent needs a fresh id",
+            style.strong(&offer.to_string())
+        ),
+        ActionRefused::NoSuchOffer { offer } => format!(
+            "no offer {} rests on this book — {} shows the board",
+            style.strong(&offer.to_string()),
+            style.strong("offers")
         ),
         ActionRefused::NoCrossing => {
             "no crossing — the two offers do not meet (wrong resources, or the prices never cross); an unmatched offer rests".into()
         }
-        ActionRefused::BadCouncil => format!(
-            "a council is three or more distinct planets, a positive quota and collateral, a real window, a fresh id — e.g. {}",
-            style.strong("council 1 with base,outpost,haven: 5 iron in 60, stake 3")
+        ActionRefused::CouncilKnown { council } => format!(
+            "council {} already seals on this book — a new council needs a fresh id",
+            style.strong(&council.to_string())
         ),
         ActionRefused::ElevationBarred { settled, coherent, crossed, aligned } => {
             let gates: Vec<&str> = [
@@ -3914,10 +3959,6 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
                 gates.join("; ")
             )
         }
-        ActionRefused::BadClimb => format!(
-            "a climb moves strictly upward in G — the fiber advances and never retreats; e.g. {}",
-            style.strong("elevate 1/6")
-        ),
         ActionRefused::Shielded { source_shielded, dest_shielded } => format!(
             "the shield holds — {} not met its sun; a people makes the solar leap itself ({} wakes thermal), or it is left to its sky",
             style.strong(match (source_shielded, dest_shielded) {

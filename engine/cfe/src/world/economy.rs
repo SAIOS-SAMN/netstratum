@@ -20,18 +20,19 @@ impl World {
     pub fn post_offer(
         &mut self,
         orb: u64,
-        give: Resource,
-        give_amount: Ratio,
-        want: Resource,
-        want_amount: Ratio,
+        pair: crate::dop::Exchange,
+        give_amount: crate::dop::Positive,
+        want_amount: crate::dop::Positive,
         offer: u64,
     ) -> Result<(), ActionRefused> {
-        if give == want
-            || give_amount <= ratio(0, 1)
-            || want_amount <= ratio(0, 1)
-            || self.offers.iter().any(|held| held.offer == offer)
-        {
-            return Err(ActionRefused::BadOffer);
+        // The reflexive trade and the non-positive amounts died at the
+        // `Exchange` and `Positive` doors (29_CONSTRUCTION); the
+        // fresh-id FACT keeps its own name.
+        let (give, want) = (pair.give(), pair.want());
+        let give_amount = give_amount.value().clone();
+        let want_amount = want_amount.value().clone();
+        if self.offers.iter().any(|held| held.offer == offer) {
+            return Err(ActionRefused::OfferKnown { offer });
         }
         if peek(&self.orbs, orb).is_none() {
             return Err(ActionRefused::NoSuchOrb { orb });
@@ -65,7 +66,7 @@ impl World {
     pub fn counter_offer(
         &mut self,
         offer: u64,
-        want_amount: Ratio,
+        want_amount: crate::dop::Positive,
         appraisal: Option<[u8; 32]>,
     ) -> Result<(), ActionRefused> {
         self.counter_offer_as(SOVEREIGN, offer, want_amount, appraisal)
@@ -75,12 +76,15 @@ impl World {
         &mut self,
         actor: u64,
         offer: u64,
-        want_amount: Ratio,
+        want_amount: crate::dop::Positive,
         appraisal: Option<[u8; 32]>,
     ) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Collect)?;
-        if want_amount <= ratio(0, 1) || !self.offers.iter().any(|held| held.offer == offer) {
-            return Err(ActionRefused::BadOffer);
+        // The non-positive ask died at the `Positive` door; the missing
+        // offer is a FACT of this book, named as one.
+        let want_amount = want_amount.value().clone();
+        if !self.offers.iter().any(|held| held.offer == offer) {
+            return Err(ActionRefused::NoSuchOffer { offer });
         }
         if let Some(cited) = &appraisal {
             match self.appraisal_stale(cited) {

@@ -24,7 +24,7 @@ fn the_seat_replays_from_the_receipt_not_from_a_file() {
     // precedent, where GenesisSealed did exactly this for the axes.
     let mut world = World::new();
     world.found("seat-hold").expect("founds");
-    world.seat_station_as(cfe::world::SOVEREIGN, "abyssal-vocalis", cfe::dop::Station::from_wire(1).expect("a band office")).expect("seats");
+    world.seat_station_as(cfe::world::SOVEREIGN, cfe::dop::name("abyssal-vocalis"), cfe::dop::Station::from_wire(1).expect("a band office")).expect("seats");
 
     assert_eq!(world.station_of("abyssal-vocalis"), Some(1), "the seat is held");
     let committed = world.committed();
@@ -42,8 +42,8 @@ fn re_seating_replaces_and_the_chain_keeps_the_history() {
     // promotion is auditable rather than an overwrite.
     let mut world = World::new();
     world.found("climb").expect("founds");
-    world.seat_station_as(cfe::world::SOVEREIGN, "brine-cortex", cfe::dop::Station::from_wire(3).expect("a band office")).expect("observer");
-    world.seat_station_as(cfe::world::SOVEREIGN, "brine-cortex", cfe::dop::Station::from_wire(2).expect("a band office")).expect("watcher");
+    world.seat_station_as(cfe::world::SOVEREIGN, cfe::dop::name("brine-cortex"), cfe::dop::Station::from_wire(3).expect("a band office")).expect("observer");
+    world.seat_station_as(cfe::world::SOVEREIGN, cfe::dop::name("brine-cortex"), cfe::dop::Station::from_wire(2).expect("a band office")).expect("watcher");
 
     assert_eq!(world.station_of("brine-cortex"), Some(2), "the current office");
     let seatings = world
@@ -65,7 +65,7 @@ fn an_office_outside_the_vocabulary_refuses() {
     assert_eq!(cfe::dop::Station::from_wire(5), None, "5 is not an office");
     let mut world = World::new();
     world.found("bad-office").expect("founds");
-    assert!(world.seat_station_as(cfe::world::SOVEREIGN, "", cfe::dop::Station::from_wire(1).expect("a band office")).is_err(), "no nameless line");
+    assert!(cfe::dop::Name::new("").is_none(), "no nameless line — the case cannot be constructed");
     assert!(world.committed().stations.is_empty(), "and nothing was seated");
 }
 
@@ -124,7 +124,7 @@ fn the_seat_moves_no_value() {
     let mut world = World::new();
     world.found("neutral").expect("founds");
     let before = world.committed();
-    world.seat_station_as(cfe::world::SOVEREIGN, "line", cfe::dop::Station::from_wire(2).expect("a band office")).expect("seats");
+    world.seat_station_as(cfe::world::SOVEREIGN, cfe::dop::name("line"), cfe::dop::Station::from_wire(2).expect("a band office")).expect("seats");
     let after = world.committed();
 
     assert_eq!(before.orbs[0].banked, after.orbs[0].banked, "no bank moved");

@@ -6,10 +6,9 @@
 //! orbit that "does not move" moves: albedo and orbit re-seat, the
 //! world crosses substrate bands.
 
-use cfe::dop::{positive, unit};
+use cfe::dop::{among, positive, unit, window};
 
 use cfe::dop::Resource;
-use cfe::ratio::ratio;
 use cfe::thermal::{t_eq4, StarClass, SubstrateBand};
 use cfe::world::{
     aperture_transfer, license_tech, ActionRefused, Leap, World, FIRST_ORB,
@@ -32,7 +31,7 @@ fn the_crown_gifts_only_onto_a_finished_stack_and_moves_the_orbit() {
     grantor.transfer(cfe::dop::between(c, FIRST_ORB), Resource::Iron, cfe::dop::positive(6, 1)).expect("spreads");
     grantor.transfer(cfe::dop::between(c, b), Resource::Iron, cfe::dop::positive(6, 1)).expect("spreads");
     grantor
-        .seal_council(1, vec![FIRST_ORB, b, c], Resource::Iron, ratio(2, 1), 600, ratio(1, 1))
+        .seal_council(1, among(&[FIRST_ORB, b, c]), Resource::Iron, positive(2, 1), window(600), positive(1, 1))
         .expect("the council stands");
     let mut receiver = sunlit("kepler-passage");
     aperture_transfer(

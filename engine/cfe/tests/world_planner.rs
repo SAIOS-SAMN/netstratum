@@ -7,8 +7,7 @@
 //! their sun themselves, or not — that refusal IS the union's oldest
 //! law, stated as a deed.
 
-use cfe::dop::{positive, unit, ClosureEvent, Resource};
-use cfe::ratio::ratio;
+use cfe::dop::{among, positive, unit, window, ClosureEvent, Resource};
 use cfe::thermal::StarClass;
 use cfe::world::{
     aperture_transfer, license_tech, replay, ActionRefused, Leap, World, FIRST_ORB,
@@ -31,7 +30,7 @@ fn planner_pair() -> (World, World) {
     grantor.transfer(cfe::dop::between(c, FIRST_ORB), Resource::Iron, cfe::dop::positive(6, 1)).expect("spreads");
     grantor.transfer(cfe::dop::between(c, b), Resource::Iron, cfe::dop::positive(6, 1)).expect("spreads");
     grantor
-        .seal_council(1, vec![FIRST_ORB, b, c], Resource::Iron, ratio(2, 1), 600, ratio(1, 1))
+        .seal_council(1, among(&[FIRST_ORB, b, c]), Resource::Iron, positive(2, 1), window(600), positive(1, 1))
         .expect("the council stands open");
     let mut receiver = sunlit("kepler-passage");
     aperture_transfer(

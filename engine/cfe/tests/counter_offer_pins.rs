@@ -13,7 +13,7 @@
 //!                is cited — and a STALE citation refuses: the market
 //!                moved, re-appraise first. Consent needs no such gate.
 
-use cfe::dop::{ClosureEvent, Holding, Resource, ZoneKind};
+use cfe::dop::{exchange, positive, ClosureEvent, Holding, Resource, ZoneKind};
 use cfe::ratio::ratio;
 use cfe::world::{replay, ActionRefused, World, FIRST_ORB};
 
@@ -27,7 +27,7 @@ fn market_world() -> World {
     }
     world.collect().expect("banks");
     world
-        .post_offer(FIRST_ORB, Resource::Iron, ratio(4, 1), Resource::Biomass, ratio(2, 1), 7)
+        .post_offer(FIRST_ORB, exchange(Resource::Iron, Resource::Biomass), positive(4, 1), positive(2, 1), 7)
         .expect("a resting intent");
     world
 }
@@ -38,7 +38,7 @@ fn market_world() -> World {
 fn a_counter_amends_the_resting_terms() {
     let mut world = market_world();
     world
-        .counter_offer(7, ratio(3, 1), None)
+        .counter_offer(7, positive(3, 1), None)
         .expect("the counter stands");
     let held = world.offers().iter().find(|o| o.offer == 7).expect("still resting");
     assert_eq!(held.want_amount, ratio(3, 1), "the ask moved to the countered figure");
@@ -68,7 +68,7 @@ fn a_stale_cited_counter_refuses_and_a_fresh_one_stands() {
     assert_eq!(world.appraisal_stale(&stale), Some(true), "measurably stale");
 
     let receipts = world.chronicle().receipts().len();
-    match world.counter_offer(7, ratio(5, 2), Some(stale)) {
+    match world.counter_offer(7, positive(5, 2), Some(stale)) {
         Err(ActionRefused::StaleAppraisalCited { .. }) => {}
         other => panic!("stale evidence must refuse, got {other:?}"),
     }
@@ -78,7 +78,7 @@ fn a_stale_cited_counter_refuses_and_a_fresh_one_stands() {
     world.appraise(Holding::Estate).expect("re-appraises");
     let fresh = world.chronicle().receipts().last().expect("appraisal").own.0;
     world
-        .counter_offer(7, ratio(5, 2), Some(fresh))
+        .counter_offer(7, positive(5, 2), Some(fresh))
         .expect("the renegotiation proceeds on fresh evidence");
     assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
 }
@@ -89,11 +89,14 @@ fn a_stale_cited_counter_refuses_and_a_fresh_one_stands() {
 fn counters_need_a_resting_offer_and_rounds_are_receipts() {
     let mut world = market_world();
     assert!(
-        matches!(world.counter_offer(99, ratio(1, 1), None), Err(ActionRefused::BadOffer)),
+        matches!(
+            world.counter_offer(99, positive(1, 1), None),
+            Err(ActionRefused::NoSuchOffer { offer: 99 })
+        ),
         "no such resting offer"
     );
-    world.counter_offer(7, ratio(3, 1), None).expect("round one");
-    world.counter_offer(7, ratio(7, 2), None).expect("round two — the poster counters back");
+    world.counter_offer(7, positive(3, 1), None).expect("round one");
+    world.counter_offer(7, positive(7, 2), None).expect("round two — the poster counters back");
     let held = world.offers().iter().find(|o| o.offer == 7).expect("resting");
     assert_eq!(held.want_amount, ratio(7, 2), "the latest round holds the terms");
     assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");

@@ -328,7 +328,9 @@ reaches permanence.
 **The climb is landed machinery, not a metaphor.** `ELEVATE-1` gates the
 gauge climb on three receipted readings — S settlement, T coherence,
 G the crossing — executes as ONE `GaugeShifted` receipt, and never
-retreats (`BadClimb`; Article IV). The fiber holds what it gains.
+retreats — the delta is a `Positive` proven at the door, so a flat or
+backward climb is unrepresentable (29_CONSTRUCTION; Article IV). The
+fiber holds what it gains.
 
 ### 3b. THE UNION OF STATIONS — accountability is a PHYSICS layer
 

@@ -22,20 +22,21 @@ fn sunlit(name: &str) -> World {
 
 /// The refusal names every gate: a fresh world has not crossed; after
 /// the crossing but with no loop closed this year, coherence bars;
-/// after a collect, the climb opens. A non-positive delta refuses
-/// typed — the fiber never retreats.
+/// after a collect, the climb opens. A non-positive delta is not a
+/// deed that can be asked for — the `Positive` door refuses the case
+/// before a verb exists to receive it (29_CONSTRUCTION).
 #[test]
 fn the_gates_refuse_typed_and_each_is_escapable() {
     let mut world = sunlit("ascendant");
     let mut partner = sunlit("witness");
 
-    // A negative or zero climb is not a climb.
-    assert_eq!(world.elevate(ratio(0, 1)), Err(ActionRefused::BadClimb));
-    assert_eq!(world.elevate(ratio(-1, 6)), Err(ActionRefused::BadClimb));
+    // A negative or zero climb cannot even be constructed.
+    assert!(cfe::dop::Positive::new(ratio(0, 1)).is_none());
+    assert!(cfe::dop::Positive::new(ratio(-1, 6)).is_none());
 
     // Not crossed, no loop closed: both gates named in one refusal.
     assert_eq!(
-        world.elevate(ratio(1, 6)),
+        world.elevate(positive(1, 6)),
         Err(ActionRefused::ElevationBarred {
             settled: true,
             coherent: false,
@@ -51,7 +52,7 @@ fn the_gates_refuse_typed_and_each_is_escapable() {
     )
     .expect("the crossing");
     assert_eq!(
-        world.elevate(ratio(1, 6)),
+        world.elevate(positive(1, 6)),
         Err(ActionRefused::ElevationBarred {
             settled: true,
             coherent: false,
@@ -66,7 +67,7 @@ fn the_gates_refuse_typed_and_each_is_escapable() {
         world.tick();
     }
     world.collect().expect("collects");
-    world.elevate(ratio(1, 6)).expect("the climb opens");
+    world.elevate(positive(1, 6)).expect("the climb opens");
     assert_eq!(world.gauge(), &ratio(1, 6));
 }
 
@@ -89,8 +90,8 @@ fn a_lawful_climb_is_one_receipt_and_replays() {
     .expect("the crossing");
 
     let shifts_before = shifts(&world);
-    world.elevate(ratio(1, 4)).expect("climbs");
-    world.elevate(ratio(1, 4)).expect("climbs again");
+    world.elevate(positive(1, 4)).expect("climbs");
+    world.elevate(positive(1, 4)).expect("climbs again");
     assert_eq!(shifts(&world), shifts_before + 2, "each step is ONE receipt");
     assert_eq!(world.gauge(), &ratio(1, 2));
     assert_eq!(replay(world.chronicle()).gauge[0], ratio(1, 2));
@@ -119,7 +120,7 @@ fn famine_bars_the_climb_until_relieved() {
         }
     }
     assert!(famished, "the overdriven colony strikes famine");
-    match world.elevate(ratio(1, 6)) {
+    match world.elevate(positive(1, 6)) {
         Err(ActionRefused::ElevationBarred { settled: false, .. }) => {}
         other => panic!("famine must bar the settlement gate, got {other:?}"),
     }

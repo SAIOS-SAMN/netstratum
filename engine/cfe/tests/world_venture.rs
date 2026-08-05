@@ -6,7 +6,7 @@
 //! chronicle carrying its own legs, conservation exact both ways,
 //! both worlds replaying. Measured here; the HANDOFF §9 idiom paid.
 
-use cfe::dop::{positive, unit, ClosureEvent, Resource};
+use cfe::dop::{among, positive, unit, window, ClosureEvent, Resource};
 use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
 use cfe::vrp::ChainRead;
@@ -32,7 +32,7 @@ fn the_venture_composes_whole_under_one_deal() {
     grantor.transfer(cfe::dop::between(c, FIRST_ORB), Resource::Iron, cfe::dop::positive(6, 1)).expect("spreads");
     grantor.transfer(cfe::dop::between(c, b), Resource::Iron, cfe::dop::positive(6, 1)).expect("spreads");
     grantor
-        .seal_council(1, vec![FIRST_ORB, b, c], Resource::Iron, ratio(2, 1), 600, ratio(1, 1))
+        .seal_council(1, among(&[FIRST_ORB, b, c]), Resource::Iron, positive(2, 1), window(600), positive(1, 1))
         .expect("the council stands open");
     // The receiving world: sunlit and crossed (deal 20, the crossing).
     let mut receiver = sunlit("kepler-passage");

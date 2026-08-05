@@ -6,7 +6,7 @@
 //! touched, conservation-exact both directions; replay reproduces
 //! the whole book.
 
-use cfe::dop::{positive, unit};
+use cfe::dop::{exchange, positive, unit};
 
 use cfe::dop::Resource;
 use cfe::ratio::ratio;
@@ -26,22 +26,20 @@ fn sunlit(name: &str) -> World {
 #[test]
 fn an_offer_rests_and_replays() {
     let mut world = sunlit("bazaar");
-    assert_eq!(
-        world.post_offer(FIRST_ORB, Resource::Iron, ratio(0, 1), Resource::Biomass, ratio(1, 1), 1),
-        Err(ActionRefused::BadOffer),
-        "positive amounts only"
+    assert!(
+        cfe::dop::Positive::new(ratio(0, 1)).is_none(),
+        "a zero amount cannot even be constructed"
     );
-    assert_eq!(
-        world.post_offer(FIRST_ORB, Resource::Iron, ratio(1, 1), Resource::Iron, ratio(1, 1), 1),
-        Err(ActionRefused::BadOffer),
-        "two DISTINCT resources"
+    assert!(
+        cfe::dop::Exchange::new(Resource::Iron, Resource::Iron).is_none(),
+        "a reflexive trade cannot even be constructed"
     );
     world
-        .post_offer(FIRST_ORB, Resource::Iron, ratio(4, 1), Resource::Biomass, ratio(2, 1), 1)
+        .post_offer(FIRST_ORB, exchange(Resource::Iron, Resource::Biomass), positive(4, 1), positive(2, 1), 1)
         .expect("posts");
     assert_eq!(
-        world.post_offer(FIRST_ORB, Resource::Iron, ratio(1, 1), Resource::Biomass, ratio(1, 1), 1),
-        Err(ActionRefused::BadOffer),
+        world.post_offer(FIRST_ORB, exchange(Resource::Iron, Resource::Biomass), positive(1, 1), positive(1, 1), 1),
+        Err(ActionRefused::OfferKnown { offer: 1 }),
         "a fresh id per intent"
     );
     assert_eq!(world.offers().len(), 1, "the unmatched offer RESTS");
@@ -57,12 +55,12 @@ fn a_crossing_clears_at_the_resting_price() {
     let mut frost = sunlit("rimeside");
     // The Furnace rests first: 4 iron for 2 biomass (price 1/2 per).
     furnace
-        .post_offer(FIRST_ORB, Resource::Iron, ratio(4, 1), Resource::Biomass, ratio(2, 1), 7)
+        .post_offer(FIRST_ORB, exchange(Resource::Iron, Resource::Biomass), positive(4, 1), positive(2, 1), 7)
         .expect("rests");
     frost.tick();
     // The Frost bids better than asked: 3 biomass for 3 iron.
     frost
-        .post_offer(FIRST_ORB, Resource::Biomass, ratio(3, 1), Resource::Iron, ratio(3, 1), 9)
+        .post_offer(FIRST_ORB, exchange(Resource::Biomass, Resource::Iron), positive(3, 1), positive(3, 1), 9)
         .expect("posts");
 
     let iron_before = furnace.orb().unwrap().banked_amount(Resource::Iron)
@@ -116,9 +114,9 @@ fn the_gap_melts_the_cargo_and_distance_walls() {
     // Aligned local pair: delivered whole.
     let mut a = sunlit("concord-a");
     let mut b = sunlit("concord-b");
-    a.post_offer(FIRST_ORB, Resource::Iron, ratio(2, 1), Resource::Biomass, ratio(1, 1), 1)
+    a.post_offer(FIRST_ORB, exchange(Resource::Iron, Resource::Biomass), positive(2, 1), positive(1, 1), 1)
         .expect("posts");
-    b.post_offer(FIRST_ORB, Resource::Biomass, ratio(1, 1), Resource::Iron, ratio(2, 1), 2)
+    b.post_offer(FIRST_ORB, exchange(Resource::Biomass, Resource::Iron), positive(1, 1), positive(2, 1), 2)
         .expect("posts");
     let b_iron = b.orb().unwrap().banked_amount(Resource::Iron);
     clear_trade(&mut a, 1, &mut b, 2, 10, ratio(0, 1)).expect("clears");
@@ -132,9 +130,9 @@ fn the_gap_melts_the_cargo_and_distance_walls() {
     let mut c = sunlit("discord-c");
     let mut d = sunlit("discord-d");
     c.shift_gauge(ratio(1, 2));
-    c.post_offer(FIRST_ORB, Resource::Iron, ratio(2, 1), Resource::Biomass, ratio(1, 1), 3)
+    c.post_offer(FIRST_ORB, exchange(Resource::Iron, Resource::Biomass), positive(2, 1), positive(1, 1), 3)
         .expect("posts");
-    d.post_offer(FIRST_ORB, Resource::Biomass, ratio(1, 1), Resource::Iron, ratio(2, 1), 4)
+    d.post_offer(FIRST_ORB, exchange(Resource::Biomass, Resource::Iron), positive(1, 1), positive(2, 1), 4)
         .expect("posts");
     let d_iron = d.orb().unwrap().banked_amount(Resource::Iron);
     clear_trade(&mut c, 3, &mut d, 4, 20, ratio(6, 1)).expect("clears");
@@ -168,9 +166,9 @@ fn the_gap_melts_the_cargo_and_distance_walls() {
     // Distance 64 walls the pair: melt ≥ 1, refused before movement.
     let mut e = sunlit("far-e");
     let mut f = sunlit("far-f");
-    e.post_offer(FIRST_ORB, Resource::Iron, ratio(2, 1), Resource::Biomass, ratio(1, 1), 5)
+    e.post_offer(FIRST_ORB, exchange(Resource::Iron, Resource::Biomass), positive(2, 1), positive(1, 1), 5)
         .expect("posts");
-    f.post_offer(FIRST_ORB, Resource::Biomass, ratio(1, 1), Resource::Iron, ratio(2, 1), 6)
+    f.post_offer(FIRST_ORB, exchange(Resource::Biomass, Resource::Iron), positive(1, 1), positive(2, 1), 6)
         .expect("posts");
     let iron_before = e.orb().unwrap().banked_amount(Resource::Iron);
     assert!(
@@ -189,11 +187,11 @@ fn the_gap_melts_the_cargo_and_distance_walls() {
 fn no_crossing_no_movement() {
     let mut a = sunlit("askance");
     let mut b = sunlit("beneath");
-    a.post_offer(FIRST_ORB, Resource::Iron, ratio(2, 1), Resource::Biomass, ratio(4, 1), 1)
+    a.post_offer(FIRST_ORB, exchange(Resource::Iron, Resource::Biomass), positive(2, 1), positive(4, 1), 1)
         .expect("posts");
     // B asks MORE iron per biomass than A offers — the prices never
     // cross (A wants 2 biomass per iron; B gives at most 1/2).
-    b.post_offer(FIRST_ORB, Resource::Biomass, ratio(1, 1), Resource::Iron, ratio(2, 1), 2)
+    b.post_offer(FIRST_ORB, exchange(Resource::Biomass, Resource::Iron), positive(1, 1), positive(2, 1), 2)
         .expect("posts");
     assert_eq!(
         clear_trade(&mut a, 1, &mut b, 2, 5, ratio(0, 1)),
@@ -205,7 +203,7 @@ fn no_crossing_no_movement() {
     let mut shielded = World::new();
     shielded.found("darkhold").expect("founds");
     shielded
-        .post_offer(FIRST_ORB, Resource::Biomass, ratio(4, 1), Resource::Iron, ratio(2, 1), 3)
+        .post_offer(FIRST_ORB, exchange(Resource::Biomass, Resource::Iron), positive(4, 1), positive(2, 1), 3)
         .expect("posts — resting is lawful even under the shield");
     match clear_trade(&mut a, 1, &mut shielded, 3, 6, ratio(0, 1)) {
         Err(ActionRefused::Shielded { .. }) => {}
@@ -253,9 +251,9 @@ fn the_lane_bends_the_melt_then_lapses() {
     );
     // Distance 16, no gap: raw melt 16/64 = 1/4; the lane halves it
     // to 1/8 — delivered = 2 × 7/8 = 7/4.
-    a.post_offer(FIRST_ORB, Resource::Iron, ratio(2, 1), Resource::Biomass, ratio(1, 1), 1)
+    a.post_offer(FIRST_ORB, exchange(Resource::Iron, Resource::Biomass), positive(2, 1), positive(1, 1), 1)
         .expect("posts");
-    b.post_offer(FIRST_ORB, Resource::Biomass, ratio(1, 1), Resource::Iron, ratio(2, 1), 2)
+    b.post_offer(FIRST_ORB, exchange(Resource::Biomass, Resource::Iron), positive(1, 1), positive(2, 1), 2)
         .expect("posts");
     let b_iron = b.orb().unwrap().banked_amount(Resource::Iron);
     clear_trade(&mut a, 1, &mut b, 2, 50, ratio(16, 1)).expect("clears");

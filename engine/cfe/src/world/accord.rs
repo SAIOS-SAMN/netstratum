@@ -18,23 +18,22 @@ impl World {
     pub fn seal_council(
         &mut self,
         council: u64,
-        members: Vec<u64>,
+        members: crate::dop::Among,
         resource: Resource,
-        quota: Ratio,
-        window: u64,
-        collateral: Ratio,
+        quota: crate::dop::Positive,
+        window: crate::dop::Window,
+        collateral: crate::dop::Positive,
     ) -> Result<(), ActionRefused> {
-        let mut distinct = members.clone();
-        distinct.sort_unstable();
-        distinct.dedup();
-        if distinct.len() < 3
-            || distinct.len() != members.len()
-            || quota <= ratio(0, 1)
-            || collateral <= ratio(0, 1)
-            || window == 0
-            || self.councils.iter().any(|held| held.council == council)
-        {
-            return Err(ActionRefused::BadCouncil);
+        // The shape half of the dead `BadCouncil` is unrepresentable
+        // now — `Among` proved the membership, `Positive` the quota and
+        // collateral, `Window` the deadline (29_CONSTRUCTION). Only the
+        // fresh-id FACT remains, honestly named.
+        let members = members.members().to_vec();
+        let quota = quota.value().clone();
+        let collateral = collateral.value().clone();
+        let window = window.get();
+        if self.councils.iter().any(|held| held.council == council) {
+            return Err(ActionRefused::CouncilKnown { council });
         }
         for member in &members {
             if !self.orbs.iter().any(|held| held.orb_id == *member) {

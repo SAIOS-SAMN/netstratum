@@ -189,7 +189,7 @@ use cfe::world::{ActionRefused, World};
 fn seated() -> World {
     let mut world = World::new();
     world.found("mint-hold").expect("founds");
-    world.seat_station("tunborn", cfe::dop::Station::from_wire(1).expect("a band office")).expect("seats the progenitor");
+    world.seat_station(cfe::dop::name("tunborn"), cfe::dop::Station::from_wire(1).expect("a band office")).expect("seats the progenitor");
     world
 }
 
@@ -199,12 +199,12 @@ fn seated() -> World {
 fn only_a_progenitor_may_mint() {
     let mut world = seated();
     // A watcher (2) is a real office and still not a board-maker.
-    world.seat_station("coralline", cfe::dop::Station::from_wire(2).expect("a band office")).expect("seats the watcher");
+    world.seat_station(cfe::dop::name("coralline"), cfe::dop::Station::from_wire(2).expect("a band office")).expect("seats the watcher");
 
     for line in ["coralline", "nobody"] {
         assert!(
             matches!(
-                world.mint_vocabulary(line, 4, "◇", "probe", vec![
+                world.mint_vocabulary(line, 4, "◇", cfe::dop::name("probe"), vec![
                     (CHANNEL_YIELD, ratio(5, 4)),
                     (CHANNEL_UPKEEP, ratio(5, 4)),
                 ]),
@@ -215,7 +215,7 @@ fn only_a_progenitor_may_mint() {
     }
     // And the progenitor may.
     assert!(world
-        .mint_vocabulary("tunborn", 4, "◇", "probe", vec![
+        .mint_vocabulary("tunborn", 4, "◇", cfe::dop::name("probe"), vec![
             (CHANNEL_YIELD, ratio(7, 4)),
             (CHANNEL_UPKEEP, ratio(7, 4)),
         ])
@@ -229,7 +229,7 @@ fn no_axis_mints_an_office() {
     let mut world = seated();
     for axis in [0u8, 7, 8, 99] {
         assert!(matches!(
-            world.mint_vocabulary("tunborn", axis, "", "office", vec![
+            world.mint_vocabulary("tunborn", axis, "", cfe::dop::name("office"), vec![
                 (CHANNEL_YIELD, ratio(5, 4)),
                 (CHANNEL_UPKEEP, ratio(5, 4)),
             ]),
@@ -244,7 +244,7 @@ fn no_axis_mints_an_office() {
 fn a_dominant_mint_is_refused_at_the_door() {
     let mut world = seated();
     assert!(matches!(
-        world.mint_vocabulary("tunborn", 4, "◇", "freelunch", vec![
+        world.mint_vocabulary("tunborn", 4, "◇", cfe::dop::name("freelunch"), vec![
             (CHANNEL_YIELD, ratio(2, 1)),
             (CHANNEL_UPKEEP, ratio(1, 2)),
         ]),
@@ -252,7 +252,7 @@ fn a_dominant_mint_is_refused_at_the_door() {
     ));
     // Out of bounds refuses too.
     assert!(matches!(
-        world.mint_vocabulary("tunborn", 4, "◇", "huge", vec![
+        world.mint_vocabulary("tunborn", 4, "◇", cfe::dop::name("huge"), vec![
             (CHANNEL_YIELD, ratio(9, 1)),
             (CHANNEL_UPKEEP, ratio(9, 1)),
         ]),
@@ -261,7 +261,7 @@ fn a_dominant_mint_is_refused_at_the_door() {
     // A channel the engine does not compute refuses — the table grows by
     // LANDING a channel, never by a mint naming one.
     assert!(matches!(
-        world.mint_vocabulary("tunborn", 4, "◇", "ghost", vec![
+        world.mint_vocabulary("tunborn", 4, "◇", cfe::dop::name("ghost"), vec![
             (9, ratio(5, 4)),
             (CHANNEL_UPKEEP, ratio(3, 4)),
         ]),
@@ -277,7 +277,7 @@ fn a_mint_that_only_renames_an_existing_mechanism_refuses() {
     // Class 1 (biotic-swarm) is yield x5/4, upkeep x5/4. A different
     // word, a different mark, the same trade.
     assert!(matches!(
-        world.mint_vocabulary("tunborn", 4, "✦", "swarmlike", vec![
+        world.mint_vocabulary("tunborn", 4, "✦", cfe::dop::name("swarmlike"), vec![
             (CHANNEL_UPKEEP, ratio(5, 4)),
             (CHANNEL_YIELD, ratio(5, 4)),
         ]),
@@ -285,7 +285,7 @@ fn a_mint_that_only_renames_an_existing_mechanism_refuses() {
     ));
     // And a genuinely new trade lands.
     assert!(world
-        .mint_vocabulary("tunborn", 4, "✦", "swarmlike", vec![
+        .mint_vocabulary("tunborn", 4, "✦", cfe::dop::name("swarmlike"), vec![
             (CHANNEL_YIELD, ratio(7, 4)),
             (CHANNEL_SURVEY, ratio(7, 4)),
         ])
@@ -299,14 +299,14 @@ fn a_minted_mark_cannot_shadow_a_seated_one() {
     let mut world = seated();
     // ∿ is class 6, plasma-field.
     assert!(matches!(
-        world.mint_vocabulary("tunborn", 4, "∿", "newname", vec![
+        world.mint_vocabulary("tunborn", 4, "∿", cfe::dop::name("newname"), vec![
             (CHANNEL_YIELD, ratio(7, 4)),
             (CHANNEL_UPKEEP, ratio(7, 4)),
         ]),
         Err(ActionRefused::MintNameTaken { .. })
     ));
     assert!(matches!(
-        world.mint_vocabulary("tunborn", 4, "✧", "plasma-field", vec![
+        world.mint_vocabulary("tunborn", 4, "✧", cfe::dop::name("plasma-field"), vec![
             (CHANNEL_YIELD, ratio(7, 4)),
             (CHANNEL_UPKEEP, ratio(7, 4)),
         ]),
@@ -322,7 +322,7 @@ fn a_minted_class_can_be_sealed_and_it_computes() {
     let before = cfe::vocabulary::ceiling(world.chronicle(), cfe::vocabulary::Axis::Class);
 
     let code = world
-        .mint_vocabulary("tunborn", 4, "⌘", "covenantal", vec![
+        .mint_vocabulary("tunborn", 4, "⌘", cfe::dop::name("covenantal"), vec![
             (CHANNEL_YIELD, ratio(7, 4)),
             (CHANNEL_UPKEEP, ratio(7, 4)),
         ])
@@ -394,7 +394,7 @@ fn the_fold_at_a_stamp_does_not_see_a_later_mint() {
     world.tick();
     world.tick();
     world
-        .mint_vocabulary("tunborn", 4, "⌘", "covenantal", vec![
+        .mint_vocabulary("tunborn", 4, "⌘", cfe::dop::name("covenantal"), vec![
             (CHANNEL_YIELD, ratio(7, 4)),
             (CHANNEL_UPKEEP, ratio(7, 4)),
         ])
@@ -457,7 +457,7 @@ fn a_seated_line_may_not_covenant() {
     // EVERY SEATED OFFICE MAY NOT — T0, T1 and T2 alike.
     for station in 1..=4u8 {
         let (mut world, charted) = common();
-        world.seat_station("commoners", cfe::dop::Station::from_wire(station).expect("a band office")).expect("seats");
+        world.seat_station(cfe::dop::name("commoners"), cfe::dop::Station::from_wire(station).expect("a band office")).expect("seats");
         assert!(
             matches!(
                 world.seal_forward(cfe::dop::between(cfe::world::FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(1, 1), cfe::dop::window(8)),

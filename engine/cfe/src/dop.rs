@@ -343,6 +343,90 @@ pub fn between(from: u64, to: u64) -> Between {
     Between::new(from, to).expect("a between literal must join two distinct endpoints")
 }
 
+/// **THREE OR MORE DISTINCT MEMBERS, proven at construction** (P1,
+/// 29_CONSTRUCTION). A council is multilateral by definition — two
+/// parties are a forward, and a duplicated member would be bound
+/// twice under one lock. Both halves of `BadCouncil`'s membership
+/// shape lived in one anonymous arm; an `Among` cannot be short and
+/// cannot repeat, so the arm dies.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Among {
+    members: Vec<u64>,
+}
+
+impl Among {
+    pub fn new(members: Vec<u64>) -> Option<Among> {
+        let mut distinct = members.clone();
+        distinct.sort_unstable();
+        distinct.dedup();
+        (distinct.len() >= 3 && distinct.len() == members.len())
+            .then_some(Among { members })
+    }
+    pub fn members(&self) -> &[u64] {
+        &self.members
+    }
+}
+
+/// The literal door for memberships.
+pub fn among(members: &[u64]) -> Among {
+    Among::new(members.to_vec())
+        .expect("an among literal must hold three or more distinct members")
+}
+
+/// **TWO DISTINCT RESOURCES, proven at construction** (P1). An offer
+/// that gives what it wants trades nothing — `give == want` was
+/// `BadOffer`'s shape half. An `Exchange` cannot be reflexive.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Exchange {
+    give: Resource,
+    want: Resource,
+}
+
+impl Exchange {
+    pub fn new(give: Resource, want: Resource) -> Option<Exchange> {
+        (give != want).then_some(Exchange { give, want })
+    }
+    pub fn give(&self) -> Resource {
+        self.give
+    }
+    pub fn want(&self) -> Resource {
+        self.want
+    }
+}
+
+/// The literal door for exchanges.
+pub fn exchange(give: Resource, want: Resource) -> Exchange {
+    Exchange::new(give, want).expect("an exchange literal must trade two distinct resources")
+}
+
+/// **A NAME, proven non-empty at construction** (P1). The nameless
+/// line and the nameless word were each policed by their own arm
+/// (`LineUnnamed`; the emptiness half of `MintNameTaken`); a `Name`
+/// cannot be empty, so the arms die and only the collision FACTS
+/// remain.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Name(String);
+
+impl Name {
+    pub fn new(text: &str) -> Option<Name> {
+        (!text.is_empty()).then(|| Name(text.to_string()))
+    }
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+impl core::fmt::Display for Name {
+    fn fmt(&self, out: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        out.write_str(&self.0)
+    }
+}
+
+/// The literal door for names.
+pub fn name(text: &str) -> Name {
+    Name::new(text).expect("a name literal must not be empty")
+}
+
 /// **A DELIVERY WINDOW — at least one tick.** `window == 0` was a shape
 /// arm; a zero-tick obligation is not an obligation.
 pub type Window = core::num::NonZeroU64;

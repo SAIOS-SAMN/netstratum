@@ -7,8 +7,7 @@
 //! the co-op pressure by design. Star-independent: a mind needs no
 //! sky to starve.
 
-use cfe::dop::{positive, unit, ClosureEvent, Resource};
-use cfe::ratio::ratio;
+use cfe::dop::{among, positive, unit, window, ClosureEvent, Resource};
 use cfe::thermal::StarClass;
 use cfe::world::{aperture_transfer, replay, World, FIRST_ORB};
 
@@ -101,7 +100,7 @@ fn a_starving_mind_mints_no_nodes() {
     grantor.transfer(cfe::dop::between(c, FIRST_ORB), Resource::Iron, cfe::dop::positive(6, 1)).expect("spreads");
     grantor.transfer(cfe::dop::between(c, b), Resource::Iron, cfe::dop::positive(6, 1)).expect("spreads");
     grantor
-        .seal_council(1, vec![FIRST_ORB, b, c], Resource::Iron, ratio(2, 1), 600, ratio(1, 1))
+        .seal_council(1, among(&[FIRST_ORB, b, c]), Resource::Iron, positive(2, 1), window(600), positive(1, 1))
         .expect("council");
     aperture_transfer(&mut grantor, FIRST_ORB, &mut world, FIRST_ORB,
         Resource::Iron, cfe::dop::positive(1, 1), 9).expect("crosses");

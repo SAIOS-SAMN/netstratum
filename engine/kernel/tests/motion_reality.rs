@@ -133,10 +133,10 @@ fn a_real_seating_is_reproduced_by_its_move() {
     let before = project(&world.committed());
     let mark = world.chronicle().receipts().len();
 
-    world.seat_station_as(SOVEREIGN, "abyssal-vocalis", cfe::dop::Station::from_wire(3).expect("a band office")).expect("seats");
-    world.seat_station_as(SOVEREIGN, "brine-cortex", cfe::dop::Station::from_wire(1).expect("a band office")).expect("seats");
+    world.seat_station_as(SOVEREIGN, cfe::dop::name("abyssal-vocalis"), cfe::dop::Station::from_wire(3).expect("a band office")).expect("seats");
+    world.seat_station_as(SOVEREIGN, cfe::dop::name("brine-cortex"), cfe::dop::Station::from_wire(1).expect("a band office")).expect("seats");
     // A RE-seating: the replacement law is what this pins.
-    world.seat_station_as(SOVEREIGN, "abyssal-vocalis", cfe::dop::Station::from_wire(2).expect("a band office")).expect("re-seats");
+    world.seat_station_as(SOVEREIGN, cfe::dop::name("abyssal-vocalis"), cfe::dop::Station::from_wire(2).expect("a band office")).expect("re-seats");
 
     let after = project(&world.committed());
     let (composed, unexpressed) = replay_through_moves(&before, &receipts_after(&world, mark));
@@ -212,8 +212,8 @@ fn the_schedule_recovers_the_world_from_shuffled_real_receipts() {
 
     let before = project(&world.committed());
     let mark = world.chronicle().receipts().len();
-    world.seat_station_as(SOVEREIGN, "line", cfe::dop::Station::from_wire(4).expect("a band office")).expect("seats");
-    world.seat_station_as(SOVEREIGN, "line", cfe::dop::Station::from_wire(1).expect("a band office")).expect("re-seats");
+    world.seat_station_as(SOVEREIGN, cfe::dop::name("line"), cfe::dop::Station::from_wire(4).expect("a band office")).expect("seats");
+    world.seat_station_as(SOVEREIGN, cfe::dop::name("line"), cfe::dop::Station::from_wire(1).expect("a band office")).expect("re-seats");
     let after = project(&world.committed());
 
     let mut scheduled: Vec<(Slot, Move)> = world
