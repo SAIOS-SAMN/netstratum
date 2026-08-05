@@ -75,6 +75,26 @@ impl World {
         if albedo < zero || albedo >= one || orbit_r <= zero {
             return Err(ActionRefused::BadSiting);
         }
+        // THE RING REACH (operator ruling 2026-08-06): the star's
+        // MAGNETISM bounds how many RINGS it anchors — a ring is a
+        // distinct orbit radius, and the reach is the field grade
+        // (`StarClass::ring_reach`, the dynamo derivation). Filling an
+        // anchored ring stays lawful; THREADING A NEW ONE beyond the
+        // field refuses. Refusal-pure: judged before anything moves.
+        let mut rings: Vec<&Ratio> = Vec::new();
+        for held in &self.orbs {
+            if let Some(site) = &held.thermal {
+                if !rings.contains(&&site.orbit_r) {
+                    rings.push(&site.orbit_r);
+                }
+            }
+        }
+        if !rings.contains(&&orbit_r) {
+            let reach = self.star.expect("checked above").ring_reach();
+            if rings.len() >= usize::from(reach) {
+                return Err(ActionRefused::RingReachExceeded { held: rings.len(), reach });
+            }
+        }
         let held = peel(&mut self.orbs, orb)
             .ok_or(ActionRefused::NoSuchOrb { orb })?;
         if held.thermal.is_some() {

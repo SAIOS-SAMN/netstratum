@@ -199,6 +199,53 @@ impl StarClass {
         }
     }
 
+    /// **MAGNETISM — the field grade of this class** (operator ruling
+    /// 2026-08-06: *how many planets can orbit a star should be based
+    /// on the magnetism of the star associated with the solar system*).
+    ///
+    /// Derived from the DYNAMO, the way the abundance spine wears
+    /// metallicity: a star's field comes from its convective dynamo,
+    /// and convection deepens down the main sequence — O/B/A are
+    /// radiative (weak fossil fields), F begins shallow convection,
+    /// G is the solar dynamo, K runs deeper, M is FULLY convective and
+    /// carries the strongest main-sequence fields (the packed systems
+    /// are the measured case). Remnants: the white dwarf keeps a fossil
+    /// megagauss field; the NEUTRON STAR is the strongest field in
+    /// nature but COMPACT — a tight magnetosphere sweeps clean, so its
+    /// grade is anchored to the measured case (three planets at
+    /// PSR B1257+12, the first exoplanets ever found); Wolf–Rayet
+    /// strips its own disk with wind. Grades are placeholder dials
+    /// ruled at balance, like every figure in this table.
+    pub fn magnetism(self) -> u8 {
+        match self {
+            StarClass::O => 2,
+            StarClass::B => 3,
+            StarClass::A => 3,
+            StarClass::F => 5,
+            StarClass::G => 8,
+            StarClass::K => 9,
+            StarClass::M => 12,
+            StarClass::BrownDwarf => 10,
+            StarClass::WhiteDwarf => 6,
+            StarClass::RedGiant => 4,
+            StarClass::NeutronStar => 3,
+            StarClass::WolfRayet => 2,
+            StarClass::LuminalWhiteHole => 12,
+        }
+    }
+
+    /// **THE RING REACH — how many RINGS this star's field anchors.**
+    /// The law the ruling asked for: planet capacity is BASED ON the
+    /// magnetism, and at v1 the derivation is identity — one ring per
+    /// field grade. G reaches EIGHT, which lands the home calibration
+    /// exactly: Sol's dynamo holds Sol's count. A ring is a distinct
+    /// `orbit_r`; slots WITHIN a ring stay the turn law's business
+    /// (60 × 60 per ring, ψ separating) — magnetism bounds how many
+    /// rings exist, never how a ring fills.
+    pub fn ring_reach(self) -> u8 {
+        self.magnetism()
+    }
+
     /// Luminosity relative to Sol (exact rational placeholder).
     pub fn luminosity(self) -> Ratio {
         match self {

@@ -3432,6 +3432,12 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "the work earns {} — {claimed} was claimed",
             style.strong(&bound.to_string())
         ),
+        ActionRefused::RingReachExceeded { held, reach } => format!(
+            "this star's field anchors {} ring(s) and {held} already stand — site on \
+             an anchored ring (slots within a ring stay open), or this system has \
+             reached its magnetism",
+            style.strong(&reach.to_string())
+        ),
         ActionRefused::OffSlot { theta } => format!(
             "{theta} is not a slot — a turn divides into {}, so an orbit sits at \
              k/{} or it does not sit",

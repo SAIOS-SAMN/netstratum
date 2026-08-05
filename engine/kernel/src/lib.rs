@@ -102,7 +102,14 @@ use solver_verify::{verify_work, WorkBroken};
 /// increment reads the floor). What changes is the READING — D on the
 /// board grows with the estate — and one refusal's reported number,
 /// which the law itself lists as patch-class.
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 5, patch: 1 };
+///
+/// **0.6.0 — THE MAGNETIC REACH** (operator ruling 2026-08-06: planet
+/// capacity is based on the star's magnetism). MINOR, derived: the
+/// judge now REFUSES `RingBeyondReach` where it previously admitted —
+/// a `PlanetSited` threading a ring beyond what the star's field
+/// anchors. A verdict changed, so `minor` moves; the opened ground
+/// (0.5.1) rides beneath it as the patch it was.
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 6, patch: 0 };
 
 /// The judge's version, as it rides the wire.
 ///
@@ -299,6 +306,13 @@ pub enum Refused {
     /// horizon could set it past any reachable stamp and never come up
     /// for approval at all.
     UnionTermNotRuled { declared: u64, ruled: u64 },
+    /// THE RING REACH (2026-08-06) — a siting threads a NEW ring beyond
+    /// what the star's magnetism anchors. The reach is the field grade
+    /// (`StarClass::ring_reach`, the dynamo derivation), computed by
+    /// CALLING the same rule the emitter refused on (call-not-copy).
+    /// Filling an anchored ring never refuses here — slots within a
+    /// ring are the turn law's business, not the field's.
+    RingBeyondReach { held: usize, reach: u8 },
     /// E5b — an estate survey whose covering is not the whole estate:
     /// empty (an unwitnessed observation cannot enter the record) or
     /// short of the orbs that stand (a partial covering underpays the
@@ -338,6 +352,7 @@ pub fn admits(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
     // that both must hold, never which speaks first, so this is a
     // diagnostics choice and is recorded as one.
     revocation_law(prior, next, step)?;
+    magnetic_reach(prior, step)?;
     decay(prior, step)?;
     gauge_move(prior, next, step)?;
     element_move(prior, next, step)
@@ -391,6 +406,40 @@ pub fn admits(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
 /// gauge-invariant part that grows — never on `Degree::get`, which
 /// includes the ground and would make the comparison vacuous exactly
 /// the way the struck `D > 0` gate was (a floor cannot decide).
+/// **THE MAGNETIC REACH GATE** (operator ruling 2026-08-06: planet
+/// capacity is based on the star's magnetism). A `PlanetSited` deed
+/// that threads a ring the prior state does not hold, when the prior
+/// state already holds as many rings as the star's field anchors,
+/// refuses. A ring is a distinct `orbit_r`; the reach is
+/// `StarClass::ring_reach` — the SAME sealed rule the emitter draws,
+/// so the field cannot be quoted one way at the door and another at
+/// the judge. No star in the prior state is the emitter's refusal
+/// (`NoStarCommissioned`) and is not re-judged here.
+fn magnetic_reach(prior: &Committed, step: &Step) -> Result<(), Refused> {
+    let ClosureEvent::PlanetSited { orbit_r, .. } = &step.event else {
+        return Ok(());
+    };
+    let Some(star) = prior.star else {
+        return Ok(());
+    };
+    let mut rings: Vec<&Ratio> = Vec::new();
+    for held in &prior.orbs {
+        if let Some(site) = &held.thermal {
+            if !rings.contains(&&site.orbit_r) {
+                rings.push(&site.orbit_r);
+            }
+        }
+    }
+    if rings.contains(&orbit_r) {
+        return Ok(());
+    }
+    let reach = star.ring_reach();
+    match rings.len() < usize::from(reach) {
+        true => Ok(()),
+        false => Err(Refused::RingBeyondReach { held: rings.len(), reach }),
+    }
+}
+
 fn revocation_law(
     prior: &Committed,
     next: &Committed,

@@ -179,8 +179,15 @@ fn the_arrow_law_holds() {
     // is no longer one place that interprets a payload. Recorded here
     // rather than left silent, since a struck guard leaves no trace at
     // the call site.
-    // The verifier half sits in the sealed math tier: physics + hashing.
-    let verify_allowed = ["blake3", "physics"];
+    // The verifier half sits in the sealed math tier: physics + hashing
+    // + exact-rational geometry. AMENDMENT (THE SHELL, 667079c): `ratio`
+    // enters the sealed set — it sits BELOW every crate ("the constant
+    // lives in ratio — below every crate — so the solver and the world
+    // read ONE turn law rather than two copies", the dependency's own
+    // comment). The landing added the import and missed this line; the
+    // guard sat red until the next full run found it, which is the
+    // guard doing its job one commit late.
+    let verify_allowed = ["blake3", "physics", "ratio"];
     for dep in runtime_deps(&root.join("engine/solver-verify/Cargo.toml")) {
         assert!(
             verify_allowed.contains(&dep.as_str()),
