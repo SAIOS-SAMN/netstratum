@@ -28,5 +28,6 @@ pub mod query;
 pub use ratio;
 pub mod thermal;
 pub mod tlv;
+pub mod vocabulary;
 pub mod vrp;
 pub mod world;

@@ -277,6 +277,21 @@ pub fn render_receipt(receipt: &Receipt) -> String {
         // LIT-1 — the literature deeds. Witness COUNT only: the digests
         // are the evidence, and a display line is not where evidence is
         // examined.
+        // THE VOCABULARY MINT (tag 90, 28_VOCABULARY): the mark, the
+        // word and the mechanism it arrived with — a reader should be
+        // able to see WHAT a minted class does, not merely that one
+        // happened.
+        E::VocabularyMinted { axis, code, sigil, word, binding } => (
+            "vocabulary_minted",
+            format!(
+                "axis {axis} code {code} {sigil} {word} [{}]",
+                binding
+                    .iter()
+                    .map(|(channel, factor)| format!("{channel}:{factor}"))
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            ),
+        ),
         E::WorkAspired { name, .. } => ("work_aspired", name.clone()),
         E::WorkClaimed { work, witnesses, .. } => (
             "work_claimed",

@@ -94,6 +94,37 @@ pub enum ActionRefused {
     TaxonUnknown { class: u8, clade: u8 },
     /// KERNEL-TAXON — one seal per star; identity is forever.
     TaxonAlreadySealed,
+    /// **THE COVENANT IS A T3 INSTRUMENT** (operator ruling 2026-08-05:
+    /// *drop covenant to T3 and below*). A line holding a chartered
+    /// OFFICE does not covenant — it decrees, delegates, or petitions
+    /// through the council. The forward obligation is how the COMMON
+    /// band binds: parties with no chartered authority over each other
+    /// reach agreement by posting collateral against a deadline, which
+    /// is the whole reason collateral exists in it.
+    ///
+    /// The refusal names the seat that bars it, so the way down is
+    /// legible: release the office and the instrument opens.
+    CovenantAboveTheCommon { line: String, station: u8 },
+    /// 28_VOCABULARY §5 — minting is a TIER 0 power (`12_UNION` ruling
+    /// 4: progenitors *create the board everyone else plays on*). The
+    /// line named holds no progenitor seat in this chronicle.
+    MintWithoutStanding { line: String },
+    /// 28_VOCABULARY §7 — no such vocabulary. Note there is no axis for
+    /// STATIONS: minting an office would let a T0 seat manufacture the
+    /// seat that judges it, so offices change by amendment alone (§10).
+    VocabularyAxisUnknown { axis: u8 },
+    /// 28_VOCABULARY §4a — the binding does not TRADE: it must carry at
+    /// least one benefit and at least one friction, every factor inside
+    /// the bounds, every channel one the engine already computes. A
+    /// strictly-dominant entry is unmintable by construction.
+    BindingUnlawful,
+    /// 28_VOCABULARY §6 — the mechanism already exists under another
+    /// name. Word and mark differences are not novelty; a partition
+    /// whose members compute identically distinguishes nothing.
+    MintNotNovel { like: u8 },
+    /// 28_VOCABULARY §6 — the mark or the word is already taken on this
+    /// axis. A mark that names two things defines neither.
+    MintNameTaken { word: String },
     /// WARDEN-1a — the elder's reverse shield: no aperture reaches a
     /// warded star; solve the gate.
     TheWardHolds,

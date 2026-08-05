@@ -337,6 +337,22 @@ impl World {
         window: u64,
     ) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Collect)?;
+        // **THE COVENANT IS A T3 INSTRUMENT** (operator ruling
+        // 2026-08-05: *drop covenant to T3 and below*).
+        //
+        // `tier_of(None) = T3` is the only road to the common band
+        // (`12_UNION` §2a), so the gate reads the world's OWN line and
+        // refuses any that holds a seat. A seated office has chartered
+        // authority and does not need to post collateral against a
+        // deadline to be believed; the common has nothing else.
+        //
+        // An unsealed world holds no line and therefore no seat, so it
+        // is common by construction — the same reading `tier_of` gives.
+        if let Some(line) = self.genesis.as_ref().map(|held| held.civilization.clone()) {
+            if let Some(station) = self.station_of(&line) {
+                return Err(ActionRefused::CovenantAboveTheCommon { line, station });
+            }
+        }
         if self.orbs.is_empty() {
             return Err(ActionRefused::NoColony);
         }

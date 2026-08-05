@@ -1,10 +1,21 @@
 # 28 — THE MINTED VOCABULARY: how a class of entity comes into being
 
-**Status:** DESIGN, drafted 2026-08-05 on the operator's order — *open
-this up to an end user with permissions; eliminate the hardcoding of
-these classes while still letting the engine create NPCs.* Nothing here
-is landed. It becomes LAW when the operator rules on §7's deed, which is
-a wire amendment.
+**Status:** **LAW — LANDED 2026-08-05** on the operator's order *execute
+on V0–V4*, which is the amendment ruling §7 was waiting for. Drafted the
+same day from the order *open this up to an end user with permissions;
+eliminate the hardcoding of these classes while still letting the engine
+create NPCs.*
+
+All five slices are built and witnessed in
+`engine/cfe/tests/vocabulary_pins.rs` (14 pins):
+
+| slice | what landed |
+|---|---|
+| V0 | the class carries a MECHANISM — the found vacuity paid |
+| V1 | the ceilings are readings of the fold, not constants |
+| V2 | `VocabularyMinted` **tag 96**, four gates, wire round-trip |
+| V3 | the cleave draws from the fold AT ITS OWN RECEIPT |
+| V4 | `t0 vocab` and `t0 mint` in the progenitor console |
 
 Subordinate to `00_CHARTER.md`, `26_ARTICLES.md` and `27_EVIDENCE.md`.
 Governs `15_TAXON` §2/§3 (the class and clade vocabularies),
@@ -117,11 +128,12 @@ channel the engine does not already compute:
 | 1 | zone yield | `world/tick.rs` `yield_factor` |
 | 2 | zone upkeep | `world/tick.rs` `upkeep_factor` |
 | 3 | survey draw | `world/survey.rs` `scan_draw` |
-| 4 | research rate | `world/tech.rs` |
-| 5 | route friction | `world/mod.rs` `charter_route` |
 
-*(Placeholder set — it grows by landing a channel, never by a mint
-naming one that is not there.)*
+**AS BUILT the table is the three above and no more.** Research rate and
+route friction were drafted here and are NOT declared, because neither
+is wired — and a channel a binding may name while nothing reads it is
+the very vacuity §3 exists to pay off. The table grows by LANDING a
+channel, and this is the first place that rule was applied to itself.
 
 ### 4a. ONE BENEFIT, ONE FRICTION — PRACTICE-1's law, generalized
 
@@ -195,7 +207,7 @@ things defines neither.
 
 ---
 
-## §7 THE DEED — `VocabularyMinted`, tag 90
+## §7 THE DEED — `VocabularyMinted`, tag 96
 
 ```text
     VocabularyMinted {
@@ -209,8 +221,16 @@ things defines neither.
     }
 ```
 
-Tag 90 is the next free tag outside reservations (`dop.rs` §TAGS; the
-highest in use is 85).
+**Tag 96**, above every tag in use. This draft said "tag 90, the next
+free tag outside reservations, the highest in use is 85" and BOTH halves
+were wrong: 90 was already `SovereignUnionSealed`, and the count came
+from a regex that matched only `N => Some(Self::…)` arms and missed every
+block-form arm. Drafted onto 90, the mint's decoder SHADOWED the
+sovereign union — every such receipt would have become undecodable, a
+chain-breaking defect. It was caught by clippy's unreachable-pattern
+warning rather than by the tag register, whose own "next free tag" line
+had gone stale the day tag 90 was taken. That line now states the free
+set and is not a single number anyone can outrun.
 
 **`code` is CARRIED and VERIFIED, never chosen.** The minter does not
 pick a number — the lawful code is `ceiling(axis) + 1` derived from the
@@ -319,7 +339,27 @@ a collateralized forward delivery obligation. A covenant PRACTICE would
 bind a line to obligations with one benefit and one friction (§4a); a
 covenant CLADE would say the line is constituted by them.
 
-**Recommendation: the practice.** A practice is adopted and released by
+**THE TIER RULING (operator, 2026-08-05): *drop covenant to T3 and
+below*.** The covenant is a **COMMON-BAND instrument** and `seal_forward`
+now refuses any line holding a chartered office.
+
+The reason is in the mechanism rather than in the hierarchy. A covenant
+posts COLLATERAL against a DEADLINE — that is what the struct is: an
+obligor, a beneficiary, a quota, a stake, a window. Collateral exists
+because the parties hold no authority over each other and need something
+better than a promise. A seated office already has chartered authority:
+it decrees, it delegates, it petitions through the council (`12_UNION`
+§7). Asking it to post a stake against its own word is a category error,
+and letting it do so would let an office buy obligations it could simply
+have ordered.
+
+`tier_of(None) = T3` is the only road to the common band (`12_UNION`
+§2a), so the gate reads the world's own line and refuses any seat at all
+— T0, T1 and T2 alike. An unsealed world holds no line and therefore no
+seat, so it is common by construction, which is the same reading
+`tier_of` gives. Witnessed in `a_seated_line_may_not_covenant`.
+
+**Recommendation for the NAME: the practice.** A practice is adopted and released by
 receipt, which is exactly the shape of an obligation people, and it
 costs no wire change at all. The clade reading is available if the
 operator wants covenant to be inherited rather than chosen — and note

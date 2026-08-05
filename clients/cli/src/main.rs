@@ -122,6 +122,17 @@ fn active_station() -> String {
         .unwrap_or_else(|| "player".into())
 }
 
+/// The active operator's own name — the LINE the mint's standing gate
+/// reads. `active_station` reads a display file (a §11 rule 2 debt this
+/// tree already inventories); the mint does NOT trust it — the engine
+/// re-reads the seat from the chain and refuses on its own authority.
+fn active_line() -> Option<String> {
+    std::fs::read_to_string("var/operators/active")
+        .ok()
+        .map(|name| name.trim().to_string())
+        .filter(|name| !name.is_empty())
+}
+
 fn tier0_gate(style: &Style) -> bool {
     if active_station() == "progenitor" {
         return true;
@@ -1297,6 +1308,142 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             }
             let verb = words.next();
             match verb {
+                // ── THE ARCHETYPE EDITOR (28_VOCABULARY §5, V4) ────────
+                //
+                // `t0 vocab [axis]`  read the live folded vocabulary
+                // `t0 mint <axis> <sigil> <word> <ch>:<p>/<q> ...`
+                //
+                // The CLI FORMATS AND RELAYS; it never validates. Every
+                // gate lives at the world door where the chain is — a
+                // client-side check that disagreed with the kernel would
+                // be a second truth, which is the defect the definition
+                // law struck one layer up.
+                Some("vocab") => {
+                    let axes: Vec<(u8, &str)> = vec![
+                        (1, "disposition"), (2, "metabolism"), (3, "perception"),
+                        (4, "class"), (5, "clade"), (6, "practice"),
+                    ];
+                    let wanted = words.next().and_then(|w| {
+                        w.parse::<u8>().ok().or_else(|| {
+                            axes.iter().find(|(_, name)| *name == w).map(|(code, _)| *code)
+                        })
+                    });
+                    for (code, name) in &axes {
+                        if wanted.is_some_and(|w| w != *code) {
+                            continue;
+                        }
+                        let Some(axis) = cfe::vocabulary::Axis::from_code(*code) else {
+                            continue;
+                        };
+                        let seeded = cfe::vocabulary::seed(axis).len();
+                        let entries = cfe::vocabulary::fold(world.chronicle(), axis);
+                        println!(
+                            "\n{} {} — {} entries ({} seeded, {} minted)",
+                            style.dim(&format!("axis {code}")),
+                            style.strong(name),
+                            entries.len(),
+                            seeded,
+                            entries.len().saturating_sub(seeded)
+                        );
+                        for (n, entry) in entries.iter().enumerate() {
+                            let origin = if n < seeded { "seed" } else { "MINTED" };
+                            let mechanism = match entry.binding.is_empty() {
+                                true => style.dim("no mechanism").to_string(),
+                                false => entry
+                                    .binding
+                                    .iter()
+                                    .map(|(ch, f)| format!("{ch}:{f}"))
+                                    .collect::<Vec<_>>()
+                                    .join(" "),
+                            };
+                            println!(
+                                "  {:>3}  {:<2} {:<22} {:<7} {}",
+                                entry.code, entry.sigil, entry.word,
+                                style.dim(origin), mechanism
+                            );
+                        }
+                    }
+                }
+                Some("mint") => {
+                    let usage = || {
+                        println!(
+                            "{} {}\n     {}",
+                            style.bad("✗"),
+                            style.strong("t0 mint <axis> <sigil> <word> <channel>:<p>/<q> ..."),
+                            style.dim("e.g. t0 mint class ⌘ covenantal 1:7/4 2:7/4   (channels: 1 yield · 2 upkeep · 3 survey)")
+                        )
+                    };
+                    let axis_word = words.next();
+                    let sigil = words.next().unwrap_or("");
+                    let word = words.next().unwrap_or("");
+                    let Some(axis) = axis_word.and_then(|w| {
+                        w.parse::<u8>().ok().or(match w {
+                            "disposition" => Some(1), "metabolism" => Some(2),
+                            "perception" => Some(3), "class" => Some(4),
+                            "clade" => Some(5), "practice" => Some(6),
+                            _ => None,
+                        })
+                    }) else {
+                        usage();
+                        return;
+                    };
+                    if word.is_empty() {
+                        usage();
+                        return;
+                    }
+                    let mut binding = Vec::new();
+                    let mut malformed = None;
+                    for term in words.by_ref() {
+                        let Some((channel, factor)) = term.split_once(':') else {
+                            malformed = Some(term.to_string());
+                            break;
+                        };
+                        let (numer, denom) = factor.split_once('/').unwrap_or((factor, "1"));
+                        match (
+                            channel.parse::<u8>(),
+                            numer.trim().parse::<i64>(),
+                            denom.trim().parse::<i64>(),
+                        ) {
+                            (Ok(channel), Ok(n), Ok(d)) if d != 0 => {
+                                binding.push((channel, cfe::ratio::ratio(n, d)))
+                            }
+                            _ => {
+                                malformed = Some(term.to_string());
+                                break;
+                            }
+                        }
+                    }
+                    if let Some(term) = malformed {
+                        println!(
+                            "{} {} is not a channel factor — exact rationals only, no decimals ({})",
+                            style.bad("✗"),
+                            style.strong(&term),
+                            style.dim("1:7/4  2:7/4")
+                        );
+                        return;
+                    }
+                    if binding.is_empty() {
+                        usage();
+                        return;
+                    }
+                    // The seat is read from the CHAIN, and the line is the
+                    // operator's own. The engine refuses if it is not T0.
+                    let line = active_line().unwrap_or_else(|| String::from("operator"));
+                    match world.mint_vocabulary(&line, axis, sigil, word, binding) {
+                        Ok(code) => {
+                            *current = world.now();
+                            println!(
+                                "{} {} {} minted on axis {} as code {} — the board grew a class no coder wrote",
+                                style.ok("✓"),
+                                sigil,
+                                style.strong(word),
+                                style.strong(&axis.to_string()),
+                                style.strong(&code.to_string())
+                            );
+                        }
+                        Err(refusal) => refuse(world, &refusal, style),
+                    }
+                }
                 None | Some("inbox") | Some("requests") => {
                     // THE PRIORITY INBOX (operator ruling: flagged,
                     // never spammed): the upward flow aggregates into
@@ -3514,6 +3661,43 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "the terrain is already charted — one seed per star, forever (02 §2.5); {} reads the map",
             style.strong("terrain")
         ),
+        // THE COVENANT IS A T3 INSTRUMENT (operator ruling 2026-08-05).
+        // The refusal names the seat that bars it, so the way down is
+        // legible: the instrument opens to the common band.
+        ActionRefused::CovenantAboveTheCommon { line, station } => format!(
+            "{} holds the {} seat — a covenant is a COMMON-BAND instrument. An office with chartered authority decrees, delegates or petitions the council; it does not post collateral against its own word",
+            style.strong(line),
+            style.strong(match station {
+                1 => "progenitor",
+                2 => "watcher",
+                3 => "observer",
+                _ => "sovereign",
+            })
+        ),
+        // 28_VOCABULARY §5-§7 — the four mint gates. Each names the way
+        // up as well as the wall: the article gives before it withholds.
+        ActionRefused::MintWithoutStanding { line } => format!(
+            "{} holds no progenitor seat — minting is a TIER 0 power ({}), the office that makes the board others play on",
+            style.strong(line),
+            style.dim("12_UNION ruling 4")
+        ),
+        ActionRefused::VocabularyAxisUnknown { axis } => format!(
+            "no vocabulary {} — {} (there is no axis for an OFFICE: minting one would let a seat manufacture the seat that judges it)",
+            style.strong(&axis.to_string()),
+            style.dim("1 disposition · 2 metabolism · 3 perception · 4 class · 5 clade · 6 practice")
+        ),
+        ActionRefused::BindingUnlawful => format!(
+            "the binding does not TRADE — it needs one BENEFIT and one FRICTION, every factor in [1/4, 4], every channel one the engine computes ({}). A class that is strictly better than its neighbours is not a class",
+            style.dim("1 yield · 2 upkeep · 3 survey")
+        ),
+        ActionRefused::MintNotNovel { like } => format!(
+            "that mechanism already stands as code {} — a different word and a different mark are not novelty; give it a trade nothing else makes",
+            style.strong(&like.to_string())
+        ),
+        ActionRefused::MintNameTaken { word } => format!(
+            "the mark or the word {} is already taken on that axis — a mark that names two things defines neither",
+            style.strong(word)
+        ),
         ActionRefused::NoStarCommissioned => format!(
             "no sun yet — commission one first: {} (O B A F G K M · bd wd rg ns wr lwh)",
             style.strong("star <class>")
@@ -3839,6 +4023,19 @@ fn chronicle(world: &World, style: &Style) {
         let described = match &receipt.event {
             cfe::dop::ClosureEvent::ColonyFounded { name, .. } => {
                 format!("⚑ colony {} founded", style.strong(name))
+            }
+            cfe::dop::ClosureEvent::VocabularyMinted { axis, code, sigil, word, binding } => {
+                format!(
+                    "✎ VOCABULARY MINTED — axis {axis}, code {}, {} {} [{}]",
+                    style.strong(&code.to_string()),
+                    sigil,
+                    style.strong(word),
+                    binding
+                        .iter()
+                        .map(|(channel, factor)| format!("{channel}:{factor}"))
+                        .collect::<Vec<_>>()
+                        .join(" ")
+                )
             }
             cfe::dop::ClosureEvent::SovereignUnionSealed { progenitor, sovereign, term_stamps } => {
                 format!(

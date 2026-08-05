@@ -92,6 +92,14 @@ another people's world* passes through diplomacy — unless the receiving
 side is a warring imperium by its own ledger, or diplomacy has failed by
 receipted breach (§7). Planners plan; the council disposes.
 
+**THE COVENANT IS A T3 INSTRUMENT** (operator ruling 2026-08-05: *drop
+covenant to T3 and below*). The forward obligation (FORWARD-1) is barred
+to every seated office and open to the common band alone. A covenant
+posts collateral against a deadline because its parties hold no
+authority over one another; a station holds authority by charter and
+does not buy what it may order. `world::seal_forward` enforces it and
+`CovenantAboveTheCommon` names the seat that bars it.
+
 ## 2a. The tier overlay — progenitors are TIER 0 (operator ruling, 2026-07-30)
 
 The board's vertical reading, overlaid on the bands. **This is not the

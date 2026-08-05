@@ -212,7 +212,12 @@ impl World {
             return Err(ActionRefused::GenesisAlreadySealed);
         }
         for (axis, code) in [(1u8, disposition), (2, metabolism), (3, perception)] {
-            if !crate::dop::axis_valid(axis, code) {
+            // 28_VOCABULARY V1: the axis vocabularies fold too, so a
+            // minted disposition/metabolism/perception is seatable.
+            let folded = crate::vocabulary::Axis::from_code(axis)
+                .map(|on| code != 0 && code <= crate::vocabulary::ceiling(self.chronicle(), on))
+                .unwrap_or(false);
+            if !folded {
                 return Err(ActionRefused::UnknownAxisValue { axis, code });
             }
         }
@@ -287,10 +292,16 @@ impl World {
         if self.taxon.is_some() {
             return Err(ActionRefused::TaxonAlreadySealed);
         }
+        // 28_VOCABULARY V1: the ceilings are READINGS OF THE FOLD, not
+        // constants. A class a progenitor minted this era is sealable in
+        // it; a class nobody minted is not. Before this the ceilings were
+        // compiled, which is why clades 19 and 20 stood ruled-but-
+        // unsealable for four days.
+        use crate::vocabulary::{ceiling, Axis};
         if class == 0
             || clade == 0
-            || class > crate::dop::class_ceiling()
-            || clade > crate::dop::clade_ceiling()
+            || class > ceiling(self.chronicle(), Axis::Class)
+            || clade > ceiling(self.chronicle(), Axis::Clade)
         {
             return Err(ActionRefused::TaxonUnknown { class, clade });
         }
@@ -315,6 +326,9 @@ impl World {
     /// Build-scoped. `station` is the BAND-1 vocabulary by index
     /// (1 progenitor, 2 watcher, 3 observer, 4 sovereign); anything
     /// else refuses rather than seating a nameless office.
+    pub fn seat_station(&mut self, line: &str, station: u8) -> Result<(), ActionRefused> {
+        self.seat_station_as(SOVEREIGN, line, station)
+    }
     pub fn seat_station_as(
         &mut self,
         actor: u64,
@@ -335,6 +349,86 @@ impl World {
         }
         Ok(())
     }
+    /// **THE VOCABULARY MINT** (tag 90, `28_VOCABULARY` §5–§7).
+    ///
+    /// A T0 progenitor adds an entry to a vocabulary, and the board
+    /// grows a class of entity that no coder wrote. Four gates, each
+    /// refusing typed.
+    ///
+    /// **The code is DERIVED here, never accepted.** The caller does not
+    /// pass one: the lawful value is `ceiling(axis) + 1` read from the
+    /// fold, and the receipt carries it so a reader who has not folded
+    /// the chain can still see which entry this is. A caller that could
+    /// choose could collide two nodes deliberately.
+    pub fn mint_vocabulary(
+        &mut self,
+        line: &str,
+        axis: u8,
+        sigil: &str,
+        word: &str,
+        binding: Vec<(u8, crate::ratio::Ratio)>,
+    ) -> Result<u8, ActionRefused> {
+        self.mint_vocabulary_as(SOVEREIGN, line, axis, sigil, word, binding)
+    }
+    pub fn mint_vocabulary_as(
+        &mut self,
+        actor: u64,
+        line: &str,
+        axis: u8,
+        sigil: &str,
+        word: &str,
+        binding: Vec<(u8, crate::ratio::Ratio)>,
+    ) -> Result<u8, ActionRefused> {
+        use crate::vocabulary as vocab;
+        self.permitted(actor, Scope::Build)?;
+
+        // GATE 1 — STANDING. Tier 0 only. `station_of` reads the CHAIN,
+        // so this cannot be granted by editing anything.
+        if self.station_of(line) != Some(1) {
+            return Err(ActionRefused::MintWithoutStanding { line: line.to_string() });
+        }
+
+        // GATE 2 — THE AXIS EXISTS.
+        let Some(on) = vocab::Axis::from_code(axis) else {
+            return Err(ActionRefused::VocabularyAxisUnknown { axis });
+        };
+
+        // GATE 3 — THE BINDING TRADES (§4a).
+        if !vocab::binding_lawful(&binding) {
+            return Err(ActionRefused::BindingUnlawful);
+        }
+
+        // GATE 4 — NOVELTY (§6), measured on the canonical mechanism.
+        let standing = vocab::fold(self.chronicle(), on);
+        let shape = vocab::canonical(&binding);
+        if let Some(twin) = standing
+            .iter()
+            .find(|entry| vocab::canonical(&entry.binding) == shape)
+        {
+            return Err(ActionRefused::MintNotNovel { like: twin.code });
+        }
+        if word.is_empty()
+            || standing.iter().any(|entry| {
+                entry.word == word || (!sigil.is_empty() && entry.sigil == sigil)
+            })
+        {
+            return Err(ActionRefused::MintNameTaken { word: word.to_string() });
+        }
+
+        let code = standing.iter().map(|entry| entry.code).max().unwrap_or(0) + 1;
+        self.close(
+            ClosureEvent::VocabularyMinted {
+                axis,
+                code,
+                sigil: sigil.to_string(),
+                word: word.to_string(),
+                binding,
+            },
+            actor,
+        );
+        Ok(code)
+    }
+
     /// THE VERTICAL AXIS: the seat a line holds, from the CHAIN.
     pub fn station_of(&self, line: &str) -> Option<u8> {
         self.stations.iter().find(|(held, _)| held == line).map(|(_, seat)| *seat)

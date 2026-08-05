@@ -777,6 +777,13 @@ fn covered(event: &ClosureEvent) -> bool {
         // a station GATES AUTHORITY, so WHO may seat one is the law
         // that was missing while it lived in an editable file.
         | E::StationSeated { .. }
+        // THE VOCABULARY MINT (tag 90, 28_VOCABULARY §7): banked-neutral
+        // like the seat above — it moves no value, no element and no
+        // key, so {I2 containment, I3 exactness} complete it. Containment
+        // is again the whole point: minting is a TIER 0 power, so WHO may
+        // grow a vocabulary is the law, and the four gates live at the
+        // world door where the chain is (`mint_vocabulary_as`).
+        | E::VocabularyMinted { .. }
     )
 }
 
@@ -1270,6 +1277,14 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // ── CIVILIZATIONAL — keyed on a LINE's own identity ──────────
         E::GenesisSealed { .. }        // civilization + the three axes
         | E::TaxonSealed { .. }        // class, clade
+        // THE VOCABULARY MINT is CIVILIZATIONAL, and the row is keyed on
+        // what the deed CARRIES rather than on what it enables. It is
+        // authored by a LINE holding a progenitor seat and it names a
+        // class of entity — identity vocabulary, not a place and not a
+        // quantity. That a minted entry later changes yields does not
+        // move it: the deed carries a definition; the tick carries the
+        // consequence.
+        | E::VocabularyMinted { .. }
         // BOOK-1 / LIT-1: a line's own accounts and what it reaches
         // for. Both are keyed on the LINE's identity, never on a place
         // — the layer law is declared per deed, never inferred.
@@ -1377,6 +1392,11 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // their #42 — unenforced until their covered() entry + witness.
         | E::TaxonSealed { .. }
         | E::StationSeated { .. }
+        // Build-class: a mint EXTENDS what the world can express. It
+        // creates nothing bankable and razes nothing — it opens room in
+        // the vocabulary, which is the progenitor's own office
+        // (12_UNION ruling 4: *create new spaces*).
+        | E::VocabularyMinted { .. }
         // D5 — THE SOVEREIGN UNION. Build-class: it opens the standing
         // the whole world is raised on. The scope is necessary and NOT
         // sufficient — `union` additionally requires the ROOT

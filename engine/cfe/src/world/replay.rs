@@ -227,6 +227,12 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             ClosureEvent::VeilLifted { .. } => veiled = false,
             // KERNEL-TAXON: the seal replays — identity is forever.
             ClosureEvent::TaxonSealed { class, clade } => taxon = Some((*class, *clade)),
+            // 28_VOCABULARY V2: the mint carries no per-world state —
+            // the vocabulary is READ from the chronicle by
+            // `vocabulary::fold`, never mirrored into `Committed`. A
+            // second copy in the committed state would be the two-truths
+            // defect the definition law struck, one layer down.
+            ClosureEvent::VocabularyMinted { .. } => {}
             // THE VERTICAL AXIS (tag 89): the seat replays from the
             // receipt, so the registry file stops being the authority
             // on who holds which office. One seat per line — re-seating
