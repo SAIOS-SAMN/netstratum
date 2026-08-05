@@ -819,6 +819,68 @@ pub enum ZoneKind {
     /// the knife edge — diamond nets exactly 0.
     Resonator = 7,
 }
+/// **THE REFINEMENT LAW** (2026-08-05, on the operator's ruling that
+/// this codebase carries *too many constants — you aren't building
+/// algorithms or theorems, you're building static content*).
+///
+/// The structural economy was a hand-tuned table. It is not: it is a
+/// LADDER, and the ladder has a law. Every structural resource sits at a
+/// REFINEMENT TIER — how many conversion steps it stands from raw — and
+/// a converter at tier `t` consumes tier `t−1` and emits tier `t`:
+///
+/// ```text
+///     input per tick   =  2^(t−1)          doubling with each step
+///     yield per tick   =  4^(2−t)          quartering with each step
+/// ```
+///
+/// **This REPRODUCES the landed table exactly** (pinned in
+/// `refinement_pins`), so nothing is repriced by stating it — the
+/// numbers were always this law, written out longhand. The Smelter's
+/// `2 Iron → 1 Alloy` and the Synthesizer's `4 Alloy → 1/4 Diamond` are
+/// the same two formulas at `t = 2` and `t = 3`.
+///
+/// **Why the two rates differ.** Input doubles and yield quarters, so
+/// the cost per unit of refined output rises by EIGHT per step. That is
+/// the whole reason a refined tier is worth more than what it is made
+/// of, and it is now one number rather than six.
+///
+/// **AND IT NAMES ITS OWN BOUNDARY.** Only the structural chain
+/// `Iron → Alloy → Diamond` obeys it. Joule, Sink and Crystal are OFF
+/// the chain and have their own laws — the heat law (05 §1.2) mints
+/// joules, the sink law banks cold, and Crystal is the SURVEY currency
+/// rather than a refinement of anything. A law that claimed them would
+/// be overreach, so it declines them by returning `None`.
+pub fn refinement_tier(resource: Resource) -> Option<u32> {
+    match resource {
+        // Raw: taken from the world, refined from nothing.
+        Resource::Iron | Resource::Biomass => Some(1),
+        // Smelted from iron — the tier-2 structural currency.
+        Resource::Alloy => Some(2),
+        // The ultra-refined tier, from alloy.
+        Resource::Diamond => Some(3),
+        // OFF THE CHAIN, each with its own law.
+        Resource::Joule | Resource::Sink | Resource::Crystal => None,
+        // NO CATCH-ALL, deliberately. The match is exhaustive, so a new
+        // resource breaks the build until someone RULES whether it
+        // stands on the refinement chain — the `layer_of` discipline,
+        // where adding a case fails compilation rather than defaulting
+        // into the safest-looking answer.
+    }
+}
+
+/// The input a tier-`t` conversion consumes: `2^(t−1)`.
+pub fn refinement_input(tier: u32) -> Ratio {
+    ratio(1i64 << tier.saturating_sub(1).min(30), 1)
+}
+
+/// The output a tier-`t` conversion emits: `4^(2−t)`.
+pub fn refinement_yield(tier: u32) -> Ratio {
+    match tier <= 2 {
+        true => ratio(1i64 << (2 * (2 - tier.min(2))), 1),
+        false => ratio(1, 1i64 << (2 * (tier - 2)).min(30)),
+    }
+}
+
 
 impl ZoneKind {
     pub fn from_wire(code: u8) -> Option<Self> {
@@ -863,8 +925,17 @@ impl ZoneKind {
         match self {
             Self::Extractor => (Resource::Iron, ratio(3, 2)),
             Self::Habitat => (Resource::Biomass, ratio(1, 1)),
-            Self::Smelter => (Resource::Alloy, ratio(1, 1)),
-            Self::Synthesizer => (Resource::Diamond, ratio(1, 4)),
+            // DERIVED (THE REFINEMENT LAW): `4^(2−t)`. These read
+            // `ratio(1,1)` and `ratio(1,4)` until 2026-08-05, which was
+            // the law written out longhand in two places.
+            Self::Smelter => (
+                Resource::Alloy,
+                refinement_yield(refinement_tier(Resource::Alloy).unwrap_or(1)),
+            ),
+            Self::Synthesizer => (
+                Resource::Diamond,
+                refinement_yield(refinement_tier(Resource::Diamond).unwrap_or(1)),
+            ),
             Self::Encasement => (Resource::Joule, ratio(0, 1)),
             Self::CryoArray => (Resource::Sink, ratio(0, 1)),
             Self::Resonator => (Resource::Crystal, ratio(1, 8)),
@@ -877,12 +948,21 @@ impl ZoneKind {
         match self {
             Self::Extractor => vec![(Resource::Biomass, ratio(1, 2))],
             Self::Habitat => vec![(Resource::Iron, ratio(1, 4))],
+            // DERIVED (THE REFINEMENT LAW): the structural input is
+            // `2^(t−1)` of the tier below. The biomass line is the FOOD
+            // slot and rides the ration law, which is a different one.
             Self::Smelter => vec![
-                (Resource::Iron, ratio(2, 1)),
+                (
+                    Resource::Iron,
+                    refinement_input(refinement_tier(Resource::Alloy).unwrap_or(1)),
+                ),
                 (Resource::Biomass, ratio(1, 2)),
             ],
             Self::Synthesizer => vec![
-                (Resource::Alloy, ratio(4, 1)),
+                (
+                    Resource::Alloy,
+                    refinement_input(refinement_tier(Resource::Diamond).unwrap_or(1)),
+                ),
                 (Resource::Biomass, ratio(1, 1)),
             ],
             Self::Encasement => vec![(Resource::Iron, ratio(1, 4))],
