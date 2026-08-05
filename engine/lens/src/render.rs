@@ -321,6 +321,10 @@ pub fn render_receipt(receipt: &Receipt) -> String {
             format!("{} closed to writing", &hex(&kind.0)[..8]),
         ),
         E::ZoneBuilt { tile, kind, .. } => ("zone_built", format!("{} @ {tile}", zone_name(*kind))),
+        E::LineMinted { seed } => (
+            "line_minted",
+            format!("a people enters — {}", cfe::dop::line_synthesis(seed).name),
+        ),
         E::ParcelConveyed { from_orb, to_orb, amount, postage, resource, .. } => (
             "parcel_conveyed",
             format!(

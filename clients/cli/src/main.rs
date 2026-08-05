@@ -4127,6 +4127,15 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::ColonyFounded { name, .. } => {
                 format!("⚑ colony {} founded", style.strong(name))
             }
+            cfe::dop::ClosureEvent::LineMinted { seed } => {
+                let draw = cfe::dop::line_synthesis(seed);
+                format!(
+                    "✶ line MINTED — {} ({}), \"{}\"",
+                    style.strong(&draw.name),
+                    draw.species,
+                    draw.motto
+                )
+            }
             cfe::dop::ClosureEvent::ParcelConveyed { from_orb, to_orb, amount: posted, .. } => {
                 format!("✉ parcel CONVEYED — {} posted orb {from_orb} → orb {to_orb}", amount(posted))
             }

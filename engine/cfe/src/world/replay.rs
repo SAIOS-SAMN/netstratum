@@ -223,6 +223,10 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     dest.last_touch = receipt.stamp;
                 }
             }
+            // THE MINTED LINE (tag 101): identity, never matter — the
+            // line derives from the receipt's seed wherever it is read;
+            // nothing in committed state moves.
+            ClosureEvent::LineMinted { .. } => {}
             ClosureEvent::FamineStruck { orb_id, resource, drawn } => {
                 if let Some(held) = peel(&mut orbs, *orb_id) {
                     held.bank(*resource, -drawn.clone());

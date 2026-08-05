@@ -127,7 +127,12 @@ use solver_verify::{verify_work, WorkBroken};
 /// derived: tag 100 enters `covered()` with a full I1 arm — the gate
 /// admits what was `Unjudged` and refuses three new ways (address, cap,
 /// postage), each by calling the same sealed rules the emitter drew.
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 9, patch: 0 };
+///
+/// **0.10.0 — THE MINTED LINE** (the standing ruling: the engine mints
+/// its peoples). MINOR, derived: tag 101 enters `covered()` — the gate
+/// admits what was `Unjudged`. The receipt is a seed; there is nothing
+/// declarable to misdeclare, so no new refusal arm exists.
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 10, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
@@ -863,6 +868,9 @@ fn covered(event: &ClosureEvent) -> bool {
         // the receipt's own seed and covering. BY HAND, again: the
         // compiler does not force this list.
         | E::AppraisalStruck { .. }
+        // THE MINTED LINE (tag 101) — banked-neutral: identity, never
+        // matter; the receipt is a seed and everything derives. BY HAND.
+        | E::LineMinted { .. }
         // CONVEY (tag 100) — value-moving, with its I1 arm in
         // `admitted_deltas`: the postage burns (net negative), the
         // amount nets zero, and the postal theorems (address, monetary
@@ -1510,6 +1518,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
     match event {
         // ── CIVILIZATIONAL — keyed on a LINE's own identity ──────────
         E::GenesisSealed { .. }        // civilization + the three axes
+        | E::LineMinted { .. }         // a people enters — line-keyed by nature
         | E::TaxonSealed { .. }        // class, clade
         // THE VOCABULARY MINT is CIVILIZATIONAL, and the row is keyed on
         // what the deed CARRIES rather than on what it enables. It is
@@ -1616,7 +1625,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
     match event {
         // Build — create or extend the world, or open authority.
         E::ColonyFounded { .. } | E::ZoneBuilt { .. } | E::WorldCharted { .. }
-        | E::EstateSurveyed { .. } | E::AppraisalStruck { .. }
+        | E::EstateSurveyed { .. } | E::AppraisalStruck { .. } | E::LineMinted { .. }
         | E::EntityRegistered { .. } | E::ScopeGranted { .. } | E::ScopeRevoked { .. }
         | E::ColonyCharted { .. } | E::StarCommissioned { .. } | E::PlanetSited { .. }
         | E::BondSealed { .. } | E::ForwardSealed { .. } | E::CouncilSealed { .. }

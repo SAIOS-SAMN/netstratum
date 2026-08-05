@@ -313,6 +313,31 @@ impl World {
     pub fn taxon(&self) -> Option<(u8, u8)> {
         self.taxon
     }
+    /// **MINT A LINE** (tag 101, 2026-08-06): the engine mints its
+    /// peoples — the standing ruling that retired the author. The seed
+    /// is the chronicle's terminal digest (CHARTER §9); the whole line
+    /// derives from it through `dop::line_synthesis`, so the receipt
+    /// carries the seed alone and every reader derives the same people.
+    /// Build scope, refusal-pure. Successive mints draw different
+    /// lines, because each receipt moves the terminal digest.
+    pub fn mint_line(&mut self) -> Result<crate::dop::LineDraw, ActionRefused> {
+        self.mint_line_as(SOVEREIGN)
+    }
+
+    pub fn mint_line_as(
+        &mut self,
+        actor: u64,
+    ) -> Result<crate::dop::LineDraw, ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        let Some(seed) = self.chronicle.receipts().last().map(|receipt| receipt.own.0)
+        else {
+            return Err(ActionRefused::NoColony);
+        };
+        let draw = crate::dop::line_synthesis(&seed);
+        self.close(ClosureEvent::LineMinted { seed }, actor);
+        Ok(draw)
+    }
+
     /// THE VERTICAL AXIS (tag 89) — seat a line in an office.
     ///
     /// A station GATES AUTHORITY (the tier-0 verbs check it), and until

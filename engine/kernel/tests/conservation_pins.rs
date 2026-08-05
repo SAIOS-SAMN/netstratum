@@ -294,7 +294,10 @@ fn the_version_is_pinned() {
     //   the postal deed; address, monetary cap and postage all verified
     //   at the gate by the emitter's own sealed rules. The estate chain
     //   is whole: survey → appraise → counter → convey.
-    assert_eq!(KERNEL_VERSION.to_string(), "0.9.0", "the gate is version-pinned");
+    // 0.10.0 — THE MINTED LINE (2026-08-06): tag 101 covered — the
+    //   engine mints its peoples; the receipt is a seed, everything
+    //   derives, nothing declarable to misdeclare.
+    assert_eq!(KERNEL_VERSION.to_string(), "0.10.0", "the gate is version-pinned");
     assert_eq!(VERSION, KERNEL_VERSION.code(), "the wire carries the packed form");
     // ORDER IS PRESERVED: a chain cut under the old linear versions
     // compares BELOW every packed one, which is true — an earlier gate
