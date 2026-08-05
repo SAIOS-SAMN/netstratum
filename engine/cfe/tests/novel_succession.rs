@@ -27,7 +27,7 @@ fn derelict_with_insulation() -> World {
         world.tick();
     }
     assert!(
-        world.techs().iter().any(|(_, condition, _)| *condition == 1),
+        world.techs().iter().any(|(_, condition, _, _)| *condition == 1),
         "the predecessor earned its insulation"
     );
     assert!(
@@ -59,14 +59,14 @@ fn the_successor_inherits_the_chronicle_not_the_tree() {
     let predecessor_node = world
         .techs()
         .iter()
-        .find(|(_, condition, _)| *condition == 1)
-        .map(|(_, _, node)| *node)
+        .find(|(_, condition, _, _)| *condition == 1)
+        .map(|(_, _, node, _)| *node)
         .expect("held above");
     let kernel = world
         .techs()
         .iter()
-        .find(|(_, condition, _)| *condition == 0)
-        .map(|(_, _, node)| *node)
+        .find(|(_, condition, _, _)| *condition == 0)
+        .map(|(_, _, node, _)| *node)
         .expect("the sited world knows its sun");
 
     world.succeed("mycelial-chord").expect("the derelict admits a successor");
@@ -74,12 +74,12 @@ fn the_successor_inherits_the_chronicle_not_the_tree() {
     // The tree is NOT inherited: the living tree drops to the kernel
     // alone — the sun is known to the WORLD, not to the line.
     assert_eq!(
-        world.techs().iter().map(|(_, condition, _)| *condition).collect::<Vec<_>>(),
+        world.techs().iter().map(|(_, condition, _, _)| *condition).collect::<Vec<_>>(),
         vec![0],
         "the successor starts with the world's kernel and nothing else"
     );
     assert!(
-        world.techs().iter().any(|(_, _, node)| *node == kernel),
+        world.techs().iter().any(|(_, _, node, _)| *node == kernel),
         "the kernel node is the SAME node — the world's own fact"
     );
 
@@ -93,8 +93,8 @@ fn the_successor_inherits_the_chronicle_not_the_tree() {
     let successor_node = world
         .techs()
         .iter()
-        .find(|(_, condition, _)| *condition == 1)
-        .map(|(_, _, node)| *node)
+        .find(|(_, condition, _, _)| *condition == 1)
+        .map(|(_, _, node, _)| *node)
         .expect("the inherited span crystallizes for the successor");
     assert_ne!(
         successor_node, predecessor_node,
@@ -149,7 +149,7 @@ fn a_second_succession_moves_the_boundary_again() {
     // relieved); a third line takes the chronicle.
     world.succeed("lichen-verdict").expect("the cascade still stands");
     assert_eq!(
-        world.techs().iter().map(|(_, condition, _)| *condition).collect::<Vec<_>>(),
+        world.techs().iter().map(|(_, condition, _, _)| *condition).collect::<Vec<_>>(),
         vec![0],
         "each succession clears the tree back to the world's kernel"
     );

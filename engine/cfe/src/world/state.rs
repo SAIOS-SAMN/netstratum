@@ -120,9 +120,12 @@ pub struct Committed {
     pub councils: Vec<Council>,
     /// MARKET-1: the resting offers, in posting order.
     pub offers: Vec<Offer>,
-    /// TECH-1a: the discovered nodes — (orb, condition, node id) in
-    /// discovery order; condition 0 is the kernel solar leap.
-    pub techs: Vec<(u64, u8, [u8; 32])>,
+    /// TECH-1a: the discovered nodes — (orb, condition, node id,
+    /// RECEIPTED magnitude) in discovery order; condition 0 is the
+    /// kernel solar leap. The magnitude is what the `TechDiscovered`
+    /// receipt asserted (operator ruling 2026-08-05: receipt
+    /// authority) — the tick's boon factors read IT, never a table.
+    pub techs: Vec<(u64, u8, [u8; 32], Ratio)>,
     /// WANT-1: the struck cognitive wants — (orb, kind), replay-
     /// derived like famine; kinds per the tag-62 table.
     pub wants: Vec<(u64, u8)>,
@@ -225,9 +228,10 @@ pub struct World {
     /// IDEO-1 WORKSPACE, per orb: accrued ideological friction since
     /// the last seal — sealed by `FrictionSettled` at collect.
     pub(super) friction_pending: Vec<(u64, Ratio)>,
-    /// TECH-1a: the discovered nodes (committed — replays from
-    /// receipts alone); condition 0 is the kernel solar leap.
-    pub(super) techs: Vec<(u64, u8, [u8; 32])>,
+    /// TECH-1a: the discovered nodes with their RECEIPTED magnitudes
+    /// (committed — replays from receipts alone); condition 0 is the
+    /// kernel solar leap.
+    pub(super) techs: Vec<(u64, u8, [u8; 32], Ratio)>,
     /// #41 WORKSPACE: the shear cursor — (receipts processed, carried
     /// sheet). A pure cache over receipts: never committed, never
     /// persisted; a resumed world rebuilds it at its first boundary.

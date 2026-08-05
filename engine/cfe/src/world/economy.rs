@@ -334,7 +334,7 @@ impl World {
             if self
                 .techs
                 .iter()
-                .any(|(owner, condition, _)| *owner == orb_id && *condition == 2)
+                .any(|(owner, condition, _, _)| *owner == orb_id && *condition == 2)
             {
                 throughput *= ratio(5, 4);
             }

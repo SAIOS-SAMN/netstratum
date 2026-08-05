@@ -94,7 +94,7 @@ fn a_licensed_leap_lands_in_the_far_sky() {
     assert_eq!(deal, 7);
     assert_eq!(Some(node_out), arrived, "one deal, one node, two books");
     assert!(
-        receiver.techs().iter().any(|(_, condition, _)| *condition == 3),
+        receiver.techs().iter().any(|(_, condition, _, _)| *condition == 3),
         "the receiver holds what it never crystallized"
     );
 
@@ -107,7 +107,7 @@ fn a_licensed_leap_lands_in_the_far_sky() {
 
     // Both legs replay in their own world (SEAL B per chronicle).
     let committed = replay(receiver.chronicle());
-    assert!(committed.techs.iter().any(|(_, condition, held)| *condition == 3 && *held == node_out));
+    assert!(committed.techs.iter().any(|(_, condition, held, _)| *condition == 3 && *held == node_out));
     let resumed = World::resume(receiver.chronicle().clone());
     assert_eq!(resumed.techs(), receiver.techs());
 }

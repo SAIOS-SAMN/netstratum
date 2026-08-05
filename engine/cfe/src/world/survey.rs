@@ -180,7 +180,7 @@ pub const RE_EMERGENCE: u8 = 7;
 impl World {
     /// TERRA-1: does this world hold the gifted terraforming node?
     pub fn can_terraform(&self) -> bool {
-        self.techs.iter().any(|(_, condition, _)| *condition == 6)
+        self.techs.iter().any(|(_, condition, _, _)| *condition == 6)
     }
     /// TERRA-1 — TERRAFORM: move a SITED planet between substrate
     /// bands by re-seating its albedo and orbit — the highest
@@ -306,7 +306,7 @@ impl World {
                     false => self
                         .techs
                         .iter()
-                        .any(|(o, c, _)| *o == orb && *c == condition),
+                        .any(|(o, c, _, _)| *o == orb && *c == condition),
                 };
                 let (progress, threshold) = match condition {
                     0 => (u64::from(self.knows_its_sun()), 1),
@@ -328,7 +328,7 @@ impl World {
                     6 => {
                         let earned = (0u8..=5)
                             .filter(|c| {
-                                self.techs.iter().any(|(o, k, _)| *o == orb && k == c)
+                                self.techs.iter().any(|(o, k, _, _)| *o == orb && k == c)
                             })
                             .count() as u64;
                         (earned, 6)
@@ -569,7 +569,7 @@ impl World {
     /// holds (the operator's speed boost to understanding; placeholder
     /// constants, the syntropy floor at 1/2).
     pub(super) fn deposit_window(&self) -> u64 {
-        let relearned = self.techs.iter().any(|(_, condition, _)| *condition == 7);
+        let relearned = self.techs.iter().any(|(_, condition, _, _)| *condition == 7);
         let aligned = self
             .syntropy_ratio()
             .map(|ratio_read| ratio_read >= ratio(1, 2))

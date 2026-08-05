@@ -52,7 +52,7 @@ impl World {
     }
 
     /// TECH-1a: the discovered nodes — (orb, condition, node id).
-    pub fn techs(&self) -> &[(u64, u8, [u8; 32])] {
+    pub fn techs(&self) -> &[(u64, u8, [u8; 32], Ratio)] {
         &self.techs
     }
     /// #40 (the petition's executor): GRANT a technology node under
@@ -85,7 +85,7 @@ impl World {
         if peek(&self.orbs, orb).is_none() {
             return Err(ActionRefused::NoSuchOrb { orb });
         }
-        if self.techs.iter().any(|(o, c, _)| *o == orb && *c == condition) {
+        if self.techs.iter().any(|(o, c, _, _)| *o == orb && *c == condition) {
             return Err(ActionRefused::NodeAlreadyHeld { condition });
         }
         let mut seed = b"tech.granted".to_vec();
@@ -96,10 +96,10 @@ impl World {
         }
         let node: [u8; 32] = blake3::hash(&seed).into();
         let name = format!("gifted {}", crate::dop::tech_node_name(condition, &node));
-        self.techs.push((orb, condition, node));
         let stamp = self.clock.now();
         let (modifier, magnitude) =
             crate::dop::tech_node_of(condition).unwrap_or((condition, ratio(1, 1)));
+        self.techs.push((orb, condition, node, magnitude.clone()));
         self.chronicle.append(
             ClosureEvent::TechDiscovered {
                 orb_id: orb,
@@ -135,8 +135,8 @@ impl World {
         let tech_hash = self
             .techs
             .iter()
-            .find(|(held, held_condition, _)| *held == orb && *held_condition == condition)
-            .map(|(_, _, node)| *node)
+            .find(|(held, held_condition, _, _)| *held == orb && *held_condition == condition)
+            .map(|(_, _, node, _)| *node)
             .ok_or(ActionRefused::ConditionUncrystallized { condition })?;
         let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
         let chain = match condition {
@@ -340,18 +340,19 @@ impl World {
         seed.copy_from_slice(&root);
         seed[0] ^= practice;
         let name = crate::dop::tech_node_name(7, &seed);
+        let magnitude = ratio(3, 4);
         self.close(
             ClosureEvent::TechDiscovered {
                 orb_id: FIRST_ORB,
                 node: seed,
                 condition: 7,
                 modifier: 7,
-                magnitude: ratio(3, 4),
+                magnitude: magnitude.clone(),
                 name,
             },
             actor,
         );
-        self.techs.push((FIRST_ORB, 7, seed));
+        self.techs.push((FIRST_ORB, 7, seed, magnitude));
         Ok(())
     }
 }

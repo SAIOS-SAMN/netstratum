@@ -103,8 +103,8 @@ fn release_is_a_rediscovery_and_the_lesson_re_emerges() {
         .committed()
         .techs
         .iter()
-        .filter(|(_, condition, _)| *condition == 7)
-        .map(|(_, condition, _)| *condition)
+        .filter(|(_, condition, _, _)| *condition == 7)
+        .map(|(_, condition, _, _)| *condition)
         .collect();
     assert_eq!(relearned, vec![7], "one re-emergence node, condition 7");
     let named = world.chronicle().receipts().iter().any(|receipt| {

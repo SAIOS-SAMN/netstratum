@@ -44,6 +44,18 @@ pub const SCHEMA_V2: u8 = 2;
 /// reading of a world that never seated one). The additive-trailing
 /// shape is the KERNEL-TAXON precedent, unchanged.
 pub const SCHEMA_V3: u8 = 3;
+/// RECEIPT AUTHORITY (operator ruling 2026-08-05): v4 appends the
+/// techs' RECEIPTED MAGNITUDES as a trailing run of ratios, one per
+/// tech entry in the techs family's own order. Emit v4; ACCEPT v3 and
+/// below by RECONSTRUCTING each magnitude from the closed writer rule
+/// of those eras (every pre-v4 writer was deterministic: the
+/// crystallized table for conditions it names, 3/4 for the
+/// re-emergence lesson, 1 otherwise). Honest caveat, recorded: a
+/// pre-v4 LICENSED node of a crystallized condition carried 1 in its
+/// receipt while the table says otherwise — the reconstruction reads
+/// the table, so such a node decodes with the table's value; the
+/// kernel reads no magnitude today, so no admission changes.
+pub const SCHEMA_V4: u8 = 4;
 
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
@@ -65,7 +77,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V3];
+    let mut out = vec![SCHEMA_V4];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -156,8 +168,11 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         put_u64(&mut out, offer.posted);
     }
 
+    // The in-place family keeps its v1 3-field layout; the receipted
+    // magnitudes ride the v4 TRAILING run below, so every older
+    // decoder still reads this family whole.
     put_u32(&mut out, committed.techs.len() as u32);
-    for (orb, condition, node) in &committed.techs {
+    for (orb, condition, node, _) in &committed.techs {
         put_u64(&mut out, *orb);
         out.push(*condition);
         out.extend_from_slice(node);
@@ -245,6 +260,12 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         out.push(u8::try_from(name.len()).unwrap_or(u8::MAX));
         out.extend_from_slice(&name[..name.len().min(usize::from(u8::MAX))]);
     }
+    // RECEIPT AUTHORITY (v4 trailing run): each tech entry's receipted
+    // magnitude, in the techs family's own order — no count, because
+    // the count IS the techs count already written above.
+    for (_, _, _, magnitude) in &committed.techs {
+        ratio::encode(magnitude, &mut out);
+    }
     out
 }
 
@@ -317,7 +338,7 @@ impl<'a> Take<'a> {
 pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
     let mut take = Take { bytes, at: 0 };
     let schema = take.u8()?;
-    if schema != SCHEMA_V1 && schema != SCHEMA_V2 && schema != SCHEMA_V3 {
+    if schema != SCHEMA_V1 && schema != SCHEMA_V2 && schema != SCHEMA_V3 && schema != SCHEMA_V4 {
         return None;
     }
 
@@ -423,9 +444,12 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         });
     }
 
-    let mut techs = Vec::new();
+    // The 3-field family decodes as it always did; the receipted
+    // magnitudes arrive in the v4 trailing run (or reconstruct, for
+    // older schemas) once the tail is reached.
+    let mut bare_techs = Vec::new();
     for _ in 0..take.u32()? {
-        techs.push((take.u64()?, take.u8()?, take.array32()?));
+        bare_techs.push((take.u64()?, take.u8()?, take.array32()?));
     }
 
     let mut wants = Vec::new();
@@ -516,7 +540,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
     // never seated one); v3 reads the trailing table. Refuse never
     // guess: a short or unlawful entry refuses whole.
     let mut stations: Vec<(String, u8)> = Vec::new();
-    if schema == SCHEMA_V3 {
+    if schema >= SCHEMA_V3 {
         let held = take.u8()?;
         for _ in 0..held {
             let station = take.u8()?;
@@ -531,6 +555,32 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
             stations.push((String::from_utf8(name).ok()?, station));
         }
     }
+
+    // RECEIPT AUTHORITY: v4 reads the trailing magnitude run, one per
+    // tech entry in order. Older schemas never carried it —
+    // reconstruct by the closed writer rule of those eras (see
+    // `SCHEMA_V4`): the crystallized table where it answers, 3/4 for
+    // the re-emergence lesson, 1 otherwise.
+    let techs: Vec<(u64, u8, [u8; 32], Ratio)> = if schema >= SCHEMA_V4 {
+        let mut whole = Vec::with_capacity(bare_techs.len());
+        for (orb, condition, node) in bare_techs {
+            whole.push((orb, condition, node, take.ratio()?));
+        }
+        whole
+    } else {
+        bare_techs
+            .into_iter()
+            .map(|(orb, condition, node)| {
+                let magnitude = cfe::dop::tech_node_of(condition)
+                    .map(|(_, magnitude)| magnitude)
+                    .unwrap_or_else(|| match condition {
+                        7 => ratio::ratio(3, 4),
+                        _ => ratio::ratio(1, 1),
+                    });
+                (orb, condition, node, magnitude)
+            })
+            .collect()
+    };
 
     if !take.done() {
         return None;

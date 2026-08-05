@@ -27,7 +27,7 @@ use crate::ratio::{ratio, Ratio};
 /// crystallized for this orb, 1 otherwise. Derived from the tech
 /// list, never stored. Pub: the kernel CALLS the sealed rule for
 /// I5's bound (call-not-copy, KERNEL CHARTER §0b).
-pub fn ease_of(techs: &[(u64, u8, [u8; 32])], orb: u64, at: u64) -> Ratio {
+pub fn ease_of(techs: &[(u64, u8, [u8; 32], Ratio)], orb: u64, at: u64) -> Ratio {
     // RULESET EPOCHS (`21_KERNEL_PARAMETERS` §11): the rule is selected
     // by the stamp the deed carries, so a receipt written under EPOCH 0
     // is forever gated by EPOCH 0 and `replay` cannot drift from the
@@ -42,8 +42,11 @@ pub fn ease_of(techs: &[(u64, u8, [u8; 32])], orb: u64, at: u64) -> Ratio {
 /// EPOCH 0 — the landed cliff. **Never edit this function.** Every
 /// receipt stamped before `epoch::CONTINUOUS_FROM` is gated by it, and
 /// changing it would rewrite history's meaning.
-fn ease_cliff(techs: &[(u64, u8, [u8; 32])], orb: u64) -> Ratio {
-    match techs.iter().any(|(held, condition, _)| *held == orb && *condition == 5) {
+/// (2026-08-05: the tech tuple grew a receipted-magnitude field; the
+/// pattern gained one `_` and the COMPUTATION is untouched — a type
+/// spelling is not the sealed meaning.)
+fn ease_cliff(techs: &[(u64, u8, [u8; 32], Ratio)], orb: u64) -> Ratio {
+    match techs.iter().any(|(held, condition, _, _)| *held == orb && *condition == 5) {
         true => ratio(1, 2),
         false => ratio(1, 1),
     }
@@ -61,11 +64,11 @@ fn ease_cliff(techs: &[(u64, u8, [u8; 32])], orb: u64) -> Ratio {
 /// **DIRECTION.** `ease` MULTIPLIES decay (`rate · ease · elapsed`), so
 /// LOWER ease is the reward. A curve saturating toward 1 at high tech
 /// would make advanced technology INCREASE decay; this one descends.
-fn ease_gradient(techs: &[(u64, u8, [u8; 32])], orb: u64) -> Ratio {
+fn ease_gradient(techs: &[(u64, u8, [u8; 32], Ratio)], orb: u64) -> Ratio {
     let condition = techs
         .iter()
-        .filter(|(held, _, _)| *held == orb)
-        .map(|(_, condition, _)| *condition)
+        .filter(|(held, _, _, _)| *held == orb)
+        .map(|(_, condition, _, _)| *condition)
         .max()
         .unwrap_or(0);
 

@@ -136,3 +136,40 @@ fn survived_cold_crystallizes_insulation() {
     });
     assert!(insulated, "eight survived famine-years crystallize an insulation of this line's own");
 }
+
+/// **RECEIPT AUTHORITY** (operator ruling 2026-08-05): the state
+/// carries what the receipts asserted — entry for entry, the tech
+/// list's magnitude IS the `TechDiscovered` magnitude, and it is what
+/// the tick's boon factors read. No rule reads the table at tick time;
+/// the inline dials are dead. Resume rebuilds the same magnitudes from
+/// the receipts alone.
+#[test]
+fn the_state_carries_what_the_receipts_asserted() {
+    let mut world = burning(1);
+    for tick in 1..=70u32 {
+        world.tick();
+        if tick % 60 == 0 {
+            let _ = world.collect();
+        }
+    }
+    assert!(!world.techs().is_empty(), "the arc crystallizes");
+    for (orb, condition, node, magnitude) in world.techs() {
+        let receipted = world
+            .chronicle()
+            .receipts()
+            .iter()
+            .find_map(|receipt| match &receipt.event {
+                ClosureEvent::TechDiscovered {
+                    orb_id, condition: held, node: id, magnitude, ..
+                } if orb_id == orb && held == condition && id == node => Some(magnitude.clone()),
+                _ => None,
+            })
+            .expect("every held node has its receipt");
+        assert_eq!(
+            *magnitude, receipted,
+            "condition {condition}: the state must carry the receipt's own magnitude"
+        );
+    }
+    let resumed = World::resume(world.chronicle().clone());
+    assert_eq!(resumed.techs(), world.techs(), "resume rebuilds the receipted magnitudes");
+}

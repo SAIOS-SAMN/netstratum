@@ -168,11 +168,11 @@ impl World {
         // receipts the kernel SOLAR LEAP — its people now know their
         // sun. Once per world, never per orb; the node id is seeded
         // from the kernel name + the discovering orb (SEAL B).
-        if !self.techs.iter().any(|(_, condition, _)| *condition == 0) {
+        if !self.techs.iter().any(|(_, condition, _, _)| *condition == 0) {
             let mut seed = b"tech.kernel.solar-leap".to_vec();
             seed.extend_from_slice(&orb.to_le_bytes());
             let node: [u8; 32] = blake3::hash(&seed).into();
-            self.techs.push((orb, 0, node));
+            self.techs.push((orb, 0, node, ratio(1, 1)));
             self.close(
                 ClosureEvent::TechDiscovered {
                     orb_id: orb,

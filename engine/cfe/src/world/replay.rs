@@ -22,7 +22,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut bonds: Vec<Bond> = Vec::new();
     let mut forwards: Vec<Forward> = Vec::new();
     let mut councils: Vec<Council> = Vec::new();
-    let mut techs: Vec<(u64, u8, [u8; 32])> = Vec::new();
+    let mut techs: Vec<(u64, u8, [u8; 32], Ratio)> = Vec::new();
     let mut offers: Vec<Offer> = Vec::new();
     let mut wants: Vec<(u64, u8)> = Vec::new();
     let mut prospects: Vec<Prospected> = Vec::new();
@@ -397,7 +397,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             // living tree drops to the world's kernel; the record
             // stands in the receipts above and below this one.
             ClosureEvent::LineSucceeded { .. } => {
-                techs.retain(|(_, condition, _)| *condition == 0);
+                techs.retain(|(_, condition, _, _)| *condition == 0);
                 genesis = None;
             }
             // G1 (04 §1/§5): the binding copy replays as the sealed
@@ -612,9 +612,11 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 }
             }
             // TECH-1a: a discovered node replays into the tech list —
-            // the solar leap (condition 0) among them.
-            ClosureEvent::TechDiscovered { orb_id, node, condition, .. } => {
-                techs.push((*orb_id, *condition, *node));
+            // the solar leap (condition 0) among them. The RECEIPT's
+            // magnitude rides along: it is the number the tick obeys
+            // (receipt authority, operator ruling 2026-08-05).
+            ClosureEvent::TechDiscovered { orb_id, node, condition, magnitude, .. } => {
+                techs.push((*orb_id, *condition, *node, magnitude.clone()));
             }
             // COUNCIL-1: the seal replays whole — every member's lock
             // withdraws; deliveries re-credit through the transfer and

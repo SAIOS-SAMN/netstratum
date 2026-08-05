@@ -10,14 +10,14 @@ impl World {
     /// (12_UNION §5a); the reading gates licensing and the shield,
     /// never the world's own life.
     pub fn knows_its_sun(&self) -> bool {
-        self.techs.iter().any(|(_, condition, _)| *condition == 0)
+        self.techs.iter().any(|(_, condition, _, _)| *condition == 0)
     }
     /// TERRA-1: is the BASE-7 stack complete — the solar leap plus
     /// all five crystallized conditions? Six earned nodes; the gifted
     /// seventh (terraforming) completes base-7. Derived, never stored.
     pub fn base_seven_complete(&self) -> bool {
         (0u8..=5).all(|condition| {
-            self.techs.iter().any(|(_, held, _)| *held == condition)
+            self.techs.iter().any(|(_, held, _, _)| *held == condition)
         })
     }
     /// **THE FULL BASE-11 STACK** (operator ruling 2026-08-02) — the
@@ -388,7 +388,7 @@ impl World {
                 famished,
             });
         }
-        self.techs.retain(|(_, condition, _)| *condition == 0);
+        self.techs.retain(|(_, condition, _, _)| *condition == 0);
         // The audit law (G1 × NOVEL-1): a line's axes never outlive
         // the line — the deed releases the seal; the successor seals
         // ANEW (entry in the bands). The old seal stands in the

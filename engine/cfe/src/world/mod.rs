@@ -598,7 +598,7 @@ pub fn license_tech(
     let node: [u8; 32] = blake3::hash(&seed).into();
     // A FACT, now honestly named: the destination already holds this
     // node. It wore the transfer refusal's word for want of its own.
-    if dst.techs.iter().any(|(_, _, held)| *held == node) {
+    if dst.techs.iter().any(|(_, _, held, _)| *held == node) {
         return Err(ActionRefused::NodeAlreadyHeld { condition });
     }
     let src_stamp = src.clock.now();
@@ -615,14 +615,21 @@ pub fn license_tech(
         src_stamp,
         vec![SOVEREIGN],
     );
-    dst.techs.push((to, condition, node));
+    // A licensed node carries the SAME mechanism a crystallized one
+    // does — the receipt asserts the table's magnitude, and the tick
+    // obeys the receipt (receipt authority, operator ruling
+    // 2026-08-05). Pre-ruling licensed receipts asserted 1, and 1 they
+    // remain: history stands as written.
+    let (modifier, magnitude) =
+        crate::dop::tech_node_of(condition).unwrap_or((0, ratio(1, 1)));
+    dst.techs.push((to, condition, node, magnitude.clone()));
     dst.chronicle.append(
         ClosureEvent::TechDiscovered {
             orb_id: to,
             node,
             condition,
-            modifier: 0,
-            magnitude: ratio(1, 1),
+            modifier,
+            magnitude,
             name,
         },
         dst_stamp,

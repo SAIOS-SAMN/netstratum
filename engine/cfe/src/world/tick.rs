@@ -240,14 +240,19 @@ impl World {
         let class_upkeep =
             crate::vocabulary::factor_on(&archetype, crate::vocabulary::CHANNEL_UPKEEP);
         // TECH-1b: each orb's crystallized boons, read once — [unused,
-        // insulation, discipline, deepening, doctrine, stores].
-        let boons: Vec<(u64, [bool; 6])> = flows
+        // insulation, discipline, deepening, doctrine, stores] — each
+        // carrying the magnitude ITS RECEIPT asserted (receipt
+        // authority, operator ruling 2026-08-05): the factors below
+        // read the chain's own numbers, never a table and never an
+        // inline dial.
+        const NO_BOON: [Option<Ratio>; 6] = [None, None, None, None, None, None];
+        let boons: Vec<(u64, [Option<Ratio>; 6])> = flows
             .iter()
             .map(|(orb_id, _)| {
-                let mut held = [false; 6];
-                for (orb, condition, _) in &self.techs {
+                let mut held = NO_BOON;
+                for (orb, condition, _, magnitude) in &self.techs {
                     if orb == orb_id && (*condition as usize) < 6 {
-                        held[*condition as usize] = true;
+                        held[*condition as usize] = Some(magnitude.clone());
                     }
                 }
                 (*orb_id, held)
@@ -257,8 +262,8 @@ impl World {
             let boon = boons
                 .iter()
                 .find(|(held, _)| held == orb_id)
-                .map(|(_, held)| *held)
-                .unwrap_or([false; 6]);
+                .map(|(_, held)| held.clone())
+                .unwrap_or(NO_BOON);
             // THERMAL-1: the heat law, live only when the sun is
             // commissioned AND this orb is sited (the opt-in guard).
             let holder = peek(&self.orbs, *orb_id);
@@ -282,10 +287,10 @@ impl World {
                     sum + zone.kind.factory_heat() * vigour.clone()
                 });
                 // TECH-1b: the doctrine crystallized — the radiator
-                // sheds at 5/4 (10 §3).
-                let radiator = match boon[4] {
-                    true => radiator_base() * ratio(5, 4),
-                    false => radiator_base(),
+                // sheds at the magnitude its receipt asserted (10 §3).
+                let radiator = match &boon[4] {
+                    Some(magnitude) => radiator_base() * magnitude.clone(),
+                    None => radiator_base(),
                 };
                 let heat_net = stellar_load + factory - radiator;
                 // ECON-J (05 §1.2): heating upkeep on a sub-mesic orb —
@@ -296,9 +301,9 @@ impl World {
                         .fold(zero.clone(), |sum, (_, vigour)| sum + vigour.clone());
                     let mut burn = crate::dop::heating_per_zone() * running;
                     // TECH-1b: insulation crystallized — the cold
-                    // bites at 3/4 (10 §3).
-                    if boon[1] {
-                        burn *= ratio(3, 4);
+                    // bites at the receipted magnitude (10 §3).
+                    if let Some(magnitude) = &boon[1] {
+                        burn *= magnitude.clone();
                     }
                     accrue(&mut self.accrued, *orb_id, Resource::Joule, -burn);
                 }
@@ -314,9 +319,9 @@ impl World {
                         let headroom = -heat_net.clone();
                         let mut lattice = crate::dop::sink_throughput() * arrays;
                         // TECH-1b: the lattice deepened — capture at
-                        // 5/4 (10 §3).
-                        if boon[3] {
-                            lattice *= ratio(5, 4);
+                        // the receipted magnitude (10 §3).
+                        if let Some(magnitude) = &boon[3] {
+                            lattice *= magnitude.clone();
                         }
                         let captured = headroom.min(lattice);
                         if captured > zero {
@@ -333,9 +338,9 @@ impl World {
                         .fold(zero.clone(), |sum, (_, vigour)| sum + vigour.clone());
                     let mut throughput = encasement_throughput() * shells;
                     // TECH-1b: discipline crystallized — the shells
-                    // encase at 5/4 (10 §3).
-                    if boon[2] {
-                        throughput *= ratio(5, 4);
+                    // encase at the receipted magnitude (10 §3).
+                    if let Some(magnitude) = &boon[2] {
+                        throughput *= magnitude.clone();
                     }
                     let encased = heat_net.clone().min(throughput);
                     if encased > zero {
@@ -575,7 +580,7 @@ impl World {
                     if self
                         .techs
                         .iter()
-                        .any(|(held, kind, _)| *held == orb && *kind == condition)
+                        .any(|(held, kind, _, _)| *held == orb && *kind == condition)
                     {
                         continue;
                     }
@@ -598,7 +603,7 @@ impl World {
                     // The name is THIS line's own (10 §2 law 4): drawn
                     // from the node hash, never a rung label.
                     let name = crate::dop::tech_node_name(condition, &node);
-                    self.techs.push((orb, condition, node));
+                    self.techs.push((orb, condition, node, magnitude.clone()));
                     self.chronicle.append(
                         ClosureEvent::TechDiscovered {
                             orb_id: orb,

@@ -35,20 +35,20 @@ use solver::Difficulty;
 #[test]
 fn epoch0_deeds_are_still_judged_by_the_cliff() {
     let before = cfe::epoch::CONTINUOUS_FROM - 1;
-    let none: Vec<(u64, u8, [u8; 32])> = vec![];
+    let none: Vec<(u64, u8, [u8; 32], cfe::ratio::Ratio)> = vec![];
     assert_eq!(ease_of(&none, 1, before), ratio(1, 1), "no tech: the cliff's own answer");
 
     // The cliff's defining property: conditions 0-4 are ALL identical
     // to holding nothing. Four fifths of the tech tree bought nothing.
     for condition in 0u8..=4 {
-        let held = vec![(1u64, condition, [0u8; 32])];
+        let held = vec![(1u64, condition, [0u8; 32], ratio(1, 1))];
         assert_eq!(
             ease_of(&held, 1, before),
             ratio(1, 1),
             "EPOCH 0 condition {condition} is indistinguishable from no tech — as it always was"
         );
     }
-    let at_cliff = vec![(1u64, 5u8, [0u8; 32])];
+    let at_cliff = vec![(1u64, 5u8, [0u8; 32], ratio(1, 1))];
     assert_eq!(ease_of(&at_cliff, 1, before), ratio(1, 2), "only condition 5 paid");
 }
 
@@ -60,12 +60,12 @@ fn epoch0_deeds_are_still_judged_by_the_cliff() {
 #[test]
 fn epoch1_the_cliff_becomes_a_strict_descent() {
     let at = cfe::epoch::CONTINUOUS_FROM;
-    let none: Vec<(u64, u8, [u8; 32])> = vec![];
+    let none: Vec<(u64, u8, [u8; 32], cfe::ratio::Ratio)> = vec![];
     let baseline = ease_of(&none, 1, at);
 
     let mut previous = baseline.clone();
     for condition in 1u8..=5 {
-        let held = vec![(1u64, condition, [0u8; 32])];
+        let held = vec![(1u64, condition, [0u8; 32], ratio(1, 1))];
         let ease = ease_of(&held, 1, at);
         assert!(ease < previous, "EPOCH 1 condition {condition}: {ease} must beat {previous}");
         previous = ease;
@@ -73,7 +73,7 @@ fn epoch1_the_cliff_becomes_a_strict_descent() {
 
     // And EPOCH 0 disagrees at exactly the conditions the cliff flattened
     // — which is the whole reason the epoch exists.
-    let mid = vec![(1u64, 3u8, [0u8; 32])];
+    let mid = vec![(1u64, 3u8, [0u8; 32], ratio(1, 1))];
     assert_ne!(
         ease_of(&mid, 1, at),
         ease_of(&mid, 1, cfe::epoch::CONTINUOUS_FROM - 1),
@@ -87,7 +87,7 @@ fn epoch1_the_cliff_becomes_a_strict_descent() {
 fn epoch1_never_punishes_and_never_removes_the_sink() {
     let at = cfe::epoch::CONTINUOUS_FROM;
     for condition in 0u8..=12 {
-        let held = vec![(1u64, condition, [0u8; 32])];
+        let held = vec![(1u64, condition, [0u8; 32], ratio(1, 1))];
         let ease = ease_of(&held, 1, at);
         assert!(ease <= ratio(1, 1), "condition {condition}: tech must never increase decay");
         assert!(ease >= ratio(1, 2), "condition {condition}: the sink never vanishes");
