@@ -962,8 +962,10 @@ fn covered(event: &ClosureEvent) -> bool {
         // like the seat above — it moves no value, no element and no
         // key, so {I2 containment, I3 exactness} complete it. Containment
         // is again the whole point: minting is a TIER 0 power, so WHO may
-        // grow a vocabulary is the law, and the four gates live at the
-        // world door where the chain is (`mint_vocabulary_as`).
+        // grow a vocabulary is the law. The FACT gates (standing,
+        // novelty) live at the world door where the chain is
+        // (`mint_vocabulary_as`); the shape gates died at the `Axis`
+        // and `TradingBinding` doors (29_CONSTRUCTION).
         | E::VocabularyMinted { .. }
     )
 }

@@ -114,23 +114,88 @@ pub fn canonical(binding: &Binding) -> Vec<(u8, Ratio)> {
 /// deleted and never barred — and it is paid nothing.* A binding is
 /// either empty, or it trades.
 pub fn binding_trades(binding: &Binding) -> bool {
-    let entries = canonical(binding);
-    if entries.is_empty() {
-        return true;
-    }
-    let mut benefit = false;
-    let mut friction = false;
-    for (channel, factor) in &entries {
-        if !channel_valid(*channel) || !factor_in_bounds(factor) || *factor <= ratio(0, 1) {
-            return false;
+    TradingBinding::new(binding.to_vec()).is_ok()
+}
+
+/// The named fault a refused binding carries — each names the exact
+/// term that broke the trade, because the way up is the point.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BindingFault {
+    /// The channel is not one the engine computes — the table grows by
+    /// LANDING a channel, never by a binding naming one.
+    ChannelUnknown { channel: u8 },
+    /// The composed factor on this channel falls outside the bounds.
+    FactorOutOfBounds { channel: u8 },
+    /// Every entry is friction — that is a penalty, not a class.
+    NoBenefit,
+    /// Every entry is benefit — a strictly-dominant entry is not a
+    /// trade, and it is unmintable by construction.
+    NoFriction,
+}
+
+/// **A BINDING THAT TRADES, proven at construction** (P1,
+/// 29_CONSTRUCTION). The `BindingUnlawful` arm died at this door: the
+/// one-benefit-one-friction law (§4a), the factor bounds and the
+/// closed channel set are all decidable from the value alone, so a
+/// binding that does not trade cannot be constructed — and the fault
+/// is NAMED, where the dead arm was a unit.
+///
+/// Judged on [`canonical`] form, exactly as the dead gate judged: a
+/// channel that composes to 1 is silent, and the empty binding is
+/// lawful and claims nothing (Article II's ground state).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TradingBinding(Vec<(u8, Ratio)>);
+
+impl TradingBinding {
+    pub fn new(entries: Vec<(u8, Ratio)>) -> Result<TradingBinding, BindingFault> {
+        // Channels are judged on the RAW entries: `canonical` silently
+        // drops a channel outside the table, so judging there would let
+        // a phantom channel ride into the receipt as dead weight — the
+        // exact vacuity the closed table exists to refuse.
+        if let Some((channel, _)) = entries.iter().find(|(channel, _)| !channel_valid(*channel)) {
+            return Err(BindingFault::ChannelUnknown { channel: *channel });
         }
-        let helps = (*factor > ratio(1, 1)) == channel_favours_increase(*channel);
-        match helps {
-            true => benefit = true,
-            false => friction = true,
+        let canon = canonical(&entries);
+        // The empty canonical form claims nothing and is lawful.
+        if canon.is_empty() {
+            return Ok(TradingBinding(entries));
         }
+        let mut benefit = false;
+        let mut friction = false;
+        for (channel, factor) in canon {
+            // Factors are judged on the COMPOSED form: two entries of
+            // 3/1 on one channel are a ninefold, and 5/4 × 4/5 is
+            // silence, exactly as `factor_on` computes them.
+            if !factor_in_bounds(&factor) {
+                return Err(BindingFault::FactorOutOfBounds { channel });
+            }
+            match (factor > ratio(1, 1)) == channel_favours_increase(channel) {
+                true => benefit = true,
+                false => friction = true,
+            }
+        }
+        if !benefit {
+            return Err(BindingFault::NoBenefit);
+        }
+        if !friction {
+            return Err(BindingFault::NoFriction);
+        }
+        Ok(TradingBinding(entries))
     }
-    benefit && friction
+    /// The entries as declared — the receipt carries these verbatim.
+    pub fn entries(&self) -> &Binding {
+        &self.0
+    }
+    pub fn into_entries(self) -> Vec<(u8, Ratio)> {
+        self.0
+    }
+}
+
+/// The literal door — a malformed literal is a build error in a
+/// runtime coat.
+pub fn trading(entries: Vec<(u8, Ratio)>) -> TradingBinding {
+    TradingBinding::new(entries)
+        .expect("a binding literal must trade: one benefit, one friction, in bounds, on real channels")
 }
 
 /// **THE ARCHETYPE BINDINGS** — the seed mechanism of each class.

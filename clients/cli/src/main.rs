@@ -1491,6 +1491,35 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         usage();
                         return;
                     }
+                    // The trade law is proven at THIS door, fault named
+                    // (29_CONSTRUCTION): an unlawful binding never
+                    // reaches the verb.
+                    let binding = match cfe::vocabulary::TradingBinding::new(binding) {
+                        Ok(binding) => binding,
+                        Err(fault) => {
+                            use cfe::vocabulary::BindingFault;
+                            let why = match fault {
+                                BindingFault::ChannelUnknown { channel } => format!(
+                                    "channel {} is not one the engine computes — the table grows by LANDING a channel ({})",
+                                    style.strong(&channel.to_string()),
+                                    style.dim("1 yield · 2 upkeep · 3 survey")
+                                ),
+                                BindingFault::FactorOutOfBounds { channel } => format!(
+                                    "the factor on channel {} falls outside {}",
+                                    style.strong(&channel.to_string()),
+                                    style.dim("[1/4, 4]")
+                                ),
+                                BindingFault::NoBenefit => String::from(
+                                    "every entry is FRICTION — that is a penalty, not a class",
+                                ),
+                                BindingFault::NoFriction => String::from(
+                                    "every entry is BENEFIT — a class strictly better than its neighbours is not a class",
+                                ),
+                            };
+                            println!("{} the binding does not TRADE: {}", style.bad("✗"), why);
+                            return;
+                        }
+                    };
                     // The seat is read from the CHAIN, and the line is the
                     // operator's own. The engine refuses if it is not T0.
                     let line = active_line().unwrap_or_else(|| String::from("operator"));
@@ -3900,10 +3929,6 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "{} holds no progenitor seat — minting is a TIER 0 power ({}), the office that makes the board others play on",
             style.strong(line),
             style.dim("12_UNION ruling 4")
-        ),
-        ActionRefused::BindingUnlawful => format!(
-            "the binding does not TRADE — it needs one BENEFIT and one FRICTION, every factor in [1/4, 4], every channel one the engine computes ({}). A class that is strictly better than its neighbours is not a class",
-            style.dim("1 yield · 2 upkeep · 3 survey")
         ),
         ActionRefused::MintNotNovel { like } => format!(
             "that mechanism already stands as code {} — a different word and a different mark are not novelty; give it a trade nothing else makes",

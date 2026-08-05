@@ -383,11 +383,14 @@ impl World {
     /// **THE VOCABULARY MINT** (tag 90, `28_VOCABULARY` §5–§7).
     ///
     /// A T0 progenitor adds an entry to a vocabulary, and the board
-    /// grows a class of entity that no coder wrote. Three gates, each
-    /// refusing typed — the fourth died at the door: the axis is a
-    /// [`crate::vocabulary::Axis`], so an unknown axis cannot be
-    /// constructed (29_CONSTRUCTION), and there is still no variant for
-    /// STATIONS (§10) — the enum simply does not hold one.
+    /// grows a class of entity that no coder wrote. Two gates remain,
+    /// both FACTS of the chain — standing and novelty; the shapes died
+    /// at the doors (29_CONSTRUCTION): the axis is a
+    /// [`crate::vocabulary::Axis`] (no unknown axis constructs, and no
+    /// variant names a STATION — §10), and the binding is a
+    /// [`crate::vocabulary::TradingBinding`] (one benefit, one
+    /// friction, in bounds, on real channels — §4a — or it does not
+    /// construct).
     ///
     /// **The code is DERIVED here, never accepted.** The caller does not
     /// pass one: the lawful value is `ceiling(axis) + 1` read from the
@@ -400,7 +403,7 @@ impl World {
         axis: crate::vocabulary::Axis,
         sigil: &str,
         word: crate::dop::Name,
-        binding: Vec<(u8, crate::ratio::Ratio)>,
+        binding: crate::vocabulary::TradingBinding,
     ) -> Result<u8, ActionRefused> {
         self.mint_vocabulary_as(SOVEREIGN, line, axis, sigil, word, binding)
     }
@@ -411,7 +414,7 @@ impl World {
         axis: crate::vocabulary::Axis,
         sigil: &str,
         word: crate::dop::Name,
-        binding: Vec<(u8, crate::ratio::Ratio)>,
+        binding: crate::vocabulary::TradingBinding,
     ) -> Result<u8, ActionRefused> {
         use crate::vocabulary as vocab;
         self.permitted(actor, Scope::Build)?;
@@ -422,14 +425,12 @@ impl World {
             return Err(ActionRefused::MintWithoutStanding { line: line.to_string() });
         }
 
-        // GATE 2 — THE BINDING TRADES (§4a).
-        if !vocab::binding_trades(&binding) {
-            return Err(ActionRefused::BindingUnlawful);
-        }
+        // The trade law (§4a) died at the `TradingBinding` door — a
+        // binding that does not trade cannot be constructed.
 
-        // GATE 3 — NOVELTY (§6), measured on the canonical mechanism.
+        // GATE 2 — NOVELTY (§6), measured on the canonical mechanism.
         let standing = vocab::fold(self.chronicle(), axis);
-        let shape = vocab::canonical(&binding);
+        let shape = vocab::canonical(binding.entries());
         if let Some(twin) = standing
             .iter()
             .find(|entry| vocab::canonical(&entry.binding) == shape)
@@ -448,13 +449,14 @@ impl World {
         let code = standing.iter().map(|entry| entry.code).max().unwrap_or(0) + 1;
         self.close(
             ClosureEvent::VocabularyMinted {
-                // The wire keeps the u8 code — the receipt is readable
-                // without the enum, and the encoding is unchanged.
+                // The wire keeps the u8 code and the raw entries — the
+                // receipt is readable without the door types, and the
+                // encoding is unchanged.
                 axis: axis.code(),
                 code,
                 sigil: sigil.to_string(),
                 word: word.to_string(),
-                binding,
+                binding: binding.into_entries(),
             },
             actor,
         );

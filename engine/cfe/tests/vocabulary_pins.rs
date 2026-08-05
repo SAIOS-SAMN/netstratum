@@ -204,10 +204,10 @@ fn only_a_progenitor_may_mint() {
     for line in ["coralline", "nobody"] {
         assert!(
             matches!(
-                world.mint_vocabulary(line, cfe::vocabulary::Axis::Class, "◇", cfe::dop::name("probe"), vec![
+                world.mint_vocabulary(line, cfe::vocabulary::Axis::Class, "◇", cfe::dop::name("probe"), cfe::vocabulary::trading(vec![
                     (CHANNEL_YIELD, ratio(5, 4)),
                     (CHANNEL_UPKEEP, ratio(5, 4)),
-                ]),
+                ])),
                 Err(ActionRefused::MintWithoutStanding { .. })
             ),
             "{line} minted without a progenitor seat"
@@ -215,10 +215,10 @@ fn only_a_progenitor_may_mint() {
     }
     // And the progenitor may.
     assert!(world
-        .mint_vocabulary("tunborn", cfe::vocabulary::Axis::Class,"◇", cfe::dop::name("probe"), vec![
+        .mint_vocabulary("tunborn", cfe::vocabulary::Axis::Class,"◇", cfe::dop::name("probe"), cfe::vocabulary::trading(vec![
             (CHANNEL_YIELD, ratio(7, 4)),
             (CHANNEL_UPKEEP, ratio(7, 4)),
-        ])
+        ]))
         .is_ok());
 }
 
@@ -241,35 +241,53 @@ fn no_axis_mints_an_office() {
     assert_eq!(cfe::vocabulary::Axis::ALL.len(), 6);
 }
 
-/// **THE BINDING MUST TRADE** (§4a) — a strictly-dominant entry is
-/// refused at the door, not balanced afterwards.
+/// **THE BINDING MUST TRADE** (§4a) — sharpened by the door
+/// (29_CONSTRUCTION): a strictly-dominant entry cannot be CONSTRUCTED,
+/// and the fault is NAMED where the dead arm was a unit.
 #[test]
 fn a_dominant_mint_is_refused_at_the_door() {
-    let mut world = seated();
+    use cfe::vocabulary::{BindingFault, TradingBinding};
+    // Better yield AND cheaper upkeep: pure gain, no trade.
     assert!(matches!(
-        world.mint_vocabulary("tunborn", cfe::vocabulary::Axis::Class,"◇", cfe::dop::name("freelunch"), vec![
+        TradingBinding::new(vec![
             (CHANNEL_YIELD, ratio(2, 1)),
             (CHANNEL_UPKEEP, ratio(1, 2)),
         ]),
-        Err(ActionRefused::BindingUnlawful)
+        Err(BindingFault::NoFriction)
     ));
-    // Out of bounds refuses too.
+    // Out of bounds refuses too, naming the channel.
     assert!(matches!(
-        world.mint_vocabulary("tunborn", cfe::vocabulary::Axis::Class,"◇", cfe::dop::name("huge"), vec![
+        TradingBinding::new(vec![
             (CHANNEL_YIELD, ratio(9, 1)),
             (CHANNEL_UPKEEP, ratio(9, 1)),
         ]),
-        Err(ActionRefused::BindingUnlawful)
+        Err(BindingFault::FactorOutOfBounds { channel: CHANNEL_YIELD })
     ));
-    // A channel the engine does not compute refuses — the table grows by
-    // LANDING a channel, never by a mint naming one.
+    // A channel the engine does not compute refuses BY NAME — the table
+    // grows by LANDING a channel, never by a binding naming one. The
+    // dead gate judged this on canonical form, which silently DROPPED
+    // the phantom channel and refused for a leftover reason; the door
+    // judges the raw entries, so the claim itself is what refuses.
     assert!(matches!(
-        world.mint_vocabulary("tunborn", cfe::vocabulary::Axis::Class,"◇", cfe::dop::name("ghost"), vec![
+        TradingBinding::new(vec![
             (9, ratio(5, 4)),
             (CHANNEL_UPKEEP, ratio(3, 4)),
         ]),
-        Err(ActionRefused::BindingUnlawful)
+        Err(BindingFault::ChannelUnknown { channel: 9 })
     ));
+    // The strengthening the door buys: a phantom channel riding BESIDE
+    // a lawful trade passed the dead gate and entered the receipt as
+    // dead weight. It no longer constructs.
+    assert!(matches!(
+        TradingBinding::new(vec![
+            (9, ratio(5, 4)),
+            (CHANNEL_YIELD, ratio(5, 4)),
+            (CHANNEL_UPKEEP, ratio(5, 4)),
+        ]),
+        Err(BindingFault::ChannelUnknown { channel: 9 })
+    ));
+    // And the empty binding is lawful — Article II's ground state.
+    assert!(TradingBinding::new(vec![]).is_ok());
 }
 
 /// **NOVELTY IS THE MECHANISM, NEVER THE NAME** (§6). This is the gate
@@ -280,18 +298,18 @@ fn a_mint_that_only_renames_an_existing_mechanism_refuses() {
     // Class 1 (biotic-swarm) is yield x5/4, upkeep x5/4. A different
     // word, a different mark, the same trade.
     assert!(matches!(
-        world.mint_vocabulary("tunborn", cfe::vocabulary::Axis::Class,"✦", cfe::dop::name("swarmlike"), vec![
+        world.mint_vocabulary("tunborn", cfe::vocabulary::Axis::Class,"✦", cfe::dop::name("swarmlike"), cfe::vocabulary::trading(vec![
             (CHANNEL_UPKEEP, ratio(5, 4)),
             (CHANNEL_YIELD, ratio(5, 4)),
-        ]),
+        ])),
         Err(ActionRefused::MintNotNovel { like: 1 })
     ));
     // And a genuinely new trade lands.
     assert!(world
-        .mint_vocabulary("tunborn", cfe::vocabulary::Axis::Class,"✦", cfe::dop::name("swarmlike"), vec![
+        .mint_vocabulary("tunborn", cfe::vocabulary::Axis::Class,"✦", cfe::dop::name("swarmlike"), cfe::vocabulary::trading(vec![
             (CHANNEL_YIELD, ratio(7, 4)),
             (CHANNEL_SURVEY, ratio(7, 4)),
-        ])
+        ]))
         .is_ok());
 }
 
@@ -302,17 +320,17 @@ fn a_minted_mark_cannot_shadow_a_seated_one() {
     let mut world = seated();
     // ∿ is class 6, plasma-field.
     assert!(matches!(
-        world.mint_vocabulary("tunborn", cfe::vocabulary::Axis::Class,"∿", cfe::dop::name("newname"), vec![
+        world.mint_vocabulary("tunborn", cfe::vocabulary::Axis::Class,"∿", cfe::dop::name("newname"), cfe::vocabulary::trading(vec![
             (CHANNEL_YIELD, ratio(7, 4)),
             (CHANNEL_UPKEEP, ratio(7, 4)),
-        ]),
+        ])),
         Err(ActionRefused::MintNameTaken { .. })
     ));
     assert!(matches!(
-        world.mint_vocabulary("tunborn", cfe::vocabulary::Axis::Class,"✧", cfe::dop::name("plasma-field"), vec![
+        world.mint_vocabulary("tunborn", cfe::vocabulary::Axis::Class,"✧", cfe::dop::name("plasma-field"), cfe::vocabulary::trading(vec![
             (CHANNEL_YIELD, ratio(7, 4)),
             (CHANNEL_UPKEEP, ratio(7, 4)),
-        ]),
+        ])),
         Err(ActionRefused::MintNameTaken { .. })
     ));
 }
@@ -325,10 +343,10 @@ fn a_minted_class_can_be_sealed_and_it_computes() {
     let before = cfe::vocabulary::ceiling(world.chronicle(), cfe::vocabulary::Axis::Class);
 
     let code = world
-        .mint_vocabulary("tunborn", cfe::vocabulary::Axis::Class,"⌘", cfe::dop::name("covenantal"), vec![
+        .mint_vocabulary("tunborn", cfe::vocabulary::Axis::Class,"⌘", cfe::dop::name("covenantal"), cfe::vocabulary::trading(vec![
             (CHANNEL_YIELD, ratio(7, 4)),
             (CHANNEL_UPKEEP, ratio(7, 4)),
-        ])
+        ]))
         .expect("the progenitor mints");
     assert_eq!(code, before + 1, "the code is the next one, derived");
 
@@ -397,10 +415,10 @@ fn the_fold_at_a_stamp_does_not_see_a_later_mint() {
     world.tick();
     world.tick();
     world
-        .mint_vocabulary("tunborn", cfe::vocabulary::Axis::Class,"⌘", cfe::dop::name("covenantal"), vec![
+        .mint_vocabulary("tunborn", cfe::vocabulary::Axis::Class,"⌘", cfe::dop::name("covenantal"), cfe::vocabulary::trading(vec![
             (CHANNEL_YIELD, ratio(7, 4)),
             (CHANNEL_UPKEEP, ratio(7, 4)),
-        ])
+        ]))
         .expect("mints");
     let after = fold(world.chronicle(), Axis::Class).len();
 

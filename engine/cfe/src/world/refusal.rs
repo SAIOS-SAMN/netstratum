@@ -105,17 +105,14 @@ pub enum ActionRefused {
     /// 4: progenitors *create the board everyone else plays on*). The
     /// line named holds no progenitor seat in this chronicle.
     ///
-    /// The unknown-axis arm that once followed died at the door
-    /// (29_CONSTRUCTION): the verb takes [`crate::vocabulary::Axis`],
-    /// so no unknown axis can be constructed — and there is still no
-    /// variant for STATIONS, because offices change by amendment alone
-    /// (§10); the enum simply does not hold one.
+    /// The two shape arms that once followed died at the doors
+    /// (29_CONSTRUCTION): the verb takes [`crate::vocabulary::Axis`]
+    /// (no unknown axis constructs, and no variant names a STATION —
+    /// offices change by amendment alone, §10) and a
+    /// [`crate::vocabulary::TradingBinding`] (§4a — one benefit, one
+    /// friction, in bounds, on real channels, or it does not
+    /// construct, with the fault NAMED where the dead arm was a unit).
     MintWithoutStanding { line: String },
-    /// 28_VOCABULARY §4a — the binding does not TRADE: it must carry at
-    /// least one benefit and at least one friction, every factor inside
-    /// the bounds, every channel one the engine already computes. A
-    /// strictly-dominant entry is unmintable by construction.
-    BindingUnlawful,
     /// 28_VOCABULARY §6 — the mechanism already exists under another
     /// name. Word and mark differences are not novelty; a partition
     /// whose members compute identically distinguishes nothing.
