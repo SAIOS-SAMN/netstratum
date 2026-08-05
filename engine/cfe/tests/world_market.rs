@@ -151,7 +151,7 @@ fn the_gap_melts_the_cargo_and_distance_walls() {
     assert_eq!(received, Some(ratio(115, 64)), "the receipt speaks what LANDED");
     // THE CONFORM RULING: the void's share is a first-class receipt
     // on the receiving book — sent = received + void share; every
-    // deal sums to zero under ONE rule, and the judge only sums.
+    // deal sums to zero under ONE rule, and the gate only sums.
     let void_share = d.chronicle().receipts().iter().find_map(|r| match &r.event {
         ClosureEvent::VoidShare { resource: Resource::Iron, amount, .. } => Some(amount.clone()),
         _ => None,

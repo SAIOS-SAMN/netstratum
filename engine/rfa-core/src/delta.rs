@@ -186,7 +186,7 @@ where
 /// the SAME UNITS as its payload, weights each residual exactly its
 /// size, needs no root ever, and keeps the arithmetic lean (squaring
 /// doubles bit-length — the denominator lesson). The zero point — the
-/// only place the LAW judges — is unchanged.
+/// only place the LAW gates — is unchanged.
 pub fn coherence_functional(delta: &Delta) -> Lens {
     let mut c = Ratio::zero();
     for_each_residual(delta, |_i, _j, _k, _l, r| {

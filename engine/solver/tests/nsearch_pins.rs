@@ -20,7 +20,7 @@ fn a_forged_task_is_solvable_at_its_own_depth() {
             // vocabulary carries whole. Recolor is deliberately outside
             // it (10! permutations is not a fair-depth search), so this
             // measures the rungs the forge path is meant to serve.
-            if rung.tier > 1 {
+            if rung.tier() > 1 {
                 continue;
             }
             for seed in 0..6u8 {
@@ -28,11 +28,11 @@ fn a_forged_task_is_solvable_at_its_own_depth() {
                 digest[0] = seed;
                 digest[1] = rank as u8;
                 digest[2] = level as u8;
-                let task = forge_field(digest, &rung).expect("forges");
-                match solve_field(&task, rung.word_len) {
+                let task = forge_field(digest, &rung);
+                match solve_field(&task, rung.word_len()) {
                     FieldSolveRead::Solved { matches_expected, word, .. } => {
                         assert!(
-                            word.len() <= rung.word_len,
+                            word.len() <= rung.word_len(),
                             "rank {rank} level {level}: found a word longer than the bound"
                         );
                         assert_eq!(
@@ -48,7 +48,7 @@ fn a_forged_task_is_solvable_at_its_own_depth() {
                         "rank {rank} level {level} seed {seed}: a forged task was \
                          unsolvable at its own depth {} — the ladder prices work \
                          nobody can do",
-                        rung.word_len
+                        rung.word_len()
                     ),
                 }
             }
@@ -62,7 +62,7 @@ fn a_forged_task_is_solvable_at_its_own_depth() {
 #[test]
 fn an_empty_task_never_reads_solved() {
     let rung = Rung::level(2, 0);
-    let mut task = forge_field([1u8; 32], &rung).expect("forges");
+    let mut task = forge_field([1u8; 32], &rung);
     task.train.clear();
     assert_eq!(solve_field(&task, 3), FieldSolveRead::Unsolved);
 }

@@ -16,7 +16,7 @@
 
 use cfe::literature::WORKS;
 use cfe::ratio::ratio;
-use cfe::world::survey::{FIRST_WORK, LAST_CONDITION};
+use cfe::world::survey::{first_work, last_condition};
 use cfe::world::World;
 
 fn literate_world() -> (World, u64) {
@@ -49,8 +49,8 @@ fn the_stack_is_base_eleven() {
     let (world, orb) = literate_world();
     let sky = world.constellation(orb);
     assert_eq!(sky.len(), 11, "eleven nodes");
-    assert_eq!(LAST_CONDITION, 11);
-    assert_eq!(FIRST_WORK, 8);
+    assert_eq!(last_condition(), 11);
+    assert_eq!(first_work(), 8);
     let seen: Vec<u8> = sky.iter().map(|(condition, ..)| *condition).collect();
     // 7 is PRACTICE-1's re-emergence lesson and is NOT a sky node.
     assert_eq!(
@@ -107,7 +107,7 @@ fn claiming_a_work_does_not_advance_the_crown() {
 fn an_uplift_node_is_held_by_the_claim_itself() {
     let (mut world, orb) = literate_world();
     let witness = a_receipt(&world);
-    let valor = FIRST_WORK; // 8 — the charter's order: VALOR first.
+    let valor = first_work(); // 8 — the charter's order: VALOR first.
     assert_eq!(World::work_at(valor), Some("VALOR"));
 
     let unheld = world.constellation(orb).into_iter().find(|(c, ..)| *c == valor);
@@ -130,14 +130,14 @@ fn an_uplift_node_is_held_by_the_claim_itself() {
 /// tier does.
 #[test]
 fn the_uplift_tier_is_exactly_the_chartered_works() {
-    for condition in 0..FIRST_WORK {
+    for condition in 0..first_work() {
         assert_eq!(World::work_at(condition), None, "{condition} is base tier");
     }
-    let mapped: Vec<&str> = (FIRST_WORK..=LAST_CONDITION)
+    let mapped: Vec<&str> = (first_work()..=last_condition())
         .map(|condition| World::work_at(condition).expect("a work"))
         .collect();
     assert_eq!(mapped, WORKS.to_vec(), "the charter's order, in order");
-    assert_eq!(World::work_at(LAST_CONDITION + 1), None, "nothing above");
+    assert_eq!(World::work_at(last_condition() + 1), None, "nothing above");
 }
 
 /// The full stack needs the base complete AND every deed witnessed —
@@ -153,7 +153,7 @@ fn base_eleven_needs_the_base_and_every_deed() {
         world.claim_work(orb, name, &[witness]).expect("claims");
     }
     // Every deed stands...
-    assert!((FIRST_WORK..=LAST_CONDITION).all(|c| world.work_claimed(orb, c)));
+    assert!((first_work()..=last_condition()).all(|c| world.work_claimed(orb, c)));
     // ...and the full stack still refuses, because the BASE is not done.
     assert!(
         !world.base_eleven_complete(orb),
@@ -177,4 +177,74 @@ fn the_sky_never_claims_the_re_emergence_slot() {
     );
     assert_eq!(World::work_at(7), None, "7 is not a work");
     assert_eq!(World::work_at(8), Some("VALOR"), "the works begin at 8");
+}
+
+/// **THE STACK AND THE SOLVER'S FRAME ARE ONE NUMBER** (operator ruling
+/// 2026-08-05: *tie spin to orbit … extrapolate down to base-11 per
+/// entity*).
+///
+/// `solver_verify::shell::STACK_NODES` names base-11 from below the
+/// `cfe` arrow, where it cannot import this constant. Two copies of a
+/// number is the two-truths defect, so the equality is PINNED rather
+/// than trusted — this test is what makes them one truth.
+#[test]
+fn the_solvers_stack_base_is_this_stack_base() {
+    assert_eq!(
+        i64::from(cfe::world::survey::last_condition()),
+        solver_verify::shell::STACK_NODES,
+        "the solver frames entities on a different base than the sky — \
+         one of the two moved without the other"
+    );
+    assert_eq!(
+        solver_verify::shell::FRAME_PERIOD,
+        ratio::TURN_SLOTS * i64::from(cfe::world::survey::last_condition()),
+        "the composite frame ring must be the orbital ring times the stack"
+    );
+}
+
+/// **AND ELEVEN IS DERIVED ON BOTH SIDES OF THE ARROW.** The sky's own
+/// parts sum to it, the solver's parts sum to it, and the two sums
+/// agree — so there is no `11` left in the tree for anyone to edit in
+/// one place.
+#[test]
+fn both_sides_derive_eleven_from_the_same_parts() {
+    use cfe::world::survey as sky;
+    use solver_verify::shell as frame;
+
+    use cfe::world::survey::NodeKind;
+
+    // THE SKY COUNTS ITS OWN NODES — nothing here is typed.
+    assert_eq!(sky::count_of(NodeKind::Leap), sky::solar_leap(), "one star, one leap");
+    assert_eq!(sky::count_of(NodeKind::Crystallized), 5, "the crystallized tier, counted");
+    assert_eq!(sky::count_of(NodeKind::Crown), 1, "one gifted crown, counted");
+    assert_eq!(sky::count_of(NodeKind::Lesson), 1, "the re-emergence lesson, counted");
+    assert_eq!(
+        sky::works(),
+        cfe::literature::WORKS.len() as u8,
+        "the works ARE the literature vocabulary, not a restatement of its size"
+    );
+    assert_eq!(sky::base_nodes(), 7, "leap + crystallized + crown");
+    assert_eq!(sky::last_condition(), 11, "base + works");
+    // The base occupies 0..=6 and the lesson rides at 7, so the works
+    // begin at base + lesson = 8. The counts ARE the indices consumed —
+    // an extra +1 here put VALOR at 9 and left 8 unnamed, which the
+    // work_at pin caught.
+    assert_eq!(
+        sky::first_work(),
+        sky::base_nodes() + sky::count_of(NodeKind::Lesson),
+        "the works begin past the base AND past the lesson riding between"
+    );
+    assert_eq!(sky::first_work(), 8, "and that is eight");
+
+    // PART FOR PART, the solver's declared parts match what the sky
+    // COUNTS — not merely the totals. A drift names which part moved.
+    assert_eq!(i64::from(sky::count_of(NodeKind::Leap)), frame::SOLAR_LEAP);
+    assert_eq!(
+        i64::from(sky::count_of(NodeKind::Crystallized)),
+        frame::CRYSTALLIZED_CONDITIONS
+    );
+    assert_eq!(i64::from(sky::count_of(NodeKind::Crown)), frame::GIFTED_CROWN);
+    assert_eq!(i64::from(sky::works()), frame::CHARTERED_WORKS);
+    assert_eq!(i64::from(sky::base_nodes()), frame::BASE_NODES);
+    assert_eq!(i64::from(sky::last_condition()), frame::STACK_NODES);
 }

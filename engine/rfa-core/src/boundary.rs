@@ -23,7 +23,7 @@
 //! ```
 //!
 //! One pass over the support. Traversal order cannot change it, no
-//! spanning structure is chosen, and every judge computing it arrives
+//! spanning structure is chosen, and every gate computing it arrives
 //! at the same answer — which is what a kernel invariant requires and
 //! what the forest version could never provide.
 //!
@@ -108,7 +108,7 @@ impl BoundaryForm {
 /// vertex, in ONE pass.
 ///
 /// Canonical by construction: no spanning structure is chosen and no
-/// order is walked, so two judges always agree. Antisymmetry makes the
+/// order is walked, so two gates always agree. Antisymmetry makes the
 /// sum well-formed — `Δ_ij = −Δ_ji`, so an edge contributes `+` at one
 /// end and `−` at the other, and a pure circulation cancels at every
 /// vertex exactly.

@@ -3,7 +3,7 @@
 //! rests on measurement and not on reading.
 //!
 //! This is a measuring instrument, not a mechanic: it appends nothing,
-//! writes nothing, and judges nothing. It replays what the conductor
+//! writes nothing, and gates nothing. It replays what the conductor
 //! already replays and reports where the time goes.
 //!
 //! ```text
@@ -65,7 +65,7 @@ fn main() {
 
     // (5) ONE WHOLE BEAT, as `chain_beat` actually spends it: for each
     // new deed, rebuild the prefix chronicle (copy + verify) and replay
-    // it whole, then judge the step.
+    // it whole, then gate the step.
     let first = n.saturating_sub(deeds);
     let at = Instant::now();
     let mut prior = cfe::world::replay(

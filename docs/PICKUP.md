@@ -581,7 +581,7 @@ narrow remainder is real and still open. Struck text kept, not rewritten
 (the history law) — read the correction, not the strike.
 
 - ~~The judge does not judge. Nothing in production calls `lawful`.~~
-  **`kernel::lawful` IS called in production**, per deed, every beat, at
+  **`kernel::well_formed` IS called in production**, per deed, every beat, at
   `conductor/src/lib.rs:1380`, with refusals collected into
   `self.refused`.
 - ~~`engine/rfa-core` has ZERO dependents.~~ **Two crates depend on it:**
@@ -640,7 +640,7 @@ must be read as the VERIFIER half only. Amendment owed there.
 
 **POLARITY DEFECT — FOUND AND FIXED (2026-08-01).** `fold.rs`'s module
 header and `orbit_lock`'s own doc comment both stated the fold gate
-INVERTED (lock found ⇒ fold lawful), against the code, `FoldVerdict`,
+INVERTED (lock found ⇒ fold lawful), against the code, `FoldReading`,
 `SYSTEM_SPEC` §4 and `EQUATIONS` E2 — all of which agree a lock VETOES
 and the residue emits. The code was never wrong; only the two glosses
 were, which is the C(Δ)=0 lesson repeating. It matters because the

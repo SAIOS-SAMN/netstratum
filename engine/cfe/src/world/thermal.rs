@@ -148,7 +148,7 @@ impl World {
         // distinct orbit radius, and the reach is the field grade
         // (`StarClass::ring_reach`, the dynamo derivation). Filling an
         // anchored ring stays lawful; THREADING A NEW ONE beyond the
-        // field refuses. Refusal-pure: judged before anything moves.
+        // field refuses. Refusal-pure: checked before anything moves.
         let mut rings: Vec<&Ratio> = Vec::new();
         for held in &self.orbs {
             if let Some(site) = &held.thermal {

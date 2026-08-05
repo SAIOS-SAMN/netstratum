@@ -1,5 +1,5 @@
 //! THE SEALED RULES — every rule read by BOTH the live proposer and
-//! the judge.
+//! the gate.
 //!
 //! **This module exists because a rule read from two places is the
 //! drift that already cost this codebase a landing.** P3 (the ease
@@ -12,7 +12,7 @@
 //! one file instead of by a bisect.
 //!
 //! THE BOUNCE (GROUND §4): adding a rule here is a deliberate act. A
-//! value that moves in this file moves under BOTH judges at once, so
+//! value that moves in this file moves under BOTH gates at once, so
 //! amending anything here requires a workspace sweep and never a
 //! single-crate check. The kernel CALLS these, never copies them
 //! (CHARTER §0b).
@@ -30,7 +30,7 @@ use crate::ratio::{ratio, Ratio};
 pub fn ease_of(techs: &[(u64, u8, [u8; 32])], orb: u64, at: u64) -> Ratio {
     // RULESET EPOCHS (`21_KERNEL_PARAMETERS` §11): the rule is selected
     // by the stamp the deed carries, so a receipt written under EPOCH 0
-    // is forever judged by EPOCH 0 and `replay` cannot drift from the
+    // is forever gated by EPOCH 0 and `replay` cannot drift from the
     // live path. Sealed rules are APPEND-ONLY — the cliff below stays
     // in the tree permanently because past receipts still need it.
     match crate::epoch::epoch_at(at) {
@@ -40,7 +40,7 @@ pub fn ease_of(techs: &[(u64, u8, [u8; 32])], orb: u64, at: u64) -> Ratio {
 }
 
 /// EPOCH 0 — the landed cliff. **Never edit this function.** Every
-/// receipt stamped before `epoch::CONTINUOUS_FROM` is judged by it, and
+/// receipt stamped before `epoch::CONTINUOUS_FROM` is gated by it, and
 /// changing it would rewrite history's meaning.
 fn ease_cliff(techs: &[(u64, u8, [u8; 32])], orb: u64) -> Ratio {
     match techs.iter().any(|(held, condition, _)| *held == orb && *condition == 5) {
@@ -89,7 +89,7 @@ const EASE_SCALE: i64 = 5;
 ///
 /// Sealed and public for the same reason `demurrage_due` is: the
 /// kernel calls it on `prior.orbs` and the proposer on its own, so one
-/// computation serves two judges and neither can disagree about what
+/// computation serves two gates and neither can disagree about what
 /// supply stood.
 pub fn standing_supply(orbs: &[ColonyOrb]) -> Vec<(Resource, Ratio)> {
     [Resource::Joule, Resource::Sink]
@@ -107,11 +107,11 @@ pub fn standing_supply(orbs: &[ColonyOrb]) -> Vec<(Resource, Ratio)> {
 /// what an orb owes at `stamp` — `min(rate · ease · elapsed, banked)`
 /// per leaking resource, FLAT, never proportional (the 2^1100
 /// denominator lesson). Pub: the kernel CALLS this for I5's bound
-/// (call-not-copy) — one rule, one computation, two judges.
+/// (call-not-copy) — one rule, one computation, two gates.
 ///
 /// **`supply`** is the world's standing total per leaking resource,
 /// which P2's EPOCH 1 rate reads. Passed PRECOMPUTED rather than
-/// derived inside for two reasons: proposer and judge must reach one
+/// derived inside for two reasons: proposer and gate must reach one
 /// rate from one state, and a settle site holding `&mut ColonyOrb`
 /// cannot also hand out a shared borrow of the slice that orb lives
 /// in. Build it with [`standing_supply`]. Ignored under EPOCH 0.
@@ -238,7 +238,7 @@ pub trait MintWarrant {
     /// What this payload earns, or `None` if it is not a proof.
     fn earns(&self, work: &[u8]) -> Option<Ratio>;
 
-    /// **THE ESCROW CHECK — would the judge ADMIT this deed?**
+    /// **THE ESCROW CHECK — would the gate ADMIT this deed?**
     ///
     /// `earns` answers what a payload is WORTH. It cannot answer
     /// whether the deed will stand, because most of the law is a
@@ -250,13 +250,13 @@ pub trait MintWarrant {
     ///
     /// That is exactly what was measured: a 60-beat era put mints
     /// carrying `MintWithoutCapacityIncrement` into the record, and the
-    /// judge refused them where nobody could take them back.
+    /// gate refused them where nobody could take them back.
     ///
     /// So the emitter ESCROWS: it builds the state the deed WOULD
     /// produce, asks here whether that transition stands, and settles
-    /// only on yes. `cfe` still parses nothing and imports no judge —
+    /// only on yes. `cfe` still parses nothing and imports no gate —
     /// it hands over two committed states and the event, and whoever
-    /// can judge, judges.
+    /// can gate, gates.
     ///
     /// Default `false`: a warrant that cannot answer must not be able
     /// to settle. The same posture `NoWarrant` takes on `earns`, for

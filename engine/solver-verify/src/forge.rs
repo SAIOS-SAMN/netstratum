@@ -59,13 +59,13 @@ impl Difficulty {
     /// This is what a price may be read from. A shape is matched WHOLE
     /// against the ladder, so a payload still cannot name its own price
     /// by inventing a convenient difficulty — the anti-self-pricing
-    /// defence is unchanged. What changes is what the judge is handed:
+    /// defence is unchanged. What changes is what the gate is handed:
     /// a POSITION, not a matrix.
     ///
     /// **Why (operator ruling 2026-08-04: *`Grid` should fall out,
     /// because we aren't building a matrix*).** `mint_bound` used to
     /// match the whole `Difficulty` — so `rows` and `cols`, the
-    /// dimensions of an ARC grid, were literally part of the judge's
+    /// dimensions of an ARC grid, were literally part of the gate's
     /// price lookup. That is THE MOTION clause 5's failure: *ARC is a
     /// TYPE of work, not the only type; the machinery must be
     /// work-CLASS generic, never grid-specific.* It was proved the same
@@ -74,7 +74,7 @@ impl Difficulty {
     /// spelled in planar fields.
     ///
     /// A rung is class-independent. The SHAPE stays here, where the
-    /// forge needs it; only the position crosses to the judge.
+    /// forge needs it; only the position crosses to the gate.
     pub fn rung(&self) -> Option<u32> {
         (0..=Difficulty::top()).find(|&n| Difficulty::level(n) == *self)
     }
@@ -116,7 +116,7 @@ impl Difficulty {
     /// secret word is the identity task, and a copy task is a task.
     /// `train_pairs: 0` is not: a replay over no pairs proves nothing
     /// (the vacuity closed in `98ccbbe`).
-    pub fn lawful(&self) -> bool {
+    pub fn well_formed(&self) -> bool {
         self.rows > 0 && self.cols > 0 && self.train_pairs > 0
     }
 }

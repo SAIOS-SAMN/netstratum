@@ -30,8 +30,8 @@
 //! The judgment is EXACT: `orbit_lock` (the fold gate) compares the
 //! [`RcfSignature`] — the whole exact invariant-factor sequence — not
 //! the hash. [`rcf_hash`] is the compact blake3 fingerprint, for
-//! commitment binding only (a convenience, never a judge — a hash is a
-//! lossy summary and the law judges on exact form).
+//! commitment binding only (a convenience, never a gate — a hash is a
+//! lossy summary and the law gates on exact form).
 
 use crate::delta::Delta;
 use cfe::ratio::Ratio;
@@ -418,9 +418,9 @@ pub fn rcf_signature(delta: &Delta) -> RcfSignature {
 
 /// The compact blake3 fingerprint of a Delta's RCF signature — the
 /// same 32 bytes for conjugate states, for COMMITMENT BINDING only
-/// (the arbor may carry it). Never a judge: the fold gate compares the
+/// (the arbor may carry it). Never a gate: the fold gate compares the
 /// exact [`RcfSignature`], because a hash is a lossy summary and the
-/// law judges on exact form. blake3, not the ancestor's Keccak (the
+/// law gates on exact form. blake3, not the ancestor's Keccak (the
 /// house hash; the bytes are netstratum's own, re-witnessed).
 pub fn rcf_hash(delta: &Delta) -> [u8; 32] {
     let mut buf = Vec::new();

@@ -164,7 +164,7 @@ fn a_judged_record_is_re_judged_or_refused() {
     assert!(judged.judged, "the record is judged");
 
     // present() carries records + blobs but NO step (the arbor stores
-    // none — the Phase-3 seam): the judged record cannot be re-judged,
+    // none — the Phase-3 seam): the gated record cannot be re-gated,
     // so the receiver refuses it.
     let base_segment = src.present();
     let mut dst = Arbor::open(scratch("judge-dst1")).expect("opens");
@@ -173,7 +173,7 @@ fn a_judged_record_is_re_judged_or_refused() {
         Err(ArborRefused::JudgedWithoutProof { .. })
     ));
 
-    // Carry the LAWFUL step alongside: now the receiver re-judges and
+    // Carry the LAWFUL step alongside: now the receiver re-gates and
     // admits, reaching the equal arbor.
     let mut with_step = base_segment.clone();
     with_step.extend_from_slice(&step_frame(judged.commit, &transfer_step(2)));
@@ -184,11 +184,11 @@ fn a_judged_record_is_re_judged_or_refused() {
     // Carry an UNLAWFUL step for the same record: the transition is
     // claimed by actor 999, who is no entity in `prior` (I2 —
     // identity precedes the world). The commit still reseals (the
-    // judged flag is unchanged; the step is not in the seal), so the
+    // gated flag is unchanged; the step is not in the seal), so the
     // break is the KERNEL's verdict, not the chain's. (A wrong
     // transfer AMOUNT would NOT refuse — conservation reads the world
     // total, which is state-derived and unchanged; the unlawfulness
-    // must be one the kernel actually judges.)
+    // must be one the kernel actually gates.)
     let liar = kernel::Step {
         event: ClosureEvent::ResourceTransferred { from_orb: 1, to_orb: 2, resource: Resource::Iron, amount: ratio(3, 1) },
         actor: 999,

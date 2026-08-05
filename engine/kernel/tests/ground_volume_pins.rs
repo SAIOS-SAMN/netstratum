@@ -14,10 +14,10 @@
 //!   their measure;
 //! - `Degree` is never zero (2026-08-01) — preserved: volume ≥ 1 for
 //!   any state, and the empty pre-founding state weighs 1;
-//! - the judge reads `Degree::above()` — the circulation, deliberately
+//! - the gate reads `Degree::above()` — the circulation, deliberately
 //!   never `get()` (`revocation_law`'s own comment) — so opening the
-//!   floor moves NO verdict: `above()` still returns the circulation,
-//!   and the fold guard compares ranks. That derivation is what makes
+//!   floor changes NOTHING the gate admits: `above()` still returns the
+//!   circulation, and the fold gate compares ranks. That derivation makes
 //!   this a PATCH under the semver law, and the pins below hold it.
 //!
 //! At one orb the product is `1 × (GROUND + c)` — byte-identical to the
@@ -93,8 +93,8 @@ fn never_zero_survives_the_opening() {
 }
 
 #[test]
-fn the_judge_reads_circulation_and_no_verdict_moves() {
-    // The invariance that makes this a PATCH: `above()` is the
+fn the_gate_reads_circulation_and_nothing_admitted_changes() {
+    // The invariance that made 0.5.1 a PATCH: `above()` is the
     // circulation regardless of volume, so every D4 comparison — and
     // any arm reading above() — is untouched by the estate's size.
     let small = read_entangled(&estate_with_loop(3));

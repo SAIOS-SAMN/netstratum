@@ -1,7 +1,7 @@
-//! THE ESTATE SURVEY, JUDGED — the theorems' kernel half (E5b).
+//! THE ESTATE SURVEY, GATED — the theorems' kernel half (E5b).
 //!
 //! The emitter's proofs live in `cfe/tests/estate_survey_pins.rs`; here
-//! the JUDGE holds them: a lawful survey admits, a partial covering
+//! the GATE holds them: a well-formed survey admits, a partial covering
 //! refuses (unwitnessed observations cannot enter), a misquoted meter
 //! refuses (the kernel calls the SAME sealed rule the emitter drew
 //! from), and the draw conserves.
@@ -61,7 +61,7 @@ fn a_partial_covering_refuses_the_observation() {
 
 #[test]
 fn a_misquoted_meter_refuses() {
-    // THEOREM (metered): the judge computes the meter by CALLING the
+    // THEOREM (metered): the gate computes the meter by CALLING the
     // sealed rule — a declared cost above or below it refuses, so the
     // survey cannot be quoted one way and charged another.
     let (prior, next, mut step) = surveyed_transition();

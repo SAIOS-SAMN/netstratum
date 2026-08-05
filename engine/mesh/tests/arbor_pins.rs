@@ -1,6 +1,6 @@
 //! SPINE-1 pins (NS-5 §9): the arbor walks and reloads whole; the
 //! arrow and the address hold structurally; the nursery owns its own
-//! addresses; the store verifies on every read; and the judge stands
+//! addresses; the store verifies on every read; and the gate stands
 //! at the door — lawful passes, unlawful refuses, the sealed default
 //! refuses, and the unjudged hole is STAMPED, never hidden.
 
@@ -36,7 +36,7 @@ fn branch_coord(branch: &str, t: u64) -> Coordinate {
     Coordinate { branch: branch.into(), ..coord(t) }
 }
 
-/// One orb holding `iron` iron — the judge's test material.
+/// One orb holding `iron` iron — the gate's test material.
 fn orb(id: u64, iron: (i64, i64)) -> ColonyOrb {
     let mut held = ColonyOrb { orb_id: id, name: format!("orb-{id}"), ..Default::default() };
     held.bank(Resource::Iron, ratio(iron.0, iron.1));
@@ -112,7 +112,7 @@ fn the_spine_walks_and_reloads_whole() {
     );
     assert_eq!(arbor.fetch(&second.state).expect("the geometry unpacks"), bytes_b);
 
-    // A step offered at genesis refuses: nothing prior to judge from.
+    // A step offered at genesis refuses: nothing prior to gate from.
     let fresh = scratch("walks-genesis");
     let mut fresh_spine = Arbor::open(&fresh).expect("opens");
     let refused = fresh_spine.extend(coord(0), &bytes_a, Some(&transfer_step(0))).unwrap_err();
@@ -245,7 +245,7 @@ fn the_judge_stands_at_the_door() {
     let minting_next = two_orb_state((6, 1), (6, 1));
     arbor.extend(coord(0), &prior, None).expect("genesis");
 
-    // A lawful transfer judges and lands STAMPED judged.
+    // A lawful transfer gates and lands STAMPED gated.
     let judged = arbor
         .extend(coord(1), &lawful_next, Some(&transfer_step(1)))
         .expect("the lawful step enters")
@@ -265,7 +265,7 @@ fn the_judge_stands_at_the_door() {
     // TRUTH-UPDATE (recorded): this block rode the last-uncovered deed
     // (ZoneRazed → EraAnnexed → AssayStruck → TaxonSealed) to prove
     // the sealed default passed through. With coverage now TOTAL (all
-    // 64 deeds judged, kernel `taxon_pins.rs`), there is no Unjudged
+    // 64 deeds gated, kernel `taxon_pins.rs`), there is no Unjudged
     // deed to carry — so the pin shows the arbor carrying a
     // containment refusal instead: TaxonSealed needs Build, and the
     // Collect-hand (100) lacks it, so the kernel's NotPermitted rides
@@ -283,7 +283,7 @@ fn the_judge_stands_at_the_door() {
         })
     );
 
-    // A step-less extend still stamps judged = false (the pre-chain
+    // A step-less extend still stamps gated = false (the pre-chain
     // adoption shape — no judgment claimed, honestly recorded).
     let hole = arbor.extend(coord(2), &minting_next, None).expect("admitted unjudged").clone();
     assert!(!hole.judged, "no judgment claimed is visible in the record, never hidden");
@@ -309,14 +309,14 @@ fn the_record_speaks_the_blobs_schema() {
 /// THE ADOPTION DOOR (#36): a played, pre-chain world enters the
 /// mainline once — the debt stamped unjudged, never hidden; a second
 /// adoption refuses; and the chained economy continues on top through
-/// the ordinary judged door.
+/// the ordinary gated door.
 #[test]
 fn adoption_is_once_and_names_its_debt() {
     let root = scratch("adoption");
     let mut arbor = Arbor::open(&root).expect("opens empty");
 
     // A world with pre-chain history: its chronicle is the Tier-A
-    // debt. Adoption seats its CURRENT state, judged=0 stamped.
+    // debt. Adoption seats its CURRENT state, gated=0 stamped.
     let debt = two_orb_state((10, 1), (0, 1));
     let adopted = arbor.adopt(coord(1), &debt).expect("the debt is adopted").clone();
     assert_eq!(adopted.parent, [0u8; 32], "adoption is the mainline's birth");

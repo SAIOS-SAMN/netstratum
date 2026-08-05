@@ -239,7 +239,7 @@ impl Chronicle {
 
     /// MESH-1b: hold (or release) the pen. While held, every append
     /// carries the hand — see `append`. The walk in `mesh` stays the
-    /// judge; this is the stamp, not the gate.
+    /// gate; this is the stamp, not the gate.
     pub fn set_hand(&mut self, hand: Option<u64>) {
         self.hand = hand;
     }

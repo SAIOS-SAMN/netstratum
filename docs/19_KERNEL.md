@@ -67,7 +67,7 @@ is not satisfied by a validator that stands beside the updater.
 **The cure, in order of preference:**
 
 1. **Derive apply from judge.** `lawful` already computes the lawful
-   per-resource deltas (`lawful_deltas`), the lawful gauge move
+   per-resource deltas (`admitted_deltas`), the lawful gauge move
    (`gauge_move`), the lawful element move (`element_move`). Where the
    judge already knows the answer, the applier should USE that answer
    rather than recompute it. Every place it does is one fewer chance to
@@ -310,7 +310,7 @@ load-bearing.
 
 ### 3a.1 The judge exists because the transition is defined twice
 
-    pub fn lawful(prior: &Committed, next: &Committed, step: &Step)
+    pub fn well_formed(prior: &Committed, next: &Committed, step: &Step)
         -> Result<(), Unlawful>
 
 **It takes `next` as an argument.** Someone else computed the answer and
@@ -349,7 +349,7 @@ new world.
 **Four reasons this is structural, not stylistic:**
 
 1. **THE MOVE ALREADY EXISTS AND IS THROWN AWAY.** `lib.rs:611`:
-   `lawful_deltas(prior, event) -> Result<Vec<(Resource, Ratio)>, Unlawful>`.
+   `admitted_deltas(prior, event) -> Result<Vec<(Resource, Ratio)>, Unlawful>`.
    That IS the move. `conservation` uses it only to compare against the
    `next` it was handed, then drops it. `gauge_move` and `element_move`
    do the same on their axes. **Every deed computes its own move and

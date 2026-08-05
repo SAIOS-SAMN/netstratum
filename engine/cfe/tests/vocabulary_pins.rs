@@ -7,7 +7,7 @@
 
 use cfe::ratio::ratio;
 use cfe::vocabulary::{
-    archetype_binding, binding_lawful, canonical, channel_favours_increase, factor_in_bounds,
+    archetype_binding, binding_trades, canonical, channel_favours_increase, factor_in_bounds,
     factor_on, CHANNELS, CHANNEL_SURVEY, CHANNEL_UPKEEP, CHANNEL_YIELD,
 };
 
@@ -18,7 +18,7 @@ fn every_seed_archetype_binding_is_lawful() {
     for class in 0..=cfe::dop::class_ceiling() {
         let binding = archetype_binding(class);
         assert!(
-            binding_lawful(&binding),
+            binding_trades(&binding),
             "class {class} ({}) carries an unlawful binding: {binding:?}",
             cfe::dop::archetype_word(class)
         );
@@ -34,7 +34,7 @@ fn every_seed_archetype_binding_is_lawful() {
 #[test]
 fn the_unclassed_binding_is_empty_and_lawful() {
     assert!(archetype_binding(0).is_empty());
-    assert!(binding_lawful(&archetype_binding(0)));
+    assert!(binding_trades(&archetype_binding(0)));
     // And an empty binding is the identity on every channel.
     for channel in CHANNELS {
         assert_eq!(factor_on(&archetype_binding(0), channel), ratio(1, 1));
@@ -69,13 +69,13 @@ fn no_two_archetypes_share_a_mechanism() {
 #[test]
 fn a_strictly_dominant_binding_is_refused() {
     // Better yield AND cheaper upkeep: pure gain, no trade.
-    assert!(!binding_lawful(&[
+    assert!(!binding_trades(&[
         (CHANNEL_YIELD, ratio(3, 2)),
         (CHANNEL_UPKEEP, ratio(3, 4))
     ]));
     // Strictly worse on both is refused too — that is a penalty, not a
     // class.
-    assert!(!binding_lawful(&[
+    assert!(!binding_trades(&[
         (CHANNEL_YIELD, ratio(3, 4)),
         (CHANNEL_UPKEEP, ratio(3, 2))
     ]));
@@ -87,7 +87,7 @@ fn a_strictly_dominant_binding_is_refused() {
     assert!(!channel_favours_increase(CHANNEL_UPKEEP));
     assert!(!channel_favours_increase(CHANNEL_SURVEY));
     // The lawful trade: more yield, more upkeep.
-    assert!(binding_lawful(&[
+    assert!(binding_trades(&[
         (CHANNEL_YIELD, ratio(3, 2)),
         (CHANNEL_UPKEEP, ratio(3, 2))
     ]));
@@ -223,7 +223,7 @@ fn only_a_progenitor_may_mint() {
 }
 
 /// **STATIONS ARE NOT MINTABLE** (§10) — there is no axis code for an
-/// office, so a T0 seat cannot manufacture the seat that judges it.
+/// office, so a T0 seat cannot manufacture the seat that gates it.
 #[test]
 fn no_axis_mints_an_office() {
     let mut world = seated();

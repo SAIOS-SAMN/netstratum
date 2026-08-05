@@ -2097,7 +2097,7 @@ because the correction is the more useful record.
 | what | says | verdict |
 |---|---|---|
 | `f_fold_star` — THE CODE | `Some(witness) => TorsionVeto` · `None => GaugeFold` | **CORRECT** |
-| `FoldVerdict` doc | lock ⇒ genuine, collapse FORBIDDEN; no lock ⇒ gauge, fold lawful | **CORRECT** |
+| `FoldReading` doc | lock ⇒ genuine, collapse FORBIDDEN; no lock ⇒ gauge, fold lawful | **CORRECT** |
 | `SYSTEM_SPEC` §4 / `EQUATIONS` E2 | `≠ ∅` → forbid + emit; `= ∅` → gauge | **CORRECT** |
 | `fold.rs` MODULE HEADER | "If so, the two are the same state seen through a symmetry — the fold is lawful. If not, the difference is TORSION" | **INVERTED** |
 | `orbit_lock` fn doc | "`None` — no lock, the difference is genuine" | **INVERTED** |

@@ -143,7 +143,7 @@ fn d4_binds_creation_and_leaves_motion_alone() {
         actor: SOVEREIGN,
         stamp: 1,
     };
-    // Whatever else judges this deed, it is never D4's two refusals.
+    // Whatever else gates this deed, it is never D4's two refusals.
     if matches!(
         admits(&still, &still, &transfer),
         Err(Refused::MintWithoutCapacityIncrement { .. }) | Err(Refused::RankUndefined { .. })
@@ -173,7 +173,7 @@ fn a_mint_that_grows_circulation_passes_d4() {
     }
 }
 
-/// D4 IS THREE NAMED RULES NOW, and the split judges identically.
+/// D4 IS THREE NAMED RULES NOW, and the split gates identically.
 ///
 /// The pile was one function doing resolution, claim-detection and
 /// increment at once. Splitting it distributes the load without moving
@@ -210,7 +210,7 @@ fn the_split_judges_exactly_as_the_pile_did() {
     // and by discovery_pins' widened `grown` fixtures.
 }
 
-/// THE VERSION IS x.y.z, AND ORDERED. A prototype judge says so in its
+/// THE VERSION IS x.y.z, AND ORDERED. A prototype gate says so in its
 /// major, and a peer comparing two commitments still gets a total
 /// order from the packed form.
 #[test]
@@ -237,7 +237,7 @@ fn the_version_is_semver_and_orders() {
 /// states outlived its author: value that already exists may MOVE
 /// through a world that could not mint in it. D4 carries the same rule
 /// now (`d4_binds_creation_and_leaves_motion_alone` checks D4's own
-/// arms; this checks the WHOLE judge, which is the stronger claim and
+/// arms; this checks the WHOLE gate, which is the stronger claim and
 /// why it is worth having back).
 #[test]
 fn the_judge_gates_creation_never_motion() {

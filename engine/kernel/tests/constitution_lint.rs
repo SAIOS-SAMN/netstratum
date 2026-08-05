@@ -187,7 +187,7 @@ fn records_a_strike(line: &str) -> bool {
 /// words to satisfy a lint would be the worse defect.
 ///
 /// The scope is deliberately narrow: this exempts QUOTATION, not
-/// commentary. Prose about a relay sits outside the `>` and is judged
+/// commentary. Prose about a relay sits outside the `>` and is gated
 /// like any other law.
 fn is_relay(line: &str) -> bool {
     line.trim_start().starts_with('>')
@@ -593,7 +593,7 @@ fn the_retired_vocabulary_stays_retired() {
 /// That is the only version of this law that cannot rot.
 ///
 /// Editing this test IS the amendment (the `recurrence_guard` shape). A
-/// future author who wants the judge or the loop to consume `C` must
+/// future author who wants the gate or the loop to consume `C` must
 /// come here and say so, in the open.
 #[test]
 fn c_is_out_of_the_judge_and_out_of_the_loop() {
@@ -617,7 +617,7 @@ fn c_is_out_of_the_judge_and_out_of_the_loop() {
             // CODE ONLY. The prose deliberately NAMES what it refuses —
             // `bridge.rs` says "never `coherence_functional` here" — so a
             // naive scan would fail on the very comment that records the
-            // exile. Strip comments and judge the code.
+            // exile. Strip comments and gate the code.
             for (n, line) in whole.lines().enumerate() {
                 let t = line.trim_start();
                 if t.starts_with("//") {

@@ -162,12 +162,12 @@ fn main() {
             if let Some(spec) = polity.cycle(&book, &registry) {
                 newborns.push(spec);
             }
-            // DIRECTIVE 19: the judge speaks on the board. Every deed
+            // DIRECTIVE 19: the gate speaks on the board. Every deed
             // `kernel::admits` refused this beat is named here, once —
             // the verdict stays on the polity's permanent record either
             // way. The deed still STANDS in the chronicle: `replay` is
             // the live transition until the Phase 3 flip demotes it
-            // (U_DIRECTIVES §5), so this line reports a judge overruled
+            // (U_DIRECTIVES §5), so this line reports a gate overruled
             // by a proposer, which is exactly the gap worth seeing.
             let world_name = polity.spec.world_name.clone();
             for (sequence, unlawful) in polity.unreported_refusals() {
@@ -236,7 +236,7 @@ fn main() {
         }
         // THE REFUSALS SPEAK (operator ruling 2026-08-02: stop
         // swallowing them). Both were collected and neither was ever
-        // read: the judge's per-deed verdicts, and the lane charters
+        // read: the gate's per-deed verdicts, and the lane charters
         // that could not be paid for. A refusal names its cure, and a
         // cure nobody reads is not a cure. Census, never a panic.
         if beat.is_multiple_of(10) || (cycles > 0 && beat == cycles) {

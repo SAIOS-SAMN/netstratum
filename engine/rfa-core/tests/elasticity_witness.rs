@@ -9,7 +9,7 @@
 
 use cfe::ratio::{ratio, Ratio};
 use rfa_core::{
-    coherence_functional, for_each_residual, magnitude, validate_step, Delta, GateVerdict, Lens,
+    coherence_functional, for_each_residual, magnitude, validate_step, Delta, GateReading, Lens,
     StepBound,
 };
 
@@ -71,7 +71,7 @@ fn shock_stress_gated_recovery_convergence() {
         let next = shocked(d02);
         assert_eq!(
             validate_step(&current, &next, &bound),
-            GateVerdict::Accepted,
+            GateReading::Accepted,
             "a lawful recovery step refused"
         );
         // C is READ here and governs nothing. Note what CANNOT be
@@ -99,7 +99,7 @@ fn shock_stress_gated_recovery_convergence() {
     let overshoot = shocked(ratio(4, 1));
     assert_eq!(
         validate_step(&current, &overshoot, &bound),
-        GateVerdict::Accepted,
+        GateReading::Accepted,
         "motion away from C's minimum is lawful — the lineage is n-dimensional"
     );
     // C still READS the excursion — and cannot be asked which is

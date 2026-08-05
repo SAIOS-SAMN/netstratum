@@ -19,7 +19,7 @@
 //! compared a quantity that had not changed. `k_max` bounded nothing,
 //! and the verdict reduced to "did any operator in the caller's list
 //! survive one conjugation" — a property of the argument list, not of
-//! the states being judged.
+//! the states being gated.
 //!
 //! `k_max` and the walk are gone. What remains is the exact test the
 //! invariant actually supports, at `O(n³ · fiber)`:
@@ -66,7 +66,7 @@
 //! antisymmetric surface generates no valid walk (it breaks off), never
 //! a panic — the gate is total. Conjugacy is tested by the EXACT RCF
 //! signature ([`crate::rcf::rcf_signature`]), never a hash (the law
-//! judges on exact form).
+//! gates on exact form).
 
 use crate::delta::Delta;
 use crate::rcf::rcf_signature;
@@ -172,7 +172,7 @@ pub enum TorsionCause {
 
 /// The verdict of the fold gate for a pair `(a, b)`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum FoldVerdict {
+pub enum FoldReading {
     /// The difference was a PROVEN lawful frame change: equal invariant
     /// factors AND a re-walked conjugator witness. The two states are
     /// one seen through a symmetry, and the fold is LAWFUL. Carries the
@@ -192,12 +192,12 @@ pub enum FoldVerdict {
 /// signature tautology). The operator set is a GROUP PRESENTATION: a
 /// prover wanting a deeper conjugator composes generators itself and
 /// presents the composite as one [`Operator`], which is exactly the
-/// element the judge then re-walks. Multi-step witnesses remain
+/// element the gate then re-walks. Multi-step witnesses remain
 /// verifiable — [`verify_orbit_witness`] re-walks any `step` — but the
 /// built-in search is single-step by construction.
 ///
 /// ALTITUDE: this is prover-side work and belongs nowhere inside a
-/// judge. The judge calls [`verify_orbit_witness`] (O(step)) or, for
+/// gate. The gate calls [`verify_orbit_witness`] (O(step)) or, for
 /// the veto branch, [`rcf_signature`] directly (O(n³·fiber)); it never
 /// sweeps an operator space. (The `solver`/`solver-verify` split is the
 /// house precedent: search is free and non-constitutional, replay is
@@ -219,13 +219,13 @@ pub fn orbit_lock(a: &Delta, b: &Delta, operators: &[Operator]) -> Option<OrbitW
 }
 
 /// THE WITNESS VERIFIER — the JUDGE's half of the split (U1a's pattern
-/// applied to the fold gate: the prover SEARCHES, the judge REPLAYS).
+/// applied to the fold gate: the prover SEARCHES, the gate REPLAYS).
 ///
 /// Given a PRESENTED [`OrbitWitness`], re-walk the one path it claims:
 /// conjugate `step` times by the named operator and require the result
 /// to EQUAL `b` exactly. **No search, no operator sweep, no `k_max`** —
 /// the cost is O(`step`) conjugations plus one id lookup, and it is the
-/// same exact arithmetic on every node, so two judges always agree.
+/// same exact arithmetic on every node, so two gates always agree.
 ///
 /// **The landing test is tensor equality, never a signature compare.**
 /// A signature compare here would re-introduce the search fallacy: it
@@ -279,17 +279,17 @@ pub fn f_fold_star(
     b: &Delta,
     operators: &[Operator],
     witness: Option<&OrbitWitness>,
-) -> FoldVerdict {
+) -> FoldReading {
     // O(n³ · fiber), exact, coordinate-free: the invariant-factor
     // sequences over Rat[x]. Different factors = provably non-conjugate.
     if rcf_signature(a) != rcf_signature(b) {
-        return FoldVerdict::TorsionVeto(TorsionCause::SignaturesDiffer);
+        return FoldReading::TorsionVeto(TorsionCause::SignaturesDiffer);
     }
     match witness {
-        None => FoldVerdict::TorsionVeto(TorsionCause::WitnessAbsent),
+        None => FoldReading::TorsionVeto(TorsionCause::WitnessAbsent),
         Some(claimed) => match verify_orbit_witness(a, b, operators, claimed) {
-            true => FoldVerdict::GaugeFold(*claimed),
-            false => FoldVerdict::TorsionVeto(TorsionCause::WitnessInvalid),
+            true => FoldReading::GaugeFold(*claimed),
+            false => FoldReading::TorsionVeto(TorsionCause::WitnessInvalid),
         },
     }
 }
@@ -297,19 +297,19 @@ pub fn f_fold_star(
 /// THE COMPOSED GATE (U2e — the singularity pipeline, 16_UNIT §4a):
 /// both states pass through `Π_G` ([`crate::reduce::coboundary_reduce`]
 /// — what a relabeling could remove, is removed) BEFORE the gate
-/// judges. This composition is what makes the verdict ANGLE-FREE: a
+/// gates. This composition is what makes the verdict ANGLE-FREE: a
 /// frame change leaves the RCF signature identical, and a gauge shift
 /// is stripped by the reduction — so the verdict cannot depend on the
 /// frame or gauge of approach.
 ///
 /// The witness is re-walked against the REDUCED tensors, so a prover
 /// searches on `Π_G(a)` and `Π_G(b)`, not on the raw pair.
-pub fn judged_fold(
+pub fn gated_fold(
     a: &Delta,
     b: &Delta,
     operators: &[Operator],
     witness: Option<&OrbitWitness>,
-) -> FoldVerdict {
+) -> FoldReading {
     f_fold_star(
         &crate::reduce::coboundary_reduce(a),
         &crate::reduce::coboundary_reduce(b),

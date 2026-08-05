@@ -168,7 +168,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 }
             }
             // U1: the discovery mint banks like a yield; the work
-            // payload is judged at the door (kernel I4), not at
+            // payload is gated at the door (kernel I4), not at
             // replay — the receipt carries it for re-verification.
             ClosureEvent::DiscoveryMinted { orb_id, resource, amount, .. } => {
                 if let Some(held) = peel(&mut orbs, *orb_id) {

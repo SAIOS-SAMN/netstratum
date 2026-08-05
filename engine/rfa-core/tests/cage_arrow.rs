@@ -61,7 +61,7 @@ fn the_cage_has_no_exit_to_a_computable_type() {
     // the engine can branch on.
     // CODE ONLY. The module's own prose NAMES the doors it refuses, so
     // a naive scan matches the documentation and fails on a clean file —
-    // it did, on the first run. Strip comments and judge the code.
+    // it did, on the first run. Strip comments and gate the code.
     let whole = fs::read_to_string("src/cage.rs").expect("cage readable");
     let source: String = whole
         .lines()

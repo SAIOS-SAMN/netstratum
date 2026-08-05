@@ -66,7 +66,7 @@
 //! and `mesh::spine::seal`, they are not summands of `Δ`, and reading
 //! the mint as raw divergence was the over-reach.
 //!
-//! ALTITUDE: this is a READING, not a judge and not an objective
+//! ALTITUDE: this is a READING, not a gate and not an objective
 //! (`26_ARTICLES`, Ξ/ΔD are readings never objectives). It is `O(dim² ·
 //! fiber)` over the committed relation and calls no search.
 
@@ -123,7 +123,7 @@ pub struct Extent {
 /// - there is no `From<usize>`, no public tuple construction, and
 ///   [`Degree::default`] is the GROUND, never zero.
 ///
-/// A below-ground degree is therefore not a state the judge refuses at
+/// A below-ground degree is therefore not a state the gate refuses at
 /// runtime — it is a state that cannot be built. That is the house's
 /// own standing defense against the vacuous arm (`17_CAPACITY` §10b
 /// AV-4: *degenerate arms are made structurally unrepresentable where
@@ -138,9 +138,9 @@ pub struct Degree {
     /// weighs one, and the empty pre-founding state weighs one.
     volume: usize,
     /// The gauge-invariant circulation standing above the floor. This
-    /// is what the judge reads (`above()`), and it is deliberately
-    /// UNTOUCHED by the volume — which is the derivation that makes the
-    /// opening a patch: no verdict anywhere consults the floor.
+    /// is what the gate reads (`above()`), and it is deliberately
+    /// UNTOUCHED by the volume — which is the derivation that made the
+    /// opening a patch: nothing the gate admits consults the floor.
     circulation: usize,
 }
 
@@ -176,8 +176,8 @@ impl Degree {
 
     /// How much stands ABOVE the ground — the gauge-invariant
     /// circulation, which is what grows. **Volume-blind on purpose**:
-    /// this is the judge's operand (`revocation_law` reads it and never
-    /// `get()`), so the estate's size can never move a verdict.
+    /// this is the gate's operand (`revocation_law` reads it and never
+    /// `get()`), so the estate's size can never change what admits.
     pub fn above(self) -> usize {
         self.circulation
     }

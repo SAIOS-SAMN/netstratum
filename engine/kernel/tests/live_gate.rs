@@ -102,7 +102,7 @@ fn a_caller_without_a_verifier_cannot_mint_at_all() {
 }
 
 /// ONE FUNCTION, TWO JUDGES. The warrant answers with `mint_bound` —
-/// the same ladder I4 enforces — so the emitter and the judge cannot
+/// the same ladder I4 enforces — so the emitter and the gate cannot
 /// disagree about what a proof is worth.
 #[test]
 fn the_warrant_and_the_judge_read_one_ladder() {
@@ -131,12 +131,12 @@ fn the_warrant_and_the_judge_read_one_ladder() {
 /// both totals — and the emitter had no `next` to offer.
 ///
 /// So a mint could carry a real proof, price correctly, and still be a
-/// deed the judge refuses. Measured: a 60-beat era put mints carrying
-/// `MintWithoutCapacityIncrement` into the record, where the judge met
+/// deed the gate refuses. Measured: a 60-beat era put mints carrying
+/// `MintWithoutCapacityIncrement` into the record, where the gate met
 /// them too late to take them back.
 ///
 /// The emitter now builds the state the deed WOULD produce and asks the
-/// judge before closing. This pins the half that matters: not that the
+/// gate before closing. This pins the half that matters: not that the
 /// mint is refused — it was refused before — but that **no receipt is
 /// left behind**, which is the whole difference between catching drift
 /// and making it unreachable.
@@ -177,7 +177,7 @@ fn a_deed_the_judge_refuses_leaves_no_receipt() {
 
 /// **THE WARRANT'S DEFAULT IS REFUSAL, on both questions.**
 ///
-/// `NoWarrant` cannot price a payload and cannot judge a transition. A
+/// `NoWarrant` cannot price a payload and cannot gate a transition. A
 /// caller holding one must not be able to settle either way — the
 /// restrictive answer is the shape of the type rather than a rule
 /// somebody remembers.

@@ -428,7 +428,7 @@ been overtaken. Corrections are carried into `PICKUP.md` §8a/§8b
 alongside this file.
 
 - **§8a "The judge does not judge. Nothing in production calls
-  `lawful`." — NOW FALSE.** `kernel::lawful` is called in production at
+  `lawful`." — NOW FALSE.** `kernel::well_formed` is called in production at
   `conductor/src/lib.rs:1380`, per deed, every beat, with refusals
   collected into `self.refused`. `[READ]`
 - **§8a "`engine/rfa-core` has ZERO dependents." — NOW FALSE.** Two

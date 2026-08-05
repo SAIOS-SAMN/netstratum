@@ -358,7 +358,7 @@ fn zero_dimension_difficulty_refuses_never_panics() {
     // Grid::new(...).expect() to PANIC inside the kernel's call path —
     // a crafted payload crashing the node (DoS), violating the
     // kernel's total-never-panics law. The guard refuses it as form,
-    // and the judge stays total.
+    // and the gate stays total.
     for degenerate in [(0usize, 3usize), (3, 0), (0, 0)] {
         let mut proof = honest_proof();
         proof.difficulty.rows = degenerate.0;

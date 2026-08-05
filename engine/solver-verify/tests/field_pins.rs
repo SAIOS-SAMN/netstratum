@@ -119,7 +119,7 @@ fn the_axis_algebra_holds_at_any_rank() {
 
 /// TOTAL, NEVER PANICKING. An operator naming an axis the field does
 /// not have leaves it unchanged — the verifier rejects a useless word
-/// by failing to close, never by crashing inside the judge.
+/// by failing to close, never by crashing inside the gate.
 #[test]
 fn an_axis_the_field_does_not_have_changes_nothing() {
     let plane = field(&[2, 2], &[1, 2, 3, 4]);

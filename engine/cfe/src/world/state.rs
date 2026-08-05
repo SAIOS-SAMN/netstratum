@@ -86,7 +86,7 @@ pub struct Offer {
 }
 
 /// COUNCIL-1 (12_UNION §7): a multilateral forward — every member
-/// bound alike, judged together at the boundary.
+/// bound alike, gated together at the boundary.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Council {
     pub council: u64,

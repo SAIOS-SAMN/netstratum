@@ -17,7 +17,7 @@
 //! ```
 //!
 //! **THE MOVE ALREADY EXISTS IN THE JUDGE AND IS DISCARDED.**
-//! `lawful_deltas` (`lib.rs:611`) returns `Vec<(Resource, Ratio)>` —
+//! `admitted_deltas` (`lib.rs:611`) returns `Vec<(Resource, Ratio)>` —
 //! that is the move — and `conservation` uses it only to compare
 //! against the `next` it was handed, then drops it. This module gives
 //! that value a type and a law.

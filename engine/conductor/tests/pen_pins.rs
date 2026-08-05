@@ -4,7 +4,7 @@
 //! the seat); the seat's deeds append lawfully ON THE FILE, hand
 //! carried, seal cited; the yield back returns the pen; the
 //! conductor re-resumes FROM THE RECEIPTS with the seat's deeds
-//! kept. The walk is the judge throughout — a mis-stamped funnel
+//! kept. The walk is the gate throughout — a mis-stamped funnel
 //! would refuse USURPED/UNCITED and fail this pin.
 
 use cfe::ratio::ratio;

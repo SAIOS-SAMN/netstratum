@@ -147,7 +147,7 @@
 //!         the melt as a first-class receipt on the receiving book:
 //!         sent = received + void share; every deal in the universe
 //!         sums to zero under ONE rule; losses are receipted, never
-//!         silent; the judge only sums, never recomputes φ·D.
+//!         silent; the gate only sums, never recomputes φ·D.
 //!         `orb_id` ADDED 2026-08-02 (SYN-6): the record named the
 //!         DEAL and never the BEARER, so the melt was receipted and
 //!         credited to NO ONE — visible in aggregate, unattributable
@@ -160,7 +160,7 @@
 //!         framing when state rides a TLV stream)
 //!   84 The arbor commitment record (SPINE-1, NS-5 §9 — one position
 //!         on the one clock: coordinate {branch ‖ S ‖ G ‖ T} ‖ schema
-//!         ‖ kernel version ‖ judged ‖ state digest ‖ parent ‖
+//!         ‖ kernel version ‖ gated ‖ state digest ‖ parent ‖
 //!         commit. The two maps derive from the append-only record
 //!         stream; one value per address, always. Not a ClosureEvent —
 //!         the mesh's own framing)
@@ -191,7 +191,7 @@
 //!         where work is the OPAQUE proof payload — solver-verify's
 //!         encoding monopoly (forge digest, difficulty, program,
 //!         output, certificate); the receipt carries its proof whole,
-//!         replay re-verifies forever. Judged by I4's bound arm:
+//!         replay re-verifies forever. Gated by I4's bound arm:
 //!         verify_work(work) = Ok(d) ∧ amount ≤ mint_bound(d);
 //!         mint_bound is SEALED SHUT until Ruling Box 1)
 //!   87 The arbor SEGMENT blob frame (SPINE-UPLINK, NS-5 §9 — a
@@ -200,9 +200,9 @@
 //!         on arrival. Segment-only — NEVER stored in arbor.tlv).
 //!   88 The arbor SEGMENT step frame (SPINE-UPLINK — the proof a
 //!         JUDGED record's transition was lawful: commit[32] ‖
-//!         actor[8] ‖ stamp[8] ‖ event_bytes; the receiver re-judges
+//!         actor[8] ‖ stamp[8] ‖ event_bytes; the receiver re-gates
 //!         under its own kernel. Segment-only, carried only for
-//!         judged records).
+//!         gated records).
 //!   89 ClosureEvent::StationSeated (THE VERTICAL AXIS, 2026-08-01 —
 //!         the seat enters the chain. A station GATES AUTHORITY (the
 //!         tier-0 verbs check it), and it lived only in
@@ -358,19 +358,40 @@ pub fn tech_node_of(condition: u8) -> Option<(u8, Ratio)> {
 /// this line speaks of it). Flavor at the surface, hash as the
 /// identity underneath — replay re-derives the identical name because
 /// the receipt carries the identical node.
-pub fn tech_node_name(condition: u8, node: &[u8; 32]) -> String {
-    let concept = match condition {
-        1 => "insulation",
-        2 => "discipline",
-        3 => "deepening",
-        4 => "doctrine",
-        5 => "stores",
-        7 => "re-emergence",
-        // TERRA-1: the gifted crown of the base-7 stack — never
+/// **THE CONDITION VOCABULARY** — the bare concept a condition names,
+/// separated from the voice that speaks it (2026-08-05).
+///
+/// It lived inline inside [`tech_node_name`], which returns
+/// `"{voice} {concept}"`, so the only way to ask what a condition WAS
+/// meant parsing a composed string — and a caller that tried
+/// `starts_with` got the voice instead of the concept. The vocabulary is
+/// now askable directly, which is what lets `survey::node_kind` classify
+/// by MEANING rather than by number.
+///
+/// `None` is the honest answer outside the namespace: an unnamed
+/// condition is not a node.
+pub fn condition_concept(condition: u8) -> Option<&'static str> {
+    match condition {
+        0 => Some("solar leap"),
+        1 => Some("insulation"),
+        2 => Some("discipline"),
+        3 => Some("deepening"),
+        4 => Some("doctrine"),
+        5 => Some("stores"),
+        // TERRA-1: the gifted crown of the base stack — never
         // crystallized locally, only licensed down from tier 0.
-        6 => "terraforming",
-        _ => "working",
-    };
+        6 => Some("terraforming"),
+        // PRACTICE-1's lesson: it rides the condition field and is NOT a
+        // sky node.
+        7 => Some("re-emergence"),
+        _ => None,
+    }
+}
+
+pub fn tech_node_name(condition: u8, node: &[u8; 32]) -> String {
+    let concept = condition_concept(condition)
+        .filter(|_| condition != 0)
+        .unwrap_or("working");
     const VOICES: [&str; 12] = [
         "resonant", "patient", "vaulted", "keening", "tidal", "ember",
         "hollow", "woven", "still", "spiral", "murmured", "adamant",
@@ -431,7 +452,7 @@ pub fn demurrage_per_tick(supply: &Ratio, at: u64) -> Ratio {
 }
 
 /// EPOCH 0 — the landed flat rate. **Never edit this function.** Every
-/// receipt stamped before `epoch::CONTINUOUS_FROM` is judged by it.
+/// receipt stamped before `epoch::CONTINUOUS_FROM` is gated by it.
 fn sink_flat() -> Ratio {
     ratio(1, 32)
 }
@@ -445,9 +466,9 @@ fn sink_flat() -> Ratio {
 ///
 /// **Supply, not rank.** Rank lives behind `bridge::read_entangled` in
 /// the `kernel` crate, above this one, so `cfe` structurally cannot
-/// read it — and a proposer computing a different rate from the judge
+/// read it — and a proposer computing a different rate from the gate
 /// refuses honest deeds at I5 (`21_KERNEL_PARAMETERS` §9). Supply is
-/// computable here, so one value serves both judges.
+/// computable here, so one value serves both gates.
 ///
 /// **Bounded above by `1/4`** (#16 requires a bounded function; an
 /// uncapped rate above `1` would confiscate a whole bank each tick),
@@ -511,7 +532,7 @@ pub fn friction_rate() -> Ratio {
 
 /// N4 (NS-2 §1.5, placeholder): crystals one scan draws from the
 /// probing orb's bank — the lens's power, spent on the looking, hit or
-/// miss. Judged pure before anything moves.
+/// miss. Gated pure before anything moves.
 /// MASK-1a (14 §4, placeholder): the veil's standing joule toll,
 /// settled at every collect — an unpayable toll lifts the veil by
 /// receipt, never silently.
@@ -596,7 +617,7 @@ pub fn archetype_word(class: u8) -> &'static str {
 /// **THE SURVEY METER** (E5b, 2026-08-05: *surveys must be metered*).
 /// The sealed charging rule: what one survey costs, PER ORB COVERED —
 /// `cost = rate × volume`, exact, flat, never compounding (the 2^1100
-/// lesson binds charging exactly as it binds decay). The kernel judges
+/// lesson binds charging exactly as it binds decay). The gate verifies
 /// a survey's declared cost by calling THIS rule (call-not-copy), so
 /// the meter cannot be quoted one way and charged another.
 ///
@@ -863,6 +884,68 @@ pub enum ZoneKind {
     /// the knife edge — diamond nets exactly 0.
     Resonator = 7,
 }
+/// **THE REFINEMENT LAW** (2026-08-05, on the operator's ruling that
+/// this codebase carries *too many constants — you aren't building
+/// algorithms or theorems, you're building static content*).
+///
+/// The structural economy was a hand-tuned table. It is not: it is a
+/// LADDER, and the ladder has a law. Every structural resource sits at a
+/// REFINEMENT TIER — how many conversion steps it stands from raw — and
+/// a converter at tier `t` consumes tier `t−1` and emits tier `t`:
+///
+/// ```text
+///     input per tick   =  2^(t−1)          doubling with each step
+///     yield per tick   =  4^(2−t)          quartering with each step
+/// ```
+///
+/// **This REPRODUCES the landed table exactly** (pinned in
+/// `refinement_pins`), so nothing is repriced by stating it — the
+/// numbers were always this law, written out longhand. The Smelter's
+/// `2 Iron → 1 Alloy` and the Synthesizer's `4 Alloy → 1/4 Diamond` are
+/// the same two formulas at `t = 2` and `t = 3`.
+///
+/// **Why the two rates differ.** Input doubles and yield quarters, so
+/// the cost per unit of refined output rises by EIGHT per step. That is
+/// the whole reason a refined tier is worth more than what it is made
+/// of, and it is now one number rather than six.
+///
+/// **AND IT NAMES ITS OWN BOUNDARY.** Only the structural chain
+/// `Iron → Alloy → Diamond` obeys it. Joule, Sink and Crystal are OFF
+/// the chain and have their own laws — the heat law (05 §1.2) mints
+/// joules, the sink law banks cold, and Crystal is the SURVEY currency
+/// rather than a refinement of anything. A law that claimed them would
+/// be overreach, so it declines them by returning `None`.
+pub fn refinement_tier(resource: Resource) -> Option<u32> {
+    match resource {
+        // Raw: taken from the world, refined from nothing.
+        Resource::Iron | Resource::Biomass => Some(1),
+        // Smelted from iron — the tier-2 structural currency.
+        Resource::Alloy => Some(2),
+        // The ultra-refined tier, from alloy.
+        Resource::Diamond => Some(3),
+        // OFF THE CHAIN, each with its own law.
+        Resource::Joule | Resource::Sink | Resource::Crystal => None,
+        // NO CATCH-ALL, deliberately. The match is exhaustive, so a new
+        // resource breaks the build until someone RULES whether it
+        // stands on the refinement chain — the `layer_of` discipline,
+        // where adding a case fails compilation rather than defaulting
+        // into the safest-looking answer.
+    }
+}
+
+/// The input a tier-`t` conversion consumes: `2^(t−1)`.
+pub fn refinement_input(tier: u32) -> Ratio {
+    ratio(1i64 << tier.saturating_sub(1).min(30), 1)
+}
+
+/// The output a tier-`t` conversion emits: `4^(2−t)`.
+pub fn refinement_yield(tier: u32) -> Ratio {
+    match tier <= 2 {
+        true => ratio(1i64 << (2 * (2 - tier.min(2))), 1),
+        false => ratio(1, 1i64 << (2 * (tier - 2)).min(30)),
+    }
+}
+
 
 impl ZoneKind {
     pub fn from_wire(code: u8) -> Option<Self> {
@@ -907,8 +990,17 @@ impl ZoneKind {
         match self {
             Self::Extractor => (Resource::Iron, ratio(3, 2)),
             Self::Habitat => (Resource::Biomass, ratio(1, 1)),
-            Self::Smelter => (Resource::Alloy, ratio(1, 1)),
-            Self::Synthesizer => (Resource::Diamond, ratio(1, 4)),
+            // DERIVED (THE REFINEMENT LAW): `4^(2−t)`. These read
+            // `ratio(1,1)` and `ratio(1,4)` until 2026-08-05, which was
+            // the law written out longhand in two places.
+            Self::Smelter => (
+                Resource::Alloy,
+                refinement_yield(refinement_tier(Resource::Alloy).unwrap_or(1)),
+            ),
+            Self::Synthesizer => (
+                Resource::Diamond,
+                refinement_yield(refinement_tier(Resource::Diamond).unwrap_or(1)),
+            ),
             Self::Encasement => (Resource::Joule, ratio(0, 1)),
             Self::CryoArray => (Resource::Sink, ratio(0, 1)),
             Self::Resonator => (Resource::Crystal, ratio(1, 8)),
@@ -921,12 +1013,21 @@ impl ZoneKind {
         match self {
             Self::Extractor => vec![(Resource::Biomass, ratio(1, 2))],
             Self::Habitat => vec![(Resource::Iron, ratio(1, 4))],
+            // DERIVED (THE REFINEMENT LAW): the structural input is
+            // `2^(t−1)` of the tier below. The biomass line is the FOOD
+            // slot and rides the ration law, which is a different one.
             Self::Smelter => vec![
-                (Resource::Iron, ratio(2, 1)),
+                (
+                    Resource::Iron,
+                    refinement_input(refinement_tier(Resource::Alloy).unwrap_or(1)),
+                ),
                 (Resource::Biomass, ratio(1, 2)),
             ],
             Self::Synthesizer => vec![
-                (Resource::Alloy, ratio(4, 1)),
+                (
+                    Resource::Alloy,
+                    refinement_input(refinement_tier(Resource::Diamond).unwrap_or(1)),
+                ),
                 (Resource::Biomass, ratio(1, 1)),
             ],
             Self::Encasement => vec![(Resource::Iron, ratio(1, 4))],
@@ -1154,7 +1255,7 @@ pub enum ClosureEvent {
     /// `want`. The price IS the ratio (no absolute price exists —
     /// guardrail 6); the offer RESTS as committed state until a
     /// crossing clears it or it is never met. No escrow: affordability
-    /// is judged at the fill, and a stale offer refuses then.
+    /// is gated at the fill, and a stale offer refuses then.
     OfferPosted {
         offer: u64,
         orb_id: u64,
@@ -1220,7 +1321,7 @@ pub enum ClosureEvent {
     /// forward among three or more orbs, every member bound alike —
     /// each locks the same collateral against delivering ≥ quota to
     /// fellow members within the window. The group overtakes the
-    /// individual: the reckoning judges all members together at the
+    /// individual: the reckoning gates all members together at the
     /// boundary, never one at a time.
     CouncilSealed {
         council: u64,
@@ -1421,13 +1522,13 @@ pub enum ClosureEvent {
     /// THEOREM (witnessed): `covered` carries one entry per orb the
     /// survey stood over — the orb's id and the DIGEST OF ITS OWN
     /// FOUNDING RECEIPT, gathered from the chronicle at the deed. The
-    /// emitter refuses an orb it cannot witness, and the judge refuses
+    /// emitter refuses an orb it cannot witness, and the gate refuses
     /// an empty covering, so an unwitnessed observation is not a state
     /// that can enter the record.
     ///
     /// THEOREM (metered): `cost` equals the sealed meter over the
-    /// volume — `survey_meter().1 × covered.len()` — judged by the
-    /// kernel calling the SAME rule (call-not-copy), and drawn from
+    /// volume — `survey_meter().1 × covered.len()` — checked by the
+    /// gate calling the SAME rule (call-not-copy), and drawn from
     /// `payer`'s bank before the receipt closes. A survey that cannot
     /// pay refuses pure: no receipt, no debit.
     ///

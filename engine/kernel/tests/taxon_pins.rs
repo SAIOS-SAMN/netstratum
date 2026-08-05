@@ -1,5 +1,5 @@
 //! THE LAST DEED — TaxonSealed enters coverage, and with it the
-//! kernel is TOTAL: every one of the 64 deeds is judged, `Unjudged`
+//! kernel is TOTAL: every one of the 64 deeds is gated, `Unjudged`
 //! unreachable via any current deed (the Phase 3 precondition).
 //!
 //! The completeness witness enumerates ALL 64 variants and asserts
@@ -135,7 +135,7 @@ fn every_deed() -> Vec<ClosureEvent> {
 fn coverage_is_total_the_sealed_default_is_unreachable() {
     // THE PHASE 3 PRECONDITION as a standing test (supersedes the old
     // sealed-default pin now that the last deed is covered): every one
-    // of the 64 deeds is judged — none refuses Unjudged. A deed may
+    // of the 64 deeds is gated — none refuses Unjudged. A deed may
     // refuse for its OWN law (a value-mover over prior==next breaks
     // conservation; an authority deed from a bare hand refuses
     // NotPermitted) — that is a JUDGED verdict. Only Unjudged means a

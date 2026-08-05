@@ -2,8 +2,8 @@
 //! rulings 2026-08-05: *survey is a derivation of observation;
 //! observations must be witnessed; surveys must be metered*).
 //!
-//! Each pin is one theorem's proof at the emitter; the judge's half
-//! lives in `kernel/tests/estate_survey_judged.rs`. Replay MATCHES
+//! Each pin is one theorem's proof at the emitter; the gate's half
+//! lives in `kernel/tests/estate_survey_gated.rs`. Replay MATCHES
 //! closes every arc — SEAL B is the connectivity proof.
 
 use cfe::dop::{parcels_of, survey_meter, ClosureEvent};

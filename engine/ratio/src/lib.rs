@@ -110,6 +110,77 @@ pub fn ratio_str(r: &Ratio) -> String {
 // `cfe::dop` re-exports every name, so every existing citation resolves
 // unchanged.
 
+/// **THE DERIVATION OF THE RING, computed rather than asserted.**
+///
+/// `gcd` and `lcm` as `const fn` so the ring's size is not a number
+/// anyone typed — it is the answer to the requirement, evaluated by the
+/// compiler. Change the requirement and the constant follows; there is
+/// no second place to edit and no way for the two to disagree.
+pub const fn gcd(a: i64, b: i64) -> i64 {
+    let (mut a, mut b) = (if a < 0 { -a } else { a }, if b < 0 { -b } else { b });
+    while b != 0 {
+        let t = a % b;
+        a = b;
+        b = t;
+    }
+    a
+}
+
+/// The least common multiple of `1..=n` — the smallest ring on which
+/// every subdivision up to `n` lands exactly on a slot.
+pub const fn lcm_through(n: i64) -> i64 {
+    let mut held = 1i64;
+    let mut k = 2i64;
+    while k <= n {
+        held = held / gcd(held, k) * k;
+        k += 1;
+    }
+    held
+}
+
+/// **THE REQUIREMENT THE RING ANSWERS, and it is not a number either**
+/// (operator ruling 2026-08-05: *all of the constants here need to be
+/// derived dynamically*).
+///
+/// A first cut wrote `RING_SUBDIVISIONS = 6` — "halves through sixths
+/// must land on a slot" — which derived sixty from a typed six and moved
+/// the magic number one level down rather than removing it. Six was
+/// never the requirement. THE REQUIREMENT IS THE ENGINE'S OWN CLOSED
+/// VOCABULARIES: a population must be layoutable symmetrically by any
+/// partition it actually has, so the ring must admit each of their
+/// arities.
+///
+/// ```text
+///     3   dispositions   expansionist · empiricist · epicurean
+///     3   metabolisms    mineral · biotic · plasmic
+///     4   perceptions    planar · volumetric · harmonic · umbral
+///     4   stations       progenitor · watcher · observer · sovereign
+///     5   practices      the five receipted disciplines
+/// ```
+///
+/// The distinct arities are `{3, 4, 5}` and `lcm(3, 4, 5) = 60`.
+///
+/// **The vocabularies live ABOVE this crate** — `ledger::registry` and
+/// `cfe` both depend on `ratio`, never the reverse — so the arities are
+/// stated here and PINNED against the live vocabularies from up there
+/// (`ring_derivation_pins`). Copying them down would be the two-truths
+/// defect; stating the requirement and proving it matches is not.
+pub const RING_ARITIES: [i64; 3] = [3, 4, 5];
+
+/// The lcm of a set of arities — the smallest ring admitting them all.
+pub const fn lcm_of(arities: &[i64]) -> i64 {
+    let mut held = 1i64;
+    let mut at = 0usize;
+    while at < arities.len() {
+        let k = arities[at];
+        if k > 0 {
+            held = held / gcd(held, k) * k;
+        }
+        at += 1;
+    }
+    held
+}
+
 /// THE ORBITAL SLOTS — a turn divides into SIXTY.
 ///
 /// **Base 60, for the reason base 60 has always been used.** It is the
@@ -127,7 +198,58 @@ pub fn ratio_str(r: &Ratio) -> String {
 /// radians is `2π`, which no rational closes, so a wrapped angle would
 /// need a float and the seam would never meet. In turns the seam is
 /// exact and the circle is representable.
-pub const TURN_SLOTS: i64 = 60;
+/// **DERIVED: `lcm(3, 4, 5) = 60`.** Not typed — evaluated from
+/// [`RING_ARITIES`], the arities of the engine's own closed
+/// vocabularies. Sixty is not a rounding and not a tradition here: it is
+/// the smallest ring on which every partition the population actually
+/// has can be laid out symmetrically. Land a sixth practice and the ring
+/// follows on its own.
+pub const TURN_SLOTS: i64 = lcm_of(&RING_ARITIES);
+
+/// **DOES A DIVISION OF THE RING HOLD?** The proof a caller gets instead
+/// of a bool: the arity, the ring it was checked against, and the
+/// remainder that decided it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct DivisionProof {
+    pub arity: i64,
+    pub ring: i64,
+    pub remainder: i64,
+    pub cell_span: i64,
+}
+
+impl DivisionProof {
+    pub fn holds(&self) -> bool {
+        self.remainder == 0 && self.arity > 0
+    }
+    /// Why it holds or does not, in the caller's own terms.
+    pub fn because(&self) -> String {
+        match self.holds() {
+            true => format!(
+                "{} divides the {}-slot ring exactly; each cell spans {} slots",
+                self.arity, self.ring, self.cell_span
+            ),
+            false if self.arity <= 0 => "an arity must be positive".into(),
+            false => format!(
+                "{} does not divide the {}-slot ring — {} slots are left over, so a cell \
+                 centre would fall between teeth",
+                self.arity, self.ring, self.remainder
+            ),
+        }
+    }
+}
+
+/// Divide a ring of `ring` slots into `arity` cells, PROVING the result.
+pub const fn divide_ring(ring: i64, arity: i64) -> DivisionProof {
+    if arity <= 0 {
+        return DivisionProof { arity, ring, remainder: -1, cell_span: 0 };
+    }
+    DivisionProof {
+        arity,
+        ring,
+        remainder: ring % arity,
+        cell_span: ring / arity,
+    }
+}
 
 /// Is this angle ON a slot? Refusing off-slot angles keeps placement
 /// DISCRETE, and discreteness is what makes collision a decidable

@@ -189,7 +189,7 @@ use state::CrystalDeposit;
 /// (one chronicle proves conservation), no single chronicle proves it
 /// here — the deal id links the legs (double entry across two books).
 /// Both orbs settle due demurrage at the touch (the SINK-1 law) before
-/// value moves; affordability is judged on the source's post-decay
+/// value moves; affordability is gated on the source's post-decay
 /// bank, computed pure, so a refusal orphans nothing in either world.
 /// The cross-empire cohesion books (compassion/morality) DO NOT post
 /// here: cross-world reading composes at N5/N6 (09 board law) — an
@@ -310,7 +310,7 @@ fn haul(
     );
     // The conform ruling (2026-07-31): the melt is a FIRST-CLASS
     // receipt on the receiving book — sent = received + void share,
-    // so every deal sums to zero under one rule and the judge only
+    // so every deal sums to zero under one rule and the gate only
     // sums, never recomputes φ·D. Losses are receipted, never
     // silent. Banks never move on it.
     if void_share > ratio(0, 1) {

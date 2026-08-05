@@ -472,7 +472,7 @@ pub fn propose(task: &Task, need: &Need) -> SolveRead {
 /// The need shapes what is reached for; it never shapes what is
 /// accepted. A starving mind may look in a different order and compose
 /// deeper, and still nothing crosses that does not close — which is why
-/// letting hunger steer the search costs the judge nothing.
+/// letting hunger steer the search costs the gate nothing.
 pub fn propose_consulted(task: &Task, need: &Need) -> SolveRead {
     propose_consulted_measured(task, need).read
 }
@@ -487,8 +487,8 @@ pub fn propose_consulted(task: &Task, need: &Need) -> SolveRead {
 /// **The cost is a MEASUREMENT; only the CLAIM goes through the door.**
 /// Candidates tested is a fact about work already done, true whether or
 /// not anything crossed — offering it to the door would be asking
-/// exactness to verify an expenditure. What the door judges is the
-/// read, exactly as [`propose_consulted`] judges it.
+/// exactness to verify an expenditure. What the door gates is the
+/// read, exactly as [`propose_consulted`] gates it.
 pub fn propose_consulted_measured(task: &Task, need: &Need) -> Proposal {
     let measured = propose_measured(task, need);
     let (tested, reach) = (measured.tested, measured.reach);
@@ -522,7 +522,7 @@ impl rfa_core::Exact for SolveRead {}
 /// Nothing about having come from the search makes a program true. This
 /// re-derivation is the same one `verify_work` step 2 performs later at
 /// the kernel; doing it here means a candidate that could never pass the
-/// judge never leaves the workshop.
+/// gate never leaves the workshop.
 pub fn solve_consulted(task: &Task, max_depth: usize) -> SolveRead {
     match consult_observed(task, max_depth) {
         Consultation::Crossed(read) => read,

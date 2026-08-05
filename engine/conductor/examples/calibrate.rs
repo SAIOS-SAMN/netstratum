@@ -48,7 +48,7 @@ fn digest_for(rung: u32, i: u32) -> [u8; 32] {
     d
 }
 
-/// The prior state a mint judges against: one orb holding iron, the
+/// The prior state a mint gates against: one orb holding iron, the
 /// sovereign seated (holds every scope by construction).
 fn mint_prior() -> Committed {
     let mut committed = World::new().committed();
@@ -64,7 +64,7 @@ fn mint_prior() -> Committed {
     committed
 }
 
-/// The per-rung tally — every judged outcome counted by kind.
+/// The per-rung tally — every gated outcome counted by kind.
 #[derive(Default)]
 struct RungTally {
     solves_honest: u32,
@@ -167,7 +167,7 @@ fn part_a_and_b() {
             tally.cert_bytes_total += work.len();
 
             // MINT PRESSURE: a POSITIVE 1-mint against this verified
-            // work, judged under the ruled f; every outcome is
+            // work, gated under the ruled f; every outcome is
             // tallied, none assumed.
             let mut minted = prior.clone();
             if let Some(orb) = minted.orbs.first_mut() {

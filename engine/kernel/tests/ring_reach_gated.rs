@@ -1,4 +1,4 @@
-//! THE MAGNETIC REACH, JUDGED — the kernel holds the ring law the
+//! THE MAGNETIC REACH, GATED — the kernel holds the ring rule the
 //! emitter refuses on, by calling the SAME sealed rule (2026-08-06).
 
 use cfe::dop::ClosureEvent;
@@ -25,7 +25,7 @@ fn sited_o_system() -> (World, Vec<u64>) {
 }
 
 #[test]
-fn the_judge_holds_the_ring_law() {
+fn the_gate_holds_the_ring_rule() {
     let (mut world, ids) = sited_o_system();
     world.site_planet(ids[0], ratio(1, 2), ratio(1, 1), None, None).expect("ring one");
     world.site_planet(ids[1], ratio(1, 2), ratio(2, 1), None, None).expect("ring two");
@@ -38,7 +38,7 @@ fn the_judge_holds_the_ring_law() {
     let step = Step { event: receipt.event, actor: SOVEREIGN, stamp: receipt.stamp };
     assert_eq!(admits(&prior, &next, &step), Ok(()), "an anchored ring fills lawfully");
 
-    // The SAME transition claimed as a THIRD ring refuses — the judge
+    // The SAME transition claimed as a THIRD ring refuses — the gate
     // computes the reach from the same rule the emitter drew.
     let forged = Step {
         event: ClosureEvent::PlanetSited {
@@ -56,7 +56,7 @@ fn the_judge_holds_the_ring_law() {
             admits(&prior, &next, &forged),
             Err(Refused::RingBeyondReach { held: 2, reach: 2 })
         ),
-        "a ring beyond the field refuses at the judge too"
+        "a ring beyond the field refuses at the gate too"
     );
     assert_eq!(StarClass::O.ring_reach(), 2, "and the figure is the dial's");
 }

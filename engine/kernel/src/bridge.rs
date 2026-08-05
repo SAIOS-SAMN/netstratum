@@ -868,12 +868,12 @@ pub enum FoldGuard {
 
 impl FoldGuard {
     /// Only the two lawful shapes admit.
-    pub fn is_lawful(&self) -> bool {
+    pub fn is_admitted(&self) -> bool {
         matches!(self, FoldGuard::Total | FoldGuard::CarriedWithinFloor)
     }
 }
 
-/// Judge a fold against the occupancy floor. `archived` names the orbs
+/// Gate a fold against the occupancy floor. `archived` names the orbs
 /// the fold sealed into the era record; a TOTAL fold archives every orb
 /// the prior universe held.
 pub fn fold_guard(prior: &Committed, next: &Committed, archived: &[u64]) -> FoldGuard {
