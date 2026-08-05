@@ -1,12 +1,30 @@
-//! **THE TUNED-CONSTANT RATCHET** (P2, `29_CONSTRUCTION`).
+//! **THE TUNED-CONSTANT RATCHET** (P2, `29_CONSTRUCTION`; census law
+//! per the operator ruling 2026-08-05).
 //!
 //! P2's law: every number DERIVES, MEASURES, or MINTS. Until a cluster
 //! is converted, its literals are DEBT — and PROVABLE NOT POLICED
 //! rules that a debt must be a COUNTED number whose count only falls,
 //! never a policy hoping nobody adds another.
 //!
-//! This witness is the count. It walks every source tree in the
-//! workspace and counts `ratio(p, q)` literals whose value is neither
+//! **The census tracks two metrics, ruled distinct:**
+//!
+//! - **DIALS** — tunables that alter balance without physical
+//!   grounding. Counted here; target ZERO; the ceiling only falls.
+//! - **ANCHORS** — cited empirical invariants, permitted ONLY through
+//!   the typed declarations in `cfe::anchor` (there is no bare
+//!   `measured()` constructor — that would be laundering). The anchor
+//!   set is FINITE and PINNED EXACTLY in `anchor_pins.rs`, so this
+//!   walk excludes `anchor.rs`: its discipline is the opposite one —
+//!   nothing enters, leaves, or changes without going red against its
+//!   own citation.
+//!
+//! `conductor/src/polities.rs` is likewise excluded: the founding
+//! roster is APPROVED as lawful compiled seed data under THE
+//! DEFINITION LAW (same ruling) — genesis reads no chain, so the seed
+//! is definition, not tuning. Its size is pinned below so seed growth
+//! stays visible.
+//!
+//! This witness counts `ratio(p, q)` literals whose value is neither
 //! zero nor one — the identity and the additive zero are lawful
 //! algebra, not tuning. A literal written with variables
 //! (`ratio(condition as i64, 1)`) does not parse as two integers and
@@ -38,7 +56,7 @@ const SOURCE_TREES: [&str; 11] = [
 ];
 
 /// **THE CEILING — measured 2026-08-05, and it only falls.**
-const TUNED_LITERAL_CEILING: usize = 200;
+const TUNED_LITERAL_CEILING: usize = 127;
 
 /// Parse `ratio(<int>, <int>)` starting at `text` (just past the open
 /// paren). Returns the pair only when both arguments are integer
@@ -66,21 +84,14 @@ fn tuned_in(line: &str) -> usize {
             }
         }
     }
-    // A derivation helper does not launder its anchor: `kelvin4(279)`
-    // derives the QUARTIC, but 279 is still a dial and still counts.
-    let mut rest = line;
-    while let Some(at) = rest.find("kelvin4(") {
-        rest = &rest[at + "kelvin4(".len()..];
-        if let Some((anchor_text, _)) = rest.split_once(')') {
-            if let Ok(anchor) = anchor_text.trim().replace('_', "").parse::<i64>() {
-                if anchor != 0 && anchor != 1 {
-                    count += 1;
-                }
-            }
-        }
-    }
     count
 }
+
+/// Files the DIAL walk does not enter, each under its own opposite
+/// discipline (see the module doc): the anchors are pinned exactly,
+/// the seed's size is pinned below. Both filenames are unique in the
+/// workspace.
+const NOT_DIALS: [&str; 2] = ["anchor.rs", "polities.rs"];
 
 fn walk(dir: &Path, total: &mut usize, files: &mut usize) {
     let Ok(entries) = fs::read_dir(dir) else {
@@ -91,6 +102,10 @@ fn walk(dir: &Path, total: &mut usize, files: &mut usize) {
         if path.is_dir() {
             walk(&path, total, files);
         } else if path.extension().is_some_and(|ext| ext == "rs") {
+            let name = path.file_name().and_then(|held| held.to_str()).unwrap_or("");
+            if NOT_DIALS.contains(&name) {
+                continue;
+            }
             *files += 1;
             let Ok(text) = fs::read_to_string(&path) else {
                 continue;
@@ -139,6 +154,19 @@ fn the_census_parser_reads_what_it_should() {
     assert_eq!(tuned_in("ratio(condition as i64, 1)"), 0);
     assert_eq!(tuned_in("ratio(5, 4)) * ratio(3, 2)"), 2, "two dials on one line");
     assert_eq!(tuned_in("ratio(10_000, 1)"), 1, "underscores do not hide a dial");
-    assert_eq!(tuned_in("kelvin4(279)"), 1, "a derivation helper's anchor still counts");
-    assert_eq!(tuned_in("kelvin4(t)"), 0, "a variable anchor already derives");
+}
+
+/// **THE SEED'S SIZE IS PINNED** — polities.rs stands outside the dial
+/// walk as APPROVED compiled seed (THE DEFINITION LAW, operator ruling
+/// 2026-08-05), so its growth must stay visible HERE: a new seed value
+/// goes red until this pin moves with it, deliberately, in review.
+#[test]
+fn the_approved_seed_is_exactly_as_large_as_approved() {
+    let text = fs::read_to_string("../conductor/src/polities.rs")
+        .expect("the approved seed stands where it stood");
+    let seeded: usize = text.lines().map(tuned_in).sum();
+    assert_eq!(
+        seeded, 55,
+        "the founding roster's seed count moved — approval covered 55 values"
+    );
 }

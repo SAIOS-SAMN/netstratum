@@ -16,22 +16,22 @@
 
 use crate::ratio::{ratio, Ratio};
 
-/// The fourth power of a whole-kelvin anchor, exact — the ONLY way a
-/// band bound or the folded constant enters this module (P2,
-/// 29_CONSTRUCTION): the base TEMPERATURE is the parameter, the
-/// quartic DERIVES. A flattened `6_059_221_281` could drift from its
-/// own anchor without anyone noticing; the derived form cannot. The
-/// tuned-constant census counts these anchors as it counts a ratio
-/// literal — the kelvin is still a dial until the measured-anchor
-/// mechanism lands; only the fourth power stopped being one.
-fn kelvin4(kelvin: i64) -> Ratio {
+/// The fourth power of a CITED kelvin anchor, exact — the ONLY way a
+/// band bound or the folded constant enters this module (P2, operator
+/// ruling 2026-08-05): the parameter is a [`crate::anchor::KelvinAnchor`]
+/// — a typed declaration carrying its empirical citation — so a bare
+/// number cannot become a thermal bound, and a flattened quartic
+/// cannot drift from the anchor it encodes.
+fn kelvin4(anchor: crate::anchor::KelvinAnchor) -> Ratio {
+    let kelvin = anchor.kelvin();
     ratio(kelvin * kelvin * kelvin * kelvin, 1)
 }
 
-/// The folded thermal constant `K = 1/(16πσ)` as one exact rational
-/// (placeholder): `279⁴`, so `T_eq⁴(L=1, A=0, r=1) = K` lands mesic.
+/// The folded thermal constant `K = 1/(16πσ)` as one exact rational:
+/// the fourth power of the Sol-equilibrium anchor, so
+/// `T_eq⁴(L=1, A=0, r=1) = K` lands mesic by calibration.
 pub fn thermal_k() -> Ratio {
-    kelvin4(279)
+    kelvin4(crate::anchor::KelvinAnchor::SolEquilibrium)
 }
 
 /// `T_eq⁴ = L (1 − A) K / r²` — the equilibrium baseline in flux space
@@ -56,13 +56,16 @@ pub enum SubstrateBand {
 
 impl SubstrateBand {
     /// The inclusive `[lo⁴, hi⁴]` bounds in K⁴ — DERIVED from the
-    /// kelvin anchors, never stored flattened (the anchors are the
-    /// parameters; the quartics cannot drift from them).
+    /// CITED kelvin anchors, never stored flattened (the anchors are
+    /// the parameters; the quartics cannot drift from them).
     pub fn bounds4(self) -> (Ratio, Ratio) {
+        use crate::anchor::KelvinAnchor as At;
         match self {
-            SubstrateBand::Cryogenic => (kelvin4(10), kelvin4(100)),
-            SubstrateBand::Mesic => (kelvin4(250), kelvin4(320)),
-            SubstrateBand::HyperThermal => (kelvin4(600), kelvin4(1500)),
+            SubstrateBand::Cryogenic => (kelvin4(At::CryoFloor), kelvin4(At::CryoCeiling)),
+            SubstrateBand::Mesic => (kelvin4(At::MesicFloor), kelvin4(At::MesicCeiling)),
+            SubstrateBand::HyperThermal => {
+                (kelvin4(At::FoundryFloor), kelvin4(At::FoundryCeiling))
+            }
         }
     }
 }
@@ -255,23 +258,17 @@ impl StarClass {
         self.magnetism()
     }
 
-    /// Luminosity relative to Sol (exact rational placeholder).
+    /// Luminosity relative to Sol — the CITED anchor table
+    /// (`crate::anchor::luminosity`, operator ruling 2026-08-05) for
+    /// every astronomical class; the lore class alone keeps a DIAL
+    /// here, because fiction has no empirical citation and the census
+    /// counts it honestly.
     pub fn luminosity(self) -> Ratio {
-        match self {
-            StarClass::O => ratio(100_000, 1),
-            StarClass::B => ratio(20_000, 1),
-            StarClass::A => ratio(20, 1),
-            StarClass::F => ratio(3, 1),
-            StarClass::G => ratio(1, 1),
-            StarClass::K => ratio(3, 10),
-            StarClass::M => ratio(1, 100),
-            StarClass::BrownDwarf => ratio(1, 10_000),
-            StarClass::WhiteDwarf => ratio(1, 100),
-            StarClass::RedGiant => ratio(1_000, 1),
-            StarClass::NeutronStar => ratio(100, 1),
-            StarClass::WolfRayet => ratio(200_000, 1),
-            StarClass::LuminalWhiteHole => ratio(1_000_000, 1),
-        }
+        crate::anchor::luminosity(self)
+            .unwrap_or_else(|| match self {
+                StarClass::LuminalWhiteHole => ratio(1_000_000, 1),
+                anchored => unreachable!("{anchored:?} is anchored"),
+            })
     }
 }
 

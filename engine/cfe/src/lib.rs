@@ -15,6 +15,7 @@
 //!   unreceipted accrual is workspace and never persists.
 
 pub mod almanac;
+pub mod anchor;
 pub mod books;
 pub mod growth;
 pub mod literature;
