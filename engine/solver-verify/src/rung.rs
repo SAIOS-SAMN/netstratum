@@ -26,21 +26,77 @@ use crate::field::{Axis, Field, Word, HUES};
 use physics::Beacon;
 
 /// One rung of the hardness ladder, at any rank.
+///
+/// **FIELDS PRIVATE, ONE DOOR** (29_CONSTRUCTION C1, operator ruling
+/// 2026-08-05: *apply from theorems — never judge the stochastic
+/// outcome*). A `Rung` that exists IS lawful: the theorem is checked at
+/// [`Rung::new`], once, with a proof — so the forge that draws from it
+/// is TOTAL and nothing downstream re-judges what construction already
+/// proved. The old `lawful()` judge arm is dead and deleted.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Rung {
-    /// Which vocabulary families the secret word may draw from:
-    /// 1 mirrors and swaps · 2 + recolor · 3 + rolls.
-    pub tier: u8,
-    /// The secret word's length (also the fair search depth).
-    pub word_len: usize,
-    /// The field's extents. `shape.len()` IS the rank — 2 is a grid,
-    /// 3 a volume, and this type knows the difference only as a number.
-    pub shape: Vec<usize>,
-    /// Training pairs forged per task.
-    pub train_pairs: usize,
+    tier: u8,
+    word_len: usize,
+    shape: Vec<usize>,
+    train_pairs: usize,
+}
+
+/// **WHY A RUNG STANDS OR DOES NOT** — the door's proof, with the
+/// numbers that decided it.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum RungVerdict {
+    /// A zero extent: the field it would forge cannot exist.
+    EmptyExtent { axis: usize },
+    /// A shapeless rung — rank 0 is the vacuous-arm class.
+    NoAxes,
+    /// The cell count overflows.
+    TooVast,
+    /// No training pairs: "maps every training pair" would be true over
+    /// none, and an empty word would verify and mint for nothing.
+    NothingToProve,
 }
 
 impl Rung {
+    /// **THE ONE DOOR.** Everything the struck `lawful()` judged is
+    /// checked here, once, and a refusal names its reason. Past this
+    /// door there is no unlawful rung to catch.
+    ///
+    /// `word_len: 0` is LAWFUL and deliberately admitted: the empty word
+    /// is the identity task, and a copy task is a task.
+    pub fn new(
+        tier: u8,
+        word_len: usize,
+        shape: Vec<usize>,
+        train_pairs: usize,
+    ) -> Result<Rung, RungVerdict> {
+        if shape.is_empty() {
+            return Err(RungVerdict::NoAxes);
+        }
+        if let Some(axis) = shape.iter().position(|&e| e == 0) {
+            return Err(RungVerdict::EmptyExtent { axis });
+        }
+        if shape.iter().try_fold(1usize, |n, &e| n.checked_mul(e)).is_none() {
+            return Err(RungVerdict::TooVast);
+        }
+        if train_pairs == 0 {
+            return Err(RungVerdict::NothingToProve);
+        }
+        Ok(Rung { tier, word_len, shape, train_pairs })
+    }
+
+    pub fn tier(&self) -> u8 {
+        self.tier
+    }
+    pub fn word_len(&self) -> usize {
+        self.word_len
+    }
+    pub fn shape(&self) -> &[usize] {
+        &self.shape
+    }
+    pub fn train_pairs(&self) -> usize {
+        self.train_pairs
+    }
+
     /// The rank this rung stands at.
     pub fn rank(&self) -> usize {
         self.shape.len()
@@ -114,19 +170,10 @@ impl Rung {
             .map(|level| (rank, level))
     }
 
-    /// THE DEGENERACY LAW. A zero extent makes `Field::new` refuse and
-    /// the forge unable to produce anything; `train_pairs: 0` is the
-    /// vacuity — "maps every training pair" is true over no pairs, so an
-    /// empty word would verify and mint for nothing.
-    ///
-    /// `word_len: 0` is LAWFUL and deliberately admitted: the empty word
-    /// is the identity task, and a copy task is a task.
-    pub fn lawful(&self) -> bool {
-        !self.shape.is_empty()
-            && !self.shape.contains(&0)
-            && self.train_pairs > 0
-            && self.shape.iter().try_fold(1usize, |n, &e| n.checked_mul(e)).is_some()
-    }
+    // `lawful()` LIVED HERE and is DELETED (29_CONSTRUCTION C1): every
+    // check it performed moved into `Rung::new`, so a rung that exists
+    // has nothing left to be judged for. The degeneracy law did not
+    // weaken — it moved from a judgment to a precondition of existence.
 }
 
 /// A forged task, at any rank.
@@ -200,10 +247,11 @@ fn sample_field(beacon: &Beacon, rung: &Rung, pair: usize) -> Field {
 ///
 /// THE BOUNDARY LAW holds unchanged: the forge allocates rewards and
 /// paces difficulty. It is never a security primitive.
-pub fn forge_field(digest: [u8; 32], rung: &Rung) -> Option<FieldTask> {
-    if !rung.lawful() {
-        return None;
-    }
+pub fn forge_field(digest: [u8; 32], rung: &Rung) -> FieldTask {
+    // TOTAL, deliberately. A `Rung` is lawful by construction (the one
+    // door), so the stochastic draw ranges over the lawful space and
+    // there is no outcome left to judge — the theorem was applied
+    // BEFORE the beacon ever drew.
     let beacon = Beacon::from_digest(digest);
     let word: Word = (0..rung.word_len)
         .map(|slot| sample_axis(&beacon, rung, slot))
@@ -224,12 +272,12 @@ pub fn forge_field(digest: [u8; 32], rung: &Rung) -> Option<FieldTask> {
     for byte in &digest[..6] {
         name.push_str(&format!("{byte:02x}"));
     }
-    Some(FieldTask {
+    FieldTask {
         name: format!("{name}_r{}w{}", rung.rank(), rung.word_len),
         train,
         test_in,
         test_expected,
-    })
+    }
 }
 
 /// **THE CLOSED VOCABULARY AT A RANK** — every transform a word may be
