@@ -33,6 +33,19 @@ use std::path::PathBuf;
 use cfe::dop::ClosureEvent;
 use conductor::run_era;
 
+/// **THE SCRATCH IS PER-PROCESS** (fixed 2026-08-05).
+///
+/// This helper was the only one in the tree without `process::id()` in
+/// its path, so two concurrent boards — a second worktree running its
+/// own `cargo test`, which is ordinary on this machine — shared
+/// `/tmp/netstratum-mint-loop` and each `remove_dir_all`'d the other's
+/// universe mid-era. The symptom was a pin that FAILED IN THE FULL RUN
+/// and PASSED ALONE, twice, which reads exactly like flakiness in the
+/// engine and is not: the engine is deterministic, and the two runs were
+/// deleting each other's `var`.
+///
+/// Found while confirming V0–V4, where a real board failure and this one
+/// would have been indistinguishable.
 fn scratch(name: &str) -> PathBuf {
     let mut path = std::env::temp_dir();
     // PROCESS-UNIQUE, like every other fixture in the tree. Without the

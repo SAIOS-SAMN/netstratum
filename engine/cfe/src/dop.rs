@@ -170,6 +170,12 @@
 //!         seals at coder-03's amendment; the vocabularies are 15 §2
 //!         (class 1–7, 0 lawful-unclassed) and 15 §3 (clade 1–18,
 //!         0 unrecorded), append-only by amendment)
+//!   96 ClosureEvent::VocabularyMinted (28_VOCABULARY §7, 2026-08-05 —
+//!         a T0 progenitor adds an entry to a vocabulary: axis ‖ code ‖
+//!         sigil ‖ word ‖ binding, where the binding is the entry's
+//!         MECHANISM as exact rational factors over the closed channel
+//!         set. The code is carried and VERIFIED against the fold, never
+//!         chosen. Additive: a minor bump, never breaking)
 //!   86 ClosureEvent::DiscoveryMinted (U1 KERNEL-VERIFY,
 //!         U_DIRECTIVES §2 — the PoUW mint: value created ONLY
 //!         against verified work. orb ‖ resource ‖ amount ‖ work,
@@ -198,7 +204,14 @@
 //!         exactly this for the axes. Station codes are the BAND-1
 //!         vocabulary by index: 1 progenitor · 2 watcher · 3 observer
 //!         · 4 sovereign.)
-//!         — the next free tag outside reservations is 90.
+//!         — the next free tag outside reservations is 97. (This line
+//!         read "90" until 2026-08-05 and was STALE: tag 90 was taken by
+//!         SovereignUnionSealed after it was written, and a mint drafted
+//!         onto 90 shadowed that deed's decoder arm — every sovereign
+//!         union would have become undecodable. Caught by clippy's
+//!         unreachable-pattern warning, not by the register. The free
+//!         tags below the top are 14, 15, 56, 57, 58, 64, 66, 73, 83, 84
+//!         and 87; 9 and 51 are reserved and 65 is retired forever.)
 //!   In-value practice codes (append-only): 1 the Austerity · 2 the Showpiece ·
 //!   3 the Restraint · 4 the Hoard · 5 the Overdrive (deep-end: adoption
 //!   gated on hardship ≥ 8 receipts). Placeholder names, operator
@@ -1249,6 +1262,31 @@ pub enum ClosureEvent {
     /// Codes must stand in the ratified vocabularies; names stay
     /// register-side forever.
     TaxonSealed { class: u8, clade: u8 },
+    /// **THE VOCABULARY MINT** (tag 90, `28_VOCABULARY` §7,
+    /// 2026-08-05): a T0 progenitor adds an entry to a vocabulary.
+    ///
+    /// This is what makes the class, clade, axis and practice tables
+    /// GROWABLE without a coder. The definition law bars a FILE from
+    /// saying what exists; it never barred the CHAIN, because a minting
+    /// is something that HAPPENED and every node replays it identically.
+    ///
+    /// `code` is CARRIED AND VERIFIED, never chosen — the lawful value
+    /// is `ceiling(axis) + 1` read from the fold, so two nodes cannot
+    /// mint colliding codes and a reader who has not folded the chain
+    /// can still see which entry this is.
+    ///
+    /// `binding` is the entry's MECHANISM (§4): exact rational factors
+    /// over the closed channel set. Data, not code — no sandbox, no
+    /// interpreter, no new capability class. An entry that computes
+    /// nothing is refused, which is `27_EVIDENCE` LAW 8 enforced at the
+    /// door instead of discovered later.
+    VocabularyMinted {
+        axis: u8,
+        code: u8,
+        sigil: String,
+        word: String,
+        binding: Vec<(u8, Ratio)>,
+    },
     /// THE VERTICAL AXIS (tag 89, 2026-08-01): a line takes an office.
     ///
     /// The station GATES AUTHORITY — the tier-0 verbs check it — and it
@@ -1699,6 +1737,22 @@ impl ClosureEvent {
             Self::TaxonSealed { class, clade } => {
                 tlv::put(85, &[*class, *clade], &mut out);
             }
+            Self::VocabularyMinted { axis, code, sigil, word, binding } => {
+                let mut value = vec![*axis, *code];
+                let mut text = |s: &String| {
+                    let bytes = s.as_bytes();
+                    value.extend_from_slice(&(bytes.len() as u16).to_le_bytes());
+                    value.extend_from_slice(bytes);
+                };
+                text(sigil);
+                text(word);
+                value.push(binding.len() as u8);
+                for (channel, factor) in binding {
+                    value.push(*channel);
+                    ratio::encode(factor, &mut value);
+                }
+                tlv::put(96, &value, &mut out);
+            }
             Self::StationSeated { line, station } => {
                 let mut value = vec![*station];
                 value.extend_from_slice(line.as_bytes());
@@ -2145,6 +2199,32 @@ impl ClosureEvent {
                 class: *value.first()?,
                 clade: *value.get(1)?,
             }),
+            96 => {
+                let axis = *value.first()?;
+                let code = *value.get(1)?;
+                let mut at = 2usize;
+                let take_text = |at: &mut usize| -> Option<String> {
+                    let len =
+                        u16::from_le_bytes(value.get(*at..*at + 2)?.try_into().ok()?) as usize;
+                    *at += 2;
+                    let text = String::from_utf8(value.get(*at..*at + len)?.to_vec()).ok()?;
+                    *at += len;
+                    Some(text)
+                };
+                let sigil = take_text(&mut at)?;
+                let word = take_text(&mut at)?;
+                let count = *value.get(at)? as usize;
+                at += 1;
+                let mut binding = Vec::with_capacity(count);
+                for _ in 0..count {
+                    let channel = *value.get(at)?;
+                    at += 1;
+                    let (factor, used) = ratio::decode(value.get(at..)?)?;
+                    at += used;
+                    binding.push((channel, factor));
+                }
+                Some(Self::VocabularyMinted { axis, code, sigil, word, binding })
+            }
             89 => {
                 let station = *value.first()?;
                 if station == 0 || station > 4 {
@@ -2767,42 +2847,13 @@ pub fn tile_class(seed: &[u8; 32], orb_id: u64, tile: u16) -> TileClass {
 
 
 
-/// THE ORBITAL SLOTS — a turn divides into SIXTY.
-///
-/// **Base 60, for the reason base 60 has always been used.** It is the
-/// smallest number that divides evenly by 1, 2, 3, 4, 5, 6, 10, 12, 15,
-/// 20, 30 and 60 — twelve exact subdivisions. Halves, thirds, quarters,
-/// fifths and sixths of a ring all land ON a slot, so a system can be
-/// laid out symmetrically at many arities without any angle falling
-/// between the teeth. Sixty is not a rounding: it is the number that
-/// makes the most placements exact.
-///
-/// A slot is `k/60` for `k ∈ 0..60`, and `k = 60` is `k = 0` — the ring
-/// closes.
-pub const TURN_SLOTS: i64 = 60;
+/// THE TURN LAW — relocated to `ratio` (2026-08-05) so the solver can
+/// address a SPHERE in the same frame the universe sites its orbs in,
+/// and re-exported here so every existing citation resolves unchanged.
+/// One truth, two readers: `cfe::dop::TURN_SLOTS` and
+/// `ratio::TURN_SLOTS` are the same constant, not two copies.
+pub use ratio::{on_slot, slot_angle, slot_of, turn_gap, TURN_SLOTS};
 
-/// Is this angle ON a slot? An orbit sits at a slot or it does not sit.
-///
-/// Refusing off-slot angles is what keeps placement DISCRETE, and
-/// discreteness is what makes collision a decidable question rather
-/// than a tolerance.
-pub fn on_slot(theta: &Ratio) -> bool {
-    let scaled = theta.clone() * ratio(TURN_SLOTS, 1);
-    scaled.is_integer() && *theta >= ratio(0, 1) && *theta < ratio(1, 1)
-}
-
-/// The slot index of an angle that is on one.
-pub fn slot_of(theta: &Ratio) -> Option<i64> {
-    on_slot(theta).then(|| {
-        let scaled = theta.clone() * ratio(TURN_SLOTS, 1);
-        scaled.to_integer().try_into().unwrap_or(0)
-    })
-}
-
-/// The angle of a slot, wrapping: `slot(61)` is `slot(1)`.
-pub fn slot_angle(k: i64) -> Ratio {
-    ratio(k.rem_euclid(TURN_SLOTS), TURN_SLOTS)
-}
 
 /// WRAPPED L1 SEPARATION between two sited orbs — the only adjacency
 /// this system can compute exactly.
@@ -2837,10 +2888,4 @@ pub fn separation(a: &ThermalSite, b: &ThermalSite) -> Option<Ratio> {
     Some(total)
 }
 
-/// The wrapped gap between two turn-fractions — the SHORT WAY ROUND,
-/// which is what makes each angular axis a circle rather than a
-/// segment.
-pub fn turn_gap(a: &Ratio, b: &Ratio) -> Ratio {
-    let raw = if a >= b { a.clone() - b.clone() } else { b.clone() - a.clone() };
-    raw.clone().min(ratio(1, 1) - raw)
-}
+

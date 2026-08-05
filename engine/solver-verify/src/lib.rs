@@ -21,12 +21,16 @@ pub mod forge;
 pub mod grid;
 pub mod loader;
 pub mod objects;
+pub mod rung;
+pub mod shell;
 pub mod volume;
 pub mod work;
 
 pub use certificate::{verify_certificate, CertificateRead, SolveCertificate};
 pub use corpus::task_digest;
 pub use field::{quarter_turn, Axis, Field, Word};
+pub use rung::{forge_field, FieldTask, Rung};
+pub use shell::{Ring, Shell, Turn};
 pub use forge::{forge_task, Difficulty};
 pub use grid::{run, Grid, Op, Program, TileMirror};
 pub use loader::{load_task, LoadError, Task, TaskPair};

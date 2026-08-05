@@ -213,6 +213,18 @@ impl World {
         let showpiece = self.practices.contains(&2);
         let hoard = self.practices.contains(&4);
         let overdrive = self.practices.contains(&5);
+        // 28_VOCABULARY V0: the sealed class's own mechanism, read once.
+        // Before this the class was a term that only resonated — sealed,
+        // replayed, and read by no rule (LAW 8's excision test). An
+        // UNSEALED world reads the empty binding and is unaffected, so
+        // this is strictly additive to every world that has not sealed.
+        let archetype = self
+            .taxon
+            .map(|(class, _)| crate::vocabulary::archetype_binding(class))
+            .unwrap_or_default();
+        let class_yield = crate::vocabulary::factor_on(&archetype, crate::vocabulary::CHANNEL_YIELD);
+        let class_upkeep =
+            crate::vocabulary::factor_on(&archetype, crate::vocabulary::CHANNEL_UPKEEP);
         // TECH-1b: each orb's crystallized boons, read once — [unused,
         // insulation, discipline, deepening, doctrine, stores].
         let boons: Vec<(u64, [bool; 6])> = flows
@@ -369,8 +381,11 @@ impl World {
                 for (zone, vigour) in active {
                     let (resource, amount) = crate::dop::zone_yield(zone.kind, metabolism);
                     let boost = terrain_boost(&terrain, *orb_id, zone, &standing);
-                    let mut yield_factor = ratio(1, 1);
-                    let mut upkeep_factor = ratio(1, 1);
+                    // The class's mechanism composes WITH the adopted
+                    // practices, never instead of them: identity and
+                    // discipline are different claims on the same world.
+                    let mut yield_factor = class_yield.clone();
+                    let mut upkeep_factor = class_upkeep.clone();
                     if overdrive {
                         yield_factor *= ratio(5, 4);
                         upkeep_factor *= ratio(5, 4);

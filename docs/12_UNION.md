@@ -82,6 +82,7 @@ lawful, none an edit:
 | modify quantum states | a gauge operation on G — a `GaugeShifted` deed (11 §2.1, tag 42); never a continuous field, always a discrete receipted shift (§6) |
 | issue a technology leap | `TechDiscovered` / `TechLicensed` (10, reserved tags 39–40) — a leap may be known or UNKNOWN to the receiving civilization; unknown leaps land as sealed grants the locals must still unlock |
 | create new spaces | extending the fiber — minted planes open room, and band capacity reads the fiber (§1) |
+| mint a vocabulary entry | **DESIGN, `28_VOCABULARY` §7** — `VocabularyMinted` (tag 90): a new class, clade, axis value or practice, carrying its own mechanism. The archetype editor is this power made concrete |
 | create a new galaxy | the observation deed (`GalaxyObserved`, tag 54 — inscribed at GALAXY-1a) — a crossing anchored past every charted reach CREATES the galaxy it observes; the observer's domain progenitor executes the deed (`13_GALAXY.md`, GALAXY-1; ruled 2026-07-30) |
 
 **The delegation law.** A progenitor delegating a planet (or issuing a
@@ -90,6 +91,14 @@ The power to create is sovereign; the power to *hand what was created into
 another people's world* passes through diplomacy — unless the receiving
 side is a warring imperium by its own ledger, or diplomacy has failed by
 receipted breach (§7). Planners plan; the council disposes.
+
+**THE COVENANT IS A T3 INSTRUMENT** (operator ruling 2026-08-05: *drop
+covenant to T3 and below*). The forward obligation (FORWARD-1) is barred
+to every seated office and open to the common band alone. A covenant
+posts collateral against a deadline because its parties hold no
+authority over one another; a station holds authority by charter and
+does not buy what it may order. `world::seal_forward` enforces it and
+`CovenantAboveTheCommon` names the seat that bars it.
 
 ## 2a. The tier overlay — progenitors are TIER 0 (operator ruling, 2026-07-30)
 

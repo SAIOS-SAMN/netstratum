@@ -1672,9 +1672,17 @@ impl Polity {
         let origin_key = self.world.gauge().clone();
 
         // Which axis mutates, and to what (never to itself).
-        let mutate = |current: &str, options: &[&str], domain: &str| -> String {
-            let others: Vec<&&str> = options.iter().filter(|o| **o != current).collect();
-            others[beacon.uniform_index(domain, others.len() as u64) as usize].to_string()
+        // The folded vocabulary hands back owned words, so the draw
+        // takes a slice of `String` rather than of `&'static str`. Same
+        // law: never to itself, so a flagged axis genuinely moves.
+        let mutate_from = |current: &str, options: &[String], domain: &str| -> String {
+            let others: Vec<&String> = options.iter().filter(|o| o.as_str() != current).collect();
+            match others.is_empty() {
+                true => current.to_string(),
+                false => others
+                    [beacon.uniform_index(domain, others.len() as u64) as usize]
+                    .clone(),
+            }
         };
         // MULTI-AXIAL (operator ruling 2026-08-02: *unpin unary, and
         // make it multi-axis*). `11_AEON` §3 retired "Charted" for
@@ -1694,6 +1702,29 @@ impl Polity {
         // branches can never be clones. `mutate` draws from the options
         // EXCLUDING the current value, so every flagged axis genuinely
         // moves.
+        // **28_VOCABULARY V3 — THE DRAW READS THE FOLD, AT THE RECEIPT.**
+        //
+        // The axis vocabularies are no longer the compiled constants:
+        // they are `seed ∪ minted`, so a class of entity a progenitor
+        // minted is one a cleave can actually walk onto. Without this
+        // the editor would grow a vocabulary nothing ever wears.
+        //
+        // AND IT READS THE VOCABULARY AS OF THE DRAWING RECEIPT, never
+        // as of today (`28_VOCABULARY` §9). Read today's and replaying an
+        // old era hands lines a class that did not exist when they
+        // cleaved — a SEAL B violation that fails SILENTLY, because the
+        // replay still terminates and still looks like a world.
+        let stamp = receipt.stamp;
+        let words = |axis: cfe::vocabulary::Axis| -> Vec<String> {
+            cfe::vocabulary::fold_at(self.world.chronicle(), axis, stamp)
+                .into_iter()
+                .filter(|entry| entry.code != 0)
+                .map(|entry| entry.word)
+                .collect()
+        };
+        let dispositions = words(cfe::vocabulary::Axis::Disposition);
+        let metabolisms = words(cfe::vocabulary::Axis::Metabolism);
+        let perceptions = words(cfe::vocabulary::Axis::Perception);
         let axes = 1 + beacon.uniform_index("growth.axes", 7);
         let (mut disposition, mut metabolism, mut perception) = (
             parent.disposition.clone(),
@@ -1701,13 +1732,13 @@ impl Polity {
             parent.perception.clone(),
         );
         if axes & 1 != 0 {
-            disposition = mutate(&disposition, &DISPOSITIONS, "growth.disposition");
+            disposition = mutate_from(&disposition, &dispositions, "growth.disposition");
         }
         if axes & 2 != 0 {
-            metabolism = mutate(&metabolism, &METABOLISMS, "growth.metabolism");
+            metabolism = mutate_from(&metabolism, &metabolisms, "growth.metabolism");
         }
         if axes & 4 != 0 {
-            perception = mutate(&perception, &PERCEPTIONS, "growth.perception");
+            perception = mutate_from(&perception, &perceptions, "growth.perception");
         }
 
         // THEMED NAMING (operator ruling): the child's name derives

@@ -44,6 +44,13 @@ partition needs:
 | 6 | ∿ | plasma-field (plasmic/energy) | Coronal Choir, Borealis |
 | 7 | ▲ | apex-terrestrial (solitary apex) | Lyran, Anunnaki |
 
+> **THE TABLES ABOVE AND BELOW BECOME A SEED, not the whole**
+> (`28_VOCABULARY`, design 2026-08-05). The class and clade vocabularies
+> are closed today and raisable only by a coder. The design folds them
+> from the chain — compiled seed ∪ chain-minted growth — so a T0
+> progenitor may mint an entry by receipt. Nothing here changes until
+> that deed is ruled; the tables stay the authority meanwhile.
+
 ## 3. The clade vocabulary (proposed, from the live register)
 
 Code 0 = unrecorded (lawful). Append-only; future seats reserve

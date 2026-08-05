@@ -7,3 +7,8 @@ description = "The sealed verifier half of the ARC harness — everything a REPL
 [dependencies]
 blake3.workspace = true
 physics = { path = "../physics" }
+# THE SPHERICAL FRAME (2026-08-05): the shell addresses cells on the
+# 60-slot ring the universe sites its orbs on. The constant lives in
+# `ratio` — below every crate — so the solver and the world read ONE
+# turn law rather than two copies.
+ratio = { path = "../ratio" }

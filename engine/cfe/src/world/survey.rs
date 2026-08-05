@@ -297,6 +297,13 @@ impl World {
         if self.practices.contains(&3) {
             draw *= ratio(1, 2);
         }
+        // 28_VOCABULARY V0, CHANNEL_SURVEY: the sealed class's own
+        // mechanism. A metashifter sees for half the draw; a
+        // pelagic-aerial line, having no fixed vantage, pays more.
+        if let Some((class, _)) = self.taxon {
+            let binding = crate::vocabulary::archetype_binding(class);
+            draw *= crate::vocabulary::factor_on(&binding, crate::vocabulary::CHANNEL_SURVEY);
+        }
         let have = paying.banked_amount(Resource::Crystal);
         if have < draw {
             return Err(ActionRefused::CannotAfford {

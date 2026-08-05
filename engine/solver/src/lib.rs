@@ -23,6 +23,7 @@
 pub mod derive;
 pub mod need;
 pub mod search;
+pub mod nsearch;
 pub mod volume;
 
 // The verifier half moved to `solver-verify` (the prover/verifier
@@ -46,6 +47,7 @@ pub use search::{
     Consultation, Proposal,
     SolveRead,
 };
+pub use nsearch::{solve_field, FieldSolveRead};
 pub use volume::{
     forge_volume, run_volume, solve_volume, VOp, VolDifficulty, Volume, VolumeSolveRead,
     VolumeTask,
