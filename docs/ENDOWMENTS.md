@@ -256,7 +256,84 @@ on it. The slug-to-world name pattern is not reliable in general —
 on `trench-hold` — so adopting it here would be a guess dressed as a
 measurement. Booked for a ruling, not resolved by inference.
 
-## §5 CANDIDATES — named, NOT yet verified
+## §5 E5 — THE CLEAVE'S POSSIBILITY SPACE IS CONSTANT, AND LANDED LAW SAYS IT SHOULD COMPOUND
+
+**Operator, 2026-08-05:** *for every divergent line you should have a
+multiplicative event where the possibilities of possibilities grows as
+the upper line compounds on the lower lines — these are endowments.*
+
+This is the register's own definition exactly: standing landed law
+already grants, which no code path has ever claimed.
+
+**MEASURED, from the draw in `conductor::divergence_step`.** `mutate`
+excludes the current value, so a flagged axis genuinely moves:
+
+| mask | axes moved | outcomes |
+|---|---|---|
+| 1 | disposition | 2 |
+| 2 | metabolism | 2 |
+| 3 | disposition+metabolism | 4 |
+| 4 | perception | 3 |
+| 5 | disposition+perception | 6 |
+| 6 | metabolism+perception | 6 |
+| 7 | disposition+metabolism+perception | 12 |
+| | **axis outcomes** | **35** |
+| | × gauge delta, `1/12..=5/12` | 5 |
+| | **= per cleave** | **175** |
+
+**AND 175 IS A CONSTANT.** Nothing in that product reads the line's
+depth, its open grades, or how many cleaves preceded it. A line at grade
+1 and a line at grade 9 draw from the same 175. The upper line does not
+compound on the lower; there is no multiplicative event.
+
+**WHAT LANDED LAW ALREADY GRANTS, unclaimed in two places.**
+
+1. `11_AEON` §3 makes a cleave a walk on the manifold
+   **{disposition × metabolism × perception × G}**. The draw walks the
+   first three as a nonempty subset (correct, 2026-08-02) and touches G
+   only as ONE phase moved by a delta from a fixed five-value range. **G
+   is in the manifold and not in the mask.**
+2. GAUGE-N (`11` §2.1) grows the graded key — one plane per earned mint,
+   `shift_gauge_at` refusing `PlaneUnearned` otherwise. That is the
+   engine's own compounding surface, and **nothing autonomous claims
+   it**: `shift_gauge_at` has three callers — the CLI verb (the
+   operator's hand), one `cfe` test, and `Polity::unfold`, which `cycle`
+   does not call. Every autonomous line sits at genesis `[0]` forever
+   while its earned mints pile up unspent. The era FOLD runs every era;
+   the unfold runs never.
+
+So the compounding term is pinned at k = 1 by (2), and even if it grew,
+(1) would not spend it.
+
+**THE SHAPE OF THE CLAIM, if a cleave walked the open grades too** —
+a nonempty subset of k grades, each taking one of the five deltas:
+
+| grades k | subsets `2^k−1` | deltas `5^k` | possibility space |
+|---|---|---|---|
+| 1 | 1 | 5 | 175 |
+| 2 | 3 | 25 | 2,625 |
+| 3 | 7 | 125 | 30,625 |
+| 4 | 15 | 625 | 328,125 |
+| 5 | 31 | 3,125 | 3,390,625 |
+| 7 | 127 | 78,125 | 347,265,625 |
+
+That is the "possibilities of possibilities": the space a cleave draws
+from is itself a function of what the line has earned, so depth buys
+reach and the upper line compounds on the lower.
+
+**NOT CLAIMED HERE, and the order matters.** (2) before (1): opening the
+grades is worthless if the cleave cannot spend them, and spending them is
+undefined while k = 1. Wiring the unfold into the beat is ALREADY KNOWN
+to break a replay pin — `survey_pins` diverged by exactly 7 crystal, and
+that is unexplained (`conductor::Polity::unfold`'s own note). **A
+proposer that breaks SEAL B is worse than one that never expands**, so
+the 7-crystal divergence is the first thing owed, not the last.
+
+Both halves are rulings, not refactors: the mask's domain is a law about
+what a cleave MAY move, and the unfold's wiring changes what every
+autonomous line does every beat.
+
+## §6 CANDIDATES — named, NOT yet verified
 
 Sourced from `PICKUP.md` §8b/§8e, which is sweep-reported and explicitly
 not re-verified per row. Listed so they are not lost; each needs its own
@@ -282,7 +359,7 @@ findings.**
 - `cfe/src/world/` (WANT-1 kind 1) — the epistemological want is
   reportedly in the tag-62 vocabulary with no engine rule.
 
-## §6 WHAT THIS LANE OWNS, AND WHAT IT RELAYS
+## §7 WHAT THIS LANE OWNS, AND WHAT IT RELAYS
 
 Per the lane map (shared memory, read 2026-08-03) this register is the
 record lane's. Territory: `00_CHARTER.md`, `BUILD_ORDER.md`, `PICKUP.md`,
