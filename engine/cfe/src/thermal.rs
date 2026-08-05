@@ -16,10 +16,22 @@
 
 use crate::ratio::{ratio, Ratio};
 
+/// The fourth power of a whole-kelvin anchor, exact — the ONLY way a
+/// band bound or the folded constant enters this module (P2,
+/// 29_CONSTRUCTION): the base TEMPERATURE is the parameter, the
+/// quartic DERIVES. A flattened `6_059_221_281` could drift from its
+/// own anchor without anyone noticing; the derived form cannot. The
+/// tuned-constant census counts these anchors as it counts a ratio
+/// literal — the kelvin is still a dial until the measured-anchor
+/// mechanism lands; only the fourth power stopped being one.
+fn kelvin4(kelvin: i64) -> Ratio {
+    ratio(kelvin * kelvin * kelvin * kelvin, 1)
+}
+
 /// The folded thermal constant `K = 1/(16πσ)` as one exact rational
 /// (placeholder): `279⁴`, so `T_eq⁴(L=1, A=0, r=1) = K` lands mesic.
 pub fn thermal_k() -> Ratio {
-    ratio(6_059_221_281, 1)
+    kelvin4(279)
 }
 
 /// `T_eq⁴ = L (1 − A) K / r²` — the equilibrium baseline in flux space
@@ -43,17 +55,14 @@ pub enum SubstrateBand {
 }
 
 impl SubstrateBand {
-    /// The inclusive `[lo⁴, hi⁴]` bounds in K⁴ (exact).
+    /// The inclusive `[lo⁴, hi⁴]` bounds in K⁴ — DERIVED from the
+    /// kelvin anchors, never stored flattened (the anchors are the
+    /// parameters; the quartics cannot drift from them).
     pub fn bounds4(self) -> (Ratio, Ratio) {
         match self {
-            // 10⁴ .. 100⁴
-            SubstrateBand::Cryogenic => (ratio(10_000, 1), ratio(100_000_000, 1)),
-            // 250⁴ .. 320⁴
-            SubstrateBand::Mesic => (ratio(3_906_250_000, 1), ratio(10_485_760_000, 1)),
-            // 600⁴ .. 1500⁴
-            SubstrateBand::HyperThermal => {
-                (ratio(129_600_000_000, 1), ratio(5_062_500_000_000, 1))
-            }
+            SubstrateBand::Cryogenic => (kelvin4(10), kelvin4(100)),
+            SubstrateBand::Mesic => (kelvin4(250), kelvin4(320)),
+            SubstrateBand::HyperThermal => (kelvin4(600), kelvin4(1500)),
         }
     }
 }

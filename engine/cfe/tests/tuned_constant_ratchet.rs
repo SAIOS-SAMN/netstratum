@@ -66,6 +66,19 @@ fn tuned_in(line: &str) -> usize {
             }
         }
     }
+    // A derivation helper does not launder its anchor: `kelvin4(279)`
+    // derives the QUARTIC, but 279 is still a dial and still counts.
+    let mut rest = line;
+    while let Some(at) = rest.find("kelvin4(") {
+        rest = &rest[at + "kelvin4(".len()..];
+        if let Some((anchor_text, _)) = rest.split_once(')') {
+            if let Ok(anchor) = anchor_text.trim().replace('_', "").parse::<i64>() {
+                if anchor != 0 && anchor != 1 {
+                    count += 1;
+                }
+            }
+        }
+    }
     count
 }
 
@@ -126,4 +139,6 @@ fn the_census_parser_reads_what_it_should() {
     assert_eq!(tuned_in("ratio(condition as i64, 1)"), 0);
     assert_eq!(tuned_in("ratio(5, 4)) * ratio(3, 2)"), 2, "two dials on one line");
     assert_eq!(tuned_in("ratio(10_000, 1)"), 1, "underscores do not hide a dial");
+    assert_eq!(tuned_in("kelvin4(279)"), 1, "a derivation helper's anchor still counts");
+    assert_eq!(tuned_in("kelvin4(t)"), 0, "a variable anchor already derives");
 }
