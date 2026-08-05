@@ -39,6 +39,74 @@ impl World {
         if self.star.is_none() {
             return Err(ActionRefused::NoStarCommissioned);
         }
+        // THE PLACEMENT DRAW (2026-08-06). An unangled siting is not
+        // PLACELESS — `None` means *the world places me*. The longitude
+        // draws from the chronicle's terminal digest (CHARTER §9:
+        // chronicle-seeded, no wall clock) and walks forward past taken
+        // places deterministically — the collision-stepping idiom the
+        // compiled roster and the cleave's naming already use. The
+        // RECEIPT CARRIES THE RESOLVED ANGLE, so replay applies and
+        // never re-draws. This closes the hole the ring-reach landing
+        // recorded: before it, any number of unangled orbs stacked on
+        // one ring and the placement law's decidability could simply
+        // be opted out of.
+        let theta = match theta {
+            Some(turn) => Some(turn),
+            None => {
+                let seed = self
+                    .chronicle
+                    .receipts()
+                    .last()
+                    .map(|receipt| receipt.own.0)
+                    .unwrap_or([0u8; 32]);
+                let mut hasher = blake3::Hasher::new();
+                hasher.update(b"netstratum.place.theta.v1");
+                hasher.update(&seed);
+                hasher.update(&orb.to_le_bytes());
+                let start = u64::from_le_bytes(
+                    hasher.finalize().as_bytes()[..8].try_into().expect("eight bytes"),
+                ) % crate::ratio::TURN_SLOTS as u64;
+                let taken = |candidate: &Ratio| {
+                    self.orbs.iter().any(|held| {
+                        held.orb_id != orb
+                            && held.thermal.as_ref().is_some_and(|site| {
+                                site.orbit_r == orbit_r
+                                    && site.theta.as_ref() == Some(candidate)
+                                    && site.psi == psi
+                            })
+                    })
+                };
+                let slots = crate::ratio::TURN_SLOTS as u64;
+                let drawn = (0..slots)
+                    .map(|offset| ratio(((start + offset) % slots) as i64, slots as i64))
+                    .find(|candidate| !taken(candidate));
+                match drawn {
+                    Some(turn) => Some(turn),
+                    // The ring is FULL at this inclination: every slot
+                    // holds. Refuse with the seed slot's occupant — the
+                    // place the draw first asked for.
+                    None => {
+                        let first = ratio(start as i64, slots as i64);
+                        let holder = self
+                            .orbs
+                            .iter()
+                            .find(|held| {
+                                held.thermal.as_ref().is_some_and(|site| {
+                                    site.orbit_r == orbit_r
+                                        && site.theta.as_ref() == Some(&first)
+                                        && site.psi == psi
+                                })
+                            })
+                            .map(|held| held.orb_id)
+                            .unwrap_or(orb);
+                        return Err(ActionRefused::OrbitOccupied {
+                            orb: holder,
+                            slot: crate::dop::slot_of(&first).unwrap_or(0),
+                        });
+                    }
+                }
+            }
+        };
         // THE PLACEMENT LAW. An angle must sit ON a slot, and no two
         // orbs may share a place. Together these make collision
         // DECIDABLE rather than a tolerance — which is the whole point
