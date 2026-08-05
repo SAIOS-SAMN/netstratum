@@ -29,10 +29,23 @@ use crate::literature::{work_of, WORKS};
 /// **The crown's gate does not move.** It still gates on `0..=5` and
 /// still completes base-7; the uplift sits ABOVE it rather than
 /// widening what it waits for.
-pub const LAST_CONDITION: u8 = 11;
+/// **DERIVED, NOT TYPED** (operator ruling 2026-08-05: *bring these down
+/// to the theorem level*). Eleven is a SUM and the sum is the sky's own
+/// structure — the base tier plus one node per chartered work. Written
+/// as `11`, the day a sixth condition lands someone edits one place and
+/// not the others.
+pub const SOLAR_LEAP: u8 = 1;
+pub const CRYSTALLIZED_CONDITIONS: u8 = 5;
+pub const GIFTED_CROWN: u8 = 1;
+/// The BASE tier — what the crown completes and `base_seven_complete`
+/// waits for. Its gate does not move.
+pub const BASE_NODES: u8 = SOLAR_LEAP + CRYSTALLIZED_CONDITIONS + GIFTED_CROWN;
+/// The UPLIFT tier — one node per chartered work.
+pub const CHARTERED_WORKS: u8 = 4;
+pub const LAST_CONDITION: u8 = BASE_NODES + CHARTERED_WORKS;
 /// The first node of the uplift tier — `8`, where the works begin.
 /// `7` is skipped: it belongs to PRACTICE-1 and is not a sky node.
-pub const FIRST_WORK: u8 = 8;
+pub const FIRST_WORK: u8 = BASE_NODES + 1;
 /// PRACTICE-1's re-emergence lesson. Held in `techs` like a sky node,
 /// rendered in the sky like none — it rides separately by design.
 pub const RE_EMERGENCE: u8 = 7;

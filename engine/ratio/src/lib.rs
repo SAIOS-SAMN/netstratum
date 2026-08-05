@@ -110,6 +110,40 @@ pub fn ratio_str(r: &Ratio) -> String {
 // `cfe::dop` re-exports every name, so every existing citation resolves
 // unchanged.
 
+/// **THE DERIVATION OF THE RING, computed rather than asserted.**
+///
+/// `gcd` and `lcm` as `const fn` so the ring's size is not a number
+/// anyone typed — it is the answer to the requirement, evaluated by the
+/// compiler. Change the requirement and the constant follows; there is
+/// no second place to edit and no way for the two to disagree.
+pub const fn gcd(a: i64, b: i64) -> i64 {
+    let (mut a, mut b) = (if a < 0 { -a } else { a }, if b < 0 { -b } else { b });
+    while b != 0 {
+        let t = a % b;
+        a = b;
+        b = t;
+    }
+    a
+}
+
+/// The least common multiple of `1..=n` — the smallest ring on which
+/// every subdivision up to `n` lands exactly on a slot.
+pub const fn lcm_through(n: i64) -> i64 {
+    let mut held = 1i64;
+    let mut k = 2i64;
+    while k <= n {
+        held = held / gcd(held, k) * k;
+        k += 1;
+    }
+    held
+}
+
+/// **THE REQUIREMENT** the ring answers: halves, thirds, quarters,
+/// fifths and sixths of a turn must each land ON a slot, so a system can
+/// be laid out symmetrically at those arities with no angle falling
+/// between the teeth.
+pub const RING_SUBDIVISIONS: i64 = 6;
+
 /// THE ORBITAL SLOTS — a turn divides into SIXTY.
 ///
 /// **Base 60, for the reason base 60 has always been used.** It is the
@@ -127,7 +161,56 @@ pub fn ratio_str(r: &Ratio) -> String {
 /// radians is `2π`, which no rational closes, so a wrapped angle would
 /// need a float and the seam would never meet. In turns the seam is
 /// exact and the circle is representable.
-pub const TURN_SLOTS: i64 = 60;
+/// **DERIVED: `lcm(1..=6) = 60`.** Not typed — evaluated. Sixty is not
+/// a rounding and not a tradition here; it is the smallest number that
+/// satisfies [`RING_SUBDIVISIONS`], and if that requirement ever changes
+/// this value changes with it.
+pub const TURN_SLOTS: i64 = lcm_through(RING_SUBDIVISIONS);
+
+/// **DOES A DIVISION OF THE RING HOLD?** The proof a caller gets instead
+/// of a bool: the arity, the ring it was checked against, and the
+/// remainder that decided it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct DivisionProof {
+    pub arity: i64,
+    pub ring: i64,
+    pub remainder: i64,
+    pub cell_span: i64,
+}
+
+impl DivisionProof {
+    pub fn holds(&self) -> bool {
+        self.remainder == 0 && self.arity > 0
+    }
+    /// Why it holds or does not, in the caller's own terms.
+    pub fn because(&self) -> String {
+        match self.holds() {
+            true => format!(
+                "{} divides the {}-slot ring exactly; each cell spans {} slots",
+                self.arity, self.ring, self.cell_span
+            ),
+            false if self.arity <= 0 => "an arity must be positive".into(),
+            false => format!(
+                "{} does not divide the {}-slot ring — {} slots are left over, so a cell \
+                 centre would fall between teeth",
+                self.arity, self.ring, self.remainder
+            ),
+        }
+    }
+}
+
+/// Divide a ring of `ring` slots into `arity` cells, PROVING the result.
+pub const fn divide_ring(ring: i64, arity: i64) -> DivisionProof {
+    if arity <= 0 {
+        return DivisionProof { arity, ring, remainder: -1, cell_span: 0 };
+    }
+    DivisionProof {
+        arity,
+        ring,
+        remainder: ring % arity,
+        cell_span: ring / arity,
+    }
+}
 
 /// Is this angle ON a slot? Refusing off-slot angles keeps placement
 /// DISCRETE, and discreteness is what makes collision a decidable

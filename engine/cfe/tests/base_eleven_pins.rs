@@ -201,3 +201,25 @@ fn the_solvers_stack_base_is_this_stack_base() {
         "the composite frame ring must be the orbital ring times the stack"
     );
 }
+
+/// **AND ELEVEN IS DERIVED ON BOTH SIDES OF THE ARROW.** The sky's own
+/// parts sum to it, the solver's parts sum to it, and the two sums
+/// agree — so there is no `11` left in the tree for anyone to edit in
+/// one place.
+#[test]
+fn both_sides_derive_eleven_from_the_same_parts() {
+    use cfe::world::survey as sky;
+    use solver_verify::shell as frame;
+
+    assert_eq!(sky::SOLAR_LEAP + sky::CRYSTALLIZED_CONDITIONS + sky::GIFTED_CROWN, sky::BASE_NODES);
+    assert_eq!(sky::BASE_NODES + sky::CHARTERED_WORKS, sky::LAST_CONDITION);
+    assert_eq!(sky::FIRST_WORK, sky::BASE_NODES + 1, "the works begin above the base");
+
+    // Part for part, the two derivations agree — not merely the totals.
+    assert_eq!(i64::from(sky::SOLAR_LEAP), frame::SOLAR_LEAP);
+    assert_eq!(i64::from(sky::CRYSTALLIZED_CONDITIONS), frame::CRYSTALLIZED_CONDITIONS);
+    assert_eq!(i64::from(sky::GIFTED_CROWN), frame::GIFTED_CROWN);
+    assert_eq!(i64::from(sky::CHARTERED_WORKS), frame::CHARTERED_WORKS);
+    assert_eq!(i64::from(sky::BASE_NODES), frame::BASE_NODES);
+    assert_eq!(i64::from(sky::LAST_CONDITION), frame::STACK_NODES);
+}

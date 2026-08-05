@@ -384,3 +384,115 @@ fn the_population_partitions_evenly_across_the_stack() {
         "the orbital partition is uneven: {by_orbit:?}"
     );
 }
+
+// ─────────────────────────────────────────────────────────────────────
+// THE CONSTANTS AS THEOREMS (operator ruling 2026-08-05)
+// ─────────────────────────────────────────────────────────────────────
+
+/// **SIXTY IS DERIVED, NOT TYPED.** The ring is `lcm(1..=6)` — the
+/// smallest number on which halves, thirds, quarters, fifths and sixths
+/// each land on a slot. Change the requirement and the constant follows;
+/// there is nowhere to edit it independently.
+#[test]
+fn the_ring_is_the_answer_to_its_own_requirement() {
+    assert_eq!(ratio::lcm_through(ratio::RING_SUBDIVISIONS), ratio::TURN_SLOTS);
+    assert_eq!(ratio::TURN_SLOTS, 60, "the requirement evaluates to sixty");
+
+    // It is the SMALLEST such number — the claim "sixty is not a
+    // rounding" checked rather than repeated.
+    for candidate in 1..ratio::TURN_SLOTS {
+        let divides_all = (1..=ratio::RING_SUBDIVISIONS).all(|k| candidate % k == 0);
+        assert!(
+            !divides_all,
+            "{candidate} also admits every subdivision — sixty is not minimal"
+        );
+    }
+    // And every required subdivision genuinely lands.
+    for k in 1..=ratio::RING_SUBDIVISIONS {
+        assert!(ratio::divide_ring(ratio::TURN_SLOTS, k).holds(), "{k} must divide");
+    }
+}
+
+/// **ELEVEN IS A SUM, NOT A NUMBER** — `(1 leap + 5 conditions + 1
+/// crown) + 4 works`. Written as `11`, the day a sixth condition lands
+/// someone edits one crate and not the other.
+#[test]
+fn the_stack_is_the_sum_of_its_own_parts() {
+    use solver_verify::shell::{
+        BASE_NODES, CHARTERED_WORKS, CRYSTALLIZED_CONDITIONS, GIFTED_CROWN, SOLAR_LEAP,
+    };
+    assert_eq!(SOLAR_LEAP + CRYSTALLIZED_CONDITIONS + GIFTED_CROWN, BASE_NODES);
+    assert_eq!(BASE_NODES, 7, "the base tier the crown completes");
+    assert_eq!(BASE_NODES + CHARTERED_WORKS, STACK_NODES);
+    assert_eq!(STACK_NODES, 11);
+}
+
+/// **EVERY CALL PROVES ITS SHAPE.** A refusal carries the numbers that
+/// decided it, so it teaches the law instead of merely denying.
+#[test]
+fn a_shape_call_returns_its_derivation() {
+    use solver_verify::shell::ShapeVerdict;
+
+    let held = Shell::examine(5, 12, 60);
+    assert!(held.holds(), "{}", held.because());
+    assert!(held.because().contains("5 slots"), "the cell span is reported: {}", held.because());
+
+    // A longitude off the ring names the remainder.
+    let bad_long = Shell::examine(5, 7, 35);
+    assert!(matches!(bad_long, ShapeVerdict::LongitudeOffSlot(_)));
+    assert!(
+        bad_long.because().contains("left over"),
+        "the refusal must show the remainder: {}",
+        bad_long.because()
+    );
+
+    // A latitude off the HALVED ring names the halved ring, and says
+    // why it differs from the longitude's.
+    let bad_lat = Shell::examine(4, 12, 48);
+    assert!(matches!(bad_lat, ShapeVerdict::LatitudeOffSlot(_)));
+    assert!(
+        bad_lat.because().contains("30"),
+        "the refusal must name the halved ring: {}",
+        bad_lat.because()
+    );
+
+    // A cell count mismatch says what was wanted.
+    assert!(matches!(
+        Shell::examine(5, 12, 59),
+        ShapeVerdict::CellCountWrong { given: 59, wanted: 60 }
+    ));
+
+    // And a standing shell can show the proof that admitted it.
+    assert!(shell(5, 12).shape_proof().holds());
+}
+
+/// **THE FRAME MAP PROVES ITSELF.** The construction is valid iff the
+/// bases are coprime, so the call reports the gcd that decides it and
+/// the two CRT carriers — each checkable in one division.
+#[test]
+fn the_frame_call_carries_its_own_proof() {
+    let proof = solver_verify::shell::frame_proof();
+    assert!(proof.holds(), "{}", proof.because());
+    assert_eq!(proof.common, 1, "the bases must share no factor");
+    assert_eq!(proof.period, proof.ring * proof.stack);
+
+    // The carriers are what the proof claims — derived, not tuned.
+    assert_eq!(proof.ring_carrier % proof.ring, 1);
+    assert_eq!(proof.ring_carrier % proof.stack, 0);
+    assert_eq!(proof.stack_carrier % proof.ring, 0);
+    assert_eq!(proof.stack_carrier % proof.stack, 1);
+    assert_eq!(proof.ring_carrier, proof.stack * proof.stack, "121 = 11 squared");
+
+    // AND THE PROOF WOULD FAIL IF IT SHOULD. A shared factor collapses
+    // the map, and the reader is told by how much.
+    let broken = solver_verify::shell::FrameProof {
+        ring: 60,
+        stack: 10,
+        common: ratio::gcd(60, 10),
+        period: 600,
+        ring_carrier: 121,
+        stack_carrier: 540,
+    };
+    assert!(!broken.holds(), "a shared factor must refuse");
+    assert!(broken.because().contains("SHARE a factor"), "{}", broken.because());
+}

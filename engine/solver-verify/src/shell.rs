@@ -92,30 +92,101 @@ pub struct Shell {
     cells: Vec<u8>,
 }
 
+/// **WHY A SHAPE HOLDS OR DOES NOT** — the proof a caller gets back
+/// instead of a bare `None` (operator ruling 2026-08-05: *each call
+/// should prove that the shape holds or doesn\'t hold, and what the
+/// derivation is of*).
+///
+/// Every arm carries the numbers that decided it, so a refusal teaches
+/// the caller the law rather than merely denying them.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ShapeVerdict {
+    /// The shape stands, with the two divisions that admitted it.
+    Holds {
+        longitude: ratio::DivisionProof,
+        latitude: ratio::DivisionProof,
+        cells: usize,
+    },
+    /// The longitude arity does not divide the full ring.
+    LongitudeOffSlot(ratio::DivisionProof),
+    /// The latitude arity does not divide the HALVED ring. Note this
+    /// refuses arities the longitude admits — 4, 12, 20 and 60 divide
+    /// sixty and not thirty — which is the closed sphere\'s own 1:2.
+    LatitudeOffSlot(ratio::DivisionProof),
+    /// The cell count is not `bands · slots`.
+    CellCountWrong { given: usize, wanted: usize },
+    /// A hue stands off the ladder.
+    HueOffLadder { hue: u8, ladder: u8 },
+}
+
+impl ShapeVerdict {
+    pub fn holds(&self) -> bool {
+        matches!(self, ShapeVerdict::Holds { .. })
+    }
+    /// The derivation, in words, for a caller or an operator.
+    pub fn because(&self) -> String {
+        match self {
+            ShapeVerdict::Holds { longitude, latitude, cells } => format!(
+                "holds: {} cells. longitude — {}. latitude — {}",
+                cells,
+                longitude.because(),
+                latitude.because()
+            ),
+            ShapeVerdict::LongitudeOffSlot(p) => format!("longitude fails: {}", p.because()),
+            ShapeVerdict::LatitudeOffSlot(p) => format!(
+                "latitude fails: {} (the polar span is a HALF turn, so a band arity must \
+                 divide {} — not {})",
+                p.because(),
+                BAND_SLOTS,
+                TURN_SLOTS
+            ),
+            ShapeVerdict::CellCountWrong { given, wanted } => {
+                format!("cell count fails: {given} given, {wanted} wanted")
+            }
+            ShapeVerdict::HueOffLadder { hue, ladder } => {
+                format!("hue {hue} stands off a ladder of {ladder}")
+            }
+        }
+    }
+}
+
 impl Shell {
-    /// THE ONE DOOR. At least one band and one slot, the slot count
-    /// divides the ring, the cell count is `bands · slots`, every hue on
-    /// the ladder.
+    /// **EXAMINE A SHAPE, PROVING THE VERDICT.** The law, stated once,
+    /// with its reasons attached — `new` is this plus a constructor.
+    pub fn examine(bands: usize, slots: usize, cells: usize) -> ShapeVerdict {
+        let longitude = ratio::divide_ring(TURN_SLOTS, slots as i64);
+        if !longitude.holds() {
+            return ShapeVerdict::LongitudeOffSlot(longitude);
+        }
+        // The polar span is a HALF turn, so a band boundary lands on a
+        // slot of the halved ring. Same discreteness law, same reason:
+        // a cell centre between teeth is not a place.
+        let latitude = ratio::divide_ring(BAND_SLOTS, bands as i64);
+        if !latitude.holds() {
+            return ShapeVerdict::LatitudeOffSlot(latitude);
+        }
+        let wanted = bands.saturating_mul(slots);
+        if cells != wanted {
+            return ShapeVerdict::CellCountWrong { given: cells, wanted };
+        }
+        ShapeVerdict::Holds { longitude, latitude, cells }
+    }
+
+    /// THE ONE DOOR. Every admission carries the proof that admitted it.
     pub fn new(bands: usize, slots: usize, cells: Vec<u8>) -> Option<Shell> {
-        if bands == 0 || slots == 0 {
-            return None;
-        }
-        if !(TURN_SLOTS as usize).is_multiple_of(slots) {
-            return None;
-        }
-        // The polar span is a HALF turn, so a band boundary must land on
-        // a slot of the halved ring. Same discreteness law, same reason:
-        // a cell centre between slots is not a place.
-        if !(BAND_SLOTS as usize).is_multiple_of(bands) {
-            return None;
-        }
-        if cells.len() != bands.checked_mul(slots)? {
-            return None;
-        }
+        Shell::examine(bands, slots, cells.len())
+            .holds()
+            .then_some(())?;
         if cells.iter().any(|&hue| hue >= HUES) {
             return None;
         }
         Some(Shell { bands, slots, cells })
+    }
+
+    /// The proof that admitted THIS shell — available after the fact, so
+    /// a reader never has to re-derive why it stands.
+    pub fn shape_proof(&self) -> ShapeVerdict {
+        Shell::examine(self.bands, self.slots, self.cells.len())
     }
 
     pub fn bands(&self) -> usize {
@@ -289,10 +360,31 @@ pub fn vocabulary(shell: &Shell) -> Vec<Turn> {
 // individuated the population without preserving addition would be a
 // scramble; this one is a frame.
 
-/// The per-entity stack, base-11 (`survey::LAST_CONDITION`). Named here
-/// rather than imported because `solver-verify` sits below `cfe`; the
-/// two are pinned equal in `shell_pins`.
-pub const STACK_NODES: i64 = 11;
+/// **THE STACK, DERIVED FROM ITS PARTS** (operator ruling 2026-08-05:
+/// *bring these down to the theorem level*).
+///
+/// Base-11 was written as `11` in two crates. It is not a number: it is
+/// a SUM, and the sum is the sky's own structure —
+///
+/// ```text
+///     1  the solar leap
+///     5  the crystallized conditions
+///     1  the gifted crown          → 7, the BASE tier
+///     4  the chartered works       → 11, the UPLIFT
+/// ```
+///
+/// Written as the sum, a reader can see WHERE eleven comes from and a
+/// change to any part carries through. Written as `11`, the day a sixth
+/// condition lands someone edits one crate and not the other.
+pub const SOLAR_LEAP: i64 = 1;
+pub const CRYSTALLIZED_CONDITIONS: i64 = 5;
+pub const GIFTED_CROWN: i64 = 1;
+/// The BASE tier — what `base_seven_complete` waits for.
+pub const BASE_NODES: i64 = SOLAR_LEAP + CRYSTALLIZED_CONDITIONS + GIFTED_CROWN;
+/// The UPLIFT tier — one node per chartered work.
+pub const CHARTERED_WORKS: i64 = 4;
+/// **DERIVED: `7 + 4 = 11`.** Never typed.
+pub const STACK_NODES: i64 = BASE_NODES + CHARTERED_WORKS;
 
 /// The composite period: every distinct frame, once.
 pub const FRAME_PERIOD: i64 = TURN_SLOTS * STACK_NODES;
@@ -308,6 +400,66 @@ pub const FRAME_PERIOD: i64 = TURN_SLOTS * STACK_NODES;
 /// to round.
 pub fn frame_index(orbit_slot: i64, node: i64) -> i64 {
     (121 * orbit_slot + 540 * node).rem_euclid(FRAME_PERIOD)
+}
+
+/// **THE PROOF THE FRAME MAP RESTS ON** — returned by the call rather
+/// than asserted in a comment.
+///
+/// The whole construction is valid iff the two bases are coprime. This
+/// reports the gcd that decides it, the period that follows, and the two
+/// CRT coefficients — each of which is checkable by the reader in one
+/// division.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FrameProof {
+    pub ring: i64,
+    pub stack: i64,
+    pub common: i64,
+    pub period: i64,
+    /// `≡ 1 (mod ring)`, `≡ 0 (mod stack)`.
+    pub ring_carrier: i64,
+    /// `≡ 0 (mod ring)`, `≡ 1 (mod stack)`.
+    pub stack_carrier: i64,
+}
+
+impl FrameProof {
+    /// Does the shape hold? Only if the bases share no factor.
+    pub fn holds(&self) -> bool {
+        self.common == 1
+            && self.period == self.ring * self.stack
+            && self.ring_carrier.rem_euclid(self.ring) == 1
+            && self.ring_carrier.rem_euclid(self.stack) == 0
+            && self.stack_carrier.rem_euclid(self.ring) == 0
+            && self.stack_carrier.rem_euclid(self.stack) == 1
+    }
+    pub fn because(&self) -> String {
+        match self.holds() {
+            true => format!(
+                "gcd({}, {}) = 1, so the frames are individual and the period is {}. \
+                 Carriers {} (=1 mod {}, =0 mod {}) and {} (=0 mod {}, =1 mod {})",
+                self.ring, self.stack, self.period,
+                self.ring_carrier, self.ring, self.stack,
+                self.stack_carrier, self.ring, self.stack
+            ),
+            false => format!(
+                "gcd({}, {}) = {} — the bases SHARE a factor, so the map collapses: \
+                 {} pairs would fold onto {} indices and entities would collide",
+                self.ring, self.stack, self.common,
+                self.ring * self.stack, self.period / self.common.max(1)
+            ),
+        }
+    }
+}
+
+/// Prove the frame map, from the bases themselves.
+pub fn frame_proof() -> FrameProof {
+    FrameProof {
+        ring: TURN_SLOTS,
+        stack: STACK_NODES,
+        common: ratio::gcd(TURN_SLOTS, STACK_NODES),
+        period: FRAME_PERIOD,
+        ring_carrier: 121,
+        stack_carrier: 540,
+    }
 }
 
 /// The orbital slot and stack node a frame index came from — the
