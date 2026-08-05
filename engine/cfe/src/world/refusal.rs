@@ -67,9 +67,10 @@ pub enum ActionRefused {
     /// fraction reached 1: this pair is economically walled off by
     /// decay physics, not by rule.
     EconomicallyWalled { melt: Box<Ratio> },
-    /// MANU-1 — an instrument grade is a crystallized condition, 1–6.
-    InstrumentGradeUnknown { condition: u8 },
     /// MANU-1 — the line has not crystallized this condition here.
+    /// (The unknown-grade arm that preceded this died at the
+    /// `ForgeableGrade` door, 29_CONSTRUCTION: the vocabulary decides
+    /// forgeability, so an unknown grade cannot be constructed.)
     ConditionUncrystallized { condition: u8 },
     /// MANU-1 — the converter chain does not stand on this orb.
     ChainIncomplete { needs: ZoneKind },

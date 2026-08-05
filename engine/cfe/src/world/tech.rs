@@ -78,10 +78,16 @@ impl World {
     /// diamond (v1 placeholders at the condition table's cadence).
     /// The scan-reach law reads the best grade held: reach = base +
     /// grade — never a global constant again.
-    pub fn forge_instrument(&mut self, orb: u64, condition: u8) -> Result<(), ActionRefused> {
-        if condition == 0 || condition > 6 {
-            return Err(ActionRefused::InstrumentGradeUnknown { condition });
-        }
+    pub fn forge_instrument(
+        &mut self,
+        orb: u64,
+        grade: crate::world::survey::ForgeableGrade,
+    ) -> Result<(), ActionRefused> {
+        // The grade shape died at the `ForgeableGrade` door
+        // (29_CONSTRUCTION): the vocabulary said crystallized or crown,
+        // or this call could not be written. Only the facts of this
+        // orb's sky remain.
+        let condition = grade.condition();
         let tech_hash = self
             .techs
             .iter()

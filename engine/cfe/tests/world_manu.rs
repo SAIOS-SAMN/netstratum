@@ -31,18 +31,24 @@ fn manufacturer() -> World {
 
 #[test]
 fn the_forge_gates_then_holds() {
+    use cfe::world::survey::{forgeable_grade, ForgeableGrade};
     let mut world = manufacturer();
     // Understanding gates: condition 1 has not crystallized.
     assert_eq!(
-        world.forge_instrument(FIRST_ORB, 1),
+        world.forge_instrument(FIRST_ORB, forgeable_grade(1)),
         Err(ActionRefused::ConditionUncrystallized { condition: 1 }),
         "the understanding comes before the instrument"
     );
-    // Grade vocabulary is closed.
-    assert_eq!(
-        world.forge_instrument(FIRST_ORB, 7),
-        Err(ActionRefused::InstrumentGradeUnknown { condition: 7 }),
-    );
+    // Sharpened by the door (29_CONSTRUCTION): an unforgeable grade
+    // cannot be CONSTRUCTED — the leap (0), the lesson (7) and the
+    // uplift works never become a ForgeableGrade, so the dead
+    // InstrumentGradeUnknown arm has no case left to catch.
+    for outside in [0u8, 7, 8, 99] {
+        assert!(
+            ForgeableGrade::new(outside).is_none(),
+            "condition {outside} must not construct a forgeable grade"
+        );
+    }
     // Crystallize condition 1 (the granted path — understanding lands).
     let agent = world.register_agent("gifting-hand").expect("registers");
     world.grant(agent, Scope::Build).expect("granted");
@@ -50,12 +56,12 @@ fn the_forge_gates_then_holds() {
     // Grade 3 needs the synthesizer leg too — the chain gates.
     world.grant_tech_as(agent, FIRST_ORB, 3).expect("condition 3 crystallizes");
     assert_eq!(
-        world.forge_instrument(FIRST_ORB, 3),
+        world.forge_instrument(FIRST_ORB, forgeable_grade(3)),
         Err(ActionRefused::ChainIncomplete { needs: ZoneKind::Synthesizer }),
     );
     // Grade 1 forges: one alloy for the frame, receipted.
     let alloy_before = world.orb().unwrap().banked_amount(Resource::Alloy);
-    world.forge_instrument(FIRST_ORB, 1).expect("the instrument forges");
+    world.forge_instrument(FIRST_ORB, forgeable_grade(1)).expect("the instrument forges");
     let orb = world.orb().unwrap();
     assert_eq!(
         orb.banked_amount(Resource::Alloy),

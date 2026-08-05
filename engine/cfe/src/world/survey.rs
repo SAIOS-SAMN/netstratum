@@ -92,6 +92,36 @@ pub fn node_kind(condition: u8) -> NodeKind {
     }
 }
 
+/// **A GRADE AN INSTRUMENT CAN BE FORGED AT, proven at construction**
+/// (P1, 29_CONSTRUCTION). The `InstrumentGradeUnknown` arm died at
+/// this door: forgeability is decidable from the value alone by asking
+/// the vocabulary — [`node_kind`] must say crystallized or crown — so
+/// the hand-written `1..=6` range at the verb is gone, and a sixth
+/// crystallized condition landing moves this door by itself. The leap
+/// (0), the lesson (7) and the uplift works stay unforgeable because
+/// they never construct.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ForgeableGrade(u8);
+
+impl ForgeableGrade {
+    pub fn new(condition: u8) -> Option<ForgeableGrade> {
+        matches!(node_kind(condition), NodeKind::Crystallized | NodeKind::Crown)
+            .then_some(ForgeableGrade(condition))
+    }
+    /// The condition this grade IS — grade and condition are one
+    /// number by MANU-1's own law.
+    pub fn condition(&self) -> u8 {
+        self.0
+    }
+}
+
+/// The literal door — a malformed literal is a build error in a
+/// runtime coat.
+pub fn forgeable_grade(condition: u8) -> ForgeableGrade {
+    ForgeableGrade::new(condition)
+        .expect("a forgeable grade must be a crystallized or crown condition")
+}
+
 /// How many conditions are of a kind — counted, never asserted.
 pub fn count_of(kind: NodeKind) -> u8 {
     (0u8..=u8::MAX)

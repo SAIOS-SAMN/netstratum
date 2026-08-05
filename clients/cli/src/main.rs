@@ -1082,9 +1082,16 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         // MANU-1 (10 §3f): forge an instrument — manufacturing is
         // technology + understanding + industry; grade = condition,
         // and the scan horizon reads the best grade held.
-        Some("forge") => match words.next().and_then(|w| w.parse::<u8>().ok()) {
-            Some(condition) => {
-                match world.forge_instrument(cfe::world::FIRST_ORB, condition) {
+        // The grade is proven at THIS door (29_CONSTRUCTION): the
+        // vocabulary decides forgeability, so an unknown grade never
+        // reaches the verb.
+        Some("forge") => match words
+            .next()
+            .and_then(|w| w.parse::<u8>().ok())
+            .map(|condition| (condition, cfe::world::survey::ForgeableGrade::new(condition)))
+        {
+            Some((condition, Some(grade))) => {
+                match world.forge_instrument(cfe::world::FIRST_ORB, grade) {
                     Ok(()) => println!(
                         "{} the grade-{} instrument FORGES — the scan horizon grows",
                         style.ok("⚙"),
@@ -1093,8 +1100,13 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     Err(refusal) => refuse(world, &refusal, style),
                 }
             }
+            Some((condition, None)) => println!(
+                "{} {} is not a forgeable grade — the vocabulary says crystallized or crown, and only those construct",
+                style.bad("✗"),
+                style.strong(&condition.to_string())
+            ),
             None => println!(
-                "{} usage: {} — grade is a crystallized condition 1..6",
+                "{} usage: {} — grade is a crystallized or crown condition",
                 style.bad("✗"),
                 style.strong("forge <condition>")
             ),
@@ -3868,10 +3880,6 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
         ActionRefused::EconomicallyWalled { melt } => format!(
             "the void takes {} of every unit at this distance — this pair is economically WALLED; charter a route or trade nearer",
             style.strong(&format!("{}/{}", melt.numer(), melt.denom()))
-        ),
-        ActionRefused::InstrumentGradeUnknown { condition } => format!(
-            "an instrument grade is a crystallized condition 1..6 — {} is outside the sky",
-            style.strong(&condition.to_string())
         ),
         ActionRefused::ConditionUncrystallized { condition } => format!(
             "condition {} has not crystallized here — the understanding comes before the instrument",
