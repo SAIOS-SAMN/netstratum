@@ -1439,7 +1439,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             "{} {}\n     {}",
                             style.bad("✗"),
                             style.strong("t0 mint <axis> <sigil> <word> <channel>:<p>/<q> ..."),
-                            style.dim("e.g. t0 mint class ⌘ covenantal 1:7/4 2:7/4   (axes: 1 disposition · 2 metabolism · 3 perception · 4 class · 5 clade · 6 practice; channels: 1 yield · 2 upkeep · 3 survey; no axis mints an OFFICE)")
+                            style.dim("e.g. t0 mint class ⌘ covenantal 1:7/4 2:7/4   (axes: 1 disposition · 2 metabolism · 3 perception · 4 class · 5 clade · 6 practice; channels: 1 yield · 2 upkeep · 3 survey · 4 demurrage · 5 hab-yield · 6 hab-upkeep · 7 ext-upkeep · 8 conv-yield · 9 align gate · 10 temper gate; no axis mints an OFFICE)")
                         )
                     };
                     let axis_word = words.next();
@@ -1514,7 +1514,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                 BindingFault::ChannelUnknown { channel } => format!(
                                     "channel {} is not one the engine computes — the table grows by LANDING a channel ({})",
                                     style.strong(&channel.to_string()),
-                                    style.dim("1 yield · 2 upkeep · 3 survey")
+                                    style.dim("1 yield · 2 upkeep · 3 survey · 4 demurrage · 5 hab-yield · 6 hab-upkeep · 7 ext-upkeep · 8 conv-yield · 9 align gate · 10 temper gate")
                                 ),
                                 BindingFault::FactorOutOfBounds { channel } => format!(
                                     "the factor on channel {} falls outside {}",

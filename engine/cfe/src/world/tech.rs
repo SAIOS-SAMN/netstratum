@@ -6,7 +6,45 @@
 
 use super::*;
 
+/// The discipline's mechanism, from the practice vocabulary's seed.
+///
+/// Adoption refuses codes past the seed until the mint door opens, so
+/// the seed IS the fold for every adoptable code today; #36 step 3
+/// swaps this to `fold_at` the adoption stamp when minted practices
+/// become adoptable.
+pub(super) fn practice_binding(code: u8) -> Vec<(u8, Ratio)> {
+    crate::vocabulary::seed(crate::vocabulary::Axis::Practice)
+        .into_iter()
+        .find(|entry| entry.code == code)
+        .map(|entry| entry.binding)
+        .unwrap_or_default()
+}
+
 impl World {
+    /// The composed factor the ADOPTED disciplines apply on a channel —
+    /// the product across practices, 1 where all are silent. This is
+    /// the read that replaced the bespoke `contains(&N)` branches
+    /// (operator ruling 2026-08-05): a practice ACTS only through its
+    /// binding data.
+    pub(super) fn practice_factor(&self, channel: u8) -> Ratio {
+        self.practices.iter().fold(ratio(1, 1), |acc, code| {
+            acc * crate::vocabulary::factor_on(&practice_binding(*code), channel)
+        })
+    }
+
+    /// The strictest gate any adopted discipline declares on a channel
+    /// — thresholds take the MAX, never the product: two disciplines
+    /// each holding the climb to a half do not soften it to a quarter.
+    /// `None` when no adopted practice binds the gate.
+    pub(super) fn practice_gate(&self, channel: u8) -> Option<Ratio> {
+        self.practices
+            .iter()
+            .filter_map(|code| {
+                crate::vocabulary::gate_of(&practice_binding(*code), channel)
+            })
+            .max()
+    }
+
     /// TECH-1a: the discovered nodes — (orb, condition, node id).
     pub fn techs(&self) -> &[(u64, u8, [u8; 32])] {
         &self.techs
@@ -215,7 +253,12 @@ impl World {
         if self.practices.contains(&practice) {
             return Err(ActionRefused::PracticeAlreadyAdopted { practice });
         }
-        if practice == 5 {
+        // The tempering gate, read from the discipline's OWN data
+        // (CHANNEL_TEMPER) — no practice is named here. Only the
+        // Overdrive binds it today, so the refusal keeps its name.
+        if let Some(threshold) =
+            crate::vocabulary::gate_of(&practice_binding(practice), crate::vocabulary::CHANNEL_TEMPER)
+        {
             let hardships = self
                 .chronicle
                 .receipts()
@@ -230,7 +273,7 @@ impl World {
                     )
                 })
                 .count();
-            if hardships < 8 {
+            if ratio(hardships as i64, 1) < threshold {
                 return Err(ActionRefused::OverdriveUntempered { hardships });
             }
         }

@@ -115,16 +115,19 @@ impl World {
                 && matches!(receipt.event, ClosureEvent::YieldCollected { .. })
         });
         let crossed = self.crossed;
-        // PRACTICE-1 (operator-ruled): an adopted discipline must
+        // CHANNEL_ALIGN (operator-ruled): an adopted discipline must
         // stand ALIGNED — the syntropy ratio (09 §2.5, engine read)
-        // holds the floor (placeholder 1/2) or the climb refuses. The
-        // alignment loop: resolve the friction to rise. A line with no
-        // practice, or no deeds posted, stands aligned.
-        let aligned = self.practices.is_empty()
-            || self
+        // holds the floor the disciplines THEMSELVES declare, or the
+        // climb refuses. The alignment loop: resolve the friction to
+        // rise. No adopted practice binds the gate → no floor → a line
+        // with no practice, or no deeds posted, stands aligned.
+        let aligned = match self.practice_gate(crate::vocabulary::CHANNEL_ALIGN) {
+            None => true,
+            Some(floor) => self
                 .syntropy_ratio()
-                .map(|ratio_read| ratio_read >= ratio(1, 2))
-                .unwrap_or(true);
+                .map(|ratio_read| ratio_read >= floor)
+                .unwrap_or(true),
+        };
         if !(settled && coherent && crossed && aligned) {
             return Err(ActionRefused::ElevationBarred { settled, coherent, crossed, aligned });
         }

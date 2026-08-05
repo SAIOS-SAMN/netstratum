@@ -270,21 +270,21 @@ fn a_dominant_mint_is_refused_at_the_door() {
     // judges the raw entries, so the claim itself is what refuses.
     assert!(matches!(
         TradingBinding::new(vec![
-            (9, ratio(5, 4)),
+            (99, ratio(5, 4)),
             (CHANNEL_UPKEEP, ratio(3, 4)),
         ]),
-        Err(BindingFault::ChannelUnknown { channel: 9 })
+        Err(BindingFault::ChannelUnknown { channel: 99 })
     ));
     // The strengthening the door buys: a phantom channel riding BESIDE
     // a lawful trade passed the dead gate and entered the receipt as
     // dead weight. It no longer constructs.
     assert!(matches!(
         TradingBinding::new(vec![
-            (9, ratio(5, 4)),
+            (99, ratio(5, 4)),
             (CHANNEL_YIELD, ratio(5, 4)),
             (CHANNEL_UPKEEP, ratio(5, 4)),
         ]),
-        Err(BindingFault::ChannelUnknown { channel: 9 })
+        Err(BindingFault::ChannelUnknown { channel: 99 })
     ));
     // And the empty binding is lawful — Article II's ground state.
     assert!(TradingBinding::new(vec![]).is_ok());

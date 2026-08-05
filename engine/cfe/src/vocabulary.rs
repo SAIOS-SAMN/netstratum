@@ -28,6 +28,30 @@ pub const CHANNEL_YIELD: u8 = 1;
 pub const CHANNEL_UPKEEP: u8 = 2;
 /// The survey draw — `world::survey`. Less is better.
 pub const CHANNEL_SURVEY: u8 = 3;
+/// Demurrage decay — every `demurrage_due` read. Less is better (the
+/// stores keep). Landed by the practice ruling (2026-08-05): the Hoard
+/// binds it below one.
+pub const CHANNEL_DEMURRAGE: u8 = 4;
+/// Habitat yield alone — the tick prices habitats separately, so the
+/// channel exists separately. More is better.
+pub const CHANNEL_HABITAT_YIELD: u8 = 5;
+/// Habitat upkeep alone. Less is better.
+pub const CHANNEL_HABITAT_UPKEEP: u8 = 6;
+/// Extractor upkeep alone. Less is better.
+pub const CHANNEL_EXTRACTOR_UPKEEP: u8 = 7;
+/// Converter (smelter/synthesizer/resonator) yield alone. More is
+/// better.
+pub const CHANNEL_CONVERTER_YIELD: u8 = 8;
+/// **GATE — the elevation alignment floor** (syntropy ratio the climb
+/// must hold, `genesis::elevate`). A gate is not a multiplier: its
+/// value is a THRESHOLD, it is read by explicit entry (silence means
+/// no gate, never "gate of one"), and binding one is always FRICTION —
+/// a gate only ever constrains its holder.
+pub const CHANNEL_ALIGN: u8 = 9;
+/// **GATE — the adoption tempering threshold** (hardship receipts the
+/// chronicle must hold before `adopt_practice` opens). The Overdrive
+/// binds 8.
+pub const CHANNEL_TEMPER: u8 = 10;
 
 /// The closed channel table.
 ///
@@ -37,7 +61,18 @@ pub const CHANNEL_SURVEY: u8 = 3;
 /// never by a binding naming one that is not there. Research rate and
 /// route friction are the obvious next two and are deliberately absent
 /// until they are wired.
-pub const CHANNELS: [u8; 3] = [CHANNEL_YIELD, CHANNEL_UPKEEP, CHANNEL_SURVEY];
+pub const CHANNELS: [u8; 10] = [
+    CHANNEL_YIELD,
+    CHANNEL_UPKEEP,
+    CHANNEL_SURVEY,
+    CHANNEL_DEMURRAGE,
+    CHANNEL_HABITAT_YIELD,
+    CHANNEL_HABITAT_UPKEEP,
+    CHANNEL_EXTRACTOR_UPKEEP,
+    CHANNEL_CONVERTER_YIELD,
+    CHANNEL_ALIGN,
+    CHANNEL_TEMPER,
+];
 
 /// **DOES A FACTOR ABOVE 1 HELP ON THIS CHANNEL?**
 ///
@@ -47,11 +82,30 @@ pub const CHANNELS: [u8; 3] = [CHANNEL_YIELD, CHANNEL_UPKEEP, CHANNEL_SURVEY];
 /// because the draw is a COST. A structural rule of "one factor above 1
 /// and one below" would have called a class that raises upkeep and
 /// lowers yield a fair trade when it is strictly worse on both.
+///
+/// Gate channels have no answer here — a gate is judged by
+/// [`channel_is_gate`], never by polarity.
 pub fn channel_favours_increase(channel: u8) -> bool {
+    matches!(
+        channel,
+        CHANNEL_YIELD | CHANNEL_HABITAT_YIELD | CHANNEL_CONVERTER_YIELD
+    )
+}
+
+/// A GATE channel carries a threshold, not a multiplier: read by
+/// explicit entry, always friction, bounded by its own law.
+pub fn channel_is_gate(channel: u8) -> bool {
+    matches!(channel, CHANNEL_ALIGN | CHANNEL_TEMPER)
+}
+
+/// The lawful factor bounds, PER CHANNEL. Mechanism channels keep the
+/// fourfold band; the alignment floor is a share of one; the tempering
+/// threshold is a receipt count.
+pub fn channel_bounds(channel: u8) -> (Ratio, Ratio) {
     match channel {
-        CHANNEL_YIELD => true,
-        CHANNEL_UPKEEP | CHANNEL_SURVEY => false,
-        _ => false,
+        CHANNEL_ALIGN => (ratio(1, 4), ratio(1, 1)),
+        CHANNEL_TEMPER => (ratio(1, 1), ratio(16, 1)),
+        _ => (ratio(1, 4), ratio(4, 1)),
     }
 }
 
@@ -67,6 +121,18 @@ pub type Binding = [(u8, Ratio)];
 /// never on a directional quantity, so `24_FORM` §2b is untouched.
 pub fn factor_in_bounds(factor: &Ratio) -> bool {
     *factor >= ratio(1, 4) && *factor <= ratio(4, 1)
+}
+
+/// The gate a binding declares on `channel`, by EXPLICIT entry —
+/// silence is NO gate, never a gate of one. `factor_on`'s identity
+/// default is right for multipliers and wrong for thresholds: a
+/// binding that says nothing about tempering demands no receipts, not
+/// one receipt.
+pub fn gate_of(binding: &Binding, channel: u8) -> Option<Ratio> {
+    binding
+        .iter()
+        .any(|(held, _)| *held == channel)
+        .then(|| factor_on(binding, channel))
 }
 
 /// The factor a binding applies on one channel — the PRODUCT of every
@@ -165,13 +231,22 @@ impl TradingBinding {
         for (channel, factor) in canon {
             // Factors are judged on the COMPOSED form: two entries of
             // 3/1 on one channel are a ninefold, and 5/4 × 4/5 is
-            // silence, exactly as `factor_on` computes them.
-            if !factor_in_bounds(&factor) {
+            // silence, exactly as `factor_on` computes them — and each
+            // channel is judged against ITS OWN bounds.
+            let (low, high) = channel_bounds(channel);
+            if factor < low || factor > high {
                 return Err(BindingFault::FactorOutOfBounds { channel });
             }
-            match (factor > ratio(1, 1)) == channel_favours_increase(channel) {
-                true => benefit = true,
-                false => friction = true,
+            // A gate is always friction — it only ever constrains its
+            // holder — and it carries no polarity to judge.
+            match channel_is_gate(channel) {
+                true => friction = true,
+                false => {
+                    match (factor > ratio(1, 1)) == channel_favours_increase(channel) {
+                        true => benefit = true,
+                        false => friction = true,
+                    }
+                }
             }
         }
         if !benefit {
@@ -322,7 +397,60 @@ pub fn seed(axis: Axis) -> Vec<Entry> {
             })
             .collect(),
         Axis::Clade => (0..=20).map(|code| plain(code, clade_word(code))).collect(),
-        Axis::Practice => (1..=5).map(|code| plain(code, practice_word(code))).collect(),
+        // **THE PRACTICE MECHANISMS ARE DATA** (operator ruling
+        // 2026-08-05): each discipline is a factor set over the landed
+        // channels, one benefit, one friction, exact — the bespoke
+        // tick branches these replace are gone. Every practice binds
+        // the alignment gate (the climb holds the syntropy floor while
+        // any discipline is adopted); the Overdrive alone binds the
+        // tempering gate.
+        Axis::Practice => {
+            let lean = ratio(3, 4);
+            let keen = ratio(5, 4);
+            let half = ratio(1, 2);
+            let double = ratio(2, 1);
+            let tempered = ratio(8, 1);
+            let bound = |code: u8, binding: Vec<(u8, Ratio)>| Entry {
+                code,
+                sigil: String::new(),
+                word: practice_word(code).into(),
+                binding,
+            };
+            vec![
+                // austerity: the habitats dim, the extractors ration.
+                bound(1, vec![
+                    (CHANNEL_HABITAT_YIELD, lean.clone()),
+                    (CHANNEL_EXTRACTOR_UPKEEP, lean.clone()),
+                    (CHANNEL_ALIGN, half.clone()),
+                ]),
+                // showpiece: the habitats shine and eat double.
+                bound(2, vec![
+                    (CHANNEL_HABITAT_YIELD, keen.clone()),
+                    (CHANNEL_HABITAT_UPKEEP, double),
+                    (CHANNEL_ALIGN, half.clone()),
+                ]),
+                // restraint: the lens disciplined — the draw halves;
+                // the alignment gate is its friction.
+                bound(3, vec![
+                    (CHANNEL_SURVEY, half.clone()),
+                    (CHANNEL_ALIGN, half.clone()),
+                ]),
+                // hoard: the stores keep, the converters slow.
+                bound(4, vec![
+                    (CHANNEL_CONVERTER_YIELD, lean),
+                    (CHANNEL_DEMURRAGE, half.clone()),
+                    (CHANNEL_ALIGN, half.clone()),
+                ]),
+                // overdrive: everything runs hot — and it takes only
+                // the tempered.
+                bound(5, vec![
+                    (CHANNEL_YIELD, keen.clone()),
+                    (CHANNEL_UPKEEP, keen),
+                    (CHANNEL_ALIGN, half),
+                    (CHANNEL_TEMPER, tempered),
+                ]),
+            ]
+        }
     }
 }
 

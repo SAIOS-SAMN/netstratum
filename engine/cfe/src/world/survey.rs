@@ -430,10 +430,9 @@ impl World {
         // post-decay read): a refusal draws nothing, reads nothing,
         // orphans nothing.
         let mut draw = crate::dop::scan_draw();
-        // PRACTICE-1 the Restraint: the lens disciplined — the draw halves.
-        if self.practices.contains(&3) {
-            draw *= ratio(1, 2);
-        }
+        // CHANNEL_SURVEY: the adopted disciplines' composed draw factor
+        // (the Restraint binds 1/2 — the lens disciplined).
+        draw *= self.practice_factor(crate::vocabulary::CHANNEL_SURVEY);
         // 28_VOCABULARY V0, CHANNEL_SURVEY: the sealed class's own
         // mechanism. A metashifter sees for half the draw; a
         // pelagic-aerial line, having no fixed vantage, pays more.

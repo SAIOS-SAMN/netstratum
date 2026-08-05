@@ -207,12 +207,19 @@ impl World {
         let stamp_now = self.clock.now();
         // D3: the charted seed, read once — uncharted boosts read 1.
         let terrain = self.terrain_seed;
-        // PRACTICE-1: the bound disciplines, read once — one benefit,
-        // one friction each (14 §4; constants placeholder).
-        let austerity = self.practices.contains(&1);
-        let showpiece = self.practices.contains(&2);
-        let hoard = self.practices.contains(&4);
-        let overdrive = self.practices.contains(&5);
+        // PRACTICE-1: the bound disciplines, read once — PURE DATA over
+        // the channel table (operator ruling 2026-08-05): a practice
+        // acts only through its binding; the bespoke branches are gone.
+        use crate::vocabulary::{
+            CHANNEL_CONVERTER_YIELD, CHANNEL_EXTRACTOR_UPKEEP, CHANNEL_HABITAT_UPKEEP,
+            CHANNEL_HABITAT_YIELD,
+        };
+        let practice_yield = self.practice_factor(crate::vocabulary::CHANNEL_YIELD);
+        let practice_upkeep = self.practice_factor(crate::vocabulary::CHANNEL_UPKEEP);
+        let practice_habitat_yield = self.practice_factor(CHANNEL_HABITAT_YIELD);
+        let practice_habitat_upkeep = self.practice_factor(CHANNEL_HABITAT_UPKEEP);
+        let practice_extractor_upkeep = self.practice_factor(CHANNEL_EXTRACTOR_UPKEEP);
+        let practice_converter_yield = self.practice_factor(CHANNEL_CONVERTER_YIELD);
         // 28_VOCABULARY V0: the sealed class's own mechanism, read once.
         // Before this the class was a term that only resonated — sealed,
         // replayed, and read by no rule (LAW 8's excision test). An
@@ -384,29 +391,21 @@ impl World {
                     // The class's mechanism composes WITH the adopted
                     // practices, never instead of them: identity and
                     // discipline are different claims on the same world.
-                    let mut yield_factor = class_yield.clone();
-                    let mut upkeep_factor = class_upkeep.clone();
-                    if overdrive {
-                        yield_factor *= ratio(5, 4);
-                        upkeep_factor *= ratio(5, 4);
-                    }
+                    // Every factor here is CHANNEL DATA — the global
+                    // channels apply everywhere, the zone-scoped ones
+                    // where the zone kind matches, silence reads 1.
+                    let mut yield_factor = class_yield.clone() * practice_yield.clone();
+                    let mut upkeep_factor = class_upkeep.clone() * practice_upkeep.clone();
                     match zone.kind {
                         ZoneKind::Habitat => {
-                            if showpiece {
-                                yield_factor *= ratio(5, 4);
-                                upkeep_factor *= ratio(2, 1);
-                            }
-                            if austerity {
-                                yield_factor *= ratio(3, 4);
-                            }
+                            yield_factor *= practice_habitat_yield.clone();
+                            upkeep_factor *= practice_habitat_upkeep.clone();
                         }
-                        ZoneKind::Extractor if austerity => {
-                            upkeep_factor *= ratio(3, 4);
+                        ZoneKind::Extractor => {
+                            upkeep_factor *= practice_extractor_upkeep.clone();
                         }
-                        ZoneKind::Smelter | ZoneKind::Synthesizer | ZoneKind::Resonator
-                            if hoard =>
-                        {
-                            yield_factor *= ratio(3, 4);
+                        ZoneKind::Smelter | ZoneKind::Synthesizer | ZoneKind::Resonator => {
+                            yield_factor *= practice_converter_yield.clone();
                         }
                         _ => {}
                     }

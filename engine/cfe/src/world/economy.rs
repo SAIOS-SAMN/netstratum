@@ -475,9 +475,10 @@ impl World {
         {
             let source = peek(&self.orbs, from)
                 .expect("checked above");
-            // PRACTICE-1 the Hoard: the stores keep — decay halves.
-            let hoard_keep = if self.practices.contains(&4) { ratio(1, 2) } else { ratio(1, 1) };
-            let decay = hoard_keep * demurrage_due(source, star, stamp, &ease_of(&self.techs, from, stamp), &super::rules::standing_supply(&self.orbs))
+            // CHANNEL_DEMURRAGE: the adopted disciplines' composed
+            // decay factor (the Hoard binds 1/2 — the stores keep).
+            let keep = self.practice_factor(crate::vocabulary::CHANNEL_DEMURRAGE);
+            let decay = keep * demurrage_due(source, star, stamp, &ease_of(&self.techs, from, stamp), &super::rules::standing_supply(&self.orbs))
                 .into_iter()
                 .find(|(due, _)| *due == resource)
                 .map(|(_, decay)| decay)
@@ -618,9 +619,10 @@ impl World {
         {
             let held = peek(&self.orbs, absorber)
                 .expect("checked above");
-            // PRACTICE-1 the Hoard: the stores keep — decay halves.
-            let hoard_keep = if self.practices.contains(&4) { ratio(1, 2) } else { ratio(1, 1) };
-            let decay = hoard_keep * demurrage_due(held, star, stamp, &ease_of(&self.techs, absorber, stamp), &super::rules::standing_supply(&self.orbs))
+            // CHANNEL_DEMURRAGE: the adopted disciplines' composed
+            // decay factor (the Hoard binds 1/2 — the stores keep).
+            let keep = self.practice_factor(crate::vocabulary::CHANNEL_DEMURRAGE);
+            let decay = keep * demurrage_due(held, star, stamp, &ease_of(&self.techs, absorber, stamp), &super::rules::standing_supply(&self.orbs))
                 .into_iter()
                 .find(|(due, _)| *due == Resource::Sink)
                 .map(|(_, decay)| decay)
