@@ -196,19 +196,19 @@ pub enum ActionRefused {
     NoSuchBond,
     /// FORWARD-1 — one OPEN forward per (obligor, beneficiary,
     /// resource); a vitrified pact cannot be cancelled, only run out.
-    ForwardAlreadySealed,    /// BOOK-1 (19_LENS §16) — a book kind is content-addressed over its
+    ForwardAlreadySealed,
+    /// BOOK-1 (19_LENS §16) — a book kind is content-addressed over its
     /// NORMALIZED name, so re-declaring one is not a second book. This
     /// IS the novelty gate: exact, unthresholded, and it names the book
-    /// already standing rather than a distance.
+    /// already standing rather than a distance. (The empty normal form
+    /// and the charter-mint collision died at the `BookName` door; the
+    /// negative posting died at the `NonNegative` doors —
+    /// 29_CONSTRUCTION.)
     BookAlreadyMinted { name: String },
-    /// BOOK-1 — the charter's four are law, not inventory: they cannot
-    /// be minted over, and they cannot be archived by anyone.
-    CharterBookNotMintable { name: String },
     /// BOOK-1 (§16c) — closing the covenant book must never be a way to
-    /// stop being measured by it.
+    /// stop being measured by it. Archiving is addressed by KIND, not
+    /// by name, so this stays a fact of the charter table at the verb.
     CharterBookNotArchivable { name: String },
-    /// BOOK-1 — a name that normalizes to nothing addresses nothing.
-    BookNameEmpty,
     /// BOOK-1 — this orb keeps no such book.
     NoSuchBook,
     /// BOOK-1 (§16c) — an archived book is closed to WRITING. It keeps
@@ -216,10 +216,6 @@ pub enum ActionRefused {
     BookClosedToWriting { name: String },
     /// BOOK-1 — a book already closed cannot be closed again.
     BookAlreadyArchived { name: String },
-    /// BOOK-1 — a book ACCRUES. A negative posting would let an orb
-    /// unwrite its own history, which is what the chronicle exists to
-    /// prevent.
-    BookPostingNegative,
     /// LIT-1 — the works are CHARTERED. A line invents accounts
     /// (BOOK-1); it does not invent the literature it reaches for.
     NoSuchWork { name: String },

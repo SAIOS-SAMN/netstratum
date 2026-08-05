@@ -5,8 +5,9 @@
 //! must not launder, and the charter's books must be closeable by
 //! nobody.
 
-use cfe::books::{is_charter, kind_of, normalize, CHARTER_BOOKS};
+use cfe::books::{book_name, is_charter, kind_of, normalize, BookName, BookNameFault, CHARTER_BOOKS};
 use cfe::dop::{ClosureEvent, ColonyOrb};
+use cfe::dop::non_negative;
 use cfe::ratio::ratio;
 use cfe::world::{replay, ActionRefused, World};
 
@@ -29,11 +30,11 @@ fn orb_id(world: &World) -> u64 {
 fn a_duplicate_book_refuses_by_identity_not_by_threshold() {
     let mut world = founded();
     let orb = orb_id(&world);
-    world.mint_book(orb, "Valor").expect("first mint stands");
+    world.mint_book(orb, &book_name("Valor")).expect("first mint stands");
 
     // Exact, case, padding, and inner-whitespace variants are ONE book.
     for variant in ["Valor", "valor", "  VALOR  ", "va lor"] {
-        let again = world.mint_book(orb, variant);
+        let again = world.mint_book(orb, &book_name(variant));
         match variant {
             // "va lor" normalizes differently — it is a different name
             // and therefore honestly a different book.
@@ -59,17 +60,15 @@ fn the_normal_form_collapses_presentation_only() {
 /// normal form so padding cannot smuggle one through.
 #[test]
 fn a_charter_book_cannot_be_minted_over() {
-    let mut world = founded();
-    let orb = orb_id(&world);
     for name in CHARTER_BOOKS {
         assert!(is_charter(name));
         assert!(matches!(
-            world.mint_book(orb, name),
-            Err(ActionRefused::CharterBookNotMintable { .. })
+            BookName::new(name),
+            Err(BookNameFault::Charter { .. })
         ));
         assert!(matches!(
-            world.mint_book(orb, &format!("  {} ", name.to_lowercase())),
-            Err(ActionRefused::CharterBookNotMintable { .. })
+            BookName::new(&format!("  {} ", name.to_lowercase())),
+            Err(BookNameFault::Charter { .. })
         ));
     }
 }
@@ -77,11 +76,9 @@ fn a_charter_book_cannot_be_minted_over() {
 /// A name that normalizes to nothing addresses nothing.
 #[test]
 fn an_empty_name_addresses_no_book() {
-    let mut world = founded();
-    let orb = orb_id(&world);
     assert!(matches!(
-        world.mint_book(orb, "   "),
-        Err(ActionRefused::BookNameEmpty)
+        BookName::new("   "),
+        Err(BookNameFault::NormalizesToNothing)
     ));
 }
 
@@ -93,15 +90,15 @@ fn an_empty_name_addresses_no_book() {
 fn archiving_closes_writing_and_preserves_reading() {
     let mut world = founded();
     let orb = orb_id(&world);
-    let kind = world.mint_book(orb, "Valor").expect("mints");
+    let kind = world.mint_book(orb, &book_name("Valor")).expect("mints");
     world
-        .post_book(orb, kind, ratio(3, 1), ratio(1, 1))
+        .post_book(orb, kind, non_negative(3, 1), non_negative(1, 1))
         .expect("posts");
     world.archive_book(orb, kind).expect("archives");
 
     // Closed to WRITING.
     assert!(matches!(
-        world.post_book(orb, kind, ratio(1, 1), ratio(0, 1)),
+        world.post_book(orb, kind, non_negative(1, 1), non_negative(0, 1)),
         Err(ActionRefused::BookClosedToWriting { .. })
     ));
     // And every entry it took is still there, unchanged.
@@ -137,7 +134,7 @@ fn a_charter_book_is_closeable_by_nobody() {
 fn a_closed_book_cannot_be_closed_twice() {
     let mut world = founded();
     let orb = orb_id(&world);
-    let kind = world.mint_book(orb, "Valor").expect("mints");
+    let kind = world.mint_book(orb, &book_name("Valor")).expect("mints");
     world.archive_book(orb, kind).expect("archives");
     assert!(matches!(
         world.archive_book(orb, kind),
@@ -151,17 +148,10 @@ fn a_closed_book_cannot_be_closed_twice() {
 /// history, which is what the chronicle exists to prevent.
 #[test]
 fn a_book_cannot_be_unwritten() {
-    let mut world = founded();
-    let orb = orb_id(&world);
-    let kind = world.mint_book(orb, "Valor").expect("mints");
-    assert!(matches!(
-        world.post_book(orb, kind, ratio(-1, 1), ratio(0, 1)),
-        Err(ActionRefused::BookPostingNegative)
-    ));
-    assert!(matches!(
-        world.post_book(orb, kind, ratio(0, 1), ratio(-1, 1)),
-        Err(ActionRefused::BookPostingNegative)
-    ));
+    assert!(
+        cfe::dop::NonNegative::new(ratio(-1, 1)).is_none(),
+        "a negative side cannot even be constructed"
+    );
 }
 
 /// Both sides move together through one deed. There is no single-sided
@@ -170,12 +160,12 @@ fn a_book_cannot_be_unwritten() {
 fn a_posting_carries_both_sides_at_once() {
     let mut world = founded();
     let orb = orb_id(&world);
-    let kind = world.mint_book(orb, "Valor").expect("mints");
+    let kind = world.mint_book(orb, &book_name("Valor")).expect("mints");
     world
-        .post_book(orb, kind, ratio(2, 1), ratio(1, 1))
+        .post_book(orb, kind, non_negative(2, 1), non_negative(1, 1))
         .expect("posts");
     world
-        .post_book(orb, kind, ratio(1, 1), ratio(2, 1))
+        .post_book(orb, kind, non_negative(1, 1), non_negative(2, 1))
         .expect("posts again");
     let held = world.orb().expect("orb").book(kind).expect("kept");
     assert_eq!(held.kept, ratio(3, 1), "kept accrued");
@@ -187,7 +177,7 @@ fn posting_to_a_book_that_was_never_minted_refuses() {
     let mut world = founded();
     let orb = orb_id(&world);
     assert!(matches!(
-        world.post_book(orb, kind_of("never minted"), ratio(1, 1), ratio(0, 1)),
+        world.post_book(orb, kind_of("never minted"), non_negative(1, 1), non_negative(0, 1)),
         Err(ActionRefused::NoSuchBook)
     ));
 }
@@ -200,13 +190,13 @@ fn posting_to_a_book_that_was_never_minted_refuses() {
 fn the_registry_rebuilds_from_receipts_alone() {
     let mut world = founded();
     let orb = orb_id(&world);
-    let kept = world.mint_book(orb, "Valor").expect("mints");
-    let closed = world.mint_book(orb, "Ardor").expect("mints");
+    let kept = world.mint_book(orb, &book_name("Valor")).expect("mints");
+    let closed = world.mint_book(orb, &book_name("Ardor")).expect("mints");
     world
-        .post_book(orb, kept, ratio(5, 1), ratio(2, 1))
+        .post_book(orb, kept, non_negative(5, 1), non_negative(2, 1))
         .expect("posts");
     world
-        .post_book(orb, closed, ratio(1, 1), ratio(1, 1))
+        .post_book(orb, closed, non_negative(1, 1), non_negative(1, 1))
         .expect("posts");
     world.archive_book(orb, closed).expect("archives");
 
@@ -227,9 +217,9 @@ fn the_registry_rebuilds_from_receipts_alone() {
 fn a_minted_book_survives_the_wire() {
     let mut world = founded();
     let orb = orb_id(&world);
-    let kind = world.mint_book(orb, "Valor").expect("mints");
+    let kind = world.mint_book(orb, &book_name("Valor")).expect("mints");
     world
-        .post_book(orb, kind, ratio(7, 3), ratio(1, 5))
+        .post_book(orb, kind, non_negative(7, 3), non_negative(1, 5))
         .expect("posts");
     world.archive_book(orb, kind).expect("archives");
 
@@ -292,7 +282,7 @@ fn charter_and_minted_books_read_through_one_view() {
         4,
         "the charter four stand before anything is minted"
     );
-    world.mint_book(orb, "Valor").expect("mints");
+    world.mint_book(orb, &book_name("Valor")).expect("mints");
     let view = world.orb().expect("orb").books();
     assert_eq!(view.len(), 5);
     assert_eq!(view.iter().filter(|held| held.chartered).count(), 4);
@@ -305,7 +295,7 @@ fn charter_and_minted_books_read_through_one_view() {
 fn an_unposted_book_has_no_standing() {
     let mut world = founded();
     let orb = orb_id(&world);
-    let kind = world.mint_book(orb, "Valor").expect("mints");
+    let kind = world.mint_book(orb, &book_name("Valor")).expect("mints");
     let view = world.orb().expect("orb").books();
     let held = view.iter().find(|held| held.kind == kind).expect("minted");
     assert!(!held.posted());

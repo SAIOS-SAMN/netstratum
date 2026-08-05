@@ -7,6 +7,8 @@
 //! a line ASSERTS. The pin that matters most is the first: nothing here
 //! can be reached at stamp 0.
 
+use cfe::books::book_name;
+use cfe::dop::non_negative;
 use cfe::ratio::ratio;
 use cfe::world::World;
 
@@ -25,10 +27,10 @@ fn founded() -> (World, u64) {
 #[test]
 fn practice_cannot_be_reached_at_stamp_zero() {
     let (mut world, orb) = founded();
-    let kind = world.mint_book(orb, "Ledger").expect("mints");
+    let kind = world.mint_book(orb, &book_name("Ledger")).expect("mints");
     for _ in 0..50 {
         world
-            .post_book(orb, kind, ratio(1, 1), ratio(1, 1))
+            .post_book(orb, kind, non_negative(1, 1), non_negative(1, 1))
             .expect("posts");
     }
     let growth = world.growth_of(orb);
@@ -41,15 +43,15 @@ fn practice_cannot_be_reached_at_stamp_zero() {
 #[test]
 fn practice_is_span_against_the_age_of_the_line() {
     let (mut world, orb) = founded();
-    let kind = world.mint_book(orb, "Ledger").expect("mints");
+    let kind = world.mint_book(orb, &book_name("Ledger")).expect("mints");
     world
-        .post_book(orb, kind, ratio(1, 1), ratio(0, 1))
+        .post_book(orb, kind, non_negative(1, 1), non_negative(0, 1))
         .expect("posts");
     for _ in 0..10 {
         world.tick();
     }
     world
-        .post_book(orb, kind, ratio(1, 1), ratio(0, 1))
+        .post_book(orb, kind, non_negative(1, 1), non_negative(0, 1))
         .expect("posts later");
 
     let growth = world.growth_of(orb);
@@ -64,15 +66,15 @@ fn practice_is_span_against_the_age_of_the_line() {
 #[test]
 fn practice_dilutes_when_the_writing_stops() {
     let (mut world, orb) = founded();
-    let kind = world.mint_book(orb, "Ledger").expect("mints");
+    let kind = world.mint_book(orb, &book_name("Ledger")).expect("mints");
     world
-        .post_book(orb, kind, ratio(1, 1), ratio(0, 1))
+        .post_book(orb, kind, non_negative(1, 1), non_negative(0, 1))
         .expect("posts");
     for _ in 0..5 {
         world.tick();
     }
     world
-        .post_book(orb, kind, ratio(1, 1), ratio(0, 1))
+        .post_book(orb, kind, non_negative(1, 1), non_negative(0, 1))
         .expect("posts");
     let attentive = world.growth_of(orb).practice;
 
@@ -91,10 +93,10 @@ fn practice_dilutes_when_the_writing_stops() {
 #[test]
 fn knowledge_counts_only_accounts_written_in() {
     let (mut world, orb) = founded();
-    let used = world.mint_book(orb, "Kept").expect("mints");
-    world.mint_book(orb, "Empty").expect("mints");
+    let used = world.mint_book(orb, &book_name("Kept")).expect("mints");
+    world.mint_book(orb, &book_name("Empty")).expect("mints");
     world
-        .post_book(orb, used, ratio(1, 1), ratio(0, 1))
+        .post_book(orb, used, non_negative(1, 1), non_negative(0, 1))
         .expect("posts");
     assert_eq!(world.growth_of(orb).knowledge, 1, "an empty book is not knowledge");
 }
@@ -104,17 +106,17 @@ fn knowledge_counts_only_accounts_written_in() {
 #[test]
 fn expertise_is_depth_and_thins_as_breadth_grows() {
     let (mut world, orb) = founded();
-    let one = world.mint_book(orb, "First").expect("mints");
+    let one = world.mint_book(orb, &book_name("First")).expect("mints");
     world
-        .post_book(orb, one, ratio(4, 1), ratio(0, 1))
+        .post_book(orb, one, non_negative(4, 1), non_negative(0, 1))
         .expect("posts");
     let deep = world.growth_of(orb);
     assert_eq!(deep.knowledge, 1);
     assert_eq!(deep.expertise, ratio(1, 1), "one account holds everything");
 
-    let two = world.mint_book(orb, "Second").expect("mints");
+    let two = world.mint_book(orb, &book_name("Second")).expect("mints");
     world
-        .post_book(orb, two, ratio(4, 1), ratio(0, 1))
+        .post_book(orb, two, non_negative(4, 1), non_negative(0, 1))
         .expect("posts");
     let broad = world.growth_of(orb);
     assert_eq!(broad.knowledge, 2);
@@ -129,9 +131,9 @@ fn expertise_is_depth_and_thins_as_breadth_grows() {
 #[test]
 fn wisdom_requires_having_been_tested() {
     let (mut world, orb) = founded();
-    let unbeaten = world.mint_book(orb, "Unbeaten").expect("mints");
+    let unbeaten = world.mint_book(orb, &book_name("Unbeaten")).expect("mints");
     world
-        .post_book(orb, unbeaten, ratio(9, 1), ratio(0, 1))
+        .post_book(orb, unbeaten, non_negative(9, 1), non_negative(0, 1))
         .expect("only wins");
     assert_eq!(
         world.growth_of(orb).wisdom,
@@ -140,7 +142,7 @@ fn wisdom_requires_having_been_tested() {
     );
 
     world
-        .post_book(orb, unbeaten, ratio(0, 1), ratio(1, 1))
+        .post_book(orb, unbeaten, non_negative(0, 1), non_negative(1, 1))
         .expect("and a loss");
     assert_eq!(world.growth_of(orb).wisdom, ratio(1, 1), "now it has been tested");
 }
@@ -148,13 +150,13 @@ fn wisdom_requires_having_been_tested() {
 #[test]
 fn wisdom_is_the_share_of_accounts_tested() {
     let (mut world, orb) = founded();
-    let tested = world.mint_book(orb, "Tested").expect("mints");
-    let spotless = world.mint_book(orb, "Spotless").expect("mints");
+    let tested = world.mint_book(orb, &book_name("Tested")).expect("mints");
+    let spotless = world.mint_book(orb, &book_name("Spotless")).expect("mints");
     world
-        .post_book(orb, tested, ratio(1, 1), ratio(1, 1))
+        .post_book(orb, tested, non_negative(1, 1), non_negative(1, 1))
         .expect("posts");
     world
-        .post_book(orb, spotless, ratio(1, 1), ratio(0, 1))
+        .post_book(orb, spotless, non_negative(1, 1), non_negative(0, 1))
         .expect("posts");
     assert_eq!(world.growth_of(orb).wisdom, ratio(1, 2));
 }
@@ -166,9 +168,9 @@ fn wisdom_is_the_share_of_accounts_tested() {
 #[test]
 fn a_single_orb_line_is_wholly_local() {
     let (mut world, orb) = founded();
-    let kind = world.mint_book(orb, "Ledger").expect("mints");
+    let kind = world.mint_book(orb, &book_name("Ledger")).expect("mints");
     world
-        .post_book(orb, kind, ratio(3, 1), ratio(1, 1))
+        .post_book(orb, kind, non_negative(3, 1), non_negative(1, 1))
         .expect("posts");
     assert_eq!(world.growth_of(orb).locality, ratio(1, 1));
 }
@@ -192,13 +194,13 @@ fn an_orb_that_recorded_nothing_holds_no_locality() {
 #[test]
 fn triviality_exposes_a_padded_record() {
     let (mut world, orb) = founded();
-    let kind = world.mint_book(orb, "Ledger").expect("mints");
+    let kind = world.mint_book(orb, &book_name("Ledger")).expect("mints");
     world
-        .post_book(orb, kind, ratio(1, 1), ratio(0, 1))
+        .post_book(orb, kind, non_negative(1, 1), non_negative(0, 1))
         .expect("a real entry");
     for _ in 0..3 {
         world
-            .post_book(orb, kind, ratio(0, 1), ratio(0, 1))
+            .post_book(orb, kind, non_negative(0, 1), non_negative(0, 1))
             .expect("padding");
     }
     let growth = world.growth_of(orb);
@@ -210,10 +212,10 @@ fn triviality_exposes_a_padded_record() {
 #[test]
 fn a_wholly_empty_record_is_not_substantive() {
     let (mut world, orb) = founded();
-    let kind = world.mint_book(orb, "Ledger").expect("mints");
+    let kind = world.mint_book(orb, &book_name("Ledger")).expect("mints");
     for _ in 0..5 {
         world
-            .post_book(orb, kind, ratio(0, 1), ratio(0, 1))
+            .post_book(orb, kind, non_negative(0, 1), non_negative(0, 1))
             .expect("padding");
         world.tick();
     }
@@ -233,13 +235,13 @@ fn a_wholly_empty_record_is_not_substantive() {
 #[test]
 fn growth_is_derived_and_reproduces() {
     let (mut world, orb) = founded();
-    let kind = world.mint_book(orb, "Ledger").expect("mints");
+    let kind = world.mint_book(orb, &book_name("Ledger")).expect("mints");
     world
-        .post_book(orb, kind, ratio(2, 1), ratio(1, 1))
+        .post_book(orb, kind, non_negative(2, 1), non_negative(1, 1))
         .expect("posts");
     world.tick();
     world
-        .post_book(orb, kind, ratio(1, 1), ratio(2, 1))
+        .post_book(orb, kind, non_negative(1, 1), non_negative(2, 1))
         .expect("posts");
     assert_eq!(world.growth_of(orb), world.growth_of(orb), "pure");
 }

@@ -2900,7 +2900,14 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     }
                     Some("mint") => {
                         let name = words.collect::<Vec<_>>().join(" ");
-                        match world.mint_book(*current, &name) {
+                        let proven = match cfe::books::BookName::new(&name) {
+                            Ok(proven) => proven,
+                            Err(fault) => {
+                                println!("{} {}", style.bad("✗"), book_name_fault(&fault, style));
+                                return;
+                            }
+                        };
+                        match world.mint_book(*current, &proven) {
                             Ok(_) => println!(
                                 "{} book {} minted — an account of this line's own making",
                                 style.ok("✓"),
@@ -2910,8 +2917,8 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         }
                     }
                     Some("post") => {
-                        let kept = words.next().and_then(parse_ratio_arg);
-                        let lost = words.next().and_then(parse_ratio_arg);
+                        let kept = words.next().and_then(parse_ratio_arg).and_then(cfe::dop::NonNegative::new);
+                        let lost = words.next().and_then(parse_ratio_arg).and_then(cfe::dop::NonNegative::new);
                         let name = words.collect::<Vec<_>>().join(" ");
                         match (kept, lost, name.is_empty()) {
                             (Some(kept), Some(lost), false) => {
@@ -2926,7 +2933,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                 }
                             }
                             _ => println!(
-                                "{} {} — the amounts come first so a name may hold spaces",
+                                "{} {} — the amounts come first so a name may hold spaces; a book accrues, so both sides are non-negative",
                                 style.bad("✗"),
                                 style.strong("book post <kept> <lost> <name>")
                             ),
@@ -3212,7 +3219,14 @@ fn act_as(world: &mut World, actor: u64, rest: &[&str], style: &Style, current: 
             None => println!("{} as <handle> raze <tile>", style.bad("✗")),
         },
         ["book", "mint", name @ ..] if !name.is_empty() => {
-            match world.mint_book_as(actor, *current, &name.join(" ")) {
+            let proven = match cfe::books::BookName::new(&name.join(" ")) {
+                Ok(proven) => proven,
+                Err(fault) => {
+                    println!("{} {}", style.bad("✗"), book_name_fault(&fault, style));
+                    return;
+                }
+            };
+            match world.mint_book_as(actor, *current, &proven) {
                 Ok(_) => println!(
                     "{} entity {actor} minted a book — receipt tagged to it",
                     style.ok("✓")
@@ -3221,7 +3235,10 @@ fn act_as(world: &mut World, actor: u64, rest: &[&str], style: &Style, current: 
             }
         }
         ["book", "post", kept, lost, name @ ..] if !name.is_empty() => {
-            match (parse_ratio_arg(kept), parse_ratio_arg(lost)) {
+            match (
+                parse_ratio_arg(kept).and_then(cfe::dop::NonNegative::new),
+                parse_ratio_arg(lost).and_then(cfe::dop::NonNegative::new),
+            ) {
                 (Some(kept), Some(lost)) => {
                     let kind = cfe::books::kind_of(&name.join(" "));
                     match world.post_book_as(actor, *current, kind, kept, lost) {
@@ -3596,6 +3613,19 @@ fn amount(value: &Ratio) -> String {
     }
 }
 
+/// The `BookName` door's faults, told at the client's own boundary —
+/// the arms died in the engine (29_CONSTRUCTION), the words stay here.
+fn book_name_fault(fault: &cfe::books::BookNameFault, style: &Style) -> String {
+    match fault {
+        cfe::books::BookNameFault::NormalizesToNothing => {
+            "a book needs a name that is not only whitespace".to_string()
+        }
+        cfe::books::BookNameFault::Charter { name } => {
+            format!("{} is a charter book — law, not inventory", style.strong(name))
+        }
+    }
+}
+
 fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
     let text = match refusal {
         // K4: the emitter now refuses BEFORE writing, so these are
@@ -3634,15 +3664,13 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "{} is already kept — a book is its normalized name, so re-declaring it is not a second book",
             style.strong(name)
         ),
-        ActionRefused::CharterBookNotMintable { name } => format!(
-            "{} is a charter book — law, not inventory",
-            style.strong(name)
-        ),
+        // The empty and charter names die at the `BookName` door
+        // (29_CONSTRUCTION) — the client reports them at ITS door via
+        // `book_name_fault`.
         ActionRefused::CharterBookNotArchivable { name } => format!(
             "{} is a charter book and is closeable by nobody — otherwise it could be closed by whoever it convicts",
             style.strong(name)
         ),
-        ActionRefused::BookNameEmpty => "a book needs a name that is not only whitespace".to_string(),
         ActionRefused::NoSuchBook => "no such book on this orb".to_string(),
         ActionRefused::BookClosedToWriting { name } => format!(
             "{} is archived — closed to writing, and still fully readable",
@@ -3682,9 +3710,6 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "receipt {} is not in this world's chronicle — the law verifies the citation",
             style.strong(&hex(digest)[..8])
         ),
-        ActionRefused::BookPostingNegative => {
-            "a book accrues — a negative posting would unwrite history".to_string()
-        }
 
         ActionRefused::NoColony => format!(
             "no colony yet — start with {}",

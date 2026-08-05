@@ -10,8 +10,9 @@
 //! actually makes: mint, post, read back, close, and find it still
 //! readable.
 
-use cfe::books::kind_of;
+use cfe::books::{book_name, kind_of};
 use cfe::world::{replay, ActionRefused, World};
+use cfe::dop::non_negative;
 use cfe::ratio::ratio;
 
 fn founded() -> World {
@@ -34,11 +35,11 @@ fn a_line_mints_posts_reads_and_closes_its_own_book() {
 
     // The door opens on a name, not a digest — that is the whole point
     // of addressing a kind by its normalized name.
-    let kind = world.mint_book(orb, "Deep Valor").expect("mints");
+    let kind = world.mint_book(orb, &book_name("Deep Valor")).expect("mints");
     assert_eq!(kind, kind_of("  deep   VALOR "));
 
     world
-        .post_book(orb, kind, ratio(3, 1), ratio(1, 1))
+        .post_book(orb, kind, non_negative(3, 1), non_negative(1, 1))
         .expect("posts");
 
     // Read back through the uniform view the display uses.
@@ -64,8 +65,8 @@ fn the_display_view_carries_charter_and_minted_alike() {
     let orb = orb_id(&world);
     assert_eq!(world.orb().expect("orb").books().len(), 4);
 
-    world.mint_book(orb, "Valor").expect("mints");
-    world.mint_book(orb, "Ardor").expect("mints");
+    world.mint_book(orb, &book_name("Valor")).expect("mints");
+    world.mint_book(orb, &book_name("Ardor")).expect("mints");
     let view = world.orb().expect("orb").books();
     assert_eq!(view.len(), 6);
     assert_eq!(view.iter().filter(|held| held.chartered).count(), 4);
@@ -83,24 +84,24 @@ fn the_door_refuses_the_way_the_law_says() {
 
     // `book mint` with nothing after it.
     assert!(matches!(
-        world.mint_book(orb, ""),
-        Err(ActionRefused::BookNameEmpty)
+        cfe::books::BookName::new(""),
+        Err(cfe::books::BookNameFault::NormalizesToNothing)
     ));
     // `book mint TRADE-1`
     assert!(matches!(
-        world.mint_book(orb, "trade-1"),
-        Err(ActionRefused::CharterBookNotMintable { .. })
+        cfe::books::BookName::new("trade-1"),
+        Err(cfe::books::BookNameFault::Charter { .. })
     ));
     // `book post` before minting.
     assert!(matches!(
-        world.post_book(orb, kind_of("valor"), ratio(1, 1), ratio(0, 1)),
+        world.post_book(orb, kind_of("valor"), non_negative(1, 1), non_negative(0, 1)),
         Err(ActionRefused::NoSuchBook)
     ));
 
-    let kind = world.mint_book(orb, "Valor").expect("mints");
+    let kind = world.mint_book(orb, &book_name("Valor")).expect("mints");
     // `book mint Valor` twice.
     assert!(matches!(
-        world.mint_book(orb, "  valor  "),
+        world.mint_book(orb, &book_name("  valor  ")),
         Err(ActionRefused::BookAlreadyMinted { .. })
     ));
     // `book archive COVENANT-1`
@@ -111,7 +112,7 @@ fn the_door_refuses_the_way_the_law_says() {
     // `book post` into a closed account.
     world.archive_book(orb, kind).expect("closes");
     assert!(matches!(
-        world.post_book(orb, kind, ratio(1, 1), ratio(0, 1)),
+        world.post_book(orb, kind, non_negative(1, 1), non_negative(0, 1)),
         Err(ActionRefused::BookClosedToWriting { .. })
     ));
 }
@@ -123,10 +124,10 @@ fn the_door_refuses_the_way_the_law_says() {
 fn everything_the_door_does_survives_replay() {
     let mut world = founded();
     let orb = orb_id(&world);
-    let kept = world.mint_book(orb, "Deep Valor").expect("mints");
-    let closed = world.mint_book(orb, "Ardor").expect("mints");
+    let kept = world.mint_book(orb, &book_name("Deep Valor")).expect("mints");
+    let closed = world.mint_book(orb, &book_name("Ardor")).expect("mints");
     world
-        .post_book(orb, kept, ratio(5, 2), ratio(1, 4))
+        .post_book(orb, kept, non_negative(5, 2), non_negative(1, 4))
         .expect("posts");
     world.archive_book(orb, closed).expect("closes");
 
@@ -151,10 +152,10 @@ fn the_agent_door_is_scope_checked() {
     // An entity id that was never registered holds no scope at all.
     let stranger = 9_999_u64;
     assert!(
-        world.mint_book_as(stranger, orb, "Valor").is_err(),
+        world.mint_book_as(stranger, orb, &book_name("Valor")).is_err(),
         "an unregistered actor may not mint"
     );
     // And the sovereign path still works, so the refusal above is the
     // scope check rather than the deed being broken.
-    assert!(world.mint_book(orb, "Valor").is_ok());
+    assert!(world.mint_book(orb, &book_name("Valor")).is_ok());
 }

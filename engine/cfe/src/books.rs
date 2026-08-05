@@ -98,6 +98,52 @@ pub fn is_charter(name: &str) -> bool {
     CHARTER_BOOKS.iter().any(|held| normalize(held) == normal)
 }
 
+/// **A MINTABLE BOOK NAME, proven at construction** (P1,
+/// 29_CONSTRUCTION). Two arms died at this door, both decidable from
+/// the text alone: a name whose normal form is empty addresses
+/// nothing, and the charter's four are law, not inventory. The verb
+/// keeps only the facts of the orb's own shelf.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BookName(String);
+
+/// The named fault a refused book name carries.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum BookNameFault {
+    /// A name that normalizes to nothing addresses nothing.
+    NormalizesToNothing,
+    /// The charter's four cannot be minted over; the fault names the
+    /// standing book, because the reason is the whole point.
+    Charter { name: String },
+}
+
+impl BookName {
+    pub fn new(text: &str) -> Result<BookName, BookNameFault> {
+        let normal = normalize(text);
+        if normal.is_empty() {
+            return Err(BookNameFault::NormalizesToNothing);
+        }
+        if let Some(held) = CHARTER_BOOKS.iter().find(|held| normalize(held) == normal) {
+            return Err(BookNameFault::Charter { name: (*held).to_string() });
+        }
+        Ok(BookName(text.to_string()))
+    }
+    /// The name as declared — presentation; [`BookKind`] is identity.
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+    /// The kind this name addresses.
+    pub fn kind(&self) -> BookKind {
+        kind_of(&self.0)
+    }
+}
+
+/// The literal door — a malformed literal is a build error in a
+/// runtime coat.
+pub fn book_name(text: &str) -> BookName {
+    BookName::new(text)
+        .expect("a book-name literal must normalize to something and must not be chartered")
+}
+
 /// ONE MINTED ACCOUNT — committed state, rebuilt from receipts on
 /// replay. Kind-ascending on the orb (canonical order).
 #[derive(Debug, Clone, PartialEq, Eq, Default)]

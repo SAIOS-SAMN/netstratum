@@ -3,9 +3,10 @@
 //! The tier above BOOK-1: works a LITERATE line may aspire to, and may
 //! claim only with chain receipts to show for it.
 
-use cfe::books::normalize;
+use cfe::books::{book_name, normalize};
 use cfe::dop::{ClosureEvent, ColonyOrb};
 use cfe::literature::{claimed_share, is_work, work_of, WORKS};
+use cfe::dop::non_negative;
 use cfe::ratio::ratio;
 use cfe::world::{replay, ActionRefused, World};
 
@@ -23,9 +24,9 @@ fn orb_id(world: &World) -> u64 {
 fn literate_world() -> (World, u64) {
     let mut world = founded();
     let orb = orb_id(&world);
-    let kind = world.mint_book(orb, "Ledger of Deeds").expect("mints");
+    let kind = world.mint_book(orb, &book_name("Ledger of Deeds")).expect("mints");
     world
-        .post_book(orb, kind, ratio(1, 1), ratio(0, 1))
+        .post_book(orb, kind, non_negative(1, 1), non_negative(0, 1))
         .expect("posts");
     // PRACTICE COSTS TIME (GROWTH-1). A second posting after real chain
     // distance is what makes this line literate; both at one stamp
@@ -34,7 +35,7 @@ fn literate_world() -> (World, u64) {
         world.tick();
     }
     world
-        .post_book(orb, kind, ratio(1, 1), ratio(1, 1))
+        .post_book(orb, kind, non_negative(1, 1), non_negative(1, 1))
         .expect("posts again");
     (world, orb)
 }
@@ -55,11 +56,11 @@ fn literacy_costs_chain_time_not_keystrokes() {
     let orb = world.orb().expect("founded").orb_id;
     assert!(!world.literate(orb), "a fresh line keeps no books");
 
-    let kind = world.mint_book(orb, "Ledger of Deeds").expect("mints");
+    let kind = world.mint_book(orb, &book_name("Ledger of Deeds")).expect("mints");
     assert!(!world.literate(orb), "an empty book is not writing");
 
     world
-        .post_book(orb, kind, ratio(1, 1), ratio(0, 1))
+        .post_book(orb, kind, non_negative(1, 1), non_negative(0, 1))
         .expect("posts");
     assert!(
         !world.literate(orb),
@@ -68,7 +69,7 @@ fn literacy_costs_chain_time_not_keystrokes() {
 
     // A second posting at the SAME stamp still spans nothing.
     world
-        .post_book(orb, kind, ratio(1, 1), ratio(0, 1))
+        .post_book(orb, kind, non_negative(1, 1), non_negative(0, 1))
         .expect("posts again");
     assert!(
         !world.literate(orb),
@@ -80,7 +81,7 @@ fn literacy_costs_chain_time_not_keystrokes() {
         world.tick();
     }
     world
-        .post_book(orb, kind, ratio(0, 1), ratio(1, 1))
+        .post_book(orb, kind, non_negative(0, 1), non_negative(1, 1))
         .expect("posts across time");
     assert!(world.literate(orb), "writing that SPANS is keeping books");
 }

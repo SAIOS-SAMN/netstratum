@@ -46,7 +46,7 @@
 //! magnitude is a charter decision and is not taken here.
 
 use super::*;
-use crate::books::{is_charter, kind_of, BookAccount, BookKind};
+use crate::books::{kind_of, BookAccount, BookKind};
 
 impl World {
     /// **MINT A BOOK** — declare a kind of account this orb will keep.
@@ -55,7 +55,11 @@ impl World {
     /// potence is deliberately NOT offered: re-minting refuses loudly
     /// rather than silently succeeding, because a civilization that
     /// thinks it created a second book should learn that it did not.
-    pub fn mint_book(&mut self, orb: u64, name: &str) -> Result<BookKind, ActionRefused> {
+    pub fn mint_book(
+        &mut self,
+        orb: u64,
+        name: &crate::books::BookName,
+    ) -> Result<BookKind, ActionRefused> {
         self.mint_book_as(SOVEREIGN, orb, name)
     }
 
@@ -64,17 +68,13 @@ impl World {
         &mut self,
         actor: u64,
         orb: u64,
-        name: &str,
+        name: &crate::books::BookName,
     ) -> Result<BookKind, ActionRefused> {
         self.permitted(actor, Scope::Build)?;
-        if crate::books::normalize(name).is_empty() {
-            return Err(ActionRefused::BookNameEmpty);
-        }
-        // The charter's four are law, not inventory. Compared in normal
-        // form so " trade-1 " cannot slip past as a mintable name.
-        if is_charter(name) {
-            return Err(ActionRefused::CharterBookNotMintable { name: name.to_string() });
-        }
+        // The empty normal form and the charter collision died at the
+        // `BookName` door (29_CONSTRUCTION) — both were decidable from
+        // the text alone. Only the facts of this orb's shelf remain.
+        let name = name.as_str();
         if self.orb_by_id(orb).is_none() {
             return Err(ActionRefused::NoSuchOrb { orb });
         }
@@ -108,8 +108,8 @@ impl World {
         &mut self,
         orb: u64,
         kind: BookKind,
-        kept: Ratio,
-        lost: Ratio,
+        kept: crate::dop::NonNegative,
+        lost: crate::dop::NonNegative,
     ) -> Result<(), ActionRefused> {
         self.post_book_as(SOVEREIGN, orb, kind, kept, lost)
     }
@@ -120,15 +120,16 @@ impl World {
         actor: u64,
         orb: u64,
         kind: BookKind,
-        kept: Ratio,
-        lost: Ratio,
+        kept: crate::dop::NonNegative,
+        lost: crate::dop::NonNegative,
     ) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Collect)?;
-        // A book ACCRUES. A negative posting would let an orb unwrite
-        // its own history, which is what the chronicle exists to prevent.
-        if kept < ratio(0, 1) || lost < ratio(0, 1) {
-            return Err(ActionRefused::BookPostingNegative);
-        }
+        // A book ACCRUES — a negative posting would let an orb unwrite
+        // its own history. The shape died at the `NonNegative` doors
+        // (zero is lawful: posting nothing to both sides is a deed that
+        // records a stand of nothing, and the chronicle keeps it).
+        let kept = kept.value().clone();
+        let lost = lost.value().clone();
         if self.orb_by_id(orb).is_none() {
             return Err(ActionRefused::NoSuchOrb { orb });
         }

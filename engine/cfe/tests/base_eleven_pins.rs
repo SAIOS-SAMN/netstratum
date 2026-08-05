@@ -15,7 +15,8 @@
 //! changing the base, and these pins are mostly here to hold it still.
 
 use cfe::literature::WORKS;
-use cfe::ratio::ratio;
+use cfe::books::book_name;
+use cfe::dop::non_negative;
 use cfe::world::survey::{first_work, last_condition};
 use cfe::world::World;
 
@@ -23,9 +24,9 @@ fn literate_world() -> (World, u64) {
     let mut world = World::default();
     world.found("home").expect("founds");
     let orb = world.orb().expect("founded").orb_id;
-    let kind = world.mint_book(orb, "Ledger of Deeds").expect("mints");
+    let kind = world.mint_book(orb, &book_name("Ledger of Deeds")).expect("mints");
     world
-        .post_book(orb, kind, ratio(1, 1), ratio(0, 1))
+        .post_book(orb, kind, non_negative(1, 1), non_negative(0, 1))
         .expect("posts");
     // PRACTICE COSTS TIME (GROWTH-1). A second posting after real chain
     // distance is what makes this line literate; both at one stamp
@@ -34,7 +35,7 @@ fn literate_world() -> (World, u64) {
         world.tick();
     }
     world
-        .post_book(orb, kind, ratio(1, 1), ratio(1, 1))
+        .post_book(orb, kind, non_negative(1, 1), non_negative(1, 1))
         .expect("posts again");
     (world, orb)
 }
