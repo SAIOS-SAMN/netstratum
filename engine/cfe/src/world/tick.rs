@@ -214,12 +214,19 @@ impl World {
             CHANNEL_CONVERTER_YIELD, CHANNEL_EXTRACTOR_UPKEEP, CHANNEL_HABITAT_UPKEEP,
             CHANNEL_HABITAT_YIELD,
         };
-        let practice_yield = self.practice_factor(crate::vocabulary::CHANNEL_YIELD);
-        let practice_upkeep = self.practice_factor(crate::vocabulary::CHANNEL_UPKEEP);
-        let practice_habitat_yield = self.practice_factor(CHANNEL_HABITAT_YIELD);
-        let practice_habitat_upkeep = self.practice_factor(CHANNEL_HABITAT_UPKEEP);
-        let practice_extractor_upkeep = self.practice_factor(CHANNEL_EXTRACTOR_UPKEEP);
-        let practice_converter_yield = self.practice_factor(CHANNEL_CONVERTER_YIELD);
+        // ONE fold walk per tick, six channel products from it.
+        let practice_bindings = self.adopted_practice_bindings();
+        let practice_on = |channel: u8| -> Ratio {
+            practice_bindings.iter().fold(ratio(1, 1), |acc, binding| {
+                acc * crate::vocabulary::factor_on(binding, channel)
+            })
+        };
+        let practice_yield = practice_on(crate::vocabulary::CHANNEL_YIELD);
+        let practice_upkeep = practice_on(crate::vocabulary::CHANNEL_UPKEEP);
+        let practice_habitat_yield = practice_on(CHANNEL_HABITAT_YIELD);
+        let practice_habitat_upkeep = practice_on(CHANNEL_HABITAT_UPKEEP);
+        let practice_extractor_upkeep = practice_on(CHANNEL_EXTRACTOR_UPKEEP);
+        let practice_converter_yield = practice_on(CHANNEL_CONVERTER_YIELD);
         // 28_VOCABULARY V0: the sealed class's own mechanism, read once.
         // Before this the class was a term that only resonated — sealed,
         // replayed, and read by no rule (LAW 8's excision test). An

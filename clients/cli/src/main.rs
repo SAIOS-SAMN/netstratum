@@ -2117,19 +2117,23 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         }
         Some(deed @ ("practice" | "release")) => {
             let releasing = deed == "release";
+            // The seed five by name; ANY code passes through numeric —
+            // the world judges it against the FOLD, so a minted
+            // discipline adopts by the code its receipt carries.
             let code = match words.next() {
-                Some("1") | Some("austerity") => Some(1u8),
-                Some("2") | Some("showpiece") => Some(2),
-                Some("3") | Some("restraint") => Some(3),
-                Some("4") | Some("hoard") => Some(4),
-                Some("5") | Some("overdrive") => Some(5),
+                Some("austerity") => Some(1u8),
+                Some("showpiece") => Some(2),
+                Some("restraint") => Some(3),
+                Some("hoard") => Some(4),
+                Some("overdrive") => Some(5),
+                Some(word) if word.parse::<u8>().is_ok() => word.parse::<u8>().ok(),
                 other => {
                     println!(
-                        "{} name the discipline: {} (got {})",
+                        "{} name the discipline: {} — or a minted code",
                         style.bad("✗"),
                         style.strong("austerity · showpiece · restraint · hoard · overdrive"),
-                        other.unwrap_or("nothing")
                     );
+                    let _ = other;
                     None
                 }
             };
@@ -3868,8 +3872,9 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
         ActionRefused::VeilOutOfOrder =>
             "one veil per star — lift before drawing anew (nothing stacks)".to_string(),
         ActionRefused::PracticeUnknown { practice } => format!(
-            "no discipline {} stands in the vocabulary — 1 the Austerity · 2 the Showpiece · 3 the Restraint · 4 the Hoard · 5 the Overdrive",
-            style.strong(&practice.to_string())
+            "no discipline {} stands in the FOLD — the seed five (1 Austerity · 2 Showpiece · 3 Restraint · 4 Hoard · 5 Overdrive) plus whatever a progenitor has minted ({})",
+            style.strong(&practice.to_string()),
+            style.dim("t0 mint practice <sigil> <word> <channel>:<p>/<q> ...")
         ),
         ActionRefused::RouteKnown { deal } => format!(
             "deal {} already charters a lane on this book — one charter per deal",

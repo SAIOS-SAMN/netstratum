@@ -74,7 +74,11 @@ pub enum ActionRefused {
     ConditionUncrystallized { condition: u8 },
     /// MANU-1 — the converter chain does not stand on this orb.
     ChainIncomplete { needs: ZoneKind },
-    /// PRACTICE-1 — outside the practice vocabulary (1–5).
+    /// PRACTICE-1 — no such discipline stands in the FOLD (seed ∪
+    /// minted). A FACT of the chain, not a shape: since the mint door
+    /// opened (#36 step 3) the lawful set grows by receipt, so what it
+    /// holds is not decidable from the value alone — the
+    /// `UnknownAxisValue` family, and it stays.
     PracticeUnknown { practice: u8 },
     /// PRACTICE-1 — one adoption per discipline per star.
     PracticeAlreadyAdopted { practice: u8 },

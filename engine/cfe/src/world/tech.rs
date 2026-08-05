@@ -6,30 +6,38 @@
 
 use super::*;
 
-/// The discipline's mechanism, from the practice vocabulary's seed.
-///
-/// Adoption refuses codes past the seed until the mint door opens, so
-/// the seed IS the fold for every adoptable code today; #36 step 3
-/// swaps this to `fold_at` the adoption stamp when minted practices
-/// become adoptable.
-pub(super) fn practice_binding(code: u8) -> Vec<(u8, Ratio)> {
-    crate::vocabulary::seed(crate::vocabulary::Axis::Practice)
-        .into_iter()
-        .find(|entry| entry.code == code)
-        .map(|entry| entry.binding)
-        .unwrap_or_default()
-}
-
 impl World {
+    /// Every adopted discipline's mechanism, in ONE fold walk — the
+    /// FOLD, seed ∪ minted, so a minted discipline computes exactly as
+    /// a seeded one (#36 step 3, the mint door). An entry never
+    /// mutates once minted, so today's fold carries the binding any
+    /// adoption stamp saw — the ordering law holds for free.
+    pub(super) fn adopted_practice_bindings(&self) -> Vec<Vec<(u8, Ratio)>> {
+        let standing =
+            crate::vocabulary::fold(self.chronicle(), crate::vocabulary::Axis::Practice);
+        self.practices
+            .iter()
+            .map(|code| {
+                standing
+                    .iter()
+                    .find(|entry| entry.code == *code)
+                    .map(|entry| entry.binding.clone())
+                    .unwrap_or_default()
+            })
+            .collect()
+    }
+
     /// The composed factor the ADOPTED disciplines apply on a channel —
     /// the product across practices, 1 where all are silent. This is
     /// the read that replaced the bespoke `contains(&N)` branches
     /// (operator ruling 2026-08-05): a practice ACTS only through its
     /// binding data.
     pub(super) fn practice_factor(&self, channel: u8) -> Ratio {
-        self.practices.iter().fold(ratio(1, 1), |acc, code| {
-            acc * crate::vocabulary::factor_on(&practice_binding(*code), channel)
-        })
+        self.adopted_practice_bindings()
+            .iter()
+            .fold(ratio(1, 1), |acc, binding| {
+                acc * crate::vocabulary::factor_on(binding, channel)
+            })
     }
 
     /// The strictest gate any adopted discipline declares on a channel
@@ -37,11 +45,9 @@ impl World {
     /// each holding the climb to a half do not soften it to a quarter.
     /// `None` when no adopted practice binds the gate.
     pub(super) fn practice_gate(&self, channel: u8) -> Option<Ratio> {
-        self.practices
+        self.adopted_practice_bindings()
             .iter()
-            .filter_map(|code| {
-                crate::vocabulary::gate_of(&practice_binding(*code), channel)
-            })
+            .filter_map(|binding| crate::vocabulary::gate_of(binding, channel))
             .max()
     }
 
@@ -247,9 +253,19 @@ impl World {
     }
     pub fn adopt_practice_as(&mut self, actor: u64, practice: u8) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Build)?;
-        if !(1..=5).contains(&practice) {
-            return Err(ActionRefused::PracticeUnknown { practice });
-        }
+        // THE MINT DOOR IS OPEN (#36 step 3): the lawful disciplines
+        // are the FOLD — seed ∪ minted — so this is a FACT of the
+        // chain, never a compiled range. The 1..=5 guard died here;
+        // the arm survives because what the fold holds is not
+        // decidable from the code alone (the UnknownAxisValue family).
+        let binding = crate::vocabulary::fold(
+            self.chronicle(),
+            crate::vocabulary::Axis::Practice,
+        )
+        .into_iter()
+        .find(|entry| entry.code == practice)
+        .map(|entry| entry.binding)
+        .ok_or(ActionRefused::PracticeUnknown { practice })?;
         if self.practices.contains(&practice) {
             return Err(ActionRefused::PracticeAlreadyAdopted { practice });
         }
@@ -257,7 +273,7 @@ impl World {
         // (CHANNEL_TEMPER) — no practice is named here. Only the
         // Overdrive binds it today, so the refusal keeps its name.
         if let Some(threshold) =
-            crate::vocabulary::gate_of(&practice_binding(practice), crate::vocabulary::CHANNEL_TEMPER)
+            crate::vocabulary::gate_of(&binding, crate::vocabulary::CHANNEL_TEMPER)
         {
             let hardships = self
                 .chronicle
