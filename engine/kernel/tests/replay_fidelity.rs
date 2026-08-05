@@ -14,7 +14,7 @@
 //! dropped field fails HERE and names itself, rather than surfacing
 //! three tests away as a resource that drifted.
 
-use cfe::dop::{slot_angle, ZoneKind};
+use cfe::dop::{Slot, ZoneKind};
 use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
 use cfe::world::{replay, World, SOVEREIGN};
@@ -35,7 +35,7 @@ fn a_sited_world_replays_with_both_turns_intact() {
     world.commission_star(StarClass::G).expect("star");
     let orb = world.committed().orbs[0].orb_id;
     world
-        .site_planet(orb, ratio(1, 4), ratio(3, 2), Some(slot_angle(17)), Some(slot_angle(43)))
+        .site_planet(orb, ratio(1, 4), ratio(3, 2), Some(Slot::from_index(17)), Some(Slot::from_index(43)))
         .expect("sites with a place and an inclination");
 
     let live = world.committed().orbs[0].thermal.clone().expect("sited");
@@ -90,7 +90,7 @@ fn a_world_that_has_run_still_rebuilds_from_its_chain() {
     world.commission_star(StarClass::G).expect("star");
     let orb = world.committed().orbs[0].orb_id;
     world
-        .site_planet(orb, ratio(1, 4), ratio(1, 1), Some(slot_angle(5)), None)
+        .site_planet(orb, ratio(1, 4), ratio(1, 1), Some(Slot::from_index(5)), None)
         .expect("sites");
 
     for _ in 0..24 {

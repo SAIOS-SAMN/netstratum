@@ -32,29 +32,20 @@ impl World {
         orb: u64,
         albedo: Ratio,
         orbit_r: Ratio,
-        theta: Option<Ratio>,
-        psi: Option<Ratio>,
+        theta: Option<crate::dop::Slot>,
+        psi: Option<crate::dop::Slot>,
     ) -> Result<(), ActionRefused> {
         use crate::dop::ThermalSite;
         if self.star.is_none() {
             return Err(ActionRefused::NoStarCommissioned);
         }
-        // THE PLACEMENT LAW. An angle must sit ON a slot, and no two
-        // orbs may share a place. Together these make collision
-        // DECIDABLE rather than a tolerance — which is the whole point
-        // of a discrete ring.
-        // ψ is bound by the same slot law — an inclination between the
-        // teeth is as undecidable as a longitude between them.
-        if let Some(tilt) = &psi {
-            if !crate::dop::on_slot(tilt) {
-                return Err(ActionRefused::OffSlot { theta: Box::new(tilt.clone()) });
-            }
-        }
+        // THE PLACEMENT LAW, half retired by construction
+        // (29_CONSTRUCTION C1): an angle IS a `Slot` — off-slot cannot
+        // reach this function, so the `OffSlot` judge arms are deleted
+        // and only the FACT half remains: no two orbs share a place.
+        // Collision stays decidable because the type is discrete.
         if let Some(turn) = &theta {
-            if !crate::dop::on_slot(turn) {
-                return Err(ActionRefused::OffSlot { theta: Box::new(turn.clone()) });
-            }
-            let slot = crate::dop::slot_of(turn).unwrap_or(0);
+            let slot = turn.index();
             if let Some(taken) = self.orbs.iter().find(|held| {
                 held.orb_id != orb
                     && held.thermal.as_ref().is_some_and(|site| {
