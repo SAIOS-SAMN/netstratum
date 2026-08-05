@@ -3527,6 +3527,10 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "the work earns {} — {claimed} was claimed",
             style.strong(&bound.to_string())
         ),
+        ActionRefused::ConveyExceedsMonetary { asked, monetary } => format!(
+            "{asked} outruns the parcel's monetary portion ({monetary}) — the free \
+             portion stays home; convey less, or re-survey after the estate grows"
+        ),
         ActionRefused::StaleAppraisalCited { .. } => "that appraisal is STALE — the \
              world moved past its stamp; re-appraise, then counter on the fresh \
              reading (staleness triggers renegotiation; it never blocks acceptance)"
@@ -4122,6 +4126,9 @@ fn chronicle(world: &World, style: &Style) {
         let described = match &receipt.event {
             cfe::dop::ClosureEvent::ColonyFounded { name, .. } => {
                 format!("⚑ colony {} founded", style.strong(name))
+            }
+            cfe::dop::ClosureEvent::ParcelConveyed { from_orb, to_orb, amount: posted, .. } => {
+                format!("✉ parcel CONVEYED — {} posted orb {from_orb} → orb {to_orb}", amount(posted))
             }
             cfe::dop::ClosureEvent::OfferCountered { offer, want_amount, .. } => {
                 format!("⇄ offer {offer} COUNTERED — ask now {}", amount(want_amount))

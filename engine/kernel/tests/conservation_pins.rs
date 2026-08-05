@@ -290,7 +290,11 @@ fn the_version_is_pinned() {
     //   renegotiate arm; the gate admits what was Unjudged. Staleness
     //   refuses only a counter's citation, at the emitter, where the
     //   chronicle lives.
-    assert_eq!(KERNEL_VERSION.to_string(), "0.8.0", "the gate is version-pinned");
+    // 0.9.0 — CONVEY (2026-08-06): tag 100 covered with a full I1 arm —
+    //   the postal deed; address, monetary cap and postage all verified
+    //   at the gate by the emitter's own sealed rules. The estate chain
+    //   is whole: survey → appraise → counter → convey.
+    assert_eq!(KERNEL_VERSION.to_string(), "0.9.0", "the gate is version-pinned");
     assert_eq!(VERSION, KERNEL_VERSION.code(), "the wire carries the packed form");
     // ORDER IS PRESERVED: a chain cut under the old linear versions
     // compares BELOW every packed one, which is true — an earlier gate

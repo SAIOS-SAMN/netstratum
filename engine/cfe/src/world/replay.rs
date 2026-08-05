@@ -207,6 +207,22 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     held.want_amount = want_amount.clone();
                 }
             }
+            // CONVEY (tag 100): the postal move replays EXACTLY as the
+            // live path made it — sender pays amount + postage (the
+            // stamp from the SAME sealed rule), receiver banks the
+            // amount whole, both touched.
+            ClosureEvent::ParcelConveyed { from_orb, to_orb, resource, amount, postage, .. } => {
+                let (stamp, _) = crate::dop::postal_meter();
+                if let Some(held) = peel(&mut orbs, *from_orb) {
+                    held.bank(*resource, -amount.clone());
+                    held.bank(stamp, -postage.clone());
+                    held.last_touch = receipt.stamp;
+                }
+                if let Some(dest) = peel(&mut orbs, *to_orb) {
+                    dest.bank(*resource, amount.clone());
+                    dest.last_touch = receipt.stamp;
+                }
+            }
             ClosureEvent::FamineStruck { orb_id, resource, drawn } => {
                 if let Some(held) = peel(&mut orbs, *orb_id) {
                     held.bank(*resource, -drawn.clone());

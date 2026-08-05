@@ -122,7 +122,12 @@ use solver_verify::{verify_work, WorkBroken};
 /// admits a deed that was `Unjudged`. Staleness gates NOTHING at this
 /// tier by design: it refuses only a counter's citation, at the
 /// emitter, where the chronicle lives.
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 8, patch: 0 };
+///
+/// **0.9.0 — CONVEY** (operator: complete the estate chain). MINOR,
+/// derived: tag 100 enters `covered()` with a full I1 arm — the gate
+/// admits what was `Unjudged` and refuses three new ways (address, cap,
+/// postage), each by calling the same sealed rules the emitter drew.
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 9, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
@@ -334,6 +339,17 @@ pub enum Refused {
     /// computes over the prior state and the receipted covering. A
     /// value cannot be quoted one way and receipted another.
     AppraisalMisvalued { declared: Box<Ratio>, computed: Box<Ratio> },
+    /// CONVEY — an endpoint outside the survey's covering: a postal
+    /// address IS a surveyed parcel, at the gate as at the emitter.
+    ConveyOutsideSurvey { orb: u64 },
+    /// CONVEY — the declared postage is not the postal meter's figure
+    /// over the amount. Stamps cannot be quoted one way and burned
+    /// another.
+    PostageMismatch { declared: Box<Ratio>, metered: Box<Ratio> },
+    /// CONVEY — the ask outruns the sender parcel's monetary portion of
+    /// its prior bank. The free portion stays home, held at the gate
+    /// from the receipt's own covering.
+    ConveyExceedsMonetary { asked: Box<Ratio>, cap: Box<Ratio> },
     /// E5b — an estate survey whose covering is not the whole estate:
     /// empty (an unwitnessed observation cannot enter the record) or
     /// short of the orbs that stand (a partial covering underpays the
@@ -847,6 +863,12 @@ fn covered(event: &ClosureEvent) -> bool {
         // the receipt's own seed and covering. BY HAND, again: the
         // compiler does not force this list.
         | E::AppraisalStruck { .. }
+        // CONVEY (tag 100) — value-moving, with its I1 arm in
+        // `admitted_deltas`: the postage burns (net negative), the
+        // amount nets zero, and the postal theorems (address, monetary
+        // cap, metered postage) are checked there against the receipt's
+        // own seed and covering. BY HAND, as ever.
+        | E::ParcelConveyed { .. }
         // THE COUNTER (tag 99) — banked-neutral: it re-terms a resting
         // offer and moves nothing; the fill that later clears is the
         // conserved deed. BY HAND: the compiler does not force this
@@ -1065,6 +1087,45 @@ fn admitted_deltas(
         E::CrystalDrawn { amount, .. } => {
             non_negative(Resource::Crystal, amount)?;
             vec![(Resource::Crystal, -amount.clone())]
+        }
+        // CONVEY — the postal theorems, held at the gate. The move nets
+        // zero (amount out, amount in); only the postage leaves the
+        // total, burned like upkeep. Address and cap verified from the
+        // receipt's own seed and covering against the prior state;
+        // postage verified by CALLING the postal meter.
+        E::ParcelConveyed { from_orb, to_orb, resource, amount, postage, seed, covered, .. } => {
+            non_negative(*resource, amount)?;
+            for endpoint in [from_orb, to_orb] {
+                if !covered.contains(endpoint) {
+                    return Err(Refused::ConveyOutsideSurvey { orb: *endpoint });
+                }
+            }
+            let (stamp, rate) = cfe::dop::postal_meter();
+            let metered = rate * amount.clone();
+            if *postage != metered {
+                return Err(Refused::PostageMismatch {
+                    declared: Box::new(postage.clone()),
+                    metered: Box::new(metered),
+                });
+            }
+            let monetary = cfe::dop::parcels_of(seed, covered)
+                .into_iter()
+                .find(|parcel| parcel.orb_id == *from_orb)
+                .map(|parcel| parcel.monetary)
+                .unwrap_or_else(|| ratio(0, 1));
+            let cap = prior
+                .orbs
+                .iter()
+                .find(|held| held.orb_id == *from_orb)
+                .map(|held| monetary * held.banked_amount(*resource))
+                .unwrap_or_else(|| ratio(0, 1));
+            if *amount > cap {
+                return Err(Refused::ConveyExceedsMonetary {
+                    asked: Box::new(amount.clone()),
+                    cap: Box::new(cap),
+                });
+            }
+            vec![(stamp, -postage.clone())]
         }
         // E5b THE ESTATE SURVEY — the three theorems, held at the gate. The meter
         // and the covering are verified HERE, against the prior state
@@ -1488,7 +1549,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
 
         // ── WORLD — keyed on an ORB inside one committed state ───────
         E::ColonyFounded { .. } | E::ColonyCharted { .. } | E::WorldCharted { .. }
-        | E::EstateSurveyed { .. } | E::AppraisalStruck { .. }
+        | E::EstateSurveyed { .. } | E::AppraisalStruck { .. } | E::ParcelConveyed { .. }
         | E::ZoneBuilt { .. } | E::ZoneRazed { .. }
         | E::YieldCollected { .. } | E::DemurrageSettled { .. } | E::UpkeepSettled { .. }
         | E::VentSettled { .. }
@@ -1595,6 +1656,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // and conserves trivially; the scope is Collect because it is a
         // value movement within the orb's own accounts.
         E::BookPosted { .. }
+        | E::ParcelConveyed { .. }
         | E::YieldCollected { .. } | E::UpkeepSettled { .. } | E::ResourceTransferred { .. }
         | E::OverflowAbsorbed { .. } | E::BondSettled { .. } | E::ForwardReleased { .. }
         | E::FrictionSettled { .. } | E::ApertureSent { .. } | E::ApertureReceived { .. }

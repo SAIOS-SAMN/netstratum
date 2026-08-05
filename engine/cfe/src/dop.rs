@@ -184,6 +184,14 @@
 //!         MECHANISM as exact rational factors over the closed channel
 //!         set. The code is carried and VERIFIED against the fold, never
 //!         chosen. Additive: a minor bump, never breaking)
+//!  100 ClosureEvent::ParcelConveyed (CONVEY, 2026-08-06 — the postal
+//!         deed, the estate chain's last link: from ‖ to ‖ resource ‖
+//!         amount ‖ postage ‖ survey ‖ seed ‖ covered. World-contained;
+//!         both endpoints must be SURVEYED PARCELS; only the MONETARY
+//!         portion of the sender's bank conveys — the free portion
+//!         stays home; postage = postal_meter rate × amount, drawn from
+//!         the sender and burned like upkeep, verified at the gate by
+//!         the same rule)
 //!   99 ClosureEvent::OfferCountered (THE COUNTER, 2026-08-06 — the
 //!         third outcome of survey/appraise → refuse/accept/renegotiate:
 //!         offer ‖ want_amount ‖ optional appraisal digest. Amends a
@@ -237,7 +245,7 @@
 //!         exactly this for the axes. Station codes are the BAND-1
 //!         vocabulary by index: 1 progenitor · 2 watcher · 3 observer
 //!         · 4 sovereign.)
-//!         — the next free tag outside reservations is 100. (This line
+//!         — the next free tag outside reservations is 101. (This line
 //!         read "90" until 2026-08-05 and was STALE: tag 90 was taken by
 //!         SovereignUnionSealed after it was written, and a mint drafted
 //!         onto 90 shadowed that deed's decoder arm — every sovereign
@@ -636,6 +644,15 @@ pub fn archetype_word(class: u8) -> &'static str {
         7 => "apex-terrestrial",
         _ => "unknown",
     }
+}
+
+/// **THE POSTAL METER** (CONVEY, 2026-08-06): what carrying one unit
+/// through the post costs — postage = rate × amount, exact, linear,
+/// never compounding. Iron, like the survey's stakes: stamps are
+/// struck metal. A placeholder dial ruled at balance, and the gate
+/// verifies a conveyance's declared postage by calling THIS rule.
+pub fn postal_meter() -> (Resource, Ratio) {
+    (Resource::Iron, ratio(1, 16))
 }
 
 /// **THE SURVEY METER** (E5b, 2026-08-05: *surveys must be metered*).
@@ -1691,6 +1708,24 @@ pub enum ClosureEvent {
         want_amount: Ratio,
         appraisal: Option<[u8; 32]>,
     },
+    /// **CONVEY** (tag 100): the postal deed. The parcel's monetary
+    /// break finally MEANS something mechanically: only the monetary
+    /// portion of the sender's bank is postal-addressable, the free
+    /// portion stays home, and both endpoints must be surveyed parcels.
+    /// `seed` and `covered` ride along so the gate re-derives the
+    /// parcels, the monetary cap and the postage from the prior state
+    /// alone (the appraisal's self-containment pattern). Postage burns
+    /// — the amount arrives whole.
+    ParcelConveyed {
+        from_orb: u64,
+        to_orb: u64,
+        resource: Resource,
+        amount: Ratio,
+        postage: Ratio,
+        survey: [u8; 32],
+        seed: [u8; 32],
+        covered: Vec<u64>,
+    },
 }
 
 impl ClosureEvent {
@@ -2117,6 +2152,29 @@ impl ClosureEvent {
                 }
                 ratio::encode(want_amount, &mut value);
                 tlv::put(99, &value, &mut out);
+            }
+            Self::ParcelConveyed {
+                from_orb,
+                to_orb,
+                resource,
+                amount,
+                postage,
+                survey,
+                seed,
+                covered,
+            } => {
+                let mut value = from_orb.to_le_bytes().to_vec();
+                value.extend_from_slice(&to_orb.to_le_bytes());
+                value.push(*resource as u8);
+                ratio::encode(amount, &mut value);
+                ratio::encode(postage, &mut value);
+                value.extend_from_slice(survey);
+                value.extend_from_slice(seed);
+                value.extend_from_slice(&(covered.len() as u32).to_le_bytes());
+                for orb in covered {
+                    value.extend_from_slice(&orb.to_le_bytes());
+                }
+                tlv::put(100, &value, &mut out);
             }
             Self::AppraisalStruck { subject, survey, seed, covered, value: worth } => {
                 let mut value = subject.wire().to_vec();
@@ -2650,6 +2708,38 @@ impl ClosureEvent {
                 };
                 let (want_amount, _) = ratio::decode(value.get(at..)?)?;
                 Some(Self::OfferCountered { offer, want_amount, appraisal })
+            }
+            100 => {
+                let from_orb = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let to_orb = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let resource = Resource::from_wire(*value.get(16)?)?;
+                let mut at = 17usize;
+                let (amount, used) = ratio::decode(value.get(at..)?)?;
+                at += used;
+                let (postage, used) = ratio::decode(value.get(at..)?)?;
+                at += used;
+                let survey: [u8; 32] = value.get(at..at + 32)?.try_into().ok()?;
+                at += 32;
+                let seed: [u8; 32] = value.get(at..at + 32)?.try_into().ok()?;
+                at += 32;
+                let count =
+                    u32::from_le_bytes(value.get(at..at + 4)?.try_into().ok()?) as usize;
+                at += 4;
+                let mut covered = Vec::with_capacity(count);
+                for _ in 0..count {
+                    covered.push(u64::from_le_bytes(value.get(at..at + 8)?.try_into().ok()?));
+                    at += 8;
+                }
+                Some(Self::ParcelConveyed {
+                    from_orb,
+                    to_orb,
+                    resource,
+                    amount,
+                    postage,
+                    survey,
+                    seed,
+                    covered,
+                })
             }
             89 => {
                 let station = *value.first()?;
