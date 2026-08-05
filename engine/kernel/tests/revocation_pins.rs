@@ -213,9 +213,17 @@ fn the_split_judges_exactly_as_the_pile_did() {
 /// THE VERSION IS x.y.z, AND ORDERED. A prototype gate says so in its
 /// major, and a peer comparing two commitments still gets a total
 /// order from the packed form.
+///
+/// **ONE CONSTANT, ONE PIN** (folded 2026-08-06, d3-scope's relay).
+/// This test also asserted the exact version string, so ONE constant
+/// was held by TWO pins in two files and every bump edited both — the
+/// two-truths smell in miniature. The exact string lives solely in
+/// `conservation_pins`' amendment ledger now, beside the history that
+/// justifies it; what this test keeps are claims about the Version
+/// ALGEBRA — ordering, packing, the prototype major — which are true of
+/// any version and never need editing on a bump.
 #[test]
 fn the_version_is_semver_and_orders() {
-    assert_eq!(KERNEL_VERSION.to_string(), "0.7.0");
     assert_eq!(KERNEL_VERSION.major, 0, "prototype — nothing has promised stability");
     assert!(
         KERNEL_VERSION.code() > kernel::Version { major: 0, minor: 4, patch: 0 }.code(),
