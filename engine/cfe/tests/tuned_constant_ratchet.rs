@@ -38,7 +38,7 @@ const SOURCE_TREES: [&str; 11] = [
 ];
 
 /// **THE CEILING — measured 2026-08-05, and it only falls.**
-const TUNED_LITERAL_CEILING: usize = 190;
+const TUNED_LITERAL_CEILING: usize = 203;
 
 /// Parse `ratio(<int>, <int>)` starting at `text` (just past the open
 /// paren). Returns the pair only when both arguments are integer
@@ -46,8 +46,10 @@ const TUNED_LITERAL_CEILING: usize = 190;
 fn literal_pair(text: &str) -> Option<(i64, i64)> {
     let (numer_text, rest) = text.split_once(',')?;
     let (denom_text, _) = rest.split_once(')')?;
-    let numer: i64 = numer_text.trim().parse().ok()?;
-    let denom: i64 = denom_text.trim().parse().ok()?;
+    // Rust spells big literals with underscores (`ratio(10_000, 1)`) —
+    // still a dial; a bare parse would miss every one of them.
+    let numer: i64 = numer_text.trim().replace('_', "").parse().ok()?;
+    let denom: i64 = denom_text.trim().replace('_', "").parse().ok()?;
     Some((numer, denom))
 }
 
@@ -123,4 +125,5 @@ fn the_census_parser_reads_what_it_should() {
     assert_eq!(tuned_in("ratio(n, 1)"), 0, "a variable already derives");
     assert_eq!(tuned_in("ratio(condition as i64, 1)"), 0);
     assert_eq!(tuned_in("ratio(5, 4)) * ratio(3, 2)"), 2, "two dials on one line");
+    assert_eq!(tuned_in("ratio(10_000, 1)"), 1, "underscores do not hide a dial");
 }
