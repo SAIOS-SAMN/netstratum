@@ -107,7 +107,7 @@ fn the_crossing_observes_and_the_observation_creates() {
     aperture_transfer(
         &mut far_half[0].world, FIRST_ORB,
         &mut near_half[0].world, FIRST_ORB,
-        Resource::Iron, ratio(5, 1), 9,
+        Resource::Iron, cfe::dop::positive(5, 1), 9,
     )
     .expect("the aperture opens");
     assert!(worlds[0].world.has_crossed() && worlds[1].world.has_crossed());

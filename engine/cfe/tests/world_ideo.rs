@@ -42,7 +42,7 @@ fn furnace_and_coldstore() -> (World, u64) {
     world.tick();
     world.collect().expect("banks the joules");
     world
-        .transfer(FIRST_ORB, charted, Resource::Joule, ratio(1, 1))
+        .transfer(cfe::dop::between(FIRST_ORB, charted), Resource::Joule, cfe::dop::positive(1, 1))
         .expect("relieves the freeze");
     world.tick();
     world.tick();
@@ -114,7 +114,7 @@ fn the_ratio_derives_and_never_stores() {
 #[test]
 fn friction_prices_divergence_exactly() {
     let (mut world, charted) = furnace_and_coldstore();
-    world.absorb(FIRST_ORB, charted, ratio(1, 1)).expect("absorbs"); // debt @19
+    world.absorb(cfe::dop::between(FIRST_ORB, charted), cfe::dop::positive(1, 1)).expect("absorbs"); // debt @19
     for _ in 0..9 {
         world.tick(); // the window lapses at now=27: extracted = 1
     }
@@ -126,7 +126,7 @@ fn friction_prices_divergence_exactly() {
     // The extractor (reading 0) moves 2 iron to the fresh reader (1):
     // ΔS_ideo = 1/8 × 1 × 2 = 1/4, on the mover.
     world
-        .transfer(FIRST_ORB, charted, Resource::Iron, ratio(2, 1))
+        .transfer(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(2, 1))
         .expect("transfers across the divide");
     let vented_before = world.orb_by_id(FIRST_ORB).expect("orb").entropy_vented.clone();
     let joules_before = world
@@ -227,7 +227,7 @@ fn aligned_partners_generate_exactly_zero() {
     world.collect().expect("collects");
     let charted = world.chart("outpost", FIRST_ORB).expect("charts");
     world
-        .transfer(FIRST_ORB, charted, Resource::Iron, ratio(5, 1))
+        .transfer(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(5, 1))
         .expect("transfers");
     for _ in 0..2 {
         world.tick();

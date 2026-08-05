@@ -78,9 +78,9 @@ fn the_draw_places_theta_and_absence_stays_absent_in_psi() {
 fn seatings_replay_including_a_replacement() {
     let mut world = World::new();
     world.found("seated").expect("founds");
-    world.seat_station_as(SOVEREIGN, "abyssal-vocalis", 3).expect("seats");
-    world.seat_station_as(SOVEREIGN, "brine-cortex", 1).expect("seats");
-    world.seat_station_as(SOVEREIGN, "abyssal-vocalis", 2).expect("re-seats");
+    world.seat_station_as(SOVEREIGN, "abyssal-vocalis", cfe::dop::Station::from_wire(3).expect("a band office")).expect("seats");
+    world.seat_station_as(SOVEREIGN, "brine-cortex", cfe::dop::Station::from_wire(1).expect("a band office")).expect("seats");
+    world.seat_station_as(SOVEREIGN, "abyssal-vocalis", cfe::dop::Station::from_wire(2).expect("a band office")).expect("re-seats");
 
     assert_eq!(
         replay(world.chronicle()).stations,

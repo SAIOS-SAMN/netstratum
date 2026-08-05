@@ -771,6 +771,10 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 (Some(amt), Some(resource), Some(target), Some(deal)) => {
                     match far_world(&target) {
                         Ok(mut far) => {
+                            let Some(amt) = cfe::dop::Positive::new(amt) else {
+                                println!("{} cargo must be positive — zero moves nothing and a negative is not a quantity", style.bad("✗"));
+                                return;
+                            };
                             match cfe::world::aperture_transfer(
                                 world, *current, &mut far, cfe::world::FIRST_ORB,
                                 resource, amt, deal,
@@ -2177,7 +2181,14 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                 .orb_by_id(target)
                                 .map(|held| held.famine.clone())
                                 .unwrap_or_default();
-                            match world.transfer_as(SOVEREIGN, source, target, resource, value.clone()) {
+                            let (Some(lane), Some(cargo)) = (
+                                cfe::dop::Between::new(source, target),
+                                cfe::dop::Positive::new(value.clone()),
+                            ) else {
+                                println!("{} a transfer joins two DIFFERENT planets with a positive amount", style.bad("✗"));
+                                return;
+                            };
+                            match world.transfer_as(SOVEREIGN, lane, resource, cargo) {
                                 Ok(()) => {
                                     println!(
                                         "{} {} {} sent to {} — receipt sealed at stamp {}; the books of both planets balance",
@@ -2242,7 +2253,14 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         .map(|held| held.orb_id);
                     match (source, absorber) {
                         (Some(source), Some(absorber)) => {
-                            match world.absorb_as(SOVEREIGN, source, absorber, value.clone()) {
+                            let (Some(pair), Some(cargo)) = (
+                                cfe::dop::Between::new(source, absorber),
+                                cfe::dop::Positive::new(value.clone()),
+                            ) else {
+                                println!("{} absorption joins two DIFFERENT planets with a positive amount", style.bad("✗"));
+                                return;
+                            };
+                            match world.absorb_as(SOVEREIGN, pair, cargo) {
                                 Ok(()) => {
                                     println!(
                                         "{} {} overflow absorbed from {} — sink consumed, shed to the void through the absorber's arrays; the reciprocity window opens ({} ticks)",
@@ -2311,7 +2329,14 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         .map(|held| held.orb_id);
                     match (target, source) {
                         (Some(target), Some(source)) => {
-                            match world.seal_bond_as(SOVEREIGN, source, target, resource, rate.clone(), term) {
+                            let (Some(pair), Some(flow)) = (
+                                cfe::dop::Between::new(source, target),
+                                cfe::dop::Positive::new(rate.clone()),
+                            ) else {
+                                println!("{} a bond streams a positive rate between two DIFFERENT planets", style.bad("✗"));
+                                return;
+                            };
+                            match world.seal_bond_as(SOVEREIGN, pair, resource, flow, term) {
                                 Ok(()) => println!(
                                     "{} bond sealed: {} {}/tick streams to {}{} — settles at each touch; severing without notice posts the load",
                                     style.ok("⚭"),
@@ -2444,8 +2469,16 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         .map(|held| held.orb_id);
                     match (beneficiary, obligor) {
                         (Some(beneficiary), Some(obligor)) => {
+                            let (Some(pair), Some(owed), Some(ticks)) = (
+                                cfe::dop::Between::new(obligor, beneficiary),
+                                cfe::dop::Positive::new(quota.clone()),
+                                cfe::dop::Window::new(window),
+                            ) else {
+                                println!("{} a forward owes a positive quota between two DIFFERENT planets inside at least one tick", style.bad("✗"));
+                                return;
+                            };
                             match world.seal_forward_as(
-                                SOVEREIGN, obligor, beneficiary, resource, quota.clone(), window,
+                                SOVEREIGN, pair, resource, owed, ticks,
                             ) {
                                 Ok(()) => println!(
                                     "{} forward vitrified: {} {} owed to {} within {} ticks — the collateral sits in the lattice until the word is kept or broken",
@@ -3735,10 +3768,18 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
         // BadSiting is DEAD (29_CONSTRUCTION C1): albedo is a `Unit`
         // and the radius a `Positive` — the client's parse doors report
         // an out-of-range argument before any verb sees it.
-        ActionRefused::BadTransfer => format!(
-            "a transfer moves a positive amount between two different planets — e.g. {}",
-            style.strong("send 5/2 iron to outpost")
+        // BadTransfer is DEAD (29_CONSTRUCTION C1): Between, Positive
+        // and Window prove the shapes at the doors; the client reports
+        // parse faults before any verb runs.
+        ActionRefused::NodeAlreadyHeld { condition } => format!(
+            "node {} is already held on that side — a technology crystallizes once",
+            style.strong(&condition.to_string())
         ),
+        ActionRefused::NodeUnlicensable { condition } => format!(
+            "condition {} is not licensable — only the crystallized tier and the crown license down (derived from the vocabulary, never a range)",
+            style.strong(&condition.to_string())
+        ),
+        ActionRefused::LineUnnamed => "a seat needs a named line".to_string(),
         ActionRefused::NoSuchCouncil { council } => format!(
             "no open council {} stands — delegation settles inside diplomacy; seal the council first",
             style.strong(&format!("{council}"))

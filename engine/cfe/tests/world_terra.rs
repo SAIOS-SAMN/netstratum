@@ -29,15 +29,15 @@ fn the_crown_gifts_only_onto_a_finished_stack_and_moves_the_orbit() {
     let mut grantor = sunlit("lyra-hearth");
     let b = grantor.chart("midhold", FIRST_ORB).expect("charts");
     let c = grantor.chart("farhold", b).expect("charts");
-    grantor.transfer(c, FIRST_ORB, Resource::Iron, ratio(6, 1)).expect("spreads");
-    grantor.transfer(c, b, Resource::Iron, ratio(6, 1)).expect("spreads");
+    grantor.transfer(cfe::dop::between(c, FIRST_ORB), Resource::Iron, cfe::dop::positive(6, 1)).expect("spreads");
+    grantor.transfer(cfe::dop::between(c, b), Resource::Iron, cfe::dop::positive(6, 1)).expect("spreads");
     grantor
         .seal_council(1, vec![FIRST_ORB, b, c], Resource::Iron, ratio(2, 1), 600, ratio(1, 1))
         .expect("the council stands");
     let mut receiver = sunlit("kepler-passage");
     aperture_transfer(
         &mut receiver, FIRST_ORB, &mut grantor, FIRST_ORB,
-        Resource::Iron, ratio(1, 1), 1,
+        Resource::Iron, cfe::dop::positive(1, 1), 1,
     )
     .expect("both cross");
 

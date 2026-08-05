@@ -44,7 +44,7 @@ fn furnace_and_coldstore() -> (World, u64) {
     world.tick();
     world.collect().expect("banks the joules"); // @17: seals vent 1/2
     world
-        .transfer(FIRST_ORB, charted, Resource::Joule, ratio(1, 1))
+        .transfer(cfe::dop::between(FIRST_ORB, charted), Resource::Joule, cfe::dop::positive(1, 1))
         .expect("relieves the freeze");
     world.tick(); // @17: thawed — captures, burns 1/4
     world.tick(); // @18
@@ -78,12 +78,12 @@ fn lapse_stamps(world: &World) -> Vec<(u64, Ratio, u64)> {
 fn identical_remainders_lapse_in_emission_order() {
     let (mut world, charted) = furnace_and_coldstore();
     world
-        .absorb(FIRST_ORB, charted, ratio(1, 2))
+        .absorb(cfe::dop::between(FIRST_ORB, charted), cfe::dop::positive(1, 2))
         .expect("absorbs half"); // debt A @19 → lapses 27
     world.tick(); // @20 — the standing strike keeps venting
     world.tick(); // @21
     world
-        .absorb(FIRST_ORB, charted, ratio(1, 2))
+        .absorb(cfe::dop::between(FIRST_ORB, charted), cfe::dop::positive(1, 2))
         .expect("absorbs the same again"); // debt B @21 → lapses 29
     let debts = world.committed().debts;
     assert_eq!(debts.len(), 2, "two windows stand open");
@@ -143,13 +143,13 @@ fn identical_remainders_lapse_in_emission_order() {
 fn three_resolutions_share_one_lane_and_one_stamp() {
     let (mut world, charted) = furnace_and_coldstore();
     world
-        .absorb(FIRST_ORB, charted, ratio(1, 1))
+        .absorb(cfe::dop::between(FIRST_ORB, charted), cfe::dop::positive(1, 1))
         .expect("absorbs"); // debt @19 → lapses 27
     world
-        .seal_bond(FIRST_ORB, charted, Resource::Biomass, ratio(1, 8), 8)
+        .seal_bond(cfe::dop::between(FIRST_ORB, charted), Resource::Biomass, cfe::dop::positive(1, 8), 8)
         .expect("seals the term bond"); // @19 → expires orderly at 27
     world
-        .seal_forward(FIRST_ORB, charted, Resource::Iron, ratio(1, 1), 8)
+        .seal_forward(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(1, 1), cfe::dop::window(8))
         .expect("seals the pact"); // @19, undelivered → slashes at 27
 
     for _ in 0..8 {

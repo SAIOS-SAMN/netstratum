@@ -316,12 +316,11 @@ impl World {
     /// Transfer banked value between two orbs as the sovereign.
     pub fn transfer(
         &mut self,
-        from: u64,
-        to: u64,
+        lane: crate::dop::Between,
         resource: Resource,
-        amount: Ratio,
+        amount: crate::dop::Positive,
     ) -> Result<(), ActionRefused> {
-        self.transfer_as(SOVEREIGN, from, to, resource, amount)
+        self.transfer_as(SOVEREIGN, lane, resource, amount)
     }
     /// TRADE-1 (09 §2.1) — move BANKED value orb-to-orb within the
     /// world: the chartering conservation law generalized (nothing
@@ -334,10 +333,9 @@ impl World {
     pub fn transfer_as(
         &mut self,
         actor: u64,
-        from: u64,
-        to: u64,
+        lane: crate::dop::Between,
         resource: Resource,
-        amount: Ratio,
+        amount: crate::dop::Positive,
     ) -> Result<(), ActionRefused> {
         // P2: the standing supply the sink's EPOCH 1 rate reads,
         // snapshotted BEFORE any orb is peeled — an owned Vec, so no
@@ -347,9 +345,9 @@ impl World {
         if self.orbs.is_empty() {
             return Err(ActionRefused::NoColony);
         }
-        if from == to || amount <= ratio(0, 1) {
-            return Err(ActionRefused::BadTransfer);
-        }
+        // Both shapes died at the doors (29_CONSTRUCTION C1).
+        let (from, to) = (lane.from(), lane.to());
+        let amount = amount.value().clone();
         if !self.orbs.iter().any(|held| held.orb_id == from) {
             return Err(ActionRefused::NoSuchOrb { orb: from });
         }
@@ -458,11 +456,10 @@ impl World {
     /// Absorb as the sovereign.
     pub fn absorb(
         &mut self,
-        source: u64,
-        absorber: u64,
-        amount: Ratio,
+        pair: crate::dop::Between,
+        amount: crate::dop::Positive,
     ) -> Result<(), ActionRefused> {
-        self.absorb_as(SOVEREIGN, source, absorber, amount)
+        self.absorb_as(SOVEREIGN, pair, amount)
     }
     /// ABSORB-1 (05 §1.4, 09 §2.4) — route the source's un-sealed
     /// overflow into the absorber's banked sink instead of the void:
@@ -478,9 +475,8 @@ impl World {
     pub fn absorb_as(
         &mut self,
         actor: u64,
-        source: u64,
-        absorber: u64,
-        amount: Ratio,
+        pair: crate::dop::Between,
+        amount: crate::dop::Positive,
     ) -> Result<(), ActionRefused> {
         // P2: the standing supply the sink's EPOCH 1 rate reads,
         // snapshotted BEFORE any orb is peeled — an owned Vec, so no
@@ -490,9 +486,9 @@ impl World {
         if self.orbs.is_empty() {
             return Err(ActionRefused::NoColony);
         }
-        if source == absorber || amount <= ratio(0, 1) {
-            return Err(ActionRefused::BadTransfer);
-        }
+        // Both shapes died at the doors (29_CONSTRUCTION C1).
+        let (source, absorber) = (pair.from(), pair.to());
+        let amount = amount.value().clone();
         if !self.orbs.iter().any(|held| held.orb_id == source) {
             return Err(ActionRefused::NoSuchOrb { orb: source });
         }

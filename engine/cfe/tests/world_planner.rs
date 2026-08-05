@@ -28,15 +28,15 @@ fn planner_pair() -> (World, World) {
     let mut grantor = sunlit("eridu-forge");
     let b = grantor.chart("midhold", FIRST_ORB).expect("charts");
     let c = grantor.chart("farhold", b).expect("charts");
-    grantor.transfer(c, FIRST_ORB, Resource::Iron, ratio(6, 1)).expect("spreads");
-    grantor.transfer(c, b, Resource::Iron, ratio(6, 1)).expect("spreads");
+    grantor.transfer(cfe::dop::between(c, FIRST_ORB), Resource::Iron, cfe::dop::positive(6, 1)).expect("spreads");
+    grantor.transfer(cfe::dop::between(c, b), Resource::Iron, cfe::dop::positive(6, 1)).expect("spreads");
     grantor
         .seal_council(1, vec![FIRST_ORB, b, c], Resource::Iron, ratio(2, 1), 600, ratio(1, 1))
         .expect("the council stands open");
     let mut receiver = sunlit("kepler-passage");
     aperture_transfer(
         &mut grantor, FIRST_ORB, &mut receiver, FIRST_ORB,
-        Resource::Iron, ratio(1, 1), 1,
+        Resource::Iron, cfe::dop::positive(1, 1), 1,
     )
     .expect("both cross");
     (grantor, receiver)

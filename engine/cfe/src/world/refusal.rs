@@ -136,9 +136,14 @@ pub enum ActionRefused {
     NoStarCommissioned,
     /// THERMAL-1 — the orb is already sited; an orbit does not move.
     AlreadySited { orb: u64 },
-    /// TRADE-1 — a transfer moves a POSITIVE amount between two
-    /// DISTINCT orbs; anything else refuses whole.
-    BadTransfer,
+    /// The destination already holds this tech node — a FACT that wore
+    /// the dead BadTransfer's word for want of its own.
+    NodeAlreadyHeld { condition: u8 },
+    /// Licensing asked for a node outside the crystallized tier and the
+    /// crown — derived from `node_kind`, never a magic range.
+    NodeUnlicensable { condition: u8 },
+    /// A seat needs a named line.
+    LineUnnamed,
     /// THRESHOLD-1 (12_UNION §7) — the shield holds: a people that has
     /// not made the solar leap cannot be reached by aperture, in
     /// either direction. The flags name which side stands shielded —

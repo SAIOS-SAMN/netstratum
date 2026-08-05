@@ -96,8 +96,9 @@ fn the_meter_charges_the_volume_and_an_unpayable_survey_leaves_nothing() {
     poor.found("origin").expect("founds");
     let haven = poor.chart("haven", FIRST_ORB).expect("charts");
     let left = poor.orbs()[0].banked_amount(resource);
-    if left > ratio(0, 1) {
-        poor.transfer(FIRST_ORB, haven, resource, left).expect("drains");
+    if let Some(amount) = cfe::dop::Positive::new(left.clone()) {
+        poor.transfer(cfe::dop::between(FIRST_ORB, haven), resource, amount)
+            .expect("drains");
     }
     let receipts_before = poor.chronicle().receipts().len();
     let banked_before = poor.orbs()[0].banked_amount(resource);

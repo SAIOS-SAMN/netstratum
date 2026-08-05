@@ -323,22 +323,30 @@ impl World {
     /// is a CACHE from this receipt on — precisely what `GenesisSealed`
     /// did for the axes at G1.
     ///
-    /// Build-scoped. `station` is the BAND-1 vocabulary by index
-    /// (1 progenitor, 2 watcher, 3 observer, 4 sovereign); anything
-    /// else refuses rather than seating a nameless office.
-    pub fn seat_station(&mut self, line: &str, station: u8) -> Result<(), ActionRefused> {
+    /// Build-scoped. `station` is a [`crate::dop::Station`] — the BAND-1
+    /// vocabulary AS A TYPE, so an off-band index is unrepresentable and
+    /// the old range check is dead (29_CONSTRUCTION C1).
+    pub fn seat_station(
+        &mut self,
+        line: &str,
+        station: crate::dop::Station,
+    ) -> Result<(), ActionRefused> {
         self.seat_station_as(SOVEREIGN, line, station)
     }
     pub fn seat_station_as(
         &mut self,
         actor: u64,
         line: &str,
-        station: u8,
+        station: crate::dop::Station,
     ) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Build)?;
-        if station == 0 || station > 4 || line.is_empty() {
-            return Err(ActionRefused::BadTransfer);
+        // The band range is unrepresentable off-vocabulary now — a
+        // `Station` IS one of the four offices. The nameless line keeps
+        // a refusal, honestly named at last.
+        if line.is_empty() {
+            return Err(ActionRefused::LineUnnamed);
         }
+        let station = station.as_wire();
         self.close(
             ClosureEvent::StationSeated { line: line.to_string(), station },
             actor,

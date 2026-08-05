@@ -48,7 +48,7 @@ fn an_aperture_conserves_across_two_worlds() {
         &mut beta,
         FIRST_ORB,
         Resource::Iron,
-        ratio(5, 1),
+        cfe::dop::positive(5, 1),
         7,
     )
     .expect("the aperture opens");
@@ -103,7 +103,7 @@ fn an_aperture_refuses_typed() {
             &mut beta,
             FIRST_ORB,
             Resource::Iron,
-            ratio(100, 1),
+            cfe::dop::positive(100, 1),
             1
         ),
         Err(ActionRefused::CannotAfford {
@@ -112,26 +112,17 @@ fn an_aperture_refuses_typed() {
             have: Box::new(ratio(20, 1)),
         })
     );
-    // Non-positive amount.
-    assert_eq!(
-        aperture_transfer(
-            &mut alpha,
-            FIRST_ORB,
-            &mut beta,
-            FIRST_ORB,
-            Resource::Iron,
-            ratio(0, 1),
-            1
-        ),
-        Err(ActionRefused::BadTransfer)
-    );
+    // **BadTransfer IS DEAD** (29_CONSTRUCTION C1): a non-positive
+    // cargo cannot be constructed, so the verb can never be handed one.
+    // The probe lives at the door now.
+    assert_eq!(cfe::dop::Positive::new(ratio(0, 1)), None, "zero cargo is not cargo");
     // No such source / destination orb.
     assert_eq!(
-        aperture_transfer(&mut alpha, 99, &mut beta, FIRST_ORB, Resource::Iron, ratio(1, 1), 1),
+        aperture_transfer(&mut alpha, 99, &mut beta, FIRST_ORB, Resource::Iron, cfe::dop::positive(1, 1), 1),
         Err(ActionRefused::NoSuchOrb { orb: 99 })
     );
     assert_eq!(
-        aperture_transfer(&mut alpha, FIRST_ORB, &mut beta, 99, Resource::Iron, ratio(1, 1), 1),
+        aperture_transfer(&mut alpha, FIRST_ORB, &mut beta, 99, Resource::Iron, cfe::dop::positive(1, 1), 1),
         Err(ActionRefused::NoSuchOrb { orb: 99 })
     );
     // No leg written on any refusal — a refusal orphans nothing.
@@ -152,7 +143,7 @@ fn both_legs_replay_in_their_own_world() {
         &mut beta,
         FIRST_ORB,
         Resource::Iron,
-        ratio(8, 1),
+        cfe::dop::positive(8, 1),
         3,
     )
     .expect("the aperture opens");

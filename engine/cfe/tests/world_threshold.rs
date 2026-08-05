@@ -42,7 +42,7 @@ fn the_shield_refuses_both_directions_and_moves_nothing() {
     assert_eq!(
         aperture_transfer(
             &mut sunward, FIRST_ORB, &mut deepmat, FIRST_ORB,
-            Resource::Iron, ratio(5, 1), 1,
+            Resource::Iron, cfe::dop::positive(5, 1), 1,
         ),
         Err(ActionRefused::Shielded { source_shielded: false, dest_shielded: true })
     );
@@ -51,7 +51,7 @@ fn the_shield_refuses_both_directions_and_moves_nothing() {
     assert_eq!(
         aperture_transfer(
             &mut deepmat, FIRST_ORB, &mut sunward, FIRST_ORB,
-            Resource::Iron, ratio(5, 1), 2,
+            Resource::Iron, cfe::dop::positive(5, 1), 2,
         ),
         Err(ActionRefused::Shielded { source_shielded: true, dest_shielded: false })
     );
@@ -88,7 +88,7 @@ fn the_first_aperture_is_the_crossing() {
     // ...and the first aperture is the crossing, for both.
     aperture_transfer(
         &mut alpha, FIRST_ORB, &mut haven, FIRST_ORB,
-        Resource::Iron, ratio(5, 1), 9,
+        Resource::Iron, cfe::dop::positive(5, 1), 9,
     )
     .expect("the aperture opens");
     assert!(alpha.has_crossed());

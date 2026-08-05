@@ -200,10 +200,10 @@ pub fn aperture_transfer(
     dst: &mut World,
     to: u64,
     resource: Resource,
-    amount: Ratio,
+    amount: crate::dop::Positive,
     deal: u64,
 ) -> Result<(), ActionRefused> {
-    haul(src, from, dst, to, resource, amount, deal, &ratio(0, 1))
+    haul(src, from, dst, to, resource, amount.value().clone(), deal, &ratio(0, 1))
 }
 
 /// MARKET-2 (ruled 2026-07-31): the melt coefficient φ — the fraction
@@ -233,9 +233,6 @@ fn haul(
     // supply — a busy world's rate must not be charged to a quiet one.
     let src_supply = standing_supply(&src.orbs);
     let dst_supply = standing_supply(&dst.orbs);
-    if amount <= ratio(0, 1) {
-        return Err(ActionRefused::BadTransfer);
-    }
     if *melt >= ratio(1, 1) {
         return Err(ActionRefused::EconomicallyWalled { melt: Box::new(melt.clone()) });
     }
@@ -599,8 +596,10 @@ pub fn license_tech(
     seed.extend_from_slice(&deal.to_le_bytes());
     seed.push(condition);
     let node: [u8; 32] = blake3::hash(&seed).into();
+    // A FACT, now honestly named: the destination already holds this
+    // node. It wore the transfer refusal's word for want of its own.
     if dst.techs.iter().any(|(_, _, held)| *held == node) {
-        return Err(ActionRefused::BadTransfer);
+        return Err(ActionRefused::NodeAlreadyHeld { condition });
     }
     let src_stamp = src.clock.now();
     let dst_stamp = dst.clock.now();

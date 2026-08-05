@@ -43,7 +43,7 @@ fn source_and_charted() -> (World, u64) {
 fn a_bond_streams_and_settles_in_one_receipt() {
     let (mut world, charted) = source_and_charted();
     world
-        .seal_bond(FIRST_ORB, charted, Resource::Iron, ratio(1, 2), 0)
+        .seal_bond(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(1, 2), 0)
         .expect("seals"); // @16, open-ended
     for _ in 0..6 {
         world.tick();
@@ -102,11 +102,11 @@ fn severing_mid_winter_drops_the_partner() {
     world.tick(); // @16: the furnace mints; the cold orb's joule famine strikes
     world.collect().expect("banks the joules"); // @17
     world
-        .transfer(FIRST_ORB, charted, Resource::Joule, ratio(1, 1))
+        .transfer(cfe::dop::between(FIRST_ORB, charted), Resource::Joule, cfe::dop::positive(1, 1))
         .expect("relieves the freeze");
     // The heating lifeline: 1/4 joule per tick, open-ended.
     world
-        .seal_bond(FIRST_ORB, charted, Resource::Joule, ratio(1, 4), 0)
+        .seal_bond(cfe::dop::between(FIRST_ORB, charted), Resource::Joule, cfe::dop::positive(1, 4), 0)
         .expect("seals the lifeline"); // @17
     world.tick();
     world.tick();
@@ -149,7 +149,7 @@ fn severing_mid_winter_drops_the_partner() {
 fn an_orderly_term_bond_expires_posting_nothing() {
     let (mut world, charted) = source_and_charted();
     world
-        .seal_bond(FIRST_ORB, charted, Resource::Iron, ratio(1, 2), 4)
+        .seal_bond(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(1, 2), 4)
         .expect("seals for a term"); // @16, expires at 20
     world.tick();
     world.tick();
@@ -189,7 +189,7 @@ fn an_insolvent_settle_breaks_the_bond_as_default() {
     let (mut world, charted) = source_and_charted();
     // Rate 4/tick against a 10-iron bank and 5/4-iron income: doomed.
     world
-        .seal_bond(FIRST_ORB, charted, Resource::Iron, ratio(4, 1), 0)
+        .seal_bond(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(4, 1), 0)
         .expect("seals beyond its means"); // @16
     for _ in 0..4 {
         world.tick();
@@ -227,22 +227,17 @@ fn an_insolvent_settle_breaks_the_bond_as_default() {
 fn bond_refusals_are_typed() {
     let (mut world, charted) = source_and_charted();
     world
-        .seal_bond(FIRST_ORB, charted, Resource::Iron, ratio(1, 2), 0)
+        .seal_bond(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(1, 2), 0)
         .expect("seals");
     assert_eq!(
-        world.seal_bond(FIRST_ORB, charted, Resource::Iron, ratio(1, 4), 0),
+        world.seal_bond(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(1, 4), 0),
         Err(ActionRefused::BondAlreadySealed)
     );
+    // **BadTransfer IS DEAD**: both faults live at the type doors.
+    assert_eq!(cfe::dop::Between::new(FIRST_ORB, FIRST_ORB), None, "a bond to oneself streams nothing");
+    assert_eq!(cfe::dop::Positive::new(ratio(0, 1)), None, "a zero rate is not a stream");
     assert_eq!(
-        world.seal_bond(FIRST_ORB, FIRST_ORB, Resource::Iron, ratio(1, 2), 0),
-        Err(ActionRefused::BadTransfer)
-    );
-    assert_eq!(
-        world.seal_bond(FIRST_ORB, charted, Resource::Iron, ratio(0, 1), 0),
-        Err(ActionRefused::BadTransfer)
-    );
-    assert_eq!(
-        world.seal_bond(FIRST_ORB, 99, Resource::Iron, ratio(1, 2), 0),
+        world.seal_bond(cfe::dop::between(FIRST_ORB, 99), Resource::Iron, cfe::dop::positive(1, 2), 0),
         Err(ActionRefused::NoSuchOrb { orb: 99 })
     );
     assert_eq!(

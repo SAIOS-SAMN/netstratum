@@ -189,7 +189,7 @@ use cfe::world::{ActionRefused, World};
 fn seated() -> World {
     let mut world = World::new();
     world.found("mint-hold").expect("founds");
-    world.seat_station("tunborn", 1).expect("seats the progenitor");
+    world.seat_station("tunborn", cfe::dop::Station::from_wire(1).expect("a band office")).expect("seats the progenitor");
     world
 }
 
@@ -199,7 +199,7 @@ fn seated() -> World {
 fn only_a_progenitor_may_mint() {
     let mut world = seated();
     // A watcher (2) is a real office and still not a board-maker.
-    world.seat_station("coralline", 2).expect("seats the watcher");
+    world.seat_station("coralline", cfe::dop::Station::from_wire(2).expect("a band office")).expect("seats the watcher");
 
     for line in ["coralline", "nobody"] {
         assert!(
@@ -451,16 +451,16 @@ fn a_seated_line_may_not_covenant() {
     // THE COMMON MAY. tier_of(None) = T3, the only road to the band.
     let (mut world, charted) = common();
     world
-        .seal_forward(cfe::world::FIRST_ORB, charted, Resource::Iron, ratio(1, 1), 8)
+        .seal_forward(cfe::dop::between(cfe::world::FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(1, 1), cfe::dop::window(8))
         .expect("the common band binds by contract");
 
     // EVERY SEATED OFFICE MAY NOT — T0, T1 and T2 alike.
     for station in 1..=4u8 {
         let (mut world, charted) = common();
-        world.seat_station("commoners", station).expect("seats");
+        world.seat_station("commoners", cfe::dop::Station::from_wire(station).expect("a band office")).expect("seats");
         assert!(
             matches!(
-                world.seal_forward(cfe::world::FIRST_ORB, charted, Resource::Iron, ratio(1, 1), 8),
+                world.seal_forward(cfe::dop::between(cfe::world::FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(1, 1), cfe::dop::window(8)),
                 Err(ActionRefused::CovenantAboveTheCommon { .. })
             ),
             "station {station} sealed a covenant it should not hold"

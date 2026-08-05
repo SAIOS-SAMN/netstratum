@@ -218,14 +218,14 @@ impl World {
         actor: u64,
         orb: u64,
         resource: Resource,
-        amount: Ratio,
+        amount: crate::dop::NonNegative,
         work: Vec<u8>,
         warrant: &dyn MintWarrant,
     ) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Collect)?;
-        if amount < ratio(0, 1) {
-            return Err(ActionRefused::BadTransfer);
-        }
+        // A negative mint is unrepresentable (NonNegative); zero stays
+        // lawful — a saturated rung honestly pays nothing.
+        let amount = amount.value().clone();
         if !self.orbs.iter().any(|held| held.orb_id == orb) {
             return Err(ActionRefused::NoSuchOrb { orb });
         }

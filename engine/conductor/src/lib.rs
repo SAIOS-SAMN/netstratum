@@ -1588,6 +1588,12 @@ impl Polity {
                     // refused the lawful recycled line by construction.
                     let earned = kernel::mint_bound(difficulty.rung());
                     if earned > cfe::ratio::ratio(0, 1) {
+                        // The bound is the kernel's own reading and is
+                        // non-negative by its ladder; the door proves it
+                        // rather than trusting this comment.
+                        let Some(earned) = cfe::dop::NonNegative::new(earned) else {
+                            return;
+                        };
                         let _ = self.world.mint_discovery_as(
                             self.automaton,
                             cfe::world::FIRST_ORB,

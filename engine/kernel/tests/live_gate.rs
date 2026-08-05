@@ -36,7 +36,7 @@ fn a_payload_that_is_not_a_proof_never_reaches_the_chronicle() {
         SOVEREIGN,
         orb,
         Resource::Iron,
-        ratio(1, 1),
+        cfe::dop::non_negative(1, 1),
         GARBAGE.to_vec(),
         &kernel::SealedWarrant,
     );
@@ -71,7 +71,7 @@ fn replay_grants_nothing_because_nothing_was_written() {
                     SOVEREIGN,
                     orb,
                     Resource::Iron,
-                    ratio(scale, 1),
+                    cfe::dop::NonNegative::new(ratio(scale, 1)).expect("scale ≥ 0"),
                     GARBAGE.to_vec(),
                     &kernel::SealedWarrant,
                 )
@@ -94,7 +94,7 @@ fn a_caller_without_a_verifier_cannot_mint_at_all() {
         SOVEREIGN,
         orb,
         Resource::Iron,
-        ratio(1, 1),
+        cfe::dop::non_negative(1, 1),
         GARBAGE.to_vec(),
         &NoWarrant,
     );
@@ -152,7 +152,7 @@ fn a_deed_the_judge_refuses_leaves_no_receipt() {
         SOVEREIGN,
         orb,
         Resource::Iron,
-        ratio(0, 1),
+        cfe::dop::non_negative(0, 1),
         GARBAGE.to_vec(),
         &kernel::SealedWarrant,
     );

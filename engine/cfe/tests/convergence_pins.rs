@@ -73,10 +73,10 @@ fn convergence_is_a_magnitude_that_is_high_when_conduct_agrees() {
     // opens a reciprocity entry, and value flowing back closes it.
     let (mut world, far) = two_colonies();
     world
-        .transfer(FIRST_ORB, far, Resource::Iron, ratio(4, 1))
+        .transfer(cfe::dop::between(FIRST_ORB, far), Resource::Iron, cfe::dop::positive(4, 1))
         .expect("moves value across the boundary");
     world
-        .transfer(far, FIRST_ORB, Resource::Iron, ratio(2, 1))
+        .transfer(cfe::dop::between(far, FIRST_ORB), Resource::Iron, cfe::dop::positive(2, 1))
         .expect("and some of it returns");
     for _ in 0..4 {
         world.tick();

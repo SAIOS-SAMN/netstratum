@@ -20,8 +20,8 @@ fn archipelago() -> (World, u64, u64) {
     world.found("commons").expect("founds");
     let b = world.chart("midhold", FIRST_ORB).expect("charts");
     let c = world.chart("farhold", b).expect("charts");
-    world.transfer(c, FIRST_ORB, Resource::Iron, ratio(6, 1)).expect("spreads");
-    world.transfer(c, b, Resource::Iron, ratio(6, 1)).expect("spreads");
+    world.transfer(cfe::dop::between(c, FIRST_ORB), Resource::Iron, cfe::dop::positive(6, 1)).expect("spreads");
+    world.transfer(cfe::dop::between(c, b), Resource::Iron, cfe::dop::positive(6, 1)).expect("spreads");
     (world, b, c)
 }
 
@@ -73,8 +73,8 @@ fn the_reckoning_judges_all_together() {
     assert_eq!(iron(&world, c), ratio(5, 1));
 
     // a delivers to b; b delivers to c; c delivers to no one.
-    world.transfer(FIRST_ORB, b, Resource::Iron, ratio(2, 1)).expect("a keeps faith");
-    world.transfer(b, c, Resource::Iron, ratio(2, 1)).expect("b keeps faith");
+    world.transfer(cfe::dop::between(FIRST_ORB, b), Resource::Iron, cfe::dop::positive(2, 1)).expect("a keeps faith");
+    world.transfer(cfe::dop::between(b, c), Resource::Iron, cfe::dop::positive(2, 1)).expect("b keeps faith");
     for _ in 0..11 {
         world.tick();
     }

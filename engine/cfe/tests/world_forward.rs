@@ -48,18 +48,18 @@ fn a_fulfilled_forward_releases_exactly() {
     // Empty books: the multiplier is 1 — full collateral, the empty
     // book is not a credential.
     world
-        .seal_forward(FIRST_ORB, charted, Resource::Iron, ratio(3, 1), 10)
+        .seal_forward(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(3, 1), cfe::dop::window(10))
         .expect("seals"); // @16: locks 3 of the source's 10 iron
     assert_eq!(banked(&world, FIRST_ORB, Resource::Iron), ratio(7, 1));
 
     world
-        .transfer(FIRST_ORB, charted, Resource::Iron, ratio(2, 1))
+        .transfer(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(2, 1))
         .expect("delivers two");
     world.tick(); // 2 < 3: nothing resolves
     assert_eq!(world.committed().forwards.len(), 1);
 
     world
-        .transfer(FIRST_ORB, charted, Resource::Iron, ratio(1, 1))
+        .transfer(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(1, 1))
         .expect("delivers the third");
     world.tick(); // quota met → RELEASE at this boundary
 
@@ -88,10 +88,10 @@ fn a_fulfilled_forward_releases_exactly() {
 fn a_missed_deadline_slashes_to_the_aggrieved() {
     let (mut world, charted) = source_and_charted();
     world
-        .seal_forward(FIRST_ORB, charted, Resource::Iron, ratio(3, 1), 5)
+        .seal_forward(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(3, 1), cfe::dop::window(5))
         .expect("seals"); // @16, deadline at 21
     world
-        .transfer(FIRST_ORB, charted, Resource::Iron, ratio(1, 1))
+        .transfer(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(1, 1))
         .expect("delivers one — not enough");
     for _ in 0..6 {
         world.tick(); // the tick opening at now=21 fires the slash
@@ -151,14 +151,14 @@ fn the_collateral_curve_reads_the_books() {
     // seal locks quota × 1/4.
     let (mut world, charted) = source_and_charted();
     world
-        .seal_forward(FIRST_ORB, charted, Resource::Iron, ratio(3, 1), 10)
+        .seal_forward(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(3, 1), cfe::dop::window(10))
         .expect("seals");
     world
-        .transfer(FIRST_ORB, charted, Resource::Iron, ratio(3, 1))
+        .transfer(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(3, 1))
         .expect("delivers whole");
     world.tick(); // releases: fulfilled book = 3
     world
-        .seal_forward(FIRST_ORB, charted, Resource::Iron, ratio(4, 1), 10)
+        .seal_forward(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(4, 1), cfe::dop::window(10))
         .expect("seals again");
     let locked = world
         .chronicle()
@@ -179,7 +179,7 @@ fn the_collateral_curve_reads_the_books() {
 fn locked_collateral_cannot_be_spent() {
     let (mut world, charted) = source_and_charted();
     world
-        .seal_forward(FIRST_ORB, charted, Resource::Iron, ratio(3, 1), 10)
+        .seal_forward(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(3, 1), cfe::dop::window(10))
         .expect("seals"); // source: 10 − 3 locked = 7
     assert_eq!(
         world.zone(16, ZoneKind::Extractor),
@@ -190,7 +190,7 @@ fn locked_collateral_cannot_be_spent() {
         })
     );
     assert_eq!(
-        world.transfer(FIRST_ORB, charted, Resource::Iron, ratio(8, 1)),
+        world.transfer(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(8, 1)),
         Err(ActionRefused::CannotAfford {
             resource: Resource::Iron,
             need: Box::new(ratio(8, 1)),
@@ -205,10 +205,10 @@ fn locked_collateral_cannot_be_spent() {
 fn bond_flow_counts_toward_the_quota() {
     let (mut world, charted) = source_and_charted();
     world
-        .seal_forward(FIRST_ORB, charted, Resource::Iron, ratio(3, 1), 12)
+        .seal_forward(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(3, 1), cfe::dop::window(12))
         .expect("seals"); // @16
     world
-        .seal_bond(FIRST_ORB, charted, Resource::Iron, ratio(1, 2), 0)
+        .seal_bond(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(1, 2), 0)
         .expect("seals the bond");
     for _ in 0..6 {
         world.tick();
@@ -231,31 +231,24 @@ fn bond_flow_counts_toward_the_quota() {
 fn forward_refusals_are_typed() {
     let (mut world, charted) = source_and_charted();
     world
-        .seal_forward(FIRST_ORB, charted, Resource::Iron, ratio(2, 1), 5)
+        .seal_forward(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(2, 1), cfe::dop::window(5))
         .expect("seals");
     assert_eq!(
-        world.seal_forward(FIRST_ORB, charted, Resource::Iron, ratio(1, 1), 5),
+        world.seal_forward(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(1, 1), cfe::dop::window(5)),
         Err(ActionRefused::ForwardAlreadySealed)
     );
+    // **BadTransfer IS DEAD** (29_CONSTRUCTION C1): the self-loop, the
+    // zero quota and the zero window fault at their TYPE doors, named.
+    assert_eq!(cfe::dop::Between::new(FIRST_ORB, FIRST_ORB), None, "a self-obligation binds nobody");
+    assert_eq!(cfe::dop::Positive::new(ratio(0, 1)), None, "a zero quota owes nothing");
+    assert_eq!(cfe::dop::Window::new(0), None, "a zero-tick window is not a window");
     assert_eq!(
-        world.seal_forward(FIRST_ORB, FIRST_ORB, Resource::Iron, ratio(1, 1), 5),
-        Err(ActionRefused::BadTransfer)
-    );
-    assert_eq!(
-        world.seal_forward(FIRST_ORB, charted, Resource::Iron, ratio(0, 1), 5),
-        Err(ActionRefused::BadTransfer)
-    );
-    assert_eq!(
-        world.seal_forward(FIRST_ORB, charted, Resource::Biomass, ratio(1, 1), 0),
-        Err(ActionRefused::BadTransfer)
-    );
-    assert_eq!(
-        world.seal_forward(FIRST_ORB, 99, Resource::Iron, ratio(1, 1), 5),
+        world.seal_forward(cfe::dop::between(FIRST_ORB, 99), Resource::Iron, cfe::dop::positive(1, 1), cfe::dop::window(5)),
         Err(ActionRefused::NoSuchOrb { orb: 99 })
     );
     // Fresh books on biomass: quota 20 wants 20 collateral; 3 stands.
     assert_eq!(
-        world.seal_forward(FIRST_ORB, charted, Resource::Biomass, ratio(20, 1), 5),
+        world.seal_forward(cfe::dop::between(FIRST_ORB, charted), Resource::Biomass, cfe::dop::positive(20, 1), cfe::dop::window(5)),
         Err(ActionRefused::CannotAfford {
             resource: Resource::Biomass,
             need: Box::new(ratio(20, 1)),
