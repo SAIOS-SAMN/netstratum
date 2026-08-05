@@ -121,26 +121,28 @@ impl World {
     ///    whole (`CannotAfford` when bank < amount + postage).
     pub fn convey(
         &mut self,
-        from: u64,
-        to: u64,
+        route: crate::dop::Between,
         resource: Resource,
-        amount: Ratio,
+        amount: crate::dop::Positive,
     ) -> Result<(), ActionRefused> {
-        self.convey_as(SOVEREIGN, from, to, resource, amount)
+        self.convey_as(SOVEREIGN, route, resource, amount)
     }
 
+    /// NATIVE TO THE FOURTH KILL: `Between` proves the postal route has
+    /// two distinct endpoints and `Positive` proves the amount — a
+    /// self-conveyance and a zero conveyance are not deeds that can be
+    /// asked for. The old `BadTransfer` arm died with the shapes it
+    /// guarded.
     pub fn convey_as(
         &mut self,
         actor: u64,
-        from: u64,
-        to: u64,
+        route: crate::dop::Between,
         resource: Resource,
-        amount: Ratio,
+        amount: crate::dop::Positive,
     ) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Collect)?;
-        if from == to || amount <= ratio(0, 1) {
-            return Err(ActionRefused::BadTransfer);
-        }
+        let (from, to) = (route.from(), route.to());
+        let amount: Ratio = amount.value().clone();
         let Some((survey, seed, covered)) =
             self.chronicle.receipts().iter().rev().find_map(|receipt| match &receipt.event {
                 ClosureEvent::EstateSurveyed { seed, covered, .. } => Some((

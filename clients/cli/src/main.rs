@@ -1859,8 +1859,14 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         );
                         return;
                     };
-                    let Some(code) =
-                        STATIONS.iter().position(|s| *s == station_word).map(|i| i as u8 + 1)
+                    // NATIVE TO THE FOURTH KILL: the word parses
+                    // straight to the `Station` enum — the u8 code and
+                    // its range check died together; an off-band office
+                    // is unconstructable past this door.
+                    let Some(station) = STATIONS
+                        .iter()
+                        .position(|s| *s == station_word)
+                        .and_then(|i| cfe::dop::Station::from_wire(i as u8 + 1))
                     else {
                         println!(
                             "{} unknown station {} — {}",
@@ -1873,7 +1879,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     // ONE OFFICE PER LINE — a seat REPLACES. Said
                     // before it is done, never after.
                     if let Some(held) = world.station_of(sigil) {
-                        if held != code {
+                        if held != station.as_wire() {
                             let was = STATIONS
                                 .get(held as usize - 1)
                                 .copied()
@@ -1886,7 +1892,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             );
                         }
                     }
-                    match world.seat_station_as(cfe::world::SOVEREIGN, sigil, code) {
+                    match world.seat_station_as(cfe::world::SOVEREIGN, sigil, station) {
                         Ok(()) => {}
                         Err(refusal) => {
                             refuse(world, &refusal, style);

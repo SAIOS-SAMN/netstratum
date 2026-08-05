@@ -42,7 +42,7 @@ fn a_postal_address_is_a_surveyed_parcel() {
     let mut unsurveyed = World::new();
     unsurveyed.found("origin").expect("founds");
     let haven = unsurveyed.chart("haven", FIRST_ORB).expect("charts");
-    match unsurveyed.convey(FIRST_ORB, haven, Resource::Iron, ratio(1, 2)) {
+    match unsurveyed.convey(cfe::dop::between(FIRST_ORB, haven), Resource::Iron, cfe::dop::positive(1, 2)) {
         Err(ActionRefused::ClaimWithoutWitness { .. }) => {}
         other => panic!("no survey, no postal address, got {other:?}"),
     }
@@ -50,16 +50,16 @@ fn a_postal_address_is_a_surveyed_parcel() {
     // Surveyed: both endpoints covered — the conveyance stands.
     let mut world = surveyed_estate();
     let haven = world.orbs()[1].orb_id;
-    world.convey(FIRST_ORB, haven, Resource::Iron, ratio(1, 2)).expect("the post delivers");
+    world.convey(cfe::dop::between(FIRST_ORB, haven), Resource::Iron, cfe::dop::positive(1, 2)).expect("the post delivers");
 
     // An orb chartered AFTER the survey has no address until resurvey.
     let late = world.chart("annex", FIRST_ORB).expect("charts late");
-    match world.convey(FIRST_ORB, late, Resource::Iron, ratio(1, 4)) {
+    match world.convey(cfe::dop::between(FIRST_ORB, late), Resource::Iron, cfe::dop::positive(1, 4)) {
         Err(ActionRefused::ClaimWithoutWitness { .. }) => {}
         other => panic!("an unsurveyed annex is not an address, got {other:?}"),
     }
     world.survey_estate(FIRST_ORB).expect("resurvey — metered again");
-    world.convey(FIRST_ORB, late, Resource::Iron, ratio(1, 4)).expect("now addressed");
+    world.convey(cfe::dop::between(FIRST_ORB, late), Resource::Iron, cfe::dop::positive(1, 4)).expect("now addressed");
     assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
 }
 
@@ -91,7 +91,7 @@ fn the_free_portion_stays_home() {
     if over <= banked {
         // Only meaningful when the cap actually bites below the bank.
         let receipts = world.chronicle().receipts().len();
-        match world.convey(FIRST_ORB, haven, Resource::Iron, over) {
+        match world.convey(cfe::dop::between(FIRST_ORB, haven), Resource::Iron, cfe::dop::Positive::new(over).expect("positive fixture")) {
             Err(ActionRefused::ConveyExceedsMonetary { .. }) => {}
             other => panic!("the free portion is not postal, got {other:?}"),
         }
@@ -100,7 +100,7 @@ fn the_free_portion_stays_home() {
     // Within the monetary portion, the post delivers.
     let lawful = cap * ratio(1, 2);
     if lawful > ratio(0, 1) {
-        world.convey(FIRST_ORB, haven, Resource::Iron, lawful).expect("delivers");
+        world.convey(cfe::dop::between(FIRST_ORB, haven), Resource::Iron, cfe::dop::Positive::new(lawful).expect("positive fixture")).expect("delivers");
     }
     assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
 }
@@ -123,7 +123,7 @@ fn postage_is_metered_and_the_amount_arrives_whole() {
         .expect("haven")
         .banked_amount(Resource::Iron);
 
-    world.convey(FIRST_ORB, haven, Resource::Iron, amount.clone()).expect("delivers");
+    world.convey(cfe::dop::between(FIRST_ORB, haven), Resource::Iron, cfe::dop::Positive::new(amount.clone()).expect("positive fixture")).expect("delivers");
 
     assert_eq!(
         world.orbs()[0].banked_amount(Resource::Iron),
