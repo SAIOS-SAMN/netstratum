@@ -56,7 +56,10 @@ fn a_bond_sealed_in_the_new_order_reaches_d_on_the_bond_channel() {
 
     // Before the bond: the two orbs relate by nothing.
     let bare = read_entangled(&world.committed());
-    assert_eq!(bare.degree(), Degree::GROUND, "no obligation, no circulation");
+    // THE OPENED GROUND (2026-08-05): two orbs at rest read a floor of
+    // two — the estate's volume, nothing circulating above it.
+    assert!(bare.degree().is_ground(), "no obligation, no circulation");
+    assert_eq!(bare.degree().get(), 2, "the floor is the estate: two orbs");
 
     world
         .seal_bond(FIRST_ORB, charted, Resource::Iron, ratio(1, 2), 0)
@@ -101,8 +104,9 @@ fn both_offices_stand_from_one_committed_state() {
     let read = read_entangled(&state);
     assert_eq!(
         read.degree(),
-        Degree::above_ground(read.rank),
-        "D is GROUND plus what circulates — the only constructor there is"
+        Degree::in_volume(state.orbs.len(), read.rank),
+        "D is the estate's volume weighting GROUND plus what circulates — \
+         the opened constructor (2026-08-05)"
     );
 
     // A SINGLE BOND IS A LINE, NOT A CYCLE. Two orbs and one relation
@@ -110,7 +114,7 @@ fn both_offices_stand_from_one_committed_state() {
     // holds real substance and no circulation yet. Recorded rather than
     // hidden — the offices are independent, and this is what that looks
     // like when only one of them has anything.
-    assert_eq!(read.degree(), Degree::GROUND, "one relation closes no loop");
+    assert!(read.degree().is_ground(), "one relation closes no loop");
     assert!(!state.bonds.is_empty(), "yet V is not empty — the offices are not each other");
 }
 

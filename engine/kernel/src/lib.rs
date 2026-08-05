@@ -85,7 +85,24 @@ use solver_verify::{verify_work, WorkBroken};
 /// the two could not collide, and the merge lands both rather than
 /// letting one bump overwrite the other. A chain cut under 3 verifies
 /// forever under the judge that cut it.
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 5, patch: 0 };
+/// **0.5.1 — THE OPENED GROUND** (operator ruling 2026-08-05: *GROUND
+/// needs to be opened up into V = Volume of orbs, weight on D as
+/// capacity*). `D = volume(orbs) × (GROUND + circulation)` — the floor
+/// a state stands on is the measure of its estate, and founding an orb
+/// multiplies the whole degree.
+///
+/// **PATCH, and the class is DERIVED rather than judged by feel.** The
+/// semver law says patch = a change that cannot alter any verdict.
+/// Proven at the type: every judge arm reads `Degree::above()`, which
+/// returns the circulation and is volume-blind by construction
+/// (`revocation_law`'s own comment already barred `get()`); the fold
+/// guard compares rank against rank, verdict-identical to the old
+/// floor-to-floor read on all inputs including adversarial ones (an
+/// orb smuggled into `next` cannot pad an increment, because no
+/// increment reads the floor). What changes is the READING — D on the
+/// board grows with the estate — and one refusal's reported number,
+/// which the law itself lists as patch-class.
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 5, patch: 1 };
 
 /// The judge's version, as it rides the wire.
 ///
