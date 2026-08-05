@@ -1260,8 +1260,8 @@ pub enum ClosureEvent {
         orb_id: u64,
         albedo: Ratio,
         orbit_r: Ratio,
-        theta: Option<Ratio>,
-        psi: Option<Ratio>,
+        theta: Option<Slot>,
+        psi: Option<Slot>,
     },
     /// VENT-1 (05 §1.4) — accumulated vented entropy settled into the
     /// orb's cumulative ledger at collect (the yield pattern: one
@@ -1766,9 +1766,9 @@ impl ClosureEvent {
                 // bytes at all, so a receipt that never had one is
                 // byte-identical to what it was before the amendment.
                 if let Some(turn) = theta {
-                    ratio::encode(turn, &mut value);
+                    ratio::encode(turn.angle(), &mut value);
                     if let Some(tilt) = psi {
-                        ratio::encode(tilt, &mut value);
+                        ratio::encode(tilt.angle(), &mut value);
                     }
                 }
                 tlv::put(25, &value, &mut out);
@@ -2241,15 +2241,21 @@ impl ClosureEvent {
                 // before the amendment. `None` is not `0`: zero would
                 // put all of history on one ray.
                 let tail = value.get(8 + used + used_r..).unwrap_or(&[]);
+                // FORM AT THE DOOR (29_CONSTRUCTION C1): an off-slot
+                // angle refuses at DECODE — the codec fixes form — so a
+                // `Slot` past this point is proven and nothing
+                // downstream re-checks it. `OffSlot` is dead.
                 let (theta, used_t) = match ratio::decode(tail) {
-                    Some((turn, n)) => (Some(turn), n),
+                    Some((turn, n)) => (Some(Slot::from_angle(turn)?), n),
                     None => (None, 0),
                 };
-                let psi = tail
-                    .get(used_t..)
-                    .filter(|rest| !rest.is_empty())
-                    .and_then(ratio::decode)
-                    .map(|(turn, _)| turn);
+                let psi = match tail.get(used_t..).filter(|rest| !rest.is_empty()) {
+                    Some(rest) => {
+                        let (turn, _) = ratio::decode(rest)?;
+                        Some(Slot::from_angle(turn)?)
+                    }
+                    None => None,
+                };
                 Some(Self::PlanetSited { orb_id, albedo, orbit_r, theta, psi })
             }
             27 => {
@@ -2698,7 +2704,7 @@ pub struct ThermalSite {
     /// Adjacency is WRAPPED L1 on `(r, θ, ψ)`, never Euclidean: plane
     /// distance needs `cos` and a square root and both are barred
     /// (`24_FORM` §2b). See [`separation`].
-    pub theta: Option<Ratio>,
+    pub theta: Option<Slot>,
     /// **ψ — THE INCLINATION**, the second turn, also `[0, 1) ⊂ ℚ`.
     ///
     /// `θ` alone confines every orb to ONE PLANE: a disc around the
@@ -2714,7 +2720,7 @@ pub struct ThermalSite {
     ///
     /// `None` on every frame written before this amendment, and `None`
     /// means UNINCLINED — not the equator, which `Some(0)` means.
-    pub psi: Option<Ratio>,
+    pub psi: Option<Slot>,
 }
 
 /// The colony orb — COMMITTED state only. Unreceipted accrual is
@@ -2843,11 +2849,11 @@ impl ColonyOrb {
             // one that HAS a place keeps it across the state container,
             // which is what the committed snapshot lost before this.
             if let Some(turn) = &site.theta {
-                ratio::encode(turn, &mut value);
+                ratio::encode(turn.angle(), &mut value);
                 // ψ only after θ — an inclination without a longitude
                 // would be a place with no place to be inclined from.
                 if let Some(tilt) = &site.psi {
-                    ratio::encode(tilt, &mut value);
+                    ratio::encode(tilt.angle(), &mut value);
                 }
             }
             tlv::put(26, &value, &mut out);
@@ -3035,14 +3041,18 @@ impl ColonyOrb {
                     // and UNINCLINED, never zero.
                     let tail = value.get(used + used_r + 1..).unwrap_or(&[]);
                     let (theta, used_t) = match ratio::decode(tail) {
-                        Some((turn, n)) => (Some(turn), n),
+                        Some((turn, n)) => (Some(Slot::from_angle(turn)?), n),
                         None => (None, 0),
                     };
-                    let psi = tail
-                        .get(used_t..)
-                        .filter(|rest| !rest.is_empty())
-                        .and_then(ratio::decode)
-                        .map(|(turn, _)| turn);
+                    // FORM AT THE DOOR: same law as tag 25 — a Slot
+                    // past decode is proven, nothing downstream checks.
+                    let psi = match tail.get(used_t..).filter(|rest| !rest.is_empty()) {
+                        Some(rest) => {
+                            let (turn, _) = ratio::decode(rest)?;
+                            Some(Slot::from_angle(turn)?)
+                        }
+                        None => None,
+                    };
                     orb.thermal = Some(ThermalSite { albedo, orbit_r, theta, psi });
                 }
                 20 => {
@@ -3221,7 +3231,7 @@ pub fn tile_class(seed: &[u8; 32], orb_id: u64, tile: u16) -> TileClass {
 /// and re-exported here so every existing citation resolves unchanged.
 /// One truth, two readers: `cfe::dop::TURN_SLOTS` and
 /// `ratio::TURN_SLOTS` are the same constant, not two copies.
-pub use ratio::{on_slot, slot_angle, slot_of, turn_gap, TURN_SLOTS};
+pub use ratio::{on_slot, slot_angle, slot_of, turn_gap, Slot, TURN_SLOTS};
 
 
 /// WRAPPED L1 SEPARATION between two sited orbs — the only adjacency
@@ -3247,12 +3257,12 @@ pub fn separation(a: &ThermalSite, b: &ThermalSite) -> Option<Ratio> {
     } else {
         b.orbit_r.clone() - a.orbit_r.clone()
     };
-    let mut total = radial + turn_gap(theta_a, theta_b);
+    let mut total = radial + turn_gap(theta_a.angle(), theta_b.angle());
     // ψ ADDS ITS OWN WRAPPED TERM. Two orbs at one radius and one
     // longitude are still apart if they are inclined differently —
     // without this the volume collapses back to a disc.
     if let (Some(psi_a), Some(psi_b)) = (&a.psi, &b.psi) {
-        total += turn_gap(psi_a, psi_b);
+        total += turn_gap(psi_a.angle(), psi_b.angle());
     }
     Some(total)
 }

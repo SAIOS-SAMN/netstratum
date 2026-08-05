@@ -77,13 +77,13 @@ fn filling_an_anchored_ring_stays_lawful_past_the_reach() {
     let mut world = system_under(StarClass::O, 3);
     let ids: Vec<u64> = world.orbs().iter().map(|o| o.orb_id).collect();
     world
-        .site_planet(ids[0], ratio(1, 2), ratio(1, 1), Some(ratio(0, 1)), None)
+        .site_planet(ids[0], ratio(1, 2), ratio(1, 1), Some(cfe::dop::Slot::from_index(0)), None)
         .expect("ring one, slot zero");
     world
-        .site_planet(ids[1], ratio(1, 2), ratio(2, 1), Some(ratio(0, 1)), None)
+        .site_planet(ids[1], ratio(1, 2), ratio(2, 1), Some(cfe::dop::Slot::from_index(0)), None)
         .expect("ring two");
     world
-        .site_planet(ids[2], ratio(1, 2), ratio(1, 1), Some(ratio(1, 2)), None)
+        .site_planet(ids[2], ratio(1, 2), ratio(1, 1), Some(cfe::dop::Slot::from_index(30)), None)
         .expect("ring one again, the far slot — slots are the turn law's, not the field's");
     assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
 }

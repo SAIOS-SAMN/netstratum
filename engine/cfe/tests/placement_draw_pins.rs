@@ -42,7 +42,7 @@ fn two_unangled_sitings_on_one_ring_resolve_to_distinct_slots() {
     world.site_planet(ids[0], ratio(1, 2), ratio(1, 1), None, None).expect("first");
     world.site_planet(ids[1], ratio(1, 2), ratio(1, 1), None, None).expect("second, same ring");
 
-    let sited: Vec<Option<cfe::ratio::Ratio>> = world
+    let sited: Vec<Option<cfe::dop::Slot>> = world
         .orbs()
         .iter()
         .filter(|o| ids[..2].contains(&o.orb_id))
@@ -52,10 +52,9 @@ fn two_unangled_sitings_on_one_ring_resolve_to_distinct_slots() {
         sited.iter().all(|t| t.is_some()),
         "an unangled siting RESOLVES to a slot — placeless is not a place: {sited:?}"
     );
-    assert!(
-        cfe::dop::on_slot(sited[0].as_ref().expect("resolved")),
-        "and the drawn angle sits ON the lattice"
-    );
+    // "on the lattice" is no longer an assertion — a `Slot` cannot be
+    // off the ring BY TYPE (C1's kill), which retires the check this
+    // pin used to make. The distinctness below is what remains to hold.
     assert_ne!(sited[0], sited[1], "two orbs, one ring, two places — collision decided");
     assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
 }
@@ -85,19 +84,19 @@ fn a_given_angle_is_never_overridden_and_the_walk_respects_it() {
     let mut world = system(3);
     let ids: Vec<u64> = world.orbs().iter().map(|o| o.orb_id).collect();
     world
-        .site_planet(ids[0], ratio(1, 2), ratio(1, 1), Some(ratio(1, 2)), None)
+        .site_planet(ids[0], ratio(1, 2), ratio(1, 1), Some(cfe::dop::Slot::from_index(30)), None)
         .expect("given: the far slot");
     world.site_planet(ids[1], ratio(1, 2), ratio(1, 1), None, None).expect("drawn");
     let given = world.orbs().iter().find(|o| o.orb_id == ids[0]).unwrap();
     let drawn = world.orbs().iter().find(|o| o.orb_id == ids[1]).unwrap();
     assert_eq!(
         given.thermal.as_ref().unwrap().theta,
-        Some(ratio(1, 2)),
-        "the given angle stands exactly as asked"
+        Some(cfe::dop::Slot::from_index(30)),
+        "the given slot stands exactly as asked"
     );
     assert_ne!(
         drawn.thermal.as_ref().unwrap().theta,
-        Some(ratio(1, 2)),
+        Some(cfe::dop::Slot::from_index(30)),
         "and the draw walked past the taken place"
     );
     assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");

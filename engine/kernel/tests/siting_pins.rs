@@ -7,16 +7,16 @@
 //! it is the triple `arbor::Coordinate` has addressed all along
 //! (`s: [Ratio; 3]`) with nothing inhabiting it.
 
-use cfe::dop::{on_slot, separation, slot_angle, slot_of, turn_gap, ClosureEvent, ThermalSite, TURN_SLOTS};
+use cfe::dop::{on_slot, separation, slot_angle, slot_of, turn_gap, ClosureEvent, Slot, ThermalSite, TURN_SLOTS};
 use cfe::ratio::ratio;
-use cfe::world::{ActionRefused, World};
+
 
 fn site(r: (i64, i64), turn: Option<i64>, tilt: Option<i64>) -> ThermalSite {
     ThermalSite {
         albedo: ratio(0, 1),
         orbit_r: ratio(r.0, r.1),
-        theta: turn.map(slot_angle),
-        psi: tilt.map(slot_angle),
+        theta: turn.map(Slot::from_index),
+        psi: tilt.map(Slot::from_index),
     }
 }
 
@@ -93,24 +93,19 @@ fn an_orb_without_a_longitude_has_no_separation_at_all() {
 // ── THE PLACEMENT LAW · nothing collides ─────────────────────────────
 
 #[test]
-fn an_orbit_between_the_teeth_refuses_on_either_turn() {
-    let mut world = World::new();
-    world.found("placed").expect("founds");
-    world.commission_star(cfe::thermal::StarClass::G).ok();
-    let orb = world.committed().orbs[0].orb_id;
-
-    let bad_theta =
-        world.site_planet(orb, ratio(0, 1), ratio(1, 1), Some(ratio(1, 7)), None);
-    assert!(matches!(bad_theta, Err(ActionRefused::OffSlot { .. })), "{bad_theta:?}");
-
-    let bad_psi = world.site_planet(
-        orb,
-        ratio(0, 1),
-        ratio(1, 1),
-        Some(slot_angle(0)),
-        Some(ratio(1, 7)),
-    );
-    assert!(matches!(bad_psi, Err(ActionRefused::OffSlot { .. })), "{bad_psi:?}");
+fn an_orbit_between_the_teeth_cannot_be_constructed() {
+    // **THE OFFSLOT JUDGE IS DEAD** (29_CONSTRUCTION C1). This pin used
+    // to hand `site_planet` a 1/7 turn and expect the verb to refuse.
+    // The fault now lives at the TYPE's one door: an off-slot angle
+    // never becomes a `Slot`, so there is no off-slot siting for any
+    // verb to judge — the refusal arm is deleted and the compiler
+    // guarantees what the runtime used to check.
+    assert_eq!(Slot::from_angle(ratio(1, 7)), None, "sevenths sit between the teeth");
+    assert_eq!(Slot::from_angle(ratio(1, 8)), None, "eighths too");
+    // The door admits exactly the ring.
+    let lawful = Slot::from_angle(ratio(1, 5)).expect("fifths divide sixty");
+    assert_eq!(lawful.index(), 12);
+    assert_eq!(Slot::from_index(12), lawful, "the two doors agree");
 }
 
 // ── THE WIRE · additive, and legacy untouched ────────────────────────
@@ -135,8 +130,8 @@ fn both_turns_survive_the_wire_and_lengthen_the_frame() {
         orb_id: 7,
         albedo: ratio(1, 4),
         orbit_r: ratio(3, 2),
-        theta: Some(slot_angle(5)),
-        psi: Some(slot_angle(50)),
+        theta: Some(Slot::from_index(5)),
+        psi: Some(Slot::from_index(50)),
     };
     let bytes = placed.wire_bytes();
     assert_eq!(ClosureEvent::from_wire(25, &bytes[5..]), Some(placed), "both turns decode");

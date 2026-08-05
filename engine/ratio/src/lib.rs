@@ -278,3 +278,38 @@ pub fn turn_gap(a: &Ratio, b: &Ratio) -> Ratio {
     let raw = if a >= b { a.clone() - b.clone() } else { b.clone() - a.clone() };
     raw.clone().min(ratio(1, 1) - raw)
 }
+
+/// **A SLOT — an angle PROVEN on the ring at construction** (29_CONSTRUCTION
+/// C1: apply from theorems, never judge the outcome).
+///
+/// `Ratio` can spell any turn-fraction, so every consumer of an angle
+/// had to re-check `on_slot` and refuse — a shape refusal (`OffSlot`)
+/// standing where a type should be. A `Slot` cannot be off the ring:
+/// [`Slot::from_index`] is total and wraps, [`Slot::from_angle`] is the
+/// one door, and past it there is nothing left to check. The `OffSlot`
+/// refusal died when this type landed.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Slot(Ratio);
+
+impl Slot {
+    /// Total: any index lands on the wrapped ring.
+    pub fn from_index(k: i64) -> Slot {
+        Slot(slot_angle(k))
+    }
+    /// The one door for arbitrary angles — `None` carries the fault:
+    /// the angle sits between the teeth.
+    pub fn from_angle(theta: Ratio) -> Option<Slot> {
+        on_slot(&theta).then_some(Slot(theta))
+    }
+    /// The angle, as the exact turn-fraction it always was.
+    pub fn angle(&self) -> &Ratio {
+        &self.0
+    }
+    /// The slot index — total, because a Slot is on the ring by
+    /// construction. This is `slot_of` with the `Option` gone: the
+    /// `Option` existed only to carry the judgment this type retired.
+    pub fn index(&self) -> i64 {
+        let scaled = self.0.clone() * ratio(TURN_SLOTS, 1);
+        scaled.to_integer().try_into().unwrap_or(0)
+    }
+}

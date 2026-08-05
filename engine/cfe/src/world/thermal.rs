@@ -32,24 +32,21 @@ impl World {
         orb: u64,
         albedo: Ratio,
         orbit_r: Ratio,
-        theta: Option<Ratio>,
-        psi: Option<Ratio>,
+        theta: Option<crate::dop::Slot>,
+        psi: Option<crate::dop::Slot>,
     ) -> Result<(), ActionRefused> {
         use crate::dop::ThermalSite;
         if self.star.is_none() {
             return Err(ActionRefused::NoStarCommissioned);
         }
-        // THE PLACEMENT DRAW (2026-08-06). An unangled siting is not
-        // PLACELESS — `None` means *the world places me*. The longitude
-        // draws from the chronicle's terminal digest (CHARTER §9:
-        // chronicle-seeded, no wall clock) and walks forward past taken
-        // places deterministically — the collision-stepping idiom the
-        // compiled roster and the cleave's naming already use. The
-        // RECEIPT CARRIES THE RESOLVED ANGLE, so replay applies and
-        // never re-draws. This closes the hole the ring-reach landing
-        // recorded: before it, any number of unangled orbs stacked on
-        // one ring and the placement law's decidability could simply
-        // be opted out of.
+        // THE PLACEMENT DRAW (2026-08-06), rewritten NATIVE to the slot
+        // type the C1 kill landed: the draw produces `Slot::from_index`
+        // directly — total, wrapping — so an off-lattice draw is not a
+        // case that exists. `None` still means *the world places me*:
+        // the longitude draws from the chronicle's terminal digest
+        // (CHARTER §9) and walks forward past taken places
+        // deterministically; the RECEIPT CARRIES THE RESOLVED SLOT, so
+        // replay applies and never re-draws.
         let theta = match theta {
             Some(turn) => Some(turn),
             None => {
@@ -63,10 +60,11 @@ impl World {
                 hasher.update(b"netstratum.place.theta.v1");
                 hasher.update(&seed);
                 hasher.update(&orb.to_le_bytes());
+                let slots = crate::ratio::TURN_SLOTS as u64;
                 let start = u64::from_le_bytes(
                     hasher.finalize().as_bytes()[..8].try_into().expect("eight bytes"),
-                ) % crate::ratio::TURN_SLOTS as u64;
-                let taken = |candidate: &Ratio| {
+                ) % slots;
+                let taken = |candidate: &crate::dop::Slot| {
                     self.orbs.iter().any(|held| {
                         held.orb_id != orb
                             && held.thermal.as_ref().is_some_and(|site| {
@@ -76,17 +74,13 @@ impl World {
                             })
                     })
                 };
-                let slots = crate::ratio::TURN_SLOTS as u64;
                 let drawn = (0..slots)
-                    .map(|offset| ratio(((start + offset) % slots) as i64, slots as i64))
+                    .map(|offset| crate::dop::Slot::from_index((start + offset) as i64))
                     .find(|candidate| !taken(candidate));
                 match drawn {
                     Some(turn) => Some(turn),
-                    // The ring is FULL at this inclination: every slot
-                    // holds. Refuse with the seed slot's occupant — the
-                    // place the draw first asked for.
                     None => {
-                        let first = ratio(start as i64, slots as i64);
+                        let first = crate::dop::Slot::from_index(start as i64);
                         let holder = self
                             .orbs
                             .iter()
@@ -101,28 +95,19 @@ impl World {
                             .unwrap_or(orb);
                         return Err(ActionRefused::OrbitOccupied {
                             orb: holder,
-                            slot: crate::dop::slot_of(&first).unwrap_or(0),
+                            slot: first.index(),
                         });
                     }
                 }
             }
         };
-        // THE PLACEMENT LAW. An angle must sit ON a slot, and no two
-        // orbs may share a place. Together these make collision
-        // DECIDABLE rather than a tolerance — which is the whole point
-        // of a discrete ring.
-        // ψ is bound by the same slot law — an inclination between the
-        // teeth is as undecidable as a longitude between them.
-        if let Some(tilt) = &psi {
-            if !crate::dop::on_slot(tilt) {
-                return Err(ActionRefused::OffSlot { theta: Box::new(tilt.clone()) });
-            }
-        }
+        // THE PLACEMENT LAW, half retired by construction
+        // (29_CONSTRUCTION C1): an angle IS a `Slot` — off-slot cannot
+        // reach this function, so the `OffSlot` judge arms are deleted
+        // and only the FACT half remains: no two orbs share a place.
+        // Collision stays decidable because the type is discrete.
         if let Some(turn) = &theta {
-            if !crate::dop::on_slot(turn) {
-                return Err(ActionRefused::OffSlot { theta: Box::new(turn.clone()) });
-            }
-            let slot = crate::dop::slot_of(turn).unwrap_or(0);
+            let slot = turn.index();
             if let Some(taken) = self.orbs.iter().find(|held| {
                 held.orb_id != orb
                     && held.thermal.as_ref().is_some_and(|site| {

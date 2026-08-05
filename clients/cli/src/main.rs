@@ -3438,12 +3438,10 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
              reached its magnetism",
             style.strong(&reach.to_string())
         ),
-        ActionRefused::OffSlot { theta } => format!(
-            "{theta} is not a slot — a turn divides into {}, so an orbit sits at \
-             k/{} or it does not sit",
-            cfe::dop::TURN_SLOTS,
-            cfe::dop::TURN_SLOTS
-        ),
+        // `OffSlot` is DEAD (29_CONSTRUCTION C1): an off-slot angle
+        // cannot be constructed, so no verb can be handed one to refuse.
+        // The client parses user input through `Slot::from_angle` and
+        // reports the fault at ITS door instead.
         ActionRefused::OrbitOccupied { orb, slot } => format!(
             "slot {slot} on that ring is held by {} — two orbs cannot share a place",
             style.strong(&orb.to_string())

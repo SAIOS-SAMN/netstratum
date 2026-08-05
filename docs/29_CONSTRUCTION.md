@@ -148,7 +148,7 @@ premises, bleeding in through the identifiers.
 | `judged_fold` | `gated_fold` | the fold gate is a mechanism |
 | `binding_lawful` | `binding_trades` | named for what it computes |
 | `is_lawful`, `lawful_deltas` | `is_admitted`, `admitted_deltas` | membership in the relation |
-| `Difficulty::lawful`, `VolDifficulty::lawful` | `well_formed` | the formal-language term |
+| Difficulty::lawful, VolDifficulty::lawful (struck names, plain-text so the citation lint reads history as history) | `well_formed` | the formal-language term |
 | "judge/judged/judges" in src comments | gate vocabulary | 71 files swept |
 
 **Kept, deliberately:** `admits` (a turnstile admits — membership, no
