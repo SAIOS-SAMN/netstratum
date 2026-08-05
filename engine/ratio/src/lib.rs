@@ -96,3 +96,63 @@ pub fn ratio_str(r: &Ratio) -> String {
         false => format!("{}/{}", r.numer(), r.denom()),
     }
 }
+
+// ─────────────────────────────────────────────────────────────────────
+// THE TURN — exact angular geometry
+// ─────────────────────────────────────────────────────────────────────
+//
+// **RELOCATED FROM `cfe::dop` (2026-08-05)** so the solver can address a
+// SPHERE in the same frame the universe sites its orbs in (operator
+// ruling: *grid needs to be discarded for spherical references*).
+// `solver-verify` cannot reach `cfe` — the arrow runs the other way —
+// and copying the constant would be the two-truths defect. `ratio` sits
+// below everything and is where exact-rational geometry belongs.
+// `cfe::dop` re-exports every name, so every existing citation resolves
+// unchanged.
+
+/// THE ORBITAL SLOTS — a turn divides into SIXTY.
+///
+/// **Base 60, for the reason base 60 has always been used.** It is the
+/// smallest number that divides evenly by 1, 2, 3, 4, 5, 6, 10, 12, 15,
+/// 20, 30 and 60 — twelve exact subdivisions. Halves, thirds, quarters,
+/// fifths and sixths of a ring all land ON a slot, so a system can be
+/// laid out symmetrically at many arities without any angle falling
+/// between the teeth. Sixty is not a rounding: it is the number that
+/// makes the most placements exact.
+///
+/// A slot is `k/60` for `k ∈ 0..60`, and `k = 60` is `k = 0` — the ring
+/// closes.
+///
+/// **AND IT IS WHY ANGLES ARE TURNS, NOT RADIANS.** A full turn in
+/// radians is `2π`, which no rational closes, so a wrapped angle would
+/// need a float and the seam would never meet. In turns the seam is
+/// exact and the circle is representable.
+pub const TURN_SLOTS: i64 = 60;
+
+/// Is this angle ON a slot? Refusing off-slot angles keeps placement
+/// DISCRETE, and discreteness is what makes collision a decidable
+/// question rather than a tolerance.
+pub fn on_slot(theta: &Ratio) -> bool {
+    let scaled = theta.clone() * ratio(TURN_SLOTS, 1);
+    scaled.is_integer() && *theta >= ratio(0, 1) && *theta < ratio(1, 1)
+}
+
+/// The slot index of an angle that is on one.
+pub fn slot_of(theta: &Ratio) -> Option<i64> {
+    on_slot(theta).then(|| {
+        let scaled = theta.clone() * ratio(TURN_SLOTS, 1);
+        scaled.to_integer().try_into().unwrap_or(0)
+    })
+}
+
+/// The angle of a slot, wrapping: `slot_angle(61)` is `slot_angle(1)`.
+pub fn slot_angle(k: i64) -> Ratio {
+    ratio(k.rem_euclid(TURN_SLOTS), TURN_SLOTS)
+}
+
+/// The wrapped gap between two turn-fractions — the SHORT WAY ROUND,
+/// which is what makes each angular axis a circle rather than a segment.
+pub fn turn_gap(a: &Ratio, b: &Ratio) -> Ratio {
+    let raw = if a >= b { a.clone() - b.clone() } else { b.clone() - a.clone() };
+    raw.clone().min(ratio(1, 1) - raw)
+}
