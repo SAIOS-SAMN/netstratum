@@ -3452,6 +3452,10 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "the work earns {} — {claimed} was claimed",
             style.strong(&bound.to_string())
         ),
+        ActionRefused::StaleAppraisalCited { .. } => "that appraisal is STALE — the \
+             world moved past its stamp; re-appraise, then counter on the fresh \
+             reading (staleness triggers renegotiation; it never blocks acceptance)"
+            .to_string(),
         ActionRefused::RingReachExceeded { held, reach } => format!(
             "this star's field anchors {} ring(s) and {held} already stand — site on \
              an anchored ring (slots within a ring stay open), or this system has \
@@ -4043,6 +4047,9 @@ fn chronicle(world: &World, style: &Style) {
         let described = match &receipt.event {
             cfe::dop::ClosureEvent::ColonyFounded { name, .. } => {
                 format!("⚑ colony {} founded", style.strong(name))
+            }
+            cfe::dop::ClosureEvent::OfferCountered { offer, want_amount, .. } => {
+                format!("⇄ offer {offer} COUNTERED — ask now {}", amount(want_amount))
             }
             cfe::dop::ClosureEvent::AppraisalStruck { value, .. } => {
                 format!("⚖ APPRAISED — {} in the commensurate unit", amount(value))

@@ -52,6 +52,59 @@ impl World {
         );
         Ok(())
     }
+    /// **THE COUNTER-OFFER** (tag 99, 2026-08-06): the RENEGOTIATE arm
+    /// of refuse/accept/renegotiate. Amends the resting offer's ask in
+    /// committed state — so acceptance (the clear) honors the countered
+    /// terms by construction, and each round is a receipt.
+    ///
+    /// THE STALENESS LAW, encoded where the ruling put it: a counter
+    /// citing a STALE appraisal refuses — the market moved, re-appraise
+    /// first. An uncited counter is lawful (evidence is optional); a
+    /// fresh citation is lawful; and NOTHING ELSE reads staleness —
+    /// acceptance is consent and never re-checks.
+    pub fn counter_offer(
+        &mut self,
+        offer: u64,
+        want_amount: Ratio,
+        appraisal: Option<[u8; 32]>,
+    ) -> Result<(), ActionRefused> {
+        self.counter_offer_as(SOVEREIGN, offer, want_amount, appraisal)
+    }
+
+    pub fn counter_offer_as(
+        &mut self,
+        actor: u64,
+        offer: u64,
+        want_amount: Ratio,
+        appraisal: Option<[u8; 32]>,
+    ) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Collect)?;
+        if want_amount <= ratio(0, 1) || !self.offers.iter().any(|held| held.offer == offer) {
+            return Err(ActionRefused::BadOffer);
+        }
+        if let Some(cited) = &appraisal {
+            match self.appraisal_stale(cited) {
+                Some(false) => {}
+                Some(true) => {
+                    return Err(ActionRefused::StaleAppraisalCited { appraisal: *cited })
+                }
+                None => {
+                    return Err(ActionRefused::ClaimWithoutWitness {
+                        name: "cited appraisal is not on this chronicle".into(),
+                    })
+                }
+            }
+        }
+        let held = self
+            .offers
+            .iter_mut()
+            .find(|held| held.offer == offer)
+            .expect("checked above");
+        held.want_amount = want_amount.clone();
+        self.close(ClosureEvent::OfferCountered { offer, want_amount, appraisal }, actor);
+        Ok(())
+    }
+
     /// Collect the genesis orb as the sovereign.
     pub fn collect(&mut self) -> Result<usize, ActionRefused> {
         self.collect_as(SOVEREIGN, FIRST_ORB)

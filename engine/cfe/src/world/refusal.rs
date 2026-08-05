@@ -238,6 +238,11 @@ pub enum ActionRefused {
     /// anchored ring stay open — the refusal is for a NEW ring beyond
     /// the field, never for filling one the field already holds.
     RingReachExceeded { held: usize, reach: u8 },
+    /// THE COUNTER (2026-08-06) — the cited appraisal is STALE: the
+    /// world moved past its stamp, so the evidence must be re-taken
+    /// before the renegotiation proceeds. Staleness gates ONLY this —
+    /// a counter's citation — never acceptance, which is consent.
+    StaleAppraisalCited { appraisal: [u8; 32] },
     /// LIT-1 — a cited digest is not a receipt this world sealed. The
     /// law verifies the CITATION, never the virtue.
     WitnessNotInChronicle { digest: [u8; 32] },
