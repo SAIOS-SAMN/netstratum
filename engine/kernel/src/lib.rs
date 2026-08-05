@@ -299,6 +299,17 @@ pub enum Refused {
     /// horizon could set it past any reachable stamp and never come up
     /// for approval at all.
     UnionTermNotRuled { declared: u64, ruled: u64 },
+    /// E5b — an estate survey whose covering is not the whole estate:
+    /// empty (an unwitnessed observation cannot enter the record) or
+    /// short of the orbs that stand (a partial covering underpays the
+    /// meter). One theorem, both halves: the observation is read whole,
+    /// witnessed whole, and charged whole.
+    SurveyNotWhole { covered: usize, estate: usize },
+    /// E5b — the declared cost does not equal the sealed meter over the
+    /// volume. The kernel computes the meter by calling the SAME rule
+    /// the emitter drew from (call-not-copy), so a survey cannot be
+    /// quoted one way and charged another.
+    SurveyMeterMismatch { declared: Box<Ratio>, metered: Box<Ratio> },
 }
 
 /// THE JUDGE. Does `step` lawfully carry `prior` to `next`? Pure,
@@ -719,6 +730,12 @@ fn covered(event: &ClosureEvent) -> bool {
         // Forward/Council seals — all move banks) stay held out for
         // W-A slice-2's I1 arms. TaxonSealed stays coder-03's #42.
         | E::WorldCharted { .. } | E::StarCommissioned { .. } | E::PlanetSited { .. }
+        // E5b THE ESTATE SURVEY (tag 97) — a VALUE-MOVING deed with its
+        // own I1 arm in `lawful_deltas` (the meter's draw, plus the
+        // witnessed and metered theorems judged there). Added BY HAND:
+        // the compiler does not force this list, which is exactly how
+        // BookPosted went unjudged (PICKUP §0).
+        | E::EstateSurveyed { .. }
         | E::PracticeAdopted { .. } | E::PracticeReleased { .. } | E::ElderWarded { .. }
         | E::VeilDrawn { .. } | E::WardLifted { .. } | E::VeilLifted { .. }
         | E::GenesisSealed { .. } | E::ProspectStruck { .. } | E::LineSucceeded { .. }
@@ -931,6 +948,28 @@ fn lawful_deltas(
         E::CrystalDrawn { amount, .. } => {
             non_negative(Resource::Crystal, amount)?;
             vec![(Resource::Crystal, -amount.clone())]
+        }
+        // E5b THE ESTATE SURVEY — the three theorems, judged. The meter
+        // and the covering are verified HERE, against the prior state
+        // and the sealed rule, before conservation checks the draw.
+        E::EstateSurveyed { covered, cost, .. } => {
+            // WITNESSED AND WHOLE: one witness per orb that stands.
+            if covered.is_empty() || covered.len() != prior.orbs.len() {
+                return Err(Refused::SurveyNotWhole {
+                    covered: covered.len(),
+                    estate: prior.orbs.len(),
+                });
+            }
+            // METERED: the declared cost IS the sealed meter's figure.
+            let (resource, rate) = cfe::dop::survey_meter();
+            let metered = rate * ratio(covered.len() as i64, 1);
+            if *cost != metered {
+                return Err(Refused::SurveyMeterMismatch {
+                    declared: Box::new(cost.clone()),
+                    metered: Box::new(metered),
+                });
+            }
+            vec![(resource, -cost.clone())]
         }
         E::OverflowAbsorbed { amount, .. } => {
             non_negative(Resource::Sink, amount)?;
@@ -1332,6 +1371,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
 
         // ── WORLD — keyed on an ORB inside one committed state ───────
         E::ColonyFounded { .. } | E::ColonyCharted { .. } | E::WorldCharted { .. }
+        | E::EstateSurveyed { .. }
         | E::ZoneBuilt { .. } | E::ZoneRazed { .. }
         | E::YieldCollected { .. } | E::DemurrageSettled { .. } | E::UpkeepSettled { .. }
         | E::VentSettled { .. }
@@ -1398,6 +1438,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
     match event {
         // Build — create or extend the world, or open authority.
         E::ColonyFounded { .. } | E::ZoneBuilt { .. } | E::WorldCharted { .. }
+        | E::EstateSurveyed { .. }
         | E::EntityRegistered { .. } | E::ScopeGranted { .. } | E::ScopeRevoked { .. }
         | E::ColonyCharted { .. } | E::StarCommissioned { .. } | E::PlanetSited { .. }
         | E::BondSealed { .. } | E::ForwardSealed { .. } | E::CouncilSealed { .. }

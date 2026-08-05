@@ -176,6 +176,15 @@
 //!         MECHANISM as exact rational factors over the closed channel
 //!         set. The code is carried and VERIFIED against the fold, never
 //!         chosen. Additive: a minor bump, never breaking)
+//!   97 ClosureEvent::EstateSurveyed (E5b THE ESTATE CHAIN, 2026-08-05 —
+//!         the metered, witnessed observation of an estate: seed ‖ payer ‖
+//!         covered (orb ‖ witness digest, one per orb surveyed) ‖ cost.
+//!         Survey DERIVES from observation: parcels derive pure from the
+//!         receipt's seed forever; the deed pays the meter — cost =
+//!         survey_meter rate × volume — and carries one witness per orb,
+//!         the digest of that orb's own founding receipt. An observation
+//!         without witnesses cannot be built, a survey that cannot pay
+//!         does not happen)
 //!   86 ClosureEvent::DiscoveryMinted (U1 KERNEL-VERIFY,
 //!         U_DIRECTIVES §2 — the PoUW mint: value created ONLY
 //!         against verified work. orb ‖ resource ‖ amount ‖ work,
@@ -204,7 +213,7 @@
 //!         exactly this for the axes. Station codes are the BAND-1
 //!         vocabulary by index: 1 progenitor · 2 watcher · 3 observer
 //!         · 4 sovereign.)
-//!         — the next free tag outside reservations is 97. (This line
+//!         — the next free tag outside reservations is 98. (This line
 //!         read "90" until 2026-08-05 and was STALE: tag 90 was taken by
 //!         SovereignUnionSealed after it was written, and a mint drafted
 //!         onto 90 shadowed that deed's decoder arm — every sovereign
@@ -582,6 +591,62 @@ pub fn archetype_word(class: u8) -> &'static str {
         7 => "apex-terrestrial",
         _ => "unknown",
     }
+}
+
+/// **THE SURVEY METER** (E5b, 2026-08-05: *surveys must be metered*).
+/// The sealed charging rule: what one survey costs, PER ORB COVERED —
+/// `cost = rate × volume`, exact, flat, never compounding (the 2^1100
+/// lesson binds charging exactly as it binds decay). The kernel judges
+/// a survey's declared cost by calling THIS rule (call-not-copy), so
+/// the meter cannot be quoted one way and charged another.
+///
+/// Iron is the carrier — survey stakes driven into ground — and the
+/// rate is a placeholder parameter ruled at balance time, like every
+/// dial in this file.
+pub fn survey_meter() -> (Resource, Ratio) {
+    (Resource::Iron, ratio(1, 8))
+}
+
+/// One parcel of a surveyed orb — the deed's unit of distribution
+/// (E5b: *parcel breaks open into free/monetary values*).
+///
+/// THEOREM (exact break): `free + monetary == 1` of the parcel's whole,
+/// BY CONSTRUCTION — the two are drawn as `k/12` and `(12−k)/12` from
+/// one byte of the derivation digest, so no residue is truncated and
+/// no residue is invented. What a break leaves over is the carry the
+/// interest law accrues on (the residual carry law), and it is exact.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Parcel {
+    pub orb_id: u64,
+    /// The free portion — held without denomination.
+    pub free: Ratio,
+    /// The monetary portion — the denominated value the postal
+    /// machinery conveys.
+    pub monetary: Ratio,
+}
+
+/// **PARCELS DERIVE; THEY ARE NEVER STORED** (survey is a derivation of
+/// observation). Pure and total over the survey receipt's seed and the
+/// orbs it covered: the same receipt yields the same parcels forever,
+/// and an orb the survey did not cover has no parcel — deriving one
+/// would be an unmetered survey.
+pub fn parcels_of(seed: &[u8; 32], covered: &[u64]) -> Vec<Parcel> {
+    covered
+        .iter()
+        .map(|orb_id| {
+            let mut hasher = blake3::Hasher::new();
+            hasher.update(b"netstratum.estate.parcel.v1");
+            hasher.update(seed);
+            hasher.update(&orb_id.to_le_bytes());
+            let draw = hasher.finalize().as_bytes()[0] % 13;
+            let free = ratio(i64::from(draw), 12);
+            Parcel {
+                orb_id: *orb_id,
+                monetary: ratio(1, 1) - free.clone(),
+                free,
+            }
+        })
+        .collect()
 }
 
 pub fn scan_draw() -> Ratio {
@@ -1349,6 +1414,34 @@ pub enum ClosureEvent {
     RouteChartered { deal: u64, eta: Ratio },
     /// ROUTE-1: the lane lapsed on this book (unpaid maintenance).
     RouteLapsed { deal: u64 },
+    /// **THE ESTATE SURVEY** (tag 97, E5b — operator rulings 2026-08-05:
+    /// *survey is a derivation of observation; observations must be
+    /// witnessed; surveys must be metered*).
+    ///
+    /// THEOREM (witnessed): `covered` carries one entry per orb the
+    /// survey stood over — the orb's id and the DIGEST OF ITS OWN
+    /// FOUNDING RECEIPT, gathered from the chronicle at the deed. The
+    /// emitter refuses an orb it cannot witness, and the judge refuses
+    /// an empty covering, so an unwitnessed observation is not a state
+    /// that can enter the record.
+    ///
+    /// THEOREM (metered): `cost` equals the sealed meter over the
+    /// volume — `survey_meter().1 × covered.len()` — judged by the
+    /// kernel calling the SAME rule (call-not-copy), and drawn from
+    /// `payer`'s bank before the receipt closes. A survey that cannot
+    /// pay refuses pure: no receipt, no debit.
+    ///
+    /// THEOREM (derivation): `seed` is the chronicle's terminal digest
+    /// at the survey (CHARTER §9). Parcels are not state — they DERIVE
+    /// from this receipt via [`parcels_of`], the same receipt yielding
+    /// the same parcels forever. Nothing here is stored that replay
+    /// cannot re-check.
+    EstateSurveyed {
+        seed: [u8; 32],
+        payer: u64,
+        covered: Vec<(u64, [u8; 32])>,
+        cost: Ratio,
+    },
 }
 
 impl ClosureEvent {
@@ -1752,6 +1845,17 @@ impl ClosureEvent {
                     ratio::encode(factor, &mut value);
                 }
                 tlv::put(96, &value, &mut out);
+            }
+            Self::EstateSurveyed { seed, payer, covered, cost } => {
+                let mut value = seed.to_vec();
+                value.extend_from_slice(&payer.to_le_bytes());
+                value.extend_from_slice(&(covered.len() as u32).to_le_bytes());
+                for (orb, witness) in covered {
+                    value.extend_from_slice(&orb.to_le_bytes());
+                    value.extend_from_slice(witness);
+                }
+                ratio::encode(cost, &mut value);
+                tlv::put(97, &value, &mut out);
             }
             Self::StationSeated { line, station } => {
                 let mut value = vec![*station];
@@ -2224,6 +2328,23 @@ impl ClosureEvent {
                     binding.push((channel, factor));
                 }
                 Some(Self::VocabularyMinted { axis, code, sigil, word, binding })
+            }
+            97 => {
+                let seed: [u8; 32] = value.get(..32)?.try_into().ok()?;
+                let payer = u64::from_le_bytes(value.get(32..40)?.try_into().ok()?);
+                let count =
+                    u32::from_le_bytes(value.get(40..44)?.try_into().ok()?) as usize;
+                let mut at = 44usize;
+                let mut covered = Vec::with_capacity(count);
+                for _ in 0..count {
+                    let orb = u64::from_le_bytes(value.get(at..at + 8)?.try_into().ok()?);
+                    at += 8;
+                    let witness: [u8; 32] = value.get(at..at + 32)?.try_into().ok()?;
+                    at += 32;
+                    covered.push((orb, witness));
+                }
+                let (cost, _) = ratio::decode(value.get(at..)?)?;
+                Some(Self::EstateSurveyed { seed, payer, covered, cost })
             }
             89 => {
                 let station = *value.first()?;

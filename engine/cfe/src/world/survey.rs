@@ -444,4 +444,98 @@ impl World {
             240
         }
     }
+
+    /// **THE ESTATE SURVEY** (tag 97, E5b — operator rulings 2026-08-05:
+    /// *survey is a derivation of observation; observations must be
+    /// witnessed; surveys must be metered*). Build scope — reading the
+    /// map is the surveyor's office, the `chart_terrain` precedent.
+    ///
+    /// The three theorems, enforced here in order, refusal-pure (every
+    /// check before any mutation — a refusal orphans nothing):
+    ///
+    /// 1. WITNESSED: one witness per orb, the digest of that orb's own
+    ///    founding receipt (`ColonyFounded` / `ColonyCharted`), gathered
+    ///    from the chronicle. An orb the chronicle cannot witness
+    ///    refuses `ClaimWithoutWitness` — the LIT-1 refusal, reused
+    ///    because it is the same law: a claim stands on receipts or it
+    ///    does not stand.
+    /// 2. METERED: `cost = survey_meter().1 × volume`, drawn from
+    ///    `payer` before the receipt closes. Unpayable refuses
+    ///    `CannotAfford` with nothing written.
+    /// 3. DERIVED: the receipt seeds from the chronicle's terminal
+    ///    digest (CHARTER §9); parcels derive pure from it forever via
+    ///    [`crate::dop::parcels_of`] — see [`Self::parcels`].
+    pub fn survey_estate(&mut self, payer: u64) -> Result<[u8; 32], ActionRefused> {
+        self.survey_estate_as(SOVEREIGN, payer)
+    }
+
+    pub fn survey_estate_as(
+        &mut self,
+        actor: u64,
+        payer: u64,
+    ) -> Result<[u8; 32], ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if self.orbs.is_empty() {
+            return Err(ActionRefused::NoColony);
+        }
+        // THEOREM 1 — the witnesses, gathered before anything moves.
+        let mut covered: Vec<(u64, [u8; 32])> = Vec::with_capacity(self.orbs.len());
+        for held in &self.orbs {
+            let witness = self
+                .chronicle
+                .receipts()
+                .iter()
+                .find(|receipt| match &receipt.event {
+                    ClosureEvent::ColonyFounded { orb_id, .. }
+                    | ClosureEvent::ColonyCharted { orb_id, .. } => *orb_id == held.orb_id,
+                    _ => false,
+                })
+                .map(|receipt| receipt.own.0)
+                .ok_or(ActionRefused::ClaimWithoutWitness { name: held.name.clone() })?;
+            covered.push((held.orb_id, witness));
+        }
+        // THEOREM 2 — the meter, judged post-check and drawn pre-close.
+        let (resource, rate) = crate::dop::survey_meter();
+        let cost = rate * ratio(covered.len() as i64, 1);
+        let seed = self
+            .chronicle
+            .receipts()
+            .last()
+            .map(|receipt| receipt.own.0)
+            .expect("a world with orbs has receipts");
+        let held = peel(&mut self.orbs, payer).ok_or(ActionRefused::NoSuchOrb { orb: payer })?;
+        let have = held.banked_amount(resource);
+        if have < cost {
+            return Err(ActionRefused::CannotAfford {
+                resource,
+                need: Box::new(cost),
+                have: Box::new(have),
+            });
+        }
+        held.bank(resource, -cost.clone());
+        // THEOREM 3 — the receipt the parcels derive from.
+        self.close(
+            ClosureEvent::EstateSurveyed { seed, payer, covered, cost },
+            actor,
+        );
+        Ok(seed)
+    }
+
+    /// **THE PARCELS — derived, never stored.** The latest survey's
+    /// receipt is the sole source: its seed and its covering, through
+    /// [`crate::dop::parcels_of`]. `None` before any survey — an
+    /// unsurveyed estate has no parcels, because deriving one would be
+    /// an unmetered survey.
+    pub fn parcels(&self) -> Option<Vec<crate::dop::Parcel>> {
+        self.chronicle.receipts().iter().rev().find_map(|receipt| {
+            match &receipt.event {
+                ClosureEvent::EstateSurveyed { seed, covered, .. } => {
+                    let orbs: Vec<u64> = covered.iter().map(|(orb, _)| *orb).collect();
+                    Some(crate::dop::parcels_of(seed, &orbs))
+                }
+                _ => None,
+            }
+        })
+    }
 }
+

@@ -4024,6 +4024,13 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::ColonyFounded { name, .. } => {
                 format!("⚑ colony {} founded", style.strong(name))
             }
+            cfe::dop::ClosureEvent::EstateSurveyed { covered, cost, .. } => {
+                format!(
+                    "⌖ estate SURVEYED — {} orb(s), one witness each, {} iron metered",
+                    style.strong(&covered.len().to_string()),
+                    amount(cost)
+                )
+            }
             cfe::dop::ClosureEvent::VocabularyMinted { axis, code, sigil, word, binding } => {
                 format!(
                     "✎ VOCABULARY MINTED — axis {axis}, code {}, {} {} [{}]",
