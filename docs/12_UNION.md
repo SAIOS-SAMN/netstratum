@@ -82,6 +82,7 @@ lawful, none an edit:
 | modify quantum states | a gauge operation on G — a `GaugeShifted` deed (11 §2.1, tag 42); never a continuous field, always a discrete receipted shift (§6) |
 | issue a technology leap | `TechDiscovered` / `TechLicensed` (10, reserved tags 39–40) — a leap may be known or UNKNOWN to the receiving civilization; unknown leaps land as sealed grants the locals must still unlock |
 | create new spaces | extending the fiber — minted planes open room, and band capacity reads the fiber (§1) |
+| mint a vocabulary entry | **DESIGN, `28_VOCABULARY` §7** — `VocabularyMinted` (tag 90): a new class, clade, axis value or practice, carrying its own mechanism. The archetype editor is this power made concrete |
 | create a new galaxy | the observation deed (`GalaxyObserved`, tag 54 — inscribed at GALAXY-1a) — a crossing anchored past every charted reach CREATES the galaxy it observes; the observer's domain progenitor executes the deed (`13_GALAXY.md`, GALAXY-1; ruled 2026-07-30) |
 
 **The delegation law.** A progenitor delegating a planet (or issuing a
