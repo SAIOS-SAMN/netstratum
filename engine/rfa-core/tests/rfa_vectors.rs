@@ -15,7 +15,7 @@ use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 use rfa_core::{
     coboundary_reduce, coherence_functional, for_each_residual, magnitude, validate_step,
-    Delta, GateVerdict, Lens, StepBound,
+    Delta, GateReading, Lens, StepBound,
 };
 
 fn delta3(d01: Ratio, d12: Ratio, d02: Ratio) -> Delta {
@@ -136,7 +136,7 @@ fn the_two_gates_rule_typed() {
         reference: magnitude(&before),
         epsilon: ratio(1, 1),
     };
-    assert_eq!(validate_step(&before, &after, &bound), GateVerdict::Accepted);
+    assert_eq!(validate_step(&before, &after, &bound), GateReading::Accepted);
 
     // AND THE SAME STEP REVERSED (C rises 6 → 12) is equally lawful.
     // The struck productivity gate refused this as `Unproductive`,
@@ -144,7 +144,7 @@ fn the_two_gates_rule_typed() {
     // lineage was never travelling C's lane.
     assert_eq!(
         validate_step(&after, &before, &bound),
-        GateVerdict::Accepted,
+        GateReading::Accepted,
         "direction along C governs nothing — the lane is struck"
     );
 
@@ -154,7 +154,7 @@ fn the_two_gates_rule_typed() {
         epsilon: ratio(1, 100),
     };
     match validate_step(&before, &after, &tight) {
-        GateVerdict::MagnitudeDrift { excursion, bound } => {
+        GateReading::MagnitudeDrift { excursion, bound } => {
             assert!(excursion > bound);
         }
         other => panic!("expected magnitude refusal, measured {other:?}"),
@@ -169,5 +169,5 @@ fn the_fixed_point_is_lawful() {
         reference: magnitude(&d),
         epsilon: ratio(1, 1),
     };
-    assert_eq!(validate_step(&d, &d, &bound), GateVerdict::Accepted);
+    assert_eq!(validate_step(&d, &d, &bound), GateReading::Accepted);
 }

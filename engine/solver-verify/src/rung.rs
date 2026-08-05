@@ -7,14 +7,14 @@
 //! a shape as `rows`/`cols`; `volume::VolDifficulty` spelled it as
 //! `layers`/`rows`/`cols`. They shared no field, so they shared no code:
 //! two `level()` tables, two `top()`, two `rung()`, two `lawful()`, two
-//! forges, two proof shapes and two arms in the judge. That duplication
+//! forges, two proof shapes and two arms in the gate. That duplication
 //! was not an accident of style — a three-dimensional rung **cannot be
 //! spelled in planar fields**, so the moment a volumetric class landed a
 //! parallel everything had to land with it.
 //!
 //! `shape: Vec<usize>` spells every rank, and rank falls out of
 //! `shape.len()`. A fourth-rank class needs no new type, no new ladder
-//! and no new judge arm — which is THE MOTION clause 5 (*ARC is a TYPE
+//! and no new gate arm — which is THE MOTION clause 5 (*ARC is a TYPE
 //! of work, not the only type; the machinery must be work-CLASS generic,
 //! never grid-specific*) made structural instead of promised.
 //!
@@ -28,11 +28,11 @@ use physics::Beacon;
 /// One rung of the hardness ladder, at any rank.
 ///
 /// **FIELDS PRIVATE, ONE DOOR** (29_CONSTRUCTION C1, operator ruling
-/// 2026-08-05: *apply from theorems — never judge the stochastic
+/// 2026-08-05: *apply from theorems — never gate the stochastic
 /// outcome*). A `Rung` that exists IS lawful: the theorem is checked at
 /// [`Rung::new`], once, with a proof — so the forge that draws from it
-/// is TOTAL and nothing downstream re-judges what construction already
-/// proved. The old `lawful()` judge arm is dead and deleted.
+/// is TOTAL and nothing downstream re-gates what construction already
+/// proved. The old `lawful()` gate arm is dead and deleted.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Rung {
     tier: u8,
@@ -44,7 +44,7 @@ pub struct Rung {
 /// **WHY A RUNG STANDS OR DOES NOT** — the door's proof, with the
 /// numbers that decided it.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum RungVerdict {
+pub enum RungFault {
     /// A zero extent: the field it would forge cannot exist.
     EmptyExtent { axis: usize },
     /// A shapeless rung — rank 0 is the vacuous-arm class.
@@ -57,7 +57,7 @@ pub enum RungVerdict {
 }
 
 impl Rung {
-    /// **THE ONE DOOR.** Everything the struck `lawful()` judged is
+    /// **THE ONE DOOR.** Everything the struck `lawful()` gated is
     /// checked here, once, and a refusal names its reason. Past this
     /// door there is no unlawful rung to catch.
     ///
@@ -68,18 +68,18 @@ impl Rung {
         word_len: usize,
         shape: Vec<usize>,
         train_pairs: usize,
-    ) -> Result<Rung, RungVerdict> {
+    ) -> Result<Rung, RungFault> {
         if shape.is_empty() {
-            return Err(RungVerdict::NoAxes);
+            return Err(RungFault::NoAxes);
         }
         if let Some(axis) = shape.iter().position(|&e| e == 0) {
-            return Err(RungVerdict::EmptyExtent { axis });
+            return Err(RungFault::EmptyExtent { axis });
         }
         if shape.iter().try_fold(1usize, |n, &e| n.checked_mul(e)).is_none() {
-            return Err(RungVerdict::TooVast);
+            return Err(RungFault::TooVast);
         }
         if train_pairs == 0 {
-            return Err(RungVerdict::NothingToProve);
+            return Err(RungFault::NothingToProve);
         }
         Ok(Rung { tier, word_len, shape, train_pairs })
     }
@@ -172,7 +172,7 @@ impl Rung {
 
     // `lawful()` LIVED HERE and is DELETED (29_CONSTRUCTION C1): every
     // check it performed moved into `Rung::new`, so a rung that exists
-    // has nothing left to be judged for. The degeneracy law did not
+    // has nothing left to be gated for. The degeneracy law did not
     // weaken — it moved from a judgment to a precondition of existence.
 }
 
@@ -250,7 +250,7 @@ fn sample_field(beacon: &Beacon, rung: &Rung, pair: usize) -> Field {
 pub fn forge_field(digest: [u8; 32], rung: &Rung) -> FieldTask {
     // TOTAL, deliberately. A `Rung` is lawful by construction (the one
     // door), so the stochastic draw ranges over the lawful space and
-    // there is no outcome left to judge — the theorem was applied
+    // there is no outcome left to gate — the theorem was applied
     // BEFORE the beacon ever drew.
     let beacon = Beacon::from_digest(digest);
     let word: Word = (0..rung.word_len)

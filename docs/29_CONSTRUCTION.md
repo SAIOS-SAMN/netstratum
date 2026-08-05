@@ -47,7 +47,7 @@ forbids: `BadTransfer`, `BadSiting`, `TaxonUnknown`, `OffSlot`,
 `BindingUnlawful`. Every one is a debt. The type let an unlawful value
 exist, so a judge had to catch it. **Each is removable by
 construction** — private fields, one door, the door returns the proof
-(`ShapeVerdict`, `DivisionProof` — the pattern is already landed).
+(`ShapeReading`, `DivisionProof` — the pattern is already landed).
 
 **FACT refusals (~23)** guard contingent state: `CannotAfford`,
 `NoSuchOrb`, `SeatFull`, `MintNotNovel`. These are not judgments of
@@ -123,3 +123,40 @@ honest so "placeholder" cannot quietly become "permanent."
 
 The census is the progress meter: `const` declarations and `ratio`
 literals in `src/`, counted by pin, expected to fall monotonically.
+
+---
+
+## §5 THE SEMANTICS RULING — machinery speaks machine words
+
+**Operator, 2026-08-05:** *why are we judging/lawful — that is not a
+mechanical state of machinery; that's esotericism with bias bleeding
+over into our semantics.*
+
+Correct, and the defect ran deeper than the functions: the VOCABULARY
+itself imported an authority frame. A judge has discretion; a verdict is
+pronounced; "lawful" appeals to an order outside the machine. A machine
+has none of those — a transition is DEFINED or UNDEFINED, a shape
+CONSTRUCTS or FAULTS, a gate ADMITS what the relation contains. Naming
+the mechanism after a courtroom is the same bias LAW 9 bars from
+premises, bleeding in through the identifiers.
+
+**Retired from machinery (renamed 2026-08-05):**
+
+| was | now | why |
+|---|---|---|
+| `FoldVerdict`, `GateVerdict`, `ShapeVerdict`, `RungVerdict` | `…Reading` / `…Fault` | a machine measures and faults; it does not pronounce |
+| `judged_fold` | `gated_fold` | the fold gate is a mechanism |
+| `binding_lawful` | `binding_trades` | named for what it computes |
+| `is_lawful`, `lawful_deltas` | `is_admitted`, `admitted_deltas` | membership in the relation |
+| `Difficulty::lawful`, `VolDifficulty::lawful` | `well_formed` | the formal-language term |
+| "judge/judged/judges" in src comments | gate vocabulary | 71 files swept |
+
+**Kept, deliberately:** `admits` (a turnstile admits — membership, no
+discretion), `Refused` (a lock refuses a key), `Reading`/`Read` (the
+tree's own measurement vocabulary, already everywhere).
+
+**The boundary:** the DOCUMENT layer keeps "law" as a genre word — a
+charter is a document, and the operator's own workflow names charter-law
+docs. What is retired is the courtroom as a description of MACHINE
+STATE. The doc layer's own prose sweep ("the judge" as a character in
+chapter prose) is the doc lane's follow-on, not this ruling's scope.

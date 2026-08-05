@@ -11,7 +11,7 @@
 //!   · `objects::background` — `counts[cell as usize]` on `[usize; 10]`.
 //!
 //! Under work-shapes v1 (forge-only) neither is reachable from the
-//! judge: every grid `verify_work` feeds to `run` comes from the forge,
+//! gate: every grid `verify_work` feeds to `run` comes from the forge,
 //! and the wire-carried output grid is only compared and hashed. That
 //! is a property of v1's SHAPE, not of the code being total — and
 //! work-shapes v2 (the corpus registry, 16_UNIT §7a) ends it, because a
@@ -56,17 +56,17 @@ fn the_ten_slot_operators_are_total_over_lawful_hues() {
 #[test]
 fn the_degeneracy_law_is_named_and_admits_the_copy_task() {
     for level in 0..=5 {
-        assert!(Difficulty::level(level).lawful(), "every ladder rung is lawful");
+        assert!(Difficulty::level(level).well_formed(), "every ladder rung is lawful");
     }
     let rung = Difficulty::level(3);
-    assert!(!Difficulty { rows: 0, ..rung }.lawful(), "a zero row panics the forge");
-    assert!(!Difficulty { cols: 0, ..rung }.lawful(), "a zero col panics the forge");
+    assert!(!Difficulty { rows: 0, ..rung }.well_formed(), "a zero row panics the forge");
+    assert!(!Difficulty { cols: 0, ..rung }.well_formed(), "a zero col panics the forge");
     assert!(
-        !Difficulty { train_pairs: 0, ..rung }.lawful(),
+        !Difficulty { train_pairs: 0, ..rung }.well_formed(),
         "no training pair proves nothing — the vacuity"
     );
     assert!(
-        Difficulty { word_len: 0, ..rung }.lawful(),
+        Difficulty { word_len: 0, ..rung }.well_formed(),
         "the empty secret word is the identity task, and a copy task is a task"
     );
 }

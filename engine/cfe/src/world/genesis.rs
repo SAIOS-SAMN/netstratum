@@ -394,7 +394,7 @@ impl World {
         };
 
         // GATE 3 — THE BINDING TRADES (§4a).
-        if !vocab::binding_lawful(&binding) {
+        if !vocab::binding_trades(&binding) {
             return Err(ActionRefused::BindingUnlawful);
         }
 

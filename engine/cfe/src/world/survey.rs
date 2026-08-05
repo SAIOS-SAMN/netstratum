@@ -398,7 +398,7 @@ impl World {
         let Some(paying) = self.orb_by_id(prober) else {
             return Err(ActionRefused::NoSuchOrb { orb: prober });
         };
-        // Affordability judged PURE before anything moves (crystals
+        // Affordability gated PURE before anything moves (crystals
         // are never demurraged, so the pre-touch read is the
         // post-decay read): a refusal draws nothing, reads nothing,
         // orphans nothing.

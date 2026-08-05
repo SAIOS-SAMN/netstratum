@@ -23,7 +23,7 @@
 //! mainline cannot be written from inside it (one value per address,
 //! always), followers never decohere (a branch is addressable, never
 //! a second claim on one address), and re-convergence has one door:
-//! the kernel judges the merge, or the nursery keeps its toys. We
+//! the kernel gates the merge, or the nursery keeps its toys. We
 //! punish the lie, never the disagreement.
 //!
 //! THE UPLINK LAW (operator order 2026-07-31 — mesh authenticity):
@@ -82,7 +82,7 @@ pub struct MeshHead {
     pub head: [u8; 32],
 }
 
-/// The typed mesh refusal — every kind judges ONE chain against its
+/// The typed mesh refusal — every kind gates ONE chain against its
 /// own content or its own law; no copy is reconciled with another.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MeshRefused {
@@ -200,7 +200,7 @@ pub fn head(chronicle: &Chronicle) -> MeshHead {
 
 /// The integrity door: parse the framed receipts out of bytes
 /// (unknown tags skip — SEAL A), then re-verify the chain from its
-/// own content. ONE chain, judged against itself — never against a
+/// own content. ONE chain, gated against itself — never against a
 /// copy. A frame that does not parse refuses MALFORMED; a chain that
 /// does not recompute refuses FORGED with its break named.
 pub fn receive(bytes: &[u8], side: Side) -> Result<Chronicle, MeshRefused> {
@@ -225,7 +225,7 @@ struct WalkState {
     pending_cite: Option<u64>,
 }
 
-/// The authority walk (NS-5 §7.1), the one computation of it: judge
+/// The authority walk (NS-5 §7.1), the one computation of it: gate
 /// each receipt under the authority BEFORE it (carry the hand, cite a
 /// pending seal — authorship before citation), then apply its effect
 /// (a seal moves the pen and opens a citation). Before the first seal
@@ -297,7 +297,7 @@ pub fn yield_authority(
 /// The guarded write door (NS-5 §7.3): refuses USURPED before
 /// writing; injects the hand at the provenance head and the citation
 /// when one is pending. Seals go through `yield_authority` — the walk
-/// judges whatever enters by any door.
+/// gates whatever enters by any door.
 pub fn append_as(
     chronicle: &mut Chronicle,
     hand: u64,

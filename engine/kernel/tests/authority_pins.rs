@@ -8,7 +8,7 @@
 //! completeness rule is satisfied by {I2 containment, I3 exactness}
 //! ALONE — conservation's non-constraint (`_ => Ok(())`) is CORRECT
 //! for them, ratified here against the replay reading: the deed is
-//! judged by WHO may do it (Build/Raze scope) and that the state stays
+//! gated by WHO may do it (Build/Raze scope) and that the state stays
 //! exact, never by a value delta it does not carry. Value-moving
 //! "authority" deeds (ColonyFounded/Charted, ZoneBuilt/Razed,
 //! Forward/Council seals — all move banks) are W-A slice-2, gated on
@@ -59,7 +59,7 @@ fn raze_deeds() -> Vec<ClosureEvent> {
 
 fn judge(world: &World, event: &ClosureEvent, actor: u64) -> Result<(), Refused> {
     // Banked-neutral: prior and next carry the SAME banks; the deed is
-    // judged by scope and exactness, not by a value delta.
+    // gated by scope and exactness, not by a value delta.
     let state = world.committed();
     let step = Step { event: event.clone(), actor, stamp: world.now() };
     admits(&state, &state, &step)

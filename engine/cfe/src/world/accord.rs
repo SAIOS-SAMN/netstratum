@@ -11,7 +11,7 @@ impl World {
     /// forward among three or more distinct orbs, every member bound
     /// alike. Each locks the SAME collateral (a bank withdrawal, the
     /// vitrified-vault law) against delivering ≥ quota to fellow
-    /// members within the window; the reckoning judges all together at
+    /// members within the window; the reckoning gates all together at
     /// the boundary — the whole of the group over the needs of the
     /// individual. Any member unable to lock refuses the WHOLE seal:
     /// a council that starts unequal never starts.

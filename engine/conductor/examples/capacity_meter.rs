@@ -2,7 +2,7 @@
 //! `17_CAPACITY` §7 owes: *build the meter, measure, then rule — never
 //! rule a placeholder blind.*
 //!
-//! A READING. Appends nothing, writes nothing, judges nothing, changes
+//! A READING. Appends nothing, writes nothing, gates nothing, changes
 //! no law. It replays each world's chronicle and reports what rows
 //! **B1–B8** (`docs/FORGE_BUDGET.md`, `EQUATIONS` §7) need before any of
 //! them can be given a value.

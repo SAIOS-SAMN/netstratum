@@ -110,7 +110,7 @@
 //!
 //! **A proposal is a GUESS, never evidence.** The outside does not
 //! accept it because the cage produced it; it re-checks it under its own
-//! exact rules, exactly as a mesh peer re-judges an incoming step rather
+//! exact rules, exactly as a mesh peer re-gates an incoming step rather
 //! than trusting its sender. A proposal that fails verification costs
 //! nothing, because nothing was ever trusted.
 //!

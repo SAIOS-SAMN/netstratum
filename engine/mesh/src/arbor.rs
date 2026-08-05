@@ -49,7 +49,7 @@ pub const SPINE_RECORD_TAG: u8 = 84;
 pub const SEGMENT_BLOB_TAG: u8 = 87;
 /// Tag 88 — a SEGMENT step frame (SPINE-UPLINK): `commit[32] ‖
 /// actor[8] ‖ stamp[8] ‖ event_bytes`, the proof a JUDGED record's
-/// transition was lawful, re-judged under the receiver's kernel.
+/// transition was lawful, re-gated under the receiver's kernel.
 pub const SEGMENT_STEP_TAG: u8 = 88;
 
 /// A position on the one clock (NS-5 §9.1): the nursery branch (""
@@ -95,7 +95,7 @@ pub struct Commitment {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArborRefused {
     Io { message: String },
-    /// A frame that is not a well-formed tag-84 record — judge-side,
+    /// A frame that is not a well-formed tag-84 record — gate-side,
     /// unknown REFUSES.
     Malformed { frame: usize },
     /// A record whose commit does not recompute, a broken parent
@@ -110,11 +110,11 @@ pub enum ArborRefused {
     /// A second pass through the adoption door: the mainline already
     /// stands, and adoption happens once (one truth, one birth).
     AlreadyAdopted,
-    /// A step offered at genesis: nothing prior exists to judge from.
+    /// A step offered at genesis: nothing prior exists to gate from.
     GenesisJudged,
     StoreMissing,
     Refused(kernel::Refused),
-    /// SPINE-UPLINK: a received record claims `judged` but its step
+    /// SPINE-UPLINK: a received record claims `gated` but its step
     /// did not ride the segment — the receiver cannot reproduce the
     /// kernel verdict, so it will not admit the claim. Admission is
     /// re-judging, never trust; a judgment you cannot re-run is a
@@ -131,7 +131,7 @@ fn io(error: std::io::Error) -> ArborRefused {
 }
 
 /// Seal a commitment: compute its commit hash from its fields —
-/// `BLAKE3(coordinate ‖ schema ‖ kernel ‖ judged ‖ state ‖ parent)`.
+/// `BLAKE3(coordinate ‖ schema ‖ kernel ‖ gated ‖ state ‖ parent)`.
 pub fn seal(
     coordinate: Coordinate,
     schema: u8,
@@ -153,7 +153,7 @@ pub fn seal(
 
 impl Commitment {
     /// One TLV record, tag 84: `coordinate ‖ schema ‖ LE64(kernel) ‖
-    /// judged ‖ state[32] ‖ parent[32] ‖ commit[32]`.
+    /// gated ‖ state[32] ‖ parent[32] ‖ commit[32]`.
     pub fn wire_bytes(&self) -> Vec<u8> {
         let mut value = self.coordinate.bytes();
         value.push(self.schema);
@@ -322,7 +322,7 @@ impl Arbor {
 
     /// The one write (NS-5 §9.3): the arrow holds, the address is
     /// fresh, the state decodes, and — when a step is offered — the
-    /// kernel judges across the seam. The judged flag is stamped into
+    /// kernel gates across the seam. The gated flag is stamped into
     /// the commitment either way; the coverage hole is visible, never
     /// hidden.
     pub fn extend(
@@ -383,9 +383,9 @@ impl Arbor {
 
     /// THE ADOPTION DOOR (#36): a pre-chain world enters the mainline
     /// ONCE — its current state seated as the unjudged genesis, the
-    /// debt stamped `judged = false` (history before the chain is
+    /// debt stamped `gated = false` (history before the chain is
     /// NAMED, never hidden). After adoption every step arrives through
-    /// [`Arbor::extend`], judged where covered. A second adoption
+    /// [`Arbor::extend`], gated where covered. A second adoption
     /// refuses: one truth, one birth — re-entry through this door
     /// would be a mirror made of genesis records.
     pub fn adopt(
@@ -432,11 +432,11 @@ impl Arbor {
     /// referenced blob (tag 87, `state ‖ bytes`). Only chain-verified
     /// bytes ride (THE UPLINK LAW): records recompute, blobs are
     /// content-addressed. NOTE: a JUDGED record needs its step (tag 88)
-    /// to be re-judged on arrival, and the arbor stores NO steps — so a
-    /// arbor carrying judged records is not fully presentable through
+    /// to be re-gated on arrival, and the arbor stores NO steps — so a
+    /// arbor carrying gated records is not fully presentable through
     /// this door alone (the Phase-3 seam: per-deed threading brings the
-    /// step storage that makes judged records re-presentable). Today
-    /// every record is `judged = false`, so `present` is complete.
+    /// step storage that makes gated records re-presentable). Today
+    /// every record is `gated = false`, so `present` is complete.
     pub fn present(&self) -> Vec<u8> {
         let mut out = Vec::new();
         for record in &self.records {
@@ -460,7 +460,7 @@ impl Arbor {
     /// every record must reseal (its commit recomputes), extend this
     /// arbor's own head lawfully (parent links, the arrow ascends, the
     /// address is fresh), carry a hash-matched blob that decodes as
-    /// committed state, and — if it claims `judged` — re-run
+    /// committed state, and — if it claims `gated` — re-run
     /// `kernel::admits` under this node's kernel from the carried step.
     /// The first break refuses typed; nothing partial is admitted past
     /// it. Returns the count admitted.
@@ -506,7 +506,7 @@ impl Arbor {
                         .ok_or(ArborRefused::Malformed { frame })?;
                     steps.insert(commit, kernel::Step { event, actor, stamp });
                 }
-                // Judge-side: an unknown frame in a segment REFUSES
+                // Gate-side: an unknown frame in a segment REFUSES
                 // (never skip — a skipped frame is an unadmitted truth).
                 _ => return Err(ArborRefused::Malformed { frame }),
             }
@@ -522,7 +522,7 @@ impl Arbor {
 
     /// Admit ONE received record onto this arbor — the trustless core
     /// of `receive`, in order (reseal → geometry → chain-extension →
-    /// re-judge → append).
+    /// re-gate → append).
     fn admit(
         &mut self,
         record: Commitment,
@@ -602,7 +602,7 @@ impl Arbor {
                 }
             }
         }
-        // 4. Re-judge — a judged record's transition re-runs `lawful`
+        // 4. Re-gate — a gated record's transition re-runs `lawful`
         //    under THIS kernel from the carried step, or it is refused:
         //    a judgment the receiver cannot reproduce is not admitted.
         if record.judged {

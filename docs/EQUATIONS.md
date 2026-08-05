@@ -823,7 +823,7 @@ capacity axis does not. Until this is ruled, no reading may assert the
 cone is closed at step scale.
 
 **E2 · The singularity law (the angle-free collision).** LANDED (U2e)
-— `rfa_core::judged_fold` (Π_G then F_fold*) with THE ANGLE-FREE
+— `rfa_core::gated_fold` (Π_G then F_fold*) with THE ANGLE-FREE
 WITNESS green (`fold_pins.rs`): the verdict is invariant under every
 permutation frame of the entities and under gauge-coboundary shifts
 of either input; the veto is frame-invariant too. Authority: 16_UNIT
@@ -869,7 +869,7 @@ Authority: engine/kernel/CHARTER.md §1–§6. Implementation:
 
 **I1 · Conservation, TOTAL.** LANDED WHOLE (the value-law wave,
 operator directive 2026-07-31) — `kernel::conservation` +
-`kernel::lawful_deltas`. Per-resource, every resource, every covered
+`kernel::admitted_deltas`. Per-resource, every resource, every covered
 deed; an empty declaration holds every bank still (smuggling under a
 neutral deed refuses). THE SIGN LAW rides the declaration: every
 amount non-negative, direction from the DEED (`AmountNotPositive` —
@@ -948,7 +948,7 @@ a fold transition's only lawful LOCAL effect is its declared key move
 (gauge declaration==effect, every grade, every covered deed — a key
 smuggled under a neutral deed refuses `GaugeBroken`). The PAIR half —
 `orbit_lock` between the two MERGING chains via the sealed
-`rfa_core::judged_fold` (C4/C4a, E2) — is the merge site's law
+`rfa_core::gated_fold` (C4/C4a, E2) — is the merge site's law
 (converge/mesh admission), the aperture-pair seam pattern: kernel
 enforces the local half, the seam enforces the pair.
 

@@ -212,7 +212,7 @@ H(content)` proves WHICH task was solved and never that the task was
 admissible — **identity is not admission**. That stands. So does
 `task_digest`, the v2 payload carrying task content (observed content
 still cannot be re-derived), the BLAKE3 decision, `Grid::new`'s hue
-refusal, and `Difficulty::lawful`.
+refusal, and `Difficulty::well_formed`.
 
 *What replaces it: a PREDICATE, not a list.* A claim is admissible when
 the BASE vocabulary provably FAILS the task at depth `d` and the
@@ -254,7 +254,7 @@ untouched: `WORK_SCHEMA_V1 = 1`, `WORK_SCHEMA_V2_CORPUS = 2`, dispatch
 on the leading byte, an unknown byte refuses. The op table and the
 certificate encoding were EXTRACTED to one shared definition rather
 than copied — two copies of a wire table is how they drift. The
-`Difficulty::lawful` vacuity guard has a v2 equivalent: `train_len == 0`
+`Difficulty::well_formed` vacuity guard has a v2 equivalent: `train_len == 0`
 refuses as form, so `98ccbbe`'s hole cannot reopen in the new shape.
 
 **Names and identity.** `task_digest` covers the OBSERVABLE task only —
@@ -505,7 +505,7 @@ commit on explicit operator go.
     the judge needs no admissible set at all — one re-forge leg does
     what corpus work needed a whole admission mechanism to attempt.
   - **The vacuity is unreachable, not merely guarded.**
-    `VolDifficulty::lawful` refuses a degenerate rung at DECODE, before
+    `VolDifficulty::well_formed` refuses a degenerate rung at DECODE, before
     the forge runs: `train_pairs: 0` is the exploitable one (a free
     mint, since "maps every pair" is vacuously true over none), and
     zero dimensions are the totality half (they PANIC the forge).
@@ -582,7 +582,7 @@ commit on explicit operator go.
   Same sweep, second finding: `forge_task` panics on a degenerate
   `Difficulty` and the fields are `pub`, so the guard can only live at
   the doors — and it lived as an INLINE condition inside `decode_work`
-  alone. Now named `Difficulty::lawful()` so v2's corpus decode path
+  alone. Now named `Difficulty::well_formed()` so v2's corpus decode path
   calls the law instead of restating it (restating is how HOLE B
   happened). `word_len: 0` is deliberately admitted: the empty secret
   word is the identity task, and a copy task is a task.

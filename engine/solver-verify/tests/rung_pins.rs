@@ -35,7 +35,7 @@ fn the_one_ladder_reproduces_both_old_ones() {
 
 /// **THE THING TWO LADDERS COULD NOT DO.** A rank-4 task forges from the
 /// same ladder, the same forge and the same vocabulary — no new type, no
-/// new table, no new judge arm. This is the ruling's actual point.
+/// new table, no new gate arm. This is the ruling's actual point.
 #[test]
 fn a_fourth_rank_task_forges_with_no_new_code() {
     let digest = [7u8; 32];
@@ -81,21 +81,21 @@ fn an_invented_shape_has_no_position() {
     assert_eq!(invented.position(), None, "off the ladder is off the price list");
 
     // THE DEGENERACY LAW IS NOW THE DOOR (29_CONSTRUCTION C1): a
-    // degenerate rung is not judged unlawful — it CANNOT EXIST, and the
+    // degenerate rung is not gated unlawful — it CANNOT EXIST, and the
     // refusal names why. This replaced `lawful()`, whose every check
-    // moved here; there is no rung left for it to judge.
-    use solver_verify::rung::RungVerdict;
+    // moved here; there is no rung left for it to gate.
+    use solver_verify::rung::RungFault;
     assert_eq!(
         Rung::new(1, 1, vec![3, 0], 2),
-        Err(RungVerdict::EmptyExtent { axis: 1 }),
+        Err(RungFault::EmptyExtent { axis: 1 }),
         "a zero extent refuses at the door, naming the axis"
     );
     assert_eq!(
         Rung::new(1, 1, vec![3, 3], 0),
-        Err(RungVerdict::NothingToProve),
+        Err(RungFault::NothingToProve),
         "no training pairs is the vacuity, refused before it exists"
     );
-    assert_eq!(Rung::new(1, 1, vec![], 2), Err(RungVerdict::NoAxes));
+    assert_eq!(Rung::new(1, 1, vec![], 2), Err(RungFault::NoAxes));
     // The empty word stands: a copy task is a task.
     assert!(Rung::new(1, 0, vec![3, 3], 2).is_ok());
 }

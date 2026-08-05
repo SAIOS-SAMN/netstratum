@@ -8,7 +8,7 @@
 //! reciprocity_B) × volume` accrues as workspace against the mover
 //! and seals by `FrictionSettled` (tag 38, the VentSettled shape)
 //! into the vented ledger. Aligned partners — ANY alignment —
-//! generate exactly zero. The engine judges nothing.
+//! generate exactly zero. The engine gates nothing.
 
 use cfe::dop::{cohesion_ratio, ClosureEvent, ColonyOrb, Resource, ZoneKind};
 use cfe::ratio::{ratio, Ratio};

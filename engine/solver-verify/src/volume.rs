@@ -19,17 +19,17 @@
 //!
 //! **SIMPLER THAN CORPUS v2, and for a structural reason.** A
 //! volumetric task is FORGE-ONLY: it re-derives from its digest, so the
-//! judge needs nothing but the digest to know the task is real. There
+//! gate needs nothing but the digest to know the task is real. There
 //! is no admissible-set problem, no Merkle root, no inclusion path —
 //! all of which corpus work needs precisely because observed content
 //! cannot be re-derived. Volumetric work is v1's shape in three
 //! dimensions.
 //!
 //! **THE VACUITY IS STRUCTURALLY IMPOSSIBLE HERE, not merely guarded.**
-//! `VolDifficulty::lawful` refuses a degenerate rung at DECODE, before
+//! `VolDifficulty::well_formed` refuses a degenerate rung at DECODE, before
 //! any forge or replay runs, so a payload claiming zero training pairs
 //! (whose "maps every pair" would be vacuously true — a free mint) is
-//! not a payload at all. The same law as `Difficulty::lawful`, and the
+//! not a payload at all. The same law as `Difficulty::well_formed`, and the
 //! reason both exist as named predicates rather than inline conditions:
 //! a guard restated at each door is a guard that a new door forgets.
 
@@ -163,7 +163,7 @@ impl VolDifficulty {
     }
 
     /// THE DEGENERACY LAW, volumetric — the counterpart of
-    /// [`crate::forge::Difficulty::lawful`], named for the same reason.
+    /// [`crate::forge::Difficulty::well_formed`], named for the same reason.
     ///
     /// A rung with no layer, no row, no column, or NO TRAINING PAIR is
     /// refused at decode, before the forge is ever called. Each field
@@ -173,11 +173,11 @@ impl VolDifficulty {
     ///   would verify and mint for nothing;
     /// - `rows`/`cols`/`layers` of 0 — the forge's `Grid::new(..)
     ///   .expect(..)` and `Volume::new(..).expect(..)` PANIC, which is a
-    ///   totality violation inside the judge (audit HOLE B's class).
+    ///   totality violation inside the gate (audit HOLE B's class).
     ///
     /// `word_len: 0` is LAWFUL and deliberately admitted: the empty word
     /// is the identity task, and a copy task is a task.
-    pub fn lawful(&self) -> bool {
+    pub fn well_formed(&self) -> bool {
         self.layers > 0 && self.rows > 0 && self.cols > 0 && self.train_pairs > 0
     }
 }
@@ -226,7 +226,7 @@ fn sample_volume(beacon: &Beacon, d: &VolDifficulty, pair: usize) -> Volume {
 /// the planar forge: the secret word renders the observations, then is
 /// discarded; the verifier is the authority.
 ///
-/// PRECONDITION: `difficulty.lawful()`. Every decode door checks it
+/// PRECONDITION: `difficulty.well_formed()`. Every decode door checks it
 /// first, so the `expect`s above are unreachable from a payload.
 pub fn forge_volume(digest: [u8; 32], difficulty: VolDifficulty) -> VolumeTask {
     let beacon = Beacon::from_digest(digest);

@@ -1,7 +1,7 @@
 //! COUNCIL-1 — THE MULTILATERAL FORWARD (12_UNION §7). Three or more
 //! orbs bound alike: each locks the same collateral against
 //! delivering ≥ quota to fellow members within the window; the
-//! reckoning judges ALL members together at the boundary — the whole
+//! reckoning gates ALL members together at the boundary — the whole
 //! of the group over the needs of the individual. A breacher's
 //! collateral divides exactly among the faithful; if every member
 //! breached there is no aggrieved party — collateral goes home, the

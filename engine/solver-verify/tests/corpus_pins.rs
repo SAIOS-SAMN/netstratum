@@ -13,7 +13,7 @@
 //! was solved and never that the task was admissible. **Identity is not
 //! admission.** What went is the answer, not the question, and until
 //! the replacement predicate lands (base-fails-at-depth-d ∧
-//! candidate-closes) this judge does not admit at all — lawfully, since
+//! candidate-closes) this gate does not admit at all — lawfully, since
 //! corpus work has no rate and THE MOTION clause 4 makes imported
 //! content a benchmark, never a mint source.
 //!
@@ -106,7 +106,7 @@ fn the_task_id_is_content_alone() {
     );
 }
 
-/// IDENTITY IS NOT ADMISSION, and the judge no longer pretends
+/// IDENTITY IS NOT ADMISSION, and the gate no longer pretends
 /// otherwise. A task nobody authorized now verifies — because there is
 /// no admission test, and saying so out loud is the point of this pin.
 /// It earns nothing: corpus work has no rate (THE MOTION clause 4).

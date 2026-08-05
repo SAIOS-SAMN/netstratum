@@ -104,7 +104,7 @@ pub enum View {
 ///
 /// Pure, total, and stateless. Takes the relation it is GIVEN — the
 /// projection from committed state belongs to whoever holds the state,
-/// which keeps this crate free of any dependency on the judge.
+/// which keeps this crate free of any dependency on the gate.
 ///
 /// The `support` is the observation record: which pairs carry an
 /// OBSERVED relation. An absent pair is absent, not zero, and reading it

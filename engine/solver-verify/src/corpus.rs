@@ -9,7 +9,7 @@
 //!
 //! Corpus work raised a question v1 never had: a corpus task is
 //! observed content, cannot be re-derived from a digest, and so must
-//! ride in the payload — at which point the judge must ask *is this a
+//! ride in the payload — at which point the gate must ask *is this a
 //! real task, or one the miner wrote?* The finding that content
 //! addressing does not answer that question stands and is not what was
 //! struck: **`task_id = H(content)` proves WHICH task was solved, never
@@ -43,7 +43,7 @@
 //! lawful, because it also has no rate, and THE MOTION's clause 4 says
 //! imported content is a BENCHMARK and never a mint source: the ARC
 //! corpus carries no seed, can be authored, and its held-out answer is
-//! not checkable by the judge. Measuring against it stays useful;
+//! not checkable by the gate. Measuring against it stays useful;
 //! minting from it was never the plan this ruling took away.
 
 use crate::grid::Grid;
@@ -66,7 +66,7 @@ const TAG_TASK: &[u8] = b"netstratum.corpus.task.v1";
 ///   corpus file must not change what the task IS.
 /// - **`test_expected`.** The held-out answer never rides in a proof.
 ///   For real corpus work it may not even be known — which is the whole
-///   point of the benchmark — and a judge that needed it could only
+///   point of the benchmark — and a gate that needed it could only
 ///   ever verify tasks whose answers were already public.
 pub fn task_digest(train: &[TaskPair], test_in: &Grid) -> [u8; 32] {
     let mut hasher = blake3::Hasher::new();

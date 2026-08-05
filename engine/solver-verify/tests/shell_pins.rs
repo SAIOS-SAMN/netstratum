@@ -434,7 +434,7 @@ fn the_stack_is_the_sum_of_its_own_parts() {
 /// decided it, so it teaches the law instead of merely denying.
 #[test]
 fn a_shape_call_returns_its_derivation() {
-    use solver_verify::shell::ShapeVerdict;
+    use solver_verify::shell::ShapeReading;
 
     let held = Shell::examine(5, 12, 60);
     assert!(held.holds(), "{}", held.because());
@@ -442,7 +442,7 @@ fn a_shape_call_returns_its_derivation() {
 
     // A longitude off the ring names the remainder.
     let bad_long = Shell::examine(5, 7, 35);
-    assert!(matches!(bad_long, ShapeVerdict::LongitudeOffSlot(_)));
+    assert!(matches!(bad_long, ShapeReading::LongitudeOffSlot(_)));
     assert!(
         bad_long.because().contains("left over"),
         "the refusal must show the remainder: {}",
@@ -452,7 +452,7 @@ fn a_shape_call_returns_its_derivation() {
     // A latitude off the HALVED ring names the halved ring, and says
     // why it differs from the longitude's.
     let bad_lat = Shell::examine(4, 12, 48);
-    assert!(matches!(bad_lat, ShapeVerdict::LatitudeOffSlot(_)));
+    assert!(matches!(bad_lat, ShapeReading::LatitudeOffSlot(_)));
     assert!(
         bad_lat.because().contains("30"),
         "the refusal must name the halved ring: {}",
@@ -462,7 +462,7 @@ fn a_shape_call_returns_its_derivation() {
     // A cell count mismatch says what was wanted.
     assert!(matches!(
         Shell::examine(5, 12, 59),
-        ShapeVerdict::CellCountWrong { given: 59, wanted: 60 }
+        ShapeReading::CellCountWrong { given: 59, wanted: 60 }
     ));
 
     // And a standing shell can show the proof that admitted it.

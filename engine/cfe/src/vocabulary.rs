@@ -113,7 +113,7 @@ pub fn canonical(binding: &Binding) -> Vec<(u8, Ratio)> {
 /// form: *it holds its place, keeps its structural existence, is never
 /// deleted and never barred — and it is paid nothing.* A binding is
 /// either empty, or it trades.
-pub fn binding_lawful(binding: &Binding) -> bool {
+pub fn binding_trades(binding: &Binding) -> bool {
     let entries = canonical(binding);
     if entries.is_empty() {
         return true;
@@ -203,7 +203,7 @@ impl Axis {
     /// **STATIONS ARE ABSENT AND THAT IS THE LAW** (`28_VOCABULARY`
     /// §10). The four offices are chartered by `12_UNION` §3 as stations
     /// of FUNCTION; minting one would let a T0 seat manufacture the seat
-    /// that judges it. Offices change by amendment and by nothing else,
+    /// that gates it. Offices change by amendment and by nothing else,
     /// so there is no axis code for them to be minted under.
     pub const ALL: [Axis; 6] = [
         Axis::Disposition,

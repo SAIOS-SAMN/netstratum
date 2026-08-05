@@ -329,7 +329,7 @@ fn tier3_the_genesis_mint_is_chartered_exactly() {
 #[test]
 fn tier3_zones_pay_their_cost_and_refund_from_prior() {
     // Ratified against the LIVE world path: the real zone() closure is
-    // the next state; the kernel re-judges it. Multi-resource: the
+    // the next state; the kernel re-gates it. Multi-resource: the
     // cost vector is per-resource, never a scalar.
     let mut world = World::new();
     world.found("origin").expect("founds");
@@ -388,7 +388,7 @@ fn an_assay_is_bounded_by_its_vein() {
     // WITNESS TRUTH-UPDATE (the element law landed): this pin held
     // AssayStruck OUT as Unjudged, because admitting it on
     // banked-neutrality would be an unguarded element mint. The
-    // element law now judges it with strict symmetry to the banked
+    // element law now gates it with strict symmetry to the banked
     // ledger — this state carries NO vein, so the bound is zero and
     // the mint refuses AssayExceedsVein, both sides whole. The full
     // element witnesses (honest mint, sign, zero-invariance) live in

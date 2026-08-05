@@ -66,7 +66,7 @@
 //! and `mesh::spine::seal`, they are not summands of `Δ`, and reading
 //! the mint as raw divergence was the over-reach.
 //!
-//! ALTITUDE: this is a READING, not a judge and not an objective
+//! ALTITUDE: this is a READING, not a gate and not an objective
 //! (`26_ARTICLES`, Ξ/ΔD are readings never objectives). It is `O(dim² ·
 //! fiber)` over the committed relation and calls no search.
 
@@ -123,7 +123,7 @@ pub struct Extent {
 /// - there is no `From<usize>`, no public tuple construction, and
 ///   [`Degree::default`] is the GROUND, never zero.
 ///
-/// A below-ground degree is therefore not a state the judge refuses at
+/// A below-ground degree is therefore not a state the gate refuses at
 /// runtime — it is a state that cannot be built. That is the house's
 /// own standing defense against the vacuous arm (`17_CAPACITY` §10b
 /// AV-4: *degenerate arms are made structurally unrepresentable where

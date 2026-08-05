@@ -19,7 +19,7 @@ pub struct StepBound {
 /// The typed verdict of one validated step. Exactly one arm; a
 /// refusal carries its measurement whole.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum GateVerdict {
+pub enum GateReading {
     /// Both gates passed.
     Accepted,
     /// Conservation refused: antisymmetry / zero-diagonal violated.
@@ -48,7 +48,7 @@ pub enum GateVerdict {
 ///
 /// ```text
 /// STRUCK:  productive = C(after) < C(before) || both zero
-///          → else GateVerdict::Unproductive
+///          → else GateReading::Unproductive
 /// ```
 ///
 /// It refused any step that did not strictly lower `C`. The fault is
@@ -68,13 +68,13 @@ pub enum GateVerdict {
 /// verdict of this module consults it, and `Accepted` no longer carries
 /// it, because a verdict that ships a scalar invites the next reader to
 /// gate on it.
-pub fn validate_step(before: &Delta, after: &Delta, bound: &StepBound) -> GateVerdict {
+pub fn validate_step(before: &Delta, after: &Delta, bound: &StepBound) -> GateReading {
     // `before` is retained in the signature: the two-sided magnitude
     // bound is a per-step law and callers hold the pair. Nothing about
     // the prior state gates the step's DIRECTION any more.
     let _ = before;
     if let Some(at) = after.first_conservation_break() {
-        return GateVerdict::ConservationViolated { at };
+        return GateReading::ConservationViolated { at };
     }
 
     let mass = magnitude(after);
@@ -85,11 +85,11 @@ pub fn validate_step(before: &Delta, after: &Delta, bound: &StepBound) -> GateVe
     };
     let allowed = &bound.epsilon * &bound.reference;
     if excursion > allowed {
-        return GateVerdict::MagnitudeDrift {
+        return GateReading::MagnitudeDrift {
             excursion,
             bound: allowed,
         };
     }
 
-    GateVerdict::Accepted
+    GateReading::Accepted
 }

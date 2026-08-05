@@ -119,7 +119,7 @@ impl World {
                 self.relieve_recovered(recipient);
             }
             // COUNCIL-1: councils reckon at the BOUNDARY only — all
-            // members judged together (the group over the individual;
+            // members gated together (the group over the individual;
             // no early release, no early slash). A breacher's
             // collateral divides exactly among the faithful; if every
             // member breached there is no aggrieved party — each

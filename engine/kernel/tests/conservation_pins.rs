@@ -1,7 +1,7 @@
 //! KERNEL invariant witness — conservation (CHARTER §11 rule 3, the
 //! first invariant, red-first). A deed that only MOVES value may not
 //! change the world's total of that value; an honest transfer admits,
-//! a minting one refuses with the residual whole. The judge is pure —
+//! a minting one refuses with the residual whole. The gate is pure —
 //! it reads two states and a claimed step, touches nothing else.
 
 use cfe::dop::{ClosureEvent, Resource};
@@ -33,7 +33,7 @@ fn the_last_deed_covered_exhausts_the_sealed_default() {
     // EraAnnexed (gauge law), AssayStruck (element law), TaxonSealed
     // (the last). TaxonSealed now COVERS, so `Unjudged` is unreachable
     // via any current deed. The pin transforms: it witnesses that the
-    // final holdout is judged (admits, prior == next, neutral). The
+    // final holdout is gated (admits, prior == next, neutral). The
     // completeness of all 64 lives in `taxon_pins.rs`; the sealed
     // default stays in the kernel as refuse-unknown for future
     // enum additions.
@@ -132,7 +132,7 @@ fn exactness_holds_over_the_value_ledgers_and_the_primitive_is_sealed() {
 /// is the mesh opposition.
 #[test]
 fn the_aperture_leg_conserves_its_exact_declared_amount() {
-    // The kernel check is unit-level: it judges prior/next against the
+    // The kernel check is unit-level: it gates prior/next against the
     // leg's declared amount, needing no THRESHOLD-1 crossing machinery.
     // `next` = the source world after a 3-iron debit (value crossed out).
     let world = two_orb_world();
@@ -244,11 +244,11 @@ fn creation_and_decay_bound_the_value_law_by_declaration_and_sign() {
 #[test]
 fn the_version_is_pinned() {
     // The commitment binds this; an amendment bumps it. Pinned so a
-    // silent change to the judge cannot pass unnoticed.
+    // silent change to the gate cannot pass unnoticed.
     // VERSION 2 — THE RULING BOX 1 AMENDMENT (operator, 2026-08-01):
     // mint_bound unsealed, f ladder-pinned 0·0·0·1·4·7 against the
     // #17 calibration (5898351). Version-1 chains verify forever
-    // under the sealed-shut judge they were cut with.
+    // under the sealed-shut gate they were cut with.
     // VERSION 3 — THE CAPACITY LAW AMENDMENT (operator, 2026-08-01):
     // a DiscoveryMinted deed refuses unless the prior state reads
     // Entangled. BREAKING — version 2 admitted mints on Void, Stasis
@@ -264,11 +264,11 @@ fn the_version_is_pinned() {
     //    over a RESOLVED rank reading.
     // Minted on separate branches for separate reasons; 4 was skipped
     // on main so the two could not collide, and both are kept.
-    // x.y.z, major 0 — a PROTOTYPE judge (operator ruling 2026-08-04).
+    // x.y.z, major 0 — a PROTOTYPE gate (operator ruling 2026-08-04).
     // The five linear amendments become 0.1.0 .. 0.5.0, so the count
     // survives in `minor` and the leading 0 says nothing has promised
     // stability yet.
-    //   minor  a LAW change — the judge admits or refuses what it did
+    //   minor  a LAW change — the gate admits or refuses what it did
     //          not before. Every amendment so far is one of these.
     //   patch  a change that cannot alter a verdict.
     // 0.5.0 carries BOTH of the day's amendments: the capacity law
@@ -276,7 +276,7 @@ fn the_version_is_pinned() {
     assert_eq!(KERNEL_VERSION.to_string(), "0.5.0", "the judge is version-pinned");
     assert_eq!(VERSION, KERNEL_VERSION.code(), "the wire carries the packed form");
     // ORDER IS PRESERVED: a chain cut under the old linear versions
-    // compares BELOW every packed one, which is true — an earlier judge
+    // compares BELOW every packed one, which is true — an earlier gate
     // cut it.
     // The packed form orders above the linear era (1..5) — what a
     // peer comparing two commitments needs. Asserted against the
@@ -318,7 +318,7 @@ fn an_honest_transfer_is_admitted() {
 fn a_minting_transfer_refuses_with_the_residual_whole() {
     // The forger writes a real transfer shape but the `next` state
     // MINTS: the destination gains more iron than the source lost.
-    // The world's total rises, and the judge refuses by measurement —
+    // The world's total rises, and the gate refuses by measurement —
     // both totals carried, never a scalar verdict.
     let mut world = two_orb_world();
     let haven = world.orbs()[1].orb_id;

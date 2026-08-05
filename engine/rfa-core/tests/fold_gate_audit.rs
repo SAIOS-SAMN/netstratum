@@ -15,7 +15,7 @@
 
 use cfe::ratio::{ratio, Ratio};
 use rfa_core::{
-    coboundary_reduce, f_fold_star, judged_fold, rcf_signature, Delta, FoldVerdict, Operator,
+    coboundary_reduce, f_fold_star, gated_fold, rcf_signature, Delta, FoldReading, Operator,
     OrbitWitness, TorsionCause,
 };
 
@@ -104,7 +104,7 @@ fn the_operator_list_no_longer_decides_the_verdict() {
     for (n, ops) in lists.iter().enumerate() {
         assert_eq!(
             f_fold_star(&a, &a, ops, None),
-            FoldVerdict::TorsionVeto(TorsionCause::WitnessAbsent),
+            FoldReading::TorsionVeto(TorsionCause::WitnessAbsent),
             "list {n}: the same pair must reach the same verdict"
         );
     }
@@ -118,12 +118,12 @@ fn an_empty_operator_list_permits_nothing() {
     let coherent = triangle(q(1, 1), q(1, 2), q(3, 2));
     let incoherent = triangle(q(2, 1), q(3, 1), q(7, 1));
     assert_eq!(
-        judged_fold(&coherent, &incoherent, &[], None),
-        FoldVerdict::TorsionVeto(TorsionCause::SignaturesDiffer)
+        gated_fold(&coherent, &incoherent, &[], None),
+        FoldReading::TorsionVeto(TorsionCause::SignaturesDiffer)
     );
     assert_eq!(
-        judged_fold(&incoherent, &coherent, &[], None),
-        FoldVerdict::TorsionVeto(TorsionCause::SignaturesDiffer)
+        gated_fold(&incoherent, &coherent, &[], None),
+        FoldReading::TorsionVeto(TorsionCause::SignaturesDiffer)
     );
 }
 
@@ -153,8 +153,8 @@ fn a_proven_genuine_difference_is_vetoed_never_collapsed() {
         Some(OrbitWitness { operator_id: 9, step: 1 }),
     ] {
         assert_eq!(
-            judged_fold(&coherent, &incoherent, &ops, witness.as_ref()),
-            FoldVerdict::TorsionVeto(TorsionCause::SignaturesDiffer),
+            gated_fold(&coherent, &incoherent, &ops, witness.as_ref()),
+            FoldReading::TorsionVeto(TorsionCause::SignaturesDiffer),
             "genuine difference vetoes regardless of any presented witness"
         );
     }
@@ -170,7 +170,7 @@ fn a_gauge_pair_is_never_routed_to_the_minting_branch() {
     let witness = OrbitWitness { operator_id: 0, step: 1 };
     assert_eq!(
         f_fold_star(&one, &one, &ops, Some(&witness)),
-        FoldVerdict::GaugeFold(witness),
+        FoldReading::GaugeFold(witness),
         "the identity proves a state is gauge-identical to itself"
     );
 }

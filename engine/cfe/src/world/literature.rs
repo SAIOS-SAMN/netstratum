@@ -157,7 +157,7 @@ impl World {
         }
         // THE CITATION IS WHAT IS VERIFIED. Every digest must be a
         // receipt this world actually sealed — the law checks that the
-        // evidence EXISTS, and judges nothing about what it shows.
+        // evidence EXISTS, and gates nothing about what it shows.
         for witness in witnesses {
             if !self.chronicle.receipts().iter().any(|receipt| receipt.own.0 == *witness) {
                 return Err(ActionRefused::WitnessNotInChronicle { digest: *witness });

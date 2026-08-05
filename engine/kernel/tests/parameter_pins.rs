@@ -28,7 +28,7 @@ use solver::Difficulty;
 
 /// EPOCH 0 · HISTORY IS UNTOUCHED — the whole point of the mechanism.
 ///
-/// A deed stamped before the activation point is judged by the rule
+/// A deed stamped before the activation point is gated by the rule
 /// that stood when it was written, whatever the rule says today. This
 /// is what stops `replay` drifting from the live path, and it fails
 /// the moment anyone edits `ease_cliff`.

@@ -5,7 +5,7 @@
 //! opens a reciprocity window (the MORALITY books): compensation
 //! flowing back inside the window posts `returned_across`; the unpaid
 //! remainder lapses by receipt to `extracted_across` — one mechanic,
-//! two outcomes, measured by behavior. The engine judges nothing.
+//! two outcomes, measured by behavior. The engine gates nothing.
 
 use cfe::dop::{ClosureEvent, Resource, ZoneKind};
 use cfe::ratio::{ratio, Ratio};

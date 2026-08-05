@@ -1,4 +1,4 @@
-//! THE WORK PROOF — the opaque payload's one form and its judge
+//! THE WORK PROOF — the opaque payload's one form and its gate
 //! (U1 KERNEL-VERIFY, U_DIRECTIVES §2).
 //!
 //! THE OPAQUE-PAYLOAD LAW: the `DiscoveryMinted` deed carries its
@@ -101,7 +101,7 @@ pub struct VolumeProof {
 }
 
 /// What a verified payload turned out to BE. v1 returns a ladder rung;
-/// corpus work has no rung — its identity is its task_id — so the judge
+/// corpus work has no rung — its identity is its task_id — so the gate
 /// reports the class and the kernel prices it.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum WorkClass {
@@ -111,7 +111,7 @@ pub enum WorkClass {
     ///
     /// Renamed from `AdmissibleCorpus` when the Merkle admission
     /// mechanism was struck (2026-08-04) — the old name CLAIMED an
-    /// admission this judge no longer performs, and a name that
+    /// admission this gate no longer performs, and a name that
     /// overclaims is the vacuity THE MOTION clause 6 forbids.
     Corpus { task_id: [u8; 32] },
     /// Volumetric work: re-derivable like forge work, but on its OWN
@@ -151,7 +151,7 @@ pub enum WorkBroken {
     /// The payload is internally inconsistent: it names one task and
     /// carries another.
     TaskIdMismatch,
-    /// The payload is a well-formed shape this judge cannot price. Not
+    /// The payload is a well-formed shape this gate cannot price. Not
     /// a malformation — a SHAPE the caller has not been taught. Today:
     /// corpus work reaching `verify_work`, whose return type can only
     /// express a ladder rung. `verify_work_class` accepts it.
@@ -440,10 +440,10 @@ pub fn decode_work(bytes: &[u8]) -> Option<WorkProof> {
     //    "maps EVERY training pair" is vacuously true (a free mint);
     //  · rows/cols 0 → the forge's Grid::new(...).expect() PANICS in
     //    the kernel's call path — the totality law forbids it.
-    // The judge never re-forges a degenerate task: it refuses first.
-    // The condition now carries a NAME (`Difficulty::lawful`) so the
+    // The gate never re-forges a degenerate task: it refuses first.
+    // The condition now carries a NAME (`Difficulty::well_formed`) so the
     // v2 corpus decode path calls the same law instead of restating it.
-    if !difficulty.lawful() {
+    if !difficulty.well_formed() {
         return None;
     }
     let program = r.program()?;
@@ -501,7 +501,7 @@ pub fn decode_volume_work(bytes: &[u8]) -> Option<VolumeProof> {
     // `train_pairs: 0` is the exploitable one: "maps EVERY training
     // pair" is vacuously true over none, which is a free mint. The
     // zero dimensions are the totality half — they PANIC the forge.
-    if !difficulty.lawful() {
+    if !difficulty.well_formed() {
         return None;
     }
     let program = r.vprogram()?;
@@ -582,7 +582,7 @@ pub fn decode_corpus_work(bytes: &[u8]) -> Option<CorpusProof> {
     // THE VACUITY, refused for the new shape too (98ccbbe's law): a
     // replay over no training pair proves nothing, and "maps EVERY
     // pair" is vacuously true over none. v1 refuses this through
-    // `Difficulty::lawful`; v2 has no difficulty, so it refuses here.
+    // `Difficulty::well_formed`; v2 has no difficulty, so it refuses here.
     if train_len == 0 {
         return None;
     }
@@ -644,13 +644,13 @@ pub fn verify_work_class(bytes: &[u8]) -> Result<WorkClass, WorkBroken> {
 /// at depth `d` and the candidate closes it, both halves replayable
 /// with the machinery already here.
 ///
-/// **So this judge does NOT admit, and must not be read as if it did.**
+/// **So this gate does NOT admit, and must not be read as if it did.**
 /// It proves a payload is internally consistent and that the program
 /// closes the carried task. Whether the task is one anybody authorized
 /// is a question it no longer asks — lawfully, because corpus work has
 /// no rate either: THE MOTION clause 4 makes imported content a
 /// BENCHMARK and never a mint source. It carries no seed, it can be
-/// authored, and its held-out answer is not checkable by the judge.
+/// authored, and its held-out answer is not checkable by the gate.
 ///
 /// **What this CANNOT check, stated plainly and unchanged by the
 /// strike.** A corpus task's held-out answer is not carried and not

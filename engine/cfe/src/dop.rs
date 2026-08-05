@@ -147,7 +147,7 @@
 //!         the melt as a first-class receipt on the receiving book:
 //!         sent = received + void share; every deal in the universe
 //!         sums to zero under ONE rule; losses are receipted, never
-//!         silent; the judge only sums, never recomputes φ·D.
+//!         silent; the gate only sums, never recomputes φ·D.
 //!         `orb_id` ADDED 2026-08-02 (SYN-6): the record named the
 //!         DEAL and never the BEARER, so the melt was receipted and
 //!         credited to NO ONE — visible in aggregate, unattributable
@@ -160,7 +160,7 @@
 //!         framing when state rides a TLV stream)
 //!   84 The arbor commitment record (SPINE-1, NS-5 §9 — one position
 //!         on the one clock: coordinate {branch ‖ S ‖ G ‖ T} ‖ schema
-//!         ‖ kernel version ‖ judged ‖ state digest ‖ parent ‖
+//!         ‖ kernel version ‖ gated ‖ state digest ‖ parent ‖
 //!         commit. The two maps derive from the append-only record
 //!         stream; one value per address, always. Not a ClosureEvent —
 //!         the mesh's own framing)
@@ -182,7 +182,7 @@
 //!         where work is the OPAQUE proof payload — solver-verify's
 //!         encoding monopoly (forge digest, difficulty, program,
 //!         output, certificate); the receipt carries its proof whole,
-//!         replay re-verifies forever. Judged by I4's bound arm:
+//!         replay re-verifies forever. Gated by I4's bound arm:
 //!         verify_work(work) = Ok(d) ∧ amount ≤ mint_bound(d);
 //!         mint_bound is SEALED SHUT until Ruling Box 1)
 //!   87 The arbor SEGMENT blob frame (SPINE-UPLINK, NS-5 §9 — a
@@ -191,9 +191,9 @@
 //!         on arrival. Segment-only — NEVER stored in arbor.tlv).
 //!   88 The arbor SEGMENT step frame (SPINE-UPLINK — the proof a
 //!         JUDGED record's transition was lawful: commit[32] ‖
-//!         actor[8] ‖ stamp[8] ‖ event_bytes; the receiver re-judges
+//!         actor[8] ‖ stamp[8] ‖ event_bytes; the receiver re-gates
 //!         under its own kernel. Segment-only, carried only for
-//!         judged records).
+//!         gated records).
 //!   89 ClosureEvent::StationSeated (THE VERTICAL AXIS, 2026-08-01 —
 //!         the seat enters the chain. A station GATES AUTHORITY (the
 //!         tier-0 verbs check it), and it lived only in
@@ -443,7 +443,7 @@ pub fn demurrage_per_tick(supply: &Ratio, at: u64) -> Ratio {
 }
 
 /// EPOCH 0 — the landed flat rate. **Never edit this function.** Every
-/// receipt stamped before `epoch::CONTINUOUS_FROM` is judged by it.
+/// receipt stamped before `epoch::CONTINUOUS_FROM` is gated by it.
 fn sink_flat() -> Ratio {
     ratio(1, 32)
 }
@@ -457,9 +457,9 @@ fn sink_flat() -> Ratio {
 ///
 /// **Supply, not rank.** Rank lives behind `bridge::read_entangled` in
 /// the `kernel` crate, above this one, so `cfe` structurally cannot
-/// read it — and a proposer computing a different rate from the judge
+/// read it — and a proposer computing a different rate from the gate
 /// refuses honest deeds at I5 (`21_KERNEL_PARAMETERS` §9). Supply is
-/// computable here, so one value serves both judges.
+/// computable here, so one value serves both gates.
 ///
 /// **Bounded above by `1/4`** (#16 requires a bounded function; an
 /// uncapped rate above `1` would confiscate a whole bank each tick),
@@ -523,7 +523,7 @@ pub fn friction_rate() -> Ratio {
 
 /// N4 (NS-2 §1.5, placeholder): crystals one scan draws from the
 /// probing orb's bank — the lens's power, spent on the looking, hit or
-/// miss. Judged pure before anything moves.
+/// miss. Gated pure before anything moves.
 /// MASK-1a (14 §4, placeholder): the veil's standing joule toll,
 /// settled at every collect — an unpayable toll lifts the veil by
 /// receipt, never silently.
@@ -1190,7 +1190,7 @@ pub enum ClosureEvent {
     /// `want`. The price IS the ratio (no absolute price exists —
     /// guardrail 6); the offer RESTS as committed state until a
     /// crossing clears it or it is never met. No escrow: affordability
-    /// is judged at the fill, and a stale offer refuses then.
+    /// is gated at the fill, and a stale offer refuses then.
     OfferPosted {
         offer: u64,
         orb_id: u64,
@@ -1256,7 +1256,7 @@ pub enum ClosureEvent {
     /// forward among three or more orbs, every member bound alike —
     /// each locks the same collateral against delivering ≥ quota to
     /// fellow members within the window. The group overtakes the
-    /// individual: the reckoning judges all members together at the
+    /// individual: the reckoning gates all members together at the
     /// boundary, never one at a time.
     CouncilSealed {
         council: u64,

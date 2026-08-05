@@ -643,8 +643,8 @@ pub struct Polity {
     /// the whole stream every cycle — quadratic over a live era).
     arbor: Option<mesh::arbor::Arbor>,
     /// DIRECTIVE 19 — how many receipts have been threaded through the
-    /// judge and into the chain. Every deed past this mark is chained
-    /// individually, with its own step, and judged.
+    /// gate and into the chain. Every deed past this mark is chained
+    /// individually, with its own step, and gated.
     chained: usize,
     /// WHICH REGIME this line searches under. Set by the era runner so
     /// the three paths can be benchmarked against one another.
@@ -665,7 +665,7 @@ pub struct Polity {
     /// mix a measured number with a bound and ruin both yields.
     pub swept: u64,
     /// Deeds the kernel REFUSED, by receipt sequence. Kept rather than
-    /// discarded — a refusal the board never sees is the judge speaking
+    /// discarded — a refusal the board never sees is the gate speaking
     /// into a void.
     /// THE JUDGE'S REFUSALS — per-deed, from `chain_beat`.
     ///
@@ -698,18 +698,18 @@ pub struct Polity {
     /// BOTH carry `word_len: 2` while differing in tier, rows and cols.
     /// So a line promoting 3 → 4 on an unchanged digest hit the memo and
     /// was handed the level-3 solve, which the conductor then shipped as
-    /// a level-4 proof: the judge re-forged level 4, re-ran the program
+    /// a level-4 proof: the gate re-forged level 4, re-ran the program
     /// and got a different grid — `WorkRefused { OutputMismatch }`, a
-    /// mint the proposer emitted and the judge refused. The task IS the
+    /// mint the proposer emitted and the gate refused. The task IS the
     /// whole difficulty, so the key must be too.
     last_forge: Option<([u8; 32], Difficulty, Need, SolveRead)>,
     /// How many refusals the board has already been TOLD. The record
     /// above is permanent; this is only the narrator's place in it, so
     /// a refusal is announced once per process and kept forever.
     /// Workspace state, like `chained`: a RESUMED world restarts both
-    /// at 0 and re-judges its whole chronicle on the next beat, so a
+    /// at 0 and re-gates its whole chronicle on the next beat, so a
     /// pre-existing refusal is announced again in the new process. That
-    /// is honest — the judge met the deed again — and it is the same
+    /// is honest — the gate met the deed again — and it is the same
     /// re-verification `chained: 0` already performs.
     reported: usize,
 
@@ -1327,7 +1327,7 @@ impl Polity {
     ///
     /// The hunger steers the reach; it never steers what is accepted.
     /// The sector door still re-derives every proposal, so a starving
-    /// mind looking in a different order costs the judge nothing.
+    /// mind looking in a different order costs the gate nothing.
     fn hunger(&self) -> Need {
         let now = self.world.now();
         let receipts = self.world.chronicle().receipts();
@@ -1550,12 +1550,12 @@ impl Polity {
             Some((name, word, cert_hex, proof)) => {
                 // A1 — CLOSE THE PoUW LOOP. Cognition proved out; now it
                 // MINTS. The amount is `kernel::mint_bound` — the ruled
-                // ladder read from the same function the judge enforces,
+                // ladder read from the same function the gate enforces,
                 // never a number chosen here.
                 if let Some((work, difficulty)) = proof {
                     // THE MINT'S ONE ANCHOR (kernel VERSION 4). The
                     // amount is `kernel::mint_bound` — the ruled ladder
-                    // read from the same function the judge enforces,
+                    // read from the same function the gate enforces,
                     // never a number chosen here — and the proof rides
                     // the deed whole, so `verify_work` re-forges,
                     // re-applies and re-chains it forever.
@@ -1859,7 +1859,7 @@ impl Polity {
         // #36 KERNEL-OBSERVED PLAY: the beat chains. The committed
         // state extends this world's arbor at the world clock —
         // adopted once at first sight (the pre-chain founding stamped
-        // a named debt), extended every beat after, judged=0 stamped
+        // a named debt), extended every beat after, gated=0 stamped
         // (the hole visible, never hidden; the Phase 3 flip threads
         // the steps). A penned world skips the beat entirely, so its
         // arbor stalls with its pen (MESH-1b). Best-effort like the
@@ -1900,7 +1900,7 @@ impl Polity {
 
         // THE ADOPTION DOOR (#36): a pre-chain world enters ONCE, its
         // current state seated as the unjudged genesis — the debt named,
-        // never hidden. Everything after walks through the judge.
+        // never hidden. Everything after walks through the gate.
         if arbor.head("").is_none() {
             let bytes = codec::state_bytes(&self.world.committed());
             let coordinate = mesh::arbor::Coordinate {
@@ -1968,7 +1968,7 @@ impl Polity {
             .map(|_| ())
     }
 
-    /// DIRECTIVE 19 — every deed this world's judge REFUSED, by receipt
+    /// DIRECTIVE 19 — every deed this world's gate REFUSED, by receipt
     /// sequence, in the order it met them. The record is permanent and
     /// nothing prunes it: the chronicle keeps the deed, this keeps the
     /// verdict.
@@ -1976,7 +1976,7 @@ impl Polity {
     /// A refusal here does NOT mean the deed was undone. `world.rs`'s
     /// `replay` is still the live transition (the Phase 3 flip demotes
     /// it to proposer, `U_DIRECTIVES` §5), so a refused deed stands in
-    /// the chronicle with the judge on record against it. That gap is
+    /// the chronicle with the gate on record against it. That gap is
     /// the whole reason this must be visible rather than counted.
     pub fn refusals(&self) -> &[(u64, kernel::Refused)] {
         &self.refused

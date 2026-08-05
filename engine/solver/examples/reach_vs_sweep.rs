@@ -4,7 +4,7 @@
 //!
 //! Two numbers matter, not one. CONFIRMED is how often the answer was
 //! right. FALSE CLOSURES is how often a program closed the training
-//! pairs and got the held-out answer WRONG — which the judge cannot
+//! pairs and got the held-out answer WRONG — which the gate cannot
 //! detect and a corpus rate would therefore pay for. A proposer that
 //! confirms slightly fewer with far fewer false closures is the better
 //! citizen of this economy.

@@ -111,7 +111,7 @@ pub enum ActionRefused {
     MintWithoutStanding { line: String },
     /// 28_VOCABULARY §7 — no such vocabulary. Note there is no axis for
     /// STATIONS: minting an office would let a T0 seat manufacture the
-    /// seat that judges it, so offices change by amendment alone (§10).
+    /// seat that gates it, so offices change by amendment alone (§10).
     VocabularyAxisUnknown { axis: u8 },
     /// 28_VOCABULARY §4a — the binding does not TRADE: it must carry at
     /// least one benefit and at least one friction, every factor inside

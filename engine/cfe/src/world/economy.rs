@@ -14,7 +14,7 @@ impl World {
     /// MARKET-1 (BUILD_ORDER §3a): POST an offer — a receipted intent
     /// to give one resource for another at an exact-rational price
     /// (want/give — no absolute price exists, guardrail 6). No escrow:
-    /// the fill judges affordability when a crossing clears; an offer
+    /// the fill gates affordability when a crossing clears; an offer
     /// that outlived its bank refuses THEN, harming no one now. An
     /// unmatched offer rests.
     pub fn post_offer(
@@ -274,7 +274,7 @@ impl World {
     /// world: the chartering conservation law generalized (nothing
     /// minted, nothing lost). Both sides settle due demurrage at the
     /// touch (the SINK-1 law) before value moves; affordability is
-    /// judged on the post-decay bank; the compassion books post iff
+    /// gated on the post-decay bank; the compassion books post iff
     /// the counterparty stands in receipted, uncleared crisis at this
     /// stamp — a replay fact, never a judgment call. Collect scope;
     /// relief for the receiver re-checked at the landed law (02 §2.4).
@@ -420,7 +420,7 @@ impl World {
     /// draw opens a reciprocity window owed source → absorber; TRADE-1
     /// payments retire it oldest-first; the unpaid remainder lapses to
     /// the extraction book. The absorber settles due demurrage at this
-    /// touch; affordability judged on the post-decay sink, computed
+    /// touch; affordability gated on the post-decay sink, computed
     /// pure — a refusal orphans nothing. Collect scope.
     pub fn absorb_as(
         &mut self,

@@ -100,7 +100,7 @@ pub struct Shell {
 /// Every arm carries the numbers that decided it, so a refusal teaches
 /// the caller the law rather than merely denying them.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum ShapeVerdict {
+pub enum ShapeReading {
     /// The shape stands, with the two divisions that admitted it.
     Holds {
         longitude: ratio::DivisionProof,
@@ -119,31 +119,31 @@ pub enum ShapeVerdict {
     HueOffLadder { hue: u8, ladder: u8 },
 }
 
-impl ShapeVerdict {
+impl ShapeReading {
     pub fn holds(&self) -> bool {
-        matches!(self, ShapeVerdict::Holds { .. })
+        matches!(self, ShapeReading::Holds { .. })
     }
     /// The derivation, in words, for a caller or an operator.
     pub fn because(&self) -> String {
         match self {
-            ShapeVerdict::Holds { longitude, latitude, cells } => format!(
+            ShapeReading::Holds { longitude, latitude, cells } => format!(
                 "holds: {} cells. longitude — {}. latitude — {}",
                 cells,
                 longitude.because(),
                 latitude.because()
             ),
-            ShapeVerdict::LongitudeOffSlot(p) => format!("longitude fails: {}", p.because()),
-            ShapeVerdict::LatitudeOffSlot(p) => format!(
+            ShapeReading::LongitudeOffSlot(p) => format!("longitude fails: {}", p.because()),
+            ShapeReading::LatitudeOffSlot(p) => format!(
                 "latitude fails: {} (the polar span is a HALF turn, so a band arity must \
                  divide {} — not {})",
                 p.because(),
                 BAND_SLOTS,
                 TURN_SLOTS
             ),
-            ShapeVerdict::CellCountWrong { given, wanted } => {
+            ShapeReading::CellCountWrong { given, wanted } => {
                 format!("cell count fails: {given} given, {wanted} wanted")
             }
-            ShapeVerdict::HueOffLadder { hue, ladder } => {
+            ShapeReading::HueOffLadder { hue, ladder } => {
                 format!("hue {hue} stands off a ladder of {ladder}")
             }
         }
@@ -153,23 +153,23 @@ impl ShapeVerdict {
 impl Shell {
     /// **EXAMINE A SHAPE, PROVING THE VERDICT.** The law, stated once,
     /// with its reasons attached — `new` is this plus a constructor.
-    pub fn examine(bands: usize, slots: usize, cells: usize) -> ShapeVerdict {
+    pub fn examine(bands: usize, slots: usize, cells: usize) -> ShapeReading {
         let longitude = ratio::divide_ring(TURN_SLOTS, slots as i64);
         if !longitude.holds() {
-            return ShapeVerdict::LongitudeOffSlot(longitude);
+            return ShapeReading::LongitudeOffSlot(longitude);
         }
         // The polar span is a HALF turn, so a band boundary lands on a
         // slot of the halved ring. Same discreteness law, same reason:
         // a cell centre between teeth is not a place.
         let latitude = ratio::divide_ring(BAND_SLOTS, bands as i64);
         if !latitude.holds() {
-            return ShapeVerdict::LatitudeOffSlot(latitude);
+            return ShapeReading::LatitudeOffSlot(latitude);
         }
         let wanted = bands.saturating_mul(slots);
         if cells != wanted {
-            return ShapeVerdict::CellCountWrong { given: cells, wanted };
+            return ShapeReading::CellCountWrong { given: cells, wanted };
         }
-        ShapeVerdict::Holds { longitude, latitude, cells }
+        ShapeReading::Holds { longitude, latitude, cells }
     }
 
     /// THE ONE DOOR. Every admission carries the proof that admitted it.
@@ -185,7 +185,7 @@ impl Shell {
 
     /// The proof that admitted THIS shell — available after the fact, so
     /// a reader never has to re-derive why it stands.
-    pub fn shape_proof(&self) -> ShapeVerdict {
+    pub fn shape_proof(&self) -> ShapeReading {
         Shell::examine(self.bands, self.slots, self.cells.len())
     }
 

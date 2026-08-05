@@ -14,7 +14,7 @@ pub struct Grid {
 /// The lawful hue ladder: 0–9 inclusive. Wire law, not a preference —
 /// two operators in the sealed math index ten-slot tables by hue
 /// (`Op::Recolor`'s `[u8; 10]`, `objects::background`'s `[usize; 10]`),
-/// so a hue past the ladder is an out-of-bounds panic INSIDE the judge.
+/// so a hue past the ladder is an out-of-bounds panic INSIDE the gate.
 pub const HUES: u8 = 10;
 
 impl Grid {

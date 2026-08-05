@@ -176,7 +176,7 @@ fn the_vacuity_cannot_be_encoded_at_all() {
         VolDifficulty { rows: 0, ..proof.difficulty },
         VolDifficulty { cols: 0, ..proof.difficulty },
     ] {
-        assert!(!bend.lawful(), "a degenerate rung is not lawful");
+        assert!(!bend.well_formed(), "a degenerate rung is not lawful");
         let bent = VolumeProof { difficulty: bend, ..proof.clone() };
         let bytes = encode_volume_work(&bent).expect("the wire will carry the bytes");
         assert!(
@@ -191,10 +191,10 @@ fn the_vacuity_cannot_be_encoded_at_all() {
     }
 
     // The empty WORD stays lawful: a copy task is a task.
-    assert!(VolDifficulty { word_len: 0, ..proof.difficulty }.lawful());
+    assert!(VolDifficulty { word_len: 0, ..proof.difficulty }.well_formed());
 }
 
-/// The three schemas do not collide, and v3 is routed to its own judge.
+/// The three schemas do not collide, and v3 is routed to its own gate.
 #[test]
 fn v3_never_confuses_itself_with_the_other_shapes() {
     let proof = honest_proof(3, 2).or_else(|| honest_proof(5, 2)).expect("a fixture closes");

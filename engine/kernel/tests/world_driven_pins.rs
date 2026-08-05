@@ -7,12 +7,12 @@
 //! `scope_of` is `None` (containment carries no requirement — a
 //! world-driven consequence is not attributed to a hand) and
 //! conservation's non-constraint is CORRECT (ratified against the
-//! replay reading). They are judged by I3 exactness alone. The
+//! replay reading). They are gated by I3 exactness alone. The
 //! value-moving members of these families (FamineStruck −drawn,
 //! ForwardSlashed +collateral, CouncilClosed +banked) stay held out
 //! for the I1 value slice; the FOLD TRIO (Confluent/EraAnnexed/
 //! EraFolded) stays held out for U2d's I6 gate — a fold must be
-//! orbit-lock-judged, never admitted on exactness alone.
+//! orbit-lock-gated, never admitted on exactness alone.
 
 use cfe::dop::{ClosureEvent, Resource};
 use cfe::ratio::ratio;

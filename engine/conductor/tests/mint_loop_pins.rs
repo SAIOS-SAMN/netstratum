@@ -9,7 +9,7 @@
 //! for the ruling that ends it:**
 //!
 //! - A1 (2026-08-01) closed the loop and this pin passed.
-//! - It passed VACUOUSLY. The proposer never asked the judge, and
+//! - It passed VACUOUSLY. The proposer never asked the gate, and
 //!   `replay` — still the live transition — banked mints that
 //!   `kernel::admits` had refused as `MintWithoutStanding`.
 //! - 2026-08-04: the proposer was taught to ask first, and the board
@@ -102,7 +102,7 @@ fn a_solving_line_mints_against_its_own_verified_work() {
     );
 
     // THE JUDGE AGREES. The mints above are not merely unblocked, they
-    // are LAWFUL under the version that judged them — the removal
+    // are LAWFUL under the version that gated them — the removal
     // loosened the law, and this pin is where that claim is checked
     // rather than assumed.
     let refused: usize = worlds.iter().map(|p| p.refusals().len()).sum();

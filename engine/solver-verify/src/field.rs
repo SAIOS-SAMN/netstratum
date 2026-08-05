@@ -31,7 +31,7 @@
 //! **The hue law is the carrier's, as it was for `Grid`.** A hue past
 //! the ladder is not clamped — it is not a field. Two operators index
 //! ten-slot tables by hue, and out-of-range there is an out-of-bounds
-//! panic inside the judge.
+//! panic inside the gate.
 
 /// The lawful hue ladder: 0–9 inclusive. Wire law, not a preference.
 pub const HUES: u8 = 10;

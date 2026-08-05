@@ -16,13 +16,13 @@
 //!
 //! **Why the split is load-bearing and not tidiness.** A rate never
 //! attains its bound at any single step, so a window can never be an
-//! invariant — hoisting this reading into the judge would make the
+//! invariant — hoisting this reading into the gate would make the
 //! kernel history-dependent, which it is not and must not become. The
 //! kernel is pure over `(prior, next, step)`; a window is a story about
 //! many steps and belongs to whoever reads them.
 //!
 //! **THIS REPORTS; IT NEVER GATES.** Rule 5. Delete this module and the
-//! judge is unchanged — `kernel::revocation_law` reaches its own verdict
+//! gate is unchanged — `kernel::revocation_law` reaches its own verdict
 //! from its own read, per step. What is added here is only that an
 //! operator can SEE a window in which deeds were emitted while nothing
 //! grew.
@@ -70,7 +70,7 @@ impl Claim {
     /// Did the window's claim on capacity survive?
     ///
     /// A READING, never a gate — no caller may use this to refuse a
-    /// deed. The judge refuses per step, from its own read.
+    /// deed. The gate refuses per step, from its own read.
     pub fn stood(&self) -> bool {
         matches!(self, Claim::Stood | Claim::Quiet)
     }

@@ -14,13 +14,13 @@
 //!
 //! **THE FIX COSTS NOTHING ON THE WIRE.** A receipt already carries
 //! `stamp` (`vrp.rs:100`), already monotone and already inside the
-//! frame hash. So the ruleset a receipt is judged under is DERIVED
+//! frame hash. So the ruleset a receipt is gated under is DERIVED
 //! from what it already holds rather than stored beside it:
 //!
 //! ```text
 //! the epoch is a function of the stamp
 //! every sealed rule takes the stamp it is being evaluated AT
-//! a receipt is judged under the ruleset in force when it was written
+//! a receipt is gated under the ruleset in force when it was written
 //! ```
 //!
 //! No new field, no schema bump, no rehashing, and no historical world

@@ -7,7 +7,7 @@
 //! what `LAW 8` and `constitution_lint` exist to say. This is the
 //! mechanical form.
 //!
-//! **THE INVARIANT: the lens is never UPSTREAM of the judge.**
+//! **THE INVARIANT: the lens is never UPSTREAM of the gate.**
 //!
 //! ```text
 //!     W \ L  ≡  W          remove the lens, the world is unchanged
@@ -30,7 +30,7 @@ use std::path::{Path, PathBuf};
 /// The lane's crates — what must stay deletable.
 const LENS_CRATES: [&str; 2] = ["lens", "scribe"];
 
-/// THE SEALED CORE — the judge, the math it judges with, and everything
+/// THE SEALED CORE — the gate, the math it gates with, and everything
 /// they stand on. No crate here may depend on a lens crate in any
 /// capacity, dev-dependencies included: a law test that renders is a
 /// law test that cannot run once the lens is gone.
@@ -250,7 +250,7 @@ fn no_lens_type_owns_a_copy_of_world_state() {
     );
 }
 
-/// **THE SEALED CORE IS LENS-FREE.** The judge and the sealed math may
+/// **THE SEALED CORE IS LENS-FREE.** The gate and the sealed math may
 /// not reach for a reading, in any dependency table.
 #[test]
 fn no_sealed_crate_depends_on_a_lens() {

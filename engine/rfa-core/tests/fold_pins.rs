@@ -17,7 +17,7 @@
 
 use cfe::ratio::{ratio, Ratio};
 use rfa_core::{
-    f_fold_star, judged_fold, orbit_lock, verify_orbit_witness, Delta, FoldVerdict, Operator,
+    f_fold_star, gated_fold, orbit_lock, verify_orbit_witness, Delta, FoldReading, Operator,
     OrbitWitness, TorsionCause,
 };
 
@@ -118,8 +118,8 @@ fn the_polarity_is_pinned_against_inversion() {
     let ops = vec![identity_op(3), frame(3, &[1, 2, 0], 9)];
 
     assert_eq!(
-        judged_fold(&coherent, &incoherent, &ops, None),
-        FoldVerdict::TorsionVeto(TorsionCause::SignaturesDiffer),
+        gated_fold(&coherent, &incoherent, &ops, None),
+        FoldReading::TorsionVeto(TorsionCause::SignaturesDiffer),
         "POLARITY: a proven genuine difference is NEVER folded away"
     );
 
@@ -128,13 +128,13 @@ fn the_polarity_is_pinned_against_inversion() {
     // witness — and with one, it folds.
     assert_eq!(
         f_fold_star(&coherent, &coherent, &ops, None),
-        FoldVerdict::TorsionVeto(TorsionCause::WitnessAbsent),
+        FoldReading::TorsionVeto(TorsionCause::WitnessAbsent),
         "POLARITY: no witness, no fold — the default is veto"
     );
     let identity_witness = OrbitWitness { operator_id: 0, step: 1 };
     assert_eq!(
         f_fold_star(&coherent, &coherent, &ops, Some(&identity_witness)),
-        FoldVerdict::GaugeFold(identity_witness),
+        FoldReading::GaugeFold(identity_witness),
         "a state IS gauge-identical to itself, and the identity proves it"
     );
 }
@@ -147,12 +147,12 @@ fn the_default_is_veto_not_fold() {
     let ops = vec![identity_op(3)];
     assert_eq!(
         f_fold_star(&a, &a, &ops, None),
-        FoldVerdict::TorsionVeto(TorsionCause::WitnessAbsent)
+        FoldReading::TorsionVeto(TorsionCause::WitnessAbsent)
     );
     // An empty operator list cannot prove anything either.
     assert_eq!(
         f_fold_star(&a, &a, &[], None),
-        FoldVerdict::TorsionVeto(TorsionCause::WitnessAbsent)
+        FoldReading::TorsionVeto(TorsionCause::WitnessAbsent)
     );
 }
 
@@ -161,7 +161,7 @@ fn the_default_is_veto_not_fold() {
 #[test]
 fn a_valid_conjugator_witness_permits_the_fold() {
     // The prover searches, finds the frame that carries `a` onto `b`,
-    // and presents it. The judge re-walks that one path and folds.
+    // and presents it. The gate re-walks that one path and folds.
     let a = anchor_3();
     let rotate = frame(3, &[1, 2, 0], 9); // even permutation, det +1
     let b = rotate.apply(&a).expect("the frame applies");
@@ -172,7 +172,7 @@ fn a_valid_conjugator_witness_permits_the_fold() {
     assert!(verify_orbit_witness(&a, &b, &ops, &witness), "the judge re-walks it");
     assert_eq!(
         f_fold_star(&a, &b, &ops, Some(&witness)),
-        FoldVerdict::GaugeFold(witness),
+        FoldReading::GaugeFold(witness),
         "a proven frame change IS gauge — the fold is lawful"
     );
 }
@@ -200,7 +200,7 @@ fn the_witness_lands_on_the_tensor_never_on_the_signature() {
     );
     assert_eq!(
         f_fold_star(&a, &b, &ops, Some(&identity_claim)),
-        FoldVerdict::TorsionVeto(TorsionCause::WitnessInvalid),
+        FoldReading::TorsionVeto(TorsionCause::WitnessInvalid),
         "a signature-preserving non-conjugator proves nothing"
     );
 
@@ -224,7 +224,7 @@ fn a_forged_witness_refuses() {
         assert!(!verify_orbit_witness(&a, &b, &ops, &forged), "forged: {forged:?}");
         assert_eq!(
             f_fold_star(&a, &b, &ops, Some(&forged)),
-            FoldVerdict::TorsionVeto(TorsionCause::WitnessInvalid)
+            FoldReading::TorsionVeto(TorsionCause::WitnessInvalid)
         );
     }
 }
@@ -270,8 +270,8 @@ fn the_angle_free_witness() {
     let a = anchor_3();
     let b = incoherent_3();
     let ops = vec![identity_op(3), frame(3, &[1, 2, 0], 9)];
-    let base = judged_fold(&a, &b, &ops, None);
-    assert_eq!(base, FoldVerdict::TorsionVeto(TorsionCause::SignaturesDiffer));
+    let base = gated_fold(&a, &b, &ops, None);
+    assert_eq!(base, FoldReading::TorsionVeto(TorsionCause::SignaturesDiffer));
 
     // Every EVEN 3-entity permutation frame: the verdict holds.
     for (n, perm) in [[0, 1, 2], [1, 2, 0], [2, 0, 1]].into_iter().enumerate() {
@@ -279,7 +279,7 @@ fn the_angle_free_witness() {
         let fa = f.apply(&a).expect("the frame applies");
         let fb = f.apply(&b).expect("the frame applies");
         assert_eq!(
-            judged_fold(&fa, &fb, &ops, None),
+            gated_fold(&fa, &fb, &ops, None),
             base,
             "the verdict cannot depend on the frame of approach: {perm:?}"
         );
@@ -289,23 +289,23 @@ fn the_angle_free_witness() {
     let potentials = [q(0, 1), q(5, 1), q(1, 3)];
     let shifted_a = gauge_shifted(&a, &potentials);
     let shifted_b = gauge_shifted(&b, &potentials);
-    assert_eq!(judged_fold(&shifted_a, &b, &ops, None), base);
-    assert_eq!(judged_fold(&a, &shifted_b, &ops, None), base);
-    assert_eq!(judged_fold(&shifted_a, &shifted_b, &ops, None), base);
+    assert_eq!(gated_fold(&shifted_a, &b, &ops, None), base);
+    assert_eq!(gated_fold(&a, &shifted_b, &ops, None), base);
+    assert_eq!(gated_fold(&shifted_a, &shifted_b, &ops, None), base);
 }
 
 #[test]
 fn a_pure_gauge_pair_agrees_on_signature() {
     // Two states differing only by a coboundary reduce to the same
-    // representative, so `judged_fold` reaches the witness branch
+    // representative, so `gated_fold` reaches the witness branch
     // rather than the exact-proof branch. Gauge is never mistaken for
     // structure.
     let base = incoherent_3();
     let shifted = gauge_shifted(&base, &[q(0, 1), q(5, 1), q(1, 3)]);
     let ops = vec![identity_op(3)];
     assert_eq!(
-        judged_fold(&base, &shifted, &ops, None),
-        FoldVerdict::TorsionVeto(TorsionCause::WitnessAbsent),
+        gated_fold(&base, &shifted, &ops, None),
+        FoldReading::TorsionVeto(TorsionCause::WitnessAbsent),
         "signatures agree (it is only gauge) — what is missing is the proof, not the sameness"
     );
 }

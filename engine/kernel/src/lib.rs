@@ -1,6 +1,6 @@
 //! THE KERNEL — the one validated update function (CHARTER §11 rule 3).
 //!
-//! `admits(prior, next, step)` judges whether ONE step lawfully carries
+//! `admits(prior, next, step)` gates whether ONE step lawfully carries
 //! the universe from `prior` to `next`. It is:
 //!
 //! - **pure** — same inputs, same verdict, forever;
@@ -10,7 +10,7 @@
 //! - **encoding-blind** — it never produces or reads bytes.
 //!   Serialization is the codec's monopoly (the arbor), so the kernel
 //!   and the chain can never disagree about bytes: only one component
-//!   ever produces them. The kernel judges MEANING; the codec fixes
+//!   ever produces them. The kernel gates MEANING; the codec fixes
 //!   FORM; the two never overlap.
 //!
 //! Conservation, containment, and exactness are INVARIANTS inside this
@@ -20,8 +20,8 @@
 //! diverge.
 //!
 //! **Versioned like the charter.** [`VERSION`] is bumped only by
-//! amendment. Every chain commitment binds the version that judged the
-//! step, so old history verifies under the judge it was cut with — no
+//! amendment. Every chain commitment binds the version that gated the
+//! step, so old history verifies under the gate it was cut with — no
 //! future change reinterprets the past. The kernel never reads the
 //! commitment; the arbor binds `VERSION` into it.
 //!
@@ -46,20 +46,20 @@ use solver_verify::{verify_work, WorkBroken};
 ///
 /// VERSION 2 — RULING BOX 1 (operator, 2026-08-01): `mint_bound`
 /// unsealed, the emission rate `f` ladder-pinned against the #17
-/// calibration (evidence commit 5898351). Version-1 history judged
+/// calibration (evidence commit 5898351). Version-1 history gated
 /// every positive discovery mint refused; it verifies forever under
 /// its own law.
 ///
 /// VERSION 3 — THE CAPACITY LAW (operator ruling 2026-08-01), now
 /// STRUCK. It refused a `DiscoveryMinted` unless the prior state read
 /// `Vacuity::Entangled` — structure AND flow, both standing. Kept in
-/// this record because version-3 history is judged by version-3 law
+/// this record because version-3 history is gated by version-3 law
 /// forever; the note below says why the law did not survive.
 ///
 /// **The bump was announced and never landed.** The commit that
 /// introduced the law was titled *"VERSION 3 now means something"* and
 /// left the constant at 2, so the chain would have bound version 2 to
-/// steps that version 2 would have judged differently — the one thing
+/// steps that version 2 would have gated differently — the one thing
 /// this constant exists to prevent. Version-2 history verifies forever
 /// under version 2's law.
 /// VERSION 5 — TWO AMENDMENTS, LANDED TOGETHER AT THE MERGE.
@@ -67,7 +67,7 @@ use solver_verify::{verify_work, WorkBroken};
 /// **VERSION 4 — THE CAPACITY LAW IS REMOVED** (operator ruling
 /// 2026-08-04, harness lane). BREAKING in the LOOSENING direction:
 /// every state version 3 refused as `MintWithoutStanding` or
-/// `MintWithoutOwnStanding` is now judged on the mint's real anchor
+/// `MintWithoutOwnStanding` is now gated on the mint's real anchor
 /// alone. *Identity is pegged to entity, and identity gets recycled
 /// without bonds* — the capacity law read STANDING off relational
 /// structure, so it demanded of a world exactly what a recycled
@@ -84,10 +84,10 @@ use solver_verify::{verify_work, WorkBroken};
 /// on separate branches for separate reasons; 4 was skipped on main so
 /// the two could not collide, and the merge lands both rather than
 /// letting one bump overwrite the other. A chain cut under 3 verifies
-/// forever under the judge that cut it.
+/// forever under the gate that cut it.
 pub const KERNEL_VERSION: Version = Version { major: 0, minor: 5, patch: 0 };
 
-/// The judge's version, as it rides the wire.
+/// The gate's version, as it rides the wire.
 ///
 /// **`x.y.z`, and `major = 0` because this is a prototype** (operator
 /// ruling 2026-08-04: *knock version down to x.x.x — we are still
@@ -98,8 +98,8 @@ pub const KERNEL_VERSION: Version = Version { major: 0, minor: 5, patch: 0 };
 /// **What each field means, so the next bump is not a judgement call:**
 ///
 /// ```text
-/// major  reserved for the first stable judge. Still 0.
-/// minor  a LAW change — the judge admits or refuses something it did
+/// major  reserved for the first stable gate. Still 0.
+/// minor  a LAW change — the gate admits or refuses something it did
 ///        not before. Every amendment so far is one of these.
 /// patch  a change that cannot alter any verdict: a refusal's wording,
 ///        a split of one rule into named parts, a faster read.
@@ -124,7 +124,7 @@ impl Version {
     /// so this is not a wire amendment. Chains cut under the linear
     /// versions 1–5 carry those small integers and still compare BELOW
     /// every packed version, which is true and is the ordering we want:
-    /// they were cut by an earlier judge.
+    /// they were cut by an earlier gate.
     pub const fn code(self) -> u64 {
         ((self.major as u64) << 32) | ((self.minor as u64) << 16) | self.patch as u64
     }
@@ -136,13 +136,13 @@ impl std::fmt::Display for Version {
     }
 }
 
-/// The packed judge version bound into every commitment.
+/// The packed gate version bound into every commitment.
 pub const VERSION: u64 = KERNEL_VERSION.code();
 
 /// One proposed transition: the deed that CLAIMS to carry `prior` to
 /// `next`. `event` is what closed, `actor` is who under NS-6
 /// containment, `stamp` is the world-clock value it is stamped with.
-/// The kernel judges whether the claim is lawful; it never applies it.
+/// The kernel gates whether the claim is lawful; it never applies it.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Step {
     pub event: ClosureEvent,
@@ -191,7 +191,7 @@ pub enum Refused {
     /// non-negative decay.
     DecayNotPositive { resource: Resource, amount: Box<Ratio> },
     /// THE ELEMENT LAW (operator ruling 2026-08-01): the element
-    /// ledger is judged with strict symmetry to the banked ledger. An
+    /// ledger is gated with strict symmetry to the banked ledger. An
     /// element mint carried a negative amount — value enters the
     /// element ledger only by a lawful, non-negative assay.
     ElementNotPositive { element: [u8; 32], amount: Box<Ratio> },
@@ -245,14 +245,14 @@ pub enum Refused {
     /// defining canonicity itself (the equations are shared, never copied
     /// — KERNEL CHARTER §0b).
     NotCanonical,
-    /// THE SEALED DEFAULT — the judge refuses what no invariant covers.
-    /// This event has no landed rule; a deed the kernel cannot judge does
+    /// THE SEALED DEFAULT — the gate refuses what no invariant covers.
+    /// This event has no landed rule; a deed the kernel cannot gate does
     /// NOT enter. Coverage grows by amendment: each landing moves an event
-    /// from this default-refuse arm to an explicit judged arm, and the
+    /// from this default-refuse arm to an explicit gated arm, and the
     /// kernel wires as the live gate (Phase 3) only when `Unjudged` is
     /// unreachable — every event covered. **SEAL A is a READER's law,
-    /// never the judge's:** readers skip unknown TAGS so old software
-    /// survives new content; a judge that skips unknown DEEDS is a hole
+    /// never the gate's:** readers skip unknown TAGS so old software
+    /// survives new content; a gate that skips unknown DEEDS is a hole
     /// exactly the size of every future tag. Two laws, one word "unknown"
     /// — conflating them silently rebuilds default-admit.
     Unjudged,
@@ -301,8 +301,8 @@ pub fn admits(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
     union(step)?;
 
     creation(step)?;
-    // D4 AFTER `creation`, deliberately. `creation` judges the DEED —
-    // its proof and its bound; D4 judges the deed's EFFECT on the
+    // D4 AFTER `creation`, deliberately. `creation` gates the DEED —
+    // its proof and its bound; D4 gates the deed's EFFECT on the
     // world. Ordering effect after validity means a malformed payload
     // is named `WorkRefused`, not misreported as a capacity failure,
     // and the work law stays reachable by every fixture that tests it.
@@ -347,7 +347,7 @@ pub fn admits(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
 /// refuses* (`18` §2f consequence 2 — no hidden work). The OVER-A-
 /// WINDOW half (`deeds(w) > 0 ∧ ΔD(w) = 0`) is a LENS reading and
 /// gates nothing; it lives in `lens::revocation` and must never be
-/// hoisted into the judge. A rate never attains its bound at any single
+/// hoisted into the gate. A rate never attains its bound at any single
 /// step, so a window can never be an invariant.
 ///
 /// **THE PHANTOM-RANK GATE, now due.** `EntangledRead::rank_is_defined`
@@ -400,7 +400,7 @@ fn d4a_resolution(before: &bridge::EntangledRead, after: &bridge::EntangledRead)
     }
 }
 
-/// What D4b found: whether there is a capacity claim here to judge.
+/// What D4b found: whether there is a capacity claim here to gate.
 enum Claim {
     /// Nothing circulates. No claim was made, so none can be vacated.
     None,
@@ -502,7 +502,7 @@ fn union(step: &Step) -> Result<(), Refused> {
 }
 
 /// INVARIANT — element conservation (THE ELEMENT LAW, operator ruling
-/// 2026-08-01). The element ledger is judged with strict symmetry to
+/// 2026-08-01). The element ledger is gated with strict symmetry to
 /// the banked ledger: an assay mints `richness · elapsed` into a
 /// vein's element — non-negative by declaration, and bounded by the
 /// PRIOR vein's `richness` and `last_assay` (both already committed
@@ -647,12 +647,12 @@ fn gauge_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
     Ok(())
 }
 
-/// The landed coverage of the invariant set. An event is judged (not
+/// The landed coverage of the invariant set. An event is gated (not
 /// refused `Unjudged`) only when EVERY invariant that should govern it has
 /// landed — the completeness rule, so partial coverage never admits. The
 /// universal trio I1/I2/I3 is now landed, so events whose full set is
 /// {containment, exactness} — the pure authority deeds, moving no value —
-/// are fully judged. Value-moving deeds beyond the transfer wait on I1's
+/// are fully gated. Value-moving deeds beyond the transfer wait on I1's
 /// coverage extension; minting/decaying deeds wait on I4/I5. The set grows
 /// only by witnessed amendment (§11 clause 2); the kernel wires as the live
 /// gate (Phase 3) when this predicate is total (every event covered).
@@ -726,7 +726,7 @@ fn covered(event: &ClosureEvent) -> bool {
         // W-C / W-D slice — the BANKED-NEUTRAL world-driven and mesh
         // deeds. Their `world.rs::replay` arms set a flag, a list, or
         // are no-ops (no bank); `scope_of` is None (a tick's own
-        // consequence carries no actor scope). Judged by I3 exactness,
+        // consequence carries no actor scope). Gated by I3 exactness,
         // conservation and containment vacuous — ratified against the
         // replay reading in `world_driven_pins.rs`. HELD OUT: the
         // value-movers of these families (FamineStruck −drawn,
@@ -742,7 +742,7 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::RouteLapsed { .. }
         // THE VALUE LAW WAVE (operator directive 2026-07-31): the
         // value-moving deeds under TOTAL conservation + THE SIGN LAW,
-        // deltas declared per-resource in `lawful_deltas` (the sealed
+        // deltas declared per-resource in `admitted_deltas` (the sealed
         // rules called, stateful reads from prior). Witnessed in
         // `value_pins.rs`. Tier 1 (single-resource, sign-guarded),
         // Tier 2 (escrow moves under THE ESCROW LAW — conservation reads
@@ -756,7 +756,7 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::ColonyFounded { .. } | E::ColonyCharted { .. } | E::ZoneBuilt { .. }
         | E::ZoneRazed { .. }
         // THE ELEMENT LAW (operator ruling 2026-08-01): the assay mints
-        // into the element ledger, judged with strict symmetry to the
+        // into the element ledger, gated with strict symmetry to the
         // banked ledger — sign-guarded, bounded by the prior vein's
         // richness × elapsed, and zero-invariant for every other deed.
         // Witnessed in `element_pins.rs`.
@@ -766,7 +766,7 @@ fn covered(event: &ClosureEvent) -> bool {
         // star (15 §4). {I2 containment (Build), I3 exactness} complete
         // it; it moves no bank, no element, no key (all three
         // conservation laws hold vacuously). With this, `covered()` is
-        // TOTAL — every one of the 64 deeds is judged; `Unjudged` is
+        // TOTAL — every one of the 64 deeds is gated; `Unjudged` is
         // unreachable via any current deed (the Phase 3 precondition,
         // witnessed in `taxon_pins.rs`). The sealed default stays as
         // defense for FUTURE enum additions (refuse-unknown).
@@ -811,7 +811,7 @@ fn covered(event: &ClosureEvent) -> bool {
 /// the near leg's exact inverse) is the cross-node opposition (KERNEL
 /// CHARTER §5a); the kernel enforces the LOCAL half.
 fn conservation(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Refused> {
-    let deltas = lawful_deltas(prior, &step.event)?;
+    let deltas = admitted_deltas(prior, &step.event)?;
     let mut resources: Vec<Resource> = Vec::new();
     for (resource, _) in &deltas {
         if !resources.contains(resource) {
@@ -864,7 +864,7 @@ fn conservation(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
 /// costs/refunds — CHARTER §0b). Stateful declarations (the council's
 /// resource, the razed zone's kind) read PRIOR state, never the event.
 /// An event with no arm declares nothing: every bank must hold still.
-fn lawful_deltas(
+fn admitted_deltas(
     prior: &Committed,
     event: &ClosureEvent,
 ) -> Result<Vec<(Resource, Ratio)>, Refused> {
@@ -1097,11 +1097,11 @@ fn creation(step: &Step) -> Result<(), Refused> {
 /// **PRICED ON THE RUNG, NOT THE SHAPE** (operator ruling 2026-08-04:
 /// *`Grid` should fall out, because we aren't building a matrix*). This
 /// took `&Difficulty` and matched the whole struct — so `rows` and
-/// `cols`, the dimensions of an ARC grid, were part of the judge's
+/// `cols`, the dimensions of an ARC grid, were part of the gate's
 /// price lookup. THE MOTION clause 5 forbids exactly that: *ARC is a
 /// TYPE of work, not the only type.* The exact-match defence is
 /// unchanged and now lives in `Difficulty::rung`, which is where the
-/// shape belongs; the judge is handed a POSITION. One pricing path now
+/// shape belongs; the gate is handed a POSITION. One pricing path now
 /// serves every work class, planar and volumetric alike, instead of
 /// each new class needing its own.
 /// Work-shapes v1: planar forge tasks only (structural — `verify_work`
@@ -1139,7 +1139,7 @@ fn decay(prior: &Committed, step: &Step) -> Result<(), Refused> {
             }
             // I5's bound (U1f): THE SEALED DEMURRAGE RULE, called
             // never copied (CHARTER §0b) — one computation, two
-            // judges. `elapsed` reads the prior orb's `last_touch`,
+            // gates. `elapsed` reads the prior orb's `last_touch`,
             // already committed on the orb wire (tag 28); an orb the
             // rule owes nothing (no leak, no bank, no time) bounds
             // at zero, so only the zero decay is lawful there.
@@ -1152,17 +1152,17 @@ fn decay(prior: &Committed, step: &Step) -> Result<(), Refused> {
                         orb,
                         prior.star,
                         step.stamp,
-                        // RULESET EPOCHS (`21_KERNEL_PARAMETERS` §11): the judge
+                        // RULESET EPOCHS (`21_KERNEL_PARAMETERS` §11): the gate
                         // selects the rule by the stamp the DEED carries,
                         // not by the rule standing today. A receipt
-                        // written under EPOCH 0 is judged by EPOCH 0
+                        // written under EPOCH 0 is gated by EPOCH 0
                         // forever, which is what stops `replay` drifting
                         // from the live path when a sealed rule moves.
                         &cfe::world::ease_of(&prior.techs, *orb_id, step.stamp),
-                        // P2: the judge reads standing supply from the
+                        // P2: the gate reads standing supply from the
                         // SAME sealed function the proposer used, on
                         // `prior`'s own orbs — one computation, two
-                        // judges (CHARTER §0b). A rate the kernel
+                        // gates (CHARTER §0b). A rate the kernel
                         // accepted without re-deriving would be a number
                         // a node could lie about, with the mint directly
                         // downstream.
@@ -1192,7 +1192,7 @@ fn decay(prior: &Committed, step: &Step) -> Result<(), Refused> {
 /// sealed DECLARATION of that law plus defense-in-depth over the value
 /// ledgers (the banked resources and elements most likely to carry a
 /// decoded value). It CALLS the sealed `ratio::is_canonical` (KERNEL
-/// CHARTER §0b: the equation is shared, never reimplemented in the judge).
+/// CHARTER §0b: the equation is shared, never reimplemented in the gate).
 fn exactness(next: &Committed) -> Result<(), Refused> {
     for orb in &next.orbs {
         let banked = orb.banked.iter().map(|(_, amount)| amount);
@@ -1448,8 +1448,8 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
 /// question: what does this payload earn?
 ///
 /// This is the one organ that may read a work payload, and it does the
-/// same two things the judge does — `verify_work` then `mint_bound` —
-/// so proposer and judge cannot disagree about what a proof is worth
+/// same two things the gate does — `verify_work` then `mint_bound` —
+/// so proposer and gate cannot disagree about what a proof is worth
 /// (CHARTER §0b, call-not-copy).
 ///
 /// It closes the live gate WITHOUT breaking the opaque-payload law:
@@ -1462,11 +1462,11 @@ impl cfe::world::MintWarrant for SealedWarrant {
         Some(mint_bound(difficulty.rung()))
     }
 
-    /// THE ESCROW CHECK, answered by the judge itself — `admits` is the
+    /// THE ESCROW CHECK, answered by the gate itself — `admits` is the
     /// same function the door runs, not a copy of its reasoning
     /// (CHARTER §0b, call-not-copy). So a deed the emitter settles is
-    /// one the judge has already accepted on the identical inputs, and
-    /// proposer/judge drift on the mint path is not caught late — it is
+    /// one the gate has already accepted on the identical inputs, and
+    /// proposer/gate drift on the mint path is not caught late — it is
     /// unreachable.
     fn admits(
         &self,

@@ -3,7 +3,7 @@
 //! transition emits its EXPLICIT structural delta — the declared key
 //! move — and nothing else; no state jump is special-cased).
 //!
-//! The kernel half judges the LOCAL transition: the deed's only
+//! The kernel half gates the LOCAL transition: the deed's only
 //! lawful effect on the gauge vector is exactly what it declares
 //! (declaration == effect, the banked law's shape applied to the
 //! key), with banks held still by total conservation. The PAIR half

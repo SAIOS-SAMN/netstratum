@@ -195,7 +195,7 @@ fn opposed_obligations_net_rather_than_double_count() {
 
 #[test]
 fn obligations_to_unknown_or_self_are_skipped_never_panic() {
-    // Totality: the projection is pure and total like the judge it
+    // Totality: the projection is pure and total like the gate it
     // serves. A bond naming an orb this book does not hold relates
     // nothing here; a self-bond would hit the zero diagonal, which
     // `set_antisym` refuses — so it must never reach it.
@@ -526,7 +526,7 @@ fn a_total_fold_is_lawful_and_carries_nothing() {
     let archived = vec![1, 2, 3];
     let verdict = fold_guard(&prior, &successor, &archived);
     assert_eq!(verdict, FoldGuard::Total, "a whole-era fold carries nothing");
-    assert!(verdict.is_lawful());
+    assert!(verdict.is_admitted());
     assert_eq!(
         read_entangled(&successor).degree(),
         Degree::GROUND,
@@ -549,11 +549,11 @@ fn a_fold_that_drops_standing_without_account_refuses() {
         FoldGuard::StandingDroppedWithoutAccount { orbs: 1 },
         "an unarchived disappearance is unaccounted"
     );
-    assert!(!verdict.is_lawful());
+    assert!(!verdict.is_admitted());
 
     // Archive it and the same fold is lawful — the orb left into the
     // record rather than out of existence.
-    assert!(fold_guard(&prior, &successor, &[3]).is_lawful(), "sealed is accounted");
+    assert!(fold_guard(&prior, &successor, &[3]).is_admitted(), "sealed is accounted");
 }
 
 #[test]
@@ -578,7 +578,7 @@ fn a_carry_into_fewer_tones_refuses() {
         FoldGuard::RoomBelowOccupancy { carried_rank, successor_degree: 1 },
         "carried structure landing in fewer tones than it occupies must refuse"
     );
-    assert!(!verdict.is_lawful());
+    assert!(!verdict.is_admitted());
 }
 
 #[test]
@@ -593,7 +593,7 @@ fn a_carry_that_keeps_its_tones_admits() {
 
     let verdict = fold_guard(&prior, &successor, &[]);
     assert_eq!(verdict, FoldGuard::CarriedWithinFloor);
-    assert!(verdict.is_lawful(), "room carried with the structure it holds");
+    assert!(verdict.is_admitted(), "room carried with the structure it holds");
 }
 
 #[test]

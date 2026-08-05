@@ -43,10 +43,10 @@ pub use capacity::{
 pub use delta::{coherence_functional, for_each_residual, magnitude, Delta};
 pub use fiber::{loop_holonomy, plaquette_curvature, MatrixFiber2x2};
 pub use fold::{
-    f_fold_star, judged_fold, orbit_lock, verify_orbit_witness, FoldVerdict, Operator,
+    f_fold_star, gated_fold, orbit_lock, verify_orbit_witness, FoldReading, Operator,
     OrbitWitness, RatMatrix, TorsionCause,
 };
-pub use gates::{validate_step, GateVerdict, StepBound};
+pub use gates::{validate_step, GateReading, StepBound};
 // THE FOUR-ROW CLASSIFICATION IS STRUCK (operator ruling 2026-08-04):
 // `Vacuity` and `dual_pole` are gone with the capacity law that was
 // their only gate. The BOUNDARY FORM stays — the divergence is a

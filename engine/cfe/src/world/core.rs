@@ -206,11 +206,11 @@ impl World {
     /// economy never heard of it: cognition proved out and minted
     /// nothing.
     ///
-    /// The world PROPOSES; it does not judge. `work` rides WHOLE as the
+    /// The world PROPOSES; it does not gate. `work` rides WHOLE as the
     /// opaque payload (THE OPAQUE-PAYLOAD LAW — cfe never parses it),
     /// and the kernel re-runs `verify_work` at the door plus the ruled
     /// bound `f(difficulty)`. A caller computes its amount from
-    /// `kernel::mint_bound` so proposer and judge read ONE function.
+    /// `kernel::mint_bound` so proposer and gate read ONE function.
     ///
     /// Collect-scoped, matching `scope_of(DiscoveryMinted)`.
     pub fn mint_discovery_as(
@@ -238,7 +238,7 @@ impl World {
         // warrant and asks what they earn. A caller with no verifier
         // cannot mint at all, and a caller with one cannot mint past
         // what the work bounds — checked BEFORE `close`, so a refused
-        // mint leaves no receipt. Previously the judge caught this
+        // mint leaves no receipt. Previously the gate caught this
         // afterwards, by which point the chronicle held it and `replay`
         // granted the value.
         let bound = warrant.earns(&work).ok_or(ActionRefused::WorkRefused)?;
@@ -249,12 +249,12 @@ impl World {
             });
         }
         // THE ESCROW. The deed is built, the state it WOULD produce is
-        // built, and the judge is asked — all before anything is
+        // built, and the gate is asked — all before anything is
         // closed. `earns` above priced the work; this asks whether the
         // TRANSITION stands, which is where D4 and conservation live.
         //
         // A mint that fails here leaves no receipt and moves no value:
-        // it was never in the record to take back. Previously the judge
+        // it was never in the record to take back. Previously the gate
         // met these deeds afterwards, and a 60-beat era banked mints it
         // then refused — the drift the escrow makes unreachable rather
         // than merely visible.
