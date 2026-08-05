@@ -255,3 +255,82 @@ pub fn vocabulary(shell: &Shell) -> Vec<Turn> {
     }
     out
 }
+
+// ─────────────────────────────────────────────────────────────────────
+// THE ENTITY FRAME — base-60 orbit tied to base-11 stack
+// ─────────────────────────────────────────────────────────────────────
+//
+// Operator ruling 2026-08-05: *tie spin to orbit and you'll get
+// individual frames on base-60; extrapolate down to base-11 per entity
+// in population on partition and hold structure.*
+//
+// Both bases were already landed law, and neither was invented here:
+//
+//   base-60  THE ORBITAL RING (`ratio::TURN_SLOTS`) — the SHARED frame.
+//            Every orb is sited at a slot `k/60`, and the ring is the
+//            one thing the whole population holds in common.
+//   base-11  THE CONDITION STACK (`cfe::world::survey::LAST_CONDITION`,
+//            operator ruling 2026-08-02, *uplift to base-11*) — the
+//            PER-ENTITY frame. Eleven nodes: the solar leap, the five
+//            crystallized conditions, the gifted crown, and four
+//            chartered works.
+//
+// **WHY THE TIE IS EXACT: gcd(11, 60) = 1.** Sixty factors as 2²·3·5 and
+// eleven is prime, so the two bases share no factor. By the Chinese
+// Remainder Theorem the pair `(orbit mod 60, node mod 11)` maps to a
+// single index mod 660 — and the map is a BIJECTION, so every entity in
+// the population gets a frame no other entity holds. That is what
+// "individual frames" means, and it is a theorem rather than a policy.
+//
+// **AND IT HOLDS STRUCTURE.** CRT is not merely a relabelling: it is a
+// ring isomorphism, so the index of a sum is the sum of the indices.
+// Advancing an orbit by one slot and advancing a stack by one node
+// commute, and composing two frames composes their spins. A map that
+// individuated the population without preserving addition would be a
+// scramble; this one is a frame.
+
+/// The per-entity stack, base-11 (`survey::LAST_CONDITION`). Named here
+/// rather than imported because `solver-verify` sits below `cfe`; the
+/// two are pinned equal in `shell_pins`.
+pub const STACK_NODES: i64 = 11;
+
+/// The composite period: every distinct frame, once.
+pub const FRAME_PERIOD: i64 = TURN_SLOTS * STACK_NODES;
+
+/// **THE FRAME OF AN ENTITY** — its orbital slot tied to its stack node.
+///
+/// The CRT index: the unique `x` in `0..660` with `x ≡ orbit (mod 60)`
+/// and `x ≡ node (mod 11)`.
+///
+/// The coefficients are exact and derived, not tuned: `121 = 11²` is
+/// `≡ 1 (mod 60)` and `≡ 0 (mod 11)`; `540 = 60·9` is `≡ 0 (mod 60)` and
+/// `≡ 1 (mod 11)`. Integer arithmetic throughout — no float, and nothing
+/// to round.
+pub fn frame_index(orbit_slot: i64, node: i64) -> i64 {
+    (121 * orbit_slot + 540 * node).rem_euclid(FRAME_PERIOD)
+}
+
+/// The orbital slot and stack node a frame index came from — the
+/// inverse, and the reason the map is a bijection rather than a hash.
+pub fn frame_parts(index: i64) -> (i64, i64) {
+    let index = index.rem_euclid(FRAME_PERIOD);
+    (index.rem_euclid(TURN_SLOTS), index.rem_euclid(STACK_NODES))
+}
+
+impl Shell {
+    /// **TIE SPIN TO ORBIT.** The rotation this entity's frame presents.
+    ///
+    /// The frame index runs on the composite 660-ring; a shell of
+    /// `slots` cells reads it at its own arity. An orb at a different
+    /// orbital slot, or at a different node of its stack, sees the same
+    /// shell turned differently — which is what it means for a frame to
+    /// be the entity's own rather than the observer's.
+    pub fn frame_turn(&self, orbit_slot: i64, node: i64) -> Turn {
+        Turn::Spin(frame_index(orbit_slot, node).rem_euclid(self.slots as i64))
+    }
+
+    /// The shell as this entity sees it.
+    pub fn in_frame(&self, orbit_slot: i64, node: i64) -> Shell {
+        self.frame_turn(orbit_slot, node).apply(self)
+    }
+}

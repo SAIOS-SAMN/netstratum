@@ -178,3 +178,26 @@ fn the_sky_never_claims_the_re_emergence_slot() {
     assert_eq!(World::work_at(7), None, "7 is not a work");
     assert_eq!(World::work_at(8), Some("VALOR"), "the works begin at 8");
 }
+
+/// **THE STACK AND THE SOLVER'S FRAME ARE ONE NUMBER** (operator ruling
+/// 2026-08-05: *tie spin to orbit … extrapolate down to base-11 per
+/// entity*).
+///
+/// `solver_verify::shell::STACK_NODES` names base-11 from below the
+/// `cfe` arrow, where it cannot import this constant. Two copies of a
+/// number is the two-truths defect, so the equality is PINNED rather
+/// than trusted — this test is what makes them one truth.
+#[test]
+fn the_solvers_stack_base_is_this_stack_base() {
+    assert_eq!(
+        i64::from(cfe::world::survey::LAST_CONDITION),
+        solver_verify::shell::STACK_NODES,
+        "the solver frames entities on a different base than the sky — \
+         one of the two moved without the other"
+    );
+    assert_eq!(
+        solver_verify::shell::FRAME_PERIOD,
+        ratio::TURN_SLOTS * i64::from(cfe::world::survey::LAST_CONDITION),
+        "the composite frame ring must be the orbital ring times the stack"
+    );
+}

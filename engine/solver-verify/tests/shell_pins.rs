@@ -258,3 +258,129 @@ fn the_equator_is_the_polar_axis_fixed_circle() {
         assert_eq!(odd.at(0, slot), flipped.at(4, slot), "the poles exchange");
     }
 }
+
+// ─────────────────────────────────────────────────────────────────────
+// THE ENTITY FRAME (operator ruling 2026-08-05)
+// ─────────────────────────────────────────────────────────────────────
+
+use solver_verify::shell::{frame_index, frame_parts, FRAME_PERIOD, STACK_NODES};
+
+/// **THE TWO BASES ARE COPRIME — the theorem the tie rests on.**
+///
+/// Sixty is 2²·3·5 and eleven is prime, so they share no factor. Every
+/// claim below follows from that and from nothing else.
+#[test]
+fn the_orbital_ring_and_the_stack_share_no_factor() {
+    fn gcd(a: i64, b: i64) -> i64 {
+        if b == 0 { a.abs() } else { gcd(b, a % b) }
+    }
+    assert_eq!(gcd(ratio::TURN_SLOTS, STACK_NODES), 1, "60 and 11 must be coprime");
+    assert_eq!(FRAME_PERIOD, 660, "the composite ring is 60 x 11");
+    // And the stack is the LANDED base-11, not a number chosen here.
+    assert_eq!(STACK_NODES, 11, "cfe::world::survey::LAST_CONDITION");
+}
+
+/// **INDIVIDUAL FRAMES — every entity holds one no other entity holds.**
+///
+/// The CRT map over all 660 pairs is a BIJECTION: 660 distinct indices,
+/// and each recovers exactly the orbit and node it came from. This is
+/// what makes a frame the entity's own rather than a bucket it shares.
+#[test]
+fn every_orbit_and_node_pair_holds_its_own_frame() {
+    let mut seen = vec![false; FRAME_PERIOD as usize];
+    for orbit in 0..ratio::TURN_SLOTS {
+        for node in 0..STACK_NODES {
+            let index = frame_index(orbit, node);
+            assert!(
+                (0..FRAME_PERIOD).contains(&index),
+                "the frame left the composite ring"
+            );
+            assert!(
+                !seen[index as usize],
+                "two entities collided on frame {index} — the frames are not individual"
+            );
+            seen[index as usize] = true;
+            // And the index REMEMBERS where it came from.
+            assert_eq!(
+                frame_parts(index),
+                (orbit, node),
+                "the frame did not recover its own orbit and node"
+            );
+        }
+    }
+    assert!(seen.iter().all(|hit| *hit), "the map did not cover the ring");
+}
+
+/// **HOLD STRUCTURE.** The frame map is not a relabelling — it is
+/// additive. The index of a sum is the sum of the indices, so advancing
+/// an orbit and advancing a stack COMMUTE, and composing two frames
+/// composes their spins.
+///
+/// A map that individuated the population without preserving addition
+/// would be a scramble. This is the test that tells the two apart.
+#[test]
+fn the_frame_map_holds_structure() {
+    for orbit in 0..ratio::TURN_SLOTS {
+        for node in 0..STACK_NODES {
+            for (d_orbit, d_node) in [(1i64, 0i64), (0, 1), (1, 1), (7, 3), (59, 10)] {
+                let composed = frame_index(orbit + d_orbit, node + d_node);
+                let summed =
+                    (frame_index(orbit, node) + frame_index(d_orbit, d_node)).rem_euclid(FRAME_PERIOD);
+                assert_eq!(
+                    composed, summed,
+                    "frame({orbit}+{d_orbit}, {node}+{d_node}) broke additivity"
+                );
+            }
+        }
+    }
+    // The identity frame is the identity.
+    assert_eq!(frame_index(0, 0), 0);
+}
+
+/// **THE TIE REACHES THE CARRIER.** Two entities at different orbital
+/// slots see the same shell turned differently, and the turn they see
+/// composes the way their frames do.
+#[test]
+fn spin_is_tied_to_orbit_and_the_composition_survives() {
+    let held = shell(5, 12);
+
+    // Different orbits, different views — the frame is the entity's own.
+    let mut views = std::collections::HashSet::new();
+    for orbit in 0..12i64 {
+        views.insert(held.in_frame(orbit, 0).cells().to_vec());
+    }
+    assert!(views.len() > 1, "every orbit saw the same shell — the tie is not tied");
+
+    // And the view composes: stepping the frame equals spinning by the
+    // difference the frame map reports.
+    for orbit in 0..ratio::TURN_SLOTS {
+        for node in 0..STACK_NODES {
+            let direct = held.in_frame(orbit, node);
+            let via = Turn::Spin(frame_index(orbit, node) % 12).apply(&held);
+            assert_eq!(direct, via, "the frame's spin disagreed with its index");
+        }
+    }
+}
+
+/// **THE POPULATION PARTITIONS, AND THE PARTITION IS EVEN.** Reading the
+/// frames of a whole population by stack node partitions them into
+/// eleven classes of sixty — no node is crowded and none is empty,
+/// because coprimality distributes them exactly.
+#[test]
+fn the_population_partitions_evenly_across_the_stack() {
+    let mut by_node = [0usize; STACK_NODES as usize];
+    let mut by_orbit = [0usize; ratio::TURN_SLOTS as usize];
+    for index in 0..FRAME_PERIOD {
+        let (orbit, node) = frame_parts(index);
+        by_node[node as usize] += 1;
+        by_orbit[orbit as usize] += 1;
+    }
+    assert!(
+        by_node.iter().all(|n| *n == ratio::TURN_SLOTS as usize),
+        "the stack partition is uneven: {by_node:?}"
+    );
+    assert!(
+        by_orbit.iter().all(|n| *n == STACK_NODES as usize),
+        "the orbital partition is uneven: {by_orbit:?}"
+    );
+}

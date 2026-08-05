@@ -54,6 +54,7 @@ dependencies = [
  "num-rational",
  "num-traits",
  "ratio",
+ "solver-verify",
 ]
 
 [[package]]

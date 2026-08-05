@@ -12,6 +12,12 @@ num-rational.workspace = true
 num-traits.workspace = true
 
 [dev-dependencies]
+# THE FRAME TIE (2026-08-05): the solver names base-11 from below this
+# crate's arrow and cannot import LAST_CONDITION. Dev-only, so the
+# runtime arrow is untouched (the arrow-law guard's own note: dev-deps
+# are lawful cargo cycles), and the equality is pinned rather than
+# duplicated.
+solver-verify = { path = "../solver-verify" }
 # The taxon witness rides the snapshot codec round-trip (dev-only —
 # the runtime stays codec-blind; dev cycles are lawful in cargo).
 codec = { path = "../codec" }
