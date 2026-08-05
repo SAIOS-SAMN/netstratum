@@ -4030,6 +4030,9 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::ColonyFounded { name, .. } => {
                 format!("⚑ colony {} founded", style.strong(name))
             }
+            cfe::dop::ClosureEvent::AppraisalStruck { value, .. } => {
+                format!("⚖ APPRAISED — {} in the commensurate unit", amount(value))
+            }
             cfe::dop::ClosureEvent::EstateSurveyed { covered, cost, .. } => {
                 format!(
                     "⌖ estate SURVEYED — {} orb(s), one witness each, {} iron metered",

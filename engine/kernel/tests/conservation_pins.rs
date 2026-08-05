@@ -282,7 +282,11 @@ fn the_version_is_pinned() {
     // 0.6.0 — THE MAGNETIC REACH (2026-08-06): a PlanetSited threading
     //   a ring beyond the star's field grade refuses RingBeyondReach.
     //   MINOR: the judge refuses what it admitted before.
-    assert_eq!(KERNEL_VERSION.to_string(), "0.6.0", "the judge is version-pinned");
+        // 0.7.0 — THE APPRAISAL (2026-08-06): tag 98 covered; the gate
+    // admits what was Unjudged and refuses AppraisalOutsideSurvey /
+    // AppraisalMisvalued. Staleness deliberately gates NOTHING — it
+    // triggers renegotiation; consent closes acceptance.
+assert_eq!(KERNEL_VERSION.to_string(), "0.7.0", "the judge is version-pinned");
     assert_eq!(VERSION, KERNEL_VERSION.code(), "the wire carries the packed form");
     // ORDER IS PRESERVED: a chain cut under the old linear versions
     // compares BELOW every packed one, which is true — an earlier gate

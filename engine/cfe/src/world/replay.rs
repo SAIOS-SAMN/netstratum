@@ -196,6 +196,9 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     held.last_touch = receipt.stamp;
                 }
             }
+            // THE APPRAISAL (tag 98): a valuation reading, receipted.
+            // Moves no bank, sites nothing — the receipt IS the state.
+            ClosureEvent::AppraisalStruck { .. } => {}
             ClosureEvent::FamineStruck { orb_id, resource, drawn } => {
                 if let Some(held) = peel(&mut orbs, *orb_id) {
                     held.bank(*resource, -drawn.clone());

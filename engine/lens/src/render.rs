@@ -321,6 +321,14 @@ pub fn render_receipt(receipt: &Receipt) -> String {
             format!("{} closed to writing", &hex(&kind.0)[..8]),
         ),
         E::ZoneBuilt { tile, kind, .. } => ("zone_built", format!("{} @ {tile}", zone_name(*kind))),
+        E::AppraisalStruck { covered, value, .. } => (
+            "appraisal_struck",
+            format!(
+                "valued {} over {} covered orb(s) — staleness renegotiates, consent closes",
+                ratio_str(value),
+                covered.len()
+            ),
+        ),
         // E5b: witness digests are evidence, not display — COUNT only,
         // the LIT-1 precedent.
         E::EstateSurveyed { covered, cost, .. } => (

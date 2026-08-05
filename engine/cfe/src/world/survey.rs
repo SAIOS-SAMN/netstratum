@@ -647,5 +647,101 @@ impl World {
             }
         })
     }
+
+    /// **THE APPRAISAL** (tag 98, 2026-08-06): value derived from the
+    /// survey, at any scale of the ladder — *you have to appraise the
+    /// estate before you can put a price tag on it*. Build scope, the
+    /// surveyor's office. Refusal-pure.
+    ///
+    /// T1 custody — refuses `ClaimWithoutWitness` where no survey
+    /// stands, and where the subject's orb lies outside the survey's
+    /// covering: the same law as the survey's own witnesses, one rung
+    /// up. T2 — the value is computed by the sealed rule and RECEIPTED
+    /// with the seed and covering, so the gate re-derives it from the
+    /// prior state alone. Staleness (T4) is a separate READING —
+    /// [`Self::appraisal_stale`] — because it triggers renegotiation
+    /// and never gates this deed or acceptance.
+    pub fn appraise(&mut self, holding: crate::dop::Holding) -> Result<Ratio, ActionRefused> {
+        self.appraise_as(SOVEREIGN, holding)
+    }
+
+    pub fn appraise_as(
+        &mut self,
+        actor: u64,
+        holding: crate::dop::Holding,
+    ) -> Result<Ratio, ActionRefused> {
+        use crate::dop::Holding;
+        self.permitted(actor, Scope::Build)?;
+        let Some((survey, seed, covered)) =
+            self.chronicle.receipts().iter().rev().find_map(|receipt| match &receipt.event {
+                ClosureEvent::EstateSurveyed { seed, covered, .. } => Some((
+                    receipt.own.0,
+                    *seed,
+                    covered.iter().map(|(orb, _)| *orb).collect::<Vec<u64>>(),
+                )),
+                _ => None,
+            })
+        else {
+            return Err(ActionRefused::ClaimWithoutWitness { name: "estate unsurveyed".into() });
+        };
+        if let Holding::Planetary { orb } | Holding::Building { orb, .. } = &holding {
+            if !covered.contains(orb) {
+                return Err(ActionRefused::ClaimWithoutWitness {
+                    name: format!("orb {orb} outside the survey"),
+                });
+            }
+        }
+        let value = match &holding {
+            Holding::Building { orb, tile } => self
+                .appraise_value(&holding)
+                .ok_or(ActionRefused::NoSuchZone { tile: *tile })
+                .map_err(|refusal| match self.orbs.iter().any(|o| o.orb_id == *orb) {
+                    true => refusal,
+                    false => ActionRefused::NoSuchOrb { orb: *orb },
+                })?,
+            Holding::Planetary { orb } => self
+                .appraise_value(&holding)
+                .ok_or(ActionRefused::NoSuchOrb { orb: *orb })?,
+            Holding::Estate => self
+                .appraise_value(&holding)
+                .ok_or(ActionRefused::NoColony)?,
+        };
+        self.close(
+            ClosureEvent::AppraisalStruck {
+                subject: holding,
+                survey,
+                seed,
+                covered,
+                value: value.clone(),
+            },
+            actor,
+        );
+        Ok(value)
+    }
+
+    /// The sealed rule, callable without a deed — pure over the
+    /// committed state and the survey's parcels.
+    pub fn appraise_value(&self, holding: &crate::dop::Holding) -> Option<Ratio> {
+        let parcels = match holding {
+            crate::dop::Holding::Estate => self.parcels()?,
+            _ => Vec::new(),
+        };
+        crate::dop::appraised_value(holding, &self.orbs, &parcels)
+    }
+
+    /// **STALENESS — the renegotiation trigger** (operator ruling
+    /// 2026-08-06: *staleness triggers renegotiation* — and never
+    /// blocks acceptance, because consent closes deals). Decidable and
+    /// deliberately CONSERVATIVE at v1: an appraisal is stale the
+    /// moment ANY receipt follows it — any motion of the world dates a
+    /// valuation. `None` where no such appraisal stands.
+    pub fn appraisal_stale(&self, appraisal: &[u8; 32]) -> Option<bool> {
+        let receipts = self.chronicle.receipts();
+        let at = receipts.iter().position(|receipt| {
+            receipt.own.0 == *appraisal
+                && matches!(receipt.event, ClosureEvent::AppraisalStruck { .. })
+        })?;
+        Some(at + 1 < receipts.len())
+    }
 }
 

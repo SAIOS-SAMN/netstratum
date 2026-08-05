@@ -109,7 +109,14 @@ use solver_verify::{verify_work, WorkBroken};
 /// a `PlanetSited` threading a ring beyond what the star's field
 /// anchors. What the gate admits changed, so `minor` moves; the opened
 /// ground (0.5.1) rides beneath it as the patch it was.
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 6, patch: 0 };
+///
+/// **0.7.0 — THE APPRAISAL** (operator rulings 2026-08-06: appraise
+/// before pricing; staleness triggers renegotiation, consent closes
+/// acceptance). MINOR, derived: tag 98 enters `covered()` — the gate
+/// now admits (and can refuse `AppraisalOutsideSurvey` /
+/// `AppraisalMisvalued`) a deed that was `Unjudged` before. What the
+/// gate admits changed, so `minor` moves.
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 7, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
@@ -313,6 +320,14 @@ pub enum Refused {
     /// Filling an anchored ring never refuses here — slots within a
     /// ring are the turn rule's business, not the field's.
     RingBeyondReach { held: usize, reach: u8 },
+    /// THE APPRAISAL (2026-08-06) — the subject's orb lies outside the
+    /// survey's covering (orb 0 names the estate itself where the
+    /// covering cannot value it whole). Nothing appraises unsurveyed.
+    AppraisalOutsideSurvey { orb: u64 },
+    /// THE APPRAISAL — the declared value is not what the sealed rule
+    /// computes over the prior state and the receipted covering. A
+    /// value cannot be quoted one way and receipted another.
+    AppraisalMisvalued { declared: Box<Ratio>, computed: Box<Ratio> },
     /// E5b — an estate survey whose covering is not the whole estate:
     /// empty (an unwitnessed observation cannot enter the record) or
     /// short of the orbs that stand (a partial covering underpays the
@@ -353,6 +368,7 @@ pub fn admits(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
     // diagnostics choice and is recorded as one.
     revocation_law(prior, next, step)?;
     magnetic_reach(prior, step)?;
+    appraisal_rule(prior, step)?;
     decay(prior, step)?;
     gauge_move(prior, next, step)?;
     element_move(prior, next, step)
@@ -415,6 +431,39 @@ pub fn admits(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
 /// so the field cannot be quoted one way at the door and another at
 /// the judge. No star in the prior state is the emitter's refusal
 /// (`NoStarCommissioned`) and is not re-judged here.
+/// **THE APPRAISAL RULE** (2026-08-06): an `AppraisalStruck` declares a
+/// value; the gate RE-DERIVES it from the prior state and the receipt's
+/// own seed and covering, calling the same sealed rule the emitter used
+/// (call-not-copy). A subject outside the covering refuses; a declared
+/// value the rule does not compute refuses. Staleness is deliberately
+/// NOT here — it triggers renegotiation and never gates a deed.
+fn appraisal_rule(prior: &Committed, step: &Step) -> Result<(), Refused> {
+    let ClosureEvent::AppraisalStruck { subject, seed, covered, value, .. } = &step.event
+    else {
+        return Ok(());
+    };
+    use cfe::dop::Holding;
+    if let Holding::Planetary { orb } | Holding::Building { orb, .. } = subject {
+        if !covered.contains(orb) {
+            return Err(Refused::AppraisalOutsideSurvey { orb: *orb });
+        }
+    }
+    let parcels = cfe::dop::parcels_of(seed, covered);
+    match cfe::dop::appraised_value(subject, &prior.orbs, &parcels) {
+        Some(computed) if computed == *value => Ok(()),
+        Some(computed) => Err(Refused::AppraisalMisvalued {
+            declared: Box::new(value.clone()),
+            computed: Box::new(computed),
+        }),
+        None => Err(Refused::AppraisalOutsideSurvey {
+            orb: match subject {
+                Holding::Planetary { orb } | Holding::Building { orb, .. } => *orb,
+                Holding::Estate => 0,
+            },
+        }),
+    }
+}
+
 fn magnetic_reach(prior: &Committed, step: &Step) -> Result<(), Refused> {
     let ClosureEvent::PlanetSited { orbit_r, .. } = &step.event else {
         return Ok(());
@@ -785,6 +834,11 @@ fn covered(event: &ClosureEvent) -> bool {
         // the compiler does not force this list, which is exactly how
         // BookPosted went ungated (PICKUP §0).
         | E::EstateSurveyed { .. }
+        // THE APPRAISAL (tag 98) — banked-neutral: a valuation reading
+        // moves nothing, and the gate arm re-derives its value from
+        // the receipt's own seed and covering. BY HAND, again: the
+        // compiler does not force this list.
+        | E::AppraisalStruck { .. }
         | E::PracticeAdopted { .. } | E::PracticeReleased { .. } | E::ElderWarded { .. }
         | E::VeilDrawn { .. } | E::WardLifted { .. } | E::VeilLifted { .. }
         | E::GenesisSealed { .. } | E::ProspectStruck { .. } | E::LineSucceeded { .. }
@@ -1420,7 +1474,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
 
         // ── WORLD — keyed on an ORB inside one committed state ───────
         E::ColonyFounded { .. } | E::ColonyCharted { .. } | E::WorldCharted { .. }
-        | E::EstateSurveyed { .. }
+        | E::EstateSurveyed { .. } | E::AppraisalStruck { .. }
         | E::ZoneBuilt { .. } | E::ZoneRazed { .. }
         | E::YieldCollected { .. } | E::DemurrageSettled { .. } | E::UpkeepSettled { .. }
         | E::VentSettled { .. }
@@ -1487,7 +1541,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
     match event {
         // Build — create or extend the world, or open authority.
         E::ColonyFounded { .. } | E::ZoneBuilt { .. } | E::WorldCharted { .. }
-        | E::EstateSurveyed { .. }
+        | E::EstateSurveyed { .. } | E::AppraisalStruck { .. }
         | E::EntityRegistered { .. } | E::ScopeGranted { .. } | E::ScopeRevoked { .. }
         | E::ColonyCharted { .. } | E::StarCommissioned { .. } | E::PlanetSited { .. }
         | E::BondSealed { .. } | E::ForwardSealed { .. } | E::CouncilSealed { .. }
