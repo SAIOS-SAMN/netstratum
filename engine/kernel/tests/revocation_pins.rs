@@ -215,7 +215,7 @@ fn the_split_judges_exactly_as_the_pile_did() {
 /// order from the packed form.
 #[test]
 fn the_version_is_semver_and_orders() {
-    assert_eq!(KERNEL_VERSION.to_string(), "0.7.0");
+    assert_eq!(KERNEL_VERSION.to_string(), "0.8.0");
     assert_eq!(KERNEL_VERSION.major, 0, "prototype — nothing has promised stability");
     assert!(
         KERNEL_VERSION.code() > kernel::Version { major: 0, minor: 4, patch: 0 }.code(),

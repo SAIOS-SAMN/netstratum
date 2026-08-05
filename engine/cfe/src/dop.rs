@@ -184,6 +184,14 @@
 //!         MECHANISM as exact rational factors over the closed channel
 //!         set. The code is carried and VERIFIED against the fold, never
 //!         chosen. Additive: a minor bump, never breaking)
+//!   99 ClosureEvent::OfferCountered (THE COUNTER, 2026-08-06 — the
+//!         third outcome of survey/appraise → refuse/accept/renegotiate:
+//!         offer ‖ want_amount ‖ optional appraisal digest. Amends a
+//!         RESTING offer's ask in committed state, so acceptance (the
+//!         clear) honors the countered terms by construction. A STALE
+//!         appraisal citation refuses at the emitter — staleness
+//!         triggers renegotiation and the evidence must be re-taken;
+//!         consent needs no such gate, so acceptance never re-checks)
 //!   98 ClosureEvent::AppraisalStruck (THE APPRAISAL, 2026-08-06 — value
 //!         derives from the survey at every scale: subject ‖ survey
 //!         digest ‖ seed ‖ covered ‖ value. One rule dispatches on the
@@ -229,7 +237,7 @@
 //!         exactly this for the axes. Station codes are the BAND-1
 //!         vocabulary by index: 1 progenitor · 2 watcher · 3 observer
 //!         · 4 sovereign.)
-//!         — the next free tag outside reservations is 99. (This line
+//!         — the next free tag outside reservations is 100. (This line
 //!         read "90" until 2026-08-05 and was STALE: tag 90 was taken by
 //!         SovereignUnionSealed after it was written, and a mint drafted
 //!         onto 90 shadowed that deed's decoder arm — every sovereign
@@ -1672,6 +1680,17 @@ pub enum ClosureEvent {
         covered: Vec<u64>,
         value: Ratio,
     },
+    /// **THE COUNTER-OFFER** (tag 99): renegotiation as a receipt. It
+    /// amends the resting offer's ask — the negotiation stays STANDING
+    /// (resting books are lawful) and every round is a receipt. The
+    /// optional `appraisal` digest is the round's evidence; the emitter
+    /// refuses a STALE citation, because staleness is the trigger that
+    /// demands fresh evidence — and deliberately gates nothing else.
+    OfferCountered {
+        offer: u64,
+        want_amount: Ratio,
+        appraisal: Option<[u8; 32]>,
+    },
 }
 
 impl ClosureEvent {
@@ -2086,6 +2105,18 @@ impl ClosureEvent {
                 }
                 ratio::encode(cost, &mut value);
                 tlv::put(97, &value, &mut out);
+            }
+            Self::OfferCountered { offer, want_amount, appraisal } => {
+                let mut value = offer.to_le_bytes().to_vec();
+                match appraisal {
+                    Some(digest) => {
+                        value.push(1);
+                        value.extend_from_slice(digest);
+                    }
+                    None => value.push(0),
+                }
+                ratio::encode(want_amount, &mut value);
+                tlv::put(99, &value, &mut out);
             }
             Self::AppraisalStruck { subject, survey, seed, covered, value: worth } => {
                 let mut value = subject.wire().to_vec();
@@ -2609,6 +2640,16 @@ impl ClosureEvent {
                 }
                 let (worth, _) = ratio::decode(value.get(at..)?)?;
                 Some(Self::AppraisalStruck { subject, survey, seed, covered, value: worth })
+            }
+            99 => {
+                let offer = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let (appraisal, at) = match value.get(8)? {
+                    0 => (None, 9usize),
+                    1 => (Some(value.get(9..41)?.try_into().ok()?), 41usize),
+                    _ => return None,
+                };
+                let (want_amount, _) = ratio::decode(value.get(at..)?)?;
+                Some(Self::OfferCountered { offer, want_amount, appraisal })
             }
             89 => {
                 let station = *value.first()?;

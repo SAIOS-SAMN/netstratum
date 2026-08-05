@@ -199,6 +199,14 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             // THE APPRAISAL (tag 98): a valuation reading, receipted.
             // Moves no bank, sites nothing — the receipt IS the state.
             ClosureEvent::AppraisalStruck { .. } => {}
+            // THE COUNTER (tag 99): the resting offer's ask amends —
+            // the SAME mutation the live path made, so fills read one
+            // truth on both sides of a restart.
+            ClosureEvent::OfferCountered { offer, want_amount, .. } => {
+                if let Some(held) = offers.iter_mut().find(|held| held.offer == *offer) {
+                    held.want_amount = want_amount.clone();
+                }
+            }
             ClosureEvent::FamineStruck { orb_id, resource, drawn } => {
                 if let Some(held) = peel(&mut orbs, *orb_id) {
                     held.bank(*resource, -drawn.clone());

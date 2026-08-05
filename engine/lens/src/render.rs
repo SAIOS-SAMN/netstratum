@@ -321,6 +321,17 @@ pub fn render_receipt(receipt: &Receipt) -> String {
             format!("{} closed to writing", &hex(&kind.0)[..8]),
         ),
         E::ZoneBuilt { tile, kind, .. } => ("zone_built", format!("{} @ {tile}", zone_name(*kind))),
+        E::OfferCountered { offer, want_amount, appraisal } => (
+            "offer_countered",
+            format!(
+                "offer {offer} re-asked at {}{}",
+                ratio_str(want_amount),
+                match appraisal {
+                    Some(_) => " on fresh appraisal",
+                    None => "",
+                }
+            ),
+        ),
         E::AppraisalStruck { covered, value, .. } => (
             "appraisal_struck",
             format!(

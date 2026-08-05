@@ -286,7 +286,7 @@ fn the_version_is_pinned() {
     // admits what was Unjudged and refuses AppraisalOutsideSurvey /
     // AppraisalMisvalued. Staleness deliberately gates NOTHING — it
     // triggers renegotiation; consent closes acceptance.
-assert_eq!(KERNEL_VERSION.to_string(), "0.7.0", "the judge is version-pinned");
+assert_eq!(KERNEL_VERSION.to_string(), "0.8.0", "the judge is version-pinned");
     assert_eq!(VERSION, KERNEL_VERSION.code(), "the wire carries the packed form");
     // ORDER IS PRESERVED: a chain cut under the old linear versions
     // compares BELOW every packed one, which is true — an earlier gate

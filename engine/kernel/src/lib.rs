@@ -116,7 +116,13 @@ use solver_verify::{verify_work, WorkBroken};
 /// now admits (and can refuse `AppraisalOutsideSurvey` /
 /// `AppraisalMisvalued`) a deed that was `Unjudged` before. What the
 /// gate admits changed, so `minor` moves.
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 7, patch: 0 };
+///
+/// **0.8.0 — THE COUNTER-OFFER** (operator ruling 2026-08-06: the third
+/// outcome). MINOR, derived: tag 99 enters `covered()` — the gate
+/// admits a deed that was `Unjudged`. Staleness gates NOTHING at this
+/// tier by design: it refuses only a counter's citation, at the
+/// emitter, where the chronicle lives.
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 8, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
@@ -841,6 +847,12 @@ fn covered(event: &ClosureEvent) -> bool {
         // the receipt's own seed and covering. BY HAND, again: the
         // compiler does not force this list.
         | E::AppraisalStruck { .. }
+        // THE COUNTER (tag 99) — banked-neutral: it re-terms a resting
+        // offer and moves nothing; the fill that later clears is the
+        // conserved deed. BY HAND: the compiler does not force this
+        // list. Staleness deliberately has NO gate arm — it triggers
+        // renegotiation at the emitter and gates nothing here.
+        | E::OfferCountered { .. }
         | E::PracticeAdopted { .. } | E::PracticeReleased { .. } | E::ElderWarded { .. }
         | E::VeilDrawn { .. } | E::WardLifted { .. } | E::VeilLifted { .. }
         | E::GenesisSealed { .. } | E::ProspectStruck { .. } | E::LineSucceeded { .. }
@@ -1470,7 +1482,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::ForwardSealed { .. } | E::ForwardReleased { .. } | E::ForwardSlashed { .. }
         | E::OverflowAbsorbed { .. } | E::AbsorptionLapsed { .. }
         | E::CouncilSealed { .. } | E::CouncilClosed { .. }
-        | E::OfferPosted { .. } | E::OfferCleared { .. }
+        | E::OfferPosted { .. } | E::OfferCleared { .. } | E::OfferCountered { .. }
         | E::RouteChartered { .. } | E::RouteLapsed { .. }
         | E::VoidShare { .. } => Some(Layer::Universal),
 
@@ -1550,7 +1562,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::GaugeShiftedAt { .. } | E::TechLicensed { .. } | E::GenesisSealed { .. }
         | E::PracticeAdopted { .. } | E::PracticeReleased { .. } | E::ProspectStruck { .. }
         | E::ElderWarded { .. } | E::VeilDrawn { .. } | E::InstrumentForged { .. }
-        | E::RouteChartered { .. } | E::OfferPosted { .. } | E::LineSucceeded { .. }
+        | E::RouteChartered { .. } | E::OfferPosted { .. } | E::OfferCountered { .. } | E::LineSucceeded { .. }
         // KERNEL-TAXON: the drafted Build-class arm coder-03 named for
         // their #42 — unenforced until their covered() entry + witness.
         | E::TaxonSealed { .. }
