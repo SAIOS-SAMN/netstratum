@@ -654,9 +654,45 @@ that will not reduce is emitted as a new degree:
 
 Growth is EARNED, never assumed: `GaugeShiftedAt` opens the plane, and
 opening grade k requires k receipted mints (`PlaneUnearned` refuses
-otherwise). **Capacity growth and the discovery mint are ONE event** —
-24_FORM §2d THE SIGN LAW names it EGRESS: strictly positive divergence, no
-trapped interior.
+otherwise). `24_FORM` §2d THE SIGN LAW names it EGRESS: strictly positive
+divergence, no trapped interior.
+
+**SCOPED (operator ruling 2026-08-04). This row read "capacity growth
+and the discovery mint are ONE event", and that sentence is now bounded
+— it was contradicted by the two sentences before it.** Those say that
+`GaugeShiftedAt` OPENS the plane and that opening grade k requires k
+receipted MINTS. That is two deeds with an ACCUMULATION between them,
+not one event: a mint earns toward a plane, and the plane opens when
+enough have been earned. D3/D4 are ONE CONE (§6, the manifold dual on
+the capacity axis) — they were never one deed.
+
+**What the bundling cost, measured twice.** Read as an identity, the
+row licenses binding a capacity increment to every mint, and that has
+now failed from two directions. `capacity_law` refused mints on any
+world holding no relation and stopped the economy dead (374 solves, 0
+mints, 124 withheld) until it was struck. D4's first landing then bound
+`ΔD > 0` per mint and refused 48 of 55 — every one reading
+`was: 0, now: 0` — because **a mint banks value and forms no relation,
+so ΔD is zero by construction.** Two independent mechanisms, the same
+wall, the same day.
+
+**The scope, stated so a third attempt is not made.** A ROUTINE mint —
+rediscovery inside the vocabulary the line already holds — banks value
+and opens nothing, and that is correct rather than a defect. A mint
+that opened a plane for routine work would mint capacity for free,
+which is the forgery `Π_G` exists to strip. The identity D3 describes
+belongs to the NOVEL mint: work the base could not reach, where the
+reach ACQUIRED is the plane opened. That deed does not exist yet
+(`16_UNIT` §7a's successor, the compression predicate), so today no
+mint carries a capacity claim, and D4 correctly binds only where a
+claim already stands.
+
+**Therefore the row constrains nothing per-deed today, and that is the
+relaxed reading, not a weakened one.** Growth stays EARNED — k mints
+per grade, `PlaneUnearned` still refuses — and the accumulation is
+where the earning lives. When the novel mint lands it will carry its
+own capacity claim, D3 becomes an identity for THAT deed, and D4 binds
+it with no further amendment.
 
 **D4 · The revocation law — THE ECLIPSE ANCHOR (floored at H¹).**
 **LANDED WHOLE 2026-08-04 (operator ruling: "implement D4 — bring it to
@@ -1451,7 +1487,7 @@ none, which is why projecting the entity containment hierarchy could
 never have raised the rank.
 
 **MEASURED LIVE: 33 books, 0 lanes, rank 0.** `charter_route`
-(`world.rs:3772`) draws 4 alloy per side; no polity banks alloy; every
+(`world/mod.rs::charter_route`) draws 4 alloy per side; no polity banks alloy; every
 charter refuses `CannotAfford`; `conductor/src/lib.rs:378` swallows it
 with `let _ =`. 17 crossings cleared, 0 lanes chartered. The door is
 open and the substrate is economically empty — a refusal that names its
@@ -1468,7 +1504,7 @@ inherited by B-E1:**
   §1.3's *"no oracle, no single number."* A ceiling riding it would add
   a THIRD reader to an unresolved contradiction. Read the four named
   axes of `09` §2; morality's ratio is already sealed as
-  `world::reciprocity_reading` (`world.rs:4905`) — call it, never write
+  `world::reciprocity_reading` (`world/mod.rs`) — call it, never write
   a second.
 
 **OPEN ROW (FORGE_BUDGET §7.6): compassion has no entropic counterpart**

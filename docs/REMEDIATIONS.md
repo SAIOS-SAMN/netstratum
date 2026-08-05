@@ -215,7 +215,7 @@ The space, measured from the source:
   the prefix chronicle and replays it **whole, once per new deed**:
   `receipts[..=at].to_vec()` copies the prefix, `Chronicle::from_receipts`
   re-hashes the entire chain (`cfe/src/vrp.rs:201`), and
-  `world::replay` (`cfe/src/world.rs:4193`) is one monolithic 113-arm
+  `world::replay` (`cfe/src/world/replay.rs`) is one monolithic 113-arm
   loop from genesis. The code's own comment concedes it: *"O(deeds ×
   history) per beat … the cure when it bites is a stepping replay in
   cfe."* Measured at 734 µs/world at 180 receipts and rising linearly.
@@ -241,7 +241,7 @@ The space, measured from the source:
 
 ## §4 THE FIND-SCANS — peel that does not peel
 
-- [ ] **R9 — `peel` IS ITSELF A FIND-SCAN.** `cfe/src/world.rs:4939`:
+- [ ] **R9 — `peel` IS ITSELF A FIND-SCAN.** `cfe/src/world/mod.rs::peel`:
   ```rust
   fn peel(orbs: &mut [ColonyOrb], orb: u64) -> Option<&mut ColonyOrb> {
       orbs.iter_mut().find(|held| held.orb_id == orb)
@@ -250,7 +250,7 @@ The space, measured from the source:
   Its own doc comment says it exists so there is *"no cartesian
   find-scan repetition; peels and shears where there were iterations"*
   — and the body is a linear find. There are **67 scan sites in
-  `world.rs` alone** and `peel`/`peek` account for most of them. The
+  `cfe::world` alone** and `peel`/`peek` account for most of them. The
   name is right and the implementation has not caught up: an
   `orb_id → slot` index (rebuilt on the rare membership change) makes
   every peel O(1) and makes the name true. `[READ]`
@@ -263,7 +263,7 @@ The space, measured from the source:
   hot and keyed (orbs, offers, techs, debts, covenants). `[READ]`
 
 - [ ] **R11 — `deposit_receipt` IS O(receipts × orbs).** Its inner
-  `deposit` helper (`cfe/src/world.rs:4144-4150`) does
+  `deposit` helper (`cfe/src/world/mod.rs`) does
   `sheet.iter().position(...)` per receipt to find the orb's slot in a
   `Vec<(u64, CrystalDeposit)>`. The shear cursor above it is correct;
   the sheet lookup inside it is not. `[READ]`
@@ -277,7 +277,7 @@ The space, measured from the source:
 ## §5 THE FULL RE-DERIVATIONS
 
 - [ ] **R13 — THE NON-INCREMENTAL TWIN IS STILL LIVE.**
-  `cfe/src/world.rs` has both `crystal_deposits_at` (`:1079`, the
+  `cfe/src/world/survey.rs` has both `crystal_deposits_at` (the
   correct #41 incremental shear) and `crystal_deposits` (`:1094`,
   a full chronicle rescan that opens `let _ = now;` and never prunes
   the window). `constellation()` (`:1182`) calls **the full-rescan
@@ -288,7 +288,7 @@ The space, measured from the source:
   route `constellation` through the cursor. `[READ]`
 
 - [ ] **R14 — `committed()` CLONES 22 COLLECTIONS.**
-  `cfe/src/world.rs:2905` deep-clones every committed family to
+  `cfe/src/world/core.rs::committed` deep-clones every committed family to
   produce a snapshot; `chain_beat` calls it again for
   `codec::state_bytes` at `conductor/src/lib.rs:1403`, and
   `Polity::cycle` calls it once more just to list orb ids
@@ -342,7 +342,7 @@ Recorded so they are not "fixed" by a later reader:
   O(step), no search. This is the house pattern (`solver` /
   `solver-verify`) correctly applied. PICKUP §8a's altitude correction
   is satisfied in the code.
-- **The #41 shear cursor** (`cfe/src/world.rs:1079`) is a correct
+- **The #41 shear cursor** (`cfe/src/world/survey.rs`) is a correct
   incremental sweep with a pruned window. R13 is about its abandoned
   twin, not about it.
 - **`Chronicle::receipts()`** returns a slice, not a copy. The

@@ -290,7 +290,7 @@ pub fn journal(world_name: &str, world: &World, voice: &Voice, year_ticks: u64) 
     let mut out = Vec::new();
     // The committed prefix replays through the REAL chain machinery:
     // events re-append into a partial chronicle and `replay` grounds
-    // the boundary state — no shadow fold to drift from world.rs.
+    // the boundary state — no shadow fold to drift from `cfe::world`.
     let mut partial = Chronicle::new();
     let mut fed = 0usize;
     let mut zones_before: u64 = 0;

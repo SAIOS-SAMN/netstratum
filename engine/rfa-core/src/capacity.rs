@@ -128,47 +128,103 @@ pub struct Extent {
 /// own standing defense against the vacuous arm (`17_CAPACITY` §10b
 /// AV-4: *degenerate arms are made structurally unrepresentable where
 /// possible*).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct Degree(usize);
+#[derive(Debug, Clone, Copy)]
+pub struct Degree {
+    /// **THE OPENED GROUND** (operator ruling 2026-08-05: *GROUND needs
+    /// to be opened up into V = Volume of orbs, weight on D as
+    /// capacity*). The floor a state stands on is the VOLUME of its
+    /// estate — the measure of the orbs it holds — never below one.
+    /// The 2026-08-01 point survives as the base case: an estate of one
+    /// weighs one, and the empty pre-founding state weighs one.
+    volume: usize,
+    /// The gauge-invariant circulation standing above the floor. This
+    /// is what the gate reads (`above()`), and it is deliberately
+    /// UNTOUCHED by the volume — which is the derivation that made the
+    /// opening a patch: nothing the gate admits consults the floor.
+    circulation: usize,
+}
 
 impl Degree {
-    /// The floor itself: the one degree a committed state occupies by
-    /// existing. `α ≅ Ω` is not nothing — it is a POINT
-    /// (`24_FORM` §2e), which is one dimension, never none.
-    pub const GROUND: Degree = Degree(Extent::GROUND);
+    /// The floor's base case: one orb, nothing circulating. `α ≅ Ω` is
+    /// not nothing — it is a POINT (`24_FORM` §2e), one dimension,
+    /// never none. Wider estates stand on wider floors.
+    pub const GROUND: Degree = Degree { volume: Extent::GROUND, circulation: 0 };
 
-    /// THE ONLY CONSTRUCTOR. The point the state occupies, plus the
-    /// independent circulation standing above it.
-    ///
-    /// `GROUND + circulation` — total, and below-ground is arithmetically
-    /// out of reach rather than guarded against.
+    /// The point-weighted constructor: volume one, plus circulation.
+    /// This is the pre-opening reading and remains correct wherever no
+    /// estate stands behind the extent (the bare algebra, a lens over a
+    /// projection). Below-ground stays arithmetically out of reach.
     pub fn above_ground(circulation: usize) -> Self {
-        Degree(Extent::GROUND + circulation)
+        Degree { volume: Extent::GROUND, circulation }
     }
 
-    /// The reading as a number, for a lens. Always `≥ GROUND`.
+    /// **THE OPENED CONSTRUCTOR** — the estate's volume weighting the
+    /// degree. `volume` is clamped to one: a state that exists occupies
+    /// at least the point, so never-zero survives the opening by
+    /// construction rather than by guard.
+    pub fn in_volume(volume: usize, circulation: usize) -> Self {
+        Degree { volume: volume.max(Extent::GROUND), circulation }
+    }
+
+    /// The reading as a number, for a lens:
+    /// `volume × (GROUND + circulation)`. Weight means MULTIPLY —
+    /// founding an orb multiplies the whole degree, which is the
+    /// compounding the expansion rulings ask for. Always `≥ GROUND`.
     pub fn get(self) -> usize {
-        self.0
+        self.volume * (Extent::GROUND + self.circulation)
     }
 
     /// How much stands ABOVE the ground — the gauge-invariant
-    /// circulation, which is what grows.
+    /// circulation, which is what grows. **Volume-blind on purpose**:
+    /// this is the gate's operand (`revocation_law` reads it and never
+    /// `get()`), so the estate's size can never change what admits.
     pub fn above(self) -> usize {
-        self.0 - Extent::GROUND
+        self.circulation
     }
 
-    /// ON THE GROUND: the point state, at rest on the floor. It holds
-    /// its place and its structural existence; it is never deleted and
-    /// never barred. **Article II's operand is this predicate, never a
-    /// zero.**
+    /// The estate's measure — the opened ground itself.
+    pub fn volume(self) -> usize {
+        self.volume
+    }
+
+    /// ON THE GROUND: at rest on the floor of its own estate, however
+    /// wide that floor is. It holds its place and its structural
+    /// existence; it is never deleted and never barred. **Article II's
+    /// operand is this predicate, never a zero.**
     pub fn is_ground(self) -> bool {
-        self.0 == Extent::GROUND
+        self.circulation == 0
     }
 
-    /// ABOVE THE GROUND: expanded topological volume carrying
-    /// circulation.
+    /// ABOVE THE GROUND: circulation stands on the floor.
     pub fn is_above_ground(self) -> bool {
-        self.0 > Extent::GROUND
+        self.circulation > 0
+    }
+}
+
+/// A degree IS its magnitude: two readings of equal capacity are equal,
+/// however that capacity decomposes into floor and circulation. The
+/// decomposition stays separately readable (`volume()`, `above()`) —
+/// the couple remains two individuals — but comparison, ordering and
+/// hashing are on what stands.
+impl PartialEq for Degree {
+    fn eq(&self, other: &Self) -> bool {
+        self.get() == other.get()
+    }
+}
+impl Eq for Degree {}
+impl PartialOrd for Degree {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+impl Ord for Degree {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.get().cmp(&other.get())
+    }
+}
+impl std::hash::Hash for Degree {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.get().hash(state);
     }
 }
 
@@ -182,7 +238,7 @@ impl Default for Degree {
 
 impl std::fmt::Display for Degree {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
+        write!(f, "{}", self.get())
     }
 }
 

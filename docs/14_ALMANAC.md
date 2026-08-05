@@ -185,3 +185,154 @@ grammar generates CONTENT; it never generates LAW.
    element ids — a line that eats lithium is one row, when ruled.
 5. PICKUP/BUILD_ORDER inscriptions; the register note here flipped to
    LANDED with evidence.
+
+---
+
+## 8. The periodic law — the reading layer (landed, `cfe::almanac`)
+
+**Status:** LANDED 2026-08-04 (d3-scope), 19 witnesses in
+`engine/cfe/tests/almanac_pins.rs`. **Everything in this section is a
+DERIVATION** — pure, total, exact-rational, no I/O and no deed.
+`dop::element_properties`, `thermal::band_of` and `site_planet` are
+untouched, so nothing that has replayed replays differently. It adds
+the reading a refinement deed must be written AGAINST; it does not
+add the deed.
+
+### 8.1 Broken apart by concern, so each axis widens alone
+
+    almanac/periodic.rs   the five axes — where an element sits
+    almanac/locality.rs   what a star makes reachable; what pressure
+                          refines
+    almanac/compound.rs   what elements make together; the gem's identity
+    almanac/thermal.rs    the temperature line closed; the orbit grain
+
+The split is the point: widening a lane touches `periodic.rs`, adding
+a star class touches `locality.rs`, and neither disturbs the gem
+digest or the thermal closure.
+
+### 8.2 The five axes, and each DECIDES something no other can
+
+An axis that changes no outcome is decoration. Every one below is
+pinned to an outcome no other axis can move:
+
+| axis | reads | decides |
+|---|---|---|
+| LINE | period, `1..=7` | the PRESSURE it demands to refine |
+| LANE | group, `1..=10` | how much it BINDS — recurs at every line |
+| SHELL | geometry, `1..=4` | the ARITY: how many bind at once (`1+shell`) |
+| PHASE | state, `1..=4` | which thermal region it is workable in |
+| SPIN | chirality, `0..=1` | which GEM a composition names |
+
+Read from bytes 3..=7 of the element id, one per axis, so no two are
+correlated by construction. Bytes 1 and 2 belong to
+`element_properties` and are untouched — this table is INDEPENDENT of
+that draw, not a re-slicing of it.
+
+**Recurrence along the lane is load-bearing.** A lane's character
+depends on the lane alone, so a civilization that has refined one
+element can PREDICT the next. That is what makes discovery cumulative
+rather than a lottery, and it is the pin that would fail first if
+anyone made the table a list.
+
+### 8.3 Why the lanes are TEN — a derived width, not a preferred one
+
+Saturation for an n-body compound is `arity · (LANES/2 + 1) / 2`, so
+it is whole for every arity exactly when `LANES/2 + 1` is even — that
+is, when **`LANES ≡ 2 (mod 4)`**:
+
+| LANES | a=2 | a=3 | a=4 | a=5 | |
+|---|---|---|---|---|---|
+| 8 | 5 | **15/2** | 10 | **25/2** | odd arities impossible |
+| **10** | 6 | 9 | 12 | 15 | every arity reachable |
+| 12 | 7 | **21/2** | 14 | **35/2** | the same hole returns |
+
+The first landing stood at 8 and had to RECORD that no three-body
+compound could saturate, rather than tune the hole away. Widening to
+10 — the smallest width that opens the odd arities — closes it. The
+three-body case is the one that matters: it is the irreducibly
+multi-party compound a pairwise projection cannot express, and the
+witness now checks that none of its three pairs compound on their own.
+
+The binds fold at the half (`1..=5` rising, then back down), which is
+what makes the lane periodic rather than a ramp.
+
+### 8.4 Locality — two INDEPENDENT readings
+
+A resource is a PLACE, not a number, and it takes both readings:
+
+- **The star says how DEEP.** `lines_of(class)` — a heavy, bright
+  class forges down to line 7; an M dwarf reaches 3; a brown dwarf 2.
+  The same element id is present in one system and absent from
+  another. Locality DOMINATES pressure: no stratum releases what the
+  system does not carry.
+- **The orbit says how HOT** (§8.6). Neither implies the other — a
+  shallow element under a heavy star can still be unworkable in the
+  wrong region.
+
+`pressure(stratum, class)` is the stratum an orb has opened against
+the deepest line its star offers; `refines` is met at exact
+comparison, no tolerance.
+
+### 8.5 Composition — the lanes' rule, not the members'
+
+Three conditions, one per participating axis: every member shares the
+SHELL (and the count entering equals its arity), every member shares
+the PHASE, and the binds SATURATE across the set. Any set drawn from
+the same lanes compounds alike whatever their lines, so one recipe
+names a FAMILY of gems — the periodicity paying out.
+
+`gem_of` is content-addressed, so a "new" gem is new by IDENTITY
+rather than by anyone's say-so. Order-free (members sorted before
+hashing — a compound is not a sequence) but **not spin-blind**: the
+set's parity enters the digest, so the same composition in opposite
+handedness is a different gem. `knowledge_of` sums the members'
+lines, so both DEPTH and WIDTH are won.
+
+### 8.6 The thermal closure — naming the four silences
+
+`thermal::band_of` returns `Option<SubstrateBand>` and answers NONE in
+four places, which the tree's own witnesses already recorded: below
+the cryogenic floor, between cryogenic and mesic, between mesic and
+hyperthermal, and above hyperthermal. A `None` is not a temperature —
+every orb has one — so a reading that declines to name it is a hole in
+the vocabulary rather than a refusal.
+
+`ThermalRegion` closes the line: Quenched · Cryogenic · **Sublime** ·
+Mesic · **Torrid** · HyperThermal · **Incandescent** · Beyond, and
+`region_of` is TOTAL. **It changes no admission** — `SubstrateBand`
+still rules siting, and every temperature that had a band keeps it.
+
+### 8.7 The orbit grain — heat amplified by closeness, without irrationality
+
+Heat is amplified by closeness (`t_eq4 = L(1−a)k / r²`), and the
+division is where irrationality enters: `r → 0` is unbounded in VALUE,
+and `r = 1/10^k` is unbounded in DENOMINATOR (~`10^(2k)` — the same
+exact-rational blowup that killed proportional demurrage at ~2^1100
+and forced the flat law; witnessed here at over 30 digits by k = 16).
+
+The engine already answers this one layer down: the melt law posts in
+whole lots on a `1/64` grid *"so exact arithmetic stays cheap."* An
+orbit is the same kind of quantity and takes the same discipline.
+`ORBIT_GRAIN = 64` is that grid, not a new number.
+
+`orbit_on_grain` FLOORS rather than rounds — no orbit is moved closer
+to its star than it was asked to be — and lifts everything inside the
+first step to the first step: an orbit inside the grain is not a
+nearer orbit, it is not an orbit.
+
+Two things fall out and both are pinned:
+
+1. **The denominator cannot run away.** Every grained orbit's
+   denominator divides the grain, so the heat stays holdable however
+   small the orbit asked to be — under 30 digits at every k tested,
+   where the ungrained form had already passed it.
+2. **The ceiling is DERIVED**, not chosen: brightest class, zero
+   albedo, one grain out. Nothing grained exceeds it, so `Beyond`
+   becomes unreachable — the arm exists in order to be checked
+   unreachable. Amplification survives intact: quartering the orbit
+   still multiplies the heat by more than a hundred.
+
+**The open hole, recorded:** `site_planet` refuses `orbit_r <= 0` and
+admits everything above, so an UNGRAINED lawful siting can still
+outrun the ceiling. Making the grain LAW is a `site_planet` amendment
+and belongs to that lane; the closure names the region either way.

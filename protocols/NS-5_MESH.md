@@ -85,7 +85,48 @@ N7 (ANCHOR), where the mesh meets parties it cannot re-compute.
 
 ## 2. Consilience — the landed first slice (MESH-1a)
 
-### 2.1 The measured manifold (v2) and the structural census
+### 2.1 The measured manifold (v2) and the structural census — STRUCK
+
+> **THE CENSUS KERNEL IS OUT** (operator ruling 2026-08-04):
+> *incompatible with the architecture — we are building on a higher
+> dimensional plane of multi-axial PoW++ with two algorithms, PoUW and
+> PoWC, both converging on n-dimensional polynomials.*
+>
+> **The code excised it four days before this text was struck.**
+> `engine/mesh/src/lib.rs` records it: the reconciliation instruments —
+> consilience, the manifold, the census, the triangle, tag 65 and
+> refusal kinds 3–4 — went under the one-truth amendment on
+> 2026-07-31. This section is the SPEC that outlived them, still
+> carrying a wire format (§4's `LE32(census count) ‖ (census u8 ‖
+> LE64(id))…`) for an instrument no code has emitted since.
+>
+> **Two independent reasons, and the second is the general one.** The
+> one-truth amendment struck it because *you do not reconcile what
+> cannot diverge, and agreement between copies was never a
+> measurement*. The ruling above strikes it again for its SHAPE: a
+> census is a FLAT ENUMERATION — committed fields sorted into
+> seventeen named families plus a tripwire code — and an enumeration
+> cannot describe a state whose capacity is a polynomial fiber that
+> GROWS. It is the same 2D construct as the Merkle corpus root, struck
+> the same day for the same reason: enumerations fix what the
+> architecture is built to let expand.
+>
+> **What replaces it is not a better census.** Equality between two
+> states is not established by listing their fields; the two algorithms
+> decide on structure — PoWC on whether a difference is genuine or
+> gauge, PoUW on what verified work has earned — and both read the
+> polynomial, never a roster.
+>
+> **NOT STRUCK, and the distinction is load-bearing:**
+> `rfa_core::capacity::flux` calls its return an *egress census* —
+> `Flux { sources, sinks, balanced }`, the count of divergence poles.
+> That is a READING in the D/V algebra and is unrelated to this
+> instrument beyond the shared word. A sweep on the word alone would
+> gut the capacity meter, exactly as a sweep on "vacuity" would have
+> gutted the circulation it was built on.
+
+The text below is kept as the record of what was specified, and is
+**not implementable law**.
 
 The v1 8-dimension projection was a keyhole (the coder-04 audit,
 2026-07-31): two states differing only in structure measured C = 0

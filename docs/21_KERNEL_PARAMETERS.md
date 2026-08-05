@@ -67,7 +67,7 @@ feedback term.
 **What it is:** the decay rate on un-vaulted banked joules/sink,
 settled by receipt at touch. **FLAT, never proportional** — the sealed
 rule computes `min(rate · ease · elapsed, banked)`, and the flatness is
-deliberate (`world.rs:4840`, "the 2^1100 denominator lesson").
+deliberate (`world/rules.rs::ease_of`, "the 2^1100 denominator lesson").
 
 **Measured:** one literal, constant, blind to supply. It is the only
 destruction path the kernel bounds, so it is the only counterweight to
@@ -75,7 +75,7 @@ P1 — and the two cannot see each other.
 
 ### P3 · `ease_of` — THE MODIFIER ON THE SINK
 
-    cfe/world.rs:4832          scales P2's bound
+    cfe/world/replay.rs        scales P2's bound
 
     condition-5 tech held  →  1/2
     otherwise              →  1/1
@@ -193,7 +193,7 @@ against the tree, not argued.
 
 The ruling asks that the seed *operate strictly at `t = 0` and evaluate
 to `0` for all `t > 0`*. **That is already true by construction:**
-`world.rs:1351` refuses a second founding outright
+`world/genesis.rs::found` refuses a second founding outright
 (`ColonyAlreadyFounded`). There is no `t > 0` branch to zero because
 there is no `t > 0` call.
 
@@ -271,7 +271,7 @@ the first quiet world.
    exists to provide is unnecessary.
 4. **UNBOUNDED DENOMINATORS.** Exact-rational division by a running
    supply total compounds denominators, which is the failure
-   `world.rs:4840` records as *"the 2^1100 denominator lesson."*
+   `world/rules.rs::ease_of` records as *"the 2^1100 denominator lesson."*
    Whatever form lands must be denominator-bounded by construction.
 
 ### 7d. `P2` — DIRECTION RULED, FORM REVERSES A LANDED LESSON
@@ -281,7 +281,7 @@ the first quiet world.
 1. **THIS MAKES DEMURRAGE PROPORTIONAL.** The sealed rule is
    deliberately flat: *"`min(rate · ease · elapsed, banked)` per
    leaking resource, **FLAT, never proportional** (the 2^1100
-   denominator lesson)"* (`world.rs:4840`). Scaling the rate by
+   denominator lesson)"* (`world/rules.rs::ease_of`). Scaling the rate by
    `Σ/Φ_D` is the exact move that lesson was learned from. **The most
    serious of the four blocks**, because it reverses a rule the tree
    arrived at by failure.
@@ -395,7 +395,7 @@ split sink follows. Designing it surfaced a blocker that invalidates
 
 `bridge::read_entangled` — the only reader of rank `D` — lives in
 `kernel`. **`cfe::world::demurrage_due` therefore cannot compute rank**,
-and `world.rs` references it zero times today. The projection cannot
+and `cfe::world` references it zero times today. The projection cannot
 move below `cfe` either: it needs `Committed` (in `cfe`) and the
 reduction (in `rfa-core`, which already depends on `cfe`), so any home
 below `kernel` is circular.
@@ -404,9 +404,9 @@ below `kernel` is circular.
 
 `demurrage_due` is a SEALED RULE — *"the kernel CALLS this for I5's
 bound (call-not-copy), one rule, one computation, two judges"*
-(`world.rs:4842`). `P2` makes the rate depend on rank. So:
+(`world/rules.rs::ease_of`). `P2` makes the rate depend on rank. So:
 
-- the PROPOSER (`world.rs`) cannot see rank;
+- the PROPOSER (`cfe::world`) cannot see rank;
 - the JUDGE (`kernel`) can;
 - if they compute different rates, **honest deeds refuse at I5.**
 
@@ -518,7 +518,7 @@ is a kernel-lane task that was already on the board.
 
 ### 10c. PROCESS
 
-`-p cfe` and `-p kernel` are not a sweep. `world.rs` is shared by
+`-p cfe` and `-p kernel` are not a sweep. `cfe::world` is shared by
 `conductor`, `ledger`, `scribe` and `lens`, so a rule change there is a
 WORKSPACE change and must be tested as one. Recorded because the
 failure was mine and the discipline is cheap.

@@ -431,7 +431,7 @@ AEON fold; NS-5 mesh consilience; `cfe::opposition` (the seam-conservation).
 - `engine/kernel` — the crate: `admits(prior,next,step)`, `VERSION=1`,
   `Step`, `Unlawful`, invariant **I1 conservation** (transfers only), 3
   witnesses. Built and tested STANDALONE — **not yet wired as the gate**;
-  `world.rs` still applies deeds without consulting it. The kernel is the
+  `cfe::world` still applies deeds without consulting it. The kernel is the
   specification being assembled, not yet the doorman.
 - `engine/kernel/CHARTER.md` — the six invariants, equations, algorithms.
 - `docs/00_CHARTER.md` §11 — the One-Truth Amendment (plain register).

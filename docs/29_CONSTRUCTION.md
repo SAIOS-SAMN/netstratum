@@ -142,7 +142,7 @@ premises, bleeding in through the identifiers.
 
 **Retired from machinery (renamed 2026-08-05):**
 
-| was | now | why |
+| was (retired) | now | why |
 |---|---|---|
 | `FoldVerdict`, `GateVerdict`, `ShapeVerdict`, `RungVerdict` | `…Reading` / `…Fault` | a machine measures and faults; it does not pronounce |
 | `judged_fold` | `gated_fold` | the fold gate is a mechanism |

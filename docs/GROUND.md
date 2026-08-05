@@ -69,7 +69,13 @@ holds all four or it has not landed:
 
 ## §4 THE WORLD.RS DECOMPOSITION
 
-### 4a. What is actually there — measured
+**THE DECOMPOSITION LANDED (`666be81`); this §4 is now a record of the
+BEFORE state, confirmed 2026-08-04.** `engine/cfe/src/world.rs` does not
+exist; `world/` holds 19 files, 6,860 lines, largest `mod.rs` at 903.
+The line-range table below measured the pre-split monolith and is kept
+as evidence, not as a map — do not navigate by it.
+
+### 4a. What WAS there — measured before the split
 
 ```text
 engine/cfe/src/world.rs                          5,034 lines
@@ -109,7 +115,7 @@ twice.
 
 **The measured narrowing, offered to that lane.** `replay`'s 612-line
 body recomputes exactly ONE shared rule —
-`dop::commensurate_weight(resource)` at world.rs:4439, in the
+`dop::commensurate_weight(resource)` in `world/replay.rs`, in the
 `ResourceTransferred` arm. It never calls `ease_of` or `demurrage_due`;
 those arms apply the receipted amount. **So the double-definition
 exposure is one call site, not 113 arms.** And the P3 divergence (Crystal
@@ -140,8 +146,8 @@ and the two readers disagreed, and nothing named the rule as shared.
 ### 4d. SEQUENCING — the parked patch is a hard constraint
 
 **The kernel lane holds a saved P2 patch: 27 hunks across five files,
-including `engine/cfe/src/world.rs`,** parked pending #30 rather than
-re-derived. **Any restructure of world.rs invalidates 474 lines of
+including `engine/cfe/src/world/`,** parked pending #30 rather than
+re-derived. **Any restructure of `cfe::world` invalidates 474 lines of
 standing work**, so this is not a lane-local decision.
 
 **The order that costs least:**

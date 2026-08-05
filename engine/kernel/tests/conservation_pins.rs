@@ -59,7 +59,7 @@ fn the_last_deed_covered_exhausts_the_sealed_default() {
 /// NotPermitted; the same agent, once granted, is admitted; the sovereign
 /// (all scopes by construction) always passes; a non-entity refuses
 /// NoSuchEntity before any state is read. The kernel's scope_of(Collect)
-/// for ResourceTransferred is ratified here against world.rs.
+/// for ResourceTransferred is ratified here against `cfe::world`.
 #[test]
 fn containment_gates_the_transfer_by_scope() {
     let mut world = two_orb_world();
@@ -273,7 +273,20 @@ fn the_version_is_pinned() {
     //   patch  a change that cannot alter a verdict.
     // 0.5.0 carries BOTH of the day's amendments: the capacity law
     // removed (harness), and D4 the revocation law (cognition).
-    assert_eq!(KERNEL_VERSION.to_string(), "0.5.0", "the judge is version-pinned");
+    // 0.5.1 — THE OPENED GROUND (2026-08-05): D = volume × (GROUND +
+    //   circulation). PATCH, derived: every judge arm reads above(),
+    //   which is volume-blind; the fold guard compares ranks. No
+    //   verdict moved. (And this pin CAUGHT the bump landing without a
+    //   test run — it sat red for a day because the bumping commit
+    //   only built. The pin did its job; the process did not.)
+    // 0.6.0 — THE MAGNETIC REACH (2026-08-06): a PlanetSited threading
+    //   a ring beyond the star's field grade refuses RingBeyondReach.
+    //   MINOR: the judge refuses what it admitted before.
+        // 0.7.0 — THE APPRAISAL (2026-08-06): tag 98 covered; the gate
+    // admits what was Unjudged and refuses AppraisalOutsideSurvey /
+    // AppraisalMisvalued. Staleness deliberately gates NOTHING — it
+    // triggers renegotiation; consent closes acceptance.
+assert_eq!(KERNEL_VERSION.to_string(), "0.7.0", "the judge is version-pinned");
     assert_eq!(VERSION, KERNEL_VERSION.code(), "the wire carries the packed form");
     // ORDER IS PRESERVED: a chain cut under the old linear versions
     // compares BELOW every packed one, which is true — an earlier gate

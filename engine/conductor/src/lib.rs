@@ -654,6 +654,10 @@ pub struct Polity {
     /// gate and into the chain. Every deed past this mark is chained
     /// individually, with its own step, and gated.
     chained: usize,
+    /// Planes this line has OPENED — the unfold, one per earned mint.
+    /// The fiber's grade count is `world.key().len()`; this counts the
+    /// openings that got it there.
+    pub unfolded: u64,
     /// WHICH REGIME this line searches under. Set by the era runner so
     /// the three paths can be benchmarked against one another.
     pub mode: SearchMode,
@@ -896,6 +900,7 @@ impl Polity {
                     return Polity {
                         chained: 0,
                         refused: Vec::new(),
+                        unfolded: 0,
                         lane_refused: Vec::new(),
                         last_forge: None,
                         reported: 0,
@@ -996,6 +1001,7 @@ impl Polity {
         Polity {
             chained: 0,
             refused: Vec::new(),
+            unfolded: 0,
             lane_refused: Vec::new(),
             last_forge: None,
             reported: 0,
@@ -1843,6 +1849,53 @@ impl Polity {
         })
     }
 
+    /// THE UNFOLD (GAUGE-N, `11` §2.1) — a line OPENS the plane it has
+    /// already EARNED.
+    ///
+    /// **NOT CALLED FROM `cycle`, and that is a hold rather than a
+    /// design.** Wiring it into the beat made
+    /// `survey_pins::the_survey_charters_the_sector_and_the_spent_lens_idles`
+    /// fail on `replay MATCHES the surveyed world` — the live world and
+    /// the replay of its own chronicle disagreed by exactly 7 crystal.
+    /// The GaugeShiftedAt deed itself replays correctly (the key is
+    /// identical on both sides); what moves is downstream of the
+    /// chronicle gaining a receipt. Until that is understood this stays
+    /// caller-driven, because a proposer that breaks SEAL B is worse
+    /// than one that never expands.
+    ///
+    /// The mechanism was landed and had exactly two callers: a cfe test
+    /// and the operator's CLI verb. No autonomous line had ever opened
+    /// a plane, so every live world sat at genesis `[0]` forever while
+    /// its earned mints piled up unspent. The era FOLD (the
+    /// contraction) ran every era; the unfold (the expansion) ran never.
+    ///
+    /// **The earning rule is NOT restated here.** `shift_gauge_at`
+    /// refuses `PlaneUnearned` when the grade outruns the receipted
+    /// mints — one plane per `TechDiscovered { condition: 1.. }`,
+    /// `Diverged` or `Confluent`. This asks it and takes the refusal;
+    /// copying the filter would be two definitions of one law
+    /// (CHARTER §0b).
+    ///
+    /// **The plane's value is CHRONICLE-SEEDED**, never chosen: drawn
+    /// from the world's own terminal digest, so replay re-derives it
+    /// exactly and no wall clock enters (CHARTER §9).
+    pub fn unfold(&mut self) -> bool {
+        let Some(receipt) = self.world.chronicle().receipts().last() else {
+            return false;
+        };
+        let beacon = Beacon::from_digest(receipt.own.0);
+        // The next grade above what already stands.
+        let next = self.world.key().len();
+        let value = ratio(beacon.uniform_index("unfold.plane", 12) as i64, 12);
+        match self.world.shift_gauge_at(next as u16, value) {
+            Ok(()) => {
+                self.unfolded = self.unfolded.saturating_add(1);
+                true
+            }
+            Err(_) => false,
+        }
+    }
+
     /// One full heartbeat. A growth returns the newborn's spec —
     /// the era loop gives it a world of its own.
     pub fn cycle(&mut self, book: &Ledger, registry: &Registry) -> Option<PolitySpec> {
@@ -1988,8 +2041,8 @@ impl Polity {
     /// nothing prunes it: the chronicle keeps the deed, this keeps the
     /// verdict.
     ///
-    /// A refusal here does NOT mean the deed was undone. `world.rs`'s
-    /// `replay` is still the live transition (the Phase 3 flip demotes
+    /// A refusal here does NOT mean the deed was undone.
+    /// `world/replay.rs` is still the live transition (the Phase 3 flip demotes
     /// it to proposer, `U_DIRECTIVES` §5), so a refused deed stands in
     /// the chronicle with the gate on record against it. That gap is
     /// the whole reason this must be visible rather than counted.

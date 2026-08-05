@@ -50,12 +50,36 @@ refreshes at each major handoff.
 
 ## 3. The parallel-node protocol (who touches what)
 
-- **coder-02 (main tree):** `docs/` (except 03), `engine/cfe/` in
+**SUPERSEDED 2026-08-04 — the two-node model below is history.** Work
+is now organised as NAMED LANES, one git worktree and branch each
+(`kernel`, `lens`, `capacity`, `record`, `harness`, `cognition`,
+`remediations`, `syntropy`, …). **The live ownership table is not in
+this file** — keeping a second copy here is how the old one went stale.
+Read the lane map before claiming any territory, run `pwd` and
+`git branch --show-current` at session start and after every merge, and
+never share a worktree: two nodes in one working tree is the one state
+git cannot untangle.
+
+`/opt/netstratum` (root) is the LANDING ZONE and is nobody's workspace.
+
+Two naming traps that have already cost a session each: **"CHARTER"**
+names both `docs/00_CHARTER.md` (the record lane's) and
+`engine/kernel/CHARTER.md` (the kernel lane's); **"harness"** names both
+the harness LANE (the conductor's) and `engine/solver/tests/
+harness_pins.rs` (the ARC solve harness, the cognition lane's). One
+word, two lanes — do not let it mean whichever is convenient.
+
+The struck two-node model, kept not rewritten:
+
+- ~~**coder-02 (main tree):** `docs/` (except 03), `engine/cfe/` in
   practice (world.rs named in the charter; dop.rs/tests by usage),
-  `clients/cli/`.
-- **coder-01 (worktree):** `engine/rfa-core`, `engine/physics`,
+  `clients/cli/`.~~
+- ~~**coder-01 (worktree):** `engine/rfa-core`, `engine/physics`,
   `engine/solver`, `engine/mirror`, `engine/conductor` (by usage),
-  `docs/03`, workspace `Cargo.toml`, `tools/observer.py`.
+  `docs/03`, workspace `Cargo.toml`, `tools/observer.py`.~~
+  **`engine/mirror` HAS NOT EXISTED SINCE 2026-07-31** — the crate is
+  `engine/ledger` (the mirror NAME died by operator order) and the
+  display half is `engine/lens`.
 - Cross-territory happens ONLY as a mechanical relay (the P1
   precedent): e.g. adding a renderer arm the compiler demands. Flag it
   in the landing entry and the commit message.
@@ -136,7 +160,7 @@ engine judges nothing; it measures.
 ## 7. Build, test, play
 
 ```
-cargo test --workspace                                  # 158/158 green at handoff
+cargo test --workspace                                  # 809/809 green at 8067f60 (2026-08-04)
 cargo clippy --workspace --all-targets -- -D warnings   # must finish clean
 cargo test -p cfe --test world_<name>                   # one witness file
 printf 'found meridian\n…\nquit\n' | cargo run -p netstratum-cli -- --plain
@@ -149,12 +173,28 @@ tracked, never a source of truth.
 ## 8. Compiler-enforced connectivity (expected breakage)
 
 Adding a `ClosureEvent` variant intentionally breaks three exhaustive
-matches until you add arms: `world.rs::replay`, the CLI chronicle
-renderer (`clients/cli/src/main.rs`), and the mirror's
-`render_receipt` (`engine/mirror/src/lib.rs` — coder-01 territory,
-mechanical relay). `engine/mirror/src/converge.rs` and `journal.rs`
-have catch-alls. Adding an `ActionRefused` variant breaks the CLI
-`refuse()` match — the new arm must name the cure.
+matches until you add arms. **PATHS CORRECTED 2026-08-04** — all three
+had moved, and the crate the old text named no longer exists:
+
+| match site | was |
+|---|---|
+| `engine/cfe/src/world/replay.rs` | `world.rs::replay` (the file was split) |
+| `clients/cli/src/main.rs` | unchanged |
+| `engine/lens/src/render.rs` (`render_receipt`) | `engine/mirror/src/lib.rs` |
+
+`engine/ledger/src/converge.rs` and the scribe's `journal.rs` have
+catch-alls. Adding an `ActionRefused` variant breaks the CLI `refuse()`
+match — the new arm must name the cure.
+
+**AND A FOURTH SITE THE COMPILER DOES NOT ENFORCE, which is the whole
+lesson of this section.** `kernel::covered()` decides which deeds the
+judge judges at all, and it is a `matches!` list — adding a variant
+does NOT break it, so a new deed silently becomes `Unjudged`. That has
+already happened: `BookPosted` is live and uncovered, and the pin meant
+to prove totality enumerates a hand list of 64 against an enum of 71
+(PICKUP §0). **When you add a variant, add it to `covered()` by hand,
+or make the pin exhaustiveness-checked so the compiler starts
+enforcing what this section assumes it does.**
 
 **Gotcha (CLI planet cursor, inscribed by operator ruling 2026-07-30):**
 `chart` automatically advances the active planet cursor to the newly
@@ -165,7 +205,7 @@ row of empty orbs. Found live at the N4 landing: the scanner truthfully
 reported three drained colonies as resonant (empty ≅ empty), which is
 the lens working and the arc broken.
 
-## 9. Verification gaps on record (dated: 2026-07-27)
+## 9. Verification gaps on record (dated: 2026-07-27; **refreshed 2026-08-04**)
 
 The landed state, the lanes, and the next-work candidates live in
 `PICKUP.md` §5 and the BUILD_ORDER boards. What lives HERE is the
@@ -179,15 +219,36 @@ honest debt the witnesses have not yet measured:
    order) replays and resumes identical. The engine held; both first
    expectations were the witness author's (a tick off-by-one, an
    overpriced collateral) — the §10 habit, exercised.
-2. **The state.json `cohesion` block content pin** in `mirror_pins`
-   (coder-01, relay): the block is emitted mechanically and the
-   workspace compiles green, but nothing asserts its bytes.
+2. **The state.json `cohesion` block content pin** ~~in `mirror_pins`
+   (coder-01, relay)~~: the block is emitted mechanically and the
+   workspace compiles green, but nothing asserts its bytes. **The named
+   witness file no longer exists** — nothing matching `mirror` survives
+   anywhere in the tree (renamed 2026-07-31). Whoever picks this up must
+   first find where the pin should now live (`engine/lens`), which is
+   itself the debt: a gap recorded against a path outlives the path.
 3. **JOURNAL follow-on (Q4.6, relay):** the Chronicle Feed reads the
    cohesion books and friction receipts mirror-side under its
    reflection law.
 
+4. **`covered()` is not total** (2026-08-04): `BookPosted` is a live,
+   value-moving deed the kernel does not judge, and
+   `kernel/tests/taxon_pins.rs` cannot see it because it enumerates a
+   hand list of 64 against an enum of 71. The Phase 3 flip's
+   precondition is therefore unmet, and the mint escrow cannot be
+   generalised until it closes. Full record in PICKUP §0.
+5. **`tools/` has no test harness** (2026-08-04): the observer's
+   INTELLIGENCE fix is pinned by MEASUREMENT (705 receipts on the live
+   board) rather than by a test, because no Python witness runner
+   exists. Standing one up is a lane decision nobody holds.
+
 Strike entries here when their witnesses land; add new ones when a
 claim ships proven-by-argument.
+
+**A habit this refresh earned:** three of the five entries above went
+stale by naming a PATH or a COUNT that the tree later moved. When you
+record a gap, anchor it to a symbol or a law rather than a line number
+where you can — line numbers rot silently and take the finding with
+them.
 
 ## 10. Session habits that kept this clean
 

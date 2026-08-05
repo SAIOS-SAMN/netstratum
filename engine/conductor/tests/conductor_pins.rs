@@ -81,13 +81,37 @@ fn research_unlocks_industry() {
 }
 
 /// DIVERGENCE (AEON-1b, 11 §3): a long era CLEAVES at least one line
-/// into peer branches — line membership recorded in the registry, one
-/// mutated axis, a new world beating alongside, and the KEYS move:
-/// the origin receipts `Diverged` (+delta) and the branch founds at
-/// the opposite phase — the branches are distinguishable on the G
-/// fiber, never a parent and a child.
+/// into peer branches — line membership recorded in the registry, a
+/// NONEMPTY SUBSET of the axes moved, a new world beating alongside,
+/// and the KEYS move: the origin receipts `Diverged` (+delta) and the
+/// branch founds at the opposite phase — the branches are
+/// distinguishable on the G fiber, never a parent and a child.
+///
+/// **THE NAME WAS THE LAST OF THE UNARY MODEL** (operator, 2026-08-05:
+/// *you're pigeonholing a divergence into smaller paths that have
+/// multi-vent capability*). This read `a_thriving_line_diverges` — one
+/// line, one divergence — while both the law and the engine had already
+/// moved on. `11_AEON` §3 retired "Charted" for importing terrestrial
+/// unary budding (one parent, mutate one axis); the 2026-08-02 ruling
+/// unpinned `== 1` here; and `divergence_step` draws
+/// `1 + uniform_index("growth.axes", 7)` — a mask over three bits, so
+/// ALL SEVEN vents are reachable and the single-axis move is one case
+/// among seven rather than the only one.
+///
+/// The engine states the reason better than a name can: *"a walk
+/// confined to one coordinate at a time is not a walk on a manifold, it
+/// is a walk on its axes."* The cleave is a walk on
+/// {disposition × metabolism × perception × G}.
+///
+/// **WHAT THIS PIN STILL CANNOT SEE, recorded rather than papered
+/// over:** it accepts `1..=3` moved axes, which correctly stops
+/// requiring unary — but it would pass just as green if the engine
+/// REGRESSED to unary, because permitting a range proves nothing about
+/// reaching it. The observed masks are printed below so a regression is
+/// at least visible in the output; a pin that BITES needs the draw
+/// tested where the draw lives, and `divergence_step` is private.
 #[test]
-fn a_thriving_line_diverges() {
+fn a_cleave_walks_the_manifold_not_one_axis_at_a_time() {
     let root = scratch("speciate");
     let var = root.to_string_lossy().into_owned();
     let worlds = run_era(&var, 45);
@@ -146,6 +170,17 @@ fn a_thriving_line_diverges() {
         assert!(
             (1..=3).contains(&mutations),
             "a cleave moves at least one axis and at most all three, got {mutations}"
+        );
+        // The vent this cleave actually took. Printed, not asserted:
+        // with few branches in an era, demanding a multi-axis cleave
+        // would be flaky rather than strict — and a flaky pin teaches
+        // a lane to re-run instead of to read.
+        println!(
+            "cleave vent: {} axes moved (d={} m={} p={})",
+            mutations,
+            branch.disposition != origin.disposition,
+            branch.metabolism != origin.metabolism,
+            branch.perception != origin.perception
         );
         // PEERS: the species is the line's, whole — the kinship
         // suffix is retired (11 §3: "Charted" imported terrestrial

@@ -1,11 +1,70 @@
 # PICKUP — the state of the board (2026-07-27, coder-01; refreshed
 # post-ideology-board by coder-02 the same day; refreshed 2026-07-30 by
-# coder-02 — the galaxy law + the fifth progenitor seat)
+# coder-02 — the galaxy law + the fifth progenitor seat; **§0 REFRESH
+# 2026-08-04** — every count below re-measured against `main`)
 
 Cold-start orientation for any node resuming work. Read
 `00_CHARTER.md` whole, then `BUILD_ORDER.md` for the current landing —
 this file is the fast map, never the authority. The working discipline,
 state-model laws, and earned gotchas live in `HANDOFF.md`.
+
+## 0. REFRESH 2026-08-04 — what this file got wrong, measured
+
+Re-verified against `main` at `8067f60` (board 809/809). Every row was
+measured in the tree, not re-read from prose. **Read this section
+before trusting any count below it.**
+
+| this file said | measured |
+|---|---|
+| §2 "158/158 green at `22a5995`" | **809/809** at `8067f60` |
+| §4 "next free 87" | `dop.rs` emits tags to **95** |
+| §5 "the kernel judges 59 of 64 deed types" | **70 of 71** |
+| §8f "Coverage is 64/64" | also wrong — see below |
+| §5 Phase 3 flip "(all covered)" | **precondition NOT met** |
+| §5a "`world.rs` IS SLATED FOR REFACTOR" | **landed** — file gone |
+| §9 "four lanes sit 18–19 commits behind" | far wider; see §9 |
+
+**THE ONE THAT MATTERS — `covered()` IS NOT TOTAL.** The enum carries
+**71** `ClosureEvent` variants; `kernel::covered()` names **70**.
+`BookPosted` is missing — a live, value-moving deed (emitted at
+`cfe/src/world/books.rs:151`, replayed at `world/replay.rs:77`, read by
+`world/growth.rs:27`, reachable from the CLI at `clients/cli/src/
+main.rs:2621` and `:2929`). `kernel::admits` therefore answers
+`Refused::Unjudged` for it. The other two Book deeds — `BookMinted` and
+`BookArchived` — are both covered; only the posting was skipped.
+
+**The totality pin cannot see it.** `kernel/tests/taxon_pins.rs`
+asserts the kernel is total by enumerating a HAND LIST of 64 variants.
+The enum has grown to 71. The seven outside its universe are
+BookMinted, BookPosted, BookArchived, WorkAspired, WorkClaimed,
+StationSeated, SovereignUnionSealed — six covered, one not — so the pin
+passes green while the property it names is false. Its own docstring
+names this failure: *"a count that balances against an uncounted
+universe is the failure mode; this counts the universe."* It counts 64
+against 71.
+
+Two consequences recorded elsewhere as settled, and neither is:
+
+1. **The Phase 3 flip's precondition is unmet.** It makes the kernel
+   the live gate once `Unjudged` is unreachable. Every book posting
+   reaches it. Flipping today refuses that deed.
+2. **The mint escrow (`8067f60`) cannot be generalised until this
+   closes.** Escrow's reach is exactly `covered()`: an escrowed emitter
+   settles only on `admits`, so escrowing an uncovered deed does not
+   judge it, it ABOLISHES it. Escrow converts a coverage gap from a
+   silent omission into a hard outage.
+
+**The fix worth making is the pin, not the one missing row.** Adding
+`BookPosted` to `covered()` closes today's gap and leaves the next one
+open — the list has already fallen behind twice. Derive the universe
+from the compiler: a `match` with no `_` arm is exhaustiveness-checked,
+so a new variant breaks the build until someone classifies it.
+
+**THE PATTERN, since it is the same one three times.** Every stale
+entry found in this refresh is stale the same way: a count or a path
+restated in prose, then outrun by the tree. §8's own preamble already
+admits §8b–§8f were "not each re-verified". A number that lives only in
+a document is a second truth with no test over it.
 
 ## 1. Run it
 
@@ -32,7 +91,10 @@ Conductor boot order: adopt legacy `bots.json` → CONVERGE archived eras
 (idempotent, quarantines named) → genesis polities → beat. Journals + the
 wall regenerate every 60-tick year.
 
-## 2. Landed (all witnessed; 158/158 green, clippy zero at `22a5995`)
+## 2. Landed (all witnessed; **809/809 green, clippy zero at `8067f60`**)
+
+> The `158/158 at 22a5995` this heading carried until 2026-08-04 was
+> five days and some 650 witnesses out of date. §0 has the refresh.
 
 | landing | what |
 |---|---|
@@ -127,8 +189,15 @@ coder-03 — the almanac's mint/assay/stores); 74–77 WARDEN-1a/MASK-1a ·
 81 IncursionStruck · 83 the committed-state container (CODEC-1) · 84
 the spine commitment record (SPINE-1) · 85 TaxonSealed (KERNEL-TAXON)
 · 86 DiscoveryMinted (U1 KERNEL-VERIFY — the PoUW mint, the opaque
-work payload); **next free 87** (the dop.rs header is the one
-authority; this section only mirrors it).
+work payload); ~~**next free 87**~~ **STALE — corrected 2026-08-04:**
+`dop.rs` emits tags up to **95** via `tlv::put`. The header is the one
+authority and this section only mirrors it, so the number is not
+restated here again; read the header. **One reconciliation is OWED to
+whoever owns the registry:** the header's own line reads *"the next
+free tag outside reservations is 90"* while tags 90–95 already appear
+in `tlv::put`. Either the orb-entry tags share this space (and the
+header's sentence needs re-wording) or the claim outran the code.
+Recorded as a question, not a defect — it was not resolved here.
 
 **The tag-claim convention** (2026-07-30, after a live collision caught
 mid-cadence — 55 claimed twice, the later claimant moved to 60, and the
@@ -161,11 +230,13 @@ forever.
   (arch-02's two U1 holes CLOSED at one decode guard — witnesses 7/8;
   the mesh-second amendment made in SYSTEM_SPEC §6 / U_DIRECTIVES §7;
   the doc-drift fixed: `verify_work` is the anchor, the bare
-  certificate is tamper-evidence only). **I1–I5 are WHOLE; the
-  kernel judges 59 of 64 deed types.** OPEN: U2 (orbit_lock/I6 + the
+  certificate is tamper-evidence only). ~~**I1–I5 are WHOLE; the
+  kernel judges 59 of 64 deed types.**~~ **CORRECTED 2026-08-04:** I1–I5
+  are whole; the kernel judges **70 of 71**. `covered()` is NOT total —
+  `BookPosted` is unjudged. See §0. OPEN: U2 (orbit_lock/I6 + the
   angle-free witness — the one research-shaped landing, consult
   /opt/repos), the W-waves (53 deeds, parallelizable, task list
-  carries the families), Phase 3 flip (all covered), U3 (after
+  carries the families), Phase 3 flip (**NOT all covered — the precondition is unmet, §0**), U3 (after
   #36/#37), U4 (Ruling Boxes — operator words only: the rate f, the
   work-shapes, the split; rule f against the OBSERVED chained economy
   once #36 lands). Secondary (U_DIRECTIVES §10): S1 the volumetric
@@ -420,7 +491,17 @@ coder-04's flag.
 - Parallel worktrees per node; merge to `main` on green; BUILD_ORDER
   conflicts resolve by keeping both entries.
 
-## 5a. `world.rs` IS SLATED FOR REFACTOR (2026-08-02, kernel lane)
+## 5a. ~~`world.rs` IS SLATED FOR REFACTOR~~ — **LANDED** (2026-08-02, kernel lane; confirmed 2026-08-04)
+
+**THE SPLIT IS DONE AND THIS SECTION'S TENSE IS WRONG BELOW.**
+`engine/cfe/src/world.rs` does not exist; `engine/cfe/src/world/` holds
+the modules. Struck text kept, not rewritten (the §11 habit).
+
+**Knock-on, and it is the reason this matters:** §8c and §8e below cite
+roughly eight line numbers in `cfe/src/world.rs` — a path that can no
+longer be opened. Those entries cannot be looked up at all until
+someone re-locates them in `world/`. A line number in a document is
+only as durable as the file it names.
 
 **Read `docs/20_WORLD_REFACTOR.md` before modifying
 `engine/cfe/src/world.rs`.** The file carries the same banner at its
@@ -624,15 +705,30 @@ playtest — the same discipline Ruling Box 1 used for `f`.
   kernel's own `AssayExceedsVein`.
 - `cfe/src/dop.rs:559` — disposition weights (3/5·1/5·1/5) deciding
   which history counts as winning.
-- `cfe/src/world.rs:1011,1040,1092,3490` — the year voice 60, the
-  syntropy floor 1/2, the TECH-1b condition thresholds (480/240/100),
-  the practice deposit window.
-- `cfe/src/world.rs:688,3658,3714` — instrument forge costs and the
-  ROUTE-1 charter/toll rates, hard-coded in bodies rather than sited in
-  `dop.rs` beside the other constants.
-- `cfe/src/world.rs:3404` — `lift_ward`'s ceiling 5, with `depth`
-  SUPPLIED BY THE CALLER: an aperture gate trusting an unverified
-  external number. Live wire: the reading taken, not passed.
+- `engine/cfe/src/world/` — the year voice 60, the syntropy floor 1/2,
+  the TECH-1b condition thresholds (480/240/100), the practice deposit
+  window. (Line numbers struck 2026-08-04: see the note closing §8c.)
+- `engine/cfe/src/world/` — instrument forge costs and the ROUTE-1
+  charter/toll rates (`terraform`, `aperture_transfer`, `haul`),
+  hard-coded in bodies rather than sited in `dop.rs` beside the other
+  constants.
+- `engine/cfe/src/world/genesis.rs` — `lift_ward`'s ceiling 5, with
+  `depth` SUPPLIED BY THE CALLER: an aperture gate trusting an
+  unverified external number. Live wire: the reading taken, not passed.
+  (Cited here as `world.rs:3404`; the constant actually sat at 3490 in
+  the pre-split monolith — the drift that prompted the §8c note.)
+
+**WHY EVERY LINE NUMBER IN §8c AND §8e IS STRUCK (2026-08-04).** These
+cited `cfe/src/world.rs`, which has not existed since `666be81` split
+5,034 lines into `world/`. Resolving them mechanically was ATTEMPTED
+and REFUSED: read against the pre-split monolith, the numbers do not
+land where the entries say they do. `1011` is inside a `CouncilClosed`
+match, not "the year voice 60"; `1040` is demurrage/vent logic, not
+"the syntropy floor"; `lift_ward`'s ceiling is at 3490, cited as 3404.
+**They had already drifted BEFORE the split** — the file kept growing
+underneath them. Rewriting them to new line numbers would have laundered
+wrong pointers into confident-looking ones, so the entries now name
+SYMBOLS, which do not drift. Cite a symbol or a law, never a line.
 - `ledger/src/galaxy.rs:33`, `registry.rs:37`, `converge.rs:257,287` —
   reach 16, seat widths 8/16, terminal window 8, the /12 G-sheet
   advance (restated a third time at `conductor/src/lib.rs:105` and
@@ -663,9 +759,21 @@ These read a rendering as if it were truth:
 - `scribe/src/lib.rs:101` + `journal.rs:707,777` — the append cursor is
   a LINE COUNT of the exported `chronicle.jsonl` / `journal.jsonl`, and
   the wall is rebuilt by re-parsing the display stream it just wrote.
-- `tools/observer.py:273` — `consumed` is accumulated by splitting the
+- ~~`tools/observer.py:273` — `consumed` is accumulated by splitting the
   chronicle's `detail` display string, violating that file's own
-  no-grepping law at line 11, and it feeds the INTELLIGENCE ratio.
+  no-grepping law at line 11, and it feeds the INTELLIGENCE ratio.~~
+  **CLOSED 2026-08-04** (`348164e`, harness node). The premise recorded
+  here — that no data field existed to read instead — was false: every
+  exported receipt already carries `tlv`, hex of
+  `receipt.event.wire_bytes()` (`lens/src/render.rs`, NOT the scribe as
+  the task had it). `yield_amount` now decodes tag 3 with the
+  `tlv_records`/`tlv_ratio` helpers the file already ran in production —
+  the MIRROR-TLV pattern applied to a receipt instead of an orb.
+  Measured read-only on the live board: 705 `yield_collected` receipts,
+  prose and bytes agreeing on all 705, four views byte-identical. No
+  number moved; the silent-zero failure mode did (`frac` swallowed a bad
+  token into `Fraction(0)`, so a renderer format change would have
+  dropped INTELLIGENCE to "—" with no error).
 - `conductor/src/lib.rs:618` — the forge rung reconstructs on resume by
   counting `solves/*.json` files (`level = (1 + solved/3).min(5)`), "an
   honest approximation until solves become receipts". Live carrier: a
@@ -683,38 +791,68 @@ witness, not a ruling.
   conditional, so the emitted SHAPE changes with progress and every
   consumer's `condition === 6` test (`observatory.html:266`,
   `observer.py:671`) can never match. [VERIFIED]
-- `ledger/src/lib.rs:191` — `write_universe_card` hard-codes `span` to
-  `"64"` while `universe_span()` reads that same field as the authority:
-  every clock tick clobbers a non-default span back to 64.
-- `tools/observer.py:311` — petitions are counted from `inbox/pending/`,
-  but the engine writes directives flat into `inbox/`, so "petitions
-  pending upward" is permanently 0.
-- `conductor/src/lib.rs:141` — `deck_band4` branches on
-  `metabolism == "aeric"`, which is not in `METABOLISMS`
-  (`registry.rs:21`): the AericDeckBand law is unreachable.
+- ~~`ledger/src/lib.rs:191` — `write_universe_card` hard-codes `span` to
+  `"64"`~~ **CLOSED** (verified 2026-08-04): the span is carried forward
+  verbatim on every rewrite; the surviving `64` is `universe_span`'s
+  `unwrap_or_else` default, which correctly seeds the first write only.
+- ~~`tools/observer.py:311` — petitions are counted from `inbox/pending/`~~
+  **CLOSED** (verified 2026-08-04): the reader counts `*.json` at the
+  inbox root, archives excluded by being directories. The old path
+  survives only inside the comment explaining the fix.
+- `conductor/src/lib.rs` — `deck_band4` branches on
+  `metabolism == "aeric"`, which is not in `METABOLISMS`: the
+  AericDeckBand law is unreachable. **DECLARED AND PINNED 2026-08-04**
+  (`polity_therm_pins.rs::the_aeric_deck_band_is_unreachable_today`) so
+  the dead branch is honest rather than hidden — but the RULING is still
+  owed and is the operator's: **is an aeric line a kind of PEOPLE or a
+  kind of HOME?** People → it belongs in `clade`, an append-only
+  amendment to a closed vocabulary ratified at `15_TAXON` §3. Home → it
+  is a siting property, `deck_band4` takes a siting argument rather than
+  an axis, and both call sites change shape. The two say opposite things
+  about a line that migrates off its giant. Nothing is blocked meanwhile:
+  33 live registry cards carry no aeric substrate.
 - `ledger/src/registry.rs:231` — `lineage_domain` takes a
   `SubstrateBand` that every call site passes as `None`, so the
   thermal/cryo halves of the progenitor seat law never fire.
-- `conductor/src/lib.rs:1294` — `spatial_l1` is UNWRAPPED L1 on a torus,
-  used for every melt distance, while `ledger`'s own `l1_distance` wraps.
-- `conductor/src/lib.rs:329,1403` — deal ids are `beat*100_000 + seq*4`
-  with the merchant pass carving `+90_000`: a hand-partitioned namespace
-  that collides past ~22,500 crossings in a beat.
-- `conductor/src/lib.rs:756` — the survey charter gates on
-  `iron >= 40 && biomass >= 20` while the comment two lines up states
-  the charter moves 20 iron + 10 biomass.
-- `cfe/src/vrp.rs:26` — `Timekeeper::attest` ignores `self.id` and always
-  attests, so the 3-of-3 quorum is three identical keepers and
-  `QuorumOpen`/`Refuses` are unreachable.
-- `cfe/src/world.rs:1082` — `crystal_deposits` opens `let _ = now;` and
-  never window-prunes, unlike its counterpart `crystal_deposits_at`, so the
-  `constellation()` read can diverge from what actually crystallizes.
-- `cfe/src/world.rs:2002` — WANT-1 kind 1 (epistemological) is in the
+- `conductor/src/lib.rs` — `spatial_l1` is UNWRAPPED L1 on a torus, used
+  for every melt distance, while `ledger`'s own `l1_distance` wraps
+  against `universe_span`. **RE-VERIFIED STILL LIVE 2026-08-04** by
+  reading both bodies: the conductor's takes a plain absolute
+  difference per leg; the ledger's calls `wrapped_abs(u, v, &span)`.
+- `conductor/src/lib.rs` — deal ids are `beat*100_000 + seq*4` with the
+  merchant pass carving `+90_000` out of the SAME block: a
+  hand-partitioned namespace that collides once `seq*4` reaches 90,000,
+  i.e. past ~22,500 crossings in a beat. **RE-VERIFIED STILL LIVE
+  2026-08-04**: `beat * 100_000 + seq * 4` at two sites and
+  `beat * 100_000 + 90_000 + seq * 4` at a third.
+- `conductor/src/lib.rs` — the survey charter gates on
+  `iron >= ratio(40,1) && biomass >= ratio(20,1)` while the comment
+  directly above states the charter moves *"20 iron + 10 biomass"*.
+  **RE-VERIFIED STILL LIVE 2026-08-04.** Stated precisely, because the
+  original entry read as a plain contradiction and it may not be one: a
+  RESERVE requirement of double the spend is a defensible rule. What is
+  not defensible is that the comment and the gate cannot both be read as
+  describing the same law. One of the two is wrong and neither says
+  which.
+- ~~`cfe/src/vrp.rs:26` — `Timekeeper::attest` ignores `self.id`~~
+  **ADDRESSED, not fixed** (verified 2026-08-04) — and the distinction
+  is the point. `attest` is still blind to `self.id`, now DELIBERATELY
+  and with the reason on the type: *"one process gives three keepers one
+  input, so the honest answer is the same answer"*, and *"a rule picking
+  which keeper refuses would be authored physics."* `tick` is total over
+  any attestation triple, so `QuorumOpen` is reachable by a caller. The
+  live quorum arrives with real processes at N7.
+- `engine/cfe/src/world/survey.rs` — `crystal_deposits` opens
+  `let _ = now;` and never window-prunes, unlike its counterpart
+  `crystal_deposits_at`, so the `constellation()` read can diverge from
+  what actually crystallizes.
+- `engine/cfe/src/world/` — WANT-1 kind 1 (epistemological) is in the
   tag-62 vocabulary with no engine rule: a declared want that can never
   strike.
-- `tools/observer.py:41,100` — `RESOURCES` stops at `sink`; the engine
-  carries a seventh, `Crystal` (tag 7), so crystal banks are invisible
-  in every observer table and the TLV decode.
+- ~~`tools/observer.py:41,100` — `RESOURCES` stops at `sink`~~ **CLOSED**
+  (verified 2026-08-04): `crystal` is in `RESOURCES` and in the TLV
+  decode, which reads it off the EXISTING banked entry (tag 18) rather
+  than a new tag.
 
 ### 8f. DOC AND PROTOCOL DRIFT
 
@@ -734,14 +872,20 @@ witness, not a ruling.
   (SPINE-UPLINK segment blob/step) have NO protocol entry at all.
 - `protocols/NS-7_ANCHOR.md` is a 26-line STUB (§1–§3 all `(unwritten)`).
   `NS-4_APERTURE.md` §4 (the facet ladder) is `(unwritten — N5)`.
-- `kernel/src/lib.rs:327,857` — `covered()` and `scope_of`'s own doc
-  comments still say only `ResourceTransferred` is covered and the rest
-  is "drafted law, unenforced". Coverage is 64/64. A reader of the
-  constitution is told the containment law is inert when it is live.
+- `kernel/src/lib.rs` — `covered()` and `scope_of`'s own doc comments
+  still say only `ResourceTransferred` is covered and the rest is
+  "drafted law, unenforced". A reader of the constitution is told the
+  containment law is inert when it is live. ~~Coverage is 64/64.~~
+  **THIS CORRECTION IS ITSELF WRONG — corrected again 2026-08-04:**
+  coverage is **70 of 71**, and `covered()` is NOT total. `BookPosted`
+  is unjudged. See §0. Twice now this entry has carried a confident
+  count that the tree had already outrun; the durable fix is a
+  compiler-derived pin, not a third number here.
 - `SYSTEM_SPEC.md` §5 lists the spine uplink under Build (it landed at
   `1a7b579`); `BUILD_ORDER.md` §3c lists SPINE UPLINK and BOX-1
   CALIBRATION as open (both landed); several docs still quote coverage
-  59/64 (it is 64/64 since `3c5c994`).
+  59/64 ~~(it is 64/64 since `3c5c994`)~~ — **it is 70/71, and not
+  total; see §0.**
 
 ## 9. THE LOOSE ENDS SWEEP — 2026-08-02 (remediations-lane)
 
@@ -763,11 +907,33 @@ entry); §8e's duplicate `constellation` key is re-verified STILL LIVE at
 - R15 — the whole-state blob per commitment is a WIRE question; no lane
   changes it alone.
 
-**THE INTEGRATION RISK, named because it is nobody's task.** Four lanes
-sit 18–19 commits behind `main`, and `kernel-lane` is 19 ahead / 19
-behind — fully diverged. `capacity-lane` already gates its `20_FOUNDING`
-§6a on kernel #30, so the coupling is live. A reconciliation pass is
-owed before any of the four lands, and no node currently holds it.
+**THE INTEGRATION RISK, named because it is nobody's task.** ~~Four
+lanes sit 18–19 commits behind `main`, and `kernel-lane` is 19 ahead /
+19 behind — fully diverged.~~ `capacity-lane` already gates its
+`20_FOUNDING` §6a on kernel #30, so the coupling is live. A
+reconciliation pass is owed before any of the four lands, and no node
+currently holds it.
+
+**REMEASURED 2026-08-04** — the drift is far wider than the numbers
+above, and `main` now moves several times a day:
+
+- `harness-lane` is **102 behind / 0 ahead**: fully merged, stale, and
+  nothing is waiting in it.
+- `d3-scope` is **52 behind / 17 ahead** (the almanac and the observer
+  fix). Its merge is owed and will NOT be clean — it carries kernel
+  VERSION 4 where `main` carries 5, and both are real amendments.
+  **Compose, do not choose.**
+
+**AND A HAZARD LEARNED THE HARD WAY, recorded because it cost real
+work.** A lane on a fork 49 commits behind ran
+`cargo clippy --workspace -D warnings`, found six genuine findings in
+two files it did not own, and relayed them. Every one was ALREADY FIXED
+on `main` at `ff3f227` ("clippy to zero"). **Re-run the measurement
+against `main`, not against your fork, before any relay leaves your
+lane** — relaying a defect that no longer exists costs the receiving
+lane a wasted investigation and puts a false entry in the record, which
+is worse than not relaying at all. The same discipline applies to every
+count in this file, which is what §0 is.
 
 **THE ONE CONVERGENCE WORTH THE BOARD'S ATTENTION.** `kernel-lane`
 reverted P3 (`df48786`) after it exposed a live/replay divergence — *"the

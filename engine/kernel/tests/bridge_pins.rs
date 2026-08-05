@@ -45,11 +45,13 @@ fn a_world_that_relates_nothing_stands_on_the_ground() {
     assert!(read.rank_is_defined(), "a zero cocycle IS a cocycle");
 
     // AND IT HAS NOT VANISHED. `D` is the ELEVATION, and it reads the
-    // GROUND — the world stands on the surface holding one degree,
-    // itself. This is the reading Article II consults.
-    assert_eq!(read.degree(), Degree::GROUND, "it stands ON the ground, not in it");
-    assert_eq!(read.degree().get(), 1, "D reads ONE at the floor, never zero");
-    assert!(read.degree().is_ground());
+    // floor of its own estate — THE OPENED GROUND (operator ruling
+    // 2026-08-05: *GROUND opens into V = volume of orbs, weight on D as
+    // capacity*). Three orbs at rest stand on a floor of three; the
+    // point survives inside as the per-orb weight.
+    assert!(read.degree().is_ground(), "it stands ON the ground, not in it");
+    assert_eq!(read.degree().get(), 3, "the floor IS the volume: three orbs read three");
+    assert_eq!(read.degree().volume(), 3, "the opened ground is the estate's measure");
     assert!(!read.degree().is_above_ground());
 
     // A lone orb relates to nothing at all, lawfully — and still stands.
@@ -107,7 +109,11 @@ fn no_committed_world_ever_reads_below_the_ground() {
         // The elevation partitions exactly, and `above()` is the rank.
         assert_ne!(degree.is_ground(), degree.is_above_ground(), "world {n}");
         assert_eq!(degree.above(), read.rank, "world {n}: above-ground IS the rank");
-        assert_eq!(degree.get(), read.rank + 1, "world {n}: D = GROUND + circulation");
+        assert_eq!(
+            degree.get(),
+            state.orbs.len().max(1) * (read.rank + 1),
+            "world {n}: D = volume × (GROUND + circulation) — the opened ground"
+        );
     }
 }
 
@@ -488,7 +494,11 @@ fn the_degree_rises_above_the_ground() {
     );
     assert!(degree > Degree::GROUND, "strictly above, never merely at");
     assert_eq!(degree.above(), read.rank, "the elevation IS the circulation");
-    assert_eq!(degree.get(), read.rank + 1, "D = GROUND + circulation, and GROUND is 1");
+    assert_eq!(
+        degree.get(),
+        3 * (read.rank + 1),
+        "D = volume × (GROUND + circulation): the estate weights the whole degree"
+    );
 
     // AND THE CONTRAST, in one place so the pair is legible: the same
     // three orbs with a COMPOSING triangle stay on the floor. The
@@ -498,17 +508,17 @@ fn the_degree_rises_above_the_ground() {
     flat.bonds = vec![bond(1, 2, 2), bond(2, 3, 3), bond(1, 3, 5)];
     let composed = read_entangled(&flat);
     assert_eq!(composed.rank, 0, "2 + 3 = 5 composes — pure frame");
-    assert_eq!(
-        composed.degree(),
-        Degree::GROUND,
+    assert!(
+        composed.degree().is_ground(),
         "and a world of pure frame stands ON the ground, however many bonds it holds"
     );
 
     // The polytonic reading (EQUATIONS D1): each surviving grade is a
-    // TONE. The flat world is single-toned at the point; the strained
-    // world is polytonic — the chord it holds is what D counts.
-    assert!(composed.degree().get() == 1, "the flat world is one tone");
-    assert!(degree.get() > 1, "the strained world is polytonic");
+    // TONE. The flat world rests on the floor of its estate — the
+    // OPENED ground, one degree per orb held; the strained world stands
+    // above it, and the chord is what D counts.
+    assert_eq!(composed.degree().get(), 3, "the flat estate reads its volume");
+    assert!(degree.get() > composed.degree().get(), "the strained world stands higher");
 }
 
 // ─── THE FOLD GUARD — the occupancy floor on both offices ───────────
@@ -570,12 +580,15 @@ fn a_carry_into_fewer_tones_refuses() {
     // The successor keeps all three orbs and DROPS their obligations —
     // the structure crossed, the room did not.
     let successor = orbs(3);
-    assert_eq!(read_entangled(&successor).degree(), Degree::GROUND, "no tones in the successor");
+    assert!(read_entangled(&successor).degree().is_ground(), "no tones in the successor");
 
     let verdict = fold_guard(&prior, &successor, &[]);
     assert_eq!(
         verdict,
-        FoldGuard::RoomBelowOccupancy { carried_rank, successor_degree: 1 },
+        // The VERDICT is rank-against-rank and unchanged by the opened
+        // ground; the reported degree is the weighted reading — three
+        // orbs at rest, floor of three.
+        FoldGuard::RoomBelowOccupancy { carried_rank, successor_degree: 3 },
         "carried structure landing in fewer tones than it occupies must refuse"
     );
     assert!(!verdict.is_admitted());

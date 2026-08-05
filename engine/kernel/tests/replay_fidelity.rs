@@ -45,20 +45,31 @@ fn a_sited_world_replays_with_both_turns_intact() {
     fidelity(&world, "siting with both turns");
 }
 
-/// Absent must stay absent — `None` must never become a zero anywhere
+/// Absent must stay absent — `None` must never become a ZERO anywhere
 /// in the round trip, or every legacy orb silently moves to the equator.
+///
+/// TRUTH-UPDATED (THE PLACEMENT DRAW, 2026-08-06): a `theta: None`
+/// DEED no longer records placeless — the world draws the longitude,
+/// chronicle-seeded, and the receipt carries the resolved slot. That is
+/// not the zero-coercion this pin guards against: the drawn angle is
+/// receipted, on-slot, and replays exactly. What this pin still holds:
+/// ψ is NOT drawn, so absence survives there — and legacy receipts
+/// carrying `None` replay verbatim, because replay reads receipts and
+/// the draw lives only at the deed.
 #[test]
-fn an_unplaced_world_replays_unplaced() {
+fn the_draw_places_theta_and_absence_stays_absent_in_psi() {
     let mut world = World::new();
     world.found("bare").expect("founds");
     world.commission_star(StarClass::G).expect("star");
     let orb = world.committed().orbs[0].orb_id;
     world.site_planet(orb, unit(1, 4), positive(3, 2), None, None).expect("sites");
 
+    let live = world.committed().orbs[0].thermal.clone().expect("sited");
     let site = replay(world.chronicle()).orbs[0].thermal.clone().expect("sited");
-    assert!(site.theta.is_none(), "absent stays absent — never zero");
-    assert!(site.psi.is_none(), "unplaced is not the equator");
-    fidelity(&world, "siting without turns");
+    assert!(site.theta.is_some(), "the draw placed it — placeless is not a place");
+    assert_eq!(site.theta, live.theta, "the RECEIPTED slot replays exactly, never re-drawn");
+    assert!(site.psi.is_none(), "ψ is not drawn — absent stays absent, never zero");
+    fidelity(&world, "siting through the placement draw");
 }
 
 /// The vertical axis through the same guard, with a RE-seating so the

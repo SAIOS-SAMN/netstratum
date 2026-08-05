@@ -185,6 +185,20 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     held.last_touch = receipt.stamp;
                 }
             }
+            // THE ESTATE SURVEY (tag 97): the meter's draw replays
+            // exactly — the resource comes from the SAME sealed rule the
+            // live path drew from (call-not-copy), and every settle is a
+            // touch. The parcels are derived, so nothing else moves.
+            ClosureEvent::EstateSurveyed { payer, cost, .. } => {
+                if let Some(held) = peel(&mut orbs, *payer) {
+                    let (resource, _) = crate::dop::survey_meter();
+                    held.bank(resource, -cost.clone());
+                    held.last_touch = receipt.stamp;
+                }
+            }
+            // THE APPRAISAL (tag 98): a valuation reading, receipted.
+            // Moves no bank, sites nothing — the receipt IS the state.
+            ClosureEvent::AppraisalStruck { .. } => {}
             ClosureEvent::FamineStruck { orb_id, resource, drawn } => {
                 if let Some(held) = peel(&mut orbs, *orb_id) {
                     held.bank(*resource, -drawn.clone());

@@ -9,7 +9,7 @@ that implements it, and the witness test that goes red if either side
 drifts.
 
 Ownership (CHARTER §10): coder-02 owns `docs/` (except this document),
-`engine/cfe/src/world.rs`, `clients/cli/`. coder-01 owns
+`engine/cfe/src/world/`, `clients/cli/`. coder-01 owns
 `engine/rfa-core/`, `engine/physics/`, this document
 (`docs/03_SUBSTRATE_CONTRACT.md`), and the workspace members line.
 Cross-territory changes travel by relay through the operator, never

@@ -223,7 +223,7 @@ axes). The 15 roots are the first 15 genesis deeds; a 16th is one more deed.
 
 **Landed / build.** Landed: `clients/cli`, all deeds, the steward inbox,
 lens-shaped reads (NS-2). Build: the client talks to the local kernel (not
-`world.rs` directly) — Phase 3; AI-agent defense — post-mesh.
+`cfe::world` directly) — Phase 3; AI-agent defense — post-mesh.
 
 **Observation is a lens, never a copy (§11 rule 2).** Views DERIVE from the
 chain at a granted facet depth, disposable, never read back. The observer,

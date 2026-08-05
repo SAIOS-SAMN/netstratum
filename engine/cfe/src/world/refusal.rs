@@ -232,6 +232,12 @@ pub enum ActionRefused {
     /// LIT-1 — a claim without receipts is a boast. The chronicle is
     /// what separates the two.
     ClaimWithoutWitness { name: String },
+    /// THE RING REACH (2026-08-06) — this star's field anchors no more
+    /// rings. A ring is a distinct orbit radius; the reach derives from
+    /// the star's MAGNETISM (`StarClass::ring_reach`). Slots within an
+    /// anchored ring stay open — the refusal is for a NEW ring beyond
+    /// the field, never for filling one the field already holds.
+    RingReachExceeded { held: usize, reach: u8 },
     /// LIT-1 — a cited digest is not a receipt this world sealed. The
     /// law verifies the CITATION, never the virtue.
     WitnessNotInChronicle { digest: [u8; 32] },

@@ -136,6 +136,28 @@ def decode_orb_tlv(path):
     return orb
 
 
+def yield_amount(tlv_hex):
+    """The yield's amount from the receipt's CANONICAL bytes.
+
+    Every exported receipt carries `tlv` — hex of the event's wire
+    form (lens/render.rs: `hex(&receipt.event.wire_bytes())`). For
+    YieldCollected that is tag 3, laid out by `dop.rs::amount_layout`
+    as orb u64 LE (8) ‖ resource u8 (1) ‖ ratio. Reading it here is
+    the MIRROR-TLV pattern applied to a receipt instead of an orb:
+    the wire is the authority, the `detail` prose is a rendering.
+
+    None when no tag-3 record stands — the caller then adds nothing
+    rather than guessing a zero into a total."""
+    try:
+        data = bytes.fromhex(tlv_hex)
+    except ValueError:
+        return None
+    for tag, value in tlv_records(data):
+        if tag == 3 and len(value) > 9:
+            return tlv_ratio(value, 9)[0]
+    return None
+
+
 # ── readers (the lens's data files — data, never prose) ─────────────
 
 def read_jsonl(path):
@@ -277,10 +299,14 @@ def world_facts(world_dir):
         events.append(receipt)
         terminal_digest = receipt.get("digest") or terminal_digest
         if receipt.get("event") == "yield_collected":
-            try:
-                consumed += frac(receipt.get("detail", "").split(" ")[0])
-            except (ValueError, ZeroDivisionError):
-                pass
+            # THE NO-GREPPING LAW, obeyed (see this file's docstring).
+            # This read the amount out of the rendered `detail` string
+            # with `.split(" ")[0]` — a parse of a rendering, and the
+            # denominator of the INTELLIGENCE reading. The canonical
+            # bytes were on the same receipt the whole time.
+            amount = yield_amount(receipt.get("tlv", ""))
+            if amount is not None:
+                consumed += amount
     puzzles, depth = 0, 0
     solves = world_dir / "solves"
     if solves.is_dir():

@@ -158,7 +158,7 @@ orb fields:
 | **morality** — reciprocity | 2.4 | `returned_across` | `extracted_across` |
 
 Morality's ratio is **already built and already sealed** —
-`reciprocity_reading` (`cfe/src/world.rs:4905`) is exactly
+`reciprocity_reading` (`cfe/src/world/mod.rs`) is exactly
 `returned/(returned+extracted)`. Call it; never write a second.
 
 **Compassion has no entropic counterpart in the present sum**, so its
@@ -350,7 +350,7 @@ idea natural. **It cannot work, and the reason is structural.** `[READ]`
    **`rank = 0` still.**
 3. **The edges are keyed to orbs, not entities.** `Bond.source/target`,
    `Covenant.obligor/beneficiary`, `AbsorptionDebt.debtor/creditor`
-   (`world.rs:187-228`) are all orb ids. There is no entity-keyed
+   (`world/state.rs`) are all orb ids. There is no entity-keyed
    relation for `project_complex` to read even if it wanted to.
 
 **So the substrate is not "in the wrong place" — the cycle-bearing
@@ -629,7 +629,7 @@ indexes by NAME, so a new coordinate moves no existing reading.
 The two projections are **complementary, never overlapping** — pinned.
 
 **The substrate was already in the law.** `cfe::world::charter_route`
-(`world.rs:3784-3799`) writes the SAME `deal` into BOTH books, and
+(`world/mod.rs::charter_route`) writes the SAME `deal` into BOTH books, and
 `pair_melt` (`:3850`) already joins on shared deal ids. A lane is the
 one committed, replay-derived relation that spans two worlds. The edge
 value is the best shared `eta` — the law's own reading, called rather
@@ -665,7 +665,7 @@ books read: 33 · books holding ANY lane: 0 · lane legs: 0
 cross-book rank: 0 · flows: 0 · verdicts: [Void, Void, Void, Void]
 ```
 
-**And the cause is one line.** `charter_route` (`world.rs:3772`) draws
+**And the cause is one line.** `charter_route` (`world/mod.rs`) draws
 **4 alloy from each side**. No polity banks alloy at all (measured:
 `banked` holds iron, biomass, joule, sink — never alloy). So every
 charter refuses `CannotAfford`, **17 crossings cleared and 0 lanes were

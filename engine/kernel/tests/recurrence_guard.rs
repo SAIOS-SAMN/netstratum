@@ -182,13 +182,16 @@ fn the_arrow_law_holds() {
     // The verifier half sits in the sealed math tier: physics + hashing
     // + the exact-arithmetic floor.
     //
-    // AMENDMENT (2026-08-05, the spherical carrier): "ratio" enters the
-    // set. The turn law (TURN_SLOTS, Slot, turn_gap) RELOCATED from
-    // cfe::dop down into `ratio` precisely so this tier could read it
-    // without reaching UP — the alternative was a second copy of the
-    // constant, the two-truths defect. `ratio` is the floor below
-    // physics itself (physics imports it), so the arrow still points
-    // strictly downward.
+    // AMENDMENT (2026-08-05, the spherical carrier — recorded by BOTH
+    // lanes independently, composed at merge): "ratio" enters the set.
+    // The turn law (TURN_SLOTS, Slot, turn_gap) RELOCATED from cfe::dop
+    // down into `ratio` precisely so this tier could read it without
+    // reaching UP — the alternative was a second copy of the constant,
+    // the two-truths defect. `ratio` is the floor below physics itself
+    // (physics imports it), so the arrow still points strictly
+    // downward. The d3-scope lane hit the red guard first and amended
+    // one commit late; the lens lane amended in the landing commit —
+    // one amendment, two witnesses, which is how a guard should fail.
     let verify_allowed = ["blake3", "physics", "ratio"];
     for dep in runtime_deps(&root.join("engine/solver-verify/Cargo.toml")) {
         assert!(

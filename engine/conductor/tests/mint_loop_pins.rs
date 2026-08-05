@@ -48,6 +48,15 @@ use conductor::run_era;
 /// would have been indistinguishable.
 fn scratch(name: &str) -> PathBuf {
     let mut path = std::env::temp_dir();
+    // PROCESS-UNIQUE, like every other fixture in the tree. Without the
+    // pid this was the ONE test reusing a fixed path across runs and
+    // across concurrent cargo invocations, and `run_era` ->
+    // `default_era_roots` scans the PARENT directory for `<base>-era*`
+    // — so leftover state from another run is reachable. Measured: the
+    // same 60-beat era gave 296/56/272, then 297/57/276, then
+    // 328/48/234 with two kernel refusals. The engine itself replays
+    // exactly (`examples/determinism_probe.rs`); only this fixture
+    // drifted.
     path.push(format!("netstratum-mint-{name}-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&path);
     std::fs::create_dir_all(&path).expect("scratch");

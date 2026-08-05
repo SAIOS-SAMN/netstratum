@@ -103,11 +103,11 @@ also that `C` is LENS-ONLY and gates nothing, which the parenthetical
 ## Directives
 
 1. **Worktree.** Main holds in-flight uncommitted work
-   (`clients/cli/src/main.rs`, `engine/cfe/src/world.rs`,
+   (`clients/cli/src/main.rs`, `engine/cfe/src/world/`,
    `engine/conductor/src/lib.rs`). MESH-1a works in
    `.claude/worktrees/mesh-n6`, branch `mesh/n6`, off main; merge only
    on green: build, full suite, clippy zero. This landing never edits
-   `world.rs` — `replay` is already public.
+   `cfe::world` — `replay` is already public.
 2. **One landing.** Spec + mechanic + vectors together, red-first:
    NS-5 §1/§2/§3, the `engine/mesh` crate, the dop.rs tag header, and
    the witnesses land as one unit.

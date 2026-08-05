@@ -263,7 +263,7 @@ outside it.
 
 Two engineering nodes work this repo. File ownership keeps merges
 conflict-free: **coder-02 (vocabulary node, main tree)** owns `docs/`
-(EXCEPT the substrate contract), `engine/cfe/src/world.rs`, `clients/cli/`.
+(EXCEPT the substrate contract), `engine/cfe/src/world/`, `clients/cli/`.
 **coder-01 (substrate node, worktree)** owns `engine/rfa-core/`,
 `engine/physics/`, `engine/solver/`, `engine/ledger/` (registry +
 observer), `docs/03_SUBSTRATE_CONTRACT.md`, and the workspace `Cargo.toml`

@@ -3452,6 +3452,12 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "the work earns {} — {claimed} was claimed",
             style.strong(&bound.to_string())
         ),
+        ActionRefused::RingReachExceeded { held, reach } => format!(
+            "this star's field anchors {} ring(s) and {held} already stand — site on \
+             an anchored ring (slots within a ring stay open), or this system has \
+             reached its magnetism",
+            style.strong(&reach.to_string())
+        ),
         // `OffSlot` is DEAD (29_CONSTRUCTION C1): an off-slot angle
         // cannot be constructed, so no verb can be handed one to refuse.
         // The client parses user input through `Slot::from_angle` and
@@ -4037,6 +4043,16 @@ fn chronicle(world: &World, style: &Style) {
         let described = match &receipt.event {
             cfe::dop::ClosureEvent::ColonyFounded { name, .. } => {
                 format!("⚑ colony {} founded", style.strong(name))
+            }
+            cfe::dop::ClosureEvent::AppraisalStruck { value, .. } => {
+                format!("⚖ APPRAISED — {} in the commensurate unit", amount(value))
+            }
+            cfe::dop::ClosureEvent::EstateSurveyed { covered, cost, .. } => {
+                format!(
+                    "⌖ estate SURVEYED — {} orb(s), one witness each, {} iron metered",
+                    style.strong(&covered.len().to_string()),
+                    amount(cost)
+                )
             }
             cfe::dop::ClosureEvent::VocabularyMinted { axis, code, sigil, word, binding } => {
                 format!(

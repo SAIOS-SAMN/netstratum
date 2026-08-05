@@ -1,0 +1,32 @@
+//! THE ALMANAC — the periodic law of elements, the locality a star and
+//! a planet give it, the pressure that refines them, and the gems they
+//! compound into.
+//!
+//! `14_ALMANAC.md` rules the grammar; `dop::element_properties` landed
+//! its first half. This is the reading a refinement DEED must be
+//! written against, and it is **broken apart by concern so each axis
+//! can widen without disturbing the others** (operator ruling
+//! 2026-08-04):
+//!
+//!   [`periodic`]  the five axes — line, lane, shell, phase, spin
+//!   [`locality`]  what a star makes reachable, and what pressure
+//!                 refines
+//!   [`compound`]  what elements make together, and the gem's identity
+//!   [`thermal`]   the temperature line closed, and the orbit grain
+//!
+//! **EVERYTHING HERE IS A DERIVATION.** Pure, total, exact-rational, no
+//! I/O and no deed. `element_properties`, `thermal::band_of` and
+//! `site_planet` are all untouched, so nothing that has replayed
+//! replays differently.
+
+pub mod compound;
+pub mod locality;
+pub mod periodic;
+pub mod thermal;
+
+pub use compound::{compounds, gem_of, knowledge_of};
+pub use locality::{lines_of, local_to, pressure, refines, workable_in};
+pub use periodic::{periodic_of, Periodic, CELLS, LANES, LINES, PHASES, SHELLS, SPINS};
+pub use thermal::{
+    ceiling4, grained_t_eq4, orbit_on_grain, region_of, workable_at, ThermalRegion, ORBIT_GRAIN,
+};

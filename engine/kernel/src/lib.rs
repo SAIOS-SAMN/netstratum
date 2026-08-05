@@ -85,7 +85,38 @@ use solver_verify::{verify_work, WorkBroken};
 /// the two could not collide, and the merge lands both rather than
 /// letting one bump overwrite the other. A chain cut under 3 verifies
 /// forever under the gate that cut it.
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 5, patch: 0 };
+/// **0.5.1 — THE OPENED GROUND** (operator ruling 2026-08-05: *GROUND
+/// needs to be opened up into V = Volume of orbs, weight on D as
+/// capacity*). `D = volume(orbs) × (GROUND + circulation)` — the floor
+/// a state stands on is the measure of its estate, and founding an orb
+/// multiplies the whole degree.
+///
+/// **PATCH, and the class is DERIVED rather than chosen by feel.** The
+/// version rule says patch = a change that cannot alter what the gate
+/// admits or refuses. Proven at the type: every gate arm reads
+/// `Degree::above()`, which returns the circulation and is volume-blind
+/// by construction (`revocation_law`'s own comment already barred
+/// `get()`); the fold gate compares rank against rank — identical to
+/// the old floor-to-floor read on all inputs including adversarial ones
+/// (an orb smuggled into `next` cannot pad an increment, because no
+/// increment reads the floor). What changes is the READING — D on the
+/// board grows with the estate — and one refusal's reported number,
+/// which the rule itself lists as patch-class.
+///
+/// **0.6.0 — THE MAGNETIC REACH** (operator ruling 2026-08-06: planet
+/// capacity is based on the star's magnetism). MINOR, derived: the
+/// gate now REFUSES `RingBeyondReach` where it previously admitted —
+/// a `PlanetSited` threading a ring beyond what the star's field
+/// anchors. What the gate admits changed, so `minor` moves; the opened
+/// ground (0.5.1) rides beneath it as the patch it was.
+///
+/// **0.7.0 — THE APPRAISAL** (operator rulings 2026-08-06: appraise
+/// before pricing; staleness triggers renegotiation, consent closes
+/// acceptance). MINOR, derived: tag 98 enters `covered()` — the gate
+/// now admits (and can refuse `AppraisalOutsideSurvey` /
+/// `AppraisalMisvalued`) a deed that was `Unjudged` before. What the
+/// gate admits changed, so `minor` moves.
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 7, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
@@ -282,6 +313,32 @@ pub enum Refused {
     /// horizon could set it past any reachable stamp and never come up
     /// for approval at all.
     UnionTermNotRuled { declared: u64, ruled: u64 },
+    /// THE RING REACH (2026-08-06) — a siting threads a NEW ring beyond
+    /// what the star's magnetism anchors. The reach is the field grade
+    /// (`StarClass::ring_reach`, the dynamo derivation), computed by
+    /// CALLING the same rule the emitter refused on (call-not-copy).
+    /// Filling an anchored ring never refuses here — slots within a
+    /// ring are the turn rule's business, not the field's.
+    RingBeyondReach { held: usize, reach: u8 },
+    /// THE APPRAISAL (2026-08-06) — the subject's orb lies outside the
+    /// survey's covering (orb 0 names the estate itself where the
+    /// covering cannot value it whole). Nothing appraises unsurveyed.
+    AppraisalOutsideSurvey { orb: u64 },
+    /// THE APPRAISAL — the declared value is not what the sealed rule
+    /// computes over the prior state and the receipted covering. A
+    /// value cannot be quoted one way and receipted another.
+    AppraisalMisvalued { declared: Box<Ratio>, computed: Box<Ratio> },
+    /// E5b — an estate survey whose covering is not the whole estate:
+    /// empty (an unwitnessed observation cannot enter the record) or
+    /// short of the orbs that stand (a partial covering underpays the
+    /// meter). One theorem, both halves: the observation is read whole,
+    /// witnessed whole, and charged whole.
+    SurveyNotWhole { covered: usize, estate: usize },
+    /// E5b — the declared cost does not equal the sealed meter over the
+    /// volume. The kernel computes the meter by calling the SAME rule
+    /// the emitter drew from (call-not-copy), so a survey cannot be
+    /// quoted one way and charged another.
+    SurveyMeterMismatch { declared: Box<Ratio>, metered: Box<Ratio> },
 }
 
 /// THE JUDGE. Does `step` lawfully carry `prior` to `next`? Pure,
@@ -310,6 +367,8 @@ pub fn admits(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
     // that both must hold, never which speaks first, so this is a
     // diagnostics choice and is recorded as one.
     revocation_law(prior, next, step)?;
+    magnetic_reach(prior, step)?;
+    appraisal_rule(prior, step)?;
     decay(prior, step)?;
     gauge_move(prior, next, step)?;
     element_move(prior, next, step)
@@ -363,6 +422,75 @@ pub fn admits(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
 /// gauge-invariant part that grows — never on `Degree::get`, which
 /// includes the ground and would make the comparison vacuous exactly
 /// the way the struck `D > 0` gate was (a floor cannot decide).
+/// **THE MAGNETIC REACH GATE** (operator ruling 2026-08-06: planet
+/// capacity is based on the star's magnetism). A `PlanetSited` deed
+/// that threads a ring the prior state does not hold, when the prior
+/// state already holds as many rings as the star's field anchors,
+/// refuses. A ring is a distinct `orbit_r`; the reach is
+/// `StarClass::ring_reach` — the SAME sealed rule the emitter draws,
+/// so the field cannot be quoted one way at the door and another at
+/// the judge. No star in the prior state is the emitter's refusal
+/// (`NoStarCommissioned`) and is not re-judged here.
+/// **THE APPRAISAL RULE** (2026-08-06): an `AppraisalStruck` declares a
+/// value; the gate RE-DERIVES it from the prior state and the receipt's
+/// own seed and covering, calling the same sealed rule the emitter used
+/// (call-not-copy). A subject outside the covering refuses; a declared
+/// value the rule does not compute refuses. Staleness is deliberately
+/// NOT here — it triggers renegotiation and never gates a deed.
+fn appraisal_rule(prior: &Committed, step: &Step) -> Result<(), Refused> {
+    let ClosureEvent::AppraisalStruck { subject, seed, covered, value, .. } = &step.event
+    else {
+        return Ok(());
+    };
+    use cfe::dop::Holding;
+    if let Holding::Planetary { orb } | Holding::Building { orb, .. } = subject {
+        if !covered.contains(orb) {
+            return Err(Refused::AppraisalOutsideSurvey { orb: *orb });
+        }
+    }
+    let parcels = cfe::dop::parcels_of(seed, covered);
+    match cfe::dop::appraised_value(subject, &prior.orbs, &parcels) {
+        Some(computed) if computed == *value => Ok(()),
+        Some(computed) => Err(Refused::AppraisalMisvalued {
+            declared: Box::new(value.clone()),
+            computed: Box::new(computed),
+        }),
+        None => Err(Refused::AppraisalOutsideSurvey {
+            orb: match subject {
+                Holding::Planetary { orb } | Holding::Building { orb, .. } => *orb,
+                Holding::Estate => 0,
+            },
+        }),
+    }
+}
+
+fn magnetic_reach(prior: &Committed, step: &Step) -> Result<(), Refused> {
+    let ClosureEvent::PlanetSited { orbit_r, .. } = &step.event else {
+        return Ok(());
+    };
+    let Some(star) = prior.star else {
+        return Ok(());
+    };
+    // `orbit_r` is a `Positive` end to end (29_CONSTRUCTION C1), so the
+    // ring census compares proven radii — no bare Ratio ever enters.
+    let mut rings: Vec<&cfe::dop::Positive> = Vec::new();
+    for held in &prior.orbs {
+        if let Some(site) = &held.thermal {
+            if !rings.contains(&&site.orbit_r) {
+                rings.push(&site.orbit_r);
+            }
+        }
+    }
+    if rings.contains(&orbit_r) {
+        return Ok(());
+    }
+    let reach = star.ring_reach();
+    match rings.len() < usize::from(reach) {
+        true => Ok(()),
+        false => Err(Refused::RingBeyondReach { held: rings.len(), reach }),
+    }
+}
+
 fn revocation_law(
     prior: &Committed,
     next: &Committed,
@@ -691,7 +819,7 @@ fn covered(event: &ClosureEvent) -> bool {
         // no banked value. Matches `world::literature`.
         | E::WorkAspired { .. } | E::WorkClaimed { .. }
         // W-A slice-1 — the BANKED-NEUTRAL authority deeds. Each one's
-        // `world.rs::replay` arm touches NO bank (it sets a flag, a
+        // `world/replay.rs` arm touches NO bank (it sets a flag, a
         // seal, a list: terrain seed, star, planet site, practice,
         // ward, veil, genesis, prospect, the succession boundary, a
         // licence record, an instrument, a route, an offer, a bond).
@@ -702,6 +830,17 @@ fn covered(event: &ClosureEvent) -> bool {
         // Forward/Council seals — all move banks) stay held out for
         // W-A slice-2's I1 arms. TaxonSealed stays coder-03's #42.
         | E::WorldCharted { .. } | E::StarCommissioned { .. } | E::PlanetSited { .. }
+        // E5b THE ESTATE SURVEY (tag 97) — a VALUE-MOVING deed with its
+        // own I1 arm in `lawful_deltas` (the meter's draw, plus the
+        // witnessed and metered theorems judged there). Added BY HAND:
+        // the compiler does not force this list, which is exactly how
+        // BookPosted went ungated (PICKUP §0).
+        | E::EstateSurveyed { .. }
+        // THE APPRAISAL (tag 98) — banked-neutral: a valuation reading
+        // moves nothing, and the gate arm re-derives its value from
+        // the receipt's own seed and covering. BY HAND, again: the
+        // compiler does not force this list.
+        | E::AppraisalStruck { .. }
         | E::PracticeAdopted { .. } | E::PracticeReleased { .. } | E::ElderWarded { .. }
         | E::VeilDrawn { .. } | E::WardLifted { .. } | E::VeilLifted { .. }
         | E::GenesisSealed { .. } | E::ProspectStruck { .. } | E::LineSucceeded { .. }
@@ -709,7 +848,7 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::OfferPosted { .. } | E::BondSealed { .. }
         // THE MISSED SIXTH (arch-02's coverage audit): the enum holds
         // 64 deeds, not the documented 63 — GaugeShiftedAt (tag 60,
-        // the graded key shift, LIVE at world.rs's shift_gauge_at) was
+        // the graded key shift, LIVE at world/gauge.rs's shift_gauge_at) was
         // never counted. Banked-neutral (replay resizes the gauge key,
         // no bank), Build-scoped beside its covered counterpart
         // GaugeShifted. Without it the Phase 3 flip could never
@@ -724,7 +863,7 @@ fn covered(event: &ClosureEvent) -> bool {
         // Witnessed in gauge_pins.rs.
         | E::Confluent { .. } | E::EraAnnexed { .. } | E::EraFolded { .. }
         // W-C / W-D slice — the BANKED-NEUTRAL world-driven and mesh
-        // deeds. Their `world.rs::replay` arms set a flag, a list, or
+        // deeds. Their `world/replay.rs` arms set a flag, a list, or
         // are no-ops (no bank); `scope_of` is None (a tick's own
         // consequence carries no actor scope). Gated by I3 exactness,
         // conservation and containment vacuous — ratified against the
@@ -914,6 +1053,28 @@ fn admitted_deltas(
         E::CrystalDrawn { amount, .. } => {
             non_negative(Resource::Crystal, amount)?;
             vec![(Resource::Crystal, -amount.clone())]
+        }
+        // E5b THE ESTATE SURVEY — the three theorems, held at the gate. The meter
+        // and the covering are verified HERE, against the prior state
+        // and the sealed rule, before conservation checks the draw.
+        E::EstateSurveyed { covered, cost, .. } => {
+            // WITNESSED AND WHOLE: one witness per orb that stands.
+            if covered.is_empty() || covered.len() != prior.orbs.len() {
+                return Err(Refused::SurveyNotWhole {
+                    covered: covered.len(),
+                    estate: prior.orbs.len(),
+                });
+            }
+            // METERED: the declared cost IS the sealed meter's figure.
+            let (resource, rate) = cfe::dop::survey_meter();
+            let metered = rate * ratio(covered.len() as i64, 1);
+            if *cost != metered {
+                return Err(Refused::SurveyMeterMismatch {
+                    declared: Box::new(cost.clone()),
+                    metered: Box::new(metered),
+                });
+            }
+            vec![(resource, -cost.clone())]
         }
         E::OverflowAbsorbed { amount, .. } => {
             non_negative(Resource::Sink, amount)?;
@@ -1315,6 +1476,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
 
         // ── WORLD — keyed on an ORB inside one committed state ───────
         E::ColonyFounded { .. } | E::ColonyCharted { .. } | E::WorldCharted { .. }
+        | E::EstateSurveyed { .. } | E::AppraisalStruck { .. }
         | E::ZoneBuilt { .. } | E::ZoneRazed { .. }
         | E::YieldCollected { .. } | E::DemurrageSettled { .. } | E::UpkeepSettled { .. }
         | E::VentSettled { .. }
@@ -1373,7 +1535,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
 /// a mesh/universe-ledger deed governed by its own law (never a hole: an
 /// uncovered event refuses `Unjudged` before this is consulted). Each arm
 /// is RATIFIED by a red-first witness as its event enters `covered()`
-/// against `world.rs`; today only `ResourceTransferred` (Collect) is
+/// against `cfe::world`; today only `ResourceTransferred` (Collect) is
 /// covered and witnessed. The rest are the drafted law, unenforced until
 /// their coverage lands.
 fn scope_of(event: &ClosureEvent) -> Option<Scope> {
@@ -1381,6 +1543,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
     match event {
         // Build — create or extend the world, or open authority.
         E::ColonyFounded { .. } | E::ZoneBuilt { .. } | E::WorldCharted { .. }
+        | E::EstateSurveyed { .. } | E::AppraisalStruck { .. }
         | E::EntityRegistered { .. } | E::ScopeGranted { .. } | E::ScopeRevoked { .. }
         | E::ColonyCharted { .. } | E::StarCommissioned { .. } | E::PlanetSited { .. }
         | E::BondSealed { .. } | E::ForwardSealed { .. } | E::CouncilSealed { .. }

@@ -1,12 +1,20 @@
 # 20 — THE `world.rs` REFACTOR: what the kernel pulls, what stays
 
-**Status:** SPEC (kernel lane, 2026-08-02). `engine/cfe/src/world.rs`
-is 5001 lines holding three unrelated things. This document is the
-inventory: what the KERNEL and the MINER must pull out to function
-standalone, what stays with the game, and the seam between them.
+**Status:** ~~SPEC~~ **LANDED** (kernel lane, 2026-08-02; confirmed by
+measurement 2026-08-04). The split is DONE: `engine/cfe/src/world.rs`
+no longer exists and `engine/cfe/src/world/` holds **19 files, 6,860
+lines, largest `mod.rs` at 903**. Everything below is kept as the
+INVENTORY AND REASONING that produced the split — read it in the past
+tense.
 
-**Any developer modifying `world.rs` should read this first.** The file
-carries a banner pointing here.
+~~`engine/cfe/src/world.rs` is 5001 lines holding three unrelated
+things.~~ This document is the inventory: what the KERNEL and the MINER
+must pull out to function standalone, what stays with the game, and the
+seam between them.
+
+~~**Any developer modifying `world.rs` should read this first.** The
+file carries a banner pointing here.~~ There is no such file to modify;
+the modules carry their own headers.
 
 ---
 
@@ -179,7 +187,7 @@ both. The reverse re-creates the monolith.
 framing of #30:
 
 > *Replay's body recomputes exactly ONE shared rule —
-> `dop::commensurate_weight(resource)` at `world.rs:4439`. **It never
+> `dop::commensurate_weight(resource)` in `world/replay.rs`. **It never
 > calls `ease_of` or `demurrage_due`** — those arms apply the receipted
 > amount. So the double-definition exposure is one call site rather
 > than 113 arms.*

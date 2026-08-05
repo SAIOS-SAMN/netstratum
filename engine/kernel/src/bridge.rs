@@ -70,7 +70,7 @@ pub const CHANNEL_DEBT: usize = 2;
 /// Channels 0–2 are intra-book by construction: `Bond`, `Covenant` and
 /// `AbsorptionDebt` are all keyed on orb ids inside one book. A LANE is
 /// the opposite — `cfe::world::charter_route` writes the SAME `deal`
-/// into BOTH books (`world.rs:3784-3799`), so a shared deal id is a
+/// into BOTH books (`world/mod.rs::charter_route`), so a shared deal id is a
 /// committed, replay-derived relation spanning two worlds. It is the
 /// only one there is.
 ///
@@ -200,6 +200,13 @@ pub struct EntangledRead {
     /// four-row classification that once consumed it is struck —
     /// operator ruling 2026-08-04.)
     pub rank: usize,
+    /// **THE ESTATE'S VOLUME — the opened ground** (operator ruling
+    /// 2026-08-05). The measure of the orbs this reading stood over:
+    /// `state.orbs.len()` for a single book, the sum across books for
+    /// the cross-book read, never below one. It weights [`Self::degree`]
+    /// and NOTHING the judge consults — every verdict arm reads
+    /// `degree().above()`, which is volume-blind by construction.
+    pub volume: usize,
 
     /// **THE CHARGE FIELD, CARRIED WHOLE — what each cycle HOLDS**
     /// (operator ruling 2026-08-02: *your entire definition is wrong if
@@ -313,7 +320,7 @@ impl EntangledRead {
     /// stand*. Use [`EntangledRead::rank`] only where the question is
     /// *does anything circulate above the floor*.
     pub fn degree(&self) -> Degree {
-        Degree::above_ground(self.rank)
+        Degree::in_volume(self.volume, self.rank)
     }
 
 }
@@ -465,11 +472,14 @@ pub fn project_complex_across(books: &[&Committed]) -> (Delta, Support) {
 /// [`project_complex_across`]. Same poles, same laws, wider complex.
 pub fn read_entangled_across(books: &[&Committed], unknown: usize) -> EntangledRead {
     let (delta, support) = project_complex_across(books);
+    // The estate observed across books IS all their orbs — one law,
+    // no per-instrument special case (the opened ground, 2026-08-05).
+    let volume = books.iter().map(|b| b.orbs.len()).sum::<usize>().max(1);
     let symmetry_foundation = symmetry_foundation(&delta, &support);
     let flows = boundary_form(&delta, &support).flows;
     let holonomy = holonomies(&delta, &support);
     let rank = holonomy.len();
-    EntangledRead { rank, holonomy, symmetry_foundation, flows, unknown }
+    EntangledRead { rank, holonomy, symmetry_foundation, flows, unknown, volume }
 }
 
 /// Per-channel RANK and FLOW for ONE book — the surviving half of the
@@ -783,6 +793,10 @@ pub fn standing_of(state: &Committed, orb: u64) -> Ratio {
 /// absence.
 pub fn read_entangled_observed(state: &Committed, unknown: usize) -> EntangledRead {
     let (delta, support) = project_complex(state);
+    // THE OPENED GROUND (2026-08-05): the floor this reading stands on
+    // is the estate's measure. Never below one — the empty pre-founding
+    // state still weighs the point.
+    let volume = state.orbs.len().max(1);
     // THE RESIDUAL FIELD, WHOLE, over FILLED TRIANGLES ONLY. Never
     // `coherence_functional` here — that sums the field into one scalar
     // and discards which triple produced each residual, the exact place
@@ -799,7 +813,7 @@ pub fn read_entangled_observed(state: &Committed, unknown: usize) -> EntangledRe
     // readings the caller may need (operator ruling 2026-08-02).
     let holonomy = holonomies(&delta, &support);
     let rank = holonomy.len();
-    EntangledRead { rank, holonomy, symmetry_foundation, flows, unknown }
+    EntangledRead { rank, holonomy, symmetry_foundation, flows, unknown, volume }
 }
 
 /// THE FOLD GUARD — the occupancy floor, on both offices at once
@@ -888,8 +902,14 @@ pub fn fold_guard(prior: &Committed, next: &Committed, archived: &[u64]) -> Fold
     // D's half: the carried structure must keep its tones. The rank the
     // carried pairs bore before is the room the successor owes them.
     let carried_rank = read_entangled(&restrict(prior, &carried)).rank;
-    let successor_degree = read_entangled(next).degree().get();
-    if successor_degree < Degree::above_ground(carried_rank).get() {
+    let successor = read_entangled(next);
+    // Compared on the CIRCULATION, never the weighted degree: with the
+    // ground opened into the estate's volume (2026-08-05), a magnitude
+    // comparison would let a wide successor's floor pad over lost tones.
+    // Rank against rank is verdict-identical to the old floor-to-floor
+    // read and volume-proof by construction.
+    if successor.rank < carried_rank {
+        let successor_degree = successor.degree().get();
         return FoldGuard::RoomBelowOccupancy { carried_rank, successor_degree };
     }
     FoldGuard::CarriedWithinFloor
