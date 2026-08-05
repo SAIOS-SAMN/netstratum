@@ -61,7 +61,7 @@ composition is what was refused, not the parts:
 
 **The kernel is this equation's judge, not its driver.** The game proposes
 `N_i` (a deed); the validator scores and weights; convergence gates the fold;
-the node stamps and chains. `lawful(prior, next, step)` is the check that a
+the node stamps and chains. `admits(prior, next, step)` is the check that a
 proposed `Δ_{k+1}` is a legal image of `Δ_k` under one term of this equation.
 The equation GENERATES candidates; the kernel ADMITS or REFUSES. Never does
 the kernel optimize the equation globally (KERNEL_RELAY §9).
@@ -164,7 +164,7 @@ scalar, and the last place in this document where an objective survived
 after the gradient itself was struck at §0. The guard had been placed on
 the damped-gradient term while the objective leaked through the scoring rule; both are now
 gone. `∂Δ` is not deleted but UNCAGED — a directional operator, never
-collapsed to a magnitude, never bounded above (`18_TORSION` §2b).
+collapsed to a magnitude, never bounded above (`24_FORM` §2b).
 
 **No quantity is scored, minimized, or descended.** An operator is
 ADMITTED or it ROOTS: where a proposed step composes, it folds; where it

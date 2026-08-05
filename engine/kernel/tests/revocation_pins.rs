@@ -14,7 +14,7 @@ use cfe::dop::{ClosureEvent, ColonyOrb, Resource};
 use cfe::ipsal::{Entity, Scope};
 use cfe::ratio::ratio;
 use cfe::world::{Bond, Committed, World, SOVEREIGN};
-use kernel::{bridge, lawful, Step, Unlawful};
+use kernel::{bridge, admits, Step, Refused, KERNEL_VERSION};
 
 const HAND: u64 = 100;
 
@@ -75,15 +75,15 @@ fn ring(n: u64) -> Committed {
 fn a_mint_that_grows_nothing_refuses() {
     let still = ring(4);
     // prior == next: nothing grew across the step.
-    match lawful(&still, &still, &mint()) {
-        Err(Unlawful::MintWithoutCapacityIncrement { was, now }) => {
+    match admits(&still, &still, &mint()) {
+        Err(Refused::MintWithoutCapacityIncrement { was, now }) => {
             assert_eq!(was, now, "the reading is carried whole, both sides");
         }
         // The capacity law may refuse first on standing; that is a
         // different rule and this pin is not about it. What must never
         // happen is ADMISSION.
         Err(other) => assert!(
-            !matches!(other, Unlawful::Unjudged),
+            !matches!(other, Refused::Unjudged),
             "refused for a stated reason: {other:?}"
         ),
         Ok(()) => panic!("a mint that grew no circulation must never be admitted"),
@@ -93,7 +93,7 @@ fn a_mint_that_grows_nothing_refuses() {
 /// THE PHANTOM-RANK GATE, asked FIRST. `rank_is_defined` existed unused
 /// for weeks with its own header warning that an unresolved absence
 /// *"would let phantom topology mint phantom rank"* — recorded in
-/// `18_TORSION` §6 as debt. D4 computes an increment over that rank, so
+/// `25_STANDING` §6 as debt. D4 computes an increment over that rank, so
 /// the debt is now due: an unresolved reading refuses before any
 /// increment is compared.
 #[test]
@@ -123,7 +123,7 @@ fn the_phantom_rank_gate_is_asked_first() {
 fn the_refusal_never_lowers_the_degree() {
     let still = ring(4);
     let before = bridge::read_entangled(&still).degree();
-    let _ = lawful(&still, &still, &mint());
+    let _ = admits(&still, &still, &mint());
     let after = bridge::read_entangled(&still).degree();
     assert_eq!(before, after, "the claim vacates; the degree does not");
     assert!(
@@ -145,8 +145,8 @@ fn d4_binds_creation_and_leaves_motion_alone() {
     };
     // Whatever else judges this deed, it is never D4's two refusals.
     if matches!(
-        lawful(&still, &still, &transfer),
-        Err(Unlawful::MintWithoutCapacityIncrement { .. }) | Err(Unlawful::RankUndefined { .. })
+        admits(&still, &still, &transfer),
+        Err(Refused::MintWithoutCapacityIncrement { .. }) | Err(Refused::RankUndefined { .. })
     ) {
         panic!("D4 must not bind a deed that mints nothing")
     }
@@ -166,9 +166,92 @@ fn a_mint_that_grows_circulation_passes_d4() {
     // D4's own arm admits this pair. Other invariants may still refuse
     // the deed for their own reasons; what this pins is that D4 does
     // not, so the law is a gate and not a wall.
-    if let Err(Unlawful::MintWithoutCapacityIncrement { .. }) =
-        lawful(&before, &after, &mint())
+    if let Err(Refused::MintWithoutCapacityIncrement { .. }) =
+        admits(&before, &after, &mint())
     {
         panic!("a mint that grew circulation must clear D4")
     }
+}
+
+/// D4 IS THREE NAMED RULES NOW, and the split judges identically.
+///
+/// The pile was one function doing resolution, claim-detection and
+/// increment at once. Splitting it distributes the load without moving
+/// a verdict — which is what makes it a `patch` and not a `minor`.
+#[test]
+fn the_split_judges_exactly_as_the_pile_did() {
+    // D4b: nothing circulates -> no claim -> D4 does not bind.
+    let bare = world(4);
+    assert!(
+        !matches!(
+            admits(&bare, &bare, &mint()),
+            Err(Refused::MintWithoutCapacityIncrement { .. })
+        ),
+        "a line holding no relations is claiming none — D4b lets it by"
+    );
+
+    // D4c: a claim stands and does not grow -> vacated.
+    let still = ring(4);
+    assert!(
+        bridge::read_entangled(&still).degree().above() > 0,
+        "the fixture must actually hold a claim, else this proves nothing"
+    );
+    // A standing claim that grows nothing must never be ADMITTED. The
+    // specific arm may not be reached: D4 runs after `creation`, and
+    // this fixture's mint carries an empty proof, so `WorkRefused`
+    // speaks first. That ordering is deliberate (deed validity before
+    // effect validity) and the pin states what it can honestly see.
+    assert!(
+        admits(&still, &still, &mint()).is_err(),
+        "a standing claim that grows nothing is never admitted"
+    );
+    // D4c itself, reached directly through a fixture that clears
+    // `creation`: covered by `a_mint_that_grows_nothing_refuses` above
+    // and by discovery_pins' widened `grown` fixtures.
+}
+
+/// THE VERSION IS x.y.z, AND ORDERED. A prototype judge says so in its
+/// major, and a peer comparing two commitments still gets a total
+/// order from the packed form.
+#[test]
+fn the_version_is_semver_and_orders() {
+    assert_eq!(KERNEL_VERSION.to_string(), "0.5.0");
+    assert_eq!(KERNEL_VERSION.major, 0, "prototype — nothing has promised stability");
+    assert!(
+        KERNEL_VERSION.code() > kernel::Version { major: 0, minor: 4, patch: 0 }.code(),
+        "a later version packs larger"
+    );
+    assert!(
+        kernel::Version { major: 1, minor: 0, patch: 0 }.code() > KERNEL_VERSION.code(),
+        "and a major bump outranks every minor"
+    );
+    assert!(
+        KERNEL_VERSION.code() > 5,
+        "the linear era (1..5) orders below the packed form — an earlier judge cut those chains"
+    );
+}
+
+/// **THE JUDGE GATES CREATION, NEVER MOTION** — restored 2026-08-04.
+///
+/// Written for the capacity law and deleted with it, but the law it
+/// states outlived its author: value that already exists may MOVE
+/// through a world that could not mint in it. D4 carries the same rule
+/// now (`d4_binds_creation_and_leaves_motion_alone` checks D4's own
+/// arms; this checks the WHOLE judge, which is the stronger claim and
+/// why it is worth having back).
+#[test]
+fn the_judge_gates_creation_never_motion() {
+    let mut ring = ring(4);
+    ring.orbs[0].bank(cfe::dop::Resource::Iron, ratio(10, 1));
+    let move_it = Step {
+        event: ClosureEvent::ResourceTransferred {
+            from_orb: 1,
+            to_orb: 2,
+            resource: cfe::dop::Resource::Iron,
+            amount: ratio(0, 1),
+        },
+        actor: HAND,
+        stamp: 1,
+    };
+    assert_eq!(admits(&ring, &ring, &move_it), Ok(()), "motion is not creation");
 }

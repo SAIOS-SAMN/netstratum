@@ -38,7 +38,7 @@ use std::io::Write as _;
 
 use ledger::registry::Civilization;
 use ledger::Ledger;
-use lens::json::ratio_str;
+use cfe::ratio::ratio_str;
 use lens::render::universal_clock;
 
 /// A year = 60 ticks (08 §1.5, placeholder) — one field of the
@@ -655,7 +655,7 @@ fn narrate(
 /// Render one entry as its journal.jsonl line (08 §3) — flat JSON via
 /// the ledger's own writer, one line, no trailing newline.
 pub fn render_entry(entry: &JournalEntry) -> String {
-    let mut w = lens::json::JsonWriter::new();
+    let mut w = pen::JsonWriter::new();
     w.open();
     w.field_u64("year", entry.year);
     w.field_u64("tick", entry.tick);
@@ -776,16 +776,16 @@ struct WallCard {
 
 fn parse_wall_card(line: &str) -> Option<WallCard> {
     Some(WallCard {
-        tick: ledger::json::extract_u64(line, "tick")?,
-        year: ledger::json::extract_u64(line, "year")?,
-        cycle: ledger::json::extract_string(line, "cycle")?,
-        world: ledger::json::extract_string(line, "world")?,
-        civilization: ledger::json::extract_string(line, "civilization")?,
-        archetype: ledger::json::extract_string(line, "archetype")?,
-        alert: ledger::json::extract_string(line, "alert")?,
-        headline: ledger::json::extract_string(line, "headline")?,
-        body: ledger::json::extract_string(line, "body")?,
-        trade_request: ledger::json::extract_string(line, "trade_request"),
+        tick: ledger::extract::extract_u64(line, "tick")?,
+        year: ledger::extract::extract_u64(line, "year")?,
+        cycle: ledger::extract::extract_string(line, "cycle")?,
+        world: ledger::extract::extract_string(line, "world")?,
+        civilization: ledger::extract::extract_string(line, "civilization")?,
+        archetype: ledger::extract::extract_string(line, "archetype")?,
+        alert: ledger::extract::extract_string(line, "alert")?,
+        headline: ledger::extract::extract_string(line, "headline")?,
+        body: ledger::extract::extract_string(line, "body")?,
+        trade_request: ledger::extract::extract_string(line, "trade_request"),
     })
 }
 

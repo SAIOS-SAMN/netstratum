@@ -39,6 +39,61 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut stations: Vec<(String, u8)> = Vec::new();
     for receipt in chronicle.receipts() {
         match &receipt.event {
+            // BOOK-1 (19_LENS §16) — the open registry rebuilds from
+            // receipts alone, like every other committed ledger here.
+            // LIT-1 — the literature rebuilds from receipts alone.
+            ClosureEvent::WorkAspired { orb_id, work, name } => {
+                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                    held.aspirations.push(crate::literature::Aspiration {
+                        work: *work,
+                        name: name.clone(),
+                        witnesses: Vec::new(),
+                    });
+                    held.aspirations.sort_by_key(|held| held.work);
+                }
+            }
+            ClosureEvent::WorkClaimed { orb_id, work, witnesses } => {
+                if let Some(held) = orbs
+                    .iter_mut()
+                    .find(|held| held.orb_id == *orb_id)
+                    .and_then(|held| held.aspirations.iter_mut().find(|held| held.work == *work))
+                {
+                    held.witnesses = witnesses.clone();
+                }
+            }
+            ClosureEvent::BookMinted { orb_id, kind, name } => {
+                if let Some(held) = orbs.iter_mut().find(|held| held.orb_id == *orb_id) {
+                    held.books.push(crate::books::BookAccount {
+                        kind: *kind,
+                        name: name.clone(),
+                        minted_by: *orb_id,
+                        kept: ratio(0, 1),
+                        lost: ratio(0, 1),
+                        archived: false,
+                    });
+                    held.books.sort_by_key(|held| held.kind);
+                }
+            }
+            ClosureEvent::BookPosted { orb_id, kind, kept, lost } => {
+                if let Some(account) = orbs
+                    .iter_mut()
+                    .find(|held| held.orb_id == *orb_id)
+                    .and_then(|held| held.books.iter_mut().find(|held| held.kind == *kind))
+                {
+                    account.kept += kept.clone();
+                    account.lost += lost.clone();
+                }
+            }
+            ClosureEvent::BookArchived { orb_id, kind } => {
+                if let Some(account) = orbs
+                    .iter_mut()
+                    .find(|held| held.orb_id == *orb_id)
+                    .and_then(|held| held.books.iter_mut().find(|held| held.kind == *kind))
+                {
+                    // Closed to WRITING. Every entry it took stays.
+                    account.archived = true;
+                }
+            }
             ClosureEvent::EntityRegistered { entity_id, principal, handle } => {
                 entities.push(Entity {
                     entity_id: *entity_id,
@@ -195,11 +250,18 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             ClosureEvent::StarCommissioned { class } => {
                 star = crate::thermal::StarClass::from_wire(*class);
             }
-            ClosureEvent::PlanetSited { orb_id, albedo, orbit_r } => {
+            ClosureEvent::PlanetSited { orb_id, albedo, orbit_r, theta, psi } => {
                 if let Some(held) = peel(&mut orbs, *orb_id) {
                     held.thermal = Some(crate::dop::ThermalSite {
                         albedo: albedo.clone(),
                         orbit_r: orbit_r.clone(),
+                        // BOTH TURNS FROM THE RECEIPT — never None.
+                        // Binding one and discarding it loses an orb's
+                        // PLACE on replay while the live path keeps it,
+                        // which is the live/replay divergence class.
+                        // Clippy caught this twice here, once per turn.
+                        theta: theta.clone(),
+                        psi: psi.clone(),
                     });
                 }
             }
@@ -231,10 +293,10 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             // live path made — the compassion books are a replay fact.
             ClosureEvent::ResourceTransferred { from_orb, to_orb, resource, amount } => {
                 let from_crisis = peek(&orbs, *from_orb)
-                    .map(|held| in_crisis(held))
+                    .map(in_crisis)
                     .unwrap_or(false);
                 let to_crisis = peek(&orbs, *to_orb)
-                    .map(|held| in_crisis(held))
+                    .map(in_crisis)
                     .unwrap_or(false);
                 let value = amount.clone() * crate::dop::commensurate_weight(*resource);
                 if let Some(held) = peel(&mut orbs, *from_orb) {
@@ -327,10 +389,10 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             // match the live order exactly.
             ClosureEvent::OverflowAbsorbed { source_orb, absorber_orb, amount } => {
                 let source_crisis = peek(&orbs, *source_orb)
-                    .map(|held| in_crisis(held))
+                    .map(in_crisis)
                     .unwrap_or(false);
                 let absorber_crisis = peek(&orbs, *absorber_orb)
-                    .map(|held| in_crisis(held))
+                    .map(in_crisis)
                     .unwrap_or(false);
                 let value =
                     amount.clone() * crate::dop::commensurate_weight(Resource::Sink);

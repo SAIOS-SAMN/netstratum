@@ -9,7 +9,7 @@ use cfe::dop::{Resource, ZoneKind};
 use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
 use conductor::{
-    founding_polities, joule_runway_allows, load_polities, write_default_polities, PolitySpec,
+    founding_polities, joule_runway_allows, PolitySpec,
     Polity, Policy,
 };
 use ledger::registry::{Civilization, Registry};
@@ -201,53 +201,58 @@ fn the_aeric_deck_band_is_unreachable_today() {
     );
 }
 
-/// The operator's file: thermal fields round-trip through the seeded
-/// polities.json; files WITHOUT thermal fields (the pre-BOT-THERM shape)
-/// still load and found thermally-derived worlds — compat held.
+/// **THE SITING TRIPLE STANDS OR FALLS WHOLE.**
+///
+/// This was a round-trip through the seeded `polities.json`. THE
+/// DEFINITION LAW struck the file, and with it the hazard the round-trip
+/// was really watching: the old shape let a file pin a star and omit its
+/// albedo, and the loader filled the gap silently. The compiled roster
+/// takes one `Option<(StarClass, Ratio, Ratio)>`, so the incoherent
+/// middle is now UNREPRESENTABLE rather than merely untested — but the
+/// seats it named still need pinning, so they are asserted directly.
 #[test]
-fn old_bots_files_still_load_and_derive() {
-    let root = scratch("compat");
-    fs::create_dir_all(&root).expect("scratch");
-    let path = root.join("polities.json");
-    write_default_polities(&path).expect("seeds");
-    let seeded = load_polities(&path).expect("loads");
-    assert_eq!(seeded.len(), founding_polities().len());
+fn every_seat_is_wholly_pinned_or_wholly_derived() {
+    for spec in founding_polities() {
+        let pinned = [spec.star.is_some(), spec.albedo.is_some(), spec.orbit.is_some()];
+        assert!(
+            pinned.iter().all(|p| *p) || pinned.iter().all(|p| !*p),
+            "{} is half-sited — star, albedo and orbit must stand or fall together",
+            spec.civilization.sigil
+        );
+    }
+    let founding = founding_polities();
     assert!(
-        seeded.iter().any(|s| s.star == Some(StarClass::M)),
-        "the Frost seat survives the round-trip"
+        founding.iter().any(|s| s.star == Some(StarClass::M)),
+        "the Frost seat stands in the roster"
     );
     assert!(
-        seeded
+        founding
             .iter()
             .any(|s| s.star == Some(StarClass::G) && s.orbit == Some(ratio(1, 2))),
-        "the Furnace seat survives the round-trip"
+        "the Furnace seat stands in the roster"
     );
     assert!(
-        seeded
+        founding
             .iter()
             .any(|s| s.star.is_none() && s.albedo.is_none() && s.orbit.is_none()),
-        "mesic seats stay derived in the seeded file"
+        "and mesic seats stay derived"
     );
+}
 
-    // A pre-BOT-THERM entry — no thermal fields at all — still loads…
-    let legacy = root.join("legacy.json");
-    fs::write(
-        &legacy,
-        r#"[{"name":"Fernwake","sigil":"fernwake","species":"monarch butterfly",
-           "motto":"drift and arrive","disposition":"epicurean","metabolism":"biotic",
-           "perception":"volumetric","world":"lantern-sea","planet":"petal",
-           "colony":"alight","policy":"steady","x":"3","y":"1/2","z":"-4"}]"#,
-    )
-    .expect("writes");
-    let specs = load_polities(&legacy).expect("the old shape still loads");
-    assert!(
-        specs[0].star.is_none() && specs[0].albedo.is_none() && specs[0].orbit.is_none(),
-        "absent fields stay absent on the spec"
-    );
+/// An UNSITED seat still founds a real sun at genesis — the derived
+/// path stays exercised, which is the whole reason mesic seats are left
+/// unpinned in the roster rather than filled in for tidiness.
+#[test]
+fn an_unsited_seat_still_derives_its_sun_at_genesis() {
+    let root = scratch("derive");
+    fs::create_dir_all(&root).expect("scratch");
+    let spec = founding_polities()
+        .into_iter()
+        .find(|s| s.star.is_none())
+        .expect("a derived seat stands in the roster");
 
-    // …and its genesis derives a real sun and siting anyway.
     let polity = Polity::genesis(
-        specs[0].clone(),
+        spec,
         &Registry::at(root.join("registry")),
         &Ledger::at(root.join("worlds")),
     );

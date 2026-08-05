@@ -159,7 +159,7 @@ THE SECOND DEFINITION as one, which is `19_KERNEL` §3 made structural.
     merge base          b3bf038 (the vertical axis)
     kernel-lane ahead   27 commits
     capacity-lane ahead 12 commits
-    textual conflicts   ONE — docs/18_TORSION.md
+    textual conflicts   ONE — docs/26_ARTICLES.md
 
 **The single conflict understates the work.** `capacity-lane` DELETED
 `world.rs`; `kernel-lane` modified it heavily. Git sees add/delete, not

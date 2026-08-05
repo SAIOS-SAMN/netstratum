@@ -1,6 +1,6 @@
 //! THE CAPACITY PINS — the D meter held by witnesses, not by prose.
 //!
-//! Closes `18_TORSION.md` §6.2's first half. What these pin:
+//! Closes `25_STANDING` §6.2's first half. What these pin:
 //!
 //! 1. THE PAIRWISE LAW — a Δ built from node-local scalar differences
 //!    is a pure coboundary and CIRCULATES NOWHERE. It stands ON THE
@@ -12,7 +12,7 @@
 //! 4. FRAME-FREE — a gauge shift leaves D identical (D1: frame
 //!    artifacts contribute NOTHING).
 //! 5. IDEMPOTENT — why D is monotone by algebra, not by decree.
-//! 6. CONTAINER ≠ CAPACITY — arity is not D (18 §5).
+//! 6. CONTAINER ≠ CAPACITY — arity is not D (26_ARTICLES §5).
 //! 7. THE POSITIVE CONSTRUCTION — capacity is the CIRCULATION, built by
 //!    projection, not the residue left after stripping a frame.
 //! 8. DIVERGENCE IS ONE PASS — no walk, no basepoint; div is grad's
@@ -95,7 +95,7 @@ fn the_equilibrium_anchor_is_a_coboundary() {
     // built on satisfies Δ02 = Δ01 + Δ12 exactly, so it IS a coboundary
     // (potentials 0, 1, 3/2) and carries zero capacity. Its RAW extent
     // is non-zero — three standing pairs — which is precisely the
-    // container/capacity distinction of 18 §5.
+    // container/capacity distinction of 26_ARTICLES §5.
     let anchor = anchor_3();
     assert_eq!(
         ext_x(&anchor),
@@ -286,7 +286,7 @@ fn capacity_is_idempotent() {
 
 #[test]
 fn the_container_is_not_the_capacity() {
-    // 18 §5: the arities Delta{dim, fiber} are the CONTAINER the
+    // 26_ARTICLES §5: the arities Delta{dim, fiber} are the CONTAINER the
     // relation rides on, never D. A wide, empty universe holds enormous
     // arity and zero capacity — the Article II vacuous case, and the
     // shape Article III prices at zero when deeds accompany it.
@@ -382,7 +382,7 @@ fn the_only_constructor_can_never_yield_a_below_ground_degree() {
 }
 
 /// `A · Δ · Aᵀ` — CONGRUENCE, the transformation law of an alternating
-/// 2-form. Δ is a 2-form (`18_TORSION` §2a: "already an alternating
+/// 2-form. Δ is a 2-form (`24_FORM` §2a: "already an alternating
 /// form, not a metric tensor"), and a 2-form transforms by congruence,
 /// never by the conjugation `A·Δ·A⁻¹` that acts on endomorphisms.
 #[allow(clippy::needless_range_loop)] // matrix indices read clearest as indices
@@ -725,7 +725,7 @@ fn the_borne_share_conserves_the_circulation() {
                     continue;
                 }
                 let v = circ.entry(i, j, 0).clone();
-                whole = whole + if v < q(0, 1) { q(0, 1) - v } else { v };
+                whole += if v < q(0, 1) { q(0, 1) - v } else { v };
             }
         }
         let handed: Ratio = borne(&delta, &support).into_iter().fold(q(0, 1), |a, b| a + b);
@@ -795,7 +795,7 @@ fn every_share_is_positive_or_ground() {
 
 #[test]
 fn the_axial_share_distinguishes_worlds_the_scalar_cannot() {
-    // NEVER ONE SCALAR (`18_TORSION` §2b; operator ruling 2026-08-02:
+    // NEVER ONE SCALAR (`24_FORM` §2b; operator ruling 2026-08-02:
     // multi-axial on vertices towards uplift). The first landing of the
     // borne share summed across every coordinate, and a sum cannot tell
     // a world that stands on ONE axis from one spread across all of

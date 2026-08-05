@@ -83,7 +83,7 @@ fn main() {
             stamp: receipt.stamp,
         };
         // The verdict is not the probe's business — only its cost is.
-        let _ = kernel::lawful(&prior, &next, &step);
+        let _ = kernel::admits(&prior, &next, &step);
         judged += 1;
         prior = next;
     }

@@ -32,7 +32,7 @@
 //! `exp` is transcendental and `∫` / `d/dt` are continuous. Neither is
 //! admissible: exactness is a type-level guarantee here, and **the chain
 //! is discrete — one commitment per step, which is `c` itself**
-//! (`18_TORSION` LAW 5). So every derivative is a DIFFERENCE and every
+//! (`26_ARTICLES` LAW 5). So every derivative is a DIFFERENCE and every
 //! integral is a SUM, and the physics arrives whole rather than
 //! approximated:
 //!
@@ -53,7 +53,9 @@
 //! GIVEN and keeps none of them — a lens with its own timeline is a
 //! second timeline (`19_LENS` §1a).
 
+use cfe::dop::Resource;
 use cfe::ratio::{ratio, Ratio};
+use cfe::world::Committed;
 use num_traits::Signed;
 use rfa_core::capacity::Degree;
 
@@ -164,6 +166,38 @@ impl Medium {
             true => Medium::inert(),
             false => Medium { eta: retained / shed },
         }
+    }
+
+    /// **THE MEDIUM AS IT ACTUALLY STANDS** — derived from committed
+    /// state, with nothing supplied by a caller (`19_LENS` §5b: *η is
+    /// DERIVED, never dialed*).
+    ///
+    /// The pairing is the thermal law's own, and it was already in the
+    /// tree waiting to be read (`05 §1.2`, encase-first / vent-overflow):
+    ///
+    /// ```text
+    ///     RETAINED   banked Joule + banked Sink — what encasement kept
+    ///     SHED       entropy_vented — what overflowed to the void
+    /// ```
+    ///
+    /// A world that keeps more than it loses ACCELERATES what propagates
+    /// through it; one bleeding faster than it holds DAMPS. Both are
+    /// facts about the world rather than arguments about it, so two
+    /// observers reading the same chain read the same medium — which is
+    /// what LAW 6 requires and what a passed-in `η` could never give.
+    ///
+    /// A world that has vented nothing is INERT, not infinitely fast:
+    /// the surround has taken nothing away yet.
+    pub fn of(state: &Committed) -> Self {
+        let zero = ratio(0, 1);
+        let retained = state.orbs.iter().fold(zero.clone(), |sum, orb| {
+            sum + orb.banked_amount(Resource::Joule) + orb.banked_amount(Resource::Sink)
+        });
+        let shed = state
+            .orbs
+            .iter()
+            .fold(zero, |sum, orb| sum + orb.entropy_vented.clone());
+        Medium::from_surround(retained, shed)
     }
 
     /// Does this medium speed the motion, damp it, or leave it alone?

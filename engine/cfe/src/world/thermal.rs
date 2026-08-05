@@ -32,10 +32,43 @@ impl World {
         orb: u64,
         albedo: Ratio,
         orbit_r: Ratio,
+        theta: Option<Ratio>,
+        psi: Option<Ratio>,
     ) -> Result<(), ActionRefused> {
         use crate::dop::ThermalSite;
         if self.star.is_none() {
             return Err(ActionRefused::NoStarCommissioned);
+        }
+        // THE PLACEMENT LAW. An angle must sit ON a slot, and no two
+        // orbs may share a place. Together these make collision
+        // DECIDABLE rather than a tolerance — which is the whole point
+        // of a discrete ring.
+        // ψ is bound by the same slot law — an inclination between the
+        // teeth is as undecidable as a longitude between them.
+        if let Some(tilt) = &psi {
+            if !crate::dop::on_slot(tilt) {
+                return Err(ActionRefused::OffSlot { theta: Box::new(tilt.clone()) });
+            }
+        }
+        if let Some(turn) = &theta {
+            if !crate::dop::on_slot(turn) {
+                return Err(ActionRefused::OffSlot { theta: Box::new(turn.clone()) });
+            }
+            let slot = crate::dop::slot_of(turn).unwrap_or(0);
+            if let Some(taken) = self.orbs.iter().find(|held| {
+                held.orb_id != orb
+                    && held.thermal.as_ref().is_some_and(|site| {
+                        site.orbit_r == orbit_r
+                            && site.theta.as_ref() == Some(turn)
+                            // ψ SEPARATES: two orbs may share a ring
+                            // and a longitude if they are inclined
+                            // differently. Without this the collision
+                            // law would forbid a volume it should allow.
+                            && site.psi == psi
+                    })
+            }) {
+                return Err(ActionRefused::OrbitOccupied { orb: taken.orb_id, slot });
+            }
         }
         let zero = ratio(0, 1);
         let one = ratio(1, 1);
@@ -50,6 +83,13 @@ impl World {
         held.thermal = Some(ThermalSite {
             albedo: albedo.clone(),
             orbit_r: orbit_r.clone(),
+            theta: theta.clone(),
+            // THE LIVE PATH KEEPS THE INCLINATION. Writing None here
+            // while the RECEIPT carried it made live and replay
+            // disagree in the opposite direction to the earlier drops —
+            // and clippy could not see it, because the binding IS used
+            // (by the receipt). Only replay_fidelity catches this.
+            psi: psi.clone(),
         });
         // TECH-1a (12_UNION §5a): a world's FIRST thermal opt-in
         // receipts the kernel SOLAR LEAP — its people now know their
@@ -73,7 +113,7 @@ impl World {
             );
         }
         self.close(
-            ClosureEvent::PlanetSited { orb_id: orb, albedo, orbit_r },
+            ClosureEvent::PlanetSited { orb_id: orb, albedo, orbit_r, theta, psi },
             SOVEREIGN,
         );
         Ok(())

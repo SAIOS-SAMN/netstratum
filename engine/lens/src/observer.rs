@@ -37,7 +37,7 @@
 //! approach.** So the tolerance is DYNAMIC — as ruled — and it is
 //! DERIVED rather than DIALED. A caller-supplied `ε` would make two
 //! observers report different captures from one state, which is not
-//! evidence (`18_TORSION` LAW 6). A depth is a position, and every
+//! evidence (`26_ARTICLES` LAW 6). A depth is a position, and every
 //! observer standing in the same place reads the same thing.
 //!
 //! A fixed absolute tolerance would be worse than a dial: the substrate

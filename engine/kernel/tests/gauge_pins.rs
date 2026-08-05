@@ -20,7 +20,7 @@ use cfe::dop::{ClosureEvent, ColonyOrb, Resource};
 use cfe::ipsal::Entity;
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::{Committed, World, SOVEREIGN};
-use kernel::{lawful, Step, Unlawful};
+use kernel::{admits, Step, Refused};
 
 /// A one-orb committed state, sovereign seated, gauge at the base key.
 fn seated() -> Committed {
@@ -54,11 +54,11 @@ fn the_fold_trio_moves_exactly_its_declared_key() {
     // deed's ONLY effect.
     let confluent = ClosureEvent::Confluent { partner: "far-line".into(), gauge: ratio(1, 3) };
     let next = with_key(&prior, vec![ratio(1, 3)]);
-    assert_eq!(lawful(&prior, &next, &step(confluent)), Ok(()));
+    assert_eq!(admits(&prior, &next, &step(confluent)), Ok(()));
     // EraFolded: the new sheet seats at the declared key.
     let folded = ClosureEvent::EraFolded { era: 2, gauge: ratio(1, 6) };
     let next = with_key(&prior, vec![ratio(1, 6)]);
-    assert_eq!(lawful(&prior, &next, &step(folded)), Ok(()));
+    assert_eq!(admits(&prior, &next, &step(folded)), Ok(()));
     // EraAnnexed: a universe-ledger record — the world's key holds
     // still, its banks hold still; the pair-half (the annexed chain's
     // verification) is converge's law at the seam.
@@ -68,7 +68,7 @@ fn the_fold_trio_moves_exactly_its_declared_key() {
         terminal: [7u8; 32],
         offset: 4,
     };
-    assert_eq!(lawful(&prior, &prior.clone(), &step(annexed)), Ok(()));
+    assert_eq!(admits(&prior, &prior.clone(), &step(annexed)), Ok(()));
 }
 
 #[test]
@@ -78,8 +78,8 @@ fn a_wrong_key_refuses_with_both_sides_whole() {
     // The state moved to a key the deed did not declare.
     let smuggled = with_key(&prior, vec![ratio(1, 2)]);
     assert_eq!(
-        lawful(&prior, &smuggled, &step(confluent)),
-        Err(Unlawful::GaugeBroken {
+        admits(&prior, &smuggled, &step(confluent)),
+        Err(Refused::GaugeBroken {
             grade: 0,
             expected: Box::new(ratio(1, 3)),
             actual: Box::new(ratio(1, 2)),
@@ -97,8 +97,8 @@ fn a_key_move_smuggled_under_a_neutral_deed_refuses() {
     let neutral = ClosureEvent::OverheatCleared { orb_id: 1 };
     let smuggled = with_key(&prior, vec![ratio(1, 4)]);
     assert_eq!(
-        lawful(&prior, &smuggled, &step(neutral)),
-        Err(Unlawful::GaugeBroken {
+        admits(&prior, &smuggled, &step(neutral)),
+        Err(Refused::GaugeBroken {
             grade: 0,
             expected: Box::new(ratio(0, 1)),
             actual: Box::new(ratio(1, 4)),
@@ -110,8 +110,8 @@ fn a_key_move_smuggled_under_a_neutral_deed_refuses() {
     let shifted = ClosureEvent::GaugeShifted { gauge: ratio(1, 3) };
     let wrong = with_key(&prior, vec![ratio(2, 3)]);
     assert!(matches!(
-        lawful(&prior, &wrong, &step(shifted)),
-        Err(Unlawful::GaugeBroken { grade: 0, .. })
+        admits(&prior, &wrong, &step(shifted)),
+        Err(Refused::GaugeBroken { grade: 0, .. })
     ));
 }
 
@@ -123,11 +123,11 @@ fn the_graded_shift_resizes_exactly() {
     let prior = seated();
     let shift = ClosureEvent::GaugeShiftedAt { grade: 2, gauge: ratio(1, 4) };
     let next = with_key(&prior, vec![ratio(0, 1), ratio(0, 1), ratio(1, 4)]);
-    assert_eq!(lawful(&prior, &next, &step(shift.clone())), Ok(()));
+    assert_eq!(admits(&prior, &next, &step(shift.clone())), Ok(()));
     // An unresized vector (the plane not opened) refuses.
     let flat = with_key(&prior, vec![ratio(1, 4)]);
     assert!(matches!(
-        lawful(&prior, &flat, &step(shift)),
-        Err(Unlawful::GaugeBroken { .. })
+        admits(&prior, &flat, &step(shift)),
+        Err(Refused::GaugeBroken { .. })
     ));
 }

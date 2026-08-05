@@ -4,7 +4,7 @@
 //! Before this module the algebra was an ISLAND: `coboundary_reduce`,
 //! `for_each_residual`, `orbit_lock` and `rcf_signature` were all
 //! landed and witnessed in `rfa-core`, and not one of them had ever run
-//! on a universe. `Δ(V)` — "the relation V expresses" (`18_TORSION`
+//! on a universe. `Δ(V)` — "the relation V expresses" (`26_ARTICLES`
 //! §2a, `EQUATIONS` D0) — was not a computation that existed. This is
 //! that computation.
 //!
@@ -37,7 +37,7 @@
 //! together), and projecting it onto pairs would MANUFACTURE pairwise
 //! structure that the deed never created. A multi-party obligation
 //! needs its own carrier; inventing edges to fit this one is exactly
-//! the cosmetic move `18_TORSION` §3 Article III forbids.
+//! the cosmetic move `27_EVIDENCE` Article III forbids.
 
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::Committed;
@@ -138,7 +138,7 @@ pub enum Resolve {
 /// this coordinate, do not compose, by this much*.
 ///
 /// **Summing them destroys them.** `C(Δ) = Σ|R|` is a scalar aggregate,
-/// and `18_TORSION` §2b bars exactly that where the system computes —
+/// and `24_FORM` §2b bars exactly that where the system computes —
 /// L1 survives only at an OPERATOR lens. Worse, the residue composition
 /// law (the design owed at `KERNEL_RELAY` §7.4) has nothing to compose
 /// if the residuals were already added together, and `EQUATIONS` D3
@@ -153,7 +153,7 @@ pub struct Residual {
     pub value: Ratio,
 }
 
-/// THE ENTANGLED READ (`18_TORSION` §2f). The rank side and the
+/// THE ENTANGLED READ (`24_FORM` §2f). The rank side and the
 /// potential side, computed in ONE pass over ONE prior state. They are
 /// not separately obtainable from this module by construction: a
 /// caller that could take `D` alone and consult the strain separately
@@ -292,7 +292,7 @@ impl EntangledRead {
     /// Article IV monotonicity gets its gate, that gate consults this
     /// first** — an unresolved absence would let phantom topology mint
     /// phantom rank. Until the gate exists, this is an available
-    /// reading, recorded in `18_TORSION` §6 as debt rather than
+    /// reading, recorded in `25_STANDING` §6 as debt rather than
     /// asserted here as enforcement.
     pub fn rank_is_defined(&self) -> bool {
         self.unknown == 0
@@ -669,7 +669,7 @@ fn symmetry_foundation(delta: &Delta, support: &Support) -> Vec<Residual> {
 }
 
 /// Read the entangled pair from one prior state, in one pass
-/// (`18_TORSION` §2f's binding build constraint).
+/// (`24_FORM` §2f's binding build constraint).
 ///
 /// Single-book reading: every pair among the book's own orbs is
 /// observed, so `unknown` is zero by construction. For a reading that
@@ -709,7 +709,7 @@ pub fn borne_by_orb(state: &Committed) -> Vec<(u64, Ratio)> {
 /// uplift*).
 ///
 /// One share per CHANNEL — [`CHANNEL_BOND`], [`CHANNEL_FORWARD`],
-/// [`CHANNEL_DEBT`] — never summed. `18_TORSION` §2b bars collapsing a
+/// [`CHANNEL_DEBT`] — never summed. `24_FORM` §2b bars collapsing a
 /// directional quantity to a scalar wherever the system computes, and
 /// the collapse costs the only thing an orb can act on: two orbs
 /// reading the same total may stand on one channel each or on all

@@ -20,6 +20,18 @@ impl World {
             self.techs.iter().any(|(_, held, _)| *held == condition)
         })
     }
+    /// **THE FULL BASE-11 STACK** (operator ruling 2026-08-02) — the
+    /// base tier complete AND every chartered work claimed on evidence.
+    ///
+    /// [`Self::base_seven_complete`] is deliberately left exactly as it
+    /// landed: the crown's gate does not move, and every law that binds
+    /// to it reads the same thing it always did.
+    pub fn base_eleven_complete(&self, orb: u64) -> bool {
+        self.base_seven_complete()
+            && (crate::world::survey::FIRST_WORK..=crate::world::survey::LAST_CONDITION)
+                .all(|condition| self.work_claimed(orb, condition))
+    }
+
     /// WANT-1: the struck cognitive wants — (orb, kind).
     pub fn wants(&self) -> &[(u64, u8)] {
         &self.wants
@@ -208,6 +220,7 @@ impl World {
         resource: Resource,
         amount: Ratio,
         work: Vec<u8>,
+        warrant: &dyn MintWarrant,
     ) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Collect)?;
         if amount < ratio(0, 1) {
@@ -216,10 +229,49 @@ impl World {
         if !self.orbs.iter().any(|held| held.orb_id == orb) {
             return Err(ActionRefused::NoSuchOrb { orb });
         }
-        self.close(
-            ClosureEvent::DiscoveryMinted { orb_id: orb, resource, amount, work },
-            actor,
-        );
+        // K4 THE LIVE GATE. The emitter cannot VERIFY — the
+        // opaque-payload law bars `cfe` from importing the verifier, and
+        // `recurrence_guard` fails the build on any attempt. So it does
+        // the lawful thing instead: it CALLS BACK to whoever can.
+        //
+        // `cfe` never parses the payload; it hands the bytes to the
+        // warrant and asks what they earn. A caller with no verifier
+        // cannot mint at all, and a caller with one cannot mint past
+        // what the work bounds — checked BEFORE `close`, so a refused
+        // mint leaves no receipt. Previously the judge caught this
+        // afterwards, by which point the chronicle held it and `replay`
+        // granted the value.
+        let bound = warrant.earns(&work).ok_or(ActionRefused::WorkRefused)?;
+        if amount > bound {
+            return Err(ActionRefused::MintExceedsWork {
+                bound: Box::new(bound),
+                claimed: Box::new(amount),
+            });
+        }
+        // THE ESCROW. The deed is built, the state it WOULD produce is
+        // built, and the judge is asked — all before anything is
+        // closed. `earns` above priced the work; this asks whether the
+        // TRANSITION stands, which is where D4 and conservation live.
+        //
+        // A mint that fails here leaves no receipt and moves no value:
+        // it was never in the record to take back. Previously the judge
+        // met these deeds afterwards, and a 60-beat era banked mints it
+        // then refused — the drift the escrow makes unreachable rather
+        // than merely visible.
+        let event = ClosureEvent::DiscoveryMinted { orb_id: orb, resource, amount, work };
+        let prior = self.committed();
+        let mut candidate = prior.clone();
+        if let Some(held) = candidate.orbs.iter_mut().find(|held| held.orb_id == orb) {
+            held.bank(resource, match &event {
+                ClosureEvent::DiscoveryMinted { amount, .. } => amount.clone(),
+                _ => ratio(0, 1),
+            });
+        }
+        let stamp = self.now();
+        if !warrant.admits(&prior, &candidate, &event, actor, stamp) {
+            return Err(ActionRefused::WorkRefused);
+        }
+        self.close(event, actor);
         Ok(())
     }
     /// The committed projection of the live world.

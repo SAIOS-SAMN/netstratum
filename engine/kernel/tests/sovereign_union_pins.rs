@@ -9,7 +9,7 @@
 use cfe::dop::{ClosureEvent, Office, ZoneKind, UNION_REVIEW_HORIZON};
 use cfe::ipsal::{Entity, Scope};
 use cfe::world::{Committed, World, FIRST_ORB, SOVEREIGN};
-use kernel::{lawful, Step, Unlawful};
+use kernel::{admits, Step, Refused};
 
 const DELEGATE: u64 = 100;
 
@@ -43,7 +43,7 @@ fn union(progenitor: Office, sovereign: Office, term: u64, actor: u64) -> Step {
 fn the_root_entity_alone_may_strike_the_union() {
     let state = seat();
     assert_eq!(
-        lawful(&state, &state, &union(Office::Progenitor, Office::Sovereign, UNION_REVIEW_HORIZON, SOVEREIGN)),
+        admits(&state, &state, &union(Office::Progenitor, Office::Sovereign, UNION_REVIEW_HORIZON, SOVEREIGN)),
         Ok(()),
         "the root entity constitutes the union"
     );
@@ -52,8 +52,8 @@ fn the_root_entity_alone_may_strike_the_union() {
     // authority to act WITHIN the world, never authority to constitute
     // it — so passing containment is necessary and not sufficient.
     assert_eq!(
-        lawful(&state, &state, &union(Office::Progenitor, Office::Sovereign, UNION_REVIEW_HORIZON, DELEGATE)),
-        Err(Unlawful::UnionNotStruckByRoot { actor: DELEGATE }),
+        admits(&state, &state, &union(Office::Progenitor, Office::Sovereign, UNION_REVIEW_HORIZON, DELEGATE)),
+        Err(Refused::UnionNotStruckByRoot { actor: DELEGATE }),
         "a delegate with Build may not enter the offices into union"
     );
 }
@@ -70,8 +70,8 @@ fn the_union_must_be_a_dyad_of_two_different_offices() {
         (Office::Sovereign, Office::Progenitor),
     ] {
         assert_eq!(
-            lawful(&state, &state, &union(p, s, UNION_REVIEW_HORIZON, SOVEREIGN)),
-            Err(Unlawful::UnionMalformed { progenitor: p, sovereign: s }),
+            admits(&state, &state, &union(p, s, UNION_REVIEW_HORIZON, SOVEREIGN)),
+            Err(Refused::UnionMalformed { progenitor: p, sovereign: s }),
             "{p:?} with {s:?} is not the dyad"
         );
     }
@@ -85,8 +85,8 @@ fn the_review_horizon_is_ruled_and_cannot_be_named_by_the_deed() {
     let state = seat();
     for declared in [0, 1, 1499, 1501, u64::MAX] {
         assert_eq!(
-            lawful(&state, &state, &union(Office::Progenitor, Office::Sovereign, declared, SOVEREIGN)),
-            Err(Unlawful::UnionTermNotRuled { declared, ruled: UNION_REVIEW_HORIZON }),
+            admits(&state, &state, &union(Office::Progenitor, Office::Sovereign, declared, SOVEREIGN)),
+            Err(Refused::UnionTermNotRuled { declared, ruled: UNION_REVIEW_HORIZON }),
             "a horizon of {declared} is not the ruled term"
         );
     }

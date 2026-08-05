@@ -29,7 +29,7 @@ fn worn(ticks: usize) -> World {
     // THERMAL-1: an orb must be SITED before thermal wakes for it —
     // r = 1/2 puts it in the leaking band, so demurrage bites.
     world
-        .site_planet(FIRST_ORB, ratio(3, 10), ratio(1, 2))
+        .site_planet(FIRST_ORB, ratio(3, 10), ratio(1, 2), None, None)
         .expect("sites");
     for _ in 0..ticks {
         world.tick();

@@ -24,7 +24,7 @@
 //! engine).
 //!
 //! **LORE LIVES IN DATA, NOT SOURCE:** polity specs load from
-//! `<var>/polities.json` when present; `write_default_polities` seeds that
+//! the COMPILED roster (THE DEFINITION LAW — `polities.rs`); nothing
 //! file once so even the founding NPCs are operator-editable. NPC
 //! entries carry `founder: "conductor"` — the observer marks them ⚙.
 //!
@@ -50,11 +50,15 @@ use ledger::galaxy::Galaxy;
 use ledger::registry::{lineage_domain, Civilization, Registry, DISPOSITIONS, METABOLISMS, PERCEPTIONS};
 use ledger::{Directive, Disposition, Ledger};
 use physics::Beacon;
-use solver::{forge_task, solve_consulted, Difficulty, SolveRead};
+use solver::{
+    forge_task, propose_consulted_measured, solve_consulted, Difficulty, Hunger, Need,
+    SolveRead,
+};
+
 use std::path::Path;
 
 mod polities;
-pub use polities::{founding_polities, load_polities, write_default_polities};
+pub use polities::{founding_polities, registered_polities, roster};
 
 /// AEON-1b (11 §5): THE FOLD — seal the live era and rotate it into
 /// the archive sequence. `EraFolded` (tag 46) appends to the universe
@@ -119,13 +123,9 @@ pub fn fold(var_root: &str) -> std::io::Result<(u64, Ratio)> {
     if registry.is_dir() {
         std::fs::rename(&registry, archive.join("registry"))?;
     }
-    let roster = root.join("polities.json");
-    if roster.is_file() {
-        // The archived copy carries the live name. (It was written as
-        // `bots.json` under two earlier roster names; nothing reads it
-        // back, so the archive name simply tracks the current one.)
-        std::fs::copy(&roster, archive.join("polities.json"))?;
-    }
+    // THE DEFINITION LAW: no roster file is archived, because none
+    // exists. The era's roster is the roster the binary that sealed it
+    // was compiled with — recorded by the commit, not by a copy.
     Ok((era, gauge))
 }
 
@@ -429,6 +429,142 @@ pub fn market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
     cleared
 }
 
+/// WHERE A LINE IS GOING — read from its own measured yield, never set
+/// by a constant.
+///
+/// `SEARCH_BUDGET` bounds one heartbeat so a single beat cannot run
+/// away; it was never a statement about whether spending is WORTH it.
+/// This is. Every branch below cites a number from
+/// `solver/examples/forge_reach.rs`, measured over 200 forged tasks per
+/// rung on rungs 3–5 — the rungs that actually pay, since
+/// `mint_bound` f(0..=2) = 0.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Trajectory {
+    /// The cheap reach is closing work. STAY THERE. Yield per candidate
+    /// is highest at sated on every rung — 51/2, 17 and 13 against
+    /// struck's 199/8, 11 and 9. Spending more while the cheap reach
+    /// pays is buying what you already have.
+    Growth,
+    /// Spending and closing nothing. NECESSITY OPENS THE REACH, and it
+    /// is worth a great deal: the marginal yield of the sated→struck
+    /// step measured 97/4, 13/2 and 7 at rungs 3, 4 and 5. At rung 3
+    /// struck closes 200/200 — matching an exhaustive sweep at 8
+    /// candidates per task against up to 200,000.
+    Stagnation,
+    /// Struck, and STILL closing nothing. The READING has failed, so
+    /// stop reading and EXHAUST instead — this is where the sweep earns
+    /// its keep and the only place it does.
+    ///
+    /// Two measurements put it here rather than at a deeper hunger.
+    /// First, deeper hunger is worthless: struck→long-starved bought
+    /// EXACTLY ZERO extra yield at rungs 3 and 4, and at rung 5 bought
+    /// one more confirmed closure and one more FALSE one. Second, the
+    /// sweep is worth something precisely where the reach is not — at
+    /// rungs 4 and 5 it confirms 122 and 86 against the reach's 77 and
+    /// 54. Those are the tasks composed through intermediate states no
+    /// observation motivates: solved by exhaustion, not by reading.
+    Decline,
+}
+
+/// WHICH REGIME a board runs under — the three paths, held together so
+/// they can be measured against each other rather than argued about.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum SearchMode {
+    /// COUPLED — the trajectory routes. Read while reading pays,
+    /// escalate the hunger on stagnation, exhaust only on decline.
+    #[default]
+    Coupled,
+    /// UNCOUPLED — always exhaust. The original path, and the control
+    /// every other number is read against.
+    Uncoupled,
+    /// **V ∪ D** — the union. Every task gets BOTH: read first, and
+    /// exhaust whenever the reading did not close. Not a router — a
+    /// dyad, neither path deriving its standing from the other, and the
+    /// closure set is the union of what each can reach alone.
+    ///
+    /// It should find everything either finds, and pay both costs to do
+    /// it. Whether that is worth it is what the benchmark answers.
+    Union,
+}
+
+/// HOW a line searches. Both paths are live; neither is deprecated.
+///
+/// They are not competitors — they fail in different places. The reach
+/// MATCHES an exhaustive sweep exactly at rung 3 (200/199/1) at 8
+/// candidates against up to 200,000, and loses only at rungs 4-5, where
+/// the answer needs composition through states the observation cannot
+/// name. So the engine reads first and exhausts only when reading has
+/// demonstrably run out — which is what makes exhaustion affordable at
+/// all.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SearchPath {
+    /// Derivation-first: the observation names the operator, the need
+    /// orders the reach. ~66x the energy per candidate on the live
+    /// board.
+    Reach,
+    /// Exhaustive composition, bounded by `SEARCH_BUDGET`. Finds what
+    /// no reading motivates, and costs four orders of magnitude more.
+    Sweep,
+}
+
+impl Trajectory {
+    /// WHICH PATH this trajectory searches by.
+    pub fn path(&self) -> SearchPath {
+        match self {
+            Trajectory::Growth | Trajectory::Stagnation => SearchPath::Reach,
+            Trajectory::Decline => SearchPath::Sweep,
+        }
+    }
+
+    /// The reach this trajectory buys, when it is reading. Unused on
+    /// the sweep path, which has no need to order.
+    pub fn need(&self, starved: u64) -> Need {
+        self.need_of(Vec::new(), starved)
+    }
+
+    /// **THE TRAJECTORY DECIDES WHETHER; THE LINE DECIDES WHICH.**
+    ///
+    /// Composed at the 2026-08-04 merge. This lane's trajectory answers
+    /// *is spending paying* — a homeostatic reading, measured, and it
+    /// is what stops a paying line from buying reach it already has.
+    /// It cannot answer WHAT the line is short of, and its own
+    /// `need` could only ever say Novelty.
+    ///
+    /// `Polity::hunger` answers that half: it reads the line's own
+    /// chronicle rhythm for BOTH hungers — starved of signal, starved
+    /// of links — so two lines stagnating for different reasons reach
+    /// for different families. Empty `measured` falls back to Novelty,
+    /// which is this lane's original behaviour exactly.
+    pub fn need_of(&self, measured: Vec<Hunger>, starved: u64) -> Need {
+        match self {
+            Trajectory::Growth | Trajectory::Decline => Need::sated(),
+            Trajectory::Stagnation => match measured.is_empty() {
+                true => Need::struck(Hunger::Novelty, starved),
+                false => Need { hungers: measured, starved_for: starved },
+            },
+        }
+    }
+
+    /// Advance on the beat's outcome. A close returns any line to
+    /// growth — including one in decline, which is what makes the
+    /// contraction recoverable rather than a trap.
+    pub fn advance(self, closed: bool) -> Trajectory {
+        match (self, closed) {
+            (_, true) => Trajectory::Growth,
+            (Trajectory::Growth, false) => Trajectory::Stagnation,
+            (Trajectory::Stagnation | Trajectory::Decline, false) => Trajectory::Decline,
+        }
+    }
+
+    pub fn describe(&self) -> &'static str {
+        match self {
+            Trajectory::Growth => "growth",
+            Trajectory::Stagnation => "stagnation",
+            Trajectory::Decline => "decline",
+        }
+    }
+}
+
 /// A build temperament — the only thing that differs between polities.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Policy {
@@ -514,6 +650,24 @@ pub struct Polity {
     /// The fiber's grade count is `world.key().len()`; this counts the
     /// openings that got it there.
     pub unfolded: u64,
+    /// WHICH REGIME this line searches under. Set by the era runner so
+    /// the three paths can be benchmarked against one another.
+    pub mode: SearchMode,
+    /// WHERE THIS LINE IS GOING, read from its own outcomes and used
+    /// to decide what the next beat's search may spend.
+    pub trajectory: Trajectory,
+    /// Beats since this line last closed a task — what it hands the
+    /// hunger when it reaches. A real duration, never a constant.
+    pub starved: u64,
+    /// Candidate programs this line has spent on the READ path,
+    /// cumulative. The S of W/S; the board reads its own yield without
+    /// instrumentation.
+    pub spent: u64,
+    /// Times this line fell back to the EXHAUST path. Counted as
+    /// invocations, not candidates: the sweep reports no count and is
+    /// bounded by `SEARCH_BUDGET`, so folding it into `spent` would
+    /// mix a measured number with a bound and ruin both yields.
+    pub swept: u64,
     /// Deeds the kernel REFUSED, by receipt sequence. Kept rather than
     /// discarded — a refusal the board never sees is the judge speaking
     /// into a void.
@@ -524,7 +678,7 @@ pub struct Polity {
     /// been judging every deed every beat and posting its verdicts into
     /// a field no caller could see. A refusal names its cure, and a cure
     /// nobody can read is not a cure.
-    pub refused: Vec<(u64, kernel::Unlawful)>,
+    pub refused: Vec<(u64, kernel::Refused)>,
     /// THE LANE REFUSALS — why `charter_route` said no.
     ///
     /// `conductor/src/lib.rs`'s charter site discarded this with
@@ -552,7 +706,7 @@ pub struct Polity {
     /// and got a different grid — `WorkRefused { OutputMismatch }`, a
     /// mint the proposer emitted and the judge refused. The task IS the
     /// whole difficulty, so the key must be too.
-    last_forge: Option<([u8; 32], Difficulty, SolveRead)>,
+    last_forge: Option<([u8; 32], Difficulty, Need, SolveRead)>,
     /// How many refusals the board has already been TOLD. The record
     /// above is permanent; this is only the narrator's place in it, so
     /// a refusal is announced once per process and kept forever.
@@ -562,6 +716,7 @@ pub struct Polity {
     /// is honest — the judge met the deed again — and it is the same
     /// re-verification `chained: 0` already performs.
     reported: usize,
+
 }
 
 fn banked(world: &World, resource: Resource) -> Ratio {
@@ -741,6 +896,11 @@ impl Polity {
                         lane_refused: Vec::new(),
                         last_forge: None,
                         reported: 0,
+                        mode: SearchMode::default(),
+                        trajectory: Trajectory::Growth,
+                        starved: 0,
+                        spent: 0,
+                        swept: 0,
                         spec,
                         world,
                         automaton,
@@ -782,9 +942,9 @@ impl Polity {
         }
         // PRACTICE-1 (operator-ruled: NPCs adopt at genesis): the
         // disposition names the founding discipline — expansionist
-        // keeps the Vigil, epicurean raises the Icon, empiricist keeps
-        // the Fast. Receipted like every deed; the Hoard and the
-        // Athanor are earned choices, never seeded.
+        // keeps the Restraint, epicurean raises the Showpiece, empiricist keeps
+        // the Austerity. Receipted like every deed; the Hoard and the
+        // Overdrive are earned choices, never seeded.
         let founding_practice = match spec.civilization.disposition.as_str() {
             "expansionist" => Some(3),
             "epicurean" => Some(2),
@@ -815,7 +975,14 @@ impl Polity {
         // An unlawful operator-pinned siting (albedo ≥ 1, orbit ≤ 0)
         // leaves the orb thermally DORMANT (the engine's opt-in guard)
         // instead of killing the board; derived seats are always lawful.
-        let _ = world.site_planet(cfe::world::FIRST_ORB, albedo, orbit);
+        // SITED WITHOUT AN ANGLE, deliberately. Passing ANY slot here
+        // makes conductor/tests/survey_pins.rs fail with a live/replay
+        // divergence in Crystal — measured at slots 0, 1, 7 and 30, so
+        // it is the PRESENCE of the angle and not its value. See
+        // `21_KERNEL_PARAMETERS` §17: the capability is landed and
+        // witnessed, and the conductor does not use it until #30
+        // closes the divergence it exposes.
+        let _ = world.site_planet(cfe::world::FIRST_ORB, albedo, orbit, None, None);
         Polity {
             chained: 0,
             refused: Vec::new(),
@@ -823,6 +990,11 @@ impl Polity {
             lane_refused: Vec::new(),
             last_forge: None,
             reported: 0,
+            mode: SearchMode::default(),
+            trajectory: Trajectory::Growth,
+            starved: 0,
+            spent: 0,
+            swept: 0,
             spec,
             world,
             automaton,
@@ -850,7 +1022,11 @@ impl Polity {
     /// resonant orb with room to grow. Unaffordable or starving, the
     /// survey idles lawfully and siting draws rule as before.
     fn survey_step(&mut self) {
-        if self.level < 5 {
+        // THE TOP OF THE LADDER, DERIVED (operator ruling 2026-08-04):
+        // a line surveys once nothing above it differs. `Difficulty::
+        // climbs` reads that off the ladder instead of restating its
+        // length as a constant.
+        if Difficulty::climbs(self.level) {
             return;
         }
         if self.world.orb().is_none_or(|orb| !orb.famine.is_empty()) {
@@ -1133,19 +1309,120 @@ impl Polity {
     /// stacked grids, stack operators — while planar and harmonic
     /// civilizations work the planar forge (the harmonic carrier is a
     /// named gap; it lands with its own vocabulary, not as a skin).
+    /// **WHAT THIS LINE IS STARVED FOR** — a CHARACTER's hunger, read
+    /// from its own history.
+    ///
+    /// **Derived, never stored** (`09_LEDGER` §1.2's law, applied to a
+    /// person instead of a book). No deed, no tag, no schema, no kernel
+    /// arm: hunger is a reading of the chronicle this line already
+    /// wrote, so two characters differ without a wire amendment.
+    ///
+    /// WANT-1 strikes its wants on an ORB — a PLACE starves. That is
+    /// the right law for a world and the wrong one for a person, and it
+    /// is why two characters with the same grants were identical by
+    /// construction: `Entity` carries `entity_id`, `handle`,
+    /// `principal`, `grants` and nothing it could differ in. This reads
+    /// the same two hungers off the actor's own deeds instead.
+    ///
+    /// ```text
+    ///   Novelty     nothing DISCOVERED lately — the line has stopped
+    ///               finding, and reaches for what MAKES structure
+    ///   Resonance   nothing LINKED lately — the line has stopped
+    ///               relating, and reaches for what RELATES
+    /// ```
+    ///
+    /// The hunger steers the reach; it never steers what is accepted.
+    /// The sector door still re-derives every proposal, so a starving
+    /// mind looking in a different order costs the judge nothing.
+    fn hunger(&self) -> Need {
+        let now = self.world.now();
+        let receipts = self.world.chronicle().receipts();
+        let since = |matches: &dyn Fn(&cfe::dop::ClosureEvent) -> bool| -> u64 {
+            receipts
+                .iter()
+                .rev()
+                .find(|r| matches(&r.event))
+                .map_or(now, |r| now.saturating_sub(r.stamp))
+        };
+        let found = since(&|e| {
+            matches!(
+                e,
+                cfe::dop::ClosureEvent::DiscoveryMinted { .. }
+                    | cfe::dop::ClosureEvent::TechDiscovered { .. }
+            )
+        });
+        let linked = since(&|e| {
+            matches!(
+                e,
+                cfe::dop::ClosureEvent::BondSealed { .. }
+                    | cfe::dop::ClosureEvent::BondSettled { .. }
+                    | cfe::dop::ClosureEvent::ResourceTransferred { .. }
+            )
+        });
+        // **HUNGER IS RELATIVE TO THE LINE'S OWN RHYTHM**, not to a
+        // borrowed constant.
+        //
+        // This first read inherited WANT-1's orb windows — novelty 480,
+        // resonance 240 — and they are the wrong SCALE for a person: a
+        // 60-beat era never reaches either, so every character was
+        // permanently sated, searched at depth 1, and the live board's
+        // earnings fell 268 -> 53. That was the constant, not the
+        // design.
+        //
+        // A line is starved when it has gone longer without finding
+        // than it usually takes it to find — `since > now / finds`,
+        // written as a product so the arithmetic stays exact integers.
+        // A line that has NEVER found is starved from the start.
+        //
+        // Scale-free by construction: it reads the same at 60 beats and
+        // 6000, and it introduces no number to tune. The two windows it
+        // replaces are gone rather than re-picked.
+        let count = |matches: &dyn Fn(&cfe::dop::ClosureEvent) -> bool| -> u64 {
+            receipts.iter().filter(|r| matches(&r.event)).count() as u64
+        };
+        let is_find = |e: &cfe::dop::ClosureEvent| {
+            matches!(
+                e,
+                cfe::dop::ClosureEvent::DiscoveryMinted { .. }
+                    | cfe::dop::ClosureEvent::TechDiscovered { .. }
+            )
+        };
+        let is_link = |e: &cfe::dop::ClosureEvent| {
+            matches!(
+                e,
+                cfe::dop::ClosureEvent::BondSealed { .. }
+                    | cfe::dop::ClosureEvent::BondSettled { .. }
+                    | cfe::dop::ClosureEvent::ResourceTransferred { .. }
+            )
+        };
+        let stalled = |since: u64, deeds: u64| match deeds {
+            0 => now > 0,
+            n => since.saturating_mul(n) > now,
+        };
+        let mut hungers = Vec::new();
+        if stalled(found, count(&is_find)) {
+            hungers.push(Hunger::Novelty);
+        }
+        if stalled(linked, count(&is_link)) {
+            hungers.push(Hunger::Resonance);
+        }
+        let starved_for = match hungers.is_empty() {
+            true => 0,
+            false => found.max(linked),
+        };
+        Need { hungers, starved_for }
+    }
+
     fn research_step(&mut self, book: &Ledger) {
         let Some(receipt) = self.world.chronicle().receipts().last() else {
             return;
         };
         let digest = receipt.own.0;
-        // R5 probe: how often is the forge re-drawn from a digest that
-        // has not moved? An unchanged digest re-forges the identical
-        // task and re-runs the identical sweep for the identical answer
-        // — 81 ms when that answer is Unsolved.
-        if self.last_forge.as_ref().is_some_and(|(held, _, _)| *held == digest) {
-            PROBE_DIGEST_REPEAT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-        }
-        PROBE_DIGEST_TOTAL.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        // CAPTURED BEFORE THE BEAT MOVES ANYTHING. Promotion reads both,
+        // and reading either afterwards would be vacuous: a close always
+        // advances the trajectory to Growth.
+        let trajectory_before = self.trajectory;
+
         let solved = if self.spec.civilization.perception == "volumetric" {
             let difficulty = solver::VolDifficulty::level(self.level);
             let task = solver::forge_volume(digest, difficulty);
@@ -1185,20 +1462,67 @@ impl Polity {
             // beat — so the search inside may become as dirty as it
             // likes (float scoring, batching, sampled beam) and nothing
             // downstream changes.
-            // The memo, or the search. Same inputs, same answer — the
-            // door the purity of `solve` opens.
-            let read = match self.last_forge.take() {
-                Some((held, held_difficulty, cached))
-                    if held == digest && held_difficulty == difficulty =>
-                {
-                    self.last_forge = Some((held, held_difficulty, cached.clone()));
-                    cached
+            //
+            // THE REACH IS COUPLED TO THE LINE'S OWN TRAJECTORY, never
+            // to a constant. What it spends is decided by whether
+            // spending has been PAYING — see `Trajectory::read`, and
+            // `examples/forge_reach.rs` for the numbers each branch
+            // cites. `SEARCH_BUDGET` still stands behind this as the
+            // per-beat ceiling that keeps one heartbeat bounded; it is
+            // no longer what DECIDES the spend.
+            // THE THREE PATHS. Each spends differently and each is
+            // counted separately: read-candidates are MEASURED, sweep
+            // invocations are BOUNDED by `SEARCH_BUDGET`, and blending
+            // the two would ruin both yields.
+            let reach = |polity: &mut Self| {
+                let need = polity.trajectory.need_of(polity.hunger().hungers, polity.starved);
+                // THE MEMO, restored into the coupled path (remediations
+                // R5). `propose` is pure: same digest, same difficulty,
+                // same need, same answer. Keyed on all three — a
+                // need-blind key hands a hungry mind its sated self's
+                // answer, which is the staleness that shipped a level-3
+                // solve as a level-4 proof.
+                if let Some((held, held_d, held_need, cached)) = polity.last_forge.clone() {
+                    if held == digest && held_d == difficulty && held_need == need {
+                        PROBE_DIGEST_REPEAT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                        return cached;
+                    }
                 }
-                _ => {
-                    let fresh = solve_consulted(&task, difficulty.word_len);
-                    self.last_forge = Some((digest, difficulty, fresh.clone()));
-                    fresh
+                // COST IS MEASURED, then the proposal crosses THE SECTOR
+                // DOOR. `propose_measured` alone would skip it: the
+                // reach may look in any order it likes, but nothing
+                // crosses that does not re-derive against every training
+                // pair. Measure inside, dispose outside.
+                let proposal = propose_consulted_measured(&task, &need);
+                polity.spent = polity.spent.saturating_add(proposal.tested as u64);
+                polity.last_forge =
+                    Some((digest, difficulty, need, proposal.read.clone()));
+                proposal.read
+            };
+            // WHICH PATH ACTUALLY PAID FOR THIS BEAT — captured before
+            // the trajectory advances, because promotion reads it.
+            let read = match self.mode {
+                SearchMode::Uncoupled => {
+                    self.swept = self.swept.saturating_add(1);
+                    solve_consulted(&task, difficulty.word_len)
                 }
+                SearchMode::Coupled => match self.trajectory.path() {
+                    SearchPath::Reach => reach(self),
+                    SearchPath::Sweep => {
+                        self.swept = self.swept.saturating_add(1);
+                        solve_consulted(&task, difficulty.word_len)
+                    }
+                },
+                // V ∪ D: read, and exhaust whenever the reading did not
+                // close. Both costs paid; the closure set is the union.
+                SearchMode::Union => match reach(self) {
+                    closed @ SolveRead::Solved { .. } => closed,
+                    SolveRead::Unsolved => {
+                        self.swept = self.swept.saturating_add(1);
+                        solve_consulted(&task, difficulty.word_len)
+                    }
+                },
+
             };
             match read {
                 SolveRead::Solved {
@@ -1247,7 +1571,7 @@ impl Polity {
                     // to entity and is recycled WITHOUT bonds, so a
                     // standing test read off relational structure
                     // refused the lawful recycled line by construction.
-                    let earned = kernel::mint_bound(&difficulty);
+                    let earned = kernel::mint_bound(difficulty.rung());
                     if earned > cfe::ratio::ratio(0, 1) {
                         let _ = self.world.mint_discovery_as(
                             self.automaton,
@@ -1255,6 +1579,11 @@ impl Polity {
                             cfe::dop::Resource::Crystal,
                             earned,
                             work,
+                            // The emitter now demands a warrant, and the
+                            // kernel's is the only one that reads a
+                            // payload. The bound is checked twice by one
+                            // function: here and at I4.
+                            &kernel::SealedWarrant,
                         );
                     }
                 }
@@ -1268,12 +1597,55 @@ impl Polity {
                 );
                 self.solved += 1;
                 self.streak += 1;
-                if self.streak >= 3 && self.level < 5 {
+                // THE COUPLING CLOSES HERE. A close returns the line to
+                // growth from wherever it was, and clears the hunger it
+                // reached with.
+                self.trajectory = self.trajectory.advance(true);
+                self.starved = 0;
+                // D CLIMBS WHEN THE RUNG IS MASTERED — coupled, not
+                // counted. The old rule was `streak >= 3 && level < 5`:
+                // two chosen constants, one counting confirms while
+                // ignoring what they COST, the other an absolute
+                // ceiling.
+                //
+                // The couple: D (the rung, an extent) advances only on
+                // expenditure of V (the reach, a rate), and the signal
+                // that a rung is finished is that it stopped costing —
+                // a close off the CHEAP reach. A close that needed
+                // hunger or exhaustion says the line is at its limit
+                // and holds, however many it strings together.
+                //
+                // The ceiling is DERIVED, never chosen: a line climbs
+                // while the ladder still differentiates, and stops
+                // where `Difficulty::level` saturates and the next rung
+                // is the same task at the same price. That reads the
+                // ladder instead of asserting its length, so extending
+                // the ladder extends the climb with no edit here.
+                // PATH-AGNOSTIC BY CONSTRUCTION. The first cut tested
+                // `path_used == Reach`, which silently broke the
+                // uncoupled control: that path never reaches, so it
+                // could never promote, never left rung 1, and earned
+                // exactly zero. The signal is not WHICH path paid, it
+                // is whether the line was ALREADY closing — sustained
+                // productivity at this rung. In coupled mode Growth
+                // implies the cheap reach anyway, so this subsumes the
+                // path test rather than weakening it.
+                let mastered = trajectory_before == Trajectory::Growth;
+                let ladder_still_climbs =
+                    Difficulty::level(self.level + 1) != Difficulty::level(self.level);
+                if mastered && ladder_still_climbs {
+
                     self.level += 1;
                     self.streak = 0;
                 }
             }
-            None => self.streak = 0,
+            None => {
+                self.streak = 0;
+                // Growth → stagnation → decline, one step per barren
+                // beat. What each state SPENDS is `Trajectory::need`.
+                self.trajectory = self.trajectory.advance(false);
+                self.starved = self.starved.saturating_add(1);
+            }
         }
     }
 
@@ -1286,7 +1658,9 @@ impl Polity {
     /// decides where its branches land on the manifold. The lineage
     /// pointer records LINE membership (LINEAGE-1), never parenthood.
     fn divergence_step(&mut self, registry: &Registry) -> Option<PolitySpec> {
-        if self.cleaved || self.level < 5 || self.solved < 20 {
+        // Divergence waits for the TOP of the ladder — derived from
+        // the ladder, not from a remembered 5.
+        if self.cleaved || Difficulty::climbs(self.level) || self.solved < 20 {
             return None;
         }
         let receipt = self.world.chronicle().receipts().last()?;
@@ -1564,7 +1938,7 @@ impl Polity {
 
         // DIRECTIVE 19 — PER-DEED JUDGMENT. One commitment per DEED, not
         // one per beat, and each carries its own step so
-        // `mesh::arbor::extend` runs `kernel::lawful` on it. Batching
+        // `mesh::arbor::extend` runs `kernel::admits` on it. Batching
         // was refused by ruling: nine deeds in one composite hides an
         // un-inspected interior where a local unlawful step shelters
         // behind a net-positive whole.
@@ -1589,7 +1963,7 @@ impl Polity {
                 actor: receipt.provenance.first().copied().unwrap_or(cfe::world::SOVEREIGN),
                 stamp: receipt.stamp,
             };
-            if let Err(unlawful) = kernel::lawful(&prior, &next, &step) {
+            if let Err(unlawful) = kernel::admits(&prior, &next, &step) {
                 self.refused.push((receipt.sequence, unlawful));
             }
             prior = next;
@@ -1626,7 +2000,7 @@ impl Polity {
     /// it to proposer, `U_DIRECTIVES` §5), so a refused deed stands in
     /// the chronicle with the judge on record against it. That gap is
     /// the whole reason this must be visible rather than counted.
-    pub fn refusals(&self) -> &[(u64, kernel::Unlawful)] {
+    pub fn refusals(&self) -> &[(u64, kernel::Refused)] {
         &self.refused
     }
 
@@ -1634,7 +2008,7 @@ impl Polity {
     /// marks them told — the RECORD stays whole above; only the
     /// narrator's cursor moves, so each refusal is announced once
     /// instead of every beat thereafter.
-    pub fn unreported_refusals(&mut self) -> &[(u64, kernel::Unlawful)] {
+    pub fn unreported_refusals(&mut self) -> &[(u64, kernel::Refused)] {
         let from = self.reported.min(self.refused.len());
         self.reported = self.refused.len();
         &self.refused[from..]
@@ -2087,6 +2461,12 @@ fn galaxy_creator(registry: &Registry, civilization: &Civilization) -> String {
 /// every polity, then `cycles` heartbeats; branches born mid-era join the
 /// beat. Returns the live worlds.
 pub fn run_era(var_root: &str, cycles: u32) -> Vec<Polity> {
+    run_era_with(var_root, cycles, SearchMode::default())
+}
+
+/// The era runner, under a named search regime — the seam the
+/// three-path benchmark drives.
+pub fn run_era_with(var_root: &str, cycles: u32, mode: SearchMode) -> Vec<Polity> {
     let registry = Registry::at(format!("{var_root}/registry"));
     let book = Ledger::at(format!("{var_root}/worlds"));
     let eras = ledger::converge::default_era_roots(var_root);
@@ -2100,7 +2480,9 @@ pub fn run_era(var_root: &str, cycles: u32) -> Vec<Polity> {
         .map(|mut spec| {
             let opening = spec.gauge.take().unwrap_or_else(|| ratio(0, 1));
             spec.gauge = Some(cfe::world::wrap_gauge(opening + live_base.clone()));
-            Polity::genesis(spec, &registry, &book)
+            let mut polity = Polity::genesis(spec, &registry, &book);
+            polity.mode = mode;
+            polity
         })
         .collect();
     for beat in 0..cycles {
@@ -2113,7 +2495,9 @@ pub fn run_era(var_root: &str, cycles: u32) -> Vec<Polity> {
             }
         }
         for spec in newborns {
-            worlds.push(Polity::genesis(spec, &registry, &book));
+            let mut polity = Polity::genesis(spec, &registry, &book);
+            polity.mode = mode;
+            worlds.push(polity);
         }
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — the lens renders journals + wall, write-only display

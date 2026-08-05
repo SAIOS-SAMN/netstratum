@@ -218,10 +218,10 @@ fn demurrage_settles_both_sides_at_the_transfer_touch() {
     world.zone(16, ZoneKind::Encasement).expect("zones the shell");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2))
+        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None, None)
         .expect("sites the furnace");
     world
-        .site_planet(charted, ratio(0, 1), ratio(1, 2))
+        .site_planet(charted, ratio(0, 1), ratio(1, 2), None, None)
         .expect("sites the store");
 
     // One furnace tick mints 15/8 joules (the THERMAL-1 arithmetic).
@@ -294,7 +294,7 @@ fn an_upkeep_only_collect_anchors_last_touch_on_replay() {
     world.found("anchor").expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(100, 1))
+        .site_planet(FIRST_ORB, ratio(0, 1), ratio(100, 1), None, None)
         .expect("sites cold");
     world.zone(0, ZoneKind::Encasement).expect("zones the shell");
     world.tick(); // heating burns joules the orb lacks: joule famine

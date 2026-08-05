@@ -3,7 +3,8 @@
 //! into display JSON. One producer of every rendering — the ledger's
 //! display half CALLS these; nothing ever parses them back.
 
-use crate::json::{ratio_str, JsonWriter};
+use cfe::ratio::ratio_str;
+use pen::JsonWriter;
 use cfe::ratio::Ratio;
 use cfe::vrp::Receipt;
 use cfe::world::World;
@@ -270,6 +271,40 @@ pub fn render_receipt(receipt: &Receipt) -> String {
     w.array(receipt.provenance.iter().map(|p| p.to_string()));
     let (name, detail): (&str, String) = match &receipt.event {
         E::ColonyFounded { name, .. } => ("colony_founded", name.clone()),
+        // BOOK-1 (19_LENS §16) — the open registry's three deeds. The
+        // kind is shown truncated: it is an identity, not a reading, and
+        // a full digest in a display line teaches nobody anything.
+        // LIT-1 — the literature deeds. Witness COUNT only: the digests
+        // are the evidence, and a display line is not where evidence is
+        // examined.
+        E::WorkAspired { name, .. } => ("work_aspired", name.clone()),
+        E::WorkClaimed { work, witnesses, .. } => (
+            "work_claimed",
+            format!(
+                "{} on {} chain receipt(s)",
+                &hex(&work.0)[..8],
+                witnesses.len()
+            ),
+        ),
+        E::BookMinted { name, kind, .. } => (
+            "book_minted",
+            format!("{name} ({})", &hex(&kind.0)[..8]),
+        ),
+        E::BookPosted { kind, kept, lost, .. } => (
+            "book_posted",
+            format!(
+                "{} kept / {} lost on {}",
+                ratio_str(kept),
+                ratio_str(lost),
+                &hex(&kind.0)[..8]
+            ),
+        ),
+        // Closed to WRITING only — the display says so, because the
+        // word "archived" alone reads as gone (§16c).
+        E::BookArchived { kind, .. } => (
+            "book_archived",
+            format!("{} closed to writing", &hex(&kind.0)[..8]),
+        ),
         E::ZoneBuilt { tile, kind, .. } => ("zone_built", format!("{} @ {tile}", zone_name(*kind))),
         E::YieldCollected { resource, amount, .. } => (
             "yield_collected",
@@ -375,7 +410,7 @@ pub fn render_receipt(receipt: &Receipt) -> String {
         }
         E::OverheatCleared { .. } => ("overheat_cleared", String::new()),
         E::StarCommissioned { class } => ("star_commissioned", format!("class {class}")),
-        E::PlanetSited { orb_id, albedo, orbit_r } => (
+        E::PlanetSited { orb_id, albedo, orbit_r, theta: _, psi: _ } => (
             "planet_sited",
             format!("orb {orb_id} A={} r={}", ratio_str(albedo), ratio_str(orbit_r)),
         ),

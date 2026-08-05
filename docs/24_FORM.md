@@ -1,10 +1,10 @@
 # 24 — THE FORM: the relational tensor, its boundary, and the sign law
 
-**Status:** LAW, split out of `18_TORSION.md` on 2026-08-03 by operator
+**Status:** LAW, split out of the retired `18_TORSION.md` on 2026-08-03 by operator
 ruling. It carries §2 THE FORM whole — the Δ/Ω mathematics the engine
 computes on.
 
-**Why it moved.** `18_TORSION` is the physics subset that constrains the
+**Why it moved.** `18_TORSION` was the physics subset that constrained the
 computational mathematics, and §2 was 704 of its 1,572 lines — the
 single largest block, and a different KIND of thing from the four
 articles it sat beside. The articles rule what a law may be; the form
@@ -387,17 +387,17 @@ one at a time. Entanglement is ONE object:
     Δ(D) ⋈ ∂Δ     neither term is separately defined, neither is
                   separately guardable, no operation touches one alone
 
-**Why this is the stronger force.** It moves the anti-dogma law from a
-RECONCILIATION INSTRUMENT to an INVARIANT — from *detect and tax* to
+**Why this is the stronger force.** It moves the no-free-energy law
+from a RECONCILIATION INSTRUMENT to an INVARIANT — from *detect and tax* to
 *cannot be constructed*. That is this system's own strongest principle,
 already stated in the kernel's own header: *"an unlawful transition is
 not caught after the fact, it cannot be constructed … you do not
-reconcile what cannot diverge."* Under entanglement the dogmatic loop
-does not mint and get penalised; **it cannot mint.**
+reconcile what cannot diverge."* Under entanglement a closed loop at
+uniform potential does not mint and get penalised; **it cannot mint.**
 
 Three consequences, each structural:
 
-1. **No capacity from ritual.** A traverse emitting deeds without
+1. **No capacity from repetition.** A traverse emitting deeds without
    moving `∂Δ` produces no `Δ(D)` — not "is taxed for it." There is no
    path by which activity alone becomes capacity.
 2. **No hidden work.** Potential motion that registers no capacity is
@@ -625,7 +625,7 @@ sector; what crosses the door is the constraint as an exact quantity.
 
 ### 2m.3 "COVENANT", DEFINED — and what of it is ceremony
 
-The operator flags the term as carrying religious and dogmatic
+The operator flags the term as carrying inherited ceremonial
 freight. Measured, the mechanism carries none:
 
     Covenant { obligor, beneficiary, resource, quota,
@@ -645,8 +645,8 @@ the accurate one.
 "vitrified" are inherited from FORWARD-1 and `BUILD_ORDER` §3, not
 minted here — but `bridge.rs` propagated *"the vitrified pact's
 OUTSTANDING quota"* into the kernel's own doc surface without
-challenging it, which is exactly the drift the anti-dogma ordinance
-exists to catch. **Fixed at the source:** `CHANNEL_FORWARD` now states
+challenging it, which is exactly the drift Article III's grounding law
+(LAW 8) exists to catch. **Fixed at the source:** `CHANNEL_FORWARD` now states
 the mechanism and records that the names are inherited labels rather
 than descriptions.
 

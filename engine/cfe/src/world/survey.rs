@@ -2,6 +2,40 @@
 //! terraforming, deposits.
 
 use super::*;
+use crate::literature::{work_of, WORKS};
+
+/// **THE SKY IS BASE-11** (operator ruling 2026-08-02, *uplift to
+/// base-11*). Eleven nodes, in two tiers, and `7` is not one of them:
+///
+/// ```text
+///     0        the solar leap
+///     1..=5    the five crystallized conditions
+///     6        the gifted crown — completes the BASE
+///     7        NOT A SKY NODE — the re-emergence lesson (PRACTICE-1),
+///              which "rides separately as TechDiscovered condition 7"
+///              (`dop.rs`) and eases `deposit_window` 240 -> 180
+///     8..=11   THE UPLIFT TIER — one node per chartered work
+/// ```
+///
+/// Seven base nodes plus four works is ELEVEN. The condition FIELD is a
+/// shared namespace with two populations — sky nodes and separately
+/// riding ones — and `7` was already spoken for by landed law before
+/// the uplift. A first cut of this ruling put the works at `7..=10` and
+/// so gave one number two meanings: `deposit_window` reads `techs` for
+/// the lesson while the sky claimed the same slot for VALOR, which
+/// would have rendered a held lesson as an unreached work and hidden
+/// the real node entirely.
+///
+/// **The crown's gate does not move.** It still gates on `0..=5` and
+/// still completes base-7; the uplift sits ABOVE it rather than
+/// widening what it waits for.
+pub const LAST_CONDITION: u8 = 11;
+/// The first node of the uplift tier — `8`, where the works begin.
+/// `7` is skipped: it belongs to PRACTICE-1 and is not a sky node.
+pub const FIRST_WORK: u8 = 8;
+/// PRACTICE-1's re-emergence lesson. Held in `techs` like a sky node,
+/// rendered in the sky like none — it rides separately by design.
+pub const RE_EMERGENCE: u8 = 7;
 
 impl World {
     /// TERRA-1: does this world hold the gifted terraforming node?
@@ -41,9 +75,12 @@ impl World {
         held.thermal = Some(ThermalSite {
             albedo: albedo.clone(),
             orbit_r: orbit_r.clone(),
+            // Historical siting carries no angle — an orb has a radius
+            // and no place until one is receipted.
+            theta: None, psi: None,
         });
         self.close(
-            ClosureEvent::PlanetSited { orb_id: orb, albedo, orbit_r },
+            ClosureEvent::PlanetSited { orb_id: orb, albedo, orbit_r, theta: None , psi: None },
             SOVEREIGN,
         );
         Ok(())
@@ -89,6 +126,29 @@ impl World {
     /// 240); the state conditions and the kernel report 1-of-1 when
     /// their reading holds; the crown reports base-7 readiness (the
     /// gift needs the stack, 6 of 6 earned nodes).
+    /// The chartered work a node of the uplift tier stands for, if it
+    /// is one. `7..=10` map to the charter's order.
+    pub fn work_at(condition: u8) -> Option<&'static str> {
+        match (FIRST_WORK..=LAST_CONDITION).contains(&condition) {
+            true => WORKS.get((condition - FIRST_WORK) as usize).copied(),
+            false => None,
+        }
+    }
+
+    /// Has this line CLAIMED the work this node stands for? Derived
+    /// from the aspiration's witnesses — the evidence IS the node.
+    pub fn work_claimed(&self, orb: u64, condition: u8) -> bool {
+        let Some(name) = World::work_at(condition) else {
+            return false;
+        };
+        let work = work_of(name);
+        self.orb_by_id(orb).is_some_and(|held| {
+            held.aspirations
+                .iter()
+                .any(|held| held.work == work && held.claimed())
+        })
+    }
+
     pub fn constellation(&self, orb: u64) -> Vec<(u8, bool, u64, u64)> {
         let now = self.clock.now();
         let deposits = self.crystal_deposits(now);
@@ -98,12 +158,19 @@ impl World {
             .find(|(held, _)| *held == orb)
             .map(|(_, sheet)| sheet)
             .unwrap_or(&blank);
-        (0u8..=6)
+        (0u8..=LAST_CONDITION)
+            .filter(|condition| *condition != RE_EMERGENCE)
             .map(|condition| {
-                let held = self
-                    .techs
-                    .iter()
-                    .any(|(o, c, _)| *o == orb && *c == condition);
+                // The BASE tier is earned into `techs`. The UPLIFT tier
+                // (7..=10) is not granted at all — a work is held when
+                // the line CLAIMED it, so the node IS the deed.
+                let held = match condition >= FIRST_WORK {
+                    true => self.work_claimed(orb, condition),
+                    false => self
+                        .techs
+                        .iter()
+                        .any(|(o, c, _)| *o == orb && *c == condition),
+                };
                 let (progress, threshold) = match condition {
                     0 => (u64::from(self.knows_its_sun()), 1),
                     1 => {
@@ -128,6 +195,11 @@ impl World {
                             })
                             .count() as u64;
                         (earned, 6)
+                    }
+                    // THE UPLIFT TIER — one node per chartered work,
+                    // held on a WITNESSED claim. A deed is the upgrade.
+                    held_work if held_work >= FIRST_WORK => {
+                        (u64::from(self.work_claimed(orb, condition)), 1)
                     }
                     _ => (
                         u64::from(self.condition_holds(orb, condition, now, sheet)),
@@ -221,7 +293,7 @@ impl World {
         // post-decay read): a refusal draws nothing, reads nothing,
         // orphans nothing.
         let mut draw = crate::dop::scan_draw();
-        // PRACTICE-1 the Vigil: the lens disciplined — the draw halves.
+        // PRACTICE-1 the Restraint: the lens disciplined — the draw halves.
         if self.practices.contains(&3) {
             draw *= ratio(1, 2);
         }

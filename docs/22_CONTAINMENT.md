@@ -1,9 +1,9 @@
 # 22 — THE CONTAINMENT SECTOR — C, its bound, and the path algebra
 
-**Status:** LAW, split out of `18_TORSION.md` on 2026-08-02 by operator
+**Status:** LAW, split out of the retired `18_TORSION.md` on 2026-08-02 by operator
 ruling. It carries the `C` definition thread and the containment law.
 
-**Why it moved.** `18_TORSION` is the physics subset that constrains the
+**Why it moved.** `18_TORSION` was the physics subset that constrained the
 computational mathematics. It had grown to 2,020 lines and twenty §2
 subsections, ten of them added in one day. Measured: of those twenty,
 CODE cites only §2a, §2b, §2d, §2e, §2f and §2h. Every section moved

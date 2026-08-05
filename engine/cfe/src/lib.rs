@@ -15,12 +15,18 @@
 //!   unreceipted accrual is workspace and never persists.
 
 pub mod almanac;
+pub mod books;
+pub mod growth;
+pub mod literature;
 pub mod dop;
 pub mod epoch;
 pub mod ipsal;
 pub mod persist;
 pub mod query;
-pub mod ratio;
+/// Re-exported from the `ratio` LEAF crate (K4): moving the module
+/// out is what let `physics` stop depending on `cfe`, which is what
+/// let `cfe` reach the verifier. Callers keep writing `cfe::ratio::*`.
+pub use ratio;
 pub mod thermal;
 pub mod tlv;
 pub mod vrp;

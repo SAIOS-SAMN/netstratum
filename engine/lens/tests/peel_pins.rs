@@ -117,7 +117,7 @@ fn near_returns_the_entries_exactly_and_unsummed() {
 
     assert_eq!(entries.len(), 3, "three observed pairs, three entries");
     // Exact values, not aggregates — a lens that pre-summed would hand
-    // back a number the caller could not take apart (18 §2b).
+    // back a number the caller could not take apart (24_FORM §2b).
     let mut seen: Vec<Ratio> = entries.iter().map(|e| e.value.clone()).collect();
     seen.sort();
     assert_eq!(seen, vec![q(2, 1), q(3, 1), q(9, 1)]);

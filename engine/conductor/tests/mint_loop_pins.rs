@@ -11,7 +11,7 @@
 //! - A1 (2026-08-01) closed the loop and this pin passed.
 //! - It passed VACUOUSLY. The proposer never asked the judge, and
 //!   `replay` — still the live transition — banked mints that
-//!   `kernel::lawful` had refused as `MintWithoutStanding`.
+//!   `kernel::admits` had refused as `MintWithoutStanding`.
 //! - 2026-08-04: the proposer was taught to ask first, and the board
 //!   went to **374 solves, 0 mints, 124 withheld** over 60 beats. The
 //!   capacity law required `Vacuity::Entangled`, which needed a
@@ -75,7 +75,13 @@ fn a_solving_line_mints_against_its_own_verified_work() {
         }
     }
     let solved: u32 = worlds.iter().map(|p| p.solved).sum();
+    let spent: u64 = worlds.iter().map(|p| p.spent).sum();
+    let swept: u64 = worlds.iter().map(|p| p.swept).sum();
+    let growth = worlds.iter().filter(|p| p.trajectory == conductor::Trajectory::Growth).count();
+    let stagnation = worlds.iter().filter(|p| p.trajectory == conductor::Trajectory::Stagnation).count();
+    let decline = worlds.iter().filter(|p| p.trajectory == conductor::Trajectory::Decline).count();
     println!("MEASURED over 60 beats: {solved} solves, {minted} mints, earned {earned_total}");
+    println!("MEASURED spend: {spent} read-candidates + {swept} sweep-invocations  |  trajectories at close: growth {growth}, stagnation {stagnation}, decline {decline}");
 
     assert!(
         minted > 0,

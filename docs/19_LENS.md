@@ -2,7 +2,7 @@
 
 **Status:** LANDED (2026-08-02). Every reading described here is built
 and pinned; §14 is the inventory. Subordinate to `00_CHARTER.md` and
-`18_TORSION.md`.
+`26_ARTICLES.md`.
 
 **Lane:** `.claude/worktrees/lens-lane`, branch `lens-lane`. Territory:
 `engine/lens/`, `engine/scribe/`. This document is this lane's own; it
@@ -14,8 +14,8 @@ amends no other lane's law.
 
 A lens **reads and reports**. It never gates.
 
-That is not a style preference — it is constitutional. `18_TORSION` §7b
-places the over-time and global readings outside `lawful()` and gives
+That is not a style preference — it is constitutional. `25_STANDING` §7b
+places the over-time and global readings outside `admits()` and gives
 the reason: *a judge that reads a window is no longer pure, no longer
 total, and no longer replayable step-by-step.* The lens is therefore
 **forbidden** in the kernel rather than merely permitted outside it, and
@@ -66,7 +66,7 @@ every place "human" named a SEAT or licensed an EXCEPTION.
 
 **THE STANDING TRAP.** A reading used as a target stops being a reading.
 Work reshapes itself into whatever the number counts, and the measure
-stops measuring. `18_TORSION` records that this system's own author made
+stops measuring. `27_EVIDENCE` records that this system's own author made
 that mistake once already. Every reading below is a reading; none is an
 objective; nothing optimizes any of them.
 
@@ -320,7 +320,7 @@ convergence sinks, and neither is the other's absence.**
 **Convergence is a CAPABILITY.** `05 §1.4` — a dim-star system holds the
 rarest resource in a high-flux universe, radiator headroom, and SELLS
 it. The Frost trades convergence. A reading that renders it as shrinkage
-prices a capability as a loss, and `18_TORSION` §2d's own correction
+prices a capability as a loss, and `24_FORM` §2d's own correction
 says why the old framing was wrong: *trapped is convergence MINUS the
 shedding, never convergence itself.*
 
@@ -381,6 +381,29 @@ is owed, what capacity stands nearby.
 
 **η is DERIVED, never dialed** (LAW 6), for the reason §5c gives.
 
+**WHAT IT IS DERIVED FROM, settled 2026-08-02.** Until now this clause
+was a promise and the code took `retained` and `shed` as arguments, so η
+was dialed by whoever called it — the exact thing the sentence above
+forbids, sitting one file away from the sentence. The pairing that
+grounds it was already in the tree, and it is the thermal law's own
+(`05 §1.2`, encase-first / vent-overflow):
+
+```text
+    RETAINED   banked Joule + banked Sink   what encasement KEPT
+    SHED       entropy_vented (VENT-1)      what overflowed to the VOID
+```
+
+Both are committed state summed across every orb, so the medium is a
+fact about the world rather than an argument about it. A world that
+keeps more than it loses accelerates what propagates through it; one
+bleeding faster than it holds damps. **A world that has vented nothing
+is INERT, not infinitely fast** — the surround has taken nothing away
+yet, and that is a reading rather than a division by zero.
+
+This is what LAW 6 actually asks for: two observers reading one chain
+now derive one η independently, which a passed-in parameter could never
+guarantee no matter how carefully it was documented.
+
 ### 5c. WHY NO TOLERANCE CONSTANT SURVIVES
 
 The earlier draft here proposed a fixed ruled tolerance, then a
@@ -426,7 +449,7 @@ forms are BARRED here and must not arrive intact.
 
 Two independent faults. It is the exact `1/(1+x)` shape of the struck
 cosmetic meter `Ξ = deeds/(1+ΔD)`; and it collapses a directional
-quantity to a scalar magnitude, which `18_TORSION` §2b bars wherever the
+quantity to a scalar magnitude, which `24_FORM` §2b bars wherever the
 system computes.
 
 **The idea survives and is worth having:** velocity as a DIFFERENCE OF
@@ -481,10 +504,10 @@ There is no third option in which a lens keeps count.
 
 ## §8 WHAT THIS LANE DOES NOT TOUCH
 
-- `lawful()` and everything in `engine/kernel/src` — kernel lane.
+- `admits()` and everything in `engine/kernel/src` — kernel lane.
 - `engine/rfa-core/` — kernel lane. The lens CONSUMES `coboundary_reduce`,
   `holonomies`, `Delta`, `Vacuity`; it does not modify them.
-- `18_TORSION`, `17_CAPACITY`, `EQUATIONS`, `kernel/CHARTER.md` — kernel
+- `26_ARTICLES`, `17_CAPACITY`, `EQUATIONS`, `kernel/CHARTER.md` — kernel
   lane's documents. Defects found in them are REPORTED, never edited
   from here.
 
@@ -492,7 +515,7 @@ There is no third option in which a lens keeps count.
 
 ## §9 THE OPEN REPORT — a stale debt pointing at struck law
 
-Two live pointers aim at a STRUCK meter: `18_TORSION` §6 debt 1 reads
+Two live pointers aim at a STRUCK meter: `25_STANDING` §6 debt 1 reads
 *"`Ξ_cosmetic` is not measured … First build"*, and §7b routes an
 *"Art. III window reading"* to `scribe`/`lens`.
 
@@ -503,7 +526,7 @@ explicitly, and its reasoning is that *physics needs no penalty — a
 closed loop at uniform potential does no work, not because a law forbids
 it but because there is no free energy in it.* LAW 4 now carries that
 ground, via `dual_pole` / `Vacuity::Stasis`, already landed and already
-consulted by `kernel::capacity_law`.
+consulted by `kernel::standing`.
 
 Building the window reading would implement a struck law. It is not
 built. The stale debt is reported to the kernel lane rather than edited
@@ -682,3 +705,536 @@ about paper.
 is ever read back AS STATE. The claim as written is stronger than the
 law requires and stronger than the code honours, and a false claim in a
 header is worth fixing even when the code is fine.
+
+---
+
+## §16 THE BOOKS ARE OPEN — civilizations MINT and ARCHIVE them
+
+*(operator correction 2026-08-02, superseding this section's first cut)*
+
+§6 established the aperture as per-observer sensitivity without belief
+and left the question it could not answer: where does a PARTICULAR
+observer's instrument come from? The first answer given here was
+*"from its cohesion books"* — right in spirit, **wrong in two ways that
+both come down to scope.**
+
+### 16a. THE TWO FAULTS OF THE FIRST CUT
+
+**FAULT ONE — a bounded book set.** The instrument read eight NAMED
+struct fields. That made its width a constant of the source code, so a
+civilization could invent an entirely new kind of account and the lens
+would be structurally blind to it until someone edited this crate.
+**Content growth gated on a compile is the wrong scope for a reading
+layer.** Civilizations do not merely USE books; they MINT them, and they
+ARCHIVE them, and the reading must follow that without being told.
+
+**FAULT TWO — a layer error, and it produced a false limit.** The books
+were welded onto the eleven harmonic channels, and the residue was then
+reported as a limit: *"eight books cannot honestly fill eleven
+channels."* That framing was wrong at the root. The eleven are
+SUBSTRATE — spectral, spatial, adjacency, torsion — fixed because the
+physics is fixed. Books are CONTENT — open, because civilizations make
+them. **Joining a growing content set to a fixed substrate axis is the
+same layer confusion this tree has caught repeatedly**, and the repair
+is not a better mapping but NO mapping.
+
+There was a plainer defect inside it too. The old channel 0 summed
+`given_in_crisis + returned_across` against `extracted_across` — welding
+the compassion pair to the morality pair and orphaning
+`drawn_in_crisis` entirely. **Each book is a DUAL and its two sides
+belong to each other.**
+
+### 16b. THE SHAPE THAT REPLACES IT
+
+```text
+    APERTURE   11 fixed harmonic channels   SUBSTRATE — physics
+    REGARD     one channel per book kept    CONTENT — civilization
+```
+
+Two instruments, two layers, never joined. `Aperture` knows nothing of
+books; `Regard` knows nothing of harmonics. The regard's WIDTH is a fact
+about how many kinds of account an observer has actually kept, and it is
+**bounded by nothing in this crate**.
+
+A book is a DUAL LEDGER: what was KEPT against what was LOST on one
+named account. The charter's four (`09 §2.1`–`§2.4`) are all of that
+shape already, which is why opening the set cost no translation — the
+shape was uniform, only the ENUMERATION was frozen.
+
+**ONE ENUMERATION POINT.** `books_of` is the single place any book is
+named. When committed state grows a registry, it appends there and
+nothing else in the lane changes, because the instrument never names an
+account.
+
+### 16c. ARCHIVING CLOSES A BOOK TO WRITING, NEVER TO READING
+
+**This is an anti-laundering rule, not bookkeeping.** If archiving
+dropped a book from the reading, the cheapest way to stop being measured
+by your breaches would be to close the book — and the worst-behaved
+civilization would present the cleanest instrument.
+
+So an archived book takes no new entries and **keeps every entry it
+took**. Its weight is identical closed or open. What archiving reports
+is that the account will not move again, which is real information and
+not an erasure.
+
+**AND PROVENANCE BOUNDS WHO MAY CLOSE WHAT.** A civilization may archive
+what it MINTED. It may never archive what the CHARTER keeps — otherwise
+the covenant book is closeable by exactly whoever it convicts. That is
+why `BookId` carries `Chartered` against `Minted` rather than being a
+bare identifier.
+
+### 16d. BOOK-1 — THE REGISTRY, BUILT
+
+*(operator directive 2026-08-02: take the cfe side)*
+
+The committed-state half is landed. `cfe::books` holds the identity and
+the dual account; `cfe::world::books` holds three deeds and no fourth:
+
+```text
+    MINT      declare a kind of account         BookMinted    tag 91
+    POST      a DUAL entry, both sides at once  BookPosted    tag 92
+    ARCHIVE   close it to WRITING only          BookArchived  tag 93
+                                    orb registry entry  tag 90
+```
+
+**The specification named tags `0x3E`/`0x3F`. Those are 62 and 63, and
+both are LIVE.** Transcribing them would have corrupted the wire.
+Allocated from genuinely free space instead, verified against both the
+encode and decode tables and against capacity-lane's own allocations.
+
+`ColonyOrb::books` presents the charter four and everything minted
+through ONE view, so a reader never learns which storage a book came
+from. **The charter four are not moved** — they keep their landed fields
+and their landed entry (tag 41, IDEO-1); rewriting sealed state to make
+a uniform container would break every existing chronicle for a tidiness
+that buys nothing.
+
+An orb that minted nothing emits no book entry at all and stays
+byte-identical to a pre-BOOK-1 orb.
+
+### 16e. THE NOVELTY GATE IS IDENTITY, NOT A THRESHOLD
+
+The specification asked for `distance(schema_new, schemas) ≥ θ_novelty`.
+**That is refused, and replaced by something exact.**
+
+A kind is content-addressed over its NORMALIZED name, so two
+declarations that normalize alike ARE one kind. A duplicate does not
+fail a distance test — it is the same book, and the second mint refuses
+naming the one already standing. Case, padding and inner-whitespace
+variants all collapse.
+
+**Why the threshold was refused, the second reason being the decisive
+one:**
+
+1. `θ` is a dialed constant of exactly the shape §5c and Article III
+   strike — *the bounded dynamic parameters a descent needs to be
+   tuned*. A mint gate is the last place a tunable belongs, because
+   whoever tunes it decides who may keep books.
+2. **There is no structural schema to measure a distance over.** A book
+   declares a name and accrues two sides; nothing machine-checkable
+   distinguishes `Valor` from `Valour` except the strings. A "schema
+   distance" could only be string distance — a LINGUISTIC judgment
+   wearing a numeric coat — and it would refuse genuinely distinct books
+   as readily as duplicates.
+
+**What the exact gate does NOT catch, said plainly:** a deliberate
+near-miss such as `valor-2`. No honest test here can, because that IS a
+different name and may well be a different book.
+
+**So deliberate spam is not answered by a gate, and must not be.** It is
+answered by refusing to reward width. `Regard::width` is a READING, and
+§1 rules that nothing optimizes a reading. An orb that mints a thousand
+empty books has a thousand empty books and has bought nothing: an
+unposted book opens no channel at all. A mint COST would bound it
+further; that magnitude is a charter decision and was not taken here.
+
+### 16f. WHAT BOOK-1 REFUSES, AND WHY EACH REFUSAL NAMES ITS REASON
+
+```text
+    BookAlreadyMinted          the gate — names the book already standing
+    CharterBookNotMintable     the four are law, not inventory
+    CharterBookNotArchivable   closeable by nobody (§16c)
+    BookClosedToWriting        archived — and still fully readable
+    BookAlreadyArchived        a closed book closes once
+    BookPostingNegative        a book accrues; history is not unwritten
+    BookNameEmpty              a name that normalizes to nothing
+    NoSuchBook                 this orb keeps no such book
+```
+
+`CharterBookNotArchivable` exists because a charter book has no minted
+account to find, so it would otherwise fall out as `NoSuchBook` — a true
+refusal for a MISLEADING reason. Here the reason IS the rule, so it is
+named.
+
+**Conservation:** a posting moves BOOK value and touches no banked
+resource, so it settles nothing and conserves trivially. The kernel's
+`scope_of` is exhaustive by design — adding an event forces a scope
+decision at compile time — and the three arms are drafted there to match
+the deeds' own scope checks: mint and archive are Build, posting is
+Collect.
+
+---
+
+## §17 THE WORD "CONVERGED" IS NOT THIS LANE'S TO SETTLE
+
+*(relay raised 2026-08-02 — `OPEN_QUESTIONS.md` Q5)*
+
+`Motion::Converging` is a DIRECTION — a volume drawing inward, the sink
+pole against Diverging's source pole, ongoing and carrying its own
+positive magnitude. Elsewhere in the tree `converged` means FINISHED: a
+world annexed into the universe timeline (CONVERGE-1, `07`). `rfa-core`
+hit the same ambiguity and struck the word from that crate outright,
+because *zero says the relations compose, never that anything was
+finished or emptied.*
+
+**The trap is that the naive reading of "converged" names the wrong
+arm.** A volume that stopped is `Still`. A volume that is CONVERGING is
+in motion. This lane pins its own half — `Motion::Still` is never called
+converged, held by `a_still_volume_is_not_called_converged` and
+`a_still_reading_does_not_claim_convergence` — and those pins reach
+nothing outside `engine/lens`.
+
+**Nothing is renamed.** CONVERGE-1 is landed law with its own spec and
+is correct in its own domain; the Diverging/Converging pair was ruled
+directly and deliberately mirrors `Flux { sources, sinks }`. Two correct
+uses of one word in two domains is not a defect — a THIRD use that
+conflates them would be, and Q5 exists to keep one from appearing.
+
+The open half belongs to the lanes that own `ledger` and `conductor`:
+whether a timeline-convergence result is anywhere fed into a motion
+reading. This lane checked its own side and found none — `lens` does not
+import `ledger::converge`, and `Motion` derives only from two `Degree`
+values.
+
+---
+
+## §18 LIT-1 — LITERATURE, and the display rule
+
+*(operator directive 2026-08-02)*
+
+BOOK-1 gave a line accounts of its own making. **Literature is the tier
+above: works a line ASPIRES to, and may claim only with chain receipts
+to show for it.**
+
+```text
+    BOOK         an account a line KEEPS            BOOK-1
+    LITERACY     the line learned to read/write     DERIVED, never stored
+    LITERATURE   a work it may ASPIRE to            LIT-1
+```
+
+### 18a. LITERACY IS DERIVED; THE STACK IS BASE-11
+
+**A line is literate when it keeps its own books** — when it has MINTED
+one and POSTED to it. Minting alone is not writing; the page is blank.
+Writing is the act, literacy is the reading of that act, and nothing
+stores it.
+
+Literacy needs no slot in the stack: it is already implied by receipts
+that exist, and a derived reading cannot go stale. It is the DOORWAY to
+the upper tier, not a node in it.
+
+**THE STACK IS NOW BASE-11** (operator ruling 2026-08-02, *uplift to
+base-11*). An earlier draft of this section treated base-7 being full as
+a constraint to design around. It was a constraint to LIFT:
+
+```text
+    0        the solar leap
+    1..=5    the five crystallized conditions
+    6        the gifted crown — completes the BASE
+    7        NOT A SKY NODE — PRACTICE-1's re-emergence lesson, which
+             "rides separately as TechDiscovered condition 7" and eases
+             `deposit_window` 240 -> 180
+    8..=11   THE UPLIFT TIER — one node per chartered work
+```
+
+Seven base nodes plus four works is ELEVEN, and `7` is not one of them.
+**The condition FIELD is a shared namespace with two populations** — sky
+nodes and separately-riding ones — and `7` was spoken for by landed law
+before the uplift. A first cut put the works at `7..=10` and so gave one
+number two meanings: `deposit_window` reads `techs` for the lesson while
+the sky claimed the same slot for VALOR. Nothing would have broken
+loudly; a held lesson would simply have rendered as an unreached work
+and the real node would have become invisible. Pinned in
+`the_sky_never_claims_the_re_emergence_slot`.
+
+**The crown's gate does not move, and that is the whole care taken
+here.** It still waits on `0..=5`, still reports a threshold of six, and
+`base_seven_complete` is left exactly as it landed so every law binding
+to it reads what it always did. The four new nodes sit ABOVE the crown
+rather than among the nodes it waits for — which is why claiming a deed
+cannot advance the crown by a single step. Pinned in
+`base_eleven_pins.rs`, including that pin specifically.
+
+**A DEED IS THE NODE.** The uplift tier is never granted into `techs`. A
+work is held exactly when it has been CLAIMED on chain receipts, so the
+evidence IS the upgrade: *deeds are accomplishments and civilizational
+upgrades* (operator, 2026-08-02). Reaching for a work is not holding it.
+
+`base_eleven_complete` reads the full stack — the base tier done AND
+every deed witnessed. Deeds do not substitute for the base beneath them.
+
+### 18b. ASPIRING IS FREE; CLAIMING COSTS EVIDENCE
+
+```text
+    ASPIRE   a literate line declares a work it reaches for. Proves
+             nothing, and is meant to prove nothing.
+    CLAIM    the line asserts it has DONE the thing, and cites CHAIN
+             RECEIPTS. Every digest is checked against the chronicle.
+```
+
+**The law verifies the CITATION, never the virtue.** It checks that the
+receipts exist and are this world's. It does not score whether the deeds
+amount to valor — **any formula that did would be the struck C-gate
+wearing a new name**, a number standing in for a judgement, which
+`27_EVIDENCE` bars and this tree has removed once already.
+
+A claim without receipts refuses. That is the whole of *deeds if claimed
+need chain receipts*: a claim without evidence is a boast, and the
+chronicle is what separates the two. Cited evidence is deduplicated and
+ordered, so one state has one encoding however it was typed.
+
+### 18c. THE FOUR CHARTERED WORKS
+
+VALOR · HONOR · COURAGE · COMMITMENT, reached *through union and
+otherwise towards stewardship*. A line invents ACCOUNTS (BOOK-1); it
+does not invent the literature it reaches for, so the works are
+chartered and `aspire Glory` refuses.
+
+**`COMMITMENT` collides with a kernel primitive, and that is recorded
+rather than resolved silently.** `26_ARTICLES` ARTICLE IV clause 2 rules
+that this manifold is *one commitment per step*, and `Commitment.parent`
+is the chain's backward reference. That is the GOVERNING layer; a work a
+civilization aspires to is CONTENT — the same distinction that kept the
+`humans` civilization, the `humanoid` clade and `Human Capital` from
+being renamed when "human" was struck as a SEAT (§1.0), and the same
+verdict Q5 reached for `converged`. Two correct uses in two layers is
+not a defect; a third that conflated them would be.
+
+### 18d. EMOJI ARE OUTLAWED; ANSI COLOUR IS NOT
+
+*(operator ruling 2026-08-02)*
+
+Colour is a property of the TERMINAL and carries no glyph — it degrades
+to plain text and costs a reader nothing. An emoji is a GLYPH whose
+rendering, width and availability vary by font and platform, and it
+breaks column alignment in exactly the surfaces this lane exists to
+keep readable.
+
+**No character from the Emoji blocks (U+1F000 and above) appears in this
+workspace.** Three had entered — `U+1F4D6` in the BOOK-1 chronicle
+rendering, all three mine — and are struck, replaced with `U+25A4`
+(SQUARE WITH HORIZONTAL FILL), already in the CLI's own register.
+
+The BMP dingbats and geometric symbols the CLI has always used are NOT
+emoji and are untouched: `✓ ✗ ⚑ ⛏ ☉ ✍ ▤ ◉` and the box-drawing set.
+They are single-width, font-stable, and predate this ruling.
+
+### 18e. THE SPACE IS THE POINT
+
+The works were not RECOVERED from anywhere — `courage`, `stewardship`,
+`literacy`, `literature` and `aspire` appear nowhere in any of the 49
+refs, and `valor` only in fixtures this lane wrote. **That was never the
+ask.** The directive was to CREATE SPACE FOR them, and the space is what
+base-11 opens: four slots above the crown, one per chartered work,
+filled by deeds rather than by timers.
+
+### 18f. WHAT IS NOT BUILT YET
+
+**Deeds as tradeable, and deeds sparking uplifts.** A claimed work is an
+accomplishment and a civilizational upgrade today — it holds a node in
+the stack. It is not yet a thing that can be TRADED between lines, and
+nothing yet uses a held deed to spark a further uplift. Both are named
+by the directive and neither is built; the node is the foundation they
+would stand on.
+
+### 18g. WHAT WAS NOT BUILT, AND WHY
+
+**No new substrate/mesh axis.** The directive raised one as a
+possibility. `04` rules its own constraint: *no genesis axis ships
+before the mechanic that reads it*, and the axis vocabulary is
+append-only under SUBSTRATE-1 (`12_UNION` §5a). LIT-1 needed no axis —
+aspirations are per-orb committed state and the claim is verified
+against the chronicle that already exists. **If an axis is still wanted,
+it now has a mechanic to read it, which is the order `04` requires.**
+
+**No automatic posting from deeds.** What receipts amount to valor is
+not decided here. A line cites its own evidence and the law verifies the
+citation; a declared event-kind-to-work mapping would be the structural
+schema §16e records as absent.
+
+---
+
+## §19 A GATE MAY READ A WINDOW — the test is VIEWPOINT-DEPENDENCE
+
+*(relayed by syntropy-inscription 2026-08-02; operator ruling: "windowed
+might need to get punted to lens-lane because that's a 'perspective' we
+need to account for")*
+
+The question put to this lane: **does a gate get to read a windowed
+quantity at all?** `tech.rs` condition 4 is a live tech unlock reading
+`vented_entries` and `encased_entries` over a window, and if a window is
+a perspective then an unlock depends on a viewpoint.
+
+**The ruling: the axis is not windowed-vs-cumulative. It is
+VIEWPOINT-DEPENDENT vs RECORD-DETERMINED.**
+
+A perspective in this lane's sense is chosen by the OBSERVER. Two
+observers may legitimately differ and both be right (§2b, §6) — which is
+exactly why a reading may never gate (§1). A window is only a
+perspective if someone gets to pick it.
+
+Condition 4's window is picked by nobody:
+
+```text
+    floor = now − deposit_window()
+      now              the CHAIN clock
+      deposit_window   derived from committed state
+```
+
+Every node replaying the same chronicle to the same height computes the
+same floor and reaches the same verdict. **That is a RECENCY predicate,
+and recency is a fact about the record rather than a view of it.** The
+relay's own parenthetical is the right instinct: recent venting should
+mean something different from ancient venting, and saying so in law is
+lawful.
+
+**THE TEST, for the next time this comes up:**
+
+> Would two nodes replaying the same chronicle to the same height
+> disagree? If they cannot, it is not a perspective, whatever its shape.
+
+So condition 4 stands. It reads the record through a rule that is itself
+part of the law, which is not the category error one level down — it is
+the ordinary business of law.
+
+### 19a. TWO FINDINGS WHILE ANSWERING, both outside this lane
+
+Neither changes the ruling. The first turned out to be the intent; the
+second stands, and is relayed rather than fixed here since
+`world/tech.rs` and `world/survey.rs` are not this lane's territory.
+
+**1. The window LENGTH is world-state-dependent — and that is the
+DIRECTION, not a hazard** (operator ruling 2026-08-03). `deposit_window`
+returns 180 instead of 240 when a re-emergence lesson is held and the
+syntropy reading is at or above `1/2`, so condition 4's verdict can move
+because a neighbouring deed landed. This lane first flagged that as a
+coupling to examine. It is the intent:
+
+> Constants, absolutes and statics are being eliminated in favour of
+> deterministic throughput driven by DYNAMISM (morphodynamics).
+
+A window that changes with the world is not a leak in a static rule — it
+is a rule that has stopped pretending to be static while staying exactly
+as replayable. That is the same reason §5c struck the tolerance constant
+and §16e refused a dialed `θ` on the mint gate: **the objection was never
+to a quantity moving, it was to a quantity being SET.** Derived and
+moving is lawful; dialed and fixed is not.
+
+The test in §19 is unchanged and is what keeps this honest — a window
+may move as much as the record moves, and not one step further.
+
+**2. The floor expression is duplicated.** `survey.rs` prunes at
+`now − deposit_window()` and `tech.rs` filters at `now −
+deposit_window()`. The cache's prune floor must never be TIGHTER than
+any consumer's, or the consumer silently reads a truncated record and it
+looks like data that was never there. Today the two agree because both
+sites were written the same way — not by construction. The comment
+claims *"same sheet as the full scan, by construction"*, and that claim
+is only true while they agree. One shared function makes it true. This
+is the same shape as the two `ratio_str` copies collapsed in §16's
+neighbourhood: one rule, two homes, nothing holding them equal.
+
+### 19b. WHAT THIS LANE STILL OWES
+
+Rendering LIFETIME and WINDOW side by side is a genuine lens job and is
+NOT yet built. It needs `thermal_books_of` / `heat_encased_of`, which
+landed on `main` at `2112aa3` and are **not on this branch** — this lane
+sits on `main@e0f8db2` plus the capacity-lane merge. Blocked on the
+reconciliation, not on design.
+
+---
+
+## §20 GROWTH-1 — the six mechanisms, and the anti-leap test
+
+*(operator ruling 2026-08-03: "practice, wisdom, knowledge, expertise,
+locality, triviality — we need these defined as growth mechanisms")*
+
+The question they answer: *how does a line go from primordialism to
+significant civilization without leaps and bounds and skipping
+everything in between?*
+
+**The rule: a rung must measure something the chain PRODUCES, never
+something a line ASSERTS.** `26_ARTICLES` ARTICLE IV clause 2 rules one
+commitment per step, so a stamp IS elapsed history. A claim can be
+typed; a span cannot be forged.
+
+```text
+    THE TEST: can a line reach this rung at stamp 0?
+              If yes, it is a leap.
+```
+
+### 20a. THE LEAP THAT WAS MEASURED, and it was this lane's
+
+Before GROWTH-1, a colony went from founded to a CLAIMED civilizational
+upgrade in five commands with **every receipt at stamp 0** — and the
+witness cited was receipt #0, the sovereign founder joining, which has
+nothing to do with valor. The base tier beneath it wants 480 ticks of
+famine survived and 240 consecutive ticks of overheat.
+
+The base tier was built from things that cannot be compressed. The
+uplift tier was built from declarations. That was the whole gap.
+
+### 20b. THE SIX AXES, and they are orthogonal
+
+```text
+    PRACTICE     TIME       did the doing span real chain time?
+    KNOWLEDGE    BREADTH    how many distinct accounts are kept?
+    EXPERTISE    DEPTH      how concentrated is the deepest one?
+    WISDOM       TESTING    how much of it has been tested?
+    LOCALITY     SCOPE      how much of the line's record sits here?
+    TRIVIALITY   EMPTINESS  how much of it moved nothing?
+```
+
+**WISDOM is the one worth explaining.** It reads the share of accounts
+carrying BOTH sides — kept AND lost. *A line that has only ever posted
+wins has recorded a great deal and learned nothing.* The dual ledger is
+what makes that measurable, and it is why BOOK-1 made both sides
+structural rather than conventional. That decision paid here.
+
+**TRIVIALITY is the guard that makes the other five honest.** Without
+it every axis is farmable: a thousand empty postings would read as
+practice, breadth and depth alike.
+
+### 20c. NO THRESHOLDS, AND WHY THAT IS POSSIBLE
+
+Every axis is an exact rational or a count, derived and reported whole.
+Nothing in GROWTH-1 compares against a number, so there is nothing to
+dial (ruling 2026-08-03: constants and statics give way to deterministic
+throughput driven by dynamism).
+
+Where a gate needs one, it compares against ZERO — the difference
+between *happened* and *did not*, which is not a dial. `literate` is the
+first and so far only one: **a line reads and writes when its postings
+SPAN time**, not when one posting exists.
+
+**Six readings and no aggregate.** Collapsing them to a single "growth
+score" would be the struck C-gate wearing a sixth name.
+
+### 20d. THE HOLE THE PINS FOUND
+
+The first cut measured practice as the span of POSTINGS. A line could
+post zeros across a long life and read as practised — padding buying
+literacy, the leap re-entering through the axis built to close it. Its
+own pin caught it.
+
+**Only real writing extends the span now.** An empty posting is counted
+by TRIVIALITY and refused by PRACTICE, which is the correct division of
+labour: one reports the padding, the other declines to be fooled by it.
+
+### 20e. WHAT IS STILL A LEAP
+
+`claim` still accepts a SINGLE witness of any age, so a work can be
+claimed the moment a line becomes literate. Practice now gates entry to
+the literature; it does not yet shape what a claim must show. The
+plural-and-spanning witness rule proposed alongside this is NOT built.

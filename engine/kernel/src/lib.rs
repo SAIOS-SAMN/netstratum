@@ -1,10 +1,10 @@
 //! THE KERNEL — the one validated update function (CHARTER §11 rule 3).
 //!
-//! `lawful(prior, next, step)` judges whether ONE step lawfully carries
+//! `admits(prior, next, step)` judges whether ONE step lawfully carries
 //! the universe from `prior` to `next`. It is:
 //!
 //! - **pure** — same inputs, same verdict, forever;
-//! - **total** — every input returns `Ok` or a typed `Unlawful`, never
+//! - **total** — every input returns `Ok` or a typed `Refused`, never
 //!   panics, never hangs;
 //! - **no I/O** — it touches no file, clock, socket, or thread;
 //! - **encoding-blind** — it never produces or reads bytes.
@@ -37,7 +37,7 @@ use cfe::dop::{ClosureEvent, Office, Resource, UNION_REVIEW_HORIZON};
 use cfe::ipsal::Scope;
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::{Committed, SOVEREIGN};
-use solver_verify::{verify_work, Difficulty, WorkBroken};
+use solver_verify::{verify_work, WorkBroken};
 
 /// The kernel version — bumped ONLY by charter amendment. The arbor
 /// binds this into every commitment (`H(schema ‖ bytes ‖ parent ‖
@@ -85,7 +85,59 @@ use solver_verify::{verify_work, Difficulty, WorkBroken};
 /// the two could not collide, and the merge lands both rather than
 /// letting one bump overwrite the other. A chain cut under 3 verifies
 /// forever under the judge that cut it.
-pub const VERSION: u64 = 5;
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 5, patch: 0 };
+
+/// The judge's version, as it rides the wire.
+///
+/// **`x.y.z`, and `major = 0` because this is a prototype** (operator
+/// ruling 2026-08-04: *knock version down to x.x.x — we are still
+/// prototyping*). The five linear amendments become `0.1.0 … 0.5.0`,
+/// so the count is preserved in `minor` and the leading `0` says
+/// plainly that nothing here has promised stability yet.
+///
+/// **What each field means, so the next bump is not a judgement call:**
+///
+/// ```text
+/// major  reserved for the first stable judge. Still 0.
+/// minor  a LAW change — the judge admits or refuses something it did
+///        not before. Every amendment so far is one of these.
+/// patch  a change that cannot alter any verdict: a refusal's wording,
+///        a split of one rule into named parts, a faster read.
+/// ```
+///
+/// The split of D4 into [`d4a_resolution`], [`d4b_standing_claim`] and
+/// [`d4c_increment`] is the first `patch`-shaped change: three named
+/// rules where there was one, judging identically.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Version {
+    pub major: u16,
+    pub minor: u16,
+    pub patch: u16,
+}
+
+impl Version {
+    /// The wire form. Packed so ORDER IS PRESERVED — a later version is
+    /// a larger `u64`, which is what a peer comparing two commitments
+    /// needs and all it needs.
+    ///
+    /// The wire field stays `u64` and `Commitment.kernel` is untouched,
+    /// so this is not a wire amendment. Chains cut under the linear
+    /// versions 1–5 carry those small integers and still compare BELOW
+    /// every packed version, which is true and is the ordering we want:
+    /// they were cut by an earlier judge.
+    pub const fn code(self) -> u64 {
+        ((self.major as u64) << 32) | ((self.minor as u64) << 16) | self.patch as u64
+    }
+}
+
+impl std::fmt::Display for Version {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}.{}.{}", self.major, self.minor, self.patch)
+    }
+}
+
+/// The packed judge version bound into every commitment.
+pub const VERSION: u64 = KERNEL_VERSION.code();
 
 /// One proposed transition: the deed that CLAIMS to carry `prior` to
 /// `next`. `event` is what closed, `actor` is who under NS-6
@@ -103,7 +155,7 @@ pub struct Step {
 /// never a scalar). An `Ok(())` from [`lawful`] is the transition
 /// admitted.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Unlawful {
+pub enum Refused {
     /// A value-conserving step changed the total of a resource across
     /// the world's banks — value was minted or burned where the deed
     /// promised only to MOVE it. Both totals carried (boxed — the
@@ -121,7 +173,7 @@ pub enum Unlawful {
     /// **D4** — the rank reading is not resolved, so no increment over
     /// it can be trusted. An unresolved absence is not a zero: without
     /// this, phantom topology mints phantom rank
-    /// (`EntangledRead::rank_is_defined`, `18_TORSION` §6's debt, now
+    /// (`EntangledRead::rank_is_defined`, `25_STANDING` §6's debt, now
     /// due). Both unknown counts carried.
     RankUndefined { unknown_before: usize, unknown_after: usize },
     /// I2 — the actor is not an entity in `prior`. Identity precedes the
@@ -204,6 +256,7 @@ pub enum Unlawful {
     /// exactly the size of every future tag. Two laws, one word "unknown"
     /// — conflating them silently rebuilds default-admit.
     Unjudged,
+
     /// D5 — THE SOVEREIGN UNION was struck by someone other than the
     /// ROOT ENTITY. The union is the standing the whole world is
     /// raised on, and no delegate may enter the offices into it: a
@@ -234,18 +287,19 @@ pub enum Unlawful {
 /// THE JUDGE. Does `step` lawfully carry `prior` to `next`? Pure,
 /// total, encoding-blind, AND network-blind (it reads no mesh, no peer,
 /// no uplink — `engine/kernel` imports `cfe` only; all arrows point one
-/// way). `Ok(())` admits; `Err(Unlawful)` refuses with the break whole.
-pub fn lawful(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Unlawful> {
+/// way). `Ok(())` admits; `Err(Refused)` refuses with the break whole.
+pub fn admits(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Refused> {
     // The sealed default arm (mesh-operator ruling, airtight-critical):
     // refuse-unknown, not admit-unknown. What no invariant covers does
     // not enter.
     if !covered(&step.event) {
-        return Err(Unlawful::Unjudged);
+        return Err(Refused::Unjudged);
     }
     conservation(prior, next, step)?;
     containment(prior, step)?;
     exactness(next)?;
-    union_law(step)?;
+    union(step)?;
+
     creation(step)?;
     // D4 AFTER `creation`, deliberately. `creation` judges the DEED —
     // its proof and its bound; D4 judges the deed's EFFECT on the
@@ -257,8 +311,8 @@ pub fn lawful(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Un
     // diagnostics choice and is recorded as one.
     revocation_law(prior, next, step)?;
     decay(prior, step)?;
-    gauge_law(prior, next, step)?;
-    element_law(prior, next, step)
+    gauge_move(prior, next, step)?;
+    element_move(prior, next, step)
 }
 
 /// **INVARIANT — D4, THE REVOCATION LAW. The eclipse anchor, floored
@@ -299,7 +353,7 @@ pub fn lawful(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Un
 /// **THE PHANTOM-RANK GATE, now due.** `EntangledRead::rank_is_defined`
 /// has existed unused, its own header warning that an unresolved
 /// absence *"would let phantom topology mint phantom rank"*, and
-/// `18_TORSION` §6 recorded it as DEBT rather than enforcement. D4
+/// `25_STANDING` §6 recorded it as DEBT rather than enforcement. D4
 /// gates a mint on a rank-derived increment, which makes that debt due:
 /// without this check the increment is computed over an incomplete
 /// reading and phantom topology satisfies the test. It is asked FIRST,
@@ -313,7 +367,7 @@ fn revocation_law(
     prior: &Committed,
     next: &Committed,
     step: &Step,
-) -> Result<(), Unlawful> {
+) -> Result<(), Refused> {
     let ClosureEvent::DiscoveryMinted { .. } = &step.event else {
         // D4 binds the MINT. Motion of value that already exists makes
         // no capacity claim, so there is no claim to vacate.
@@ -321,46 +375,80 @@ fn revocation_law(
     };
     let before = bridge::read_entangled(prior);
     let after = bridge::read_entangled(next);
-    // 1. The phantom-rank gate. An unresolved absence is not a zero.
-    if !before.rank_is_defined() || !after.rank_is_defined() {
-        return Err(Unlawful::RankUndefined {
+
+    d4a_resolution(&before, &after)?;
+    match d4b_standing_claim(&before) {
+        Claim::None => Ok(()),
+        Claim::Standing(was) => d4c_increment(was, after.degree().above()),
+    }
+}
+
+/// **D4a — THE RESOLUTION GATE.** An unresolved absence is not a zero.
+///
+/// `rank_is_defined` stood unused since it was written, its own header
+/// warning that an unresolved absence *"would let phantom topology mint
+/// phantom rank"*, with `25_STANDING` §6 recording it as DEBT rather
+/// than enforcement. D4 computes an increment OVER that rank, so the
+/// debt came due: asked FIRST, before anything is compared.
+fn d4a_resolution(before: &bridge::EntangledRead, after: &bridge::EntangledRead) -> Result<(), Refused> {
+    match before.rank_is_defined() && after.rank_is_defined() {
+        true => Ok(()),
+        false => Err(Refused::RankUndefined {
             unknown_before: before.unknown,
             unknown_after: after.unknown,
-        });
+        }),
     }
-    // 2. IS THERE A CLAIM TO VACATE AT ALL?
-    //
-    // D4 vacates *a claim that did not survive `Π_G`* — and where
-    // NOTHING circulates, no capacity claim was ever made. A line
-    // holding no relations is not claiming capacity and failing; it is
-    // claiming none.
-    //
-    // **This narrowing was forced by measurement, at the merge.** D4
-    // first landed binding every `DiscoveryMinted`, and a 60-beat era
-    // then refused 48 of 55 mints, every one reading `was: 0, now: 0`.
-    // That is the SAME defect the capacity law was struck for the same
-    // day — *identity is pegged to entity, and identity gets recycled
-    // without bonds* — reached by a different route. A mint banks
-    // value and adds no relation, so `ΔD` is zero by construction on
-    // any world holding nothing, and the gate refused the lawful
-    // recycled line exactly as its predecessor did.
-    //
-    // **THE GAP THIS EXPOSES, recorded rather than papered over.**
-    // EQUATIONS D3 asserts *capacity growth and the discovery mint are
-    // ONE event*. In this engine they are two: the mint banks value,
-    // and a plane is opened separately by `GaugeShiftedAt`. Until a
-    // deed exists that claims capacity as it mints, D4 can only bind
-    // where a claim already stands. Owed to the operator.
-    let (was, now) = (before.degree().above(), after.degree().above());
-    if was == 0 {
-        return Ok(());
+}
+
+/// What D4b found: whether there is a capacity claim here to judge.
+enum Claim {
+    /// Nothing circulates. No claim was made, so none can be vacated.
+    None,
+    /// A claim stands, carrying the circulation it stands on.
+    Standing(usize),
+}
+
+/// **D4b — IS THERE A CLAIM TO VACATE AT ALL?**
+///
+/// D4 vacates *a claim that did not survive `Π_G`*, and where NOTHING
+/// circulates no capacity claim was ever made. A line holding no
+/// relations is not claiming capacity and failing; it is claiming none.
+///
+/// **This gate was forced by measurement.** D4 first landed binding
+/// every `DiscoveryMinted`, and a 60-beat era refused 48 of 55 mints,
+/// each reading `was: 0, now: 0`. That is the SAME defect the capacity
+/// law was struck for the same day — *identity is pegged to entity, and
+/// identity gets recycled without bonds* — reached by another route: a
+/// mint banks value and adds no relation, so `ΔD` is zero by
+/// construction on any world holding nothing.
+///
+/// **THE GAP THIS EXPOSES, recorded rather than papered over.**
+/// EQUATIONS D3 asserts *capacity growth and the discovery mint are ONE
+/// event*. In this engine they are two — the mint banks value, a plane
+/// opens separately by `GaugeShiftedAt`. Until a deed claims capacity
+/// as it mints, D4 can only bind where a claim already stands. Owed to
+/// the operator.
+fn d4b_standing_claim(before: &bridge::EntangledRead) -> Claim {
+    match before.degree().above() {
+        0 => Claim::None,
+        was => Claim::Standing(was),
     }
+}
+
+/// **D4c — THE INCREMENT.** A standing claim grows, or it vacates.
+///
+/// Read on the CIRCULATION — what stands above the floor — never on the
+/// full `Degree`, which includes the ground and would make the
+/// comparison vacuous exactly the way the struck `D > 0` gate was: a
+/// floor decides nothing.
+///
+/// The refusal IS the vacating. Nothing here writes, and `Degree` has
+/// no below-ground representation to write into even if it did —
+/// Article IV, the `H¹` floor. The claim vacates; the degree does not.
+fn d4c_increment(was: usize, now: usize) -> Result<(), Refused> {
     match now > was {
         true => Ok(()),
-        // The claim is vacated by refusal. `D` is untouched — nothing
-        // here writes, and `Degree` has no below-ground representation
-        // to write even if it did.
-        false => Err(Unlawful::MintWithoutCapacityIncrement { was, now }),
+        false => Err(Refused::MintWithoutCapacityIncrement { was, now }),
     }
 }
 /// INVARIANT — D5, THE SOVEREIGN UNION (operator ruling 2026-08-02).
@@ -390,22 +478,22 @@ fn revocation_law(
 /// Pure and total like the rest: reads the step only, no clock, no
 /// history — the review FALLS DUE by arithmetic on the receipt's own
 /// stamp, and nothing about it is decided here.
-fn union_law(step: &Step) -> Result<(), Unlawful> {
+fn union(step: &Step) -> Result<(), Refused> {
     let ClosureEvent::SovereignUnionSealed { progenitor, sovereign, term_stamps } = &step.event
     else {
         return Ok(());
     };
     if step.actor != SOVEREIGN {
-        return Err(Unlawful::UnionNotStruckByRoot { actor: step.actor });
+        return Err(Refused::UnionNotStruckByRoot { actor: step.actor });
     }
     if *progenitor != Office::Progenitor || *sovereign != Office::Sovereign {
-        return Err(Unlawful::UnionMalformed {
+        return Err(Refused::UnionMalformed {
             progenitor: *progenitor,
             sovereign: *sovereign,
         });
     }
     if *term_stamps != UNION_REVIEW_HORIZON {
-        return Err(Unlawful::UnionTermNotRuled {
+        return Err(Refused::UnionTermNotRuled {
             declared: *term_stamps,
             ruled: UNION_REVIEW_HORIZON,
         });
@@ -421,12 +509,12 @@ fn union_law(step: &Step) -> Result<(), Unlawful> {
 /// state, so the bound is deterministic from `(prior, step)`). Every
 /// other deed declares no element move, so every element total holds
 /// still (a smuggled element mint under any deed refuses).
-fn element_law(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Unlawful> {
+fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Refused> {
     // The declared element mint for this deed (None = holds still).
     let declared: Option<([u8; 32], Ratio)> = match &step.event {
         ClosureEvent::AssayStruck { orb_id, element, amount } => {
             if *amount < ratio(0, 1) {
-                return Err(Unlawful::ElementNotPositive {
+                return Err(Refused::ElementNotPositive {
                     element: *element,
                     amount: Box::new(amount.clone()),
                 });
@@ -443,7 +531,7 @@ fn element_law(prior: &Committed, next: &Committed, step: &Step) -> Result<(), U
                 })
                 .unwrap_or_else(|| ratio(0, 1));
             if *amount > bound {
-                return Err(Unlawful::AssayExceedsVein {
+                return Err(Refused::AssayExceedsVein {
                     bound: Box::new(bound),
                     claimed: Box::new(amount.clone()),
                 });
@@ -475,7 +563,7 @@ fn element_law(prior: &Committed, next: &Committed, step: &Step) -> Result<(), U
         let after = total_element(next, element);
         let expected = before + delta;
         if after != expected {
-            return Err(Unlawful::ElementBroken {
+            return Err(Refused::ElementBroken {
                 element,
                 expected: Box::new(expected),
                 actual: Box::new(after),
@@ -511,7 +599,7 @@ fn total_element(state: &Committed, element: [u8; 32]) -> Ratio {
 /// site's law (converge/mesh admission calling the sealed
 /// `rfa_core::f_fold_star`): the kernel enforces the LOCAL half, the
 /// seam enforces the pair (the aperture-pair pattern, CHARTER §5a).
-fn gauge_law(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Unlawful> {
+fn gauge_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Refused> {
     use ClosureEvent as E;
     // The declared key effect — ratified against the replay arms.
     let expected: Vec<Ratio> = match &step.event {
@@ -549,7 +637,7 @@ fn gauge_law(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Unl
         let want = expected.get(grade).unwrap_or(&zero);
         let got = next.gauge.get(grade).unwrap_or(&zero);
         if want != got {
-            return Err(Unlawful::GaugeBroken {
+            return Err(Refused::GaugeBroken {
                 grade,
                 expected: Box::new(want.clone()),
                 actual: Box::new(got.clone()),
@@ -589,11 +677,19 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::EntityRegistered { .. } | E::ScopeGranted { .. } | E::ScopeRevoked { .. }
         // D5 — THE SOVEREIGN UNION. A CONSTITUTIONAL deed: no value
         // moves, no ratio is carried, no plane opens. I2 containment
-        // covers it and `union_law` adds the three checks the union
+        // covers it and `union` adds the three checks the union
         // needs — the ROOT entity struck it, the parties are a dyad of
         // two different offices, and the review horizon is the ruled
         // one. Ratified red-first by `sovereign_union_pins`.
         | E::SovereignUnionSealed { .. }
+        // BOOK-1 (19_LENS §16): minting DECLARES a standing account and
+        // archiving ALTERS one — both extend or amend the world's
+        // structure, neither moves banked value. Matches
+        // `world::books`' own scope checks.
+        | E::BookMinted { .. } | E::BookArchived { .. }
+        // LIT-1: aspiring and claiming both add standing state and move
+        // no banked value. Matches `world::literature`.
+        | E::WorkAspired { .. } | E::WorkClaimed { .. }
         // W-A slice-1 — the BANKED-NEUTRAL authority deeds. Each one's
         // `world/replay.rs` arm touches NO bank (it sets a flag, a
         // seal, a list: terrain seed, star, planet site, practice,
@@ -707,7 +803,7 @@ fn covered(event: &ClosureEvent) -> bool {
 /// declare vectors, never a scalar. The PAIR-level law (a far leg is
 /// the near leg's exact inverse) is the cross-node opposition (KERNEL
 /// CHARTER §5a); the kernel enforces the LOCAL half.
-fn conservation(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Unlawful> {
+fn conservation(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Refused> {
     let deltas = lawful_deltas(prior, &step.event)?;
     let mut resources: Vec<Resource> = Vec::new();
     for (resource, _) in &deltas {
@@ -744,7 +840,7 @@ fn conservation(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
         let after = total_conserved(next, resource);
         let expected = before + declared;
         if after != expected {
-            return Err(Unlawful::ConservationBroken {
+            return Err(Refused::ConservationBroken {
                 resource,
                 before: Box::new(expected), // the lawful total this deed requires
                 after: Box::new(after),     // the total the step actually produced
@@ -764,10 +860,10 @@ fn conservation(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
 fn lawful_deltas(
     prior: &Committed,
     event: &ClosureEvent,
-) -> Result<Vec<(Resource, Ratio)>, Unlawful> {
+) -> Result<Vec<(Resource, Ratio)>, Refused> {
     use ClosureEvent as E;
     let non_negative = |resource: Resource, amount: &Ratio| match *amount < ratio(0, 1) {
-        true => Err(Unlawful::AmountNotPositive {
+        true => Err(Refused::AmountNotPositive {
             resource,
             amount: Box::new(amount.clone()),
         }),
@@ -938,10 +1034,10 @@ fn total_conserved(state: &Committed, resource: Resource) -> Ratio {
 /// I4 adds the sign. NAMED SEAM: at convergence scale the mint is bounded
 /// by verified work — `mint ≤ verify_certificate(work)` — the PoUW anchor
 /// (KERNEL CHARTER §5a), which fills on Ruling Box 1. No fiat (05 §1.2).
-fn creation(step: &Step) -> Result<(), Unlawful> {
+fn creation(step: &Step) -> Result<(), Refused> {
     match &step.event {
         ClosureEvent::YieldCollected { resource, amount, .. } if *amount < ratio(0, 1) => {
-            Err(Unlawful::MintNotPositive { resource: *resource, amount: Box::new(amount.clone()) })
+            Err(Refused::MintNotPositive { resource: *resource, amount: Box::new(amount.clone()) })
         }
         // U1 — I4 completes on the discovery mint: sign, then the
         // REPLAY-COMPLETE verification (the kernel hands the opaque
@@ -950,17 +1046,18 @@ fn creation(step: &Step) -> Result<(), Unlawful> {
         // the work earns refuses with both sides carried.
         ClosureEvent::DiscoveryMinted { resource, amount, work, .. } => {
             if *amount < ratio(0, 1) {
-                return Err(Unlawful::MintNotPositive {
+                return Err(Refused::MintNotPositive {
                     resource: *resource,
                     amount: Box::new(amount.clone()),
                 });
             }
             let difficulty =
-                verify_work(work).map_err(|broken| Unlawful::WorkRefused { broken })?;
-            let bound = mint_bound(&difficulty);
+                verify_work(work).map_err(|broken| Refused::WorkRefused { broken })?;
+            let bound = mint_bound(difficulty.rung());
+
             match *amount <= bound {
                 true => Ok(()),
-                false => Err(Unlawful::MintExceedsWork {
+                false => Err(Refused::MintExceedsWork {
                     bound: Box::new(bound),
                     claimed: Box::new(amount.clone()),
                 }),
@@ -985,27 +1082,36 @@ fn creation(step: &Step) -> Result<(), Unlawful> {
 ///                                    ~1.75× inverse-hit-rate step)
 /// ```
 ///
-/// `f` is defined ON THE LADDER ONLY: a payload's difficulty either
-/// matches a `Difficulty::level` rung exactly or it earns ZERO — an
-/// off-ladder shape cannot name its own price (the attacker-shaped
-/// hole the #17 audit closed stays closed at the rate too).
+/// `f` is defined ON THE LADDER ONLY: a payload's shape either matches
+/// a ladder rung exactly or it earns ZERO — an off-ladder shape cannot
+/// name its own price (the attacker-shaped hole the #17 audit closed
+/// stays closed at the rate too).
+///
+/// **PRICED ON THE RUNG, NOT THE SHAPE** (operator ruling 2026-08-04:
+/// *`Grid` should fall out, because we aren't building a matrix*). This
+/// took `&Difficulty` and matched the whole struct — so `rows` and
+/// `cols`, the dimensions of an ARC grid, were part of the judge's
+/// price lookup. THE MOTION clause 5 forbids exactly that: *ARC is a
+/// TYPE of work, not the only type.* The exact-match defence is
+/// unchanged and now lives in `Difficulty::rung`, which is where the
+/// shape belongs; the judge is handed a POSITION. One pricing path now
+/// serves every work class, planar and volumetric alike, instead of
+/// each new class needing its own.
 /// Work-shapes v1: planar forge tasks only (structural — `verify_work`
 /// accepts no other form). Reward split v1: 100% to the solving world
 /// (the deed banks on its own orb; no mesh counterparty exists yet;
 /// the v2 40/40/20 prover/mesh/reserve split is INSCRIBED in
 /// U_DIRECTIVES §8 for the mesh era). Saturated rungs are
 /// proof-of-position; the economy lives up the ladder.
-pub fn mint_bound(difficulty: &Difficulty) -> Ratio {
-    if *difficulty == Difficulty::level(3) {
-        return ratio(1, 1);
+pub fn mint_bound(rung: Option<u32>) -> Ratio {
+    match rung {
+        Some(3) => ratio(1, 1),
+        Some(4) => ratio(4, 1),
+        Some(5) => ratio(7, 1),
+        // Saturated rungs pay zero by ruling, and OFF-LADDER pays zero
+        // because a payload never names its own price.
+        _ => ratio(0, 1),
     }
-    if *difficulty == Difficulty::level(4) {
-        return ratio(4, 1);
-    }
-    if *difficulty == Difficulty::level(5) {
-        return ratio(7, 1);
-    }
-    ratio(0, 1)
 }
 
 /// INVARIANT — bounded decay (I5), COMPLETE (U1f). Value is destroyed
@@ -1015,11 +1121,11 @@ pub fn mint_bound(difficulty: &Difficulty) -> Ratio {
 /// is FLAT and denominator-bounded, `decay ≤ rate · ease · elapsed`
 /// (never proportional — the 2^1100 lesson), which fills when the sealed
 /// demurrage rule + `last_touch` join the check.
-fn decay(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
+fn decay(prior: &Committed, step: &Step) -> Result<(), Refused> {
     match &step.event {
         ClosureEvent::DemurrageSettled { orb_id, resource, amount } => {
             if *amount < ratio(0, 1) {
-                return Err(Unlawful::DecayNotPositive {
+                return Err(Refused::DecayNotPositive {
                     resource: *resource,
                     amount: Box::new(amount.clone()),
                 });
@@ -1062,7 +1168,7 @@ fn decay(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
                 .unwrap_or_else(|| ratio(0, 1));
             match *amount <= due {
                 true => Ok(()),
-                false => Err(Unlawful::DecayExceedsBound {
+                false => Err(Refused::DecayExceedsBound {
                     bound: Box::new(due),
                     claimed: Box::new(amount.clone()),
                 }),
@@ -1080,13 +1186,13 @@ fn decay(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
 /// ledgers (the banked resources and elements most likely to carry a
 /// decoded value). It CALLS the sealed `ratio::is_canonical` (KERNEL
 /// CHARTER §0b: the equation is shared, never reimplemented in the judge).
-fn exactness(next: &Committed) -> Result<(), Unlawful> {
+fn exactness(next: &Committed) -> Result<(), Refused> {
     for orb in &next.orbs {
         let banked = orb.banked.iter().map(|(_, amount)| amount);
         let elements = orb.elements.iter().map(|(_, amount)| amount);
         for value in banked.chain(elements) {
             if !cfe::ratio::is_canonical(value) {
-                return Err(Unlawful::NotCanonical);
+                return Err(Refused::NotCanonical);
             }
         }
     }
@@ -1099,7 +1205,7 @@ fn exactness(next: &Committed) -> Result<(), Unlawful> {
 /// sovereign holds every scope by construction; an agent holds exactly
 /// its granted scopes. World-driven events (consequences the tick
 /// computes, no actor) carry no scope requirement (`scope_of` = None).
-fn containment(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
+fn containment(prior: &Committed, step: &Step) -> Result<(), Refused> {
     let Some(scope) = scope_of(&step.event) else {
         return Ok(());
     };
@@ -1107,10 +1213,10 @@ fn containment(prior: &Committed, step: &Step) -> Result<(), Unlawful> {
         .entities
         .iter()
         .find(|held| held.entity_id == step.actor)
-        .ok_or(Unlawful::NoSuchEntity { actor: step.actor })?;
+        .ok_or(Refused::NoSuchEntity { actor: step.actor })?;
     match entity.permits(scope) {
         true => Ok(()),
-        false => Err(Unlawful::NotPermitted { actor: step.actor, scope }),
+        false => Err(Refused::NotPermitted { actor: step.actor, scope }),
     }
 }
 
@@ -1164,6 +1270,11 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // ── CIVILIZATIONAL — keyed on a LINE's own identity ──────────
         E::GenesisSealed { .. }        // civilization + the three axes
         | E::TaxonSealed { .. }        // class, clade
+        // BOOK-1 / LIT-1: a line's own accounts and what it reaches
+        // for. Both are keyed on the LINE's identity, never on a place
+        // — the layer law is declared per deed, never inferred.
+        | E::BookMinted { .. } | E::BookPosted { .. } | E::BookArchived { .. }
+        | E::WorkAspired { .. } | E::WorkClaimed { .. }
         | E::PracticeAdopted { .. } | E::PracticeReleased { .. }
         | E::LineSucceeded { .. } | E::StationSeated { .. }
         | E::Diverged { .. } | E::Confluent { .. }
@@ -1268,15 +1379,28 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::StationSeated { .. }
         // D5 — THE SOVEREIGN UNION. Build-class: it opens the standing
         // the whole world is raised on. The scope is necessary and NOT
-        // sufficient — `union_law` additionally requires the ROOT
+        // sufficient — `union` additionally requires the ROOT
         // entity, because no delegate may strike the union.
-        | E::SovereignUnionSealed { .. } => {
+        | E::SovereignUnionSealed { .. }        // BOOK-1 (19_LENS §16): minting DECLARES a standing account and
+        // archiving ALTERS one — both extend or amend the world's
+        // structure, neither moves banked value. Drafted law, matching
+        // `world::books`' own scope checks.
+        | E::BookMinted { .. } | E::BookArchived { .. }
+        // LIT-1: aspiring and claiming both add standing state and
+        // move no banked value. Drafted law, matching world::literature.
+        | E::WorkAspired { .. } | E::WorkClaimed { .. } => {
+
             Some(Scope::Build)
         }
         // Raze — demolish or lift what was raised.
         E::ZoneRazed { .. } | E::WardLifted { .. } | E::VeilLifted { .. } => Some(Scope::Raze),
         // Collect — settle or move banked value.
-        E::YieldCollected { .. } | E::UpkeepSettled { .. } | E::ResourceTransferred { .. }
+        // BOOK-1: a posting moves BOOK value — a dual entry, both sides
+        // at once. It touches no banked resource, so it settles nothing
+        // and conserves trivially; the scope is Collect because it is a
+        // value movement within the orb's own accounts.
+        E::BookPosted { .. }
+        | E::YieldCollected { .. } | E::UpkeepSettled { .. } | E::ResourceTransferred { .. }
         | E::OverflowAbsorbed { .. } | E::BondSettled { .. } | E::ForwardReleased { .. }
         | E::FrictionSettled { .. } | E::ApertureSent { .. } | E::ApertureReceived { .. }
         | E::CrystalDrawn { .. } | E::AssayStruck { .. } | E::OfferCleared { .. }
@@ -1297,5 +1421,42 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::Confluent { .. } | E::StarAged { .. } | E::EraFolded { .. }
         | E::CouncilClosed { .. } | E::TechDiscovered { .. } | E::IncursionStruck { .. }
         | E::VoidShare { .. } | E::RouteLapsed { .. } => None,
+    }
+}
+
+/// **THE SEALED WARRANT (K4).** The kernel's answer to `cfe`'s
+/// question: what does this payload earn?
+///
+/// This is the one organ that may read a work payload, and it does the
+/// same two things the judge does — `verify_work` then `mint_bound` —
+/// so proposer and judge cannot disagree about what a proof is worth
+/// (CHARTER §0b, call-not-copy).
+///
+/// It closes the live gate WITHOUT breaking the opaque-payload law:
+/// `cfe` still never imports the verifier. It asks; this answers.
+pub struct SealedWarrant;
+
+impl cfe::world::MintWarrant for SealedWarrant {
+    fn earns(&self, work: &[u8]) -> Option<Ratio> {
+        let difficulty = verify_work(work).ok()?;
+        Some(mint_bound(difficulty.rung()))
+    }
+
+    /// THE ESCROW CHECK, answered by the judge itself — `admits` is the
+    /// same function the door runs, not a copy of its reasoning
+    /// (CHARTER §0b, call-not-copy). So a deed the emitter settles is
+    /// one the judge has already accepted on the identical inputs, and
+    /// proposer/judge drift on the mint path is not caught late — it is
+    /// unreachable.
+    fn admits(
+        &self,
+        prior: &cfe::world::Committed,
+        next: &cfe::world::Committed,
+        event: &cfe::dop::ClosureEvent,
+        actor: u64,
+        stamp: u64,
+    ) -> bool {
+        let step = Step { event: event.clone(), actor, stamp };
+        crate::admits(prior, next, &step).is_ok()
     }
 }

@@ -39,13 +39,13 @@ fn the_first_siting_receipts_the_solar_leap_once() {
         "a commissioned sky is not yet a KNOWN sky — the leap is the opt-in"
     );
 
-    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1)).expect("sites");
+    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None, None).expect("sites");
     assert!(world.knows_its_sun(), "the opt-in IS the leap's receipt");
     assert_eq!(leaps(&world), 1);
 
     // A second orb charted and sited: the world already knows its sun.
     let second = world.chart("penumbra", FIRST_ORB).expect("charts");
-    world.site_planet(second, ratio(1, 10), ratio(1, 1)).expect("sites");
+    world.site_planet(second, ratio(1, 10), ratio(1, 1), None, None).expect("sites");
     assert_eq!(leaps(&world), 1, "the leap is once per world, never per orb");
 }
 
@@ -56,7 +56,7 @@ fn the_leap_replays_and_resumes() {
     let mut world = World::new();
     world.found("heliopolis").expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
-    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1)).expect("sites");
+    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None, None).expect("sites");
 
     let committed = replay(world.chronicle());
     assert_eq!(committed.techs.len(), 1);

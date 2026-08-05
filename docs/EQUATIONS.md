@@ -126,8 +126,8 @@ relational structure, the landed tensor.
     V     = the committed state, whole
     Δ(V)  = the relation V expresses          (`rfa_core::Delta`)
 
-  **V IS SOVEREIGN** (operator ruling 2026-08-01; 18 §2c′). Its standing
-  comes from ADMISSION — it passed `lawful()`, it carries receipts, it
+  **V IS SOVEREIGN** (operator ruling 2026-08-01; 24_FORM §2c′). Its standing
+  comes from ADMISSION — it passed `admits()`, it carries receipts, it
   is in the chain — and no reading confers or revokes it. Every row
   below that reads `V` is TESTIMONY about `V`, never authority over it:
   readings price allocation, and standing is the judge's, granted
@@ -136,7 +136,7 @@ relational structure, the landed tensor.
   **NOTATION, binding:** `Δ` is THE RELATIONAL TENSOR. It is never a
   Laplacian, and no rule in this ledger takes a Laplacian of anything.
 
-  **`V` IS NEVER ENCLOSED** (operator ruling 2026-08-01, 18 §2b — *the
+  **`V` IS NEVER ENCLOSED** (operator ruling 2026-08-01, 24_FORM §2b — *the
   whole or the nothing*). No operator wraps `V` in this ledger. Every
   operator returns a part, and D0 bars parts of `V`: it is read whole or
   it is not read. The readings take `Δ`, the relation `V` expresses —
@@ -145,7 +145,7 @@ relational structure, the landed tensor.
   sequence: they were one error wearing three brackets.
 
 **D1 · D(Ω) — the progenitor's reading of the totality.** INSCRIBED.
-Superseded in form by `18_TORSION.md` §2a (operator ruling 2026-08-01):
+Superseded in form by `24_FORM` §2a (operator ruling 2026-08-01):
 capacity is a SPACE, driven by the torsion form — never a metric
 density, never a scalar. **RENOTATED 2026-08-02** (operator ruling:
 *`D(Ω) +: V(Ω)`*): this row read `Ω(D)`, *the space indexed by `D`*,
@@ -190,12 +190,12 @@ residuals. Two readings, both owed:
 
 Two universes of equal rank carrying different charge read the same
 count and are not the same universe — pinned in `bridge_pins` as
-`the_charge_field_is_carried_whole_never_counted`. 18 §2b bars
+`the_charge_field_is_carried_whole_never_counted`. 24_FORM §2b bars
 collapsing a directional
 quantity to a scalar aggregate wherever the system computes, and a count
 is such a collapse.
 
-**D IS THE PROGENITOR** (operator ruling 2026-08-01; 18 §2c′). Its
+**D IS THE PROGENITOR** (operator ruling 2026-08-01; 24_FORM §2c′). Its
 office is to MAKE ROOM: D3's emission opens a plane, the fiber grows,
 and band capacity is a reading of that fiber (`12_UNION` §1 — *a band is
 space available in the universe*). Nothing else creates space. `D` makes
@@ -309,7 +309,7 @@ shape in the row meant to exclude it.
 
     TERMS          D owes room that was EARNED    — `PlaneUnearned`
                                                     refuses otherwise
-                   V owes work that was RECEIPTED — admission, `lawful()`
+                   V owes work that was RECEIPTED — admission, `admits()`
 
     CONSIDERATION  the MINT: a plane WITH content, of neither kind
                    alone. Neither office can produce it unaided, which
@@ -411,7 +411,7 @@ foundation needs its own ruling, not an inscription.
 
 **THE UNION IS NOW DEEDED** (operator ruling 2026-08-02, executed).
 `ClosureEvent::SovereignUnionSealed { progenitor, sovereign,
-term_stamps }` at **TAG 90**, judged by `kernel::union_law` and read by
+term_stamps }` at **TAG 90**, judged by `kernel::union` and read by
 `World::union_review`.
 
 ```text
@@ -422,7 +422,7 @@ term_stamps }` at **TAG 90**, judged by `kernel::union_law` and read by
                V(Ω), what STANDS.
 
     APPROVAL   THE ROOT ENTITY, and nothing else. `scope_of` puts the
-               deed in Build so containment applies, and `union_law`
+               deed in Build so containment applies, and `union`
                requires `actor == SOVEREIGN` on top of it — a granted
                scope is authority to act WITHIN the world, never to
                constitute it.
@@ -576,7 +576,7 @@ is `18` §4.
                              BY RECEIPT (D3). `PlaneUnearned`
                              refuses every other route.
 
-    STATE     V(Ω) holds     the deed is ADMITTED — `lawful()`
+    STATE     V(Ω) holds     the deed is ADMITTED — `admits()`
                              passes and a receipt is written.
                              THIS IS THE SOLIDIFICATION.
 ```
@@ -586,7 +586,7 @@ phase boundary the declared and derived descriptions genuinely differ
 and *their relation IS the transition* — hold both sides and the
 crossing is legible; collapse them with an `==` and the phase structure
 disappears. So the crossing is a DISPOSITION, not a flow. There is no
-partial solidification and no half-committed deed: `kernel::lawful`
+partial solidification and no half-committed deed: `kernel::admits`
 returns admission or refusal and has no third answer, so no value
 strictly between claimed and committed exists to be occupied. This is
 the operator's standing rule that *there is no "half used" — an open
@@ -608,7 +608,7 @@ alone does not reverse one.
 `Delta { dim, fiber }`, are the CONTAINER the relation is carried on —
 they are not D. The distinction is load-bearing: a universe may carry
 enormous arity and near-zero D, when every difference it holds is pure
-frame. That is exactly the flat field 18 §3 Article III LAW 4 excludes
+frame. That is exactly the flat field 27_EVIDENCE Article III LAW 4 excludes
 at zero — much structure claimed, none surviving reduction. Only the
 ruled reading makes that article coherent.
 
@@ -624,14 +624,14 @@ capacity increment**, and D counts minted planes. `12_UNION` §3 and
 `11_AEON` §7 defer seat widths to "capacity as a live fiber reading
 (minted-plane count)" — a reading that has never existed. It is D.
 
-**∂Δ IS UNCAGED** (18 §2b). It is a directional operator and is never
+**∂Δ IS UNCAGED** (24_FORM §2b). It is a directional operator and is never
 collapsed to `‖∂Δ‖`, never bounded above, never reduced to a scalar
 aggregate. This EXTENDS the proportional law rather than reversing it:
 squares were barred as the mathematics of minimization, and L1 was a
 smaller cage of the same kind. Scalar aggregates survive only where a
 reading is reported to an OPERATOR lens, never where the system computes.
 
-**The union is ONE Δ WITH TWO COMPLEMENTARY PROJECTIONS** (18 §2c,
+**The union is ONE Δ WITH TWO COMPLEMENTARY PROJECTIONS** (24_FORM §2c,
 restated 2026-08-01; the former `U* = D(V) ⊕ V(D)` is STRUCK — nothing
 computed it, and `⊕` named a FREE join where the algebra holds a
 CONSTRAINED one). `D = rank(Δ)` and `∂Δ = boundary(Δ)` are projections
@@ -654,7 +654,7 @@ that will not reduce is emitted as a new degree:
 
 Growth is EARNED, never assumed: `GaugeShiftedAt` opens the plane, and
 opening grade k requires k receipted mints (`PlaneUnearned` refuses
-otherwise). 18 §2d THE SIGN LAW names it EGRESS: strictly positive
+otherwise). `24_FORM` §2d THE SIGN LAW names it EGRESS: strictly positive
 divergence, no trapped interior.
 
 **SCOPED (operator ruling 2026-08-04). This row read "capacity growth
@@ -712,7 +712,7 @@ below is honoured in code:
 **THE PHANTOM-RANK GATE IS NOW DUE, and D4 is what made it due.**
 `EntangledRead::rank_is_defined` had stood unused since it was written,
 its own header warning that an unresolved absence *"would let phantom
-topology mint phantom rank"*, and `18_TORSION` §6 recorded it as DEBT
+topology mint phantom rank"*, and `25_STANDING` §6 recorded it as DEBT
 rather than enforcement. D4 computes its increment OVER that rank, so an
 unresolved reading is no longer merely unfortunate — it is a mint
 surface. `revocation_law` asks it FIRST, before any increment is
@@ -740,7 +740,7 @@ was deleted to make the law fit.
 as a scalar decay and NOT as a contraction of `D`, but as the **FORMAL
 ENTANGLEMENT COLLAPSE OPERATOR** — the site where a claim on capacity
 that never entangled with potential is VACATED from the frame. It is
-the execution of 18 §3 Article III, not a second penalty beside it.
+the execution of 27_EVIDENCE Article III, not a second penalty beside it.
 
     D itself NEVER falls by this rule   — Article IV, and the algebra:
                                           Π_G is idempotent, so what
@@ -763,7 +763,7 @@ mechanism is remapped, not struck.
 in two places and they must never merge:
 
     PER-STEP (kernel):   a deed that mints carries a non-zero capacity
-                         increment, or REFUSES — 18 §2f consequence 2
+                         increment, or REFUSES — 24_FORM §2f consequence 2
                          (no hidden work), §2g's gap disposition. Local,
                          judgeable, already the pin-6 casualty.
     OVER A WINDOW (lens): deeds emitted while the rank did not grow —
@@ -772,7 +772,7 @@ in two places and they must never merge:
                          itself is untouched.
 
     (`Ξ(w) = deeds(w)/(1 + ΔD(w))` was this row's window arithmetic and
-    is STRUCK — 18 §3 struck the cosmetic meter, together with the
+    is STRUCK — 26_ARTICLES §3 struck the cosmetic meter, together with the
     scalar allocation score `T_k` and an esoteric masking symbol that
     never existed in the codebase at all, on one ground: an article
     outlawing scalar authority cannot enforce itself with a scalar, and
@@ -790,7 +790,7 @@ computable fact and the exact condition this row detects. Flooring the
 delta would abolish the very reading.
 
 Kernel CHARTER §1 forbids the second half in the judge: *a global
-property is not a per-step fact and cannot enter `lawful()` without
+property is not a per-step fact and cannot enter `admits()` without
 destroying its nature — enforce the LOCAL invariants, MEASURE the
 global with a lens.* Passing a 60-tick window reading into the judge
 would break the kernel's nature to enforce an article that never needed
@@ -803,7 +803,7 @@ translate, never transcribe; the 17 §8 precedent):
    relayed form wrote the loop trap as `Ξ → ∞`; with `ΔD(w) = 0` the
    formula gave `deeds(w)/1` — finite — so the refusal stood on the
    `1 +` denominator existing precisely to keep the trap computable,
-   infinity being barred by standing ruling (the T∞ purge). 18 §3 has
+   infinity being barred by standing ruling (the T∞ purge). 26_ARTICLES §3 has
    since struck the meter itself, so the correction is kept as record
    rather than as live law.
 2. **Eclipse strips ALLOCATION, never capacity or standing.** Article
@@ -824,14 +824,14 @@ translate, never transcribe; the 17 §8 precedent):
 That is I6 on the capacity axis — *no difference dies without account*.
 D3 and D4 together are the standing law that **capacity grows or its
 unearned claim is vacated**, both ends bounded, neither optional; and
-18 §3 Article IV governs the axis — `D` never retreats.
+27_EVIDENCE Article IV governs the axis — `D` never retreats.
 
 **D3/D4 ARE THE MANIFOLD DUAL ON THE CAPACITY AXIS** (`12_UNION` §2c,
 operator ruling 2026-07-30; inscribed here 2026-08-01). Syntropy and
 entropy are *opposite ends of one closed, coned manifold — no open
 ends, every expansion on one leg bounded by the opposing force on the
 other*. D3 (emission, the egress reading) is the syntropic leg. This is
-the SAME statement as 18 §2c's union read on one axis — the constrained
+the SAME statement as 24_FORM §2c's union read on one axis — the constrained
 join is non-destructive precisely because neither leg runs free of the
 other. The thermal instance is T3, the behavioural instance is S1, and
 no leg of any of them may be read alone (§6).
@@ -901,7 +901,7 @@ SYSTEM_SPEC §1. Implementation: `physics::beacon`.
 ## §2 The kernel — the judge (`lawful` is the conjunction)
 
 Authority: engine/kernel/CHARTER.md §1–§6. Implementation:
-`kernel::lawful` and its invariant functions.
+`kernel::admits` and its invariant functions.
 
 **I1 · Conservation, TOTAL.** LANDED WHOLE (the value-law wave,
 operator directive 2026-07-31) — `kernel::conservation` +
@@ -936,7 +936,7 @@ threading, gated on the Phase 3 flip.
     every value a canonical exact rational (coprime, den > 0); no float exists
 
 **I1e · Element conservation.** LANDED (operator ruling 2026-08-01) —
-`kernel::element_law`: the element ledger judged with strict symmetry
+`kernel::element_move`: the element ledger judged with strict symmetry
 to `banked`. An assay mints `richness · elapsed` (sign-guarded,
 bounded by the PRIOR vein — deterministic from `(prior, step)`);
 every other deed holds every element key still. Refusals
@@ -963,7 +963,7 @@ norms, no roots (§0.3 chapter two stands).
 The charter's parenthetical is RESTORED (kernel CHARTER §2, "Bounded
 creation (syntropy)"): I4 is not merely a ceiling on creation, it is
 the syntropic leg of the value law — *no fiat; joules only by
-encasement* (05 §1.2, 01 §6.1). With I5 it forms the dual, and 18 §2f
+encasement* (05 §1.2, 01 §6.1). With I5 it forms the dual, and 24_FORM §2f
 ENTANGLES this leg with verified work (`Δ(D) ⋈ ∂Δ`): the mint is not
 bounded by work, it is inseparable from it. Read I4 without its
 parenthetical and the value law reads as two ceilings; read with it,
@@ -979,7 +979,7 @@ SCHEMA_V3 premise died at execution.
     elapsed = stamp − last_touch; thermally gated  // proportional (the
     an un-owed decay refuses, both sides whole     // 2^1100 lesson)
 
-**I6 · The fold gate.** KERNEL HALF LANDED (U2d) — `kernel::gauge_law`:
+**I6 · The fold gate.** KERNEL HALF LANDED (U2d) — `kernel::gauge_move`:
 a fold transition's only lawful LOCAL effect is its declared key move
 (gauge declaration==effect, every grade, every covered deed — a key
 smuggled under a neutral deed refuses `GaugeBroken`). The PAIR half —
@@ -1213,7 +1213,7 @@ coned manifold: the syntropic arm ENCASES (joules mint, loops close, G
 climbs), the entropic arm VENTS (heat disperses, demurrage decays, sink
 absorbs), and **neither leg runs free of the other**. The rows below
 are therefore ONE SECTION and not two — splitting them into a thermal
-section and a syntropic section would be exactly the partition 18 §2c
+section and a syntropic section would be exactly the partition 24_FORM §2c
 bars, performed on the map instead of the territory. Every `T`/`S` row
 names both legs or names which leg it is.
 
@@ -1280,7 +1280,7 @@ detected but the scarce half of the economy: a dim-star system holds
 *the rarest resource in a high-flux universe*, and sells it as `S_cool`.
 The Frost's entire trade is convergence.
 
-**A SINK IS NOT A TRAPPED INTERIOR.** What 18 §2d forbids is convergence
+**A SINK IS NOT A TRAPPED INTERIOR.** What 24_FORM §2d forbids is convergence
 with NO EGRESS — a closed region that takes and never sheds. The line
 above is exactly why absorption is lawful: `sink_consumed =
 heat_absorbed = vented_after_shed`, so what is taken IS shed, and the

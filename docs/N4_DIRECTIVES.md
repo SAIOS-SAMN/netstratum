@@ -26,7 +26,7 @@ Coder-03's assessment is verified and approved. Checked against the tree
   over rationals, zero iff ~~converged~~). Safe to use. ~~The torus "no
   squaring" law applies to L1 distance on the star-chart, not to RFA
   residuals.~~
-  - **CORRECTED 2026-08-02 (`18_TORSION` §2n) — this bullet is wrong on
+  - **CORRECTED 2026-08-02 (`22_CONTAINMENT` §2n) — this bullet is wrong on
     all three counts.** The code sums ABSOLUTE VALUES, not squares:
     `delta.rs:193` is `c += r.abs()`, i.e. `C(Δ) = Σ|R|`. THE
     PROPORTIONAL LAW bars squares as aggregators of difference

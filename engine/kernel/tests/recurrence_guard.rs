@@ -164,15 +164,21 @@ fn the_arrow_law_holds() {
              coverage grows by amendment, never silently (§11 clause 2)"
         );
     }
-    // Nothing imports upward into the kernel, and cfe never imports
-    // the verifier or the codec at runtime (the opaque-payload law).
-    let cfe_forbidden = ["solver-verify", "kernel", "codec"];
-    for dep in runtime_deps(&root.join("engine/cfe/Cargo.toml")) {
-        assert!(
-            !cfe_forbidden.contains(&dep.as_str()),
-            "cfe imports {dep:?} at runtime — the arrow points one way only"
-        );
-    }
+    // THE cfe IMPORT GATE IS STRUCK (operator ruling 2026-08-03). It
+    // asserted `cfe` never imports solver-verify, kernel or codec — the
+    // opaque-payload rule — and it is no longer checked here.
+    //
+    // NOTHING CURRENTLY NEEDS THE PERMISSION. K4 closed the mint with
+    // `MintWarrant`, a callback: `cfe` asks what a payload earns and
+    // never parses one, so the emitter verifies without importing the
+    // verifier. The check is removed because it was ruled out, not
+    // because something was blocked by it.
+    //
+    // What is now unguarded: `cfe` MAY import the verifier, and if it
+    // ever does, proof structure becomes readable by the game and there
+    // is no longer one place that interprets a payload. Recorded here
+    // rather than left silent, since a struck guard leaves no trace at
+    // the call site.
     // The verifier half sits in the sealed math tier: physics + hashing.
     let verify_allowed = ["blake3", "physics"];
     for dep in runtime_deps(&root.join("engine/solver-verify/Cargo.toml")) {
@@ -198,6 +204,11 @@ fn no_new_read_back_path_ever() {
     // moved with it into engine/scribe/src/lib.rs. RELOCATED debts,
     // not new ones: the same reads, the new home; the ledger's own
     // entry stays for its law reads (universe, starchart, directives).
+    // THE DEFINITION LAW paid one of these off (2026-08-05):
+    // `engine/conductor/src/polities.rs` left this list because its
+    // roster read-back was STRUCK, not relocated. The list is allowed to
+    // shrink — "never grows" is the law, and a debt retired is the only
+    // lawful way off it.
     let adopted = [
         "engine/scribe/src/journal.rs",
         "engine/scribe/src/lib.rs",
@@ -207,7 +218,6 @@ fn no_new_read_back_path_ever() {
         "engine/ledger/src/registry.rs",
         "engine/conductor/src/lib.rs",
         "engine/conductor/src/main.rs",
-        "engine/conductor/src/polities.rs",
         "clients/cli/src/main.rs",
     ];
     let mut sources = Vec::new();

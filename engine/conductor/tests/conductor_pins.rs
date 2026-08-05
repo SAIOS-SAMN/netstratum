@@ -3,7 +3,7 @@
 //! end-to-end, research unlocks industry, and a thriving line
 //! speciates — chronicle-chosen, lineage-recorded.
 
-use conductor::{founding_polities, load_polities, run_era, write_default_polities, Polity};
+use conductor::{founding_polities, run_era, Polity};
 use ledger::registry::Registry;
 use ledger::Ledger;
 use std::fs;
@@ -97,12 +97,27 @@ fn a_thriving_line_diverges() {
     );
 
     let registry = Registry::at(root.join("registry"));
+    // **LINEAGE IS MEMBERSHIP, NOT PARENTHOOD** (LINEAGE-1). A SEEDED
+    // line may carry its own head's slug and share its axes exactly —
+    // Slagborn stands in the Tunborn line and is not a cleave of it.
+    // This filtered on `!lineage.is_empty()` and so counted the seeded
+    // line as a branch, then demanded it differ from its own head.
+    //
+    // Caught 2026-08-04 when the fifth seat was added to the fallback
+    // roster and Slagborn gained the lineage the law always gave it.
+    // The pin was reading the field, not the event: a CLEAVE is what
+    // `divergence_step` produces at runtime, so the seeded roster is
+    // what must be excluded to find one.
+    let seeded: Vec<String> = conductor::founding_polities()
+        .iter()
+        .map(|p| p.civilization.sigil.clone())
+        .collect();
     let branches: Vec<_> = registry
         .list()
         .into_iter()
-        .filter(|c| !c.lineage.is_empty())
+        .filter(|c| !c.lineage.is_empty() && !seeded.contains(&c.sigil))
         .collect();
-    assert!(!branches.is_empty(), "line membership recorded in the registry");
+    assert!(!branches.is_empty(), "a cleave was recorded in the registry");
 
     for branch in &branches {
         let origin = registry
@@ -142,38 +157,90 @@ fn a_thriving_line_diverges() {
 
     // The keys moved: the origin receipts the cleave (+delta) and the
     // branch world founds at the OPPOSITE phase — never both at zero.
+    // Same distinction as above: a SEEDED line carries its head's slug
+    // and never cleaved. Only a runtime branch has a `Diverged` receipt
+    // to find.
     let newborn = worlds
         .iter()
-        .find(|b| !b.spec.civilization.lineage.is_empty())
+        .find(|b| {
+            !b.spec.civilization.lineage.is_empty()
+                && !seeded.contains(&b.spec.civilization.sigil)
+        })
         .expect("newborn world");
+    // **THE CLEAVING WORLD IS FOUND BY ITS RECEIPT, NOT BY THE LINEAGE
+    // POINTER** (LINEAGE-1, corrected 2026-08-05).
+    //
+    // This read `lineage.first()` — the LINE HEAD — and called it the
+    // origin. LINEAGE-1 is explicit that the pointer records LINE
+    // MEMBERSHIP, never parenthood, so on a second-generation cleave the
+    // head is a GRANDPARENT and the phase law says nothing about the
+    // pair. It held only while the roster was small enough that every
+    // cleave was first-generation; THE DEFINITION LAW compiled the full
+    // 19-line roster in, a deeper cleave appeared, and the head and the
+    // grandchild landed on the same phase — a true reading, failed
+    // against the wrong world.
+    //
+    // The receipt names the parent unambiguously: exactly one world
+    // receipted `Diverged { branch: newborn }`.
     let origin_world = worlds
         .iter()
         .find(|b| {
-            Some(&b.spec.civilization.sigil)
-                == newborn.spec.civilization.lineage.first()
+            b.world.chronicle().receipts().iter().any(|r| {
+                matches!(
+                    &r.event,
+                    cfe::dop::ClosureEvent::Diverged { branch, .. }
+                        if *branch == newborn.spec.civilization.sigil
+                )
+            })
         })
-        .expect("the origin beats on");
-    let cleaved = origin_world.world.chronicle().receipts().iter().any(|r| {
-        matches!(
-            &r.event,
-            cfe::dop::ClosureEvent::Diverged { branch, .. }
-                if *branch == newborn.spec.civilization.sigil
-        )
-    });
-    assert!(cleaved, "the origin receipted the cleave, naming its peer");
-    assert_ne!(
-        origin_world.world.gauge(),
-        &cfe::ratio::ratio(0, 1),
-        "the origin's key moved"
+        .expect("the world that receipted this cleave beats on");
+    assert!(
+        !newborn.spec.civilization.lineage.is_empty(),
+        "the branch stands in a line"
     );
+    // **THE PHASES ARE READ AT THE CLEAVE, NOT AT ERA'S END**
+    // (corrected 2026-08-05).
+    //
+    // The law is about the MOMENT of the cleave: the origin's key moves
+    // to `g + δ` and the branch founds at `g − δ`, with δ drawn in
+    // 1/12..=5/12. Those can never coincide — collision would need
+    // 2δ ≡ 0 (mod 1), and 2δ lands in 2/12..=10/12.
+    //
+    // This read both worlds' gauges at the END of the era instead, by
+    // which time keys have moved on for reasons that have nothing to do
+    // with the cleave. It held only while the roster was small; with the
+    // full 19-line roster two unrelated worlds sat at 1/6 apiece and the
+    // pin reported a fiber collision that the arithmetic forbids.
+    //
+    // The receipt carries the origin's key AT the cleave, and the
+    // branch's spec carries the phase it founded at.
+    let at_cleave = origin_world
+        .world
+        .chronicle()
+        .receipts()
+        .iter()
+        .find_map(|r| match &r.event {
+            cfe::dop::ClosureEvent::Diverged { branch, gauge }
+                if *branch == newborn.spec.civilization.sigil =>
+            {
+                Some(gauge.clone())
+            }
+            _ => None,
+        })
+        .expect("the cleave receipt carries the origin's key");
+    let founded_at = newborn
+        .spec
+        .gauge
+        .clone()
+        .expect("the branch founds at an explicit phase");
+    assert_ne!(at_cleave, cfe::ratio::ratio(0, 1), "the origin's key moved");
     assert_ne!(
-        newborn.world.gauge(),
-        &cfe::ratio::ratio(0, 1),
+        founded_at,
+        cfe::ratio::ratio(0, 1),
         "the branch founds at its cleaved key"
     );
     assert_ne!(
-        origin_world.world.gauge(),
-        newborn.world.gauge(),
+        at_cleave, founded_at,
         "opposite phases — the branches never collide on the fiber"
     );
     assert!(newborn.world.now() > 0, "the branch's clock runs");
@@ -259,8 +326,12 @@ fn a_steward_directive_lands_through_the_leash() {
 
     assert!(inbox.join("applied/000001-zone.json").exists(), "the zone applied");
     assert!(inbox.join("refused/000002-smite.json").exists(), "the smite refused");
+    let acting = worlds
+        .iter()
+        .position(|p| p.spec.civilization.sigil == "slagborn")
+        .expect("the acting line stands");
     assert!(
-        worlds[0]
+        worlds[acting]
             .world
             .orb()
             .expect("orb")
@@ -293,33 +364,35 @@ fn perception_routes_the_research() {
     assert!(!slagborn.is_empty() && slagborn.iter().all(|n| n.starts_with("forge_")));
 }
 
-/// Lore lives in data: the default polities seed a file the operator
-/// owns; loading it round-trips the specs; a hand-added entry loads.
+/// **THE ROSTER IS THE COMPILED ROSTER** — the inverse of the pin this
+/// replaces, which read *"lore lives in data: the default polities seed
+/// a file the operator owns"*. THE DEFINITION LAW struck that creed:
+/// a definition compiles, only a receipt persists.
+///
+/// The lines it named still stand, and they are checked BY IDENTITY,
+/// never by position — the earlier version read `loaded[0]` and broke
+/// the moment the fifth seat was added ahead of it.
 #[test]
-fn bots_load_from_the_operators_file() {
-    let root = scratch("polities");
-    fs::create_dir_all(&root).expect("scratch");
-    let path = root.join("polities.json");
-    write_default_polities(&path).expect("seeds");
-    let loaded = load_polities(&path).expect("loads");
-    assert_eq!(loaded.len(), founding_polities().len());
-    assert_eq!(loaded[0].civilization.sigil, "slagborn");
-
-    // Seeding again never clobbers the operator's file.
-    let before = fs::read_to_string(&path).expect("read");
-    write_default_polities(&path).expect("no-op");
-    assert_eq!(before, fs::read_to_string(&path).expect("read"));
-
-    // A hand-added entry loads alongside the defaults.
-    let extended = before.replace(
-        "]",
-        r#",{"name":"Fernwake","sigil":"fernwake","species":"monarch butterfly",
-           "motto":"drift and arrive","disposition":"epicurean","metabolism":"biotic",
-           "perception":"volumetric","world":"lantern-sea","planet":"petal",
-           "colony":"alight","policy":"steady"}]"#,
+fn the_roster_carries_the_tardigrade_line_and_its_head() {
+    let founding = founding_polities();
+    assert!(
+        founding.iter().any(|p| p.civilization.sigil == "slagborn"),
+        "the tardigrade line stands in the roster"
     );
-    fs::write(&path, extended).expect("edit");
-    let loaded = load_polities(&path).expect("loads");
-    assert_eq!(loaded.len(), founding_polities().len() + 1);
-    assert_eq!(loaded.last().expect("fernwake").civilization.name, "Fernwake");
+    assert!(
+        founding.iter().any(|p| p.civilization.sigil == "tunborn"),
+        "and so does its head — the fifth seat, 12_UNION §2"
+    );
+    // Two readings of a compiled roster are the same roster. The struck
+    // path could not promise this: a second boot re-read a file the
+    // first boot had written, and anything could have edited it between.
+    assert_eq!(
+        founding.len(),
+        founding_polities().len(),
+        "the roster does not change between readings"
+    );
+    assert!(
+        founding.iter().all(|p| p.civilization.founder == "conductor"),
+        "every compiled line is founded by the conductor, not by an editor"
+    );
 }

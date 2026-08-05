@@ -6,7 +6,7 @@
 //! function, so any machine, any build, any year must reproduce these
 //! bytes — that is the whole point of the beacon.
 
-use cfe::ratio::{ratio, Ratio};
+use ratio::{ratio, Ratio};
 use num_bigint::BigInt;
 use physics::Beacon;
 use std::str::FromStr;

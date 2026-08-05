@@ -158,7 +158,7 @@ Verification by opposition still requires TWO records to set against
 each other. §11 rule 5 clause 1 rejects *a reconciling check between
 copies*, and the kernel's own header answers it: **you do not reconcile
 what cannot diverge.** Where the judge makes an unlawful transition
-unconstructible (18 §2f, §2g), there is no second book left to oppose.
+unconstructible (24_FORM §2f, §2g), there is no second book left to oppose.
 Opposition was a good answer to a question the One-Truth Amendment
 removed. Losing an elegant mechanism to a stronger law is the ordinary
 shape of this constitution, not a defeat.
@@ -174,7 +174,7 @@ Each is landed algebra, and each is now carried by kernel I1/I6 rather
 than by any opposition module:
 
 - the Delta antisymmetry (`Δ_ij = −Δ_ji` — my waste and your food are
-  ONE entry read from two ends): `rfa_core::set_antisym`, and 18 §2a's
+  ONE entry read from two ends): `rfa_core::set_antisym`, and 24_FORM §2a's
   grounding of `Delta` as an alternating form;
 - the aperture's two legs — ONE MOVEMENT READ FROM TWO ENDS, exactly as
   the antisymmetry above: a debit and its far credit are the same
@@ -393,7 +393,7 @@ ruling in the chapter the word *union* comes from.
                      (§1). Nothing else creates space.
 
     SOVEREIGN    V   holds. Its standing comes from ADMISSION — it
-                     passed `lawful()`, it carries receipts, it is in
+                     passed `admits()`, it carries receipts, it is in
                      the chain. No reading confers it; none revokes it.
 
 **D provides the floor, but owns no piece of what moves upon it. V
@@ -452,7 +452,7 @@ board-maker a byproduct of what plays on the board, which is the union
 inverted.
 
     ORIGIN       the receipted deed → the office
-                 V's standing: ADMISSION — it passed `lawful()`
+                 V's standing: ADMISSION — it passed `admits()`
                  D's room:     RECEIPTED MINTS — D3, *D rises BY
                                RECEIPT*; `GaugeShiftedAt` opens the
                                plane, `PlaneUnearned` refuses unearned

@@ -14,7 +14,7 @@ fn sunlit(name: &str) -> World {
     world.found(name).expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1))
+        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None, None)
         .expect("sites");
     world
 }
@@ -92,7 +92,7 @@ fn a_funded_veil_pays_its_toll_and_stands() {
     world.zone(8, ZoneKind::Habitat).expect("zones");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(1, 2), ratio(1, 2))
+        .site_planet(FIRST_ORB, ratio(1, 2), ratio(1, 2), None, None)
         .expect("sites hot");
     world.zone(16, ZoneKind::Encasement).expect("zones the shell");
     // Receipt-anchored, never tick-counted: mint until the bank shows.

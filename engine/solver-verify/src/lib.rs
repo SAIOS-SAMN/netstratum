@@ -16,6 +16,7 @@
 
 pub mod certificate;
 pub mod corpus;
+pub mod field;
 pub mod forge;
 pub mod grid;
 pub mod loader;
@@ -25,6 +26,7 @@ pub mod work;
 
 pub use certificate::{verify_certificate, CertificateRead, SolveCertificate};
 pub use corpus::task_digest;
+pub use field::{quarter_turn, Axis, Field, Word};
 pub use forge::{forge_task, Difficulty};
 pub use grid::{run, Grid, Op, Program, TileMirror};
 pub use loader::{load_task, LoadError, Task, TaskPair};

@@ -190,7 +190,7 @@ impl World {
     }
     /// PRACTICE-1 — adopt a discipline: one benefit, one friction,
     /// bound by receipt (the derived creed never binds; the practice
-    /// does). Build scope. The Athanor (5) takes only the tempered —
+    /// does). Build scope. The Overdrive (5) takes only the tempered —
     /// eight hardship receipts stand in the chronicle or the door
     /// refuses.
     pub fn adopt_practice(&mut self, practice: u8) -> Result<(), ActionRefused> {
@@ -220,7 +220,7 @@ impl World {
                 })
                 .count();
             if hardships < 8 {
-                return Err(ActionRefused::AthanorUntempered { hardships });
+                return Err(ActionRefused::OverdriveUntempered { hardships });
             }
         }
         self.close(ClosureEvent::PracticeAdopted { practice }, actor);

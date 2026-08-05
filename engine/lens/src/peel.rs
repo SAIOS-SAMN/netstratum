@@ -71,7 +71,7 @@ pub enum Depth {
 
 /// One standing coordinate of a relation, with the place that holds it.
 ///
-/// Carried whole rather than summed: `18_TORSION` §2b bars collapsing a
+/// Carried whole rather than summed: `24_FORM` §2b bars collapsing a
 /// directional quantity to a scalar aggregate wherever the system
 /// computes, and a lens that pre-summed its entries would hand the
 /// caller a number it could not take apart again.

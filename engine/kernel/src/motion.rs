@@ -2,7 +2,7 @@
 //! the multi-axial transition, its inversion axiom, and the schedule
 //! that makes non-commutative composition safe across nodes.
 //!
-//! **WHY THIS EXISTS.** `lawful(prior, next, step)` accepts `next` and
+//! **WHY THIS EXISTS.** `admits(prior, next, step)` accepts `next` and
 //! returns `Ok(())`: the transition is computed elsewhere and the
 //! kernel grades it. Returning `Committed` instead would fix the
 //! duplication and keep the LINEARITY — a whole world is a POINT, with
@@ -164,7 +164,7 @@ impl Move {
     /// group**; the group exists only so the commutator can be written.
     ///
     /// That is the whole reason inversion is required here: the
-    /// commutator needs it, and `18_TORSION` §2k.1 established that the
+    /// commutator needs it, and `23_TRAVERSAL` §2k.1 established that the
     /// commutator IS the torsion. Without inverses the torsion is not
     /// expressible at all.
     pub fn inverse(&self) -> Self {
@@ -192,7 +192,7 @@ impl Move {
                 None => banked.push((*key, delta.clone())),
             }
         }
-        banked.sort_by(|a, b| a.0.cmp(&b.0));
+        banked.sort_by_key(|entry| entry.0);
         banked.retain(|(_, d)| *d != ratio(0, 1));
 
         let width = self.gauge.len().max(next.gauge.len());
@@ -214,7 +214,7 @@ impl Move {
                 None => books.push((*key, delta.clone())),
             }
         }
-        books.sort_by(|a, b| a.0.cmp(&b.0));
+        books.sort_by_key(|entry| entry.0);
         books.retain(|(_, d)| *d != ratio(0, 1));
 
         let mut records = self.records.clone();
@@ -267,7 +267,7 @@ impl Standing {
                 None => banked.push((*key, delta.clone().max(ratio(0, 1)))),
             }
         }
-        banked.sort_by(|a, b| a.0.cmp(&b.0));
+        banked.sort_by_key(|entry| entry.0);
         banked.retain(|(_, held)| *held != ratio(0, 1));
 
         let mut seats = self.seats.clone();
@@ -286,7 +286,7 @@ impl Standing {
                 None => books.push((*key, delta.clone())),
             }
         }
-        books.sort_by(|a, b| a.0.cmp(&b.0));
+        books.sort_by_key(|entry| entry.0);
 
         // RECORDS APPLY IN ORDER, and the order is the content: an
         // insert after a remove leaves the record standing, the reverse
@@ -303,7 +303,7 @@ impl Standing {
                 RecordOp::Remove { key } => records.retain(|(k, _)| k != key),
             }
         }
-        records.sort_by(|a, b| a.0.cmp(&b.0));
+        records.sort_by_key(|entry| entry.0);
 
         Self { banked, seats, books, records }
     }
@@ -362,7 +362,7 @@ pub fn compose_scheduled(standing: &Standing, mut moves: Vec<(Slot, Move)>) -> S
 }
 
 /// THE COST ENVELOPE — `O(n^D)`, replacing the flat `O(1)` bound
-/// (operator ruling 2026-08-02, superseding `18_TORSION` §2n.3's
+/// (operator ruling 2026-08-02, superseding `22_CONTAINMENT` §2n.3's
 /// per-axis statement for the WORK envelope).
 ///
 /// A flat bound was a scalar collapse: it fixed the budget independent
@@ -402,7 +402,7 @@ pub fn project(state: &Committed) -> Standing {
             banked.push(((orb.orb_id, *resource), held.clone()));
         }
     }
-    banked.sort_by(|a, b| a.0.cmp(&b.0));
+    banked.sort_by_key(|entry| entry.0);
     banked.retain(|(_, held)| *held != ratio(0, 1));
 
     let mut seats: Vec<(String, u8)> = state.stations.clone();

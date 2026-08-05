@@ -102,7 +102,7 @@ walks — exactly the way function and tier read today.
   communion · schism · passage — precedence order breaks ties;
   hardship holds tier 2 by operator ruling). The hardship word GRADES
   by endured weight (operator-ruled 2026-07-30): **tempering** supports
-  the base, **anneal** aligns the middle, **athanor** crowns the deep
+  the base, **anneal** aligns the middle, **hardening** crowns the deep
   end — floors are placeholder parameters; "crucible" is retired from
   the creed vocabulary (the Furnace rename law's shadow). VOICE drawn from
   the chronicle's terminal digest (the 10 §2 law applied to belief).
@@ -112,10 +112,10 @@ walks — exactly the way function and tier read today.
 - **CREED-2 / PRACTICE-1 — LANDED 2026-07-31** (the metabolism half
   landed earlier as coder-01's G2). The derived creed never binds; the
   RECEIPTED PRACTICE does (tags 68/69): one benefit, one friction,
-  exact, per discipline — 1 the Fast (rations ×3/4 / habitat yield
-  ×3/4) · 2 the Icon (habitat yield ×5/4 / life support ×2) · 3 the
-  Vigil (scan draw ×1/2 / +1/8 friction per transfer) · 4 the Hoard
-  (demurrage ×1/2 / converter yields ×3/4) · 5 the Athanor (all yields
+  exact, per discipline — 1 the Austerity (rations ×3/4 / habitat yield
+  ×3/4) · 2 the Showpiece (habitat yield ×5/4 / life support ×2) · 3 the
+  Restraint (scan draw ×1/2 / +1/8 friction per transfer) · 4 the Hoard
+  (demurrage ×1/2 / converter yields ×3/4) · 5 the Overdrive (all yields
   AND upkeep ×5/4; adoption gated on eight hardship receipts — the
   deep end takes only the tempered). Operator rulings inscribed:
   RELEASE IS A REDISCOVERY — barred until new doctrine lands after the
@@ -126,8 +126,8 @@ walks — exactly the way function and tier read today.
   operator's "intelligence alignment", flagged as this chapter's
   proxy, re-rulable). The climb gains its fourth gate: a practiced
   line elevates only aligned (ElevationBarred names it). NPCs adopt at
-  genesis by disposition (expansionist→Vigil, epicurean→Icon,
-  empiricist→Fast; the Hoard and Athanor are earned, never seeded);
+  genesis by disposition (expansionist→Restraint, epicurean→Showpiece,
+  empiricist→Austerity; the Hoard and Overdrive are earned, never seeded);
   the sovereign hand adopts by the `practice`/`release` verbs. All
   constants placeholder; names operator-renameable. Five witnesses.
 - **MASK-1a — LANDED 2026-07-31** (tags 76/77): the veil deed and its

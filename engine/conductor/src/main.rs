@@ -3,12 +3,13 @@
 //! Usage:
 //!   conductor [--var var] [--cycles N] [--cadence SECONDS] [--fold]
 //!
-//! Polity lore lives in `<var>/polities.json` — seeded with the founding
-//! NPCs on first run, then the operator's file to edit freely.
+//! THE DEFINITION LAW (`polities.rs`): the roster is COMPILED. There is
+//! no `polities.json` to seed, adopt, or hand-edit — a line is added
+//! through the receipted door (`civ new`), never by editing a file.
 //! `--cycles 0` (default) beats forever at the cadence. Watch live:
 //!   python3 tools/observer.py --watch 2
 
-use conductor::{founding_polities, load_polities, observe_crossings, write_default_polities, Polity};
+use conductor::{observe_crossings, roster, Polity};
 use ledger::registry::Registry;
 use ledger::Ledger;
 use std::path::PathBuf;
@@ -51,24 +52,13 @@ fn main() {
         }
     }
     std::fs::create_dir_all(&var_root).expect("var root");
-    let polities_path = PathBuf::from(&var_root).join("polities.json");
-    // Compat shim: an operator's pre-rename roster is honored — adopted
-    // ONCE as polities.json, never silently ignored, never overwritten.
-    // Two generations of the name are carried, newest first: an
-    // existing universe keeps its roster across both renames without
-    // the operator touching a file.
-    for legacy_name in ["egregores.json", "bots.json"] {
-        let legacy = PathBuf::from(&var_root).join(legacy_name);
-        if !polities_path.exists() && legacy.exists() {
-            std::fs::rename(&legacy, &polities_path)
-                .unwrap_or_else(|_| panic!("adopt legacy {legacy_name}"));
-            println!("conductor: adopted legacy {legacy_name} as polities.json");
-        }
-    }
-    write_default_polities(&polities_path).expect("seed polities.json");
-    let specs = load_polities(&polities_path).unwrap_or_else(founding_polities);
-
+    // THE DEFINITION LAW: the roster compiles. The legacy-adoption shim
+    // for `egregores.json`/`bots.json` is struck with the file itself —
+    // there is no longer a roster on disk for a legacy name to become.
     let registry = Registry::at(format!("{var_root}/registry"));
+    // THE DEFINITION LAW: the compiled founding lines plus every line
+    // the operator has registered since. No roster file is read.
+    let specs = roster(&registry);
     let book = Ledger::at(format!("{var_root}/worlds"));
 
     // CONVERGE-1 (07 §1.6): converge the archived eras BEFORE genesis —
@@ -105,9 +95,8 @@ fn main() {
         })
         .collect();
     println!(
-        "conductor: {} civilizations from {} — {}",
+        "conductor: {} civilizations from the compiled roster — {}",
         worlds.len(),
-        polities_path.display(),
         if cycles == 0 {
             format!("beating every {cadence_secs}s (Ctrl-C to stop)")
         } else {
@@ -174,7 +163,7 @@ fn main() {
                 newborns.push(spec);
             }
             // DIRECTIVE 19: the judge speaks on the board. Every deed
-            // `kernel::lawful` refused this beat is named here, once —
+            // `kernel::admits` refused this beat is named here, once —
             // the verdict stays on the polity's permanent record either
             // way. The deed still STANDS in the chronicle: `replay` is
             // the live transition until the Phase 3 flip demotes it

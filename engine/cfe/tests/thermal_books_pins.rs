@@ -8,7 +8,7 @@
 //!
 //! `heat_encased_of` is that arm, derived from receipts already written.
 
-use cfe::dop::{Resource, ZoneKind};
+use cfe::dop::ZoneKind;
 use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
 use cfe::world::{replay, World, FIRST_ORB, SOVEREIGN};
@@ -24,7 +24,7 @@ fn furnace() -> World {
     world.zone(8, ZoneKind::Habitat).expect("zones");
     world.zone(16, ZoneKind::Encasement).expect("zones the shell");
     world.commission_star(StarClass::G).expect("commissions");
-    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2)).expect("sites hot");
+    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None, None).expect("sites hot");
     world
 }
 

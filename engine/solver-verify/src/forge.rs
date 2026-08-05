@@ -48,6 +48,60 @@ impl Difficulty {
         }
     }
 
+    /// The top rung, derived: the first level nothing rises above.
+    pub fn top() -> u32 {
+        (0..).find(|&n| !Difficulty::climbs(n)).unwrap_or(0)
+    }
+
+    /// **WHICH LADDER RUNG THIS SHAPE IS** — `None` if it is none of
+    /// them.
+    ///
+    /// This is what a price may be read from. A shape is matched WHOLE
+    /// against the ladder, so a payload still cannot name its own price
+    /// by inventing a convenient difficulty — the anti-self-pricing
+    /// defence is unchanged. What changes is what the judge is handed:
+    /// a POSITION, not a matrix.
+    ///
+    /// **Why (operator ruling 2026-08-04: *`Grid` should fall out,
+    /// because we aren't building a matrix*).** `mint_bound` used to
+    /// match the whole `Difficulty` — so `rows` and `cols`, the
+    /// dimensions of an ARC grid, were literally part of the judge's
+    /// price lookup. That is THE MOTION clause 5's failure: *ARC is a
+    /// TYPE of work, not the only type; the machinery must be
+    /// work-CLASS generic, never grid-specific.* It was proved the same
+    /// day by having to invent a whole parallel `VolDifficulty` with a
+    /// `layers` field, because a three-dimensional rung cannot be
+    /// spelled in planar fields.
+    ///
+    /// A rung is class-independent. The SHAPE stays here, where the
+    /// forge needs it; only the position crosses to the judge.
+    pub fn rung(&self) -> Option<u32> {
+        (0..=Difficulty::top()).find(|&n| Difficulty::level(n) == *self)
+    }
+
+    /// **DOES THE LADDER STILL RISE ABOVE `level`?**
+    ///
+    /// Read from the ladder itself: a rung climbs while the next rung
+    /// is a DIFFERENT rung. [`Difficulty::level`]'s catch-all arm makes
+    /// every level at or above the top structurally identical, so
+    /// equality IS saturation and needs no constant to say so.
+    ///
+    /// **This replaces `level < 5` at its call sites** (operator ruling
+    /// 2026-08-04). That constant was not even the real bound — it
+    /// restated the ladder's own saturation as a magic number, and a
+    /// number restating a structure is a second truth that can drift
+    /// from it. Add a rung to `level` and every caller follows; nothing
+    /// needs to be told.
+    /// **Compared against SATURATION, not against the next rung.** The
+    /// first derivation asked `level(n+1) != level(n)` and was wrong at
+    /// the bottom: rungs 0 and 1 are deliberately the same opening
+    /// rung, so it read "nothing above me" at the very start of the
+    /// ladder. A plateau is not a ceiling. The saturated rung is
+    /// whatever the catch-all arm returns, so ask for it directly.
+    pub fn climbs(level: u32) -> bool {
+        Difficulty::level(level) != Difficulty::level(u32::MAX)
+    }
+
     /// THE DEGENERACY LAW, given a name (2026-08-04).
     ///
     /// [`forge_task`] PANICS on a degenerate rung — `rows`/`cols` of 0

@@ -15,7 +15,7 @@ use cfe::ipsal::{Entity, Scope};
 use cfe::ratio::ratio;
 use cfe::tlv;
 use cfe::world::{Committed, World, SOVEREIGN};
-use kernel::{lawful, Step, Unlawful};
+use kernel::{admits, Step, Refused};
 use solver::{solve, SolveRead};
 use solver_verify::{
     decode_work, encode_work, forge_task, run, Difficulty, Op, SolveCertificate, WorkBroken,
@@ -166,8 +166,8 @@ fn the_sealed_shut_bound_refuses_every_positive_mint() {
     let prior = seated((6, 1));
     let next = seated((7, 1)); // the claimed mint banked — conservation holds
     assert_eq!(
-        lawful(&prior, &next, &mint_step((1, 1), work)),
-        Err(Unlawful::MintExceedsWork {
+        admits(&prior, &next, &mint_step((1, 1), work)),
+        Err(Refused::MintExceedsWork {
             bound: Box::new(ratio(0, 1)),
             claimed: Box::new(ratio(1, 1)),
         }),
@@ -190,15 +190,15 @@ fn the_ruled_rate_pays_the_ladder_exactly() {
         // D4: the admitting state also GROWS, or the claim vacates.
         let at_bound = grown((6 + f, 1));
         assert_eq!(
-            lawful(&prior, &at_bound, &mint_step((f, 1), work.clone())),
+            admits(&prior, &at_bound, &mint_step((f, 1), work.clone())),
             Ok(()),
             "level {level}: a mint of exactly f = {f} admits"
         );
         // One past f: refuses, the bound and the claim carried whole.
         let past = seated((6 + f + 1, 1));
         assert_eq!(
-            lawful(&prior, &past, &mint_step((f + 1, 1), work)),
-            Err(Unlawful::MintExceedsWork {
+            admits(&prior, &past, &mint_step((f + 1, 1), work)),
+            Err(Refused::MintExceedsWork {
                 bound: Box::new(ratio(f, 1)),
                 claimed: Box::new(ratio(f + 1, 1)),
             }),
@@ -217,8 +217,8 @@ fn saturated_and_off_ladder_work_earns_zero() {
         let proof = honest_proof_with(Difficulty::level(level));
         let work = encode_work(&proof).expect("encodes");
         assert_eq!(
-            lawful(&seated((6, 1)), &seated((7, 1)), &mint_step((1, 1), work)),
-            Err(Unlawful::MintExceedsWork {
+            admits(&seated((6, 1)), &seated((7, 1)), &mint_step((1, 1), work)),
+            Err(Refused::MintExceedsWork {
                 bound: Box::new(ratio(0, 1)),
                 claimed: Box::new(ratio(1, 1)),
             }),
@@ -231,8 +231,8 @@ fn saturated_and_off_ladder_work_earns_zero() {
     let proof = honest_proof_with(off_ladder);
     let work = encode_work(&proof).expect("encodes");
     assert_eq!(
-        lawful(&seated((6, 1)), &seated((7, 1)), &mint_step((1, 1), work)),
-        Err(Unlawful::MintExceedsWork {
+        admits(&seated((6, 1)), &seated((7, 1)), &mint_step((1, 1), work)),
+        Err(Refused::MintExceedsWork {
             bound: Box::new(ratio(0, 1)),
             claimed: Box::new(ratio(1, 1)),
         }),
@@ -245,10 +245,10 @@ fn a_tampered_chain_refuses_at_its_exact_link() {
     let mut proof = honest_proof();
     proof.certificate.steps[0][0] ^= 0xff;
     let work = encode_work(&proof).expect("encodes");
-    let verdict = lawful(&seated((6, 1)), &seated((7, 1)), &mint_step((1, 1), work));
+    let verdict = admits(&seated((6, 1)), &seated((7, 1)), &mint_step((1, 1), work));
     assert_eq!(
         verdict,
-        Err(Unlawful::WorkRefused {
+        Err(Refused::WorkRefused {
             broken: WorkBroken::ChainDiverged { at_step: 1 }
         }),
         "tampering with link 1 is named as link 1 — the break whole"
@@ -281,8 +281,8 @@ fn an_intact_chain_over_a_non_solution_refuses() {
     };
     let work = encode_work(&proof).expect("encodes");
     assert_eq!(
-        lawful(&seated((6, 1)), &seated((7, 1)), &mint_step((1, 1), work)),
-        Err(Unlawful::WorkRefused {
+        admits(&seated((6, 1)), &seated((7, 1)), &mint_step((1, 1), work)),
+        Err(Refused::WorkRefused {
             broken: WorkBroken::TrainingMiss { pair: 0 }
         }),
         "an intact chain proves nothing without the replay"
@@ -294,9 +294,9 @@ fn a_wrong_forge_digest_never_verifies() {
     let mut proof = honest_proof();
     proof.forge_digest = [8u8; 32]; // a different task entirely
     let work = encode_work(&proof).expect("encodes");
-    let verdict = lawful(&seated((6, 1)), &seated((7, 1)), &mint_step((1, 1), work));
+    let verdict = admits(&seated((6, 1)), &seated((7, 1)), &mint_step((1, 1), work));
     assert!(
-        matches!(verdict, Err(Unlawful::WorkRefused { .. })),
+        matches!(verdict, Err(Refused::WorkRefused { .. })),
         "the task is not the one claimed: {verdict:?}"
     );
 }
@@ -307,14 +307,14 @@ fn a_malformed_payload_refuses_as_form() {
     let mut work = encode_work(&honest_proof()).expect("encodes");
     work.push(0);
     assert_eq!(
-        lawful(&seated((6, 1)), &seated((7, 1)), &mint_step((1, 1), work)),
-        Err(Unlawful::WorkRefused { broken: WorkBroken::Malformed }),
+        admits(&seated((6, 1)), &seated((7, 1)), &mint_step((1, 1), work)),
+        Err(Refused::WorkRefused { broken: WorkBroken::Malformed }),
         "truncation, trailing bytes, unknown codes — all form refusals"
     );
     // And an empty payload is no proof at all.
     assert_eq!(
-        lawful(&seated((6, 1)), &seated((7, 1)), &mint_step((1, 1), Vec::new())),
-        Err(Unlawful::WorkRefused { broken: WorkBroken::Malformed }),
+        admits(&seated((6, 1)), &seated((7, 1)), &mint_step((1, 1), Vec::new())),
+        Err(Refused::WorkRefused { broken: WorkBroken::Malformed }),
         "no certificate → no discovery mint"
     );
 }
@@ -331,7 +331,7 @@ fn the_zero_mint_with_valid_work_admits() {
     // advance ("already the pin-6 casualty"); the intent survives, the
     // fixture moved.
     let next = grown((6, 1));
-    assert_eq!(lawful(&prior, &next, &mint_step((0, 1), work)), Ok(()));
+    assert_eq!(admits(&prior, &next, &mint_step((0, 1), work)), Ok(()));
 }
 
 #[test]
@@ -346,8 +346,8 @@ fn degenerate_difficulty_refuses_as_form_never_mints() {
     proof.difficulty.train_pairs = 0;
     let work = encode_work(&proof).expect("encodes");
     assert_eq!(
-        lawful(&seated((6, 1)), &seated((7, 1)), &mint_step((1, 1), work)),
-        Err(Unlawful::WorkRefused { broken: WorkBroken::Malformed }),
+        admits(&seated((6, 1)), &seated((7, 1)), &mint_step((1, 1), work)),
+        Err(Refused::WorkRefused { broken: WorkBroken::Malformed }),
         "no training pairs, no verifiable work — refused as form"
     );
 }
@@ -365,8 +365,8 @@ fn zero_dimension_difficulty_refuses_never_panics() {
         proof.difficulty.cols = degenerate.1;
         let work = encode_work(&proof).expect("encodes");
         assert_eq!(
-            lawful(&seated((6, 1)), &seated((7, 1)), &mint_step((1, 1), work)),
-            Err(Unlawful::WorkRefused { broken: WorkBroken::Malformed }),
+            admits(&seated((6, 1)), &seated((7, 1)), &mint_step((1, 1), work)),
+            Err(Refused::WorkRefused { broken: WorkBroken::Malformed }),
             "a zero dimension refuses as form — the judge never panics"
         );
     }

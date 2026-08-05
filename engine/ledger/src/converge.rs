@@ -21,7 +21,8 @@ use cfe::vrp::{receipt_digest, ReceiptHash};
 use num_traits::Zero;
 use physics::{AxisVector, Triple};
 
-use crate::json::{self, JsonWriter};
+use crate::extract;
+use pen::JsonWriter;
 use crate::{sanitize, Ledger};
 
 /// One archived receipt, reconstructed from a chronicle.jsonl line —
@@ -470,15 +471,15 @@ enum ParsedChronicle {
 
 fn parse_receipt_line(line: &str) -> Option<RawReceipt> {
     Some(RawReceipt {
-        sequence: json::extract_u64(line, "seq")?,
-        stamp: json::extract_u64(line, "stamp")?,
-        parent: hex32(&json::extract_string(line, "parent")?)?,
-        digest: hex32(&json::extract_string(line, "digest")?)?,
-        by: json::extract_string_array(line, "by")?
+        sequence: extract::extract_u64(line, "seq")?,
+        stamp: extract::extract_u64(line, "stamp")?,
+        parent: hex32(&extract::extract_string(line, "parent")?)?,
+        digest: hex32(&extract::extract_string(line, "digest")?)?,
+        by: extract::extract_string_array(line, "by")?
             .iter()
             .map(|s| s.parse().ok())
             .collect::<Option<Vec<u64>>>()?,
-        event_bytes: hex_bytes(&json::extract_string(line, "tlv")?)?,
+        event_bytes: hex_bytes(&extract::extract_string(line, "tlv")?)?,
     })
 }
 

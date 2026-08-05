@@ -209,10 +209,10 @@ impl World {
         let terrain = self.terrain_seed;
         // PRACTICE-1: the bound disciplines, read once — one benefit,
         // one friction each (14 §4; constants placeholder).
-        let fast = self.practices.contains(&1);
-        let icon = self.practices.contains(&2);
+        let austerity = self.practices.contains(&1);
+        let showpiece = self.practices.contains(&2);
         let hoard = self.practices.contains(&4);
-        let athanor = self.practices.contains(&5);
+        let overdrive = self.practices.contains(&5);
         // TECH-1b: each orb's crystallized boons, read once — [unused,
         // insulation, discipline, deepening, doctrine, stores].
         let boons: Vec<(u64, [bool; 6])> = flows
@@ -371,21 +371,21 @@ impl World {
                     let boost = terrain_boost(&terrain, *orb_id, zone, &standing);
                     let mut yield_factor = ratio(1, 1);
                     let mut upkeep_factor = ratio(1, 1);
-                    if athanor {
+                    if overdrive {
                         yield_factor *= ratio(5, 4);
                         upkeep_factor *= ratio(5, 4);
                     }
                     match zone.kind {
                         ZoneKind::Habitat => {
-                            if icon {
+                            if showpiece {
                                 yield_factor *= ratio(5, 4);
                                 upkeep_factor *= ratio(2, 1);
                             }
-                            if fast {
+                            if austerity {
                                 yield_factor *= ratio(3, 4);
                             }
                         }
-                        ZoneKind::Extractor if fast => {
+                        ZoneKind::Extractor if austerity => {
                             upkeep_factor *= ratio(3, 4);
                         }
                         ZoneKind::Smelter | ZoneKind::Synthesizer | ZoneKind::Resonator

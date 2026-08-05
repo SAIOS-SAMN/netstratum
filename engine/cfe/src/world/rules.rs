@@ -218,3 +218,71 @@ pub fn ward_progress(depth: u32) -> Ratio {
         false => ratio(i64::from(depth), i64::from(gate.max(1))),
     }
 }
+
+/// **THE MINT WARRANT (K4).** What a payload EARNS, answered by
+/// somebody who may read it.
+///
+/// `cfe` may not import the verifier — the opaque-payload law, enforced
+/// by `kernel/tests/recurrence_guard.rs::the_arrow_law_holds`. Proofs
+/// are opaque bytes to the game and only the sealed verifier reads
+/// them; a proposer that could interpret proof structure would break
+/// the seal.
+///
+/// So the emitter does not verify: it ASKS. This trait is the callback,
+/// and it keeps the arrow intact — `cfe` defines the question, whoever
+/// sits above it answers.
+///
+/// `None` means the payload is not a proof. The emitter refuses BEFORE
+/// closing, so a bad mint never reaches the chronicle.
+pub trait MintWarrant {
+    /// What this payload earns, or `None` if it is not a proof.
+    fn earns(&self, work: &[u8]) -> Option<Ratio>;
+
+    /// **THE ESCROW CHECK — would the judge ADMIT this deed?**
+    ///
+    /// `earns` answers what a payload is WORTH. It cannot answer
+    /// whether the deed will stand, because most of the law is a
+    /// property of the TRANSITION — D4 reads the capacity increment
+    /// across `prior → next`, and conservation reads both totals. A
+    /// warrant that only prices the work leaves every transition-shaped
+    /// invariant to be discovered afterwards, by which point the
+    /// chronicle already holds the deed.
+    ///
+    /// That is exactly what was measured: a 60-beat era put mints
+    /// carrying `MintWithoutCapacityIncrement` into the record, and the
+    /// judge refused them where nobody could take them back.
+    ///
+    /// So the emitter ESCROWS: it builds the state the deed WOULD
+    /// produce, asks here whether that transition stands, and settles
+    /// only on yes. `cfe` still parses nothing and imports no judge —
+    /// it hands over two committed states and the event, and whoever
+    /// can judge, judges.
+    ///
+    /// Default `false`: a warrant that cannot answer must not be able
+    /// to settle. The same posture `NoWarrant` takes on `earns`, for
+    /// the same reason — the restrictive answer is the shape of the
+    /// type, not a rule someone remembers.
+    fn admits(
+        &self,
+        _prior: &crate::world::Committed,
+        _next: &crate::world::Committed,
+        _event: &crate::dop::ClosureEvent,
+        _actor: u64,
+        _stamp: u64,
+    ) -> bool {
+        false
+    }
+}
+
+/// The warrant that admits nothing — for callers with no verifier.
+///
+/// Not a convenience: it is the DEFAULT POSTURE. A caller that cannot
+/// verify must not be able to mint, and this makes that the shape of
+/// the type rather than a rule someone remembers.
+pub struct NoWarrant;
+
+impl MintWarrant for NoWarrant {
+    fn earns(&self, _work: &[u8]) -> Option<Ratio> {
+        None
+    }
+}

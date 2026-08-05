@@ -17,7 +17,7 @@ authority it already is.
 ```text
 sealed math core   rfa-core (Δ, C(Δ), Π_G, orbit_lock) · cfe::ratio · verify_certificate
 physics            reversible kinematics · beacon ξ_k
-the judge          kernel::lawful — I1..I6 + the two proofs
+the judge          kernel::admits — I1..I6 + the two proofs
 the spine + codec  the chain (tag 84) · the one encoding
 state semantics    cfe (deeds, orbs, the world)
 control plane      steward seam · authority walk · the uplink door

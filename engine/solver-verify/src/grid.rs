@@ -42,11 +42,6 @@ impl Grid {
         self.cells[r * self.cols + c]
     }
 
-    fn from_fn(rows: usize, cols: usize, f: impl Fn(usize, usize) -> u8) -> Grid {
-        let mut out = Grid { rows: 0, cols: 0, cells: Vec::new() };
-        out.fill_from(rows, cols, f);
-        out
-    }
 
     /// Refill this grid in place, REUSING its existing allocation.
     ///

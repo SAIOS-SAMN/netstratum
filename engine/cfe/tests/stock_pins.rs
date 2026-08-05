@@ -413,3 +413,40 @@ fn a_clean_draw_never_moves_rate_or_ceiling() {
         "the stock did not recover from a clean over-draw"
     );
 }
+
+/// RESEARCH RAISES THE CEILING, and a raised ceiling is what a
+/// saturating curve needs — a faster rate against the same bound just
+/// arrives at the same place sooner.
+///
+/// **Wired 2026-08-04 at the integration audit.** `research_ceiling`
+/// landed beside `research_rate` and `reinvest` and had ZERO callers —
+/// not one test, on this lane or on `capacity-lane` where it was
+/// written. It was not dropped by the merge; it arrived unwired. An
+/// exported function nothing calls is the vacuity clause's own case,
+/// so it is wired rather than deleted: the feature was wanted, only its
+/// witness was missing.
+#[test]
+fn research_on_the_ceiling_lifts_where_the_curve_saturates() {
+    let zero = ratio(0, 1);
+    let settle = |gain: Ratio| {
+        let mut s = tended();
+        s.research_ceiling(&gain);
+        // Run far past the knee so the curve is at its bound, not on
+        // its way there — the ceiling is what it saturates AGAINST.
+        for _ in 0..400 {
+            s.step(&zero);
+        }
+        s.current.clone()
+    };
+    let plain = settle(ratio(0, 1));
+    let lifted = settle(ratio(50, 1));
+    assert!(
+        lifted > plain,
+        "raising the ceiling did not raise where the stock settles: {plain} vs {lifted}"
+    );
+
+    // And it is the CEILING that moved, not the rate: the same gain
+    // applied twice lifts further still, because the bound is additive.
+    let twice = settle(ratio(100, 1));
+    assert!(twice > lifted, "the ceiling is additive — a larger gain settles higher");
+}

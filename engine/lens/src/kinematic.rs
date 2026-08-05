@@ -44,7 +44,7 @@
 //! `KineticStep::Converged { action_magnitude }` and derives a velocity
 //! `v(T) = 1/(1+‖Δₜ‖) − 1/(1+‖Δₜ₋₁‖)`. **Both are barred**: the second
 //! is the `1/(1+x)` shape of the struck cosmetic meter, and both collapse
-//! a directional quantity to a scalar magnitude, which `18_TORSION` §2b
+//! a directional quantity to a scalar magnitude, which `24_FORM` §2b
 //! forbids wherever the system computes.
 //!
 //! The IDEA survives whole and is worth having — pressure and velocity

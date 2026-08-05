@@ -356,7 +356,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             let orbit_r = words.next().and_then(parse_ratio_arg);
             match (albedo, orbit_r) {
                 (Some(albedo), Some(orbit_r)) => {
-                    match world.site_planet(*current, albedo, orbit_r) {
+                    match world.site_planet(*current, albedo, orbit_r, None, None) {
                         Ok(()) => {
                             thermal_line(world, style, *current);
                             println!("{} orbit sited — thermal is live for this planet", style.ok("✓"));
@@ -909,10 +909,11 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 ),
             }
         }
-        // THE CONSTELLATION (operator ruling 2026-07-30): the base-7
-        // stack as this line's own sky — held nodes glow with their
-        // voice-names, timers show exact progress, the crown shows
-        // its gate. Per-line, never a shared ladder.
+        // THE CONSTELLATION — this line's own sky, BASE-11 since the
+        // uplift (operator ruling 2026-08-02). Held nodes glow with
+        // their voice-names, timers show exact progress, the crown
+        // shows its gate, and the uplift tier shows the deeds claimed.
+        // Per-line, never a shared ladder.
         Some("tech") => {
             // The voice-names live in the receipts (typed events —
             // read, never parsed).
@@ -927,13 +928,51 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     }
                 }
             }
+            // ELEVEN sky nodes: the base tier as it always was, then
+            // one per chartered work. INDEXED BY CONDITION, so slot 7
+            // must be held even though the sky never emits it — and the
+            // array must stay as long as the highest condition, not as
+            // long as the sky.
             let concepts = [
                 "the solar leap", "insulation", "discipline", "deepening",
                 "doctrine", "stores", "the crown (terraforming)",
+                "the re-emergence lesson (rides separately)",
+                "VALOR", "HONOR", "COURAGE", "COMMITMENT",
             ];
             println!("{}", style.head("THE CONSTELLATION — this line's own sky"));
             for (condition, held, progress, threshold) in world.constellation(*current) {
                 let concept = concepts[condition as usize];
+                // The uplift tier reads from DEEDS, not from timers, so
+                // it renders on its own terms.
+                if condition >= 8 {
+                    if condition == 8 {
+                        println!(
+                            "  {}",
+                            style.dim("— the uplift tier: deeds, claimed on chain receipts —")
+                        );
+                    }
+                    let reached = world
+                        .orb_by_id(*current)
+                        .is_some_and(|orb| {
+                            orb.aspirations.iter().any(|held| {
+                                held.work == cfe::literature::work_of(concept)
+                            })
+                        });
+                    println!(
+                        "  {} {:<28} {}",
+                        match held {
+                            true => style.strong("◆"),
+                            false => style.dim("○"),
+                        },
+                        concept,
+                        match (held, reached) {
+                            (true, _) => style.ok("CLAIMED — a civilizational upgrade"),
+                            (false, true) => style.dim("reached for; the deed still has to be witnessed").to_string(),
+                            (false, false) => style.dim("unreached").to_string(),
+                        }
+                    );
+                    continue;
+                }
                 let voice = voices.iter().find(|(c, _, _)| *c == condition);
                 let line = match (held, voice) {
                     (true, Some((_, name, stamp))) => format!(
@@ -1242,8 +1281,8 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         // THE CIV CONSOLE (2026-07-30 ruling): build a custom
         // civilization — axes, station, seat checks — from inside the
         // client. `civ` / `civ seats` shows the station console; `civ
-        // new` registers the line and appends it to var/polities.json
-        // so the conductor brings it online at its next boot.
+        // new` registers the line; the conductor derives its world from
+        // the registry card at its next boot (THE DEFINITION LAW).
         // THE OPERATOR MENU (prototype — no passwords): profiles under
         // var/operators/<sigil>, many accounts on one machine; login
         // switches, continue resumes the profile's last saved world.
@@ -1706,48 +1745,24 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             return;
                         }
                     }
-                    // Seat the world deterministically from the sigil —
-                    // no wall clock, no dice (CHARTER §9's spirit).
-                    let digest: [u8; 32] = blake3::hash(sigil.as_bytes()).into();
-                    let coord = |at: usize| -> i64 { i64::from(digest[at] % 63) - 31 };
-                    let entry = format!(
-                        "  {{\"name\":\"{}\",\"sigil\":\"{}\",\"species\":\"{}\",\"motto\":\"{}\",\"disposition\":\"{}\",\"metabolism\":\"{}\",\"perception\":\"{}\",\"world\":\"{}-hearth\",\"planet\":\"{}-prime\",\"colony\":\"first-{}\",\"policy\":\"steady\",\"x\":\"{}\",\"y\":\"{}\",\"z\":\"{}\"{}}}",
-                        newcomer.name, sigil, newcomer.species, newcomer.motto,
-                        newcomer.disposition, newcomer.metabolism, newcomer.perception,
-                        sigil, sigil, sigil,
-                        coord(0), coord(1), coord(2),
+                    // THE DEFINITION LAW (conductor::polities): registering
+                    // IS the whole act. This used to splice a JSON entry
+                    // onto var/polities.json by stripping the trailing
+                    // `]` — a second, unreceipted definition of the line,
+                    // written by string surgery. The conductor now derives
+                    // the world, planet, colony and placement from the
+                    // sigil at boot, so the registry card is sufficient.
+                    println!(
+                        "{} {} registered{} — the conductor brings the line online at its next boot ({}-hearth awaits)",
+                        style.ok("✓"),
+                        style.strong(&newcomer.name),
                         newcomer
                             .station
                             .as_ref()
-                            .map(|s| format!(",\"station\":\"{s}\""))
-                            .unwrap_or_default()
+                            .map(|s| format!(" ({s} seat taken)"))
+                            .unwrap_or_default(),
+                        sigil
                     );
-                    let roster = std::path::PathBuf::from("var/polities.json");
-                    let appended = std::fs::read_to_string(&roster)
-                        .ok()
-                        .and_then(|text| {
-                            let trimmed = text.trim_end();
-                            let body = trimmed.strip_suffix(']')?.trim_end();
-                            let glue = if body.trim_end().ends_with('[') { "\n" } else { ",\n" };
-                            Some(format!("{body}{glue}{entry}\n]\n"))
-                        });
-                    match appended.map(|text| std::fs::write(&roster, text)) {
-                        Some(Ok(())) => println!(
-                            "{} {} registered{} and rostered — the conductor brings the line online at its next boot ({}-hearth awaits)",
-                            style.ok("✓"),
-                            style.strong(&newcomer.name),
-                            newcomer
-                                .station
-                                .as_ref()
-                                .map(|s| format!(" ({s} seat taken)"))
-                                .unwrap_or_default(),
-                            sigil
-                        ),
-                        _ => println!(
-                            "{} registered, but var/polities.json would not append — add the entry by hand",
-                            style.bad("✗")
-                        ),
-                    }
                 }
                 Some(other) => println!(
                     "{} unknown civ verb {} — {} or {}",
@@ -1761,16 +1776,16 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         Some(deed @ ("practice" | "release")) => {
             let releasing = deed == "release";
             let code = match words.next() {
-                Some("1") | Some("fast") => Some(1u8),
-                Some("2") | Some("icon") => Some(2),
-                Some("3") | Some("vigil") => Some(3),
+                Some("1") | Some("austerity") => Some(1u8),
+                Some("2") | Some("showpiece") => Some(2),
+                Some("3") | Some("restraint") => Some(3),
                 Some("4") | Some("hoard") => Some(4),
-                Some("5") | Some("athanor") => Some(5),
+                Some("5") | Some("overdrive") => Some(5),
                 other => {
                     println!(
                         "{} name the discipline: {} (got {})",
                         style.bad("✗"),
-                        style.strong("fast · icon · vigil · hoard · athanor"),
+                        style.strong("austerity · showpiece · restraint · hoard · overdrive"),
                         other.unwrap_or("nothing")
                     );
                     None
@@ -2349,12 +2364,270 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             reading
                         );
                     }
+                    // BOOK-1: the four above are the CHARTER's. A line
+                    // may mint its own, and a display that showed only
+                    // four would imply the set is closed.
+                    let minted: Vec<_> =
+                        orb.books().into_iter().filter(|held| !held.chartered).collect();
+                    match minted.is_empty() {
+                        true => println!(
+                            "  {}",
+                            style.dim("no minted books — `book mint <name>` opens an account of your own")
+                        ),
+                        false => {
+                            for view in minted {
+                                let reading = match view.standing() {
+                                    Some(value) => format!("ratio {}", style.strong(&amount(&value))),
+                                    None => style.dim("no deeds yet").to_string(),
+                                };
+                                let mark = match view.archived {
+                                    true => style.warn(" (closed)"),
+                                    false => String::new(),
+                                };
+                                println!(
+                                    "  {:<11} kept {} · lost {} — {}{}",
+                                    view.name,
+                                    style.strong(&amount(&view.kept)),
+                                    style.strong(&amount(&view.lost)),
+                                    reading,
+                                    mark
+                                );
+                            }
+                        }
+                    }
                 }
                 None => println!(
                     "{} no colony yet — {} begins the story",
                     style.bad("✗"),
                     style.strong("found <name>")
                 ),
+            }
+        }
+        // GROWTH-1 — the six axes, carried whole. No aggregate: six
+        // readings and no score, because collapsing them is the struck
+        // C-gate under a sixth name.
+        Some("growth") => match world.orb_by_id(*current) {
+            None => println!(
+                "{} no colony yet — {} begins the story",
+                style.bad("✗"),
+                style.strong("found <name>")
+            ),
+            Some(_) => {
+                let growth = world.growth_of(*current);
+                println!(
+                    "{}  {}",
+                    style.head("GROWTH"),
+                    style.dim("what the chain PRODUCED — none of it reachable at stamp 0")
+                );
+                for (axis, sense, reading) in [
+                    ("practice", "TIME      did the writing span real chain time", amount(&growth.practice)),
+                    ("knowledge", "BREADTH   accounts written in", growth.knowledge.to_string()),
+                    ("expertise", "DEPTH     the deepest account's share", amount(&growth.expertise)),
+                    ("wisdom", "TESTING   accounts carrying BOTH sides", amount(&growth.wisdom)),
+                    ("locality", "SCOPE     the line's record that sits here", amount(&growth.locality)),
+                    ("triviality", "EMPTINESS postings that moved nothing", amount(&growth.triviality)),
+                ] {
+                    // Pad the PLAIN word before painting it — colour
+                    // codes count toward a format width and skew the
+                    // column (the same trap as the books display).
+                    println!(
+                        "  {} {} — {}",
+                        style.strong(&format!("{axis:<11}")),
+                        style.dim(sense),
+                        style.strong(&reading)
+                    );
+                }
+                println!(
+                    "  {}",
+                    match (growth.practised(), growth.substantive()) {
+                        (true, true) => style.ok("this line keeps books: it reads and writes"),
+                        (false, _) => style.dim("no practice yet — writing has to SPAN time, not fill one stamp").to_string(),
+                        (true, false) => style.warn("the record spans time and moved nothing"),
+                    }
+                );
+            }
+        },
+        // LIT-1 — the literature's doors. Literacy is DERIVED (a line
+        // that keeps its own books has learned to write), so there is
+        // no verb that grants it.
+        Some("literature") | Some("works") => match world.orb_by_id(*current) {
+            None => println!(
+                "{} no colony yet — {} begins the story",
+                style.bad("✗"),
+                style.strong("found <name>")
+            ),
+            Some(_) => {
+                let literate = world.literate(*current);
+                println!(
+                    "{}  {}",
+                    style.head("LITERATURE"),
+                    match literate {
+                        true => style.dim("this line reads and writes — it may reach for these"),
+                        false => style.dim("not yet literate: keep a book of your own and the works open"),
+                    }
+                );
+                for view in world.literature(*current) {
+                    let standing = match (view.claimed, view.witnesses) {
+                        (true, n) => style.ok(&format!("claimed on {n} receipt(s)")),
+                        (false, _) => style.dim("—"),
+                    };
+                    let reach = match world
+                        .orb_by_id(*current)
+                        .is_some_and(|orb| orb.aspirations.iter().any(|h| h.work == view.work))
+                    {
+                        true => style.strong("reached for"),
+                        false => style.dim("unreached").to_string(),
+                    };
+                    println!("  {:<12} {:<14} {}", view.name, reach, standing);
+                }
+            }
+        },
+        Some("aspire") => {
+            let name = words.collect::<Vec<_>>().join(" ");
+            match world.aspire(*current, &name) {
+                Ok(_) => println!(
+                    "{} this line reaches for {} — the deed still has to be done",
+                    style.ok("✓"),
+                    style.strong(&name)
+                ),
+                Err(refusal) => refuse(world, &refusal, style),
+            }
+        }
+        Some("claim") => {
+            let rest = words.collect::<Vec<_>>();
+            // `claim <work> on <digest> [digest ...]` — the receipts are
+            // the point, so the word `on` separates them from the name.
+            let split = rest.iter().position(|word| *word == "on");
+            match split {
+                Some(at) if at > 0 && at + 1 < rest.len() => {
+                    let name = rest[..at].join(" ");
+                    let mut witnesses = Vec::new();
+                    let mut bad = None;
+                    for word in &rest[at + 1..] {
+                        match resolve_witness(world, word) {
+                            Ok(digest) => witnesses.push(digest),
+                            Err(why) => bad = Some(why),
+                        }
+                    }
+                    match bad {
+                        Some(why) => println!(
+                            "{} {} — {} lists the receipts",
+                            style.bad("✗"),
+                            why,
+                            style.strong("chronicle")
+                        ),
+                        None => match world.claim_work(*current, &name, &witnesses) {
+                            Ok(()) => println!(
+                                "{} {} CLAIMED on {} chain receipt(s) — the citation is verified, the virtue is not scored",
+                                style.ok("✓"),
+                                style.strong(&name),
+                                style.strong(&witnesses.len().to_string())
+                            ),
+                            Err(refusal) => refuse(world, &refusal, style),
+                        },
+                    }
+                }
+                _ => println!(
+                    "{} {} — a claim without receipts is a boast",
+                    style.bad("✗"),
+                    style.strong("claim <work> on <digest> [digest ...]")
+                ),
+            }
+        }
+        // BOOK-1 (19_LENS §16) — the open registry's doors. Amounts
+        // come BEFORE the name on `post` so a name may hold spaces
+        // without the parse turning ambiguous.
+        Some("book") | Some("books") => {
+            let sub = words.next();
+            match world.orb_by_id(*current) {
+                None => println!(
+                    "{} no colony yet — {} begins the story",
+                    style.bad("✗"),
+                    style.strong("found <name>")
+                ),
+                Some(_) => match sub {
+                    None | Some("list") => {
+                        println!(
+                            "{}  {}",
+                            style.head("BOOKS"),
+                            style.dim("the charter's four and everything this line minted — one view, no privilege")
+                        );
+                        let orb = world.orb_by_id(*current).expect("checked above");
+                        for view in orb.books() {
+                            let standing = match view.standing() {
+                                Some(value) => format!("standing {}", style.strong(&amount(&value))),
+                                None => style.dim("no entries yet").to_string(),
+                            };
+                            // Pad the PLAIN word before painting it:
+                            // the colour codes count toward a format
+                            // width and would skew the column.
+                            let mark = match (view.chartered, view.archived) {
+                                (true, _) => style.dim(&format!("{:<7}", "charter")),
+                                (false, true) => style.warn(&format!("{:<7}", "closed")),
+                                (false, false) => style.ok(&format!("{:<7}", "minted")),
+                            };
+                            println!(
+                                "  {} {:<22} kept {} · lost {} — {}",
+                                mark,
+                                view.name,
+                                style.strong(&amount(&view.kept)),
+                                style.strong(&amount(&view.lost)),
+                                standing
+                            );
+                        }
+                    }
+                    Some("mint") => {
+                        let name = words.collect::<Vec<_>>().join(" ");
+                        match world.mint_book(*current, &name) {
+                            Ok(_) => println!(
+                                "{} book {} minted — an account of this line's own making",
+                                style.ok("✓"),
+                                style.strong(&name)
+                            ),
+                            Err(refusal) => refuse(world, &refusal, style),
+                        }
+                    }
+                    Some("post") => {
+                        let kept = words.next().and_then(parse_ratio_arg);
+                        let lost = words.next().and_then(parse_ratio_arg);
+                        let name = words.collect::<Vec<_>>().join(" ");
+                        match (kept, lost, name.is_empty()) {
+                            (Some(kept), Some(lost), false) => {
+                                let kind = cfe::books::kind_of(&name);
+                                match world.post_book(*current, kind, kept, lost) {
+                                    Ok(()) => println!(
+                                        "{} posted to {} — both sides at once, as a book is kept",
+                                        style.ok("✓"),
+                                        style.strong(&name)
+                                    ),
+                                    Err(refusal) => refuse(world, &refusal, style),
+                                }
+                            }
+                            _ => println!(
+                                "{} {} — the amounts come first so a name may hold spaces",
+                                style.bad("✗"),
+                                style.strong("book post <kept> <lost> <name>")
+                            ),
+                        }
+                    }
+                    Some("archive") | Some("close") => {
+                        let name = words.collect::<Vec<_>>().join(" ");
+                        match world.archive_book(*current, cfe::books::kind_of(&name)) {
+                            Ok(()) => println!(
+                                "{} {} closed to writing — every entry it took stays readable",
+                                style.ok("✓"),
+                                style.strong(&name)
+                            ),
+                            Err(refusal) => refuse(world, &refusal, style),
+                        }
+                    }
+                    Some(other) => println!(
+                        "{} no such book verb {} — try {}",
+                        style.bad("✗"),
+                        style.strong(other),
+                        style.strong("book · book mint · book post · book archive")
+                    ),
+                },
             }
         }
         Some("planets") => {
@@ -2509,7 +2782,10 @@ fn help(style: &Style) {
         ("absorb <amt> from <p> [into <p>]", "route a hot planet's un-sealed overflow into the absorber's banked sink — emptying it clears the strike; the draw owes the absorber within the reciprocity window or it lapses to the extraction book"),
         ("bond <rate> <res> to <p> [for <n>]", "seal a standing order: rate/tick streams without per-tick clearing, settled in one receipt at each touch — a term bond expires orderly; severing or defaulting posts the notice load"),
         ("sever <res> to <p> · bonds", "cut a standing bond (the load posts to the cutter) · list the standing orders"),
-        ("forward <q> <res> to <p> within <n>", "vitrify a delivery pact in the Glasskeeper lattice — collateral (priced by your fidelity books, never barred) locks until the quota is delivered (release) or the deadline passes (BREACH_AND_SLASH); `forwards` lists the open pacts"),
+        ("forward <q> <res> to <p> within <n>", "vitrify a delivery pact in the Glasskeeper lattice — collateral (priced by your fidelity books, never barred) locks until the quota is delivered (release) or the deadline passes (BREACH_AND_SLASH); `forwards` lists the open pacts"),        ("growth", "GROWTH-1: the six axes of how a line actually grew — practice (did the writing SPAN chain time), knowledge (breadth), expertise (depth), wisdom (accounts carrying BOTH sides — a line that only ever posted wins has learned nothing), locality (scope), triviality (what moved nothing, the guard that keeps the rest honest). Carried whole; there is no score"),
+        ("literature · aspire <work> · claim <work> on <digest>", "LIT-1: the works a LITERATE line may reach for — VALOR · HONOR · COURAGE · COMMITMENT. Literacy is DERIVED and never granted: keep a book of your own (`book mint` then `book post`) and the literature opens. Aspiring is free and proves nothing; CLAIMING cites chain receipts, and the law verifies every digest is a receipt this world sealed. It never scores the virtue — a claim without receipts is a boast"),
+        ("book · book mint <name> · book post <kept> <lost> <name> · book archive <name>", "BOOK-1: the OPEN registry — a line mints its own kinds of account beside the charter's four. A book is a DUAL ledger (kept against lost) and posts both sides at once. Archiving closes it to WRITING and never to reading: every entry it took stays. A book IS its normalized name, so re-minting one is not a second book, and the charter's four can be neither minted over nor closed"),
+
         ("ideology", "the dual cohesion ledger for this planet — the four axes, their books, and the derived readings; divergent trade partners pay a friction entropy tax, aligned ones pay zero"),
         ("charter <world> deal <n>", "ROUTE-1: charter a maintained lane — melt × (1−η), η from the pair's best instrument grade; upkeep draws at the year voice, unpaid lanes lapse"),
         ("forge <condition>", "MANU-1: forge an instrument from a crystallized condition + the converter chain (alloy = grade; diamond at 3+) — scan reach = base + best grade"),
@@ -2524,7 +2800,7 @@ fn help(style: &Style) {
         ("aperture <amt> <res> to <world> deal <n>", "cross banked value into another saved world — two legs, one deal, both chronicles sealed at once"),
         ("license <cond> to <world> via <council> deal <n>", "issue a technology into another world through diplomacy; condition 6 gifts THE CROWN onto a finished base-7 stack"),
         ("ascend <sigil> to <station>", "claim a station seat for a line whose world has crossed and climbed — the registry checks the room; a seat is reached, never appointed"),
-        ("tech", "the constellation: this line's base-7 sky — held nodes with their voice-names, exact progress toward what has not crystallized, the crown's gate"),
+        ("tech", "the constellation: this line's base-11 sky — held nodes with their voice-names, exact progress toward what has not crystallized, the crown's gate"),
         ("venture <cond> to <world> via <council> deal <n>", "SCIENCE-1: the joint research venture — incompatible sciences cross their outputs (a council-bound licensed leap, named as what it is)"),
         ("offer … · trade …", "MARKET-1: offer <amt> <res> for <amt> <res> id <n> posts a resting intent (no escrow, no absolute price); trade <mine> with <world> <theirs> deal <n> clears a crossing at the RESTING price via two aperture pairs"),
         ("shift <grade> <value>", "GAUGE-N: move — or open — the key at a grade; the fiber is a graded vector, not one dial (grade 0 stays the landed scalar every law binds to)"),
@@ -2533,7 +2809,7 @@ fn help(style: &Style) {
         ("aperture <amt> <res> to <world> deal <n>", "cross banked value into another saved world — two legs, one deal, both chronicles sealed at once"),
         ("license <cond> to <world> via <council> deal <n>", "issue a technology into another world through diplomacy; condition 6 gifts THE CROWN onto a finished base-7 stack"),
         ("ascend <sigil> to <station>", "claim a station seat for a line whose world has crossed and climbed — the registry checks the room; a seat is reached, never appointed"),
-        ("tech", "the constellation: this line's base-7 sky — held nodes with their voice-names, exact progress toward what has not crystallized, the crown's gate"),
+        ("tech", "the constellation: this line's base-11 sky — held nodes with their voice-names, exact progress toward what has not crystallized, the crown's gate"),
         ("terraform <albedo> <orbit>", "the gifted crown (base-7 complete + licensed from tier 0): re-seat a sited planet — the only lawful way an orbit moves"),
         ("npcs [pause|resume|speed <s>]", "the player\'s hand on the autonomous board — pause holds every polity world, speed sets seconds between beats (0 = flat out); bare npcs shows the state"),
         ("civ [seats] · civ new …", "the civ console: seats shows every station\'s room (progenitors per domain, 8 each — space, not rank); civ new <sigil> | <Name> | <species> | <motto> | <disp> <metab> <perc> [station] registers a custom line and rosters it for the conductor"),
@@ -2613,6 +2889,40 @@ fn act_as(world: &mut World, actor: u64, rest: &[&str], style: &Style, current: 
             },
             None => println!("{} as <handle> raze <tile>", style.bad("✗")),
         },
+        ["book", "mint", name @ ..] if !name.is_empty() => {
+            match world.mint_book_as(actor, *current, &name.join(" ")) {
+                Ok(_) => println!(
+                    "{} entity {actor} minted a book — receipt tagged to it",
+                    style.ok("✓")
+                ),
+                Err(refusal) => refuse(world, &refusal, style),
+            }
+        }
+        ["book", "post", kept, lost, name @ ..] if !name.is_empty() => {
+            match (parse_ratio_arg(kept), parse_ratio_arg(lost)) {
+                (Some(kept), Some(lost)) => {
+                    let kind = cfe::books::kind_of(&name.join(" "));
+                    match world.post_book_as(actor, *current, kind, kept, lost) {
+                        Ok(()) => println!(
+                            "{} entity {actor} posted a dual entry — receipt tagged to it",
+                            style.ok("✓")
+                        ),
+                        Err(refusal) => refuse(world, &refusal, style),
+                    }
+                }
+                _ => println!("{} as <handle> book post <kept> <lost> <name>", style.bad("✗")),
+            }
+        }
+        ["book", "archive", name @ ..] | ["book", "close", name @ ..] if !name.is_empty() => {
+            let kind = cfe::books::kind_of(&name.join(" "));
+            match world.archive_book_as(actor, *current, kind) {
+                Ok(()) => println!(
+                    "{} entity {actor} closed a book to writing — receipt tagged to it",
+                    style.ok("✓")
+                ),
+                Err(refusal) => refuse(world, &refusal, style),
+            }
+        }
         ["collect"] => match world.collect_as(actor, *current) {
             Ok(count) => println!(
                 "{} entity {actor} collected — {count} receipt(s) tagged to it",
@@ -2623,7 +2933,7 @@ fn act_as(world: &mut World, actor: u64, rest: &[&str], style: &Style, current: 
         _ => println!(
             "{} as <handle> supports: {} — identity changes authority, not vocabulary",
             style.bad("✗"),
-            style.strong("zone · raze · collect")
+            style.strong("zone · raze · collect · book")
         ),
     }
 }
@@ -2966,6 +3276,82 @@ fn amount(value: &Ratio) -> String {
 
 fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
     let text = match refusal {
+        // K4: the emitter now refuses BEFORE writing, so these are
+        // reachable from every caller rather than only from the judge.
+        ActionRefused::WorkRefused => {
+            "that payload is not a proof — the work did not verify".to_string()
+        }
+        ActionRefused::MintExceedsWork { bound, claimed } => format!(
+            "the work earns {} — {claimed} was claimed",
+            style.strong(&bound.to_string())
+        ),
+        ActionRefused::OffSlot { theta } => format!(
+            "{theta} is not a slot — a turn divides into {}, so an orbit sits at \
+             k/{} or it does not sit",
+            cfe::dop::TURN_SLOTS,
+            cfe::dop::TURN_SLOTS
+        ),
+        ActionRefused::OrbitOccupied { orb, slot } => format!(
+            "slot {slot} on that ring is held by {} — two orbs cannot share a place",
+            style.strong(&orb.to_string())
+        ),        // BOOK-1 (19_LENS §16) — each refusal names what stands rather
+        // than a code, because the reason IS the rule here.
+        ActionRefused::BookAlreadyMinted { name } => format!(
+            "{} is already kept — a book is its normalized name, so re-declaring it is not a second book",
+            style.strong(name)
+        ),
+        ActionRefused::CharterBookNotMintable { name } => format!(
+            "{} is a charter book — law, not inventory",
+            style.strong(name)
+        ),
+        ActionRefused::CharterBookNotArchivable { name } => format!(
+            "{} is a charter book and is closeable by nobody — otherwise it could be closed by whoever it convicts",
+            style.strong(name)
+        ),
+        ActionRefused::BookNameEmpty => "a book needs a name that is not only whitespace".to_string(),
+        ActionRefused::NoSuchBook => "no such book on this orb".to_string(),
+        ActionRefused::BookClosedToWriting { name } => format!(
+            "{} is archived — closed to writing, and still fully readable",
+            style.strong(name)
+        ),
+        ActionRefused::BookAlreadyArchived { name } => {
+            format!("{} is already closed", style.strong(name))
+        }
+        ActionRefused::NoSuchWork { name } => format!(
+            "{} is not a chartered work — the literature is {}; a line invents ACCOUNTS ({}), never the works it reaches for",
+            style.strong(name),
+            style.strong(&cfe::literature::WORKS.join(" · ")),
+            style.strong("book mint")
+        ),
+        ActionRefused::NotLiterate => format!(
+            "this line has not learned to write — keep a book of your own first ({} then {})",
+            style.strong("book mint <name>"),
+            style.strong("book post <kept> <lost> <name>")
+        ),
+        ActionRefused::WorkAlreadyAspired { name } => {
+            format!("{} is already reached for", style.strong(name))
+        }
+        ActionRefused::WorkNotAspired { name } => format!(
+            "{} was never reached for — {} before you claim it",
+            style.strong(name),
+            style.strong("aspire")
+        ),
+        ActionRefused::WorkAlreadyClaimed { name } => format!(
+            "{} is already claimed — evidence is cited once and never swapped after",
+            style.strong(name)
+        ),
+        ActionRefused::ClaimWithoutWitness { name } => format!(
+            "a claim to {} needs CHAIN RECEIPTS — without them it is a boast",
+            style.strong(name)
+        ),
+        ActionRefused::WitnessNotInChronicle { digest } => format!(
+            "receipt {} is not in this world's chronicle — the law verifies the citation",
+            style.strong(&hex(digest)[..8])
+        ),
+        ActionRefused::BookPostingNegative => {
+            "a book accrues — a negative posting would unwrite history".to_string()
+        }
+
         ActionRefused::NoColony => format!(
             "no colony yet — start with {}",
             style.strong("found <name>")
@@ -3074,7 +3460,7 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
         ActionRefused::VeilOutOfOrder =>
             "one veil per star — lift before drawing anew (nothing stacks)".to_string(),
         ActionRefused::PracticeUnknown { practice } => format!(
-            "no discipline {} stands in the vocabulary — 1 the Fast · 2 the Icon · 3 the Vigil · 4 the Hoard · 5 the Athanor",
+            "no discipline {} stands in the vocabulary — 1 the Austerity · 2 the Showpiece · 3 the Restraint · 4 the Hoard · 5 the Overdrive",
             style.strong(&practice.to_string())
         ),
         ActionRefused::RouteKnown { deal } => format!(
@@ -3113,8 +3499,8 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "release is a REDISCOVERY — no new doctrine has landed since discipline {} was adopted; earn the lesson first",
             style.strong(&practice.to_string())
         ),
-        ActionRefused::AthanorUntempered { hardships } => format!(
-            "the Athanor takes only the tempered — {} hardship receipts stand, eight are required",
+        ActionRefused::OverdriveUntempered { hardships } => format!(
+            "the Overdrive takes only the tempered — {} hardship receipts stand, eight are required",
             style.strong(&hardships.to_string())
         ),
         ActionRefused::TaxonUnknown { class, clade } => format!(
@@ -3459,6 +3845,27 @@ fn chronicle(world: &World, style: &Style) {
                     "⚭ SOVEREIGN UNION — {progenitor:?} + {sovereign:?}, reviewed at {} stamps (a horizon, never an expiry)",
                     style.strong(&term_stamps.to_string())
                 )
+                }
+                // LIT-1 — the literature deeds.
+            cfe::dop::ClosureEvent::WorkAspired { name, .. } => {
+                format!("✍ aspires to {}", style.strong(name))
+            }
+            cfe::dop::ClosureEvent::WorkClaimed { witnesses, .. } => format!(
+                "✍ work CLAIMED on {} chain receipt(s)",
+                style.strong(&witnesses.len().to_string())
+            ),
+            // BOOK-1 — the open registry's three deeds.
+            cfe::dop::ClosureEvent::BookMinted { name, .. } => {
+                format!("▤ book {} minted", style.strong(name))
+            }
+            cfe::dop::ClosureEvent::BookPosted { kept, lost, .. } => format!(
+                "▤ posted {} kept / {} lost",
+                style.strong(&amount(kept)),
+                amount(lost)
+            ),
+            cfe::dop::ClosureEvent::BookArchived { .. } => {
+                "▤ book closed to writing (still readable)".to_string()
+
             }
             cfe::dop::ClosureEvent::ZoneBuilt { tile, kind, .. } => format!(
                 "⛏ tile {} ({}) zoned {}",
@@ -3603,7 +4010,7 @@ fn chronicle(world: &World, style: &Style) {
                 "☀ sun commissioned — {}",
                 style.strong(star_name(*class))
             ),
-            cfe::dop::ClosureEvent::PlanetSited { orb_id, albedo, orbit_r } => format!(
+            cfe::dop::ClosureEvent::PlanetSited { orb_id, albedo, orbit_r, theta: _, psi: _ } => format!(
                 "◍ orb {} sited — albedo {} at orbit r {}",
                 style.strong(&orb_id.to_string()),
                 amount(albedo),
@@ -3807,6 +4214,39 @@ fn chronicle(world: &World, style: &Style) {
             tag,
             described
         );
+    }
+}
+
+/// Parse the hex an operator typed into raw bytes — a full digest or
+/// any PREFIX of one, since a prefix is what a display shows.
+fn unhex_prefix(word: &str) -> Option<Vec<u8>> {
+    let word = word.trim_start_matches("0x");
+    if word.is_empty() || word.len() > 64 || !word.len().is_multiple_of(2) {
+        return None;
+    }
+    word.as_bytes()
+        .chunks(2)
+        .map(|pair| u8::from_str_radix(std::str::from_utf8(pair).ok()?, 16).ok())
+        .collect()
+}
+
+/// Resolve a typed prefix against the chronicle to the ONE receipt it
+/// names. Zero matches or several are both refused here rather than
+/// guessed at — citing evidence is not a place to be approximately
+/// right, and the world would refuse an unknown digest anyway.
+fn resolve_witness(world: &World, word: &str) -> Result<[u8; 32], String> {
+    let prefix = unhex_prefix(word).ok_or_else(|| format!("{word} is not hex"))?;
+    let matches: Vec<[u8; 32]> = world
+        .chronicle()
+        .receipts()
+        .iter()
+        .map(|receipt| receipt.own.0)
+        .filter(|digest| digest.starts_with(&prefix))
+        .collect();
+    match matches.len() {
+        1 => Ok(matches[0]),
+        0 => Err(format!("no receipt in this chronicle begins {word}")),
+        n => Err(format!("{word} names {n} receipts — type more of the digest")),
     }
 }
 
