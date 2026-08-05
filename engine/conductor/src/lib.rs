@@ -1061,11 +1061,17 @@ impl Polity {
         let orbs: Vec<u64> = self.world.committed().orbs.iter().map(|o| o.orb_id).collect();
         if orbs.len() == 1 {
             // The expansion: the survey confirms the home sigil and
-            // the charter plants its next sector — reserves permitting
-            // (20 iron + 10 biomass move at the charter, P1).
-            if banked(&self.world, Resource::Iron) >= ratio(40, 1)
-                && banked(&self.world, Resource::Biomass) >= ratio(20, 1)
-            {
+            // the charter plants its next sector. DERIVED (P2): the
+            // charter MOVES the founding reserves, so the gate is
+            // double them — a line charters only from a position that
+            // keeps a second founding in the bank. The dead 40/20
+            // restated exactly this.
+            let launches = cfe::dop::founding_reserves()
+                .into_iter()
+                .all(|(resource, moved)| {
+                    banked(&self.world, resource) >= moved * ratio(2, 1)
+                });
+            if launches {
                 let site_name = format!("{}-survey", self.spec.colony);
                 if let Ok(site) = self.world.chart_as(self.automaton, &site_name, primary) {
                     let _ = self.world.zone_as(self.automaton, site, 0, ZoneKind::Extractor);
@@ -1141,41 +1147,68 @@ impl Polity {
             None
         };
 
-        let settlement: Option<ZoneKind> = match self.spec.policy {
-            Policy::Aggressive => {
+        // **THE SETTLEMENT GATES DERIVE** (P2, operator ruling
+        // 2026-08-06: measured system bounds). The per-policy reserve
+        // numbers these replace were restated by hand, and the
+        // measurement (`measured_bounds.rs`) proved the shape unlawful
+        // at bootstrap: a reserve gate on a resource with NO INCOME
+        // SOURCE is unsatisfiable — Steady's habitat gate equalled the
+        // whole founding biomass and seven lines locked at one zone;
+        // Industry's extractor gate exceeded the endowment and every
+        // Industry line habitat-spammed into iron famine. The derived
+        // law: a build that opens the line's FIRST income of a funding
+        // resource gates at COST (affordability); expansion gates at
+        // COST × the policy's reserve factor. Post-bootstrap the
+        // derived gates reproduce the dead numbers exactly.
+        let metabolism = world
+            .committed()
+            .genesis
+            .as_ref()
+            .map(|held| held.metabolism)
+            .unwrap_or(2);
+        let has_income = |world: &World, resource: Resource| {
+            world.orb().is_some_and(|orb| {
+                orb.zones
+                    .iter()
+                    .any(|zone| cfe::dop::zone_yield(zone.kind, metabolism).0 == resource)
+            })
+        };
+        let reserve_factor = match self.spec.policy {
+            Policy::Aggressive => ratio(1, 1),
+            Policy::Steady => ratio(2, 1),
+            Policy::Industry => ratio(5, 2),
+        };
+        let gated = |world: &World, kind: ZoneKind| {
+            kind.cost().into_iter().all(|(resource, need)| {
+                let bar = match has_income(world, resource) {
+                    true => need * reserve_factor.clone(),
+                    false => need,
+                };
+                banked(world, resource) >= bar
+            })
+        };
+        let settlement: Option<ZoneKind> = {
+            // The city caps and shape preferences ARE the temperament
+            // — they stay; only the reserve arithmetic derives.
+            let (cap, wants_extractor) = match self.spec.policy {
                 // One extractor SHORT of the knife-edge: a standing
                 // +1/tick biomass surplus, so industry stays fundable.
-                if total >= 16 {
-                    None
-                } else if ext + 1 < 2 * hab.max(1) && iron >= ratio(10, 1) {
-                    Some(ZoneKind::Extractor)
-                } else if bio >= ratio(5, 1) {
-                    Some(ZoneKind::Habitat)
-                } else {
-                    None
-                }
-            }
-            Policy::Steady => {
-                if total >= 12 {
-                    None
-                } else if ext <= hab && iron >= ratio(20, 1) {
-                    Some(ZoneKind::Extractor)
-                } else if hab < ext && bio >= ratio(10, 1) {
-                    Some(ZoneKind::Habitat)
-                } else {
-                    None
-                }
-            }
-            Policy::Industry => {
-                if total >= 20 {
-                    None
-                } else if ext < 2 * hab.max(1) && iron >= ratio(25, 1) {
-                    Some(ZoneKind::Extractor)
-                } else if bio >= ratio(10, 1) {
-                    Some(ZoneKind::Habitat)
-                } else {
-                    None
-                }
+                Policy::Aggressive => (16, ext + 1 < 2 * hab.max(1)),
+                Policy::Steady => (12, ext <= hab),
+                Policy::Industry => (20, ext < 2 * hab.max(1)),
+            };
+            let wants_habitat = match self.spec.policy {
+                Policy::Steady => hab < ext,
+                _ => true,
+            };
+            if total >= cap {
+                None
+            } else if wants_extractor && gated(world, ZoneKind::Extractor) {
+                Some(ZoneKind::Extractor)
+            } else if wants_habitat && gated(world, ZoneKind::Habitat) {
+                Some(ZoneKind::Habitat)
+            } else {
+                None
             }
         };
 
