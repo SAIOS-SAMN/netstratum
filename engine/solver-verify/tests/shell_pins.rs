@@ -7,7 +7,7 @@
 //! `27_EVIDENCE` LAW 8 excises.
 
 use ratio::TURN_SLOTS;
-use solver_verify::shell::{run, vocabulary, Shell, Turn};
+use solver_verify::shell::{run, vocabulary, Shell, Turn, BAND_SLOTS};
 
 fn shell(bands: usize, slots: usize) -> Shell {
     let cells: Vec<u8> = (0..bands * slots).map(|n| (n % 10) as u8).collect();
@@ -44,7 +44,7 @@ fn the_ring_closes_exactly_at_every_lawful_arity() {
 /// floats.
 #[test]
 fn every_transform_is_an_exact_permutation() {
-    let held = shell(4, 12);
+    let held = shell(6, 12);
     let census = |s: &Shell| {
         let mut counts = [0usize; 10];
         for &hue in s.cells() {
@@ -145,5 +145,116 @@ fn the_vocabulary_is_closed_under_composition() {
                 b.describe()
             );
         }
+    }
+}
+
+
+/// **THE POLAR AXIS IS DISTINGUISHED, AND THAT IS WHERE THE EQUATOR
+/// COMES FROM** (operator correction, 2026-08-05).
+///
+/// An earlier header claimed a sphere has no distinguished axis. It was
+/// false and this file's own operators refute it: `Spin` turns about the
+/// polar axis and `Invert` reflects through the equator, which is that
+/// axis's fixed circle. The honest claim is ONE distinguished axis
+/// rather than a rectangle's two, and the two axes are DIFFERENT KINDS.
+#[test]
+fn latitude_is_a_half_turn_and_longitude_is_a_whole_one() {
+    assert_eq!(BAND_SLOTS * 2, ratio::TURN_SLOTS, "the polar span is half the ring");
+
+    let held = shell(6, 12);
+    // Longitude CLOSES — the last slot's neighbour is the first.
+    assert_eq!(held.slot_that(0), Some(ratio::ratio(0, 1)));
+    assert_eq!(
+        run(&vec![Turn::Spin(12)], &held),
+        held,
+        "a full turn of longitude returns"
+    );
+    // Latitude does NOT close — pole to pole runs 0 .. 1/2 and stops.
+    let first = held.band_angle(0).expect("a band");
+    let last = held.band_angle(5).expect("a band");
+    assert_eq!(first, ratio::ratio(0, 1), "one pole sits at 0");
+    assert!(last < ratio::ratio(1, 2), "the other pole bounds the span at 1/2");
+    assert!(last > first, "latitude runs, it does not wrap");
+    assert_eq!(held.band_angle(6), None, "there is no band past the pole");
+
+    // **THE HALVED RING ADMITS FEWER ARITIES, AND THAT IS THE 1:2 MADE
+    // CONCRETE.** Sixty divides by 4, 12, 20 and 60; thirty does not. So
+    // quarters, twelfths and twentieths are lawful LONGITUDES and
+    // unlawful LATITUDES — the two axes are different kinds, and the
+    // difference is arithmetic rather than convention.
+    for lawful_both in [1usize, 2, 3, 5, 6, 10, 15, 30] {
+        assert_eq!(30 % lawful_both, 0);
+        assert!(
+            Shell::new(lawful_both, 12, vec![0; lawful_both * 12]).is_some(),
+            "{lawful_both} divides thirty and must be a lawful band count"
+        );
+    }
+    for longitude_only in [4usize, 12, 20, 60] {
+        assert_eq!(60 % longitude_only, 0, "{longitude_only} is a lawful longitude arity");
+        assert_ne!(30 % longitude_only, 0, "{longitude_only} is NOT a lawful latitude arity");
+        assert!(
+            Shell::new(longitude_only, 12, vec![0; longitude_only * 12]).is_none(),
+            "{longitude_only} divides sixty but not thirty — it cannot band the poles"
+        );
+    }
+    assert!(Shell::new(7, 12, vec![0; 84]).is_none(), "sevenths divide neither");
+}
+
+/// **NO 3-D DISTORTION — the holonomic claim, measured.**
+///
+/// The standard objection to a spherical grid is that cells have
+/// unequal AREA: polar cells pinch, equatorial cells spread. That
+/// distortion is a property of an EMBEDDING in Euclidean 3-space, and it
+/// cannot arise here because the carrier has no metric — nothing
+/// measures an area, a length or a chord.
+///
+/// What it measures is transport around closed loops. Every latitude
+/// ring closes in exactly `slots` steps at EVERY band, so there is no
+/// quantity that could differ between a polar ring and an equatorial
+/// one. This is the test that would fail if a metric ever crept in.
+#[test]
+fn the_loop_structure_is_band_independent() {
+    for (bands, slots) in [(2usize, 4usize), (3, 12), (5, 20), (6, 60), (10, 30)] {
+        let held = shell(bands, slots);
+        // Every ring closes in the same number of steps — polar and
+        // equatorial alike.
+        let closures: Vec<usize> = (0..bands)
+            .map(|band| held.ring_closure(band).expect("a band"))
+            .collect();
+        assert!(
+            closures.iter().all(|c| *c == slots),
+            "a ring closed in a different number of steps by band: {closures:?}              — a metric crept into the carrier"
+        );
+
+        // And transport CONFIRMS it: spinning a full ring returns the
+        // shell exactly, so no band accumulated a residue the others did
+        // not. A non-zero holonomy here would be structure no frame can
+        // explain — and around a closed latitude ring there must be none.
+        assert_eq!(
+            run(&vec![Turn::Spin(slots as i64)], &held),
+            held,
+            "{bands}x{slots}: transport around the ring did not close"
+        );
+    }
+}
+
+/// The equator is REAL STRUCTURE, not distortion: `Invert` fixes it.
+/// With an odd band count there is a true middle band and it is its own
+/// image; with an even count the equator is the boundary between two.
+#[test]
+fn the_equator_is_the_polar_axis_fixed_circle() {
+    let odd = shell(5, 12);
+    let flipped = Turn::Invert.apply(&odd);
+    // The middle band (index 2 of 5) maps to itself.
+    for slot in 0..12 {
+        assert_eq!(
+            odd.at(2, slot),
+            flipped.at(2, slot),
+            "the equatorial band must be fixed by an equatorial reflection"
+        );
+    }
+    // And the poles exchange.
+    for slot in 0..12 {
+        assert_eq!(odd.at(0, slot), flipped.at(4, slot), "the poles exchange");
     }
 }

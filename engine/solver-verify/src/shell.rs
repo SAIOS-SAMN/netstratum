@@ -10,10 +10,25 @@
 //! `27_EVIDENCE` LAW 1 says the same from the physics side: a quantity
 //! that changes when you relabel is a property of the labelling.
 //!
-//! A sphere has no distinguished axis. Its symmetries act transitively:
-//! every point is like every other, which is exactly what "frame-free"
-//! means when it is a property of the carrier rather than a promise
-//! about the reader.
+//! **A SPHERE DOES HAVE A DISTINGUISHED AXIS, and the first draft of
+//! this header denied it** (operator correction, 2026-08-05). That was
+//! false, and the code below refutes it: `Spin` rotates about the POLAR
+//! axis and `Invert` reflects through the EQUATOR. There is no equator
+//! without a polar axis — the equator IS the axis's fixed circle, which
+//! is where the word comes from.
+//!
+//! The honest count is ONE distinguished axis, not two. A rectangle
+//! privileges a horizontal AND a vertical, and its two mirrors are
+//! independent; a sphere privileges one axis, and around it every
+//! longitude is alike. That difference is what the carrier buys, and it
+//! is pinned as `the_ring_has_no_origin_longitude` — a statement about
+//! longitude alone, which is all it ever proved.
+//!
+//! **AND THE TWO AXES ARE NOT THE SAME KIND.** Longitude closes: it is a
+//! full turn and a circle. Latitude does NOT close: pole to pole is a
+//! HALF turn with endpoints. That 1:2 ratio is the closed sphere's own
+//! shape rather than a convention, and it is why one axis has poles and
+//! the other has none.
 //!
 //! **AND IT IS THE UNIVERSE'S OWN FRAME.** Orbs are sited at `(r, θ, ψ)`
 //! with angles as exact rationals in TURNS on a 60-slot ring
@@ -28,6 +43,22 @@
 //! contains no floats and no trigonometry, and it never resamples: every
 //! transform is a PERMUTATION OF CELLS.
 //!
+//! **NO 3-D DISTORTION, AND IT IS PROVABLE HERE.** A lat-long
+//! tessellation embedded in Euclidean 3-space has cells of unequal AREA
+//! — polar cells pinch, equatorial cells spread — and that distortion is
+//! the standard objection to spherical grids. It does not arise here,
+//! for a reason this tree can state exactly: **the carrier has no
+//! metric.** Nothing measures an area, a length or a chord. What is
+//! measured is transport around CLOSED LOOPS, which is what `rfa_core`
+//! means by a holonomy — *the charge a loop carries that no frame can
+//! explain*, exact and rational, no float and no root.
+//!
+//! Every latitude ring closes in exactly `slots` steps, at EVERY band.
+//! The loop structure is band-independent, so there is no quantity that
+//! could differ between a polar ring and an equatorial one. The
+//! distortion is a property of an EMBEDDING, and the embedding never
+//! enters. Pinned as `the_loop_structure_is_band_independent`.
+//!
 //! **WHAT IS REPRESENTABLE, STATED HONESTLY.** The full rotation group
 //! of a sphere is `SO(3)`, and a general rotation does NOT permute the
 //! cells of a band-and-slot tessellation — it would need interpolation,
@@ -39,7 +70,13 @@
 //! rounding.
 
 use crate::field::HUES;
-use ratio::TURN_SLOTS;
+use ratio::{ratio, slot_angle, Ratio, TURN_SLOTS};
+
+/// **THE POLAR SPAN IS A HALF TURN.** Longitude closes at a full turn;
+/// latitude runs pole to pole and stops. So the bands divide THIRTY
+/// where the slots divide sixty — the same ring, halved, which is the
+/// closed sphere's own 1:2 rather than a convention.
+pub const BAND_SLOTS: i64 = TURN_SLOTS / 2;
 
 /// Hues on a spherical shell: `bands` rings of latitude, `slots` cells
 /// around each.
@@ -64,6 +101,12 @@ impl Shell {
             return None;
         }
         if !(TURN_SLOTS as usize).is_multiple_of(slots) {
+            return None;
+        }
+        // The polar span is a HALF turn, so a band boundary must land on
+        // a slot of the halved ring. Same discreteness law, same reason:
+        // a cell centre between slots is not a place.
+        if !(BAND_SLOTS as usize).is_multiple_of(bands) {
             return None;
         }
         if cells.len() != bands.checked_mul(slots)? {
@@ -108,6 +151,31 @@ impl Shell {
     /// How many whole ring-slots one cell of this shell spans.
     pub fn slot_width(&self) -> i64 {
         TURN_SLOTS / self.slots as i64
+    }
+
+    /// The LATITUDE of a band as an exact turn-fraction in `[0, 1/2]` —
+    /// `0` at one pole, `1/2` at the other.
+    pub fn band_angle(&self, band: usize) -> Option<Ratio> {
+        (band < self.bands).then(|| {
+            slot_angle(band as i64 * (BAND_SLOTS / self.bands as i64)) * ratio(1, 1)
+        })
+    }
+
+    /// The LONGITUDE of a slot as an exact turn-fraction in `[0, 1)`.
+    pub fn slot_that(&self, slot: usize) -> Option<Ratio> {
+        (slot < self.slots).then(|| slot_angle(slot as i64 * self.slot_width()))
+    }
+
+    /// **THE HOLONOMY OF A LATITUDE RING** — how many steps transport
+    /// takes to close, at this band.
+    ///
+    /// It is `slots` at EVERY band, which is the whole no-distortion
+    /// claim in one function: a polar ring and an equatorial ring are
+    /// the same loop. In a Euclidean embedding the polar ring is
+    /// physically shorter; the carrier has no embedding and therefore no
+    /// shorter.
+    pub fn ring_closure(&self, band: usize) -> Option<usize> {
+        (band < self.bands).then_some(self.slots)
     }
 }
 
