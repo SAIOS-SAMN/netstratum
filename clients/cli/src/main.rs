@@ -1839,6 +1839,81 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         style.strong("civ new <sigil> | <Name> | <species> | <motto> | <disp> <metab> <perc> [station]")
                     );
                 }
+                Some("seat") => {
+                    // #23 — THE TAG-89 DEED'S FIRST CALLER. The seat
+                    // was receipted law (`vertical_axis_pins`: "the seat
+                    // replays from the receipt, not from a file") with
+                    // ZERO callers, so every live seating was a
+                    // hand-edit of the cache this deed exists to
+                    // replace. The verb: deed FIRST, cache after.
+                    let (Some(sigil), Some(station_word)) = (words.next(), words.next())
+                    else {
+                        println!(
+                            "{} the form is {}",
+                            style.bad("✗"),
+                            style.strong("civ seat <sigil> <progenitor|watcher|observer|sovereign>")
+                        );
+                        return;
+                    };
+                    let Some(code) =
+                        STATIONS.iter().position(|s| *s == station_word).map(|i| i as u8 + 1)
+                    else {
+                        println!(
+                            "{} unknown station {} — {}",
+                            style.bad("✗"),
+                            style.strong(station_word),
+                            style.dim(&STATIONS.join("/"))
+                        );
+                        return;
+                    };
+                    // ONE OFFICE PER LINE — a seat REPLACES. Said
+                    // before it is done, never after.
+                    if let Some(held) = world.station_of(sigil) {
+                        if held != code {
+                            let was = STATIONS
+                                .get(held as usize - 1)
+                                .copied()
+                                .unwrap_or("unknown");
+                            println!(
+                                "{} {} vacates its {} seat — one office per line",
+                                style.dim("note:"),
+                                style.strong(sigil),
+                                style.strong(was)
+                            );
+                        }
+                    }
+                    match world.seat_station_as(cfe::world::SOVEREIGN, sigil, code) {
+                        Ok(()) => {}
+                        Err(refusal) => {
+                            refuse(world, &refusal, style);
+                            return;
+                        }
+                    }
+                    // The registry render follows the receipt — the
+                    // CACHE half, honest until #24 makes the registry a
+                    // projection of the chain outright.
+                    match registry.seat(sigil, station_word) {
+                        Ok(()) => println!(
+                            "{} {} seated as {} — receipted on this world's chain; the registry \
+                             card follows the receipt",
+                            style.ok("✓"),
+                            style.strong(sigil),
+                            style.strong(station_word)
+                        ),
+                        Err(RegistryRefused::NoSeatOpen { station, domain, held, width }) => {
+                            println!(
+                                "{} RECEIPTED, but the {station} room for the {domain} domain \
+                                 stands FULL ({held}/{width}) — the card did not follow; the \
+                                 chain is the truth and the room law is the registry's",
+                                style.bad("✗")
+                            );
+                        }
+                        Err(refusal) => println!(
+                            "{} receipted; the card did not follow: {refusal:?}",
+                            style.bad("✗")
+                        ),
+                    }
+                }
                 Some("new") => {
                     let rest = line
                         .splitn(3, char::is_whitespace)
