@@ -173,7 +173,7 @@ pub enum Refused {
     /// **D4** — the rank reading is not resolved, so no increment over
     /// it can be trusted. An unresolved absence is not a zero: without
     /// this, phantom topology mints phantom rank
-    /// (`EntangledRead::rank_is_defined`, `18_TORSION` §6's debt, now
+    /// (`EntangledRead::rank_is_defined`, `25_STANDING` §6's debt, now
     /// due). Both unknown counts carried.
     RankUndefined { unknown_before: usize, unknown_after: usize },
     /// I2 — the actor is not an entity in `prior`. Identity precedes the
@@ -353,7 +353,7 @@ pub fn admits(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
 /// **THE PHANTOM-RANK GATE, now due.** `EntangledRead::rank_is_defined`
 /// has existed unused, its own header warning that an unresolved
 /// absence *"would let phantom topology mint phantom rank"*, and
-/// `18_TORSION` §6 recorded it as DEBT rather than enforcement. D4
+/// `25_STANDING` §6 recorded it as DEBT rather than enforcement. D4
 /// gates a mint on a rank-derived increment, which makes that debt due:
 /// without this check the increment is computed over an incomplete
 /// reading and phantom topology satisfies the test. It is asked FIRST,
@@ -387,7 +387,7 @@ fn revocation_law(
 ///
 /// `rank_is_defined` stood unused since it was written, its own header
 /// warning that an unresolved absence *"would let phantom topology mint
-/// phantom rank"*, with `18_TORSION` §6 recording it as DEBT rather
+/// phantom rank"*, with `25_STANDING` §6 recording it as DEBT rather
 /// than enforcement. D4 computes an increment OVER that rank, so the
 /// debt came due: asked FIRST, before anything is compared.
 fn d4a_resolution(before: &bridge::EntangledRead, after: &bridge::EntangledRead) -> Result<(), Refused> {

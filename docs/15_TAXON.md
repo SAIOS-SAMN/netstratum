@@ -33,16 +33,16 @@ Append-only; one code, one meaning, forever. The six archetype classes
 (14 §1) plus a seventh the spectrum lacked — the solitary apex lines a
 partition needs:
 
-| code | class | seated today |
-|---|---|---|
-| 0 | unclassed (lawful — a class arrives by amendment, never by default) | revenants, unratified lines |
-| 1 | biotic-swarm (collective/eusocial/colonial) | Hivelight, Klethaxu, Mycelial Weft, Coralline, Deepmat |
-| 2 | geodic-lithovore (mineral metabolisms, stone-eaters) | Slagborn, Tunborn, Cairnborn, Agarthan |
-| 3 | metashifter (veil-native) | Darlok — the seat is FILLED (2026-08-01) |
-| 4 | telepathic-resonant (alignment/coherence lines) | Syzygy, Archon, **Draco** (sub-archetype of Archon — same class, clade 19) |
-| 5 | pelagic-aerial (volumetric biotic) | Echowright, Eightfold, Hadal, Aerie, Frostwright |
-| 6 | etherial-field (plasmic/energy) | Coronal Choir, Borealis |
-| 7 | apex-terrestrial (solitary apex) | Lyran, Anunnaki |
+| code | sigil | class | seated today |
+|---|---|---|---|
+| 0 | ∅ | unclassed (lawful — a class arrives by amendment, never by default) | revenants, unratified lines |
+| 1 | ⬡ | biotic-swarm (collective/eusocial/colonial) | Hivelight, Klethaxu, Mycelial Weft, Coralline, Deepmat |
+| 2 | ◈ | geodic-lithovore (mineral metabolisms, stone-eaters) | Slagborn, Tunborn, Cairnborn, Agarthan |
+| 3 | ◐ | metashifter (veil-native) | Darlok — the seat is FILLED (2026-08-01) |
+| 4 | ≋ | telepathic-resonant (alignment/coherence lines) | Syzygy, Archon, **Draco** (sub-archetype of Archon — same class, clade 19) |
+| 5 | ⊚ | pelagic-aerial (volumetric biotic) | Echowright, Eightfold, Hadal, Aerie, Frostwright |
+| 6 | ∿ | plasma-field (plasmic/energy) | Coronal Choir, Borealis |
+| 7 | ▲ | apex-terrestrial (solitary apex) | Lyran, Anunnaki |
 
 ## 3. The clade vocabulary (proposed, from the live register)
 
@@ -113,4 +113,6 @@ lands only WITH its coverage):**
 2. **The class partition** (§2) — including the seventh class and
    every seating; any line the operator re-seats moves by table edit
    before the migration, by amendment after.
-3. **The clade table** (§3) — codes 1–17 as assigned, 18 reserved.
+3. **The clade table** (§3) — codes 1–17 as assigned, 18 reserved,
+   **19 draconic and 20 metashifting seated 2026-08-01**; the compiled
+   `clade_ceiling` was raised 18 → 20 on 2026-08-05 to admit them.

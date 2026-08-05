@@ -21,9 +21,18 @@ fn the_seal_is_once_and_in_vocabulary() {
         world.seal_taxon(8, 5),
         Err(ActionRefused::TaxonUnknown { class: 8, clade: 5 })
     ));
+    // ABOVE THE CEILING, DERIVED — never a hand-picked number. This
+    // probe read clade 19 and expected a refusal, which encoded the
+    // ceiling of the day: `15_TAXON` §3 then seated 19 (draconic) and 20
+    // (metashifting) by operator ruling, and the pin would have kept
+    // insisting a ruled clade was unknown. Reading one past the ceiling
+    // keeps the property (out-of-vocabulary refuses) without pinning
+    // WHICH codes are in it.
+    let past = cfe::dop::clade_ceiling() + 1;
     assert!(matches!(
-        world.seal_taxon(2, 19),
-        Err(ActionRefused::TaxonUnknown { class: 2, clade: 19 })
+        world.seal_taxon(2, past),
+        Err(ActionRefused::TaxonUnknown { class: 2, clade })
+            if clade == past
     ));
 
     // The lawful seal: geodic-lithovore (2), tardigrade (5).
@@ -80,4 +89,62 @@ fn the_taxon_rides_the_snapshot_and_v1_still_reads() {
     v1.truncate(v1.len() - 2); // drop the seat count AND the taxon byte
     let old = codec::from_state_bytes(&v1).expect("v1 reads whole");
     assert_eq!(old.taxon, None, "v1 carries no taxon — lawfully unrecorded");
+}
+
+/// **EVERY ARCHETYPE CARRIES A SIGIL AND A WORD** (operator ruling
+/// 2026-08-05: *each archetype needs a sigil as well as the
+/// vocabulary*).
+///
+/// A sigil is a symbol with a DEFINITION — which is why the word is
+/// lawful here and in `cfe::query::Sigil` alike. This pin holds the
+/// three properties that make it one rather than an ornament: every
+/// class in the ratified range has one, no two classes share one, and
+/// each has a word beside it.
+#[test]
+fn every_archetype_carries_a_sigil_and_a_word() {
+    let mut seen: Vec<&str> = Vec::new();
+    for class in 0..=cfe::dop::class_ceiling() {
+        let sigil = cfe::dop::archetype_sigil(class);
+        let word = cfe::dop::archetype_word(class);
+        assert_ne!(sigil, "?", "class {class} has no sigil");
+        assert_ne!(word, "unknown", "class {class} has no word");
+        assert!(
+            !seen.contains(&sigil),
+            "class {class} reuses the sigil {sigil} — a mark that names two \
+             things defines neither"
+        );
+        seen.push(sigil);
+    }
+    // Past the ratified ceiling there is nothing to mark.
+    assert_eq!(cfe::dop::archetype_sigil(cfe::dop::class_ceiling() + 1), "?");
+
+    // DISCREDITED PHYSICS IS NOT VOCABULARY. Class 6 read
+    // "etherial-field" until 2026-08-05 — the luminiferous aether,
+    // measured out of existence by Michelson-Morley. The mechanism is a
+    // plasma and the word now says so.
+    assert_eq!(cfe::dop::archetype_word(6), "plasma-field");
+}
+
+/// **THE RULED CLADES ARE SEALABLE** — the ceiling admits what the
+/// operator seated.
+///
+/// `15_TAXON` §3 seated clade 19 (draconic) and clade 20 (metashifting)
+/// on 2026-08-01, and `clade_ceiling` stayed at 18 until 2026-08-05. For
+/// those four days `seal_taxon` refused both: a landed ruling that the
+/// deed recording it could not express.
+#[test]
+fn the_ruled_clades_can_actually_be_sealed() {
+    assert!(
+        cfe::dop::clade_ceiling() >= 20,
+        "clade 19 (draconic) and 20 (metashifting) are ruled — the \
+         ceiling must admit them or the ruling has no deed"
+    );
+    for (class, clade) in [(4u8, 19u8), (3, 20)] {
+        let mut world = World::new();
+        world.found("clade-hold").expect("founds");
+        world
+            .seal_taxon(class, clade)
+            .unwrap_or_else(|e| panic!("class {class} clade {clade} refused: {e:?}"));
+        assert_eq!(world.taxon(), Some((class, clade)));
+    }
 }

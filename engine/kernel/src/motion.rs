@@ -163,7 +163,7 @@ impl Move {
     /// group**; the group exists only so the commutator can be written.
     ///
     /// That is the whole reason inversion is required here: the
-    /// commutator needs it, and `18_TORSION` §2k.1 established that the
+    /// commutator needs it, and `23_TRAVERSAL` §2k.1 established that the
     /// commutator IS the torsion. Without inverses the torsion is not
     /// expressible at all.
     pub fn inverse(&self) -> Self {
@@ -361,7 +361,7 @@ pub fn compose_scheduled(standing: &Standing, mut moves: Vec<(Slot, Move)>) -> S
 }
 
 /// THE COST ENVELOPE — `O(n^D)`, replacing the flat `O(1)` bound
-/// (operator ruling 2026-08-02, superseding `18_TORSION` §2n.3's
+/// (operator ruling 2026-08-02, superseding `22_CONTAINMENT` §2n.3's
 /// per-axis statement for the WORK envelope).
 ///
 /// A flat bound was a scalar collapse: it fixed the budget independent

@@ -4,7 +4,7 @@
 //! leaps and bounds and skipping everything in between?"*
 //!
 //! The answer this module encodes: **a rung must measure something the
-//! chain PRODUCES, never something a line ASSERTS.** `18_TORSION`
+//! chain PRODUCES, never something a line ASSERTS.** `26_ARTICLES`
 //! ARTICLE IV clause 2 rules that this manifold is one commitment per
 //! step, so a stamp IS elapsed history. A claim can be typed; a span
 //! cannot be forged.

@@ -91,7 +91,7 @@ with the residual list carried whole (N4 directive 5: C is the summary
 scalar, never the payload). Arity ≥ 2 generalizes: n nodes, one shared
 position claimed pairwise; unanimity is the geometry, not a vote.
 
-**CORRECTED 2026-08-02 (`18_TORSION` §2n).** The formula above read
+**CORRECTED 2026-08-02 (`22_CONTAINMENT` §2n).** The formula above read
 `ΣR²`; the code sums ABSOLUTE VALUES (`delta.rs:193`, `c += r.abs()`)
 and THE PROPORTIONAL LAW bars squares as aggregators of difference.
 The multiplier 6 and the zero-iff claim are unaffected — `Σ|R| = 0` iff

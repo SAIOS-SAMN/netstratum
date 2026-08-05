@@ -293,7 +293,7 @@ the closed case.
 
 ### 5.2 The rejected approach — gradient descent
 
-*(Formula corrected 2026-08-02, `18_TORSION` §2n: the functional is
+*(Formula corrected 2026-08-02, `22_CONTAINMENT` §2n: the functional is
 `C(Δ) = Σ|R|` — `delta.rs:193` sums absolute values, and squares are
 barred as aggregators by THE PROPORTIONAL LAW. **The rejection below is
 unaffected and stands**: driving ANY aggregate of the residuals to zero

@@ -1,5 +1,5 @@
 //! THE BOUNDARY 1-FORM — `∂Δ`, uncaged (DIRECTIVE 10, operator ruling
-//! 2026-08-01; `18_TORSION` §2b).
+//! 2026-08-01; `24_FORM` §2b).
 //!
 //! **NO TRAVERSAL. NO BASIS. NO WALK.** (operator correction
 //! 2026-08-01: *we are working in polynomials, not graphs, matrices, or
@@ -31,7 +31,7 @@
 //! WHOLE as its components with their positions intact. It is never
 //! summed, never normed, never collapsed to `‖∂Δ‖` — the law bars
 //! collapsing a directional quantity to a scalar aggregate wherever the
-//! system computes (`18_TORSION` §2b), and a form reduced to one number
+//! system computes (`24_FORM` §2b), and a form reduced to one number
 //! is exactly that collapse.
 //!
 //! **THE DUAL-POLE LOCK IS STRUCK** (operator ruling 2026-08-04). This
@@ -55,7 +55,7 @@
 //!
 //! **What remains here is the reading, which was never the problem.**
 //! [`boundary_form`] is `∂Δ` carried whole, and the divergence is a
-//! first-class reading for THE SIGN LAW (`18_TORSION` §2d) and the
+//! first-class reading for THE SIGN LAW (`24_FORM` §2d) and the
 //! object `capacity.rs` splits against to build the circulation. A
 //! reading is not a gate; removing the gate does not touch it.
 //!

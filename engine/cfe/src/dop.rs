@@ -504,10 +504,71 @@ pub fn class_ceiling() -> u8 {
 }
 
 /// KERNEL-TAXON (15 §3): the ratified clade-vocabulary ceiling —
-/// codes 1..=18 (18 reserved for the gastropod), 0 unrecorded;
-/// raised only by amendment.
+/// codes 1..=20, 0 unrecorded; raised only by amendment.
+///
+/// **RAISED 18 → 20 (2026-08-05), paying a landed ruling the ceiling had
+/// outgrown.** `15_TAXON` §3 seated two more clades on 2026-08-01 by
+/// operator ruling — **19 draconic** (a sub-archetype inside class 4,
+/// *one archetype, two expressions*) and **20 metashifting** (the Darlok
+/// seat, class 3, FILLED) — and this constant was not raised with them.
+/// `seal_taxon` refuses anything above the ceiling, so both ruled clades
+/// were unsealable: the rulings existed on paper and the deed that
+/// records them could not be done. Found when the compiled roster
+/// (THE DEFINITION LAW) began carrying `draconic` and `metashifting` as
+/// live clade words.
 pub fn clade_ceiling() -> u8 {
-    18
+    20
+}
+
+/// **THE ARCHETYPE SIGILS** (operator ruling 2026-08-05: *sigil is
+/// allowed because it is essentially a rune or symbol with a definition,
+/// and each archetype needs a sigil as well as the vocabulary*).
+///
+/// One glyph per class of `15_TAXON` §2, each chosen to state the
+/// class's MECHANISM rather than to decorate it. A sigil here is exactly
+/// what the ruling says it is: a symbol that carries a definition, in
+/// the same sense as `cfe::query::Sigil` (the frame-invariant canonical
+/// form) and the registry's line identifier. Three uses of one honest
+/// word — a mark that stands for a defined thing.
+///
+/// Compiled, never filed: the class partition is a DEFINITION, and
+/// definitions compile (`conductor::polities`, THE DEFINITION LAW).
+pub fn archetype_sigil(class: u8) -> &'static str {
+    match class {
+        0 => "∅",  // unclassed — the empty class, lawful and occupied by nothing
+        1 => "⬡",  // biotic-swarm — the cell that tiles: many bodies, one lattice
+        2 => "◈",  // geodic-lithovore — the faceted solid, eaten and rebuilt
+        3 => "◐",  // metashifter — the half-lit disc: form unfixed
+        4 => "≋",  // telepathic-resonant — phases in agreement
+        5 => "⊚",  // pelagic-aerial — a body free inside a medium
+        6 => "∿",  // plasma-field — the field's own oscillation
+        7 => "▲",  // apex-terrestrial — the solitary peak
+        _ => "?",
+    }
+}
+
+/// The class WORD for a code — the vocabulary the sigil marks.
+///
+/// **`etherial-field` is renamed `plasma-field` (2026-08-05).** "Ether"
+/// names the luminiferous aether, a medium nineteenth-century physics
+/// proposed and Michelson–Morley measured out of existence. It is not
+/// mysticism, which is why it survived earlier sweeps — it is worse for
+/// this document's purposes: DISCREDITED PHYSICS carried in the class
+/// vocabulary of an engine whose Article III admits only observables.
+/// The mechanism is a plasma: current sheets, magnetohydrodynamics, the
+/// `plasmic` metabolism the axis vocabulary already carries.
+pub fn archetype_word(class: u8) -> &'static str {
+    match class {
+        0 => "unclassed",
+        1 => "biotic-swarm",
+        2 => "geodic-lithovore",
+        3 => "metashifter",
+        4 => "telepathic-resonant",
+        5 => "pelagic-aerial",
+        6 => "plasma-field",
+        7 => "apex-terrestrial",
+        _ => "unknown",
+    }
 }
 
 pub fn scan_draw() -> Ratio {
@@ -2187,7 +2248,7 @@ pub struct ThermalSite {
     ///
     /// Adjacency is WRAPPED L1 on `(r, θ, ψ)`, never Euclidean: plane
     /// distance needs `cos` and a square root and both are barred
-    /// (`18_TORSION` §2b). See [`separation`].
+    /// (`24_FORM` §2b). See [`separation`].
     pub theta: Option<Ratio>,
     /// **ψ — THE INCLINATION**, the second turn, also `[0, 1) ⊂ ℚ`.
     ///

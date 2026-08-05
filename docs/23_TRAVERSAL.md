@@ -1,9 +1,9 @@
 # 23 — THE TRAVERSAL LANE AND THE PATH POLYNOMIAL
 
-**Status:** LAW, split out of `18_TORSION.md` on 2026-08-02 by operator
+**Status:** LAW, split out of the retired `18_TORSION.md` on 2026-08-02 by operator
 ruling. It carries the traversal and path-algebra thread.
 
-**Why it moved.** `18_TORSION` is the physics subset that constrains the
+**Why it moved.** `18_TORSION` was the physics subset that constrained the
 computational mathematics. It had grown to 2,020 lines and twenty §2
 subsections, ten of them added in one day. Measured: of those twenty,
 CODE cites only §2a, §2b, §2d, §2e, §2f and §2h. Every section moved
@@ -174,7 +174,7 @@ same construction. So the two scales are one object:
 
 The lane's traversability and the mint's standing therefore read the
 same quantity at two resolutions. One measurement, two uses — which is
-why `18_TORSION` is the correct home for both and why no second
+why `26_ARTICLES` is the correct home for both and why no second
 "usefulness" metric is needed.
 
 **3. TORSION PROPAGATES — and §2k's open item 2 was not an open
@@ -287,7 +287,7 @@ returns `OrbitWitness { operator_id, step: 1 }`, so the single-step
 reach is already in the witness type.
 
 **THE FORWARD LINK — the one part that needs care, and it resolves
-without mysticism.**
+with ordinary arithmetic.**
 
 Backward is a REFERENCE: hash the parent, landed as
 `Commitment.parent`. Forward cannot be a reference — **you cannot hash

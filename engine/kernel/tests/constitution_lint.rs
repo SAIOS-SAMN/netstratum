@@ -290,15 +290,15 @@ fn the_struck_symbols_stay_struck() {
     // gets a lint disabled. Ambiguous vocabulary is out of scope here
     // and belongs to a symbol registry, if one is ever built.
     const STRUCK: [(&str, &str); 9] = [
-        ("Ξ", "the cosmetic meter, struck by 18 §3"),
+        ("Ξ", "the cosmetic meter, struck by 26_ARTICLES §3"),
         ("Ω ≡ V", "the room identified with the substance, struck 2026-08-02 (17 §3)"),
         ("Ω  ≡  V", "the room identified with the substance, struck 2026-08-02 (17 §3)"),
         ("Ω(D)", "the totality made a function of one office, retired 2026-08-02 (17 §3)"),
-        ("S⁺_out", "twin-singularity esoterica, struck by 18 §2d"),
-        ("S⁺_hol", "twin-singularity esoterica, struck by 18 §2d"),
+        ("S⁺_out", "twin-singularity esoterica, struck by 24_FORM §2d"),
+        ("S⁺_hol", "twin-singularity esoterica, struck by 24_FORM §2d"),
         ("ζ∇V", "the damped-gradient term, struck 2026-08-01"),
-        ("∇V", "V enclosed in a nabla, struck 2026-08-01 (18 §2b)"),
-        ("∂V", "V enclosed in a boundary, struck 2026-08-01 (18 §2b)"),
+        ("∇V", "V enclosed in a nabla, struck 2026-08-01 (24_FORM §2b)"),
+        ("∂V", "V enclosed in a boundary, struck 2026-08-01 (24_FORM §2b)"),
     ];
 
     // ADOPTED, pinned by file:line. Historical records and recorded

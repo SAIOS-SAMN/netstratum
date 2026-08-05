@@ -185,23 +185,76 @@ fn the_placement_is_the_same_on_every_reading() {
     assert_eq!(read(&first), read(&second), "two readings, one board");
 }
 
-/// **THE HELD-OUT NAMES STAY OUT.**
+/// **EVERY ARCHETYPE CLASS KEEPS ITS SEATED LINES** (`15_TAXON` §2).
 ///
-/// Six seed-roster lines were not compiled in: they are mythological
-/// references (contactee and gnostic), which the operator ordered out of
-/// the build and which `06_CIVILIZATIONS` §2a's locality-anchored naming
-/// law independently refuses — a name must carry its PLACE, MEDIUM and
-/// MANIFESTATION. They return by being RENAMED, never by reappearing.
+/// This pin is the inverse of the one it replaces, which asserted that
+/// six mythologically-named lines stayed OUT of the roster. That was a
+/// category error the operator corrected: occult terminology in the LAW
+/// (mythology invoked as an authority, as the retired `18_TORSION` once did) is
+/// struck; ARCHETYPES for civilization classes are game content and
+/// belong here.
+///
+/// Left standing, the error had already cost something measurable —
+/// class 7 (apex-terrestrial) is seated by Lyran and Anunnaki ALONE, so
+/// holding them out emptied a class, and clade 19 `draconic` was
+/// orphaned by dropping Draco, the one line that wears it.
+///
+/// So the guard runs the other way: the taxonomy's named occupants must
+/// be IN the roster. A class the partition says is seated, and which no
+/// compiled line occupies, is a class that exists only on paper.
 #[test]
-fn the_held_out_names_stay_out_of_the_roster() {
-    let held = ["lyran", "anunnaki", "archon", "agarthan", "draco", "pleiadian"];
+fn every_archetype_class_keeps_its_seated_lines() {
+    // `15_TAXON` §2's own table, by class code — only the lines the
+    // partition names as FOUNDING occupants (grown lines join at play).
+    const SEATED: [(u8, &str, &[&str]); 6] = [
+        (1, "biotic-swarm", &["hivelight", "klethaxu", "mycelial-weft", "coralline", "deepmat"]),
+        (2, "geodic-lithovore", &["slagborn", "tunborn", "agarthan"]),
+        (3, "metashifter", &["darlok"]),
+        (4, "telepathic-resonant", &["syzygy", "archon", "draco"]),
+        (6, "plasma-field", &["coronal-choir"]),
+        (7, "apex-terrestrial", &["lyran", "anunnaki"]),
+    ];
     let founding = founding_polities();
-    for sigil in held {
+    let mut empty = Vec::new();
+    for (code, class, occupants) in SEATED {
+        let present: Vec<&str> = occupants
+            .iter()
+            .copied()
+            .filter(|sigil| founding.iter().any(|s| s.civilization.sigil == *sigil))
+            .collect();
         assert!(
-            !founding.iter().any(|s| s.civilization.sigil == sigil),
-            "{sigil} is back in the compiled roster without a lawful name"
+            !present.is_empty(),
+            "class {code} ({class}) has NO occupant in the roster — \
+             the partition names {occupants:?} and the board seats none"
         );
+        if present.len() < occupants.len() {
+            empty.push(format!("class {code} ({class}): {present:?} of {occupants:?}"));
+        }
     }
+    assert!(
+        empty.is_empty(),
+        "a class lost a seated line — the archetype partition and the \
+         roster must agree:\n  {}",
+        empty.join("\n  ")
+    );
+
+    // AND THE RULED SUB-ARCHETYPE IS WORN. Clade 19 `draconic` seats
+    // INSIDE class 4 beside Archon (operator ruling 2026-08-01: one
+    // archetype, two expressions). A clade with no line wearing it is a
+    // ruling with no expression on the board it governs.
+    let draco = founding
+        .iter()
+        .find(|s| s.civilization.sigil == "draco")
+        .expect("clade 19 draconic needs the line that wears it");
+    assert_eq!(draco.civilization.clade, "draconic");
+    let archon = founding
+        .iter()
+        .find(|s| s.civilization.sigil == "archon")
+        .expect("the class-4 archetype Draco expresses");
+    assert_ne!(
+        draco.civilization.clade, archon.civilization.clade,
+        "two expressions, or it is not a sub-archetype"
+    );
 }
 
 /// **THE FIFTH SEAT** (`12_UNION` §2, operator ruling 2026-07-30).

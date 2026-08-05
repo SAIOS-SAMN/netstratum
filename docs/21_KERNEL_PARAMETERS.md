@@ -208,7 +208,7 @@ Pinned rather than amended — `kernel/tests/parameter_pins.rs`:
 1. **THE SIGMOID IS NOT COMPUTABLE HERE.** `cfe/src/ratio.rs` exposes
    `ratio`, `is_canonical`, `encode`, `decode` — and nothing else.
    There is no `e`, no exponential, no root. A logistic curve is
-   irrational at essentially every point, and `18_TORSION` §2b bars
+   irrational at essentially every point, and `24_FORM` §2b bars
    roots and floats outright. This is a **type-level impossibility**,
    not a preference.
 2. **WRONG DOMAIN.** `P3` is `ease_of(techs, orb)` — a function of an

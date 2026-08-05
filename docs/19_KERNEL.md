@@ -127,7 +127,7 @@ until it lands (`KERNEL_RELAY` §7.1). That is a mesh-lane rung, and it
 is the honest reason the kernel is *mineable* but not yet *contested*.
 
 **This gap is where a nonce would enter, and it is ruled shut**
-(`18_TORSION` §2k, operator 2026-08-02). Hashcash is the reflexive fix
+(`23_TRAVERSAL` §2k, operator 2026-08-02). Hashcash is the reflexive fix
 for exactly this hole. The anchor must be paid in structure that
 survives reduction, not in energy spent — and that ruling supplies the
 criterion without yet supplying the mechanism, so the gap stays open
@@ -155,7 +155,7 @@ the two chains run across has no fixed dimension — which is why `D` is
 a rank and not a capacity.
 
 **A polynomial made of chains.** Degree = the standing planes;
-coefficients = what each carries. This is already how `18_TORSION` §2e
+coefficients = what each carries. This is already how `24_FORM` §2e
 reads the fiber.
 
 **THE HARD PART, and it is a real blocker.** *Overlapping* Venn
@@ -225,11 +225,11 @@ throat is a REGION with its own geometry rather than a line between two
 points. That is the right shape for a join whose content is the
 overlap — and it is why the egress/ingress pairing is load-bearing
 here in a way it was not in
-`18_TORSION` §2d, where its symbols merely renamed the mint and the chain and
+`24_FORM` §2d, where its symbols merely renamed the mint and the chain and
 drove nothing. **Struck there for driving nothing; earned here because
 the join has no mechanism and this supplies one.**
 
-**What keeps the throat open is ruled in `18_TORSION` §2k** — the
+**What keeps the throat open is ruled in `23_TRAVERSAL` §2k** — the
 Einstein–Cartan half of the pair. A throat held open by accumulated
 weight pinches to a point; one held open by structure no frame explains
 stays traversable. That section also carries the consequence for
@@ -282,7 +282,7 @@ document does not make it.
   `standing` that did not exist; it landed at `bd99c4b` and the
   label now means what it says.
 - **Struck vocabulary is still live** in `17_CAPACITY.md`,
-  `18_TORSION.md` and `EQUATIONS.md` — the anti-dogma ordinance's
+  `26_ARTICLES.md` and `EQUATIONS.md` — the anti-dogma ordinance's
   terms, and `capacity` where the code now says `rank`.
   `17_CAPACITY.md` is *named* for a struck container word, which is how
   a struck idea returns.
@@ -355,7 +355,7 @@ new world.
    endpoints, but composing their moves is defined. The linear framing
    and the missing join are ONE defect, not two.
 3. **ORDER BECOMES EXPRESSIBLE.** `a ∘ b ≠ b ∘ a`, and the difference
-   is the commutator — which `18_TORSION` §2k.1 established IS the
+   is the commutator — which `23_TRAVERSAL` §2k.1 established IS the
    torsion. A state-valued transition cannot represent that two
    orderings differ; it hands back two endpoints and the ordering is
    gone. A move-valued one carries it.

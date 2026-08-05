@@ -32,7 +32,7 @@
 //! `exp` is transcendental and `∫` / `d/dt` are continuous. Neither is
 //! admissible: exactness is a type-level guarantee here, and **the chain
 //! is discrete — one commitment per step, which is `c` itself**
-//! (`18_TORSION` LAW 5). So every derivative is a DIFFERENCE and every
+//! (`26_ARTICLES` LAW 5). So every derivative is a DIFFERENCE and every
 //! integral is a SUM, and the physics arrives whole rather than
 //! approximated:
 //!

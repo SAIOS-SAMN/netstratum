@@ -1,11 +1,11 @@
 //! THE CAPACITY METER — `ext_x` and the D reading.
 //!
-//! Closes the first half of `18_TORSION.md` §6.2 ("`D` is not
+//! Closes the first half of `25_STANDING` §6.2 ("`D` is not
 //! measured"). Until this existed, Articles II, III and IV had no
 //! operand and every capacity claim in the tree was unfalsifiable.
 //!
 //! **D is what SURVIVES reduction** (operator ruling 2026-08-01,
-//! `17_CAPACITY` §4b, `18_TORSION` §5):
+//! `17_CAPACITY` §4b, `26_ARTICLES` §5):
 //!
 //! ```text
 //! D  =  ext_x( Π_G( Δ(V) ) )
@@ -24,7 +24,7 @@
 //! [`Degree`]: `GROUND + circulation`, never zero, with no
 //! representation for a below-ground value.
 //!
-//! **NEVER ONE SCALAR.** [`Extent`] reports per index. `18_TORSION`
+//! **NEVER ONE SCALAR.** [`Extent`] reports per index. `26_ARTICLES`
 //! §2b bars collapsing a directional quantity to a scalar aggregate
 //! wherever the system computes; a single "capacity number" would be
 //! the `C = x` substandard character (`17_CAPACITY` §2a.2) returning
@@ -62,12 +62,12 @@
 //! THE SIGN LAW; it is simply not `D`.
 //!
 //! The cosmological naming that once wrapped these two readings is
-//! PURGED (`18_TORSION` §2d): the organs are `DiscoveryMinted` (tag 86)
+//! PURGED (`24_FORM` §2d): the organs are `DiscoveryMinted` (tag 86)
 //! and `mesh::spine::seal`, they are not summands of `Δ`, and reading
 //! the mint as raw divergence was the over-reach.
 //!
 //! ALTITUDE: this is a READING, not a judge and not an objective
-//! (`18_TORSION`, Ξ/ΔD are readings never objectives). It is `O(dim² ·
+//! (`26_ARTICLES`, Ξ/ΔD are readings never objectives). It is `O(dim² ·
 //! fiber)` over the committed relation and calls no search.
 
 use crate::delta::Delta;
@@ -110,7 +110,7 @@ pub struct Extent {
 /// zeros, `is_ground()` tested `coordinates == 0`, and the pin that
 /// claimed to prove the floor compared the constant to its own literal.
 /// The ruling said D is never zero; the arithmetic still returned zero.
-/// That is the failure `18_TORSION` §2h records and LAW 8 forbids — a
+/// That is the failure `24_FORM` §2h records and LAW 8 forbids — a
 /// term that resonates but computes nothing.
 ///
 /// The floor is now load-bearing:
@@ -134,7 +134,7 @@ pub struct Degree(usize);
 impl Degree {
     /// The floor itself: the one degree a committed state occupies by
     /// existing. `α ≅ Ω` is not nothing — it is a POINT
-    /// (`18_TORSION` §2e), which is one dimension, never none.
+    /// (`24_FORM` §2e), which is one dimension, never none.
     pub const GROUND: Degree = Degree(Extent::GROUND);
 
     /// THE ONLY CONSTRUCTOR. The point the state occupies, plus the
@@ -198,7 +198,7 @@ impl Extent {
     ///
     /// The floor is **the point**: a universe that exists occupies one
     /// degree, itself. `α ≅ Ω` does not mean nothing — it means the
-    /// traverse is a POINT (`18_TORSION` §2e), which is one dimension,
+    /// traverse is a POINT (`24_FORM` §2e), which is one dimension,
     /// never none.
     ///
     /// **This constant is now CONSUMED, not merely declared** — see
@@ -275,7 +275,7 @@ pub fn ext_x(delta: &Delta) -> Extent {
 /// exactly: `Δ` has no gradient part iff `div(Δ) = 0` everywhere.
 ///
 /// **THIS IS THE SIGNED READING, and the sign is the law**
-/// (`18_TORSION` §2d, THE SIGN LAW):
+/// (`24_FORM` §2d, THE SIGN LAW):
 ///
 /// - `div_i > 0` — an EGRESS. The vertex sources: it emits more than it
 ///   absorbs.
@@ -305,7 +305,7 @@ pub fn divergence(delta: &Delta) -> Vec<Vec<Ratio>> {
 
 /// The egress census of a relation — how many vertices SOURCE, how many
 /// SINK, how many are balanced. Counted over any fiber layer carrying a
-/// non-zero divergence at that vertex (`18_TORSION` §2d, THE SIGN LAW).
+/// non-zero divergence at that vertex (`24_FORM` §2d, THE SIGN LAW).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Flux {
     /// DIVERGENCE — `div > 0` on some layer. The vertex SOURCES: it
@@ -617,7 +617,7 @@ pub fn circulation_on(delta: &Delta, support: &Support) -> Delta {
 /// borne_i,l = ½ · Σ_{j ~ i} |circulation_on(Δ, S)_ij,l|
 /// ```
 ///
-/// **NEVER ONE SCALAR** (`18_TORSION` §2b, operator ruling 2026-08-02:
+/// **NEVER ONE SCALAR** (`24_FORM` §2b, operator ruling 2026-08-02:
 /// *this needs to be multi-axial on vertices*). The first landing of
 /// this share summed across every coordinate and returned ONE number
 /// per entity. That is a directional quantity collapsed to a scalar
@@ -682,7 +682,7 @@ pub fn borne_axial(delta: &Delta, support: &Support) -> Vec<Vec<Ratio>> {
 /// ```
 ///
 /// **THIS IS THE LENS FORM — the L1 over [`borne_axial`], and the axial
-/// reading is the one that computes.** `18_TORSION` §2b permits an L1
+/// reading is the one that computes.** `24_FORM` §2b permits an L1
 /// aggregate at a HUMAN LENS and bars it wherever the system computes,
 /// so this is for display and for totals that must reconcile (the
 /// conservation pin sums it against the whole circulation). **A gate

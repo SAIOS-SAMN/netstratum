@@ -1,6 +1,6 @@
 # 25 — STANDING: build debt, the decision surface, and the D > 0 proof
 
-**Status:** LAW, split out of `18_TORSION.md` on 2026-08-03 by operator
+**Status:** LAW, split out of the retired `18_TORSION.md` on 2026-08-03 by operator
 ruling. It carries §6, §7 and §8 — what the engine cannot yet express,
 what of the law enters the kernel, and the measured proof.
 

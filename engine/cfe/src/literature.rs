@@ -43,7 +43,7 @@
 //! the receipts exist and are this world's; it does not score whether
 //! the deeds amount to valor. Any formula that scored virtue would be
 //! the struck C-gate wearing a new name — a number standing in for a
-//! judgement, which `18_TORSION` bars and this tree has removed once
+//! judgement, which `27_EVIDENCE` bars and this tree has removed once
 //! already.
 //!
 //! An unwitnessed claim refuses. That is the whole of "deeds if claimed
@@ -57,7 +57,7 @@
 //! what a line holds are where the receipts come from.
 //!
 //! **A NOTE ON `COMMITMENT`, recorded rather than resolved silently.**
-//! `commitment` is already load-bearing in the kernel: `18_TORSION`
+//! `commitment` is already load-bearing in the kernel: `26_ARTICLES`
 //! ARTICLE IV clause 2 rules that this manifold is *one commitment per
 //! step*, and `Commitment.parent` is the chain's backward reference.
 //! That is the GOVERNING layer. A work a civilization aspires to is

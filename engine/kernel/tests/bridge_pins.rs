@@ -433,8 +433,7 @@ fn sparsity_makes_relation_rare_and_a_rare_relation_reshapes() {
 
 #[test]
 fn reading_capacity_mints_nothing() {
-    // The allowance is not an act. Reading D is a LENS (18 §3, Article
-    // III's readings-never-objectives clause): it changes no bank, no
+    // The allowance is not an act. Reading D is a LENS (27_EVIDENCE Article // III's readings-never-objectives clause): it changes no bank, no
     // key, no obligation, and reading twice reads the same.
     let mut state = orbs(4);
     state.bonds = vec![bond(1, 2, 3), bond(2, 3, 3), bond(3, 4, 3), bond(4, 1, 3)];

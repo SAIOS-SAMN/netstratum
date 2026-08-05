@@ -128,20 +128,33 @@ fn seat(
 /// `ENDOWMENTS.md` inventories. Compiling the roster resolves it: one
 /// name, one place.
 ///
-/// **SIX LINES ARE HELD OUT, pending an operator ruling** — Lyran,
-/// Anunnaki, Archon, Agarthan, Draco and Pleiadian. They are not
-/// declined on taste; they fail two standing laws at once. The operator
-/// ordered the occult out of the build (and struck `Anunnaki` from
-/// `18_TORSION` by name); and `06_CIVILIZATIONS` §2a's LOCALITY-ANCHORED
-/// NAMING law requires a name to carry its PLACE, MEDIUM and
-/// MANIFESTATION — which contactee and gnostic names do not, being
-/// mythological references rather than descriptions of anywhere.
-/// Compiling them into the binary would have moved what was struck from
-/// a data file INTO the source, so they wait for a name instead.
+/// **AN ARCHETYPE IS NOT A DOCTRINE** (operator correction, 2026-08-05).
 ///
-/// The cost is stated rather than hidden: those six held five of the
-/// eight station seats, so the **observer band is EMPTY** until one is
-/// renamed or a lawful line takes the seat.
+/// The first cut of this roster held six lines OUT — Lyran, Anunnaki,
+/// Archon, Agarthan, Draco, Pleiadian — reading them as occult content
+/// under the operator's order to clear the build of non-science. That
+/// conflated two different things, and the operator named the
+/// distinction: *there is a difference between archetypes for our
+/// classes and having occult terminology in our documentation.*
+///
+/// **Occult terminology in the LAW** is a document treating mythology as
+/// an AUTHORITY or a claim about reality — the retired `18_TORSION`
+/// asserting that the Anunnaki RATIFIED something, THE CURSE offered as a mechanism.
+/// That is non-science stated as fact inside physics law, and it stays
+/// struck.
+///
+/// **An archetype is game content.** This is an AI MUD; its factions may
+/// be drawn from myth exactly as any space opera's are. The tell that
+/// the first cut was wrong: it kept Darlok — a *Master of Orion* race —
+/// while striking five neighbours on identical reasoning.
+///
+/// And these six are not decoration; they ARE the class partition
+/// (`15_TAXON` §2). Class 7 (apex-terrestrial) is seated by Lyran and
+/// Anunnaki and by nobody else, so holding them out EMPTIED a class.
+/// Clade 19 `draconic` is a landed operator ruling of 2026-08-01 with a
+/// structural argument — *one archetype, two expressions*, draconic
+/// seating inside class 4 beside Archon — so holding Draco out orphaned
+/// a ruled clade. All six are restored with their ratified taxa.
 pub fn founding_polities() -> Vec<PolitySpec> {
     let g_half = || Some((StarClass::G, ratio(1, 2), ratio(1, 2)));
     vec![
@@ -158,6 +171,34 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             "tun-reach", "husk", "first-wake", Policy::Steady,
             (ratio(2, 1), ratio(-3, 1), ratio(1, 1)), g_half(),
         ),
+        // CLASS 7 — apex-terrestrial. Seated by these two and no others,
+        // so the class stands or falls with them (`15_TAXON` §2).
+        seat(
+            "Lyran", "lyran", "feline progenitor", "felid",
+            "we were first, and we remember why that matters less than you think",
+            "epicurean", "biotic", "harmonic",
+            Some("progenitor"), &[],
+            "lyra-hearth", "sunwell", "first-hearth", Policy::Steady,
+            (ratio(1, 1), ratio(1, 1), ratio(1, 1)), None,
+        ),
+        seat(
+            "Anunnaki", "anunnaki", "those of royal blood", "humanoid",
+            "we plan in stone and fire; we no longer dig",
+            "expansionist", "mineral", "planar",
+            Some("progenitor"), &[],
+            "eridu-forge", "duranki", "abzu", Policy::Industry,
+            (ratio(8, 1), ratio(3, 1), ratio(5, 1)), g_half(),
+        ),
+        // CLASS 2 — geodic-lithovore, beside Slagborn and Tunborn.
+        seat(
+            "Agarthan", "agarthan", "the will inside the stone", "lithic",
+            "the surface is weather; we are the world",
+            "epicurean", "mineral", "volumetric",
+            Some("progenitor"), &[],
+            "agartha-deep", "innerlight", "vril-hollow", Policy::Steady,
+            (ratio(0, 1), ratio(-13, 1), ratio(7, 1)),
+            Some((StarClass::M, ratio(1, 2), ratio(2, 1))),
+        ),
         seat(
             "Coronal Choir", "coronal-choir", "current sheet", "plasmoid",
             "we are the weather of the star",
@@ -167,12 +208,48 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             (ratio(15, 1), ratio(15, 1), ratio(-6, 1)), None,
         ),
         // ── THE WATCHER BAND (T1) ─────────────────────────────────────
+        // CLASS 4 — telepathic-resonant. Archon and Draco are ONE
+        // archetype at two clades (operator ruling 2026-08-01): class is
+        // the shared identity, clade is how it is expressed, and any
+        // mechanic keyed on class sees them as one line.
+        seat(
+            "Archon", "archon", "still mind of the deep frost", "cryo-coherent",
+            "in the perfect cold, everything can be known",
+            "empiricist", "biotic", "volumetric",
+            Some("watcher"), &[],
+            "kenoma-vault", "stillspire", "pleroma-gate", Policy::Steady,
+            (ratio(-9, 1), ratio(14, 1), ratio(2, 1)),
+            Some((StarClass::M, ratio(0, 1), ratio(1, 1))),
+        ),
+        seat(
+            "Pleiadian", "pleiadian", "the seven who watch", "humanoid",
+            "we hold the threshold and do not descend",
+            "empiricist", "biotic", "harmonic",
+            Some("watcher"), &[],
+            "seven-sisters", "maia", "threshold-watch", Policy::Steady,
+            (ratio(21, 1), ratio(-6, 1), ratio(13, 1)),
+            Some((StarClass::B, ratio(1, 4), ratio(1, 1))),
+        ),
         seat(
             "Coralline", "coralline", "reef polyp", "cnidarian", "we accrete, therefore we are",
             "epicurean", "biotic", "harmonic",
             Some("watcher"), &[],
             "coralline-hearth", "coralline-prime", "first-coralline", Policy::Steady,
             (ratio(12, 1), ratio(0, 1), ratio(0, 1)), None,
+        ),
+        // ── THE OBSERVER BAND (T1) ────────────────────────────────────
+        // Clade 19 `draconic` — the sub-archetype the 2026-08-01 ruling
+        // exists to seat. Same class as Archon, a different expression
+        // of it; the first cut of this roster orphaned the clade by
+        // dropping the only line that wears it.
+        seat(
+            "Draco", "draco", "coherent of the warm dark", "draconic",
+            "the union is the evidence; the seat above re-checks it",
+            "epicurean", "biotic", "umbral",
+            Some("observer"), &[],
+            "eclipse-hold", "umbra", "totality", Policy::Steady,
+            (ratio(-11, 1), ratio(16, 1), ratio(4, 1)),
+            Some((StarClass::K, ratio(1, 4), ratio(3, 4))),
         ),
         // ── THE UNSEATED LINES (T3 — `tier_of(None)`) ─────────────────
         // The line RESOLVES to its head: without this lineage the law has

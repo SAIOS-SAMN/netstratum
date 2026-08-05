@@ -61,7 +61,7 @@
 //! `1 / (1 + coherence_functional(delta))`. **That is the third
 //! appearance today of the same barred form** — after the struck
 //! cosmetic meter `Ξ = deeds/(1+ΔD)` and the ancestral coherence
-//! velocity. `18_TORSION` §2b bars collapsing a directional quantity to
+//! velocity. `24_FORM` §2b bars collapsing a directional quantity to
 //! a scalar aggregate *wherever the system computes*.
 //!
 //! **And this is the one place in the workspace where the law carves an
@@ -132,7 +132,7 @@ impl Phase {
 /// **Not a relation** (see the module header): eleven exact rationals
 /// with no coboundary, so nothing here is gauge and nothing reduces.
 /// This is how a lens becomes per-observer without any belief entering
-/// a rule (`18_TORSION` LAW 9) — the substrate is identical for every
+/// a rule (`26_ARTICLES` LAW 9) — the substrate is identical for every
 /// observer; only the instrument differs.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Aperture {
@@ -197,7 +197,7 @@ impl Default for Aperture {
 /// currently manifesting luminally."*
 ///
 /// It is an L1 aggregate, lawful here because a lens is the one surface
-/// where `18_TORSION` §2b permits one — and held in
+/// where `24_FORM` §2b permits one — and held in
 /// `rfa_core::Lens` so that permission cannot leak. The value goes in
 /// exact and comes out only as text: no accessor, no ordering, no
 /// comparison. **It may be shown; it may never be computed on.**

@@ -12,7 +12,7 @@
 //! cite chain receipts, and every cited digest is checked against this
 //! world's chronicle. Nothing here scores whether the deeds amount to
 //! valor — a formula that did would be the struck C-gate under a new
-//! name, and `18_TORSION` bars exactly that.
+//! name, and `26_ARTICLES` bars exactly that.
 
 use super::*;
 use crate::literature::{is_work, work_named, work_of, Aspiration, WorkId, WorkView};
@@ -28,7 +28,7 @@ impl World {
     /// wanted 480 ticks of famine survived.
     ///
     /// So literacy now reads PRACTICE (GROWTH-1): the postings must
-    /// SPAN chain time. One commitment per step (`18_TORSION` ARTICLE
+    /// SPAN chain time. One commitment per step (`26_ARTICLES` ARTICLE
     /// IV cl. 2) means a span cannot be forged the way a keystroke can.
     ///
     /// **This is not a threshold.** It compares practice against ZERO —

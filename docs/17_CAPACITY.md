@@ -1,11 +1,10 @@
 # 17 — THE CAPACITY LAW: Δ(V) = D
 
-**Status:** SUBORDINATE to `18_TORSION.md` (the constitutional law, four
+**Status:** SUBORDINATE to `26_ARTICLES.md` (the constitutional law, four
 articles) and to `EQUATIONS.md` §1. Where any two disagree, the order is
-`00_CHARTER` → `18_TORSION` → `EQUATIONS` §1 → this document.
+`00_CHARTER` → `26_ARTICLES` → `EQUATIONS` §1 → this document.
 
-**§4b OF THIS DOCUMENT STANDS AS LAW** (operator ruling, `18_TORSION`
-§5): `D` is **the structure surviving `Π_G(Δ(V))`**. The competing
+**§4b OF THIS DOCUMENT STANDS AS LAW** (operator ruling, `26_ARTICLES` §5): `D` is **the structure surviving `Π_G(Δ(V))`**. The competing
 index-set reading — D as the extents of `(i, j, k, l)` — is STRUCK from
 `EQUATIONS.md` §1 and `SYSTEM_SPEC.md` §0. The indices and the arities
 `Delta{dim, fiber}` are the CONTAINER the relation rides on, never the
@@ -50,13 +49,13 @@ rather than quietly deleted, per the ledger's own drift discipline.
 |---|---|---|
 | Ω is the operator manifold — the closed vocabulary of `N_i` with their weights | Ω is the totality of the individual universe (§3) | it made D a reachability computation over operators when D is a direct reading of one universe's own structure |
 | D is a count — the number of surviving independent planes, the DEGREE of a polynomial | D is a SHAPE `{i, j, k, l}`, four extents, never a scalar (D1) | collapsing four extents into one number is the same error as the C it replaced: a scalar cannot say WHERE capacity is strained |
-| `∂Δ` returns as a MAGNITUDE of available potential, overlaid on scoped dimensions | `∂Δ` is a DIRECTIONAL operator and stays one — UNCAGED, never collapsed to a scalar, never bounded above, never reduced to `‖∂Δ‖` (`18_TORSION` §2b) | the draft was wrong about the *collapse*, not the operator: the direction survives, and turning it into a magnitude is itself the cage |
+| `∂Δ` returns as a MAGNITUDE of available potential, overlaid on scoped dimensions | `∂Δ` is a DIRECTIONAL operator and stays one — UNCAGED, never collapsed to a scalar, never bounded above, never reduced to `‖∂Δ‖` (`24_FORM` §2b) | the draft was wrong about the *collapse*, not the operator: the direction survives, and turning it into a magnitude is itself the cage |
 | "the equations are untouched; only the objective inverts" | E1 is STRUCK — there is no master equation | the composition was refused, not merely re-aimed; many algorithms at many scales replace the one master |
 
 **A correction to this table's own second row, recorded 2026-08-01.** An
 earlier revision of it read "`∂Δ` is STRUCK WHOLE." That over-read the
 FOUNDATION RULING. What was struck is the GRADIENT AS DRIVER — the damped-gradient term as
-a descent term chained into a master equation. `18_TORSION` §2b restores
+a descent term chained into a master equation. `24_FORM` §2b restores
 `∂Δ` as an uncaged directional operator. The distinction is the whole
 point: **the direction was never the problem; the collapse to a scalar
 was.**
@@ -76,7 +75,7 @@ Three things follow, and each closes a question this document carried.
 one instantiation — the arity the landed `Delta` happens to carry. The
 Ω classification is not indexed to a fixed arity, and capacity is
 whatever structure survives reduction at whatever arity the universe
-expresses. This is the same ruling `18_TORSION` §5 makes from the other
+expresses. This is the same ruling `26_ARTICLES` §5 makes from the other
 side: the indices are the container, the surviving structure is the
 capacity. **Any future law written against a fixed four is void by this
 ruling**, not merely stale.
@@ -87,7 +86,7 @@ ruling**, not merely stale.
 it is the rank-1 shadow of a classification that is not rank-1, and it
 is overridden wherever the classification stands. This is stricter than
 this document's earlier "C is demoted to a gate," and it agrees exactly
-with `18_TORSION` §2b: an L1 aggregate is lawful only as a reading
+with `24_FORM` §2b: an L1 aggregate is lawful only as a reading
 reported to an OPERATOR lens, never where the system computes. §5 below
 carries what survives of C and why it must.
 
@@ -1024,7 +1023,7 @@ distinction, it discards which triple broke and by how much, and it is
 therefore a LENS reading and nothing else. That is all it ever was.
 
 **THE PREDICATE AND THE COLLAPSE ARE DIFFERENT OBJECTS — this resolves
-the apparent conflict with Article I and §2b.** `18_TORSION` §2b bars
+the apparent conflict with Article I and §2b.** `24_FORM` §2b bars
 collapsing a directional quantity to a scalar aggregate wherever the
 system computes, and §2a above calls `C = x` a substandard character.
 Both are right, and neither touches what §5 needs, because:
@@ -1166,7 +1165,7 @@ bound.
 
 **Strengthened by the §2a ruling, and reframed.** The finding above is
 true of the CONTAINER — `Delta{dim, fiber}` — and the container is not
-the capacity (`18_TORSION` §5). So the conclusion no longer rests on an
+the capacity (`26_ARTICLES` §5). So the conclusion no longer rests on an
 arity argument at all, and holds more simply: **indices are not capacity,
 so no index has a receipt to owe.** Capacity is the structure surviving
 `Π_G(Δ(V))`; what is receipted is the opening of genuine irreducible
@@ -1235,11 +1234,11 @@ The relayed answer was to eliminate `ε_mag` and bound growth by a
 
 1. ~~**The cited authorities do not exist.**~~ **WITHDRAWN, same day
    (`b5456d1`).** This refusal was correct when written and is now
-   false: `18_TORSION.md` landed as law with exactly those four
+   false: `18_TORSION.md` (now split across `24_FORM`/`26_ARTICLES`/`27_EVIDENCE`) landed as law with exactly those four
    articles, and Article I (Anti-Tensor), Article II (Non-Vacuous
    Capacity), `Θ`, the egress reading, the cosmetic meter and the
    Eclipse all resolved to it — the meter and the Eclipse have since
-   been struck by 18 §3, and are named here only as history. The citations were forward-references to a document being
+   been struck by 26_ARTICLES §3, and are named here only as history. The citations were forward-references to a document being
    written in parallel, not inventions. **The lesson is not that the
    refusal was wrong to make** — an unresolvable citation must be
    refused, or invented authority enters the law unchallenged — **but
@@ -1249,7 +1248,7 @@ The relayed answer was to eliminate `ε_mag` and bound growth by a
    STANDS.** "Growth permitted iff a non-zero cohomological defect" IS
    `orbit_lock ≠ ∅`. "Denied where the shift yields no structural
    uplift" IS `PlaneUnearned` (landed, `engine/cfe/src/world.rs`).
-   `18_TORSION` reached the same grounding independently — §2a names
+   `24_FORM` reached the same grounding independently — §2a names
    `orbit_lock` as already a torsion test, and Article II names
    `PlaneUnearned` as its own constitutional form. Two readers arriving
    at the same landed organs from opposite directions is the strongest
@@ -1300,7 +1299,7 @@ is no lawful path the system walks from `δΔ ≠ 0` toward `δΔ = 0`;
 vocabulary of well-formedness, and it is barred.
 
 **SYNTROPY STANDS (operator ruling 2026-08-01).** A rename of this term
-was drafted the same day and is WITHDRAWN; `18_TORSION` §2i carries the
+was drafted the same day and is WITHDRAWN; `24_FORM` §2i carries the
 full reasoning and the definition. In short: syntropy here is **the
 exact inverse arm of entropy in one conserved partition** —
 `syntropy = syntropic / (syntropic + entropic)`, so
@@ -1308,12 +1307,12 @@ exact inverse arm of entropy in one conserved partition** —
 external theory. It is landed, it computes, and it GATES
 (`World::syntropy_ratio()`, the 1/2 floor at `world.rs:3495`), so by
 this project's own GROUNDING TEST it stays. No synonym is admitted for
-it: one measurement, one name (`18_TORSION` §2i).
+it: one measurement, one name (`24_FORM` §2i).
 
 **Consequently, SYNTROPY CONTAINS NO REDUCTION TERM.** Syntropy is
 defined solely by the GROWTH of surviving structure against activity
 spent — `Σ ≈ ΔD / deeds`. (It was first written here as the reciprocal
-of Article III's cosmetic meter; that meter was struck by 18 §3, and the
+of Article III's cosmetic meter; that meter was struck by 26_ARTICLES §3, and the
 reading stands on its own without it.)
 It is not a second primitive and never gets its own quantity (two
 authorities for one measurement is the drift `EQUATIONS.md` §0 exists to
@@ -1355,7 +1354,7 @@ transition shrinking `H¹` must REFUSE, never read healthy.
 **AV-3 · THE SCALAR COLLAPSE.** A directional or structural quantity
 flattened to one number, which is then available to descend.
 *Instance:* `extent: BigRational`; `C = Σ|R|`; `‖∂Δ‖`.
-*Defense:* Article I and `18_TORSION` §2b — L1 aggregates are lawful
+*Defense:* Article I and `24_FORM` §2b — L1 aggregates are lawful
 only where reported to an OPERATOR lens. *Witness:* no aggregate crosses
 into a computing path.
 
@@ -1390,7 +1389,7 @@ index space rather than the surviving structure, which makes arity
 farmable.
 *Instance:* D as the extents of `(i,j,k,l)`; the proposed `k`-growth
 deed.
-*Defense:* `18_TORSION` §5 — indices and `Delta{dim,fiber}` are the
+*Defense:* `26_ARTICLES` §5 — indices and `Delta{dim,fiber}` are the
 container; capacity is what survives `Π_G(Δ(V))`. *Witness:* no reading
 derives D from an arity.
 
@@ -1839,7 +1838,7 @@ prices it at zero: deeds without genuine `ΔD` carry no allocation claim,
 and the claim is vacated.
 
 *Owed, and honestly open:* the three defenses above are stated in law
-and **none is measured** (`18_TORSION` §6). Until `orbit_lock` has a
+and **none is measured** (`25_STANDING` §6). Until `orbit_lock` has a
 caller, AV-11 has no enforcement — it is the first attack vector this
 constitution opens faster than it can close, and that ordering should be
 deliberate rather than discovered. §12 makes that ordering a ruling.
@@ -1914,7 +1913,7 @@ self-limits. Article III prices FLOW not STOCK — the window reading takes `ΔD
 a span, so an actor who stops creating is eclipsed regardless of
 accumulated capacity, and there is no rent on past structure. Article II
 denies standing to a state resting ON THE GROUND — never by calling it
-zero, which `Degree` cannot express (`18_TORSION` §3 Article II). Internal transfers conserve (I1),
+zero, which `Degree` cannot express (`26_ARTICLES` §3 Article II). Internal transfers conserve (I1),
 so value moving between units is not withdrawal at all.
 
 **The one true exit is N7.** `NS-7_ANCHOR.md` is a 26-line stub, every
@@ -1933,7 +1932,7 @@ is the practical content of this section:
 The reasoning is not caution, it is structural. The only defenses against
 extracting farmed value are creation-side; the creation-side defenses are
 `orbit_lock`, the window reading, and `D`; none of the three is measured
-(`18_TORSION` §6). Opening an exit while the gates that qualify what may
+(`25_STANDING` §6). Opening an exit while the gates that qualify what may
 leave are unbuilt converts every unmeasured attack vector into an
 externally realizable one at the same instant.
 

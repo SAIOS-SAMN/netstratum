@@ -167,34 +167,80 @@ fn a_thriving_line_diverges() {
                 && !seeded.contains(&b.spec.civilization.sigil)
         })
         .expect("newborn world");
+    // **THE CLEAVING WORLD IS FOUND BY ITS RECEIPT, NOT BY THE LINEAGE
+    // POINTER** (LINEAGE-1, corrected 2026-08-05).
+    //
+    // This read `lineage.first()` — the LINE HEAD — and called it the
+    // origin. LINEAGE-1 is explicit that the pointer records LINE
+    // MEMBERSHIP, never parenthood, so on a second-generation cleave the
+    // head is a GRANDPARENT and the phase law says nothing about the
+    // pair. It held only while the roster was small enough that every
+    // cleave was first-generation; THE DEFINITION LAW compiled the full
+    // 19-line roster in, a deeper cleave appeared, and the head and the
+    // grandchild landed on the same phase — a true reading, failed
+    // against the wrong world.
+    //
+    // The receipt names the parent unambiguously: exactly one world
+    // receipted `Diverged { branch: newborn }`.
     let origin_world = worlds
         .iter()
         .find(|b| {
-            Some(&b.spec.civilization.sigil)
-                == newborn.spec.civilization.lineage.first()
+            b.world.chronicle().receipts().iter().any(|r| {
+                matches!(
+                    &r.event,
+                    cfe::dop::ClosureEvent::Diverged { branch, .. }
+                        if *branch == newborn.spec.civilization.sigil
+                )
+            })
         })
-        .expect("the origin beats on");
-    let cleaved = origin_world.world.chronicle().receipts().iter().any(|r| {
-        matches!(
-            &r.event,
-            cfe::dop::ClosureEvent::Diverged { branch, .. }
-                if *branch == newborn.spec.civilization.sigil
-        )
-    });
-    assert!(cleaved, "the origin receipted the cleave, naming its peer");
-    assert_ne!(
-        origin_world.world.gauge(),
-        &cfe::ratio::ratio(0, 1),
-        "the origin's key moved"
+        .expect("the world that receipted this cleave beats on");
+    assert!(
+        !newborn.spec.civilization.lineage.is_empty(),
+        "the branch stands in a line"
     );
+    // **THE PHASES ARE READ AT THE CLEAVE, NOT AT ERA'S END**
+    // (corrected 2026-08-05).
+    //
+    // The law is about the MOMENT of the cleave: the origin's key moves
+    // to `g + δ` and the branch founds at `g − δ`, with δ drawn in
+    // 1/12..=5/12. Those can never coincide — collision would need
+    // 2δ ≡ 0 (mod 1), and 2δ lands in 2/12..=10/12.
+    //
+    // This read both worlds' gauges at the END of the era instead, by
+    // which time keys have moved on for reasons that have nothing to do
+    // with the cleave. It held only while the roster was small; with the
+    // full 19-line roster two unrelated worlds sat at 1/6 apiece and the
+    // pin reported a fiber collision that the arithmetic forbids.
+    //
+    // The receipt carries the origin's key AT the cleave, and the
+    // branch's spec carries the phase it founded at.
+    let at_cleave = origin_world
+        .world
+        .chronicle()
+        .receipts()
+        .iter()
+        .find_map(|r| match &r.event {
+            cfe::dop::ClosureEvent::Diverged { branch, gauge }
+                if *branch == newborn.spec.civilization.sigil =>
+            {
+                Some(gauge.clone())
+            }
+            _ => None,
+        })
+        .expect("the cleave receipt carries the origin's key");
+    let founded_at = newborn
+        .spec
+        .gauge
+        .clone()
+        .expect("the branch founds at an explicit phase");
+    assert_ne!(at_cleave, cfe::ratio::ratio(0, 1), "the origin's key moved");
     assert_ne!(
-        newborn.world.gauge(),
-        &cfe::ratio::ratio(0, 1),
+        founded_at,
+        cfe::ratio::ratio(0, 1),
         "the branch founds at its cleaved key"
     );
     assert_ne!(
-        origin_world.world.gauge(),
-        newborn.world.gauge(),
+        at_cleave, founded_at,
         "opposite phases — the branches never collide on the fiber"
     );
     assert!(newborn.world.now() > 0, "the branch's clock runs");

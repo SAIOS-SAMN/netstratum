@@ -2,7 +2,7 @@
 
 **Status:** LANDED (2026-08-02). Every reading described here is built
 and pinned; §14 is the inventory. Subordinate to `00_CHARTER.md` and
-`18_TORSION.md`.
+`26_ARTICLES.md`.
 
 **Lane:** `.claude/worktrees/lens-lane`, branch `lens-lane`. Territory:
 `engine/lens/`, `engine/scribe/`. This document is this lane's own; it
@@ -14,7 +14,7 @@ amends no other lane's law.
 
 A lens **reads and reports**. It never gates.
 
-That is not a style preference — it is constitutional. `18_TORSION` §7b
+That is not a style preference — it is constitutional. `25_STANDING` §7b
 places the over-time and global readings outside `admits()` and gives
 the reason: *a judge that reads a window is no longer pure, no longer
 total, and no longer replayable step-by-step.* The lens is therefore
@@ -66,7 +66,7 @@ every place "human" named a SEAT or licensed an EXCEPTION.
 
 **THE STANDING TRAP.** A reading used as a target stops being a reading.
 Work reshapes itself into whatever the number counts, and the measure
-stops measuring. `18_TORSION` records that this system's own author made
+stops measuring. `27_EVIDENCE` records that this system's own author made
 that mistake once already. Every reading below is a reading; none is an
 objective; nothing optimizes any of them.
 
@@ -320,7 +320,7 @@ convergence sinks, and neither is the other's absence.**
 **Convergence is a CAPABILITY.** `05 §1.4` — a dim-star system holds the
 rarest resource in a high-flux universe, radiator headroom, and SELLS
 it. The Frost trades convergence. A reading that renders it as shrinkage
-prices a capability as a loss, and `18_TORSION` §2d's own correction
+prices a capability as a loss, and `24_FORM` §2d's own correction
 says why the old framing was wrong: *trapped is convergence MINUS the
 shedding, never convergence itself.*
 
@@ -449,7 +449,7 @@ forms are BARRED here and must not arrive intact.
 
 Two independent faults. It is the exact `1/(1+x)` shape of the struck
 cosmetic meter `Ξ = deeds/(1+ΔD)`; and it collapses a directional
-quantity to a scalar magnitude, which `18_TORSION` §2b bars wherever the
+quantity to a scalar magnitude, which `24_FORM` §2b bars wherever the
 system computes.
 
 **The idea survives and is worth having:** velocity as a DIFFERENCE OF
@@ -507,7 +507,7 @@ There is no third option in which a lens keeps count.
 - `admits()` and everything in `engine/kernel/src` — kernel lane.
 - `engine/rfa-core/` — kernel lane. The lens CONSUMES `coboundary_reduce`,
   `holonomies`, `Delta`, `Vacuity`; it does not modify them.
-- `18_TORSION`, `17_CAPACITY`, `EQUATIONS`, `kernel/CHARTER.md` — kernel
+- `26_ARTICLES`, `17_CAPACITY`, `EQUATIONS`, `kernel/CHARTER.md` — kernel
   lane's documents. Defects found in them are REPORTED, never edited
   from here.
 
@@ -515,7 +515,7 @@ There is no third option in which a lens keeps count.
 
 ## §9 THE OPEN REPORT — a stale debt pointing at struck law
 
-Two live pointers aim at a STRUCK meter: `18_TORSION` §6 debt 1 reads
+Two live pointers aim at a STRUCK meter: `25_STANDING` §6 debt 1 reads
 *"`Ξ_cosmetic` is not measured … First build"*, and §7b routes an
 *"Art. III window reading"* to `scribe`/`lens`.
 
@@ -987,7 +987,7 @@ every deed witnessed. Deeds do not substitute for the base beneath them.
 receipts exist and are this world's. It does not score whether the deeds
 amount to valor — **any formula that did would be the struck C-gate
 wearing a new name**, a number standing in for a judgement, which
-`18_TORSION` bars and this tree has removed once already.
+`27_EVIDENCE` bars and this tree has removed once already.
 
 A claim without receipts refuses. That is the whole of *deeds if claimed
 need chain receipts*: a claim without evidence is a boast, and the
@@ -1002,7 +1002,7 @@ does not invent the literature it reaches for, so the works are
 chartered and `aspire Glory` refuses.
 
 **`COMMITMENT` collides with a kernel primitive, and that is recorded
-rather than resolved silently.** `18_TORSION` ARTICLE IV clause 2 rules
+rather than resolved silently.** `26_ARTICLES` ARTICLE IV clause 2 rules
 that this manifold is *one commitment per step*, and `Commitment.parent`
 is the chain's backward reference. That is the GOVERNING layer; a work a
 civilization aspires to is CONTENT — the same distinction that kept the
@@ -1165,7 +1165,7 @@ significant civilization without leaps and bounds and skipping
 everything in between?*
 
 **The rule: a rung must measure something the chain PRODUCES, never
-something a line ASSERTS.** `18_TORSION` ARTICLE IV clause 2 rules one
+something a line ASSERTS.** `26_ARTICLES` ARTICLE IV clause 2 rules one
 commitment per step, so a stamp IS elapsed history. A claim can be
 typed; a span cannot be forged.
 

@@ -102,7 +102,7 @@ fn a_reduction_has_no_base_case_which_is_the_bootstrap_deadlock() {
 /// INVERSION 2 · THE TRIANGLE IS AN ARTIFACT. On a complex with
 /// 2-cells a triangle BOUNDS: it is the boundary of a face and
 /// contributes nothing to `H₁`. It registered as `1` only because
-/// `Delta` has no 2-cells to fill it (`18_TORSION` §2m: *the complex
+/// `Delta` has no 2-cells to fill it (`23_TRAVERSAL` §2m: *the complex
 /// tops out at 2-simplices*). **The one non-zero reading measures a
 /// MISSING CELL, not a present cycle.**
 ///

@@ -93,7 +93,7 @@ fn a_mint_that_grows_nothing_refuses() {
 /// THE PHANTOM-RANK GATE, asked FIRST. `rank_is_defined` existed unused
 /// for weeks with its own header warning that an unresolved absence
 /// *"would let phantom topology mint phantom rank"* — recorded in
-/// `18_TORSION` §6 as debt. D4 computes an increment over that rank, so
+/// `25_STANDING` §6 as debt. D4 computes an increment over that rank, so
 /// the debt is now due: an unresolved reading refuses before any
 /// increment is compared.
 #[test]
