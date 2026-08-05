@@ -184,6 +184,20 @@
 //!         MECHANISM as exact rational factors over the closed channel
 //!         set. The code is carried and VERIFIED against the fold, never
 //!         chosen. Additive: a minor bump, never breaking)
+//!  101 ClosureEvent::LineMinted (THE MINTED LINE, 2026-08-06 — the
+//!         engine mints its peoples: seed alone rides the wire, and
+//!         EVERYTHING derives from it through `line_synthesis` — name,
+//!         species, motto, taxon, axes — one rule, one truth, nothing
+//!         declarable to misdeclare. A minted line holds NO office:
+//!         seats enter by tag 89's deed, never by a draw)
+//!  100 ClosureEvent::ParcelConveyed (CONVEY, 2026-08-06 — the postal
+//!         deed, the estate chain's last link: from ‖ to ‖ resource ‖
+//!         amount ‖ postage ‖ survey ‖ seed ‖ covered. World-contained;
+//!         both endpoints must be SURVEYED PARCELS; only the MONETARY
+//!         portion of the sender's bank conveys — the free portion
+//!         stays home; postage = postal_meter rate × amount, drawn from
+//!         the sender and burned like upkeep, verified at the gate by
+//!         the same rule)
 //!   99 ClosureEvent::OfferCountered (THE COUNTER, 2026-08-06 — the
 //!         third outcome of survey/appraise → refuse/accept/renegotiate:
 //!         offer ‖ want_amount ‖ optional appraisal digest. Amends a
@@ -237,7 +251,7 @@
 //!         exactly this for the axes. Station codes are the BAND-1
 //!         vocabulary by index: 1 progenitor · 2 watcher · 3 observer
 //!         · 4 sovereign.)
-//!         — the next free tag outside reservations is 100. (This line
+//!         — the next free tag outside reservations is 102. (This line
 //!         read "90" until 2026-08-05 and was STALE: tag 90 was taken by
 //!         SovereignUnionSealed after it was written, and a mint drafted
 //!         onto 90 shadowed that deed's decoder arm — every sovereign
@@ -702,6 +716,103 @@ pub fn archetype_word(class: u8) -> &'static str {
         7 => "apex-terrestrial",
         _ => "unknown",
     }
+}
+
+/// **THE LINE WORD-TABLES** — the compiled base vocabulary a minted
+/// civilization draws from (the standing ruling: the engine mints its
+/// peoples). Sized against the ratified taxon vocabulary so EVERY
+/// class has words and every disposition × perception has a motto —
+/// totality pinned, not assumed. The minted-vocabulary system (tag 96)
+/// extends these by deed; this is the base it extends.
+const LINE_VOICES: [&str; 12] = [
+    "adamant", "pale", "keening", "vaulted", "ember", "tidal",
+    "hollow", "woven", "still", "spiral", "murmured", "resonant",
+];
+const LINE_HEADS_MINERAL: [&str; 6] = ["ember", "slag", "basalt", "vein", "cinder", "forge"];
+const LINE_HEADS_BIOTIC: [&str; 6] = ["bloom", "grove", "reef", "moss", "fern", "spore"];
+const LINE_HEADS_PLASMIC: [&str; 6] = ["arc", "corona", "flux", "aurora", "filament", "sheet"];
+const LINE_TAILS: [[&str; 4]; 4] = [
+    ["march", "reach", "field", "span"],     // planar
+    ["vault", "deep", "well", "hollow"],     // volumetric
+    ["choir", "chord", "hum", "call"],       // harmonic
+    ["veil", "shade", "gloam", "shroud"],    // umbral
+];
+const MOTTO_STEMS: [&str; 3] = [
+    "the frontier is",          // expansionist
+    "what we measure is",       // empiricist
+    "what we savor is",         // epicurean
+];
+const MOTTO_ENDS: [[&str; 4]; 4] = [
+    ["the next horizon", "the drawn map", "the open plain", "the far marker"], // planar
+    ["the whole depth", "the held volume", "the deep room", "the hollow's answer"], // volumetric
+    ["the standing chord", "the shared tone", "the long resonance", "the answered call"], // harmonic
+    ["the unlit path", "the kept shadow", "the quiet between", "the veiled turn"], // umbral
+];
+
+/// One minted line, whole — everything the registry card needs, drawn
+/// from a digest. **No station field, structurally**: a draw mints a
+/// PEOPLE (the common, lawful state); office enters only by the
+/// receipted seat deed (tag 89). A draw that manufactured office would
+/// mint authority from a hash.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LineDraw {
+    pub name: String,
+    pub species: String,
+    pub motto: String,
+    pub class: u8,
+    pub clade: u8,
+    pub disposition: u8,
+    pub metabolism: u8,
+    pub perception: u8,
+}
+
+/// **LINE SYNTHESIS** — a civilization drawn from a digest: pure,
+/// total, deterministic (CHARTER §9 — the caller seeds from the
+/// chronicle, never a clock). Lawful BY CONSTRUCTION: every axis is
+/// drawn modulo its closed vocabulary and every taxon code modulo its
+/// ratified ceiling, so there is nothing left to check after.
+pub fn line_synthesis(digest: &[u8; 32]) -> LineDraw {
+    let disposition = 1 + digest[0] % 3;
+    let metabolism = 1 + digest[1] % 3;
+    let perception = 1 + digest[2] % 4;
+    let class = 1 + digest[3] % class_ceiling();
+    let clade = 1 + digest[4] % clade_ceiling();
+    let heads: &[&str; 6] = match metabolism {
+        1 => &LINE_HEADS_MINERAL,
+        3 => &LINE_HEADS_PLASMIC,
+        _ => &LINE_HEADS_BIOTIC,
+    };
+    let head = heads[digest[5] as usize % heads.len()];
+    let tail = LINE_TAILS[perception as usize - 1][digest[6] as usize % 4];
+    let voice = LINE_VOICES[digest[7] as usize % LINE_VOICES.len()];
+    let mut name_chars = head.chars();
+    let name = match name_chars.next() {
+        Some(first) => format!("{}{}{}", first.to_uppercase(), name_chars.as_str(), tail),
+        None => tail.to_string(),
+    };
+    LineDraw {
+        name,
+        species: format!("{voice} {}", archetype_word(class)),
+        motto: format!(
+            "{} {}",
+            MOTTO_STEMS[disposition as usize - 1],
+            MOTTO_ENDS[perception as usize - 1][digest[8] as usize % 4]
+        ),
+        class,
+        clade,
+        disposition,
+        metabolism,
+        perception,
+    }
+}
+
+/// **THE POSTAL METER** (CONVEY, 2026-08-06): what carrying one unit
+/// through the post costs — postage = rate × amount, exact, linear,
+/// never compounding. Iron, like the survey's stakes: stamps are
+/// struck metal. A placeholder dial ruled at balance, and the gate
+/// verifies a conveyance's declared postage by calling THIS rule.
+pub fn postal_meter() -> (Resource, Ratio) {
+    (Resource::Iron, ratio(1, 16))
 }
 
 /// **THE SURVEY METER** (E5b, 2026-08-05: *surveys must be metered*).
@@ -1757,6 +1868,31 @@ pub enum ClosureEvent {
         want_amount: Ratio,
         appraisal: Option<[u8; 32]>,
     },
+    /// **CONVEY** (tag 100): the postal deed. The parcel's monetary
+    /// break finally MEANS something mechanically: only the monetary
+    /// portion of the sender's bank is postal-addressable, the free
+    /// portion stays home, and both endpoints must be surveyed parcels.
+    /// `seed` and `covered` ride along so the gate re-derives the
+    /// parcels, the monetary cap and the postage from the prior state
+    /// alone (the appraisal's self-containment pattern). Postage burns
+    /// — the amount arrives whole.
+    ParcelConveyed {
+        from_orb: u64,
+        to_orb: u64,
+        resource: Resource,
+        amount: Ratio,
+        postage: Ratio,
+        survey: [u8; 32],
+        seed: [u8; 32],
+        covered: Vec<u64>,
+    },
+    /// **THE MINTED LINE** (tag 101): a civilization enters by receipt.
+    /// The seed is the whole receipt — every field of the line derives
+    /// from it through [`line_synthesis`], so the wire carries ONE
+    /// truth and the registry card is a render of it. Banked-neutral:
+    /// a mint creates IDENTITY, never matter (the element grammar's
+    /// law, applied to peoples).
+    LineMinted { seed: [u8; 32] },
 }
 
 impl ClosureEvent {
@@ -2183,6 +2319,32 @@ impl ClosureEvent {
                 }
                 ratio::encode(want_amount, &mut value);
                 tlv::put(99, &value, &mut out);
+            }
+            Self::LineMinted { seed } => {
+                tlv::put(101, seed, &mut out);
+            }
+            Self::ParcelConveyed {
+                from_orb,
+                to_orb,
+                resource,
+                amount,
+                postage,
+                survey,
+                seed,
+                covered,
+            } => {
+                let mut value = from_orb.to_le_bytes().to_vec();
+                value.extend_from_slice(&to_orb.to_le_bytes());
+                value.push(*resource as u8);
+                ratio::encode(amount, &mut value);
+                ratio::encode(postage, &mut value);
+                value.extend_from_slice(survey);
+                value.extend_from_slice(seed);
+                value.extend_from_slice(&(covered.len() as u32).to_le_bytes());
+                for orb in covered {
+                    value.extend_from_slice(&orb.to_le_bytes());
+                }
+                tlv::put(100, &value, &mut out);
             }
             Self::AppraisalStruck { subject, survey, seed, covered, value: worth } => {
                 let mut value = subject.wire().to_vec();
@@ -2717,6 +2879,39 @@ impl ClosureEvent {
                 let (want_amount, _) = ratio::decode(value.get(at..)?)?;
                 Some(Self::OfferCountered { offer, want_amount, appraisal })
             }
+            100 => {
+                let from_orb = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let to_orb = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let resource = Resource::from_wire(*value.get(16)?)?;
+                let mut at = 17usize;
+                let (amount, used) = ratio::decode(value.get(at..)?)?;
+                at += used;
+                let (postage, used) = ratio::decode(value.get(at..)?)?;
+                at += used;
+                let survey: [u8; 32] = value.get(at..at + 32)?.try_into().ok()?;
+                at += 32;
+                let seed: [u8; 32] = value.get(at..at + 32)?.try_into().ok()?;
+                at += 32;
+                let count =
+                    u32::from_le_bytes(value.get(at..at + 4)?.try_into().ok()?) as usize;
+                at += 4;
+                let mut covered = Vec::with_capacity(count);
+                for _ in 0..count {
+                    covered.push(u64::from_le_bytes(value.get(at..at + 8)?.try_into().ok()?));
+                    at += 8;
+                }
+                Some(Self::ParcelConveyed {
+                    from_orb,
+                    to_orb,
+                    resource,
+                    amount,
+                    postage,
+                    survey,
+                    seed,
+                    covered,
+                })
+            }
+            101 => Some(Self::LineMinted { seed: value.get(..32)?.try_into().ok()? }),
             89 => {
                 let station = *value.first()?;
                 if station == 0 || station > 4 {

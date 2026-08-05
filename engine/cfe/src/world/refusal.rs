@@ -243,6 +243,11 @@ pub enum ActionRefused {
     /// anchored ring stay open — the refusal is for a NEW ring beyond
     /// the field, never for filling one the field already holds.
     RingReachExceeded { held: usize, reach: u8 },
+    /// CONVEY (2026-08-06) — the ask outruns the sender's MONETARY
+    /// portion. The free portion of a parcel is held without
+    /// denomination and stays home; only the monetary break travels
+    /// the post.
+    ConveyExceedsMonetary { asked: Box<Ratio>, monetary: Box<Ratio> },
     /// THE COUNTER (2026-08-06) — the cited appraisal is STALE: the
     /// world moved past its stamp, so the evidence must be re-taken
     /// before the renegotiation proceeds. Staleness gates ONLY this —

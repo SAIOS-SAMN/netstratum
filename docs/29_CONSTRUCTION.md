@@ -1,8 +1,16 @@
 # 29 — THE CONSTRUCTIVE LAW: how the judge and the constants both leave
 
-**Status:** DESIGN, drafted 2026-08-05 on the operator's question — *how
-do we remove "judge" and constants from our codebase* — following the
-ruling that the tree carries too much static content.
+**Status:** **LAW — RATIFIED BY THE OPERATOR, 2026-08-06.** The ruling,
+verbatim: *"full forward advancement on PROVABLE not POLICED — that is
+the absolute truth."* What was drafted as a design is now the organizing
+principle of all forward work: every rule the engine carries is either
+PROVEN at construction — a type, a derivation, a fold of the chain — or
+it is a debt with a count, and the count only falls. Policing (checking
+after the fact what construction could have made impossible) is the
+defect class this law exists to eliminate.
+
+Originally drafted 2026-08-05 on the operator's question — *how do we
+remove "judge" and constants from our codebase.*
 
 Subordinate to `00_CHARTER.md`, `26_ARTICLES.md`, `27_EVIDENCE.md`.
 

@@ -105,6 +105,116 @@ impl World {
         Ok(())
     }
 
+    /// **CONVEY** (tag 100, 2026-08-06): the postal deed — the estate
+    /// chain's last link. World-contained (cross-world rides the
+    /// aperture pair). Refusal-pure, checks in address → cap → afford
+    /// order:
+    ///
+    /// 1. ADDRESS: both endpoints must stand in the standing survey's
+    ///    covering — a postal address IS a surveyed parcel
+    ///    (`ClaimWithoutWitness`, the custody refusal's fourth use).
+    /// 2. MONETARY CAP: the ask may not exceed the sender parcel's
+    ///    monetary portion of its bank — the free portion stays home
+    ///    (`ConveyExceedsMonetary`).
+    /// 3. POSTAGE: `postal_meter().1 × amount`, drawn from the sender
+    ///    with the amount, burned like upkeep — the amount arrives
+    ///    whole (`CannotAfford` when bank < amount + postage).
+    pub fn convey(
+        &mut self,
+        route: crate::dop::Between,
+        resource: Resource,
+        amount: crate::dop::Positive,
+    ) -> Result<(), ActionRefused> {
+        self.convey_as(SOVEREIGN, route, resource, amount)
+    }
+
+    /// NATIVE TO THE FOURTH KILL: `Between` proves the postal route has
+    /// two distinct endpoints and `Positive` proves the amount — a
+    /// self-conveyance and a zero conveyance are not deeds that can be
+    /// asked for. The old `BadTransfer` arm died with the shapes it
+    /// guarded.
+    pub fn convey_as(
+        &mut self,
+        actor: u64,
+        route: crate::dop::Between,
+        resource: Resource,
+        amount: crate::dop::Positive,
+    ) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Collect)?;
+        let (from, to) = (route.from(), route.to());
+        let amount: Ratio = amount.value().clone();
+        let Some((survey, seed, covered)) =
+            self.chronicle.receipts().iter().rev().find_map(|receipt| match &receipt.event {
+                ClosureEvent::EstateSurveyed { seed, covered, .. } => Some((
+                    receipt.own.0,
+                    *seed,
+                    covered.iter().map(|(orb, _)| *orb).collect::<Vec<u64>>(),
+                )),
+                _ => None,
+            })
+        else {
+            return Err(ActionRefused::ClaimWithoutWitness { name: "estate unsurveyed".into() });
+        };
+        for endpoint in [from, to] {
+            if !covered.contains(&endpoint) {
+                return Err(ActionRefused::ClaimWithoutWitness {
+                    name: format!("orb {endpoint} has no postal address — not in the survey"),
+                });
+            }
+        }
+        if peek(&self.orbs, to).is_none() {
+            return Err(ActionRefused::NoSuchOrb { orb: to });
+        }
+        let monetary = crate::dop::parcels_of(&seed, &covered)
+            .into_iter()
+            .find(|parcel| parcel.orb_id == from)
+            .map(|parcel| parcel.monetary)
+            .expect("covered above");
+        let sender = peek(&self.orbs, from).ok_or(ActionRefused::NoSuchOrb { orb: from })?;
+        let cap = monetary.clone() * sender.banked_amount(resource);
+        if amount > cap {
+            return Err(ActionRefused::ConveyExceedsMonetary {
+                asked: Box::new(amount),
+                monetary: Box::new(cap),
+            });
+        }
+        let (stamp, rate) = crate::dop::postal_meter();
+        let postage = rate * amount.clone();
+        let have = sender.banked_amount(stamp);
+        let need = match stamp == resource {
+            true => amount.clone() + postage.clone(),
+            false => postage.clone(),
+        };
+        if have < need {
+            return Err(ActionRefused::CannotAfford {
+                resource: stamp,
+                need: Box::new(need),
+                have: Box::new(have),
+            });
+        }
+        let held = peel(&mut self.orbs, from).expect("checked above");
+        held.bank(resource, -amount.clone());
+        held.bank(stamp, -postage.clone());
+        held.last_touch = self.clock.now();
+        let dest = peel(&mut self.orbs, to).expect("checked above");
+        dest.bank(resource, amount.clone());
+        dest.last_touch = self.clock.now();
+        self.close(
+            ClosureEvent::ParcelConveyed {
+                from_orb: from,
+                to_orb: to,
+                resource,
+                amount,
+                postage,
+                survey,
+                seed,
+                covered,
+            },
+            actor,
+        );
+        Ok(())
+    }
+
     /// Collect the genesis orb as the sovereign.
     pub fn collect(&mut self) -> Result<usize, ActionRefused> {
         self.collect_as(SOVEREIGN, FIRST_ORB)
