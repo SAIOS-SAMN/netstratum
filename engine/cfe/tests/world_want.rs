@@ -32,7 +32,7 @@ fn a_harmonic_mind_starves_without_links() {
         .expect("seals harmonic");
     // The link, then the silence.
     aperture_transfer(&mut world, FIRST_ORB, &mut partner, FIRST_ORB,
-        Resource::Iron, ratio(1, 1), 1).expect("links");
+        Resource::Iron, cfe::dop::positive(1, 1), 1).expect("links");
     for _ in 0..300 {
         world.tick();
     }
@@ -48,7 +48,7 @@ fn a_harmonic_mind_starves_without_links() {
 
     // Feed it: a fresh link, then the boundary relieves.
     aperture_transfer(&mut world, FIRST_ORB, &mut partner, FIRST_ORB,
-        Resource::Iron, ratio(1, 1), 2).expect("feeds");
+        Resource::Iron, cfe::dop::positive(1, 1), 2).expect("feeds");
     for _ in 0..60 {
         world.tick();
     }
@@ -98,13 +98,13 @@ fn a_starving_mind_mints_no_nodes() {
     let mut grantor = sunlit("grantline");
     let b = grantor.chart("midhold", FIRST_ORB).expect("charts");
     let c = grantor.chart("farhold", b).expect("charts");
-    grantor.transfer(c, FIRST_ORB, Resource::Iron, ratio(6, 1)).expect("spreads");
-    grantor.transfer(c, b, Resource::Iron, ratio(6, 1)).expect("spreads");
+    grantor.transfer(cfe::dop::between(c, FIRST_ORB), Resource::Iron, cfe::dop::positive(6, 1)).expect("spreads");
+    grantor.transfer(cfe::dop::between(c, b), Resource::Iron, cfe::dop::positive(6, 1)).expect("spreads");
     grantor
         .seal_council(1, vec![FIRST_ORB, b, c], Resource::Iron, ratio(2, 1), 600, ratio(1, 1))
         .expect("council");
     aperture_transfer(&mut grantor, FIRST_ORB, &mut world, FIRST_ORB,
-        Resource::Iron, ratio(1, 1), 9).expect("crosses");
+        Resource::Iron, cfe::dop::positive(1, 1), 9).expect("crosses");
     cfe::world::license_tech(
         &mut grantor, FIRST_ORB, &mut world, FIRST_ORB,
         cfe::world::Leap { condition: 5, name: "granted stores".into(), deal: 20, council: 1 },

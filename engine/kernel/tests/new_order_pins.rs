@@ -62,7 +62,7 @@ fn a_bond_sealed_in_the_new_order_reaches_d_on_the_bond_channel() {
     assert_eq!(bare.degree().get(), 2, "the floor is the estate: two orbs");
 
     world
-        .seal_bond(FIRST_ORB, charted, Resource::Iron, ratio(1, 2), 0)
+        .seal_bond(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(1, 2), 0)
         .expect("the accord seals");
 
     let state = world.committed();
@@ -92,7 +92,7 @@ fn both_offices_stand_from_one_committed_state() {
     // `D` is the reading taken of it.
     let (mut world, charted) = economy();
     world
-        .seal_bond(FIRST_ORB, charted, Resource::Iron, ratio(1, 2), 0)
+        .seal_bond(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(1, 2), 0)
         .expect("seals");
     let state = world.committed();
 
@@ -125,7 +125,7 @@ fn the_open_axes_name_where_this_world_can_still_grow() {
     // open — the reading gives a map before it ever withholds anything.
     let (mut world, charted) = economy();
     world
-        .seal_bond(FIRST_ORB, charted, Resource::Iron, ratio(1, 2), 0)
+        .seal_bond(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(1, 2), 0)
         .expect("seals");
     let state = world.committed();
 

@@ -125,11 +125,10 @@ fn an_unaligned_practice_bars_the_climb() {
     let mut world = World::new();
     world.found("unaligned").expect("founds");
     world.adopt_practice(4).expect("adopts the Hoard");
-    // A breached forward posts entropic weight with nothing syntropic
-    // beside it: ratio 0 < 1/2.
-    world
-        .seal_forward(FIRST_ORB, FIRST_ORB, Resource::Iron, ratio(1, 1), 4)
-        .err(); // self-forward may refuse — the books path below suffices
+    // A self-forward once stood here with `.err()` — tolerated refusal,
+    // dead by its own comment ("the books path below suffices"). Since
+    // C1 a self-loop cannot be CONSTRUCTED, so the vestige is deleted
+    // rather than converted: there is no deed to tolerate.
     // Simpler entropic weight: an absorption debt lapsing.
     // (Direct book arithmetic through the landed deeds is exercised in
     // world_absorb; here the gate reading alone is pinned.)

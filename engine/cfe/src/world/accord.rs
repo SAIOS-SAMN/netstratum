@@ -105,13 +105,12 @@ impl World {
     /// Seal a bond as the sovereign.
     pub fn seal_bond(
         &mut self,
-        source: u64,
-        target: u64,
+        pair: crate::dop::Between,
         resource: Resource,
-        rate: Ratio,
+        rate: crate::dop::Positive,
         term: u64,
     ) -> Result<(), ActionRefused> {
-        self.seal_bond_as(SOVEREIGN, source, target, resource, rate, term)
+        self.seal_bond_as(SOVEREIGN, pair, resource, rate, term)
     }
     /// BOND-1 (09 §2.2) — seal a standing order: source streams `rate`
     /// of `resource` per tick to target, non-transactional, settled by
@@ -121,19 +120,20 @@ impl World {
     pub fn seal_bond_as(
         &mut self,
         actor: u64,
-        source: u64,
-        target: u64,
+        pair: crate::dop::Between,
         resource: Resource,
-        rate: Ratio,
+        rate: crate::dop::Positive,
         term: u64,
     ) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Collect)?;
         if self.orbs.is_empty() {
             return Err(ActionRefused::NoColony);
         }
-        if source == target || rate <= ratio(0, 1) {
-            return Err(ActionRefused::BadTransfer);
-        }
+        // The self-loop and the non-positive rate are unrepresentable
+        // (29_CONSTRUCTION C1): `Between` and `Positive` proved both at
+        // the door, so only facts remain here.
+        let (source, target) = (pair.from(), pair.to());
+        let rate = rate.value().clone();
         if !self.orbs.iter().any(|held| held.orb_id == source) {
             return Err(ActionRefused::NoSuchOrb { orb: source });
         }
@@ -311,13 +311,12 @@ impl World {
     /// Seal a forward as the sovereign.
     pub fn seal_forward(
         &mut self,
-        obligor: u64,
-        beneficiary: u64,
+        pair: crate::dop::Between,
         resource: Resource,
-        quota: Ratio,
-        window: u64,
+        quota: crate::dop::Positive,
+        window: crate::dop::Window,
     ) -> Result<(), ActionRefused> {
-        self.seal_forward_as(SOVEREIGN, obligor, beneficiary, resource, quota, window)
+        self.seal_forward_as(SOVEREIGN, pair, resource, quota, window)
     }
     /// FORWARD-1 (01 §7, 09 §2.3) — seal a vitrified delivery pact:
     /// the obligor locks collateral (the fidelity curve prices it —
@@ -330,11 +329,10 @@ impl World {
     pub fn seal_forward_as(
         &mut self,
         actor: u64,
-        obligor: u64,
-        beneficiary: u64,
+        pair: crate::dop::Between,
         resource: Resource,
-        quota: Ratio,
-        window: u64,
+        quota: crate::dop::Positive,
+        window: crate::dop::Window,
     ) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Collect)?;
         // **THE COVENANT IS A T3 INSTRUMENT** (operator ruling
@@ -356,9 +354,12 @@ impl World {
         if self.orbs.is_empty() {
             return Err(ActionRefused::NoColony);
         }
-        if obligor == beneficiary || quota <= ratio(0, 1) || window == 0 {
-            return Err(ActionRefused::BadTransfer);
-        }
+        // Self-loop, non-positive quota, zero window: all three shapes
+        // are unrepresentable now — Between, Positive and Window proved
+        // them at the doors.
+        let (obligor, beneficiary) = (pair.from(), pair.to());
+        let quota = quota.value().clone();
+        let window = window.get();
         if !self.orbs.iter().any(|held| held.orb_id == obligor) {
             return Err(ActionRefused::NoSuchOrb { orb: obligor });
         }

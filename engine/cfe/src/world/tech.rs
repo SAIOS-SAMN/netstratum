@@ -27,8 +27,13 @@ impl World {
         if condition == 0 {
             return Err(ActionRefused::SolarLeapNeverLicensed);
         }
-        if !(1..=6).contains(&condition) {
-            return Err(ActionRefused::BadTransfer);
+        // DERIVED, not a magic range: the licensable nodes are exactly
+        // the crystallized tier and the crown — asked of the vocabulary
+        // (`node_kind`), so a sixth condition landing moves this gate
+        // by itself.
+        use crate::world::survey::{node_kind, NodeKind};
+        if !matches!(node_kind(condition), NodeKind::Crystallized | NodeKind::Crown) {
+            return Err(ActionRefused::NodeUnlicensable { condition });
         }
         if condition == 6 && !self.base_seven_complete() {
             return Err(ActionRefused::BaseSevenUnfinished);
@@ -37,7 +42,7 @@ impl World {
             return Err(ActionRefused::NoSuchOrb { orb });
         }
         if self.techs.iter().any(|(o, c, _)| *o == orb && *c == condition) {
-            return Err(ActionRefused::BadTransfer);
+            return Err(ActionRefused::NodeAlreadyHeld { condition });
         }
         let mut seed = b"tech.granted".to_vec();
         seed.extend_from_slice(&orb.to_le_bytes());

@@ -315,6 +315,72 @@ impl Office {
     }
 }
 
+/// **TWO DISTINCT ENDPOINTS, proven at construction** (29_CONSTRUCTION
+/// C1). Every value-moving verb refused `from == to` separately and
+/// anonymously — five arms of one shape. A `Between` cannot be a
+/// self-loop; the door names the fault once and the arms die.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Between {
+    from: u64,
+    to: u64,
+}
+
+impl Between {
+    pub fn new(from: u64, to: u64) -> Option<Between> {
+        (from != to).then_some(Between { from, to })
+    }
+    pub fn from(&self) -> u64 {
+        self.from
+    }
+    pub fn to(&self) -> u64 {
+        self.to
+    }
+}
+
+/// The literal door — panics on a self-loop literal, the `ratio(n, 0)`
+/// class: a malformed literal is a build error in a runtime coat.
+pub fn between(from: u64, to: u64) -> Between {
+    Between::new(from, to).expect("a between literal must join two distinct endpoints")
+}
+
+/// **A DELIVERY WINDOW — at least one tick.** `window == 0` was a shape
+/// arm; a zero-tick obligation is not an obligation.
+pub type Window = core::num::NonZeroU64;
+
+/// The literal door for windows.
+pub fn window(ticks: u64) -> Window {
+    Window::new(ticks).expect("a window literal must be at least one tick")
+}
+
+/// **THE STATION, AS A TYPE** (BAND-1's closed vocabulary; NOT mintable
+/// by 28_VOCABULARY §10 — offices change by amendment alone, which is
+/// exactly why an enum is honest here where the minted vocabularies get
+/// folds). The u8 range check in `seat_station_as` dies: a `Station`
+/// IS in the band by construction.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum Station {
+    Progenitor = 1,
+    Watcher = 2,
+    Observer = 3,
+    Sovereign = 4,
+}
+
+impl Station {
+    /// The wire byte, and the only lawful reading of one.
+    pub fn from_wire(byte: u8) -> Option<Station> {
+        match byte {
+            1 => Some(Station::Progenitor),
+            2 => Some(Station::Watcher),
+            3 => Some(Station::Observer),
+            4 => Some(Station::Sovereign),
+            _ => None,
+        }
+    }
+    pub fn as_wire(self) -> u8 {
+        self as u8
+    }
+}
+
 /// THE RULED REVIEW HORIZON — 25 years at 60 ticks a year (`11` §1).
 ///
 /// **A REVIEW, NEVER AN EXPIRY** (operator ruling 2026-08-02). A
@@ -3480,7 +3546,7 @@ pub fn tile_class(seed: &[u8; 32], orb_id: u64, tile: u16) -> TileClass {
 /// and re-exported here so every existing citation resolves unchanged.
 /// One truth, two readers: `cfe::dop::TURN_SLOTS` and
 /// `ratio::TURN_SLOTS` are the same constant, not two copies.
-pub use ratio::{on_slot, positive, slot_angle, slot_of, turn_gap, unit, Positive, Slot, Unit, TURN_SLOTS};
+pub use ratio::{non_negative, on_slot, positive, slot_angle, slot_of, turn_gap, unit, NonNegative, Positive, Slot, Unit, TURN_SLOTS};
 
 
 /// WRAPPED L1 SEPARATION between two sited orbs — the only adjacency

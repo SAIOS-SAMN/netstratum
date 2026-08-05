@@ -47,7 +47,7 @@ fn the_gates_refuse_typed_and_each_is_escapable() {
     // Cross the void (THRESHOLD-1) — one gate opens.
     aperture_transfer(
         &mut world, FIRST_ORB, &mut partner, FIRST_ORB,
-        Resource::Iron, ratio(1, 1), 1,
+        Resource::Iron, cfe::dop::positive(1, 1), 1,
     )
     .expect("the crossing");
     assert_eq!(
@@ -84,7 +84,7 @@ fn a_lawful_climb_is_one_receipt_and_replays() {
     world.collect().expect("collects");
     aperture_transfer(
         &mut world, FIRST_ORB, &mut partner, FIRST_ORB,
-        Resource::Iron, ratio(1, 1), 2,
+        Resource::Iron, cfe::dop::positive(1, 1), 2,
     )
     .expect("the crossing");
 

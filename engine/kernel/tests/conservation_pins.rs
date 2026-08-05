@@ -67,7 +67,7 @@ fn containment_gates_the_transfer_by_scope() {
     let agent = world.register_agent("hand").expect("registers");
     let prior = world.committed();
     world
-        .transfer(FIRST_ORB, haven, Resource::Iron, ratio(3, 1))
+        .transfer(cfe::dop::between(FIRST_ORB, haven), Resource::Iron, cfe::dop::positive(3, 1))
         .expect("the move closes");
     let next = world.committed();
     let stamp = world.now();
@@ -318,7 +318,7 @@ fn an_honest_transfer_is_admitted() {
     let haven = world.orbs()[1].orb_id;
     let prior = world.committed();
     world
-        .transfer(FIRST_ORB, haven, Resource::Iron, ratio(3, 1))
+        .transfer(cfe::dop::between(FIRST_ORB, haven), Resource::Iron, cfe::dop::positive(3, 1))
         .expect("the move closes");
     let next = world.committed();
     let step = Step {
@@ -355,7 +355,7 @@ fn a_minting_transfer_refuses_with_the_residual_whole() {
     // Play the honest move, then corrupt `next` — credit the
     // destination an extra 2 iron the source never paid.
     world
-        .transfer(FIRST_ORB, haven, Resource::Iron, ratio(3, 1))
+        .transfer(cfe::dop::between(FIRST_ORB, haven), Resource::Iron, cfe::dop::positive(3, 1))
         .expect("the move closes");
     let mut next = world.committed();
     if let Some(orb) = next.orbs.iter_mut().find(|orb| orb.orb_id == haven) {

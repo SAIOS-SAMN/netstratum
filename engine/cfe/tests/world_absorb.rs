@@ -53,7 +53,7 @@ fn furnace_and_coldstore() -> (World, u64) {
     // ECON-J relief by TRADE-1: one joule covers the heating bill —
     // and posts both crisis books (struck giver, struck receiver).
     world
-        .transfer(FIRST_ORB, charted, Resource::Joule, ratio(1, 1))
+        .transfer(cfe::dop::between(FIRST_ORB, charted), Resource::Joule, cfe::dop::positive(1, 1))
         .expect("relieves the freeze");
     world.tick(); // @17: thawed — captures, burns 1/4
     world.tick(); // @18
@@ -84,7 +84,7 @@ fn the_absorption_invariant_measures_across_two_orbs() {
         ratio(1, 1)
     );
 
-    world.absorb(FIRST_ORB, charted, ratio(1, 1)).expect("absorbs"); // @19
+    world.absorb(cfe::dop::between(FIRST_ORB, charted), cfe::dop::positive(1, 1)).expect("absorbs"); // @19
 
     // sink_consumed = 1:
     assert_eq!(banked(&world, charted, Resource::Sink), ratio(49_997, 10_000));
@@ -119,7 +119,7 @@ fn the_absorption_invariant_measures_across_two_orbs() {
     // ...paid inside the window: the returned book posts, no lapse.
     world.collect().expect("collects"); // @19 — pending 0: no new seal
     world
-        .transfer(FIRST_ORB, charted, Resource::Joule, ratio(1, 1))
+        .transfer(cfe::dop::between(FIRST_ORB, charted), Resource::Joule, cfe::dop::positive(1, 1))
         .expect("pays the debt");
     assert_eq!(
         world.orb_by_id(FIRST_ORB).expect("orb").returned_across,
@@ -149,7 +149,7 @@ fn the_absorption_invariant_measures_across_two_orbs() {
 #[test]
 fn an_unpaid_window_lapses_to_the_extraction_book() {
     let (mut world, charted) = furnace_and_coldstore();
-    world.absorb(FIRST_ORB, charted, ratio(1, 1)).expect("absorbs"); // debt @19, window 8
+    world.absorb(cfe::dop::between(FIRST_ORB, charted), cfe::dop::positive(1, 1)).expect("absorbs"); // debt @19, window 8
     for _ in 0..8 {
         world.tick(); // now runs 19..26 — the window still open
     }
@@ -188,12 +188,12 @@ fn an_unpaid_window_lapses_to_the_extraction_book() {
 fn partial_absorption_and_partial_pay_measure_exactly() {
     let (mut world, charted) = furnace_and_coldstore();
     world
-        .absorb(FIRST_ORB, charted, ratio(1, 2))
+        .absorb(cfe::dop::between(FIRST_ORB, charted), cfe::dop::positive(1, 2))
         .expect("absorbs half");
     assert!(world.orb_by_id(FIRST_ORB).expect("orb").overheat, "half is not relief");
     assert_eq!(world.vent_pending_of(FIRST_ORB), ratio(1, 2));
     world
-        .absorb(FIRST_ORB, charted, ratio(1, 2))
+        .absorb(cfe::dop::between(FIRST_ORB, charted), cfe::dop::positive(1, 2))
         .expect("absorbs the rest");
     assert!(!world.orb_by_id(FIRST_ORB).expect("orb").overheat);
     assert_eq!(world.committed().debts.len(), 2);
@@ -204,7 +204,7 @@ fn partial_absorption_and_partial_pay_measure_exactly() {
     );
     // Pay 1/2: the oldest debt dies whole; the younger stands.
     world
-        .transfer(FIRST_ORB, charted, Resource::Joule, ratio(1, 2))
+        .transfer(cfe::dop::between(FIRST_ORB, charted), Resource::Joule, cfe::dop::positive(1, 2))
         .expect("pays half");
     assert_eq!(
         world.orb_by_id(FIRST_ORB).expect("orb").returned_across,
@@ -251,35 +251,28 @@ fn absorption_refuses_typed() {
     world.tick();
     assert_eq!(world.vent_pending_of(FIRST_ORB), ratio(5, 2));
     assert_eq!(
-        world.absorb(FIRST_ORB, charted, ratio(5, 1)),
+        world.absorb(cfe::dop::between(FIRST_ORB, charted), cfe::dop::positive(5, 1)),
         Err(ActionRefused::CannotAbsorb { pending: Box::new(ratio(5, 2)) })
     );
     assert_eq!(
-        world.absorb(FIRST_ORB, charted, ratio(1, 1)),
+        world.absorb(cfe::dop::between(FIRST_ORB, charted), cfe::dop::positive(1, 1)),
         Err(ActionRefused::CannotAfford {
             resource: Resource::Sink,
             need: Box::new(ratio(1, 1)),
             have: Box::new(ratio(0, 1)),
         })
     );
+    // **BadTransfer IS DEAD** (29_CONSTRUCTION C1): the self-loop, the
+    // zero and the negative fault at the TYPE doors, each named.
+    assert_eq!(cfe::dop::Between::new(FIRST_ORB, FIRST_ORB), None, "a self-loop is not a lane");
+    assert_eq!(cfe::dop::Positive::new(ratio(0, 1)), None, "zero absorbs nothing");
+    assert_eq!(cfe::dop::Positive::new(ratio(-1, 1)), None, "a negative is not a quantity");
     assert_eq!(
-        world.absorb(FIRST_ORB, FIRST_ORB, ratio(1, 1)),
-        Err(ActionRefused::BadTransfer)
-    );
-    assert_eq!(
-        world.absorb(FIRST_ORB, charted, ratio(0, 1)),
-        Err(ActionRefused::BadTransfer)
-    );
-    assert_eq!(
-        world.absorb(FIRST_ORB, charted, ratio(-1, 1)),
-        Err(ActionRefused::BadTransfer)
-    );
-    assert_eq!(
-        world.absorb(99, charted, ratio(1, 1)),
+        world.absorb(cfe::dop::between(99, charted), cfe::dop::positive(1, 1)),
         Err(ActionRefused::NoSuchOrb { orb: 99 })
     );
     assert_eq!(
-        world.absorb(FIRST_ORB, 99, ratio(1, 1)),
+        world.absorb(cfe::dop::between(FIRST_ORB, 99), cfe::dop::positive(1, 1)),
         Err(ActionRefused::NoSuchOrb { orb: 99 })
     );
 }

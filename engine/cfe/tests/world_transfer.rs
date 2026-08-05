@@ -29,7 +29,7 @@ fn a_transfer_conserves_and_refuses_typed() {
 
     // The charted holds the moved founding reserves; send 5 iron back.
     world
-        .transfer(charted, FIRST_ORB, Resource::Iron, ratio(5, 1))
+        .transfer(cfe::dop::between(charted, FIRST_ORB), Resource::Iron, cfe::dop::positive(5, 1))
         .expect("transfers");
     assert_eq!(banked(&world, charted, Resource::Iron), ratio(15, 1));
     assert_eq!(banked(&world, FIRST_ORB, Resource::Iron), ratio(5, 1));
@@ -48,27 +48,22 @@ fn a_transfer_conserves_and_refuses_typed() {
 
     // Refusals, typed with the exact shortfall.
     assert_eq!(
-        world.transfer(charted, FIRST_ORB, Resource::Iron, ratio(100, 1)),
+        world.transfer(cfe::dop::between(charted, FIRST_ORB), Resource::Iron, cfe::dop::positive(100, 1)),
         Err(ActionRefused::CannotAfford {
             resource: Resource::Iron,
             need: Box::new(ratio(100, 1)),
             have: Box::new(ratio(15, 1)),
         })
     );
+    // **BadTransfer IS DEAD** (29_CONSTRUCTION C1). These probes handed
+    // the verb a self-loop, a zero and a negative and expected one
+    // anonymous refusal for three different faults. The faults now live
+    // at the TYPE doors, each named by its own type:
+    assert_eq!(cfe::dop::Between::new(charted, charted), None, "a self-loop is not a lane");
+    assert_eq!(cfe::dop::Positive::new(ratio(0, 1)), None, "zero moves nothing");
+    assert_eq!(cfe::dop::Positive::new(ratio(-1, 1)), None, "a negative is not a quantity");
     assert_eq!(
-        world.transfer(charted, charted, Resource::Iron, ratio(1, 1)),
-        Err(ActionRefused::BadTransfer)
-    );
-    assert_eq!(
-        world.transfer(charted, FIRST_ORB, Resource::Iron, ratio(0, 1)),
-        Err(ActionRefused::BadTransfer)
-    );
-    assert_eq!(
-        world.transfer(charted, FIRST_ORB, Resource::Iron, ratio(-1, 1)),
-        Err(ActionRefused::BadTransfer)
-    );
-    assert_eq!(
-        world.transfer(charted, 99, Resource::Iron, ratio(1, 1)),
+        world.transfer(cfe::dop::between(charted, 99), Resource::Iron, cfe::dop::positive(1, 1)),
         Err(ActionRefused::NoSuchOrb { orb: 99 })
     );
 
@@ -119,7 +114,7 @@ fn a_transfer_into_famine_relieves_at_the_law() {
     // A gift of 1/4 biomass: below the extractor's 1/2 one-tick
     // upkeep — the famine holds.
     world
-        .transfer(FIRST_ORB, charted, Resource::Biomass, ratio(1, 4))
+        .transfer(cfe::dop::between(FIRST_ORB, charted), Resource::Biomass, cfe::dop::positive(1, 4))
         .expect("gives");
     assert!(world
         .orb_by_id(charted)
@@ -129,7 +124,7 @@ fn a_transfer_into_famine_relieves_at_the_law() {
 
     // The second 1/4 reaches the bill: relief fires, receipted once.
     world
-        .transfer(FIRST_ORB, charted, Resource::Biomass, ratio(1, 4))
+        .transfer(cfe::dop::between(FIRST_ORB, charted), Resource::Biomass, cfe::dop::positive(1, 4))
         .expect("gives again");
     assert!(!world
         .orb_by_id(charted)
@@ -168,7 +163,7 @@ fn crisis_posting_is_a_replay_fact() {
     // Draw 2 banked iron OUT of the struck charted: distress
     // extraction — the source's entropic book posts exactly 2.
     world
-        .transfer(charted, FIRST_ORB, Resource::Iron, ratio(2, 1))
+        .transfer(cfe::dop::between(charted, FIRST_ORB), Resource::Iron, cfe::dop::positive(2, 1))
         .expect("draws");
     assert_eq!(
         world.orb_by_id(FIRST_ORB).expect("orb").drawn_in_crisis,
@@ -177,7 +172,7 @@ fn crisis_posting_is_a_replay_fact() {
 
     // Relieve the charted with one 1/2 biomass gift.
     world
-        .transfer(FIRST_ORB, charted, Resource::Biomass, ratio(1, 2))
+        .transfer(cfe::dop::between(FIRST_ORB, charted), Resource::Biomass, cfe::dop::positive(1, 2))
         .expect("gives");
     assert_eq!(
         world.orb_by_id(FIRST_ORB).expect("orb").given_in_crisis,
@@ -186,7 +181,7 @@ fn crisis_posting_is_a_replay_fact() {
 
     // Healthy↔healthy now: no book moves.
     world
-        .transfer(FIRST_ORB, charted, Resource::Iron, ratio(1, 1))
+        .transfer(cfe::dop::between(FIRST_ORB, charted), Resource::Iron, cfe::dop::positive(1, 1))
         .expect("transfers");
     let source = world.orb_by_id(FIRST_ORB).expect("orb");
     assert_eq!(source.given_in_crisis, ratio(1, 2));
@@ -231,7 +226,7 @@ fn demurrage_settles_both_sides_at_the_transfer_touch() {
 
     // Transfer at the same stamp as the collect: elapsed 0 — no decay.
     world
-        .transfer(FIRST_ORB, charted, Resource::Joule, ratio(1, 1))
+        .transfer(cfe::dop::between(FIRST_ORB, charted), Resource::Joule, cfe::dop::positive(1, 1))
         .expect("transfers");
     let demurrage = world
         .chronicle()
@@ -250,7 +245,7 @@ fn demurrage_settles_both_sides_at_the_transfer_touch() {
         world.tick();
     }
     world
-        .transfer(FIRST_ORB, charted, Resource::Joule, ratio(1, 8))
+        .transfer(cfe::dop::between(FIRST_ORB, charted), Resource::Joule, cfe::dop::positive(1, 8))
         .expect("transfers again");
     let mut settled: Vec<(u64, Ratio)> = world
         .chronicle()

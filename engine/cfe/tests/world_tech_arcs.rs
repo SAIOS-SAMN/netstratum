@@ -48,13 +48,13 @@ fn lattice_deepening_crystallizes_and_never_outruns_headroom() {
     vault.commission_star(StarClass::G).expect("commissions");
     vault.site_planet(FIRST_ORB, unit(0, 1), positive(100, 1), None, None).expect("sites the vault");
     vault.zone(0, ZoneKind::CryoArray).expect("zones");
-    aperture_transfer(&mut fuel, FIRST_ORB, &mut vault, FIRST_ORB, Resource::Joule, ratio(45, 1), 78)
+    aperture_transfer(&mut fuel, FIRST_ORB, &mut vault, FIRST_ORB, Resource::Joule, cfe::dop::positive(45, 1), 78)
         .expect("the fuel crosses");
     // The array's build spent half the founding iron (20 − 10): its
     // 1/4-iron upkeep would strike at tick 41 (measured — the first
     // draft forgot the build cost). The furnace lends STEEL as well
     // as fire: +35 iron covers 180 ticks of upkeep.
-    aperture_transfer(&mut fuel, FIRST_ORB, &mut vault, FIRST_ORB, Resource::Iron, ratio(35, 1), 80)
+    aperture_transfer(&mut fuel, FIRST_ORB, &mut vault, FIRST_ORB, Resource::Iron, cfe::dop::positive(35, 1), 80)
         .expect("the steel crosses");
     // 45 banked joules cover 180 ticks of the 1/4 burn: the array
     // stays awake through the whole arc. Sink banks at the year
@@ -110,7 +110,7 @@ fn long_stores_halves_the_decay_measured_on_the_receipt() {
     keep.commission_star(StarClass::K).expect("commissions");
     keep.site_planet(FIRST_ORB, unit(0, 1), positive(2, 1), None, None).expect("sites cold, leaking");
     keep.zone(0, ZoneKind::Habitat).expect("zones");
-    aperture_transfer(&mut fuel, FIRST_ORB, &mut keep, FIRST_ORB, Resource::Joule, ratio(65, 1), 79)
+    aperture_transfer(&mut fuel, FIRST_ORB, &mut keep, FIRST_ORB, Resource::Joule, cfe::dop::positive(65, 1), 79)
         .expect("the fuel crosses");
     // Cross a year boundary untouched: banked stays 65 ≥ 60 (decay
     // settles only at a touch), the world is cold and active —

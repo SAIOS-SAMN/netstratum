@@ -31,11 +31,11 @@ fn the_ward_refuses_both_ways_until_the_depth_gate_opens() {
 
     // No aperture reaches a warded star — either direction.
     assert!(matches!(
-        aperture_transfer(&mut visitor, FIRST_ORB, &mut elder, FIRST_ORB, Resource::Iron, ratio(1, 1), 7),
+        aperture_transfer(&mut visitor, FIRST_ORB, &mut elder, FIRST_ORB, Resource::Iron, cfe::dop::positive(1, 1), 7),
         Err(ActionRefused::TheWardHolds)
     ));
     assert!(matches!(
-        aperture_transfer(&mut elder, FIRST_ORB, &mut visitor, FIRST_ORB, Resource::Iron, ratio(1, 1), 8),
+        aperture_transfer(&mut elder, FIRST_ORB, &mut visitor, FIRST_ORB, Resource::Iron, cfe::dop::positive(1, 1), 8),
         Err(ActionRefused::TheWardHolds)
     ));
 
@@ -49,7 +49,7 @@ fn the_ward_refuses_both_ways_until_the_depth_gate_opens() {
     assert!(matches!(elder.lift_ward("again", 9), Err(ActionRefused::WardOutOfOrder)));
 
     // The elder trades from here on.
-    aperture_transfer(&mut visitor, FIRST_ORB, &mut elder, FIRST_ORB, Resource::Iron, ratio(1, 1), 9)
+    aperture_transfer(&mut visitor, FIRST_ORB, &mut elder, FIRST_ORB, Resource::Iron, cfe::dop::positive(1, 1), 9)
         .expect("the aperture opens");
     let lifted = elder.chronicle().receipts().iter().any(|receipt| {
         matches!(&receipt.event, ClosureEvent::WardLifted { claimer } if claimer == "the-visitor")

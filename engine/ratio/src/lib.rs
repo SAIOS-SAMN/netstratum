@@ -359,3 +359,23 @@ pub fn unit(numer: i64, denom: i64) -> Unit {
 pub fn positive(numer: i64, denom: i64) -> Positive {
     Positive::new(ratio(numer, denom)).expect("a positive literal must exceed 0")
 }
+
+/// **A NON-NEGATIVE VALUE — `x ≥ 0`, proven at construction.** The mint
+/// amount's shape: zero is lawful (a rung can pay nothing), negative is
+/// not a quantity.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct NonNegative(Ratio);
+
+impl NonNegative {
+    pub fn new(value: Ratio) -> Option<NonNegative> {
+        (value >= ratio(0, 1)).then_some(NonNegative(value))
+    }
+    pub fn value(&self) -> &Ratio {
+        &self.0
+    }
+}
+
+/// The literal door, same class as [`unit`]/[`positive`].
+pub fn non_negative(numer: i64, denom: i64) -> NonNegative {
+    NonNegative::new(ratio(numer, denom)).expect("a non-negative literal must be ≥ 0")
+}

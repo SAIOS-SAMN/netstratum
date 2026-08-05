@@ -79,13 +79,21 @@ fn a_refused_transfer_leaves_the_projection_untouched() {
         .map(|(r, held)| (*r, held.clone() / ratio(2, 1)))
         .expect("the founding seed leaves something to move");
 
-    // A self-transfer is the smallest real banked deed a one-orb world
-    // admits, and its move must be exactly zero — a claim the algebra
-    // can get WRONG (it would be wrong if the two legs did not cancel).
-    let moved = world.transfer_as(SOVEREIGN, orb, orb, resource, amount.clone());
-    // A pin that silently took the refusal branch would prove nothing,
-    // so the branch taken is recorded rather than left to inference.
-    println!("transfer verdict: {moved:?}");
+    // **THE SELF-TRANSFER CANNOT EXIST** (29_CONSTRUCTION C1). This pin
+    // used to move `orb -> orb` and assert the two legs cancelled to
+    // exactly zero — a claim the algebra could get wrong. `Between`
+    // retired the hazard by type: a self-loop is not a lane, so the
+    // case whose cancellation needed proving is unrepresentable, and a
+    // one-orb world admits NO transfer at all — which is the honest
+    // statement this pin now makes before proving composition on the
+    // refused/no-op path below.
+    assert_eq!(
+        cfe::dop::Between::new(orb, orb),
+        None,
+        "the two legs cannot fail to cancel — they cannot exist"
+    );
+    let moved: Result<(), cfe::world::ActionRefused> = Ok(());
+    let _ = (&resource, &amount);
 
     let after = project(&world.committed());
     let events = receipts_after(&world, mark);
@@ -125,10 +133,10 @@ fn a_real_seating_is_reproduced_by_its_move() {
     let before = project(&world.committed());
     let mark = world.chronicle().receipts().len();
 
-    world.seat_station_as(SOVEREIGN, "abyssal-vocalis", 3).expect("seats");
-    world.seat_station_as(SOVEREIGN, "brine-cortex", 1).expect("seats");
+    world.seat_station_as(SOVEREIGN, "abyssal-vocalis", cfe::dop::Station::from_wire(3).expect("a band office")).expect("seats");
+    world.seat_station_as(SOVEREIGN, "brine-cortex", cfe::dop::Station::from_wire(1).expect("a band office")).expect("seats");
     // A RE-seating: the replacement law is what this pins.
-    world.seat_station_as(SOVEREIGN, "abyssal-vocalis", 2).expect("re-seats");
+    world.seat_station_as(SOVEREIGN, "abyssal-vocalis", cfe::dop::Station::from_wire(2).expect("a band office")).expect("re-seats");
 
     let after = project(&world.committed());
     let (composed, unexpressed) = replay_through_moves(&before, &receipts_after(&world, mark));
@@ -204,8 +212,8 @@ fn the_schedule_recovers_the_world_from_shuffled_real_receipts() {
 
     let before = project(&world.committed());
     let mark = world.chronicle().receipts().len();
-    world.seat_station_as(SOVEREIGN, "line", 4).expect("seats");
-    world.seat_station_as(SOVEREIGN, "line", 1).expect("re-seats");
+    world.seat_station_as(SOVEREIGN, "line", cfe::dop::Station::from_wire(4).expect("a band office")).expect("seats");
+    world.seat_station_as(SOVEREIGN, "line", cfe::dop::Station::from_wire(1).expect("a band office")).expect("re-seats");
     let after = project(&world.committed());
 
     let mut scheduled: Vec<(Slot, Move)> = world
