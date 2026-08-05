@@ -6,6 +6,10 @@ description = "The pre-chain ledger of record and its lens (Charter §11): the s
 
 [dependencies]
 cfe = { path = "../cfe" }
+# THE RING DERIVATION (2026-08-05): `ratio::TURN_SLOTS` is derived from
+# the arities of THIS crate's closed vocabularies, and the requirement is
+# proved here against the live lists rather than copied down.
+ratio = { path = "../ratio" }
 pen = { path = "../pen" }
 # The JSON emitter is `pen` — a crate BELOW both this and the lens, so
 # the one-way arrow holds without either borrowing the other's writer.

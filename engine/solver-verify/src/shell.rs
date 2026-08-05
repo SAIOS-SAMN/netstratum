@@ -340,7 +340,7 @@ pub fn vocabulary(shell: &Shell) -> Vec<Turn> {
 //   base-60  THE ORBITAL RING (`ratio::TURN_SLOTS`) — the SHARED frame.
 //            Every orb is sited at a slot `k/60`, and the ring is the
 //            one thing the whole population holds in common.
-//   base-11  THE CONDITION STACK (`cfe::world::survey::LAST_CONDITION`,
+//   base-11  THE CONDITION STACK (`cfe::world::survey::last_condition()`,
 //            operator ruling 2026-08-02, *uplift to base-11*) — the
 //            PER-ENTITY frame. Eleven nodes: the solar leap, the five
 //            crystallized conditions, the gifted crown, and four
@@ -376,6 +376,18 @@ pub fn vocabulary(shell: &Shell) -> Vec<Turn> {
 /// Written as the sum, a reader can see WHERE eleven comes from and a
 /// change to any part carries through. Written as `11`, the day a sixth
 /// condition lands someone edits one crate and not the other.
+/// **THE STACK'S PARTS, stated here and COUNTED above the arrow.**
+///
+/// `cfe::world::survey` derives each of these by asking the condition
+/// vocabularies — `node_kind`, `count_of`, `literature::WORKS` — and
+/// this crate sits BELOW `cfe` and cannot call them. So the parts are
+/// declared here as the requirement and PINNED part-for-part against
+/// what the sky actually counts (`base_eleven_pins`). A drift in either
+/// direction turns that witness red and names which part moved.
+///
+/// This is the same discipline `RING_ARITIES` follows one crate down:
+/// state the requirement where it is needed, prove it against the live
+/// vocabulary where the vocabulary lives.
 pub const SOLAR_LEAP: i64 = 1;
 pub const CRYSTALLIZED_CONDITIONS: i64 = 5;
 pub const GIFTED_CROWN: i64 = 1;

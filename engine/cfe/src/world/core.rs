@@ -28,7 +28,7 @@ impl World {
     /// to it reads the same thing it always did.
     pub fn base_eleven_complete(&self, orb: u64) -> bool {
         self.base_seven_complete()
-            && (crate::world::survey::FIRST_WORK..=crate::world::survey::LAST_CONDITION)
+            && (crate::world::survey::first_work()..=crate::world::survey::last_condition())
                 .all(|condition| self.work_claimed(orb, condition))
     }
 

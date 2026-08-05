@@ -138,11 +138,48 @@ pub const fn lcm_through(n: i64) -> i64 {
     held
 }
 
-/// **THE REQUIREMENT** the ring answers: halves, thirds, quarters,
-/// fifths and sixths of a turn must each land ON a slot, so a system can
-/// be laid out symmetrically at those arities with no angle falling
-/// between the teeth.
-pub const RING_SUBDIVISIONS: i64 = 6;
+/// **THE REQUIREMENT THE RING ANSWERS, and it is not a number either**
+/// (operator ruling 2026-08-05: *all of the constants here need to be
+/// derived dynamically*).
+///
+/// A first cut wrote `RING_SUBDIVISIONS = 6` — "halves through sixths
+/// must land on a slot" — which derived sixty from a typed six and moved
+/// the magic number one level down rather than removing it. Six was
+/// never the requirement. THE REQUIREMENT IS THE ENGINE'S OWN CLOSED
+/// VOCABULARIES: a population must be layoutable symmetrically by any
+/// partition it actually has, so the ring must admit each of their
+/// arities.
+///
+/// ```text
+///     3   dispositions   expansionist · empiricist · epicurean
+///     3   metabolisms    mineral · biotic · plasmic
+///     4   perceptions    planar · volumetric · harmonic · umbral
+///     4   stations       progenitor · watcher · observer · sovereign
+///     5   practices      the five receipted disciplines
+/// ```
+///
+/// The distinct arities are `{3, 4, 5}` and `lcm(3, 4, 5) = 60`.
+///
+/// **The vocabularies live ABOVE this crate** — `ledger::registry` and
+/// `cfe` both depend on `ratio`, never the reverse — so the arities are
+/// stated here and PINNED against the live vocabularies from up there
+/// (`ring_derivation_pins`). Copying them down would be the two-truths
+/// defect; stating the requirement and proving it matches is not.
+pub const RING_ARITIES: [i64; 3] = [3, 4, 5];
+
+/// The lcm of a set of arities — the smallest ring admitting them all.
+pub const fn lcm_of(arities: &[i64]) -> i64 {
+    let mut held = 1i64;
+    let mut at = 0usize;
+    while at < arities.len() {
+        let k = arities[at];
+        if k > 0 {
+            held = held / gcd(held, k) * k;
+        }
+        at += 1;
+    }
+    held
+}
 
 /// THE ORBITAL SLOTS — a turn divides into SIXTY.
 ///
@@ -161,11 +198,13 @@ pub const RING_SUBDIVISIONS: i64 = 6;
 /// radians is `2π`, which no rational closes, so a wrapped angle would
 /// need a float and the seam would never meet. In turns the seam is
 /// exact and the circle is representable.
-/// **DERIVED: `lcm(1..=6) = 60`.** Not typed — evaluated. Sixty is not
-/// a rounding and not a tradition here; it is the smallest number that
-/// satisfies [`RING_SUBDIVISIONS`], and if that requirement ever changes
-/// this value changes with it.
-pub const TURN_SLOTS: i64 = lcm_through(RING_SUBDIVISIONS);
+/// **DERIVED: `lcm(3, 4, 5) = 60`.** Not typed — evaluated from
+/// [`RING_ARITIES`], the arities of the engine's own closed
+/// vocabularies. Sixty is not a rounding and not a tradition here: it is
+/// the smallest ring on which every partition the population actually
+/// has can be laid out symmetrically. Land a sixth practice and the ring
+/// follows on its own.
+pub const TURN_SLOTS: i64 = lcm_of(&RING_ARITIES);
 
 /// **DOES A DIVISION OF THE RING HOLD?** The proof a caller gets instead
 /// of a bool: the arity, the ring it was checked against, and the

@@ -277,7 +277,7 @@ fn the_orbital_ring_and_the_stack_share_no_factor() {
     assert_eq!(gcd(ratio::TURN_SLOTS, STACK_NODES), 1, "60 and 11 must be coprime");
     assert_eq!(FRAME_PERIOD, 660, "the composite ring is 60 x 11");
     // And the stack is the LANDED base-11, not a number chosen here.
-    assert_eq!(STACK_NODES, 11, "cfe::world::survey::LAST_CONDITION");
+    assert_eq!(STACK_NODES, 11, "cfe::world::survey::last_condition()");
 }
 
 /// **INDIVIDUAL FRAMES — every entity holds one no other entity holds.**
@@ -395,22 +395,25 @@ fn the_population_partitions_evenly_across_the_stack() {
 /// there is nowhere to edit it independently.
 #[test]
 fn the_ring_is_the_answer_to_its_own_requirement() {
-    assert_eq!(ratio::lcm_through(ratio::RING_SUBDIVISIONS), ratio::TURN_SLOTS);
+    // The requirement is the ENGINE'S OWN VOCABULARY ARITIES, not a
+    // typed "subdivide through six". A first cut wrote
+    // `RING_SUBDIVISIONS = 6` and so derived sixty from a magic six —
+    // moving the number one level down rather than removing it.
+    assert_eq!(ratio::lcm_of(&ratio::RING_ARITIES), ratio::TURN_SLOTS);
     assert_eq!(ratio::TURN_SLOTS, 60, "the requirement evaluates to sixty");
 
-    // It is the SMALLEST such number — the claim "sixty is not a
-    // rounding" checked rather than repeated.
+    // It is the SMALLEST ring admitting them — "sixty is not a rounding"
+    // checked rather than repeated.
     for candidate in 1..ratio::TURN_SLOTS {
-        let divides_all = (1..=ratio::RING_SUBDIVISIONS).all(|k| candidate % k == 0);
-        assert!(
-            !divides_all,
-            "{candidate} also admits every subdivision — sixty is not minimal"
-        );
+        let admits_all = ratio::RING_ARITIES.iter().all(|k| candidate % k == 0);
+        assert!(!admits_all, "{candidate} also admits them all — sixty is not minimal");
     }
-    // And every required subdivision genuinely lands.
-    for k in 1..=ratio::RING_SUBDIVISIONS {
+    for k in ratio::RING_ARITIES {
         assert!(ratio::divide_ring(ratio::TURN_SLOTS, k).holds(), "{k} must divide");
     }
+    // The LIVE vocabularies are proved against these arities in
+    // `ledger::ring_derivation_pins`, which is where the vocabularies
+    // actually live — this crate sits below them.
 }
 
 /// **ELEVEN IS A SUM, NOT A NUMBER** — `(1 leap + 5 conditions + 1

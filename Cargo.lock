@@ -127,6 +127,7 @@ dependencies = [
  "num-traits",
  "pen",
  "physics",
+ "ratio",
  "scribe",
 ]
 

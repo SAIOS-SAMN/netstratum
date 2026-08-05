@@ -349,19 +349,40 @@ pub fn tech_node_of(condition: u8) -> Option<(u8, Ratio)> {
 /// this line speaks of it). Flavor at the surface, hash as the
 /// identity underneath — replay re-derives the identical name because
 /// the receipt carries the identical node.
-pub fn tech_node_name(condition: u8, node: &[u8; 32]) -> String {
-    let concept = match condition {
-        1 => "insulation",
-        2 => "discipline",
-        3 => "deepening",
-        4 => "doctrine",
-        5 => "stores",
-        7 => "re-emergence",
-        // TERRA-1: the gifted crown of the base-7 stack — never
+/// **THE CONDITION VOCABULARY** — the bare concept a condition names,
+/// separated from the voice that speaks it (2026-08-05).
+///
+/// It lived inline inside [`tech_node_name`], which returns
+/// `"{voice} {concept}"`, so the only way to ask what a condition WAS
+/// meant parsing a composed string — and a caller that tried
+/// `starts_with` got the voice instead of the concept. The vocabulary is
+/// now askable directly, which is what lets `survey::node_kind` classify
+/// by MEANING rather than by number.
+///
+/// `None` is the honest answer outside the namespace: an unnamed
+/// condition is not a node.
+pub fn condition_concept(condition: u8) -> Option<&'static str> {
+    match condition {
+        0 => Some("solar leap"),
+        1 => Some("insulation"),
+        2 => Some("discipline"),
+        3 => Some("deepening"),
+        4 => Some("doctrine"),
+        5 => Some("stores"),
+        // TERRA-1: the gifted crown of the base stack — never
         // crystallized locally, only licensed down from tier 0.
-        6 => "terraforming",
-        _ => "working",
-    };
+        6 => Some("terraforming"),
+        // PRACTICE-1's lesson: it rides the condition field and is NOT a
+        // sky node.
+        7 => Some("re-emergence"),
+        _ => None,
+    }
+}
+
+pub fn tech_node_name(condition: u8, node: &[u8; 32]) -> String {
+    let concept = condition_concept(condition)
+        .filter(|_| condition != 0)
+        .unwrap_or("working");
     const VOICES: [&str; 12] = [
         "resonant", "patient", "vaulted", "keening", "tidal", "ember",
         "hollow", "woven", "still", "spiral", "murmured", "adamant",

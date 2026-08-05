@@ -34,18 +34,115 @@ use crate::literature::{work_of, WORKS};
 /// structure — the base tier plus one node per chartered work. Written
 /// as `11`, the day a sixth condition lands someone edits one place and
 /// not the others.
-pub const SOLAR_LEAP: u8 = 1;
-pub const CRYSTALLIZED_CONDITIONS: u8 = 5;
-pub const GIFTED_CROWN: u8 = 1;
+/// **WHAT KIND OF NODE A CONDITION IS** — the classification every
+/// count below is derived from (operator ruling 2026-08-05: *all of
+/// these constants need to be derived dynamically*).
+///
+/// A first cut typed `1`, `5`, `1` and `4`. Those are not numbers, they
+/// are the SIZES OF POPULATIONS in the condition namespace, and the
+/// namespace already knows its own members: `dop::tech_node_of` answers
+/// for the crystallized tier, `dop::tech_node_name` names the crown and
+/// the lesson, and `literature::WORKS` lists the chartered works. Count
+/// what is there instead of restating how much of it there was.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum NodeKind {
+    /// Condition 0 — the solar leap. One, because a world has one star.
+    Leap,
+    /// The crystallized tier — every condition carrying a tech node.
+    Crystallized,
+    /// The gifted crown, granted rather than earned.
+    Crown,
+    /// PRACTICE-1's re-emergence lesson — rides the condition field but
+    /// is NOT a sky node.
+    Lesson,
+    /// The uplift tier — one node per chartered work.
+    Work,
+    /// Outside the namespace.
+    None,
+}
+
+/// Classify a condition by asking the vocabularies, never a table of
+/// numbers.
+pub fn node_kind(condition: u8) -> NodeKind {
+    if condition == 0 {
+        return NodeKind::Leap;
+    }
+    if crate::dop::tech_node_of(condition).is_some() {
+        return NodeKind::Crystallized;
+    }
+    // Classified by MEANING, asked of the vocabulary — never by parsing
+    // a composed name (`tech_node_name` returns "{voice} {concept}", so
+    // a `starts_with` reads the voice) and never by a number.
+    match crate::dop::condition_concept(condition) {
+        // PRACTICE-1's lesson rides the condition field and is not a sky
+        // node.
+        Some("re-emergence") => NodeKind::Lesson,
+        // The gifted crown completes the base.
+        Some("terraforming") => NodeKind::Crown,
+        Some(_) => NodeKind::Crystallized,
+        None => {
+            // Past the named vocabulary lie the uplift nodes, one per
+            // chartered work.
+            let named = 0u8..first_work();
+            match !named.contains(&condition) && condition < first_work() + works() {
+                true => NodeKind::Work,
+                false => NodeKind::None,
+            }
+        }
+    }
+}
+
+/// How many conditions are of a kind — counted, never asserted.
+pub fn count_of(kind: NodeKind) -> u8 {
+    (0u8..=u8::MAX)
+        .take(64)
+        .filter(|c| match kind {
+            NodeKind::Leap => *c == 0,
+            NodeKind::Crystallized => crate::dop::tech_node_of(*c).is_some(),
+            NodeKind::Crown => {
+                crate::dop::condition_concept(*c) == Some("terraforming")
+            }
+            NodeKind::Lesson => {
+                crate::dop::condition_concept(*c) == Some("re-emergence")
+            }
+            _ => false,
+        })
+        .count() as u8
+}
+
+/// The chartered works — the UPLIFT tier's own size, read from the
+/// literature vocabulary rather than restated here.
+pub fn works() -> u8 {
+    crate::literature::WORKS.len() as u8
+}
+
+/// One, because a world has ONE star to make the leap to.
+pub const fn solar_leap() -> u8 {
+    1
+}
 /// The BASE tier — what the crown completes and `base_seven_complete`
 /// waits for. Its gate does not move.
-pub const BASE_NODES: u8 = SOLAR_LEAP + CRYSTALLIZED_CONDITIONS + GIFTED_CROWN;
-/// The UPLIFT tier — one node per chartered work.
-pub const CHARTERED_WORKS: u8 = 4;
-pub const LAST_CONDITION: u8 = BASE_NODES + CHARTERED_WORKS;
-/// The first node of the uplift tier — `8`, where the works begin.
+/// The BASE tier, COUNTED: the leap, every crystallized condition, and
+/// the gifted crown.
+pub fn base_nodes() -> u8 {
+    count_of(NodeKind::Leap) + count_of(NodeKind::Crystallized) + count_of(NodeKind::Crown)
+}
+/// The whole stack, COUNTED: from the first work through the last one.
+/// There is no `11` anywhere — ask the vocabularies and they add to it.
+pub fn last_condition() -> u8 {
+    first_work() + works() - 1
+}
+/// The first node of the uplift tier, where the works begin.
 /// `7` is skipped: it belongs to PRACTICE-1 and is not a sky node.
-pub const FIRST_WORK: u8 = BASE_NODES + 1;
+/// The first node of the uplift tier.
+///
+/// The base occupies indices `0..=6` — seven nodes — and PRACTICE-1's
+/// lesson rides at `7`, so the works begin at `base + lesson = 8`. The
+/// counts ARE the indices consumed; there is no extra `+1` to add, and a
+/// first cut that added one put VALOR at 9 and left 8 unnamed.
+pub fn first_work() -> u8 {
+    base_nodes() + count_of(NodeKind::Lesson)
+}
 /// PRACTICE-1's re-emergence lesson. Held in `techs` like a sky node,
 /// rendered in the sky like none — it rides separately by design.
 pub const RE_EMERGENCE: u8 = 7;
@@ -142,8 +239,8 @@ impl World {
     /// The chartered work a node of the uplift tier stands for, if it
     /// is one. `7..=10` map to the charter's order.
     pub fn work_at(condition: u8) -> Option<&'static str> {
-        match (FIRST_WORK..=LAST_CONDITION).contains(&condition) {
-            true => WORKS.get((condition - FIRST_WORK) as usize).copied(),
+        match (first_work()..=last_condition()).contains(&condition) {
+            true => WORKS.get((condition - first_work()) as usize).copied(),
             false => None,
         }
     }
@@ -171,13 +268,13 @@ impl World {
             .find(|(held, _)| *held == orb)
             .map(|(_, sheet)| sheet)
             .unwrap_or(&blank);
-        (0u8..=LAST_CONDITION)
+        (0u8..=last_condition())
             .filter(|condition| *condition != RE_EMERGENCE)
             .map(|condition| {
                 // The BASE tier is earned into `techs`. The UPLIFT tier
                 // (7..=10) is not granted at all — a work is held when
                 // the line CLAIMED it, so the node IS the deed.
-                let held = match condition >= FIRST_WORK {
+                let held = match condition >= first_work() {
                     true => self.work_claimed(orb, condition),
                     false => self
                         .techs
@@ -211,7 +308,7 @@ impl World {
                     }
                     // THE UPLIFT TIER — one node per chartered work,
                     // held on a WITNESSED claim. A deed is the upgrade.
-                    held_work if held_work >= FIRST_WORK => {
+                    held_work if held_work >= first_work() => {
                         (u64::from(self.work_claimed(orb, condition)), 1)
                     }
                     _ => (
