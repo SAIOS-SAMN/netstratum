@@ -162,8 +162,8 @@ impl World {
     pub fn terraform(
         &mut self,
         orb: u64,
-        albedo: Ratio,
-        orbit_r: Ratio,
+        albedo: crate::dop::Unit,
+        orbit_r: crate::dop::Positive,
     ) -> Result<(), ActionRefused> {
         use crate::dop::ThermalSite;
         if !self.can_terraform() {
@@ -172,11 +172,8 @@ impl World {
         if self.star.is_none() {
             return Err(ActionRefused::NoStarCommissioned);
         }
-        let zero = ratio(0, 1);
-        let one = ratio(1, 1);
-        if albedo < zero || albedo >= one || orbit_r <= zero {
-            return Err(ActionRefused::BadSiting);
-        }
+        // BadSiting is DEAD (29_CONSTRUCTION C1): the types prove the
+        // ranges, so nothing is left to re-check here.
         let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
         if held.thermal.is_none() {
             // A first siting is the solar leap's door, not terraform's.

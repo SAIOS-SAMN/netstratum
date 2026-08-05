@@ -63,8 +63,6 @@ pub enum ActionRefused {
     TerrainAlreadyCharted,
     /// ROUTE-1 — this deal id already charters a lane on this book.
     RouteKnown { deal: u64 },
-    /// ROUTE-1 — a lane's suppression must sit inside [0, 1).
-    BadEta,
     /// MARKET-2 (Samuelson iceberg, ruled 2026-07-31) — the melt
     /// fraction reached 1: this pair is economically walled off by
     /// decay physics, not by rule.
@@ -138,8 +136,6 @@ pub enum ActionRefused {
     NoStarCommissioned,
     /// THERMAL-1 — the orb is already sited; an orbit does not move.
     AlreadySited { orb: u64 },
-    /// THERMAL-1 — albedo must satisfy 0 ≤ A < 1, orbit r > 0.
-    BadSiting,
     /// TRADE-1 — a transfer moves a POSITIVE amount between two
     /// DISTINCT orbs; anything else refuses whole.
     BadTransfer,

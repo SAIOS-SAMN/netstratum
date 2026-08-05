@@ -124,7 +124,7 @@ pub fn demurrage_due(
 ) -> Vec<(Resource, Ratio)> {
     let mut due = Vec::new();
     if let (Some(class), Some(site)) = (star, &orb.thermal) {
-        let t4 = crate::thermal::t_eq4(&class.luminosity(), &site.albedo, &site.orbit_r);
+        let t4 = crate::thermal::t_eq4(&class.luminosity(), site.albedo.value(), site.orbit_r.value());
         if crate::thermal::leaks(&t4) && stamp > orb.last_touch {
             let elapsed = ratio((stamp - orb.last_touch) as i64, 1);
             for resource in [Resource::Joule, Resource::Sink] {

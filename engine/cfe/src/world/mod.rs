@@ -340,12 +340,11 @@ pub fn charter_route(
     orb_a: u64,
     b: &mut World,
     orb_b: u64,
-    eta: Ratio,
+    eta: crate::dop::Unit,
     deal: u64,
 ) -> Result<(), ActionRefused> {
-    if eta < ratio(0, 1) || eta >= ratio(1, 1) {
-        return Err(ActionRefused::BadEta);
-    }
+    // BadEta is DEAD (29_CONSTRUCTION C1): efficiency is a `Unit` —
+    // [0, 1) by construction — so the range judge has nothing to catch.
     if !a.knows_its_sun() || !b.knows_its_sun() {
         return Err(ActionRefused::Shielded {
             source_shielded: !a.knows_its_sun(),
@@ -421,7 +420,7 @@ impl World {
     }
 
     /// ROUTE-1: the live lanes — (deal, eta).
-    pub fn routes(&self) -> &[(u64, Ratio)] {
+    pub fn routes(&self) -> &[(u64, crate::dop::Unit)] {
         &self.routes
     }
 }
@@ -442,7 +441,7 @@ pub fn pair_melt(a: &World, b: &World, distance: &Ratio) -> Ratio {
         .map(|(_, eta)| eta.clone())
         .max();
     if let Some(eta) = best_eta {
-        melt *= ratio(1, 1) - eta;
+        melt *= ratio(1, 1) - eta.value().clone();
     }
     melt
 }

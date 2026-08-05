@@ -10,7 +10,7 @@
 //! into the vented ledger. Aligned partners — ANY alignment —
 //! generate exactly zero. The engine gates nothing.
 
-use cfe::dop::{cohesion_ratio, ClosureEvent, ColonyOrb, Resource, ZoneKind};
+use cfe::dop::{positive, unit, cohesion_ratio, ClosureEvent, ColonyOrb, Resource, ZoneKind};
 use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::StarClass;
 use cfe::world::{replay, World, FIRST_ORB, SOVEREIGN};
@@ -34,10 +34,10 @@ fn furnace_and_coldstore() -> (World, u64) {
         .expect("zones the array");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None, None)
+        .site_planet(FIRST_ORB, unit(0, 1), positive(1, 2), None, None)
         .expect("sites hot");
     world
-        .site_planet(charted, ratio(0, 1), ratio(100, 1), None, None)
+        .site_planet(charted, unit(0, 1), positive(100, 1), None, None)
         .expect("sites cold");
     world.tick();
     world.collect().expect("banks the joules");

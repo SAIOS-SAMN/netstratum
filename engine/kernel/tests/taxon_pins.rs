@@ -81,7 +81,7 @@ fn every_deed() -> Vec<ClosureEvent> {
         E::OverheatStruck { orb_id: 1, overflow: r(1) },
         E::OverheatCleared { orb_id: 1 },
         E::StarCommissioned { class: 5 },
-        E::PlanetSited { orb_id: 1, albedo: r(0), orbit_r: r(1) , theta: None, psi: None },
+        E::PlanetSited { orb_id: 1, albedo: cfe::dop::Unit::new(r(0)).expect("unit"), orbit_r: cfe::dop::Positive::new(r(1)).expect("positive") , theta: None, psi: None },
         E::VentSettled { orb_id: 1, amount: r(1) },
         E::DemurrageSettled { orb_id: 1, resource: Resource::Iron, amount: r(1) },
         E::ResourceTransferred { from_orb: 1, to_orb: 2, resource: Resource::Iron, amount: r(1) },
@@ -126,7 +126,7 @@ fn every_deed() -> Vec<ClosureEvent> {
         E::DiscoveryMinted { orb_id: 1, resource: Resource::Iron, amount: r(1), work: Vec::new() },
         E::InstrumentForged { orb_id: 1, tech_hash: bytes, grade: 1 },
         E::VoidShare { orb_id: 1, deal: 1, resource: Resource::Iron, amount: r(1) },
-        E::RouteChartered { deal: 1, eta: r(0) },
+        E::RouteChartered { deal: 1, eta: cfe::dop::unit(0, 1) },
         E::RouteLapsed { deal: 1 },
     ]
 }

@@ -6,7 +6,7 @@
 //! nothing. These pins hold the closure, and hold the two ledgers
 //! APART: physics on one side, economics on the other.
 
-use cfe::dop::{ClosureEvent, Resource, ZoneKind};
+use cfe::dop::{positive, unit, ClosureEvent, Resource, ZoneKind};
 use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::StarClass;
 use cfe::world::{World, FIRST_ORB};
@@ -29,7 +29,7 @@ fn worn(ticks: usize) -> World {
     // THERMAL-1: an orb must be SITED before thermal wakes for it —
     // r = 1/2 puts it in the leaking band, so demurrage bites.
     world
-        .site_planet(FIRST_ORB, ratio(3, 10), ratio(1, 2), None, None)
+        .site_planet(FIRST_ORB, unit(3, 10), positive(1, 2), None, None)
         .expect("sites");
     for _ in 0..ticks {
         world.tick();

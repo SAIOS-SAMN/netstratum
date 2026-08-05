@@ -13,8 +13,8 @@ use cfe::ratio::ratio;
 
 fn site(r: (i64, i64), turn: Option<i64>, tilt: Option<i64>) -> ThermalSite {
     ThermalSite {
-        albedo: ratio(0, 1),
-        orbit_r: ratio(r.0, r.1),
+        albedo: cfe::dop::unit(0, 1),
+        orbit_r: cfe::dop::Positive::new(ratio(r.0, r.1)).expect("positive"),
         theta: turn.map(Slot::from_index),
         psi: tilt.map(Slot::from_index),
     }
@@ -114,8 +114,8 @@ fn an_orbit_between_the_teeth_cannot_be_constructed() {
 fn a_siting_without_turns_is_byte_identical_to_the_old_frame() {
     let legacy = ClosureEvent::PlanetSited {
         orb_id: 7,
-        albedo: ratio(1, 4),
-        orbit_r: ratio(3, 2),
+        albedo: cfe::dop::unit(1, 4),
+        orbit_r: cfe::dop::positive(3, 2),
         theta: None,
         psi: None,
     };
@@ -128,8 +128,8 @@ fn a_siting_without_turns_is_byte_identical_to_the_old_frame() {
 fn both_turns_survive_the_wire_and_lengthen_the_frame() {
     let placed = ClosureEvent::PlanetSited {
         orb_id: 7,
-        albedo: ratio(1, 4),
-        orbit_r: ratio(3, 2),
+        albedo: cfe::dop::unit(1, 4),
+        orbit_r: cfe::dop::positive(3, 2),
         theta: Some(Slot::from_index(5)),
         psi: Some(Slot::from_index(50)),
     };
@@ -138,8 +138,8 @@ fn both_turns_survive_the_wire_and_lengthen_the_frame() {
 
     let bare = ClosureEvent::PlanetSited {
         orb_id: 7,
-        albedo: ratio(1, 4),
-        orbit_r: ratio(3, 2),
+        albedo: cfe::dop::unit(1, 4),
+        orbit_r: cfe::dop::positive(3, 2),
         theta: None,
         psi: None,
     };

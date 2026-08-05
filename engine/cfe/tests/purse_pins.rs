@@ -9,7 +9,7 @@
 //! Each pin fails if the mechanic changes. None of them assert a
 //! definition back at itself.
 
-use cfe::dop::{Resource, ZoneKind};
+use cfe::dop::{positive, unit, Resource, ZoneKind};
 use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::StarClass;
 use cfe::world::{World, FIRST_ORB};
@@ -22,7 +22,7 @@ fn warm_world_with_unsettled_due() -> (World, u64) {
     world.found("purse").expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None, None)
+        .site_planet(FIRST_ORB, unit(0, 1), positive(1, 2), None, None)
         .expect("sites");
     world.zone(0, ZoneKind::Extractor).expect("zones");
     world.zone(8, ZoneKind::Habitat).expect("zones");

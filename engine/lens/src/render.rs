@@ -407,7 +407,7 @@ pub fn render_receipt(receipt: &Receipt) -> String {
         ),
         E::RouteChartered { deal, eta } => (
             "route_chartered",
-            format!("lane {deal} chartered at η {eta} — the path is paid for"),
+            format!("lane {deal} chartered at η {} — the path is paid for", ratio_str(eta.value())),
         ),
         E::RouteLapsed { deal } => (
             "route_lapsed",
@@ -427,7 +427,7 @@ pub fn render_receipt(receipt: &Receipt) -> String {
         E::StarCommissioned { class } => ("star_commissioned", format!("class {class}")),
         E::PlanetSited { orb_id, albedo, orbit_r, theta: _, psi: _ } => (
             "planet_sited",
-            format!("orb {orb_id} A={} r={}", ratio_str(albedo), ratio_str(orbit_r)),
+            format!("orb {orb_id} A={} r={}", ratio_str(albedo.value()), ratio_str(orbit_r.value())),
         ),
         E::VentSettled { amount, .. } => ("vent_settled", ratio_str(amount)),
         E::DemurrageSettled { resource, amount, .. } => (

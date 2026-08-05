@@ -7,7 +7,7 @@
 //! gate's reading, and each false is escapable. The one monotone
 //! thing is G itself: a climb moves strictly upward.
 
-use cfe::dop::{ClosureEvent, Resource, ZoneKind};
+use cfe::dop::{positive, unit, ClosureEvent, Resource, ZoneKind};
 use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
 use cfe::world::{aperture_transfer, replay, ActionRefused, World, FIRST_ORB};
@@ -16,7 +16,7 @@ fn sunlit(name: &str) -> World {
     let mut world = World::new();
     world.found(name).expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
-    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None, None).expect("sites");
+    world.site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None).expect("sites");
     world
 }
 

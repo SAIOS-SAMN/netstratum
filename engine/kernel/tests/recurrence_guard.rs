@@ -179,8 +179,17 @@ fn the_arrow_law_holds() {
     // is no longer one place that interprets a payload. Recorded here
     // rather than left silent, since a struck guard leaves no trace at
     // the call site.
-    // The verifier half sits in the sealed math tier: physics + hashing.
-    let verify_allowed = ["blake3", "physics"];
+    // The verifier half sits in the sealed math tier: physics + hashing
+    // + the exact-arithmetic floor.
+    //
+    // AMENDMENT (2026-08-05, the spherical carrier): "ratio" enters the
+    // set. The turn law (TURN_SLOTS, Slot, turn_gap) RELOCATED from
+    // cfe::dop down into `ratio` precisely so this tier could read it
+    // without reaching UP — the alternative was a second copy of the
+    // constant, the two-truths defect. `ratio` is the floor below
+    // physics itself (physics imports it), so the arrow still points
+    // strictly downward.
+    let verify_allowed = ["blake3", "physics", "ratio"];
     for dep in runtime_deps(&root.join("engine/solver-verify/Cargo.toml")) {
         assert!(
             verify_allowed.contains(&dep.as_str()),

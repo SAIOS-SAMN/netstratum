@@ -383,7 +383,7 @@ pub fn market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
             // stands, or when the pair's technology now supports a
             // deeper suppression than the best lane held.
             if crossed_here {
-                let best_held: Option<Ratio> = one
+                let best_held: Option<cfe::dop::Unit> = one
                     .world
                     .routes()
                     .iter()
@@ -400,7 +400,15 @@ pub fn market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
                     .map(|(_, _, grade)| *grade)
                     .max()
                     .unwrap_or(0);
-                let eta = ratio(1 + i64::from(best_grade), 8);
+                // (1+grade)/8 is the PICKUP-flagged placeholder (C2's
+                // cluster). At grade >= 7 it reaches 1, which is out of
+                // [0,1) — the dead BadEta used to refuse that at the
+                // verb; the Unit door now says it at construction, and
+                // an unconstructible efficiency charters no lane, which
+                // is the same observable outcome.
+                let Some(eta) = cfe::dop::Unit::new(ratio(1 + i64::from(best_grade), 8)) else {
+                    continue;
+                };
                 if best_held.is_none_or(|held| eta > held) {
                     let deal = beat * 100_000 + seq * 4;
                     seq += 1;
@@ -767,7 +775,7 @@ fn regime(world: &World, metabolism: &str) -> Option<(Regime, Ratio)> {
     let site = world.orb()?.thermal.clone()?;
     let t4 = deck_band4(
         metabolism,
-        cfe::thermal::t_eq4(&class.luminosity(), &site.albedo, &site.orbit_r),
+        cfe::thermal::t_eq4(&class.luminosity(), site.albedo.value(), site.orbit_r.value()),
     );
     let (mesic_lo, mesic_hi) = cfe::thermal::SubstrateBand::Mesic.bounds4();
     if t4 < mesic_lo {
@@ -977,7 +985,14 @@ impl Polity {
         // `21_KERNEL_PARAMETERS` §17: the capability is landed and
         // witnessed, and the conductor does not use it until #30
         // closes the divergence it exposes.
-        let _ = world.site_planet(cfe::world::FIRST_ORB, albedo, orbit, None, None);
+        // The spec's siting is Ratio-typed data; the doors prove it here.
+        // `let _ =` already discarded refusals on this path, so an
+        // unconstructible spec value sites nothing — same as before.
+        if let (Some(albedo), Some(orbit)) =
+            (cfe::dop::Unit::new(albedo), cfe::dop::Positive::new(orbit))
+        {
+            let _ = world.site_planet(cfe::world::FIRST_ORB, albedo, orbit, None, None);
+        }
         Polity {
             chained: 0,
             refused: Vec::new(),

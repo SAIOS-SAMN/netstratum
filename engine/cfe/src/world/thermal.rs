@@ -30,8 +30,8 @@ impl World {
     pub fn site_planet(
         &mut self,
         orb: u64,
-        albedo: Ratio,
-        orbit_r: Ratio,
+        albedo: crate::dop::Unit,
+        orbit_r: crate::dop::Positive,
         theta: Option<crate::dop::Slot>,
         psi: Option<crate::dop::Slot>,
     ) -> Result<(), ActionRefused> {
@@ -61,11 +61,9 @@ impl World {
                 return Err(ActionRefused::OrbitOccupied { orb: taken.orb_id, slot });
             }
         }
-        let zero = ratio(0, 1);
-        let one = ratio(1, 1);
-        if albedo < zero || albedo >= one || orbit_r <= zero {
-            return Err(ActionRefused::BadSiting);
-        }
+        // BadSiting is DEAD (29_CONSTRUCTION C1): albedo is a `Unit`
+        // and the radius a `Positive` — out-of-range cannot reach this
+        // verb, so the range judge is deleted and only facts remain.
         let held = peel(&mut self.orbs, orb)
             .ok_or(ActionRefused::NoSuchOrb { orb })?;
         if held.thermal.is_some() {

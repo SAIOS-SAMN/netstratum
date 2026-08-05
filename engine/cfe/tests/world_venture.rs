@@ -6,7 +6,7 @@
 //! chronicle carrying its own legs, conservation exact both ways,
 //! both worlds replaying. Measured here; the HANDOFF §9 idiom paid.
 
-use cfe::dop::{ClosureEvent, Resource};
+use cfe::dop::{positive, unit, ClosureEvent, Resource};
 use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
 use cfe::vrp::ChainRead;
@@ -16,7 +16,7 @@ fn sunlit(name: &str) -> World {
     let mut world = World::new();
     world.found(name).expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
-    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None, None).expect("sites");
+    world.site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None).expect("sites");
     world
 }
 

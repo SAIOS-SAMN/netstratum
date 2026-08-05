@@ -4,7 +4,7 @@
 //! an adopted discipline gates the climb through alignment; the
 //! Overdrive takes only the tempered.
 
-use cfe::dop::{ClosureEvent, Resource, ZoneKind};
+use cfe::dop::{positive, unit, ClosureEvent, Resource, ZoneKind};
 use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::StarClass;
 use cfe::world::{replay, ActionRefused, World, FIRST_ORB};
@@ -95,7 +95,7 @@ fn release_is_a_rediscovery_and_the_lesson_re_emerges() {
     // The solar leap is the doctrine earned since adoption.
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None, None)
+        .site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None)
         .expect("sites — the leap receipts");
     world.release_practice(2).expect("the rediscovery releases");
     assert!(world.committed().practices.is_empty());

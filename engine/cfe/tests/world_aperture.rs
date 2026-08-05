@@ -8,7 +8,7 @@
 //! across the pair). The cross-empire cohesion books DO NOT post here:
 //! cross-world reading composes at N5/N6 (09 board law).
 
-use cfe::dop::{ClosureEvent, Resource};
+use cfe::dop::{positive, unit, ClosureEvent, Resource};
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::{aperture_transfer, replay, ActionRefused, World, FIRST_ORB};
 
@@ -25,7 +25,7 @@ fn sunlit(name: &str) -> World {
     let mut world = World::new();
     world.found(name).expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
-    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None, None).expect("sites");
+    world.site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None).expect("sites");
     world
 }
 

@@ -2,7 +2,7 @@
 //! flow model through the two-armed heat law — encase first, only the
 //! overflow vents — with the opt-in guard, exact numbers end to end.
 
-use cfe::dop::{ClosureEvent, Resource, ZoneKind};
+use cfe::dop::{positive, unit, ClosureEvent, Resource, ZoneKind};
 use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::{self, StarClass};
 use cfe::world::{replay, ActionRefused, World, FIRST_ORB};
@@ -50,7 +50,7 @@ fn a_mesic_sol_world_runs_clean() {
     world.found("meridian").expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None, None)
+        .site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None)
         .expect("sites");
     world.zone(0, ZoneKind::Extractor).expect("zones");
     world.zone(8, ZoneKind::Habitat).expect("zones");
@@ -72,7 +72,7 @@ fn the_furnace_mints_and_only_the_overflow_vents() {
     world.found("furnace").expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None, None)
+        .site_planet(FIRST_ORB, unit(0, 1), positive(1, 2), None, None)
         .expect("sites");
     world.zone(0, ZoneKind::Extractor).expect("zones");
     world.zone(8, ZoneKind::Habitat).expect("zones");
@@ -139,7 +139,7 @@ fn thermal_refusals_are_typed() {
     let mut world = World::new();
     world.found("refusals").expect("founds");
     assert_eq!(
-        world.site_planet(FIRST_ORB, ratio(1, 2), ratio(1, 1), None, None),
+        world.site_planet(FIRST_ORB, unit(1, 2), positive(1, 1), None, None),
         Err(ActionRefused::NoStarCommissioned)
     );
     world.commission_star(StarClass::K).expect("commissions");
@@ -147,21 +147,17 @@ fn thermal_refusals_are_typed() {
         world.commission_star(StarClass::G),
         Err(ActionRefused::StarAlreadyCommissioned)
     );
-    assert_eq!(
-        world.site_planet(FIRST_ORB, ratio(1, 1), ratio(1, 1), None, None),
-        Err(ActionRefused::BadSiting),
-        "albedo must be < 1"
-    );
-    assert_eq!(
-        world.site_planet(FIRST_ORB, ratio(1, 2), ratio(0, 1), None, None),
-        Err(ActionRefused::BadSiting),
-        "orbit r must be > 0"
-    );
+    // **BadSiting is DEAD** (29_CONSTRUCTION C1). These two probes used
+    // to hand the verb an albedo of 1 and a radius of 0 and expect a
+    // refusal. The fault now lives at the TYPE doors — the values never
+    // construct, so no verb can be handed them.
+    assert_eq!(cfe::dop::Unit::new(ratio(1, 1)), None, "albedo must be < 1");
+    assert_eq!(cfe::dop::Positive::new(ratio(0, 1)), None, "orbit r must be > 0");
     world
-        .site_planet(FIRST_ORB, ratio(1, 2), ratio(1, 1), None, None)
+        .site_planet(FIRST_ORB, unit(1, 2), positive(1, 1), None, None)
         .expect("sites");
     assert_eq!(
-        world.site_planet(FIRST_ORB, ratio(1, 2), ratio(2, 1), None, None),
+        world.site_planet(FIRST_ORB, unit(1, 2), positive(2, 1), None, None),
         Err(ActionRefused::AlreadySited { orb: FIRST_ORB })
     );
 }
@@ -175,7 +171,7 @@ fn the_thermal_world_replays_and_round_trips() {
     world.found("replayed").expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(1, 4), ratio(1, 2), None, None)
+        .site_planet(FIRST_ORB, unit(1, 4), positive(1, 2), None, None)
         .expect("sites");
     world.zone(0, ZoneKind::Extractor).expect("zones");
     world.zone(16, ZoneKind::Encasement).expect("zones");
@@ -206,7 +202,7 @@ fn the_vent_ledger_conserves_and_seals_at_collect() {
     world.found("books").expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None, None)
+        .site_planet(FIRST_ORB, unit(0, 1), positive(1, 2), None, None)
         .expect("sites");
     world.zone(0, ZoneKind::Extractor).expect("zones");
     world.zone(8, ZoneKind::Habitat).expect("zones");
@@ -242,7 +238,7 @@ fn a_cold_orb_burns_joules_and_freeze_locks() {
     world.found("frost").expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(100, 1), None, None)
+        .site_planet(FIRST_ORB, unit(0, 1), positive(100, 1), None, None)
         .expect("sites");
     world.zone(0, ZoneKind::Extractor).expect("zones");
     let outcome = world.tick();
@@ -265,7 +261,7 @@ fn the_vault_captures_sink_and_charges_no_demurrage() {
     world.found("vault").expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(100, 1), None, None)
+        .site_planet(FIRST_ORB, unit(0, 1), positive(100, 1), None, None)
         .expect("sites");
     world.zone(0, ZoneKind::CryoArray).expect("zones");
     world.tick();
@@ -303,7 +299,7 @@ fn warm_banked_joules_pay_receipted_demurrage_at_touch() {
     world.found("demurrage").expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None, None)
+        .site_planet(FIRST_ORB, unit(0, 1), positive(1, 2), None, None)
         .expect("sites");
     world.zone(0, ZoneKind::Extractor).expect("zones");
     world.zone(8, ZoneKind::Habitat).expect("zones");

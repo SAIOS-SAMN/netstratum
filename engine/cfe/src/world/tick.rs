@@ -256,7 +256,7 @@ impl World {
             let mut t4: Option<Ratio> = None;
             let mut frozen = false;
             if let (Some(class), Some(site)) = (self.star, site) {
-                let t_eq4 = thermal::t_eq4(&class.luminosity(), &site.albedo, &site.orbit_r);
+                let t_eq4 = thermal::t_eq4(&class.luminosity(), site.albedo.value(), site.orbit_r.value());
                 // ECON-J freeze-lock (05 §1.2): a sub-mesic orb in joule
                 // famine is frozen whole — no flows until fuel arrives.
                 let sub_mesic = t_eq4 < thermal::SubstrateBand::Mesic.bounds4().0;
@@ -632,7 +632,7 @@ impl World {
         let heating_need: Ratio = match (star, &held.thermal) {
             (Some(class), Some(site)) => {
                 let t4 =
-                    crate::thermal::t_eq4(&class.luminosity(), &site.albedo, &site.orbit_r);
+                    crate::thermal::t_eq4(&class.luminosity(), site.albedo.value(), site.orbit_r.value());
                 match t4 < crate::thermal::SubstrateBand::Mesic.bounds4().0 {
                     true => {
                         crate::dop::heating_per_zone() * ratio(held.zones.len() as i64, 1)

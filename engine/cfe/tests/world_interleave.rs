@@ -11,7 +11,7 @@
 //!    tick prologue — replay and resume rebuild the same state from
 //!    the same receipt order.
 
-use cfe::dop::{ClosureEvent, Resource, ZoneKind};
+use cfe::dop::{positive, unit, ClosureEvent, Resource, ZoneKind};
 use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::StarClass;
 use cfe::world::{replay, World, FIRST_ORB, SOVEREIGN};
@@ -36,10 +36,10 @@ fn furnace_and_coldstore() -> (World, u64) {
         .expect("zones the array");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None, None)
+        .site_planet(FIRST_ORB, unit(0, 1), positive(1, 2), None, None)
         .expect("sites hot");
     world
-        .site_planet(charted, ratio(0, 1), ratio(100, 1), None, None)
+        .site_planet(charted, unit(0, 1), positive(100, 1), None, None)
         .expect("sites cold");
     world.tick();
     world.collect().expect("banks the joules"); // @17: seals vent 1/2

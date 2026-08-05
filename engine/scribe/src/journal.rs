@@ -235,7 +235,7 @@ fn archetype(committed: &Committed, voice: &Voice) -> &'static str {
         .iter()
         .find_map(|orb| orb.thermal.as_ref());
     if let (Some(class), Some(site)) = (committed.star, site) {
-        let t4 = t_eq4(&class.luminosity(), &site.albedo, &site.orbit_r);
+        let t4 = t_eq4(&class.luminosity(), site.albedo.value(), site.orbit_r.value());
         return match band_of(&t4) {
             Some(SubstrateBand::HyperThermal) => "Emberkin (Radiotroph)",
             Some(SubstrateBand::Cryogenic) => "Coherent (Cryo-Superconductor)",
@@ -364,7 +364,7 @@ fn narrate(
         .find_map(|orb| orb.thermal.as_ref().map(|site| (orb, site.clone())));
     let t4 = match (committed.star, &sited) {
         (Some(class), Some((_, site))) => {
-            Some(t_eq4(&class.luminosity(), &site.albedo, &site.orbit_r))
+            Some(t_eq4(&class.luminosity(), site.albedo.value(), site.orbit_r.value()))
         }
         _ => None,
     };

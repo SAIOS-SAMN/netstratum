@@ -363,8 +363,14 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             ),
         },
         Some("site") => {
-            let albedo = words.next().and_then(parse_ratio_arg);
-            let orbit_r = words.next().and_then(parse_ratio_arg);
+            let albedo = words
+                .next()
+                .and_then(parse_ratio_arg)
+                .and_then(cfe::dop::Unit::new);
+            let orbit_r = words
+                .next()
+                .and_then(parse_ratio_arg)
+                .and_then(cfe::dop::Positive::new);
             match (albedo, orbit_r) {
                 (Some(albedo), Some(orbit_r)) => {
                     match world.site_planet(*current, albedo, orbit_r, None, None) {
@@ -1075,7 +1081,15 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             .map(|(_, _, grade)| *grade)
                             .max()
                             .unwrap_or(0);
-                        let eta = ratio(1 + i64::from(best_grade), 8);
+                        let Some(eta) =
+                            cfe::dop::Unit::new(ratio(1 + i64::from(best_grade), 8))
+                        else {
+                            println!(
+                                "{} grade {best_grade} prices an efficiency of 1 or more — no lane erases the void",
+                                style.bad("✗")
+                            );
+                            return;
+                        };
                         match cfe::world::charter_route(
                             world,
                             cfe::world::FIRST_ORB,
@@ -1107,8 +1121,14 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             }
         }
         Some("terraform") => {
-            let albedo = words.next().and_then(parse_ratio_arg);
-            let orbit = words.next().and_then(parse_ratio_arg);
+            let albedo = words
+                .next()
+                .and_then(parse_ratio_arg)
+                .and_then(cfe::dop::Unit::new);
+            let orbit = words
+                .next()
+                .and_then(parse_ratio_arg)
+                .and_then(cfe::dop::Positive::new);
             match (albedo, orbit) {
                 (Some(albedo), Some(orbit)) => {
                     match world.terraform(*current, albedo, orbit) {
@@ -3373,7 +3393,7 @@ fn thermal_line(world: &World, style: &Style, current: u64) {
         println!("{}", style.dim("  (this planet is unsited — 'site <albedo> <r>')"));
         return;
     };
-    let t4 = thermal::t_eq4(&class.luminosity(), &site.albedo, &site.orbit_r);
+    let t4 = thermal::t_eq4(&class.luminosity(), site.albedo.value(), site.orbit_r.value());
     let band = match thermal::band_of(&t4) {
         Some(thermal::SubstrateBand::Cryogenic) => "CRYOGENIC (the vault: lossless joule store)",
         Some(thermal::SubstrateBand::Mesic) => "MESIC (near-zero life-support overhead)",
@@ -3612,10 +3632,8 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "deal {} already charters a lane on this book — one charter per deal",
             style.strong(&deal.to_string())
         ),
-        ActionRefused::BadEta => {
-            "a lane's suppression sits inside [0, 1) — raw space is 0, no lane erases the void"
-                .to_string()
-        }
+        // BadEta is DEAD (29_CONSTRUCTION C1): η is a `Unit` and cannot
+        // leave [0,1), so no verb can be handed one to refuse.
         ActionRefused::EconomicallyWalled { melt } => format!(
             "the void takes {} of every unit at this distance — this pair is economically WALLED; charter a route or trade nearer",
             style.strong(&format!("{}/{}", melt.numer(), melt.denom()))
@@ -3704,11 +3722,9 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             "orb {} is already sited — an orbit does not move",
             style.strong(&orb.to_string())
         ),
-        ActionRefused::BadSiting => format!(
-            "siting needs {} with 0 ≤ A < 1 and r > 0 — e.g. {}",
-            style.strong("site <albedo> <r>"),
-            style.strong("site 3/10 1")
-        ),
+        // BadSiting is DEAD (29_CONSTRUCTION C1): albedo is a `Unit`
+        // and the radius a `Positive` — the client's parse doors report
+        // an out-of-range argument before any verb sees it.
         ActionRefused::BadTransfer => format!(
             "a transfer moves a positive amount between two different planets — e.g. {}",
             style.strong("send 5/2 iron to outpost")
@@ -4179,7 +4195,7 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::RouteChartered { deal, eta } => format!(
                 "⇉ lane {} CHARTERED at η {} — the melt bends around the path",
                 deal,
-                style.strong(&format!("{}/{}", eta.numer(), eta.denom()))
+                style.strong(&format!("{}/{}", eta.value().numer(), eta.value().denom()))
             ),
             cfe::dop::ClosureEvent::RouteLapsed { deal } => format!(
                 "⇢ lane {} LAPSES — raw space takes the path back",
@@ -4208,8 +4224,8 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::PlanetSited { orb_id, albedo, orbit_r, theta: _, psi: _ } => format!(
                 "◍ orb {} sited — albedo {} at orbit r {}",
                 style.strong(&orb_id.to_string()),
-                amount(albedo),
-                amount(orbit_r)
+                amount(albedo.value()),
+                amount(orbit_r.value())
             ),
             cfe::dop::ClosureEvent::VentSettled { amount: vented, .. } => format!(
                 "♨ vented entropy settled: {} into the cumulative ledger",

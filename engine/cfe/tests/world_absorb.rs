@@ -7,7 +7,7 @@
 //! remainder lapses by receipt to `extracted_across` — one mechanic,
 //! two outcomes, measured by behavior. The engine gates nothing.
 
-use cfe::dop::{ClosureEvent, Resource, ZoneKind};
+use cfe::dop::{positive, unit, ClosureEvent, Resource, ZoneKind};
 use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::StarClass;
 use cfe::world::{replay, ActionRefused, World, FIRST_ORB, SOVEREIGN};
@@ -40,10 +40,10 @@ fn furnace_and_coldstore() -> (World, u64) {
         .expect("zones the array");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None, None)
+        .site_planet(FIRST_ORB, unit(0, 1), positive(1, 2), None, None)
         .expect("sites hot");
     world
-        .site_planet(charted, ratio(0, 1), ratio(100, 1), None, None)
+        .site_planet(charted, unit(0, 1), positive(100, 1), None, None)
         .expect("sites cold");
     // Tick @16: the furnace mints 15/8 and overflows 1/2 (struck); the
     // array captures 19999/10000 before the unheated charted's joule
@@ -245,7 +245,7 @@ fn absorption_refuses_typed() {
     let charted = world.chart("outpost", FIRST_ORB).expect("charts");
     world.commission_star(StarClass::G).expect("commissions");
     world
-        .site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 2), None, None)
+        .site_planet(FIRST_ORB, unit(0, 1), positive(1, 2), None, None)
         .expect("sites hot");
     // No shell: heat_net 5/2 all overflows on one tick.
     world.tick();

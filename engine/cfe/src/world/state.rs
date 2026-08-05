@@ -145,7 +145,7 @@ pub struct Committed {
     pub instruments: Vec<(u64, [u8; 32], u8)>,
     /// ROUTE-1: this book's live lanes — (deal, eta); a PAIR exists
     /// where both books hold the deal.
-    pub routes: Vec<(u64, Ratio)>,
+    pub routes: Vec<(u64, crate::dop::Unit)>,
     /// PRACTICE-1: the receipted disciplines, adoption order.
     pub practices: Vec<u8>,
     /// ELEMENT-GRAMMAR-1 (14 §3): the opened veins — the working
@@ -248,7 +248,7 @@ pub struct World {
     /// MANU-1: the forged instruments (replay of the receipts).
     pub(super) instruments: Vec<(u64, [u8; 32], u8)>,
     /// ROUTE-1: the live lanes (replay of the receipts).
-    pub(super) routes: Vec<(u64, Ratio)>,
+    pub(super) routes: Vec<(u64, crate::dop::Unit)>,
     pub(super) prospects: Vec<Prospected>,
     /// WARDEN-1a: the elder's reverse shield (replay of the receipts).
     pub(super) warded: Option<bool>,

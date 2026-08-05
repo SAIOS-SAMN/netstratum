@@ -6,7 +6,7 @@
 //! the arbor binds the draw to the sky; two worlds mint DIFFERENT
 //! elements from ONE grammar; replay MATCHES.
 
-use cfe::dop::{ClosureEvent, ZoneKind};
+use cfe::dop::{positive, unit, ClosureEvent, ZoneKind};
 use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
 use cfe::vrp::ChainRead;
@@ -16,7 +16,7 @@ fn charted(name: &str, class: StarClass) -> World {
     let mut world = World::new();
     world.found(name).expect("founds");
     world.commission_star(class).expect("commissions");
-    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None, None).expect("sites");
+    world.site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None).expect("sites");
     world.zone(0, ZoneKind::Extractor).expect("zones");
     world
 }

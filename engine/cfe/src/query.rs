@@ -171,7 +171,7 @@ fn thermal_class(orb: &ColonyOrb, star: Option<StarClass>) -> u8 {
     let (Some(site), Some(class)) = (&orb.thermal, star) else {
         return 0;
     };
-    match band_of(&t_eq4(&class.luminosity(), &site.albedo, &site.orbit_r)) {
+    match band_of(&t_eq4(&class.luminosity(), site.albedo.value(), site.orbit_r.value())) {
         Some(SubstrateBand::Cryogenic) => 1,
         Some(SubstrateBand::Mesic) => 2,
         Some(SubstrateBand::HyperThermal) => 3,

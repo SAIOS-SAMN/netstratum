@@ -176,8 +176,8 @@ impl World {
                     (Some(class), Some(site)) => {
                         let t4 = crate::thermal::t_eq4(
                             &class.luminosity(),
-                            &site.albedo,
-                            &site.orbit_r,
+                            site.albedo.value(),
+                            site.orbit_r.value(),
                         );
                         t4 < crate::thermal::SubstrateBand::Mesic.bounds4().0
                     }

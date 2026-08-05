@@ -1086,8 +1086,8 @@ pub enum ClosureEvent {
     /// `recurrence_guard` fails the build on reuse.)
     PlanetSited {
         orb_id: u64,
-        albedo: Ratio,
-        orbit_r: Ratio,
+        albedo: Unit,
+        orbit_r: Positive,
         theta: Option<Slot>,
         psi: Option<Slot>,
     },
@@ -1447,7 +1447,7 @@ pub enum ClosureEvent {
     /// settles and nothing lapses when it falls due.
     SovereignUnionSealed { progenitor: Office, sovereign: Office, term_stamps: u64 },
     /// ROUTE-1: a lane chartered — this book's leg of the pair.
-    RouteChartered { deal: u64, eta: Ratio },
+    RouteChartered { deal: u64, eta: Unit },
     /// ROUTE-1: the lane lapsed on this book (unpaid maintenance).
     RouteLapsed { deal: u64 },
 }
@@ -1546,8 +1546,8 @@ impl ClosureEvent {
             }
             Self::PlanetSited { orb_id, albedo, orbit_r, theta, psi } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
-                ratio::encode(albedo, &mut value);
-                ratio::encode(orbit_r, &mut value);
+                ratio::encode(albedo.value(), &mut value);
+                ratio::encode(orbit_r.value(), &mut value);
                 // TRAILING and OPTIONAL: an unsited angle writes no
                 // bytes at all, so a receipt that never had one is
                 // byte-identical to what it was before the amendment.
@@ -1872,7 +1872,7 @@ impl ClosureEvent {
             }
             Self::RouteChartered { deal, eta } => {
                 let mut value = deal.to_le_bytes().to_vec();
-                ratio::encode(eta, &mut value);
+                ratio::encode(eta.value(), &mut value);
                 tlv::put(79, &value, &mut out);
             }
             Self::VoidShare { orb_id, deal, resource, amount } => {
@@ -2000,7 +2000,9 @@ impl ClosureEvent {
             25 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let (albedo, used) = ratio::decode(value.get(8..)?)?;
+                let albedo = Unit::new(albedo)?;
                 let (orbit_r, used_r) = ratio::decode(value.get(8 + used..)?)?;
+                let orbit_r = Positive::new(orbit_r)?;
                 // The trailing angle, ABSENT on every receipt written
                 // before the amendment. `None` is not `0`: zero would
                 // put all of history on one ray.
@@ -2360,6 +2362,7 @@ impl ClosureEvent {
             79 => {
                 let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let (eta, _) = ratio::decode(value.get(8..)?)?;
+                let eta = Unit::new(eta)?;
                 Some(Self::RouteChartered { deal, eta })
             }
             80 => Some(Self::RouteLapsed {
@@ -2419,9 +2422,9 @@ fn amount_fields(value: &[u8]) -> Option<(u64, Resource, Ratio)> {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ThermalSite {
     /// Albedo A, 0 ≤ A < 1.
-    pub albedo: Ratio,
+    pub albedo: Unit,
     /// Orbit radius r > 0, in the star's units.
-    pub orbit_r: Ratio,
+    pub orbit_r: Positive,
     /// THE ANGLE — a fraction of a TURN, `θ ∈ [0, 1) ⊂ ℚ`.
     ///
     /// **Turns, never radians.** A full turn in radians is `2π`, which
@@ -2572,8 +2575,8 @@ impl ColonyOrb {
         }
         if let Some(site) = &self.thermal {
             let mut value = Vec::new();
-            ratio::encode(&site.albedo, &mut value);
-            ratio::encode(&site.orbit_r, &mut value);
+            ratio::encode(site.albedo.value(), &mut value);
+            ratio::encode(site.orbit_r.value(), &mut value);
             value.push(self.overheat as u8);
             // THE ANGLE, additive-trailing on tag 26 (2026-08-02). An
             // unsited angle writes nothing, so an orb that never had a
@@ -2763,7 +2766,9 @@ impl ColonyOrb {
                 }
                 26 => {
                     let (albedo, used) = ratio::decode(value)?;
+                    let albedo = Unit::new(albedo)?;
                     let (orbit_r, used_r) = ratio::decode(value.get(used..)?)?;
+                    let orbit_r = Positive::new(orbit_r)?;
                     orb.overheat = *value.get(used + used_r)? != 0;
                     // The trailing angle: absent on every frame written
                     // before the amendment, and absent means UNPLACED,
@@ -2963,7 +2968,7 @@ pub fn tile_class(seed: &[u8; 32], orb_id: u64, tile: u16) -> TileClass {
 /// and re-exported here so every existing citation resolves unchanged.
 /// One truth, two readers: `cfe::dop::TURN_SLOTS` and
 /// `ratio::TURN_SLOTS` are the same constant, not two copies.
-pub use ratio::{on_slot, slot_angle, slot_of, turn_gap, Slot, TURN_SLOTS};
+pub use ratio::{on_slot, positive, slot_angle, slot_of, turn_gap, unit, Positive, Slot, Unit, TURN_SLOTS};
 
 
 /// WRAPPED L1 SEPARATION between two sited orbs — the only adjacency
@@ -2984,10 +2989,10 @@ pub fn separation(a: &ThermalSite, b: &ThermalSite) -> Option<Ratio> {
     let (Some(theta_a), Some(theta_b)) = (&a.theta, &b.theta) else {
         return None;
     };
-    let radial = if a.orbit_r >= b.orbit_r {
-        a.orbit_r.clone() - b.orbit_r.clone()
+    let radial = if a.orbit_r.value() >= b.orbit_r.value() {
+        a.orbit_r.value().clone() - b.orbit_r.value().clone()
     } else {
-        b.orbit_r.clone() - a.orbit_r.clone()
+        b.orbit_r.value().clone() - a.orbit_r.value().clone()
     };
     let mut total = radial + turn_gap(theta_a.angle(), theta_b.angle());
     // ψ ADDS ITS OWN WRAPPED TERM. Two orbs at one radius and one

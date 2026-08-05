@@ -6,8 +6,8 @@
 //! overwriting a node the predecessor held; the kernel (the world's
 //! own sun) stays with the world; replay MATCHES.
 
-use cfe::dop::{ClosureEvent, ZoneKind};
-use cfe::ratio::ratio;
+use cfe::dop::{positive, unit, ClosureEvent, ZoneKind};
+
 use cfe::thermal::StarClass;
 use cfe::vrp::ChainRead;
 use cfe::world::{replay, ActionRefused, World, FIRST_ORB};
@@ -21,7 +21,7 @@ fn derelict_with_insulation() -> World {
     let mut world = World::new();
     world.found("dimlight-hold").expect("founds");
     world.commission_star(StarClass::M).expect("commissions");
-    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None, None).expect("sites cold");
+    world.site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None).expect("sites cold");
     world.zone(8, ZoneKind::Habitat).expect("zones");
     for _ in 1..=541u32 {
         world.tick();

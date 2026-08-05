@@ -19,7 +19,7 @@
 //!    held as a test rather than as prose: holonomy comes from edges
 //!    OUTSIDE a spanning forest, and a forest has none.
 
-use cfe::ratio::{ratio, Ratio};
+use cfe::ratio::{ratio};
 use cfe::world::Committed;
 use kernel::bridge::{
     project_complex_across, read_entangled_across, poles_per_dimension_across, CHANNELS,
@@ -28,15 +28,15 @@ use kernel::bridge::{
 
 /// A committed book holding exactly the lanes named. Everything else
 /// stays at its default — the lane channel is what is under test.
-fn book_with_lanes(lanes: &[(u64, Ratio)]) -> Committed {
+fn book_with_lanes(lanes: &[(u64, cfe::dop::Unit)]) -> Committed {
     Committed { routes: lanes.to_vec(), ..Default::default() }
 }
 
 #[test]
 fn a_shared_lane_is_an_edge_and_an_unshared_one_is_not() {
-    let a = book_with_lanes(&[(7, ratio(1, 8))]);
-    let b = book_with_lanes(&[(7, ratio(1, 8))]);
-    let c = book_with_lanes(&[(9, ratio(1, 8))]);
+    let a = book_with_lanes(&[(7, cfe::dop::unit(1, 8))]);
+    let b = book_with_lanes(&[(7, cfe::dop::unit(1, 8))]);
+    let c = book_with_lanes(&[(9, cfe::dop::unit(1, 8))]);
 
     let (delta, support) = project_complex_across(&[&a, &b, &c]);
     assert_eq!(delta.fiber(), CHANNELS, "one coordinate per channel");
@@ -59,9 +59,9 @@ fn a_triangle_of_lanes_carries_rank_that_no_book_can_see_alone() {
     // Three worlds, pairwise laned: A~B, B~C, C~A. Three edges over
     // three vertices — a spanning forest takes two, so exactly ONE
     // edge stands outside it and closes one independent cycle.
-    let a = book_with_lanes(&[(1, ratio(1, 8)), (3, ratio(1, 8))]);
-    let b = book_with_lanes(&[(1, ratio(1, 8)), (2, ratio(1, 8))]);
-    let c = book_with_lanes(&[(2, ratio(1, 8)), (3, ratio(1, 8))]);
+    let a = book_with_lanes(&[(1, cfe::dop::unit(1, 8)), (3, cfe::dop::unit(1, 8))]);
+    let b = book_with_lanes(&[(1, cfe::dop::unit(1, 8)), (2, cfe::dop::unit(1, 8))]);
+    let c = book_with_lanes(&[(2, cfe::dop::unit(1, 8)), (3, cfe::dop::unit(1, 8))]);
 
     let read = read_entangled_across(&[&a, &b, &c], 0);
     assert_eq!(read.rank, 1, "the closed triangle carries exactly one independent cycle");
@@ -81,8 +81,8 @@ fn a_triangle_of_lanes_carries_rank_that_no_book_can_see_alone() {
 
 #[test]
 fn the_channels_stay_complementary() {
-    let a = book_with_lanes(&[(1, ratio(1, 8))]);
-    let b = book_with_lanes(&[(1, ratio(1, 8))]);
+    let a = book_with_lanes(&[(1, cfe::dop::unit(1, 8))]);
+    let b = book_with_lanes(&[(1, cfe::dop::unit(1, 8))]);
     let (delta, support) = project_complex_across(&[&a, &b]);
     for channel in 0..CHANNELS {
         if channel == CHANNEL_LANE {
@@ -104,7 +104,7 @@ fn the_channels_stay_complementary() {
 
 #[test]
 fn a_lone_book_relates_to_nothing_and_neither_pole_stands() {
-    let a = book_with_lanes(&[(1, ratio(1, 8))]);
+    let a = book_with_lanes(&[(1, cfe::dop::unit(1, 8))]);
     let read = read_entangled_across(&[&a], 0);
     assert_eq!(read.rank, 0, "one book has no boundary to relate across");
     // The VERDICT form is struck with the vacuity removal; the poles
@@ -115,8 +115,8 @@ fn a_lone_book_relates_to_nothing_and_neither_pole_stands() {
 
 #[test]
 fn unknown_is_carried_and_refuses_the_reading() {
-    let a = book_with_lanes(&[(1, ratio(1, 8))]);
-    let b = book_with_lanes(&[(1, ratio(1, 8))]);
+    let a = book_with_lanes(&[(1, cfe::dop::unit(1, 8))]);
+    let b = book_with_lanes(&[(1, cfe::dop::unit(1, 8))]);
     let blind = read_entangled_across(&[&a, &b], 3);
     assert_eq!(blind.unknown, 3, "the observer's blindness rides the read");
     assert!(
@@ -134,9 +134,9 @@ fn a_tree_of_lanes_carries_no_cycle() {
     // this is what a tree reads: A~B, B~C, no closing edge. Two edges
     // over three vertices is exactly a spanning forest, so NOTHING
     // stands outside it and the rank is zero however deep the tree.
-    let a = book_with_lanes(&[(1, ratio(1, 8))]);
-    let b = book_with_lanes(&[(1, ratio(1, 8)), (2, ratio(1, 8))]);
-    let c = book_with_lanes(&[(2, ratio(1, 8))]);
+    let a = book_with_lanes(&[(1, cfe::dop::unit(1, 8))]);
+    let b = book_with_lanes(&[(1, cfe::dop::unit(1, 8)), (2, cfe::dop::unit(1, 8))]);
+    let c = book_with_lanes(&[(2, cfe::dop::unit(1, 8))]);
     let read = read_entangled_across(&[&a, &b, &c], 0);
     assert_eq!(
         read.rank, 0,

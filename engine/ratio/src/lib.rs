@@ -313,3 +313,49 @@ impl Slot {
         scaled.to_integer().try_into().unwrap_or(0)
     }
 }
+
+/// **A UNIT-INTERVAL VALUE — `x ∈ [0, 1)`, proven at construction.**
+///
+/// Albedo, route efficiency and every other half-open-unit quantity
+/// carried bare `Ratio`s, so each verb re-checked the range and refused
+/// (`BadSiting`, `BadEta` — shape refusals standing where a type should
+/// be). A `Unit` cannot leave the interval; the checks die at every
+/// consumer.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Unit(Ratio);
+
+impl Unit {
+    /// The value door — `None` carries the fault.
+    pub fn new(value: Ratio) -> Option<Unit> {
+        (value >= ratio(0, 1) && value < ratio(1, 1)).then_some(Unit(value))
+    }
+    pub fn value(&self) -> &Ratio {
+        &self.0
+    }
+}
+
+/// **A STRICTLY POSITIVE VALUE — `x > 0`, proven at construction.**
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Positive(Ratio);
+
+impl Positive {
+    pub fn new(value: Ratio) -> Option<Positive> {
+        (value > ratio(0, 1)).then_some(Positive(value))
+    }
+    pub fn value(&self) -> &Ratio {
+        &self.0
+    }
+}
+
+/// **THE LITERAL DOORS** — for literals written in source, where the
+/// author can see the numbers. They panic on an out-of-range literal,
+/// which is the same class as [`ratio`] itself panicking on `d = 0`:
+/// a malformed LITERAL is a build error wearing a run-time coat, not a
+/// runtime condition. Values that arrive at runtime go through
+/// [`Unit::new`] / [`Positive::new`], which fault instead.
+pub fn unit(numer: i64, denom: i64) -> Unit {
+    Unit::new(ratio(numer, denom)).expect("a unit literal must sit in [0, 1)")
+}
+pub fn positive(numer: i64, denom: i64) -> Positive {
+    Positive::new(ratio(numer, denom)).expect("a positive literal must exceed 0")
+}

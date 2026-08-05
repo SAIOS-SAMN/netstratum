@@ -6,6 +6,8 @@
 //! touched, conservation-exact both directions; replay reproduces
 //! the whole book.
 
+use cfe::dop::{positive, unit};
+
 use cfe::dop::Resource;
 use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
@@ -15,7 +17,7 @@ fn sunlit(name: &str) -> World {
     let mut world = World::new();
     world.found(name).expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
-    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None, None).expect("sites");
+    world.site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None).expect("sites");
     world
 }
 
@@ -241,10 +243,10 @@ fn the_lane_bends_the_melt_then_lapses() {
     };
     let mut a = alloyed("waypoint-a");
     let mut b = alloyed("waypoint-b");
-    charter_route(&mut a, FIRST_ORB, &mut b, FIRST_ORB, ratio(1, 2), 40).expect("charters");
+    charter_route(&mut a, FIRST_ORB, &mut b, FIRST_ORB, unit(1, 2), 40).expect("charters");
     assert!(
         matches!(
-            charter_route(&mut a, FIRST_ORB, &mut b, FIRST_ORB, ratio(1, 2), 40),
+            charter_route(&mut a, FIRST_ORB, &mut b, FIRST_ORB, unit(1, 2), 40),
             Err(cfe::world::ActionRefused::RouteKnown { deal: 40 })
         ),
         "one charter per deal"

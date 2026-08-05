@@ -32,7 +32,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut terrain_seed: Option<[u8; 32]> = None;
     let mut practices: Vec<u8> = Vec::new();
     let mut instruments: Vec<(u64, [u8; 32], u8)> = Vec::new();
-    let mut routes: Vec<(u64, Ratio)> = Vec::new();
+    let mut routes: Vec<(u64, crate::dop::Unit)> = Vec::new();
     let mut warded: Option<bool> = None;
     let mut veiled = false;
     let mut taxon: Option<(u8, u8)> = None;

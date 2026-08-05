@@ -16,7 +16,7 @@
 
 use cfe::dop::ClosureEvent;
 use cfe::ipsal::Scope;
-use cfe::ratio::ratio;
+
 use cfe::world::{World, SOVEREIGN};
 use kernel::{admits, Step, Refused};
 
@@ -37,7 +37,10 @@ fn build_deeds() -> Vec<ClosureEvent> {
         ClosureEvent::PracticeAdopted { practice: 1 },
         ClosureEvent::ElderWarded {},
         ClosureEvent::VeilDrawn {},
-        ClosureEvent::RouteChartered { deal: 1, eta: ratio(1, 1) },
+        // eta was `ratio(1, 1)` here — OUT of [0,1), a stale fixture
+        // posing as a lawful deed. The `Unit` door caught it the moment
+        // the type landed, which is the construction law doing its job.
+        ClosureEvent::RouteChartered { deal: 1, eta: cfe::dop::unit(1, 2) },
         // THE MISSED SIXTH (arch-02's audit) entered coverage here as
         // GaugeShiftedAt — then U2d's GAUGE LAW landed and outran this
         // fixture: the deed DECLARES a key move, so judging it with

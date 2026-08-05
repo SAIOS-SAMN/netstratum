@@ -451,7 +451,7 @@ pub fn project_complex_across(books: &[&Committed]) -> (Delta, Support) {
                 .max();
             if let Some(eta) = shared {
                 let mut coords = vec![ratio(0, 1); CHANNELS];
-                coords[CHANNEL_LANE] = eta;
+                coords[CHANNEL_LANE] = eta.value().clone();
                 delta.set_antisym(i, j, coords);
                 support.connect(i, j, CHANNEL_LANE);
             }

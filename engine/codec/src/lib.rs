@@ -205,7 +205,7 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
     put_u32(&mut out, committed.routes.len() as u32);
     for (deal, eta) in &committed.routes {
         put_u64(&mut out, *deal);
-        ratio::encode(eta, &mut out);
+        ratio::encode(eta.value(), &mut out);
     }
 
     put_u32(&mut out, committed.practices.len() as u32);
@@ -468,7 +468,9 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
 
     let mut routes = Vec::new();
     for _ in 0..take.u32()? {
-        routes.push((take.u64()?, take.ratio()?));
+        // FORM AT THE DOOR: the snapshot's eta re-proves [0,1) at decode,
+        // same law as the chronicle door — a Unit past here is proven.
+        routes.push((take.u64()?, cfe::dop::Unit::new(take.ratio()?)?));
     }
 
     let practices_len = take.u32()? as usize;

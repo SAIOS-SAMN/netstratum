@@ -6,6 +6,8 @@
 //! orbit that "does not move" moves: albedo and orbit re-seat, the
 //! world crosses substrate bands.
 
+use cfe::dop::{positive, unit};
+
 use cfe::dop::Resource;
 use cfe::ratio::ratio;
 use cfe::thermal::{t_eq4, StarClass, SubstrateBand};
@@ -17,7 +19,7 @@ fn sunlit(name: &str) -> World {
     let mut world = World::new();
     world.found(name).expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
-    world.site_planet(FIRST_ORB, ratio(0, 1), ratio(1, 1), None, None).expect("sites");
+    world.site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None).expect("sites");
     world
 }
 
@@ -41,7 +43,7 @@ fn the_crown_gifts_only_onto_a_finished_stack_and_moves_the_orbit() {
 
     // The orbit does not move without the crown.
     assert_eq!(
-        receiver.terraform(FIRST_ORB, ratio(1, 2), ratio(1, 2)),
+        receiver.terraform(FIRST_ORB, unit(1, 2), positive(1, 2)),
         Err(ActionRefused::TerraformUnearned)
     );
     // The crown refuses an unfinished stack (only the solar leap held).
@@ -66,8 +68,8 @@ fn the_crown_gifts_only_onto_a_finished_stack_and_moves_the_orbit() {
 
     // Under the crown, the world moves BETWEEN BANDS: mesic (load 1)
     // re-seats hot (load 2) — measured in T_eq4, exact.
-    receiver.terraform(FIRST_ORB, ratio(1, 2), ratio(1, 2)).expect("the orbit moves");
+    receiver.terraform(FIRST_ORB, unit(1, 2), positive(1, 2)).expect("the orbit moves");
     let site = receiver.orb().expect("orb").thermal.clone().expect("sited");
-    let t4 = t_eq4(&StarClass::G.luminosity(), &site.albedo, &site.orbit_r);
+    let t4 = t_eq4(&StarClass::G.luminosity(), site.albedo.value(), site.orbit_r.value());
     assert!(t4 > SubstrateBand::Mesic.bounds4().1, "the world crossed into the hot band");
 }

@@ -6,6 +6,8 @@
 //! feed is a RENDERING, never state (08 §1.1); the terminology law
 //! holds in every generated word.
 
+use cfe::dop::{positive, unit};
+
 use std::fs;
 use std::path::PathBuf;
 
@@ -72,7 +74,7 @@ fn frozen_world() -> World {
     let mut world = World::new();
     world.found("frostfall").expect("founds");
     world.commission_star(StarClass::M).expect("commissions");
-    world.site_planet(1, ratio(0, 1), ratio(1, 1), None, None).expect("sites");
+    world.site_planet(1, unit(0, 1), positive(1, 1), None, None).expect("sites");
     world.zone(0, ZoneKind::Extractor).expect("zones");
     world.zone(8, ZoneKind::Habitat).expect("zones");
     for _ in 0..60 {
@@ -87,7 +89,7 @@ fn furnace_world() -> World {
     let mut world = World::new();
     world.found("emberhold").expect("founds");
     world.commission_star(StarClass::A).expect("commissions");
-    world.site_planet(1, ratio(0, 1), ratio(1, 1), None, None).expect("sites");
+    world.site_planet(1, unit(0, 1), positive(1, 1), None, None).expect("sites");
     world.zone(0, ZoneKind::Encasement).expect("zones");
     for _ in 0..30 {
         world.tick();
