@@ -734,6 +734,13 @@ pub struct Polity {
 
 }
 
+/// The smelter's (iron, biomass) gate — bound ONCE, read by the
+/// industrial arm, the forge hold, and the gather alike, so the
+/// ratchet counts two dials and no reader can drift from another.
+fn smelter_gates() -> (Ratio, Ratio) {
+    (ratio(30, 1), ratio(10, 1))
+}
+
 fn banked(world: &World, resource: Resource) -> Ratio {
     world
         .orb()
@@ -1106,7 +1113,104 @@ impl Polity {
         let _ = self.world.zone_as(self.automaton, target, tile, ZoneKind::Extractor);
     }
 
+    /// **THE FORGE GATHERS** (the G2 relay's second arm, 2026-08-06 —
+    /// "not a spend to hold back; a distribution to gather back"). The
+    /// chart law rides 10 biomass to every child and the market banks
+    /// imports where the offer rested, so a rung-3 mineral line's
+    /// biomass stands scattered across the estate while the smelter
+    /// gate reads the primary bank alone. The estate chain exists for
+    /// exactly this movement: the survey grants the postal addresses,
+    /// the conveyance moves the parcels, postage prices it honestly.
+    ///
+    /// Children keep a DERIVED floor — their own per-tick biomass
+    /// rations × the reciprocity window — so the gather can never
+    /// famine what the charter founded. Every deed is refusal-pure:
+    /// an unaffordable survey or an over-cap conveyance idles this
+    /// beat and the gather resumes on the next.
+    fn gather_for_forge(&mut self) {
+        let primary = cfe::world::FIRST_ORB;
+        if !(self.level >= 3
+            && zone_count(&self.world, ZoneKind::Smelter) < 3
+            && industry_relevant(&self.spec.civilization.metabolism, ZoneKind::Smelter))
+        {
+            return;
+        }
+        let (_, bio_gate) = smelter_gates();
+        if banked(&self.world, Resource::Biomass) >= bio_gate {
+            return;
+        }
+        let committed = self.world.committed();
+        let orbs: Vec<u64> = committed.orbs.iter().map(|held| held.orb_id).collect();
+        if orbs.len() < 2 {
+            return;
+        }
+        // The postal addresses: the standing survey must cover the
+        // estate as it stands; a grown estate re-surveys, then gathers
+        // on the next beat.
+        let covered = self
+            .world
+            .chronicle()
+            .receipts()
+            .iter()
+            .rev()
+            .find_map(|receipt| match &receipt.event {
+                cfe::dop::ClosureEvent::EstateSurveyed { covered, .. } => {
+                    Some(covered.iter().map(|(orb, _)| *orb).collect::<Vec<u64>>())
+                }
+                _ => None,
+            })
+            .unwrap_or_default();
+        if !orbs.iter().all(|orb| covered.contains(orb)) {
+            let _ = self.world.survey_estate_as(self.automaton, primary);
+            return;
+        }
+        let metabolism = committed
+            .genesis
+            .as_ref()
+            .map(|held| held.metabolism)
+            .unwrap_or(2);
+        let mut need = bio_gate - banked(&self.world, Resource::Biomass);
+        for child in orbs.into_iter().filter(|orb| *orb != primary) {
+            if need <= ratio(0, 1) {
+                break;
+            }
+            let Some(held) = committed.orbs.iter().find(|held| held.orb_id == child) else {
+                continue;
+            };
+            // The derived floor: the child's own per-tick biomass
+            // rations across the reciprocity window.
+            let rations: Ratio = held
+                .zones
+                .iter()
+                .flat_map(|zone| cfe::dop::zone_upkeep(zone.kind, metabolism))
+                .filter(|(resource, _)| *resource == Resource::Biomass)
+                .fold(ratio(0, 1), |sum, (_, amount)| sum + amount);
+            let floor = rations * ratio(cfe::dop::reciprocity_window() as i64, 1);
+            let surplus = held.banked_amount(Resource::Biomass) - floor;
+            if surplus <= ratio(0, 1) {
+                continue;
+            }
+            let ask = surplus.min(need.clone());
+            let Some(amount) = cfe::dop::Positive::new(ask.clone()) else {
+                continue;
+            };
+            if self
+                .world
+                .convey_as(
+                    self.automaton,
+                    cfe::dop::between(child, primary),
+                    Resource::Biomass,
+                    amount,
+                )
+                .is_ok()
+            {
+                need -= ask;
+            }
+        }
+    }
+
     fn build_step(&mut self) {
+        self.gather_for_forge();
         let world = &mut self.world;
         if world.orb().is_none_or(|orb| !orb.famine.is_empty()) {
             return; // starving colonies build nothing
@@ -1130,12 +1234,7 @@ impl Polity {
         // line's OWN science (relevance table) — a plasmic line never
         // forges iron; its advancement crosses by joint venture.
         let metabolism = self.spec.civilization.metabolism.clone();
-        // The smelter's gate, bound ONCE — the industrial arm and the
-        // forge hold below read the same pair, so the ratchet counts
-        // two dials, not four (it went red on the duplication and was
-        // right to).
-        let smelter_iron_gate = ratio(30, 1);
-        let smelter_bio_gate = ratio(10, 1);
+        let (smelter_iron_gate, smelter_bio_gate) = smelter_gates();
         let industrial: Option<ZoneKind> = if can_synth
             && alloy >= ratio(20, 1)
             && bio >= ratio(15, 1)
