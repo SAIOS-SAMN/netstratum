@@ -4770,10 +4770,26 @@ fn chronicle(world: &World, style: &Style) {
                     Some((class, clade)) => cfe::dop::line_synthesis_at(seed, *class, *clade),
                     None => cfe::dop::line_synthesis(seed),
                 };
+                // #45: a MINTED class resolves its word from the FOLD
+                // at the render seam — the pure draw stays fold-blind.
+                let species = match draw.class > cfe::dop::class_ceiling() {
+                    true => cfe::vocabulary::fold(
+                        world.chronicle(),
+                        cfe::vocabulary::Axis::Class,
+                    )
+                    .into_iter()
+                    .find(|entry| entry.code == draw.class)
+                    .map(|entry| {
+                        let voice = draw.species.split(' ').next().unwrap_or("").to_string();
+                        format!("{voice} {}", entry.word)
+                    })
+                    .unwrap_or_else(|| draw.species.clone()),
+                    false => draw.species.clone(),
+                };
                 format!(
                     "✶ line MINTED — {} ({}), \"{}\"",
                     style.strong(&draw.name),
-                    draw.species,
+                    species,
                     draw.motto
                 )
             }

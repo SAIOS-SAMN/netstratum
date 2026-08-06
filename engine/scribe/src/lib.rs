@@ -29,7 +29,7 @@
 use cfe::world::World;
 use ledger::{sanitize, Ledger};
 use pen::JsonWriter;
-use lens::render::{hex, render_receipt, render_state};
+use lens::render::{hex, render_receipt, render_state_with};
 use std::fs;
 use std::io::Write as _;
 
@@ -62,7 +62,19 @@ pub fn record(
 
     // state.json — write whole to a counterpart, then rename (atomic
     // on POSIX): a reader never sees a torn snapshot.
-    let state = render_state(world_name, planet, civilization, world);
+    // #45: the Spectrum's weighted mass rides the uplink — derived
+    // HERE (scribe holds the kernel; the lens stays kernel-free) and
+    // handed to the renderer as data.
+    let mass = {
+        let payloads = world.chronicle().receipts().iter().filter_map(|r| {
+            match &r.event {
+                cfe::dop::ClosureEvent::DiscoveryMinted { work, .. } => Some(work.as_slice()),
+                _ => None,
+            }
+        });
+        cfe::ratio::ratio_str(&kernel::spectrum_of(payloads).weighted)
+    };
+    let state = render_state_with(world_name, planet, civilization, world, Some(&mass));
     let tmp = planet_dir.join("state.json.tmp");
     fs::write(&tmp, state)?;
     fs::rename(&tmp, planet_dir.join("state.json"))?;

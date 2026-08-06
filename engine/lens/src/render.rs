@@ -90,8 +90,25 @@ fn want_name(kind: u8) -> &'static str {
 }
 
 pub fn render_state(world_name: &str, planet: &str, civilization: &str, world: &World) -> String {
+    render_state_with(world_name, planet, civilization, world, None)
+}
+
+/// The same rendering with the COGNITION MASS the caller derived —
+/// the lens needs no kernel dependency to see (its charter): the
+/// Spectrum's weighted mass arrives as data, preformatted, exactly as
+/// every relation the lens is GIVEN. `None` omits the field.
+pub fn render_state_with(
+    world_name: &str,
+    planet: &str,
+    civilization: &str,
+    world: &World,
+    cognition_mass: Option<&str>,
+) -> String {
     let mut w = JsonWriter::new();
     w.open();
+    if let Some(mass) = cognition_mass {
+        w.field_str("cognition_mass", mass);
+    }
     w.field_str("civilization", civilization);
     w.field_str("world", world_name);
     w.field_str("planet", planet);
