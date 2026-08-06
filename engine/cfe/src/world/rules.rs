@@ -47,7 +47,7 @@ pub fn ease_of(techs: &[(u64, u8, [u8; 32], Ratio)], orb: u64, at: u64) -> Ratio
 /// spelling is not the sealed meaning.)
 fn ease_cliff(techs: &[(u64, u8, [u8; 32], Ratio)], orb: u64) -> Ratio {
     match techs.iter().any(|(held, condition, _, _)| *held == orb && *condition == 5) {
-        true => ratio(1, 2),
+        true => ratio(1, 2), // SEALED-RATE: epoch-0 law — editing rewrites history
         false => ratio(1, 1),
     }
 }

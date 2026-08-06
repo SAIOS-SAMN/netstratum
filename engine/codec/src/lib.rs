@@ -574,7 +574,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
                 let magnitude = cfe::dop::tech_node_of(condition)
                     .map(|(_, magnitude)| magnitude)
                     .unwrap_or_else(|| match condition {
-                        7 => ratio::ratio(3, 4),
+                        7 => ratio::ratio(3, 4), // SEALED-RATE: pre-v4 writer rule
                         _ => ratio::ratio(1, 1),
                     });
                 (orb, condition, node, magnitude)

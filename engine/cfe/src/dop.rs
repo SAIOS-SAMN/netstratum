@@ -644,7 +644,7 @@ pub fn demurrage_per_tick(supply: &Ratio, at: u64) -> Ratio {
 /// EPOCH 0 — the landed flat rate. **Never edit this function.** Every
 /// receipt stamped before `epoch::CONTINUOUS_FROM` is gated by it.
 fn sink_flat() -> Ratio {
-    ratio(1, 32)
+    ratio(1, 32) // SEALED-RATE: epoch-0 law — editing rewrites history
 }
 
 /// EPOCH 1 — the sink reads standing supply.

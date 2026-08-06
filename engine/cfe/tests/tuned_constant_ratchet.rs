@@ -56,7 +56,7 @@ const SOURCE_TREES: [&str; 11] = [
 ];
 
 /// **THE CEILING — measured 2026-08-05, and it only falls.**
-const TUNED_LITERAL_CEILING: usize = 119;
+const TUNED_LITERAL_CEILING: usize = 116;
 
 /// Parse `ratio(<int>, <int>)` starting at `text` (just past the open
 /// paren). Returns the pair only when both arguments are integer
@@ -71,7 +71,17 @@ fn literal_pair(text: &str) -> Option<(i64, i64)> {
     Some((numer, denom))
 }
 
+/// The sealed-history marker. An EPOCH-0 or writer-rule constant is
+/// not a tunable — editing it rewrites what history means — so a line
+/// carrying this marker leaves the dial walk and enters the SEALED
+/// class, whose size is pinned EXACTLY below (the anchor discipline:
+/// nothing enters without going red here, wearing its seal, in review).
+const SEALED_MARK: &str = "SEALED-RATE";
+
 fn tuned_in(line: &str) -> usize {
+    if line.contains(SEALED_MARK) {
+        return 0;
+    }
     let mut count = 0;
     let mut rest = line;
     while let Some(at) = rest.find("ratio(") {
@@ -154,6 +164,43 @@ fn the_census_parser_reads_what_it_should() {
     assert_eq!(tuned_in("ratio(condition as i64, 1)"), 0);
     assert_eq!(tuned_in("ratio(5, 4)) * ratio(3, 2)"), 2, "two dials on one line");
     assert_eq!(tuned_in("ratio(10_000, 1)"), 1, "underscores do not hide a dial");
+}
+
+/// **THE SEALED CLASS IS PINNED EXACTLY** — a sealed constant is
+/// counted by its marker, and the count moves only in review: history
+/// gains a sealed rule when an epoch closes, never silently. The
+/// VALUES are held by the epoch pins (`parameter_pins` holds the
+/// cliff, the flat sink rate rides `demurrage_per_tick` at an epoch-0
+/// stamp, the writer rule rides the codec's own round trips).
+#[test]
+fn the_sealed_class_is_exactly_as_large_as_sealed() {
+    let mut marks = 0usize;
+    let mut files = 0usize;
+    fn walk_marks(dir: &Path, mark: &str, marks: &mut usize, files: &mut usize) {
+        let Ok(entries) = fs::read_dir(dir) else {
+            return;
+        };
+        for entry in entries.filter_map(|held| held.ok()) {
+            let path = entry.path();
+            if path.is_dir() {
+                walk_marks(&path, mark, marks, files);
+            } else if path.extension().is_some_and(|ext| ext == "rs") {
+                *files += 1;
+                if let Ok(text) = fs::read_to_string(&path) {
+                    *marks += text.lines().filter(|line| line.contains(mark)).count();
+                }
+            }
+        }
+    }
+    for tree in SOURCE_TREES {
+        walk_marks(Path::new(tree), SEALED_MARK, &mut marks, &mut files);
+    }
+    assert!(files > 0, "the walk found no source files — the paths moved");
+    assert_eq!(
+        marks, 3,
+        "the sealed class moved — an epoch closed (lawful, pin it here \
+         in review) or a dial put on a seal it did not earn"
+    );
 }
 
 /// **THE SEED'S SIZE IS PINNED** — polities.rs stands outside the dial
