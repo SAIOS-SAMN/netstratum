@@ -154,3 +154,31 @@ fn a_corpus_mint_refuses_as_unpriced() {
         other => panic!("expected CarrierUnpriced, got {other:?}"),
     }
 }
+
+/// **THE MEASURED TABLE PRICES EXACTLY** — 34 confirmed rows, one
+/// blind; W = scarcity × VisitedNodes₃ / word_len with the ratified
+/// scarcities (1243/34 standard, 283/1 blind); an unmeasured task is
+/// unpriced, never guessed.
+#[test]
+fn the_measured_table_prices_exactly() {
+    use kernel::carrier_table::MEASURED;
+    assert_eq!(MEASURED.len(), 34, "the benchmark confirmed 34");
+    assert_eq!(
+        MEASURED.iter().filter(|(_, _, _, blind)| *blind).count(),
+        1,
+        "exactly one blind-spot solve"
+    );
+    let (id, visited, word_len, blind) = &MEASURED[0];
+    assert!(!blind);
+    assert_eq!(
+        kernel::corpus_weight(id),
+        Some(ratio(1243, 34) * ratio(*visited as i64, i64::from(*word_len)))
+    );
+    let (id, visited, word_len, _) =
+        MEASURED.iter().find(|(_, _, _, blind)| *blind).expect("the blind row");
+    assert_eq!(
+        kernel::corpus_weight(id),
+        Some(ratio(283, 1) * ratio(*visited as i64, i64::from(*word_len)))
+    );
+    assert_eq!(kernel::corpus_weight(&[0u8; 32]), None, "unmeasured is unpriced");
+}

@@ -31,6 +31,7 @@
 //! that no state semantics ever live outside this function.
 
 pub mod bridge;
+pub mod carrier_table;
 pub mod motion;
 
 use cfe::dop::{ClosureEvent, Office, Resource, UNION_REVIEW_HORIZON};
@@ -132,7 +133,7 @@ use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 /// its peoples). MINOR, derived: tag 101 enters `covered()` — the gate
 /// admits what was `Unjudged`. The receipt is a seed; there is nothing
 /// declarable to misdeclare, so no new refusal arm exists.
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 13, patch: 0 };
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 14, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
@@ -1391,8 +1392,36 @@ fn carrier_bound(work: &[u8]) -> Result<Ratio, WorkBroken> {
     match verify_work_class(work)? {
         WorkClass::Forge(difficulty) => Ok(mint_bound(difficulty.rung())),
         WorkClass::Volumetric(_) => Err(WorkBroken::CarrierRetired),
-        WorkClass::Corpus { .. } => Err(WorkBroken::CarrierUnpriced),
+        // THE RATIFIED PRICING (2026-08-06): a corpus solve the
+        // benchmark MEASURED prices at
+        //   W(τ) = scarcity(class) × VisitedNodes₃(τ) / word_len(τ)
+        // — population scarcity 1243/34 (blind: 283/1), the search
+        // frontier the sweep provably expands, over the canonical
+        // word. The benchmark is the measurement authority: a task it
+        // never confirmed refuses UNPRICED until a re-measurement
+        // extends the table (carrier_table.rs, regenerable).
+        WorkClass::Corpus { task_id } => {
+            corpus_weight(&task_id).ok_or(WorkBroken::CarrierUnpriced)
+        }
     }
+}
+
+/// The measured weight of a confirmed corpus task, or `None` where
+/// the benchmark never confirmed it.
+pub fn corpus_weight(task_id: &[u8; 32]) -> Option<Ratio> {
+    carrier_table::MEASURED
+        .iter()
+        .find(|(held, _, _, _)| held == task_id)
+        .map(|(_, visited, word_len, blind)| {
+            let scarcity = match blind {
+                true => ratio(carrier_table::BLIND_POPULATION, 1),
+                false => {
+                    let (population, confirmed) = carrier_table::MEASURED_POPULATION;
+                    ratio(population, confirmed)
+                }
+            };
+            scarcity * ratio(*visited as i64, i64::from(*word_len))
+        })
 }
 
 pub fn mint_bound(rung: Option<u32>) -> Ratio {

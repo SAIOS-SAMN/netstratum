@@ -254,17 +254,12 @@ pub fn frontier(vocabulary: usize, depth: usize) -> u128 {
 /// derivable — reached by exhaustion rather than by reading. Whether
 /// the economy should pay for them is the operator's call; the numbers
 /// are in `examples/reach_vs_sweep.rs`.
-pub fn solve(task: &Task, max_depth: usize) -> SolveRead {
-    // THE VACUOUS SOLVE, REFUSED (operator ruling C8, U_DIRECTIVES §10
-    // S1). With no training pair, `closes` is true over nothing and the
-    // empty program would "solve" at depth 0 — a claim nobody earned.
-    // The honest withhold is the lawful reading: nothing to close means
-    // nothing proved. This guard is also the TOTALITY guard — the
-    // derived-operator path reads `train[0]` and an empty train drove it
-    // to panic in-process, the same class as audit HOLE B.
-    if task.train.is_empty() {
-        return SolveRead::Unsolved;
-    }
+/// **THE SWEEP'S VOCABULARY, one home** — the general six, the object
+/// operators, and the task-derived recolors and tiles. `solve` builds
+/// its frontier from THIS, and the carrier pricing derives
+/// `VisitedNodes₃ = frontier(len, 3)` from the same call — the
+/// measurement and the search cannot drift (call-not-copy).
+pub fn sweep_vocabulary(task: &Task) -> Vec<Op> {
     let mut vocabulary = vec![
         Op::Rotate90,
         Op::Rotate180,
@@ -276,6 +271,21 @@ pub fn solve(task: &Task, max_depth: usize) -> SolveRead {
     vocabulary.extend(solver_verify::objects::OBJ_OPS.iter().cloned().map(Op::Object));
     vocabulary.extend(derived_recolors(task));
     vocabulary.extend(derived_tiles(task));
+    vocabulary
+}
+
+pub fn solve(task: &Task, max_depth: usize) -> SolveRead {
+    // THE VACUOUS SOLVE, REFUSED (operator ruling C8, U_DIRECTIVES §10
+    // S1). With no training pair, `closes` is true over nothing and the
+    // empty program would "solve" at depth 0 — a claim nobody earned.
+    // The honest withhold is the lawful reading: nothing to close means
+    // nothing proved. This guard is also the TOTALITY guard — the
+    // derived-operator path reads `train[0]` and an empty train drove it
+    // to panic in-process, the same class as audit HOLE B.
+    if task.train.is_empty() {
+        return SolveRead::Unsolved;
+    }
+    let vocabulary = sweep_vocabulary(task);
 
     // ONE SCRATCH BUFFER for the whole sweep. A grid here is 9 to 16
     // bytes, so a fresh Vec per candidate is mostly allocator

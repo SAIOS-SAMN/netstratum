@@ -319,7 +319,14 @@ fn the_version_is_pinned() {
     //   anchored), the fold reads seed ∪ charters, the tick obeys.
     //   MINOR: a new tag enters the registry (banked-neutral,
     //   {I2, I3} complete it — the gate admits what was Unjudged).
-    assert_eq!(KERNEL_VERSION.to_string(), "0.13.0", "the gate is version-pinned");
+    // 0.14.0 — THE CORPUS PRICES (2026-08-06): the ratified carrier
+    //   pricing lands with its measured table — a benchmark-confirmed
+    //   corpus solve mints at W = scarcity × VisitedNodes₃/word_len
+    //   (1243/34 standard, 283/1 blind). MINOR: the gate ADMITS what
+    //   refused CarrierUnpriced. The forge stays priced until a live
+    //   corpus submission path exists; ITS zeroing is the next
+    //   carrier amendment.
+    assert_eq!(KERNEL_VERSION.to_string(), "0.14.0", "the gate is version-pinned");
     assert_eq!(VERSION, KERNEL_VERSION.code(), "the wire carries the packed form");
     // ORDER IS PRESERVED: a chain cut under the old linear versions
     // compares BELOW every packed one, which is true — an earlier gate

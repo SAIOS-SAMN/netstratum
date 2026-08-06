@@ -42,8 +42,8 @@ pub use solver_verify::{
 pub use derive::{derive, Candidate};
 pub use need::{Family, Hunger, Need};
 pub use search::{
-    consult_observed, propose, propose_consulted, propose_consulted_measured, propose_measured,
-    solve, solve_consulted,
+    consult_observed, frontier, propose, propose_consulted, propose_consulted_measured,
+    propose_measured, solve, solve_consulted, sweep_vocabulary,
     Consultation, Proposal,
     SolveRead,
 };
