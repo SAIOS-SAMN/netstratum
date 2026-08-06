@@ -710,7 +710,9 @@ pub fn bond_notice_window() -> u64 {
 pub fn collateral_required(fulfilled: &Ratio, breached: &Ratio, quota: &Ratio) -> Ratio {
     let one = ratio(1, 1);
     let multiplier = (breached.clone() + one.clone()) / (fulfilled.clone() + one);
-    let clamped = multiplier.max(ratio(1, 4)).min(ratio(4, 1));
+    // The clamp IS the fourfold band — one home (P2).
+    let (low, high) = crate::vocabulary::fourfold_band();
+    let clamped = multiplier.max(low).min(high);
     quota.clone() * clamped
 }
 
