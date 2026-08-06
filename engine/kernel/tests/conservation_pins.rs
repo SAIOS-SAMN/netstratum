@@ -319,6 +319,15 @@ fn the_version_is_pinned() {
     //   anchored), the fold reads seed ∪ charters, the tick obeys.
     //   MINOR: a new tag enters the registry (banked-neutral,
     //   {I2, I3} complete it — the gate admits what was Unjudged).
+    // ── THE NEXT-FREE RULE (adopted 2026-08-06, the tag registry's
+    // discipline applied to versions): the version constant is a
+    // SHARED REGISTER — two lanes bumping concurrently collide by
+    // construction (measured: both lanes minted 0.13.0 independently;
+    // resolved as a sequence, the collision named in both ledgers).
+    // CLAIM THE NEXT MINOR HERE BEFORE BUMPING ANYWHERE.
+    //   0.15.0 — claimed and landed by the d3-scope composition
+    //            (the genesis exception, 54f85ea, their ledger).
+    //   — the next free minor is 16.
     // 0.14.0 — THE CORPUS PRICES (2026-08-06): the ratified carrier
     //   pricing lands with its measured table — a benchmark-confirmed
     //   corpus solve mints at W = scarcity × VisitedNodes₃/word_len
