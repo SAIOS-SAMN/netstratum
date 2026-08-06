@@ -329,6 +329,21 @@ impl World {
         if self.orb_by_id(orb).is_none() {
             return Err(ActionRefused::NoSuchOrb { orb });
         }
+        // ECO-1 (#40): the loop's two inputs, read before the vein is
+        // borrowed — the star (proven Some only once a vein is found:
+        // prospecting requires it, and nothing uncommissions a sun)
+        // and the regenerators standing on this orb (prior state; the
+        // kernel re-derives both from the same reads).
+        let star = self.star;
+        let regenerators = self
+            .orb_by_id(orb)
+            .map(|held| {
+                held.zones
+                    .iter()
+                    .filter(|zone| zone.kind == crate::dop::ZoneKind::Regenerator)
+                    .count() as u64
+            })
+            .unwrap_or(0);
         let now = self.clock.now();
         let Some(vein) = self
             .prospects
@@ -340,12 +355,28 @@ impl World {
         if now <= vein.last_assay {
             return Err(ActionRefused::NothingAccrued);
         }
-        let elapsed = ratio((now - vein.last_assay) as i64, 1);
+        let span = now - vein.last_assay;
+        let elapsed = ratio(span as i64, 1);
         let amount = vein.richness.clone() * elapsed;
+        // ECO-1: wear and recovery settle in the SAME receipt — the
+        // one-home law prices both (the kernel calls the same fn).
+        let class = star.expect("a vein stands, so a star was commissioned");
+        let (_, _, natural) = crate::dop::element_properties(&element, class);
+        let after =
+            crate::dop::vein_wear(&vein.richness, &natural, &amount, regenerators, span);
+        vein.richness = after.clone();
         vein.last_assay = now;
         let held = peel(&mut self.orbs, orb).expect("judged above");
         held.bank_element(element, amount.clone());
-        self.close(ClosureEvent::AssayStruck { orb_id: orb, element, amount: amount.clone() }, actor);
+        self.close(
+            ClosureEvent::AssayStruck {
+                orb_id: orb,
+                element,
+                amount: amount.clone(),
+                richness: Some(after),
+            },
+            actor,
+        );
         Ok(amount)
     }
     /// G1 (04 §1.1, §4) — the disposition-weighted progress read:

@@ -116,7 +116,7 @@ fn every_deed() -> Vec<ClosureEvent> {
         E::PracticeAdopted { practice: 1 },
         E::PracticeReleased { practice: 1 },
         E::ProspectStruck { orb_id: 1, stratum: 0, element: bytes, family: 1, tier: 1, richness: r(1), name: "p".into() },
-        E::AssayStruck { orb_id: 1, element: bytes, amount: r(1) },
+        E::AssayStruck { orb_id: 1, element: bytes, amount: r(1), richness: None },
         E::ElderWarded {},
         E::WardLifted { claimer: "w".into() },
         E::VeilDrawn {},

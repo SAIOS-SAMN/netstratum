@@ -133,7 +133,10 @@ use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 /// its peoples). MINOR, derived: tag 101 enters `covered()` — the gate
 /// admits what was `Unjudged`. The receipt is a seed; there is nothing
 /// declarable to misdeclare, so no new refusal arm exists.
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 14, patch: 0 };
+/// (Amendments 0.11.0 through the current minor are recorded in the
+/// version ledger — `tests/conservation_pins.rs` — beside the
+/// NEXT-FREE RULE that assigns minors across lanes.)
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 16, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
@@ -252,6 +255,23 @@ pub enum Refused {
     /// vein (`Prospected.richness`, `last_assay`); an assay with no
     /// prior vein yields nothing. Both sides carried whole.
     AssayExceedsVein { bound: Box<Ratio>, claimed: Box<Ratio> },
+    /// ECO-1 (#40): the assay declared an after-richness off the
+    /// sealed wear law. The gate re-derives it by CALLING the
+    /// emitter's one home (`cfe::dop::vein_wear` — wear from the
+    /// draw, recovery from the orb's standing regenerators, capped at
+    /// the spring's hash-derived natural flow) and refuses any other
+    /// number. A declaration with no prior vein, or on a starless
+    /// state, has no lawful derivation and refuses with expected 0.
+    /// The sealed 3-field form declares nothing and judges only the
+    /// bound. Both sides carried whole.
+    VeinWearMisdeclared { expected: Box<Ratio>, declared: Box<Ratio> },
+    /// ECO-1 (#40): the vein book moved off its two deeds. Richness
+    /// is JUDGED state now, so the book's motion is the law's:
+    /// a prospect pushes exactly its receipted vein; an assay moves
+    /// that vein's span anchor and lands its declared richness;
+    /// every other deed holds the book still. `at` names the first
+    /// diverging index (the shorter book's length when one is short).
+    VeinBookBroken { at: usize },
     /// THE ELEMENT LAW: an element total changed where the deed
     /// declared no change — the ledger's total for one element must
     /// equal the prior total plus exactly what the deed declares
@@ -672,7 +692,7 @@ fn union(step: &Step) -> Result<(), Refused> {
 fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Refused> {
     // The declared element mint for this deed (None = holds still).
     let declared: Option<([u8; 32], Ratio)> = match &step.event {
-        ClosureEvent::AssayStruck { orb_id, element, amount } => {
+        ClosureEvent::AssayStruck { orb_id, element, amount, richness } => {
             if *amount < ratio(0, 1) {
                 return Err(Refused::ElementNotPositive {
                     element: *element,
@@ -695,6 +715,53 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
                     bound: Box::new(bound),
                     claimed: Box::new(amount.clone()),
                 });
+            }
+            // ECO-1 (#40): the declared after-richness, judged by
+            // CALLING the emitter's one home on the same prior reads
+            // (call-not-copy): the vein's standing flow, the spring's
+            // hash-derived natural flow under the prior star, the
+            // regenerators standing on the orb, the settled span. The
+            // sealed 3-field form declares nothing and skips this arm.
+            if let Some(declared_richness) = richness {
+                let expected = prior
+                    .prospects
+                    .iter()
+                    .find(|vein| vein.orb == *orb_id && vein.element == *element)
+                    .and_then(|vein| {
+                        let class = prior.star?;
+                        let (_, _, natural) =
+                            cfe::dop::element_properties(element, class);
+                        let regenerators = prior
+                            .orbs
+                            .iter()
+                            .find(|held| held.orb_id == *orb_id)
+                            .map(|held| {
+                                held.zones
+                                    .iter()
+                                    .filter(|zone| {
+                                        zone.kind == cfe::dop::ZoneKind::Regenerator
+                                    })
+                                    .count() as u64
+                            })
+                            .unwrap_or(0);
+                        let elapsed = step.stamp.saturating_sub(vein.last_assay);
+                        Some(cfe::dop::vein_wear(
+                            &vein.richness,
+                            &natural,
+                            amount,
+                            regenerators,
+                            elapsed,
+                        ))
+                    });
+                match expected {
+                    Some(expected) if expected == *declared_richness => {}
+                    other => {
+                        return Err(Refused::VeinWearMisdeclared {
+                            expected: Box::new(other.unwrap_or_else(|| ratio(0, 1))),
+                            declared: Box::new(declared_richness.clone()),
+                        })
+                    }
+                }
             }
             Some((*element, amount.clone()))
         }
@@ -729,6 +796,45 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
                 actual: Box::new(after),
             });
         }
+    }
+    // ECO-1 (#40): THE VEIN BOOK HOLDS STILL. Richness became judged
+    // state, so the book's whole motion is declared: a prospect pushes
+    // exactly its receipted vein; an assay moves that vein's span
+    // anchor and lands its declared richness (the sealed 3-field form
+    // holds richness where it stood); every other deed leaves the book
+    // untouched. Declaration == effect, the banked law's shape applied
+    // to the vein registry.
+    let mut book = prior.prospects.clone();
+    match &step.event {
+        ClosureEvent::ProspectStruck { orb_id, stratum, element, richness, .. } => {
+            book.push(cfe::world::Prospected {
+                orb: *orb_id,
+                stratum: *stratum,
+                element: *element,
+                richness: richness.clone(),
+                last_assay: step.stamp,
+            });
+        }
+        ClosureEvent::AssayStruck { orb_id, element, richness, .. } => {
+            if let Some(vein) = book
+                .iter_mut()
+                .find(|vein| vein.orb == *orb_id && vein.element == *element)
+            {
+                vein.last_assay = step.stamp;
+                if let Some(after) = richness {
+                    vein.richness = after.clone();
+                }
+            }
+        }
+        _ => {}
+    }
+    if next.prospects != book {
+        let at = book
+            .iter()
+            .zip(next.prospects.iter())
+            .position(|(expected, actual)| expected != actual)
+            .unwrap_or_else(|| book.len().min(next.prospects.len()));
+        return Err(Refused::VeinBookBroken { at });
     }
     Ok(())
 }

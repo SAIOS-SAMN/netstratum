@@ -133,10 +133,36 @@ fn the_deed_round_trips_byte_exact() {
         orb_id: 1,
         element: [9u8; 32],
         amount: ratio(10, 1),
+        richness: None,
     };
-    let bytes = assay.wire_bytes();
-    let mut records = cfe::tlv::records(&bytes);
+    let sealed = assay.wire_bytes();
+    let mut records = cfe::tlv::records(&sealed);
     let (tag, value) = records.next().expect("one record");
     assert_eq!(tag, 71);
     assert_eq!(ClosureEvent::from_wire(tag, value).expect("decodes"), assay);
+    // ECO-1 (#40): the widened form round-trips through the SAME tag —
+    // the after-richness rides as a trailing ratio, so the sealed form
+    // is a strict byte-prefix of the ecological one and old receipts
+    // decode to `None` (richness holds still) forever.
+    let worn = ClosureEvent::AssayStruck {
+        orb_id: 1,
+        element: [9u8; 32],
+        amount: ratio(10, 1),
+        richness: Some(ratio(3, 8)),
+    };
+    let widened = worn.wire_bytes();
+    let mut records = cfe::tlv::records(&widened);
+    let (tag, wide_value) = records.next().expect("one record");
+    assert_eq!(tag, 71);
+    assert_eq!(ClosureEvent::from_wire(tag, wide_value).expect("decodes"), worn);
+    // The additive-trailing law, stated where it actually holds: the
+    // record's LENGTH header moves (the value grew), so it is the
+    // VALUE that extends — the sealed encoding is a byte-prefix of the
+    // ecological one, which is exactly what lets a pre-ecology receipt
+    // decode to `richness: None` forever.
+    let sealed_value = cfe::tlv::records(&sealed).next().expect("one record").1;
+    assert!(
+        wide_value.len() > sealed_value.len() && wide_value.starts_with(sealed_value),
+        "the ecological value extends the sealed one; it never re-cuts it"
+    );
 }

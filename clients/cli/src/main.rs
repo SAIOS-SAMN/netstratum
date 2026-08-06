@@ -455,11 +455,42 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     .map(|vein| vein.element);
                 match found {
                     Some(element) => match world.assay(*current, element) {
-                        Ok(drawn) => println!(
-                            "{} {} drawn from the opened vein — one receipt, the whole span",
-                            style.ok("⚖"),
-                            style.strong(&amount(&drawn))
-                        ),
+                        Ok(drawn) => {
+                            println!(
+                                "{} {} drawn from the opened vein — one receipt, the whole span",
+                                style.ok("⚖"),
+                                style.strong(&amount(&drawn))
+                            );
+                            // ECO-1 (#40): the ground answers back. The
+                            // wear settled in that same receipt, so the
+                            // player sees what the draw cost the spring
+                            // at the moment they take it.
+                            let after = world
+                                .committed()
+                                .prospects
+                                .iter()
+                                .find(|vein| vein.orb == *current && vein.element == element)
+                                .map(|vein| vein.richness.clone());
+                            let natural = world.committed().star.map(|star| {
+                                let (_, _, natural) =
+                                    cfe::dop::element_properties(&element, star);
+                                natural
+                            });
+                            if let (Some(after), Some(natural)) = (after, natural) {
+                                println!(
+                                    "  {} the spring now runs at {} of {}/tick natural — {}",
+                                    style.dim("↳"),
+                                    style.strong(&amount(&after)),
+                                    amount(&natural),
+                                    match after < natural {
+                                        true => style.dim(
+                                            "a regenerator on this orb restores it between draws",
+                                        ),
+                                        false => style.dim("still running at its nature"),
+                                    }
+                                );
+                            }
+                        }
                         Err(refusal) => refuse(world, &refusal, style),
                     },
                     None => println!(
@@ -3041,7 +3072,8 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             }
             let star = committed.star.unwrap_or(cfe::thermal::StarClass::G);
             for vein in &committed.prospects {
-                let (family, tier, _) = cfe::dop::element_properties(&vein.element, star);
+                let (family, tier, natural) =
+                    cfe::dop::element_properties(&vein.element, star);
                 // The periodic EXTRAPOLATION: group and period derive
                 // from the identity hash by the same modular law as
                 // family and tier — display until the chemistry lands
@@ -3059,6 +3091,37 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     period,
                     amount(&vein.richness),
                     vein.last_assay
+                );
+                // ECO-1 (#40): THE GROUND'S CONDITION. A vein is a
+                // spring — the draw tires it and regenerators restore
+                // it — so the standing flow is shown against the
+                // nature it can never pass, with the tending that
+                // decides which way it is heading.
+                let tending = committed
+                    .orbs
+                    .iter()
+                    .find(|orb| orb.orb_id == vein.orb)
+                    .map(|orb| {
+                        orb.zones
+                            .iter()
+                            .filter(|zone| zone.kind == cfe::dop::ZoneKind::Regenerator)
+                            .count()
+                    })
+                    .unwrap_or(0);
+                let worn = vein.richness < natural;
+                println!(
+                    "      {} {} of {}/tick natural{}",
+                    match (worn, tending) {
+                        (false, _) => style.dim("○ untouched —"),
+                        (true, 0) => style.warn("◔ WORN —"),
+                        (true, _) => style.dim("◑ recovering —"),
+                    },
+                    amount(&vein.richness),
+                    amount(&natural),
+                    match tending {
+                        0 => String::new(),
+                        held => format!(" · {held} regenerator(s) tending"),
+                    }
                 );
             }
             for orb in &committed.orbs {
@@ -5185,9 +5248,13 @@ fn chronicle(world: &World, style: &Style) {
                 style.strong(name),
                 style.strong(&stratum.to_string())
             ),
-            cfe::dop::ClosureEvent::AssayStruck { amount: drawn, .. } => format!(
-                "⚖ {} drawn from the opened vein — one receipt, the whole span",
-                style.strong(&amount(drawn))
+            cfe::dop::ClosureEvent::AssayStruck { amount: drawn, richness, .. } => format!(
+                "⚖ {} drawn from the opened vein — one receipt, the whole span{}",
+                style.strong(&amount(drawn)),
+                match richness {
+                    Some(after) => format!(" · the spring now runs at {}", amount(after)),
+                    None => String::new(),
+                }
             ),
             cfe::dop::ClosureEvent::HandoffSealed { from, to } => format!(
                 "✍ hand {} yields the pen to hand {} (NS-5 §7)",

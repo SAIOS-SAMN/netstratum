@@ -327,7 +327,8 @@ fn the_version_is_pinned() {
     // CLAIM THE NEXT MINOR HERE BEFORE BUMPING ANYWHERE.
     //   0.15.0 — claimed and landed by the d3-scope composition
     //            (the genesis exception, 54f85ea, their ledger).
-    //   — the next free minor is 16.
+    //   0.16.0 — claimed and landed here (ECO-1, this ledger).
+    //   — the next free minor is 17.
     // 0.14.0 — THE CORPUS PRICES (2026-08-06): the ratified carrier
     //   pricing lands with its measured table — a benchmark-confirmed
     //   corpus solve mints at W = scarcity × VisitedNodes₃/word_len
@@ -335,7 +336,21 @@ fn the_version_is_pinned() {
     //   refused CarrierUnpriced. The forge stays priced until a live
     //   corpus submission path exists; ITS zeroing is the next
     //   carrier amendment.
-    assert_eq!(KERNEL_VERSION.to_string(), "0.14.0", "the gate is version-pinned");
+    // 0.16.0 — THE ECOLOGICAL LOOP (2026-08-06, #40): tag 71 widens —
+    //   the assay's receipt carries the vein's after-richness, and the
+    //   deed settles wear (scaled by the draw against the spring's
+    //   hash-derived natural flow) and recovery (the Regenerator's
+    //   second arm, at its own working rate, capped at natural) in ONE
+    //   receipt. The gate re-derives the declaration by CALLING the
+    //   emitter's one home (`cfe::dop::vein_wear`) and refuses
+    //   VeinWearMisdeclared off it; the vein book itself becomes
+    //   judged state (VeinBookBroken — a prospect pushes, an assay
+    //   moves its vein, everything else holds the book still). MINOR:
+    //   the gate refuses what it admitted (a book left unmoved by an
+    //   assay) and admits the widened form. The sealed 3-field form
+    //   declares nothing, judges only the bound, and holds richness
+    //   still forever.
+    assert_eq!(KERNEL_VERSION.to_string(), "0.16.0", "the gate is version-pinned");
     assert_eq!(VERSION, KERNEL_VERSION.code(), "the wire carries the packed form");
     // ORDER IS PRESERVED: a chain cut under the old linear versions
     // compares BELOW every packed one, which is true — an earlier gate

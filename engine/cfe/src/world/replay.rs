@@ -435,12 +435,19 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     last_assay: receipt.stamp,
                 });
             }
-            ClosureEvent::AssayStruck { orb_id, element, amount } => {
+            ClosureEvent::AssayStruck { orb_id, element, amount, richness } => {
                 if let Some(vein) = prospects
                     .iter_mut()
                     .find(|held| held.orb == *orb_id && held.element == *element)
                 {
                     vein.last_assay = receipt.stamp;
+                    // ECO-1 (#40): the receipt carries the vein's flow
+                    // after the deed — replay reads, never re-derives.
+                    // The sealed 3-field form carries none: richness
+                    // holds still, exactly as the pre-ecology law did.
+                    if let Some(after) = richness {
+                        vein.richness = after.clone();
+                    }
                 }
                 if let Some(held) = peel(&mut orbs, *orb_id) {
                     held.bank_element(*element, amount.clone());

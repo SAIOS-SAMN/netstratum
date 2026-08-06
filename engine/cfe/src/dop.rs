@@ -118,7 +118,12 @@
 //!   71 ClosureEvent::AssayStruck (ELEMENT-GRAMMAR-1, 14 §3 — the
 //!         extraction closure: richness × elapsed banked in ONE
 //!         receipt, the bond-settle shape; the mint creates identity,
-//!         the assay moves matter)
+//!         the assay moves matter. WIDENED 2026-08-06, ECO-1 #40:
+//!         a trailing ratio — the vein's richness AFTER the deed
+//!         (wear and regeneration settle in the same receipt, the
+//!         tag-101 additive pattern). The legacy 3-field form decodes
+//!         with the field absent and replays with richness unmoved —
+//!         sealed history exact.)
 //!   72 Orb elements entry (element_id[32] ‖ ratio — banked element
 //!         stores, element-id-ascending; SEAL A: old readers skip)
 //!   74 ClosureEvent::ElderWarded (WARDEN-1a, 10 §3e — the reverse
@@ -1233,6 +1238,53 @@ pub fn element_properties(
     (family, tier, richness)
 }
 
+/// **ECO-1 (#40) — THE VEIN'S WEAR LAW, the one home.** The verb
+/// settles it, the kernel re-derives it; both call HERE (the
+/// `fourfold_band` discipline — one function, two readers).
+///
+/// The vein is a SPRING. Its natural flow is hash-derived
+/// ([`element_properties`]) and never moves; its standing flow is
+/// committed state that the draw tires and the regenerators restore.
+/// Every quantity below already rides the receipt or prior committed
+/// state, so the law holds NO new dial:
+///
+/// 1. WEAR — the draw priced against the spring's own nature:
+///    `worn = standing × natural / (natural + drawn)`. A draw the size
+///    of the natural flow halves the vein; a light draw barely marks
+///    it; a hard draw guts it. Exact-rational throughout.
+/// 2. RECOVERY — the Regenerator's second arm, THE SAME FORM RUN ON
+///    THE GAP. Each regenerator standing on the orb returns matter at
+///    its own working rate ([`ZoneKind::Regenerator`]'s yield rate —
+///    what extraction takes, regeneration returns) across the settled
+///    span, and that returned quantity closes the distance to natural
+///    by exactly the fraction the drawn quantity opened it by:
+///    `after = natural − (natural − worn) × natural / (natural + restored)`.
+///
+/// **The cap is a THEOREM, not a check.** Recovery shrinks the gap by
+/// a factor in `(0, 1]`, so `worn ≤ after ≤ natural` for every input:
+/// no regenerator can lift a vein past its nature, and no draw can
+/// push one below zero. Both bounds hold by construction, which is
+/// why neither is written as a clamp. A first cut ADDED the recovery
+/// as a flat `rate × elapsed` and clamped at the top — that summed a
+/// quantity into a flow, and made one regenerator saturate the cap in
+/// a single tick, so the whole ecology collapsed to a binary.
+///
+/// `natural` is strictly positive for every drawn element (the family
+/// bases are 1..=3 over tiers 1..=3), so the divisors never vanish.
+pub fn vein_wear(
+    standing: &Ratio,
+    natural: &Ratio,
+    drawn: &Ratio,
+    regenerators: u64,
+    elapsed: u64,
+) -> Ratio {
+    let worn = standing.clone() * natural.clone() / (natural.clone() + drawn.clone());
+    let (_, rate) = ZoneKind::Regenerator.yield_per_tick();
+    let restored = ratio(regenerators as i64, 1) * rate * ratio(elapsed as i64, 1);
+    let gap = (natural.clone() - worn) * natural.clone() / (natural.clone() + restored);
+    natural.clone() - gap
+}
+
 /// The element's name — the naming law (10 §2 law 4) applied to
 /// matter: the family fixes the FORM, the hash draws the voice.
 pub fn element_name(family: u8, element: &[u8; 32]) -> String {
@@ -1874,7 +1926,11 @@ pub enum ClosureEvent {
     },
     /// ELEMENT-GRAMMAR-1 (14 §3) — the extraction closure: richness ×
     /// elapsed banked in ONE receipt (the bond-settle shape).
-    AssayStruck { orb_id: u64, element: [u8; 32], amount: Ratio },
+    /// ECO-1 (#40): `richness` is the vein's flow AFTER this deed —
+    /// wear from the draw and recovery from the orb's regenerators
+    /// settle in the same receipt ([`vein_wear`], the one home).
+    /// `None` is the sealed pre-ecology form: richness holds still.
+    AssayStruck { orb_id: u64, element: [u8; 32], amount: Ratio, richness: Option<Ratio> },
     /// WARDEN-1a (10 §3e) — the reverse shield: this star is the
     /// elder; every aperture refuses until the ward lifts.
     ElderWarded {},
@@ -2412,10 +2468,15 @@ impl ClosureEvent {
                 value.extend_from_slice(name.as_bytes());
                 tlv::put(70, &value, &mut out);
             }
-            Self::AssayStruck { orb_id, element, amount } => {
+            Self::AssayStruck { orb_id, element, amount, richness } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.extend_from_slice(element);
                 ratio::encode(amount, &mut value);
+                // ECO-1: the trailing after-richness, additive — its
+                // absence IS the sealed legacy form, byte-exact.
+                if let Some(after) = richness {
+                    ratio::encode(after, &mut value);
+                }
                 tlv::put(71, &value, &mut out);
             }
             Self::BookMinted { orb_id, kind, name } => {
@@ -2968,8 +3029,14 @@ impl ClosureEvent {
             71 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
-                let (amount, _) = ratio::decode(value.get(40..)?)?;
-                Some(Self::AssayStruck { orb_id, element, amount })
+                let (amount, used) = ratio::decode(value.get(40..)?)?;
+                // ECO-1: bytes past the amount are the after-richness;
+                // the sealed 3-field form ends exactly here.
+                let richness = match value.len() > 40 + used {
+                    true => Some(ratio::decode(value.get(40 + used..)?)?.0),
+                    false => None,
+                };
+                Some(Self::AssayStruck { orb_id, element, amount, richness })
             }
             91 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

@@ -394,7 +394,8 @@ fn an_assay_is_bounded_by_its_vein() {
     // element witnesses (honest mint, sign, zero-invariance) live in
     // element_pins.rs.
     let prior = seated((6, 1));
-    let assay = ClosureEvent::AssayStruck { orb_id: 1, element: [3u8; 32], amount: ratio(1, 1) };
+    let assay =
+        ClosureEvent::AssayStruck { orb_id: 1, element: [3u8; 32], amount: ratio(1, 1), richness: None };
     assert_eq!(
         admits(&prior, &prior.clone(), &step(assay, HAND)),
         Err(Refused::AssayExceedsVein {

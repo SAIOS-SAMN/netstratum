@@ -710,9 +710,19 @@ pub fn render_receipt(receipt: &Receipt) -> String {
                 "{name} read from stratum {stratum} on orb {orb_id} (family {family}, tier {tier}) — what the seed always held"
             ),
         ),
-        E::AssayStruck { orb_id, amount, .. } => (
+        E::AssayStruck { orb_id, amount, richness, .. } => (
             "assay_struck",
-            format!("{} drawn from the opened vein on orb {orb_id}", ratio_str(amount)),
+            format!(
+                "{} drawn from the opened vein on orb {orb_id}{}",
+                ratio_str(amount),
+                // ECO-1 (#40): the receipt carries the flow the vein
+                // is left running at. The sealed pre-ecology form
+                // carries none and reads exactly as it always did.
+                match richness {
+                    Some(after) => format!(" — the spring now runs at {}", ratio_str(after)),
+                    None => String::new(),
+                }
+            ),
         ),
     };
     w.field_str("event", name);
