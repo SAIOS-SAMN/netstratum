@@ -275,6 +275,9 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             // second copy in the committed state would be the two-truths
             // defect the definition law struck, one layer down.
             ClosureEvent::VocabularyMinted { .. } => {}
+            // P2 (tag 103): the chartered value is FOLD-derived
+            // (`parameter::of`) — the receipt is the state.
+            ClosureEvent::ParameterChartered { .. } => {}
             // THE VERTICAL AXIS (tag 89): the seat replays from the
             // receipt, so the registry file stops being the authority
             // on who holds which office. One seat per line — re-seating

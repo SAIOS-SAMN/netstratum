@@ -476,6 +476,47 @@ impl World {
         Ok(code)
     }
 
+    /// **CHARTER A PARAMETER** (tag 103, P2's mint path for the
+    /// balance placeholders). The band died at the door — a
+    /// [`crate::parameter::Chartered`] stands inside the fourfold band
+    /// of its seed or it does not construct — so ONE gate remains, a
+    /// fact of the chain: chartering is a TIER 0 power under the same
+    /// standing law as the vocabulary mint (12_UNION ruling 4).
+    pub fn charter_parameter(
+        &mut self,
+        line: &str,
+        charter: crate::parameter::Chartered,
+    ) -> Result<(), ActionRefused> {
+        self.charter_parameter_as(SOVEREIGN, line, charter)
+    }
+
+    pub fn charter_parameter_as(
+        &mut self,
+        actor: u64,
+        line: &str,
+        charter: crate::parameter::Chartered,
+    ) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if self.station_of(line) != Some(1) {
+            return Err(ActionRefused::MintWithoutStanding { line: line.to_string() });
+        }
+        self.close(
+            ClosureEvent::ParameterChartered {
+                key: charter.key().code(),
+                value: charter.value().clone(),
+            },
+            actor,
+        );
+        Ok(())
+    }
+
+    /// The chartered value of a parameter — the FOLD's reading (seed ∪
+    /// charters). Public: the conductor's thermal mirror and the CLI
+    /// read the same rule the tick runs.
+    pub fn parameter(&self, key: crate::parameter::Parameter) -> crate::ratio::Ratio {
+        crate::parameter::of(self.chronicle(), key)
+    }
+
     /// THE VERTICAL AXIS: the seat a line holds, from the CHAIN.
     pub fn station_of(&self, line: &str) -> Option<u8> {
         self.stations.iter().find(|(held, _)| held == line).map(|(_, seat)| *seat)

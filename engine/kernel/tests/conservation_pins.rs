@@ -313,7 +313,13 @@ fn the_version_is_pinned() {
     //   (the event's wire value grew); no verdict moves — the deed is
     //   banked-neutral and the old 32-byte form decodes sealed
     //   (ceilings: None -> the compiled derivation, forever).
-    assert_eq!(KERNEL_VERSION.to_string(), "0.12.0", "the gate is version-pinned");
+    // 0.13.0 — THE CHARTERED PARAMETERS (2026-08-06): tag 103 covered
+    //   — a balance placeholder chartered by a T0 line moves the live
+    //   rule for its world; the band is a door (fourfold of the seed,
+    //   anchored), the fold reads seed ∪ charters, the tick obeys.
+    //   MINOR: a new tag enters the registry (banked-neutral,
+    //   {I2, I3} complete it — the gate admits what was Unjudged).
+    assert_eq!(KERNEL_VERSION.to_string(), "0.13.0", "the gate is version-pinned");
     assert_eq!(VERSION, KERNEL_VERSION.code(), "the wire carries the packed form");
     // ORDER IS PRESERVED: a chain cut under the old linear versions
     // compares BELOW every packed one, which is true — an earlier gate

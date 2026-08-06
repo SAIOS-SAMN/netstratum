@@ -132,7 +132,7 @@ use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 /// its peoples). MINOR, derived: tag 101 enters `covered()` — the gate
 /// admits what was `Unjudged`. The receipt is a seed; there is nothing
 /// declarable to misdeclare, so no new refusal arm exists.
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 12, patch: 0 };
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 13, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
@@ -973,6 +973,12 @@ fn covered(event: &ClosureEvent) -> bool {
         // (`mint_vocabulary_as`); the shape gates died at the `Axis`
         // and `TradingBinding` doors (29_CONSTRUCTION).
         | E::VocabularyMinted { .. }
+        // P2 (tag 103): a chartered parameter is banked-neutral like
+        // the mint above — it moves no value, no element and no key;
+        // {I2 containment, I3 exactness} complete it. WHO may charter
+        // is the T0 standing gate at the world door; the band is a
+        // door (`cfe::parameter::Chartered`).
+        | E::ParameterChartered { .. }
     )
 }
 
@@ -1616,6 +1622,9 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // move it: the deed carries a definition; the tick carries the
         // consequence.
         | E::VocabularyMinted { .. }
+        // P2 (tag 103): a chartered parameter is a DEFINITION the
+        // world's rules read, exactly as a minted vocabulary entry is.
+        | E::ParameterChartered { .. }
         // BOOK-1 / LIT-1: a line's own accounts and what it reaches
         // for. Both are keyed on the LINE's identity, never on a place
         // — the layer law is declared per deed, never inferred.
@@ -1731,6 +1740,9 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // the vocabulary, which is the progenitor's own office
         // (12_UNION ruling 4: *create new spaces*).
         | E::VocabularyMinted { .. }
+        // P2 (tag 103): chartering a parameter re-rules the board —
+        // Build-class, the progenitor's own office.
+        | E::ParameterChartered { .. }
         // D5 — THE SOVEREIGN UNION. Build-class: it opens the standing
         // the whole world is raised on. The scope is necessary and NOT
         // sufficient — `union` additionally requires the ROOT

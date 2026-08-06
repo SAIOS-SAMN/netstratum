@@ -253,7 +253,9 @@
 //!         · 4 sovereign.)
 //!    102  ClosureEvent::DemurrageTouched (SINK-1, the atomic touch —
 //!         the demurrage seam closed 2026-08-06)
-//!         — the next free tag outside reservations is 103. (This line
+//!    103  ClosureEvent::ParameterChartered (P2, the chartered
+//!         parameters — the balance placeholders' mint path)
+//!         — the next free tag outside reservations is 104. (This line
 //!         read "90" until 2026-08-05 and was STALE: tag 90 was taken by
 //!         SovereignUnionSealed after it was written, and a mint drafted
 //!         onto 90 shadowed that deed's decoder arm — every sovereign
@@ -601,30 +603,30 @@ pub fn founding_reserves() -> Vec<(Resource, Ratio)> {
 /// THERMAL-1 (05 §1.2, placeholder): joules one active encasement
 /// shell can capture per tick.
 pub fn encasement_throughput() -> Ratio {
-    ratio(2, 1)
+    crate::parameter::Parameter::EncasementThroughput.seed()
 }
 
 /// THERMAL-1 (05 §1.2, placeholder): the orb's base radiator capacity.
 pub fn radiator_base() -> Ratio {
-    ratio(2, 1)
+    crate::parameter::Parameter::RadiatorBase.seed()
 }
 
 /// THERMAL-1 (05 §1.2, placeholder): the per-tick leak on ACCRUED
 /// joules outside the cryo vault — the D3 spoilage shape.
 pub fn joule_leak_per_tick() -> Ratio {
-    ratio(1, 8)
+    crate::parameter::Parameter::JouleLeakPerTick.seed()
 }
 
 /// ECON-J (05 §1.2, placeholder): joules one active zone burns per
 /// tick for heating on a sub-mesic sited orb.
 pub fn heating_per_zone() -> Ratio {
-    ratio(1, 4)
+    crate::parameter::Parameter::HeatingPerZone.seed()
 }
 
 /// SINK-1 (05 §1.4, placeholder): sink capacity one active cryo-lattice
 /// array captures per tick from vault-band headroom.
 pub fn sink_throughput() -> Ratio {
-    ratio(2, 1)
+    crate::parameter::Parameter::SinkThroughput.seed()
 }
 
 /// P2 (`21_KERNEL_PARAMETERS` §2): the per-elapsed-tick decay rate on
@@ -717,7 +719,7 @@ pub fn collateral_required(fulfilled: &Ratio, breached: &Ratio, quota: &Ratio) -
 /// cross-orb transfer. Friction prices DIVERGENCE, not vice: aligned
 /// partners (any alignment) pay exactly zero.
 pub fn friction_rate() -> Ratio {
-    ratio(1, 8)
+    crate::parameter::Parameter::FrictionRate.seed()
 }
 
 /// N4 (NS-2 §1.5, placeholder): crystals one scan draws from the
@@ -727,7 +729,7 @@ pub fn friction_rate() -> Ratio {
 /// settled at every collect — an unpayable toll lifts the veil by
 /// receipt, never silently.
 pub fn veil_toll() -> Ratio {
-    ratio(1, 4)
+    crate::parameter::Parameter::VeilToll.seed()
 }
 
 /// KERNEL-TAXON (15 §2): the ratified class-vocabulary ceiling —
@@ -1580,6 +1582,13 @@ pub enum ClosureEvent {
     /// that stood before it — the per-row order sensitivity that
     /// refused lawful second rows is unrepresentable here.
     DemurrageTouched { orb_id: u64, decays: Vec<(Resource, Ratio)> },
+    /// **P2 (tag 103) — A BALANCE PLACEHOLDER CHARTERED**: the value
+    /// the named parameter holds from this receipt on, for this world.
+    /// The fold reads seed ∪ charters (`crate::parameter::of`); the
+    /// band is proven at the door (`crate::parameter::Chartered` — the
+    /// fourfold band of the seed, anchored so charters cannot walk);
+    /// WHO may charter is the T0 standing gate, the mint's own law.
+    ParameterChartered { key: u8, value: Ratio },
     /// TRADE-1 (09 §2.1) — BANKED value moved orb-to-orb within one
     /// world: the chartering conservation law generalized (nothing
     /// minted, nothing lost). The cohesion-book postings derive from
@@ -2144,6 +2153,11 @@ impl ClosureEvent {
                 }
                 tlv::put(102, &value, &mut out);
             }
+            Self::ParameterChartered { key, value } => {
+                let mut bytes = vec![*key];
+                ratio::encode(value, &mut bytes);
+                tlv::put(103, &bytes, &mut out);
+            }
             Self::ResourceTransferred { from_orb, to_orb, resource, amount } => {
                 let mut value = from_orb.to_le_bytes().to_vec();
                 value.extend_from_slice(&to_orb.to_le_bytes());
@@ -2689,6 +2703,14 @@ impl ClosureEvent {
                 }
                 // Refuse trailing bytes — never a guess.
                 (at == value.len()).then_some(Self::DemurrageTouched { orb_id, decays })
+            }
+            103 => {
+                let key = *value.first()?;
+                // The key must NAME a parameter — refuse, never guess.
+                crate::parameter::Parameter::from_code(key)?;
+                let (chartered, used) = ratio::decode(value.get(1..)?)?;
+                (1 + used == value.len())
+                    .then_some(Self::ParameterChartered { key, value: chartered })
             }
             30 => {
                 let from_orb = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

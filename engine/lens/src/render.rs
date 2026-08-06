@@ -321,6 +321,16 @@ pub fn render_receipt(receipt: &Receipt) -> String {
             format!("{} closed to writing", &hex(&kind.0)[..8]),
         ),
         E::ZoneBuilt { tile, kind, .. } => ("zone_built", format!("{} @ {tile}", zone_name(*kind))),
+        E::ParameterChartered { key, value } => (
+            "parameter_chartered",
+            format!(
+                "{} chartered to {}",
+                cfe::parameter::Parameter::from_code(*key)
+                    .map(|held| format!("{held:?}"))
+                    .unwrap_or_else(|| format!("key {key}")),
+                ratio_str(value)
+            ),
+        ),
         E::LineMinted { seed, ceilings } => (
             "line_minted",
             format!(

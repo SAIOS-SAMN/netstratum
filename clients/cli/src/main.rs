@@ -1433,6 +1433,51 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         }
                     }
                 }
+                // P2 (tag 103): charter a balance parameter — a TIER 0
+                // power under the mint's own standing gate. Both doors
+                // prove at THIS parse: the key names a parameter, the
+                // value stands in the fourfold band of its seed.
+                Some("parameter") => {
+                    let key = words.next().and_then(|w| {
+                        w.parse::<u8>().ok().and_then(cfe::parameter::Parameter::from_code)
+                    });
+                    let value = words.next().and_then(|w| {
+                        let (n, d) = w.split_once('/').unwrap_or((w, "1"));
+                        match (n.trim().parse::<i64>(), d.trim().parse::<i64>()) {
+                            (Ok(n), Ok(d)) if d != 0 => Some(cfe::ratio::ratio(n, d)),
+                            _ => None,
+                        }
+                    });
+                    let Some((key, value)) = key.zip(value) else {
+                        println!(
+                            "{} usage: {} — keys: 1 encasement · 2 radiator · 3 leak · 4 heating · 5 sink · 6 friction · 7 veil",
+                            style.bad("✗"),
+                            style.strong("t0 parameter <key> <p>/<q>")
+                        );
+                        return;
+                    };
+                    let Some(charter) = cfe::parameter::Chartered::new(key, value) else {
+                        println!(
+                            "{} the value stands outside the fourfold band of the seed ({} = {})",
+                            style.bad("✗"),
+                            style.strong(&format!("{key:?}")),
+                            style.dim(&key.seed().to_string())
+                        );
+                        return;
+                    };
+                    let line = active_line().unwrap_or_else(|| String::from("operator"));
+                    match world.charter_parameter(&line, charter) {
+                        Ok(()) => {
+                            *current = world.now();
+                            println!(
+                                "{} {} chartered — the rule follows the chain",
+                                style.ok("⚖"),
+                                style.strong(&format!("{key:?}"))
+                            );
+                        }
+                        Err(refusal) => refuse(world, &refusal, style),
+                    }
+                }
                 Some("mint") => {
                     let usage = || {
                         println!(
@@ -4283,6 +4328,15 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::ColonyFounded { name, .. } => {
                 format!("⚑ colony {} founded", style.strong(name))
             }
+            cfe::dop::ClosureEvent::ParameterChartered { key, value } => format!(
+                "⚖ parameter {} CHARTERED to {} — the rule follows the chain",
+                style.strong(
+                    &cfe::parameter::Parameter::from_code(*key)
+                        .map(|held| format!("{held:?}"))
+                        .unwrap_or_else(|| format!("key {key}"))
+                ),
+                style.strong(&amount(value))
+            ),
             cfe::dop::ClosureEvent::LineMinted { seed, ceilings } => {
                 // The receipt declares the ceilings it drew under; the
                 // sealed old form (None) re-derives compiled.

@@ -120,7 +120,16 @@ pub type Binding = [(u8, Ratio)];
 /// hundredfold. The bound is on the FACTOR — a scalar coefficient — and
 /// never on a directional quantity, so `24_FORM` §2b is untouched.
 pub fn factor_in_bounds(factor: &Ratio) -> bool {
-    *factor >= ratio(1, 4) && *factor <= ratio(4, 1)
+    let (low, high) = fourfold_band();
+    *factor >= low && *factor <= high
+}
+
+/// **THE FOURFOLD BAND — one home.** The factor bounds here and the
+/// chartered-parameter band (`crate::parameter::Chartered`) read the
+/// SAME pair, so the band law cannot drift between its two readers
+/// and the census counts two dials, not four.
+pub fn fourfold_band() -> (Ratio, Ratio) {
+    (ratio(1, 4), ratio(4, 1))
 }
 
 /// The gate a binding declares on `channel`, by EXPLICIT entry —

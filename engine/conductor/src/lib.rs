@@ -1363,9 +1363,14 @@ impl Polity {
                             .fold(ratio(0, 1), |sum, zone| sum + zone.kind.factory_heat())
                     })
                     .unwrap_or_else(|| ratio(0, 1));
-                let heat_net =
-                    t4 / cfe::thermal::thermal_k() + factory - cfe::dop::radiator_base();
-                let throughput = cfe::dop::encasement_throughput() * ratio(shells, 1);
+                // P2 (tag 103): the mirror follows the CHARTERED
+                // fold, exactly as the tick does — a chartered radiator
+                // must move the conductor's read too or the mirror lies.
+                let heat_net = t4 / cfe::thermal::thermal_k() + factory
+                    - world.parameter(cfe::parameter::Parameter::RadiatorBase);
+                let throughput =
+                    world.parameter(cfe::parameter::Parameter::EncasementThroughput)
+                        * ratio(shells, 1);
                 if heat_net > throughput {
                     // The shell answer: joule collection outranks
                     // sprawl — raise the next shell, or HOARD the ore

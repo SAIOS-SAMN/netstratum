@@ -14,7 +14,10 @@ impl World {
     /// overflow vents, degrade by 1/(1+overflow)); famine strikes per
     /// orb; the one clock walks by quorum.
     pub fn tick(&mut self) -> TickOutcome {
-        use crate::dop::{encasement_throughput, joule_leak_per_tick, radiator_base};
+        use crate::parameter::Parameter;
+        // P2 (tag 103): the thermal rates read the CHARTERED table —
+        // one fold walk per tick, seed where nothing is chartered.
+        let rates = crate::parameter::table_of(self.chronicle());
         use crate::thermal;
         // ABSORB-1 (09 §2.4): reciprocity windows expire at their
         // exact stamp — the unpaid remainder posts to the debtor's
@@ -289,8 +292,8 @@ impl World {
                 // TECH-1b: the doctrine crystallized — the radiator
                 // sheds at the magnitude its receipt asserted (10 §3).
                 let radiator = match &boon[4] {
-                    Some(magnitude) => radiator_base() * magnitude.clone(),
-                    None => radiator_base(),
+                    Some(magnitude) => rates.get(Parameter::RadiatorBase).clone() * magnitude.clone(),
+                    None => rates.get(Parameter::RadiatorBase).clone(),
                 };
                 let heat_net = stellar_load + factory - radiator;
                 // ECON-J (05 §1.2): heating upkeep on a sub-mesic orb —
@@ -299,7 +302,7 @@ impl World {
                     let running: Ratio = active
                         .iter()
                         .fold(zero.clone(), |sum, (_, vigour)| sum + vigour.clone());
-                    let mut burn = crate::dop::heating_per_zone() * running;
+                    let mut burn = rates.get(Parameter::HeatingPerZone).clone() * running;
                     // TECH-1b: insulation crystallized — the cold
                     // bites at the receipted magnitude (10 §3).
                     if let Some(magnitude) = &boon[1] {
@@ -317,7 +320,7 @@ impl World {
                         .fold(zero.clone(), |sum, (_, vigour)| sum + vigour.clone());
                     if arrays > zero {
                         let headroom = -heat_net.clone();
-                        let mut lattice = crate::dop::sink_throughput() * arrays;
+                        let mut lattice = rates.get(Parameter::SinkThroughput).clone() * arrays;
                         // TECH-1b: the lattice deepened — capture at
                         // the receipted magnitude (10 §3).
                         if let Some(magnitude) = &boon[3] {
@@ -336,7 +339,7 @@ impl World {
                         .iter()
                         .filter(|(zone, _)| zone.kind == ZoneKind::Encasement)
                         .fold(zero.clone(), |sum, (_, vigour)| sum + vigour.clone());
-                    let mut throughput = encasement_throughput() * shells;
+                    let mut throughput = rates.get(Parameter::EncasementThroughput).clone() * shells;
                     // TECH-1b: discipline crystallized — the shells
                     // encase at the receipted magnitude (10 §3).
                     if let Some(magnitude) = &boon[2] {
@@ -444,7 +447,7 @@ impl World {
                 if t4 > thermal::cryo_vault_max4() {
                     let held_joules = triple_amount(&self.accrued, *orb_id, Resource::Joule);
                     if held_joules > zero {
-                        let leak = held_joules.min(joule_leak_per_tick());
+                        let leak = held_joules.min(rates.get(Parameter::JouleLeakPerTick).clone());
                         accrue(&mut self.accrued, *orb_id, Resource::Joule, -leak);
                     }
                 }
@@ -637,6 +640,8 @@ impl World {
         let stamp = self.clock.now();
         let star = self.star;
         let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
+        let heating_rate =
+            crate::parameter::of(self.chronicle(), crate::parameter::Parameter::HeatingPerZone);
         let Some(held) = peel(&mut self.orbs, orb) else {
             return;
         };
@@ -646,7 +651,7 @@ impl World {
                     crate::thermal::t_eq4(&class.luminosity(), site.albedo.value(), site.orbit_r.value());
                 match t4 < crate::thermal::SubstrateBand::Mesic.bounds4().0 {
                     true => {
-                        crate::dop::heating_per_zone() * ratio(held.zones.len() as i64, 1)
+                        heating_rate.clone() * ratio(held.zones.len() as i64, 1)
                     }
                     false => ratio(0, 1),
                 }

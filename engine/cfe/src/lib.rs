@@ -16,6 +16,7 @@
 
 pub mod almanac;
 pub mod anchor;
+pub mod parameter;
 pub mod books;
 pub mod growth;
 pub mod literature;

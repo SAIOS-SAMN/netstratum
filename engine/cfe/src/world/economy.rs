@@ -235,7 +235,7 @@ impl World {
         // MASK-1a: the veil's standing toll settles at the touch — an
         // unpayable toll LIFTS the veil by receipt, never silently.
         if self.veiled {
-            let toll = crate::dop::veil_toll();
+            let toll = crate::parameter::of(self.chronicle(), crate::parameter::Parameter::VeilToll);
             let held_joules = self
                 .orbs
                 .iter()
@@ -262,6 +262,10 @@ impl World {
                 self.veiled = false;
             }
         }
+        let encasement_rate = crate::parameter::of(
+            self.chronicle(),
+            crate::parameter::Parameter::EncasementThroughput,
+        );
         let held = peel(&mut self.orbs, orb)
             .ok_or(ActionRefused::NoSuchOrb { orb })?;
         let mut settleable: Vec<(Resource, Ratio)> = Vec::new();
@@ -330,7 +334,7 @@ impl World {
                 .iter()
                 .filter(|zone| held.zone_active(zone) && zone.kind == ZoneKind::Encasement)
                 .count() as i64;
-            let mut throughput = crate::dop::encasement_throughput() * ratio(shells, 1);
+            let mut throughput = encasement_rate * ratio(shells, 1);
             if self
                 .techs
                 .iter()
@@ -549,7 +553,9 @@ impl World {
         // FORWARD-1: the delivery credits the open pact on this lane.
         credit_forwards(&mut self.forwards, from, to, resource, &amount);
         credit_councils(&mut self.councils, from, to, resource, &amount);
-        let friction = crate::dop::friction_rate() * divergence * value;
+        let friction = crate::parameter::of(self.chronicle(), crate::parameter::Parameter::FrictionRate)
+            * divergence
+            * value;
         if friction > ratio(0, 1) {
             match self
                 .friction_pending

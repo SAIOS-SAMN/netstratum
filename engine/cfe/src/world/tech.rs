@@ -226,7 +226,9 @@ impl World {
                     return false;
                 }
                 let bill_year =
-                    crate::dop::heating_per_zone() * ratio(active, 1) * ratio(60, 1);
+                    crate::parameter::of(self.chronicle(), crate::parameter::Parameter::HeatingPerZone)
+                        * ratio(active, 1)
+                        * ratio(60, 1);
                 let cold = match (self.star, &held.thermal) {
                     (Some(class), Some(site)) => {
                         let t4 = crate::thermal::t_eq4(
