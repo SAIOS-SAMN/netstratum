@@ -2828,6 +2828,133 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         // GROWTH-1 — the six axes, carried whole. No aggregate: six
         // readings and no score, because collapsing them is the struck
         // C-gate under a sixth name.
+        // ── HISTORY AS A PLACE (#43) — the chronicle, walkable ──────
+        Some("eras") | Some("history") => {
+            let receipts = world.chronicle().receipts();
+            println!(
+                "{} THE RECORD — {} receipts, stamp 0 → {}",
+                style.strong("⌛"),
+                receipts.len(),
+                world.now()
+            );
+            let mut era = 0u64;
+            let mut opened = 0u64;
+            let mut count = 0usize;
+            for receipt in receipts {
+                count += 1;
+                match &receipt.event {
+                    cfe::dop::ClosureEvent::EraFolded { era: folded, gauge } => {
+                        println!(
+                            "  era {} — stamps {}..{} · {} receipts · folded at gauge {}",
+                            style.strong(&era.to_string()),
+                            opened,
+                            receipt.stamp,
+                            count,
+                            amount(gauge)
+                        );
+                        era = *folded;
+                        opened = receipt.stamp;
+                        count = 0;
+                    }
+                    cfe::dop::ClosureEvent::Diverged { branch, gauge } => println!(
+                        "  {} the line CLEAVES — branch {} departs at gauge {}",
+                        style.warn("⑂"),
+                        style.strong(branch),
+                        amount(gauge)
+                    ),
+                    cfe::dop::ClosureEvent::Confluent { partner, gauge } => println!(
+                        "  {} confluence with {} at gauge {}",
+                        style.ok("⑃"),
+                        style.strong(partner),
+                        amount(gauge)
+                    ),
+                    cfe::dop::ClosureEvent::LineSucceeded { successor } => println!(
+                        "  {} succession — {} takes the line",
+                        style.warn("♔"),
+                        style.strong(successor)
+                    ),
+                    _ => {}
+                }
+            }
+            println!(
+                "  era {} — stamps {}..{} · {} receipts · {}",
+                style.strong(&era.to_string()),
+                opened,
+                world.now(),
+                count,
+                style.ok("open")
+            );
+            println!("  {}", style.dim("`visit <stamp>` stands you in the past"));
+        }
+        Some("visit") => match words.next().and_then(|w| w.parse::<u64>().ok()) {
+            None => println!(
+                "{} usage: {} — reconstruct the world as it stood",
+                style.bad("✗"),
+                style.strong("visit <stamp>")
+            ),
+            Some(stamp) => {
+                // The prefix replica: re-append every receipt at or
+                // before the stamp; digests re-derive identically, and
+                // replay stands you in that world (SEAL B is why this
+                // is possible at all).
+                let mut replica = cfe::vrp::Chronicle::new();
+                let mut kept = 0usize;
+                for receipt in world.chronicle().receipts() {
+                    if receipt.stamp > stamp {
+                        break;
+                    }
+                    replica.append(
+                        receipt.event.clone(),
+                        receipt.stamp,
+                        receipt.provenance.clone(),
+                    );
+                    kept += 1;
+                }
+                if kept == 0 {
+                    println!("{}", style.dim("nothing had happened yet — the world is unfounded"));
+                    return;
+                }
+                let then = cfe::world::replay(&replica);
+                println!(
+                    "{} YOU STAND AT STAMP {} — {} receipts deep (of {})",
+                    style.strong("⌖"),
+                    style.strong(&stamp.to_string()),
+                    kept,
+                    world.chronicle().receipts().len()
+                );
+                for orb in &then.orbs {
+                    println!(
+                        "  {} {} — {} zones · {}",
+                        style.strong(&format!("orb {}", orb.orb_id)),
+                        orb.name,
+                        orb.zones.len(),
+                        orb.banked
+                            .iter()
+                            .map(|(resource, held)| format!(
+                                "{} {}",
+                                amount(held),
+                                resource_name(*resource)
+                            ))
+                            .collect::<Vec<_>>()
+                            .join(" · ")
+                    );
+                }
+                let star = then
+                    .star
+                    .map(|class| format!("{class:?}"))
+                    .unwrap_or_else(|| "dark".into());
+                println!(
+                    "  sky {} · techs {} · practices {:?}",
+                    star,
+                    then.techs.len(),
+                    then.practices
+                );
+                println!(
+                    "  {}",
+                    style.dim("derived by replaying the prefix — the past provably happened")
+                );
+            }
+        },
         // ── THE PLAYER'S ATLAS — every wired surface, listable ──────
         Some("settlements") | Some("orbs") => {
             let committed = world.committed();
@@ -3498,6 +3625,7 @@ fn help(style: &Style) {
 
         ("ideology", "the dual cohesion ledger for this planet — the four axes, their books, and the derived readings; divergent trade partners pay a friction entropy tax, aligned ones pay zero"),
         ("charter <world> deal <n>", "ROUTE-1: charter a maintained lane — melt × (1−η), η from the pair's best instrument grade; upkeep draws at the year voice, unpaid lanes lapse"),
+        ("eras · visit <stamp>", "HISTORY AS A PLACE: the record segmented by era folds, cleaves, confluences and successions — and `visit` reconstructs the world AS IT STOOD at any stamp by replaying the prefix; the past provably happened and is visitable"),
         ("dashboard · settlements · rings · elements · civs · contacts · routes", "THE ATLAS: your whole aspect, listable — the board overview; every settlement's zones and banks; the star's rings and thermal bands; the named element table and banked matter; the registered civilizations; aperture deals, councils and pens; the chartered lanes"),
         ("spectrum", "P3: the cognition reading — what this chain actually solved, weighed against the benchmark floor; a reading, never a score"),
         ("zone <tile> regen", "REGEN-1: the regenerator — restores the line's own ration at the extractor's rate (every number derives from the standing table); requires the DEEPENING (condition 3) crystallized on the orb"),
