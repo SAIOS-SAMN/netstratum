@@ -328,7 +328,8 @@ fn the_version_is_pinned() {
     //   0.15.0 — claimed and landed by the d3-scope composition
     //            (the genesis exception, 54f85ea, their ledger).
     //   0.16.0 — claimed and landed here (ECO-1, this ledger).
-    //   — the next free minor is 17.
+    //   0.17.0 — claimed and landed here (ELEMENT-CHEMISTRY, below).
+    //   — the next free minor is 18.
     // 0.14.0 — THE CORPUS PRICES (2026-08-06): the ratified carrier
     //   pricing lands with its measured table — a benchmark-confirmed
     //   corpus solve mints at W = scarcity × VisitedNodes₃/word_len
@@ -350,7 +351,20 @@ fn the_version_is_pinned() {
     //   assay) and admits the widened form. The sealed 3-field form
     //   declares nothing, judges only the bound, and holds richness
     //   still forever.
-    assert_eq!(KERNEL_VERSION.to_string(), "0.16.0", "the gate is version-pinned");
+    // 0.17.0 — ELEMENT CHEMISTRY (2026-08-06, #37): tag 104 covered —
+    //   matter BONDS. The almanac's periodic table, complete and pinned
+    //   but read by nothing, gets its first consumer: a set of banked
+    //   elements whose lanes saturate compounds into a gem, each member
+    //   spending its lane's valence and the gem carrying away exactly
+    //   the sum (mass-exact by the saturation identity, so the recipe
+    //   needs no number of its own). The gate re-derives the recipe AND
+    //   the gem's identity from the receipt's members by calling the
+    //   emitter's own law, and refuses MatterDoesNotBond /
+    //   GemMisidentified off it. The element declaration widens from
+    //   ONE move to MANY — a deed may now move several element keys at
+    //   once, and repeated keys SUM rather than overwrite. MINOR: the
+    //   gate admits what was Unjudged.
+    assert_eq!(KERNEL_VERSION.to_string(), "0.17.0", "the gate is version-pinned");
     assert_eq!(VERSION, KERNEL_VERSION.code(), "the wire carries the packed form");
     // ORDER IS PRESERVED: a chain cut under the old linear versions
     // compares BELOW every packed one, which is true — an earlier gate

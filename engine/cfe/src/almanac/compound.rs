@@ -6,6 +6,7 @@
 //! civilization that has made one gem knows the recipe for the rest.
 
 use super::periodic::{periodic_of, Periodic, LANES};
+use crate::ratio::{ratio, Ratio};
 
 /// Do these elements COMPOUND? Three conditions, one per participating
 /// axis:
@@ -72,4 +73,59 @@ pub fn gem_of(elements: &[[u8; 32]]) -> Option<[u8; 32]> {
 pub fn knowledge_of(elements: &[[u8; 32]]) -> Option<u16> {
     compounds(elements)
         .then(|| elements.iter().map(|e| u16::from(periodic_of(e).line)).sum())
+}
+
+/// **A SET THAT COMPOUNDS, proven at construction** (P1,
+/// 29_CONSTRUCTION — the [`super::super::world::survey::ForgeableGrade`]
+/// precedent). Whether matter bonds is a property of the SET ALONE:
+/// the shells agree, the phases agree, and the binds saturate. None of
+/// that reads the chain, so it is decidable at a door and a verb
+/// holding one of these can never ask again.
+///
+/// The chain-dependent halves — is this element LOCAL to the star, has
+/// the orb the PRESSURE to refine it, is it WORKABLE at this
+/// temperature — stay facts at the verb forever, because a set that
+/// bonds nowhere today bonds tomorrow when the world moves.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Compoundable(Vec<[u8; 32]>);
+
+impl Compoundable {
+    /// The door. `None` where the matter does not bond.
+    pub fn new(elements: &[[u8; 32]]) -> Option<Compoundable> {
+        compounds(elements).then(|| Compoundable(elements.to_vec()))
+    }
+    /// The members, in the order they were offered.
+    pub fn members(&self) -> &[[u8; 32]] {
+        &self.0
+    }
+    /// The gem this set makes — total on a proven set, so no `Option`
+    /// survives the door.
+    pub fn gem(&self) -> [u8; 32] {
+        gem_of(&self.0).expect("a compoundable set names its gem")
+    }
+    /// The knowledge it wins — likewise total past the door.
+    pub fn knowledge(&self) -> u16 {
+        knowledge_of(&self.0).expect("a compoundable set carries its knowledge")
+    }
+}
+
+/// **THE RECIPE — what a compounding spends and what it makes.** ONE
+/// HOME: the deed settles it and the kernel re-derives it by calling
+/// here (the `vein_wear` discipline).
+///
+/// A member gives up its LANE'S VALENCE — `binds`, the quantity that
+/// lane brings to any bond — and the gem carries away exactly the sum.
+/// So the transformation is MASS-EXACT by construction, and it needs no
+/// number of its own: the compounding law already fixes that sum at
+/// `arity · (LANES/2 + 1) / 2` for every set that bonds at all.
+pub fn recipe_of(set: &Compoundable) -> (Vec<([u8; 32], Ratio)>, Ratio) {
+    let spends: Vec<([u8; 32], Ratio)> = set
+        .members()
+        .iter()
+        .map(|element| (*element, ratio(i64::from(periodic_of(element).binds), 1)))
+        .collect();
+    let yielded = spends
+        .iter()
+        .fold(ratio(0, 1), |sum, (_, spend)| sum + spend.clone());
+    (spends, yielded)
 }

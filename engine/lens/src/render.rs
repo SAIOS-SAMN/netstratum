@@ -339,6 +339,14 @@ pub fn render_receipt(receipt: &Receipt) -> String {
             format!("{} closed to writing", &hex(&kind.0)[..8]),
         ),
         E::ZoneBuilt { tile, kind, .. } => ("zone_built", format!("{} @ {tile}", zone_name(*kind))),
+        E::GemCompounded { orb_id, members, gem } => (
+            "gem_compounded",
+            format!(
+                "{} bond into {} on orb {orb_id}",
+                members.len(),
+                &hex(gem)[..8]
+            ),
+        ),
         E::ParameterChartered { key, value } => (
             "parameter_chartered",
             format!(

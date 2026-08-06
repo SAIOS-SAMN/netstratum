@@ -43,6 +43,7 @@ pub use rules::{
 
 pub mod accord;
 pub mod books;
+pub mod chemistry;
 pub mod growth;
 pub mod literature;
 pub mod core;

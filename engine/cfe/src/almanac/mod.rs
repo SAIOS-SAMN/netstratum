@@ -24,7 +24,7 @@ pub mod locality;
 pub mod periodic;
 pub mod thermal;
 
-pub use compound::{compounds, gem_of, knowledge_of};
+pub use compound::{compounds, gem_of, knowledge_of, recipe_of, Compoundable};
 pub use locality::{lines_of, local_to, pressure, refines, workable_in};
 pub use periodic::{periodic_of, Periodic, CELLS, LANES, LINES, PHASES, SHELLS, SPINS};
 pub use thermal::{

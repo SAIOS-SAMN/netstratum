@@ -507,6 +507,109 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 style.strong("assay <element-prefix>")
             ),
         },
+        // ELEMENT-CHEMISTRY (#37): the bench and the bond.
+        Some("bench") => {
+            let bench = world.bench_standing(*current);
+            println!(
+                "{} THE BENCH — what this orb's matter would make",
+                style.strong("◈")
+            );
+            if bench.is_empty() {
+                println!(
+                    "  {}",
+                    style.dim(
+                        "nothing here bonds — a set needs one geometry, one phase, and binds \
+                         that saturate. Assay more veins, or trade for what your sky lacks"
+                    )
+                );
+            }
+            let mut ready = 0;
+            for (members, gem, knowledge, standing) in &bench {
+                let named: Vec<String> = members
+                    .iter()
+                    .map(|member| hex_prefix(member)[..6].to_string())
+                    .collect();
+                println!(
+                    "  {} → {} · knowledge {}",
+                    style.strong(&named.join(" + ")),
+                    style.strong(&hex_prefix(gem)[..8]),
+                    knowledge
+                );
+                // THE PLACE'S OWN SAY. A set that bonds is not a set
+                // this rock can work: a compound shares one phase and
+                // an orb sits in one thermal band, so the bench names
+                // what stands in the way rather than sending you into
+                // a refusal.
+                match standing {
+                    None => {
+                        ready += 1;
+                        println!("      {}", style.ok("✓ this orb can work it"));
+                    }
+                    Some(refusal) => {
+                        println!("      {} {}", style.warn("⚠"), refuse_text(world, refusal, style));
+                    }
+                }
+            }
+            if ready > 0 {
+                println!(
+                    "  {} {}",
+                    style.dim("↳"),
+                    style.dim("compound <prefix> <prefix> … to bond a set")
+                );
+            }
+        }
+        Some("compound") => {
+            let prefixes: Vec<String> = words.map(|word| word.to_string()).collect();
+            if prefixes.len() < 2 {
+                println!(
+                    "{} usage: {} — bond banked elements into a gem ({} lists what would)",
+                    style.bad("✗"),
+                    style.strong("compound <prefix> <prefix> …"),
+                    style.strong("bench")
+                );
+            } else {
+                let committed = world.committed();
+                let held = committed.orbs.iter().find(|orb| orb.orb_id == *current);
+                let resolved: Option<Vec<[u8; 32]>> = prefixes
+                    .iter()
+                    .map(|prefix| {
+                        held.and_then(|orb| {
+                            orb.elements
+                                .iter()
+                                .map(|(element, _)| *element)
+                                .find(|element| hex_prefix(element).starts_with(prefix.as_str()))
+                        })
+                    })
+                    .collect();
+                match resolved {
+                    Some(members) => match world.compound_as(cfe::world::SOVEREIGN, *current, &members) {
+                        Ok(gem) => {
+                            println!(
+                                "{} {} bond into {} — the lanes saturate and the matter holds",
+                                style.ok("◈"),
+                                style.strong(&format!("{} elements", members.len())),
+                                style.strong(&hex_prefix(&gem)[..8])
+                            );
+                            if let Some(set) = cfe::almanac::Compoundable::new(&members) {
+                                println!(
+                                    "  {} knowledge {} won — this recipe works at every line of \
+                                     the same lanes",
+                                    style.dim("↳"),
+                                    style.strong(&set.knowledge().to_string())
+                                );
+                            }
+                        }
+                        Err(refusal) => refuse(world, &refusal, style),
+                    },
+                    None => println!(
+                        "{} this orb banks nothing matching one of those prefixes — {} lists \
+                         what it holds",
+                        style.bad("✗"),
+                        style.strong("elements")
+                    ),
+                }
+            }
+        }
         Some("genesis") => {
             let civilization = words.next();
             let axes = (
@@ -3126,15 +3229,24 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             }
             for orb in &committed.orbs {
                 for (element, held) in &orb.elements {
-                    let name = committed
-                        .prospects
-                        .iter()
-                        .find(|vein| &vein.element == element)
-                        .map(|_| {
+                    // ELEMENT-CHEMISTRY (#37): banked matter is either
+                    // DRAWN (a vein named it) or MADE (a gem this
+                    // world's own bond named). Both are element ids in
+                    // one ledger; the chronicle says which is which.
+                    let drawn = committed.prospects.iter().any(|vein| &vein.element == element);
+                    let made = is_gem(world, element);
+                    let name = match (drawn, made) {
+                        (true, _) => {
                             let (family, _, _) = cfe::dop::element_properties(element, star);
                             cfe::dop::element_name(family, element)
-                        })
-                        .unwrap_or_else(|| format!("{:02x}{:02x}…", element[0], element[1]));
+                        }
+                        (false, true) => format!(
+                            "{} {}",
+                            style.strong("gem"),
+                            &hex_prefix(element)[..8]
+                        ),
+                        (false, false) => format!("{:02x}{:02x}…", element[0], element[1]),
+                    };
                     println!(
                         "  banked: {} {} on orb {}",
                         style.strong(&amount(held)),
@@ -3700,6 +3812,8 @@ fn help(style: &Style) {
         ("dashboard · settlements · rings · elements · civs · contacts · routes", "THE ATLAS: your whole aspect, listable — the board overview; every settlement's zones and banks; the star's rings and thermal bands; the named element table and banked matter; the registered civilizations; aperture deals, councils and pens; the chartered lanes"),
         ("spectrum", "P3: the cognition reading — what this chain actually solved, weighed against the benchmark floor; a reading, never a score"),
         ("zone <tile> regen", "REGEN-1: the regenerator — restores the line's own ration at the extractor's rate (every number derives from the standing table); requires the DEEPENING (condition 3) crystallized on the orb"),
+        ("prospect <stratum> · assay <prefix>", "THE GROUND: prospecting READS what your genesis seed always held at a stratum — one stratum, one reading, and no redraw can re-roll it; assaying DRAWS richness × elapsed from an opened vein. ECO-1: the draw TIRES the vein (priced against its hash-derived natural flow) and regenerators on the orb restore it between draws, so extraction has a long-run cost and tending the ground pays"),
+        ("bench · compound <prefix> <prefix> …", "ELEMENT-CHEMISTRY: matter BONDS. A set compounds when every member shares the geometry and the phase, the count equals the geometry's arity, and the binds SATURATE — so the recipe is the LANES', not the members', and one recipe names a family of gems at every line. Each member spends its lane's valence and the gem carries away exactly the sum. `bench` lists every set your ledger could make; the gem is content-addressed, so the same matter names the same gem in every world — which is what makes it tradeable. Bonding also needs the place: your star must carry the line, your strata must bring the pressure, and the orb must be at a workable heat"),
         ("forge <condition>", "MANU-1: forge an instrument from a crystallized condition + the converter chain (alloy = grade; diamond at 3+) — scan reach = base + best grade"),
         ("pen <world> · pen return <world>", "the receipted handoff (MESH-1b): ask the conductor for a world\'s pen — the seal lands at its next beat and your cross-world deeds write there lawfully; return it when done"),
         ("login [name] · whoami · continue", "the operator menu (prototype, no passwords): many accounts on one machine — login mints/switches, bare login lists, continue resumes your profile\'s last saved world"),
@@ -3977,6 +4091,19 @@ fn hex_prefix(element: &[u8; 32]) -> String {
     element[..4].iter().map(|byte| format!("{byte:02x}")).collect()
 }
 
+/// ELEMENT-CHEMISTRY (#37): did this world MAKE this identity? Read
+/// from the chronicle, which is the only place that knows — a gem and
+/// a drawn element are both element ids in one ledger, and what
+/// separates them is the deed that put them there.
+fn is_gem(world: &cfe::world::World, element: &[u8; 32]) -> bool {
+    world.chronicle().receipts().iter().any(|receipt| {
+        matches!(
+            &receipt.event,
+            cfe::dop::ClosureEvent::GemCompounded { gem, .. } if gem == element
+        )
+    })
+}
+
 /// The near-miss zone-delta word: a kind wire code, 0 = unzoned.
 fn kind_word(code: u8) -> &'static str {
     ZoneKind::from_wire(code).map(kind_name).unwrap_or("empty")
@@ -4212,6 +4339,13 @@ fn book_name_fault(fault: &cfe::books::BookNameFault, style: &Style) -> String {
 }
 
 fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
+    println!("{} {}", style.bad("✗"), refuse_text(world, refusal, style));
+}
+
+/// The refusal's own words, without the mark. Split out so the BENCH
+/// can say what stands in a set's way in exactly the voice the deed
+/// would use if you tried it — one text, two readers.
+fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String {
     let text = match refusal {
         // K4: the emitter now refuses BEFORE writing, so these are
         // reachable from every caller rather than only from the judge.
@@ -4278,6 +4412,35 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
         ActionRefused::WorkAlreadyAspired { name } => {
             format!("{} is already reached for", style.strong(name))
         }
+        ActionRefused::MatterDoesNotBond => format!(
+            "this matter does not BOND — a set compounds when every member shares the geometry \
+             and the phase, the count equals the geometry's arity, and the binds saturate. \
+             {} shows every set of what you hold that would",
+            style.strong("bench")
+        ),
+        ActionRefused::ElementNotLocal { element } => format!(
+            "{} lies on a LINE this system does not carry — deep matter does not occur under a \
+             shallow star. Another world holds it; {} is how it gets here",
+            style.strong(&hex(element)[..8]),
+            style.strong("trade")
+        ),
+        ActionRefused::PressureUnreached { element } => format!(
+            "{} needs more PRESSURE than this orb has opened — {} deeper strata to bring it to bear",
+            style.strong(&hex(element)[..8]),
+            style.strong("prospect")
+        ),
+        ActionRefused::NotWorkableHere { element } => format!(
+            "{} is not workable at this orb's temperature — matter has a phase and a place has a \
+             heat. The same set bonds on a world in another band",
+            style.strong(&hex(element)[..8])
+        ),
+        ActionRefused::CannotAffordElement { element, need, have } => format!(
+            "not enough {} — the bond spends {} and you hold {}; {} the vein for more",
+            style.strong(&hex(element)[..8]),
+            style.strong(&amount(need)),
+            style.strong(&amount(have)),
+            style.strong("assay")
+        ),
         ActionRefused::WorkNotAspired { name } => format!(
             "{} was never reached for — {} before you claim it",
             style.strong(name),
@@ -4586,7 +4749,7 @@ fn refuse(world: &World, refusal: &ActionRefused, style: &Style) {
             style.strong("forwards")
         ),
     };
-    println!("{} {text}", style.bad("✗"));
+    text
 }
 
 fn map(world: &World, style: &Style, current: u64) {
@@ -5247,6 +5410,11 @@ fn chronicle(world: &World, style: &Style) {
                 "⛏ {} read from stratum {} (family {family}, tier {tier}) — what the seed always held",
                 style.strong(name),
                 style.strong(&stratum.to_string())
+            ),
+            cfe::dop::ClosureEvent::GemCompounded { members, gem, .. } => format!(
+                "◈ {} bond into {} — the lanes saturate and the matter holds",
+                style.strong(&format!("{} elements", members.len())),
+                style.strong(&hex(gem)[..8])
             ),
             cfe::dop::ClosureEvent::AssayStruck { amount: drawn, richness, .. } => format!(
                 "⚖ {} drawn from the opened vein — one receipt, the whole span{}",

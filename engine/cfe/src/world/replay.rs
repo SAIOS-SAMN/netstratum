@@ -435,6 +435,22 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     last_assay: receipt.stamp,
                 });
             }
+            // ELEMENT-CHEMISTRY (#37): the bond replays by re-deriving
+            // its own recipe from the members the receipt names — the
+            // same one home the verb settled and the gate judged. A
+            // receipt whose members no longer bond spends nothing,
+            // which cannot arise past the gate.
+            ClosureEvent::GemCompounded { orb_id, members, gem } => {
+                if let Some(set) = crate::almanac::Compoundable::new(members) {
+                    let (spends, yielded) = crate::almanac::recipe_of(&set);
+                    if let Some(held) = peel(&mut orbs, *orb_id) {
+                        for (element, spend) in &spends {
+                            held.bank_element(*element, -spend.clone());
+                        }
+                        held.bank_element(*gem, yielded);
+                    }
+                }
+            }
             ClosureEvent::AssayStruck { orb_id, element, amount, richness } => {
                 if let Some(vein) = prospects
                     .iter_mut()

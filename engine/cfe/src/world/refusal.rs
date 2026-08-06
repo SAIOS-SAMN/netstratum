@@ -57,6 +57,28 @@ pub enum ActionRefused {
     /// ELEMENT-GRAMMAR-1 — no prospect on this orb carries that
     /// identity; the assay reads only opened veins.
     NoSuchElement { element: [u8; 32] },
+    /// ELEMENT-CHEMISTRY (#37) — the offered matter does not BOND: the
+    /// shells disagree, the phases cannot coexist, the count is not the
+    /// geometry's arity, or the binds do not saturate. A property of
+    /// the SET ALONE, so it dies at the `Compoundable` door and this
+    /// arm is what the door's `None` is reported as.
+    MatterDoesNotBond,
+    /// ELEMENT-CHEMISTRY (#37) — this system does not carry the
+    /// element's LINE: deep matter simply does not occur under a
+    /// shallow star. A fact of the sky, at the verb forever.
+    ElementNotLocal { element: [u8; 32] },
+    /// ELEMENT-CHEMISTRY (#37) — the orb has not opened deep enough to
+    /// release this element: the pressure its line demands is above
+    /// the deepest stratum prospected here.
+    PressureUnreached { element: [u8; 32] },
+    /// ELEMENT-CHEMISTRY (#37) — the element is not workable at this
+    /// orb's temperature: matter has a phase, and a place has a heat.
+    /// The same set bonds on a colder world.
+    NotWorkableHere { element: [u8; 32] },
+    /// ELEMENT-CHEMISTRY (#37) — the orb does not hold enough of an
+    /// element to spend its lane's valence. The banked `CannotAfford`
+    /// applied to the element ledger, both sides carried whole.
+    CannotAffordElement { element: [u8; 32], need: Box<Ratio>, have: Box<Ratio> },
     /// THERMAL-1 — one sun per world; it is already commissioned.
     StarAlreadyCommissioned,
     /// D3 — one terrain charter per star; the seed is forever.

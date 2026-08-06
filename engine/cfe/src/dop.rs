@@ -260,7 +260,13 @@
 //!         the demurrage seam closed 2026-08-06)
 //!    103  ClosureEvent::ParameterChartered (P2, the chartered
 //!         parameters — the balance placeholders' mint path)
-//!         — the next free tag outside reservations is 104. (This line
+//!    104  ClosureEvent::GemCompounded (ELEMENT-CHEMISTRY, #37 — the
+//!         almanac's first CONSUMER: banked elements bond into a gem
+//!         by the lane law, the members spending their valence and the
+//!         gem carrying away exactly the sum. The receipt names the
+//!         members and the gem; every quantity re-derives from
+//!         `almanac::recipe_of`)
+//!         — the next free tag outside reservations is 105. (This line
 //!         read "90" until 2026-08-05 and was STALE: tag 90 was taken by
 //!         SovereignUnionSealed after it was written, and a mint drafted
 //!         onto 90 shadowed that deed's decoder arm — every sovereign
@@ -1685,6 +1691,19 @@ pub enum ClosureEvent {
     /// fourfold band of the seed, anchored so charters cannot walk);
     /// WHO may charter is the T0 standing gate, the mint's own law.
     ParameterChartered { key: u8, value: Ratio },
+    /// **ELEMENT-CHEMISTRY (tag 104, #37) — MATTER BONDS.** The
+    /// almanac's first consumer: a set of banked elements whose lanes
+    /// saturate bonds into a GEM, each member spending its lane's
+    /// valence and the gem carrying away exactly the sum.
+    ///
+    /// The receipt names only the ORB, the MEMBERS and the GEM.
+    /// Everything else — what each member spends, what the gem yields,
+    /// the knowledge won — re-derives from
+    /// [`crate::almanac::recipe_of`] over the members alone, so the
+    /// gate re-computes rather than trusts (call-not-copy). Member
+    /// order is the offered order; the gem is order-free by its own
+    /// law.
+    GemCompounded { orb_id: u64, members: Vec<[u8; 32]>, gem: [u8; 32] },
     /// TRADE-1 (09 §2.1) — BANKED value moved orb-to-orb within one
     /// world: the chartering conservation law generalized (nothing
     /// minted, nothing lost). The cohesion-book postings derive from
@@ -2258,6 +2277,17 @@ impl ClosureEvent {
                 ratio::encode(value, &mut bytes);
                 tlv::put(103, &bytes, &mut out);
             }
+            Self::GemCompounded { orb_id, members, gem } => {
+                // orb ‖ gem ‖ members — the member count is the
+                // remainder over 32, so no length prefix is needed and
+                // a truncated value cannot decode as a shorter set.
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(gem);
+                for member in members {
+                    value.extend_from_slice(member);
+                }
+                tlv::put(104, &value, &mut out);
+            }
             Self::ResourceTransferred { from_orb, to_orb, resource, amount } => {
                 let mut value = from_orb.to_le_bytes().to_vec();
                 value.extend_from_slice(&to_orb.to_le_bytes());
@@ -2816,6 +2846,21 @@ impl ClosureEvent {
                 let (chartered, used) = ratio::decode(value.get(1..)?)?;
                 (1 + used == value.len())
                     .then_some(Self::ParameterChartered { key, value: chartered })
+            }
+            104 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let gem: [u8; 32] = value.get(8..40)?.try_into().ok()?;
+                let rest = value.get(40..)?;
+                // A partial identity is not a member — refuse, never
+                // guess (the DemurrageTouched discipline).
+                if rest.is_empty() || rest.len() % 32 != 0 {
+                    return None;
+                }
+                let members: Vec<[u8; 32]> = rest
+                    .chunks_exact(32)
+                    .map(|chunk| chunk.try_into().expect("chunks_exact(32)"))
+                    .collect();
+                Some(Self::GemCompounded { orb_id, members, gem })
             }
             30 => {
                 let from_orb = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

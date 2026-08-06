@@ -117,6 +117,7 @@ fn every_deed() -> Vec<ClosureEvent> {
         E::PracticeReleased { practice: 1 },
         E::ProspectStruck { orb_id: 1, stratum: 0, element: bytes, family: 1, tier: 1, richness: r(1), name: "p".into() },
         E::AssayStruck { orb_id: 1, element: bytes, amount: r(1), richness: None },
+        E::GemCompounded { orb_id: 1, members: vec![bytes], gem: bytes },
         E::ElderWarded {},
         E::WardLifted { claimer: "w".into() },
         E::VeilDrawn {},
@@ -135,13 +136,19 @@ fn every_deed() -> Vec<ClosureEvent> {
 fn coverage_is_total_the_sealed_default_is_unreachable() {
     // THE PHASE 3 PRECONDITION as a standing test (supersedes the old
     // sealed-default pin now that the last deed is covered): every one
-    // of the 64 deeds is gated — none refuses Unjudged. A deed may
+    // of the deeds is gated — none refuses Unjudged. A deed may
     // refuse for its OWN law (a value-mover over prior==next breaks
     // conservation; an authority deed from a bare hand refuses
     // NotPermitted) — that is a JUDGED verdict. Only Unjudged means a
     // coverage hole.
+    //
+    // THE COUNT IS BY HAND and that is a known weakness: Rust cannot
+    // count an enum's variants, so a new deed left out of
+    // `every_deed()` passes this pin silently. #37's GemCompounded was
+    // added here deliberately when it landed (64 -> 65); the tag
+    // registry in `dop.rs` is the other place that must move.
     let deeds = every_deed();
-    assert_eq!(deeds.len(), 64, "one instance of every ClosureEvent variant");
+    assert_eq!(deeds.len(), 65, "one instance of every ClosureEvent variant");
     let state = seated();
     for event in deeds {
         let verdict = admits(&state, &state, &step(event.clone(), SOVEREIGN));

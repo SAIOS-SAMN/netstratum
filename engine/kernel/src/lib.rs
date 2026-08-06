@@ -136,7 +136,7 @@ use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 /// (Amendments 0.11.0 through the current minor are recorded in the
 /// version ledger — `tests/conservation_pins.rs` — beside the
 /// NEXT-FREE RULE that assigns minors across lanes.)
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 16, patch: 0 };
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 17, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
@@ -265,6 +265,16 @@ pub enum Refused {
     /// The sealed 3-field form declares nothing and judges only the
     /// bound. Both sides carried whole.
     VeinWearMisdeclared { expected: Box<Ratio>, declared: Box<Ratio> },
+    /// ELEMENT-CHEMISTRY (#37): the receipt's members do not BOND —
+    /// the shells disagree, the phases cannot coexist, the count is not
+    /// the geometry's arity, or the binds do not saturate. Matter that
+    /// does not compound declares no move and may make none.
+    MatterDoesNotBond,
+    /// ELEMENT-CHEMISTRY (#37): the receipt named a gem that is not the
+    /// one its members make. The gem is content-addressed and
+    /// order-free, so the gate re-derives it and refuses any other
+    /// identity — a compounding cannot mint a name it did not earn.
+    GemMisidentified { expected: Box<[u8; 32]>, declared: Box<[u8; 32]> },
     /// ECO-1 (#40): the vein book moved off its two deeds. Richness
     /// is JUDGED state now, so the book's motion is the law's:
     /// a prospect pushes exactly its receipted vein; an assay moves
@@ -690,8 +700,9 @@ fn union(step: &Step) -> Result<(), Refused> {
 /// other deed declares no element move, so every element total holds
 /// still (a smuggled element mint under any deed refuses).
 fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Refused> {
-    // The declared element mint for this deed (None = holds still).
-    let declared: Option<([u8; 32], Ratio)> = match &step.event {
+    // The declared element moves for this deed (empty = every key
+    // holds still). Signed: a mint is positive, a spend negative.
+    let declared: Vec<([u8; 32], Ratio)> = match &step.event {
         ClosureEvent::AssayStruck { orb_id, element, amount, richness } => {
             if *amount < ratio(0, 1) {
                 return Err(Refused::ElementNotPositive {
@@ -763,15 +774,45 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
                     }
                 }
             }
-            Some((*element, amount.clone()))
+            vec![(*element, amount.clone())]
         }
-        _ => None,
+        // ELEMENT-CHEMISTRY (#37): a bond moves MANY keys at once —
+        // each member spends its lane's valence and the gem carries
+        // away the sum. The gate re-derives every one of those numbers
+        // by CALLING the emitter's one home over the members the
+        // receipt names (call-not-copy), so a compounding cannot be
+        // quoted one way and settled another. A receipt whose members
+        // do not bond declares nothing and therefore may move nothing.
+        ClosureEvent::GemCompounded { members, gem, .. } => {
+            let Some(set) = cfe::almanac::Compoundable::new(members) else {
+                return Err(Refused::MatterDoesNotBond);
+            };
+            if set.gem() != *gem {
+                return Err(Refused::GemMisidentified {
+                    expected: Box::new(set.gem()),
+                    declared: Box::new(*gem),
+                });
+            }
+            let (spends, yielded) = cfe::almanac::recipe_of(&set);
+            let mut declared: Vec<([u8; 32], Ratio)> = spends
+                .into_iter()
+                .map(|(element, spend)| (element, -spend))
+                .collect();
+            declared.push((*gem, yielded));
+            declared
+        }
+        _ => Vec::new(),
     };
     // Total-check every element key present in either state or in the
     // declaration: the total moves by exactly the declared amount.
+    // A key may be declared MORE THAN ONCE (a set holding two of one
+    // lane spends twice), so the deltas SUM rather than overwrite —
+    // taking only the first match would let the second spend vanish.
     let mut keys: Vec<[u8; 32]> = Vec::new();
-    if let Some((element, _)) = &declared {
-        keys.push(*element);
+    for (element, _) in &declared {
+        if !keys.contains(element) {
+            keys.push(*element);
+        }
     }
     for orb in prior.orbs.iter().chain(next.orbs.iter()) {
         for (element, _) in &orb.elements {
@@ -782,10 +823,9 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
     }
     for element in keys {
         let delta = declared
-            .as_ref()
+            .iter()
             .filter(|(held, _)| *held == element)
-            .map(|(_, amount)| amount.clone())
-            .unwrap_or_else(|| ratio(0, 1));
+            .fold(ratio(0, 1), |sum, (_, amount)| sum + amount.clone());
         let before = total_element(prior, element);
         let after = total_element(next, element);
         let expected = before + delta;
@@ -998,6 +1038,13 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::OfferCountered { .. }
         | E::PracticeAdopted { .. } | E::PracticeReleased { .. } | E::ElderWarded { .. }
         | E::VeilDrawn { .. } | E::WardLifted { .. } | E::VeilLifted { .. }
+        // ELEMENT-CHEMISTRY (tag 104) — value-moving in the ELEMENT
+        // ledger, with its arm in `element_move`: the members' spends
+        // and the gem's yield are re-derived from the receipt's own
+        // members by calling the emitter's recipe, and the gem's
+        // identity is re-derived too. BY HAND, as ever — the compiler
+        // does not force this list.
+        | E::GemCompounded { .. }
         | E::GenesisSealed { .. } | E::ProspectStruck { .. } | E::LineSucceeded { .. }
         | E::TechLicensed { .. } | E::InstrumentForged { .. } | E::RouteChartered { .. }
         | E::OfferPosted { .. } | E::BondSealed { .. }
@@ -1855,6 +1902,11 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::FamineStruck { .. } | E::FamineRelieved { .. }
         | E::GaugeShifted { .. } | E::GaugeShiftedAt { .. }
         | E::ProspectStruck { .. } | E::AssayStruck { .. } | E::CrystalDrawn { .. }
+        // ELEMENT-CHEMISTRY (#37): a bond is WORLD-layer beside the
+        // mint and the assay it consumes — it carries an orb's matter,
+        // not a line's identity. The gem's name is content-addressed
+        // from the members, so no line is keyed by it.
+        | E::GemCompounded { .. }
         | E::InstrumentForged { .. }
         | E::TechDiscovered { .. } | E::TechLicensed { .. } => Some(Layer::World),
 
@@ -1961,6 +2013,11 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::OverflowAbsorbed { .. } | E::BondSettled { .. } | E::ForwardReleased { .. }
         | E::FrictionSettled { .. } | E::ApertureSent { .. } | E::ApertureReceived { .. }
         | E::CrystalDrawn { .. } | E::AssayStruck { .. } | E::OfferCleared { .. }
+        // ELEMENT-CHEMISTRY (#37): compounding SPENDS banked element
+        // value and banks a gem — Collect, exactly as the assay that
+        // filled the ledger it draws on. Ratified by the chemistry
+        // witnesses as it enters covered().
+        | E::GemCompounded { .. }
         // U1: the discovery mint settles banked value against verified
         // work — Collect, like the yield it banks beside. Ratified by
         // the U1 witnesses as it enters covered().
