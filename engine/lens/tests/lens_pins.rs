@@ -93,7 +93,17 @@ fn the_rich_rendering_re_serves_from_the_chronicle() {
     let chronicle_path = root.join("chronicle.tlv");
     cfe::persist::sync(world.chronicle(), &chronicle_path).expect("syncs");
     let resumed = lens::world(&chronicle_path).expect("resumes by replay");
-    let projected = lens::render::render_state("meridian", "meridian-prime", "test-sigil", &resumed);
+    // #45: the export carries the cognition mass scribe derived (the
+    // lens is GIVEN it, per its charter). This fixture minted nothing,
+    // so the mass is exactly zero — the re-derivation passes what the
+    // kernel would compute over an empty work set.
+    let projected = lens::render::render_state_with(
+        "meridian",
+        "meridian-prime",
+        "test-sigil",
+        &resumed,
+        Some("0"),
+    );
     assert_eq!(projected, display, "the rich export re-derives byte-for-byte");
 }
 
