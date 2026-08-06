@@ -144,9 +144,10 @@ fn long_stores_halves_the_decay_measured_on_the_receipt() {
         .iter()
         .rev()
         .find_map(|receipt| match &receipt.event {
-            ClosureEvent::DemurrageSettled { resource: Resource::Joule, amount, .. } => {
-                Some(amount.clone())
-            }
+            ClosureEvent::DemurrageTouched { decays, .. } => decays
+                .iter()
+                .find(|(resource, _)| *resource == Resource::Joule)
+                .map(|(_, amount)| amount.clone()),
             _ => None,
         })
         .expect("the leak settles by receipt, never silently");

@@ -132,7 +132,7 @@ use solver_verify::{verify_work, WorkBroken};
 /// its peoples). MINOR, derived: tag 101 enters `covered()` — the gate
 /// admits what was `Unjudged`. The receipt is a seed; there is nothing
 /// declarable to misdeclare, so no new refusal arm exists.
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 10, patch: 0 };
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 11, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
@@ -237,6 +237,10 @@ pub enum Refused {
     /// that actually CREATES value. Value leaves only by a lawful,
     /// non-negative decay.
     DecayNotPositive { resource: Resource, amount: Box<Ratio> },
+    /// I5 — an atomic touch (tag 102) carried the same resource twice:
+    /// one window settles one row per resource, and a repeat would
+    /// draw the same window's decay twice.
+    DecayRowDuplicated { resource: Resource },
     /// THE ELEMENT LAW (operator ruling 2026-08-01): the element
     /// ledger is gated with strict symmetry to the banked ledger. An
     /// element mint carried a negative amount — value enters the
@@ -820,8 +824,10 @@ fn covered(event: &ClosureEvent) -> bool {
         // declared amount, the local half of pair conservation.
         E::ResourceTransferred { .. } | E::ApertureSent { .. } | E::ApertureReceived { .. }
         // I4 creation / I5 decay (declaration==effect + sign) fully cover
-        // the mint and the demurrage decay.
+        // the mint and the demurrage decay — per-row (sealed) and the
+        // atomic touch alike.
         | E::YieldCollected { .. } | E::DemurrageSettled { .. }
+        | E::DemurrageTouched { .. }
         // U1 — the discovery mint's FULL set is landed: I1
         // (declaration==effect), I2 (Collect), I3, and I4 whole (sign
         // + the replay-complete verification + the sealed-shut bound).
@@ -1089,6 +1095,10 @@ fn admitted_deltas(
         E::DiscoveryMinted { resource, amount, .. } => vec![(*resource, amount.clone())],
         // — decays (the sign lives at I5, order preserved) —
         E::DemurrageSettled { resource, amount, .. } => vec![(*resource, -amount.clone())],
+        E::DemurrageTouched { decays, .. } => decays
+            .iter()
+            .map(|(resource, amount)| (*resource, -amount.clone()))
+            .collect(),
         // — Tier 1: single-resource debits, sign-guarded —
         E::UpkeepSettled { resource, amount, .. } => {
             non_negative(*resource, amount)?;
@@ -1425,6 +1435,57 @@ fn decay(prior: &Committed, step: &Step) -> Result<(), Refused> {
                 }),
             }
         }
+        // THE ATOMIC TOUCH (tag 102, the demurrage seam closed
+        // 2026-08-06): one receipt carries every resource the touch
+        // settled, so the whole settlement is judged against the anchor
+        // that stood BEFORE it — the per-row form judged each row
+        // against a prior the previous row had already anchored, and a
+        // dual-resource touch's second row always read elapsed 0. The
+        // sealed rule is still CALLED, never copied; it is called once
+        // for the touch, exactly as the emitter called it.
+        ClosureEvent::DemurrageTouched { orb_id, decays } => {
+            for (at, (resource, amount)) in decays.iter().enumerate() {
+                if *amount < ratio(0, 1) {
+                    return Err(Refused::DecayNotPositive {
+                        resource: *resource,
+                        amount: Box::new(amount.clone()),
+                    });
+                }
+                // One window settles one row per resource — a repeat
+                // would draw the same window twice.
+                if decays[..at].iter().any(|(held, _)| held == resource) {
+                    return Err(Refused::DecayRowDuplicated { resource: *resource });
+                }
+            }
+            let due_rows = prior
+                .orbs
+                .iter()
+                .find(|held| held.orb_id == *orb_id)
+                .map(|orb| {
+                    cfe::world::demurrage_due(
+                        orb,
+                        prior.star,
+                        step.stamp,
+                        &cfe::world::ease_of(&prior.techs, *orb_id, step.stamp),
+                        &cfe::world::standing_supply(&prior.orbs),
+                    )
+                })
+                .unwrap_or_default();
+            for (resource, amount) in decays {
+                let due = due_rows
+                    .iter()
+                    .find(|(held, _)| held == resource)
+                    .map(|(_, held)| held.clone())
+                    .unwrap_or_else(|| ratio(0, 1));
+                if *amount > due {
+                    return Err(Refused::DecayExceedsBound {
+                        bound: Box::new(due),
+                        claimed: Box::new(amount.clone()),
+                    });
+                }
+            }
+            Ok(())
+        }
         _ => Ok(()),
     }
 }
@@ -1562,7 +1623,8 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         E::ColonyFounded { .. } | E::ColonyCharted { .. } | E::WorldCharted { .. }
         | E::EstateSurveyed { .. } | E::AppraisalStruck { .. } | E::ParcelConveyed { .. }
         | E::ZoneBuilt { .. } | E::ZoneRazed { .. }
-        | E::YieldCollected { .. } | E::DemurrageSettled { .. } | E::UpkeepSettled { .. }
+        | E::YieldCollected { .. } | E::DemurrageSettled { .. } | E::DemurrageTouched { .. }
+        | E::UpkeepSettled { .. }
         | E::VentSettled { .. }
         | E::StarCommissioned { .. } | E::StarAged { .. } | E::PlanetSited { .. }
         | E::OverheatStruck { .. } | E::OverheatCleared { .. }
@@ -1683,7 +1745,8 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // invariants (conservation, decay) or their own protocol law.
         E::FamineStruck { .. } | E::FamineRelieved { .. } | E::EraAnnexed { .. }
         | E::GalaxyObserved { .. } | E::OverheatStruck { .. } | E::OverheatCleared { .. }
-        | E::VentSettled { .. } | E::DemurrageSettled { .. } | E::AbsorptionLapsed { .. }
+        | E::VentSettled { .. } | E::DemurrageSettled { .. } | E::DemurrageTouched { .. }
+        | E::AbsorptionLapsed { .. }
         | E::ForwardSlashed { .. } | E::WantStruck { .. } | E::WantRelieved { .. }
         | E::HandoffSealed { .. } | E::GaugeShifted { .. } | E::Diverged { .. }
         | E::Confluent { .. } | E::StarAged { .. } | E::EraFolded { .. }

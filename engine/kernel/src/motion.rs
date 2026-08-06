@@ -441,6 +441,17 @@ pub fn move_of(event: &ClosureEvent) -> Option<Move> {
         ClosureEvent::DemurrageSettled { orb_id, resource, amount } => {
             Some(Move::banked_of(*orb_id, *resource, -amount.clone()))
         }
+        // The atomic touch (tag 102): every settled row folds into one
+        // move — one deed, one motion.
+        ClosureEvent::DemurrageTouched { orb_id, decays } => {
+            decays.iter().fold(None, |motion, (resource, amount)| {
+                let row = Move::banked_of(*orb_id, *resource, -amount.clone());
+                Some(match motion {
+                    Some(held) => held.then_free(&row),
+                    None => row,
+                })
+            })
+        }
         // YIELD-1: a collection banks what the zones produced. Added
         // only after a live run showed 0/2 coverage — the deeds a world
         // actually writes are not the deeds that read well on paper.

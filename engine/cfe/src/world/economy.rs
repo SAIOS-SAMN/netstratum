@@ -770,6 +770,9 @@ impl World {
                 | ClosureEvent::UpkeepSettled { orb_id, amount, .. } if *orb_id == orb => {
                     carried + amount.clone()
                 }
+                ClosureEvent::DemurrageTouched { orb_id, decays } if *orb_id == orb => {
+                    decays.iter().fold(carried, |sum, (_, amount)| sum + amount.clone())
+                }
                 _ => carried,
             })
     }
@@ -784,6 +787,12 @@ impl World {
             |(decay, upkeep), receipt| match &receipt.event {
                 ClosureEvent::DemurrageSettled { orb_id, amount, .. } if *orb_id == orb => {
                     (decay + amount.clone(), upkeep)
+                }
+                ClosureEvent::DemurrageTouched { orb_id, decays } if *orb_id == orb => {
+                    let touched = decays
+                        .iter()
+                        .fold(decay, |sum, (_, amount)| sum + amount.clone());
+                    (touched, upkeep)
                 }
                 ClosureEvent::UpkeepSettled { orb_id, amount, .. } if *orb_id == orb => {
                     (decay, upkeep + amount.clone())

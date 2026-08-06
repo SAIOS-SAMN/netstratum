@@ -286,6 +286,7 @@ impl World {
                             | ClosureEvent::OverheatStruck { .. }
                             | ClosureEvent::VentSettled { .. }
                             | ClosureEvent::DemurrageSettled { .. }
+                            | ClosureEvent::DemurrageTouched { .. }
                     )
                 })
                 .count();

@@ -251,7 +251,9 @@
 //!         exactly this for the axes. Station codes are the BAND-1
 //!         vocabulary by index: 1 progenitor · 2 watcher · 3 observer
 //!         · 4 sovereign.)
-//!         — the next free tag outside reservations is 102. (This line
+//!    102  ClosureEvent::DemurrageTouched (SINK-1, the atomic touch —
+//!         the demurrage seam closed 2026-08-06)
+//!         — the next free tag outside reservations is 103. (This line
 //!         read "90" until 2026-08-05 and was STALE: tag 90 was taken by
 //!         SovereignUnionSealed after it was written, and a mint drafted
 //!         onto 90 shadowed that deed's decoder arm — every sovereign
@@ -1546,7 +1548,20 @@ pub enum ClosureEvent {
     VentSettled { orb_id: u64, amount: Ratio },
     /// SINK-1 (Q2) — receipted demurrage: un-vaulted banked stores
     /// decayed since last touch; settled here, never silently.
+    ///
+    /// SEALED (2026-08-06): new touches emit [`Self::DemurrageTouched`]
+    /// — the per-row form judged each row against a prior the previous
+    /// row had already anchored, so a dual-resource touch's second row
+    /// always read elapsed 0 (the demurrage seam). Old receipts stay
+    /// decodable and replayable forever.
     DemurrageSettled { orb_id: u64, resource: Resource, amount: Ratio },
+    /// SINK-1 (tag 102, the demurrage seam closed 2026-08-06) — **ONE
+    /// TOUCH, ONE RECEIPT**: every resource the touch settles rides
+    /// together, because the TOUCH is the deed and the anchor moves
+    /// once. The judge reads the whole settlement against the anchor
+    /// that stood before it — the per-row order sensitivity that
+    /// refused lawful second rows is unrepresentable here.
+    DemurrageTouched { orb_id: u64, decays: Vec<(Resource, Ratio)> },
     /// TRADE-1 (09 §2.1) — BANKED value moved orb-to-orb within one
     /// world: the chartering conservation law generalized (nothing
     /// minted, nothing lost). The cohesion-book postings derive from
@@ -2094,6 +2109,15 @@ impl ClosureEvent {
             Self::DemurrageSettled { orb_id, resource, amount } => {
                 tlv::put(29, &amount_layout(*orb_id, *resource, amount), &mut out);
             }
+            Self::DemurrageTouched { orb_id, decays } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.push(decays.len() as u8);
+                for (resource, amount) in decays {
+                    value.push(*resource as u8);
+                    ratio::encode(amount, &mut value);
+                }
+                tlv::put(102, &value, &mut out);
+            }
             Self::ResourceTransferred { from_orb, to_orb, resource, amount } => {
                 let mut value = from_orb.to_le_bytes().to_vec();
                 value.extend_from_slice(&to_orb.to_le_bytes());
@@ -2619,6 +2643,21 @@ impl ClosureEvent {
             29 => {
                 let (orb_id, resource, amount) = amount_fields(value)?;
                 Some(Self::DemurrageSettled { orb_id, resource, amount })
+            }
+            102 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let count = *value.get(8)? as usize;
+                let mut at = 9usize;
+                let mut decays = Vec::with_capacity(count);
+                for _ in 0..count {
+                    let resource = Resource::from_wire(*value.get(at)?)?;
+                    at += 1;
+                    let (amount, used) = ratio::decode(value.get(at..)?)?;
+                    at += used;
+                    decays.push((resource, amount));
+                }
+                // Refuse trailing bytes — never a guess.
+                (at == value.len()).then_some(Self::DemurrageTouched { orb_id, decays })
             }
             30 => {
                 let from_orb = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

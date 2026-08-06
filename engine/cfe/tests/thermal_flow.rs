@@ -286,7 +286,12 @@ fn the_vault_captures_sink_and_charges_no_demurrage() {
         .chronicle()
         .receipts()
         .iter()
-        .filter(|r| matches!(r.event, ClosureEvent::DemurrageSettled { .. }))
+        .filter(|r| {
+            matches!(
+                r.event,
+                ClosureEvent::DemurrageSettled { .. } | ClosureEvent::DemurrageTouched { .. }
+            )
+        })
         .count();
     assert_eq!(demurrage, 0, "the vault is lossless — no decay receipts");
 }
@@ -316,15 +321,17 @@ fn warm_banked_joules_pay_receipted_demurrage_at_touch() {
     let elapsed = world.orb().expect("orb").last_touch - touch;
     assert_eq!(elapsed, 4);
     // FLAT decay = 1/32 × 4 = 1/8 (never proportional — the
-    // denominator-explosion ruling), settled by receipt.
+    // denominator-explosion ruling), settled by receipt — the ATOMIC
+    // touch (tag 102): one receipt carries the settlement.
     let decayed = world
         .chronicle()
         .receipts()
         .iter()
         .find_map(|r| match &r.event {
-            ClosureEvent::DemurrageSettled { resource: Resource::Joule, amount, .. } => {
-                Some(amount.clone())
-            }
+            ClosureEvent::DemurrageTouched { decays, .. } => decays
+                .iter()
+                .find(|(resource, _)| *resource == Resource::Joule)
+                .map(|(_, amount)| amount.clone()),
             _ => None,
         })
         .expect("demurrage receipted");
@@ -344,10 +351,19 @@ fn vent_and_demurrage_events_round_trip() {
             resource: Resource::Sink,
             amount: ratio(1, 8),
         },
+        // The atomic touch (tag 102) — the dual-row settlement rides
+        // whole, exact rationals and all.
+        ClosureEvent::DemurrageTouched {
+            orb_id: 3,
+            decays: vec![
+                (Resource::Joule, ratio(1, 8)),
+                (Resource::Sink, ratio(22, 7)),
+            ],
+        },
     ] {
         let bytes = event.wire_bytes();
         let (tag, value) = cfe::tlv::records(&bytes).next().expect("one record");
-        assert!(tag == 27 || tag == 29);
+        assert!(tag == 27 || tag == 29 || tag == 102);
         let decoded = ClosureEvent::from_wire(tag, value).expect("decodes");
         assert_eq!(decoded, event);
         assert_eq!(decoded.wire_bytes(), bytes);

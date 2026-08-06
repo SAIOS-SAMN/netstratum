@@ -4506,6 +4506,18 @@ fn chronicle(world: &World, style: &Style) {
                 style.strong(&amount(decay)),
                 resource_name(*resource)
             ),
+            cfe::dop::ClosureEvent::DemurrageTouched { decays, .. } => format!(
+                "◌ the touch settled: {} — one touch, one receipt",
+                decays
+                    .iter()
+                    .map(|(resource, decay)| format!(
+                        "{} {}",
+                        style.strong(&amount(decay)),
+                        resource_name(*resource)
+                    ))
+                    .collect::<Vec<_>>()
+                    .join(" · ")
+            ),
             cfe::dop::ClosureEvent::ResourceTransferred {
                 from_orb, to_orb, resource, amount: moved,
             } => format!(

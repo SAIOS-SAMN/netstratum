@@ -297,7 +297,15 @@ fn the_version_is_pinned() {
     // 0.10.0 — THE MINTED LINE (2026-08-06): tag 101 covered — the
     //   engine mints its peoples; the receipt is a seed, everything
     //   derives, nothing declarable to misdeclare.
-    assert_eq!(KERNEL_VERSION.to_string(), "0.10.0", "the gate is version-pinned");
+    // 0.11.0 — THE ATOMIC TOUCH (2026-08-06): tag 102 covered — the
+    //   demurrage seam closed. One touch, one receipt: the judge reads
+    //   the whole settlement against the pre-touch anchor, and refuses
+    //   DecayRowDuplicated where a repeat would draw one window twice.
+    //   MINOR: the gate admits the dual-resource settlement the
+    //   per-row form structurally refused, and new touches emit the
+    //   new tag. Old per-row chains verify forever under the sealed
+    //   arm they were cut with.
+    assert_eq!(KERNEL_VERSION.to_string(), "0.11.0", "the gate is version-pinned");
     assert_eq!(VERSION, KERNEL_VERSION.code(), "the wire carries the packed form");
     // ORDER IS PRESERVED: a chain cut under the old linear versions
     // compares BELOW every packed one, which is true — an earlier gate

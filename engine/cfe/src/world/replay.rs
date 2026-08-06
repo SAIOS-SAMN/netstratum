@@ -331,9 +331,20 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 }
             }
             // SINK-1: receipted demurrage replays as a bank draw.
+            // (Sealed per-row form — old chronicles hold it forever.)
             ClosureEvent::DemurrageSettled { orb_id, resource, amount } => {
                 if let Some(held) = peel(&mut orbs, *orb_id) {
                     held.bank(*resource, -amount.clone());
+                    held.last_touch = receipt.stamp;
+                }
+            }
+            // SINK-1: the ATOMIC touch (tag 102) — every settled
+            // resource applies together and the anchor moves ONCE.
+            ClosureEvent::DemurrageTouched { orb_id, decays } => {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    for (resource, amount) in decays {
+                        held.bank(*resource, -amount.clone());
+                    }
                     held.last_touch = receipt.stamp;
                 }
             }

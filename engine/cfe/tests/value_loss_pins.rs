@@ -56,6 +56,10 @@ fn value_lost_is_the_sum_of_its_receipts() {
             | ClosureEvent::UpkeepSettled { orb_id, amount, .. } if *orb_id == orb => {
                 carried + amount.clone()
             }
+            // The atomic touch (tag 102): every settled row counts.
+            ClosureEvent::DemurrageTouched { orb_id, decays } if *orb_id == orb => {
+                decays.iter().fold(carried, |sum, (_, amount)| sum + amount.clone())
+            }
             _ => carried,
         });
     assert_eq!(book, expected, "the book IS its receipts, and nothing else");

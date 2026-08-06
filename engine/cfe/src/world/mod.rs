@@ -786,10 +786,20 @@ fn touch(
     ease: &Ratio,
     supply: &[(Resource, Ratio)],
 ) {
-    for (resource, decay) in demurrage_due(orb, star, stamp, ease, supply) {
-        orb.bank(resource, -decay.clone());
+    // ONE TOUCH, ONE RECEIPT (the demurrage seam, closed 2026-08-06):
+    // every settled resource rides one DemurrageTouched, because the
+    // anchor moves once per touch. The per-row form let a judge see a
+    // prior the first row had already anchored, so a dual-resource
+    // touch's second row always read elapsed 0 and refused lawful
+    // decay. A zero-due touch still anchors silently — the carrier
+    // deed's own replay arm carries the anchor.
+    let decays = demurrage_due(orb, star, stamp, ease, supply);
+    if !decays.is_empty() {
+        for (resource, decay) in &decays {
+            orb.bank(*resource, -decay.clone());
+        }
         chronicle.append(
-            ClosureEvent::DemurrageSettled { orb_id: orb.orb_id, resource, amount: decay },
+            ClosureEvent::DemurrageTouched { orb_id: orb.orb_id, decays },
             stamp,
             vec![],
         );

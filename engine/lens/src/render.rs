@@ -477,6 +477,16 @@ pub fn render_receipt(receipt: &Receipt) -> String {
             "demurrage_settled",
             format!("{} {}", ratio_str(amount), resource_name(*resource)),
         ),
+        E::DemurrageTouched { decays, .. } => (
+            "demurrage_touched",
+            decays
+                .iter()
+                .map(|(resource, amount)| {
+                    format!("{} {}", ratio_str(amount), resource_name(*resource))
+                })
+                .collect::<Vec<_>>()
+                .join(" · "),
+        ),
         E::ResourceTransferred { from_orb, to_orb, resource, amount } => (
             "resource_transferred",
             format!(

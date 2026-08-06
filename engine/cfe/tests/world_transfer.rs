@@ -232,7 +232,12 @@ fn demurrage_settles_both_sides_at_the_transfer_touch() {
         .chronicle()
         .receipts()
         .iter()
-        .filter(|r| matches!(r.event, ClosureEvent::DemurrageSettled { .. }))
+        .filter(|r| {
+            matches!(
+                r.event,
+                ClosureEvent::DemurrageSettled { .. } | ClosureEvent::DemurrageTouched { .. }
+            )
+        })
         .count();
     assert_eq!(demurrage, 0, "a same-stamp touch pays nothing");
 
@@ -252,9 +257,12 @@ fn demurrage_settles_both_sides_at_the_transfer_touch() {
         .receipts()
         .iter()
         .filter_map(|r| match &r.event {
-            ClosureEvent::DemurrageSettled { orb_id, resource: Resource::Joule, amount } => {
-                Some((*orb_id, amount.clone()))
-            }
+            // The atomic touch (tag 102): each side's settlement rides
+            // one receipt; the joule row is read out of it.
+            ClosureEvent::DemurrageTouched { orb_id, decays } => decays
+                .iter()
+                .find(|(resource, _)| *resource == Resource::Joule)
+                .map(|(_, amount)| (*orb_id, amount.clone())),
             _ => None,
         })
         .collect();
