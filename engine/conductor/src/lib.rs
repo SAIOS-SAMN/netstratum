@@ -1147,6 +1147,22 @@ impl Polity {
             None
         };
 
+        // **THE FORGE HOLD, generalized from the Furnace arm** (the
+        // G2 measurement, 2026-08-06): when ONLY the biomass line
+        // blocks an unlocked smelter, hold the rations for it — a
+        // habitat spent now pushes the forge past the horizon again.
+        // Measured before this arm existed: mineral lines imported
+        // biomass through the triangle trade and spent every unit on
+        // hearths — bio 0 at every mineral line, the smelter's 10
+        // never accumulating. The Furnace branch already ruled these
+        // exact words for its own seat; this is the same law on the
+        // settlement path.
+        let forge_starved = can_smelt
+            && smelters < 3
+            && iron >= ratio(30, 1)
+            && bio < ratio(10, 1)
+            && industry_relevant(&metabolism, ZoneKind::Smelter);
+
         // **THE SETTLEMENT GATES DERIVE** (P2, operator ruling
         // 2026-08-06: measured system bounds). The per-policy reserve
         // numbers these replace were restated by hand, and the
@@ -1205,7 +1221,10 @@ impl Polity {
                 None
             } else if wants_extractor && gated(world, ZoneKind::Extractor) {
                 Some(ZoneKind::Extractor)
-            } else if wants_habitat && gated(world, ZoneKind::Habitat) {
+            } else if wants_habitat && !forge_starved && gated(world, ZoneKind::Habitat) {
+                // `forge_starved` holds the rations: the biomass a
+                // hearth would eat is the biomass the unlocked smelter
+                // is waiting on.
                 Some(ZoneKind::Habitat)
             } else {
                 None
