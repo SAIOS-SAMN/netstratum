@@ -332,6 +332,11 @@ pub enum Axis {
     Class = 4,
     Clade = 5,
     Practice = 6,
+    /// **THE ZONE AXIS (#41)** — what a world can BUILD. Its seed is
+    /// the standing zone table, so the fold's ceiling is exactly the
+    /// next free `ZoneKind` wire code and a minted kind never collides
+    /// with a compiled one.
+    Zone = 7,
 }
 
 impl Axis {
@@ -343,6 +348,7 @@ impl Axis {
             4 => Some(Axis::Class),
             5 => Some(Axis::Clade),
             6 => Some(Axis::Practice),
+            7 => Some(Axis::Zone),
             _ => None,
         }
     }
@@ -354,13 +360,22 @@ impl Axis {
     /// of FUNCTION; minting one would let a T0 seat manufacture the seat
     /// that gates it. Offices change by amendment and by nothing else,
     /// so there is no axis code for them to be minted under.
-    pub const ALL: [Axis; 6] = [
+    ///
+    /// #41 added the ZONE axis at code 7 and the law is untouched by
+    /// it: a building is not an office. What a world may BUILD is a
+    /// vocabulary of the same kind as what it may BE — it changes
+    /// reachability, never authority — whereas a station gates who may
+    /// mint at all. The absence being asserted is of an OFFICE axis,
+    /// and no count of the list can say that; the witness now names it
+    /// directly.
+    pub const ALL: [Axis; 7] = [
         Axis::Disposition,
         Axis::Metabolism,
         Axis::Perception,
         Axis::Class,
         Axis::Clade,
         Axis::Practice,
+        Axis::Zone,
     ];
 }
 
@@ -371,6 +386,10 @@ pub struct Entry {
     pub sigil: String,
     pub word: String,
     pub binding: Vec<(u8, Ratio)>,
+    /// #41: the base a ZONE entry's binding modulates, where its mint
+    /// declared one. `None` on every other axis and on a zone mint
+    /// that leaves its base to be inferred — see [`zone_base`].
+    pub base: Option<u8>,
 }
 
 /// **THE COMPILED SEED.** Genesis reads no chain — there is none yet —
@@ -383,6 +402,7 @@ pub fn seed(axis: Axis) -> Vec<Entry> {
         sigil: String::new(),
         word: word.into(),
         binding: Vec::new(),
+        base: None,
     };
     match axis {
         Axis::Disposition => vec![
@@ -403,6 +423,7 @@ pub fn seed(axis: Axis) -> Vec<Entry> {
                 sigil: crate::dop::archetype_sigil(code).into(),
                 word: crate::dop::archetype_word(code).into(),
                 binding: archetype_binding(code),
+                base: None,
             })
             .collect(),
         Axis::Clade => (0..=20).map(|code| plain(code, clade_word(code))).collect(),
@@ -424,6 +445,7 @@ pub fn seed(axis: Axis) -> Vec<Entry> {
                 sigil: String::new(),
                 word: practice_word(code).into(),
                 binding,
+                base: None,
             };
             vec![
                 // austerity: the habitats dim, the extractors ration.
@@ -460,6 +482,111 @@ pub fn seed(axis: Axis) -> Vec<Entry> {
                 ]),
             ]
         }
+        // **THE ZONE SEED IS THE STANDING TABLE** (#41). Every compiled
+        // kind enters the fold at its own wire code with an EMPTY
+        // binding — the ground state, which is lawful and claims
+        // nothing (Article II). Two things follow for free: the fold's
+        // ceiling is the last compiled code, so the first minted kind
+        // takes the next wire code and cannot collide; and a minted
+        // kind is read by exactly the machinery that reads a compiled
+        // one, because they are entries of one axis.
+        Axis::Zone => (1..=crate::dop::ZONE_KINDS)
+            .filter_map(|code| {
+                crate::dop::ZoneKind::from_wire(code)
+                    .map(|kind| plain(code, crate::dop::zone_word(kind)))
+            })
+            .collect(),
+    }
+}
+
+/// **THE BASE A MINTED ZONE MODULATES (#41)** — the operator's
+/// three-way ruling, as one resolution ladder.
+///
+/// A minted kind's binding is a set of SCALE FACTORS, and factors need
+/// something to scale. This says what:
+///
+/// 1. **DECLARED** — the mint named a base outright. The binding
+///    modulates that kind, and [`TradingBinding`]'s one-benefit-one-
+///    friction law then makes a minted kind provably unable to
+///    dominate the thing it is a variant of.
+/// 2. **INFERRED** — no base was named, so it is read from the
+///    channels the binding actually touches: the table already says
+///    which family each channel prices.
+/// 3. **UNRESOLVED** — neither answers, so the entry stands as
+///    VOCABULARY that never builds. Making this a lawful outcome is
+///    what lets inference stay ambiguous without being dangerous: a
+///    channel set that names two families, or none, falls through here
+///    instead of having to be guessed at.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ZoneBase {
+    Declared(crate::dop::ZoneKind),
+    Inferred(crate::dop::ZoneKind),
+    /// The entry names a building nothing can build — a word without a
+    /// workshop.
+    Unresolved,
+}
+
+impl ZoneBase {
+    /// The kind this base modulates, if any builds at all.
+    pub fn kind(self) -> Option<crate::dop::ZoneKind> {
+        match self {
+            ZoneBase::Declared(kind) | ZoneBase::Inferred(kind) => Some(kind),
+            ZoneBase::Unresolved => None,
+        }
+    }
+}
+
+/// Resolve a minted zone entry's base by the ladder above.
+pub fn zone_base(declared: Option<u8>, binding: &[(u8, Ratio)]) -> ZoneBase {
+    // 1. DECLARED — and a declared base must be a COMPILED kind. A
+    //    minted kind cannot be based on another minted kind: that
+    //    would make the economics a chain of lookups whose depth is
+    //    whatever the chain happens to hold, and the gate re-derives a
+    //    build cost from committed state alone.
+    if let Some(code) = declared {
+        return match crate::dop::ZoneKind::from_wire(code)
+            .filter(|_| code <= crate::dop::ZONE_KINDS)
+        {
+            Some(kind) => ZoneBase::Declared(kind),
+            None => ZoneBase::Unresolved,
+        };
+    }
+    // 2. INFERRED — from the families the touched channels price. The
+    //    table is the authority on which channel belongs to which
+    //    family; nothing is restated here.
+    let mut family: Option<crate::dop::ZoneKind> = None;
+    for (channel, _) in binding {
+        let Some(named) = channel_family(*channel) else {
+            continue;
+        };
+        match family {
+            // A binding that speaks to two families names no single
+            // base, so it resolves to none rather than to a guess.
+            Some(held) if held != named => return ZoneBase::Unresolved,
+            _ => family = Some(named),
+        }
+    }
+    // 3. UNRESOLVED — the general channels (and the gates) price every
+    //    zone alike, so a binding built only from those names no base.
+    match family {
+        Some(kind) => ZoneBase::Inferred(kind),
+        None => ZoneBase::Unresolved,
+    }
+}
+
+/// Which zone family a channel prices, where it prices one. The
+/// general channels (yield, upkeep) and the world channels (survey,
+/// demurrage) and the gates price every zone alike and so name no
+/// family.
+pub fn channel_family(channel: u8) -> Option<crate::dop::ZoneKind> {
+    use crate::dop::ZoneKind;
+    match channel {
+        CHANNEL_HABITAT_YIELD | CHANNEL_HABITAT_UPKEEP => Some(ZoneKind::Habitat),
+        CHANNEL_EXTRACTOR_UPKEEP => Some(ZoneKind::Extractor),
+        // The converter channel prices the whole converter chain; the
+        // smelter is its first rung and stands for the family.
+        CHANNEL_CONVERTER_YIELD => Some(ZoneKind::Smelter),
+        _ => None,
     }
 }
 
@@ -518,6 +645,7 @@ pub fn fold(chronicle: &crate::vrp::Chronicle, axis: Axis) -> Vec<Entry> {
             sigil,
             word,
             binding,
+            base,
         } = &receipt.event
         {
             if Axis::from_code(*on) == Some(axis) {
@@ -526,6 +654,7 @@ pub fn fold(chronicle: &crate::vrp::Chronicle, axis: Axis) -> Vec<Entry> {
                     sigil: sigil.clone(),
                     word: word.clone(),
                     binding: binding.clone(),
+                    base: *base,
                 });
             }
         }
@@ -563,6 +692,7 @@ pub fn fold_at(chronicle: &crate::vrp::Chronicle, axis: Axis, stamp: u64) -> Vec
             sigil,
             word,
             binding,
+            base,
         } = &receipt.event
         {
             if Axis::from_code(*on) == Some(axis) {
@@ -571,6 +701,7 @@ pub fn fold_at(chronicle: &crate::vrp::Chronicle, axis: Axis, stamp: u64) -> Vec
                     sigil: sigil.clone(),
                     word: word.clone(),
                     binding: binding.clone(),
+                    base: *base,
                 });
             }
         }

@@ -75,6 +75,15 @@ pub enum ActionRefused {
     /// orb's temperature: matter has a phase, and a place has a heat.
     /// The same set bonds on a colder world.
     NotWorkableHere { element: [u8; 32] },
+    /// ZONE-VOCABULARY (#41) — a base was declared on an axis that has
+    /// no bases. Only a minted BUILDING modulates a standing kind.
+    BaseOffAxis { axis: u8 },
+    /// ZONE-VOCABULARY (#41) — the declared base names no compiled zone
+    /// kind. A minted kind may only modulate a kind the table already
+    /// compiles: basing a mint on another mint would make the economics
+    /// a lookup chain whose depth is whatever the chain happens to
+    /// hold, and the gate re-derives a build cost from committed state.
+    BaseUnknown { code: u8 },
     /// ELEMENT-CHEMISTRY (#37) — the orb does not hold enough of an
     /// element to spend its lane's valence. The banked `CannotAfford`
     /// applied to the element ledger, both sides carried whole.

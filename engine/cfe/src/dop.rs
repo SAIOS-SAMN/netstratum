@@ -1333,6 +1333,36 @@ pub fn cohesion_ratio(syntropic: &Ratio, entropic: &Ratio) -> Option<Ratio> {
     }
 }
 
+/// **HOW MANY KINDS THE TABLE COMPILES (#41)** — the last compiled
+/// wire code, and so the boundary a minted kind begins past. Counted
+/// from the table by [`ZoneKind::from_wire`] rather than restated, so
+/// landing a ninth compiled kind moves this by itself.
+pub const ZONE_KINDS: u8 = {
+    let mut code = 0u8;
+    while ZoneKind::from_wire_const(code + 1).is_some() {
+        code += 1;
+    }
+    code
+};
+
+/// **THE ZONE'S OWN WORD** — the naming law applied to buildings, and
+/// the ONE home for it (#41). The zone axis's seed is built from this,
+/// so a kind's word is vocabulary rather than decoration; the lens and
+/// the CLI read it here instead of keeping copies, which is how the
+/// three spellings that used to exist became one.
+pub fn zone_word(kind: ZoneKind) -> &'static str {
+    match kind {
+        ZoneKind::Extractor => "extractor",
+        ZoneKind::Habitat => "habitat",
+        ZoneKind::Smelter => "smelter",
+        ZoneKind::Synthesizer => "synthesizer",
+        ZoneKind::Encasement => "encasement",
+        ZoneKind::CryoArray => "cryo-array",
+        ZoneKind::Resonator => "resonator",
+        ZoneKind::Regenerator => "regenerator",
+    }
+}
+
 /// The zone kinds, with their ruleset-v1 economics.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -1429,6 +1459,13 @@ pub fn refinement_yield(tier: u32) -> Ratio {
 
 impl ZoneKind {
     pub fn from_wire(code: u8) -> Option<Self> {
+        Self::from_wire_const(code)
+    }
+
+    /// The same reading, usable where a constant is being computed
+    /// ([`ZONE_KINDS`] counts the table with it). One match, two
+    /// callers — the codes are never written down twice.
+    pub const fn from_wire_const(code: u8) -> Option<Self> {
         match code {
             1 => Some(Self::Extractor),
             2 => Some(Self::Habitat),
@@ -1997,6 +2034,13 @@ pub enum ClosureEvent {
         sigil: String,
         word: String,
         binding: Vec<(u8, Ratio)>,
+        /// **THE DECLARED BASE (#41)** — for a ZONE mint, the compiled
+        /// kind this entry's binding modulates. `None` on every other
+        /// axis, and on a zone mint that leaves the base to be inferred
+        /// from its channels (`vocabulary::zone_base`). Rides as a
+        /// trailing byte by the additive pattern, so every sealed
+        /// pre-zone mint decodes with it absent.
+        base: Option<u8>,
     },
     /// THE VERTICAL AXIS (tag 89, 2026-08-01): a line takes an office.
     ///
@@ -2564,7 +2608,7 @@ impl ClosureEvent {
             Self::TaxonSealed { class, clade } => {
                 tlv::put(85, &[*class, *clade], &mut out);
             }
-            Self::VocabularyMinted { axis, code, sigil, word, binding } => {
+            Self::VocabularyMinted { axis, code, sigil, word, binding, base } => {
                 let mut value = vec![*axis, *code];
                 let mut text = |s: &String| {
                     let bytes = s.as_bytes();
@@ -2577,6 +2621,11 @@ impl ClosureEvent {
                 for (channel, factor) in binding {
                     value.push(*channel);
                     ratio::encode(factor, &mut value);
+                }
+                // #41: the declared base, trailing and optional — its
+                // ABSENCE is the sealed pre-zone form, byte-exact.
+                if let Some(base) = base {
+                    value.push(*base);
                 }
                 tlv::put(96, &value, &mut out);
             }
@@ -3167,7 +3216,10 @@ impl ClosureEvent {
                     at += used;
                     binding.push((channel, factor));
                 }
-                Some(Self::VocabularyMinted { axis, code, sigil, word, binding })
+                // #41: a byte past the binding is the declared base;
+                // the sealed pre-zone form ends exactly here.
+                let base = value.get(at).copied();
+                Some(Self::VocabularyMinted { axis, code, sigil, word, binding, base })
             }
             97 => {
                 let seed: [u8; 32] = value.get(..32)?.try_into().ok()?;

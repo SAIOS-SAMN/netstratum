@@ -230,15 +230,37 @@ fn only_a_progenitor_may_mint() {
 /// unknown code becomes an axis, and no variant names an office.
 #[test]
 fn no_axis_mints_an_office() {
-    for code in [0u8, 7, 8, 99] {
+    // WITNESS TRUTH-UPDATE (#41, the zone axis): this asserted that
+    // code 7 constructs NO axis, and read a count of six. Both were
+    // standing in for the actual law, which is that no axis names an
+    // OFFICE — and a count cannot say that. Code 7 is now the ZONE
+    // axis, and a building is not an office: what a world may BUILD
+    // changes reachability, where a station gates who may mint at all.
+    //
+    // The law, stated as itself: not one axis carries an office's word.
+    let offices = ["progenitor", "watcher", "observer", "sovereign"];
+    for axis in cfe::vocabulary::Axis::ALL {
+        for entry in cfe::vocabulary::seed(axis) {
+            assert!(
+                !offices.contains(&entry.word.as_str()),
+                "axis {axis:?} seats {} — offices change by amendment and nothing else",
+                entry.word
+            );
+        }
+    }
+    // And past the named axes nothing constructs, so no unknown code
+    // becomes a vocabulary by accident.
+    for code in [0u8, 8, 9, 99] {
         assert!(
             cfe::vocabulary::Axis::from_code(code).is_none(),
             "code {code} must not construct an axis"
         );
     }
-    // And the six that do construct are exactly the six vocabularies —
-    // the offices of 12_UNION §3 are not among them.
-    assert_eq!(cfe::vocabulary::Axis::ALL.len(), 6);
+    assert_eq!(
+        cfe::vocabulary::Axis::ALL.len(),
+        7,
+        "the axes are the six vocabularies plus what a world may build"
+    );
 }
 
 /// **THE BINDING MUST TRADE** (§4a) — sharpened by the door
@@ -386,6 +408,10 @@ fn the_mint_round_trips_the_wire() {
         sigil: "⌘".into(),
         word: "covenantal".into(),
         binding: vec![(CHANNEL_YIELD, ratio(7, 4)), (CHANNEL_UPKEEP, ratio(22, 7))],
+        // #41: a CLASS mint declares no base — only a minted building
+        // modulates a standing kind. This is the sealed form, and it
+        // round-trips exactly as it always did.
+        base: None,
     };
     let bytes = event.wire_bytes();
     // wire_bytes emits a TLV record: tag(1) | len(4 LE) | value.

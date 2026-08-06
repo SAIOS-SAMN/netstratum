@@ -429,8 +429,45 @@ impl World {
         word: crate::dop::Name,
         binding: crate::vocabulary::TradingBinding,
     ) -> Result<u8, ActionRefused> {
+        self.mint_vocabulary_based_as(actor, line, axis, sigil, word, binding, None)
+    }
+
+    /// **THE ZONE MINT'S FULL FORM (#41)** — the same deed carrying a
+    /// declared BASE, the first rung of the operator's resolution
+    /// ladder (`vocabulary::zone_base`).
+    ///
+    /// `base` is meaningful only on [`crate::vocabulary::Axis::Zone`]:
+    /// a minted building's binding is a set of scale factors, and the
+    /// base is what they scale. Left `None`, the base is INFERRED from
+    /// the channels the binding touches; where neither answers, the
+    /// entry is lawful vocabulary that simply never builds.
+    ///
+    /// A declared base must name a COMPILED kind. Refusing here rather
+    /// than degrading to inference is the P1 discipline: a caller that
+    /// names a base at all has said something decidable, and a base
+    /// that names nothing is a malformed declaration, not a silence.
+    #[allow(clippy::too_many_arguments)]
+    pub fn mint_vocabulary_based_as(
+        &mut self,
+        actor: u64,
+        line: &str,
+        axis: crate::vocabulary::Axis,
+        sigil: &str,
+        word: crate::dop::Name,
+        binding: crate::vocabulary::TradingBinding,
+        base: Option<u8>,
+    ) -> Result<u8, ActionRefused> {
         use crate::vocabulary as vocab;
         self.permitted(actor, Scope::Build)?;
+
+        if let Some(code) = base {
+            if axis != vocab::Axis::Zone {
+                return Err(ActionRefused::BaseOffAxis { axis: axis.code() });
+            }
+            if code == 0 || code > crate::dop::ZONE_KINDS {
+                return Err(ActionRefused::BaseUnknown { code });
+            }
+        }
 
         // GATE 1 — STANDING. Tier 0 only. `station_of` reads the CHAIN,
         // so this cannot be granted by editing anything.
@@ -470,6 +507,7 @@ impl World {
                 sigil: sigil.to_string(),
                 word: word.to_string(),
                 binding: binding.into_entries(),
+                base,
             },
             actor,
         );

@@ -42,17 +42,12 @@ fn resource_name(r: cfe::dop::Resource) -> &'static str {
     }
 }
 
+/// #41: the zone's word, read from `dop::zone_word` — the vocabulary's
+/// own home. This kept its own copy of the table until the zone axis
+/// made a kind's word into VOCABULARY; a third spelling was one too
+/// many, and the lens renders what the engine names.
 fn zone_name(k: cfe::dop::ZoneKind) -> &'static str {
-    match k {
-        cfe::dop::ZoneKind::Extractor => "extractor",
-        cfe::dop::ZoneKind::Habitat => "habitat",
-        cfe::dop::ZoneKind::Smelter => "smelter",
-        cfe::dop::ZoneKind::Synthesizer => "synthesizer",
-        cfe::dop::ZoneKind::Encasement => "encasement",
-        cfe::dop::ZoneKind::CryoArray => "cryo-array",
-        cfe::dop::ZoneKind::Resonator => "resonator",
-        cfe::dop::ZoneKind::Regenerator => "regenerator",
-    }
+    cfe::dop::zone_word(k)
 }
 
 /// The base-7 stack's concept words (10 §2: the condition fixes the
@@ -299,15 +294,21 @@ pub fn render_receipt(receipt: &Receipt) -> String {
         // word and the mechanism it arrived with — a reader should be
         // able to see WHAT a minted class does, not merely that one
         // happened.
-        E::VocabularyMinted { axis, code, sigil, word, binding } => (
+        E::VocabularyMinted { axis, code, sigil, word, binding, base } => (
             "vocabulary_minted",
             format!(
-                "axis {axis} code {code} {sigil} {word} [{}]",
+                "axis {axis} code {code} {sigil} {word} [{}]{}",
                 binding
                     .iter()
                     .map(|(channel, factor)| format!("{channel}:{factor}"))
                     .collect::<Vec<_>>()
-                    .join(" ")
+                    .join(" "),
+                // #41: a zone mint may name the base its binding
+                // modulates; every other mint carries none.
+                match base {
+                    Some(base) => format!(" on {base}"),
+                    None => String::new(),
+                }
             ),
         ),
         E::WorkAspired { name, .. } => ("work_aspired", name.clone()),

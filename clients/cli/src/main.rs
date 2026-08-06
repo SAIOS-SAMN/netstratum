@@ -4457,17 +4457,12 @@ fn band_word(code: u8) -> &'static str {
     }
 }
 
+/// #41: the zone's word, read from `dop::zone_word` — the vocabulary's
+/// own home. This used to keep its own copy of the table, which is
+/// exactly the drift the zone axis's seed made intolerable: a kind's
+/// word is now vocabulary, and vocabulary is not spelled twice.
 fn kind_name(kind: ZoneKind) -> &'static str {
-    match kind {
-        ZoneKind::Extractor => "extractor",
-        ZoneKind::Habitat => "habitat",
-        ZoneKind::Smelter => "smelter",
-        ZoneKind::Synthesizer => "synthesizer",
-        ZoneKind::Encasement => "encasement",
-        ZoneKind::CryoArray => "cryo-array",
-        ZoneKind::Resonator => "resonator",
-        ZoneKind::Regenerator => "regenerator",
-    }
+    cfe::dop::zone_word(kind)
 }
 
 fn parse_resource(word: &str) -> Option<Resource> {
@@ -4691,6 +4686,17 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
         ActionRefused::WorkAlreadyAspired { name } => {
             format!("{} is already reached for", style.strong(name))
         }
+        ActionRefused::BaseOffAxis { axis } => format!(
+            "axis {axis} has no bases — only a minted BUILDING modulates a standing kind, so a \
+             base belongs to a {} mint alone",
+            style.strong("zone")
+        ),
+        ActionRefused::BaseUnknown { code } => format!(
+            "{} names no standing zone kind — a minted kind modulates one the table already \
+             compiles (1–{}), never another mint",
+            style.strong(&code.to_string()),
+            cfe::dop::ZONE_KINDS
+        ),
         ActionRefused::MatterDoesNotBond => format!(
             "this matter does not BOND — a set compounds when every member shares the geometry \
              and the phase, the count equals the geometry's arity, and the binds saturate. \
@@ -5314,9 +5320,9 @@ fn chronicle(world: &World, style: &Style) {
                     amount(cost)
                 )
             }
-            cfe::dop::ClosureEvent::VocabularyMinted { axis, code, sigil, word, binding } => {
+            cfe::dop::ClosureEvent::VocabularyMinted { axis, code, sigil, word, binding, base } => {
                 format!(
-                    "✎ VOCABULARY MINTED — axis {axis}, code {}, {} {} [{}]",
+                    "✎ VOCABULARY MINTED — axis {axis}, code {}, {} {} [{}]{}",
                     style.strong(&code.to_string()),
                     sigil,
                     style.strong(word),
@@ -5324,7 +5330,11 @@ fn chronicle(world: &World, style: &Style) {
                         .iter()
                         .map(|(channel, factor)| format!("{channel}:{factor}"))
                         .collect::<Vec<_>>()
-                        .join(" ")
+                        .join(" "),
+                    match base.and_then(cfe::dop::ZoneKind::from_wire) {
+                        Some(kind) => format!(" on {}", style.strong(cfe::dop::zone_word(kind))),
+                        None => String::new(),
+                    }
                 )
             }
             cfe::dop::ClosureEvent::SovereignUnionSealed { progenitor, sovereign, term_stamps } => {
