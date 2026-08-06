@@ -305,7 +305,15 @@ fn the_version_is_pinned() {
     //   per-row form structurally refused, and new touches emit the
     //   new tag. Old per-row chains verify forever under the sealed
     //   arm they were cut with.
-    assert_eq!(KERNEL_VERSION.to_string(), "0.11.0", "the gate is version-pinned");
+    // 0.12.0 — FOLD-AWARE LINE SYNTHESIS (2026-08-06): tag 101's value
+    //   widens — the receipt DECLARES the (class, clade) ceilings its
+    //   draw ran under (the fold's at the mint stamp), so minted
+    //   classes are drawable and every reader re-derives the exact
+    //   draw from the receipt alone. MINOR by the schema discipline
+    //   (the event's wire value grew); no verdict moves — the deed is
+    //   banked-neutral and the old 32-byte form decodes sealed
+    //   (ceilings: None -> the compiled derivation, forever).
+    assert_eq!(KERNEL_VERSION.to_string(), "0.12.0", "the gate is version-pinned");
     assert_eq!(VERSION, KERNEL_VERSION.code(), "the wire carries the packed form");
     // ORDER IS PRESERVED: a chain cut under the old linear versions
     // compares BELOW every packed one, which is true — an earlier gate

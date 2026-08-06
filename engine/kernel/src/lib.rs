@@ -132,7 +132,7 @@ use solver_verify::{verify_work, WorkBroken};
 /// its peoples). MINOR, derived: tag 101 enters `covered()` — the gate
 /// admits what was `Unjudged`. The receipt is a seed; there is nothing
 /// declarable to misdeclare, so no new refusal arm exists.
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 11, patch: 0 };
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 12, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///

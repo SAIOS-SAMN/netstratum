@@ -90,14 +90,19 @@ fn the_deed_mints_by_seed_and_everything_derives() {
     let before = world.chronicle().receipts().last().expect("founded").own.0;
 
     let first = world.mint_line().expect("a people enters");
-    let ClosureEvent::LineMinted { seed } =
+    let ClosureEvent::LineMinted { seed, ceilings } =
         &world.chronicle().receipts().last().expect("minted").event
     else {
         panic!("the last receipt is the mint");
     };
     assert_eq!(seed, &before, "the seed IS the pre-mint terminal digest");
+    // FOLD-AWARE (2026-08-06): the receipt DECLARES the ceilings its
+    // draw ran under, and on an unminted chain they equal the seed's —
+    // so the declared derivation and the compiled one agree here.
+    let (class_c, clade_c) = ceilings.expect("a new mint declares its ceilings");
+    assert_eq!((class_c, clade_c), (class_ceiling(), clade_ceiling()));
     assert_eq!(
-        line_synthesis(seed),
+        cfe::dop::line_synthesis_at(seed, class_c, clade_c),
         first,
         "every reader derives the same people from the receipt"
     );
@@ -105,4 +110,78 @@ fn the_deed_mints_by_seed_and_everything_derives() {
     let second = world.mint_line().expect("another people");
     assert_ne!(first, second, "each receipt moves the digest — each mint is a new line");
     assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
+}
+
+/// **THE FOLD IS DRAWABLE** (operator ruling 2026-08-06): a minted
+/// class grows the draw space the moment its receipt stands — the
+/// mint's receipt declares the fold's ceilings, and a digest landing
+/// on the new residue wears the minted code. The sealed compiled rule
+/// (ceilings: None) never could.
+#[test]
+fn a_minted_class_is_drawable_and_the_receipt_declares_it() {
+    use cfe::dop::ClosureEvent;
+    use cfe::world::World;
+    let mut world = World::new();
+    world.found("fold-cradle").expect("founds");
+    world
+        .seat_station(
+            cfe::dop::name("tunborn"),
+            cfe::dop::Station::from_wire(1).expect("a band office"),
+        )
+        .expect("seats the progenitor");
+    let code = world
+        .mint_vocabulary(
+            "tunborn",
+            cfe::vocabulary::Axis::Class,
+            "✶",
+            cfe::dop::name("voidborne"),
+            cfe::vocabulary::trading(vec![
+                (cfe::vocabulary::CHANNEL_YIELD, cfe::ratio::ratio(7, 4)),
+                (cfe::vocabulary::CHANNEL_UPKEEP, cfe::ratio::ratio(7, 4)),
+            ]),
+        )
+        .expect("the progenitor mints a class");
+    assert_eq!(code, class_ceiling() + 1, "the next code, derived");
+
+    world.mint_line().expect("a people enters the grown space");
+    let ClosureEvent::LineMinted { seed, ceilings } =
+        &world.chronicle().receipts().last().expect("minted").event
+    else {
+        panic!("the last receipt is the mint");
+    };
+    let declared = ceilings.expect("a new mint declares its ceilings");
+    assert_eq!(declared.0, code, "the receipt carries the grown class ceiling");
+
+    // The pure law: a digest whose class byte lands on the new residue
+    // wears the minted code — the space genuinely grew...
+    let mut probe = *seed;
+    probe[3] = code - 1; // (code-1) % code == code-1 → class = code
+    assert_eq!(
+        cfe::dop::line_synthesis_at(&probe, declared.0, declared.1).class,
+        code,
+        "the minted class is drawable"
+    );
+    // ...and the sealed compiled rule never reaches it.
+    assert!(cfe::dop::line_synthesis(&probe).class <= class_ceiling());
+
+    // The draw is derived, never committed — replay is untouched.
+    assert_eq!(cfe::world::replay(world.chronicle()), world.committed());
+}
+
+/// Tag 101 rides the wire byte-faithful in BOTH forms: the sealed
+/// 32-byte pre-amendment receipt and the declaring 34-byte one.
+#[test]
+fn the_mint_receipt_round_trips_both_forms() {
+    use cfe::dop::ClosureEvent;
+    for event in [
+        ClosureEvent::LineMinted { seed: [7u8; 32], ceilings: None },
+        ClosureEvent::LineMinted { seed: [7u8; 32], ceilings: Some((9, 21)) },
+    ] {
+        let bytes = event.wire_bytes();
+        let (tag, value) = cfe::tlv::records(&bytes).next().expect("one record");
+        assert_eq!(tag, 101);
+        let decoded = ClosureEvent::from_wire(tag, value).expect("decodes");
+        assert_eq!(decoded, event);
+        assert_eq!(decoded.wire_bytes(), bytes, "byte-faithful both ways");
+    }
 }

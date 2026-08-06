@@ -4283,8 +4283,13 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::ColonyFounded { name, .. } => {
                 format!("⚑ colony {} founded", style.strong(name))
             }
-            cfe::dop::ClosureEvent::LineMinted { seed } => {
-                let draw = cfe::dop::line_synthesis(seed);
+            cfe::dop::ClosureEvent::LineMinted { seed, ceilings } => {
+                // The receipt declares the ceilings it drew under; the
+                // sealed old form (None) re-derives compiled.
+                let draw = match ceilings {
+                    Some((class, clade)) => cfe::dop::line_synthesis_at(seed, *class, *clade),
+                    None => cfe::dop::line_synthesis(seed),
+                };
                 format!(
                     "✶ line MINTED — {} ({}), \"{}\"",
                     style.strong(&draw.name),

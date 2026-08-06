@@ -858,11 +858,29 @@ pub struct LineDraw {
 /// drawn modulo its closed vocabulary and every taxon code modulo its
 /// ratified ceiling, so there is nothing left to check after.
 pub fn line_synthesis(digest: &[u8; 32]) -> LineDraw {
+    // The sealed pre-amendment derivation: compiled ceilings. Old
+    // LineMinted receipts (ceilings: None) re-derive through THIS,
+    // forever.
+    line_synthesis_at(digest, class_ceiling(), clade_ceiling())
+}
+
+/// **THE FOLD-AWARE DRAW** (operator ruling 2026-08-06): the same
+/// synthesis, under the vocabulary ceilings the CALLER proves — the
+/// fold's at the mint stamp, so a minted class or clade is drawable
+/// the moment its receipt stands. Pure and total; a zero ceiling is
+/// lifted to one so the modulus is defined (the seed vocabularies are
+/// never empty).
+///
+/// RECORDED DEBT: a draw wearing a MINTED class carries the right CODE
+/// but its species word renders through the compiled table's fallback
+/// ("unknown") — resolving the fold's own word needs the chronicle at
+/// the render, which is the reader's seam, not this pure function's.
+pub fn line_synthesis_at(digest: &[u8; 32], class_ceiling: u8, clade_ceiling: u8) -> LineDraw {
     let disposition = 1 + digest[0] % 3;
     let metabolism = 1 + digest[1] % 3;
     let perception = 1 + digest[2] % 4;
-    let class = 1 + digest[3] % class_ceiling();
-    let clade = 1 + digest[4] % clade_ceiling();
+    let class = 1 + digest[3] % class_ceiling.max(1);
+    let clade = 1 + digest[4] % clade_ceiling.max(1);
     let heads: &[&str; 6] = match metabolism {
         1 => &LINE_HEADS_MINERAL,
         3 => &LINE_HEADS_PLASMIC,
@@ -1991,7 +2009,15 @@ pub enum ClosureEvent {
     /// truth and the registry card is a render of it. Banked-neutral:
     /// a mint creates IDENTITY, never matter (the element grammar's
     /// law, applied to peoples).
-    LineMinted { seed: [u8; 32] },
+    ///
+    /// **FOLD-AWARE (operator ruling 2026-08-06, receipt authority):**
+    /// `ceilings` declares the (class, clade) vocabulary ceilings the
+    /// draw was taken under — the FOLD's ceilings at the mint stamp, so
+    /// minted classes and clades are drawable the moment their receipts
+    /// stand. `None` is the sealed pre-amendment form: those receipts
+    /// drew under the compiled ceilings, and decode to exactly that,
+    /// byte-faithful both ways.
+    LineMinted { seed: [u8; 32], ceilings: Option<(u8, u8)> },
 }
 
 impl ClosureEvent {
@@ -2428,8 +2454,13 @@ impl ClosureEvent {
                 ratio::encode(want_amount, &mut value);
                 tlv::put(99, &value, &mut out);
             }
-            Self::LineMinted { seed } => {
-                tlv::put(101, seed, &mut out);
+            Self::LineMinted { seed, ceilings } => {
+                let mut value = seed.to_vec();
+                if let Some((class, clade)) = ceilings {
+                    value.push(*class);
+                    value.push(*clade);
+                }
+                tlv::put(101, &value, &mut out);
             }
             Self::ParcelConveyed {
                 from_orb,
@@ -3034,7 +3065,15 @@ impl ClosureEvent {
                     covered,
                 })
             }
-            101 => Some(Self::LineMinted { seed: value.get(..32)?.try_into().ok()? }),
+            101 => {
+                let seed: [u8; 32] = value.get(..32)?.try_into().ok()?;
+                let ceilings = match value.len() {
+                    32 => None,
+                    34 => Some((*value.get(32)?, *value.get(33)?)),
+                    _ => return None, // refuse, never guess
+                };
+                Some(Self::LineMinted { seed, ceilings })
+            }
             89 => {
                 let station = *value.first()?;
                 if station == 0 || station > 4 {

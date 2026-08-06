@@ -336,8 +336,18 @@ impl World {
         else {
             return Err(ActionRefused::NoColony);
         };
-        let draw = crate::dop::line_synthesis(&seed);
-        self.close(ClosureEvent::LineMinted { seed }, actor);
+        // FOLD-AWARE (operator ruling 2026-08-06): the draw runs under
+        // the FOLD's ceilings — a minted class or clade is drawable the
+        // moment its receipt stands — and the receipt DECLARES the
+        // ceilings it drew under, so every reader re-derives this exact
+        // draw from the receipt alone (receipt authority; the ordering
+        // law holds by declaration).
+        let ceilings = (
+            crate::vocabulary::ceiling(self.chronicle(), crate::vocabulary::Axis::Class),
+            crate::vocabulary::ceiling(self.chronicle(), crate::vocabulary::Axis::Clade),
+        );
+        let draw = crate::dop::line_synthesis_at(&seed, ceilings.0, ceilings.1);
+        self.close(ClosureEvent::LineMinted { seed, ceilings: Some(ceilings) }, actor);
         Ok(draw)
     }
 
