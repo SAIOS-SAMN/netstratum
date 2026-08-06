@@ -258,18 +258,28 @@ impl World {
         // met these deeds afterwards, and a 60-beat era banked mints it
         // then refused — the drift the escrow makes unreachable rather
         // than merely visible.
-        let event = ClosureEvent::DiscoveryMinted { orb_id: orb, resource, amount, work };
+        let event =
+            ClosureEvent::DiscoveryMinted { orb_id: orb, resource, amount: amount.clone(), work };
         let prior = self.committed();
         let mut candidate = prior.clone();
         if let Some(held) = candidate.orbs.iter_mut().find(|held| held.orb_id == orb) {
-            held.bank(resource, match &event {
-                ClosureEvent::DiscoveryMinted { amount, .. } => amount.clone(),
-                _ => ratio(0, 1),
-            });
+            held.bank(resource, amount.clone());
         }
         let stamp = self.now();
         if !warrant.admits(&prior, &candidate, &event, actor, stamp) {
             return Err(ActionRefused::WorkRefused);
+        }
+        // THE CREDIT LANDS ON THE LIVE ORB (found 2026-08-06 by the
+        // seam's digest perturbation): the escrow refactor banked the
+        // mint on the CANDIDATE — a throwaway built for the gate — and
+        // closed the receipt without ever crediting the world, so live
+        // starved while replay granted (a SEAL B split, dormant until a
+        // mint landed inside a replay-pinned arc). The mint banks like
+        // a yield and anchors like a touch, exactly as replay applies
+        // its receipt.
+        if let Some(held) = peel(&mut self.orbs, orb) {
+            held.bank(resource, amount);
+            held.last_touch = stamp;
         }
         self.close(event, actor);
         Ok(())
