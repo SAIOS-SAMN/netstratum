@@ -56,7 +56,7 @@ const SOURCE_TREES: [&str; 11] = [
 ];
 
 /// **THE CEILING — measured 2026-08-05, and it only falls.**
-const TUNED_LITERAL_CEILING: usize = 116;
+const TUNED_LITERAL_CEILING: usize = 114;
 
 /// Parse `ratio(<int>, <int>)` starting at `text` (just past the open
 /// paren). Returns the pair only when both arguments are integer
@@ -78,8 +78,15 @@ fn literal_pair(text: &str) -> Option<(i64, i64)> {
 /// nothing enters without going red here, wearing its seal, in review).
 const SEALED_MARK: &str = "SEALED-RATE";
 
+/// The approved-seed marker (operator ruling 2026-08-06: the founding
+/// endowment is APPROVED SEED — definition, not tuning, and never to
+/// drift into dial status or freeze as sealed history). Same
+/// discipline as the sealed class: marked lines leave the dial walk
+/// and the marker count is pinned exactly.
+const SEED_MARK: &str = "APPROVED-SEED";
+
 fn tuned_in(line: &str) -> usize {
-    if line.contains(SEALED_MARK) {
+    if line.contains(SEALED_MARK) || line.contains(SEED_MARK) {
         return 0;
     }
     let mut count = 0;
@@ -200,6 +207,16 @@ fn the_sealed_class_is_exactly_as_large_as_sealed() {
         marks, 3,
         "the sealed class moved — an epoch closed (lawful, pin it here \
          in review) or a dial put on a seal it did not earn"
+    );
+    let mut seeded = 0usize;
+    let mut seed_files = 0usize;
+    for tree in SOURCE_TREES {
+        walk_marks(Path::new(tree), SEED_MARK, &mut seeded, &mut seed_files);
+    }
+    assert_eq!(
+        seeded, 2,
+        "the marked seed class moved — approval covers the founding \
+         endowment's two values (operator ruling 2026-08-06)"
     );
 }
 

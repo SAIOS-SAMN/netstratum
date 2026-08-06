@@ -593,8 +593,8 @@ pub fn tech_node_name(condition: u8, node: &[u8; 32]) -> String {
 /// Founding banks the bootstrap reserves (02 §2.1): 20 iron, 10 biomass.
 pub fn founding_reserves() -> Vec<(Resource, Ratio)> {
     vec![
-        (Resource::Iron, ratio(20, 1)),
-        (Resource::Biomass, ratio(10, 1)),
+        (Resource::Iron, ratio(20, 1)),    // APPROVED-SEED: founding endowment
+        (Resource::Biomass, ratio(10, 1)), // APPROVED-SEED: founding endowment
     ]
 }
 
