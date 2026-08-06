@@ -1126,6 +1126,12 @@ pub fn metabolic_harvest(metabolism: u8) -> (Resource, Ratio) {
 pub fn zone_yield(kind: ZoneKind, metabolism: u8) -> (Resource, Ratio) {
     match (kind, kind.yield_per_tick()) {
         (ZoneKind::Habitat, (Resource::Biomass, _)) => metabolic_harvest(metabolism),
+        // REGEN-1: the regenerator restores the line's OWN ration —
+        // the harvest map's resource at the extractor's rate.
+        (ZoneKind::Regenerator, (_, rate)) => {
+            let (ration, _) = metabolic_harvest(metabolism);
+            (ration, rate)
+        }
         (_, held) => held,
     }
 }
@@ -1291,6 +1297,14 @@ pub enum ZoneKind {
     /// into resonance crystals. One synthesizer feeds one resonator on
     /// the knife edge — diamond nets exactly 0.
     Resonator = 7,
+    /// **REGEN-1 — THE REGENERATOR** (operator directive 2026-08-06):
+    /// ecological restoration as infrastructure. What extraction
+    /// takes, regeneration returns: it yields the metabolism's RATION
+    /// resource at the extractor's own rate — every number DERIVES
+    /// from the standing table, no new dial. Placing one requires the
+    /// DEEPENING crystallized on the orb (condition 3 — the lattice
+    /// understood): regeneration is a technology, not a birthright.
+    Regenerator = 8,
 }
 /// **THE REFINEMENT LAW** (2026-08-05, on the operator's ruling that
 /// this codebase carries *too many constants — you aren't building
@@ -1365,6 +1379,7 @@ impl ZoneKind {
             5 => Some(Self::Encasement),
             6 => Some(Self::CryoArray),
             7 => Some(Self::Resonator),
+            8 => Some(Self::Regenerator),
             _ => None,
         }
     }
@@ -1388,6 +1403,23 @@ impl ZoneKind {
                 (Resource::Alloy, ratio(10, 1)),
                 (Resource::Diamond, ratio(5, 1)),
             ],
+            // DERIVED: the shell's frame plus a double hearth — the
+            // restoration engine is built from what the table already
+            // prices.
+            Self::Regenerator => {
+                let mut cost = Self::Encasement.cost();
+                // Two hearths' worth of the habitat's own line, summed
+                // — the table's numbers, twice, no factor of its own.
+                for _ in 0..2 {
+                    for (resource, held) in Self::Habitat.cost() {
+                        match cost.iter_mut().find(|(kind, _)| *kind == resource) {
+                            Some((_, sum)) => *sum += held,
+                            None => cost.push((resource, held)),
+                        }
+                    }
+                }
+                cost
+            }
         }
     }
 
@@ -1412,6 +1444,14 @@ impl ZoneKind {
             Self::Encasement => (Resource::Joule, ratio(0, 1)),
             Self::CryoArray => (Resource::Sink, ratio(0, 1)),
             Self::Resonator => (Resource::Crystal, ratio(1, 8)),
+            // DERIVED: the ration resource (the habitat's own yield
+            // map) at the EXTRACTOR's rate — what extraction takes,
+            // regeneration returns.
+            Self::Regenerator => {
+                let (ration, _) = Self::Habitat.yield_per_tick();
+                let (_, rate) = Self::Extractor.yield_per_tick();
+                (ration, rate)
+            }
         }
     }
 
@@ -1441,6 +1481,8 @@ impl ZoneKind {
             Self::Encasement => vec![(Resource::Iron, ratio(1, 4))],
             Self::CryoArray => vec![(Resource::Iron, ratio(1, 4))],
             Self::Resonator => vec![(Resource::Diamond, ratio(1, 4))],
+            // DERIVED: the habitat's own life-support line.
+            Self::Regenerator => Self::Habitat.upkeep_per_tick(),
         }
     }
 
@@ -1449,7 +1491,7 @@ impl ZoneKind {
     /// hot, the shell itself adds nothing).
     pub fn factory_heat(&self) -> Ratio {
         match self {
-            Self::Extractor | Self::Habitat => ratio(1, 4),
+            Self::Extractor | Self::Habitat | Self::Regenerator => ratio(1, 4),
             Self::Smelter | Self::Synthesizer | Self::Resonator => ratio(1, 1),
             Self::Encasement | Self::CryoArray => ratio(0, 1),
         }

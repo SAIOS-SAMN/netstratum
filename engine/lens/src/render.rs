@@ -51,6 +51,7 @@ fn zone_name(k: cfe::dop::ZoneKind) -> &'static str {
         cfe::dop::ZoneKind::Encasement => "encasement",
         cfe::dop::ZoneKind::CryoArray => "cryo-array",
         cfe::dop::ZoneKind::Resonator => "resonator",
+        cfe::dop::ZoneKind::Regenerator => "regenerator",
     }
 }
 

@@ -313,6 +313,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 Some("enc") | Some("encasement") => Some(ZoneKind::Encasement),
                 Some("cryo") | Some("cryo-array") => Some(ZoneKind::CryoArray),
                 Some("res") | Some("resonator") => Some(ZoneKind::Resonator),
+                Some("regen") | Some("regenerator") => Some(ZoneKind::Regenerator),
                 _ => None,
             };
             match (tile, kind) {
@@ -2234,6 +2235,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                 cfe::dop::ZoneKind::Encasement => 'N',
                                 cfe::dop::ZoneKind::CryoArray => 'C',
                                 cfe::dop::ZoneKind::Resonator => 'R',
+                                cfe::dop::ZoneKind::Regenerator => 'G',
                             },
                             None => cfe::dop::tile_class(&seed, cfe::world::FIRST_ORB, tile).glyph(),
                         };
@@ -2826,6 +2828,250 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         // GROWTH-1 — the six axes, carried whole. No aggregate: six
         // readings and no score, because collapsing them is the struck
         // C-gate under a sixth name.
+        // ── THE PLAYER'S ATLAS — every wired surface, listable ──────
+        Some("settlements") | Some("orbs") => {
+            let committed = world.committed();
+            println!("{} SETTLEMENTS — {} standing", style.strong("⌂"), committed.orbs.len());
+            for orb in &committed.orbs {
+                let mut kinds = std::collections::BTreeMap::new();
+                for zone in &orb.zones {
+                    *kinds.entry(format!("{:?}", zone.kind)).or_insert(0u32) += 1;
+                }
+                let zones: Vec<String> =
+                    kinds.iter().map(|(kind, held)| format!("{held}×{kind}")).collect();
+                let state = if !orb.famine.is_empty() {
+                    style.bad(&format!("FAMINE {:?}", orb.famine)).to_string()
+                } else if orb.overheat {
+                    style.bad("OVERHEAT").to_string()
+                } else {
+                    style.ok("settled").to_string()
+                };
+                println!(
+                    "  {} {} [{}] — {} — {}",
+                    style.strong(&format!("orb {}", orb.orb_id)),
+                    orb.name,
+                    zones.join(" · "),
+                    state,
+                    orb.banked
+                        .iter()
+                        .map(|(resource, held)| format!("{} {}", amount(held), resource_name(*resource)))
+                        .collect::<Vec<_>>()
+                        .join(" · ")
+                );
+            }
+        }
+        Some("rings") | Some("sky") => {
+            let committed = world.committed();
+            match committed.star {
+                None => println!("{} no sun commissioned — the sky is dark", style.dim("✦")),
+                Some(class) => {
+                    println!(
+                        "{} STAR {:?} — luminosity {} · field anchors {} rings",
+                        style.strong("✦"),
+                        class,
+                        amount(&class.luminosity()),
+                        style.strong(&class.ring_reach().to_string())
+                    );
+                    for orb in &committed.orbs {
+                        match &orb.thermal {
+                            None => println!(
+                                "  orb {} {} — {}",
+                                orb.orb_id, orb.name, style.dim("unsited (thermally dormant)")
+                            ),
+                            Some(site) => {
+                                let t4 = cfe::thermal::t_eq4(
+                                    &class.luminosity(),
+                                    site.albedo.value(),
+                                    site.orbit_r.value(),
+                                );
+                                let band = match cfe::thermal::band_of(&t4) {
+                                    Some(band) => format!("{band:?}"),
+                                    None => format!(
+                                        "gap (coverage {})",
+                                        amount(&cfe::thermal::coverage(&t4))
+                                    ),
+                                };
+                                println!(
+                                    "  orb {} {} — ring r={} · A={} · {} {}",
+                                    orb.orb_id,
+                                    orb.name,
+                                    amount(site.orbit_r.value()),
+                                    amount(site.albedo.value()),
+                                    style.strong(&band),
+                                    if orb.overheat { style.bad("♨").to_string() } else { String::new() }
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Some("elements") | Some("periodic") => {
+            let committed = world.committed();
+            println!("{} THE ELEMENT TABLE — matter this world has named", style.strong("◇"));
+            if committed.prospects.is_empty() {
+                println!("  {}", style.dim("no veins prospected — `prospect <stratum>` opens the ground"));
+            }
+            let star = committed.star.unwrap_or(cfe::thermal::StarClass::G);
+            for vein in &committed.prospects {
+                let (family, tier, _) = cfe::dop::element_properties(&vein.element, star);
+                println!(
+                    "  {} — orb {} stratum {} · family {} tier {} · richness {}/tick · last assay t{}",
+                    style.strong(&cfe::dop::element_name(family, &vein.element)),
+                    vein.orb,
+                    vein.stratum,
+                    family,
+                    tier,
+                    amount(&vein.richness),
+                    vein.last_assay
+                );
+            }
+            for orb in &committed.orbs {
+                for (element, held) in &orb.elements {
+                    let name = committed
+                        .prospects
+                        .iter()
+                        .find(|vein| &vein.element == element)
+                        .map(|_| {
+                            let (family, _, _) = cfe::dop::element_properties(element, star);
+                            cfe::dop::element_name(family, element)
+                        })
+                        .unwrap_or_else(|| format!("{:02x}{:02x}…", element[0], element[1]));
+                    println!(
+                        "  banked: {} {} on orb {}",
+                        style.strong(&amount(held)),
+                        name,
+                        orb.orb_id
+                    );
+                }
+            }
+        }
+        Some("civs") | Some("neighbors") => {
+            let registry = ledger::registry::Registry::at("var/registry");
+            let roster = registry.list();
+            println!("{} KNOWN CIVILIZATIONS — {} registered", style.strong("✧"), roster.len());
+            for card in &roster {
+                println!(
+                    "  {} — {} · {} {} {}",
+                    style.strong(&card.sigil),
+                    card.name,
+                    card.disposition,
+                    card.metabolism,
+                    card.perception,
+                );
+            }
+            if roster.is_empty() {
+                println!("  {}", style.dim("nobody registered — run an era or seat lines"));
+            }
+        }
+        Some("contacts") => {
+            let mut deals: std::collections::BTreeSet<u64> = Default::default();
+            let mut councils: std::collections::BTreeSet<u64> = Default::default();
+            let mut pens = 0u32;
+            for receipt in world.chronicle().receipts() {
+                match &receipt.event {
+                    cfe::dop::ClosureEvent::ApertureSent { deal, .. }
+                    | cfe::dop::ClosureEvent::ApertureReceived { deal, .. } => {
+                        deals.insert(*deal);
+                    }
+                    cfe::dop::ClosureEvent::TechLicensed { council, .. } => {
+                        councils.insert(*council);
+                    }
+                    cfe::dop::ClosureEvent::HandoffSealed { .. } => pens += 1,
+                    _ => {}
+                }
+            }
+            println!(
+                "{} CONTACTS — {} aperture deals · {} licensing councils · {} pen handoffs",
+                style.strong("☍"),
+                deals.len(),
+                councils.len(),
+                pens
+            );
+            for deal in &deals {
+                println!("  aperture deal {}", style.strong(&deal.to_string()));
+            }
+            for council in &councils {
+                println!("  council {}", style.strong(&council.to_string()));
+            }
+            if deals.is_empty() && councils.is_empty() && pens == 0 {
+                println!("  {}", style.dim("no cross-world contact yet — the leap, then apertures"));
+            }
+        }
+        Some("routes") => {
+            let committed = world.committed();
+            println!("{} CHARTERED LANES — {}", style.strong("⇶"), committed.routes.len());
+            for (deal, eta) in &committed.routes {
+                println!(
+                    "  deal {} — η {} (melt shed {})",
+                    style.strong(&deal.to_string()),
+                    amount(eta.value()),
+                    style.dim("melt × (1−η)")
+                );
+            }
+            if committed.routes.is_empty() {
+                println!("  {}", style.dim("no lanes — `charter <world> deal <n>` after an instrument forges"));
+            }
+        }
+        Some("dashboard") | Some("dash") => {
+            let committed = world.committed();
+            println!("{}", style.strong("╔═══ NETSTRATUM — THE BOARD ═══╗"));
+            let star = committed
+                .star
+                .map(|class| format!("{class:?}"))
+                .unwrap_or_else(|| "dark".into());
+            println!(
+                "  sky {} · orbs {} · routes {} · veins {}",
+                style.strong(&star),
+                committed.orbs.len(),
+                committed.routes.len(),
+                committed.prospects.len()
+            );
+            if let Some(orb) = committed.orbs.iter().find(|held| held.orb_id == *current) {
+                println!(
+                    "  {} [{}]: {}",
+                    style.strong(&orb.name),
+                    orb.zones.len(),
+                    orb.banked
+                        .iter()
+                        .map(|(resource, held)| format!("{} {}", amount(held), resource_name(*resource)))
+                        .collect::<Vec<_>>()
+                        .join(" · ")
+                );
+                if !orb.famine.is_empty() {
+                    println!("  {}", style.bad(&format!("FAMINE: {:?}", orb.famine)));
+                }
+            }
+            let practices: Vec<String> = committed
+                .practices
+                .iter()
+                .map(|code| cfe::vocabulary::practice_word(*code).to_string())
+                .collect();
+            if !practices.is_empty() {
+                println!("  disciplines: {}", style.strong(&practices.join(" · ")));
+            }
+            let held_techs = committed.techs.len();
+            println!(
+                "  sky nodes {} · instruments {} · books open",
+                held_techs, committed.instruments.len()
+            );
+            let payloads: Vec<&[u8]> = world
+                .chronicle()
+                .receipts()
+                .iter()
+                .filter_map(|receipt| match &receipt.event {
+                    cfe::dop::ClosureEvent::DiscoveryMinted { work, .. } => Some(work.as_slice()),
+                    _ => None,
+                })
+                .collect();
+            let spectrum = kernel::spectrum_of(payloads.into_iter());
+            println!(
+                "  cognition mass {} · {}",
+                style.strong(&amount(&spectrum.weighted)),
+                style.dim("`spectrum` for the whole reading — `settlements` `rings` `elements` `civs` `contacts` `routes`")
+            );
+            println!("{}", style.strong("╚══════════════════════════════╝"));
+        }
         // P3 — THE SPECTRUM: the cognition reading, derived whole from
         // the work this chronicle actually minted; there is no score.
         Some("spectrum") => {
@@ -3252,6 +3498,9 @@ fn help(style: &Style) {
 
         ("ideology", "the dual cohesion ledger for this planet — the four axes, their books, and the derived readings; divergent trade partners pay a friction entropy tax, aligned ones pay zero"),
         ("charter <world> deal <n>", "ROUTE-1: charter a maintained lane — melt × (1−η), η from the pair's best instrument grade; upkeep draws at the year voice, unpaid lanes lapse"),
+        ("dashboard · settlements · rings · elements · civs · contacts · routes", "THE ATLAS: your whole aspect, listable — the board overview; every settlement's zones and banks; the star's rings and thermal bands; the named element table and banked matter; the registered civilizations; aperture deals, councils and pens; the chartered lanes"),
+        ("spectrum", "P3: the cognition reading — what this chain actually solved, weighed against the benchmark floor; a reading, never a score"),
+        ("zone <tile> regen", "REGEN-1: the regenerator — restores the line's own ration at the extractor's rate (every number derives from the standing table); requires the DEEPENING (condition 3) crystallized on the orb"),
         ("forge <condition>", "MANU-1: forge an instrument from a crystallized condition + the converter chain (alloy = grade; diamond at 3+) — scan reach = base + best grade"),
         ("pen <world> · pen return <world>", "the receipted handoff (MESH-1b): ask the conductor for a world\'s pen — the seal lands at its next beat and your cross-world deeds write there lawfully; return it when done"),
         ("login [name] · whoami · continue", "the operator menu (prototype, no passwords): many accounts on one machine — login mints/switches, bare login lists, continue resumes your profile\'s last saved world"),
@@ -3330,6 +3579,7 @@ fn act_as(world: &mut World, actor: u64, rest: &[&str], style: &Style, current: 
                 "hab" => Some(ZoneKind::Habitat),
                 "smelt" => Some(ZoneKind::Smelter),
                 "synth" => Some(ZoneKind::Synthesizer),
+                "regen" => Some(ZoneKind::Regenerator),
                 _ => None,
             };
             match (tile, kind) {
@@ -3611,6 +3861,7 @@ fn kind_name(kind: ZoneKind) -> &'static str {
         ZoneKind::Encasement => "encasement",
         ZoneKind::CryoArray => "cryo-array",
         ZoneKind::Resonator => "resonator",
+        ZoneKind::Regenerator => "regenerator",
     }
 }
 
@@ -4168,6 +4419,7 @@ fn map(world: &World, style: &Style, current: u64) {
                     ZoneKind::Encasement => "c",
                     ZoneKind::CryoArray => "k",
                     ZoneKind::Resonator => "r",
+                    ZoneKind::Regenerator => "g",
                 }),
                 Some(zone) => match zone.kind {
                     ZoneKind::Extractor => style.ok("E"),
@@ -4177,6 +4429,7 @@ fn map(world: &World, style: &Style, current: u64) {
                     ZoneKind::Encasement => style.warn("C"),
                     ZoneKind::CryoArray => style.head("K"),
                     ZoneKind::Resonator => style.prompt("R"),
+                    ZoneKind::Regenerator => style.ok("G"),
                 },
                 None => style.dim("·"),
             };

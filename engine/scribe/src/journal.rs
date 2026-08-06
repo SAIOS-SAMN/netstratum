@@ -273,6 +273,7 @@ fn zone_word(kind: ZoneKind) -> &'static str {
         ZoneKind::Synthesizer => "synthesizer",
         ZoneKind::Encasement => "encasement shell",
         ZoneKind::CryoArray => "cryo-lattice array",
+        ZoneKind::Regenerator => "regenerator",
         ZoneKind::Resonator => "resonator",
     }
 }

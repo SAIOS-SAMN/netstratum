@@ -20,6 +20,17 @@ impl World {
         if self.orbs.is_empty() {
             return Err(ActionRefused::NoColony);
         }
+        // REGEN-1: regeneration is a TECHNOLOGY — placing a
+        // regenerator requires the DEEPENING (condition 3)
+        // crystallized on this orb. A fact of the sky, at the verb.
+        if kind == ZoneKind::Regenerator
+            && !self
+                .techs
+                .iter()
+                .any(|(held, condition, _, _)| *held == orb && *condition == 3)
+        {
+            return Err(ActionRefused::ConditionUncrystallized { condition: 3 });
+        }
         let held = peel(&mut self.orbs, orb)
             .ok_or(ActionRefused::NoSuchOrb { orb })?;
         if held.zones.iter().any(|zone| zone.tile == tile) {
