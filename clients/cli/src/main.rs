@@ -3042,13 +3042,21 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             let star = committed.star.unwrap_or(cfe::thermal::StarClass::G);
             for vein in &committed.prospects {
                 let (family, tier, _) = cfe::dop::element_properties(&vein.element, star);
+                // The periodic EXTRAPOLATION: group and period derive
+                // from the identity hash by the same modular law as
+                // family and tier — display until the chemistry lands
+                // (#37), exactly as names are display.
+                let group = 1 + vein.element[3] % 18;
+                let period = 1 + vein.element[4] % 7;
                 println!(
-                    "  {} — orb {} stratum {} · family {} tier {} · richness {}/tick · last assay t{}",
+                    "  {} — orb {} stratum {} · family {} tier {} · group {} period {} · richness {}/tick · assayed t{}",
                     style.strong(&cfe::dop::element_name(family, &vein.element)),
                     vein.orb,
                     vein.stratum,
                     family,
                     tier,
+                    group,
+                    period,
                     amount(&vein.richness),
                     vein.last_assay
                 );
