@@ -26,6 +26,16 @@ use super::*;
 /// the knowledge won, and what (if anything) stands in the way here.
 pub type BenchRead = (Vec<[u8; 32]>, [u8; 32], u16, Option<ActionRefused>);
 
+/// A plane of the table — the `(shell, phase)` matter must share before
+/// it can bond at all. Bonding never crosses one, so a plane is the
+/// unit the bench looks at.
+type Plane = (u8, u8);
+
+/// One element as a plane holds it: its identity, and the lane valence
+/// the saturation walk needs — read ONCE at the shear rather than
+/// re-read for every set the element might appear in.
+type Seated = ([u8; 32], u8);
+
 impl World {
     /// Compound on the genesis orb as the sovereign.
     pub fn compound(&mut self, members: &[[u8; 32]]) -> Result<[u8; 32], ActionRefused> {
@@ -191,34 +201,124 @@ impl World {
     /// would bond, as (members, gem, knowledge). Derived at call and
     /// never stored: it is a reading of the ledger, not state.
     ///
-    /// Bounded by construction: it walks combinations of the elements
-    /// actually HELD, and the widest compound the table admits is five
-    /// bodies ([`crate::almanac::periodic::SHELLS`] + 1).
+    /// **SHEARED ONTO THE PLANES, NEVER SWEPT** — the standing ruling
+    /// that [`peel`] carries (operator, 2026-07-30): *no cartesian
+    /// find-scan repetition; peels and shears where there were
+    /// iterations.*
+    ///
+    /// A first cut of this walked EVERY subset of the ledger up to five
+    /// bodies and asked the door about each — some 55,000 candidate
+    /// sets for a world holding 24 elements, every one of them
+    /// re-reading each member's seat in the table. It also had to SORT
+    /// its output afterwards, which is the tell: a frontier walk has no
+    /// order of its own, so determinism had to be bolted on.
+    ///
+    /// The bonding law already PARTITIONS the search and the sweep was
+    /// ignoring it. A set bonds only where every member shares the
+    /// SHELL and the PHASE, so `(shell, phase)` are the planes matter
+    /// can bond on, and nothing lying between two planes was ever a
+    /// candidate. So: one pass deposits the ledger onto its planes (the
+    /// crystal-shear idiom), and each plane is then read on its OWN
+    /// terms — terms which are CONSTANTS there rather than things to
+    /// search for, because the shell fixes how many bond at once and
+    /// the saturation identity fixes what their binds must sum to.
+    ///
+    /// Order is deterministic by construction — planes in table order,
+    /// members in ledger order — so nothing is sorted afterwards.
+    ///
+    /// The reading is UNCHANGED: `compounds` demands one shell, one
+    /// phase, and a count equal to the arity, so every set the sweep
+    /// could find lies inside exactly one plane at exactly that size.
+    /// The door remains the one authority on what bonds; the shear only
+    /// decides where to look.
     pub fn bench(&self, orb: u64) -> Vec<(Vec<[u8; 32]>, [u8; 32], u16)> {
         let Some(held) = self.orb_by_id(orb) else {
             return Vec::new();
         };
-        let stock: Vec<[u8; 32]> = held.elements.iter().map(|(id, _)| *id).collect();
-        let mut found = Vec::new();
-        let widest = usize::from(crate::almanac::periodic::SHELLS + 1);
-        // Every subset up to the widest arity, in index order so the
-        // reading is deterministic.
-        let mut frontier: Vec<Vec<usize>> = stock.iter().enumerate().map(|(at, _)| vec![at]).collect();
-        while let Some(picked) = frontier.pop() {
-            let members: Vec<[u8; 32]> = picked.iter().map(|at| stock[*at]).collect();
-            if let Some(set) = crate::almanac::Compoundable::new(&members) {
-                found.push((members.clone(), set.gem(), set.knowledge()));
+        // THE SHEAR — ONE pass over the ledger. Each element is
+        // deposited on its plane carrying the single number the walk
+        // needs (its lane's valence), read once here instead of
+        // re-read for every candidate it might appear in.
+        let mut sheet: Vec<(Plane, Vec<Seated>)> = Vec::new();
+        for (element, _) in &held.elements {
+            let seat = crate::almanac::periodic_of(element);
+            let plane = (seat.shell, seat.phase);
+            match sheet.iter_mut().find(|(held, _)| *held == plane) {
+                Some((_, members)) => members.push((*element, seat.binds)),
+                None => sheet.push((plane, vec![(*element, seat.binds)])),
             }
-            if picked.len() < widest {
-                let last = *picked.last().expect("non-empty");
-                for next in (last + 1)..stock.len() {
-                    let mut wider = picked.clone();
-                    wider.push(next);
-                    frontier.push(wider);
+        }
+        // The sheet is bounded by the TABLE, not by the ledger: there
+        // are only `SHELLS × PHASES` planes however much matter a world
+        // banks.
+        sheet.sort_by_key(|(plane, _)| *plane);
+
+        let mut found = Vec::new();
+        for (plane, members) in &sheet {
+            // THE PLANE'S OWN CONSTANT: its shell fixes the arity, so
+            // a plane that cannot seat that many holds no set at all
+            // and is never walked.
+            let arity = usize::from(plane.0) + 1;
+            if members.len() < arity {
+                continue;
+            }
+            for picked in saturating_sets(members, arity) {
+                if let Some(set) = crate::almanac::Compoundable::new(&picked) {
+                    found.push((set.members().to_vec(), set.gem(), set.knowledge()));
                 }
             }
         }
-        found.sort_by_key(|(members, _, _)| members.clone());
         found
+    }
+}
+
+/// **ONE PLANE'S SATURATING SETS** — the deterministic walk INSIDE a
+/// plane, where the arity and the binds target are the plane's own
+/// constants rather than things to search for.
+///
+/// Members are taken in ledger order and never revisited, so the
+/// reading needs no sort. The comparison is the compounding law's own
+/// doubled form (`Σ binds · 2 == arity · (LANES/2 + 1)`), so no
+/// division enters and the halving that law relies on is never
+/// restated here.
+fn saturating_sets(plane: &[Seated], arity: usize) -> Vec<Vec<[u8; 32]>> {
+    let doubled = arity as u32 * u32::from(crate::almanac::LANES / 2 + 1);
+    let mut found = Vec::new();
+    let mut picked: Vec<usize> = Vec::with_capacity(arity);
+    walk_plane(plane, arity, doubled, 0, 0, &mut picked, &mut found);
+    found
+}
+
+fn walk_plane(
+    plane: &[Seated],
+    arity: usize,
+    doubled: u32,
+    from: usize,
+    sum: u32,
+    picked: &mut Vec<usize>,
+    found: &mut Vec<Vec<[u8; 32]>>,
+) {
+    if picked.len() == arity {
+        if sum * 2 == doubled {
+            found.push(picked.iter().map(|at| plane[*at].0).collect());
+        }
+        return;
+    }
+    // What the rest could still add, at the lane fold's peak.
+    let peak = u32::from(crate::almanac::LANES / 2);
+    let rest = (arity - picked.len() - 1) as u32;
+    for next in from..plane.len() {
+        let sum = sum + u32::from(plane[next].1);
+        // Binds are strictly positive, so an overshoot never recovers;
+        // and a partial sum that cannot reach the target even if every
+        // remaining member sat at the peak never will. Neither prune
+        // may BREAK the loop — a plane is in ledger order, not binds
+        // order, so a lighter member can always follow a heavier one.
+        if sum * 2 > doubled || (sum + rest * peak) * 2 < doubled {
+            continue;
+        }
+        picked.push(next);
+        walk_plane(plane, arity, doubled, next + 1, sum, picked, found);
+        picked.pop();
     }
 }
