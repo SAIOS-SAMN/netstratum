@@ -37,7 +37,7 @@ use cfe::dop::{ClosureEvent, Office, Resource, UNION_REVIEW_HORIZON};
 use cfe::ipsal::Scope;
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::{Committed, SOVEREIGN};
-use solver_verify::{verify_work, WorkBroken};
+use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 
 /// The kernel version — bumped ONLY by charter amendment. The arbor
 /// binds this into every commitment (`H(schema ‖ bytes ‖ parent ‖
@@ -1312,9 +1312,8 @@ fn creation(step: &Step) -> Result<(), Refused> {
                     amount: Box::new(amount.clone()),
                 });
             }
-            let difficulty =
-                verify_work(work).map_err(|broken| Refused::WorkRefused { broken })?;
-            let bound = mint_bound(difficulty.rung());
+            let bound =
+                carrier_bound(work).map_err(|broken| Refused::WorkRefused { broken })?;
 
             match *amount <= bound {
                 true => Ok(()),
@@ -1364,6 +1363,32 @@ fn creation(step: &Step) -> Result<(), Refused> {
 /// the v2 40/40/20 prover/mesh/reserve split is INSCRIBED in
 /// U_DIRECTIVES §8 for the mesh era). Saturated rungs are
 /// proof-of-position; the economy lives up the ladder.
+/// **THE CARRIER LAW** (P4, operator ruling 2026-08-06) — what a work
+/// class is worth at the mint, in ONE place for the gate arm and the
+/// sealed warrant alike (CHARTER §0b, call-not-copy):
+///
+/// - **Forge** stays priced by the ladder until the corpus rates are
+///   MEASURED — the acknowledged sequencing: W(τ) = complexity /
+///   solve-rate needs P3's blind benchmark, and zeroing the forge
+///   before corpus can pay would zero issuance.
+/// - **Volumetric is RETIRED.** It never could mint (an accident of
+///   `verify_work`'s return type); the refusal is now the ruling,
+///   named `CarrierRetired`. Verification stands forever — history is
+///   never orphaned.
+/// - **Corpus is STAGED.** Verified whole, refused `CarrierUnpriced`
+///   until the measured-rate table fills from the benchmark; the flip
+///   that prices corpus and zeroes the forge is the carrier switch,
+///   and IT carries the version bump. This landing moves no verdict:
+///   volume and corpus refused before and refuse still, with their
+///   reasons named instead of accidental.
+fn carrier_bound(work: &[u8]) -> Result<Ratio, WorkBroken> {
+    match verify_work_class(work)? {
+        WorkClass::Forge(difficulty) => Ok(mint_bound(difficulty.rung())),
+        WorkClass::Volumetric(_) => Err(WorkBroken::CarrierRetired),
+        WorkClass::Corpus { .. } => Err(WorkBroken::CarrierUnpriced),
+    }
+}
+
 pub fn mint_bound(rung: Option<u32>) -> Ratio {
     match rung {
         Some(3) => ratio(1, 1),
@@ -1769,8 +1794,8 @@ pub struct SealedWarrant;
 
 impl cfe::world::MintWarrant for SealedWarrant {
     fn earns(&self, work: &[u8]) -> Option<Ratio> {
-        let difficulty = verify_work(work).ok()?;
-        Some(mint_bound(difficulty.rung()))
+        // THE CARRIER LAW, asked of the same function the gate runs.
+        carrier_bound(work).ok()
     }
 
     /// THE ESCROW CHECK, answered by the gate itself — `admits` is the

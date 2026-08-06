@@ -156,6 +156,18 @@ pub enum WorkBroken {
     /// corpus work reaching `verify_work`, whose return type can only
     /// express a ladder rung. `verify_work_class` accepts it.
     UnsupportedShape,
+    /// **P4, THE CARRIER LAW (operator ruling 2026-08-06): the
+    /// volumetric carrier is RETIRED at the mint.** Verified forever
+    /// (`verify_volume_work` stands — history is never orphaned),
+    /// minting never again. What was an accident of `verify_work`'s
+    /// return type is now the ruling, named as itself.
+    CarrierRetired,
+    /// **P4: a VERIFIED corpus proof with no measured price yet.** The
+    /// carrier law prices corpus work by W(τ) = complexity / measured
+    /// solve rate, and the rate table fills from the blind benchmark
+    /// (P3). Until it does, a corpus mint refuses as UNPRICED — never
+    /// as broken; the proof itself verified whole.
+    CarrierUnpriced,
 }
 
 fn mirror_code(m: TileMirror) -> u8 {
