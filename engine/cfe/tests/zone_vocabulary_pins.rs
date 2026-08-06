@@ -35,7 +35,18 @@ fn the_zone_seed_is_the_standing_table_so_the_next_code_cannot_collide() {
     // and can never shadow a compiled one.
     let ceiling = seed.iter().map(|entry| entry.code).max().unwrap_or(0);
     assert_eq!(ceiling, ZONE_KINDS);
-    assert_eq!(ZoneKind::from_wire(ceiling + 1), None, "the next code is free");
+    // Free of the COMPILED table, which is what "free" has to mean once
+    // minted codes exist: `from_wire` answers for them by design (that
+    // is how a minted building rides one byte), so the question is
+    // whether the table claims the code, and `from_wire_const` is the
+    // reading that says.
+    assert_eq!(ZoneKind::from_wire_const(ceiling + 1), None, "the next code is free");
+    assert_eq!(
+        ZoneKind::from_wire(ceiling + 1),
+        Some(ZoneKind::Minted(ceiling + 1)),
+        "and past the table the wire reads a MINTED kind"
+    );
+    assert!(ZoneKind::Minted(ceiling + 1).wire() == ceiling + 1, "which rides as its own code");
 }
 
 #[test]
@@ -52,7 +63,7 @@ fn a_declared_base_wins() {
     // habitat channels on a mint that declares the extractor.
     assert_eq!(
         zone_base(
-            Some(ZoneKind::Extractor as u8),
+            Some(ZoneKind::Extractor.wire()),
             &[(CHANNEL_HABITAT_YIELD, ratio(5, 4)), (CHANNEL_HABITAT_UPKEEP, ratio(5, 4))]
         ),
         ZoneBase::Declared(ZoneKind::Extractor),
@@ -149,7 +160,7 @@ fn the_mint_receipt_carries_the_base_and_the_sealed_form_decodes_without_it() {
         sigil: "⌂".into(),
         word: "deepworks".into(),
         binding: vec![(CHANNEL_YIELD, ratio(2, 1)), (CHANNEL_UPKEEP, ratio(2, 1))],
-        base: Some(ZoneKind::Extractor as u8),
+        base: Some(ZoneKind::Extractor.wire()),
     };
     let widened = deed.wire_bytes();
     let mut records = cfe::tlv::records(&widened);

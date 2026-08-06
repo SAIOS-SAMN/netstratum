@@ -136,7 +136,7 @@ use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 /// (Amendments 0.11.0 through the current minor are recorded in the
 /// version ledger — `tests/conservation_pins.rs` — beside the
 /// NEXT-FREE RULE that assigns minors across lanes.)
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 17, patch: 0 };
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 18, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
@@ -1389,9 +1389,18 @@ fn admitted_deltas(
         //   copied —
         // The chartered genesis mint: EXACTLY the founding reserves.
         E::ColonyFounded { .. } => cfe::dop::founding_reserves(),
-        E::ZoneBuilt { kind, .. } => {
-            kind.cost().into_iter().map(|(resource, cost)| (resource, -cost)).collect()
-        }
+        // #41: a build is PRICED on its base. A minted kind's base
+        // lives in the FOLD, which this function cannot read — `prior`
+        // is committed state and carries no chronicle — so the receipt
+        // DECLARES it and the gate reads the declaration, exactly as
+        // tag 101 declares the ceilings its draw ran under. A compiled
+        // kind declares none and is its own base.
+        E::ZoneBuilt { kind, base, .. } => base
+            .unwrap_or(*kind)
+            .cost()
+            .into_iter()
+            .map(|(resource, cost)| (resource, -cost))
+            .collect(),
         // The raze refunds the PRIOR zone's kind at the tile (stateful
         // — the event names only the tile). No zone, no refund.
         E::ZoneRazed { orb_id, tile } => prior
@@ -1399,7 +1408,11 @@ fn admitted_deltas(
             .iter()
             .find(|held| held.orb_id == *orb_id)
             .and_then(|orb| orb.zones.iter().find(|zone| zone.tile == *tile))
-            .map(|zone| zone.kind.raze_refund())
+            // #41: the salvage halves what the build SPENT, and for a
+            // minted kind that is its base's cost. The base was fixed
+            // at build time and JUDGED then, so reading it from
+            // committed state here needs no fold and trusts nothing new.
+            .map(|zone| zone.priced_as().raze_refund())
             .unwrap_or_default(),
         // No arm: the deed declares NO banked movement — the total
         // check holds every bank still.

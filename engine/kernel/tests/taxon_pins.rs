@@ -59,7 +59,7 @@ fn every_deed() -> Vec<ClosureEvent> {
     let bytes = [0u8; 32];
     vec![
         E::ColonyFounded { orb_id: 1, name: "c".into() },
-        E::ZoneBuilt { orb_id: 1, tile: 0, kind: ZoneKind::Extractor },
+        E::ZoneBuilt { orb_id: 1, tile: 0, kind: ZoneKind::Extractor, base: None },
         E::YieldCollected { orb_id: 1, resource: Resource::Iron, amount: r(1) },
         E::UpkeepSettled { orb_id: 1, resource: Resource::Iron, amount: r(1) },
         E::FamineStruck { orb_id: 1, resource: Resource::Iron, drawn: r(1) },

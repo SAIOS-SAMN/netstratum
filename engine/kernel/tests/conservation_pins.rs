@@ -329,7 +329,8 @@ fn the_version_is_pinned() {
     //            (the genesis exception, 54f85ea, their ledger).
     //   0.16.0 — claimed and landed here (ECO-1, this ledger).
     //   0.17.0 — claimed and landed here (ELEMENT-CHEMISTRY, below).
-    //   — the next free minor is 18.
+    //   0.18.0 — claimed and landed here (ZONE VOCABULARY, below).
+    //   — the next free minor is 19.
     // 0.14.0 — THE CORPUS PRICES (2026-08-06): the ratified carrier
     //   pricing lands with its measured table — a benchmark-confirmed
     //   corpus solve mints at W = scarcity × VisitedNodes₃/word_len
@@ -364,7 +365,19 @@ fn the_version_is_pinned() {
     //   ONE move to MANY — a deed may now move several element keys at
     //   once, and repeated keys SUM rather than overwrite. MINOR: the
     //   gate admits what was Unjudged.
-    assert_eq!(KERNEL_VERSION.to_string(), "0.17.0", "the gate is version-pinned");
+    // 0.18.0 — ZONE VOCABULARY (2026-08-07, #41): a world MINTS its own
+    //   building kinds, and the gate learns to price one. `ZoneBuilt`
+    //   widens by the additive pattern to declare the compiled BASE a
+    //   build was priced against, because a minted kind's base lives in
+    //   the fold and `admits` is handed committed state with no
+    //   chronicle in it — the tag-101 precedent, where the receipt
+    //   declares what the gate cannot re-derive. The raze reads the
+    //   same base from committed `Zone` state, where it was fixed at
+    //   build time and judged then, so salvage cannot outrun the build.
+    //   MINOR: the gate prices a build it previously priced at the
+    //   compiled table alone. Sealed chains carry no base, read as the
+    //   kind's own, and judge exactly as they always did.
+    assert_eq!(KERNEL_VERSION.to_string(), "0.18.0", "the gate is version-pinned");
     assert_eq!(VERSION, KERNEL_VERSION.code(), "the wire carries the packed form");
     // ORDER IS PRESERVED: a chain cut under the old linear versions
     // compares BELOW every packed one, which is true — an earlier gate

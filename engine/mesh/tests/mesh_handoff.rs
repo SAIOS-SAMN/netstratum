@@ -35,7 +35,7 @@ fn a_premesh_chronicle() -> Chronicle {
         vec![100],
     );
     chronicle.append(
-        ClosureEvent::ZoneBuilt { orb_id: 1, tile: 4, kind: ZoneKind::Extractor },
+        ClosureEvent::ZoneBuilt { orb_id: 1, tile: 4, kind: ZoneKind::Extractor, base: None },
         1,
         vec![100],
     );

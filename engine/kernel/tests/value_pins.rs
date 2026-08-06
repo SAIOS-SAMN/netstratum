@@ -336,7 +336,7 @@ fn tier3_zones_pay_their_cost_and_refund_from_prior() {
     let prior = world.committed();
     world.zone(0, ZoneKind::Extractor).expect("zones");
     let next = world.committed();
-    let build = ClosureEvent::ZoneBuilt { orb_id: FIRST_ORB, tile: 0, kind: ZoneKind::Extractor };
+    let build = ClosureEvent::ZoneBuilt { orb_id: FIRST_ORB, tile: 0, kind: ZoneKind::Extractor, base: None };
     assert_eq!(
         admits(&prior, &next, &step(build.clone(), SOVEREIGN)),
         Ok(()),

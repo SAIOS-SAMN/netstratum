@@ -188,7 +188,11 @@ impl World {
             .position(|zone| zone.tile == tile)
             .ok_or(ActionRefused::NoSuchZone { tile })?;
         let zone = held.zones.remove(at);
-        for (resource, refund) in zone.kind.raze_refund() {
+        // #41: the refund halves what the build SPENT, which for a
+        // minted kind is its base's cost — `priced_as` is the one home
+        // both ends read, so a building cannot be raised at one price
+        // and salvaged at another.
+        for (resource, refund) in zone.priced_as().raze_refund() {
             held.bank(resource, refund);
         }
         let orb_id = held.orb_id;

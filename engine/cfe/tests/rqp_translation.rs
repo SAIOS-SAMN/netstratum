@@ -39,8 +39,8 @@ fn the_sigil_is_frame_free() {
     // structure's. Query by WHAT it is, never by WHO reads it.
     let mut held = ColonyOrb { orb_id: 1, name: "held".to_string(), ..ColonyOrb::default() };
     held.zones = vec![
-        cfe::dop::Zone { tile: 10, kind: ZoneKind::Extractor },
-        cfe::dop::Zone { tile: 21, kind: ZoneKind::Habitat },
+        cfe::dop::Zone { tile: 10, kind: ZoneKind::Extractor, base: None },
+        cfe::dop::Zone { tile: 21, kind: ZoneKind::Habitat, base: None },
     ];
     held.banked = vec![
         (Resource::Iron, ratio(10, 1)),
@@ -61,8 +61,8 @@ fn a_cross_frame_read_measures_its_loss() {
     // measured, shown, never silent.
     let mut ours = ColonyOrb { orb_id: 1, name: "ours".to_string(), ..ColonyOrb::default() };
     ours.zones = vec![
-        cfe::dop::Zone { tile: 10, kind: ZoneKind::Extractor },
-        cfe::dop::Zone { tile: 21, kind: ZoneKind::Habitat },
+        cfe::dop::Zone { tile: 10, kind: ZoneKind::Extractor, base: None },
+        cfe::dop::Zone { tile: 21, kind: ZoneKind::Habitat, base: None },
     ];
     ours.banked = vec![
         (Resource::Iron, ratio(10, 1)),
@@ -71,8 +71,8 @@ fn a_cross_frame_read_measures_its_loss() {
     let mut theirs = ColonyOrb { orb_id: 7, name: "theirs".to_string(), ..ColonyOrb::default() };
     // The rot90 image — congruent, a genuine twin across worlds.
     theirs.zones = vec![
-        cfe::dop::Zone { tile: 22, kind: ZoneKind::Extractor },
-        cfe::dop::Zone { tile: 45, kind: ZoneKind::Habitat },
+        cfe::dop::Zone { tile: 22, kind: ZoneKind::Extractor, base: None },
+        cfe::dop::Zone { tile: 45, kind: ZoneKind::Habitat, base: None },
     ];
     theirs.banked = ours.banked.clone();
     let (resonant, survival) = translated_read(&ours, PLANAR, &theirs, HARMONIC);

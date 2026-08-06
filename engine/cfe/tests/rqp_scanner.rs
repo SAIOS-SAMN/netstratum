@@ -106,8 +106,8 @@ fn the_sigil_is_frame_invariant() {
         ..ColonyOrb::default()
     };
     original.zones = vec![
-        cfe::dop::Zone { tile: 10, kind: ZoneKind::Extractor },
-        cfe::dop::Zone { tile: 21, kind: ZoneKind::Habitat },
+        cfe::dop::Zone { tile: 10, kind: ZoneKind::Extractor, base: None },
+        cfe::dop::Zone { tile: 21, kind: ZoneKind::Habitat, base: None },
     ];
     original.banked = vec![
         (Resource::Iron, ratio(10, 1)),
@@ -119,8 +119,8 @@ fn the_sigil_is_frame_invariant() {
         ..ColonyOrb::default()
     };
     rotated.zones = vec![
-        cfe::dop::Zone { tile: 22, kind: ZoneKind::Extractor },
-        cfe::dop::Zone { tile: 45, kind: ZoneKind::Habitat },
+        cfe::dop::Zone { tile: 22, kind: ZoneKind::Extractor, base: None },
+        cfe::dop::Zone { tile: 45, kind: ZoneKind::Habitat, base: None },
     ];
     rotated.banked = original.banked.clone();
     let mut swapped = ColonyOrb {
@@ -129,8 +129,8 @@ fn the_sigil_is_frame_invariant() {
         ..ColonyOrb::default()
     };
     swapped.zones = vec![
-        cfe::dop::Zone { tile: 22, kind: ZoneKind::Habitat },
-        cfe::dop::Zone { tile: 45, kind: ZoneKind::Extractor },
+        cfe::dop::Zone { tile: 22, kind: ZoneKind::Habitat, base: None },
+        cfe::dop::Zone { tile: 45, kind: ZoneKind::Extractor, base: None },
     ];
     swapped.banked = original.banked.clone();
     assert_eq!(

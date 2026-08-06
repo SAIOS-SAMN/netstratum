@@ -155,7 +155,7 @@ fn joint_zones(orb: &ColonyOrb) -> Vec<(u8, u8, u8)> {
                 .map(|zone| {
                     let (row, col) = (zone.tile as u8 / GRID, zone.tile as u8 % GRID);
                     let (to_row, to_col) = transforms(row, col)[way];
-                    (to_row, to_col, zone.kind as u8)
+                    (to_row, to_col, zone.kind.wire())
                 })
                 .collect();
             mapped.sort_unstable();

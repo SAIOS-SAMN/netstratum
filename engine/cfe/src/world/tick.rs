@@ -242,6 +242,32 @@ impl World {
         let class_yield = crate::vocabulary::factor_on(&archetype, crate::vocabulary::CHANNEL_YIELD);
         let class_upkeep =
             crate::vocabulary::factor_on(&archetype, crate::vocabulary::CHANNEL_UPKEEP);
+        // **#41: THE MINTED BUILDINGS' OWN BINDINGS, SHEARED ONCE.**
+        // The zone fold is read HERE, not per zone: folding the
+        // chronicle inside the tile loop would rescan the whole chain
+        // once per building per tick, which is the find-scan repetition
+        // the peel/shear ruling forbids. One pass, then a lookup by
+        // code — and a world that has minted no buildings pays for an
+        // empty vector.
+        let minted_zones: Vec<(u8, Vec<(u8, Ratio)>)> = crate::vocabulary::fold(
+            self.chronicle(),
+            crate::vocabulary::Axis::Zone,
+        )
+        .into_iter()
+        .filter(|entry| !entry.binding.is_empty())
+        .map(|entry| (entry.code, entry.binding))
+        .collect();
+        let minted_on = |kind: ZoneKind, channel: u8| -> Ratio {
+            match kind {
+                ZoneKind::Minted(code) => minted_zones
+                    .iter()
+                    .find(|(held, _)| *held == code)
+                    .map(|(_, binding)| crate::vocabulary::factor_on(binding, channel))
+                    .unwrap_or_else(|| ratio(1, 1)),
+                // A compiled kind claims nothing of its own.
+                _ => ratio(1, 1),
+            }
+        };
         // TECH-1b: each orb's crystallized boons, read once — [unused,
         // insulation, discipline, deepening, doctrine, stores] — each
         // carrying the magnitude ITS RECEIPT asserted (receipt
@@ -287,7 +313,7 @@ impl World {
                 // Weighted: a zone running at half its inputs runs its
                 // furnace at half.
                 let factory: Ratio = active.iter().fold(zero.clone(), |sum, (zone, vigour)| {
-                    sum + zone.kind.factory_heat() * vigour.clone()
+                    sum + zone.priced_as().factory_heat() * vigour.clone()
                 });
                 // TECH-1b: the doctrine crystallized — the radiator
                 // sheds at the magnitude its receipt asserted (10 §3).
@@ -401,7 +427,11 @@ impl World {
                 let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
                 let standing: Vec<Zone> = active.iter().map(|(zone, _)| zone.clone()).collect();
                 for (zone, vigour) in active {
-                    let (resource, amount) = crate::dop::zone_yield(zone.kind, metabolism);
+                    // #41: a minted building's numbers are its BASE's —
+                    // the binding modulates what a building DOES, and
+                    // `priced_as` reads the base fixed at build time.
+                    let seat = zone.priced_as();
+                    let (resource, amount) = crate::dop::zone_yield(seat, metabolism);
                     let boost = terrain_boost(&terrain, *orb_id, zone, &standing);
                     // The class's mechanism composes WITH the adopted
                     // practices, never instead of them: identity and
@@ -409,18 +439,31 @@ impl World {
                     // Every factor here is CHANNEL DATA — the global
                     // channels apply everywhere, the zone-scoped ones
                     // where the zone kind matches, silence reads 1.
-                    let mut yield_factor = class_yield.clone() * practice_yield.clone();
-                    let mut upkeep_factor = class_upkeep.clone() * practice_upkeep.clone();
-                    match zone.kind {
+                    // The MINTED binding composes with the class's and
+                    // the practices' — three claims on one world, none
+                    // of them instead of the others.
+                    let mut yield_factor = class_yield.clone()
+                        * practice_yield.clone()
+                        * minted_on(zone.kind, crate::vocabulary::CHANNEL_YIELD);
+                    let mut upkeep_factor = class_upkeep.clone()
+                        * practice_upkeep.clone()
+                        * minted_on(zone.kind, crate::vocabulary::CHANNEL_UPKEEP);
+                    // The family channels follow the BASE: a minted
+                    // extractor-variant is priced as an extractor.
+                    match seat {
                         ZoneKind::Habitat => {
-                            yield_factor *= practice_habitat_yield.clone();
-                            upkeep_factor *= practice_habitat_upkeep.clone();
+                            yield_factor *= practice_habitat_yield.clone()
+                                * minted_on(zone.kind, CHANNEL_HABITAT_YIELD);
+                            upkeep_factor *= practice_habitat_upkeep.clone()
+                                * minted_on(zone.kind, CHANNEL_HABITAT_UPKEEP);
                         }
                         ZoneKind::Extractor => {
-                            upkeep_factor *= practice_extractor_upkeep.clone();
+                            upkeep_factor *= practice_extractor_upkeep.clone()
+                                * minted_on(zone.kind, CHANNEL_EXTRACTOR_UPKEEP);
                         }
                         ZoneKind::Smelter | ZoneKind::Synthesizer | ZoneKind::Resonator => {
-                            yield_factor *= practice_converter_yield.clone();
+                            yield_factor *= practice_converter_yield.clone()
+                                * minted_on(zone.kind, CHANNEL_CONVERTER_YIELD);
                         }
                         _ => {}
                     }
@@ -431,7 +474,7 @@ impl World {
                         amount * efficiency.clone() * boost * yield_factor.clone() * vigour.clone(),
                     );
                     // A zone drawing half its inputs consumes half.
-                    for (resource, amount) in crate::dop::zone_upkeep(zone.kind, metabolism) {
+                    for (resource, amount) in crate::dop::zone_upkeep(seat, metabolism) {
                         accrue(
                             &mut self.accrued,
                             *orb_id,

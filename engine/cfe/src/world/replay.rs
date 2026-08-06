@@ -143,12 +143,16 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 }
                 orbs.push(charted);
             }
-            ClosureEvent::ZoneBuilt { orb_id, tile, kind } => {
+            ClosureEvent::ZoneBuilt { orb_id, tile, kind, base } => {
                 if let Some(held) = peel(&mut orbs, *orb_id) {
-                    for (resource, cost) in kind.cost() {
+                    // #41: the build was PRICED on its base — replay
+                    // reads the receipt's own declaration rather than
+                    // re-resolving the fold, so a minted kind replays
+                    // at exactly what it was raised for.
+                    for (resource, cost) in base.unwrap_or(*kind).cost() {
                         held.bank(resource, -cost);
                     }
-                    held.zones.push(Zone { tile: *tile, kind: *kind });
+                    held.zones.push(Zone { tile: *tile, kind: *kind, base: *base });
                     held.zones.sort_by_key(|zone| zone.tile);
                 }
             }
@@ -243,7 +247,9 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 if let Some(held) = peel(&mut orbs, *orb_id) {
                     if let Some(at) = held.zones.iter().position(|zone| zone.tile == *tile) {
                         let zone = held.zones.remove(at);
-                        for (resource, refund) in zone.kind.raze_refund() {
+                        // #41: the base it was raised on prices the
+                        // salvage — see `Zone::priced_as`.
+                        for (resource, refund) in zone.priced_as().raze_refund() {
                             held.bank(resource, refund);
                         }
                     }

@@ -316,7 +316,18 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 Some("cryo") | Some("cryo-array") => Some(ZoneKind::CryoArray),
                 Some("res") | Some("resonator") => Some(ZoneKind::Resonator),
                 Some("regen") | Some("regenerator") => Some(ZoneKind::Regenerator),
-                _ => None,
+                // #41: a MINTED building, named by the word its mint
+                // gave it. The fold is the authority on what a world
+                // can build — a compiled name is matched first so a
+                // mint can never shadow a standing kind.
+                Some(word) => cfe::vocabulary::fold(
+                    world.chronicle(),
+                    cfe::vocabulary::Axis::Zone,
+                )
+                .iter()
+                .find(|entry| entry.word == word && entry.code > cfe::dop::ZONE_KINDS)
+                .map(|entry| ZoneKind::Minted(entry.code)),
+                None => None,
             };
             match (tile, kind) {
                 (Some(tile), Some(kind)) if tile < GRID * GRID => match world.zone_as(SOVEREIGN, *current, tile, kind) {
@@ -327,7 +338,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             style.ok("✓"),
                             style.strong(&tile.to_string()),
                             coordinate(tile),
-                            style.strong(kind_name(kind)),
+                            style.strong(&zone_title(world, kind)),
                             style.dim(&format!("#{sequence}"))
                         );
                         map(world, style, *current);
@@ -1608,7 +1619,6 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     let line = active_line().unwrap_or_else(|| String::from("operator"));
                     match world.charter_parameter(&line, charter) {
                         Ok(()) => {
-                            *current = world.now();
                             println!(
                                 "{} {} chartered — the rule follows the chain",
                                 style.ok("⚖"),
@@ -1624,7 +1634,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             "{} {}\n     {}",
                             style.bad("✗"),
                             style.strong("t0 mint <axis> <sigil> <word> <channel>:<p>/<q> ..."),
-                            style.dim("e.g. t0 mint class ⌘ covenantal 1:7/4 2:7/4   (axes: 1 disposition · 2 metabolism · 3 perception · 4 class · 5 clade · 6 practice; channels: 1 yield · 2 upkeep · 3 survey · 4 demurrage · 5 hab-yield · 6 hab-upkeep · 7 ext-upkeep · 8 conv-yield · 9 align gate · 10 temper gate; no axis mints an OFFICE)")
+                            style.dim("e.g. t0 mint class ⌘ covenantal 1:7/4 2:7/4 · t0 mint zone ⌂ deepworks on extractor 1:2 7:2   (axes: 1 disposition · 2 metabolism · 3 perception · 4 class · 5 clade · 6 practice · 7 zone; channels: 1 yield · 2 upkeep · 3 survey · 4 demurrage · 5 hab-yield · 6 hab-upkeep · 7 ext-upkeep · 8 conv-yield · 9 align gate · 10 temper gate; no axis mints an OFFICE)")
                         )
                     };
                     let axis_word = words.next();
@@ -1643,6 +1653,8 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                 "class" => Some(cfe::vocabulary::Axis::Class),
                                 "clade" => Some(cfe::vocabulary::Axis::Clade),
                                 "practice" => Some(cfe::vocabulary::Axis::Practice),
+                                // #41: what a world may BUILD.
+                                "zone" | "building" => Some(cfe::vocabulary::Axis::Zone),
                                 _ => None,
                             })
                     }) else {
@@ -1655,7 +1667,27 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     }
                     let mut binding = Vec::new();
                     let mut malformed = None;
-                    for term in words.by_ref() {
+                    // #41: `on <base>` names the standing kind a minted
+                    // BUILDING modulates — the ladder's first rung.
+                    // Omit it and the base is inferred from the channels
+                    // the binding touches; where neither answers, the
+                    // word stands and nothing can be raised from it.
+                    let mut base: Option<u8> = None;
+                    while let Some(term) = words.next() {
+                        if term == "on" {
+                            let named = words.next().unwrap_or("");
+                            base = (1..=cfe::dop::ZONE_KINDS)
+                                .find(|code| {
+                                    cfe::dop::ZoneKind::from_wire_const(*code)
+                                        .is_some_and(|kind| cfe::dop::zone_word(kind) == named)
+                                })
+                                .or_else(|| named.parse::<u8>().ok());
+                            if base.is_none() {
+                                malformed = Some(named.to_string());
+                                break;
+                            }
+                            continue;
+                        }
                         let Some((channel, factor)) = term.split_once(':') else {
                             malformed = Some(term.to_string());
                             break;
@@ -1724,9 +1756,10 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         println!("{} a minted word must not be empty", style.bad("✗"));
                         return;
                     };
-                    match world.mint_vocabulary(&line, axis, sigil, word_name, binding) {
+                    match world.mint_vocabulary_based_as(
+                        SOVEREIGN, &line, axis, sigil, word_name, binding, base,
+                    ) {
                         Ok(code) => {
-                            *current = world.now();
                             println!(
                                 "{} {} {} minted on axis {} as code {} — the board grew a class no coder wrote",
                                 style.ok("✓"),
@@ -2375,6 +2408,9 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                 cfe::dop::ZoneKind::CryoArray => 'C',
                                 cfe::dop::ZoneKind::Resonator => 'R',
                                 cfe::dop::ZoneKind::Regenerator => 'G',
+                                // #41: a minted building — the chain
+                                // named it, so the map marks it as one.
+                                cfe::dop::ZoneKind::Minted(_) => 'M',
                             },
                             None => cfe::dop::tile_class(&seed, cfe::world::FIRST_ORB, tile).glyph(),
                         };
@@ -4465,6 +4501,24 @@ fn kind_name(kind: ZoneKind) -> &'static str {
     cfe::dop::zone_word(kind)
 }
 
+/// #41: a building's word, MINTED ONES RESOLVED. The compiled table
+/// answers for its own kinds; a minted kind's word lives in the fold,
+/// so the chronicle is asked for it — the same seam the minted species
+/// word resolves at (#45). Falls back to the generic word where the
+/// fold has no entry, which is what an unbuildable stray code is.
+fn zone_title(world: &World, kind: ZoneKind) -> String {
+    match kind {
+        ZoneKind::Minted(code) => {
+            cfe::vocabulary::fold(world.chronicle(), cfe::vocabulary::Axis::Zone)
+                .iter()
+                .find(|entry| entry.code == code)
+                .map(|entry| entry.word.clone())
+                .unwrap_or_else(|| format!("minted {code}"))
+        }
+        held => kind_name(held).to_string(),
+    }
+}
+
 fn parse_resource(word: &str) -> Option<Resource> {
     match word.to_ascii_lowercase().as_str() {
         "iron" => Some(Resource::Iron),
@@ -4686,6 +4740,20 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
         ActionRefused::WorkAlreadyAspired { name } => {
             format!("{} is already reached for", style.strong(name))
         }
+        ActionRefused::ZoneKindUnknown { code } => format!(
+            "no building in this world's vocabulary carries code {} — {} lists what stands, and \
+             {} is how a new one enters",
+            style.strong(&code.to_string()),
+            style.strong("buildings"),
+            style.strong("t0 mint zone …")
+        ),
+        ActionRefused::ZoneKindUnbuildable { code } => format!(
+            "building {} is a WORD without a workshop — its binding names no base to modulate, so \
+             nothing can be raised from it. Mint it again naming a base ({}), or bind a channel \
+             that belongs to one family",
+            style.strong(&code.to_string()),
+            style.strong("t0 mint zone <sigil> <word> on <base> …")
+        ),
         ActionRefused::BaseOffAxis { axis } => format!(
             "axis {axis} has no bases — only a minted BUILDING modulates a standing kind, so a \
              base belongs to a {} mint alone",
@@ -5067,6 +5135,7 @@ fn map(world: &World, style: &Style, current: u64) {
                     ZoneKind::CryoArray => "k",
                     ZoneKind::Resonator => "r",
                     ZoneKind::Regenerator => "g",
+                    ZoneKind::Minted(_) => "m",
                 }),
                 Some(zone) => match zone.kind {
                     ZoneKind::Extractor => style.ok("E"),
@@ -5077,6 +5146,7 @@ fn map(world: &World, style: &Style, current: u64) {
                     ZoneKind::CryoArray => style.head("K"),
                     ZoneKind::Resonator => style.prompt("R"),
                     ZoneKind::Regenerator => style.ok("G"),
+                    ZoneKind::Minted(_) => style.strong("M"),
                 },
                 None => style.dim("·"),
             };

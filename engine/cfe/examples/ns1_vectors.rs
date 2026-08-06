@@ -27,7 +27,7 @@ fn main() {
 
     for event in [
         ClosureEvent::ColonyFounded { orb_id: 1, name: "meridian".into() },
-        ClosureEvent::ZoneBuilt { orb_id: 1, tile: 4, kind: ZoneKind::Extractor },
+        ClosureEvent::ZoneBuilt { orb_id: 1, tile: 4, kind: ZoneKind::Extractor, base: None },
         ClosureEvent::YieldCollected {
             orb_id: 1,
             resource: Resource::Iron,

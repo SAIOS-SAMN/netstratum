@@ -10,8 +10,8 @@ fn an_orb() -> ColonyOrb {
         orb_id: 1,
         name: "meridian".into(),
         zones: vec![
-            Zone { tile: 4, kind: ZoneKind::Extractor },
-            Zone { tile: 9, kind: ZoneKind::Habitat },
+            Zone { tile: 4, kind: ZoneKind::Extractor, base: None },
+            Zone { tile: 9, kind: ZoneKind::Habitat, base: None },
         ],
         banked: Vec::new(),
         famine: vec![Resource::Biomass],
@@ -66,7 +66,7 @@ fn the_ratio_carrier_is_canonical() {
 fn events_round_trip_through_their_wire_records() {
     let events = [
         ClosureEvent::ColonyFounded { orb_id: 1, name: "meridian".into() },
-        ClosureEvent::ZoneBuilt { orb_id: 1, tile: 4, kind: ZoneKind::Extractor },
+        ClosureEvent::ZoneBuilt { orb_id: 1, tile: 4, kind: ZoneKind::Extractor, base: None },
         ClosureEvent::YieldCollected {
             orb_id: 1,
             resource: Resource::Iron,

@@ -167,6 +167,7 @@ fn the_chain_links_and_names_its_first_break() {
             orb_id: 1,
             tile: 4,
             kind: cfe::dop::ZoneKind::Extractor,
+            base: None,
         },
         1,
         vec![],

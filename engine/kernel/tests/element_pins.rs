@@ -163,7 +163,7 @@ fn under_a_sun(richness: (i64, i64), last_assay: u64, regenerators: usize) -> Co
     let mut committed = with_vein(richness, last_assay);
     committed.star = Some(cfe::thermal::StarClass::G);
     committed.orbs[0].zones = (0..regenerators)
-        .map(|tile| cfe::dop::Zone { tile: tile as u16, kind: cfe::dop::ZoneKind::Regenerator })
+        .map(|tile| cfe::dop::Zone { tile: tile as u16, kind: cfe::dop::ZoneKind::Regenerator, base: None })
         .collect();
     committed
 }

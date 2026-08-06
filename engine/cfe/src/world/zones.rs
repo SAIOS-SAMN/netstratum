@@ -31,12 +31,37 @@ impl World {
         {
             return Err(ActionRefused::ConditionUncrystallized { condition: 3 });
         }
+        // **#41 — THE LADDER'S THIRD RUNG, ENFORCED.** A minted kind
+        // builds on the base its mint declared, or on the one its
+        // channels infer. Where neither answers, the entry is lawful
+        // vocabulary that names a building nobody can raise — so the
+        // refusal lands HERE, at the verb, and the mint stays lawful.
+        //
+        // A fact of the chain, not a shape: what the fold holds decides
+        // it, so it can never move to a door.
+        let base = match kind {
+            ZoneKind::Minted(code) => {
+                let fold = crate::vocabulary::fold(self.chronicle(), crate::vocabulary::Axis::Zone);
+                let Some(entry) = fold.iter().find(|entry| entry.code == code) else {
+                    return Err(ActionRefused::ZoneKindUnknown { code });
+                };
+                match crate::vocabulary::zone_base(entry.base, &entry.binding).kind() {
+                    Some(base) => Some(base),
+                    None => return Err(ActionRefused::ZoneKindUnbuildable { code }),
+                }
+            }
+            // A compiled kind is its own base and declares none.
+            _ => None,
+        };
+        // The build is PRICED on the base — the binding modulates what
+        // a building does, never what it costs to raise.
+        let priced = base.unwrap_or(kind);
         let held = peel(&mut self.orbs, orb)
             .ok_or(ActionRefused::NoSuchOrb { orb })?;
         if held.zones.iter().any(|zone| zone.tile == tile) {
             return Err(ActionRefused::TileAlreadyZoned { tile });
         }
-        for (resource, cost) in kind.cost() {
+        for (resource, cost) in priced.cost() {
             let have = held.banked_amount(resource);
             if have < cost {
                 return Err(ActionRefused::CannotAfford {
@@ -46,13 +71,13 @@ impl World {
                 });
             }
         }
-        for (resource, cost) in kind.cost() {
+        for (resource, cost) in priced.cost() {
             held.bank(resource, -cost);
         }
-        held.zones.push(Zone { tile, kind });
+        held.zones.push(Zone { tile, kind, base });
         held.zones.sort_by_key(|zone| zone.tile);
         let orb_id = held.orb_id;
-        self.close(ClosureEvent::ZoneBuilt { orb_id, tile, kind }, actor);
+        self.close(ClosureEvent::ZoneBuilt { orb_id, tile, kind, base }, actor);
         Ok(())
     }
 }

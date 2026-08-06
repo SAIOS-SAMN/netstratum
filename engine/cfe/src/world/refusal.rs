@@ -75,6 +75,16 @@ pub enum ActionRefused {
     /// orb's temperature: matter has a phase, and a place has a heat.
     /// The same set bonds on a colder world.
     NotWorkableHere { element: [u8; 32] },
+    /// ZONE-VOCABULARY (#41) — no zone-axis entry in the FOLD carries
+    /// this code. A fact of the chain, not a shape: what the fold holds
+    /// grows by receipt, so this can never move to a door (the
+    /// `PracticeUnknown` family).
+    ZoneKindUnknown { code: u8 },
+    /// ZONE-VOCABULARY (#41) — the entry exists and names no BASE, so
+    /// it is vocabulary for a building nobody can raise. The ladder's
+    /// third rung, and it is lawful: the mint stands, the build does
+    /// not.
+    ZoneKindUnbuildable { code: u8 },
     /// ZONE-VOCABULARY (#41) — a base was declared on an axis that has
     /// no bases. Only a minted BUILDING modulates a standing kind.
     BaseOffAxis { axis: u8 },

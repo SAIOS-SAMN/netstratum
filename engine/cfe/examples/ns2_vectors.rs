@@ -17,8 +17,8 @@ fn main() {
     // biomass — and its rot90 twin at tiles 22, 45.
     let mut probe = ColonyOrb { orb_id: 2, name: "planted-a".into(), ..ColonyOrb::default() };
     probe.zones = vec![
-        Zone { tile: 10, kind: ZoneKind::Extractor },
-        Zone { tile: 21, kind: ZoneKind::Habitat },
+        Zone { tile: 10, kind: ZoneKind::Extractor, base: None },
+        Zone { tile: 21, kind: ZoneKind::Habitat, base: None },
     ];
     probe.banked = vec![
         (Resource::Iron, ratio(10, 1)),
@@ -26,8 +26,8 @@ fn main() {
     ];
     let mut twin = ColonyOrb { orb_id: 3, name: "planted-b".into(), ..ColonyOrb::default() };
     twin.zones = vec![
-        Zone { tile: 22, kind: ZoneKind::Extractor },
-        Zone { tile: 45, kind: ZoneKind::Habitat },
+        Zone { tile: 22, kind: ZoneKind::Extractor, base: None },
+        Zone { tile: 45, kind: ZoneKind::Habitat, base: None },
     ];
     twin.banked = probe.banked.clone();
 

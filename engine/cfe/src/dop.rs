@@ -1360,6 +1360,9 @@ pub fn zone_word(kind: ZoneKind) -> &'static str {
         ZoneKind::CryoArray => "cryo-array",
         ZoneKind::Resonator => "resonator",
         ZoneKind::Regenerator => "regenerator",
+        // #41: a minted kind's WORD lives in the fold, not the table.
+        // The chronicle names it; this answers only that it is one.
+        ZoneKind::Minted(_) => "minted",
     }
 }
 
@@ -1393,6 +1396,12 @@ pub enum ZoneKind {
     /// DEEPENING crystallized on the orb (condition 3 — the lattice
     /// understood): regeneration is a technology, not a birthright.
     Regenerator = 8,
+    /// **A MINTED BUILDING (#41)** — the fold code of a zone-axis entry
+    /// past the compiled table. Its economics are its BASE's, modulated
+    /// by its binding (`vocabulary::zone_base`), so they are read
+    /// through the World (which holds the chronicle) and never from the
+    /// compiled methods below.
+    Minted(u8),
 }
 /// **THE REFINEMENT LAW** (2026-08-05, on the operator's ruling that
 /// this codebase carries *too many constants — you aren't building
@@ -1458,13 +1467,46 @@ pub fn refinement_yield(tier: u32) -> Ratio {
 
 
 impl ZoneKind {
+    /// The wire reading, WHOLE: a compiled code names its kind, and
+    /// anything past the table is a MINTED kind carrying its own fold
+    /// code (#41). Validity of a minted code is the FOLD's business,
+    /// exactly as a practice's is — the wire only says which entry is
+    /// meant.
     pub fn from_wire(code: u8) -> Option<Self> {
-        Self::from_wire_const(code)
+        match Self::from_wire_const(code) {
+            Some(compiled) => Some(compiled),
+            None if code > ZONE_KINDS => Some(Self::Minted(code)),
+            None => None,
+        }
     }
 
-    /// The same reading, usable where a constant is being computed
-    /// ([`ZONE_KINDS`] counts the table with it). One match, two
-    /// callers — the codes are never written down twice.
+    /// The code this kind rides as — one byte, compiled or minted.
+    /// Replaces the `as u8` cast the compiled-only enum allowed.
+    pub fn wire(self) -> u8 {
+        match self {
+            Self::Extractor => 1,
+            Self::Habitat => 2,
+            Self::Smelter => 3,
+            Self::Synthesizer => 4,
+            Self::Encasement => 5,
+            Self::CryoArray => 6,
+            Self::Resonator => 7,
+            Self::Regenerator => 8,
+            Self::Minted(code) => code,
+        }
+    }
+
+    /// Is this a kind the table compiles, rather than one the chain
+    /// minted?
+    pub fn compiled(self) -> bool {
+        !matches!(self, Self::Minted(_))
+    }
+
+    /// **THE COMPILED TABLE ONLY** — and it must stay that way:
+    /// [`ZONE_KINDS`] counts the table by walking this until it
+    /// answers `None`, so a version that admitted minted codes would
+    /// never terminate. One match, two callers; the codes are never
+    /// written down twice.
     pub const fn from_wire_const(code: u8) -> Option<Self> {
         match code {
             1 => Some(Self::Extractor),
@@ -1498,6 +1540,14 @@ impl ZoneKind {
                 (Resource::Alloy, ratio(10, 1)),
                 (Resource::Diamond, ratio(5, 1)),
             ],
+            // #41: THE COMPILED TABLE HAS NO ANSWER FOR A MINTED KIND.
+            // Its economics are its base's, modulated by its binding,
+            // and the base lives in the FOLD — so the authority is
+            // `World::zone_economics`, which holds the chronicle. This
+            // answers the ground state so the method stays total; a
+            // caller reaching a minted kind here has asked the wrong
+            // object, and the build gate refuses before that can pay.
+            Self::Minted(_) => Vec::new(),
             // DERIVED: the shell's frame plus a double hearth — the
             // restoration engine is built from what the table already
             // prices.
@@ -1547,6 +1597,9 @@ impl ZoneKind {
                 let (_, rate) = Self::Extractor.yield_per_tick();
                 (ration, rate)
             }
+            // #41: the ground state — see `cost`. A minted kind yields
+            // through `World::zone_economics`, never here.
+            Self::Minted(_) => (Resource::Iron, ratio(0, 1)),
         }
     }
 
@@ -1578,6 +1631,8 @@ impl ZoneKind {
             Self::Resonator => vec![(Resource::Diamond, ratio(1, 4))],
             // DERIVED: the habitat's own life-support line.
             Self::Regenerator => Self::Habitat.upkeep_per_tick(),
+            // #41: the ground state — see `cost`.
+            Self::Minted(_) => Vec::new(),
         }
     }
 
@@ -1589,6 +1644,8 @@ impl ZoneKind {
             Self::Extractor | Self::Habitat | Self::Regenerator => ratio(1, 4),
             Self::Smelter | Self::Synthesizer | Self::Resonator => ratio(1, 1),
             Self::Encasement | Self::CryoArray => ratio(0, 1),
+            // #41: the ground state — see `cost`.
+            Self::Minted(_) => ratio(0, 1),
         }
     }
 
@@ -1606,6 +1663,30 @@ impl ZoneKind {
 pub struct Zone {
     pub tile: u16,
     pub kind: ZoneKind,
+    /// **#41: THE BASE A MINTED BUILDING WAS RAISED ON.** `None` for
+    /// every compiled kind, which is its own base.
+    ///
+    /// Committed state, and it has to be: the raze refunds half of what
+    /// the build spent, and the gate reads the PRIOR zone to price it.
+    /// A minted kind's base lives in the FOLD, which `admits` cannot
+    /// read — so the base is FIXED at build time, judged then, and read
+    /// from committed state ever after. Wire: a trailing byte on the
+    /// zone's own record (SEAL A — old readers stop at the kind).
+    pub base: Option<ZoneKind>,
+}
+
+impl Zone {
+    /// A compiled kind stands on itself.
+    pub fn compiled(tile: u16, kind: ZoneKind) -> Zone {
+        Zone { tile, kind, base: None }
+    }
+    /// **WHAT THIS ZONE COSTS AND REFUNDS** — the base's numbers where
+    /// one was raised, its own where it is compiled. One home for both
+    /// the emitter and the gate, so a build and its raze cannot price
+    /// the same building differently.
+    pub fn priced_as(&self) -> ZoneKind {
+        self.base.unwrap_or(self.kind)
+    }
 }
 
 /// The closures of the colony loop — completed transitions, the only
@@ -1630,7 +1711,16 @@ pub enum ClosureEvent {
     /// cannot be made.
     WorkClaimed { orb_id: u64, work: WorkId, witnesses: Vec<[u8; 32]> },
     ColonyFounded { orb_id: u64, name: String },
-    ZoneBuilt { orb_id: u64, tile: u16, kind: ZoneKind },
+    ZoneBuilt {
+        orb_id: u64,
+        tile: u16,
+        kind: ZoneKind,
+        /// #41: the compiled kind this build was PRICED against — the
+        /// base a minted kind modulates. `None` for a compiled kind,
+        /// which is its own base. The gate reads it because `admits`
+        /// judges from committed state and cannot resolve the fold.
+        base: Option<ZoneKind>,
+    },
     YieldCollected { orb_id: u64, resource: Resource, amount: Ratio },
     /// Collect settled a negative net from banked (02 §2.3).
     UpkeepSettled { orb_id: u64, resource: Resource, amount: Ratio },
@@ -2203,10 +2293,16 @@ impl ClosureEvent {
                 value.extend_from_slice(name.as_bytes());
                 tlv::put(1, &value, &mut out);
             }
-            Self::ZoneBuilt { orb_id, tile, kind } => {
+            Self::ZoneBuilt { orb_id, tile, kind, base } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.extend_from_slice(&tile.to_le_bytes());
-                value.push(*kind as u8);
+                value.push(kind.wire());
+                // #41: the base this build was priced against, trailing
+                // and optional — the gate reads it because it cannot
+                // read the fold.
+                if let Some(base) = base {
+                    value.push(base.wire());
+                }
                 tlv::put(2, &value, &mut out);
             }
             Self::YieldCollected { orb_id, resource, amount } => {
@@ -2747,7 +2843,13 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let tile = u16::from_le_bytes(value.get(8..10)?.try_into().ok()?);
                 let kind = ZoneKind::from_wire(*value.get(10)?)?;
-                Some(Self::ZoneBuilt { orb_id, tile, kind })
+                // #41: a byte past the kind is the base this build was
+                // priced against; the sealed form ends here.
+                let base = match value.get(11) {
+                    Some(code) => Some(ZoneKind::from_wire(*code)?),
+                    None => None,
+                };
+                Some(Self::ZoneBuilt { orb_id, tile, kind, base })
             }
             3 => {
                 let (orb_id, resource, amount) = amount_fields(value)?;
@@ -3532,7 +3634,12 @@ impl ColonyOrb {
         tlv::put(16, &header, &mut out);
         for zone in &self.zones {
             let mut value = zone.tile.to_le_bytes().to_vec();
-            value.push(zone.kind as u8);
+            value.push(zone.kind.wire());
+            // #41: the base a minted building was raised on, trailing
+            // and optional — its ABSENCE is the sealed pre-zone form.
+            if let Some(base) = zone.base {
+                value.push(base.wire());
+            }
             tlv::put(17, &value, &mut out);
         }
         for (resource, amount) in &self.banked {
@@ -3689,7 +3796,13 @@ impl ColonyOrb {
                 17 => {
                     let tile = u16::from_le_bytes(value.get(..2)?.try_into().ok()?);
                     let kind = ZoneKind::from_wire(*value.get(2)?)?;
-                    orb.zones.push(Zone { tile, kind });
+                    // #41: a byte past the kind is the raised base; the
+                    // sealed form ends exactly here and reads None.
+                    let base = match value.get(3) {
+                        Some(code) => Some(ZoneKind::from_wire(*code)?),
+                        None => None,
+                    };
+                    orb.zones.push(Zone { tile, kind, base });
                 }
                 18 => {
                     let resource = Resource::from_wire(*value.first()?)?;

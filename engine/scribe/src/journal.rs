@@ -275,6 +275,13 @@ fn zone_word(kind: ZoneKind) -> &'static str {
         ZoneKind::CryoArray => "cryo-lattice array",
         ZoneKind::Regenerator => "regenerator",
         ZoneKind::Resonator => "resonator",
+        // #41: a minted building's word lives in the FOLD; the journal
+        // is prose over receipts and names it generically rather than
+        // re-reading the chain here. (This keeps its own long-form
+        // spellings deliberately — "encasement shell" against the
+        // vocabulary's "encasement" — so it is not folded into
+        // `dop::zone_word` the way the lens and the CLI were.)
+        ZoneKind::Minted(_) => "minted works",
     }
 }
 
