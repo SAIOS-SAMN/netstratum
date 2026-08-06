@@ -13,6 +13,7 @@ cfe = { path = "../../engine/cfe" }
 ledger = { path = "../../engine/ledger" }
 mesh = { path = "../../engine/mesh" }
 conductor = { path = "../../engine/conductor" }
+kernel = { path = "../../engine/kernel" }
 num-bigint.workspace = true
 blake3.workspace = true
 scribe = { path = "../../engine/scribe" }

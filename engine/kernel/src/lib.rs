@@ -1406,6 +1406,61 @@ fn carrier_bound(work: &[u8]) -> Result<Ratio, WorkBroken> {
     }
 }
 
+/// **THE SPECTRUM — the cognition reading of one chronicle** (P3).
+/// Derived whole from the work the chain actually minted, through the
+/// same sealed verifier the gate runs (call-not-copy). Nothing is
+/// stored and nothing is scored: a reading is a projection of
+/// receipts, and nothing optimizes a reading (19_LENS §1 — the same
+/// law GROWTH-1 carries). The caller hands the opaque work payloads;
+/// cfe never imports the verifier (the opaque-payload law holds).
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct Spectrum {
+    /// Confirmed forge mints per rung, 0..=5.
+    pub forge_rungs: [u32; 6],
+    /// Corpus mints the measured table prices — and of those, blind.
+    pub corpus_measured: u32,
+    pub corpus_blind: u32,
+    /// Work that verifies under no current carrier price (retired or
+    /// unpriced) — held, never hidden.
+    pub unpriced: u32,
+    /// Work that does not verify at all.
+    pub broken: u32,
+    /// The weighted cognition mass: Σ carrier_bound over priced work.
+    pub weighted: Ratio,
+}
+
+pub fn spectrum_of<'a>(work: impl Iterator<Item = &'a [u8]>) -> Spectrum {
+    let mut read = Spectrum { weighted: ratio(0, 1), ..Default::default() };
+    for payload in work {
+        match verify_work_class(payload) {
+            Ok(WorkClass::Forge(difficulty)) => {
+                if let Some(rung) = difficulty.rung() {
+                    if let Some(held) = read.forge_rungs.get_mut(rung as usize) {
+                        *held += 1;
+                    }
+                    read.weighted = read.weighted.clone() + mint_bound(Some(rung));
+                }
+            }
+            Ok(WorkClass::Corpus { task_id }) => match corpus_weight(&task_id) {
+                Some(weight) => {
+                    read.corpus_measured += 1;
+                    if carrier_table::MEASURED
+                        .iter()
+                        .any(|(held, _, _, blind)| held == &task_id && *blind)
+                    {
+                        read.corpus_blind += 1;
+                    }
+                    read.weighted = read.weighted.clone() + weight;
+                }
+                None => read.unpriced += 1,
+            },
+            Ok(WorkClass::Volumetric(_)) => read.unpriced += 1,
+            Err(_) => read.broken += 1,
+        }
+    }
+    read
+}
+
 /// The measured weight of a confirmed corpus task, or `None` where
 /// the benchmark never confirmed it.
 pub fn corpus_weight(task_id: &[u8; 32]) -> Option<Ratio> {

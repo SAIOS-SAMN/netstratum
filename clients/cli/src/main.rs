@@ -2826,6 +2826,43 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         // GROWTH-1 — the six axes, carried whole. No aggregate: six
         // readings and no score, because collapsing them is the struck
         // C-gate under a sixth name.
+        // P3 — THE SPECTRUM: the cognition reading, derived whole from
+        // the work this chronicle actually minted; there is no score.
+        Some("spectrum") => {
+            let payloads: Vec<&[u8]> = world
+                .chronicle()
+                .receipts()
+                .iter()
+                .filter_map(|receipt| match &receipt.event {
+                    cfe::dop::ClosureEvent::DiscoveryMinted { work, .. } => {
+                        Some(work.as_slice())
+                    }
+                    _ => None,
+                })
+                .collect();
+            let read = kernel::spectrum_of(payloads.into_iter());
+            println!(
+                "{} the SPECTRUM — what this chain has actually solved (a reading, never a score)",
+                style.strong("◮")
+            );
+            for (rung, count) in read.forge_rungs.iter().enumerate() {
+                if *count > 0 {
+                    println!("  forge rung {rung}: {count}");
+                }
+            }
+            println!(
+                "  corpus: {} measured ({} blind) · {} unpriced · {} broken",
+                read.corpus_measured, read.corpus_blind, read.unpriced, read.broken
+            );
+            println!(
+                "  weighted cognition mass: {}",
+                style.strong(&amount(&read.weighted))
+            );
+            println!(
+                "  {}",
+                style.dim("the benchmark floor: 34 of 1243 confirmed, 1 of 283 blind — the space above is open")
+            );
+        }
         Some("growth") => match world.orb_by_id(*current) {
             None => println!(
                 "{} no colony yet — {} begins the story",

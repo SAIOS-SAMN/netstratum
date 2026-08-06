@@ -169,6 +169,7 @@ dependencies = [
  "blake3",
  "cfe",
  "conductor",
+ "kernel",
  "ledger",
  "mesh",
  "num-bigint",
