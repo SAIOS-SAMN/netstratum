@@ -1130,6 +1130,12 @@ impl Polity {
         // line's OWN science (relevance table) — a plasmic line never
         // forges iron; its advancement crosses by joint venture.
         let metabolism = self.spec.civilization.metabolism.clone();
+        // The smelter's gate, bound ONCE — the industrial arm and the
+        // forge hold below read the same pair, so the ratchet counts
+        // two dials, not four (it went red on the duplication and was
+        // right to).
+        let smelter_iron_gate = ratio(30, 1);
+        let smelter_bio_gate = ratio(10, 1);
         let industrial: Option<ZoneKind> = if can_synth
             && alloy >= ratio(20, 1)
             && bio >= ratio(15, 1)
@@ -1138,8 +1144,8 @@ impl Polity {
             Some(ZoneKind::Synthesizer)
         } else if can_smelt
             && smelters < 3
-            && iron >= ratio(30, 1)
-            && bio >= ratio(10, 1)
+            && iron >= smelter_iron_gate
+            && bio >= smelter_bio_gate
             && industry_relevant(&metabolism, ZoneKind::Smelter)
         {
             Some(ZoneKind::Smelter)
@@ -1159,8 +1165,8 @@ impl Polity {
         // settlement path.
         let forge_starved = can_smelt
             && smelters < 3
-            && iron >= ratio(30, 1)
-            && bio < ratio(10, 1)
+            && iron >= smelter_iron_gate
+            && bio < smelter_bio_gate
             && industry_relevant(&metabolism, ZoneKind::Smelter);
 
         // **THE SETTLEMENT GATES DERIVE** (P2, operator ruling
