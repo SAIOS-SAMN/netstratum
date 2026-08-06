@@ -7,6 +7,8 @@
 //! and exact ratios are the truth underneath, always shown as exact
 //! fractions (the C2R rule: "3/2", never 1.5).
 
+mod corpus;
+
 use std::io::{self, BufRead, Write};
 
 use cfe::dop::{ColonyOrb, Resource, ZoneKind};
@@ -610,6 +612,9 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 }
             }
         }
+        // THE CORPUS BENCH (#38a): cognition as gameplay. The economy's
+        // second head, finally reachable by a player.
+        Some("corpus") => corpus_command(world, words, style, *current),
         Some("genesis") => {
             let civilization = words.next();
             let axes = (
@@ -3810,6 +3815,7 @@ fn help(style: &Style) {
         ("charter <world> deal <n>", "ROUTE-1: charter a maintained lane — melt × (1−η), η from the pair's best instrument grade; upkeep draws at the year voice, unpaid lanes lapse"),
         ("eras · visit <stamp>", "HISTORY AS A PLACE: the record segmented by era folds, cleaves, confluences and successions — and `visit` reconstructs the world AS IT STOOD at any stamp by replaying the prefix; the past provably happened and is visitable"),
         ("dashboard · settlements · rings · elements · civs · contacts · routes", "THE ATLAS: your whole aspect, listable — the board overview; every settlement's zones and banks; the star's rings and thermal bands; the named element table and banked matter; the registered civilizations; aperture deals, councils and pens; the chartered lanes"),
+        ("corpus [<n>] · corpus list · corpus try [<n>] <move>… · corpus solve [<n>] <move>…", "THE CORPUS BENCH: the economy's second head, played. The bench serves the 34 ARC tasks the carrier law actually PRICES and pays a verified solve at the measured weight W = scarcity × complexity (the blind-spot task pays most, being 283/1). A proof is not an ANSWER, it is an EXPLANATION — a program that reproduces every training pair and then the test input — so `try` shows you exactly which pairs your rule explains and where it misses, and `solve` seals it. Moves: rot90 · rot180 · rot270 · fliph · flipv · transpose · recolor:0>1,7>2 · tile:3x3[:rows|cols|both][:…]. A task pays a world ONCE: cognition pays for what it first explained"),
         ("spectrum", "P3: the cognition reading — what this chain actually solved, weighed against the benchmark floor; a reading, never a score"),
         ("zone <tile> regen", "REGEN-1: the regenerator — restores the line's own ration at the extractor's rate (every number derives from the standing table); requires the DEEPENING (condition 3) crystallized on the orb"),
         ("prospect <stratum> · assay <prefix>", "THE GROUND: prospecting READS what your genesis seed always held at a stratum — one stratum, one reading, and no redraw can re-roll it; assaying DRAWS richness × elapsed from an opened vein. ECO-1: the draw TIRES the vein (priced against its hash-derived natural flow) and regenerators on the orb restore it between draws, so extraction has a long-run cost and tending the ground pays"),
@@ -4089,6 +4095,279 @@ fn scan(world: &mut World, style: &Style, prober: u64, exemplar: u64) {
 /// ELEMENT-GRAMMAR-1: the element id's short spoken form.
 fn hex_prefix(element: &[u8; 32]) -> String {
     element[..4].iter().map(|byte| format!("{byte:02x}")).collect()
+}
+
+/// **THE CORPUS BENCH (#38a)** — `corpus` serves a priced task,
+/// `corpus try` tests a hypothesis against the training pairs, and
+/// `corpus solve` seals the proof and mints what the carrier law
+/// prices it at.
+fn corpus_command(
+    world: &mut World,
+    mut words: std::str::SplitWhitespace,
+    style: &Style,
+    current: u64,
+) {
+    let dir = corpus::corpus_dir();
+    let served = corpus::priced(&dir);
+    if served.is_empty() {
+        println!(
+            "{} no priced corpus tasks under {} — the carrier table was measured over that \
+             archive; point {} at it",
+            style.bad("✗"),
+            style.strong(&dir.display().to_string()),
+            style.strong("NETSTRATUM_CORPUS")
+        );
+        return;
+    }
+    let color = !style.plain;
+    match words.next() {
+        // `corpus` / `corpus <n>` — serve a task.
+        None | Some("show") => show_task(&served, 0, style, color, world),
+        Some(word) if word.parse::<usize>().is_ok() => {
+            let at = word.parse::<usize>().expect("just parsed");
+            match at < served.len() {
+                true => show_task(&served, at, style, color, world),
+                false => println!(
+                    "{} the priced set holds {} tasks (0–{})",
+                    style.bad("✗"),
+                    style.strong(&served.len().to_string()),
+                    served.len() - 1
+                ),
+            }
+        }
+        Some("list") => {
+            println!(
+                "{} THE PRICED SET — {} tasks the carrier law pays for",
+                style.strong("✻"),
+                style.strong(&served.len().to_string())
+            );
+            for (at, held) in served.iter().enumerate() {
+                let earned = kernel::corpus_weight(&held.task_id);
+                println!(
+                    "  {:>2}  {} · {} train pairs{} · pays {}{}",
+                    at,
+                    style.strong(&hex_prefix(&held.task_id)),
+                    held.task.train.len(),
+                    match held.blind {
+                        true => format!(" · {}", style.strong("BLIND")),
+                        false => String::new(),
+                    },
+                    style.strong(
+                        &earned.map(|w| amount(&w)).unwrap_or_else(|| "—".into())
+                    ),
+                    match corpus::already_earned(world.chronicle(), &held.task_id) {
+                        true => format!(" · {}", style.dim("already earned here")),
+                        false => String::new(),
+                    }
+                );
+            }
+        }
+        Some(verb @ ("try" | "solve")) => {
+            let rest: Vec<&str> = words.collect();
+            let (at, program_words) = match rest.split_first() {
+                Some((first, tail)) if first.parse::<usize>().is_ok() => {
+                    (first.parse::<usize>().expect("just parsed"), tail)
+                }
+                _ => (0usize, rest.as_slice()),
+            };
+            if at >= served.len() {
+                println!("{} no task {at} in the priced set", style.bad("✗"));
+                return;
+            }
+            if program_words.is_empty() {
+                println!(
+                    "{} usage: {} — e.g. {}",
+                    style.bad("✗"),
+                    style.strong(&format!("corpus {verb} [<n>] <move> <move> …")),
+                    style.strong(&format!("corpus {verb} 0 tile:3x3"))
+                );
+                return;
+            }
+            match corpus::parse_program(program_words) {
+                Err(complaint) => println!("{} {complaint}", style.bad("✗")),
+                Ok(program) => match verb {
+                    "try" => try_program(&served[at], &program, style, color),
+                    _ => solve_task(world, &served[at], program, style, current),
+                },
+            }
+        }
+        Some(other) => println!(
+            "{} {other} is not a corpus verb — {} · {} · {} · {}",
+            style.bad("✗"),
+            style.strong("corpus [<n>]"),
+            style.strong("corpus list"),
+            style.strong("corpus try <move>…"),
+            style.strong("corpus solve <move>…")
+        ),
+    }
+}
+
+fn show_task(
+    served: &[corpus::Served],
+    at: usize,
+    style: &Style,
+    color: bool,
+    world: &World,
+) {
+    let held = &served[at];
+    let earned = kernel::corpus_weight(&held.task_id);
+    println!(
+        "{} CORPUS TASK {} of {} — {}{}",
+        style.strong("✻"),
+        style.strong(&at.to_string()),
+        served.len() - 1,
+        style.strong(&hex_prefix(&held.task_id)),
+        match held.blind {
+            true => format!(" · {}", style.strong("BLIND SPOT")),
+            false => String::new(),
+        }
+    );
+    println!(
+        "  {}",
+        style.dim(
+            "find the RULE, not the answer: a proof is a program that reproduces every \
+             training pair and then the test input"
+        )
+    );
+    for (n, pair) in held.task.train.iter().enumerate() {
+        println!("  {} {}", style.dim("train"), style.dim(&n.to_string()));
+        let (input, output) = corpus::pair_grids(pair);
+        for row in corpus::beside(input, output, "→", color) {
+            println!("    {row}");
+        }
+    }
+    println!("  {}", style.dim("test input"));
+    for row in corpus::paint(&held.task.test_in, color) {
+        println!("    {row}");
+    }
+    println!(
+        "  {} pays {} · {} to test a rule · {} to submit",
+        style.dim("↳"),
+        style.strong(&earned.map(|w| amount(&w)).unwrap_or_else(|| "—".into())),
+        style.strong(&format!("corpus try {at} <move>…")),
+        style.strong(&format!("corpus solve {at} <move>…"))
+    );
+    if corpus::already_earned(world.chronicle(), &held.task_id) {
+        println!(
+            "  {} {}",
+            style.warn("⚠"),
+            style.dim("this world has already earned from this task — a second mint pays nothing")
+        );
+    }
+}
+
+fn try_program(served: &corpus::Served, program: &solver_verify::Program, style: &Style, color: bool) {
+    let verdicts = corpus::train_verdicts(&served.task, program);
+    let held = verdicts.iter().filter(|held| **held).count();
+    for (n, (pair, ok)) in served.task.train.iter().zip(&verdicts).enumerate() {
+        let (input, _) = corpus::pair_grids(pair);
+        let got = solver_verify::run(program, input);
+        println!(
+            "  {} {} {}",
+            style.dim("train"),
+            style.dim(&n.to_string()),
+            match ok {
+                true => style.ok("✓ explained"),
+                false => style.bad("✗ not this rule"),
+            }
+        );
+        if !ok {
+            // SHOW THE MISS. A rule that fails is information, and a
+            // bench that only says "no" teaches nothing.
+            for row in corpus::beside(&got, &pair.output, "vs", color) {
+                println!("      {row}");
+            }
+        }
+    }
+    match held == verdicts.len() {
+        true => println!(
+            "  {} every training pair explained — {} to seal it and mint",
+            style.ok("✓"),
+            style.strong("corpus solve")
+        ),
+        false => println!(
+            "  {} {held}/{} explained — the rule has to hold for ALL of them",
+            style.warn("⚠"),
+            verdicts.len()
+        ),
+    }
+}
+
+fn solve_task(
+    world: &mut World,
+    served: &corpus::Served,
+    program: solver_verify::Program,
+    style: &Style,
+    current: u64,
+) {
+    // The bench refuses to seal a rule that does not explain the
+    // training pairs — the gate would refuse it anyway (TrainingMiss),
+    // and failing here says WHY rather than "the work did not verify".
+    let verdicts = corpus::train_verdicts(&served.task, &program);
+    if verdicts.iter().any(|held| !held) {
+        let held = verdicts.iter().filter(|h| **h).count();
+        println!(
+            "{} that rule explains {held}/{} training pairs — {} shows where it misses",
+            style.bad("✗"),
+            verdicts.len(),
+            style.strong("corpus try")
+        );
+        return;
+    }
+    // #38d — the once-per-task law, at the emitter (the staleness
+    // precedent): the chronicle is what knows, and cfe may not read a
+    // payload.
+    if corpus::already_earned(world.chronicle(), &served.task_id) {
+        println!(
+            "{} this world already earned from {} — cognition pays for what it FIRST explained",
+            style.bad("✗"),
+            style.strong(&hex_prefix(&served.task_id))
+        );
+        return;
+    }
+    let proof = corpus::seal(served, program);
+    let Some(payload) = corpus::payload(&proof) else {
+        println!("{} that proof does not encode — nothing was minted", style.bad("✗"));
+        return;
+    };
+    // THE AMOUNT IS THE KERNEL'S OWN READING, never a number chosen
+    // here: the same `carrier_bound` the gate enforces at I4.
+    let Some(earned) = kernel::corpus_weight(&served.task_id) else {
+        println!(
+            "{} that task carries no measured price — the carrier law refuses an unpriced mint",
+            style.bad("✗")
+        );
+        return;
+    };
+    let Some(amount_earned) = cfe::dop::NonNegative::new(earned.clone()) else {
+        println!("{} the measured price is not a lawful mint", style.bad("✗"));
+        return;
+    };
+    match world.mint_discovery_as(
+        SOVEREIGN,
+        current,
+        Resource::Crystal,
+        amount_earned,
+        payload,
+        &kernel::SealedWarrant,
+    ) {
+        Ok(()) => {
+            println!(
+                "{} the rule holds — {} crystal minted against VERIFIED work",
+                style.ok("✦"),
+                style.strong(&amount(&earned))
+            );
+            println!(
+                "  {} {}",
+                style.dim("↳"),
+                style.dim(
+                    "the proof rides the receipt whole: the gate re-hashed the task, re-applied \
+                     your program to every pair, and re-chained the certificate"
+                )
+            );
+        }
+        Err(refusal) => refuse(world, &refusal, style),
+    }
 }
 
 /// ELEMENT-CHEMISTRY (#37): did this world MAKE this identity? Read

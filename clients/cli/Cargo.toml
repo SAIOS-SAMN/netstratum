@@ -17,3 +17,8 @@ kernel = { path = "../../engine/kernel" }
 num-bigint.workspace = true
 blake3.workspace = true
 scribe = { path = "../../engine/scribe" }
+# THE CORPUS BENCH (#38): the CLI serves and seals corpus proofs, so it
+# holds the sealed math directly — a client above every tier, never an
+# upward import (the arrow law constrains the kernel and cfe, not the
+# clients that sit above them).
+solver-verify = { path = "../../engine/solver-verify" }
