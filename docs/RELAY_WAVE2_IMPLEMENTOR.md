@@ -1,9 +1,11 @@
 # RELAY — TO THE WAVE-2 IMPLEMENTOR NODE
 
-> **LANDED (2026-08-07):** E-APT-1 tags 108–109, kernel **0.21.0**,
-> `element_trade_step`, harness route clear green. Specialized
-> ElementRouteChartered + STAMP still open. Standing law remains
-> authority for Wave-3/4.
+> **LANDED Wave-2 (2026-08-07):** E-APT-1 tags 108–109, kernel **0.21.0**,
+> `element_trade_step`, harness route clear green.
+> **LANDED Wave-3/4 (2026-08-07):** ElementRouteChartered 110, SCHEMA_V6,
+> STAMP 111–113 + orb tag 73, kernel **0.22.0**, `stamp_market_step`,
+> O6.1/O6.2, harness stamp spot green. Standing law remains authority
+> for instruments / R3–R4 / observer STAMP.
 
 You continue the vertical slice after **Wave-1 `2109bf0`**. Read
 `RELAY_WAVE1_IMPLEMENTOR.md` for standing law (registers, SEAL B,

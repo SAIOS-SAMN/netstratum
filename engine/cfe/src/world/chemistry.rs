@@ -66,7 +66,17 @@ impl World {
         let Some(class) = self.star else {
             return Err(ActionRefused::NoStarCommissioned);
         };
-        let (spend, refined, yielded) = crate::dop::refine_recipe(&raw, class);
+        let (mut spend, refined, yielded) = crate::dop::refine_recipe(&raw, class);
+        // O6.2 T5 Crucible — office advantage (not a gate): half the
+        // spend. Derive half as (1+1); no new ratio dial (ratchet 112).
+        // Q-T2 coded default: T3 may still refine; Crucible only eases.
+        let crucible = self
+            .stations
+            .iter()
+            .any(|(_, s)| *s == Station::Crucible.as_wire());
+        if crucible {
+            spend /= ratio(1, 1) + ratio(1, 1);
+        }
         let have = held.element_amount(&raw);
         if have < spend {
             return Err(ActionRefused::CannotAffordElement {

@@ -2,8 +2,8 @@
 
 **Status:** PARTIAL LAND — operator directive 2026-08-07; **Wave-1
 `2109bf0`** REFINE-1; **Wave-2** E-APT-1 (tags 108–109) +
-`element_trade_step` NPC clear under `pair_melt` / ROUTE-1 topology.
-**Specialized ElementRouteChartered and E-MKT cargo still open.**
+`element_trade_step`; **Wave-3** ElementRouteChartered (tag 110) +
+SCHEMA_V6 + rail on charter. **E-MKT cargo still open.**
 Depends on GROUND STEP and composes with ROUTE-1, MARKET-1, MERCHANT-1,
 APERTURE-1, TREATY-1.
 
@@ -21,7 +21,7 @@ Today:
 | Closed carriers (iron…crystal) | Full zone economy + aperture trade |
 | Elements (tag 72) | Prospect/assay + refine (Wave-1) + **cross-world E-APT** (Wave-2) |
 | Converters | Smelter/synthesizer (closed carriers) + **ElementRefinery** (open matter) |
-| Routes | ROUTE-1 melt on carrier shipments; element routes **not landed** |
+| Routes | ROUTE-1 melt on carrier shipments; **ElementRouteChartered** + rail (Wave-3) |
 
 This is why play collapses toward “more iron / more zones.” Exhaustive
 play needs **matter diversity → refining chains → trade gradients →

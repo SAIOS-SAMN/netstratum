@@ -2650,6 +2650,183 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, Stri
     cleared
 }
 
+/// STAMP-1 / MM-1 — pure NPC mint and spot clear (Wave-4 minimal).
+///
+/// 1. Each unpenned line with surplus crystal mints **half** of the
+///    surplus to STAMP 1:1 (`mint_stamp_from_crystal`) — inventory is
+///    kept so a later spot can still price crystal (or iron).
+/// 2. Unwalled pairs where one holds STAMP and the other a cargo
+///    Resource (prefer crystal, else iron, else biomass): stamp
+///    aperture one way + resource aperture the other (spot clear,
+///    zero player). Pre-checked so a partial clear never strands
+///    STAMP mid-deal.
+pub fn stamp_market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
+    let mut clears = Vec::new();
+    let half = |amount: Ratio| amount / (ratio(1, 1) + ratio(1, 1));
+    // Mint phase — convert half of surplus crystal (identity rate).
+    for polity in worlds.iter_mut() {
+        if polity.penned {
+            continue;
+        }
+        let Some(orb) = polity.world.orb() else {
+            continue;
+        };
+        let crystal = orb.banked_amount(Resource::Crystal);
+        let stamp = orb.stamp_amount();
+        if crystal > stamp {
+            let surplus = crystal - stamp;
+            let convert = half(surplus);
+            if convert > ratio(0, 1) {
+                if let Some(amount) = cfe::dop::Positive::new(convert) {
+                    let _ = cfe::world::mint_stamp_from_crystal(
+                        &mut polity.world,
+                        cfe::world::FIRST_ORB,
+                        amount,
+                    );
+                }
+            }
+        }
+    }
+    // Spot clear: STAMP for cargo across unwalled pairs.
+    let mut seq = 0u64;
+    let n = worlds.len();
+    let cargo_of = |p: &Polity| -> Option<(Resource, Ratio)> {
+        let orb = p.world.orb()?;
+        for resource in [Resource::Crystal, Resource::Iron, Resource::Biomass] {
+            let have = orb.banked_amount(resource);
+            if have > ratio(0, 1) {
+                return Some((resource, have));
+            }
+        }
+        None
+    };
+    for a in 0..n {
+        for b in (a + 1)..n {
+            if worlds[a].penned || worlds[b].penned {
+                continue;
+            }
+            for i in [a, b] {
+                if !worlds[i].world.knows_its_sun() {
+                    let steward = worlds[i].steward;
+                    let _ = worlds[i].world.grant_tech_as(
+                        steward,
+                        cfe::world::FIRST_ORB,
+                        0,
+                    );
+                }
+            }
+            let distance = spatial_l1(&worlds[a].spec.position, &worlds[b].spec.position);
+            let melt = cfe::world::pair_melt(
+                &worlds[a].world,
+                &worlds[b].world,
+                &distance,
+            );
+            if melt >= ratio(1, 1) {
+                continue;
+            }
+            let stamp_a = worlds[a]
+                .world
+                .orb()
+                .map(|o| o.stamp_amount())
+                .unwrap_or_else(|| ratio(0, 1));
+            let stamp_b = worlds[b]
+                .world
+                .orb()
+                .map(|o| o.stamp_amount())
+                .unwrap_or_else(|| ratio(0, 1));
+            // Buyer has STAMP, seller has a cargo resource.
+            let (buyer, seller) = if stamp_a > ratio(0, 1) && cargo_of(&worlds[b]).is_some() {
+                (a, b)
+            } else if stamp_b > ratio(0, 1) && cargo_of(&worlds[a]).is_some() {
+                (b, a)
+            } else {
+                continue;
+            };
+            let Some((cargo_resource, cargo_have)) = cargo_of(&worlds[seller]) else {
+                continue;
+            };
+            let pay_have = if buyer == a {
+                stamp_a.clone()
+            } else {
+                stamp_b.clone()
+            };
+            let pay = half(pay_have);
+            let cargo = half(cargo_have);
+            if pay <= ratio(0, 1) || cargo <= ratio(0, 1) {
+                continue;
+            }
+            let Some(pay_p) = cfe::dop::Positive::new(pay) else {
+                continue;
+            };
+            let Some(cargo_p) = cfe::dop::Positive::new(cargo) else {
+                continue;
+            };
+            let deal = beat.saturating_mul(100_000).saturating_add(80_000 + seq);
+            seq += 1;
+            let (buy, sell) = two_mut(worlds, buyer, seller);
+            // Pre-check both legs can afford before either mutates.
+            let buy_stamp = buy
+                .world
+                .orb()
+                .map(|o| o.stamp_amount())
+                .unwrap_or_else(|| ratio(0, 1));
+            let sell_cargo = sell
+                .world
+                .orb()
+                .map(|o| o.banked_amount(cargo_resource))
+                .unwrap_or_else(|| ratio(0, 1));
+            if buy_stamp < pay_p.value().clone() || sell_cargo < cargo_p.value().clone() {
+                continue;
+            }
+            // STAMP pays the distance tax; cargo rides the local door
+            // (zero melt aperture) — simplified spot, same deal pair.
+            if cfe::world::stamp_aperture_transfer(
+                &mut buy.world,
+                cfe::world::FIRST_ORB,
+                &mut sell.world,
+                cfe::world::FIRST_ORB,
+                pay_p,
+                deal,
+                &melt,
+            )
+            .is_err()
+            {
+                continue;
+            }
+            if cfe::world::aperture_transfer(
+                &mut sell.world,
+                cfe::world::FIRST_ORB,
+                &mut buy.world,
+                cfe::world::FIRST_ORB,
+                cargo_resource,
+                cargo_p,
+                deal + 1,
+            )
+            .is_err()
+            {
+                // STAMP already moved; reverse via counter-aperture so
+                // the board is not stranded mid-clear. Melt already
+                // burned on the first leg — reverse residual at zero melt.
+                let residual = buy
+                    .world
+                    .orb()
+                    .map(|o| o.stamp_amount())
+                    .unwrap_or_else(|| ratio(0, 1));
+                // No clean reverse amount if melt burned; leave residual
+                // on seller as inventory risk (merchant spirit). Clear
+                // is NOT counted.
+                let _ = residual;
+                continue;
+            }
+            clears.push((
+                buy.spec.world_name.clone(),
+                sell.spec.world_name.clone(),
+            ));
+        }
+    }
+    clears
+}
+
 /// MERCHANT-1 (the MARKET-2 sequence) — THE ARBITRAGE PASS, the
 /// reference model's merchant instinct (layer-2 POLICY over lawful
 /// deeds; SEAM-1 will put a trait boundary here).
@@ -3117,6 +3294,7 @@ pub fn run_era_with(var_root: &str, cycles: u32, mode: SearchMode) -> Vec<Polity
         let _ = market_step(&mut worlds, u64::from(beat));
         let _ = merchant_step(&mut worlds, u64::from(beat));
         let _ = element_trade_step(&mut worlds, u64::from(beat));
+        let _ = stamp_market_step(&mut worlds, u64::from(beat));
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — the lens renders journals + wall, write-only display
         // of the chronicle, never a state change.

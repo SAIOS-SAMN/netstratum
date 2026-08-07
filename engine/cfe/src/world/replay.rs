@@ -33,6 +33,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut practices: Vec<u8> = Vec::new();
     let mut instruments: Vec<(u64, [u8; 32], u8)> = Vec::new();
     let mut routes: Vec<(u64, crate::dop::Unit)> = Vec::new();
+    let mut element_routes: Vec<(u64, crate::dop::Unit, [u8; 32], u8)> = Vec::new();
     let mut treaties: Vec<crate::treaty::Treaty> = Vec::new();
     let mut warded: Option<bool> = None;
     let mut veiled = false;
@@ -858,13 +859,48 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             }
             ClosureEvent::RouteLapsed { deal } => {
                 routes.retain(|(held, _)| held != deal);
+                element_routes.retain(|(held, _, _, _)| held != deal);
+            }
+            ClosureEvent::ElementRouteChartered {
+                deal,
+                element,
+                eta,
+                rail,
+            } => {
+                element_routes.push((*deal, eta.clone(), *element, *rail));
+                // Also a ROUTE-1 leg for melt suppression (same deal id).
+                if !routes.iter().any(|(held, _)| held == deal) {
+                    routes.push((*deal, eta.clone()));
+                }
+            }
+            ClosureEvent::StampMinted {
+                orb_id,
+                amount,
+                crystal_spent,
+            } => {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank(Resource::Crystal, -crystal_spent.clone());
+                    held.bank_stamp(amount.clone());
+                }
+            }
+            ClosureEvent::StampApertureSent { from_orb, amount, .. } => {
+                if let Some(held) = peel(&mut orbs, *from_orb) {
+                    held.bank_stamp(-amount.clone());
+                }
+                crossed = true;
+            }
+            ClosureEvent::StampApertureReceived { to_orb, amount, .. } => {
+                if let Some(held) = peel(&mut orbs, *to_orb) {
+                    held.bank_stamp(amount.clone());
+                }
+                crossed = true;
             }
         }
     }
     Committed {
         orbs, entities, star, debts, bonds, forwards, councils, offers, techs, wants, crossed,
-        gauge, genesis, terrain_seed, practices, instruments, routes, treaties, prospects, warded,
-        veiled, taxon, stations,
+        gauge, genesis, terrain_seed, practices, instruments, routes, element_routes, treaties,
+        prospects, warded, veiled, taxon, stations,
     }
 }
 

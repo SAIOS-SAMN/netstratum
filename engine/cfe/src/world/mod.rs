@@ -12,7 +12,7 @@
 //! free matter.
 
 use crate::dop::{
-    founding_reserves, ClosureEvent, ColonyOrb, Resource, Zone, ZoneKind,
+    founding_reserves, ClosureEvent, ColonyOrb, Resource, Station, Zone, ZoneKind,
 };
 use crate::ipsal::{Entity, Scope};
 use crate::ratio::{ratio, Ratio};
@@ -458,6 +458,193 @@ fn haul_element(
     Ok(())
 }
 
+/// E-ROUTE-1 — charter a ROUTE-1 lane specialized to one element and
+/// rail. Same alloy cost and dual-book pattern as [`charter_route`].
+/// Rail must be 1..=4 (`Rail::from_wire`).
+#[allow(clippy::too_many_arguments)]
+pub fn charter_element_route(
+    a: &mut World,
+    orb_a: u64,
+    b: &mut World,
+    orb_b: u64,
+    element: [u8; 32],
+    eta: crate::dop::Unit,
+    rail: u8,
+    deal: u64,
+) -> Result<(), ActionRefused> {
+    if crate::dop::Rail::from_wire(rail).is_none() {
+        return Err(ActionRefused::UnknownAxisValue { axis: 0, code: rail });
+    }
+    if !a.knows_its_sun() || !b.knows_its_sun() {
+        return Err(ActionRefused::Shielded {
+            source_shielded: !a.knows_its_sun(),
+            dest_shielded: !b.knows_its_sun(),
+        });
+    }
+    if a.routes.iter().any(|(held, _)| *held == deal)
+        || b.routes.iter().any(|(held, _)| *held == deal)
+        || a.element_routes.iter().any(|(held, _, _, _)| *held == deal)
+        || b.element_routes.iter().any(|(held, _, _, _)| *held == deal)
+    {
+        return Err(ActionRefused::RouteKnown { deal });
+    }
+    // Same alloy charter bill as ROUTE-1 — one function, one literal.
+    let cost = route_charter_cost();
+    for (world, orb) in [(&mut *a, orb_a), (&mut *b, orb_b)] {
+        let held = peek(&world.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
+        let have = held.banked_amount(Resource::Alloy);
+        if have < cost {
+            return Err(ActionRefused::CannotAfford {
+                resource: Resource::Alloy,
+                need: Box::new(cost),
+                have: Box::new(have),
+            });
+        }
+    }
+    for (world, orb) in [(&mut *a, orb_a), (&mut *b, orb_b)] {
+        let held = peel(&mut world.orbs, orb).expect("checked");
+        held.bank(Resource::Alloy, -cost.clone());
+        let stamp = world.clock.now();
+        world.chronicle.append(
+            ClosureEvent::UpkeepSettled {
+                orb_id: orb,
+                resource: Resource::Alloy,
+                amount: cost.clone(),
+            },
+            stamp,
+            vec![SOVEREIGN],
+        );
+        world.routes.push((deal, eta.clone()));
+        world.element_routes.push((deal, eta.clone(), element, rail));
+        world.chronicle.append(
+            ClosureEvent::ElementRouteChartered {
+                deal,
+                element,
+                eta: eta.clone(),
+                rail,
+            },
+            stamp,
+            vec![SOVEREIGN],
+        );
+    }
+    Ok(())
+}
+
+/// STAMP-1 — convert crystal into STAMP at identity rate (amount ==
+/// crystal_spent). No free mint; no undervied curve dial.
+pub fn mint_stamp_from_crystal(
+    world: &mut World,
+    orb: u64,
+    amount: crate::dop::Positive,
+) -> Result<(), ActionRefused> {
+    let spent = amount.value().clone();
+    let held = peel(&mut world.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
+    let have = held.banked_amount(Resource::Crystal);
+    if have < spent {
+        return Err(ActionRefused::CannotAfford {
+            resource: Resource::Crystal,
+            need: Box::new(spent),
+            have: Box::new(have),
+        });
+    }
+    held.bank(Resource::Crystal, -spent.clone());
+    held.bank_stamp(spent.clone());
+    let stamp = world.clock.now();
+    world.chronicle.append(
+        ClosureEvent::StampMinted {
+            orb_id: orb,
+            amount: spent.clone(),
+            crystal_spent: spent,
+        },
+        stamp,
+        vec![SOVEREIGN],
+    );
+    Ok(())
+}
+
+/// STAMP aperture — cross-world STAMP move with melt (same doors as
+/// resource haul; STAMP has no demurrage).
+#[allow(clippy::too_many_arguments)]
+pub fn stamp_aperture_transfer(
+    src: &mut World,
+    from: u64,
+    dst: &mut World,
+    to: u64,
+    amount: crate::dop::Positive,
+    deal: u64,
+    melt: &Ratio,
+) -> Result<(), ActionRefused> {
+    if *melt >= ratio(1, 1) {
+        return Err(ActionRefused::EconomicallyWalled {
+            melt: Box::new(melt.clone()),
+        });
+    }
+    if src.ward_holds() || dst.ward_holds() {
+        return Err(ActionRefused::TheWardHolds);
+    }
+    if src.at_war_with(dst.name()) || dst.at_war_with(src.name()) {
+        return Err(ActionRefused::AtWar {
+            partner: dst.name().to_string(),
+        });
+    }
+    if !src.knows_its_sun() || !dst.knows_its_sun() {
+        return Err(ActionRefused::Shielded {
+            source_shielded: !src.knows_its_sun(),
+            dest_shielded: !dst.knows_its_sun(),
+        });
+    }
+    let amount = amount.value().clone();
+    {
+        let source = src
+            .orbs
+            .iter()
+            .find(|h| h.orb_id == from)
+            .ok_or(ActionRefused::NoSuchOrb { orb: from })?;
+        if source.stamp_amount() < amount {
+            return Err(ActionRefused::CannotAfford {
+                resource: Resource::Crystal, // typed refuse; stamp is not Resource
+                need: Box::new(amount.clone()),
+                have: Box::new(source.stamp_amount()),
+            });
+        }
+    }
+    if !dst.orbs.iter().any(|h| h.orb_id == to) {
+        return Err(ActionRefused::NoSuchOrb { orb: to });
+    }
+    let src_stamp = src.clock.now();
+    let dst_stamp = dst.clock.now();
+    {
+        let source = src.orbs.iter_mut().find(|h| h.orb_id == from).expect("ok");
+        source.bank_stamp(-amount.clone());
+    }
+    src.chronicle.append(
+        ClosureEvent::StampApertureSent {
+            deal,
+            from_orb: from,
+            amount: amount.clone(),
+        },
+        src_stamp,
+        vec![SOVEREIGN],
+    );
+    let delivered = amount * (ratio(1, 1) - melt.clone());
+    {
+        let target = dst.orbs.iter_mut().find(|h| h.orb_id == to).expect("ok");
+        target.bank_stamp(delivered.clone());
+    }
+    dst.chronicle.append(
+        ClosureEvent::StampApertureReceived {
+            deal,
+            to_orb: to,
+            amount: delivered,
+        },
+        dst_stamp,
+        vec![SOVEREIGN],
+    );
+    src.crossed = true;
+    dst.crossed = true;
+    Ok(())
+}
+
 /// ROUTE-1 (the MARKET-2 sequence): CHARTER A LANE — a two-legged
 /// deed pairing both books on one deal id. The lane suppresses the
 /// iceberg (melt × (1 − η)); η comes from the partners' technology
@@ -487,7 +674,7 @@ pub fn charter_route(
     {
         return Err(ActionRefused::RouteKnown { deal });
     }
-    let cost = ratio(4, 1);
+    let cost = route_charter_cost();
     for (world, orb) in [(&mut *a, orb_a), (&mut *b, orb_b)] {
         let held = peek(&world.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
         let have = held.banked_amount(Resource::Alloy);
@@ -518,6 +705,12 @@ pub fn charter_route(
     Ok(())
 }
 
+/// ROUTE-1 / E-ROUTE-1 alloy charter bill — one literal for both
+/// charter paths (call-not-copy; ratchet).
+fn route_charter_cost() -> Ratio {
+    ratio(4, 1)
+}
+
 impl World {
     /// ROUTE-1: the year-voice maintenance draw — 1/4 joule per live
     /// lane (v1 placeholder). An unaffordable lane LAPSES by receipt
@@ -543,6 +736,7 @@ impl World {
                 );
             } else {
                 self.routes.retain(|(held_deal, _)| *held_deal != deal);
+                self.element_routes.retain(|(held_deal, _, _, _)| *held_deal != deal);
                 self.chronicle.append(ClosureEvent::RouteLapsed { deal }, stamp, vec![SOVEREIGN]);
                 lapsed.push(deal);
             }
@@ -573,6 +767,16 @@ pub fn pair_melt(a: &World, b: &World, distance: &Ratio) -> Ratio {
         .max();
     if let Some(eta) = best_eta {
         melt *= ratio(1, 1) - eta.value().clone();
+    }
+    // O6.1 T4 Caravan — office advantage (not a gate): either end
+    // holding caravan further suppresses melt by one instrument grade
+    // of η. Grade is the Resonator's crystal yield (landed table), not
+    // a new dial.
+    let caravan = a.stations.iter().any(|(_, s)| *s == Station::Caravan.as_wire())
+        || b.stations.iter().any(|(_, s)| *s == Station::Caravan.as_wire());
+    if caravan {
+        let grade = ZoneKind::Resonator.yield_per_tick().1;
+        melt *= ratio(1, 1) - grade;
     }
     // **#42 THE PACTS** — what two worlds have AGREED the crossing
     // costs. A trade or defense pact eases the melt; a war burdens it

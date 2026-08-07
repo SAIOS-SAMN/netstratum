@@ -149,6 +149,8 @@ pub struct Committed {
     /// ROUTE-1: this book's live lanes — (deal, eta); a PAIR exists
     /// where both books hold the deal.
     pub routes: Vec<(u64, crate::dop::Unit)>,
+    /// E-ROUTE-1: element-specialized lanes — (deal, η, element, rail).
+    pub element_routes: Vec<(u64, crate::dop::Unit, [u8; 32], u8)>,
     /// #42: this book's standing PACTS, seal order. A treaty is a PAIR
     /// object and neither world owns it — each carries its own leg, the
     /// aperture's deal-id pattern — so this is what THIS world has
@@ -259,6 +261,8 @@ pub struct World {
     pub(super) instruments: Vec<(u64, [u8; 32], u8)>,
     /// ROUTE-1: the live lanes (replay of the receipts).
     pub(super) routes: Vec<(u64, crate::dop::Unit)>,
+    /// E-ROUTE-1: element-specialized lanes (replay of the receipts).
+    pub(super) element_routes: Vec<(u64, crate::dop::Unit, [u8; 32], u8)>,
     /// #42: the standing pacts (replay of the receipts).
     pub(super) treaties: Vec<crate::treaty::Treaty>,
     pub(super) prospects: Vec<Prospected>,

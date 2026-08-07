@@ -206,6 +206,12 @@ fn main() {
                 "beat {beat}: ELEMENT CROSSING — {from} → {to}; open matter rides the void"
             );
         }
+        // STAMP MM-1: mint + spot clear (Wave-4).
+        for (buyer, seller) in conductor::stamp_market_step(&mut worlds, beat) {
+            println!(
+                "beat {beat}: STAMP SPOT — {buyer} ⇌ {seller}; crystal clears for STAMP"
+            );
+        }
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — journals + the Terminal Wall regenerate lens-side.
         if beat.is_multiple_of(scribe::journal::YEAR_TICKS) {

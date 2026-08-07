@@ -391,10 +391,12 @@ fn the_version_is_pinned() {
     //   admit six offices they previously refused as unknown.
     // 0.21.0 — E-APT-1 (2026-08-07, Wave-2): ElementApertureSent /
     //   ElementApertureReceived (tags 108–109) enter covered() and
-    //   element_move — the gate admits open-matter cross-world hauls
-    //   it previously left Unjudged. Claimed before bump (next free 22).
-    //   — the next free minor is 22.
-    assert_eq!(KERNEL_VERSION.to_string(), "0.21.0", "the gate is version-pinned");
+    //   element_move.
+    // 0.22.0 — STAMP + E-ROUTE (2026-08-07): StampMinted / StampAperture*
+    //   and ElementRouteChartered enter covered(); stamp conservation
+    //   and crystal convert identity. Next free minor 23.
+    //   — the next free minor is 23.
+    assert_eq!(KERNEL_VERSION.to_string(), "0.22.0", "the gate is version-pinned");
     assert_eq!(VERSION, KERNEL_VERSION.code(), "the wire carries the packed form");
     // ORDER IS PRESERVED: a chain cut under the old linear versions
     // compares BELOW every packed one, which is true — an earlier gate

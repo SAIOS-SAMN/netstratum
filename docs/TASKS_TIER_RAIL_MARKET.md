@@ -38,12 +38,12 @@ strand-adapter · isthmus/datum-adapter
 
 ---
 
-## Wave 2 — Rails R1–R4 as data  `! foundation`
+## Wave 2 — Rails R1–R4 as data  `partial land`
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
-| R2.1 | [ ] `Rail` type u8 1..=4 on routes + instruments | D0.5 | wire tags claimed first |
-| R2.2 | [ ] Default R1 on all local balances | R2.1 | replay |
+| R2.1 | [x] `Rail` type u8 1..=4 on element routes + wire | D0.5 | tags 110; `Rail::from_wire` |
+| R2.2 | [x] Default R1 (Hearth) on local element charters | R2.1 | SCHEMA_V6 replay |
 | R2.3 | [ ] Promotion deeds R1→R2 (aperture-linked) | R2.1, E-APT-1 | pins |
 | R2.4 | [ ] Feature-gated R3 strand adapter (no hard path dep) | R2.1 | `stamp-rail-strand` builds optional |
 | R2.5 | [ ] Feature-gated R4 isthmus/datum adapter | R2.1 | `stamp-rail-court` builds optional |
@@ -51,12 +51,12 @@ strand-adapter · isthmus/datum-adapter
 
 ---
 
-## Wave 3 — Element commerce  `! fun depth`
+## Wave 3 — Element commerce  `partial land`
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
 | E3.1 | [x] **E-APT-1** element aperture legs (id in value; conservation) | ground_step live | tags 108–109; element_move |
-| E3.2 | [~] **E-ROUTE-1** — Wave-2 reuses ROUTE-1 melt via `pair_melt` (cargo is E-APT); specialized ElementRouteChartered still open | E3.1, ROUTE-1 | melt+lane suppress live |
+| E3.2 | [x] **E-ROUTE-1** ElementRouteChartered (tag 110) + rail + SCHEMA_V6 | E3.1, ROUTE-1 | charter + melt via routes table |
 | E3.3 | [x] Conductor `element_trade_step` NPC | E3.1 | pure NPC clear in `wave1_era_pins` |
 | E3.4 | [x] **REFINE-1** ElementRefinery zone; derive rates from family/tier | 14 §5 | two seeds different chains |
 | E3.5 | [x] Conductor build prefers refinery when raw surplus | E3.4 | pin |
@@ -67,14 +67,14 @@ strand-adapter · isthmus/datum-adapter
 
 ---
 
-## Wave 4 — STAMP unit + spot  `! money`
+## Wave 4 — STAMP unit + spot  `partial land`
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
-| S4.1 | [ ] **STAMP-1** balances on orb/world; mint sources; transfer deed | D0.5 Q-S1 | pins; SEAL B |
-| S4.2 | [ ] Crystal→STAMP convert schedule (placeholder curve) | S4.1 | |
-| S4.3 | [ ] **BOOK-S** STAMP spot against Resource \| ElementId | S4.1, E3.6 | |
-| S4.4 | [ ] **MM-1** conductor `stamp_market_step` two-sided NPC quotes | S4.3 | **no player required for clears** |
+| S4.1 | [x] **STAMP-1** balances on orb (tag 73); mint + aperture deeds | D0.5 Q-S1 | tags 111–113; stamp_move; SEAL B |
+| S4.2 | [x] Crystal→STAMP identity convert (1:1; no curve dial) | S4.1 | `mint_stamp_from_crystal` |
+| S4.3 | [x] **BOOK-S** minimal STAMP spot vs Resource (crystal/iron/biomass) | S4.1 | stamp_market_step legs |
+| S4.4 | [x] **MM-1** conductor `stamp_market_step` pure NPC | S4.3 | `pure_npc_stamp_spot_clears` green |
 | S4.5 | [ ] CLI `stamp` verbs | S4.1 | |
 | S4.6 | [ ] Observer treasury includes STAMP | S4.1 | |
 
@@ -97,8 +97,8 @@ strand-adapter · isthmus/datum-adapter
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
-| O6.1 | [ ] T4 Caravan: route melt/capacity advantage + lapse office | E3.2, T1.x | |
-| O6.2 | [ ] T5 Crucible: refinery reserve advantage | E3.4, T1.x | |
+| O6.1 | [x] T4 Caravan: pair_melt suppress by Resonator grade η | E3.2, T1.x | melt × (1 − grade) |
+| O6.2 | [x] T5 Crucible: refine spend half (derive 1+1) | E3.4, T1.x | office advantage only |
 | O6.3 | [ ] T6 Exchange: only seated MM may list Share/Note/Fut/Perp | Wave 5, T1.x | |
 | O6.4 | [ ] T7 Assay: consilience challenge / slash path | E3.1 | |
 | O6.5 | [ ] T8 Vault: custody inventory + margin accounts | I5.x | |
@@ -135,14 +135,21 @@ strand-adapter · isthmus/datum-adapter
 ```
 [x] T1.1–T1.4 stations T4–T9 + NPC seats     ← Wave-1 2109bf0
 [x] E3.4–E3.5 REFINE-1 + NPC build           ← Wave-1 2109bf0
-[x] E3.1 + E3.3 element aperture + NPC trade ← Wave-2 (pair_melt lanes)
-[~] E3.2 specialized ElementRouteChartered   ← optional follow-on
-[ ] S4.1–S4.4 STAMP + spot + NPC MM          ← Wave-4
-[ ] R2.1–R2.3 rails R1–R2 only               ← open
+[x] E3.1 + E3.3 element aperture + NPC trade ← Wave-2 4686399
+[x] E3.2 ElementRouteChartered + SCHEMA_V6   ← Wave-3 this land
+[x] S4.1–S4.4 STAMP + spot + NPC MM          ← Wave-4 this land
+[x] R2.1–R2.2 Rail type + default R1         ← this land
+[x] O6.1–O6.2 Caravan/Crucible advantages    ← this land
+[ ] R2.3 promotion R1→R2                     ← open
+[ ] S4.5–S4.6 CLI + observer STAMP           ← open
 ```
 
 **Wave-2 land:** tags 108–109, kernel 0.21.0, `element_trade_step`,
-harness `pure_npc_element_route_clears` green. STAMP still ignored.
+harness `pure_npc_element_route_clears` green.
+
+**Wave-3/4 land:** tags 110–113, orb STAMP TLV 73, kernel **0.22.0**,
+SCHEMA_V6 element_routes, `stamp_market_step`, harness
+`pure_npc_stamp_spot_clears` green. Ratchet stays ≤112.
 
 ---
 

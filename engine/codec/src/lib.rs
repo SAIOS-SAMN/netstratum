@@ -65,6 +65,11 @@ pub const SCHEMA_V4: u8 = 4;
 /// treaties had.
 pub const SCHEMA_V5: u8 = 5;
 
+/// **SCHEMA v6 (Wave-3/4) — ELEMENT ROUTES.** Specialized element
+/// lanes ride the snapshot trail after treaties. A v5 blob ends before
+/// them and decodes with an empty element-route table (SEAL A).
+pub const SCHEMA_V6: u8 = 6;
+
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
 }
@@ -85,7 +90,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V5];
+    let mut out = vec![SCHEMA_V6];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -295,6 +300,14 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
             ratio::encode(factor, &mut out);
         }
     }
+    // Wave-3 E-ROUTE (v6 TRAILING RUN): element-specialized lanes.
+    put_u32(&mut out, committed.element_routes.len() as u32);
+    for (deal, eta, element, rail) in &committed.element_routes {
+        put_u64(&mut out, *deal);
+        ratio::encode(eta.value(), &mut out);
+        out.extend_from_slice(element);
+        out.push(*rail);
+    }
     out
 }
 
@@ -369,6 +382,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
     let schema = take.u8()?;
     if schema != SCHEMA_V1 && schema != SCHEMA_V2 && schema != SCHEMA_V3 && schema != SCHEMA_V4
         && schema != SCHEMA_V5
+        && schema != SCHEMA_V6
     {
         return None;
     }
@@ -613,9 +627,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
             .collect()
     };
 
-    // #42 (v5 TRAILING RUN): the pacts, read LAST — after every older
-    // schema's fields, so a v4 blob simply ends here holding none,
-    // which is what a world predating treaties held.
+    // #42 (v5 TRAILING RUN): the pacts after older fields.
     let mut treaties: Vec<cfe::treaty::Treaty> = Vec::new();
     if schema >= SCHEMA_V5 {
         for _ in 0..take.u32()? {
@@ -631,6 +643,19 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
                 terms.push((take.u8()?, take.ratio()?));
             }
             treaties.push(cfe::treaty::Treaty { deal, kind, partner, terms, sealed, term });
+        }
+    }
+
+    // Wave-3 (v6 TRAILING RUN): element-specialized lanes.
+    let mut element_routes = Vec::new();
+    if schema >= SCHEMA_V6 {
+        for _ in 0..take.u32()? {
+            let deal = take.u64()?;
+            let eta = cfe::dop::Unit::new(take.ratio()?)?;
+            let element = take.array32()?;
+            let rail = take.u8()?;
+            cfe::dop::Rail::from_wire(rail)?;
+            element_routes.push((deal, eta, element, rail));
         }
     }
 
@@ -655,6 +680,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         terrain_seed,
         instruments,
         routes,
+        element_routes,
         treaties,
         practices,
         prospects,

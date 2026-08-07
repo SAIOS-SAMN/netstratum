@@ -1,15 +1,15 @@
 # 32 — STAMP: unit of account, books, and self-sustaining markets
 
-**Status:** DESIGN — operator directive 2026-08-07. **Not landed.** Wave-1
-opened offices T6 (Exchange seat vocabulary + NPC seat path) and local
-element refine as preconditions; STAMP wire, balances, and NPC market
-makers remain **Wave-4** (`TASKS_TIER_RAIL_MARKET` S4.*,
-`RELAY_WAVE2_IMPLEMENTOR` defers STAMP until element routes clear).
-Establishes an **in-game currency** that is exact-rational, receipted,
-NPC-sustained, and optionally tradeable on **strand / datum / isthmus**
-at R3–R4 (`30_OFFICES_AND_RAILS`). Does not replace crystal (PoUW mint
-medium) or closed carriers (physical law). Does not bill real money per
-tick (`01_ECONOMY` / CHARTER split).
+**Status:** PARTIAL LAND — operator directive 2026-08-07. **Wave-4
+minimal:** orb STAMP (TLV 73), crystal→STAMP identity mint (tag 111),
+stamp aperture legs (112–113), kernel `stamp_move` **0.22.0**, conductor
+`stamp_market_step`, harness `pure_npc_stamp_spot_clears` green.
+Instruments (Share/Note/Fut/Perp), CLI verbs, observer treasury still
+open. Establishes an **in-game currency** that is exact-rational,
+receipted, NPC-sustained, and optionally tradeable on **strand / datum /
+isthmus** at R3–R4 (`30_OFFICES_AND_RAILS`). Does not replace crystal
+(PoUW mint medium) or closed carriers (physical law). Does not bill real
+money per tick (`01_ECONOMY` / CHARTER split).
 
 **Name:** **STAMP** — a unit of account whose truth is a **sealed
 receipt chain**, not a mined commodity fantasy. Plural: stamps.

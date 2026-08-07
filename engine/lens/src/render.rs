@@ -683,6 +683,32 @@ pub fn render_receipt(receipt: &Receipt) -> String {
                 ratio_str(amount)
             ),
         ),
+        E::ElementRouteChartered { deal, rail, .. } => (
+            "element_route_chartered",
+            format!("lane {deal} chartered for element cargo on rail R{rail}"),
+        ),
+        E::StampMinted { orb_id, amount, crystal_spent } => (
+            "stamp_minted",
+            format!(
+                "orb {orb_id} mints {} STAMP against {} crystal",
+                ratio_str(amount),
+                ratio_str(crystal_spent)
+            ),
+        ),
+        E::StampApertureSent { deal, from_orb, amount } => (
+            "stamp_aperture_sent",
+            format!(
+                "deal {deal}: orb {from_orb} dispatches {} STAMP across the void",
+                ratio_str(amount)
+            ),
+        ),
+        E::StampApertureReceived { deal, to_orb, amount } => (
+            "stamp_aperture_received",
+            format!(
+                "deal {deal}: orb {to_orb} receives {} STAMP",
+                ratio_str(amount)
+            ),
+        ),
         E::ApertureSent { deal, from_orb, resource, amount } => (
             "aperture_sent",
             format!(

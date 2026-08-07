@@ -9,7 +9,7 @@
 use cfe::dop::ZoneKind;
 use cfe::ratio::ratio;
 use cfe::world::World;
-use codec::{from_state_bytes, state_bytes, SCHEMA_V5};
+use codec::{from_state_bytes, state_bytes, SCHEMA_V6};
 
 /// A rich session: zones, ticks, a collection, a gauge shift, a raw
 /// want — enough committed surface to exercise the families that a
@@ -31,10 +31,10 @@ fn a_rich_world() -> World {
 fn the_state_round_trips_byte_exact() {
     let committed = a_rich_world().committed();
     let bytes = state_bytes(&committed);
-    // #42: v5 leads since the pacts joined the snapshot. Every older
-    // schema still READS — a v4 state decodes with no treaties, which
-    // is what a world predating them held.
-    assert_eq!(bytes[0], SCHEMA_V5, "the schema leads the bytes");
+    // Wave-3/4: v6 leads since element routes joined the snapshot.
+    // Every older schema still READS — a v5 state decodes with no
+    // element lanes, which is what a world predating them held.
+    assert_eq!(bytes[0], SCHEMA_V6, "the schema leads the bytes");
     let decoded = from_state_bytes(&bytes).expect("the canonical state decodes");
     assert_eq!(decoded, committed, "value round trip");
     assert_eq!(state_bytes(&decoded), bytes, "BYTE round trip — one state, one encoding");
@@ -53,7 +53,7 @@ fn the_empty_world_encodes() {
 fn a_future_schema_refuses() {
     let committed = World::new().committed();
     let mut bytes = state_bytes(&committed);
-    bytes[0] = SCHEMA_V5 + 1;
+    bytes[0] = SCHEMA_V6 + 1;
     assert!(
         from_state_bytes(&bytes).is_none(),
         "a schema this kernel does not know refuses — never a guess"

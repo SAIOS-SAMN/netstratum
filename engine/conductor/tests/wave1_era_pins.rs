@@ -13,7 +13,7 @@ use cfe::dop::{ClosureEvent, Station};
 use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
 use cfe::world::replay;
-use conductor::{element_trade_step, Polity, PolitySpec, Policy};
+use conductor::{element_trade_step, stamp_market_step, Polity, PolitySpec, Policy};
 use ledger::registry::{tier_of, Civilization, Registry, Tier};
 use ledger::Ledger;
 use std::fs;
@@ -286,9 +286,84 @@ fn pure_npc_element_route_clears() {
     );
 }
 
-/// Wave-4 target — STAMP spot clear. Stays ignored until S4/MM-1.
+/// Wave-4 exit — pure NPC STAMP mint + spot clear (S4 / MM-1).
+///
+/// Discovery mints crystal; `stamp_market_step` converts half surplus
+/// to STAMP 1:1 and clears STAMP for cargo (crystal/iron/biomass)
+/// across an unwalled pair. Witness: `StampMinted` + aperture legs,
+/// SEAL B on both books.
 #[test]
-#[ignore = "wave-4 S4/MM-1 — turns green when stamp_market_step clears a spot"]
 fn pure_npc_stamp_spot_clears() {
-    panic!("not yet: STAMP spot under pure NPC");
+    let root = scratch("stamp");
+    let registry = Registry::at(root.join("registry"));
+    let book = Ledger::at(root.join("worlds"));
+    let mut buyer = Polity::genesis(
+        line("Stampbuyer", "stampbuyer", "empiricist", "mineral"),
+        &registry,
+        &book,
+    );
+    let mut seller_spec = line("Stampseller", "stampseller", "expansionist", "mineral");
+    seller_spec.position = (ratio(8, 1), ratio(0, 1), ratio(0, 1));
+    let mut seller = Polity::genesis(seller_spec, &registry, &book);
+
+    let mut cleared_on = None;
+    for beat in 1u32..=96 {
+        let _ = buyer.cycle(&book, &registry);
+        let _ = seller.cycle(&book, &registry);
+        let mut pair = vec![buyer, seller];
+        let hits = stamp_market_step(&mut pair, u64::from(beat));
+        seller = pair.pop().expect("seller");
+        buyer = pair.pop().expect("buyer");
+        let minted = buyer.world.chronicle().receipts().iter().any(|r| {
+            matches!(r.event, ClosureEvent::StampMinted { .. })
+        }) || seller.world.chronicle().receipts().iter().any(|r| {
+            matches!(r.event, ClosureEvent::StampMinted { .. })
+        });
+        let received = buyer.world.chronicle().receipts().iter().any(|r| {
+            matches!(r.event, ClosureEvent::StampApertureReceived { .. })
+        }) || seller.world.chronicle().receipts().iter().any(|r| {
+            matches!(r.event, ClosureEvent::StampApertureReceived { .. })
+        });
+        if minted && (received || !hits.is_empty()) {
+            cleared_on = Some(beat);
+            break;
+        }
+    }
+    assert!(
+        cleared_on.is_some(),
+        "pure NPC must mint STAMP and clear a spot within 96 beats; \
+         buyer_stamp={:?} seller_stamp={:?} buyer_crystal={:?} seller_crystal={:?}",
+        buyer.world.orb().map(|o| o.stamp_amount()),
+        seller.world.orb().map(|o| o.stamp_amount()),
+        buyer.world.orb().map(|o| o.banked_amount(cfe::dop::Resource::Crystal)),
+        seller.world.orb().map(|o| o.banked_amount(cfe::dop::Resource::Crystal)),
+    );
+    let minted = buyer.world.chronicle().receipts().iter().any(|r| {
+        matches!(r.event, ClosureEvent::StampMinted { .. })
+    }) || seller.world.chronicle().receipts().iter().any(|r| {
+        matches!(r.event, ClosureEvent::StampMinted { .. })
+    });
+    assert!(minted, "StampMinted must stand after mint phase");
+    let sent = buyer.world.chronicle().receipts().iter().any(|r| {
+        matches!(r.event, ClosureEvent::StampApertureSent { .. })
+    }) || seller.world.chronicle().receipts().iter().any(|r| {
+        matches!(r.event, ClosureEvent::StampApertureSent { .. })
+    });
+    let received = buyer.world.chronicle().receipts().iter().any(|r| {
+        matches!(r.event, ClosureEvent::StampApertureReceived { .. })
+    }) || seller.world.chronicle().receipts().iter().any(|r| {
+        matches!(r.event, ClosureEvent::StampApertureReceived { .. })
+    });
+    assert!(sent, "StampApertureSent must stand after spot");
+    assert!(received, "StampApertureReceived must stand after spot");
+    assert_eq!(
+        replay(buyer.world.chronicle()),
+        buyer.world.committed(),
+        "buyer replay MATCHES"
+    );
+    assert_eq!(
+        replay(seller.world.chronicle()),
+        seller.world.committed(),
+        "seller replay MATCHES"
+    );
 }

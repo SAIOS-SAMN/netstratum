@@ -935,11 +935,11 @@ roster.
 
 | Doc | Role | State |
 |-----|------|--------|
-| `30_OFFICES_AND_RAILS.md` | T4–T9 offices + R1–R4 rails | **T-line partial land** (Wave-1); R-line still design |
-| `31_ELEMENT_COMMERCE.md` | Element routes, refineries, NPC trade | **REFINE-1 landed**; E-APT/E-ROUTE still design |
-| `32_STAMP_MARKET.md` | STAMP unit, instruments, NPC MM | Design only |
-| `TASKS_TIER_RAIL_MARKET.md` | Waves 0–8 + vertical slice | Wave-1 rows closed; Wave-2+ open |
-| `RELAY_WAVE2_IMPLEMENTOR.md` | Next-slice brief for implementors | **READ BEFORE coding Wave-2** |
+| `30_OFFICES_AND_RAILS.md` | T4–T9 offices + R1–R4 rails | **T-line land**; R1–R2 type land; R3–R4 open |
+| `31_ELEMENT_COMMERCE.md` | Element routes, refineries, NPC trade | REFINE + E-APT + E-ROUTE land; E-MKT open |
+| `32_STAMP_MARKET.md` | STAMP unit, instruments, NPC MM | **Spot + MM land**; instruments open |
+| `TASKS_TIER_RAIL_MARKET.md` | Waves 0–8 + vertical slice | Waves 1–4 partial; Wave 5+ open |
+| `RELAY_WAVE2_IMPLEMENTOR.md` | Slice brief (historical + Wave-3/4 note) | next: instruments / observer |
 
 ---
 
@@ -965,6 +965,12 @@ roster.
 **Wave-2 (2026-08-07):** E-APT-1 tags **108–109**, kernel **0.21.0**,
 `element_aperture_transfer` / `haul_element`, conductor
 `element_trade_step`, harness `pure_npc_element_route_clears` green.
-Melt via `pair_melt` (ROUTE-1 topology); specialized ElementRouteChartered
-and STAMP remain open. See `RELAY_WAVE2_IMPLEMENTOR.md`.
+Melt via `pair_melt` (ROUTE-1 topology).
+
+**Wave-3/4 (2026-08-07):** ElementRouteChartered tag **110**, `Rail`
+1..=4, SCHEMA_V6 `element_routes`, STAMP orb TLV **73** + tags
+**111–113**, kernel **0.22.0** `stamp_move`, conductor
+`stamp_market_step`, O6.1 Caravan melt grade + O6.2 Crucible half
+refine spend, harness `pure_npc_stamp_spot_clears` green. Ratchet ≤112.
+Still open: R2.3 promotion, instruments I5, CLI/observer STAMP, R3–R4.
 

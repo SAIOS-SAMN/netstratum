@@ -285,12 +285,16 @@
 //!         the same pair_melt law as resource hauls. No demurrage.)
 //!    109  ClosureEvent::ElementApertureReceived (WAVE-2 E-APT-1 —
 //!         destination leg: open matter arrives. Delivered = sent ×
-//!         (1−melt). Next free for NEW deeds: 110.)
-//!    107+ WAVE-1/2 claim ledger: offices T4–T9 (StationSeated 5–10);
-//!         REFINE-1 tag 107; E-APT tags 108–109. Next free: **110**.
-//!         (Historic staleness notes: free tags below the top include
-//!         14, 15, 56, 57, 58, 64, 66, 73, 83, 84, 87; 9 and 51 reserved;
-//!         65 retired forever.)
+//!         (1−melt).)
+//!    110  ClosureEvent::ElementRouteChartered (WAVE-2/3 E-ROUTE-1 —
+//!         ROUTE-1 lane specialized to an ElementId cargo + rail altitude.)
+//!    111  ClosureEvent::StampMinted (WAVE-4 STAMP-1 — crystal→STAMP
+//!         convert at identity rate; source crystal spent receipted.)
+//!    112  ClosureEvent::StampApertureSent (STAMP cross-world debit leg.)
+//!    113  ClosureEvent::StampApertureReceived (STAMP cross-world credit.)
+//!    107+ claim ledger through Wave-4 spot: next free **114**.
+//!         (Historic free tags below top: 14, 15, 56, 57, 58, 64, 66,
+//!         73, 83, 84, 87; 9 and 51 reserved; 65 retired forever.)
 //!   In-value practice codes (append-only): 1 the Austerity · 2 the Showpiece ·
 //!   3 the Restraint · 4 the Hoard · 5 the Overdrive (deep-end: adoption
 //!   gated on hardship ≥ 8 receipts). Placeholder names, operator
@@ -314,6 +318,35 @@ use crate::books::{kind_of, BookAccount, BookKind, BookView};
 use crate::literature::{Aspiration, WorkId};
 use crate::ratio::{self, ratio, Ratio};
 use crate::tlv;
+
+/// **R1–R4 settlement altitude** (30_OFFICES_AND_RAILS). Receipted on
+/// routes and instruments; never inferred from T-tier. Default **R1**.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[repr(u8)]
+pub enum Rail {
+    Hearth = 1,
+    Aperture = 2,
+    Strand = 3,
+    Court = 4,
+}
+
+impl Rail {
+    pub fn from_wire(byte: u8) -> Option<Rail> {
+        match byte {
+            1 => Some(Rail::Hearth),
+            2 => Some(Rail::Aperture),
+            3 => Some(Rail::Strand),
+            4 => Some(Rail::Court),
+            _ => None,
+        }
+    }
+    pub fn as_wire(self) -> u8 {
+        self as u8
+    }
+    pub const fn hearth() -> Rail {
+        Rail::Hearth
+    }
+}
 
 /// THE TWO OFFICES (`EQUATIONS` D5, `18` §2c′) as a TYPE, so the office
 /// can never be confused with the root ENTITY. `world::SOVEREIGN` is
@@ -2201,6 +2234,34 @@ pub enum ClosureEvent {
         element: [u8; 32],
         amount: Ratio,
     },
+    /// E-ROUTE-1 (tag 110) — a ROUTE-1 lane specialized to one element
+    /// cargo identity and a settlement rail (1..=4). Alloy charter cost
+    /// matches ROUTE-1; melt suppression still rides `pair_melt`.
+    ElementRouteChartered {
+        deal: u64,
+        element: [u8; 32],
+        eta: Unit,
+        rail: u8,
+    },
+    /// STAMP-1 (tag 111) — mint STAMP against spent crystal (identity
+    /// rate: stamp == crystal_spent). No free faucet.
+    StampMinted {
+        orb_id: u64,
+        amount: Ratio,
+        crystal_spent: Ratio,
+    },
+    /// STAMP aperture source leg (tag 112) — STAMP leaves this book.
+    StampApertureSent {
+        deal: u64,
+        from_orb: u64,
+        amount: Ratio,
+    },
+    /// STAMP aperture destination leg (tag 113) — STAMP arrives.
+    StampApertureReceived {
+        deal: u64,
+        to_orb: u64,
+        amount: Ratio,
+    },
     /// N4 (NS-2 §1.5) — the scanner's power draw, the ONE chronicle
     /// event of RQP: crystals left the probing orb's bank to hold the
     /// lens open. Deliberately blind to what was asked and what was
@@ -2817,6 +2878,32 @@ impl ClosureEvent {
                 value.extend_from_slice(element);
                 ratio::encode(amount, &mut value);
                 tlv::put(109, &value, &mut out);
+            }
+            Self::ElementRouteChartered { deal, element, eta, rail } => {
+                // deal ‖ element[32] ‖ eta ‖ rail
+                let mut value = deal.to_le_bytes().to_vec();
+                value.extend_from_slice(element);
+                ratio::encode(eta.value(), &mut value);
+                value.push(*rail);
+                tlv::put(110, &value, &mut out);
+            }
+            Self::StampMinted { orb_id, amount, crystal_spent } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                ratio::encode(amount, &mut value);
+                ratio::encode(crystal_spent, &mut value);
+                tlv::put(111, &value, &mut out);
+            }
+            Self::StampApertureSent { deal, from_orb, amount } => {
+                let mut value = deal.to_le_bytes().to_vec();
+                value.extend_from_slice(&from_orb.to_le_bytes());
+                ratio::encode(amount, &mut value);
+                tlv::put(112, &value, &mut out);
+            }
+            Self::StampApertureReceived { deal, to_orb, amount } => {
+                let mut value = deal.to_le_bytes().to_vec();
+                value.extend_from_slice(&to_orb.to_le_bytes());
+                ratio::encode(amount, &mut value);
+                tlv::put(113, &value, &mut out);
             }
             Self::CrystalDrawn { orb_id, amount } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
@@ -3466,6 +3553,50 @@ impl ClosureEvent {
                     amount,
                 })
             }
+            110 => {
+                let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
+                let (eta_r, used) = ratio::decode(value.get(40..)?)?;
+                let eta = Unit::new(eta_r)?;
+                let rail = *value.get(40 + used)?;
+                Rail::from_wire(rail)?;
+                Some(Self::ElementRouteChartered {
+                    deal,
+                    element,
+                    eta,
+                    rail,
+                })
+            }
+            111 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let (amount, used) = ratio::decode(value.get(8..)?)?;
+                let (crystal_spent, _) = ratio::decode(value.get(8 + used..)?)?;
+                Some(Self::StampMinted {
+                    orb_id,
+                    amount,
+                    crystal_spent,
+                })
+            }
+            112 => {
+                let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let from_orb = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let (amount, _) = ratio::decode(value.get(16..)?)?;
+                Some(Self::StampApertureSent {
+                    deal,
+                    from_orb,
+                    amount,
+                })
+            }
+            113 => {
+                let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let to_orb = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let (amount, _) = ratio::decode(value.get(16..)?)?;
+                Some(Self::StampApertureReceived {
+                    deal,
+                    to_orb,
+                    amount,
+                })
+            }
             55 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let (amount, _) = ratio::decode(value.get(8..)?)?;
@@ -3680,9 +3811,9 @@ impl ClosureEvent {
             }
             89 => {
                 let station = *value.first()?;
-                if station == 0 || station > 4 {
-                    return None;
-                }
+                // Wave-1: offices 1..=10 (progenitor…anchor). Refuse
+                // unknown rather than guess.
+                Station::from_wire(station)?;
                 Some(Self::StationSeated {
                     line: String::from_utf8(value.get(1..)?.to_vec()).ok()?,
                     station,
@@ -3884,6 +4015,10 @@ pub struct ColonyOrb {
     /// element-id-ascending (canonical order); zero entries dropped.
     /// Wire: orb entry tag 70 (SEAL A — old readers skip).
     pub elements: Vec<([u8; 32], Ratio)>,
+    /// STAMP-1 (32_STAMP_MARKET): unit-of-account balance on this orb.
+    /// Exact rational; zero encodes as ABSENT (one state, one encoding).
+    /// Wire: orb entry tag 73 (SEAL A — old readers skip).
+    pub stamp: Ratio,
     /// BOOK-1 (19_LENS §16): the books this orb MINTED, kind-ascending
     /// (canonical order). The charter's four are NOT here — they keep
     /// their landed fields and their landed wire entry; `books()`
@@ -3972,6 +4107,12 @@ impl ColonyOrb {
             let mut value = element.to_vec();
             ratio::encode(amount, &mut value);
             tlv::put(72, &value, &mut out);
+        }
+        // STAMP-1: unit-of-account balance — only when nonzero.
+        if self.stamp != ratio(0, 1) {
+            let mut value = Vec::new();
+            ratio::encode(&self.stamp, &mut value);
+            tlv::put(73, &value, &mut out);
         }
         // BOOK-1: minted books, kind-ascending. An orb that minted none
         // stays byte-identical to a pre-BOOK-1 one (one state, one
@@ -4088,6 +4229,10 @@ impl ColonyOrb {
                     let element: [u8; 32] = value.get(..32)?.try_into().ok()?;
                     let (amount, _) = ratio::decode(value.get(32..)?)?;
                     orb.elements.push((element, amount));
+                }
+                73 => {
+                    let (amount, _) = ratio::decode(value)?;
+                    orb.stamp = amount;
                 }
                 91 => {
                     let work: [u8; 32] = value.get(..32)?.try_into().ok()?;
@@ -4223,6 +4368,19 @@ impl ColonyOrb {
             }
         }
         self.elements.retain(|(_, amount)| amount != &ratio(0, 1));
+    }
+
+    /// STAMP-1: the unit-of-account balance on this orb.
+    pub fn stamp_amount(&self) -> Ratio {
+        self.stamp.clone()
+    }
+
+    /// STAMP-1: move STAMP (signed delta). Zero balances encode as absent.
+    pub fn bank_stamp(&mut self, amount: Ratio) {
+        self.stamp += amount;
+        if self.stamp == ratio(0, 1) {
+            self.stamp = ratio(0, 1);
+        }
     }
 
     /// How much of one input stands, as a share in `[0, 1]`.

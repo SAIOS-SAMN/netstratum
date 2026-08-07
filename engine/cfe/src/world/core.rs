@@ -315,6 +315,7 @@ impl World {
             practices: self.practices.clone(),
             instruments: self.instruments.clone(),
             routes: self.routes.clone(),
+            element_routes: self.element_routes.clone(),
             treaties: self.treaties.clone(),
             prospects: self.prospects.clone(),
             warded: self.warded,

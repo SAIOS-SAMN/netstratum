@@ -136,7 +136,7 @@ use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 /// (Amendments 0.11.0 through the current minor are recorded in the
 /// version ledger — `tests/conservation_pins.rs` — beside the
 /// NEXT-FREE RULE that assigns minors across lanes.)
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 21, patch: 0 };
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 22, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
@@ -433,7 +433,67 @@ pub fn admits(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
     appraisal_rule(prior, step)?;
     decay(prior, step)?;
     gauge_move(prior, next, step)?;
-    element_move(prior, next, step)
+    element_move(prior, next, step)?;
+    stamp_move(prior, next, step)
+}
+
+/// STAMP-1 conservation: total orb.stamp moves by exactly the deed's
+/// declared delta (mint positive, aperture send negative, receive
+/// positive). Neutral deeds hold the total still.
+fn stamp_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Refused> {
+    let declared = match &step.event {
+        ClosureEvent::StampMinted { amount, crystal_spent, .. } => {
+            if *amount < ratio(0, 1) || *crystal_spent < ratio(0, 1) {
+                return Err(Refused::ElementNotPositive {
+                    element: [0u8; 32],
+                    amount: Box::new(amount.clone()),
+                });
+            }
+            if *amount != *crystal_spent {
+                return Err(Refused::AssayExceedsVein {
+                    bound: Box::new(crystal_spent.clone()),
+                    claimed: Box::new(amount.clone()),
+                });
+            }
+            amount.clone()
+        }
+        ClosureEvent::StampApertureSent { amount, .. } => {
+            if *amount < ratio(0, 1) {
+                return Err(Refused::ElementNotPositive {
+                    element: [0u8; 32],
+                    amount: Box::new(amount.clone()),
+                });
+            }
+            -amount.clone()
+        }
+        ClosureEvent::StampApertureReceived { amount, .. } => {
+            if *amount < ratio(0, 1) {
+                return Err(Refused::ElementNotPositive {
+                    element: [0u8; 32],
+                    amount: Box::new(amount.clone()),
+                });
+            }
+            amount.clone()
+        }
+        _ => ratio(0, 1),
+    };
+    let before = prior
+        .orbs
+        .iter()
+        .fold(ratio(0, 1), |s, o| s + o.stamp.clone());
+    let after = next
+        .orbs
+        .iter()
+        .fold(ratio(0, 1), |s, o| s + o.stamp.clone());
+    let expected = before.clone() + declared;
+    if after != expected {
+        return Err(Refused::ConservationBroken {
+            resource: Resource::Crystal, // stamp is not Resource; crystal is the nearest law carrier
+            before: Box::new(before),
+            after: Box::new(after),
+        });
+    }
+    Ok(())
 }
 
 /// **INVARIANT — D4, THE REVOCATION LAW. The eclipse anchor, floored
@@ -1117,6 +1177,8 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::ElementRefined { .. }
         // E-APT-1 (tags 108–109): element-ledger legs, arm in element_move.
         | E::ElementApertureSent { .. } | E::ElementApertureReceived { .. }
+        | E::ElementRouteChartered { .. }
+        | E::StampMinted { .. } | E::StampApertureSent { .. } | E::StampApertureReceived { .. }
         | E::GenesisSealed { .. } | E::ProspectStruck { .. } | E::LineSucceeded { .. }
         | E::TechLicensed { .. } | E::InstrumentForged { .. } | E::RouteChartered { .. }
         | E::OfferPosted { .. } | E::BondSealed { .. }
@@ -1320,6 +1382,18 @@ fn admitted_deltas(
         E::ApertureReceived { resource, amount, .. } => {
             non_negative(*resource, amount)?;
             vec![(*resource, amount.clone())]
+        }
+        // STAMP-1: crystal spent for identity mint — resource debit only;
+        // STAMP balance is judged in stamp_move.
+        E::StampMinted { crystal_spent, amount, .. } => {
+            non_negative(Resource::Crystal, crystal_spent)?;
+            if *amount != *crystal_spent {
+                return Err(Refused::AssayExceedsVein {
+                    bound: Box::new(crystal_spent.clone()),
+                    claimed: Box::new(amount.clone()),
+                });
+            }
+            vec![(Resource::Crystal, -crystal_spent.clone())]
         }
         // — mints (the sign lives at I4, order preserved for the
         //   landed pins) —
@@ -1996,6 +2070,8 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // orb's matter converts, no line is keyed.
         | E::ElementRefined { .. }
         | E::ElementApertureSent { .. } | E::ElementApertureReceived { .. }
+        | E::ElementRouteChartered { .. }
+        | E::StampMinted { .. } | E::StampApertureSent { .. } | E::StampApertureReceived { .. }
         // #42: a treaty is WORLD-layer. It is keyed on the pair, and
         // the pair is two worlds — not a line's identity (a pact
         // outlives whoever signed it) and not one place.
@@ -2069,7 +2145,8 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // chartered parameter it most resembles.
         | E::TreatySealed { .. } | E::TreatyStruck { .. }
         | E::ElderWarded { .. } | E::VeilDrawn { .. } | E::InstrumentForged { .. }
-        | E::RouteChartered { .. } | E::OfferPosted { .. } | E::OfferCountered { .. } | E::LineSucceeded { .. }
+        | E::RouteChartered { .. } | E::ElementRouteChartered { .. }
+        | E::OfferPosted { .. } | E::OfferCountered { .. } | E::LineSucceeded { .. }
         // KERNEL-TAXON: the drafted Build-class arm coder-03 named for
         // their #42 — unenforced until their covered() entry + witness.
         | E::TaxonSealed { .. }
@@ -2119,6 +2196,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // form — Collect, exactly as the assay and the gem.
         | E::ElementRefined { .. }
         | E::ElementApertureSent { .. } | E::ElementApertureReceived { .. }
+        | E::StampMinted { .. } | E::StampApertureSent { .. } | E::StampApertureReceived { .. }
         // U1: the discovery mint settles banked value against verified
         // work — Collect, like the yield it banks beside. Ratified by
         // the U1 witnesses as it enters covered().
