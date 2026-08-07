@@ -149,6 +149,12 @@ pub struct Committed {
     /// ROUTE-1: this book's live lanes — (deal, eta); a PAIR exists
     /// where both books hold the deal.
     pub routes: Vec<(u64, crate::dop::Unit)>,
+    /// #42: this book's standing PACTS, seal order. A treaty is a PAIR
+    /// object and neither world owns it — each carries its own leg, the
+    /// aperture's deal-id pattern — so this is what THIS world has
+    /// agreed to, and the partner's book carries the mirror.
+    /// Replay-rebuilt; expiry is read from the clock, never stored.
+    pub treaties: Vec<crate::treaty::Treaty>,
     /// PRACTICE-1: the receipted disciplines, adoption order.
     pub practices: Vec<u8>,
     /// ELEMENT-GRAMMAR-1 (14 §3): the opened veins — the working
@@ -253,6 +259,8 @@ pub struct World {
     pub(super) instruments: Vec<(u64, [u8; 32], u8)>,
     /// ROUTE-1: the live lanes (replay of the receipts).
     pub(super) routes: Vec<(u64, crate::dop::Unit)>,
+    /// #42: the standing pacts (replay of the receipts).
+    pub(super) treaties: Vec<crate::treaty::Treaty>,
     pub(super) prospects: Vec<Prospected>,
     /// WARDEN-1a: the elder's reverse shield (replay of the receipts).
     pub(super) warded: Option<bool>,

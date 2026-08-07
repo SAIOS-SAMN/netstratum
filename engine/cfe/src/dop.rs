@@ -266,7 +266,14 @@
 //!         gem carrying away exactly the sum. The receipt names the
 //!         members and the gem; every quantity re-derives from
 //!         `almanac::recipe_of`)
-//!         — the next free tag outside reservations is 105. (This line
+//!    105  ClosureEvent::TreatySealed (#42 — the political spectrum:
+//!         trade, defense, peace and war as one co-signed pairwise
+//!         charter over the PAIR channels. The kind is the sign of what
+//!         the terms do, and peace/war displace each other.)
+//!    106  ClosureEvent::TreatyStruck (#42 — a pact ends: broken by the
+//!         partner's contrary pact, or renounced. Expiry needs no
+//!         receipt — a term runs out by the clock, like a bond's.)
+//!         — the next free tag outside reservations is 107. (This line
 //!         read "90" until 2026-08-05 and was STALE: tag 90 was taken by
 //!         SovereignUnionSealed after it was written, and a mint drafted
 //!         onto 90 shadowed that deed's decoder arm — every sovereign
@@ -1818,6 +1825,25 @@ pub enum ClosureEvent {
     /// fourfold band of the seed, anchored so charters cannot walk);
     /// WHO may charter is the T0 standing gate, the mint's own law.
     ParameterChartered { key: u8, value: Ratio },
+    /// **TREATIES (tag 105, #42) — THE POLITICAL SPECTRUM.** One
+    /// world's leg of a co-signed pairwise charter: the kind is the
+    /// politics (trade · defense · peace · war), the terms bind the
+    /// PAIR channels, and `term` is how long it stands (0 = until
+    /// broken, the bond's shape). Both books carry their own leg, the
+    /// aperture's deal-id pattern — neither world owns the pact.
+    TreatySealed {
+        deal: u64,
+        kind: u8,
+        partner: String,
+        terms: Vec<(u8, Ratio)>,
+        term: u64,
+    },
+    /// **TREATIES (tag 106, #42)** — a standing pact ENDS. `broken`
+    /// separates the two ways: a pact struck down by the partner's
+    /// contrary pact (peace over war, war over peace) is BROKEN and
+    /// posts against whoever did it; one renounced by its own holder
+    /// is not.
+    TreatyStruck { deal: u64, partner: String, broken: bool },
     /// **ELEMENT-CHEMISTRY (tag 104, #37) — MATTER BONDS.** The
     /// almanac's first consumer: a set of banked elements whose lanes
     /// saturate bonds into a GEM, each member spending its lane's
@@ -2417,6 +2443,24 @@ impl ClosureEvent {
                 ratio::encode(value, &mut bytes);
                 tlv::put(103, &bytes, &mut out);
             }
+            Self::TreatySealed { deal, kind, partner, terms, term } => {
+                let mut value = deal.to_le_bytes().to_vec();
+                value.push(*kind);
+                value.extend_from_slice(&term.to_le_bytes());
+                value.push(terms.len() as u8);
+                for (channel, factor) in terms {
+                    value.push(*channel);
+                    ratio::encode(factor, &mut value);
+                }
+                value.extend_from_slice(partner.as_bytes());
+                tlv::put(105, &value, &mut out);
+            }
+            Self::TreatyStruck { deal, partner, broken } => {
+                let mut value = deal.to_le_bytes().to_vec();
+                value.push(u8::from(*broken));
+                value.extend_from_slice(partner.as_bytes());
+                tlv::put(106, &value, &mut out);
+            }
             Self::GemCompounded { orb_id, members, gem } => {
                 // orb ‖ gem ‖ members — the member count is the
                 // remainder over 32, so no length prefix is needed and
@@ -2997,6 +3041,31 @@ impl ClosureEvent {
                 let (chartered, used) = ratio::decode(value.get(1..)?)?;
                 (1 + used == value.len())
                     .then_some(Self::ParameterChartered { key, value: chartered })
+            }
+            105 => {
+                let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let kind = *value.get(8)?;
+                // The kind must NAME a pact — refuse, never guess.
+                crate::treaty::TreatyKind::from_wire(kind)?;
+                let term = u64::from_le_bytes(value.get(9..17)?.try_into().ok()?);
+                let count = *value.get(17)? as usize;
+                let mut at = 18usize;
+                let mut terms = Vec::with_capacity(count);
+                for _ in 0..count {
+                    let channel = *value.get(at)?;
+                    at += 1;
+                    let (factor, used) = ratio::decode(value.get(at..)?)?;
+                    at += used;
+                    terms.push((channel, factor));
+                }
+                let partner = String::from_utf8(value.get(at..)?.to_vec()).ok()?;
+                Some(Self::TreatySealed { deal, kind, partner, terms, term })
+            }
+            106 => {
+                let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let broken = *value.get(8)? != 0;
+                let partner = String::from_utf8(value.get(9..)?.to_vec()).ok()?;
+                Some(Self::TreatyStruck { deal, partner, broken })
             }
             104 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

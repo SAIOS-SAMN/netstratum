@@ -99,7 +99,7 @@ fn the_spine_walks_and_reloads_whole() {
 
     let genesis = arbor.extend(coord(0), &bytes_a, None).expect("genesis").clone();
     assert_eq!(genesis.parent, [0u8; 32], "genesis is parentless");
-    assert_eq!(genesis.schema, codec::SCHEMA_V4, "the record repeats the blob's form");
+    assert_eq!(genesis.schema, codec::SCHEMA_V5, "the record repeats the blob's form");
     assert_eq!(genesis.kernel, kernel::VERSION);
     assert!(!genesis.judged, "genesis is honestly unjudged");
 
@@ -303,7 +303,11 @@ fn the_record_speaks_the_blobs_schema() {
         genesis.schema, bytes[0],
         "the record's schema is the blob's leading byte, never a constant"
     );
-    assert_eq!(genesis.schema, codec::SCHEMA_V4, "the codec emits v4 today — RECEIPT AUTHORITY added the magnitude run");
+    assert_eq!(
+        genesis.schema,
+        codec::SCHEMA_V5,
+        "the codec emits v5 today — #42 appended the standing pacts"
+    );
 }
 
 /// THE ADOPTION DOOR (#36): a played, pre-chain world enters the

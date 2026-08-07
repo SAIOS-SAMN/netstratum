@@ -330,7 +330,8 @@ fn the_version_is_pinned() {
     //   0.16.0 — claimed and landed here (ECO-1, this ledger).
     //   0.17.0 — claimed and landed here (ELEMENT-CHEMISTRY, below).
     //   0.18.0 — claimed and landed here (ZONE VOCABULARY, below).
-    //   — the next free minor is 19.
+    //   0.19.0 — claimed and landed here (TREATIES, below).
+    //   — the next free minor is 20.
     // 0.14.0 — THE CORPUS PRICES (2026-08-06): the ratified carrier
     //   pricing lands with its measured table — a benchmark-confirmed
     //   corpus solve mints at W = scarcity × VisitedNodes₃/word_len
@@ -377,7 +378,13 @@ fn the_version_is_pinned() {
     //   MINOR: the gate prices a build it previously priced at the
     //   compiled table alone. Sealed chains carry no base, read as the
     //   kind's own, and judge exactly as they always did.
-    assert_eq!(KERNEL_VERSION.to_string(), "0.18.0", "the gate is version-pinned");
+    // 0.19.0 — TREATIES (2026-08-07, #42): tags 105 and 106 covered —
+    //   the political spectrum as one co-signed pairwise charter.
+    //   Banked-neutral: a pact re-rules what a CROSSING costs and moves
+    //   nothing by itself, so {I2 containment, I3 exactness} complete
+    //   both deeds and the haul that later crosses is the conserved
+    //   one. MINOR: the gate admits what was Unjudged.
+    assert_eq!(KERNEL_VERSION.to_string(), "0.19.0", "the gate is version-pinned");
     assert_eq!(VERSION, KERNEL_VERSION.code(), "the wire carries the packed form");
     // ORDER IS PRESERVED: a chain cut under the old linear versions
     // compares BELOW every packed one, which is true — an earlier gate

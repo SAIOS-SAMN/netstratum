@@ -33,6 +33,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut practices: Vec<u8> = Vec::new();
     let mut instruments: Vec<(u64, [u8; 32], u8)> = Vec::new();
     let mut routes: Vec<(u64, crate::dop::Unit)> = Vec::new();
+    let mut treaties: Vec<crate::treaty::Treaty> = Vec::new();
     let mut warded: Option<bool> = None;
     let mut veiled = false;
     let mut taxon: Option<(u8, u8)> = None;
@@ -268,6 +269,47 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             }
             // INCURSION-1a: a universe-ledger event — world replay
             // ignores it (the EraAnnexed precedent, explicit no-op).
+            // #42: a pact enters this book. Sealing a kind that
+            // DISPLACES another strikes that other down first — peace
+            // ends a war, war breaks a peace — so the register can
+            // never hold both at once and replay needs no second rule
+            // to say so.
+            ClosureEvent::TreatySealed { deal, kind, partner, terms, term } => {
+                if let Some(kind) = crate::treaty::TreatyKind::from_wire(*kind) {
+                    if let Some(displaced) = kind.displaces() {
+                        treaties.retain(|held| {
+                            !(held.partner == *partner && held.kind == displaced)
+                        });
+                    }
+                    treaties.push(crate::treaty::Treaty {
+                        deal: *deal,
+                        kind,
+                        partner: partner.clone(),
+                        terms: terms.clone(),
+                        sealed: receipt.stamp,
+                        term: *term,
+                    });
+                }
+            }
+            // #42: the strike carries WHETHER it was a breach, so the
+            // load posts HERE and not at the seal that caused it.
+            //
+            // Found by the replay pin: the verb strikes the displaced
+            // pact in its OWN receipt, BEFORE sealing the new one, so
+            // by the time replay saw the seal the peace was already
+            // gone and the breach was invisible. Live charged it,
+            // replay did not — a SEAL B split. The receipt already
+            // knew: `broken` is the flag, and reading it here makes
+            // the two definitions agree by construction.
+            ClosureEvent::TreatyStruck { deal, partner, broken } => {
+                treaties.retain(|held| !(held.deal == *deal && held.partner == *partner));
+                if *broken {
+                    let load = crate::dop::commensurate_weight(Resource::Iron);
+                    if let Some(orb) = orbs.first_mut() {
+                        orb.severance_load += load;
+                    }
+                }
+            }
             ClosureEvent::IncursionStruck { .. } => {}
             ClosureEvent::ElderWarded {} => warded = Some(false),
             ClosureEvent::WardLifted { .. } => warded = Some(true),
@@ -786,7 +828,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     }
     Committed {
         orbs, entities, star, debts, bonds, forwards, councils, offers, techs, wants, crossed,
-        gauge, genesis, terrain_seed, practices, instruments, routes, prospects, warded,
+        gauge, genesis, terrain_seed, practices, instruments, routes, treaties, prospects, warded,
         veiled, taxon, stations,
     }
 }

@@ -340,6 +340,34 @@ pub fn render_receipt(receipt: &Receipt) -> String {
             format!("{} closed to writing", &hex(&kind.0)[..8]),
         ),
         E::ZoneBuilt { tile, kind, .. } => ("zone_built", format!("{} @ {tile}", zone_name(*kind))),
+        E::TreatySealed { deal, kind, partner, terms, term } => (
+            "treaty_sealed",
+            format!(
+                "{} with {partner} (deal {deal}){} [{}]",
+                cfe::treaty::TreatyKind::from_wire(*kind)
+                    .map(|held| held.word())
+                    .unwrap_or("pact"),
+                match term {
+                    0 => String::from(" standing"),
+                    held => format!(" for {held}"),
+                },
+                terms
+                    .iter()
+                    .map(|(channel, factor)| format!("{channel}:{factor}"))
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            ),
+        ),
+        E::TreatyStruck { deal, partner, broken } => (
+            "treaty_struck",
+            format!(
+                "the pact with {partner} (deal {deal}) {}",
+                match broken {
+                    true => "is BROKEN",
+                    false => "is renounced",
+                }
+            ),
+        ),
         E::GemCompounded { orb_id, members, gem } => (
             "gem_compounded",
             format!(

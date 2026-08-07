@@ -136,7 +136,7 @@ use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 /// (Amendments 0.11.0 through the current minor are recorded in the
 /// version ledger — `tests/conservation_pins.rs` — beside the
 /// NEXT-FREE RULE that assigns minors across lanes.)
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 18, patch: 0 };
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 19, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
@@ -1024,6 +1024,12 @@ fn covered(event: &ClosureEvent) -> bool {
         // THE MINTED LINE (tag 101) — banked-neutral: identity, never
         // matter; the receipt is a seed and everything derives. BY HAND.
         | E::LineMinted { .. }
+        // TREATIES (tags 105, 106) — banked-neutral: a pact re-rules
+        // what a CROSSING costs and moves nothing by itself; the haul
+        // that later crosses is the conserved deed. {I2 containment,
+        // I3 exactness} complete them. BY HAND, as ever — the compiler
+        // does not force this list.
+        | E::TreatySealed { .. } | E::TreatyStruck { .. }
         // CONVEY (tag 100) — value-moving, with its I1 arm in
         // `admitted_deltas`: the postage burns (net negative), the
         // amount nets zero, and the postal theorems (address, monetary
@@ -1920,6 +1926,10 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // not a line's identity. The gem's name is content-addressed
         // from the members, so no line is keyed by it.
         | E::GemCompounded { .. }
+        // #42: a treaty is WORLD-layer. It is keyed on the pair, and
+        // the pair is two worlds — not a line's identity (a pact
+        // outlives whoever signed it) and not one place.
+        | E::TreatySealed { .. } | E::TreatyStruck { .. }
         | E::InstrumentForged { .. }
         | E::TechDiscovered { .. } | E::TechLicensed { .. } => Some(Layer::World),
 
@@ -1984,6 +1994,10 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::BondSealed { .. } | E::ForwardSealed { .. } | E::CouncilSealed { .. }
         | E::GaugeShiftedAt { .. } | E::TechLicensed { .. } | E::GenesisSealed { .. }
         | E::PracticeAdopted { .. } | E::PracticeReleased { .. } | E::ProspectStruck { .. }
+        // #42: sealing or ending a pact re-rules what crossing this
+        // pair costs — Build, the founding class of act, beside the
+        // chartered parameter it most resembles.
+        | E::TreatySealed { .. } | E::TreatyStruck { .. }
         | E::ElderWarded { .. } | E::VeilDrawn { .. } | E::InstrumentForged { .. }
         | E::RouteChartered { .. } | E::OfferPosted { .. } | E::OfferCountered { .. } | E::LineSucceeded { .. }
         // KERNEL-TAXON: the drafted Build-class arm coder-03 named for

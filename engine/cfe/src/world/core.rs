@@ -75,6 +75,13 @@ impl World {
     pub fn chronicle_mut(&mut self) -> &mut Chronicle {
         &mut self.chronicle
     }
+    /// **THIS WORLD'S OWN NAME** — the genesis colony's, which is what
+    /// `found` set and what every other world calls it (#42). A treaty
+    /// names its partner by this, so the pair is identified by the same
+    /// string on both books.
+    pub fn name(&self) -> &str {
+        self.orbs.first().map(|held| held.name.as_str()).unwrap_or("")
+    }
     /// The genesis orb (convenience for the single-planet reads).
     pub fn orb(&self) -> Option<&ColonyOrb> {
         self.orbs.first()
@@ -308,6 +315,7 @@ impl World {
             practices: self.practices.clone(),
             instruments: self.instruments.clone(),
             routes: self.routes.clone(),
+            treaties: self.treaties.clone(),
             prospects: self.prospects.clone(),
             warded: self.warded,
             veiled: self.veiled,

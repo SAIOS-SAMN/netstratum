@@ -57,6 +57,14 @@ pub const SCHEMA_V3: u8 = 3;
 /// kernel reads no magnitude today, so no admission changes.
 pub const SCHEMA_V4: u8 = 4;
 
+/// **SCHEMA v5 (#42) — THE PACTS RIDE THE SNAPSHOT.** A world's
+/// standing treaties are committed state, so a snapshot that dropped
+/// them would reopen a world at peace with everyone it was at war
+/// with. Appended after the routes, version-gated: a v4 snapshot
+/// decodes with NO pacts, which is exactly what a world that predates
+/// treaties had.
+pub const SCHEMA_V5: u8 = 5;
+
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
 }
@@ -77,7 +85,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V4];
+    let mut out = vec![SCHEMA_V5];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -266,6 +274,27 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
     for (_, _, _, magnitude) in &committed.techs {
         ratio::encode(magnitude, &mut out);
     }
+    // #42 (v5 TRAILING RUN): the standing pacts, LAST — the
+    // additive-trailing law this codec has followed since v2. An
+    // older reader stops before it and decodes a whole state; a block
+    // inserted mid-stream would misalign every field after it, which
+    // is exactly what `world_taxon`'s v1 pin caught when this was
+    // first written between the routes and the practices.
+    put_u32(&mut out, committed.treaties.len() as u32);
+    for treaty in &committed.treaties {
+        put_u64(&mut out, treaty.deal);
+        out.push(treaty.kind.wire());
+        put_u64(&mut out, treaty.sealed);
+        put_u64(&mut out, treaty.term);
+        let partner = treaty.partner.as_bytes();
+        put_u32(&mut out, partner.len() as u32);
+        out.extend_from_slice(partner);
+        put_u32(&mut out, treaty.terms.len() as u32);
+        for (channel, factor) in &treaty.terms {
+            out.push(*channel);
+            ratio::encode(factor, &mut out);
+        }
+    }
     out
 }
 
@@ -338,7 +367,9 @@ impl<'a> Take<'a> {
 pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
     let mut take = Take { bytes, at: 0 };
     let schema = take.u8()?;
-    if schema != SCHEMA_V1 && schema != SCHEMA_V2 && schema != SCHEMA_V3 && schema != SCHEMA_V4 {
+    if schema != SCHEMA_V1 && schema != SCHEMA_V2 && schema != SCHEMA_V3 && schema != SCHEMA_V4
+        && schema != SCHEMA_V5
+    {
         return None;
     }
 
@@ -582,6 +613,27 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
             .collect()
     };
 
+    // #42 (v5 TRAILING RUN): the pacts, read LAST — after every older
+    // schema's fields, so a v4 blob simply ends here holding none,
+    // which is what a world predating treaties held.
+    let mut treaties: Vec<cfe::treaty::Treaty> = Vec::new();
+    if schema >= SCHEMA_V5 {
+        for _ in 0..take.u32()? {
+            let deal = take.u64()?;
+            // The kind must NAME a pact — refuse, never guess.
+            let kind = cfe::treaty::TreatyKind::from_wire(take.u8()?)?;
+            let sealed = take.u64()?;
+            let term = take.u64()?;
+            let partner_len = take.u32()? as usize;
+            let partner = String::from_utf8(take.slice(partner_len)?.to_vec()).ok()?;
+            let mut terms = Vec::new();
+            for _ in 0..take.u32()? {
+                terms.push((take.u8()?, take.ratio()?));
+            }
+            treaties.push(cfe::treaty::Treaty { deal, kind, partner, terms, sealed, term });
+        }
+    }
+
     if !take.done() {
         return None;
     }
@@ -603,6 +655,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         terrain_seed,
         instruments,
         routes,
+        treaties,
         practices,
         prospects,
         warded,

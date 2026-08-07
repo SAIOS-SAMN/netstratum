@@ -44,6 +44,7 @@ pub use rules::{
 pub mod accord;
 pub mod books;
 pub mod chemistry;
+pub mod diplomacy;
 pub mod growth;
 pub mod literature;
 pub mod core;
@@ -246,6 +247,14 @@ fn haul(
     if src.ward_holds() || dst.ward_holds() {
         return Err(ActionRefused::TheWardHolds);
     }
+    // **#42 THE WALL** — a pair at WAR exchanges nothing, in either
+    // direction, exactly as the elder's ward bars a crossing. Either
+    // book's war is enough: it takes two to trade and one to refuse.
+    // This is what makes war expensive — it costs the trade, not a
+    // number chosen to make it costly.
+    if src.at_war_with(dst.name()) || dst.at_war_with(src.name()) {
+        return Err(ActionRefused::AtWar { partner: dst.name().to_string() });
+    }
     if !src.knows_its_sun() || !dst.knows_its_sun() {
         return Err(ActionRefused::Shielded {
             source_shielded: !src.knows_its_sun(),
@@ -440,6 +449,18 @@ pub fn pair_melt(a: &World, b: &World, distance: &Ratio) -> Ratio {
         .max();
     if let Some(eta) = best_eta {
         melt *= ratio(1, 1) - eta.value().clone();
+    }
+    // **#42 THE PACTS** — what two worlds have AGREED the crossing
+    // costs. A trade or defense pact eases the melt; a war burdens it
+    // (for whatever still crosses before the wall refuses it).
+    //
+    // BOTH BOOKS MUST HOLD IT. A treaty is a pair object and neither
+    // world owns it, so one side's signature moves nothing — which is
+    // exactly why a pact is worth having and a decree is not.
+    let ours = a.pair_factor(b.name(), crate::treaty::PAIR_MELT);
+    let theirs = b.pair_factor(a.name(), crate::treaty::PAIR_MELT);
+    if ours == theirs {
+        melt *= ours;
     }
     melt
 }

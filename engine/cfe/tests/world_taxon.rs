@@ -81,12 +81,20 @@ fn the_taxon_rides_the_snapshot_and_v1_still_reads() {
         plain.found("plain-hold").expect("founds");
         plain.committed()
     };
-    // v3 now emits BOTH trailing fields — the taxon presence byte and
-    // the seat count — so an old stream drops both to be v1.
+    // EVERY SCHEMA SINCE v1 APPENDS, so an old stream is this one with
+    // each later era's trailing run removed. This fixture holds no
+    // techs, so v4's magnitude run is empty and contributes nothing;
+    // what must come off is v5's pact count (4 bytes, #42), v3's seat
+    // count (1) and v2's taxon presence byte (1).
+    //
+    // The hand-truncation is what makes this pin BITE: it fails the
+    // moment a new field is added anywhere but the tail, which is
+    // exactly how #42 was caught inserting its block mid-stream
+    // between the routes and the practices.
     let current = codec::state_bytes(&unsealed);
     let mut v1 = current.clone();
     v1[0] = 1; // SCHEMA_V1
-    v1.truncate(v1.len() - 2); // drop the seat count AND the taxon byte
+    v1.truncate(v1.len() - 6);
     let old = codec::from_state_bytes(&v1).expect("v1 reads whole");
     assert_eq!(old.taxon, None, "v1 carries no taxon — lawfully unrecorded");
 }

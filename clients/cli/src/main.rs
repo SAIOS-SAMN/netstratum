@@ -626,6 +626,10 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         // THE CORPUS BENCH (#38a): cognition as gameplay. The economy's
         // second head, finally reachable by a player.
         Some("corpus") => corpus_command(world, words, style, *current),
+        // #42 THE POLITICAL SPECTRUM — trade · defense · peace · war.
+        Some("treaty") | Some("treaties") | Some("pact") => {
+            treaty_command(world, words, style)
+        }
         Some("genesis") => {
             let civilization = words.next();
             let axes = (
@@ -3852,6 +3856,7 @@ fn help(style: &Style) {
         ("eras · visit <stamp>", "HISTORY AS A PLACE: the record segmented by era folds, cleaves, confluences and successions — and `visit` reconstructs the world AS IT STOOD at any stamp by replaying the prefix; the past provably happened and is visitable"),
         ("dashboard · settlements · rings · elements · civs · contacts · routes", "THE ATLAS: your whole aspect, listable — the board overview; every settlement's zones and banks; the star's rings and thermal bands; the named element table and banked matter; the registered civilizations; aperture deals, councils and pens; the chartered lanes"),
         ("corpus [<n>] · corpus list · corpus try [<n>] <move>… · corpus solve [<n>] <move>…", "THE CORPUS BENCH: the economy's second head, played. The bench serves the 34 ARC tasks the carrier law actually PRICES and pays a verified solve at the measured weight W = scarcity × complexity (the blind-spot task pays most, being 283/1). A proof is not an ANSWER, it is an EXPLANATION — a program that reproduces every training pair and then the test input — so `try` shows you exactly which pairs your rule explains and where it misses, and `solve` seals it. Moves: rot90 · rot180 · rot270 · fliph · flipv · transpose · recolor:0>1,7>2 · tile:3x3[:rows|cols|both][:…]. A task pays a world ONCE: cognition pays for what it first explained"),
+        ("treaty <kind> with <world> [deal <n>] [for <n>] [melt <p>/<q>] · treaties · treaty renounce <deal> <world>", "#42 THE POLITICAL SPECTRUM — trade · defense · peace · war, as one co-signed pairwise charter. The KIND is the sign of what it binds: a concord (trade, defense) must EASE the crossing, a war must BURDEN it, and a PEACE binds nothing at all — barring war is its whole content. Peace and war displace each other: peace ends a war for free, war BREAKS a peace and the load posts to the breaker's own book. A defense pact spends the option to attack (you cannot declare war on one you swore to defend, nor swear to defend one you are at war with). Both books must seal it or it moves nothing, either may renounce its OWN leg, and a term runs out by the clock. A pair at WAR is walled: no aperture crosses"),
         ("spectrum", "P3: the cognition reading — what this chain actually solved, weighed against the benchmark floor; a reading, never a score"),
         ("zone <tile> regen", "REGEN-1: the regenerator — restores the line's own ration at the extractor's rate (every number derives from the standing table); requires the DEEPENING (condition 3) crystallized on the orb"),
         ("prospect <stratum> · assay <prefix>", "THE GROUND: prospecting READS what your genesis seed always held at a stratum — one stratum, one reading, and no redraw can re-roll it; assaying DRAWS richness × elapsed from an opened vein. ECO-1: the draw TIRES the vein (priced against its hash-derived natural flow) and regenerators on the orb restore it between draws, so extraction has a long-run cost and tending the ground pays"),
@@ -4131,6 +4136,198 @@ fn scan(world: &mut World, style: &Style, prober: u64, exemplar: u64) {
 /// ELEMENT-GRAMMAR-1: the element id's short spoken form.
 fn hex_prefix(element: &[u8; 32]) -> String {
     element[..4].iter().map(|byte| format!("{byte:02x}")).collect()
+}
+
+/// **#42 THE POLITICAL SPECTRUM** — `treaty <kind> with <world> [deal
+/// <n>] [for <n>] [melt <p>/<q>]`, and `treaties` to read what stands.
+fn treaty_command(world: &mut World, mut words: std::str::SplitWhitespace, style: &Style) {
+    use cfe::treaty::{TreatyKind, TreatyTerms, PAIR_MELT};
+    let kind_word = words.next();
+    // Bare `treaties` (or an unknown first word) reads the board.
+    let Some(kind) = kind_word.and_then(|word| match word {
+        "trade" => Some(TreatyKind::Trade),
+        "defense" | "defence" => Some(TreatyKind::Defense),
+        "peace" => Some(TreatyKind::Peace),
+        "war" => Some(TreatyKind::War),
+        _ => None,
+    }) else {
+        if let Some("renounce") = kind_word {
+            let deal = words.next().and_then(|w| w.parse::<u64>().ok());
+            let partner = words.next();
+            return match (deal, partner) {
+                (Some(deal), Some(partner)) => match world.renounce(deal, partner) {
+                    Ok(()) => println!(
+                        "{} the pact with {} is renounced — your own leg, and only yours",
+                        style.ok("⚑"),
+                        style.strong(partner)
+                    ),
+                    Err(refusal) => refuse(world, &refusal, style),
+                },
+                _ => println!(
+                    "{} usage: {}",
+                    style.bad("✗"),
+                    style.strong("treaty renounce <deal> <world>")
+                ),
+            };
+        }
+        let standing = world.treaties();
+        println!(
+            "{} THE PACTS — what {} has agreed",
+            style.strong("⚑"),
+            style.strong(world.name())
+        );
+        if standing.is_empty() {
+            println!(
+                "  {}",
+                style.dim(
+                    "none stand — a pact re-prices the crossing between two worlds; both must \
+                     seal it, and either may renounce its own leg"
+                )
+            );
+        }
+        for pact in &standing {
+            println!(
+                "  {} with {} · deal {}{} [{}]",
+                style.strong(pact.kind.word()),
+                style.strong(&pact.partner),
+                pact.deal,
+                match pact.term {
+                    0 => String::from(" · standing"),
+                    held => format!(" · until t{}", pact.sealed + held),
+                },
+                pact.terms
+                    .iter()
+                    .map(|(channel, factor)| format!(
+                        "{}×{}",
+                        match *channel {
+                            PAIR_MELT => "melt",
+                            _ => "?",
+                        },
+                        amount(factor)
+                    ))
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            );
+        }
+        if !standing.is_empty() {
+            println!(
+                "  {} {}",
+                style.dim("↳"),
+                style.dim("treaty <trade|defense|peace|war> with <world> [deal <n>] [for <n>] [melt <p>/<q>]")
+            );
+        }
+        return;
+    };
+    // `with <world>` names the partner; the rest is optional.
+    let mut partner: Option<String> = None;
+    let mut deal: u64 = 1;
+    let mut term: u64 = 0;
+    let mut melt: Option<cfe::ratio::Ratio> = None;
+    let mut malformed: Option<String> = None;
+    while let Some(word) = words.next() {
+        match word {
+            "with" => partner = words.next().map(|held| held.to_string()),
+            "deal" => deal = words.next().and_then(|w| w.parse().ok()).unwrap_or(1),
+            "for" => term = words.next().and_then(|w| w.parse().ok()).unwrap_or(0),
+            "melt" => {
+                let held = words.next().unwrap_or("");
+                let (numer, denom) = held.split_once('/').unwrap_or((held, "1"));
+                match (numer.parse::<i64>(), denom.parse::<i64>()) {
+                    (Ok(n), Ok(d)) if d != 0 => melt = Some(cfe::ratio::ratio(n, d)),
+                    _ => malformed = Some(held.to_string()),
+                }
+            }
+            other => malformed = Some(other.to_string()),
+        }
+    }
+    if let Some(word) = malformed {
+        println!(
+            "{} {} is not part of a pact — {}",
+            style.bad("✗"),
+            style.strong(&word),
+            style.dim("treaty <kind> with <world> [deal <n>] [for <n>] [melt <p>/<q>]")
+        );
+        return;
+    }
+    let Some(partner) = partner else {
+        println!(
+            "{} a pact needs a partner — {}",
+            style.bad("✗"),
+            style.strong("treaty <kind> with <world> …")
+        );
+        return;
+    };
+    // **THE ENGINE CHOOSES NO TERMS.** A first cut defaulted the melt
+    // to a halving for a concord and a doubling for a war — two dials,
+    // and the ratchet counted them. It was right to: what a pact costs
+    // is the PARTIES' business, and an engine that picks it is writing
+    // policy nobody agreed to. So a concord or a discord must SAY its
+    // factor; only a peace, which binds nothing, needs no terms.
+    let terms = match kind {
+        TreatyKind::Peace => Vec::new(),
+        _ => match melt {
+            Some(factor) => vec![(PAIR_MELT, factor)],
+            None => {
+                println!(
+                    "{} a {} pact must SAY what it does to the crossing — {} (the engine \
+                     chooses no terms; a concord must ease and a war must burden, inside \
+                     the fourfold band)",
+                    style.bad("✗"),
+                    style.strong(kind.word()),
+                    style.strong("melt <p>/<q>")
+                );
+                return;
+            }
+        },
+    };
+    // The trade law is proven at THIS door, fault named: a pact that
+    // contradicts its own kind never reaches the verb.
+    let terms = match TreatyTerms::new(kind, terms) {
+        Ok(terms) => terms,
+        Err(fault) => {
+            use cfe::treaty::TreatyFault;
+            println!(
+                "{} {}",
+                style.bad("✗"),
+                match fault {
+                    TreatyFault::PeaceBindsNothing =>
+                        "a PEACE binds nothing — that absence is the pact; drop the terms".into(),
+                    TreatyFault::TermsEmpty =>
+                        "a pact that changes nothing between two worlds is not a pact".into(),
+                    TreatyFault::TermsContradictKind { .. } => format!(
+                        "those terms contradict a {} pact — a concord must EASE the crossing \
+                         and a war must BURDEN it",
+                        kind.word()
+                    ),
+                    TreatyFault::FactorOutOfBounds { .. } =>
+                        "the factor falls outside the fourfold band [1/4, 4]".to_string(),
+                    TreatyFault::ChannelUnknown { channel } => format!(
+                        "channel {channel} is not one the engine computes BETWEEN two worlds"
+                    ),
+                }
+            );
+            return;
+        }
+    };
+    match world.treaty(deal, &partner, terms, term) {
+        Ok(()) => {
+            println!(
+                "{} {} sealed with {} — this world's leg; {} must seal theirs for it to bind",
+                style.ok("⚑"),
+                style.strong(kind.word()),
+                style.strong(&partner),
+                style.strong(&partner)
+            );
+            if kind == TreatyKind::War {
+                println!(
+                    "  {} {}",
+                    style.warn("⚠"),
+                    style.dim("the crossing is now WALLED — a pair at war exchanges nothing")
+                );
+            }
+        }
+        Err(refusal) => refuse(world, &refusal, style),
+    }
 }
 
 /// **THE CORPUS BENCH (#38a)** — `corpus` serves a priced task,
@@ -4764,6 +4961,36 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
              compiles (1–{}), never another mint",
             style.strong(&code.to_string()),
             cfe::dop::ZONE_KINDS
+        ),
+        ActionRefused::TreatyWithSelf => String::from(
+            "a world does not treat with itself — a pact reads two parties",
+        ),
+        ActionRefused::TreatyAlreadyStands { partner, kind } => format!(
+            "a {} pact already stands with {} — a second is not stronger, it is ambiguous \
+             (the pair factors multiply). {} it first to re-term it",
+            style.strong(
+                cfe::treaty::TreatyKind::from_wire(*kind).map(|k| k.word()).unwrap_or("pact")
+            ),
+            style.strong(partner),
+            style.strong("renounce")
+        ),
+        ActionRefused::NoSuchTreaty { deal } => format!(
+            "no pact on this book carries deal {} with that world — {} lists what stands, and a \
+             world may only ever end its OWN leg",
+            style.strong(&deal.to_string()),
+            style.strong("treaties")
+        ),
+        ActionRefused::SwornToDefend { partner } => format!(
+            "you are SWORN TO DEFEND {} — a defense pact spends the option to attack. {} the \
+             defense first if that is what is meant; the chronicle will show you did",
+            style.strong(partner),
+            style.strong("renounce")
+        ),
+        ActionRefused::AtWar { partner } => format!(
+            "the crossing is WALLED — you are at war with {}. A pair at war exchanges nothing; \
+             seal a {} to open the way again",
+            style.strong(partner),
+            style.strong("peace")
         ),
         ActionRefused::MatterDoesNotBond => format!(
             "this matter does not BOND — a set compounds when every member shares the geometry \
@@ -5769,6 +5996,25 @@ fn chronicle(world: &World, style: &Style) {
                 "⛏ {} read from stratum {} (family {family}, tier {tier}) — what the seed always held",
                 style.strong(name),
                 style.strong(&stratum.to_string())
+            ),
+            cfe::dop::ClosureEvent::TreatySealed { kind, partner, term, .. } => format!(
+                "⚑ {} sealed with {}{} — the crossing is re-priced by agreement",
+                style.strong(
+                    cfe::treaty::TreatyKind::from_wire(*kind).map(|k| k.word()).unwrap_or("pact")
+                ),
+                style.strong(partner),
+                match term {
+                    0 => String::from(" (standing)"),
+                    held => format!(" (for {held})"),
+                }
+            ),
+            cfe::dop::ClosureEvent::TreatyStruck { partner, broken, .. } => format!(
+                "⚑ the pact with {} {}",
+                style.strong(partner),
+                match broken {
+                    true => style.bad("is BROKEN — the load posts to this world's own book"),
+                    false => style.dim("is renounced"),
+                }
             ),
             cfe::dop::ClosureEvent::GemCompounded { members, gem, .. } => format!(
                 "◈ {} bond into {} — the lanes saturate and the matter holds",

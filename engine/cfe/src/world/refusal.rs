@@ -75,6 +75,26 @@ pub enum ActionRefused {
     /// orb's temperature: matter has a phase, and a place has a heat.
     /// The same set bonds on a colder world.
     NotWorkableHere { element: [u8; 32] },
+    /// TREATIES (#42) — a world does not treat with itself: the pair
+    /// would be one party, and every pair law reads two.
+    TreatyWithSelf,
+    /// TREATIES (#42) — a live pact of this kind already stands with
+    /// this partner. A second is not a stronger pact but an ambiguous
+    /// one, and the pair factors MULTIPLY, so it would compound in
+    /// silence.
+    TreatyAlreadyStands { partner: String, kind: u8 },
+    /// TREATIES (#42) — no pact on this book carries that deal id with
+    /// that partner. A world may end its OWN leg and no other.
+    NoSuchTreaty { deal: u64 },
+    /// TREATIES (#42) — a defense pact stands with this world, and a
+    /// defense pact SWEARS OFF war. Renounce it first if that is what
+    /// is meant; the chronicle then shows the oath was broken
+    /// deliberately rather than quietly.
+    SwornToDefend { partner: String },
+    /// TREATIES (#42) — the crossing is WALLED: these worlds are at
+    /// war, and a pair at war exchanges nothing. The same shape as the
+    /// elder's reverse shield, reached by politics instead of by age.
+    AtWar { partner: String },
     /// ZONE-VOCABULARY (#41) — no zone-axis entry in the FOLD carries
     /// this code. A fact of the chain, not a shape: what the fold holds
     /// grows by receipt, so this can never move to a door (the
