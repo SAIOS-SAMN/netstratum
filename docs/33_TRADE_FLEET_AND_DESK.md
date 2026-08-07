@@ -1,8 +1,9 @@
 # 33 — TRADE DESK · FLEETS · ALIGNMENT · LOCAL CAPITAL
 
-**Status:** PARTIAL LAND — **Phases 1–4 complete** on main (sightlines +
-alignment + fleets + **Note/Future/Share/Perp** local books); Phase 5
-still design. Implementation board: **`TASKS_TRADE_FLEET_DESK.md`**.
+**Status:** PARTIAL LAND — **Phases 1–4 complete** on main; **Phase 5
+design lock** in `36_DEFENSE_AXIOMS.md` (species-relative defense,
+covert terraform, espionage). Implementation board:
+**`TASKS_TRADE_FLEET_DESK.md`**.
 
 **Does not overturn:** CHARTER exactness, SEAL B, call-not-copy, tuned-
 constant ratchet, ROUTE-1 / MARKET-1 / STAMP-1 as landed. **Does not**
@@ -275,7 +276,7 @@ Note at Phase 4 land (Q-S3).
 | `f` | FLEET | Hulls, scrap, yard, buy/sell/commission |
 | `x` | EXCH | **Local** books only (archetype-filtered) |
 | `g` | GROW | Existing colony loop surface |
-| `d` | DEFEND | Convoy risk / escort (Phase 5) |
+| `d` | DEFEND | Convoy + domain posture + veil/ward + espionage (`36`) |
 | `e` | EXPLORE | Scan/prospect — feeds cargo identity |
 
 ### 6.3 Route optimize panel
@@ -327,7 +328,7 @@ Authority detail and task IDs: **`TASKS_TRADE_FLEET_DESK.md`**.
 | **3** | **Fleet capital** | **LANDED** — scrap/yard/hulls, capacity-gated hauls, fleet_step, CLI |
 | **3** | **Fleet capital** | Scrap · yard · hull mint/assign/scrap; shipwright NPC spot; route capacity limited by hulls |
 | **4** | **Local capital markets** | Civ-filtered Note/Future/Share/Perp books; instrument_step; freight/alignment seasons tradeable |
-| **5** | **Defense & deep rails** | Escort/interdiction hooks; R3–R4 / Anchor exits for capital claims |
+| **5** | **Defense axioms · escort · covert terraform · espionage · deep rails** | Species-relative CEL/ATM/COG/CYB/INF/KIN (`36`); escort; covert ATM tamper; R3–R4 optional |
 
 **Dependency spine:**
 

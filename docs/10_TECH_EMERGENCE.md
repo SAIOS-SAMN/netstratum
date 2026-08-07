@@ -158,6 +158,13 @@ the world crosses substrate bands. No new wire tags. The TUniversal
 calibration rides 11 §1: base-1 daily · base-7 weekly (the stack's
 rhythm) · base-60 yearly.
 
+**DEFENSE dual-use (design 2026-08-08 — `36_DEFENSE_AXIOMS`).** Overt
+TERRA-1 remains the public crown path. Phase 5 adds **covert atmospheric
+tampering** (offensive medium shift without free PlanetSited rewrite)
+and species-relative defense tech families (CEL/ATM/COG/CYB/INF/KIN)
+that compose MASK-1, WARDEN-1, MANU-1, and escort hulls. Not landed;
+no tags claimed until P5 waves pin.
+
 **SCIENCE-1 (open) — speciated puzzle science.** A line's puzzle tree
 is its OWN science: perception already routes the solver (volumetric
 lines forge volume tasks, planar lines forge grids — landed), and

@@ -1018,5 +1018,12 @@ See `35_ORBIT_DYNAMO_AND_ESTATE.md`, `ENDOWMENTS` §8.
 - Desk EXCH books; CLI `note|future|share|perp`; `fleet mint … finance`
 - pins `instrument_pins` (5); FORWARD-1 parallel (Q-S3)
 
-**Next:** Phase 5 defense & deep rails · P1.8 offer widen · Q-O1 ψ.
+**Phase 5 DESIGN LOCK (2026-08-08):** `36_DEFENSE_AXIOMS.md` — defense as
+integrity of the entity (CEL/ATM/COG/CYB/INF/KIN) relative to metabolism,
+disposition, perception, clade; dual of ATM = **covert atmospheric
+tampering** (offensive terraform); espionage stack on veil/ward/instruments;
+KIN escort remains first vertical. Board: P5.0–P5.26 on
+`TASKS_TRADE_FLEET_DESK.md`.
+
+**Next:** P5-A escort vertical · or P1.8 offer widen · Q-O1 ψ.
 

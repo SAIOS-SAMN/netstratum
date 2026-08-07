@@ -1,0 +1,432 @@
+# 36 — DEFENSE AXIOMS · SPECIES-RELATIVE SECURITY · COVERT TERRAFORM · ESPIONAGE
+
+**Status:** DESIGN LOCK for Phase 5 expansion (2026-08-08).  
+**Does not land mechanics until red-first pins; claim tags at land only.**  
+**Authority:** `00_CHARTER`, `04_CIVILIZATION_GENESIS`, `05_THERMAL_BALANCE`,
+`06_CIVILIZATIONS`, `10_TECH_EMERGENCE` (TERRA-1, WARDEN-1, MASK-1, MANU-1),
+`14_ALMANAC`, `15_TAXON`, `33_TRADE_FLEET_AND_DESK` §Phase 5,
+`TASKS_TRADE_FLEET_DESK` P5.*, `24_FORM` §2j (field, not collision).
+
+**Does not** default defense to human kinetic war. **Does not** invent
+float combat dice. **Does not** require strand/datum for R1–R2 defense
+fun. **Does not** replace ideology bonds or market Notes with “military
+bonds.”
+
+---
+
+## 0. Why this file exists
+
+Phase 5 began as **escort + interdiction + deep-rail exits** — capital
+in transit. That is necessary and remains the first vertical, but it is
+only the **kinetic/logistics surface** of a deeper law:
+
+> **Defense is whatever preserves the entity’s capacity to continue as
+> itself under interference.**  
+> For a tardigrade-clade biotic line, “itself” is not the same as for a
+> plasmic current-sheet or a lithic lattice mind.
+
+The operator charge (session):
+
+1. Defense from the **entity itself** outward — neural/cognitive, cyber/
+   digital, atmospheric, cellular — each extrapolated as an **axiom of
+   defense** relative to civilization and species.
+2. **Atmospheric tampering** as offensive terraforming (covert conquest
+   prep).
+3. Extrapolate **espionage**.
+4. Document technologies under defense; define defense for **non-human**
+   lines without human-normative blind spots.
+
+This document is the design lock. Implementation lands in phased P5
+slices on `TASKS_TRADE_FLEET_DESK.md`.
+
+---
+
+## 1. The axiom (universal shape, local content)
+
+### 1.1 One law, many bodies
+
+```text
+defense_posture(entity) =
+  preserve( integrity_axes(entity) )
+  against( interference_channels )
+  at cost( exact-rational residual, receipted )
+```
+
+| Universal (engine) | Local (civ / species) |
+|--------------------|------------------------|
+| Integrity is multi-axial | Which axes exist and what breaks them |
+| Interference is typed | Which channel is “attack” for this line |
+| Residual is never silent | What is lost (mass, signal, heat, memory…) |
+| Posture is receipted | Tech nodes + deeds, not ambient buffs |
+
+**Human kinetic framing is one specialization** of this law (cellular +
+atmospheric + cognitive in a mesic bipedal package). It is **not** the
+template other lines are forced into.
+
+### 1.2 Integrity axes (the “entity itself”)
+
+Every sealed line already carries constitution via genesis + taxon +
+thermal site. Defense reads that constitution:
+
+| Axis | Already landed | Defense question |
+|------|----------------|------------------|
+| **Metabolism** | mineral / biotic / plasmic | What is *food* and what is *poison* as attack? |
+| **Disposition** | expansionist / empiricist / epicurean | What counts as *victory* if defense fails? |
+| **Perception** | planar / volumetric / harmonic / umbral | What is *fog of war* vs *signal integrity*? |
+| **Clade / species** | register + taxon | Body plan: lattice, current sheet, wetware, glass… |
+| **Thermal band** | cryo / mesic / hyper / mantle regimes | What is *atmosphere* for this niche? |
+| **Chronicle identity** | SEAL B, taxon seal | What is *memory* / *self-history* under attack? |
+
+### 1.3 Integrity domains (defense surfaces)
+
+Six **domains** — each a channel pair (defend / offend). Domains are
+not “buildings”; they are **typed residual classes** the engine can
+refuse and receipt.
+
+| Domain | Code | What is preserved | Human-visible metaphor | Non-human examples |
+|--------|------|-------------------|------------------------|--------------------|
+| **Cellular / somatic** | `CEL` | Body integrity, biomass/mineral lattice coherence | Armor, immune, hull plating | Tardigrade cryptobiosis; lithic fracture toughness; fungal mycelial redundancy |
+| **Atmospheric / medium** | `ATM` | Habitable medium around the entity (gas, plasma, ice, rock fluid) | Atmosphere, life support | Plasmic current-sheet “atmosphere” = local B-field + density; cryo sublimation shell; mantle melt pocket |
+| **Neural / cognitive** | `COG` | Decision integrity, want-maps, solve capacity | Psyops, morale, mind | Umbral occlusion of intent; harmonic jamming of perception frame; empiricist proof-poisoning |
+| **Cyber / digital** | `CYB` | Instrument, ledger interface, licensed tech stack | Hacking, C2, spoofing | Instrument grade corruption; aperture deal forgery attempts (refused typed); stamp-book spoof |
+| **Informational / veil** | `INF` | What others may *lawfully read* about you | SIGINT, OPSEC | MASK-1 veil, registry cloud, false assay surface |
+| **Kinetic / logistics** | `KIN` | Hulls, escorts, interdiction of cargo in transit | Fleet combat, convoy | Escort hull role (P3 inert → P5 active); route risk |
+
+**Digital vs cyber (operator language, unified in law):**  
+- **Digital defense** = integrity of *instruments and readings* (MANU-1 grade, scan truth).  
+- **Cyber defense** = integrity of *cross-world messages and books* (aperture, treaty, STAMP clear).  
+Both sit under domain `CYB` with two **sub-channels** (instrument / mesh).
+
+### 1.4 Axiom table by metabolism (primary)
+
+Defense *priority* and *failure residual* derive first from metabolism
+(what the line *is* as a process), then clade colour, then disposition.
+
+#### Mineral (metabolism 1)
+
+| Domain | Defense means | Attack that matters | Residual on breach |
+|--------|---------------|---------------------|--------------------|
+| CEL | Fracture toughness, alloy shell, cryo/heat embrittlement resistance | Kinetic shatter, thermal shock | Zone raze risk, scrap forced salvage |
+| ATM | Dust/atmosphere as *radiator and coolant medium*, not breath | Vacuum strip, dust blow-off, albedo sabotage | Overheat / freeze band shift |
+| COG | Planar doctrine integrity; “map is territory” | False charts, forged surveys | Bad siting, estate mis-appraisal |
+| CYB | Converter chain integrity (smelter/synth) | Instrument spoof of yield | Wrong conversion, famine of wrong resource |
+| INF | Ore-body OPSEC; assay fog | False assay richness | Bad trade, bad Note collateral |
+| KIN | Escort bulk haulers | Interdiction of iron/alloy trains | HullCapacityShort, VoidShare |
+
+#### Biotic (metabolism 2)
+
+| Domain | Defense means | Attack that matters | Residual on breach |
+|--------|---------------|---------------------|--------------------|
+| CEL | Immune / spore / membrane; Habitat as organ | Pathogen analogue, starvation, toxin | Famine, Habitat dormancy |
+| ATM | Breathable / humid / CO₂–O₂ balance (mesic default) | **Atmospheric tampering**, pathogen aerosol, desiccation | Band coverage collapse, ration death |
+| COG | Collective memory, pheromone/harmonic social graph | Panic, schism, want-storm | WantStruck flood, practice release |
+| CYB | Bio-instrumentation, assay of living stocks | Spoofed richness, counterfeit biomatter | Bad refine, bad Share dividend base |
+| INF | Veil of population disposition | Census spoof, treaty false flag | Bad peace/war call |
+| KIN | Escort of spore-barge / chitin hulls | Cargo of biomass lost to void | Starvation cascade |
+
+#### Plasmic (metabolism 3)
+
+| Domain | Defense means | Attack that matters | Residual on breach |
+|--------|---------------|---------------------|--------------------|
+| CEL | Current-sheet coherence; reconnection resistance | Magnetic shear, quench | Sheet collapse, zero yield |
+| ATM | Local plasma “weather” — density + field as habitat | **Field-stripping**, radiative cooling attack | Forced dormancy, Furnace exile |
+| COG | Field-pattern memory; umbral/harmonic perception | Pattern noise, occlusion flood | Scan blindness, wrong joint venture |
+| CYB | Resonator / instrument as *sense organ* | Grade sabotage, false t_eq readings | Bad terraform, bad melt windows |
+| INF | Opacity of field topology | Topology spoof | Ambush of routes in “empty” space |
+| KIN | Runner/plasma-sled escort | Interdiction of spark cargo | STAMP/joule loss |
+
+### 1.5 Clade colour (secondary, not a second physics)
+
+Clade does not invent new domains; it **weights** them and names the
+voice of residual.
+
+| Clade family (examples from 06) | Domain emphasis | Distinct “death” |
+|---------------------------------|-----------------|------------------|
+| Tardigrade / cryptobiotic | CEL extreme, ATM secondary | Tuned desiccation = *strategy*, not defeat, until time limit |
+| Lithic / endolithic / Glasskeeper | CEL + COG (lattice memory), ATM = rock fluid | Vitrification = defense *and* stasis |
+| Hymenopteran / hive | COG collective, INF hive-mask | Queen/node loss ≠ human “leader death” — graph cut residual |
+| Cetacean / volumetric | ATM medium, COG song/harmonic | Silence / medium wrong density |
+| Plasmoid / syzygial | ATM field, CYB sense | Reconnection cascade |
+| Fungal / mycelial | CEL network redundancy | Fragmentation into many small selves (not always lethal) |
+| Cryo-coherent | ATM ice, CEL quantum noise | Thermal leak as attack |
+
+**Rule:** clade never invents a seventh domain; it only chooses
+**which residual is primary** when multi-domain breach hits.
+
+### 1.6 Disposition colour (tertiary — posture, not anatomy)
+
+| Disposition | Defense posture | Espionage flavour | Covert terraform flavour |
+|-------------|-----------------|-------------------|---------------------------|
+| **Expansionist** | Perimeter, escort mass, first-strike atmospheric prep | Route intel, yard sabotage | **Primary user** of offensive ATM |
+| **Empiricist** | Proof integrity, instrument grade, anti-spoof | Science theft, joint-venture poison | Research terraforming “for science” dual-use |
+| **Epicurean** | Surplus buffers, festival continuity, anti-famine | Market rumor, STAMP panic | Soft power climate for guests, rare hard strip |
+
+### 1.7 Perception colour (how defense *sees*)
+
+| Perception | Fog of war is… | Cognitive defense is… |
+|------------|----------------|------------------------|
+| Planar | Unknown tiles / wrong chart | Chart seals, survey witnesses |
+| Volumetric | Unknown strata / 3D occlusion | Prospect integrity, depth ward |
+| Harmonic | Noise band, false resonance | Filter tech, practice gates |
+| Umbral | Wrong occlusion graph (what blocks what) | Occlusion seals, syzygy timing |
+
+---
+
+## 2. Technology tree under DEFENSE
+
+Technologies are **condition-style nodes** and/or **instrument grades**
+(compose MANU-1, PLANNER-1, TERRA-1). Names are provisional; wire tags
+claimed only at land.
+
+### 2.1 Domain tech families (document now, land later)
+
+| Family | Node ideas (voice varies by metabolism) | Depends | Domain |
+|--------|------------------------------------------|---------|--------|
+| **Somatic lattice** | Membrane, shell, cryptobiosis, vitrification | CEL zones / Habitat | CEL |
+| **Medium envelope** | Habitat dome, cryo shell, field cage, dust radiator | thermal site | ATM |
+| **Mind seal** | Doctrine cache, want-damper, proof-witness quorum | COG / practices | COG |
+| **Instrument guard** | Grade floor, anti-spoof seal, scan checksum | MANU-1 instruments | CYB-instrument |
+| **Mesh guard** | Aperture signature, deal nonce hygiene, STAMP clear witness | routes, STAMP | CYB-mesh |
+| **Veil craft** | MASK-1 deepen, false face, census fog | veil toll | INF |
+| **Convoy doctrine** | Escort activation, risk bands, interdiction residual | Hull Escort | KIN |
+| **Ward depth** | WARDEN-1b elder / depth gate compose | ward | INF+CYB |
+| **Terra dual-use** | TERRA-1 crown; **AtmosphereCraft** offense path | base-7 + license | ATM |
+| **Espionage suite** | Probe under veil, steal tech hash, seed false survey | INF + CYB | INF |
+
+### 2.2 Offense duals (every defense has a typed dual)
+
+| Defense domain | Offensive dual | Covert? |
+|----------------|----------------|---------|
+| CEL | Pathogen / fracture / quench | Sometimes |
+| ATM | **Atmospheric tampering / covert terraform** | **Primary covert invasion tool** |
+| COG | Doctrine poison, want storm | Often |
+| CYB | Instrument spoof, mesh spoof (refused or residual typed) | Often |
+| INF | Deep veil, false flag treaty | Always |
+| KIN | Interdiction, escort hunt | Rarely covert |
+
+**Law:** offensive duals use the **same residual types** as defense
+breach. No “HP”; only typed losses already meaningful to the economy
+(famine, band shift, void share, practice release, instrument grade…).
+
+### 2.3 Compose, don’t fork (landed building blocks)
+
+| Landed | Role in defense axioms |
+|--------|------------------------|
+| Escort hull (P3) | KIN budget carrier; inert until P5 activates risk |
+| Treaty Defense kind | Political non-war; not kinetic |
+| MASK-1 veil | INF baseline |
+| WARDEN-1a reverse shield | Extreme INF+mesh lockdown |
+| TERRA-1 terraform | ATM **overt** seat change (PlanetSited) |
+| MANU-1 instruments | CYB-instrument grade |
+| Estate survey witnesses | Anti-spoof for INF on land |
+| Appraisal staleness | Economic mind-integrity adjacent |
+| Thermal dual (34) | ATM/thermal stress already books entropy |
+
+---
+
+## 3. Atmospheric tampering & covert terraform
+
+### 3.1 Why this is not “just TERRA-1 again”
+
+| Mode | Visibility | Receipt | Intent |
+|------|------------|---------|--------|
+| **Overt terraform** (TERRA-1) | Public crown tech | Fresh `PlanetSited` | Legitimate band shift |
+| **Covert atmospheric tampering** | Veiled / deniable | New deeds under INF+ATM | Soften target for conquest |
+
+Covert path **must not** free-mint a PlanetSited rewrite without
+witness. It accumulates **tamper stress** on a target orb’s medium:
+
+```text
+tamper_pressure(orb, domain=ATM) ∈ ℚ≥0
+  increased by CovertTamper deeds (metered, residual)
+  decreased by MediumEnvelope defense / detection
+  at threshold → forced band coverage loss OR public unmask of actor
+```
+
+(Exact threshold from 1+1 ladder at land — no free dials.)
+
+### 3.2 Invasion / conquest narrative (mechanics)
+
+1. **Espionage** maps target ATM vulnerability (band coverage, Habitat
+   count, Regenerator presence).
+2. **Covert tamper** shifts effective medium (albedo dusting, gas strip,
+   field shear for plasmic) without full re-site.
+3. **Detection** → treaty war flag, residual on spy, or INF reveal.
+4. **Overt phase** may then license TERRA-1 or open war (treaty kind).
+5. **Defense** is MediumEnvelope + detection instruments + ward.
+
+### 3.3 Species-relative “atmosphere”
+
+| Line | Medium under attack |
+|------|---------------------|
+| Mesic biotic | Gas mix, humidity, pressure proxy |
+| Cryo | Sublimation / ice shell |
+| Hyper / Emberkin | Flux envelope, radiator dust |
+| Plasmic | Magnetic bottle, density |
+| Lithic / Marrow | Melt pocket, pore fluid, dust |
+| Glasskeeper | Stress field in lattice (ATM≈CEL merge) |
+
+---
+
+## 4. Espionage stack
+
+Espionage is **not** a separate fantasy skill tree; it is **INF + COG +
+CYB** used offensively with deniability.
+
+### 4.1 Layers
+
+| Layer | Deed class (names provisional) | Reads / writes |
+|-------|--------------------------------|----------------|
+| **Scout** | Probe under veil, scan foreign orb | CYB-instrument |
+| **Infiltrate** | False face, temporary local entity? | INF |
+| **Exfiltrate** | Copy tech hash / survey seed (not free mint) | INF+CYB |
+| **Sabotage** | Lower instrument grade, seed false prospect | CYB / INF |
+| **Atmosphere ops** | CovertTamper | ATM |
+| **Cognitive ops** | Want storm / practice poison | COG |
+| **Counter-intel** | Detection instruments, ward, veil tax | all |
+
+### 4.2 Compose with MASK / WARDEN
+
+- VeilDrawn already clouds readings — **OPSEC**.
+- Ward is **hard lockdown** (no aperture) — rare elder-class defense.
+- Espionage *against* a veiled world costs VeilToll-like residual
+  (compose Parameter::VeilToll).
+- Espionage *while veiled* may reduce detection probability only as
+  **typed refuse rates**, not dice: e.g. detection requires instrument
+  grade ≥ N (MANU-1).
+
+### 4.3 Disposition × espionage
+
+| Disposition | Preferred ops |
+|-------------|----------------|
+| Expansionist | Atmosphere ops, route sabotage, yard intel |
+| Empiricist | Tech exfil, false science, instrument spoof |
+| Epicurean | Market rumor (STAMP panic), treaty scandal |
+
+---
+
+## 5. DEFEND pane & player surface (spec)
+
+```
+DEFEND [d]
+  posture: domain scores (derived) · primary residual risk
+  KIN: escort assign · convoy risk band
+  ATM: medium envelope status · tamper pressure (self/foreign)
+  CEL: somatic readiness (Habitat / shell tech)
+  COG: doctrine / want load
+  CYB: instrument floor · mesh seal
+  INF: veil · ward · detection grade
+  ESPIONAGE: active ops (if any) · counter-intel
+```
+
+Verbs (provisional):
+
+```text
+defend status
+escort assign <hull> <deal>
+medium reinforce          # ATM defense spend
+veil · ward               # compose landed
+spy probe <world>         # scout
+spy tamper <world> …      # covert ATM (gated)
+spy extract <tech>        # exfil hash
+```
+
+---
+
+## 6. Implementation board (Phase 5 expansion)
+
+Maps onto and **extends** `TASKS_TRADE_FLEET_DESK` P5:
+
+| Wave | Content | Exit |
+|------|---------|------|
+| **P5-A** | KIN vertical: escort active, interdiction residual, DEFEND pane skeleton | convoy risk pin |
+| **P5-B** | Domain readings derived from metabolism/clade/thermal (no new combat) | desk shows species-relative posture |
+| **P5-C** | INF compose: veil/ward on DEFEND; counter-intel grade | pins |
+| **P5-D** | ATM defense + CovertTamper + detection | invasion narrative pins |
+| **P5-E** | COG + CYB instrument/mesh guards | spoof refuse pins |
+| **P5-F** | Espionage suite (scout/exfil/sabotage) | SEAL B |
+| **P5-G** | Deep rails R3/R4 / Anchor (original P5.4–P5.7) | optional features |
+| **P5-H** | Docs + demo: escort + one covert terraform arc | program metric |
+
+**Order law:** P5-A before combat fantasy; P5-B before any species-blind
+“armor HP”; P5-D before invasion; P5-G never blocks R1–R2 fun.
+
+### 6.1 Provisional tag budget (claim at land only)
+
+| Range | Use |
+|-------|-----|
+| next free **132** | first P5 deed (likely EscortAssigned risk or ConvoyRisk) |
+| + ATM/ESP family | CovertTamper, TamperDetected, MediumReinforced, SpyExtracted… |
+| no float | all residuals exact rational |
+
+### 6.2 Non-goals
+
+- Real-time tactical combat sim  
+- Human-only moral framing as engine law  
+- Silent HP bars  
+- Free terraform without TERRA-1 or metered tamper  
+- Path-dependency on strand/datum for core defense  
+
+---
+
+## 7. Worked examples (design colour → mechanic)
+
+### 7.1 Expansionist biotic invader vs mesic peer
+
+1. Scout under veil → map Habitat density + coverage.  
+2. Covert dusting (ATM) raises tamper_pressure.  
+3. Target’s MediumEnvelope + Regenerator slows pressure.  
+4. Detection → war treaty kind.  
+5. Escort clash on routes (KIN) if trade continues.
+
+### 7.2 Empiricist plasmic line
+
+Defense is **field cage + instrument grade**, not walls. Attack that
+matters is **false t_eq** and **sheet quench**, not “bombs.” Espionage
+steals instrument tech hashes via joint-venture poison.
+
+### 7.3 Lithic Glasskeeper
+
+CEL and COG merge: attack is **lattice stress** and **memory erase**.
+Vitrification is a defensive deed with stasis residual (no actions)
+rather than death. Atmospheric tampering is almost irrelevant;
+**substrate fluid** tamper is the ATM analogue.
+
+### 7.4 Epicurean hive clade
+
+Defense is **graph redundancy + surplus burn**. Cognitive attack is
+schism. Atmospheric attack hits shared brood medium. Espionage is
+**census fog** and festival-calendar disruption (want timing).
+
+---
+
+## 8. Open questions
+
+| ID | Question | Lean |
+|----|----------|------|
+| Q-D1 | Is CovertTamper a new PlanetSited half-state or pure pressure scalar? | Pressure scalar + threshold event |
+| Q-D2 | Multi-actor tamper stack (who is blamed)? | Last unveiled actor + INF witness |
+| Q-D3 | Plasmic ATM = thermal site fields only? | Compose thermal + new field TLV later |
+| Q-D4 | Share of espionage with MASK toll | Compose VeilToll |
+| Q-D5 | Escort risk formula vs pair_melt | Risk residual separate from melt |
+| Q-D6 | Non-player precursor (elder) as defense puzzle only? | Keep WARDEN combat-free |
+
+---
+
+## 9. Registers & companions
+
+| Doc | Role |
+|-----|------|
+| This file | Design lock |
+| `TASKS_TRADE_FLEET_DESK` P5.* | Implementation rows (expanded) |
+| `10_TECH_EMERGENCE` | Tech conditions compose |
+| `06_CIVILIZATIONS` | Clade colour source |
+| `05` / `34` | Thermal / medium |
+| `33` DEFEND pane | UI |
+| `15_TAXON` | Class/clade ceilings |
+
+---
+
+*Phase 5 begins with KIN vertical (escort), but **defense means** are
+defined here first so no land accidentally hard-codes human war as the
+only coherence.*

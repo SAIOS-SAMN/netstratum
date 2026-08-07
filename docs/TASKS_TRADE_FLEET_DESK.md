@@ -39,7 +39,7 @@ P1 Sightlines & parity  ──►  P2 Alignment (D_eff)
 | **2** | Alignment economics | P1 readings useful | Orbit windows move melt |
 | **3** | Fleet capital | P2 D_eff; yard design | Hulls limit and optimize routes |
 | **4** | Local capital markets | P1 STAMP player; `32` Wave 5 | Civ-filtered Note/Fut/Share/Perp |
-| **5** | Defense & deep rails | P3 hulls; R-line | Escort + R3/R4 capital exits |
+| **5** | Defense axioms · escort · covert terraform · espionage · deep rails | P3 hulls; `36_DEFENSE_AXIOMS` | Species-relative defense + KIN convoy + R3/R4 |
 
 ---
 
@@ -168,25 +168,86 @@ a Future prices freight around an alignment window without float marks.
 
 ---
 
-## Phase 5 — Defense & deep rails
+## Phase 5 — Defense axioms · convoy · covert terraform · espionage · deep rails
 
-**Goal:** Protect capital in transit; optional R3/R4 exits for claims.
+**Authority design:** `36_DEFENSE_AXIOMS.md` (species-relative domains
+CEL/ATM/COG/CYB/INF/KIN; covert atmospheric tampering; espionage stack).  
+**Goal:** Protect the **entity** (not only cargo); make defense mean
+different things for mineral / biotic / plasmic (+ clade colour);
+optional R3/R4 exits for claims.
+
+### P5-A — KIN vertical (capital in transit)
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
-| P5.1 | [ ] Escort role becomes active: convoy risk reading | P3.3 | |
+| P5.0 | [x] Design lock `36_DEFENSE_AXIOMS.md` | P4 land | file exists |
+| P5.1 | [ ] Escort role **active**: convoy risk reading (typed) | P3.3, P5.0 | pin |
 | P5.2 | [ ] Interdiction / loss law (typed residual, not silent delete) | P5.1 | pins |
-| P5.3 | [ ] DEFEND pane: assign escort, risk band | P5.1, P1.1 | |
+| P5.3 | [ ] DEFEND pane skeleton: escort assign + risk band + domain readout stub | P5.1, P1.1 | desk `d` |
+
+### P5-B — Species-relative posture (readings first)
+
+| ID | Task | Depends | Exit |
+|----|------|---------|------|
+| P5.11 | [ ] Derive domain weights from metabolism × disposition × perception | P5.0, genesis | pure reading |
+| P5.12 | [ ] Clade colour table (voice + primary residual) from taxon/06 | P5.11 | no new dials |
+| P5.13 | [ ] DEFEND shows **non-human** posture copy (plasmic/lithic/hive…) | P5.11–P5.12 | CLI/desk |
+
+### P5-C — INF compose (veil / ward / counter-intel)
+
+| ID | Task | Depends | Exit |
+|----|------|---------|------|
+| P5.14 | [ ] Surface MASK-1 / WARDEN-1a on DEFEND | P5.3, landed veil/ward | |
+| P5.15 | [ ] Detection grade from MANU-1 instrument floor | P5.14, MANU-1 | pin |
+
+### P5-D — ATM defense + covert terraform
+
+| ID | Task | Depends | Exit |
+|----|------|---------|------|
+| P5.16 | [ ] MediumEnvelope defense spend / reading (species medium) | P5.11, thermal | |
+| P5.17 | [ ] CovertTamper deed + tamper_pressure scalar (exact) | P5.16, veil | pins |
+| P5.18 | [ ] TamperDetected / unmask residual | P5.17 | |
+| P5.19 | [ ] Dual-use gate: TERRA-1 overt vs CovertTamper covert | TERRA-1, P5.17 | doc+pin |
+
+### P5-E — COG + CYB
+
+| ID | Task | Depends | Exit |
+|----|------|---------|------|
+| P5.20 | [ ] Cognitive integrity reading (wants / practices load) | WANT-1, PRACTICE-1 | |
+| P5.21 | [ ] Instrument-guard (anti-spoof) refuse path | MANU-1 | |
+| P5.22 | [ ] Mesh-guard (aperture/STAMP clear witness hygiene) | routes, STAMP | |
+
+### P5-F — Espionage suite
+
+| ID | Task | Depends | Exit |
+|----|------|---------|------|
+| P5.23 | [ ] Spy probe / scout under veil | P5.14–P5.15 | |
+| P5.24 | [ ] Tech hash exfil (no free mint of node) | P5.23, PLANNER-1 | |
+| P5.25 | [ ] Sabotage: false prospect / instrument grade hit | P5.23 | |
+| P5.26 | [ ] Disposition-routed NPC espionage_step | P5.23–P5.25 | pure NPC |
+
+### P5-G — Deep rails (original capital exits)
+
+| ID | Task | Depends | Exit |
+|----|------|---------|------|
 | P5.4 | [ ] R2.3 promotion R1→R2 claims (tier board) | R2.1 landed | |
-| P5.5 | [ ] Feature-gated R3 strand adapter for capital packets | P5.4, X7.1 | optional build |
-| P5.6 | [ ] Feature-gated R4 court/datum path | P5.5 | optional build |
+| P5.5 | [ ] Feature-gated R3 strand adapter for capital packets | P5.4, X7.1 | optional |
+| P5.6 | [ ] Feature-gated R4 court/datum path | P5.5 | optional |
 | P5.7 | [ ] T9 Anchor exit verbs for instruments/hull claims | P5.5–P5.6, O6.6 | |
 | P5.8 | [ ] Lease hulls optional (Q-F6) | P3.3 | |
-| P5.9 | [ ] End-to-end demo script: mint scrap→hull→route→Future→(optional R3) | all | documented run |
-| P5.10 | [ ] Docs Phase 5 land; program success metric (33 §12) checked | P5.9 | |
 
-**Phase 5 done when:** trade is defendable and deep-rail exits exist
-without being required for R1–R2 fun.
+### P5-H — Close-out
+
+| ID | Task | Depends | Exit |
+|----|------|---------|------|
+| P5.9 | [ ] Demo: escort convoy + one covert ATM arc + optional R3 | P5.1–P5.3, P5.17 | scripted |
+| P5.10 | [ ] Docs Phase 5 land; 33 §12 metric; 36 status → PARTIAL/LAND | P5.9 | |
+
+**Phase 5 done when:** (1) convoy capital is defendable with typed loss;
+(2) DEFEND posture is **species-relative** (not human-only war);
+(3) covert atmospheric tampering exists as metered dual of ATM defense;
+(4) espionage composes veil/ward/instruments; (5) deep rails optional
+and never required for R1–R2 fun.
 
 ---
 

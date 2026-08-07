@@ -21,9 +21,9 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 | ZoneKind compiled | **1–10** (ShipYard = 10) |
 | Codec | **SCHEMA_V9** (notes · futures · shares · perps) |
 | Pure-NPC green | offices, refine, STAMP, fleet, **full instrument_step** |
-| Next work | **Phase 5** defense · P1.8 offer widen · Q-O1… |
-| Docs | `30`–`35`; Phase **4 complete** (Note/Fut/Share/Perp) |
-| Trade program | Phases **1–4 landed**; Phase 5 open |
+| Next work | **Phase 5-A** escort vertical (`36` design lock) · P1.8 · Q-O1… |
+| Docs | `30`–`36`; Phase **4 complete**; **`36` defense axioms** design |
+| Trade program | Phases **1–4 landed**; Phase 5 design → implement |
 | Help | `note|future|share|perp` · desk EXCH · estate — ANSI |
 | Dirty / other lane | do not `git add -A` without reviewing observer/other-lane files |
 

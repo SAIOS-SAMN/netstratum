@@ -300,8 +300,27 @@ Not law until ruled and landed — except **coded defaults** below.
 | **Q-R2** | STAMP mint schedule: crystal-only convert vs multi-collateral? | Crystal convert + Vault Notes against elements — *open* |
 | **Q-S1** | Crystal→STAMP conversion curve? | Placeholder linear at landing; **ratchet forbids undervied dials** — derive/mint at S4.2 |
 | **Q-S2** | Demurrage on unbacked STAMP on/off? | Off in v1 — *open* |
-| **Q-S3** | Migrate FORWARD-1 into Note or keep parallel? | Parallel until NOTE-1 green — *open* |
-| **Q-S4** | Minimum clears before a perp index lists? | N=8 clears in window — *open* |
+| **Q-S3** | Migrate FORWARD-1 into Note or keep parallel? | **CODED Phase-4:** parallel (Notes landed; Bond/Forward stay) |
+| **Q-S4** | Minimum clears before a perp index lists? | N=8 clears in window — *open*; Perp opens on last-clear in v1 |
+
+---
+
+## Q-D — Defense axioms · covert terraform · espionage (opened 2026-08-08)
+
+Recorded from `36_DEFENSE_AXIOMS.md`. Not law until ruled and landed.
+
+| ID | Question | Lean / default |
+|----|----------|----------------|
+| **Q-D1** | CovertTamper = pressure scalar vs half PlanetSited? | Pressure scalar + threshold event |
+| **Q-D2** | Multi-actor tamper blame? | Last unveiled actor + INF witness |
+| **Q-D3** | Plasmic ATM medium? | Compose thermal + optional field TLV |
+| **Q-D4** | Espionage vs veiled cost? | Compose VeilToll |
+| **Q-D5** | Escort risk vs pair_melt? | Separate typed residual (not melt rewrite) |
+| **Q-D6** | Elder as combat? | Keep WARDEN puzzle-only (no combat) |
+| **Q-D7** | Digital vs cyber split in wire? | One CYB domain, two sub-channels |
+| **Q-D8** | Clade as mechanic or voice? | Voice + residual priority only (15_TAXON law) |
+
+Authority: `36_DEFENSE_AXIOMS.md`. Board: `TASKS_TRADE_FLEET_DESK` P5.*
 
 ---
 
