@@ -10,9 +10,10 @@ bump) that we adopted after the 0.13.0 collision.
 
 | Register | Taken today | Next free |
 |---|---|---|
-| Kernel minor | **0.16.0** (ECO-1), **0.17.0** (element chemistry) | **18** |
-| `ClosureEvent` tag | **104** (`GemCompounded`) | **105** |
-| `ZoneKind` wire | — | 9 |
+| Kernel minor | **0.16.0** ECO-1, **0.17.0** chemistry, **0.18.0** zone vocabulary, **0.19.0** treaties | **20** |
+| `ClosureEvent` tag | **104** `GemCompounded`, **105** `TreatySealed`, **106** `TreatyStruck` | **107** |
+| `ZoneKind` wire | **9+** are MINTED kinds (`ZoneKind::Minted`) — the compiled table ends at 8 | — |
+| Codec state schema | **v5** (the standing pacts ride the snapshot) | v6 |
 
 **d3-scope: 0.16.0 is gone.** The harness note said you intended it for
 the conductor's forge-zeroing. It was never claimed in
@@ -74,6 +75,45 @@ corpus path mints, it must do the same check or worlds will double-mint.
 
 Still open on #38: **(b) the conductor corpus path is yours** — I did not
 touch it. (c) the novelty predicate for player-authored tasks.
+
+## LANDED SINCE (2026-08-07)
+
+**`d4d94d5` + `56532d1` — the zone vocabulary (#41), kernel 0.18.0.** A
+world MINTS its own building kinds. The base a minted kind modulates
+resolves by the operator's three-way ladder (declared > inferred from
+channel family > unresolved, which is lawful vocabulary that never
+builds). `ZoneKind::Minted(u8)` rides ONE wire byte, so `ZoneBuilt`'s
+shape is untouched — but `*kind as u8` stops compiling; use
+`ZoneKind::wire()`. `ZoneBuilt` and the committed `Zone` both carry the
+compiled BASE, because `admits` judges from committed state and cannot
+resolve the fold.
+
+**`4af1e24` — treaties (#42), kernel 0.19.0, tags 105/106, schema v5.**
+Trade, defense, peace and war as one co-signed pairwise charter over
+ONE pair channel (the melt — the only quantity the engine computes
+between two worlds). Peace and war displace each other; breaking a
+peace posts to the breaker's severance book. A pair at WAR is walled:
+`haul` refuses `AtWar`, so no aperture crosses. **Both books must hold
+a pact before the melt moves** — one signature changes nothing.
+
+**`368c964` — the agent door (#39).** The inbound half of the uplink:
+an external agent submits deeds through the same scoped `*_as` verbs
+and is judged identically. The door adds no authority.
+
+**`219f414` — the plane shear.** `World::bench` swept every subset of a
+ledger; it now shears onto the `(shell, phase)` planes. 7.32s -> 0.04s,
+equivalence proven against the old sweep as a reference oracle.
+
+## A CONTRADICTION FOR THE OPERATOR (#38c)
+
+`solver-verify/src/corpus.rs` still states THE MOTION clause 4 —
+*imported content is a BENCHMARK and never a mint source* — and
+justifies having no admission test with *"it also has no rate"*. That
+premise is now false: kernel 0.14.0 priced corpus work, and #38a's
+bench mints against it. Either the Carrier Switch superseded clause 4
+(and that module doc is now the opposite of what the engine does), or
+the bench should measure without minting. Recorded in the task; not
+resolved by code.
 
 ## TO THE OPERATOR
 
