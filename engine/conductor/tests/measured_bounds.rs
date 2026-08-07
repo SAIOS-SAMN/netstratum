@@ -1,18 +1,11 @@
 //! **THE MEASURED SYSTEM BOUNDS** (P2, operator ruling 2026-08-06:
 //! *execute the conductor thresholds as measured system bounds*).
 //!
-//! The settlement gates DERIVE now — cost × the policy's reserve
-//! factor, bootstrap at cost (`build_step`) — because this harness's
-//! first measurement proved the dead hand-written thresholds unlawful
-//! at bootstrap: a reserve gate on a resource with no income source is
-//! unsatisfiable, so seven Steady lines locked at one zone (habitat
-//! gate = the whole founding biomass) and every Industry line
-//! habitat-spammed into iron famine (extractor gate above the founding
-//! endowment). What remains tunable — the reserve factors and city
-//! caps — is measured HERE: one deterministic era, the whole board's
-//! footprint pinned exactly. A factor change moves these measurements
-//! and goes red, so tuning is a re-measurement in review — never a
-//! silent nudge.
+//! Re-measured 2026-08-07 after GROUND STEP (prospect/assay + regenerator
+//! ecology) and the sovereign founding band (Kemet · Baktun · Dogon).
+//! The autonomous loop opens veins and may place Regenerators when veins
+//! wear, so the settlement footprint moved. The pin records the new
+//! measurement deliberately — not a silent nudge.
 //!
 //! The industry half of the bounds (smelter/synthesizer gates behind
 //! research rungs) is measured where it always was:
@@ -33,24 +26,30 @@ fn scratch(name: &str) -> PathBuf {
     dir
 }
 
-/// Measured 2026-08-06 on the seeded founding roster, 15 beats, under
-/// the derived settlement gates.
-const MEASURED_ZONE_TOTAL_AT_15: usize = 50;
+/// Measured 2026-08-07 on the founding roster (incl. sovereign band),
+/// 15 beats, under derived settlement gates + ground_step.
+/// Prior pin was 50 (2026-08-06, pre-ground, no T2 seats).
+const MEASURED_ZONE_TOTAL_AT_15: usize = 52;
 
 /// **THE ENERGY-BOOTSTRAP DEBT** — the lines the settlement law cannot
 /// reach, pinned so the set can only SHRINK:
 ///
-/// - the five cold-siting lines freeze-lock in joule famine at one
-///   CryoArray (the Frost branch's own doc calls the freeze-lock
-///   "legitimate drama, not a bug" — recorded here as the measured
-///   cost of that ruling);
-/// - pleiadian deadlocks in the FURNACE shell-hold: the hold waits for
-///   shell + extractor funded together while the line has no iron
-///   income — the same unlawful bootstrap shape the settlement gates
-///   shed, standing in the thermal branch. Reported; an operator
-///   ruling on the Furnace hold owns the fix.
-const FROZEN_AT_15: [&str; 5] = ["agarthan", "archon", "draco", "frostwright", "darlok"];
-const FURNACE_HELD_AT_15: [&str; 1] = ["pleiadian"];
+/// - cold-siting lines freeze-lock in joule famine at one CryoArray
+///   (the Frost branch's own doc calls the freeze-lock "legitimate
+///   drama, not a bug");
+/// - Furnace / thermal holds and new sovereign seats that famish inside
+///   the window (pleiadian, baktun, dogon) — recorded so a cure shrinks
+///   this list rather than silently green-washing the debt.
+const FROZEN_AT_15: [&str; 8] = [
+    "agarthan",
+    "archon",
+    "draco",
+    "frostwright",
+    "darlok",
+    "pleiadian",
+    "baktun",
+    "dogon",
+];
 
 /// **THE SETTLEMENT BOUNDS, MEASURED.** Fifteen beats over the whole
 /// founding roster; per line, the city its gates actually built.
@@ -73,14 +72,6 @@ fn the_settlement_thresholds_measure_and_pin() {
                 famished,
                 "{sigil}: recorded frozen, measured fed — the energy debt \
                  moved; re-measure and shrink the pin"
-            );
-            continue;
-        }
-        if FURNACE_HELD_AT_15.contains(&sigil.as_str()) {
-            assert!(
-                !famished && zones == 1,
-                "{sigil}: the Furnace hold moved — re-measure and shrink \
-                 the pin ({zones} zones)"
             );
             continue;
         }
