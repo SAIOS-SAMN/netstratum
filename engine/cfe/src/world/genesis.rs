@@ -41,6 +41,8 @@ impl World {
             notes: Vec::new(),
             futures: Vec::new(),
             last_clears: Vec::new(),
+            shares: Vec::new(),
+            perps: Vec::new(),
         }
     }
     /// P2-PERSIST — resume a world from its chronicle: the committed
@@ -92,6 +94,8 @@ impl World {
             notes: committed.notes,
             futures: committed.futures,
             last_clears: committed.last_clears,
+            shares: committed.shares,
+            perps: committed.perps,
         }
     }
     /// ELEVATE-1 (12_UNION §6) — THE THREE-GATE GAUGE CLIMB, the

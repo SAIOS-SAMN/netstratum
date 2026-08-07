@@ -2523,6 +2523,172 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 other
             ),
         },
+        Some("share") => match words.next() {
+            None | Some("list") | Some("help") => {
+                println!(
+                    "{} SHARES — listable={}",
+                    style.head("SHARE"),
+                    world.shares_listable()
+                );
+                for s in world.shares().iter().filter(|s| s.open) {
+                    println!(
+                        "  share {} · {:?} units {} par {} holder {}",
+                        s.share_id,
+                        s.stream,
+                        amount(&s.units),
+                        amount(&s.par),
+                        s.holder
+                    );
+                }
+            }
+            Some("issue") => {
+                let stream = words
+                    .next()
+                    .and_then(|w| match w {
+                        "iron" | "i" => Some(cfe::dop::Resource::Iron),
+                        "bio" | "biomass" => Some(cfe::dop::Resource::Biomass),
+                        "crystal" | "c" => Some(cfe::dop::Resource::Crystal),
+                        _ => None,
+                    })
+                    .unwrap_or(cfe::dop::Resource::Iron);
+                let units = words
+                    .next()
+                    .and_then(|w| w.parse::<i64>().ok())
+                    .unwrap_or(1);
+                let par = words
+                    .next()
+                    .and_then(|w| w.parse::<i64>().ok())
+                    .unwrap_or(1);
+                let orb = world.orb().map(|o| o.orb_id).unwrap_or(cfe::world::FIRST_ORB);
+                match (
+                    cfe::dop::Positive::new(ratio(units, 1)),
+                    cfe::dop::Positive::new(ratio(par, 1)),
+                ) {
+                    (Some(u), Some(p)) => {
+                        match world.issue_share(orb, cfe::world::SOVEREIGN, stream, u, p) {
+                            Ok(id) => println!(
+                                "{} share {id} ISSUED · {:?}×{units} par {par}",
+                                style.ok("✓"),
+                                stream
+                            ),
+                            Err(refusal) => refuse(world, &refusal, style),
+                        }
+                    }
+                    _ => println!("{} need positive units/par", style.bad("✗")),
+                }
+            }
+            Some("dividend") | Some("div") => {
+                let id = words.next().and_then(|w| w.parse().ok()).unwrap_or(0);
+                match world.pay_share_dividend(id) {
+                    Ok(a) => println!("{} share {id} dividend {} STAMP", style.ok("✓"), amount(&a)),
+                    Err(refusal) => refuse(world, &refusal, style),
+                }
+            }
+            Some("transfer") => {
+                let id = words.next().and_then(|w| w.parse().ok()).unwrap_or(0);
+                let to = words.next().and_then(|w| w.parse().ok()).unwrap_or(0);
+                let u = words
+                    .next()
+                    .and_then(|w| w.parse::<i64>().ok())
+                    .unwrap_or(1);
+                if let Some(units) = cfe::dop::Positive::new(ratio(u, 1)) {
+                    match world.transfer_share(id, to, units) {
+                        Ok(()) => println!("{} share {id} → {to}", style.ok("✓")),
+                        Err(refusal) => refuse(world, &refusal, style),
+                    }
+                }
+            }
+            Some(other) => println!(
+                "{} share {:?} — list|issue|dividend|transfer",
+                style.bad("✗"),
+                other
+            ),
+        },
+        Some("perp") => match words.next() {
+            None | Some("list") | Some("help") => {
+                println!(
+                    "{} PERPS — listable={}",
+                    style.head("PERP"),
+                    world.perps_listable()
+                );
+                for p in world.perps().iter().filter(|p| p.open) {
+                    println!(
+                        "  perp {} · {:?}×{} entry {} margin {}",
+                        p.perp_id,
+                        p.resource,
+                        amount(&p.notional),
+                        amount(&p.entry),
+                        amount(&p.margin)
+                    );
+                }
+            }
+            Some("open") => {
+                let res = words
+                    .next()
+                    .and_then(|w| match w {
+                        "crystal" | "c" => Some(cfe::dop::Resource::Crystal),
+                        "iron" | "i" => Some(cfe::dop::Resource::Iron),
+                        _ => None,
+                    })
+                    .unwrap_or(cfe::dop::Resource::Crystal);
+                let notional = words
+                    .next()
+                    .and_then(|w| w.parse::<i64>().ok())
+                    .unwrap_or(1);
+                let margin = words
+                    .next()
+                    .and_then(|w| w.parse::<i64>().ok())
+                    .unwrap_or(1);
+                let orb = world.orb().map(|o| o.orb_id).unwrap_or(cfe::world::FIRST_ORB);
+                let long = cfe::world::SOVEREIGN;
+                let short = world
+                    .entities()
+                    .iter()
+                    .map(|e| e.entity_id)
+                    .find(|id| *id != long)
+                    .unwrap_or(long.saturating_add(1));
+                match (
+                    cfe::dop::Positive::new(ratio(notional, 1)),
+                    cfe::dop::Positive::new(ratio(margin, 1)),
+                ) {
+                    (Some(n), Some(m)) => match world.open_perp(orb, long, short, res, n, m) {
+                        Ok(id) => println!(
+                            "{} perp {id} OPEN · {:?}×{notional}",
+                            style.ok("✓"),
+                            res
+                        ),
+                        Err(refusal) => refuse(world, &refusal, style),
+                    },
+                    _ => println!("{} need positive sizes", style.bad("✗")),
+                }
+            }
+            Some("fund") => {
+                let id = words.next().and_then(|w| w.parse().ok()).unwrap_or(0);
+                match world.fund_perp(id) {
+                    Ok(f) => println!("{} perp {id} funding {}", style.ok("✓"), amount(&f)),
+                    Err(refusal) => refuse(world, &refusal, style),
+                }
+            }
+            Some("close") => {
+                let id = words.next().and_then(|w| w.parse().ok()).unwrap_or(0);
+                match world.close_perp(id) {
+                    Ok(()) => println!("{} perp {id} CLOSED", style.ok("✓")),
+                    Err(refusal) => refuse(world, &refusal, style),
+                }
+            }
+            Some("liquidate") | Some("liq") => {
+                let id = words.next().and_then(|w| w.parse().ok()).unwrap_or(0);
+                match world.liquidate_perp(id) {
+                    Ok(()) => println!("{} perp {id} LIQUIDATED", style.ok("✓")),
+                    Err(refusal) => refuse(world, &refusal, style),
+                }
+            }
+            Some(other) => println!(
+                "{} perp {:?} — list|open|fund|close|liquidate",
+                style.bad("✗"),
+                other
+            ),
+        },
         Some("future") | Some("fut") => match words.next() {
             None | Some("list") | Some("help") => {
                 println!(
@@ -4506,20 +4672,41 @@ fn fleet_command(
                 .next()
                 .and_then(|w| w.parse::<u8>().ok())
                 .unwrap_or(0);
-            match world.mint_hull(current, role, grade) {
-                Ok(id) => {
-                    let _ = sync_world(world);
-                    println!(
-                        "{} hull {} minted ({})",
-                        style.ok("🚢"),
-                        style.strong(&id.to_string()),
-                        style.accent(cfe::world::hull_voice(
-                            role,
-                            world.committed().genesis.as_ref().map(|g| g.metabolism)
-                        ))
-                    );
+            let finance = matches!(words.next(), Some("finance") | Some("note") | Some("fin"));
+            if finance {
+                match world.mint_hull_financed(current, role, grade) {
+                    Ok((id, note)) => {
+                        let _ = sync_world(world);
+                        println!(
+                            "{} hull {} minted ({}){}",
+                            style.ok("🚢"),
+                            style.strong(&id.to_string()),
+                            style.accent(cfe::world::hull_voice(
+                                role,
+                                world.committed().genesis.as_ref().map(|g| g.metabolism)
+                            )),
+                            note.map(|n| format!(" · yard note {n}"))
+                                .unwrap_or_default()
+                        );
+                    }
+                    Err(refusal) => refuse(world, &refusal, style),
                 }
-                Err(refusal) => refuse(world, &refusal, style),
+            } else {
+                match world.mint_hull(current, role, grade) {
+                    Ok(id) => {
+                        let _ = sync_world(world);
+                        println!(
+                            "{} hull {} minted ({})",
+                            style.ok("🚢"),
+                            style.strong(&id.to_string()),
+                            style.accent(cfe::world::hull_voice(
+                                role,
+                                world.committed().genesis.as_ref().map(|g| g.metabolism)
+                            ))
+                        );
+                    }
+                    Err(refusal) => refuse(world, &refusal, style),
+                }
             }
         }
         Some("assign") => {
@@ -5888,6 +6075,18 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
         ActionRefused::FutureImmature { fut_id, expiry } => {
             format!("future {fut_id} expires at t{expiry}")
         }
+        ActionRefused::SharesBookClosed => {
+            "share book closed — need zones+production or Exchange".into()
+        }
+        ActionRefused::NoSuchShare { share_id } => format!("no open share {share_id}"),
+        ActionRefused::ShareOverTransfer => "transfer exceeds share units".into(),
+        ActionRefused::PerpsBookClosed => {
+            "perp book closed — need cargo evidence or Exchange".into()
+        }
+        ActionRefused::NoSuchPerp { perp_id } => format!("no open perp {perp_id}"),
+        ActionRefused::PerpMarginBreach { perp_id } => {
+            format!("perp {perp_id} margin breach — liquidate or fund")
+        }
         ActionRefused::BalanceEntropyDominates {
             balance,
             syntropy,
@@ -7116,6 +7315,83 @@ fn chronicle(world: &World, style: &Style) {
                 "📌 last clear {:?} = {} STAMP/unit",
                 resource,
                 amount(price)
+            ),
+            cfe::dop::ClosureEvent::ShareIssued {
+                share_id,
+                stream,
+                units,
+                ..
+            } => format!(
+                "🏛 share {} · {} units on {:?}",
+                style.strong(&share_id.to_string()),
+                amount(units),
+                stream
+            ),
+            cfe::dop::ClosureEvent::ShareTransferred {
+                share_id,
+                to,
+                units,
+                ..
+            } => format!(
+                "🏛 share {} transferred {} → {}",
+                share_id,
+                amount(units),
+                to
+            ),
+            cfe::dop::ClosureEvent::ShareDividend {
+                share_id,
+                amount: a,
+                ..
+            } => format!(
+                "🏛 share {} dividend {} STAMP",
+                share_id,
+                amount(a)
+            ),
+            cfe::dop::ClosureEvent::PerpOpened {
+                perp_id,
+                resource,
+                notional,
+                entry,
+                ..
+            } => format!(
+                "∞ perp {} · {}×{:?} @ {}",
+                style.strong(&perp_id.to_string()),
+                amount(notional),
+                resource,
+                amount(entry)
+            ),
+            cfe::dop::ClosureEvent::PerpFunded {
+                perp_id,
+                funding,
+                mark,
+                ..
+            } => format!(
+                "∞ perp {} funding {} @ mark {}",
+                perp_id,
+                amount(funding),
+                amount(mark)
+            ),
+            cfe::dop::ClosureEvent::PerpClosed {
+                perp_id,
+                long_pnl,
+                liquidated,
+                ..
+            } => format!(
+                "∞ perp {} closed PnL {}{}",
+                perp_id,
+                amount(long_pnl),
+                if *liquidated { " LIQ" } else { "" }
+            ),
+            cfe::dop::ClosureEvent::HullFinanced {
+                hull_id,
+                note_id,
+                note_face,
+                ..
+            } => format!(
+                "🚢 hull {} financed · note {} face {}",
+                hull_id,
+                note_id,
+                amount(note_face)
             ),
             cfe::dop::ClosureEvent::AssayStruck { amount: drawn, richness, .. } => format!(
                 "⚖ {} drawn from the opened vein — one receipt, the whole span{}",

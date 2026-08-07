@@ -76,6 +76,9 @@ pub const SCHEMA_V7: u8 = 7;
 /// **SCHEMA v8 (Phase-4 instruments) — notes, futures, last clears.**
 pub const SCHEMA_V8: u8 = 8;
 
+/// **SCHEMA v9 — shares + perps trail.**
+pub const SCHEMA_V9: u8 = 9;
+
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
 }
@@ -96,7 +99,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V8];
+    let mut out = vec![SCHEMA_V9];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -353,6 +356,28 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         out.push(*r as u8);
         ratio::encode(p, &mut out);
     }
+    put_u32(&mut out, committed.shares.len() as u32);
+    for s in &committed.shares {
+        put_u64(&mut out, s.share_id);
+        put_u64(&mut out, s.orb_id);
+        put_u64(&mut out, s.holder);
+        out.push(s.stream as u8);
+        ratio::encode(&s.units, &mut out);
+        ratio::encode(&s.par, &mut out);
+        out.push(u8::from(s.open));
+    }
+    put_u32(&mut out, committed.perps.len() as u32);
+    for p in &committed.perps {
+        put_u64(&mut out, p.perp_id);
+        put_u64(&mut out, p.orb_id);
+        put_u64(&mut out, p.long);
+        put_u64(&mut out, p.short);
+        out.push(p.resource as u8);
+        ratio::encode(&p.notional, &mut out);
+        ratio::encode(&p.entry, &mut out);
+        ratio::encode(&p.margin, &mut out);
+        out.push(u8::from(p.open));
+    }
     out
 }
 
@@ -430,6 +455,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         && schema != SCHEMA_V6
         && schema != SCHEMA_V7
         && schema != SCHEMA_V8
+        && schema != SCHEMA_V9
     {
         return None;
     }
@@ -779,6 +805,37 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         }
     }
 
+    let mut shares = Vec::new();
+    let mut perps = Vec::new();
+    if schema >= SCHEMA_V9 {
+        for _ in 0..take.u32()? {
+            let share_id = take.u64()?;
+            let orb_id = take.u64()?;
+            let holder = take.u64()?;
+            let stream = cfe::dop::Resource::from_wire(take.u8()?)?;
+            let units = take.ratio()?;
+            let par = take.ratio()?;
+            let open = take.u8()? != 0;
+            shares.push(cfe::dop::MarketShare {
+                share_id, orb_id, holder, stream, units, par, open,
+            });
+        }
+        for _ in 0..take.u32()? {
+            let perp_id = take.u64()?;
+            let orb_id = take.u64()?;
+            let long = take.u64()?;
+            let short = take.u64()?;
+            let resource = cfe::dop::Resource::from_wire(take.u8()?)?;
+            let notional = take.ratio()?;
+            let entry = take.ratio()?;
+            let margin = take.ratio()?;
+            let open = take.u8()? != 0;
+            perps.push(cfe::dop::MarketPerp {
+                perp_id, orb_id, long, short, resource, notional, entry, margin, open,
+            });
+        }
+    }
+
     if !take.done() {
         return None;
     }
@@ -812,5 +869,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         notes,
         futures,
         last_clears,
+        shares,
+        perps,
     })
 }

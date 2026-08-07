@@ -837,6 +837,92 @@ pub fn render_receipt(receipt: &Receipt) -> String {
                 ratio_str(price)
             ),
         ),
+        E::ShareIssued {
+            share_id,
+            stream,
+            units,
+            ..
+        } => (
+            "share_issued",
+            format!(
+                "share {share_id} {} units on {}",
+                ratio_str(units),
+                resource_name(*stream)
+            ),
+        ),
+        E::ShareTransferred {
+            share_id,
+            to,
+            units,
+            ..
+        } => (
+            "share_transferred",
+            format!(
+                "share {share_id} {} → holder {to}",
+                ratio_str(units)
+            ),
+        ),
+        E::ShareDividend {
+            share_id,
+            amount,
+            ..
+        } => (
+            "share_dividend",
+            format!("share {share_id} dividend {} STAMP", ratio_str(amount)),
+        ),
+        E::PerpOpened {
+            perp_id,
+            resource,
+            notional,
+            entry,
+            ..
+        } => (
+            "perp_opened",
+            format!(
+                "perp {perp_id} {}×{} @ {}",
+                ratio_str(notional),
+                resource_name(*resource),
+                ratio_str(entry)
+            ),
+        ),
+        E::PerpFunded {
+            perp_id,
+            funding,
+            mark,
+            ..
+        } => (
+            "perp_funded",
+            format!(
+                "perp {perp_id} funding {} @ mark {}",
+                ratio_str(funding),
+                ratio_str(mark)
+            ),
+        ),
+        E::PerpClosed {
+            perp_id,
+            long_pnl,
+            liquidated,
+            ..
+        } => (
+            "perp_closed",
+            format!(
+                "perp {perp_id} closed PnL {}{}",
+                ratio_str(long_pnl),
+                if *liquidated { " LIQUIDATED" } else { "" }
+            ),
+        ),
+        E::HullFinanced {
+            hull_id,
+            note_id,
+            note_face,
+            ..
+        } => (
+            "hull_financed",
+            format!(
+                "hull {hull_id} financed note {note_id} face {}",
+                ratio_str(note_face)
+            ),
+        ),
         E::ApertureSent { deal, from_orb, resource, amount } => (
             "aperture_sent",
             format!(

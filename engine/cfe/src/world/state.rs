@@ -187,6 +187,10 @@ pub struct Committed {
     pub futures: Vec<crate::dop::MarketFuture>,
     /// PHASE-4: last-clear marks (resource → STAMP price), latest wins.
     pub last_clears: Vec<(crate::dop::Resource, Ratio)>,
+    /// SHARE-1 open issues.
+    pub shares: Vec<crate::dop::MarketShare>,
+    /// PERP-1 open positions.
+    pub perps: Vec<crate::dop::MarketPerp>,
 }
 
 /// G1 (04 §1): a civilization's sealed axes, as the world holds them.
@@ -287,6 +291,8 @@ pub struct World {
     pub(super) notes: Vec<crate::dop::MarketNote>,
     pub(super) futures: Vec<crate::dop::MarketFuture>,
     pub(super) last_clears: Vec<(crate::dop::Resource, Ratio)>,
+    pub(super) shares: Vec<crate::dop::MarketShare>,
+    pub(super) perps: Vec<crate::dop::MarketPerp>,
 }
 
 /// PLANNER-1: what a licensed leap carries — the condition and name

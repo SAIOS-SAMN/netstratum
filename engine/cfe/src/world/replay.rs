@@ -43,6 +43,8 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut notes: Vec<crate::dop::MarketNote> = Vec::new();
     let mut futures: Vec<crate::dop::MarketFuture> = Vec::new();
     let mut last_clears: Vec<(crate::dop::Resource, Ratio)> = Vec::new();
+    let mut shares: Vec<crate::dop::MarketShare> = Vec::new();
+    let mut perps: Vec<crate::dop::MarketPerp> = Vec::new();
     for receipt in chronicle.receipts() {
         match &receipt.event {
             // BOOK-1 (19_LENS §16) — the open registry rebuilds from
@@ -1062,12 +1064,129 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 last_clears.retain(|(r, _)| *r != *resource);
                 last_clears.push((*resource, price.clone()));
             }
+            ClosureEvent::ShareIssued {
+                share_id,
+                orb_id,
+                holder,
+                stream,
+                units,
+                par,
+            } => {
+                shares.push(crate::dop::MarketShare {
+                    share_id: *share_id,
+                    orb_id: *orb_id,
+                    holder: *holder,
+                    stream: *stream,
+                    units: units.clone(),
+                    par: par.clone(),
+                    open: true,
+                });
+            }
+            ClosureEvent::ShareTransferred {
+                share_id,
+                from: _,
+                to,
+                units,
+            } => {
+                if let Some(s) = shares.iter_mut().find(|s| s.share_id == *share_id) {
+                    s.units = s.units.clone() - units.clone();
+                    if s.units == ratio(0, 1) {
+                        s.open = false;
+                    }
+                    let stream = s.stream;
+                    let orb = s.orb_id;
+                    let par = s.par.clone();
+                    if let Some(dest) = shares
+                        .iter_mut()
+                        .find(|s| s.open && s.holder == *to && s.stream == stream && s.orb_id == orb)
+                    {
+                        dest.units += units.clone();
+                    } else {
+                        let nid = shares.iter().map(|s| s.share_id).max().unwrap_or(0) + 1;
+                        shares.push(crate::dop::MarketShare {
+                            share_id: nid,
+                            orb_id: orb,
+                            holder: *to,
+                            stream,
+                            units: units.clone(),
+                            par,
+                            open: true,
+                        });
+                    }
+                }
+            }
+            ClosureEvent::ShareDividend {
+                share_id: _,
+                orb_id,
+                stream,
+                resource_cut,
+                amount,
+            } => {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank(*stream, -resource_cut.clone());
+                    held.bank_stamp(amount.clone());
+                }
+            }
+            ClosureEvent::PerpOpened {
+                perp_id,
+                orb_id,
+                long,
+                short,
+                resource,
+                notional,
+                entry,
+                margin,
+            } => {
+                let lock = margin.clone() + margin.clone();
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank_stamp(-lock);
+                }
+                perps.push(crate::dop::MarketPerp {
+                    perp_id: *perp_id,
+                    orb_id: *orb_id,
+                    long: *long,
+                    short: *short,
+                    resource: *resource,
+                    notional: notional.clone(),
+                    entry: entry.clone(),
+                    margin: margin.clone(),
+                    open: true,
+                });
+            }
+            ClosureEvent::PerpFunded { .. } => {}
+            ClosureEvent::PerpClosed {
+                perp_id,
+                orb_id,
+                mark: _,
+                long_pnl,
+                liquidated: _,
+            } => {
+                if let Some(p) = perps.iter_mut().find(|p| p.perp_id == *perp_id) {
+                    p.open = false;
+                    if let Some(held) = peel(&mut orbs, *orb_id) {
+                        let unlock = p.margin.clone() + p.margin.clone();
+                        held.bank_stamp(unlock);
+                        if *long_pnl > ratio(0, 1) {
+                            held.bank_stamp(long_pnl.clone());
+                        } else if *long_pnl < ratio(0, 1) {
+                            let loss = ratio(0, 1) - long_pnl.clone();
+                            let have = held.stamp_amount();
+                            let take = if have < loss { have } else { loss };
+                            held.bank_stamp(-take);
+                        }
+                    }
+                }
+            }
+            ClosureEvent::HullFinanced { .. } => {
+                // NoteIssued + HullMinted already applied on their own receipts.
+            }
         }
     }
     Committed {
         orbs, entities, star, debts, bonds, forwards, councils, offers, techs, wants, crossed,
         gauge, genesis, terrain_seed, practices, instruments, routes, element_routes, treaties,
-        prospects, warded, veiled, taxon, stations, hulls, notes, futures, last_clears,
+        prospects, warded, veiled, taxon, stations, hulls, notes, futures, last_clears, shares,
+        perps,
     }
 }
 

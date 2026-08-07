@@ -225,6 +225,57 @@ fn every_deed() -> Vec<ClosureEvent> {
             resource: Resource::Crystal,
             price: r(1),
         },
+        E::ShareIssued {
+            share_id: 1,
+            orb_id: 1,
+            holder: 1,
+            stream: Resource::Iron,
+            units: r(1),
+            par: r(1),
+        },
+        E::ShareTransferred {
+            share_id: 1,
+            from: 1,
+            to: 2,
+            units: r(1),
+        },
+        E::ShareDividend {
+            share_id: 1,
+            orb_id: 1,
+            stream: Resource::Iron,
+            resource_cut: r(1),
+            amount: r(1),
+        },
+        E::PerpOpened {
+            perp_id: 1,
+            orb_id: 1,
+            long: 1,
+            short: 2,
+            resource: Resource::Crystal,
+            notional: r(1),
+            entry: r(1),
+            margin: r(1),
+        },
+        E::PerpFunded {
+            perp_id: 1,
+            orb_id: 1,
+            funding: r(0),
+            mark: r(1),
+        },
+        E::PerpClosed {
+            perp_id: 1,
+            orb_id: 1,
+            mark: r(1),
+            long_pnl: r(0),
+            liquidated: false,
+        },
+        E::HullFinanced {
+            hull_id: 1,
+            note_id: 1,
+            orb_id: 1,
+            scrap_spent: r(4),
+            note_face: r(1),
+        },
         E::ElderWarded {},
         E::WardLifted { claimer: "w".into() },
         E::VeilDrawn {},
@@ -264,7 +315,7 @@ fn coverage_is_total_the_sealed_default_is_unreachable() {
     // treaty deeds after it (65 -> 67); the tag registry in `dop.rs` is
     // the other place that must move.
     let deeds = every_deed();
-    assert_eq!(deeds.len(), 85, "one instance of every ClosureEvent variant");
+    assert_eq!(deeds.len(), 92, "one instance of every ClosureEvent variant");
     let state = seated();
     for event in deeds {
         let verdict = admits(&state, &state, &step(event.clone(), SOVEREIGN));

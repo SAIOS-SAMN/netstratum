@@ -1,11 +1,14 @@
-//! PHASE-4 — market Notes + Futures (32_STAMP_MARKET / TASKS P4).
+//! PHASE-4 — market Notes · Futures · Shares · Perps (32 / TASKS P4).
 //!
-//! Notes ≠ ideology BondSealed. Futures mark only against receipted
-//! last clears (no float mark-to-model). Listing filtered by evidence
-//! and Exchange seat (Q-F5).
+//! Notes ≠ ideology BondSealed. Futures/Perps mark only against receipted
+//! last clears (no float mark-to-model). Shares dividend from yield window.
+//! Listing filtered by evidence and Exchange seat (Q-F5).
 
 use super::*;
-use crate::dop::{MarketFuture, MarketNote, Resource, Station};
+use crate::dop::{
+    hull_scrap_cost, HullRole, MarketFuture, MarketNote, MarketPerp, MarketShare, Resource,
+    Station,
+};
 
 impl World {
     /// Does T6 Exchange stand on this world's station list?
@@ -391,5 +394,466 @@ impl World {
 
     pub fn last_clears(&self) -> &[(Resource, Ratio)] {
         &self.last_clears
+    }
+
+    pub fn shares(&self) -> &[MarketShare] {
+        &self.shares
+    }
+
+    pub fn perps(&self) -> &[MarketPerp] {
+        &self.perps
+    }
+
+    /// SHARE book: Exchange, or production evidence (zones + banked stream).
+    pub fn shares_listable(&self) -> bool {
+        if self.exchange_seated() {
+            return true;
+        }
+        self.orb().is_some_and(|o| {
+            !o.zones.is_empty()
+                && (o.banked_amount(Resource::Iron) > ratio(0, 1)
+                    || o.banked_amount(Resource::Biomass) > ratio(0, 1)
+                    || o.banked_amount(Resource::Crystal) > ratio(0, 1))
+        })
+    }
+
+    /// PERP book: same gate as futures (index needs last-clear depth).
+    pub fn perps_listable(&self) -> bool {
+        self.futures_listable()
+    }
+
+    /// Issue shares on a production stream (resource). Par STAMP/unit.
+    pub fn issue_share(
+        &mut self,
+        orb: u64,
+        holder: u64,
+        stream: Resource,
+        units: crate::dop::Positive,
+        par: crate::dop::Positive,
+    ) -> Result<u64, ActionRefused> {
+        self.issue_share_as(SOVEREIGN, orb, holder, stream, units, par)
+    }
+
+    pub fn issue_share_as(
+        &mut self,
+        actor: u64,
+        orb: u64,
+        holder: u64,
+        stream: Resource,
+        units: crate::dop::Positive,
+        par: crate::dop::Positive,
+    ) -> Result<u64, ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if !self.shares_listable() {
+            return Err(ActionRefused::SharesBookClosed);
+        }
+        let u = units.value().clone();
+        let p = par.value().clone();
+        if u == ratio(0, 1) || p == ratio(0, 1) {
+            return Err(ActionRefused::InstrumentEmpty);
+        }
+        if peek(&self.orbs, orb).is_none() {
+            return Err(ActionRefused::NoSuchOrb { orb });
+        }
+        // Production evidence: zone stands or stream banked.
+        let ok = peek(&self.orbs, orb).is_some_and(|o| {
+            !o.zones.is_empty() || o.banked_amount(stream) > ratio(0, 1)
+        });
+        if !ok {
+            return Err(ActionRefused::SharesBookClosed);
+        }
+        let share_id = self
+            .shares
+            .iter()
+            .map(|s| s.share_id)
+            .max()
+            .unwrap_or(0)
+            .saturating_add(1);
+        self.shares.push(MarketShare {
+            share_id,
+            orb_id: orb,
+            holder,
+            stream,
+            units: u.clone(),
+            par: p.clone(),
+            open: true,
+        });
+        self.close(
+            ClosureEvent::ShareIssued {
+                share_id,
+                orb_id: orb,
+                holder,
+                stream,
+                units: u,
+                par: p,
+            },
+            actor,
+        );
+        Ok(share_id)
+    }
+
+    /// Transfer share units to a new holder (secondary).
+    pub fn transfer_share(
+        &mut self,
+        share_id: u64,
+        to: u64,
+        units: crate::dop::Positive,
+    ) -> Result<(), ActionRefused> {
+        self.transfer_share_as(SOVEREIGN, share_id, to, units)
+    }
+
+    pub fn transfer_share_as(
+        &mut self,
+        actor: u64,
+        share_id: u64,
+        to: u64,
+        units: crate::dop::Positive,
+    ) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        let want = units.value().clone();
+        let at = self
+            .shares
+            .iter()
+            .position(|s| s.share_id == share_id && s.open)
+            .ok_or(ActionRefused::NoSuchShare { share_id })?;
+        let from = self.shares[at].holder;
+        if self.shares[at].units < want {
+            return Err(ActionRefused::ShareOverTransfer);
+        }
+        self.shares[at].units = self.shares[at].units.clone() - want.clone();
+        if self.shares[at].units == ratio(0, 1) {
+            self.shares[at].open = false;
+        }
+        // Credit recipient: new share line or merge if same stream/holder.
+        let stream = self.shares[at].stream;
+        let orb = self.shares[at].orb_id;
+        let par = self.shares[at].par.clone();
+        if let Some(dest) = self
+            .shares
+            .iter_mut()
+            .find(|s| s.open && s.holder == to && s.stream == stream && s.orb_id == orb)
+        {
+            dest.units += want.clone();
+        } else {
+            let nid = self
+                .shares
+                .iter()
+                .map(|s| s.share_id)
+                .max()
+                .unwrap_or(0)
+                .saturating_add(1);
+            self.shares.push(MarketShare {
+                share_id: nid,
+                orb_id: orb,
+                holder: to,
+                stream,
+                units: want.clone(),
+                par,
+                open: true,
+            });
+        }
+        self.close(
+            ClosureEvent::ShareTransferred {
+                share_id,
+                from,
+                to,
+                units: want,
+            },
+            actor,
+        );
+        Ok(())
+    }
+
+    /// Dividend: exact 1/8 of banked stream × holder units / total open units
+    /// (if total zero, refuse). Pays STAMP at last_clear(stream) × resource cut.
+    pub fn pay_share_dividend(&mut self, share_id: u64) -> Result<Ratio, ActionRefused> {
+        self.pay_share_dividend_as(SOVEREIGN, share_id)
+    }
+
+    pub fn pay_share_dividend_as(
+        &mut self,
+        actor: u64,
+        share_id: u64,
+    ) -> Result<Ratio, ActionRefused> {
+        self.permitted(actor, Scope::Collect)?;
+        let at = self
+            .shares
+            .iter()
+            .position(|s| s.share_id == share_id && s.open)
+            .ok_or(ActionRefused::NoSuchShare { share_id })?;
+        let share = self.shares[at].clone();
+        let total_units = self
+            .shares
+            .iter()
+            .filter(|s| s.open && s.orb_id == share.orb_id && s.stream == share.stream)
+            .fold(ratio(0, 1), |a, s| a + s.units.clone());
+        if total_units == ratio(0, 1) {
+            return Err(ActionRefused::InstrumentEmpty);
+        }
+        let pool = peek(&self.orbs, share.orb_id)
+            .map(|o| o.banked_amount(share.stream))
+            .unwrap_or_else(|| ratio(0, 1));
+        // Window cut: eighth of pool (1/(1+1+1+1+1+1+1+1)).
+        let eight = {
+            let two = ratio(1, 1) + ratio(1, 1);
+            let four = two.clone() + two;
+            four.clone() + four
+        };
+        let cut = pool / eight;
+        let slice = cut * share.units.clone() / total_units;
+        if slice == ratio(0, 1) {
+            return Err(ActionRefused::InstrumentEmpty);
+        }
+        // Convert to STAMP at last clear (or identity).
+        let mark = self.last_clear_of(share.stream);
+        let stamp_pay = slice.clone() * mark;
+        let held = peel(&mut self.orbs, share.orb_id)
+            .ok_or(ActionRefused::NoSuchOrb { orb: share.orb_id })?;
+        held.bank(share.stream, -slice.clone());
+        held.bank_stamp(stamp_pay.clone());
+        self.close(
+            ClosureEvent::ShareDividend {
+                share_id,
+                orb_id: share.orb_id,
+                stream: share.stream,
+                resource_cut: slice,
+                amount: stamp_pay.clone(),
+            },
+            actor,
+        );
+        Ok(stamp_pay)
+    }
+
+    /// Open a Perp: same margin law as Future; entry = last clear.
+    #[allow(clippy::too_many_arguments)]
+    pub fn open_perp(
+        &mut self,
+        orb: u64,
+        long: u64,
+        short: u64,
+        resource: Resource,
+        notional: crate::dop::Positive,
+        margin: crate::dop::Positive,
+    ) -> Result<u64, ActionRefused> {
+        self.open_perp_as(SOVEREIGN, orb, long, short, resource, notional, margin)
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn open_perp_as(
+        &mut self,
+        actor: u64,
+        orb: u64,
+        long: u64,
+        short: u64,
+        resource: Resource,
+        notional: crate::dop::Positive,
+        margin: crate::dop::Positive,
+    ) -> Result<u64, ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if !self.perps_listable() {
+            return Err(ActionRefused::PerpsBookClosed);
+        }
+        if long == short {
+            return Err(ActionRefused::InstrumentEmpty);
+        }
+        let n = notional.value().clone();
+        let m = margin.value().clone();
+        if n == ratio(0, 1) || m == ratio(0, 1) {
+            return Err(ActionRefused::InstrumentEmpty);
+        }
+        let entry = self.last_clear_of(resource);
+        let lock = m.clone() + m.clone();
+        let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
+        let have = held.stamp_amount();
+        if have < lock {
+            return Err(ActionRefused::CannotAffordStamp {
+                need: Box::new(lock),
+                have: Box::new(have),
+            });
+        }
+        held.bank_stamp(-lock);
+        let perp_id = self
+            .perps
+            .iter()
+            .map(|p| p.perp_id)
+            .max()
+            .unwrap_or(0)
+            .saturating_add(1);
+        self.perps.push(MarketPerp {
+            perp_id,
+            orb_id: orb,
+            long,
+            short,
+            resource,
+            notional: n.clone(),
+            entry: entry.clone(),
+            margin: m.clone(),
+            open: true,
+        });
+        self.close(
+            ClosureEvent::PerpOpened {
+                perp_id,
+                orb_id: orb,
+                long,
+                short,
+                resource,
+                notional: n,
+                entry,
+                margin: m,
+            },
+            actor,
+        );
+        Ok(perp_id)
+    }
+
+    /// Funding: long pays short when mark > entry (premium), else reverse.
+    /// Amount = notional × |mark − entry| / 8 (eighth ladder).
+    pub fn fund_perp(&mut self, perp_id: u64) -> Result<Ratio, ActionRefused> {
+        self.fund_perp_as(SOVEREIGN, perp_id)
+    }
+
+    pub fn fund_perp_as(
+        &mut self,
+        actor: u64,
+        perp_id: u64,
+    ) -> Result<Ratio, ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        let at = self
+            .perps
+            .iter()
+            .position(|p| p.perp_id == perp_id && p.open)
+            .ok_or(ActionRefused::NoSuchPerp { perp_id })?;
+        let perp = self.perps[at].clone();
+        let mark = self.last_clear_of(perp.resource);
+        let diff = if mark >= perp.entry {
+            mark.clone() - perp.entry.clone()
+        } else {
+            perp.entry.clone() - mark.clone()
+        };
+        let eight = {
+            let two = ratio(1, 1) + ratio(1, 1);
+            let four = two.clone() + two;
+            four.clone() + four
+        };
+        let funding = perp.notional.clone() * diff / eight;
+        // Maintenance: margin must cover quarter of notional×entry value.
+        let four = ratio(1, 1) + ratio(1, 1) + ratio(1, 1) + ratio(1, 1);
+        let maint = perp.notional.clone() * perp.entry.clone() / four;
+        if perp.margin < maint && funding > ratio(0, 1) {
+            return Err(ActionRefused::PerpMarginBreach { perp_id });
+        }
+        self.close(
+            ClosureEvent::PerpFunded {
+                perp_id,
+                orb_id: perp.orb_id,
+                funding: funding.clone(),
+                mark,
+            },
+            actor,
+        );
+        Ok(funding)
+    }
+
+    /// Close perp: unlock margins, apply PnL vs mark; liquidated if margin breach.
+    pub fn close_perp(&mut self, perp_id: u64) -> Result<(), ActionRefused> {
+        self.close_perp_as(SOVEREIGN, perp_id, false)
+    }
+
+    pub fn liquidate_perp(&mut self, perp_id: u64) -> Result<(), ActionRefused> {
+        self.close_perp_as(SOVEREIGN, perp_id, true)
+    }
+
+    pub fn close_perp_as(
+        &mut self,
+        actor: u64,
+        perp_id: u64,
+        liquidated: bool,
+    ) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        let at = self
+            .perps
+            .iter()
+            .position(|p| p.perp_id == perp_id && p.open)
+            .ok_or(ActionRefused::NoSuchPerp { perp_id })?;
+        let perp = self.perps[at].clone();
+        let mark = self.last_clear_of(perp.resource);
+        let long_pnl = perp.notional.clone() * (mark.clone() - perp.entry.clone());
+        let orb = perp.orb_id;
+        let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
+        let unlock = perp.margin.clone() + perp.margin.clone();
+        held.bank_stamp(unlock);
+        if long_pnl > ratio(0, 1) {
+            held.bank_stamp(long_pnl.clone());
+        } else if long_pnl < ratio(0, 1) {
+            let loss = ratio(0, 1) - long_pnl.clone();
+            let have = held.stamp_amount();
+            let take = if have < loss { have } else { loss };
+            held.bank_stamp(-take);
+        }
+        self.perps[at].open = false;
+        self.close(
+            ClosureEvent::PerpClosed {
+                perp_id,
+                orb_id: orb,
+                mark,
+                long_pnl,
+                liquidated,
+            },
+            actor,
+        );
+        Ok(())
+    }
+
+    /// P4.10 — mint hull and issue companion yard Note (face = scrap cost / 4
+    /// in STAMP identity; coll = half face) when notes listable and STAMP allows.
+    pub fn mint_hull_financed(
+        &mut self,
+        orb: u64,
+        role: HullRole,
+        grade: u8,
+    ) -> Result<(u64, Option<u64>), ActionRefused> {
+        self.mint_hull_financed_as(SOVEREIGN, orb, role, grade)
+    }
+
+    pub fn mint_hull_financed_as(
+        &mut self,
+        actor: u64,
+        orb: u64,
+        role: HullRole,
+        grade: u8,
+    ) -> Result<(u64, Option<u64>), ActionRefused> {
+        let cost = hull_scrap_cost(role, grade);
+        let hull_id = self.mint_hull_as(actor, orb, role, grade)?;
+        let mut note_id = None;
+        if self.notes_listable() {
+            let four = ratio(1, 1) + ratio(1, 1) + ratio(1, 1) + ratio(1, 1);
+            let face = cost.clone() / four;
+            let coll = face.clone() / (ratio(1, 1) + ratio(1, 1));
+            let stamp = self
+                .orb()
+                .map(|o| o.stamp_amount())
+                .unwrap_or_else(|| ratio(0, 1));
+            if face > ratio(0, 1) && stamp >= coll {
+                if let (Some(n), Some(c)) = (
+                    crate::dop::Positive::new(face.clone()),
+                    crate::dop::Positive::new(coll),
+                ) {
+                    if let Ok(id) = self.issue_note_as(actor, orb, actor, n, c, 60) {
+                        note_id = Some(id);
+                        self.close(
+                            ClosureEvent::HullFinanced {
+                                hull_id,
+                                note_id: id,
+                                orb_id: orb,
+                                scrap_spent: cost,
+                                note_face: face,
+                            },
+                            actor,
+                        );
+                    }
+                }
+            }
+        }
+        Ok((hull_id, note_id))
     }
 }

@@ -15,16 +15,16 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 |------|--------|
 | Wave-1 commit | **`2109bf0`** (T4–T9, REFINE-1) |
 | Wave-2 commit | **`4686399`** (E-APT, element_trade_step) |
-| Kernel | **0.26.0** (next free minor **27**) |
-| Next free tag | **125** (Note/Future/LastClear 120–124) |
+| Kernel | **0.27.0** (next free minor **28**) |
+| Next free tag | **132** (instruments through HullFinanced 131) |
 | Stations | **10** (T4–T9 economic offices open) |
 | ZoneKind compiled | **1–10** (ShipYard = 10) |
-| Codec | **SCHEMA_V8** (notes · futures · last clears) |
-| Pure-NPC green | offices, refine, STAMP, fleet, **instrument_step** Notes |
-| Next work | **Share/Perp** · shipwright finance · Phase 5 · P1.8 · Q-O1… |
-| Docs | `30`–`35`; Phase **4 NOTE/FUT** partial land |
-| Trade program | Phases **1–4** (Share/Perp deferred); Phase 5 open |
-| Help | `note` / `future` / `estate` / desk — full ANSI (`--plain`) |
+| Codec | **SCHEMA_V9** (notes · futures · shares · perps) |
+| Pure-NPC green | offices, refine, STAMP, fleet, **full instrument_step** |
+| Next work | **Phase 5** defense · P1.8 offer widen · Q-O1… |
+| Docs | `30`–`35`; Phase **4 complete** (Note/Fut/Share/Perp) |
+| Trade program | Phases **1–4 landed**; Phase 5 open |
+| Help | `note|future|share|perp` · desk EXCH · estate — ANSI |
 | Dirty / other lane | do not `git add -A` without reviewing observer/other-lane files |
 
 Older §0 counts (809 tests, 71 deeds, tag 95) are **historical**; re-measure

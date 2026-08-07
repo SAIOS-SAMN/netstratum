@@ -114,3 +114,53 @@ fn two_books_differ_by_evidence() {
     // Founding iron alone would open futures; STAMP path also counts.
     assert!(rich.futures_listable() || rich.notes_listable());
 }
+
+#[test]
+fn share_issue_dividend_and_perp_fund_close() {
+    let mut w = stamp_world();
+    // Zone for production evidence.
+    let _ = w.zone(0, cfe::dop::ZoneKind::Extractor);
+    for _ in 0..4 {
+        w.tick();
+    }
+    let _ = w.collect();
+    assert!(w.shares_listable());
+    let units = Positive::new(ratio(1, 1)).expect("u");
+    let par = Positive::new(ratio(1, 1)).expect("p");
+    let sid = w
+        .issue_share(FIRST_ORB, SOVEREIGN, Resource::Iron, units, par)
+        .expect("share");
+    // May be empty if no iron pool — still SEAL B if we only issue.
+    let _ = w.pay_share_dividend(sid);
+    let mark = Positive::new(ratio(1, 1)).expect("m");
+    w.mark_last_clear(FIRST_ORB, Resource::Crystal, mark)
+        .expect("mark");
+    let n = Positive::new(ratio(1, 1)).expect("n");
+    let m = Positive::new(ratio(1, 1)).expect("m");
+    let short = w.register_agent("short").expect("agent");
+    let pid = w
+        .open_perp(FIRST_ORB, SOVEREIGN, short, Resource::Crystal, n, m)
+        .expect("perp");
+    let _ = w.fund_perp(pid);
+    w.close_perp(pid).expect("close");
+    assert!(w.perps().iter().any(|p| p.perp_id == pid && !p.open));
+    assert_eq!(replay(w.chronicle()), w.committed());
+}
+
+#[test]
+fn hull_financed_optional_note() {
+    let mut w = stamp_world();
+    // Yard + scrap for hauler.
+    let _ = w.zone(1, cfe::dop::ZoneKind::ShipYard);
+    let scrap = Positive::new(ratio(4, 1)).expect("scrap");
+    // Need iron for salvage; founding has iron.
+    if let Ok(()) = w.salvage_scrap(FIRST_ORB, scrap) {
+        let (hull, note) = w
+            .mint_hull_financed(FIRST_ORB, cfe::dop::HullRole::Hauler, 0)
+            .expect("finance mint");
+        assert!(hull >= 1);
+        // Note optional if STAMP thin after margin locks.
+        let _ = note;
+        assert_eq!(replay(w.chronicle()), w.committed());
+    }
+}

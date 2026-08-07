@@ -1,8 +1,8 @@
 # 33 — TRADE DESK · FLEETS · ALIGNMENT · LOCAL CAPITAL
 
-**Status:** PARTIAL LAND — **Phases 1–4** on main (sightlines + alignment
-+ fleet capital + **local Notes/Futures**); Phase 5 still design.
-Implementation board: **`TASKS_TRADE_FLEET_DESK.md`**. Share/Perp deferred.
+**Status:** PARTIAL LAND — **Phases 1–4 complete** on main (sightlines +
+alignment + fleets + **Note/Future/Share/Perp** local books); Phase 5
+still design. Implementation board: **`TASKS_TRADE_FLEET_DESK.md`**.
 
 **Does not overturn:** CHARTER exactness, SEAL B, call-not-copy, tuned-
 constant ratchet, ROUTE-1 / MARKET-1 / STAMP-1 as landed. **Does not**

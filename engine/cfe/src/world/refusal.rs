@@ -101,6 +101,18 @@ pub enum ActionRefused {
     NoSuchFuture { fut_id: u64 },
     /// PHASE-4 — future not yet at expiry.
     FutureImmature { fut_id: u64, expiry: u64 },
+    /// SHARE-1 — book not listable (no production evidence).
+    SharesBookClosed,
+    /// SHARE-1 — no open share id.
+    NoSuchShare { share_id: u64 },
+    /// SHARE-1 — transfer exceeds units held.
+    ShareOverTransfer,
+    /// PERP-1 — book not listable.
+    PerpsBookClosed,
+    /// PERP-1 — no open perp id.
+    NoSuchPerp { perp_id: u64 },
+    /// PERP-1 — margin below maintenance (quarter of entry notional value).
+    PerpMarginBreach { perp_id: u64 },
     /// ELEMENT-CHEMISTRY (#37) — this system does not carry the
     /// element's LINE: deep matter simply does not occur under a
     /// shallow star. A fact of the sky, at the verb forever.

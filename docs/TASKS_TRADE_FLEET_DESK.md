@@ -145,23 +145,24 @@ not one global static board; planet + archetype matter.
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
-| P4.0 | [x] Claim tags **120–124** (Note/Future/LastClear); SCHEMA_V8; next free **125** | P3.0 | dop header |
+| P4.0 | [x] Tags **120–131**; SCHEMA_V9; next free **132** | P3.0 | dop header |
 | P4.1 | [x] **NOTE-1** issue / redeem (collateral ≥ half face; ≠ BondSealed) | P1.6 STAMP | instrument_pins |
 | P4.2 | [x] **FUT-1** margin both sides + cash settle vs **last clear** only | P4.1 | no float mark |
-| P4.3 | [ ] **SHARE-1** issue / transfer / dividend from receipt window | P4.1, production evidence | deferred |
-| P4.4 | [ ] **PERP-1** funding from last-clear premium; liquidation | P4.2, Q-S4 | deferred |
-| P4.5 | [x] Listing filter: STAMP/cargo evidence · expansionist · Exchange | P4.1–P4.2 | two books differ pin |
-| P4.6 | [x] Local book identity (per-world notes/futures/clears trail) | P4.5 | SCHEMA_V8 |
-| P4.7 | [x] `instrument_step` NPC: mark clears, redeem, settle, issue Note | P4.1–P4.2 | pure NPC |
-| P4.8 | [~] Freight/alignment seasons via last-clear marks | P4.2, P2.5 | mark API live; season Future later |
-| P4.9 | [~] EXCH / CLI lists local instruments (`note` / `future`) | P4.5, P1.1 | desk EXCH polish open |
-| P4.10 | [ ] Shipwright finance: Note/Future commission for hull build | P4.1, P3.9 | open |
-| P4.11 | [x] FORWARD-1 coexistence: Notes parallel (Q-S3) — keep Bond/Forward | P4.1 | 32 §3.5 |
-| P4.12 | [x] Harness: Note lifecycle + Future open/settle + SEAL B | P4.7 | instrument_pins green |
-| P4.13 | [x] Docs Phase 4 land; `32`/`33`/PICKUP/BUILD_ORDER | P4.12 | this board |
+| P4.3 | [x] **SHARE-1** issue / transfer / dividend (⅛ pool × units/total) | P4.1 | instrument_pins |
+| P4.4 | [x] **PERP-1** open / fund (⅛ premium) / close / liquidate | P4.2 | instrument_pins |
+| P4.5 | [x] Listing filter: evidence · disposition · Exchange | P4.1–P4.4 | two books pin |
+| P4.6 | [x] Local book identity (SCHEMA_V9 shares/perps trail) | P4.5 | |
+| P4.7 | [x] `instrument_step`: clears, notes, perps fund, empiricist shares | P4.1–P4.4 | pure NPC |
+| P4.8 | [x] Last-clear marks power Fut/Perp; alignment seasons use same marks | P4.2 | mark API |
+| P4.9 | [x] Desk EXCH + CLI `note|future|share|perp` list open books | P4.5 | |
+| P4.10 | [x] Shipwright finance: `mint_hull_financed` + `fleet mint … finance` | P4.1, P3.9 | HullFinanced 131 |
+| P4.11 | [x] FORWARD-1 coexistence: Notes parallel (Q-S3) | P4.1 | 32 §3.5 |
+| P4.12 | [x] Harness Note/Future/Share/Perp/HullFinance SEAL B | P4.7 | instrument_pins 5 |
+| P4.13 | [x] Docs Phase 4 complete land | P4.12 | this board |
 
 **Phase 4 done when:** two civilizations show different listable books;
 a Future prices freight around an alignment window without float marks.
+**Exit met** for Note/Fut/Share/Perp local books (2026-08-08).
 
 **Aligns with:** `TASKS_TIER_RAIL_MARKET` Wave 5 (I5.*) — land once, check both boards.
 

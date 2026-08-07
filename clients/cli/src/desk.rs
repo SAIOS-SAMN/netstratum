@@ -394,26 +394,7 @@ fn render_pane(style: Style, home: &World, pane: Pane, orb_id: u64) -> Vec<Strin
         Pane::Routes => render_routes(style, home),
         Pane::Arb => render_arb(style, home),
         Pane::Fleet => render_fleet(style, home),
-        Pane::Exch => vec![
-            format!(
-                "  {}",
-                style.warn("(Phase 4) local instrument books — not landed")
-            ),
-            format!(
-                "  {} {}",
-                style.money("STAMP"),
-                style.value(
-                    &home
-                        .orb()
-                        .map(|o| ratio_str(&o.stamp_amount()))
-                        .unwrap_or_else(|| "0/1".into())
-                )
-            ),
-            format!(
-                "  {}",
-                style.hint("use: stamp balance · stamp mint <amt> · stamp aperture …")
-            ),
-        ],
+        Pane::Exch => render_exch(style, home),
         Pane::Grow => render_grow(style, home, orb_id),
         Pane::Defend => {
             vec![format!(
@@ -422,6 +403,106 @@ fn render_pane(style: Style, home: &World, pane: Pane, orb_id: u64) -> Vec<Strin
             )]
         }
         Pane::Explore => render_explore(style, home),
+    }
+}
+
+fn render_exch(style: Style, home: &World) -> Vec<String> {
+    let mut lines = vec![
+        format!(
+            "  {} {}  books: note={} fut={} share={} perp={}  exch={}",
+            style.money("STAMP"),
+            style.value(
+                &home
+                    .orb()
+                    .map(|o| ratio_str(&o.stamp_amount()))
+                    .unwrap_or_else(|| "0/1".into())
+            ),
+            yn(home.notes_listable()),
+            yn(home.futures_listable()),
+            yn(home.shares_listable()),
+            yn(home.perps_listable()),
+            yn(home.exchange_seated()),
+        ),
+        format!(
+            "  {}",
+            style.hint(
+                "note · future · share · perp · fleet mint (financed when STAMP allows)"
+            )
+        ),
+    ];
+    let notes: Vec<_> = home.notes().iter().filter(|n| n.open).collect();
+    if !notes.is_empty() {
+        lines.push(format!("  {}", style.label("NOTES")));
+        for n in notes.iter().take(6) {
+            lines.push(format!(
+                "    note {} face {} mat t{}",
+                n.note_id,
+                ratio_str(&n.notional),
+                n.maturity
+            ));
+        }
+    }
+    let futs: Vec<_> = home.futures().iter().filter(|f| f.open).collect();
+    if !futs.is_empty() {
+        lines.push(format!("  {}", style.label("FUTURES")));
+        for f in futs.iter().take(6) {
+            lines.push(format!(
+                "    fut {} {:?}×{} @ {} exp t{}",
+                f.fut_id,
+                f.resource,
+                ratio_str(&f.notional),
+                ratio_str(&f.price),
+                f.expiry
+            ));
+        }
+    }
+    let shares: Vec<_> = home.shares().iter().filter(|s| s.open).collect();
+    if !shares.is_empty() {
+        lines.push(format!("  {}", style.label("SHARES")));
+        for s in shares.iter().take(6) {
+            lines.push(format!(
+                "    share {} {:?} units {} par {}",
+                s.share_id,
+                s.stream,
+                ratio_str(&s.units),
+                ratio_str(&s.par)
+            ));
+        }
+    }
+    let perps: Vec<_> = home.perps().iter().filter(|p| p.open).collect();
+    if !perps.is_empty() {
+        lines.push(format!("  {}", style.label("PERPS")));
+        for p in perps.iter().take(6) {
+            lines.push(format!(
+                "    perp {} {:?}×{} entry {}",
+                p.perp_id,
+                p.resource,
+                ratio_str(&p.notional),
+                ratio_str(&p.entry)
+            ));
+        }
+    }
+    if notes.is_empty() && futs.is_empty() && shares.is_empty() && perps.is_empty() {
+        lines.push(format!(
+            "  {}",
+            style.dim("(no open instruments — bank STAMP/cargo or seat Exchange)")
+        ));
+    }
+    let clears = home.last_clears();
+    if !clears.is_empty() {
+        lines.push(format!("  {}", style.label("LAST CLEARS")));
+        for (r, p) in clears.iter().rev().take(4) {
+            lines.push(format!("    {:?} @ {} STAMP/u", r, ratio_str(p)));
+        }
+    }
+    lines
+}
+
+fn yn(b: bool) -> &'static str {
+    if b {
+        "open"
+    } else {
+        "—"
     }
 }
 

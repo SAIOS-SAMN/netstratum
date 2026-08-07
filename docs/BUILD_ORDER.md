@@ -1011,12 +1011,12 @@ See `34_MATTER_BALANCE.md`.
 (tag 98). CLI `estate survey|parcels`, `appraise …`, `rings` shows period.
 See `35_ORBIT_DYNAMO_AND_ESTATE.md`, `ENDOWMENTS` §8.
 
-**Phase 4 PARTIAL — local capital (NOTE-1 / FUT-1):**
-- Tags **120–124** NoteIssued/Redeemed, FutureOpened/Settled, LastClearMarked
-- SCHEMA_V8 notes/futures/last_clears trail; kernel **0.26.0**
-- Listing filter: STAMP/cargo evidence · expansionist · Exchange seat
-- `instrument_step` NPC; CLI `note` / `future`; pins `instrument_pins`
-- Share/Perp deferred; shipwright finance open; FORWARD-1 stays parallel
+**Phase 4 LANDED — local capital (Note · Future · Share · Perp):**
+- Tags **120–131** (through HullFinanced); SCHEMA_V9; kernel **0.27.0**
+- Listing filters by evidence / disposition / Exchange
+- `instrument_step` funds perps, issues empiricist shares, note lifecycle
+- Desk EXCH books; CLI `note|future|share|perp`; `fleet mint … finance`
+- pins `instrument_pins` (5); FORWARD-1 parallel (Q-S3)
 
-**Next:** SHARE-1 / PERP-1 · shipwright Note finance · Phase 5 · P1.8 · Q-O1.
+**Next:** Phase 5 defense & deep rails · P1.8 offer widen · Q-O1 ψ.
 

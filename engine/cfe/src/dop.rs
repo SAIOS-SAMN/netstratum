@@ -312,7 +312,15 @@
 //!    123  ClosureEvent::FutureSettled (FUT-1 — cash settle vs last clear.)
 //!    124  ClosureEvent::LastClearMarked (PHASE-4 — receipted spot mark for
 //!         instrument marks; Resource ‖ price_in_stamp.)
-//!    Phase-4 claim ledger: next free **125**. SCHEMA_V8 notes/futures/clears.
+//!    125  ClosureEvent::ShareIssued (SHARE-1 — equity on production stream;
+//!         zone class or resource stream; STAMP par optional.)
+//!    126  ClosureEvent::ShareTransferred (SHARE-1 secondary transfer.)
+//!    127  ClosureEvent::ShareDividend (SHARE-1 — exact fraction of yield window.)
+//!    128  ClosureEvent::PerpOpened (PERP-1 — unending Future on last-clear index.)
+//!    129  ClosureEvent::PerpFunded (PERP-1 — funding from premium vs last clear.)
+//!    130  ClosureEvent::PerpClosed (PERP-1 — close or liquidation.)
+//!    131  ClosureEvent::HullFinanced (P4.10 shipwright — Note paper with hull mint.)
+//!    Phase-4 remainder claim ledger: next free **132**. SCHEMA_V9 shares/perps.
 //!         Orb TLV: 73 STAMP, 74 scrap. ZoneKind::ShipYard = 10.
 //!         (Historic free tags below top: 14, 15, 56, 57, 58, 64, 66,
 //!         83, 84, 87; 9 and 51 reserved; 65 retired forever.)
@@ -1717,6 +1725,36 @@ pub struct MarketFuture {
     pub open: bool,
 }
 
+/// SHARE-1 — equity claim on a production stream (resource yield class).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MarketShare {
+    pub share_id: u64,
+    pub orb_id: u64,
+    pub holder: u64,
+    /// Stream resource (e.g. Iron from extractors).
+    pub stream: Resource,
+    /// Units of claim outstanding.
+    pub units: Ratio,
+    /// Par STAMP per unit at issue (exact).
+    pub par: Ratio,
+    pub open: bool,
+}
+
+/// PERP-1 — unending Future on a last-clear index (resource).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MarketPerp {
+    pub perp_id: u64,
+    pub orb_id: u64,
+    pub long: u64,
+    pub short: u64,
+    pub resource: Resource,
+    pub notional: Ratio,
+    /// Entry mark (STAMP per unit).
+    pub entry: Ratio,
+    pub margin: Ratio,
+    pub open: bool,
+}
+
 /// Capacity units a hull can haul (derive: role base × (1+grade)).
 /// Bases are powers of two built from `1+1` — no free dials.
 pub fn hull_capacity(role: u8, grade: u8) -> Ratio {
@@ -2567,6 +2605,64 @@ pub enum ClosureEvent {
         resource: Resource,
         price: Ratio,
     },
+    /// SHARE-1 (tag 125) — equity issue on a production stream.
+    ShareIssued {
+        share_id: u64,
+        orb_id: u64,
+        holder: u64,
+        stream: Resource,
+        units: Ratio,
+        par: Ratio,
+    },
+    /// SHARE-1 (tag 126) — transfer units to a new holder.
+    ShareTransferred {
+        share_id: u64,
+        from: u64,
+        to: u64,
+        units: Ratio,
+    },
+    /// SHARE-1 (tag 127) — dividend from receipted yield window.
+    ShareDividend {
+        share_id: u64,
+        orb_id: u64,
+        stream: Resource,
+        resource_cut: Ratio,
+        amount: Ratio,
+    },
+    /// PERP-1 (tag 128) — open perpetual on last-clear index.
+    PerpOpened {
+        perp_id: u64,
+        orb_id: u64,
+        long: u64,
+        short: u64,
+        resource: Resource,
+        notional: Ratio,
+        entry: Ratio,
+        margin: Ratio,
+    },
+    /// PERP-1 (tag 129) — funding payment (premium vs last clear).
+    PerpFunded {
+        perp_id: u64,
+        orb_id: u64,
+        funding: Ratio,
+        mark: Ratio,
+    },
+    /// PERP-1 (tag 130) — close or liquidate.
+    PerpClosed {
+        perp_id: u64,
+        orb_id: u64,
+        mark: Ratio,
+        long_pnl: Ratio,
+        liquidated: bool,
+    },
+    /// P4.10 (tag 131) — shipwright finance: Note issued with hull mint.
+    HullFinanced {
+        hull_id: u64,
+        note_id: u64,
+        orb_id: u64,
+        scrap_spent: Ratio,
+        note_face: Ratio,
+    },
     /// N4 (NS-2 §1.5) — the scanner's power draw, the ONE chronicle
     /// event of RQP: crystals left the probing orb's bank to hold the
     /// lens open. Deliberately blind to what was asked and what was
@@ -3342,6 +3438,108 @@ impl ClosureEvent {
                 value.push(*resource as u8);
                 ratio::encode(price, &mut value);
                 tlv::put(124, &value, &mut out);
+            }
+            Self::ShareIssued {
+                share_id,
+                orb_id,
+                holder,
+                stream,
+                units,
+                par,
+            } => {
+                let mut value = share_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&orb_id.to_le_bytes());
+                value.extend_from_slice(&holder.to_le_bytes());
+                value.push(*stream as u8);
+                ratio::encode(units, &mut value);
+                ratio::encode(par, &mut value);
+                tlv::put(125, &value, &mut out);
+            }
+            Self::ShareTransferred {
+                share_id,
+                from,
+                to,
+                units,
+            } => {
+                let mut value = share_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&from.to_le_bytes());
+                value.extend_from_slice(&to.to_le_bytes());
+                ratio::encode(units, &mut value);
+                tlv::put(126, &value, &mut out);
+            }
+            Self::ShareDividend {
+                share_id,
+                orb_id,
+                stream,
+                resource_cut,
+                amount,
+            } => {
+                let mut value = share_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&orb_id.to_le_bytes());
+                value.push(*stream as u8);
+                ratio::encode(resource_cut, &mut value);
+                ratio::encode(amount, &mut value);
+                tlv::put(127, &value, &mut out);
+            }
+            Self::PerpOpened {
+                perp_id,
+                orb_id,
+                long,
+                short,
+                resource,
+                notional,
+                entry,
+                margin,
+            } => {
+                let mut value = perp_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&orb_id.to_le_bytes());
+                value.extend_from_slice(&long.to_le_bytes());
+                value.extend_from_slice(&short.to_le_bytes());
+                value.push(*resource as u8);
+                ratio::encode(notional, &mut value);
+                ratio::encode(entry, &mut value);
+                ratio::encode(margin, &mut value);
+                tlv::put(128, &value, &mut out);
+            }
+            Self::PerpFunded {
+                perp_id,
+                orb_id,
+                funding,
+                mark,
+            } => {
+                let mut value = perp_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&orb_id.to_le_bytes());
+                ratio::encode(funding, &mut value);
+                ratio::encode(mark, &mut value);
+                tlv::put(129, &value, &mut out);
+            }
+            Self::PerpClosed {
+                perp_id,
+                orb_id,
+                mark,
+                long_pnl,
+                liquidated,
+            } => {
+                let mut value = perp_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&orb_id.to_le_bytes());
+                ratio::encode(mark, &mut value);
+                ratio::encode(long_pnl, &mut value);
+                value.push(u8::from(*liquidated));
+                tlv::put(130, &value, &mut out);
+            }
+            Self::HullFinanced {
+                hull_id,
+                note_id,
+                orb_id,
+                scrap_spent,
+                note_face,
+            } => {
+                let mut value = hull_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&note_id.to_le_bytes());
+                value.extend_from_slice(&orb_id.to_le_bytes());
+                ratio::encode(scrap_spent, &mut value);
+                ratio::encode(note_face, &mut value);
+                tlv::put(131, &value, &mut out);
             }
             Self::CrystalDrawn { orb_id, amount } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
@@ -4172,6 +4370,108 @@ impl ClosureEvent {
                     orb_id,
                     resource,
                     price,
+                })
+            }
+            125 => {
+                let share_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let orb_id = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let holder = u64::from_le_bytes(value.get(16..24)?.try_into().ok()?);
+                let stream = Resource::from_wire(*value.get(24)?)?;
+                let (units, u1) = ratio::decode(value.get(25..)?)?;
+                let (par, _) = ratio::decode(value.get(25 + u1..)?)?;
+                Some(Self::ShareIssued {
+                    share_id,
+                    orb_id,
+                    holder,
+                    stream,
+                    units,
+                    par,
+                })
+            }
+            126 => {
+                let share_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let from = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let to = u64::from_le_bytes(value.get(16..24)?.try_into().ok()?);
+                let (units, _) = ratio::decode(value.get(24..)?)?;
+                Some(Self::ShareTransferred {
+                    share_id,
+                    from,
+                    to,
+                    units,
+                })
+            }
+            127 => {
+                let share_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let orb_id = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let stream = Resource::from_wire(*value.get(16)?)?;
+                let (resource_cut, u1) = ratio::decode(value.get(17..)?)?;
+                let (amount, _) = ratio::decode(value.get(17 + u1..)?)?;
+                Some(Self::ShareDividend {
+                    share_id,
+                    orb_id,
+                    stream,
+                    resource_cut,
+                    amount,
+                })
+            }
+            128 => {
+                let perp_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let orb_id = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let long = u64::from_le_bytes(value.get(16..24)?.try_into().ok()?);
+                let short = u64::from_le_bytes(value.get(24..32)?.try_into().ok()?);
+                let resource = Resource::from_wire(*value.get(32)?)?;
+                let (notional, u1) = ratio::decode(value.get(33..)?)?;
+                let (entry, u2) = ratio::decode(value.get(33 + u1..)?)?;
+                let (margin, _) = ratio::decode(value.get(33 + u1 + u2..)?)?;
+                Some(Self::PerpOpened {
+                    perp_id,
+                    orb_id,
+                    long,
+                    short,
+                    resource,
+                    notional,
+                    entry,
+                    margin,
+                })
+            }
+            129 => {
+                let perp_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let orb_id = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let (funding, u1) = ratio::decode(value.get(16..)?)?;
+                let (mark, _) = ratio::decode(value.get(16 + u1..)?)?;
+                Some(Self::PerpFunded {
+                    perp_id,
+                    orb_id,
+                    funding,
+                    mark,
+                })
+            }
+            130 => {
+                let perp_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let orb_id = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let (mark, u1) = ratio::decode(value.get(16..)?)?;
+                let (long_pnl, u2) = ratio::decode(value.get(16 + u1..)?)?;
+                let liquidated = *value.get(16 + u1 + u2)? != 0;
+                Some(Self::PerpClosed {
+                    perp_id,
+                    orb_id,
+                    mark,
+                    long_pnl,
+                    liquidated,
+                })
+            }
+            131 => {
+                let hull_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let note_id = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let orb_id = u64::from_le_bytes(value.get(16..24)?.try_into().ok()?);
+                let (scrap_spent, u1) = ratio::decode(value.get(24..)?)?;
+                let (note_face, _) = ratio::decode(value.get(24 + u1..)?)?;
+                Some(Self::HullFinanced {
+                    hull_id,
+                    note_id,
+                    orb_id,
+                    scrap_spent,
+                    note_face,
                 })
             }
             55 => {

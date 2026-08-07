@@ -270,7 +270,10 @@ fn colony_help(style: Style) {
     row(style, "thermal · map · status", "readings + thermal balance");
     row(style, "estate survey · parcels · appraise …", "real estate ladder (35)");
     row(style, "note list|issue|redeem", "NOTE-1 STAMP debt (Phase 4)");
-    row(style, "future list|mark|open|settle", "FUT-1 cargo×STAMP (Phase 4)");
+    row(style, "future list|mark|open|settle", "FUT-1 cargo×STAMP");
+    row(style, "share list|issue|dividend|transfer", "SHARE-1 equity stream");
+    row(style, "perp list|open|fund|close|liq", "PERP-1 last-clear index");
+    row(style, "fleet mint hauler [g] finance", "hull + optional yard Note");
     row(style, "prospect · assay · compound · refine", "elements + alchemy");
     println!();
     println!(

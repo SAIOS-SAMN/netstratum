@@ -3379,6 +3379,28 @@ fn ensure_npc_instruments(world: &mut cfe::world::World, actor: u64) {
             }
         }
     }
+    // Fund open perps once per beat (premium ladder).
+    let perps: Vec<u64> = world
+        .perps()
+        .iter()
+        .filter(|p| p.open)
+        .map(|p| p.perp_id)
+        .collect();
+    for id in perps {
+        let _ = world.fund_perp_as(actor, id);
+    }
+    // Empiricist (disposition 2) or Exchange: issue Iron share when listable and none open.
+    if world.shares_listable() && world.shares().iter().all(|s| !s.open) {
+        let empiricist = world.genesis().is_some_and(|g| g.disposition == 2);
+        if empiricist || world.exchange_seated() {
+            if let (Some(u), Some(p)) = (
+                Positive::new(ratio(1, 1)),
+                Positive::new(ratio(1, 1)),
+            ) {
+                let _ = world.issue_share_as(actor, orb_id, actor, Resource::Iron, u, p);
+            }
+        }
+    }
 }
 
 /// FLEET-1 Phase-3 — pure NPC salvage + mint + assign (TASKS_TRADE_FLEET_DESK P3.9).

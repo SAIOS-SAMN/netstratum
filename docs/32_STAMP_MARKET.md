@@ -1,11 +1,10 @@
 # 32 — STAMP: unit of account, books, and self-sustaining markets
 
 **Status:** PARTIAL LAND — operator directive 2026-08-07. **Wave-4
-minimal:** orb STAMP (TLV 73), crystal→STAMP identity mint (tag 111),
-stamp aperture legs (112–113), conductor `stamp_market_step`, harness
-`pure_npc_stamp_spot_clears` green. **Phase-4 partial:** NOTE-1 / FUT-1
-(tags 120–124), SCHEMA_V8, `instrument_step`, CLI `note`/`future`.
-Share/Perp and shipwright finance still open. Establishes an **in-game currency** that is exact-rational,
+minimal:** orb STAMP (TLV 73), crystal→STAMP mint (111), apertures
+(112–113), `stamp_market_step` green. **Phase-4 complete:** NOTE · FUT ·
+SHARE · PERP (tags 120–131), SCHEMA_V9, `instrument_step`, desk EXCH,
+shipwright `HullFinanced`. Establishes an **in-game currency** that is exact-rational,
 receipted, NPC-sustained, and optionally tradeable on **strand / datum /
 isthmus** at R3–R4 (`30_OFFICES_AND_RAILS`). Does not replace crystal
 (PoUW mint medium) or closed carriers (physical law). Does not bill real
