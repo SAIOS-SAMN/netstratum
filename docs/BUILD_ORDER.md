@@ -933,17 +933,34 @@ roster.
 
 ## DESIGN BOARD — T4–T9 · R1–R4 · Element commerce · STAMP (2026-08-07)
 
-**Not yet landed.** Spec and task DAG only. Do not treat as current
-implementation state.
+| Doc | Role | State |
+|-----|------|--------|
+| `30_OFFICES_AND_RAILS.md` | T4–T9 offices + R1–R4 rails | **T-line partial land** (Wave-1); R-line still design |
+| `31_ELEMENT_COMMERCE.md` | Element routes, refineries, NPC trade | **REFINE-1 landed**; E-APT/E-ROUTE still design |
+| `32_STAMP_MARKET.md` | STAMP unit, instruments, NPC MM | Design only |
+| `TASKS_TIER_RAIL_MARKET.md` | Waves 0–8 + vertical slice | Wave-1 rows closed; Wave-2+ open |
+| `RELAY_WAVE2_IMPLEMENTOR.md` | Next-slice brief for implementors | **READ BEFORE coding Wave-2** |
 
-| Doc | Role |
-|-----|------|
-| `30_OFFICES_AND_RAILS.md` | T4–T9 offices + R1–R4 rails (naming + law) |
-| `31_ELEMENT_COMMERCE.md` | Element routes, refineries, NPC trade |
-| `32_STAMP_MARKET.md` | STAMP unit, Share/Note/Future/Perp, NPC MM, strand/datum exits |
-| `TASKS_TIER_RAIL_MARKET.md` | Implementation waves 0–8 + first vertical slice |
+---
 
-First vertical slice (from the task file): stations derive → REFINE-1 →
-E-APT/E-ROUTE NPC → STAMP spot + MM → R1–R2 only. Perps and R3/R4 after
-that slice is green under pure NPC.
+## WAVE-1 LANDED — offices T4–T9 · NPC seats · ElementRefinery (2026-08-07)
+
+**Commit:** `2109bf0`. **Kernel:** `0.20.0` (next free minor **21**).  
+**Tag:** `107` `ElementRefined` (next free **108**). **ZoneKind:** `9` ElementRefinery.  
+**Schema:** no codec schema bump (stations reuse tag 89; zone/kind additive).
+
+| Surface | What landed |
+|---------|-------------|
+| `cfe::dop::Station` | Wire 1–10: progenitor…anchor; `word` / `from_word` |
+| `ledger::registry` | `STATIONS[10]`, `tier_of` T0–T9, seat_width 16 (T4–T8), unbounded T9/T2; `office_preconditions` + `OfficeEvidence` |
+| `ratio::RING_ARITIES` | `{3,4,5,10}` — stations arity 10; lcm still 60 |
+| Conductor | `office_step` (T3→caravan/exchange); `refine_step`; build prefers ElementRefinery when raw surplus (after industry/forge-starved law) |
+| Founding roster | T2 sovereigns Kemet·Baktun·Dogon; gamified species words |
+| Kernel | `covered` / `element_move` / `layer_of` / `scope_of` for `ElementRefined` |
+| CLI | `ascend` checks preconditions; map glyphs `F` for refinery |
+| Pins | `wave1_era_pins` (T4+T6 seat + refine green; route/STAMP ignored); ledger tier/seat pins; vertical_axis 1..=10 |
+
+**Not in Wave-1:** R1–R4 wire, element aperture/route, STAMP, office *gameplay* advantages (O6), observer T-column (other lane holds dirty `observer.py`).
+
+**Next vertical slice (Wave-2):** claim tags → red done-bar for route+STAMP remains → **E-APT-1 → E-ROUTE-1 → element_trade_step** → then S4/R2. See `RELAY_WAVE2_IMPLEMENTOR.md`.
 

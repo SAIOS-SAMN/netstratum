@@ -1,12 +1,31 @@
 # PICKUP — the state of the board (2026-07-27, coder-01; refreshed
 # post-ideology-board by coder-02 the same day; refreshed 2026-07-30 by
 # coder-02 — the galaxy law + the fifth progenitor seat; **§0 REFRESH
-# 2026-08-04** — every count below re-measured against `main`)
+# 2026-08-04** — every count below re-measured against `main`;
+# **§0b WAVE-1 2026-08-07**)
 
 Cold-start orientation for any node resuming work. Read
 `00_CHARTER.md` whole, then `BUILD_ORDER.md` for the current landing —
 this file is the fast map, never the authority. The working discipline,
 state-model laws, and earned gotchas live in `HANDOFF.md`.
+
+## 0b. WAVE-1 LAND (2026-08-07) — read before older counts
+
+| Fact | Value |
+|------|--------|
+| Commit | **`2109bf0`** |
+| Kernel | **0.20.0** (next free minor **21**) |
+| Next free tag | **108** (`ElementRefined` = 107) |
+| Stations | **10** (T4–T9 economic offices open) |
+| ZoneKind compiled | **1–9** (ElementRefinery = 9) |
+| Cycle topology | `build → ground → office → refine → tick → collect` |
+| Pure-NPC green | elements, T4+T6 seats, refine (`wave1_era_pins`) |
+| Next work | **Wave-2** E-APT + E-ROUTE + NPC element trade — `RELAY_WAVE2_IMPLEMENTOR.md` |
+| Docs | `30`/`31` partial land; `32` design; `TASKS_TIER_RAIL_MARKET` |
+| Dirty / other lane | `tools/observer.py` may hold uncommitted work — do not `git add -A` |
+
+Older §0 counts (809 tests, 71 deeds, tag 95) are **historical**; re-measure
+against `main` before citing any number.
 
 ## 0. REFRESH 2026-08-04 — what this file got wrong, measured
 

@@ -10,10 +10,12 @@ not inscribed law — they tune at balance time.
 unit of account is **STAMP** (`32_STAMP_MARKET.md`) — exact-rational,
 receipted, NPC-sustained; instruments are Share · Note · Future · Perp
 (Notes ≠ ideology standing bonds). Element trade routes and derived
-refineries: `31_ELEMENT_COMMERCE.md`. External trade of STAMP claims uses
-the **R-line** (R3 strand, R4 isthmus/datum) in `30_OFFICES_AND_RAILS.md`.
-NS-7 remains the boundary for **real-world** settlement; STAMP is in-game
-first and only optionally exits the court rail.
+refineries: `31_ELEMENT_COMMERCE.md` (**REFINE-1 landed Wave-1**; routes
+pending Wave-2). Offices T4–T9 and R-line: `30_OFFICES_AND_RAILS.md`
+(T-line landed; rails design). External trade of STAMP claims uses the
+**R-line** (R3 strand, R4 isthmus/datum). NS-7 remains the boundary for
+**real-world** settlement; STAMP is in-game first and only optionally
+exits the court rail.
 
 The economic architecture follows the charter's split: gameplay is
 high-frequency, free, and local (CFE ticks, receipted by NS-3); value

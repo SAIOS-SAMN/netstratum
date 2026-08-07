@@ -1,8 +1,9 @@
 # 31 — ELEMENT COMMERCE: routes, refineries, distribution
 
-**Status:** DESIGN — operator directive 2026-08-07. Lifts deferred
-slices of `14_ALMANAC` §5 (refinery derivation) and §5a (element
-apertures) into a playable commerce board. Depends on GROUND STEP
+**Status:** PARTIAL LAND — operator directive 2026-08-07; **Wave-1
+`2109bf0`** landed **REFINE-1** (`ZoneKind::ElementRefinery` = 9,
+`ElementRefined` tag 107, pure-NPC build + `refine_step`). **E-APT /
+E-ROUTE / element market cargo still DESIGN.** Depends on GROUND STEP
 (prospect/assay live) and composes with ROUTE-1, MARKET-1, MERCHANT-1,
 APERTURE-1, TREATY-1.
 
@@ -18,9 +19,9 @@ Today:
 | Surface | State |
 |---------|--------|
 | Closed carriers (iron…crystal) | Full zone economy + aperture trade |
-| Elements (tag 72) | Prospect/assay bank; **no cross-world trade**; **no refinery zone in conductor** |
-| Converters | Smelter/synthesizer for **closed** carriers only |
-| Routes | ROUTE-1 melt on carrier shipments, not element ids |
+| Elements (tag 72) | Prospect/assay bank + **local refine** (Wave-1); **no cross-world trade yet** |
+| Converters | Smelter/synthesizer (closed carriers) + **ElementRefinery** (open matter) |
+| Routes | ROUTE-1 melt on carrier shipments; element routes **not landed** |
 
 This is why play collapses toward “more iron / more zones.” Exhaustive
 play needs **matter diversity → refining chains → trade gradients →
@@ -92,17 +93,35 @@ market_step — pin order at landing):
 
 ## 3. Elemental refineries (14 §5 made playable)
 
-### 3.1 One zone kind, many tunings
+### 3.0 LANDED (Wave-1 `2109bf0`) — what the tree actually does
 
-**ZoneKind::ElementRefinery** (name may be `Refinery` in UI):
+| Site | Implementation |
+|------|----------------|
+| Zone | `ZoneKind::ElementRefinery = 9`; word `element-refinery`; CLI map glyph `F` |
+| Cost / upkeep | Cost = habitat bill (biomass); upkeep = encasement iron (no bio drain — measured against forge-starved trap) |
+| Heat | Converter-hot (`factory_heat` with smelter class) |
+| Gate | **DEEPENING (condition 3)** on the orb — same technology door as Regenerator. Q-T2: T5 not required |
+| Verb | `World::refine_as` → `ClosureEvent::ElementRefined` tag **107** |
+| Recipe | `dop::refine_recipe` / `refined_identity` — spend/yield from `refinement_input`/`refinement_yield` at the raw element's tier; gate re-derives (call-not-copy) |
+| Conductor | After ground banks elements: prefer refinery when surplus and industry not claiming the slot; `refine_step` one convert per beat |
+| Pin | `conductor/tests/wave1_era_pins.rs::pure_npc_refines_elements` |
+
+**Still deferred from the design table below:** per-zone `element_id`
+tuning on ZoneBuilt (v1 picks first banked raw that covers the spend);
+family fantasy rates beyond the shared refinement ladder; Crucible
+reserve advantage (O6.2).
+
+### 3.1 One zone kind, many tunings (design target)
+
+**ZoneKind::ElementRefinery** (landed; UI may say `Refinery`):
 
 | Field | Law |
 |-------|-----|
-| Tuning | `element_id` on ZoneBuilt (or additive rider) |
-| Input | that element, rate = f(family, tier) |
-| Output | **refined form** = new registry identity, predecessor-linked, tier+1 |
+| Tuning | `element_id` on ZoneBuilt (or additive rider) — **v1: verb arg, not zone field** |
+| Input | that element, rate = f(family, tier) — **v1: refinement ladder on tier** |
+| Output | **refined form** = content-addressed identity (`refined_identity`) |
 | Heat | converter-hot; thermal board prices it |
-| Gate | Deepening (condition 3) or Crucible (T5) advantage — **Q-T2** |
+| Gate | Deepening (condition 3); Crucible (T5) **advantage only** — **Q-T2 coded** |
 
 **No per-element static table.** Two seeds grow different chains from
 one function — measured at landing (14 §7).
@@ -122,12 +141,13 @@ Still **one zone kind**; fantasy comes from derived rates, not four enums.
 
 ### 3.3 Conductor
 
-`build_step` extension:
+**Landed:** `build_step` prefers ElementRefinery when element kinds > 0,
+no refinery stands, industrial is not fundable this beat, not
+forge-starved; DEEPENING gifted when needed. `refine_step` after
+`office_step` in the cycle quartet.
 
-1. If banked raw element above threshold and Deepening held → prefer
-   refinery tuning to richest held raw element.
-2. Crucible (T5) lines get lower reserve factor for refinery builds.
-3. One zone per beat law unchanged.
+**Still design:** Crucible (T5) lower reserve factor (O6.2); tune
+refinery to richest raw element on place.
 
 ### 3.4 Closed converters stay
 

@@ -66,7 +66,7 @@ The two are one problem wearing two hats.
 | class (archetype) | 8 | `dop::class_ceiling()` | a coder |
 | clade | 20 | `dop::clade_ceiling()` | a coder |
 | practice | 5 | in-value codes, append-only | a coder (cheaply) |
-| station (office) | 4 | `registry::STATIONS` | **see §10 — not mintable** |
+| station (office) | 10 | `registry::STATIONS` (T0–T2 band + T4–T9 economic; Wave-1) | **see §10 — not mintable** |
 
 Every row says "a coder". That is the hardcoding the order names, and it
 means the board's imaginative surface is bounded by whoever holds the

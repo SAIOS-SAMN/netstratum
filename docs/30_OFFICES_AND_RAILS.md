@@ -1,10 +1,11 @@
 # 30 — OFFICES AND RAILS: T4–T9 and R1–R4
 
-**Status:** DESIGN — operator directive 2026-08-07. Extends `12_UNION`
-§2a (tier overlay) and `28_VOCABULARY` §10 (stations). Does **not**
-overturn the ruling that **progenitors are the top** (T0 creates the
-board). Higher **numbers** on the T-line are **deeper function bands**,
-not higher rank. The R-line is a **separate ladder** (settlement
+**Status:** PARTIAL LAND — operator directive 2026-08-07; **Wave-1
+`2109bf0`** opened the T-line (stations T4–T9, seat widths, ascend
+preconditions, pure-NPC seats to T4/T6). **R-line still DESIGN.** Does
+**not** overturn the ruling that **progenitors are the top** (T0 creates
+the board). Higher **numbers** on the T-line are **deeper function
+bands**, not higher rank. The R-line is a **separate ladder** (settlement
 altitude), never a recolor of T.
 
 **Subordinate to:** `00_CHARTER`, `12_UNION`, `01_ECONOMY`, `14_ALMANAC`,
@@ -76,13 +77,18 @@ not free mint-spam). New codes join `STATIONS` only by landing (append-only).
 | **T8** | `vault` | **Vault** | Holds collateral and custody for instruments (not owner-equity) | Escrow volume + zero custody breach window |
 | **T9** | `anchor` | **Anchor** | Bridges STAMP claims to **R3/R4** rails (strand / datum-isthmus) | Successful cross-rail settlements; NS-7 / isthmus exit proofs |
 
-**Seat widths (placeholder, BAND-1 shape):** T4–T8 width 16 per domain
-(or unbounded with NoSeatOpen only for T9 per domain — rule at landing).
-T0 stays 8 per lineage domain; T1 16; T2 unbounded; T3 is absence.
+**Seat widths (Q-T1 default, coded Wave-1):** T4–T8 width **16**; T9
+Anchor and T2 Sovereign **unbounded**. T0 stays 8 per lineage domain;
+T1 16; T3 is absence.
 
-**Ascend path:** same door as today (`ascend <sigil> to <station>`), with
-**typed preconditions** above — never a pure UI click. Failures name the
-cure (CHARTER refusal law).
+**Ascend path (landed):** `ascend <sigil> to <station>` and conductor
+`office_step` call `office_preconditions(station, OfficeEvidence)` —
+facts of the chain (element kinds, assays, routes, market clears,
+crossed). Failures name the cure. Seat width remains the registry door
+(`NoSeatOpen`). One office per line; NPC only climbs from T3 (no seat).
+
+**Wire:** station codes 5–10 on existing `StationSeated` (tag 89); no
+new ClosureEvent for seating T4–T9.
 
 ---
 
@@ -176,8 +182,11 @@ stripped of basic economy.
 
 Recorded for `OPEN_QUESTIONS.md`:
 
-- Q-T1: seat widths for T4–T9 per domain.
-- Q-T2: whether T5 Crucible is required to build refineries or only
+- Q-T1: **coded default** — T4–T8 width 16; T9 unbounded (`2109bf0`).
+- Q-T2: **coded default** — T5 advantage only; T3 may refine with zone
+  (ElementRefinery gate is DEEPENING, not Crucible seat).
+- Q-T1 (historical open): seat widths for T4–T9 per domain.
+- Q-T2 (historical open): whether T5 Crucible is required to build refineries or only
   confers advantage.
 - Q-R1: whether R3 requires a live strand process or may settle to a
   sealed strand receipt file offline.

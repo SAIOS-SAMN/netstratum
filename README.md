@@ -9,13 +9,15 @@ Engine (CFE), and settled to existing chains through the WWW3 bridge (NS-7).
 The current landing is always read at `docs/BUILD_ORDER.md`, never inferred.
 Resuming work? `docs/PICKUP.md` is the fast map of the board; `docs/HANDOFF.md` is the working practice around it.
 
+**Wave-1 (2026-08-07, `2109bf0`):** offices T4–T9, pure-NPC seats to T4/T6,
+ElementRefinery + element refine. Next slice: `docs/RELAY_WAVE2_IMPLEMENTOR.md`
+(element aperture · route · NPC trade). Task DAG: `docs/TASKS_TIER_RAIL_MARKET.md`.
+
 ```
 protocols/   NS-1 DOP · NS-2 RQP · NS-3 VRP · NS-4 APERTURE · NS-5 MESH · NS-6 IPSAL-OS · NS-7 ANCHOR
-docs/        00 charter · 01 economy · 02 colony loop · 03 substrate contract ·
-             04 civilization genesis · 05 thermal balance · 06 civilizations
-             (the world-book) · 07 era convergence · 08 chronicle feed ·
-             09 ideology · 10 tech emergence · BUILD_ORDER (the one carrier) ·
-             OPEN_QUESTIONS
+docs/        00 charter · 01 economy · … · 30 offices/rails · 31 element commerce ·
+             32 STAMP market · BUILD_ORDER (the one carrier) · OPEN_QUESTIONS ·
+             TASKS_TIER_RAIL_MARKET · RELAY_WAVE2_IMPLEMENTOR
 engine/      the Rust workspace: cfe · kernel · codec · rfa-core · physics ·
              solver · solver-verify · ledger · mesh · conductor
 clients/     the CLI/MUD client

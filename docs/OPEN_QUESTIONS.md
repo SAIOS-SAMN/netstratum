@@ -290,16 +290,16 @@ under BUILD_ORDER rather than fixed in passing.
 ## Q-T / Q-R / Q-S — Offices, rails, STAMP (opened 2026-08-07)
 
 Recorded from `30_OFFICES_AND_RAILS`, `31_ELEMENT_COMMERCE`, `32_STAMP_MARKET`.
-Not law until ruled and landed.
+Not law until ruled and landed — except **coded defaults** below.
 
-| ID | Question | Default if unruled at first vertical slice |
-|----|----------|-----------------------------------------------|
-| **Q-T1** | Seat widths for T4–T9 per domain? | 16 for T4–T8; T9 unbounded with domain soft-cap |
-| **Q-T2** | Is T5 Crucible **required** to build ElementRefinery, or only advantaged? | Advantage only (T3 may refine) |
-| **Q-R1** | Must R3 require a live strand process, or sealed strand receipt file offline? | Sealed receipt file OK for offline demo |
-| **Q-R2** | STAMP mint schedule: crystal-only convert vs multi-collateral? | Crystal convert + Vault Notes against elements |
-| **Q-S1** | Crystal→STAMP conversion curve? | Placeholder linear at landing; re-measure |
-| **Q-S2** | Demurrage on unbacked STAMP on/off? | Off in v1 |
-| **Q-S3** | Migrate FORWARD-1 into Note or keep parallel? | Parallel until NOTE-1 green |
-| **Q-S4** | Minimum clears before a perp index lists? | N=8 clears in window |
+| ID | Question | Default / land status |
+|----|----------|------------------------|
+| **Q-T1** | Seat widths for T4–T9 per domain? | **CODED Wave-1:** 16 for T4–T8; T9 unbounded |
+| **Q-T2** | Is T5 Crucible **required** to build ElementRefinery, or only advantaged? | **CODED Wave-1:** advantage only; zone needs DEEPENING |
+| **Q-R1** | Must R3 require a live strand process, or sealed strand receipt file offline? | Sealed receipt file OK for offline demo — *open* |
+| **Q-R2** | STAMP mint schedule: crystal-only convert vs multi-collateral? | Crystal convert + Vault Notes against elements — *open* |
+| **Q-S1** | Crystal→STAMP conversion curve? | Placeholder linear at landing; **ratchet forbids undervied dials** — derive/mint at S4.2 |
+| **Q-S2** | Demurrage on unbacked STAMP on/off? | Off in v1 — *open* |
+| **Q-S3** | Migrate FORWARD-1 into Note or keep parallel? | Parallel until NOTE-1 green — *open* |
+| **Q-S4** | Minimum clears before a perp index lists? | N=8 clears in window — *open* |
 

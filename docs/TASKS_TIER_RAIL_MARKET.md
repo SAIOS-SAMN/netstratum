@@ -21,19 +21,20 @@ strand-adapter · isthmus/datum-adapter
 | D0.2 | [x] `31_ELEMENT_COMMERCE` — routes + refineries | file exists |
 | D0.3 | [x] `32_STAMP_MARKET` — currency + instruments | file exists |
 | D0.4 | [x] Pointers from 12_UNION / 01_ECONOMY / 14_ALMANAC / OPEN_QUESTIONS | patches |
-| D0.5 | [ ] Operator rulings Q-T1, Q-T2, Q-R1, Q-R2, Q-S1–S4 | recorded answers |
+| D0.5 | [~] Q-T1/Q-T2 **coded as defaults** in Wave-1; Q-R/Q-S still open | recorded + landed defaults |
 
 ---
 
-## Wave 1 — Registry: open T4–T9  `! foundation`
+## Wave 1 — Registry: open T4–T9  `done 2109bf0`  (foundation green)
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
-| T1.1 | [x] Extend `STATIONS` + `tier_of` → T4…T9 exhaustive | D0.5 widths | compile; recurrence/registry pins |
+| T1.1 | [x] Extend `STATIONS` + `tier_of` → T4…T9 exhaustive | defaults Q-T1 | compile; recurrence/registry pins |
 | T1.2 | [x] `ascend` preconditions per office (deed counts) | T1.1 | typed refusals with cures |
 | T1.3 | [x] Seat width + NoSeatOpen for new stations | T1.1 | pins |
-| T1.4 | [x] Founding or mid-era **NPC path** to at least T4/T6 (not only CLI) | T1.2 | conductor pin |
+| T1.4 | [x] Founding or mid-era **NPC path** to at least T4/T6 (not only CLI) | T1.2 | conductor pin `wave1_era_pins` |
 | T1.5 | [ ] Observer STATION column shows T4–T9 names | T1.1 | visual pin (observer dirty — other lane) |
+| T1.R | [x] **REFINE-1** + E3.5 (pulled into Wave-1 exit) | ground_step | `ElementRefined` tag 107; pure NPC refine |
 
 ---
 
@@ -131,31 +132,30 @@ strand-adapter · isthmus/datum-adapter
 
 ## Suggested first vertical slice (minimum fun)
 
-Ship **one path** end-to-end before broadening instruments:
-
 ```
-T1.1 stations T4–T9 (derive only)
-E3.4 REFINE-1 + E3.5 NPC build
-E3.1–E3.3 element aperture + route + NPC trade
-S4.1–S4.4 STAMP + spot + NPC MM
-R2.1–R2.3 rails R1–R2 only
+[x] T1.1–T1.4 stations T4–T9 + NPC seats     ← Wave-1 2109bf0
+[x] E3.4–E3.5 REFINE-1 + NPC build           ← Wave-1 2109bf0
+[ ] E3.1–E3.3 element aperture + route + NPC trade   ← Wave-2
+[ ] S4.1–S4.4 STAMP + spot + NPC MM                  ← Wave-4 (after E3)
+[ ] R2.1–R2.3 rails R1–R2 only                       ← Wave-2/3 parallel OK
 ```
 
-Defer perps, R3/R4, and full T9 until that slice is green under pure NPC
-(same bar as `ground_pins`).
+**Wave-2 order (see `RELAY_WAVE2_IMPLEMENTOR.md`):** claim tags → keep
+done-bar red for route/STAMP → E-APT-1 → E-ROUTE-1 → `element_trade_step`
+→ pure NPC route clear turns harness green. Perps and R3/R4 stay deferred.
 
 ---
 
 ## Dependency sketch
 
 ```
-D0 ──► T1 (offices) ──► O6 (office gameplay)
+D0 ──► T1 (offices) ✓ ──► O6 (office gameplay)
  │
  ├──► R2 (rails data) ──► X7 (cross-repo)
  │
- ├──► E3 (element commerce) ──► S4 (STAMP spot) ──► I5 (instruments)
+ ├──► E3: REFINE ✓ ──► E-APT/E-ROUTE (Wave-2) ──► S4 STAMP ──► I5
  │                                    │
- └──► ground_step (done) ─────────────┘
+ └──► ground_step ✓ ──────────────────┘
 ```
 
 ---

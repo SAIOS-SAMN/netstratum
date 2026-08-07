@@ -1,5 +1,10 @@
 # RELAY — TO THE WAVE-1 IMPLEMENTOR NODE
 
+> **LANDED `2109bf0` (2026-08-07).** Wave-1 exit met: stations T4–T9,
+> NPC T4/T6 seats, REFINE-1 + pure-NPC refine; harness green for those
+> arcs. **Do not re-implement.** Standing law below remains authority for
+> later waves. Next brief: `RELAY_WAVE2_IMPLEMENTOR.md`.
+
 You are building the first vertical slice of the tier/rail/market arc
 (`TASKS_TIER_RAIL_MARKET.md`). This brief is the accumulated law you
 need that the task DAG does not carry. Read it before you write a line;
@@ -286,14 +291,19 @@ ruling, the η native ruling, and the IS-3 deed grant.
 
 ---
 
-## 9. STARTING STATE
+## 9. STARTING STATE (historical — pre–Wave-1)
 
-`main` @ `48bc7d3`. Board **958/0** across cfe, kernel, lens, mesh,
-scribe, codec, ledger, solver, solver-verify, rfa-core, CLI. Clippy
-clean. Ratchet green at 112.
+`main` @ `48bc7d3` at brief write. **Post-land:** `main` @ **`2109bf0`**,
+kernel **0.20.0**, tag **107** claimed, next free tag **108** / minor **21**.
 
-The `conductor` suite is excluded from that figure; last full green was
-**32/0** across all 14 binaries on `56532d1`. It has not been re-run
-since treaties, the agent door, or `48bc7d3`. **Re-run it before you
-build on top** — you want a known-good baseline that is yours, not one
-you inherited on trust.
+Wave-1 verification (implementor-measured, not the 958 figure): ledger /
+kernel / cfe / lens / codec / mesh / scribe / ratio green; `wave1_era_pins`
++ `ground_pins` + `arbor_observed_pins` + `research_unlocks_industry` green;
+clippy zero; ratchet at 112. Conductor full suite still budget
+`mint_loop_pins` separately.
+
+## 10. LANDING RECORD (append-only)
+
+| Commit | Slice |
+|--------|--------|
+| `2109bf0` | Station 5–10; registry T4–T9; office_preconditions; office_step; ElementRefinery + ElementRefined; wave1_era_pins; T2 founding sovereigns |

@@ -123,13 +123,16 @@ coherence flow UP (closed loops fund the three-gate climb); licensing
 and gauge keys flow DOWN (council-gated, shield-bounded). The observer
 board renders the tier column from this reading.
 
-**T4–T9 and the R-line (DESIGN 2026-08-07):** the office table extends
-**downward** into specialized economic functions (Caravan · Crucible ·
-Exchange · Assay · Vault · Anchor) without placing anyone above the
-progenitors. A separate **Rail ladder R1–R4** (Hearth · Aperture ·
-Strand · Court) measures settlement altitude for claims, independent of
-office. Full law: `30_OFFICES_AND_RAILS.md`. Element commerce and STAMP
-markets: `31_ELEMENT_COMMERCE.md`, `32_STAMP_MARKET.md`. Task DAG:
+**T4–T9 and the R-line (2026-08-07; T-line Wave-1 land `2109bf0`):** the
+office table extends **downward** into specialized economic functions
+(Caravan · Crucible · Exchange · Assay · Vault · Anchor) without placing
+anyone above the progenitors. Stations `caravan`…`anchor` are in
+`STATIONS` / `Station` wire 5–10; `tier_of` reads T4…T9; NPC
+`office_step` can seat T4/T6 from the common. A separate **Rail ladder
+R1–R4** (Hearth · Aperture · Strand · Court) measures settlement
+altitude for claims — **still design**. Full law: `30_OFFICES_AND_RAILS.md`.
+Element commerce (REFINE-1 landed; routes pending) and STAMP:
+`31_ELEMENT_COMMERCE.md`, `32_STAMP_MARKET.md`. Task DAG:
 `TASKS_TIER_RAIL_MARKET.md`.
 
 ## 2b. The torsion law (operator ruling, 2026-07-30)
