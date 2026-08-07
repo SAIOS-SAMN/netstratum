@@ -3,6 +3,10 @@
 **Status:** IMPLEMENTATION BOARD (operator directive 2026-08-07).  
 **Authority docs:** `30_OFFICES_AND_RAILS.md`, `31_ELEMENT_COMMERCE.md`,
 `32_STAMP_MARKET.md`.  
+**Related program (desk · fleets · alignment · local capital):**  
+`33_TRADE_FLEET_AND_DESK.md` + **`TASKS_TRADE_FLEET_DESK.md`** (5 phases).  
+That board **consumes** S4.5–S4.6, E3.6, Wave 5 I5.*, O6, R2.3/X7 —
+land once, check both boards.  
 **Discipline:** one landing at a time; red-first witnesses; spec + mechanic
 + vectors together (CHARTER / HANDOFF). Commit only on operator go for
 production landings; this file is the backlog DAG.

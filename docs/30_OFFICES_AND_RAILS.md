@@ -13,7 +13,8 @@ altitude), never a recolor of T.
 `datum` (authority bench), `xylarium/strand` (domain tollway).
 
 **Companion landings:** `31_ELEMENT_COMMERCE.md`, `32_STAMP_MARKET.md`,
-`TASKS_TIER_RAIL_MARKET.md`.
+`33_TRADE_FLEET_AND_DESK.md` (desk · fleets · alignment · local capital),
+`TASKS_TIER_RAIL_MARKET.md`, `TASKS_TRADE_FLEET_DESK.md`.
 
 ---
 

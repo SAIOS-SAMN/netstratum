@@ -11,6 +11,11 @@ isthmus** at R3–R4 (`30_OFFICES_AND_RAILS`). Does not replace crystal
 (PoUW mint medium) or closed carriers (physical law). Does not bill real
 money per tick (`01_ECONOMY` / CHARTER split).
 
+**Companion play surface:** interactive desk, fleets, alignment-priced
+routes, and **localized** instrument books — `33_TRADE_FLEET_AND_DESK.md`
++ `TASKS_TRADE_FLEET_DESK.md` (Phases 1–5). Wave 5 instruments here are
+**consumed** by Phase 4 of that board (civ-filtered listings).
+
 **Name:** **STAMP** — a unit of account whose truth is a **sealed
 receipt chain**, not a mined commodity fantasy. Plural: stamps.
 Symbol in prose: **S̸** (optional; plain `STAMP` in wire).

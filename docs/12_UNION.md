@@ -131,9 +131,10 @@ anyone above the progenitors. Stations `caravan`…`anchor` are in
 `office_step` can seat T4/T6 from the common. A separate **Rail ladder
 R1–R4** (Hearth · Aperture · Strand · Court) measures settlement
 altitude for claims — **still design**. Full law: `30_OFFICES_AND_RAILS.md`.
-Element commerce (REFINE-1 landed; routes pending) and STAMP:
-`31_ELEMENT_COMMERCE.md`, `32_STAMP_MARKET.md`. Task DAG:
-`TASKS_TIER_RAIL_MARKET.md`.
+Element commerce (REFINE + E-APT + E-ROUTE partial) and STAMP:
+`31_ELEMENT_COMMERCE.md`, `32_STAMP_MARKET.md`. Trade desk / fleets /
+alignment / local capital: `33_TRADE_FLEET_AND_DESK.md`. Task DAGs:
+`TASKS_TIER_RAIL_MARKET.md`, `TASKS_TRADE_FLEET_DESK.md`.
 
 ## 2b. The torsion law (operator ruling, 2026-07-30)
 

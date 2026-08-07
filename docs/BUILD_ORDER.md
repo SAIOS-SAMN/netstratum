@@ -938,7 +938,9 @@ roster.
 | `30_OFFICES_AND_RAILS.md` | T4–T9 offices + R1–R4 rails | **T-line land**; R1–R2 type land; R3–R4 open |
 | `31_ELEMENT_COMMERCE.md` | Element routes, refineries, NPC trade | REFINE + E-APT + E-ROUTE land; E-MKT open |
 | `32_STAMP_MARKET.md` | STAMP unit, instruments, NPC MM | **Spot + MM land**; instruments open |
+| `33_TRADE_FLEET_AND_DESK.md` | Trade desk · fleets · alignment · local capital | **DESIGN LOCK** — not landed |
 | `TASKS_TIER_RAIL_MARKET.md` | Waves 0–8 + vertical slice | Waves 1–4 partial; Wave 5+ open |
+| `TASKS_TRADE_FLEET_DESK.md` | 5-phase desk/fleet/market implementation | Phase 0 docs; Phases 1–5 open |
 | `RELAY_WAVE2_IMPLEMENTOR.md` | Slice brief (historical + Wave-3/4 note) | next: instruments / observer |
 
 ---
@@ -973,4 +975,11 @@ Melt via `pair_melt` (ROUTE-1 topology).
 `stamp_market_step`, O6.1 Caravan melt grade + O6.2 Crucible half
 refine spend, harness `pure_npc_stamp_spot_clears` green. Ratchet ≤112.
 Still open: R2.3 promotion, instruments I5, CLI/observer STAMP, R3–R4.
+
+**Trade desk program (2026-08-07, design lock):** full interactive
+trade/diplomacy/routes/fleets/local capital markets documented in
+`33_TRADE_FLEET_AND_DESK.md` and loaded as **five phases** in
+`TASKS_TRADE_FLEET_DESK.md` (P1 sightlines → P2 alignment → P3 fleets →
+P4 local instruments → P5 defense/deep rails). Does not land code until
+Phase 1 implementation starts. Q-F1…Q-F6 in `OPEN_QUESTIONS.md`.
 

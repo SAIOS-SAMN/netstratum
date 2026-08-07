@@ -303,3 +303,22 @@ Not law until ruled and landed — except **coded defaults** below.
 | **Q-S3** | Migrate FORWARD-1 into Note or keep parallel? | Parallel until NOTE-1 green — *open* |
 | **Q-S4** | Minimum clears before a perp index lists? | N=8 clears in window — *open* |
 
+---
+
+## Q-F — Trade desk · fleets · alignment (opened 2026-08-07)
+
+Recorded from `33_TRADE_FLEET_AND_DESK.md`. Not law until ruled and
+landed — defaults below are **implementation defaults** if a phase must
+ship before a full ruling.
+
+| ID | Question | Default if forced early |
+|----|----------|-------------------------|
+| **Q-F1** | θ advance per tick vs year-voice only? | Year-voice coarse; tick fine optional |
+| **Q-F2** | Hull η stack with route η? | Product of complements (pin Phase 3) |
+| **Q-F3** | Scrap: one pool vs per-resource? | **One scrap pool** from iron/alloy burn v1 |
+| **Q-F4** | Can T3 mint hulls without yard zone? | **Yard required**; office optional advantage |
+| **Q-F5** | R1 bourse without T6 Exchange? | Yes, **Spot-only**; T6 unlocks full stack |
+| **Q-F6** | Lease vs own hull on commission? | **Own** v1; lease Phase 5+ |
+
+Task board: `TASKS_TRADE_FLEET_DESK.md`. Authority: `33_TRADE_FLEET_AND_DESK.md`.
+

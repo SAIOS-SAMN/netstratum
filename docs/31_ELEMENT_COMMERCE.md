@@ -8,7 +8,8 @@ Depends on GROUND STEP and composes with ROUTE-1, MARKET-1, MERCHANT-1,
 APERTURE-1, TREATY-1.
 
 **Companion:** `30_OFFICES_AND_RAILS.md` (T4 Caravan, T5 Crucible),
-`32_STAMP_MARKET.md` (pricing and instruments).
+`32_STAMP_MARKET.md` (pricing and instruments),
+`33_TRADE_FLEET_AND_DESK.md` (trade desk, routes, fleets, alignment).
 
 ---
 
