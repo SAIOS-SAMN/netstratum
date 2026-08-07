@@ -923,6 +923,39 @@ pub fn render_receipt(receipt: &Receipt) -> String {
                 ratio_str(note_face)
             ),
         ),
+        E::EscortOnDuty {
+            hull_id,
+            deal,
+            grade,
+        } => (
+            "escort_on_duty",
+            format!("escort hull {hull_id} g{grade} → deal {deal}"),
+        ),
+        E::InterdictionStruck {
+            deal,
+            amount,
+            risk,
+            ..
+        } => (
+            "interdiction",
+            format!(
+                "deal {deal} lost {} (risk {})",
+                ratio_str(amount),
+                ratio_str(risk)
+            ),
+        ),
+        E::ConvoyRiskMarked {
+            deal,
+            risk,
+            escort_cover,
+        } => (
+            "convoy_risk",
+            format!(
+                "deal {deal} risk {} cover {}",
+                ratio_str(risk),
+                ratio_str(escort_cover)
+            ),
+        ),
         E::ApertureSent { deal, from_orb, resource, amount } => (
             "aperture_sent",
             format!(

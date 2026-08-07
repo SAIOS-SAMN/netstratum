@@ -396,12 +396,7 @@ fn render_pane(style: Style, home: &World, pane: Pane, orb_id: u64) -> Vec<Strin
         Pane::Fleet => render_fleet(style, home),
         Pane::Exch => render_exch(style, home),
         Pane::Grow => render_grow(style, home, orb_id),
-        Pane::Defend => {
-            vec![format!(
-                "  {}",
-                style.warn("(Phase 5) convoy / escort — not landed")
-            )]
-        }
+        Pane::Defend => render_defend(style, home),
         Pane::Explore => render_explore(style, home),
     }
 }
@@ -504,6 +499,100 @@ fn yn(b: bool) -> &'static str {
     } else {
         "—"
     }
+}
+
+fn render_defend(style: Style, home: &World) -> Vec<String> {
+    use cfe::world::{DefenseDomain, RiskBand};
+    let posture = home.defense_posture();
+    let mut lines = vec![
+        format!(
+            "  {} primary {} · secondary {} · {}",
+            style.label("POSTURE"),
+            style.strong(posture.primary.word()),
+            style.accent(posture.secondary.word()),
+            style.dim(posture.voice)
+        ),
+        format!(
+            "  met={} dis={} per={}  (36_DEFENSE_AXIOMS)",
+            posture.metabolism, posture.disposition, posture.perception
+        ),
+    ];
+    let domains = [
+        DefenseDomain::Cel,
+        DefenseDomain::Atm,
+        DefenseDomain::Cog,
+        DefenseDomain::Cyb,
+        DefenseDomain::Inf,
+        DefenseDomain::Kin,
+    ];
+    let rank_line: String = domains
+        .iter()
+        .enumerate()
+        .map(|(i, d)| format!("{}:{}", d.word(), posture.ranks[i]))
+        .collect::<Vec<_>>()
+        .join(" ");
+    lines.push(format!("  ranks {}", style.value(&rank_line)));
+    lines.push(format!(
+        "  {}",
+        style.hint("escort assign <hull> <deal> · defend risk <deal> · fleet mint escort")
+    ));
+    // Escorts on duty
+    let escorts: Vec<_> = home
+        .hulls()
+        .iter()
+        .filter(|h| {
+            h.assigned_route != 0
+                && cfe::dop::HullRole::from_wire(h.role) == Some(cfe::dop::HullRole::Escort)
+        })
+        .collect();
+    if escorts.is_empty() {
+        lines.push(format!(
+            "  {}",
+            style.dim("(no escorts on duty — corridors EXPOSED at base risk 1/8)")
+        ));
+    } else {
+        lines.push(format!("  {}", style.label("ESCORTS ON DUTY")));
+        for h in escorts.iter().take(8) {
+            let risk = home.convoy_risk(h.assigned_route);
+            let band = home.convoy_risk_band(h.assigned_route);
+            let paint = match band {
+                RiskBand::Secure => style.ok(band.word()),
+                RiskBand::Exposed => style.warn(band.word()),
+                RiskBand::Contested => style.bad(band.word()),
+            };
+            lines.push(format!(
+                "    hull {} g{} → deal {} · risk {} · {}",
+                h.hull_id,
+                h.grade,
+                h.assigned_route,
+                ratio_str(&risk),
+                paint
+            ));
+        }
+    }
+    // Sample live route deals
+    let deals: Vec<u64> = home
+        .routes()
+        .iter()
+        .map(|(d, _)| *d)
+        .chain(home.committed().element_routes.iter().map(|(d, _, _, _)| *d))
+        .collect();
+    if !deals.is_empty() {
+        lines.push(format!("  {}", style.label("CORRIDOR RISK")));
+        for deal in deals.into_iter().take(6) {
+            let risk = home.convoy_risk(deal);
+            let cover = home.escort_cover(deal);
+            let band = home.convoy_risk_band(deal);
+            lines.push(format!(
+                "    deal {} · risk {} · cover {} · {}",
+                deal,
+                ratio_str(&risk),
+                ratio_str(&cover),
+                band.word()
+            ));
+        }
+    }
+    lines
 }
 
 fn render_trade(style: Style, home: &World) -> Vec<String> {

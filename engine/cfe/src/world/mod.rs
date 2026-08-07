@@ -62,6 +62,9 @@ pub mod stock;
 pub mod fleet;
 pub mod balance;
 pub mod instruments;
+pub mod defense;
+
+pub use defense::{DefenseDomain, DefensePosture, RiskBand};
 
 pub use replay::replay;
 pub use fleet::hull_voice;
@@ -333,17 +336,27 @@ fn haul(
         src_stamp,
         vec![SOVEREIGN],
     );
-    // The touch then the credit, in the destination world — the
-    // DELIVERED amount: what the void melted never arrives, and the
-    // receipt speaks only what landed (MARKET-2).
-    let delivered = amount.clone() * (ratio(1, 1) - melt.clone());
+    // DELIVERED after melt, then P5-A interdiction residual (typed, not silent).
+    // delivered_raw = amount × (1 − melt); lost to risk = delivered_raw × risk / 2.
+    let after_melt = amount.clone() * (ratio(1, 1) - melt.clone());
+    let interdicted = if *melt > ratio(0, 1) {
+        src.strike_interdiction(SOVEREIGN, deal, from, resource, &after_melt)
+            .unwrap_or_else(|_| ratio(0, 1))
+    } else {
+        ratio(0, 1)
+    };
+    let delivered = if interdicted >= after_melt {
+        ratio(0, 1)
+    } else {
+        after_melt - interdicted
+    };
     {
         let target = dst.orbs.iter_mut().find(|held| held.orb_id == to).expect("checked");
         let ease = ease_of(&dst.techs, to, dst_stamp);
         touch(target, dst.star, &mut dst.chronicle, dst_stamp, &ease, &dst_supply);
         target.bank(resource, delivered.clone());
     }
-    let void_share = amount - delivered.clone();
+    let void_share = amount.clone() - delivered.clone();
     dst.chronicle.append(
         ClosureEvent::ApertureReceived { deal, to_orb: to, resource, amount: delivered },
         dst_stamp,

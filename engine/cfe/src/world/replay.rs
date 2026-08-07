@@ -1180,6 +1180,13 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             ClosureEvent::HullFinanced { .. } => {
                 // NoteIssued + HullMinted already applied on their own receipts.
             }
+            ClosureEvent::EscortOnDuty { .. } => {
+                // HullAssigned already set assigned_route; this is KIN duty mark.
+            }
+            ClosureEvent::InterdictionStruck { .. } => {
+                // Residual is in ApertureReceived delivered amount; typed audit only.
+            }
+            ClosureEvent::ConvoyRiskMarked { .. } => {}
         }
     }
     Committed {

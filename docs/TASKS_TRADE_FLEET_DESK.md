@@ -181,9 +181,9 @@ optional R3/R4 exits for claims.
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
 | P5.0 | [x] Design lock `36_DEFENSE_AXIOMS.md` | P4 land | file exists |
-| P5.1 | [ ] Escort role **active**: convoy risk reading (typed) | P3.3, P5.0 | pin |
-| P5.2 | [ ] Interdiction / loss law (typed residual, not silent delete) | P5.1 | pins |
-| P5.3 | [ ] DEFEND pane skeleton: escort assign + risk band + domain readout stub | P5.1, P1.1 | desk `d` |
+| P5.1 | [x] Escort role **active**: `escort_assign` + cover/risk pure law | P3.3, P5.0 | defense_pins |
+| P5.2 | [x] Interdiction residual on +melt hauls (`InterdictionStruck` 133) | P5.1 | pins + haul path |
+| P5.3 | [x] DEFEND pane + `defend` CLI: posture stubs + escort/risk | P5.1, P1.1 | desk `d` |
 
 ### P5-B — Species-relative posture (readings first)
 

@@ -320,7 +320,13 @@
 //!    129  ClosureEvent::PerpFunded (PERP-1 — funding from premium vs last clear.)
 //!    130  ClosureEvent::PerpClosed (PERP-1 — close or liquidation.)
 //!    131  ClosureEvent::HullFinanced (P4.10 shipwright — Note paper with hull mint.)
-//!    Phase-4 remainder claim ledger: next free **132**. SCHEMA_V9 shares/perps.
+//!    132  ClosureEvent::EscortOnDuty (P5-A KIN — escort hull assigned to
+//!         corridor deal; activates convoy coverage.)
+//!    133  ClosureEvent::InterdictionStruck (P5-A KIN — typed residual
+//!         cargo loss on positive-melt haul without full escort cover.)
+//!    134  ClosureEvent::ConvoyRiskMarked (P5-A KIN — optional receipted
+//!         risk band reading for a deal; pure derive preferred.)
+//!    Phase-5-A claim ledger: next free **135**. KIN escort/interdiction.
 //!         Orb TLV: 73 STAMP, 74 scrap. ZoneKind::ShipYard = 10.
 //!         (Historic free tags below top: 14, 15, 56, 57, 58, 64, 66,
 //!         83, 84, 87; 9 and 51 reserved; 65 retired forever.)
@@ -2663,6 +2669,26 @@ pub enum ClosureEvent {
         scrap_spent: Ratio,
         note_face: Ratio,
     },
+    /// P5-A KIN (tag 132) — escort hull on corridor duty.
+    EscortOnDuty {
+        hull_id: u64,
+        deal: u64,
+        grade: u8,
+    },
+    /// P5-A KIN (tag 133) — typed interdiction residual (cargo lost to risk).
+    InterdictionStruck {
+        deal: u64,
+        orb_id: u64,
+        resource: Resource,
+        amount: Ratio,
+        risk: Ratio,
+    },
+    /// P5-A KIN (tag 134) — receipted convoy risk band for a deal (optional).
+    ConvoyRiskMarked {
+        deal: u64,
+        risk: Ratio,
+        escort_cover: Ratio,
+    },
     /// N4 (NS-2 §1.5) — the scanner's power draw, the ONE chronicle
     /// event of RQP: crystals left the probing orb's bank to hold the
     /// lens open. Deliberately blind to what was asked and what was
@@ -3540,6 +3566,40 @@ impl ClosureEvent {
                 ratio::encode(scrap_spent, &mut value);
                 ratio::encode(note_face, &mut value);
                 tlv::put(131, &value, &mut out);
+            }
+            Self::EscortOnDuty {
+                hull_id,
+                deal,
+                grade,
+            } => {
+                let mut value = hull_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&deal.to_le_bytes());
+                value.push(*grade);
+                tlv::put(132, &value, &mut out);
+            }
+            Self::InterdictionStruck {
+                deal,
+                orb_id,
+                resource,
+                amount,
+                risk,
+            } => {
+                let mut value = deal.to_le_bytes().to_vec();
+                value.extend_from_slice(&orb_id.to_le_bytes());
+                value.push(*resource as u8);
+                ratio::encode(amount, &mut value);
+                ratio::encode(risk, &mut value);
+                tlv::put(133, &value, &mut out);
+            }
+            Self::ConvoyRiskMarked {
+                deal,
+                risk,
+                escort_cover,
+            } => {
+                let mut value = deal.to_le_bytes().to_vec();
+                ratio::encode(risk, &mut value);
+                ratio::encode(escort_cover, &mut value);
+                tlv::put(134, &value, &mut out);
             }
             Self::CrystalDrawn { orb_id, amount } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
@@ -4472,6 +4532,40 @@ impl ClosureEvent {
                     orb_id,
                     scrap_spent,
                     note_face,
+                })
+            }
+            132 => {
+                let hull_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let deal = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let grade = *value.get(16)?;
+                Some(Self::EscortOnDuty {
+                    hull_id,
+                    deal,
+                    grade,
+                })
+            }
+            133 => {
+                let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let orb_id = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let resource = Resource::from_wire(*value.get(16)?)?;
+                let (amount, u1) = ratio::decode(value.get(17..)?)?;
+                let (risk, _) = ratio::decode(value.get(17 + u1..)?)?;
+                Some(Self::InterdictionStruck {
+                    deal,
+                    orb_id,
+                    resource,
+                    amount,
+                    risk,
+                })
+            }
+            134 => {
+                let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let (risk, u1) = ratio::decode(value.get(8..)?)?;
+                let (escort_cover, _) = ratio::decode(value.get(8 + u1..)?)?;
+                Some(Self::ConvoyRiskMarked {
+                    deal,
+                    risk,
+                    escort_cover,
                 })
             }
             55 => {

@@ -269,11 +269,16 @@ impl World {
         let Some(g) = &self.genesis else {
             return true;
         };
+        // P5-A: Escort is always catalog-legal (KIN defense); freight roles stay
+        // metabolism-coloured.
+        if matches!(role, HullRole::Escort) {
+            return true;
+        }
         match g.metabolism {
             // mineral — full catalog
             1 => true,
-            // biotic — hauler + escort (organic bulk + guard)
-            2 => matches!(role, HullRole::Hauler | HullRole::Escort | HullRole::Semi),
+            // biotic — hauler + semi (organic bulk)
+            2 => matches!(role, HullRole::Hauler | HullRole::Semi),
             // plasmic — runner + hauler (courier emphasis)
             3 => matches!(role, HullRole::Runner | HullRole::Hauler | HullRole::Semi),
             _ => true,

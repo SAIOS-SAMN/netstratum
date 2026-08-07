@@ -1025,5 +1025,10 @@ tampering** (offensive terraform); espionage stack on veil/ward/instruments;
 KIN escort remains first vertical. Board: P5.0–P5.26 on
 `TASKS_TRADE_FLEET_DESK.md`.
 
-**Next:** P5-A escort vertical · or P1.8 offer widen · Q-O1 ψ.
+**P5-A LANDED (KIN escort / interdiction):** tags **132–134** EscortOnDuty,
+InterdictionStruck, ConvoyRiskMarked; `defense_posture` stubs; convoy risk =
+(1/8)×(1−escort_cover); haul residual typed; DEFEND desk + `defend` CLI;
+kernel **0.28.0**; `defense_pins`. See `36_DEFENSE_AXIOMS.md`.
+
+**Next:** P5-B posture depth · P5-D CovertTamper · P1.8 · Q-O1 ψ.
 

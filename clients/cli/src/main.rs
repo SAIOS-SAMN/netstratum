@@ -2458,6 +2458,71 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 other
             ),
         },
+        // P5-A DEFEND / escort
+        Some("defend") | Some("defence") => match words.next() {
+            None | Some("status") | Some("help") => {
+                let p = world.defense_posture();
+                println!(
+                    "{} DEFEND — primary {} · secondary {} · {}",
+                    style.head("🛡"),
+                    style.strong(p.primary.word()),
+                    p.secondary.word(),
+                    style.dim(p.voice)
+                );
+                println!(
+                    "  ranks CEL:{} ATM:{} COG:{} CYB:{} INF:{} KIN:{}",
+                    p.ranks[0], p.ranks[1], p.ranks[2], p.ranks[3], p.ranks[4], p.ranks[5]
+                );
+                println!(
+                    "  {}",
+                    style.hint("defend escort <hull> <deal> · defend risk <deal> · desk [d]")
+                );
+            }
+            Some("escort") => {
+                let hull = words.next().and_then(|w| w.parse().ok());
+                let deal = words.next().and_then(|w| w.parse().ok());
+                match (hull, deal) {
+                    (Some(h), Some(d)) => match world.escort_assign(h, d) {
+                        Ok(()) => {
+                            let _ = sync_world(world);
+                            let risk = world.convoy_risk(d);
+                            println!(
+                                "{} escort hull {h} → deal {d} · risk now {}",
+                                style.ok("🛡"),
+                                amount(&risk)
+                            );
+                        }
+                        Err(refusal) => refuse(world, &refusal, style),
+                    },
+                    _ => println!(
+                        "{} usage: {}",
+                        style.bad("✗"),
+                        style.strong("defend escort <hull_id> <deal>")
+                    ),
+                }
+            }
+            Some("risk") => {
+                let deal = words.next().and_then(|w| w.parse().ok()).unwrap_or(0);
+                match world.mark_convoy_risk(deal) {
+                    Ok(r) => {
+                        let _ = sync_world(world);
+                        println!(
+                            "{} deal {deal} risk {} · cover {} · {}",
+                            style.ok("🛡"),
+                            amount(&r),
+                            amount(&world.escort_cover(deal)),
+                            world.convoy_risk_band(deal).word()
+                        );
+                    }
+                    Err(refusal) => refuse(world, &refusal, style),
+                }
+            }
+            Some(other) => println!(
+                "{} defend {:?} — status|escort|risk",
+                style.bad("✗"),
+                other
+            ),
+        },
         // PHASE-4 instruments (NOTE-1 / FUT-1).
         Some("note") => match words.next() {
             None | Some("list") | Some("help") => {
@@ -6087,6 +6152,9 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
         ActionRefused::PerpMarginBreach { perp_id } => {
             format!("perp {perp_id} margin breach — liquidate or fund")
         }
+        ActionRefused::EscortRoleRequired { hull_id } => {
+            format!("hull {hull_id} is not an escort — `fleet mint escort`")
+        }
         ActionRefused::BalanceEntropyDominates {
             balance,
             syntropy,
@@ -7392,6 +7460,37 @@ fn chronicle(world: &World, style: &Style) {
                 hull_id,
                 note_id,
                 amount(note_face)
+            ),
+            cfe::dop::ClosureEvent::EscortOnDuty {
+                hull_id,
+                deal,
+                grade,
+            } => format!(
+                "🛡 escort hull {} g{} on duty · deal {}",
+                style.strong(&hull_id.to_string()),
+                grade,
+                deal
+            ),
+            cfe::dop::ClosureEvent::InterdictionStruck {
+                deal,
+                amount: lost,
+                risk,
+                ..
+            } => format!(
+                "⚔ interdiction deal {} lost {} (risk {})",
+                deal,
+                style.bad(&amount(lost)),
+                amount(risk)
+            ),
+            cfe::dop::ClosureEvent::ConvoyRiskMarked {
+                deal,
+                risk,
+                escort_cover,
+            } => format!(
+                "🛡 convoy deal {} risk {} cover {}",
+                deal,
+                amount(risk),
+                amount(escort_cover)
             ),
             cfe::dop::ClosureEvent::AssayStruck { amount: drawn, richness, .. } => format!(
                 "⚖ {} drawn from the opened vein — one receipt, the whole span{}",

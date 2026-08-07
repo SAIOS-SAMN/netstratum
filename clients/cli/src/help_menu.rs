@@ -273,7 +273,8 @@ fn colony_help(style: Style) {
     row(style, "future list|mark|open|settle", "FUT-1 cargo×STAMP");
     row(style, "share list|issue|dividend|transfer", "SHARE-1 equity stream");
     row(style, "perp list|open|fund|close|liq", "PERP-1 last-clear index");
-    row(style, "fleet mint hauler [g] finance", "hull + optional yard Note");
+    row(style, "fleet mint hauler|escort [g] finance", "hull + optional yard Note");
+    row(style, "defend status|escort|risk", "P5-A KIN convoy + posture (36)");
     row(style, "prospect · assay · compound · refine", "elements + alchemy");
     println!();
     println!(

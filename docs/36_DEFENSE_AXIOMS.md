@@ -1,7 +1,7 @@
 # 36 — DEFENSE AXIOMS · SPECIES-RELATIVE SECURITY · COVERT TERRAFORM · ESPIONAGE
 
-**Status:** DESIGN LOCK for Phase 5 expansion (2026-08-08).  
-**Does not land mechanics until red-first pins; claim tags at land only.**  
+**Status:** DESIGN LOCK + **P5-A KIN partial land** (tags 132–134, 2026-08-08).  
+**Remaining waves** land red-first; claim tags at each wave only.  
 **Authority:** `00_CHARTER`, `04_CIVILIZATION_GENESIS`, `05_THERMAL_BALANCE`,
 `06_CIVILIZATIONS`, `10_TECH_EMERGENCE` (TERRA-1, WARDEN-1, MASK-1, MANU-1),
 `14_ALMANAC`, `15_TAXON`, `33_TRADE_FLEET_AND_DESK` §Phase 5,
