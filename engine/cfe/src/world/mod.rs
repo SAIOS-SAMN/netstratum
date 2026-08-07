@@ -764,11 +764,12 @@ impl World {
     }
 }
 
-/// Phase-2 (33 / TASKS_TRADE_FLEET_DESK): ticks per orbital slot step.
-/// Year-voice default (Q-F1): one lattice slot per 60-tick year — the
-/// same base-60 ring as `TURN_SLOTS`, so a full year steps one place
-/// on the orbit. Not a free dial: it is the year length the colony
-/// loop already uses for journal segmentation.
+/// Phase-2 (33 / TASKS_TRADE_FLEET_DESK): base ticks per orbital slot
+/// step — the year-voice length (`YEAR_TICKS` / journal ring). Not a
+/// free dial: colony loop already segments years at 60. Individual
+/// orbits scale this by core magnetism, star dynamo, and polity
+/// disposition ([`orbit_phase_period`]) so not every ring advances
+/// in lockstep.
 pub const ORBIT_PHASE_TICKS: u64 = 60;
 
 /// Alignment band for desk and route windows (derived from `D_orbit`,
@@ -796,25 +797,95 @@ impl Alignment {
     }
 }
 
-/// Phase advance on a sited θ: `index + floor(now / ORBIT_PHASE_TICKS)`
-/// wrapped on the turn lattice. Pure reading — no receipt (Q-F1 /
-/// design: derived from clock + site).
-fn phased_theta(site: &crate::dop::ThermalSite, now: u64) -> Option<crate::dop::Slot> {
+/// **Core magnetism grade** — ring depth of the sited orbit on the
+/// orbit grain (`ORBIT_GRAIN` = 64). Farther rings couple more weakly
+/// to the stellar dynamo and take longer per θ step. Floor one grain
+/// step so an orbit always has a period (never zero).
+pub fn core_magnetism(site: &crate::dop::ThermalSite) -> u64 {
+    use num_bigint::BigInt;
+    use num_traits::ToPrimitive;
+    let grid = BigInt::from(crate::almanac::ORBIT_GRAIN);
+    let r = site.orbit_r.value();
+    let stepped = r.numer() * &grid / r.denom();
+    let at_least = if stepped < BigInt::from(1) {
+        BigInt::from(1)
+    } else {
+        stepped
+    };
+    // Lawful grain steps fit u64; overflow clamps to u64::MAX (still ≥ 1).
+    at_least.to_u64().unwrap_or(u64::MAX).max(1)
+}
+
+/// **Polity offset of the star's world** — sealed genesis disposition
+/// (1 expansionist · 2 empiricist · 3 epicurean). Stretches the period
+/// so different civil characters under different suns do not share a
+/// single clockwork. Unsealed worlds read as 1 (no extra stretch).
+pub fn star_polity_offset(world: &World) -> u64 {
+    world
+        .genesis
+        .as_ref()
+        .map(|g| u64::from(g.disposition.max(1)))
+        .unwrap_or(1)
+}
+
+/// **Ticks per θ-slot step** for one world's sited genesis orb.
+///
+/// ```text
+/// period = max(1, ORBIT_PHASE_TICKS × core_magnetism × polity
+///                  / star.magnetism())
+/// ```
+///
+/// - **core** — ring depth (grain steps of `orbit_r`)
+/// - **polity** — sealed disposition under this star
+/// - **star.magnetism** — dynamo grade (`StarClass::magnetism`);
+///   stronger main-sequence fields (M > G > O) couple rings tighter
+///   → shorter periods
+///
+/// Pure reading; no receipt. Different (class, ring, polity) triples
+/// advance at different rates → relative `D_orbit` moves over time.
+pub fn orbit_phase_period(world: &World, site: &crate::dop::ThermalSite) -> u64 {
+    let core = core_magnetism(site);
+    let polity = star_polity_offset(world);
+    let star_m = world
+        .star
+        .map(|c| u64::from(c.magnetism().max(1)))
+        .unwrap_or(1);
+    let num = ORBIT_PHASE_TICKS
+        .saturating_mul(core)
+        .saturating_mul(polity);
+    (num / star_m).max(1)
+}
+
+/// Phase advance on a sited θ under this world's star + polity + core.
+/// `index + floor(now / period)` wrapped on the turn lattice. Pure
+/// reading — no receipt (Q-F1 / design: derived from clock + site +
+/// dynamo law).
+fn phased_theta(
+    world: &World,
+    site: &crate::dop::ThermalSite,
+    now: u64,
+) -> Option<crate::dop::Slot> {
     let base = site.theta.as_ref()?;
-    let steps = (now / ORBIT_PHASE_TICKS) as i64;
+    let period = orbit_phase_period(world, site);
+    let steps = (now / period) as i64;
     Some(crate::dop::Slot::from_index(base.index() + steps))
 }
 
 /// Thermal site as the orbit law sees it at `now` (θ advanced; ψ fixed).
-fn phased_site(site: &crate::dop::ThermalSite, now: u64) -> crate::dop::ThermalSite {
+fn phased_site(
+    world: &World,
+    site: &crate::dop::ThermalSite,
+    now: u64,
+) -> crate::dop::ThermalSite {
     let mut out = site.clone();
-    out.theta = phased_theta(site, now);
+    out.theta = phased_theta(world, site, now);
     out
 }
 
 /// **D_orbit** — wrapped L1 separation of the two worlds' genesis orbs
 /// at their phased places. Zero when either is unsited / unplaced
-/// (33 §3.1: not "far", unplaced).
+/// (33 §3.1: not "far", unplaced). Each end advances on its own
+/// period (core × polity ÷ star magnetism).
 pub fn d_orbit(a: &World, b: &World) -> Ratio {
     let (Some(site_a), Some(site_b)) = (
         a.orb().and_then(|o| o.thermal.as_ref()),
@@ -822,8 +893,8 @@ pub fn d_orbit(a: &World, b: &World) -> Ratio {
     ) else {
         return ratio(0, 1);
     };
-    let sa = phased_site(site_a, a.now());
-    let sb = phased_site(site_b, b.now());
+    let sa = phased_site(a, site_a, a.now());
+    let sb = phased_site(b, site_b, b.now());
     crate::dop::separation(&sa, &sb).unwrap_or_else(|| ratio(0, 1))
 }
 
@@ -872,8 +943,8 @@ pub fn route_melt_at(
     ) else {
         return pair_melt(a, b, d_chart);
     };
-    let sa = phased_site(site_a, home_now);
-    let sb = phased_site(site_b, b.now());
+    let sa = phased_site(a, site_a, home_now);
+    let sb = phased_site(b, site_b, b.now());
     let orbit = crate::dop::separation(&sa, &sb).unwrap_or_else(|| ratio(0, 1));
     let d_eff = d_chart.clone() + orbit;
     pair_melt(a, b, &d_eff)

@@ -98,9 +98,10 @@ distance in melt, player trade desk, and civ-filtered capital books.
 |--------|---------|--------|
 | `D_chart` | Spatial L1 between world chart positions | `spatial_l1` (landed) |
 | `D_key` | Wrapped key gap | already inside `pair_melt` |
-| `D_orbit` | Chord / phase gap between sited orbs at current θ, ψ, r | `PlanetSited` + clock (extend use of θ/ψ) |
+| `D_orbit` | Chord / phase gap between sited orbs at current θ, ψ, r | `PlanetSited` + clock (θ advances per-world) |
 | `D_eff` | Effective transit distance | **one function** (new): see §3.2 |
 | `alignment` | Desk reading of relative phase | derived band: CHEAP / FAIR / DEAR |
+| **orbit period** | ticks per θ-slot step | `ORBIT_PHASE_TICKS × core_magnetism × polity / star.magnetism()` — **not lockstep** |
 
 ### 3.2 Effective distance (sketch — pin at Phase 2 land)
 
@@ -128,6 +129,11 @@ correction (still useful for timing Futures).
   at land; prefer **derived from clock + site**, no per-beat spam
   receipts unless state must move).
 - Desk shows: current band, next N beats' projected `D_eff` / melt.
+- **Not lockstep:** each world's θ steps every
+  `ORBIT_PHASE_TICKS × core_magnetism(orbit_r grain) × disposition
+  / StarClass::magnetism()` ticks — core ring depth, sealed polity, and
+  stellar dynamo grade. Relative alignment moves even when both clocks
+  advance together.
 
 ### 3.4 Candidate routes (reading, not mint)
 

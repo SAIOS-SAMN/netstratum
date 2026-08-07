@@ -253,7 +253,10 @@ fn routes_help(style: Style) {
     );
     println!(
         "  {}",
-        style.hint("Alignment CHEAP/FAIR/DEAR: orbital phase shifts D_orbit each year.")
+        style.hint(
+            "Alignment CHEAP/FAIR/DEAR: each orbit advances at its own period \
+             (core grain × polity ÷ star magnetism) — not lockstep.",
+        ),
     );
 }
 
