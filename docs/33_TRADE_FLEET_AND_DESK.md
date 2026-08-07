@@ -12,7 +12,8 @@ require strand/datum for local fun (R1–R2 first).
 **Subordinate to:** `00_CHARTER`, `01_ECONOMY`, `02_COLONY_LOOP`,
 `05_THERMAL_BALANCE`, `12_UNION`, `16_UNIT`, `28_VOCABULARY`,
 `29_CONSTRUCTION`, `30_OFFICES_AND_RAILS`, `31_ELEMENT_COMMERCE`,
-`32_STAMP_MARKET`.
+`32_STAMP_MARKET`, **`34_MATTER_BALANCE`** (elements · alchemy · fleets
+· entropy∥syntropy).
 
 **Companion board:** `TASKS_TRADE_FLEET_DESK.md` (Phases 1–5).  
 **Related board:** `TASKS_TIER_RAIL_MARKET.md` (offices, STAMP, instruments

@@ -1000,5 +1000,10 @@ board `TASKS_TRADE_FLEET_DESK.md`.
 - `fleet_step` NPC; CLI `fleet salvage|mint|assign|scrap`; desk `f`
 - Pin `pure_npc_fleet_hauls`; ratchet ≤112 (alignment thresholds derived)
 
+**Matter balance (34, partial land):** closed loop extract → refine/compound
+→ scrap → hulls → trade; `OrderWorked` (118) / `ElementSalvaged` (119);
+order-work gated when thermal balance < 1/2 unless Regenerator stands.
+Kernel **0.24.0**. See `34_MATTER_BALANCE.md`.
+
 **Next:** Phase 4 local capital markets · or P1.8 offer widen.
 

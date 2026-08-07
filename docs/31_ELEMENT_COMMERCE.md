@@ -9,7 +9,9 @@ APERTURE-1, TREATY-1.
 
 **Companion:** `30_OFFICES_AND_RAILS.md` (T4 Caravan, T5 Crucible),
 `32_STAMP_MARKET.md` (pricing and instruments),
-`33_TRADE_FLEET_AND_DESK.md` (trade desk, routes, fleets, alignment).
+`33_TRADE_FLEET_AND_DESK.md` (trade desk, routes, fleets, alignment),
+`34_MATTER_BALANCE.md` (extract → refine/alchemy → scrap → hulls;
+entropy∥syntropy cap on order-work).
 
 ---
 

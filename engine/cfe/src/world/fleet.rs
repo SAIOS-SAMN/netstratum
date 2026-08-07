@@ -69,10 +69,62 @@ impl World {
             ClosureEvent::ScrapSalvaged {
                 orb_id: orb,
                 amount: spent.clone(),
-                iron_spent: spent,
+                iron_spent: spent.clone(),
             },
             actor,
         );
+        // Recycling residual — not order-work gated (34 §2.2).
+        let (ent, syn) = self.order_arms_salvage(orb, &spent);
+        self.post_order_worked(actor, orb, balance::ORDER_SALVAGE, ent, syn);
+        Ok(())
+    }
+
+    /// Salvage scrap from a banked element (identity amount). Yard
+    /// required. Ties alchemy surplus / raw matter into the fleet loop
+    /// (34 §3). Not order-gated — recycling path.
+    pub fn salvage_element_scrap(
+        &mut self,
+        orb: u64,
+        element: [u8; 32],
+        amount: crate::dop::Positive,
+    ) -> Result<(), ActionRefused> {
+        self.salvage_element_scrap_as(SOVEREIGN, orb, element, amount)
+    }
+
+    pub fn salvage_element_scrap_as(
+        &mut self,
+        actor: u64,
+        orb: u64,
+        element: [u8; 32],
+        amount: crate::dop::Positive,
+    ) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Collect)?;
+        let spent = amount.value().clone();
+        let held = peek(&self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
+        if !held.zones.iter().any(|z| z.kind == ZoneKind::ShipYard) {
+            return Err(ActionRefused::NoShipYard { orb });
+        }
+        let have = held.element_amount(&element);
+        if have < spent {
+            return Err(ActionRefused::CannotAffordElement {
+                element,
+                need: Box::new(spent),
+                have: Box::new(have),
+            });
+        }
+        let held = peel(&mut self.orbs, orb).expect("checked");
+        held.bank_element(element, -spent.clone());
+        held.bank_scrap(spent.clone());
+        self.close(
+            ClosureEvent::ElementSalvaged {
+                orb_id: orb,
+                element,
+                amount: spent.clone(),
+            },
+            actor,
+        );
+        let (ent, syn) = self.order_arms_salvage(orb, &spent);
+        self.post_order_worked(actor, orb, balance::ORDER_SALVAGE, ent, syn);
         Ok(())
     }
 
@@ -113,6 +165,9 @@ impl World {
                 have: Box::new(have),
             });
         }
+        // 34_MATTER_BALANCE: hull mint is order-work.
+        self.require_order_balance(orb)?;
+        let (ent, syn) = self.order_arms_hull(&cost);
         let hull_id = self
             .hulls
             .iter()
@@ -139,6 +194,7 @@ impl World {
             },
             actor,
         );
+        self.post_order_worked(actor, orb, balance::ORDER_HULL, ent, syn);
         Ok(hull_id)
     }
 

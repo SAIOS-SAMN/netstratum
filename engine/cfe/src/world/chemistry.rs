@@ -85,6 +85,9 @@ impl World {
                 have: Box::new(have),
             });
         }
+        // 34_MATTER_BALANCE: order-work gate (entropy ∥ syntropy).
+        self.require_order_balance(orb)?;
+        let (ent, syn) = self.order_arms_refine(orb, &spend, &yielded);
         let held = peel(&mut self.orbs, orb).expect("judged above");
         held.bank_element(raw, -spend.clone());
         held.bank_element(refined, yielded.clone());
@@ -98,6 +101,7 @@ impl World {
             },
             actor,
         );
+        self.post_order_worked(actor, orb, balance::ORDER_REFINE, ent, syn);
         Ok(refined)
     }
 
@@ -138,6 +142,10 @@ impl World {
         // THE RECIPE — one home, the same the gate re-derives from.
         let (spends, yielded) = crate::almanac::recipe_of(&set);
 
+        // 34_MATTER_BALANCE: alchemy is order-work.
+        self.require_order_balance(orb)?;
+        let (ent, syn) = self.order_arms_compound(&yielded);
+
         // Nothing above moved anything. The deed:
         let gem = set.gem();
         let held = peel(&mut self.orbs, orb).expect("judged above");
@@ -153,6 +161,7 @@ impl World {
             },
             actor,
         );
+        self.post_order_worked(actor, orb, balance::ORDER_COMPOUND, ent, syn);
         Ok(gem)
     }
 

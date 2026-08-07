@@ -78,6 +78,13 @@ pub enum ActionRefused {
     HullRoleForbidden { role: u8 },
     /// FLEET-1 — assign to a deal neither book holds as a route.
     RouteUnknown { deal: u64 },
+    /// MATTER-BALANCE-1 (34) — entropy dominates; build a Regenerator
+    /// or encase heat before more order-work (refine/compound/hull).
+    BalanceEntropyDominates {
+        balance: Box<Ratio>,
+        syntropy: Box<Ratio>,
+        entropy: Box<Ratio>,
+    },
     /// ELEMENT-CHEMISTRY (#37) — this system does not carry the
     /// element's LINE: deep matter simply does not occur under a
     /// shallow star. A fact of the sky, at the verb forever.

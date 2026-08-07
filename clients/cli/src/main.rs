@@ -4126,11 +4126,62 @@ fn fleet_command(
             }
         }
         Some("salvage") => {
+            // fleet salvage <amt>  |  fleet salvage element <amt> <prefix>
+            if matches!(words.clone().next(), Some("element") | Some("elem")) {
+                words.next();
+                let amt = words.next().and_then(parse_ratio_arg);
+                let prefix = words.next().map(str::to_string);
+                match (amt, prefix) {
+                    (Some(amt), Some(prefix)) => {
+                        let element = world.orb_by_id(current).and_then(|orb| {
+                            orb.elements
+                                .iter()
+                                .map(|(id, _)| *id)
+                                .find(|id| hex_prefix(id).starts_with(&prefix))
+                        });
+                        let Some(element) = element else {
+                            println!(
+                                "{} no banked element matching {} — `elements` lists stock",
+                                style.bad("✗"),
+                                style.strong(&prefix)
+                            );
+                            return;
+                        };
+                        let Some(amt) = cfe::dop::Positive::new(amt) else {
+                            println!("{} amount must be positive", style.bad("✗"));
+                            return;
+                        };
+                        match world.salvage_element_scrap(current, element, amt) {
+                            Ok(()) => {
+                                let _ = sync_world(world);
+                                println!(
+                                    "{} element salvaged to scrap — bank {}",
+                                    style.ok("⚙"),
+                                    style.cargo(&amount(
+                                        &world
+                                            .orb_by_id(current)
+                                            .map(|o| o.scrap_amount())
+                                            .unwrap_or_else(|| ratio(0, 1))
+                                    ))
+                                );
+                            }
+                            Err(refusal) => refuse(world, &refusal, style),
+                        }
+                    }
+                    _ => println!(
+                        "{} usage: {}",
+                        style.bad("✗"),
+                        style.verb("fleet salvage element <amt> <prefix>")
+                    ),
+                }
+                return;
+            }
             let Some(amt) = words.next().and_then(parse_ratio_arg) else {
                 println!(
-                    "{} usage: {}",
+                    "{} usage: {} · {}",
                     style.bad("✗"),
-                    style.verb("fleet salvage <amt>")
+                    style.verb("fleet salvage <amt>"),
+                    style.verb("fleet salvage element <amt> <prefix>")
                 );
                 return;
             };
@@ -5347,6 +5398,26 @@ fn thermal_line(world: &World, style: &Style, current: u64) {
     if let Some(value) = joules {
         println!("  accrued joules {} (encased, uncollected)", style.strong(&amount(&value)));
     }
+    let s = orb.syntropy_contained.clone();
+    let e = orb.entropy_vented.clone();
+    println!(
+        "  books S {} · E {} · {}",
+        style.ok(&amount(&s)),
+        style.bad(&amount(&e)),
+        match world.thermal_balance_of(current) {
+            None => style.dim("balance unbooked (bootstrap)"),
+            Some(b) if b >= cfe::world::World::balance_orderly_floor() => {
+                style.ok(&format!("balance {} ORDERLY", amount(&b)))
+            }
+            Some(b) => style.bad(&format!(
+                "balance {} STRAINED — regenerator unlocks order-work",
+                amount(&b)
+            )),
+        }
+    );
+    if world.regenerator_stands(current) {
+        println!("  {}", style.ok("regenerator stands — order-work uncapped by strain"));
+    }
 }
 
 fn resource_name(resource: Resource) -> &'static str {
@@ -5515,6 +5586,16 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
              and the phase, the count equals the geometry's arity, and the binds saturate. \
              {} shows every set of what you hold that would",
             style.strong("bench")
+        ),
+        ActionRefused::BalanceEntropyDominates {
+            balance,
+            syntropy,
+            entropy,
+        } => format!(
+            "entropy dominates order (balance {} = S {} / (S+E), E {}) — build a regenerator or encase heat before refine/compound/hull mint",
+            amount(balance),
+            amount(syntropy),
+            amount(entropy)
         ),
         ActionRefused::NoShipYard { orb } => format!(
             "no shipyard stands on orb {orb} — build one (`zone <tile> yard`) before salvaging or minting hulls"
@@ -5991,6 +6072,24 @@ fn status(world: &World, style: &Style, current: u64) {
             );
             banked_lines(world, style, current);
             accrued_lines(world, style, current);
+            let s = orb.syntropy_contained.clone();
+            let e = orb.entropy_vented.clone();
+            let scrap = amount(&orb.scrap_amount());
+            println!(
+                "  {} S {} · E {} · scrap {} · hulls {} · {}",
+                style.dim("balance"),
+                style.ok(&amount(&s)),
+                style.bad(&amount(&e)),
+                style.cargo(&scrap),
+                style.strong(&world.hulls().len().to_string()),
+                match world.thermal_balance_of(current) {
+                    None => style.dim("unbooked"),
+                    Some(b) if b >= cfe::world::World::balance_orderly_floor() => {
+                        style.ok(&format!("{} orderly", amount(&b)))
+                    }
+                    Some(b) => style.bad(&format!("{} strained", amount(&b))),
+                }
+            );
         }
         None => println!(
             "{} no colony — {} begins the story",
@@ -6644,6 +6743,21 @@ fn chronicle(world: &World, style: &Style) {
                 "🚢 hull {} scrapped · {} scrap recovered",
                 style.strong(&hull_id.to_string()),
                 style.strong(&amount(scrap_returned))
+            ),
+            cfe::dop::ClosureEvent::OrderWorked {
+                kind,
+                entropy,
+                syntropy,
+                ..
+            } => format!(
+                "⚖ order kind {} — entropy {} · syntropy {}",
+                style.strong(&kind.to_string()),
+                style.bad(&amount(entropy)),
+                style.ok(&amount(syntropy))
+            ),
+            cfe::dop::ClosureEvent::ElementSalvaged { amount: a, .. } => format!(
+                "⚙ {} element mass salvaged to scrap",
+                style.strong(&amount(a))
             ),
             cfe::dop::ClosureEvent::AssayStruck { amount: drawn, richness, .. } => format!(
                 "⚖ {} drawn from the opened vein — one receipt, the whole span{}",

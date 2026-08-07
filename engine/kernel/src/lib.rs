@@ -136,7 +136,7 @@ use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 /// (Amendments 0.11.0 through the current minor are recorded in the
 /// version ledger — `tests/conservation_pins.rs` — beside the
 /// NEXT-FREE RULE that assigns minors across lanes.)
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 23, patch: 0 };
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 24, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
@@ -921,6 +921,16 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             }
             vec![(*element, amount.clone())]
         }
+        // 34: element → scrap; element mass leaves the open-matter ledger.
+        ClosureEvent::ElementSalvaged { element, amount, .. } => {
+            if *amount < ratio(0, 1) {
+                return Err(Refused::ElementNotPositive {
+                    element: *element,
+                    amount: Box::new(amount.clone()),
+                });
+            }
+            vec![(*element, -amount.clone())]
+        }
         _ => Vec::new(),
     };
     // Total-check every element key present in either state or in the
@@ -1179,7 +1189,7 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::ElementApertureSent { .. } | E::ElementApertureReceived { .. }
         | E::ElementRouteChartered { .. }
         | E::StampMinted { .. } | E::StampApertureSent { .. } | E::StampApertureReceived { .. }
-        | E::ScrapSalvaged { .. } | E::HullMinted { .. } | E::HullAssigned { .. } | E::HullScrapped { .. }
+        | E::ScrapSalvaged { .. } | E::HullMinted { .. } | E::HullAssigned { .. } | E::HullScrapped { .. } | E::OrderWorked { .. } | E::ElementSalvaged { .. }
         | E::GenesisSealed { .. } | E::ProspectStruck { .. } | E::LineSucceeded { .. }
         | E::TechLicensed { .. } | E::InstrumentForged { .. } | E::RouteChartered { .. }
         | E::OfferPosted { .. } | E::BondSealed { .. }
@@ -1408,7 +1418,8 @@ fn admitted_deltas(
             vec![(Resource::Iron, -iron_spent.clone())]
         }
         // Hull mint/assign/scrap move scrap ledger only (not Resource).
-        E::HullMinted { .. } | E::HullAssigned { .. } | E::HullScrapped { .. } => Vec::new(),
+        E::HullMinted { .. } | E::HullAssigned { .. } | E::HullScrapped { .. } | E::OrderWorked { .. } => Vec::new(),
+        E::ElementSalvaged { .. } => Vec::new(),
         // — mints (the sign lives at I4, order preserved for the
         //   landed pins) —
         E::YieldCollected { resource, amount, .. } => vec![(*resource, amount.clone())],
@@ -2086,7 +2097,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::ElementApertureSent { .. } | E::ElementApertureReceived { .. }
         | E::ElementRouteChartered { .. }
         | E::StampMinted { .. } | E::StampApertureSent { .. } | E::StampApertureReceived { .. }
-        | E::ScrapSalvaged { .. } | E::HullMinted { .. } | E::HullAssigned { .. } | E::HullScrapped { .. }
+        | E::ScrapSalvaged { .. } | E::HullMinted { .. } | E::HullAssigned { .. } | E::HullScrapped { .. } | E::OrderWorked { .. } | E::ElementSalvaged { .. }
         // #42: a treaty is WORLD-layer. It is keyed on the pair, and
         // the pair is two worlds — not a line's identity (a pact
         // outlives whoever signed it) and not one place.
@@ -2212,7 +2223,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::ElementRefined { .. }
         | E::ElementApertureSent { .. } | E::ElementApertureReceived { .. }
         | E::StampMinted { .. } | E::StampApertureSent { .. } | E::StampApertureReceived { .. }
-        | E::ScrapSalvaged { .. } | E::HullMinted { .. } | E::HullAssigned { .. } | E::HullScrapped { .. }
+        | E::ScrapSalvaged { .. } | E::HullMinted { .. } | E::HullAssigned { .. } | E::HullScrapped { .. } | E::OrderWorked { .. } | E::ElementSalvaged { .. }
         // U1: the discovery mint settles banked value against verified
         // work — Collect, like the yield it banks beside. Ratified by
         // the U1 witnesses as it enters covered().

@@ -270,10 +270,23 @@ fn colony_strip(style: Style, home: &World, orb_id: u64) -> String {
         .orb()
         .map(|o| ratio_str(&o.stamp_amount()))
         .unwrap_or_else(|| "0/1".into());
+    let balance = home.thermal_balance_of(orb_id);
+    let bal_s = match &balance {
+        None => style.dim("balance —"),
+        Some(b) if *b >= World::balance_orderly_floor() => {
+            style.align_cheap(&format!("balance {}", ratio_str(b)))
+        }
+        Some(b) => style.align_dear(&format!("balance {}", ratio_str(b))),
+    };
+    let regen = if home.regenerator_stands(orb_id) {
+        style.ok("regen●")
+    } else {
+        style.dim("regen○")
+    };
     let committed = home.committed();
     let Some(orb) = committed.orbs.iter().find(|o| o.orb_id == orb_id) else {
         return format!(
-            "  {} (no orb) · {} {}",
+            "  {} (no orb) · {} {} · {bal_s}",
             style.dim("colony:"),
             style.money("STAMP"),
             style.value(&stamp)
@@ -307,7 +320,7 @@ fn colony_strip(style: Style, home: &World, orb_id: u64) -> String {
         )
     };
     format!(
-        "  {} [{}z] {} {} · {banks}{famine}",
+        "  {} [{}z] {} {} · {bal_s} {regen} · {banks}{famine}",
         style.label(&orb.name),
         orb.zones.len(),
         style.money("STAMP"),

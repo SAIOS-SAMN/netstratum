@@ -750,6 +750,27 @@ pub fn render_receipt(receipt: &Receipt) -> String {
                 ratio_str(scrap_returned)
             ),
         ),
+        E::OrderWorked {
+            orb_id,
+            kind,
+            entropy,
+            syntropy,
+        } => (
+            "order_worked",
+            format!(
+                "orb {orb_id} order kind {kind}: entropy {} · syntropy {}",
+                ratio_str(entropy),
+                ratio_str(syntropy)
+            ),
+        ),
+        E::ElementSalvaged {
+            orb_id,
+            amount,
+            ..
+        } => (
+            "element_salvaged",
+            format!("orb {orb_id} salvages {} element mass to scrap", ratio_str(amount)),
+        ),
         E::ApertureSent { deal, from_orb, resource, amount } => (
             "aperture_sent",
             format!(

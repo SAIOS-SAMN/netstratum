@@ -299,7 +299,12 @@
 //!         deal 0 = idle pool.)
 //!    117  ClosureEvent::HullScrapped (FLEET-1 — hull removed, scrap
 //!         reverse half cost.)
-//!    107+ claim ledger through Phase-3 fleet: next free **118**.
+//!    118  ClosureEvent::OrderWorked (34_MATTER_BALANCE — books both
+//!         thermal arms after refine/compound/hull/salvage; no Resource
+//!         move.)
+//!    119  ClosureEvent::ElementSalvaged (34 — banked element → scrap
+//!         at identity; yard required; recycling path.)
+//!    107+ claim ledger through matter-balance: next free **120**.
 //!         Orb TLV: 73 STAMP, **74 scrap**. ZoneKind::ShipYard = 10.
 //!         (Historic free tags below top: 14, 15, 56, 57, 58, 64, 66,
 //!         83, 84, 87; 9 and 51 reserved; 65 retired forever.)
@@ -2385,6 +2390,21 @@ pub enum ClosureEvent {
         orb_id: u64,
         scrap_returned: Ratio,
     },
+    /// MATTER-BALANCE-1 (tag 118) — order-work books both thermal arms.
+    /// `kind`: 1 refine · 2 compound · 3 hull mint · 4 salvage.
+    /// Neither arm is Resource; both replay onto orb books.
+    OrderWorked {
+        orb_id: u64,
+        kind: u8,
+        entropy: Ratio,
+        syntropy: Ratio,
+    },
+    /// MATTER-BALANCE-1 (tag 119) — element → scrap at identity amount.
+    ElementSalvaged {
+        orb_id: u64,
+        element: [u8; 32],
+        amount: Ratio,
+    },
     /// N4 (NS-2 §1.5) — the scanner's power draw, the ONE chronicle
     /// event of RQP: crystals left the probing orb's bank to hold the
     /// lens open. Deliberately blind to what was asked and what was
@@ -3062,6 +3082,28 @@ impl ClosureEvent {
                 value.extend_from_slice(&orb_id.to_le_bytes());
                 ratio::encode(scrap_returned, &mut value);
                 tlv::put(117, &value, &mut out);
+            }
+            Self::OrderWorked {
+                orb_id,
+                kind,
+                entropy,
+                syntropy,
+            } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.push(*kind);
+                ratio::encode(entropy, &mut value);
+                ratio::encode(syntropy, &mut value);
+                tlv::put(118, &value, &mut out);
+            }
+            Self::ElementSalvaged {
+                orb_id,
+                element,
+                amount,
+            } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(element);
+                ratio::encode(amount, &mut value);
+                tlv::put(119, &value, &mut out);
             }
             Self::CrystalDrawn { orb_id, amount } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
@@ -3792,6 +3834,28 @@ impl ClosureEvent {
                     hull_id,
                     orb_id,
                     scrap_returned,
+                })
+            }
+            118 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let kind = *value.get(8)?;
+                let (entropy, used) = ratio::decode(value.get(9..)?)?;
+                let (syntropy, _) = ratio::decode(value.get(9 + used..)?)?;
+                Some(Self::OrderWorked {
+                    orb_id,
+                    kind,
+                    entropy,
+                    syntropy,
+                })
+            }
+            119 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
+                let (amount, _) = ratio::decode(value.get(40..)?)?;
+                Some(Self::ElementSalvaged {
+                    orb_id,
+                    element,
+                    amount,
                 })
             }
             55 => {

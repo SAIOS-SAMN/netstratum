@@ -3337,7 +3337,6 @@ fn ensure_npc_fleet(world: &mut cfe::world::World, actor: u64) {
     let orb_id = cfe::world::FIRST_ORB;
     let has_yard = orb.zones.iter().any(|z| z.kind == cfe::dop::ZoneKind::ShipYard);
     if !has_yard {
-        // Prefer free tile yard when iron/bio can pay smelter cost.
         let cost_ok = cfe::dop::ZoneKind::ShipYard
             .cost()
             .into_iter()
@@ -3354,26 +3353,43 @@ fn ensure_npc_fleet(world: &mut cfe::world::World, actor: u64) {
     if !orb.zones.iter().any(|z| z.kind == cfe::dop::ZoneKind::ShipYard) {
         return;
     }
-    // Salvage iron above a thin reserve (1+1) — leaves iron for life.
-    let iron = orb.banked_amount(cfe::dop::Resource::Iron);
-    let reserve = ratio(1, 1) + ratio(1, 1);
-    if iron > reserve {
-        let convert = iron - reserve;
-        if convert > ratio(0, 1) {
-            if let Some(amt) = cfe::dop::Positive::new(convert) {
-                let _ = world.salvage_scrap_as(actor, orb_id, amt);
-            }
-        }
-    }
     // Mint haulers until free capacity ≥ one hauler base (derive 1+1+1+1).
     let one = ratio(1, 1);
     let target_cap = one.clone() + one.clone() + one.clone() + one;
-    while world.free_capacity(0) < target_cap {
+    let need = cfe::dop::hull_scrap_cost(cfe::dop::HullRole::Hauler, 0);
+    // Salvage only the capacity shortfall — not dump-all-iron (leaves
+    // life reserve; salvage residual is neutral dual so mint stays open).
+    if world.free_capacity(0) < target_cap {
+        let scrap = orb.scrap_amount();
+        if scrap < need {
+            let want = need.clone() - scrap;
+            let iron = orb.banked_amount(cfe::dop::Resource::Iron);
+            let reserve = ratio(1, 1) + ratio(1, 1);
+            let convertible = if iron > reserve {
+                iron - reserve
+            } else {
+                ratio(0, 1)
+            };
+            let convert = if convertible < want {
+                convertible
+            } else {
+                want
+            };
+            if convert > ratio(0, 1) {
+                if let Some(amt) = cfe::dop::Positive::new(convert) {
+                    let _ = world.salvage_scrap_as(actor, orb_id, amt);
+                }
+            }
+        }
+    }
+    for _ in 0..4 {
+        if world.free_capacity(0) >= target_cap {
+            break;
+        }
         let scrap = world
             .orb()
             .map(|o| o.scrap_amount())
             .unwrap_or_else(|| ratio(0, 1));
-        let need = cfe::dop::hull_scrap_cost(cfe::dop::HullRole::Hauler, 0);
         if scrap < need {
             break;
         }

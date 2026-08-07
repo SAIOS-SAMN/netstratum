@@ -2,6 +2,8 @@
 
 **Status:** IMPLEMENTATION BOARD — operator directive 2026-08-07.  
 **Authority doc:** `33_TRADE_FLEET_AND_DESK.md`.  
+**Matter loop:** `34_MATTER_BALANCE.md` (elements · alchemy · fleets ·
+entropy∥syntropy — partial land with Phase 3 fleets).  
 **Consumes:** `30_OFFICES_AND_RAILS`, `31_ELEMENT_COMMERCE`, `32_STAMP_MARKET`,
 `TASKS_TIER_RAIL_MARKET` (S4.5–S4.6, E3.6, Wave 5 instruments, O6).  
 **Discipline:** one landing at a time; red-first witnesses; claim tags

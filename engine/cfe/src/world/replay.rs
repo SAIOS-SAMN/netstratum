@@ -935,6 +935,27 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     held.bank_scrap(scrap_returned.clone());
                 }
             }
+            ClosureEvent::OrderWorked {
+                orb_id,
+                entropy,
+                syntropy,
+                ..
+            } => {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.entropy_vented += entropy.clone();
+                    held.syntropy_contained += syntropy.clone();
+                }
+            }
+            ClosureEvent::ElementSalvaged {
+                orb_id,
+                element,
+                amount,
+            } => {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank_element(*element, -amount.clone());
+                    held.bank_scrap(amount.clone());
+                }
+            }
         }
     }
     Committed {

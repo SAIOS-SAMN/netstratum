@@ -149,6 +149,11 @@ fn fleet_help(style: Style) {
     row(style, "zone <tile> yard", "build ShipYard (smelter cost)");
     row(style, "fleet · fleet list", "scrap, free capacity, hull roster");
     row(style, "fleet salvage <amt>", "iron → scrap 1:1 at yard");
+    row(
+        style,
+        "fleet salvage element <amt> <prefix>",
+        "element → scrap (alchemy surplus → ships)",
+    );
     row(style, "fleet mint <role> [grade]", "hauler|semi|runner|escort");
     row(style, "fleet assign <id> <deal|0>", "bind hull to route (0=idle)");
     row(style, "fleet scrap <id>", "dismantle hull, recover half scrap");
@@ -156,6 +161,10 @@ fn fleet_help(style: Style) {
     println!(
         "  {}",
         style.hint("Positive-melt hauls need free hull capacity. Metabolism filters roles.")
+    );
+    println!(
+        "  {}",
+        style.hint("Entropy-dominant balance gates hull mint — build regenerator (34_MATTER_BALANCE).")
     );
     println!(
         "  {}",
@@ -251,14 +260,21 @@ fn routes_help(style: Style) {
 fn colony_help(style: Style) {
     banner_line(style, "COLONY LOOP");
     row(style, "found <name>", "genesis colony");
-    row(style, "zone <tile> <ext|hab|smelt|…>", "build");
+    row(style, "zone <tile> <ext|hab|smelt|yard|regen|…>", "build");
     row(style, "tick <n> · collect", "time + settle workspace");
     row(style, "star <class> · site <A> <r>", "commission sun + site orbit");
-    row(style, "thermal · map · status", "readings");
+    row(style, "thermal · map · status", "readings + thermal balance");
+    row(style, "prospect · assay · compound · refine", "elements + alchemy");
     println!();
     println!(
         "  {}",
         style.hint("`site` places θ on the lattice — alignment uses it for D_orbit.")
+    );
+    println!(
+        "  {}",
+        style.hint(
+            "Loop: extract → refine/compound → scrap → hulls → trade; entropy∥syntropy caps order-work (34)."
+        )
     );
 }
 

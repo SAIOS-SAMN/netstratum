@@ -388,8 +388,8 @@ fn pure_npc_fleet_hauls() {
 
     let mut hull_on = None;
     let mut haul_on = None;
-    // Short pure-fleet path: cycle once for iron yield, then fleet_step.
-    for beat in 1u32..=12 {
+    // Pure-fleet path: cycle for iron, fleet_step salvage/mint, trade.
+    for beat in 1u32..=24 {
         let _ = a.cycle(&book, &registry);
         let _ = b.cycle(&book, &registry);
         let mut pair = vec![a, b];
@@ -416,7 +416,7 @@ fn pure_npc_fleet_hauls() {
     }
     assert!(
         hull_on.is_some(),
-        "NPC must mint a hull within 12 beats; hulls_a={} scrap_a={:?} iron={:?}",
+        "NPC must mint a hull within 24 beats; hulls_a={} scrap_a={:?} iron={:?}",
         a.world.hulls().len(),
         a.world.orb().map(|o| o.scrap_amount()),
         a.world.orb().map(|o| o.banked_amount(cfe::dop::Resource::Iron)),
