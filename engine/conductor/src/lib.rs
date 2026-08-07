@@ -3353,13 +3353,15 @@ fn ensure_npc_fleet(world: &mut cfe::world::World, actor: u64) {
     if !orb.zones.iter().any(|z| z.kind == cfe::dop::ZoneKind::ShipYard) {
         return;
     }
-    // Mint haulers until free capacity ≥ one hauler base (derive 1+1+1+1).
+    // Target total fleet capacity (all hulls), not free_capacity(0).
+    // free_capacity(0) only counts *idle* hulls — after assign to a route
+    // it drops to 0 and would mint a new hauler every beat forever.
     let one = ratio(1, 1);
     let target_cap = one.clone() + one.clone() + one.clone() + one;
     let need = cfe::dop::hull_scrap_cost(cfe::dop::HullRole::Hauler, 0);
-    // Salvage only the capacity shortfall — not dump-all-iron (leaves
-    // life reserve; salvage residual is neutral dual so mint stays open).
-    if world.free_capacity(0) < target_cap {
+    let fleet_cap = npc_fleet_capacity(world);
+    // Salvage only the capacity shortfall — not dump-all-iron.
+    if fleet_cap < target_cap {
         let scrap = orb.scrap_amount();
         if scrap < need {
             let want = need.clone() - scrap;
@@ -3383,7 +3385,7 @@ fn ensure_npc_fleet(world: &mut cfe::world::World, actor: u64) {
         }
     }
     for _ in 0..4 {
-        if world.free_capacity(0) >= target_cap {
+        if npc_fleet_capacity(world) >= target_cap {
             break;
         }
         let scrap = world
@@ -3424,4 +3426,11 @@ fn ensure_npc_fleet(world: &mut cfe::world::World, actor: u64) {
             let _ = world.assign_hull_as(actor, id, deal);
         }
     }
+}
+
+/// Sum of capacity across every hull (assigned or idle).
+fn npc_fleet_capacity(world: &cfe::world::World) -> cfe::ratio::Ratio {
+    world.hulls().iter().fold(ratio(0, 1), |s, h| {
+        s + cfe::dop::hull_capacity(h.role, h.grade)
+    })
 }
