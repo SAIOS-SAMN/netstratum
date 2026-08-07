@@ -1102,17 +1102,23 @@ pub fn parcels_of(seed: &[u8; 32], covered: &[u64]) -> Vec<Parcel> {
 }
 
 /// **THE APPRAISABLE SUBJECT — one law, every scale** (operator ruling
-/// 2026-08-06: *planetary → estate → building → dwelling*). A DWELLING
-/// is a `Building` whose zone is `Habitat` — the ladder's rungs are the
-/// committed types themselves, not four separate laws.
+/// 2026-08-06: *planetary → estate → building → dwelling*; extended
+/// 2026-08-07: *orbital place + prospected stratum* — 35_ORBIT_DYNAMO).
+/// A DWELLING is a `Building` whose zone is `Habitat`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Holding {
     /// The surveyed whole — valued through its parcels.
     Estate,
-    /// One sited colony orb — its banks plus its buildings.
+    /// One colony orb — its banks plus its buildings.
     Planetary { orb: u64 },
     /// One zone on one orb. `Habitat` here is the dwelling.
     Building { orb: u64, tile: u16 },
+    /// **Sited place under the dynamo** — planetary capital plus site
+    /// premium (core grain × star magnetism). Requires thermal site.
+    Orbital { orb: u64 },
+    /// **Prospected exploration claim** — stratum on an orb (tile field
+    /// carries the stratum code). Requires a standing prospect.
+    Stratum { orb: u64, stratum: u8 },
 }
 
 impl Holding {
@@ -1122,6 +1128,8 @@ impl Holding {
             Holding::Estate => (1u8, 0u64, 0u16),
             Holding::Planetary { orb } => (2, *orb, 0),
             Holding::Building { orb, tile } => (3, *orb, *tile),
+            Holding::Orbital { orb } => (4, *orb, 0),
+            Holding::Stratum { orb, stratum } => (5, *orb, u16::from(*stratum)),
         };
         let mut out = [0u8; 11];
         out[0] = scale;
@@ -1136,16 +1144,49 @@ impl Holding {
             1 => Some(Holding::Estate),
             2 => Some(Holding::Planetary { orb }),
             3 => Some(Holding::Building { orb, tile }),
+            4 => Some(Holding::Orbital { orb }),
+            5 => Some(Holding::Stratum {
+                orb,
+                stratum: u8::try_from(tile).ok()?,
+            }),
             _ => None,
         }
     }
 }
+
+/// Grain steps of an orbit radius on [`crate::almanac::ORBIT_GRAIN`] —
+/// the core-magnetism grade (35 §1). Floor 1.
+pub fn core_magnetism_of(orbit_r: &Ratio) -> u64 {
+    use num_bigint::BigInt;
+    use num_traits::ToPrimitive;
+    let grid = BigInt::from(crate::almanac::ORBIT_GRAIN);
+    let stepped = orbit_r.numer() * &grid / orbit_r.denom();
+    let at_least = if stepped < BigInt::from(1) {
+        BigInt::from(1)
+    } else {
+        stepped
+    };
+    at_least.to_u64().unwrap_or(u64::MAX).max(1)
+}
+
+/// Site premium for a sited place: `(core/grain) × star_magnetism × iron weight`.
+pub fn orbital_site_premium(orbit_r: &Ratio, star_magnetism: u8) -> Ratio {
+    let core = core_magnetism_of(orbit_r);
+    let grain = ratio(crate::almanac::ORBIT_GRAIN, 1);
+    let star_m = ratio(i64::from(star_magnetism.max(1)), 1);
+    (ratio(core as i64, 1) / grain) * star_m * commensurate_weight(Resource::Iron)
+}
+
+/// Prospect richness row for pure appraisal (orb, stratum, richness).
+pub type ProspectRow = (u64, u8, Ratio);
 
 /// **THE VALUATION RULE — sealed, pure, one dispatch** (T2/T3 of the
 /// appraisal). Value derives from surveyed content and nothing else:
 ///
 ///   Building   Σ its kind's sealed build cost × commensurate weight
 ///   Planetary  Σ banked × weight  +  Σ its buildings' values
+///   Orbital    planetary + site premium (must be sited)
+///   Stratum    prospect richness × iron weight (must be prospected)
 ///   Estate     Σ planetary(orb) × the parcel's MONETARY portion —
 ///              the appraisal is what DENOMINATES the parcel break
 ///
@@ -1157,6 +1198,8 @@ pub fn appraised_value(
     holding: &Holding,
     orbs: &[ColonyOrb],
     parcels: &[Parcel],
+    star_magnetism: u8,
+    prospects: &[ProspectRow],
 ) -> Option<Ratio> {
     let weight_of = |costs: Vec<(Resource, Ratio)>| {
         costs
@@ -1179,11 +1222,37 @@ pub fn appraised_value(
                 .fold(ratio(0, 1), |sum, (resource, amount)| {
                     sum + amount.clone() * commensurate_weight(*resource)
                 });
+            let elements = held
+                .elements
+                .iter()
+                .fold(ratio(0, 1), |sum, (_, amount)| {
+                    sum + amount.clone() * commensurate_weight(Resource::Iron)
+                });
             let built = held
                 .zones
                 .iter()
                 .fold(ratio(0, 1), |sum, zone| sum + weight_of(zone.kind.cost()));
-            Some(banked + built)
+            Some(banked + elements + built)
+        }
+        Holding::Orbital { orb } => {
+            let held = orbs.iter().find(|o| o.orb_id == *orb)?;
+            let site = held.thermal.as_ref()?;
+            let base = appraised_value(
+                &Holding::Planetary { orb: *orb },
+                orbs,
+                &[],
+                star_magnetism,
+                prospects,
+            )?;
+            let premium = orbital_site_premium(site.orbit_r.value(), star_magnetism);
+            Some(base + premium)
+        }
+        Holding::Stratum { orb, stratum } => {
+            let richness = prospects
+                .iter()
+                .find(|(o, s, _)| *o == *orb && *s == *stratum)
+                .map(|(_, _, r)| r.clone())?;
+            Some(richness * commensurate_weight(Resource::Iron))
         }
         Holding::Estate => {
             if parcels.is_empty() {
@@ -1191,8 +1260,22 @@ pub fn appraised_value(
             }
             let mut total = ratio(0, 1);
             for parcel in parcels {
-                let planetary =
-                    appraised_value(&Holding::Planetary { orb: parcel.orb_id }, orbs, &[])?;
+                // Estate book uses Orbital when sited (place + capital),
+                // else planetary — exploration expansion premium on survey.
+                let rung = if orbs
+                    .iter()
+                    .find(|o| o.orb_id == parcel.orb_id)
+                    .is_some_and(|o| o.thermal.is_some())
+                {
+                    Holding::Orbital {
+                        orb: parcel.orb_id,
+                    }
+                } else {
+                    Holding::Planetary {
+                        orb: parcel.orb_id,
+                    }
+                };
+                let planetary = appraised_value(&rung, orbs, &[], star_magnetism, prospects)?;
                 total += planetary * parcel.monetary.clone();
             }
             Some(total)

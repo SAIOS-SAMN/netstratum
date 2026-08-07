@@ -710,7 +710,11 @@ impl World {
         else {
             return Err(ActionRefused::ClaimWithoutWitness { name: "estate unsurveyed".into() });
         };
-        if let Holding::Planetary { orb } | Holding::Building { orb, .. } = &holding {
+        if let Holding::Planetary { orb }
+        | Holding::Building { orb, .. }
+        | Holding::Orbital { orb }
+        | Holding::Stratum { orb, .. } = &holding
+        {
             if !covered.contains(orb) {
                 return Err(ActionRefused::ClaimWithoutWitness {
                     name: format!("orb {orb} outside the survey"),
@@ -725,9 +729,14 @@ impl World {
                     true => refusal,
                     false => ActionRefused::NoSuchOrb { orb: *orb },
                 })?,
-            Holding::Planetary { orb } => self
+            Holding::Planetary { orb } | Holding::Orbital { orb } => self
                 .appraise_value(&holding)
                 .ok_or(ActionRefused::NoSuchOrb { orb: *orb })?,
+            Holding::Stratum { orb, stratum } => self.appraise_value(&holding).ok_or(
+                ActionRefused::ClaimWithoutWitness {
+                    name: format!("stratum {stratum} unprospected on orb {orb}"),
+                },
+            )?,
             Holding::Estate => self
                 .appraise_value(&holding)
                 .ok_or(ActionRefused::NoColony)?,
@@ -746,13 +755,19 @@ impl World {
     }
 
     /// The sealed rule, callable without a deed — pure over the
-    /// committed state and the survey's parcels.
+    /// committed state, survey parcels, star dynamo, and prospects.
     pub fn appraise_value(&self, holding: &crate::dop::Holding) -> Option<Ratio> {
         let parcels = match holding {
             crate::dop::Holding::Estate => self.parcels()?,
             _ => Vec::new(),
         };
-        crate::dop::appraised_value(holding, &self.orbs, &parcels)
+        let star_m = self.star.map(|c| c.magnetism()).unwrap_or(1);
+        let prospects: Vec<crate::dop::ProspectRow> = self
+            .prospects
+            .iter()
+            .map(|p| (p.orb, p.stratum, p.richness.clone()))
+            .collect();
+        crate::dop::appraised_value(holding, &self.orbs, &parcels, star_m, &prospects)
     }
 
     /// **STALENESS — the renegotiation trigger** (operator ruling

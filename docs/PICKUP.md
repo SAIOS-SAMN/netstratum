@@ -15,17 +15,16 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 |------|--------|
 | Wave-1 commit | **`2109bf0`** (T4–T9, REFINE-1) |
 | Wave-2 commit | **`4686399`** (E-APT, element_trade_step) |
-| Kernel | **0.24.0** (next free minor **25**) |
+| Kernel | **0.25.0** (next free minor **26**) |
 | Next free tag | **120** (OrderWorked 118, ElementSalvaged 119) |
 | Stations | **10** (T4–T9 economic offices open) |
-| ZoneKind compiled | **1–9** (ElementRefinery = 9) |
-| Codec | **SCHEMA_V6** (element_routes trailing) |
-| Pure-NPC green | offices, refine, element aperture, **STAMP spot** (`wave1_era_pins`) |
-| Next work | **Trade desk Phase 4** (instruments) · P1.8 offer widen · R2.3 |
-| Docs | `30`–`34` partial; **`33` Phases 1–3 + 34 matter balance** |
-| Trade program | Desk+fleets+**matter/entropy cap** landed; Phases 4–5 open |
+| ZoneKind compiled | **1–10** (ShipYard = 10) |
 | Codec | **SCHEMA_V7** (hulls trail) |
-| Help | `help` / `help desk` / topics — full ANSI (disable: `--plain`) |
+| Pure-NPC green | offices, refine, element aperture, **STAMP spot**, fleet (`wave1_era_pins`) |
+| Next work | **Trade desk Phase 4** (instruments) · P1.8 offer widen · Q-O1… |
+| Docs | `30`–`35`; **`35` orbit dynamo + estate real estate** |
+| Trade program | Desk+fleets+matter cap+**differential orbits**+estate place; Phases 4–5 open |
+| Help | `help` / `help desk` / `estate` / topics — full ANSI (`--plain`) |
 | Dirty / other lane | do not `git add -A` without reviewing observer/other-lane files |
 
 Older §0 counts (809 tests, 71 deeds, tag 95) are **historical**; re-measure

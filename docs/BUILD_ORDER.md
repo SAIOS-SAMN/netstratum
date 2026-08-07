@@ -1003,7 +1003,13 @@ board `TASKS_TRADE_FLEET_DESK.md`.
 **Matter balance (34, partial land):** closed loop extract → refine/compound
 → scrap → hulls → trade; `OrderWorked` (118) / `ElementSalvaged` (119);
 order-work gated when thermal balance < 1/2 unless Regenerator stands.
-Kernel **0.24.0**. See `34_MATTER_BALANCE.md`.
+See `34_MATTER_BALANCE.md`.
 
-**Next:** Phase 4 local capital markets · or P1.8 offer widen.
+**Orbit dynamo + estate place (35):** θ period =
+`ORBIT_PHASE_TICKS × core_magnetism × disposition / star.magnetism()`
+(not lockstep). Holding scales **4 Orbital** / **5 Stratum** on appraisal
+(tag 98). CLI `estate survey|parcels`, `appraise …`, `rings` shows period.
+Kernel **0.25.0**. See `35_ORBIT_DYNAMO_AND_ESTATE.md`, `ENDOWMENTS` §8.
+
+**Next:** Phase 4 local capital markets · or P1.8 offer widen · Q-O1 ψ.
 

@@ -136,7 +136,13 @@ use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 /// (Amendments 0.11.0 through the current minor are recorded in the
 /// version ledger — `tests/conservation_pins.rs` — beside the
 /// NEXT-FREE RULE that assigns minors across lanes.)
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 24, patch: 0 };
+///
+/// **0.25.0 — ORBITAL / STRATUM APPRAISAL** (35_ORBIT_DYNAMO_AND_ESTATE).
+/// MINOR, derived: appraisal subjects scale 4–5 (Orbital place under the
+/// dynamo; prospected Stratum) enter the valuation rule; the gate
+/// re-derives with star magnetism + prospects. Same tag 98; what the
+/// rule can value expanded, so `minor` moves.
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 25, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
@@ -565,13 +571,23 @@ fn appraisal_rule(prior: &Committed, step: &Step) -> Result<(), Refused> {
         return Ok(());
     };
     use cfe::dop::Holding;
-    if let Holding::Planetary { orb } | Holding::Building { orb, .. } = subject {
+    if let Holding::Planetary { orb }
+    | Holding::Building { orb, .. }
+    | Holding::Orbital { orb }
+    | Holding::Stratum { orb, .. } = subject
+    {
         if !covered.contains(orb) {
             return Err(Refused::AppraisalOutsideSurvey { orb: *orb });
         }
     }
     let parcels = cfe::dop::parcels_of(seed, covered);
-    match cfe::dop::appraised_value(subject, &prior.orbs, &parcels) {
+    let star_m = prior.star.map(|c| c.magnetism()).unwrap_or(1);
+    let prospects: Vec<cfe::dop::ProspectRow> = prior
+        .prospects
+        .iter()
+        .map(|p| (p.orb, p.stratum, p.richness.clone()))
+        .collect();
+    match cfe::dop::appraised_value(subject, &prior.orbs, &parcels, star_m, &prospects) {
         Some(computed) if computed == *value => Ok(()),
         Some(computed) => Err(Refused::AppraisalMisvalued {
             declared: Box::new(value.clone()),
@@ -579,7 +595,10 @@ fn appraisal_rule(prior: &Committed, step: &Step) -> Result<(), Refused> {
         }),
         None => Err(Refused::AppraisalOutsideSurvey {
             orb: match subject {
-                Holding::Planetary { orb } | Holding::Building { orb, .. } => *orb,
+                Holding::Planetary { orb }
+                | Holding::Building { orb, .. }
+                | Holding::Orbital { orb }
+                | Holding::Stratum { orb, .. } => *orb,
                 Holding::Estate => 0,
             },
         }),

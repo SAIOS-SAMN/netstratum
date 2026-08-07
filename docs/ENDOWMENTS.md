@@ -359,6 +359,30 @@ findings.**
 - `cfe/src/world/` (WANT-1 kind 1) — the epistemological want is
   reportedly in the tag-62 vocabulary with no engine rule.
 
+## §8 CLAIMED 2026-08-07 — ORBIT DYNAMO + ESTATE PLACE (35)
+
+**Operator charge (session):** *all orbits should not be the same —
+magnetism of cores, offset by polity of the star and class of the star;
+document and build to spec; endowments and estates with deeds for real
+estate to expose exploration and expansion economics.*
+
+| Entitlement | Standing that existed | Claim path landed |
+|-------------|----------------------|-------------------|
+| Differential θ | θ advanced lockstep `now/60` | `orbit_phase_period` — core grain × disposition / star.magnetism |
+| Dynamo dual use | `StarClass::magnetism` only priced ring reach | same table drives period |
+| Sited place as capital | `PlanetSited` unappraised | `Holding::Orbital` scale 4 |
+| Prospect as capital | `ProspectStruck` unappraised | `Holding::Stratum` scale 5 |
+| Estate player surface | deeds 97–100, CLI half-orphan | `estate survey\|parcels`, `appraise …` |
+| Sky readout | rings listed r/A only | core + period ticks/slot |
+
+**Doc:** `35_ORBIT_DYNAMO_AND_ESTATE.md`. **Kernel:** 0.25.0 (appraisal
+subjects expanded; gate re-derives with star + prospects).
+
+**Still open (vents):** Q-O1 ψ precession · Q-O2 hull/route holdings ·
+Q-O3 landlord lease of slots · Q-O4 multi-star period × chart.
+
+---
+
 ## §7 WHAT THIS LANE OWNS, AND WHAT IT RELAYS
 
 Per the lane map (shared memory, read 2026-08-03) this register is the

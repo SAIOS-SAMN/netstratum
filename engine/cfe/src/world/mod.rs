@@ -802,18 +802,7 @@ impl Alignment {
 /// to the stellar dynamo and take longer per θ step. Floor one grain
 /// step so an orbit always has a period (never zero).
 pub fn core_magnetism(site: &crate::dop::ThermalSite) -> u64 {
-    use num_bigint::BigInt;
-    use num_traits::ToPrimitive;
-    let grid = BigInt::from(crate::almanac::ORBIT_GRAIN);
-    let r = site.orbit_r.value();
-    let stepped = r.numer() * &grid / r.denom();
-    let at_least = if stepped < BigInt::from(1) {
-        BigInt::from(1)
-    } else {
-        stepped
-    };
-    // Lawful grain steps fit u64; overflow clamps to u64::MAX (still ≥ 1).
-    at_least.to_u64().unwrap_or(u64::MAX).max(1)
+    crate::dop::core_magnetism_of(site.orbit_r.value())
 }
 
 /// **Polity offset of the star's world** — sealed genesis disposition

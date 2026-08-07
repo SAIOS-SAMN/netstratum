@@ -2407,6 +2407,104 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             ),
             Err(refusal) => refuse(world, &refusal, style),
         },
+        // ESTATE CHAIN (35 / E5b): survey → parcels → appraise any holding.
+        Some("estate") => match words.next() {
+            None | Some("help") => {
+                println!("{}", style.head("ESTATE — survey · parcels · real-estate appraisal"));
+                println!("  {}  meter estate (iron × orbs), witness founding receipts", style.strong("estate survey"));
+                println!("  {}  derived free/monetary break per orb", style.strong("estate parcels"));
+                println!(
+                    "  {}  {}",
+                    style.strong("appraise estate|planet [orb]|building <tile>|orbital [orb]|stratum <n>"),
+                    style.dim("value at every scale — place & exploration claims")
+                );
+            }
+            Some("survey") => {
+                let payer = world.orb().map(|o| o.orb_id).unwrap_or(cfe::world::FIRST_ORB);
+                match world.survey_estate(payer) {
+                    Ok(seed) => {
+                        let n = world.orbs().len();
+                        println!(
+                            "{} estate SURVEYED — {} orb(s), seed {:02x}{:02x}… · parcels derive forever",
+                            style.ok("✓"),
+                            n,
+                            seed[0],
+                            seed[1]
+                        );
+                    }
+                    Err(refusal) => refuse(world, &refusal, style),
+                }
+            }
+            Some("parcels") => match world.parcels() {
+                None => println!(
+                    "  {}",
+                    style.dim("unsurveyed — `estate survey` opens the metered map")
+                ),
+                Some(parcels) => {
+                    println!("{}", style.head("PARCELS — free + monetary = 1 (exact break)"));
+                    for p in parcels {
+                        println!(
+                            "  orb {} · free {} · monetary {}",
+                            p.orb_id,
+                            amount(&p.free),
+                            amount(&p.monetary)
+                        );
+                    }
+                }
+            },
+            Some(other) => println!(
+                "{} unknown estate verb {:?} — try estate survey|parcels|help",
+                style.bad("✗"),
+                other
+            ),
+        },
+        Some("appraise") => {
+            use cfe::dop::Holding;
+            let orb = world.orb().map(|o| o.orb_id).unwrap_or(cfe::world::FIRST_ORB);
+            let holding = match words.next() {
+                None | Some("estate") => Some(Holding::Estate),
+                Some("planet") | Some("planetary") => {
+                    let o = words
+                        .next()
+                        .and_then(|w| w.parse().ok())
+                        .unwrap_or(orb);
+                    Some(Holding::Planetary { orb: o })
+                }
+                Some("building") | Some("zone") => {
+                    let tile = words.next().and_then(|w| w.parse().ok()).unwrap_or(0);
+                    Some(Holding::Building { orb, tile })
+                }
+                Some("orbital") | Some("orbit") | Some("place") => {
+                    let o = words
+                        .next()
+                        .and_then(|w| w.parse().ok())
+                        .unwrap_or(orb);
+                    Some(Holding::Orbital { orb: o })
+                }
+                Some("stratum") | Some("vein") | Some("prospect") => {
+                    let s = words.next().and_then(|w| w.parse().ok()).unwrap_or(0);
+                    Some(Holding::Stratum { orb, stratum: s })
+                }
+                Some(other) => {
+                    println!(
+                        "{} unknown scale {:?} — estate|planet|building|orbital|stratum",
+                        style.bad("✗"),
+                        other
+                    );
+                    None
+                }
+            };
+            if let Some(h) = holding {
+                match world.appraise(h) {
+                    Ok(value) => println!(
+                        "{} APPRAISED — value {} (iron-commensurate weight) · stale after any later deed",
+                        style.ok("✓"),
+                        amount(&value)
+                    ),
+                    Err(refusal) => refuse(world, &refusal, style),
+                }
+            }
+        },
         Some("terrain") => match world.terrain_seed() {
             None => println!(
                 "  uncharted — every tile reads Standard (·) until {} charts the seed (02 §2.5, the opt-in deed)",
@@ -3219,12 +3317,16 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                         amount(&cfe::thermal::coverage(&t4))
                                     ),
                                 };
+                                let period = cfe::world::orbit_phase_period(world, site);
+                                let core = cfe::world::core_magnetism(site);
                                 println!(
-                                    "  orb {} {} — ring r={} · A={} · {} {}",
+                                    "  orb {} {} — ring r={} · A={} · core {} · period {}t/slot · {} {}",
                                     orb.orb_id,
                                     orb.name,
                                     amount(site.orbit_r.value()),
                                     amount(site.albedo.value()),
+                                    core,
+                                    period,
                                     style.strong(&band),
                                     if orb.overheat { style.bad("♨").to_string() } else { String::new() }
                                 );

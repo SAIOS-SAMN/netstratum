@@ -266,7 +266,9 @@ fn colony_help(style: Style) {
     row(style, "zone <tile> <ext|hab|smelt|yard|regen|…>", "build");
     row(style, "tick <n> · collect", "time + settle workspace");
     row(style, "star <class> · site <A> <r>", "commission sun + site orbit");
+    row(style, "rings / sky", "star field · core · orbit period/slot");
     row(style, "thermal · map · status", "readings + thermal balance");
+    row(style, "estate survey · parcels · appraise …", "real estate ladder (35)");
     row(style, "prospect · assay · compound · refine", "elements + alchemy");
     println!();
     println!(
