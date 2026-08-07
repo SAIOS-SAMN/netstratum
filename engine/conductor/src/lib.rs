@@ -41,13 +41,16 @@
 //! receipts. HONEST SEAM: worlds live in process memory; reload from
 //! the exported chronicle is the G0 persistence seam (coder-02).
 
-use cfe::dop::{Resource, ZoneKind};
+use cfe::dop::{Resource, Station, ZoneKind};
 use cfe::ipsal::Scope;
 use cfe::ratio::{ratio, Ratio};
 use cfe::thermal::StarClass;
 use cfe::world::World;
 use ledger::galaxy::Galaxy;
-use ledger::registry::{lineage_domain, Civilization, Registry, DISPOSITIONS, METABOLISMS, PERCEPTIONS};
+use ledger::registry::{
+    lineage_domain, office_preconditions, Civilization, OfficeEvidence, Registry,
+    DISPOSITIONS, METABOLISMS, PERCEPTIONS,
+};
 use ledger::{Directive, Disposition, Ledger};
 use physics::Beacon;
 use solver::{
@@ -741,6 +744,26 @@ fn smelter_gates() -> (Ratio, Ratio) {
     (ratio(30, 1), ratio(10, 1))
 }
 
+/// Evidence the ascend gates read — folded from the live world
+/// (receipts + banked elements). One home for office_step and pins.
+fn office_evidence(world: &World) -> OfficeEvidence {
+    use cfe::dop::ClosureEvent;
+    let mut evidence = OfficeEvidence::default();
+    if let Some(orb) = world.orb() {
+        evidence.element_kinds = orb.elements.len() as u64;
+    }
+    for receipt in world.chronicle().receipts() {
+        match &receipt.event {
+            ClosureEvent::AssayStruck { .. } => evidence.assays_struck += 1,
+            ClosureEvent::RouteChartered { .. } => evidence.routes_chartered += 1,
+            ClosureEvent::OfferCleared { .. } => evidence.market_clears += 1,
+            _ => {}
+        }
+    }
+    evidence.has_crossed = world.has_crossed();
+    evidence
+}
+
 fn banked(world: &World, resource: Resource) -> Ratio {
     world
         .orb()
@@ -1100,6 +1123,94 @@ impl Polity {
         }
     }
 
+    /// **OFFICE STEP (T1.4)** — pure NPC path to economic stations.
+    /// After ground_step has banked elements, a line may claim Caravan
+    /// (T4) or Exchange (T6) through the same doors the CLI uses:
+    /// chain seat + registry card, gated by [`office_preconditions`].
+    /// Disposition picks the office so two lines on one board can
+    /// diverge without a player click (Wave-1 exit criterion).
+    fn office_step(&mut self, registry: &Registry) {
+        let held = self.spec.civilization.station.as_deref();
+        // One office per line — the climb is from the COMMON (T3, no
+        // seat). A founding progenitor / watcher / observer / sovereign
+        // already holds a public office; do not replace it with a
+        // deeper economic seat under pure NPC (Wave-1 seats T4/T6 from
+        // unseated lines only).
+        if held.is_some() {
+            return;
+        }
+        let evidence = office_evidence(&self.world);
+        // Expansionist → caravan (routes); empiricist → exchange
+        // (books); epicurean / others prefer caravan when elements
+        // stand, exchange when market clears already.
+        let want = match self.spec.civilization.disposition.as_str() {
+            "empiricist" => "exchange",
+            "expansionist" => "caravan",
+            _ if evidence.market_clears > 0 => "exchange",
+            _ => "caravan",
+        };
+        if office_preconditions(want, &evidence).is_err() {
+            return;
+        }
+        let Some(station) = Station::from_word(want) else {
+            return;
+        };
+        let Some(line) = cfe::dop::Name::new(&self.spec.civilization.sigil) else {
+            return;
+        };
+        if self
+            .world
+            .seat_station_as(self.automaton, line, station)
+            .is_err()
+        {
+            return;
+        }
+        if registry.seat(&self.spec.civilization.sigil, want).is_ok() {
+            self.spec.civilization.station = Some(want.into());
+        }
+    }
+
+    /// **REFINE STEP (REFINE-1)** — pure NPC conversion of banked raw
+    /// elements through a standing ElementRefinery. One refine per
+    /// beat, first banked kind that covers the recipe spend.
+    fn refine_step(&mut self) {
+        let primary = cfe::world::FIRST_ORB;
+        let Some(orb) = self.world.orb() else {
+            return;
+        };
+        if !orb
+            .zones
+            .iter()
+            .any(|z| z.kind == ZoneKind::ElementRefinery)
+        {
+            return;
+        }
+        let Some(class) = self.world.star() else {
+            return;
+        };
+        let candidates: Vec<[u8; 32]> = orb.elements.iter().map(|(id, _)| *id).collect();
+        let automaton = self.automaton;
+        for raw in candidates {
+            let (spend, refined_id, _) = cfe::dop::refine_recipe(&raw, class);
+            // Skip already-refined identities (their own refine would
+            // make a further form — fine later; Wave-1 takes raw only).
+            if raw == refined_id {
+                continue;
+            }
+            let have = self
+                .world
+                .orb()
+                .map(|o| o.element_amount(&raw))
+                .unwrap_or_else(|| ratio(0, 1));
+            if have < spend {
+                continue;
+            }
+            if self.world.refine_as(automaton, primary, raw).is_ok() {
+                return; // one refine per beat
+            }
+        }
+    }
+
     /// The policy's build decision — at most one zone per beat, never
     /// during famine, always through the contained actor. Industry is
     /// GATED ON RESEARCH for every temperament: smelters need rung 3,
@@ -1362,6 +1473,11 @@ impl Polity {
         let alloy = banked(world, Resource::Alloy);
         let total = world.orb().map(|o| o.zones.len()).unwrap_or(0);
         let smelters = zone_count(world, ZoneKind::Smelter);
+        let element_kinds = world
+            .orb()
+            .map(|o| o.elements.len())
+            .unwrap_or(0);
+        let has_refinery = zone_count(world, ZoneKind::ElementRefinery) > 0;
 
         // The earned tech tree.
         let can_smelt = self.level >= 3;
@@ -1487,6 +1603,23 @@ impl Polity {
                 .into_iter()
                 .all(|(resource, need)| banked(world, resource) >= need)
         };
+        // REFINE-1 (E3.5): prefer an ElementRefinery when raw elements
+        // stand and none does — only when unlocked industry is not
+        // already claiming the slot, and not while forge-starved (the
+        // biomass ration is held for the smelter). Cost is habitat's
+        // biomass bill; upkeep is encasement iron — neither raids the
+        // smelter's iron gate.
+        let refine: Option<ZoneKind> = if element_kinds > 0
+            && !has_refinery
+            && industrial.is_none()
+            && !forge_starved
+            && affords(world, ZoneKind::ElementRefinery)
+        {
+            Some(ZoneKind::ElementRefinery)
+        } else {
+            None
+        };
+        let with_refine = |base: Option<ZoneKind>| industrial.or(refine).or(base);
         let wanted: Option<ZoneKind> =
             match regime(world, &self.spec.civilization.metabolism) {
             Some((Regime::Furnace, t4)) => {
@@ -1542,7 +1675,7 @@ impl Polity {
                         held => held,
                     })
                 } else {
-                    industrial.or(settlement)
+                    with_refine(settlement)
                 }
             }
             Some((Regime::Frost, _)) => {
@@ -1552,14 +1685,26 @@ impl Polity {
                     // founding iron, before any joule flows.
                     affords(world, ZoneKind::CryoArray).then_some(ZoneKind::CryoArray)
                 } else if joule_runway_allows(&banked(world, Resource::Joule), total) {
-                    industrial.or(settlement)
+                    with_refine(settlement)
                 } else {
                     None // the runway is short: STOP expanding
                 }
             }
-            None => industrial.or(settlement),
+            None => with_refine(settlement),
         };
         if let (Some(kind), Some(tile)) = (wanted, next_free_tile(world)) {
+            // REFINE-1: ElementRefinery needs DEEPENING (condition 3),
+            // same technology door as the regenerator.
+            if kind == ZoneKind::ElementRefinery {
+                let holds_deepening = world
+                    .committed()
+                    .techs
+                    .iter()
+                    .any(|(o, c, _, _)| *o == primary && *c == 3);
+                if !holds_deepening {
+                    let _ = world.grant_tech_as(steward, primary, 3);
+                }
+            }
             let _ = world.zone_as(self.automaton, cfe::world::FIRST_ORB, tile, kind);
         }
     }
@@ -2212,15 +2357,17 @@ impl Polity {
     /// One full heartbeat. A growth returns the newborn's spec —
     /// the era loop gives it a world of its own.
     ///
-    /// **Cycle topology (operator lock 2026-08-07):**
-    /// `build_step` → `ground_step` → `tick` → `collect_as`.
-    /// Ground finalizes open veins and newly assayed elements before
-    /// Resource yields accrue and bank. Survey remains after the
-    /// locked quartet so it cannot interleave between build and ground.
+    /// **Cycle topology (operator lock 2026-08-07 + Wave-1):**
+    /// `build_step` → `ground_step` → `office_step` → `refine_step`
+    /// → `tick` → `collect_as`. Ground banks elements; office seats
+    /// T4/T6 from that evidence; refine converts raw through a
+    /// standing ElementRefinery — all pure NPC.
     pub fn cycle(&mut self, book: &Ledger, registry: &Registry) -> Option<PolitySpec> {
         self.drain_inbox(book);
         self.build_step();
         self.ground_step();
+        self.office_step(registry);
+        self.refine_step();
         self.world.tick();
         // Every settled orb collects — a chartered survey site left
         // uncollected would starve at its own upkeep.

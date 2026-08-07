@@ -57,12 +57,18 @@ fn re_seating_replaces_and_the_chain_keeps_the_history() {
 
 #[test]
 fn an_office_outside_the_vocabulary_refuses() {
-    // BAND-1 has four offices. 0 is not one, and neither is 5 — and
-    // since C1's Station type, an off-band office is UNREPRESENTABLE:
-    // the wire door refuses it before any verb could. Authority from
-    // nowhere is no longer a runtime case.
+    // Closed office vocabulary is 1..=10 (BAND-1 + Wave-1 T4–T9).
+    // 0 is not one, and neither is 11 — and since C1's Station type,
+    // an off-band office is UNREPRESENTABLE: the wire door refuses it
+    // before any verb could. Authority from nowhere is no longer a
+    // runtime case.
     assert_eq!(cfe::dop::Station::from_wire(0), None, "0 is not an office");
-    assert_eq!(cfe::dop::Station::from_wire(5), None, "5 is not an office");
+    assert_eq!(cfe::dop::Station::from_wire(11), None, "11 is not an office");
+    assert_eq!(
+        cfe::dop::Station::from_wire(5),
+        Some(cfe::dop::Station::Caravan),
+        "5 is caravan (T4) after Wave-1"
+    );
     let mut world = World::new();
     world.found("bad-office").expect("founds");
     assert!(cfe::dop::Name::new("").is_none(), "no nameless line — the case cannot be constructed");
@@ -82,7 +88,7 @@ fn the_wire_refuses_a_station_it_cannot_name() {
     assert_eq!(back, Some(lawful_seat), "tag 89 round-trips whole");
 
     let mut forged = value.to_vec();
-    forged[0] = 9; // an office that does not exist
+    forged[0] = 11; // an office that does not exist (1..=10 are lawful)
     assert_eq!(ClosureEvent::from_wire(89, &forged), None, "the wire refuses it");
 }
 

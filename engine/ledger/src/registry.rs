@@ -22,28 +22,41 @@ pub const DISPOSITIONS: [&str; 3] = ["expansionist", "empiricist", "epicurean"];
 pub const METABOLISMS: [&str; 3] = ["mineral", "biotic", "plasmic"];
 pub const PERCEPTIONS: [&str; 4] = ["planar", "volumetric", "harmonic", "umbral"];
 
-/// BAND-1 (12_UNION §2–§3): the class STATIONS — offices in the
-/// union, never ranks. Append-only like the axes. A civilization with
-/// no station is simply a people of the bands (the common, lawful
-/// state).
-pub const STATIONS: [&str; 4] = ["progenitor", "watcher", "observer", "sovereign"];
+/// BAND-1 + T4–T9 (12_UNION §2a, 30_OFFICES_AND_RAILS): class STATIONS —
+/// offices in the union, never ranks. Append-only like the axes. A
+/// civilization with no station is simply a people of the bands (the
+/// common, lawful state). T4–T9 are **deeper economic functions**, not
+/// offices above the progenitors.
+pub const STATIONS: [&str; 10] = [
+    "progenitor",
+    "watcher",
+    "observer",
+    "sovereign",
+    "caravan",
+    "crucible",
+    "exchange",
+    "assay",
+    "vault",
+    "anchor",
+];
 
 /// BAND-1 (12_UNION §1): a station's seat width — SPACE AVAILABLE,
-/// not rank. `None` is unbounded (every charter-holding civilization
-/// is a Sovereign). Progenitor width is PER LINEAGE DOMAIN (8 seats
-/// per species, 12_UNION §2 — domains open as substrates elevate, so
-/// the band grows by domains, not by widening). Constants are
-/// placeholder parameters; the fiber-growth reading (capacity as a
-/// function of minted planes) awaits AEON-1b's plane surface.
+/// not rank. `None` is unbounded. Progenitor width is PER LINEAGE
+/// DOMAIN (8 seats per species). T4–T8 width 16 (Q-T1 default);
+/// T9 Anchor unbounded (domain soft-cap later).
 pub fn seat_width(station: &str) -> Option<u64> {
     match station {
         "progenitor" => Some(8),
         "watcher" | "observer" => Some(16),
+        "caravan" | "crucible" | "exchange" | "assay" | "vault" => Some(16),
+        "sovereign" | "anchor" => None,
         _ => None,
     }
 }
 
-/// THE TIER — the vertical band a station sits in (12_UNION §2a).
+/// THE TIER — the vertical band a station sits in (12_UNION §2a +
+/// 30_OFFICES_AND_RAILS). Higher **numbers** are deeper functions, not
+/// higher rank. T0 remains the top.
 ///
 /// A DERIVED reading, never stored. The station is the committed fact;
 /// the tier is what it means.
@@ -58,53 +71,122 @@ pub enum Tier {
     /// THE BIOSPHERE NODES — the common, lawful state. Reached by
     /// holding no seat, never by holding an unrecognised one.
     T3,
+    /// CARAVAN — trade routes (T4).
+    T4,
+    /// CRUCIBLE — elemental refineries (T5).
+    T5,
+    /// EXCHANGE — STAMP market-making (T6).
+    T6,
+    /// ASSAY — element identity court (T7).
+    T7,
+    /// VAULT — custody and collateral (T8).
+    T8,
+    /// ANCHOR — external settlement seats (T9).
+    T9,
 }
 
 /// The station → tier reading, and THE ENGINE AUTHORITY for it.
 ///
-/// **This existed three times and nowhere that counted.** `12_UNION`
-/// §2a rules the tier a derived reading; the derivation lived in
-/// `tools/observer.py`, again in `tools/observatory.html`, and a third
-/// time in prose in `BUILD_ORDER.md`, while this crate knew
-/// [`STATIONS`] and knew nothing of tiers (`19_REGISTRY` §3). Any gate
-/// keyed on tier was therefore advisory — a mapping anyone with a shell
-/// could edit — which is no gate at all.
-///
 /// **`None` is a REFUSAL, not a default.** An unrecognised station does
 /// NOT fall through to `T3`: the common is the absence of a seat, never
-/// the presence of an unreadable one. A caller that cannot read a tier
-/// must refuse rather than assume the safest-looking band, because the
-/// safest-looking band is exactly the one an attacker would want an
-/// unknown seat to land in.
+/// the presence of an unreadable one.
 ///
 /// **Exhaustive by construction.** Every value in [`STATIONS`] is named
 /// here, and `tier_covers_every_station` fails the build if a station
-/// is added without deciding its band — the `kernel::layer_of` shape,
-/// where adding a case breaks compilation until someone rules on it.
+/// is added without deciding its band.
 pub fn tier_of(station: Option<&str>) -> Option<Tier> {
     match station {
-        // The common: no seat held. This is the ONLY road to T3.
         None => Some(Tier::T3),
         Some("progenitor") => Some(Tier::T0),
         Some("watcher") | Some("observer") => Some(Tier::T1),
         Some("sovereign") => Some(Tier::T2),
-        // Unreadable seat — the caller refuses. Never a silent T3.
+        Some("caravan") => Some(Tier::T4),
+        Some("crucible") => Some(Tier::T5),
+        Some("exchange") => Some(Tier::T6),
+        Some("assay") => Some(Tier::T7),
+        Some("vault") => Some(Tier::T8),
+        Some("anchor") => Some(Tier::T9),
         Some(_) => None,
     }
 }
 
 /// Is this line seated in an office that serves everyone?
 ///
-/// T0, T1 and T2 are the board-makers, the architect observers and the
-/// record keepers. **A seated office may not adopt one people's
-/// lifestyle instrument** — a conflict-of-interest reading, not a
-/// hierarchy one (operator ruling 2026-08-02, relayed via
-/// syntropy-inscription).
+/// Any seated office (T0–T2, T4–T9) is a public function — not a
+/// lifestyle instrument. **Only T3 (no seat) is non-serving.**
 ///
 /// Returns `None` when the tier cannot be read, so a gate refuses
 /// instead of guessing.
 pub fn holds_a_serving_seat(station: Option<&str>) -> Option<bool> {
-    tier_of(station).map(|tier| matches!(tier, Tier::T0 | Tier::T1 | Tier::T2))
+    tier_of(station).map(|tier| tier != Tier::T3)
+}
+
+/// T1.2 — typed preconditions for economic offices (facts of the
+/// chain, not doors). Callers pass what the world has already done;
+/// this function never invents history.
+///
+/// Returns `Ok(())` when the office may be claimed, or `Err(reason)`
+/// naming the cure (never silent).
+pub fn office_preconditions(
+    station: &str,
+    evidence: &OfficeEvidence,
+) -> Result<(), &'static str> {
+    match station {
+        "progenitor" | "watcher" | "observer" | "sovereign" => Ok(()),
+        "caravan" => {
+            if evidence.element_kinds > 0 || evidence.routes_chartered > 0 {
+                Ok(())
+            } else {
+                Err("open a vein (prospect/assay) or charter a route first")
+            }
+        }
+        "crucible" => {
+            if evidence.element_kinds > 0 {
+                Ok(())
+            } else {
+                Err("bank at least one almanac element before claiming the crucible")
+            }
+        }
+        "exchange" => {
+            if evidence.market_clears > 0 || evidence.element_kinds > 0 {
+                Ok(())
+            } else {
+                Err("clear a market trade or hold element inventory first")
+            }
+        }
+        "assay" => {
+            if evidence.assays_struck > 0 {
+                Ok(())
+            } else {
+                Err("seal at least one AssayStruck before claiming the assay court")
+            }
+        }
+        "vault" => {
+            if evidence.element_kinds > 0 || evidence.market_clears > 0 {
+                Ok(())
+            } else {
+                Err("hold matter or clear a trade before claiming the vault")
+            }
+        }
+        "anchor" => {
+            if evidence.has_crossed {
+                Ok(())
+            } else {
+                Err("cross the void (aperture) before claiming the anchor")
+            }
+        }
+        _ => Err("unknown station"),
+    }
+}
+
+/// Evidence a world presents when ascending an economic office.
+#[derive(Debug, Clone, Copy, Default)]
+pub struct OfficeEvidence {
+    pub element_kinds: u64,
+    pub assays_struck: u64,
+    pub routes_chartered: u64,
+    pub market_clears: u64,
+    pub has_crossed: bool,
 }
 
 /// One civilization: a species-level identity spanning worlds.

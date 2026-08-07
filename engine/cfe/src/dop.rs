@@ -273,7 +273,16 @@
 //!    106  ClosureEvent::TreatyStruck (#42 — a pact ends: broken by the
 //!         partner's contrary pact, or renounced. Expiry needs no
 //!         receipt — a term runs out by the clock, like a bond's.)
-//!         — the next free tag outside reservations is 107. (This line
+//!    107  ClosureEvent::ElementRefined (WAVE-1 REFINE-1, 2026-08-07 —
+//!         banked raw element spends into a refined-form identity.
+//!         Rates re-derive from `refine_recipe`; the refined id from
+//!         `refined_identity`. ZoneKind::ElementRefinery = 9 rides
+//!         ZoneBuilt; the conversion itself needs this deed so SEAL B
+//!         can replay element mass. Next free for NEW deeds: 108.)
+//!    107+ WAVE-1 claim ledger (2026-08-07, RELAY_WAVE1): offices T4–T9
+//!         reuse StationSeated (tag 89) with new station wire codes 5–10;
+//!         REFINE-1 claims tag 107 (ElementRefined) + ZoneKind 9.
+//!         — the next free tag outside reservations is 108. (This line
 //!         read "90" until 2026-08-05 and was STALE: tag 90 was taken by
 //!         SovereignUnionSealed after it was written, and a mint drafted
 //!         onto 90 shadowed that deed's decoder arm — every sovereign
@@ -469,6 +478,18 @@ pub enum Station {
     Watcher = 2,
     Observer = 3,
     Sovereign = 4,
+    /// T4 Caravan — trade routes (30_OFFICES_AND_RAILS).
+    Caravan = 5,
+    /// T5 Crucible — elemental refineries.
+    Crucible = 6,
+    /// T6 Exchange — STAMP market-making.
+    Exchange = 7,
+    /// T7 Assay — element identity court.
+    Assay = 8,
+    /// T8 Vault — custody and collateral.
+    Vault = 9,
+    /// T9 Anchor — R3/R4 external settlement.
+    Anchor = 10,
 }
 
 impl Station {
@@ -479,11 +500,47 @@ impl Station {
             2 => Some(Station::Watcher),
             3 => Some(Station::Observer),
             4 => Some(Station::Sovereign),
+            5 => Some(Station::Caravan),
+            6 => Some(Station::Crucible),
+            7 => Some(Station::Exchange),
+            8 => Some(Station::Assay),
+            9 => Some(Station::Vault),
+            10 => Some(Station::Anchor),
             _ => None,
         }
     }
     pub fn as_wire(self) -> u8 {
         self as u8
+    }
+    /// Registry / CLI word (append-only closed vocabulary).
+    pub fn word(self) -> &'static str {
+        match self {
+            Station::Progenitor => "progenitor",
+            Station::Watcher => "watcher",
+            Station::Observer => "observer",
+            Station::Sovereign => "sovereign",
+            Station::Caravan => "caravan",
+            Station::Crucible => "crucible",
+            Station::Exchange => "exchange",
+            Station::Assay => "assay",
+            Station::Vault => "vault",
+            Station::Anchor => "anchor",
+        }
+    }
+    pub fn from_word(word: &str) -> Option<Station> {
+        match word {
+            "progenitor" => Some(Station::Progenitor),
+            "watcher" => Some(Station::Watcher),
+            "observer" => Some(Station::Observer),
+            "sovereign" => Some(Station::Sovereign),
+            "caravan" => Some(Station::Caravan),
+            "crucible" => Some(Station::Crucible),
+            "exchange" => Some(Station::Exchange),
+            "assay" => Some(Station::Assay),
+            "vault" => Some(Station::Vault),
+            "anchor" => Some(Station::Anchor),
+            _ => None,
+        }
     }
 }
 
@@ -1315,6 +1372,32 @@ pub fn element_name(family: u8, element: &[u8; 32]) -> String {
     format!("{voice} {form}")
 }
 
+/// **REFINE-1 — THE REFINED IDENTITY** (31_ELEMENT_COMMERCE §3).
+/// Content-addressed from the raw element; the gate re-derives by
+/// calling the same function (call-not-copy). One home for emitter
+/// and admits.
+pub fn refined_identity(raw: &[u8; 32]) -> [u8; 32] {
+    let mut hasher = blake3::Hasher::new();
+    hasher.update(b"netstratum.element.refine.v1");
+    hasher.update(raw);
+    *hasher.finalize().as_bytes()
+}
+
+/// **REFINE-1 — THE RECIPE** (14 §5 / 31 §3): spend and yield DERIVE
+/// from the raw element's tier via the standing refinement law
+/// (`refinement_input` / `refinement_yield`) — no new dial. The
+/// refined identity is content-addressed. Gate re-derives both.
+pub fn refine_recipe(
+    raw: &[u8; 32],
+    class: crate::thermal::StarClass,
+) -> (Ratio, [u8; 32], Ratio) {
+    let (_family, tier, _) = element_properties(raw, class);
+    let spend = refinement_input(u32::from(tier));
+    let yielded = refinement_yield(u32::from(tier));
+    let refined = refined_identity(raw);
+    (spend, refined, yielded)
+}
+
 /// G1 (04 §1.1, placeholder weights): the disposition's value
 /// weighting over the three v1 counters — territory closures, verified
 /// discoveries, consumed yield — exact rationals summing to 1. The
@@ -1367,6 +1450,7 @@ pub fn zone_word(kind: ZoneKind) -> &'static str {
         ZoneKind::CryoArray => "cryo-array",
         ZoneKind::Resonator => "resonator",
         ZoneKind::Regenerator => "regenerator",
+        ZoneKind::ElementRefinery => "element-refinery",
         // #41: a minted kind's WORD lives in the fold, not the table.
         // The chronicle names it; this answers only that it is one.
         ZoneKind::Minted(_) => "minted",
@@ -1403,6 +1487,13 @@ pub enum ZoneKind {
     /// DEEPENING crystallized on the orb (condition 3 — the lattice
     /// understood): regeneration is a technology, not a birthright.
     Regenerator = 8,
+    /// **REFINE-1 — THE ELEMENT REFINERY** (31_ELEMENT_COMMERCE §3,
+    /// Wave-1 2026-08-07): converts banked raw elements into refined
+    /// forms via `refine_as` / tag 107. Resource yield is zero — the
+    /// conversion is the element ledger. DEEPENING (condition 3)
+    /// gates placement, same technology door as the regenerator.
+    /// Q-T2: T5 Crucible is advantage only; T3 may refine with the zone.
+    ElementRefinery = 9,
     /// **A MINTED BUILDING (#41)** — the fold code of a zone-axis entry
     /// past the compiled table. Its economics are its BASE's, modulated
     /// by its binding (`vocabulary::zone_base`), so they are read
@@ -1499,6 +1590,7 @@ impl ZoneKind {
             Self::CryoArray => 6,
             Self::Resonator => 7,
             Self::Regenerator => 8,
+            Self::ElementRefinery => 9,
             Self::Minted(code) => code,
         }
     }
@@ -1524,6 +1616,7 @@ impl ZoneKind {
             6 => Some(Self::CryoArray),
             7 => Some(Self::Resonator),
             8 => Some(Self::Regenerator),
+            9 => Some(Self::ElementRefinery),
             _ => None,
         }
     }
@@ -1572,6 +1665,13 @@ impl ZoneKind {
                 }
                 cost
             }
+            // DERIVED: the habitat's bill. The refinery's feedstock is
+            // elements (tag 72); pricing it on the smelter's iron line
+            // raided the research→industry forge (smelter gate 30 iron)
+            // and left mineral pure-NPC lines unable to smelt. Habitat
+            // biomass is the founding ration every metabolism can meet
+            // once, no new dial (31 §3).
+            Self::ElementRefinery => Self::Habitat.cost(),
         }
     }
 
@@ -1604,6 +1704,9 @@ impl ZoneKind {
                 let (_, rate) = Self::Extractor.yield_per_tick();
                 (ration, rate)
             }
+            // Element conversion is the element ledger (`refine_as`),
+            // not a Resource flow — zero Resource yield.
+            Self::ElementRefinery => (Resource::Iron, ratio(0, 1)),
             // #41: the ground state — see `cost`. A minted kind yields
             // through `World::zone_economics`, never here.
             Self::Minted(_) => (Resource::Iron, ratio(0, 1)),
@@ -1638,6 +1741,12 @@ impl ZoneKind {
             Self::Resonator => vec![(Resource::Diamond, ratio(1, 4))],
             // DERIVED: the habitat's own life-support line.
             Self::Regenerator => Self::Habitat.upkeep_per_tick(),
+            // DERIVED: the encasement's iron maintenance — elements are
+            // the feedstock, so the food slot must not drain biomass.
+            // Measured: biomass upkeep kept mineral lines forge-starved
+            // forever (smelter needs 10 bio; a bio-upkeep refinery
+            // spent the triangle-trade ration before industry could).
+            Self::ElementRefinery => Self::Encasement.upkeep_per_tick(),
             // #41: the ground state — see `cost`.
             Self::Minted(_) => Vec::new(),
         }
@@ -1649,7 +1758,9 @@ impl ZoneKind {
     pub fn factory_heat(&self) -> Ratio {
         match self {
             Self::Extractor | Self::Habitat | Self::Regenerator => ratio(1, 4),
-            Self::Smelter | Self::Synthesizer | Self::Resonator => ratio(1, 1),
+            Self::Smelter | Self::Synthesizer | Self::Resonator | Self::ElementRefinery => {
+                ratio(1, 1)
+            }
             Self::Encasement | Self::CryoArray => ratio(0, 1),
             // #41: the ground state — see `cost`.
             Self::Minted(_) => ratio(0, 1),
@@ -1857,6 +1968,18 @@ pub enum ClosureEvent {
     /// order is the offered order; the gem is order-free by its own
     /// law.
     GemCompounded { orb_id: u64, members: Vec<[u8; 32]>, gem: [u8; 32] },
+    /// REFINE-1 (tag 107, 31_ELEMENT_COMMERCE §3) — banked raw element
+    /// spends into a refined-form identity. Spend and yield re-derive
+    /// from [`refine_recipe`]; the refined id from [`refined_identity`].
+    /// One ElementRefinery on the orb is the technology gate (Q-T2:
+    /// T3 may refine; T5 is advantage only, not a hard gate).
+    ElementRefined {
+        orb_id: u64,
+        raw: [u8; 32],
+        refined: [u8; 32],
+        spent: Ratio,
+        yielded: Ratio,
+    },
     /// TRADE-1 (09 §2.1) — BANKED value moved orb-to-orb within one
     /// world: the chartering conservation law generalized (nothing
     /// minted, nothing lost). The cohesion-book postings derive from
@@ -2165,9 +2288,9 @@ pub enum ClosureEvent {
     /// with a shell. `KERNEL_RELAY` §1.5 named this exactly: *the game
     /// is constitutional; the universe is not*. Now the seat is a deed.
     ///
-    /// `station` is the BAND-1 vocabulary by index (1 progenitor,
-    /// 2 watcher, 3 observer, 4 sovereign); 0 and anything above 4 are
-    /// not offices and the wire refuses them.
+    /// `station` is the closed office vocabulary by index (1 progenitor
+    /// … 10 anchor; T4–T9 Wave-1); 0 and anything outside 1..=10 are
+    /// not offices and the wire refuses them via [`Station::from_wire`].
     StationSeated { line: String, station: u8 },
     /// U1 KERNEL-VERIFY (U_DIRECTIVES §2): the discovery mint — value
     /// created ONLY against verified work (the PoUW anchor, I4's
@@ -2471,6 +2594,15 @@ impl ClosureEvent {
                     value.extend_from_slice(member);
                 }
                 tlv::put(104, &value, &mut out);
+            }
+            Self::ElementRefined { orb_id, raw, refined, spent, yielded } => {
+                // orb ‖ raw ‖ refined ‖ spent ‖ yielded
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(raw);
+                value.extend_from_slice(refined);
+                ratio::encode(spent, &mut value);
+                ratio::encode(yielded, &mut value);
+                tlv::put(107, &value, &mut out);
             }
             Self::ResourceTransferred { from_orb, to_orb, resource, amount } => {
                 let mut value = from_orb.to_le_bytes().to_vec();
@@ -3081,6 +3213,20 @@ impl ClosureEvent {
                     .map(|chunk| chunk.try_into().expect("chunks_exact(32)"))
                     .collect();
                 Some(Self::GemCompounded { orb_id, members, gem })
+            }
+            107 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let raw: [u8; 32] = value.get(8..40)?.try_into().ok()?;
+                let refined: [u8; 32] = value.get(40..72)?.try_into().ok()?;
+                let (spent, used) = ratio::decode(value.get(72..)?)?;
+                let (yielded, _) = ratio::decode(value.get(72 + used..)?)?;
+                Some(Self::ElementRefined {
+                    orb_id,
+                    raw,
+                    refined,
+                    spent,
+                    yielded,
+                })
             }
             30 => {
                 let from_orb = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

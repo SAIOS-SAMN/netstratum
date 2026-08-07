@@ -6,6 +6,15 @@ landing N7 seals (the ANCHOR bridge is the only lawful money boundary).
 All percentages and prices in this document are **placeholder parameters**,
 not inscribed law — they tune at balance time.
 
+**2026-08-07 expansion (in-game money + element commerce):** the playable
+unit of account is **STAMP** (`32_STAMP_MARKET.md`) — exact-rational,
+receipted, NPC-sustained; instruments are Share · Note · Future · Perp
+(Notes ≠ ideology standing bonds). Element trade routes and derived
+refineries: `31_ELEMENT_COMMERCE.md`. External trade of STAMP claims uses
+the **R-line** (R3 strand, R4 isthmus/datum) in `30_OFFICES_AND_RAILS.md`.
+NS-7 remains the boundary for **real-world** settlement; STAMP is in-game
+first and only optionally exits the court rail.
+
 The economic architecture follows the charter's split: gameplay is
 high-frequency, free, and local (CFE ticks, receipted by NS-3); value
 settlement is low-frequency and external (NS-7 consensus roots to WWW3

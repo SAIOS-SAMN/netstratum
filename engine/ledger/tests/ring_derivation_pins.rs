@@ -70,10 +70,11 @@ fn the_ring_is_the_least_that_admits_them_all() {
 
 /// **THE STATED ARITIES ARE THE LIVE ONES, as a SET.**
 ///
-/// `RING_ARITIES` is `{3, 4, 5}`; the vocabularies are 3, 3, 4, 4, 5.
-/// Duplicates do not change an lcm, so the set is what matters — and
-/// this is the witness that the set is a reading of the tree rather
-/// than a guess that happens to agree.
+/// `RING_ARITIES` is `{3, 4, 5, 10}`; the vocabularies are 3, 3, 4, 10, 5
+/// (stations grew to 10 with Wave-1 T4–T9). Duplicates do not change an
+/// lcm, so the set is what matters — and this is the witness that the
+/// set is a reading of the tree rather than a guess that happens to
+/// agree.
 #[test]
 fn the_stated_arities_are_the_live_ones() {
     let mut live: Vec<i64> = vec![

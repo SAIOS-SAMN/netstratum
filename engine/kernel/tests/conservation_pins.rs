@@ -384,7 +384,14 @@ fn the_version_is_pinned() {
     //   nothing by itself, so {I2 containment, I3 exactness} complete
     //   both deeds and the haul that later crosses is the conserved
     //   one. MINOR: the gate admits what was Unjudged.
-    assert_eq!(KERNEL_VERSION.to_string(), "0.19.0", "the gate is version-pinned");
+    // 0.20.0 — OFFICES T4–T9 (2026-08-07, Wave-1): six economic
+    //   stations (caravan·crucible·exchange·assay·vault·anchor) enter
+    //   the closed office vocabulary and the tier ladder. StationSeated
+    //   already covered; MINOR because serving-seat and tier gates now
+    //   admit six offices they previously refused as unknown. Claimed
+    //   in this ledger before bump (NEXT-FREE RULE; next free is 21).
+    //   — the next free minor is 21.
+    assert_eq!(KERNEL_VERSION.to_string(), "0.20.0", "the gate is version-pinned");
     assert_eq!(VERSION, KERNEL_VERSION.code(), "the wire carries the packed form");
     // ORDER IS PRESERVED: a chain cut under the old linear versions
     // compares BELOW every packed one, which is true — an earlier gate

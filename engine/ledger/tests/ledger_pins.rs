@@ -474,7 +474,8 @@ fn tier_covers_every_station() {
     }
 }
 
-/// The ladder, pinned against the reading that lived in Python.
+/// The ladder, pinned against the reading that lived in Python — and
+/// Wave-1's T4–T9 economic offices (30_OFFICES_AND_RAILS).
 #[test]
 fn the_ladder_reads_as_ruled() {
     use ledger::registry::{tier_of, Tier};
@@ -483,6 +484,12 @@ fn the_ladder_reads_as_ruled() {
     assert_eq!(tier_of(Some("observer")), Some(Tier::T1));
     assert_eq!(tier_of(Some("sovereign")), Some(Tier::T2));
     assert_eq!(tier_of(None), Some(Tier::T3), "the common is the absence of a seat");
+    assert_eq!(tier_of(Some("caravan")), Some(Tier::T4));
+    assert_eq!(tier_of(Some("crucible")), Some(Tier::T5));
+    assert_eq!(tier_of(Some("exchange")), Some(Tier::T6));
+    assert_eq!(tier_of(Some("assay")), Some(Tier::T7));
+    assert_eq!(tier_of(Some("vault")), Some(Tier::T8));
+    assert_eq!(tier_of(Some("anchor")), Some(Tier::T9));
 }
 
 /// AN UNREADABLE SEAT REFUSES. It must not fall through to the common —
@@ -499,14 +506,86 @@ fn an_unknown_station_refuses_rather_than_defaulting() {
     );
 }
 
-/// The serving-seat reading: T0/T1/T2 serve everyone, T3 is the common,
-/// and an unreadable seat answers neither.
+/// The serving-seat reading: any seated office (T0–T2, T4–T9) serves;
+/// T3 is the common; an unreadable seat answers neither.
 #[test]
 fn serving_seats_are_the_seated_offices() {
     use ledger::registry::holds_a_serving_seat;
-    for seated in ["progenitor", "watcher", "observer", "sovereign"] {
+    for seated in [
+        "progenitor", "watcher", "observer", "sovereign",
+        "caravan", "crucible", "exchange", "assay", "vault", "anchor",
+    ] {
         assert_eq!(holds_a_serving_seat(Some(seated)), Some(true), "{seated} did not read as seated");
     }
     assert_eq!(holds_a_serving_seat(None), Some(false), "the common read as a seated office");
     assert_eq!(holds_a_serving_seat(Some("nonesuch")), None, "an unknown seat answered a gate");
+}
+
+/// T1.3 — seat widths for the economic offices (Q-T1 default 16;
+/// Anchor unbounded like Sovereign).
+#[test]
+fn economic_office_seat_widths() {
+    use ledger::registry::seat_width;
+    for office in ["caravan", "crucible", "exchange", "assay", "vault"] {
+        assert_eq!(seat_width(office), Some(16), "{office} width");
+    }
+    assert_eq!(seat_width("anchor"), None, "anchor is unbounded");
+    assert_eq!(seat_width("sovereign"), None, "sovereign is unbounded");
+}
+
+/// T1.2 — typed preconditions name the cure; band-1 offices need none.
+#[test]
+fn office_preconditions_name_the_cure() {
+    use ledger::registry::{office_preconditions, OfficeEvidence};
+    let empty = OfficeEvidence::default();
+    for band1 in ["progenitor", "watcher", "observer", "sovereign"] {
+        assert!(office_preconditions(band1, &empty).is_ok(), "{band1}");
+    }
+    assert!(
+        office_preconditions("caravan", &empty).is_err(),
+        "caravan without evidence must refuse"
+    );
+    let with_elements = OfficeEvidence { element_kinds: 1, ..Default::default() };
+    assert!(office_preconditions("caravan", &with_elements).is_ok());
+    assert!(office_preconditions("crucible", &with_elements).is_ok());
+    assert!(office_preconditions("exchange", &with_elements).is_ok());
+    assert!(
+        office_preconditions("assay", &with_elements).is_err(),
+        "assay needs AssayStruck"
+    );
+    let assayed = OfficeEvidence { assays_struck: 1, ..Default::default() };
+    assert!(office_preconditions("assay", &assayed).is_ok());
+    assert!(
+        office_preconditions("anchor", &with_elements).is_err(),
+        "anchor needs a void crossing"
+    );
+    let crossed = OfficeEvidence { has_crossed: true, ..Default::default() };
+    assert!(office_preconditions("anchor", &crossed).is_ok());
+}
+
+/// T1.3 — NoSeatOpen for caravan when the room is full (width 16).
+#[test]
+fn caravan_room_fills_at_width_sixteen() {
+    use ledger::registry::{Registry, RegistryRefused};
+    let root = scratch("caravan-room");
+    let registry = Registry::at(&root);
+    for n in 0..16 {
+        let mut line = humans();
+        line.name = format!("Caravan {n}");
+        line.sigil = format!("caravan-{n}");
+        line.station = Some("caravan".into());
+        registry.create(&line).expect("a seat stands open");
+    }
+    let mut seventeenth = humans();
+    seventeenth.sigil = "caravan-full".into();
+    seventeenth.station = Some("caravan".into());
+    assert_eq!(
+        registry.create(&seventeenth),
+        Err(RegistryRefused::NoSeatOpen {
+            station: "caravan".into(),
+            domain: "mesic".into(),
+            held: 16,
+            width: 16,
+        })
+    );
 }

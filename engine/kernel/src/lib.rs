@@ -136,7 +136,7 @@ use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 /// (Amendments 0.11.0 through the current minor are recorded in the
 /// version ledger — `tests/conservation_pins.rs` — beside the
 /// NEXT-FREE RULE that assigns minors across lanes.)
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 19, patch: 0 };
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 20, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
@@ -801,6 +801,45 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             declared.push((*gem, yielded));
             declared
         }
+        // REFINE-1 (tag 107): spend raw, bank refined. Re-derive the
+        // recipe from the raw identity + star (call-not-copy). A
+        // receipt whose numbers disagree with the law moves nothing.
+        ClosureEvent::ElementRefined {
+            raw,
+            refined,
+            spent,
+            yielded,
+            ..
+        } => {
+            let Some(class) = prior.star else {
+                // No star → no lawful recipe; any declared spend is
+                // above the zero bound.
+                return Err(Refused::AssayExceedsVein {
+                    bound: Box::new(ratio(0, 1)),
+                    claimed: Box::new(spent.clone()),
+                });
+            };
+            let (law_spend, law_refined, law_yield) = cfe::dop::refine_recipe(raw, class);
+            if law_refined != *refined {
+                return Err(Refused::GemMisidentified {
+                    expected: Box::new(law_refined),
+                    declared: Box::new(*refined),
+                });
+            }
+            if *spent != law_spend || *yielded != law_yield {
+                return Err(Refused::AssayExceedsVein {
+                    bound: Box::new(law_spend),
+                    claimed: Box::new(spent.clone()),
+                });
+            }
+            if *spent < ratio(0, 1) || *yielded < ratio(0, 1) {
+                return Err(Refused::ElementNotPositive {
+                    element: *raw,
+                    amount: Box::new(spent.clone()),
+                });
+            }
+            vec![(*raw, -spent.clone()), (*refined, yielded.clone())]
+        }
         _ => Vec::new(),
     };
     // Total-check every element key present in either state or in the
@@ -1051,6 +1090,10 @@ fn covered(event: &ClosureEvent) -> bool {
         // identity is re-derived too. BY HAND, as ever — the compiler
         // does not force this list.
         | E::GemCompounded { .. }
+        // REFINE-1 (tag 107): element-ledger move with arm in
+        // `element_move` — rates re-derived from `refine_recipe`.
+        // BY HAND: the compiler does not force this list.
+        | E::ElementRefined { .. }
         | E::GenesisSealed { .. } | E::ProspectStruck { .. } | E::LineSucceeded { .. }
         | E::TechLicensed { .. } | E::InstrumentForged { .. } | E::RouteChartered { .. }
         | E::OfferPosted { .. } | E::BondSealed { .. }
@@ -1926,6 +1969,9 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // not a line's identity. The gem's name is content-addressed
         // from the members, so no line is keyed by it.
         | E::GemCompounded { .. }
+        // REFINE-1: WORLD-layer beside the assay and the gem — an
+        // orb's matter converts, no line is keyed.
+        | E::ElementRefined { .. }
         // #42: a treaty is WORLD-layer. It is keyed on the pair, and
         // the pair is two worlds — not a line's identity (a pact
         // outlives whoever signed it) and not one place.
@@ -2045,6 +2091,9 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // filled the ledger it draws on. Ratified by the chemistry
         // witnesses as it enters covered().
         | E::GemCompounded { .. }
+        // REFINE-1: spends banked element value and banks a refined
+        // form — Collect, exactly as the assay and the gem.
+        | E::ElementRefined { .. }
         // U1: the discovery mint settles banked value against verified
         // work — Collect, like the yield it banks beside. Ratified by
         // the U1 witnesses as it enters covered().

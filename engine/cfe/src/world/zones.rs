@@ -20,10 +20,11 @@ impl World {
         if self.orbs.is_empty() {
             return Err(ActionRefused::NoColony);
         }
-        // REGEN-1: regeneration is a TECHNOLOGY — placing a
-        // regenerator requires the DEEPENING (condition 3)
-        // crystallized on this orb. A fact of the sky, at the verb.
-        if kind == ZoneKind::Regenerator
+        // REGEN-1 / REFINE-1: regeneration and elemental refining are
+        // TECHNOLOGIES — placing either requires the DEEPENING
+        // (condition 3) crystallized on this orb. A fact of the sky,
+        // at the verb.
+        if matches!(kind, ZoneKind::Regenerator | ZoneKind::ElementRefinery)
             && !self
                 .techs
                 .iter()

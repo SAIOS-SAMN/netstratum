@@ -499,6 +499,18 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     }
                 }
             }
+            ClosureEvent::ElementRefined {
+                orb_id,
+                raw,
+                refined,
+                spent,
+                yielded,
+            } => {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank_element(*raw, -spent.clone());
+                    held.bank_element(*refined, yielded.clone());
+                }
+            }
             ClosureEvent::AssayStruck { orb_id, element, amount, richness } => {
                 if let Some(vein) = prospects
                     .iter_mut()

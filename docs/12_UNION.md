@@ -123,6 +123,15 @@ coherence flow UP (closed loops fund the three-gate climb); licensing
 and gauge keys flow DOWN (council-gated, shield-bounded). The observer
 board renders the tier column from this reading.
 
+**T4–T9 and the R-line (DESIGN 2026-08-07):** the office table extends
+**downward** into specialized economic functions (Caravan · Crucible ·
+Exchange · Assay · Vault · Anchor) without placing anyone above the
+progenitors. A separate **Rail ladder R1–R4** (Hearth · Aperture ·
+Strand · Court) measures settlement altitude for claims, independent of
+office. Full law: `30_OFFICES_AND_RAILS.md`. Element commerce and STAMP
+markets: `31_ELEMENT_COMMERCE.md`, `32_STAMP_MARKET.md`. Task DAG:
+`TASKS_TIER_RAIL_MARKET.md`.
+
 ## 2b. The torsion law (operator ruling, 2026-07-30)
 
 **Deterministic at the top, probabilistic at the bottom — where they

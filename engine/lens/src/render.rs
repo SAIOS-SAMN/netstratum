@@ -233,6 +233,23 @@ pub fn render_state_with(
             w.field_str(resource_name(*resource), &ratio_str(amount));
         }
         w.close();
+        // ELEMENT-GRAMMAR-1 (14_ALMANAC): open matter vocabulary, separate
+        // from the closed Resource enum. The board and chemistry consumers
+        // need these visible; iron is one legacy law carrier, not the table.
+        w.key("elements");
+        w.open_array();
+        let star = world.star().unwrap_or(cfe::thermal::StarClass::G);
+        for (element, amount) in &orb.elements {
+            let (family, _tier, _richness) =
+                cfe::dop::element_properties(element, star);
+            w.open();
+            w.field_str("id", &hex(element));
+            w.field_str("name", &cfe::dop::element_name(family, element));
+            w.field_u64("family", u64::from(family));
+            w.field_str("amount", &ratio_str(amount));
+            w.close();
+        }
+        w.close_array();
         w.key("famine");
         w.array(orb.famine.iter().map(|r| resource_name(*r).to_string()));
         w.key("zones");
@@ -366,6 +383,14 @@ pub fn render_receipt(receipt: &Receipt) -> String {
                     true => "is BROKEN",
                     false => "is renounced",
                 }
+            ),
+        ),
+        E::ElementRefined { orb_id, spent, yielded, .. } => (
+            "element_refined",
+            format!(
+                "orb {orb_id} refines {} → {} of the refined form",
+                ratio_str(spent),
+                ratio_str(yielded)
             ),
         ),
         E::GemCompounded { orb_id, members, gem } => (

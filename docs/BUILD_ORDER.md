@@ -928,3 +928,22 @@ orphaned by dropping the only line that wears it. All six are restored
 with their ratified taxa, and the pin now runs the other way: every
 class the partition names as seated must have its occupants in the
 roster.
+
+---
+
+## DESIGN BOARD — T4–T9 · R1–R4 · Element commerce · STAMP (2026-08-07)
+
+**Not yet landed.** Spec and task DAG only. Do not treat as current
+implementation state.
+
+| Doc | Role |
+|-----|------|
+| `30_OFFICES_AND_RAILS.md` | T4–T9 offices + R1–R4 rails (naming + law) |
+| `31_ELEMENT_COMMERCE.md` | Element routes, refineries, NPC trade |
+| `32_STAMP_MARKET.md` | STAMP unit, Share/Note/Future/Perp, NPC MM, strand/datum exits |
+| `TASKS_TIER_RAIL_MARKET.md` | Implementation waves 0–8 + first vertical slice |
+
+First vertical slice (from the task file): stations derive → REFINE-1 →
+E-APT/E-ROUTE NPC → STAMP spot + MM → R1–R2 only. Perps and R3/R4 after
+that slice is green under pure NPC.
+

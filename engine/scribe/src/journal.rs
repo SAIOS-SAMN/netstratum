@@ -275,6 +275,7 @@ fn zone_word(kind: ZoneKind) -> &'static str {
         ZoneKind::CryoArray => "cryo-lattice array",
         ZoneKind::Regenerator => "regenerator",
         ZoneKind::Resonator => "resonator",
+        ZoneKind::ElementRefinery => "element refinery",
         // #41: a minted building's word lives in the FOLD; the journal
         // is prose over receipts and names it generically rather than
         // re-reading the chain here. (This keeps its own long-form

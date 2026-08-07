@@ -12,11 +12,15 @@ entry tag 72), the abundance spine, hash-derived properties and
 names, the prospect/assay CLI verbs. Measured: two worlds mint
 DIFFERENT elements from one grammar; the spine binds the draw to the
 sky; replay reads, never rolls. DEFERRED to ELEMENT-GRAMMAR-2,
-recorded: the refinery derivation (§5) and G2 element rations (§7.4). Composes with: D3's
+recorded: the refinery derivation (§5) and G2 element rations (§7.4).
+**Play board opened 2026-08-07:** `31_ELEMENT_COMMERCE.md` lifts §5/§5a
+into landings E-ROUTE-1 · E-APT-1 · REFINE-1 · E-MKT-1 (NPC trade +
+derived ElementRefinery). STAMP pricing of element cargo: `32_STAMP_MARKET.md`.
+Composes with: D3's
 seeded chart (the draw's door), G2's rations (elements made edible),
 SCIENCE-1's relevance (elements made visible), MARKET-1 (elements made
 tradeable), WANT-1 (elements made wanted), G4 at the mesh (elements
-made confirmable).
+made confirmable), GROUND STEP (conductor prospect/assay).
 
 **The one law over this whole chapter:** content enters through a
 DEED, never through a commit. We author laws, seeds, and small exact

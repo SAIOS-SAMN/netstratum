@@ -1095,6 +1095,39 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         );
                         return;
                     }
+                    // T1.2 — typed preconditions name the cure (facts of
+                    // the chain; seat width stays the registry door).
+                    let evidence = {
+                        use cfe::dop::ClosureEvent;
+                        use ledger::registry::OfficeEvidence;
+                        let mut evidence = OfficeEvidence::default();
+                        if let Some(orb) = world.orb() {
+                            evidence.element_kinds = orb.elements.len() as u64;
+                        }
+                        for receipt in world.chronicle().receipts() {
+                            match &receipt.event {
+                                ClosureEvent::AssayStruck { .. } => evidence.assays_struck += 1,
+                                ClosureEvent::RouteChartered { .. } => {
+                                    evidence.routes_chartered += 1
+                                }
+                                ClosureEvent::OfferCleared { .. } => evidence.market_clears += 1,
+                                _ => {}
+                            }
+                        }
+                        evidence.has_crossed = world.has_crossed();
+                        evidence
+                    };
+                    if let Err(cure) =
+                        ledger::registry::office_preconditions(&station, &evidence)
+                    {
+                        println!(
+                            "{} the {} office refuses — {}",
+                            style.bad("✗"),
+                            style.strong(&station),
+                            style.dim(cure)
+                        );
+                        return;
+                    }
                     let registry = ledger::registry::Registry::at("var/registry");
                     match registry.seat(&sigil, &station) {
                         Ok(()) => println!(
@@ -2413,6 +2446,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                 cfe::dop::ZoneKind::CryoArray => 'C',
                                 cfe::dop::ZoneKind::Resonator => 'R',
                                 cfe::dop::ZoneKind::Regenerator => 'G',
+                                cfe::dop::ZoneKind::ElementRefinery => 'F',
                                 // #41: a minted building — the chain
                                 // named it, so the map marks it as one.
                                 cfe::dop::ZoneKind::Minted(_) => 'M',
@@ -5011,6 +5045,10 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
              {} shows every set of what you hold that would",
             style.strong("bench")
         ),
+        ActionRefused::NoRefineryStanding { orb } => format!(
+            "orb {} has no element-refinery — raise one (DEEPENING first) before refining",
+            style.strong(&orb.to_string())
+        ),
         ActionRefused::ElementNotLocal { element } => format!(
             "{} lies on a LINE this system does not carry — deep matter does not occur under a \
              shallow star. Another world holds it; {} is how it gets here",
@@ -5375,6 +5413,7 @@ fn map(world: &World, style: &Style, current: u64) {
                     ZoneKind::CryoArray => "k",
                     ZoneKind::Resonator => "r",
                     ZoneKind::Regenerator => "g",
+                    ZoneKind::ElementRefinery => "f",
                     ZoneKind::Minted(_) => "m",
                 }),
                 Some(zone) => match zone.kind {
@@ -5386,6 +5425,7 @@ fn map(world: &World, style: &Style, current: u64) {
                     ZoneKind::CryoArray => style.head("K"),
                     ZoneKind::Resonator => style.prompt("R"),
                     ZoneKind::Regenerator => style.ok("G"),
+                    ZoneKind::ElementRefinery => style.warn("F"),
                     ZoneKind::Minted(_) => style.strong("M"),
                 },
                 None => style.dim("·"),
@@ -6033,6 +6073,14 @@ fn chronicle(world: &World, style: &Style) {
                 "◈ {} bond into {} — the lanes saturate and the matter holds",
                 style.strong(&format!("{} elements", members.len())),
                 style.strong(&hex(gem)[..8])
+            ),
+            cfe::dop::ClosureEvent::ElementRefined {
+                spent, yielded, refined, ..
+            } => format!(
+                "◈ {} refined into {} of {} — the refinery converts raw matter",
+                style.strong(&amount(spent)),
+                style.strong(&amount(yielded)),
+                style.strong(&hex(refined)[..8])
             ),
             cfe::dop::ClosureEvent::AssayStruck { amount: drawn, richness, .. } => format!(
                 "⚖ {} drawn from the opened vein — one receipt, the whole span{}",

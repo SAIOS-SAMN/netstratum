@@ -158,14 +158,17 @@ pub const fn lcm_through(n: i64) -> i64 {
 ///     5   practices      the five receipted disciplines
 /// ```
 ///
-/// The distinct arities are `{3, 4, 5}` and `lcm(3, 4, 5) = 60`.
+/// The distinct arities are `{3, 4, 5, 10}` and `lcm(3, 4, 5, 10) = 60`.
+/// Wave-1 (2026-08-07) opened stations T4–T9 — the stations vocabulary
+/// grew from 4 to 10, so 10 joins the ring's admitted arities. The lcm
+/// is unchanged (60 already divides by 10); the set is what moved.
 ///
 /// **The vocabularies live ABOVE this crate** — `ledger::registry` and
 /// `cfe` both depend on `ratio`, never the reverse — so the arities are
 /// stated here and PINNED against the live vocabularies from up there
 /// (`ring_derivation_pins`). Copying them down would be the two-truths
 /// defect; stating the requirement and proving it matches is not.
-pub const RING_ARITIES: [i64; 3] = [3, 4, 5];
+pub const RING_ARITIES: [i64; 4] = [3, 4, 5, 10];
 
 /// The lcm of a set of arities — the smallest ring admitting them all.
 pub const fn lcm_of(arities: &[i64]) -> i64 {

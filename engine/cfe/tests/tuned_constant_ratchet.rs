@@ -230,7 +230,8 @@ fn the_approved_seed_is_exactly_as_large_as_approved() {
         .expect("the approved seed stands where it stood");
     let seeded: usize = text.lines().map(tuned_in).sum();
     assert_eq!(
-        seeded, 55,
-        "the founding roster's seed count moved — approval covered 55 values"
+        seeded, 68,
+        "the founding roster's seed count moved — approval covered 68 values \
+         (Wave-1 added three T2 sovereign seats: Kemet · Baktun · Dogon)"
     );
 }

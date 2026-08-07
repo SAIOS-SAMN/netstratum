@@ -37,6 +37,60 @@ type Plane = (u8, u8);
 type Seated = ([u8; 32], u8);
 
 impl World {
+    /// **REFINE-1** — convert banked raw element into its refined form
+    /// through an ElementRefinery on the orb. Collect scope: moves the
+    /// element ledger. Rates and identity re-derive from
+    /// [`crate::dop::refine_recipe`] (call-not-copy).
+    pub fn refine(&mut self, orb: u64, raw: [u8; 32]) -> Result<[u8; 32], ActionRefused> {
+        self.refine_as(SOVEREIGN, orb, raw)
+    }
+
+    /// The contained form of refine.
+    pub fn refine_as(
+        &mut self,
+        actor: u64,
+        orb: u64,
+        raw: [u8; 32],
+    ) -> Result<[u8; 32], ActionRefused> {
+        self.permitted(actor, Scope::Collect)?;
+        let Some(held) = self.orb_by_id(orb) else {
+            return Err(ActionRefused::NoSuchOrb { orb });
+        };
+        let stands = held
+            .zones
+            .iter()
+            .any(|zone| zone.kind == ZoneKind::ElementRefinery);
+        if !stands {
+            return Err(ActionRefused::NoRefineryStanding { orb });
+        }
+        let Some(class) = self.star else {
+            return Err(ActionRefused::NoStarCommissioned);
+        };
+        let (spend, refined, yielded) = crate::dop::refine_recipe(&raw, class);
+        let have = held.element_amount(&raw);
+        if have < spend {
+            return Err(ActionRefused::CannotAffordElement {
+                element: raw,
+                need: Box::new(spend),
+                have: Box::new(have),
+            });
+        }
+        let held = peel(&mut self.orbs, orb).expect("judged above");
+        held.bank_element(raw, -spend.clone());
+        held.bank_element(refined, yielded.clone());
+        self.close(
+            ClosureEvent::ElementRefined {
+                orb_id: orb,
+                raw,
+                refined,
+                spent: spend,
+                yielded,
+            },
+            actor,
+        );
+        Ok(refined)
+    }
+
     /// Compound on the genesis orb as the sovereign.
     pub fn compound(&mut self, members: &[[u8; 32]]) -> Result<[u8; 32], ActionRefused> {
         self.compound_as(SOVEREIGN, FIRST_ORB, members)
