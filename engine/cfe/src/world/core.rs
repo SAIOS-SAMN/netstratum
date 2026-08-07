@@ -328,6 +328,8 @@ impl World {
             last_clears: self.last_clears.clone(),
             shares: self.shares.clone(),
             perps: self.perps.clone(),
+            clear_depths: self.clear_depths.clone(),
+            market_sealed_until: self.market_sealed_until,
         }
     }
     /// ELEMENT-GRAMMAR-1 (14 §3) — the extraction closure: richness ×

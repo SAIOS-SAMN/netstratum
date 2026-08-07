@@ -326,7 +326,12 @@
 //!         cargo loss on positive-melt haul without full escort cover.)
 //!    134  ClosureEvent::ConvoyRiskMarked (P5-A KIN — optional receipted
 //!         risk band reading for a deal; pure derive preferred.)
-//!    Phase-5-A claim ledger: next free **135**. KIN escort/interdiction.
+//!    135  ClosureEvent::MarketSealed (P5-M — circuit breaker; books freeze.)
+//!    136  ClosureEvent::MarketResumed (P5-M — breaker lifts.)
+//!    137  ClosureEvent::SpotClearRecorded (P5-M — honest clear depth for seal.)
+//!    138  ClosureEvent::LiquidityRaidStruck (P5-M — typed economic attack residual.)
+//!    139  ClosureEvent::ClearPoisonRefused (P5-M — mark without depth refused.)
+//!    Phase-5-M claim ledger: next free **140**. MKT economic warfare.
 //!         Orb TLV: 73 STAMP, 74 scrap. ZoneKind::ShipYard = 10.
 //!         (Historic free tags below top: 14, 15, 56, 57, 58, 64, 66,
 //!         83, 84, 87; 9 and 51 reserved; 65 retired forever.)
@@ -2689,6 +2694,31 @@ pub enum ClosureEvent {
         risk: Ratio,
         escort_cover: Ratio,
     },
+    /// P5-M MKT (tag 135) — circuit breaker; instrument books freeze until resume_at.
+    MarketSealed { resume_at: u64 },
+    /// P5-M MKT (tag 136) — breaker lifted.
+    MarketResumed {},
+    /// P5-M MKT (tag 137) — honest spot clear depth for last-clear seal.
+    SpotClearRecorded {
+        orb_id: u64,
+        resource: Resource,
+        price: Ratio,
+        depth: u64,
+    },
+    /// P5-M MKT (tag 138) — liquidity raid residual (fee burned; optional offer void).
+    LiquidityRaidStruck {
+        orb_id: u64,
+        fee: Ratio,
+        offers_voided: u8,
+    },
+    /// P5-M MKT (tag 139) — attempted mark without clear depth (refused audit).
+    ClearPoisonRefused {
+        orb_id: u64,
+        resource: Resource,
+        price: Ratio,
+        depth: u64,
+        need: u64,
+    },
     /// N4 (NS-2 §1.5) — the scanner's power draw, the ONE chronicle
     /// event of RQP: crystals left the probing orb's bank to hold the
     /// lens open. Deliberately blind to what was asked and what was
@@ -3600,6 +3630,48 @@ impl ClosureEvent {
                 ratio::encode(risk, &mut value);
                 ratio::encode(escort_cover, &mut value);
                 tlv::put(134, &value, &mut out);
+            }
+            Self::MarketSealed { resume_at } => {
+                tlv::put(135, &resume_at.to_le_bytes(), &mut out);
+            }
+            Self::MarketResumed {} => {
+                tlv::put(136, &[], &mut out);
+            }
+            Self::SpotClearRecorded {
+                orb_id,
+                resource,
+                price,
+                depth,
+            } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.push(*resource as u8);
+                ratio::encode(price, &mut value);
+                value.extend_from_slice(&depth.to_le_bytes());
+                tlv::put(137, &value, &mut out);
+            }
+            Self::LiquidityRaidStruck {
+                orb_id,
+                fee,
+                offers_voided,
+            } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                ratio::encode(fee, &mut value);
+                value.push(*offers_voided);
+                tlv::put(138, &value, &mut out);
+            }
+            Self::ClearPoisonRefused {
+                orb_id,
+                resource,
+                price,
+                depth,
+                need,
+            } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.push(*resource as u8);
+                ratio::encode(price, &mut value);
+                value.extend_from_slice(&depth.to_le_bytes());
+                value.extend_from_slice(&need.to_le_bytes());
+                tlv::put(139, &value, &mut out);
             }
             Self::CrystalDrawn { orb_id, amount } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
@@ -4566,6 +4638,49 @@ impl ClosureEvent {
                     deal,
                     risk,
                     escort_cover,
+                })
+            }
+            135 => {
+                let resume_at = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                Some(Self::MarketSealed { resume_at })
+            }
+            136 => Some(Self::MarketResumed {}),
+            137 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let resource = Resource::from_wire(*value.get(8)?)?;
+                let (price, u1) = ratio::decode(value.get(9..)?)?;
+                let at = 9 + u1;
+                let depth = u64::from_le_bytes(value.get(at..at + 8)?.try_into().ok()?);
+                Some(Self::SpotClearRecorded {
+                    orb_id,
+                    resource,
+                    price,
+                    depth,
+                })
+            }
+            138 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let (fee, u1) = ratio::decode(value.get(8..)?)?;
+                let offers_voided = *value.get(8 + u1)?;
+                Some(Self::LiquidityRaidStruck {
+                    orb_id,
+                    fee,
+                    offers_voided,
+                })
+            }
+            139 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let resource = Resource::from_wire(*value.get(8)?)?;
+                let (price, u1) = ratio::decode(value.get(9..)?)?;
+                let at = 9 + u1;
+                let depth = u64::from_le_bytes(value.get(at..at + 8)?.try_into().ok()?);
+                let need = u64::from_le_bytes(value.get(at + 8..at + 16)?.try_into().ok()?);
+                Some(Self::ClearPoisonRefused {
+                    orb_id,
+                    resource,
+                    price,
+                    depth,
+                    need,
                 })
             }
             55 => {

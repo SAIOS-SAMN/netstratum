@@ -81,10 +81,35 @@ impl World {
         if peek(&self.orbs, orb).is_none() {
             return Err(ActionRefused::NoSuchOrb { orb });
         }
+        if self.market_sealed() {
+            return Err(ActionRefused::MarketCircuitOpen {
+                resume_at: self.market_resume_at().unwrap_or(0),
+            });
+        }
         if !self.notes_listable() && !self.futures_listable() {
             return Err(ActionRefused::InstrumentBookClosed);
         }
         let p = price.value().clone();
+        let depth = self.clear_depth_of(resource);
+        let need = market_defense::CLEAR_SEAL_DEPTH;
+        if depth < need {
+            // Typed refuse: poison attempt without honest depth (36 §10).
+            self.close(
+                ClosureEvent::ClearPoisonRefused {
+                    orb_id: orb,
+                    resource,
+                    price: p,
+                    depth,
+                    need,
+                },
+                actor,
+            );
+            return Err(ActionRefused::ClearSealUnmet {
+                resource,
+                depth,
+                need,
+            });
+        }
         self.last_clears.retain(|(r, _)| *r != resource);
         self.last_clears.push((resource, p.clone()));
         self.close(
@@ -121,6 +146,11 @@ impl World {
         term_ticks: u64,
     ) -> Result<u64, ActionRefused> {
         self.permitted(actor, Scope::Build)?;
+        if self.market_sealed() {
+            return Err(ActionRefused::MarketCircuitOpen {
+                resume_at: self.market_resume_at().unwrap_or(0),
+            });
+        }
         if !self.notes_listable() {
             return Err(ActionRefused::InstrumentBookClosed);
         }
@@ -268,6 +298,11 @@ impl World {
         term_ticks: u64,
     ) -> Result<u64, ActionRefused> {
         self.permitted(actor, Scope::Build)?;
+        if self.market_sealed() {
+            return Err(ActionRefused::MarketCircuitOpen {
+                resume_at: self.market_resume_at().unwrap_or(0),
+            });
+        }
         if !self.futures_listable() {
             return Err(ActionRefused::InstrumentBookClosed);
         }
@@ -444,6 +479,11 @@ impl World {
         par: crate::dop::Positive,
     ) -> Result<u64, ActionRefused> {
         self.permitted(actor, Scope::Build)?;
+        if self.market_sealed() {
+            return Err(ActionRefused::MarketCircuitOpen {
+                resume_at: self.market_resume_at().unwrap_or(0),
+            });
+        }
         if !self.shares_listable() {
             return Err(ActionRefused::SharesBookClosed);
         }
@@ -650,6 +690,11 @@ impl World {
         margin: crate::dop::Positive,
     ) -> Result<u64, ActionRefused> {
         self.permitted(actor, Scope::Build)?;
+        if self.market_sealed() {
+            return Err(ActionRefused::MarketCircuitOpen {
+                resume_at: self.market_resume_at().unwrap_or(0),
+            });
+        }
         if !self.perps_listable() {
             return Err(ActionRefused::PerpsBookClosed);
         }

@@ -3297,6 +3297,7 @@ pub fn run_era_with(var_root: &str, cycles: u32, mode: SearchMode) -> Vec<Polity
         let _ = element_trade_step(&mut worlds, u64::from(beat));
         let _ = stamp_market_step(&mut worlds, u64::from(beat));
         instrument_step(&mut worlds);
+        market_war_step(&mut worlds);
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — the lens renders journals + wall, write-only display
         // of the chronicle, never a state change.
@@ -3317,7 +3318,7 @@ pub fn run_era_with(var_root: &str, cycles: u32, mode: SearchMode) -> Vec<Polity
     worlds
 }
 
-/// PHASE-4 — pure NPC instrument lifecycle (P4.7): mark last clears,
+/// PHASE-4 — pure NPC instrument lifecycle (P4.7): honest spot clears,
 /// redeem matured notes, settle expired futures; issue a small Note
 /// when listable and STAMP affords half-face collateral.
 pub fn instrument_step(worlds: &mut [Polity]) {
@@ -3329,19 +3330,77 @@ pub fn instrument_step(worlds: &mut [Polity]) {
     }
 }
 
+/// P5-M — pure NPC economic warfare (36 §10): disposition-routed clear
+/// seal building, liquidity raids, circuit breaker — no suite required.
+pub fn market_war_step(worlds: &mut [Polity]) {
+    for polity in worlds.iter_mut() {
+        if polity.penned {
+            continue;
+        }
+        ensure_npc_market_war(&mut polity.world, polity.automaton);
+    }
+}
+
+fn ensure_npc_market_war(world: &mut cfe::world::World, actor: u64) {
+    use cfe::dop::{Positive, Resource};
+    if world.orb().is_none() {
+        return;
+    }
+    let orb_id = cfe::world::FIRST_ORB;
+    let dis = world.genesis().map(|g| g.disposition).unwrap_or(1);
+    // If sealed, expansionist resumes early when resume is near; others wait.
+    if world.market_sealed() {
+        if dis == 1 {
+            if let Some(at) = world.market_resume_at() {
+                if world.now().saturating_add(1) >= at {
+                    let _ = world.resume_market_as(actor);
+                }
+            }
+        }
+        return;
+    }
+    // Empiricist (2) / epicurean (3): build honest clear depth on Crystal.
+    if (dis == 2 || dis == 3) && (world.futures_listable() || world.notes_listable()) {
+        if let Some(p) = Positive::new(ratio(1, 1)) {
+            let _ = world.record_spot_clear_as(actor, orb_id, Resource::Crystal, p);
+        }
+    }
+    // Expansionist (1): liquidity raid when stamp affords fee and an offer rests.
+    if dis == 1 {
+        let stamp = world
+            .orb()
+            .map(|o| o.stamp_amount())
+            .unwrap_or_else(|| ratio(0, 1));
+        let has_offer = world.offers().iter().any(|o| o.orb == orb_id);
+        if has_offer && stamp >= ratio(1, 1) {
+            let _ = world.liquidity_raid_as(actor, orb_id);
+        }
+    }
+    // Epicurean (3): trip breaker when crystal clear depth is still thin
+    // but instrument books are open (protect against thin-book poison).
+    if dis == 3
+        && (world.notes_listable() || world.futures_listable())
+        && world.clear_depth_of(Resource::Crystal) < cfe::world::CLEAR_SEAL_DEPTH / 2
+        && world.now().is_multiple_of(30)
+    {
+        let _ = world.seal_market_as(actor);
+    }
+}
+
 fn ensure_npc_instruments(world: &mut cfe::world::World, actor: u64) {
     use cfe::dop::{Positive, Resource};
     let Some(orb) = world.orb() else {
         return;
     };
     let orb_id = cfe::world::FIRST_ORB;
-    // Publish crystal last-clear at identity when listable and crystal banked.
-    if (world.futures_listable() || world.notes_listable())
+    // Honest clear path (P5-M Q-S4): record spot clears; depth≥8 seals last-clear.
+    if !world.market_sealed()
+        && (world.futures_listable() || world.notes_listable())
         && (orb.banked_amount(Resource::Crystal) > ratio(0, 1)
             || orb.stamp_amount() > ratio(0, 1))
     {
         if let Some(p) = Positive::new(ratio(1, 1)) {
-            let _ = world.mark_last_clear_as(actor, orb_id, Resource::Crystal, p);
+            let _ = world.record_spot_clear_as(actor, orb_id, Resource::Crystal, p);
         }
     }
     // Redeem / settle anything due.

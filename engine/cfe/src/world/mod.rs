@@ -63,8 +63,10 @@ pub mod fleet;
 pub mod balance;
 pub mod instruments;
 pub mod defense;
+pub mod market_defense;
 
 pub use defense::{DefenseDomain, DefensePosture, RiskBand};
+pub use market_defense::{MarketIntegrity, BREAKER_TICKS, CLEAR_SEAL_DEPTH};
 
 pub use replay::replay;
 pub use fleet::hull_voice;

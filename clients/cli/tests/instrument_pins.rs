@@ -1,9 +1,9 @@
 //! PHASE-4 NOTE-1 / FUT-1 pins (32 / TASKS_TRADE_FLEET_DESK P4).
 
 use cfe::dop::{ClosureEvent, Positive, Resource};
-use cfe::ratio::ratio;
+use cfe::ratio::{ratio, Ratio};
 use cfe::world::{
-    replay, Committed, MintWarrant, World, FIRST_ORB, SOVEREIGN,
+    replay, Committed, MintWarrant, World, CLEAR_SEAL_DEPTH, FIRST_ORB, SOVEREIGN,
 };
 
 /// Test warrant: earns identity amount from work[0] and admits any transition.
@@ -49,6 +49,15 @@ fn stamp_world() -> World {
     w
 }
 
+/// P5-M Q-S4: last-clear marks require honest clear depth.
+fn seal_clear(w: &mut World, resource: Resource, price: &Ratio) {
+    let p = Positive::new(price.clone()).expect("pos");
+    for _ in 0..CLEAR_SEAL_DEPTH {
+        w.record_spot_clear(FIRST_ORB, resource, p.clone())
+            .expect("clear");
+    }
+}
+
 #[test]
 fn note_issue_and_redeem_after_maturity() {
     let mut w = stamp_world();
@@ -75,8 +84,7 @@ fn note_issue_and_redeem_after_maturity() {
 fn future_opens_marks_and_settles_vs_last_clear() {
     let mut w = stamp_world();
     let price = Positive::new(ratio(1, 1)).expect("p");
-    w.mark_last_clear(FIRST_ORB, Resource::Crystal, price.clone())
-        .expect("mark");
+    seal_clear(&mut w, Resource::Crystal, &ratio(1, 1));
     assert_eq!(w.last_clear_of(Resource::Crystal), ratio(1, 1));
     let n = Positive::new(ratio(1, 1)).expect("n");
     let m = Positive::new(ratio(1, 1)).expect("m");
@@ -132,9 +140,7 @@ fn share_issue_dividend_and_perp_fund_close() {
         .expect("share");
     // May be empty if no iron pool — still SEAL B if we only issue.
     let _ = w.pay_share_dividend(sid);
-    let mark = Positive::new(ratio(1, 1)).expect("m");
-    w.mark_last_clear(FIRST_ORB, Resource::Crystal, mark)
-        .expect("mark");
+    seal_clear(&mut w, Resource::Crystal, &ratio(1, 1));
     let n = Positive::new(ratio(1, 1)).expect("n");
     let m = Positive::new(ratio(1, 1)).expect("m");
     let short = w.register_agent("short").expect("agent");

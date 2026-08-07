@@ -45,6 +45,8 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut last_clears: Vec<(crate::dop::Resource, Ratio)> = Vec::new();
     let mut shares: Vec<crate::dop::MarketShare> = Vec::new();
     let mut perps: Vec<crate::dop::MarketPerp> = Vec::new();
+    let mut clear_depths: Vec<(crate::dop::Resource, u64)> = Vec::new();
+    let mut market_sealed_until: Option<u64> = None;
     for receipt in chronicle.receipts() {
         match &receipt.event {
             // BOOK-1 (19_LENS §16) — the open registry rebuilds from
@@ -1187,13 +1189,47 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 // Residual is in ApertureReceived delivered amount; typed audit only.
             }
             ClosureEvent::ConvoyRiskMarked { .. } => {}
+            ClosureEvent::MarketSealed { resume_at } => {
+                market_sealed_until = Some(*resume_at);
+            }
+            ClosureEvent::MarketResumed {} => {
+                market_sealed_until = None;
+            }
+            ClosureEvent::SpotClearRecorded {
+                resource,
+                price,
+                depth,
+                ..
+            } => {
+                clear_depths.retain(|(r, _)| *r != *resource);
+                clear_depths.push((*resource, *depth));
+                if *depth >= 8 {
+                    last_clears.retain(|(r, _)| *r != *resource);
+                    last_clears.push((*resource, price.clone()));
+                }
+            }
+            ClosureEvent::LiquidityRaidStruck {
+                orb_id,
+                fee,
+                offers_voided,
+            } => {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank_stamp(-fee.clone());
+                }
+                if *offers_voided > 0 {
+                    if let Some(i) = offers.iter().position(|o| o.orb == *orb_id) {
+                        offers.remove(i);
+                    }
+                }
+            }
+            ClosureEvent::ClearPoisonRefused { .. } => {}
         }
     }
     Committed {
         orbs, entities, star, debts, bonds, forwards, councils, offers, techs, wants, crossed,
         gauge, genesis, terrain_seed, practices, instruments, routes, element_routes, treaties,
         prospects, warded, veiled, taxon, stations, hulls, notes, futures, last_clears, shares,
-        perps,
+        perps, clear_depths, market_sealed_until,
     }
 }
 

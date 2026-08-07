@@ -191,6 +191,10 @@ pub struct Committed {
     pub shares: Vec<crate::dop::MarketShare>,
     /// PERP-1 open positions.
     pub perps: Vec<crate::dop::MarketPerp>,
+    /// P5-M: honest clear depth per resource (for last-clear seal).
+    pub clear_depths: Vec<(crate::dop::Resource, u64)>,
+    /// P5-M: circuit breaker — if Some(t), books sealed until clock ≥ t.
+    pub market_sealed_until: Option<u64>,
 }
 
 /// G1 (04 §1): a civilization's sealed axes, as the world holds them.
@@ -293,6 +297,8 @@ pub struct World {
     pub(super) last_clears: Vec<(crate::dop::Resource, Ratio)>,
     pub(super) shares: Vec<crate::dop::MarketShare>,
     pub(super) perps: Vec<crate::dop::MarketPerp>,
+    pub(super) clear_depths: Vec<(crate::dop::Resource, u64)>,
+    pub(super) market_sealed_until: Option<u64>,
 }
 
 /// PLANNER-1: what a licensed leap carries — the condition and name

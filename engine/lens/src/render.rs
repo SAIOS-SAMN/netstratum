@@ -956,6 +956,44 @@ pub fn render_receipt(receipt: &Receipt) -> String {
                 ratio_str(escort_cover)
             ),
         ),
+        E::MarketSealed { resume_at } => (
+            "market_sealed",
+            format!("circuit breaker until t{resume_at}"),
+        ),
+        E::MarketResumed {} => ("market_resumed", "circuit breaker lifted".into()),
+        E::SpotClearRecorded {
+            resource,
+            price,
+            depth,
+            ..
+        } => (
+            "spot_clear",
+            format!(
+                "{:?} clear @ {} (depth {depth})",
+                resource,
+                ratio_str(price)
+            ),
+        ),
+        E::LiquidityRaidStruck {
+            orb_id,
+            fee,
+            offers_voided,
+        } => (
+            "liquidity_raid",
+            format!(
+                "raid orb {orb_id} fee {} voided {offers_voided}",
+                ratio_str(fee)
+            ),
+        ),
+        E::ClearPoisonRefused {
+            resource,
+            depth,
+            need,
+            ..
+        } => (
+            "clear_poison",
+            format!("{resource:?} mark refused depth {depth}/{need}"),
+        ),
         E::ApertureSent { deal, from_orb, resource, amount } => (
             "aperture_sent",
             format!(

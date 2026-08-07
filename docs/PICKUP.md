@@ -15,16 +15,16 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 |------|--------|
 | Wave-1 commit | **`2109bf0`** (T4–T9, REFINE-1) |
 | Wave-2 commit | **`4686399`** (E-APT, element_trade_step) |
-| Kernel | **0.28.0** (next free minor **29**) |
-| Next free tag | **135** (P5-A KIN 132–134 escort/interdiction) |
+| Kernel | **0.29.0** (next free minor **30**) |
+| Next free tag | **140** (P5-M MKT 135–139 seal/clear/raid) |
 | Stations | **10** (T4–T9 economic offices open) |
 | ZoneKind compiled | **1–10** (ShipYard = 10) |
-| Codec | **SCHEMA_V9** (notes · futures · shares · perps) |
-| Pure-NPC green | offices, refine, STAMP, fleet, **full instrument_step** |
-| Next work | **P5-B** species posture depth · P5-D CovertTamper · P1.8 · Q-O1… |
-| Docs | `30`–`36`; Phase **4 complete**; **P5-A KIN landed** |
-| Trade program | Phases **1–4 + P5-A** landed; P5-B…H open |
-| Help | `note|future|share|perp` · desk EXCH · estate — ANSI |
+| Codec | **SCHEMA_V10** (… + clear_depths · market_sealed_until) |
+| Pure-NPC green | offices, refine, STAMP, fleet, instrument_step, **market_war_step** |
+| Next work | **P5-B** species posture depth · P5-D CovertTamper · P5.37 CYBER suite · P1.8 |
+| Docs | `30`–`36`; Phase **4 complete**; **P5-A + P5-M landed** |
+| Trade program | Phases **1–4 + P5-A + P5-M** landed; P5-B…H remainder open |
+| Help | `market|suite` · `note|future|share|perp` · desk EXCH/DEFEND — ANSI |
 | Dirty / other lane | do not `git add -A` without reviewing observer/other-lane files |
 
 Older §0 counts (809 tests, 71 deeds, tag 95) are **historical**; re-measure

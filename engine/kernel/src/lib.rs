@@ -150,7 +150,11 @@ use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 /// **0.27.0 — PHASE-4 SHARE/PERP/HULL FINANCE.** Tags 125–131; SCHEMA_V9.
 ///
 /// **0.28.0 — P5-A KIN escort/interdiction.** Tags 132–134.
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 28, patch: 0 };
+///
+/// **0.29.0 — P5-M MKT market defense.** Tags 135–139 (MarketSealed/
+/// MarketResumed/SpotClearRecorded/LiquidityRaidStruck/ClearPoisonRefused);
+/// SCHEMA_V10 clear_depths + market_sealed_until trail.
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 29, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
@@ -488,6 +492,16 @@ fn stamp_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
                 });
             }
             amount.clone()
+        }
+        // P5-M: liquidity raid burns fee STAMP (typed residual).
+        ClosureEvent::LiquidityRaidStruck { fee, .. } => {
+            if *fee < ratio(0, 1) {
+                return Err(Refused::ElementNotPositive {
+                    element: [0u8; 32],
+                    amount: Box::new(fee.clone()),
+                });
+            }
+            -fee.clone()
         }
         _ => ratio(0, 1),
     };
@@ -1218,6 +1232,7 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::StampMinted { .. } | E::StampApertureSent { .. } | E::StampApertureReceived { .. }
         | E::ScrapSalvaged { .. } | E::HullMinted { .. } | E::HullAssigned { .. } | E::HullScrapped { .. } | E::OrderWorked { .. } | E::ElementSalvaged { .. }
         | E::NoteIssued { .. } | E::NoteRedeemed { .. } | E::FutureOpened { .. } | E::FutureSettled { .. } | E::LastClearMarked { .. } | E::ShareIssued { .. } | E::ShareTransferred { .. } | E::ShareDividend { .. } | E::PerpOpened { .. } | E::PerpFunded { .. } | E::PerpClosed { .. } | E::HullFinanced { .. } | E::EscortOnDuty { .. } | E::InterdictionStruck { .. } | E::ConvoyRiskMarked { .. }
+        | E::MarketSealed { .. } | E::MarketResumed { .. } | E::SpotClearRecorded { .. } | E::LiquidityRaidStruck { .. } | E::ClearPoisonRefused { .. }
         | E::GenesisSealed { .. } | E::ProspectStruck { .. } | E::LineSucceeded { .. }
         | E::TechLicensed { .. } | E::InstrumentForged { .. } | E::RouteChartered { .. }
         | E::OfferPosted { .. } | E::BondSealed { .. }
@@ -1448,7 +1463,8 @@ fn admitted_deltas(
         // Hull mint/assign/scrap move scrap ledger only (not Resource).
         E::HullMinted { .. } | E::HullAssigned { .. } | E::HullScrapped { .. } | E::OrderWorked { .. } => Vec::new(),
         E::ElementSalvaged { .. } => Vec::new(),
-        E::NoteIssued { .. } | E::NoteRedeemed { .. } | E::FutureOpened { .. } | E::FutureSettled { .. } | E::LastClearMarked { .. } | E::ShareIssued { .. } | E::ShareTransferred { .. } | E::ShareDividend { .. } | E::PerpOpened { .. } | E::PerpFunded { .. } | E::PerpClosed { .. } | E::HullFinanced { .. } | E::EscortOnDuty { .. } | E::InterdictionStruck { .. } | E::ConvoyRiskMarked { .. } => Vec::new(),
+        E::NoteIssued { .. } | E::NoteRedeemed { .. } | E::FutureOpened { .. } | E::FutureSettled { .. } | E::LastClearMarked { .. } | E::ShareIssued { .. } | E::ShareTransferred { .. } | E::ShareDividend { .. } | E::PerpOpened { .. } | E::PerpFunded { .. } | E::PerpClosed { .. } | E::HullFinanced { .. } | E::EscortOnDuty { .. } | E::InterdictionStruck { .. } | E::ConvoyRiskMarked { .. }
+        | E::MarketSealed { .. } | E::MarketResumed { .. } | E::SpotClearRecorded { .. } | E::LiquidityRaidStruck { .. } | E::ClearPoisonRefused { .. } => Vec::new(),
         // — mints (the sign lives at I4, order preserved for the
         //   landed pins) —
         E::YieldCollected { resource, amount, .. } => vec![(*resource, amount.clone())],
@@ -2128,6 +2144,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::StampMinted { .. } | E::StampApertureSent { .. } | E::StampApertureReceived { .. }
         | E::ScrapSalvaged { .. } | E::HullMinted { .. } | E::HullAssigned { .. } | E::HullScrapped { .. } | E::OrderWorked { .. } | E::ElementSalvaged { .. }
         | E::NoteIssued { .. } | E::NoteRedeemed { .. } | E::FutureOpened { .. } | E::FutureSettled { .. } | E::LastClearMarked { .. } | E::ShareIssued { .. } | E::ShareTransferred { .. } | E::ShareDividend { .. } | E::PerpOpened { .. } | E::PerpFunded { .. } | E::PerpClosed { .. } | E::HullFinanced { .. } | E::EscortOnDuty { .. } | E::InterdictionStruck { .. } | E::ConvoyRiskMarked { .. }
+        | E::MarketSealed { .. } | E::MarketResumed { .. } | E::SpotClearRecorded { .. } | E::LiquidityRaidStruck { .. } | E::ClearPoisonRefused { .. }
         // #42: a treaty is WORLD-layer. It is keyed on the pair, and
         // the pair is two worlds — not a line's identity (a pact
         // outlives whoever signed it) and not one place.
@@ -2255,6 +2272,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::StampMinted { .. } | E::StampApertureSent { .. } | E::StampApertureReceived { .. }
         | E::ScrapSalvaged { .. } | E::HullMinted { .. } | E::HullAssigned { .. } | E::HullScrapped { .. } | E::OrderWorked { .. } | E::ElementSalvaged { .. }
         | E::NoteIssued { .. } | E::NoteRedeemed { .. } | E::FutureOpened { .. } | E::FutureSettled { .. } | E::LastClearMarked { .. } | E::ShareIssued { .. } | E::ShareTransferred { .. } | E::ShareDividend { .. } | E::PerpOpened { .. } | E::PerpFunded { .. } | E::PerpClosed { .. } | E::HullFinanced { .. } | E::EscortOnDuty { .. } | E::InterdictionStruck { .. } | E::ConvoyRiskMarked { .. }
+        | E::MarketSealed { .. } | E::MarketResumed { .. } | E::SpotClearRecorded { .. } | E::LiquidityRaidStruck { .. } | E::ClearPoisonRefused { .. }
         // U1: the discovery mint settles banked value against verified
         // work — Collect, like the yield it banks beside. Ratified by
         // the U1 witnesses as it enters covered().

@@ -16,6 +16,7 @@ pub enum DefenseDomain {
     Cyb = 4,
     Inf = 5,
     Kin = 6,
+    Mkt = 7,
 }
 
 impl DefenseDomain {
@@ -27,6 +28,7 @@ impl DefenseDomain {
             DefenseDomain::Cyb => "CYB",
             DefenseDomain::Inf => "INF",
             DefenseDomain::Kin => "KIN",
+            DefenseDomain::Mkt => "MKT",
         }
     }
 
@@ -38,6 +40,7 @@ impl DefenseDomain {
             DefenseDomain::Cyb => "instrument + mesh",
             DefenseDomain::Inf => "OPSEC / veil",
             DefenseDomain::Kin => "hulls / convoy",
+            DefenseDomain::Mkt => "books / clears / STAMP",
         }
     }
 }
@@ -65,8 +68,8 @@ impl RiskBand {
 pub struct DefensePosture {
     pub primary: DefenseDomain,
     pub secondary: DefenseDomain,
-    /// Rank 1..=3 per domain order CEL,ATM,COG,CYB,INF,KIN.
-    pub ranks: [u8; 6],
+    /// Rank 1..=3 per domain order CEL,ATM,COG,CYB,INF,KIN,MKT.
+    pub ranks: [u8; 7],
     pub metabolism: u8,
     pub disposition: u8,
     pub perception: u8,
@@ -81,37 +84,37 @@ impl World {
             .as_ref()
             .map(|g| (g.metabolism, g.disposition, g.perception))
             .unwrap_or((1, 1, 1));
-        // ranks: CEL ATM COG CYB INF KIN — 3 = emphasis
+        // ranks: CEL ATM COG CYB INF KIN MKT — 3 = emphasis
         let (primary, secondary, ranks, voice) = match met {
-            // mineral — kinetic + somatic
+            // mineral — kinetic + somatic + industrial books
             1 => (
                 DefenseDomain::Kin,
-                DefenseDomain::Cel,
-                [3u8, 2, 1, 2, 1, 3],
-                "mineral lattice — convoy & shell",
+                DefenseDomain::Mkt,
+                [3u8, 2, 1, 2, 1, 3, 3],
+                "mineral lattice — convoy, shell & industrial books",
             ),
-            // biotic — medium + somatic
+            // biotic — medium + somatic + ration books
             2 => (
                 DefenseDomain::Atm,
-                DefenseDomain::Cel,
-                [3, 3, 2, 1, 2, 2],
-                "biotic organ — medium & membrane",
+                DefenseDomain::Mkt,
+                [3, 3, 2, 1, 2, 2, 2],
+                "biotic organ — medium, membrane & ration books",
             ),
-            // plasmic — medium + cognitive/field
+            // plasmic — medium + cognitive + phase-timed books
             3 => (
                 DefenseDomain::Atm,
                 DefenseDomain::Cog,
-                [1, 3, 3, 2, 2, 1],
-                "plasmic sheet — field cage & pattern",
+                [1, 3, 3, 2, 2, 1, 3],
+                "plasmic sheet — field, pattern & clear windows",
             ),
             _ => (
                 DefenseDomain::Kin,
                 DefenseDomain::Cel,
-                [2, 2, 2, 2, 2, 2],
+                [2, 2, 2, 2, 2, 2, 2],
                 "unsealed — balanced stub",
             ),
         };
-        // Disposition colour: expansionist boosts KIN; empiricist CYB/COG; epicurean ATM/CEL.
+        // Disposition: expansionist KIN; empiricist CYB/COG; epicurean CEL/ATM/MKT.
         let mut ranks = ranks;
         match dis {
             1 => {
@@ -124,6 +127,7 @@ impl World {
             3 => {
                 ranks[0] = ranks[0].saturating_add(1).min(3); // CEL
                 ranks[1] = ranks[1].saturating_add(1).min(3); // ATM
+                ranks[6] = ranks[6].saturating_add(1).min(3); // MKT
             }
             _ => {}
         }

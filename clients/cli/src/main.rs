@@ -2458,10 +2458,11 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 other
             ),
         },
-        // P5-A DEFEND / escort
+        // P5-A DEFEND / escort · P5-M MKT integrity
         Some("defend") | Some("defence") => match words.next() {
             None | Some("status") | Some("help") => {
                 let p = world.defense_posture();
+                let mi = world.market_integrity();
                 println!(
                     "{} DEFEND — primary {} · secondary {} · {}",
                     style.head("🛡"),
@@ -2470,12 +2471,32 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     style.dim(p.voice)
                 );
                 println!(
-                    "  ranks CEL:{} ATM:{} COG:{} CYB:{} INF:{} KIN:{}",
-                    p.ranks[0], p.ranks[1], p.ranks[2], p.ranks[3], p.ranks[4], p.ranks[5]
+                    "  ranks CEL:{} ATM:{} COG:{} CYB:{} INF:{} KIN:{} MKT:{}",
+                    p.ranks[0],
+                    p.ranks[1],
+                    p.ranks[2],
+                    p.ranks[3],
+                    p.ranks[4],
+                    p.ranks[5],
+                    p.ranks[6]
                 );
+                if mi.sealed {
+                    println!(
+                        "  {} circuit open until t{}",
+                        style.warn("MKT SEALED"),
+                        mi.resume_at.unwrap_or(0)
+                    );
+                } else {
+                    println!(
+                        "  MKT clear depth crystal {}/{} iron {}/{}",
+                        mi.crystal_depth, mi.seal_need, mi.iron_depth, mi.seal_need
+                    );
+                }
                 println!(
                     "  {}",
-                    style.hint("defend escort <hull> <deal> · defend risk <deal> · desk [d]")
+                    style.hint(
+                        "defend escort|risk · market seal|resume|clear|raid · suite market|convoy"
+                    )
                 );
             }
             Some("escort") => {
@@ -2521,6 +2542,166 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 "{} defend {:?} — status|escort|risk",
                 style.bad("✗"),
                 other
+            ),
+        },
+        // P5-M market defense deeds (clear seal · breaker · raid)
+        Some("market") => match words.next() {
+            None | Some("status") | Some("help") => {
+                let mi = world.market_integrity();
+                println!(
+                    "{} MARKET — sealed={} resume={:?} · crystal_depth={}/{} iron_depth={}/{}",
+                    style.head("MKT"),
+                    mi.sealed,
+                    mi.resume_at,
+                    mi.crystal_depth,
+                    mi.seal_need,
+                    mi.iron_depth,
+                    mi.seal_need
+                );
+                println!(
+                    "  books note={} fut={} share={} perp={}",
+                    mi.notes_open, mi.futures_open, mi.shares_open, mi.perps_open
+                );
+                println!(
+                    "  {}",
+                    style.hint(
+                        "market seal|resume · market clear <crystal|iron> <p>/<q> · market raid [orb]"
+                    )
+                );
+            }
+            Some("seal") => match world.seal_market() {
+                Ok(at) => {
+                    let _ = sync_world(world);
+                    println!("{} circuit breaker until t{at}", style.warn("MKT SEALED"));
+                }
+                Err(refusal) => refuse(world, &refusal, style),
+            },
+            Some("resume") => match world.resume_market() {
+                Ok(()) => {
+                    let _ = sync_world(world);
+                    println!("{} circuit breaker lifted", style.ok("MKT OPEN"));
+                }
+                Err(refusal) => refuse(world, &refusal, style),
+            },
+            Some("clear") => {
+                let res = words.next().and_then(parse_resource);
+                let price = words
+                    .next()
+                    .and_then(parse_ratio_arg)
+                    .and_then(cfe::dop::Positive::new);
+                match (res, price) {
+                    (Some(resource), Some(p)) => {
+                        match world.record_spot_clear(*current, resource, p) {
+                            Ok(depth) => {
+                                let _ = sync_world(world);
+                                println!(
+                                    "{} {:?} clear depth {depth}/{}",
+                                    style.ok("✓"),
+                                    resource,
+                                    cfe::world::CLEAR_SEAL_DEPTH
+                                );
+                            }
+                            Err(refusal) => refuse(world, &refusal, style),
+                        }
+                    }
+                    _ => println!(
+                        "{} usage: {}",
+                        style.bad("✗"),
+                        style.strong("market clear <crystal|iron|…> <p>/<q>")
+                    ),
+                }
+            }
+            Some("raid") => {
+                let orb = words
+                    .next()
+                    .and_then(|w| w.parse().ok())
+                    .unwrap_or(*current);
+                match world.liquidity_raid(orb) {
+                    Ok(()) => {
+                        let _ = sync_world(world);
+                        println!("{} liquidity raid struck orb {orb}", style.warn("RAID"));
+                    }
+                    Err(refusal) => refuse(world, &refusal, style),
+                }
+            }
+            Some(other) => println!(
+                "{} market {:?} — status|seal|resume|clear|raid",
+                style.bad("✗"),
+                other
+            ),
+        },
+        // Suite shells — UI over deeds (36 §10), not a second physics.
+        Some("suite") => match words.next() {
+            Some("market") | Some("mkt") | Some("war") => {
+                let mi = world.market_integrity();
+                let p = world.defense_posture();
+                println!(
+                    "{} MARKET WAR suite — MKT rank {} · sealed={}",
+                    style.head("SUITE"),
+                    p.ranks[6],
+                    mi.sealed
+                );
+                println!(
+                    "  clear seal crystal {}/{} iron {}/{} · resume={:?}",
+                    mi.crystal_depth, mi.seal_need, mi.iron_depth, mi.seal_need, mi.resume_at
+                );
+                println!(
+                    "  instruments note={} fut={} share={} perp={}",
+                    mi.notes_open, mi.futures_open, mi.shares_open, mi.perps_open
+                );
+                let offers = world.offers().len();
+                println!("  resting offers {offers}");
+                println!(
+                    "  {}",
+                    style.hint("same deeds: market seal|clear|raid · note|future|share|perp")
+                );
+            }
+            Some("convoy") | Some("kin") => {
+                let p = world.defense_posture();
+                println!(
+                    "{} CONVOY suite — KIN rank {} · primary {}",
+                    style.head("SUITE"),
+                    p.ranks[5],
+                    p.primary.word()
+                );
+                let escorts: Vec<_> = world
+                    .hulls()
+                    .iter()
+                    .filter(|h| {
+                        h.assigned_route != 0
+                            && cfe::dop::HullRole::from_wire(h.role)
+                                == Some(cfe::dop::HullRole::Escort)
+                    })
+                    .collect();
+                if escorts.is_empty() {
+                    println!("  (no escorts on duty)");
+                } else {
+                    for h in escorts.iter().take(8) {
+                        let band = world.convoy_risk_band(h.assigned_route);
+                        println!(
+                            "  hull {} → deal {} · risk {} · {}",
+                            h.hull_id,
+                            h.assigned_route,
+                            amount(&world.convoy_risk(h.assigned_route)),
+                            band.word()
+                        );
+                    }
+                }
+                println!(
+                    "  {}",
+                    style.hint("defend escort <hull> <deal> · defend risk <deal>")
+                );
+            }
+            Some("cyber") | Some("cyb") => {
+                println!(
+                    "{} CYBER suite — stub until P5-E instrument/mesh guards land",
+                    style.head("SUITE")
+                );
+                println!("  {}", style.dim("dashboard over CYB deeds; no second ledger"));
+            }
+            _ => println!(
+                "{} suite market|convoy|cyber — dashboards over the same deeds (36 §10)",
+                style.bad("✗")
             ),
         },
         // PHASE-4 instruments (NOTE-1 / FUT-1).
@@ -6155,6 +6336,19 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
         ActionRefused::EscortRoleRequired { hull_id } => {
             format!("hull {hull_id} is not an escort — `fleet mint escort`")
         }
+        ActionRefused::MarketCircuitOpen { resume_at } => {
+            format!(
+                "market circuit open until t{resume_at} — `market resume` lifts the breaker"
+            )
+        }
+        ActionRefused::ClearSealUnmet {
+            resource,
+            depth,
+            need,
+        } => format!(
+            "{resource:?} last-clear seal unmet ({depth}/{need} honest clears) — `market clear {:?} <p>/<q>`",
+            resource
+        ),
         ActionRefused::BalanceEntropyDominates {
             balance,
             syntropy,
@@ -7491,6 +7685,43 @@ fn chronicle(world: &World, style: &Style) {
                 deal,
                 amount(risk),
                 amount(escort_cover)
+            ),
+            cfe::dop::ClosureEvent::MarketSealed { resume_at } => format!(
+                "📉 market sealed — circuit open until t{}",
+                style.warn(&resume_at.to_string())
+            ),
+            cfe::dop::ClosureEvent::MarketResumed {} => {
+                "📈 market resumed — circuit breaker lifted".into()
+            }
+            cfe::dop::ClosureEvent::SpotClearRecorded {
+                resource,
+                price,
+                depth,
+                ..
+            } => format!(
+                "✓ {:?} spot clear @ {} (depth {})",
+                resource,
+                amount(price),
+                depth
+            ),
+            cfe::dop::ClosureEvent::LiquidityRaidStruck {
+                orb_id,
+                fee,
+                offers_voided,
+            } => format!(
+                "⚔ liquidity raid orb {} fee {} voided {}",
+                orb_id,
+                style.bad(&amount(fee)),
+                offers_voided
+            ),
+            cfe::dop::ClosureEvent::ClearPoisonRefused {
+                resource,
+                depth,
+                need,
+                ..
+            } => format!(
+                "⊘ {:?} last-clear poison refused ({}/{})",
+                resource, depth, need
             ),
             cfe::dop::ClosureEvent::AssayStruck { amount: drawn, richness, .. } => format!(
                 "⚖ {} drawn from the opened vein — one receipt, the whole span{}",

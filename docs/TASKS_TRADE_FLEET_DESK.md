@@ -225,14 +225,14 @@ not a second physics. NPC must war without opening a suite.
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
 | P5.30 | [x] Design: MKT domain + suite architecture (`36` §10) | P4 land, P5.0 | this row |
-| P5.31 | [ ] MKT rank on `defense_posture` + EXCH integrity flags | P5.30, P5.3 | reading |
-| P5.32 | [ ] Clear seal: LastClear requires N real clears (Q-S4) | P5.31, P4.2 | pin |
-| P5.33 | [ ] Circuit breaker deed `MarketSealed` / resume | P5.31 | pins |
-| P5.34 | [ ] Typed offenses: liquidity raid / clear poison (refuse+residual) | P5.32–P5.33 | pins |
-| P5.35 | [ ] CONVOY suite shell (dashboard over P5-A risk) | P5.1–P5.3 | optional UI |
-| P5.36 | [ ] MARKET WAR suite shell (breaker, clears, open instruments) | P5.33–P5.34 | optional UI |
+| P5.31 | [x] MKT rank on `defense_posture` + EXCH integrity flags | P5.30, P5.3 | reading |
+| P5.32 | [x] Clear seal: LastClear requires N real clears (Q-S4) | P5.31, P4.2 | pin |
+| P5.33 | [x] Circuit breaker deed `MarketSealed` / resume | P5.31 | pins |
+| P5.34 | [x] Typed offenses: liquidity raid / clear poison (refuse+residual) | P5.32–P5.33 | pins |
+| P5.35 | [x] CONVOY suite shell (dashboard over P5-A risk) | P5.1–P5.3 | optional UI |
+| P5.36 | [x] MARKET WAR suite shell (breaker, clears, open instruments) | P5.33–P5.34 | optional UI |
 | P5.37 | [ ] CYBER suite shell (instrument + mesh guards) | P5.21–P5.22 | optional UI |
-| P5.38 | [ ] NPC `market_war_step` (disposition-routed) | P5.34 | pure NPC |
+| P5.38 | [x] NPC `market_war_step` (disposition-routed) | P5.34 | pure NPC |
 | P5.39 | [ ] Species-relative MKT residual copy (mineral/biotic/plasmic) | P5.11, P5.31 | |
 
 ### P5-F — Espionage suite

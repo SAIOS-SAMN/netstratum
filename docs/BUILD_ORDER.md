@@ -1034,5 +1034,12 @@ kernel **0.28.0**; `defense_pins`. See `36_DEFENSE_AXIOMS.md`.
 (economic warfare); suites (CYBER, MARKET WAR, CONVOY, …) are dashboards
 over the same deeds, never a second physics. Board wave **P5-M**.
 
-**Next:** P5-B posture (+MKT rank) · P5-M clear seal/breaker · P5-D CovertTamper · P1.8.
+**P5-M LANDED (MKT clear seal / breaker / raid / suites):** tags **135–139**
+MarketSealed, MarketResumed, SpotClearRecorded, LiquidityRaidStruck,
+ClearPoisonRefused; `CLEAR_SEAL_DEPTH=8`; circuit breaker `BREAKER_TICKS=60`;
+SCHEMA_V10; kernel **0.29.0**; `market_war_step` disposition-routed; CLI
+`market` / `suite market|convoy`; EXCH integrity flags; `defense_pins` MKT.
+See `36_DEFENSE_AXIOMS.md` §10.
+
+**Next:** P5-B species posture depth · P5-D CovertTamper · P5.37 CYBER suite · P1.8.
 

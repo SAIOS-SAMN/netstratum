@@ -465,11 +465,13 @@ UI home: desk panes **DEFEND** + **EXCH** + optional `suite <name>` full-screen
 
 ### 10.5 Implementation order for MKT + suites
 
-1. **Readings** — MKT rank on `defense_posture`; EXCH shows integrity flags.  
-2. **Passive defense** — clear seal (N clears), circuit breaker deed.  
-3. **Active offense (typed)** — LiquidityRaid / ClearPoison attempts with refuse+residual.  
-4. **Suite shells** — dashboards over (1)–(3); CONVOY suite can land first (P5-A already has risk).  
-5. **NPC `market_war_step`** — disposition-routed.
+1. **Readings** — MKT rank on `defense_posture`; EXCH shows integrity flags. **LANDED.**  
+2. **Passive defense** — clear seal (N clears), circuit breaker deed. **LANDED** (tags 135–137).  
+3. **Active offense (typed)** — LiquidityRaid / ClearPoison attempts with refuse+residual. **LANDED** (tags 138–139).  
+4. **Suite shells** — dashboards over (1)–(3); CONVOY + MARKET WAR shells **LANDED**; CYBER deferred to P5-E.  
+5. **NPC `market_war_step`** — disposition-routed. **LANDED.**
+
+**Land commit:** kernel **0.29.0**, SCHEMA_V10, next free tag **140**.
 
 ---
 

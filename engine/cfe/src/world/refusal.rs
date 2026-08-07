@@ -115,6 +115,10 @@ pub enum ActionRefused {
     PerpMarginBreach { perp_id: u64 },
     /// P5-A — hull is not an Escort role.
     EscortRoleRequired { hull_id: u64 },
+    /// P5-M — circuit breaker holds instrument books.
+    MarketCircuitOpen { resume_at: u64 },
+    /// P5-M — last-clear needs honest clear depth (seal).
+    ClearSealUnmet { resource: Resource, depth: u64, need: u64 },
     /// ELEMENT-CHEMISTRY (#37) — this system does not carry the
     /// element's LINE: deep matter simply does not occur under a
     /// shallow star. A fact of the sky, at the verb forever.

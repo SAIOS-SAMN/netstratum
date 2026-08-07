@@ -79,6 +79,9 @@ pub const SCHEMA_V8: u8 = 8;
 /// **SCHEMA v9 — shares + perps trail.**
 pub const SCHEMA_V9: u8 = 9;
 
+/// **SCHEMA v10 — P5-M clear depths + circuit breaker.**
+pub const SCHEMA_V10: u8 = 10;
+
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
 }
@@ -99,7 +102,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V9];
+    let mut out = vec![SCHEMA_V10];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -378,6 +381,19 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         ratio::encode(&p.margin, &mut out);
         out.push(u8::from(p.open));
     }
+    // SCHEMA v10 — clear seal depths + circuit breaker clock.
+    put_u32(&mut out, committed.clear_depths.len() as u32);
+    for (r, d) in &committed.clear_depths {
+        out.push(*r as u8);
+        put_u64(&mut out, *d);
+    }
+    match committed.market_sealed_until {
+        None => out.push(0),
+        Some(t) => {
+            out.push(1);
+            put_u64(&mut out, t);
+        }
+    }
     out
 }
 
@@ -456,6 +472,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         && schema != SCHEMA_V7
         && schema != SCHEMA_V8
         && schema != SCHEMA_V9
+        && schema != SCHEMA_V10
     {
         return None;
     }
@@ -836,6 +853,21 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         }
     }
 
+    let mut clear_depths = Vec::new();
+    let mut market_sealed_until = None;
+    if schema >= SCHEMA_V10 {
+        for _ in 0..take.u32()? {
+            let resource = cfe::dop::Resource::from_wire(take.u8()?)?;
+            let depth = take.u64()?;
+            clear_depths.push((resource, depth));
+        }
+        match take.u8()? {
+            0 => market_sealed_until = None,
+            1 => market_sealed_until = Some(take.u64()?),
+            _ => return None,
+        }
+    }
+
     if !take.done() {
         return None;
     }
@@ -871,5 +903,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         last_clears,
         shares,
         perps,
+        clear_depths,
+        market_sealed_until,
     })
 }

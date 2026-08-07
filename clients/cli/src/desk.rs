@@ -402,6 +402,19 @@ fn render_pane(style: Style, home: &World, pane: Pane, orb_id: u64) -> Vec<Strin
 }
 
 fn render_exch(style: Style, home: &World) -> Vec<String> {
+    let mi = home.market_integrity();
+    let seal_line = if mi.sealed {
+        format!(
+            "  {} until t{}",
+            style.warn("CIRCUIT OPEN"),
+            mi.resume_at.unwrap_or(0)
+        )
+    } else {
+        format!(
+            "  clear seal crystal {}/{} iron {}/{}",
+            mi.crystal_depth, mi.seal_need, mi.iron_depth, mi.seal_need
+        )
+    };
     let mut lines = vec![
         format!(
             "  {} {}  books: note={} fut={} share={} perp={}  exch={}",
@@ -412,16 +425,17 @@ fn render_exch(style: Style, home: &World) -> Vec<String> {
                     .map(|o| ratio_str(&o.stamp_amount()))
                     .unwrap_or_else(|| "0/1".into())
             ),
-            yn(home.notes_listable()),
-            yn(home.futures_listable()),
-            yn(home.shares_listable()),
-            yn(home.perps_listable()),
+            yn(mi.notes_open),
+            yn(mi.futures_open),
+            yn(mi.shares_open),
+            yn(mi.perps_open),
             yn(home.exchange_seated()),
         ),
+        seal_line,
         format!(
             "  {}",
             style.hint(
-                "note · future · share · perp · fleet mint (financed when STAMP allows)"
+                "note · future · share · perp · market seal|clear|raid · suite market"
             )
         ),
     ];
@@ -524,6 +538,7 @@ fn render_defend(style: Style, home: &World) -> Vec<String> {
         DefenseDomain::Cyb,
         DefenseDomain::Inf,
         DefenseDomain::Kin,
+        DefenseDomain::Mkt,
     ];
     let rank_line: String = domains
         .iter()
@@ -532,9 +547,24 @@ fn render_defend(style: Style, home: &World) -> Vec<String> {
         .collect::<Vec<_>>()
         .join(" ");
     lines.push(format!("  ranks {}", style.value(&rank_line)));
+    let mi = home.market_integrity();
+    if mi.sealed {
+        lines.push(format!(
+            "  {} until t{}",
+            style.warn("MKT CIRCUIT"),
+            mi.resume_at.unwrap_or(0)
+        ));
+    } else {
+        lines.push(format!(
+            "  MKT depth crystal {}/{} iron {}/{}",
+            mi.crystal_depth, mi.seal_need, mi.iron_depth, mi.seal_need
+        ));
+    }
     lines.push(format!(
         "  {}",
-        style.hint("escort assign <hull> <deal> · defend risk <deal> · fleet mint escort")
+        style.hint(
+            "escort · risk · market seal|clear|raid · suite market|convoy · fleet mint escort"
+        )
     ));
     // Escorts on duty
     let escorts: Vec<_> = home
