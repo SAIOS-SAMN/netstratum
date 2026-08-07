@@ -168,6 +168,21 @@ pub enum WorkBroken {
     /// (P3). Until it does, a corpus mint refuses as UNPRICED — never
     /// as broken; the proof itself verified whole.
     CarrierUnpriced,
+    /// **THE RESOLUTION PATH IS ABSENT** (operator directive
+    /// 2026-08-07: *verify-time search is PROHIBITED; require mint
+    /// requests to provide the complete resolution path as proof,
+    /// validate it in time linear in the path, and reject ungranted
+    /// where the path is absent*).
+    ///
+    /// A claim with no program states no resolution — there is nothing
+    /// to re-apply, and establishing one would mean SEARCHING at the
+    /// gate, which is exactly what the directive forbids. The claimant
+    /// carries the path or the claim does not stand.
+    ///
+    /// Refused rather than silently admitted: an empty program is the
+    /// identity, so a task whose pairs happen to be identity would
+    /// otherwise verify having proven nothing.
+    PathAbsent,
 }
 
 fn mirror_code(m: TileMirror) -> u8 {
@@ -674,6 +689,14 @@ pub fn verify_work_class(bytes: &[u8]) -> Result<WorkClass, WorkBroken> {
 /// bought, and it is now one more reason there is no such rate.
 pub fn verify_corpus_work(bytes: &[u8]) -> Result<WorkClass, WorkBroken> {
     let proof = decode_corpus_work(bytes).ok_or(WorkBroken::Malformed)?;
+    // 0. THE PATH IS CARRIED, OR THERE IS NO CLAIM (operator directive
+    //    2026-08-07). Everything below RE-APPLIES what the claimant
+    //    supplied and is linear in the path's length; nothing here
+    //    searches for a path, because a gate that searches prices
+    //    admission at the cost of a search.
+    if proof.program.is_empty() {
+        return Err(WorkBroken::PathAbsent);
+    }
     // 1. Re-hash: identity is content, so recompute it from content.
     if crate::corpus::task_digest(&proof.train, &proof.test_in) != proof.task_id {
         return Err(WorkBroken::TaskIdMismatch);
@@ -717,6 +740,14 @@ pub fn verify_work(bytes: &[u8]) -> Result<Difficulty, WorkBroken> {
         return Err(WorkBroken::UnsupportedShape);
     }
     let proof = decode_work(bytes).ok_or(WorkBroken::Malformed)?;
+    // 0. THE PATH IS CARRIED, OR THERE IS NO CLAIM (operator directive
+    //    2026-08-07). The forge carrier mints too, so the law is the
+    //    same law: a claim states its resolution, and the gate
+    //    re-applies it in time linear in the path. Nothing here
+    //    searches.
+    if proof.program.is_empty() {
+        return Err(WorkBroken::PathAbsent);
+    }
     // 1. Re-forge: the task IS its digest under this difficulty.
     let task = forge_task(proof.forge_digest, proof.difficulty);
     // 2. Re-apply: every training pair exactly, or the solve is none.

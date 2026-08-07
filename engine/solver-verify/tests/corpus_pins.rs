@@ -266,3 +266,72 @@ fn a_tampered_corpus_chain_names_its_break() {
         Err(WorkBroken::ChainDiverged { .. })
     ));
 }
+
+/// **THE RESOLUTION PATH IS CARRIED, OR THERE IS NO CLAIM** (operator
+/// directive 2026-08-07: *verify-time search is PROHIBITED; require the
+/// complete resolution path as proof, validate it in time linear in the
+/// path, and reject ungranted where the path is absent*).
+///
+/// The pin that matters is the SILENT one it closes: the empty program
+/// is the identity, so a task whose pairs happen to be identity would
+/// verify with no work shown at all — a mint for having claimed
+/// something. The gate refuses the empty path outright rather than
+/// letting the task's own shape decide whether nothing counts.
+#[test]
+fn a_claim_with_no_resolution_path_is_refused_ungranted() {
+    // A task the IDENTITY maps: every pair's output is its input.
+    let identity_task = {
+        let pair = |cells: [u8; 4]| {
+            let grid = grid(2, 2, &cells);
+            TaskPair { input: grid.clone(), output: grid }
+        };
+        Task {
+            name: "mirror".into(),
+            train: vec![pair([1, 2, 3, 4]), pair([5, 6, 7, 8])],
+            test_in: grid(2, 2, &[9, 9, 9, 9]),
+            test_expected: None,
+        }
+    };
+    // The empty path re-applies to every pair EXACTLY — nothing is
+    // wrong with it except that it proves nothing.
+    for held in &identity_task.train {
+        assert_eq!(run(&Vec::new(), &held.input), held.output);
+    }
+    let hollow = proof_for(&identity_task, Vec::new());
+    let bytes = encode_corpus_work(&hollow).expect("it encodes — it is well formed");
+    assert_eq!(
+        verify_corpus_work(&bytes),
+        Err(WorkBroken::PathAbsent),
+        "no path, no claim — the gate never searches for one"
+    );
+
+    // And a task the identity does NOT map refuses the same way, on
+    // the path rather than on the miss: the absence is judged first,
+    // so the reason a claimant is turned away never depends on which
+    // task they picked.
+    let turning = {
+        let make = |cells: [u8; 4]| {
+            let input = grid(2, 2, &cells);
+            let output = run(&vec![Op::Rotate90], &input);
+            TaskPair { input, output }
+        };
+        Task {
+            name: "turning".into(),
+            train: vec![make([1, 2, 3, 4]), make([5, 6, 7, 8])],
+            test_in: grid(2, 2, &[9, 0, 1, 2]),
+            test_expected: None,
+        }
+    };
+    let hollow = proof_for(&turning, Vec::new());
+    let bytes = encode_corpus_work(&hollow).expect("encodes");
+    assert_eq!(verify_corpus_work(&bytes), Err(WorkBroken::PathAbsent));
+
+    // A CARRIED path still verifies — the law refuses absence, not
+    // work.
+    let honest = proof_for(&turning, vec![Op::Rotate90]);
+    let bytes = encode_corpus_work(&honest).expect("encodes");
+    assert_eq!(
+        verify_corpus_work(&bytes),
+        Ok(WorkClass::Corpus { task_id: honest.task_id })
+    );
+}

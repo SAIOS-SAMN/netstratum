@@ -30,21 +30,40 @@
 //! the mirror for. And it cannot move at mesh speed: every node must
 //! carry the same root, and changing it is a kernel VERSION amendment.
 //!
-//! ## What replaces it: a PREDICATE, not a list
+//! ## What replaces it: THE CARRIED PATH
 //!
-//! Admission becomes re-checkable rather than looked up — a claim is
-//! admissible when the BASE vocabulary provably FAILS the task at depth
-//! `d` and the candidate closes it. Both halves replay under machinery
-//! `verify_work` already has: re-run the base search, re-run the
-//! candidate. No root, no constant, no authority, and it moves as fast
-//! as the mesh does. The shape is the nursery vocabulary-minting gate.
+//! **Operator rulings 2026-08-07, and they settle both halves.**
 //!
-//! Until that lands, corpus work has NO admission test — which is
-//! lawful, because it also has no rate, and THE MOTION's clause 4 says
-//! imported content is a BENCHMARK and never a mint source: the ARC
-//! corpus carries no seed, can be authored, and its held-out answer is
-//! not checkable by the gate. Measuring against it stays useful;
-//! minting from it was never the plan this ruling took away.
+//! **1. The Carrier Switch SUPERSEDES THE MOTION clause 4.** Imported
+//! content IS a mint source. Clause 4 held that the ARC corpus was a
+//! benchmark and never a mint source, and this module justified having
+//! no admission test on the grounds that corpus work *"also has no
+//! rate"*. That premise expired the day it gained one: kernel 0.14.0
+//! prices corpus work from the measured carrier table, and a solve
+//! mints at `W(τ) = scarcity × complexity`. The clause and the
+//! justification are struck; what stood on them is gone with them.
+//!
+//! **2. Verify-time search is PROHIBITED.** The predicate drafted here
+//! — *the base vocabulary provably fails at depth `d` and the candidate
+//! closes it* — is struck for its FIRST half. Re-running a base search
+//! at the gate prices admission at the cost of a search, and
+//! `verify_work` is called on every judged mint.
+//!
+//! So admission is neither a list nor a search. **The claimant carries
+//! the complete resolution path, and the gate re-applies it.** Every
+//! check in `verify_corpus_work` is linear in the path's own length:
+//! re-hash the task, re-apply the program to each pair, re-run it on
+//! the test input, re-chain the certificate. Nothing is looked up and
+//! nothing is discovered. A claim carrying no path is refused
+//! `PathAbsent` — refused rather than admitted, because the empty
+//! program is the identity and would otherwise verify a task whose
+//! pairs happen to be identity while proving nothing.
+//!
+//! What this costs, stated plainly: the gate confirms that a claimed
+//! resolution HOLDS, never that it was hard to find. Difficulty is
+//! priced by the measured carrier table instead — which is what
+//! measurement is for, and is why the rate had to land before the
+//! admission question could be answered this way.
 
 use crate::grid::Grid;
 use crate::loader::TaskPair;
