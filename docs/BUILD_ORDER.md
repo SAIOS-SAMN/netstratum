@@ -1030,5 +1030,9 @@ InterdictionStruck, ConvoyRiskMarked; `defense_posture` stubs; convoy risk =
 (1/8)×(1−escort_cover); haul residual typed; DEFEND desk + `defend` CLI;
 kernel **0.28.0**; `defense_pins`. See `36_DEFENSE_AXIOMS.md`.
 
-**Next:** P5-B posture depth · P5-D CovertTamper · P1.8 · Q-O1 ψ.
+**Market defense / suites (design 2026-08-08):** `36` §10 — **MKT** domain
+(economic warfare); suites (CYBER, MARKET WAR, CONVOY, …) are dashboards
+over the same deeds, never a second physics. Board wave **P5-M**.
+
+**Next:** P5-B posture (+MKT rank) · P5-M clear seal/breaker · P5-D CovertTamper · P1.8.
 

@@ -276,7 +276,7 @@ Note at Phase 4 land (Q-S3).
 | `f` | FLEET | Hulls, scrap, yard, buy/sell/commission |
 | `x` | EXCH | **Local** books only (archetype-filtered) |
 | `g` | GROW | Existing colony loop surface |
-| `d` | DEFEND | Convoy + domain posture + veil/ward + espionage (`36`) |
+| `d` | DEFEND | Convoy + domains (CEL…MKT) + veil/ward + espionage + suite entry (`36`) |
 | `e` | EXPLORE | Scan/prospect — feeds cargo identity |
 
 ### 6.3 Route optimize panel

@@ -319,6 +319,10 @@ Recorded from `36_DEFENSE_AXIOMS.md`. Not law until ruled and landed.
 | **Q-D6** | Elder as combat? | Keep WARDEN puzzle-only (no combat) |
 | **Q-D7** | Digital vs cyber split in wire? | One CYB domain, two sub-channels |
 | **Q-D8** | Clade as mechanic or voice? | Voice + residual priority only (15_TAXON law) |
+| **Q-D9** | MKT as 7th domain vs CYB sub-channel? | **Ruled:** first-class **MKT** domain (`36` §1.3, §10) |
+| **Q-D10** | Mini-games separate currency? | **Ruled:** suites only; no shadow score (`36` §10.3–10.4) |
+| **Q-D11** | N for clear seal before mark? | Compose Q-S4 (default 8) at P5.32 land |
+| **Q-D12** | Circuit breaker duration? | Year-voice (60) or until explicit resume — *open* |
 
 Authority: `36_DEFENSE_AXIOMS.md`. Board: `TASKS_TRADE_FLEET_DESK` P5.*
 

@@ -1,6 +1,7 @@
 # 36 — DEFENSE AXIOMS · SPECIES-RELATIVE SECURITY · COVERT TERRAFORM · ESPIONAGE
 
-**Status:** DESIGN LOCK + **P5-A KIN partial land** (tags 132–134, 2026-08-08).  
+**Status:** DESIGN LOCK + **P5-A KIN partial land** (tags 132–134) +
+**market-defense / suite architecture** (this amendment, 2026-08-08).  
 **Remaining waves** land red-first; claim tags at each wave only.  
 **Authority:** `00_CHARTER`, `04_CIVILIZATION_GENESIS`, `05_THERMAL_BALANCE`,
 `06_CIVILIZATIONS`, `10_TECH_EMERGENCE` (TERRA-1, WARDEN-1, MASK-1, MANU-1),
@@ -88,14 +89,20 @@ refuse and receipt.
 | **Cellular / somatic** | `CEL` | Body integrity, biomass/mineral lattice coherence | Armor, immune, hull plating | Tardigrade cryptobiosis; lithic fracture toughness; fungal mycelial redundancy |
 | **Atmospheric / medium** | `ATM` | Habitable medium around the entity (gas, plasma, ice, rock fluid) | Atmosphere, life support | Plasmic current-sheet “atmosphere” = local B-field + density; cryo sublimation shell; mantle melt pocket |
 | **Neural / cognitive** | `COG` | Decision integrity, want-maps, solve capacity | Psyops, morale, mind | Umbral occlusion of intent; harmonic jamming of perception frame; empiricist proof-poisoning |
-| **Cyber / digital** | `CYB` | Instrument, ledger interface, licensed tech stack | Hacking, C2, spoofing | Instrument grade corruption; aperture deal forgery attempts (refused typed); stamp-book spoof |
+| **Cyber / digital** | `CYB` | Instrument, ledger interface, licensed tech stack | Hacking, C2, spoofing | Instrument grade corruption; aperture deal forgery attempts (refused typed) |
+| **Market / book** | `MKT` | Capacity to **clear, hold, and price** STAMP & instruments without coercion | Economic warfare, dump attacks, liquidity assassination | Note/Future/Share/Perp integrity; last-clear poison; Exchange listing denial |
 | **Informational / veil** | `INF` | What others may *lawfully read* about you | SIGINT, OPSEC | MASK-1 veil, registry cloud, false assay surface |
 | **Kinetic / logistics** | `KIN` | Hulls, escorts, interdiction of cargo in transit | Fleet combat, convoy | Escort hull role (P3 inert → P5 active); route risk |
 
-**Digital vs cyber (operator language, unified in law):**  
-- **Digital defense** = integrity of *instruments and readings* (MANU-1 grade, scan truth).  
-- **Cyber defense** = integrity of *cross-world messages and books* (aperture, treaty, STAMP clear).  
-Both sit under domain `CYB` with two **sub-channels** (instrument / mesh).
+**Seven domains** after the market-warfare ruling (2026-08-08): MKT is
+**not** optional flavour. A civilization that only “wins” kinetics while
+its STAMP book and last-clears are poisoned has **not** preserved the
+capacity to continue as a commercial self.
+
+**Digital vs cyber vs market (operator language):**  
+- **Digital defense** = integrity of *instruments and readings* (MANU-1 grade, scan truth) → `CYB-instrument`.  
+- **Cyber defense** = integrity of *cross-world messages* (aperture, treaty legs) → `CYB-mesh`.  
+- **Market defense** = integrity of *local capital books and marks* (offers, Note/Fut/Share/Perp, last-clear) → **`MKT`**.
 
 ### 1.4 Axiom table by metabolism (primary)
 
@@ -110,6 +117,7 @@ Defense *priority* and *failure residual* derive first from metabolism
 | ATM | Dust/atmosphere as *radiator and coolant medium*, not breath | Vacuum strip, dust blow-off, albedo sabotage | Overheat / freeze band shift |
 | COG | Planar doctrine integrity; “map is territory” | False charts, forged surveys | Bad siting, estate mis-appraisal |
 | CYB | Converter chain integrity (smelter/synth) | Instrument spoof of yield | Wrong conversion, famine of wrong resource |
+| MKT | Spot depth, alloy/iron clears, Note collateral truth | Dump iron, poison last-clear, fake depth | Contagious default, worthless clears |
 | INF | Ore-body OPSEC; assay fog | False assay richness | Bad trade, bad Note collateral |
 | KIN | Escort bulk haulers | Interdiction of iron/alloy trains | HullCapacityShort, VoidShare |
 
@@ -121,6 +129,7 @@ Defense *priority* and *failure residual* derive first from metabolism
 | ATM | Breathable / humid / CO₂–O₂ balance (mesic default) | **Atmospheric tampering**, pathogen aerosol, desiccation | Band coverage collapse, ration death |
 | COG | Collective memory, pheromone/harmonic social graph | Panic, schism, want-storm | WantStruck flood, practice release |
 | CYB | Bio-instrumentation, assay of living stocks | Spoofed richness, counterfeit biomatter | Bad refine, bad Share dividend base |
+| MKT | Ration futures, biomass clears, Share streams | Panic selling of Habitat output, dividend drain | Famine via price, not only empty banks |
 | INF | Veil of population disposition | Census spoof, treaty false flag | Bad peace/war call |
 | KIN | Escort of spore-barge / chitin hulls | Cargo of biomass lost to void | Starvation cascade |
 
@@ -132,6 +141,7 @@ Defense *priority* and *failure residual* derive first from metabolism
 | ATM | Local plasma “weather” — density + field as habitat | **Field-stripping**, radiative cooling attack | Forced dormancy, Furnace exile |
 | COG | Field-pattern memory; umbral/harmonic perception | Pattern noise, occlusion flood | Scan blindness, wrong joint venture |
 | CYB | Resonator / instrument as *sense organ* | Grade sabotage, false t_eq readings | Bad terraform, bad melt windows |
+| MKT | Melt-window books, crystal/STAMP clears | Last-clear spoof timed to phase | Futures liquidated into false marks |
 | INF | Opacity of field topology | Topology spoof | Ambush of routes in “empty” space |
 | KIN | Runner/plasma-sled escort | Interdiction of spark cargo | STAMP/joule loss |
 
@@ -315,8 +325,10 @@ DEFEND [d]
   CEL: somatic readiness (Habitat / shell tech)
   COG: doctrine / want load
   CYB: instrument floor · mesh seal
+  MKT: book integrity · last-clear seal · circuit breaker
   INF: veil · ward · detection grade
   ESPIONAGE: active ops (if any) · counter-intel
+  SUITES: optional dashboards that CALL the same deeds (see §10)
 ```
 
 Verbs (provisional):
@@ -329,6 +341,8 @@ veil · ward               # compose landed
 spy probe <world>         # scout
 spy tamper <world> …      # covert ATM (gated)
 spy extract <tech>        # exfil hash
+market seal · market break   # MKT circuit breaker / resume
+suite cyber | market      # open suite UI (optional)
 ```
 
 ---
@@ -339,33 +353,123 @@ Maps onto and **extends** `TASKS_TRADE_FLEET_DESK` P5:
 
 | Wave | Content | Exit |
 |------|---------|------|
-| **P5-A** | KIN vertical: escort active, interdiction residual, DEFEND pane skeleton | convoy risk pin |
-| **P5-B** | Domain readings derived from metabolism/clade/thermal (no new combat) | desk shows species-relative posture |
+| **P5-A** | KIN vertical: escort active, interdiction residual, DEFEND pane skeleton | **LANDED** convoy risk pin |
+| **P5-B** | Domain readings derived from metabolism/clade/thermal (incl. MKT rank) | desk shows species-relative posture |
 | **P5-C** | INF compose: veil/ward on DEFEND; counter-intel grade | pins |
 | **P5-D** | ATM defense + CovertTamper + detection | invasion narrative pins |
 | **P5-E** | COG + CYB instrument/mesh guards | spoof refuse pins |
+| **P5-M** | **MKT economic warfare** + optional cyber/market **suites** | see §10; pins |
 | **P5-F** | Espionage suite (scout/exfil/sabotage) | SEAL B |
 | **P5-G** | Deep rails R3/R4 / Anchor (original P5.4–P5.7) | optional features |
-| **P5-H** | Docs + demo: escort + one covert terraform arc | program metric |
+| **P5-H** | Docs + demo: escort + one covert terraform + one market-war arc | program metric |
 
 **Order law:** P5-A before combat fantasy; P5-B before any species-blind
-“armor HP”; P5-D before invasion; P5-G never blocks R1–R2 fun.
+“armor HP”; P5-D before invasion; **P5-M after Phase 4 books exist**
+(landed); P5-G never blocks R1–R2 fun.
 
 ### 6.1 Provisional tag budget (claim at land only)
 
 | Range | Use |
 |-------|-----|
-| next free **132** | first P5 deed (likely EscortAssigned risk or ConvoyRisk) |
+| **135+** | next free after P5-A (132–134 landed) |
 | + ATM/ESP family | CovertTamper, TamperDetected, MediumReinforced, SpyExtracted… |
+| + MKT family | MarketSealed, LastClearPoisoned, CircuitBroken, LiquidityRaid… |
 | no float | all residuals exact rational |
 
 ### 6.2 Non-goals
 
-- Real-time tactical combat sim  
+- Real-time tactical combat sim as a **second physics**  
 - Human-only moral framing as engine law  
 - Silent HP bars  
 - Free terraform without TERRA-1 or metered tamper  
 - Path-dependency on strand/datum for core defense  
+- Mini-games that mint value outside SEAL B / conservation  
+
+---
+
+## 10. Market defense & in-game suites (ruling 2026-08-08)
+
+### 10.1 Why markets need defense
+
+Phase 4 made STAMP, Notes, Futures, Shares, and Perps **constitutive**
+of many lines’ “self.” Economic warfare is real in the same sense as
+interdiction: it destroys capacity to continue **as a trading self**.
+
+Examples of attack (offense dual of MKT):
+
+| Attack | Mechanism (compose Phase 4) | Residual |
+|--------|----------------------------|----------|
+| **Liquidity raid** | Flood / drain Spot with offer spam then vanish | Empty book, false depth |
+| **Last-clear poison** | Push marks without real clear depth | Fut/Perp wrong settle |
+| **Note cascade** | Force immature pressure / seize path abuse | Contagious default |
+| **Share harvest** | Dividend drain without production growth | Stream emptied into STAMP |
+| **Listing denial** | INF/CYB attack on Exchange evidence | Book “closed” while cargo exists |
+| **STAMP panic** | Rumor + veil (epicurean target) | Hoarding, broken clears |
+
+Defense (MKT) is **not** “more HP on the Exchange.” It is typed posture:
+
+| Defense | Meaning |
+|---------|---------|
+| **Clear seal** | LastClearMarked only after N real clears (compose Q-S4) |
+| **Circuit breaker** | Temporary MarketSealed: new issues/settles refuse, open books freeze |
+| **Collateral floor** | Note/Perp margin law already partial — raise under stress |
+| **Witness depth** | Estate/survey/instrument grade gates “real” production Shares |
+| **Listing honesty** | notes_listable / futures_listable already evidence-gated — harden |
+| **Mesh+MKT joint** | Aperture spoof attempts refused with same residual as bad clear |
+
+### 10.2 Species-relative MKT
+
+| Line | Market attack that “kills” them | Defense emphasis |
+|------|----------------------------------|------------------|
+| Mineral | Alloy/iron spot collapse; scrap-linked Notes | Clear seal on industrial cargo |
+| Biotic | Ration futures panic; Habitat Share drain | Dividend gates; ATM+MKT joint |
+| Plasmic | Phase-timed last-clear poison around alignment | Mark windows tied to D_orbit honesty |
+| Epicurean | Festival STAMP velocity shock | Circuit breaker + surplus buffers |
+| Empiricist | False science → false Share streams | Witness depth, instrument grade |
+| Expansionist | Corridor + book joint attack | KIN escort + MKT breaker together |
+
+### 10.3 Should there be in-game games / dashboards?
+
+**Yes — as suites, not as a second world.**
+
+| Rule | Detail |
+|------|--------|
+| **One physics** | Every suite action is a **deed** (or pure reading) already (or to-be) in cfe. No shadow ledger. |
+| **One chronicle** | SEAL B: suite UI cannot invent residual. |
+| **NPC parity** | Full economic warfare must run in `instrument_step` / future `market_war_step` **without** opening a suite. |
+| **Suite = lens + training + intensity** | Dashboard, alerts, scripted scenarios, optional time-pressure **presentation** — same admits/refuses. |
+| **Optional** | Core loop never requires suite; desk EXCH + DEFEND remain sufficient. |
+| **No free mint** | “Win the mini-game” never grants tech nodes or STAMP outside warrant/receipt law. |
+
+#### Suite catalog (authorized design)
+
+| Suite | Domain | Player fantasy | Engine hooks |
+|-------|--------|----------------|--------------|
+| **CYBER** | CYB-instrument + CYB-mesh | Trace spoof, seal instrument, patch aperture | MANU-1 grade, aperture refuse, scan integrity |
+| **MARKET WAR** | MKT | Defend clears, trip breaker, counter-raid | LastClear, offers, Note/Fut/Share/Perp, circuit breaker |
+| **ESPIONAGE** | INF + COG | Probe / counter-intel board | Veil, ward, detection grade, spy deeds (P5-F) |
+| **MEDIUM** | ATM | Detect tamper pressure, reinforce envelope | CovertTamper, MediumEnvelope (P5-D) |
+| **CONVOY** | KIN | Escort assignment, risk map | EscortOnDuty, convoy_risk (P5-A **landed**) |
+
+UI home: desk panes **DEFEND** + **EXCH** + optional `suite <name>` full-screen
+(ANSI suite or future TUI). Same commands as CLI.
+
+### 10.4 What we refuse
+
+| Anti-pattern | Why |
+|--------------|-----|
+| Separate “hacking sim” with its own score currency | Breaks call-not-copy / STAMP monopoly |
+| Real-time twitch that skips receipts | Breaks SEAL B audit |
+| Human “bank run” only | Ignores plasmic/mineral market death |
+| Suite-only content | NPC lines must fight economic war unaided |
+
+### 10.5 Implementation order for MKT + suites
+
+1. **Readings** — MKT rank on `defense_posture`; EXCH shows integrity flags.  
+2. **Passive defense** — clear seal (N clears), circuit breaker deed.  
+3. **Active offense (typed)** — LiquidityRaid / ClearPoison attempts with refuse+residual.  
+4. **Suite shells** — dashboards over (1)–(3); CONVOY suite can land first (P5-A already has risk).  
+5. **NPC `market_war_step`** — disposition-routed.
 
 ---
 
