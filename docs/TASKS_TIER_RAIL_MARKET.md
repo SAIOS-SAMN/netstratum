@@ -55,9 +55,9 @@ strand-adapter · isthmus/datum-adapter
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
-| E3.1 | [ ] **E-APT-1** element aperture legs (id in value; conservation) | ground_step live | tag + pins |
-| E3.2 | [ ] **E-ROUTE-1** element route charter / upkeep / lapse | E3.1, ROUTE-1 | CLI + pins |
-| E3.3 | [ ] Conductor `element_trade_step` NPC | E3.2 | pure NPC route clear |
+| E3.1 | [x] **E-APT-1** element aperture legs (id in value; conservation) | ground_step live | tags 108–109; element_move |
+| E3.2 | [~] **E-ROUTE-1** — Wave-2 reuses ROUTE-1 melt via `pair_melt` (cargo is E-APT); specialized ElementRouteChartered still open | E3.1, ROUTE-1 | melt+lane suppress live |
+| E3.3 | [x] Conductor `element_trade_step` NPC | E3.1 | pure NPC clear in `wave1_era_pins` |
 | E3.4 | [x] **REFINE-1** ElementRefinery zone; derive rates from family/tier | 14 §5 | two seeds different chains |
 | E3.5 | [x] Conductor build prefers refinery when raw surplus | E3.4 | pin |
 | E3.6 | [ ] **E-MKT-1** offers carry ElementId cargo | E3.1, MARKET-1 | NPC market_step |
@@ -135,14 +135,14 @@ strand-adapter · isthmus/datum-adapter
 ```
 [x] T1.1–T1.4 stations T4–T9 + NPC seats     ← Wave-1 2109bf0
 [x] E3.4–E3.5 REFINE-1 + NPC build           ← Wave-1 2109bf0
-[ ] E3.1–E3.3 element aperture + route + NPC trade   ← Wave-2
-[ ] S4.1–S4.4 STAMP + spot + NPC MM                  ← Wave-4 (after E3)
-[ ] R2.1–R2.3 rails R1–R2 only                       ← Wave-2/3 parallel OK
+[x] E3.1 + E3.3 element aperture + NPC trade ← Wave-2 (pair_melt lanes)
+[~] E3.2 specialized ElementRouteChartered   ← optional follow-on
+[ ] S4.1–S4.4 STAMP + spot + NPC MM          ← Wave-4
+[ ] R2.1–R2.3 rails R1–R2 only               ← open
 ```
 
-**Wave-2 order (see `RELAY_WAVE2_IMPLEMENTOR.md`):** claim tags → keep
-done-bar red for route/STAMP → E-APT-1 → E-ROUTE-1 → `element_trade_step`
-→ pure NPC route clear turns harness green. Perps and R3/R4 stay deferred.
+**Wave-2 land:** tags 108–109, kernel 0.21.0, `element_trade_step`,
+harness `pure_npc_element_route_clears` green. STAMP still ignored.
 
 ---
 

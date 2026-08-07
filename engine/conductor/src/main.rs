@@ -200,6 +200,12 @@ fn main() {
                 "beat {beat}: THE CARAVAN — {m} bridges {a} ⇌ {b}; the walled trade flows"
             );
         }
+        // E3.3: pure NPC element aperture hauls (Wave-2).
+        for (from, to) in conductor::element_trade_step(&mut worlds, beat) {
+            println!(
+                "beat {beat}: ELEMENT CROSSING — {from} → {to}; open matter rides the void"
+            );
+        }
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — journals + the Terminal Wall regenerate lens-side.
         if beat.is_multiple_of(scribe::journal::YEAR_TICKS) {

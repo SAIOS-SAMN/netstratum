@@ -388,10 +388,13 @@ fn the_version_is_pinned() {
     //   stations (caravan·crucible·exchange·assay·vault·anchor) enter
     //   the closed office vocabulary and the tier ladder. StationSeated
     //   already covered; MINOR because serving-seat and tier gates now
-    //   admit six offices they previously refused as unknown. Claimed
-    //   in this ledger before bump (NEXT-FREE RULE; next free is 21).
-    //   — the next free minor is 21.
-    assert_eq!(KERNEL_VERSION.to_string(), "0.20.0", "the gate is version-pinned");
+    //   admit six offices they previously refused as unknown.
+    // 0.21.0 — E-APT-1 (2026-08-07, Wave-2): ElementApertureSent /
+    //   ElementApertureReceived (tags 108–109) enter covered() and
+    //   element_move — the gate admits open-matter cross-world hauls
+    //   it previously left Unjudged. Claimed before bump (next free 22).
+    //   — the next free minor is 22.
+    assert_eq!(KERNEL_VERSION.to_string(), "0.21.0", "the gate is version-pinned");
     assert_eq!(VERSION, KERNEL_VERSION.code(), "the wire carries the packed form");
     // ORDER IS PRESERVED: a chain cut under the old linear versions
     // compares BELOW every packed one, which is true — an earlier gate

@@ -6033,6 +6033,20 @@ fn chronicle(world: &World, style: &Style) {
                 style.strong(&amount(moved)),
                 resource_name(*resource)
             ),
+            cfe::dop::ClosureEvent::ElementApertureSent {
+                deal, from_orb, amount: moved, element, ..
+            } => format!(
+                "⎋ {} of {} crossed out orb {from_orb} → deal {deal} — open matter leaves this book",
+                style.strong(&amount(moved)),
+                style.strong(&hex(element)[..8]),
+            ),
+            cfe::dop::ClosureEvent::ElementApertureReceived {
+                deal, to_orb, amount: moved, element, ..
+            } => format!(
+                "⎋ {} of {} crossed in deal {deal} → orb {to_orb} — open matter arrives",
+                style.strong(&amount(moved)),
+                style.strong(&hex(element)[..8]),
+            ),
             cfe::dop::ClosureEvent::CrystalDrawn { orb_id, amount: drawn } => format!(
                 "◎ {} crystal held the lens open on orb {orb_id} — what was seen left no receipt",
                 style.strong(&amount(drawn))

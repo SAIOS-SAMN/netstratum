@@ -208,6 +208,32 @@ pub fn aperture_transfer(
     haul(src, from, dst, to, resource, amount.value().clone(), deal, &ratio(0, 1))
 }
 
+/// E-APT-1 — cross-world ELEMENT haul with melt. Zero melt is the
+/// local door; positive melt is MARKET-2 iceberg on open matter.
+/// Demurrage does not touch the element ledger (31 §1).
+#[allow(clippy::too_many_arguments)] // mirrors haul / aperture_transfer arity
+pub fn element_aperture_transfer(
+    src: &mut World,
+    from: u64,
+    dst: &mut World,
+    to: u64,
+    element: [u8; 32],
+    amount: crate::dop::Positive,
+    deal: u64,
+    melt: &Ratio,
+) -> Result<(), ActionRefused> {
+    haul_element(
+        src,
+        from,
+        dst,
+        to,
+        element,
+        amount.value().clone(),
+        deal,
+        melt,
+    )
+}
+
 /// MARKET-2 (ruled 2026-07-31): the melt coefficient φ — the fraction
 /// of cargo the void takes per unit of L1 distance (spatial + key).
 /// Space transport consumes its own payload (Samuelson's iceberg);
@@ -329,6 +355,104 @@ fn haul(
     }
     dst.relieve_recovered(to);
     // THRESHOLD-1: the deed IS the crossing, for both worlds.
+    src.crossed = true;
+    dst.crossed = true;
+    Ok(())
+}
+
+/// E-APT-1 — the element twin of [`haul`]. Same shield/war/melt doors;
+/// banks the open-matter ledger (no demurrage touch).
+#[allow(clippy::too_many_arguments)]
+fn haul_element(
+    src: &mut World,
+    from: u64,
+    dst: &mut World,
+    to: u64,
+    element: [u8; 32],
+    amount: Ratio,
+    deal: u64,
+    melt: &Ratio,
+) -> Result<(), ActionRefused> {
+    if *melt >= ratio(1, 1) {
+        return Err(ActionRefused::EconomicallyWalled {
+            melt: Box::new(melt.clone()),
+        });
+    }
+    if src.ward_holds() || dst.ward_holds() {
+        return Err(ActionRefused::TheWardHolds);
+    }
+    if src.at_war_with(dst.name()) || dst.at_war_with(src.name()) {
+        return Err(ActionRefused::AtWar {
+            partner: dst.name().to_string(),
+        });
+    }
+    if !src.knows_its_sun() || !dst.knows_its_sun() {
+        return Err(ActionRefused::Shielded {
+            source_shielded: !src.knows_its_sun(),
+            dest_shielded: !dst.knows_its_sun(),
+        });
+    }
+    if !src.orbs.iter().any(|held| held.orb_id == from) {
+        return Err(ActionRefused::NoSuchOrb { orb: from });
+    }
+    if !dst.orbs.iter().any(|held| held.orb_id == to) {
+        return Err(ActionRefused::NoSuchOrb { orb: to });
+    }
+    {
+        let source = src
+            .orbs
+            .iter()
+            .find(|held| held.orb_id == from)
+            .expect("checked");
+        let have = source.element_amount(&element);
+        if have < amount {
+            return Err(ActionRefused::CannotAffordElement {
+                element,
+                need: Box::new(amount),
+                have: Box::new(have),
+            });
+        }
+    }
+    let src_stamp = src.clock.now();
+    let dst_stamp = dst.clock.now();
+    {
+        let source = src
+            .orbs
+            .iter_mut()
+            .find(|held| held.orb_id == from)
+            .expect("checked");
+        source.bank_element(element, -amount.clone());
+    }
+    src.chronicle.append(
+        ClosureEvent::ElementApertureSent {
+            deal,
+            from_orb: from,
+            element,
+            amount: amount.clone(),
+        },
+        src_stamp,
+        vec![SOVEREIGN],
+    );
+    let delivered = amount.clone() * (ratio(1, 1) - melt.clone());
+    {
+        let target = dst
+            .orbs
+            .iter_mut()
+            .find(|held| held.orb_id == to)
+            .expect("checked");
+        target.bank_element(element, delivered.clone());
+    }
+    dst.chronicle.append(
+        ClosureEvent::ElementApertureReceived {
+            deal,
+            to_orb: to,
+            element,
+            amount: delivered,
+        },
+        dst_stamp,
+        vec![SOVEREIGN],
+    );
+    // THRESHOLD-1: element trade is also a crossing.
     src.crossed = true;
     dst.crossed = true;
     Ok(())

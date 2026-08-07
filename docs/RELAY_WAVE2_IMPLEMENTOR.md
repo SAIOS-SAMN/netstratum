@@ -1,5 +1,10 @@
 # RELAY — TO THE WAVE-2 IMPLEMENTOR NODE
 
+> **LANDED (2026-08-07):** E-APT-1 tags 108–109, kernel **0.21.0**,
+> `element_trade_step`, harness route clear green. Specialized
+> ElementRouteChartered + STAMP still open. Standing law remains
+> authority for Wave-3/4.
+
 You continue the vertical slice after **Wave-1 `2109bf0`**. Read
 `RELAY_WAVE1_IMPLEMENTOR.md` for standing law (registers, SEAL B,
 ratchet, green-board trap). This brief is **only what changed** and

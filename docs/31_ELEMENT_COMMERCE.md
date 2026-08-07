@@ -1,10 +1,10 @@
 # 31 — ELEMENT COMMERCE: routes, refineries, distribution
 
 **Status:** PARTIAL LAND — operator directive 2026-08-07; **Wave-1
-`2109bf0`** landed **REFINE-1** (`ZoneKind::ElementRefinery` = 9,
-`ElementRefined` tag 107, pure-NPC build + `refine_step`). **E-APT /
-E-ROUTE / element market cargo still DESIGN.** Depends on GROUND STEP
-(prospect/assay live) and composes with ROUTE-1, MARKET-1, MERCHANT-1,
+`2109bf0`** REFINE-1; **Wave-2** E-APT-1 (tags 108–109) +
+`element_trade_step` NPC clear under `pair_melt` / ROUTE-1 topology.
+**Specialized ElementRouteChartered and E-MKT cargo still open.**
+Depends on GROUND STEP and composes with ROUTE-1, MARKET-1, MERCHANT-1,
 APERTURE-1, TREATY-1.
 
 **Companion:** `30_OFFICES_AND_RAILS.md` (T4 Caravan, T5 Crucible),
@@ -19,7 +19,7 @@ Today:
 | Surface | State |
 |---------|--------|
 | Closed carriers (iron…crystal) | Full zone economy + aperture trade |
-| Elements (tag 72) | Prospect/assay bank + **local refine** (Wave-1); **no cross-world trade yet** |
+| Elements (tag 72) | Prospect/assay + refine (Wave-1) + **cross-world E-APT** (Wave-2) |
 | Converters | Smelter/synthesizer (closed carriers) + **ElementRefinery** (open matter) |
 | Routes | ROUTE-1 melt on carrier shipments; element routes **not landed** |
 

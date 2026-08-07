@@ -2551,6 +2551,105 @@ fn two_mut<T>(slice: &mut [T], i: usize, j: usize) -> (&mut T, &mut T) {
     }
 }
 
+/// E-APT / E3.3 — pure NPC element aperture trade (Wave-2).
+///
+/// For every unordered pair that is not penned and not economically
+/// walled: if the exporter holds open matter, gift the solar leap when
+/// needed (THRESHOLD-1), ship half the richest held element across the
+/// void under `pair_melt` / ROUTE-1 suppression, and land
+/// `ElementApertureSent` / `ElementApertureReceived`. Never invents
+/// element ids. One successful clear per pair per call is enough for
+/// the done bar; more pairs still run (no singles on the board).
+pub fn element_trade_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
+    let mut cleared = Vec::new();
+    let mut seq: u64 = 0;
+    let n = worlds.len();
+    for a in 0..n {
+        for b in (a + 1)..n {
+            if worlds[a].penned || worlds[b].penned {
+                continue;
+            }
+            // THRESHOLD-1: aperture needs the solar leap (condition 0).
+            for i in [a, b] {
+                if !worlds[i].world.knows_its_sun() {
+                    let steward = worlds[i].steward;
+                    let _ = worlds[i].world.grant_tech_as(
+                        steward,
+                        cfe::world::FIRST_ORB,
+                        0,
+                    );
+                }
+            }
+            let distance = spatial_l1(&worlds[a].spec.position, &worlds[b].spec.position);
+            let melt = cfe::world::pair_melt(
+                &worlds[a].world,
+                &worlds[b].world,
+                &distance,
+            );
+            if melt >= ratio(1, 1) {
+                continue; // walled direct — merchant territory, not element haul
+            }
+            // Prefer shipping from the side with more total element mass.
+            let mass = |p: &Polity| -> Ratio {
+                p.world
+                    .orb()
+                    .map(|o| {
+                        o.elements
+                            .iter()
+                            .fold(ratio(0, 1), |s, (_, a)| s + a.clone())
+                    })
+                    .unwrap_or_else(|| ratio(0, 1))
+            };
+            let (exporter, importer) = if mass(&worlds[a]) >= mass(&worlds[b]) {
+                (a, b)
+            } else {
+                (b, a)
+            };
+            let Some((element, have)) = worlds[exporter]
+                .world
+                .orb()
+                .and_then(|o| {
+                    o.elements
+                        .iter()
+                        .max_by(|x, y| x.1.cmp(&y.1))
+                        .map(|(id, amt)| (*id, amt.clone()))
+                })
+            else {
+                continue;
+            };
+            // Ship half (derive 2 as 1+1 — no tuned dial).
+            let ship = have.clone() / (ratio(1, 1) + ratio(1, 1));
+            if ship <= ratio(0, 1) {
+                continue;
+            }
+            let Some(amount) = cfe::dop::Positive::new(ship) else {
+                continue;
+            };
+            let deal = beat.saturating_mul(100_000).saturating_add(70_000 + seq);
+            seq += 1;
+            let (ex, im) = two_mut(worlds, exporter, importer);
+            if cfe::world::element_aperture_transfer(
+                &mut ex.world,
+                cfe::world::FIRST_ORB,
+                &mut im.world,
+                cfe::world::FIRST_ORB,
+                element,
+                amount,
+                deal,
+                &melt,
+            )
+            .is_ok()
+            {
+                cleared.push((
+                    ex.spec.world_name.clone(),
+                    im.spec.world_name.clone(),
+                ));
+            }
+        }
+    }
+    cleared
+}
+
 /// MERCHANT-1 (the MARKET-2 sequence) — THE ARBITRAGE PASS, the
 /// reference model's merchant instinct (layer-2 POLICY over lawful
 /// deeds; SEAM-1 will put a trait boundary here).
@@ -3014,6 +3113,10 @@ pub fn run_era_with(var_root: &str, cycles: u32, mode: SearchMode) -> Vec<Polity
             polity.mode = mode;
             worlds.push(polity);
         }
+        // OFFER-1a + MERCHANT-1 + E3.3: market, caravan, element haul.
+        let _ = market_step(&mut worlds, u64::from(beat));
+        let _ = merchant_step(&mut worlds, u64::from(beat));
+        let _ = element_trade_step(&mut worlds, u64::from(beat));
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — the lens renders journals + wall, write-only display
         // of the chronicle, never a state change.

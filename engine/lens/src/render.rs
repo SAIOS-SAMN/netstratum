@@ -669,6 +669,20 @@ pub fn render_receipt(receipt: &Receipt) -> String {
             "era_folded",
             format!("aeon {era} folds; the new sheet seats at {}", ratio_str(gauge)),
         ),
+        E::ElementApertureSent { deal, from_orb, amount, .. } => (
+            "element_aperture_sent",
+            format!(
+                "deal {deal}: orb {from_orb} dispatches {} of open matter across the void",
+                ratio_str(amount)
+            ),
+        ),
+        E::ElementApertureReceived { deal, to_orb, amount, .. } => (
+            "element_aperture_received",
+            format!(
+                "deal {deal}: orb {to_orb} receives {} of open matter (melt already taken)",
+                ratio_str(amount)
+            ),
+        ),
         E::ApertureSent { deal, from_orb, resource, amount } => (
             "aperture_sent",
             format!(

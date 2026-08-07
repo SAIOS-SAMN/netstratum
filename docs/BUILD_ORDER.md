@@ -962,5 +962,9 @@ roster.
 
 **Not in Wave-1:** R1–R4 wire, element aperture/route, STAMP, office *gameplay* advantages (O6), observer T-column (other lane holds dirty `observer.py`).
 
-**Next vertical slice (Wave-2):** claim tags → red done-bar for route+STAMP remains → **E-APT-1 → E-ROUTE-1 → element_trade_step** → then S4/R2. See `RELAY_WAVE2_IMPLEMENTOR.md`.
+**Wave-2 (2026-08-07):** E-APT-1 tags **108–109**, kernel **0.21.0**,
+`element_aperture_transfer` / `haul_element`, conductor
+`element_trade_step`, harness `pure_npc_element_route_clears` green.
+Melt via `pair_melt` (ROUTE-1 topology); specialized ElementRouteChartered
+and STAMP remain open. See `RELAY_WAVE2_IMPLEMENTOR.md`.
 

@@ -278,18 +278,19 @@
 //!         Rates re-derive from `refine_recipe`; the refined id from
 //!         `refined_identity`. ZoneKind::ElementRefinery = 9 rides
 //!         ZoneBuilt; the conversion itself needs this deed so SEAL B
-//!         can replay element mass. Next free for NEW deeds: 108.)
-//!    107+ WAVE-1 claim ledger (2026-08-07, RELAY_WAVE1): offices T4–T9
-//!         reuse StationSeated (tag 89) with new station wire codes 5–10;
-//!         REFINE-1 claims tag 107 (ElementRefined) + ZoneKind 9.
-//!         — the next free tag outside reservations is 108. (This line
-//!         read "90" until 2026-08-05 and was STALE: tag 90 was taken by
-//!         SovereignUnionSealed after it was written, and a mint drafted
-//!         onto 90 shadowed that deed's decoder arm — every sovereign
-//!         union would have become undecodable. Caught by clippy's
-//!         unreachable-pattern warning, not by the register. The free
-//!         tags below the top are 14, 15, 56, 57, 58, 64, 66, 73, 83, 84
-//!         and 87; 9 and 51 are reserved and 65 is retired forever.)
+//!         can replay element mass.)
+//!    108  ClosureEvent::ElementApertureSent (WAVE-2 E-APT-1, 2026-08-07 —
+//!         source leg of a cross-world ELEMENT haul: open matter leaves
+//!         this book. Pair of 108/109; ROUTE-1 lanes suppress melt via
+//!         the same pair_melt law as resource hauls. No demurrage.)
+//!    109  ClosureEvent::ElementApertureReceived (WAVE-2 E-APT-1 —
+//!         destination leg: open matter arrives. Delivered = sent ×
+//!         (1−melt). Next free for NEW deeds: 110.)
+//!    107+ WAVE-1/2 claim ledger: offices T4–T9 (StationSeated 5–10);
+//!         REFINE-1 tag 107; E-APT tags 108–109. Next free: **110**.
+//!         (Historic staleness notes: free tags below the top include
+//!         14, 15, 56, 57, 58, 64, 66, 73, 83, 84, 87; 9 and 51 reserved;
+//!         65 retired forever.)
 //!   In-value practice codes (append-only): 1 the Austerity · 2 the Showpiece ·
 //!   3 the Restraint · 4 the Hoard · 5 the Overdrive (deep-end: adoption
 //!   gated on hardship ≥ 8 receipts). Placeholder names, operator
@@ -2183,6 +2184,23 @@ pub enum ClosureEvent {
     /// value ARRIVED in this world's orb from another, bound to the same
     /// `deal`. Replay of this world sees only the credit.
     ApertureReceived { deal: u64, to_orb: u64, resource: Resource, amount: Ratio },
+    /// E-APT-1 (tag 108, WAVE-2) — source leg of a cross-world ELEMENT
+    /// haul. Open matter (tag 72 ledger) leaves this orb; the pair's
+    /// melt is applied on the receive leg. No resource demurrage.
+    ElementApertureSent {
+        deal: u64,
+        from_orb: u64,
+        element: [u8; 32],
+        amount: Ratio,
+    },
+    /// E-APT-1 (tag 109) — destination leg: element mass arrives
+    /// (already melt-reduced). Bound to the same `deal`.
+    ElementApertureReceived {
+        deal: u64,
+        to_orb: u64,
+        element: [u8; 32],
+        amount: Ratio,
+    },
     /// N4 (NS-2 §1.5) — the scanner's power draw, the ONE chronicle
     /// event of RQP: crystals left the probing orb's bank to hold the
     /// lens open. Deliberately blind to what was asked and what was
@@ -2784,6 +2802,21 @@ impl ClosureEvent {
                 value.push(*resource as u8);
                 ratio::encode(amount, &mut value);
                 tlv::put(48, &value, &mut out);
+            }
+            Self::ElementApertureSent { deal, from_orb, element, amount } => {
+                // deal ‖ from_orb ‖ element[32] ‖ amount
+                let mut value = deal.to_le_bytes().to_vec();
+                value.extend_from_slice(&from_orb.to_le_bytes());
+                value.extend_from_slice(element);
+                ratio::encode(amount, &mut value);
+                tlv::put(108, &value, &mut out);
+            }
+            Self::ElementApertureReceived { deal, to_orb, element, amount } => {
+                let mut value = deal.to_le_bytes().to_vec();
+                value.extend_from_slice(&to_orb.to_le_bytes());
+                value.extend_from_slice(element);
+                ratio::encode(amount, &mut value);
+                tlv::put(109, &value, &mut out);
             }
             Self::CrystalDrawn { orb_id, amount } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
@@ -3408,6 +3441,30 @@ impl ClosureEvent {
                 let resource = Resource::from_wire(*value.get(16)?)?;
                 let (amount, _) = ratio::decode(value.get(17..)?)?;
                 Some(Self::ApertureReceived { deal, to_orb, resource, amount })
+            }
+            108 => {
+                let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let from_orb = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let element: [u8; 32] = value.get(16..48)?.try_into().ok()?;
+                let (amount, _) = ratio::decode(value.get(48..)?)?;
+                Some(Self::ElementApertureSent {
+                    deal,
+                    from_orb,
+                    element,
+                    amount,
+                })
+            }
+            109 => {
+                let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let to_orb = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let element: [u8; 32] = value.get(16..48)?.try_into().ok()?;
+                let (amount, _) = ratio::decode(value.get(48..)?)?;
+                Some(Self::ElementApertureReceived {
+                    deal,
+                    to_orb,
+                    element,
+                    amount,
+                })
             }
             55 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

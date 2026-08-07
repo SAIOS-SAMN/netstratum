@@ -446,6 +446,29 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 }
                 crossed = true;
             }
+            // E-APT-1: element legs — same doors, open-matter ledger.
+            ClosureEvent::ElementApertureSent {
+                from_orb,
+                element,
+                amount,
+                ..
+            } => {
+                if let Some(held) = peel(&mut orbs, *from_orb) {
+                    held.bank_element(*element, -amount.clone());
+                }
+                crossed = true;
+            }
+            ClosureEvent::ElementApertureReceived {
+                to_orb,
+                element,
+                amount,
+                ..
+            } => {
+                if let Some(held) = peel(&mut orbs, *to_orb) {
+                    held.bank_element(*element, amount.clone());
+                }
+                crossed = true;
+            }
             // N4 (NS-2 §1.5): the draw replays as a bank debit and a
             // touch anchor. The reading it paid for CANNOT replay —
             // the receipt is deliberately blind to it (the lens law).

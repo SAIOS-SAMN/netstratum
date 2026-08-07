@@ -13,7 +13,7 @@ use cfe::dop::{ClosureEvent, Station};
 use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
 use cfe::world::replay;
-use conductor::{Polity, PolitySpec, Policy};
+use conductor::{element_trade_step, Polity, PolitySpec, Policy};
 use ledger::registry::{tier_of, Civilization, Registry, Tier};
 use ledger::Ledger;
 use std::fs;
@@ -217,11 +217,73 @@ fn pure_npc_refines_elements() {
     );
 }
 
-/// Wave-3 target — element route clear. Stays ignored until E-ROUTE.
+/// Wave-2 exit — pure NPC element aperture clear (E-APT + E3.3).
+///
+/// Two mineral lines bank elements via ground_step, then
+/// `element_trade_step` hauls open matter under pair_melt. A clear is
+/// `ElementApertureReceived` on the importer's chronicle.
 #[test]
-#[ignore = "wave-3 E-ROUTE-1 — turns green when element_trade_step clears a route"]
 fn pure_npc_element_route_clears() {
-    panic!("not yet: element route under pure NPC");
+    let root = scratch("eapt");
+    let registry = Registry::at(root.join("registry"));
+    let book = Ledger::at(root.join("worlds"));
+    let mut exporter = Polity::genesis(
+        line("Veinexport", "veinexport", "expansionist", "mineral"),
+        &registry,
+        &book,
+    );
+    // Offset on the chart so melt is positive but < 1 (not walled).
+    let mut importer_spec = line("Veinimport", "veinimport", "empiricist", "mineral");
+    importer_spec.position = (ratio(8, 1), ratio(0, 1), ratio(0, 1));
+    let mut importer = Polity::genesis(importer_spec, &registry, &book);
+
+    let mut cleared_on = None;
+    for beat in 1u32..=24 {
+        let _ = exporter.cycle(&book, &registry);
+        let _ = importer.cycle(&book, &registry);
+        let mut pair = vec![exporter, importer];
+        let hits = element_trade_step(&mut pair, u64::from(beat));
+        importer = pair.pop().expect("importer");
+        exporter = pair.pop().expect("exporter");
+        let received = importer.world.chronicle().receipts().iter().any(|r| {
+            matches!(r.event, ClosureEvent::ElementApertureReceived { .. })
+        }) || exporter.world.chronicle().receipts().iter().any(|r| {
+            matches!(r.event, ClosureEvent::ElementApertureReceived { .. })
+        });
+        if received || !hits.is_empty() {
+            cleared_on = Some(beat);
+            break;
+        }
+    }
+    assert!(
+        cleared_on.is_some(),
+        "pure NPC must clear an element aperture within 24 beats; \
+         exporter_elems={} importer_elems={}",
+        element_kinds(&exporter),
+        element_kinds(&importer),
+    );
+    let received = importer.world.chronicle().receipts().iter().any(|r| {
+        matches!(r.event, ClosureEvent::ElementApertureReceived { .. })
+    }) || exporter.world.chronicle().receipts().iter().any(|r| {
+        matches!(r.event, ClosureEvent::ElementApertureReceived { .. })
+    });
+    assert!(received, "ElementApertureReceived must stand after trade");
+    let sent = exporter.world.chronicle().receipts().iter().any(|r| {
+        matches!(r.event, ClosureEvent::ElementApertureSent { .. })
+    }) || importer.world.chronicle().receipts().iter().any(|r| {
+        matches!(r.event, ClosureEvent::ElementApertureSent { .. })
+    });
+    assert!(sent, "ElementApertureSent must stand after trade");
+    assert_eq!(
+        replay(exporter.world.chronicle()),
+        exporter.world.committed(),
+        "exporter replay MATCHES"
+    );
+    assert_eq!(
+        replay(importer.world.chronicle()),
+        importer.world.committed(),
+        "importer replay MATCHES"
+    );
 }
 
 /// Wave-4 target — STAMP spot clear. Stays ignored until S4/MM-1.

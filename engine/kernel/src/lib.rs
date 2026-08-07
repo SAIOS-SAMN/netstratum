@@ -136,7 +136,7 @@ use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 /// (Amendments 0.11.0 through the current minor are recorded in the
 /// version ledger — `tests/conservation_pins.rs` — beside the
 /// NEXT-FREE RULE that assigns minors across lanes.)
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 20, patch: 0 };
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 21, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
@@ -840,6 +840,27 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             }
             vec![(*raw, -spent.clone()), (*refined, yielded.clone())]
         }
+        // E-APT-1: element leave / arrive. Sign-guarded; amount on the
+        // receipt is the whole truth of that leg (melt applied before
+        // the receive is sealed).
+        ClosureEvent::ElementApertureSent { element, amount, .. } => {
+            if *amount < ratio(0, 1) {
+                return Err(Refused::ElementNotPositive {
+                    element: *element,
+                    amount: Box::new(amount.clone()),
+                });
+            }
+            vec![(*element, -amount.clone())]
+        }
+        ClosureEvent::ElementApertureReceived { element, amount, .. } => {
+            if *amount < ratio(0, 1) {
+                return Err(Refused::ElementNotPositive {
+                    element: *element,
+                    amount: Box::new(amount.clone()),
+                });
+            }
+            vec![(*element, amount.clone())]
+        }
         _ => Vec::new(),
     };
     // Total-check every element key present in either state or in the
@@ -1094,6 +1115,8 @@ fn covered(event: &ClosureEvent) -> bool {
         // `element_move` — rates re-derived from `refine_recipe`.
         // BY HAND: the compiler does not force this list.
         | E::ElementRefined { .. }
+        // E-APT-1 (tags 108–109): element-ledger legs, arm in element_move.
+        | E::ElementApertureSent { .. } | E::ElementApertureReceived { .. }
         | E::GenesisSealed { .. } | E::ProspectStruck { .. } | E::LineSucceeded { .. }
         | E::TechLicensed { .. } | E::InstrumentForged { .. } | E::RouteChartered { .. }
         | E::OfferPosted { .. } | E::BondSealed { .. }
@@ -1972,6 +1995,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // REFINE-1: WORLD-layer beside the assay and the gem — an
         // orb's matter converts, no line is keyed.
         | E::ElementRefined { .. }
+        | E::ElementApertureSent { .. } | E::ElementApertureReceived { .. }
         // #42: a treaty is WORLD-layer. It is keyed on the pair, and
         // the pair is two worlds — not a line's identity (a pact
         // outlives whoever signed it) and not one place.
@@ -2094,6 +2118,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // REFINE-1: spends banked element value and banks a refined
         // form — Collect, exactly as the assay and the gem.
         | E::ElementRefined { .. }
+        | E::ElementApertureSent { .. } | E::ElementApertureReceived { .. }
         // U1: the discovery mint settles banked value against verified
         // work — Collect, like the yield it banks beside. Ratified by
         // the U1 witnesses as it enters covered().
