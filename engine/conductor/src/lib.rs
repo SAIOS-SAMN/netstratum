@@ -2581,7 +2581,7 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, Stri
                 }
             }
             let distance = spatial_l1(&worlds[a].spec.position, &worlds[b].spec.position);
-            let melt = cfe::world::pair_melt(
+            let melt = cfe::world::route_melt(
                 &worlds[a].world,
                 &worlds[b].world,
                 &distance,
@@ -2716,7 +2716,7 @@ pub fn stamp_market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, Strin
                 }
             }
             let distance = spatial_l1(&worlds[a].spec.position, &worlds[b].spec.position);
-            let melt = cfe::world::pair_melt(
+            let melt = cfe::world::route_melt(
                 &worlds[a].world,
                 &worlds[b].world,
                 &distance,
@@ -2871,13 +2871,13 @@ pub fn merchant_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String, S
                 }
                 // Strictly additive: the direct pair must be walled.
                 let d_ab = spatial_l1(&worlds[a].spec.position, &worlds[b].spec.position);
-                if cfe::world::pair_melt(&worlds[a].world, &worlds[b].world, &d_ab) < one() {
+                if cfe::world::route_melt(&worlds[a].world, &worlds[b].world, &d_ab) < one() {
                     continue;
                 }
                 let d_am = spatial_l1(&worlds[a].spec.position, &worlds[m].spec.position);
                 let d_mb = spatial_l1(&worlds[m].spec.position, &worlds[b].spec.position);
-                let melt_am = cfe::world::pair_melt(&worlds[a].world, &worlds[m].world, &d_am);
-                let melt_mb = cfe::world::pair_melt(&worlds[m].world, &worlds[b].world, &d_mb);
+                let melt_am = cfe::world::route_melt(&worlds[a].world, &worlds[m].world, &d_am);
+                let melt_mb = cfe::world::route_melt(&worlds[m].world, &worlds[b].world, &d_mb);
                 if melt_am >= one() || melt_mb >= one() {
                     continue;
                 }

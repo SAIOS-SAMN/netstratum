@@ -87,16 +87,16 @@ by law; desk shows windows.
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
-| P2.1 | [ ] Spec pin: `D_eff = D_chart + D_orbit` (33 §3.2); single producer | P1.2 | doc + function site named |
-| P2.2 | [ ] Drive θ (and ψ if required) from clock/site — exact lattice | P2.1, PlanetSited | deterministic replay |
-| P2.3 | [ ] `D_orbit` chord/phase reading; zero if unsited | P2.2 | unit pins |
-| P2.4 | [ ] `pair_melt` / `route_melt` consumes `D_eff` only | P2.1, P2.3 | call-not-copy; old tests updated |
-| P2.5 | [ ] Alignment band CHEAP / FAIR / DEAR derived (no new melt dial) | P2.4 | desk + pins |
-| P2.6 | [ ] ROUTES pane: projected melt over next K beats | P2.5, P1.3 | optimize “wait window” |
-| P2.7 | [ ] Candidate route list includes alignment-sensitive sort | P2.5, P1.2 | |
-| P2.8 | [ ] Year-voice or tick policy locked (Q-F1) | P2.2 | OPEN_QUESTIONS resolved or default coded |
-| P2.9 | [ ] Harness: same chart, different phase ⇒ different melt | P2.4 | green |
-| P2.10 | [ ] Docs + BUILD_ORDER Phase 2 land | P2.9 | |
+| P2.1 | [x] `effective_distance` / `d_orbit` / `route_melt` (33 §3.2) | P1.2 | cfe::world |
+| P2.2 | [x] θ advanced pure-from-clock: `index + now/60` on Slot lattice | P2.1 | no receipt spam |
+| P2.3 | [x] `d_orbit` via phased `separation`; 0 if unsited | P2.2 | |
+| P2.4 | [x] `route_melt` + clear_trade / conductor / CLI use D_eff | P2.1, P2.3 | call-not-copy |
+| P2.5 | [x] Alignment CHEAP/FAIR/DEAR/— from D_orbit thresholds | P2.4 | desk colors |
+| P2.6 | [x] ROUTES pane: projected melt next 6 year-steps | P2.5 | |
+| P2.7 | [x] TRADE peers sorted OPEN by rising melt | P2.5 | |
+| P2.8 | [x] Q-F1 coded: `ORBIT_PHASE_TICKS = 60` year-voice | P2.2 | |
+| P2.9 | [x] `phase_shifts_orbit_and_melt` pin | P2.4 | green |
+| P2.10 | [x] Docs + BUILD_ORDER Phase 2 land | P2.9 | |
 
 **Phase 2 done when:** a player can delay a haul one window and measure
 lower void loss under pure law.

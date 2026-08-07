@@ -10,6 +10,8 @@
 mod agent;
 mod corpus;
 mod desk;
+mod help_menu;
+mod style;
 
 use std::io::{self, BufRead, Write};
 
@@ -18,6 +20,7 @@ use cfe::ipsal::Scope;
 use cfe::ratio::{ratio, Ratio};
 use cfe::vrp::ChainRead;
 use cfe::world::{replay, ActionRefused, World, SOVEREIGN};
+use style::Style;
 
 /// The slice's world is an 8×8 tile grid; tile = row*8 + col.
 const GRID: u16 = 8;
@@ -30,7 +33,7 @@ fn main() {
         .position(|arg| arg == "--script")
         .and_then(|at| args.get(at + 1))
         .cloned();
-    let style = Style { plain };
+    let style = Style::new(plain);
     let mut world = World::new();
     let mut current: u64 = cfe::world::FIRST_ORB;
     banner(&style);
@@ -67,49 +70,16 @@ fn main() {
     }
 }
 
-struct Style {
-    plain: bool,
-}
-
-impl Style {
-    fn wrap(&self, code: &str, text: &str) -> String {
-        match self.plain {
-            true => text.to_string(),
-            false => format!("\x1b[{code}m{text}\x1b[0m"),
-        }
-    }
-    fn ok(&self, text: &str) -> String {
-        self.wrap("1;32", text) // bold green — a sealed closure
-    }
-    fn warn(&self, text: &str) -> String {
-        self.wrap("1;33", text) // bold yellow — workspace / caution
-    }
-    fn bad(&self, text: &str) -> String {
-        self.wrap("1;31", text) // bold red — a refusal
-    }
-    fn head(&self, text: &str) -> String {
-        self.wrap("1;36", text) // bold cyan — section headers
-    }
-    fn strong(&self, text: &str) -> String {
-        self.wrap("1", text) // bold — numbers the eye should catch
-    }
-    fn dim(&self, text: &str) -> String {
-        self.wrap("2", text) // dim — structure, hashes, hints
-    }
-    fn prompt(&self, text: &str) -> String {
-        self.wrap("1;35", text)
-    }
-}
-
 fn banner(style: &Style) {
-    println!("{}", style.head("╔══════════════════════════════════════════════╗"));
-    println!("{}", style.head("║  NETSTRATUM — the first slice                ║"));
-    println!("{}", style.head("╚══════════════════════════════════════════════╝"));
+    println!("{}", style.border("╔══════════════════════════════════════════════════╗"));
+    println!("{}", style.title("║  NETSTRATUM — colony · trade desk · chronicle    ║"));
+    println!("{}", style.border("╚══════════════════════════════════════════════════╝"));
     println!(
-        "Start with {} then {} — type {} for everything.",
-        style.strong("found <name>"),
-        style.strong("zone <tile|r:c> <ext|hab>"),
-        style.strong("help")
+        "  {}  then  {}  ·  {}  ·  {} for topics",
+        style.verb("found <name>"),
+        style.verb("zone <tile> ext"),
+        style.verb("desk enter"),
+        style.key("help")
     );
 }
 
@@ -294,7 +264,10 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         }
         Some("stamp") => stamp_command(world, words, style, *current),
         Some("element") => element_command(world, words, style, *current),
-        Some("help") => help(style),
+        Some("help") => {
+            let topic = words.next();
+            help_menu::help(*style, topic);
+        }
         Some("found") => {
             let name = words.collect::<Vec<_>>().join(" ");
             match name.is_empty() {
@@ -3919,7 +3892,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
     }
 }
 
-/// Phase-1 desk entry: one-shot pane render, or interactive loop.
+/// Desk entry: one-shot pane render, or interactive loop (full ANSI).
 fn desk_command(
     world: &mut World,
     mut pane: desk::Pane,
@@ -3929,15 +3902,18 @@ fn desk_command(
 ) {
     let enter = matches!(words.next(), Some("enter") | Some("loop") | Some("i"));
     let show = |world: &World, pane: desk::Pane| {
-        for line in desk::render_frame(world, pane, current) {
+        for line in desk::render_frame(*style, world, pane, current) {
             println!("{line}");
         }
     };
     show(world, pane);
     if !enter {
         println!(
-            "  {} `desk enter` for interactive loop · pane keys t y r a f x g d e · q quits",
-            style.dim("hint:")
+            "  {} {} · pane keys {} · {}",
+            style.hint("hint:"),
+            style.verb("desk enter"),
+            style.key("t y r a f x g d e"),
+            style.key("help desk")
         );
         return;
     }
@@ -3956,21 +3932,12 @@ fn desk_command(
                 }
                 match line {
                     "q" | "quit" | "exit" | "back" => break,
-                    "?" | "help" => {
-                        println!(
-                            "  panes: t trade · y diplo · r routes · a arb · f fleet · x exch · g grow · d defend · e explore"
-                        );
-                        println!(
-                            "  or type any world verb (offer, trade, stamp, element, charter, treaty…); empty redisplays"
-                        );
-                    }
+                    "?" | "help" => help_menu::help(*style, Some("desk")),
                     key if desk::Pane::from_key(key).is_some() => {
                         pane = desk::Pane::from_key(key).expect("just checked");
                         show(world, pane);
                     }
                     other => {
-                        // Dispatch deeds through the ordinary command path
-                        // (P1.9 — no shadow ledger).
                         let mut cur = current;
                         command(world, other, style, &mut cur);
                         show(world, pane);
@@ -4062,7 +4029,7 @@ fn stamp_command(
                             &charted_position(&my_name),
                             &charted_position(&target),
                         );
-                        let melt = cfe::world::pair_melt(world, &far, &distance);
+                        let melt = cfe::world::route_melt(world, &far, &distance);
                         match cfe::world::stamp_aperture_transfer(
                             world,
                             current,
@@ -4150,7 +4117,7 @@ fn element_command(
                                 &charted_position(&my_name),
                                 &charted_position(&target),
                             );
-                            let melt = cfe::world::pair_melt(world, &far, &distance);
+                            let melt = cfe::world::route_melt(world, &far, &distance);
                             match cfe::world::element_aperture_transfer(
                                 world,
                                 current,
@@ -4294,85 +4261,6 @@ fn element_command(
     }
 }
 
-fn help(style: &Style) {
-    let lines = [
-        ("found <name>", "establish your colony (banks 20 iron + 10 biomass) — your first receipt"),
-        ("zone <tile|r:c> <kind>", "build — ext: 10 iron → +3/2 iron/t · hab: 5 bio → +1 bio/t · smelt: 15 iron+10 bio → 2 iron+1/2 bio in, +1 alloy/t · synth: 20 alloy+15 bio → 4 alloy+1 bio in, +1/4 diamond/t · enc: 8 iron → encases excess heat as joules · res: 10 alloy+5 diamond → 1/4 diamond in, +1/8 crystal/t"),
-        ("tick <n>", "let n ticks pass — active zones net yield−upkeep into the workspace; famine strikes if a store runs dry"),
-        ("collect", "settle the workspace against the bank — sealed as receipts; only banked value persists"),
-        ("raze <tile|r:c>", "demolish a zone for half its cost back — the famine escape hatch"),
-        ("chart <planet> [from <p>]", "found a charted colony: the founding reserves MOVE from the source colony (nothing is minted)"),
-        ("send <amt> <res> to <p> [from <p>]", "move banked value between planets — conservation exact; demurrage settles both sides at the touch; a gift covering the one-tick bill relieves famine"),
-        ("absorb <amt> from <p> [into <p>]", "route a hot planet's un-sealed overflow into the absorber's banked sink — emptying it clears the strike; the draw owes the absorber within the reciprocity window or it lapses to the extraction book"),
-        ("bond <rate> <res> to <p> [for <n>]", "seal a standing order: rate/tick streams without per-tick clearing, settled in one receipt at each touch — a term bond expires orderly; severing or defaulting posts the notice load"),
-        ("sever <res> to <p> · bonds", "cut a standing bond (the load posts to the cutter) · list the standing orders"),
-        ("forward <q> <res> to <p> within <n>", "vitrify a delivery pact in the Glasskeeper lattice — collateral (priced by your fidelity books, never barred) locks until the quota is delivered (release) or the deadline passes (BREACH_AND_SLASH); `forwards` lists the open pacts"),        ("growth", "GROWTH-1: the six axes of how a line actually grew — practice (did the writing SPAN chain time), knowledge (breadth), expertise (depth), wisdom (accounts carrying BOTH sides — a line that only ever posted wins has learned nothing), locality (scope), triviality (what moved nothing, the guard that keeps the rest honest). Carried whole; there is no score"),
-        ("literature · aspire <work> · claim <work> on <digest>", "LIT-1: the works a LITERATE line may reach for — VALOR · HONOR · COURAGE · COMMITMENT. Literacy is DERIVED and never granted: keep a book of your own (`book mint` then `book post`) and the literature opens. Aspiring is free and proves nothing; CLAIMING cites chain receipts, and the law verifies every digest is a receipt this world sealed. It never scores the virtue — a claim without receipts is a boast"),
-        ("book · book mint <name> · book post <kept> <lost> <name> · book archive <name>", "BOOK-1: the OPEN registry — a line mints its own kinds of account beside the charter's four. A book is a DUAL ledger (kept against lost) and posts both sides at once. Archiving closes it to WRITING and never to reading: every entry it took stays. A book IS its normalized name, so re-minting one is not a second book, and the charter's four can be neither minted over nor closed"),
-
-        ("ideology", "the dual cohesion ledger for this planet — the four axes, their books, and the derived readings; divergent trade partners pay a friction entropy tax, aligned ones pay zero"),
-        ("desk [t|y|r|a|f|x|g|d|e] · desk enter", "TRADE DESK (Phase 1): interactive panes over live melt/routes/treaties — TRADE peers, DIPLO, ROUTES, ARBITRAGE map; colony strip always on; no shadow ledger"),
-        ("stamp [balance] · stamp mint <amt> · stamp aperture <amt> to <world> deal <n>", "STAMP-1 player path: show balance; crystal→STAMP identity mint; cross-world STAMP aperture (pays melt)"),
-        ("element aperture <amt> <prefix> to <world> deal <n> · element charter <world> <prefix> deal <n> [rail <1-4>]", "E-APT / E-ROUTE player path: haul open matter under pair_melt; charter element lane + rail"),
-        ("charter <world> deal <n>", "ROUTE-1: charter a maintained lane — melt × (1−η), η from the pair's best instrument grade; upkeep draws at the year voice, unpaid lanes lapse"),
-        ("eras · visit <stamp>", "HISTORY AS A PLACE: the record segmented by era folds, cleaves, confluences and successions — and `visit` reconstructs the world AS IT STOOD at any stamp by replaying the prefix; the past provably happened and is visitable"),
-        ("dashboard · settlements · rings · elements · civs · contacts · routes", "THE ATLAS: your whole aspect, listable — the board overview; every settlement's zones and banks; the star's rings and thermal bands; the named element table and banked matter; the registered civilizations; aperture deals, councils and pens; the chartered lanes"),
-        ("corpus [<n>] · corpus list · corpus try [<n>] <move>… · corpus solve [<n>] <move>…", "THE CORPUS BENCH: the economy's second head, played. The bench serves the 34 ARC tasks the carrier law actually PRICES and pays a verified solve at the measured weight W = scarcity × complexity (the blind-spot task pays most, being 283/1). A proof is not an ANSWER, it is an EXPLANATION — a program that reproduces every training pair and then the test input — so `try` shows you exactly which pairs your rule explains and where it misses, and `solve` seals it. Moves: rot90 · rot180 · rot270 · fliph · flipv · transpose · recolor:0>1,7>2 · tile:3x3[:rows|cols|both][:…]. A task pays a world ONCE: cognition pays for what it first explained"),
-        ("treaty <kind> with <world> [deal <n>] [for <n>] [melt <p>/<q>] · treaties · treaty renounce <deal> <world>", "#42 THE POLITICAL SPECTRUM — trade · defense · peace · war, as one co-signed pairwise charter. The KIND is the sign of what it binds: a concord (trade, defense) must EASE the crossing, a war must BURDEN it, and a PEACE binds nothing at all — barring war is its whole content. Peace and war displace each other: peace ends a war for free, war BREAKS a peace and the load posts to the breaker's own book. A defense pact spends the option to attack (you cannot declare war on one you swore to defend, nor swear to defend one you are at war with). Both books must seal it or it moves nothing, either may renounce its OWN leg, and a term runs out by the clock. A pair at WAR is walled: no aperture crosses"),
-        ("agent <handle> · agent <handle> <deed> …", "#39 THE AGENT DOOR — the INBOUND half of the uplink (`lens` state JSON is the outbound half). Bare, it REGISTERS a contained agent with zero grants; with a deed it SUBMITS one through the door, answered as one JSON object naming the actor, the deed, whether it sealed, and the receipt digest if it did. The door adds NO authority: every request runs the same scoped `*_as` verb the operator's own commands do, so an agent is an entity with grants and the gate judges it identically. Deeds: zone · prospect · raze · collect · assay · compound, plus `look`, which is a reading and seals nothing"),
-        ("spectrum", "P3: the cognition reading — what this chain actually solved, weighed against the benchmark floor; a reading, never a score"),
-        ("zone <tile> regen", "REGEN-1: the regenerator — restores the line's own ration at the extractor's rate (every number derives from the standing table); requires the DEEPENING (condition 3) crystallized on the orb"),
-        ("prospect <stratum> · assay <prefix>", "THE GROUND: prospecting READS what your genesis seed always held at a stratum — one stratum, one reading, and no redraw can re-roll it; assaying DRAWS richness × elapsed from an opened vein. ECO-1: the draw TIRES the vein (priced against its hash-derived natural flow) and regenerators on the orb restore it between draws, so extraction has a long-run cost and tending the ground pays"),
-        ("bench · compound <prefix> <prefix> …", "ELEMENT-CHEMISTRY: matter BONDS. A set compounds when every member shares the geometry and the phase, the count equals the geometry's arity, and the binds SATURATE — so the recipe is the LANES', not the members', and one recipe names a family of gems at every line. Each member spends its lane's valence and the gem carries away exactly the sum. `bench` lists every set your ledger could make; the gem is content-addressed, so the same matter names the same gem in every world — which is what makes it tradeable. Bonding also needs the place: your star must carry the line, your strata must bring the pressure, and the orb must be at a workable heat"),
-        ("forge <condition>", "MANU-1: forge an instrument from a crystallized condition + the converter chain (alloy = grade; diamond at 3+) — scan reach = base + best grade"),
-        ("pen <world> · pen return <world>", "the receipted handoff (MESH-1b): ask the conductor for a world\'s pen — the seal lands at its next beat and your cross-world deeds write there lawfully; return it when done"),
-        ("login [name] · whoami · continue", "the operator menu (prototype, no passwords): many accounts on one machine — login mints/switches, bare login lists, continue resumes your profile\'s last saved world"),
-        ("t0 <inbox|move|galaxies|contract|clean>", "the progenitor console (tier 0): inbox streams the upward petitions; move <world> x y z re-charts a sector (the separation deed); galaxies reads the charted skies (13_GALAXY — membership derived, never stored); contract folds the era; clean sweeps --closed-* ruins"),
-        ("venture <cond> to <world> via <council> deal <n>", "SCIENCE-1: the joint research venture — incompatible sciences cross their outputs (a council-bound licensed leap, named as what it is)"),
-        ("offer … · trade …", "MARKET-1: offer <amt> <res> for <amt> <res> id <n> posts a resting intent (no escrow, no absolute price); trade <mine> with <world> <theirs> deal <n> clears a crossing at the RESTING price via two aperture pairs"),
-        ("shift <grade> <value>", "GAUGE-N: move — or open — the key at a grade; the fiber is a graded vector, not one dial (grade 0 stays the landed scalar every law binds to)"),
-        ("elevate <delta> · age <class>", "the union verbs on this world: the three-gate gauge climb (settle · cohere · cross), and the star moving in its region"),
-        ("council <id> <res> <quota> <win> <stake> with <p,p,p>", "seal a multilateral forward — three or more planets bound alike, judged together at the boundary"),
-        ("aperture <amt> <res> to <world> deal <n>", "cross banked value into another saved world — two legs, one deal, both chronicles sealed at once"),
-        ("license <cond> to <world> via <council> deal <n>", "issue a technology into another world through diplomacy; condition 6 gifts THE CROWN onto a finished base-7 stack"),
-        ("ascend <sigil> to <station>", "claim a station seat for a line whose world has crossed and climbed — the registry checks the room; a seat is reached, never appointed"),
-        ("tech", "the constellation: this line's base-11 sky — held nodes with their voice-names, exact progress toward what has not crystallized, the crown's gate"),
-        ("venture <cond> to <world> via <council> deal <n>", "SCIENCE-1: the joint research venture — incompatible sciences cross their outputs (a council-bound licensed leap, named as what it is)"),
-        ("offer … · trade …", "MARKET-1: offer <amt> <res> for <amt> <res> id <n> posts a resting intent (no escrow, no absolute price); trade <mine> with <world> <theirs> deal <n> clears a crossing at the RESTING price via two aperture pairs"),
-        ("shift <grade> <value>", "GAUGE-N: move — or open — the key at a grade; the fiber is a graded vector, not one dial (grade 0 stays the landed scalar every law binds to)"),
-        ("elevate <delta> · age <class>", "the union verbs on this world: the three-gate gauge climb (settle · cohere · cross), and the star moving in its region"),
-        ("council <id> <res> <quota> <win> <stake> with <p,p,p>", "seal a multilateral forward — three or more planets bound alike, judged together at the boundary"),
-        ("aperture <amt> <res> to <world> deal <n>", "cross banked value into another saved world — two legs, one deal, both chronicles sealed at once"),
-        ("license <cond> to <world> via <council> deal <n>", "issue a technology into another world through diplomacy; condition 6 gifts THE CROWN onto a finished base-7 stack"),
-        ("ascend <sigil> to <station>", "claim a station seat for a line whose world has crossed and climbed — the registry checks the room; a seat is reached, never appointed"),
-        ("tech", "the constellation: this line's base-11 sky — held nodes with their voice-names, exact progress toward what has not crystallized, the crown's gate"),
-        ("terraform <albedo> <orbit>", "the gifted crown (base-7 complete + licensed from tier 0): re-seat a sited planet — the only lawful way an orbit moves"),
-        ("npcs [pause|resume|speed <s>]", "the player\'s hand on the autonomous board — pause holds every polity world, speed sets seconds between beats (0 = flat out); bare npcs shows the state"),
-        ("civ [seats] · civ new …", "the civ console: seats shows every station\'s room (progenitors per domain, 8 each — space, not rank); civ new <sigil> | <Name> | <species> | <motto> | <disp> <metab> <perc> [station] registers a custom line and rosters it for the conductor"),
-        ("save · resume <world>", "sync the chronicle to var/worlds/<name>/ (append-only) · resume a saved world at launch"),
-        ("planet <name> · planets", "switch the planet cursor · list this world's planets"),
-        ("agent <handle>", "register a contained agent (zero grants until you open scopes)"),
-        ("grant|revoke <handle> <scope>", "open or shut an agent's scope: build, raze, collect — revocation is immediate"),
-        ("as <handle> <cmd>", "act as an entity — its authority, its generation tag on the receipts"),
-        ("who", "everyone in this world: sovereigns, agents, grants"),
-        ("star <class>", "commission the sun (once): O B A F G K M · bd wd rg ns wr lwh — fixes L for every orbit"),
-        ("site <albedo> <r>", "site this planet's orbit (exact fractions) — thermal wakes: encase first, only overflow vents"),
-        ("thermal", "the thermal read: T_eq⁴, band, overheat, encased joules"),
-        ("scan [planet]", "the resonance scanner (draws 1 crystal from THIS planet): finds orbs structurally congruent to the exemplar — same zones under the grid symmetry, same bank, same band; near-misses refuse with their delta whole; bare scan hunts this planet's twins"),
-        ("succeed <line>", "the succession deed (10 §3c): a successor line adopts a DERELICT world's chronicle — refuses while any planet stands unfamished; the living tree drops to the kernel, every discovered node stands in the record forever, and the successor's conditions read the whole inherited history"),
-        ("genesis <civ> <d> <m> <p>", "G1: seal the line's three axes as THE binding receipt in this world's chronicle (once per world) — dispositions expansionist|empiricist|epicurean · metabolisms mineral|biotic|plasmic · perceptions planar|volumetric|harmonic|umbral; the scored progress read follows the sealed disposition"),
-        ("map", "the tile grid"),
-        ("status", "colony, ledgers, clock, receipts"),
-        ("chronicle", "the world's full receipted history"),
-        ("journal", "the chronicle feed: one entry per completed 60-tick year, newest first"),
-        ("verify", "re-check every hash link in the chain"),
-        ("replay", "rebuild the world from receipts alone and compare"),
-        ("quit", "leave (no disk persistence yet — each launch is a fresh world)"),
-    ];
-    for (name, what) in lines {
-        println!("  {:<28} {}", style.strong(name), what);
-    }
-}
 
 fn parse_scope(word: &str) -> Option<Scope> {
     match word {

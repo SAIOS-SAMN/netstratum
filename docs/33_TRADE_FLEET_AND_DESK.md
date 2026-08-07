@@ -1,9 +1,8 @@
 # 33 — TRADE DESK · FLEETS · ALIGNMENT · LOCAL CAPITAL
 
-**Status:** PARTIAL LAND — **Phase 1** (sightlines & player parity) on
-main; Phases 2–5 still design. Captures the full interactive trade /
-diplomacy / fleet / localized capital-market surface.
-Implementation board: **`TASKS_TRADE_FLEET_DESK.md`**.
+**Status:** PARTIAL LAND — **Phases 1–2** on main (sightlines + alignment
+economics); Phases 3–5 still design. Implementation board:
+**`TASKS_TRADE_FLEET_DESK.md`**.
 
 **Does not overturn:** CHARTER exactness, SEAL B, call-not-copy, tuned-
 constant ratchet, ROUTE-1 / MARKET-1 / STAMP-1 as landed. **Does not**
@@ -316,8 +315,8 @@ Authority detail and task IDs: **`TASKS_TRADE_FLEET_DESK.md`**.
 
 | Phase | Name | Player-visible exit |
 |-------|------|---------------------|
-| **1** | **Sightlines & parity** | **LANDED** — `desk` panes; `stamp` / `element` verbs; observer STAMP; melt pin |
-| **2** | **Alignment economics** | θ (ψ) driven; `D_eff` single producer; CHEAP/FAIR/DEAR windows on route panel |
+| **1** | **Sightlines & parity** | **LANDED** — desk panes; stamp/element verbs; observer STAMP |
+| **2** | **Alignment economics** | **LANDED** — `D_eff`, year-voice θ phase, alignment bands, melt windows |
 | **3** | **Fleet capital** | Scrap · yard · hull mint/assign/scrap; shipwright NPC spot; route capacity limited by hulls |
 | **4** | **Local capital markets** | Civ-filtered Note/Future/Share/Perp books; instrument_step; freight/alignment seasons tradeable |
 | **5** | **Defense & deep rails** | Escort/interdiction hooks; R3–R4 / Anchor exits for capital claims |

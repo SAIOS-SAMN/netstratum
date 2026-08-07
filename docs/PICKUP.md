@@ -21,9 +21,10 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 | ZoneKind compiled | **1–9** (ElementRefinery = 9) |
 | Codec | **SCHEMA_V6** (element_routes trailing) |
 | Pure-NPC green | offices, refine, element aperture, **STAMP spot** (`wave1_era_pins`) |
-| Next work | **Trade desk Phase 2** (alignment/`D_eff`) · P1.8 offer widen · I5 · R2.3 |
-| Docs | `30`/`31`/`32` partial; **`33` Phase-1 partial land**; two task boards |
-| Trade program | Phase 1 desk+STAMP+element verbs landed; Phases 2–5 open |
+| Next work | **Trade desk Phase 3** (fleets) · P1.8 offer widen · I5 · R2.3 |
+| Docs | `30`/`31`/`32` partial; **`33` Phases 1–2 partial land** |
+| Trade program | Desk+STAMP+element+alignment landed; Phases 3–5 open |
+| Help | `help` / `help desk` / topics — full ANSI (disable: `--plain`) |
 | Dirty / other lane | do not `git add -A` without reviewing observer/other-lane files |
 
 Older §0 counts (809 tests, 71 deeds, tag 95) are **historical**; re-measure

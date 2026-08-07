@@ -750,12 +750,133 @@ impl World {
     }
 }
 
+/// Phase-2 (33 / TASKS_TRADE_FLEET_DESK): ticks per orbital slot step.
+/// Year-voice default (Q-F1): one lattice slot per 60-tick year — the
+/// same base-60 ring as `TURN_SLOTS`, so a full year steps one place
+/// on the orbit. Not a free dial: it is the year length the colony
+/// loop already uses for journal segmentation.
+pub const ORBIT_PHASE_TICKS: u64 = 60;
+
+/// Alignment band for desk and route windows (derived from `D_orbit`,
+/// not a second melt formula).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Alignment {
+    /// Orbital separation in the lower quarter of a turn-scale.
+    Cheap,
+    /// Mid band.
+    Fair,
+    /// Wide orbital separation (dearest hauls).
+    Dear,
+    /// One or both ends unsited — no orbital term.
+    Unplaced,
+}
+
+impl Alignment {
+    pub fn word(self) -> &'static str {
+        match self {
+            Alignment::Cheap => "CHEAP",
+            Alignment::Fair => "FAIR",
+            Alignment::Dear => "DEAR",
+            Alignment::Unplaced => "—",
+        }
+    }
+}
+
+/// Phase advance on a sited θ: `index + floor(now / ORBIT_PHASE_TICKS)`
+/// wrapped on the turn lattice. Pure reading — no receipt (Q-F1 /
+/// design: derived from clock + site).
+fn phased_theta(site: &crate::dop::ThermalSite, now: u64) -> Option<crate::dop::Slot> {
+    let base = site.theta.as_ref()?;
+    let steps = (now / ORBIT_PHASE_TICKS) as i64;
+    Some(crate::dop::Slot::from_index(base.index() + steps))
+}
+
+/// Thermal site as the orbit law sees it at `now` (θ advanced; ψ fixed).
+fn phased_site(site: &crate::dop::ThermalSite, now: u64) -> crate::dop::ThermalSite {
+    let mut out = site.clone();
+    out.theta = phased_theta(site, now);
+    out
+}
+
+/// **D_orbit** — wrapped L1 separation of the two worlds' genesis orbs
+/// at their phased places. Zero when either is unsited / unplaced
+/// (33 §3.1: not "far", unplaced).
+pub fn d_orbit(a: &World, b: &World) -> Ratio {
+    let (Some(site_a), Some(site_b)) = (
+        a.orb().and_then(|o| o.thermal.as_ref()),
+        b.orb().and_then(|o| o.thermal.as_ref()),
+    ) else {
+        return ratio(0, 1);
+    };
+    let sa = phased_site(site_a, a.now());
+    let sb = phased_site(site_b, b.now());
+    crate::dop::separation(&sa, &sb).unwrap_or_else(|| ratio(0, 1))
+}
+
+/// **D_eff** — the one effective transit distance (33 §3.2):
+/// `D_chart + D_orbit`. Call-not-copy for every melt path.
+pub fn effective_distance(a: &World, b: &World, d_chart: &Ratio) -> Ratio {
+    d_chart.clone() + d_orbit(a, b)
+}
+
+/// Alignment band from current `D_orbit` (exact thresholds: 1/4, 1/2).
+pub fn alignment_of(a: &World, b: &World) -> Alignment {
+    let (Some(_), Some(_)) = (
+        a.orb().and_then(|o| o.thermal.as_ref()).and_then(|s| s.theta.as_ref()),
+        b.orb().and_then(|o| o.thermal.as_ref()).and_then(|s| s.theta.as_ref()),
+    ) else {
+        return Alignment::Unplaced;
+    };
+    let d = d_orbit(a, b);
+    if d < ratio(1, 4) {
+        Alignment::Cheap
+    } else if d < ratio(1, 2) {
+        Alignment::Fair
+    } else {
+        Alignment::Dear
+    }
+}
+
+/// Projected melt at a future home clock (peer clock held). Pure.
+pub fn route_melt_at(
+    a: &World,
+    b: &World,
+    d_chart: &Ratio,
+    home_now: u64,
+) -> Ratio {
+    // Temporarily phase home against an explicit now by constructing
+    // D_orbit with a synthetic read: recompute separation with home
+    // phased to home_now and peer to its own now.
+    let (Some(site_a), Some(site_b)) = (
+        a.orb().and_then(|o| o.thermal.as_ref()),
+        b.orb().and_then(|o| o.thermal.as_ref()),
+    ) else {
+        return pair_melt(a, b, d_chart);
+    };
+    let sa = phased_site(site_a, home_now);
+    let sb = phased_site(site_b, b.now());
+    let orbit = crate::dop::separation(&sa, &sb).unwrap_or_else(|| ratio(0, 1));
+    let d_eff = d_chart.clone() + orbit;
+    pair_melt(a, b, &d_eff)
+}
+
+/// **Route melt** — the desk and market path: `pair_melt` over
+/// [`effective_distance`]. One producer of the iceberg number for
+/// interplanetary economics.
+pub fn route_melt(a: &World, b: &World, d_chart: &Ratio) -> Ratio {
+    pair_melt(a, b, &effective_distance(a, b, d_chart))
+}
+
 /// MARKET-2: THE pair's melt fraction — the one producer of the
 /// formula. The transit reads the whole manifold gap (spatial L1 +
-/// the wrapped key gap: 11 §2.1's clash consumes payload, never a
-/// tertiary sink) at φ = 1/64 per unit; the best lane BOTH books
-/// hold (ROUTE-1) suppresses it. At ≥ 1 the pair is economically
-/// WALLED by decay physics.
+/// orbital phase + the wrapped key gap: 11 §2.1's clash consumes
+/// payload, never a tertiary sink) at φ = 1/64 per unit; the best
+/// lane BOTH books hold (ROUTE-1) suppresses it. At ≥ 1 the pair is
+/// economically WALLED by decay physics.
+///
+/// **Callers that have a chart distance should prefer [`route_melt`],**
+/// which folds Phase-2 `D_orbit` into the distance argument. Passing
+/// raw `D_chart` alone understates cost when both ends are sited.
 pub fn pair_melt(a: &World, b: &World, distance: &Ratio) -> Ratio {
     let gap = key_distance(a.key(), b.key());
     let mut melt = (distance.clone() + gap) * ratio(MELT_PER_UNIT.0, MELT_PER_UNIT.1);
@@ -871,7 +992,8 @@ pub fn clear_trade(
     // (1 − φ·D). ONE producer of the melt number (the conform
     // ruling's spirit): clear_trade and every profit test read
     // pair_melt, nothing recomputes the formula.
-    let melt = pair_melt(a, b, &distance);
+    // Phase-2: distance arg is D_chart; melt sees D_eff.
+    let melt = route_melt(a, b, &distance);
     // The two directions — each an aperture pair, shield-checked,
     // demurrage-touched; sent − received = the void's exact share.
     haul(a, held_a.orb, b, held_b.orb, held_a.give, x, deal, &melt)?;

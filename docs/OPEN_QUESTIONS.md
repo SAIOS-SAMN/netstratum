@@ -313,7 +313,7 @@ ship before a full ruling.
 
 | ID | Question | Default if forced early |
 |----|----------|-------------------------|
-| **Q-F1** | θ advance per tick vs year-voice only? | Year-voice coarse; tick fine optional |
+| **Q-F1** | θ advance per tick vs year-voice only? | **CODED Phase-2:** year-voice — `ORBIT_PHASE_TICKS = 60` |
 | **Q-F2** | Hull η stack with route η? | Product of complements (pin Phase 3) |
 | **Q-F3** | Scrap: one pool vs per-resource? | **One scrap pool** from iron/alloy burn v1 |
 | **Q-F4** | Can T3 mint hulls without yard zone? | **Yard required**; office optional advantage |

@@ -986,5 +986,12 @@ board `TASKS_TRADE_FLEET_DESK.md`.
 - Observer STAMP (TLV 73) + lens JSON `stamp`
 - P1.8 offer cargo widen **deferred** (STAMP/element clear via dedicated verbs)
 
-**Next:** Phase 2 alignment (`D_eff`) · or finish P1.8 MARKET-1 widen.
+**Phase 2 LANDED — alignment economics:**
+- `cfe::world::{d_orbit, effective_distance, route_melt, alignment_of}`
+- θ advances pure-from-clock (`ORBIT_PHASE_TICKS = 60`, Q-F1 year-voice)
+- Desk TRADE shows D_chart/D_orb/D_eff/melt/align; ROUTES melt windows
+- CLI/conductor clear paths use `route_melt` (D_eff)
+- Full ANSI help menus: `help`, `help desk`, `help stamp`, …
+
+**Next:** Phase 3 fleet capital · or P1.8 MARKET-1 offer widen.
 
