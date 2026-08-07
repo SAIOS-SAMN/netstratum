@@ -1037,10 +1037,80 @@ impl Polity {
         }
     }
 
+    /// **GROUND STEP** (operator lock 2026-08-07) — the almanac arm of
+    /// the autonomous loop. Issues the same deeds the CLI uses:
+    /// `prospect_as` (Scope::Build) and `assay_as` (Scope::Collect).
+    ///
+    /// **Baseline policy (deterministic, no metabolic gates):**
+    /// - Prospect: the lowest unopened stratum on each commissioned
+    ///   orb, at most one successful prospect per beat (same capacity
+    ///   discipline as `build_step`'s one zone).
+    /// - Assay: every open vein where `now > last_assay` (span law).
+    ///
+    /// Placement in `cycle`: after `build_step`, before `tick`, so
+    /// open veins and banked elements stand before Resource yields.
+    fn ground_step(&mut self) {
+        if self.world.star().is_none() {
+            return; // prospect refuses NoStarCommissioned
+        }
+        let automaton = self.automaton;
+        let orbs: Vec<u64> = self
+            .world
+            .committed()
+            .orbs
+            .iter()
+            .map(|held| held.orb_id)
+            .collect();
+
+        // PROSPECT — one success per beat, lowest stratum first.
+        let mut prospected = false;
+        for orb in &orbs {
+            if prospected {
+                break;
+            }
+            for stratum in 0u8..=31 {
+                match self.world.prospect_as(automaton, *orb, stratum) {
+                    Ok(_) => {
+                        prospected = true;
+                        break;
+                    }
+                    // Already open: try the next higher stratum.
+                    Err(cfe::world::ActionRefused::StratumProspected { .. }) => continue,
+                    // Any other refusal (scope, no orb, …): leave this orb.
+                    Err(_) => break,
+                }
+            }
+        }
+
+        // ASSAY — every open vein with a positive span.
+        // Snapshot (orb, element, last_assay): assay mutates prospects.
+        let veins: Vec<(u64, [u8; 32], u64)> = self
+            .world
+            .committed()
+            .prospects
+            .iter()
+            .map(|vein| (vein.orb, vein.element, vein.last_assay))
+            .collect();
+        let now = self.world.now();
+        for (orb, element, last_assay) in veins {
+            if now <= last_assay {
+                continue; // NothingAccrued — wait for the tick to open span
+            }
+            let _ = self.world.assay_as(automaton, orb, element);
+        }
+    }
+
     /// The policy's build decision — at most one zone per beat, never
     /// during famine, always through the contained actor. Industry is
     /// GATED ON RESEARCH for every temperament: smelters need rung 3,
     /// synthesizers rung 5.
+    ///
+    /// **ECO regenerators (operator lock 2026-08-07, mandatory):** when
+    /// any open vein on an orb is worn (richness below its natural
+    /// spring), the polity prioritizes `ZoneKind::Regenerator` so the
+    /// element extraction lifecycle repairs itself. Regenerator
+    /// placement requires DEEPENING (condition 3); the steward gifts
+    /// that node when the ecology demands it and the gift is lawful.
     /// RQP/FUNCTION wiring (operator directive 2026-07-30): the
     /// Pathfinder directs the drills. A mature colony (rung 5 — the
     /// synthesizer tier that can have refined a crystal) pays the
@@ -1209,12 +1279,80 @@ impl Polity {
         }
     }
 
+    /// True when any open vein on `orb` is worn: richness below the
+    /// hash-derived natural spring (`element_properties`). Prospected
+    /// but never assayed veins sit at nature and do not count.
+    fn orb_veins_worn(world: &World, orb: u64) -> bool {
+        let Some(class) = world.star() else {
+            return false;
+        };
+        world.committed().prospects.iter().any(|vein| {
+            if vein.orb != orb {
+                return false;
+            }
+            let (_, _, natural) = cfe::dop::element_properties(&vein.element, class);
+            vein.richness < natural
+        })
+    }
+
+    /// An orb that has worn veins and no regenerator yet needs repair.
+    fn orb_needs_regenerator(world: &World, orb: u64) -> bool {
+        if !Self::orb_veins_worn(world, orb) {
+            return false;
+        }
+        let regens = world
+            .committed()
+            .orbs
+            .iter()
+            .find(|held| held.orb_id == orb)
+            .map(|held| {
+                held.zones
+                    .iter()
+                    .filter(|z| z.kind == ZoneKind::Regenerator)
+                    .count()
+            })
+            .unwrap_or(0);
+        regens == 0
+    }
+
     fn build_step(&mut self) {
         self.gather_for_forge();
+        let steward = self.steward;
+        let automaton = self.automaton;
         let world = &mut self.world;
         if world.orb().is_none_or(|orb| !orb.famine.is_empty()) {
             return; // starving colonies build nothing
         }
+
+        // ECO regenerators first: extract-without-repair is a doomed
+        // ecology. Prefer the regenerator over every other build when
+        // veins are worn and no regenerator stands. DEEPENING (3) is
+        // gifted by the steward when the zone gate requires it.
+        let primary = cfe::world::FIRST_ORB;
+        if Self::orb_needs_regenerator(world, primary) {
+            let holds_deepening = world
+                .committed()
+                .techs
+                .iter()
+                .any(|(o, c, _, _)| *o == primary && *c == 3);
+            if !holds_deepening {
+                let _ = world.grant_tech_as(steward, primary, 3);
+            }
+            let can_pay = ZoneKind::Regenerator.cost().into_iter().all(|(resource, need)| {
+                banked(world, resource) >= need
+            });
+            if can_pay {
+                if let Some(tile) = next_free_tile(world) {
+                    if world
+                        .zone_as(automaton, primary, tile, ZoneKind::Regenerator)
+                        .is_ok()
+                    {
+                        return; // one zone per beat — the regenerator took it
+                    }
+                }
+            }
+        }
+
         let (ext, hab) = (
             zone_count(world, ZoneKind::Extractor),
             zone_count(world, ZoneKind::Habitat),
@@ -2073,10 +2211,16 @@ impl Polity {
 
     /// One full heartbeat. A growth returns the newborn's spec —
     /// the era loop gives it a world of its own.
+    ///
+    /// **Cycle topology (operator lock 2026-08-07):**
+    /// `build_step` → `ground_step` → `tick` → `collect_as`.
+    /// Ground finalizes open veins and newly assayed elements before
+    /// Resource yields accrue and bank. Survey remains after the
+    /// locked quartet so it cannot interleave between build and ground.
     pub fn cycle(&mut self, book: &Ledger, registry: &Registry) -> Option<PolitySpec> {
         self.drain_inbox(book);
         self.build_step();
-        self.survey_step();
+        self.ground_step();
         self.world.tick();
         // Every settled orb collects — a chartered survey site left
         // uncollected would starve at its own upkeep.
@@ -2084,6 +2228,7 @@ impl Polity {
         for orb in orbs {
             let _ = self.world.collect_as(self.automaton, orb);
         }
+        self.survey_step();
         self.research_step(book);
         let newborn = self.divergence_step(registry);
         // THE RESUME CARRIER (task 25, 2026-07-30): every polity
