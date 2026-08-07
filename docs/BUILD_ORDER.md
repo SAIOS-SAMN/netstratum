@@ -1009,7 +1009,14 @@ See `34_MATTER_BALANCE.md`.
 `ORBIT_PHASE_TICKS × core_magnetism × disposition / star.magnetism()`
 (not lockstep). Holding scales **4 Orbital** / **5 Stratum** on appraisal
 (tag 98). CLI `estate survey|parcels`, `appraise …`, `rings` shows period.
-Kernel **0.25.0**. See `35_ORBIT_DYNAMO_AND_ESTATE.md`, `ENDOWMENTS` §8.
+See `35_ORBIT_DYNAMO_AND_ESTATE.md`, `ENDOWMENTS` §8.
 
-**Next:** Phase 4 local capital markets · or P1.8 offer widen · Q-O1 ψ.
+**Phase 4 PARTIAL — local capital (NOTE-1 / FUT-1):**
+- Tags **120–124** NoteIssued/Redeemed, FutureOpened/Settled, LastClearMarked
+- SCHEMA_V8 notes/futures/last_clears trail; kernel **0.26.0**
+- Listing filter: STAMP/cargo evidence · expansionist · Exchange seat
+- `instrument_step` NPC; CLI `note` / `future`; pins `instrument_pins`
+- Share/Perp deferred; shipwright finance open; FORWARD-1 stays parallel
+
+**Next:** SHARE-1 / PERP-1 · shipwright Note finance · Phase 5 · P1.8 · Q-O1.
 

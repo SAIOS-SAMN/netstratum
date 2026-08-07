@@ -38,6 +38,9 @@ impl World {
             taxon: None,
             stations: Vec::new(),
             hulls: Vec::new(),
+            notes: Vec::new(),
+            futures: Vec::new(),
+            last_clears: Vec::new(),
         }
     }
     /// P2-PERSIST — resume a world from its chronicle: the committed
@@ -86,6 +89,9 @@ impl World {
             taxon: committed.taxon,
             stations: committed.stations,
             hulls: committed.hulls,
+            notes: committed.notes,
+            futures: committed.futures,
+            last_clears: committed.last_clears,
         }
     }
     /// ELEVATE-1 (12_UNION §6) — THE THREE-GATE GAUGE CLIMB, the

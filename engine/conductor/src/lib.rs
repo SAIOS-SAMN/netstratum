@@ -3296,6 +3296,7 @@ pub fn run_era_with(var_root: &str, cycles: u32, mode: SearchMode) -> Vec<Polity
         let _ = merchant_step(&mut worlds, u64::from(beat));
         let _ = element_trade_step(&mut worlds, u64::from(beat));
         let _ = stamp_market_step(&mut worlds, u64::from(beat));
+        instrument_step(&mut worlds);
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — the lens renders journals + wall, write-only display
         // of the chronicle, never a state change.
@@ -3314,6 +3315,70 @@ pub fn run_era_with(var_root: &str, cycles: u32, mode: SearchMode) -> Vec<Polity
         }
     }
     worlds
+}
+
+/// PHASE-4 — pure NPC instrument lifecycle (P4.7): mark last clears,
+/// redeem matured notes, settle expired futures; issue a small Note
+/// when listable and STAMP affords half-face collateral.
+pub fn instrument_step(worlds: &mut [Polity]) {
+    for polity in worlds.iter_mut() {
+        if polity.penned {
+            continue;
+        }
+        ensure_npc_instruments(&mut polity.world, polity.automaton);
+    }
+}
+
+fn ensure_npc_instruments(world: &mut cfe::world::World, actor: u64) {
+    use cfe::dop::{Positive, Resource};
+    let Some(orb) = world.orb() else {
+        return;
+    };
+    let orb_id = cfe::world::FIRST_ORB;
+    // Publish crystal last-clear at identity when listable and crystal banked.
+    if (world.futures_listable() || world.notes_listable())
+        && (orb.banked_amount(Resource::Crystal) > ratio(0, 1)
+            || orb.stamp_amount() > ratio(0, 1))
+    {
+        if let Some(p) = Positive::new(ratio(1, 1)) {
+            let _ = world.mark_last_clear_as(actor, orb_id, Resource::Crystal, p);
+        }
+    }
+    // Redeem / settle anything due.
+    let due_notes: Vec<u64> = world
+        .notes()
+        .iter()
+        .filter(|n| n.open && world.now() >= n.maturity)
+        .map(|n| n.note_id)
+        .collect();
+    for id in due_notes {
+        let _ = world.redeem_note_as(actor, id);
+    }
+    let due_futs: Vec<u64> = world
+        .futures()
+        .iter()
+        .filter(|f| f.open && world.now() >= f.expiry)
+        .map(|f| f.fut_id)
+        .collect();
+    for id in due_futs {
+        let _ = world.settle_future_as(actor, id);
+    }
+    // Issue one Note if listable, no open notes, stamp can cover half face.
+    if world.notes_listable() && world.notes().iter().all(|n| !n.open) {
+        let face = ratio(1, 1) + ratio(1, 1); // 2
+        let coll = ratio(1, 1); // half
+        let stamp = world
+            .orb()
+            .map(|o| o.stamp_amount())
+            .unwrap_or_else(|| ratio(0, 1));
+        if stamp >= coll {
+            if let (Some(n), Some(c)) = (Positive::new(face), Positive::new(coll)) {
+                let holder = actor;
+                let term = 60u64; // one year-voice
+                let _ = world.issue_note_as(actor, orb_id, holder, n, c, term);
+            }
+        }
+    }
 }
 
 /// FLEET-1 Phase-3 — pure NPC salvage + mint + assign (TASKS_TRADE_FLEET_DESK P3.9).

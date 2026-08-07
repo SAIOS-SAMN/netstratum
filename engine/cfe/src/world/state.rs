@@ -181,6 +181,12 @@ pub struct Committed {
     pub stations: Vec<(String, u8)>,
     /// FLEET-1: receipted hulls (replay of mint/assign/scrap).
     pub hulls: Vec<crate::dop::Hull>,
+    /// PHASE-4: open market Notes (STAMP debt).
+    pub notes: Vec<crate::dop::MarketNote>,
+    /// PHASE-4: open market Futures.
+    pub futures: Vec<crate::dop::MarketFuture>,
+    /// PHASE-4: last-clear marks (resource → STAMP price), latest wins.
+    pub last_clears: Vec<(crate::dop::Resource, Ratio)>,
 }
 
 /// G1 (04 §1): a civilization's sealed axes, as the world holds them.
@@ -278,6 +284,9 @@ pub struct World {
     pub(super) stations: Vec<(String, u8)>,
     /// FLEET-1 hulls.
     pub(super) hulls: Vec<crate::dop::Hull>,
+    pub(super) notes: Vec<crate::dop::MarketNote>,
+    pub(super) futures: Vec<crate::dop::MarketFuture>,
+    pub(super) last_clears: Vec<(crate::dop::Resource, Ratio)>,
 }
 
 /// PLANNER-1: what a licensed leap carries — the condition and name

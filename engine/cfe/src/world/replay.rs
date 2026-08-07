@@ -40,6 +40,9 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut taxon: Option<(u8, u8)> = None;
     let mut stations: Vec<(String, u8)> = Vec::new();
     let mut hulls: Vec<crate::dop::Hull> = Vec::new();
+    let mut notes: Vec<crate::dop::MarketNote> = Vec::new();
+    let mut futures: Vec<crate::dop::MarketFuture> = Vec::new();
+    let mut last_clears: Vec<(crate::dop::Resource, Ratio)> = Vec::new();
     for receipt in chronicle.receipts() {
         match &receipt.event {
             // BOOK-1 (19_LENS §16) — the open registry rebuilds from
@@ -956,12 +959,115 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     held.bank_scrap(amount.clone());
                 }
             }
+            ClosureEvent::NoteIssued {
+                note_id,
+                orb_id,
+                issuer,
+                holder,
+                notional,
+                collateral,
+                maturity,
+            } => {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank_stamp(-collateral.clone());
+                }
+                notes.push(crate::dop::MarketNote {
+                    note_id: *note_id,
+                    orb_id: *orb_id,
+                    issuer: *issuer,
+                    holder: *holder,
+                    notional: notional.clone(),
+                    collateral: collateral.clone(),
+                    maturity: *maturity,
+                    open: true,
+                });
+            }
+            ClosureEvent::NoteRedeemed {
+                note_id,
+                orb_id,
+                paid,
+                seized,
+            } => {
+                if let Some(n) = notes.iter_mut().find(|n| n.note_id == *note_id) {
+                    let coll = n.collateral.clone();
+                    n.open = false;
+                    if let Some(held) = peel(&mut orbs, *orb_id) {
+                        // Mirror live path: full pay releases collateral; seize path credits seize then pays.
+                        if *seized == ratio(0, 1) {
+                            held.bank_stamp(-paid.clone());
+                            held.bank_stamp(coll);
+                        } else {
+                            held.bank_stamp(seized.clone());
+                            held.bank_stamp(-paid.clone());
+                        }
+                    }
+                }
+            }
+            ClosureEvent::FutureOpened {
+                fut_id,
+                orb_id,
+                long,
+                short,
+                resource,
+                notional,
+                price,
+                margin,
+                expiry,
+            } => {
+                let lock = margin.clone() + margin.clone();
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank_stamp(-lock);
+                }
+                futures.push(crate::dop::MarketFuture {
+                    fut_id: *fut_id,
+                    orb_id: *orb_id,
+                    long: *long,
+                    short: *short,
+                    resource: *resource,
+                    notional: notional.clone(),
+                    price: price.clone(),
+                    margin: margin.clone(),
+                    expiry: *expiry,
+                    open: true,
+                });
+            }
+            ClosureEvent::FutureSettled {
+                fut_id,
+                orb_id,
+                mark: _,
+                long_pnl,
+                short_pnl: _,
+            } => {
+                if let Some(f) = futures.iter_mut().find(|f| f.fut_id == *fut_id) {
+                    f.open = false;
+                    if let Some(held) = peel(&mut orbs, *orb_id) {
+                        let unlock = f.margin.clone() + f.margin.clone();
+                        held.bank_stamp(unlock);
+                        if *long_pnl > ratio(0, 1) {
+                            held.bank_stamp(long_pnl.clone());
+                        } else if *long_pnl < ratio(0, 1) {
+                            let loss = ratio(0, 1) - long_pnl.clone();
+                            let have = held.stamp_amount();
+                            let take = if have < loss { have } else { loss };
+                            held.bank_stamp(-take);
+                        }
+                    }
+                }
+            }
+            ClosureEvent::LastClearMarked {
+                orb_id: _,
+                resource,
+                price,
+            } => {
+                last_clears.retain(|(r, _)| *r != *resource);
+                last_clears.push((*resource, price.clone()));
+            }
         }
     }
     Committed {
         orbs, entities, star, debts, bonds, forwards, councils, offers, techs, wants, crossed,
         gauge, genesis, terrain_seed, practices, instruments, routes, element_routes, treaties,
-        prospects, warded, veiled, taxon, stations, hulls,
+        prospects, warded, veiled, taxon, stations, hulls, notes, futures, last_clears,
     }
 }
 

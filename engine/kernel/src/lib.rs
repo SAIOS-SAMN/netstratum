@@ -142,7 +142,11 @@ use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 /// dynamo; prospected Stratum) enter the valuation rule; the gate
 /// re-derives with star magnetism + prospects. Same tag 98; what the
 /// rule can value expanded, so `minor` moves.
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 25, patch: 0 };
+///
+/// **0.26.0 — PHASE-4 NOTES / FUTURES** (32 + TASKS_TRADE_FLEET_DESK P4).
+/// MINOR: tags 120–124 enter `covered()` (NoteIssued/Redeemed,
+/// FutureOpened/Settled, LastClearMarked). SCHEMA_V8 trail.
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 26, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
@@ -1209,6 +1213,7 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::ElementRouteChartered { .. }
         | E::StampMinted { .. } | E::StampApertureSent { .. } | E::StampApertureReceived { .. }
         | E::ScrapSalvaged { .. } | E::HullMinted { .. } | E::HullAssigned { .. } | E::HullScrapped { .. } | E::OrderWorked { .. } | E::ElementSalvaged { .. }
+        | E::NoteIssued { .. } | E::NoteRedeemed { .. } | E::FutureOpened { .. } | E::FutureSettled { .. } | E::LastClearMarked { .. }
         | E::GenesisSealed { .. } | E::ProspectStruck { .. } | E::LineSucceeded { .. }
         | E::TechLicensed { .. } | E::InstrumentForged { .. } | E::RouteChartered { .. }
         | E::OfferPosted { .. } | E::BondSealed { .. }
@@ -1439,6 +1444,7 @@ fn admitted_deltas(
         // Hull mint/assign/scrap move scrap ledger only (not Resource).
         E::HullMinted { .. } | E::HullAssigned { .. } | E::HullScrapped { .. } | E::OrderWorked { .. } => Vec::new(),
         E::ElementSalvaged { .. } => Vec::new(),
+        E::NoteIssued { .. } | E::NoteRedeemed { .. } | E::FutureOpened { .. } | E::FutureSettled { .. } | E::LastClearMarked { .. } => Vec::new(),
         // — mints (the sign lives at I4, order preserved for the
         //   landed pins) —
         E::YieldCollected { resource, amount, .. } => vec![(*resource, amount.clone())],
@@ -2117,6 +2123,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::ElementRouteChartered { .. }
         | E::StampMinted { .. } | E::StampApertureSent { .. } | E::StampApertureReceived { .. }
         | E::ScrapSalvaged { .. } | E::HullMinted { .. } | E::HullAssigned { .. } | E::HullScrapped { .. } | E::OrderWorked { .. } | E::ElementSalvaged { .. }
+        | E::NoteIssued { .. } | E::NoteRedeemed { .. } | E::FutureOpened { .. } | E::FutureSettled { .. } | E::LastClearMarked { .. }
         // #42: a treaty is WORLD-layer. It is keyed on the pair, and
         // the pair is two worlds — not a line's identity (a pact
         // outlives whoever signed it) and not one place.
@@ -2243,6 +2250,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::ElementApertureSent { .. } | E::ElementApertureReceived { .. }
         | E::StampMinted { .. } | E::StampApertureSent { .. } | E::StampApertureReceived { .. }
         | E::ScrapSalvaged { .. } | E::HullMinted { .. } | E::HullAssigned { .. } | E::HullScrapped { .. } | E::OrderWorked { .. } | E::ElementSalvaged { .. }
+        | E::NoteIssued { .. } | E::NoteRedeemed { .. } | E::FutureOpened { .. } | E::FutureSettled { .. } | E::LastClearMarked { .. }
         // U1: the discovery mint settles banked value against verified
         // work — Collect, like the yield it banks beside. Ratified by
         // the U1 witnesses as it enters covered().

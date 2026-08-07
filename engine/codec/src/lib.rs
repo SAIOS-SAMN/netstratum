@@ -73,6 +73,9 @@ pub const SCHEMA_V6: u8 = 6;
 /// **SCHEMA v7 (Phase-3 fleet) — hulls trail after element routes.**
 pub const SCHEMA_V7: u8 = 7;
 
+/// **SCHEMA v8 (Phase-4 instruments) — notes, futures, last clears.**
+pub const SCHEMA_V8: u8 = 8;
+
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
 }
@@ -93,7 +96,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V7];
+    let mut out = vec![SCHEMA_V8];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -320,6 +323,36 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         out.push(h.role);
         out.push(h.grade);
     }
+    // Phase-4 instruments (v8 trail).
+    put_u32(&mut out, committed.notes.len() as u32);
+    for n in &committed.notes {
+        put_u64(&mut out, n.note_id);
+        put_u64(&mut out, n.orb_id);
+        put_u64(&mut out, n.issuer);
+        put_u64(&mut out, n.holder);
+        ratio::encode(&n.notional, &mut out);
+        ratio::encode(&n.collateral, &mut out);
+        put_u64(&mut out, n.maturity);
+        out.push(u8::from(n.open));
+    }
+    put_u32(&mut out, committed.futures.len() as u32);
+    for f in &committed.futures {
+        put_u64(&mut out, f.fut_id);
+        put_u64(&mut out, f.orb_id);
+        put_u64(&mut out, f.long);
+        put_u64(&mut out, f.short);
+        out.push(f.resource as u8);
+        ratio::encode(&f.notional, &mut out);
+        ratio::encode(&f.price, &mut out);
+        ratio::encode(&f.margin, &mut out);
+        put_u64(&mut out, f.expiry);
+        out.push(u8::from(f.open));
+    }
+    put_u32(&mut out, committed.last_clears.len() as u32);
+    for (r, p) in &committed.last_clears {
+        out.push(*r as u8);
+        ratio::encode(p, &mut out);
+    }
     out
 }
 
@@ -396,6 +429,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         && schema != SCHEMA_V5
         && schema != SCHEMA_V6
         && schema != SCHEMA_V7
+        && schema != SCHEMA_V8
     {
         return None;
     }
@@ -690,6 +724,61 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         }
     }
 
+    let mut notes = Vec::new();
+    let mut futures = Vec::new();
+    let mut last_clears = Vec::new();
+    if schema >= SCHEMA_V8 {
+        for _ in 0..take.u32()? {
+            let note_id = take.u64()?;
+            let orb_id = take.u64()?;
+            let issuer = take.u64()?;
+            let holder = take.u64()?;
+            let notional = take.ratio()?;
+            let collateral = take.ratio()?;
+            let maturity = take.u64()?;
+            let open = take.u8()? != 0;
+            notes.push(cfe::dop::MarketNote {
+                note_id,
+                orb_id,
+                issuer,
+                holder,
+                notional,
+                collateral,
+                maturity,
+                open,
+            });
+        }
+        for _ in 0..take.u32()? {
+            let fut_id = take.u64()?;
+            let orb_id = take.u64()?;
+            let long = take.u64()?;
+            let short = take.u64()?;
+            let resource = cfe::dop::Resource::from_wire(take.u8()?)?;
+            let notional = take.ratio()?;
+            let price = take.ratio()?;
+            let margin = take.ratio()?;
+            let expiry = take.u64()?;
+            let open = take.u8()? != 0;
+            futures.push(cfe::dop::MarketFuture {
+                fut_id,
+                orb_id,
+                long,
+                short,
+                resource,
+                notional,
+                price,
+                margin,
+                expiry,
+                open,
+            });
+        }
+        for _ in 0..take.u32()? {
+            let resource = cfe::dop::Resource::from_wire(take.u8()?)?;
+            let price = take.ratio()?;
+            last_clears.push((resource, price));
+        }
+    }
+
     if !take.done() {
         return None;
     }
@@ -720,5 +809,8 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         taxon,
         stations,
         hulls,
+        notes,
+        futures,
+        last_clears,
     })
 }

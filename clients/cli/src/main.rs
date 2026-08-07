@@ -2458,6 +2458,185 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 other
             ),
         },
+        // PHASE-4 instruments (NOTE-1 / FUT-1).
+        Some("note") => match words.next() {
+            None | Some("list") | Some("help") => {
+                println!(
+                    "{} NOTES — listable={} · Exchange={}",
+                    style.head("NOTE"),
+                    world.notes_listable(),
+                    world.exchange_seated()
+                );
+                for n in world.notes() {
+                    if !n.open {
+                        continue;
+                    }
+                    println!(
+                        "  note {} · face {} STAMP · coll {} · matures t{} · holder {}",
+                        n.note_id,
+                        amount(&n.notional),
+                        amount(&n.collateral),
+                        n.maturity,
+                        n.holder
+                    );
+                }
+            }
+            Some("issue") => {
+                let face = words
+                    .next()
+                    .and_then(|w| w.parse::<i64>().ok())
+                    .unwrap_or(2);
+                let coll = words
+                    .next()
+                    .and_then(|w| w.parse::<i64>().ok())
+                    .unwrap_or(1);
+                let term = words
+                    .next()
+                    .and_then(|w| w.parse::<u64>().ok())
+                    .unwrap_or(60);
+                let orb = world.orb().map(|o| o.orb_id).unwrap_or(cfe::world::FIRST_ORB);
+                let holder = cfe::world::SOVEREIGN;
+                match (
+                    cfe::dop::Positive::new(ratio(face, 1)),
+                    cfe::dop::Positive::new(ratio(coll, 1)),
+                ) {
+                    (Some(n), Some(c)) => match world.issue_note(orb, holder, n, c, term) {
+                        Ok(id) => println!(
+                            "{} note {id} ISSUED — face {face} coll {coll} term {term}",
+                            style.ok("✓")
+                        ),
+                        Err(refusal) => refuse(world, &refusal, style),
+                    },
+                    _ => println!("{} need positive face and collateral", style.bad("✗")),
+                }
+            }
+            Some("redeem") => {
+                let id = words.next().and_then(|w| w.parse().ok()).unwrap_or(0);
+                match world.redeem_note(id) {
+                    Ok(()) => println!("{} note {id} REDEEMED", style.ok("✓")),
+                    Err(refusal) => refuse(world, &refusal, style),
+                }
+            }
+            Some(other) => println!(
+                "{} note {:?} — try note list|issue|redeem",
+                style.bad("✗"),
+                other
+            ),
+        },
+        Some("future") | Some("fut") => match words.next() {
+            None | Some("list") | Some("help") => {
+                println!(
+                    "{} FUTURES — listable={} · clears={}",
+                    style.head("FUTURE"),
+                    world.futures_listable(),
+                    world.last_clears().len()
+                );
+                for f in world.futures() {
+                    if !f.open {
+                        continue;
+                    }
+                    println!(
+                        "  fut {} · {}×{:?} @ {} · margin {} · exp t{}",
+                        f.fut_id,
+                        amount(&f.notional),
+                        f.resource,
+                        amount(&f.price),
+                        amount(&f.margin),
+                        f.expiry
+                    );
+                }
+            }
+            Some("mark") => {
+                let res = words
+                    .next()
+                    .and_then(|w| match w {
+                        "crystal" | "c" => Some(cfe::dop::Resource::Crystal),
+                        "iron" | "i" => Some(cfe::dop::Resource::Iron),
+                        "bio" | "biomass" => Some(cfe::dop::Resource::Biomass),
+                        _ => None,
+                    })
+                    .unwrap_or(cfe::dop::Resource::Crystal);
+                let price_n = words
+                    .next()
+                    .and_then(|w| w.parse::<i64>().ok())
+                    .unwrap_or(1);
+                let orb = world.orb().map(|o| o.orb_id).unwrap_or(cfe::world::FIRST_ORB);
+                if let Some(p) = cfe::dop::Positive::new(ratio(price_n, 1)) {
+                    match world.mark_last_clear(orb, res, p) {
+                        Ok(()) => println!(
+                            "{} last clear {:?} = {} STAMP/unit",
+                            style.ok("✓"),
+                            res,
+                            price_n
+                        ),
+                        Err(refusal) => refuse(world, &refusal, style),
+                    }
+                }
+            }
+            Some("open") => {
+                let res = words
+                    .next()
+                    .and_then(|w| match w {
+                        "crystal" | "c" => Some(cfe::dop::Resource::Crystal),
+                        "iron" | "i" => Some(cfe::dop::Resource::Iron),
+                        _ => None,
+                    })
+                    .unwrap_or(cfe::dop::Resource::Crystal);
+                let notional = words
+                    .next()
+                    .and_then(|w| w.parse::<i64>().ok())
+                    .unwrap_or(1);
+                let price = words
+                    .next()
+                    .and_then(|w| w.parse::<i64>().ok())
+                    .unwrap_or(1);
+                let margin = words
+                    .next()
+                    .and_then(|w| w.parse::<i64>().ok())
+                    .unwrap_or(1);
+                let term = words
+                    .next()
+                    .and_then(|w| w.parse::<u64>().ok())
+                    .unwrap_or(60);
+                let orb = world.orb().map(|o| o.orb_id).unwrap_or(cfe::world::FIRST_ORB);
+                let long = cfe::world::SOVEREIGN;
+                let short = world
+                    .entities()
+                    .iter()
+                    .map(|e| e.entity_id)
+                    .find(|id| *id != long)
+                    .unwrap_or(long.saturating_add(1));
+                match (
+                    cfe::dop::Positive::new(ratio(notional, 1)),
+                    cfe::dop::Positive::new(ratio(price, 1)),
+                    cfe::dop::Positive::new(ratio(margin, 1)),
+                ) {
+                    (Some(n), Some(p), Some(m)) => {
+                        match world.open_future(orb, long, short, res, n, p, m, term) {
+                            Ok(id) => println!(
+                                "{} future {id} OPEN — {:?}×{notional} @ {price} margin {margin}",
+                                style.ok("✓"),
+                                res
+                            ),
+                            Err(refusal) => refuse(world, &refusal, style),
+                        }
+                    }
+                    _ => println!("{} need positive sizes", style.bad("✗")),
+                }
+            }
+            Some("settle") => {
+                let id = words.next().and_then(|w| w.parse().ok()).unwrap_or(0);
+                match world.settle_future(id) {
+                    Ok(()) => println!("{} future {id} SETTLED", style.ok("✓")),
+                    Err(refusal) => refuse(world, &refusal, style),
+                }
+            }
+            Some(other) => println!(
+                "{} future {:?} — try future list|mark|open|settle",
+                style.bad("✗"),
+                other
+            ),
+        },
         Some("appraise") => {
             use cfe::dop::Holding;
             let orb = world.orb().map(|o| o.orb_id).unwrap_or(cfe::world::FIRST_ORB);
@@ -5689,6 +5868,26 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
              {} shows every set of what you hold that would",
             style.strong("bench")
         ),
+        ActionRefused::InstrumentBookClosed => {
+            "instrument book closed — seat Exchange or bank STAMP/cargo evidence".into()
+        }
+        ActionRefused::InstrumentEmpty => "empty notional, margin, or identical sides".into(),
+        ActionRefused::InstrumentUndercollateralized => {
+            "note collateral must cover at least half face".into()
+        }
+        ActionRefused::CannotAffordStamp { need, have } => format!(
+            "need {} STAMP, have {}",
+            amount(need),
+            amount(have)
+        ),
+        ActionRefused::NoSuchNote { note_id } => format!("no open note {note_id}"),
+        ActionRefused::NoteImmature { note_id, maturity } => {
+            format!("note {note_id} matures at t{maturity}")
+        }
+        ActionRefused::NoSuchFuture { fut_id } => format!("no open future {fut_id}"),
+        ActionRefused::FutureImmature { fut_id, expiry } => {
+            format!("future {fut_id} expires at t{expiry}")
+        }
         ActionRefused::BalanceEntropyDominates {
             balance,
             syntropy,
@@ -6860,6 +7059,63 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::ElementSalvaged { amount: a, .. } => format!(
                 "⚙ {} element mass salvaged to scrap",
                 style.strong(&amount(a))
+            ),
+            cfe::dop::ClosureEvent::NoteIssued {
+                note_id,
+                notional,
+                maturity,
+                ..
+            } => format!(
+                "📜 note {} issued · face {} STAMP · matures t{}",
+                style.strong(&note_id.to_string()),
+                style.strong(&amount(notional)),
+                maturity
+            ),
+            cfe::dop::ClosureEvent::NoteRedeemed {
+                note_id,
+                paid,
+                seized,
+                ..
+            } => format!(
+                "📜 note {} redeemed · paid {} · seized {}",
+                style.strong(&note_id.to_string()),
+                amount(paid),
+                amount(seized)
+            ),
+            cfe::dop::ClosureEvent::FutureOpened {
+                fut_id,
+                resource,
+                notional,
+                price,
+                expiry,
+                ..
+            } => format!(
+                "📈 future {} · {}×{:?} @ {} · exp t{}",
+                style.strong(&fut_id.to_string()),
+                amount(notional),
+                resource,
+                amount(price),
+                expiry
+            ),
+            cfe::dop::ClosureEvent::FutureSettled {
+                fut_id,
+                mark,
+                long_pnl,
+                ..
+            } => format!(
+                "📈 future {} settled · mark {} · long PnL {}",
+                style.strong(&fut_id.to_string()),
+                amount(mark),
+                amount(long_pnl)
+            ),
+            cfe::dop::ClosureEvent::LastClearMarked {
+                resource,
+                price,
+                ..
+            } => format!(
+                "📌 last clear {:?} = {} STAMP/unit",
+                resource,
+                amount(price)
             ),
             cfe::dop::ClosureEvent::AssayStruck { amount: drawn, richness, .. } => format!(
                 "⚖ {} drawn from the opened vein — one receipt, the whole span{}",

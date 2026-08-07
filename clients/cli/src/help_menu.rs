@@ -269,6 +269,8 @@ fn colony_help(style: Style) {
     row(style, "rings / sky", "star field · core · orbit period/slot");
     row(style, "thermal · map · status", "readings + thermal balance");
     row(style, "estate survey · parcels · appraise …", "real estate ladder (35)");
+    row(style, "note list|issue|redeem", "NOTE-1 STAMP debt (Phase 4)");
+    row(style, "future list|mark|open|settle", "FUT-1 cargo×STAMP (Phase 4)");
     row(style, "prospect · assay · compound · refine", "elements + alchemy");
     println!();
     println!(

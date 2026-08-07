@@ -771,6 +771,72 @@ pub fn render_receipt(receipt: &Receipt) -> String {
             "element_salvaged",
             format!("orb {orb_id} salvages {} element mass to scrap", ratio_str(amount)),
         ),
+        E::NoteIssued {
+            note_id,
+            notional,
+            maturity,
+            ..
+        } => (
+            "note_issued",
+            format!(
+                "note {note_id} face {} STAMP · matures t{maturity}",
+                ratio_str(notional)
+            ),
+        ),
+        E::NoteRedeemed {
+            note_id,
+            paid,
+            seized,
+            ..
+        } => (
+            "note_redeemed",
+            format!(
+                "note {note_id} paid {} · seized {}",
+                ratio_str(paid),
+                ratio_str(seized)
+            ),
+        ),
+        E::FutureOpened {
+            fut_id,
+            resource,
+            notional,
+            price,
+            expiry,
+            ..
+        } => (
+            "future_opened",
+            format!(
+                "future {fut_id} {}×{} @ {} STAMP · exp t{expiry}",
+                ratio_str(notional),
+                resource_name(*resource),
+                ratio_str(price)
+            ),
+        ),
+        E::FutureSettled {
+            fut_id,
+            mark,
+            long_pnl,
+            ..
+        } => (
+            "future_settled",
+            format!(
+                "future {fut_id} mark {} · long PnL {}",
+                ratio_str(mark),
+                ratio_str(long_pnl)
+            ),
+        ),
+        E::LastClearMarked {
+            resource,
+            price,
+            ..
+        } => (
+            "last_clear",
+            format!(
+                "{} last clear {} STAMP/unit",
+                resource_name(*resource),
+                ratio_str(price)
+            ),
+        ),
         E::ApertureSent { deal, from_orb, resource, amount } => (
             "aperture_sent",
             format!(

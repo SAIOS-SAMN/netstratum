@@ -304,8 +304,16 @@
 //!         move.)
 //!    119  ClosureEvent::ElementSalvaged (34 — banked element → scrap
 //!         at identity; yard required; recycling path.)
-//!    107+ claim ledger through matter-balance: next free **120**.
-//!         Orb TLV: 73 STAMP, **74 scrap**. ZoneKind::ShipYard = 10.
+//!    120  ClosureEvent::NoteIssued (PHASE-4 NOTE-1 — STAMP debt instrument;
+//!         collateral locked; ≠ BondSealed ideology stream.)
+//!    121  ClosureEvent::NoteRedeemed (NOTE-1 — maturity pay or collateral seize.)
+//!    122  ClosureEvent::FutureOpened (PHASE-4 FUT-1 — cargo×STAMP dated;
+//!         margin both sides; mark = last clear only.)
+//!    123  ClosureEvent::FutureSettled (FUT-1 — cash settle vs last clear.)
+//!    124  ClosureEvent::LastClearMarked (PHASE-4 — receipted spot mark for
+//!         instrument marks; Resource ‖ price_in_stamp.)
+//!    Phase-4 claim ledger: next free **125**. SCHEMA_V8 notes/futures/clears.
+//!         Orb TLV: 73 STAMP, 74 scrap. ZoneKind::ShipYard = 10.
 //!         (Historic free tags below top: 14, 15, 56, 57, 58, 64, 66,
 //!         83, 84, 87; 9 and 51 reserved; 65 retired forever.)
 //!   In-value practice codes (append-only): 1 the Austerity · 2 the Showpiece ·
@@ -1681,6 +1689,34 @@ pub struct Hull {
     pub assigned_route: u64,
 }
 
+/// NOTE-1 — market STAMP debt (≠ ideology BondSealed).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MarketNote {
+    pub note_id: u64,
+    pub orb_id: u64,
+    pub issuer: u64,
+    pub holder: u64,
+    pub notional: Ratio,
+    pub collateral: Ratio,
+    pub maturity: u64,
+    pub open: bool,
+}
+
+/// FUT-1 — dated cargo×STAMP; mark = last clear only.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MarketFuture {
+    pub fut_id: u64,
+    pub orb_id: u64,
+    pub long: u64,
+    pub short: u64,
+    pub resource: Resource,
+    pub notional: Ratio,
+    pub price: Ratio,
+    pub margin: Ratio,
+    pub expiry: u64,
+    pub open: bool,
+}
+
 /// Capacity units a hull can haul (derive: role base × (1+grade)).
 /// Bases are powers of two built from `1+1` — no free dials.
 pub fn hull_capacity(role: u8, grade: u8) -> Ratio {
@@ -2488,6 +2524,49 @@ pub enum ClosureEvent {
         element: [u8; 32],
         amount: Ratio,
     },
+    /// NOTE-1 (tag 120) — market Note (STAMP debt); collateral locked.
+    NoteIssued {
+        note_id: u64,
+        orb_id: u64,
+        issuer: u64,
+        holder: u64,
+        notional: Ratio,
+        collateral: Ratio,
+        maturity: u64,
+    },
+    /// NOTE-1 (tag 121) — redeem at maturity (pay notional) or seize collateral.
+    NoteRedeemed {
+        note_id: u64,
+        orb_id: u64,
+        paid: Ratio,
+        seized: Ratio,
+    },
+    /// FUT-1 (tag 122) — dated cargo delivery for STAMP; margin both sides.
+    FutureOpened {
+        fut_id: u64,
+        orb_id: u64,
+        long: u64,
+        short: u64,
+        resource: Resource,
+        notional: Ratio,
+        price: Ratio,
+        margin: Ratio,
+        expiry: u64,
+    },
+    /// FUT-1 (tag 123) — cash settle vs receipted last-clear mark.
+    FutureSettled {
+        fut_id: u64,
+        orb_id: u64,
+        mark: Ratio,
+        long_pnl: Ratio,
+        short_pnl: Ratio,
+    },
+    /// PHASE-4 (tag 124) — last-clear spot mark (STAMP per unit cargo).
+    LastClearMarked {
+        orb_id: u64,
+        resource: Resource,
+        price: Ratio,
+    },
     /// N4 (NS-2 §1.5) — the scanner's power draw, the ONE chronicle
     /// event of RQP: crystals left the probing orb's bank to hold the
     /// lens open. Deliberately blind to what was asked and what was
@@ -3187,6 +3266,82 @@ impl ClosureEvent {
                 value.extend_from_slice(element);
                 ratio::encode(amount, &mut value);
                 tlv::put(119, &value, &mut out);
+            }
+            Self::NoteIssued {
+                note_id,
+                orb_id,
+                issuer,
+                holder,
+                notional,
+                collateral,
+                maturity,
+            } => {
+                let mut value = note_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&orb_id.to_le_bytes());
+                value.extend_from_slice(&issuer.to_le_bytes());
+                value.extend_from_slice(&holder.to_le_bytes());
+                ratio::encode(notional, &mut value);
+                ratio::encode(collateral, &mut value);
+                value.extend_from_slice(&maturity.to_le_bytes());
+                tlv::put(120, &value, &mut out);
+            }
+            Self::NoteRedeemed {
+                note_id,
+                orb_id,
+                paid,
+                seized,
+            } => {
+                let mut value = note_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&orb_id.to_le_bytes());
+                ratio::encode(paid, &mut value);
+                ratio::encode(seized, &mut value);
+                tlv::put(121, &value, &mut out);
+            }
+            Self::FutureOpened {
+                fut_id,
+                orb_id,
+                long,
+                short,
+                resource,
+                notional,
+                price,
+                margin,
+                expiry,
+            } => {
+                let mut value = fut_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&orb_id.to_le_bytes());
+                value.extend_from_slice(&long.to_le_bytes());
+                value.extend_from_slice(&short.to_le_bytes());
+                value.push(*resource as u8);
+                ratio::encode(notional, &mut value);
+                ratio::encode(price, &mut value);
+                ratio::encode(margin, &mut value);
+                value.extend_from_slice(&expiry.to_le_bytes());
+                tlv::put(122, &value, &mut out);
+            }
+            Self::FutureSettled {
+                fut_id,
+                orb_id,
+                mark,
+                long_pnl,
+                short_pnl,
+            } => {
+                let mut value = fut_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&orb_id.to_le_bytes());
+                ratio::encode(mark, &mut value);
+                ratio::encode(long_pnl, &mut value);
+                ratio::encode(short_pnl, &mut value);
+                tlv::put(123, &value, &mut out);
+            }
+            Self::LastClearMarked {
+                orb_id,
+                resource,
+                price,
+            } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.push(*resource as u8);
+                ratio::encode(price, &mut value);
+                tlv::put(124, &value, &mut out);
             }
             Self::CrystalDrawn { orb_id, amount } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
@@ -3939,6 +4094,84 @@ impl ClosureEvent {
                     orb_id,
                     element,
                     amount,
+                })
+            }
+            120 => {
+                let note_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let orb_id = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let issuer = u64::from_le_bytes(value.get(16..24)?.try_into().ok()?);
+                let holder = u64::from_le_bytes(value.get(24..32)?.try_into().ok()?);
+                let (notional, u1) = ratio::decode(value.get(32..)?)?;
+                let (collateral, u2) = ratio::decode(value.get(32 + u1..)?)?;
+                let at = 32 + u1 + u2;
+                let maturity = u64::from_le_bytes(value.get(at..at + 8)?.try_into().ok()?);
+                Some(Self::NoteIssued {
+                    note_id,
+                    orb_id,
+                    issuer,
+                    holder,
+                    notional,
+                    collateral,
+                    maturity,
+                })
+            }
+            121 => {
+                let note_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let orb_id = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let (paid, u1) = ratio::decode(value.get(16..)?)?;
+                let (seized, _) = ratio::decode(value.get(16 + u1..)?)?;
+                Some(Self::NoteRedeemed {
+                    note_id,
+                    orb_id,
+                    paid,
+                    seized,
+                })
+            }
+            122 => {
+                let fut_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let orb_id = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let long = u64::from_le_bytes(value.get(16..24)?.try_into().ok()?);
+                let short = u64::from_le_bytes(value.get(24..32)?.try_into().ok()?);
+                let resource = Resource::from_wire(*value.get(32)?)?;
+                let (notional, u1) = ratio::decode(value.get(33..)?)?;
+                let (price, u2) = ratio::decode(value.get(33 + u1..)?)?;
+                let (margin, u3) = ratio::decode(value.get(33 + u1 + u2..)?)?;
+                let at = 33 + u1 + u2 + u3;
+                let expiry = u64::from_le_bytes(value.get(at..at + 8)?.try_into().ok()?);
+                Some(Self::FutureOpened {
+                    fut_id,
+                    orb_id,
+                    long,
+                    short,
+                    resource,
+                    notional,
+                    price,
+                    margin,
+                    expiry,
+                })
+            }
+            123 => {
+                let fut_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let orb_id = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let (mark, u1) = ratio::decode(value.get(16..)?)?;
+                let (long_pnl, u2) = ratio::decode(value.get(16 + u1..)?)?;
+                let (short_pnl, _) = ratio::decode(value.get(16 + u1 + u2..)?)?;
+                Some(Self::FutureSettled {
+                    fut_id,
+                    orb_id,
+                    mark,
+                    long_pnl,
+                    short_pnl,
+                })
+            }
+            124 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let resource = Resource::from_wire(*value.get(8)?)?;
+                let (price, _) = ratio::decode(value.get(9..)?)?;
+                Some(Self::LastClearMarked {
+                    orb_id,
+                    resource,
+                    price,
                 })
             }
             55 => {

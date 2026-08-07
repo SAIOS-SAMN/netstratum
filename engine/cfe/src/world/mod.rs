@@ -61,6 +61,7 @@ pub mod state;
 pub mod stock;
 pub mod fleet;
 pub mod balance;
+pub mod instruments;
 
 pub use replay::replay;
 pub use fleet::hull_voice;

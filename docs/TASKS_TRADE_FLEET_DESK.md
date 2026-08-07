@@ -145,20 +145,20 @@ not one global static board; planet + archetype matter.
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
-| P4.0 | [ ] Claim instrument tags per `32` Wave 5 | P3.0 discipline | header first |
-| P4.1 | [ ] **NOTE-1** issue / coupon / default (≠ ideology bond) | P1.6 STAMP, T8 optional | pins; Vault seize sketch |
-| P4.2 | [ ] **FUT-1** margin + last-clear mark + delivery/cash | P4.1, P1.8 cargo | no float mark-to-model |
-| P4.3 | [ ] **SHARE-1** issue / transfer / dividend from receipt window | P4.1, production evidence | |
-| P4.4 | [ ] **PERP-1** funding from last-clear premium; liquidation | P4.2, Q-S4 | |
-| P4.5 | [ ] Listing filter: archetype + evidence + office (T6 full stack; Q-F5 Spot-only without) | P4.1–P4.4, genesis | two civs different books |
-| P4.6 | [ ] Planetary/local book identity (per world Exchange seat) | P4.5 | no global blob |
-| P4.7 | [ ] `instrument_step` NPC lifecycle (funding, expiry, auctions) | P4.2–P4.4 | pure NPC |
-| P4.8 | [ ] Freight/alignment seasons: Future on cargo or melt-index from last clears | P4.2, P2.5 | |
-| P4.9 | [ ] EXCH pane lists **only** local listable instruments | P4.5, P1.1 | |
-| P4.10 | [ ] Shipwright finance: Note/Future commission for hull build | P4.1, P3.9 | |
-| P4.11 | [ ] FORWARD-1 coexistence map (Q-S3) documented + coded boundary | P4.1 | |
-| P4.12 | [ ] Harness: NPC Note or Future lifecycle + player open/close | P4.7 | green |
-| P4.13 | [ ] Docs Phase 4 land; `32` status update | P4.12 | |
+| P4.0 | [x] Claim tags **120–124** (Note/Future/LastClear); SCHEMA_V8; next free **125** | P3.0 | dop header |
+| P4.1 | [x] **NOTE-1** issue / redeem (collateral ≥ half face; ≠ BondSealed) | P1.6 STAMP | instrument_pins |
+| P4.2 | [x] **FUT-1** margin both sides + cash settle vs **last clear** only | P4.1 | no float mark |
+| P4.3 | [ ] **SHARE-1** issue / transfer / dividend from receipt window | P4.1, production evidence | deferred |
+| P4.4 | [ ] **PERP-1** funding from last-clear premium; liquidation | P4.2, Q-S4 | deferred |
+| P4.5 | [x] Listing filter: STAMP/cargo evidence · expansionist · Exchange | P4.1–P4.2 | two books differ pin |
+| P4.6 | [x] Local book identity (per-world notes/futures/clears trail) | P4.5 | SCHEMA_V8 |
+| P4.7 | [x] `instrument_step` NPC: mark clears, redeem, settle, issue Note | P4.1–P4.2 | pure NPC |
+| P4.8 | [~] Freight/alignment seasons via last-clear marks | P4.2, P2.5 | mark API live; season Future later |
+| P4.9 | [~] EXCH / CLI lists local instruments (`note` / `future`) | P4.5, P1.1 | desk EXCH polish open |
+| P4.10 | [ ] Shipwright finance: Note/Future commission for hull build | P4.1, P3.9 | open |
+| P4.11 | [x] FORWARD-1 coexistence: Notes parallel (Q-S3) — keep Bond/Forward | P4.1 | 32 §3.5 |
+| P4.12 | [x] Harness: Note lifecycle + Future open/settle + SEAL B | P4.7 | instrument_pins green |
+| P4.13 | [x] Docs Phase 4 land; `32`/`33`/PICKUP/BUILD_ORDER | P4.12 | this board |
 
 **Phase 4 done when:** two civilizations show different listable books;
 a Future prices freight around an alignment window without float marks.

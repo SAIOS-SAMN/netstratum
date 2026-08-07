@@ -85,6 +85,22 @@ pub enum ActionRefused {
         syntropy: Box<Ratio>,
         entropy: Box<Ratio>,
     },
+    /// PHASE-4 — instrument book not listable (no evidence / Exchange).
+    InstrumentBookClosed,
+    /// PHASE-4 — zero notional / margin / empty sides.
+    InstrumentEmpty,
+    /// PHASE-4 — note collateral below half face.
+    InstrumentUndercollateralized,
+    /// PHASE-4 — STAMP short for collateral or margin.
+    CannotAffordStamp { need: Box<Ratio>, have: Box<Ratio> },
+    /// PHASE-4 — no open note with this id.
+    NoSuchNote { note_id: u64 },
+    /// PHASE-4 — note not yet at maturity.
+    NoteImmature { note_id: u64, maturity: u64 },
+    /// PHASE-4 — no open future with this id.
+    NoSuchFuture { fut_id: u64 },
+    /// PHASE-4 — future not yet at expiry.
+    FutureImmature { fut_id: u64, expiry: u64 },
     /// ELEMENT-CHEMISTRY (#37) — this system does not carry the
     /// element's LINE: deep matter simply does not occur under a
     /// shallow star. A fact of the sky, at the verb forever.
