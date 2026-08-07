@@ -33,7 +33,7 @@ strand-adapter · isthmus/datum-adapter
 | T1.2 | [x] `ascend` preconditions per office (deed counts) | T1.1 | typed refusals with cures |
 | T1.3 | [x] Seat width + NoSeatOpen for new stations | T1.1 | pins |
 | T1.4 | [x] Founding or mid-era **NPC path** to at least T4/T6 (not only CLI) | T1.2 | conductor pin `wave1_era_pins` |
-| T1.5 | [ ] Observer STATION column shows T4–T9 names | T1.1 | visual pin (observer dirty — other lane) |
+| T1.5 | [x] Observer STATION column shows T4–T9 names | T1.1 | `tools/observer.py` ALL_TIERS + tier_of |
 | T1.R | [x] **REFINE-1** + E3.5 (pulled into Wave-1 exit) | ground_step | `ElementRefined` tag 107; pure NPC refine |
 
 ---

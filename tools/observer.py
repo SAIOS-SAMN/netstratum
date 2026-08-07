@@ -3,8 +3,10 @@
 
 THE TOPOLOGY: a CIVILIZATION (registry identity, spans worlds) settles
 COLONIES on PLANETS inside a WORLD (one clock, one chronicle, one
-receipt chain). The observatory renders VIEWS over that topology —
-a dashboard by default, tables and drill-downs by subcommand.
+receipt chain). Worlds sit on a 3-torus starchart; galaxies are lazy
+regions with a center and reach. The observatory renders VIEWS over
+that topology — a universe dashboard by default, tables and
+drill-downs by subcommand.
 
 READ-ONLY BY CONSTRUCTION — opens files for reading, never writes.
 Standard library only. Exact fractions in, exact fractions out.
@@ -12,20 +14,23 @@ Chronicle `detail` strings are DISPLAYED verbatim, never parsed
 (the no-grepping law: a parse of a rendering is a second truth).
 
 Usage:
-  python3 tools/observer.py                    # the dashboard
+  python3 tools/observer.py                    # universe dashboard (default)
+  python3 tools/observer.py --watch 2          # refresh every 2s
   python3 tools/observer.py civs [--tier T0]   # civilizations, by tier
   python3 tools/observer.py worlds             # settled planets table
   python3 tools/observer.py world <name>       # one world, whole
   python3 tools/observer.py civ <slug>         # one line, whole
-  python3 tools/observer.py tiers              # the union board T0→T3
-  python3 tools/observer.py stress             # the t0 stress read
+  python3 tools/observer.py tiers              # the union board T0→T9
+  python3 tools/observer.py stress             # condition roll-up only
   python3 tools/observer.py techs              # crystallized nodes
   python3 tools/observer.py chart              # the star chart
+  python3 tools/observer.py market             # resting offers
   python3 tools/observer.py <view> --watch 2   # any view, refreshed
+  # Live worlds only by default; --closed- ruins stay hidden (no cinder spam).
 
-Chain check: '✓' means every exported receipt's parent digest equals
+Chain check: 'ok' means every exported receipt's parent digest equals
 its predecessor's digest with contiguous sequence numbers — splicing,
-deletion, or reordering reads '✗ BROKEN'. (Full BLAKE3 recomputation
+deletion, or reordering reads 'BROKEN'. (Full BLAKE3 recomputation
 lives in-game via `verify`/`replay`; the chronicle is the authority,
 the lens is its write-only rendering.)
 """
@@ -46,12 +51,37 @@ from pathlib import Path
 RESOURCES = ["iron", "biomass", "alloy", "diamond", "joule", "sink", "crystal"]
 STAR_NAMES = {1: "O", 2: "B", 3: "A", 4: "F", 5: "G", 6: "K", 7: "M",
               8: "bd", 9: "wd", 10: "rg", 11: "ns", 12: "wr", 13: "lwh"}
-TIER_OF_STATION = {"progenitor": "T0", "watcher": "T1", "observer": "T1",
-                   "sovereign": "T2"}
-TIER_TITLES = {"T0": "T0 — THE BOARD-MAKERS (progenitors)",
-               "T1": "T1 — THE ARCHITECT OBSERVERS (watchers · observers)",
-               "T2": "T2 — THE RECORD KEEPERS (sovereigns)",
-               "T3": "T3 — THE BIOSPHERE NODES (the common, lawful state)"}
+# 12_UNION §2a + 30_OFFICES (Wave-1): T4–T9 are deeper economic offices,
+# not ranks above the progenitors. Keep in lockstep with
+# ledger::registry::tier_of — one reading, two surfaces.
+TIER_OF_STATION = {
+    "progenitor": "T0",
+    "watcher": "T1",
+    "observer": "T1",
+    "sovereign": "T2",
+    # T3 = absence of a seat (handled in tier_of), never a station word.
+    "caravan": "T4",
+    "crucible": "T5",
+    "exchange": "T6",
+    "assay": "T7",
+    "vault": "T8",
+    "anchor": "T9",
+}
+TIER_TITLES = {
+    "T0": "T0 — THE BOARD-MAKERS (progenitors)",
+    "T1": "T1 — THE ARCHITECT OBSERVERS (watchers · observers)",
+    "T2": "T2 — THE RECORD KEEPERS (sovereigns)",
+    "T3": "T3 — THE BIOSPHERE NODES (the common, lawful state)",
+    "T4": "T4 — CARAVAN (trade routes)",
+    "T5": "T5 — CRUCIBLE (elemental refineries)",
+    "T6": "T6 — EXCHANGE (STAMP market-making)",
+    "T7": "T7 — ASSAY (element identity court)",
+    "T8": "T8 — VAULT (custody and collateral)",
+    "T9": "T9 — ANCHOR (external settlement seats)",
+    "T?": "T? — UNREADABLE SEAT (not the common — refuse, never default)",
+}
+# Display order: top of the board down through deeper economic functions.
+ALL_TIERS = ("T0", "T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9")
 
 
 # ── exact arithmetic ────────────────────────────────────────────────
@@ -69,6 +99,29 @@ def show(fraction):
     if fraction.denominator == 1:
         return str(fraction.numerator)
     return f"{fraction.numerator}/{fraction.denominator}"
+
+
+def show_board(fraction):
+    """Compact bank figure for the watch board.
+
+    Exact fractions stay exact when short. Very large reduced forms
+    (long-run demurrage leftovers) floor to whole units with a trailing
+    '+' so the dashboard stays readable without inventing floats.
+    """
+    if fraction is None:
+        return "—"
+    if fraction < 0:
+        return "-" + show_board(-fraction)
+    if fraction.denominator == 1:
+        return str(fraction.numerator)
+    if fraction.numerator < 1000 and fraction.denominator <= 64:
+        return show(fraction)
+    whole = fraction.numerator // fraction.denominator
+    if fraction.numerator % fraction.denominator == 0:
+        return str(whole)
+    if whole == 0:
+        return show(fraction) if fraction.denominator <= 256 else "<1"
+    return f"{whole}+"
 
 
 # ── the house wire (state.tlv; landed as "MIRROR-TLV"): the committed orb decoded native ──
@@ -109,15 +162,44 @@ RESOURCE_NAMES = {1: "iron", 2: "biomass", 3: "alloy", 4: "diamond",
                   5: "joule", 6: "sink", 7: "crystal"}
 
 
+def element_name(element_id: bytes) -> str:
+    """Port of cfe::dop::element_name — family form + voice from hash.
+
+    Family is read from byte[1] against a default G-star spine when the
+    star is unknown at this layer (the board names matter; the assay
+    already bound richness to the real class at mint time).
+    """
+    # G/F/K spine bands [2,1,1,1] — the common board default.
+    bands = (2, 1, 1, 1)
+    total = sum(bands) or 1
+    pick = element_id[1] % total
+    family = 4
+    for at, weight in enumerate(bands):
+        if pick < weight:
+            family = at + 1
+            break
+        pick -= weight
+    form = {1: "lode", 2: "marrow", 3: "rime"}.get(family, "veil")
+    voices = (
+        "adamant", "pale", "keening", "vaulted", "ember", "tidal",
+        "hollow", "woven", "still", "spiral", "murmured", "resonant",
+    )
+    voice = voices[element_id[0] % len(voices)]
+    return f"{voice} {form}"
+
+
 def decode_orb_tlv(path):
     """The committed orb from state.tlv — banked, famine, zones,
-    vented — decoded from the canonical bytes. Returns None when no
-    carrier stands (the JSON rendering then carries the display)."""
+    vented, elements — decoded from the canonical bytes. Returns None
+    when no carrier stands (the JSON rendering then carries the display)."""
     try:
         data = path.read_bytes()
     except OSError:
         return None
-    orb = {"banked": {}, "famine": [], "zones": 0, "vented": Fraction(0)}
+    orb = {
+        "banked": {}, "famine": [], "zones": 0,
+        "vented": Fraction(0), "elements": [],
+    }
     for tag, value in tlv_records(data):
         if tag == 17:
             orb["zones"] += 1
@@ -131,6 +213,15 @@ def decode_orb_tlv(path):
                 orb["famine"].append(name)
         elif tag == 28:
             orb["vented"], _ = tlv_ratio(value)
+        elif tag == 72 and len(value) >= 32:
+            # element_id[32] ‖ ratio — the open matter vocabulary
+            # (14_ALMANAC). Closed Resource enum is untouched.
+            element_id = bytes(value[:32])
+            try:
+                amount, _ = tlv_ratio(value, 32)
+            except (IndexError, ValueError):
+                continue
+            orb["elements"].append((element_id, amount))
         # every other tag: skipped whole (SEAL A) — future fields
         # never break this reader.
     return orb
@@ -204,9 +295,52 @@ def load_registry(var_root):
     return registry
 
 
+# Engine-only or retired names that must not appear as peoples.
+BOARD_EXCLUDE_CIVS = frozenset({"proofer"})
+BOARD_EXCLUDE_WORLDS = frozenset({"visible-proof", "proofer-hearth"})
+
+
+def ensure_registry_coverage(registry, rows):
+    """Synthesize a card for any civilization living on a world without
+    a registry file so the board never shows a blank species.
+
+    Engine fixtures (proofer / visible-proof) are excluded entirely —
+    they are not peoples of the universe.
+    """
+    for row in rows:
+        slug = row.get("civilization") or "?"
+        if slug in registry or slug == "?" or slug in BOARD_EXCLUDE_CIVS:
+            continue
+        if row.get("world") in BOARD_EXCLUDE_WORLDS:
+            continue
+        registry[slug] = {
+            "name": slug,
+            "sigil": slug,
+            "species": "unregistered line",
+            "clade": "—",
+            "station": None,
+            "founder": "unknown",
+            "axes": {},
+            "_synthetic": True,
+        }
+    # Drop engine fixtures if a card lingered on disk.
+    for slug in BOARD_EXCLUDE_CIVS:
+        registry.pop(slug, None)
+    return registry
+
+
 def tier_of(card):
-    """12_UNION §2a: the TIER is a derived reading, never stored."""
-    return TIER_OF_STATION.get(card.get("station"), "T3")
+    """12_UNION §2a + 30_OFFICES: tier is a derived reading, never stored.
+
+    T3 is the ABSENCE of a seat. An unknown station word must NOT fall
+    through to T3 (that is the hole a gate would leak through) — it
+    renders as T? so the board refuses to launder an unreadable office
+    into the common.
+    """
+    station = card.get("station") if card else None
+    if not station:
+        return "T3"
+    return TIER_OF_STATION.get(station, "T?")
 
 
 CREED_CONCEPTS = [
@@ -282,11 +416,40 @@ def function_of(card, agg):
     return "sky-condenser"
 
 
-def world_dirs(var_root):
+def is_closed_ruin(dir_name: str) -> bool:
+    """Chronicle rotation / divergence ruins: `<base>--closed-<digest8>`.
+
+    These keep the *identity fields* of the live world in state.json
+    (world/planet/civ still read as the original) but are archives on
+    disk — never a second live solar system. Listing them on the board
+    floods the SOLAR SYSTEMS table with hundreds of cinder-reach clones.
+    """
+    return "--closed-" in dir_name
+
+
+def world_dirs(var_root, *, include_closed=False):
+    """Live world directories only (default). Closed ruins opt-in."""
     worlds_dir = Path(var_root) / "worlds"
     if not worlds_dir.is_dir():
         return []
-    return sorted(p for p in worlds_dir.iterdir() if p.is_dir())
+    out = []
+    for p in sorted(worlds_dir.iterdir()):
+        if not p.is_dir() or p.name in BOARD_EXCLUDE_WORLDS:
+            continue
+        if not include_closed and is_closed_ruin(p.name):
+            continue
+        out.append(p)
+    return out
+
+
+def count_closed_ruins(var_root):
+    worlds_dir = Path(var_root) / "worlds"
+    if not worlds_dir.is_dir():
+        return 0
+    return sum(
+        1 for p in worlds_dir.iterdir()
+        if p.is_dir() and is_closed_ruin(p.name)
+    )
 
 
 def world_facts(world_dir):
@@ -340,6 +503,13 @@ def world_facts(world_dir):
                 state["zones"] = state.get("zones", [])
                 state["_wire_zones"] = wire["zones"]
                 state["entropy_vented"] = show(wire["vented"])
+                # Prefer the wire (authority); JSON may lag until lens exports.
+                state["elements"] = [
+                    {"id": eid.hex(), "name": element_name(eid), "amount": show(amt)}
+                    for eid, amt in wire["elements"]
+                ]
+            elif "elements" not in state:
+                state["elements"] = []
             planets.append(state)
     # THE STEWARD DOOR IS FLAT. Directives are written straight into
     # `inbox/` and archived into `inbox/applied/` or `inbox/refused/`
@@ -369,6 +539,15 @@ def read_all(var_root):
         worlds[facts["name"]] = facts
         for state in facts["planets"]:
             banked = state.get("banked", {})
+            elements = state.get("elements") or []
+            element_total = Fraction(0)
+            element_kinds = 0
+            for entry in elements:
+                try:
+                    element_total += frac(str(entry.get("amount", "0")))
+                    element_kinds += 1
+                except (ValueError, TypeError):
+                    pass
             row = {
                 "civilization": state.get("civilization", "?"),
                 "world": state.get("world", facts["name"]),
@@ -381,12 +560,20 @@ def read_all(var_root):
                 "consumed": facts["consumed"], "linked": facts["linked"],
                 "star": state.get("star_class"),
                 "vented": state.get("entropy_vented", "0"),
+                "elements": elements,
+                "element_kinds": element_kinds,
+                "element_total": element_total,
             }
             for resource in RESOURCES:
                 row[resource] = frac(banked[resource]) if resource in banked else Fraction(0)
             row["intelligence"] = (
                 Fraction(facts["puzzles"]) / facts["consumed"]
                 if facts["consumed"] > 0 else None)
+            # Engine fixtures are not peoples — never surface them.
+            if row["civilization"] in BOARD_EXCLUDE_CIVS:
+                continue
+            if row["world"] in BOARD_EXCLUDE_WORLDS:
+                continue
             rows.append(row)
     return rows, worlds
 
@@ -411,14 +598,81 @@ def load_starchart(var_root):
 
 
 def universe_card(var_root):
+    """Return (span, tuniversal) — the short pair every view already uses."""
+    card = load_universe(var_root)
+    return card["span"], card["tuniversal"]
+
+
+def load_universe(var_root):
+    """Full universe.json card with safe defaults."""
+    defaults = {
+        "topology": "torus",
+        "span": Fraction(64),
+        "tuniversal": "00:00:00:00:00:00",
+        "ticks": 60,
+        "fiber": "—",
+    }
     path = Path(var_root) / "worlds" / "universe.json"
-    if path.exists():
+    if not path.exists():
+        return defaults
+    try:
+        card = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return defaults
+    return {
+        "topology": card.get("topology", defaults["topology"]),
+        "span": frac(card.get("span", "64")),
+        "tuniversal": card.get("tuniversal", defaults["tuniversal"]),
+        "ticks": int(card.get("ticks", defaults["ticks"])),
+        "fiber": card.get("fiber", defaults["fiber"]),
+    }
+
+
+def load_galaxies(var_root):
+    """galaxies.json is one JSON object per line (the starchart pattern)."""
+    path = Path(var_root) / "worlds" / "galaxies.json"
+    galaxies = []
+    if not path.exists():
+        return galaxies
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
         try:
-            card = json.loads(path.read_text(encoding="utf-8"))
-            return frac(card.get("span", "64")), card.get("tuniversal", "00:00:00:00:00:00")
-        except (json.JSONDecodeError, ValueError):
-            pass
-    return Fraction(64), "00:00:00:00:00:00"
+            card = json.loads(line)
+            galaxies.append({
+                "name": card.get("galaxy", "?"),
+                "center": (
+                    frac(card.get("x", "0")),
+                    frac(card.get("y", "0")),
+                    frac(card.get("z", "0")),
+                ),
+                "reach": frac(card.get("reach", "16")),
+            })
+        except (json.JSONDecodeError, ValueError, KeyError):
+            continue
+    return galaxies
+
+
+def galaxy_membership(chart, galaxies, span):
+    """Assign each charted world to the nearest galaxy whose reach
+    covers it (wrapped L1). Uncovered worlds are intergalactic."""
+    members = {g["name"]: [] for g in galaxies}
+    intergalactic = []
+    for world, coords in chart.items():
+        best_name, best_d = None, None
+        for galaxy in galaxies:
+            d = toroidal_l1(coords[:3], galaxy["center"], span)
+            if d <= galaxy["reach"] and (best_d is None or d < best_d):
+                best_name, best_d = galaxy["name"], d
+        if best_name is None:
+            intergalactic.append(world)
+        else:
+            members[best_name].append((world, best_d))
+    for name in members:
+        members[name].sort(key=lambda pair: (pair[1], pair[0]))
+    intergalactic.sort()
+    return members, intergalactic
 
 
 def toroidal_l1(a, b, span):
@@ -475,6 +729,10 @@ class Paint:
     def bad(self, text):
         return self.c(text, "31")
 
+    def warn(self, text):
+        """Caution — yellow, not alarm red. Famine and heat use this."""
+        return self.c(text, "33")
+
     def dim(self, text):
         return self.c(text, "2")
 
@@ -500,67 +758,472 @@ def display_name(name):
 
 
 def civ_display(card, slug):
-    name = card.get("name", slug)
-    if card.get("founder") == "conductor":
-        name = "⚙ " + name
-    return name
+    """Display name only — founder is not a prefix (was 'auto', inconsistent)."""
+    return card.get("name") or slug
+
+
+def station_label(card):
+    """BAND-1: station is an office or the common unseated state.
+
+    Never blank: None reads 'common' (T3), never an empty cell.
+    """
+    station = card.get("station")
+    if station:
+        return station
+    return "common"
+
+
+def engine_pulse(var_root):
+    """Is the conductor alive, and how fresh is the export?
+
+    Returns (running: bool, age_seconds: float|None, newest_path: str|None).
+    """
+    running = False
+    try:
+        # Match the binary name without sweeping the whole process table
+        # into a false positive on this script's own command line.
+        import subprocess
+        out = subprocess.check_output(
+            ["pgrep", "-f", r"(^|/)(conductor|target/.*/conductor)( |$)"],
+            text=True, stderr=subprocess.DEVNULL)
+        running = bool(out.strip())
+    except (subprocess.CalledProcessError, FileNotFoundError, OSError):
+        running = False
+
+    newest, newest_path = None, None
+    worlds = Path(var_root) / "worlds"
+    if worlds.is_dir():
+        for path in worlds.rglob("state.json"):
+            try:
+                mtime = path.stat().st_mtime
+            except OSError:
+                continue
+            if newest is None or mtime > newest:
+                newest, newest_path = mtime, str(path)
+        for path in worlds.rglob("chronicle.jsonl"):
+            try:
+                mtime = path.stat().st_mtime
+            except OSError:
+                continue
+            if newest is None or mtime > newest:
+                newest, newest_path = mtime, str(path)
+    age = (time.time() - newest) if newest is not None else None
+    return running, age, newest_path
+
+
+def format_age(seconds):
+    if seconds is None:
+        return "no exports yet"
+    seconds = int(seconds)
+    if seconds < 60:
+        return f"{seconds}s ago"
+    if seconds < 3600:
+        return f"{seconds // 60}m ago"
+    if seconds < 86400:
+        return f"{seconds // 3600}h ago"
+    return f"{seconds // 86400}d ago"
+
+
+def condition_parts(row):
+    """Plain-language condition tokens — no emoji, no alarm glyphs.
+
+    Returns a list of (severity, severity) where severity is one of
+    'ok', 'caution', 'broken'. Empty list means steady / nothing to note.
+    """
+    parts = []
+    if not row.get("linked", True):
+        parts.append(("chain broken", "broken"))
+    famine = row.get("famine") or []
+    if famine:
+        parts.append(("short " + "+".join(famine), "caution"))
+    try:
+        vented = frac(str(row.get("vented", "0")))
+        if vented > 0:
+            parts.append((f"venting {show_board(vented)}", "caution"))
+    except (ValueError, TypeError):
+        pass
+    return parts
+
+
+def condition_label(row, paint):
+    """Single painted condition string for tables."""
+    parts = condition_parts(row)
+    if not parts:
+        return paint.good("steady")
+    painted = []
+    for text, severity in parts:
+        if severity == "broken":
+            painted.append(paint.bad(text))
+        else:
+            painted.append(paint.warn(text))
+    return ", ".join(painted)
 
 
 def stress_flags(row, paint):
-    """The stress read: famine ⚠ · vented ♨ · broken chain ✗."""
-    flags = []
-    if row["famine"]:
-        flags.append(paint.bad("⚠" + ",".join(row["famine"])))
-    try:
-        if frac(str(row["vented"])) > 0:
-            flags.append(paint.c("♨" + str(row["vented"]), "33"))
-    except ValueError:
-        pass
-    if not row["linked"]:
-        flags.append(paint.bad("✗chain"))
-    return flags
+    """Back-compat name used by older views — now plain language."""
+    parts = condition_parts(row)
+    if not parts:
+        return []
+    out = []
+    for text, severity in parts:
+        if severity == "broken":
+            out.append(paint.bad(text))
+        else:
+            out.append(paint.warn(text))
+    return out
+
+
+def tech_held_count(state):
+    """How many base-stack conditions this planet has crystallized."""
+    stack = state.get("constellation") or []
+    if not isinstance(stack, list):
+        return 0
+    return sum(1 for node in stack if isinstance(node, dict) and node.get("held"))
+
+
+def zone_summary(kinds):
+    """Compact zone inventory: E×3 H×2 S×1 …"""
+    if not kinds:
+        return "—"
+    # Accept either a set of kind names or a multiset dict.
+    if isinstance(kinds, dict):
+        counts = kinds
+    else:
+        counts = {}
+        for kind in kinds:
+            counts[kind] = counts.get(kind, 0) + 1
+    short = {
+        "extractor": "E", "habitat": "H", "smelter": "S",
+        "synthesizer": "Y", "encasement": "C", "cryo-array": "K",
+        "resonator": "R", "regenerator": "G",
+        "element-refinery": "F",  # Wave-1 REFINE-1
+    }
+    parts = []
+    for kind, n in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0])):
+        glyph = short.get(kind, kind[:3])
+        parts.append(f"{glyph}×{n}" if n != 1 else glyph)
+    return " ".join(parts)
 
 
 # ── views ───────────────────────────────────────────────────────────
 
 def view_board(var_root, args, paint):
-    """The dashboard: the whole board at a glance, then pointers."""
+    """Universe dashboard: cosmos → galaxies → systems → civilizations.
+
+    Built for `--watch`: someone sitting on the board should understand
+    what is happening without already knowing which colony is starving.
+    """
     rows, worlds = read_all(var_root)
-    registry = load_registry(var_root)
-    span, tuniversal = universe_card(var_root)
-    lines = [paint.head("THE BOARD"), ""]
+    registry = ensure_registry_coverage(load_registry(var_root), rows)
+    universe = load_universe(var_root)
+    chart = load_starchart(var_root)
+    galaxies = load_galaxies(var_root)
+    span = universe["span"]
+    members, intergalactic = galaxy_membership(chart, galaxies, span)
+    running, age, _newest = engine_pulse(var_root)
+
+    # Index planet state for tech holdings / zone kinds (from the
+    # worlds we already loaded — never re-read the chronicle).
+    planet_state = {}
+    for wname, facts in worlds.items():
+        for state in facts["planets"]:
+            key = (state.get("world", wname), state.get("planet", "?"))
+            planet_state[key] = state
+
+    # ── UNIVERSE ────────────────────────────────────────────────────
     tiers = {}
     for slug, card in registry.items():
         tiers.setdefault(tier_of(card), []).append(slug)
     tier_line = " · ".join(
-        f"{t} {len(tiers.get(t, []))}" for t in ("T0", "T1", "T2", "T3"))
-    lines.append(
-        f"  TUniversal {paint.strong(tuniversal)} · span {show(span)} · "
-        f"{paint.strong(str(len(registry)))} civilizations ({tier_line}) · "
-        f"{paint.strong(str(len(worlds)))} worlds · "
-        f"{paint.strong(str(len(rows)))} settled planets")
-    stressed = [(r, stress_flags(r, paint)) for r in rows]
-    stressed = [(r, f) for r, f in stressed if f]
+        f"{t} {len(tiers.get(t, []))}"
+        for t in ALL_TIERS
+        if tiers.get(t) or t in ("T0", "T1", "T2", "T3"))
+    chains_ok = all(w["linked"] for w in worlds.values()) if worlds else True
+    total_receipts = sum(w["receipts"] for w in worlds.values())
+    total_puzzles = sum(w["puzzles"] for w in worlds.values())
     petitions = sum(w["pending"] for w in worlds.values())
-    if stressed:
-        lines += ["", paint.head("STRESS — the t0 read")]
-        for row, flags in stressed:
-            lines.append(f"  {row['world']}/{row['planet']}  {' '.join(flags)}")
+    offers = 0
+    for facts in worlds.values():
+        for state in facts["planets"]:
+            offers += len(state.get("offers") or [])
+
+    totals = {r: Fraction(0) for r in RESOURCES}
+    element_kinds = 0
+    element_mass = Fraction(0)
+    for row in rows:
+        for r in RESOURCES:
+            totals[r] += row[r]
+        element_kinds += row.get("element_kinds", 0)
+        element_mass += row.get("element_total", Fraction(0))
+    active = sum(1 for row in rows if row["clock"] > 0)
+    short_iron = sum(1 for row in rows if "iron" in (row.get("famine") or []))
+    short_bio = sum(1 for row in rows if "biomass" in (row.get("famine") or []))
+    venting = sum(1 for row in rows if frac(str(row.get("vented", "0") or "0")) > 0)
+    broken = sum(1 for row in rows if not row.get("linked", True))
+    t2_count = len(tiers.get("T2", []))
+    t1_count = len(tiers.get("T1", []))
+
+    if running:
+        pulse = paint.good("LIVE") + f" · last export {format_age(age)}"
+    elif age is not None and age < 120:
+        pulse = paint.warn("export fresh, conductor not seen") + f" · {format_age(age)}"
     else:
-        lines += ["", f"  stress: {paint.good('none — the board breathes')}"]
-    lines.append(
-        f"  petitions pending upward: {paint.strong(str(petitions))}"
-        + ("" if petitions == 0 else "  (t0 inbox in the client)"))
-    lines += ["", paint.head("VIEWS"),
-              "  " + paint.dim("civs [--tier T0] · worlds · world <name> · civ <slug> · "
-                               "market · tiers · stress · techs · chart — any view takes --watch N")]
-    return "\n".join(lines)
+        pulse = paint.bad("STALE") + f" · last export {format_age(age)} · conductor not running"
+
+    lines = [
+        paint.head("UNIVERSE"),
+        f"  engine {pulse}",
+        f"  topology {paint.strong(universe['topology'])} · "
+        f"span {paint.strong(show(span))} · "
+        f"TUniversal {paint.strong(universe['tuniversal'])} · "
+        f"{universe['ticks']} ticks/year",
+        f"  fiber {paint.dim(universe['fiber'])}",
+        f"  {paint.strong(str(len(registry)))} civilizations ({tier_line})",
+        f"  {paint.strong(str(len(worlds)))} worlds · "
+        f"{paint.strong(str(len(rows)))} settled planets · "
+        f"{paint.strong(str(len(galaxies)))} galaxies · "
+        f"{paint.strong(str(len(chart)))} charted positions"
+        + (
+            f" · {paint.dim(str(count_closed_ruins(var_root)) + ' closed ruins hidden')}"
+            if count_closed_ruins(var_root)
+            else ""
+        ),
+        f"  activity: {paint.strong(str(active))} systems ticking · "
+        f"{paint.strong(str(total_receipts))} receipts · "
+        f"{paint.strong(str(total_puzzles))} puzzles solved · "
+        f"{paint.strong(str(offers))} market offer(s) · "
+        f"{paint.strong(str(petitions))} petition(s)",
+        f"  matter — elements {paint.strong(str(element_kinds))} kinds "
+        f"({paint.strong(show_board(element_mass))} total mass) · "
+        f"law carriers: biomass {paint.strong(show_board(totals['biomass']))} · "
+        f"joule {paint.strong(show_board(totals['joule']))} · "
+        f"crystal {paint.strong(show_board(totals['crystal']))} · "
+        f"alloy {paint.strong(show_board(totals['alloy']))} · "
+        f"iron(legacy) {paint.dim(show_board(totals['iron']))}",
+        f"  chain {paint.good('all intact') if chains_ok else paint.bad('BROKEN somewhere')}"
+        f" · condition roll-up: "
+        f"{short_iron} short iron · {short_bio} short biomass · "
+        f"{venting} venting heat · {broken} broken",
+    ]
+    if t2_count == 0:
+        lines.append(
+            "  " + paint.warn(
+                "BOARD GAP: zero sovereigns (T2 empty) — no line holds the "
+                "record-keeper seat; ascend via `ascend <sigil> to sovereign` "
+                "or seat founding T2 lines"))
+    if t1_count == 0:
+        lines.append(
+            "  " + paint.warn(
+                "BOARD GAP: zero T1 seats (watcher/observer) — the architect band is empty"))
+
+    # ── GALAXIES ────────────────────────────────────────────────────
+    lines += ["", paint.head("GALAXIES")]
+    if not galaxies:
+        lines.append("  " + paint.dim("no galaxies charted yet — observation founds them"))
+    else:
+        g_table = []
+        for galaxy in galaxies:
+            name = galaxy["name"]
+            roster = members.get(name, [])
+            # Busiest member by clock among this galaxy's worlds.
+            lead = "—"
+            lead_clock = -1
+            for world_name, _dist in roster:
+                for row in rows:
+                    if row["world"] == world_name and row["clock"] > lead_clock:
+                        lead_clock = row["clock"]
+                        lead = f"{display_name(world_name)} t{row['clock']}"
+            cx, cy, cz = galaxy["center"]
+            g_table.append([
+                display_name(name),
+                f"({show(cx)}, {show(cy)}, {show(cz)})",
+                show(galaxy["reach"]),
+                str(len(roster)),
+                lead,
+            ])
+        lines.append(tabulate(
+            ["GALAXY", "CENTER", "REACH", "WORLDS", "MOST ACTIVE"],
+            g_table))
+        if intergalactic:
+            lines.append(
+                "  intergalactic (outside every reach): "
+                + ", ".join(display_name(w) for w in intergalactic))
+
+    # ── SOLAR SYSTEMS ───────────────────────────────────────────────
+    lines += ["", paint.head("SOLAR SYSTEMS — each world is one star system")]
+    # Sort: most active first (clock desc), then name.
+    system_rows = sorted(rows, key=lambda r: (-r["clock"], r["world"], r["planet"]))
+    s_table = []
+    for row in system_rows:
+        state = planet_state.get((row["world"], row["planet"]), {})
+        # Prefer multiset from state zones; fall back to kind set.
+        kind_counts = {}
+        for zone in state.get("zones") or []:
+            k = zone.get("kind", "?")
+            kind_counts[k] = kind_counts.get(k, 0) + 1
+        if not kind_counts and row.get("zone_kinds"):
+            kind_counts = {k: 1 for k in row["zone_kinds"]}
+        held = tech_held_count(state)
+        civ_slug = row["civilization"]
+        civ_card = registry.get(civ_slug, {})
+        civ_name = civ_card.get("name", civ_slug)
+        # Galaxy of this world (short label for the column).
+        g_name = "—"
+        for galaxy in galaxies:
+            roster = members.get(galaxy["name"], [])
+            if any(w == row["world"] for w, _ in roster):
+                g_name = galaxy["name"]
+                if g_name.startswith("the-"):
+                    g_name = g_name[4:]
+                # archon-sky-1 → archon·1
+                g_name = g_name.replace("-sky-", "·").replace("-", "·")
+                break
+        else:
+            if row["world"] in intergalactic:
+                g_name = "intergalactic"
+            elif row["world"] not in chart:
+                g_name = "uncharted"
+        ek = row.get("element_kinds", 0)
+        elem_cell = (
+            f"{ek}·{show_board(row.get('element_total', Fraction(0)))}"
+            if ek else "—")
+        s_table.append([
+            display_name(row["world"]),
+            row["planet"],
+            STAR_NAMES.get(row["star"], "—"),
+            civ_name[:18],
+            g_name[:14],
+            zone_summary(kind_counts),
+            str(row["clock"]),
+            elem_cell,
+            show_board(row["biomass"]),
+            show_board(row["crystal"]),
+            show_board(row["joule"]),
+            f"{held}" if held else "—",
+            str(worlds.get(row["world"], {}).get("puzzles", 0) or "—")
+            if worlds.get(row["world"], {}).get("puzzles", 0) else "—",
+            condition_label(row, paint),
+        ])
+    lines.append(tabulate(
+        ["WORLD", "PLANET", "STAR", "CIVILIZATION", "GALAXY", "ZONES",
+         "CLOCK", "ELEMENTS", "BIO", "CRYSTAL", "JOULE", "TECH", "PUZZLES",
+         "CONDITION"],
+        s_table))
+    lines.append(paint.dim(
+        "  zones: E extractor · H habitat · S smelter · Y synthesizer · "
+        "C encasement · K cryo · R resonator · G regenerator"))
+    lines.append(paint.dim(
+        "  ELEMENTS = N kinds · total mass (almanac matter, tag 72) · "
+        "BIO/CRYSTAL/JOULE are closed law carriers · iron is legacy ration only"))
+    lines.append(paint.dim(
+        "  condition: steady = banks feeding · short X = famine on resource X · "
+        "venting = excess heat sealed as entropy · large banks floor with '+'"))
+
+    # ── CIVILIZATIONS ───────────────────────────────────────────────
+    lines += ["", paint.head("CIVILIZATIONS")]
+    # Aggregate per civ from rows.
+    civ_agg = {}
+    for row in rows:
+        agg = civ_agg.setdefault(row["civilization"], {
+            "clock": 0, "zones": 0, "worlds": set(),
+            "iron": Fraction(0), "biomass": Fraction(0), "crystal": Fraction(0),
+            "element_kinds": 0, "element_total": Fraction(0),
+            "puzzles": 0, "famine": set(), "venting": False,
+        })
+        agg["clock"] = max(agg["clock"], row["clock"])
+        agg["zones"] += row["zones"]
+        agg["worlds"].add(row["world"])
+        agg["iron"] += row["iron"]
+        agg["biomass"] += row["biomass"]
+        agg["crystal"] += row["crystal"]
+        agg["element_kinds"] += row.get("element_kinds", 0)
+        agg["element_total"] += row.get("element_total", Fraction(0))
+        for f in row.get("famine") or []:
+            agg["famine"].add(f)
+        try:
+            if frac(str(row.get("vented", "0") or "0")) > 0:
+                agg["venting"] = True
+        except (ValueError, TypeError):
+            pass
+    # puzzles double-count if multi-planet; fix by world once
+    for slug, agg in civ_agg.items():
+        agg["puzzles"] = sum(
+            worlds.get(w, {}).get("puzzles", 0) for w in agg["worlds"])
+
+    unregistered = sorted(
+        slug for slug in civ_agg if slug not in registry)
+    for tier in ALL_TIERS:
+        members_t = sorted(
+            (slug for slug, card in registry.items() if tier_of(card) == tier),
+            key=lambda s: (-civ_agg.get(s, {}).get("clock", 0), s))
+        # Unregistered holdings (player/test lines) land under T3.
+        if tier == "T3":
+            members_t = members_t + [
+                s for s in unregistered if s not in members_t]
+        # Always show the classical band; show economic bands only when
+        # someone holds a seat there (keeps the watch board scannable).
+        if not members_t and tier not in ("T0", "T1", "T2", "T3"):
+            continue
+        lines.append(paint.strong(f"  {TIER_TITLES[tier]}"))
+        if not members_t:
+            lines.append("    " + paint.dim("(empty)"))
+            continue
+        c_table = []
+        for slug in members_t:
+            card = registry.get(slug, {})
+            agg = civ_agg.get(slug, {
+                "clock": 0, "zones": 0, "worlds": set(),
+                "iron": Fraction(0), "biomass": Fraction(0), "crystal": Fraction(0),
+                "element_kinds": 0, "element_total": Fraction(0),
+                "puzzles": 0, "famine": set(), "venting": False,
+            })
+            home = ", ".join(sorted(display_name(w) for w in agg["worlds"])) or "—"
+            cond_bits = []
+            if agg["famine"]:
+                cond_bits.append("short " + "+".join(sorted(agg["famine"])))
+            if agg["venting"]:
+                cond_bits.append("venting")
+            if not cond_bits:
+                cond = paint.good("steady") if agg["worlds"] else paint.dim("unseated")
+            else:
+                cond = paint.warn(", ".join(cond_bits))
+            c_table.append([
+                civ_display(card, slug)[:22],
+                (card.get("species") or "?")[:24],
+                station_label(card),
+                home[:28],
+                str(agg["zones"]),
+                str(agg["clock"]),
+                show_board(agg.get("element_total", Fraction(0)))
+                if agg.get("element_kinds") else "—",
+                show_board(agg["biomass"]),
+                show_board(agg["crystal"]),
+                str(agg["puzzles"]) if agg["puzzles"] else "—",
+                cond,
+            ])
+        lines.append(tabulate(
+            ["CIVILIZATION", "SPECIES", "STATION", "WORLD(S)",
+             "ZONES", "CLOCK", "ELEMENTS", "BIO", "CRYSTAL", "PUZZLES",
+             "CONDITION"],
+            c_table))
+        lines.append("")
+
+    # ── NAV ─────────────────────────────────────────────────────────
+    lines += [
+        paint.head("DRILL DOWN"),
+        "  " + paint.dim(
+            "worlds · world <name> · civs [--tier T0] · civ <slug> · "
+            "chart · market · techs · tiers · stress"),
+        "  " + paint.dim(
+            "watch: python3 tools/observer.py --watch 2 --root var"),
+    ]
+    return "\n".join(lines).rstrip()
 
 
 def view_civs(var_root, args, paint):
     """The civilizations, grouped by tier, filterable."""
     rows, worlds = read_all(var_root)
-    registry = load_registry(var_root)
+    registry = ensure_registry_coverage(load_registry(var_root), rows)
     civs = {}
     for row in rows:
         agg = civs.setdefault(row["civilization"], {
@@ -595,30 +1258,38 @@ def view_civs(var_root, args, paint):
             "colonies": 0, "puzzles": 0, "depth": 0, "consumed": Fraction(0),
             "worlds": set(), "zone_kinds": set(),
             **{r: Fraction(0) for r in RESOURCES}})
-        axes = card.get("axes", {})
         by_tier.setdefault(tier, []).append([
             civ_display(card, slug),
             card.get("species", "?"),
-            "·".join(axes.get(a, "?")[:3]
-                     for a in ["disposition", "metabolism", "perception"]),
-            card.get("station", "—") or "—",
+            station_label(card),
             function_of(card, agg),
             creed_of(agg.get("events", []), agg.get("digest", "")),
             str(len(agg["worlds"])), str(agg["colonies"]),
-            show(agg["iron"]), show(agg["biomass"]),
-            show(agg["joule"]), show(agg["sink"]), show(agg["crystal"]),
+            show_board(agg["biomass"]),
+            show_board(agg["joule"]), show_board(agg["sink"]),
+            show_board(agg["crystal"]),
+            show_board(agg["iron"]),
             str(agg["puzzles"]),
             show(Fraction(agg["puzzles"]) / agg["consumed"])
             if agg["consumed"] > 0 else "—",
         ])
     lines = []
-    for tier in ("T0", "T1", "T2", "T3"):
+    for tier in ALL_TIERS:
         if tier not in by_tier:
             continue
         lines += [paint.head(TIER_TITLES[tier]), tabulate(
-            ["CIVILIZATION", "SPECIES", "AXES", "STATION", "FUNCTION", "CREED", "WORLDS", "COLONIES",
-             "IRON", "BIOMASS", "JOULE", "SINK", "CRYSTAL", "PUZZLES", "INTELLIGENCE"],
+            ["CIVILIZATION", "SPECIES", "STATION", "FUNCTION", "CREED",
+             "WORLDS", "COLONIES",
+             "BIOMASS", "JOULE", "SINK", "CRYSTAL", "IRON(leg)", "PUZZLES",
+             "INTELLIGENCE"],
             by_tier[tier]), ""]
+    if "T?" in by_tier:
+        lines += [paint.head(TIER_TITLES["T?"]), tabulate(
+            ["CIVILIZATION", "SPECIES", "STATION", "FUNCTION", "CREED",
+             "WORLDS", "COLONIES",
+             "BIOMASS", "JOULE", "SINK", "CRYSTAL", "IRON(leg)", "PUZZLES",
+             "INTELLIGENCE"],
+            by_tier["T?"]), ""]
     return "\n".join(lines).rstrip() or "(no civilizations match)"
 
 
@@ -634,23 +1305,27 @@ def view_worlds(var_root, args, paint):
                   reverse=(args.sort not in ("civilization", "world", "planet")))
     table = []
     for row in rows:
-        planet = row["planet"]
-        flags = stress_flags(row, paint)
-        if flags:
-            planet += " " + " ".join(flags)
+        ek = row.get("element_kinds", 0)
+        elem = (
+            f"{ek}·{show_board(row.get('element_total', Fraction(0)))}"
+            if ek else "—")
         table.append([
-            row["civilization"], row["world"], planet,
-            show(row["iron"]), show(row["biomass"]),
-            show(row["alloy"]), show(row["diamond"]),
-            show(row["joule"]), show(row["sink"]), show(row["crystal"]),
+            row["civilization"], row["world"], row["planet"],
+            elem,
+            show_board(row["biomass"]),
+            show_board(row["alloy"]), show_board(row["diamond"]),
+            show_board(row["joule"]), show_board(row["sink"]),
+            show_board(row["crystal"]),
+            show_board(row["iron"]),
             STAR_NAMES.get(row["star"], "—"),
             str(row["zones"]), str(row["clock"]),
-            paint.good("✓") if row["linked"] else paint.bad("✗ BROKEN"),
+            paint.good("ok") if row["linked"] else paint.bad("BROKEN"),
+            condition_label(row, paint),
         ])
     return "\n".join([paint.head("SETTLED PLANETS"), tabulate(
-        ["CIVILIZATION", "WORLD", "PLANET", "IRON", "BIOMASS", "ALLOY",
-         "DIAMOND", "JOULE", "SINK", "CRYSTAL", "STAR", "ZONES", "TICKS",
-         "CHAIN"],
+        ["CIVILIZATION", "WORLD", "PLANET", "ELEMENTS", "BIOMASS", "ALLOY",
+         "DIAMOND", "JOULE", "SINK", "CRYSTAL", "IRON(leg)", "STAR", "ZONES",
+         "TICKS", "CHAIN", "CONDITION"],
         table)])
 
 
@@ -667,7 +1342,7 @@ def view_world(var_root, args, paint):
     chart = load_starchart(var_root)
     span, _ = universe_card(var_root)
     lines = [paint.head(f"WORLD {facts['name']}")]
-    chain = paint.good("✓ intact") if facts["linked"] else paint.bad("✗ BROKEN")
+    chain = paint.good("intact") if facts["linked"] else paint.bad("BROKEN")
     lines.append(
         f"  chain {chain} · {facts['receipts']} receipts · "
         f"{facts['puzzles']} puzzles (depth {facts['depth']}) · "
@@ -696,7 +1371,20 @@ def view_world(var_root, args, paint):
             f"{len(state.get('zones', []))} zone(s) · vented {state.get('entropy_vented', '0')}",
             f"    {holdings}"]
         if state.get("famine"):
-            lines.append("    " + paint.bad("⚠ famine: " + ", ".join(state["famine"])))
+            lines.append(
+                "    " + paint.warn("short on: " + ", ".join(state["famine"])))
+        elements = state.get("elements") or []
+        if elements:
+            shown = []
+            for entry in elements[:12]:
+                if isinstance(entry, dict):
+                    name = entry.get("name") or (entry.get("id") or "?")[:8]
+                    amt = entry.get("amount", "?")
+                    shown.append(f"{name} {amt}")
+                else:
+                    shown.append(str(entry))
+            more = f" · +{len(elements) - 12} more" if len(elements) > 12 else ""
+            lines.append("    elements: " + " · ".join(shown) + more)
         zones = state.get("zones", [])
         if zones:
             kinds = {}
@@ -751,8 +1439,16 @@ def view_civ(var_root, args, paint):
     clade = card.get("clade", "")
     lines.append(f"  species {paint.strong(card.get('species', '?'))}"
                  + (f" · clade {clade}" if clade else "")
-                 + f" · axes {'·'.join(axes.get(a, '?') for a in ['disposition', 'metabolism', 'perception'])} · "
-                 f"station {card.get('station', '—') or '—'}")
+                 + f" · station {station_label(card)}")
+    # The three sealed identity axes (G1): disposition · metabolism ·
+    # perception — what the line wants, how it feeds, how it senses.
+    # Shown only on the drill-down, never as a bare "axes" column.
+    if any(axes.get(a) for a in ("disposition", "metabolism", "perception")):
+        lines.append(
+            "  identity: "
+            f"wants={axes.get('disposition', '—')} · "
+            f"feeds={axes.get('metabolism', '—')} · "
+            f"senses={axes.get('perception', '—')}")
     if card.get("motto"):
         lines.append(f"  {paint.dim(chr(0x201C) + card['motto'] + chr(0x201D))}")
     # The lineage walk (LINEAGE-2): the pointer is a space-joined
@@ -782,36 +1478,53 @@ def view_civ(var_root, args, paint):
     if held:
         lines += ["", paint.head("  HOLDINGS")]
         for row in held:
-            flags = stress_flags(row, paint)
             lines.append(
                 f"    {row['world']}/{row['planet']} · "
                 f"{STAR_NAMES.get(row['star'], '—')} star · "
-                f"clock {row['clock']} · {row['zones']} zone(s)"
-                + ("  " + " ".join(flags) if flags else ""))
+                f"clock {row['clock']} · {row['zones']} zone(s) · "
+                f"{condition_label(row, paint)}")
     else:
         lines.append("  no settled planets on the board")
     return "\n".join(lines)
 
 
 def view_tiers(var_root, args, paint):
-    """The union board T0→T3 — who stands where, seats by station."""
+    """The union board T0→T9 — who stands where, seats by station."""
     registry = load_registry(var_root)
     lines = []
-    for tier in ("T0", "T1", "T2", "T3"):
+    for tier in ALL_TIERS:
         members = sorted(
             slug for slug, card in registry.items() if tier_of(card) == tier)
+        # Skip empty economic bands on the tiers view unless every band
+        # is wanted later; always print the classical four.
+        if not members and tier not in ("T0", "T1", "T2", "T3"):
+            continue
         lines.append(paint.head(TIER_TITLES[tier]))
         if members:
             for slug in members:
                 card = registry[slug]
+                station = station_label(card)
                 lines.append(
                     f"  {civ_display(card, slug):<24} "
-                    f"{paint.dim(card.get('species', '?'))}")
+                    f"{paint.dim((card.get('species') or '?')[:20]):<22} "
+                    f"{paint.strong(station)}")
         else:
             lines.append("  " + paint.dim("(no one stands here yet)"))
         lines.append("")
-    lines.append(paint.dim("seats are space, not rank — the rooms and their "
-                           "widths live in the client: civ seats"))
+    # Unreadable seats (T?) if any registry card holds an unknown office.
+    unknown = sorted(
+        slug for slug, card in registry.items() if tier_of(card) == "T?")
+    if unknown:
+        lines.append(paint.head(TIER_TITLES["T?"]))
+        for slug in unknown:
+            card = registry[slug]
+            lines.append(
+                f"  {civ_display(card, slug):<24} "
+                f"{paint.bad(str(card.get('station')))}")
+        lines.append("")
+    lines.append(paint.dim(
+        "seats are space, not rank — T4–T9 are deeper economic offices "
+        "(Wave-1); rooms and widths: CLI `civ seats` · registry seat_width"))
     return "\n".join(lines)
 
 
@@ -865,34 +1578,43 @@ def epistemic_reads(var_root, paint):
         ]
         if near:
             reads.append(
-                f"{name}  {paint.bad('◌epistemological')} — "
+                f"{name}  {paint.warn('truth-starved')} — "
                 f"{len(near)} corrupted chronicle(s) in reach: "
                 + paint.dim(", ".join(display_name(n) for n in near)))
     return reads
 
 
 def view_stress(var_root, args, paint):
-    """The t0 stress read, alone and whole."""
+    """Condition roll-up only — shortages, heat, petitions, truth-starvation.
+
+    Prefer the default board for the full picture; this view is the
+    narrow t0 checklist.
+    """
     rows, worlds = read_all(var_root)
-    lines = [paint.head("STRESS — the t0 read")]
+    lines = [paint.head("CONDITION ROLL-UP")]
     any_stress = False
     for line in epistemic_reads(var_root, paint):
         any_stress = True
         lines.append(f"  {line}")
-    for row in rows:
-        flags = stress_flags(row, paint)
-        if flags:
-            any_stress = True
-            lines.append(f"  {row['world']}/{row['planet']}  {' '.join(flags)}")
+    short = [r for r in rows if condition_parts(r)]
+    if short:
+        any_stress = True
+        lines.append(paint.strong("  systems under pressure"))
+        for row in short:
+            lines.append(
+                f"    {row['world']}/{row['planet']:<16}  "
+                f"{condition_label(row, paint)}")
     for name, facts in sorted(worlds.items()):
         if facts["pending"]:
             any_stress = True
             lines.append(
                 f"  {name}  {paint.strong(str(facts['pending']))} petition(s) pending")
     if not any_stress:
-        lines.append("  " + paint.good("none — the board breathes"))
+        lines.append("  " + paint.good("all systems steady — the board breathes"))
     lines.append(paint.dim(
         "  deeds: t0 move (separate) · licensed leap (relieve) · t0 contract (seal)"))
+    lines.append(paint.dim(
+        "  for the full universe view: python3 tools/observer.py  (no subcommand)"))
     return "\n".join(lines)
 
 
@@ -1018,7 +1740,7 @@ def main():
                         choices=["civilization", "world", "planet"] + RESOURCES
                         + ["zones", "clock", "intelligence"])
     parser.add_argument("--tier", default=None,
-                        help="filter civs by tier: T0..T3")
+                        help="filter civs by tier: T0..T9 (or T? for unreadable)")
     parser.add_argument("--tail", type=int, default=8,
                         help="chronicle receipts shown in world view (default 8)")
     parser.add_argument("--plain", action="store_true")
@@ -1040,7 +1762,8 @@ def main():
             output = render_view(args.root, args, paint)
             if not plain:
                 print("\033[2J\033[H", end="")
-            print(f"NETSTRATUM OBSERVATORY — {args.view} — "
+            title = "universe" if args.view == "board" else args.view
+            print(f"NETSTRATUM OBSERVATORY — {title} — "
                   f"{time.strftime('%H:%M:%S')} — {args.root}/\n")
             print(output)
             time.sleep(args.watch)
