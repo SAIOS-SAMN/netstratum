@@ -322,6 +322,7 @@ impl World {
             veiled: self.veiled,
             taxon: self.taxon,
             stations: self.stations.clone(),
+            hulls: self.hulls.clone(),
         }
     }
     /// ELEMENT-GRAMMAR-1 (14 §3) — the extraction closure: richness ×

@@ -187,6 +187,8 @@ fn main() {
             );
             worlds.push(Polity::genesis(spec, &registry, &book));
         }
+        // FLEET-1: salvage/mint/assign before hauls need capacity.
+        conductor::fleet_step(&mut worlds);
         // OFFER-1a: the market beat — intents post, crossings clear
         // (one aperture pair each way, receipted both sides).
         for (seller, buyer) in conductor::market_step(&mut worlds, beat) {

@@ -9,6 +9,7 @@ pub fn help(style: Style, topic: Option<&str>) {
         Some("desk") | Some("trade-desk") | Some("t") => desk_help(style),
         Some("stamp") | Some("money") => stamp_help(style),
         Some("element") | Some("elements") | Some("matter") => element_help(style),
+        Some("fleet") | Some("hull") | Some("ship") => fleet_help(style),
         Some("market") | Some("trade") | Some("offer") => market_help(style),
         Some("route") | Some("routes") | Some("charter") => routes_help(style),
         Some("colony") | Some("grow") | Some("build") => colony_help(style),
@@ -83,6 +84,7 @@ fn topics(style: Style) {
         ("desk", "trade desk panes and keybinds"),
         ("stamp", "STAMP mint and aperture"),
         ("element", "element haul and charter"),
+        ("fleet", "scrap, yard, hulls, capacity"),
         ("market", "offers and trade clears"),
         ("routes", "ROUTE-1 and element lanes"),
         ("colony", "found / zone / tick / collect"),
@@ -139,6 +141,25 @@ fn desk_help(style: Style) {
     println!(
         "  {}",
         style.hint("No desk ledger — every action is a chronicle deed (SEAL B).")
+    );
+}
+
+fn fleet_help(style: Style) {
+    banner_line(style, "FLEET — SCRAP · YARD · HULLS");
+    row(style, "zone <tile> yard", "build ShipYard (smelter cost)");
+    row(style, "fleet · fleet list", "scrap, free capacity, hull roster");
+    row(style, "fleet salvage <amt>", "iron → scrap 1:1 at yard");
+    row(style, "fleet mint <role> [grade]", "hauler|semi|runner|escort");
+    row(style, "fleet assign <id> <deal|0>", "bind hull to route (0=idle)");
+    row(style, "fleet scrap <id>", "dismantle hull, recover half scrap");
+    println!();
+    println!(
+        "  {}",
+        style.hint("Positive-melt hauls need free hull capacity. Metabolism filters roles.")
+    );
+    println!(
+        "  {}",
+        style.hint("desk f — FLEET pane. NPC fleet_step salvages/mints under pure era.")
     );
 }
 

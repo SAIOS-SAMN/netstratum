@@ -66,6 +66,18 @@ pub enum ActionRefused {
     /// REFINE-1 — no ElementRefinery stands on this orb. The zone is
     /// the technology gate; T5 is advantage only (Q-T2).
     NoRefineryStanding { orb: u64 },
+    /// FLEET-1 — no ShipYard on the orb (Q-F4).
+    NoShipYard { orb: u64 },
+    /// FLEET-1 — not enough scrap for the mint or haul residual.
+    CannotAffordScrap { need: Box<Ratio>, have: Box<Ratio> },
+    /// FLEET-1 — no hull with this id.
+    NoSuchHull { hull_id: u64 },
+    /// FLEET-1 — haul exceeds free hull capacity for the deal.
+    HullCapacityShort { need: Box<Ratio>, have: Box<Ratio> },
+    /// FLEET-1 — metabolism catalog refuses this role.
+    HullRoleForbidden { role: u8 },
+    /// FLEET-1 — assign to a deal neither book holds as a route.
+    RouteUnknown { deal: u64 },
     /// ELEMENT-CHEMISTRY (#37) — this system does not carry the
     /// element's LINE: deep matter simply does not occur under a
     /// shallow star. A fact of the sky, at the verb forever.

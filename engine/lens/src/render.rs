@@ -714,6 +714,42 @@ pub fn render_receipt(receipt: &Receipt) -> String {
                 ratio_str(amount)
             ),
         ),
+        E::ScrapSalvaged { orb_id, amount, iron_spent } => (
+            "scrap_salvaged",
+            format!(
+                "orb {orb_id} salvages {} scrap from {} iron",
+                ratio_str(amount),
+                ratio_str(iron_spent)
+            ),
+        ),
+        E::HullMinted {
+            hull_id,
+            orb_id,
+            role,
+            grade,
+            scrap_spent,
+        } => (
+            "hull_minted",
+            format!(
+                "orb {orb_id} mints hull {hull_id} role {role} grade {grade} for {} scrap",
+                ratio_str(scrap_spent)
+            ),
+        ),
+        E::HullAssigned { hull_id, deal } => (
+            "hull_assigned",
+            format!("hull {hull_id} assigned to deal {deal} (0=idle)"),
+        ),
+        E::HullScrapped {
+            hull_id,
+            orb_id,
+            scrap_returned,
+        } => (
+            "hull_scrapped",
+            format!(
+                "orb {orb_id} scraps hull {hull_id} recovering {}",
+                ratio_str(scrap_returned)
+            ),
+        ),
         E::ApertureSent { deal, from_orb, resource, amount } => (
             "aperture_sent",
             format!(

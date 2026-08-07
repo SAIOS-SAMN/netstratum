@@ -3291,6 +3291,7 @@ pub fn run_era_with(var_root: &str, cycles: u32, mode: SearchMode) -> Vec<Polity
             worlds.push(polity);
         }
         // OFFER-1a + MERCHANT-1 + E3.3: market, caravan, element haul.
+        fleet_step(&mut worlds);
         let _ = market_step(&mut worlds, u64::from(beat));
         let _ = merchant_step(&mut worlds, u64::from(beat));
         let _ = element_trade_step(&mut worlds, u64::from(beat));
@@ -3313,4 +3314,98 @@ pub fn run_era_with(var_root: &str, cycles: u32, mode: SearchMode) -> Vec<Polity
         }
     }
     worlds
+}
+
+/// FLEET-1 Phase-3 — pure NPC salvage + mint + assign (TASKS_TRADE_FLEET_DESK P3.9).
+///
+/// Ensures each unpenned line can haul: ShipYard when iron affords,
+/// scrap from iron, hauler grade 0 until idle capacity ≥ 4, assign
+/// idle hulls onto the first live route deal.
+pub fn fleet_step(worlds: &mut [Polity]) {
+    for polity in worlds.iter_mut() {
+        if polity.penned {
+            continue;
+        }
+        ensure_npc_fleet(&mut polity.world, polity.automaton);
+    }
+}
+
+fn ensure_npc_fleet(world: &mut cfe::world::World, actor: u64) {
+    let Some(orb) = world.orb() else {
+        return;
+    };
+    let orb_id = cfe::world::FIRST_ORB;
+    let has_yard = orb.zones.iter().any(|z| z.kind == cfe::dop::ZoneKind::ShipYard);
+    if !has_yard {
+        // Prefer free tile yard when iron/bio can pay smelter cost.
+        let cost_ok = cfe::dop::ZoneKind::ShipYard
+            .cost()
+            .into_iter()
+            .all(|(r, n)| orb.banked_amount(r) >= n);
+        if cost_ok {
+            if let Some(tile) = (0u16..64).find(|&t| !orb.zones.iter().any(|z| z.tile == t)) {
+                let _ = world.zone_as(actor, orb_id, tile, cfe::dop::ZoneKind::ShipYard);
+            }
+        }
+    }
+    let Some(orb) = world.orb() else {
+        return;
+    };
+    if !orb.zones.iter().any(|z| z.kind == cfe::dop::ZoneKind::ShipYard) {
+        return;
+    }
+    // Salvage iron above a thin reserve (1+1) — leaves iron for life.
+    let iron = orb.banked_amount(cfe::dop::Resource::Iron);
+    let reserve = ratio(1, 1) + ratio(1, 1);
+    if iron > reserve {
+        let convert = iron - reserve;
+        if convert > ratio(0, 1) {
+            if let Some(amt) = cfe::dop::Positive::new(convert) {
+                let _ = world.salvage_scrap_as(actor, orb_id, amt);
+            }
+        }
+    }
+    // Mint haulers until free capacity ≥ one hauler base (derive 1+1+1+1).
+    let one = ratio(1, 1);
+    let target_cap = one.clone() + one.clone() + one.clone() + one;
+    while world.free_capacity(0) < target_cap {
+        let scrap = world
+            .orb()
+            .map(|o| o.scrap_amount())
+            .unwrap_or_else(|| ratio(0, 1));
+        let need = cfe::dop::hull_scrap_cost(cfe::dop::HullRole::Hauler, 0);
+        if scrap < need {
+            break;
+        }
+        if world
+            .mint_hull_as(actor, orb_id, cfe::dop::HullRole::Hauler, 0)
+            .is_err()
+        {
+            break;
+        }
+    }
+    // Assign idle hulls to first live route deal.
+    let deal = world
+        .routes()
+        .first()
+        .map(|(d, _)| *d)
+        .or_else(|| {
+            world
+                .committed()
+                .element_routes
+                .first()
+                .map(|(d, _, _, _)| *d)
+        })
+        .unwrap_or(0);
+    if deal != 0 {
+        let idle: Vec<u64> = world
+            .hulls()
+            .iter()
+            .filter(|h| h.assigned_route == 0)
+            .map(|h| h.hull_id)
+            .collect();
+        for id in idle {
+            let _ = world.assign_hull_as(actor, id, deal);
+        }
+    }
 }

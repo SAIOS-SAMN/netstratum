@@ -292,9 +292,17 @@
 //!         convert at identity rate; source crystal spent receipted.)
 //!    112  ClosureEvent::StampApertureSent (STAMP cross-world debit leg.)
 //!    113  ClosureEvent::StampApertureReceived (STAMP cross-world credit.)
-//!    107+ claim ledger through Wave-4 spot: next free **114**.
+//!    114  ClosureEvent::ScrapSalvaged (FLEET-1 Phase-3 — iron→scrap
+//!         identity convert at a ShipYard.)
+//!    115  ClosureEvent::HullMinted (FLEET-1 — scrap spent, hull banks.)
+//!    116  ClosureEvent::HullAssigned (FLEET-1 — hull ↔ route deal;
+//!         deal 0 = idle pool.)
+//!    117  ClosureEvent::HullScrapped (FLEET-1 — hull removed, scrap
+//!         reverse half cost.)
+//!    107+ claim ledger through Phase-3 fleet: next free **118**.
+//!         Orb TLV: 73 STAMP, **74 scrap**. ZoneKind::ShipYard = 10.
 //!         (Historic free tags below top: 14, 15, 56, 57, 58, 64, 66,
-//!         73, 83, 84, 87; 9 and 51 reserved; 65 retired forever.)
+//!         83, 84, 87; 9 and 51 reserved; 65 retired forever.)
 //!   In-value practice codes (append-only): 1 the Austerity · 2 the Showpiece ·
 //!   3 the Restraint · 4 the Hoard · 5 the Overdrive (deep-end: adoption
 //!   gated on hardship ≥ 8 receipts). Placeholder names, operator
@@ -1485,6 +1493,7 @@ pub fn zone_word(kind: ZoneKind) -> &'static str {
         ZoneKind::Resonator => "resonator",
         ZoneKind::Regenerator => "regenerator",
         ZoneKind::ElementRefinery => "element-refinery",
+        ZoneKind::ShipYard => "shipyard",
         // #41: a minted kind's WORD lives in the fold, not the table.
         // The chronicle names it; this answers only that it is one.
         ZoneKind::Minted(_) => "minted",
@@ -1528,12 +1537,92 @@ pub enum ZoneKind {
     /// gates placement, same technology door as the regenerator.
     /// Q-T2: T5 Crucible is advantage only; T3 may refine with the zone.
     ElementRefinery = 9,
+    /// **FLEET-1 — THE SHIP YARD** (33 Phase 3): converts scrap into
+    /// hulls via `mint_hull`. Resource yield zero. Cost mirrors
+    /// smelter iron bill (call-not-copy). Q-F4: yard required to mint.
+    ShipYard = 10,
     /// **A MINTED BUILDING (#41)** — the fold code of a zone-axis entry
     /// past the compiled table. Its economics are its BASE's, modulated
     /// by its binding (`vocabulary::zone_base`), so they are read
     /// through the World (which holds the chronicle) and never from the
     /// compiled methods below.
     Minted(u8),
+}
+
+/// FLEET-1 hull role (universal physics; civ voice is separate).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[repr(u8)]
+pub enum HullRole {
+    Hauler = 1,
+    Semi = 2,
+    Runner = 3,
+    Escort = 4,
+}
+
+impl HullRole {
+    pub fn from_wire(byte: u8) -> Option<HullRole> {
+        match byte {
+            1 => Some(HullRole::Hauler),
+            2 => Some(HullRole::Semi),
+            3 => Some(HullRole::Runner),
+            4 => Some(HullRole::Escort),
+            _ => None,
+        }
+    }
+    pub fn as_wire(self) -> u8 {
+        self as u8
+    }
+    pub fn word(self) -> &'static str {
+        match self {
+            HullRole::Hauler => "hauler",
+            HullRole::Semi => "semi",
+            HullRole::Runner => "runner",
+            HullRole::Escort => "escort",
+        }
+    }
+}
+
+/// Receipted hull asset (capacity/η/upkeep derive at read).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Hull {
+    pub hull_id: u64,
+    pub role: u8,
+    pub grade: u8,
+    pub home_orb: u64,
+    /// 0 = idle pool; else ROUTE-1 / E-ROUTE deal id.
+    pub assigned_route: u64,
+}
+
+/// Capacity units a hull can haul (derive: role base × (1+grade)).
+/// Bases are powers of two built from `1+1` — no free dials.
+pub fn hull_capacity(role: u8, grade: u8) -> Ratio {
+    let one = ratio(1, 1);
+    let two = one.clone() + one.clone();
+    let four = two.clone() + two.clone();
+    let eight = four.clone() + four.clone();
+    let base = match HullRole::from_wire(role).unwrap_or(HullRole::Hauler) {
+        HullRole::Hauler => four,
+        HullRole::Semi => eight,
+        HullRole::Runner => one,
+        HullRole::Escort => two,
+    };
+    base * ratio(1 + i64::from(grade.min(7)), 1)
+}
+
+/// Hull η in [0, 1) — grade × Resonator yield (1/8 ladder, landed).
+pub fn hull_eta(role: u8, grade: u8) -> Ratio {
+    let g = i64::from(grade.min(7));
+    let boost = match HullRole::from_wire(role).unwrap_or(HullRole::Hauler) {
+        HullRole::Runner => g + 1, // couriers grade one step better
+        _ => g,
+    };
+    let eighth = ZoneKind::Resonator.yield_per_tick().1;
+    ratio(boost.min(7), 1) * eighth
+}
+
+/// Scrap spent to mint (derive: capacity at role/grade).
+pub fn hull_scrap_cost(role: HullRole, grade: u8) -> Ratio {
+    hull_capacity(role.as_wire(), grade)
 }
 /// **THE REFINEMENT LAW** (2026-08-05, on the operator's ruling that
 /// this codebase carries *too many constants — you aren't building
@@ -1625,6 +1714,7 @@ impl ZoneKind {
             Self::Resonator => 7,
             Self::Regenerator => 8,
             Self::ElementRefinery => 9,
+            Self::ShipYard => 10,
             Self::Minted(code) => code,
         }
     }
@@ -1651,6 +1741,7 @@ impl ZoneKind {
             7 => Some(Self::Resonator),
             8 => Some(Self::Regenerator),
             9 => Some(Self::ElementRefinery),
+            10 => Some(Self::ShipYard),
             _ => None,
         }
     }
@@ -1706,6 +1797,10 @@ impl ZoneKind {
             // biomass is the founding ration every metabolism can meet
             // once, no new dial (31 §3).
             Self::ElementRefinery => Self::Habitat.cost(),
+            // Yard: habitat biomass bill — leaves iron free for scrap
+            // salvage (measured: smelter cost left founding iron too
+            // thin to mint a hauler in the same era).
+            Self::ShipYard => Self::Habitat.cost(),
         }
     }
 
@@ -1741,6 +1836,7 @@ impl ZoneKind {
             // Element conversion is the element ledger (`refine_as`),
             // not a Resource flow — zero Resource yield.
             Self::ElementRefinery => (Resource::Iron, ratio(0, 1)),
+            Self::ShipYard => (Resource::Iron, ratio(0, 1)),
             // #41: the ground state — see `cost`. A minted kind yields
             // through `World::zone_economics`, never here.
             Self::Minted(_) => (Resource::Iron, ratio(0, 1)),
@@ -1781,6 +1877,7 @@ impl ZoneKind {
             // forever (smelter needs 10 bio; a bio-upkeep refinery
             // spent the triangle-trade ration before industry could).
             Self::ElementRefinery => Self::Encasement.upkeep_per_tick(),
+            Self::ShipYard => Self::Encasement.upkeep_per_tick(),
             // #41: the ground state — see `cost`.
             Self::Minted(_) => Vec::new(),
         }
@@ -1792,7 +1889,11 @@ impl ZoneKind {
     pub fn factory_heat(&self) -> Ratio {
         match self {
             Self::Extractor | Self::Habitat | Self::Regenerator => ratio(1, 4),
-            Self::Smelter | Self::Synthesizer | Self::Resonator | Self::ElementRefinery => {
+            Self::Smelter
+            | Self::Synthesizer
+            | Self::Resonator
+            | Self::ElementRefinery
+            | Self::ShipYard => {
                 ratio(1, 1)
             }
             Self::Encasement | Self::CryoArray => ratio(0, 1),
@@ -2261,6 +2362,28 @@ pub enum ClosureEvent {
         deal: u64,
         to_orb: u64,
         amount: Ratio,
+    },
+    /// FLEET-1 (tag 114) — iron salvaged into scrap at a ShipYard.
+    ScrapSalvaged {
+        orb_id: u64,
+        amount: Ratio,
+        iron_spent: Ratio,
+    },
+    /// FLEET-1 (tag 115) — hull minted; scrap spent.
+    HullMinted {
+        hull_id: u64,
+        orb_id: u64,
+        role: u8,
+        grade: u8,
+        scrap_spent: Ratio,
+    },
+    /// FLEET-1 (tag 116) — hull assigned to route deal (0 = idle).
+    HullAssigned { hull_id: u64, deal: u64 },
+    /// FLEET-1 (tag 117) — hull scrapped; scrap returned.
+    HullScrapped {
+        hull_id: u64,
+        orb_id: u64,
+        scrap_returned: Ratio,
     },
     /// N4 (NS-2 §1.5) — the scanner's power draw, the ONE chronicle
     /// event of RQP: crystals left the probing orb's bank to hold the
@@ -2904,6 +3027,41 @@ impl ClosureEvent {
                 value.extend_from_slice(&to_orb.to_le_bytes());
                 ratio::encode(amount, &mut value);
                 tlv::put(113, &value, &mut out);
+            }
+            Self::ScrapSalvaged { orb_id, amount, iron_spent } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                ratio::encode(amount, &mut value);
+                ratio::encode(iron_spent, &mut value);
+                tlv::put(114, &value, &mut out);
+            }
+            Self::HullMinted {
+                hull_id,
+                orb_id,
+                role,
+                grade,
+                scrap_spent,
+            } => {
+                let mut value = hull_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&orb_id.to_le_bytes());
+                value.push(*role);
+                value.push(*grade);
+                ratio::encode(scrap_spent, &mut value);
+                tlv::put(115, &value, &mut out);
+            }
+            Self::HullAssigned { hull_id, deal } => {
+                let mut value = hull_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&deal.to_le_bytes());
+                tlv::put(116, &value, &mut out);
+            }
+            Self::HullScrapped {
+                hull_id,
+                orb_id,
+                scrap_returned,
+            } => {
+                let mut value = hull_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&orb_id.to_le_bytes());
+                ratio::encode(scrap_returned, &mut value);
+                tlv::put(117, &value, &mut out);
             }
             Self::CrystalDrawn { orb_id, amount } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
@@ -3597,6 +3755,45 @@ impl ClosureEvent {
                     amount,
                 })
             }
+            114 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let (amount, used) = ratio::decode(value.get(8..)?)?;
+                let (iron_spent, _) = ratio::decode(value.get(8 + used..)?)?;
+                Some(Self::ScrapSalvaged {
+                    orb_id,
+                    amount,
+                    iron_spent,
+                })
+            }
+            115 => {
+                let hull_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let orb_id = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let role = *value.get(16)?;
+                let grade = *value.get(17)?;
+                let (scrap_spent, _) = ratio::decode(value.get(18..)?)?;
+                Some(Self::HullMinted {
+                    hull_id,
+                    orb_id,
+                    role,
+                    grade,
+                    scrap_spent,
+                })
+            }
+            116 => {
+                let hull_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let deal = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                Some(Self::HullAssigned { hull_id, deal })
+            }
+            117 => {
+                let hull_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let orb_id = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                let (scrap_returned, _) = ratio::decode(value.get(16..)?)?;
+                Some(Self::HullScrapped {
+                    hull_id,
+                    orb_id,
+                    scrap_returned,
+                })
+            }
             55 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let (amount, _) = ratio::decode(value.get(8..)?)?;
@@ -4019,6 +4216,8 @@ pub struct ColonyOrb {
     /// Exact rational; zero encodes as ABSENT (one state, one encoding).
     /// Wire: orb entry tag 73 (SEAL A — old readers skip).
     pub stamp: Ratio,
+    /// FLEET-1 scrap pool (tag 74). One kind (Q-F3).
+    pub scrap: Ratio,
     /// BOOK-1 (19_LENS §16): the books this orb MINTED, kind-ascending
     /// (canonical order). The charter's four are NOT here — they keep
     /// their landed fields and their landed wire entry; `books()`
@@ -4113,6 +4312,12 @@ impl ColonyOrb {
             let mut value = Vec::new();
             ratio::encode(&self.stamp, &mut value);
             tlv::put(73, &value, &mut out);
+        }
+        // FLEET-1 scrap pool — only when nonzero.
+        if self.scrap != ratio(0, 1) {
+            let mut value = Vec::new();
+            ratio::encode(&self.scrap, &mut value);
+            tlv::put(74, &value, &mut out);
         }
         // BOOK-1: minted books, kind-ascending. An orb that minted none
         // stays byte-identical to a pre-BOOK-1 one (one state, one
@@ -4233,6 +4438,10 @@ impl ColonyOrb {
                 73 => {
                     let (amount, _) = ratio::decode(value)?;
                     orb.stamp = amount;
+                }
+                74 => {
+                    let (amount, _) = ratio::decode(value)?;
+                    orb.scrap = amount;
                 }
                 91 => {
                     let work: [u8; 32] = value.get(..32)?.try_into().ok()?;
@@ -4380,6 +4589,19 @@ impl ColonyOrb {
         self.stamp += amount;
         if self.stamp == ratio(0, 1) {
             self.stamp = ratio(0, 1);
+        }
+    }
+
+    /// FLEET-1: scrap pool on this orb.
+    pub fn scrap_amount(&self) -> Ratio {
+        self.scrap.clone()
+    }
+
+    /// FLEET-1: move scrap (signed delta).
+    pub fn bank_scrap(&mut self, amount: Ratio) {
+        self.scrap += amount;
+        if self.scrap < ratio(0, 1) {
+            self.scrap = ratio(0, 1);
         }
     }
 

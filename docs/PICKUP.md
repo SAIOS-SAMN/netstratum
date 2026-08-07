@@ -15,15 +15,16 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 |------|--------|
 | Wave-1 commit | **`2109bf0`** (T4–T9, REFINE-1) |
 | Wave-2 commit | **`4686399`** (E-APT, element_trade_step) |
-| Kernel | **0.22.0** (next free minor **23**) |
-| Next free tag | **114** (STAMP/E-ROUTE through 113; orb STAMP TLV 73) |
+| Kernel | **0.23.0** (next free minor **24**) |
+| Next free tag | **118** (fleet through 117; scrap TLV 74; STAMP TLV 73) |
 | Stations | **10** (T4–T9 economic offices open) |
 | ZoneKind compiled | **1–9** (ElementRefinery = 9) |
 | Codec | **SCHEMA_V6** (element_routes trailing) |
 | Pure-NPC green | offices, refine, element aperture, **STAMP spot** (`wave1_era_pins`) |
-| Next work | **Trade desk Phase 3** (fleets) · P1.8 offer widen · I5 · R2.3 |
-| Docs | `30`/`31`/`32` partial; **`33` Phases 1–2 partial land** |
-| Trade program | Desk+STAMP+element+alignment landed; Phases 3–5 open |
+| Next work | **Trade desk Phase 4** (instruments) · P1.8 offer widen · R2.3 |
+| Docs | `30`/`31`/`32` partial; **`33` Phases 1–3 partial land** |
+| Trade program | Desk+alignment+**fleets** landed; Phases 4–5 open |
+| Codec | **SCHEMA_V7** (hulls trail) |
 | Help | `help` / `help desk` / topics — full ANSI (disable: `--plain`) |
 | Dirty / other lane | do not `git add -A` without reviewing observer/other-lane files |
 

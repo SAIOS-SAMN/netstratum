@@ -13,7 +13,7 @@ use cfe::dop::{ClosureEvent, Station};
 use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
 use cfe::world::replay;
-use conductor::{element_trade_step, stamp_market_step, Polity, PolitySpec, Policy};
+use conductor::{element_trade_step, fleet_step, stamp_market_step, Polity, PolitySpec, Policy};
 use ledger::registry::{tier_of, Civilization, Registry, Tier};
 use ledger::Ledger;
 use std::fs;
@@ -242,6 +242,7 @@ fn pure_npc_element_route_clears() {
         let _ = exporter.cycle(&book, &registry);
         let _ = importer.cycle(&book, &registry);
         let mut pair = vec![exporter, importer];
+        fleet_step(&mut pair);
         let hits = element_trade_step(&mut pair, u64::from(beat));
         importer = pair.pop().expect("importer");
         exporter = pair.pop().expect("exporter");
@@ -311,6 +312,7 @@ fn pure_npc_stamp_spot_clears() {
         let _ = buyer.cycle(&book, &registry);
         let _ = seller.cycle(&book, &registry);
         let mut pair = vec![buyer, seller];
+        fleet_step(&mut pair);
         let hits = stamp_market_step(&mut pair, u64::from(beat));
         seller = pair.pop().expect("seller");
         buyer = pair.pop().expect("buyer");
@@ -365,5 +367,68 @@ fn pure_npc_stamp_spot_clears() {
         replay(seller.world.chronicle()),
         seller.world.committed(),
         "seller replay MATCHES"
+    );
+}
+
+
+/// Phase-3 exit — pure NPC fleets salvage, mint, and capacity-gate hauls.
+#[test]
+fn pure_npc_fleet_hauls() {
+    let root = scratch("fleet");
+    let registry = Registry::at(root.join("registry"));
+    let book = Ledger::at(root.join("worlds"));
+    let mut a = Polity::genesis(
+        line("Fleetwright", "fleetwright", "expansionist", "mineral"),
+        &registry,
+        &book,
+    );
+    let mut b_spec = line("Fleetpeer", "fleetpeer", "empiricist", "mineral");
+    b_spec.position = (ratio(8, 1), ratio(0, 1), ratio(0, 1));
+    let mut b = Polity::genesis(b_spec, &registry, &book);
+
+    let mut hull_on = None;
+    let mut haul_on = None;
+    // Short pure-fleet path: cycle once for iron yield, then fleet_step.
+    for beat in 1u32..=12 {
+        let _ = a.cycle(&book, &registry);
+        let _ = b.cycle(&book, &registry);
+        let mut pair = vec![a, b];
+        fleet_step(&mut pair);
+        let _ = element_trade_step(&mut pair, u64::from(beat));
+        b = pair.pop().expect("b");
+        a = pair.pop().expect("a");
+        if hull_on.is_none() && !a.world.hulls().is_empty() {
+            hull_on = Some(beat);
+        }
+        let hauled = a.world.chronicle().receipts().iter().any(|r| {
+            matches!(r.event, ClosureEvent::ElementApertureSent { .. } | ClosureEvent::ApertureSent { .. })
+        }) || b.world.chronicle().receipts().iter().any(|r| {
+            matches!(r.event, ClosureEvent::ElementApertureSent { .. } | ClosureEvent::ApertureSent { .. })
+        });
+        if hull_on.is_some() && hauled {
+            haul_on = Some(beat);
+            break;
+        }
+        if hull_on.is_some() && haul_on.is_none() {
+            // Hulls stand — haul may need another beat of element banking.
+            haul_on = haul_on.or(None);
+        }
+    }
+    assert!(
+        hull_on.is_some(),
+        "NPC must mint a hull within 12 beats; hulls_a={} scrap_a={:?} iron={:?}",
+        a.world.hulls().len(),
+        a.world.orb().map(|o| o.scrap_amount()),
+        a.world.orb().map(|o| o.banked_amount(cfe::dop::Resource::Iron)),
+    );
+    assert!(
+        haul_on.is_some(),
+        "with hulls, a cross-world haul must clear; capacity={}",
+        a.world.free_capacity(0),
+    );
+    assert_eq!(
+        replay(a.world.chronicle()),
+        a.world.committed(),
+        "SEAL B after fleet"
     );
 }

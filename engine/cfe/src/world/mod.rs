@@ -59,8 +59,10 @@ pub mod zones;
 pub mod replay;
 pub mod state;
 pub mod stock;
+pub mod fleet;
 
 pub use replay::replay;
+pub use fleet::hull_voice;
 pub use state::{
     AbsorptionDebt, Bond, Committed, Council, Forward, Genesis, Leap, Offer, Prospected,
     TickOutcome, World,
@@ -264,6 +266,10 @@ fn haul(
     if *melt >= ratio(1, 1) {
         return Err(ActionRefused::EconomicallyWalled { melt: Box::new(melt.clone()) });
     }
+    // FLEET-1: positive melt hauls need hull capacity (Phase 3).
+    if *melt > ratio(0, 1) {
+        fleet::require_hull_capacity(src, deal, &amount)?;
+    }
     // THRESHOLD-1 (12_UNION §7): the shield — an aperture touches only
     // worlds whose peoples have made the solar leap (TECH-1a). A world
     // is a star system, so every aperture IS interstellar; the first
@@ -377,6 +383,9 @@ fn haul_element(
         return Err(ActionRefused::EconomicallyWalled {
             melt: Box::new(melt.clone()),
         });
+    }
+    if *melt > ratio(0, 1) {
+        fleet::require_hull_capacity(src, deal, &amount)?;
     }
     if src.ward_holds() || dst.ward_holds() {
         return Err(ActionRefused::TheWardHolds);
@@ -578,6 +587,10 @@ pub fn stamp_aperture_transfer(
         return Err(ActionRefused::EconomicallyWalled {
             melt: Box::new(melt.clone()),
         });
+    }
+    let amount_check = amount.value().clone();
+    if *melt > ratio(0, 1) {
+        fleet::require_hull_capacity(src, deal, &amount_check)?;
     }
     if src.ward_holds() || dst.ward_holds() {
         return Err(ActionRefused::TheWardHolds);
@@ -828,9 +841,14 @@ pub fn alignment_of(a: &World, b: &World) -> Alignment {
         return Alignment::Unplaced;
     };
     let d = d_orbit(a, b);
-    if d < ratio(1, 4) {
+    // Thresholds: quarter and half of a turn — built from 1+1, no dials.
+    let two = ratio(1, 1) + ratio(1, 1);
+    let four = two.clone() + two.clone();
+    let quarter = ratio(1, 1) / four;
+    let half = ratio(1, 1) / two;
+    if d < quarter {
         Alignment::Cheap
-    } else if d < ratio(1, 2) {
+    } else if d < half {
         Alignment::Fair
     } else {
         Alignment::Dear
@@ -898,6 +916,18 @@ pub fn pair_melt(a: &World, b: &World, distance: &Ratio) -> Ratio {
     if caravan {
         let grade = ZoneKind::Resonator.yield_per_tick().1;
         melt *= ratio(1, 1) - grade;
+    }
+    // FLEET-1 / Q-F2: hull η stacks as product of complements with
+    // route η — best hull on either book (idle or assigned).
+    let hull_eta = a
+        .hulls
+        .iter()
+        .chain(b.hulls.iter())
+        .map(|h| crate::dop::hull_eta(h.role, h.grade))
+        .max()
+        .unwrap_or_else(|| ratio(0, 1));
+    if hull_eta > ratio(0, 1) {
+        melt *= ratio(1, 1) - hull_eta;
     }
     // **#42 THE PACTS** — what two worlds have AGREED the crossing
     // costs. A trade or defense pact eases the melt; a war burdens it

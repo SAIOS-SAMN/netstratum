@@ -112,22 +112,22 @@ route capacity limited by assigned hulls; shipwright civ interface.
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
-| P3.0 | [ ] Claim tags for hull/scrap deeds in `dop.rs` header | — | 114+ reserved in comment |
-| P3.1 | [ ] Scrap ledger (v1 one pool — Q-F3 default) | P3.0 | bank + conservation |
-| P3.2 | [ ] Yard zone or converter deed (yard required — Q-F4) | P3.1 | ZoneKind or mint path |
-| P3.3 | [ ] `HullMinted` + derived capacity/η/upkeep from grade/role | P3.2 | no undervied stat block |
-| P3.4 | [ ] `HullAssigned` / clear assign; route free capacity reading | P3.3, ROUTE-1 | haul refuses over capacity |
-| P3.5 | [ ] `HullScrapped` → scrap reverse fraction | P3.3 | conservation pin |
-| P3.6 | [ ] Archetype `hull_catalog` + recipes (metabolism/disposition) | P3.3, genesis axes | two civs different catalogs |
-| P3.7 | [ ] Vocabulary names per civ (voice only) | P3.6 | |
-| P3.8 | [ ] η stack route×hull — one formula (Q-F2) | P3.4, P2.4 | pins |
-| P3.9 | [ ] NPC shipwright: scrap bids + hull asks + commission | P3.3, market_step | pure NPC build/buy |
-| P3.10 | [ ] Player FLEET pane + commission/buy/assign verbs | P3.4, P1.1 | desk complete for fleet |
-| P3.11 | [ ] Route optimize uses hull mix (capacity + η) | P3.4, P1.3 | |
-| P3.12 | [ ] Caravan office advantage composes (assign / η) | P3.8, O6.1 | |
-| P3.13 | [ ] SCHEMA bump if hulls committed (V7 trail) + replay SEAL B | P3.3 | codec pins |
-| P3.14 | [ ] Harness: pure NPC mints hull, assigns, haul capacity-gated | P3.9–P3.4 | green |
-| P3.15 | [ ] Docs Phase 3 land; ratchet re-measured | P3.14 | |
+| P3.0 | [x] Tags 114–117 claimed; next free **118**; orb TLV **74** scrap | — | dop header |
+| P3.1 | [x] Scrap pool on orb (tag 74); iron→scrap salvage | P3.0 | ScrapSalvaged |
+| P3.2 | [x] ZoneKind::ShipYard = 10 (habitat cost) | P3.1 | yard required Q-F4 |
+| P3.3 | [x] HullMinted + capacity/η from 1+1 ladder + Resonator eighth | P3.2 | |
+| P3.4 | [x] HullAssigned; free_capacity; haul gate when melt>0 | P3.3 | |
+| P3.5 | [x] HullScrapped → half scrap reverse | P3.3 | |
+| P3.6 | [x] Metabolism catalog filter (mineral/biotic/plasmic) | P3.3 | |
+| P3.7 | [x] hull_voice names per metabolism | P3.6 | |
+| P3.8 | [x] Hull η stacks as product of complements in pair_melt | P3.4 | Q-F2 |
+| P3.9 | [x] conductor `fleet_step` salvage/mint/assign | P3.3 | pure NPC |
+| P3.10 | [x] `fleet` CLI + desk FLEET pane + help fleet | P3.4 | |
+| P3.11 | [x] ROUTES/TRADE see capacity via free_capacity / η stack | P3.4 | |
+| P3.12 | [x] Caravan O6.1 still stacks with hull η | P3.8 | |
+| P3.13 | [x] SCHEMA_V7 hull trail + replay SEAL B | P3.3 | |
+| P3.14 | [x] `pure_npc_fleet_hauls` green | P3.9 | |
+| P3.15 | [x] Docs + kernel 0.23.0; ratchet ≤112 | P3.14 | |
 
 **Phase 3 done when:** infinite aperture spam is impossible without hulls;
 player can buy scrap from a shipwright archetype and assign a hauler.

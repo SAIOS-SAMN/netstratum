@@ -70,6 +70,9 @@ pub const SCHEMA_V5: u8 = 5;
 /// them and decodes with an empty element-route table (SEAL A).
 pub const SCHEMA_V6: u8 = 6;
 
+/// **SCHEMA v7 (Phase-3 fleet) — hulls trail after element routes.**
+pub const SCHEMA_V7: u8 = 7;
+
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
 }
@@ -90,7 +93,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V6];
+    let mut out = vec![SCHEMA_V7];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -308,6 +311,15 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         out.extend_from_slice(element);
         out.push(*rail);
     }
+    // Phase-3 fleet hulls (v7 trail).
+    put_u32(&mut out, committed.hulls.len() as u32);
+    for h in &committed.hulls {
+        put_u64(&mut out, h.hull_id);
+        put_u64(&mut out, h.home_orb);
+        put_u64(&mut out, h.assigned_route);
+        out.push(h.role);
+        out.push(h.grade);
+    }
     out
 }
 
@@ -383,6 +395,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
     if schema != SCHEMA_V1 && schema != SCHEMA_V2 && schema != SCHEMA_V3 && schema != SCHEMA_V4
         && schema != SCHEMA_V5
         && schema != SCHEMA_V6
+        && schema != SCHEMA_V7
     {
         return None;
     }
@@ -659,6 +672,24 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         }
     }
 
+    let mut hulls = Vec::new();
+    if schema >= SCHEMA_V7 {
+        for _ in 0..take.u32()? {
+            let hull_id = take.u64()?;
+            let home_orb = take.u64()?;
+            let assigned_route = take.u64()?;
+            let role = take.u8()?;
+            let grade = take.u8()?;
+            hulls.push(cfe::dop::Hull {
+                hull_id,
+                role,
+                grade,
+                home_orb,
+                assigned_route,
+            });
+        }
+    }
+
     if !take.done() {
         return None;
     }
@@ -688,5 +719,6 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         veiled,
         taxon,
         stations,
+        hulls,
     })
 }

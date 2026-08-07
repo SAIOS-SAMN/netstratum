@@ -179,6 +179,8 @@ pub struct Committed {
     /// One seat per line: re-seating REPLACES, and the chain carries
     /// the whole history of who sat where.
     pub stations: Vec<(String, u8)>,
+    /// FLEET-1: receipted hulls (replay of mint/assign/scrap).
+    pub hulls: Vec<crate::dop::Hull>,
 }
 
 /// G1 (04 §1): a civilization's sealed axes, as the world holds them.
@@ -274,6 +276,8 @@ pub struct World {
     pub(super) taxon: Option<(u8, u8)>,
     /// THE VERTICAL AXIS (tag 89): the seats held, (line, station).
     pub(super) stations: Vec<(String, u8)>,
+    /// FLEET-1 hulls.
+    pub(super) hulls: Vec<crate::dop::Hull>,
 }
 
 /// PLANNER-1: what a licensed leap carries — the condition and name

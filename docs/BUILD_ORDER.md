@@ -993,5 +993,12 @@ board `TASKS_TRADE_FLEET_DESK.md`.
 - CLI/conductor clear paths use `route_melt` (D_eff)
 - Full ANSI help menus: `help`, `help desk`, `help stamp`, …
 
-**Next:** Phase 3 fleet capital · or P1.8 MARKET-1 offer widen.
+**Phase 3 LANDED — fleet capital:**
+- Tags 114–117 ScrapSalvaged/HullMinted/HullAssigned/HullScrapped
+- ZoneKind::ShipYard=10; orb scrap TLV 74; SCHEMA_V7 hull trail
+- Kernel **0.23.0**; positive-melt hauls need free hull capacity
+- `fleet_step` NPC; CLI `fleet salvage|mint|assign|scrap`; desk `f`
+- Pin `pure_npc_fleet_hauls`; ratchet ≤112 (alignment thresholds derived)
+
+**Next:** Phase 4 local capital markets · or P1.8 offer widen.
 

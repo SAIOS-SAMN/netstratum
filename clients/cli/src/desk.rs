@@ -380,13 +380,7 @@ fn render_pane(style: Style, home: &World, pane: Pane, orb_id: u64) -> Vec<Strin
         Pane::Diplo => render_diplo(style, home),
         Pane::Routes => render_routes(style, home),
         Pane::Arb => render_arb(style, home),
-        Pane::Fleet => vec![
-            format!("  {}", style.warn("(Phase 3) hulls · scrap · yard — not landed")),
-            format!(
-                "  {}",
-                style.dim("until then: capacity is unlimited aperture (engine)")
-            ),
-        ],
+        Pane::Fleet => render_fleet(style, home),
         Pane::Exch => vec![
             format!(
                 "  {}",
@@ -653,6 +647,52 @@ fn render_arb(style: Style, home: &World) -> Vec<String> {
     lines.push(format!(
         "  {}",
         style.hint("NPC merchant_step bridges these; player: multi-hop aperture/trade")
+    ));
+    lines
+}
+
+fn render_fleet(style: Style, home: &World) -> Vec<String> {
+    let scrap = home
+        .orb()
+        .map(|o| ratio_str(&o.scrap_amount()))
+        .unwrap_or_else(|| "0/1".into());
+    let mut lines = vec![format!(
+        "  {} {}  {} {}  {} {}",
+        style.money("scrap"),
+        style.cargo(&scrap),
+        style.label("free cap"),
+        style.value(&ratio_str(&home.free_capacity(0))),
+        style.label("hulls"),
+        style.strong(&home.hulls().len().to_string())
+    )];
+    let metab = home.committed().genesis.as_ref().map(|g| g.metabolism);
+    for h in home.hulls() {
+        let role = cfe::dop::HullRole::from_wire(h.role)
+            .map(|r| cfe::world::hull_voice(r, metab))
+            .unwrap_or("?");
+        let assign = if h.assigned_route == 0 {
+            "idle".into()
+        } else {
+            format!("deal {}", h.assigned_route)
+        };
+        lines.push(format!(
+            "  hull {} · {} g{} · cap {} · {}",
+            style.strong(&h.hull_id.to_string()),
+            style.accent(role),
+            h.grade,
+            style.cargo(&ratio_str(&cfe::dop::hull_capacity(h.role, h.grade))),
+            style.route(&assign)
+        ));
+    }
+    if home.hulls().is_empty() {
+        lines.push(format!(
+            "  {}",
+            style.hint("zone <tile> yard · fleet salvage <n> · fleet mint hauler")
+        ));
+    }
+    lines.push(format!(
+        "  {}",
+        style.hint("positive-melt hauls require free hull capacity (Phase 3)")
     ));
     lines
 }

@@ -39,6 +39,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut veiled = false;
     let mut taxon: Option<(u8, u8)> = None;
     let mut stations: Vec<(String, u8)> = Vec::new();
+    let mut hulls: Vec<crate::dop::Hull> = Vec::new();
     for receipt in chronicle.receipts() {
         match &receipt.event {
             // BOOK-1 (19_LENS §16) — the open registry rebuilds from
@@ -895,12 +896,51 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 }
                 crossed = true;
             }
+            ClosureEvent::ScrapSalvaged { orb_id, amount, iron_spent, .. } => {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank(Resource::Iron, -iron_spent.clone());
+                    held.bank_scrap(amount.clone());
+                }
+            }
+            ClosureEvent::HullMinted {
+                hull_id,
+                orb_id,
+                role,
+                grade,
+                scrap_spent,
+            } => {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank_scrap(-scrap_spent.clone());
+                }
+                hulls.push(crate::dop::Hull {
+                    hull_id: *hull_id,
+                    role: *role,
+                    grade: *grade,
+                    home_orb: *orb_id,
+                    assigned_route: 0,
+                });
+            }
+            ClosureEvent::HullAssigned { hull_id, deal } => {
+                if let Some(h) = hulls.iter_mut().find(|h| h.hull_id == *hull_id) {
+                    h.assigned_route = *deal;
+                }
+            }
+            ClosureEvent::HullScrapped {
+                hull_id,
+                orb_id,
+                scrap_returned,
+            } => {
+                hulls.retain(|h| h.hull_id != *hull_id);
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank_scrap(scrap_returned.clone());
+                }
+            }
         }
     }
     Committed {
         orbs, entities, star, debts, bonds, forwards, councils, offers, techs, wants, crossed,
         gauge, genesis, terrain_seed, practices, instruments, routes, element_routes, treaties,
-        prospects, warded, veiled, taxon, stations,
+        prospects, warded, veiled, taxon, stations, hulls,
     }
 }
 

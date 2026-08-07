@@ -264,6 +264,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         }
         Some("stamp") => stamp_command(world, words, style, *current),
         Some("element") => element_command(world, words, style, *current),
+        Some("fleet") => fleet_command(world, words, style, *current),
         Some("help") => {
             let topic = words.next();
             help_menu::help(*style, topic);
@@ -301,6 +302,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 Some("cryo") | Some("cryo-array") => Some(ZoneKind::CryoArray),
                 Some("res") | Some("resonator") => Some(ZoneKind::Resonator),
                 Some("regen") | Some("regenerator") => Some(ZoneKind::Regenerator),
+                Some("yard") | Some("shipyard") | Some("ship-yard") => Some(ZoneKind::ShipYard),
                 // #41: a MINTED building, named by the word its mint
                 // gave it. The fold is the authority on what a world
                 // can build — a compiled name is matched first so a
@@ -2431,6 +2433,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                 cfe::dop::ZoneKind::Resonator => 'R',
                                 cfe::dop::ZoneKind::Regenerator => 'G',
                                 cfe::dop::ZoneKind::ElementRefinery => 'F',
+                                cfe::dop::ZoneKind::ShipYard => 'P',
                                 // #41: a minted building — the chain
                                 // named it, so the map marks it as one.
                                 cfe::dop::ZoneKind::Minted(_) => 'M',
@@ -4070,6 +4073,170 @@ fn stamp_command(
     }
 }
 
+/// FLEET-1 player verbs (Phase 3).
+fn fleet_command(
+    world: &mut World,
+    mut words: std::str::SplitWhitespace<'_>,
+    style: &Style,
+    current: u64,
+) {
+    match words.next() {
+        None | Some("list") | Some("status") => {
+            let scrap = world
+                .orb_by_id(current)
+                .map(|o| amount(&o.scrap_amount()))
+                .unwrap_or_else(|| "0/1".into());
+            let cap = amount(&world.free_capacity(0));
+            println!(
+                "{} fleet — scrap {} · free capacity {} · hulls {}",
+                style.route("🚢"),
+                style.cargo(&scrap),
+                style.value(&cap),
+                style.strong(&world.hulls().len().to_string())
+            );
+            let metab = world
+                .committed()
+                .genesis
+                .as_ref()
+                .map(|g| g.metabolism);
+            for h in world.hulls() {
+                let role = cfe::dop::HullRole::from_wire(h.role)
+                    .map(|r| cfe::world::hull_voice(r, metab))
+                    .unwrap_or("?");
+                let cap = amount(&cfe::dop::hull_capacity(h.role, h.grade));
+                let assign = if h.assigned_route == 0 {
+                    style.dim("idle")
+                } else {
+                    style.route(&format!("deal {}", h.assigned_route))
+                };
+                println!(
+                    "  hull {} · {} g{} · cap {} · {}",
+                    style.strong(&h.hull_id.to_string()),
+                    style.accent(role),
+                    h.grade,
+                    style.cargo(&cap),
+                    assign
+                );
+            }
+            if world.hulls().is_empty() {
+                println!(
+                    "  {}",
+                    style.hint("build zone yard · fleet salvage <amt> · fleet mint hauler")
+                );
+            }
+        }
+        Some("salvage") => {
+            let Some(amt) = words.next().and_then(parse_ratio_arg) else {
+                println!(
+                    "{} usage: {}",
+                    style.bad("✗"),
+                    style.verb("fleet salvage <amt>")
+                );
+                return;
+            };
+            let Some(amt) = cfe::dop::Positive::new(amt) else {
+                println!("{} amount must be positive", style.bad("✗"));
+                return;
+            };
+            match world.salvage_scrap(current, amt) {
+                Ok(()) => {
+                    let _ = sync_world(world);
+                    println!(
+                        "{} scrap banked — {}",
+                        style.ok("⚙"),
+                        style.cargo(&amount(
+                            &world
+                                .orb_by_id(current)
+                                .map(|o| o.scrap_amount())
+                                .unwrap_or_else(|| ratio(0, 1))
+                        ))
+                    );
+                }
+                Err(refusal) => refuse(world, &refusal, style),
+            }
+        }
+        Some("mint") => {
+            let role_word = words.next().unwrap_or("hauler");
+            let role = match role_word {
+                "hauler" => cfe::dop::HullRole::Hauler,
+                "semi" => cfe::dop::HullRole::Semi,
+                "runner" => cfe::dop::HullRole::Runner,
+                "escort" => cfe::dop::HullRole::Escort,
+                _ => {
+                    println!(
+                        "{} role must be hauler|semi|runner|escort",
+                        style.bad("✗")
+                    );
+                    return;
+                }
+            };
+            let grade = words
+                .next()
+                .and_then(|w| w.parse::<u8>().ok())
+                .unwrap_or(0);
+            match world.mint_hull(current, role, grade) {
+                Ok(id) => {
+                    let _ = sync_world(world);
+                    println!(
+                        "{} hull {} minted ({})",
+                        style.ok("🚢"),
+                        style.strong(&id.to_string()),
+                        style.accent(cfe::world::hull_voice(
+                            role,
+                            world.committed().genesis.as_ref().map(|g| g.metabolism)
+                        ))
+                    );
+                }
+                Err(refusal) => refuse(world, &refusal, style),
+            }
+        }
+        Some("assign") => {
+            let hull_id = words.next().and_then(|w| w.parse::<u64>().ok());
+            let deal = words.next().and_then(|w| w.parse::<u64>().ok());
+            match (hull_id, deal) {
+                (Some(hull_id), Some(deal)) => match world.assign_hull(hull_id, deal) {
+                    Ok(()) => {
+                        let _ = sync_world(world);
+                        println!(
+                            "{} hull {} → deal {}",
+                            style.ok("⇉"),
+                            style.strong(&hull_id.to_string()),
+                            style.route(&deal.to_string())
+                        );
+                    }
+                    Err(refusal) => refuse(world, &refusal, style),
+                },
+                _ => println!(
+                    "{} usage: {}",
+                    style.bad("✗"),
+                    style.verb("fleet assign <hull_id> <deal|0>")
+                ),
+            }
+        }
+        Some("scrap") => {
+            let Some(hull_id) = words.next().and_then(|w| w.parse::<u64>().ok()) else {
+                println!(
+                    "{} usage: {}",
+                    style.bad("✗"),
+                    style.verb("fleet scrap <hull_id>")
+                );
+                return;
+            };
+            match world.scrap_hull(hull_id) {
+                Ok(()) => {
+                    let _ = sync_world(world);
+                    println!("{} hull {} scrapped", style.ok("⚙"), style.strong(&hull_id.to_string()));
+                }
+                Err(refusal) => refuse(world, &refusal, style),
+            }
+        }
+        Some(other) => println!(
+            "{} unknown fleet verb {other} — list · salvage · mint · assign · scrap",
+            style.bad("✗")
+        ),
+    }
+}
+
 /// Element aperture + charter player verbs (P1.7).
 fn element_command(
     world: &mut World,
@@ -5349,6 +5516,28 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
              {} shows every set of what you hold that would",
             style.strong("bench")
         ),
+        ActionRefused::NoShipYard { orb } => format!(
+            "no shipyard stands on orb {orb} — build one (`zone <tile> yard`) before salvaging or minting hulls"
+        ),
+        ActionRefused::CannotAffordScrap { need, have } => format!(
+            "need {} scrap, hold {} — salvage iron at the yard first",
+            amount(need),
+            amount(have)
+        ),
+        ActionRefused::NoSuchHull { hull_id } => {
+            format!("no hull {hull_id} — `fleet` lists what you hold")
+        }
+        ActionRefused::HullCapacityShort { need, have } => format!(
+            "haul needs {} hull capacity, free {} — mint/assign haulers (`fleet mint hauler`)",
+            amount(need),
+            amount(have)
+        ),
+        ActionRefused::HullRoleForbidden { role } => {
+            format!("this line's metabolism does not mint hull role {role}")
+        }
+        ActionRefused::RouteUnknown { deal } => {
+            format!("no route deal {deal} on this book — charter first")
+        }
         ActionRefused::NoRefineryStanding { orb } => format!(
             "orb {} has no element-refinery — raise one (DEEPENING first) before refining",
             style.strong(&orb.to_string())
@@ -5718,6 +5907,7 @@ fn map(world: &World, style: &Style, current: u64) {
                     ZoneKind::Resonator => "r",
                     ZoneKind::Regenerator => "g",
                     ZoneKind::ElementRefinery => "f",
+                    ZoneKind::ShipYard => "p",
                     ZoneKind::Minted(_) => "m",
                 }),
                 Some(zone) => match zone.kind {
@@ -5730,6 +5920,7 @@ fn map(world: &World, style: &Style, current: u64) {
                     ZoneKind::Resonator => style.prompt("R"),
                     ZoneKind::Regenerator => style.ok("G"),
                     ZoneKind::ElementRefinery => style.warn("F"),
+                    ZoneKind::ShipYard => style.route("P"),
                     ZoneKind::Minted(_) => style.strong("M"),
                 },
                 None => style.dim("·"),
@@ -6421,6 +6612,38 @@ fn chronicle(world: &World, style: &Style) {
                 "∫⎋ deal {} received {} STAMP",
                 style.strong(&deal.to_string()),
                 style.strong(&amount(a))
+            ),
+            cfe::dop::ClosureEvent::ScrapSalvaged { amount: a, iron_spent, .. } => format!(
+                "⚙ {} scrap salvaged from {} iron",
+                style.strong(&amount(a)),
+                style.strong(&amount(iron_spent))
+            ),
+            cfe::dop::ClosureEvent::HullMinted {
+                hull_id,
+                role,
+                grade,
+                scrap_spent,
+                ..
+            } => format!(
+                "🚢 hull {} role {} grade {} for {} scrap",
+                style.strong(&hull_id.to_string()),
+                style.strong(&role.to_string()),
+                style.strong(&grade.to_string()),
+                style.strong(&amount(scrap_spent))
+            ),
+            cfe::dop::ClosureEvent::HullAssigned { hull_id, deal } => format!(
+                "🚢 hull {} → deal {} (0=idle)",
+                style.strong(&hull_id.to_string()),
+                style.strong(&deal.to_string())
+            ),
+            cfe::dop::ClosureEvent::HullScrapped {
+                hull_id,
+                scrap_returned,
+                ..
+            } => format!(
+                "🚢 hull {} scrapped · {} scrap recovered",
+                style.strong(&hull_id.to_string()),
+                style.strong(&amount(scrap_returned))
             ),
             cfe::dop::ClosureEvent::AssayStruck { amount: drawn, richness, .. } => format!(
                 "⚖ {} drawn from the opened vein — one receipt, the whole span{}",
