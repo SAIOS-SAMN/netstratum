@@ -79,8 +79,8 @@ strand-adapter · isthmus/datum-adapter
 | S4.2 | [x] Crystal→STAMP identity convert (1:1; no curve dial) | S4.1 | `mint_stamp_from_crystal` |
 | S4.3 | [x] **BOOK-S** minimal STAMP spot vs Resource (crystal/iron/biomass) | S4.1 | stamp_market_step legs |
 | S4.4 | [x] **MM-1** conductor `stamp_market_step` pure NPC | S4.3 | `pure_npc_stamp_spot_clears` green |
-| S4.5 | [ ] CLI `stamp` verbs | S4.1 | |
-| S4.6 | [ ] Observer treasury includes STAMP | S4.1 | |
+| S4.5 | [x] CLI `stamp` verbs (balance · mint · aperture) | S4.1 | Phase-1 desk land |
+| S4.6 | [x] Observer STAMP (tag 73) + lens JSON | S4.1 | worlds table STAMP col |
 
 ---
 

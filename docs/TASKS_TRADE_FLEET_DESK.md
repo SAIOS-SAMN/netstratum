@@ -59,18 +59,18 @@ player can act on money/cargo paths NPCs already use.
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
-| P1.1 | [ ] CLI **trade desk mode** (persistent frame + pane keys t/y/r/…) | D0.1 | `trade` or desk enter; colony strip visible |
-| P1.2 | [ ] TRADE pane: peer table `D_chart`, melt, treaty, WALL/SHIELD/OPEN | P1.1 | pure reading; no new dial |
-| P1.3 | [ ] ROUTES pane: list live lanes + upkeep/lapse hints | P1.1 | uses `routes` / element_routes |
-| P1.4 | [ ] DIPLO pane: treaty status + offer seal/renounce shortcuts | P1.1 | wraps existing treaty verbs |
-| P1.5 | [ ] Arbitrage map (read-only): show A–M–B triangles merchant law would take | P1.2 | matches `merchant_step` geometry |
-| P1.6 | [ ] Player **STAMP** verbs: balance, mint (crystal identity), aperture | S4.1 landed | S4.5 exit; SEAL B |
-| P1.7 | [ ] Player **element** haul + optional element charter verb | E3.1–E3.2 landed | mirrors NPC steps |
-| P1.8 | [ ] MARKET-1 cargo widen: offers may give/want **Resource \| STAMP \| ElementId** | P1.6, P1.7 | E3.6 + BOOK-S real; pins |
-| P1.9 | [ ] Desk actions dispatch to deeds only (post/fill/charter/aperture) | P1.1–P1.8 | no shadow state |
-| P1.10 | [ ] Observer: routes + STAMP treasury columns (reconcile dirty lane) | P1.3, P1.6 | S4.6 / E3.8 |
-| P1.11 | [ ] Harness: player-path or pure-NPC pin that desk readings match engine melt | P1.2 | green board |
-| P1.12 | [ ] Docs: Phase 1 land note in BUILD_ORDER + 33 status PARTIAL | P1.11 | |
+| P1.1 | [x] CLI **trade desk mode** (`desk` / `desk enter`, panes t/y/r/a/…) | D0.1 | colony strip; interactive loop |
+| P1.2 | [x] TRADE pane: peer table `D_chart`, melt, treaty, WALL/SHIELD/OPEN | P1.1 | calls `pair_melt` only |
+| P1.3 | [x] ROUTES pane: carrier + element lanes + upkeep hints | P1.1 | `routes` CLI also lists element lanes |
+| P1.4 | [x] DIPLO pane: standing treaties + renounce hint | P1.1 | reads `treaties()` |
+| P1.5 | [x] Arbitrage map (read-only): walled pairs with open M-bridge | P1.2 | merchant geometry |
+| P1.6 | [x] Player **STAMP** verbs: balance, mint, aperture | S4.1 landed | S4.5; SEAL B pin |
+| P1.7 | [x] Player **element** aperture + charter (rail default R2) | E3.1–E3.2 landed | mirrors NPC |
+| P1.8 | [~] MARKET-1 cargo widen Resource\|STAMP\|ElementId | P1.6, P1.7 | **deferred** — clear via stamp/element verbs; offer widen next slice |
+| P1.9 | [x] Desk loop dispatches world verbs to `command` (no shadow ledger) | P1.1 | P1.9 |
+| P1.10 | [x] Observer STAMP (tag 73) + world STAMP column; lens JSON `stamp` | P1.6 | S4.6 partial; routes pane in desk/CLI |
+| P1.11 | [x] `clients/cli/tests/desk_pins.rs` melt ≡ pair_melt + stamp mint | P1.2 | green |
+| P1.12 | [x] Docs: Phase 1 land note + 33 PARTIAL | P1.11 | |
 
 **Phase 1 done when:** operator can open the desk, see peers/routes/melt,
 post/clear STAMP and element cargo, charter a lane, without inventing

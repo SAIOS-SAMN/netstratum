@@ -233,6 +233,11 @@ pub fn render_state_with(
             w.field_str(resource_name(*resource), &ratio_str(amount));
         }
         w.close();
+        // STAMP-1 (32 / Phase-1 desk): unit-of-account balance — only when
+        // nonzero so empty orbs stay byte-identical to pre-STAMP JSON.
+        if orb.stamp_amount() != cfe::ratio::ratio(0, 1) {
+            w.field_str("stamp", &ratio_str(&orb.stamp_amount()));
+        }
         // ELEMENT-GRAMMAR-1 (14_ALMANAC): open matter vocabulary, separate
         // from the closed Resource enum. The board and chemistry consumers
         // need these visible; iron is one legacy law carrier, not the table.

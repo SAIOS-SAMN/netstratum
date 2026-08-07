@@ -199,6 +199,7 @@ def decode_orb_tlv(path):
     orb = {
         "banked": {}, "famine": [], "zones": 0,
         "vented": Fraction(0), "elements": [],
+        "stamp": Fraction(0),
     }
     for tag, value in tlv_records(data):
         if tag == 17:
@@ -222,6 +223,12 @@ def decode_orb_tlv(path):
             except (IndexError, ValueError):
                 continue
             orb["elements"].append((element_id, amount))
+        elif tag == 73:
+            # STAMP-1 unit-of-account balance (TLV 73 on ColonyOrb).
+            try:
+                orb["stamp"], _ = tlv_ratio(value)
+            except (IndexError, ValueError):
+                pass
         # every other tag: skipped whole (SEAL A) — future fields
         # never break this reader.
     return orb
@@ -508,8 +515,15 @@ def world_facts(world_dir):
                     {"id": eid.hex(), "name": element_name(eid), "amount": show(amt)}
                     for eid, amt in wire["elements"]
                 ]
+                # STAMP-1 (tag 73) — unit of account treasury.
+                if wire.get("stamp", Fraction(0)) != 0:
+                    state["stamp"] = show(wire["stamp"])
+                else:
+                    state["stamp"] = state.get("stamp", "0")
             elif "elements" not in state:
                 state["elements"] = []
+            if "stamp" not in state:
+                state["stamp"] = "0"
             planets.append(state)
     # THE STEWARD DOOR IS FLAT. Directives are written straight into
     # `inbox/` and archived into `inbox/applied/` or `inbox/refused/`
@@ -548,6 +562,10 @@ def read_all(var_root):
                     element_kinds += 1
                 except (ValueError, TypeError):
                     pass
+            try:
+                stamp_amt = frac(str(state.get("stamp", "0")))
+            except (ValueError, TypeError):
+                stamp_amt = Fraction(0)
             row = {
                 "civilization": state.get("civilization", "?"),
                 "world": state.get("world", facts["name"]),
@@ -563,6 +581,7 @@ def read_all(var_root):
                 "elements": elements,
                 "element_kinds": element_kinds,
                 "element_total": element_total,
+                "stamp": stamp_amt,
             }
             for resource in RESOURCES:
                 row[resource] = frac(banked[resource]) if resource in banked else Fraction(0)
@@ -1312,6 +1331,7 @@ def view_worlds(var_root, args, paint):
         table.append([
             row["civilization"], row["world"], row["planet"],
             elem,
+            show_board(row.get("stamp", Fraction(0))),
             show_board(row["biomass"]),
             show_board(row["alloy"]), show_board(row["diamond"]),
             show_board(row["joule"]), show_board(row["sink"]),
@@ -1323,7 +1343,7 @@ def view_worlds(var_root, args, paint):
             condition_label(row, paint),
         ])
     return "\n".join([paint.head("SETTLED PLANETS"), tabulate(
-        ["CIVILIZATION", "WORLD", "PLANET", "ELEMENTS", "BIOMASS", "ALLOY",
+        ["CIVILIZATION", "WORLD", "PLANET", "ELEMENTS", "STAMP", "BIOMASS", "ALLOY",
          "DIAMOND", "JOULE", "SINK", "CRYSTAL", "IRON(leg)", "STAR", "ZONES",
          "TICKS", "CHAIN", "CONDITION"],
         table)])
@@ -1364,12 +1384,13 @@ def view_world(var_root, args, paint):
         banked = state.get("banked", {})
         holdings = " · ".join(
             f"{r} {banked[r]}" for r in RESOURCES if r in banked) or "empty banks"
+        stamp = state.get("stamp", "0")
         star = STAR_NAMES.get(state.get("star_class"), "—")
         lines += ["", paint.head(
             f"  PLANET {state.get('planet', '?')} — {state.get('civilization', '?')}"),
             f"    star {star} · clock {state.get('clock', 0)} · "
             f"{len(state.get('zones', []))} zone(s) · vented {state.get('entropy_vented', '0')}",
-            f"    {holdings}"]
+            f"    STAMP {stamp} · {holdings}"]
         if state.get("famine"):
             lines.append(
                 "    " + paint.warn("short on: " + ", ".join(state["famine"])))

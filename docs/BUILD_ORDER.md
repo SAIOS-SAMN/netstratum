@@ -976,10 +976,15 @@ Melt via `pair_melt` (ROUTE-1 topology).
 refine spend, harness `pure_npc_stamp_spot_clears` green. Ratchet ≤112.
 Still open: R2.3 promotion, instruments I5, CLI/observer STAMP, R3–R4.
 
-**Trade desk program (2026-08-07, design lock):** full interactive
-trade/diplomacy/routes/fleets/local capital markets documented in
-`33_TRADE_FLEET_AND_DESK.md` and loaded as **five phases** in
-`TASKS_TRADE_FLEET_DESK.md` (P1 sightlines → P2 alignment → P3 fleets →
-P4 local instruments → P5 defense/deep rails). Does not land code until
-Phase 1 implementation starts. Q-F1…Q-F6 in `OPEN_QUESTIONS.md`.
+**Trade desk program (2026-08-07):** design in `33_TRADE_FLEET_AND_DESK.md`;
+board `TASKS_TRADE_FLEET_DESK.md`.
+
+**Phase 1 LANDED — sightlines & player parity:**
+- CLI `desk` / `desk enter` — TRADE · DIPLO · ROUTES · ARB (+ placeholders)
+- `stamp balance|mint|aperture`, `element aperture|charter`
+- Desk melt = `pair_melt` only (`desk_pins`)
+- Observer STAMP (TLV 73) + lens JSON `stamp`
+- P1.8 offer cargo widen **deferred** (STAMP/element clear via dedicated verbs)
+
+**Next:** Phase 2 alignment (`D_eff`) · or finish P1.8 MARKET-1 widen.
 

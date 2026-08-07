@@ -9,6 +9,7 @@
 
 mod agent;
 mod corpus;
+mod desk;
 
 use std::io::{self, BufRead, Write};
 
@@ -283,6 +284,16 @@ fn sync_world_at(world: &World, name: &str) -> Result<usize, String> {
 fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
     let mut words = line.split_whitespace();
     match words.next() {
+        // Phase-1 trade desk (33 / TASKS_TRADE_FLEET_DESK P1).
+        Some("desk") => {
+            let pane = words
+                .next()
+                .and_then(desk::Pane::from_key)
+                .unwrap_or(desk::Pane::Trade);
+            desk_command(world, pane, style, *current, words);
+        }
+        Some("stamp") => stamp_command(world, words, style, *current),
+        Some("element") => element_command(world, words, style, *current),
         Some("help") => help(style),
         Some("found") => {
             let name = words.collect::<Vec<_>>().join(" ");
@@ -3402,6 +3413,33 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             if committed.routes.is_empty() {
                 println!("  {}", style.dim("no lanes — `charter <world> deal <n>` after an instrument forges"));
             }
+            println!(
+                "{} ELEMENT LANES — {}",
+                style.strong("⇢"),
+                committed.element_routes.len()
+            );
+            for (deal, eta, element, rail) in &committed.element_routes {
+                let rail_word = cfe::dop::Rail::from_wire(*rail)
+                    .map(|r| match r {
+                        cfe::dop::Rail::Hearth => "R1",
+                        cfe::dop::Rail::Aperture => "R2",
+                        cfe::dop::Rail::Strand => "R3",
+                        cfe::dop::Rail::Court => "R4",
+                    })
+                    .unwrap_or("R?");
+                println!(
+                    "  deal {} — η {} · {rail_word} · element {}",
+                    style.strong(&deal.to_string()),
+                    amount(eta.value()),
+                    style.dim(&hex_prefix(element))
+                );
+            }
+            if committed.element_routes.is_empty() {
+                println!(
+                    "  {}",
+                    style.dim("no element lanes — `element charter <world> <prefix> deal <n>`")
+                );
+            }
         }
         Some("dashboard") | Some("dash") => {
             let committed = world.committed();
@@ -3881,6 +3919,381 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
     }
 }
 
+/// Phase-1 desk entry: one-shot pane render, or interactive loop.
+fn desk_command(
+    world: &mut World,
+    mut pane: desk::Pane,
+    style: &Style,
+    current: u64,
+    mut words: std::str::SplitWhitespace<'_>,
+) {
+    let enter = matches!(words.next(), Some("enter") | Some("loop") | Some("i"));
+    let show = |world: &World, pane: desk::Pane| {
+        for line in desk::render_frame(world, pane, current) {
+            println!("{line}");
+        }
+    };
+    show(world, pane);
+    if !enter {
+        println!(
+            "  {} `desk enter` for interactive loop · pane keys t y r a f x g d e · q quits",
+            style.dim("hint:")
+        );
+        return;
+    }
+    let stdin = io::stdin();
+    loop {
+        print!("{} ", style.prompt("desk»"));
+        io::stdout().flush().ok();
+        let mut line = String::new();
+        match stdin.lock().read_line(&mut line) {
+            Ok(0) => break,
+            Ok(_) => {
+                let line = line.trim();
+                if line.is_empty() {
+                    show(world, pane);
+                    continue;
+                }
+                match line {
+                    "q" | "quit" | "exit" | "back" => break,
+                    "?" | "help" => {
+                        println!(
+                            "  panes: t trade · y diplo · r routes · a arb · f fleet · x exch · g grow · d defend · e explore"
+                        );
+                        println!(
+                            "  or type any world verb (offer, trade, stamp, element, charter, treaty…); empty redisplays"
+                        );
+                    }
+                    key if desk::Pane::from_key(key).is_some() => {
+                        pane = desk::Pane::from_key(key).expect("just checked");
+                        show(world, pane);
+                    }
+                    other => {
+                        // Dispatch deeds through the ordinary command path
+                        // (P1.9 — no shadow ledger).
+                        let mut cur = current;
+                        command(world, other, style, &mut cur);
+                        show(world, pane);
+                    }
+                }
+            }
+            Err(_) => break,
+        }
+    }
+}
+
+/// STAMP-1 player verbs (P1.6 / S4.5).
+fn stamp_command(
+    world: &mut World,
+    mut words: std::str::SplitWhitespace<'_>,
+    style: &Style,
+    current: u64,
+) {
+    match words.next() {
+        None | Some("balance") | Some("bal") => {
+            let stamp = world
+                .orb_by_id(current)
+                .map(|o| amount(&o.stamp_amount()))
+                .unwrap_or_else(|| "0/1".into());
+            let crystal = world
+                .orb_by_id(current)
+                .map(|o| amount(&o.banked_amount(Resource::Crystal)))
+                .unwrap_or_else(|| "0/1".into());
+            println!(
+                "{} STAMP {} · crystal {} (mint is 1:1 identity convert)",
+                style.strong("∫"),
+                style.strong(&stamp),
+                style.dim(&crystal)
+            );
+        }
+        Some("mint") => {
+            let Some(amt) = words.next().and_then(parse_ratio_arg) else {
+                println!(
+                    "{} usage: {}",
+                    style.bad("✗"),
+                    style.strong("stamp mint <amt>")
+                );
+                return;
+            };
+            let Some(amt) = cfe::dop::Positive::new(amt) else {
+                println!("{} amount must be positive", style.bad("✗"));
+                return;
+            };
+            match cfe::world::mint_stamp_from_crystal(world, current, amt) {
+                Ok(()) => match sync_world(world) {
+                    Ok(_) => println!(
+                        "{} STAMP minted 1:1 from crystal — balance {}",
+                        style.ok("∫"),
+                        style.strong(&amount(
+                            &world
+                                .orb_by_id(current)
+                                .map(|o| o.stamp_amount())
+                                .unwrap_or_else(|| ratio(0, 1))
+                        ))
+                    ),
+                    Err(err) => println!(
+                        "{} minted but sync refused: {err}",
+                        style.bad("✗")
+                    ),
+                },
+                Err(refusal) => refuse(world, &refusal, style),
+            }
+        }
+        Some("aperture") => {
+            // stamp aperture <amt> to <world> deal <n>
+            let amt = words.next().and_then(parse_ratio_arg);
+            let target = match (words.next(), words.next()) {
+                (Some("to"), Some(name)) => Some(name.to_string()),
+                _ => None,
+            };
+            let deal = match (words.next(), words.next()) {
+                (Some("deal"), Some(n)) => n.parse::<u64>().ok(),
+                _ => None,
+            };
+            match (amt, target, deal) {
+                (Some(amt), Some(target), Some(deal)) => match far_world(&target) {
+                    Ok(mut far) => {
+                        let Some(amt) = cfe::dop::Positive::new(amt) else {
+                            println!("{} amount must be positive", style.bad("✗"));
+                            return;
+                        };
+                        let my_name = world.name().to_string();
+                        let distance = conductor::spatial_l1(
+                            &charted_position(&my_name),
+                            &charted_position(&target),
+                        );
+                        let melt = cfe::world::pair_melt(world, &far, &distance);
+                        match cfe::world::stamp_aperture_transfer(
+                            world,
+                            current,
+                            &mut far,
+                            cfe::world::FIRST_ORB,
+                            amt,
+                            deal,
+                            &melt,
+                        ) {
+                            Ok(()) => match sync_world(world).and(sync_world_at(&far, &target)) {
+                                Ok(_) => println!(
+                                    "{} STAMP aperture deal {} — melt {} both books sealed",
+                                    style.ok("∫⎋"),
+                                    style.strong(&deal.to_string()),
+                                    style.dim(&amount(&melt))
+                                ),
+                                Err(err) => println!(
+                                    "{} deed landed but sync refused: {err}",
+                                    style.bad("✗")
+                                ),
+                            },
+                            Err(refusal) => refuse(world, &refusal, style),
+                        }
+                    }
+                    Err(err) => println!("{} {err}", style.bad("✗")),
+                },
+                _ => println!(
+                    "{} usage: {}",
+                    style.bad("✗"),
+                    style.strong("stamp aperture <amt> to <world> deal <n>")
+                ),
+            }
+        }
+        Some(other) => println!(
+            "{} unknown stamp verb {other} — balance · mint · aperture",
+            style.bad("✗")
+        ),
+    }
+}
+
+/// Element aperture + charter player verbs (P1.7).
+fn element_command(
+    world: &mut World,
+    mut words: std::str::SplitWhitespace<'_>,
+    style: &Style,
+    current: u64,
+) {
+    match words.next() {
+        Some("aperture") => {
+            // element aperture <amt> <prefix> to <world> deal <n>
+            let amt = words.next().and_then(parse_ratio_arg);
+            let prefix = words.next().map(str::to_string);
+            let target = match (words.next(), words.next()) {
+                (Some("to"), Some(name)) => Some(name.to_string()),
+                _ => None,
+            };
+            let deal = match (words.next(), words.next()) {
+                (Some("deal"), Some(n)) => n.parse::<u64>().ok(),
+                _ => None,
+            };
+            match (amt, prefix, target, deal) {
+                (Some(amt), Some(prefix), Some(target), Some(deal)) => {
+                    let element = world.orb_by_id(current).and_then(|orb| {
+                        orb.elements
+                            .iter()
+                            .map(|(id, _)| *id)
+                            .find(|id| hex_prefix(id).starts_with(&prefix))
+                    });
+                    let Some(element) = element else {
+                        println!(
+                            "{} no banked element matching prefix {} — `elements` lists stock",
+                            style.bad("✗"),
+                            style.strong(&prefix)
+                        );
+                        return;
+                    };
+                    let Some(amt) = cfe::dop::Positive::new(amt) else {
+                        println!("{} amount must be positive", style.bad("✗"));
+                        return;
+                    };
+                    match far_world(&target) {
+                        Ok(mut far) => {
+                            let my_name = world.name().to_string();
+                            let distance = conductor::spatial_l1(
+                                &charted_position(&my_name),
+                                &charted_position(&target),
+                            );
+                            let melt = cfe::world::pair_melt(world, &far, &distance);
+                            match cfe::world::element_aperture_transfer(
+                                world,
+                                current,
+                                &mut far,
+                                cfe::world::FIRST_ORB,
+                                element,
+                                amt,
+                                deal,
+                                &melt,
+                            ) {
+                                Ok(()) => match sync_world(world).and(sync_world_at(&far, &target))
+                                {
+                                    Ok(_) => println!(
+                                        "{} element aperture deal {} · {} · melt {} — both books sealed",
+                                        style.ok("⇢"),
+                                        style.strong(&deal.to_string()),
+                                        style.dim(&hex_prefix(&element)),
+                                        style.dim(&amount(&melt))
+                                    ),
+                                    Err(err) => println!(
+                                        "{} deed landed but sync refused: {err}",
+                                        style.bad("✗")
+                                    ),
+                                },
+                                Err(refusal) => refuse(world, &refusal, style),
+                            }
+                        }
+                        Err(err) => println!("{} {err}", style.bad("✗")),
+                    }
+                }
+                _ => println!(
+                    "{} usage: {}",
+                    style.bad("✗"),
+                    style.strong("element aperture <amt> <prefix> to <world> deal <n>")
+                ),
+            }
+        }
+        Some("charter") => {
+            // element charter <world> <prefix> deal <n> [rail <1-4>]
+            let target = words.next().map(str::to_string);
+            let prefix = words.next().map(str::to_string);
+            let deal = match (words.next(), words.next()) {
+                (Some("deal"), Some(n)) => n.parse::<u64>().ok(),
+                _ => None,
+            };
+            let mut rail: u8 = 2; // default R2 aperture for element cargo
+            if let (Some("rail"), Some(n)) = (words.next(), words.next()) {
+                if let Ok(r) = n.parse::<u8>() {
+                    rail = r;
+                }
+            }
+            match (target, prefix, deal) {
+                (Some(target), Some(prefix), Some(deal)) => {
+                    let element = world.orb_by_id(current).and_then(|orb| {
+                        orb.elements
+                            .iter()
+                            .map(|(id, _)| *id)
+                            .find(|id| hex_prefix(id).starts_with(&prefix))
+                    });
+                    // Element identity may also be known only from prospects.
+                    let element = element.or_else(|| {
+                        world.committed().prospects.iter().find_map(|p| {
+                            if hex_prefix(&p.element).starts_with(&prefix) {
+                                Some(p.element)
+                            } else {
+                                None
+                            }
+                        })
+                    });
+                    let Some(element) = element else {
+                        println!(
+                            "{} no element matching {} — prospect/assay or bank first",
+                            style.bad("✗"),
+                            style.strong(&prefix)
+                        );
+                        return;
+                    };
+                    match far_world(&target) {
+                        Ok(mut far) => {
+                            let best_grade = world
+                                .instruments()
+                                .iter()
+                                .chain(far.instruments().iter())
+                                .map(|(_, _, grade)| *grade)
+                                .max()
+                                .unwrap_or(0);
+                            let Some(eta) =
+                                cfe::dop::Unit::new(ratio(1 + i64::from(best_grade), 8))
+                            else {
+                                println!(
+                                    "{} grade {best_grade} prices η ≥ 1 — no lane erases the void",
+                                    style.bad("✗")
+                                );
+                                return;
+                            };
+                            match cfe::world::charter_element_route(
+                                world,
+                                current,
+                                &mut far,
+                                cfe::world::FIRST_ORB,
+                                element,
+                                eta,
+                                rail,
+                                deal,
+                            ) {
+                                Ok(()) => match sync_world(world).and(sync_world_at(&far, &target))
+                                {
+                                    Ok(_) => println!(
+                                        "{} element route CHARTERS deal {} · rail {} · element {}",
+                                        style.ok("⇉⇢"),
+                                        style.strong(&deal.to_string()),
+                                        style.strong(&rail.to_string()),
+                                        style.dim(&hex_prefix(&element))
+                                    ),
+                                    Err(err) => println!(
+                                        "{} charter landed but sync refused: {err}",
+                                        style.bad("✗")
+                                    ),
+                                },
+                                Err(refusal) => refuse(world, &refusal, style),
+                            }
+                        }
+                        Err(err) => println!("{} {err}", style.bad("✗")),
+                    }
+                }
+                _ => println!(
+                    "{} usage: {}",
+                    style.bad("✗"),
+                    style.strong("element charter <world> <prefix> deal <n> [rail <1-4>]")
+                ),
+            }
+        }
+        None => println!(
+            "{} usage: element aperture … · element charter …",
+            style.bad("✗")
+        ),
+        Some(other) => println!(
+            "{} unknown element verb {other} — aperture · charter",
+            style.bad("✗")
+        ),
+    }
+}
+
 fn help(style: &Style) {
     let lines = [
         ("found <name>", "establish your colony (banks 20 iron + 10 biomass) — your first receipt"),
@@ -3898,6 +4311,9 @@ fn help(style: &Style) {
         ("book · book mint <name> · book post <kept> <lost> <name> · book archive <name>", "BOOK-1: the OPEN registry — a line mints its own kinds of account beside the charter's four. A book is a DUAL ledger (kept against lost) and posts both sides at once. Archiving closes it to WRITING and never to reading: every entry it took stays. A book IS its normalized name, so re-minting one is not a second book, and the charter's four can be neither minted over nor closed"),
 
         ("ideology", "the dual cohesion ledger for this planet — the four axes, their books, and the derived readings; divergent trade partners pay a friction entropy tax, aligned ones pay zero"),
+        ("desk [t|y|r|a|f|x|g|d|e] · desk enter", "TRADE DESK (Phase 1): interactive panes over live melt/routes/treaties — TRADE peers, DIPLO, ROUTES, ARBITRAGE map; colony strip always on; no shadow ledger"),
+        ("stamp [balance] · stamp mint <amt> · stamp aperture <amt> to <world> deal <n>", "STAMP-1 player path: show balance; crystal→STAMP identity mint; cross-world STAMP aperture (pays melt)"),
+        ("element aperture <amt> <prefix> to <world> deal <n> · element charter <world> <prefix> deal <n> [rail <1-4>]", "E-APT / E-ROUTE player path: haul open matter under pair_melt; charter element lane + rail"),
         ("charter <world> deal <n>", "ROUTE-1: charter a maintained lane — melt × (1−η), η from the pair's best instrument grade; upkeep draws at the year voice, unpaid lanes lapse"),
         ("eras · visit <stamp>", "HISTORY AS A PLACE: the record segmented by era folds, cleaves, confluences and successions — and `visit` reconstructs the world AS IT STOOD at any stamp by replaying the prefix; the past provably happened and is visitable"),
         ("dashboard · settlements · rings · elements · civs · contacts · routes", "THE ATLAS: your whole aspect, listable — the board overview; every settlement's zones and banks; the star's rings and thermal bands; the named element table and banked matter; the registered civilizations; aperture deals, councils and pens; the chartered lanes"),
@@ -6095,6 +6511,28 @@ fn chronicle(world: &World, style: &Style) {
                 style.strong(&amount(spent)),
                 style.strong(&amount(yielded)),
                 style.strong(&hex(refined)[..8])
+            ),
+            cfe::dop::ClosureEvent::ElementRouteChartered { deal, eta, rail, element } => format!(
+                "⇉⇢ element lane deal {} · η {} · rail {} · {}",
+                style.strong(&deal.to_string()),
+                style.strong(&amount(eta.value())),
+                style.strong(&rail.to_string()),
+                style.dim(&hex_prefix(element))
+            ),
+            cfe::dop::ClosureEvent::StampMinted { amount: a, crystal_spent, .. } => format!(
+                "∫ {} STAMP minted from {} crystal (identity)",
+                style.strong(&amount(a)),
+                style.strong(&amount(crystal_spent))
+            ),
+            cfe::dop::ClosureEvent::StampApertureSent { deal, amount: a, .. } => format!(
+                "∫⎋ deal {} sent {} STAMP across the void",
+                style.strong(&deal.to_string()),
+                style.strong(&amount(a))
+            ),
+            cfe::dop::ClosureEvent::StampApertureReceived { deal, amount: a, .. } => format!(
+                "∫⎋ deal {} received {} STAMP",
+                style.strong(&deal.to_string()),
+                style.strong(&amount(a))
             ),
             cfe::dop::ClosureEvent::AssayStruck { amount: drawn, richness, .. } => format!(
                 "⚖ {} drawn from the opened vein — one receipt, the whole span{}",
