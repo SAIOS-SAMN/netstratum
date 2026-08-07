@@ -7,6 +7,7 @@
 //! and exact ratios are the truth underneath, always shown as exact
 //! fractions (the C2R rule: "3/2", never 1.5).
 
+mod agent;
 mod corpus;
 
 use std::io::{self, BufRead, Write};
@@ -3727,6 +3728,17 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             None => println!("{} usage: {}", style.bad("✗"), style.strong("planet <name>")),
         },
         Some("agent") => match words.next() {
+            // #39 THE AGENT DOOR. `agent <handle>` REGISTERS (the
+            // sovereign's deed, unchanged); `agent <handle> <deed> …`
+            // SUBMITS through the door. Folded into the one verb
+            // rather than given its own, because a second `agent`
+            // command would have shadowed this one — which is exactly
+            // what a first cut did, and playing it found in one line.
+            Some(handle) if words.clone().next().is_some() => {
+                let request: Vec<&str> = words.collect();
+                let answer = agent::handle(world, handle, &request.join(" "));
+                println!("{}", answer.json(handle));
+            }
             Some(handle) => match world.register_agent(handle) {
                 Ok(id) => println!(
                     "{} agent {} registered (entity {id}) — contained, ZERO grants; open scopes with {}",
@@ -3857,6 +3869,7 @@ fn help(style: &Style) {
         ("dashboard · settlements · rings · elements · civs · contacts · routes", "THE ATLAS: your whole aspect, listable — the board overview; every settlement's zones and banks; the star's rings and thermal bands; the named element table and banked matter; the registered civilizations; aperture deals, councils and pens; the chartered lanes"),
         ("corpus [<n>] · corpus list · corpus try [<n>] <move>… · corpus solve [<n>] <move>…", "THE CORPUS BENCH: the economy's second head, played. The bench serves the 34 ARC tasks the carrier law actually PRICES and pays a verified solve at the measured weight W = scarcity × complexity (the blind-spot task pays most, being 283/1). A proof is not an ANSWER, it is an EXPLANATION — a program that reproduces every training pair and then the test input — so `try` shows you exactly which pairs your rule explains and where it misses, and `solve` seals it. Moves: rot90 · rot180 · rot270 · fliph · flipv · transpose · recolor:0>1,7>2 · tile:3x3[:rows|cols|both][:…]. A task pays a world ONCE: cognition pays for what it first explained"),
         ("treaty <kind> with <world> [deal <n>] [for <n>] [melt <p>/<q>] · treaties · treaty renounce <deal> <world>", "#42 THE POLITICAL SPECTRUM — trade · defense · peace · war, as one co-signed pairwise charter. The KIND is the sign of what it binds: a concord (trade, defense) must EASE the crossing, a war must BURDEN it, and a PEACE binds nothing at all — barring war is its whole content. Peace and war displace each other: peace ends a war for free, war BREAKS a peace and the load posts to the breaker's own book. A defense pact spends the option to attack (you cannot declare war on one you swore to defend, nor swear to defend one you are at war with). Both books must seal it or it moves nothing, either may renounce its OWN leg, and a term runs out by the clock. A pair at WAR is walled: no aperture crosses"),
+        ("agent <handle> · agent <handle> <deed> …", "#39 THE AGENT DOOR — the INBOUND half of the uplink (`lens` state JSON is the outbound half). Bare, it REGISTERS a contained agent with zero grants; with a deed it SUBMITS one through the door, answered as one JSON object naming the actor, the deed, whether it sealed, and the receipt digest if it did. The door adds NO authority: every request runs the same scoped `*_as` verb the operator's own commands do, so an agent is an entity with grants and the gate judges it identically. Deeds: zone · prospect · raze · collect · assay · compound, plus `look`, which is a reading and seals nothing"),
         ("spectrum", "P3: the cognition reading — what this chain actually solved, weighed against the benchmark floor; a reading, never a score"),
         ("zone <tile> regen", "REGEN-1: the regenerator — restores the line's own ration at the extractor's rate (every number derives from the standing table); requires the DEEPENING (condition 3) crystallized on the orb"),
         ("prospect <stratum> · assay <prefix>", "THE GROUND: prospecting READS what your genesis seed always held at a stratum — one stratum, one reading, and no redraw can re-roll it; assaying DRAWS richness × elapsed from an opened vein. ECO-1: the draw TIRES the vein (priced against its hash-derived natural flow) and regenerators on the orb restore it between draws, so extraction has a long-run cost and tending the ground pays"),
@@ -6084,6 +6097,6 @@ fn resolve_witness(world: &World, word: &str) -> Result<[u8; 32], String> {
     }
 }
 
-fn hex(bytes: &[u8]) -> String {
+pub fn hex(bytes: &[u8]) -> String {
     bytes.iter().map(|byte| format!("{byte:02x}")).collect()
 }
