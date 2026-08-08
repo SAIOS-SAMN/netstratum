@@ -1,11 +1,16 @@
-//! BENCH + TRADE hubs — main workbench menus.
+//! Root hubs — three peer constructs (not nested under each other).
 //!
-//! **BENCH** = make / modify / know / link the world.
-//! **TRADE** = circulate / settle what the bench produced.
+//! | Hub | Role |
+//! |-----|------|
+//! | **BENCH** | **Build components** — zones, chem craft, star, estate, econ pieces |
+//! | **INTEL** | **Knowledge activity** — research, knowledge bases, spy ops, link |
+//! | **TRADE** | **Circulation activity** — run books/fleet/rails/vault/aperture |
+//!
+//! Bench *forges* instruments and recipes; INTEL *operates* research and
+//! knowledge; TRADE *implements* market/haul of what was built.
 //!
 //! Navigation: every nested view ends with a **back-out bar**.
-//! `back` · `..` · `up` · `home` · `return` always climb toward hub root.
-//! Bare `bench` / `trade` always open the peer hub root.
+//! `back` · `..` · `home` climb to that hub's root.
 
 use cfe::dop::{Resource, ZoneKind};
 use cfe::ratio::{ratio, Ratio};
@@ -69,29 +74,42 @@ fn is_back(word: Option<&str>) -> bool {
 fn foot_bench(style: &Style, parent: Option<&str>) {
     println!();
     println!("  {}", style.section("↩ BACK-OUT"));
-    leaf(style, "bench", "← BENCH root (all domains)");
+    leaf(style, "bench", "← BENCH root (build components)");
     if let Some(p) = parent {
         leaf(style, &format!("bench {p}"), "← domain menu");
     }
-    leaf(style, "back · .. · up · home", "same as bench root from any leaf");
+    leaf(style, "back · .. · home", "bench root");
+    leaf(style, "intel", "→ KNOWLEDGE hub (research · bases · ops)");
+    leaf(style, "trade", "→ CIRCULATE hub (run components)");
+}
+
+fn foot_intel(style: &Style, parent: Option<&str>) {
+    println!();
+    println!("  {}", style.section("↩ BACK-OUT"));
+    leaf(style, "intel", "← INTEL root (knowledge activity)");
+    if let Some(p) = parent {
+        leaf(style, &format!("intel {p}"), "← domain menu");
+    }
+    leaf(style, "back · .. · home", "intel root");
+    leaf(style, "bench", "→ BUILD hub (craft components)");
     leaf(style, "trade", "→ CIRCULATE hub");
 }
 
 fn foot_trade(style: &Style, parent: Option<&str>) {
     println!();
     println!("  {}", style.section("↩ BACK-OUT"));
-    leaf(style, "trade", "← TRADE root (all domains)");
+    leaf(style, "trade", "← TRADE root (circulation activity)");
     if let Some(p) = parent {
         leaf(style, &format!("trade {p}"), "← domain menu");
     }
-    leaf(style, "back · .. · up · home", "same as trade root");
-    leaf(style, "bench", "→ MAKE hub");
+    leaf(style, "back · .. · home", "trade root");
+    leaf(style, "bench", "→ BUILD hub (craft components)");
+    leaf(style, "intel", "→ KNOWLEDGE hub");
 }
 
 // ── BENCH ────────────────────────────────────────────────────────────
 
-/// `bench [domain [leaf…]]` — make / modify / know / link hub.
-/// Takes `&mut World` so deep leaves can fire deeds (forge, probe, …).
+/// `bench [domain]` — **BUILD components** (not knowledge activity, not trade).
 pub fn bench(
     world: &mut World,
     mut words: impl Iterator<Item = String>,
@@ -113,24 +131,49 @@ pub fn bench(
         }
         Some("star") | Some("sky") | Some("system") => star_bench(world, words, style, current),
         Some("chem") | Some("chemistry") | Some("science") | Some("bond") => {
+            // Chem craft stays on bench (makes gems/recipes); catalog feeds INTEL knowledge.
             chem_bench(world, words, style, current)
         }
         Some("econ") | Some("economics") | Some("craft") => {
             econ_bench(world, words, style, current)
         }
-        Some("research") | Some("tech") | Some("practice") | Some("lab") => {
-            research_bench(world, words, style, current)
-        }
-        Some("intel") | Some("intelligence") | Some("spy") | Some("inf") => {
-            intel_bench(world, words, style, current)
-        }
-        Some("link") | Some("cross") | Some("pollinate") | Some("pollination") | Some("union")
-        | Some("coop") => link_bench(world, words, style, current),
         Some("doctrine") | Some("posture") | Some("defense") | Some("kin") => {
             doctrine_bench(world, words, style, current)
         }
         Some("estate") | Some("survey") | Some("land") => {
             estate_bench(world, words, style, current)
+        }
+        // Knowledge activity moved to root INTEL — redirect cleanly.
+        Some("research") | Some("tech") | Some("practice") | Some("lab") => {
+            println!(
+                "  {} research lives on root {} — not under bench",
+                style.dim("↳"),
+                style.key("intel research")
+            );
+            let rest: Vec<String> = std::iter::once("research".into())
+                .chain(words)
+                .collect();
+            intel(world, rest.into_iter(), style, current);
+        }
+        Some("intel") | Some("intelligence") | Some("spy") | Some("inf") => {
+            println!(
+                "  {} knowledge hub is root {} — bench builds components only",
+                style.dim("↳"),
+                style.key("intel")
+            );
+            intel(world, words, style, current);
+        }
+        Some("link") | Some("cross") | Some("pollinate") | Some("pollination") | Some("union")
+        | Some("coop") => {
+            println!(
+                "  {} cross-pollination is {} activity",
+                style.dim("↳"),
+                style.key("intel link")
+            );
+            let rest: Vec<String> = std::iter::once("link".into())
+                .chain(words)
+                .collect();
+            intel(world, rest.into_iter(), style, current);
         }
         Some(other) => {
             println!(
@@ -145,11 +188,11 @@ pub fn bench(
 }
 
 fn bench_index(style: &Style) {
-    banner(style, "BENCH — MAKE / MODIFY / KNOW / LINK");
+    banner(style, "BENCH — BUILD COMPONENTS");
     println!(
         "  {}",
         style.dim(
-            "Primary workbench. Nested views always offer `bench` or `back` to return here."
+            "Craft pieces of the world. Activity of knowledge → `intel`. Circulation → `trade`."
         )
     );
     println!();
@@ -163,49 +206,31 @@ fn bench_index(style: &Style) {
     row(style, "bench star", "sun · site · thermal · capacity (open game)");
     row(style, "bench estate", "terrain chart · parcels · appraisal");
     println!();
-    println!("  {}", style.section("KNOWLEDGE"));
+    println!("  {}", style.section("CRAFT (components only)"));
     row(
         style,
         "bench chem",
-        "alchemy science · bonds · iso · catalog · dark-7",
-    );
-    row(
-        style,
-        "bench research",
-        "tech tree · forge · practices · constellation",
-    );
-    row(
-        style,
-        "bench intel",
-        "detection · spy · veil/ward · instrument grade",
-    );
-    println!();
-    println!("  {}", style.section("PEOPLE & POWER"));
-    row(
-        style,
-        "bench link",
-        "cross-pollination · license · council · absorb · leap",
-    );
-    row(
-        style,
-        "bench doctrine",
-        "posture · defend · domains · reorient",
+        "alchemy craft · bonds · iso · catalog recipe",
     );
     row(
         style,
         "bench econ",
-        "craft trade components (instruments · routes · rails)",
+        "craft instruments · routes · rails (run under TRADE)",
     );
+    row(
+        style,
+        "bench doctrine",
+        "posture components · defend setup",
+    );
+    println!();
+    println!("  {}", style.section("NOT ON BENCH (root activity hubs)"));
+    row(style, "intel", "KNOWLEDGE — research · bases · spy · link");
+    row(style, "trade", "CIRCULATE — books · fleet · rails · vault");
     println!();
     println!("  {}", style.section("NAV"));
-    leaf(style, "back · .. · home", "this root from any leaf");
-    leaf(style, "trade", "→ CIRCULATE hub (run what you built)");
+    leaf(style, "back · home", "this root");
+    leaf(style, "intel · trade", "peer roots");
     leaf(style, "help bench", "full map");
-    println!();
-    println!(
-        "  {}",
-        style.hint("From chem: type `bench` or `back` — never stuck in a leaf.")
-    );
 }
 
 fn planetary(
@@ -458,7 +483,8 @@ fn chem_bench(
         leaf(style, "iso <a> <b>", "isomorphic union");
         leaf(style, "catalog <gem>", "chemical creation");
         leaf(style, "bench chem bonds", "unranked standing list");
-        leaf(style, "bench intel", "ENVY pull from spy/intel stash");
+        leaf(style, "intel knowledge", "chem catalog appears in knowledge bases");
+        leaf(style, "intel ops", "ENVY pull from spy stash");
         foot_bench(style, Some("chem"));
     } else {
         banner(style, "BENCH › CHEM — bond standing");
@@ -537,7 +563,86 @@ fn econ_bench(
     }
 }
 
-fn research_bench(
+// ── INTEL (root) — knowledge activity, not component craft ───────────
+
+/// `intel [domain]` — **KNOWLEDGE activity** (research · bases · ops · link).
+pub fn intel(
+    world: &mut World,
+    mut words: impl Iterator<Item = String>,
+    style: &Style,
+    current: u64,
+) {
+    let domain = words.next();
+    if is_back(domain.as_deref()) {
+        intel_index(style);
+        return;
+    }
+    match domain.as_deref() {
+        None | Some("help") | Some("?") | Some("menu") | Some("index") => intel_index(style),
+        Some("research") | Some("tech") | Some("lab") | Some("constellation") => {
+            intel_research(world, words, style, current)
+        }
+        Some("knowledge") | Some("base") | Some("kb") | Some("bases") | Some("library") => {
+            intel_knowledge(world, style, current)
+        }
+        Some("ops") | Some("spy") | Some("pipeline") | Some("espionage") => {
+            intel_ops(world, words, style, current)
+        }
+        Some("link") | Some("cross") | Some("pollinate") | Some("coop") => {
+            intel_link(world, words, style, current)
+        }
+        Some(other) => {
+            println!(
+                "{} unknown intel domain {} — try {}",
+                style.bad("✗"),
+                style.verb(other),
+                style.key("intel")
+            );
+            intel_index(style);
+        }
+    }
+}
+
+fn intel_index(style: &Style) {
+    banner(style, "INTEL — KNOWLEDGE ACTIVITY");
+    println!(
+        "  {}",
+        style.dim(
+            "Research, knowledge bases, spy ops, cross-pollination. \
+             Bench *builds* instruments; INTEL *uses* them."
+        )
+    );
+    println!();
+    println!("  {}", style.section("DOMAINS"));
+    row(
+        style,
+        "intel research",
+        "constellation game · forge instruments · practices",
+    );
+    row(
+        style,
+        "intel knowledge",
+        "knowledge bases — techs · chem catalog · intel stash · practices",
+    );
+    row(
+        style,
+        "intel ops",
+        "detection ladder · spy pipeline (probe · exfil · sabotage)",
+    );
+    row(
+        style,
+        "intel link",
+        "cross-pollination — license · council · mesh",
+    );
+    println!();
+    println!("  {}", style.section("NAV"));
+    leaf(style, "back · home", "this root");
+    leaf(style, "bench", "→ BUILD components");
+    leaf(style, "trade", "→ CIRCULATE components");
+    leaf(style, "help intel", "full map");
+}
+
+fn intel_research(
     world: &mut World,
     mut words: impl Iterator<Item = String>,
     style: &Style,
@@ -545,10 +650,9 @@ fn research_bench(
 ) {
     let leaf_w = words.next();
     if is_back(leaf_w.as_deref()) {
-        bench_index(style);
+        intel_index(style);
         return;
     }
-    // Deep deed: bench research forge <condition>
     if matches!(leaf_w.as_deref(), Some("forge")) {
         let cond = words.next().and_then(|w| w.parse::<u8>().ok());
         match cond.and_then(cfe::world::survey::ForgeableGrade::new) {
@@ -564,12 +668,11 @@ fn research_bench(
                 Err(e) => println!("{} forge refused: {e:?}", style.bad("✗")),
             },
             None => println!(
-                "{} usage: {} — crystallized/crown condition only",
+                "{} usage: {}",
                 style.bad("✗"),
-                style.strong("bench research forge <condition>")
+                style.strong("intel research forge <condition>")
             ),
         }
-        // re-show board after deed
     }
     if matches!(leaf_w.as_deref(), Some("practice")) {
         let code = words.next().and_then(|w| w.parse::<u8>().ok());
@@ -581,13 +684,13 @@ fn research_bench(
             None => println!(
                 "{} usage: {}",
                 style.bad("✗"),
-                style.strong("bench research practice <1..5>")
+                style.strong("intel research practice <1..5>")
             ),
         }
     }
 
     let board = world.research_board(current);
-    banner(style, "BENCH › RESEARCH — constellation game");
+    banner(style, "INTEL › RESEARCH — constellation activity");
     println!(
         "  held {} · forge-ready {} · instruments {} · practices {} · wants {}",
         board.held_count,
@@ -624,23 +727,110 @@ fn research_bench(
             String::new()
         };
         let forge = if n.forgeable { "  ← FORGE" } else { "" };
-        println!(
-            "  {mark} c{:<2} {:?}{bar}{forge}",
-            n.condition, n.kind
-        );
+        println!("  {mark} c{:<2} {:?}{bar}{forge}", n.condition, n.kind);
         if n.forgeable || (!n.held && n.progress > 0) {
             println!("      {}", style.dim(n.next_hint));
         }
     }
     println!();
-    leaf(style, "bench research forge <c>", "deep: forge instrument at condition");
-    leaf(style, "bench research practice <n>", "deep: adopt discipline");
-    leaf(style, "forge <c> · practice · corpus · elevate", "same deeds outside hub");
-    leaf(style, "bench link", "cross-pollinate tech via license");
-    foot_bench(style, Some("research"));
+    leaf(style, "intel research forge <c>", "forge instrument (needs smelter chain)");
+    leaf(style, "intel research practice <n>", "adopt discipline");
+    leaf(style, "intel knowledge", "see all known bases");
+    leaf(style, "bench build", "craft smelter/synth components first");
+    foot_intel(style, Some("research"));
 }
 
-fn intel_bench(
+fn intel_knowledge(world: &World, style: &Style, current: u64) {
+    banner(style, "INTEL › KNOWLEDGE BASES");
+    println!(
+        "  {}",
+        style.dim("What this line *knows* — not what it can still craft on the bench.")
+    );
+    println!();
+
+    // Tech base
+    let techs: Vec<_> = world
+        .techs()
+        .iter()
+        .filter(|(o, _, _, _)| *o == current)
+        .collect();
+    println!("  {}", style.section("TECH BASE"));
+    if techs.is_empty() {
+        println!("  {}", style.dim("(empty — research / crystallize)"));
+    } else {
+        for (_, c, h, mag) in &techs {
+            println!(
+                "  · condition {} · mag {} · hash {:02x}{:02x}…",
+                c,
+                amount(mag),
+                h[0],
+                h[1]
+            );
+        }
+    }
+
+    // Chem catalog
+    println!();
+    println!("  {}", style.section("CHEM CATALOG (known recipes)"));
+    let cat = world.chem_catalog();
+    if cat.is_empty() {
+        println!(
+            "  {}",
+            style.dim("(empty — `bench chem` then `catalog <gem>`)")
+        );
+    } else {
+        for g in cat {
+            let h = hex_prefix(g);
+            println!("  · {}", &h[..8.min(h.len())]);
+        }
+    }
+
+    // Intel stash (exfil)
+    println!();
+    println!("  {}", style.section("INTEL STASH (exfil hashes — never free techs)"));
+    let stash = world.intel_hashes();
+    if stash.is_empty() {
+        println!("  {}", style.dim("(empty — `intel ops exfil <c>`)"));
+    } else {
+        for h in stash.iter().take(16) {
+            println!("  · {:02x}{:02x}{:02x}{:02x}…", h[0], h[1], h[2], h[3]);
+        }
+    }
+
+    // Practices
+    println!();
+    println!("  {}", style.section("PRACTICES"));
+    let practices = &world.committed().practices;
+    if practices.is_empty() {
+        println!("  {}", style.dim("(none adopted)"));
+    } else {
+        println!("  {:?}", practices);
+    }
+
+    // Instruments (knowledge tools)
+    println!();
+    println!("  {}", style.section("INSTRUMENTS (detection tools)"));
+    let inst: Vec<_> = world
+        .instruments()
+        .iter()
+        .filter(|(o, _, _)| *o == current)
+        .collect();
+    if inst.is_empty() {
+        println!("  {}", style.dim("(none — `intel research forge <c>`)"));
+    } else {
+        for (_, h, g) in inst {
+            println!("  · grade {} · {:02x}{:02x}…", g, h[0], h[1]);
+        }
+    }
+
+    println!();
+    leaf(style, "intel research", "grow the tech base");
+    leaf(style, "intel ops", "fill the stash");
+    leaf(style, "bench chem · catalog", "seal recipes into chem base");
+    foot_intel(style, Some("knowledge"));
+}
+
+fn intel_ops(
     world: &mut World,
     mut words: impl Iterator<Item = String>,
     style: &Style,
@@ -648,10 +838,9 @@ fn intel_bench(
 ) {
     let leaf_w = words.next();
     if is_back(leaf_w.as_deref()) {
-        bench_index(style);
+        intel_index(style);
         return;
     }
-    // Deep deeds on the pipeline
     match leaf_w.as_deref() {
         Some("probe") => match world.spy_probe(current) {
             Ok(d) => println!("{} probe depth {d}", style.ok("◈")),
@@ -672,7 +861,7 @@ fn intel_bench(
                 None => println!(
                     "{} usage: {}",
                     style.bad("✗"),
-                    style.strong("bench intel exfil <condition>")
+                    style.strong("intel ops exfil <condition>")
                 ),
             }
         }
@@ -684,7 +873,7 @@ fn intel_bench(
     }
 
     let board = world.intel_board(current);
-    banner(style, "BENCH › INTEL — detection ladder · spy pipeline");
+    banner(style, "INTEL › OPS — spy pipeline activity");
     println!(
         "  detection g{} · instruments {} · probes {} · stash {}",
         board.detection, board.instruments, board.probe_marks, board.intel_stash
@@ -693,16 +882,10 @@ fn intel_bench(
         "  veiled={} · probe={} exfil={} sabotage={}",
         board.veiled, board.can_probe, board.can_exfil, board.can_sabotage
     );
-    // Ladder visualization
     println!();
     println!("  {}", style.section("LADDER"));
-    let steps = [
-        (0u8, "surface"),
-        (1, "probe-ready"),
-        (2, "deep stratum"),
-        (3, "optics"),
-    ];
-    for (need, label) in steps {
+    for (need, label) in [(0u8, "surface"), (1, "probe-ready"), (2, "deep stratum"), (3, "optics")]
+    {
         let ok = board.detection >= need;
         println!(
             "  {} g≥{need} {label}",
@@ -721,21 +904,18 @@ fn intel_bench(
         style.strong(&board.next_hint)
     );
     if !board.tech_conditions.is_empty() {
-        println!(
-            "  exfil targets (conditions held): {:?}",
-            board.tech_conditions
-        );
+        println!("  exfil targets: {:?}", board.tech_conditions);
     }
     println!();
-    leaf(style, "bench intel probe", "deep: scout mark (crystal fee)");
-    leaf(style, "bench intel exfil <c>", "deep: hash → stash");
-    leaf(style, "bench intel sabotage", "deep: remove instrument");
-    leaf(style, "forge <g> · veil · scan", "raise ladder / OPSEC");
-    leaf(style, "bench research", "forge path when detection thin");
-    foot_bench(style, Some("intel"));
+    leaf(style, "intel ops probe", "scout mark");
+    leaf(style, "intel ops exfil <c>", "hash → knowledge stash");
+    leaf(style, "intel ops sabotage", "remove instrument");
+    leaf(style, "intel research forge <g>", "raise detection first");
+    leaf(style, "veil · ward · scan", "OPSEC / read");
+    foot_intel(style, Some("ops"));
 }
 
-fn link_bench(
+fn intel_link(
     world: &mut World,
     mut words: impl Iterator<Item = String>,
     style: &Style,
@@ -743,11 +923,11 @@ fn link_bench(
 ) {
     let leaf_w = words.next();
     if is_back(leaf_w.as_deref()) {
-        bench_index(style);
+        intel_index(style);
         return;
     }
     let board = world.link_board();
-    banner(style, "BENCH › LINK — cross-pollination game");
+    banner(style, "INTEL › LINK — cross-pollination activity");
     println!(
         "  score {} · crossed={} · councils {} (open {}) · bonds {} · forwards {}",
         amount(&board.score),
@@ -758,30 +938,24 @@ fn link_bench(
         board.forwards
     );
     println!(
-        "  treaties {} · war legs {} · licensable conditions {:?}",
+        "  treaties {} · war {} · licensable {:?}",
         board.treaties, board.at_war_count, board.techs_licensable
     );
     println!("  {} {}", style.warn("NEXT"), style.strong(&board.next_hint));
     println!();
-    println!("  {}", style.section("PLAY PATHS"));
-    leaf(
-        style,
-        "council …",
-        "open co-op (needed for license)",
-    );
+    leaf(style, "council …", "open co-op");
     leaf(
         style,
         "license <c> to <world> via <council> deal <n>",
-        "tech leap across difference",
+        "tech leap across frames",
     );
-    leaf(style, "absorb · bond · forward", "reciprocity mesh");
-    leaf(style, "aperture · treaty", "value / oath (also TRADE)");
-    println!();
+    leaf(style, "absorb · bond · forward", "mesh");
+    leaf(style, "trade aperture · treaty", "value/oath circulation");
     println!(
         "  {}",
-        style.hint("Hail Mary: two different frames confirm — license is the play, not free mint.")
+        style.hint("Hail Mary: strangers confirm — activity here, not free mint on the bench.")
     );
-    foot_bench(style, Some("link"));
+    foot_intel(style, Some("link"));
     let _ = leaf_w;
 }
 
@@ -923,10 +1097,12 @@ pub fn trade(world: &World, mut words: impl Iterator<Item = String>, style: &Sty
 }
 
 fn trade_index(style: &Style) {
-    banner(style, "TRADE — CIRCULATE / SETTLE");
+    banner(style, "TRADE — CIRCULATE / SETTLE (activity)");
     println!(
         "  {}",
-        style.dim("Run components the BENCH crafted. Nested views: `trade` or `back` home.")
+        style.dim(
+            "Implement and run components the BENCH built. Not a craft table — activity only."
+        )
     );
     println!();
     println!("  {}", style.section("DOMAINS"));
@@ -943,7 +1119,9 @@ fn trade_index(style: &Style) {
         "trade <my_id> with <world> <their_id> deal <n>",
         "barter clear",
     );
-    leaf(style, "back · bench", "nav");
+    leaf(style, "back · home", "this root");
+    leaf(style, "bench", "→ BUILD components");
+    leaf(style, "intel", "→ KNOWLEDGE activity");
 }
 
 fn trade_books(world: &World, style: &Style) {

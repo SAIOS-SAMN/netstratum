@@ -8,6 +8,7 @@ pub fn help(style: Style, topic: Option<&str>) {
         None | Some("") | Some("all") | Some("index") => index(style),
         Some("desk") | Some("trade-desk") | Some("t") => desk_help(style),
         Some("bench") | Some("workbench") | Some("make") => bench_help(style),
+        Some("intel") | Some("intelligence") | Some("knowledge") | Some("kb") => intel_help(style),
         Some("trade-hub") | Some("trades") | Some("circulate") => trade_hub_help(style),
         Some("stamp") | Some("money") => stamp_help(style),
         Some("element") | Some("elements") | Some("matter") => element_help(style),
@@ -55,10 +56,11 @@ fn index(style: Style) {
         style.dim("--plain / NO_COLOR")
     );
     println!();
-    println!("  {}", style.section("MAIN HUBS"));
-    row(style, "bench", "MAKE / MODIFY — planetary · build · star · chem · econ");
-    row(style, "trade", "CIRCULATE / SETTLE — books · fleet · rails · vault · aperture");
-    row(style, "help bench · help trade-hub", "hub maps");
+    println!("  {}", style.section("ROOT HUBS (peers)"));
+    row(style, "bench", "BUILD components — planetary · build · star · chem · econ");
+    row(style, "intel", "KNOWLEDGE activity — research · bases · ops · link");
+    row(style, "trade", "CIRCULATE activity — books · fleet · rails · vault · aperture");
+    row(style, "help bench · help intel · help trade-hub", "hub maps");
     println!();
     println!("  {}", style.section("TRADE DESK (Phase 1–2)"));
     row(style, "desk · desk enter", "interactive trade / diplo / routes / arb");
@@ -88,8 +90,9 @@ fn index(style: Style) {
 fn topics(style: Style) {
     banner_line(style, "HELP TOPICS");
     for (name, blurb) in [
-        ("bench", "MAKE hub — planetary · build · star · chem · econ"),
-        ("trade-hub", "CIRCULATE hub — books · fleet · rails · vault · aperture"),
+        ("bench", "BUILD hub — craft components only"),
+        ("intel", "KNOWLEDGE hub — research · bases · ops · link"),
+        ("trade-hub", "CIRCULATE hub — run trade components"),
         ("desk", "trade desk panes and keybinds"),
         ("stamp", "STAMP mint and aperture"),
         ("element", "element haul and charter"),
@@ -110,10 +113,10 @@ fn topics(style: Style) {
 }
 
 fn bench_help(style: Style) {
-    banner_line(style, "BENCH — MAKE / KNOW / LINK HUB");
+    banner_line(style, "BENCH — BUILD COMPONENTS");
     println!(
         "  {}",
-        style.dim("Craft, research, intel, and cross-pollination. Nested: always `bench` or `back`.")
+        style.dim("Craft only. Knowledge activity → `intel`. Circulation → `trade`.")
     );
     println!();
     println!("  {}", style.section("MATTER & PLACE"));
@@ -122,33 +125,40 @@ fn bench_help(style: Style) {
     row(style, "bench star", "sun · site · thermal");
     row(style, "bench estate", "terrain · parcels · appraise");
     println!();
-    println!("  {}", style.section("KNOWLEDGE"));
-    row(style, "bench chem [bonds]", "alchemy · dark-7 · iso · catalog");
-    row(style, "bench research", "constellation game · forge-ready nodes");
-    row(style, "bench research forge <c>", "deep: forge instrument");
-    row(style, "bench intel", "detection ladder · spy pipeline");
-    row(style, "bench intel probe|exfil|sabotage", "deep spy deeds");
+    println!("  {}", style.section("CRAFT"));
+    row(style, "bench chem [bonds]", "alchemy craft · iso · catalog recipe");
+    row(style, "bench econ", "craft instruments · routes · rails");
+    row(style, "bench doctrine", "posture / defend setup");
     println!();
-    println!("  {}", style.section("PEOPLE & POWER"));
-    row(style, "bench link", "cross-pollination score · license path");
-    row(style, "bench doctrine", "domain ranks game · posture");
-    row(style, "bench econ", "craft instruments · routes · rails → TRADE");
+    println!("  {}", style.section("NOT HERE"));
+    row(style, "intel …", "research · knowledge bases · spy · link");
+    row(style, "trade …", "run books · fleet · rails · vault");
     println!();
-    println!("  {}", style.section("NAV (every leaf shows this)"));
-    row(style, "bench · back · .. · home", "← root from chem/intel/…");
-    row(style, "trade", "→ CIRCULATE hub");
-    println!();
+    row(style, "bench · back · home", "← bench root");
+}
+
+fn intel_help(style: Style) {
+    banner_line(style, "INTEL — KNOWLEDGE ACTIVITY");
     println!(
         "  {}",
-        style.hint("Deep games fire deeds from the hub: research forge · intel probe · estate chart.")
+        style.dim("Operate research and knowledge. Bench builds tools; INTEL uses them.")
     );
+    println!();
+    row(style, "intel", "domain index");
+    row(style, "intel research [forge <c>|practice <n>]", "constellation game");
+    row(style, "intel knowledge", "tech · chem catalog · stash · practices");
+    row(style, "intel ops [probe|exfil|sabotage]", "spy pipeline");
+    row(style, "intel link", "cross-pollination · license path");
+    println!();
+    row(style, "intel · back · home", "← intel root");
+    row(style, "bench · trade", "peer roots");
 }
 
 fn trade_hub_help(style: Style) {
-    banner_line(style, "TRADE — CIRCULATE / SETTLE HUB");
+    banner_line(style, "TRADE — CIRCULATE ACTIVITY");
     println!(
         "  {}",
-        style.dim("Run components the BENCH crafted. Make stays on bench.")
+        style.dim("Implement/run components. Craft on `bench`; knowledge on `intel`.")
     );
     println!();
     row(style, "trade", "domain index");
