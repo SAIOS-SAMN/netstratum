@@ -199,6 +199,12 @@ pub struct Committed {
     pub cascade_pressures: Vec<(u64, u64)>,
     /// P5-D: ATM tamper pressure per orb (exact rational ≥ 0).
     pub tamper_pressures: Vec<(u64, Ratio)>,
+    /// P5-B: active doctrine disposition (None = use genesis).
+    pub posture_disposition: Option<u8>,
+    /// P5-B: active perception stance (None = use genesis).
+    pub posture_perception: Option<u8>,
+    /// P5-B: primary domain override 1..=7 (None = metabolism default).
+    pub posture_primary: Option<u8>,
 }
 
 /// G1 (04 §1): a civilization's sealed axes, as the world holds them.
@@ -305,6 +311,9 @@ pub struct World {
     pub(super) market_sealed_until: Option<u64>,
     pub(super) cascade_pressures: Vec<(u64, u64)>,
     pub(super) tamper_pressures: Vec<(u64, Ratio)>,
+    pub(super) posture_disposition: Option<u8>,
+    pub(super) posture_perception: Option<u8>,
+    pub(super) posture_primary: Option<u8>,
 }
 
 /// PLANNER-1: what a licensed leap carries — the condition and name

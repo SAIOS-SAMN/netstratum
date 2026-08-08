@@ -335,7 +335,8 @@
 //!    141  ClosureEvent::CovertTamperStruck (P5-D — ATM medium pressure up.)
 //!    142  ClosureEvent::MediumReinforced (P5-D — ATM envelope defense spend.)
 //!    143  ClosureEvent::TamperDetected (P5-D — unit pressure threshold unmask.)
-//!    Phase-5 claim ledger: next free **144**.
+//!    144  ClosureEvent::PostureReoriented (P5-B — doctrine/posture shift; genesis anatomy stays.)
+//!    Phase-5 claim ledger: next free **145**.
 //!         Orb TLV: 73 STAMP, 74 scrap. ZoneKind::ShipYard = 10.
 //!         (Historic free tags below top: 14, 15, 56, 57, 58, 64, 66,
 //!         83, 84, 87; 9 and 51 reserved; 65 retired forever.)
@@ -2746,6 +2747,16 @@ pub enum ClosureEvent {
         orb_id: u64,
         pressure: Ratio,
     },
+    /// P5-B (tag 144) — in-game defense doctrine reorientation.
+    /// Genesis metabolism (anatomy) is immutable; disposition/perception
+    /// posture weights and primary domain emphasis may shift under receipt.
+    /// Codes: disposition/perception use axis vocabulary; primary 0 = clear
+    /// override, 1..=7 = CEL..MKT domain.
+    PostureReoriented {
+        disposition: u8,
+        perception: u8,
+        primary: u8,
+    },
     /// N4 (NS-2 §1.5) — the scanner's power draw, the ONE chronicle
     /// event of RQP: crystals left the probing orb's bank to hold the
     /// lens open. Deliberately blind to what was asked and what was
@@ -3734,6 +3745,13 @@ impl ClosureEvent {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 ratio::encode(pressure, &mut value);
                 tlv::put(143, &value, &mut out);
+            }
+            Self::PostureReoriented {
+                disposition,
+                perception,
+                primary,
+            } => {
+                tlv::put(144, &[*disposition, *perception, *primary], &mut out);
             }
             Self::CrystalDrawn { orb_id, amount } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
@@ -4780,6 +4798,16 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let (pressure, _) = ratio::decode(value.get(8..)?)?;
                 Some(Self::TamperDetected { orb_id, pressure })
+            }
+            144 => {
+                let disposition = *value.first()?;
+                let perception = *value.get(1)?;
+                let primary = *value.get(2)?;
+                Some(Self::PostureReoriented {
+                    disposition,
+                    perception,
+                    primary,
+                })
             }
             55 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

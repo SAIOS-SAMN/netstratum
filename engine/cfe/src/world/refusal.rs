@@ -48,6 +48,8 @@ pub enum ActionRefused {
     LineStillLiving { orbs: usize, famished: usize },
     /// G1 — one line per world: the axes seal once.
     GenesisAlreadySealed,
+    /// P5-B — doctrine reorientation needs a sealed genesis (anatomy base).
+    GenesisUnsealed,
     /// G1 — the axis vocabulary is closed (04 §1, 12 §5a): an unknown
     /// code refuses at the door, naming the axis it offended.
     UnknownAxisValue { axis: u8, code: u8 },

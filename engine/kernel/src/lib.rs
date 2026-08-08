@@ -158,7 +158,10 @@ use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 /// **0.30.0 — P5-M2 + P5-D.** Tags 140–143 (NoteCascadeStruck,
 /// CovertTamperStruck, MediumReinforced, TamperDetected); SCHEMA_V11
 /// cascade_pressure + tamper_pressures trail.
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 30, patch: 0 };
+///
+/// **0.31.0 — P5-B + P5.19 dual-use.** Tag 144 PostureReoriented;
+/// SCHEMA_V12 posture doctrine overlay; TERRA dual-use tax on CovertTamper.
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 31, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
@@ -508,6 +511,8 @@ fn stamp_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
             }
             -fee.clone()
         }
+        // P5-B: doctrine reorientation burns 1 STAMP (identity fee).
+        ClosureEvent::PostureReoriented { .. } => -ratio(1, 1),
         _ => ratio(0, 1),
     };
     let before = prior
@@ -1239,6 +1244,7 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::NoteIssued { .. } | E::NoteRedeemed { .. } | E::FutureOpened { .. } | E::FutureSettled { .. } | E::LastClearMarked { .. } | E::ShareIssued { .. } | E::ShareTransferred { .. } | E::ShareDividend { .. } | E::PerpOpened { .. } | E::PerpFunded { .. } | E::PerpClosed { .. } | E::HullFinanced { .. } | E::EscortOnDuty { .. } | E::InterdictionStruck { .. } | E::ConvoyRiskMarked { .. }
         | E::MarketSealed { .. } | E::MarketResumed { .. } | E::SpotClearRecorded { .. } | E::LiquidityRaidStruck { .. } | E::ClearPoisonRefused { .. }
         | E::NoteCascadeStruck { .. } | E::CovertTamperStruck { .. } | E::MediumReinforced { .. } | E::TamperDetected { .. }
+        | E::PostureReoriented { .. }
         | E::GenesisSealed { .. } | E::ProspectStruck { .. } | E::LineSucceeded { .. }
         | E::TechLicensed { .. } | E::InstrumentForged { .. } | E::RouteChartered { .. }
         | E::OfferPosted { .. } | E::BondSealed { .. }
@@ -1471,7 +1477,9 @@ fn admitted_deltas(
         E::ElementSalvaged { .. } => Vec::new(),
         E::NoteIssued { .. } | E::NoteRedeemed { .. } | E::FutureOpened { .. } | E::FutureSettled { .. } | E::LastClearMarked { .. } | E::ShareIssued { .. } | E::ShareTransferred { .. } | E::ShareDividend { .. } | E::PerpOpened { .. } | E::PerpFunded { .. } | E::PerpClosed { .. } | E::HullFinanced { .. } | E::EscortOnDuty { .. } | E::InterdictionStruck { .. } | E::ConvoyRiskMarked { .. }
         | E::MarketSealed { .. } | E::MarketResumed { .. } | E::SpotClearRecorded { .. } | E::LiquidityRaidStruck { .. } | E::ClearPoisonRefused { .. }
-        | E::NoteCascadeStruck { .. } | E::TamperDetected { .. } => Vec::new(),
+        | E::NoteCascadeStruck { .. } | E::TamperDetected { .. } | E::PostureReoriented { .. } => {
+            Vec::new()
+        }
         E::CovertTamperStruck { cost, .. } => {
             non_negative(Resource::Crystal, cost)?;
             vec![(Resource::Crystal, -cost.clone())]
@@ -2161,6 +2169,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::NoteIssued { .. } | E::NoteRedeemed { .. } | E::FutureOpened { .. } | E::FutureSettled { .. } | E::LastClearMarked { .. } | E::ShareIssued { .. } | E::ShareTransferred { .. } | E::ShareDividend { .. } | E::PerpOpened { .. } | E::PerpFunded { .. } | E::PerpClosed { .. } | E::HullFinanced { .. } | E::EscortOnDuty { .. } | E::InterdictionStruck { .. } | E::ConvoyRiskMarked { .. }
         | E::MarketSealed { .. } | E::MarketResumed { .. } | E::SpotClearRecorded { .. } | E::LiquidityRaidStruck { .. } | E::ClearPoisonRefused { .. }
         | E::NoteCascadeStruck { .. } | E::CovertTamperStruck { .. } | E::MediumReinforced { .. } | E::TamperDetected { .. }
+        | E::PostureReoriented { .. }
         // #42: a treaty is WORLD-layer. It is keyed on the pair, and
         // the pair is two worlds — not a line's identity (a pact
         // outlives whoever signed it) and not one place.
@@ -2290,6 +2299,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::NoteIssued { .. } | E::NoteRedeemed { .. } | E::FutureOpened { .. } | E::FutureSettled { .. } | E::LastClearMarked { .. } | E::ShareIssued { .. } | E::ShareTransferred { .. } | E::ShareDividend { .. } | E::PerpOpened { .. } | E::PerpFunded { .. } | E::PerpClosed { .. } | E::HullFinanced { .. } | E::EscortOnDuty { .. } | E::InterdictionStruck { .. } | E::ConvoyRiskMarked { .. }
         | E::MarketSealed { .. } | E::MarketResumed { .. } | E::SpotClearRecorded { .. } | E::LiquidityRaidStruck { .. } | E::ClearPoisonRefused { .. }
         | E::NoteCascadeStruck { .. } | E::CovertTamperStruck { .. } | E::MediumReinforced { .. } | E::TamperDetected { .. }
+        | E::PostureReoriented { .. }
         // U1: the discovery mint settles banked value against verified
         // work — Collect, like the yield it banks beside. Ratified by
         // the U1 witnesses as it enters covered().

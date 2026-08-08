@@ -85,6 +85,9 @@ pub const SCHEMA_V10: u8 = 10;
 /// **SCHEMA v11 — P5-M2 cascade + P5-D tamper pressures.**
 pub const SCHEMA_V11: u8 = 11;
 
+/// **SCHEMA v12 — P5-B posture doctrine overlay.**
+pub const SCHEMA_V12: u8 = 12;
+
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
 }
@@ -105,7 +108,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V11];
+    let mut out = vec![SCHEMA_V12];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -408,6 +411,28 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         put_u64(&mut out, *orb);
         ratio::encode(p, &mut out);
     }
+    // SCHEMA v12 — posture doctrine overlay (0 = none).
+    match committed.posture_disposition {
+        None => out.push(0),
+        Some(d) => {
+            out.push(1);
+            out.push(d);
+        }
+    }
+    match committed.posture_perception {
+        None => out.push(0),
+        Some(p) => {
+            out.push(1);
+            out.push(p);
+        }
+    }
+    match committed.posture_primary {
+        None => out.push(0),
+        Some(p) => {
+            out.push(1);
+            out.push(p);
+        }
+    }
     out
 }
 
@@ -488,6 +513,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         && schema != SCHEMA_V9
         && schema != SCHEMA_V10
         && schema != SCHEMA_V11
+        && schema != SCHEMA_V12
     {
         return None;
     }
@@ -898,6 +924,27 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         }
     }
 
+    let mut posture_disposition = None;
+    let mut posture_perception = None;
+    let mut posture_primary = None;
+    if schema >= SCHEMA_V12 {
+        match take.u8()? {
+            0 => posture_disposition = None,
+            1 => posture_disposition = Some(take.u8()?),
+            _ => return None,
+        }
+        match take.u8()? {
+            0 => posture_perception = None,
+            1 => posture_perception = Some(take.u8()?),
+            _ => return None,
+        }
+        match take.u8()? {
+            0 => posture_primary = None,
+            1 => posture_primary = Some(take.u8()?),
+            _ => return None,
+        }
+    }
+
     if !take.done() {
         return None;
     }
@@ -937,5 +984,8 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         market_sealed_until,
         cascade_pressures,
         tamper_pressures,
+        posture_disposition,
+        posture_perception,
+        posture_primary,
     })
 }

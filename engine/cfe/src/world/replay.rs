@@ -49,6 +49,9 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut market_sealed_until: Option<u64> = None;
     let mut cascade_pressures: Vec<(u64, u64)> = Vec::new();
     let mut tamper_pressures: Vec<(u64, crate::ratio::Ratio)> = Vec::new();
+    let mut posture_disposition: Option<u8> = None;
+    let mut posture_perception: Option<u8> = None;
+    let mut posture_primary: Option<u8> = None;
     for receipt in chronicle.receipts() {
         match &receipt.event {
             // BOOK-1 (19_LENS §16) — the open registry rebuilds from
@@ -1263,7 +1266,26 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 }
             }
             ClosureEvent::TamperDetected { .. } => {
-                // Residual audit only; pressure already set by CovertTamper.
+                // Residual audit only; pressure already set by CovertTamper
+                // or cleared/unmasked by overt terraform.
+            }
+            ClosureEvent::PostureReoriented {
+                disposition,
+                perception,
+                primary,
+            } => {
+                // Fee is STAMP on FIRST_ORB; replay of stamp deeds elsewhere
+                // is imperfect for instruments — fee applied here for fidelity.
+                if let Some(held) = peel(&mut orbs, 1) {
+                    held.bank_stamp(-ratio(1, 1));
+                }
+                posture_disposition = Some(*disposition);
+                posture_perception = Some(*perception);
+                posture_primary = if *primary == 0 {
+                    None
+                } else {
+                    Some(*primary)
+                };
             }
         }
     }
@@ -1272,6 +1294,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
         gauge, genesis, terrain_seed, practices, instruments, routes, element_routes, treaties,
         prospects, warded, veiled, taxon, stations, hulls, notes, futures, last_clears, shares,
         perps, clear_depths, market_sealed_until, cascade_pressures, tamper_pressures,
+        posture_disposition, posture_perception, posture_primary,
     }
 }
 

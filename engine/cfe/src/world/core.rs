@@ -332,6 +332,9 @@ impl World {
             market_sealed_until: self.market_sealed_until,
             cascade_pressures: self.cascade_pressures.clone(),
             tamper_pressures: self.tamper_pressures.clone(),
+            posture_disposition: self.posture_disposition,
+            posture_perception: self.posture_perception,
+            posture_primary: self.posture_primary,
         }
     }
     /// ELEMENT-GRAMMAR-1 (14 §3) — the extraction closure: richness ×

@@ -185,13 +185,14 @@ optional R3/R4 exits for claims.
 | P5.2 | [x] Interdiction residual on +melt hauls (`InterdictionStruck` 133) | P5.1 | pins + haul path |
 | P5.3 | [x] DEFEND pane + `defend` CLI: posture stubs + escort/risk | P5.1, P1.1 | desk `d` |
 
-### P5-B — Species-relative posture (readings first)
+### P5-B — Species-relative posture (readings + in-game reorient)
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
-| P5.11 | [ ] Derive domain weights from metabolism × disposition × perception | P5.0, genesis | pure reading |
-| P5.12 | [ ] Clade colour table (voice + primary residual) from taxon/06 | P5.11 | no new dials |
-| P5.13 | [ ] DEFEND shows **non-human** posture copy (plasmic/lithic/hive…) | P5.11–P5.12 | CLI/desk |
+| P5.11 | [x] Derive domain weights from metabolism × disposition × perception | P5.0, genesis | pure reading |
+| P5.12 | [x] Clade colour table (voice + primary residual) from taxon/06 | P5.11 | no new dials |
+| P5.13 | [x] DEFEND shows **non-human** posture copy (plasmic/lithic/hive…) | P5.11–P5.12 | CLI/desk |
+| P5.13b | [x] In-game doctrine reorient (`PostureReoriented` 144); anatomy sealed | P5.11 | pins |
 
 ### P5-C — INF compose (veil / ward / counter-intel)
 
@@ -242,7 +243,7 @@ not a second physics. NPC must war without opening a suite.
 | P5.16 | [x] Medium envelope reinforce deed (tag 142) | P5.0, thermal | pins |
 | P5.17 | [x] CovertTamper deed + pressure scalar (tag 141) | P5.16 | pins |
 | P5.18 | [x] TamperDetected at unit threshold (tag 143) | P5.17 | pins |
-| P5.19 | [ ] Dual-use gate: TERRA-1 overt vs CovertTamper covert | TERRA-1, P5.17 | doc+pin |
+| P5.19 | [x] Dual-use gate: TERRA-1 overt vs CovertTamper covert | TERRA-1, P5.17 | doc+pin |
 | P5.19b | [ ] Species-relative medium residual copy | P5.11, P5.17 | |
 
 ### P5-F — Espionage suite

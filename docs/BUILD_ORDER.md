@@ -1045,5 +1045,11 @@ See `36_DEFENSE_AXIOMS.md` §10.
 haircut ladder on note issue; early resume audit; tags **141–143** CovertTamper /
 MediumReinforced / TamperDetected; SCHEMA_V11; kernel **0.30.0**. See `36` §11.
 
-**Next:** P5-B species posture · P5.19 dual-use TERRA · P5-C INF · P5.37 CYBER · P1.8.
+**P5-B + P5.19 dual-use:** tag **144** `PostureReoriented` — doctrine/perception/
+primary reorient in-game (1 STAMP); metabolism anatomy sealed at genesis;
+clade/perception colour tables; DEFEND non-human voice. CovertTamper dual-use
+tax when TERRA held (2× crystal eighth); overt `terraform` clears pressure +
+unmasks. SCHEMA_V12; kernel **0.31.0**. CLI `posture set`.
+
+**Next:** P5-C INF · P5.19b medium colour · P5.37 CYBER · P1.8.
 

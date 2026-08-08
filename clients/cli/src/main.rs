@@ -2458,18 +2458,34 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 other
             ),
         },
-        // P5-A DEFEND / escort · P5-M MKT integrity
+        // P5-A DEFEND / escort · P5-B posture · P5-M MKT integrity
         Some("defend") | Some("defence") => match words.next() {
             None | Some("status") | Some("help") => {
                 let p = world.defense_posture();
                 let mi = world.market_integrity();
+                let atm = world.medium_integrity(*current);
+                let reor = if p.reoriented {
+                    style.warn("reoriented")
+                } else {
+                    style.dim("genesis doctrine")
+                };
                 println!(
                     "{} DEFEND — primary {} · secondary {} · {}",
                     style.head("🛡"),
                     style.strong(p.primary.word()),
                     p.secondary.word(),
-                    style.dim(p.voice)
+                    style.dim(&p.voice)
                 );
+                println!(
+                    "  anatomy {} · doctrine {} · perception {} · {}",
+                    metabolism_name(p.metabolism),
+                    disposition_name(p.disposition),
+                    perception_name(p.perception),
+                    reor
+                );
+                if let (Some(c), Some(l)) = (p.class, p.clade) {
+                    println!("  taxon class {c} · clade {l}");
+                }
                 println!(
                     "  ranks CEL:{} ATM:{} COG:{} CYB:{} INF:{} KIN:{} MKT:{}",
                     p.ranks[0],
@@ -2493,9 +2509,14 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     );
                 }
                 println!(
+                    "  ATM pressure {} · dual-use TERRA={}",
+                    amount(&atm.pressure),
+                    atm.dual_use
+                );
+                println!(
                     "  {}",
                     style.hint(
-                        "defend escort|risk · market seal|resume|clear|raid · suite market|convoy"
+                        "posture set · escort|risk · market · medium|tamper · suite market"
                     )
                 );
             }
@@ -2540,6 +2561,71 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             }
             Some(other) => println!(
                 "{} defend {:?} — status|escort|risk",
+                style.bad("✗"),
+                other
+            ),
+        },
+        // P5-B reconfigurable doctrine posture (anatomy sealed)
+        Some("posture") => match words.next() {
+            None | Some("status") | Some("help") => {
+                let p = world.defense_posture();
+                println!(
+                    "{} POSTURE — primary {} · secondary {}",
+                    style.head("🛡"),
+                    p.primary.word(),
+                    p.secondary.word()
+                );
+                println!(
+                    "  metabolism(anatomy)={} · disposition={} · perception={} · reoriented={}",
+                    metabolism_name(p.metabolism),
+                    disposition_name(p.disposition),
+                    perception_name(p.perception),
+                    p.reoriented
+                );
+                println!("  {}", style.dim(&p.voice));
+                println!(
+                    "  {}",
+                    style.hint(
+                        "posture set <expansionist|empiricist|epicurean> <planar|…> [CEL|ATM|…|clear]"
+                    )
+                );
+            }
+            Some("set") | Some("reorient") => {
+                let dis = words.next().and_then(parse_disposition);
+                let per = words.next().and_then(parse_perception);
+                let primary_word = words.next();
+                let primary = match primary_word {
+                    None | Some("clear") | Some("0") | Some("-") => Some(0u8),
+                    Some(w) => parse_domain(w),
+                };
+                match (dis, per, primary) {
+                    (Some(d), Some(p), Some(pri)) => {
+                        match world.reorient_posture(d, p, pri) {
+                            Ok(()) => {
+                                let _ = sync_world(world);
+                                let now = world.defense_posture();
+                                println!(
+                                    "{} doctrine reoriented → {} · {} · primary {}",
+                                    style.ok("🛡"),
+                                    disposition_name(now.disposition),
+                                    perception_name(now.perception),
+                                    now.primary.word()
+                                );
+                            }
+                            Err(refusal) => refuse(world, &refusal, style),
+                        }
+                    }
+                    _ => println!(
+                        "{} usage: {}",
+                        style.bad("✗"),
+                        style.strong(
+                            "posture set <disposition> <perception> [CEL|ATM|COG|CYB|INF|KIN|MKT|clear]"
+                        )
+                    ),
+                }
+            }
+            Some(other) => println!(
+                "{} posture {:?} — status|set",
                 style.bad("✗"),
                 other
             ),
@@ -6009,6 +6095,19 @@ fn parse_perception(word: &str) -> Option<u8> {
     }
 }
 
+fn parse_domain(word: &str) -> Option<u8> {
+    match word.to_ascii_uppercase().as_str() {
+        "CEL" | "1" => Some(1),
+        "ATM" | "2" => Some(2),
+        "COG" | "3" => Some(3),
+        "CYB" | "4" => Some(4),
+        "INF" | "5" => Some(5),
+        "KIN" | "6" => Some(6),
+        "MKT" | "7" => Some(7),
+        _ => None,
+    }
+}
+
 fn disposition_name(code: u8) -> &'static str {
     match code {
         1 => "expansionist",
@@ -6426,6 +6525,9 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
         ActionRefused::ResumeAuditUnmet { depth, need } => format!(
             "early market resume refused — crystal clear depth {depth}/{need}; keep clearing or wait for breaker"
         ),
+        ActionRefused::GenesisUnsealed => {
+            "seal genesis first — posture reorientation needs anatomy (metabolism) sealed".into()
+        }
         ActionRefused::BalanceEntropyDominates {
             balance,
             syntropy,
@@ -6539,8 +6641,9 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
             "this line still lives ({famished} of {orbs} planets famished) — succession is the derelict door, not a reset: only a full cascade admits a successor"
         ),
         ActionRefused::GenesisAlreadySealed => format!(
-            "this world's line is already sealed — one genesis per world; {} shows it",
-            style.strong("status")
+            "this world's anatomy is sealed (one genesis) — reorient doctrine with {}; {} shows posture",
+            style.strong("posture set"),
+            style.strong("defend status")
         ),
         ActionRefused::UnknownAxisValue { axis, code } => format!(
             "axis {axis} has no value {code} — the vocabulary is closed: dispositions {} · metabolisms {} · perceptions {}",
@@ -7834,6 +7937,22 @@ fn chronicle(world: &World, style: &Style) {
                 "⚠ tamper DETECTED orb {} pressure {}",
                 orb_id,
                 amount(pressure)
+            ),
+            cfe::dop::ClosureEvent::PostureReoriented {
+                disposition,
+                perception,
+                primary,
+            } => format!(
+                "🛡 posture reoriented dis={} per={} primary={}",
+                disposition_name(*disposition),
+                perception_name(*perception),
+                if *primary == 0 {
+                    "clear".into()
+                } else {
+                    cfe::world::DefenseDomain::from_wire(*primary)
+                        .map(|d| d.word().to_string())
+                        .unwrap_or_else(|| primary.to_string())
+                }
             ),
             cfe::dop::ClosureEvent::AssayStruck { amount: drawn, richness, .. } => format!(
                 "⚖ {} drawn from the opened vein — one receipt, the whole span{}",

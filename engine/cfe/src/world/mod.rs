@@ -70,7 +70,7 @@ pub use defense::{DefenseDomain, DefensePosture, RiskBand};
 pub use market_defense::{
     MarketIntegrity, BREAKER_TICKS, CLEAR_SEAL_DEPTH, RESUME_AUDIT_DEPTH,
 };
-pub use medium_defense::{MediumIntegrity, tamper_threshold};
+pub use medium_defense::{DualUseAtm, MediumIntegrity, tamper_threshold};
 
 pub use replay::replay;
 pub use fleet::hull_voice;

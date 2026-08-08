@@ -529,11 +529,14 @@ fn render_defend(style: Style, home: &World) -> Vec<String> {
             style.label("POSTURE"),
             style.strong(posture.primary.word()),
             style.accent(posture.secondary.word()),
-            style.dim(posture.voice)
+            style.dim(&posture.voice)
         ),
         format!(
-            "  met={} dis={} per={}  (36_DEFENSE_AXIOMS)",
-            posture.metabolism, posture.disposition, posture.perception
+            "  anatomy met={} · doctrine dis={} per={} · reoriented={}  (36)",
+            posture.metabolism,
+            posture.disposition,
+            posture.perception,
+            posture.reoriented
         ),
     ];
     let domains = [
@@ -587,7 +590,7 @@ fn render_defend(style: Style, home: &World) -> Vec<String> {
     lines.push(format!(
         "  {}",
         style.hint(
-            "escort · market seal|cascade · medium reinforce · tamper · suite market"
+            "posture set · escort · market cascade · medium|tamper · suite market"
         )
     ));
     // Escorts on duty

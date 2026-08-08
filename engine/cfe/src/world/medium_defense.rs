@@ -32,6 +32,16 @@ impl World {
             pressure: pressure.clone(),
             threshold: thr.clone(),
             compromised: pressure >= thr,
+            dual_use: self.can_terraform(),
+        }
+    }
+
+    /// Dual-use ATM reading (P5.19): TERRA crown held ⇒ covert path taxed.
+    pub fn dual_use_atm(&self) -> DualUseAtm {
+        DualUseAtm {
+            can_overt_terraform: self.can_terraform(),
+            can_covert_tamper: true,
+            dual_use_tax: self.can_terraform(),
         }
     }
 
@@ -50,18 +60,27 @@ impl World {
 
     pub fn covert_tamper_as(&mut self, actor: u64, orb: u64) -> Result<Ratio, ActionRefused> {
         self.permitted(actor, Scope::Build)?;
-        let step = eighth();
+        // P5.19 dual-use: never rewrites PlanetSited / thermal seat.
+        // Holding TERRA crown doubles crystal cost (1+1) — overt path is terraform.
+        let base = eighth();
+        let cost = if self.can_terraform() {
+            base.clone() + base.clone()
+        } else {
+            base.clone()
+        };
         let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
+        // Dual-use law: crystal debit only — thermal / PlanetSited never written here.
         let have = held.banked_amount(Resource::Crystal);
-        if have < step {
+        if have < cost {
             return Err(ActionRefused::CannotAfford {
                 resource: Resource::Crystal,
-                need: Box::new(step.clone()),
+                need: Box::new(cost.clone()),
                 have: Box::new(have),
             });
         }
-        held.bank(Resource::Crystal, -step.clone());
-        let mut pressure = self.tamper_pressure_of(orb) + step.clone();
+        held.bank(Resource::Crystal, -cost.clone());
+        // Pressure rises by one eighth always (meter, not cost).
+        let mut pressure = self.tamper_pressure_of(orb) + base;
         // Cap at 2 (two units) so reinforce remains meaningful — 1+1+1+1.
         let cap = ratio(1, 1) + ratio(1, 1);
         if pressure > cap {
@@ -71,7 +90,7 @@ impl World {
         self.close(
             ClosureEvent::CovertTamperStruck {
                 orb_id: orb,
-                cost: step,
+                cost,
                 pressure: pressure.clone(),
             },
             actor,
@@ -136,4 +155,14 @@ pub struct MediumIntegrity {
     pub pressure: Ratio,
     pub threshold: Ratio,
     pub compromised: bool,
+    /// True when TERRA crown is held — covert path is dual-use taxed.
+    pub dual_use: bool,
+}
+
+/// P5.19 dual-use ATM gate reading.
+#[derive(Debug, Clone)]
+pub struct DualUseAtm {
+    pub can_overt_terraform: bool,
+    pub can_covert_tamper: bool,
+    pub dual_use_tax: bool,
 }

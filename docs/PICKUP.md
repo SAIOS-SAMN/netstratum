@@ -15,16 +15,16 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 |------|--------|
 | Wave-1 commit | **`2109bf0`** (T4–T9, REFINE-1) |
 | Wave-2 commit | **`4686399`** (E-APT, element_trade_step) |
-| Kernel | **0.30.0** (next free minor **31**) |
-| Next free tag | **144** (P5-M2 140 · P5-D 141–143) |
+| Kernel | **0.31.0** (next free minor **32**) |
+| Next free tag | **145** (P5-B posture 144 · dual-use TERRA/Covert) |
 | Stations | **10** (T4–T9 economic offices open) |
 | ZoneKind compiled | **1–10** (ShipYard = 10) |
-| Codec | **SCHEMA_V11** (… + cascade_pressure · tamper_pressures) |
-| Pure-NPC green | market_war_step (raid+cascade) · instrument clears · ATM optional |
-| Next work | **P5-B** posture · P5.19 dual-use · P5-C INF · P5.37 CYBER · P1.8 |
-| Docs | `30`–`36` §11 matrix; **P5-A + P5-M + P5-M2 + P5-D land** |
-| Trade program | Phases **1–4 + P5-A/M/M2/D** partial; P5-B…H remainder open |
-| Help | `market|medium|tamper|suite` · desk EXCH/DEFEND — ANSI |
+| Codec | **SCHEMA_V12** (… + posture doctrine overlay) |
+| Pure-NPC green | market_war_step · instrument clears · ATM · posture reorient |
+| Next work | **P5-C** INF · P5.19b medium colour · P5.37 CYBER · P1.8 |
+| Docs | `30`–`36`; **P5-A/M/M2/D/B + P5.19 dual-use** landed |
+| Trade program | Phases **1–4 + P5 defense verticals** partial; P5-C…H remainder open |
+| Help | `posture set` · `market|medium|tamper|suite` · desk EXCH/DEFEND |
 | Dirty / other lane | do not `git add -A` without reviewing observer/other-lane files |
 
 Older §0 counts (809 tests, 71 deeds, tag 95) are **historical**; re-measure

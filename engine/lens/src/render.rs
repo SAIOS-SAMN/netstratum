@@ -1033,6 +1033,14 @@ pub fn render_receipt(receipt: &Receipt) -> String {
             "tamper_detected",
             format!("unmask orb {orb_id} pressure {}", ratio_str(pressure)),
         ),
+        E::PostureReoriented {
+            disposition,
+            perception,
+            primary,
+        } => (
+            "posture_reoriented",
+            format!("doctrine dis={disposition} per={perception} primary={primary}"),
+        ),
         E::ApertureSent { deal, from_orb, resource, amount } => (
             "aperture_sent",
             format!(

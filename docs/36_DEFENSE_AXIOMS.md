@@ -375,7 +375,8 @@ Maps onto and **extends** `TASKS_TRADE_FLEET_DESK` P5:
 | **135–139** | P5-M MKT landed (seal/clear/raid/poison) |
 | **140** | P5-M2 NoteCascadeStruck |
 | **141–143** | P5-D CovertTamper / MediumReinforced / TamperDetected |
-| **144+** | next free — further matrix vectors |
+| **144** | P5-B PostureReoriented (doctrine shift; anatomy sealed) |
+| **145+** | next free — further matrix vectors |
 | no float | all residuals exact rational |
 
 ### 6.2 Non-goals
@@ -512,7 +513,7 @@ schism. Atmospheric attack hits shared brood medium. Espionage is
 
 | ID | Question | Lean |
 |----|----------|------|
-| Q-D1 | Is CovertTamper a new PlanetSited half-state or pure pressure scalar? | **Ruled:** pressure scalar + TamperDetected at unit threshold |
+| Q-D1 | Is CovertTamper a new PlanetSited half-state or pure pressure scalar? | **Ruled:** pressure scalar + TamperDetected at unit threshold; **P5.19:** never rewrites thermal; TERRA dual-use tax 2× crystal; overt terraform clears pressure |
 | Q-D2 | Multi-actor tamper stack (who is blamed)? | Last unveiled actor + INF witness (later) |
 | Q-D3 | Plasmic ATM = thermal site fields only? | Compose thermal + new field TLV later |
 | Q-D4 | Share of espionage with MASK toll | Compose VeilToll |

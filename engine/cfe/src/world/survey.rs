@@ -220,6 +220,31 @@ impl World {
             ClosureEvent::PlanetSited { orb_id: orb, albedo, orbit_r, theta: None , psi: None },
             SOVEREIGN,
         );
+        // P5.19 dual-use: overt TERRA path supersedes covert stress on this orb.
+        // Public re-site clears pressure; if it was past threshold, unmask residual.
+        let prior = self.tamper_pressure_of(orb);
+        if prior > ratio(0, 1) {
+            let was_compromised = prior >= crate::world::medium_defense::tamper_threshold();
+            self.tamper_pressures.retain(|(o, _)| *o != orb);
+            if was_compromised {
+                self.close(
+                    ClosureEvent::TamperDetected {
+                        orb_id: orb,
+                        pressure: prior,
+                    },
+                    SOVEREIGN,
+                );
+            }
+            // Envelope restored by overt remediation (zero pressure, no iron spend).
+            self.close(
+                ClosureEvent::MediumReinforced {
+                    orb_id: orb,
+                    cost: ratio(0, 1),
+                    pressure: ratio(0, 1),
+                },
+                SOVEREIGN,
+            );
+        }
         Ok(())
     }
     /// TECH-1b (10 §3) — THE CRYSTAL SHEAR: one pass over the

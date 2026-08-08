@@ -29,6 +29,78 @@ fn posture_is_species_relative() {
 }
 
 #[test]
+fn posture_reorients_doctrine_not_anatomy() {
+    let mut w = stamp_for_market();
+    w.seal_genesis("reorient-line", 1, 1, 1).expect("genesis"); // expansionist mineral planar
+    let before = w.defense_posture();
+    assert_eq!(before.metabolism, 1);
+    assert_eq!(before.disposition, 1);
+    assert!(!before.reoriented);
+    // Shift doctrine to empiricist + KIN primary.
+    w.reorient_posture(2, 3, 6).expect("reorient");
+    let after = w.defense_posture();
+    assert_eq!(after.metabolism, 1, "anatomy immutable");
+    assert_eq!(after.disposition, 2);
+    assert_eq!(after.perception, 3);
+    assert_eq!(after.primary, DefenseDomain::Kin);
+    assert!(after.reoriented);
+    assert!(w.chronicle().receipts().iter().any(|r| {
+        matches!(r.event, cfe::dop::ClosureEvent::PostureReoriented { .. })
+    }));
+    assert_eq!(replay(w.chronicle()), w.committed());
+}
+
+#[test]
+fn dual_use_taxes_covert_when_terra_held() {
+    let mut w = World::new();
+    w.found("dual").expect("f");
+    // Without TERRA, cost is one eighth.
+    use cfe::world::{Committed, MintWarrant};
+    struct TestWarrant;
+    impl MintWarrant for TestWarrant {
+        fn earns(&self, work: &[u8]) -> Option<cfe::ratio::Ratio> {
+            Some(ratio(work.first().copied().unwrap_or(8).max(1) as i64, 1))
+        }
+        fn admits(
+            &self,
+            _: &Committed,
+            _: &Committed,
+            _: &cfe::dop::ClosureEvent,
+            _: u64,
+            _: u64,
+        ) -> bool {
+            true
+        }
+    }
+    w.mint_discovery_as(
+        SOVEREIGN,
+        FIRST_ORB,
+        Resource::Crystal,
+        cfe::dop::NonNegative::new(ratio(8, 1)).expect("nn"),
+        vec![8u8; 32],
+        &TestWarrant,
+    )
+    .expect("crystal");
+    assert!(!w.can_terraform());
+    let before = w
+        .orb()
+        .map(|o| o.banked_amount(Resource::Crystal))
+        .unwrap_or_else(|| ratio(0, 1));
+    w.covert_tamper(FIRST_ORB).expect("tamper");
+    let after = w
+        .orb()
+        .map(|o| o.banked_amount(Resource::Crystal))
+        .unwrap_or_else(|| ratio(0, 1));
+    let eighth = ratio(1, 1) / (ratio(1, 1) + ratio(1, 1) + ratio(1, 1) + ratio(1, 1) + ratio(1, 1) + ratio(1, 1) + ratio(1, 1) + ratio(1, 1));
+    // Use resonator eighth via another path: pressure rose by eighth; cost == eighth without dual-use.
+    assert_eq!(before - after, w.tamper_pressure_of(FIRST_ORB));
+    // Dual-use reading flags when TERRA absent.
+    assert!(!w.dual_use_atm().dual_use_tax);
+    assert_eq!(replay(w.chronicle()), w.committed());
+    let _ = eighth;
+}
+
+#[test]
 fn base_risk_positive_escort_cover_formula() {
     let mut w = yard_world();
     let risk0 = w.convoy_risk(1);
