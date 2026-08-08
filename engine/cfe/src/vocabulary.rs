@@ -319,8 +319,10 @@ pub fn archetype_binding(class: u8) -> Vec<(u8, Ratio)> {
         9 => vec![(CHANNEL_YIELD, ratio(3, 2)), (CHANNEL_UPKEEP, ratio(5, 4))], // abyssal-pressure
         10 => vec![(CHANNEL_SURVEY, ratio(1, 2)), (CHANNEL_UPKEEP, ratio(5, 4))], // crystal-mind
         11 => vec![(CHANNEL_YIELD, ratio(5, 4)), (CHANNEL_UPKEEP, ratio(3, 2))], // void-swarm
-        12 => vec![(CHANNEL_YIELD, ratio(3, 2)), (CHANNEL_UPKEEP, ratio(1, 2))], // thermal-banker
-        13 => vec![(CHANNEL_SURVEY, ratio(3, 4)), (CHANNEL_YIELD, ratio(3, 4))], // mirror-form
+        // thermal-banker: banks heat — low demurrage friction, lower yield
+        12 => vec![(CHANNEL_DEMURRAGE, ratio(3, 4)), (CHANNEL_YIELD, ratio(3, 4))],
+        // mirror-form: sees well (survey↓ cost) but yields less
+        13 => vec![(CHANNEL_SURVEY, ratio(3, 4)), (CHANNEL_YIELD, ratio(3, 4))],
         _ => vec![],
     }
 }
@@ -433,8 +435,11 @@ pub fn seed(axis: Axis) -> Vec<Entry> {
                 base: None,
             })
             .collect(),
-        Axis::Clade => (0..=crate::dop::clade_ceiling())
-            .map(|code| plain(code, clade_word(code)))
+        // Clade fold seed is LEGACY display only (0..=20). Expansion
+        // taxons (21..=ceiling) are open in taxon_table — seal validates
+        // against is_lawful_clade, not fold length (open-ended system).
+        Axis::Clade => (0u8..=20)
+            .map(|code| plain(code, clade_word(u16::from(code))))
             .collect(),
         // **THE PRACTICE MECHANISMS ARE DATA** (operator ruling
         // 2026-08-05): each discipline is a factor set over the landed
@@ -600,12 +605,12 @@ pub fn channel_family(channel: u8) -> Option<crate::dop::ZoneKind> {
 }
 
 /// Clade display word — delegates to [`crate::almanac::taxon_table`].
-pub fn clade_word(code: u8) -> &'static str {
+pub fn clade_word(code: u16) -> &'static str {
     crate::almanac::taxon_table::clade_word(code)
 }
 
 /// Parse clade wire from imperium word **or** legacy English alias.
-pub fn clade_from_word(word: &str) -> Option<u8> {
+pub fn clade_from_word(word: &str) -> Option<u16> {
     crate::almanac::taxon_table::clade_from_word(word)
 }
 

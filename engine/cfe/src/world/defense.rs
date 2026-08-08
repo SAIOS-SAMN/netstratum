@@ -91,7 +91,7 @@ pub struct DefensePosture {
     /// Active perception stance (genesis or reoriented).
     pub perception: u8,
     pub class: Option<u8>,
-    pub clade: Option<u8>,
+    pub clade: Option<u16>,
     /// True when doctrine differs from sealed genesis axes.
     pub reoriented: bool,
     pub voice: String,
@@ -445,7 +445,7 @@ impl World {
             return ratio(0, 1);
         }
         let eighth = ZoneKind::Resonator.yield_per_tick().1; // 1/8
-        let hive = self.taxon.map(|(_, c)| c) == Some(8);
+        let hive = self.taxon.map(|(_, c)| c) == Some(8u16);
         let mut cover = ratio(0, 1);
         for h in &self.hulls {
             if h.assigned_route != deal {

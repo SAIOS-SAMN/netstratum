@@ -14,10 +14,10 @@ use crate::dop::{Resource, ZoneKind};
 impl World {
     /// Taxon economy reading (mode · planet fit · flatlander flag).
     pub fn taxon_economy_of(&self, orb: u64) -> crate::almanac::TaxonEconomy {
-        let (class, clade) = self.taxon.unwrap_or((0, crate::almanac::FLATLANDER_CLADE));
+        let (class, clade) = self.taxon.unwrap_or((0, u16::from(crate::almanac::FLATLANDER_CLADE)));
         // Unsealed taxon defaults flatlander baseline for play readability.
         let clade = if self.taxon.is_none() {
-            crate::almanac::FLATLANDER_CLADE
+            u16::from(crate::almanac::FLATLANDER_CLADE)
         } else {
             clade
         };
@@ -608,5 +608,5 @@ pub struct ScienceLabBoard {
     pub skin_grade: u8,
     pub rogue: u8,
     pub metabolism: u8,
-    pub clade: Option<u8>,
+    pub clade: Option<u16>,
 }

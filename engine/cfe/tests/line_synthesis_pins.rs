@@ -100,7 +100,11 @@ fn the_deed_mints_by_seed_and_everything_derives() {
     // draw ran under, and on an unminted chain they equal the seed's —
     // so the declared derivation and the compiled one agree here.
     let (class_c, clade_c) = ceilings.expect("a new mint declares its ceilings");
-    assert_eq!((class_c, clade_c), (class_ceiling(), clade_ceiling()));
+    assert_eq!(
+        (class_c, clade_c),
+        (class_ceiling(), clade_ceiling()),
+        "mint declares open class/clade ceilings"
+    );
     assert_eq!(
         cfe::dop::line_synthesis_at(seed, class_c, clade_c),
         first,

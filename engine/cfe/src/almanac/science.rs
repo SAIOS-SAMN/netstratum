@@ -555,11 +555,18 @@ impl SeatAffinity {
 pub fn science_seat_affinity(
     metabolism: u8,
     discipline: ScienceDiscipline,
-    clade: Option<u8>,
+    clade: Option<u16>,
 ) -> SeatAffinity {
     use ScienceDiscipline::*;
-    // Clade overlays first (37 §4.2).
-    if let Some(c) = clade {
+    // Clade overlays first (37 §4.2). Expansion clades inherit owner class colour.
+    let c = clade.and_then(|code| {
+        if code <= 20 {
+            Some(code as u8)
+        } else {
+            crate::almanac::taxon_table::expansion_class_of(code)
+        }
+    });
+    if let Some(c) = c {
         match (c, discipline) {
             // polybrachia — volumetric cortex
             (7, Math | Research | Skin) => return SeatAffinity::Primary,
@@ -619,7 +626,7 @@ pub fn science_seat_fee_for(
     discipline: ScienceDiscipline,
     rank: u8,
     metabolism: u8,
-    clade: Option<u8>,
+    clade: Option<u16>,
 ) -> Ratio {
     let eighth = ratio(1, 8);
     let w = discipline.seat_weight();

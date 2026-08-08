@@ -213,7 +213,7 @@ pub enum ActionRefused {
     OverdriveUntempered { hardships: usize },
     /// KERNEL-TAXON — a code outside the ratified vocabularies
     /// (15 §2–§3): the vocabulary grows by amendment, never by deed.
-    TaxonUnknown { class: u8, clade: u8 },
+    TaxonUnknown { class: u8, clade: u16 },
     /// KERNEL-TAXON — one seal per star; identity is forever.
     TaxonAlreadySealed,
     /// **THE COVENANT IS A T3 INSTRUMENT** (operator ruling 2026-08-05:

@@ -100,6 +100,9 @@ pub const SCHEMA_V15: u8 = 15;
 /// **SCHEMA v16 — seated science labs (seats · clones · synth · skin · rogue).**
 pub const SCHEMA_V16: u8 = 16;
 
+/// **SCHEMA v17 — open clade (u16 LE in taxon field; no u8 tax cap).**
+pub const SCHEMA_V17: u8 = 17;
+
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
 }
@@ -120,7 +123,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V16];
+    let mut out = vec![SCHEMA_V17];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -290,7 +293,8 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         Some((class, clade)) => {
             out.push(1);
             out.push(class);
-            out.push(clade);
+            // v17: clade as u16 LE (open expansion). Pre-v17: single u8.
+            put_u16(&mut out, clade);
         }
         None => out.push(0),
     }
@@ -578,6 +582,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         && schema != SCHEMA_V14
         && schema != SCHEMA_V15
         && schema != SCHEMA_V16
+        && schema != SCHEMA_V17
     {
         return None;
     }
@@ -764,14 +769,22 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         _ => return None,
     };
 
-    // KERNEL-TAXON: v1 carries no taxon (None); v2 reads the trailing
-    // presence-byte + pair. An unlawful presence code refuses whole.
+    // KERNEL-TAXON: v1 carries no taxon (None); v2–v16: class + clade u8;
+    // v17+: class + clade u16 LE (open expansion, SEAL B both ways).
     let taxon = if schema == SCHEMA_V1 {
         None
     } else {
         match take.u8()? {
             0 => None,
-            1 => Some((take.u8()?, take.u8()?)),
+            1 => {
+                let class = take.u8()?;
+                let clade = if schema >= SCHEMA_V17 {
+                    take.u16()?
+                } else {
+                    u16::from(take.u8()?)
+                };
+                Some((class, clade))
+            }
             _ => return None,
         }
     };

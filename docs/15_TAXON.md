@@ -72,16 +72,17 @@ forward (18 gastropod — the register awaits its snail):
 11 cnidiform · 12 plasmiform · 13 syzygiform · 14 endolithid · 15 volatiform ·
 16 actinoform · 17 revenid · 18 heliciform · **19 draconiform** · **20 metamorphid**.
 
-**Expansion 21–254 — 18 taxons per class tier** (u8 max; target 25 needs u16):
+**Expansion 21–345 — 25 taxons per class tier** (`u16` open wire):
 
 ```text
-code = 20 + (class − 1) × 18 + slot    // class 1..=13, slot 1..=18
+code = 20 + (class − 1) × 25 + slot    // class 1..=13, slot 1..=25
 ```
 
-Examples: class 1 → `swarm-alpha`…`swarm-sigma`; class 8 → `corridor-alpha`…;
-class 13 → `mirror-sigma` (code 254). See `almanac::taxon_table::expansion_clade`.
+Examples: class 1 → `swarm-alpha`…`swarm-prime`; class 13 → `mirror-prime` (345).
+See `almanac::taxon_table::expansion_clade`.
 
-**Clade ceiling: 254.** *(Legacy English aliases still parse.)*
+**Clade ceiling: 345 (`u16`)** — further growth is a constant raise, not a
+type width fight. *(Legacy English aliases still parse.)*
 
 **19 draconic — a SUB-ARCHETYPE, not a peer line** (operator ruling
 2026-08-01). The draconic clade seats inside class 4

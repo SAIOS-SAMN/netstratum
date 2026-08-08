@@ -93,8 +93,8 @@ impl PlanetFit {
 /// `flatlander-baseline`; the wire is always clade 2.
 pub const FLATLANDER_CLADE: u8 = 2;
 
-pub fn is_flatlander_baseline(clade: u8) -> bool {
-    clade == FLATLANDER_CLADE
+pub fn is_flatlander_baseline(clade: u16) -> bool {
+    clade == u16::from(FLATLANDER_CLADE)
 }
 
 pub fn flatlander_word() -> &'static str {
@@ -107,30 +107,23 @@ pub fn flatlander_species() -> &'static str {
 
 /// Preferred thermal region family for a clade (imperium codes).
 /// Used only to colour PlanetFit — not a hard exile.
-pub fn clade_preferred_region(clade: u8) -> ThermalRegion {
-    // Expansion clades follow owning class preference via first legacy of that class.
+pub fn clade_preferred_region(clade: u16) -> ThermalRegion {
+    // Expansion clades follow owning class preference.
     if let Some(owner) = crate::almanac::taxon_table::expansion_class_of(clade) {
         return match owner {
             6 | 12 => ThermalRegion::HyperThermal,
             3 | 9 => ThermalRegion::Cryogenic,
-            8 => ThermalRegion::Torrid, // corridor-nomad
+            8 => ThermalRegion::Torrid,
             _ => ThermalRegion::Mesic,
         };
     }
     match clade {
-        // cryocoherens · draconiform cold-coherence
         3 | 19 => ThermalRegion::Cryogenic,
-        // hypobiotid · lithophage · endolithid — rock / any, prefer mesic-stone
         4 | 5 | 14 => ThermalRegion::Mesic,
-        // plasmiform · syzygiform — field / hot
         12 | 13 => ThermalRegion::HyperThermal,
-        // soniform · polybrachia · amphiform · actinoform — volumetric mesic/cold
         6 | 7 | 9 | 16 => ThermalRegion::Mesic,
-        // volatiform — atmosphere mesic/torrid
         15 => ThermalRegion::Torrid,
-        // flatlander / ailuroform / hexasocial / mycotiform / cnidiform — mesic
         1 | 2 | 8 | 10 | 11 => ThermalRegion::Mesic,
-        // metamorphid · revenid · heliciform — flexible mesic
         _ => ThermalRegion::Mesic,
     }
 }
@@ -142,39 +135,35 @@ pub fn clade_preferred_region(clade: u8) -> ThermalRegion {
 /// | Extractive | lithophage, hypobiotid, endolithid, geodic class, plasmiform |
 /// | Regenerative | mycotiform, cnidiform, amphiform, hexasocial, soniform |
 /// | Balanced | **bimaniform (flatlander)**, ailuroform, polybrachia, default |
-pub fn economic_mode(class: u8, clade: u8) -> EconomicMode {
+pub fn economic_mode(class: u8, clade: u16) -> EconomicMode {
     // Flatlander baseline always balanced.
     if is_flatlander_baseline(clade) {
         return EconomicMode::Balanced;
     }
     // Expansion clades (21+) inherit their owning class colour.
     if let Some(owner) = crate::almanac::taxon_table::expansion_class_of(clade) {
-        return economic_mode(owner, 0); // re-enter on class only
+        return economic_mode(owner, 0);
     }
-    // Class-primary colour (includes +6 balance tiers 8..=13).
     match class {
-        2 | 9 => return EconomicMode::Extractive, // geodic · abyssal-pressure
-        6 | 12 => return EconomicMode::Extractive, // plasma · thermal-banker
-        1 | 11 => return EconomicMode::Regenerative, // biotic-swarm · void-swarm
-        10 => return EconomicMode::Balanced,         // crystal-mind
-        8 | 13 => return EconomicMode::Balanced,     // corridor-nomad · mirror-form
+        2 | 9 => return EconomicMode::Extractive,
+        6 | 12 => return EconomicMode::Extractive,
+        1 | 11 => return EconomicMode::Regenerative,
+        10 | 8 | 13 => return EconomicMode::Balanced,
         _ => {}
     }
     match clade {
-        // Extractive bodies
         4 | 5 | 14 | 12 => EconomicMode::Extractive,
-        // Regenerative bodies
         8 | 9 | 10 | 11 | 6 => EconomicMode::Regenerative,
-        // Balanced / hybrid
         1 | 7 | 2 | 15 | 16 | 20 | 3 | 19 => EconomicMode::Balanced,
         _ => EconomicMode::Balanced,
     }
 }
 
 /// Planet fit from preferred region vs actual (pure).
-pub fn planet_fit(clade: u8, region: Option<ThermalRegion>) -> PlanetFit {
+pub fn planet_fit(clade: u16, region: Option<ThermalRegion>) -> PlanetFit {
     let Some(region) = region else {
-        return PlanetFit::Tolerant; // unsited — unknown world
+        // Unsited: no thermal colour yet — full rates (not a penalty).
+        return PlanetFit::Native;
     };
     let pref = clade_preferred_region(clade);
     if region == pref {
@@ -264,12 +253,12 @@ pub struct TaxonEconomy {
     pub fit: PlanetFit,
     pub flatlander: bool,
     pub class: u8,
-    pub clade: u8,
+    pub clade: u16,
 }
 
 pub fn taxon_economy(
     class: u8,
-    clade: u8,
+    clade: u16,
     region: Option<ThermalRegion>,
 ) -> TaxonEconomy {
     TaxonEconomy {

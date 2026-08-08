@@ -48,7 +48,7 @@ pub use taxon_table::{
     archetype_sigil as table_archetype_sigil, archetype_word as table_archetype_word,
     class_ceiling as table_class_ceiling, class_taxon_capacity, clade_ceiling as table_clade_ceiling,
     clade_from_word as table_clade_from_word, clade_word as table_clade_word, expansion_clade,
-    expansion_class_of, expansion_slot_of, office_seat_bonus, CLADE_EXPAND_SLOTS,
+    expansion_class_of, expansion_slot_of, is_lawful_clade, office_seat_bonus, CLADE_EXPAND_SLOTS,
     CLADE_EXPAND_TARGET, CLADE_LEGACY_MAX,
 };
 pub use thermal::{

@@ -330,29 +330,28 @@ impl World {
     /// scope (an identity-class act, the G1 posture). The coverage
     /// {containment, exactness} enters the constitution at the
     /// amendment; this deed is lawful now and sealed then.
-    pub fn seal_taxon(&mut self, class: u8, clade: u8) -> Result<(), ActionRefused> {
+    pub fn seal_taxon(&mut self, class: u8, clade: u16) -> Result<(), ActionRefused> {
         self.seal_taxon_as(SOVEREIGN, class, clade)
     }
     pub fn seal_taxon_as(
         &mut self,
         actor: u64,
         class: u8,
-        clade: u8,
+        clade: u16,
     ) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Build)?;
         if self.taxon.is_some() {
             return Err(ActionRefused::TaxonAlreadySealed);
         }
-        // 28_VOCABULARY V1: the ceilings are READINGS OF THE FOLD, not
-        // constants. A class a progenitor minted this era is sealable in
-        // it; a class nobody minted is not. Before this the ceilings were
-        // compiled, which is why clades 19 and 20 stood ruled-but-
-        // unsealable for four days.
+        // Class: fold ceiling (minted classes seal) ∪ compiled table.
+        // Clade: open u16 table — NOT the fold (fold seed is legacy 0..=20
+        // for display only; expansion lives in taxon_table, open-ended).
         use crate::vocabulary::{ceiling, Axis};
+        let class_max = ceiling(self.chronicle(), Axis::Class)
+            .max(crate::dop::class_ceiling());
         if class == 0
-            || clade == 0
-            || class > ceiling(self.chronicle(), Axis::Class)
-            || clade > ceiling(self.chronicle(), Axis::Clade)
+            || class > class_max
+            || !crate::almanac::taxon_table::is_lawful_clade(clade)
         {
             return Err(ActionRefused::TaxonUnknown { class, clade });
         }
@@ -361,7 +360,7 @@ impl World {
         Ok(())
     }
     /// KERNEL-TAXON: the sealed taxon, if the deed has been done.
-    pub fn taxon(&self) -> Option<(u8, u8)> {
+    pub fn taxon(&self) -> Option<(u8, u16)> {
         self.taxon
     }
     /// **MINT A LINE** (tag 101, 2026-08-06): the engine mints its
@@ -390,9 +389,11 @@ impl World {
         // ceilings it drew under, so every reader re-derives this exact
         // draw from the receipt alone (receipt authority; the ordering
         // law holds by declaration).
+        // Class from fold; clade from open table (not fold u8 length).
         let ceilings = (
-            crate::vocabulary::ceiling(self.chronicle(), crate::vocabulary::Axis::Class),
-            crate::vocabulary::ceiling(self.chronicle(), crate::vocabulary::Axis::Clade),
+            crate::vocabulary::ceiling(self.chronicle(), crate::vocabulary::Axis::Class)
+                .max(crate::dop::class_ceiling()),
+            crate::dop::clade_ceiling(),
         );
         let draw = crate::dop::line_synthesis_at(&seed, ceilings.0, ceilings.1);
         self.close(ClosureEvent::LineMinted { seed, ceilings: Some(ceilings) }, actor);

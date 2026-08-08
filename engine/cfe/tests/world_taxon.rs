@@ -14,26 +14,23 @@ fn the_seal_is_once_and_in_vocabulary() {
 
     // Outside the ratified vocabularies: refused with both codes named.
     assert!(matches!(
-        world.seal_taxon(0, 5),
+        world.seal_taxon(0, 5u16),
         Err(ActionRefused::TaxonUnknown { class: 0, clade: 5 })
     ));
     // ABOVE CLASS CEILING — derived, never hand-picked.
     let past_class = cfe::dop::class_ceiling() + 1;
     assert!(matches!(
-        world.seal_taxon(past_class, 5),
+        world.seal_taxon(past_class, 5u16),
         Err(ActionRefused::TaxonUnknown { class, clade: 5 })
             if class == past_class
     ));
-    // ABOVE CLADE CEILING — derived, never hand-picked.
-    // (clade_ceiling is 254; +1 saturates u8 — use overflow-aware check)
-    let past_clade = cfe::dop::clade_ceiling().saturating_add(1);
-    if past_clade > cfe::dop::clade_ceiling() {
-        assert!(matches!(
-            world.seal_taxon(2, past_clade),
-            Err(ActionRefused::TaxonUnknown { class: 2, clade })
-                if clade == past_clade
-        ));
-    }
+    // ABOVE CLADE CEILING — open u16, no saturation trap.
+    let past_clade = cfe::dop::clade_ceiling() + 1;
+    assert!(matches!(
+        world.seal_taxon(2, past_clade),
+        Err(ActionRefused::TaxonUnknown { class: 2, clade })
+            if clade == past_clade
+    ));
 
     // The lawful seal: geodic-lithovore (2), tardigrade (5).
     world.seal_taxon(2, 5).expect("seals");
@@ -158,8 +155,8 @@ fn the_ruled_clades_can_actually_be_sealed() {
         let mut world = World::new();
         world.found("clade-hold").expect("founds");
         world
-            .seal_taxon(class, clade)
+            .seal_taxon(class, u16::from(clade))
             .unwrap_or_else(|e| panic!("class {class} clade {clade} refused: {e:?}"));
-        assert_eq!(world.taxon(), Some((class, clade)));
+        assert_eq!(world.taxon(), Some((class, u16::from(clade))));
     }
 }

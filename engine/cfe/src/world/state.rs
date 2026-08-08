@@ -169,7 +169,7 @@ pub struct Committed {
     pub veiled: bool,
     /// KERNEL-TAXON (15 §4): the sealed (class, clade), or None —
     /// unclassed is lawful until the seat.
-    pub taxon: Option<(u8, u8)>,
+    pub taxon: Option<(u8, u16)>,
     /// THE VERTICAL AXIS (tag 89, 2026-08-01): the seats held, as
     /// (line, station) in seating order. A station GATES AUTHORITY, and
     /// until this landing it lived only in an editable registry file —
@@ -315,7 +315,7 @@ pub struct World {
     /// MASK-1a: the veil (replay of the receipts).
     pub(super) veiled: bool,
     /// KERNEL-TAXON: the sealed taxon (replay of the receipt).
-    pub(super) taxon: Option<(u8, u8)>,
+    pub(super) taxon: Option<(u8, u16)>,
     /// THE VERTICAL AXIS (tag 89): the seats held, (line, station).
     pub(super) stations: Vec<(String, u8)>,
     /// FLEET-1 hulls.

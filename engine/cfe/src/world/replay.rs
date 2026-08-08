@@ -37,7 +37,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut treaties: Vec<crate::treaty::Treaty> = Vec::new();
     let mut warded: Option<bool> = None;
     let mut veiled = false;
-    let mut taxon: Option<(u8, u8)> = None;
+    let mut taxon: Option<(u8, u16)> = None;
     let mut stations: Vec<(String, u8)> = Vec::new();
     let mut hulls: Vec<crate::dop::Hull> = Vec::new();
     let mut notes: Vec<crate::dop::MarketNote> = Vec::new();

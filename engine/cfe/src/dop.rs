@@ -945,16 +945,16 @@ pub fn veil_toll() -> Ratio {
 }
 
 /// KERNEL-TAXON (15 §2 / 37): class-vocabulary ceiling.
-/// **RAISED 7 → 13 (2026-08-08)** — six balance tiers (corridor-nomad …
-/// mirror-form). Codes 1..=13; 0 lawful-unclassed.
+/// **RAISED 7 → 13 (2026-08-08)** — six balance tiers. Codes 1..=13;
+/// 0 lawful-unclassed. Raise by amendment (still u8 headroom to 255).
 pub fn class_ceiling() -> u8 {
     crate::almanac::taxon_table::class_ceiling()
 }
 
-/// KERNEL-TAXON (15 §3 / 37): clade-vocabulary ceiling.
-/// **RAISED 20 → 254 (2026-08-08)** — 18 expansion taxons × 13 class tiers
-/// under u8 wire (20 + 13×18 = 254). Target 25/class needs u16 later.
-pub fn clade_ceiling() -> u8 {
+/// KERNEL-TAXON (15 §3 / 37): clade-vocabulary ceiling — **u16, open**.
+/// **RAISED to 345 (2026-08-08)** — 25 expansion taxons × 13 class tiers
+/// + 20 legacy. No u8 wire cap; further growth is a constant raise.
+pub fn clade_ceiling() -> u16 {
     crate::almanac::taxon_table::clade_ceiling()
 }
 
@@ -1031,7 +1031,7 @@ pub struct LineDraw {
     pub species: String,
     pub motto: String,
     pub class: u8,
-    pub clade: u8,
+    pub clade: u16,
     pub disposition: u8,
     pub metabolism: u8,
     pub perception: u8,
@@ -1060,12 +1060,14 @@ pub fn line_synthesis(digest: &[u8; 32]) -> LineDraw {
 /// but its species word renders through the compiled table's fallback
 /// ("unknown") — resolving the fold's own word needs the chronicle at
 /// the render, which is the reader's seam, not this pure function's.
-pub fn line_synthesis_at(digest: &[u8; 32], class_ceiling: u8, clade_ceiling: u8) -> LineDraw {
+pub fn line_synthesis_at(digest: &[u8; 32], class_ceiling: u8, clade_ceiling: u16) -> LineDraw {
     let disposition = 1 + digest[0] % 3;
     let metabolism = 1 + digest[1] % 3;
     let perception = 1 + digest[2] % 4;
     let class = 1 + digest[3] % class_ceiling.max(1);
-    let clade = 1 + digest[4] % clade_ceiling.max(1);
+    // Open clade range — two digest bytes, not a u8 modulus.
+    let raw = u16::from_le_bytes([digest[4], digest[5]]);
+    let clade = 1 + raw % clade_ceiling.max(1);
     let heads: &[&str; 6] = match metabolism {
         1 => &LINE_HEADS_MINERAL,
         3 => &LINE_HEADS_PLASMIC,
@@ -2964,7 +2966,8 @@ pub enum ClosureEvent {
     /// deed is additive; extending GenesisSealed would be breaking).
     /// Codes must stand in the ratified vocabularies; names stay
     /// register-side forever.
-    TaxonSealed { class: u8, clade: u8 },
+    /// KERNEL-TAXON — class u8, clade **u16** (open expansion; tag 85).
+    TaxonSealed { class: u8, clade: u16 },
     /// **THE VOCABULARY MINT** (tag 90, `28_VOCABULARY` §7,
     /// 2026-08-05): a T0 progenitor adds an entry to a vocabulary.
     ///
@@ -3144,7 +3147,10 @@ pub enum ClosureEvent {
     /// stand. `None` is the sealed pre-amendment form: those receipts
     /// drew under the compiled ceilings, and decode to exactly that,
     /// byte-faithful both ways.
-    LineMinted { seed: [u8; 32], ceilings: Option<(u8, u8)> },
+    /// `ceilings`: (class_ceiling u8, clade_ceiling **u16**). Legacy
+    /// receipts used two u8s (value len 34); open form is class + clade
+    /// LE u16 (value len 35).
+    LineMinted { seed: [u8; 32], ceilings: Option<(u8, u16)> },
 }
 
 impl ClosureEvent {
@@ -4180,7 +4186,11 @@ impl ClosureEvent {
                 tlv::put(81, &value, &mut out);
             }
             Self::TaxonSealed { class, clade } => {
-                tlv::put(85, &[*class, *clade], &mut out);
+                // v2 wire: class + clade LE u16 (3 bytes). Old 2-byte
+                // receipts (class + clade u8) still decode.
+                let mut value = vec![*class];
+                value.extend_from_slice(&clade.to_le_bytes());
+                tlv::put(85, &value, &mut out);
             }
             Self::VocabularyMinted { axis, code, sigil, word, binding, base } => {
                 let mut value = vec![*axis, *code];
@@ -4230,7 +4240,7 @@ impl ClosureEvent {
                 let mut value = seed.to_vec();
                 if let Some((class, clade)) = ceilings {
                     value.push(*class);
-                    value.push(*clade);
+                    value.extend_from_slice(&clade.to_le_bytes());
                 }
                 tlv::put(101, &value, &mut out);
             }
@@ -5443,10 +5453,16 @@ impl ClosureEvent {
                 let line = take_text()?;
                 Some(Self::IncursionStruck { era, world, line })
             }
-            85 => Some(Self::TaxonSealed {
-                class: *value.first()?,
-                clade: *value.get(1)?,
-            }),
+            85 => {
+                let class = *value.first()?;
+                // SEAL B: 2-byte legacy (u8 clade) or 3-byte open (u16 LE).
+                let clade = if value.len() >= 3 {
+                    u16::from_le_bytes(value.get(1..3)?.try_into().ok()?)
+                } else {
+                    u16::from(*value.get(1)?)
+                };
+                Some(Self::TaxonSealed { class, clade })
+            }
             96 => {
                 let axis = *value.first()?;
                 let code = *value.get(1)?;
@@ -5554,15 +5570,21 @@ impl ClosureEvent {
                 let seed: [u8; 32] = value.get(..32)?.try_into().ok()?;
                 let ceilings = match value.len() {
                     32 => None,
-                    34 => Some((*value.get(32)?, *value.get(33)?)),
+                    // Legacy: class u8 + clade u8
+                    34 => Some((*value.get(32)?, u16::from(*value.get(33)?))),
+                    // Open: class u8 + clade u16 LE
+                    35 => {
+                        let class = *value.get(32)?;
+                        let clade = u16::from_le_bytes(value.get(33..35)?.try_into().ok()?);
+                        Some((class, clade))
+                    }
                     _ => return None, // refuse, never guess
                 };
                 Some(Self::LineMinted { seed, ceilings })
             }
             89 => {
                 let station = *value.first()?;
-                // Wave-1: offices 1..=10 (progenitor…anchor). Refuse
-                // unknown rather than guess.
+                // Offices 1..=16 (T0–T15). Refuse unknown rather than guess.
                 Station::from_wire(station)?;
                 Some(Self::StationSeated {
                     line: String::from_utf8(value.get(1..)?.to_vec()).ok()?,

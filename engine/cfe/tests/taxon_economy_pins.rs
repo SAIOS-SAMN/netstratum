@@ -19,19 +19,19 @@ fn world_with_taxon(class: u8, clade: u8, star: StarClass) -> World {
     w.site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None)
         .expect("site");
     w.seal_genesis("eco", 1, 2, 1).expect("genesis"); // biotic planar default
-    w.seal_taxon(class, clade).expect("taxon");
+    w.seal_taxon(class, u16::from(clade)).expect("taxon");
     w
 }
 
 #[test]
 fn flatlander_baseline_is_bimaniform_balanced() {
-    assert!(is_flatlander_baseline(FLATLANDER_CLADE));
+    assert!(is_flatlander_baseline(u16::from(FLATLANDER_CLADE)));
     assert_eq!(clade_word(2), "bimaniform");
-    assert_eq!(clade_from_word("flatlander"), Some(2));
-    assert_eq!(clade_from_word("human"), Some(2));
-    assert_eq!(clade_from_word("humans"), Some(2));
+    assert_eq!(clade_from_word("flatlander"), Some(2u16));
+    assert_eq!(clade_from_word("human"), Some(2u16));
+    assert_eq!(clade_from_word("humans"), Some(2u16));
     assert_eq!(
-        economic_mode(7, 2),
+        economic_mode(7, 2u16),
         EconomicMode::Balanced,
         "flatlander always balanced"
     );
@@ -40,17 +40,17 @@ fn flatlander_baseline_is_bimaniform_balanced() {
 #[test]
 fn extractive_clades_derive() {
     // lithophage, hypobiotid, geodic class
-    assert_eq!(economic_mode(2, 4), EconomicMode::Extractive);
-    assert_eq!(economic_mode(2, 5), EconomicMode::Extractive);
-    assert_eq!(economic_mode(6, 12), EconomicMode::Extractive); // plasmiform
+    assert_eq!(economic_mode(2, 4u16), EconomicMode::Extractive);
+    assert_eq!(economic_mode(2, 5u16), EconomicMode::Extractive);
+    assert_eq!(economic_mode(6, 12u16), EconomicMode::Extractive); // plasmiform
 }
 
 #[test]
 fn regenerative_clades_derive() {
-    assert_eq!(economic_mode(1, 10), EconomicMode::Regenerative); // mycotiform swarm
-    assert_eq!(economic_mode(5, 6), EconomicMode::Regenerative); // soniform
-    assert_eq!(economic_mode(1, 8), EconomicMode::Regenerative); // hexasocial
-    assert_eq!(economic_mode(5, 11), EconomicMode::Regenerative); // cnidiform
+    assert_eq!(economic_mode(1, 10u16), EconomicMode::Regenerative); // mycotiform swarm
+    assert_eq!(economic_mode(5, 6u16), EconomicMode::Regenerative); // soniform
+    assert_eq!(economic_mode(1, 8u16), EconomicMode::Regenerative); // hexasocial
+    assert_eq!(economic_mode(5, 11u16), EconomicMode::Regenerative); // cnidiform
 }
 
 #[test]
@@ -71,21 +71,21 @@ fn yield_scales_differ_by_mode() {
 fn planet_fit_native_vs_hostile() {
     // flatlander prefers mesic
     assert_eq!(
-        planet_fit(2, Some(ThermalRegion::Mesic)),
+        planet_fit(2u16, Some(ThermalRegion::Mesic)),
         PlanetFit::Native
     );
     assert_eq!(
-        planet_fit(2, Some(ThermalRegion::HyperThermal)),
+        planet_fit(2u16, Some(ThermalRegion::HyperThermal)),
         PlanetFit::Hostile
     );
     // plasmiform prefers hyperthermal
     assert_eq!(
-        planet_fit(12, Some(ThermalRegion::HyperThermal)),
+        planet_fit(12u16, Some(ThermalRegion::HyperThermal)),
         PlanetFit::Native
     );
     // cryocoherens prefers cryogenic
     assert_eq!(
-        planet_fit(3, Some(ThermalRegion::Cryogenic)),
+        planet_fit(3u16, Some(ThermalRegion::Cryogenic)),
         PlanetFit::Native
     );
 }
@@ -160,7 +160,7 @@ fn regenerative_soft_tech_and_extractor_cap_on_hostile() {
 #[test]
 fn each_founding_clade_has_a_mode() {
     // All lawful class×clade pairs produce a mode.
-    for clade in 1u8..=20 {
+    for clade in 1u16..=20 {
         for class in 1u8..=13 {
             let m = economic_mode(class, clade);
             assert!(matches!(
@@ -174,7 +174,7 @@ fn each_founding_clade_has_a_mode() {
 
 #[test]
 fn all_imperium_clade_words_round_trip() {
-    for code in 0u8..=20 {
+    for code in 0u16..=20 {
         let w = clade_word(code);
         if w == "unknown" {
             continue;
@@ -189,10 +189,9 @@ fn expansion_taxons_per_class_and_ceilings() {
         expansion_clade, expansion_class_of, CLADE_EXPAND_SLOTS, CLADE_EXPAND_TARGET,
     };
     assert_eq!(cfe::dop::class_ceiling(), 13);
-    assert_eq!(cfe::dop::clade_ceiling(), 254);
-    assert_eq!(CLADE_EXPAND_TARGET, 25, "target remains 25 for u16 later");
-    assert_eq!(CLADE_EXPAND_SLOTS, 18, "u8-fit slots per class");
-    // 18 expansion taxons in every class tier 1..=13
+    assert_eq!(cfe::dop::clade_ceiling(), 345);
+    assert_eq!(CLADE_EXPAND_TARGET, 25);
+    assert_eq!(CLADE_EXPAND_SLOTS, 25, "full 25 slots per class — u16 open");
     for class in 1u8..=13 {
         for slot in 1u8..=CLADE_EXPAND_SLOTS {
             let code = expansion_clade(class, slot).expect("slot");
@@ -200,7 +199,6 @@ fn expansion_taxons_per_class_and_ceilings() {
             let w = clade_word(code);
             assert_ne!(w, "unknown", "class {class} slot {slot}");
             assert_eq!(clade_from_word(w), Some(code));
-            // Mode inherits class colour
             let m = economic_mode(class, code);
             assert!(matches!(
                 m,
@@ -209,7 +207,7 @@ fn expansion_taxons_per_class_and_ceilings() {
         }
     }
     assert_eq!(expansion_clade(1, 1), Some(21));
-    assert_eq!(expansion_clade(13, 18), Some(254));
+    assert_eq!(expansion_clade(13, 25), Some(345));
 }
 
 #[test]

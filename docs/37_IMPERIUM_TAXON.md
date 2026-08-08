@@ -11,8 +11,12 @@
 | Layer | Codes | What |
 |-------|-------|------|
 | **Class** | 0–**13** | Archetype mechanism (`15` §2 · +6 balance tiers) |
-| **Clade** | 0–**254** | Body expression (`15` §3 · 18 expansion × 13 classes) |
+| **Clade** | 0–**345** (`u16`) | Body expression — 25 expansion × 13 classes + 20 legacy |
 | **Office tier** | T0–**T15** | Station function (`30` · +6 balance tiers) |
+
+**Open-ended law:** clade is `u16` end-to-end (receipt tag 85, snapshot
+SCHEMA_V17, state). No artificial u8 tax. Raise `clade_ceiling()` when
+the board needs more slots — wire already holds 65535.
 | **Metabolism** | 1 mineral · 2 biotic · 3 plasmic | Food (`04` genesis) |
 | **Economic mode** | derived | extractive · regenerative · **balanced** |
 | **Planet fit** | derived | native · tolerant · hostile |
