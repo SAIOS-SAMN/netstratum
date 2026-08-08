@@ -31,18 +31,56 @@ Cross-links from activity roots: `intel craft` / `trade craft` / `diplomatic cra
 
 ---
 
-## 1. Science craft (bench disciplines)
+## 1. Science craft — **seated labs** (paid unlocks · dual ± · explosion)
 
-Not activity roots — **components** under bench that feed intel knowledge/research:
+Not activity roots — **paid capability seats** under bench. No free science.
 
-| Command | Discipline | Surfaces |
-|---------|------------|----------|
-| `bench science` | index | all five disciplines |
-| `bench chem` | chemistry | bonds · iso · dark-7 · catalog · survival utility |
-| `bench biology` | biology | biomass · regen · habitat · metabolic colour |
-| `bench physics` | physics | star · thermal · medium · site · dual-use ATM |
-| `bench math` | mathematics | exact ratios · thermal books · thresholds · market depth |
-| `bench research` | research craft | constellation board · forge readiness (run: `intel research`) |
+### Seating law
+
+| Rank | Meaning |
+|------|---------|
+| 0 | unseated — read-only craft surface |
+| 1 | basic acts (catalog / iso / domain craft) |
+| 2 | **creation** paths with dual ± outcomes + explosion risk |
+
+Fee: resonator eighth × discipline weight × rank (exact rational, no dial).
+
+```text
+bench science seat <chem|biology|physics|math|research|synthetic|clone|skin>
+```
+
+### Creation paths (need primary seat R2 + required peers)
+
+| Path | Seats | Known + | Known − | Hidden + | Hidden − (explosion) |
+|------|-------|---------|---------|----------|----------------------|
+| `chem` | Chem | catalog progress | order entropy / fee | dark-well map | runaway reaction |
+| `biochem` | Bio+Chem | hybrid yield | contamination | metabolic fit | cascade famine seed |
+| `synth` | Synthetic+Math | cyber integrity | identity shear | mesh control | **rogue faction (matrix)** |
+| `clone` | Clone+Biology | population seat | identity dilution | escort pool | clone revolt |
+| `skin` | Skin+Biology | disguise grade | unmask debt | face-dance license | unmask catastrophe |
+
+Hidden + revealed with Math seat or empiricist perception.  
+Hidden − previewed when dark-led / envy-wrath, or after explode.
+
+### Explosion
+
+```text
+risk = path.base + max(0, dark−survival) + unseated/8 + (order_thin?1/8:0)
+explodes when risk ≥ 1/2
+```
+
+No RNG — pure derived comparison. Tags 159–162 · SCHEMA_V16 · kernel 0.37.
+
+### Commands
+
+| Command | Surface |
+|---------|---------|
+| `bench science` | seats board · clones · synth · skin · rogue |
+| `bench science seat …` | pay crystal unlock |
+| `bench science preview <path>` | poles + risk before create |
+| `bench science create <path>` | dual ± attempt (may explode) |
+| `bench chem|biology|physics|math|research` | discipline craft |
+| `bench science synth\|clone\|skin` | mod path boards |
 
 Top-level shortcuts: `chem` · `biology` · `physics` · `math` · `science` → matching `bench …`.
 

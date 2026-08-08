@@ -54,6 +54,11 @@ impl World {
             spy_marks: Vec::new(),
             vault_stamp: Vec::new(),
             chem_catalog: Vec::new(),
+            science_seats: Vec::new(),
+            clone_counts: Vec::new(),
+            synth_mods: Vec::new(),
+            skin_mods: Vec::new(),
+            rogue_pressure: Vec::new(),
         }
     }
     /// P2-PERSIST — resume a world from its chronicle: the committed
@@ -118,6 +123,11 @@ impl World {
             spy_marks: committed.spy_marks,
             vault_stamp: committed.vault_stamp,
             chem_catalog: committed.chem_catalog,
+            science_seats: committed.science_seats,
+            clone_counts: committed.clone_counts,
+            synth_mods: committed.synth_mods,
+            skin_mods: committed.skin_mods,
+            rogue_pressure: committed.rogue_pressure,
         }
     }
     /// ELEVATE-1 (12_UNION §6) — THE THREE-GATE GAUGE CLIMB, the

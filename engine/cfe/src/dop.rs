@@ -350,7 +350,11 @@
 //!    156  ClosureEvent::IsoUnionStruck (CHEM science — isomorphic gem union.)
 //!    157  ClosureEvent::ChemCataloged (CHEM science — recipe sealed as known.)
 //!    158  ClosureEvent::DarkPullStruck (CHEM science — dark-7 gravity residual.)
-//!    Phase-5 claim ledger: next free **159**. Chemistry science path.
+//!    159  ClosureEvent::ScienceSeated (LAB — paid science discipline unlock.)
+//!    160  ClosureEvent::LabCreated (LAB — dual ± creation; may explode.)
+//!    161  ClosureEvent::ScienceExploded (LAB — explosion residual slash.)
+//!    162  ClosureEvent::RogueFactionStruck (LAB — synthetic matrix residual.)
+//!    Phase-5 claim ledger: next free **163**. Seated science labs.
 //!         Orb TLV: 73 STAMP, 74 scrap. ZoneKind::ShipYard = 10.
 //!         (Historic free tags below top: 14, 15, 56, 57, 58, 64, 66,
 //!         83, 84, 87; 9 and 51 reserved; 65 retired forever.)
@@ -2863,6 +2867,37 @@ pub enum ClosureEvent {
         weight: Ratio,
         dark_score: Ratio,
     },
+    /// LAB (tag 159) — science discipline seated / elevated (paid crystal).
+    ScienceSeated {
+        orb_id: u64,
+        discipline: u8,
+        rank: u8,
+        fee: Ratio,
+    },
+    /// LAB (tag 160) — lab creation with dual ± outcomes; may explode.
+    LabCreated {
+        orb_id: u64,
+        path: u8,
+        risk: Ratio,
+        exploded: bool,
+        explosion_kind: u8,
+        hidden_pos: bool,
+        hidden_neg: bool,
+        fee: Ratio,
+    },
+    /// LAB (tag 161) — explosion residual (slash resource).
+    ScienceExploded {
+        orb_id: u64,
+        path: u8,
+        kind: u8,
+        resource: u8,
+        slash: Ratio,
+    },
+    /// LAB (tag 162) — synthetic rogue faction pressure (matrix residual).
+    RogueFactionStruck {
+        orb_id: u64,
+        pressure: u8,
+    },
     /// N4 (NS-2 §1.5) — the scanner's power draw, the ONE chronicle
     /// event of RQP: crystals left the probing orb's bank to hold the
     /// lens open. Deliberately blind to what was asked and what was
@@ -3999,6 +4034,57 @@ impl ClosureEvent {
                 ratio::encode(weight, &mut value);
                 ratio::encode(dark_score, &mut value);
                 tlv::put(158, &value, &mut out);
+            }
+            Self::ScienceSeated {
+                orb_id,
+                discipline,
+                rank,
+                fee,
+            } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.push(*discipline);
+                value.push(*rank);
+                ratio::encode(fee, &mut value);
+                tlv::put(159, &value, &mut out);
+            }
+            Self::LabCreated {
+                orb_id,
+                path,
+                risk,
+                exploded,
+                explosion_kind,
+                hidden_pos,
+                hidden_neg,
+                fee,
+            } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.push(*path);
+                ratio::encode(risk, &mut value);
+                value.push(u8::from(*exploded));
+                value.push(*explosion_kind);
+                value.push(u8::from(*hidden_pos));
+                value.push(u8::from(*hidden_neg));
+                ratio::encode(fee, &mut value);
+                tlv::put(160, &value, &mut out);
+            }
+            Self::ScienceExploded {
+                orb_id,
+                path,
+                kind,
+                resource,
+                slash,
+            } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.push(*path);
+                value.push(*kind);
+                value.push(*resource);
+                ratio::encode(slash, &mut value);
+                tlv::put(161, &value, &mut out);
+            }
+            Self::RogueFactionStruck { orb_id, pressure } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.push(*pressure);
+                tlv::put(162, &value, &mut out);
             }
             Self::CrystalDrawn { orb_id, amount } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
@@ -5207,6 +5293,58 @@ impl ClosureEvent {
                     weight,
                     dark_score,
                 })
+            }
+            159 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let discipline = *value.get(8)?;
+                let rank = *value.get(9)?;
+                let (fee, _) = ratio::decode(value.get(10..)?)?;
+                Some(Self::ScienceSeated {
+                    orb_id,
+                    discipline,
+                    rank,
+                    fee,
+                })
+            }
+            160 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let path = *value.get(8)?;
+                let (risk, u1) = ratio::decode(value.get(9..)?)?;
+                let base = 9 + u1;
+                let exploded = *value.get(base)? != 0;
+                let explosion_kind = *value.get(base + 1)?;
+                let hidden_pos = *value.get(base + 2)? != 0;
+                let hidden_neg = *value.get(base + 3)? != 0;
+                let (fee, _) = ratio::decode(value.get(base + 4..)?)?;
+                Some(Self::LabCreated {
+                    orb_id,
+                    path,
+                    risk,
+                    exploded,
+                    explosion_kind,
+                    hidden_pos,
+                    hidden_neg,
+                    fee,
+                })
+            }
+            161 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let path = *value.get(8)?;
+                let kind = *value.get(9)?;
+                let resource = *value.get(10)?;
+                let (slash, _) = ratio::decode(value.get(11..)?)?;
+                Some(Self::ScienceExploded {
+                    orb_id,
+                    path,
+                    kind,
+                    resource,
+                    slash,
+                })
+            }
+            162 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let pressure = *value.get(8)?;
+                Some(Self::RogueFactionStruck { orb_id, pressure })
             }
             55 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

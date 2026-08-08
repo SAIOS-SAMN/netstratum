@@ -340,6 +340,11 @@ impl World {
             spy_marks: self.spy_marks.clone(),
             vault_stamp: self.vault_stamp.clone(),
             chem_catalog: self.chem_catalog.clone(),
+            science_seats: self.science_seats.clone(),
+            clone_counts: self.clone_counts.clone(),
+            synth_mods: self.synth_mods.clone(),
+            skin_mods: self.skin_mods.clone(),
+            rogue_pressure: self.rogue_pressure.clone(),
         }
     }
     /// ELEMENT-GRAMMAR-1 (14 §3) — the extraction closure: richness ×

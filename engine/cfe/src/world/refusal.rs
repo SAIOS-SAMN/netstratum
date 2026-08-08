@@ -295,6 +295,14 @@ pub enum ActionRefused {
     ChemAlreadyCataloged { gem: [u8; 32] },
     /// CHEM science — no banked gem of that identity to catalog or union.
     NoSuchGem { gem: [u8; 32] },
+    /// LAB — science discipline not seated (or rank too low) for this act.
+    ScienceSeatRequired {
+        discipline: u8,
+        need_rank: u8,
+        have_rank: u8,
+    },
+    /// LAB — discipline already at max rank.
+    ScienceAlreadySeated { discipline: u8, rank: u8 },
     /// THERMAL-1 — siting an orbit needs a commissioned sun first.
     NoStarCommissioned,
     /// THERMAL-1 — the orb is already sited; an orbit does not move.

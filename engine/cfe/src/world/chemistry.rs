@@ -510,6 +510,8 @@ impl World {
         if peek(&self.orbs, orb).is_none() {
             return Err(ActionRefused::NoSuchOrb { orb });
         }
+        // LAB seat gate — chemistry catalog is a paid capability.
+        self.require_science_seat(orb, crate::almanac::ScienceDiscipline::Chem, 1)?;
         if self.chem_catalog.contains(&gem) {
             return Err(ActionRefused::ChemAlreadyCataloged { gem });
         }
@@ -579,6 +581,8 @@ impl World {
         if self.star.is_none() {
             return Err(ActionRefused::NoStarCommissioned);
         }
+        // LAB seat gate — iso-union is chemistry creation.
+        self.require_science_seat(orb, crate::almanac::ScienceDiscipline::Chem, 1)?;
         if !crate::almanac::isomorphic(&a, &b) || a == b {
             return Err(ActionRefused::NotIsomorphic);
         }

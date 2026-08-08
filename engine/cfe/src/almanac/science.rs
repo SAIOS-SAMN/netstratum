@@ -251,3 +251,378 @@ pub fn iso_union_recipe(a: &[u8; 32], b: &[u8; 32]) -> Option<(Ratio, Ratio, [u8
     let one = ratio(1, 1);
     Some((one.clone(), one.clone() + one, product))
 }
+
+// ── SEATED SCIENCE · LAB CREATION · EXPLOSION ─────────────────────
+
+/// Science discipline seats — paid unlocks under the bench.
+/// Not BAND-1 offices; capability seats on an orb.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[repr(u8)]
+pub enum ScienceDiscipline {
+    Chem = 1,
+    Biology = 2,
+    Physics = 3,
+    Math = 4,
+    Research = 5,
+    /// Cybernetic / synthetic mods (matrix-risk path).
+    Synthetic = 6,
+    /// Bio clones — population control.
+    Clone = 7,
+    /// Skin / face mods (Tleilaxu-shaped: disguise + identity play).
+    Skin = 8,
+}
+
+impl ScienceDiscipline {
+    pub fn from_wire(code: u8) -> Option<Self> {
+        match code {
+            1 => Some(Self::Chem),
+            2 => Some(Self::Biology),
+            3 => Some(Self::Physics),
+            4 => Some(Self::Math),
+            5 => Some(Self::Research),
+            6 => Some(Self::Synthetic),
+            7 => Some(Self::Clone),
+            8 => Some(Self::Skin),
+            _ => None,
+        }
+    }
+
+    pub fn as_wire(self) -> u8 {
+        self as u8
+    }
+
+    pub fn word(self) -> &'static str {
+        match self {
+            Self::Chem => "chem",
+            Self::Biology => "biology",
+            Self::Physics => "physics",
+            Self::Math => "math",
+            Self::Research => "research",
+            Self::Synthetic => "synthetic",
+            Self::Clone => "clone",
+            Self::Skin => "skin",
+        }
+    }
+
+    pub fn from_word(word: &str) -> Option<Self> {
+        match word {
+            "chem" | "chemistry" | "alchemy" => Some(Self::Chem),
+            "bio" | "biology" | "life" | "biologic" => Some(Self::Biology),
+            "phys" | "physics" | "physical" => Some(Self::Physics),
+            "math" | "maths" | "mathematics" | "ratios" => Some(Self::Math),
+            "research" | "lab" | "constellation" => Some(Self::Research),
+            "synth" | "synthetic" | "cyber" | "cybernetic" => Some(Self::Synthetic),
+            "clone" | "clones" | "cloning" => Some(Self::Clone),
+            "skin" | "face" | "tleilax" | "tleilaxu" | "thalaxu" | "mask-mod" => Some(Self::Skin),
+            _ => None,
+        }
+    }
+
+    pub fn gloss(self) -> &'static str {
+        match self {
+            Self::Chem => "matter bonds · catalog · iso-union",
+            Self::Biology => "life · biomass · habitat · regen",
+            Self::Physics => "star · thermal · medium · site",
+            Self::Math => "ratios · thresholds · sealed books",
+            Self::Research => "constellation · forge · practice",
+            Self::Synthetic => "cybernetic mods · mesh integrity · rogue risk",
+            Self::Clone => "bio clones · population control · identity strain",
+            Self::Skin => "skin/face mods · disguise · unmask residual",
+        }
+    }
+
+    /// Seat fee multiplier (× resonator eighth). Derived from wire code — no free dial.
+    pub fn seat_weight(self) -> i64 {
+        i64::from(self as u8)
+    }
+
+    /// Max rank (1 = read/basic act, 2 = creation with dual outcomes).
+    pub fn max_rank(self) -> u8 {
+        2
+    }
+}
+
+/// Lab creation path — what you *make* once seats are paid.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[repr(u8)]
+pub enum LabPath {
+    /// Chemistry bond / catalog / iso (needs Chem seat).
+    ChemWork = 1,
+    /// Bio+chem hybrid work (needs Biology + Chem).
+    BioChem = 2,
+    /// Synthetic cybernetic mod (needs Synthetic + Math; Physics helps risk).
+    SynthMod = 3,
+    /// Bio clone for population (needs Clone + Biology).
+    CloneWork = 4,
+    /// Skin / face modification (needs Skin + Biology or Synthetic).
+    SkinWork = 5,
+}
+
+impl LabPath {
+    pub fn from_wire(code: u8) -> Option<Self> {
+        match code {
+            1 => Some(Self::ChemWork),
+            2 => Some(Self::BioChem),
+            3 => Some(Self::SynthMod),
+            4 => Some(Self::CloneWork),
+            5 => Some(Self::SkinWork),
+            _ => None,
+        }
+    }
+
+    pub fn as_wire(self) -> u8 {
+        self as u8
+    }
+
+    pub fn word(self) -> &'static str {
+        match self {
+            Self::ChemWork => "chem",
+            Self::BioChem => "biochem",
+            Self::SynthMod => "synth",
+            Self::CloneWork => "clone",
+            Self::SkinWork => "skin",
+        }
+    }
+
+    pub fn from_word(word: &str) -> Option<Self> {
+        match word {
+            "chem" | "chemistry" | "bond" | "catalog" => Some(Self::ChemWork),
+            "biochem" | "hybrid" | "bio-chem" | "biocross" => Some(Self::BioChem),
+            "synth" | "synthetic" | "cyber" | "mod" => Some(Self::SynthMod),
+            "clone" | "cloning" | "population" => Some(Self::CloneWork),
+            "skin" | "face" | "mask" | "tleilax" => Some(Self::SkinWork),
+            _ => None,
+        }
+    }
+
+    /// Disciplines that must be seated (rank ≥ 1) to attempt this path.
+    pub fn required_seats(self) -> &'static [ScienceDiscipline] {
+        match self {
+            Self::ChemWork => &[ScienceDiscipline::Chem],
+            Self::BioChem => &[ScienceDiscipline::Biology, ScienceDiscipline::Chem],
+            Self::SynthMod => &[ScienceDiscipline::Synthetic, ScienceDiscipline::Math],
+            Self::CloneWork => &[ScienceDiscipline::Clone, ScienceDiscipline::Biology],
+            Self::SkinWork => &[ScienceDiscipline::Skin, ScienceDiscipline::Biology],
+        }
+    }
+
+    /// Base explosion risk weight (exact rational), before dark/survival.
+    /// Eighth-derived steps — not free dials.
+    pub fn base_risk(self) -> Ratio {
+        match self {
+            Self::ChemWork => ratio(1, 8),
+            Self::BioChem => ratio(1, 4),
+            Self::SynthMod => ratio(3, 8),
+            Self::CloneWork => ratio(1, 4),
+            Self::SkinWork => ratio(1, 4) + ratio(1, 8),
+        }
+    }
+
+    /// Known positive outcome (always declared at creation).
+    pub fn known_positive(self) -> (&'static str, &'static str) {
+        match self {
+            Self::ChemWork => ("gem/catalog progress", "known chemistry deepens the catalog"),
+            Self::BioChem => ("hybrid yield", "bio+chem product feeds survival utility"),
+            Self::SynthMod => ("cyber integrity", "detection/mesh tools improve"),
+            Self::CloneWork => ("population seat", "clone count rises for habitat load"),
+            Self::SkinWork => ("disguise grade", "skin mod aids veil / diplomatic mask"),
+        }
+    }
+
+    /// Known negative outcome (always declared — the price of the work).
+    pub fn known_negative(self) -> (&'static str, &'static str) {
+        match self {
+            Self::ChemWork => ("order-work entropy", "compounding vents entropy / crystal fee"),
+            Self::BioChem => ("contamination toll", "biomass spent; contamination residual risk"),
+            Self::SynthMod => ("identity shear", "synthetic graft taxes crystal + trust"),
+            Self::CloneWork => ("identity dilution", "clone pool strains habitat / kinship"),
+            Self::SkinWork => ("unmask debt", "disguise leaves a residual if pierced"),
+        }
+    }
+
+    /// Hidden positive — not shown unless math seat or empiricist perception.
+    pub fn hidden_positive(self) -> (&'static str, &'static str) {
+        match self {
+            Self::ChemWork => ("dark-well map", "successful work maps a dark pull for later"),
+            Self::BioChem => ("metabolic fit", "biotic metabolism scores higher next bonds"),
+            Self::SynthMod => ("mesh control", "hidden command channel on synthetic limbs"),
+            Self::CloneWork => ("escort pool", "clones feed KIN escort readiness"),
+            Self::SkinWork => ("face-dance license", "hidden leap toward diplomatic/espionage mask"),
+        }
+    }
+
+    /// Hidden negative — revealed on explosion (or dark-led work).
+    pub fn hidden_negative(self) -> (&'static str, &'static str) {
+        match self {
+            Self::ChemWork => ("runaway reaction", "explosion: gem loss + crystal slash"),
+            Self::BioChem => ("cascade famine seed", "explosion: biomass slash + cascade pressure"),
+            Self::SynthMod => ("rogue faction", "explosion: matrix residual — synth turns"),
+            Self::CloneWork => ("clone revolt", "explosion: identity residual + want struck"),
+            Self::SkinWork => ("unmask catastrophe", "explosion: veil fails; spy marks reverse"),
+        }
+    }
+
+    pub fn explosion_kind(self) -> ExplosionKind {
+        match self {
+            Self::ChemWork => ExplosionKind::ChemRunaway,
+            Self::BioChem => ExplosionKind::BioChemCross,
+            Self::SynthMod => ExplosionKind::SynthRogue,
+            Self::CloneWork => ExplosionKind::CloneRevolt,
+            Self::SkinWork => ExplosionKind::SkinUnmask,
+        }
+    }
+}
+
+/// Typed explosion residual (wire code 1..=5).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[repr(u8)]
+pub enum ExplosionKind {
+    ChemRunaway = 1,
+    BioChemCross = 2,
+    SynthRogue = 3,
+    CloneRevolt = 4,
+    SkinUnmask = 5,
+}
+
+impl ExplosionKind {
+    pub fn from_wire(code: u8) -> Option<Self> {
+        match code {
+            1 => Some(Self::ChemRunaway),
+            2 => Some(Self::BioChemCross),
+            3 => Some(Self::SynthRogue),
+            4 => Some(Self::CloneRevolt),
+            5 => Some(Self::SkinUnmask),
+            _ => None,
+        }
+    }
+
+    pub fn as_wire(self) -> u8 {
+        self as u8
+    }
+
+    pub fn word(self) -> &'static str {
+        match self {
+            Self::ChemRunaway => "chem-runaway",
+            Self::BioChemCross => "biochem-cross",
+            Self::SynthRogue => "synth-rogue",
+            Self::CloneRevolt => "clone-revolt",
+            Self::SkinUnmask => "skin-unmask",
+        }
+    }
+
+    pub fn gloss(self) -> &'static str {
+        match self {
+            Self::ChemRunaway => "bad chemistry — runaway bond",
+            Self::BioChemCross => "bio+chem contamination cascade",
+            Self::SynthRogue => "synthetic turns — rogue faction (matrix)",
+            Self::CloneRevolt => "clone identity revolt",
+            Self::SkinUnmask => "skin mod pierced — face revealed",
+        }
+    }
+}
+
+/// **SEAT FEE** — resonator eighth × discipline weight × rank.
+/// Pure: same inputs → same fee. No free dial.
+pub fn science_seat_fee(discipline: ScienceDiscipline, rank: u8) -> Ratio {
+    let eighth = ratio(1, 8); // same grain as resonator yield law; world multiplies if needed
+    let w = discipline.seat_weight();
+    let r = i64::from(rank.max(1));
+    eighth * ratio(w, 1) * ratio(r, 1)
+}
+
+/// **EXPLOSION RISK** — exact rational, pure.
+///
+/// ```text
+/// risk = path.base
+///      + max(0, dark − survival)          // dark-led work is unstable
+///      + unseated_cross / 8               // missing support seats
+///      + (order_thin ? 1/8 : 0)
+/// ```
+///
+/// Explodes when `risk ≥ 1/2` (half — identity of two resonator eighths).
+pub fn explosion_risk(
+    path: LabPath,
+    dark: &Ratio,
+    survival: &Ratio,
+    unseated_cross: u8,
+    order_thin: bool,
+) -> Ratio {
+    let mut risk = path.base_risk();
+    if dark > survival {
+        risk += dark.clone() - survival.clone();
+    }
+    if unseated_cross > 0 {
+        risk += ratio(i64::from(unseated_cross), 8);
+    }
+    if order_thin {
+        risk += ratio(1, 8);
+    }
+    risk
+}
+
+/// Half threshold — two resonator eighths (derived identity).
+pub fn explosion_threshold() -> Ratio {
+    ratio(1, 2)
+}
+
+pub fn explodes(risk: &Ratio) -> bool {
+    *risk >= explosion_threshold()
+}
+
+/// Whether hidden positive poles are revealed to the operator *before* create.
+/// Empiricist perception (2) or Math seat rank ≥ 1.
+pub fn reveals_hidden_positive(perception: u8, math_rank: u8) -> bool {
+    perception == 2 || math_rank >= 1
+}
+
+/// Whether hidden negative poles are previewed (not only post-explosion).
+/// Dark leading, or Envy/Wrath pull live (caller passes flag).
+pub fn reveals_hidden_negative(dark_led: bool, envy_or_wrath: bool) -> bool {
+    dark_led || envy_or_wrath
+}
+
+/// Full pole card for UI / receipts (known always; hidden conditional).
+#[derive(Debug, Clone)]
+pub struct LabPoleCard {
+    pub path: LabPath,
+    pub known_pos: (&'static str, &'static str),
+    pub known_neg: (&'static str, &'static str),
+    pub hidden_pos: Option<(&'static str, &'static str)>,
+    pub hidden_neg: Option<(&'static str, &'static str)>,
+    pub risk: Ratio,
+    pub will_explode: bool,
+}
+
+pub fn lab_pole_card(
+    path: LabPath,
+    dark: &Ratio,
+    survival: &Ratio,
+    unseated_cross: u8,
+    order_thin: bool,
+    perception: u8,
+    math_rank: u8,
+    envy_or_wrath: bool,
+) -> LabPoleCard {
+    let risk = explosion_risk(path, dark, survival, unseated_cross, order_thin);
+    let will_explode = explodes(&risk);
+    let dark_led = dark > survival;
+    let show_hp = reveals_hidden_positive(perception, math_rank);
+    let show_hn = reveals_hidden_negative(dark_led, envy_or_wrath) || will_explode;
+    LabPoleCard {
+        path,
+        known_pos: path.known_positive(),
+        known_neg: path.known_negative(),
+        hidden_pos: if show_hp {
+            Some(path.hidden_positive())
+        } else {
+            None
+        },
+        hidden_neg: if show_hn {
+            Some(path.hidden_negative())
+        } else {
+            None
+        },
+        risk,
+        will_explode,
+    }
+}

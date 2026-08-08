@@ -1163,6 +1163,48 @@ pub fn render_receipt(receipt: &Receipt) -> String {
                 ratio_str(dark_score)
             ),
         ),
+        E::ScienceSeated {
+            orb_id,
+            discipline,
+            rank,
+            fee,
+        } => (
+            "science_seated",
+            format!(
+                "science discipline {discipline} seated rank {rank} on orb {orb_id} fee {}",
+                ratio_str(fee)
+            ),
+        ),
+        E::LabCreated {
+            orb_id,
+            path,
+            risk,
+            exploded,
+            ..
+        } => (
+            "lab_created",
+            format!(
+                "lab path {path} on orb {orb_id} risk {} {}",
+                ratio_str(risk),
+                if *exploded { "EXPLODED" } else { "stable" }
+            ),
+        ),
+        E::ScienceExploded {
+            orb_id,
+            kind,
+            slash,
+            ..
+        } => (
+            "science_exploded",
+            format!(
+                "science explosion kind {kind} on orb {orb_id} slash {}",
+                ratio_str(slash)
+            ),
+        ),
+        E::RogueFactionStruck { orb_id, pressure } => (
+            "rogue_faction",
+            format!("rogue faction pressure {pressure} on orb {orb_id}"),
+        ),
         E::ApertureSent { deal, from_orb, resource, amount } => (
             "aperture_sent",
             format!(

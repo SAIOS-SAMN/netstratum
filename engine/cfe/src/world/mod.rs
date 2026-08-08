@@ -72,6 +72,9 @@ pub mod deep_rails;
 pub mod xrail_deeds;
 pub mod offices;
 pub mod bench_games;
+pub mod science_lab;
+
+pub use science_lab::{LabCreateResult, ScienceLabBoard};
 
 pub use defense::{CorridorFog, DefenseDomain, DefensePosture, KinIntegrity, RiskBand};
 pub use market_defense::{

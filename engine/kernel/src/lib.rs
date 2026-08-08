@@ -178,7 +178,11 @@ use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 /// **0.36.0 — Chemistry science path.** Tags 156–158 IsoUnionStruck /
 /// ChemCataloged / DarkPullStruck; SCHEMA_V15 chem_catalog; civ utility
 /// + dark-7 gravity (pure almanac::science).
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 36, patch: 0 };
+///
+/// **0.37.0 — Seated science labs.** Tags 159–162 ScienceSeated /
+/// LabCreated / ScienceExploded / RogueFactionStruck; SCHEMA_V16 lab
+/// state; dual ± outcomes + derived explosion risk (no free dials).
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 37, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
@@ -993,9 +997,12 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
                 (*product, yielded),
             ]
         }
-        ClosureEvent::ChemCataloged { .. } | ClosureEvent::DarkPullStruck { .. } => {
-            Vec::new()
-        }
+        ClosureEvent::ChemCataloged { .. }
+        | ClosureEvent::DarkPullStruck { .. }
+        | ClosureEvent::ScienceSeated { .. }
+        | ClosureEvent::LabCreated { .. }
+        | ClosureEvent::ScienceExploded { .. }
+        | ClosureEvent::RogueFactionStruck { .. } => Vec::new(),
         // REFINE-1 (tag 107): spend raw, bank refined. Re-derive the
         // recipe from the raw identity + star (call-not-copy). A
         // receipt whose numbers disagree with the law moves nothing.
@@ -1335,6 +1342,8 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::VaultDeposited { .. } | E::VaultWithdrawn { .. }
         | E::AssayConsilience { .. } | E::AssaySlashed { .. }
         | E::IsoUnionStruck { .. } | E::ChemCataloged { .. } | E::DarkPullStruck { .. }
+        | E::ScienceSeated { .. } | E::LabCreated { .. } | E::ScienceExploded { .. }
+        | E::RogueFactionStruck { .. }
         | E::GenesisSealed { .. } | E::ProspectStruck { .. } | E::LineSucceeded { .. }
         | E::TechLicensed { .. } | E::InstrumentForged { .. } | E::RouteChartered { .. }
         | E::OfferPosted { .. } | E::BondSealed { .. }
@@ -1589,7 +1598,8 @@ fn admitted_deltas(
         | E::VaultWithdrawn { .. }
         | E::AssayConsilience { .. }
         | E::IsoUnionStruck { .. }
-        | E::DarkPullStruck { .. } => Vec::new(),
+        | E::DarkPullStruck { .. }
+        | E::RogueFactionStruck { .. } => Vec::new(),
         E::AssaySlashed { slash, .. } => {
             non_negative(Resource::Crystal, slash)?;
             vec![(Resource::Crystal, -slash.clone())]
@@ -1599,6 +1609,19 @@ fn admitted_deltas(
             let fee = cfe::dop::ZoneKind::Resonator.yield_per_tick().1;
             non_negative(Resource::Crystal, &fee)?;
             vec![(Resource::Crystal, -fee)]
+        }
+        E::ScienceSeated { fee, .. } | E::LabCreated { fee, .. } => {
+            non_negative(Resource::Crystal, fee)?;
+            vec![(Resource::Crystal, -fee.clone())]
+        }
+        E::ScienceExploded { resource, slash, .. } => {
+            let res = Resource::from_wire(*resource).unwrap_or(Resource::Crystal);
+            non_negative(res, slash)?;
+            if *slash > cfe::ratio::ratio(0, 1) {
+                vec![(res, -slash.clone())]
+            } else {
+                Vec::new()
+            }
         }
         // — mints (the sign lives at I4, order preserved for the
         //   landed pins) —
@@ -2288,6 +2311,8 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::VaultDeposited { .. } | E::VaultWithdrawn { .. }
         | E::AssayConsilience { .. } | E::AssaySlashed { .. }
         | E::IsoUnionStruck { .. } | E::ChemCataloged { .. } | E::DarkPullStruck { .. }
+        | E::ScienceSeated { .. } | E::LabCreated { .. } | E::ScienceExploded { .. }
+        | E::RogueFactionStruck { .. }
         // #42: a treaty is WORLD-layer. It is keyed on the pair, and
         // the pair is two worlds — not a line's identity (a pact
         // outlives whoever signed it) and not one place.
@@ -2425,6 +2450,8 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::AssayConsilience { .. } | E::AssaySlashed { .. }
         | E::IsoUnionStruck { .. } | E::DarkPullStruck { .. }
         | E::ChemCataloged { .. }
+        | E::ScienceSeated { .. } | E::LabCreated { .. } | E::ScienceExploded { .. }
+        | E::RogueFactionStruck { .. }
         // U1: the discovery mint settles banked value against verified
         // work — Collect, like the yield it banks beside. Ratified by
         // the U1 witnesses as it enters covered().

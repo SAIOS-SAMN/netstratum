@@ -97,6 +97,9 @@ pub const SCHEMA_V14: u8 = 14;
 /// **SCHEMA v15 — CHEM science catalog (known gems).**
 pub const SCHEMA_V15: u8 = 15;
 
+/// **SCHEMA v16 — seated science labs (seats · clones · synth · skin · rogue).**
+pub const SCHEMA_V16: u8 = 16;
+
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
 }
@@ -117,7 +120,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V15];
+    let mut out = vec![SCHEMA_V16];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -463,6 +466,33 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
     for h in &committed.chem_catalog {
         out.extend_from_slice(h);
     }
+    // SCHEMA v16 — science lab state.
+    put_u32(&mut out, committed.science_seats.len() as u32);
+    for (d, orb, rank) in &committed.science_seats {
+        out.push(*d);
+        put_u64(&mut out, *orb);
+        out.push(*rank);
+    }
+    put_u32(&mut out, committed.clone_counts.len() as u32);
+    for (orb, c) in &committed.clone_counts {
+        put_u64(&mut out, *orb);
+        put_u64(&mut out, *c);
+    }
+    put_u32(&mut out, committed.synth_mods.len() as u32);
+    for (orb, g) in &committed.synth_mods {
+        put_u64(&mut out, *orb);
+        out.push(*g);
+    }
+    put_u32(&mut out, committed.skin_mods.len() as u32);
+    for (orb, g) in &committed.skin_mods {
+        put_u64(&mut out, *orb);
+        out.push(*g);
+    }
+    put_u32(&mut out, committed.rogue_pressure.len() as u32);
+    for (orb, p) in &committed.rogue_pressure {
+        put_u64(&mut out, *orb);
+        out.push(*p);
+    }
     out
 }
 
@@ -547,6 +577,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         && schema != SCHEMA_V13
         && schema != SCHEMA_V14
         && schema != SCHEMA_V15
+        && schema != SCHEMA_V16
     {
         return None;
     }
@@ -1008,6 +1039,40 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         }
     }
 
+    let mut science_seats = Vec::new();
+    let mut clone_counts = Vec::new();
+    let mut synth_mods = Vec::new();
+    let mut skin_mods = Vec::new();
+    let mut rogue_pressure = Vec::new();
+    if schema >= SCHEMA_V16 {
+        for _ in 0..take.u32()? {
+            let d = take.u8()?;
+            let orb = take.u64()?;
+            let rank = take.u8()?;
+            science_seats.push((d, orb, rank));
+        }
+        for _ in 0..take.u32()? {
+            let orb = take.u64()?;
+            let c = take.u64()?;
+            clone_counts.push((orb, c));
+        }
+        for _ in 0..take.u32()? {
+            let orb = take.u64()?;
+            let g = take.u8()?;
+            synth_mods.push((orb, g));
+        }
+        for _ in 0..take.u32()? {
+            let orb = take.u64()?;
+            let g = take.u8()?;
+            skin_mods.push((orb, g));
+        }
+        for _ in 0..take.u32()? {
+            let orb = take.u64()?;
+            let p = take.u8()?;
+            rogue_pressure.push((orb, p));
+        }
+    }
+
     if !take.done() {
         return None;
     }
@@ -1054,5 +1119,10 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         spy_marks,
         vault_stamp,
         chem_catalog,
+        science_seats,
+        clone_counts,
+        synth_mods,
+        skin_mods,
+        rogue_pressure,
     })
 }

@@ -56,6 +56,11 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut spy_marks: Vec<(u64, u8)> = Vec::new();
     let mut vault_stamp: Vec<(u64, Ratio)> = Vec::new();
     let mut chem_catalog: Vec<[u8; 32]> = Vec::new();
+    let mut science_seats: Vec<(u8, u64, u8)> = Vec::new();
+    let mut clone_counts: Vec<(u64, u64)> = Vec::new();
+    let mut synth_mods: Vec<(u64, u8)> = Vec::new();
+    let mut skin_mods: Vec<(u64, u8)> = Vec::new();
+    let mut rogue_pressure: Vec<(u64, u8)> = Vec::new();
     for receipt in chronicle.receipts() {
         match &receipt.event {
             // BOOK-1 (19_LENS §16) — the open registry rebuilds from
@@ -1483,6 +1488,176 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 }
             }
             ClosureEvent::DarkPullStruck { .. } => {}
+            ClosureEvent::ScienceSeated {
+                orb_id,
+                discipline,
+                rank,
+                fee,
+            } => {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank(crate::dop::Resource::Crystal, -fee.clone());
+                }
+                if let Some(slot) = science_seats
+                    .iter_mut()
+                    .find(|(d, o, _)| *d == *discipline && *o == *orb_id)
+                {
+                    slot.2 = *rank;
+                } else {
+                    science_seats.push((*discipline, *orb_id, *rank));
+                }
+            }
+            ClosureEvent::LabCreated {
+                orb_id,
+                path,
+                fee,
+                exploded,
+                hidden_pos,
+                ..
+            } => {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank(crate::dop::Resource::Crystal, -fee.clone());
+                }
+                if !*exploded {
+                    // Apply known positives by path (call-not-copy of live path).
+                    match crate::almanac::LabPath::from_wire(*path) {
+                        Some(crate::almanac::LabPath::SynthMod) => {
+                            let g = synth_mods
+                                .iter()
+                                .find(|(o, _)| *o == *orb_id)
+                                .map(|(_, g)| *g)
+                                .unwrap_or(0)
+                                .saturating_add(1)
+                                .min(7);
+                            synth_mods.retain(|(o, _)| *o != *orb_id);
+                            if g > 0 {
+                                synth_mods.push((*orb_id, g));
+                            }
+                            if *hidden_pos {
+                                let g2 = g.saturating_add(1).min(7);
+                                synth_mods.retain(|(o, _)| *o != *orb_id);
+                                if g2 > 0 {
+                                    synth_mods.push((*orb_id, g2));
+                                }
+                            }
+                        }
+                        Some(crate::almanac::LabPath::CloneWork) => {
+                            let mut c = clone_counts
+                                .iter()
+                                .find(|(o, _)| *o == *orb_id)
+                                .map(|(_, c)| *c)
+                                .unwrap_or(0)
+                                .saturating_add(1);
+                            if *hidden_pos {
+                                c = c.saturating_add(1);
+                            }
+                            clone_counts.retain(|(o, _)| *o != *orb_id);
+                            if c > 0 {
+                                clone_counts.push((*orb_id, c));
+                            }
+                        }
+                        Some(crate::almanac::LabPath::SkinWork) => {
+                            let mut g = skin_mods
+                                .iter()
+                                .find(|(o, _)| *o == *orb_id)
+                                .map(|(_, g)| *g)
+                                .unwrap_or(0)
+                                .saturating_add(1)
+                                .min(7);
+                            if *hidden_pos {
+                                g = g.saturating_add(1).min(7);
+                            }
+                            skin_mods.retain(|(o, _)| *o != *orb_id);
+                            if g > 0 {
+                                skin_mods.push((*orb_id, g));
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            ClosureEvent::ScienceExploded {
+                orb_id,
+                path,
+                kind,
+                resource,
+                slash,
+            } => {
+                if let Some(res) = crate::dop::Resource::from_wire(*resource) {
+                    if *slash > ratio(0, 1) {
+                        if let Some(held) = peel(&mut orbs, *orb_id) {
+                            let have = held.banked_amount(res);
+                            let take = if have > *slash {
+                                slash.clone()
+                            } else {
+                                have
+                            };
+                            held.bank(res, -take);
+                        }
+                    }
+                }
+                match crate::almanac::ExplosionKind::from_wire(*kind) {
+                    Some(crate::almanac::ExplosionKind::SynthRogue) => {
+                        let g = synth_mods
+                            .iter()
+                            .find(|(o, _)| *o == *orb_id)
+                            .map(|(_, g)| *g)
+                            .unwrap_or(0)
+                            .saturating_sub(1);
+                        synth_mods.retain(|(o, _)| *o != *orb_id);
+                        if g > 0 {
+                            synth_mods.push((*orb_id, g));
+                        }
+                    }
+                    Some(crate::almanac::ExplosionKind::CloneRevolt) => {
+                        let c = clone_counts
+                            .iter()
+                            .find(|(o, _)| *o == *orb_id)
+                            .map(|(_, c)| *c)
+                            .unwrap_or(0)
+                            .saturating_sub(1);
+                        clone_counts.retain(|(o, _)| *o != *orb_id);
+                        if c > 0 {
+                            clone_counts.push((*orb_id, c));
+                        }
+                    }
+                    Some(crate::almanac::ExplosionKind::SkinUnmask) => {
+                        let g = skin_mods
+                            .iter()
+                            .find(|(o, _)| *o == *orb_id)
+                            .map(|(_, g)| *g)
+                            .unwrap_or(0)
+                            .saturating_sub(1);
+                        skin_mods.retain(|(o, _)| *o != *orb_id);
+                        if g > 0 {
+                            skin_mods.push((*orb_id, g));
+                        }
+                        if let Some(slot) = spy_marks.iter_mut().find(|(o, _)| *o == *orb_id) {
+                            slot.1 = slot.1.saturating_add(1);
+                        } else {
+                            spy_marks.push((*orb_id, 1));
+                        }
+                    }
+                    Some(crate::almanac::ExplosionKind::BioChemCross) => {
+                        let p = cascade_pressures
+                            .iter()
+                            .find(|(o, _)| *o == *orb_id)
+                            .map(|(_, p)| *p)
+                            .unwrap_or(0)
+                            .saturating_add(1);
+                        cascade_pressures.retain(|(o, _)| *o != *orb_id);
+                        cascade_pressures.push((*orb_id, p));
+                    }
+                    _ => {
+                        let _ = path;
+                    }
+                }
+            }
+            ClosureEvent::RogueFactionStruck { orb_id, pressure } => {
+                rogue_pressure.retain(|(o, _)| *o != *orb_id);
+                if *pressure > 0 {
+                    rogue_pressure.push((*orb_id, *pressure));
+                }
+            }
         }
     }
     Committed {
@@ -1491,7 +1666,8 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
         prospects, warded, veiled, taxon, stations, hulls, notes, futures, last_clears, shares,
         perps, clear_depths, market_sealed_until, cascade_pressures, tamper_pressures,
         posture_disposition, posture_perception, posture_primary, intel_hashes, spy_marks,
-        vault_stamp, chem_catalog,
+        vault_stamp, chem_catalog, science_seats, clone_counts, synth_mods, skin_mods,
+        rogue_pressure,
     }
 }
 

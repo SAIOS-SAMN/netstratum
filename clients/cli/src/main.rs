@@ -7212,6 +7212,16 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
             "no banked gem {} — compound or iso-union first",
             &hex(gem)[..8]
         ),
+        ActionRefused::ScienceSeatRequired {
+            discipline,
+            need_rank,
+            have_rank,
+        } => format!(
+            "science seat required: discipline {discipline} needs rank {need_rank} (have {have_rank}) — `bench science seat <discipline>`"
+        ),
+        ActionRefused::ScienceAlreadySeated { discipline, rank } => format!(
+            "science discipline {discipline} already at max rank {rank}"
+        ),
         ActionRefused::BalanceEntropyDominates {
             balance,
             syntropy,
@@ -8735,6 +8745,38 @@ fn chronicle(world: &World, style: &Style) {
                 amount(weight),
                 amount(dark_score)
             ),
+            cfe::dop::ClosureEvent::ScienceSeated {
+                orb_id,
+                discipline,
+                rank,
+                fee,
+            } => format!(
+                "⚗ science seat orb {orb_id} d{discipline} rank {rank} fee {}",
+                amount(fee)
+            ),
+            cfe::dop::ClosureEvent::LabCreated {
+                orb_id,
+                path,
+                risk,
+                exploded,
+                ..
+            } => format!(
+                "⚗ lab path {path} orb {orb_id} risk {} {}",
+                amount(risk),
+                if *exploded { "EXPLODED" } else { "ok" }
+            ),
+            cfe::dop::ClosureEvent::ScienceExploded {
+                orb_id,
+                kind,
+                slash,
+                ..
+            } => format!(
+                "💥 science explosion kind {kind} orb {orb_id} slash {}",
+                amount(slash)
+            ),
+            cfe::dop::ClosureEvent::RogueFactionStruck { orb_id, pressure } => {
+                format!("🕷 rogue faction orb {orb_id} pressure {pressure}")
+            }
             cfe::dop::ClosureEvent::AssayStruck { amount: drawn, richness, .. } => format!(
                 "⚖ {} drawn from the opened vein — one receipt, the whole span{}",
                 style.strong(&amount(drawn)),

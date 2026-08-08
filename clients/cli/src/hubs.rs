@@ -648,7 +648,19 @@ fn chem_bench(
             );
             let _ = st;
         }
-        leaf(style, "compound · iso · catalog", "deeds");
+        let rank = world.science_rank(current, cfe::almanac::ScienceDiscipline::Chem);
+        println!(
+            "  chem seat rank {} {}",
+            rank,
+            if rank == 0 {
+                style.warn("(seat required for catalog/iso)")
+            } else {
+                style.ok("(seated)")
+            }
+        );
+        leaf(style, "bench science seat chem", "pay crystal unlock");
+        leaf(style, "compound · iso · catalog", "deeds (need seat R1)");
+        leaf(style, "bench science create chem|biochem", "dual ± create (need R2)");
         leaf(style, "intel knowledge", "catalog appears in knowledge bases");
         leaf(style, "bench science", "all science disciplines");
         foot_bench(style, Some("chem"));
@@ -676,7 +688,7 @@ fn chem_bench(
     }
 }
 
-/// Science discipline index under bench.
+/// Science discipline index under bench — **seated** labs, dual ±, explosion.
 fn science_index(
     world: &mut World,
     mut words: impl Iterator<Item = String>,
@@ -689,6 +701,136 @@ fn science_index(
         return;
     }
     match w.as_deref() {
+        Some("seat") => {
+            let dname = words.next().unwrap_or_default();
+            match cfe::almanac::ScienceDiscipline::from_word(&dname) {
+                Some(d) => match world.seat_science(current, d) {
+                    Ok(rank) => {
+                        println!(
+                            "  {} seated {} rank {} — pay crystal, unlock capability",
+                            style.ok("✓"),
+                            d.word(),
+                            rank
+                        );
+                    }
+                    Err(e) => println!("  {} seat refused: {e:?}", style.bad("✗")),
+                },
+                None => {
+                    println!(
+                        "  {} usage: bench science seat <chem|biology|physics|math|research|synthetic|clone|skin>",
+                        style.bad("✗")
+                    );
+                }
+            }
+            foot_bench(style, Some("science"));
+        }
+        Some("create") | Some("work") | Some("attempt") => {
+            let pname = words.next().unwrap_or_default();
+            match cfe::almanac::LabPath::from_word(&pname) {
+                Some(path) => {
+                    // Show poles first (known always; hidden conditional).
+                    let card = world.lab_preview(current, path);
+                    println!("  {}", style.section("OUTCOMES (before create)"));
+                    println!(
+                        "  {} + {}",
+                        style.ok("KNOWN +"),
+                        style.dim(card.known_pos.1)
+                    );
+                    println!(
+                        "  {} − {}",
+                        style.warn("KNOWN −"),
+                        style.dim(card.known_neg.1)
+                    );
+                    match card.hidden_pos {
+                        Some((_, g)) => println!(
+                            "  {} + {}",
+                            style.ok("HIDDEN +"),
+                            style.dim(g)
+                        ),
+                        None => println!(
+                            "  {} (seat math / empiricist to reveal)",
+                            style.dim("HIDDEN +")
+                        ),
+                    }
+                    match card.hidden_neg {
+                        Some((_, g)) => println!(
+                            "  {} − {}",
+                            style.bad("HIDDEN −"),
+                            style.dim(g)
+                        ),
+                        None => println!(
+                            "  {} (revealed if dark-led or will explode)",
+                            style.dim("HIDDEN −")
+                        ),
+                    }
+                    println!(
+                        "  risk {} · threshold 1/2 · will_explode={}",
+                        amount(&card.risk),
+                        card.will_explode
+                    );
+                    match world.lab_create(current, path) {
+                        Ok(r) => {
+                            if r.exploded {
+                                println!(
+                                    "  {} EXPLOSION {} — {}",
+                                    style.bad("💥"),
+                                    r.explosion_kind
+                                        .map(|k| k.word())
+                                        .unwrap_or("?"),
+                                    r.explosion_kind
+                                        .map(|k| k.gloss())
+                                        .unwrap_or("")
+                                );
+                            } else {
+                                println!(
+                                    "  {} lab {} created · risk {}",
+                                    style.ok("✓"),
+                                    path.word(),
+                                    amount(&r.risk)
+                                );
+                            }
+                            if r.hidden_pos_landed {
+                                println!("  {} hidden positive landed", style.ok("+"));
+                            }
+                            if r.hidden_neg_landed {
+                                println!("  {} hidden negative landed", style.bad("−"));
+                            }
+                        }
+                        Err(e) => println!("  {} create refused: {e:?}", style.bad("✗")),
+                    }
+                }
+                None => {
+                    println!(
+                        "  {} usage: bench science create <chem|biochem|synth|clone|skin>",
+                        style.bad("✗")
+                    );
+                }
+            }
+            foot_bench(style, Some("science"));
+        }
+        Some("preview") | Some("poles") | Some("risk") => {
+            let pname = words.next().unwrap_or_else(|| "chem".into());
+            if let Some(path) = cfe::almanac::LabPath::from_word(&pname) {
+                let card = world.lab_preview(current, path);
+                banner(style, "BENCH › SCIENCE › PREVIEW");
+                println!("  path {} · risk {} · explode={}", path.word(), amount(&card.risk), card.will_explode);
+                println!("  {} {}", style.ok("+ known"), card.known_pos.1);
+                println!("  {} {}", style.warn("− known"), card.known_neg.1);
+                if let Some((_, g)) = card.hidden_pos {
+                    println!("  {} {}", style.ok("+ hidden"), g);
+                } else {
+                    println!("  {}", style.dim("+ hidden — seat math or empiricist perception"));
+                }
+                if let Some((_, g)) = card.hidden_neg {
+                    println!("  {} {}", style.bad("− hidden"), g);
+                } else {
+                    println!("  {}", style.dim("− hidden — dark-led / explode reveals"));
+                }
+            } else {
+                println!("{} unknown path {pname}", style.bad("✗"));
+            }
+            foot_bench(style, Some("science"));
+        }
         Some("chem") | Some("chemistry") | Some("alchemy") => {
             chem_bench(world, words, style, current)
         }
@@ -702,30 +844,139 @@ fn science_index(
         Some("research") | Some("tech") | Some("lab") => {
             research_craft_bench(world, words, style, current)
         }
+        Some("synth") | Some("synthetic") | Some("cyber") => {
+            synth_bench(world, words, style, current)
+        }
+        Some("clone") | Some("clones") => clone_bench(world, words, style, current),
+        Some("skin") | Some("face") => skin_bench(world, words, style, current),
         None | Some("help") | Some("?") | Some("index") | Some("menu") => {
-            banner(style, "BENCH › SCIENCE — disciplines (craft)");
+            banner(style, "BENCH › SCIENCE — seated labs");
             println!(
                 "  {}",
-                style.dim("Build knowledge components. Run ops on `intel research` / knowledge.")
+                style.dim(
+                    "Pay crystal to seat. Rank 1 = act. Rank 2 = create (dual ± · explosion risk)."
+                )
+            );
+            let board = world.science_lab_board(current);
+            println!(
+                "  clones {} · synth g{} · skin g{} · rogue {}",
+                board.clones, board.synth_grade, board.skin_grade, board.rogue
             );
             println!();
-            row(style, "bench chem", "chemistry · bonds · iso · dark-7 · catalog");
-            row(style, "bench biology", "life · biomass · regen · habitat");
-            row(style, "bench physics", "star · thermal · medium · site · rings");
-            row(style, "bench math", "ratios · balances · thresholds · books");
-            row(style, "bench research", "constellation · forge · practice craft");
+            println!("  {}", style.section("DISCIPLINE SEATS"));
+            for (d, rank, fee) in &board.seats {
+                let mark = if *rank >= 2 {
+                    style.ok("R2")
+                } else if *rank == 1 {
+                    style.strong("R1")
+                } else {
+                    style.dim("--")
+                };
+                println!(
+                    "  {} {}  rank {} · next fee {} · {}",
+                    mark,
+                    style.verb(d.word()),
+                    rank,
+                    amount(fee),
+                    style.dim(d.gloss())
+                );
+            }
+            println!();
+            println!("  {}", style.section("VERBS"));
+            row(style, "bench science seat <discipline>", "pay crystal · unlock rank");
+            row(style, "bench science preview <path>", "poles + explosion risk");
+            row(
+                style,
+                "bench science create <path>",
+                "chem|biochem|synth|clone|skin (needs R2 seats)",
+            );
+            row(style, "bench chem|biology|physics|math|research", "discipline craft");
+            row(style, "bench science synth|clone|skin", "mod paths");
             leaf(style, "intel research · intel knowledge", "RUN knowledge activity");
             foot_bench(style, Some("science"));
         }
         Some(other) => {
             println!(
-                "{} unknown science leaf {} — chem|biology|physics|math|research",
+                "{} unknown science leaf {} — seat|create|preview|chem|…",
                 style.bad("✗"),
                 style.verb(other)
             );
             foot_bench(style, Some("science"));
         }
     }
+}
+
+fn synth_bench(world: &mut World, mut words: impl Iterator<Item = String>, style: &Style, current: u64) {
+    let w = words.next();
+    if is_back(w.as_deref()) {
+        science_index(world, std::iter::empty(), style, current);
+        return;
+    }
+    banner(style, "BENCH › SYNTHETIC — cybernetic craft");
+    println!(
+        "  grade {} · rogue pressure {} · seat synthetic+math R2 to create",
+        world.synth_grade_of(current),
+        world.rogue_pressure_of(current)
+    );
+    let card = world.lab_preview(current, cfe::almanac::LabPath::SynthMod);
+    println!("  risk {} · explode={}", amount(&card.risk), card.will_explode);
+    println!("  {} {}", style.ok("+"), card.known_pos.1);
+    println!("  {} {}", style.warn("−"), card.known_neg.1);
+    if let Some((_, g)) = card.hidden_neg {
+        println!("  {} {}", style.bad("hidden −"), g);
+    }
+    leaf(style, "bench science seat synthetic · seat math", "unlock");
+    leaf(style, "bench science create synth", "attempt (may rogue)");
+    foot_bench(style, Some("science"));
+    let _ = w;
+}
+
+fn clone_bench(world: &mut World, mut words: impl Iterator<Item = String>, style: &Style, current: u64) {
+    let w = words.next();
+    if is_back(w.as_deref()) {
+        science_index(world, std::iter::empty(), style, current);
+        return;
+    }
+    banner(style, "BENCH › CLONE — population craft");
+    println!(
+        "  clones {} · seat clone+biology R2 · population control path",
+        world.clone_count_of(current)
+    );
+    let card = world.lab_preview(current, cfe::almanac::LabPath::CloneWork);
+    println!("  risk {} · explode={}", amount(&card.risk), card.will_explode);
+    println!("  {} {}", style.ok("+"), card.known_pos.1);
+    println!("  {} {}", style.warn("−"), card.known_neg.1);
+    leaf(style, "bench science seat clone · seat biology", "unlock");
+    leaf(style, "bench science create clone", "attempt");
+    foot_bench(style, Some("science"));
+    let _ = w;
+}
+
+fn skin_bench(world: &mut World, mut words: impl Iterator<Item = String>, style: &Style, current: u64) {
+    let w = words.next();
+    if is_back(w.as_deref()) {
+        science_index(world, std::iter::empty(), style, current);
+        return;
+    }
+    banner(style, "BENCH › SKIN — face/disguise craft (Tleilaxu-shaped)");
+    println!(
+        "  skin grade {} · seat skin+biology R2",
+        world.skin_grade_of(current)
+    );
+    let card = world.lab_preview(current, cfe::almanac::LabPath::SkinWork);
+    println!("  risk {} · explode={}", amount(&card.risk), card.will_explode);
+    println!("  {} {}", style.ok("+"), card.known_pos.1);
+    println!("  {} {}", style.warn("−"), card.known_neg.1);
+    if let Some((_, g)) = card.hidden_pos {
+        println!("  {} {}", style.ok("hidden +"), g);
+    }
+    if let Some((_, g)) = card.hidden_neg {
+        println!("  {} {}", style.bad("hidden −"), g);
+    }
+    leaf(style, "bench science seat skin · seat biology", "unlock");
+    leaf(style, "bench science create skin", "attempt");
+    foot_bench(style, Some("science"));
+    let _ = w;
 }
 
 /// Biology craft — living infrastructure and biomass path.

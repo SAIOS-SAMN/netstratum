@@ -213,6 +213,16 @@ pub struct Committed {
     pub vault_stamp: Vec<(u64, Ratio)>,
     /// CHEM science: cataloged gem identities (known chemistry).
     pub chem_catalog: Vec<[u8; 32]>,
+    /// LAB: science seats (discipline wire, orb, rank).
+    pub science_seats: Vec<(u8, u64, u8)>,
+    /// LAB: bio clone counts per orb.
+    pub clone_counts: Vec<(u64, u64)>,
+    /// LAB: synthetic mod grade per orb.
+    pub synth_mods: Vec<(u64, u8)>,
+    /// LAB: skin/face mod grade per orb.
+    pub skin_mods: Vec<(u64, u8)>,
+    /// LAB: rogue faction pressure per orb (synthetic matrix residual).
+    pub rogue_pressure: Vec<(u64, u8)>,
 }
 
 /// G1 (04 §1): a civilization's sealed axes, as the world holds them.
@@ -328,6 +338,16 @@ pub struct World {
     pub(super) vault_stamp: Vec<(u64, Ratio)>,
     /// CHEM science: cataloged gems (replay of ChemCataloged).
     pub(super) chem_catalog: Vec<[u8; 32]>,
+    /// LAB: science seats (discipline, orb, rank) — replay of ScienceSeated.
+    pub(super) science_seats: Vec<(u8, u64, u8)>,
+    /// LAB: clone counts — replay of LabCreated (clone path).
+    pub(super) clone_counts: Vec<(u64, u64)>,
+    /// LAB: synth mod grades.
+    pub(super) synth_mods: Vec<(u64, u8)>,
+    /// LAB: skin mod grades.
+    pub(super) skin_mods: Vec<(u64, u8)>,
+    /// LAB: rogue faction pressure.
+    pub(super) rogue_pressure: Vec<(u64, u8)>,
 }
 
 /// PLANNER-1: what a licensed leap carries — the condition and name

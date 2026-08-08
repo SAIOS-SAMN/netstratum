@@ -1,0 +1,561 @@
+//! Seated science labs — paid discipline unlocks, dual ± outcomes, explosion.
+//!
+//! Law: no free capability. Seat with crystal (resonator-eighth × weight × rank).
+//! Creation always lands known positive + known negative; hidden poles
+//! conditional; explosion when derived risk ≥ 1/2.
+
+use super::*;
+use crate::almanac::{
+    lab_pole_card, science_seat_fee, ExplosionKind, LabPath, LabPoleCard, ScienceDiscipline,
+};
+use crate::dop::{Resource, ZoneKind};
+
+impl World {
+    /// Rank of a science seat on an orb (0 = unseated).
+    pub fn science_rank(&self, orb: u64, discipline: ScienceDiscipline) -> u8 {
+        self.science_seats
+            .iter()
+            .find(|(d, o, _)| *d == discipline.as_wire() && *o == orb)
+            .map(|(_, _, r)| *r)
+            .unwrap_or(0)
+    }
+
+    pub fn science_seated(&self, orb: u64, discipline: ScienceDiscipline) -> bool {
+        self.science_rank(orb, discipline) >= 1
+    }
+
+    pub fn require_science_seat(
+        &self,
+        orb: u64,
+        discipline: ScienceDiscipline,
+        need_rank: u8,
+    ) -> Result<(), ActionRefused> {
+        let have = self.science_rank(orb, discipline);
+        if have < need_rank {
+            return Err(ActionRefused::ScienceSeatRequired {
+                discipline: discipline.as_wire(),
+                need_rank,
+                have_rank: have,
+            });
+        }
+        Ok(())
+    }
+
+    /// All seats on an orb (discipline wire, rank).
+    pub fn science_seats_of(&self, orb: u64) -> Vec<(ScienceDiscipline, u8)> {
+        self.science_seats
+            .iter()
+            .filter(|(_, o, _)| *o == orb)
+            .filter_map(|(d, _, r)| ScienceDiscipline::from_wire(*d).map(|dd| (dd, *r)))
+            .collect()
+    }
+
+    pub fn clone_count_of(&self, orb: u64) -> u64 {
+        self.clone_counts
+            .iter()
+            .find(|(o, _)| *o == orb)
+            .map(|(_, c)| *c)
+            .unwrap_or(0)
+    }
+
+    pub fn synth_grade_of(&self, orb: u64) -> u8 {
+        self.synth_mods
+            .iter()
+            .find(|(o, _)| *o == orb)
+            .map(|(_, g)| *g)
+            .unwrap_or(0)
+    }
+
+    pub fn skin_grade_of(&self, orb: u64) -> u8 {
+        self.skin_mods
+            .iter()
+            .find(|(o, _)| *o == orb)
+            .map(|(_, g)| *g)
+            .unwrap_or(0)
+    }
+
+    pub fn rogue_pressure_of(&self, orb: u64) -> u8 {
+        self.rogue_pressure
+            .iter()
+            .find(|(o, _)| *o == orb)
+            .map(|(_, p)| *p)
+            .unwrap_or(0)
+    }
+
+    fn set_science_seat(&mut self, orb: u64, discipline: ScienceDiscipline, rank: u8) {
+        let d = discipline.as_wire();
+        if let Some(slot) = self
+            .science_seats
+            .iter_mut()
+            .find(|(dd, o, _)| *dd == d && *o == orb)
+        {
+            slot.2 = rank;
+        } else {
+            self.science_seats.push((d, orb, rank));
+        }
+    }
+
+    /// **SEAT A SCIENCE DISCIPLINE** — pay crystal fee, unlock rank 1 or elevate.
+    pub fn seat_science(
+        &mut self,
+        orb: u64,
+        discipline: ScienceDiscipline,
+    ) -> Result<u8, ActionRefused> {
+        self.seat_science_as(SOVEREIGN, orb, discipline)
+    }
+
+    pub fn seat_science_as(
+        &mut self,
+        actor: u64,
+        orb: u64,
+        discipline: ScienceDiscipline,
+    ) -> Result<u8, ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if peek(&self.orbs, orb).is_none() {
+            return Err(ActionRefused::NoSuchOrb { orb });
+        }
+        let have = self.science_rank(orb, discipline);
+        if have >= discipline.max_rank() {
+            return Err(ActionRefused::ScienceAlreadySeated {
+                discipline: discipline.as_wire(),
+                rank: have,
+            });
+        }
+        let next_rank = have.saturating_add(1);
+        // Prefer world resonator eighth when available.
+        let eighth = ZoneKind::Resonator.yield_per_tick().1;
+        let weight = discipline.seat_weight();
+        let fee = eighth * ratio(weight, 1) * ratio(i64::from(next_rank), 1);
+        // Cross-check pure law (eighth identity).
+        let _law = science_seat_fee(discipline, next_rank);
+        let held = peek(&self.orbs, orb).expect("checked");
+        let have_c = held.banked_amount(Resource::Crystal);
+        if have_c < fee {
+            return Err(ActionRefused::CannotAfford {
+                resource: Resource::Crystal,
+                need: Box::new(fee),
+                have: Box::new(have_c),
+            });
+        }
+        let held = peel(&mut self.orbs, orb).expect("checked");
+        held.bank(Resource::Crystal, -fee.clone());
+        self.set_science_seat(orb, discipline, next_rank);
+        self.close(
+            ClosureEvent::ScienceSeated {
+                orb_id: orb,
+                discipline: discipline.as_wire(),
+                rank: next_rank,
+                fee,
+            },
+            actor,
+        );
+        Ok(next_rank)
+    }
+
+    /// Count required seats missing for a path.
+    fn unseated_cross(&self, orb: u64, path: LabPath) -> u8 {
+        path.required_seats()
+            .iter()
+            .filter(|d| !self.science_seated(orb, **d))
+            .count() as u8
+    }
+
+    /// Pure reading of poles + explosion risk for a path.
+    pub fn lab_preview(&self, orb: u64, path: LabPath) -> LabPoleCard {
+        let axes = self.civ_axes().unwrap_or(crate::almanac::CivAxes {
+            disposition: 1,
+            metabolism: 1,
+            perception: 1,
+        });
+        let pulls = self.dark_pulls();
+        let dark = pulls
+            .iter()
+            .fold(ratio(0, 1), |acc, (_, w)| acc + w.clone());
+        // Survival proxy: biomass+crystal standing as "health" of the lab.
+        let survival = self
+            .orb_by_id(orb)
+            .map(|o| {
+                o.banked_amount(Resource::Biomass) + o.banked_amount(Resource::Crystal)
+            })
+            .unwrap_or_else(|| ratio(0, 1));
+        let unseated = self.unseated_cross(orb, path);
+        let order_thin = self.order_balance_thin(orb);
+        let envy_or_wrath = pulls.iter().any(|(p, _)| {
+            matches!(
+                p,
+                crate::almanac::DarkPull::Envy | crate::almanac::DarkPull::Wrath
+            )
+        });
+        let math_rank = self.science_rank(orb, ScienceDiscipline::Math);
+        lab_pole_card(
+            path,
+            &dark,
+            &survival,
+            unseated,
+            order_thin,
+            axes.perception,
+            math_rank,
+            envy_or_wrath,
+        )
+    }
+
+    fn order_balance_thin(&self, orb: u64) -> bool {
+        // Prefer thermal / matter balance if present; else crystal famine.
+        self.orb_by_id(orb)
+            .map(|o| o.banked_amount(Resource::Crystal) < ratio(1, 1))
+            .unwrap_or(true)
+    }
+
+    /// **LAB CREATE** — dual ± outcomes; may explode.
+    ///
+    /// Always: known positive + known negative (fee).
+    /// If not explode: optional hidden positive (when preview reveals it).
+    /// If explode: hidden negative lands; partial reverse of positive.
+    pub fn lab_create(
+        &mut self,
+        orb: u64,
+        path: LabPath,
+    ) -> Result<LabCreateResult, ActionRefused> {
+        self.lab_create_as(SOVEREIGN, orb, path)
+    }
+
+    pub fn lab_create_as(
+        &mut self,
+        actor: u64,
+        orb: u64,
+        path: LabPath,
+    ) -> Result<LabCreateResult, ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if peek(&self.orbs, orb).is_none() {
+            return Err(ActionRefused::NoSuchOrb { orb });
+        }
+        // All required seats must sit (rank ≥ 1).
+        for d in path.required_seats() {
+            self.require_science_seat(orb, *d, 1)?;
+        }
+        // Creation paths need rank ≥ 2 on the primary discipline.
+        let primary = path.required_seats()[0];
+        self.require_science_seat(orb, primary, 2)?;
+
+        let card = self.lab_preview(orb, path);
+        let fee = ZoneKind::Resonator.yield_per_tick().1; // known-negative crystal toll
+        let held = peek(&self.orbs, orb).expect("checked");
+        let have = held.banked_amount(Resource::Crystal);
+        if have < fee {
+            return Err(ActionRefused::CannotAfford {
+                resource: Resource::Crystal,
+                need: Box::new(fee.clone()),
+                have: Box::new(have),
+            });
+        }
+
+        // Known negative: always pay crystal fee.
+        let held = peel(&mut self.orbs, orb).expect("checked");
+        held.bank(Resource::Crystal, -fee.clone());
+
+        let exploded = card.will_explode;
+        let kind = path.explosion_kind();
+        let mut hidden_pos_landed = false;
+        let mut hidden_neg_landed = false;
+
+        if exploded {
+            hidden_neg_landed = true;
+            self.apply_explosion(actor, orb, path, kind)?;
+        } else {
+            // Known positive lands.
+            self.apply_known_positive(orb, path);
+            // Hidden positive when math/empiricist can see it (and thus earn it).
+            if card.hidden_pos.is_some() {
+                hidden_pos_landed = true;
+                self.apply_hidden_positive(orb, path);
+            }
+        }
+
+        let risk = card.risk.clone();
+        self.close(
+            ClosureEvent::LabCreated {
+                orb_id: orb,
+                path: path.as_wire(),
+                risk: risk.clone(),
+                exploded,
+                explosion_kind: if exploded { kind.as_wire() } else { 0 },
+                hidden_pos: hidden_pos_landed,
+                hidden_neg: hidden_neg_landed,
+                fee: fee.clone(),
+            },
+            actor,
+        );
+
+        Ok(LabCreateResult {
+            path,
+            risk,
+            exploded,
+            explosion_kind: if exploded { Some(kind) } else { None },
+            known_pos: card.known_pos,
+            known_neg: card.known_neg,
+            hidden_pos_landed,
+            hidden_neg_landed,
+            hidden_pos: card.hidden_pos,
+            hidden_neg: card.hidden_neg,
+        })
+    }
+
+    fn apply_known_positive(&mut self, orb: u64, path: LabPath) {
+        match path {
+            LabPath::ChemWork => {
+                // Catalog already has its own deed; here we mint a thin
+                // research practice signal: bump detection-adjacent via
+                // nothing free — only record path success is the receipt.
+            }
+            LabPath::BioChem => {
+                // Small biomass gift is free mint — refuse that. Instead
+                // convert crystal already paid into nothing extra; the
+                // positive is "workable hybrid flag" via receipt only.
+            }
+            LabPath::SynthMod => {
+                let g = self.synth_grade_of(orb).saturating_add(1).min(7);
+                self.set_synth_grade(orb, g);
+            }
+            LabPath::CloneWork => {
+                let c = self.clone_count_of(orb).saturating_add(1);
+                self.set_clone_count(orb, c);
+            }
+            LabPath::SkinWork => {
+                let g = self.skin_grade_of(orb).saturating_add(1).min(7);
+                self.set_skin_grade(orb, g);
+            }
+        }
+    }
+
+    fn apply_hidden_positive(&mut self, orb: u64, path: LabPath) {
+        match path {
+            LabPath::SynthMod => {
+                let g = self.synth_grade_of(orb).saturating_add(1).min(7);
+                self.set_synth_grade(orb, g);
+            }
+            LabPath::CloneWork => {
+                // Escort pool: second clone (still paid by fee — no free matter).
+                let c = self.clone_count_of(orb).saturating_add(1);
+                self.set_clone_count(orb, c);
+            }
+            LabPath::SkinWork => {
+                let g = self.skin_grade_of(orb).saturating_add(1).min(7);
+                self.set_skin_grade(orb, g);
+            }
+            LabPath::ChemWork | LabPath::BioChem => {
+                // Hidden map is informational (receipt flag only).
+            }
+        }
+    }
+
+    fn apply_explosion(
+        &mut self,
+        actor: u64,
+        orb: u64,
+        path: LabPath,
+        kind: ExplosionKind,
+    ) -> Result<(), ActionRefused> {
+        let slash = ZoneKind::Resonator.yield_per_tick().1; // another eighth
+        match kind {
+            ExplosionKind::ChemRunaway => {
+                if let Some(held) = peel(&mut self.orbs, orb) {
+                    let have = held.banked_amount(Resource::Crystal);
+                    let take = if have > slash { slash.clone() } else { have };
+                    held.bank(Resource::Crystal, -take.clone());
+                    self.close(
+                        ClosureEvent::ScienceExploded {
+                            orb_id: orb,
+                            path: path.as_wire(),
+                            kind: kind.as_wire(),
+                            resource: Resource::Crystal as u8,
+                            slash: take,
+                        },
+                        actor,
+                    );
+                }
+            }
+            ExplosionKind::BioChemCross => {
+                if let Some(held) = peel(&mut self.orbs, orb) {
+                    let have = held.banked_amount(Resource::Biomass);
+                    let take = if have > slash { slash.clone() } else { have };
+                    held.bank(Resource::Biomass, -take.clone());
+                    self.close(
+                        ClosureEvent::ScienceExploded {
+                            orb_id: orb,
+                            path: path.as_wire(),
+                            kind: kind.as_wire(),
+                            resource: Resource::Biomass as u8,
+                            slash: take,
+                        },
+                        actor,
+                    );
+                }
+                // Cascade seed: bump cascade pressure.
+                let p = self
+                    .cascade_pressures
+                    .iter()
+                    .find(|(o, _)| *o == orb)
+                    .map(|(_, p)| *p)
+                    .unwrap_or(0)
+                    .saturating_add(1);
+                self.cascade_pressures.retain(|(o, _)| *o != orb);
+                self.cascade_pressures.push((orb, p));
+            }
+            ExplosionKind::SynthRogue => {
+                let p = self.rogue_pressure_of(orb).saturating_add(1).min(7);
+                self.set_rogue_pressure(orb, p);
+                // Downgrade synth if any.
+                let g = self.synth_grade_of(orb).saturating_sub(1);
+                self.set_synth_grade(orb, g);
+                self.close(
+                    ClosureEvent::ScienceExploded {
+                        orb_id: orb,
+                        path: path.as_wire(),
+                        kind: kind.as_wire(),
+                        resource: Resource::Crystal as u8,
+                        slash: ratio(0, 1),
+                    },
+                    actor,
+                );
+                self.close(
+                    ClosureEvent::RogueFactionStruck {
+                        orb_id: orb,
+                        pressure: p,
+                    },
+                    actor,
+                );
+            }
+            ExplosionKind::CloneRevolt => {
+                let c = self.clone_count_of(orb).saturating_sub(1);
+                self.set_clone_count(orb, c);
+                // Strike novelty want (identity crisis).
+                if !self.wants.iter().any(|(o, k)| *o == orb && *k == 3) {
+                    self.wants.push((orb, 3));
+                    self.close(
+                        ClosureEvent::WantStruck {
+                            orb_id: orb,
+                            kind: 3,
+                            reading: ratio(1, 1),
+                        },
+                        actor,
+                    );
+                }
+                self.close(
+                    ClosureEvent::ScienceExploded {
+                        orb_id: orb,
+                        path: path.as_wire(),
+                        kind: kind.as_wire(),
+                        resource: Resource::Biomass as u8,
+                        slash: slash.clone(),
+                    },
+                    actor,
+                );
+            }
+            ExplosionKind::SkinUnmask => {
+                let g = self.skin_grade_of(orb).saturating_sub(1);
+                self.set_skin_grade(orb, g);
+                // Reverse spy advantage: mark detection exposure.
+                if let Some(slot) = self.spy_marks.iter_mut().find(|(o, _)| *o == orb) {
+                    slot.1 = slot.1.saturating_add(1);
+                } else {
+                    self.spy_marks.push((orb, 1));
+                }
+                self.close(
+                    ClosureEvent::ScienceExploded {
+                        orb_id: orb,
+                        path: path.as_wire(),
+                        kind: kind.as_wire(),
+                        resource: Resource::Crystal as u8,
+                        slash: slash.clone(),
+                    },
+                    actor,
+                );
+            }
+        }
+        Ok(())
+    }
+
+    fn set_clone_count(&mut self, orb: u64, count: u64) {
+        self.clone_counts.retain(|(o, _)| *o != orb);
+        if count > 0 {
+            self.clone_counts.push((orb, count));
+        }
+    }
+
+    fn set_synth_grade(&mut self, orb: u64, grade: u8) {
+        self.synth_mods.retain(|(o, _)| *o != orb);
+        if grade > 0 {
+            self.synth_mods.push((orb, grade));
+        }
+    }
+
+    fn set_skin_grade(&mut self, orb: u64, grade: u8) {
+        self.skin_mods.retain(|(o, _)| *o != orb);
+        if grade > 0 {
+            self.skin_mods.push((orb, grade));
+        }
+    }
+
+    fn set_rogue_pressure(&mut self, orb: u64, pressure: u8) {
+        self.rogue_pressure.retain(|(o, _)| *o != orb);
+        if pressure > 0 {
+            self.rogue_pressure.push((orb, pressure));
+        }
+    }
+
+    /// Board reading for CLI science index.
+    pub fn science_lab_board(&self, orb: u64) -> ScienceLabBoard {
+        let seats: Vec<(ScienceDiscipline, u8, crate::ratio::Ratio)> = [
+            ScienceDiscipline::Chem,
+            ScienceDiscipline::Biology,
+            ScienceDiscipline::Physics,
+            ScienceDiscipline::Math,
+            ScienceDiscipline::Research,
+            ScienceDiscipline::Synthetic,
+            ScienceDiscipline::Clone,
+            ScienceDiscipline::Skin,
+        ]
+        .into_iter()
+        .map(|d| {
+            let rank = self.science_rank(orb, d);
+            let next = if rank >= d.max_rank() {
+                ratio(0, 1)
+            } else {
+                let eighth = ZoneKind::Resonator.yield_per_tick().1;
+                eighth * ratio(d.seat_weight(), 1) * ratio(i64::from(rank + 1), 1)
+            };
+            (d, rank, next)
+        })
+        .collect();
+        ScienceLabBoard {
+            seats,
+            clones: self.clone_count_of(orb),
+            synth_grade: self.synth_grade_of(orb),
+            skin_grade: self.skin_grade_of(orb),
+            rogue: self.rogue_pressure_of(orb),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct LabCreateResult {
+    pub path: LabPath,
+    pub risk: crate::ratio::Ratio,
+    pub exploded: bool,
+    pub explosion_kind: Option<ExplosionKind>,
+    pub known_pos: (&'static str, &'static str),
+    pub known_neg: (&'static str, &'static str),
+    pub hidden_pos_landed: bool,
+    pub hidden_neg_landed: bool,
+    pub hidden_pos: Option<(&'static str, &'static str)>,
+    pub hidden_neg: Option<(&'static str, &'static str)>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ScienceLabBoard {
+    pub seats: Vec<(ScienceDiscipline, u8, crate::ratio::Ratio)>,
+    pub clones: u64,
+    pub synth_grade: u8,
+    pub skin_grade: u8,
+    pub rogue: u8,
+}

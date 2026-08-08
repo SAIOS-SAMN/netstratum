@@ -122,6 +122,9 @@ fn compound_and_catalog_and_iso_union_seal_b() {
     // Science bench ranks something.
     let ranked = w.bench_science(FIRST_ORB);
     let _ = ranked;
+    // Seat chemistry lab (paid unlock) before catalog.
+    w.seat_science(FIRST_ORB, cfe::almanac::ScienceDiscipline::Chem)
+        .expect("seat chem");
     // Catalog the gem (crystal fee).
     let k = w.chem_catalog_gem(FIRST_ORB, gem).expect("catalog");
     assert!(k >= 1);
