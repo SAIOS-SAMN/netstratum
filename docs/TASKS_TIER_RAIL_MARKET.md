@@ -141,6 +141,7 @@ strand-adapter · isthmus/datum-adapter
 | H1.6 | [x] Deep boards: research_board · intel_board · link_board · doctrine | H1.5 | engine pure |
 | H1.7 | [x] Deep deeds from hub: forge · probe · exfil · sabotage · estate | H1.6 | mut bench |
 | H1.8 | [x] Root INTEL peer to BENCH/TRADE (knowledge activity, not craft) | H1.7 | `intel` |
+| H1.9 | [x] Full domain wire: offices·medium·fleet·assay·culture·books·opsec·stamp·element·diplo local/stellar | H1.8 | `docs/HUBS.md` |
 
 ---
 

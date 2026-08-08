@@ -25,7 +25,7 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 | **X7 adapters** | **LANDED** in-tree (`cfe::xrail`) — no external path dep |
 | **Wave 6 O6.3–O6.5** | **LANDED** — Exchange MM · Assay court · Vault custody |
 | **CHEM science** | **LANDED** — civ utility · dark-7 · iso-union · catalog |
-| **CLI hubs** | **LANDED** — `bench` BUILD · `intel` KNOW · `trade` RUN (peers) |
+| **CLI hubs** | **FULL MAP** — see `docs/HUBS.md` · bench·intel·trade complete domains |
 | **Optional open** | stellar capacity game · hull lease · Wave 8 AP · live isthmus peer |
 | Docs | Phases **1–5** + X7 + Wave 6 + chem science + hub menus |
 | Dirty / other lane | do not `git add -A` without reviewing observer/other-lane files |

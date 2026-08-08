@@ -34,6 +34,14 @@ fn hub_status_apis_construct_on_founded_world() {
     let _ = lb.score;
     let db = w.doctrine_board();
     assert_eq!(db.ranks.len(), 7);
+    // Expanded domain surfaces
+    let _ = w.medium_integrity(FIRST_ORB);
+    let _ = w.dual_use_atm();
+    let _ = w.assay_seated();
+    let _ = w.literate(FIRST_ORB);
+    let _ = w.literature(FIRST_ORB);
+    let _ = w.has_crossed();
+    let _ = w.treaties();
     // TRADE surfaces.
     let _ = w.market_integrity();
     let _ = w.deep_rail_status();
