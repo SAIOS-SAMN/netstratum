@@ -91,7 +91,7 @@ fn index(style: Style) {
 fn topics(style: Style) {
     banner_line(style, "HELP TOPICS");
     for (name, blurb) in [
-        ("bench", "BUILD hub — craft (+ dual leaves for intel/trade/diplo)"),
+        ("bench", "BUILD hub — craft (+ dual twins: bench intel|trade|diplo)"),
         ("intel", "KNOWLEDGE activity — research · bases · ops · link"),
         ("trade-hub", "CIRCULATE activity — market · haul · vault"),
         ("diplo", "DIPLOMACY activity — local · stellar · mesh"),
@@ -102,7 +102,6 @@ fn topics(style: Style) {
         ("market", "offers and trade clears"),
         ("routes", "ROUTE-1 and element lanes"),
         ("colony", "found / zone / tick / collect"),
-        ("diplo", "treaties and war walls"),
         ("topics", "this list"),
     ] {
         row(style, name, blurb);
@@ -118,7 +117,7 @@ fn bench_help(style: Style) {
     banner_line(style, "BENCH — BUILD COMPONENTS");
     println!(
         "  {}",
-        style.dim("Craft only. See docs/HUBS.md. Knowledge → intel · run → trade.")
+        style.dim("Craft only. Dual law: activity root S ⇒ bench S. docs/HUBS.md")
     );
     println!();
     println!("  {}", style.section("MATTER & PLACE"));
@@ -128,19 +127,21 @@ fn bench_help(style: Style) {
     row(style, "bench estate", "chart · ladder · parcels · appraise");
     row(style, "bench medium", "ATM reinforce · tamper");
     println!();
-    println!("  {}", style.section("CRAFT"));
+    println!("  {}", style.section("CRAFT DOMAINS"));
     row(style, "bench chem", "alchemy craft · iso · catalog");
     row(style, "bench econ", "instruments · routes · rails");
     row(style, "bench offices", "seat exchange|vault|assay|anchor");
     row(style, "bench fleet", "yard · mint hull · scrap");
     row(style, "bench assay", "T7 court · challenge");
     row(style, "bench doctrine", "posture · KIN prep");
-    row(style, "bench diplo", "diplomatic components → root diplo");
-    row(style, "bench intel-craft", "forge chain · instruments → intel");
     println!();
-    println!("  {}", style.section("DUAL LAW"));
-    row(style, "activity root S", "run on S; craft on bench S / bench *-craft");
-    row(style, "intel · trade · diplo", "activity peers");
+    println!("  {}", style.section("DUAL LAW — activity roots as craft twins"));
+    row(style, "bench intel", "knowledge tools → root intel");
+    row(style, "bench trade", "econ · fleet · offices → root trade");
+    row(style, "bench diplo", "councils · bonds · seats → root diplo");
+    println!();
+    println!("  {}", style.section("ACTIVITY PEERS"));
+    row(style, "intel · trade · diplo", "run (not craft)");
     row(style, "bench · back · home", "← bench root");
 }
 
@@ -164,7 +165,7 @@ fn intel_help(style: Style) {
     banner_line(style, "INTEL — KNOWLEDGE ACTIVITY");
     println!(
         "  {}",
-        style.dim("Operate knowledge. Bench builds tools; INTEL uses them. docs/HUBS.md")
+        style.dim("Operate knowledge. Craft tools: `bench intel`. docs/HUBS.md")
     );
     println!();
     row(style, "intel research [forge|practice]", "constellation game");
@@ -176,15 +177,16 @@ fn intel_help(style: Style) {
     row(style, "intel link", "cross-pollination · license");
     row(style, "intel wants", "cognitive wants");
     println!();
+    row(style, "bench intel", "CRAFT components for knowledge");
     row(style, "intel · back · home", "← intel root");
-    row(style, "bench · trade", "peer roots");
+    row(style, "bench · trade · diplo", "peer roots");
 }
 
 fn trade_hub_help(style: Style) {
     banner_line(style, "TRADE — CIRCULATE ACTIVITY");
     println!(
         "  {}",
-        style.dim("Run components. Craft on bench; knowledge on intel. docs/HUBS.md")
+        style.dim("Run components. Craft: `bench trade`. Knowledge: intel. docs/HUBS.md")
     );
     println!();
     row(style, "trade books", "offers · instruments · market war");
@@ -194,9 +196,11 @@ fn trade_hub_help(style: Style) {
     row(style, "trade rails", "R1–R4 · Anchor");
     row(style, "trade vault", "custody · margin");
     row(style, "trade aperture", "cross-world haul");
-    row(style, "trade diplo", "LOCAL treaties · renounce");
-    row(style, "trade stellar", "STELLAR: crossed · war · aperture · license");
+    row(style, "trade diplo", "→ diplo local (own root)");
+    row(style, "trade stellar", "→ diplo stellar (own root)");
     row(style, "trade desk", "interactive suite");
+    println!();
+    row(style, "bench trade", "CRAFT econ · fleet · offices");
     println!();
     row(
         style,
@@ -204,7 +208,7 @@ fn trade_hub_help(style: Style) {
         "barter clear",
     );
     row(style, "trade · back · home", "← trade root");
-    row(style, "bench · intel", "peer roots");
+    row(style, "bench · intel · diplo", "peer roots");
 }
 
 fn desk_help(style: Style) {
