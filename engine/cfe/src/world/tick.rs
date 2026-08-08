@@ -431,7 +431,23 @@ impl World {
                     // the binding modulates what a building DOES, and
                     // `priced_as` reads the base fixed at build time.
                     let seat = zone.priced_as();
-                    let (resource, amount) = crate::dop::zone_yield(seat, metabolism);
+                    let (resource, mut amount) = crate::dop::zone_yield(seat, metabolism);
+                    // TAXON ECONOMY (37): extractive · regenerative · balanced
+                    // + planet fit scale yields. Flatlander baseline = balanced × native.
+                    let eco = self.taxon_economy_of(*orb_id);
+                    let mode_scale = match seat {
+                        ZoneKind::Extractor => {
+                            crate::almanac::extract_yield_scale(eco.mode, eco.fit)
+                        }
+                        ZoneKind::Regenerator => {
+                            crate::almanac::regen_yield_scale(eco.mode, eco.fit)
+                        }
+                        ZoneKind::Habitat => {
+                            crate::almanac::habitat_yield_scale(eco.mode, eco.fit)
+                        }
+                        _ => ratio(1, 1),
+                    };
+                    amount = amount * mode_scale;
                     let boost = terrain_boost(&terrain, *orb_id, zone, &standing);
                     // The class's mechanism composes WITH the adopted
                     // practices, never instead of them: identity and

@@ -12,6 +12,39 @@ use crate::almanac::{
 use crate::dop::{Resource, ZoneKind};
 
 impl World {
+    /// Taxon economy reading (mode · planet fit · flatlander flag).
+    pub fn taxon_economy_of(&self, orb: u64) -> crate::almanac::TaxonEconomy {
+        let (class, clade) = self.taxon.unwrap_or((0, crate::almanac::FLATLANDER_CLADE));
+        // Unsealed taxon defaults flatlander baseline for play readability.
+        let clade = if self.taxon.is_none() {
+            crate::almanac::FLATLANDER_CLADE
+        } else {
+            clade
+        };
+        let class = if self.taxon.is_none() { 7 } else { class }; // apex-solitary baseline class
+        let region = self.thermal_region_of(orb);
+        crate::almanac::taxon_economy(class, clade, region)
+    }
+
+    pub fn regenerator_tech_need(&self) -> u8 {
+        crate::almanac::regenerator_tech_need(self.taxon_economy_of(FIRST_ORB).mode)
+    }
+
+    pub fn extractor_soft_cap(&self) -> u64 {
+        crate::almanac::extractor_soft_cap(self.taxon_economy_of(FIRST_ORB).mode)
+    }
+
+    fn thermal_region_of(&self, orb: u64) -> Option<crate::almanac::ThermalRegion> {
+        let class = self.star?;
+        let site = self.orb_by_id(orb)?.thermal.as_ref()?;
+        let t = crate::almanac::grained_t_eq4(
+            &class.luminosity(),
+            site.albedo.value(),
+            site.orbit_r.value(),
+        );
+        Some(crate::almanac::region_of(&t))
+    }
+
     /// Rank of a science seat on an orb (0 = unseated).
     pub fn science_rank(&self, orb: u64, discipline: ScienceDiscipline) -> u8 {
         self.science_seats
@@ -128,7 +161,11 @@ impl World {
         // World resonator eighth × pure affinity law (metabolism-coloured).
         let eighth = ZoneKind::Resonator.yield_per_tick().1;
         let weight = discipline.seat_weight();
-        let aff = science_seat_affinity(met, discipline, clade).fee_mult();
+        let mut aff = science_seat_affinity(met, discipline, clade).fee_mult();
+        // Research coloured by economic mode (extractive pays more for intel path).
+        if matches!(discipline, ScienceDiscipline::Research) {
+            aff *= crate::almanac::research_affinity_mult(self.taxon_economy_of(orb).mode);
+        }
         let fee = eighth * ratio(weight, 1) * ratio(i64::from(next_rank), 1) * ratio(aff, 1);
         let _law = science_seat_fee_for(discipline, next_rank, met, clade);
         let held = peek(&self.orbs, orb).expect("checked");

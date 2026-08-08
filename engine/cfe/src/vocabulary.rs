@@ -627,7 +627,14 @@ pub fn clade_from_word(word: &str) -> Option<u8> {
     match word {
         "unrecorded" => Some(0),
         "ailuroform" | "felid" | "feliform" => Some(1),
-        "bimaniform" | "humanoid" | "bimanus" => Some(2),
+        "bimaniform"
+        | "humanoid"
+        | "bimanus"
+        | "flatlander"
+        | "flatland"
+        | "human"
+        | "humans"
+        | "baseline" => Some(2),
         "cryocoherens" | "cryo-coherent" | "cryo" => Some(3),
         "lithophage" | "lithic" | "lithovore" => Some(4),
         "hypobiotid" | "tardigrade" | "void-sleeper" => Some(5),

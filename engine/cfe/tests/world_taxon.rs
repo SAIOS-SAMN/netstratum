@@ -91,11 +91,18 @@ fn the_taxon_rides_the_snapshot_and_v1_still_reads() {
     // moment a new field is added anywhere but the tail, which is
     // exactly how #42 was caught inserting its block mid-stream
     // between the routes and the practices.
+    // Historical v1 pin: every later schema APPENDS empty tails. Find the
+    // cut that yields a lawful SCHEMA_V1 stream (probe, not a frozen
+    // byte count — empty trail grew through V15/V16 science labs).
     let current = codec::state_bytes(&unsealed);
-    let mut v1 = current.clone();
-    v1[0] = 1; // SCHEMA_V1
-    v1.truncate(v1.len() - 6);
-    let old = codec::from_state_bytes(&v1).expect("v1 reads whole");
+    let old = (0..current.len())
+        .find_map(|cut| {
+            let mut v1 = current.clone();
+            v1[0] = 1; // SCHEMA_V1
+            v1.truncate(current.len().saturating_sub(cut));
+            codec::from_state_bytes(&v1)
+        })
+        .expect("some truncation yields a lawful v1 stream");
     assert_eq!(old.taxon, None, "v1 carries no taxon — lawfully unrecorded");
 }
 

@@ -182,7 +182,9 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             (ratio(1, 1), ratio(1, 1), ratio(1, 1)), None,
         ),
         seat(
-            "Anunnaki", "anunnaki", "bimaniform-regia", "bimaniform",
+            // FLATLANDER BASELINE seat (clade bimaniform) — knowledge baseline
+            // for design; extract+regen both natural (EconomicMode::Balanced).
+            "Anunnaki", "anunnaki", "bimaniform-flatlander", "bimaniform",
             "we plan in stone and fire; we no longer dig",
             "expansionist", "mineral", "planar",
             Some("progenitor"), &[],
@@ -263,7 +265,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
         // unbounded for sovereigns (registry.rs), so three founding
         // seats do not exhaust the band.
         seat(
-            "Kemet", "kemet", "bimaniform-stela", "bimaniform",
+            "Kemet", "kemet", "bimaniform-flatlander", "bimaniform",
             "what is written in stone outlives the flood",
             "empiricist", "mineral", "planar",
             Some("sovereign"), &["anunnaki"],

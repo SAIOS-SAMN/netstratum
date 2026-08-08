@@ -145,6 +145,7 @@ strand-adapter · isthmus/datum-adapter
 | H1.10 | [x] Dual law: activity root S ⇒ bench S (diplomatic · intel · trade craft twins) | H1.9 | pin |
 | H1.11 | [x] Preferred name `diplomatic` (diplo alias) + science benches (chem·bio·phys·math·research) | H1.10 | pin |
 | C1.8 | [x] Seated science labs: pay unlock · dual ± · explosion · synth/clone/skin | H1.11 | tags 159–162 · SCHEMA_V16 · kernel 0.37 |
+| C1.9 | [x] Taxon economy: extractive·regenerative·balanced + flatlander baseline + planet fit | C1.8 | `taxon_economy` pins · regen tech soften |
 
 ---
 

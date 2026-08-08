@@ -24,6 +24,7 @@ pub mod compound;
 pub mod locality;
 pub mod periodic;
 pub mod science;
+pub mod taxon_economy;
 pub mod thermal;
 
 pub use compound::{compounds, gem_of, knowledge_of, recipe_of, Compoundable};
@@ -35,6 +36,12 @@ pub use science::{
     reveals_hidden_positive, science_seat_affinity, science_seat_fee, science_seat_fee_for,
     survival_utility, CivAxes, DarkPull, ExplosionKind, LabPath, LabPoleCard, ScienceDiscipline,
     SeatAffinity,
+};
+pub use taxon_economy::{
+    clade_preferred_region, economic_mode, extract_yield_scale, extractor_soft_cap,
+    flatlander_species, flatlander_word, habitat_yield_scale, is_flatlander_baseline, planet_fit,
+    regen_yield_scale, regenerator_tech_need, research_affinity_mult, taxon_economy, EconomicMode,
+    PlanetFit, TaxonEconomy, FLATLANDER_CLADE,
 };
 pub use thermal::{
     ceiling4, grained_t_eq4, orbit_on_grain, region_of, workable_at, ThermalRegion, ORBIT_GRAIN,

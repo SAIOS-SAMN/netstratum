@@ -1,218 +1,174 @@
-# IMPERIUM TAXON — species · clades · civs · lab seats
+# IMPERIUM TAXON — species · clades · economy · planet · labs
 
-**Status:** living audit (2026-08-08).  
-**Law:** orient off human-default thinking. A plasmiform line does not
-run a flatlander's lab. Names are locality + mechanism + manifestation
-(`06` §2a), not Earth common animals.
-
----
-
-## 0. Three axes of "what lives"
-
-| Layer | Codes | Kernel? | What it is |
-|-------|-------|---------|------------|
-| **Class** (archetype) | 0–7 | yes | Mechanism family (`15_TAXON` §2) |
-| **Clade** (taxon expression) | 0–20 | yes | How that mechanism is embodied |
-| **Metabolism** | 1 mineral · 2 biotic · 3 plasmic | genesis | What is food |
-| **Civilization (line)** | free name/sigil | register | One people on the board |
-| **Species string** | free text | register only | In-world tongue — **never** Earth common names |
-
-Kernel sees **codes only**. Names are register/imperium tongue.
+**Status:** living law (2026-08-08).  
+**Authority:** ports and extends `15_TAXON` (class/clade wire + seal).  
+**Pure module:** `cfe::almanac::taxon_economy`.
 
 ---
 
-## 1. Classes (closed, wire stable)
+## 0. Layers (kernel sees codes only)
 
-| # | Sigil | Class word | Mechanism (not Earth) |
-|---|-------|------------|------------------------|
-| 0 | ∅ | unclassed | lawful empty |
-| 1 | ⬡ | biotic-swarm | many bodies, one lattice |
-| 2 | ◈ | geodic-lithovore | stone-eater / lattice rebuild |
-| 3 | ◐ | metashifter | form unfixed / veil-native |
-| 4 | ≋ | telepathic-resonant | phase agreement / coherence |
-| 5 | ⊚ | pelagic-aerial | body free inside a medium |
-| 6 | ∿ | plasma-field | current sheets / MHD mind |
-| 7 | ▲ | **apex-solitary** | solitary apex (was "apex-terrestrial" — struck Earth bias) |
-
-Wire codes **locked**. Class words are mechanism; "terrestrial" renamed
-away from Earth-default.
+| Layer | Codes | What |
+|-------|-------|------|
+| **Class** | 0–7 | Archetype mechanism (`15` §2) |
+| **Clade** | 0–20 | Body expression (`15` §3 · imperium words) |
+| **Metabolism** | 1 mineral · 2 biotic · 3 plasmic | Food (`04` genesis) |
+| **Economic mode** | derived | extractive · regenerative · **balanced** |
+| **Planet fit** | derived | native · tolerant · hostile |
+| **Line / species string** | register | Imperium tongue — never Earth common animals |
 
 ---
 
-## 2. Clades — Latin root → sentient space expression
+## 1. Classes (from `15_TAXON` — ported)
 
-Earth common names (cat, human, whale, bee, octopus, bird, fish, snail)
-are **barred** as display words. Wire codes stay; **words** are Latin-
-rooted and extrapolated to void/space sentience.
-
-| # | Old (struck as display) | Latin root | **Imperium word** | Sentience extrapolation |
-|---|-------------------------|------------|-------------------|-------------------------|
-| 0 | unrecorded | — | `unrecorded` | — |
-| 1 | felid | *Felidae* / *Ailurus* | **`ailuroform`** | solitary apex hunters; harmonic pride-lines |
-| 2 | humanoid | *bimanus* (two-handed) | **`bimaniform`** | planar tool-makers; not "humans" |
-| 3 | cryo-coherent | *cryo* + *cohaerens* | **`cryocoherens`** | superfluid/BEC minds |
-| 4 | lithic | *lithos* + *-phage* | **`lithophage`** | stone-metabolism |
-| 5 | tardigrade | *Tardigrada* / hypobiosis | **`hypobiotid`** | void-sleeper cryptobiosis |
-| 6 | cetacean | *Cetacea* → sonus | **`soniform`** | pressure-song volumetric mind |
-| 7 | cephalopod | *Cephalopoda* / brachia | **`polybrachia`** | multi-arm distributed cortex |
-| 8 | hymenopteran | *Hymenoptera* / eusocial | **`hexasocial`** | six-limb eusocial compute |
-| 9 | amphibian | *Amphibia* / dual medium | **`amphiform`** | dual-medium survival |
-| 10 | fungal | *Mycota* | **`mycotiform`** | hyphal network memory |
-| 11 | cnidarian | *Cnidaria* / *Anthozoa* | **`cnidiform`** | accrete-polyp colony |
-| 12 | plasmoid | plasma | **`plasmiform`** | free plasma intelligence |
-| 13 | syzygial | *syzygia* | **`syzygiform`** | conjunction-only existence |
-| 14 | endolithic | *endon* + *lithos* | **`endolithid`** | pore-space deep rock |
-| 15 | avian | *volare* (to fly) | **`volatiform`** | atmospheric free-body |
-| 16 | teleost | *Actinopterygii* | **`actinoform`** | finned void/sea line |
-| 17 | revenant | return | **`revenid`** | unclassed returners |
-| 18 | gastropod | *Gastropoda* / helix | **`heliciform`** | spiral-shell reserved seat |
-| 19 | draconic | *draco* form | **`draconiform`** | class-4 coherence apex expression |
-| 20 | metashifting | *meta* + *morph* | **`metamorphid`** | veil-native form shift |
-
-**Alias law:** old English clade words still **parse** (`from_word`) so
-sealed chronicles and CLI muscle memory do not break; **display** is
-imperium only.
+| # | Sigil | Word | Seated lines |
+|---|-------|------|--------------|
+| 0 | ∅ | unclassed | revenants |
+| 1 | ⬡ | biotic-swarm | Vitreous Hex, Klethaxu, Mycelial Weft, Coralline, Deepmat |
+| 2 | ◈ | geodic-lithovore | Slagborn, Tunborn, Agarthan |
+| 3 | ◐ | metashifter | Darlok |
+| 4 | ≋ | telepathic-resonant | Archon, Draco, Syzygy |
+| 5 | ⊚ | pelagic-aerial | Echowright, Brine Cortex, Frostwright |
+| 6 | ∿ | plasma-field | Coronal Choir |
+| 7 | ▲ | **apex-solitary** | Lyran, Anunnaki (flatlander seat class) |
 
 ---
 
-## 3. Founding civilizations (compiled roster)
+## 2. Clades — Latin → space sentience (ported + display)
 
-### 3.1 LOCKED — do not invent free renames without operator ruling
+| # | Imperium | Alias (parse) | Role |
+|---|----------|---------------|------|
+| 1 | ailuroform | felid | solitary apex |
+| 2 | **bimaniform** | humanoid, **flatlander**, **human**, humans | **FLATLANDER BASELINE** |
+| 3 | cryocoherens | cryo-coherent | superfluid mind |
+| 4 | lithophage | lithic | stone-eater |
+| 5 | hypobiotid | tardigrade | void-sleeper |
+| 6 | soniform | cetacean | pressure-song |
+| 7 | polybrachia | cephalopod | multi-arm cortex |
+| 8 | hexasocial | hymenopteran | eusocial comb |
+| 9 | amphiform | amphibian | dual-medium |
+| 10 | mycotiform | fungal | hyphal network |
+| 11 | cnidiform | cnidarian | accrete-polyp |
+| 12 | plasmiform | plasmoid | plasma intelligence |
+| 13 | syzygiform | syzygial | conjunction-form |
+| 14 | endolithid | endolithic | pore-rock |
+| 15 | volatiform | avian | free-body atmosphere |
+| 16 | actinoform | teleost | finned line |
+| 17 | revenid | revenant | returners |
+| 18 | heliciform | gastropod | reserved spiral |
+| 19 | draconiform | draconic | class-4 sub-archetype |
+| 20 | metamorphid | metashifting | veil-native |
 
-These seat **class structure**, band offices, or already-ruled names.
-Describe physiology/mechanism; do not casually rename the **line name**.
-
-| Line | Class | Clade (imperium) | Why locked |
-|------|-------|------------------|------------|
-| **Tunborn** | 2 geodic | hypobiotid | Fifth progenitor seat (`12_UNION` §2); head of Slagborn line |
-| **Slagborn** | 2 | hypobiotid | Operator ruled rename **declined** (`06` §2a) — name STANDS |
-| **Echowright** | 5 pelagic | soniform | Operator-ruled locality name (was Deep Chorus) |
-| **Coronal Choir** | 6 plasma | plasmiform | Class 6 seat — plasma progenitor |
-| **Agarthan** | 2 | lithophage | Class 2 progenitor seat |
-| **Archon** + **Draco** | 4 | cryocoherens / draconiform | *One archetype, two expressions* ruling |
-| **Darlok** | 3 | metamorphid | Class 3 seat FILLED |
-| **Lyran** · **Anunnaki** | 7 | ailuroform / bimaniform | Class 7 sole seaters — empty class if dropped |
-
-Archetype **myth-draw** (Lyran, Anunnaki, Archon, Draco, Pleiadian, Darlok)
-is **game content**, not physics authority (`polities.rs` ruling). Line
-names stay until operator renames the **imperium court list**.
-
-### 3.2 RENAMEABLE under imperium (species string + Earth-culture echo)
-
-| Line | Station | Clade | Species string (imperium) | Note |
-|------|---------|-------|---------------------------|------|
-| Lyran | progenitor | ailuroform | `ailuroform-primus` | was first-felid |
-| Anunnaki | progenitor | bimaniform | `bimaniform-regia` | was royal-blood humanoid |
-| Pleiadian | watcher | bimaniform | `bimaniform-septem` | seven-watch |
-| Kemet | sovereign | bimaniform | `bimaniform-stela` | Record Keeper — Earth-culture name stands until court rename |
-| Baktun | sovereign | bimaniform | `bimaniform-calendar` | same |
-| Dogon | sovereign | bimaniform | `bimaniform-scribe` | same |
-| Coralline | watcher | cnidiform | `cnidiform-accrete` | |
-| Vitreous Hex | — | hexasocial | `hexasocial-comb` | was hex-colony hymenopteran |
-| Brine Cortex | — | polybrachia | `polybrachia-cortex` | was eightfold cephalopod |
-| Frostwright | — | amphiform | `amphiform-rime` | |
-| Mycelial Weft | — | mycotiform | `mycotiform-hypha` | |
-| Syzygy | — | syzygiform | `syzygiform-conjunction` | |
-| Deepmat | — | endolithid | `endolithid-understone` | |
-| Klethaxu | — | hexasocial | `hexasocial-trail` | |
-| Tunborn | progenitor | hypobiotid | `hypobiotid-voidsleeper` | |
-| Slagborn | — | hypobiotid | `hypobiotid-endure` | |
-| Echowright | — | soniform | `soniform-songline` | |
-| Coronal Choir | progenitor | plasmiform | `plasmiform-sheet` | |
-| Agarthan | progenitor | lithophage | `lithophage-stonewill` | |
-| Archon | watcher | cryocoherens | `cryocoherens-still` | |
-| Draco | observer | draconiform | `draconiform-umbra` | |
-| Darlok | — | metamorphid | `metamorphid-veil` | |
-
-**Earth-culture court names** (Kemet · Baktun · Dogon · Lyran · Anunnaki ·
-Pleiadian) are **listed for operator court rename**, not silently
-rewritten: they seat office bands and lineage. Species/clade words move
-now; **line names** wait for imperium-court ruling.
-
-### 3.3 World-book peoples (06, not all compiled)
-
-Glasskeepers · Emberkin · Marrow · Coherent · Wanderers — design
-physiology only; not all are `founding_polities` seats.
+Wire codes **locked**. Display is imperium; aliases parse forever.
 
 ---
 
-## 4. Science / lab seats are **not universal**
+## 3. FLATLANDER BASELINE (restored and named)
 
-A plasmiform does not "unlock biology" the way a polybrachia does.
-Seats are **capability markets coloured by sealed metabolism + clade**.
+| Field | Value |
+|-------|--------|
+| Clade wire | **2** |
+| Imperium word | `bimaniform` |
+| Knowledge aliases | `flatlander` · `human` · `humans` · `baseline` |
+| Species string | `bimaniform-flatlander` |
+| Economic mode | **Balanced** (always) |
+| Design role | Earth-trained operator knowledge is **this** suite |
 
-### 4.1 Metabolism primary seats
+**Lines that seat the baseline:** Anunnaki (progenitor), Kemet / Baktun / Dogon
+(sovereign Record Keepers), Pleiadian (watcher) — all `bimaniform`.
 
-| Metabolism | Primary lab seats (fee normal) | Secondary (fee ×2 or R2 gate) | Alien / rarely seated |
-|------------|--------------------------------|-------------------------------|------------------------|
-| **Mineral** (1) | chem · physics · math · research · synthetic | biology · clone | skin (mask rare) |
-| **Biotic** (2) | biology · chem · research · clone · skin | physics · math | synthetic (graft risk ↑) |
-| **Plasmic** (3) | physics · math · research · synthetic · chem | — | biology · clone · skin (body labs alien) |
-
-### 4.2 Clade overlays (examples)
-
-| Clade | Lab colour |
-|-------|------------|
-| **plasmiform** | Physics/math first; "biology" is field topology, not biomass habitat |
-| **polybrachia** | Volumetric research · math (distributed cortex); skin = chromatophore craft |
-| **soniform** | Harmonic math · research; medium is pressure-song not ATM gas |
-| **hexasocial** | Math · research swarm; chem as comb-secretion craft |
-| **hypobiotid** | Physics · chem (desiccation / vacuum); clone rare |
-| **lithophage** | Chem · physics (pressure work); biology is pore-life optional |
-| **ailuroform** / **bimaniform** | Classic planar suite — closest to "flatlander" default |
-| **metamorphid** | Skin · synthetic · research (veil crafts) |
-| **draconiform** / **cryocoherens** | Math · physics · research (coherence engines) |
-
-### 4.3 Flatlander vs other (play meaning)
-
-| Archetype | Who | Default seat path |
-|-----------|-----|-------------------|
-| **Flatlander** | bimaniform / ailuroform · planar perception · biotic or mineral | chem → biology → research → clone/skin |
-| **Volumetric mind** | polybrachia · soniform · pelagic class | math → research → skin/chromatophore → chem |
-| **Field mind** | plasmiform · plasma-field class | physics → math → synthetic → chem (no clone) |
-| **Stone mind** | lithophage · hypobiotid · geodic | chem → physics → research |
-| **Swarm mind** | hexasocial · biotic-swarm | math → research → chem (comb) → clone (caste) |
-| **Veil mind** | metamorphid | skin → synthetic → research |
-
-Explosion paths stay universal law; **which seats exist cheaply** is
-species-coloured. That is the anti-human-default: the menu is not one
-Earth lab with reskins.
+Unsealed worlds **default** taxon economy to flatlander balanced so play
+and tests have a readable baseline before `seal_taxon`.
 
 ---
 
-## 5. Barred words (display)
+## 4. Economic modes (all generative)
 
-Never as species string, residual voice, or clade display:
+Every mode **generates** play and receipts. They differ in *how* matter
+moves — not in whether the line can live.
 
-- blue whale · honey bee · cat · dog · human · octopus · bird · fish · snail  
-- and other Earth common animal names
+| Mode | Word | Typical clades / classes | Extract | Regen | Habitat |
+|------|------|--------------------------|---------|-------|---------|
+| **Extractive** | mine-first | geodic class, lithophage, hypobiotid, endolithid, plasma class, plasmiform | ×5/4 | ×3/4 | ×7/8 |
+| **Regenerative** | restore-first | biotic-swarm class, mycotiform, cnidiform, hexasocial, soniform, amphiform | ×3/4 | ×5/4 | ×5/4 |
+| **Balanced** | flatlander | **bimaniform**, ailuroform, polybrachia, default | ×1 | ×1 | ×1 |
 
-Use Latin root → imperium sentience word (§2).
+Scales further multiply **planet fit** (native 1 · tolerant 3/4 · hostile 1/2).
+
+### 4.1 Tech / research / mining gates
+
+| Gate | Extractive | Regenerative | Balanced (flatlander) |
+|------|------------|--------------|------------------------|
+| Place **Extractor** | soft-cap 6 | soft-cap 2; **hard refuse** if hostile + over cap | soft-cap 4 |
+| Place **Regenerator** | tech condition **3** | tech condition **2** | tech condition **3** |
+| Place **ElementRefinery** | condition 3 | condition 3 | condition 3 |
+| Research seat fee | ×2 (secondary) | ×1 | ×1 (primary knowledge path) |
+| Science lab affinity | mineral/plasmic tables | biotic tables | flatlander primary suite |
+
+### 4.2 Planet fit (founded world colours the line)
+
+Preferred region by clade → compare to actual thermal region of the
+**sited** planet (star × albedo × orbit):
+
+| Clade family | Prefers |
+|--------------|---------|
+| cryocoherens · draconiform | Cryogenic |
+| plasmiform · syzygiform | HyperThermal |
+| flatlander · ailuroform · hexasocial · mycotiform · mesic majority | Mesic |
+| hypobiotid · lithophage | Mesic (stone) |
+| volatiform | Torrid |
+
+**Same species, different colony world → different fit → different rates.**
+That is the planet dependence: generative always, numbers from place.
 
 ---
 
-## 6. Landed this wave
+## 5. Technology · research · information · mining (seated)
 
-- [x] Clade display words → imperium (§2); old words remain `from_word` aliases  
-- [x] Residual voices (medium / KIN) de-Earth  
-- [x] Class 7 word: apex-terrestrial → **apex-solitary**  
-- [x] Roster species strings → imperium tongue  
-- [x] Science seat **relevance / fee colour** by metabolism (+ clade overlay)  
-- [ ] Operator court rename of Earth-culture **line names** (Kemet/Baktun/Dogon/Lyran/…)  
-- [ ] Per-clade deep lab boards (polybrachia chromatophore craft as play, etc.)
+| Domain | How taxon seats it |
+|--------|---------------------|
+| **Mining / extraction** | Extractor yield × extract_scale(mode, fit); soft-cap by mode |
+| **Regeneration** | Regenerator yield × regen_scale; tech door softens for regenerative |
+| **Habitat / farm** | habitat_scale(mode, fit); plasmic farm still metabolism-0 joule |
+| **Research / information** | Science seats + research fee mult; flatlander primary |
+| **Labs (chem/bio/synth…)** | `science_seat_affinity(metabolism, discipline, clade)` (prior land) |
+
+No second physics — only pure scales and gates over existing zones/tech.
 
 ---
 
-## 7. Imperium court backlog (operator)
+## 6. LOCKED line names (court only)
 
-Rename candidates (line name only — do not empty class seats):
+Tunborn · Slagborn · Echowright · Coronal Choir · Agarthan · Archon · Draco ·
+Darlok · Lyran · Anunnaki — seat structure. Species/clade words move;
+**line names** wait for operator court rename.
 
-| Current line | Why backlog | Suggested direction (non-binding) |
-|--------------|-------------|-------------------------------------|
-| Lyran | Earth myth star | Court sigil; keep class 7 seat |
-| Anunnaki | Earth myth as authority-echo | Court sigil; keep class 7 |
-| Pleiadian | Earth myth cluster | Court sigil |
-| Kemet · Baktun · Dogon | Earth culture Record Keepers | Locality-anchored successors per `06` §2a |
+---
 
-Until court rules, **species + clade words** carry the de-Earth law;
-**line names** stand for SEAL of office seating.
+## 7. Pins
+
+`engine/cfe/tests/taxon_economy_pins.rs`:
+
+- flatlander baseline aliases + balanced mode  
+- extractive / regenerative clade derivation  
+- yield scale inequalities  
+- planet fit native/hostile  
+- regenerator tech soften  
+- world defaults + sealed extractive  
+- extractor builds · regen tech gate  
+- every class×clade has a mode  
+- clade word round-trip  
+
+---
+
+## 8. CLI / play
+
+```text
+bench science          # metabolism · clade · primary/secondary/alien fees
+status / dashboard     # taxon economy surfaces via residual + board
+zone <tile> ext        # extract — may soft-cap under regenerative+hostile
+zone <tile> regen      # regenerator — tech condition by mode
+```
+
+Refusal: `EconomicModeBlocked` when regenerative line over-extracts on a
+hostile world.

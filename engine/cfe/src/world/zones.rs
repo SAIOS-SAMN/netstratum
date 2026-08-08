@@ -21,16 +21,50 @@ impl World {
             return Err(ActionRefused::NoColony);
         }
         // REGEN-1 / REFINE-1: regeneration and elemental refining are
-        // TECHNOLOGIES — placing either requires the DEEPENING
-        // (condition 3) crystallized on this orb. A fact of the sky,
-        // at the verb.
-        if matches!(kind, ZoneKind::Regenerator | ZoneKind::ElementRefinery)
-            && !self
+        // TECHNOLOGIES. Extractive · regenerative · balanced modes
+        // (37 / almanac::taxon_economy) colour the tech door:
+        // regenerative lines may seat regenerators at condition 2;
+        // balanced/extractive stay at DEEPENING (3). Refinery always 3.
+        if matches!(kind, ZoneKind::Regenerator | ZoneKind::ElementRefinery) {
+            let need = if matches!(kind, ZoneKind::Regenerator) {
+                self.regenerator_tech_need()
+            } else {
+                3
+            };
+            if !self
                 .techs
                 .iter()
-                .any(|(held, condition, _, _)| *held == orb && *condition == 3)
-        {
-            return Err(ActionRefused::ConditionUncrystallized { condition: 3 });
+                .any(|(held, condition, _, _)| *held == orb && *condition == need)
+            {
+                return Err(ActionRefused::ConditionUncrystallized { condition: need });
+            }
+        }
+        // Extractive soft-cap: regenerative lines feel pressure after few extractors.
+        if matches!(kind, ZoneKind::Extractor) {
+            let standing = peek(&self.orbs, orb)
+                .map(|o| {
+                    o.zones
+                        .iter()
+                        .filter(|z| z.kind == ZoneKind::Extractor)
+                        .count() as u64
+                })
+                .unwrap_or(0);
+            let cap = self.extractor_soft_cap();
+            if standing >= cap {
+                // Not a hard refuse — residual is informational via board.
+                // Hard refuse only on hostile planet + regenerative over-cap.
+                let eco = self.taxon_economy_of(orb);
+                if eco.mode == crate::almanac::EconomicMode::Regenerative
+                    && eco.fit == crate::almanac::PlanetFit::Hostile
+                    && standing >= cap
+                {
+                    return Err(ActionRefused::EconomicModeBlocked {
+                        mode: eco.mode.as_wire(),
+                        kind: ZoneKind::Extractor.wire(),
+                        reason: 1, // over extract soft-cap on hostile world
+                    });
+                }
+            }
         }
         // **#41 — THE LADDER'S THIRD RUNG, ENFORCED.** A minted kind
         // builds on the base its mint declared, or on the one its

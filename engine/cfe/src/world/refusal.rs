@@ -303,6 +303,8 @@ pub enum ActionRefused {
     },
     /// LAB — discipline already at max rank.
     ScienceAlreadySeated { discipline: u8, rank: u8 },
+    /// TAXON ECONOMY — zone/deed blocked by extractive|regenerative|balanced mode + planet.
+    EconomicModeBlocked { mode: u8, kind: u8, reason: u8 },
     /// THERMAL-1 — siting an orbit needs a commissioned sun first.
     NoStarCommissioned,
     /// THERMAL-1 — the orb is already sited; an orbit does not move.

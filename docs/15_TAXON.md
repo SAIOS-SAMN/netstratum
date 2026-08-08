@@ -128,3 +128,23 @@ lands only WITH its coverage):**
 3. **The clade table** (§3) — codes 1–17 as assigned, 18 reserved,
    **19 draconic and 20 metashifting seated 2026-08-01**; the compiled
    `clade_ceiling` was raised 18 → 20 on 2026-08-05 to admit them.
+
+---
+
+## 7. Imperium port + economy (2026-08-08)
+
+**Living map:** `37_IMPERIUM_TAXON.md` (display words, flatlander baseline,
+economic modes, planet fit, lab seats).
+
+| Concern | Where |
+|---------|--------|
+| Class + clade wire + seal | this doc §1–§4 · kernel |
+| Imperium display words | `37` §2 · `vocabulary::clade_word` |
+| **Flatlander baseline** = clade 2 bimaniform | `37` §3 · aliases human/flatlander |
+| Economic mode extractive/regenerative/**balanced** | `almanac::taxon_economy` |
+| Planet-coloured yields + regen tech gate | tick + zones |
+| Science lab seats by metabolism/clade | `science_lab` + `37` |
+
+**All modes are generative.** Rates and gates depend on sealed taxon **and**
+the founded planet's thermal region — same line, different world, different
+numbers.

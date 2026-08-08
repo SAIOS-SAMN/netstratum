@@ -7222,6 +7222,9 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
         ActionRefused::ScienceAlreadySeated { discipline, rank } => format!(
             "science discipline {discipline} already at max rank {rank}"
         ),
+        ActionRefused::EconomicModeBlocked { mode, kind, reason } => format!(
+            "taxon economy blocks zone kind {kind} under mode {mode} (reason {reason}) — regenerative lines on hostile worlds cannot over-extract; see docs/37_IMPERIUM_TAXON.md"
+        ),
         ActionRefused::BalanceEntropyDominates {
             balance,
             syntropy,
