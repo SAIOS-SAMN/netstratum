@@ -362,7 +362,7 @@ Maps onto and **extends** `TASKS_TRADE_FLEET_DESK` P5:
 | **P5-D** | ATM defense + CovertTamper + dual-use TERRA | **LANDED** 141–143 + P5.19 |
 | **P5-E** | COG + CYB instrument/mesh guards | spoof refuse pins |
 | **P5-M / M2** | MKT economic warfare + cascade/haircut/resume audit + suites | **LANDED** 135–140 |
-| **P5-K2** | KIN open-up §12 (species residual · kin_step · perception fog) | after P5-C or parallel pins |
+| **P5-K2** | KIN open-up §12 (species residual · kin_step · perception fog) | **LANDED** zero tags |
 | **P5-F** | Espionage suite (scout/exfil/sabotage) | SEAL B |
 | **P5-G** | Deep rails R3/R4 / Anchor (original P5.4–P5.7) | optional features |
 | **P5-H** | Docs + demo: escort + covert ATM + market-war arc | program metric |
@@ -635,10 +635,9 @@ Full 5×10 prose for operator colour lives in session design notes;
 
 ## 12. KIN open-up — civ/species colour without free constants
 
-**Status:** DESIGN CATALOG (loaded for **P5-K2**). Spine **P5-A landed**:
-escort duty, convoy risk = (1/8)×(1 − escort_cover), typed interdiction
-residual, CONVOY suite / DEFEND. **No new combat HP. No static KIN trees
-per civ file.**
+**Status:** **P5-K2 LANDED** (compose, zero tags). Spine P5-A + colour:
+`kin_residual_*` · hive cover · place exposure · corridor fog · `kin_step`
+· CONVOY suite residual voice. **No new combat HP. No static KIN trees.**
 
 ### 12.1 Law
 
@@ -688,8 +687,8 @@ DEFEND INF line. **Zero new tags / schema.**
 |------|------|
 | P5.14–P5.15c | **done** — defense_pins `inf_veil_gates_thin_scan…` |
 
-**Next:** **P5-K2** (§12) · P5.19b medium residual colour · P5-E/F
-espionage uses this INF surface (does not rewrite chronicle).
+**Next:** P5.19b medium residual colour · **P5-E** COG/CYB guards ·
+**P5-F** espionage (uses INF surface; no chronicle rewrite).
 
 ---
 

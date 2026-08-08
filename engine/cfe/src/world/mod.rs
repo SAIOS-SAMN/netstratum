@@ -67,7 +67,7 @@ pub mod market_defense;
 pub mod medium_defense;
 pub mod intel;
 
-pub use defense::{DefenseDomain, DefensePosture, RiskBand};
+pub use defense::{CorridorFog, DefenseDomain, DefensePosture, KinIntegrity, RiskBand};
 pub use market_defense::{
     MarketIntegrity, BREAKER_TICKS, CLEAR_SEAL_DEPTH, RESUME_AUDIT_DEPTH,
 };

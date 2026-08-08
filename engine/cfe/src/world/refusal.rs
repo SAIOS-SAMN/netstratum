@@ -259,6 +259,8 @@ pub enum ActionRefused {
     VeilOutOfOrder,
     /// P5-C INF — instrument detection grade too thin for the asked read.
     DetectionThin { need: u8, have: u8 },
+    /// P5-K2 — volumetric perception needs prospect depth before corridor risk mark.
+    CorridorFogDepth { deal: u64 },
     /// THERMAL-1 — siting an orbit needs a commissioned sun first.
     NoStarCommissioned,
     /// THERMAL-1 — the orb is already sited; an orbit does not move.

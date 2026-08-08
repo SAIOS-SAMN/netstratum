@@ -342,12 +342,91 @@ impl World {
         Ok(())
     }
 
+    /// K1 — preferred interdiction residual *kind* from sealed metabolism.
+    /// Haul still debits the cargo resource; this colours voice + UI (and
+    /// future multi-resource residual choice). No free dials.
+    pub fn kin_residual_resource(&self) -> Resource {
+        match self.defense_posture().metabolism {
+            2 => Resource::Biomass, // biotic
+            3 => Resource::Crystal, // plasmic spark
+            _ => Resource::Iron,    // mineral / unsealed
+        }
+    }
+
+    /// K1 / K3 residual voice (pure string for DEFEND / CONVOY).
+    pub fn kin_residual_voice(&self) -> &'static str {
+        let p = self.defense_posture();
+        match (p.metabolism, p.clade) {
+            (1, Some(4) | Some(14)) => "lithic lattice — iron/scrap shear",
+            (1, _) => "mineral bulk — iron train interdiction",
+            (2, Some(5)) => "cryptobiotic barge — biomass under desiccation risk",
+            (2, Some(8)) => "hive graph — many small escorts, biomass cargo",
+            (2, _) => "biotic organ — biomass / ration cargo loss",
+            (3, Some(12) | Some(13)) => "field sled — crystal/spark at reconnection",
+            (3, _) => "plasmic sheet — crystal / STAMP-spark residual",
+            _ => "convoy residual — typed cargo loss",
+        }
+    }
+
+    /// K4 — place stretch from receipted orbit period (CALL 35 dynamo).
+    /// Returns period ticks for genesis orb site, or None if unsited.
+    pub fn kin_place_period(&self) -> Option<u64> {
+        let site = self.orb()?.thermal.as_ref()?;
+        Some(orbit_phase_period(self, site))
+    }
+
+    /// Pure KIN integrity snapshot (P5-K2).
+    pub fn kin_integrity(&self, deal: u64) -> KinIntegrity {
+        let p = self.defense_posture();
+        let cover = self.escort_cover(deal);
+        let risk = self.convoy_risk(deal);
+        let band = self.convoy_risk_band(deal);
+        let fog = self.corridor_fog(deal);
+        KinIntegrity {
+            deal,
+            residual: self.kin_residual_resource(),
+            residual_voice: self.kin_residual_voice(),
+            cover,
+            risk,
+            band,
+            place_period: self.kin_place_period(),
+            kin_rank: p.ranks[5],
+            primary_is_kin: p.primary == DefenseDomain::Kin,
+            doctrine_dis: p.disposition,
+            fog,
+            fog_clear: fog.is_none(),
+        }
+    }
+
+    /// K5 — perception fog of corridor: None = clear reading; Some = refuse reason code.
+    /// Planar: deal must be a chartered route. Harmonic/umbral: need detection grade ≥ 1.
+    /// Volumetric: at least one prospect opened (depth evidence).
+    /// Unsealed worlds: no fog (anatomy not present to colour perception).
+    pub fn corridor_fog(&self, deal: u64) -> Option<CorridorFog> {
+        if deal == 0 {
+            return Some(CorridorFog::NoDeal);
+        }
+        self.genesis.as_ref()?;
+        let per = self.defense_posture().perception;
+        match per {
+            // planar — chart seals: only chartered deals are "seen"
+            1 if !self.routes.iter().any(|(d, _)| *d == deal) => Some(CorridorFog::Uncharted),
+            // volumetric — need prospect depth evidence
+            2 if self.prospects.is_empty() => Some(CorridorFog::NoDepth),
+            // harmonic / umbral — instrument grade required for risk mark
+            3 | 4 if self.detection_grade() < 1 => Some(CorridorFog::Blind),
+            _ => None,
+        }
+    }
+
     /// Escort coverage on a deal: sum (grade+1)/8 over escort hulls assigned, capped at 1.
+    /// K3: hymenopteran (clade 8) escorts count one grade higher (graph redundancy).
     pub fn escort_cover(&self, deal: u64) -> Ratio {
         if deal == 0 {
             return ratio(0, 1);
         }
         let eighth = ZoneKind::Resonator.yield_per_tick().1; // 1/8
+        let hive = self.taxon.map(|(_, c)| c) == Some(8);
         let mut cover = ratio(0, 1);
         for h in &self.hulls {
             if h.assigned_route != deal {
@@ -356,7 +435,11 @@ impl World {
             if HullRole::from_wire(h.role) != Some(HullRole::Escort) {
                 continue;
             }
-            let g = ratio(i64::from(h.grade.min(7)) + 1, 1);
+            let mut g_i = i64::from(h.grade.min(7)) + 1;
+            if hive {
+                g_i = (g_i + 1).min(8); // +1 identity grade, cap grade ladder
+            }
+            let g = ratio(g_i, 1);
             cover += g * eighth.clone();
         }
         let one = ratio(1, 1);
@@ -367,12 +450,21 @@ impl World {
         }
     }
 
-    /// Convoy risk in [0,1): base eighth without cover; reduced by escort_cover.
-    /// `base = 1/8`; `risk = base * (1 - cover)`.
+    /// Convoy risk: base eighth × (1 − cover), plus K4 place exposure when
+    /// orbit period exceeds the phase base (CALL orbit_phase_period / 35).
     pub fn convoy_risk(&self, deal: u64) -> Ratio {
         let eighth = ZoneKind::Resonator.yield_per_tick().1;
         let cover = self.escort_cover(deal);
-        eighth * (ratio(1, 1) - cover)
+        let bare = eighth.clone() * (ratio(1, 1) - cover.clone());
+        // K4: slow/far rings (period > phase base) add half-eighth × (1-cover).
+        let place_extra = match self.kin_place_period() {
+            Some(p) if p > super::ORBIT_PHASE_TICKS => {
+                let two = ratio(1, 1) + ratio(1, 1);
+                (eighth / two) * (ratio(1, 1) - cover)
+            }
+            _ => ratio(0, 1),
+        };
+        bare + place_extra
     }
 
     pub fn convoy_risk_band(&self, deal: u64) -> RiskBand {
@@ -438,6 +530,10 @@ impl World {
         if deal == 0 {
             return Err(ActionRefused::RouteUnknown { deal: 0 });
         }
+        // K5 perception fog — refuse path, not dice.
+        if let Some(fog) = self.corridor_fog(deal) {
+            return Err(fog.into_refused(deal));
+        }
         let risk = self.convoy_risk(deal);
         let cover = self.escort_cover(deal);
         self.close(
@@ -453,6 +549,8 @@ impl World {
 
     /// Apply interdiction residual on a haul: lose `amount * risk / 2` cargo
     /// (typed receipt). Zero risk ⇒ Ok no-op.
+    /// Resource is the cargo being hauled (conservation of what's on the
+    /// hull); K1 residual *kind* is a pure reading for species voice.
     pub fn strike_interdiction(
         &mut self,
         actor: u64,
@@ -471,6 +569,8 @@ impl World {
             return Ok(ratio(0, 1));
         }
         // Debit is applied by caller on the haul path; this only receipts.
+        let _preferred = self.kin_residual_resource();
+        let _ = _preferred; // voice only until multi-resource residual lands
         self.close(
             ClosureEvent::InterdictionStruck {
                 deal,
@@ -483,4 +583,49 @@ impl World {
         );
         Ok(lost)
     }
+}
+
+/// K5 corridor fog reasons (perception colour).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CorridorFog {
+    NoDeal,
+    Uncharted,
+    NoDepth,
+    Blind,
+}
+
+impl CorridorFog {
+    pub fn word(self) -> &'static str {
+        match self {
+            CorridorFog::NoDeal => "no deal",
+            CorridorFog::Uncharted => "uncharted (planar)",
+            CorridorFog::NoDepth => "no prospect depth (volumetric)",
+            CorridorFog::Blind => "detection blind (harmonic/umbral)",
+        }
+    }
+
+    fn into_refused(self, deal: u64) -> ActionRefused {
+        match self {
+            CorridorFog::NoDeal | CorridorFog::Uncharted => ActionRefused::RouteUnknown { deal },
+            CorridorFog::NoDepth => ActionRefused::CorridorFogDepth { deal },
+            CorridorFog::Blind => ActionRefused::DetectionThin { need: 1, have: 0 },
+        }
+    }
+}
+
+/// P5-K2 KIN integrity snapshot.
+#[derive(Debug, Clone)]
+pub struct KinIntegrity {
+    pub deal: u64,
+    pub residual: Resource,
+    pub residual_voice: &'static str,
+    pub cover: Ratio,
+    pub risk: Ratio,
+    pub band: RiskBand,
+    pub place_period: Option<u64>,
+    pub kin_rank: u8,
+    pub primary_is_kin: bool,
+    pub doctrine_dis: u8,
+    pub fog: Option<CorridorFog>,
+    pub fog_clear: bool,
 }

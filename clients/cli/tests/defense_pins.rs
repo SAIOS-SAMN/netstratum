@@ -51,6 +51,40 @@ fn posture_reorients_doctrine_not_anatomy() {
 }
 
 #[test]
+fn kin_residual_follows_metabolism() {
+    let mut w = World::new();
+    w.found("kin-met").expect("f");
+    w.seal_genesis("line", 1, 1, 1).expect("mineral");
+    assert_eq!(w.kin_residual_resource(), Resource::Iron);
+    assert!(!w.kin_residual_voice().is_empty());
+    // Re-seal not allowed — use fresh world for biotic.
+    let mut b = World::new();
+    b.found("kin-bio").expect("f");
+    b.seal_genesis("line", 1, 2, 1).expect("biotic");
+    assert_eq!(b.kin_residual_resource(), Resource::Biomass);
+    let mut p = World::new();
+    p.found("kin-pla").expect("f");
+    p.seal_genesis("line", 1, 3, 1).expect("plasmic");
+    assert_eq!(p.kin_residual_resource(), Resource::Crystal);
+}
+
+#[test]
+fn kin_integrity_and_planar_fog() {
+    let mut w = yard_world();
+    w.seal_genesis("fog", 1, 1, 1).expect("planar mineral"); // perception planar
+    // Deal 1 uncharted under planar → fog on mark.
+    assert!(matches!(
+        w.mark_convoy_risk(1),
+        Err(cfe::world::ActionRefused::RouteUnknown { .. })
+    ));
+    let ki = w.kin_integrity(1);
+    assert_eq!(ki.residual, Resource::Iron);
+    assert_eq!(ki.fog, Some(cfe::world::CorridorFog::Uncharted));
+    // Pure risk still computes (engine path); fog is mark/UI only.
+    assert!(ki.risk > ratio(0, 1));
+}
+
+#[test]
 fn inf_veil_gates_thin_scan_and_surface_on_posture() {
     let mut w = World::new();
     w.found("inf-home").expect("f");

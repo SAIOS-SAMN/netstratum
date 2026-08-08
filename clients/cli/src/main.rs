@@ -2918,12 +2918,33 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             }
             Some("convoy") | Some("kin") => {
                 let p = world.defense_posture();
+                let deal = world
+                    .routes()
+                    .first()
+                    .map(|(d, _)| *d)
+                    .or_else(|| {
+                        world.hulls().iter().find(|h| h.assigned_route != 0).map(|h| h.assigned_route)
+                    })
+                    .unwrap_or(0);
+                let ki = world.kin_integrity(deal);
                 println!(
-                    "{} CONVOY suite — KIN rank {} · primary {}",
+                    "{} CONVOY suite — KIN rank {} · primary {} · doctrine dis={}",
                     style.head("SUITE"),
-                    p.ranks[5],
-                    p.primary.word()
+                    ki.kin_rank,
+                    p.primary.word(),
+                    p.disposition
                 );
+                println!(
+                    "  residual {:?} · {}",
+                    ki.residual,
+                    style.dim(ki.residual_voice)
+                );
+                if let Some(per) = ki.place_period {
+                    println!("  place period {per} ticks (orbit dynamo)");
+                }
+                if let Some(fog) = ki.fog {
+                    println!("  {} {}", style.warn("FOG"), fog.word());
+                }
                 let escorts: Vec<_> = world
                     .hulls()
                     .iter()
@@ -2937,19 +2958,20 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     println!("  (no escorts on duty)");
                 } else {
                     for h in escorts.iter().take(8) {
-                        let band = world.convoy_risk_band(h.assigned_route);
+                        let k = world.kin_integrity(h.assigned_route);
                         println!(
-                            "  hull {} → deal {} · risk {} · {}",
+                            "  hull {} → deal {} · risk {} · {} · cover {}",
                             h.hull_id,
                             h.assigned_route,
-                            amount(&world.convoy_risk(h.assigned_route)),
-                            band.word()
+                            amount(&k.risk),
+                            k.band.word(),
+                            amount(&k.cover)
                         );
                     }
                 }
                 println!(
                     "  {}",
-                    style.hint("defend escort <hull> <deal> · defend risk <deal>")
+                    style.hint("defend escort <hull> <deal> · defend risk <deal> · posture set")
                 );
             }
             Some("cyber") | Some("cyb") => {
@@ -6630,6 +6652,9 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
         }
         ActionRefused::DetectionThin { need, have } => format!(
             "detection grade {have} < {need} — forge an instrument (`forge <grade>`) or lift the veil before thin survey"
+        ),
+        ActionRefused::CorridorFogDepth { deal } => format!(
+            "corridor deal {deal} is fogged (volumetric) — prospect a stratum before marking risk"
         ),
         ActionRefused::BalanceEntropyDominates {
             balance,

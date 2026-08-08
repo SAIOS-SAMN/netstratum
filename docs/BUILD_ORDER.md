@@ -1058,6 +1058,11 @@ perception corridor fog, doctrine+CONVOY suite. **No free constants.** Board
 
 **P5-C INF LANDED:** `inf_integrity` · `detection_grade` (MANU-1 max) ·
 `DetectionThin` gates veiled scan/prospect/assay; CLI `veil`/`ward`; DEFEND
-INF line. **Zero new tags / schema.** Then **P5-K2** KIN colour · P5.19b ·
-P5-E/F · P1.8.
+INF line. **Zero new tags / schema.**
+
+**P5-K2 KIN colour LANDED:** `kin_residual_resource/voice` · hive cover +1 ·
+place exposure via `orbit_phase_period` · corridor fog on risk mark ·
+conductor `kin_step` · CONVOY suite residual. **Zero new tags.**
+
+**Next:** P5-E COG/CYB · P5.19b medium colour · P5-F espionage · P1.8.
 

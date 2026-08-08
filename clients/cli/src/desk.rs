@@ -612,6 +612,24 @@ fn render_defend(style: Style, home: &World) -> Vec<String> {
             "veil|ward · posture · escort · market · medium|tamper · forge"
         )
     ));
+    // KIN colour (P5-K2)
+    let kin_deal = home
+        .routes()
+        .first()
+        .map(|(d, _)| *d)
+        .or_else(|| {
+            home.hulls()
+                .iter()
+                .find(|h| h.assigned_route != 0)
+                .map(|h| h.assigned_route)
+        })
+        .unwrap_or(0);
+    let ki = home.kin_integrity(kin_deal);
+    lines.push(format!(
+        "  KIN residual {:?} · {}",
+        ki.residual,
+        style.dim(ki.residual_voice)
+    ));
     // Escorts on duty
     let escorts: Vec<_> = home
         .hulls()
@@ -629,19 +647,18 @@ fn render_defend(style: Style, home: &World) -> Vec<String> {
     } else {
         lines.push(format!("  {}", style.label("ESCORTS ON DUTY")));
         for h in escorts.iter().take(8) {
-            let risk = home.convoy_risk(h.assigned_route);
-            let band = home.convoy_risk_band(h.assigned_route);
-            let paint = match band {
-                RiskBand::Secure => style.ok(band.word()),
-                RiskBand::Exposed => style.warn(band.word()),
-                RiskBand::Contested => style.bad(band.word()),
+            let k = home.kin_integrity(h.assigned_route);
+            let paint = match k.band {
+                RiskBand::Secure => style.ok(k.band.word()),
+                RiskBand::Exposed => style.warn(k.band.word()),
+                RiskBand::Contested => style.bad(k.band.word()),
             };
             lines.push(format!(
                 "    hull {} g{} → deal {} · risk {} · {}",
                 h.hull_id,
                 h.grade,
                 h.assigned_route,
-                ratio_str(&risk),
+                ratio_str(&k.risk),
                 paint
             ));
         }

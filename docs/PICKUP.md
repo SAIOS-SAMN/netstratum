@@ -22,10 +22,11 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 | Codec | **SCHEMA_V12** (… + posture doctrine overlay) |
 | Pure-NPC green | market_war_step · instrument clears · ATM · posture · INF surface |
 | **Landed P5-C** | veil/ward DEFEND · `detection_grade` · `DetectionThin` under veil |
-| **Next phase (LOADED)** | **P5-K2** KIN colour (`36` §12) · then P5.19b · P5-E/F |
-| Docs | `36` §12–§13; A/M/M2/D/B/C/19 landed |
-| Trade program | Phases **1–4** complete; Phase **5 partial** — K2 next |
-| Help | `veil|ward` · `posture set` · `market|medium|tamper|suite` |
+| **Landed P5-K2** | kin residual/voice · place risk · fog · `kin_step` · CONVOY colour |
+| **Next phase** | **P5-E** COG/CYB · P5.19b medium colour · **P5-F** espionage |
+| Docs | `36` §12–§13; A/B/C/D/M/M2/K2/19 landed |
+| Trade program | Phases **1–4** complete; Phase **5 partial** — E/F next |
+| Help | `suite convoy` · `veil|ward` · `posture` · `market|medium|tamper` |
 | Dirty / other lane | do not `git add -A` without reviewing observer/other-lane files |
 
 Older §0 counts (809 tests, 71 deeds, tag 95) are **historical**; re-measure

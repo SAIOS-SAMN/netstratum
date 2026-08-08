@@ -3292,6 +3292,7 @@ pub fn run_era_with(var_root: &str, cycles: u32, mode: SearchMode) -> Vec<Polity
         }
         // OFFER-1a + MERCHANT-1 + E3.3: market, caravan, element haul.
         fleet_step(&mut worlds);
+        kin_step(&mut worlds);
         let _ = market_step(&mut worlds, u64::from(beat));
         let _ = merchant_step(&mut worlds, u64::from(beat));
         let _ = element_trade_step(&mut worlds, u64::from(beat));
@@ -3327,6 +3328,69 @@ pub fn instrument_step(worlds: &mut [Polity]) {
             continue;
         }
         ensure_npc_instruments(&mut polity.world, polity.automaton);
+    }
+}
+
+/// P5-K2 — pure NPC KIN colour (36 §12): disposition-routed escort /
+/// risk marks. No suite required. Compose fleet routes + escort role.
+pub fn kin_step(worlds: &mut [Polity]) {
+    for polity in worlds.iter_mut() {
+        if polity.penned {
+            continue;
+        }
+        ensure_npc_kin(&mut polity.world, polity.automaton);
+    }
+}
+
+fn ensure_npc_kin(world: &mut cfe::world::World, actor: u64) {
+    use cfe::dop::HullRole;
+    let dis = world.defense_posture().disposition;
+    let deals: Vec<u64> = world.routes().iter().map(|(d, _)| *d).collect();
+    if deals.is_empty() {
+        return;
+    }
+    // Empiricist (2): mark risk on first clear corridor (fog may refuse).
+    if dis == 2 {
+        for &deal in deals.iter().take(2) {
+            let _ = world.mark_convoy_risk_as(actor, deal);
+        }
+        return;
+    }
+    // Expansionist (1): assign idle escorts onto first deal; mark risk.
+    if dis == 1 {
+        let idle: Vec<u64> = world
+            .hulls()
+            .iter()
+            .filter(|h| {
+                h.assigned_route == 0
+                    && HullRole::from_wire(h.role) == Some(HullRole::Escort)
+            })
+            .map(|h| h.hull_id)
+            .collect();
+        if let Some(&deal) = deals.first() {
+            for hull_id in idle.into_iter().take(2) {
+                let _ = world.escort_assign_as(actor, hull_id, deal);
+            }
+            let _ = world.mark_convoy_risk_as(actor, deal);
+        }
+        return;
+    }
+    // Epicurean (3): only reinforce when CONTESTED; prefer secure.
+    if dis == 3 {
+        for &deal in &deals {
+            let band = world.convoy_risk_band(deal);
+            if band == cfe::world::RiskBand::Contested {
+                let idle = world.hulls().iter().find(|h| {
+                    h.assigned_route == 0
+                        && HullRole::from_wire(h.role) == Some(HullRole::Escort)
+                });
+                if let Some(h) = idle {
+                    let id = h.hull_id;
+                    let _ = world.escort_assign_as(actor, id, deal);
+                }
+            }
+            let _ = world.mark_convoy_risk_as(actor, deal);
+        }
     }
 }
 

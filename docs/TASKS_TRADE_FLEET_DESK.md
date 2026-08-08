@@ -207,20 +207,21 @@ stealth points, no chronicle rewrite, **zero new tags**.
 | P5.15b | [x] Thin-scan / veiled prospect/assay refuse (`DetectionThin`) | P5.15 | pin |
 | P5.15c | [x] Docs + pins green; no schema bump | P5.14–P5.15b | ratchet |
 
-### P5-K2 — KIN open-up (species/civ colour, no free constants) · **LOADED**
+### P5-K2 — KIN open-up (species/civ colour, no free constants) · **LANDED**
 
 **Authority:** `36` §12. Base risk formula stays; residual *kind* and
 NPC routing re-colour from sealed axes / thermal / taxon / doctrine.
+**Zero new tags.**
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
 | P5.50 | [x] Design: six KIN openings §12 (no undervived dials) | P5-A, P5-B | `36` §12 |
-| P5.51 | [ ] K1 metabolism-keyed interdiction debit (resource match arm) | P5.2, P5.11 | pin SEAL B |
-| P5.52 | [ ] K2 NPC `kin_step` disposition-routed (escort / risk / haul) | P5.51, P5.38 pattern | pure NPC |
-| P5.53 | [ ] K3 clade colour on escort cover *voice* + optional weight | P5.12, P5.1 | reading |
-| P5.54 | [ ] K4 fold orbit/thermal place into risk reading (CALL 35) | P5.1, 35 dynamo | pure |
-| P5.55 | [ ] K5 perception fog of corridor (charted/instrument gates) | P5.15, P5.13b | refuse path |
-| P5.56 | [ ] K6 CONVOY suite shows doctrine primary + residual kind | P5.35, P5.51 | UI |
+| P5.51 | [x] K1 metabolism residual kind + voice (`kin_residual_*`) | P5.2, P5.11 | pin |
+| P5.52 | [x] K2 NPC `kin_step` disposition-routed | P5.51, P5.38 pattern | pure NPC |
+| P5.53 | [x] K3 clade colour on escort cover (hive +1 grade) + voice | P5.12, P5.1 | reading |
+| P5.54 | [x] K4 place exposure from `orbit_phase_period` (CALL 35) | P5.1, 35 dynamo | pure |
+| P5.55 | [x] K5 perception fog on `mark_convoy_risk` | P5.15, P5.13b | refuse path |
+| P5.56 | [x] K6 CONVOY suite + DEFEND residual kind | P5.35, P5.51 | UI |
 
 ### P5-E — COG + CYB
 
