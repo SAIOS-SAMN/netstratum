@@ -33,16 +33,19 @@ impl World {
         }
     }
 
-    /// P5.19b — species-relative medium residual voice (36 §1.4 / §3.3).
+    /// P5.19b — species-relative medium residual voice (36 §1.4 / §3.3 / 37).
+    /// Imperium tongue — no Earth common animals.
     pub fn medium_residual_voice(&self) -> &'static str {
         let p = self.defense_posture();
         match (p.metabolism, p.clade) {
-            (1, Some(4) | Some(14)) => "lithic pore fluid / dust radiator under stress",
+            (1, Some(4) | Some(14)) => "lithophage pore fluid / dust radiator under stress",
             (1, _) => "mineral medium — dust, albedo, coolant envelope",
-            (2, Some(5)) => "cryptobiotic shell — desiccation as strategy until limit",
-            (2, Some(6)) => "cetacean song medium — density wrongness is attack",
-            (2, _) => "biotic medium — gas mix, humidity, Habitat envelope",
-            (3, Some(12) | Some(13)) => "plasmic bottle — field shear and density quench",
+            (2, Some(5)) => "hypobiotid shell — desiccation as strategy until limit",
+            (2, Some(6)) => "soniform pressure medium — density wrongness is attack",
+            (2, Some(7)) => "polybrachia volumetric medium — saline/pressure cortex",
+            (2, Some(8)) => "hexasocial comb medium — trail-graph humidity",
+            (2, _) => "biotic medium — mix, humidity, Habitat envelope",
+            (3, Some(12) | Some(13)) => "plasmiform bottle — field shear and density quench",
             (3, _) => "plasmic weather — magnetic envelope, radiative strip",
             _ => "medium envelope under pressure",
         }

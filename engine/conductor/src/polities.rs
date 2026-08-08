@@ -164,17 +164,17 @@ pub fn founding_polities() -> Vec<PolitySpec> {
         // aeon — Tunborn, the Slagborn line's OWN head.* It is compiled
         // now, so no boot path can lose it again.
         seat(
-            "Tunborn", "tunborn", "void-sleeper", "tardigrade",
+            "Tunborn", "tunborn", "hypobiotid-voidsleeper", "hypobiotid",
             "the dark between stars is a bed, not a wall",
             "expansionist", "mineral", "planar",
             Some("progenitor"), &[],
             "tun-reach", "husk", "first-wake", Policy::Steady,
             (ratio(2, 1), ratio(-3, 1), ratio(1, 1)), g_half(),
         ),
-        // CLASS 7 — apex-terrestrial. Seated by these two and no others,
-        // so the class stands or falls with them (`15_TAXON` §2).
+        // CLASS 7 — apex-solitary. Seated by these two and no others,
+        // so the class stands or falls with them (`15_TAXON` §2 / 37).
         seat(
-            "Lyran", "lyran", "first-felid", "felid",
+            "Lyran", "lyran", "ailuroform-primus", "ailuroform",
             "we were first, and we remember why that matters less than you think",
             "epicurean", "biotic", "harmonic",
             Some("progenitor"), &[],
@@ -182,7 +182,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             (ratio(1, 1), ratio(1, 1), ratio(1, 1)), None,
         ),
         seat(
-            "Anunnaki", "anunnaki", "royal-blood", "humanoid",
+            "Anunnaki", "anunnaki", "bimaniform-regia", "bimaniform",
             "we plan in stone and fire; we no longer dig",
             "expansionist", "mineral", "planar",
             Some("progenitor"), &[],
@@ -191,7 +191,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
         ),
         // CLASS 2 — geodic-lithovore, beside Slagborn and Tunborn.
         seat(
-            "Agarthan", "agarthan", "stone-will", "lithic",
+            "Agarthan", "agarthan", "lithophage-stonewill", "lithophage",
             "the surface is weather; we are the world",
             "epicurean", "mineral", "volumetric",
             Some("progenitor"), &[],
@@ -200,7 +200,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             Some((StarClass::M, ratio(1, 2), ratio(2, 1))),
         ),
         seat(
-            "Coronal Choir", "coronal-choir", "coronal sheet", "plasmoid",
+            "Coronal Choir", "coronal-choir", "plasmiform-sheet", "plasmiform",
             "we are the weather of the star",
             "expansionist", "plasmic", "harmonic",
             Some("progenitor"), &[],
@@ -213,7 +213,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
         // the shared identity, clade is how it is expressed, and any
         // mechanic keyed on class sees them as one line.
         seat(
-            "Archon", "archon", "deep-frost mind", "cryo-coherent",
+            "Archon", "archon", "cryocoherens-still", "cryocoherens",
             "in the perfect cold, everything can be known",
             "empiricist", "biotic", "volumetric",
             Some("watcher"), &[],
@@ -222,7 +222,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             Some((StarClass::M, ratio(0, 1), ratio(1, 1))),
         ),
         seat(
-            "Pleiadian", "pleiadian", "seven-watch", "humanoid",
+            "Pleiadian", "pleiadian", "bimaniform-septem", "bimaniform",
             "we hold the threshold and do not descend",
             "empiricist", "biotic", "harmonic",
             Some("watcher"), &[],
@@ -231,19 +231,19 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             Some((StarClass::B, ratio(1, 4), ratio(1, 1))),
         ),
         seat(
-            "Coralline", "coralline", "accrete-polyp", "cnidarian", "we accrete, therefore we are",
+            "Coralline", "coralline", "cnidiform-accrete", "cnidiform", "we accrete, therefore we are",
             "epicurean", "biotic", "harmonic",
             Some("watcher"), &[],
             "coralline-hearth", "coralline-prime", "first-coralline", Policy::Steady,
             (ratio(12, 1), ratio(0, 1), ratio(0, 1)), None,
         ),
         // ── THE OBSERVER BAND (T1) ────────────────────────────────────
-        // Clade 19 `draconic` — the sub-archetype the 2026-08-01 ruling
+        // Clade 19 `draconiform` — the sub-archetype the 2026-08-01 ruling
         // exists to seat. Same class as Archon, a different expression
         // of it; the first cut of this roster orphaned the clade by
         // dropping the only line that wears it.
         seat(
-            "Draco", "draco", "warm-dark coherent", "draconic",
+            "Draco", "draco", "draconiform-umbra", "draconiform",
             "the union is the evidence; the seat above re-checks it",
             "epicurean", "biotic", "umbral",
             Some("observer"), &[],
@@ -263,7 +263,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
         // unbounded for sovereigns (registry.rs), so three founding
         // seats do not exhaust the band.
         seat(
-            "Kemet", "kemet", "scarab-ledger", "humanoid",
+            "Kemet", "kemet", "bimaniform-stela", "bimaniform",
             "what is written in stone outlives the flood",
             "empiricist", "mineral", "planar",
             Some("sovereign"), &["anunnaki"],
@@ -272,7 +272,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             Some((StarClass::G, ratio(1, 3), ratio(1, 1))),
         ),
         seat(
-            "Baktun", "baktun", "long-count", "humanoid",
+            "Baktun", "baktun", "bimaniform-calendar", "bimaniform",
             "the calendar is the spine of the sky",
             "empiricist", "biotic", "harmonic",
             Some("sovereign"), &["anunnaki"],
@@ -281,7 +281,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             Some((StarClass::K, ratio(1, 4), ratio(4, 5))),
         ),
         seat(
-            "Dogon", "dogon", "star-scribe", "humanoid",
+            "Dogon", "dogon", "bimaniform-scribe", "bimaniform",
             "we kept the star before the star kept us",
             "empiricist", "biotic", "harmonic",
             Some("sovereign"), &["anunnaki"],
@@ -290,33 +290,31 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             Some((StarClass::A, ratio(1, 5), ratio(1, 1))),
         ),
         // ── THE UNSEATED LINES (T3 — `tier_of(None)`) ─────────────────
-        // The line RESOLVES to its head: without this lineage the law has
-        // nothing to read and Slagborn is an endure-form line with no origin.
-        // Species words are the in-world tongue (gamified), never Earth
-        // common names — clade carries the biological register.
+        // Species strings = imperium tongue (37); never Earth common names.
+        // Clade field = imperium word (legacy English still parses).
         seat(
-            "Slagborn", "slagborn", "endure-form", "tardigrade", "we eat what worlds discard",
+            "Slagborn", "slagborn", "hypobiotid-endure", "hypobiotid", "we eat what worlds discard",
             "expansionist", "mineral", "planar",
             None, &["tunborn"],
             "cinder-reach", "bask", "first-vent", Policy::Aggressive,
             (ratio(0, 1), ratio(0, 1), ratio(0, 1)), g_half(),
         ),
         seat(
-            "Echowright", "deep-chorus", "songline", "cetacean", "we heard it before you saw it",
+            "Echowright", "deep-chorus", "soniform-songline", "soniform", "we heard it before you saw it",
             "epicurean", "biotic", "harmonic",
             None, &[],
             "kepler-passage", "tidefall", "songline", Policy::Steady,
             (ratio(12, 1), ratio(5, 1), ratio(3, 1)), None,
         ),
         seat(
-            "Vitreous Hex", "hivelight", "hex-colony", "hymenopteran", "the comb computes",
+            "Vitreous Hex", "hivelight", "hexasocial-comb", "hexasocial", "the comb computes",
             "empiricist", "biotic", "volumetric",
             None, &[],
             "amber-veil", "comb", "waggle-reach", Policy::Industry,
             (ratio(-7, 1), ratio(9, 1), ratio(2, 1)), None,
         ),
         seat(
-            "Brine Cortex", "eightfold", "eightfold", "cephalopod", "eight arms, one argument",
+            "Brine Cortex", "eightfold", "polybrachia-cortex", "polybrachia", "eight arms, one argument",
             "epicurean", "biotic", "volumetric",
             None, &[],
             "jovian-reach", "europa", "brine-garden", Policy::Steady,
@@ -326,7 +324,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
         // albedo lands in the cryogenic vault (05 §1.2): sink banks,
         // joules are life, and the freeze-lock is honestly on the table.
         seat(
-            "Frostwright", "frostwright", "still-yard", "amphibian",
+            "Frostwright", "frostwright", "amphiform-rime", "amphiform",
             "we bank what the fire cannot hold",
             "empiricist", "biotic", "planar",
             None, &[],
@@ -335,7 +333,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             Some((StarClass::M, ratio(0, 1), ratio(1, 1))),
         ),
         seat(
-            "Mycelial Weft", "mycelial-weft", "hyphal weft", "fungal",
+            "Mycelial Weft", "mycelial-weft", "mycotiform-hypha", "mycotiform",
             "the network under the soil holds the forest's memory",
             "empiricist", "biotic", "volumetric",
             None, &[],
@@ -343,7 +341,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             (ratio(3, 1), ratio(-4, 1), ratio(11, 1)), None,
         ),
         seat(
-            "Syzygy", "syzygy", "conjunction-form", "syzygial", "we exist where the voices agree",
+            "Syzygy", "syzygy", "syzygiform-conjunction", "syzygiform", "we exist where the voices agree",
             "epicurean", "biotic", "umbral",
             None, &[],
             "alignment", "penumbra", "conjunction", Policy::Steady,
@@ -351,7 +349,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             Some((StarClass::G, ratio(1, 1), ratio(1, 1))),
         ),
         seat(
-            "Deepmat", "deepmat", "understone mat", "endolithic",
+            "Deepmat", "deepmat", "endolithid-understone", "endolithid",
             "the sky is a rumor we have not confirmed",
             "empiricist", "biotic", "planar",
             None, &[],
@@ -360,14 +358,14 @@ pub fn founding_polities() -> Vec<PolitySpec> {
             Some((StarClass::G, ratio(1, 1), ratio(1, 1))),
         ),
         seat(
-            "Klethaxu", "klethaxu", "trail-column", "hymenopteran", "the trail is the thought",
+            "Klethaxu", "klethaxu", "hexasocial-trail", "hexasocial", "the trail is the thought",
             "expansionist", "biotic", "planar",
             None, &[],
             "klethax-warren", "duff", "first-trail", Policy::Industry,
             (ratio(33, 1), ratio(-21, 1), ratio(6, 1)), None,
         ),
         seat(
-            "Darlok", "darlok", "veil-shifter", "metashifting", "you have already met us",
+            "Darlok", "darlok", "metamorphid-veil", "metamorphid", "you have already met us",
             "empiricist", "biotic", "umbral",
             None, &[],
             "shroudmere", "nowhere-yet", "first-mask", Policy::Steady,

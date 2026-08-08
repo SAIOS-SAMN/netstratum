@@ -15,8 +15,8 @@ fn main() {
 
     let _ = registry.create(&Civilization {
         name: "Humans".into(),
-        sigil: "humans".into(),
-        species: "human".into(),
+        sigil: "bimaniform-line".into(),
+        species: "bimaniform".into(),
         clade: String::new(),
         motto: "we go anyway".into(),
         disposition: "empiricist".into(),
@@ -29,7 +29,7 @@ fn main() {
     let _ = registry.create(&Civilization {
         name: "Deep Chorus".into(),
         sigil: "deep-chorus".into(),
-        species: "blue whale".into(),
+        species: "soniform-depth".into(),
         clade: String::new(),
         motto: "we heard it before you saw it".into(),
         disposition: "epicurean".into(),
@@ -50,7 +50,7 @@ fn main() {
         mars.tick();
     }
     mars.collect().unwrap();
-    scribe::record(&book, "sol", "mars", "humans", &mars).unwrap();
+    scribe::record(&book, "sol", "mars", "bimaniform-line", &mars).unwrap();
     scribe::record_solve(&book, "sol", "arc_6150a2bd", "rotate180", "deadbeef", 1).unwrap();
 
     // Deep Chorus settles tidefall, in the kepler-passage world:

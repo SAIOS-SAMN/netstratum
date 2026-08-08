@@ -60,6 +60,25 @@ fn seat_fee_scales_by_discipline_and_rank() {
 }
 
 #[test]
+fn plasmic_biology_is_alien_fee_vs_primary_physics() {
+    use cfe::almanac::{science_seat_affinity, science_seat_fee_for, SeatAffinity};
+    let bio = science_seat_affinity(3, ScienceDiscipline::Biology, Some(12));
+    let phys = science_seat_affinity(3, ScienceDiscipline::Physics, Some(12));
+    assert_eq!(bio, SeatAffinity::Alien);
+    assert_eq!(phys, SeatAffinity::Primary);
+    let f_bio = science_seat_fee_for(ScienceDiscipline::Biology, 1, 3, Some(12));
+    let f_phys = science_seat_fee_for(ScienceDiscipline::Physics, 1, 3, Some(12));
+    assert!(f_bio > f_phys, "alien body labs cost more for plasmiform");
+}
+
+#[test]
+fn polybrachia_math_is_primary() {
+    use cfe::almanac::{science_seat_affinity, SeatAffinity};
+    let m = science_seat_affinity(2, ScienceDiscipline::Math, Some(7));
+    assert_eq!(m, SeatAffinity::Primary);
+}
+
+#[test]
 fn chem_catalog_requires_seat() {
     let mut w = founded();
     let gem = [1u8; 32];

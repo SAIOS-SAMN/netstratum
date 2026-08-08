@@ -590,31 +590,63 @@ pub fn channel_family(channel: u8) -> Option<crate::dop::ZoneKind> {
     }
 }
 
-/// `15_TAXON` §3, compiled. Code 0 is unrecorded and lawful.
+/// `15_TAXON` §3 + `37_IMPERIUM_TAXON` — display words.
+///
+/// Wire codes are stable. Display is **Latin-rooted sentience** under the
+/// imperium tongue — never Earth common animals (no whale/bee/cat/human).
+/// Old English words remain parseable via [`clade_from_word`].
 pub fn clade_word(code: u8) -> &'static str {
     match code {
         0 => "unrecorded",
-        1 => "felid",
-        2 => "humanoid",
-        3 => "cryo-coherent",
-        4 => "lithic",
-        5 => "tardigrade",
-        6 => "cetacean",
-        7 => "cephalopod",
-        8 => "hymenopteran",
-        9 => "amphibian",
-        10 => "fungal",
-        11 => "cnidarian",
-        12 => "plasmoid",
-        13 => "syzygial",
-        14 => "endolithic",
-        15 => "avian",
-        16 => "teleost",
-        17 => "revenant",
-        18 => "gastropod",
-        19 => "draconic",
-        20 => "metashifting",
+        1 => "ailuroform",     // Felidae → solitary apex form
+        2 => "bimaniform",     // two-handed planar toolmakers (not "human")
+        3 => "cryocoherens",   // cryo + cohaerens
+        4 => "lithophage",     // stone-eater
+        5 => "hypobiotid",     // hypobiosis / cryptobiosis void-sleeper
+        6 => "soniform",       // Cetacea → pressure-song mind
+        7 => "polybrachia",    // Cephalopoda → multi-arm cortex
+        8 => "hexasocial",     // Hymenoptera → six-limb eusocial
+        9 => "amphiform",      // dual-medium
+        10 => "mycotiform",    // Mycota
+        11 => "cnidiform",     // Cnidaria
+        12 => "plasmiform",    // free plasma intelligence
+        13 => "syzygiform",    // conjunction-form
+        14 => "endolithid",    // pore-space rock
+        15 => "volatiform",    // volare — free-body atmospheric
+        16 => "actinoform",    // Actinopterygii lineage, not "fish"
+        17 => "revenid",
+        18 => "heliciform",    // Gastropoda spiral
+        19 => "draconiform",
+        20 => "metamorphid",   // veil-native form shift
         _ => "unknown",
+    }
+}
+
+/// Parse clade wire from imperium word **or** legacy English alias.
+pub fn clade_from_word(word: &str) -> Option<u8> {
+    match word {
+        "unrecorded" => Some(0),
+        "ailuroform" | "felid" | "feliform" => Some(1),
+        "bimaniform" | "humanoid" | "bimanus" => Some(2),
+        "cryocoherens" | "cryo-coherent" | "cryo" => Some(3),
+        "lithophage" | "lithic" | "lithovore" => Some(4),
+        "hypobiotid" | "tardigrade" | "void-sleeper" => Some(5),
+        "soniform" | "cetacean" | "ceticant" => Some(6),
+        "polybrachia" | "cephalopod" | "octobranch" => Some(7),
+        "hexasocial" | "hymenopteran" | "formicine" | "eusocialid" => Some(8),
+        "amphiform" | "amphibian" => Some(9),
+        "mycotiform" | "fungal" | "mycota" => Some(10),
+        "cnidiform" | "cnidarian" => Some(11),
+        "plasmiform" | "plasmoid" => Some(12),
+        "syzygiform" | "syzygial" => Some(13),
+        "endolithid" | "endolithic" => Some(14),
+        "volatiform" | "avian" => Some(15),
+        "actinoform" | "teleost" => Some(16),
+        "revenid" | "revenant" => Some(17),
+        "heliciform" | "gastropod" => Some(18),
+        "draconiform" | "draconic" => Some(19),
+        "metamorphid" | "metashifting" | "metashifter" => Some(20),
+        _ => None,
     }
 }
 

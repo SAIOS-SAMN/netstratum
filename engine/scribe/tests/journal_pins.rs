@@ -284,7 +284,7 @@ fn a_journal_free_replay_is_unaffected() {
     let book = Ledger::at(&root);
     let world = growth_world();
     let committed = world.committed();
-    scribe::record(&book, "sol", "prime", "humans", &world).expect("records");
+    scribe::record(&book, "sol", "prime", "bimaniform-line", &world).expect("records");
     let chronicle_path = book.world_dir("sol").join("chronicle.jsonl");
     let chronicle_bytes = fs::read(&chronicle_path).expect("chronicle");
     let receipts = world.chronicle().receipts().len();

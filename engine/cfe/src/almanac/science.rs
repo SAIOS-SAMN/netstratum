@@ -521,13 +521,111 @@ impl ExplosionKind {
     }
 }
 
-/// **SEAT FEE** — resonator eighth × discipline weight × rank.
+/// How natural a science seat is for a sealed metabolism (37 §4).
+///
+/// - **Primary** — fee ×1 (this is the line's own craft)
+/// - **Secondary** — fee ×2 (possible, costly, alien-ish)
+/// - **Alien** — fee ×4 (almost never the default path; still seatable)
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u8)]
+pub enum SeatAffinity {
+    Primary = 1,
+    Secondary = 2,
+    Alien = 4,
+}
+
+impl SeatAffinity {
+    pub fn fee_mult(self) -> i64 {
+        i64::from(self as u8)
+    }
+
+    pub fn word(self) -> &'static str {
+        match self {
+            Self::Primary => "primary",
+            Self::Secondary => "secondary",
+            Self::Alien => "alien",
+        }
+    }
+}
+
+/// **SEAT AFFINITY** — pure: metabolism × discipline (+ optional clade).
+///
+/// Plasmiform does not need the same lab path as a bimaniform flatlander.
+/// Polybrachia (clade 7) colours skin/math as primary even under biotic.
+pub fn science_seat_affinity(
+    metabolism: u8,
+    discipline: ScienceDiscipline,
+    clade: Option<u8>,
+) -> SeatAffinity {
+    use ScienceDiscipline::*;
+    // Clade overlays first (37 §4.2).
+    if let Some(c) = clade {
+        match (c, discipline) {
+            // polybrachia — volumetric cortex
+            (7, Math | Research | Skin) => return SeatAffinity::Primary,
+            (7, Biology | Chem) => return SeatAffinity::Secondary,
+            // soniform — pressure-song
+            (6, Math | Research | Physics) => return SeatAffinity::Primary,
+            // hexasocial — comb compute
+            (8, Math | Research | Chem) => return SeatAffinity::Primary,
+            (8, Clone) => return SeatAffinity::Primary, // caste clone
+            // plasmiform / syzygiform
+            (12 | 13, Physics | Math | Synthetic | Research | Chem) => {
+                return SeatAffinity::Primary
+            }
+            (12 | 13, Biology | Clone | Skin) => return SeatAffinity::Alien,
+            // hypobiotid / lithophage
+            (5 | 4 | 14, Chem | Physics | Research) => return SeatAffinity::Primary,
+            (5 | 4 | 14, Biology | Clone | Skin) => return SeatAffinity::Alien,
+            // metamorphid — veil crafts
+            (20, Skin | Synthetic | Research) => return SeatAffinity::Primary,
+            // cryocoherens / draconiform
+            (3 | 19, Math | Physics | Research) => return SeatAffinity::Primary,
+            // bimaniform / ailuroform — flatlander default
+            (1 | 2, Chem | Biology | Research | Clone | Skin) => return SeatAffinity::Primary,
+            _ => {}
+        }
+    }
+    // Metabolism defaults (37 §4.1).
+    match metabolism {
+        1 => match discipline {
+            // mineral
+            Chem | Physics | Math | Research | Synthetic => SeatAffinity::Primary,
+            Biology | Clone => SeatAffinity::Secondary,
+            Skin => SeatAffinity::Alien,
+        },
+        3 => match discipline {
+            // plasmic
+            Physics | Math | Research | Synthetic | Chem => SeatAffinity::Primary,
+            Biology | Clone | Skin => SeatAffinity::Alien,
+        },
+        _ => match discipline {
+            // biotic (default 2)
+            Biology | Chem | Research | Clone | Skin => SeatAffinity::Primary,
+            Physics | Math => SeatAffinity::Secondary,
+            Synthetic => SeatAffinity::Secondary,
+        },
+    }
+}
+
+/// **SEAT FEE** — resonator eighth × discipline weight × rank × affinity.
 /// Pure: same inputs → same fee. No free dial.
 pub fn science_seat_fee(discipline: ScienceDiscipline, rank: u8) -> Ratio {
-    let eighth = ratio(1, 8); // same grain as resonator yield law; world multiplies if needed
+    science_seat_fee_for(discipline, rank, 2, None)
+}
+
+/// Fee coloured by sealed metabolism + clade (call from world with axes).
+pub fn science_seat_fee_for(
+    discipline: ScienceDiscipline,
+    rank: u8,
+    metabolism: u8,
+    clade: Option<u8>,
+) -> Ratio {
+    let eighth = ratio(1, 8);
     let w = discipline.seat_weight();
     let r = i64::from(rank.max(1));
-    eighth * ratio(w, 1) * ratio(r, 1)
+    let aff = science_seat_affinity(metabolism, discipline, clade).fee_mult();
+    eighth * ratio(w, 1) * ratio(r, 1) * ratio(aff, 1)
 }
 
 /// **EXPLOSION RISK** — exact rational, pure.

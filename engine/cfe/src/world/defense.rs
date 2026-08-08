@@ -184,62 +184,79 @@ impl World {
         };
 
         // Clade colour (36 §1.5) — weights only, no new domain.
+        // Clade colour — imperium words (37); codes stable.
         let clade_voice = match clade {
             Some(5) => {
-                // tardigrade
+                // hypobiotid (void-sleeper)
                 ranks[0] = ranks[0].saturating_add(1).min(3);
                 ranks[1] = ranks[1].saturating_add(1).min(3);
-                "cryptobiotic endurance"
+                "hypobiotid endurance"
             }
             Some(4) | Some(14) => {
-                // lithic / endolithic
+                // lithophage / endolithid
                 ranks[0] = ranks[0].saturating_add(1).min(3);
                 ranks[2] = ranks[2].saturating_add(1).min(3);
                 "lattice memory"
             }
             Some(8) => {
-                // hymenopteran
+                // hexasocial
                 ranks[2] = ranks[2].saturating_add(1).min(3);
                 ranks[4] = ranks[4].saturating_add(1).min(3);
-                "hive graph"
+                "comb graph"
             }
             Some(6) => {
-                // cetacean
+                // soniform
                 ranks[1] = ranks[1].saturating_add(1).min(3);
                 ranks[2] = ranks[2].saturating_add(1).min(3);
-                "song medium"
+                "pressure-song medium"
+            }
+            Some(7) => {
+                // polybrachia
+                ranks[1] = ranks[1].saturating_add(1).min(3);
+                ranks[4] = ranks[4].saturating_add(1).min(3);
+                "arm-cortex volumetric"
             }
             Some(12) | Some(13) => {
-                // plasmoid / syzygial
+                // plasmiform / syzygiform
                 ranks[1] = ranks[1].saturating_add(1).min(3);
                 ranks[3] = ranks[3].saturating_add(1).min(3);
                 "field sense"
             }
             Some(10) => {
-                // fungal
+                // mycotiform
                 ranks[0] = ranks[0].saturating_add(1).min(3);
                 ranks[4] = ranks[4].saturating_add(1).min(3);
-                "mycelial redundancy"
+                "hyphal redundancy"
             }
             Some(3) => {
-                // cryo-coherent
+                // cryocoherens
                 ranks[1] = ranks[1].saturating_add(1).min(3);
                 ranks[0] = ranks[0].saturating_add(1).min(3);
-                "ice shell"
+                "coherent ice shell"
             }
             Some(19) => {
-                // draconic
+                // draconiform
                 ranks[2] = ranks[2].saturating_add(1).min(3);
                 ranks[3] = ranks[3].saturating_add(1).min(3);
                 "coherence apex"
             }
             Some(20) => {
-                // metashifting
+                // metamorphid
                 ranks[4] = ranks[4].saturating_add(1).min(3);
                 ranks[3] = ranks[3].saturating_add(1).min(3);
                 "veil-native"
             }
-            _ => "standard clade colour",
+            Some(1) => {
+                // ailuroform
+                ranks[3] = ranks[3].saturating_add(1).min(3);
+                "solitary apex colour"
+            }
+            Some(2) => {
+                // bimaniform (flatlander-default planar)
+                ranks[4] = ranks[4].saturating_add(1).min(3);
+                "planar tool-maker colour"
+            }
+            _ => "open clade colour",
         };
 
         // Optional primary override from reorientation.
@@ -357,12 +374,14 @@ impl World {
     pub fn kin_residual_voice(&self) -> &'static str {
         let p = self.defense_posture();
         match (p.metabolism, p.clade) {
-            (1, Some(4) | Some(14)) => "lithic lattice — iron/scrap shear",
+            (1, Some(4) | Some(14)) => "lithophage lattice — iron/scrap shear",
             (1, _) => "mineral bulk — iron train interdiction",
-            (2, Some(5)) => "cryptobiotic barge — biomass under desiccation risk",
-            (2, Some(8)) => "hive graph — many small escorts, biomass cargo",
+            (2, Some(5)) => "hypobiotid barge — biomass under desiccation risk",
+            (2, Some(6)) => "soniform convoy — pressure-song cargo path",
+            (2, Some(7)) => "polybrachia convoy — multi-arm haul",
+            (2, Some(8)) => "hexasocial graph — many small escorts, biomass cargo",
             (2, _) => "biotic organ — biomass / ration cargo loss",
-            (3, Some(12) | Some(13)) => "field sled — crystal/spark at reconnection",
+            (3, Some(12) | Some(13)) => "plasmiform sled — crystal/spark at reconnection",
             (3, _) => "plasmic sheet — crystal / STAMP-spark residual",
             _ => "convoy residual — typed cargo loss",
         }
@@ -420,7 +439,7 @@ impl World {
     }
 
     /// Escort coverage on a deal: sum (grade+1)/8 over escort hulls assigned, capped at 1.
-    /// K3: hymenopteran (clade 8) escorts count one grade higher (graph redundancy).
+    /// K3: hexasocial (clade 8) escorts count one grade higher (graph redundancy).
     pub fn escort_cover(&self, deal: u64) -> Ratio {
         if deal == 0 {
             return ratio(0, 1);

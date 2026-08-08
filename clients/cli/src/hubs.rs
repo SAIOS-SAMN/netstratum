@@ -858,13 +858,26 @@ fn science_index(
                 )
             );
             let board = world.science_lab_board(current);
+            let met = match board.metabolism {
+                1 => "mineral",
+                3 => "plasmic",
+                _ => "biotic",
+            };
+            let clade_w = board
+                .clade
+                .map(cfe::vocabulary::clade_word)
+                .unwrap_or("unrecorded");
             println!(
-                "  clones {} · synth g{} · skin g{} · rogue {}",
-                board.clones, board.synth_grade, board.skin_grade, board.rogue
+                "  metabolism {} · clade {} · clones {} · synth g{} · skin g{} · rogue {}",
+                met, clade_w, board.clones, board.synth_grade, board.skin_grade, board.rogue
+            );
+            println!(
+                "  {}",
+                style.dim("Fees colour by your line — plasmiform ≠ flatlander (docs/37_IMPERIUM_TAXON.md).")
             );
             println!();
-            println!("  {}", style.section("DISCIPLINE SEATS"));
-            for (d, rank, fee) in &board.seats {
+            println!("  {}", style.section("DISCIPLINE SEATS (affinity · fee)"));
+            for (d, rank, fee, aff) in &board.seats {
                 let mark = if *rank >= 2 {
                     style.ok("R2")
                 } else if *rank == 1 {
@@ -872,11 +885,17 @@ fn science_index(
                 } else {
                     style.dim("--")
                 };
+                let aff_s = match aff {
+                    cfe::almanac::SeatAffinity::Primary => style.ok("primary"),
+                    cfe::almanac::SeatAffinity::Secondary => style.warn("secondary"),
+                    cfe::almanac::SeatAffinity::Alien => style.bad("alien"),
+                };
                 println!(
-                    "  {} {}  rank {} · next fee {} · {}",
+                    "  {} {}  rank {} · {} · fee {} · {}",
                     mark,
                     style.verb(d.word()),
                     rank,
+                    aff_s,
                     amount(fee),
                     style.dim(d.gloss())
                 );

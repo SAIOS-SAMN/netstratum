@@ -32,8 +32,9 @@ pub use periodic::{periodic_of, Periodic, CELLS, LANES, LINES, PHASES, SHELLS, S
 pub use science::{
     dark_utility, explodes, explosion_risk, explosion_threshold, isomorphic, iso_union_knowledge,
     iso_union_product, iso_union_recipe, lab_pole_card, net_utility, reveals_hidden_negative,
-    reveals_hidden_positive, science_seat_fee, survival_utility, CivAxes, DarkPull, ExplosionKind,
-    LabPath, LabPoleCard, ScienceDiscipline,
+    reveals_hidden_positive, science_seat_affinity, science_seat_fee, science_seat_fee_for,
+    survival_utility, CivAxes, DarkPull, ExplosionKind, LabPath, LabPoleCard, ScienceDiscipline,
+    SeatAffinity,
 };
 pub use thermal::{
     ceiling4, grained_t_eq4, orbit_on_grain, region_of, workable_at, ThermalRegion, ORBIT_GRAIN,

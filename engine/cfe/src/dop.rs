@@ -959,7 +959,7 @@ pub fn archetype_sigil(class: u8) -> &'static str {
         4 => "≋",  // telepathic-resonant — phases in agreement
         5 => "⊚",  // pelagic-aerial — a body free inside a medium
         6 => "∿",  // plasma-field — the field's own oscillation
-        7 => "▲",  // apex-terrestrial — the solitary peak
+        7 => "▲",  // apex-solitary — the solitary peak (not Earth-"terrestrial")
         _ => "?",
     }
 }
@@ -983,7 +983,7 @@ pub fn archetype_word(class: u8) -> &'static str {
         4 => "telepathic-resonant",
         5 => "pelagic-aerial",
         6 => "plasma-field",
-        7 => "apex-terrestrial",
+        7 => "apex-solitary", // was apex-terrestrial — Earth-default struck (37)
         _ => "unknown",
     }
 }

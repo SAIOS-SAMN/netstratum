@@ -6,7 +6,8 @@
 
 use super::*;
 use crate::almanac::{
-    lab_pole_card, science_seat_fee, ExplosionKind, LabPath, LabPoleCard, ScienceDiscipline,
+    lab_pole_card, science_seat_affinity, science_seat_fee_for, ExplosionKind, LabPath,
+    LabPoleCard, ScienceDiscipline, SeatAffinity,
 };
 use crate::dop::{Resource, ZoneKind};
 
@@ -122,12 +123,14 @@ impl World {
             });
         }
         let next_rank = have.saturating_add(1);
-        // Prefer world resonator eighth when available.
+        let met = self.civ_axes().map(|a| a.metabolism).unwrap_or(2);
+        let clade = self.taxon.map(|(_, c)| c);
+        // World resonator eighth × pure affinity law (metabolism-coloured).
         let eighth = ZoneKind::Resonator.yield_per_tick().1;
         let weight = discipline.seat_weight();
-        let fee = eighth * ratio(weight, 1) * ratio(i64::from(next_rank), 1);
-        // Cross-check pure law (eighth identity).
-        let _law = science_seat_fee(discipline, next_rank);
+        let aff = science_seat_affinity(met, discipline, clade).fee_mult();
+        let fee = eighth * ratio(weight, 1) * ratio(i64::from(next_rank), 1) * ratio(aff, 1);
+        let _law = science_seat_fee_for(discipline, next_rank, met, clade);
         let held = peek(&self.orbs, orb).expect("checked");
         let have_c = held.banked_amount(Resource::Crystal);
         if have_c < fee {
@@ -505,7 +508,9 @@ impl World {
 
     /// Board reading for CLI science index.
     pub fn science_lab_board(&self, orb: u64) -> ScienceLabBoard {
-        let seats: Vec<(ScienceDiscipline, u8, crate::ratio::Ratio)> = [
+        let met = self.civ_axes().map(|a| a.metabolism).unwrap_or(2);
+        let clade = self.taxon.map(|(_, c)| c);
+        let seats: Vec<(ScienceDiscipline, u8, crate::ratio::Ratio, SeatAffinity)> = [
             ScienceDiscipline::Chem,
             ScienceDiscipline::Biology,
             ScienceDiscipline::Physics,
@@ -518,13 +523,17 @@ impl World {
         .into_iter()
         .map(|d| {
             let rank = self.science_rank(orb, d);
+            let aff = science_seat_affinity(met, d, clade);
             let next = if rank >= d.max_rank() {
                 ratio(0, 1)
             } else {
                 let eighth = ZoneKind::Resonator.yield_per_tick().1;
-                eighth * ratio(d.seat_weight(), 1) * ratio(i64::from(rank + 1), 1)
+                eighth
+                    * ratio(d.seat_weight(), 1)
+                    * ratio(i64::from(rank + 1), 1)
+                    * ratio(aff.fee_mult(), 1)
             };
-            (d, rank, next)
+            (d, rank, next, aff)
         })
         .collect();
         ScienceLabBoard {
@@ -533,6 +542,8 @@ impl World {
             synth_grade: self.synth_grade_of(orb),
             skin_grade: self.skin_grade_of(orb),
             rogue: self.rogue_pressure_of(orb),
+            metabolism: met,
+            clade,
         }
     }
 }
@@ -553,9 +564,12 @@ pub struct LabCreateResult {
 
 #[derive(Debug, Clone)]
 pub struct ScienceLabBoard {
-    pub seats: Vec<(ScienceDiscipline, u8, crate::ratio::Ratio)>,
+    /// (discipline, rank, next_fee, affinity) — affinity is metabolism/clade coloured.
+    pub seats: Vec<(ScienceDiscipline, u8, crate::ratio::Ratio, SeatAffinity)>,
     pub clones: u64,
     pub synth_grade: u8,
     pub skin_grade: u8,
     pub rogue: u8,
+    pub metabolism: u8,
+    pub clade: Option<u8>,
 }
