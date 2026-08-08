@@ -2890,6 +2890,81 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 Err(refusal) => refuse(world, &refusal, style),
             }
         },
+        // P5-F espionage
+        Some("spy") => match words.next() {
+            None | Some("status") | Some("help") => {
+                let e = world.espionage_integrity();
+                println!(
+                    "{} SPY — detect g{} · marks {} · intel {} · veiled={}",
+                    style.head("INF"),
+                    e.detection_grade,
+                    e.spy_marks,
+                    e.intel_count,
+                    e.veiled
+                );
+                println!(
+                    "  can_probe={} can_exfil={} can_sabotage={}",
+                    e.can_probe, e.can_exfil, e.can_sabotage
+                );
+                println!(
+                    "  {}",
+                    style.hint("spy probe [orb] · spy exfil <condition> · spy sabotage [orb]")
+                );
+            }
+            Some("probe") => {
+                let orb = words
+                    .next()
+                    .and_then(|w| w.parse().ok())
+                    .unwrap_or(*current);
+                match world.spy_probe(orb) {
+                    Ok(d) => {
+                        let _ = sync_world(world);
+                        println!("{} probe orb {orb} depth {d}", style.ok("SPY"));
+                    }
+                    Err(refusal) => refuse(world, &refusal, style),
+                }
+            }
+            Some("exfil") => {
+                let cond = words.next().and_then(|w| w.parse().ok());
+                match cond {
+                    Some(c) => match world.tech_exfil(*current, c) {
+                        Ok(h) => {
+                            let _ = sync_world(world);
+                            println!(
+                                "{} exfil condition {c} · hash {:02x}{:02x}… (intel stash, not tech mint)",
+                                style.warn("EXFIL"),
+                                h[0],
+                                h[1]
+                            );
+                        }
+                        Err(refusal) => refuse(world, &refusal, style),
+                    },
+                    None => println!(
+                        "{} usage: {}",
+                        style.bad("✗"),
+                        style.strong("spy exfil <condition>")
+                    ),
+                }
+            }
+            Some("sabotage") => {
+                let orb = words
+                    .next()
+                    .and_then(|w| w.parse().ok())
+                    .unwrap_or(*current);
+                match world.sabotage_instrument(orb) {
+                    Ok(g) => {
+                        let _ = sync_world(world);
+                        println!("{} sabotaged instrument grade {g} on orb {orb}", style.warn("SABOTAGE"));
+                    }
+                    Err(refusal) => refuse(world, &refusal, style),
+                }
+            }
+            Some(other) => println!(
+                "{} spy {:?} — status|probe|exfil|sabotage",
+                style.bad("✗"),
+                other
+            ),
+        },
         // Suite shells — UI over deeds (36 §10), not a second physics.
         Some("suite") => match words.next() {
             Some("market") | Some("mkt") | Some("war") => {
@@ -2972,6 +3047,27 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 println!(
                     "  {}",
                     style.hint("defend escort <hull> <deal> · defend risk <deal> · posture set")
+                );
+            }
+            Some("spy") | Some("espionage") | Some("intel") => {
+                let e = world.espionage_integrity();
+                println!(
+                    "{} ESPIONAGE suite — detect g{} · marks {} · intel hashes {}",
+                    style.head("SUITE"),
+                    e.detection_grade,
+                    e.spy_marks,
+                    e.intel_count
+                );
+                println!(
+                    "  probe={} exfil={} sabotage={} veiled={}",
+                    e.can_probe, e.can_exfil, e.can_sabotage, e.veiled
+                );
+                for (i, h) in world.intel_hashes().iter().take(4).enumerate() {
+                    println!("  intel[{i}] {:02x}{:02x}…", h[0], h[1]);
+                }
+                println!(
+                    "  {}",
+                    style.hint("spy probe|exfil|sabotage · forge · veil — same deeds")
                 );
             }
             Some("cyber") | Some("cyb") => {
@@ -6686,6 +6782,15 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
         ActionRefused::InstrumentSpoof { orb, grade } => format!(
             "instrument grade {grade} already forged on orb {orb} — anti-spoof refuses re-forge (forge another condition)"
         ),
+        ActionRefused::SpyProbeRequired { orb } => format!(
+            "spy probe orb {orb} first — exfil/sabotage need a scout mark"
+        ),
+        ActionRefused::IntelAlreadyHeld => {
+            "that tech hash is already in the intel stash — no free mint either way".into()
+        }
+        ActionRefused::NoInstrumentToSabotage { orb } => {
+            format!("no instrument on orb {orb} to sabotage")
+        }
         ActionRefused::BalanceEntropyDominates {
             balance,
             syntropy,
@@ -8112,6 +8217,30 @@ fn chronicle(world: &World, style: &Style) {
                         .unwrap_or_else(|| primary.to_string())
                 }
             ),
+            cfe::dop::ClosureEvent::SpyProbed {
+                orb_id,
+                depth,
+                fee,
+            } => format!(
+                "👁 spy probe orb {} depth {} fee {}",
+                orb_id,
+                depth,
+                amount(fee)
+            ),
+            cfe::dop::ClosureEvent::TechExfiltrated {
+                condition,
+                fee,
+                ..
+            } => format!(
+                "📤 tech exfil condition {} fee {} (intel stash)",
+                condition,
+                amount(fee)
+            ),
+            cfe::dop::ClosureEvent::InstrumentSabotaged {
+                orb_id,
+                grade,
+                ..
+            } => format!("🕱 instrument sabotage orb {} grade {}", orb_id, grade),
             cfe::dop::ClosureEvent::AssayStruck { amount: drawn, richness, .. } => format!(
                 "⚖ {} drawn from the opened vein — one receipt, the whole span{}",
                 style.strong(&amount(drawn)),

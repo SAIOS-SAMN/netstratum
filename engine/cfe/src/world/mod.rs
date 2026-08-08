@@ -67,6 +67,7 @@ pub mod market_defense;
 pub mod medium_defense;
 pub mod intel;
 pub mod cog_cyb;
+pub mod espionage;
 
 pub use defense::{CorridorFog, DefenseDomain, DefensePosture, KinIntegrity, RiskBand};
 pub use market_defense::{
@@ -75,6 +76,7 @@ pub use market_defense::{
 pub use medium_defense::{DualUseAtm, MediumIntegrity, tamper_threshold};
 pub use intel::{InfIntegrity, WardState};
 pub use cog_cyb::{CogIntegrity, CybIntegrity};
+pub use espionage::EspionageIntegrity;
 
 pub use replay::replay;
 pub use fleet::hull_voice;

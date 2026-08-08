@@ -335,6 +335,8 @@ impl World {
             posture_disposition: self.posture_disposition,
             posture_perception: self.posture_perception,
             posture_primary: self.posture_primary,
+            intel_hashes: self.intel_hashes.clone(),
+            spy_marks: self.spy_marks.clone(),
         }
     }
     /// ELEMENT-GRAMMAR-1 (14 §3) — the extraction closure: richness ×

@@ -52,6 +52,8 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut posture_disposition: Option<u8> = None;
     let mut posture_perception: Option<u8> = None;
     let mut posture_primary: Option<u8> = None;
+    let mut intel_hashes: Vec<[u8; 32]> = Vec::new();
+    let mut spy_marks: Vec<(u64, u8)> = Vec::new();
     for receipt in chronicle.receipts() {
         match &receipt.event {
             // BOOK-1 (19_LENS §16) — the open registry rebuilds from
@@ -1287,6 +1289,41 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     Some(*primary)
                 };
             }
+            ClosureEvent::SpyProbed {
+                orb_id,
+                depth,
+                fee,
+            } => {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank(crate::dop::Resource::Crystal, -fee.clone());
+                }
+                spy_marks.retain(|(o, _)| *o != *orb_id);
+                spy_marks.push((*orb_id, *depth));
+            }
+            ClosureEvent::TechExfiltrated {
+                tech_hash,
+                fee,
+                ..
+            } => {
+                if let Some(held) = peel(&mut orbs, 1) {
+                    held.bank(crate::dop::Resource::Crystal, -fee.clone());
+                }
+                if !intel_hashes.contains(tech_hash) {
+                    intel_hashes.push(*tech_hash);
+                }
+            }
+            ClosureEvent::InstrumentSabotaged {
+                orb_id,
+                grade,
+                tech_hash,
+            } => {
+                if let Some(i) = instruments
+                    .iter()
+                    .position(|(o, h, g)| o == orb_id && h == tech_hash && g == grade)
+                {
+                    instruments.remove(i);
+                }
+            }
         }
     }
     Committed {
@@ -1294,7 +1331,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
         gauge, genesis, terrain_seed, practices, instruments, routes, element_routes, treaties,
         prospects, warded, veiled, taxon, stations, hulls, notes, futures, last_clears, shares,
         perps, clear_depths, market_sealed_until, cascade_pressures, tamper_pressures,
-        posture_disposition, posture_perception, posture_primary,
+        posture_disposition, posture_perception, posture_primary, intel_hashes, spy_marks,
     }
 }
 

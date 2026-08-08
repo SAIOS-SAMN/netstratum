@@ -50,6 +50,8 @@ impl World {
             posture_disposition: None,
             posture_perception: None,
             posture_primary: None,
+            intel_hashes: Vec::new(),
+            spy_marks: Vec::new(),
         }
     }
     /// P2-PERSIST — resume a world from its chronicle: the committed
@@ -110,6 +112,8 @@ impl World {
             posture_disposition: committed.posture_disposition,
             posture_perception: committed.posture_perception,
             posture_primary: committed.posture_primary,
+            intel_hashes: committed.intel_hashes,
+            spy_marks: committed.spy_marks,
         }
     }
     /// ELEVATE-1 (12_UNION §6) — THE THREE-GATE GAUGE CLIMB, the

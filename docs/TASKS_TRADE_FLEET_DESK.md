@@ -269,14 +269,14 @@ not a second physics. NPC must war without opening a suite.
 | P5.19 | [x] Dual-use gate: TERRA-1 overt vs CovertTamper covert | TERRA-1, P5.17 | doc+pin |
 | P5.19b | [ ] Species-relative medium residual copy | P5.11, P5.17 | |
 
-### P5-F — Espionage suite
+### P5-F — Espionage suite · **LANDED**
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
-| P5.23 | [ ] Spy probe / scout under veil | P5.14–P5.15 | |
-| P5.24 | [ ] Tech hash exfil (no free mint of node) | P5.23, PLANNER-1 | |
-| P5.25 | [ ] Sabotage: false prospect / instrument grade hit | P5.23 | |
-| P5.26 | [ ] Disposition-routed NPC espionage_step | P5.23–P5.25 | pure NPC |
+| P5.23 | [x] Spy probe / scout (`SpyProbed` 145) | P5.14–P5.15 | pins |
+| P5.24 | [x] Tech hash exfil to intel stash (`TechExfiltrated` 146) | P5.23 | pins |
+| P5.25 | [x] Sabotage instrument remove (`InstrumentSabotaged` 147) | P5.23 | pins |
+| P5.26 | [x] Disposition-routed NPC `espionage_step` | P5.23–P5.25 | pure NPC |
 
 ### P5-G — Deep rails (original capital exits)
 
@@ -295,8 +295,8 @@ not a second physics. NPC must war without opening a suite.
 | P5.9 | [ ] Demo: escort convoy + one covert ATM arc + optional R3 | P5.1–P5.3, P5.17 | scripted |
 | P5.10 | [ ] Docs Phase 5 land; 33 §12 metric; 36 status → PARTIAL/LAND | P5.9 | |
 
-**Phase 5 land progress (measured):** P5-A · P5-B · P5-D (+dual-use) ·
-P5-M · P5-M2 **landed**. **Next:** P5-C → P5-K2 (or P5.19b) → P5-E/F.
+**Phase 5 land progress (measured):** P5-A…F · K2 · M/M2 · dual-use
+**landed**. **Open:** P5.19b · P5-G deep rails · P5-H close-out.
 
 **Phase 5 done when:** (1) convoy capital is defendable with typed loss
 **and** species-coloured residual (K1); (2) DEFEND posture is

@@ -363,7 +363,7 @@ Maps onto and **extends** `TASKS_TRADE_FLEET_DESK` P5:
 | **P5-E** | COG + CYB instrument/mesh guards + CYBER suite | **LANDED** zero tags |
 | **P5-M / M2** | MKT economic warfare + cascade/haircut/resume audit + suites | **LANDED** 135–140 |
 | **P5-K2** | KIN open-up §12 (species residual · kin_step · perception fog) | **LANDED** zero tags |
-| **P5-F** | Espionage suite (scout/exfil/sabotage) | SEAL B |
+| **P5-F** | Espionage suite (scout/exfil/sabotage) | **LANDED** 145–147 |
 | **P5-G** | Deep rails R3/R4 / Anchor (original P5.4–P5.7) | optional features |
 | **P5-H** | Docs + demo: escort + covert ATM + market-war arc | program metric |
 
@@ -381,7 +381,8 @@ without free dials (§12); P5-G never blocks R1–R2 fun.
 | **140** | P5-M2 NoteCascadeStruck |
 | **141–143** | P5-D CovertTamper / MediumReinforced / TamperDetected |
 | **144** | P5-B PostureReoriented (doctrine shift; anatomy sealed) |
-| **145+** | next free — further matrix vectors |
+| **145–147** | P5-F SpyProbed / TechExfiltrated / InstrumentSabotaged |
+| **148+** | next free |
 | no float | all residuals exact rational |
 
 ### 6.2 Non-goals

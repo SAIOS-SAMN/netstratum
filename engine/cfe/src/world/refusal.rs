@@ -263,6 +263,12 @@ pub enum ActionRefused {
     CorridorFogDepth { deal: u64 },
     /// P5-E CYB — instrument grade/node already held on orb (anti-spoof reforge).
     InstrumentSpoof { orb: u64, grade: u8 },
+    /// P5-F — exfil/sabotage require a prior SpyProbed mark on the orb.
+    SpyProbeRequired { orb: u64 },
+    /// P5-F — intel stash already holds this hash.
+    IntelAlreadyHeld,
+    /// P5-F — no instrument on orb to sabotage.
+    NoInstrumentToSabotage { orb: u64 },
     /// THERMAL-1 — siting an orbit needs a commissioned sun first.
     NoStarCommissioned,
     /// THERMAL-1 — the orb is already sited; an orbit does not move.

@@ -15,19 +15,17 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 |------|--------|
 | Wave-1 commit | **`2109bf0`** (T4–T9, REFINE-1) |
 | Wave-2 commit | **`4686399`** (E-APT, element_trade_step) |
-| Kernel | **0.31.0** (next free minor **32**) |
-| Next free tag | **145** (claim at next residual land; P5-C may need **zero**) |
+| Kernel | **0.32.0** (next free minor **33**) |
+| Next free tag | **148** (P5-F 145–147 spy/exfil/sabotage) |
 | Stations | **10** (T4–T9 economic offices open) |
 | ZoneKind compiled | **1–10** (ShipYard = 10) |
-| Codec | **SCHEMA_V12** (… + posture doctrine overlay) |
-| Pure-NPC green | market_war_step · instrument clears · ATM · posture · INF surface |
-| **Landed P5-C** | veil/ward DEFEND · `detection_grade` · `DetectionThin` under veil |
-| **Landed P5-K2** | kin residual/voice · place risk · fog · `kin_step` · CONVOY colour |
-| **Landed P5-E** | cog/cyb integrity · instrument spoof guard · mesh guard · suite cyber |
-| **Next phase** | **P5-F** espionage · P5.19b medium colour · P5-H close-out |
-| Docs | `36`; A/B/C/D/E/M/M2/K2/19 landed |
-| Trade program | Phases **1–4** complete; Phase **5 partial** — F next |
-| Help | `suite cyber|convoy|market` · `veil|ward` · `posture` · forge |
+| Codec | **SCHEMA_V13** (… + intel_hashes · spy_marks) |
+| Pure-NPC green | market_war · kin · espionage_step · instrument · ATM |
+| **Landed P5-F** | spy probe/exfil/sabotage · intel stash · suite spy |
+| **Next phase** | P5.19b medium colour · P5-G deep rails · **P5-H** close-out |
+| Docs | `36`; Phase 5 core verticals A–F + K2 + M landed |
+| Trade program | Phases **1–4** complete; Phase **5** near-complete (G/H open) |
+| Help | `spy probe|exfil|sabotage` · `suite spy|cyber|…` |
 | Dirty / other lane | do not `git add -A` without reviewing observer/other-lane files |
 
 Older §0 counts (809 tests, 71 deeds, tag 95) are **historical**; re-measure

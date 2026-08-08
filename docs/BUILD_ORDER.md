@@ -1068,5 +1068,9 @@ conductor `kin_step` · CONVOY suite residual. **Zero new tags.**
 anti-spoof reforge · mesh-guard veiled melt · `suite cyber` · stamp hygiene
 reading. **Zero new tags.**
 
-**Next:** P5-F espionage · P5.19b medium colour · P5-H close-out · P1.8.
+**P5-F espionage LANDED:** tags **145–147** SpyProbed / TechExfiltrated /
+InstrumentSabotaged; intel stash (no free tech mint); probe gate; NPC
+`espionage_step`; SCHEMA_V13; kernel **0.32.0**; CLI `spy` / suite spy.
+
+**Next:** P5.19b medium colour · P5-G deep rails · P5-H close-out · P1.8.
 

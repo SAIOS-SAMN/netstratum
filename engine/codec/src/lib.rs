@@ -88,6 +88,9 @@ pub const SCHEMA_V11: u8 = 11;
 /// **SCHEMA v12 — P5-B posture doctrine overlay.**
 pub const SCHEMA_V12: u8 = 12;
 
+/// **SCHEMA v13 — P5-F intel stash + spy marks.**
+pub const SCHEMA_V13: u8 = 13;
+
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
 }
@@ -108,7 +111,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V12];
+    let mut out = vec![SCHEMA_V13];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -433,6 +436,16 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
             out.push(p);
         }
     }
+    // SCHEMA v13 — intel hashes + spy marks.
+    put_u32(&mut out, committed.intel_hashes.len() as u32);
+    for h in &committed.intel_hashes {
+        out.extend_from_slice(h);
+    }
+    put_u32(&mut out, committed.spy_marks.len() as u32);
+    for (orb, d) in &committed.spy_marks {
+        put_u64(&mut out, *orb);
+        out.push(*d);
+    }
     out
 }
 
@@ -514,6 +527,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         && schema != SCHEMA_V10
         && schema != SCHEMA_V11
         && schema != SCHEMA_V12
+        && schema != SCHEMA_V13
     {
         return None;
     }
@@ -945,6 +959,20 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         }
     }
 
+    let mut intel_hashes = Vec::new();
+    let mut spy_marks = Vec::new();
+    if schema >= SCHEMA_V13 {
+        for _ in 0..take.u32()? {
+            let h = take.array32()?;
+            intel_hashes.push(h);
+        }
+        for _ in 0..take.u32()? {
+            let orb = take.u64()?;
+            let d = take.u8()?;
+            spy_marks.push((orb, d));
+        }
+    }
+
     if !take.done() {
         return None;
     }
@@ -987,5 +1015,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         posture_disposition,
         posture_perception,
         posture_primary,
+        intel_hashes,
+        spy_marks,
     })
 }

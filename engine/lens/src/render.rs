@@ -1041,6 +1041,33 @@ pub fn render_receipt(receipt: &Receipt) -> String {
             "posture_reoriented",
             format!("doctrine dis={disposition} per={perception} primary={primary}"),
         ),
+        E::SpyProbed {
+            orb_id,
+            depth,
+            fee,
+        } => (
+            "spy_probe",
+            format!(
+                "probe orb {orb_id} depth {depth} fee {}",
+                ratio_str(fee)
+            ),
+        ),
+        E::TechExfiltrated {
+            condition,
+            fee,
+            ..
+        } => (
+            "tech_exfil",
+            format!("exfil condition {condition} fee {}", ratio_str(fee)),
+        ),
+        E::InstrumentSabotaged {
+            orb_id,
+            grade,
+            ..
+        } => (
+            "instrument_sabotage",
+            format!("sabotage orb {orb_id} grade {grade}"),
+        ),
         E::ApertureSent { deal, from_orb, resource, amount } => (
             "aperture_sent",
             format!(

@@ -625,10 +625,21 @@ fn render_defend(style: Style, home: &World) -> Vec<String> {
         cyb.mesh_ready,
         style.dim(cyb.voice)
     ));
+    let esp = home.espionage_integrity();
+    lines.push(format!(
+        "  SPY marks {} · intel {} · probe={}",
+        esp.spy_marks,
+        esp.intel_count,
+        if esp.can_probe {
+            style.ok("ready")
+        } else {
+            style.dim("need instrument")
+        }
+    ));
     lines.push(format!(
         "  {}",
         style.hint(
-            "veil|ward · posture · escort · market · medium · forge · suite cyber"
+            "spy probe · veil|ward · posture · escort · market · forge · suite spy"
         )
     ));
     // KIN colour (P5-K2)

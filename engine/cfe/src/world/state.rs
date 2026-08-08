@@ -205,6 +205,10 @@ pub struct Committed {
     pub posture_perception: Option<u8>,
     /// P5-B: primary domain override 1..=7 (None = metabolism default).
     pub posture_primary: Option<u8>,
+    /// P5-F: exfiltrated tech hashes (intel stash — never free techs mint).
+    pub intel_hashes: Vec<[u8; 32]>,
+    /// P5-F: probe depth marks per orb (scout residual).
+    pub spy_marks: Vec<(u64, u8)>,
 }
 
 /// G1 (04 §1): a civilization's sealed axes, as the world holds them.
@@ -314,6 +318,8 @@ pub struct World {
     pub(super) posture_disposition: Option<u8>,
     pub(super) posture_perception: Option<u8>,
     pub(super) posture_primary: Option<u8>,
+    pub(super) intel_hashes: Vec<[u8; 32]>,
+    pub(super) spy_marks: Vec<(u64, u8)>,
 }
 
 /// PLANNER-1: what a licensed leap carries — the condition and name

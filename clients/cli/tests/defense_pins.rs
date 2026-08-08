@@ -51,6 +51,63 @@ fn posture_reorients_doctrine_not_anatomy() {
 }
 
 #[test]
+fn espionage_probe_exfil_refuse_and_seal_b_probe() {
+    let mut w = World::new();
+    w.found("spy-home").expect("f");
+    // No instrument → probe refuses DetectionThin.
+    assert!(matches!(
+        w.spy_probe(FIRST_ORB),
+        Err(cfe::world::ActionRefused::DetectionThin { .. })
+    ));
+    assert!(matches!(
+        w.tech_exfil(FIRST_ORB, 1),
+        Err(cfe::world::ActionRefused::DetectionThin { .. })
+    ));
+    // Integrity surface.
+    let e = w.espionage_integrity();
+    assert!(!e.can_probe);
+    assert_eq!(e.intel_count, 0);
+    // With crystal only, still need detection grade.
+    use cfe::world::{Committed, MintWarrant};
+    struct TestWarrant;
+    impl MintWarrant for TestWarrant {
+        fn earns(&self, work: &[u8]) -> Option<cfe::ratio::Ratio> {
+            Some(ratio(work.first().copied().unwrap_or(8).max(1) as i64, 1))
+        }
+        fn admits(
+            &self,
+            _: &Committed,
+            _: &Committed,
+            _: &cfe::dop::ClosureEvent,
+            _: u64,
+            _: u64,
+        ) -> bool {
+            true
+        }
+    }
+    w.mint_discovery_as(
+        SOVEREIGN,
+        FIRST_ORB,
+        Resource::Crystal,
+        cfe::dop::NonNegative::new(ratio(8, 1)).expect("nn"),
+        vec![8u8; 32],
+        &TestWarrant,
+    )
+    .expect("crystal");
+    // Still no instrument.
+    assert!(matches!(
+        w.spy_probe(FIRST_ORB),
+        Err(cfe::world::ActionRefused::DetectionThin { .. })
+    ));
+    // Exfil without probe after we can't get grade easily — SpyProbeRequired if we had grade.
+    // Pure: sabotage without instruments.
+    assert!(matches!(
+        w.sabotage_instrument(FIRST_ORB),
+        Err(cfe::world::ActionRefused::DetectionThin { .. })
+    ));
+}
+
+#[test]
 fn cog_cyb_readings_and_instrument_spoof_guard() {
     let mut w = World::new();
     w.found("cyb-home").expect("f");

@@ -3299,6 +3299,7 @@ pub fn run_era_with(var_root: &str, cycles: u32, mode: SearchMode) -> Vec<Polity
         let _ = stamp_market_step(&mut worlds, u64::from(beat));
         instrument_step(&mut worlds);
         market_war_step(&mut worlds);
+        espionage_step(&mut worlds);
         // JOURNAL-1 (08 §3): on year boundaries every civilization
         // speaks — the lens renders journals + wall, write-only display
         // of the chronicle, never a state change.
@@ -3391,6 +3392,49 @@ fn ensure_npc_kin(world: &mut cfe::world::World, actor: u64) {
             }
             let _ = world.mark_convoy_risk_as(actor, deal);
         }
+    }
+}
+
+/// P5-F — pure NPC espionage (36 §4): disposition-routed probe / exfil /
+/// sabotage / covert tamper. No suite required.
+pub fn espionage_step(worlds: &mut [Polity]) {
+    for polity in worlds.iter_mut() {
+        if polity.penned {
+            continue;
+        }
+        ensure_npc_espionage(&mut polity.world, polity.automaton);
+    }
+}
+
+fn ensure_npc_espionage(world: &mut cfe::world::World, actor: u64) {
+    use cfe::world::FIRST_ORB;
+    let dis = world.defense_posture().disposition;
+    if world.detection_grade() < 1 {
+        return;
+    }
+    let orb = FIRST_ORB;
+    // Empiricist: probe then exfil first tech condition if any.
+    if dis == 2 {
+        let _ = world.spy_probe_as(actor, orb);
+        if let Some((_, c, _, _)) = world.techs().first() {
+            let cond = *c;
+            let _ = world.tech_exfil_as(actor, orb, cond);
+        }
+        return;
+    }
+    // Expansionist: probe + sabotage or covert tamper.
+    if dis == 1 {
+        let _ = world.spy_probe_as(actor, orb);
+        if !world.instruments().is_empty() {
+            let _ = world.sabotage_instrument_as(actor, orb);
+        } else {
+            let _ = world.covert_tamper_as(actor, orb);
+        }
+        return;
+    }
+    // Epicurean: probe only (soft intel; market war handles STAMP panic).
+    if dis == 3 {
+        let _ = world.spy_probe_as(actor, orb);
     }
 }
 

@@ -336,7 +336,10 @@
 //!    142  ClosureEvent::MediumReinforced (P5-D — ATM envelope defense spend.)
 //!    143  ClosureEvent::TamperDetected (P5-D — unit pressure threshold unmask.)
 //!    144  ClosureEvent::PostureReoriented (P5-B — doctrine/posture shift; genesis anatomy stays.)
-//!    Phase-5 claim ledger: next free **145**.
+//!    145  ClosureEvent::SpyProbed (P5-F — scout residual under INF/CYB.)
+//!    146  ClosureEvent::TechExfiltrated (P5-F — hash copy; never free tech mint.)
+//!    147  ClosureEvent::InstrumentSabotaged (P5-F — grade hit on held instrument.)
+//!    Phase-5 claim ledger: next free **148**.
 //!         Orb TLV: 73 STAMP, 74 scrap. ZoneKind::ShipYard = 10.
 //!         (Historic free tags below top: 14, 15, 56, 57, 58, 64, 66,
 //!         83, 84, 87; 9 and 51 reserved; 65 retired forever.)
@@ -2757,6 +2760,24 @@ pub enum ClosureEvent {
         perception: u8,
         primary: u8,
     },
+    /// P5-F (tag 145) — scout probe residual (crystal fee; detection gated).
+    SpyProbed {
+        orb_id: u64,
+        depth: u8,
+        fee: Ratio,
+    },
+    /// P5-F (tag 146) — tech hash exfil into intel stash (not techs ledger).
+    TechExfiltrated {
+        condition: u8,
+        tech_hash: [u8; 32],
+        fee: Ratio,
+    },
+    /// P5-F (tag 147) — sabotage: remove one instrument grade (typed residual).
+    InstrumentSabotaged {
+        orb_id: u64,
+        grade: u8,
+        tech_hash: [u8; 32],
+    },
     /// N4 (NS-2 §1.5) — the scanner's power draw, the ONE chronicle
     /// event of RQP: crystals left the probing orb's bank to hold the
     /// lens open. Deliberately blind to what was asked and what was
@@ -3752,6 +3773,36 @@ impl ClosureEvent {
                 primary,
             } => {
                 tlv::put(144, &[*disposition, *perception, *primary], &mut out);
+            }
+            Self::SpyProbed {
+                orb_id,
+                depth,
+                fee,
+            } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.push(*depth);
+                ratio::encode(fee, &mut value);
+                tlv::put(145, &value, &mut out);
+            }
+            Self::TechExfiltrated {
+                condition,
+                tech_hash,
+                fee,
+            } => {
+                let mut value = vec![*condition];
+                value.extend_from_slice(tech_hash);
+                ratio::encode(fee, &mut value);
+                tlv::put(146, &value, &mut out);
+            }
+            Self::InstrumentSabotaged {
+                orb_id,
+                grade,
+                tech_hash,
+            } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.push(*grade);
+                value.extend_from_slice(tech_hash);
+                tlv::put(147, &value, &mut out);
             }
             Self::CrystalDrawn { orb_id, amount } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
@@ -4807,6 +4858,36 @@ impl ClosureEvent {
                     disposition,
                     perception,
                     primary,
+                })
+            }
+            145 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let depth = *value.get(8)?;
+                let (fee, _) = ratio::decode(value.get(9..)?)?;
+                Some(Self::SpyProbed {
+                    orb_id,
+                    depth,
+                    fee,
+                })
+            }
+            146 => {
+                let condition = *value.first()?;
+                let tech_hash: [u8; 32] = value.get(1..33)?.try_into().ok()?;
+                let (fee, _) = ratio::decode(value.get(33..)?)?;
+                Some(Self::TechExfiltrated {
+                    condition,
+                    tech_hash,
+                    fee,
+                })
+            }
+            147 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let grade = *value.get(8)?;
+                let tech_hash: [u8; 32] = value.get(9..41)?.try_into().ok()?;
+                Some(Self::InstrumentSabotaged {
+                    orb_id,
+                    grade,
+                    tech_hash,
                 })
             }
             55 => {
