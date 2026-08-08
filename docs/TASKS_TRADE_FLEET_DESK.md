@@ -293,11 +293,14 @@ not a second physics. NPC must war without opening a suite.
 | P5.9 | [ ] Demo: escort convoy + one covert ATM arc + optional R3 | P5.1–P5.3, P5.17 | scripted |
 | P5.10 | [ ] Docs Phase 5 land; 33 §12 metric; 36 status → PARTIAL/LAND | P5.9 | |
 
-**Phase 5 done when:** (1) convoy capital is defendable with typed loss;
-(2) DEFEND posture is **species-relative** (not human-only war);
-(3) covert atmospheric tampering exists as metered dual of ATM defense;
-(4) espionage composes veil/ward/instruments; (5) deep rails optional
-and never required for R1–R2 fun.
+**Phase 5 land progress (measured):** P5-A · P5-B · P5-D (+dual-use) ·
+P5-M · P5-M2 **landed**. **Next:** P5-C → P5-K2 (or P5.19b) → P5-E/F.
+
+**Phase 5 done when:** (1) convoy capital is defendable with typed loss
+**and** species-coloured residual (K1); (2) DEFEND posture is
+**species-relative** and reorientable; (3) covert ATM + dual-use TERRA;
+(4) INF surface + espionage compose veil/ward/instruments; (5) deep rails
+optional and never required for R1–R2 fun.
 
 ---
 

@@ -356,19 +356,21 @@ Maps onto and **extends** `TASKS_TRADE_FLEET_DESK` P5:
 
 | Wave | Content | Exit |
 |------|---------|------|
-| **P5-A** | KIN vertical: escort active, interdiction residual, DEFEND pane skeleton | **LANDED** convoy risk pin |
-| **P5-B** | Domain readings derived from metabolism/clade/thermal (incl. MKT rank) | desk shows species-relative posture |
-| **P5-C** | INF compose: veil/ward on DEFEND; counter-intel grade | pins |
-| **P5-D** | ATM defense + CovertTamper + detection | invasion narrative pins |
+| **P5-A** | KIN vertical: escort active, interdiction residual, DEFEND pane skeleton | **LANDED** |
+| **P5-B** | Species posture + in-game doctrine reorient (anatomy sealed) | **LANDED** tag 144 |
+| **P5-C** | **INF compose (NEXT):** veil/ward on DEFEND; detection grade | pins |
+| **P5-D** | ATM defense + CovertTamper + dual-use TERRA | **LANDED** 141–143 + P5.19 |
 | **P5-E** | COG + CYB instrument/mesh guards | spoof refuse pins |
-| **P5-M** | **MKT economic warfare** + optional cyber/market **suites** | see §10; pins |
+| **P5-M / M2** | MKT economic warfare + cascade/haircut/resume audit + suites | **LANDED** 135–140 |
+| **P5-K2** | KIN open-up §12 (species residual · kin_step · perception fog) | after P5-C or parallel pins |
 | **P5-F** | Espionage suite (scout/exfil/sabotage) | SEAL B |
 | **P5-G** | Deep rails R3/R4 / Anchor (original P5.4–P5.7) | optional features |
-| **P5-H** | Docs + demo: escort + one covert terraform + one market-war arc | program metric |
+| **P5-H** | Docs + demo: escort + covert ATM + market-war arc | program metric |
 
-**Order law:** P5-A before combat fantasy; P5-B before any species-blind
-“armor HP”; P5-D before invasion; **P5-M after Phase 4 books exist**
-(landed); P5-G never blocks R1–R2 fun.
+**Order law:** P5-A before combat fantasy; P5-B before species-blind
+armor HP; P5-D before invasion narrative depth; **P5-M after Phase 4**
+(landed); **P5-C next** (compose, few/no new tags); P5-K2 expands KIN
+without free dials (§12); P5-G never blocks R1–R2 fun.
 
 ### 6.1 Tag budget (claim at land only)
 
@@ -631,6 +633,67 @@ Full 5×10 prose for operator colour lives in session design notes;
 
 ---
 
-*Phase 5 begins with KIN vertical (escort), but **defense means** are
-defined here first so no land accidentally hard-codes human war as the
-only coherence.*
+## 12. KIN open-up — civ/species colour without free constants
+
+**Status:** DESIGN CATALOG (loaded for **P5-K2**). Spine **P5-A landed**:
+escort duty, convoy risk = (1/8)×(1 − escort_cover), typed interdiction
+residual, CONVOY suite / DEFEND. **No new combat HP. No static KIN trees
+per civ file.**
+
+### 12.1 Law
+
+```text
+Every KIN expansion CALLS existing receipts / sealed axes / thermal /
+fleet / routes. Ranks and residual *kind* may re-colour; no undervived
+dials, no free capability mint, no second physics.
+```
+
+### 12.2 Six openings (compose-first)
+
+| # | Opening | Civ/species hook | Derive from (no statics) |
+|---|---------|------------------|---------------------------|
+| **K1** | **Metabolism-keyed residual shape** | Mineral loses iron/scrap; biotic biomass/Habitat cargo; plasmic joule/crystal/STAMP-spark | Sealed genesis **metabolism**; same risk formula, different debit resource |
+| **K2** | **Disposition-routed `kin_step`** | Expansionist escorts/contests; empiricist marks risk / refuses thin cover; epicurean prioritizes SECURE bands | Active **doctrine disposition** (`PostureReoriented` or genesis); NPC parity like `market_war_step` |
+| **K3** | **Clade colour on cover/voice** | Tardigrade/lithic hull-as-body; hive many low-grade escorts; plasmoid risk near melt windows | Sealed **taxon clade**; weight ranks / residual *voice*, not new HP |
+| **K4** | **Thermal/orbit as place cost** | Cryo vs hyper corridors feel different | Receipted **orbit period · star magnetism · band** (35 dynamo); fold into risk or haul residual only by CALL |
+| **K5** | **Perception as corridor fog** | Planar: risk only on charted routes; volumetric: prospect gates “seen” risk; harmonic/umbral: false risk refuses without instrument grade | Active **perception** + MANU-1 grade; refuse paths, not dice |
+| **K6** | **Doctrine reorient + CONVOY suite** | Line can push KIN primary mid-game without rewriting anatomy | Tag **144** already; suite is UI only over escort/risk deeds |
+
+### 12.3 Land unit rule (P5-K2)
+
+```text
+Claim ≤3 tags only if residual kinds need new events.
+Prefer: pure readings + refuse paths + one kin_step NPC + residual resource match arms.
+Formula base stays 1/8 from Resonator yield — never a new “base risk” constant.
+```
+
+### 12.4 Crosswalk to matrix §11 KIN slots
+
+| Matrix slot | §12 opening |
+|-------------|-------------|
+| A1 corridor interdiction | **Landed** 133; K1 re-colours debit |
+| D1 escort convoy | **Landed** 132 + risk; K3/K6 colour |
+| A2–A5, D2–D10 | K2–K5 compose or later residual kinds |
+
+---
+
+## 13. Next phase loaded — P5-C INF (compose)
+
+**Active board wave** after P5-B / dual-use land. **Goal:** surface
+already-landed MASK-1 / WARDEN-1a on DEFEND and grade detection from
+MANU-1 — mostly **readings and refuse paths**, not a new fog physics.
+
+| Task | Law |
+|------|-----|
+| P5.14 | DEFEND shows veil/ward state; CLI `veil`/`ward` compose |
+| P5.15 | Detection grade = instrument floor (MANU-1); gates false assay / later spy |
+| Later P5-F | Espionage *uses* this surface; does not rewrite chronicle |
+
+**Conservation:** veil toll and ward depth already exist — CALL them.
+**No free “stealth points.”** After P5-C green, land **P5-K2** or
+**P5.19b** medium residual colour as capacity allows.
+
+---
+
+*Phase 5 began with KIN vertical (escort). Defense means are defined
+here first so no land hard-codes human war as the only coherence.*

@@ -328,7 +328,7 @@ Authority detail and task IDs: **`TASKS_TRADE_FLEET_DESK.md`**.
 | **3** | **Fleet capital** | **LANDED** — scrap/yard/hulls, capacity-gated hauls, fleet_step, CLI |
 | **3** | **Fleet capital** | Scrap · yard · hull mint/assign/scrap; shipwright NPC spot; route capacity limited by hulls |
 | **4** | **Local capital markets** | Civ-filtered Note/Future/Share/Perp books; instrument_step; freight/alignment seasons tradeable |
-| **5** | **Defense axioms · escort · covert terraform · espionage · deep rails** | Species-relative CEL/ATM/COG/CYB/INF/KIN (`36`); escort; covert ATM tamper; R3–R4 optional |
+| **5** | **Defense axioms · escort · covert terraform · market war · espionage · deep rails** | Species-relative 7 domains (`36`); P5-A/B/D/M landed; **next P5-C INF** then P5-K2; R3–R4 optional |
 
 **Dependency spine:**
 
