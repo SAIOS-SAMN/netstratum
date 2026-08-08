@@ -5,14 +5,17 @@
 //! | **bench** | BUILD components (every activity root has craft leaves here) |
 //! | **intel** | KNOWLEDGE activity |
 //! | **trade** | CIRCULATE / market activity |
-//! | **diplo** | DIPLOMACY activity (local + stellar) |
+//! | **diplomatic** | DIPLOMACY activity (local + stellar); short alias: `diplo` |
 //!
 //! Dual law: every standalone activity root **S** has craft surface **`bench S`**.
 //! | Activity | Craft twin |
 //! |----------|------------|
-//! | `intel`  | `bench intel`  (tools / forge chain) |
-//! | `trade`  | `bench trade`  (econ · fleet · offices umbrella) |
-//! | `diplo`  | `bench diplo`  (councils · bonds · seats · routes) |
+//! | `intel`       | `bench intel`       |
+//! | `trade`       | `bench trade`       |
+//! | `diplomatic`  | `bench diplomatic`  (`bench diplo` alias) |
+//!
+//! Science craft (under bench, not activity roots):
+//! `bench chem` · `bench biology` · `bench physics` · `bench math` · `bench research`
 
 use cfe::dop::{HullRole, Resource, ZoneKind};
 use cfe::ratio::{ratio, Ratio};
@@ -69,7 +72,7 @@ fn is_back(word: Option<&str>) -> bool {
 }
 
 fn peers_line(style: &Style) {
-    leaf(style, "bench · intel · trade · diplo", "peer roots");
+    leaf(style, "bench · intel · trade · diplomatic", "peer roots (diplo = short alias)");
 }
 
 fn foot_bench(style: &Style, parent: Option<&str>) {
@@ -107,16 +110,21 @@ fn foot_trade(style: &Style, parent: Option<&str>) {
     peers_line(style);
 }
 
-fn foot_diplo(style: &Style, parent: Option<&str>) {
+fn foot_diplomatic(style: &Style, parent: Option<&str>) {
     println!();
     println!("  {}", style.section("↩ BACK-OUT"));
-    leaf(style, "diplo", "← DIPLOMACY root");
+    leaf(style, "diplomatic", "← DIPLOMACY root (alias: diplo)");
     if let Some(p) = parent {
-        leaf(style, &format!("diplo {p}"), "← domain");
+        leaf(style, &format!("diplomatic {p}"), "← domain");
     }
-    leaf(style, "back · .. · home", "diplo root");
-    leaf(style, "bench diplo", "← craft diplomatic components");
+    leaf(style, "back · .. · home", "diplomatic root");
+    leaf(style, "bench diplomatic", "← craft diplomatic components");
     peers_line(style);
+}
+
+/// Prefer the unambiguous name in UI copy; accept short `diplo` as alias.
+fn diplomatic_key() -> &'static str {
+    "diplomatic"
 }
 
 // ════════════════════════════════════════════════════════════════════
@@ -144,8 +152,24 @@ pub fn bench(
         Some("estate") | Some("survey") | Some("land") => {
             estate_bench(world, words, style, current)
         }
-        Some("chem") | Some("chemistry") | Some("science") | Some("bond") => {
+        // Science craft disciplines (components intel research then operates).
+        Some("science") | Some("sci") | Some("disciplines") => {
+            science_index(world, words, style, current)
+        }
+        Some("chem") | Some("chemistry") | Some("bond") | Some("alchemy") => {
             chem_bench(world, words, style, current)
+        }
+        Some("biology") | Some("bio") | Some("biologic") | Some("life") => {
+            biology_bench(world, words, style, current)
+        }
+        Some("physics") | Some("phys") | Some("physical") => {
+            physics_bench(world, words, style, current)
+        }
+        Some("math") | Some("maths") | Some("mathematics") | Some("ratios") => {
+            math_bench(world, words, style, current)
+        }
+        Some("research") | Some("tech") | Some("practice") | Some("lab") | Some("constellation") => {
+            research_craft_bench(world, words, style, current)
         }
         Some("econ") | Some("economics") | Some("craft") => {
             econ_bench(world, words, style, current)
@@ -164,9 +188,11 @@ pub fn bench(
         }
         Some("assay") | Some("court") => assay_bench(world, words, style, current),
         // Dual law: activity root S ⇒ craft surface `bench S`.
-        Some("diplo") | Some("diplomacy") | Some("diplomatics") | Some("pact") => {
-            diplo_craft_bench(world, words, style, current)
-        }
+        Some("diplomatic")
+        | Some("diplomacy")
+        | Some("diplomatics")
+        | Some("diplo")
+        | Some("pact") => diplo_craft_bench(world, words, style, current),
         Some("intel") | Some("intelligence") | Some("intel-craft") | Some("knowledge-craft") => {
             intel_craft_bench(world, words, style, current)
         }
@@ -174,11 +200,6 @@ pub fn bench(
             trade_craft_bench(world, words, style, current)
         }
         // Activity-domain shortcuts still land on intel activity (not craft).
-        Some("research") | Some("tech") | Some("practice") | Some("lab") => {
-            println!("  {} → {}", style.dim("↳"), style.key("intel research"));
-            let rest: Vec<String> = std::iter::once("research".into()).chain(words).collect();
-            intel(world, rest.into_iter(), style, current);
-        }
         Some("spy") | Some("inf") | Some("ops") => {
             println!("  {} → {}", style.dim("↳"), style.key("intel ops"));
             let rest: Vec<String> = std::iter::once("ops".into()).chain(words).collect();
@@ -206,7 +227,7 @@ fn bench_index(style: &Style) {
     println!(
         "  {}",
         style.dim(
-            "Craft only. Dual law: activity root S ⇒ craft surface `bench S` (intel · trade · diplo)."
+            "Craft only. Dual law: activity root S ⇒ `bench S`. Science: chem · bio · phys · math · research."
         )
     );
     println!();
@@ -217,23 +238,34 @@ fn bench_index(style: &Style) {
     row(style, "bench estate", "chart · parcels · appraise · ladder");
     row(style, "bench medium", "ATM envelope · reinforce · tamper");
     println!();
+    println!("  {}", style.section("SCIENCE CRAFT"));
+    row(style, "bench science", "index of all science disciplines");
+    row(style, "bench chem", "chemistry · bonds · iso · catalog");
+    row(style, "bench biology", "life · biomass · regen · habitat");
+    row(style, "bench physics", "star · thermal · medium · site");
+    row(style, "bench math", "ratios · balances · thresholds · books");
+    row(style, "bench research", "constellation · forge · practice craft");
+    println!();
     println!("  {}", style.section("CRAFT DOMAINS"));
-    row(style, "bench chem", "gems/recipes → intel knowledge");
     row(style, "bench econ", "instruments · routes · rails (also under bench trade)");
     row(style, "bench fleet", "hulls · yard (also under bench trade)");
-    row(style, "bench offices", "seats (trade vault/books · diplo)");
+    row(style, "bench offices", "seats (trade vault/books · diplomatic)");
     row(style, "bench assay", "T7 court craft");
     row(style, "bench doctrine", "posture/KIN prep → trade fleet defend");
     println!();
     println!("  {}", style.section("DUAL LAW — activity roots as craft twins"));
     row(style, "bench intel", "forge chain · instruments · chem → root `intel`");
     row(style, "bench trade", "econ · fleet · offices umbrella → root `trade`");
-    row(style, "bench diplo", "council · bond · forward · seats · routes → root `diplo`");
+    row(
+        style,
+        "bench diplomatic",
+        "council · bond · seats · routes → root `diplomatic` (alias: bench diplo)",
+    );
     println!();
     println!("  {}", style.section("ACTIVITY PEERS (run, not craft)"));
     row(style, "intel", "KNOWLEDGE activity");
     row(style, "trade", "CIRCULATE activity");
-    row(style, "diplo", "DIPLOMACY activity (local · stellar)");
+    row(style, "diplomatic", "DIPLOMACY activity (alias: diplo)");
     foot_bench(style, None);
 }
 
@@ -569,7 +601,7 @@ fn chem_bench(
     }
     let science = !matches!(mode.as_deref(), Some("bonds") | Some("list") | Some("standing"));
     if science {
-        banner(style, "BENCH › CHEM — craft");
+        banner(style, "BENCH › CHEM — chemistry craft");
         if let Some(ax) = world.civ_axes() {
             println!(
                 "  axes dis={} met={} per={}",
@@ -618,6 +650,7 @@ fn chem_bench(
         }
         leaf(style, "compound · iso · catalog", "deeds");
         leaf(style, "intel knowledge", "catalog appears in knowledge bases");
+        leaf(style, "bench science", "all science disciplines");
         foot_bench(style, Some("chem"));
     } else {
         banner(style, "BENCH › CHEM — standing bonds");
@@ -641,6 +674,316 @@ fn chem_bench(
         leaf(style, "bench chem", "science view");
         foot_bench(style, Some("chem"));
     }
+}
+
+/// Science discipline index under bench.
+fn science_index(
+    world: &mut World,
+    mut words: impl Iterator<Item = String>,
+    style: &Style,
+    current: u64,
+) {
+    let w = words.next();
+    if is_back(w.as_deref()) {
+        bench_index(style);
+        return;
+    }
+    match w.as_deref() {
+        Some("chem") | Some("chemistry") | Some("alchemy") => {
+            chem_bench(world, words, style, current)
+        }
+        Some("bio") | Some("biology") | Some("life") => {
+            biology_bench(world, words, style, current)
+        }
+        Some("phys") | Some("physics") => physics_bench(world, words, style, current),
+        Some("math") | Some("maths") | Some("mathematics") => {
+            math_bench(world, words, style, current)
+        }
+        Some("research") | Some("tech") | Some("lab") => {
+            research_craft_bench(world, words, style, current)
+        }
+        None | Some("help") | Some("?") | Some("index") | Some("menu") => {
+            banner(style, "BENCH › SCIENCE — disciplines (craft)");
+            println!(
+                "  {}",
+                style.dim("Build knowledge components. Run ops on `intel research` / knowledge.")
+            );
+            println!();
+            row(style, "bench chem", "chemistry · bonds · iso · dark-7 · catalog");
+            row(style, "bench biology", "life · biomass · regen · habitat");
+            row(style, "bench physics", "star · thermal · medium · site · rings");
+            row(style, "bench math", "ratios · balances · thresholds · books");
+            row(style, "bench research", "constellation · forge · practice craft");
+            leaf(style, "intel research · intel knowledge", "RUN knowledge activity");
+            foot_bench(style, Some("science"));
+        }
+        Some(other) => {
+            println!(
+                "{} unknown science leaf {} — chem|biology|physics|math|research",
+                style.bad("✗"),
+                style.verb(other)
+            );
+            foot_bench(style, Some("science"));
+        }
+    }
+}
+
+/// Biology craft — living infrastructure and biomass path.
+fn biology_bench(
+    world: &mut World,
+    mut words: impl Iterator<Item = String>,
+    style: &Style,
+    current: u64,
+) {
+    let w = words.next();
+    if is_back(w.as_deref()) {
+        bench_index(style);
+        return;
+    }
+    banner(style, "BENCH › BIOLOGY — life craft");
+    println!(
+        "  {}",
+        style.dim("Living components. Metabolism colour follows sealed axes.")
+    );
+    if let Some(ax) = world.civ_axes() {
+        let met = match ax.metabolism {
+            1 => "mineral",
+            2 => "biotic",
+            3 => "plasmic",
+            _ => "?",
+        };
+        println!(
+            "  metabolism {} ({}) · disposition {} · perception {}",
+            ax.metabolism, met, ax.disposition, ax.perception
+        );
+    }
+    if let Some(o) = world.orb_by_id(current).or_else(|| world.orb()) {
+        let regen = o.zones.iter().filter(|z| z.kind == ZoneKind::Regenerator).count();
+        let hab = o.zones.iter().filter(|z| z.kind == ZoneKind::Habitat).count();
+        println!(
+            "  biomass {} · regenerators {} · habitats {}",
+            amount(&o.banked_amount(Resource::Biomass)),
+            regen,
+            hab
+        );
+        println!(
+            "  crystal {} · iron {} · alloy {}",
+            amount(&o.banked_amount(Resource::Crystal)),
+            amount(&o.banked_amount(Resource::Iron)),
+            amount(&o.banked_amount(Resource::Alloy))
+        );
+    }
+    println!();
+    println!("  {}", style.section("COMPONENTS TO CRAFT"));
+    leaf(style, "zone <tile> regen|hab", "living infra");
+    leaf(style, "collect", "settle biomass books");
+    leaf(style, "bench chem", "biotic-scored bonds (metabolism axis)");
+    leaf(style, "bench planetary biologic", "planetary bio leaf");
+    println!();
+    println!("  {}", style.section("THEN RUN / READ"));
+    leaf(style, "intel knowledge", "bases after life work");
+    leaf(style, "bench science", "all science disciplines");
+    foot_bench(style, Some("biology"));
+    let _ = w;
+}
+
+/// Physics craft — star, thermal, medium, site (call existing world APIs).
+fn physics_bench(
+    world: &mut World,
+    mut words: impl Iterator<Item = String>,
+    style: &Style,
+    current: u64,
+) {
+    let w = words.next();
+    if is_back(w.as_deref()) {
+        bench_index(style);
+        return;
+    }
+    match w.as_deref() {
+        Some("star") | Some("sky") => {
+            println!("  {} → {}", style.dim("↳"), style.key("bench star"));
+            star_bench(world, words, style, current);
+            return;
+        }
+        Some("medium") | Some("atm") => {
+            println!("  {} → {}", style.dim("↳"), style.key("bench medium"));
+            medium_bench(world, words, style, current);
+            return;
+        }
+        Some("thermal") | Some("heat") => {
+            banner(style, "BENCH › PHYSICS › THERMAL");
+            leaf(style, "thermal", "band reading");
+            leaf(style, "zone <tile> enc|cryo", "encasement · cryo array");
+            leaf(style, "bench star", "site under sun");
+            foot_bench(style, Some("physics"));
+            return;
+        }
+        _ => {}
+    }
+    banner(style, "BENCH › PHYSICS — physical craft");
+    println!(
+        "  {}",
+        style.dim("Star · thermal · medium · site. No second physics — pure world readings.")
+    );
+    println!("  star={:?} · can_terraform={}", world.star(), world.can_terraform());
+    let (heat, cold) = world.thermal_books_of(current);
+    println!("  thermal books heat={} · cold={}", amount(&heat), amount(&cold));
+    if let Some(bal) = world.thermal_balance_of(current) {
+        println!("  thermal balance {}", amount(&bal));
+    }
+    let d = world.dual_use_atm();
+    println!(
+        "  dual-use tax={} · overt={} · covert={}",
+        d.dual_use_tax, d.can_overt_terraform, d.can_covert_tamper
+    );
+    let mi = world.medium_integrity(current);
+    println!(
+        "  medium pressure {} · thr {} · {}",
+        amount(&mi.pressure),
+        amount(&mi.threshold),
+        style.dim(mi.residual_voice)
+    );
+    println!();
+    println!("  {}", style.section("COMPONENTS TO CRAFT"));
+    leaf(style, "commission · site · thermal", "star / orbit path");
+    leaf(style, "zone <tile> enc|cryo", "thermal infra");
+    leaf(style, "medium reinforce · tamper", "ATM envelope");
+    leaf(style, "bench star · bench medium", "deep domains");
+    leaf(style, "bench math", "ratio books for heat/balance");
+    leaf(style, "bench science", "all science disciplines");
+    foot_bench(style, Some("physics"));
+    let _ = w;
+}
+
+/// Math craft — exact ratios, balances, thresholds (presentation over sealed math).
+fn math_bench(
+    world: &mut World,
+    mut words: impl Iterator<Item = String>,
+    style: &Style,
+    current: u64,
+) {
+    let w = words.next();
+    if is_back(w.as_deref()) {
+        bench_index(style);
+        return;
+    }
+    banner(style, "BENCH › MATH — ratio craft");
+    println!(
+        "  {}",
+        style.dim("Exact rationals only. Thresholds and books — no free mint.")
+    );
+    if let Some(ax) = world.civ_axes() {
+        println!(
+            "  sealed axes dis={} met={} per={}",
+            ax.disposition, ax.metabolism, ax.perception
+        );
+    }
+    let (heat, cold) = world.thermal_books_of(current);
+    println!("  thermal heat={} · cold={}", amount(&heat), amount(&cold));
+    if let Some(bal) = world.thermal_balance_of(current) {
+        println!("  thermal balance {}", amount(&bal));
+    }
+    let rb = world.research_board(current);
+    println!(
+        "  research held {} · forgeable {} · instruments {} · practices {}",
+        rb.held_count, rb.forgeable_ready, rb.instruments, rb.practices
+    );
+    for n in rb.nodes.iter().filter(|n| n.threshold > 0).take(8) {
+        println!(
+            "  · cond {} · progress {}/{} · held={}",
+            n.condition, n.progress, n.threshold, n.held
+        );
+    }
+    let mi = world.market_integrity();
+    println!(
+        "  market crystal_depth {}/{} · sealed={}",
+        mi.crystal_depth, mi.seal_need, mi.sealed
+    );
+    println!(
+        "  free capacity {} · detection g{} · hulls {}",
+        amount(&world.free_capacity(0)),
+        world.detection_grade(),
+        world.hulls().len()
+    );
+    println!();
+    println!("  {}", style.section("READ / DERIVE"));
+    leaf(style, "thermal · market · suite", "band / integrity readings");
+    leaf(style, "bench research", "constellation thresholds as play");
+    leaf(style, "bench physics · bench chem", "apply ratios in craft");
+    leaf(style, "verify · replay", "SEAL B sealed math");
+    leaf(style, "bench science", "all science disciplines");
+    foot_bench(style, Some("math"));
+    let _ = w;
+}
+
+/// Research craft — constellation / forge components (activity twin: intel research).
+fn research_craft_bench(
+    world: &mut World,
+    mut words: impl Iterator<Item = String>,
+    style: &Style,
+    current: u64,
+) {
+    let w = words.next();
+    if is_back(w.as_deref()) {
+        bench_index(style);
+        return;
+    }
+    // Deep forge path stays on intel research deed routing when verb is forge/practice.
+    if matches!(w.as_deref(), Some("forge") | Some("practice") | Some("run")) {
+        println!("  {} → {}", style.dim("↳"), style.key("intel research"));
+        let rest: Vec<String> = std::iter::once("research".into())
+            .chain(w.into_iter())
+            .chain(words)
+            .collect();
+        intel(world, rest.into_iter(), style, current);
+        return;
+    }
+    banner(style, "BENCH › RESEARCH — constellation craft");
+    println!(
+        "  {}",
+        style.dim("Build research components. Operate forge/practice on `intel research`.")
+    );
+    let board = world.research_board(current);
+    println!(
+        "  held {} · forgeable {} · instruments {} · practices {} · wants {}",
+        board.held_count,
+        board.forgeable_ready,
+        board.instruments,
+        board.practices,
+        board.wants
+    );
+    if board.novelty_blocked {
+        println!(
+            "  {}",
+            style.warn("novelty blocks crystallize — license / discovery")
+        );
+    }
+    println!("  {} {}", style.warn("NEXT"), board.next_move);
+    for n in board.nodes.iter().take(12) {
+        let mark = if n.forgeable {
+            style.ok("forge")
+        } else if n.held {
+            style.strong("held")
+        } else {
+            style.dim("open")
+        };
+        println!(
+            "  · c{} {:?} {} · {}/{} · {}",
+            n.condition, n.kind, mark, n.progress, n.threshold, n.next_hint
+        );
+    }
+    println!();
+    println!("  {}", style.section("COMPONENTS TO CRAFT"));
+    leaf(style, "zone <tile> smelt|synth|res", "forge chain zones");
+    leaf(style, "forge <condition>", "instrument (deed)");
+    leaf(style, "bench intel", "tool craft umbrella");
+    leaf(style, "bench chem · bench math", "matter / threshold support");
+    println!();
+    println!("  {}", style.section("THEN RUN ON"));
+    leaf(style, "intel research [forge|practice]", "knowledge activity");
+    leaf(style, "bench research forge <c>", "shortcut → intel research forge");
+    leaf(style, "bench science", "all science disciplines");
+    foot_bench(style, Some("research"));
 }
 
 fn econ_bench(
@@ -674,7 +1017,7 @@ fn econ_bench(
     foot_bench(style, Some("econ"));
 }
 
-/// Craft surface for diplomacy — components the **diplo** root then runs.
+/// Craft surface for diplomacy — components the **diplomatic** root then runs.
 fn diplo_craft_bench(
     world: &mut World,
     mut words: impl Iterator<Item = String>,
@@ -687,10 +1030,10 @@ fn diplo_craft_bench(
         return;
     }
     let board = world.link_board();
-    banner(style, "BENCH › DIPLO — diplomatic components (craft)");
+    banner(style, "BENCH › DIPLOMATIC — components (craft)");
     println!(
         "  {}",
-        style.dim("Build the pieces. Run treaties/hauls on root `diplo` (not here).")
+        style.dim("Build the pieces. Run treaties/hauls on root `diplomatic` (alias: diplo).")
     );
     println!(
         "  councils {} (open {}) · bonds {} · forwards {} · treaties {}",
@@ -713,10 +1056,10 @@ fn diplo_craft_bench(
     leaf(style, "bench fleet mint escort", "KIN for convoy diplomacy");
     println!();
     println!("  {}", style.section("THEN RUN ON"));
-    leaf(style, "diplo local", "seal/renounce treaties");
-    leaf(style, "diplo stellar", "war wall · aperture · license leap");
+    leaf(style, "diplomatic local", "seal/renounce treaties");
+    leaf(style, "diplomatic stellar", "war wall · aperture · license leap");
     leaf(style, "intel link", "license path readiness");
-    foot_bench(style, Some("diplo"));
+    foot_bench(style, Some("diplomatic"));
     let _ = (w, current);
 }
 
@@ -844,7 +1187,7 @@ fn trade_craft_bench(
     println!("  {}", style.section("THEN RUN ON"));
     leaf(style, "trade books · trade stamp · trade element", "market / unit / matter");
     leaf(style, "trade fleet · trade vault · trade rails", "haul / custody / rails");
-    leaf(style, "diplo", "treaties are their own root (bench diplo crafts them)");
+    leaf(style, "diplomatic", "treaties are their own root (bench diplomatic crafts them)");
     foot_bench(style, Some("trade"));
     let _ = w;
 }
@@ -1285,8 +1628,8 @@ fn intel_link(
     println!("  {} {}", style.warn("NEXT"), board.next_hint);
     leaf(style, "council · license … via …", "tech leap");
     leaf(style, "absorb · bond · forward", "mesh");
-    leaf(style, "diplo local · diplo stellar", "oath / aperture RUN");
-    leaf(style, "bench diplo", "craft councils/bonds/seats first");
+    leaf(style, "diplomatic local · diplomatic stellar", "oath / aperture RUN");
+    leaf(style, "bench diplomatic", "craft councils/bonds/seats first");
     foot_intel(style, Some("link"));
     let _ = w;
 }
@@ -1343,13 +1686,17 @@ pub fn trade(
         Some("vault") | Some("custody") => trade_vault(world, style, current),
         Some("aperture") | Some("haul") | Some("cross") => trade_aperture(style),
         // Diplomacy is its own root — redirect.
-        Some("diplo") | Some("diplomacy") | Some("treaty") | Some("local") => {
-            println!("  {} → {}", style.dim("↳"), style.key("diplo local"));
+        Some("diplo")
+        | Some("diplomatic")
+        | Some("diplomacy")
+        | Some("treaty")
+        | Some("local") => {
+            println!("  {} → {}", style.dim("↳"), style.key("diplomatic local"));
             let rest: Vec<String> = std::iter::once("local".into()).chain(words).collect();
             diplo(world, rest.into_iter(), style, current);
         }
         Some("stellar") | Some("interstellar") | Some("stars") | Some("union") => {
-            println!("  {} → {}", style.dim("↳"), style.key("diplo stellar"));
+            println!("  {} → {}", style.dim("↳"), style.key("diplomatic stellar"));
             let rest: Vec<String> = std::iter::once("stellar".into()).chain(words).collect();
             diplo(world, rest.into_iter(), style, current);
         }
@@ -1385,7 +1732,7 @@ fn trade_index(style: &Style) {
     banner(style, "TRADE — CIRCULATE / RUN (activity)");
     println!(
         "  {}",
-        style.dim("Market/haul activity. Craft: `bench trade`. Diplomacy: root `diplo`.")
+        style.dim("Market/haul activity. Craft: `bench trade`. Diplomacy: root `diplomatic`.")
     );
     println!();
     row(style, "trade books", "offers · instruments · market war");
@@ -1402,8 +1749,12 @@ fn trade_index(style: &Style) {
     row(style, "bench econ · bench fleet · bench offices", "direct craft domains");
     println!();
     println!("  {}", style.section("DIPLOMACY (own root)"));
-    row(style, "diplo local · diplo stellar", "treaties · war · license (not under trade)");
-    row(style, "bench diplo", "craft councils · bonds · seats · routes");
+    row(
+        style,
+        "diplomatic local · diplomatic stellar",
+        "treaties · war · license (not under trade)",
+    );
+    row(style, "bench diplomatic", "craft councils · bonds · seats · routes");
     leaf(style, "trade <id> with <world> <id> deal <n>", "barter clear");
     foot_trade(style, None);
 }
@@ -1520,16 +1871,17 @@ fn trade_vault(world: &World, style: &Style, current: u64) {
 fn trade_aperture(style: &Style) {
     banner(style, "TRADE › APERTURE");
     leaf(style, "aperture · element aperture · stamp aperture", "haul");
-    leaf(style, "diplo local · diplo stellar", "gates");
-    leaf(style, "bench diplo", "craft components");
+    leaf(style, "diplomatic local · diplomatic stellar", "gates");
+    leaf(style, "bench diplomatic", "craft components");
     foot_trade(style, Some("aperture"));
 }
 
 // ════════════════════════════════════════════════════════════════════
-// DIPLO — DIPLOMACY ACTIVITY (local + stellar)
+// DIPLOMATIC — DIPLOMACY ACTIVITY (local + stellar)
+// Preferred name: `diplomatic`. Short alias: `diplo` (still accepted).
 // ════════════════════════════════════════════════════════════════════
 
-/// Root diplomacy activity. Craft components on `bench diplo`.
+/// Root diplomacy activity. Craft components on `bench diplomatic`.
 pub fn diplo(
     world: &mut World,
     mut words: impl Iterator<Item = String>,
@@ -1551,15 +1903,15 @@ pub fn diplo(
         }
         Some("mesh") | Some("council") | Some("bond") => diplo_mesh(world, style, current),
         Some("craft") | Some("bench") => {
-            println!("  {} → {}", style.dim("↳"), style.key("bench diplo"));
+            println!("  {} → {}", style.dim("↳"), style.key("bench diplomatic"));
             diplo_craft_bench(world, words, style, current);
         }
         Some(other) => {
             println!(
-                "{} unknown diplo domain {} — {}",
+                "{} unknown diplomatic domain {} — {}",
                 style.bad("✗"),
                 style.verb(other),
-                style.key("diplo")
+                style.key(diplomatic_key())
             );
             diplo_index(style);
         }
@@ -1567,24 +1919,29 @@ pub fn diplo(
 }
 
 fn diplo_index(style: &Style) {
-    banner(style, "DIPLO — DIPLOMACY ACTIVITY");
+    banner(style, "DIPLOMATIC — DIPLOMACY ACTIVITY");
     println!(
         "  {}",
-        style.dim("Run treaties and stellar haul. Craft components: `bench diplo`.")
+        style.dim("Run treaties and stellar haul. Craft: `bench diplomatic`. Alias: diplo.")
     );
     println!();
-    row(style, "diplo local", "pair treaties · renounce · same-system play");
-    row(style, "diplo stellar", "crossed · war walls · aperture · license leap");
-    row(style, "diplo mesh", "councils · bonds · forwards standing");
+    row(style, "diplomatic local", "pair treaties · renounce · same-system play");
+    row(style, "diplomatic stellar", "crossed · war walls · aperture · license leap");
+    row(style, "diplomatic mesh", "councils · bonds · forwards standing");
     println!();
     println!("  {}", style.section("CRAFT (on bench)"));
-    row(style, "bench diplo", "council · bond · forward · seats · routes · escorts");
+    row(
+        style,
+        "bench diplomatic",
+        "council · bond · forward · seats · routes · escorts",
+    );
     row(style, "bench offices · bench fleet · bench econ", "related components");
-    foot_diplo(style, None);
+    leaf(style, "diplo …", "short alias for diplomatic …");
+    foot_diplomatic(style, None);
 }
 
 fn diplo_local(world: &World, style: &Style) {
-    banner(style, "DIPLO › LOCAL — pair treaties");
+    banner(style, "DIPLOMATIC › LOCAL — pair treaties");
     println!(
         "  {}",
         style.dim("Same-system / pair play — does not require union crossing.")
@@ -1596,13 +1953,13 @@ fn diplo_local(world: &World, style: &Style) {
     }
     leaf(style, "treaty trade|defense|peace|war with <world>", "seal");
     leaf(style, "treaties · renounce <deal> <world>", "list / drop");
-    leaf(style, "diplo stellar", "interstellar wall / haul / license");
-    leaf(style, "bench diplo", "craft components first");
-    foot_diplo(style, Some("local"));
+    leaf(style, "diplomatic stellar", "interstellar wall / haul / license");
+    leaf(style, "bench diplomatic", "craft components first");
+    foot_diplomatic(style, Some("local"));
 }
 
 fn diplo_stellar(world: &World, style: &Style) {
-    banner(style, "DIPLO › STELLAR — interstellar");
+    banner(style, "DIPLOMATIC › STELLAR — interstellar");
     println!(
         "  crossed(union)={} · shielded={} · star={:?}",
         world.has_crossed(),
@@ -1629,15 +1986,14 @@ fn diplo_stellar(world: &World, style: &Style) {
     leaf(style, "aperture · element aperture · stamp aperture", "cross haul");
     leaf(style, "treaty war|peace with <world>", "stellar wall");
     leaf(style, "license <c> to <world> via <council> deal <n>", "tech leap");
-    leaf(style, "intel link · diplo mesh", "prepare co-op");
-    leaf(style, "bench diplo", "craft councils/bonds/routes");
-    foot_diplo(style, Some("stellar"));
+    leaf(style, "intel link · diplomatic mesh", "prepare co-op");
+    leaf(style, "bench diplomatic", "craft councils/bonds/routes");
+    foot_diplomatic(style, Some("stellar"));
 }
 
 fn diplo_mesh(world: &World, style: &Style, _current: u64) {
-    banner(style, "DIPLO › MESH — standing accords");
+    banner(style, "DIPLOMATIC › MESH — standing accords");
     let now = world.committed().orbs.first().map(|_| world.now()).unwrap_or(0);
-    // use link board + list councils/bonds
     let board = world.link_board();
     println!(
         "  councils {} open {} · bonds {} · forwards {} · score {}",
@@ -1663,6 +2019,6 @@ fn diplo_mesh(world: &World, style: &Style, _current: u64) {
         );
     }
     leaf(style, "council · bond · forward · absorb", "deeds (CLI)");
-    leaf(style, "bench diplo", "craft path");
-    foot_diplo(style, Some("mesh"));
+    leaf(style, "bench diplomatic", "craft path");
+    foot_diplomatic(style, Some("mesh"));
 }

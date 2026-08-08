@@ -10,7 +10,10 @@ pub fn help(style: Style, topic: Option<&str>) {
         Some("bench") | Some("workbench") | Some("make") => bench_help(style),
         Some("intel") | Some("intelligence") | Some("knowledge") | Some("kb") => intel_help(style),
         Some("trade-hub") | Some("trades") | Some("circulate") => trade_hub_help(style),
-        Some("diplo") | Some("diplomacy") | Some("diplomatics") => diplo_help(style),
+        Some("diplomatic")
+        | Some("diplomacy")
+        | Some("diplomatics")
+        | Some("diplo") => diplo_help(style),
         Some("stamp") | Some("money") => stamp_help(style),
         Some("element") | Some("elements") | Some("matter") => element_help(style),
         Some("fleet") | Some("hull") | Some("ship") => fleet_help(style),
@@ -60,8 +63,8 @@ fn index(style: Style) {
     row(style, "bench", "BUILD components (+ craft leaves for every activity root)");
     row(style, "intel", "KNOWLEDGE activity — research · bases · ops · link");
     row(style, "trade", "CIRCULATE activity — books · stamp · element · fleet · rails");
-    row(style, "diplo", "DIPLOMACY activity — local · stellar · mesh");
-    row(style, "help bench|intel|trade-hub|diplo", "hub maps · docs/HUBS.md");
+    row(style, "diplomatic", "DIPLOMACY activity — local · stellar · mesh (alias: diplo)");
+    row(style, "help bench|intel|trade-hub|diplomatic", "hub maps · docs/HUBS.md");
     println!();
     println!("  {}", style.section("TRADE DESK (Phase 1–2)"));
     row(style, "desk · desk enter", "interactive trade / diplo / routes / arb");
@@ -91,10 +94,10 @@ fn index(style: Style) {
 fn topics(style: Style) {
     banner_line(style, "HELP TOPICS");
     for (name, blurb) in [
-        ("bench", "BUILD hub — craft (+ dual twins: bench intel|trade|diplo)"),
+        ("bench", "BUILD hub — craft (+ science · dual twins)"),
         ("intel", "KNOWLEDGE activity — research · bases · ops · link"),
         ("trade-hub", "CIRCULATE activity — market · haul · vault"),
-        ("diplo", "DIPLOMACY activity — local · stellar · mesh"),
+        ("diplomatic", "DIPLOMACY activity — local · stellar · mesh (alias: diplo)"),
         ("desk", "trade desk panes and keybinds"),
         ("stamp", "STAMP mint and aperture"),
         ("element", "element haul and charter"),
@@ -127,8 +130,15 @@ fn bench_help(style: Style) {
     row(style, "bench estate", "chart · ladder · parcels · appraise");
     row(style, "bench medium", "ATM reinforce · tamper");
     println!();
+    println!("  {}", style.section("SCIENCE CRAFT"));
+    row(style, "bench science", "index of all science disciplines");
+    row(style, "bench chem", "chemistry · bonds · iso · catalog");
+    row(style, "bench biology", "life · biomass · regen · habitat");
+    row(style, "bench physics", "star · thermal · medium · site");
+    row(style, "bench math", "ratios · balances · thresholds");
+    row(style, "bench research", "constellation · forge · practice craft");
+    println!();
     println!("  {}", style.section("CRAFT DOMAINS"));
-    row(style, "bench chem", "alchemy craft · iso · catalog");
     row(style, "bench econ", "instruments · routes · rails");
     row(style, "bench offices", "seat exchange|vault|assay|anchor");
     row(style, "bench fleet", "yard · mint hull · scrap");
@@ -138,26 +148,27 @@ fn bench_help(style: Style) {
     println!("  {}", style.section("DUAL LAW — activity roots as craft twins"));
     row(style, "bench intel", "knowledge tools → root intel");
     row(style, "bench trade", "econ · fleet · offices → root trade");
-    row(style, "bench diplo", "councils · bonds · seats → root diplo");
+    row(style, "bench diplomatic", "councils · bonds · seats → root diplomatic");
     println!();
     println!("  {}", style.section("ACTIVITY PEERS"));
-    row(style, "intel · trade · diplo", "run (not craft)");
+    row(style, "intel · trade · diplomatic", "run (not craft; diplo = short alias)");
     row(style, "bench · back · home", "← bench root");
 }
 
 fn diplo_help(style: Style) {
-    banner_line(style, "DIPLO — DIPLOMACY ACTIVITY");
+    banner_line(style, "DIPLOMATIC — DIPLOMACY ACTIVITY");
     println!(
         "  {}",
-        style.dim("Run treaties & stellar haul. Craft: `bench diplo`. docs/HUBS.md")
+        style.dim("Preferred: `diplomatic`. Alias: `diplo`. Craft: `bench diplomatic`. docs/HUBS.md")
     );
     println!();
-    row(style, "diplo local", "pair treaties · renounce");
-    row(style, "diplo stellar", "crossed · war · aperture · license");
-    row(style, "diplo mesh", "councils · bonds · forwards");
-    row(style, "bench diplo", "CRAFT components for diplomacy");
+    row(style, "diplomatic local", "pair treaties · renounce");
+    row(style, "diplomatic stellar", "crossed · war · aperture · license");
+    row(style, "diplomatic mesh", "councils · bonds · forwards");
+    row(style, "bench diplomatic", "CRAFT components for diplomacy");
     println!();
-    row(style, "diplo · back · home", "← diplo root");
+    row(style, "diplomatic · back · home", "← diplomatic root");
+    row(style, "diplo …", "short alias still accepted");
     row(style, "bench · intel · trade", "peer roots");
 }
 
@@ -178,8 +189,9 @@ fn intel_help(style: Style) {
     row(style, "intel wants", "cognitive wants");
     println!();
     row(style, "bench intel", "CRAFT components for knowledge");
+    row(style, "bench research · bench science", "science craft twins");
     row(style, "intel · back · home", "← intel root");
-    row(style, "bench · trade · diplo", "peer roots");
+    row(style, "bench · trade · diplomatic", "peer roots");
 }
 
 fn trade_hub_help(style: Style) {
@@ -196,8 +208,8 @@ fn trade_hub_help(style: Style) {
     row(style, "trade rails", "R1–R4 · Anchor");
     row(style, "trade vault", "custody · margin");
     row(style, "trade aperture", "cross-world haul");
-    row(style, "trade diplo", "→ diplo local (own root)");
-    row(style, "trade stellar", "→ diplo stellar (own root)");
+    row(style, "trade diplo", "→ diplomatic local (own root)");
+    row(style, "trade stellar", "→ diplomatic stellar (own root)");
     row(style, "trade desk", "interactive suite");
     println!();
     row(style, "bench trade", "CRAFT econ · fleet · offices");
@@ -208,7 +220,7 @@ fn trade_hub_help(style: Style) {
         "barter clear",
     );
     row(style, "trade · back · home", "← trade root");
-    row(style, "bench · intel · diplo", "peer roots");
+    row(style, "bench · intel · diplomatic", "peer roots");
 }
 
 fn desk_help(style: Style) {

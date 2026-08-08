@@ -32,7 +32,7 @@ impl Pane {
     pub fn from_key(key: &str) -> Option<Pane> {
         match key.to_ascii_lowercase().as_str() {
             "t" | "trade" => Some(Pane::Trade),
-            "y" | "diplo" | "diplomacy" => Some(Pane::Diplo),
+            "y" | "diplo" | "diplomacy" | "diplomatic" | "diplomatics" => Some(Pane::Diplo),
             "r" | "routes" | "route" => Some(Pane::Routes),
             "a" | "arb" | "arbitrage" => Some(Pane::Arb),
             "f" | "fleet" => Some(Pane::Fleet),
@@ -47,7 +47,7 @@ impl Pane {
     pub fn label(self) -> &'static str {
         match self {
             Pane::Trade => "TRADE",
-            Pane::Diplo => "DIPLO",
+            Pane::Diplo => "DIPLOMATIC",
             Pane::Routes => "ROUTES",
             Pane::Arb => "ARBITRAGE",
             Pane::Fleet => "FLEET",

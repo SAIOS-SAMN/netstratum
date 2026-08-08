@@ -509,7 +509,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 style.strong("assay <element-prefix>")
             ),
         },
-        // Root hubs: BENCH (build) · INTEL · TRADE · DIPLO (activity peers).
+        // Root hubs: BENCH (build) · INTEL · TRADE · DIPLOMATIC (activity peers).
         Some("bench") => {
             let rest: Vec<String> = words.map(|w| w.to_string()).collect();
             hubs::bench(world, rest.into_iter(), style, *current);
@@ -518,12 +518,35 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             let rest: Vec<String> = words.map(|w| w.to_string()).collect();
             hubs::intel(world, rest.into_iter(), style, *current);
         }
-        Some("diplo") | Some("diplomacy") | Some("diplomatics") => {
+        Some("diplomatic")
+        | Some("diplomacy")
+        | Some("diplomatics")
+        | Some("diplo") => {
             let rest: Vec<String> = words.map(|w| w.to_string()).collect();
             hubs::diplo(world, rest.into_iter(), style, *current);
         }
         Some("chemistry") | Some("chem") => {
             let mut rest: Vec<String> = vec!["chem".into()];
+            rest.extend(words.map(|w| w.to_string()));
+            hubs::bench(world, rest.into_iter(), style, *current);
+        }
+        Some("biology") | Some("bio") => {
+            let mut rest: Vec<String> = vec!["biology".into()];
+            rest.extend(words.map(|w| w.to_string()));
+            hubs::bench(world, rest.into_iter(), style, *current);
+        }
+        Some("physics") | Some("phys") => {
+            let mut rest: Vec<String> = vec!["physics".into()];
+            rest.extend(words.map(|w| w.to_string()));
+            hubs::bench(world, rest.into_iter(), style, *current);
+        }
+        Some("math") | Some("maths") | Some("mathematics") => {
+            let mut rest: Vec<String> = vec!["math".into()];
+            rest.extend(words.map(|w| w.to_string()));
+            hubs::bench(world, rest.into_iter(), style, *current);
+        }
+        Some("science") | Some("sci") => {
+            let mut rest: Vec<String> = vec!["science".into()];
             rest.extend(words.map(|w| w.to_string()));
             hubs::bench(world, rest.into_iter(), style, *current);
         }
