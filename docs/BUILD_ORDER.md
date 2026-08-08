@@ -1082,3 +1082,42 @@ AnchorImportRefused; feature-gated export/import; kernel **0.34.0**; pins
 `xrail_pins` (+ `--features xrail-test` for full round-trip). No path dep
 on external strand/isthmus/datum crates.
 
+---
+
+## STAND-DOWN BOARD (2026-08-08) — multi-day pause
+
+**Tip:** `fce10e0` on `main` · tree **clean**.  
+**Kernel:** **0.37.0** · **next free tag 163** · **SCHEMA_V17**.
+
+### Landed this arc (hubs → science labs → imperium taxon → open clade)
+
+| Area | Status | Anchor |
+|------|--------|--------|
+| CLI dual-hub roots | bench · intel · trade · **diplomatic** | `docs/HUBS.md` |
+| Dual law | activity S ⇒ `bench S` | `780d622` |
+| Science seated labs | pay unlock · dual ± · explosion · synth/clone/skin | tags **159–162** · `86ea4aa` |
+| Imperium clade words | Latin-sentience display; no Earth common animals | `37_IMPERIUM_TAXON.md` |
+| Taxon economy | extractive · regenerative · **balanced** + planet fit | `taxon_economy` · `75c35ca` |
+| Flatlander baseline | clade **2 bimaniform** (aliases human/flatlander) | always Balanced mode |
+| Class tiers | ceiling **13** (+6 balance archetypes) | corridor-nomad…mirror-form |
+| Office tiers | **T0–T15** (+6: herald…nexus) · seat width **+25** | `30_OFFICES` |
+| Open clade | **u16** · ceiling **345** = 20 + 25×13 | `fce10e0` · no u8 tax |
+
+### Resume board (operator go required for new lands)
+
+1. **C1.7** stellar capacity game  
+2. **C1.6** NPC chemistry_step  
+3. **H1.3** desk deep-link into hubs  
+4. **P8.x** AP budget / anti click-to-win  
+5. Court rename of Earth-culture line names (optional)  
+6. Optional 5th root: polity (genesis/taxon/mint)
+
+### Smoke on cold start
+
+```text
+cargo test -p cfe --test taxon_economy_pins --test science_lab_pins --test world_taxon
+cargo build -p netstratum-cli
+```
+
+Full orientation: `docs/PICKUP.md` §0.
+

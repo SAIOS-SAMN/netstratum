@@ -1,34 +1,106 @@
-# PICKUP — the state of the board (2026-07-27, coder-01; refreshed
-# post-ideology-board by coder-02 the same day; refreshed 2026-07-30 by
-# coder-02 — the galaxy law + the fifth progenitor seat; **§0 REFRESH
-# 2026-08-04** — every count below re-measured against `main`;
-# **§0b WAVE-1 2026-08-07**)
+# PICKUP — the state of the board
 
 Cold-start orientation for any node resuming work. Read
 `00_CHARTER.md` whole, then `BUILD_ORDER.md` for the current landing —
 this file is the fast map, never the authority. The working discipline,
 state-model laws, and earned gotchas live in `HANDOFF.md`.
 
-## 0b. WAVE-1…4 LAND (2026-08-07) — read before older counts
+---
+
+## 0. STAND-DOWN SNAPSHOT (2026-08-08) — **read this first**
+
+**Multi-day stand-down.** Workspace **clean** on `main` at tip below.
+Do not invent “uncommitted hub work” — it was landed and committed.
 
 | Fact | Value |
 |------|--------|
+| **Tip** | **`fce10e0`** — *Open clade to u16: 25 taxons per class, no u8 tax cap* |
+| Branch | **`main`** · clean |
+| Kernel | **0.37.0** (next free minor **38**) |
+| Next free claim tag | **163** (science lab 159–162 landed) |
+| Codec | **SCHEMA_V17** (open clade u16 LE in taxon field) |
+| Class ceiling | **13** (+6 balance tiers 8–13) |
+| Clade ceiling | **345** (`u16` · 20 legacy + 25×13 expansion) |
+| Office stations | **16** · T0–T15 (T10–T15: herald·lattice·chorus·warden·foundry·nexus) |
+| Seat width bonus | **+25** on all bounded offices |
+| ZoneKind compiled | **1–10** (ShipYard = 10) |
+
+### What landed this session arc (newest first)
+
+| Commit | What |
+|--------|------|
+| `fce10e0` | **u16 open clade** · ceiling 345 · SCHEMA_V17 · SEAL B dual decode |
+| `375cdc9` | +6 class tiers · +6 office tiers · expansion taxons · seat +25 |
+| `75c35ca` | Taxon economy extractive·regenerative·balanced · flatlander baseline · planet fit |
+| `f14c373` | Imperium clade words · metabolism-coloured science seats |
+| `86ea4aa` | Seated science labs · dual ± · explosion · synth/clone/skin |
+| `10ffffc` | Preferred root **`diplomatic`** (alias `diplo`) · science craft benches |
+| `780d622` / `26c7378` | Dual law: activity root S ⇒ `bench S` |
+
+### CLI roots (dual law)
+
+```text
+bench          BUILD + craft twins + science labs
+intel          KNOWLEDGE activity
+trade          CIRCULATE activity
+diplomatic     DIPLOMACY activity (alias: diplo)
+
+bench intel | bench trade | bench diplomatic   craft twins
+bench science seat|preview|create              seated labs
+```
+
+### Key docs (living)
+
+| Doc | Role |
+|-----|------|
+| `docs/HUBS.md` | Hub map · dual law · science craft |
+| `docs/15_TAXON.md` | Class/clade wire + seal law |
+| `docs/37_IMPERIUM_TAXON.md` | Imperium words · economy modes · planet fit · open clade |
+| `docs/30_OFFICES_AND_RAILS.md` | T0–T15 office ladder |
+| `docs/TASKS_TIER_RAIL_MARKET.md` | Task board (C1.x H1.x open/closed) |
+
+### Open on resume (priority order)
+
+| ID | Open | Notes |
+|----|------|-------|
+| C1.7 | Stellar capacity game | design then land |
+| C1.6 | NPC `chemistry_step` | disposition-routed |
+| H1.3 | Desk panes deep-link into hubs | UX |
+| P8.x | AP budget / anti click-to-win | Wave 8 |
+| Court | Rename Earth-culture **line names** (Kemet/Baktun/Dogon/Lyran/…) | operator only |
+| Optional | Polity root (genesis/taxon/mint) · deeper hub deeds · live isthmus peer | deferred |
+
+### Smoke on resume (minimal)
+
+```bash
+cd /opt/netstratum
+git status -sb && git log -1 --oneline
+cargo test -p cfe --test taxon_economy_pins --test world_taxon --quiet
+cargo test -p cfe --test science_lab_pins --quiet
+cargo build -p netstratum-cli --quiet
+```
+
+### Stand-down discipline
+
+- **No dirty tree expected.** If dirty, treat as foreign/in-progress — investigate before `git add -A`.
+- **Do not re-litigate dual law or u16 clade** unless operator reopens.
+- **Clade is open:** further taxons = raise `clade_ceiling()` / expansion table, not type fights.
+- Historical counts below §0b are **stale** — re-measure before citing.
+
+---
+
+## 0b. WAVE-1…4 LAND (2026-08-07) — historical relative to §0
+
+| Fact | Value (at wave close; **superseded by §0**) |
+|------|--------|
 | Wave-1 commit | **`2109bf0`** (T4–T9, REFINE-1) |
 | Wave-2 commit | **`4686399`** (E-APT, element_trade_step) |
-| Kernel | **0.36.0** (next free minor **37**) |
-| Next free tag | **159** (CHEM science 156–158) |
-| Stations | **10** (T4–T9 economic offices open) |
-| ZoneKind compiled | **1–10** (ShipYard = 10) |
-| Codec | **SCHEMA_V15** (… + chem_catalog) |
-| Pure-NPC green | market_war · kin · espionage_step · instrument · ATM · offices |
-| **Phase 5 core** | **COMPLETE** — A–H · K2 · M · dual-use · rails |
-| **X7 adapters** | **LANDED** in-tree (`cfe::xrail`) — no external path dep |
-| **Wave 6 O6.3–O6.5** | **LANDED** — Exchange MM · Assay court · Vault custody |
-| **CHEM science** | **LANDED** — civ utility · dark-7 · iso-union · catalog |
-| **CLI hubs** | **4 roots** — bench·intel·trade·**diplo** · dual craft on bench · `docs/HUBS.md` |
-| **Optional open** | stellar capacity game · hull lease · Wave 8 AP · live isthmus peer |
-| Docs | Phases **1–5** + X7 + Wave 6 + chem science + hub menus |
-| Dirty / other lane | do not `git add -A` without reviewing observer/other-lane files |
+| Kernel (then) | 0.36 → **now 0.37** |
+| Next free tag (then) | 159 → **now 163** |
+| Stations (then) | 10 → **now 16** |
+| Codec (then) | V15 → **now V17** |
+| **Phase 5 core** | **COMPLETE** |
+| **X7 / Wave 6 / CHEM / hubs** | **LANDED** (see §0 table) |
 
 Older §0 counts (809 tests, 71 deeds, tag 95) are **historical**; re-measure
 against `main` before citing any number.

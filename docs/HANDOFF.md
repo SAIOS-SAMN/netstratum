@@ -11,6 +11,13 @@ protocol as lived, the state-model laws, and the earned gotchas. It
 changes only when a law or habit changes; the dated gap list in §9
 refreshes at each major handoff.
 
+### Stand-down marker (2026-08-08)
+
+**Multi-day pause.** State snapshot is **`docs/PICKUP.md` §0** and
+`BUILD_ORDER.md` §STAND-DOWN BOARD. Tip **`fce10e0`** on clean `main`.
+Resume: read PICKUP §0 → smoke tests → operator go before new lands.
+Do not re-open dual-law hubs or u16 clade unless directed.
+
 ## 1. Reading order (before any change)
 
 1. `docs/00_CHARTER.md` — every law binds; §8 terminology, §9
