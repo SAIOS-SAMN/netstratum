@@ -172,8 +172,87 @@ fn circuit_breaker_freezes_instruments() {
         w.issue_note(FIRST_ORB, SOVEREIGN, face, coll, 4),
         Err(cfe::world::ActionRefused::MarketCircuitOpen { resume_at }) if resume_at == resume
     ));
-    w.resume_market().expect("resume");
+    // Early resume without clear depth → audit refuse.
+    assert!(matches!(
+        w.resume_market(),
+        Err(cfe::world::ActionRefused::ResumeAuditUnmet { .. })
+    ));
+    // Build resume-audit depth, then lift.
+    let price = Positive::new(ratio(1, 1)).expect("p");
+    for _ in 0..cfe::world::RESUME_AUDIT_DEPTH {
+        // Sealed market refuses spot clear — wait out breaker instead.
+        let _ = price;
+    }
+    // Natural open: advance clock past resume_at via ticks.
+    while w.market_sealed() {
+        w.tick();
+    }
     assert!(!w.market_sealed());
+    // Explicit resume after natural open is still lawful (audit skipped when open).
+    w.resume_market().expect("resume when already open");
+    assert_eq!(replay(w.chronicle()), w.committed());
+}
+
+#[test]
+fn note_cascade_raises_haircut_floor() {
+    let mut w = stamp_for_market();
+    let face = ratio(2, 1);
+    let base = w.note_collateral_floor(FIRST_ORB, &face);
+    w.note_cascade(FIRST_ORB).expect("cascade");
+    let after = w.note_collateral_floor(FIRST_ORB, &face);
+    assert!(after > base, "cascade raises collateral floor");
+    // Half face no longer enough after cascade.
+    let half = Positive::new(ratio(1, 1)).expect("half");
+    let face_p = Positive::new(face).expect("face");
+    assert!(matches!(
+        w.issue_note(FIRST_ORB, SOVEREIGN, face_p, half, 4),
+        Err(cfe::world::ActionRefused::InstrumentUndercollateralized)
+    ));
+    assert_eq!(replay(w.chronicle()), w.committed());
+}
+
+#[test]
+fn covert_tamper_and_medium_reinforce() {
+    let mut w = World::new();
+    w.found("atm-home").expect("found");
+    // Founding banks iron; mint crystal for tamper cost.
+    use cfe::world::{Committed, MintWarrant};
+    struct TestWarrant;
+    impl MintWarrant for TestWarrant {
+        fn earns(&self, work: &[u8]) -> Option<cfe::ratio::Ratio> {
+            Some(ratio(work.first().copied().unwrap_or(8).max(1) as i64, 1))
+        }
+        fn admits(
+            &self,
+            _: &Committed,
+            _: &Committed,
+            _: &cfe::dop::ClosureEvent,
+            _: u64,
+            _: u64,
+        ) -> bool {
+            true
+        }
+    }
+    w.mint_discovery_as(
+        SOVEREIGN,
+        FIRST_ORB,
+        Resource::Crystal,
+        cfe::dop::NonNegative::new(ratio(8, 1)).expect("nn"),
+        vec![8u8; 32],
+        &TestWarrant,
+    )
+    .expect("crystal");
+    let mut p = ratio(0, 1);
+    // Eight eighths → unit threshold → TamperDetected.
+    for _ in 0..8 {
+        p = w.covert_tamper(FIRST_ORB).expect("tamper");
+    }
+    assert!(p >= cfe::world::tamper_threshold());
+    assert!(w.chronicle().receipts().iter().any(|r| {
+        matches!(r.event, cfe::dop::ClosureEvent::TamperDetected { .. })
+    }));
+    let after = w.medium_reinforce(FIRST_ORB).expect("reinforce");
+    assert!(after < p);
     assert_eq!(replay(w.chronicle()), w.committed());
 }
 

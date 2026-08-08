@@ -396,7 +396,7 @@ fn the_version_is_pinned() {
     //   and ElementRouteChartered enter covered(); stamp conservation
     //   and crystal convert identity. Next free minor 23.
     //   — the next free minor is 23.
-    assert_eq!(KERNEL_VERSION.to_string(), "0.29.0", "the gate is version-pinned");
+    assert_eq!(KERNEL_VERSION.to_string(), "0.30.0", "the gate is version-pinned");
     assert_eq!(VERSION, KERNEL_VERSION.code(), "the wire carries the packed form");
     // ORDER IS PRESERVED: a chain cut under the old linear versions
     // compares BELOW every packed one, which is true — an earlier gate

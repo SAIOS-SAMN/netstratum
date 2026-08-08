@@ -82,6 +82,9 @@ pub const SCHEMA_V9: u8 = 9;
 /// **SCHEMA v10 — P5-M clear depths + circuit breaker.**
 pub const SCHEMA_V10: u8 = 10;
 
+/// **SCHEMA v11 — P5-M2 cascade + P5-D tamper pressures.**
+pub const SCHEMA_V11: u8 = 11;
+
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
 }
@@ -102,7 +105,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V10];
+    let mut out = vec![SCHEMA_V11];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -394,6 +397,17 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
             put_u64(&mut out, t);
         }
     }
+    // SCHEMA v11 — cascade + tamper pressures.
+    put_u32(&mut out, committed.cascade_pressures.len() as u32);
+    for (orb, p) in &committed.cascade_pressures {
+        put_u64(&mut out, *orb);
+        put_u64(&mut out, *p);
+    }
+    put_u32(&mut out, committed.tamper_pressures.len() as u32);
+    for (orb, p) in &committed.tamper_pressures {
+        put_u64(&mut out, *orb);
+        ratio::encode(p, &mut out);
+    }
     out
 }
 
@@ -473,6 +487,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         && schema != SCHEMA_V8
         && schema != SCHEMA_V9
         && schema != SCHEMA_V10
+        && schema != SCHEMA_V11
     {
         return None;
     }
@@ -868,6 +883,21 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         }
     }
 
+    let mut cascade_pressures = Vec::new();
+    let mut tamper_pressures = Vec::new();
+    if schema >= SCHEMA_V11 {
+        for _ in 0..take.u32()? {
+            let orb = take.u64()?;
+            let p = take.u64()?;
+            cascade_pressures.push((orb, p));
+        }
+        for _ in 0..take.u32()? {
+            let orb = take.u64()?;
+            let p = take.ratio()?;
+            tamper_pressures.push((orb, p));
+        }
+    }
+
     if !take.done() {
         return None;
     }
@@ -905,5 +935,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         perps,
         clear_depths,
         market_sealed_until,
+        cascade_pressures,
+        tamper_pressures,
     })
 }

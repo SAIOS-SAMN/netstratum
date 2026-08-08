@@ -275,7 +275,8 @@ fn colony_help(style: Style) {
     row(style, "perp list|open|fund|close|liq", "PERP-1 last-clear index");
     row(style, "fleet mint hauler|escort [g] finance", "hull + optional yard Note");
     row(style, "defend status|escort|risk", "P5-A KIN convoy + posture (36)");
-    row(style, "market status|seal|resume|clear|raid", "P5-M MKT breaker + clear seal");
+    row(style, "market status|seal|resume|clear|raid|cascade", "P5-M/M2 MKT war");
+    row(style, "medium status|reinforce · tamper", "P5-D ATM envelope + covert");
     row(style, "suite market|convoy|cyber", "UI shells over same deeds (36 §10)");
     row(style, "prospect · assay · compound · refine", "elements + alchemy");
     println!();

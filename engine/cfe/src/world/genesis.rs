@@ -45,6 +45,8 @@ impl World {
             perps: Vec::new(),
             clear_depths: Vec::new(),
             market_sealed_until: None,
+            cascade_pressures: Vec::new(),
+            tamper_pressures: Vec::new(),
         }
     }
     /// P2-PERSIST — resume a world from its chronicle: the committed
@@ -100,6 +102,8 @@ impl World {
             perps: committed.perps,
             clear_depths: committed.clear_depths,
             market_sealed_until: committed.market_sealed_until,
+            cascade_pressures: committed.cascade_pressures,
+            tamper_pressures: committed.tamper_pressures,
         }
     }
     /// ELEVATE-1 (12_UNION §6) — THE THREE-GATE GAUGE CLIMB, the

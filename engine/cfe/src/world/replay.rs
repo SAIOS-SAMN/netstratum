@@ -47,6 +47,8 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut perps: Vec<crate::dop::MarketPerp> = Vec::new();
     let mut clear_depths: Vec<(crate::dop::Resource, u64)> = Vec::new();
     let mut market_sealed_until: Option<u64> = None;
+    let mut cascade_pressures: Vec<(u64, u64)> = Vec::new();
+    let mut tamper_pressures: Vec<(u64, crate::ratio::Ratio)> = Vec::new();
     for receipt in chronicle.receipts() {
         match &receipt.event {
             // BOOK-1 (19_LENS §16) — the open registry rebuilds from
@@ -1223,13 +1225,53 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 }
             }
             ClosureEvent::ClearPoisonRefused { .. } => {}
+            ClosureEvent::NoteCascadeStruck {
+                orb_id,
+                fee,
+                pressure,
+            } => {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank_stamp(-fee.clone());
+                }
+                cascade_pressures.retain(|(o, _)| *o != *orb_id);
+                cascade_pressures.push((*orb_id, *pressure));
+            }
+            ClosureEvent::CovertTamperStruck {
+                orb_id,
+                cost,
+                pressure,
+            } => {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank(crate::dop::Resource::Crystal, -cost.clone());
+                }
+                tamper_pressures.retain(|(o, _)| *o != *orb_id);
+                if *pressure > ratio(0, 1) {
+                    tamper_pressures.push((*orb_id, pressure.clone()));
+                }
+            }
+            ClosureEvent::MediumReinforced {
+                orb_id,
+                cost,
+                pressure,
+            } => {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank(crate::dop::Resource::Iron, -cost.clone());
+                }
+                tamper_pressures.retain(|(o, _)| *o != *orb_id);
+                if *pressure > ratio(0, 1) {
+                    tamper_pressures.push((*orb_id, pressure.clone()));
+                }
+            }
+            ClosureEvent::TamperDetected { .. } => {
+                // Residual audit only; pressure already set by CovertTamper.
+            }
         }
     }
     Committed {
         orbs, entities, star, debts, bonds, forwards, councils, offers, techs, wants, crossed,
         gauge, genesis, terrain_seed, practices, instruments, routes, element_routes, treaties,
         prospects, warded, veiled, taxon, stations, hulls, notes, futures, last_clears, shares,
-        perps, clear_depths, market_sealed_until,
+        perps, clear_depths, market_sealed_until, cascade_pressures, tamper_pressures,
     }
 }
 

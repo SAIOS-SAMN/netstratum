@@ -405,14 +405,19 @@ fn render_exch(style: Style, home: &World) -> Vec<String> {
     let mi = home.market_integrity();
     let seal_line = if mi.sealed {
         format!(
-            "  {} until t{}",
+            "  {} until t{} · cascade {}",
             style.warn("CIRCUIT OPEN"),
-            mi.resume_at.unwrap_or(0)
+            mi.resume_at.unwrap_or(0),
+            mi.cascade_pressure
         )
     } else {
         format!(
-            "  clear seal crystal {}/{} iron {}/{}",
-            mi.crystal_depth, mi.seal_need, mi.iron_depth, mi.seal_need
+            "  clear seal crystal {}/{} iron {}/{} · cascade {}",
+            mi.crystal_depth,
+            mi.seal_need,
+            mi.iron_depth,
+            mi.seal_need,
+            mi.cascade_pressure
         )
     };
     let mut lines = vec![
@@ -435,7 +440,7 @@ fn render_exch(style: Style, home: &World) -> Vec<String> {
         format!(
             "  {}",
             style.hint(
-                "note · future · share · perp · market seal|clear|raid · suite market"
+                "note · future · share · perp · market seal|clear|raid|cascade · suite market"
             )
         ),
     ];
@@ -550,20 +555,39 @@ fn render_defend(style: Style, home: &World) -> Vec<String> {
     let mi = home.market_integrity();
     if mi.sealed {
         lines.push(format!(
-            "  {} until t{}",
+            "  {} until t{} · cascade {}",
             style.warn("MKT CIRCUIT"),
-            mi.resume_at.unwrap_or(0)
+            mi.resume_at.unwrap_or(0),
+            mi.cascade_pressure
         ));
     } else {
         lines.push(format!(
-            "  MKT depth crystal {}/{} iron {}/{}",
-            mi.crystal_depth, mi.seal_need, mi.iron_depth, mi.seal_need
+            "  MKT depth crystal {}/{} iron {}/{} · cascade {}",
+            mi.crystal_depth,
+            mi.seal_need,
+            mi.iron_depth,
+            mi.seal_need,
+            mi.cascade_pressure
         ));
     }
+    let atm = home.medium_integrity(
+        home.orb().map(|o| o.orb_id).unwrap_or(cfe::world::FIRST_ORB),
+    );
+    let atm_paint = if atm.compromised {
+        style.warn("COMPROMISED")
+    } else {
+        style.ok("stable")
+    };
+    lines.push(format!(
+        "  ATM pressure {} / {} · {}",
+        ratio_str(&atm.pressure),
+        ratio_str(&atm.threshold),
+        atm_paint
+    ));
     lines.push(format!(
         "  {}",
         style.hint(
-            "escort · risk · market seal|clear|raid · suite market|convoy · fleet mint escort"
+            "escort · market seal|cascade · medium reinforce · tamper · suite market"
         )
     ));
     // Escorts on duty

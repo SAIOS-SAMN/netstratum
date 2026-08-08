@@ -2549,14 +2549,15 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             None | Some("status") | Some("help") => {
                 let mi = world.market_integrity();
                 println!(
-                    "{} MARKET — sealed={} resume={:?} · crystal_depth={}/{} iron_depth={}/{}",
+                    "{} MARKET — sealed={} resume={:?} · crystal_depth={}/{} iron_depth={}/{} · cascade={}",
                     style.head("MKT"),
                     mi.sealed,
                     mi.resume_at,
                     mi.crystal_depth,
                     mi.seal_need,
                     mi.iron_depth,
-                    mi.seal_need
+                    mi.seal_need,
+                    mi.cascade_pressure
                 );
                 println!(
                     "  books note={} fut={} share={} perp={}",
@@ -2624,11 +2625,84 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     Err(refusal) => refuse(world, &refusal, style),
                 }
             }
+            Some("cascade") => {
+                let orb = words
+                    .next()
+                    .and_then(|w| w.parse().ok())
+                    .unwrap_or(*current);
+                match world.note_cascade(orb) {
+                    Ok(p) => {
+                        let _ = sync_world(world);
+                        println!(
+                            "{} note cascade pressure {p} on orb {orb}",
+                            style.warn("CASCADE")
+                        );
+                    }
+                    Err(refusal) => refuse(world, &refusal, style),
+                }
+            }
             Some(other) => println!(
-                "{} market {:?} — status|seal|resume|clear|raid",
+                "{} market {:?} — status|seal|resume|clear|raid|cascade",
                 style.bad("✗"),
                 other
             ),
+        },
+        // P5-D ATM medium / covert tamper
+        Some("medium") | Some("envelope") => match words.next() {
+            None | Some("status") | Some("help") => {
+                let mi = world.medium_integrity(*current);
+                println!(
+                    "{} MEDIUM — orb {} pressure {} / {} · compromised={}",
+                    style.head("ATM"),
+                    mi.orb,
+                    amount(&mi.pressure),
+                    amount(&mi.threshold),
+                    mi.compromised
+                );
+                println!(
+                    "  {}",
+                    style.hint("medium reinforce · tamper [orb]  (crystal out / iron in)")
+                );
+            }
+            Some("reinforce") => match world.medium_reinforce(*current) {
+                Ok(p) => {
+                    let _ = sync_world(world);
+                    println!(
+                        "{} envelope reinforced · pressure now {}",
+                        style.ok("ATM"),
+                        amount(&p)
+                    );
+                }
+                Err(refusal) => refuse(world, &refusal, style),
+            },
+            Some(other) => println!(
+                "{} medium {:?} — status|reinforce",
+                style.bad("✗"),
+                other
+            ),
+        },
+        Some("tamper") => {
+            let orb = words
+                .next()
+                .and_then(|w| w.parse().ok())
+                .unwrap_or(*current);
+            match world.covert_tamper(orb) {
+                Ok(p) => {
+                    let _ = sync_world(world);
+                    let flag = if p >= cfe::world::tamper_threshold() {
+                        style.warn("DETECTED")
+                    } else {
+                        style.dim("covert")
+                    };
+                    println!(
+                        "{} tamper orb {orb} · pressure {} · {}",
+                        style.warn("ATM"),
+                        amount(&p),
+                        flag
+                    );
+                }
+                Err(refusal) => refuse(world, &refusal, style),
+            }
         },
         // Suite shells — UI over deeds (36 §10), not a second physics.
         Some("suite") => match words.next() {
@@ -6349,6 +6423,9 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
             "{resource:?} last-clear seal unmet ({depth}/{need} honest clears) — `market clear {:?} <p>/<q>`",
             resource
         ),
+        ActionRefused::ResumeAuditUnmet { depth, need } => format!(
+            "early market resume refused — crystal clear depth {depth}/{need}; keep clearing or wait for breaker"
+        ),
         ActionRefused::BalanceEntropyDominates {
             balance,
             syntropy,
@@ -7722,6 +7799,41 @@ fn chronicle(world: &World, style: &Style) {
             } => format!(
                 "⊘ {:?} last-clear poison refused ({}/{})",
                 resource, depth, need
+            ),
+            cfe::dop::ClosureEvent::NoteCascadeStruck {
+                orb_id,
+                fee,
+                pressure,
+            } => format!(
+                "📉 note cascade orb {} fee {} pressure {}",
+                orb_id,
+                amount(fee),
+                pressure
+            ),
+            cfe::dop::ClosureEvent::CovertTamperStruck {
+                orb_id,
+                cost,
+                pressure,
+            } => format!(
+                "🌫 covert tamper orb {} cost {} pressure {}",
+                orb_id,
+                amount(cost),
+                amount(pressure)
+            ),
+            cfe::dop::ClosureEvent::MediumReinforced {
+                orb_id,
+                cost,
+                pressure,
+            } => format!(
+                "🛡 medium reinforce orb {} cost {} pressure {}",
+                orb_id,
+                amount(cost),
+                amount(pressure)
+            ),
+            cfe::dop::ClosureEvent::TamperDetected { orb_id, pressure } => format!(
+                "⚠ tamper DETECTED orb {} pressure {}",
+                orb_id,
+                amount(pressure)
             ),
             cfe::dop::ClosureEvent::AssayStruck { amount: drawn, richness, .. } => format!(
                 "⚖ {} drawn from the opened vein — one receipt, the whole span{}",

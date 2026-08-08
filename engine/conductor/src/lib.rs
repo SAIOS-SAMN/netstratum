@@ -3365,7 +3365,7 @@ fn ensure_npc_market_war(world: &mut cfe::world::World, actor: u64) {
             let _ = world.record_spot_clear_as(actor, orb_id, Resource::Crystal, p);
         }
     }
-    // Expansionist (1): liquidity raid when stamp affords fee and an offer rests.
+    // Expansionist (1): liquidity raid or note cascade when stamp affords.
     if dis == 1 {
         let stamp = world
             .orb()
@@ -3374,6 +3374,8 @@ fn ensure_npc_market_war(world: &mut cfe::world::World, actor: u64) {
         let has_offer = world.offers().iter().any(|o| o.orb == orb_id);
         if has_offer && stamp >= ratio(1, 1) {
             let _ = world.liquidity_raid_as(actor, orb_id);
+        } else if stamp >= ratio(1, 1) && world.notes_listable() {
+            let _ = world.note_cascade_as(actor, orb_id);
         }
     }
     // Epicurean (3): trip breaker when crystal clear depth is still thin

@@ -1,7 +1,7 @@
 # 36 — DEFENSE AXIOMS · SPECIES-RELATIVE SECURITY · COVERT TERRAFORM · ESPIONAGE
 
-**Status:** DESIGN LOCK + **P5-A KIN partial land** (tags 132–134) +
-**market-defense / suite architecture** (this amendment, 2026-08-08).  
+**Status:** DESIGN LOCK + **P5-A** (132–134) + **P5-M** (135–139) +
+**§11 expansion matrix catalog** + **P5-M2 / P5-D land wave** (tags 140–143).  
 **Remaining waves** land red-first; claim tags at each wave only.  
 **Authority:** `00_CHARTER`, `04_CIVILIZATION_GENESIS`, `05_THERMAL_BALANCE`,
 `06_CIVILIZATIONS`, `10_TECH_EMERGENCE` (TERRA-1, WARDEN-1, MASK-1, MANU-1),
@@ -367,13 +367,15 @@ Maps onto and **extends** `TASKS_TRADE_FLEET_DESK` P5:
 “armor HP”; P5-D before invasion; **P5-M after Phase 4 books exist**
 (landed); P5-G never blocks R1–R2 fun.
 
-### 6.1 Provisional tag budget (claim at land only)
+### 6.1 Tag budget (claim at land only)
 
 | Range | Use |
 |-------|-----|
-| **135+** | next free after P5-A (132–134 landed) |
-| + ATM/ESP family | CovertTamper, TamperDetected, MediumReinforced, SpyExtracted… |
-| + MKT family | MarketSealed, LastClearPoisoned, CircuitBroken, LiquidityRaid… |
+| **132–134** | P5-A KIN landed |
+| **135–139** | P5-M MKT landed (seal/clear/raid/poison) |
+| **140** | P5-M2 NoteCascadeStruck |
+| **141–143** | P5-D CovertTamper / MediumReinforced / TamperDetected |
+| **144+** | next free — further matrix vectors |
 | no float | all residuals exact rational |
 
 ### 6.2 Non-goals
@@ -510,8 +512,8 @@ schism. Atmospheric attack hits shared brood medium. Espionage is
 
 | ID | Question | Lean |
 |----|----------|------|
-| Q-D1 | Is CovertTamper a new PlanetSited half-state or pure pressure scalar? | Pressure scalar + threshold event |
-| Q-D2 | Multi-actor tamper stack (who is blamed)? | Last unveiled actor + INF witness |
+| Q-D1 | Is CovertTamper a new PlanetSited half-state or pure pressure scalar? | **Ruled:** pressure scalar + TamperDetected at unit threshold |
+| Q-D2 | Multi-actor tamper stack (who is blamed)? | Last unveiled actor + INF witness (later) |
 | Q-D3 | Plasmic ATM = thermal site fields only? | Compose thermal + new field TLV later |
 | Q-D4 | Share of espionage with MASK toll | Compose VeilToll |
 | Q-D5 | Escort risk formula vs pair_melt | Risk residual separate from melt |
@@ -530,6 +532,98 @@ schism. Atmospheric attack hits shared brood medium. Espionage is
 | `05` / `34` | Thermal / medium |
 | `33` DEFEND pane | UI |
 | `15_TAXON` | Class/clade ceilings |
+
+---
+
+## 11. Expansion matrix (5 attacks × 10 defenses × 7 domains)
+
+**Status:** DESIGN CATALOG (2026-08-08) — structural parity under the
+conservation law. **Not** a second combat physics. **Not** 105 free tags.
+
+### 11.1 Conservation (binding)
+
+```text
+Every attack costs verified resources/STAMP (deed debit + typed residual).
+Every defense is a pure reading, a refuse path, or a paid reinforce deed.
+Zero free capability minting. Suites CALL the same deeds (NPC parity).
+```
+
+**Forbidden rewrites:** “Chronicle poisoning” means **false present
+readings / forged claims**, never mutation of past receipts (SEAL B).
+
+**Undervived names refused at wire:** Sapwood/Heartwood poles, Arbor
+parallel ledgers, free “defense buildings” that mint abilities without
+zones/tech/deeds. Bind to genesis axes, chronicle, ZoneKind, instruments.
+
+### 11.2 Land unit rule (how the catalog becomes code)
+
+```text
+per domain:
+  1 primary residual family
+  ≤5 attack modes (deed or mode on residual)
+  defenses = readings + refuse paths + ≤3 reinforce deeds
+            + compose existing zones / hulls / instruments
+```
+
+Species parity = **same 5×10 slots**, different nouns by metabolism
+(mineral lattice / biotic membrane / plasmic sheet).
+
+### 11.3 Domain catalog (summary) + land crosswalk
+
+#### MKT — economic & settlement
+
+| Slot | Name | Crosswalk |
+|------|------|-----------|
+| A1 | Liquidity raid | **Landed** 138 |
+| A2 | Last-clear poison | **Landed** 139 + seal |
+| A3 | Note cascade | **P5-M2** tag 140 |
+| A4 | Listing denial | Compose listable + INF/CYB (later) |
+| A5 | STAMP velocity shock | Invent later |
+| D1–D3 | Clear seal / breaker / integrity | **Landed** |
+| D8 | Collateral haircut ladder | **P5-M2** pure floor on issue_note |
+| D10 | Resume audit | **P5-M2** early resume gate |
+| D4–D7,D9 | Sink / multi-orb / velocity buffer / peer attest | later |
+
+#### KIN — transit & hulls
+
+| Slot | Crosswalk |
+|------|-----------|
+| A1 corridor interdiction | **Landed** residual 133 |
+| D1 escort convoy | **Landed** 132 + risk formula |
+| A2–A5, D2–D10 | P5-K2 catalog (compose risk / hull / route) |
+
+#### INF — OPSEC & fog
+
+Compose MASK/WARD/assay (P5-C). No receipt rewrite.
+
+#### CYB — instruments & mesh
+
+P5-E guards → suite (P5.37).
+
+#### ATM — medium & envelope
+
+| Slot | Crosswalk |
+|------|-----------|
+| A1 covert tamper pressure | **P5-D** CovertTamper 141 |
+| D1 medium envelope | **P5-D** MediumReinforced 142 |
+| threshold unmask | **P5-D** TamperDetected 143 |
+| A2–A5, D2–D10 | species medium colour later |
+
+#### COG / CEL
+
+Readings first (P5-B / P5.20); no free armor HP.
+
+### 11.4 Board waves (extends §6)
+
+| Wave | Content |
+|------|---------|
+| P5-M2 | Note cascade + haircut + resume audit |
+| P5-D | CovertTamper + MediumReinforce + TamperDetected |
+| P5-K2 / C / E / B | matrix remainder per land unit rule |
+
+Full 5×10 prose for operator colour lives in session design notes;
+**this §11 is the charter crosswalk.** Implementation rows on
+`TASKS_TRADE_FLEET_DESK`.
 
 ---
 

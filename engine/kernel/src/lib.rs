@@ -154,7 +154,11 @@ use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 /// **0.29.0 — P5-M MKT market defense.** Tags 135–139 (MarketSealed/
 /// MarketResumed/SpotClearRecorded/LiquidityRaidStruck/ClearPoisonRefused);
 /// SCHEMA_V10 clear_depths + market_sealed_until trail.
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 29, patch: 0 };
+///
+/// **0.30.0 — P5-M2 + P5-D.** Tags 140–143 (NoteCascadeStruck,
+/// CovertTamperStruck, MediumReinforced, TamperDetected); SCHEMA_V11
+/// cascade_pressure + tamper_pressures trail.
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 30, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
@@ -493,8 +497,9 @@ fn stamp_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
             }
             amount.clone()
         }
-        // P5-M: liquidity raid burns fee STAMP (typed residual).
-        ClosureEvent::LiquidityRaidStruck { fee, .. } => {
+        // P5-M / P5-M2: raids and cascades burn fee STAMP (typed residual).
+        ClosureEvent::LiquidityRaidStruck { fee, .. }
+        | ClosureEvent::NoteCascadeStruck { fee, .. } => {
             if *fee < ratio(0, 1) {
                 return Err(Refused::ElementNotPositive {
                     element: [0u8; 32],
@@ -1233,6 +1238,7 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::ScrapSalvaged { .. } | E::HullMinted { .. } | E::HullAssigned { .. } | E::HullScrapped { .. } | E::OrderWorked { .. } | E::ElementSalvaged { .. }
         | E::NoteIssued { .. } | E::NoteRedeemed { .. } | E::FutureOpened { .. } | E::FutureSettled { .. } | E::LastClearMarked { .. } | E::ShareIssued { .. } | E::ShareTransferred { .. } | E::ShareDividend { .. } | E::PerpOpened { .. } | E::PerpFunded { .. } | E::PerpClosed { .. } | E::HullFinanced { .. } | E::EscortOnDuty { .. } | E::InterdictionStruck { .. } | E::ConvoyRiskMarked { .. }
         | E::MarketSealed { .. } | E::MarketResumed { .. } | E::SpotClearRecorded { .. } | E::LiquidityRaidStruck { .. } | E::ClearPoisonRefused { .. }
+        | E::NoteCascadeStruck { .. } | E::CovertTamperStruck { .. } | E::MediumReinforced { .. } | E::TamperDetected { .. }
         | E::GenesisSealed { .. } | E::ProspectStruck { .. } | E::LineSucceeded { .. }
         | E::TechLicensed { .. } | E::InstrumentForged { .. } | E::RouteChartered { .. }
         | E::OfferPosted { .. } | E::BondSealed { .. }
@@ -1464,7 +1470,16 @@ fn admitted_deltas(
         E::HullMinted { .. } | E::HullAssigned { .. } | E::HullScrapped { .. } | E::OrderWorked { .. } => Vec::new(),
         E::ElementSalvaged { .. } => Vec::new(),
         E::NoteIssued { .. } | E::NoteRedeemed { .. } | E::FutureOpened { .. } | E::FutureSettled { .. } | E::LastClearMarked { .. } | E::ShareIssued { .. } | E::ShareTransferred { .. } | E::ShareDividend { .. } | E::PerpOpened { .. } | E::PerpFunded { .. } | E::PerpClosed { .. } | E::HullFinanced { .. } | E::EscortOnDuty { .. } | E::InterdictionStruck { .. } | E::ConvoyRiskMarked { .. }
-        | E::MarketSealed { .. } | E::MarketResumed { .. } | E::SpotClearRecorded { .. } | E::LiquidityRaidStruck { .. } | E::ClearPoisonRefused { .. } => Vec::new(),
+        | E::MarketSealed { .. } | E::MarketResumed { .. } | E::SpotClearRecorded { .. } | E::LiquidityRaidStruck { .. } | E::ClearPoisonRefused { .. }
+        | E::NoteCascadeStruck { .. } | E::TamperDetected { .. } => Vec::new(),
+        E::CovertTamperStruck { cost, .. } => {
+            non_negative(Resource::Crystal, cost)?;
+            vec![(Resource::Crystal, -cost.clone())]
+        }
+        E::MediumReinforced { cost, .. } => {
+            non_negative(Resource::Iron, cost)?;
+            vec![(Resource::Iron, -cost.clone())]
+        }
         // — mints (the sign lives at I4, order preserved for the
         //   landed pins) —
         E::YieldCollected { resource, amount, .. } => vec![(*resource, amount.clone())],
@@ -2145,6 +2160,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::ScrapSalvaged { .. } | E::HullMinted { .. } | E::HullAssigned { .. } | E::HullScrapped { .. } | E::OrderWorked { .. } | E::ElementSalvaged { .. }
         | E::NoteIssued { .. } | E::NoteRedeemed { .. } | E::FutureOpened { .. } | E::FutureSettled { .. } | E::LastClearMarked { .. } | E::ShareIssued { .. } | E::ShareTransferred { .. } | E::ShareDividend { .. } | E::PerpOpened { .. } | E::PerpFunded { .. } | E::PerpClosed { .. } | E::HullFinanced { .. } | E::EscortOnDuty { .. } | E::InterdictionStruck { .. } | E::ConvoyRiskMarked { .. }
         | E::MarketSealed { .. } | E::MarketResumed { .. } | E::SpotClearRecorded { .. } | E::LiquidityRaidStruck { .. } | E::ClearPoisonRefused { .. }
+        | E::NoteCascadeStruck { .. } | E::CovertTamperStruck { .. } | E::MediumReinforced { .. } | E::TamperDetected { .. }
         // #42: a treaty is WORLD-layer. It is keyed on the pair, and
         // the pair is two worlds — not a line's identity (a pact
         // outlives whoever signed it) and not one place.
@@ -2273,6 +2289,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::ScrapSalvaged { .. } | E::HullMinted { .. } | E::HullAssigned { .. } | E::HullScrapped { .. } | E::OrderWorked { .. } | E::ElementSalvaged { .. }
         | E::NoteIssued { .. } | E::NoteRedeemed { .. } | E::FutureOpened { .. } | E::FutureSettled { .. } | E::LastClearMarked { .. } | E::ShareIssued { .. } | E::ShareTransferred { .. } | E::ShareDividend { .. } | E::PerpOpened { .. } | E::PerpFunded { .. } | E::PerpClosed { .. } | E::HullFinanced { .. } | E::EscortOnDuty { .. } | E::InterdictionStruck { .. } | E::ConvoyRiskMarked { .. }
         | E::MarketSealed { .. } | E::MarketResumed { .. } | E::SpotClearRecorded { .. } | E::LiquidityRaidStruck { .. } | E::ClearPoisonRefused { .. }
+        | E::NoteCascadeStruck { .. } | E::CovertTamperStruck { .. } | E::MediumReinforced { .. } | E::TamperDetected { .. }
         // U1: the discovery mint settles banked value against verified
         // work — Collect, like the yield it banks beside. Ratified by
         // the U1 witnesses as it enters covered().

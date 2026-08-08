@@ -195,6 +195,10 @@ pub struct Committed {
     pub clear_depths: Vec<(crate::dop::Resource, u64)>,
     /// P5-M: circuit breaker — if Some(t), books sealed until clock ≥ t.
     pub market_sealed_until: Option<u64>,
+    /// P5-M2: note cascade pressure per orb (haircut ladder).
+    pub cascade_pressures: Vec<(u64, u64)>,
+    /// P5-D: ATM tamper pressure per orb (exact rational ≥ 0).
+    pub tamper_pressures: Vec<(u64, Ratio)>,
 }
 
 /// G1 (04 §1): a civilization's sealed axes, as the world holds them.
@@ -299,6 +303,8 @@ pub struct World {
     pub(super) perps: Vec<crate::dop::MarketPerp>,
     pub(super) clear_depths: Vec<(crate::dop::Resource, u64)>,
     pub(super) market_sealed_until: Option<u64>,
+    pub(super) cascade_pressures: Vec<(u64, u64)>,
+    pub(super) tamper_pressures: Vec<(u64, Ratio)>,
 }
 
 /// PLANNER-1: what a licensed leap carries — the condition and name

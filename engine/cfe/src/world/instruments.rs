@@ -159,9 +159,9 @@ impl World {
         if face == ratio(0, 1) || coll == ratio(0, 1) {
             return Err(ActionRefused::InstrumentEmpty);
         }
-        // Collateral must cover at least half face (1/(1+1)).
-        let half = face.clone() / (ratio(1, 1) + ratio(1, 1));
-        if coll < half {
+        // P5-M2 haircut ladder: base half face + cascade/thin-book steps.
+        let floor = self.note_collateral_floor(orb, &face);
+        if coll < floor {
             return Err(ActionRefused::InstrumentUndercollateralized);
         }
         let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;

@@ -62,6 +62,8 @@ fn seal_clear(w: &mut World, resource: Resource, price: &Ratio) {
 fn note_issue_and_redeem_after_maturity() {
     let mut w = stamp_world();
     assert!(w.notes_listable(), "STAMP/crystal evidence opens the note book");
+    // P5-M2 haircut: thin clear depth raises floor above half — seal first.
+    seal_clear(&mut w, Resource::Crystal, &ratio(1, 1));
     let face = Positive::new(ratio(2, 1)).expect("face");
     let coll = Positive::new(ratio(1, 1)).expect("coll");
     let id = w

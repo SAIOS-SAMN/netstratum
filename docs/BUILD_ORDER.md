@@ -1041,5 +1041,9 @@ SCHEMA_V10; kernel **0.29.0**; `market_war_step` disposition-routed; CLI
 `market` / `suite market|convoy`; EXCH integrity flags; `defense_pins` MKT.
 See `36_DEFENSE_AXIOMS.md` §10.
 
-**Next:** P5-B species posture depth · P5-D CovertTamper · P5.37 CYBER suite · P1.8.
+**§11 expansion matrix catalog** + **P5-M2 / P5-D:** tag **140** NoteCascade;
+haircut ladder on note issue; early resume audit; tags **141–143** CovertTamper /
+MediumReinforced / TamperDetected; SCHEMA_V11; kernel **0.30.0**. See `36` §11.
+
+**Next:** P5-B species posture · P5.19 dual-use TERRA · P5-C INF · P5.37 CYBER · P1.8.
 

@@ -994,6 +994,45 @@ pub fn render_receipt(receipt: &Receipt) -> String {
             "clear_poison",
             format!("{resource:?} mark refused depth {depth}/{need}"),
         ),
+        E::NoteCascadeStruck {
+            orb_id,
+            fee,
+            pressure,
+        } => (
+            "note_cascade",
+            format!(
+                "cascade orb {orb_id} fee {} pressure {pressure}",
+                ratio_str(fee)
+            ),
+        ),
+        E::CovertTamperStruck {
+            orb_id,
+            cost,
+            pressure,
+        } => (
+            "covert_tamper",
+            format!(
+                "tamper orb {orb_id} cost {} pressure {}",
+                ratio_str(cost),
+                ratio_str(pressure)
+            ),
+        ),
+        E::MediumReinforced {
+            orb_id,
+            cost,
+            pressure,
+        } => (
+            "medium_reinforce",
+            format!(
+                "envelope orb {orb_id} cost {} pressure {}",
+                ratio_str(cost),
+                ratio_str(pressure)
+            ),
+        ),
+        E::TamperDetected { orb_id, pressure } => (
+            "tamper_detected",
+            format!("unmask orb {orb_id} pressure {}", ratio_str(pressure)),
+        ),
         E::ApertureSent { deal, from_orb, resource, amount } => (
             "aperture_sent",
             format!(

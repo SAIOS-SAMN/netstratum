@@ -200,15 +200,6 @@ optional R3/R4 exits for claims.
 | P5.14 | [ ] Surface MASK-1 / WARDEN-1a on DEFEND | P5.3, landed veil/ward | |
 | P5.15 | [ ] Detection grade from MANU-1 instrument floor | P5.14, MANU-1 | pin |
 
-### P5-D — ATM defense + covert terraform
-
-| ID | Task | Depends | Exit |
-|----|------|---------|------|
-| P5.16 | [ ] MediumEnvelope defense spend / reading (species medium) | P5.11, thermal | |
-| P5.17 | [ ] CovertTamper deed + tamper_pressure scalar (exact) | P5.16, veil | pins |
-| P5.18 | [ ] TamperDetected / unmask residual | P5.17 | |
-| P5.19 | [ ] Dual-use gate: TERRA-1 overt vs CovertTamper covert | TERRA-1, P5.17 | doc+pin |
-
 ### P5-E — COG + CYB
 
 | ID | Task | Depends | Exit |
@@ -234,6 +225,25 @@ not a second physics. NPC must war without opening a suite.
 | P5.37 | [ ] CYBER suite shell (instrument + mesh guards) | P5.21–P5.22 | optional UI |
 | P5.38 | [x] NPC `market_war_step` (disposition-routed) | P5.34 | pure NPC |
 | P5.39 | [ ] Species-relative MKT residual copy (mineral/biotic/plasmic) | P5.11, P5.31 | |
+
+### P5-M2 — Matrix A3 + D8 + D10 (after §11 catalog)
+
+| ID | Task | Depends | Exit |
+|----|------|---------|------|
+| P5.40 | [x] Design: expansion matrix §11 crosswalk (`36`) | P5.30 | doc |
+| P5.41 | [x] Note cascade attack (tag 140) + cascade pressure | P5.34 | pins |
+| P5.42 | [x] Collateral haircut ladder (pure floor on `issue_note`) | P5.41 | pins |
+| P5.43 | [x] Early `resume_market` audit (clear depth gate) | P5.33 | pins |
+
+### P5-D — ATM defense + covert terraform (land slice)
+
+| ID | Task | Depends | Exit |
+|----|------|---------|------|
+| P5.16 | [x] Medium envelope reinforce deed (tag 142) | P5.0, thermal | pins |
+| P5.17 | [x] CovertTamper deed + pressure scalar (tag 141) | P5.16 | pins |
+| P5.18 | [x] TamperDetected at unit threshold (tag 143) | P5.17 | pins |
+| P5.19 | [ ] Dual-use gate: TERRA-1 overt vs CovertTamper covert | TERRA-1, P5.17 | doc+pin |
+| P5.19b | [ ] Species-relative medium residual copy | P5.11, P5.17 | |
 
 ### P5-F — Espionage suite
 

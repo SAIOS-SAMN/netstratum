@@ -331,7 +331,11 @@
 //!    137  ClosureEvent::SpotClearRecorded (P5-M — honest clear depth for seal.)
 //!    138  ClosureEvent::LiquidityRaidStruck (P5-M — typed economic attack residual.)
 //!    139  ClosureEvent::ClearPoisonRefused (P5-M — mark without depth refused.)
-//!    Phase-5-M claim ledger: next free **140**. MKT economic warfare.
+//!    140  ClosureEvent::NoteCascadeStruck (P5-M2 — short-paper cascade pressure.)
+//!    141  ClosureEvent::CovertTamperStruck (P5-D — ATM medium pressure up.)
+//!    142  ClosureEvent::MediumReinforced (P5-D — ATM envelope defense spend.)
+//!    143  ClosureEvent::TamperDetected (P5-D — unit pressure threshold unmask.)
+//!    Phase-5 claim ledger: next free **144**.
 //!         Orb TLV: 73 STAMP, 74 scrap. ZoneKind::ShipYard = 10.
 //!         (Historic free tags below top: 14, 15, 56, 57, 58, 64, 66,
 //!         83, 84, 87; 9 and 51 reserved; 65 retired forever.)
@@ -2719,6 +2723,29 @@ pub enum ClosureEvent {
         depth: u64,
         need: u64,
     },
+    /// P5-M2 (tag 140) — note cascade: fee burned; cascade pressure rises.
+    NoteCascadeStruck {
+        orb_id: u64,
+        fee: Ratio,
+        pressure: u64,
+    },
+    /// P5-D ATM (tag 141) — covert medium tamper; pressure rises by eighth.
+    CovertTamperStruck {
+        orb_id: u64,
+        cost: Ratio,
+        pressure: Ratio,
+    },
+    /// P5-D ATM (tag 142) — medium envelope reinforce; pressure falls by eighth.
+    MediumReinforced {
+        orb_id: u64,
+        cost: Ratio,
+        pressure: Ratio,
+    },
+    /// P5-D ATM (tag 143) — unit pressure threshold crossed (unmask residual).
+    TamperDetected {
+        orb_id: u64,
+        pressure: Ratio,
+    },
     /// N4 (NS-2 §1.5) — the scanner's power draw, the ONE chronicle
     /// event of RQP: crystals left the probing orb's bank to hold the
     /// lens open. Deliberately blind to what was asked and what was
@@ -3672,6 +3699,41 @@ impl ClosureEvent {
                 value.extend_from_slice(&depth.to_le_bytes());
                 value.extend_from_slice(&need.to_le_bytes());
                 tlv::put(139, &value, &mut out);
+            }
+            Self::NoteCascadeStruck {
+                orb_id,
+                fee,
+                pressure,
+            } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                ratio::encode(fee, &mut value);
+                value.extend_from_slice(&pressure.to_le_bytes());
+                tlv::put(140, &value, &mut out);
+            }
+            Self::CovertTamperStruck {
+                orb_id,
+                cost,
+                pressure,
+            } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                ratio::encode(cost, &mut value);
+                ratio::encode(pressure, &mut value);
+                tlv::put(141, &value, &mut out);
+            }
+            Self::MediumReinforced {
+                orb_id,
+                cost,
+                pressure,
+            } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                ratio::encode(cost, &mut value);
+                ratio::encode(pressure, &mut value);
+                tlv::put(142, &value, &mut out);
+            }
+            Self::TamperDetected { orb_id, pressure } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                ratio::encode(pressure, &mut value);
+                tlv::put(143, &value, &mut out);
             }
             Self::CrystalDrawn { orb_id, amount } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
@@ -4682,6 +4744,42 @@ impl ClosureEvent {
                     depth,
                     need,
                 })
+            }
+            140 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let (fee, u1) = ratio::decode(value.get(8..)?)?;
+                let at = 8 + u1;
+                let pressure = u64::from_le_bytes(value.get(at..at + 8)?.try_into().ok()?);
+                Some(Self::NoteCascadeStruck {
+                    orb_id,
+                    fee,
+                    pressure,
+                })
+            }
+            141 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let (cost, u1) = ratio::decode(value.get(8..)?)?;
+                let (pressure, _) = ratio::decode(value.get(8 + u1..)?)?;
+                Some(Self::CovertTamperStruck {
+                    orb_id,
+                    cost,
+                    pressure,
+                })
+            }
+            142 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let (cost, u1) = ratio::decode(value.get(8..)?)?;
+                let (pressure, _) = ratio::decode(value.get(8 + u1..)?)?;
+                Some(Self::MediumReinforced {
+                    orb_id,
+                    cost,
+                    pressure,
+                })
+            }
+            143 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let (pressure, _) = ratio::decode(value.get(8..)?)?;
+                Some(Self::TamperDetected { orb_id, pressure })
             }
             55 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
