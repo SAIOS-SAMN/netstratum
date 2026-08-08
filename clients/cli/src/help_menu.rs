@@ -110,26 +110,35 @@ fn topics(style: Style) {
 }
 
 fn bench_help(style: Style) {
-    banner_line(style, "BENCH — MAKE / MODIFY HUB");
+    banner_line(style, "BENCH — MAKE / KNOW / LINK HUB");
     println!(
         "  {}",
-        style.dim("Craft and reshape. Components flow to TRADE for circulation.")
+        style.dim("Craft, research, intel, and cross-pollination. Nested: always `bench` or `back`.")
     );
     println!();
-    row(style, "bench", "domain index");
+    println!("  {}", style.section("MATTER & PLACE"));
     row(style, "bench planetary [bio|chem|terraform]", "resource modification");
-    row(style, "bench build", "buildings / infra standing + zone map");
-    row(style, "bench star", "sun · site · thermal · terraform crown");
-    row(style, "bench chem [bonds]", "alchemy science / standing bonds");
-    row(style, "bench econ", "craft instruments · routes · rails (then TRADE)");
+    row(style, "bench build", "buildings / infra");
+    row(style, "bench star", "sun · site · thermal");
+    row(style, "bench estate", "terrain · parcels · appraise");
     println!();
-    println!("  {}", style.section("CHEM LEAVES (deeds)"));
-    row(style, "compound · iso · catalog", "bond · isomorphic union · known recipe");
-    row(style, "chemistry", "shortcut → bench chem");
+    println!("  {}", style.section("KNOWLEDGE"));
+    row(style, "bench chem [bonds]", "alchemy · dark-7 · iso · catalog");
+    row(style, "bench research", "tech · forge · practice · corpus");
+    row(style, "bench intel", "detection · spy · veil · scan");
+    println!();
+    println!("  {}", style.section("PEOPLE & POWER"));
+    row(style, "bench link", "license · council · absorb · treaty (cross-pollination)");
+    row(style, "bench doctrine", "posture · defend · reorient");
+    row(style, "bench econ", "craft instruments · routes · rails → TRADE");
+    println!();
+    println!("  {}", style.section("NAV (every leaf shows this)"));
+    row(style, "bench · back · .. · home", "← root from chem/intel/…");
+    row(style, "trade", "→ CIRCULATE hub");
     println!();
     println!(
         "  {}",
-        style.hint("Peer: `trade` opens CIRCULATE hub. Barter: trade <id> with <world> …")
+        style.hint("From chem: type `bench` or `back` — never stuck. Deeds stay as compound/iso/…")
     );
 }
 
@@ -146,6 +155,7 @@ fn trade_hub_help(style: Style) {
     row(style, "trade rails", "R1–R4 · Anchor");
     row(style, "trade vault", "custody · margin");
     row(style, "trade aperture", "cross-world haul");
+    row(style, "trade diplo", "treaties · war wall");
     row(style, "trade desk", "→ desk enter");
     println!();
     row(
@@ -153,11 +163,8 @@ fn trade_hub_help(style: Style) {
         "trade <my> with <world> <their> deal <n>",
         "barter clear (direct)",
     );
-    println!();
-    println!(
-        "  {}",
-        style.hint("Peer: `bench` opens MAKE hub (planetary · build · star · chem · econ).")
-    );
+    row(style, "trade · back · .. · home", "← trade root from any leaf");
+    row(style, "bench", "→ MAKE / KNOW / LINK hub");
 }
 
 fn desk_help(style: Style) {

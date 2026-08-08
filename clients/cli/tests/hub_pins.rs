@@ -12,12 +12,19 @@ fn hub_status_apis_construct_on_founded_world() {
     w.site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None)
         .expect("site");
     let _ = w.zone(0, ZoneKind::Extractor);
-    // BENCH surfaces.
+    // BENCH surfaces (chem + expanded knowledge/link domains).
     let _ = w.bench(FIRST_ORB);
     let _ = w.bench_science(FIRST_ORB);
     let _ = w.dark_pulls();
     let _ = w.civ_axes();
     let _ = w.chem_catalog();
+    let _ = w.detection_grade();
+    let _ = w.espionage_integrity();
+    let _ = w.inf_integrity();
+    let _ = w.defense_posture();
+    let _ = w.councils();
+    let _ = w.wants();
+    let _ = w.terrain_seed();
     // TRADE surfaces.
     let _ = w.market_integrity();
     let _ = w.deep_rail_status();

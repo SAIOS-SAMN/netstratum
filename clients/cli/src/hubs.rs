@@ -1,10 +1,11 @@
 //! BENCH + TRADE hubs — main workbench menus.
 //!
-//! **BENCH** = make / modify the world (planetary · build · star · chem · economics craft).
-//! **TRADE** = circulate / settle what the bench produced (books · fleet · rails · vault · aperture).
+//! **BENCH** = make / modify / know / link the world.
+//! **TRADE** = circulate / settle what the bench produced.
 //!
-//! Hubs are presentation: they surface status and route language to existing
-//! verbs. They do not invent a second physics.
+//! Navigation: every nested view ends with a **back-out bar**.
+//! `back` · `..` · `up` · `home` · `return` always climb toward hub root.
+//! Bare `bench` / `trade` always open the peer hub root.
 
 use cfe::dop::{Resource, ZoneKind};
 use cfe::ratio::{ratio, Ratio};
@@ -37,7 +38,7 @@ fn banner(style: &Style, title: &str) {
 }
 
 fn row(style: &Style, verb: &str, desc: &str) {
-    let plain_w = 36usize;
+    let plain_w = 40usize;
     let pad = if verb.len() < plain_w {
         " ".repeat(plain_w - verb.len())
     } else {
@@ -50,23 +51,80 @@ fn leaf(style: &Style, verb: &str, desc: &str) {
     println!("    {}  {}", style.key(verb), style.dim(desc));
 }
 
+fn is_back(word: Option<&str>) -> bool {
+    matches!(
+        word,
+        Some("back")
+            | Some("..")
+            | Some("up")
+            | Some("home")
+            | Some("return")
+            | Some("root")
+            | Some("exit")
+            | Some("q")
+    )
+}
+
+/// Footer on every nested bench view — always a path home.
+fn foot_bench(style: &Style, parent: Option<&str>) {
+    println!();
+    println!("  {}", style.section("↩ BACK-OUT"));
+    leaf(style, "bench", "← BENCH root (all domains)");
+    if let Some(p) = parent {
+        leaf(style, &format!("bench {p}"), "← domain menu");
+    }
+    leaf(style, "back · .. · up · home", "same as bench root from any leaf");
+    leaf(style, "trade", "→ CIRCULATE hub");
+}
+
+fn foot_trade(style: &Style, parent: Option<&str>) {
+    println!();
+    println!("  {}", style.section("↩ BACK-OUT"));
+    leaf(style, "trade", "← TRADE root (all domains)");
+    if let Some(p) = parent {
+        leaf(style, &format!("trade {p}"), "← domain menu");
+    }
+    leaf(style, "back · .. · up · home", "same as trade root");
+    leaf(style, "bench", "→ MAKE hub");
+}
+
 // ── BENCH ────────────────────────────────────────────────────────────
 
-/// `bench [domain [leaf…]]` — make / modify hub.
+/// `bench [domain [leaf…]]` — make / modify / know / link hub.
 pub fn bench(world: &World, mut words: impl Iterator<Item = String>, style: &Style, current: u64) {
     let domain = words.next();
+    if is_back(domain.as_deref()) {
+        bench_index(style);
+        return;
+    }
     match domain.as_deref() {
         None | Some("help") | Some("?") | Some("menu") | Some("index") => bench_index(style),
         Some("planetary") | Some("planet") | Some("world") => {
             planetary(world, words, style, current)
         }
-        Some("build") | Some("infra") | Some("zone") => build_bench(world, words, style, current),
+        Some("build") | Some("infra") | Some("zones") => {
+            build_bench(world, words, style, current)
+        }
         Some("star") | Some("sky") | Some("system") => star_bench(world, words, style, current),
         Some("chem") | Some("chemistry") | Some("science") | Some("bond") => {
             chem_bench(world, words, style, current)
         }
         Some("econ") | Some("economics") | Some("craft") => {
             econ_bench(world, words, style, current)
+        }
+        Some("research") | Some("tech") | Some("practice") | Some("lab") => {
+            research_bench(world, words, style, current)
+        }
+        Some("intel") | Some("intelligence") | Some("spy") | Some("inf") => {
+            intel_bench(world, words, style, current)
+        }
+        Some("link") | Some("cross") | Some("pollinate") | Some("pollination") | Some("union")
+        | Some("coop") => link_bench(world, words, style, current),
+        Some("doctrine") | Some("posture") | Some("defense") | Some("kin") => {
+            doctrine_bench(world, words, style, current)
+        }
+        Some("estate") | Some("survey") | Some("land") => {
+            estate_bench(world, words, style, current)
         }
         Some(other) => {
             println!(
@@ -81,20 +139,25 @@ pub fn bench(world: &World, mut words: impl Iterator<Item = String>, style: &Sty
 }
 
 fn bench_index(style: &Style) {
-    banner(style, "BENCH — MAKE / MODIFY");
+    banner(style, "BENCH — MAKE / MODIFY / KNOW / LINK");
     println!(
         "  {}",
-        style.dim("Craft and reshape the world. Components flow to TRADE for circulation.")
+        style.dim(
+            "Primary workbench. Nested views always offer `bench` or `back` to return here."
+        )
     );
     println!();
-    println!("  {}", style.section("DOMAINS"));
+    println!("  {}", style.section("MATTER & PLACE"));
     row(
         style,
         "bench planetary",
         "resource mod → biologic · chem · terraform",
     );
     row(style, "bench build", "buildings / infra (zones, yard, regen…)");
-    row(style, "bench star", "sun · site · rings · thermal · terraform crown");
+    row(style, "bench star", "sun · site · thermal · capacity (open game)");
+    row(style, "bench estate", "terrain chart · parcels · appraisal");
+    println!();
+    println!("  {}", style.section("KNOWLEDGE"));
     row(
         style,
         "bench chem",
@@ -102,17 +165,40 @@ fn bench_index(style: &Style) {
     );
     row(
         style,
-        "bench econ",
-        "craft trade components (forge · instruments · routes · rails)",
+        "bench research",
+        "tech tree · forge · practices · constellation",
+    );
+    row(
+        style,
+        "bench intel",
+        "detection · spy · veil/ward · instrument grade",
     );
     println!();
-    println!("  {}", style.section("SHORTCUTS (same deeds)"));
-    leaf(style, "chemistry · compound · iso · catalog", "chem leaves");
-    leaf(style, "zone · star · site · terraform · forge", "direct build verbs");
+    println!("  {}", style.section("PEOPLE & POWER"));
+    row(
+        style,
+        "bench link",
+        "cross-pollination · license · council · absorb · leap",
+    );
+    row(
+        style,
+        "bench doctrine",
+        "posture · defend · domains · reorient",
+    );
+    row(
+        style,
+        "bench econ",
+        "craft trade components (instruments · routes · rails)",
+    );
+    println!();
+    println!("  {}", style.section("NAV"));
+    leaf(style, "back · .. · home", "this root from any leaf");
+    leaf(style, "trade", "→ CIRCULATE hub (run what you built)");
+    leaf(style, "help bench", "full map");
     println!();
     println!(
         "  {}",
-        style.hint("Peer hub: `trade` (or `trades`) opens circulation / settlement.")
+        style.hint("From chem: type `bench` or `back` — never stuck in a leaf.")
     );
 }
 
@@ -122,16 +208,21 @@ fn planetary(
     style: &Style,
     current: u64,
 ) {
-    match words.next().as_deref() {
+    let leaf_w = words.next();
+    if is_back(leaf_w.as_deref()) {
+        bench_index(style);
+        return;
+    }
+    match leaf_w.as_deref() {
         None | Some("help") | Some("?") => {
             banner(style, "BENCH › PLANETARY — resource modification");
             row(style, "bench planetary biologic", "regen · biomass · living loop");
-            row(style, "bench planetary chem", "→ chem science (bonds / catalog)");
+            row(style, "bench planetary chem", "→ chem science");
             row(style, "bench planetary terraform", "TERRA crown · site rework");
             println!();
             leaf(style, "prospect · assay · refine", "open veins · draw · refine");
             leaf(style, "zone … regen", "Regenerator (syntropy)");
-            leaf(style, "terraform", "gifted crown only");
+            foot_bench(style, Some("planetary"));
         }
         Some("bio") | Some("biologic") | Some("living") => {
             banner(style, "BENCH › PLANETARY › BIOLOGIC");
@@ -142,39 +233,32 @@ fn planetary(
                     .filter(|z| z.kind == ZoneKind::Regenerator)
                     .count();
                 println!(
-                    "  biomass {} · regenerators {} · balance path: entropy∥syntropy",
+                    "  biomass {} · regenerators {}",
                     amount(&o.banked_amount(Resource::Biomass)),
                     regen
                 );
             }
-            leaf(style, "zone <tile> regen", "build Regenerator");
-            leaf(style, "zone <tile> hab", "Habitat (biotic labour later)");
-            leaf(style, "collect", "settle workspace after growth");
-            println!(
-                "  {}",
-                style.hint("Order-work (refine/compound) may refuse when entropy dominates (34).")
-            );
+            leaf(style, "zone <tile> regen|hab", "living infra");
+            leaf(style, "collect", "settle growth");
+            foot_bench(style, Some("planetary"));
         }
         Some("chem") | Some("chemistry") => {
             chem_bench(world, words, style, current);
         }
         Some("terra") | Some("terraform") | Some("tf") => {
             banner(style, "BENCH › PLANETARY › TERRAFORM");
-            println!(
-                "  can_terraform={} · dual-use ATM tax when TERRA held",
-                world.can_terraform()
-            );
-            leaf(style, "terraform …", "crown deed (base-7 stack)");
-            leaf(style, "site <A> <r>", "place orbit before heat work");
-            leaf(style, "medium · tamper", "ATM envelope / dual-use residual");
-            leaf(style, "thermal", "band + balance reading");
+            println!("  can_terraform={}", world.can_terraform());
+            leaf(style, "terraform …", "crown deed");
+            leaf(style, "site · medium · thermal", "place + ATM + heat");
+            foot_bench(style, Some("planetary"));
         }
         Some(other) => {
             println!(
-                "{} planetary leaf {} unknown — biologic|chem|terraform",
+                "{} planetary leaf {} — biologic|chem|terraform · or `back`",
                 style.bad("✗"),
                 other
             );
+            foot_bench(style, Some("planetary"));
         }
     }
 }
@@ -185,39 +269,33 @@ fn build_bench(
     style: &Style,
     current: u64,
 ) {
-    match words.next().as_deref() {
+    let leaf_w = words.next();
+    if is_back(leaf_w.as_deref()) {
+        bench_index(style);
+        return;
+    }
+    match leaf_w.as_deref() {
         None | Some("help") | Some("?") | Some("list") => {
             banner(style, "BENCH › BUILD — buildings / infra");
             if let Some(o) = world.orb_by_id(current).or_else(|| world.orb()) {
                 println!("  zones standing: {}", o.zones.len());
                 for z in o.zones.iter().take(12) {
-                    println!(
-                        "    tile {} · {:?}",
-                        z.tile,
-                        z.kind
-                    );
+                    println!("    tile {} · {:?}", z.tile, z.kind);
                 }
             }
             println!();
-            println!("  {}", style.section("ZONE KINDS"));
-            leaf(style, "zone <tile> ext|hab|smelt|synth", "core colony");
-            leaf(style, "zone <tile> enc|cryo|res|regen", "thermal / science");
-            leaf(style, "zone <tile> yard", "ShipYard → fleet");
-            leaf(style, "zone <tile> refinery", "ElementRefinery (when deepen)");
-            println!();
-            leaf(style, "raze <tile>", "remove zone");
-            leaf(style, "forge <grade>", "instrument (MANU-1)");
-            println!(
-                "  {}",
-                style.hint("Built pieces enable TRADE (haul capacity, refine path, market evidence).")
-            );
+            leaf(style, "zone <tile> ext|hab|smelt|synth|enc|cryo|res|regen|yard", "");
+            leaf(style, "raze <tile>", "remove");
+            leaf(style, "forge <grade>", "instrument (also research)");
+            foot_bench(style, Some("build"));
         }
         Some(other) => {
             println!(
-                "{} build leaf {} — use `zone <tile> <kind>` for the deed; this hub lists standing infra",
-                style.bad("✗"),
-                other
+                "{} use `zone <tile> <kind>` for the deed · `back` for bench root",
+                style.bad("✗")
             );
+            let _ = other;
+            foot_bench(style, Some("build"));
         }
     }
 }
@@ -228,7 +306,12 @@ fn star_bench(
     style: &Style,
     current: u64,
 ) {
-    match words.next().as_deref() {
+    let leaf_w = words.next();
+    if is_back(leaf_w.as_deref()) {
+        bench_index(style);
+        return;
+    }
+    match leaf_w.as_deref() {
         None | Some("help") | Some("?") | Some("status") => {
             banner(style, "BENCH › STAR — system capacity");
             match world.star() {
@@ -246,22 +329,17 @@ fn star_bench(
                     println!("  {}", style.dim("unsited — `site <A> <r>`"));
                 }
             }
-            println!();
-            leaf(style, "star <M|K|G|F|A|B|O|…>", "commission sun once");
-            leaf(style, "site <albedo> <orbit_r>", "place genesis orb");
-            leaf(style, "thermal · rings · sky", "readings");
-            leaf(style, "terraform", "crown rework (earned)");
+            leaf(style, "star <class> · site · thermal · rings", "deeds");
+            leaf(style, "terraform", "earned crown");
             println!(
                 "  {}",
-                style.hint("Open game: stellar capacity project (C1.7) — lines_of as play, not dial.")
+                style.hint("Open game C1.7: stellar capacity as play (not a free dial).")
             );
+            foot_bench(style, Some("star"));
         }
         Some(other) => {
-            println!(
-                "{} star leaf {} — use star|site|thermal verbs; hub is status + map",
-                style.bad("✗"),
-                other
-            );
+            println!("{} star leaf {} · `back` → bench", style.bad("✗"), other);
+            foot_bench(style, Some("star"));
         }
     }
 }
@@ -273,6 +351,10 @@ fn chem_bench(
     current: u64,
 ) {
     let mode = words.next();
+    if is_back(mode.as_deref()) {
+        bench_index(style);
+        return;
+    }
     // bare chem / science → ranked science view; bonds → standing list
     let science = !matches!(
         mode.as_deref(),
@@ -287,7 +369,7 @@ fn chem_bench(
                 ax.disposition, ax.metabolism, ax.perception
             );
         } else {
-            println!("  {}", style.dim("no genesis seal — utility uses neutral axes"));
+            println!("  {}", style.dim("no genesis seal — neutral axes"));
         }
         let pulls = world.dark_pulls();
         if pulls.is_empty() {
@@ -307,7 +389,8 @@ fn chem_bench(
         if !cat.is_empty() {
             println!("  catalog {} known", cat.len());
             for g in cat.iter().take(8) {
-                println!("    · {}", &hex_prefix(g)[..8.min(hex_prefix(g).len())]);
+                let h = hex_prefix(g);
+                println!("    · {}", &h[..8.min(h.len())]);
             }
         }
         let rows = world.bench_science(current);
@@ -320,12 +403,16 @@ fn chem_bench(
         for (members, gem, knowledge, standing, survival, dark, net) in &rows {
             let named: Vec<String> = members
                 .iter()
-                .map(|m| hex_prefix(m)[..6.min(hex_prefix(m).len())].to_string())
+                .map(|m| {
+                    let h = hex_prefix(m);
+                    h[..6.min(h.len())].to_string()
+                })
                 .collect();
+            let gh = hex_prefix(gem);
             println!(
                 "  {} → {} · k{} · net {} (surv {} / dark {})",
                 style.strong(&named.join(" + ")),
-                style.strong(&hex_prefix(gem)[..8.min(hex_prefix(gem).len())]),
+                style.strong(&gh[..8.min(gh.len())]),
                 knowledge,
                 amount(net),
                 amount(survival),
@@ -333,32 +420,34 @@ fn chem_bench(
             );
             match standing {
                 None => println!("      {}", style.ok("✓ workable here")),
-                Some(_) => println!("      {}", style.warn("⚠ place refuses — see compound error")),
+                Some(_) => println!("      {}", style.warn("⚠ place refuses")),
             }
         }
         println!();
         leaf(style, "compound <p> <p> …", "bond set");
         leaf(style, "iso <a> <b>", "isomorphic union");
-        leaf(style, "catalog <gem>", "chemical creation (known recipe)");
+        leaf(style, "catalog <gem>", "chemical creation");
         leaf(style, "bench chem bonds", "unranked standing list");
+        foot_bench(style, Some("chem"));
     } else {
         banner(style, "BENCH › CHEM — bond standing");
         let bench = world.bench_standing(current);
         if bench.is_empty() {
-            println!(
-                "  {}",
-                style.dim("nothing bonds — one geometry, one phase, saturating binds")
-            );
+            println!("  {}", style.dim("nothing bonds"));
         }
         for (members, gem, knowledge, standing) in &bench {
             let named: Vec<String> = members
                 .iter()
-                .map(|m| hex_prefix(m)[..6.min(hex_prefix(m).len())].to_string())
+                .map(|m| {
+                    let h = hex_prefix(m);
+                    h[..6.min(h.len())].to_string()
+                })
                 .collect();
+            let gh = hex_prefix(gem);
             println!(
                 "  {} → {} · k{}",
                 style.strong(&named.join(" + ")),
-                style.strong(&hex_prefix(gem)[..8.min(hex_prefix(gem).len())]),
+                style.strong(&gh[..8.min(gh.len())]),
                 knowledge
             );
             match standing {
@@ -367,6 +456,7 @@ fn chem_bench(
             }
         }
         leaf(style, "bench chem", "science scores + dark-7");
+        foot_bench(style, Some("chem"));
     }
 }
 
@@ -376,65 +466,262 @@ fn econ_bench(
     style: &Style,
     _current: u64,
 ) {
-    match words.next().as_deref() {
+    let leaf_w = words.next();
+    if is_back(leaf_w.as_deref()) {
+        bench_index(style);
+        return;
+    }
+    match leaf_w.as_deref() {
         None | Some("help") | Some("?") | Some("status") => {
             banner(style, "BENCH › ECONOMICS — craft trade components");
             let deep = world.deep_rail_status();
             println!(
-                "  Exchange seated={} · Vault={} · Anchor={}",
+                "  Exchange={} · Vault={} · Anchor={}",
                 world.exchange_seated(),
                 world.vault_seated(),
                 deep.anchor_seated
             );
             println!(
-                "  notes open {} · futures {} · shares {} · perps {}",
+                "  notes/fut/share/perp open {}/{}/{}/{}",
                 world.notes().iter().filter(|n| n.open).count(),
                 world.futures().iter().filter(|f| f.open).count(),
                 world.shares().iter().filter(|s| s.open).count(),
                 world.perps().iter().filter(|p| p.open).count(),
             );
             println!();
-            println!("  {}", style.section("CRAFT (then run under TRADE)"));
-            leaf(style, "forge <grade>", "instrument → detection / books");
-            leaf(style, "seat exchange|vault|anchor", "open offices");
-            leaf(style, "note issue · future open · share · perp", "list under MM");
-            leaf(style, "charter · element charter", "route components");
-            leaf(style, "rail promote · stamp mint", "altitude · STAMP unit");
-            println!();
+            leaf(style, "forge · seat exchange|vault|anchor", "open craft doors");
+            leaf(style, "note|future|share|perp issue/open", "list under MM");
+            leaf(style, "charter · element charter · rail promote", "lanes");
+            leaf(style, "stamp mint", "unit of account");
             println!(
                 "  {}",
-                style.hint("TRADE hub runs these: `trade books|fleet|rails|vault|aperture`.")
+                style.hint("Run under TRADE: `trade books|fleet|rails|vault`.")
             );
+            foot_bench(style, Some("econ"));
         }
         Some(other) => {
-            println!(
-                "{} econ leaf {} — forge|note|charter|seat verbs craft the component",
-                style.bad("✗"),
-                other
-            );
+            println!("{} econ leaf {} · `back` → bench", style.bad("✗"), other);
+            foot_bench(style, Some("econ"));
         }
     }
 }
 
+fn research_bench(
+    world: &World,
+    mut words: impl Iterator<Item = String>,
+    style: &Style,
+    current: u64,
+) {
+    let leaf_w = words.next();
+    if is_back(leaf_w.as_deref()) {
+        bench_index(style);
+        return;
+    }
+    banner(style, "BENCH › RESEARCH — tech · forge · practice");
+    let techs = world
+        .committed()
+        .techs
+        .iter()
+        .filter(|(o, _, _, _)| *o == current)
+        .count();
+    let instruments = world
+        .committed()
+        .instruments
+        .iter()
+        .filter(|(o, _, _)| *o == current)
+        .count();
+    let practices = world.committed().practices.len();
+    let wants = world.wants().len();
+    println!(
+        "  tech nodes {} · instruments {} · practices {} · open wants {}",
+        techs, instruments, practices, wants
+    );
+    if wants > 0 {
+        println!(
+            "  {}",
+            style.warn("cognitive want live — novelty can halt crystallization")
+        );
+    }
+    println!();
+    leaf(style, "tech · constellation", "tree / progress (when wired)");
+    leaf(style, "forge <grade>", "instrument — detection + mesh");
+    leaf(style, "practice adopt|release …", "disciplines (tempered)");
+    leaf(style, "corpus …", "proof work / mint path");
+    leaf(style, "elevate · shift gauge", "gauge climb");
+    println!(
+        "  {}",
+        style.hint("Cross-pollination of tech: `bench link` (license / council).")
+    );
+    foot_bench(style, Some("research"));
+    let _ = leaf_w;
+}
+
+fn intel_bench(
+    world: &World,
+    mut words: impl Iterator<Item = String>,
+    style: &Style,
+    current: u64,
+) {
+    let leaf_w = words.next();
+    if is_back(leaf_w.as_deref()) {
+        bench_index(style);
+        return;
+    }
+    banner(style, "BENCH › INTEL — detection · spy · veil");
+    let grade = world.detection_grade();
+    let e = world.espionage_integrity();
+    let inf = world.inf_integrity();
+    println!(
+        "  detection grade {} · instruments {} · spy marks {} · intel stash {}",
+        grade,
+        world.instrument_count(),
+        e.spy_marks,
+        e.intel_count
+    );
+    println!(
+        "  veiled={} · can_probe={} can_exfil={} can_sabotage={}",
+        inf.veiled || e.veiled,
+        e.can_probe,
+        e.can_exfil,
+        e.can_sabotage
+    );
+    let _ = current;
+    println!();
+    leaf(style, "forge <grade>", "raise detection (research path)");
+    leaf(style, "spy status|probe|exfil|sabotage", "espionage deeds");
+    leaf(style, "veil draw|lift · ward elder|lift", "INF OPSEC");
+    leaf(style, "scan <exemplar>", "instrumented read");
+    leaf(style, "suite spy", "UI over same deeds");
+    println!(
+        "  {}",
+        style.hint("Intel feeds dark-7 ENVY on the chem bench — rivalry gravity.")
+    );
+    foot_bench(style, Some("intel"));
+    let _ = leaf_w;
+}
+
+fn link_bench(
+    world: &World,
+    mut words: impl Iterator<Item = String>,
+    style: &Style,
+    current: u64,
+) {
+    let leaf_w = words.next();
+    if is_back(leaf_w.as_deref()) {
+        bench_index(style);
+        return;
+    }
+    banner(style, "BENCH › LINK — cross-pollination");
+    println!(
+        "  {}",
+        style.dim("Difference is fuel of proof (Hail Mary). Links move tech, value, oath.")
+    );
+    let councils = world.councils().len();
+    let crossed = world.committed().crossed;
+    println!(
+        "  councils {} · crossed(union)={} · treaties {}",
+        councils,
+        crossed,
+        world.committed().treaties.len()
+    );
+    let _ = current;
+    println!();
+    println!("  {}", style.section("KNOWLEDGE ACROSS LINES"));
+    leaf(style, "license … to <world>", "tech license leap");
+    leaf(style, "council …", "open co-op council");
+    leaf(style, "absorb …", "reciprocity / overflow");
+    println!();
+    println!("  {}", style.section("VALUE & OATH"));
+    leaf(style, "aperture · element aperture", "cross-world haul (also TRADE)");
+    leaf(style, "treaty trade|defense|peace|war", "pair law");
+    leaf(style, "bond · forward", "standing orders / pacts");
+    println!();
+    println!(
+        "  {}",
+        style.hint("Research forges nodes; LINK is how strangers confirm them.")
+    );
+    foot_bench(style, Some("link"));
+    let _ = leaf_w;
+}
+
+fn doctrine_bench(
+    world: &World,
+    mut words: impl Iterator<Item = String>,
+    style: &Style,
+    _current: u64,
+) {
+    let leaf_w = words.next();
+    if is_back(leaf_w.as_deref()) {
+        bench_index(style);
+        return;
+    }
+    banner(style, "BENCH › DOCTRINE — posture · defense");
+    let p = world.defense_posture();
+    println!(
+        "  primary {} · secondary {} · reoriented={}",
+        p.primary.word(),
+        p.secondary.word(),
+        p.reoriented
+    );
+    println!(
+        "  metabolism={} disposition={} perception={} · {}",
+        p.metabolism, p.disposition, p.perception, p.voice
+    );
+    println!();
+    leaf(style, "posture status|set …", "reorient doctrine (anatomy sealed)");
+    leaf(style, "defend status|escort|risk", "KIN convoy");
+    leaf(style, "suite convoy|cyber", "domain UI");
+    foot_bench(style, Some("doctrine"));
+    let _ = leaf_w;
+}
+
+fn estate_bench(
+    world: &World,
+    mut words: impl Iterator<Item = String>,
+    style: &Style,
+    _current: u64,
+) {
+    let leaf_w = words.next();
+    if is_back(leaf_w.as_deref()) {
+        bench_index(style);
+        return;
+    }
+    banner(style, "BENCH › ESTATE — land · survey · appraisal");
+    let seeded = world.terrain_seed().is_some();
+    println!("  terrain charted={}", seeded);
+    println!();
+    leaf(style, "survey", "chart terrain seed");
+    leaf(style, "estate survey|parcels", "real-estate ladder (35)");
+    leaf(style, "appraise …", "valuation");
+    foot_bench(style, Some("estate"));
+    let _ = leaf_w;
+}
+
 // ── TRADE ────────────────────────────────────────────────────────────
 
-/// `trade [domain]` hub when not in barter form `trade <id> with …`.
+/// `trade [domain]` hub when not in barter form.
 pub fn trade(world: &World, mut words: impl Iterator<Item = String>, style: &Style, current: u64) {
     let domain = words.next();
+    if is_back(domain.as_deref()) {
+        trade_index(style);
+        return;
+    }
     match domain.as_deref() {
         None | Some("help") | Some("?") | Some("menu") | Some("index") => trade_index(style),
         Some("books") | Some("market") | Some("mkt") | Some("instruments") => {
             trade_books(world, style)
         }
-        Some("fleet") | Some("hull") | Some("ships") => trade_fleet(world, style, current),
+        Some("fleet") | Some("hull") | Some("ships") => trade_fleet(world, style),
         Some("rails") | Some("rail") | Some("anchor") => trade_rails(world, style),
         Some("vault") | Some("custody") => trade_vault(world, style, current),
         Some("aperture") | Some("haul") | Some("cross") => trade_aperture(style),
+        Some("diplo") | Some("diplomacy") | Some("treaty") => trade_diplo(world, style),
         Some("desk") => {
             println!(
                 "  {}",
                 style.hint("interactive desk: `desk enter` · panes t|y|r|a|f …")
             );
+            foot_trade(style, None);
         }
         Some("barter") | Some("clear") => {
             println!(
@@ -442,6 +729,7 @@ pub fn trade(world: &World, mut words: impl Iterator<Item = String>, style: &Sty
                 style.dim("↳"),
                 style.strong("trade <my_offer> with <world> <their_offer> deal <n>")
             );
+            foot_trade(style, None);
         }
         Some(other) => {
             println!(
@@ -459,36 +747,31 @@ fn trade_index(style: &Style) {
     banner(style, "TRADE — CIRCULATE / SETTLE");
     println!(
         "  {}",
-        style.dim("Run components the BENCH crafted. Make stays on `bench`.")
+        style.dim("Run components the BENCH crafted. Nested views: `trade` or `back` home.")
     );
     println!();
     println!("  {}", style.section("DOMAINS"));
-    row(style, "trade books", "offers · clears · STAMP instruments · market war");
+    row(style, "trade books", "offers · instruments · market war");
     row(style, "trade fleet", "scrap · hulls · capacity · escort");
-    row(style, "trade rails", "R1–R4 · promote · Anchor import/export");
-    row(style, "trade vault", "custody deposit/withdraw · margin reserve");
-    row(style, "trade aperture", "cross-world haul · element/stamp aperture");
-    row(style, "trade desk", "interactive suite (desk enter)");
+    row(style, "trade rails", "R1–R4 · Anchor");
+    row(style, "trade vault", "custody · margin");
+    row(style, "trade aperture", "cross-world haul");
+    row(style, "trade diplo", "treaties · war wall");
+    row(style, "trade desk", "interactive suite");
     println!();
-    println!("  {}", style.section("BARTER (direct)"));
     leaf(
         style,
         "trade <my_id> with <world> <their_id> deal <n>",
-        "clear crossing",
+        "barter clear",
     );
-    leaf(style, "offer · stamp · element aperture", "post / move value");
-    println!();
-    println!(
-        "  {}",
-        style.hint("Peer hub: `bench` opens make/modify (planetary · build · star · chem · econ).")
-    );
+    leaf(style, "back · bench", "nav");
 }
 
 fn trade_books(world: &World, style: &Style) {
-    banner(style, "TRADE › BOOKS — instruments & market");
+    banner(style, "TRADE › BOOKS");
     let mi = world.market_integrity();
     println!(
-        "  sealed={} · Exchange={} · notes/fut/share/perp open={}/{}/{}/{}",
+        "  sealed={} · Exchange={} · open note/fut/share/perp={}/{}/{}/{}",
         mi.sealed,
         world.exchange_seated(),
         mi.notes_open,
@@ -496,50 +779,38 @@ fn trade_books(world: &World, style: &Style) {
         mi.shares_open,
         mi.perps_open
     );
-    println!(
-        "  clear depth crystal {}/{} · offers {}",
-        mi.crystal_depth,
-        mi.seal_need,
-        world.offers().len()
-    );
-    println!();
-    leaf(style, "offer … · trade <id> with …", "post / clear");
-    leaf(style, "note|future|share|perp …", "instrument lifecycle (MM)");
-    leaf(style, "market status|seal|clear|raid|cascade", "MKT war");
-    leaf(style, "stamp mint|aperture", "unit of account");
-    leaf(style, "suite market", "war UI over same deeds");
+    leaf(style, "offer · note|future|share|perp · market · stamp", "deeds");
+    foot_trade(style, Some("books"));
 }
 
-fn trade_fleet(world: &World, style: &Style, _current: u64) {
-    banner(style, "TRADE › FLEET — capacity in motion");
-    // Idle pool capacity for deal 0 (unassigned free).
+fn trade_fleet(world: &World, style: &Style) {
+    banner(style, "TRADE › FLEET");
     let free = world.free_capacity(0);
     println!(
-        "  hulls {} · free capacity (idle pool) {}",
+        "  hulls {} · free capacity (idle) {}",
         world.hulls().len(),
         amount(&free)
     );
-    leaf(style, "fleet · fleet mint hauler|escort [g] finance", "mint");
-    leaf(style, "fleet assign …", "route assignment");
-    leaf(style, "defend escort|risk", "KIN convoy");
-    leaf(style, "zone … yard · salvage", "bench-built yard feeds fleet");
+    leaf(style, "fleet mint|assign · defend escort", "deeds");
+    foot_trade(style, Some("fleet"));
 }
 
 fn trade_rails(world: &World, style: &Style) {
-    banner(style, "TRADE › RAILS — settlement altitude");
+    banner(style, "TRADE › RAILS");
     let d = world.deep_rail_status();
     println!(
-        "  Anchor seated={} · strand_feat={} · court_feat={}",
-        d.anchor_seated, d.strand_enabled, d.court_enabled
+        "  Anchor={} · strand={} · court={} · element routes {}",
+        d.anchor_seated,
+        d.strand_enabled,
+        d.court_enabled,
+        world.element_routes().len()
     );
-    println!("  element routes: {}", world.element_routes().len());
-    leaf(style, "rail status|promote", "R1→R2; R3/R4 gated");
-    leaf(style, "anchor export-stamp|import-*", "X7 exit");
-    leaf(style, "element charter … [rail]", "lane component (bench econ crafts)");
+    leaf(style, "rail promote · anchor export|import", "deeds");
+    foot_trade(style, Some("rails"));
 }
 
 fn trade_vault(world: &World, style: &Style, current: u64) {
-    banner(style, "TRADE › VAULT — custody & margin");
+    banner(style, "TRADE › VAULT");
     let bal = world.vault_balance_of(current);
     let res = world.vault_reserved(current);
     let free = if bal > res {
@@ -554,19 +825,21 @@ fn trade_vault(world: &World, style: &Style, current: u64) {
         amount(&res),
         amount(&free)
     );
-    leaf(style, "vault deposit|withdraw <n>", "custody move");
-    leaf(style, "seat vault", "open T8 (bench/office)");
-    leaf(style, "note issue …", "margin earmark when vault sits");
+    leaf(style, "vault deposit|withdraw", "deeds");
+    foot_trade(style, Some("vault"));
 }
 
 fn trade_aperture(style: &Style) {
-    banner(style, "TRADE › APERTURE — cross-world legs");
-    leaf(style, "aperture …", "resource haul + melt");
-    leaf(style, "element aperture …", "open-matter haul");
-    leaf(style, "stamp aperture …", "STAMP cross-book");
-    leaf(style, "treaty · war wall", "diplo gates the door");
-    println!(
-        "  {}",
-        style.hint("Melt from D_eff; hull capacity required when melt > 0.")
-    );
+    banner(style, "TRADE › APERTURE");
+    leaf(style, "aperture · element aperture · stamp aperture", "haul");
+    leaf(style, "treaty · war wall", "diplo gates");
+    foot_trade(style, Some("aperture"));
+}
+
+fn trade_diplo(world: &World, style: &Style) {
+    banner(style, "TRADE › DIPLO");
+    println!("  treaties standing: {}", world.committed().treaties.len());
+    leaf(style, "treaty trade|defense|peace|war with …", "seal");
+    leaf(style, "treaties · renounce", "list / drop leg");
+    foot_trade(style, Some("diplo"));
 }
