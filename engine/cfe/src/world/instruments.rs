@@ -151,6 +151,8 @@ impl World {
                 resume_at: self.market_resume_at().unwrap_or(0),
             });
         }
+        // O6.3 — only seated Exchange MM may list instruments.
+        self.require_exchange_mm()?;
         if !self.notes_listable() {
             return Err(ActionRefused::InstrumentBookClosed);
         }
@@ -164,15 +166,8 @@ impl World {
         if coll < floor {
             return Err(ActionRefused::InstrumentUndercollateralized);
         }
-        let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
-        let have = held.stamp_amount();
-        if have < coll {
-            return Err(ActionRefused::CannotAffordStamp {
-                need: Box::new(coll),
-                have: Box::new(have),
-            });
-        }
-        held.bank_stamp(-coll.clone());
+        // O6.5: with Vault seated, coll is earmarked in custody (no free-bank debit).
+        self.lock_instrument_stamp(orb, &coll)?;
         let note_id = self
             .notes
             .iter()
@@ -231,16 +226,46 @@ impl World {
             });
         }
         let orb = note.orb_id;
-        let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
-        let free = held.stamp_amount();
+        let vaulted = self.vault_seated();
+        let free = peek(&self.orbs, orb)
+            .map(|h| h.stamp_amount())
+            .ok_or(ActionRefused::NoSuchOrb { orb })?;
         let (paid, seized) = if free >= note.notional {
+            let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
             held.bank_stamp(-note.notional.clone());
-            // release collateral back
-            held.bank_stamp(note.collateral.clone());
+            // release collateral: free-bank path only (vault earmark ends on close).
+            if !vaulted {
+                held.bank_stamp(note.collateral.clone());
+            }
             (note.notional.clone(), ratio(0, 1))
+        } else if vaulted {
+            // Seizure from vault custody into free bank, then pay.
+            let seize = note.collateral.clone();
+            let vault_have = self.vault_balance_of(orb);
+            let take = if vault_have < seize {
+                vault_have.clone()
+            } else {
+                seize.clone()
+            };
+            if take > ratio(0, 1) {
+                let next = vault_have - take.clone();
+                self.set_vault_balance(orb, next);
+                let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
+                held.bank_stamp(take.clone());
+                let pay = if take < note.notional {
+                    take.clone()
+                } else {
+                    note.notional.clone()
+                };
+                held.bank_stamp(-pay.clone());
+                (pay, take)
+            } else {
+                (ratio(0, 1), ratio(0, 1))
+            }
         } else {
             // seize collateral toward face; remainder unpaid (integrity later)
             let seize = note.collateral.clone();
+            let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
             // collateral already locked (out of bank); credit holder via free stamp path:
             // release seize into bank then treat as payment
             held.bank_stamp(seize.clone());
@@ -303,6 +328,7 @@ impl World {
                 resume_at: self.market_resume_at().unwrap_or(0),
             });
         }
+        self.require_exchange_mm()?;
         if !self.futures_listable() {
             return Err(ActionRefused::InstrumentBookClosed);
         }
@@ -317,15 +343,7 @@ impl World {
         }
         // Total margin lock: 1+1 sides.
         let lock = m.clone() + m.clone();
-        let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
-        let have = held.stamp_amount();
-        if have < lock {
-            return Err(ActionRefused::CannotAffordStamp {
-                need: Box::new(lock),
-                have: Box::new(have),
-            });
-        }
-        held.bank_stamp(-lock);
+        self.lock_instrument_stamp(orb, &lock)?;
         let fut_id = self
             .futures
             .iter()
@@ -392,10 +410,14 @@ impl World {
         let long_pnl = fut.notional.clone() * diff.clone();
         let short_pnl = ratio(0, 1) - long_pnl.clone();
         let orb = fut.orb_id;
+        // Close first so vault_reserved drops; free-bank unlock only if not vaulted.
+        self.futures[at].open = false;
+        let vaulted = self.vault_seated();
         let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
-        // Release both margins (1+1), then apply cash PnL from pool.
-        let unlock = fut.margin.clone() + fut.margin.clone();
-        held.bank_stamp(unlock);
+        if !vaulted {
+            let unlock = fut.margin.clone() + fut.margin.clone();
+            held.bank_stamp(unlock);
+        }
         // Apply long PnL (may go negative — clamp by available stamp)
         if long_pnl > ratio(0, 1) {
             held.bank_stamp(long_pnl.clone());
@@ -405,7 +427,6 @@ impl World {
             let take = if have < loss { have } else { loss };
             held.bank_stamp(-take);
         }
-        self.futures[at].open = false;
         self.close(
             ClosureEvent::FutureSettled {
                 fut_id,
@@ -484,6 +505,7 @@ impl World {
                 resume_at: self.market_resume_at().unwrap_or(0),
             });
         }
+        self.require_exchange_mm()?;
         if !self.shares_listable() {
             return Err(ActionRefused::SharesBookClosed);
         }
@@ -695,6 +717,7 @@ impl World {
                 resume_at: self.market_resume_at().unwrap_or(0),
             });
         }
+        self.require_exchange_mm()?;
         if !self.perps_listable() {
             return Err(ActionRefused::PerpsBookClosed);
         }
@@ -708,15 +731,7 @@ impl World {
         }
         let entry = self.last_clear_of(resource);
         let lock = m.clone() + m.clone();
-        let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
-        let have = held.stamp_amount();
-        if have < lock {
-            return Err(ActionRefused::CannotAffordStamp {
-                need: Box::new(lock),
-                have: Box::new(have),
-            });
-        }
-        held.bank_stamp(-lock);
+        self.lock_instrument_stamp(orb, &lock)?;
         let perp_id = self
             .perps
             .iter()
@@ -824,9 +839,13 @@ impl World {
         let mark = self.last_clear_of(perp.resource);
         let long_pnl = perp.notional.clone() * (mark.clone() - perp.entry.clone());
         let orb = perp.orb_id;
+        self.perps[at].open = false;
+        let vaulted = self.vault_seated();
         let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
-        let unlock = perp.margin.clone() + perp.margin.clone();
-        held.bank_stamp(unlock);
+        if !vaulted {
+            let unlock = perp.margin.clone() + perp.margin.clone();
+            held.bank_stamp(unlock);
+        }
         if long_pnl > ratio(0, 1) {
             held.bank_stamp(long_pnl.clone());
         } else if long_pnl < ratio(0, 1) {
@@ -835,7 +854,6 @@ impl World {
             let take = if have < loss { have } else { loss };
             held.bank_stamp(-take);
         }
-        self.perps[at].open = false;
         self.close(
             ClosureEvent::PerpClosed {
                 perp_id,
@@ -846,6 +864,44 @@ impl World {
             },
             actor,
         );
+        Ok(())
+    }
+
+    /// O6.5 — lock coll/margin: free-bank debit, or Vault free earmark.
+    fn lock_instrument_stamp(
+        &mut self,
+        orb: u64,
+        amount: &Ratio,
+    ) -> Result<(), ActionRefused> {
+        if self.vault_seated() {
+            let have = self.vault_balance_of(orb);
+            let reserved = self.vault_reserved(orb);
+            let free = if have > reserved {
+                have - reserved
+            } else {
+                ratio(0, 1)
+            };
+            if free < *amount {
+                return Err(ActionRefused::VaultMarginHeld {
+                    free: Box::new(free),
+                    need: Box::new(amount.clone()),
+                });
+            }
+            // Earmark only — STAMP stays in vault_stamp; reserved rises after open.
+            if peek(&self.orbs, orb).is_none() {
+                return Err(ActionRefused::NoSuchOrb { orb });
+            }
+            return Ok(());
+        }
+        let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
+        let have = held.stamp_amount();
+        if have < *amount {
+            return Err(ActionRefused::CannotAffordStamp {
+                need: Box::new(amount.clone()),
+                have: Box::new(have),
+            });
+        }
+        held.bank_stamp(-amount.clone());
         Ok(())
     }
 

@@ -279,6 +279,16 @@ pub enum ActionRefused {
     AnchorRequired { rail: u8 },
     /// X7 — Anchor rejected proof (bad strand/isthmus/datum frame).
     AnchorProofInvalid { reason: u8 },
+    /// O6.3 — T6 Exchange market-maker must sit before instruments list.
+    ExchangeRequired,
+    /// O6.4 — T7 Assay office must sit before consilience challenge.
+    AssayRequired,
+    /// O6.5 — T8 Vault office must sit before custody deposit/withdraw.
+    VaultRequired,
+    /// O6.5 — vault custody short for the asked withdrawal.
+    VaultShort { need: Box<Ratio>, have: Box<Ratio> },
+    /// O6.5 — free vault (after margin reserve) short for withdraw/lock.
+    VaultMarginHeld { free: Box<Ratio>, need: Box<Ratio> },
     /// THERMAL-1 — siting an orbit needs a commissioned sun first.
     NoStarCommissioned,
     /// THERMAL-1 — the orb is already sited; an orbit does not move.

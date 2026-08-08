@@ -170,7 +170,11 @@ use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 ///
 /// **0.34.0 — X7 Anchor adapters.** Tags 149–151 StrandExported /
 /// AnchorImported / AnchorImportRefused; stamp burn/credit on export/import.
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 34, patch: 0 };
+///
+/// **0.35.0 — Wave-6 offices as play.** Tags 152–155 VaultDeposited /
+/// VaultWithdrawn / AssayConsilience / AssaySlashed; SCHEMA_V14 vault_stamp;
+/// O6.3 Exchange MM gate on instrument issue.
+pub const KERNEL_VERSION: Version = Version { major: 0, minor: 35, patch: 0 };
 
 /// The gate's version, as it rides the wire.
 ///
@@ -542,6 +546,28 @@ fn stamp_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
             amount.clone()
         }
         ClosureEvent::AnchorImportRefused { .. } => ratio(0, 1),
+        // O6.5: vault custody moves free STAMP off/on the free bank.
+        ClosureEvent::VaultDeposited { amount, .. } => {
+            if *amount < ratio(0, 1) {
+                return Err(Refused::ElementNotPositive {
+                    element: [0u8; 32],
+                    amount: Box::new(amount.clone()),
+                });
+            }
+            -amount.clone()
+        }
+        ClosureEvent::VaultWithdrawn { amount, .. } => {
+            if *amount < ratio(0, 1) {
+                return Err(Refused::ElementNotPositive {
+                    element: [0u8; 32],
+                    amount: Box::new(amount.clone()),
+                });
+            }
+            amount.clone()
+        }
+        ClosureEvent::AssayConsilience { .. } | ClosureEvent::AssaySlashed { .. } => {
+            ratio(0, 1)
+        }
         _ => ratio(0, 1),
     };
     let before = prior
@@ -1277,6 +1303,8 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::SpyProbed { .. } | E::TechExfiltrated { .. } | E::InstrumentSabotaged { .. }
         | E::RailPromoted { .. }
         | E::StrandExported { .. } | E::AnchorImported { .. } | E::AnchorImportRefused { .. }
+        | E::VaultDeposited { .. } | E::VaultWithdrawn { .. }
+        | E::AssayConsilience { .. } | E::AssaySlashed { .. }
         | E::GenesisSealed { .. } | E::ProspectStruck { .. } | E::LineSucceeded { .. }
         | E::TechLicensed { .. } | E::InstrumentForged { .. } | E::RouteChartered { .. }
         | E::OfferPosted { .. } | E::BondSealed { .. }
@@ -1526,7 +1554,14 @@ fn admitted_deltas(
         | E::RailPromoted { .. }
         | E::StrandExported { .. }
         | E::AnchorImported { .. }
-        | E::AnchorImportRefused { .. } => Vec::new(),
+        | E::AnchorImportRefused { .. }
+        | E::VaultDeposited { .. }
+        | E::VaultWithdrawn { .. }
+        | E::AssayConsilience { .. } => Vec::new(),
+        E::AssaySlashed { slash, .. } => {
+            non_negative(Resource::Crystal, slash)?;
+            vec![(Resource::Crystal, -slash.clone())]
+        }
         // — mints (the sign lives at I4, order preserved for the
         //   landed pins) —
         E::YieldCollected { resource, amount, .. } => vec![(*resource, amount.clone())],
@@ -2212,6 +2247,8 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::SpyProbed { .. } | E::TechExfiltrated { .. } | E::InstrumentSabotaged { .. }
         | E::RailPromoted { .. }
         | E::StrandExported { .. } | E::AnchorImported { .. } | E::AnchorImportRefused { .. }
+        | E::VaultDeposited { .. } | E::VaultWithdrawn { .. }
+        | E::AssayConsilience { .. } | E::AssaySlashed { .. }
         // #42: a treaty is WORLD-layer. It is keyed on the pair, and
         // the pair is two worlds — not a line's identity (a pact
         // outlives whoever signed it) and not one place.
@@ -2345,6 +2382,8 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::SpyProbed { .. } | E::TechExfiltrated { .. } | E::InstrumentSabotaged { .. }
         | E::RailPromoted { .. }
         | E::StrandExported { .. } | E::AnchorImported { .. } | E::AnchorImportRefused { .. }
+        | E::VaultDeposited { .. } | E::VaultWithdrawn { .. }
+        | E::AssayConsilience { .. } | E::AssaySlashed { .. }
         // U1: the discovery mint settles banked value against verified
         // work — Collect, like the yield it banks beside. Ratified by
         // the U1 witnesses as it enters covered().

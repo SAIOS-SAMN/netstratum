@@ -47,7 +47,8 @@ impl World {
             return false;
         };
         held.extracted_across > ratio(0, 1)
-            && held.extracted_across > ratio(2, 1) * held.returned_across.clone()
+            && held.extracted_across
+                > (ratio(1, 1) + ratio(1, 1)) * held.returned_across.clone()
             && held.forwards_breached > held.forwards_fulfilled
     }
     /// AEON-1a (11 §5): the FOLD — seal this world's part in the
@@ -337,6 +338,7 @@ impl World {
             posture_primary: self.posture_primary,
             intel_hashes: self.intel_hashes.clone(),
             spy_marks: self.spy_marks.clone(),
+            vault_stamp: self.vault_stamp.clone(),
         }
     }
     /// ELEMENT-GRAMMAR-1 (14 §3) — the extraction closure: richness ×

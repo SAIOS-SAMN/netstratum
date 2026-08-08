@@ -209,6 +209,8 @@ pub struct Committed {
     pub intel_hashes: Vec<[u8; 32]>,
     /// P5-F: probe depth marks per orb (scout residual).
     pub spy_marks: Vec<(u64, u8)>,
+    /// O6.5: STAMP held in Vault custody per orb (not free bank).
+    pub vault_stamp: Vec<(u64, Ratio)>,
 }
 
 /// G1 (04 §1): a civilization's sealed axes, as the world holds them.
@@ -320,6 +322,8 @@ pub struct World {
     pub(super) posture_primary: Option<u8>,
     pub(super) intel_hashes: Vec<[u8; 32]>,
     pub(super) spy_marks: Vec<(u64, u8)>,
+    /// O6.5: Vault custody STAMP (replay of deposit/withdraw).
+    pub(super) vault_stamp: Vec<(u64, Ratio)>,
 }
 
 /// PLANNER-1: what a licensed leap carries — the condition and name

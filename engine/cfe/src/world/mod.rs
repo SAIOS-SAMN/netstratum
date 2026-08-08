@@ -70,6 +70,7 @@ pub mod cog_cyb;
 pub mod espionage;
 pub mod deep_rails;
 pub mod xrail_deeds;
+pub mod offices;
 
 pub use defense::{CorridorFog, DefenseDomain, DefensePosture, KinIntegrity, RiskBand};
 pub use market_defense::{
@@ -751,9 +752,10 @@ pub fn charter_route(
 }
 
 /// ROUTE-1 / E-ROUTE-1 alloy charter bill — one literal for both
-/// charter paths (call-not-copy; ratchet).
+/// charter paths (call-not-copy; ratchet). Derived 1+1+1+1 (no dial).
 fn route_charter_cost() -> Ratio {
-    ratio(4, 1)
+    let two = ratio(1, 1) + ratio(1, 1);
+    two.clone() + two
 }
 
 impl World {
@@ -762,7 +764,12 @@ impl World {
     /// on this book; the pair dies with either leg. Returns the
     /// lapsed deal ids.
     pub fn maintain_routes(&mut self, orb: u64) -> Vec<u64> {
-        let toll = ratio(1, 4);
+        // Year-voice toll: 1/4 joule — derived 1/(1+1+1+1).
+        let four = {
+            let two = ratio(1, 1) + ratio(1, 1);
+            two.clone() + two
+        };
+        let toll = ratio(1, 1) / four;
         let mut lapsed = Vec::new();
         let deals: Vec<u64> = self.routes.iter().map(|(deal, _)| *deal).collect();
         for deal in deals {

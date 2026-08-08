@@ -343,7 +343,11 @@
 //!    149  ClosureEvent::StrandExported (X7 — STAMP/claim leaves to strand packet.)
 //!    150  ClosureEvent::AnchorImported (X7 — Anchor credits STAMP on valid proof.)
 //!    151  ClosureEvent::AnchorImportRefused (X7 — bad proof residual.)
-//!    Phase-5 claim ledger: next free **152**.
+//!    152  ClosureEvent::VaultDeposited (O6.5 — STAMP into Vault custody.)
+//!    153  ClosureEvent::VaultWithdrawn (O6.5 — STAMP out of Vault custody.)
+//!    154  ClosureEvent::AssayConsilience (O6.4 — Assay office re-proves vein.)
+//!    155  ClosureEvent::AssaySlashed (O6.4 — false richness residual.)
+//!    Phase-5 claim ledger: next free **156**. Wave-6 offices-as-play.
 //!         Orb TLV: 73 STAMP, 74 scrap. ZoneKind::ShipYard = 10.
 //!         (Historic free tags below top: 14, 15, 56, 57, 58, 64, 66,
 //!         83, 84, 87; 9 and 51 reserved; 65 retired forever.)
@@ -2099,7 +2103,10 @@ impl ZoneKind {
     pub fn raze_refund(&self) -> Vec<(Resource, Ratio)> {
         self.cost()
             .into_iter()
-            .map(|(resource, cost)| (resource, cost / ratio(2, 1)))
+            .map(|(resource, cost)| {
+                let two = ratio(1, 1) + ratio(1, 1);
+                (resource, cost / two)
+            })
             .collect()
     }
 }
@@ -2814,6 +2821,23 @@ pub enum ClosureEvent {
     },
     /// X7 (tag 151) — Anchor refused a proof (typed residual).
     AnchorImportRefused { orb_id: u64, reason: u8 },
+    /// O6.5 (tag 152) — STAMP deposited into Vault custody.
+    VaultDeposited { orb_id: u64, amount: Ratio },
+    /// O6.5 (tag 153) — STAMP withdrawn from Vault (not margin-held).
+    VaultWithdrawn { orb_id: u64, amount: Ratio },
+    /// O6.4 (tag 154) — Assay office consilience re-prove of a vein.
+    AssayConsilience {
+        orb_id: u64,
+        element: [u8; 32],
+        matched: bool,
+    },
+    /// O6.4 (tag 155) — false assay residual: richness corrected + crystal slash.
+    AssaySlashed {
+        orb_id: u64,
+        element: [u8; 32],
+        slash: Ratio,
+        richness_after: Ratio,
+    },
     /// N4 (NS-2 §1.5) — the scanner's power draw, the ONE chronicle
     /// event of RQP: crystals left the probing orb's bank to hold the
     /// lens open. Deliberately blind to what was asked and what was
@@ -3880,6 +3904,38 @@ impl ClosureEvent {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.push(*reason);
                 tlv::put(151, &value, &mut out);
+            }
+            Self::VaultDeposited { orb_id, amount } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                ratio::encode(amount, &mut value);
+                tlv::put(152, &value, &mut out);
+            }
+            Self::VaultWithdrawn { orb_id, amount } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                ratio::encode(amount, &mut value);
+                tlv::put(153, &value, &mut out);
+            }
+            Self::AssayConsilience {
+                orb_id,
+                element,
+                matched,
+            } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(element);
+                value.push(u8::from(*matched));
+                tlv::put(154, &value, &mut out);
+            }
+            Self::AssaySlashed {
+                orb_id,
+                element,
+                slash,
+                richness_after,
+            } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(element);
+                ratio::encode(slash, &mut value);
+                ratio::encode(richness_after, &mut value);
+                tlv::put(155, &value, &mut out);
             }
             Self::CrystalDrawn { orb_id, amount } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
@@ -5018,6 +5074,38 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let reason = *value.get(8)?;
                 Some(Self::AnchorImportRefused { orb_id, reason })
+            }
+            152 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let (amount, _) = ratio::decode(value.get(8..)?)?;
+                Some(Self::VaultDeposited { orb_id, amount })
+            }
+            153 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let (amount, _) = ratio::decode(value.get(8..)?)?;
+                Some(Self::VaultWithdrawn { orb_id, amount })
+            }
+            154 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
+                let matched = *value.get(40)? != 0;
+                Some(Self::AssayConsilience {
+                    orb_id,
+                    element,
+                    matched,
+                })
+            }
+            155 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
+                let (slash, u1) = ratio::decode(value.get(40..)?)?;
+                let (richness_after, _) = ratio::decode(value.get(40 + u1..)?)?;
+                Some(Self::AssaySlashed {
+                    orb_id,
+                    element,
+                    slash,
+                    richness_after,
+                })
             }
             55 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

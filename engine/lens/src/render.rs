@@ -1097,6 +1097,38 @@ pub fn render_receipt(receipt: &Receipt) -> String {
         E::AnchorImportRefused { reason, .. } => {
             ("anchor_refuse", format!("import refused reason {reason}"))
         }
+        E::VaultDeposited { orb_id, amount } => (
+            "vault_deposited",
+            format!("{} STAMP into Vault custody on orb {orb_id}", ratio_str(amount)),
+        ),
+        E::VaultWithdrawn { orb_id, amount } => (
+            "vault_withdrawn",
+            format!("{} STAMP out of Vault on orb {orb_id}", ratio_str(amount)),
+        ),
+        E::AssayConsilience {
+            orb_id,
+            matched,
+            ..
+        } => (
+            "assay_consilience",
+            format!(
+                "Assay re-prove on orb {orb_id} — {}",
+                if *matched { "MATCH" } else { "MISMATCH" }
+            ),
+        ),
+        E::AssaySlashed {
+            orb_id,
+            slash,
+            richness_after,
+            ..
+        } => (
+            "assay_slashed",
+            format!(
+                "false assay on orb {orb_id}: slash {} crystal · richness now {}",
+                ratio_str(slash),
+                ratio_str(richness_after)
+            ),
+        ),
         E::ApertureSent { deal, from_orb, resource, amount } => (
             "aperture_sent",
             format!(

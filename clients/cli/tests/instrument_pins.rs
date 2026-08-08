@@ -1,6 +1,6 @@
 //! PHASE-4 NOTE-1 / FUT-1 pins (32 / TASKS_TRADE_FLEET_DESK P4).
 
-use cfe::dop::{ClosureEvent, Positive, Resource};
+use cfe::dop::{ClosureEvent, Name, Positive, Resource, Station};
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::{
     replay, Committed, MintWarrant, World, CLEAR_SEAL_DEPTH, FIRST_ORB, SOVEREIGN,
@@ -28,6 +28,9 @@ impl MintWarrant for TestWarrant {
 fn stamp_world() -> World {
     let mut w = World::new();
     w.found("bourse").expect("found");
+    // O6.3 — Exchange MM must sit before instruments list.
+    let line = Name::new("mm").expect("name");
+    w.seat_station(line, Station::Exchange).expect("exchange");
     // Mint crystal then convert half to STAMP.
     let work = vec![8u8; 32];
     w.mint_discovery_as(
@@ -123,6 +126,37 @@ fn two_books_differ_by_evidence() {
     assert!(rich.notes_listable());
     // Founding iron alone would open futures; STAMP path also counts.
     assert!(rich.futures_listable() || rich.notes_listable());
+}
+
+#[test]
+fn o6_3_issue_refuses_without_exchange() {
+    let mut w = World::new();
+    w.found("no-mm").expect("found");
+    let work = vec![8u8; 32];
+    w.mint_discovery_as(
+        SOVEREIGN,
+        FIRST_ORB,
+        Resource::Crystal,
+        cfe::dop::NonNegative::new(ratio(8, 1)).expect("nn"),
+        work,
+        &TestWarrant,
+    )
+    .expect("mint");
+    let convert = w.orb().unwrap().banked_amount(Resource::Crystal)
+        / (ratio(1, 1) + ratio(1, 1));
+    cfe::world::mint_stamp_from_crystal(
+        &mut w,
+        FIRST_ORB,
+        Positive::new(convert).expect("p"),
+    )
+    .expect("stamp");
+    assert!(w.notes_listable(), "evidence still opens the book view");
+    let face = Positive::new(ratio(2, 1)).expect("face");
+    let coll = Positive::new(ratio(1, 1)).expect("coll");
+    assert!(matches!(
+        w.issue_note(FIRST_ORB, SOVEREIGN, face, coll, 4),
+        Err(cfe::world::ActionRefused::ExchangeRequired)
+    ));
 }
 
 #[test]

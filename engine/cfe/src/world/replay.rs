@@ -54,6 +54,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut posture_primary: Option<u8> = None;
     let mut intel_hashes: Vec<[u8; 32]> = Vec::new();
     let mut spy_marks: Vec<(u64, u8)> = Vec::new();
+    let mut vault_stamp: Vec<(u64, Ratio)> = Vec::new();
     for receipt in chronicle.receipts() {
         match &receipt.event {
             // BOOK-1 (19_LENS §16) — the open registry rebuilds from
@@ -979,8 +980,14 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 collateral,
                 maturity,
             } => {
-                if let Some(held) = peel(&mut orbs, *orb_id) {
-                    held.bank_stamp(-collateral.clone());
+                // O6.5: Vault-seated coll is earmarked in vault_stamp, not free bank.
+                let vaulted = stations
+                    .iter()
+                    .any(|(_, s)| *s == crate::dop::Station::Vault as u8);
+                if !vaulted {
+                    if let Some(held) = peel(&mut orbs, *orb_id) {
+                        held.bank_stamp(-collateral.clone());
+                    }
                 }
                 notes.push(crate::dop::MarketNote {
                     note_id: *note_id,
@@ -1002,7 +1009,33 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 if let Some(n) = notes.iter_mut().find(|n| n.note_id == *note_id) {
                     let coll = n.collateral.clone();
                     n.open = false;
-                    if let Some(held) = peel(&mut orbs, *orb_id) {
+                    let vaulted = stations
+                        .iter()
+                        .any(|(_, s)| *s == crate::dop::Station::Vault as u8);
+                    if vaulted {
+                        if *seized > ratio(0, 1) {
+                            let cur = vault_stamp
+                                .iter()
+                                .find(|(o, _)| *o == *orb_id)
+                                .map(|(_, a)| a.clone())
+                                .unwrap_or_else(|| ratio(0, 1));
+                            vault_stamp.retain(|(o, _)| *o != *orb_id);
+                            let next = if cur > *seized {
+                                cur - seized.clone()
+                            } else {
+                                ratio(0, 1)
+                            };
+                            if next > ratio(0, 1) {
+                                vault_stamp.push((*orb_id, next));
+                            }
+                            if let Some(held) = peel(&mut orbs, *orb_id) {
+                                held.bank_stamp(seized.clone());
+                                held.bank_stamp(-paid.clone());
+                            }
+                        } else if let Some(held) = peel(&mut orbs, *orb_id) {
+                            held.bank_stamp(-paid.clone());
+                        }
+                    } else if let Some(held) = peel(&mut orbs, *orb_id) {
                         // Mirror live path: full pay releases collateral; seize path credits seize then pays.
                         if *seized == ratio(0, 1) {
                             held.bank_stamp(-paid.clone());
@@ -1026,8 +1059,13 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 expiry,
             } => {
                 let lock = margin.clone() + margin.clone();
-                if let Some(held) = peel(&mut orbs, *orb_id) {
-                    held.bank_stamp(-lock);
+                let vaulted = stations
+                    .iter()
+                    .any(|(_, s)| *s == crate::dop::Station::Vault as u8);
+                if !vaulted {
+                    if let Some(held) = peel(&mut orbs, *orb_id) {
+                        held.bank_stamp(-lock);
+                    }
                 }
                 futures.push(crate::dop::MarketFuture {
                     fut_id: *fut_id,
@@ -1051,9 +1089,14 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             } => {
                 if let Some(f) = futures.iter_mut().find(|f| f.fut_id == *fut_id) {
                     f.open = false;
+                    let vaulted = stations
+                        .iter()
+                        .any(|(_, s)| *s == crate::dop::Station::Vault as u8);
                     if let Some(held) = peel(&mut orbs, *orb_id) {
-                        let unlock = f.margin.clone() + f.margin.clone();
-                        held.bank_stamp(unlock);
+                        if !vaulted {
+                            let unlock = f.margin.clone() + f.margin.clone();
+                            held.bank_stamp(unlock);
+                        }
                         if *long_pnl > ratio(0, 1) {
                             held.bank_stamp(long_pnl.clone());
                         } else if *long_pnl < ratio(0, 1) {
@@ -1147,8 +1190,13 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 margin,
             } => {
                 let lock = margin.clone() + margin.clone();
-                if let Some(held) = peel(&mut orbs, *orb_id) {
-                    held.bank_stamp(-lock);
+                let vaulted = stations
+                    .iter()
+                    .any(|(_, s)| *s == crate::dop::Station::Vault as u8);
+                if !vaulted {
+                    if let Some(held) = peel(&mut orbs, *orb_id) {
+                        held.bank_stamp(-lock);
+                    }
                 }
                 perps.push(crate::dop::MarketPerp {
                     perp_id: *perp_id,
@@ -1172,9 +1220,14 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             } => {
                 if let Some(p) = perps.iter_mut().find(|p| p.perp_id == *perp_id) {
                     p.open = false;
+                    let vaulted = stations
+                        .iter()
+                        .any(|(_, s)| *s == crate::dop::Station::Vault as u8);
                     if let Some(held) = peel(&mut orbs, *orb_id) {
-                        let unlock = p.margin.clone() + p.margin.clone();
-                        held.bank_stamp(unlock);
+                        if !vaulted {
+                            let unlock = p.margin.clone() + p.margin.clone();
+                            held.bank_stamp(unlock);
+                        }
                         if *long_pnl > ratio(0, 1) {
                             held.bank_stamp(long_pnl.clone());
                         } else if *long_pnl < ratio(0, 1) {
@@ -1353,6 +1406,57 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 }
             }
             ClosureEvent::AnchorImportRefused { .. } => {}
+            ClosureEvent::VaultDeposited { orb_id, amount } => {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank_stamp(-amount.clone());
+                }
+                let cur = vault_stamp
+                    .iter()
+                    .find(|(o, _)| *o == *orb_id)
+                    .map(|(_, a)| a.clone())
+                    .unwrap_or_else(|| ratio(0, 1));
+                vault_stamp.retain(|(o, _)| *o != *orb_id);
+                let next = cur + amount.clone();
+                if next > ratio(0, 1) {
+                    vault_stamp.push((*orb_id, next));
+                }
+            }
+            ClosureEvent::VaultWithdrawn { orb_id, amount } => {
+                let cur = vault_stamp
+                    .iter()
+                    .find(|(o, _)| *o == *orb_id)
+                    .map(|(_, a)| a.clone())
+                    .unwrap_or_else(|| ratio(0, 1));
+                vault_stamp.retain(|(o, _)| *o != *orb_id);
+                let next = if cur > *amount {
+                    cur - amount.clone()
+                } else {
+                    ratio(0, 1)
+                };
+                if next > ratio(0, 1) {
+                    vault_stamp.push((*orb_id, next));
+                }
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank_stamp(amount.clone());
+                }
+            }
+            ClosureEvent::AssayConsilience { .. } => {}
+            ClosureEvent::AssaySlashed {
+                orb_id,
+                element,
+                slash,
+                richness_after,
+            } => {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank(crate::dop::Resource::Crystal, -slash.clone());
+                }
+                if let Some(v) = prospects
+                    .iter_mut()
+                    .find(|p| p.orb == *orb_id && p.element == *element)
+                {
+                    v.richness = richness_after.clone();
+                }
+            }
         }
     }
     Committed {
@@ -1361,6 +1465,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
         prospects, warded, veiled, taxon, stations, hulls, notes, futures, last_clears, shares,
         perps, clear_depths, market_sealed_until, cascade_pressures, tamper_pressures,
         posture_disposition, posture_perception, posture_primary, intel_hashes, spy_marks,
+        vault_stamp,
     }
 }
 

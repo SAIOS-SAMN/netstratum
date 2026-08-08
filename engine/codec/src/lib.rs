@@ -91,6 +91,9 @@ pub const SCHEMA_V12: u8 = 12;
 /// **SCHEMA v13 — P5-F intel stash + spy marks.**
 pub const SCHEMA_V13: u8 = 13;
 
+/// **SCHEMA v14 — O6.5 vault custody STAMP per orb.**
+pub const SCHEMA_V14: u8 = 14;
+
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
 }
@@ -111,7 +114,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V13];
+    let mut out = vec![SCHEMA_V14];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -446,6 +449,12 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         put_u64(&mut out, *orb);
         out.push(*d);
     }
+    // SCHEMA v14 — vault custody STAMP.
+    put_u32(&mut out, committed.vault_stamp.len() as u32);
+    for (orb, amt) in &committed.vault_stamp {
+        put_u64(&mut out, *orb);
+        ratio::encode(amt, &mut out);
+    }
     out
 }
 
@@ -528,6 +537,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         && schema != SCHEMA_V11
         && schema != SCHEMA_V12
         && schema != SCHEMA_V13
+        && schema != SCHEMA_V14
     {
         return None;
     }
@@ -973,6 +983,15 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         }
     }
 
+    let mut vault_stamp = Vec::new();
+    if schema >= SCHEMA_V14 {
+        for _ in 0..take.u32()? {
+            let orb = take.u64()?;
+            let amt = take.ratio()?;
+            vault_stamp.push((orb, amt));
+        }
+    }
+
     if !take.done() {
         return None;
     }
@@ -1017,5 +1036,6 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         posture_primary,
         intel_hashes,
         spy_marks,
+        vault_stamp,
     })
 }

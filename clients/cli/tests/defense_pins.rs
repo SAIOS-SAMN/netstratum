@@ -383,6 +383,12 @@ fn stamp_for_market() -> World {
     }
     let mut w = World::new();
     w.found("mkt-home").expect("found");
+    // O6.3 — Exchange MM sits for instrument issue paths.
+    w.seat_station(
+        cfe::dop::Name::new("mm").expect("name"),
+        cfe::dop::Station::Exchange,
+    )
+    .expect("exchange");
     let work = vec![8u8; 32];
     w.mint_discovery_as(
         SOVEREIGN,

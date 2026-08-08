@@ -269,10 +269,12 @@ fn colony_help(style: Style) {
     row(style, "rings / sky", "star field · core · orbit period/slot");
     row(style, "thermal · map · status", "readings + thermal balance");
     row(style, "estate survey · parcels · appraise …", "real estate ladder (35)");
-    row(style, "note list|issue|redeem", "NOTE-1 STAMP debt (Phase 4)");
-    row(style, "future list|mark|open|settle", "FUT-1 cargo×STAMP");
-    row(style, "share list|issue|dividend|transfer", "SHARE-1 equity stream");
-    row(style, "perp list|open|fund|close|liq", "PERP-1 last-clear index");
+    row(style, "note list|issue|redeem", "NOTE-1 STAMP debt (needs T6 Exchange)");
+    row(style, "future list|mark|open|settle", "FUT-1 cargo×STAMP (Exchange MM)");
+    row(style, "share list|issue|dividend|transfer", "SHARE-1 equity stream (Exchange MM)");
+    row(style, "perp list|open|fund|close|liq", "PERP-1 last-clear index (Exchange MM)");
+    row(style, "vault status|deposit|withdraw", "O6.5 T8 Vault custody + margin reserve");
+    row(style, "challenge <element-prefix>", "O6.4 T7 Assay consilience / slash");
     row(style, "fleet mint hauler|escort [g] finance", "hull + optional yard Note");
     row(style, "defend status|escort|risk", "P5-A KIN convoy + posture (36)");
     row(style, "posture status|set", "P5-B doctrine reorient (anatomy sealed)");

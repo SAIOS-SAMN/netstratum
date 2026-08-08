@@ -2893,6 +2893,132 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 Err(refusal) => refuse(world, &refusal, style),
             }
         },
+        // O6.5 Vault custody · O6.4 Assay court
+        Some("vault") => match words.next() {
+            None | Some("status") | Some("help") => {
+                let orb = world.orb().map(|o| o.orb_id).unwrap_or(*current);
+                let bal = world.vault_balance_of(orb);
+                let res = world.vault_reserved(orb);
+                let free = if bal > res {
+                    bal.clone() - res.clone()
+                } else {
+                    ratio(0, 1)
+                };
+                println!(
+                    "{} VAULT — seated={} · orb {orb} custody {} · reserved {} · free {}",
+                    style.head("T8"),
+                    world.vault_seated(),
+                    amount(&bal),
+                    amount(&res),
+                    amount(&free)
+                );
+                println!(
+                    "  {}",
+                    style.hint("vault deposit <n> · vault withdraw <n>  (STAMP custody; margin holds free)")
+                );
+            }
+            Some("deposit") => {
+                let n = words
+                    .next()
+                    .and_then(|w| w.parse::<i64>().ok())
+                    .unwrap_or(1);
+                let orb = world.orb().map(|o| o.orb_id).unwrap_or(*current);
+                match cfe::dop::Positive::new(ratio(n, 1)) {
+                    Some(p) => match world.vault_deposit(orb, p) {
+                        Ok(bal) => {
+                            let _ = sync_world(world);
+                            println!(
+                                "{} deposited {n} STAMP · vault {}",
+                                style.ok("VAULT"),
+                                amount(&bal)
+                            );
+                        }
+                        Err(refusal) => refuse(world, &refusal, style),
+                    },
+                    None => println!("{} need positive amount", style.bad("✗")),
+                }
+            }
+            Some("withdraw") => {
+                let n = words
+                    .next()
+                    .and_then(|w| w.parse::<i64>().ok())
+                    .unwrap_or(1);
+                let orb = world.orb().map(|o| o.orb_id).unwrap_or(*current);
+                match cfe::dop::Positive::new(ratio(n, 1)) {
+                    Some(p) => match world.vault_withdraw(orb, p) {
+                        Ok(bal) => {
+                            let _ = sync_world(world);
+                            println!(
+                                "{} withdrew {n} STAMP · vault {}",
+                                style.ok("VAULT"),
+                                amount(&bal)
+                            );
+                        }
+                        Err(refusal) => refuse(world, &refusal, style),
+                    },
+                    None => println!("{} need positive amount", style.bad("✗")),
+                }
+            }
+            Some(other) => println!(
+                "{} vault {:?} — status|deposit|withdraw",
+                style.bad("✗"),
+                other
+            ),
+        },
+        Some("challenge") | Some("challenge_assay") => {
+            let prefix = words.next();
+            match prefix {
+                Some(p) => {
+                    let orb = world.orb().map(|o| o.orb_id).unwrap_or(*current);
+                    // Resolve element by prefix against open prospects.
+                    let hit = world
+                        .committed()
+                        .prospects
+                        .iter()
+                        .find(|v| {
+                            let hex: String = v
+                                .element
+                                .iter()
+                                .take(4)
+                                .map(|b| format!("{b:02x}"))
+                                .collect();
+                            hex.starts_with(p) || hex.starts_with(&p.to_lowercase())
+                        })
+                        .map(|v| v.element);
+                    match hit {
+                        Some(el) => match world.challenge_assay(orb, el) {
+                            Ok(true) => {
+                                let _ = sync_world(world);
+                                println!(
+                                    "{} assay consilience MATCH on {}",
+                                    style.ok("ASSAY"),
+                                    &hex(&el)[..8]
+                                );
+                            }
+                            Ok(false) => {
+                                let _ = sync_world(world);
+                                println!(
+                                    "{} assay MISMATCH — richness corrected + crystal slash on {}",
+                                    style.warn("SLASH"),
+                                    &hex(&el)[..8]
+                                );
+                            }
+                            Err(refusal) => refuse(world, &refusal, style),
+                        },
+                        None => println!(
+                            "{} no open vein matches prefix {} — prospect first",
+                            style.bad("✗"),
+                            p
+                        ),
+                    }
+                }
+                None => println!(
+                    "{} usage: {}",
+                    style.bad("✗"),
+                    style.strong("challenge <element-prefix>")
+                ),
+            }
+        },
         // X7 Anchor export/import (feature-gated deeds)
         Some("anchor") => match words.next() {
             None | Some("status") | Some("help") => {
@@ -6957,6 +7083,25 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
         ActionRefused::AnchorProofInvalid { reason } => format!(
             "Anchor rejected proof (reason {reason}) — bad strand/isthmus/datum frame"
         ),
+        ActionRefused::ExchangeRequired => {
+            "T6 Exchange must sit before instruments list — `seat exchange` (O6.3 MM gate)".into()
+        }
+        ActionRefused::AssayRequired => {
+            "T7 Assay must sit before consilience challenge — `seat assay`".into()
+        }
+        ActionRefused::VaultRequired => {
+            "T8 Vault must sit before custody — `seat vault` then `vault deposit`".into()
+        }
+        ActionRefused::VaultShort { need, have } => format!(
+            "vault short — need {} custody, hold {}",
+            amount(need),
+            amount(have)
+        ),
+        ActionRefused::VaultMarginHeld { free, need } => format!(
+            "vault free {} (after margin reserve) < {} — close instruments or deposit more",
+            amount(free),
+            amount(need)
+        ),
         ActionRefused::BalanceEntropyDominates {
             balance,
             syntropy,
@@ -8430,6 +8575,32 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::AnchorImportRefused { reason, .. } => {
                 format!("⊘ Anchor import refused reason {reason}")
             }
+            cfe::dop::ClosureEvent::VaultDeposited { orb_id, amount: a } => {
+                format!("🏦 vault deposit orb {} amount {}", orb_id, amount(a))
+            }
+            cfe::dop::ClosureEvent::VaultWithdrawn { orb_id, amount: a } => {
+                format!("🏦 vault withdraw orb {} amount {}", orb_id, amount(a))
+            }
+            cfe::dop::ClosureEvent::AssayConsilience {
+                orb_id,
+                matched,
+                ..
+            } => format!(
+                "⚖ assay consilience orb {} — {}",
+                orb_id,
+                if *matched { "MATCH" } else { "MISMATCH" }
+            ),
+            cfe::dop::ClosureEvent::AssaySlashed {
+                orb_id,
+                slash,
+                richness_after,
+                ..
+            } => format!(
+                "⚖ assay SLASH orb {} crystal {} · richness {}",
+                orb_id,
+                amount(slash),
+                amount(richness_after)
+            ),
             cfe::dop::ClosureEvent::AssayStruck { amount: drawn, richness, .. } => format!(
                 "⚖ {} drawn from the opened vein — one receipt, the whole span{}",
                 style.strong(&amount(drawn)),

@@ -103,9 +103,9 @@ strand-adapter · isthmus/datum-adapter
 |----|------|---------|------|
 | O6.1 | [x] T4 Caravan: pair_melt suppress by Resonator grade η | E3.2, T1.x | melt × (1 − grade) |
 | O6.2 | [x] T5 Crucible: refine spend half (derive 1+1) | E3.4, T1.x | office advantage only |
-| O6.3 | [ ] T6 Exchange: only seated MM may list Share/Note/Fut/Perp | Wave 5, T1.x | |
-| O6.4 | [ ] T7 Assay: consilience challenge / slash path | E3.1 | |
-| O6.5 | [ ] T8 Vault: custody inventory + margin accounts | I5.x | |
+| O6.3 | [x] T6 Exchange: only seated MM may list Share/Note/Fut/Perp | Wave 5, T1.x | require_exchange_mm on issue |
+| O6.4 | [x] T7 Assay: consilience challenge / slash path | E3.1 | tags 154–155 |
+| O6.5 | [x] T8 Vault: custody inventory + margin accounts | I5.x | tags 152–153 · SCHEMA_V14 |
 | O6.6 | [x] T9 Anchor: only exit R3/R4 (seat required for promote/export) | R2.4–R2.5 | pin |
 
 ---
