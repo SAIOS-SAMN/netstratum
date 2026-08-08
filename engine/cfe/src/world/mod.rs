@@ -66,6 +66,7 @@ pub mod defense;
 pub mod market_defense;
 pub mod medium_defense;
 pub mod intel;
+pub mod cog_cyb;
 
 pub use defense::{CorridorFog, DefenseDomain, DefensePosture, KinIntegrity, RiskBand};
 pub use market_defense::{
@@ -73,6 +74,7 @@ pub use market_defense::{
 };
 pub use medium_defense::{DualUseAtm, MediumIntegrity, tamper_threshold};
 pub use intel::{InfIntegrity, WardState};
+pub use cog_cyb::{CogIntegrity, CybIntegrity};
 
 pub use replay::replay;
 pub use fleet::hull_voice;
@@ -283,6 +285,8 @@ fn haul(
     if *melt > ratio(0, 1) {
         fleet::require_hull_capacity(src, deal, &amount)?;
     }
+    // P5.22 mesh-guard: corridor aperture needs instrument witness.
+    src.mesh_guard_haul(melt)?;
     // THRESHOLD-1 (12_UNION §7): the shield — an aperture touches only
     // worlds whose peoples have made the solar leap (TECH-1a). A world
     // is a star system, so every aperture IS interstellar; the first

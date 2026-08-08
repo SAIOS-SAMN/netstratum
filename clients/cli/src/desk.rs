@@ -606,10 +606,29 @@ fn render_defend(style: Style, home: &World) -> Vec<String> {
         inf.detection_grade,
         inf.instrument_count
     ));
+    let cog = home.cog_integrity();
+    let cyb = home.cyb_integrity();
+    lines.push(format!(
+        "  COG rank {} · wants {} · practices {} · {}",
+        cog.cog_rank,
+        cog.want_load,
+        cog.practice_load,
+        if cog.stressed {
+            style.warn("STRESSED")
+        } else {
+            style.ok("steady")
+        }
+    ));
+    lines.push(format!(
+        "  CYB rank {} · mesh_ready={} · {}",
+        cyb.cyb_rank,
+        cyb.mesh_ready,
+        style.dim(cyb.voice)
+    ));
     lines.push(format!(
         "  {}",
         style.hint(
-            "veil|ward · posture · escort · market · medium|tamper · forge"
+            "veil|ward · posture · escort · market · medium · forge · suite cyber"
         )
     ));
     // KIN colour (P5-K2)

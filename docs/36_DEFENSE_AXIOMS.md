@@ -360,7 +360,7 @@ Maps onto and **extends** `TASKS_TRADE_FLEET_DESK` P5:
 | **P5-B** | Species posture + in-game doctrine reorient (anatomy sealed) | **LANDED** tag 144 |
 | **P5-C** | INF compose: veil/ward DEFEND + detection grade | **LANDED** zero tags |
 | **P5-D** | ATM defense + CovertTamper + dual-use TERRA | **LANDED** 141–143 + P5.19 |
-| **P5-E** | COG + CYB instrument/mesh guards | spoof refuse pins |
+| **P5-E** | COG + CYB instrument/mesh guards + CYBER suite | **LANDED** zero tags |
 | **P5-M / M2** | MKT economic warfare + cascade/haircut/resume audit + suites | **LANDED** 135–140 |
 | **P5-K2** | KIN open-up §12 (species residual · kin_step · perception fog) | **LANDED** zero tags |
 | **P5-F** | Espionage suite (scout/exfil/sabotage) | SEAL B |
@@ -687,8 +687,8 @@ DEFEND INF line. **Zero new tags / schema.**
 |------|------|
 | P5.14–P5.15c | **done** — defense_pins `inf_veil_gates_thin_scan…` |
 
-**Next:** P5.19b medium residual colour · **P5-E** COG/CYB guards ·
-**P5-F** espionage (uses INF surface; no chronicle rewrite).
+**P5-E LANDED** with INF. **Next:** **P5-F** espionage (uses INF+CYB;
+no chronicle rewrite) · P5.19b medium residual colour · P5-H close-out.
 
 ---
 

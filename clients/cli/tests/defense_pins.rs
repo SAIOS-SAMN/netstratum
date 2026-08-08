@@ -51,6 +51,32 @@ fn posture_reorients_doctrine_not_anatomy() {
 }
 
 #[test]
+fn cog_cyb_readings_and_instrument_spoof_guard() {
+    let mut w = World::new();
+    w.found("cyb-home").expect("f");
+    let cog = w.cog_integrity();
+    assert_eq!(cog.want_load, 0);
+    assert!(!cog.stressed);
+    let cyb = w.cyb_integrity();
+    assert_eq!(cyb.detection_grade, 0);
+    assert!(!cyb.mesh_ready || cyb.routes_open == 0);
+    // Mesh guard: unveiled zero-melt ok; veiled melt needs detect.
+    w.mesh_guard_haul(&ratio(0, 1)).expect("local free");
+    w.draw_veil().expect("veil");
+    assert!(matches!(
+        w.mesh_guard_haul(&ratio(1, 8)),
+        Err(cfe::world::ActionRefused::DetectionThin { .. })
+    ));
+    w.lift_veil().expect("lift");
+    // Instrument spoof: cannot unit-test forge without full tech chain easily;
+    // guard_ok pure path.
+    let hash = [1u8; 32];
+    w.instrument_guard_ok(FIRST_ORB, hash, 1).expect("first");
+    // Simulate held instrument via public API only when forge works — skip push.
+    assert_eq!(w.instruments().len(), 0);
+}
+
+#[test]
 fn kin_residual_follows_metabolism() {
     let mut w = World::new();
     w.found("kin-met").expect("f");

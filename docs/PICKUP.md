@@ -23,10 +23,11 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 | Pure-NPC green | market_war_step · instrument clears · ATM · posture · INF surface |
 | **Landed P5-C** | veil/ward DEFEND · `detection_grade` · `DetectionThin` under veil |
 | **Landed P5-K2** | kin residual/voice · place risk · fog · `kin_step` · CONVOY colour |
-| **Next phase** | **P5-E** COG/CYB · P5.19b medium colour · **P5-F** espionage |
-| Docs | `36` §12–§13; A/B/C/D/M/M2/K2/19 landed |
-| Trade program | Phases **1–4** complete; Phase **5 partial** — E/F next |
-| Help | `suite convoy` · `veil|ward` · `posture` · `market|medium|tamper` |
+| **Landed P5-E** | cog/cyb integrity · instrument spoof guard · mesh guard · suite cyber |
+| **Next phase** | **P5-F** espionage · P5.19b medium colour · P5-H close-out |
+| Docs | `36`; A/B/C/D/E/M/M2/K2/19 landed |
+| Trade program | Phases **1–4** complete; Phase **5 partial** — F next |
+| Help | `suite cyber|convoy|market` · `veil|ward` · `posture` · forge |
 | Dirty / other lane | do not `git add -A` without reviewing observer/other-lane files |
 
 Older §0 counts (809 tests, 71 deeds, tag 95) are **historical**; re-measure

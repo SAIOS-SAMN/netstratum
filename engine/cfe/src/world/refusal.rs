@@ -261,6 +261,8 @@ pub enum ActionRefused {
     DetectionThin { need: u8, have: u8 },
     /// P5-K2 — volumetric perception needs prospect depth before corridor risk mark.
     CorridorFogDepth { deal: u64 },
+    /// P5-E CYB — instrument grade/node already held on orb (anti-spoof reforge).
+    InstrumentSpoof { orb: u64, grade: u8 },
     /// THERMAL-1 — siting an orbit needs a commissioned sun first.
     NoStarCommissioned,
     /// THERMAL-1 — the orb is already sited; an orbit does not move.

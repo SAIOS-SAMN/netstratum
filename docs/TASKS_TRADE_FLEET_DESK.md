@@ -223,13 +223,14 @@ NPC routing re-colour from sealed axes / thermal / taxon / doctrine.
 | P5.55 | [x] K5 perception fog on `mark_convoy_risk` | P5.15, P5.13b | refuse path |
 | P5.56 | [x] K6 CONVOY suite + DEFEND residual kind | P5.35, P5.51 | UI |
 
-### P5-E — COG + CYB
+### P5-E — COG + CYB · **LANDED**
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
-| P5.20 | [ ] Cognitive integrity reading (wants / practices load) | WANT-1, PRACTICE-1 | |
-| P5.21 | [ ] Instrument-guard (anti-spoof) refuse path | MANU-1 | |
-| P5.22 | [ ] Mesh-guard (aperture/STAMP clear witness hygiene) | routes, STAMP | |
+| P5.20 | [x] Cognitive integrity reading (wants / practices load) | WANT-1, PRACTICE-1 | reading |
+| P5.21 | [x] Instrument-guard anti-spoof reforge refuse | MANU-1 | pin |
+| P5.22 | [x] Mesh-guard veiled positive-melt + stamp hygiene reading | routes, STAMP, INF | pin |
+| P5.37 | [x] CYBER suite shell (COG+CYB dashboard) | P5.20–P5.22 | UI |
 
 ### P5-M — Market defense (MKT) + optional suites (`36` §10)
 
@@ -245,7 +246,7 @@ not a second physics. NPC must war without opening a suite.
 | P5.34 | [x] Typed offenses: liquidity raid / clear poison (refuse+residual) | P5.32–P5.33 | pins |
 | P5.35 | [x] CONVOY suite shell (dashboard over P5-A risk) | P5.1–P5.3 | optional UI |
 | P5.36 | [x] MARKET WAR suite shell (breaker, clears, open instruments) | P5.33–P5.34 | optional UI |
-| P5.37 | [ ] CYBER suite shell (instrument + mesh guards) | P5.21–P5.22 | optional UI |
+| P5.37 | [x] CYBER suite shell (instrument + mesh guards) | P5.21–P5.22 | optional UI |
 | P5.38 | [x] NPC `market_war_step` (disposition-routed) | P5.34 | pure NPC |
 | P5.39 | [ ] Species-relative MKT residual copy (mineral/biotic/plasmic) | P5.11, P5.31 | |
 

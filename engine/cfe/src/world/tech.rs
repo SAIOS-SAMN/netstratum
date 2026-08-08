@@ -138,6 +138,8 @@ impl World {
             .find(|(held, held_condition, _, _)| *held == orb && *held_condition == condition)
             .map(|(_, _, node, _)| *node)
             .ok_or(ActionRefused::ConditionUncrystallized { condition })?;
+        // P5.21 instrument-guard: refuse identical re-forge (anti-spoof).
+        self.instrument_guard_ok(orb, tech_hash, condition)?;
         let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
         let chain = match condition {
             1 | 2 => vec![ZoneKind::Smelter],

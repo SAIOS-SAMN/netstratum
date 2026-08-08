@@ -279,7 +279,7 @@ fn colony_help(style: Style) {
     row(style, "veil status|draw|lift · ward status|elder|lift", "P5-C INF MASK/WARDEN");
     row(style, "market status|seal|resume|clear|raid|cascade", "P5-M/M2 MKT war");
     row(style, "medium status|reinforce · tamper", "P5-D ATM + dual-use TERRA tax");
-    row(style, "suite market|convoy|cyber", "UI shells over same deeds (36 §10)");
+    row(style, "suite market|convoy|cyber", "UI over deeds — cyber = COG+CYB guards");
     row(style, "prospect · assay · compound · refine", "elements + alchemy");
     println!();
     println!(

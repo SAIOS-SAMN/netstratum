@@ -1,8 +1,8 @@
 # 33 — TRADE DESK · FLEETS · ALIGNMENT · LOCAL CAPITAL
 
 **Status:** PARTIAL LAND — **Phases 1–4 complete** on main; **Phase 5
-partial** — P5-A/B/C/D/M/M2/K2 + dual-use landed (`36`); **next: P5-E**
-COG/CYB. Implementation board: **`TASKS_TRADE_FLEET_DESK.md`**.
+partial** — P5-A…E/K2/M + dual-use landed (`36`); **next: P5-F**
+espionage. Implementation board: **`TASKS_TRADE_FLEET_DESK.md`**.
 
 **Does not overturn:** CHARTER exactness, SEAL B, call-not-copy, tuned-
 constant ratchet, ROUTE-1 / MARKET-1 / STAMP-1 as landed. **Does not**

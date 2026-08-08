@@ -1064,5 +1064,9 @@ INF line. **Zero new tags / schema.**
 place exposure via `orbit_phase_period` · corridor fog on risk mark ·
 conductor `kin_step` · CONVOY suite residual. **Zero new tags.**
 
-**Next:** P5-E COG/CYB · P5.19b medium colour · P5-F espionage · P1.8.
+**P5-E COG/CYB LANDED:** `cog_integrity` / `cyb_integrity` · instrument
+anti-spoof reforge · mesh-guard veiled melt · `suite cyber` · stamp hygiene
+reading. **Zero new tags.**
+
+**Next:** P5-F espionage · P5.19b medium colour · P5-H close-out · P1.8.
 

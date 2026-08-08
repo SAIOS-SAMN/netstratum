@@ -2975,11 +2975,38 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 );
             }
             Some("cyber") | Some("cyb") => {
+                let cyb = world.cyb_integrity();
+                let cog = world.cog_integrity();
                 println!(
-                    "{} CYBER suite — stub until P5-E instrument/mesh guards land",
-                    style.head("SUITE")
+                    "{} CYBER suite — CYB rank {} · {}",
+                    style.head("SUITE"),
+                    cyb.cyb_rank,
+                    style.dim(cyb.voice)
                 );
-                println!("  {}", style.dim("dashboard over CYB deeds; no second ledger"));
+                println!(
+                    "  detect g{} · instruments {} · routes {} · mesh_ready={} · stamp_banked={}",
+                    cyb.detection_grade,
+                    cyb.instrument_count,
+                    cyb.routes_open,
+                    cyb.mesh_ready,
+                    cyb.stamp_banked
+                );
+                println!(
+                    "  COG rank {} · wants {} · practices {} · stressed={} · {}",
+                    cog.cog_rank,
+                    cog.want_load,
+                    cog.practice_load,
+                    cog.stressed,
+                    style.dim(cog.voice)
+                );
+                println!(
+                    "  stamp mesh hygiene={}",
+                    world.stamp_mesh_hygiene()
+                );
+                println!(
+                    "  {}",
+                    style.hint("forge <grade> · aperture … · veil · practice — same deeds")
+                );
             }
             _ => println!(
                 "{} suite market|convoy|cyber — dashboards over the same deeds (36 §10)",
@@ -6655,6 +6682,9 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
         ),
         ActionRefused::CorridorFogDepth { deal } => format!(
             "corridor deal {deal} is fogged (volumetric) — prospect a stratum before marking risk"
+        ),
+        ActionRefused::InstrumentSpoof { orb, grade } => format!(
+            "instrument grade {grade} already forged on orb {orb} — anti-spoof refuses re-forge (forge another condition)"
         ),
         ActionRefused::BalanceEntropyDominates {
             balance,
