@@ -146,6 +146,7 @@ strand-adapter · isthmus/datum-adapter
 | H1.11 | [x] Preferred name `diplomatic` (diplo alias) + science benches (chem·bio·phys·math·research) | H1.10 | pin |
 | C1.8 | [x] Seated science labs: pay unlock · dual ± · explosion · synth/clone/skin | H1.11 | tags 159–162 · SCHEMA_V16 · kernel 0.37 |
 | C1.9 | [x] Taxon economy: extractive·regenerative·balanced + flatlander baseline + planet fit | C1.8 | `taxon_economy` pins · regen tech soften |
+| C1.10 | [x] +6 class tiers · +6 office tiers (T10–T15) · 18 expansion taxons/class (u8 max) · seat +25 | C1.9 | ceilings 13/254 · pins |
 
 ---
 

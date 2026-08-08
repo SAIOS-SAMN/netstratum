@@ -22,12 +22,12 @@ pub const DISPOSITIONS: [&str; 3] = ["expansionist", "empiricist", "epicurean"];
 pub const METABOLISMS: [&str; 3] = ["mineral", "biotic", "plasmic"];
 pub const PERCEPTIONS: [&str; 4] = ["planar", "volumetric", "harmonic", "umbral"];
 
-/// BAND-1 + T4–T9 (12_UNION §2a, 30_OFFICES_AND_RAILS): class STATIONS —
+/// BAND-1 + T4–T15 (12_UNION §2a, 30_OFFICES_AND_RAILS): class STATIONS —
 /// offices in the union, never ranks. Append-only like the axes. A
 /// civilization with no station is simply a people of the bands (the
-/// common, lawful state). T4–T9 are **deeper economic functions**, not
-/// offices above the progenitors.
-pub const STATIONS: [&str; 10] = [
+/// common, lawful state). T4–T15 are **deeper functions**, not
+/// offices above the progenitors. **T10–T15 added 2026-08-08** for balance.
+pub const STATIONS: [&str; 16] = [
     "progenitor",
     "watcher",
     "observer",
@@ -38,18 +38,25 @@ pub const STATIONS: [&str; 10] = [
     "assay",
     "vault",
     "anchor",
+    "herald",
+    "lattice",
+    "chorus",
+    "warden",
+    "foundry",
+    "nexus",
 ];
 
 /// BAND-1 (12_UNION §1): a station's seat width — SPACE AVAILABLE,
-/// not rank. `None` is unbounded. Progenitor width is PER LINEAGE
-/// DOMAIN (8 seats per species). T4–T8 width 16 (Q-T1 default);
-/// T9 Anchor unbounded (domain soft-cap later).
+/// not rank. `None` is unbounded. **+25 capacity** on bounded offices
+/// (2026-08-08 expansion: 25 more taxons/seats per tier).
 pub fn seat_width(station: &str) -> Option<u64> {
+    let bonus = 25u64; // office_seat_bonus — 25 more per tier
     match station {
-        "progenitor" => Some(8),
-        "watcher" | "observer" => Some(16),
-        "caravan" | "crucible" | "exchange" | "assay" | "vault" => Some(16),
-        "sovereign" | "anchor" => None,
+        "progenitor" => Some(8 + bonus),
+        "watcher" | "observer" => Some(16 + bonus),
+        "caravan" | "crucible" | "exchange" | "assay" | "vault" => Some(16 + bonus),
+        "herald" | "lattice" | "chorus" | "warden" | "foundry" => Some(16 + bonus),
+        "sovereign" | "anchor" | "nexus" => None,
         _ => None,
     }
 }
@@ -83,6 +90,18 @@ pub enum Tier {
     T8,
     /// ANCHOR — external settlement seats (T9).
     T9,
+    /// HERALD — diplomacy mesh / information (T10).
+    T10,
+    /// LATTICE — research / knowledge office (T11).
+    T11,
+    /// CHORUS — culture / literature (T12).
+    T12,
+    /// WARDEN — defense / medium (T13).
+    T13,
+    /// FOUNDRY — deep industrial (T14).
+    T14,
+    /// NEXUS — interstellar / union coordination (T15).
+    T15,
 }
 
 /// The station → tier reading, and THE ENGINE AUTHORITY for it.
@@ -106,6 +125,12 @@ pub fn tier_of(station: Option<&str>) -> Option<Tier> {
         Some("assay") => Some(Tier::T7),
         Some("vault") => Some(Tier::T8),
         Some("anchor") => Some(Tier::T9),
+        Some("herald") => Some(Tier::T10),
+        Some("lattice") => Some(Tier::T11),
+        Some("chorus") => Some(Tier::T12),
+        Some("warden") => Some(Tier::T13),
+        Some("foundry") => Some(Tier::T14),
+        Some("nexus") => Some(Tier::T15),
         Some(_) => None,
     }
 }
@@ -173,6 +198,42 @@ pub fn office_preconditions(
                 Ok(())
             } else {
                 Err("cross the void (aperture) before claiming the anchor")
+            }
+        }
+        "herald" => {
+            if evidence.routes_chartered > 0 || evidence.has_crossed {
+                Ok(())
+            } else {
+                Err("charter a route or cross the void before claiming the herald")
+            }
+        }
+        "lattice" => {
+            if evidence.assays_struck > 0 || evidence.element_kinds > 0 {
+                Ok(())
+            } else {
+                Err("strike an assay or hold element before claiming the lattice")
+            }
+        }
+        "chorus" => Ok(()), // culture path — open after found
+        "warden" => {
+            if evidence.element_kinds > 0 {
+                Ok(())
+            } else {
+                Err("hold matter before claiming the warden")
+            }
+        }
+        "foundry" => {
+            if evidence.element_kinds > 0 {
+                Ok(())
+            } else {
+                Err("bank element before claiming the foundry")
+            }
+        }
+        "nexus" => {
+            if evidence.has_crossed {
+                Ok(())
+            } else {
+                Err("cross the void before claiming the nexus")
             }
         }
         _ => Err("unknown station"),

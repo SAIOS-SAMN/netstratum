@@ -311,9 +311,16 @@ pub fn archetype_binding(class: u8) -> Vec<(u8, Ratio)> {
         5 => vec![(CHANNEL_YIELD, ratio(5, 4)), (CHANNEL_SURVEY, ratio(3, 2))],
         // ∿ plasma-field — energy-rich and hard to hold.
         6 => vec![(CHANNEL_YIELD, ratio(3, 2)), (CHANNEL_UPKEEP, ratio(3, 2))],
-        // ▲ apex-terrestrial — the solitary peak: it needs little and
+        // ▲ apex-solitary — the solitary peak: it needs little and
         // makes little.
         7 => vec![(CHANNEL_YIELD, ratio(1, 2)), (CHANNEL_UPKEEP, ratio(1, 2))],
+        // +6 balance tiers
+        8 => vec![(CHANNEL_YIELD, ratio(5, 4)), (CHANNEL_SURVEY, ratio(5, 4))], // corridor-nomad
+        9 => vec![(CHANNEL_YIELD, ratio(3, 2)), (CHANNEL_UPKEEP, ratio(5, 4))], // abyssal-pressure
+        10 => vec![(CHANNEL_SURVEY, ratio(1, 2)), (CHANNEL_UPKEEP, ratio(5, 4))], // crystal-mind
+        11 => vec![(CHANNEL_YIELD, ratio(5, 4)), (CHANNEL_UPKEEP, ratio(3, 2))], // void-swarm
+        12 => vec![(CHANNEL_YIELD, ratio(3, 2)), (CHANNEL_UPKEEP, ratio(1, 2))], // thermal-banker
+        13 => vec![(CHANNEL_SURVEY, ratio(3, 4)), (CHANNEL_YIELD, ratio(3, 4))], // mirror-form
         _ => vec![],
     }
 }
@@ -417,7 +424,7 @@ pub fn seed(axis: Axis) -> Vec<Entry> {
             plain(3, "harmonic"),
             plain(4, "umbral"),
         ],
-        Axis::Class => (0..=7)
+        Axis::Class => (0..=crate::dop::class_ceiling())
             .map(|code| Entry {
                 code,
                 sigil: crate::dop::archetype_sigil(code).into(),
@@ -426,7 +433,9 @@ pub fn seed(axis: Axis) -> Vec<Entry> {
                 base: None,
             })
             .collect(),
-        Axis::Clade => (0..=20).map(|code| plain(code, clade_word(code))).collect(),
+        Axis::Clade => (0..=crate::dop::clade_ceiling())
+            .map(|code| plain(code, clade_word(code)))
+            .collect(),
         // **THE PRACTICE MECHANISMS ARE DATA** (operator ruling
         // 2026-08-05): each discipline is a factor set over the landed
         // channels, one benefit, one friction, exact — the bespoke
@@ -590,71 +599,14 @@ pub fn channel_family(channel: u8) -> Option<crate::dop::ZoneKind> {
     }
 }
 
-/// `15_TAXON` §3 + `37_IMPERIUM_TAXON` — display words.
-///
-/// Wire codes are stable. Display is **Latin-rooted sentience** under the
-/// imperium tongue — never Earth common animals (no whale/bee/cat/human).
-/// Old English words remain parseable via [`clade_from_word`].
+/// Clade display word — delegates to [`crate::almanac::taxon_table`].
 pub fn clade_word(code: u8) -> &'static str {
-    match code {
-        0 => "unrecorded",
-        1 => "ailuroform",     // Felidae → solitary apex form
-        2 => "bimaniform",     // two-handed planar toolmakers (not "human")
-        3 => "cryocoherens",   // cryo + cohaerens
-        4 => "lithophage",     // stone-eater
-        5 => "hypobiotid",     // hypobiosis / cryptobiosis void-sleeper
-        6 => "soniform",       // Cetacea → pressure-song mind
-        7 => "polybrachia",    // Cephalopoda → multi-arm cortex
-        8 => "hexasocial",     // Hymenoptera → six-limb eusocial
-        9 => "amphiform",      // dual-medium
-        10 => "mycotiform",    // Mycota
-        11 => "cnidiform",     // Cnidaria
-        12 => "plasmiform",    // free plasma intelligence
-        13 => "syzygiform",    // conjunction-form
-        14 => "endolithid",    // pore-space rock
-        15 => "volatiform",    // volare — free-body atmospheric
-        16 => "actinoform",    // Actinopterygii lineage, not "fish"
-        17 => "revenid",
-        18 => "heliciform",    // Gastropoda spiral
-        19 => "draconiform",
-        20 => "metamorphid",   // veil-native form shift
-        _ => "unknown",
-    }
+    crate::almanac::taxon_table::clade_word(code)
 }
 
 /// Parse clade wire from imperium word **or** legacy English alias.
 pub fn clade_from_word(word: &str) -> Option<u8> {
-    match word {
-        "unrecorded" => Some(0),
-        "ailuroform" | "felid" | "feliform" => Some(1),
-        "bimaniform"
-        | "humanoid"
-        | "bimanus"
-        | "flatlander"
-        | "flatland"
-        | "human"
-        | "humans"
-        | "baseline" => Some(2),
-        "cryocoherens" | "cryo-coherent" | "cryo" => Some(3),
-        "lithophage" | "lithic" | "lithovore" => Some(4),
-        "hypobiotid" | "tardigrade" | "void-sleeper" => Some(5),
-        "soniform" | "cetacean" | "ceticant" => Some(6),
-        "polybrachia" | "cephalopod" | "octobranch" => Some(7),
-        "hexasocial" | "hymenopteran" | "formicine" | "eusocialid" => Some(8),
-        "amphiform" | "amphibian" => Some(9),
-        "mycotiform" | "fungal" | "mycota" => Some(10),
-        "cnidiform" | "cnidarian" => Some(11),
-        "plasmiform" | "plasmoid" => Some(12),
-        "syzygiform" | "syzygial" => Some(13),
-        "endolithid" | "endolithic" => Some(14),
-        "volatiform" | "avian" => Some(15),
-        "actinoform" | "teleost" => Some(16),
-        "revenid" | "revenant" => Some(17),
-        "heliciform" | "gastropod" => Some(18),
-        "draconiform" | "draconic" => Some(19),
-        "metamorphid" | "metashifting" | "metashifter" => Some(20),
-        _ => None,
-    }
+    crate::almanac::taxon_table::clade_from_word(word)
 }
 
 /// PRACTICE-1's five disciplines, by their in-value codes.

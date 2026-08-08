@@ -17,23 +17,23 @@ fn the_seal_is_once_and_in_vocabulary() {
         world.seal_taxon(0, 5),
         Err(ActionRefused::TaxonUnknown { class: 0, clade: 5 })
     ));
+    // ABOVE CLASS CEILING — derived, never hand-picked.
+    let past_class = cfe::dop::class_ceiling() + 1;
     assert!(matches!(
-        world.seal_taxon(8, 5),
-        Err(ActionRefused::TaxonUnknown { class: 8, clade: 5 })
+        world.seal_taxon(past_class, 5),
+        Err(ActionRefused::TaxonUnknown { class, clade: 5 })
+            if class == past_class
     ));
-    // ABOVE THE CEILING, DERIVED — never a hand-picked number. This
-    // probe read clade 19 and expected a refusal, which encoded the
-    // ceiling of the day: `15_TAXON` §3 then seated 19 (draconic) and 20
-    // (metashifting) by operator ruling, and the pin would have kept
-    // insisting a ruled clade was unknown. Reading one past the ceiling
-    // keeps the property (out-of-vocabulary refuses) without pinning
-    // WHICH codes are in it.
-    let past = cfe::dop::clade_ceiling() + 1;
-    assert!(matches!(
-        world.seal_taxon(2, past),
-        Err(ActionRefused::TaxonUnknown { class: 2, clade })
-            if clade == past
-    ));
+    // ABOVE CLADE CEILING — derived, never hand-picked.
+    // (clade_ceiling is 254; +1 saturates u8 — use overflow-aware check)
+    let past_clade = cfe::dop::clade_ceiling().saturating_add(1);
+    if past_clade > cfe::dop::clade_ceiling() {
+        assert!(matches!(
+            world.seal_taxon(2, past_clade),
+            Err(ActionRefused::TaxonUnknown { class: 2, clade })
+                if clade == past_clade
+        ));
+    }
 
     // The lawful seal: geodic-lithovore (2), tardigrade (5).
     world.seal_taxon(2, 5).expect("seals");

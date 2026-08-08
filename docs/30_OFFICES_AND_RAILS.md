@@ -59,8 +59,16 @@ T5  Crucible            ← element refining
 T6  Exchange            ← STAMP market-making
 T7  Assay               ← element identity courts
 T8  Vault               ← custody and collateral
-T9  Anchor              ← external settlement seats (BOTTOM of office)
+T9  Anchor              ← external settlement seats
+T10 Herald              ← diplomacy mesh / information   (+6 balance, 2026-08-08)
+T11 Lattice             ← research / knowledge office
+T12 Chorus              ← culture / literature
+T13 Warden              ← defense / medium envelope
+T14 Foundry             ← deep industrial (balances Crucible)
+T15 Nexus               ← interstellar / union coordination (BOTTOM)
 ```
+
+Seat widths: bounded offices **+25** capacity (25 more seats per tier).
 
 ---
 

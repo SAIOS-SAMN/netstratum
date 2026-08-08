@@ -108,6 +108,15 @@ pub fn flatlander_species() -> &'static str {
 /// Preferred thermal region family for a clade (imperium codes).
 /// Used only to colour PlanetFit — not a hard exile.
 pub fn clade_preferred_region(clade: u8) -> ThermalRegion {
+    // Expansion clades follow owning class preference via first legacy of that class.
+    if let Some(owner) = crate::almanac::taxon_table::expansion_class_of(clade) {
+        return match owner {
+            6 | 12 => ThermalRegion::HyperThermal,
+            3 | 9 => ThermalRegion::Cryogenic,
+            8 => ThermalRegion::Torrid, // corridor-nomad
+            _ => ThermalRegion::Mesic,
+        };
+    }
     match clade {
         // cryocoherens · draconiform cold-coherence
         3 | 19 => ThermalRegion::Cryogenic,
@@ -138,11 +147,17 @@ pub fn economic_mode(class: u8, clade: u8) -> EconomicMode {
     if is_flatlander_baseline(clade) {
         return EconomicMode::Balanced;
     }
-    // Class-primary colour.
+    // Expansion clades (21+) inherit their owning class colour.
+    if let Some(owner) = crate::almanac::taxon_table::expansion_class_of(clade) {
+        return economic_mode(owner, 0); // re-enter on class only
+    }
+    // Class-primary colour (includes +6 balance tiers 8..=13).
     match class {
-        2 => return EconomicMode::Extractive, // geodic-lithovore
-        6 => return EconomicMode::Extractive, // plasma-field harvests flux
-        1 => return EconomicMode::Regenerative, // biotic-swarm cycles
+        2 | 9 => return EconomicMode::Extractive, // geodic · abyssal-pressure
+        6 | 12 => return EconomicMode::Extractive, // plasma · thermal-banker
+        1 | 11 => return EconomicMode::Regenerative, // biotic-swarm · void-swarm
+        10 => return EconomicMode::Balanced,         // crystal-mind
+        8 | 13 => return EconomicMode::Balanced,     // corridor-nomad · mirror-form
         _ => {}
     }
     match clade {

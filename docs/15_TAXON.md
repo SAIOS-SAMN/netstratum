@@ -43,13 +43,20 @@ partition needs:
 | 5 | ⊚ | pelagic-aerial (volumetric biotic) | Echowright, Eightfold, Hadal, Aerie, Frostwright |
 | 6 | ∿ | plasma-field (plasmic/energy) | Coronal Choir, Borealis |
 | 7 | ▲ | apex-solitary (solitary apex; was "terrestrial") | Lyran, Anunnaki |
+| **8** | ⟺ | **corridor-nomad** (transit / corridor specialists) | open |
+| **9** | ▼ | **abyssal-pressure** (trench / deep-pressure life) | open |
+| **10** | ◆ | **crystal-mind** (compute / lattice intelligence) | open |
+| **11** | ※ | **void-swarm** (vacuum eusocial — distinct from biotic-swarm) | open |
+| **12** | ❄ | **thermal-banker** (sink / joule specialists) | open |
+| **13** | ☯ | **mirror-form** (reflection / dual-state — balances metashifter) | open |
+
+**Class ceiling: 13** (`dop::class_ceiling`, raised 2026-08-08 — six balance tiers).
 
 > **THE TABLES ABOVE AND BELOW BECOME A SEED, not the whole**
 > (`28_VOCABULARY`, design 2026-08-05). The class and clade vocabularies
 > are closed today and raisable only by a coder. The design folds them
 > from the chain — compiled seed ∪ chain-minted growth — so a T0
-> progenitor may mint an entry by receipt. Nothing here changes until
-> that deed is ruled; the tables stay the authority meanwhile.
+> progenitor may mint an entry by receipt.
 
 ## 3. The clade vocabulary (proposed, from the live register)
 
@@ -58,14 +65,23 @@ forward (18 gastropod — the register awaits its snail):
 
 **Display words (imperium — `37_IMPERIUM_TAXON`; wire codes stable):**
 
+**Legacy 1–20 (imperium display):**
+
 1 ailuroform · 2 bimaniform · 3 cryocoherens · 4 lithophage · 5 hypobiotid ·
 6 soniform · 7 polybrachia · 8 hexasocial · 9 amphiform · 10 mycotiform ·
 11 cnidiform · 12 plasmiform · 13 syzygiform · 14 endolithid · 15 volatiform ·
-16 actinoform · 17 revenid · 18 heliciform (reserved) · **19 draconiform** ·
-**20 metamorphid**.
+16 actinoform · 17 revenid · 18 heliciform · **19 draconiform** · **20 metamorphid**.
 
-*(Legacy English: felid/humanoid/cetacean/cephalopod/hymenopteran… still
-parse as aliases; never use Earth common animals as display.)*
+**Expansion 21–254 — 18 taxons per class tier** (u8 max; target 25 needs u16):
+
+```text
+code = 20 + (class − 1) × 18 + slot    // class 1..=13, slot 1..=18
+```
+
+Examples: class 1 → `swarm-alpha`…`swarm-sigma`; class 8 → `corridor-alpha`…;
+class 13 → `mirror-sigma` (code 254). See `almanac::taxon_table::expansion_clade`.
+
+**Clade ceiling: 254.** *(Legacy English aliases still parse.)*
 
 **19 draconic — a SUB-ARCHETYPE, not a peer line** (operator ruling
 2026-08-01). The draconic clade seats inside class 4

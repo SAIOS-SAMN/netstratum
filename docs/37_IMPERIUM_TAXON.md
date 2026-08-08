@@ -10,8 +10,9 @@
 
 | Layer | Codes | What |
 |-------|-------|------|
-| **Class** | 0–7 | Archetype mechanism (`15` §2) |
-| **Clade** | 0–20 | Body expression (`15` §3 · imperium words) |
+| **Class** | 0–**13** | Archetype mechanism (`15` §2 · +6 balance tiers) |
+| **Clade** | 0–**254** | Body expression (`15` §3 · 18 expansion × 13 classes) |
+| **Office tier** | T0–**T15** | Station function (`30` · +6 balance tiers) |
 | **Metabolism** | 1 mineral · 2 biotic · 3 plasmic | Food (`04` genesis) |
 | **Economic mode** | derived | extractive · regenerative · **balanced** |
 | **Planet fit** | derived | native · tolerant · hostile |

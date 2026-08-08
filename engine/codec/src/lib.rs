@@ -784,7 +784,8 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         let held = take.u8()?;
         for _ in 0..held {
             let station = take.u8()?;
-            if station == 0 || station > 4 {
+            // Stations 1..=16 (T0–T15); 0 unlawful.
+            if station == 0 || station > 16 {
                 return None;
             }
             let len = usize::from(take.u8()?);

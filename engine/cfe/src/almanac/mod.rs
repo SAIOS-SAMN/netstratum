@@ -25,6 +25,7 @@ pub mod locality;
 pub mod periodic;
 pub mod science;
 pub mod taxon_economy;
+pub mod taxon_table;
 pub mod thermal;
 
 pub use compound::{compounds, gem_of, knowledge_of, recipe_of, Compoundable};
@@ -42,6 +43,13 @@ pub use taxon_economy::{
     flatlander_species, flatlander_word, habitat_yield_scale, is_flatlander_baseline, planet_fit,
     regen_yield_scale, regenerator_tech_need, research_affinity_mult, taxon_economy, EconomicMode,
     PlanetFit, TaxonEconomy, FLATLANDER_CLADE,
+};
+pub use taxon_table::{
+    archetype_sigil as table_archetype_sigil, archetype_word as table_archetype_word,
+    class_ceiling as table_class_ceiling, class_taxon_capacity, clade_ceiling as table_clade_ceiling,
+    clade_from_word as table_clade_from_word, clade_word as table_clade_word, expansion_clade,
+    expansion_class_of, expansion_slot_of, office_seat_bonus, CLADE_EXPAND_SLOTS,
+    CLADE_EXPAND_TARGET, CLADE_LEGACY_MAX,
 };
 pub use thermal::{
     ceiling4, grained_t_eq4, orbit_on_grain, region_of, workable_at, ThermalRegion, ORBIT_GRAIN,

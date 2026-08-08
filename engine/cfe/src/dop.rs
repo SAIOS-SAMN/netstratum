@@ -595,6 +595,18 @@ pub enum Station {
     Vault = 9,
     /// T9 Anchor — R3/R4 external settlement.
     Anchor = 10,
+    /// T10 Herald — diplomacy mesh / information service.
+    Herald = 11,
+    /// T11 Lattice — research / knowledge office.
+    Lattice = 12,
+    /// T12 Chorus — culture / literature office.
+    Chorus = 13,
+    /// T13 Warden — defense / medium envelope office.
+    Warden = 14,
+    /// T14 Foundry — deep industrial (balances Crucible).
+    Foundry = 15,
+    /// T15 Nexus — interstellar / union coordination.
+    Nexus = 16,
 }
 
 impl Station {
@@ -611,6 +623,12 @@ impl Station {
             8 => Some(Station::Assay),
             9 => Some(Station::Vault),
             10 => Some(Station::Anchor),
+            11 => Some(Station::Herald),
+            12 => Some(Station::Lattice),
+            13 => Some(Station::Chorus),
+            14 => Some(Station::Warden),
+            15 => Some(Station::Foundry),
+            16 => Some(Station::Nexus),
             _ => None,
         }
     }
@@ -630,6 +648,12 @@ impl Station {
             Station::Assay => "assay",
             Station::Vault => "vault",
             Station::Anchor => "anchor",
+            Station::Herald => "herald",
+            Station::Lattice => "lattice",
+            Station::Chorus => "chorus",
+            Station::Warden => "warden",
+            Station::Foundry => "foundry",
+            Station::Nexus => "nexus",
         }
     }
     pub fn from_word(word: &str) -> Option<Station> {
@@ -644,6 +668,12 @@ impl Station {
             "assay" => Some(Station::Assay),
             "vault" => Some(Station::Vault),
             "anchor" => Some(Station::Anchor),
+            "herald" => Some(Station::Herald),
+            "lattice" => Some(Station::Lattice),
+            "chorus" => Some(Station::Chorus),
+            "warden" => Some(Station::Warden),
+            "foundry" => Some(Station::Foundry),
+            "nexus" => Some(Station::Nexus),
             _ => None,
         }
     }
@@ -914,27 +944,18 @@ pub fn veil_toll() -> Ratio {
     crate::parameter::Parameter::VeilToll.seed()
 }
 
-/// KERNEL-TAXON (15 §2): the ratified class-vocabulary ceiling —
-/// codes 1..=7, 0 lawful-unclassed; raised only by amendment.
+/// KERNEL-TAXON (15 §2 / 37): class-vocabulary ceiling.
+/// **RAISED 7 → 13 (2026-08-08)** — six balance tiers (corridor-nomad …
+/// mirror-form). Codes 1..=13; 0 lawful-unclassed.
 pub fn class_ceiling() -> u8 {
-    7
+    crate::almanac::taxon_table::class_ceiling()
 }
 
-/// KERNEL-TAXON (15 §3): the ratified clade-vocabulary ceiling —
-/// codes 1..=20, 0 unrecorded; raised only by amendment.
-///
-/// **RAISED 18 → 20 (2026-08-05), paying a landed ruling the ceiling had
-/// outgrown.** `15_TAXON` §3 seated two more clades on 2026-08-01 by
-/// operator ruling — **19 draconic** (a sub-archetype inside class 4,
-/// *one archetype, two expressions*) and **20 metashifting** (the Darlok
-/// seat, class 3, FILLED) — and this constant was not raised with them.
-/// `seal_taxon` refuses anything above the ceiling, so both ruled clades
-/// were unsealable: the rulings existed on paper and the deed that
-/// records them could not be done. Found when the compiled roster
-/// (THE DEFINITION LAW) began carrying `draconic` and `metashifting` as
-/// live clade words.
+/// KERNEL-TAXON (15 §3 / 37): clade-vocabulary ceiling.
+/// **RAISED 20 → 254 (2026-08-08)** — 18 expansion taxons × 13 class tiers
+/// under u8 wire (20 + 13×18 = 254). Target 25/class needs u16 later.
 pub fn clade_ceiling() -> u8 {
-    20
+    crate::almanac::taxon_table::clade_ceiling()
 }
 
 /// **THE ARCHETYPE SIGILS** (operator ruling 2026-08-05: *sigil is
@@ -951,17 +972,7 @@ pub fn clade_ceiling() -> u8 {
 /// Compiled, never filed: the class partition is a DEFINITION, and
 /// definitions compile (`conductor::polities`, THE DEFINITION LAW).
 pub fn archetype_sigil(class: u8) -> &'static str {
-    match class {
-        0 => "∅",  // unclassed — the empty class, lawful and occupied by nothing
-        1 => "⬡",  // biotic-swarm — the cell that tiles: many bodies, one lattice
-        2 => "◈",  // geodic-lithovore — the faceted solid, eaten and rebuilt
-        3 => "◐",  // metashifter — the half-lit disc: form unfixed
-        4 => "≋",  // telepathic-resonant — phases in agreement
-        5 => "⊚",  // pelagic-aerial — a body free inside a medium
-        6 => "∿",  // plasma-field — the field's own oscillation
-        7 => "▲",  // apex-solitary — the solitary peak (not Earth-"terrestrial")
-        _ => "?",
-    }
+    crate::almanac::taxon_table::archetype_sigil(class)
 }
 
 /// The class WORD for a code — the vocabulary the sigil marks.
@@ -975,17 +986,7 @@ pub fn archetype_sigil(class: u8) -> &'static str {
 /// The mechanism is a plasma: current sheets, magnetohydrodynamics, the
 /// `plasmic` metabolism the axis vocabulary already carries.
 pub fn archetype_word(class: u8) -> &'static str {
-    match class {
-        0 => "unclassed",
-        1 => "biotic-swarm",
-        2 => "geodic-lithovore",
-        3 => "metashifter",
-        4 => "telepathic-resonant",
-        5 => "pelagic-aerial",
-        6 => "plasma-field",
-        7 => "apex-solitary", // was apex-terrestrial — Earth-default struck (37)
-        _ => "unknown",
-    }
+    crate::almanac::taxon_table::archetype_word(class)
 }
 
 /// **THE LINE WORD-TABLES** — the compiled base vocabulary a minted

@@ -295,8 +295,9 @@ fn the_seats_are_space_not_rank() {
     let root = scratch("registry-band");
     let registry = Registry::at(&root);
 
-    // Fill the lithic progenitor room: 8 mineral-line seats.
-    for n in 0..8 {
+    // Fill the lithic progenitor room (base 8 + 25 expansion = 33).
+    let width = ledger::registry::seat_width("progenitor").expect("w");
+    for n in 0..width {
         let mut elder = humans();
         elder.name = format!("Elder {n}");
         elder.sigil = format!("elder-{n}");
@@ -304,18 +305,18 @@ fn the_seats_are_space_not_rank() {
         elder.station = Some("progenitor".into());
         registry.create(&elder).expect("a seat stands open");
     }
-    // The ninth: the room is FULL — a room filled, not a rank refused.
-    let mut ninth = humans();
-    ninth.sigil = "ninth".into();
-    ninth.metabolism = "mineral".into();
-    ninth.station = Some("progenitor".into());
+    // One past width: the room is FULL — a room filled, not a rank refused.
+    let mut overflow = humans();
+    overflow.sigil = "ninth".into();
+    overflow.metabolism = "mineral".into();
+    overflow.station = Some("progenitor".into());
     assert_eq!(
-        registry.create(&ninth),
+        registry.create(&overflow),
         Err(RegistryRefused::NoSeatOpen {
             station: "progenitor".into(),
             domain: "lithic".into(),
-            held: 8,
-            width: 8,
+            held: width,
+            width,
         })
     );
 
@@ -490,6 +491,12 @@ fn the_ladder_reads_as_ruled() {
     assert_eq!(tier_of(Some("assay")), Some(Tier::T7));
     assert_eq!(tier_of(Some("vault")), Some(Tier::T8));
     assert_eq!(tier_of(Some("anchor")), Some(Tier::T9));
+    assert_eq!(tier_of(Some("herald")), Some(Tier::T10));
+    assert_eq!(tier_of(Some("lattice")), Some(Tier::T11));
+    assert_eq!(tier_of(Some("chorus")), Some(Tier::T12));
+    assert_eq!(tier_of(Some("warden")), Some(Tier::T13));
+    assert_eq!(tier_of(Some("foundry")), Some(Tier::T14));
+    assert_eq!(tier_of(Some("nexus")), Some(Tier::T15));
 }
 
 /// AN UNREADABLE SEAT REFUSES. It must not fall through to the common —
@@ -514,6 +521,7 @@ fn serving_seats_are_the_seated_offices() {
     for seated in [
         "progenitor", "watcher", "observer", "sovereign",
         "caravan", "crucible", "exchange", "assay", "vault", "anchor",
+        "herald", "lattice", "chorus", "warden", "foundry", "nexus",
     ] {
         assert_eq!(holds_a_serving_seat(Some(seated)), Some(true), "{seated} did not read as seated");
     }
@@ -521,16 +529,18 @@ fn serving_seats_are_the_seated_offices() {
     assert_eq!(holds_a_serving_seat(Some("nonesuch")), None, "an unknown seat answered a gate");
 }
 
-/// T1.3 — seat widths for the economic offices (Q-T1 default 16;
-/// Anchor unbounded like Sovereign).
+/// T1.3 — seat widths for the economic offices (base + 25 expansion;
+/// Anchor/Sovereign/Nexus unbounded).
 #[test]
 fn economic_office_seat_widths() {
     use ledger::registry::seat_width;
-    for office in ["caravan", "crucible", "exchange", "assay", "vault"] {
-        assert_eq!(seat_width(office), Some(16), "{office} width");
+    for office in ["caravan", "crucible", "exchange", "assay", "vault", "herald", "lattice"] {
+        assert_eq!(seat_width(office), Some(41), "{office} width = 16+25");
     }
     assert_eq!(seat_width("anchor"), None, "anchor is unbounded");
     assert_eq!(seat_width("sovereign"), None, "sovereign is unbounded");
+    assert_eq!(seat_width("nexus"), None, "nexus is unbounded");
+    assert_eq!(seat_width("progenitor"), Some(33), "progenitor = 8+25");
 }
 
 /// T1.2 — typed preconditions name the cure; band-1 offices need none.
@@ -561,31 +571,34 @@ fn office_preconditions_name_the_cure() {
     );
     let crossed = OfficeEvidence { has_crossed: true, ..Default::default() };
     assert!(office_preconditions("anchor", &crossed).is_ok());
+    assert!(office_preconditions("herald", &crossed).is_ok());
+    assert!(office_preconditions("nexus", &crossed).is_ok());
 }
 
-/// T1.3 — NoSeatOpen for caravan when the room is full (width 16).
+/// T1.3 — NoSeatOpen for caravan when the room is full (width 16+25).
 #[test]
 fn caravan_room_fills_at_width_sixteen() {
     use ledger::registry::{Registry, RegistryRefused};
     let root = scratch("caravan-room");
     let registry = Registry::at(&root);
-    for n in 0..16 {
+    let width = ledger::registry::seat_width("caravan").expect("w");
+    for n in 0..width {
         let mut line = humans();
         line.name = format!("Caravan {n}");
         line.sigil = format!("caravan-{n}");
         line.station = Some("caravan".into());
         registry.create(&line).expect("a seat stands open");
     }
-    let mut seventeenth = humans();
-    seventeenth.sigil = "caravan-full".into();
-    seventeenth.station = Some("caravan".into());
+    let mut overflow = humans();
+    overflow.sigil = "caravan-full".into();
+    overflow.station = Some("caravan".into());
     assert_eq!(
-        registry.create(&seventeenth),
+        registry.create(&overflow),
         Err(RegistryRefused::NoSeatOpen {
             station: "caravan".into(),
             domain: "mesic".into(),
-            held: 16,
-            width: 16,
+            held: width,
+            width,
         })
     );
 }

@@ -159,9 +159,9 @@ fn regenerative_soft_tech_and_extractor_cap_on_hostile() {
 
 #[test]
 fn each_founding_clade_has_a_mode() {
-    // All lawful clades 1..=20 produce a mode (no panic / unknown).
+    // All lawful class×clade pairs produce a mode.
     for clade in 1u8..=20 {
-        for class in 1u8..=7 {
+        for class in 1u8..=13 {
             let m = economic_mode(class, clade);
             assert!(matches!(
                 m,
@@ -180,5 +180,44 @@ fn all_imperium_clade_words_round_trip() {
             continue;
         }
         assert_eq!(clade_from_word(w), Some(code), "round-trip {w}");
+    }
+}
+
+#[test]
+fn expansion_taxons_per_class_and_ceilings() {
+    use cfe::almanac::{
+        expansion_clade, expansion_class_of, CLADE_EXPAND_SLOTS, CLADE_EXPAND_TARGET,
+    };
+    assert_eq!(cfe::dop::class_ceiling(), 13);
+    assert_eq!(cfe::dop::clade_ceiling(), 254);
+    assert_eq!(CLADE_EXPAND_TARGET, 25, "target remains 25 for u16 later");
+    assert_eq!(CLADE_EXPAND_SLOTS, 18, "u8-fit slots per class");
+    // 18 expansion taxons in every class tier 1..=13
+    for class in 1u8..=13 {
+        for slot in 1u8..=CLADE_EXPAND_SLOTS {
+            let code = expansion_clade(class, slot).expect("slot");
+            assert_eq!(expansion_class_of(code), Some(class));
+            let w = clade_word(code);
+            assert_ne!(w, "unknown", "class {class} slot {slot}");
+            assert_eq!(clade_from_word(w), Some(code));
+            // Mode inherits class colour
+            let m = economic_mode(class, code);
+            assert!(matches!(
+                m,
+                EconomicMode::Extractive | EconomicMode::Regenerative | EconomicMode::Balanced
+            ));
+        }
+    }
+    assert_eq!(expansion_clade(1, 1), Some(21));
+    assert_eq!(expansion_clade(13, 18), Some(254));
+}
+
+#[test]
+fn six_new_class_tiers_named() {
+    for class in 8u8..=13 {
+        let w = cfe::dop::archetype_word(class);
+        assert_ne!(w, "unknown");
+        let s = cfe::dop::archetype_sigil(class);
+        assert_ne!(s, "?");
     }
 }
