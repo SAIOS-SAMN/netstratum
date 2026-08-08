@@ -1074,6 +1074,11 @@ InstrumentSabotaged; intel stash (no free tech mint); probe gate; NPC
 
 **P5.19b + P5-G + P5-H LANDED:** medium residual voice + reinforce resource
 by metabolism; tag **148** `RailPromoted` R1→R2; R3/R4 behind
-`deep-rail-strand` / `deep-rail-court` + T9 Anchor; close-out pin; kernel
-**0.33.0**. Phase 5 **core complete** (external X7 adapters optional).
+`deep-rail-strand` / `deep-rail-court` + T9 Anchor; close-out pin.
+
+**X7 adapters LANDED (in-tree):** `cfe::xrail` strand / isthmus / datum pure
+schemas; tags **149–151** StrandExported / AnchorImported /
+AnchorImportRefused; feature-gated export/import; kernel **0.34.0**; pins
+`xrail_pins` (+ `--features xrail-test` for full round-trip). No path dep
+on external strand/isthmus/datum crates.
 

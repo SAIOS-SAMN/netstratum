@@ -69,6 +69,7 @@ pub mod intel;
 pub mod cog_cyb;
 pub mod espionage;
 pub mod deep_rails;
+pub mod xrail_deeds;
 
 pub use defense::{CorridorFog, DefenseDomain, DefensePosture, KinIntegrity, RiskBand};
 pub use market_defense::{

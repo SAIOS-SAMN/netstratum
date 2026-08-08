@@ -1078,6 +1078,25 @@ pub fn render_receipt(receipt: &Receipt) -> String {
             "rail_promoted",
             format!("deal {deal} rail {from_rail}→{to_rail}"),
         ),
+        E::StrandExported {
+            amount,
+            kind,
+            ..
+        } => (
+            "strand_export",
+            format!("export kind {kind} amount {}", ratio_str(amount)),
+        ),
+        E::AnchorImported {
+            amount,
+            kind,
+            ..
+        } => (
+            "anchor_import",
+            format!("import kind {kind} amount {}", ratio_str(amount)),
+        ),
+        E::AnchorImportRefused { reason, .. } => {
+            ("anchor_refuse", format!("import refused reason {reason}"))
+        }
         E::ApertureSent { deal, from_orb, resource, amount } => (
             "aperture_sent",
             format!(

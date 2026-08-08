@@ -2,8 +2,8 @@
 
 **Status:** **PARTIAL LAND — Phase 5 core complete** (2026-08-08).  
 A–F · K2 · M/M2 · dual-use · 19b medium colour · G (R1–R2 + optional R3/R4
-features) · H close-out. Optional external strand/datum adapters remain
-on the tier board. Next free tag **149**.  
+features) · H close-out · **X7** in-tree strand/isthmus/datum adapters.
+Next free tag **152**.  
 **Authority:** `00_CHARTER`, `04_CIVILIZATION_GENESIS`, `05_THERMAL_BALANCE`,
 `06_CIVILIZATIONS`, `10_TECH_EMERGENCE` (TERRA-1, WARDEN-1, MASK-1, MANU-1),
 `14_ALMANAC`, `15_TAXON`, `33_TRADE_FLEET_AND_DESK` §Phase 5,
@@ -381,7 +381,8 @@ without free dials (§12); P5-G never blocks R1–R2 fun.
 | **144** | P5-B PostureReoriented (doctrine shift; anatomy sealed) |
 | **145–147** | P5-F SpyProbed / TechExfiltrated / InstrumentSabotaged |
 | **148** | P5-G RailPromoted |
-| **149+** | next free |
+| **149–151** | X7 StrandExported / AnchorImported / AnchorImportRefused |
+| **152+** | next free |
 | no float | all residuals exact rational |
 
 ### 6.2 Non-goals

@@ -2893,6 +2893,91 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 Err(refusal) => refuse(world, &refusal, style),
             }
         },
+        // X7 Anchor export/import (feature-gated deeds)
+        Some("anchor") => match words.next() {
+            None | Some("status") | Some("help") => {
+                let d = world.deep_rail_status();
+                println!(
+                    "{} ANCHOR — seated={} · strand_feat={} · court_feat={}",
+                    style.head("T9"),
+                    d.anchor_seated,
+                    d.strand_enabled,
+                    d.court_enabled
+                );
+                println!(
+                    "  {}",
+                    style.hint(
+                        "anchor export-stamp <p>/<q> · anchor import-strand <hex> · import-court <hex>"
+                    )
+                );
+            }
+            Some("export-stamp") | Some("export") => {
+                let amt = words
+                    .next()
+                    .and_then(parse_ratio_arg)
+                    .and_then(cfe::dop::Positive::new);
+                match amt {
+                    Some(a) => {
+                        let shown = amount(a.value());
+                        match world.export_stamp_strand(*current, a) {
+                            Ok(pkt) => {
+                                let _ = sync_world(world);
+                                println!(
+                                    "{} exported {shown} STAMP · packet {} bytes",
+                                    style.ok("STRAND"),
+                                    pkt.len()
+                                );
+                            }
+                            Err(refusal) => refuse(world, &refusal, style),
+                        }
+                    }
+                    None => println!(
+                        "{} usage: {}",
+                        style.bad("✗"),
+                        style.strong("anchor export-stamp <p>/<q>")
+                    ),
+                }
+            }
+            Some("import-strand") => {
+                let hx = words.next().unwrap_or("");
+                match decode_hex_bytes(hx) {
+                    Some(bytes) => match world.import_anchor_strand(*current, &bytes) {
+                        Ok(a) => {
+                            let _ = sync_world(world);
+                            println!(
+                                "{} imported {} STAMP via strand proof",
+                                style.ok("ANCHOR"),
+                                amount(&a)
+                            );
+                        }
+                        Err(refusal) => refuse(world, &refusal, style),
+                    },
+                    None => println!("{} need hex packet bytes", style.bad("✗")),
+                }
+            }
+            Some("import-court") => {
+                let hx = words.next().unwrap_or("");
+                match decode_hex_bytes(hx) {
+                    Some(bytes) => match world.import_anchor_court(*current, &bytes) {
+                        Ok(a) => {
+                            let _ = sync_world(world);
+                            println!(
+                                "{} imported {} STAMP via court proof",
+                                style.ok("ANCHOR"),
+                                amount(&a)
+                            );
+                        }
+                        Err(refusal) => refuse(world, &refusal, style),
+                    },
+                    None => println!("{} need hex isthmus frame", style.bad("✗")),
+                }
+            }
+            Some(other) => println!(
+                "{} anchor {:?} — status|export-stamp|import-strand|import-court",
+                style.bad("✗"),
+                other
+            ),
+        },
         // P5-G deep rails
         Some("rail") | Some("rails") => match words.next() {
             None | Some("status") | Some("help") => {
@@ -6410,6 +6495,17 @@ fn parse_domain(word: &str) -> Option<u8> {
     }
 }
 
+fn decode_hex_bytes(s: &str) -> Option<Vec<u8>> {
+    let s = s.trim();
+    if !s.len().is_multiple_of(2) || s.is_empty() {
+        return None;
+    }
+    (0..s.len())
+        .step_by(2)
+        .map(|i| u8::from_str_radix(&s[i..i + 2], 16).ok())
+        .collect()
+}
+
 fn disposition_name(code: u8) -> &'static str {
     match code {
         1 => "expansionist",
@@ -6857,6 +6953,9 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
         ),
         ActionRefused::AnchorRequired { rail } => format!(
             "R{rail} exit needs T9 Anchor seated — `seat anchor` first"
+        ),
+        ActionRefused::AnchorProofInvalid { reason } => format!(
+            "Anchor rejected proof (reason {reason}) — bad strand/isthmus/datum frame"
         ),
         ActionRefused::BalanceEntropyDominates {
             balance,
@@ -8318,6 +8417,19 @@ fn chronicle(world: &World, style: &Style) {
                 "⬆ rail deal {} R{}→R{}",
                 deal, from_rail, to_rail
             ),
+            cfe::dop::ClosureEvent::StrandExported {
+                amount: a,
+                kind,
+                ..
+            } => format!("↗ strand export kind {kind} amount {}", amount(a)),
+            cfe::dop::ClosureEvent::AnchorImported {
+                amount: a,
+                kind,
+                ..
+            } => format!("↙ Anchor import kind {kind} amount {}", amount(a)),
+            cfe::dop::ClosureEvent::AnchorImportRefused { reason, .. } => {
+                format!("⊘ Anchor import refused reason {reason}")
+            }
             cfe::dop::ClosureEvent::AssayStruck { amount: drawn, richness, .. } => format!(
                 "⚖ {} drawn from the opened vein — one receipt, the whole span{}",
                 style.strong(&amount(drawn)),

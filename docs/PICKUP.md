@@ -15,16 +15,16 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 |------|--------|
 | Wave-1 commit | **`2109bf0`** (T4–T9, REFINE-1) |
 | Wave-2 commit | **`4686399`** (E-APT, element_trade_step) |
-| Kernel | **0.33.0** (next free minor **34**) |
-| Next free tag | **149** (P5-G 148 RailPromoted) |
+| Kernel | **0.34.0** (next free minor **35**) |
+| Next free tag | **152** (X7 149–151 strand/import) |
 | Stations | **10** (T4–T9 economic offices open) |
 | ZoneKind compiled | **1–10** (ShipYard = 10) |
 | Codec | **SCHEMA_V13** (… + intel_hashes · spy_marks) |
 | Pure-NPC green | market_war · kin · espionage_step · instrument · ATM |
-| **Phase 5 core** | **COMPLETE** — A–F · K2 · M/M2 · 19b · G(R1–R2) · H |
-| **Optional open** | external strand/datum adapters (X7) · hull lease Q-F6 |
-| Docs | `36` PARTIAL LAND (core complete); trade Phases **1–5 core** |
-| Help | `rail promote` · `spy` · `medium` · `suite *` · full DEFEND |
+| **Phase 5 core** | **COMPLETE** — A–H · K2 · M · dual-use · rails |
+| **X7 adapters** | **LANDED** in-tree (`cfe::xrail`) — no external path dep |
+| **Optional open** | hull lease Q-F6 · live xylarium/isthmus/datum wire peer |
+| Docs | Phases **1–5 core** + X7; help `anchor export-stamp\|import-*` |
 | Dirty / other lane | do not `git add -A` without reviewing observer/other-lane files |
 
 Older §0 counts (809 tests, 71 deeds, tag 95) are **historical**; re-measure

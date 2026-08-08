@@ -277,6 +277,8 @@ pub enum ActionRefused {
     DeepRailGated { rail: u8, feature: &'static str },
     /// P5-G — R3/R4 exit requires T9 Anchor station seated.
     AnchorRequired { rail: u8 },
+    /// X7 — Anchor rejected proof (bad strand/isthmus/datum frame).
+    AnchorProofInvalid { reason: u8 },
     /// THERMAL-1 — siting an orbit needs a commissioned sun first.
     NoStarCommissioned,
     /// THERMAL-1 — the orb is already sited; an orbit does not move.

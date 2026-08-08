@@ -281,6 +281,7 @@ fn colony_help(style: Style) {
     row(style, "medium status|reinforce · tamper", "P5-D ATM + dual-use TERRA tax");
     row(style, "spy status|probe|exfil|sabotage", "P5-F espionage (intel stash, no free tech)");
     row(style, "rail status|promote", "P5-G R1→R2; R3/R4 feature-gated");
+    row(style, "anchor export-stamp|import-strand|import-court", "X7 T9 Anchor (feature-gated)");
     row(style, "suite market|convoy|cyber|spy", "UI over deeds — same chronicle");
     row(style, "prospect · assay · compound · refine", "elements + alchemy");
     println!();

@@ -8,6 +8,11 @@ description = "The Netstratum MUD client — one command launches it (CHARTER §
 name = "netstratum"
 path = "src/main.rs"
 
+[features]
+default = []
+# Enable full X7 export/import pins (forwards cfe deep-rail features).
+xrail-test = ["cfe/deep-rail-strand", "cfe/deep-rail-court"]
+
 [dependencies]
 cfe = { path = "../../engine/cfe" }
 ledger = { path = "../../engine/ledger" }

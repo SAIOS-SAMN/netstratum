@@ -340,7 +340,10 @@
 //!    146  ClosureEvent::TechExfiltrated (P5-F — hash copy; never free tech mint.)
 //!    147  ClosureEvent::InstrumentSabotaged (P5-F — grade hit on held instrument.)
 //!    148  ClosureEvent::RailPromoted (P5-G — element-route rail altitude lift.)
-//!    Phase-5 claim ledger: next free **149**.
+//!    149  ClosureEvent::StrandExported (X7 — STAMP/claim leaves to strand packet.)
+//!    150  ClosureEvent::AnchorImported (X7 — Anchor credits STAMP on valid proof.)
+//!    151  ClosureEvent::AnchorImportRefused (X7 — bad proof residual.)
+//!    Phase-5 claim ledger: next free **152**.
 //!         Orb TLV: 73 STAMP, 74 scrap. ZoneKind::ShipYard = 10.
 //!         (Historic free tags below top: 14, 15, 56, 57, 58, 64, 66,
 //!         83, 84, 87; 9 and 51 reserved; 65 retired forever.)
@@ -2795,6 +2798,22 @@ pub enum ClosureEvent {
         from_rail: u8,
         to_rail: u8,
     },
+    /// X7 (tag 149) — STAMP (or instrument claim) exported to strand wire.
+    StrandExported {
+        orb_id: u64,
+        amount: Ratio,
+        claim_hash: [u8; 32],
+        kind: u8,
+    },
+    /// X7 (tag 150) — Anchor credits STAMP after valid strand/court proof.
+    AnchorImported {
+        orb_id: u64,
+        amount: Ratio,
+        claim_hash: [u8; 32],
+        kind: u8,
+    },
+    /// X7 (tag 151) — Anchor refused a proof (typed residual).
+    AnchorImportRefused { orb_id: u64, reason: u8 },
     /// N4 (NS-2 §1.5) — the scanner's power draw, the ONE chronicle
     /// event of RQP: crystals left the probing orb's bank to hold the
     /// lens open. Deliberately blind to what was asked and what was
@@ -3832,6 +3851,35 @@ impl ClosureEvent {
                 value.push(*from_rail);
                 value.push(*to_rail);
                 tlv::put(148, &value, &mut out);
+            }
+            Self::StrandExported {
+                orb_id,
+                amount,
+                claim_hash,
+                kind,
+            } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                ratio::encode(amount, &mut value);
+                value.extend_from_slice(claim_hash);
+                value.push(*kind);
+                tlv::put(149, &value, &mut out);
+            }
+            Self::AnchorImported {
+                orb_id,
+                amount,
+                claim_hash,
+                kind,
+            } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                ratio::encode(amount, &mut value);
+                value.extend_from_slice(claim_hash);
+                value.push(*kind);
+                tlv::put(150, &value, &mut out);
+            }
+            Self::AnchorImportRefused { orb_id, reason } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.push(*reason);
+                tlv::put(151, &value, &mut out);
             }
             Self::CrystalDrawn { orb_id, amount } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
@@ -4939,6 +4987,37 @@ impl ClosureEvent {
                     from_rail,
                     to_rail,
                 })
+            }
+            149 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let (amount, u1) = ratio::decode(value.get(8..)?)?;
+                let at = 8 + u1;
+                let claim_hash: [u8; 32] = value.get(at..at + 32)?.try_into().ok()?;
+                let kind = *value.get(at + 32)?;
+                Some(Self::StrandExported {
+                    orb_id,
+                    amount,
+                    claim_hash,
+                    kind,
+                })
+            }
+            150 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let (amount, u1) = ratio::decode(value.get(8..)?)?;
+                let at = 8 + u1;
+                let claim_hash: [u8; 32] = value.get(at..at + 32)?.try_into().ok()?;
+                let kind = *value.get(at + 32)?;
+                Some(Self::AnchorImported {
+                    orb_id,
+                    amount,
+                    claim_hash,
+                    kind,
+                })
+            }
+            151 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let reason = *value.get(8)?;
+                Some(Self::AnchorImportRefused { orb_id, reason })
             }
             55 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

@@ -205,7 +205,11 @@ with typed proof; no free external mint.
 
 Netstratum **must not** path-depend on strand/datum for compile of core
 game (`isthmus` client pattern preferred for R4). Optional features:
-`stamp-rail-strand`, `stamp-rail-court`.
+`stamp-rail-strand` / `deep-rail-strand`, `stamp-rail-court` /
+`deep-rail-court`. **X7 land (2026-08-08):** pure adapters live in
+`cfe::xrail` (strand packet · isthmus frame · datum multi-axial verify);
+Anchor export/import deeds tags 149–151. External xylarium/isthmus/datum
+repos remain optional wire peers — not compile deps.
 
 ---
 

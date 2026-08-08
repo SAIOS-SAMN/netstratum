@@ -1334,6 +1334,25 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     r.3 = *to_rail;
                 }
             }
+            ClosureEvent::StrandExported {
+                orb_id,
+                amount,
+                ..
+            } => {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank_stamp(-amount.clone());
+                }
+            }
+            ClosureEvent::AnchorImported {
+                orb_id,
+                amount,
+                ..
+            } => {
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank_stamp(amount.clone());
+                }
+            }
+            ClosureEvent::AnchorImportRefused { .. } => {}
         }
     }
     Committed {

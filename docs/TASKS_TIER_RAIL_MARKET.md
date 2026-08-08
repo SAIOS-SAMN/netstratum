@@ -48,9 +48,9 @@ strand-adapter · isthmus/datum-adapter
 |----|------|---------|------|
 | R2.1 | [x] `Rail` type u8 1..=4 on element routes + wire | D0.5 | tags 110; `Rail::from_wire` |
 | R2.2 | [x] Default R1 (Hearth) on local element charters | R2.1 | SCHEMA_V6 replay |
-| R2.3 | [ ] Promotion deeds R1→R2 (aperture-linked) | R2.1, E-APT-1 | pins |
-| R2.4 | [ ] Feature-gated R3 strand adapter (no hard path dep) | R2.1 | `stamp-rail-strand` builds optional |
-| R2.5 | [ ] Feature-gated R4 isthmus/datum adapter | R2.1 | `stamp-rail-court` builds optional |
+| R2.3 | [x] Promotion deeds R1→R2 (`RailPromoted` 148) | R2.1, E-APT-1 | pins |
+| R2.4 | [x] Feature-gated R3 strand adapter (no hard path dep) | R2.1 | `deep-rail-strand` / `stamp-rail-strand` |
+| R2.5 | [x] Feature-gated R4 isthmus/datum adapter | R2.1 | `deep-rail-court` / `stamp-rail-court` |
 | R2.6 | [ ] Observer RAIL column (max settled rail) | R2.1 | |
 
 ---
@@ -106,7 +106,7 @@ strand-adapter · isthmus/datum-adapter
 | O6.3 | [ ] T6 Exchange: only seated MM may list Share/Note/Fut/Perp | Wave 5, T1.x | |
 | O6.4 | [ ] T7 Assay: consilience challenge / slash path | E3.1 | |
 | O6.5 | [ ] T8 Vault: custody inventory + margin accounts | I5.x | |
-| O6.6 | [ ] T9 Anchor: only exit R3/R4 | R2.4–R2.5 | |
+| O6.6 | [x] T9 Anchor: only exit R3/R4 (seat required for promote/export) | R2.4–R2.5 | pin |
 
 ---
 
@@ -114,11 +114,11 @@ strand-adapter · isthmus/datum-adapter
 
 | ID | Task | Depends | Exit | Repo |
 |----|------|---------|------|------|
-| X7.1 | [ ] Strand schema for STAMP/Note/Share packets | R2.4, S4.1 | round-trip | strand |
-| X7.2 | [ ] Isthmus opaque frame for court claims | R2.5 | no path dep | isthmus |
-| X7.3 | [ ] Datum verify path for R4 work-backed STAMP | X7.2 | reward only on multi-axial close | datum |
-| X7.4 | [ ] Netstratum Anchor import refuses bad proofs | X7.1–X7.3 | pin | netstratum |
-| X7.5 | [ ] End-to-end demo: NPC mint → R2 trade → R3 strand → R4 optional | all | scripted | multi |
+| X7.1 | [x] Strand schema STAMP/Note/Share (`cfe::xrail::strand`) | R2.4, S4.1 | round-trip | netstratum |
+| X7.2 | [x] Isthmus opaque frame (`cfe::xrail::isthmus`) | R2.5 | no path dep | netstratum |
+| X7.3 | [x] Datum multi-axial verify (`cfe::xrail::datum`) | X7.2 | multi-axial close | netstratum |
+| X7.4 | [x] Anchor import refuses bad proofs (tags 149–151) | X7.1–X7.3 | pin | netstratum |
+| X7.5 | [x] E2E pin: export/import stamp + court (feature `xrail-test`) | all | `xrail_pins` | netstratum |
 
 ---
 
@@ -144,7 +144,7 @@ strand-adapter · isthmus/datum-adapter
 [x] S4.1–S4.4 STAMP + spot + NPC MM          ← Wave-4 this land
 [x] R2.1–R2.2 Rail type + default R1         ← this land
 [x] O6.1–O6.2 Caravan/Crucible advantages    ← this land
-[ ] R2.3 promotion R1→R2                     ← open
+[x] R2.3–R2.5 + X7.1–X7.5 adapters           ← landed (feature-gated R3/R4)
 [ ] S4.5–S4.6 CLI + observer STAMP           ← open
 ```
 

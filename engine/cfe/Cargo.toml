@@ -11,12 +11,15 @@ num-bigint.workspace = true
 num-rational.workspace = true
 num-traits.workspace = true
 
-# Optional deep rails (P5-G): enable without forcing external adapters.
-# Default off — R1/R2 always lawful; R3/R4 promote only with these flags.
+# Optional deep rails / X7 adapters: enable without forcing external repos.
+# Default off — R1/R2 always lawful; R3/R4 + Anchor export/import optional.
 [features]
 default = []
 deep-rail-strand = []
 deep-rail-court = ["deep-rail-strand"]
+# Doc aliases (TASKS_TIER X7 / 32_STAMP_MARKET).
+stamp-rail-strand = ["deep-rail-strand"]
+stamp-rail-court = ["deep-rail-court"]
 
 [dev-dependencies]
 # THE FRAME TIE (2026-08-05): the solver names base-11 from below this

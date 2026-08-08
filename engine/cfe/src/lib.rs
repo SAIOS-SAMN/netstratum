@@ -35,3 +35,4 @@ pub mod treaty;
 pub mod vocabulary;
 pub mod vrp;
 pub mod world;
+pub mod xrail;
