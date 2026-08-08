@@ -91,7 +91,13 @@ fn foot_trade(style: &Style, parent: Option<&str>) {
 // ── BENCH ────────────────────────────────────────────────────────────
 
 /// `bench [domain [leaf…]]` — make / modify / know / link hub.
-pub fn bench(world: &World, mut words: impl Iterator<Item = String>, style: &Style, current: u64) {
+/// Takes `&mut World` so deep leaves can fire deeds (forge, probe, …).
+pub fn bench(
+    world: &mut World,
+    mut words: impl Iterator<Item = String>,
+    style: &Style,
+    current: u64,
+) {
     let domain = words.next();
     if is_back(domain.as_deref()) {
         bench_index(style);
@@ -203,7 +209,7 @@ fn bench_index(style: &Style) {
 }
 
 fn planetary(
-    world: &World,
+    world: &mut World,
     mut words: impl Iterator<Item = String>,
     style: &Style,
     current: u64,
@@ -264,7 +270,7 @@ fn planetary(
 }
 
 fn build_bench(
-    world: &World,
+    world: &mut World,
     mut words: impl Iterator<Item = String>,
     style: &Style,
     current: u64,
@@ -301,7 +307,7 @@ fn build_bench(
 }
 
 fn star_bench(
-    world: &World,
+    world: &mut World,
     mut words: impl Iterator<Item = String>,
     style: &Style,
     current: u64,
@@ -345,7 +351,7 @@ fn star_bench(
 }
 
 fn chem_bench(
-    world: &World,
+    world: &mut World,
     mut words: impl Iterator<Item = String>,
     style: &Style,
     current: u64,
@@ -424,10 +430,35 @@ fn chem_bench(
             }
         }
         println!();
+        if let Some((_, _, _, standing, survival, dark, net)) = rows.first() {
+            let pull = if *dark > *survival {
+                "dark gravity leading — immediate need"
+            } else {
+                "survival utility leading — long-term civ need"
+            };
+            println!(
+                "  {} top net {} · {}",
+                style.warn("NEXT"),
+                amount(net),
+                pull
+            );
+            if standing.is_some() {
+                println!(
+                    "  {}",
+                    style.dim("top set place-refuses — site heat / pressure / locality")
+                );
+            } else {
+                println!(
+                    "  {}",
+                    style.dim("compound the top set · or iso/catalog to deepen creation")
+                );
+            }
+        }
         leaf(style, "compound <p> <p> …", "bond set");
         leaf(style, "iso <a> <b>", "isomorphic union");
         leaf(style, "catalog <gem>", "chemical creation");
         leaf(style, "bench chem bonds", "unranked standing list");
+        leaf(style, "bench intel", "ENVY pull from spy/intel stash");
         foot_bench(style, Some("chem"));
     } else {
         banner(style, "BENCH › CHEM — bond standing");
@@ -461,7 +492,7 @@ fn chem_bench(
 }
 
 fn econ_bench(
-    world: &World,
+    world: &mut World,
     mut words: impl Iterator<Item = String>,
     style: &Style,
     _current: u64,
@@ -507,7 +538,7 @@ fn econ_bench(
 }
 
 fn research_bench(
-    world: &World,
+    world: &mut World,
     mut words: impl Iterator<Item = String>,
     style: &Style,
     current: u64,
@@ -517,47 +548,100 @@ fn research_bench(
         bench_index(style);
         return;
     }
-    banner(style, "BENCH › RESEARCH — tech · forge · practice");
-    let techs = world
-        .committed()
-        .techs
-        .iter()
-        .filter(|(o, _, _, _)| *o == current)
-        .count();
-    let instruments = world
-        .committed()
-        .instruments
-        .iter()
-        .filter(|(o, _, _)| *o == current)
-        .count();
-    let practices = world.committed().practices.len();
-    let wants = world.wants().len();
+    // Deep deed: bench research forge <condition>
+    if matches!(leaf_w.as_deref(), Some("forge")) {
+        let cond = words.next().and_then(|w| w.parse::<u8>().ok());
+        match cond.and_then(cfe::world::survey::ForgeableGrade::new) {
+            Some(g) => match world.forge_instrument(current, g) {
+                Ok(()) => {
+                    println!(
+                        "{} forged instrument grade {} — detection now {}",
+                        style.ok("◈"),
+                        g.condition(),
+                        world.detection_grade()
+                    );
+                }
+                Err(e) => println!("{} forge refused: {e:?}", style.bad("✗")),
+            },
+            None => println!(
+                "{} usage: {} — crystallized/crown condition only",
+                style.bad("✗"),
+                style.strong("bench research forge <condition>")
+            ),
+        }
+        // re-show board after deed
+    }
+    if matches!(leaf_w.as_deref(), Some("practice")) {
+        let code = words.next().and_then(|w| w.parse::<u8>().ok());
+        match code {
+            Some(p) => match world.adopt_practice(p) {
+                Ok(()) => println!("{} practice {p} adopted", style.ok("◈")),
+                Err(e) => println!("{} practice refused: {e:?}", style.bad("✗")),
+            },
+            None => println!(
+                "{} usage: {}",
+                style.bad("✗"),
+                style.strong("bench research practice <1..5>")
+            ),
+        }
+    }
+
+    let board = world.research_board(current);
+    banner(style, "BENCH › RESEARCH — constellation game");
     println!(
-        "  tech nodes {} · instruments {} · practices {} · open wants {}",
-        techs, instruments, practices, wants
+        "  held {} · forge-ready {} · instruments {} · practices {} · wants {}",
+        board.held_count,
+        board.forgeable_ready,
+        board.instruments,
+        board.practices,
+        board.wants
     );
-    if wants > 0 {
+    if board.novelty_blocked {
         println!(
             "  {}",
-            style.warn("cognitive want live — novelty can halt crystallization")
+            style.warn("NOVELTY WANT — crystallization halted until mind is fed")
         );
     }
+    println!("  {} {}", style.dim("next →"), style.strong(&board.next_move));
     println!();
-    leaf(style, "tech · constellation", "tree / progress (when wired)");
-    leaf(style, "forge <grade>", "instrument — detection + mesh");
-    leaf(style, "practice adopt|release …", "disciplines (tempered)");
-    leaf(style, "corpus …", "proof work / mint path");
-    leaf(style, "elevate · shift gauge", "gauge climb");
-    println!(
-        "  {}",
-        style.hint("Cross-pollination of tech: `bench link` (license / council).")
-    );
+    println!("  {}", style.section("CONSTELLATION"));
+    for n in &board.nodes {
+        if n.threshold == 0 {
+            continue;
+        }
+        let mark = if n.instrumented {
+            "⚙"
+        } else if n.held {
+            "●"
+        } else if n.progress > 0 {
+            "○"
+        } else {
+            "·"
+        };
+        let bar = if n.threshold > 1 {
+            format!(" {}/{}", n.progress, n.threshold)
+        } else {
+            String::new()
+        };
+        let forge = if n.forgeable { "  ← FORGE" } else { "" };
+        println!(
+            "  {mark} c{:<2} {:?}{bar}{forge}",
+            n.condition, n.kind
+        );
+        if n.forgeable || (!n.held && n.progress > 0) {
+            println!("      {}", style.dim(n.next_hint));
+        }
+    }
+    println!();
+    leaf(style, "bench research forge <c>", "deep: forge instrument at condition");
+    leaf(style, "bench research practice <n>", "deep: adopt discipline");
+    leaf(style, "forge <c> · practice · corpus · elevate", "same deeds outside hub");
+    leaf(style, "bench link", "cross-pollinate tech via license");
     foot_bench(style, Some("research"));
-    let _ = leaf_w;
 }
 
 fn intel_bench(
-    world: &World,
+    world: &mut World,
     mut words: impl Iterator<Item = String>,
     style: &Style,
     current: u64,
@@ -567,85 +651,142 @@ fn intel_bench(
         bench_index(style);
         return;
     }
-    banner(style, "BENCH › INTEL — detection · spy · veil");
-    let grade = world.detection_grade();
-    let e = world.espionage_integrity();
-    let inf = world.inf_integrity();
+    // Deep deeds on the pipeline
+    match leaf_w.as_deref() {
+        Some("probe") => match world.spy_probe(current) {
+            Ok(d) => println!("{} probe depth {d}", style.ok("◈")),
+            Err(e) => println!("{} probe refused: {e:?}", style.bad("✗")),
+        },
+        Some("exfil") => {
+            let cond = words.next().and_then(|w| w.parse::<u8>().ok());
+            match cond {
+                Some(c) => match world.tech_exfil(current, c) {
+                    Ok(h) => println!(
+                        "{} exfil condition {c} · hash {:02x}{:02x}… (stash only)",
+                        style.warn("EXFIL"),
+                        h[0],
+                        h[1]
+                    ),
+                    Err(e) => println!("{} exfil refused: {e:?}", style.bad("✗")),
+                },
+                None => println!(
+                    "{} usage: {}",
+                    style.bad("✗"),
+                    style.strong("bench intel exfil <condition>")
+                ),
+            }
+        }
+        Some("sabotage") => match world.sabotage_instrument(current) {
+            Ok(g) => println!("{} sabotaged instrument grade {g}", style.warn("SABOTAGE")),
+            Err(e) => println!("{} sabotage refused: {e:?}", style.bad("✗")),
+        },
+        _ => {}
+    }
+
+    let board = world.intel_board(current);
+    banner(style, "BENCH › INTEL — detection ladder · spy pipeline");
     println!(
-        "  detection grade {} · instruments {} · spy marks {} · intel stash {}",
-        grade,
-        world.instrument_count(),
-        e.spy_marks,
-        e.intel_count
+        "  detection g{} · instruments {} · probes {} · stash {}",
+        board.detection, board.instruments, board.probe_marks, board.intel_stash
     );
     println!(
-        "  veiled={} · can_probe={} can_exfil={} can_sabotage={}",
-        inf.veiled || e.veiled,
-        e.can_probe,
-        e.can_exfil,
-        e.can_sabotage
+        "  veiled={} · probe={} exfil={} sabotage={}",
+        board.veiled, board.can_probe, board.can_exfil, board.can_sabotage
     );
-    let _ = current;
+    // Ladder visualization
     println!();
-    leaf(style, "forge <grade>", "raise detection (research path)");
-    leaf(style, "spy status|probe|exfil|sabotage", "espionage deeds");
-    leaf(style, "veil draw|lift · ward elder|lift", "INF OPSEC");
-    leaf(style, "scan <exemplar>", "instrumented read");
-    leaf(style, "suite spy", "UI over same deeds");
+    println!("  {}", style.section("LADDER"));
+    let steps = [
+        (0u8, "surface"),
+        (1, "probe-ready"),
+        (2, "deep stratum"),
+        (3, "optics"),
+    ];
+    for (need, label) in steps {
+        let ok = board.detection >= need;
+        println!(
+            "  {} g≥{need} {label}",
+            if ok {
+                style.ok("✓")
+            } else {
+                style.dim("·")
+            }
+        );
+    }
+    println!();
+    println!("  {}", style.section("PIPELINE"));
     println!(
-        "  {}",
-        style.hint("Intel feeds dark-7 ENVY on the chem bench — rivalry gravity.")
+        "  {} {}",
+        style.warn("NEXT"),
+        style.strong(&board.next_hint)
     );
+    if !board.tech_conditions.is_empty() {
+        println!(
+            "  exfil targets (conditions held): {:?}",
+            board.tech_conditions
+        );
+    }
+    println!();
+    leaf(style, "bench intel probe", "deep: scout mark (crystal fee)");
+    leaf(style, "bench intel exfil <c>", "deep: hash → stash");
+    leaf(style, "bench intel sabotage", "deep: remove instrument");
+    leaf(style, "forge <g> · veil · scan", "raise ladder / OPSEC");
+    leaf(style, "bench research", "forge path when detection thin");
     foot_bench(style, Some("intel"));
-    let _ = leaf_w;
 }
 
 fn link_bench(
-    world: &World,
+    world: &mut World,
     mut words: impl Iterator<Item = String>,
     style: &Style,
-    current: u64,
+    _current: u64,
 ) {
     let leaf_w = words.next();
     if is_back(leaf_w.as_deref()) {
         bench_index(style);
         return;
     }
-    banner(style, "BENCH › LINK — cross-pollination");
+    let board = world.link_board();
+    banner(style, "BENCH › LINK — cross-pollination game");
+    println!(
+        "  score {} · crossed={} · councils {} (open {}) · bonds {} · forwards {}",
+        amount(&board.score),
+        board.crossed,
+        board.councils,
+        board.council_open,
+        board.bonds,
+        board.forwards
+    );
+    println!(
+        "  treaties {} · war legs {} · licensable conditions {:?}",
+        board.treaties, board.at_war_count, board.techs_licensable
+    );
+    println!("  {} {}", style.warn("NEXT"), style.strong(&board.next_hint));
+    println!();
+    println!("  {}", style.section("PLAY PATHS"));
+    leaf(
+        style,
+        "council …",
+        "open co-op (needed for license)",
+    );
+    leaf(
+        style,
+        "license <c> to <world> via <council> deal <n>",
+        "tech leap across difference",
+    );
+    leaf(style, "absorb · bond · forward", "reciprocity mesh");
+    leaf(style, "aperture · treaty", "value / oath (also TRADE)");
+    println!();
     println!(
         "  {}",
-        style.dim("Difference is fuel of proof (Hail Mary). Links move tech, value, oath.")
-    );
-    let councils = world.councils().len();
-    let crossed = world.committed().crossed;
-    println!(
-        "  councils {} · crossed(union)={} · treaties {}",
-        councils,
-        crossed,
-        world.committed().treaties.len()
-    );
-    let _ = current;
-    println!();
-    println!("  {}", style.section("KNOWLEDGE ACROSS LINES"));
-    leaf(style, "license … to <world>", "tech license leap");
-    leaf(style, "council …", "open co-op council");
-    leaf(style, "absorb …", "reciprocity / overflow");
-    println!();
-    println!("  {}", style.section("VALUE & OATH"));
-    leaf(style, "aperture · element aperture", "cross-world haul (also TRADE)");
-    leaf(style, "treaty trade|defense|peace|war", "pair law");
-    leaf(style, "bond · forward", "standing orders / pacts");
-    println!();
-    println!(
-        "  {}",
-        style.hint("Research forges nodes; LINK is how strangers confirm them.")
+        style.hint("Hail Mary: two different frames confirm — license is the play, not free mint.")
     );
     foot_bench(style, Some("link"));
     let _ = leaf_w;
 }
 
 fn doctrine_bench(
-    world: &World,
+    world: &mut World,
     mut words: impl Iterator<Item = String>,
     style: &Style,
     _current: u64,
@@ -655,46 +796,84 @@ fn doctrine_bench(
         bench_index(style);
         return;
     }
-    banner(style, "BENCH › DOCTRINE — posture · defense");
-    let p = world.defense_posture();
+    let board = world.doctrine_board();
+    banner(style, "BENCH › DOCTRINE — domain ranks game");
     println!(
         "  primary {} · secondary {} · reoriented={}",
-        p.primary.word(),
-        p.secondary.word(),
-        p.reoriented
+        board.primary, board.secondary, board.reoriented
     );
     println!(
-        "  metabolism={} disposition={} perception={} · {}",
-        p.metabolism, p.disposition, p.perception, p.voice
+        "  axes met={} dis={} per={} · kin {}",
+        board.metabolism, board.disposition, board.perception, board.kin_voice
     );
+    println!("  voice: {}", board.voice);
     println!();
-    leaf(style, "posture status|set …", "reorient doctrine (anatomy sealed)");
-    leaf(style, "defend status|escort|risk", "KIN convoy");
-    leaf(style, "suite convoy|cyber", "domain UI");
+    println!("  {}", style.section("RANKS CEL ATM COG CYB INF KIN MKT"));
+    let names = ["CEL", "ATM", "COG", "CYB", "INF", "KIN", "MKT"];
+    for (i, r) in board.ranks.iter().enumerate() {
+        let bar = "█".repeat(*r as usize).to_string() + &"░".repeat(3usize.saturating_sub(*r as usize));
+        println!("  {} {bar} ({r})", names[i]);
+    }
+    println!("  {} {}", style.warn("NEXT"), style.strong(&board.next_hint));
+    println!();
+    leaf(style, "posture set <dis> <per> [domain|clear]", "reorient doctrine");
+    leaf(style, "defend escort|risk · suite convoy", "KIN play");
+    leaf(style, "forge · market · veil", "raise weak domain ranks");
     foot_bench(style, Some("doctrine"));
     let _ = leaf_w;
 }
 
 fn estate_bench(
-    world: &World,
+    world: &mut World,
     mut words: impl Iterator<Item = String>,
     style: &Style,
-    _current: u64,
+    current: u64,
 ) {
     let leaf_w = words.next();
     if is_back(leaf_w.as_deref()) {
         bench_index(style);
         return;
     }
-    banner(style, "BENCH › ESTATE — land · survey · appraisal");
+    // Deep: survey terrain / estate
+    if matches!(leaf_w.as_deref(), Some("chart") | Some("survey")) {
+        match world.chart_terrain() {
+            Ok(seed) => println!(
+                "{} terrain charted · seed {:02x}{:02x}…",
+                style.ok("◈"),
+                seed[0],
+                seed[1]
+            ),
+            Err(e) => println!("{} chart refused: {e:?}", style.bad("✗")),
+        }
+    }
+    if matches!(leaf_w.as_deref(), Some("estate") | Some("ladder")) {
+        match world.survey_estate(current) {
+            Ok(h) => println!(
+                "{} estate surveyed · {:02x}{:02x}…",
+                style.ok("◈"),
+                h[0],
+                h[1]
+            ),
+            Err(e) => println!("{} estate refused: {e:?}", style.bad("✗")),
+        }
+    }
+
+    banner(style, "BENCH › ESTATE — land game");
     let seeded = world.terrain_seed().is_some();
     println!("  terrain charted={}", seeded);
+    if let Some(parcels) = world.parcels() {
+        println!("  parcels {}", parcels.len());
+        for (i, p) in parcels.iter().take(8).enumerate() {
+            println!("    #{i} {:?}", p);
+        }
+    } else {
+        println!("  {}", style.dim("no parcel map — survey estate first"));
+    }
     println!();
-    leaf(style, "survey", "chart terrain seed");
-    leaf(style, "estate survey|parcels", "real-estate ladder (35)");
-    leaf(style, "appraise …", "valuation");
+    leaf(style, "bench estate chart", "deep: chart terrain seed");
+    leaf(style, "bench estate ladder", "deep: survey_estate");
+    leaf(style, "estate parcels · appraise …", "valuation deeds");
     foot_bench(style, Some("estate"));
-    let _ = leaf_w;
 }
 
 // ── TRADE ────────────────────────────────────────────────────────────

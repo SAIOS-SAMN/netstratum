@@ -71,6 +71,7 @@ pub mod espionage;
 pub mod deep_rails;
 pub mod xrail_deeds;
 pub mod offices;
+pub mod bench_games;
 
 pub use defense::{CorridorFog, DefenseDomain, DefensePosture, KinIntegrity, RiskBand};
 pub use market_defense::{
@@ -81,6 +82,9 @@ pub use intel::{InfIntegrity, WardState};
 pub use cog_cyb::{CogIntegrity, CybIntegrity};
 pub use espionage::EspionageIntegrity;
 pub use deep_rails::DeepRailStatus;
+pub use bench_games::{
+    DoctrineBoard, IntelBoard, IntelStep, LinkBoard, ResearchBoard, ResearchNode,
+};
 
 pub use replay::replay;
 pub use fleet::hull_voice;

@@ -124,12 +124,14 @@ fn bench_help(style: Style) {
     println!();
     println!("  {}", style.section("KNOWLEDGE"));
     row(style, "bench chem [bonds]", "alchemy · dark-7 · iso · catalog");
-    row(style, "bench research", "tech · forge · practice · corpus");
-    row(style, "bench intel", "detection · spy · veil · scan");
+    row(style, "bench research", "constellation game · forge-ready nodes");
+    row(style, "bench research forge <c>", "deep: forge instrument");
+    row(style, "bench intel", "detection ladder · spy pipeline");
+    row(style, "bench intel probe|exfil|sabotage", "deep spy deeds");
     println!();
     println!("  {}", style.section("PEOPLE & POWER"));
-    row(style, "bench link", "license · council · absorb · treaty (cross-pollination)");
-    row(style, "bench doctrine", "posture · defend · reorient");
+    row(style, "bench link", "cross-pollination score · license path");
+    row(style, "bench doctrine", "domain ranks game · posture");
     row(style, "bench econ", "craft instruments · routes · rails → TRADE");
     println!();
     println!("  {}", style.section("NAV (every leaf shows this)"));
@@ -138,7 +140,7 @@ fn bench_help(style: Style) {
     println!();
     println!(
         "  {}",
-        style.hint("From chem: type `bench` or `back` — never stuck. Deeds stay as compound/iso/…")
+        style.hint("Deep games fire deeds from the hub: research forge · intel probe · estate chart.")
     );
 }
 

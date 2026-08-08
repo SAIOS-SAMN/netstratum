@@ -25,6 +25,15 @@ fn hub_status_apis_construct_on_founded_world() {
     let _ = w.councils();
     let _ = w.wants();
     let _ = w.terrain_seed();
+    // Deep game boards
+    let rb = w.research_board(FIRST_ORB);
+    assert!(!rb.nodes.is_empty() || rb.nodes.is_empty()); // constellation may be empty pre-tick
+    let ib = w.intel_board(FIRST_ORB);
+    assert_eq!(ib.detection, w.detection_grade());
+    let lb = w.link_board();
+    let _ = lb.score;
+    let db = w.doctrine_board();
+    assert_eq!(db.ranks.len(), 7);
     // TRADE surfaces.
     let _ = w.market_integrity();
     let _ = w.deep_rail_status();
