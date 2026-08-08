@@ -4,8 +4,8 @@
 (135–139) · **P5-M2** (140) · **P5-D** (141–143) · **P5-B** (144) ·
 **P5.19** dual-use · **§11** matrix catalog · **§12** KIN open-up
 (no free constants).  
-**Next loaded wave:** **P5-C** INF (compose veil/ward). **Then** P5-K2 KIN
-colour / residual / `kin_step`. Claim tags only at land.  
+**P5-C INF landed** (compose, zero tags). **Next:** **P5-K2** KIN colour /
+residual / `kin_step` (`36` §12). Claim tags only at land.  
 **Authority:** `00_CHARTER`, `04_CIVILIZATION_GENESIS`, `05_THERMAL_BALANCE`,
 `06_CIVILIZATIONS`, `10_TECH_EMERGENCE` (TERRA-1, WARDEN-1, MASK-1, MANU-1),
 `14_ALMANAC`, `15_TAXON`, `33_TRADE_FLEET_AND_DESK` §Phase 5,
@@ -358,7 +358,7 @@ Maps onto and **extends** `TASKS_TRADE_FLEET_DESK` P5:
 |------|---------|------|
 | **P5-A** | KIN vertical: escort active, interdiction residual, DEFEND pane skeleton | **LANDED** |
 | **P5-B** | Species posture + in-game doctrine reorient (anatomy sealed) | **LANDED** tag 144 |
-| **P5-C** | **INF compose (NEXT):** veil/ward on DEFEND; detection grade | pins |
+| **P5-C** | INF compose: veil/ward DEFEND + detection grade | **LANDED** zero tags |
 | **P5-D** | ATM defense + CovertTamper + dual-use TERRA | **LANDED** 141–143 + P5.19 |
 | **P5-E** | COG + CYB instrument/mesh guards | spoof refuse pins |
 | **P5-M / M2** | MKT economic warfare + cascade/haircut/resume audit + suites | **LANDED** 135–140 |
@@ -677,21 +677,19 @@ Formula base stays 1/8 from Resonator yield — never a new “base risk” cons
 
 ---
 
-## 13. Next phase loaded — P5-C INF (compose)
+## 13. P5-C INF compose — **LANDED**
 
-**Active board wave** after P5-B / dual-use land. **Goal:** surface
-already-landed MASK-1 / WARDEN-1a on DEFEND and grade detection from
-MANU-1 — mostly **readings and refuse paths**, not a new fog physics.
+**Landed:** `inf_integrity()` · `detection_grade()` = max MANU-1 instrument
+grade · `DetectionThin { need, have }` · veiled `scan` / `prospect` /
+`assay` require grade ≥ 1 · CLI `veil draw|lift` · `ward elder|lift` ·
+DEFEND INF line. **Zero new tags / schema.**
 
-| Task | Law |
-|------|-----|
-| P5.14 | DEFEND shows veil/ward state; CLI `veil`/`ward` compose |
-| P5.15 | Detection grade = instrument floor (MANU-1); gates false assay / later spy |
-| Later P5-F | Espionage *uses* this surface; does not rewrite chronicle |
+| Task | Exit |
+|------|------|
+| P5.14–P5.15c | **done** — defense_pins `inf_veil_gates_thin_scan…` |
 
-**Conservation:** veil toll and ward depth already exist — CALL them.
-**No free “stealth points.”** After P5-C green, land **P5-K2** or
-**P5.19b** medium residual colour as capacity allows.
+**Next:** **P5-K2** (§12) · P5.19b medium residual colour · P5-E/F
+espionage uses this INF surface (does not rewrite chronicle).
 
 ---
 

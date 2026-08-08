@@ -1056,7 +1056,8 @@ residual kind, `kin_step`, clade cover colour, thermal/orbit place cost,
 perception corridor fog, doctrine+CONVOY suite. **No free constants.** Board
 **P5-K2** (P5.50–P5.56).
 
-**Next phase LOADED — P5-C INF (`36` §13):** surface MASK-1 / WARDEN-1a on
-DEFEND; detection grade from MANU-1; false-scan refuse. Prefer **zero new
-tags**. Then P5-K2 · P5.19b · P5-E/F · P1.8.
+**P5-C INF LANDED:** `inf_integrity` · `detection_grade` (MANU-1 max) ·
+`DetectionThin` gates veiled scan/prospect/assay; CLI `veil`/`ward`; DEFEND
+INF line. **Zero new tags / schema.** Then **P5-K2** KIN colour · P5.19b ·
+P5-E/F · P1.8.
 

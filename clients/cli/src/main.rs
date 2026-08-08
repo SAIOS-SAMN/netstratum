@@ -2513,10 +2513,29 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     amount(&atm.pressure),
                     atm.dual_use
                 );
+                let inf = world.inf_integrity();
+                let veil_w = if inf.veiled {
+                    style.warn("VEIL")
+                } else {
+                    style.dim("open")
+                };
+                let ward_w = if inf.ward_holds {
+                    style.warn(inf.ward_state.word())
+                } else {
+                    style.dim(inf.ward_state.word())
+                };
+                println!(
+                    "  INF rank {} · {} · ward {} · detection grade {} (instruments {})",
+                    inf.inf_rank,
+                    veil_w,
+                    ward_w,
+                    inf.detection_grade,
+                    inf.instrument_count
+                );
                 println!(
                     "  {}",
                     style.hint(
-                        "posture set · escort|risk · market · medium|tamper · suite market"
+                        "veil|ward · posture · escort · market · medium|tamper · forge instrument"
                     )
                 );
             }
@@ -2561,6 +2580,87 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             }
             Some(other) => println!(
                 "{} defend {:?} — status|escort|risk",
+                style.bad("✗"),
+                other
+            ),
+        },
+        // P5-C INF — veil / ward surface (MASK-1 / WARDEN-1a compose)
+        Some("veil") => match words.next() {
+            None | Some("status") | Some("help") => {
+                let inf = world.inf_integrity();
+                println!(
+                    "{} VEIL — {} · toll {} · detection grade {}",
+                    style.head("INF"),
+                    if inf.veiled {
+                        style.warn("DRAWN")
+                    } else {
+                        style.ok("lifted/open")
+                    },
+                    amount(&inf.veil_toll),
+                    inf.detection_grade
+                );
+                println!(
+                    "  {}",
+                    style.hint("veil draw|lift — under veil, scan/prospect/assay need instruments")
+                );
+            }
+            Some("draw") => match world.draw_veil() {
+                Ok(()) => {
+                    let _ = sync_world(world);
+                    println!("{} veil DRAWN — renders cloud; chronicle never lies", style.warn("INF"));
+                }
+                Err(refusal) => refuse(world, &refusal, style),
+            },
+            Some("lift") => match world.lift_veil() {
+                Ok(()) => {
+                    let _ = sync_world(world);
+                    println!("{} veil lifted", style.ok("INF"));
+                }
+                Err(refusal) => refuse(world, &refusal, style),
+            },
+            Some(other) => println!(
+                "{} veil {:?} — status|draw|lift",
+                style.bad("✗"),
+                other
+            ),
+        },
+        Some("ward") => match words.next() {
+            None | Some("status") | Some("help") => {
+                let inf = world.inf_integrity();
+                println!(
+                    "{} WARD — state {} · holds={} (elder reverse shield)",
+                    style.head("INF"),
+                    inf.ward_state.word(),
+                    inf.ward_holds
+                );
+                println!(
+                    "  {}",
+                    style.hint("ward elder · ward lift <claimer> <depth> — aperture locked while held")
+                );
+            }
+            Some("elder") | Some("seat") => match world.ward_elder() {
+                Ok(()) => {
+                    let _ = sync_world(world);
+                    println!("{} elder WARD seated — no aperture until lift", style.warn("INF"));
+                }
+                Err(refusal) => refuse(world, &refusal, style),
+            },
+            Some("lift") => {
+                let claimer = words.next().unwrap_or("sovereign");
+                let depth = words
+                    .next()
+                    .and_then(|w| w.parse().ok())
+                    .unwrap_or_else(cfe::world::ward_gate_depth);
+                match world.lift_ward(claimer, depth) {
+                    Ok(()) => {
+                        let _ = sync_world(world);
+                        println!("{} ward LIFTED by {claimer} (depth {depth})", style.ok("INF"));
+                    }
+                    Err(refusal) => refuse(world, &refusal, style),
+                }
+            }
+            Some(other) => println!(
+                "{} ward {:?} — status|elder|lift",
                 style.bad("✗"),
                 other
             ),
@@ -6528,6 +6628,9 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
         ActionRefused::GenesisUnsealed => {
             "seal genesis first — posture reorientation needs anatomy (metabolism) sealed".into()
         }
+        ActionRefused::DetectionThin { need, have } => format!(
+            "detection grade {have} < {need} — forge an instrument (`forge <grade>`) or lift the veil before thin survey"
+        ),
         ActionRefused::BalanceEntropyDominates {
             balance,
             syntropy,

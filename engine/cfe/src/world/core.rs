@@ -355,6 +355,12 @@ impl World {
         if self.orb_by_id(orb).is_none() {
             return Err(ActionRefused::NoSuchOrb { orb });
         }
+        // P5-C false-assay gate: assay needs a real prospect (below) and
+        // at least surface detection when the line is veiled (instrument
+        // or clear eyes). Unveiled free assay of opened veins stands.
+        if self.is_veiled() {
+            self.require_detection(Self::detection_need_veiled_scan())?;
+        }
         // ECO-1 (#40): the loop's two inputs, read before the vein is
         // borrowed — the star (proven Some only once a vein is found:
         // prospecting requires it, and nothing uncommissions a sun)

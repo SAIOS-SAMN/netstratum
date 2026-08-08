@@ -587,10 +587,29 @@ fn render_defend(style: Style, home: &World) -> Vec<String> {
         ratio_str(&atm.threshold),
         atm_paint
     ));
+    let inf = home.inf_integrity();
+    let veil_w = if inf.veiled {
+        style.warn("VEIL")
+    } else {
+        style.dim("clear")
+    };
+    let ward_w = if inf.ward_holds {
+        style.warn(inf.ward_state.word())
+    } else {
+        style.dim(inf.ward_state.word())
+    };
+    lines.push(format!(
+        "  INF rank {} · {} · ward {} · detect g{} · instruments {}",
+        inf.inf_rank,
+        veil_w,
+        ward_w,
+        inf.detection_grade,
+        inf.instrument_count
+    ));
     lines.push(format!(
         "  {}",
         style.hint(
-            "posture set · escort · market cascade · medium|tamper · suite market"
+            "veil|ward · posture · escort · market · medium|tamper · forge"
         )
     ));
     // Escorts on duty

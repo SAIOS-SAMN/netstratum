@@ -51,6 +51,36 @@ fn posture_reorients_doctrine_not_anatomy() {
 }
 
 #[test]
+fn inf_veil_gates_thin_scan_and_surface_on_posture() {
+    let mut w = World::new();
+    w.found("inf-home").expect("f");
+    let inf0 = w.inf_integrity();
+    assert!(!inf0.veiled);
+    assert_eq!(inf0.detection_grade, 0);
+    assert_eq!(inf0.ward_state, cfe::world::WardState::Unseated);
+    w.draw_veil().expect("draw");
+    assert!(w.is_veiled());
+    // Under veil, scan without instrument refuses DetectionThin.
+    let refuse = w.scan(FIRST_ORB, FIRST_ORB);
+    assert!(matches!(
+        refuse,
+        Err(cfe::world::ActionRefused::DetectionThin { need: 1, have: 0 })
+    ));
+    // Prospect under veil also gated.
+    assert!(matches!(
+        w.prospect(FIRST_ORB, 0),
+        Err(cfe::world::ActionRefused::DetectionThin { .. })
+    ));
+    w.lift_veil().expect("lift");
+    assert!(!w.is_veiled());
+    // Ward surface.
+    w.ward_elder().expect("ward");
+    assert!(w.ward_holds());
+    assert_eq!(w.inf_integrity().ward_state, cfe::world::WardState::Active);
+    assert_eq!(replay(w.chronicle()), w.committed());
+}
+
+#[test]
 fn dual_use_taxes_covert_when_terra_held() {
     let mut w = World::new();
     w.found("dual").expect("f");

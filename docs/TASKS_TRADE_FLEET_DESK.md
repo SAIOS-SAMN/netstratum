@@ -194,18 +194,18 @@ optional R3/R4 exits for claims.
 | P5.13 | [x] DEFEND shows **non-human** posture copy (plasmic/lithic/hive…) | P5.11–P5.12 | CLI/desk |
 | P5.13b | [x] In-game doctrine reorient (`PostureReoriented` 144); anatomy sealed | P5.11 | pins |
 
-### P5-C — INF compose (veil / ward / counter-intel) · **NEXT LOADED**
+### P5-C — INF compose (veil / ward / counter-intel) · **LANDED**
 
 **Authority:** `36` §13. Compose MASK-1 / WARDEN-1a / MANU-1 — no free
-stealth points, no chronicle rewrite.
+stealth points, no chronicle rewrite, **zero new tags**.
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
-| P5.14 | [ ] Surface MASK-1 / WARDEN-1a on DEFEND + `defend status` | P5.3, veil/ward landed | desk/CLI |
-| P5.14b | [ ] INF rank already on posture; show veil/ward flags in suite if any | P5.14, P5.13 | reading |
-| P5.15 | [ ] Detection grade from MANU-1 instrument floor (pure) | P5.14, MANU-1 | pin |
-| P5.15b | [ ] False-assay / thin-scan refuse path gated by detection grade | P5.15 | pin |
-| P5.15c | [ ] Docs + pins green; no schema bump unless state grows | P5.14–P5.15b | ratchet |
+| P5.14 | [x] Surface MASK-1 / WARDEN-1a on DEFEND + `veil`/`ward` CLI | P5.3, veil/ward landed | desk/CLI |
+| P5.14b | [x] INF rank + veil/ward/detection on DEFEND reading | P5.14, P5.13 | reading |
+| P5.15 | [x] Detection grade from MANU-1 instrument floor (pure) | P5.14, MANU-1 | pin |
+| P5.15b | [x] Thin-scan / veiled prospect/assay refuse (`DetectionThin`) | P5.15 | pin |
+| P5.15c | [x] Docs + pins green; no schema bump | P5.14–P5.15b | ratchet |
 
 ### P5-K2 — KIN open-up (species/civ colour, no free constants) · **LOADED**
 

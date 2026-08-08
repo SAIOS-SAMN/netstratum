@@ -114,6 +114,10 @@ impl World {
         self.veiled = true;
         Ok(())
     }
+    /// MASK-1a — lift the veil by deed (starved false). Sovereign convenience.
+    pub fn lift_veil(&mut self) -> Result<(), ActionRefused> {
+        self.lift_veil_as(SOVEREIGN)
+    }
     /// MASK-1a — lift the veil by deed (starved false).
     pub fn lift_veil_as(&mut self, actor: u64) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Build)?;

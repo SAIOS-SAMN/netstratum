@@ -257,6 +257,8 @@ pub enum ActionRefused {
     DepthBelowCeiling { depth: u32, ceiling: u32 },
     /// MASK-1a — one veil per star; lift before drawing anew.
     VeilOutOfOrder,
+    /// P5-C INF — instrument detection grade too thin for the asked read.
+    DetectionThin { need: u8, have: u8 },
     /// THERMAL-1 — siting an orbit needs a commissioned sun first.
     NoStarCommissioned,
     /// THERMAL-1 — the orb is already sited; an orbit does not move.

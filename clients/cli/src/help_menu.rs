@@ -276,6 +276,7 @@ fn colony_help(style: Style) {
     row(style, "fleet mint hauler|escort [g] finance", "hull + optional yard Note");
     row(style, "defend status|escort|risk", "P5-A KIN convoy + posture (36)");
     row(style, "posture status|set", "P5-B doctrine reorient (anatomy sealed)");
+    row(style, "veil status|draw|lift · ward status|elder|lift", "P5-C INF MASK/WARDEN");
     row(style, "market status|seal|resume|clear|raid|cascade", "P5-M/M2 MKT war");
     row(style, "medium status|reinforce · tamper", "P5-D ATM + dual-use TERRA tax");
     row(style, "suite market|convoy|cyber", "UI shells over same deeds (36 §10)");

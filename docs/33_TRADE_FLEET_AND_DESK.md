@@ -1,9 +1,8 @@
 # 33 — TRADE DESK · FLEETS · ALIGNMENT · LOCAL CAPITAL
 
 **Status:** PARTIAL LAND — **Phases 1–4 complete** on main; **Phase 5
-partial** — P5-A KIN · P5-B posture · P5-D ATM/dual-use · P5-M/M2 market
-landed (`36`); **next loaded: P5-C INF**, then **P5-K2** KIN colour
-(`36` §12–§13). Implementation board: **`TASKS_TRADE_FLEET_DESK.md`**.
+partial** — P5-A/B/C/D/M/M2 + dual-use landed (`36`); **next: P5-K2**
+KIN colour (`36` §12). Implementation board: **`TASKS_TRADE_FLEET_DESK.md`**.
 
 **Does not overturn:** CHARTER exactness, SEAL B, call-not-copy, tuned-
 constant ratchet, ROUTE-1 / MARKET-1 / STAMP-1 as landed. **Does not**
@@ -328,7 +327,7 @@ Authority detail and task IDs: **`TASKS_TRADE_FLEET_DESK.md`**.
 | **3** | **Fleet capital** | **LANDED** — scrap/yard/hulls, capacity-gated hauls, fleet_step, CLI |
 | **3** | **Fleet capital** | Scrap · yard · hull mint/assign/scrap; shipwright NPC spot; route capacity limited by hulls |
 | **4** | **Local capital markets** | Civ-filtered Note/Future/Share/Perp books; instrument_step; freight/alignment seasons tradeable |
-| **5** | **Defense axioms · escort · covert terraform · market war · espionage · deep rails** | Species-relative 7 domains (`36`); P5-A/B/D/M landed; **next P5-C INF** then P5-K2; R3–R4 optional |
+| **5** | **Defense axioms · escort · covert terraform · market war · INF · espionage · deep rails** | Species-relative 7 domains (`36`); A/B/C/D/M landed; **next P5-K2**; R3–R4 optional |
 
 **Dependency spine:**
 

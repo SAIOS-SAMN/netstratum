@@ -20,12 +20,12 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 | Stations | **10** (T4–T9 economic offices open) |
 | ZoneKind compiled | **1–10** (ShipYard = 10) |
 | Codec | **SCHEMA_V12** (… + posture doctrine overlay) |
-| Pure-NPC green | market_war_step · instrument clears · ATM · posture reorient |
-| **Next phase (LOADED)** | **P5-C INF** — veil/ward on DEFEND · detection grade (MANU-1) |
-| **Then** | **P5-K2** KIN colour (`36` §12 six openings) · P5.19b medium · P5-E/F |
-| Docs | `36` §12 KIN open-up · §13 P5-C loaded; A/M/M2/D/B/19 landed |
-| Trade program | Phases **1–4** complete; Phase **5 partial** — C/K2 next |
-| Help | `posture set` · `market|medium|tamper|suite` · desk EXCH/DEFEND |
+| Pure-NPC green | market_war_step · instrument clears · ATM · posture · INF surface |
+| **Landed P5-C** | veil/ward DEFEND · `detection_grade` · `DetectionThin` under veil |
+| **Next phase (LOADED)** | **P5-K2** KIN colour (`36` §12) · then P5.19b · P5-E/F |
+| Docs | `36` §12–§13; A/M/M2/D/B/C/19 landed |
+| Trade program | Phases **1–4** complete; Phase **5 partial** — K2 next |
+| Help | `veil|ward` · `posture set` · `market|medium|tamper|suite` |
 | Dirty / other lane | do not `git add -A` without reviewing observer/other-lane files |
 
 Older §0 counts (809 tests, 71 deeds, tag 95) are **historical**; re-measure

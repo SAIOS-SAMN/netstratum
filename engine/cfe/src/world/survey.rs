@@ -444,6 +444,10 @@ impl World {
         // borrow of `self.orbs` is held across the mutable touch below.
         let supply = standing_supply(&self.orbs);
         self.permitted(actor, Scope::Collect)?;
+        // P5-C: veiled thin-scan refuses without instrument detection grade.
+        if self.is_veiled() {
+            self.require_detection(Self::detection_need_veiled_scan())?;
+        }
         if self.orb_by_id(exemplar).is_none() {
             return Err(ActionRefused::NoSuchOrb { orb: exemplar });
         }
@@ -516,6 +520,12 @@ impl World {
         self.permitted(actor, Scope::Build)?;
         if self.orb_by_id(orb).is_none() {
             return Err(ActionRefused::NoSuchOrb { orb });
+        }
+        // P5-C: under veil, deep reads need instrument detection grade
+        // (false-assay / thin-survey refuse). Unveiled surface play free.
+        if self.is_veiled() {
+            let need = Self::detection_need_for_stratum(stratum).max(Self::detection_need_veiled_scan());
+            self.require_detection(need)?;
         }
         let Some(class) = self.star else {
             return Err(ActionRefused::NoStarCommissioned);

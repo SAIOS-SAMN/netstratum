@@ -65,12 +65,14 @@ pub mod instruments;
 pub mod defense;
 pub mod market_defense;
 pub mod medium_defense;
+pub mod intel;
 
 pub use defense::{DefenseDomain, DefensePosture, RiskBand};
 pub use market_defense::{
     MarketIntegrity, BREAKER_TICKS, CLEAR_SEAL_DEPTH, RESUME_AUDIT_DEPTH,
 };
 pub use medium_defense::{DualUseAtm, MediumIntegrity, tamper_threshold};
+pub use intel::{InfIntegrity, WardState};
 
 pub use replay::replay;
 pub use fleet::hull_voice;
