@@ -11,6 +11,7 @@ mod agent;
 mod corpus;
 mod desk;
 mod help_menu;
+mod hubs;
 mod style;
 
 use std::io::{self, BufRead, Write};
@@ -72,13 +73,13 @@ fn main() {
 
 fn banner(style: &Style) {
     println!("{}", style.border("╔══════════════════════════════════════════════════╗"));
-    println!("{}", style.title("║  NETSTRATUM — colony · trade desk · chronicle    ║"));
+    println!("{}", style.title("║  NETSTRATUM — bench · trade · chronicle          ║"));
     println!("{}", style.border("╚══════════════════════════════════════════════════╝"));
     println!(
-        "  {}  then  {}  ·  {}  ·  {} for topics",
+        "  {}  ·  {}  ·  {}  ·  {}",
+        style.verb("bench"),
+        style.verb("trade"),
         style.verb("found <name>"),
-        style.verb("zone <tile> ext"),
-        style.verb("desk enter"),
         style.key("help")
     );
 }
@@ -507,143 +508,16 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 style.strong("assay <element-prefix>")
             ),
         },
-        // ELEMENT-CHEMISTRY (#37) + SCIENCE PATH: ranked bench · dark-7 · catalog.
-        //   bench                 → standing list
-        //   bench science         → civ-scored + dark-7
-        //   chemistry | chem      → science view
-        Some(cmd @ ("bench" | "chemistry" | "chem")) => {
-            let sub = words.next();
-            let show_science = cmd != "bench"
-                || matches!(sub, Some("science") | Some("rank") | Some("sci") | Some("help"));
-            if show_science {
-                let pulls = world.dark_pulls();
-                println!(
-                    "{} CHEMISTRY SCIENCE — civ-scored bench · dark-7 gravity",
-                    style.strong("◈")
-                );
-                if let Some(ax) = world.civ_axes() {
-                    println!(
-                        "  axes dis={} met={} per={}",
-                        ax.disposition, ax.metabolism, ax.perception
-                    );
-                } else {
-                    println!("  {}", style.dim("no genesis seal — utility uses neutral axes"));
-                }
-                if pulls.is_empty() {
-                    println!("  {}", style.dim("dark-7 silent (no immediate-need wells live)"));
-                } else {
-                    for (p, w) in &pulls {
-                        println!(
-                            "  {} {} · weight {} — {}",
-                            style.warn("DARK"),
-                            p.word(),
-                            amount(w),
-                            p.gloss()
-                        );
-                    }
-                }
-                let cat = world.chem_catalog();
-                if !cat.is_empty() {
-                    println!("  catalog {} gems known", cat.len());
-                    for g in cat.iter().take(8) {
-                        println!("    · {}", &hex_prefix(g)[..8]);
-                    }
-                }
-                let rows = world.bench_science(*current);
-                if rows.is_empty() {
-                    println!(
-                        "  {}",
-                        style.dim("nothing bonds — assay more veins or trade for missing matter")
-                    );
-                }
-                let mut ready = 0;
-                for (members, gem, knowledge, standing, survival, dark, net) in &rows {
-                    let named: Vec<String> = members
-                        .iter()
-                        .map(|m| hex_prefix(m)[..6].to_string())
-                        .collect();
-                    println!(
-                        "  {} → {} · k{} · net {} (surv {} / dark {})",
-                        style.strong(&named.join(" + ")),
-                        style.strong(&hex_prefix(gem)[..8]),
-                        knowledge,
-                        amount(net),
-                        amount(survival),
-                        amount(dark)
-                    );
-                    match standing {
-                        None => {
-                            ready += 1;
-                            println!("      {}", style.ok("✓ workable here"));
-                        }
-                        Some(refusal) => {
-                            println!(
-                                "      {} {}",
-                                style.warn("⚠"),
-                                refuse_text(world, refusal, style)
-                            );
-                        }
-                    }
-                }
-                if ready > 0 {
-                    println!(
-                        "  {}",
-                        style.dim(
-                            "compound … · iso <a> <b> · catalog <gem> · bench science"
-                        )
-                    );
-                }
-            } else {
-                let bench = world.bench_standing(*current);
-                println!(
-                    "{} THE BENCH — what this orb's matter would make",
-                    style.strong("◈")
-                );
-                if bench.is_empty() {
-                    println!(
-                        "  {}",
-                        style.dim(
-                            "nothing here bonds — a set needs one geometry, one phase, and binds \
-                             that saturate. Assay more veins, or trade for what your sky lacks"
-                        )
-                    );
-                }
-                let mut ready = 0;
-                for (members, gem, knowledge, standing) in &bench {
-                    let named: Vec<String> = members
-                        .iter()
-                        .map(|member| hex_prefix(member)[..6].to_string())
-                        .collect();
-                    println!(
-                        "  {} → {} · knowledge {}",
-                        style.strong(&named.join(" + ")),
-                        style.strong(&hex_prefix(gem)[..8]),
-                        knowledge
-                    );
-                    match standing {
-                        None => {
-                            ready += 1;
-                            println!("      {}", style.ok("✓ this orb can work it"));
-                        }
-                        Some(refusal) => {
-                            println!(
-                                "      {} {}",
-                                style.warn("⚠"),
-                                refuse_text(world, refusal, style)
-                            );
-                        }
-                    }
-                }
-                if ready > 0 {
-                    println!(
-                        "  {} {}",
-                        style.dim("↳"),
-                        style.dim(
-                            "compound <prefix>… · bench science · iso · catalog"
-                        )
-                    );
-                }
-            }
+        // BENCH hub — make/modify (planetary · build · star · chem · econ).
+        // chemistry|chem shortcut into bench chem science.
+        Some("bench") => {
+            let rest: Vec<String> = words.map(|w| w.to_string()).collect();
+            hubs::bench(world, rest.into_iter(), style, *current);
+        }
+        Some("chemistry") | Some("chem") => {
+            let mut rest: Vec<String> = vec!["chem".into()];
+            rest.extend(words.map(|w| w.to_string()));
+            hubs::bench(world, rest.into_iter(), style, *current);
         }
         Some("iso") | Some("union") | Some("iso-union") => {
             let a = words.next();
@@ -933,50 +807,68 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 ),
             }
         }
-        Some("trade") => {
-            // trade <my_offer> with <world> <their_offer> deal <n>
-            let mine = words.next().and_then(|w| w.parse::<u64>().ok());
-            let target = match (words.next(), words.next()) {
-                (Some("with"), Some(name)) => Some(name.to_string()),
-                _ => None,
-            };
-            let theirs = words.next().and_then(|w| w.parse::<u64>().ok());
-            let deal = match (words.next(), words.next()) {
-                (Some("deal"), Some(n)) => n.parse::<u64>().ok(),
-                _ => None,
-            };
-            match (mine, target, theirs, deal) {
-                (Some(mine), Some(target), Some(theirs), Some(deal)) => match far_world(&target) {
-                    Ok(mut far) => {
-                        let my_name = world.orb().map(|o| o.name.clone()).unwrap_or_default();
-                        let distance = conductor::spatial_l1(
-                            &charted_position(&my_name),
-                            &charted_position(&target),
-                        );
-                        match cfe::world::clear_trade(world, mine, &mut far, theirs, deal, distance)
-                        {
-                            Ok(()) => {
-                                match sync_world(world).and(sync_world_at(&far, &target)) {
-                                    Ok(_) => println!(
-                                        "{} the crossing CLEARS — two aperture pairs carried the fill; both chronicles sealed",
-                                        style.ok("⇌")
-                                    ),
-                                    Err(err) => println!(
-                                        "{} the fill landed but a sync refused: {err}",
-                                        style.bad("✗")
-                                    ),
+        Some("trade") | Some("trades") | Some("tmenu") => {
+            // Barter form: trade <offer_id> with <world> …
+            // Otherwise: TRADE hub (books · fleet · rails · vault · aperture).
+            let rest: Vec<String> = words.map(|w| w.to_string()).collect();
+            let barter = rest
+                .first()
+                .and_then(|w| w.parse::<u64>().ok())
+                .is_some();
+            if barter {
+                let mut it = rest.iter().map(|s| s.as_str());
+                let mine = it.next().and_then(|w| w.parse::<u64>().ok());
+                let target = match (it.next(), it.next()) {
+                    (Some("with"), Some(name)) => Some(name.to_string()),
+                    _ => None,
+                };
+                let theirs = it.next().and_then(|w| w.parse::<u64>().ok());
+                let deal = match (it.next(), it.next()) {
+                    (Some("deal"), Some(n)) => n.parse::<u64>().ok(),
+                    _ => None,
+                };
+                match (mine, target, theirs, deal) {
+                    (Some(mine), Some(target), Some(theirs), Some(deal)) => {
+                        match far_world(&target) {
+                            Ok(mut far) => {
+                                let my_name =
+                                    world.orb().map(|o| o.name.clone()).unwrap_or_default();
+                                let distance = conductor::spatial_l1(
+                                    &charted_position(&my_name),
+                                    &charted_position(&target),
+                                );
+                                match cfe::world::clear_trade(
+                                    world, mine, &mut far, theirs, deal, distance,
+                                ) {
+                                    Ok(()) => match sync_world(world)
+                                        .and(sync_world_at(&far, &target))
+                                    {
+                                        Ok(_) => println!(
+                                            "{} the crossing CLEARS — two aperture pairs carried the fill; both chronicles sealed",
+                                            style.ok("⇌")
+                                        ),
+                                        Err(err) => println!(
+                                            "{} the fill landed but a sync refused: {err}",
+                                            style.bad("✗")
+                                        ),
+                                    },
+                                    Err(refusal) => refuse(world, &refusal, style),
                                 }
                             }
-                            Err(refusal) => refuse(world, &refusal, style),
+                            Err(err) => println!("{} {err}", style.bad("✗")),
                         }
                     }
-                    Err(err) => println!("{} {err}", style.bad("✗")),
-                },
-                _ => println!(
-                    "{} usage: {}",
-                    style.bad("✗"),
-                    style.strong("trade <my_offer> with <world> <their_offer> deal <n>")
-                ),
+                    _ => println!(
+                        "{} usage: {} · or open hub: {}",
+                        style.bad("✗"),
+                        style.strong(
+                            "trade <my_offer> with <world> <their_offer> deal <n>"
+                        ),
+                        style.key("trade")
+                    ),
+                }
+            } else {
+                hubs::trade(world, rest.into_iter(), style, *current);
             }
         }
         // SCIENCE-1: the JOINT RESEARCH VENTURE — the formal deed for

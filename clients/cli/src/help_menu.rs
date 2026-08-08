@@ -7,6 +7,8 @@ pub fn help(style: Style, topic: Option<&str>) {
     match topic.map(|t| t.to_ascii_lowercase()).as_deref() {
         None | Some("") | Some("all") | Some("index") => index(style),
         Some("desk") | Some("trade-desk") | Some("t") => desk_help(style),
+        Some("bench") | Some("workbench") | Some("make") => bench_help(style),
+        Some("trade-hub") | Some("trades") | Some("circulate") => trade_hub_help(style),
         Some("stamp") | Some("money") => stamp_help(style),
         Some("element") | Some("elements") | Some("matter") => element_help(style),
         Some("fleet") | Some("hull") | Some("ship") => fleet_help(style),
@@ -53,12 +55,17 @@ fn index(style: Style) {
         style.dim("--plain / NO_COLOR")
     );
     println!();
+    println!("  {}", style.section("MAIN HUBS"));
+    row(style, "bench", "MAKE / MODIFY — planetary · build · star · chem · econ");
+    row(style, "trade", "CIRCULATE / SETTLE — books · fleet · rails · vault · aperture");
+    row(style, "help bench · help trade-hub", "hub maps");
+    println!();
     println!("  {}", style.section("TRADE DESK (Phase 1–2)"));
     row(style, "desk · desk enter", "interactive trade / diplo / routes / arb");
     row(style, "help desk", "full desk keybinds and panes");
     row(style, "stamp · stamp mint · stamp aperture", "STAMP unit of account");
     row(style, "element aperture · element charter", "open-matter haul + lanes");
-    row(style, "offer · trade · aperture · charter", "carrier barter + ROUTE-1");
+    row(style, "offer · trade <ids> with … · aperture", "barter clear + ROUTE-1");
     row(style, "treaty · treaties", "trade · defense · peace · war");
     println!();
     println!("  {}", style.section("COLONY LOOP"));
@@ -74,13 +81,15 @@ fn index(style: Style) {
     println!();
     println!(
         "  {}",
-        style.hint("Tip: inside the desk, type ? or help for pane keys; empty redisplays.")
+        style.hint("Tip: `bench` makes · `trade` circulates · desk for interactive panes.")
     );
 }
 
 fn topics(style: Style) {
     banner_line(style, "HELP TOPICS");
     for (name, blurb) in [
+        ("bench", "MAKE hub — planetary · build · star · chem · econ"),
+        ("trade-hub", "CIRCULATE hub — books · fleet · rails · vault · aperture"),
         ("desk", "trade desk panes and keybinds"),
         ("stamp", "STAMP mint and aperture"),
         ("element", "element haul and charter"),
@@ -97,6 +106,57 @@ fn topics(style: Style) {
         "\n  {} {}",
         style.label("usage:"),
         style.verb("help <topic>")
+    );
+}
+
+fn bench_help(style: Style) {
+    banner_line(style, "BENCH — MAKE / MODIFY HUB");
+    println!(
+        "  {}",
+        style.dim("Craft and reshape. Components flow to TRADE for circulation.")
+    );
+    println!();
+    row(style, "bench", "domain index");
+    row(style, "bench planetary [bio|chem|terraform]", "resource modification");
+    row(style, "bench build", "buildings / infra standing + zone map");
+    row(style, "bench star", "sun · site · thermal · terraform crown");
+    row(style, "bench chem [bonds]", "alchemy science / standing bonds");
+    row(style, "bench econ", "craft instruments · routes · rails (then TRADE)");
+    println!();
+    println!("  {}", style.section("CHEM LEAVES (deeds)"));
+    row(style, "compound · iso · catalog", "bond · isomorphic union · known recipe");
+    row(style, "chemistry", "shortcut → bench chem");
+    println!();
+    println!(
+        "  {}",
+        style.hint("Peer: `trade` opens CIRCULATE hub. Barter: trade <id> with <world> …")
+    );
+}
+
+fn trade_hub_help(style: Style) {
+    banner_line(style, "TRADE — CIRCULATE / SETTLE HUB");
+    println!(
+        "  {}",
+        style.dim("Run components the BENCH crafted. Make stays on bench.")
+    );
+    println!();
+    row(style, "trade", "domain index");
+    row(style, "trade books", "offers · instruments · market war");
+    row(style, "trade fleet", "hulls · capacity · escort");
+    row(style, "trade rails", "R1–R4 · Anchor");
+    row(style, "trade vault", "custody · margin");
+    row(style, "trade aperture", "cross-world haul");
+    row(style, "trade desk", "→ desk enter");
+    println!();
+    row(
+        style,
+        "trade <my> with <world> <their> deal <n>",
+        "barter clear (direct)",
+    );
+    println!();
+    println!(
+        "  {}",
+        style.hint("Peer: `bench` opens MAKE hub (planetary · build · star · chem · econ).")
     );
 }
 
@@ -286,8 +346,8 @@ fn colony_help(style: Style) {
     row(style, "anchor export-stamp|import-strand|import-court", "X7 T9 Anchor (feature-gated)");
     row(style, "suite market|convoy|cyber|spy", "UI over deeds — same chronicle");
     row(style, "prospect · assay · compound · refine", "elements + alchemy");
-    row(style, "bench · bench science · chemistry", "bond list · civ utility · dark-7");
-    row(style, "iso <a> <b> · catalog <gem>", "isomorphic union · chemical creation");
+    row(style, "bench · trade", "MAKE hub · CIRCULATE hub (primary workbenches)");
+    row(style, "bench chem · iso · catalog", "chemistry science path");
     println!();
     println!(
         "  {}",

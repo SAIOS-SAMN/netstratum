@@ -133,6 +133,9 @@ strand-adapter · isthmus/datum-adapter
 | C1.5 | [x] Chem catalog creation (tag 157) | C1.1 | crystal fee · novelty relief |
 | C1.6 | [ ] NPC `chemistry_step` disposition-routed | C1.3 | pure NPC |
 | C1.7 | [ ] Stellar capacity game (star lines as project) | locality | design then land |
+| H1.1 | [x] BENCH hub (planetary · build · star · chem · econ) | C1.x | CLI `bench` |
+| H1.2 | [x] TRADE hub (books · fleet · rails · vault · aperture) | H1.1 | CLI `trade` |
+| H1.3 | [ ] Desk panes deep-link into hub domains | H1.1–H1.2 | desk UX |
 
 ---
 
