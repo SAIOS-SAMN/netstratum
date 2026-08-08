@@ -122,6 +122,20 @@ strand-adapter · isthmus/datum-adapter
 
 ---
 
+## Chemistry science (alchemy bench as play)
+
+| ID | Task | Depends | Exit |
+|----|------|---------|------|
+| C1.1 | [x] Civ survival utility from genesis axes | #37 compound | pure `almanac::science` |
+| C1.2 | [x] Dark-7 gravity wells (green…pride) | C1.1, WANT-1 | `dark_pulls` + residual 158 |
+| C1.3 | [x] Science-ranked bench | C1.1–C1.2 | `bench_science` CLI |
+| C1.4 | [x] Isomorphic union (tags 156) | #37 | mass-exact gem fuse |
+| C1.5 | [x] Chem catalog creation (tag 157) | C1.1 | crystal fee · novelty relief |
+| C1.6 | [ ] NPC `chemistry_step` disposition-routed | C1.3 | pure NPC |
+| C1.7 | [ ] Stellar capacity game (star lines as project) | locality | design then land |
+
+---
+
 ## Wave 8 — Exhaustive play / anti click-to-win
 
 | ID | Task | Depends | Exit |

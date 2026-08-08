@@ -53,6 +53,7 @@ impl World {
             intel_hashes: Vec::new(),
             spy_marks: Vec::new(),
             vault_stamp: Vec::new(),
+            chem_catalog: Vec::new(),
         }
     }
     /// P2-PERSIST — resume a world from its chronicle: the committed
@@ -116,6 +117,7 @@ impl World {
             intel_hashes: committed.intel_hashes,
             spy_marks: committed.spy_marks,
             vault_stamp: committed.vault_stamp,
+            chem_catalog: committed.chem_catalog,
         }
     }
     /// ELEVATE-1 (12_UNION §6) — THE THREE-GATE GAUGE CLIMB, the

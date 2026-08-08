@@ -211,6 +211,8 @@ pub struct Committed {
     pub spy_marks: Vec<(u64, u8)>,
     /// O6.5: STAMP held in Vault custody per orb (not free bank).
     pub vault_stamp: Vec<(u64, Ratio)>,
+    /// CHEM science: cataloged gem identities (known chemistry).
+    pub chem_catalog: Vec<[u8; 32]>,
 }
 
 /// G1 (04 §1): a civilization's sealed axes, as the world holds them.
@@ -324,6 +326,8 @@ pub struct World {
     pub(super) spy_marks: Vec<(u64, u8)>,
     /// O6.5: Vault custody STAMP (replay of deposit/withdraw).
     pub(super) vault_stamp: Vec<(u64, Ratio)>,
+    /// CHEM science: cataloged gems (replay of ChemCataloged).
+    pub(super) chem_catalog: Vec<[u8; 32]>,
 }
 
 /// PLANNER-1: what a licensed leap carries — the condition and name

@@ -289,6 +289,12 @@ pub enum ActionRefused {
     VaultShort { need: Box<Ratio>, have: Box<Ratio> },
     /// O6.5 — free vault (after margin reserve) short for withdraw/lock.
     VaultMarginHeld { free: Box<Ratio>, need: Box<Ratio> },
+    /// CHEM science — gems do not share shell/phase (no isomorphic union).
+    NotIsomorphic,
+    /// CHEM science — gem already in the chemistry catalog.
+    ChemAlreadyCataloged { gem: [u8; 32] },
+    /// CHEM science — no banked gem of that identity to catalog or union.
+    NoSuchGem { gem: [u8; 32] },
     /// THERMAL-1 — siting an orbit needs a commissioned sun first.
     NoStarCommissioned,
     /// THERMAL-1 — the orb is already sited; an orbit does not move.

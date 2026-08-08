@@ -8,6 +8,12 @@
 //! by the lane law, so where an element SITS finally decides what a
 //! civilization can make.
 //!
+//! **SCIENCE PATH** — the bench is not only a list: it scores bonds for
+//! *this* sealed civilization (survival utility), names the dark-7
+//! gravity wells that pull toward immediate need, and supports
+//! isomorphic gem union + chemistry catalog (chemical creation as
+//! known recipe, never free matter).
+//!
 //! THE DOOR / FACT SPLIT (29_CONSTRUCTION):
 //!
 //!   DOOR   whether the matter bonds at all — the shells agree, the
@@ -21,10 +27,23 @@
 //!          next one.
 
 use super::*;
+use crate::almanac::{CivAxes, DarkPull};
 
 /// One reading of the bench: the members that bond, the gem they name,
 /// the knowledge won, and what (if anything) stands in the way here.
 pub type BenchRead = (Vec<[u8; 32]>, [u8; 32], u16, Option<ActionRefused>);
+
+/// Science-ranked bench row: bond set + gem + knowledge + standing
+/// refusal + (survival, dark, net) utilities.
+pub type ScienceRead = (
+    Vec<[u8; 32]>,
+    [u8; 32],
+    u16,
+    Option<ActionRefused>,
+    Ratio,
+    Ratio,
+    Ratio,
+);
 
 /// A plane of the table — the `(shell, phase)` matter must share before
 /// it can bond at all. Bonding never crosses one, so a plane is the
@@ -148,6 +167,11 @@ impl World {
 
         // Nothing above moved anything. The deed:
         let gem = set.gem();
+        let knowledge = set.knowledge();
+        // Science residual: if dark gravity outranks survival, receipt it.
+        let (survival, dark, _) =
+            self.score_bond(set.members(), &yielded, knowledge);
+        let dominant = self.dominant_dark_pull();
         let held = peel(&mut self.orbs, orb).expect("judged above");
         for (element, spend) in &spends {
             held.bank_element(*element, -spend.clone());
@@ -161,6 +185,19 @@ impl World {
             },
             actor,
         );
+        if dark > survival {
+            if let Some((pull, weight)) = dominant {
+                self.close(
+                    ClosureEvent::DarkPullStruck {
+                        orb_id: orb,
+                        pull: pull as u8,
+                        weight,
+                        dark_score: dark,
+                    },
+                    actor,
+                );
+            }
+        }
         self.post_order_worked(actor, orb, balance::ORDER_COMPOUND, ent, syn);
         Ok(gem)
     }
@@ -342,6 +379,256 @@ impl World {
             }
         }
         found
+    }
+
+    // ── SCIENCE PATH ──────────────────────────────────────────────
+
+    /// Sealed civ axes for utility (posture doctrine overlays disposition
+    /// / perception when reoriented; metabolism stays anatomy).
+    pub fn civ_axes(&self) -> Option<CivAxes> {
+        let g = self.genesis.as_ref()?;
+        Some(CivAxes {
+            disposition: self.posture_disposition.unwrap_or(g.disposition),
+            metabolism: g.metabolism,
+            perception: self.posture_perception.unwrap_or(g.perception),
+        })
+    }
+
+    /// Active dark-7 pulls with weights (0 = silent). Derived from
+    /// wants, famine, war residual, intel, surplus, ease — never stored.
+    pub fn dark_pulls(&self) -> Vec<(DarkPull, Ratio)> {
+        let mut out = Vec::new();
+        let one = ratio(1, 1);
+        let half = one.clone() / (one.clone() + one.clone());
+        // GREEN — growth greed: crystal famine pressure or cascade.
+        let crystal_thin = self.orb().is_some_and(|o| {
+            o.banked_amount(Resource::Crystal) < ratio(1, 1)
+        });
+        let cascade = self.cascade_pressures.iter().any(|(_, p)| *p > 0);
+        if crystal_thin || cascade {
+            out.push((DarkPull::Green, if cascade { one.clone() } else { half.clone() }));
+        }
+        // VANITY — epicurean surplus display.
+        if self.civ_axes().is_some_and(|a| a.disposition == 3) {
+            let rich = self.orb().is_some_and(|o| o.stamp_amount() > ratio(1, 1));
+            if rich {
+                out.push((DarkPull::Vanity, half.clone()));
+            }
+        }
+        // ENVY — intel stash or spy marks live.
+        if !self.intel_hashes.is_empty() || !self.spy_marks.is_empty() {
+            out.push((DarkPull::Envy, one.clone()));
+        }
+        // WRATH — any war treaty residual (at_war books).
+        if self.treaties.iter().any(|t| t.kind == crate::treaty::TreatyKind::War) {
+            out.push((DarkPull::Wrath, one.clone()));
+        }
+        // SLOTH — no instruments forged, no practices.
+        if self.instruments.is_empty() && self.practices.is_empty() {
+            out.push((DarkPull::Sloth, half.clone()));
+        }
+        // GLUTTONY — large free banks (iron+biomass+crystal).
+        if let Some(o) = self.orb() {
+            let mass = o.banked_amount(Resource::Iron)
+                + o.banked_amount(Resource::Biomass)
+                + o.banked_amount(Resource::Crystal);
+            if mass > ratio(1, 1) + ratio(1, 1) + ratio(1, 1) + ratio(1, 1) {
+                out.push((DarkPull::Gluttony, half.clone()));
+            }
+        }
+        // PRIDE — novelty want struck (starved mind chases depth).
+        if self.wants.iter().any(|(_, k)| *k == 3) {
+            out.push((DarkPull::Pride, one));
+        }
+        out
+    }
+
+    fn dominant_dark_pull(&self) -> Option<(DarkPull, Ratio)> {
+        self.dark_pulls()
+            .into_iter()
+            .max_by(|a, b| a.1.cmp(&b.1))
+    }
+
+    /// Score a candidate bond under this world's civ + dark gravity.
+    pub fn score_bond(
+        &self,
+        members: &[[u8; 32]],
+        yielded: &Ratio,
+        knowledge: u16,
+    ) -> (Ratio, Ratio, Ratio) {
+        let axes = self.civ_axes().unwrap_or(CivAxes {
+            disposition: 1,
+            metabolism: 1,
+            perception: 1,
+        });
+        let pulls = self.dark_pulls();
+        crate::almanac::net_utility(axes, members, yielded, knowledge, &pulls)
+    }
+
+    /// Bench ranked by net science utility (highest first). Pure read.
+    pub fn bench_science(&self, orb: u64) -> Vec<ScienceRead> {
+        let mut rows: Vec<ScienceRead> = self
+            .bench_standing(orb)
+            .into_iter()
+            .map(|(members, gem, knowledge, standing)| {
+                let set = crate::almanac::Compoundable::new(&members);
+                let yielded = set
+                    .as_ref()
+                    .map(|s| crate::almanac::recipe_of(s).1)
+                    .unwrap_or_else(|| ratio(0, 1));
+                let (survival, dark, net) = self.score_bond(&members, &yielded, knowledge);
+                (members, gem, knowledge, standing, survival, dark, net)
+            })
+            .collect();
+        rows.sort_by(|a, b| b.6.cmp(&a.6));
+        rows
+    }
+
+    /// Chemistry catalog (known gems).
+    pub fn chem_catalog(&self) -> &[[u8; 32]] {
+        &self.chem_catalog
+    }
+
+    /// **CHEMICAL CREATION (catalog)** — seal a banked gem as known
+    /// chemistry. No free matter; spends resonator-eighth crystal.
+    /// Empiricist novelty want may relieve on success (mind fed).
+    pub fn chem_catalog_gem(
+        &mut self,
+        orb: u64,
+        gem: [u8; 32],
+    ) -> Result<u16, ActionRefused> {
+        self.chem_catalog_gem_as(SOVEREIGN, orb, gem)
+    }
+
+    pub fn chem_catalog_gem_as(
+        &mut self,
+        actor: u64,
+        orb: u64,
+        gem: [u8; 32],
+    ) -> Result<u16, ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if peek(&self.orbs, orb).is_none() {
+            return Err(ActionRefused::NoSuchOrb { orb });
+        }
+        if self.chem_catalog.contains(&gem) {
+            return Err(ActionRefused::ChemAlreadyCataloged { gem });
+        }
+        let held = peek(&self.orbs, orb).expect("checked");
+        if held.element_amount(&gem) <= ratio(0, 1) {
+            return Err(ActionRefused::NoSuchGem { gem });
+        }
+        let fee = ZoneKind::Resonator.yield_per_tick().1;
+        let have = held.banked_amount(Resource::Crystal);
+        if have < fee {
+            return Err(ActionRefused::CannotAfford {
+                resource: Resource::Crystal,
+                need: Box::new(fee),
+                have: Box::new(have),
+            });
+        }
+        let knowledge = u16::from(crate::almanac::periodic_of(&gem).line);
+        let axes = self.civ_axes().unwrap_or(CivAxes {
+            disposition: 1,
+            metabolism: 1,
+            perception: 1,
+        });
+        let survival = crate::almanac::survival_utility(axes, &[gem], &ratio(1, 1));
+        let held = peel(&mut self.orbs, orb).expect("checked");
+        held.bank(Resource::Crystal, -fee);
+        self.chem_catalog.push(gem);
+        self.close(
+            ClosureEvent::ChemCataloged {
+                orb_id: orb,
+                gem,
+                knowledge,
+                survival,
+            },
+            actor,
+        );
+        // Novelty want relief when empiricist mind was starving.
+        if self.wants.iter().any(|(o, k)| *o == orb && *k == 3) {
+            self.wants.retain(|(o, k)| !(*o == orb && *k == 3));
+            self.close(ClosureEvent::WantRelieved { orb_id: orb, kind: 3 }, actor);
+        }
+        Ok(knowledge)
+    }
+
+    /// **ISOMORPHIC UNION** — fuse two banked gems of the same shell/phase
+    /// family into a product (chemical creation of a higher body).
+    /// Spends 1 of each, yields 2 of product (mass-exact).
+    pub fn iso_union(
+        &mut self,
+        orb: u64,
+        a: [u8; 32],
+        b: [u8; 32],
+    ) -> Result<[u8; 32], ActionRefused> {
+        self.iso_union_as(SOVEREIGN, orb, a, b)
+    }
+
+    pub fn iso_union_as(
+        &mut self,
+        actor: u64,
+        orb: u64,
+        a: [u8; 32],
+        b: [u8; 32],
+    ) -> Result<[u8; 32], ActionRefused> {
+        self.permitted(actor, Scope::Collect)?;
+        if peek(&self.orbs, orb).is_none() {
+            return Err(ActionRefused::NoSuchOrb { orb });
+        }
+        if self.star.is_none() {
+            return Err(ActionRefused::NoStarCommissioned);
+        }
+        if !crate::almanac::isomorphic(&a, &b) || a == b {
+            return Err(ActionRefused::NotIsomorphic);
+        }
+        let (spend_each, yielded, product) = crate::almanac::iso_union_recipe(&a, &b)
+            .ok_or(ActionRefused::NotIsomorphic)?;
+        let knowledge = crate::almanac::iso_union_knowledge(&a, &b).unwrap_or(0);
+        let held = peek(&self.orbs, orb).expect("checked");
+        for id in [&a, &b] {
+            let have = held.element_amount(id);
+            if have < spend_each {
+                return Err(ActionRefused::CannotAffordElement {
+                    element: *id,
+                    need: Box::new(spend_each.clone()),
+                    have: Box::new(have),
+                });
+            }
+        }
+        self.require_order_balance(orb)?;
+        let (ent, syn) = self.order_arms_compound(&yielded);
+        let (survival, dark, _) = self.score_bond(&[a, b], &yielded, knowledge);
+        let dominant = self.dominant_dark_pull();
+        let held = peel(&mut self.orbs, orb).expect("checked");
+        held.bank_element(a, -spend_each.clone());
+        held.bank_element(b, -spend_each);
+        held.bank_element(product, yielded);
+        self.close(
+            ClosureEvent::IsoUnionStruck {
+                orb_id: orb,
+                a,
+                b,
+                product,
+                knowledge,
+            },
+            actor,
+        );
+        if dark > survival {
+            if let Some((pull, weight)) = dominant {
+                self.close(
+                    ClosureEvent::DarkPullStruck {
+                        orb_id: orb,
+                        pull: pull as u8,
+                        weight,
+                        dark_score: dark,
+                    },
+                    actor,
+                );
+            }
+        }
+        self.post_order_worked(actor, orb, balance::ORDER_COMPOUND, ent, syn);
+        Ok(product)
     }
 }
 

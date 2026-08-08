@@ -15,17 +15,18 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 |------|--------|
 | Wave-1 commit | **`2109bf0`** (T4–T9, REFINE-1) |
 | Wave-2 commit | **`4686399`** (E-APT, element_trade_step) |
-| Kernel | **0.35.0** (next free minor **36**) |
-| Next free tag | **156** (Wave-6 offices 152–155) |
+| Kernel | **0.36.0** (next free minor **37**) |
+| Next free tag | **159** (CHEM science 156–158) |
 | Stations | **10** (T4–T9 economic offices open) |
 | ZoneKind compiled | **1–10** (ShipYard = 10) |
-| Codec | **SCHEMA_V14** (… + vault_stamp) |
+| Codec | **SCHEMA_V15** (… + chem_catalog) |
 | Pure-NPC green | market_war · kin · espionage_step · instrument · ATM · offices |
 | **Phase 5 core** | **COMPLETE** — A–H · K2 · M · dual-use · rails |
 | **X7 adapters** | **LANDED** in-tree (`cfe::xrail`) — no external path dep |
 | **Wave 6 O6.3–O6.5** | **LANDED** — Exchange MM · Assay court · Vault custody |
-| **Optional open** | hull lease Q-F6 · live xylarium/isthmus/datum wire peer · Wave 8 |
-| Docs | Phases **1–5** + X7 + Wave 6 offices; help `vault` · `challenge` |
+| **CHEM science** | **LANDED** — civ utility · dark-7 · iso-union · catalog |
+| **Optional open** | stellar capacity game · hull lease · Wave 8 AP · live isthmus peer |
+| Docs | Phases **1–5** + X7 + Wave 6 + chemistry science |
 | Dirty / other lane | do not `git add -A` without reviewing observer/other-lane files |
 
 Older §0 counts (809 tests, 71 deeds, tag 95) are **historical**; re-measure

@@ -55,6 +55,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut intel_hashes: Vec<[u8; 32]> = Vec::new();
     let mut spy_marks: Vec<(u64, u8)> = Vec::new();
     let mut vault_stamp: Vec<(u64, Ratio)> = Vec::new();
+    let mut chem_catalog: Vec<[u8; 32]> = Vec::new();
     for receipt in chronicle.receipts() {
         match &receipt.event {
             // BOOK-1 (19_LENS §16) — the open registry rebuilds from
@@ -1457,6 +1458,31 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     v.richness = richness_after.clone();
                 }
             }
+            ClosureEvent::IsoUnionStruck {
+                orb_id,
+                a,
+                b,
+                product,
+                ..
+            } => {
+                if let Some((spend, yielded, _)) = crate::almanac::iso_union_recipe(a, b) {
+                    if let Some(held) = peel(&mut orbs, *orb_id) {
+                        held.bank_element(*a, -spend.clone());
+                        held.bank_element(*b, -spend);
+                        held.bank_element(*product, yielded);
+                    }
+                }
+            }
+            ClosureEvent::ChemCataloged { orb_id, gem, .. } => {
+                let fee = crate::dop::ZoneKind::Resonator.yield_per_tick().1;
+                if let Some(held) = peel(&mut orbs, *orb_id) {
+                    held.bank(crate::dop::Resource::Crystal, -fee);
+                }
+                if !chem_catalog.contains(gem) {
+                    chem_catalog.push(*gem);
+                }
+            }
+            ClosureEvent::DarkPullStruck { .. } => {}
         }
     }
     Committed {
@@ -1465,7 +1491,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
         prospects, warded, veiled, taxon, stations, hulls, notes, futures, last_clears, shares,
         perps, clear_depths, market_sealed_until, cascade_pressures, tamper_pressures,
         posture_disposition, posture_perception, posture_primary, intel_hashes, spy_marks,
-        vault_stamp,
+        vault_stamp, chem_catalog,
     }
 }
 

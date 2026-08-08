@@ -12,6 +12,7 @@
 //!   [`locality`]  what a star makes reachable, and what pressure
 //!                 refines
 //!   [`compound`]  what elements make together, and the gem's identity
+//!   [`science`]   civ utility · dark-7 gravity · isomorphic union
 //!   [`thermal`]   the temperature line closed, and the orbit grain
 //!
 //! **EVERYTHING HERE IS A DERIVATION.** Pure, total, exact-rational, no
@@ -22,11 +23,16 @@
 pub mod compound;
 pub mod locality;
 pub mod periodic;
+pub mod science;
 pub mod thermal;
 
 pub use compound::{compounds, gem_of, knowledge_of, recipe_of, Compoundable};
 pub use locality::{lines_of, local_to, pressure, refines, workable_in};
 pub use periodic::{periodic_of, Periodic, CELLS, LANES, LINES, PHASES, SHELLS, SPINS};
+pub use science::{
+    dark_utility, isomorphic, iso_union_knowledge, iso_union_product, iso_union_recipe, net_utility,
+    survival_utility, CivAxes, DarkPull,
+};
 pub use thermal::{
     ceiling4, grained_t_eq4, orbit_on_grain, region_of, workable_at, ThermalRegion, ORBIT_GRAIN,
 };

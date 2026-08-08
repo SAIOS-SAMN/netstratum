@@ -286,6 +286,8 @@ fn colony_help(style: Style) {
     row(style, "anchor export-stamp|import-strand|import-court", "X7 T9 Anchor (feature-gated)");
     row(style, "suite market|convoy|cyber|spy", "UI over deeds — same chronicle");
     row(style, "prospect · assay · compound · refine", "elements + alchemy");
+    row(style, "bench · bench science · chemistry", "bond list · civ utility · dark-7");
+    row(style, "iso <a> <b> · catalog <gem>", "isomorphic union · chemical creation");
     println!();
     println!(
         "  {}",

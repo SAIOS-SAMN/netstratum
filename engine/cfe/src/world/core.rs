@@ -339,6 +339,7 @@ impl World {
             intel_hashes: self.intel_hashes.clone(),
             spy_marks: self.spy_marks.clone(),
             vault_stamp: self.vault_stamp.clone(),
+            chem_catalog: self.chem_catalog.clone(),
         }
     }
     /// ELEMENT-GRAMMAR-1 (14 §3) — the extraction closure: richness ×

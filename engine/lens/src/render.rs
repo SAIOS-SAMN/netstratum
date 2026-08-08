@@ -1129,6 +1129,40 @@ pub fn render_receipt(receipt: &Receipt) -> String {
                 ratio_str(richness_after)
             ),
         ),
+        E::IsoUnionStruck {
+            orb_id,
+            knowledge,
+            ..
+        } => (
+            "iso_union",
+            format!("isomorphic union on orb {orb_id} · knowledge {knowledge}"),
+        ),
+        E::ChemCataloged {
+            orb_id,
+            knowledge,
+            survival,
+            ..
+        } => (
+            "chem_cataloged",
+            format!(
+                "chemistry cataloged on orb {orb_id} · knowledge {knowledge} · survival {}",
+                ratio_str(survival)
+            ),
+        ),
+        E::DarkPullStruck {
+            orb_id,
+            pull,
+            weight,
+            dark_score,
+        } => (
+            "dark_pull",
+            format!(
+                "dark-{} pull on orb {orb_id} weight {} score {}",
+                pull,
+                ratio_str(weight),
+                ratio_str(dark_score)
+            ),
+        ),
         E::ApertureSent { deal, from_orb, resource, amount } => (
             "aperture_sent",
             format!(

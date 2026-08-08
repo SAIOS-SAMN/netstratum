@@ -507,55 +507,230 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 style.strong("assay <element-prefix>")
             ),
         },
-        // ELEMENT-CHEMISTRY (#37): the bench and the bond.
-        Some("bench") => {
-            let bench = world.bench_standing(*current);
-            println!(
-                "{} THE BENCH — what this orb's matter would make",
-                style.strong("◈")
-            );
-            if bench.is_empty() {
+        // ELEMENT-CHEMISTRY (#37) + SCIENCE PATH: ranked bench · dark-7 · catalog.
+        //   bench                 → standing list
+        //   bench science         → civ-scored + dark-7
+        //   chemistry | chem      → science view
+        Some(cmd @ ("bench" | "chemistry" | "chem")) => {
+            let sub = words.next();
+            let show_science = cmd != "bench"
+                || matches!(sub, Some("science") | Some("rank") | Some("sci") | Some("help"));
+            if show_science {
+                let pulls = world.dark_pulls();
                 println!(
-                    "  {}",
-                    style.dim(
-                        "nothing here bonds — a set needs one geometry, one phase, and binds \
-                         that saturate. Assay more veins, or trade for what your sky lacks"
-                    )
+                    "{} CHEMISTRY SCIENCE — civ-scored bench · dark-7 gravity",
+                    style.strong("◈")
                 );
-            }
-            let mut ready = 0;
-            for (members, gem, knowledge, standing) in &bench {
-                let named: Vec<String> = members
-                    .iter()
-                    .map(|member| hex_prefix(member)[..6].to_string())
-                    .collect();
-                println!(
-                    "  {} → {} · knowledge {}",
-                    style.strong(&named.join(" + ")),
-                    style.strong(&hex_prefix(gem)[..8]),
-                    knowledge
-                );
-                // THE PLACE'S OWN SAY. A set that bonds is not a set
-                // this rock can work: a compound shares one phase and
-                // an orb sits in one thermal band, so the bench names
-                // what stands in the way rather than sending you into
-                // a refusal.
-                match standing {
-                    None => {
-                        ready += 1;
-                        println!("      {}", style.ok("✓ this orb can work it"));
-                    }
-                    Some(refusal) => {
-                        println!("      {} {}", style.warn("⚠"), refuse_text(world, refusal, style));
+                if let Some(ax) = world.civ_axes() {
+                    println!(
+                        "  axes dis={} met={} per={}",
+                        ax.disposition, ax.metabolism, ax.perception
+                    );
+                } else {
+                    println!("  {}", style.dim("no genesis seal — utility uses neutral axes"));
+                }
+                if pulls.is_empty() {
+                    println!("  {}", style.dim("dark-7 silent (no immediate-need wells live)"));
+                } else {
+                    for (p, w) in &pulls {
+                        println!(
+                            "  {} {} · weight {} — {}",
+                            style.warn("DARK"),
+                            p.word(),
+                            amount(w),
+                            p.gloss()
+                        );
                     }
                 }
-            }
-            if ready > 0 {
+                let cat = world.chem_catalog();
+                if !cat.is_empty() {
+                    println!("  catalog {} gems known", cat.len());
+                    for g in cat.iter().take(8) {
+                        println!("    · {}", &hex_prefix(g)[..8]);
+                    }
+                }
+                let rows = world.bench_science(*current);
+                if rows.is_empty() {
+                    println!(
+                        "  {}",
+                        style.dim("nothing bonds — assay more veins or trade for missing matter")
+                    );
+                }
+                let mut ready = 0;
+                for (members, gem, knowledge, standing, survival, dark, net) in &rows {
+                    let named: Vec<String> = members
+                        .iter()
+                        .map(|m| hex_prefix(m)[..6].to_string())
+                        .collect();
+                    println!(
+                        "  {} → {} · k{} · net {} (surv {} / dark {})",
+                        style.strong(&named.join(" + ")),
+                        style.strong(&hex_prefix(gem)[..8]),
+                        knowledge,
+                        amount(net),
+                        amount(survival),
+                        amount(dark)
+                    );
+                    match standing {
+                        None => {
+                            ready += 1;
+                            println!("      {}", style.ok("✓ workable here"));
+                        }
+                        Some(refusal) => {
+                            println!(
+                                "      {} {}",
+                                style.warn("⚠"),
+                                refuse_text(world, refusal, style)
+                            );
+                        }
+                    }
+                }
+                if ready > 0 {
+                    println!(
+                        "  {}",
+                        style.dim(
+                            "compound … · iso <a> <b> · catalog <gem> · bench science"
+                        )
+                    );
+                }
+            } else {
+                let bench = world.bench_standing(*current);
                 println!(
-                    "  {} {}",
-                    style.dim("↳"),
-                    style.dim("compound <prefix> <prefix> … to bond a set")
+                    "{} THE BENCH — what this orb's matter would make",
+                    style.strong("◈")
                 );
+                if bench.is_empty() {
+                    println!(
+                        "  {}",
+                        style.dim(
+                            "nothing here bonds — a set needs one geometry, one phase, and binds \
+                             that saturate. Assay more veins, or trade for what your sky lacks"
+                        )
+                    );
+                }
+                let mut ready = 0;
+                for (members, gem, knowledge, standing) in &bench {
+                    let named: Vec<String> = members
+                        .iter()
+                        .map(|member| hex_prefix(member)[..6].to_string())
+                        .collect();
+                    println!(
+                        "  {} → {} · knowledge {}",
+                        style.strong(&named.join(" + ")),
+                        style.strong(&hex_prefix(gem)[..8]),
+                        knowledge
+                    );
+                    match standing {
+                        None => {
+                            ready += 1;
+                            println!("      {}", style.ok("✓ this orb can work it"));
+                        }
+                        Some(refusal) => {
+                            println!(
+                                "      {} {}",
+                                style.warn("⚠"),
+                                refuse_text(world, refusal, style)
+                            );
+                        }
+                    }
+                }
+                if ready > 0 {
+                    println!(
+                        "  {} {}",
+                        style.dim("↳"),
+                        style.dim(
+                            "compound <prefix>… · bench science · iso · catalog"
+                        )
+                    );
+                }
+            }
+        }
+        Some("iso") | Some("union") | Some("iso-union") => {
+            let a = words.next();
+            let b = words.next();
+            match (a, b) {
+                (Some(pa), Some(pb)) => {
+                    let committed = world.committed();
+                    let held = committed.orbs.iter().find(|orb| orb.orb_id == *current);
+                    let resolve = |prefix: &str| {
+                        held.and_then(|orb| {
+                            orb.elements
+                                .iter()
+                                .map(|(e, _)| *e)
+                                .find(|e| hex_prefix(e).starts_with(prefix))
+                        })
+                    };
+                    match (resolve(pa), resolve(pb)) {
+                        (Some(ga), Some(gb)) => match world.iso_union(*current, ga, gb) {
+                            Ok(product) => {
+                                let _ = sync_world(world);
+                                println!(
+                                    "{} isomorphic union → {} (same shell/phase family)",
+                                    style.ok("◈"),
+                                    style.strong(&hex_prefix(&product)[..8])
+                                );
+                            }
+                            Err(refusal) => refuse(world, &refusal, style),
+                        },
+                        _ => println!(
+                            "{} need two banked gem prefixes — `e` lists elements",
+                            style.bad("✗")
+                        ),
+                    }
+                }
+                _ => println!(
+                    "{} usage: {}",
+                    style.bad("✗"),
+                    style.strong("iso <gem-prefix> <gem-prefix>")
+                ),
+            }
+        }
+        Some("catalog") | Some("chem-catalog") => {
+            let prefix = words.next();
+            match prefix {
+                Some(p) => {
+                    let committed = world.committed();
+                    let held = committed.orbs.iter().find(|orb| orb.orb_id == *current);
+                    let gem = held.and_then(|orb| {
+                        orb.elements
+                            .iter()
+                            .map(|(e, _)| *e)
+                            .find(|e| hex_prefix(e).starts_with(p))
+                    });
+                    match gem {
+                        Some(g) => match world.chem_catalog_gem(*current, g) {
+                            Ok(k) => {
+                                let _ = sync_world(world);
+                                println!(
+                                    "{} cataloged {} · knowledge {k} (crystal fee · science known)",
+                                    style.ok("◈"),
+                                    style.strong(&hex_prefix(&g)[..8])
+                                );
+                            }
+                            Err(refusal) => refuse(world, &refusal, style),
+                        },
+                        None => println!(
+                            "{} no banked gem matches {} — compound first",
+                            style.bad("✗"),
+                            p
+                        ),
+                    }
+                }
+                None => {
+                    let cat = world.chem_catalog();
+                    println!(
+                        "{} CHEMISTRY CATALOG — {} known",
+                        style.head("CHEM"),
+                        cat.len()
+                    );
+                    for g in cat {
+                        println!("  · {}", &hex_prefix(g)[..8]);
+                    }
+                    println!(
+                        "  {}",
+                        style.hint("catalog <gem-prefix> seals a banked gem as known chemistry")
+                    );
+                }
             }
         }
         Some("compound") => {
@@ -7102,6 +7277,18 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
             amount(free),
             amount(need)
         ),
+        ActionRefused::NotIsomorphic => {
+            "gems are not isomorphic — need same shell and phase (bench science shows families)"
+                .into()
+        }
+        ActionRefused::ChemAlreadyCataloged { gem } => format!(
+            "gem {} already in the chemistry catalog",
+            &hex(gem)[..8]
+        ),
+        ActionRefused::NoSuchGem { gem } => format!(
+            "no banked gem {} — compound or iso-union first",
+            &hex(gem)[..8]
+        ),
         ActionRefused::BalanceEntropyDominates {
             balance,
             syntropy,
@@ -8600,6 +8787,30 @@ fn chronicle(world: &World, style: &Style) {
                 orb_id,
                 amount(slash),
                 amount(richness_after)
+            ),
+            cfe::dop::ClosureEvent::IsoUnionStruck {
+                orb_id,
+                knowledge,
+                ..
+            } => format!("◈ iso-union orb {orb_id} knowledge {knowledge}"),
+            cfe::dop::ClosureEvent::ChemCataloged {
+                orb_id,
+                knowledge,
+                survival,
+                ..
+            } => format!(
+                "◈ chem catalog orb {orb_id} k{knowledge} survival {}",
+                amount(survival)
+            ),
+            cfe::dop::ClosureEvent::DarkPullStruck {
+                orb_id,
+                pull,
+                weight,
+                dark_score,
+            } => format!(
+                "🌑 dark-{pull} orb {orb_id} weight {} score {}",
+                amount(weight),
+                amount(dark_score)
             ),
             cfe::dop::ClosureEvent::AssayStruck { amount: drawn, richness, .. } => format!(
                 "⚖ {} drawn from the opened vein — one receipt, the whole span{}",

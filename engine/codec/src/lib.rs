@@ -94,6 +94,9 @@ pub const SCHEMA_V13: u8 = 13;
 /// **SCHEMA v14 — O6.5 vault custody STAMP per orb.**
 pub const SCHEMA_V14: u8 = 14;
 
+/// **SCHEMA v15 — CHEM science catalog (known gems).**
+pub const SCHEMA_V15: u8 = 15;
+
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
 }
@@ -114,7 +117,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V14];
+    let mut out = vec![SCHEMA_V15];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -455,6 +458,11 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         put_u64(&mut out, *orb);
         ratio::encode(amt, &mut out);
     }
+    // SCHEMA v15 — chemistry catalog.
+    put_u32(&mut out, committed.chem_catalog.len() as u32);
+    for h in &committed.chem_catalog {
+        out.extend_from_slice(h);
+    }
     out
 }
 
@@ -538,6 +546,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         && schema != SCHEMA_V12
         && schema != SCHEMA_V13
         && schema != SCHEMA_V14
+        && schema != SCHEMA_V15
     {
         return None;
     }
@@ -992,6 +1001,13 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         }
     }
 
+    let mut chem_catalog = Vec::new();
+    if schema >= SCHEMA_V15 {
+        for _ in 0..take.u32()? {
+            chem_catalog.push(take.array32()?);
+        }
+    }
+
     if !take.done() {
         return None;
     }
@@ -1037,5 +1053,6 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         intel_hashes,
         spy_marks,
         vault_stamp,
+        chem_catalog,
     })
 }

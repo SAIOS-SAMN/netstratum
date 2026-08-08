@@ -347,7 +347,10 @@
 //!    153  ClosureEvent::VaultWithdrawn (O6.5 — STAMP out of Vault custody.)
 //!    154  ClosureEvent::AssayConsilience (O6.4 — Assay office re-proves vein.)
 //!    155  ClosureEvent::AssaySlashed (O6.4 — false richness residual.)
-//!    Phase-5 claim ledger: next free **156**. Wave-6 offices-as-play.
+//!    156  ClosureEvent::IsoUnionStruck (CHEM science — isomorphic gem union.)
+//!    157  ClosureEvent::ChemCataloged (CHEM science — recipe sealed as known.)
+//!    158  ClosureEvent::DarkPullStruck (CHEM science — dark-7 gravity residual.)
+//!    Phase-5 claim ledger: next free **159**. Chemistry science path.
 //!         Orb TLV: 73 STAMP, 74 scrap. ZoneKind::ShipYard = 10.
 //!         (Historic free tags below top: 14, 15, 56, 57, 58, 64, 66,
 //!         83, 84, 87; 9 and 51 reserved; 65 retired forever.)
@@ -2838,6 +2841,28 @@ pub enum ClosureEvent {
         slash: Ratio,
         richness_after: Ratio,
     },
+    /// CHEM science (tag 156) — isomorphic union of two banked gems.
+    IsoUnionStruck {
+        orb_id: u64,
+        a: [u8; 32],
+        b: [u8; 32],
+        product: [u8; 32],
+        knowledge: u16,
+    },
+    /// CHEM science (tag 157) — recipe/gem sealed into the chemistry catalog.
+    ChemCataloged {
+        orb_id: u64,
+        gem: [u8; 32],
+        knowledge: u16,
+        survival: Ratio,
+    },
+    /// CHEM science (tag 158) — dark-7 gravity residual on a bond/union.
+    DarkPullStruck {
+        orb_id: u64,
+        pull: u8,
+        weight: Ratio,
+        dark_score: Ratio,
+    },
     /// N4 (NS-2 §1.5) — the scanner's power draw, the ONE chronicle
     /// event of RQP: crystals left the probing orb's bank to hold the
     /// lens open. Deliberately blind to what was asked and what was
@@ -3936,6 +3961,44 @@ impl ClosureEvent {
                 ratio::encode(slash, &mut value);
                 ratio::encode(richness_after, &mut value);
                 tlv::put(155, &value, &mut out);
+            }
+            Self::IsoUnionStruck {
+                orb_id,
+                a,
+                b,
+                product,
+                knowledge,
+            } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(a);
+                value.extend_from_slice(b);
+                value.extend_from_slice(product);
+                value.extend_from_slice(&knowledge.to_le_bytes());
+                tlv::put(156, &value, &mut out);
+            }
+            Self::ChemCataloged {
+                orb_id,
+                gem,
+                knowledge,
+                survival,
+            } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(gem);
+                value.extend_from_slice(&knowledge.to_le_bytes());
+                ratio::encode(survival, &mut value);
+                tlv::put(157, &value, &mut out);
+            }
+            Self::DarkPullStruck {
+                orb_id,
+                pull,
+                weight,
+                dark_score,
+            } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.push(*pull);
+                ratio::encode(weight, &mut value);
+                ratio::encode(dark_score, &mut value);
+                tlv::put(158, &value, &mut out);
             }
             Self::CrystalDrawn { orb_id, amount } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
@@ -5105,6 +5168,44 @@ impl ClosureEvent {
                     element,
                     slash,
                     richness_after,
+                })
+            }
+            156 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let a: [u8; 32] = value.get(8..40)?.try_into().ok()?;
+                let b: [u8; 32] = value.get(40..72)?.try_into().ok()?;
+                let product: [u8; 32] = value.get(72..104)?.try_into().ok()?;
+                let knowledge = u16::from_le_bytes(value.get(104..106)?.try_into().ok()?);
+                Some(Self::IsoUnionStruck {
+                    orb_id,
+                    a,
+                    b,
+                    product,
+                    knowledge,
+                })
+            }
+            157 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let gem: [u8; 32] = value.get(8..40)?.try_into().ok()?;
+                let knowledge = u16::from_le_bytes(value.get(40..42)?.try_into().ok()?);
+                let (survival, _) = ratio::decode(value.get(42..)?)?;
+                Some(Self::ChemCataloged {
+                    orb_id,
+                    gem,
+                    knowledge,
+                    survival,
+                })
+            }
+            158 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let pull = *value.get(8)?;
+                let (weight, u1) = ratio::decode(value.get(9..)?)?;
+                let (dark_score, _) = ratio::decode(value.get(9 + u1..)?)?;
+                Some(Self::DarkPullStruck {
+                    orb_id,
+                    pull,
+                    weight,
+                    dark_score,
                 })
             }
             55 => {
