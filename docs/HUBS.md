@@ -7,13 +7,24 @@
 
 ## 0. BEFORE this expansion (state of the board)
 
-### Roots (already correct)
+### Roots
 
 | Root | Role |
 |------|------|
 | `bench` | **BUILD** components |
 | `intel` | **KNOWLEDGE activity** |
 | `trade` | **CIRCULATE / run** components |
+| `diplo` | **DIPLOMACY activity** (local · stellar · mesh) |
+
+### Dual law (required)
+
+Every **standalone activity root** has a matching **craft surface under bench**:
+
+| Activity root | Bench craft |
+|---------------|-------------|
+| `intel` | `bench intel-craft` (+ build smelt/synth, chem catalog) |
+| `trade` | `bench econ` · `bench fleet` · `bench offices` |
+| `diplo` | **`bench diplo`** — councils · bonds · forwards · seats · routes · escorts |
 
 ### What was wired (pre-expansion)
 
@@ -70,7 +81,7 @@ intel          KNOWLEDGE ACTIVITY
   link         council · license · bond · forward · absorb
   culture      literature aspire/claim (alias of knowledge culture)
 
-trade          CIRCULATE / RUN
+trade          CIRCULATE / RUN (market · haul — not treaties)
   books        offers · instruments · market war · suite
   stamp        mint · aperture (unit of account activity)
   element      element aperture · element charter · refine path run
@@ -78,16 +89,26 @@ trade          CIRCULATE / RUN
   rails        promote · anchor import/export
   vault        deposit · withdraw · margin
   aperture     resource · element · stamp haul
-  diplo        local treaties · renounce · pair factors
-  stellar      interstellar: crossed · war walls · aperture · license haul
   desk         interactive suite
+  (trade diplo|stellar → redirect to diplo root)
+
+diplo          DIPLOMACY ACTIVITY
+  local        pair treaties · renounce
+  stellar      crossed · war walls · aperture · license
+  mesh         councils · bonds · forwards standing
+  craft        → bench diplo
 ```
 
 ### Flow law
 
 ```text
 bench crafts ──► intel operates knowledge tools / bases
-             └► trade runs market / haul / vault / diplo
+             ├► trade runs market / haul / vault
+             └► diplo runs treaties / stellar / mesh
+
+Dual:  diplo  ←activity→  bench diplo  (craft)
+       intel  ←activity→  bench intel-craft
+       trade  ←activity→  bench econ | fleet | offices
 ```
 
 ---
@@ -125,6 +146,8 @@ crossed/shielded, war walls, aperture haul, license leap path.
 | `bench` | build |
 | `intel` · `intelligence` · `kb` | knowledge |
 | `trade` · `trades` | circulate |
-| `help bench` · `help intel` · `help trade-hub` | maps |
+| `diplo` · `diplomacy` · `diplomatics` | diplomacy activity |
+| `bench diplo` | diplomacy **craft** |
+| `help bench` · `help intel` · `help trade-hub` · `help diplo` | maps |
 
 Barter form preserved: `trade <id> with <world> <id> deal <n>`.

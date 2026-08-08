@@ -10,13 +10,13 @@ pub fn help(style: Style, topic: Option<&str>) {
         Some("bench") | Some("workbench") | Some("make") => bench_help(style),
         Some("intel") | Some("intelligence") | Some("knowledge") | Some("kb") => intel_help(style),
         Some("trade-hub") | Some("trades") | Some("circulate") => trade_hub_help(style),
+        Some("diplo") | Some("diplomacy") | Some("diplomatics") => diplo_help(style),
         Some("stamp") | Some("money") => stamp_help(style),
         Some("element") | Some("elements") | Some("matter") => element_help(style),
         Some("fleet") | Some("hull") | Some("ship") => fleet_help(style),
         Some("market") | Some("trade") | Some("offer") => market_help(style),
         Some("route") | Some("routes") | Some("charter") => routes_help(style),
         Some("colony") | Some("grow") | Some("build") => colony_help(style),
-        Some("diplo") | Some("diplomacy") | Some("treaty") => diplo_help(style),
         Some("topics") | Some("list") => topics(style),
         Some(other) => {
             println!(
@@ -57,10 +57,11 @@ fn index(style: Style) {
     );
     println!();
     println!("  {}", style.section("ROOT HUBS (peers)"));
-    row(style, "bench", "BUILD components — planetary · build · star · chem · econ");
+    row(style, "bench", "BUILD components (+ craft leaves for every activity root)");
     row(style, "intel", "KNOWLEDGE activity — research · bases · ops · link");
-    row(style, "trade", "CIRCULATE activity — books · fleet · rails · vault · aperture");
-    row(style, "help bench · help intel · help trade-hub", "hub maps");
+    row(style, "trade", "CIRCULATE activity — books · stamp · element · fleet · rails");
+    row(style, "diplo", "DIPLOMACY activity — local · stellar · mesh");
+    row(style, "help bench|intel|trade-hub|diplo", "hub maps · docs/HUBS.md");
     println!();
     println!("  {}", style.section("TRADE DESK (Phase 1–2)"));
     row(style, "desk · desk enter", "interactive trade / diplo / routes / arb");
@@ -90,9 +91,10 @@ fn index(style: Style) {
 fn topics(style: Style) {
     banner_line(style, "HELP TOPICS");
     for (name, blurb) in [
-        ("bench", "BUILD hub — craft components only"),
-        ("intel", "KNOWLEDGE hub — research · bases · ops · link"),
-        ("trade-hub", "CIRCULATE hub — run trade components"),
+        ("bench", "BUILD hub — craft (+ dual leaves for intel/trade/diplo)"),
+        ("intel", "KNOWLEDGE activity — research · bases · ops · link"),
+        ("trade-hub", "CIRCULATE activity — market · haul · vault"),
+        ("diplo", "DIPLOMACY activity — local · stellar · mesh"),
         ("desk", "trade desk panes and keybinds"),
         ("stamp", "STAMP mint and aperture"),
         ("element", "element haul and charter"),
@@ -133,9 +135,29 @@ fn bench_help(style: Style) {
     row(style, "bench fleet", "yard · mint hull · scrap");
     row(style, "bench assay", "T7 court · challenge");
     row(style, "bench doctrine", "posture · KIN prep");
+    row(style, "bench diplo", "diplomatic components → root diplo");
+    row(style, "bench intel-craft", "forge chain · instruments → intel");
     println!();
-    row(style, "intel · trade", "peer roots");
+    println!("  {}", style.section("DUAL LAW"));
+    row(style, "activity root S", "run on S; craft on bench S / bench *-craft");
+    row(style, "intel · trade · diplo", "activity peers");
     row(style, "bench · back · home", "← bench root");
+}
+
+fn diplo_help(style: Style) {
+    banner_line(style, "DIPLO — DIPLOMACY ACTIVITY");
+    println!(
+        "  {}",
+        style.dim("Run treaties & stellar haul. Craft: `bench diplo`. docs/HUBS.md")
+    );
+    println!();
+    row(style, "diplo local", "pair treaties · renounce");
+    row(style, "diplo stellar", "crossed · war · aperture · license");
+    row(style, "diplo mesh", "councils · bonds · forwards");
+    row(style, "bench diplo", "CRAFT components for diplomacy");
+    println!();
+    row(style, "diplo · back · home", "← diplo root");
+    row(style, "bench · intel · trade", "peer roots");
 }
 
 fn intel_help(style: Style) {
@@ -386,18 +408,3 @@ fn colony_help(style: Style) {
     );
 }
 
-fn diplo_help(style: Style) {
-    banner_line(style, "DIPLOMACY");
-    row(
-        style,
-        "treaty <trade|defense|peace|war> with <world> …",
-        "co-signed pair charter",
-    );
-    row(style, "treaties", "list standing pacts");
-    row(style, "treaty renounce <deal> <world>", "drop your leg");
-    println!();
-    println!(
-        "  {}",
-        style.hint("War ⇒ WALL on TRADE pane; trade/defense ease melt when both books hold it.")
-    );
-}

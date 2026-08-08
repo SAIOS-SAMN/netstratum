@@ -73,13 +73,14 @@ fn main() {
 
 fn banner(style: &Style) {
     println!("{}", style.border("╔══════════════════════════════════════════════════╗"));
-    println!("{}", style.title("║  NETSTRATUM — bench · intel · trade              ║"));
+    println!("{}", style.title("║  NETSTRATUM — bench · intel · trade · diplo      ║"));
     println!("{}", style.border("╚══════════════════════════════════════════════════╝"));
     println!(
-        "  {} build  ·  {} know  ·  {} run  ·  {}",
+        "  {} · {} · {} · {} · {}",
         style.verb("bench"),
         style.verb("intel"),
         style.verb("trade"),
+        style.verb("diplo"),
         style.key("help")
     );
 }
@@ -508,7 +509,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 style.strong("assay <element-prefix>")
             ),
         },
-        // Root hubs: BENCH (build) · INTEL (knowledge activity) · TRADE (circulate).
+        // Root hubs: BENCH (build) · INTEL · TRADE · DIPLO (activity peers).
         Some("bench") => {
             let rest: Vec<String> = words.map(|w| w.to_string()).collect();
             hubs::bench(world, rest.into_iter(), style, *current);
@@ -516,6 +517,10 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         Some("intel") | Some("intelligence") | Some("kb") => {
             let rest: Vec<String> = words.map(|w| w.to_string()).collect();
             hubs::intel(world, rest.into_iter(), style, *current);
+        }
+        Some("diplo") | Some("diplomacy") | Some("diplomatics") => {
+            let rest: Vec<String> = words.map(|w| w.to_string()).collect();
+            hubs::diplo(world, rest.into_iter(), style, *current);
         }
         Some("chemistry") | Some("chem") => {
             let mut rest: Vec<String> = vec!["chem".into()];
