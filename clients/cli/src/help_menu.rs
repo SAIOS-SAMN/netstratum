@@ -280,6 +280,7 @@ fn colony_help(style: Style) {
     row(style, "market status|seal|resume|clear|raid|cascade", "P5-M/M2 MKT war");
     row(style, "medium status|reinforce · tamper", "P5-D ATM + dual-use TERRA tax");
     row(style, "spy status|probe|exfil|sabotage", "P5-F espionage (intel stash, no free tech)");
+    row(style, "rail status|promote", "P5-G R1→R2; R3/R4 feature-gated");
     row(style, "suite market|convoy|cyber|spy", "UI over deeds — same chronicle");
     row(style, "prospect · assay · compound · refine", "elements + alchemy");
     println!();

@@ -241,6 +241,7 @@ impl World {
                     orb_id: orb,
                     cost: ratio(0, 1),
                     pressure: ratio(0, 1),
+                    resource: crate::dop::Resource::Iron,
                 },
                 SOVEREIGN,
             );

@@ -1,11 +1,9 @@
 # 36 — DEFENSE AXIOMS · SPECIES-RELATIVE SECURITY · COVERT TERRAFORM · ESPIONAGE
 
-**Status:** DESIGN LOCK + partial land — **P5-A** (132–134) · **P5-M**
-(135–139) · **P5-M2** (140) · **P5-D** (141–143) · **P5-B** (144) ·
-**P5.19** dual-use · **§11** matrix catalog · **§12** KIN open-up
-(no free constants).  
-**P5-C INF landed** (compose, zero tags). **Next:** **P5-K2** KIN colour /
-residual / `kin_step` (`36` §12). Claim tags only at land.  
+**Status:** **PARTIAL LAND — Phase 5 core complete** (2026-08-08).  
+A–F · K2 · M/M2 · dual-use · 19b medium colour · G (R1–R2 + optional R3/R4
+features) · H close-out. Optional external strand/datum adapters remain
+on the tier board. Next free tag **149**.  
 **Authority:** `00_CHARTER`, `04_CIVILIZATION_GENESIS`, `05_THERMAL_BALANCE`,
 `06_CIVILIZATIONS`, `10_TECH_EMERGENCE` (TERRA-1, WARDEN-1, MASK-1, MANU-1),
 `14_ALMANAC`, `15_TAXON`, `33_TRADE_FLEET_AND_DESK` §Phase 5,
@@ -364,8 +362,8 @@ Maps onto and **extends** `TASKS_TRADE_FLEET_DESK` P5:
 | **P5-M / M2** | MKT economic warfare + cascade/haircut/resume audit + suites | **LANDED** 135–140 |
 | **P5-K2** | KIN open-up §12 (species residual · kin_step · perception fog) | **LANDED** zero tags |
 | **P5-F** | Espionage suite (scout/exfil/sabotage) | **LANDED** 145–147 |
-| **P5-G** | Deep rails R3/R4 / Anchor (original P5.4–P5.7) | optional features |
-| **P5-H** | Docs + demo: escort + covert ATM + market-war arc | program metric |
+| **P5-G** | Deep rails R1→R2 + optional R3/R4 features + Anchor gate | **PARTIAL** 148 |
+| **P5-H** | Close-out pin + docs PARTIAL LAND core complete | **LANDED** |
 
 **Order law:** P5-A before combat fantasy; P5-B before species-blind
 armor HP; P5-D before invasion narrative depth; **P5-M after Phase 4**
@@ -382,7 +380,8 @@ without free dials (§12); P5-G never blocks R1–R2 fun.
 | **141–143** | P5-D CovertTamper / MediumReinforced / TamperDetected |
 | **144** | P5-B PostureReoriented (doctrine shift; anatomy sealed) |
 | **145–147** | P5-F SpyProbed / TechExfiltrated / InstrumentSabotaged |
-| **148+** | next free |
+| **148** | P5-G RailPromoted |
+| **149+** | next free |
 | no float | all residuals exact rational |
 
 ### 6.2 Non-goals

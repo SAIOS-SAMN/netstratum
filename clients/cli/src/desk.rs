@@ -582,11 +582,13 @@ fn render_defend(style: Style, home: &World) -> Vec<String> {
         style.ok("stable")
     };
     lines.push(format!(
-        "  ATM pressure {} / {} · {}",
+        "  ATM pressure {} / {} · {} · spend {:?}",
         ratio_str(&atm.pressure),
         ratio_str(&atm.threshold),
-        atm_paint
+        atm_paint,
+        atm.reinforce_resource
     ));
+    lines.push(format!("  {}", style.dim(atm.residual_voice)));
     let inf = home.inf_integrity();
     let veil_w = if inf.veiled {
         style.warn("VEIL")

@@ -339,7 +339,8 @@
 //!    145  ClosureEvent::SpyProbed (P5-F — scout residual under INF/CYB.)
 //!    146  ClosureEvent::TechExfiltrated (P5-F — hash copy; never free tech mint.)
 //!    147  ClosureEvent::InstrumentSabotaged (P5-F — grade hit on held instrument.)
-//!    Phase-5 claim ledger: next free **148**.
+//!    148  ClosureEvent::RailPromoted (P5-G — element-route rail altitude lift.)
+//!    Phase-5 claim ledger: next free **149**.
 //!         Orb TLV: 73 STAMP, 74 scrap. ZoneKind::ShipYard = 10.
 //!         (Historic free tags below top: 14, 15, 56, 57, 58, 64, 66,
 //!         83, 84, 87; 9 and 51 reserved; 65 retired forever.)
@@ -393,6 +394,14 @@ impl Rail {
     }
     pub const fn hearth() -> Rail {
         Rail::Hearth
+    }
+    pub fn word(self) -> &'static str {
+        match self {
+            Rail::Hearth => "R1-hearth",
+            Rail::Aperture => "R2-aperture",
+            Rail::Strand => "R3-strand",
+            Rail::Court => "R4-court",
+        }
     }
 }
 
@@ -2739,11 +2748,13 @@ pub enum ClosureEvent {
         cost: Ratio,
         pressure: Ratio,
     },
-    /// P5-D ATM (tag 142) — medium envelope reinforce; pressure falls by eighth.
+    /// P5-D / P5.19b ATM (tag 142) — medium envelope reinforce; pressure falls.
+    /// `resource` is the spend arm (species-coloured: iron/biomass/crystal).
     MediumReinforced {
         orb_id: u64,
         cost: Ratio,
         pressure: Ratio,
+        resource: Resource,
     },
     /// P5-D ATM (tag 143) — unit pressure threshold crossed (unmask residual).
     TamperDetected {
@@ -2777,6 +2788,12 @@ pub enum ClosureEvent {
         orb_id: u64,
         grade: u8,
         tech_hash: [u8; 32],
+    },
+    /// P5-G (tag 148) — promote element route rail R1→R2 (R3/R4 feature-gated).
+    RailPromoted {
+        deal: u64,
+        from_rail: u8,
+        to_rail: u8,
     },
     /// N4 (NS-2 §1.5) — the scanner's power draw, the ONE chronicle
     /// event of RQP: crystals left the probing orb's bank to hold the
@@ -3756,10 +3773,12 @@ impl ClosureEvent {
                 orb_id,
                 cost,
                 pressure,
+                resource,
             } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 ratio::encode(cost, &mut value);
                 ratio::encode(pressure, &mut value);
+                value.push(*resource as u8);
                 tlv::put(142, &value, &mut out);
             }
             Self::TamperDetected { orb_id, pressure } => {
@@ -3803,6 +3822,16 @@ impl ClosureEvent {
                 value.push(*grade);
                 value.extend_from_slice(tech_hash);
                 tlv::put(147, &value, &mut out);
+            }
+            Self::RailPromoted {
+                deal,
+                from_rail,
+                to_rail,
+            } => {
+                let mut value = deal.to_le_bytes().to_vec();
+                value.push(*from_rail);
+                value.push(*to_rail);
+                tlv::put(148, &value, &mut out);
             }
             Self::CrystalDrawn { orb_id, amount } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
@@ -4838,11 +4867,20 @@ impl ClosureEvent {
             142 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let (cost, u1) = ratio::decode(value.get(8..)?)?;
-                let (pressure, _) = ratio::decode(value.get(8 + u1..)?)?;
+                let at = 8 + u1;
+                let (pressure, u2) = ratio::decode(value.get(at..)?)?;
+                let rest = at + u2;
+                // Additive: older frames omit resource → Iron (P5-D default).
+                let resource = value
+                    .get(rest)
+                    .copied()
+                    .and_then(Resource::from_wire)
+                    .unwrap_or(Resource::Iron);
                 Some(Self::MediumReinforced {
                     orb_id,
                     cost,
                     pressure,
+                    resource,
                 })
             }
             143 => {
@@ -4888,6 +4926,18 @@ impl ClosureEvent {
                     orb_id,
                     grade,
                     tech_hash,
+                })
+            }
+            148 => {
+                let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let from_rail = *value.get(8)?;
+                let to_rail = *value.get(9)?;
+                Rail::from_wire(from_rail)?;
+                Rail::from_wire(to_rail)?;
+                Some(Self::RailPromoted {
+                    deal,
+                    from_rail,
+                    to_rail,
                 })
             }
             55 => {

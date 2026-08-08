@@ -1021,10 +1021,12 @@ pub fn render_receipt(receipt: &Receipt) -> String {
             orb_id,
             cost,
             pressure,
+            resource,
         } => (
             "medium_reinforce",
             format!(
-                "envelope orb {orb_id} cost {} pressure {}",
+                "envelope orb {orb_id} {:?} {} pressure {}",
+                resource,
                 ratio_str(cost),
                 ratio_str(pressure)
             ),
@@ -1067,6 +1069,14 @@ pub fn render_receipt(receipt: &Receipt) -> String {
         } => (
             "instrument_sabotage",
             format!("sabotage orb {orb_id} grade {grade}"),
+        ),
+        E::RailPromoted {
+            deal,
+            from_rail,
+            to_rail,
+        } => (
+            "rail_promoted",
+            format!("deal {deal} rail {from_rail}→{to_rail}"),
         ),
         E::ApertureSent { deal, from_orb, resource, amount } => (
             "aperture_sent",

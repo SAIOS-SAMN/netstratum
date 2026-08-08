@@ -1,4 +1,4 @@
-//! P5-D ATM — CovertTamper pressure + MediumEnvelope reinforce (36 §3, §11).
+//! P5-D / P5.19b ATM — CovertTamper + MediumEnvelope + species residual voice.
 
 use super::*;
 use crate::dop::Resource;
@@ -23,6 +23,31 @@ impl World {
             .unwrap_or_else(|| ratio(0, 1))
     }
 
+    /// P5.19b — reinforce spend resource by sealed metabolism (no free dial).
+    /// Mineral: iron shell · biotic: biomass membrane · plasmic: crystal field.
+    pub fn medium_reinforce_resource(&self) -> Resource {
+        match self.defense_posture().metabolism {
+            2 => Resource::Biomass,
+            3 => Resource::Crystal,
+            _ => Resource::Iron,
+        }
+    }
+
+    /// P5.19b — species-relative medium residual voice (36 §1.4 / §3.3).
+    pub fn medium_residual_voice(&self) -> &'static str {
+        let p = self.defense_posture();
+        match (p.metabolism, p.clade) {
+            (1, Some(4) | Some(14)) => "lithic pore fluid / dust radiator under stress",
+            (1, _) => "mineral medium — dust, albedo, coolant envelope",
+            (2, Some(5)) => "cryptobiotic shell — desiccation as strategy until limit",
+            (2, Some(6)) => "cetacean song medium — density wrongness is attack",
+            (2, _) => "biotic medium — gas mix, humidity, Habitat envelope",
+            (3, Some(12) | Some(13)) => "plasmic bottle — field shear and density quench",
+            (3, _) => "plasmic weather — magnetic envelope, radiative strip",
+            _ => "medium envelope under pressure",
+        }
+    }
+
     /// Medium envelope reading for DEFEND / suite.
     pub fn medium_integrity(&self, orb: u64) -> MediumIntegrity {
         let pressure = self.tamper_pressure_of(orb);
@@ -33,6 +58,9 @@ impl World {
             threshold: thr.clone(),
             compromised: pressure >= thr,
             dual_use: self.can_terraform(),
+            reinforce_resource: self.medium_reinforce_resource(),
+            residual_voice: self.medium_residual_voice(),
+            metabolism: self.defense_posture().metabolism,
         }
     }
 
@@ -119,16 +147,18 @@ impl World {
     ) -> Result<Ratio, ActionRefused> {
         self.permitted(actor, Scope::Build)?;
         let step = eighth();
+        // P5.19b: spend species medium resource (iron / biomass / crystal).
+        let resource = self.medium_reinforce_resource();
         let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
-        let have = held.banked_amount(Resource::Iron);
+        let have = held.banked_amount(resource);
         if have < step {
             return Err(ActionRefused::CannotAfford {
-                resource: Resource::Iron,
+                resource,
                 need: Box::new(step.clone()),
                 have: Box::new(have),
             });
         }
-        held.bank(Resource::Iron, -step.clone());
+        held.bank(resource, -step.clone());
         let cur = self.tamper_pressure_of(orb);
         let pressure = if cur > step {
             cur - step.clone()
@@ -141,6 +171,7 @@ impl World {
                 orb_id: orb,
                 cost: step,
                 pressure: pressure.clone(),
+                resource,
             },
             actor,
         );
@@ -157,6 +188,11 @@ pub struct MediumIntegrity {
     pub compromised: bool,
     /// True when TERRA crown is held — covert path is dual-use taxed.
     pub dual_use: bool,
+    /// P5.19b reinforce debit resource.
+    pub reinforce_resource: Resource,
+    /// Species-relative residual voice.
+    pub residual_voice: &'static str,
+    pub metabolism: u8,
 }
 
 /// P5.19 dual-use ATM gate reading.

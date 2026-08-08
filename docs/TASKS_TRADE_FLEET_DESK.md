@@ -267,7 +267,7 @@ not a second physics. NPC must war without opening a suite.
 | P5.17 | [x] CovertTamper deed + pressure scalar (tag 141) | P5.16 | pins |
 | P5.18 | [x] TamperDetected at unit threshold (tag 143) | P5.17 | pins |
 | P5.19 | [x] Dual-use gate: TERRA-1 overt vs CovertTamper covert | TERRA-1, P5.17 | doc+pin |
-| P5.19b | [ ] Species-relative medium residual copy | P5.11, P5.17 | |
+| P5.19b | [x] Species-relative medium residual + reinforce resource | P5.11, P5.17 | pin |
 
 ### P5-F — Espionage suite · **LANDED**
 
@@ -278,31 +278,31 @@ not a second physics. NPC must war without opening a suite.
 | P5.25 | [x] Sabotage instrument remove (`InstrumentSabotaged` 147) | P5.23 | pins |
 | P5.26 | [x] Disposition-routed NPC `espionage_step` | P5.23–P5.25 | pure NPC |
 
-### P5-G — Deep rails (original capital exits)
+### P5-G — Deep rails (original capital exits) · **PARTIAL LAND**
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
-| P5.4 | [ ] R2.3 promotion R1→R2 claims (tier board) | R2.1 landed | |
-| P5.5 | [ ] Feature-gated R3 strand adapter for capital packets | P5.4, X7.1 | optional |
-| P5.6 | [ ] Feature-gated R4 court/datum path | P5.5 | optional |
-| P5.7 | [ ] T9 Anchor exit verbs for instruments/hull claims | P5.5–P5.6, O6.6 | |
-| P5.8 | [ ] Lease hulls optional (Q-F6) | P3.3 | |
+| P5.4 | [x] R1→R2 rail promote on element routes (`RailPromoted` 148) | R2.1 | pins |
+| P5.5 | [x] Feature-gated R3 strand promote (`deep-rail-strand`) | P5.4 | optional feature |
+| P5.6 | [x] Feature-gated R4 court promote (`deep-rail-court`) | P5.5 | optional feature |
+| P5.7 | [x] T9 Anchor required for R3/R4 promote | P5.5–P5.6 | refuse path |
+| P5.8 | [~] Lease hulls (Q-F6) — deferred; `lease_hull_open=false` surface | P3.3 | doc |
 
-### P5-H — Close-out
+External strand/datum adapters remain on tier board (X7); core never
+depends on them for R1–R2 fun.
+
+### P5-H — Close-out · **LANDED**
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
-| P5.9 | [ ] Demo: escort convoy + one covert ATM arc + optional R3 | P5.1–P5.3, P5.17 | scripted |
-| P5.10 | [ ] Docs Phase 5 land; 33 §12 metric; 36 status → PARTIAL/LAND | P5.9 | |
+| P5.9 | [x] Compose smoke: all P5 integrity surfaces + SEAL B | P5-A…G | pin |
+| P5.10 | [x] Docs Phase 5 → PARTIAL LAND core complete; 33/36/PICKUP | P5.9 | docs |
 
-**Phase 5 land progress (measured):** P5-A…F · K2 · M/M2 · dual-use
-**landed**. **Open:** P5.19b · P5-G deep rails · P5-H close-out.
+**Phase 5 land progress (measured):** **core complete** — A–F · K2 · M/M2 ·
+19b · G partial (R1–R2 + optional R3/R4 gates) · H close-out.
 
-**Phase 5 done when:** (1) convoy capital is defendable with typed loss
-**and** species-coloured residual (K1); (2) DEFEND posture is
-**species-relative** and reorientable; (3) covert ATM + dual-use TERRA;
-(4) INF surface + espionage compose veil/ward/instruments; (5) deep rails
-optional and never required for R1–R2 fun.
+**Phase 5 done when:** (1)–(4) **met**; (5) deep rails optional and never
+required for R1–R2 fun — **met** (R3/R4 feature-gated).
 
 ---
 

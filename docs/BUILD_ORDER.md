@@ -1072,5 +1072,8 @@ reading. **Zero new tags.**
 InstrumentSabotaged; intel stash (no free tech mint); probe gate; NPC
 `espionage_step`; SCHEMA_V13; kernel **0.32.0**; CLI `spy` / suite spy.
 
-**Next:** P5.19b medium colour · P5-G deep rails · P5-H close-out · P1.8.
+**P5.19b + P5-G + P5-H LANDED:** medium residual voice + reinforce resource
+by metabolism; tag **148** `RailPromoted` R1→R2; R3/R4 behind
+`deep-rail-strand` / `deep-rail-court` + T9 Anchor; close-out pin; kernel
+**0.33.0**. Phase 5 **core complete** (external X7 adapters optional).
 

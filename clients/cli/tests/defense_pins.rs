@@ -51,6 +51,56 @@ fn posture_reorients_doctrine_not_anatomy() {
 }
 
 #[test]
+fn medium_residual_follows_metabolism() {
+    let mut m = World::new();
+    m.found("med-min").expect("f");
+    m.seal_genesis("line", 1, 1, 1).expect("mineral");
+    assert_eq!(m.medium_reinforce_resource(), Resource::Iron);
+    assert!(m.medium_residual_voice().contains("mineral") || !m.medium_residual_voice().is_empty());
+    let mut b = World::new();
+    b.found("med-bio").expect("f");
+    b.seal_genesis("line", 1, 2, 1).expect("biotic");
+    assert_eq!(b.medium_reinforce_resource(), Resource::Biomass);
+    let mut p = World::new();
+    p.found("med-pla").expect("f");
+    p.seal_genesis("line", 1, 3, 1).expect("plasmic");
+    assert_eq!(p.medium_reinforce_resource(), Resource::Crystal);
+}
+
+#[test]
+fn deep_rail_promote_hearth_to_aperture() {
+    // Minimal: no element route → RouteUnknown.
+    let mut w = World::new();
+    w.found("rail-home").expect("f");
+    assert!(matches!(
+        w.promote_rail(1),
+        Err(cfe::world::ActionRefused::RouteUnknown { .. })
+    ));
+    let st = w.deep_rail_status();
+    assert_eq!(st.max_rail, 1);
+    assert!(!st.strand_enabled);
+    assert!(!st.lease_hull_open);
+}
+
+#[test]
+fn phase5_closeout_surfaces_compose() {
+    // Smoke: all Phase-5 integrity surfaces construct on a found world.
+    let mut w = World::new();
+    w.found("p5-close").expect("f");
+    w.seal_genesis("closeout", 2, 1, 1).expect("g");
+    let _ = w.defense_posture();
+    let _ = w.market_integrity();
+    let _ = w.medium_integrity(FIRST_ORB);
+    let _ = w.inf_integrity();
+    let _ = w.kin_integrity(0);
+    let _ = w.cog_integrity();
+    let _ = w.cyb_integrity();
+    let _ = w.espionage_integrity();
+    let _ = w.deep_rail_status();
+    assert_eq!(replay(w.chronicle()), w.committed());
+}
+
+#[test]
 fn espionage_probe_exfil_refuse_and_seal_b_probe() {
     let mut w = World::new();
     w.found("spy-home").expect("f");

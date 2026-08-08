@@ -1258,9 +1258,10 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 orb_id,
                 cost,
                 pressure,
+                resource,
             } => {
                 if let Some(held) = peel(&mut orbs, *orb_id) {
-                    held.bank(crate::dop::Resource::Iron, -cost.clone());
+                    held.bank(*resource, -cost.clone());
                 }
                 tamper_pressures.retain(|(o, _)| *o != *orb_id);
                 if *pressure > ratio(0, 1) {
@@ -1322,6 +1323,15 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                     .position(|(o, h, g)| o == orb_id && h == tech_hash && g == grade)
                 {
                     instruments.remove(i);
+                }
+            }
+            ClosureEvent::RailPromoted {
+                deal,
+                to_rail,
+                ..
+            } => {
+                if let Some(r) = element_routes.iter_mut().find(|(d, _, _, _)| d == deal) {
+                    r.3 = *to_rail;
                 }
             }
         }

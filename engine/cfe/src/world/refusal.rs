@@ -269,6 +269,14 @@ pub enum ActionRefused {
     IntelAlreadyHeld,
     /// P5-F — no instrument on orb to sabotage.
     NoInstrumentToSabotage { orb: u64 },
+    /// P5-G — unknown rail code.
+    RailUnknown { rail: u8 },
+    /// P5-G — already at R4 Court ceiling.
+    RailAtCeiling { deal: u64, rail: u8 },
+    /// P5-G — R3/R4 promotion needs cargo feature flag (optional deep rail).
+    DeepRailGated { rail: u8, feature: &'static str },
+    /// P5-G — R3/R4 exit requires T9 Anchor station seated.
+    AnchorRequired { rail: u8 },
     /// THERMAL-1 — siting an orbit needs a commissioned sun first.
     NoStarCommissioned,
     /// THERMAL-1 — the orb is already sited; an orbit does not move.

@@ -15,17 +15,16 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 |------|--------|
 | Wave-1 commit | **`2109bf0`** (T4–T9, REFINE-1) |
 | Wave-2 commit | **`4686399`** (E-APT, element_trade_step) |
-| Kernel | **0.32.0** (next free minor **33**) |
-| Next free tag | **148** (P5-F 145–147 spy/exfil/sabotage) |
+| Kernel | **0.33.0** (next free minor **34**) |
+| Next free tag | **149** (P5-G 148 RailPromoted) |
 | Stations | **10** (T4–T9 economic offices open) |
 | ZoneKind compiled | **1–10** (ShipYard = 10) |
 | Codec | **SCHEMA_V13** (… + intel_hashes · spy_marks) |
 | Pure-NPC green | market_war · kin · espionage_step · instrument · ATM |
-| **Landed P5-F** | spy probe/exfil/sabotage · intel stash · suite spy |
-| **Next phase** | P5.19b medium colour · P5-G deep rails · **P5-H** close-out |
-| Docs | `36`; Phase 5 core verticals A–F + K2 + M landed |
-| Trade program | Phases **1–4** complete; Phase **5** near-complete (G/H open) |
-| Help | `spy probe|exfil|sabotage` · `suite spy|cyber|…` |
+| **Phase 5 core** | **COMPLETE** — A–F · K2 · M/M2 · 19b · G(R1–R2) · H |
+| **Optional open** | external strand/datum adapters (X7) · hull lease Q-F6 |
+| Docs | `36` PARTIAL LAND (core complete); trade Phases **1–5 core** |
+| Help | `rail promote` · `spy` · `medium` · `suite *` · full DEFEND |
 | Dirty / other lane | do not `git add -A` without reviewing observer/other-lane files |
 
 Older §0 counts (809 tests, 71 deeds, tag 95) are **historical**; re-measure

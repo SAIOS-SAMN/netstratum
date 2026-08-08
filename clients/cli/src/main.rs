@@ -2853,10 +2853,13 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             Some("reinforce") => match world.medium_reinforce(*current) {
                 Ok(p) => {
                     let _ = sync_world(world);
+                    let mi = world.medium_integrity(*current);
                     println!(
-                        "{} envelope reinforced · pressure now {}",
+                        "{} envelope reinforced ({:?}) · pressure now {} · {}",
                         style.ok("ATM"),
-                        amount(&p)
+                        mi.reinforce_resource,
+                        amount(&p),
+                        style.dim(mi.residual_voice)
                     );
                 }
                 Err(refusal) => refuse(world, &refusal, style),
@@ -2889,6 +2892,60 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 }
                 Err(refusal) => refuse(world, &refusal, style),
             }
+        },
+        // P5-G deep rails
+        Some("rail") | Some("rails") => match words.next() {
+            None | Some("status") | Some("help") => {
+                let d = world.deep_rail_status();
+                println!(
+                    "{} RAILS — max R{} · element routes {} · strand={} court={} anchor={}",
+                    style.head("R"),
+                    d.max_rail,
+                    d.routes,
+                    d.strand_enabled,
+                    d.court_enabled,
+                    d.anchor_seated
+                );
+                for (deal, eta, el, rail) in world.element_routes().iter().take(8) {
+                    let rw = cfe::dop::Rail::from_wire(*rail)
+                        .map(|r| r.word())
+                        .unwrap_or("?");
+                    println!(
+                        "  deal {deal} rail {rw} η {} el {:02x}…",
+                        amount(eta.value()),
+                        el[0]
+                    );
+                }
+                println!(
+                    "  {}",
+                    style.hint("rail promote <deal> — R1→R2 always; R3/R4 need features + Anchor")
+                );
+            }
+            Some("promote") => {
+                let deal = words.next().and_then(|w| w.parse().ok());
+                match deal {
+                    Some(d) => match world.promote_rail(d) {
+                        Ok(to) => {
+                            let _ = sync_world(world);
+                            let w = cfe::dop::Rail::from_wire(to)
+                                .map(|r| r.word())
+                                .unwrap_or("?");
+                            println!("{} deal {d} promoted → {w}", style.ok("RAIL"));
+                        }
+                        Err(refusal) => refuse(world, &refusal, style),
+                    },
+                    None => println!(
+                        "{} usage: {}",
+                        style.bad("✗"),
+                        style.strong("rail promote <deal>")
+                    ),
+                }
+            }
+            Some(other) => println!(
+                "{} rail {:?} — status|promote",
+                style.bad("✗"),
+                other
+            ),
         },
         // P5-F espionage
         Some("spy") => match words.next() {
@@ -6791,6 +6848,16 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
         ActionRefused::NoInstrumentToSabotage { orb } => {
             format!("no instrument on orb {orb} to sabotage")
         }
+        ActionRefused::RailUnknown { rail } => format!("unknown rail code {rail}"),
+        ActionRefused::RailAtCeiling { deal, rail } => {
+            format!("deal {deal} already at rail ceiling (R{rail})")
+        }
+        ActionRefused::DeepRailGated { rail, feature } => format!(
+            "R{rail} promotion is optional — enable cargo feature `{feature}` (no R1–R2 path dep)"
+        ),
+        ActionRefused::AnchorRequired { rail } => format!(
+            "R{rail} exit needs T9 Anchor seated — `seat anchor` first"
+        ),
         ActionRefused::BalanceEntropyDominates {
             balance,
             syntropy,
@@ -8190,9 +8257,11 @@ fn chronicle(world: &World, style: &Style) {
                 orb_id,
                 cost,
                 pressure,
+                resource,
             } => format!(
-                "🛡 medium reinforce orb {} cost {} pressure {}",
+                "🛡 medium reinforce orb {} {:?} {} pressure {}",
                 orb_id,
+                resource,
                 amount(cost),
                 amount(pressure)
             ),
@@ -8241,6 +8310,14 @@ fn chronicle(world: &World, style: &Style) {
                 grade,
                 ..
             } => format!("🕱 instrument sabotage orb {} grade {}", orb_id, grade),
+            cfe::dop::ClosureEvent::RailPromoted {
+                deal,
+                from_rail,
+                to_rail,
+            } => format!(
+                "⬆ rail deal {} R{}→R{}",
+                deal, from_rail, to_rail
+            ),
             cfe::dop::ClosureEvent::AssayStruck { amount: drawn, richness, .. } => format!(
                 "⚖ {} drawn from the opened vein — one receipt, the whole span{}",
                 style.strong(&amount(drawn)),

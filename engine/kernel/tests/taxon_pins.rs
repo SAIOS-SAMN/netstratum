@@ -327,6 +327,7 @@ fn every_deed() -> Vec<ClosureEvent> {
             orb_id: 1,
             cost: r(1),
             pressure: r(0),
+            resource: Resource::Iron,
         },
         E::TamperDetected {
             orb_id: 1,
@@ -351,6 +352,11 @@ fn every_deed() -> Vec<ClosureEvent> {
             orb_id: 1,
             grade: 1,
             tech_hash: bytes,
+        },
+        E::RailPromoted {
+            deal: 1,
+            from_rail: 1,
+            to_rail: 2,
         },
         E::ElderWarded {},
         E::WardLifted { claimer: "w".into() },
@@ -391,7 +397,7 @@ fn coverage_is_total_the_sealed_default_is_unreachable() {
     // treaty deeds after it (65 -> 67); the tag registry in `dop.rs` is
     // the other place that must move.
     let deeds = every_deed();
-    assert_eq!(deeds.len(), 108, "one instance of every ClosureEvent variant");
+    assert_eq!(deeds.len(), 109, "one instance of every ClosureEvent variant");
     let state = seated();
     for event in deeds {
         let verdict = admits(&state, &state, &step(event.clone(), SOVEREIGN));
