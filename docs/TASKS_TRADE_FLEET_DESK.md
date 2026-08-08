@@ -194,12 +194,33 @@ optional R3/R4 exits for claims.
 | P5.13 | [x] DEFEND shows **non-human** posture copy (plasmic/lithic/hive…) | P5.11–P5.12 | CLI/desk |
 | P5.13b | [x] In-game doctrine reorient (`PostureReoriented` 144); anatomy sealed | P5.11 | pins |
 
-### P5-C — INF compose (veil / ward / counter-intel)
+### P5-C — INF compose (veil / ward / counter-intel) · **NEXT LOADED**
+
+**Authority:** `36` §13. Compose MASK-1 / WARDEN-1a / MANU-1 — no free
+stealth points, no chronicle rewrite.
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
-| P5.14 | [ ] Surface MASK-1 / WARDEN-1a on DEFEND | P5.3, landed veil/ward | |
-| P5.15 | [ ] Detection grade from MANU-1 instrument floor | P5.14, MANU-1 | pin |
+| P5.14 | [ ] Surface MASK-1 / WARDEN-1a on DEFEND + `defend status` | P5.3, veil/ward landed | desk/CLI |
+| P5.14b | [ ] INF rank already on posture; show veil/ward flags in suite if any | P5.14, P5.13 | reading |
+| P5.15 | [ ] Detection grade from MANU-1 instrument floor (pure) | P5.14, MANU-1 | pin |
+| P5.15b | [ ] False-assay / thin-scan refuse path gated by detection grade | P5.15 | pin |
+| P5.15c | [ ] Docs + pins green; no schema bump unless state grows | P5.14–P5.15b | ratchet |
+
+### P5-K2 — KIN open-up (species/civ colour, no free constants) · **LOADED**
+
+**Authority:** `36` §12. Base risk formula stays; residual *kind* and
+NPC routing re-colour from sealed axes / thermal / taxon / doctrine.
+
+| ID | Task | Depends | Exit |
+|----|------|---------|------|
+| P5.50 | [x] Design: six KIN openings §12 (no undervived dials) | P5-A, P5-B | `36` §12 |
+| P5.51 | [ ] K1 metabolism-keyed interdiction debit (resource match arm) | P5.2, P5.11 | pin SEAL B |
+| P5.52 | [ ] K2 NPC `kin_step` disposition-routed (escort / risk / haul) | P5.51, P5.38 pattern | pure NPC |
+| P5.53 | [ ] K3 clade colour on escort cover *voice* + optional weight | P5.12, P5.1 | reading |
+| P5.54 | [ ] K4 fold orbit/thermal place into risk reading (CALL 35) | P5.1, 35 dynamo | pure |
+| P5.55 | [ ] K5 perception fog of corridor (charted/instrument gates) | P5.15, P5.13b | refuse path |
+| P5.56 | [ ] K6 CONVOY suite shows doctrine primary + residual kind | P5.35, P5.51 | UI |
 
 ### P5-E — COG + CYB
 

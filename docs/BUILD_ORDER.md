@@ -1051,5 +1051,12 @@ clade/perception colour tables; DEFEND non-human voice. CovertTamper dual-use
 tax when TERRA held (2× crystal eighth); overt `terraform` clears pressure +
 unmasks. SCHEMA_V12; kernel **0.31.0**. CLI `posture set`.
 
-**Next:** P5-C INF · P5.19b medium colour · P5.37 CYBER · P1.8.
+**KIN open-up design (`36` §12):** six compose-first expansions — metabolism
+residual kind, `kin_step`, clade cover colour, thermal/orbit place cost,
+perception corridor fog, doctrine+CONVOY suite. **No free constants.** Board
+**P5-K2** (P5.50–P5.56).
+
+**Next phase LOADED — P5-C INF (`36` §13):** surface MASK-1 / WARDEN-1a on
+DEFEND; detection grade from MANU-1; false-scan refuse. Prefer **zero new
+tags**. Then P5-K2 · P5.19b · P5-E/F · P1.8.
 

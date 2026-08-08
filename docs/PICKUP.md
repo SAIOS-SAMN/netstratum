@@ -16,14 +16,15 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 | Wave-1 commit | **`2109bf0`** (T4–T9, REFINE-1) |
 | Wave-2 commit | **`4686399`** (E-APT, element_trade_step) |
 | Kernel | **0.31.0** (next free minor **32**) |
-| Next free tag | **145** (P5-B posture 144 · dual-use TERRA/Covert) |
+| Next free tag | **145** (claim at next residual land; P5-C may need **zero**) |
 | Stations | **10** (T4–T9 economic offices open) |
 | ZoneKind compiled | **1–10** (ShipYard = 10) |
 | Codec | **SCHEMA_V12** (… + posture doctrine overlay) |
 | Pure-NPC green | market_war_step · instrument clears · ATM · posture reorient |
-| Next work | **P5-C** INF · P5.19b medium colour · P5.37 CYBER · P1.8 |
-| Docs | `30`–`36`; **P5-A/M/M2/D/B + P5.19 dual-use** landed |
-| Trade program | Phases **1–4 + P5 defense verticals** partial; P5-C…H remainder open |
+| **Next phase (LOADED)** | **P5-C INF** — veil/ward on DEFEND · detection grade (MANU-1) |
+| **Then** | **P5-K2** KIN colour (`36` §12 six openings) · P5.19b medium · P5-E/F |
+| Docs | `36` §12 KIN open-up · §13 P5-C loaded; A/M/M2/D/B/19 landed |
+| Trade program | Phases **1–4** complete; Phase **5 partial** — C/K2 next |
 | Help | `posture set` · `market|medium|tamper|suite` · desk EXCH/DEFEND |
 | Dirty / other lane | do not `git add -A` without reviewing observer/other-lane files |
 

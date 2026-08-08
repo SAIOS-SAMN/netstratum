@@ -1,9 +1,9 @@
 # 33 — TRADE DESK · FLEETS · ALIGNMENT · LOCAL CAPITAL
 
 **Status:** PARTIAL LAND — **Phases 1–4 complete** on main; **Phase 5
-design lock** in `36_DEFENSE_AXIOMS.md` (species-relative defense,
-covert terraform, espionage). Implementation board:
-**`TASKS_TRADE_FLEET_DESK.md`**.
+partial** — P5-A KIN · P5-B posture · P5-D ATM/dual-use · P5-M/M2 market
+landed (`36`); **next loaded: P5-C INF**, then **P5-K2** KIN colour
+(`36` §12–§13). Implementation board: **`TASKS_TRADE_FLEET_DESK.md`**.
 
 **Does not overturn:** CHARTER exactness, SEAL B, call-not-copy, tuned-
 constant ratchet, ROUTE-1 / MARKET-1 / STAMP-1 as landed. **Does not**

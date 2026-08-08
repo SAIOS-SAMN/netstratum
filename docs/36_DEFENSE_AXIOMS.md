@@ -1,8 +1,11 @@
 # 36 — DEFENSE AXIOMS · SPECIES-RELATIVE SECURITY · COVERT TERRAFORM · ESPIONAGE
 
-**Status:** DESIGN LOCK + **P5-A** (132–134) + **P5-M** (135–139) +
-**§11 expansion matrix catalog** + **P5-M2 / P5-D land wave** (tags 140–143).  
-**Remaining waves** land red-first; claim tags at each wave only.  
+**Status:** DESIGN LOCK + partial land — **P5-A** (132–134) · **P5-M**
+(135–139) · **P5-M2** (140) · **P5-D** (141–143) · **P5-B** (144) ·
+**P5.19** dual-use · **§11** matrix catalog · **§12** KIN open-up
+(no free constants).  
+**Next loaded wave:** **P5-C** INF (compose veil/ward). **Then** P5-K2 KIN
+colour / residual / `kin_step`. Claim tags only at land.  
 **Authority:** `00_CHARTER`, `04_CIVILIZATION_GENESIS`, `05_THERMAL_BALANCE`,
 `06_CIVILIZATIONS`, `10_TECH_EMERGENCE` (TERRA-1, WARDEN-1, MASK-1, MANU-1),
 `14_ALMANAC`, `15_TAXON`, `33_TRADE_FLEET_AND_DESK` §Phase 5,
