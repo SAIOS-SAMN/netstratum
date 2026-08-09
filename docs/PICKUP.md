@@ -65,10 +65,11 @@ bench science seat|preview|create              seated labs
 |----|------|-------|
 | C1.7 | Stellar capacity game | design then land |
 | C1.6 | NPC `chemistry_step` | disposition-routed |
-| H1.3 | Desk panes deep-link into hubs | UX |
 | P8.x | AP budget / anti click-to-win | Wave 8 |
 | Court | Rename Earth-culture **line names** (Kemet/Baktun/Dogon/Lyran/…) | operator only |
 | Optional | Polity root (genesis/taxon/mint) · deeper hub deeds · live isthmus peer | deferred |
+
+**H1.3 landed:** desk panes deep-link into hubs — HUB strip per pane; desk» `h`/`hc`; map in `docs/HUBS.md` §3.
 
 ### Smoke on resume (minimal)
 

@@ -57,6 +57,60 @@ impl Pane {
             Pane::Explore => "EXPLORE",
         }
     }
+
+    /// Hub deep-links for this pane (H1.3).
+    ///
+    /// Order: primary activity (or craft when the pane is craft-native), then
+    /// craft twin / peer. Desk» `h` runs the first; `hc` runs the second.
+    /// Operators can also type any listed verb inside desk» (command path).
+    pub fn hub_links(self) -> &'static [&'static str] {
+        match self {
+            // Circulate: books activity · dual-law craft twin.
+            Pane::Trade => &["trade books", "bench trade"],
+            // Diplomacy activity (preferred name) · craft twin.
+            Pane::Diplo => &["diplomatic local", "bench diplomatic"],
+            // Lanes are trade rails; craft instruments/routes under econ.
+            Pane::Routes => &["trade rails", "bench econ"],
+            // Triangle read sits on books; same craft twin as TRADE.
+            Pane::Arb => &["trade books", "bench trade"],
+            // Run hulls · craft hulls.
+            Pane::Fleet => &["trade fleet", "bench fleet"],
+            // Instruments / STAMP books · office seats (Exchange).
+            Pane::Exch => &["trade books", "bench offices"],
+            // Colony growth is craft-native (planetary + build).
+            Pane::Grow => &["bench planetary", "bench build"],
+            // Knowledge opsec · doctrine craft (KIN / posture).
+            Pane::Defend => &["intel opsec", "bench doctrine"],
+            // Knowledge research activity · research craft twin.
+            Pane::Explore => &["intel research", "bench research"],
+        }
+    }
+
+    /// Primary hub command for desk» `h` / `hub`.
+    pub fn hub_primary(self) -> &'static str {
+        self.hub_links()[0]
+    }
+
+    /// Craft / secondary hub command for desk» `hc` (if present).
+    pub fn hub_craft(self) -> Option<&'static str> {
+        self.hub_links().get(1).copied()
+    }
+
+    /// All panes — pin surface + iteration.
+    #[cfg(test)]
+    pub fn all() -> &'static [Pane] {
+        &[
+            Pane::Trade,
+            Pane::Diplo,
+            Pane::Routes,
+            Pane::Arb,
+            Pane::Fleet,
+            Pane::Exch,
+            Pane::Grow,
+            Pane::Defend,
+            Pane::Explore,
+        ]
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -371,6 +425,7 @@ pub fn render_frame(style: Style, home: &World, pane: Pane, orb_id: u64) -> Vec<
         pane.label()
     )));
     lines.extend(render_pane(style, home, pane, orb_id));
+    lines.push(hub_link_line(style, pane));
     lines.push(style.border(
         "╠══ COLONY ══════════════════════════════════════════════════════════╣",
     ));
@@ -384,7 +439,23 @@ pub fn render_frame(style: Style, home: &World, pane: Pane, orb_id: u64) -> Vec<
             "deeds: offer · trade · aperture · charter · stamp · element · treaty  ·  help desk"
         )
     ));
+    lines.push(format!(
+        "  {}",
+        style.hint("hub: desk» h primary · hc craft twin · type any hub verb (docs/HUBS.md)")
+    ));
     lines
+}
+
+/// H1.3 — per-pane deep-link strip into hub domains.
+fn hub_link_line(style: Style, pane: Pane) -> String {
+    let links = pane.hub_links();
+    let joined = links.join(" · ");
+    format!(
+        "  {} {}  {}",
+        style.section("HUB"),
+        style.key(&joined),
+        style.dim(&format!("← {} pane", pane.label()))
+    )
 }
 
 fn render_pane(style: Style, home: &World, pane: Pane, orb_id: u64) -> Vec<String> {
@@ -1100,3 +1171,75 @@ trait Pipe: Sized {
     }
 }
 impl<T> Pipe for T {}
+
+#[cfg(test)]
+mod h13_hub_deep_link_pins {
+    use super::*;
+
+    #[test]
+    fn every_pane_has_two_hub_links() {
+        for &pane in Pane::all() {
+            let links = pane.hub_links();
+            assert!(
+                links.len() >= 2,
+                "{} must deep-link activity + craft (got {links:?})",
+                pane.label()
+            );
+            assert_eq!(pane.hub_primary(), links[0]);
+            assert_eq!(pane.hub_craft(), Some(links[1]));
+        }
+    }
+
+    #[test]
+    fn pane_hub_map_matches_h1_3_contract() {
+        // Activity panes → activity root domain first; craft twin second.
+        assert_eq!(Pane::Trade.hub_links(), &["trade books", "bench trade"]);
+        assert_eq!(
+            Pane::Diplo.hub_links(),
+            &["diplomatic local", "bench diplomatic"]
+        );
+        assert_eq!(Pane::Routes.hub_links(), &["trade rails", "bench econ"]);
+        assert_eq!(Pane::Arb.hub_links(), &["trade books", "bench trade"]);
+        assert_eq!(Pane::Fleet.hub_links(), &["trade fleet", "bench fleet"]);
+        assert_eq!(Pane::Exch.hub_links(), &["trade books", "bench offices"]);
+        // Craft-native panes still expose two bench domains (planetary/build).
+        assert_eq!(
+            Pane::Grow.hub_links(),
+            &["bench planetary", "bench build"]
+        );
+        assert_eq!(Pane::Defend.hub_links(), &["intel opsec", "bench doctrine"]);
+        assert_eq!(
+            Pane::Explore.hub_links(),
+            &["intel research", "bench research"]
+        );
+    }
+
+    #[test]
+    fn hub_line_renders_for_every_pane() {
+        // Pure string surface — no world required.
+        let style = Style::new(true);
+        for &pane in Pane::all() {
+            let line = hub_link_line(style, pane);
+            assert!(
+                line.contains(pane.hub_primary()),
+                "hub line for {} missing primary {}",
+                pane.label(),
+                pane.hub_primary()
+            );
+            if let Some(craft) = pane.hub_craft() {
+                assert!(
+                    line.contains(craft),
+                    "hub line for {} missing craft {craft}",
+                    pane.label()
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn diplomatic_pane_key_accepts_preferred_name() {
+        assert_eq!(Pane::from_key("diplomatic"), Some(Pane::Diplo));
+        assert_eq!(Pane::from_key("diplo"), Some(Pane::Diplo));
+        assert_eq!(Pane::from_key("y"), Some(Pane::Diplo));
+    }
+}

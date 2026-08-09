@@ -1107,10 +1107,11 @@ on external strand/isthmus/datum crates.
 
 1. **C1.7** stellar capacity game  
 2. **C1.6** NPC chemistry_step  
-3. **H1.3** desk deep-link into hubs  
-4. **P8.x** AP budget / anti click-to-win  
-5. Court rename of Earth-culture line names (optional)  
-6. Optional 5th root: polity (genesis/taxon/mint)
+3. **P8.x** AP budget / anti click-to-win  
+4. Court rename of Earth-culture line names (optional)  
+5. Optional 5th root: polity (genesis/taxon/mint)
+
+**H1.3 landed:** desk panes → hub domains (`h`/`hc`, HUB strip). See `docs/HUBS.md` §3.
 
 ### Smoke on cold start
 

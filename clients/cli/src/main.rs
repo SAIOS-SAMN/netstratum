@@ -5400,6 +5400,19 @@ fn desk_command(
                 match line {
                     "q" | "quit" | "exit" | "back" => break,
                     "?" | "help" => help_menu::help(*style, Some("desk")),
+                    // H1.3 — deep-link into the pane's primary hub domain.
+                    "h" | "hub" => {
+                        let mut cur = current;
+                        command(world, pane.hub_primary(), style, &mut cur);
+                        show(world, pane);
+                    }
+                    // H1.3 — craft twin (second hub link) when present.
+                    "hc" | "hub-craft" | "craft" => {
+                        let mut cur = current;
+                        let target = pane.hub_craft().unwrap_or_else(|| pane.hub_primary());
+                        command(world, target, style, &mut cur);
+                        show(world, pane);
+                    }
                     key if desk::Pane::from_key(key).is_some() => {
                         pane = desk::Pane::from_key(key).expect("just checked");
                         show(world, pane);

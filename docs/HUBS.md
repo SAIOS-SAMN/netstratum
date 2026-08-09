@@ -177,10 +177,27 @@ Science: bench chem|biology|physics|math|research  →  intel knowledge/research
 | ID | Open |
 |----|------|
 | C1.7 | Stellar capacity **game** (lines_of as play) |
-| H1.3 | Desk panes deep-link into hubs |
 | P8.x | AP budget / anti click-to-win |
 | Polity | genesis/taxon/mint as optional 5th root |
 | Deep deeds | more domain leaves still status+verb (not all fire deeds) |
+
+### Landed: H1.3 desk deep-links
+
+Every desk pane carries a **HUB** strip and desk» shortcuts into hub domains:
+
+| Pane | Primary (`h`) | Craft twin (`hc`) |
+|------|---------------|-------------------|
+| TRADE | `trade books` | `bench trade` |
+| DIPLOMATIC | `diplomatic local` | `bench diplomatic` |
+| ROUTES | `trade rails` | `bench econ` |
+| ARBITRAGE | `trade books` | `bench trade` |
+| FLEET | `trade fleet` | `bench fleet` |
+| EXCH | `trade books` | `bench offices` |
+| GROW | `bench planetary` | `bench build` |
+| DEFEND | `intel opsec` | `bench doctrine` |
+| EXPLORE | `intel research` | `bench research` |
+
+`desk» h` / `hub` runs primary; `hc` / `craft` runs the twin. Any hub verb still types through the normal command path.
 
 ---
 

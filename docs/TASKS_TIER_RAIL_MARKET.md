@@ -135,7 +135,7 @@ strand-adapter · isthmus/datum-adapter
 | C1.7 | [ ] Stellar capacity game (star lines as project) | locality | design then land |
 | H1.1 | [x] BENCH hub (planetary · build · star · chem · econ) | C1.x | CLI `bench` |
 | H1.2 | [x] TRADE hub (books · fleet · rails · vault · aperture) | H1.1 | CLI `trade` |
-| H1.3 | [ ] Desk panes deep-link into hub domains | H1.1–H1.2 | desk UX |
+| H1.3 | [x] Desk panes deep-link into hub domains | H1.1–H1.2 | desk HUB strip · `h`/`hc` · `docs/HUBS.md` |
 | H1.4 | [x] Back-outs on every nested view (`bench`/`back`/`..`) | H1.1 | never stuck |
 | H1.5 | [x] Bench research · intel · link · doctrine · estate | H1.1 | map missing games |
 | H1.6 | [x] Deep boards: research_board · intel_board · link_board · doctrine | H1.5 | engine pure |

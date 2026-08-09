@@ -241,22 +241,36 @@ fn desk_help(style: Style) {
     println!();
     println!("  {}", style.section("PANES (keys in desk»)"));
     row(style, "t  TRADE", "peers · D_chart · D_eff · melt · alignment · door");
-    row(style, "y  DIPLO", "standing treaties · renounce hint");
+    row(style, "y  DIPLOMATIC", "standing treaties · renounce hint");
     row(style, "r  ROUTES", "carrier + element lanes · melt windows");
     row(style, "a  ARB", "read-only merchant triangles (walled + bridge)");
-    row(style, "f  FLEET", "Phase 3 placeholder");
-    row(style, "x  EXCH", "STAMP balance + Phase 4 note");
+    row(style, "f  FLEET", "hulls · scrap · free cap");
+    row(style, "x  EXCH", "STAMP · books · instruments");
     row(style, "g  GROW", "colony strip / zones");
-    row(style, "d  DEFEND", "Phase 5 placeholder");
+    row(style, "d  DEFEND", "posture · escort · veil/ward");
     row(style, "e  EXPLORE", "banked elements / prospects");
     row(style, "q  quit", "leave desk loop");
     row(style, "?  help", "this reminder inside desk");
+    println!();
+    println!("  {}", style.section("HUB DEEP-LINKS (H1.3)"));
+    row(style, "h · hub", "open primary hub domain for this pane");
+    row(style, "hc · craft", "open craft twin (bench) for this pane");
+    row(style, "t → trade books · bench trade", "circulate + dual craft");
+    row(style, "y → diplomatic local · bench diplomatic", "diplomacy activity + craft");
+    row(style, "r → trade rails · bench econ", "lanes + route craft");
+    row(style, "a → trade books · bench trade", "triangles → books");
+    row(style, "f → trade fleet · bench fleet", "run hulls + craft hulls");
+    row(style, "x → trade books · bench offices", "instruments + seats");
+    row(style, "g → bench planetary · bench build", "colony craft");
+    row(style, "d → intel opsec · bench doctrine", "knowledge + KIN craft");
+    row(style, "e → intel research · bench research", "knowledge + research craft");
     println!();
     println!("  {}", style.section("DEEDS (type any world verb inside desk»)"));
     row(style, "offer / trade / aperture / charter", "carrier market + lanes");
     row(style, "stamp mint|aperture", "money path");
     row(style, "element aperture|charter", "open matter path");
     row(style, "treaty …", "diplomacy");
+    row(style, "bench · intel · trade · diplomatic …", "any hub verb (same as root CLI)");
     println!();
     println!(
         "  {}",
@@ -264,7 +278,7 @@ fn desk_help(style: Style) {
     );
     println!(
         "  {}",
-        style.hint("No desk ledger — every action is a chronicle deed (SEAL B).")
+        style.hint("No desk ledger — every action is a chronicle deed (SEAL B). Hubs: docs/HUBS.md.")
     );
 }
 
