@@ -177,17 +177,19 @@ fn diplo_help(style: Style) {
 }
 
 fn polity_help(style: Style) {
-    banner_line(style, "POLITY — LINE IDENTITY (optional 5th root · vent open)");
+    banner_line(style, "POLITY — LINE IDENTITY (5th root · dual law)");
     println!(
         "  {}",
-        style.dim("Genesis · taxon · mint · AP. No craft twin yet. docs/HUBS.md §polity")
+        style.dim("Genesis · taxon · mint · AP · labor. Craft: `bench polity`. docs/HUBS.md")
     );
     println!();
-    row(style, "polity", "index · live genesis/taxon/AP strip");
+    row(style, "polity", "index · live genesis/taxon/AP/labor strip");
     row(style, "polity genesis", "sealed axes · seal path");
     row(style, "polity taxon", "class · clade · economy mode · planet fit");
     row(style, "polity mint", "discovery mint (no free mint)");
     row(style, "polity ap", "P8.1 shared AP budget board");
+    row(style, "polity labor", "P8.3 force from habitats + clones");
+    row(style, "bench polity", "CRAFT offices · doctrine · labor · practice");
     println!();
     row(style, "polity · back · home", "← polity root");
     row(style, "bench · intel · trade · diplomatic", "peer roots");

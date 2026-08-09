@@ -7,77 +7,84 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 
 ---
 
-## 0. STAND-DOWN SNAPSHOT (2026-08-08) — **read this first**
+## 0. STAND-DOWN SNAPSHOT (2026-08-09) — **read this first**
 
-**Multi-day stand-down.** Workspace **clean** on `main` at tip below.
-Do not invent “uncommitted hub work” — it was landed and committed.
+Workspace **clean** on `main` after Wave-8 / polity dual-law land.
 
 | Fact | Value |
 |------|--------|
-| **Tip** | **`fce10e0`** — *Open clade to u16: 25 taxons per class, no u8 tax cap* |
-| Branch | **`main`** · clean |
+| **Tip** | see `git log -1` (Wave 8 complete + polity dual law) |
+| Branch | **`main`** |
 | Kernel | **0.37.0** (next free minor **38**) |
-| Next free claim tag | **163** (science lab 159–162 landed) |
-| Codec | **SCHEMA_V17** (open clade u16 LE in taxon field) |
-| Class ceiling | **13** (+6 balance tiers 8–13) |
-| Clade ceiling | **345** (`u16` · 20 legacy + 25×13 expansion) |
-| Office stations | **16** · T0–T15 (T10–T15: herald·lattice·chorus·warden·foundry·nexus) |
-| Seat width bonus | **+25** on all bounded offices |
-| ZoneKind compiled | **1–10** (ShipYard = 10) |
+| Next free claim tag | **163** (no new residual this pass) |
+| Codec | **SCHEMA_V17** |
+| Class / clade | **13** / **345** (u16 open) |
+| CLI roots | bench · intel · trade · diplomatic · **polity** (dual law all five) |
 
 ### What landed this session arc (newest first)
 
-| Commit | What |
-|--------|------|
-| `fce10e0` | **u16 open clade** · ceiling 345 · SCHEMA_V17 · SEAL B dual decode |
-| `375cdc9` | +6 class tiers · +6 office tiers · expansion taxons · seat +25 |
-| `75c35ca` | Taxon economy extractive·regenerative·balanced · flatlander baseline · planet fit |
-| `f14c373` | Imperium clade words · metabolism-coloured science seats |
-| `86ea4aa` | Seated science labs · dual ± · explosion · synth/clone/skin |
-| `10ffffc` | Preferred root **`diplomatic`** (alias `diplo`) · science craft benches |
-| `780d622` / `26c7378` | Dual law: activity root S ⇒ `bench S` |
+| Area | What |
+|------|------|
+| **P8.2–P8.5** | Observer arc/traj/hunger/rail · labor force · ruins view · AP ruled table |
+| **POL.2–3** | `bench polity` dual law · NPC `identity_step` |
+| **Deep** | `bench planetary prospect|assay|refine` fire deeds |
+| **P8.1** | Shared AP budget |
+| **C1.6 / C1.7** | chemistry_step · stellar capacity |
+| **H1.3** | Desk pane hub deep-links |
+| Prior | dual law · science labs · open clade · taxon economy |
 
-### CLI roots (dual law)
+### CLI roots (dual law — all five)
 
 ```text
 bench          BUILD + craft twins + science labs
 intel          KNOWLEDGE activity
 trade          CIRCULATE activity
 diplomatic     DIPLOMACY activity (alias: diplo)
+polity         LINE IDENTITY (genesis · taxon · mint · AP · labor)
 
-bench intel | bench trade | bench diplomatic   craft twins
-bench science seat|preview|create              seated labs
+bench intel | bench trade | bench diplomatic | bench polity
+bench science seat|preview|create
+bench star capacity          C1.7
+bench planetary prospect|assay|refine   deep deeds
+```
+
+### Observer views (tools/observer.py)
+
+```text
+board | worlds | world | civs | arc | ruins | market | chart | …
+arc     — trajectory · hunger · rail · labor · AP (P8.2/P8.3)
+ruins   — closed archive history (P8.4)
 ```
 
 ### Key docs (living)
 
 | Doc | Role |
 |-----|------|
-| `docs/HUBS.md` | Hub map · dual law · science craft |
-| `docs/15_TAXON.md` | Class/clade wire + seal law |
-| `docs/37_IMPERIUM_TAXON.md` | Imperium words · economy modes · planet fit · open clade |
-| `docs/30_OFFICES_AND_RAILS.md` | T0–T15 office ladder |
-| `docs/TASKS_TIER_RAIL_MARKET.md` | Task board (C1.x H1.x open/closed) |
+| `docs/HUBS.md` | Hub map · dual law · science · polity |
+| `docs/TASKS_TIER_RAIL_MARKET.md` | Task board |
+| `docs/31_ELEMENT_COMMERCE.md` | **Next phase authority** (E3.6+) |
+| `docs/32_STAMP_MARKET.md` | Instruments (I5 residual) |
 
-### Open on resume (priority order)
+### Open on resume — **NEXT PHASE** (priority order)
 
 | ID | Open | Notes |
 |----|------|-------|
-| P8.2–P8.5 | Observer · labor · ruins · balance | Wave 8 remainder |
-| POL.2–3 | Polity craft twin · conductor parity | vent open at POL.1 |
-| Court | Rename Earth-culture **line names** (Kemet/Baktun/Dogon/Lyran/…) | operator only |
-| Deep deeds | More hub leaves still status+verb | deferred |
-
-**Landed this arc:** H1.3 desk deep-links · **C1.7** stellar capacity · **C1.6** chemistry_step · **P8.1** AP budget · **POL.1** polity vent.
+| **E3.6** | Element market cargo on offers | E-MKT-1 · NPC market_step |
+| **E3.7–E3.9** | WANT-1 element ids · observer routes · treaty allow-lists | after E3.6 |
+| **I5.x** | SHARE/NOTE/FUT/PERP lifecycle residual | Wave 5 |
+| Court | Rename Earth-culture line names | operator only |
+| Deep deeds | More hub leaves still status+verb | incremental |
 
 ### Smoke on resume (minimal)
 
 ```bash
 cd /opt/netstratum
 git status -sb && git log -1 --oneline
-cargo test -p cfe --test taxon_economy_pins --test world_taxon --quiet
-cargo test -p cfe --test science_lab_pins --quiet
+cargo test -p cfe --test labor_arc_pins --test ap_budget_pins --quiet
+cargo test -p conductor --test wave1_era_pins --quiet
 cargo build -p netstratum-cli --quiet
+python3 tools/observer.py arc --plain | head
+python3 tools/observer.py ruins --plain | head
 ```
 
 ### Stand-down discipline

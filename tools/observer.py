@@ -25,8 +25,11 @@ Usage:
   python3 tools/observer.py techs              # crystallized nodes
   python3 tools/observer.py chart              # the star chart
   python3 tools/observer.py market             # resting offers
+  python3 tools/observer.py arc                # P8.2 trajectory · hunger · rail · labor
+  python3 tools/observer.py ruins              # P8.4 closed-ruins history
   python3 tools/observer.py <view> --watch 2   # any view, refreshed
   # Live worlds only by default; --closed- ruins stay hidden (no cinder spam).
+  # Use `ruins` for the closed archive history view.
 
 Chain check: 'ok' means every exported receipt's parent digest equals
 its predecessor's digest with contiguous sequence numbers — splicing,
@@ -566,6 +569,9 @@ def read_all(var_root):
                 stamp_amt = frac(str(state.get("stamp", "0")))
             except (ValueError, TypeError):
                 stamp_amt = Fraction(0)
+            hunger = state.get("hunger") or []
+            if isinstance(hunger, str):
+                hunger = [hunger]
             row = {
                 "civilization": state.get("civilization", "?"),
                 "world": state.get("world", facts["name"]),
@@ -582,6 +588,18 @@ def read_all(var_root):
                 "element_kinds": element_kinds,
                 "element_total": element_total,
                 "stamp": stamp_amt,
+                # P8.2 trajectory · hunger · rail (from state uplink).
+                "trajectory": state.get("trajectory", "—"),
+                "hunger": ",".join(hunger) if hunger else "—",
+                "rail": state.get("rail", "—"),
+                "rail_routes": state.get("rail_routes", 0),
+                # P8.3 labor.
+                "labor": state.get("labor", 0),
+                "habitats": state.get("habitats", 0),
+                "ap": (
+                    f"{state.get('ap_available', '—')}/"
+                    f"{state.get('ap_capacity', '—')}"
+                ),
             }
             for resource in RESOURCES:
                 row[resource] = frac(banked[resource]) if resource in banked else Fraction(0)
@@ -1328,6 +1346,13 @@ def view_worlds(var_root, args, paint):
         elem = (
             f"{ek}·{show_board(row.get('element_total', Fraction(0)))}"
             if ek else "—")
+        traj = row.get("trajectory", "—")
+        if traj == "decline":
+            traj = paint.bad(traj)
+        elif traj == "stagnation":
+            traj = paint.warn(traj)
+        elif traj == "growth":
+            traj = paint.good(traj)
         table.append([
             row["civilization"], row["world"], row["planet"],
             elem,
@@ -1339,13 +1364,18 @@ def view_worlds(var_root, args, paint):
             show_board(row["iron"]),
             STAR_NAMES.get(row["star"], "—"),
             str(row["zones"]), str(row["clock"]),
+            traj,
+            str(row.get("hunger", "—")),
+            str(row.get("rail", "—")),
+            str(row.get("labor", 0)),
             paint.good("ok") if row["linked"] else paint.bad("BROKEN"),
             condition_label(row, paint),
         ])
     return "\n".join([paint.head("SETTLED PLANETS"), tabulate(
         ["CIVILIZATION", "WORLD", "PLANET", "ELEMENTS", "STAMP", "BIOMASS", "ALLOY",
          "DIAMOND", "JOULE", "SINK", "CRYSTAL", "IRON(leg)", "STAR", "ZONES",
-         "TICKS", "CHAIN", "CONDITION"],
+         "TICKS", "TRAJ", "HUNGER", "RAIL", "LABOR",
+         "CHAIN", "CONDITION"],
         table)])
 
 
@@ -1386,11 +1416,25 @@ def view_world(var_root, args, paint):
             f"{r} {banked[r]}" for r in RESOURCES if r in banked) or "empty banks"
         stamp = state.get("stamp", "0")
         star = STAR_NAMES.get(state.get("star_class"), "—")
+        traj = state.get("trajectory", "—")
+        hunger = state.get("hunger") or []
+        if isinstance(hunger, list):
+            hunger_s = ",".join(hunger) if hunger else "—"
+        else:
+            hunger_s = str(hunger)
+        rail = state.get("rail", "—")
+        labor = state.get("labor", 0)
+        habitats = state.get("habitats", 0)
+        ap_a = state.get("ap_available", "—")
+        ap_c = state.get("ap_capacity", "—")
         lines += ["", paint.head(
             f"  PLANET {state.get('planet', '?')} — {state.get('civilization', '?')}"),
             f"    star {star} · clock {state.get('clock', 0)} · "
             f"{len(state.get('zones', []))} zone(s) · vented {state.get('entropy_vented', '0')}",
-            f"    STAMP {stamp} · {holdings}"]
+            f"    STAMP {stamp} · {holdings}",
+            f"    traj {traj} · hunger {hunger_s} · rail {rail} "
+            f"({state.get('rail_routes', 0)} routes) · "
+            f"labor {labor} (hab {habitats}) · AP {ap_a}/{ap_c}"]
         if state.get("famine"):
             lines.append(
                 "    " + paint.warn("short on: " + ", ".join(state["famine"])))
@@ -1740,10 +1784,84 @@ def view_chart(var_root, args, paint):
     return "\n".join(lines)
 
 
+def view_ruins(var_root, args, paint):
+    """P8.4 — closed-ruins history (archives rotated on divergence).
+
+    Live board hides `--closed-` worlds. This view lists them as
+    history: name · receipts · terminal digest · age of export.
+    """
+    worlds_dir = Path(var_root) / "worlds"
+    if not worlds_dir.is_dir():
+        return paint.dim("(no worlds dir)")
+    ruins = []
+    for p in sorted(worlds_dir.iterdir()):
+        if not p.is_dir() or not is_closed_ruin(p.name):
+            continue
+        facts = world_facts(p)  # works on closed dirs too
+        # Split live stem from closed marker.
+        base, _, digest8 = p.name.partition("--closed-")
+        mtime = p.stat().st_mtime if p.exists() else 0
+        age = time.time() - mtime
+        ruins.append([
+            display_name(base),
+            digest8[:8] if digest8 else "?",
+            str(facts.get("receipts", 0)),
+            str(facts.get("puzzles", 0)),
+            format_age(age),
+            paint.good("ok") if facts.get("linked") else paint.bad("BROKEN"),
+            (facts.get("digest") or "")[:12] or "—",
+        ])
+    if not ruins:
+        return "\n".join([
+            paint.head("CLOSED RUINS"),
+            paint.dim("  (none — no divergence rotations under this var/)"),
+            paint.dim("  live board hides these; this view is the history door"),
+        ])
+    return "\n".join([
+        paint.head(f"CLOSED RUINS — {len(ruins)} archive(s)"),
+        paint.dim("  rotated on chronicle divergence · not live solar systems"),
+        tabulate(
+            ["LINE", "CLOSED", "RECEIPTS", "PUZZLES", "AGE", "CHAIN", "DIGEST"],
+            ruins,
+        ),
+    ])
+
+
+def view_arc(var_root, args, paint):
+    """P8.2 compact board: trajectory · hunger · rail · labor only."""
+    rows, _ = read_all(var_root)
+    table = []
+    for row in sorted(rows, key=lambda r: r.get("civilization", "")):
+        traj = row.get("trajectory", "—")
+        if traj == "decline":
+            traj = paint.bad(traj)
+        elif traj == "stagnation":
+            traj = paint.warn(traj)
+        elif traj == "growth":
+            traj = paint.good(traj)
+        table.append([
+            row["civilization"], row["world"],
+            traj,
+            str(row.get("hunger", "—")),
+            str(row.get("rail", "—")),
+            str(row.get("labor", 0)),
+            str(row.get("ap", "—")),
+            condition_label(row, paint),
+        ])
+    return "\n".join([
+        paint.head("ARC — trajectory · hunger · rail · labor (P8.2/P8.3)"),
+        tabulate(
+            ["CIVILIZATION", "WORLD", "TRAJ", "HUNGER", "RAIL", "LABOR", "AP", "CONDITION"],
+            table,
+        ) if table else paint.dim("(no settled planets)"),
+    ])
+
+
 VIEWS = {
     "board": view_board, "civs": view_civs, "worlds": view_worlds, "market": view_market,
     "world": view_world, "civ": view_civ, "tiers": view_tiers,
     "stress": view_stress, "techs": view_techs, "chart": view_chart,
+    "ruins": view_ruins, "arc": view_arc,
 }
 
 

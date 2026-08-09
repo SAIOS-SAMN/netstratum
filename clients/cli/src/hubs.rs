@@ -31,6 +31,30 @@ fn hex_prefix(bytes: &[u8; 32]) -> String {
     bytes.iter().take(4).map(|b| format!("{b:02x}")).collect()
 }
 
+/// Resolve a banked or prospected element by hex id prefix (deep hub deeds).
+fn resolve_element_prefix(world: &World, orb: u64, prefix: &str) -> Option<[u8; 32]> {
+    let pref = prefix.to_ascii_lowercase();
+    if let Some(held) = world.orb_by_id(orb).or_else(|| world.orb()) {
+        for (el, _) in &held.elements {
+            if hex_prefix(el).starts_with(&pref) || hex_prefix(el).contains(&pref) {
+                return Some(*el);
+            }
+            // Full hex start.
+            let full: String = el.iter().map(|b| format!("{b:02x}")).collect();
+            if full.starts_with(&pref) {
+                return Some(*el);
+            }
+        }
+    }
+    for p in world.committed().prospects.iter().filter(|p| p.orb == orb) {
+        let full: String = p.element.iter().map(|b| format!("{b:02x}")).collect();
+        if full.starts_with(&pref) {
+            return Some(p.element);
+        }
+    }
+    None
+}
+
 fn banner(style: &Style, title: &str) {
     println!(
         "{}",
@@ -203,6 +227,13 @@ pub fn bench(
         Some("trade") | Some("trades") | Some("circulate") | Some("trade-craft") => {
             trade_craft_bench(world, words, style, current)
         }
+        // Dual law: polity identity craft twin (POL.2).
+        Some("polity")
+        | Some("line")
+        | Some("identity")
+        | Some("polity-craft") => {
+            polity_craft_bench(world, words, style, current)
+        }
         // Activity-domain shortcuts still land on intel activity (not craft).
         Some("spy") | Some("inf") | Some("ops") => {
             println!("  {} → {}", style.dim("↳"), style.key("intel ops"));
@@ -265,6 +296,11 @@ fn bench_index(style: &Style) {
         "bench diplomatic",
         "council · bond · seats · routes → root `diplomatic` (alias: bench diplo)",
     );
+    row(
+        style,
+        "bench polity",
+        "axes · taxon · practice · offices · labor → root `polity` (POL.2)",
+    );
     println!();
     println!("  {}", style.section("ACTIVITY PEERS (run, not craft)"));
     row(style, "intel", "KNOWLEDGE activity");
@@ -293,7 +329,89 @@ fn planetary(
             row(style, "bench planetary medium", "→ medium domain");
             row(style, "bench planetary thermal", "heat · encase · cryo");
             row(style, "bench planetary balance", "entropy ∥ syntropy");
-            leaf(style, "prospect · assay · refine", "veins");
+            row(style, "bench planetary prospect <n>", "deep: open stratum");
+            row(style, "bench planetary assay <prefix>", "deep: draw richness");
+            row(style, "bench planetary refine <prefix>", "deep: ElementRefinery");
+            leaf(style, "prospect · assay · refine", "veins (also top-level CLI)");
+            foot_bench(style, Some("planetary"));
+        }
+        // Deep deeds — fire prospect / assay / refine from the hub leaf.
+        Some("prospect") | Some("vein") => {
+            let Some(stratum) = words.next().and_then(|s| s.parse::<u8>().ok()) else {
+                println!(
+                    "{} usage: {}",
+                    style.bad("✗"),
+                    style.strong("bench planetary prospect <stratum>")
+                );
+                return;
+            };
+            match world.prospect(current, stratum) {
+                Ok(p) => println!(
+                    "{} stratum {} · {} · family {} · richness {}",
+                    style.ok("◈"),
+                    stratum,
+                    style.cargo(&p.name),
+                    p.family,
+                    amount(&p.richness)
+                ),
+                Err(e) => println!("{} prospect refused: {e:?}", style.bad("✗")),
+            }
+            foot_bench(style, Some("planetary"));
+        }
+        Some("assay") => {
+            let Some(prefix) = words.next() else {
+                println!(
+                    "{} usage: {}",
+                    style.bad("✗"),
+                    style.strong("bench planetary assay <element-prefix>")
+                );
+                return;
+            };
+            // Resolve banked / prospected element by hex prefix.
+            let target = resolve_element_prefix(world, current, &prefix);
+            match target {
+                Some(el) => match world.assay(current, el) {
+                    Ok(amt) => println!(
+                        "{} assay {} · +{}",
+                        style.ok("◈"),
+                        &hex_prefix(&el),
+                        amount(&amt)
+                    ),
+                    Err(e) => println!("{} assay refused: {e:?}", style.bad("✗")),
+                },
+                None => println!(
+                    "{} no element matching prefix {}",
+                    style.bad("✗"),
+                    style.verb(&prefix)
+                ),
+            }
+            foot_bench(style, Some("planetary"));
+        }
+        Some("refine") => {
+            let Some(prefix) = words.next() else {
+                println!(
+                    "{} usage: {}",
+                    style.bad("✗"),
+                    style.strong("bench planetary refine <element-prefix>")
+                );
+                return;
+            };
+            let target = resolve_element_prefix(world, current, &prefix);
+            match target {
+                Some(el) => match world.refine(current, el) {
+                    Ok(refined) => println!(
+                        "{} refined → {}",
+                        style.ok("◈"),
+                        &hex_prefix(&refined)
+                    ),
+                    Err(e) => println!("{} refine refused: {e:?}", style.bad("✗")),
+                },
+                None => println!(
+                    "{} no element matching prefix {}",
+                    style.bad("✗"),
+                    style.verb(&prefix)
+                ),
+            }
             foot_bench(style, Some("planetary"));
         }
         Some("bio") | Some("biologic") | Some("living") => {
@@ -1566,6 +1684,89 @@ fn trade_craft_bench(
     let _ = w;
 }
 
+/// Craft surface for polity identity components — twin of root `polity` (POL.2).
+fn polity_craft_bench(
+    world: &mut World,
+    mut words: impl Iterator<Item = String>,
+    style: &Style,
+    current: u64,
+) {
+    let w = words.next();
+    if is_back(w.as_deref()) {
+        bench_index(style);
+        return;
+    }
+    match w.as_deref() {
+        Some("offices") | Some("office") | Some("seat") => {
+            println!("  {} → {}", style.dim("↳"), style.key("bench offices"));
+            offices_bench(world, words, style, current);
+            return;
+        }
+        Some("doctrine") | Some("posture") | Some("kin") => {
+            println!("  {} → {}", style.dim("↳"), style.key("bench doctrine"));
+            doctrine_bench(world, words, style, current);
+            return;
+        }
+        Some("practice") | Some("research") => {
+            println!("  {} → {}", style.dim("↳"), style.key("bench research"));
+            research_craft_bench(world, words, style, current);
+            return;
+        }
+        Some("labor") | Some("hab") | Some("population") => {
+            // Deep deed: show labor + allow habitat build hint.
+            let labor = world.labor_board(current);
+            banner(style, "BENCH › POLITY › LABOR — craft population seats");
+            println!(
+                "  force {} · habitats {} · clones {} · slots {}",
+                labor.force, labor.habitats, labor.clones, labor.work_slots
+            );
+            println!("  {}", style.hint(&labor.next_hint));
+            leaf(style, "zone <tile> hab", "seat a habitat (labor +1)");
+            leaf(style, "bench science create clone", "clone residual population");
+            leaf(style, "polity ap", "shared AP budget (P8.1)");
+            foot_bench(style, Some("polity"));
+            return;
+        }
+        _ => {}
+    }
+    banner(style, "BENCH › POLITY — identity components (craft · POL.2)");
+    println!(
+        "  {}",
+        style.dim("Build the pieces that root `polity` runs. Dual law: activity S ⇒ bench S.")
+    );
+    match world.genesis() {
+        Some(g) => println!(
+            "  genesis {} · dis {} · met {} · per {}",
+            g.civilization, g.disposition, g.metabolism, g.perception
+        ),
+        None => println!("  {}", style.warn("genesis unsealed — seal on activity root first")),
+    }
+    let labor = world.labor_board(current);
+    let ap = world.ap_board();
+    println!(
+        "  labor {} (hab {} + clone {}) · AP {}/{} · rail {}",
+        labor.force,
+        labor.habitats,
+        labor.clones,
+        ap.available,
+        ap.capacity,
+        world.max_rail_word()
+    );
+    println!();
+    println!("  {}", style.section("COMPONENTS TO CRAFT"));
+    leaf(style, "bench polity labor", "habitats · clones · work slots");
+    leaf(style, "bench offices", "seat exchange|vault|assay|anchor (identity ladder)");
+    leaf(style, "bench doctrine", "posture / KIN prep for the line");
+    leaf(style, "bench research", "practice adopt (discipline binds the line)");
+    leaf(style, "bench build", "zone habitat — labor seats");
+    println!();
+    println!("  {}", style.section("THEN RUN ON"));
+    leaf(style, "polity genesis · polity taxon", "axes / class-clade");
+    leaf(style, "polity mint · polity ap", "discovery mint / AP board");
+    foot_bench(style, Some("polity"));
+    let _ = w;
+}
+
 fn doctrine_bench(
     world: &mut World,
     mut words: impl Iterator<Item = String>,
@@ -2440,11 +2641,20 @@ pub fn polity(
         Some("mint") | Some("discovery") | Some("warrant") => polity_mint(world, style, current),
         Some("ap") | Some("budget") | Some("action") => polity_ap(world, style),
         Some("craft") | Some("bench") => {
+            println!("  {} → {}", style.dim("↳"), style.key("bench polity"));
+            polity_craft_bench(world, words, style, current);
+        }
+        Some("labor") | Some("population") | Some("hab") => {
+            let labor = world.labor_board(current);
+            banner(style, "POLITY › LABOR — habitats + clones (P8.3)");
             println!(
-                "  {} polity has no craft twin yet — identity is activity-only (vent open)",
-                style.dim("↳")
+                "  force {} · habitats {} · clones {} · work slots {}",
+                labor.force, labor.habitats, labor.clones, labor.work_slots
             );
-            polity_index(world, style, current);
+            println!("  {}", style.hint(&labor.next_hint));
+            leaf(style, "bench polity labor", "craft path");
+            leaf(style, "zone <tile> hab", "seat habitat");
+            foot_polity(style, Some("labor"));
         }
         Some(other) => {
             println!(
@@ -2501,10 +2711,10 @@ fn polity_index(world: &World, style: &Style, current: u64) {
     row(style, "polity taxon", "class · clade · economy mode · planet fit");
     row(style, "polity mint", "discovery mint path (warrant · crystal · no free mint)");
     row(style, "polity ap", "P8.1 shared action budget board");
+    row(style, "polity labor", "P8.3 force from habitats + clones");
     println!();
-    println!("  {}", style.section("VENT STATUS"));
-    leaf(style, "open", "root CLI + status boards");
-    leaf(style, "deferred", "dual-law `bench polity` · deep deeds · conductor polity root parity");
+    println!("  {}", style.section("CRAFT (on bench)"));
+    row(style, "bench polity", "axes · offices · doctrine · labor · practice (POL.2 dual law)");
     leaf(style, "law", "no free mint · call-not-copy · SEAL B — same as peer roots");
     foot_polity(style, None);
 }

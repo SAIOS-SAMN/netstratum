@@ -1344,6 +1344,35 @@ impl Polity {
         false
     }
 
+    /// **POL.3 IDENTITY STEP** — pure NPC parity for line identity.
+    ///
+    /// Ensures labor seats (habitat) when force is zero and resources
+    /// afford; mirrors the player `polity` / `bench polity` surfaces.
+    /// Genesis / taxon remain founding-time (not re-sealed here).
+    fn identity_step(&mut self) {
+        let primary = cfe::world::FIRST_ORB;
+        if self.world.orb().is_none_or(|o| !o.famine.is_empty()) {
+            return;
+        }
+        let labor = self.world.labor_board(primary);
+        // No habitat labor yet — try to seat one habitat when affordable.
+        if labor.habitats == 0 {
+            let can_pay = ZoneKind::Habitat.cost().into_iter().all(|(resource, need)| {
+                banked(&self.world, resource) >= need
+            });
+            if can_pay {
+                if let Some(tile) = next_free_tile(&self.world) {
+                    let _ = self.world.zone_as(
+                        self.automaton,
+                        primary,
+                        tile,
+                        ZoneKind::Habitat,
+                    );
+                }
+            }
+        }
+    }
+
     /// Iso-union first isomorphic banked gem pair.
     fn npc_chem_iso(&mut self, actor: u64, orb: u64) -> bool {
         let ids: Vec<[u8; 32]> = self
@@ -2531,6 +2560,7 @@ impl Polity {
         self.office_step(registry);
         self.refine_step();
         self.chemistry_step();
+        self.identity_step();
         self.world.tick();
         // Every settled orb collects — a chartered survey site left
         // uncollected would starve at its own upkeep.

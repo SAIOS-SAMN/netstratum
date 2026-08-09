@@ -74,13 +74,17 @@ pub mod offices;
 pub mod bench_games;
 pub mod science_lab;
 pub mod ap_budget;
+pub mod labor;
 
 pub use science_lab::{LabCreateResult, ScienceLabBoard};
 pub use bench_games::{
     DoctrineBoard, IntelBoard, IntelStep, LinkBoard, ResearchBoard, ResearchNode,
     StellarCapacityBoard, StellarLineRow, StellarVeinRow,
 };
-pub use ap_budget::{ApBoard, ApKind, AP_YEAR_TICKS};
+pub use ap_budget::{
+    ApBoard, ApKind, AP_BASE, AP_EXCHANGE_BONUS, AP_HABITAT_MULT, AP_YEAR_TICKS,
+};
+pub use labor::LaborBoard;
 
 pub use defense::{CorridorFog, DefenseDomain, DefensePosture, KinIntegrity, RiskBand};
 pub use market_defense::{

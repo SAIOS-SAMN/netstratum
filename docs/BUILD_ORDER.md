@@ -1103,20 +1103,23 @@ on external strand/isthmus/datum crates.
 | Office tiers | **T0–T15** (+6: herald…nexus) · seat width **+25** | `30_OFFICES` |
 | Open clade | **u16** · ceiling **345** = 20 + 25×13 | `fce10e0` · no u8 tax |
 
-### Resume board (operator go required for new lands)
+### Resume board — **NEXT PHASE** (operator go)
 
-1. **P8.2–P8.5** observer trajectory · labor · ruins · balance  
-2. **POL.2–3** polity craft twin · conductor root parity  
-3. Court rename of Earth-culture line names (optional)  
-4. Deep hub deeds (status+verb → fire)
+1. **E3.6** Element market cargo on offers (E-MKT-1)  
+2. **E3.7–E3.9** WANT-1 elements · observer routes · treaty allow-lists  
+3. **I5.x** instrument lifecycle residual (SHARE/NOTE/FUT/PERP)  
+4. Court rename of Earth-culture line names (optional)  
+5. More deep hub deeds (incremental)
 
-**Landed:** H1.3 desk deep-links · C1.7 stellar capacity · C1.6 chemistry_step · P8.1 AP · POL.1 polity vent.
+**Landed this arc:** H1.3 · C1.6 · C1.7 · P8.1–P8.5 · POL.1–3 · planetary deep deeds · R2.6 rail column.
 
 ### Smoke on cold start
 
 ```text
-cargo test -p cfe --test taxon_economy_pins --test science_lab_pins --test world_taxon
+cargo test -p cfe --test labor_arc_pins --test ap_budget_pins --test stellar_capacity_pins
+cargo test -p conductor --test wave1_era_pins
 cargo build -p netstratum-cli
+python3 tools/observer.py arc --plain | head
 ```
 
 Full orientation: `docs/PICKUP.md` §0.

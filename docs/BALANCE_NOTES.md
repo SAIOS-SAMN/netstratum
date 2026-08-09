@@ -71,3 +71,25 @@ diamond at 3+), η = (1+grade)/8.
 
 Re-run this survey after any tuning session; the numbers above are
 the baseline.
+
+---
+
+## P8.5 ruled table slice (2026-08-09) — AP capacity
+
+Placeholder-free **shared AP** capacity (anti click-to-win). Constants live
+in `cfe::world::ap_budget` and are the only lawful knobs:
+
+| Constant | Value | Meaning |
+|----------|------:|---------|
+| `AP_BASE` | 16 | year-voice budget with zero habitats |
+| `AP_HABITAT_MULT` | 4 | extra AP per standing Habitat zone |
+| `AP_EXCHANGE_BONUS` | 2 | when T6 Exchange is seated |
+| `AP_YEAR_TICKS` | 60 | window length (= `ORBIT_PHASE_TICKS` / journal year) |
+
+Spend family costs are unit (1 AP each): **build** · **prospect** ·
+**research** · **quote**. Pure re-derive from chronicle — no residual.
+
+Labor force (P8.3): `habitats + clones` — not a dial; derived seats only.
+
+Further balance curve retunes (famine clocks, φ melt, rung-5 forge) remain
+measurement-gated as above — not silent constants.

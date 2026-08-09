@@ -266,6 +266,25 @@ pub fn render_state_with(
             w.close();
         }
         w.close_array();
+        // P8.2 — trajectory band · hunger · rail (observer uplink).
+        w.field_str("trajectory", world.arc_band());
+        let hungers = world.hunger_words();
+        if !hungers.is_empty() {
+            w.key("hunger");
+            w.array(hungers.iter().map(|h| (*h).to_string()));
+        }
+        let rail = world.deep_rail_status();
+        w.field_str("rail", world.max_rail_word());
+        w.field_u64("rail_routes", rail.routes);
+        // P8.3 — labor force derived from habitats + clones.
+        let labor = world.labor_board(orb.orb_id);
+        w.field_u64("habitats", labor.habitats);
+        w.field_u64("clones", labor.clones);
+        w.field_u64("labor", labor.force);
+        // P8.1 AP strip for boards.
+        let ap = world.ap_board();
+        w.field_u64("ap_available", ap.available);
+        w.field_u64("ap_capacity", ap.capacity);
     }
 
     w.key("accrued");

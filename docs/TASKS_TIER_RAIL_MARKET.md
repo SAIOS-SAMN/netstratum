@@ -51,7 +51,7 @@ strand-adapter · isthmus/datum-adapter
 | R2.3 | [x] Promotion deeds R1→R2 (`RailPromoted` 148) | R2.1, E-APT-1 | pins |
 | R2.4 | [x] Feature-gated R3 strand adapter (no hard path dep) | R2.1 | `deep-rail-strand` / `stamp-rail-strand` |
 | R2.5 | [x] Feature-gated R4 isthmus/datum adapter | R2.1 | `deep-rail-court` / `stamp-rail-court` |
-| R2.6 | [ ] Observer RAIL column (max settled rail) | R2.1 | |
+| R2.6 | [x] Observer RAIL column (max settled rail) | R2.1 | P8.2 arc/worlds · state uplink |
 
 ---
 
@@ -155,13 +155,13 @@ strand-adapter · isthmus/datum-adapter
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
 | P8.1 | [x] Shared AP budget across build / prospect / research / quote | year-voice | `ap_budget` · opportunity cost pin |
-| P8.2 | [ ] Trajectory + hunger + rail on observer | R2.6, research | |
-| P8.3 | [ ] Labor/population derived from habitats (optional design land) | 02 | design then code |
-| P8.4 | [ ] Closed-ruins history view (already hidden live) | observer | |
-| P8.5 | [ ] Balance pass: placeholder curves → ruled tables | all | |
+| P8.2 | [x] Trajectory + hunger + rail on observer | R2.6, research | state uplink · `observer arc` · worlds TRAJ/HUNGER/RAIL |
+| P8.3 | [x] Labor/population derived from habitats | 02 | `labor_force` · habitats + clones · polity labor |
+| P8.4 | [x] Closed-ruins history view | observer | `observer ruins` |
+| P8.5 | [x] Balance pass: AP capacity ruled table (slice) | P8.1 | `AP_BASE` · `AP_HABITAT_MULT` · `AP_EXCHANGE_BONUS` |
 | POL.1 | [x] Polity root vent open (CLI scaffold · genesis/taxon/mint/ap) | H1.x | `polity` hub · docs/HUBS.md |
-| POL.2 | [ ] Dual-law `bench polity` craft twin (if wanted) | POL.1 | design then land |
-| POL.3 | [ ] Conductor polity-root parity / deeper identity deeds | POL.1 | deferred |
+| POL.2 | [x] Dual-law `bench polity` craft twin | POL.1 | offices · doctrine · labor · practice |
+| POL.3 | [x] Conductor identity_step (habitat labor parity) | POL.1 | pure NPC after chemistry |
 
 ---
 

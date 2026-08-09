@@ -14,6 +14,14 @@ use crate::vrp::Receipt;
 /// Year-voice window length (same constant as orbit phase / journal year).
 pub const AP_YEAR_TICKS: u64 = ORBIT_PHASE_TICKS;
 
+// ── P8.5 ruled AP table (exact; amend only with workspace sweep) ──
+/// Base AP per year-voice for an un-habited colony.
+pub const AP_BASE: u64 = 16;
+/// Extra AP per standing habitat zone.
+pub const AP_HABITAT_MULT: u64 = 4;
+/// Extra AP when T6 Exchange is seated (books open).
+pub const AP_EXCHANGE_BONUS: u64 = 2;
+
 /// Which gated deed family spends AP.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ApKind {
@@ -71,13 +79,20 @@ impl World {
 
     /// **AP capacity** for the current year-voice window.
     ///
-    /// `16 + 4×habitats + (exchange seated ? 2 : 0)` — enough for founding
-    /// arcs and pure-NPC beat cadence, tight enough that spam across all
-    /// four families hits opportunity cost.
+    /// Ruled table (P8.5 — not a free dial):
+    /// `BASE + HAB_MULT×habitats + EXCH_BONUS×(exchange seated)`.
+    /// Enough for founding arcs and pure-NPC beat cadence; tight enough
+    /// that spam across all four families hits opportunity cost.
     pub fn ap_capacity(&self) -> u64 {
         let hab = self.ap_habitats(FIRST_ORB);
-        let exch = if self.exchange_seated() { 2 } else { 0 };
-        16u64.saturating_add(hab.saturating_mul(4)).saturating_add(exch)
+        let exch = if self.exchange_seated() {
+            AP_EXCHANGE_BONUS
+        } else {
+            0
+        };
+        AP_BASE
+            .saturating_add(hab.saturating_mul(AP_HABITAT_MULT))
+            .saturating_add(exch)
     }
 
     /// Start tick of the current year-voice window.

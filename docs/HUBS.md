@@ -156,12 +156,13 @@ diplomatic     DIPLOMACY ACTIVITY  (alias: diplo)
   mesh         councils · bonds · forwards standing
   craft        → bench diplomatic
 
-polity         LINE IDENTITY (optional 5th · vent open)
+polity         LINE IDENTITY (5th root · dual law)
   genesis      sealed axes · disposition · metabolism · perception
   taxon        class · clade · economy mode · planet fit
   mint         discovery mint (warrant · no free mint)
   ap           P8.1 shared AP budget (build·prospect·research·quote)
-  craft        — none yet (identity is activity-only)
+  labor        P8.3 force from habitats + clones
+  craft        → bench polity
 ```
 
 ### Flow law
@@ -177,7 +178,8 @@ Dual:  intel       ←activity→  bench intel
 
 Science: bench chem|biology|physics|math|research  →  intel knowledge/research
 
-Polity:  who you are (axes · taxon · mint · AP) — no craft twin yet
+Polity:  who you are (axes · taxon · mint · AP · labor)
+Dual:    polity  ←activity→  bench polity
 ```
 
 ---
@@ -186,9 +188,10 @@ Polity:  who you are (axes · taxon · mint · AP) — no craft twin yet
 
 | ID | Open |
 |----|------|
-| P8.2–P8.5 | Observer trajectory · labor · ruins · balance pass |
-| Polity deep | dual-law `bench polity` · conductor root parity · deeper deeds |
-| Deep deeds | more domain leaves still status+verb (not all fire deeds) |
+| E3.6–E3.9 | Element market cargo · WANT-1 elements · observer routes · treaty allow-lists |
+| I5.x | SHARE/NOTE/FUT/PERP instrument lifecycle residual |
+| Court | Rename Earth-culture line names (operator only) |
+| Deep deeds | more domain leaves still status+verb (partial: planetary prospect/assay/refine fire) |
 
 ### Landed this pass
 
@@ -197,7 +200,12 @@ Polity:  who you are (axes · taxon · mint · AP) — no craft twin yet
 | **C1.7** | Stellar capacity game — `stellar_capacity_board` · `bench star capacity` |
 | **C1.6** | NPC `chemistry_step` disposition-routed (seat · catalog · compound · iso) |
 | **P8.1** | Shared AP budget — build · prospect · research · quote · year-voice refill |
-| **Polity vent** | Optional 5th root scaffold — `polity` · genesis/taxon/mint/ap boards |
+| **P8.2** | Trajectory · hunger · rail on observer (`arc` view · state uplink) |
+| **P8.3** | Labor force from habitats + clones |
+| **P8.4** | Closed-ruins history (`observer ruins`) |
+| **P8.5** | AP capacity ruled table constants |
+| **POL.1–3** | Polity root · `bench polity` dual law · NPC `identity_step` |
+| **Deep** | `bench planetary prospect|assay|refine` fire deeds |
 
 ### Landed: H1.3 desk deep-links
 
