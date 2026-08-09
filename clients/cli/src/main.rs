@@ -87,21 +87,33 @@ fn banner(style: &Style) {
 
 
 /// BLOCKER A3: the active profile's station — the authority the
-/// tier-0 verbs check. No login reads as "player" (T3).
+/// Operator seat claim — **session config**, not colony law.
+///
+/// Prefers line-oriented `var/operators/<name>` (no JSON). Legacy
+/// `.json` profiles still parse for one transition, then retire.
+/// Engine deeds never trust this string as physics — mint/station
+/// gates re-check the chain.
 fn active_station() -> String {
-    std::fs::read_to_string("var/operators/active")
-        .ok()
-        .map(|name| name.trim().to_string())
-        .filter(|name| !name.is_empty())
-        .and_then(|name| std::fs::read_to_string(format!("var/operators/{name}.json")).ok())
-        .and_then(|text| data_field(&text, "station"))
-        .unwrap_or_else(|| "player".into())
+    let Some(name) = active_line() else {
+        return "player".into();
+    };
+    // Preferred: plain text profile `station <word>` lines.
+    if let Ok(text) = std::fs::read_to_string(format!("var/operators/{name}")) {
+        if let Some(s) = profile_field(&text, "station") {
+            return s;
+        }
+    }
+    // Transition: legacy .json profile (display-era debt — do not extend).
+    if let Ok(text) = std::fs::read_to_string(format!("var/operators/{name}.json")) {
+        if let Some(s) = profile_field(&text, "station") {
+            return s;
+        }
+    }
+    "player".into()
 }
 
 /// The active operator's own name — the LINE the mint's standing gate
-/// reads. `active_station` reads a display file (a §11 rule 2 debt this
-/// tree already inventories); the mint does NOT trust it — the engine
-/// re-reads the seat from the chain and refuses on its own authority.
+/// reads. Session config only; the engine re-reads seats from the chain.
 fn active_line() -> Option<String> {
     std::fs::read_to_string("var/operators/active")
         .ok()
@@ -121,12 +133,27 @@ fn tier0_gate(style: &Style) -> bool {
     false
 }
 
-/// A minimal reader for the lens's DATA files (state.json /
-/// registry cards) — the same files the observer reads; data fields,
-/// never prose. INVENTORIED DEBT (§11 standing test): a display
-/// reading display files — retires when the lens re-serves from the
-/// chain at the ladder's #37; no world state ever enters through it.
-fn data_field(text: &str, key: &str) -> Option<String> {
+/// Read a key from operator profile text (plain `key value` or legacy `"key":"value"`).
+/// **Not for colony state** — session config only. Colony truth is chronicle.tlv.
+fn profile_field(text: &str, key: &str) -> Option<String> {
+    // Plain: `station progenitor` / `world aerie-hearth`
+    for line in text.lines() {
+        let line = line.trim();
+        if line.is_empty() || line.starts_with('#') {
+            continue;
+        }
+        if let Some((k, v)) = line.split_once(char::is_whitespace) {
+            if k.eq_ignore_ascii_case(key) {
+                return Some(v.trim().to_string());
+            }
+        }
+        if let Some((k, v)) = line.split_once('=') {
+            if k.trim().eq_ignore_ascii_case(key) {
+                return Some(v.trim().trim_matches('"').to_string());
+            }
+        }
+    }
+    // Legacy JSON fragment: "key":"value"
     let tag = format!("\"{key}\":\"");
     let start = text.find(&tag)? + tag.len();
     text[start..].split('\"').next().map(str::to_string)
@@ -171,26 +198,23 @@ fn far_world(name: &str) -> Result<World, String> {
     }
 }
 
-/// Pre-mesh ownership read (the retired guard's honest core): does
-/// this world's registry card name the conductor as founder?
+/// Pre-mesh ownership: does this world beat under the conductor?
+///
+/// **No state.json.** Authority is chronicle.tlv (MESH pen) or the
+/// conductor-written `spine/` arbor directory. Display files never
+/// decide who holds the clock.
 fn conductor_founded(name: &str) -> bool {
     let world_dir = std::path::PathBuf::from("var/worlds").join(name);
-    let Ok(planets) = std::fs::read_dir(world_dir.join("planets")) else {
-        return false;
-    };
-    for planet in planets.filter_map(|e| e.ok()) {
-        let Ok(state) = std::fs::read_to_string(planet.path().join("state.json")) else {
-            continue;
-        };
-        if let Some(civ) = data_field(&state, "civilization") {
-            let card =
-                std::fs::read_to_string(format!("var/registry/{civ}.json")).unwrap_or_default();
-            if data_field(&card, "founder").as_deref() == Some("conductor") {
-                return true;
-            }
+    let tlv = world_dir.join("chronicle.tlv");
+    if let Ok(chronicle) = cfe::persist::load(&tlv) {
+        match mesh::authority(&chronicle) {
+            Ok(Some(hand)) if hand == cfe::vrp::CONDUCTOR_HAND => return true,
+            Ok(Some(_)) => return false, // another hand holds the pen
+            _ => {}
         }
     }
-    false
+    // Conductor-written arbor spine — not a display file.
+    world_dir.join("spine").is_dir()
 }
 
 /// The active profile's name — the seat whose hand signs (MESH-1b).
@@ -206,39 +230,24 @@ fn seat_hand() -> u64 {
     cfe::vrp::hand_of(&active_name())
 }
 
-/// MARKET-2: a world's charted position from the starchart (data
-/// fields, never prose). Uncharted reads as the origin — a frontier
-/// world trades as local until the chart knows it.
+/// MARKET-2: a world's charted position.
+///
+/// Topology export (`starchart.json`) is a **display cache** of chart
+/// facts — not colony banks. Prefer resume of the live world and
+/// fall back to the chart file only as coordinates (never balance).
+/// Uncharted reads as the origin.
 fn charted_position(name: &str) -> (Ratio, Ratio, Ratio) {
     let zero = || cfe::ratio::ratio(0, 1);
-    let Ok(text) = std::fs::read_to_string("var/worlds/starchart.json") else {
-        return (zero(), zero(), zero());
-    };
-    for line in text.lines() {
-        if data_field(line, "world").as_deref() == Some(name) {
-            let axis = |key: &str| {
-                data_field(line, key)
-                    .and_then(|v| parse_ratio_text(&v))
-                    .unwrap_or_else(zero)
-            };
-            return (axis("x"), axis("y"), axis("z"));
-        }
+    // Prefer desk/engine chart reader (same path as desk; not banks).
+    let (x, y, z) = desk::charted_position(name);
+    if x != zero() || y != zero() || z != zero() {
+        return (x, y, z);
     }
     (zero(), zero(), zero())
 }
 
 /// Parse `p/q` or a plain integer (the lens's exact rendering).
-fn parse_ratio_text(text: &str) -> Option<Ratio> {
-    use std::str::FromStr;
-    let (numer, denom) = match text.split_once('/') {
-        Some((n, d)) => (n, d),
-        None => (text, "1"),
-    };
-    Some(Ratio::new(
-        num_bigint::BigInt::from_str(numer.trim()).ok()?,
-        num_bigint::BigInt::from_str(denom.trim()).ok()?,
-    ))
-}
+// parse_ratio_text retired with data_field starchart scrape — desk::charted_position owns chart reads.
 
 fn sync_world(world: &World) -> Result<usize, String> {
     let name = world.orb().map(|orb| orb.name.clone()).ok_or("no colony")?;
@@ -1912,28 +1921,27 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                 continue;
                             }
                             let name = entry.file_name().to_string_lossy().into_owned();
-                            // CRITICAL: the stress read from the
-                            // lens state data (famine, venting).
-                            if let Ok(planets) = std::fs::read_dir(entry.path().join("planets")) {
-                                for planet in planets.filter_map(|e| e.ok()) {
-                                    let Ok(state) = std::fs::read_to_string(
-                                        planet.path().join("state.json"),
-                                    ) else {
-                                        continue;
-                                    };
-                                    let mut flags = Vec::new();
-                                    if !state.contains("\"famine\":[]") {
-                                        flags.push("the want strikes".to_string());
+                            // CRITICAL: stress from chronicle.tlv (SEAL B),
+                            // never state.json display.
+                            let tlv = entry.path().join("chronicle.tlv");
+                            if let Ok(chronicle) = cfe::persist::load(&tlv) {
+                                let w = World::resume(chronicle);
+                                let mut flags = Vec::new();
+                                if let Some(orb) = w.orb() {
+                                    if !orb.famine.is_empty() {
+                                        flags.push("the want strikes".into());
                                     }
-                                    if let Some(vented) = data_field(&state, "entropy_vented") {
-                                        if vented != "0" {
-                                            flags.push(format!("venting {vented}"));
-                                        }
+                                    if orb.entropy_vented > ratio(0, 1) {
+                                        flags.push(format!(
+                                            "venting {}/{}",
+                                            orb.entropy_vented.numer(),
+                                            orb.entropy_vented.denom()
+                                        ));
                                     }
                                     if !flags.is_empty() {
                                         critical.push(format!(
                                             "{name}/{}: {}",
-                                            planet.file_name().to_string_lossy(),
+                                            orb.name,
                                             flags.join(" · ")
                                         ));
                                     }
@@ -2152,15 +2160,23 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 };
                 let dir = std::path::PathBuf::from("var/operators");
                 let _ = std::fs::create_dir_all(&dir);
-                let profile = dir.join(format!("{sigil}.json"));
+                // Plain profile (no JSON) — session config, not colony law.
+                let profile = dir.join(&sigil);
                 let world = std::fs::read_to_string(&profile)
                     .ok()
-                    .and_then(|text| data_field(&text, "world"))
+                    .and_then(|text| profile_field(&text, "world"))
+                    .or_else(|| {
+                        std::fs::read_to_string(dir.join(format!("{sigil}.json")))
+                            .ok()
+                            .and_then(|text| profile_field(&text, "world"))
+                    })
                     .unwrap_or_default();
                 let _ = std::fs::write(
                     &profile,
-                    format!("{{\"world\":\"{world}\",\"station\":\"{station}\"}}\n"),
+                    format!("# operator seat claim — not a receipt\nstation {station}\nworld {world}\n"),
                 );
+                // Drop legacy .json if present (display-era residue).
+                let _ = std::fs::remove_file(dir.join(format!("{sigil}.json")));
                 let _ = std::fs::write(dir.join("active"), &sigil);
                 println!(
                     "{} logged in as {} [{}] — {} resumes your last saved world",
@@ -2178,10 +2194,19 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     println!("{}", style.head("OPERATORS ON THIS MACHINE"));
                     for entry in entries.filter_map(|e| e.ok()) {
                         let name = entry.file_name().to_string_lossy().into_owned();
-                        if let Some(sigil) = name.strip_suffix(".json") {
+                        if name == "active" || name.ends_with(".json") {
+                            // .json listed only as legacy until re-login migrates.
+                            if let Some(sigil) = name.strip_suffix(".json") {
+                                listed += 1;
+                                let mark = if sigil == active.trim() { " ← active (legacy json)" } else { " (legacy json — re-login)" };
+                                println!("  {}{}", style.strong(sigil), style.dim(mark));
+                            }
+                            continue;
+                        }
+                        if entry.path().is_file() {
                             listed += 1;
-                            let mark = if sigil == active.trim() { " ← active" } else { "" };
-                            println!("  {}{}", style.strong(sigil), style.dim(mark));
+                            let mark = if name == active.trim() { " ← active" } else { "" };
+                            println!("  {}{}", style.strong(&name), style.dim(mark));
                         }
                     }
                 }
@@ -2207,14 +2232,10 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 println!("{} {} first", style.bad("✗"), style.strong("login <name>"));
                 return;
             }
-            let profile = std::fs::read_to_string(format!("var/operators/{sigil}.json"))
+            let profile = std::fs::read_to_string(format!("var/operators/{sigil}"))
+                .or_else(|_| std::fs::read_to_string(format!("var/operators/{sigil}.json")))
                 .unwrap_or_default();
-            let last = profile
-                .split("\"world\":\"")
-                .nth(1)
-                .and_then(|rest| rest.split('\"').next())
-                .unwrap_or("")
-                .to_string();
+            let last = profile_field(&profile, "world").unwrap_or_default();
             match last.as_str() {
                 "" => println!(
                     "{} no saved world on this profile yet — {} then {}",
@@ -3946,18 +3967,22 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         let active =
                             std::fs::read_to_string("var/operators/active").unwrap_or_default();
                         if !active.trim().is_empty() {
-                            let profile = format!("var/operators/{}.json", active.trim());
+                            let profile = format!("var/operators/{}", active.trim());
                             let station = std::fs::read_to_string(&profile)
                                 .ok()
-                                .and_then(|text| data_field(&text, "station"))
+                                .and_then(|text| profile_field(&text, "station"))
                                 .unwrap_or_else(|| "player".into());
                             let _ = std::fs::write(
                                 &profile,
                                 format!(
-                                    "{{\"world\":\"{}\",\"station\":\"{station}\"}}\n",
+                                    "# operator seat claim — not a receipt\nstation {station}\nworld {}\n",
                                     orb.name
                                 ),
                             );
+                            let _ = std::fs::remove_file(format!(
+                                "var/operators/{}.json",
+                                active.trim()
+                            ));
                         }
                         println!(
                             "{} world saved — {} receipt(s) appended to {} (the file only grows)",

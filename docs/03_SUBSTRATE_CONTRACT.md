@@ -120,21 +120,28 @@ verification (N6), and anchoring (N7) survive untouched.
 
 ## 7. Observation and governance → the lens, the observer, the steward
 
-Every console session reflects its civilization to `var/worlds/<civ>/`:
-`state.json` (atomic-replace snapshot), `chronicle.jsonl` (append-only
-receipt stream carrying the digest chain and the normative TLV bytes),
-`solves/` (proof-of-solution certificates), `inbox/` (steward
-directives; processed ones archive under `applied/`/`refused/`, never
-deleted). Quantities render exact (`9/2`, never `4.5`).
+Every console session reflects its civilization to `var/worlds/<world>/`:
+
+| File | Role |
+|------|------|
+| **`chronicle.tlv`** | **Authority** — resume carrier, SEAL B |
+| **`state.tlv`** | **Machine mirror** — committed orb wire |
+| `state.json` | Display snapshot only (never read back as law) |
+| `chronicle.jsonl` | Display receipt stream (lines carry `tlv` hex) |
+| `solves/` | Proof-of-solution certificates |
+| `inbox/` | Steward directives → applied/refused |
+
+Quantities render exact (`9/2`, never `4.5`). Full law:
+**`docs/JSON_DISPLAY_ONLY.md`**.
 
 - **Primitive:** `scribe::record` / `scribe::record_solve` for the
   write side, `ledger::Ledger` (`pending_directives`, `archive`) for the
   steward inbox. (Formerly `mirror::Mirror`; `engine/mirror` was EXCISED
   2026-07-31 — d606b01 — and MIRROR is deprecated as a framing whole,
   12 §2c. A lens derives from the one chain and holds no copy.) The lens
-  is a DERIVATION, never an authority — nothing reads `state.json` back into a world; replay
-  grounds worlds. The same stream is the persistence carrier: world =
-  replay(chronicle), so save/load and observation are one seam.
+  is a DERIVATION, never an authority — **nothing reads `state.json` back
+  into a world**; replay of `chronicle.tlv` grounds worlds. Persistence
+  and observation share one chain: world = replay(chronicle).
 - **Tools:** `tools/observer.py` — read-only by construction;
   civilization-centric dashboard (resources, zones, clock, puzzles,
   the intelligence ratio `puzzles / resources-collected`, per-stream

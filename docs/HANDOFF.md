@@ -2,7 +2,8 @@
 
 **Status:** PROCESS CARRIER (beside `BUILD_ORDER.md`,
 `OPEN_QUESTIONS.md`, and `PICKUP.md`), for any engineering node
-joining or resuming work. The carrier split: **state is never read
+joining or resuming work. The carrier split: **JSON is never authority**
+(`docs/JSON_DISPLAY_ONLY.md`); **state is never read
 here** — the current landing and the landed ledger live in
 `BUILD_ORDER.md` (the ONE carrier), and the fast cold-start map (run
 commands, landed table, lanes, dark spots) lives in `PICKUP.md`. THIS

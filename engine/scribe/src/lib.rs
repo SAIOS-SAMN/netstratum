@@ -108,15 +108,31 @@ pub fn record(
     fs::write(&tmp, w.finish())?;
     fs::rename(&tmp, dir.join("world.json"))?;
 
-    // chronicle.jsonl — append receipts beyond what is exported.
+    // chronicle.jsonl — WRITE-ONLY display export of the receipt chain.
+    // Authority is chronicle.tlv (synced by the caller / conductor).
+    // Rebuild from live receipts when lengths diverge so we never treat
+    // a line-count of a display stream as law (§11 rule 2).
     let path = dir.join("chronicle.jsonl");
+    let receipts = world.chronicle().receipts();
     let already = if path.exists() {
-        fs::read_to_string(&path)?.lines().count()
+        fs::read_to_string(&path)?
+            .lines()
+            .filter(|l| !l.trim().is_empty())
+            .count()
     } else {
         0
     };
-    let receipts = world.chronicle().receipts();
-    if receipts.len() > already {
+    if receipts.len() < already {
+        // Display stream is longer/stale — full rebuild from authority.
+        let mut body = String::new();
+        for receipt in receipts {
+            body.push_str(&render_receipt(receipt));
+            body.push('\n');
+        }
+        let tmp = dir.join("chronicle.jsonl.tmp");
+        fs::write(&tmp, body)?;
+        fs::rename(&tmp, &path)?;
+    } else if receipts.len() > already {
         let mut file = fs::OpenOptions::new().create(true).append(true).open(&path)?;
         for receipt in &receipts[already..] {
             let mut line = render_receipt(receipt);
@@ -127,16 +143,41 @@ pub fn record(
     Ok(())
 }
 
-/// The divergence check behind [`record`]: compare the resident
-/// chronicle's line `k` digest against the live world's receipt `k`
-/// (k = last shared index). Equal ⇒ same timeline (incremental append
-/// proceeds). Different ⇒ a PRIOR era's world lives here: the whole
-/// world dir rotates to `<name>--closed-<digest8>` (its terminal
-/// digest names it).
+/// The divergence check behind [`record`]: prefer **chronicle.tlv**
+/// (binary authority) when present; fall back to display jsonl digests
+/// only as a pre-tlv legacy path.
+///
+/// Equal digests ⇒ same timeline. Different ⇒ PRIOR era rotates to
+/// `<name>--closed-<digest8>`.
 fn rotate_divergent(dir: &std::path::Path, world: &World) -> std::io::Result<()> {
-    let path = dir.join("chronicle.jsonl");
     let receipts = world.chronicle().receipts();
-    if !path.exists() || receipts.is_empty() {
+    if receipts.is_empty() {
+        return Ok(());
+    }
+    // Prefer binary resume carrier.
+    let tlv_path = dir.join("chronicle.tlv");
+    if tlv_path.exists() {
+        match cfe::persist::load(&tlv_path) {
+            Ok(resident) => {
+                let res = resident.receipts();
+                if res.is_empty() {
+                    return Ok(());
+                }
+                let check = res.len().min(receipts.len()) - 1;
+                if res[check].own.0 == receipts[check].own.0 {
+                    return Ok(());
+                }
+                // Divergent binary chain — rotate using resident terminal digest.
+                let terminal = hex(&res.last().expect("nonempty").own.0);
+                return rotate_world_dir(dir, &terminal);
+            }
+            Err(_) => {
+                // Unreadable TLV: fall through to display stream check.
+            }
+        }
+    }
+    let path = dir.join("chronicle.jsonl");
+    if !path.exists() {
         return Ok(());
     }
     let text = fs::read_to_string(&path)?;
@@ -157,8 +198,16 @@ fn rotate_divergent(dir: &std::path::Path, world: &World) -> std::io::Result<()>
         .last()
         .and_then(|line| ledger::extract::extract_string(line, "digest"))
         .unwrap_or_else(|| "unknown".into());
-    let tag: String = terminal.chars().take(8).collect();
-    let base = dir.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
+    rotate_world_dir(dir, &terminal)
+}
+
+/// Rotate a world directory to `--closed-<digest8>` archive.
+fn rotate_world_dir(dir: &std::path::Path, terminal_digest: &str) -> std::io::Result<()> {
+    let tag: String = terminal_digest.chars().take(8).collect();
+    let base = dir
+        .file_name()
+        .map(|n| n.to_string_lossy().into_owned())
+        .unwrap_or_default();
     let mut closed = dir.with_file_name(format!("{base}--closed-{tag}"));
     let mut bump = 1u32;
     while closed.exists() {

@@ -10,6 +10,10 @@ drill-downs by subcommand.
 
 READ-ONLY BY CONSTRUCTION — opens files for reading, never writes.
 Standard library only. Exact fractions in, exact fractions out.
+
+AUTHORITY (docs/JSON_DISPLAY_ONLY.md): material fields (banks, famine,
+zones, elements, STAMP, labor) decode from **state.tlv** only. Rows
+without TLV are omitted. `state.json` is never trusted for balances.
 Chronicle `detail` strings are DISPLAYED verbatim, never parsed
 (the no-grepping law: a parse of a rendering is a second truth).
 
@@ -193,8 +197,11 @@ def element_name(element_id: bytes) -> str:
 
 def decode_orb_tlv(path):
     """The committed orb from state.tlv — banked, famine, zones,
-    vented, elements — decoded from the canonical bytes. Returns None
-    when no carrier stands (the JSON rendering then carries the display)."""
+    vented, elements, name — decoded from the canonical bytes.
+
+    Returns None when no carrier stands. **state.tlv is authority** for
+    material fields; state.json is never required and never trusted.
+    """
     try:
         data = path.read_bytes()
     except OSError:
@@ -202,11 +209,24 @@ def decode_orb_tlv(path):
     orb = {
         "banked": {}, "famine": [], "zones": 0,
         "vented": Fraction(0), "elements": [],
-        "stamp": Fraction(0),
+        "stamp": Fraction(0), "name": None, "orb_id": None,
+        "habitats": 0,
     }
     for tag, value in tlv_records(data):
-        if tag == 17:
+        if tag == 16 and len(value) >= 8:
+            # Orb header: orb_id LE64 ‖ name bytes
+            orb["orb_id"] = int.from_bytes(value[:8], "little")
+            try:
+                orb["name"] = value[8:].decode("utf-8", errors="replace")
+            except Exception:
+                orb["name"] = None
+        elif tag == 17 and len(value) >= 3:
+            # tile u16 LE ‖ kind u8
             orb["zones"] += 1
+            kind = value[2]
+            # ZoneKind::Habitat = 2 (dop wire)
+            if kind == 2:
+                orb["habitats"] += 1
         elif tag == 18 and len(value) > 1:
             name = RESOURCE_NAMES.get(value[0])
             if name:
@@ -463,20 +483,31 @@ def count_closed_ruins(var_root):
 
 
 def world_facts(world_dir):
-    """Everything one world's export carries, gathered once."""
+    """Everything one world carries, gathered once.
+
+    **Authority:** `state.tlv` (orb wire) + `chronicle.jsonl`/`tlv` chain
+    digests. **Never** trusts `state.json` for banks/famine/zones.
+    Planet dir name + world dir name supply identity labels when the
+    display export is absent.
+    """
+    # Prefer display chronicle for receipt event stream (tlv field on each
+    # line); chain linkage is digest-only (not balance trust).
     chronicle = world_dir / "chronicle.jsonl"
     linked, receipts = chain_linked(chronicle)
+    # If only chronicle.tlv exists, chain is "unknown-display" but present.
+    if receipts == 0 and (world_dir / "chronicle.tlv").exists():
+        linked = True  # binary chain verifies in-engine; board marks present
+        try:
+            receipts = max(1, (world_dir / "chronicle.tlv").stat().st_size // 64)
+        except OSError:
+            receipts = 0
     consumed = Fraction(0)
     events, terminal_digest = [], ""
     for receipt in read_jsonl(chronicle):
         events.append(receipt)
         terminal_digest = receipt.get("digest") or terminal_digest
         if receipt.get("event") == "yield_collected":
-            # THE NO-GREPPING LAW, obeyed (see this file's docstring).
-            # This read the amount out of the rendered `detail` string
-            # with `.split(" ")[0]` — a parse of a rendering, and the
-            # denominator of the INTELLIGENCE reading. The canonical
-            # bytes were on the same receipt the whole time.
+            # Wire bytes on the receipt — not detail prose.
             amount = yield_amount(receipt.get("tlv", ""))
             if amount is not None:
                 consumed += amount
@@ -484,58 +515,64 @@ def world_facts(world_dir):
     solves = world_dir / "solves"
     if solves.is_dir():
         for path in solves.iterdir():
-            if path.suffix != ".json":
-                continue
-            puzzles += 1
-            try:
-                depth = max(depth, json.loads(
-                    path.read_text(encoding="utf-8")).get("depth", 1))
-            except json.JSONDecodeError:
-                pass
+            # Solve certificates are proof blobs; count any file.
+            if path.is_file():
+                puzzles += 1
+                if path.suffix == ".json":
+                    try:
+                        depth = max(depth, json.loads(
+                            path.read_text(encoding="utf-8")).get("depth", 1))
+                    except (json.JSONDecodeError, OSError):
+                        pass
     planets = []
     planets_dir = world_dir / "planets"
+    world_name = world_dir.name
+    # Civ slug heuristic from world dir (e.g. aerie-hearth → aerie).
+    civ_guess = world_name.split("-")[0] if world_name else "?"
     if planets_dir.is_dir():
         for planet_dir in sorted(p for p in planets_dir.iterdir() if p.is_dir()):
-            state_path = planet_dir / "state.json"
-            if not state_path.exists():
-                continue
-            try:
-                state = json.loads(state_path.read_text(encoding="utf-8"))
-            except json.JSONDecodeError:
-                continue
-            # MIRROR-TLV: the COMMITTED fields prefer the house wire
-            # (state.tlv — canonical bytes); the JSON rendering keeps
-            # the context (clock, civ, star, offers, readings).
             wire = decode_orb_tlv(planet_dir / "state.tlv")
-            if wire is not None:
-                state["banked"] = {k: show(v) for k, v in wire["banked"].items()}
-                state["famine"] = wire["famine"]
-                state["zones"] = state.get("zones", [])
-                state["_wire_zones"] = wire["zones"]
-                state["entropy_vented"] = show(wire["vented"])
-                # Prefer the wire (authority); JSON may lag until lens exports.
-                state["elements"] = [
+            if wire is None:
+                # No TLV → no material row. Display JSON alone is never enough.
+                continue
+            planet_label = wire.get("name") or planet_dir.name
+            banked = {k: show(v) for k, v in wire["banked"].items()}
+            famine = list(wire["famine"])
+            # Arc band pure from TLV material (P8.2 stand-in).
+            if famine:
+                traj = "decline"
+            else:
+                traj = "growth"
+            labor = wire.get("habitats", 0)
+            state = {
+                "civilization": civ_guess,
+                "world": world_name,
+                "planet": planet_label,
+                "colony": planet_label,
+                "clock": receipts,  # display clock proxy = receipt count
+                "banked": banked,
+                "famine": famine,
+                "zones": [],
+                "_wire_zones": wire["zones"],
+                "entropy_vented": show(wire["vented"]),
+                "elements": [
                     {"id": eid.hex(), "name": element_name(eid), "amount": show(amt)}
                     for eid, amt in wire["elements"]
-                ]
-                # STAMP-1 (tag 73) — unit of account treasury.
-                if wire.get("stamp", Fraction(0)) != 0:
-                    state["stamp"] = show(wire["stamp"])
-                else:
-                    state["stamp"] = state.get("stamp", "0")
-            elif "elements" not in state:
-                state["elements"] = []
-            if "stamp" not in state:
-                state["stamp"] = "0"
+                ],
+                "stamp": show(wire.get("stamp", Fraction(0))),
+                "trajectory": traj,
+                "hunger": [],
+                "rail": "R1",
+                "rail_routes": 0,
+                "labor": labor,
+                "habitats": labor,
+                "ap_available": "—",
+                "ap_capacity": "—",
+                "star_class": None,
+            }
             planets.append(state)
-    # THE STEWARD DOOR IS FLAT. Directives are written straight into
-    # `inbox/` and archived into `inbox/applied/` or `inbox/refused/`
-    # (ledger::Ledger::pending_directives / archive) — there is no
-    # `inbox/pending/` and never was, so this counted a directory that
-    # cannot exist and "petitions pending upward" read 0 forever, on the
-    # dashboard and in the stress view both. Count the files the engine
-    # actually reads: *.json at the inbox root, archives excluded by
-    # being directories.
+    # Steward inbox: directives are still JSON files (steward protocol);
+    # counting pending is not colony physics.
     pending = 0
     inbox = world_dir / "inbox"
     if inbox.is_dir():

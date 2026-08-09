@@ -20,6 +20,7 @@ Workspace **clean** on `main` after Wave-8 / polity dual-law land.
 | Codec | **SCHEMA_V17** |
 | Class / clade | **13** / **345** (u16 open) |
 | CLI roots | bench · intel · trade · diplomatic · **polity** (dual law all five) |
+| **Authority** | **`chronicle.tlv` + `state.tlv`** — JSON is display-only (`docs/JSON_DISPLAY_ONLY.md`) |
 
 ### What landed this session arc (newest first)
 
@@ -843,26 +844,22 @@ SYMBOLS, which do not drift. Cite a symbol or a law, never a line.
   grid ("layer-2 prudence, not law" sitting inside the price path), and
   route η = (1+grade)/8 with no cited law.
 
-### 8d. FILE-BORNE READ-BACKS — §11 rule 2 debts still live
+### 8d. FILE-BORNE READ-BACKS — §11 rule 2
 
-The lens law says views derive from the chain and are never read back.
-These read a rendering as if it were truth:
+**Law:** `docs/JSON_DISPLAY_ONLY.md` — JSON is display-only.
 
-- `clients/cli/src/main.rs:142` — `data_field` scrapes display files for
-  station, founder, chart position, stress. Self-declared inventoried
-  debt; retires when the lens re-serves from the chain (#37).
-- `clients/cli/src/main.rs:1285` — famine decided by the substring test
-  `!state.contains("\"famine\":[]")` on rendered JSON.
-- `clients/cli/src/main.rs:115` — `active_station` reads authority from
-  an unreceipted `var/operators/<name>.json`, and `tier0_gate` gates
-  every tier-0 deed on it.
-- `clients/cli/src/main.rs:1725` — `civ new` appends to
-  `var/polities.json` by splicing off the trailing `]`: the CLI hand-
-  editing a file the conductor owns. **This is also why the tracked
-  `seeds/` roster and the live one diverged** (see §8f).
-- `scribe/src/lib.rs:101` + `journal.rs:707,777` — the append cursor is
-  a LINE COUNT of the exported `chronicle.jsonl` / `journal.jsonl`, and
-  the wall is rebuilt by re-parsing the display stream it just wrote.
+| Debt | Status (2026-08-09) |
+|------|---------------------|
+| CLI `data_field` / `state.json` scrapes | **CLOSED** — chronicle.tlv resume; operator plain profiles |
+| Famine substring on state.json | **CLOSED** — World::resume from tlv |
+| `conductor_founded` via registry+state.json | **CLOSED** — MESH pen / spine |
+| Operator `*.json` profiles | **CLOSED** — plain `var/operators/<name>` |
+| Observer banks from state.json | **CLOSED** — state.tlv only material rows |
+| Scribe divergence on jsonl only | **CLOSED** — prefer chronicle.tlv digests |
+| `civ new` → polities.json splice | **OPEN** — conductor-owned roster (not colony banks) |
+| Registry JSON as identity cache | **OPEN** — G1 genesis on chain is binding where sealed |
+| Starchart.json topology | **OPEN** — coordinates only; not balances |
+| Journal wall rebuild from jsonl | **OPEN** — display path; not SEAL B |
 - ~~`tools/observer.py:273` — `consumed` is accumulated by splitting the
   chronicle's `detail` display string, violating that file's own
   no-grepping law at line 11, and it feeds the INTELLIGENCE ratio.~~
