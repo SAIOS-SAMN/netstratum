@@ -444,7 +444,6 @@ pub fn lab_create_bill(
     metabolism: u8,
 ) -> Vec<(crate::dop::Resource, crate::ratio::Ratio)> {
     use crate::dop::Resource;
-    use crate::ratio::ratio;
     let e = eighth();
     match path {
         LabPath::ChemWork => {
