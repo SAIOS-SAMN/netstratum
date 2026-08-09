@@ -519,6 +519,8 @@ impl World {
         stratum: u8,
     ) -> Result<crate::dop::Prospect, ActionRefused> {
         self.permitted(actor, Scope::Build)?;
+        // P8.1 — shared AP (prospect family).
+        self.require_ap(crate::world::ApKind::Prospect)?;
         if self.orb_by_id(orb).is_none() {
             return Err(ActionRefused::NoSuchOrb { orb });
         }

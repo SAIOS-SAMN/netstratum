@@ -307,6 +307,13 @@ pub enum ActionRefused {
     EconomicModeBlocked { mode: u8, kind: u8, reason: u8 },
     /// LAB / advanced tech — needs off-planet resourcing (crossed, element route, or route).
     OffPlanetResourceRequired { kind: u8 },
+    /// P8.1 — shared AP budget exhausted for this year-voice window.
+    ApExhausted {
+        kind: String,
+        need: u64,
+        have: u64,
+        capacity: u64,
+    },
     /// THERMAL-1 — siting an orbit needs a commissioned sun first.
     NoStarCommissioned,
     /// THERMAL-1 — the orb is already sited; an orbit does not move.

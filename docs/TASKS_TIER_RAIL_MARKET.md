@@ -131,8 +131,8 @@ strand-adapter · isthmus/datum-adapter
 | C1.3 | [x] Science-ranked bench | C1.1–C1.2 | `bench_science` CLI |
 | C1.4 | [x] Isomorphic union (tags 156) | #37 | mass-exact gem fuse |
 | C1.5 | [x] Chem catalog creation (tag 157) | C1.1 | crystal fee · novelty relief |
-| C1.6 | [ ] NPC `chemistry_step` disposition-routed | C1.3 | pure NPC |
-| C1.7 | [ ] Stellar capacity game (star lines as project) | locality | design then land |
+| C1.6 | [x] NPC `chemistry_step` disposition-routed | C1.3 | pure NPC · cycle after refine |
+| C1.7 | [x] Stellar capacity game (star lines as project) | locality | `stellar_capacity_board` · `bench star capacity` |
 | H1.1 | [x] BENCH hub (planetary · build · star · chem · econ) | C1.x | CLI `bench` |
 | H1.2 | [x] TRADE hub (books · fleet · rails · vault · aperture) | H1.1 | CLI `trade` |
 | H1.3 | [x] Desk panes deep-link into hub domains | H1.1–H1.2 | desk HUB strip · `h`/`hc` · `docs/HUBS.md` |
@@ -154,11 +154,14 @@ strand-adapter · isthmus/datum-adapter
 
 | ID | Task | Depends | Exit |
 |----|------|---------|------|
-| P8.1 | [ ] Shared AP budget across build / prospect / research / quote | conductor | opportunity cost pin |
+| P8.1 | [x] Shared AP budget across build / prospect / research / quote | year-voice | `ap_budget` · opportunity cost pin |
 | P8.2 | [ ] Trajectory + hunger + rail on observer | R2.6, research | |
 | P8.3 | [ ] Labor/population derived from habitats (optional design land) | 02 | design then code |
 | P8.4 | [ ] Closed-ruins history view (already hidden live) | observer | |
 | P8.5 | [ ] Balance pass: placeholder curves → ruled tables | all | |
+| POL.1 | [x] Polity root vent open (CLI scaffold · genesis/taxon/mint/ap) | H1.x | `polity` hub · docs/HUBS.md |
+| POL.2 | [ ] Dual-law `bench polity` craft twin (if wanted) | POL.1 | design then land |
+| POL.3 | [ ] Conductor polity-root parity / deeper identity deeds | POL.1 | deferred |
 
 ---
 

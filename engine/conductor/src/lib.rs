@@ -1211,6 +1211,168 @@ impl Polity {
         }
     }
 
+    /// **C1.6 CHEMISTRY STEP** — pure NPC chemistry, disposition-routed.
+    ///
+    /// One act per beat: seat Chem lab → catalog known gem → compound
+    /// best set → iso-union. Empiricist prioritizes catalog (knowledge);
+    /// expansionist prioritizes compound/union (yield); epicurean only
+    /// bonds when survival ≥ dark (soft science).
+    fn chemistry_step(&mut self) {
+        let primary = cfe::world::FIRST_ORB;
+        if self.world.orb().is_none() || self.world.star().is_none() {
+            return;
+        }
+        if self.world.orb().is_some_and(|o| !o.famine.is_empty()) {
+            return; // starving lines do not play alchemy
+        }
+        let automaton = self.automaton;
+        let dis = self
+            .world
+            .genesis()
+            .map(|g| g.disposition)
+            .unwrap_or(1);
+        // disposition wire: 1 expansionist · 2 empiricist · 3 epicurean
+        // (and others default expansionist-ish yield path).
+        let chem = cfe::almanac::ScienceDiscipline::Chem;
+
+        // 1. Seat chem lab if unseated and the bill is affordable.
+        if self.world.science_rank(primary, chem) < 1 {
+            if self
+                .world
+                .seat_science_as(automaton, primary, chem)
+                .is_ok()
+            {
+                return; // one act per beat
+            }
+            // Cannot seat yet — no chemistry below the lab door.
+            return;
+        }
+
+        // 2. Disposition-ordered chemistry acts.
+        match dis {
+            2 => {
+                // Empiricist: catalog first (knowledge), then compound survival.
+                if self.npc_chem_catalog(automaton, primary) {
+                    return;
+                }
+                if self.npc_chem_compound(automaton, primary, /*prefer_survival*/ true) {
+                    return;
+                }
+                let _ = self.npc_chem_iso(automaton, primary);
+            }
+            3 => {
+                // Epicurean: soft science — compound only when survival ≥ dark.
+                if self.npc_chem_compound(automaton, primary, /*prefer_survival*/ true) {
+                    return;
+                }
+                if self.npc_chem_catalog(automaton, primary) {
+                    return;
+                }
+            }
+            _ => {
+                // Expansionist / default: yield first (net utility), then iso, catalog.
+                if self.npc_chem_compound(automaton, primary, /*prefer_survival*/ false) {
+                    return;
+                }
+                if self.npc_chem_iso(automaton, primary) {
+                    return;
+                }
+                let _ = self.npc_chem_catalog(automaton, primary);
+            }
+        }
+    }
+
+    /// Catalog one banked gem not yet in the chemistry catalog.
+    fn npc_chem_catalog(&mut self, actor: u64, orb: u64) -> bool {
+        let catalog: std::collections::HashSet<[u8; 32]> =
+            self.world.chem_catalog().iter().copied().collect();
+        let candidates: Vec<[u8; 32]> = self
+            .world
+            .orb()
+            .map(|o| {
+                o.elements
+                    .iter()
+                    .filter(|(_, amt)| *amt > ratio(0, 1))
+                    .map(|(id, _)| *id)
+                    .filter(|id| !catalog.contains(id))
+                    .collect()
+            })
+            .unwrap_or_default();
+        // Prefer highest survival utility gem for catalog.
+        let mut best: Option<([u8; 32], cfe::ratio::Ratio)> = None;
+        let axes = self.world.civ_axes().unwrap_or(cfe::almanac::CivAxes {
+            disposition: 1,
+            metabolism: 1,
+            perception: 1,
+        });
+        for gem in candidates {
+            let s = cfe::almanac::survival_utility(axes, &[gem], &ratio(1, 1));
+            if best.as_ref().is_none_or(|(_, bs)| s > *bs) {
+                best = Some((gem, s));
+            }
+        }
+        if let Some((gem, _)) = best {
+            return self.world.chem_catalog_gem_as(actor, orb, gem).is_ok();
+        }
+        false
+    }
+
+    /// Compound the top bench_science set (survival-first or net-first).
+    fn npc_chem_compound(&mut self, actor: u64, orb: u64, prefer_survival: bool) -> bool {
+        let ranked = self.world.bench_science(orb);
+        // ScienceRead = (members, gem, knowledge, standing, survival, dark, net)
+        let mut rows: Vec<_> = ranked
+            .into_iter()
+            .filter(|r| r.3.is_none()) // no standing refusal
+            .collect();
+        if prefer_survival {
+            // survival ≥ dark and highest survival
+            rows.retain(|r| r.4 >= r.5);
+            rows.sort_by(|a, b| b.4.cmp(&a.4));
+        } else {
+            rows.sort_by(|a, b| b.6.cmp(&a.6)); // net
+        }
+        for (members, _, _, _, _, _, _) in rows.into_iter().take(8) {
+            if self
+                .world
+                .compound_as(actor, orb, &members)
+                .is_ok()
+            {
+                return true;
+            }
+        }
+        false
+    }
+
+    /// Iso-union first isomorphic banked gem pair.
+    fn npc_chem_iso(&mut self, actor: u64, orb: u64) -> bool {
+        let ids: Vec<[u8; 32]> = self
+            .world
+            .orb()
+            .map(|o| {
+                o.elements
+                    .iter()
+                    .filter(|(_, amt)| *amt >= ratio(1, 1))
+                    .map(|(id, _)| *id)
+                    .collect()
+            })
+            .unwrap_or_default();
+        for i in 0..ids.len() {
+            for j in (i + 1)..ids.len() {
+                if cfe::almanac::isomorphic(&ids[i], &ids[j]) {
+                    if self
+                        .world
+                        .iso_union_as(actor, orb, ids[i], ids[j])
+                        .is_ok()
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+        false
+    }
+
     /// The policy's build decision — at most one zone per beat, never
     /// during famine, always through the contained actor. Industry is
     /// GATED ON RESEARCH for every temperament: smelters need rung 3,
@@ -2357,17 +2519,18 @@ impl Polity {
     /// One full heartbeat. A growth returns the newborn's spec —
     /// the era loop gives it a world of its own.
     ///
-    /// **Cycle topology (operator lock 2026-08-07 + Wave-1):**
+    /// **Cycle topology (operator lock 2026-08-07 + Wave-1 + C1.6):**
     /// `build_step` → `ground_step` → `office_step` → `refine_step`
-    /// → `tick` → `collect_as`. Ground banks elements; office seats
-    /// T4/T6 from that evidence; refine converts raw through a
-    /// standing ElementRefinery — all pure NPC.
+    /// → `chemistry_step` → `tick` → `collect_as`. Ground banks
+    /// elements; office seats T4/T6; refine converts raw; chemistry
+    /// seats labs / catalogs / compounds — all pure NPC.
     pub fn cycle(&mut self, book: &Ledger, registry: &Registry) -> Option<PolitySpec> {
         self.drain_inbox(book);
         self.build_step();
         self.ground_step();
         self.office_step(registry);
         self.refine_step();
+        self.chemistry_step();
         self.world.tick();
         // Every settled orb collects — a chartered survey site left
         // uncollected would starve at its own upkeep.

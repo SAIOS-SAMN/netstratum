@@ -107,6 +107,7 @@ Top-level shortcuts: `chem` · `biology` · `physics` · `math` · `science` →
 | `intel` | **KNOWLEDGE activity** |
 | `trade` | **CIRCULATE / run** components |
 | `diplomatic` | **DIPLOMACY activity** (local · stellar · mesh); alias `diplo` |
+| **`polity`** | **LINE IDENTITY** (optional 5th · vent open) — genesis · taxon · mint · AP |
 
 ### Domain map
 
@@ -154,6 +155,13 @@ diplomatic     DIPLOMACY ACTIVITY  (alias: diplo)
   stellar      crossed · war walls · aperture · license
   mesh         councils · bonds · forwards standing
   craft        → bench diplomatic
+
+polity         LINE IDENTITY (optional 5th · vent open)
+  genesis      sealed axes · disposition · metabolism · perception
+  taxon        class · clade · economy mode · planet fit
+  mint         discovery mint (warrant · no free mint)
+  ap           P8.1 shared AP budget (build·prospect·research·quote)
+  craft        — none yet (identity is activity-only)
 ```
 
 ### Flow law
@@ -168,6 +176,8 @@ Dual:  intel       ←activity→  bench intel
        diplomatic  ←activity→  bench diplomatic
 
 Science: bench chem|biology|physics|math|research  →  intel knowledge/research
+
+Polity:  who you are (axes · taxon · mint · AP) — no craft twin yet
 ```
 
 ---
@@ -176,10 +186,18 @@ Science: bench chem|biology|physics|math|research  →  intel knowledge/research
 
 | ID | Open |
 |----|------|
-| C1.7 | Stellar capacity **game** (lines_of as play) |
-| P8.x | AP budget / anti click-to-win |
-| Polity | genesis/taxon/mint as optional 5th root |
+| P8.2–P8.5 | Observer trajectory · labor · ruins · balance pass |
+| Polity deep | dual-law `bench polity` · conductor root parity · deeper deeds |
 | Deep deeds | more domain leaves still status+verb (not all fire deeds) |
+
+### Landed this pass
+
+| ID | Land |
+|----|------|
+| **C1.7** | Stellar capacity game — `stellar_capacity_board` · `bench star capacity` |
+| **C1.6** | NPC `chemistry_step` disposition-routed (seat · catalog · compound · iso) |
+| **P8.1** | Shared AP budget — build · prospect · research · quote · year-voice refill |
+| **Polity vent** | Optional 5th root scaffold — `polity` · genesis/taxon/mint/ap boards |
 
 ### Landed: H1.3 desk deep-links
 
@@ -209,8 +227,11 @@ Every desk pane carries a **HUB** strip and desk» shortcuts into hub domains:
 | `intel` · `intelligence` · `kb` | knowledge activity |
 | `trade` · `trades` | circulate activity |
 | **`diplomatic`** · `diplomacy` · `diplomatics` · `diplo` | diplomacy activity |
+| **`polity`** · `line` · `identity` | line identity (optional 5th · vent open) |
 | `bench diplomatic` · `bench diplo` | diplomacy **craft** |
 | `bench chem` · `biology` · `physics` · `math` · `research` | science **craft** |
-| `help bench` · `help intel` · `help trade-hub` · `help diplomatic` | maps |
+| `bench star capacity` | C1.7 stellar lines game |
+| `polity ap` | P8.1 shared AP board |
+| `help bench` · `help intel` · `help trade-hub` · `help diplomatic` · `help polity` | maps |
 
 Barter form preserved: `trade <id> with <world> <id> deal <n>`.

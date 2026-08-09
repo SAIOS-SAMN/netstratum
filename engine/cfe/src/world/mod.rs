@@ -73,8 +73,14 @@ pub mod xrail_deeds;
 pub mod offices;
 pub mod bench_games;
 pub mod science_lab;
+pub mod ap_budget;
 
 pub use science_lab::{LabCreateResult, ScienceLabBoard};
+pub use bench_games::{
+    DoctrineBoard, IntelBoard, IntelStep, LinkBoard, ResearchBoard, ResearchNode,
+    StellarCapacityBoard, StellarLineRow, StellarVeinRow,
+};
+pub use ap_budget::{ApBoard, ApKind, AP_YEAR_TICKS};
 
 pub use defense::{CorridorFog, DefenseDomain, DefensePosture, KinIntegrity, RiskBand};
 pub use market_defense::{
@@ -85,9 +91,6 @@ pub use intel::{InfIntegrity, WardState};
 pub use cog_cyb::{CogIntegrity, CybIntegrity};
 pub use espionage::EspionageIntegrity;
 pub use deep_rails::DeepRailStatus;
-pub use bench_games::{
-    DoctrineBoard, IntelBoard, IntelStep, LinkBoard, ResearchBoard, ResearchNode,
-};
 
 pub use replay::replay;
 pub use fleet::hull_voice;

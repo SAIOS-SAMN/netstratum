@@ -63,13 +63,12 @@ bench science seat|preview|create              seated labs
 
 | ID | Open | Notes |
 |----|------|-------|
-| C1.7 | Stellar capacity game | design then land |
-| C1.6 | NPC `chemistry_step` | disposition-routed |
-| P8.x | AP budget / anti click-to-win | Wave 8 |
+| P8.2–P8.5 | Observer · labor · ruins · balance | Wave 8 remainder |
+| POL.2–3 | Polity craft twin · conductor parity | vent open at POL.1 |
 | Court | Rename Earth-culture **line names** (Kemet/Baktun/Dogon/Lyran/…) | operator only |
-| Optional | Polity root (genesis/taxon/mint) · deeper hub deeds · live isthmus peer | deferred |
+| Deep deeds | More hub leaves still status+verb | deferred |
 
-**H1.3 landed:** desk panes deep-link into hubs — HUB strip per pane; desk» `h`/`hc`; map in `docs/HUBS.md` §3.
+**Landed this arc:** H1.3 desk deep-links · **C1.7** stellar capacity · **C1.6** chemistry_step · **P8.1** AP budget · **POL.1** polity vent.
 
 ### Smoke on resume (minimal)
 

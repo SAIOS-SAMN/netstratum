@@ -91,6 +91,55 @@ pub struct DoctrineBoard {
     pub next_hint: String,
 }
 
+/// One periodic line under the star (C1.7 stellar capacity game).
+#[derive(Debug, Clone)]
+pub struct StellarLineRow {
+    /// Periodic line `1..=LINES`.
+    pub line: u8,
+    /// True when `line <= lines_of(star)`.
+    pub reachable: bool,
+    /// Pressure fraction if this line is the opened stratum depth.
+    pub pressure_at: Ratio,
+    /// How many open prospects mint an element on this line.
+    pub open_veins: u64,
+    /// How many banked element kinds sit on this line.
+    pub banked_kinds: u64,
+}
+
+/// One opened prospect as capacity play.
+#[derive(Debug, Clone)]
+pub struct StellarVeinRow {
+    pub stratum: u8,
+    pub element: [u8; 32],
+    pub line: u8,
+    pub local: bool,
+    pub refines_now: bool,
+    pub richness: Ratio,
+    pub name: String,
+}
+
+/// **C1.7 STELLAR CAPACITY GAME** — `lines_of` as playable board.
+///
+/// The star caps how deep the system forges. Prospects open strata;
+/// locality + pressure decide which veins refine. Pure reading —
+/// deeds stay `prospect` / `assay` / `refine` / `star`.
+#[derive(Debug, Clone)]
+pub struct StellarCapacityBoard {
+    pub star: Option<crate::thermal::StarClass>,
+    /// `lines_of(class)` — deepest line this sun forges.
+    pub reach: u8,
+    /// Table depth (`LINES`).
+    pub table_lines: u8,
+    pub lines: Vec<StellarLineRow>,
+    pub veins: Vec<StellarVeinRow>,
+    pub open_strata: u64,
+    pub local_veins: u64,
+    pub refinable_now: u64,
+    pub deepest_open: u8,
+    pub pressure_now: Ratio,
+    pub next_move: String,
+}
+
 impl World {
     /// **RESEARCH GAME** — constellation + forge readiness + next move.
     pub fn research_board(&self, orb: u64) -> ResearchBoard {
@@ -318,6 +367,134 @@ impl World {
             voice: p.voice.clone(),
             kin_voice: self.kin_residual_voice().into(),
             next_hint,
+        }
+    }
+
+    /// **C1.7 STELLAR CAPACITY** — star lines as project (14 §8.4).
+    ///
+    /// Call-not-copy: [`crate::almanac::lines_of`], [`local_to`],
+    /// [`pressure`], [`refines`] are the authorities.
+    pub fn stellar_capacity_board(&self, orb: u64) -> StellarCapacityBoard {
+        use crate::almanac::{lines_of, local_to, periodic_of, pressure, refines, LINES};
+        use crate::dop::element_name;
+
+        let star = self.star;
+        let reach = star.map(lines_of).unwrap_or(0);
+        let deepest_open = self
+            .prospects
+            .iter()
+            .filter(|p| p.orb == orb)
+            .map(|p| p.stratum)
+            .max()
+            .unwrap_or(0);
+        // Opened stratum depth as pressure input: clamp to reach when star stands.
+        let stratum_for_pressure = if reach == 0 {
+            deepest_open
+        } else {
+            deepest_open.min(reach)
+        };
+        let pressure_now = star
+            .map(|c| pressure(stratum_for_pressure, c))
+            .unwrap_or_else(|| ratio(0, 1));
+
+        // Vein inventory under this orb.
+        let mut veins = Vec::new();
+        let mut open_per_line = [0u64; 8]; // index by line 1..=7
+        for p in self.prospects.iter().filter(|p| p.orb == orb) {
+            let per = periodic_of(&p.element);
+            let line = per.line;
+            if (1..=7).contains(&line) {
+                open_per_line[line as usize] =
+                    open_per_line[line as usize].saturating_add(1);
+            }
+            let local = star.is_some_and(|c| local_to(&p.element, c));
+            let refines_now = star.is_some_and(|c| refines(&p.element, stratum_for_pressure, c));
+            let (family, _, _) = crate::dop::element_properties(&p.element, star.unwrap_or(crate::thermal::StarClass::G));
+            let name = element_name(family, &p.element);
+            veins.push(StellarVeinRow {
+                stratum: p.stratum,
+                element: p.element,
+                line,
+                local,
+                refines_now,
+                richness: p.richness.clone(),
+                name,
+            });
+        }
+        veins.sort_by_key(|v| (v.stratum, v.line));
+
+        let mut banked_per_line = [0u64; 8];
+        if let Some(held) = peek(&self.orbs, orb) {
+            for (el, amt) in &held.elements {
+                if *amt <= ratio(0, 1) {
+                    continue;
+                }
+                let line = periodic_of(el).line;
+                if (1..=7).contains(&line) {
+                    banked_per_line[line as usize] =
+                        banked_per_line[line as usize].saturating_add(1);
+                }
+            }
+        }
+
+        let mut lines = Vec::new();
+        for line in 1..=LINES {
+            let reachable = reach > 0 && line <= reach;
+            let pressure_at = star
+                .map(|c| pressure(line, c))
+                .unwrap_or_else(|| ratio(0, 1));
+            lines.push(StellarLineRow {
+                line,
+                reachable,
+                pressure_at,
+                open_veins: open_per_line[line as usize],
+                banked_kinds: banked_per_line[line as usize],
+            });
+        }
+
+        let open_strata = veins.len() as u64;
+        let local_veins = veins.iter().filter(|v| v.local).count() as u64;
+        let refinable_now = veins.iter().filter(|v| v.refines_now).count() as u64;
+
+        let next_move = if star.is_none() {
+            "commission a star — `star <class>` then reopen capacity".into()
+        } else if open_strata == 0 {
+            format!(
+                "prospect stratum 1..{} — open the ground under this sun (reach {reach})",
+                reach.max(1)
+            )
+        } else if refinable_now > 0 {
+            format!(
+                "{refinable_now} vein(s) refine at pressure {} — assay · refine through ElementRefinery",
+                format!("{}/{}", pressure_now.numer(), pressure_now.denom())
+            )
+        } else if deepest_open < reach {
+            format!(
+                "prospect deeper (next stratum {}) — reach {reach} still open under this star",
+                deepest_open.saturating_add(1)
+            )
+        } else if local_veins < open_strata {
+            format!(
+                "deep veins beyond reach {reach} stay raw here — trade them or age/commission a heavier class"
+            )
+        } else {
+            format!(
+                "capacity saturated at reach {reach} — refine local matter · trade off-depth · age star"
+            )
+        };
+
+        StellarCapacityBoard {
+            star,
+            reach,
+            table_lines: LINES,
+            lines,
+            veins,
+            open_strata,
+            local_veins,
+            refinable_now,
+            deepest_open,
+            pressure_now,
+            next_move,
         }
     }
 }

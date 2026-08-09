@@ -509,7 +509,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 style.strong("assay <element-prefix>")
             ),
         },
-        // Root hubs: BENCH (build) · INTEL · TRADE · DIPLOMATIC (activity peers).
+        // Root hubs: BENCH · INTEL · TRADE · DIPLOMATIC · POLITY (optional 5th).
         Some("bench") => {
             let rest: Vec<String> = words.map(|w| w.to_string()).collect();
             hubs::bench(world, rest.into_iter(), style, *current);
@@ -524,6 +524,10 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         | Some("diplo") => {
             let rest: Vec<String> = words.map(|w| w.to_string()).collect();
             hubs::diplo(world, rest.into_iter(), style, *current);
+        }
+        Some("polity") | Some("line") | Some("identity") => {
+            let rest: Vec<String> = words.map(|w| w.to_string()).collect();
+            hubs::polity(world, rest.into_iter(), style, *current);
         }
         Some("chemistry") | Some("chem") => {
             let mut rest: Vec<String> = vec!["chem".into()];
@@ -7240,6 +7244,14 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
         ),
         ActionRefused::OffPlanetResourceRequired { kind } => format!(
             "advanced tech needs off-planet resourcing (kind {kind}) — cross the void, charter an element route, or hold a ROUTE-1 deal before synth/clone/skin R2; not payable in STAMP alone"
+        ),
+        ActionRefused::ApExhausted {
+            kind,
+            need,
+            have,
+            capacity,
+        } => format!(
+            "AP exhausted for {kind} (need {need}, have {have} of {capacity} this year-voice) — wait the year boundary or raise habitats; shared across build·prospect·research·quote"
         ),
         ActionRefused::BalanceEntropyDominates {
             balance,

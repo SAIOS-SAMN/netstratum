@@ -1105,13 +1105,12 @@ on external strand/isthmus/datum crates.
 
 ### Resume board (operator go required for new lands)
 
-1. **C1.7** stellar capacity game  
-2. **C1.6** NPC chemistry_step  
-3. **P8.x** AP budget / anti click-to-win  
-4. Court rename of Earth-culture line names (optional)  
-5. Optional 5th root: polity (genesis/taxon/mint)
+1. **P8.2–P8.5** observer trajectory · labor · ruins · balance  
+2. **POL.2–3** polity craft twin · conductor root parity  
+3. Court rename of Earth-culture line names (optional)  
+4. Deep hub deeds (status+verb → fire)
 
-**H1.3 landed:** desk panes → hub domains (`h`/`hc`, HUB strip). See `docs/HUBS.md` §3.
+**Landed:** H1.3 desk deep-links · C1.7 stellar capacity · C1.6 chemistry_step · P8.1 AP · POL.1 polity vent.
 
 ### Smoke on cold start
 

@@ -17,6 +17,8 @@ impl World {
         kind: ZoneKind,
     ) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Build)?;
+        // P8.1 — shared AP (build family).
+        self.require_ap(crate::world::ApKind::Build)?;
         if self.orbs.is_empty() {
             return Err(ActionRefused::NoColony);
         }

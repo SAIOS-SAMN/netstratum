@@ -14,6 +14,7 @@ pub fn help(style: Style, topic: Option<&str>) {
         | Some("diplomacy")
         | Some("diplomatics")
         | Some("diplo") => diplo_help(style),
+        Some("polity") | Some("line") | Some("identity") | Some("ap") => polity_help(style),
         Some("stamp") | Some("money") => stamp_help(style),
         Some("element") | Some("elements") | Some("matter") => element_help(style),
         Some("fleet") | Some("hull") | Some("ship") => fleet_help(style),
@@ -64,7 +65,8 @@ fn index(style: Style) {
     row(style, "intel", "KNOWLEDGE activity — research · bases · ops · link");
     row(style, "trade", "CIRCULATE activity — books · stamp · element · fleet · rails");
     row(style, "diplomatic", "DIPLOMACY activity — local · stellar · mesh (alias: diplo)");
-    row(style, "help bench|intel|trade-hub|diplomatic", "hub maps · docs/HUBS.md");
+    row(style, "polity", "LINE IDENTITY — genesis · taxon · mint · AP (optional 5th · vent open)");
+    row(style, "help bench|intel|trade-hub|diplomatic|polity", "hub maps · docs/HUBS.md");
     println!();
     println!("  {}", style.section("TRADE DESK (Phase 1–2)"));
     row(style, "desk · desk enter", "interactive trade / diplo / routes / arb");
@@ -98,6 +100,7 @@ fn topics(style: Style) {
         ("intel", "KNOWLEDGE activity — research · bases · ops · link"),
         ("trade-hub", "CIRCULATE activity — market · haul · vault"),
         ("diplomatic", "DIPLOMACY activity — local · stellar · mesh (alias: diplo)"),
+        ("polity", "LINE IDENTITY — genesis · taxon · mint · AP (optional 5th)"),
         ("desk", "trade desk panes and keybinds"),
         ("stamp", "STAMP mint and aperture"),
         ("element", "element haul and charter"),
@@ -170,7 +173,24 @@ fn diplo_help(style: Style) {
     println!();
     row(style, "diplomatic · back · home", "← diplomatic root");
     row(style, "diplo …", "short alias still accepted");
-    row(style, "bench · intel · trade", "peer roots");
+    row(style, "bench · intel · trade · polity", "peer roots");
+}
+
+fn polity_help(style: Style) {
+    banner_line(style, "POLITY — LINE IDENTITY (optional 5th root · vent open)");
+    println!(
+        "  {}",
+        style.dim("Genesis · taxon · mint · AP. No craft twin yet. docs/HUBS.md §polity")
+    );
+    println!();
+    row(style, "polity", "index · live genesis/taxon/AP strip");
+    row(style, "polity genesis", "sealed axes · seal path");
+    row(style, "polity taxon", "class · clade · economy mode · planet fit");
+    row(style, "polity mint", "discovery mint (no free mint)");
+    row(style, "polity ap", "P8.1 shared AP budget board");
+    println!();
+    row(style, "polity · back · home", "← polity root");
+    row(style, "bench · intel · trade · diplomatic", "peer roots");
 }
 
 fn intel_help(style: Style) {

@@ -31,6 +31,8 @@ impl World {
         let (give, want) = (pair.give(), pair.want());
         let give_amount = give_amount.value().clone();
         let want_amount = want_amount.value().clone();
+        // P8.1 — shared AP (quote family).
+        self.require_ap(crate::world::ApKind::Quote)?;
         if self.offers.iter().any(|held| held.offer == offer) {
             return Err(ActionRefused::OfferKnown { offer });
         }

@@ -127,6 +127,8 @@ impl World {
         orb: u64,
         grade: crate::world::survey::ForgeableGrade,
     ) -> Result<(), ActionRefused> {
+        // P8.1 — shared AP (research family).
+        self.require_ap(crate::world::ApKind::Research)?;
         // The grade shape died at the `ForgeableGrade` door
         // (29_CONSTRUCTION): the vocabulary said crystallized or crown,
         // or this call could not be written. Only the facts of this

@@ -72,7 +72,11 @@ fn is_back(word: Option<&str>) -> bool {
 }
 
 fn peers_line(style: &Style) {
-    leaf(style, "bench · intel · trade · diplomatic", "peer roots (diplo = short alias)");
+    leaf(
+        style,
+        "bench · intel · trade · diplomatic · polity",
+        "peer roots (diplo alias · polity optional 5th)",
+    );
 }
 
 fn foot_bench(style: &Style, parent: Option<&str>) {
@@ -234,7 +238,7 @@ fn bench_index(style: &Style) {
     println!("  {}", style.section("MATTER & PLACE"));
     row(style, "bench planetary", "bio · chem · terraform · medium · thermal · balance");
     row(style, "bench build", "zones · yard · refinery · regen");
-    row(style, "bench star", "commission · site · age · rings");
+    row(style, "bench star", "commission · site · age · rings · capacity (C1.7)");
     row(style, "bench estate", "chart · parcels · appraise · ladder");
     row(style, "bench medium", "ATM envelope · reinforce · tamper");
     println!();
@@ -380,6 +384,14 @@ fn star_bench(
         bench_index(style);
         return;
     }
+    // C1.7 — stellar capacity game (lines_of as play).
+    if matches!(
+        w.as_deref(),
+        Some("capacity") | Some("cap") | Some("lines") | Some("depth") | Some("game")
+    ) {
+        stellar_capacity_board(world, style, current);
+        return;
+    }
     if matches!(w.as_deref(), Some("age")) {
         println!(
             "  {}",
@@ -402,10 +414,92 @@ fn star_bench(
             println!("  {}", style.dim("unsited — `site <A> <r>`"));
         }
     }
+    // Capacity strip (always visible).
+    let board = world.stellar_capacity_board(current);
+    println!(
+        "  {} reach {}/{} · open {} · local {} · refine-ready {}",
+        style.section("capacity"),
+        board.reach,
+        board.table_lines,
+        board.open_strata,
+        board.local_veins,
+        board.refinable_now
+    );
+    leaf(style, "bench star capacity", "C1.7 game — lines_of as play");
     leaf(style, "star <class> · site · thermal · rings · sky", "deeds");
     leaf(style, "bench star age", "deep: age_star year voice");
     leaf(style, "terraform", "earned crown");
-    println!("  {}", style.hint("Open: stellar capacity game (C1.7)."));
+    leaf(style, "prospect <stratum> · assay · refine", "open & work veins");
+    foot_bench(style, Some("star"));
+}
+
+/// C1.7 — full stellar capacity board.
+fn stellar_capacity_board(world: &World, style: &Style, current: u64) {
+    let b = world.stellar_capacity_board(current);
+    banner(style, "BENCH › STAR › CAPACITY — lines_of as play");
+    match b.star {
+        Some(c) => println!(
+            "  sun {:?} · reach {} of {} table lines · pressure {}",
+            c,
+            b.reach,
+            b.table_lines,
+            amount(&b.pressure_now)
+        ),
+        None => println!("  {}", style.warn("no sun — commission before capacity plays")),
+    }
+    println!(
+        "  open strata {} · local veins {} · refinable now {} · deepest open {}",
+        b.open_strata, b.local_veins, b.refinable_now, b.deepest_open
+    );
+    println!();
+    println!("  {}", style.section("LINES (star depth)"));
+    for row in &b.lines {
+        let mark = if row.reachable {
+            style.ok("●")
+        } else {
+            style.dim("○")
+        };
+        println!(
+            "  {mark} line {} · pressure {} · veins {} · banked {}",
+            row.line,
+            amount(&row.pressure_at),
+            row.open_veins,
+            row.banked_kinds
+        );
+    }
+    if !b.veins.is_empty() {
+        println!();
+        println!("  {}", style.section("OPEN VEINS"));
+        for v in b.veins.iter().take(16) {
+            let loc = if v.local {
+                style.ok("local")
+            } else {
+                style.warn("deep")
+            };
+            let refn = if v.refines_now {
+                style.ok("refines")
+            } else {
+                style.dim("raw")
+            };
+            println!(
+                "  stratum {} · line {} · {} · {} · {} · richness {}",
+                v.stratum,
+                v.line,
+                loc,
+                refn,
+                style.cargo(&v.name),
+                amount(&v.richness)
+            );
+        }
+        if b.veins.len() > 16 {
+            println!("  {}", style.dim(&format!("… {} more", b.veins.len() - 16)));
+        }
+    }
+    println!();
+    println!("  {} {}", style.section("NEXT"), style.hint(&b.next_move));
+    leaf(style, "prospect <stratum>", "open a depth reading");
+    leaf(style, "assay <prefix> · refine <prefix>", "work local matter");
+    leaf(style, "star <class> · age", "commission / evolve the forge depth");
     foot_bench(style, Some("star"));
 }
 
@@ -2301,4 +2395,212 @@ fn diplo_mesh(world: &World, style: &Style, _current: u64) {
     leaf(style, "council · bond · forward · absorb", "deeds (CLI)");
     leaf(style, "bench diplomatic", "craft path");
     foot_diplomatic(style, Some("mesh"));
+}
+
+// ════════════════════════════════════════════════════════════════════
+// POLITY — optional 5th root (vent open)
+// ════════════════════════════════════════════════════════════════════
+//
+// Genesis · taxon · mint · AP as the LINE identity surface. Not dual-law
+// craft (no `bench polity` yet) — activity root for who you are and what
+// you may become. Deeds stay existing verbs; this hub routes + reads.
+
+fn foot_polity(style: &Style, parent: Option<&str>) {
+    println!();
+    println!("  {}", style.section("↩ BACK-OUT"));
+    leaf(style, "polity", "← POLITY root (optional 5th)");
+    if let Some(p) = parent {
+        leaf(style, &format!("polity {p}"), "← domain");
+    }
+    leaf(style, "back · .. · home", "polity root");
+    peers_line(style);
+    leaf(style, "polity · bench · intel · trade · diplomatic", "five roots (polity optional)");
+}
+
+/// Optional 5th root — line identity (genesis · taxon · mint · AP).
+pub fn polity(
+    world: &mut World,
+    mut words: impl Iterator<Item = String>,
+    style: &Style,
+    current: u64,
+) {
+    let domain = words.next();
+    if is_back(domain.as_deref()) {
+        polity_index(world, style, current);
+        return;
+    }
+    match domain.as_deref() {
+        None | Some("help") | Some("?") | Some("menu") | Some("index") => {
+            polity_index(world, style, current)
+        }
+        Some("genesis") | Some("axes") | Some("civ") => polity_genesis(world, style),
+        Some("taxon") | Some("species") | Some("clade") | Some("imperium") => {
+            polity_taxon(world, style, current)
+        }
+        Some("mint") | Some("discovery") | Some("warrant") => polity_mint(world, style, current),
+        Some("ap") | Some("budget") | Some("action") => polity_ap(world, style),
+        Some("craft") | Some("bench") => {
+            println!(
+                "  {} polity has no craft twin yet — identity is activity-only (vent open)",
+                style.dim("↳")
+            );
+            polity_index(world, style, current);
+        }
+        Some(other) => {
+            println!(
+                "{} unknown polity domain {} — {}",
+                style.bad("✗"),
+                style.verb(other),
+                style.key("polity")
+            );
+            polity_index(world, style, current);
+        }
+    }
+}
+
+fn polity_index(world: &World, style: &Style, current: u64) {
+    banner(style, "POLITY — LINE IDENTITY (optional 5th root · vent open)");
+    println!(
+        "  {}",
+        style.dim(
+            "Who you are. Genesis axes · taxon economy · discovery mint · shared AP. No bench twin yet."
+        )
+    );
+    println!();
+    // Live strip.
+    match world.genesis() {
+        Some(g) => println!(
+            "  {} {} · dis {} · met {} · per {}",
+            style.section("genesis"),
+            style.accent(&g.civilization),
+            g.disposition,
+            g.metabolism,
+            g.perception
+        ),
+        None => println!("  {} {}", style.section("genesis"), style.warn("unsealed — `genesis …`")),
+    }
+    let eco = world.taxon_economy_of(current);
+    println!(
+        "  {} mode {:?} · fit {:?} · flatlander={}",
+        style.section("taxon"),
+        eco.mode,
+        eco.fit,
+        eco.flatlander
+    );
+    let ap = world.ap_board();
+    println!(
+        "  {} {}/{} · habitats {} · {}",
+        style.section("AP"),
+        ap.available,
+        ap.capacity,
+        ap.habitats,
+        style.dim(&format!("window t{}–t{}", ap.window_start, ap.window_end))
+    );
+    println!();
+    row(style, "polity genesis", "seal / read disposition · metabolism · perception");
+    row(style, "polity taxon", "class · clade · economy mode · planet fit");
+    row(style, "polity mint", "discovery mint path (warrant · crystal · no free mint)");
+    row(style, "polity ap", "P8.1 shared action budget board");
+    println!();
+    println!("  {}", style.section("VENT STATUS"));
+    leaf(style, "open", "root CLI + status boards");
+    leaf(style, "deferred", "dual-law `bench polity` · deep deeds · conductor polity root parity");
+    leaf(style, "law", "no free mint · call-not-copy · SEAL B — same as peer roots");
+    foot_polity(style, None);
+}
+
+fn polity_genesis(world: &World, style: &Style) {
+    banner(style, "POLITY › GENESIS — sealed axes");
+    match world.genesis() {
+        Some(g) => {
+            println!("  civilization {}", style.accent(&g.civilization));
+            println!(
+                "  disposition {} · metabolism {} · perception {}",
+                g.disposition, g.metabolism, g.perception
+            );
+            if let Some(axes) = world.civ_axes() {
+                println!(
+                    "  civ_axes dis={} met={} per={}",
+                    axes.disposition, axes.metabolism, axes.perception
+                );
+            }
+        }
+        None => {
+            println!("  {}", style.warn("genesis unsealed"));
+            leaf(style, "genesis <name> <dis> <met> <per>", "seal axes (CLI)");
+        }
+    }
+    leaf(style, "status", "full colony strip");
+    foot_polity(style, Some("genesis"));
+}
+
+fn polity_taxon(world: &World, style: &Style, current: u64) {
+    banner(style, "POLITY › TAXON — class · clade · economy");
+    match world.committed().taxon {
+        Some((class, clade)) => println!(
+            "  sealed class {} · clade {}",
+            style.strong(&class.to_string()),
+            style.strong(&clade.to_string())
+        ),
+        None => println!(
+            "  {}",
+            style.dim("taxon unsealed — flatlander baseline for economy reads")
+        ),
+    }
+    let eco = world.taxon_economy_of(current);
+    println!(
+        "  mode {:?} · planet fit {:?} · flatlander={}",
+        eco.mode, eco.fit, eco.flatlander
+    );
+    println!(
+        "  regenerator tech need {} · extractor soft-cap {}",
+        world.regenerator_tech_need(),
+        world.extractor_soft_cap()
+    );
+    leaf(style, "taxon …", "seal class/clade (CLI — see help taxon)");
+    leaf(style, "docs/37_IMPERIUM_TAXON.md", "imperium words · open clade");
+    foot_polity(style, Some("taxon"));
+}
+
+fn polity_mint(world: &World, style: &Style, current: u64) {
+    banner(style, "POLITY › MINT — discovery (no free mint)");
+    let crystal = world
+        .orb_by_id(current)
+        .or_else(|| world.orb())
+        .map(|o| amount(&o.banked_amount(Resource::Crystal)))
+        .unwrap_or_else(|| "0/1".into());
+    println!("  crystal bank {}", style.money(&crystal));
+    println!(
+        "  {}",
+        style.dim("Discovery mint requires sealed work warrant — never free crystal.")
+    );
+    leaf(style, "mint discovery …", "warranted mint path (CLI)");
+    leaf(style, "stamp mint <amt>", "1:1 crystal→STAMP convert (not discovery)");
+    leaf(style, "polity ap", "AP gates build/prospect/research/quote");
+    foot_polity(style, Some("mint"));
+}
+
+fn polity_ap(world: &World, style: &Style) {
+    banner(style, "POLITY › AP — shared action budget (P8.1)");
+    let b = world.ap_board();
+    println!(
+        "  available {} / capacity {} · spent {} · habitats {}",
+        style.strong(&b.available.to_string()),
+        b.capacity,
+        b.spent,
+        b.habitats
+    );
+    println!(
+        "  window t{}–t{} · now t{}",
+        b.window_start, b.window_end, b.now
+    );
+    println!("  {}", style.hint(&b.next_hint));
+    println!();
+    println!("  {}", style.section("GATED FAMILIES (1 AP each)"));
+    leaf(style, "build", "zone …");
+    leaf(style, "prospect", "prospect <stratum>");
+    leaf(style, "research", "forge instrument · practice adopt");
+    leaf(style, "quote", "offer / post_offer");
+    leaf(style, "refill", "year-voice boundary (60 ticks)");
+    foot_polity(style, Some("ap"));
 }
