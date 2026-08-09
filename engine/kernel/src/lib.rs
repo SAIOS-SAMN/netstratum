@@ -1610,9 +1610,48 @@ fn admitted_deltas(
             non_negative(Resource::Crystal, &fee)?;
             vec![(Resource::Crystal, -fee)]
         }
-        E::ScienceSeated { fee, .. } | E::LabCreated { fee, .. } => {
-            non_negative(Resource::Crystal, fee)?;
-            vec![(Resource::Crystal, -fee.clone())]
+        // LAB: multi-resource bills (local + resonance) — not STAMP.
+        // Re-derive from pure tables; metabolism from sealed genesis.
+        E::ScienceSeated {
+            discipline,
+            rank,
+            fee,
+            ..
+        } => {
+            let met = prior
+                .genesis
+                .as_ref()
+                .map(|g| g.metabolism)
+                .unwrap_or(2);
+            if let Some(d) = cfe::almanac::ScienceDiscipline::from_wire(*discipline) {
+                let mut out = Vec::new();
+                for (r, a) in cfe::almanac::science_seat_bill(d, *rank, met, 1) {
+                    non_negative(r, &a)?;
+                    out.push((r, -a));
+                }
+                out
+            } else {
+                non_negative(Resource::Crystal, fee)?;
+                vec![(Resource::Crystal, -fee.clone())]
+            }
+        }
+        E::LabCreated { path, fee, .. } => {
+            let met = prior
+                .genesis
+                .as_ref()
+                .map(|g| g.metabolism)
+                .unwrap_or(2);
+            if let Some(p) = cfe::almanac::LabPath::from_wire(*path) {
+                let mut out = Vec::new();
+                for (r, a) in cfe::almanac::lab_create_bill(p, met) {
+                    non_negative(r, &a)?;
+                    out.push((r, -a));
+                }
+                out
+            } else {
+                non_negative(Resource::Crystal, fee)?;
+                vec![(Resource::Crystal, -fee.clone())]
+            }
         }
         E::ScienceExploded { resource, slash, .. } => {
             let res = Resource::from_wire(*resource).unwrap_or(Resource::Crystal);

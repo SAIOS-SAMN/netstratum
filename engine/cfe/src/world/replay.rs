@@ -1494,7 +1494,20 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 rank,
                 fee,
             } => {
-                if let Some(held) = peel(&mut orbs, *orb_id) {
+                // Re-derive multi-resource bill (local + resonance) — not STAMP.
+                // Fee field is crystal portion / primary for kernel display.
+                if let Some(d) = crate::almanac::ScienceDiscipline::from_wire(*discipline) {
+                    let met = genesis
+                        .as_ref()
+                        .map(|g| g.metabolism)
+                        .unwrap_or(2);
+                    let bill = crate::almanac::science_seat_bill(d, *rank, met, 1);
+                    if let Some(held) = peel(&mut orbs, *orb_id) {
+                        for (resource, amount) in &bill {
+                            held.bank(*resource, -amount.clone());
+                        }
+                    }
+                } else if let Some(held) = peel(&mut orbs, *orb_id) {
                     held.bank(crate::dop::Resource::Crystal, -fee.clone());
                 }
                 if let Some(slot) = science_seats
@@ -1514,7 +1527,18 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                 hidden_pos,
                 ..
             } => {
-                if let Some(held) = peel(&mut orbs, *orb_id) {
+                if let Some(p) = crate::almanac::LabPath::from_wire(*path) {
+                    let met = genesis
+                        .as_ref()
+                        .map(|g| g.metabolism)
+                        .unwrap_or(2);
+                    let bill = crate::almanac::lab_create_bill(p, met);
+                    if let Some(held) = peel(&mut orbs, *orb_id) {
+                        for (resource, amount) in &bill {
+                            held.bank(*resource, -amount.clone());
+                        }
+                    }
+                } else if let Some(held) = peel(&mut orbs, *orb_id) {
                     held.bank(crate::dop::Resource::Crystal, -fee.clone());
                 }
                 if !*exploded {

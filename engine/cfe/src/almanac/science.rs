@@ -331,7 +331,7 @@ impl ScienceDiscipline {
         }
     }
 
-    /// Seat fee multiplier (× resonator eighth). Derived from wire code — no free dial.
+    /// Seat fee multiplier (× bill base). Derived from wire code — no free dial.
     pub fn seat_weight(self) -> i64 {
         i64::from(self as u8)
     }
@@ -340,6 +340,180 @@ impl ScienceDiscipline {
     pub fn max_rank(self) -> u8 {
         2
     }
+
+    /// **Advanced** disciplines — R2 (and their create paths) need
+    /// off-planet resourcing evidence (crossed / element route / route).
+    pub fn is_advanced(self) -> bool {
+        matches!(
+            self,
+            Self::Synthetic | Self::Clone | Self::Skin
+        )
+    }
+}
+
+/// How a bench component is paid — **not all monetary**.
+///
+/// - **Local resource** — iron / biomass / alloy / diamond from banks
+/// - **Resonance** — crystal (scanner/knowledge fee; NOT STAMP unit-of-account)
+/// - **Off-planet** — advanced tech requires aperture/route evidence first
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CraftCostClass {
+    /// Colony bank resources (zone-style).
+    LocalResource,
+    /// Crystal resonance fee (knowledge / instruments) — not STAMP.
+    Resonance,
+    /// Needs off-world resourcing gate (crossed, element route, or route).
+    OffPlanet,
+}
+
+impl CraftCostClass {
+    pub fn word(self) -> &'static str {
+        match self {
+            Self::LocalResource => "local-resource",
+            Self::Resonance => "resonance",
+            Self::OffPlanet => "off-planet",
+        }
+    }
+}
+
+/// Resonator eighth — shared grain for resonance fees.
+fn eighth() -> crate::ratio::Ratio {
+    crate::ratio::ratio(1, 8)
+}
+
+/// **SCIENCE SEAT BILL** — resource-specific, metabolism-coloured.
+///
+/// Not STAMP. Crystal appears only as resonance (math/research/synth face),
+/// or as plasmic primary when that is the sealed food line.
+///
+/// Returns ordered spends; caller debits each. Pure.
+pub fn science_seat_bill(
+    discipline: ScienceDiscipline,
+    rank: u8,
+    metabolism: u8,
+    affinity_mult: i64,
+) -> Vec<(crate::dop::Resource, crate::ratio::Ratio)> {
+    use crate::dop::Resource;
+    use crate::ratio::ratio;
+    use ScienceDiscipline::*;
+    let r = i64::from(rank.max(1));
+    let w = discipline.seat_weight();
+    let scale = eighth() * ratio(w, 1) * ratio(r, 1) * ratio(affinity_mult.max(1), 1);
+    // Primary local resource by discipline × metabolism.
+    let primary = match discipline {
+        Chem => match metabolism {
+            1 => Resource::Iron,     // mineral chem is pressure/metal work
+            3 => Resource::Crystal,  // plasmic chem rides resonance
+            _ => Resource::Biomass,  // biotic chem
+        },
+        Biology | Clone => Resource::Biomass,
+        Physics => Resource::Iron,
+        Math | Research => Resource::Crystal, // exact books / forge — resonance
+        Synthetic => Resource::Alloy,         // cybernetic graft body
+        Skin => match metabolism {
+            1 => Resource::Iron,
+            3 => Resource::Crystal,
+            _ => Resource::Biomass,
+        },
+    };
+    let mut bill = vec![(primary, scale.clone())];
+    // R2 advanced: add diamond grain (off-world refined tier signal) for synth/skin.
+    if rank >= 2 && matches!(discipline, Synthetic | Skin) {
+        bill.push((Resource::Diamond, eighth() * ratio(r, 1)));
+    }
+    // R2 clone: extra crystal resonance for identity work.
+    if rank >= 2 && matches!(discipline, Clone) {
+        bill.push((Resource::Crystal, eighth() * ratio(r, 1)));
+    }
+    bill
+}
+
+/// Crystal portion of a bill (for receipts that carry a single Ratio fee).
+pub fn bill_crystal_portion(
+    bill: &[(crate::dop::Resource, crate::ratio::Ratio)],
+) -> crate::ratio::Ratio {
+    use crate::dop::Resource;
+    bill.iter()
+        .filter(|(r, _)| *r == Resource::Crystal)
+        .fold(crate::ratio::ratio(0, 1), |acc, (_, a)| acc + a.clone())
+}
+
+/// Lab create toll — path-specific resources (not STAMP).
+pub fn lab_create_bill(
+    path: LabPath,
+    metabolism: u8,
+) -> Vec<(crate::dop::Resource, crate::ratio::Ratio)> {
+    use crate::dop::Resource;
+    use crate::ratio::ratio;
+    let e = eighth();
+    match path {
+        LabPath::ChemWork => {
+            let r = match metabolism {
+                1 => Resource::Iron,
+                3 => Resource::Crystal,
+                _ => Resource::Biomass,
+            };
+            vec![(r, e.clone()), (Resource::Crystal, e)] // local + resonance catalog grain
+        }
+        LabPath::BioChem => {
+            vec![
+                (Resource::Biomass, e.clone() + e.clone()),
+                (Resource::Crystal, e),
+            ]
+        }
+        LabPath::SynthMod => {
+            vec![
+                (Resource::Alloy, e.clone() + e.clone()),
+                (Resource::Crystal, e.clone()),
+                (Resource::Diamond, e),
+            ]
+        }
+        LabPath::CloneWork => {
+            vec![
+                (Resource::Biomass, e.clone() + e.clone() + e.clone()),
+                (Resource::Crystal, e),
+            ]
+        }
+        LabPath::SkinWork => {
+            vec![
+                (Resource::Biomass, e.clone()),
+                (Resource::Crystal, e.clone() + e.clone()),
+            ]
+        }
+    }
+}
+
+/// R2 on advanced disciplines needs off-planet resourcing.
+pub fn seat_requires_off_planet(discipline: ScienceDiscipline, rank: u8) -> bool {
+    rank >= 2 && discipline.is_advanced()
+}
+
+/// Lab create paths that need off-planet evidence.
+pub fn lab_requires_off_planet(path: LabPath) -> bool {
+    matches!(
+        path,
+        LabPath::SynthMod | LabPath::CloneWork | LabPath::SkinWork
+    )
+}
+
+/// Cost-class tags for UI.
+pub fn science_seat_cost_classes(
+    discipline: ScienceDiscipline,
+    rank: u8,
+) -> Vec<CraftCostClass> {
+    use ScienceDiscipline::*;
+    let mut v = match discipline {
+        Math | Research => vec![CraftCostClass::Resonance],
+        Chem | Synthetic | Skin => vec![
+            CraftCostClass::LocalResource,
+            CraftCostClass::Resonance,
+        ],
+        Biology | Physics | Clone => vec![CraftCostClass::LocalResource],
+    };
+    if seat_requires_off_planet(discipline, rank) {
+        v.push(CraftCostClass::OffPlanet);
+    }
+    v
 }
 
 /// Lab creation path — what you *make* once seats are paid.

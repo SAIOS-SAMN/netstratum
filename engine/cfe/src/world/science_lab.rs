@@ -6,7 +6,8 @@
 
 use super::*;
 use crate::almanac::{
-    lab_pole_card, science_seat_affinity, science_seat_fee_for, ExplosionKind, LabPath,
+    bill_crystal_portion, lab_create_bill, lab_pole_card, lab_requires_off_planet,
+    science_seat_affinity, science_seat_bill, seat_requires_off_planet, ExplosionKind, LabPath,
     LabPoleCard, ScienceDiscipline, SeatAffinity,
 };
 use crate::dop::{Resource, ZoneKind};
@@ -43,6 +44,52 @@ impl World {
             site.orbit_r.value(),
         );
         Some(crate::almanac::region_of(&t))
+    }
+
+    /// Off-planet resourcing evidence for advanced bench tech.
+    ///
+    /// True if the line has crossed the void, holds an element route,
+    /// or holds any ROUTE-1 deal (aperture-capable resourcing path).
+    pub fn off_planet_ready(&self) -> bool {
+        self.has_crossed()
+            || !self.element_routes.is_empty()
+            || !self.routes.is_empty()
+    }
+
+    fn require_off_planet(&self, kind: u8) -> Result<(), ActionRefused> {
+        if self.off_planet_ready() {
+            Ok(())
+        } else {
+            Err(ActionRefused::OffPlanetResourceRequired { kind })
+        }
+    }
+
+    /// Debit a multi-resource bill; pure refuse if any line short.
+    fn afford_bill(
+        &self,
+        orb: u64,
+        bill: &[(Resource, crate::ratio::Ratio)],
+    ) -> Result<(), ActionRefused> {
+        let held = peek(&self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
+        for (resource, need) in bill {
+            let have = held.banked_amount(*resource);
+            if have < *need {
+                return Err(ActionRefused::CannotAfford {
+                    resource: *resource,
+                    need: Box::new(need.clone()),
+                    have: Box::new(have),
+                });
+            }
+        }
+        Ok(())
+    }
+
+    fn pay_bill(&mut self, orb: u64, bill: &[(Resource, crate::ratio::Ratio)]) {
+        if let Some(held) = peel(&mut self.orbs, orb) {
+            for (resource, amount) in bill {
+                held.bank(*resource, -amount.clone());
+            }
+        }
     }
 
     /// Rank of a science seat on an orb (0 = unseated).
@@ -156,29 +203,29 @@ impl World {
             });
         }
         let next_rank = have.saturating_add(1);
+        // Advanced R2: off-planet resourcing required (not payable in local STAMP).
+        if seat_requires_off_planet(discipline, next_rank) {
+            self.require_off_planet(1)?;
+        }
         let met = self.civ_axes().map(|a| a.metabolism).unwrap_or(2);
         let clade = self.taxon.map(|(_, c)| c);
-        // World resonator eighth × pure affinity law (metabolism-coloured).
-        let eighth = ZoneKind::Resonator.yield_per_tick().1;
-        let weight = discipline.seat_weight();
         let mut aff = science_seat_affinity(met, discipline, clade).fee_mult();
-        // Research coloured by economic mode (extractive pays more for intel path).
         if matches!(discipline, ScienceDiscipline::Research) {
             aff *= crate::almanac::research_affinity_mult(self.taxon_economy_of(orb).mode);
         }
-        let fee = eighth * ratio(weight, 1) * ratio(i64::from(next_rank), 1) * ratio(aff, 1);
-        let _law = science_seat_fee_for(discipline, next_rank, met, clade);
-        let held = peek(&self.orbs, orb).expect("checked");
-        let have_c = held.banked_amount(Resource::Crystal);
-        if have_c < fee {
-            return Err(ActionRefused::CannotAfford {
-                resource: Resource::Crystal,
-                need: Box::new(fee),
-                have: Box::new(have_c),
-            });
-        }
-        let held = peel(&mut self.orbs, orb).expect("checked");
-        held.bank(Resource::Crystal, -fee.clone());
+        // Resource-specific bill (local + resonance) — not unit-of-account STAMP.
+        let bill = science_seat_bill(discipline, next_rank, met, aff);
+        self.afford_bill(orb, &bill)?;
+        self.pay_bill(orb, &bill);
+        let fee = bill_crystal_portion(&bill); // receipt displays crystal portion (may be 0)
+        // If no crystal, still carry a non-zero ratio for kernel: first line amount.
+        let fee = if fee > ratio(0, 1) {
+            fee
+        } else {
+            bill.first()
+                .map(|(_, a)| a.clone())
+                .unwrap_or_else(|| ratio(0, 1))
+        };
         self.set_science_seat(orb, discipline, next_rank);
         self.close(
             ClosureEvent::ScienceSeated {
@@ -276,22 +323,25 @@ impl World {
         // Creation paths need rank ≥ 2 on the primary discipline.
         let primary = path.required_seats()[0];
         self.require_science_seat(orb, primary, 2)?;
-
-        let card = self.lab_preview(orb, path);
-        let fee = ZoneKind::Resonator.yield_per_tick().1; // known-negative crystal toll
-        let held = peek(&self.orbs, orb).expect("checked");
-        let have = held.banked_amount(Resource::Crystal);
-        if have < fee {
-            return Err(ActionRefused::CannotAfford {
-                resource: Resource::Crystal,
-                need: Box::new(fee.clone()),
-                have: Box::new(have),
-            });
+        // Advanced create paths need off-planet resourcing (aperture/routes).
+        if lab_requires_off_planet(path) {
+            self.require_off_planet(2)?;
         }
 
-        // Known negative: always pay crystal fee.
-        let held = peel(&mut self.orbs, orb).expect("checked");
-        held.bank(Resource::Crystal, -fee.clone());
+        let card = self.lab_preview(orb, path);
+        let met = self.civ_axes().map(|a| a.metabolism).unwrap_or(2);
+        let bill = lab_create_bill(path, met);
+        self.afford_bill(orb, &bill)?;
+        // Known negative: pay resource bill (local + resonance; not STAMP).
+        self.pay_bill(orb, &bill);
+        let fee = bill_crystal_portion(&bill);
+        let fee = if fee > ratio(0, 1) {
+            fee
+        } else {
+            bill.first()
+                .map(|(_, a)| a.clone())
+                .unwrap_or_else(|| ratio(0, 1))
+        };
 
         let exploded = card.will_explode;
         let kind = path.explosion_kind();

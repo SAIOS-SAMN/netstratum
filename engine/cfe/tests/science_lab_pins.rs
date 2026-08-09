@@ -16,28 +16,26 @@ fn founded() -> World {
     w.site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None)
         .expect("site");
     w.zone(0, ZoneKind::Extractor).expect("z");
-    // Crystal for seats + create fees.
+    // Resource banks for resource-specific seat bills (not STAMP).
     let stamp = w.now();
-    w.chronicle_mut().append(
-        cfe::dop::ClosureEvent::DiscoveryMinted {
-            orb_id: FIRST_ORB,
-            resource: cfe::dop::Resource::Crystal,
-            amount: ratio(50, 1),
-            work: vec![7u8; 32],
-        },
-        stamp,
-        vec![cfe::world::SOVEREIGN],
-    );
-    w.chronicle_mut().append(
-        cfe::dop::ClosureEvent::DiscoveryMinted {
-            orb_id: FIRST_ORB,
-            resource: cfe::dop::Resource::Biomass,
-            amount: ratio(20, 1),
-            work: vec![8u8; 32],
-        },
-        stamp,
-        vec![cfe::world::SOVEREIGN],
-    );
+    for (res, amt, work) in [
+        (cfe::dop::Resource::Crystal, ratio(50, 1), 7u8),
+        (cfe::dop::Resource::Biomass, ratio(40, 1), 8u8),
+        (cfe::dop::Resource::Iron, ratio(40, 1), 9u8),
+        (cfe::dop::Resource::Alloy, ratio(20, 1), 10u8),
+        (cfe::dop::Resource::Diamond, ratio(10, 1), 11u8),
+    ] {
+        w.chronicle_mut().append(
+            cfe::dop::ClosureEvent::DiscoveryMinted {
+                orb_id: FIRST_ORB,
+                resource: res,
+                amount: amt,
+                work: vec![work; 32],
+            },
+            stamp,
+            vec![cfe::world::SOVEREIGN],
+        );
+    }
     World::resume(w.chronicle().clone())
 }
 
@@ -124,6 +122,18 @@ fn dual_poles_known_always_hidden_conditional() {
 #[test]
 fn seat_and_create_clone_seal_b() {
     let mut w = founded();
+    // Biomass for biology/clone bills; off-planet via a stub route deal.
+    let stamp = w.now();
+    w.chronicle_mut().append(
+        cfe::dop::ClosureEvent::RouteChartered {
+            deal: 1,
+            eta: cfe::dop::unit(1, 2),
+        },
+        stamp,
+        vec![cfe::world::SOVEREIGN],
+    );
+    w = World::resume(w.chronicle().clone());
+    assert!(w.off_planet_ready(), "route counts as off-planet resourcing");
     w.seat_science(FIRST_ORB, ScienceDiscipline::Biology)
         .expect("bio r1");
     w.seat_science(FIRST_ORB, ScienceDiscipline::Biology)
@@ -133,7 +143,6 @@ fn seat_and_create_clone_seal_b() {
     w.seat_science(FIRST_ORB, ScienceDiscipline::Clone)
         .expect("clone r2");
     assert_eq!(w.science_rank(FIRST_ORB, ScienceDiscipline::Clone), 2);
-    // Create may explode under thin crystal after seat fees — either path is lawful.
     let r = w.lab_create(FIRST_ORB, LabPath::CloneWork);
     match r {
         Ok(res) => {
@@ -146,6 +155,42 @@ fn seat_and_create_clone_seal_b() {
         Err(e) => panic!("create refused: {e:?}"),
     }
     assert_eq!(replay(w.chronicle()), w.committed(), "SEAL B science lab");
+}
+
+#[test]
+fn advanced_r2_refuses_without_off_planet() {
+    let mut w = founded();
+    w.seat_science(FIRST_ORB, ScienceDiscipline::Clone)
+        .expect("clone r1 is local");
+    match w.seat_science(FIRST_ORB, ScienceDiscipline::Clone) {
+        Err(ActionRefused::OffPlanetResourceRequired { .. }) => {}
+        other => panic!("expected off-planet gate, got {other:?}"),
+    }
+}
+
+#[test]
+fn seat_bills_are_resource_specific_not_stamp() {
+    use cfe::almanac::science_seat_bill;
+    use cfe::dop::Resource;
+    let chem_bio = science_seat_bill(ScienceDiscipline::Chem, 1, 2, 1);
+    assert!(
+        chem_bio.iter().any(|(r, _)| *r == Resource::Biomass),
+        "biotic chem seat spends biomass: {chem_bio:?}"
+    );
+    let math = science_seat_bill(ScienceDiscipline::Math, 1, 2, 1);
+    assert!(
+        math.iter().all(|(r, _)| *r == Resource::Crystal),
+        "math is resonance crystal, not STAMP: {math:?}"
+    );
+    let synth = science_seat_bill(ScienceDiscipline::Synthetic, 2, 2, 1);
+    assert!(
+        synth.iter().any(|(r, _)| *r == Resource::Alloy),
+        "synth R2 spends alloy: {synth:?}"
+    );
+    assert!(
+        synth.iter().any(|(r, _)| *r == Resource::Diamond),
+        "synth R2 spends diamond: {synth:?}"
+    );
 }
 
 #[test]

@@ -32,11 +32,12 @@ pub use compound::{compounds, gem_of, knowledge_of, recipe_of, Compoundable};
 pub use locality::{lines_of, local_to, pressure, refines, workable_in};
 pub use periodic::{periodic_of, Periodic, CELLS, LANES, LINES, PHASES, SHELLS, SPINS};
 pub use science::{
-    dark_utility, explodes, explosion_risk, explosion_threshold, isomorphic, iso_union_knowledge,
-    iso_union_product, iso_union_recipe, lab_pole_card, net_utility, reveals_hidden_negative,
-    reveals_hidden_positive, science_seat_affinity, science_seat_fee, science_seat_fee_for,
-    survival_utility, CivAxes, DarkPull, ExplosionKind, LabPath, LabPoleCard, ScienceDiscipline,
-    SeatAffinity,
+    bill_crystal_portion, dark_utility, explodes, explosion_risk, explosion_threshold, isomorphic,
+    iso_union_knowledge, iso_union_product, iso_union_recipe, lab_create_bill, lab_pole_card,
+    lab_requires_off_planet, net_utility, reveals_hidden_negative, reveals_hidden_positive,
+    science_seat_affinity, science_seat_bill, science_seat_cost_classes, science_seat_fee,
+    science_seat_fee_for, seat_requires_off_planet, survival_utility, CivAxes, CraftCostClass,
+    DarkPull, ExplosionKind, LabPath, LabPoleCard, ScienceDiscipline, SeatAffinity,
 };
 pub use taxon_economy::{
     clade_preferred_region, economic_mode, extract_yield_scale, extractor_soft_cap,

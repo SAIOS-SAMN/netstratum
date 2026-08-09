@@ -7225,6 +7225,9 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
         ActionRefused::EconomicModeBlocked { mode, kind, reason } => format!(
             "taxon economy blocks zone kind {kind} under mode {mode} (reason {reason}) — regenerative lines on hostile worlds cannot over-extract; see docs/37_IMPERIUM_TAXON.md"
         ),
+        ActionRefused::OffPlanetResourceRequired { kind } => format!(
+            "advanced tech needs off-planet resourcing (kind {kind}) — cross the void, charter an element route, or hold a ROUTE-1 deal before synth/clone/skin R2; not payable in STAMP alone"
+        ),
         ActionRefused::BalanceEntropyDominates {
             balance,
             syntropy,

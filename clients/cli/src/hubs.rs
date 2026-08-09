@@ -873,8 +873,18 @@ fn science_index(
             );
             println!(
                 "  {}",
-                style.dim("Fees colour by your line — plasmiform ≠ flatlander (docs/37_IMPERIUM_TAXON.md).")
+                style.dim(
+                    "Costs: local resources · resonance (crystal, not STAMP) · off-planet for advanced R2. Taxon colours affinity."
+                )
             );
+            if world.off_planet_ready() {
+                println!("  {}", style.ok("off-planet resourcing: ready (crossed/route/element route)"));
+            } else {
+                println!(
+                    "  {}",
+                    style.warn("off-planet resourcing: locked — need aperture/route before synth·clone·skin R2")
+                );
+            }
             println!();
             println!("  {}", style.section("DISCIPLINE SEATS (affinity · fee)"));
             for (d, rank, fee, aff) in &board.seats {

@@ -33,17 +33,30 @@ Cross-links from activity roots: `intel craft` / `trade craft` / `diplomatic cra
 
 ## 1. Science craft — **seated labs** (paid unlocks · dual ± · explosion)
 
-Not activity roots — **paid capability seats** under bench. No free science.
+Not activity roots — **capability seats** under bench. No free science.
+
+### Cost classes (not all monetary)
+
+Bench craft is **not** paid in STAMP unit-of-account by default. Three classes:
+
+| Class | What | Examples |
+|-------|------|----------|
+| **Local resource** | Colony banks — iron, biomass, alloy, diamond | zones · chem/bio/physics seats · hull scrap |
+| **Resonance** | Crystal (scanner/knowledge grain — **not STAMP**) | math/research seats · catalog grain · instrument path |
+| **Off-planet** | Requires *resourcing path*, not a price tag | synth / clone / skin **R2** + their create paths |
+
+Off-planet evidence (any one): `has_crossed` · non-empty element routes · non-empty ROUTE-1 deals.  
+Advanced tech is **gated** until that evidence exists — you cannot buy synth R2 with local STAMP alone.
 
 ### Seating law
 
 | Rank | Meaning |
 |------|---------|
 | 0 | unseated — read-only craft surface |
-| 1 | basic acts (catalog / iso / domain craft) |
-| 2 | **creation** paths with dual ± outcomes + explosion risk |
+| 1 | basic acts (catalog / iso / domain craft) — local/resonance bill |
+| 2 | **creation** paths; advanced disciplines need **off-planet** first |
 
-Fee: resonator eighth × discipline weight × rank (exact rational, no dial).
+Bill: resource-specific × discipline × rank × taxon affinity (exact rational, no dial).
 
 ```text
 bench science seat <chem|biology|physics|math|research|synthetic|clone|skin>
