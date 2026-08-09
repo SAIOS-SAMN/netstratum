@@ -20,7 +20,7 @@ Workspace **clean** on `main` after Wave-8 / polity dual-law land.
 | Codec | **SCHEMA_V17** |
 | Class / clade | **13** / **345** (u16 open) |
 | CLI roots | bench · intel · trade · diplomatic · **polity** (dual law all five) |
-| **Authority** | **`chronicle.tlv` + `state.tlv`** — JSON is display-only (`docs/JSON_DISPLAY_ONLY.md`) |
+| **Authority** | **`chronicle.tlv` + `state.tlv`** · cards **`.civ` / `.card` / `.dir` / `.sol`** — no JSON law (`docs/JSON_DISPLAY_ONLY.md`) |
 
 ### What landed this session arc (newest first)
 
@@ -850,16 +850,17 @@ SYMBOLS, which do not drift. Cite a symbol or a law, never a line.
 
 | Debt | Status (2026-08-09) |
 |------|---------------------|
-| CLI `data_field` / `state.json` scrapes | **CLOSED** — chronicle.tlv resume; operator plain profiles |
-| Famine substring on state.json | **CLOSED** — World::resume from tlv |
-| `conductor_founded` via registry+state.json | **CLOSED** — MESH pen / spine |
-| Operator `*.json` profiles | **CLOSED** — plain `var/operators/<name>` |
-| Observer banks from state.json | **CLOSED** — state.tlv only material rows |
-| Scribe divergence on jsonl only | **CLOSED** — prefer chronicle.tlv digests |
-| `civ new` → polities.json splice | **OPEN** — conductor-owned roster (not colony banks) |
-| Registry JSON as identity cache | **OPEN** — G1 genesis on chain is binding where sealed |
-| Starchart.json topology | **OPEN** — coordinates only; not balances |
-| Journal wall rebuild from jsonl | **OPEN** — display path; not SEAL B |
+| CLI `data_field` / `state.json` scrapes | **CLOSED** |
+| Famine substring on state.json | **CLOSED** |
+| Operator `*.json` profiles | **CLOSED** — plain text |
+| Observer banks from state.json | **CLOSED** — state.tlv only |
+| Registry cards | **CLOSED** — `.civ` TLV (+ migrate-on-read) |
+| Universe / starchart / galaxies | **CLOSED** — `*.card` TLV |
+| Steward directives | **CLOSED** — `*.dir` TLV |
+| Solves | **CLOSED** — `*.sol` TLV |
+| Scribe colony JSON writes | **CLOSED** — no state.json/world.json/jsonl |
+| Journal wall (journal.jsonl) | **OPEN** — display feed only; not SEAL B |
+| `civ new` polities roster | **OPEN** — conductor path (not colony banks) |
 - ~~`tools/observer.py:273` — `consumed` is accumulated by splitting the
   chronicle's `detail` display string, violating that file's own
   no-grepping law at line 11, and it feeds the INTELLIGENCE ratio.~~

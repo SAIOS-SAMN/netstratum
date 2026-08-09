@@ -19,31 +19,29 @@
 //! **The display half MOVED (the #37 inversion): the writers —
 //! record, record_solve, the journals, the wall — live in `scribe`,
 //! ABOVE the lens. This crate is ledger-LAW in fact: it imports no
-//! lens, renders no display, and the shared JSON pen (`pen::JsonWriter`)
-//! writes only the Tier-A law cards (universe, starchart, registry,
-//! galaxy, fiber).**
+//! lens. Law cards use binary TLV ([`card`]), never JSON.**
 //!
 //! **THE UPLINK LAW (mesh authenticity):** nothing in this crate ever
 //! rides the mesh. Only chain-verified bytes ascend — `chronicle.tlv`
 //! today, arbor commitments at #15. Exports are for eyes; ledger
 //! files are debts awaiting adoption; the mesh carries neither.
 //!
-//! Layout under `var/`: `registry/<civ>.json` (identity),
-//! `worlds/<world>/world.json` (the card), `chronicle.jsonl` (display
-//! stream), `planets/<planet>/state.json` + `state.tlv` (snapshots),
-//! `inbox/` (the steward door), `solves/` (proof-of-solution
-//! certificates). The chronicle in memory is the world; nothing ever
-//! reads a snapshot back into a world — replay grounds worlds.
+//! Layout under `var/`: `registry/<civ>.civ` (identity TLV),
+//! `worlds/universe.card` · `starchart.card` · `galaxies.card`,
+//! `worlds/<world>/world.card`, `chronicle.tlv` (authority),
+//! `planets/<planet>/state.tlv` (machine mirror), `inbox/*.dir`
+//! (steward directives TLV), `solves/*.sol` (certificates TLV).
+//! See `docs/JSON_DISPLAY_ONLY.md`.
 
 use cfe::ratio::Ratio;
 use std::fs;
 use std::path::PathBuf;
 
+pub mod card;
 pub mod converge;
 pub mod galaxy;
 pub mod extract;
 pub mod registry;
-use pen::JsonWriter;
 pub(crate) use cfe::ratio::ratio_str;
 
 /// THE UNIVERSAL CLOCK RENDERING — T of TUniversal{S, G, T} as the
@@ -115,6 +113,7 @@ impl Ledger {
 
     /// Read pending directives, inbox-name ascending (the steward
     /// numbers them; order is the steward's stated order).
+    /// Carriers: `*.dir` TLV (preferred). Legacy `*.json` one-shot migrate.
     pub fn pending_directives(&self, world: &str) -> std::io::Result<Vec<PendingDirective>> {
         let inbox = self.world_dir(world).join("inbox");
         if !inbox.exists() {
@@ -122,12 +121,34 @@ impl Ledger {
         }
         let mut paths: Vec<PathBuf> = fs::read_dir(&inbox)?
             .filter_map(|e| e.ok().map(|e| e.path()))
-            .filter(|p| p.is_file() && p.extension().is_some_and(|x| x == "json"))
+            .filter(|p| {
+                p.is_file()
+                    && p.extension()
+                        .is_some_and(|x| x == "dir" || x == "json")
+            })
             .collect();
         paths.sort();
         let mut out = Vec::new();
         for path in paths {
-            if let Some(directive) = parse_directive(&fs::read_to_string(&path)?) {
+            let directive = if path.extension().is_some_and(|x| x == "dir") {
+                parse_directive_tlv(&fs::read(&path)?)
+            } else {
+                // Legacy JSON → rewrite as .dir and drop JSON.
+                let text = fs::read_to_string(&path)?;
+                let d = parse_directive_legacy_json(&text);
+                if let Some(ref dir) = d {
+                    let tlv_path = path.with_extension("dir");
+                    let _ = write_directive_tlv(&tlv_path, dir);
+                    let _ = fs::remove_file(&path);
+                    out.push(PendingDirective {
+                        path: tlv_path,
+                        directive: dir.clone(),
+                    });
+                    continue;
+                }
+                d
+            };
+            if let Some(directive) = directive {
                 out.push(PendingDirective { path, directive });
             }
         }
@@ -164,14 +185,39 @@ impl Ledger {
     /// NO SQUARING: we do not square circles in a toroid; L2 would
     /// collapse the geometry the residual carries.
     ///
-    /// The span (default 64) reads from `<root>/universe.json`,
-    /// written on first chart.
+    /// The span (default 64) reads from `<root>/universe.card` (TLV).
     pub fn universe_span(&self) -> Ratio {
-        fs::read_to_string(self.root.join("universe.json"))
-            .ok()
-            .and_then(|text| extract::extract_string(&text, "span"))
-            .and_then(|s| parse_ratio(&s))
+        self.read_universe_span()
             .unwrap_or_else(|| Ratio::from(num_bigint::BigInt::from(64)))
+    }
+
+    fn universe_card_path(&self) -> PathBuf {
+        self.root.join("universe.card")
+    }
+
+    fn starchart_path(&self) -> PathBuf {
+        self.root.join("starchart.card")
+    }
+
+    fn read_universe_span(&self) -> Option<Ratio> {
+        let data = card::read(&self.universe_card_path())
+            .or_else(|| {
+                // One-shot migrate from legacy universe.json
+                let text = fs::read_to_string(self.root.join("universe.json")).ok()?;
+                let span = extract::extract_string(&text, "span")?;
+                let ticks = extract::extract_string(&text, "ticks")
+                    .and_then(|t| t.parse().ok())
+                    .unwrap_or(0u64);
+                let _ = self.write_universe_card_inner(&span, ticks);
+                let _ = fs::remove_file(self.root.join("universe.json"));
+                card::read(&self.universe_card_path())
+            })?;
+        for (tag, value) in card::records(&data) {
+            if tag == card::uni::SPAN {
+                return card::str_of(value).and_then(|s| parse_ratio(&s));
+            }
+        }
+        None
     }
 
     /// THE UNIVERSAL CLOCK — T of TUniversal{S, G, T}: a six-field
@@ -185,42 +231,31 @@ impl Ledger {
     }
 
     fn write_universe_card(&self, ticks: u64) -> std::io::Result<()> {
-        // THE SPAN IS CARRIED FORWARD, NOT RE-ASSERTED. This card is
-        // rewritten on EVERY clock advance (`set_universal_clock`, once
-        // per beat), and `universe_span` reads this same field as the
-        // authority — `chart_world` wraps every coordinate against it
-        // and `l1_distance` measures with it. A hard-coded "64" here
-        // therefore restored the default geometry one tick after anyone
-        // set another, silently, while the reader kept treating the
-        // field as truth. The first write seeds the default; every
-        // rewrite preserves what stands, verbatim — a value this
-        // function cannot parse is still not this function's to
-        // rewrite.
-        let span = fs::read_to_string(self.root.join("universe.json"))
-            .ok()
-            .and_then(|text| extract::extract_string(&text, "span"))
+        // Span carried forward — never re-asserted as a hard-coded 64.
+        let span = self
+            .read_universe_span()
+            .map(|s| ratio_str(&s))
             .unwrap_or_else(|| "64".into());
-        let mut w = JsonWriter::new();
-        w.open();
-        w.field_str("topology", "torus");
-        w.field_str("span", &span);
-        w.field_str("tuniversal", &universal_clock(ticks));
-        w.field_u64("ticks", ticks);
-        w.field_str(
-            "fiber",
+        self.write_universe_card_inner(&span, ticks)
+    }
+
+    fn write_universe_card_inner(&self, span: &str, ticks: u64) -> std::io::Result<()> {
+        let mut out = Vec::new();
+        card::put_str(card::uni::TOPOLOGY, "torus", &mut out);
+        card::put_str(card::uni::SPAN, span, &mut out);
+        card::put_str(card::uni::TUNIVERSAL, &universal_clock(ticks), &mut out);
+        card::put_u64(card::uni::TICKS, ticks, &mut out);
+        card::put_str(
+            card::uni::FIBER,
             "polynomial (physics::AxisVector grades; minted dimensions grow it)",
+            &mut out,
         );
-        w.close();
-        let tmp = self.root.join("universe.json.tmp");
-        fs::write(&tmp, w.finish())?;
-        fs::rename(&tmp, self.root.join("universe.json"))
+        card::write_atomic(&self.universe_card_path(), &out)
     }
 
     /// Chart a world onto the star-chart: exact-rational coordinates in
-    /// `<root>/starchart.json` (merge-on-write; charting the same
-    /// world again moves it — the chart is a card, the chronicle is
-    /// the truth). Spatial coordinates WRAP onto the 3-torus: mod
-    /// span, exactly; `g` is the gauge phase (fiber coordinate).
+    /// `<root>/starchart.card` (TLV merge-on-write). Spatial coordinates
+    /// WRAP onto the 3-torus; `g` is the gauge phase.
     pub fn chart_world(
         &self,
         world: &str,
@@ -228,28 +263,15 @@ impl Ledger {
         g: &Ratio,
     ) -> std::io::Result<()> {
         fs::create_dir_all(&self.root)?;
-        // The universe card, written once (the clock rewrites it).
-        if !self.root.join("universe.json").exists() {
+        if !self.universe_card_path().exists() && !self.root.join("universe.json").exists() {
             self.write_universe_card(0)?;
+        } else if !self.universe_card_path().exists() {
+            let _ = self.read_universe_span(); // migrate
         }
         let span = self.universe_span();
         let wrap = |v: &Ratio| -> Ratio { v - (v / &span).floor() * &span };
         let (x, y, z) = (wrap(s.0), wrap(s.1), wrap(s.2));
-        let path = self.root.join("starchart.json");
-        let mut entries: Vec<(String, [String; 4])> = Vec::new();
-        if let Ok(text) = fs::read_to_string(&path) {
-            for line in text.lines() {
-                if let (Some(name), Some(px), Some(py)) = (
-                    extract::extract_string(line, "world"),
-                    extract::extract_string(line, "x"),
-                    extract::extract_string(line, "y"),
-                ) {
-                    let pz = extract::extract_string(line, "z").unwrap_or_else(|| "0".into());
-                    let pg = extract::extract_string(line, "g").unwrap_or_else(|| "0".into());
-                    entries.push((name, [px, py, pz, pg]));
-                }
-            }
-        }
+        let mut entries = self.load_starchart_entries();
         let slug = sanitize(world);
         entries.retain(|(name, _)| name != &slug);
         entries.push((
@@ -257,37 +279,64 @@ impl Ledger {
             [ratio_str(&x), ratio_str(&y), ratio_str(&z), ratio_str(g)],
         ));
         entries.sort();
-        let mut out = String::new();
-        for (name, [px, py, pz, pg]) in &entries {
-            let mut w = JsonWriter::new();
-            w.open();
-            w.field_str("world", name);
-            w.field_str("x", px);
-            w.field_str("y", py);
-            w.field_str("z", pz);
-            w.field_str("g", pg);
-            w.close();
-            out.push_str(&w.finish());
-            out.push('\n');
+        self.write_starchart_entries(&entries)
+    }
+
+    fn load_starchart_entries(&self) -> Vec<(String, [String; 4])> {
+        if let Some(data) = card::read(&self.starchart_path()) {
+            return parse_starchart_tlv(&data);
         }
-        let tmp = self.root.join("starchart.json.tmp");
-        fs::write(&tmp, out)?;
-        fs::rename(&tmp, path)
+        // Migrate legacy starchart.json
+        let Ok(text) = fs::read_to_string(self.root.join("starchart.json")) else {
+            return Vec::new();
+        };
+        let mut entries = Vec::new();
+        for line in text.lines() {
+            if let (Some(name), Some(px), Some(py)) = (
+                extract::extract_string(line, "world"),
+                extract::extract_string(line, "x"),
+                extract::extract_string(line, "y"),
+            ) {
+                let pz = extract::extract_string(line, "z").unwrap_or_else(|| "0".into());
+                let pg = extract::extract_string(line, "g").unwrap_or_else(|| "0".into());
+                entries.push((name, [px, py, pz, pg]));
+            }
+        }
+        if !entries.is_empty() {
+            let _ = self.write_starchart_entries(&entries);
+            let _ = fs::remove_file(self.root.join("starchart.json"));
+        }
+        entries
+    }
+
+    fn write_starchart_entries(
+        &self,
+        entries: &[(String, [String; 4])],
+    ) -> std::io::Result<()> {
+        let mut out = Vec::new();
+        for (name, [px, py, pz, pg]) in entries {
+            card::put_str(card::chart::WORLD, name, &mut out);
+            card::put_str(card::chart::X, px, &mut out);
+            card::put_str(card::chart::Y, py, &mut out);
+            card::put_str(card::chart::Z, pz, &mut out);
+            card::put_str(card::chart::G, pg, &mut out);
+            card::put(card::chart::END, &[], &mut out);
+        }
+        card::write_atomic(&self.starchart_path(), &out)
     }
 
     /// Read one world's charted coordinate: (S = (x, y, z), G).
     pub fn charted_position(&self, world: &str) -> Option<((Ratio, Ratio, Ratio), Ratio)> {
-        let text = fs::read_to_string(self.root.join("starchart.json")).ok()?;
         let slug = sanitize(world);
-        for line in text.lines() {
-            if extract::extract_string(line, "world").as_deref() == Some(&slug) {
+        for (name, [px, py, pz, pg]) in self.load_starchart_entries() {
+            if name == slug {
                 return Some((
                     (
-                        parse_ratio(&extract::extract_string(line, "x")?)?,
-                        parse_ratio(&extract::extract_string(line, "y")?)?,
-                        parse_ratio(&extract::extract_string(line, "z").unwrap_or_else(|| "0".into()))?,
+                        parse_ratio(&px)?,
+                        parse_ratio(&py)?,
+                        parse_ratio(&pz)?,
                     ),
-                    parse_ratio(&extract::extract_string(line, "g").unwrap_or_else(|| "0".into()))?,
+                    parse_ratio(&pg)?,
                 ));
             }
         }
@@ -325,7 +374,7 @@ pub fn sanitize(name: &str) -> String {
 }
 
 /// The wrapped per-axis |Δ| — the short way around the torus.
-fn wrapped_abs(a: &Ratio, b: &Ratio, span: &Ratio) -> Ratio {
+pub(crate) fn wrapped_abs(a: &Ratio, b: &Ratio, span: &Ratio) -> Ratio {
     use num_traits::Signed;
     let mut d = (a - b).abs();
     // Both coordinates live in [0, span), so d < span already; take
@@ -351,9 +400,101 @@ fn parse_ratio(text: &str) -> Option<Ratio> {
     ))
 }
 
-/// Minimal directive parsing (flat JSON: `verb`, `args`, `as`). The
-/// game loop re-validates EVERYTHING — this only reads the request.
-fn parse_directive(text: &str) -> Option<Directive> {
+/// Parse starchart TLV (concatenated entries ended by tag END).
+fn parse_starchart_tlv(data: &[u8]) -> Vec<(String, [String; 4])> {
+    let mut entries = Vec::new();
+    let mut cur: Option<(String, [String; 4])> = None;
+    for (tag, value) in card::records(data) {
+        match tag {
+            card::chart::WORLD => {
+                if let Some(prev) = cur.take() {
+                    entries.push(prev);
+                }
+                let name = card::str_of(value).unwrap_or_default();
+                cur = Some((name, ["0".into(), "0".into(), "0".into(), "0".into()]));
+            }
+            card::chart::X => {
+                if let Some((_, ref mut c)) = cur {
+                    if let Some(s) = card::str_of(value) {
+                        c[0] = s;
+                    }
+                }
+            }
+            card::chart::Y => {
+                if let Some((_, ref mut c)) = cur {
+                    if let Some(s) = card::str_of(value) {
+                        c[1] = s;
+                    }
+                }
+            }
+            card::chart::Z => {
+                if let Some((_, ref mut c)) = cur {
+                    if let Some(s) = card::str_of(value) {
+                        c[2] = s;
+                    }
+                }
+            }
+            card::chart::G => {
+                if let Some((_, ref mut c)) = cur {
+                    if let Some(s) = card::str_of(value) {
+                        c[3] = s;
+                    }
+                }
+            }
+            card::chart::END => {
+                if let Some(prev) = cur.take() {
+                    entries.push(prev);
+                }
+            }
+            _ => {}
+        }
+    }
+    if let Some(prev) = cur.take() {
+        entries.push(prev);
+    }
+    entries
+}
+
+/// Steward directive TLV.
+fn parse_directive_tlv(data: &[u8]) -> Option<Directive> {
+    let mut verb = None;
+    let mut args = Vec::new();
+    let mut acting_as = "steward".into();
+    for (tag, value) in card::records(data) {
+        match tag {
+            card::dir::VERB => verb = card::str_of(value),
+            card::dir::ARG => {
+                if let Some(a) = card::str_of(value) {
+                    args.push(a);
+                }
+            }
+            card::dir::ACTING_AS => {
+                if let Some(a) = card::str_of(value) {
+                    acting_as = a;
+                }
+            }
+            _ => {}
+        }
+    }
+    Some(Directive {
+        verb: verb?,
+        args,
+        acting_as,
+    })
+}
+
+pub fn write_directive_tlv(path: &std::path::Path, d: &Directive) -> std::io::Result<()> {
+    let mut out = Vec::new();
+    card::put_str(card::dir::VERB, &d.verb, &mut out);
+    for a in &d.args {
+        card::put_str(card::dir::ARG, a, &mut out);
+    }
+    card::put_str(card::dir::ACTING_AS, &d.acting_as, &mut out);
+    card::write_atomic(path, &out)
+}
+
+/// Legacy JSON directive (migrate-only).
+fn parse_directive_legacy_json(text: &str) -> Option<Directive> {
     let verb = extract::extract_string(text, "verb")?;
     let acting_as = extract::extract_string(text, "as").unwrap_or_else(|| "steward".into());
     let args = extract::extract_string_array(text, "args").unwrap_or_default();

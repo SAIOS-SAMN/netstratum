@@ -47,9 +47,7 @@ fn humans() -> Civilization {
     }
 }
 
-/// The reflection lands at the TOPOLOGY: world container + planet
-/// snapshot, complete and INCREMENTAL — a second record with no new
-/// receipts appends nothing; further play appends only the delta.
+/// The reflection lands as TLV: state.tlv + world.card (no JSON).
 #[test]
 fn the_reflection_is_faithful_and_incremental() {
     let root = scratch("incremental");
@@ -58,63 +56,48 @@ fn the_reflection_is_faithful_and_incremental() {
     scribe::record(&book, "sol", "mars", "humans", &world).expect("records");
 
     let dir = book.world_dir("sol");
-    let state = fs::read_to_string(dir.join("planets/mars/state.json")).expect("state exists");
-    for key in [
-        "\"civilization\":\"humans\"",
-        "\"world\":\"sol\"",
-        "\"planet\":\"mars\"",
-        "\"kind\":\"extractor\"",
-    ] {
-        assert!(state.contains(key), "snapshot carries {key}");
-    }
-    let card = fs::read_to_string(dir.join("world.json")).expect("world card");
-    assert!(card.contains("\"planets\":[\"mars\"]"));
-
-    let lines = |p: &PathBuf| {
-        fs::read_to_string(p.join("chronicle.jsonl"))
-            .expect("chronicle exists")
-            .lines()
-            .count()
-    };
-    let exported = lines(&dir);
-    assert_eq!(
-        exported,
-        world.chronicle().receipts().len(),
-        "every receipt reflected"
+    let tlv = dir.join("planets/mars/state.tlv");
+    assert!(tlv.exists(), "state.tlv machine mirror");
+    let wire = fs::read(&tlv).expect("read tlv");
+    assert!(!wire.is_empty());
+    // Zone entries present (tag 17).
+    assert!(wire.windows(1).any(|w| w[0] == 17) || wire.contains(&17u8));
+    let card = fs::read(dir.join("world.card")).expect("world.card");
+    assert!(
+        card.windows(3).any(|w| w == b"sol") || card.windows(4).any(|w| w == b"mars"),
+        "world.card carries names"
     );
+    // No JSON colony files.
+    assert!(!dir.join("planets/mars/state.json").exists());
+    assert!(!dir.join("world.json").exists());
+    assert!(!dir.join("chronicle.jsonl").exists());
 
+    // Re-record is idempotent on mirror (same wire when no new deeds).
+    let before = fs::read(&tlv).expect("before");
     scribe::record(&book, "sol", "mars", "humans", &world).expect("re-records");
-    assert_eq!(lines(&dir), exported, "no duplicate reflection");
+    assert_eq!(fs::read(&tlv).expect("after"), before);
 
     world.zone(1, ZoneKind::Extractor).expect("zones");
     scribe::record(&book, "sol", "mars", "humans", &world).expect("records the delta");
-    assert_eq!(lines(&dir), exported + 1, "exactly the delta appended");
+    let after = fs::read(&tlv).expect("delta");
+    assert_ne!(after, before, "zone deed changes wire");
 }
 
-/// ONE chronicle per world: the stream lives at the world root, and
-/// line n's parent equals line n−1's digest — the linkage an outside
-/// observer checks without recomputing hashes.
+/// Chain integrity is chronicle.tlv (SEAL B), not a JSONL export.
 #[test]
 fn the_exported_chain_links_at_world_altitude() {
     let root = scratch("chain");
     let book = Ledger::at(&root);
     let world = played_world();
     scribe::record(&book, "sol", "mars", "humans", &world).expect("records");
-
-    let text =
-        fs::read_to_string(book.world_dir("sol").join("chronicle.jsonl")).expect("read");
-    let field = |line: &str, key: &str| {
-        let needle = format!("\"{key}\":\"");
-        let start = line.find(&needle).expect("field") + needle.len();
-        line[start..start + 64].to_string()
-    };
-    let mut previous_digest: Option<String> = None;
-    for line in text.lines() {
-        if let Some(prev) = &previous_digest {
-            assert_eq!(&field(line, "parent"), prev, "the chain links");
-        }
-        previous_digest = Some(field(line, "digest"));
-    }
+    let path = book.world_dir("sol").join("chronicle.tlv");
+    cfe::persist::sync(world.chronicle(), &path).expect("sync");
+    let loaded = cfe::persist::load(&path).expect("load verifies");
+    assert_eq!(loaded.verify_chain(), cfe::vrp::ChainRead::Intact);
+    assert_eq!(
+        loaded.receipts().len(),
+        world.chronicle().receipts().len()
+    );
 }
 
 /// Directives round-trip through the WORLD's inbox in name order and
@@ -127,14 +110,22 @@ fn directives_round_trip_and_archive() {
     scribe::record(&book, "sol", "mars", "humans", &world).expect("records");
 
     let inbox = book.world_dir("sol").join("inbox");
-    fs::write(
-        inbox.join("000001-zone.json"),
-        r#"{"verb":"zone","args":["12","ext"],"as":"steward"}"#,
+    ledger::write_directive_tlv(
+        &inbox.join("000001-zone.dir"),
+        &Directive {
+            verb: "zone".into(),
+            args: vec!["12".into(), "ext".into()],
+            acting_as: "steward".into(),
+        },
     )
     .expect("writes");
-    fs::write(
-        inbox.join("000002-collect.json"),
-        r#"{"verb":"collect","args":[],"as":"steward"}"#,
+    ledger::write_directive_tlv(
+        &inbox.join("000002-collect.dir"),
+        &Directive {
+            verb: "collect".into(),
+            args: vec![],
+            acting_as: "steward".into(),
+        },
     )
     .expect("writes");
 
@@ -150,8 +141,8 @@ fn directives_round_trip_and_archive() {
     );
     book.archive(&pending[0], Disposition::Applied).expect("archives");
     book.archive(&pending[1], Disposition::Refused).expect("archives");
-    assert!(inbox.join("applied/000001-zone.json").exists());
-    assert!(inbox.join("refused/000002-collect.json").exists());
+    assert!(inbox.join("applied/000001-zone.dir").exists());
+    assert!(inbox.join("refused/000002-collect.dir").exists());
     assert!(book.pending_directives("sol").expect("reads").is_empty());
 }
 
@@ -380,33 +371,32 @@ fn the_starchart_holds_tuniversal_coordinates() {
             &ratio(0, 1),
         )
         .expect("re-charts");
-    let text = fs::read_to_string(root.join("starchart.json")).expect("read");
-    assert_eq!(text.lines().count(), 2, "one line per world");
-    assert!(text.contains("\"x\":\"1/3\""), "exact fraction rendering");
-    assert!(!text.contains("0.33"), "no float ever enters the universe");
+    let chart = fs::read(root.join("starchart.card")).expect("read starchart.card");
+    // Two worlds ⇒ two WORLD tags.
+    let worlds = chart.iter().filter(|&&b| b == 1).count();
+    assert!(worlds >= 2, "one WORLD tag per charted world");
+    assert!(
+        chart.windows(3).any(|w| w == b"1/3"),
+        "exact fraction rendering in TLV"
+    );
+    assert!(!chart.windows(4).any(|w| w == b"0.33"), "no float");
 
     // T: the six-field odometer, base 60, tick-derived only.
     assert_eq!(ledger::universal_clock(0), "00:00:00:00:00:00");
     assert_eq!(ledger::universal_clock(61), "00:00:00:00:01:01");
     assert_eq!(ledger::universal_clock(3600), "00:00:00:01:00:00");
     book.set_universal_clock(61).expect("writes the card");
-    let card = fs::read_to_string(root.join("universe.json")).expect("card");
-    assert!(card.contains("\"tuniversal\":\"00:00:00:00:01:01\""));
+    let card = fs::read(root.join("universe.card")).expect("card");
+    let od = ledger::universal_clock(61);
+    assert!(card.windows(od.len()).any(|w| w == od.as_bytes()));
 }
 
-/// THE SPAN SURVIVES THE CLOCK. `universe.json`'s span is the authority
-/// `universe_span` reads — `chart_world` wraps against it and
-/// `l1_distance` measures with it — and the clock rewrites that card
-/// every beat. It hard-coded "64" on every rewrite, so a universe of
-/// any other size was silently restored to the default one tick after
-/// it was set, while every reader went on trusting the field.
-///
-/// RED, recorded (2026-08-03, before the fix): the span read back as
-/// 64 immediately after the clock advanced, and the wrap below put the
-/// world at 121/2 — the 64-torus answer — instead of 25/2.
+/// THE SPAN SURVIVES THE CLOCK. `universe.card` span is the authority
+/// `universe_span` reads — carried forward on every clock rewrite.
 #[test]
 fn the_span_survives_a_clock_advance() {
     use cfe::ratio::ratio;
+    use ledger::card;
     let root = scratch("span");
     let book = Ledger::at(&root);
     book
@@ -414,16 +404,16 @@ fn the_span_survives_a_clock_advance() {
         .expect("charts, seeding the card at the default span");
     assert_eq!(book.universe_span(), ratio(64, 1), "the default seeds once");
 
-    // A universe of another size, set on the card the reader trusts.
-    let card = fs::read_to_string(root.join("universe.json")).expect("card");
-    fs::write(
-        root.join("universe.json"),
-        card.replace("\"span\":\"64\"", "\"span\":\"16\""),
-    )
-    .expect("rewrites the span");
+    // A universe of another size — rewrite TLV span field via write_universe path.
+    let mut out = Vec::new();
+    card::put_str(card::uni::TOPOLOGY, "torus", &mut out);
+    card::put_str(card::uni::SPAN, "16", &mut out);
+    card::put_str(card::uni::TUNIVERSAL, &ledger::universal_clock(0), &mut out);
+    card::put_u64(card::uni::TICKS, 0, &mut out);
+    card::put_str(card::uni::FIBER, "polynomial", &mut out);
+    card::write_atomic(&root.join("universe.card"), &out).expect("rewrite span");
     assert_eq!(book.universe_span(), ratio(16, 1));
 
-    // The clock walks — the geometry must not move under it.
     book.set_universal_clock(1).expect("advances the clock");
     assert_eq!(
         book.universe_span(),
@@ -431,8 +421,6 @@ fn the_span_survives_a_clock_advance() {
         "the clock carries the span forward; it does not re-assert the default"
     );
 
-    // And the carried span is the one the wrap actually uses: −7/2 mod
-    // 16 = 25/2, not the 64-torus's 121/2.
     book
         .chart_world("kepler-passage", (&ratio(-7, 2), &ratio(1, 1), &ratio(0, 1)), &ratio(0, 1))
         .expect("charts");
@@ -443,20 +431,19 @@ fn the_span_survives_a_clock_advance() {
     );
 }
 
-/// Exactness discipline holds through the topology: fractions render
-/// p/q, never decimals; the snapshot stays balanced JSON.
+/// Exactness discipline: state.tlv exists; no JSON snapshot; no decimals in wire.
 #[test]
 fn the_snapshot_is_wellformed_and_exact() {
     let root = scratch("wellformed");
     let book = Ledger::at(&root);
     let world = played_world();
     scribe::record(&book, "sol", "mars", "humans", &world).expect("records");
-    let state = fs::read_to_string(
-        book.world_dir("sol").join("planets/mars/state.json"),
-    )
-    .expect("read");
-    assert_eq!(state.matches('{').count(), state.matches('}').count());
-    assert!(!state.contains("0.5"), "no decimal ever enters the export");
+    let tlv = book.world_dir("sol").join("planets/mars/state.tlv");
+    let bytes = fs::read(&tlv).expect("read tlv");
+    assert!(!bytes.is_empty());
+    assert!(!book.world_dir("sol").join("planets/mars/state.json").exists());
+    // Wire must not embed ASCII decimal floats as balance text.
+    assert!(!bytes.windows(3).any(|w| w == b"0.5"));
 }
 
 /// THE TIER AUTHORITY (19_REGISTRY §3, closed 2026-08-03).

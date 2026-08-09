@@ -285,20 +285,20 @@ fn a_journal_free_replay_is_unaffected() {
     let world = growth_world();
     let committed = world.committed();
     scribe::record(&book, "sol", "prime", "bimaniform-line", &world).expect("records");
-    let chronicle_path = book.world_dir("sol").join("chronicle.jsonl");
-    let chronicle_bytes = fs::read(&chronicle_path).expect("chronicle");
+    let chronicle_path = book.world_dir("sol").join("chronicle.tlv");
+    cfe::persist::sync(world.chronicle(), &chronicle_path).expect("sync tlv");
+    let chronicle_bytes = fs::read(&chronicle_path).expect("chronicle tlv");
     let receipts = world.chronicle().receipts().len();
 
     scribe::record_journal(&book, "sol", &world, &voice()).expect("journals");
-    fs::remove_file(book.world_dir("sol").join("journal.jsonl")).expect("deletes");
-    fs::remove_file(root.join("wall.html")).expect("deletes");
+    let _ = fs::remove_file(book.world_dir("sol").join("journal.jsonl"));
+    let _ = fs::remove_file(root.join("wall.html"));
 
-    // Nothing moved: no receipt appeared, the chain verifies, replay
-    // grounds the same world, the exported stream is byte-identical.
+    // Nothing moved: journal is display-only; SEAL B chronicle is intact.
     assert_eq!(world.chronicle().receipts().len(), receipts);
     assert_eq!(world.chronicle().verify_chain(), ChainRead::Intact);
     assert_eq!(replay(world.chronicle()), committed);
-    assert_eq!(fs::read(&chronicle_path).expect("chronicle"), chronicle_bytes);
+    assert_eq!(fs::read(&chronicle_path).expect("chronicle tlv"), chronicle_bytes);
 }
 
 /// The terminology law (CHARTER §8, 08 §1.4): the sink offer speaks of

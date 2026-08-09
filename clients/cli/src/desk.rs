@@ -144,47 +144,12 @@ pub struct PeerRow {
 
 pub fn charted_position(name: &str) -> (Ratio, Ratio, Ratio) {
     let zero = || ratio(0, 1);
-    let Ok(text) = std::fs::read_to_string("var/worlds/starchart.json") else {
-        return (zero(), zero(), zero());
-    };
-    for line in text.lines() {
-        if field(line, "world").as_deref() == Some(name) {
-            let axis = |key: &str| {
-                field(line, key)
-                    .and_then(|v| parse_ratio_text(&v))
-                    .unwrap_or_else(zero)
-            };
-            return (axis("x"), axis("y"), axis("z"));
-        }
+    // TLV starchart.card via ledger API — never starchart.json.
+    let book = ledger::Ledger::at("var/worlds");
+    match book.charted_position(name) {
+        Some(((x, y, z), _)) => (x, y, z),
+        None => (zero(), zero(), zero()),
     }
-    (zero(), zero(), zero())
-}
-
-fn field(text: &str, key: &str) -> Option<String> {
-    let needle = format!("\"{key}\"");
-    let at = text.find(&needle)?;
-    let rest = &text[at + needle.len()..];
-    let colon = rest.find(':')?;
-    let mut val = rest[colon + 1..].trim();
-    if val.starts_with('"') {
-        val = &val[1..];
-        let end = val.find('"')?;
-        return Some(val[..end].to_string());
-    }
-    let end = val.find([',', '}', '\n']).unwrap_or(val.len());
-    Some(val[..end].trim().to_string())
-}
-
-fn parse_ratio_text(text: &str) -> Option<Ratio> {
-    use std::str::FromStr;
-    let (numer, denom) = match text.split_once('/') {
-        Some((n, d)) => (n, d),
-        None => (text, "1"),
-    };
-    Some(Ratio::new(
-        num_bigint::BigInt::from_str(numer.trim()).ok()?,
-        num_bigint::BigInt::from_str(denom.trim()).ok()?,
-    ))
 }
 
 pub fn peer_world_names(exclude: Option<&str>) -> Vec<String> {

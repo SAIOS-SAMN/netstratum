@@ -5,8 +5,7 @@
 //! recorded, displayed, joined; changing no rule today. When G1 lands,
 //! the entry is re-committed as a genesis receipt and becomes binding.
 
-use crate::extract::extract_string;
-use pen::JsonWriter;
+use crate::card;
 use std::fs;
 use std::path::PathBuf;
 
@@ -350,61 +349,58 @@ impl Registry {
                 }
             }
         }
-        let path = self.root.join(format!("{}.json", civilization.sigil));
-        if path.exists() {
+        let path = self.root.join(format!("{}.civ", civilization.sigil));
+        let legacy = self.root.join(format!("{}.json", civilization.sigil));
+        if path.exists() || legacy.exists() {
             return Err(RegistryRefused::AlreadyRegistered {
                 sigil: civilization.sigil.clone(),
             });
         }
         fs::create_dir_all(&self.root).map_err(|e| RegistryRefused::Io(e.to_string()))?;
-        let mut w = JsonWriter::new();
-        w.open();
-        w.field_str("name", &civilization.name);
-        w.field_str("sigil", &civilization.sigil);
-        w.field_str("species", &civilization.species);
-        if !civilization.clade.is_empty() {
-            w.field_str("clade", &civilization.clade);
-        }
-        w.field_str("motto", &civilization.motto);
-        w.key("axes");
-        w.open();
-        w.field_str("disposition", &civilization.disposition);
-        w.field_str("metabolism", &civilization.metabolism);
-        w.field_str("perception", &civilization.perception);
-        w.close();
-        w.field_str("founder", &civilization.founder);
-        if !civilization.lineage.is_empty() {
-            w.field_str("lineage", &civilization.lineage.join(" "));
-        }
-        if let Some(station) = &civilization.station {
-            w.field_str("station", station);
-        }
-        w.close();
-        let mut text = w.finish();
-        text.push('\n');
-        fs::write(&path, text).map_err(|e| RegistryRefused::Io(e.to_string()))?;
+        self.write_civ_tlv(&path, civilization)
+            .map_err(|e| RegistryRefused::Io(e.to_string()))?;
         Ok(())
     }
 
-    /// Load one entry by sigil.
+    fn write_civ_tlv(
+        &self,
+        path: &std::path::Path,
+        c: &Civilization,
+    ) -> std::io::Result<()> {
+        let mut out = Vec::new();
+        card::put_str(card::civ::NAME, &c.name, &mut out);
+        card::put_str(card::civ::SIGIL, &c.sigil, &mut out);
+        card::put_str(card::civ::SPECIES, &c.species, &mut out);
+        if !c.clade.is_empty() {
+            card::put_str(card::civ::CLADE, &c.clade, &mut out);
+        }
+        card::put_str(card::civ::MOTTO, &c.motto, &mut out);
+        card::put_str(card::civ::DISPOSITION, &c.disposition, &mut out);
+        card::put_str(card::civ::METABOLISM, &c.metabolism, &mut out);
+        card::put_str(card::civ::PERCEPTION, &c.perception, &mut out);
+        card::put_str(card::civ::FOUNDER, &c.founder, &mut out);
+        if !c.lineage.is_empty() {
+            card::put_str(card::civ::LINEAGE, &c.lineage.join(" "), &mut out);
+        }
+        if let Some(station) = &c.station {
+            card::put_str(card::civ::STATION, station, &mut out);
+        }
+        card::write_atomic(path, &out)
+    }
+
+    /// Load one entry by sigil (`.civ` TLV; migrates legacy `.json` once).
     pub fn load(&self, sigil: &str) -> Option<Civilization> {
-        let text = fs::read_to_string(self.root.join(format!("{sigil}.json"))).ok()?;
-        Some(Civilization {
-            name: extract_string(&text, "name")?,
-            sigil: extract_string(&text, "sigil")
-                .or_else(|| extract_string(&text, "slug"))?,
-            species: extract_string(&text, "species").unwrap_or_default(),
-            clade: extract_string(&text, "clade").unwrap_or_default(),
-            motto: extract_string(&text, "motto").unwrap_or_default(),
-            disposition: extract_string(&text, "disposition")?,
-            metabolism: extract_string(&text, "metabolism")?,
-            perception: extract_string(&text, "perception")?,
-            founder: extract_string(&text, "founder").unwrap_or_default(),
-            lineage: extract_string(&text, "lineage")
-                .map(|joined| joined.split_whitespace().map(String::from).collect())
-                .unwrap_or_default(),
-            station: extract_string(&text, "station"),
-        })
+        let civ_path = self.root.join(format!("{sigil}.civ"));
+        if let Some(data) = card::read(&civ_path) {
+            return parse_civ_tlv(&data);
+        }
+        // Migrate legacy JSON once.
+        let json_path = self.root.join(format!("{sigil}.json"));
+        let text = fs::read_to_string(&json_path).ok()?;
+        let c = parse_civ_legacy_json(&text)?;
+        let _ = self.write_civ_tlv(&civ_path, &c);
+        let _ = fs::remove_file(&json_path);
+        Some(c)
     }
 
     /// Every registered civilization, slug-ascending — the directory a
@@ -417,13 +413,77 @@ impl Registry {
             .filter_map(|e| e.ok())
             .filter_map(|e| {
                 let path = e.path();
-                (path.extension().is_some_and(|x| x == "json"))
-                    .then(|| path.file_stem().unwrap().to_string_lossy().into_owned())
+                let ext = path.extension()?.to_str()?;
+                if ext == "civ" || ext == "json" {
+                    Some(path.file_stem()?.to_string_lossy().into_owned())
+                } else {
+                    None
+                }
             })
             .collect();
         slugs.sort();
+        slugs.dedup();
         slugs.iter().filter_map(|s| self.load(s)).collect()
     }
+}
+
+fn parse_civ_tlv(data: &[u8]) -> Option<Civilization> {
+    let mut c = Civilization {
+        name: String::new(),
+        sigil: String::new(),
+        species: String::new(),
+        clade: String::new(),
+        motto: String::new(),
+        disposition: String::new(),
+        metabolism: String::new(),
+        perception: String::new(),
+        founder: String::new(),
+        lineage: Vec::new(),
+        station: None,
+    };
+    for (tag, value) in card::records(data) {
+        match tag {
+            card::civ::NAME => c.name = card::str_of(value).unwrap_or_default(),
+            card::civ::SIGIL => c.sigil = card::str_of(value).unwrap_or_default(),
+            card::civ::SPECIES => c.species = card::str_of(value).unwrap_or_default(),
+            card::civ::CLADE => c.clade = card::str_of(value).unwrap_or_default(),
+            card::civ::MOTTO => c.motto = card::str_of(value).unwrap_or_default(),
+            card::civ::DISPOSITION => c.disposition = card::str_of(value).unwrap_or_default(),
+            card::civ::METABOLISM => c.metabolism = card::str_of(value).unwrap_or_default(),
+            card::civ::PERCEPTION => c.perception = card::str_of(value).unwrap_or_default(),
+            card::civ::FOUNDER => c.founder = card::str_of(value).unwrap_or_default(),
+            card::civ::LINEAGE => {
+                c.lineage = card::str_of(value)
+                    .map(|j| j.split_whitespace().map(String::from).collect())
+                    .unwrap_or_default();
+            }
+            card::civ::STATION => c.station = card::str_of(value),
+            _ => {}
+        }
+    }
+    if c.sigil.is_empty() || c.disposition.is_empty() {
+        return None;
+    }
+    Some(c)
+}
+
+fn parse_civ_legacy_json(text: &str) -> Option<Civilization> {
+    use crate::extract::extract_string;
+    Some(Civilization {
+        name: extract_string(text, "name")?,
+        sigil: extract_string(text, "sigil").or_else(|| extract_string(text, "slug"))?,
+        species: extract_string(text, "species").unwrap_or_default(),
+        clade: extract_string(text, "clade").unwrap_or_default(),
+        motto: extract_string(text, "motto").unwrap_or_default(),
+        disposition: extract_string(text, "disposition")?,
+        metabolism: extract_string(text, "metabolism")?,
+        perception: extract_string(text, "perception")?,
+        founder: extract_string(text, "founder").unwrap_or_default(),
+        lineage: extract_string(text, "lineage")
+            .map(|joined| joined.split_whitespace().map(String::from).collect())
+            .unwrap_or_default(),
+        station: extract_string(text, "station"),
+    })
 }
 
 /// Derive a slug the way the ledger sanitizes names.
@@ -487,8 +547,10 @@ impl Registry {
             }
         }
         card.station = Some(station.into());
-        let path = self.root.join(format!("{sigil}.json"));
-        std::fs::remove_file(&path).map_err(|e| RegistryRefused::Io(e.to_string()))?;
+        // Rewrite TLV card (drop legacy json if present).
+        let path = self.root.join(format!("{sigil}.civ"));
+        let _ = fs::remove_file(self.root.join(format!("{sigil}.json")));
+        let _ = fs::remove_file(&path);
         self.create(&card)
     }
 

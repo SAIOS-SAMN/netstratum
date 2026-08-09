@@ -2099,12 +2099,14 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                             let stamp = std::fs::read_dir(&inbox)
                                 .map(|d| d.count())
                                 .unwrap_or(0);
-                            let body = format!(
-                                "{{\"verb\":\"gift\",\"args\":[\"{condition}\"],\"as\":\"steward\"}}"
-                            );
-                            match std::fs::write(
-                                inbox.join(format!("{stamp:06}-gift.json")),
-                                body,
+                            let dir = ledger::Directive {
+                                verb: "gift".into(),
+                                args: vec![condition.clone()],
+                                acting_as: "steward".into(),
+                            };
+                            match ledger::write_directive_tlv(
+                                &inbox.join(format!("{stamp:06}-gift.dir")),
+                                &dir,
                             ) {
                                 Ok(()) => println!(
                                     "{} the gift PETITIONS {} — the conductor executes at its next beat (the crown law holds there)",

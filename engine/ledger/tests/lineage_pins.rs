@@ -46,19 +46,29 @@ fn both_parents_round_trip_and_the_old_form_reads_unchanged() {
     let held = registry.load("hybrid").expect("loads");
     assert_eq!(held.lineage, vec!["first-root".to_string(), "second-root".to_string()]);
 
-    // The wire form: one field, space-joined, in append order.
+    // The wire form: TLV lineage field, space-joined, in append order.
     let root = scratch("wire");
     let registry = Registry::at(root.clone());
     registry.create(&line("hybrid", vec!["first-root", "second-root"])).expect("creates");
-    let text = fs::read_to_string(root.join("hybrid.json")).expect("reads");
-    assert!(text.contains("\"lineage\":\"first-root second-root\""));
+    let bytes = fs::read(root.join("hybrid.civ")).expect("reads .civ");
+    assert!(
+        bytes.windows(b"first-root second-root".len()).any(|w| w == b"first-root second-root"),
+        "lineage in TLV"
+    );
 
-    // A LINEAGE-1 file (single token) reads as a one-parent list.
-    fs::write(
-        root.join("elder-child.json"),
-        "{\"name\":\"Elder Child\",\"sigil\":\"elder-child\",\"species\":\"w\",\"motto\":\"m\",\"axes\":{\"disposition\":\"empiricist\",\"metabolism\":\"biotic\",\"perception\":\"planar\"},\"founder\":\"conductor\",\"lineage\":\"first-root\"}\n",
-    )
-    .expect("writes the old form");
+    // A LINEAGE-1 file (single token) via TLV.
+    use ledger::card;
+    let mut out = Vec::new();
+    card::put_str(card::civ::NAME, "Elder Child", &mut out);
+    card::put_str(card::civ::SIGIL, "elder-child", &mut out);
+    card::put_str(card::civ::SPECIES, "w", &mut out);
+    card::put_str(card::civ::MOTTO, "m", &mut out);
+    card::put_str(card::civ::DISPOSITION, "empiricist", &mut out);
+    card::put_str(card::civ::METABOLISM, "biotic", &mut out);
+    card::put_str(card::civ::PERCEPTION, "planar", &mut out);
+    card::put_str(card::civ::FOUNDER, "conductor", &mut out);
+    card::put_str(card::civ::LINEAGE, "first-root", &mut out);
+    card::write_atomic(&root.join("elder-child.civ"), &out).expect("writes");
     let old = registry.load("elder-child").expect("loads");
     assert_eq!(old.lineage, vec!["first-root".to_string()]);
 }

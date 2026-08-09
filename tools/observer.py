@@ -312,16 +312,72 @@ def chain_linked(chronicle_path):
     return True, count
 
 
+def _parse_civ_tlv(data: bytes):
+    """Parse registry .civ TLV (ledger::card::civ tags)."""
+    card = {
+        "name": "",
+        "sigil": "",
+        "species": "",
+        "clade": "",
+        "motto": "",
+        "station": None,
+        "founder": "",
+        "axes": {},
+    }
+    at = 0
+    while at + 5 <= len(data):
+        tag = data[at]
+        ln = int.from_bytes(data[at + 1 : at + 5], "little")
+        val = data[at + 5 : at + 5 + ln]
+        if len(val) < ln:
+            break
+        try:
+            s = val.decode("utf-8")
+        except Exception:
+            s = ""
+        if tag == 1:
+            card["name"] = s
+        elif tag == 2:
+            card["sigil"] = s
+        elif tag == 3:
+            card["species"] = s
+        elif tag == 4:
+            card["clade"] = s
+        elif tag == 5:
+            card["motto"] = s
+        elif tag == 6:
+            card["axes"]["disposition"] = s
+        elif tag == 7:
+            card["axes"]["metabolism"] = s
+        elif tag == 8:
+            card["axes"]["perception"] = s
+        elif tag == 9:
+            card["founder"] = s
+        elif tag == 11:
+            card["station"] = s or None
+        at += 5 + ln
+    if not card["sigil"]:
+        return None
+    return card
+
+
 def load_registry(var_root):
     registry = {}
     reg_dir = Path(var_root) / "registry"
-    if reg_dir.is_dir():
-        for path in sorted(reg_dir.glob("*.json")):
-            try:
+    if not reg_dir.is_dir():
+        return registry
+    paths = sorted(list(reg_dir.glob("*.civ")) + list(reg_dir.glob("*.json")))
+    for path in paths:
+        try:
+            if path.suffix == ".civ":
+                card = _parse_civ_tlv(path.read_bytes())
+                if not card:
+                    continue
+            else:
                 card = json.loads(path.read_text(encoding="utf-8"))
-                registry[card.get("sigil", card.get("slug", path.stem))] = card
-            except json.JSONDecodeError:
-                continue
+            registry[card.get("sigil", card.get("slug", path.stem))] = card
+        except (json.JSONDecodeError, OSError):
+            continue
     return registry
 
 

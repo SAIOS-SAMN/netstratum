@@ -129,7 +129,11 @@ pub fn converge(book: &Ledger, eras: &[(String, PathBuf)]) -> std::io::Result<Co
             .map(|entries| {
                 entries
                     .filter_map(|e| e.ok().map(|e| e.path()))
-                    .filter(|p| p.is_dir() && p.join("chronicle.jsonl").exists())
+                    .filter(|p| {
+                        p.is_dir()
+                            && (p.join("chronicle.tlv").exists()
+                                || p.join("chronicle.jsonl").exists())
+                    })
                     .collect()
             })
             .unwrap_or_default();
@@ -139,26 +143,55 @@ pub fn converge(book: &Ledger, eras: &[(String, PathBuf)]) -> std::io::Result<Co
                 .file_name()
                 .map(|n| n.to_string_lossy().into_owned())
                 .unwrap_or_default();
-            let lines = match fs::read_to_string(dir.join("chronicle.jsonl")) {
-                Ok(text) => text,
-                Err(_) => {
-                    read.quarantined.push(Quarantined {
-                        era: era.clone(),
-                        world,
-                        at: u64::MAX,
-                    });
-                    continue;
+            // Prefer binary chronicle.tlv; fall back to legacy jsonl archives.
+            let (receipts, torn) = if dir.join("chronicle.tlv").exists() {
+                match cfe::persist::load(&dir.join("chronicle.tlv")) {
+                    Ok(ch) => {
+                        let receipts: Vec<RawReceipt> = ch
+                            .receipts()
+                            .iter()
+                            .map(|r| RawReceipt {
+                                sequence: r.sequence,
+                                stamp: r.stamp,
+                                parent: r.parent.0,
+                                digest: r.own.0,
+                                by: r.provenance.clone(),
+                                event_bytes: r.event.wire_bytes(),
+                            })
+                            .collect();
+                        (receipts, false)
+                    }
+                    Err(_) => {
+                        read.quarantined.push(Quarantined {
+                            era: era.clone(),
+                            world,
+                            at: u64::MAX,
+                        });
+                        continue;
+                    }
                 }
-            };
-            let (receipts, torn) = match parse_chronicle(&lines) {
-                ParsedChronicle::Parsed { receipts, torn } => (receipts, torn),
-                ParsedChronicle::Malformed { at } => {
-                    read.quarantined.push(Quarantined {
-                        era: era.clone(),
-                        world,
-                        at,
-                    });
-                    continue;
+            } else {
+                let lines = match fs::read_to_string(dir.join("chronicle.jsonl")) {
+                    Ok(text) => text,
+                    Err(_) => {
+                        read.quarantined.push(Quarantined {
+                            era: era.clone(),
+                            world,
+                            at: u64::MAX,
+                        });
+                        continue;
+                    }
+                };
+                match parse_chronicle(&lines) {
+                    ParsedChronicle::Parsed { receipts, torn } => (receipts, torn),
+                    ParsedChronicle::Malformed { at } => {
+                        read.quarantined.push(Quarantined {
+                            era: era.clone(),
+                            world,
+                            at,
+                        });
+                        continue;
+                    }
                 }
             };
             if torn {

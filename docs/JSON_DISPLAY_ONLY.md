@@ -30,26 +30,36 @@ chronicle.tlv  ──replay──►  World  ──scribe──►  state.tlv + 
 
 ---
 
-## 2. What may still be JSON (and why)
+## 2. Binary / non-JSON carriers (landed)
 
-| File | Why JSON is OK | Must not |
-|------|----------------|----------|
-| `state.json` | Human snapshot from lens | Be read by engine for banks/famine/deeds |
-| `chronicle.jsonl` | Append-only **display** of receipts (each line carries `tlv` hex) | Be the sole resume carrier |
-| Registry cards | Identity **cache** until G1 fully binds every field to genesis receipts | Override sealed genesis axes |
-| Steward inbox `*.json` | Directive files (become real only as NS-6 scope-checked deeds) | Edit state directly |
-| Solve certificates | Proof blobs for observer depth | Replace DiscoveryMinted receipts |
+| Surface | Path | Format |
+|---------|------|--------|
+| Registry | `var/registry/<sigil>.civ` | TLV (`ledger::card::civ`) |
+| Universe | `var/worlds/universe.card` | TLV |
+| Starchart | `var/worlds/starchart.card` | TLV entries |
+| Galaxies | `var/worlds/galaxies.card` | TLV (render of ledger) |
+| World card | `var/worlds/<w>/world.card` | TLV |
+| Orb mirror | `var/worlds/<w>/planets/<p>/state.tlv` | NS-1 wire |
+| Chronicle | `var/worlds/<w>/chronicle.tlv` | SEAL B authority |
+| Directives | `var/worlds/<w>/inbox/*.dir` | TLV (`card::dir`) |
+| Solves | `var/worlds/<w>/solves/*.sol` | TLV |
+| Operators | `var/operators/<name>` | plain text lines |
+
+**No longer written:** `state.json`, `world.json`, `chronicle.jsonl`, registry `.json`, `starchart.json`, `universe.json`, `galaxies.json`, inbox `.json`, solve `.json`.
+
+One-shot **migrate-on-read** still accepts legacy JSON files and rewrites TLV, then deletes the JSON.
 
 ---
 
 ## 3. Engine rules (implemented)
 
 1. **CLI** loads far worlds only via `chronicle.tlv` + verify.  
-2. **CLI stress / inbox** reads famine & vent from resumed World, never `state.json`.  
-3. **CLI `conductor_founded`** uses MESH pen / `spine/` — never registry JSON via state scrape.  
-4. **Operator profiles** are plain `var/operators/<name>` (`station` / `world` lines). Legacy `.json` is migrated on login/save.  
-5. **Observer** material columns (banks, famine, zones, elements, STAMP, labor) decode **`state.tlv` only**. No row without TLV.  
-6. **Scribe** diverges on **`chronicle.tlv` digests** when present; `chronicle.jsonl` is write-only rebuild/append of display.
+2. **CLI stress** reads famine & vent from resumed World.  
+3. **Registry / chart / universe / directives / solves** are binary cards.  
+4. **Operator profiles** are plain text (not JSON).  
+5. **Observer** material columns from **`state.tlv` only**.  
+6. **Scribe** writes `state.tlv` + `world.card` only; no colony JSON.  
+7. **Steward** queues `*.dir` TLV directives.
 
 ---
 
@@ -57,32 +67,24 @@ chronicle.tlv  ──replay──►  World  ──scribe──►  state.tlv + 
 
 | Attack | Effect | Mitigated by |
 |--------|--------|--------------|
-| Edit `state.json` banks | Fool a tool that still scrapes JSON | Engine ignores it; observer prefers TLV |
-| Edit `state.tlv` alone | Local disk forgery of mirror | Resume/`verify` from `chronicle.tlv` refuses mismatch |
-| Edit `chronicle.tlv` digests | Breaks SEAL B parent chain | `persist::load` / `verify` refuse |
-| Edit operator profile station | Local UI claim only | Mint/station gates re-check chain |
+| Edit `state.tlv` alone | Local disk forgery of mirror | Resume from `chronicle.tlv` is law |
+| Edit `chronicle.tlv` digests | Breaks SEAL B | `persist::load` / `verify` refuse |
+| Hex-edit `.civ` / `.card` | Corrupt identity cache | Not colony banks; re-create via engine |
+| Edit operator profile | Local UI claim only | Mint/station re-check chain |
+
+JSON is not “enabled” for these surfaces. Casual edit-as-text is gone.
 
 ---
 
-## 5. Still open (honest residual)
-
-- **Registry JSON** remains the civilization identity cache; G1 sealed axes on the chronicle are the binding copy where sealed. Full registry→chain is a later land.  
-- **Starchart.json** remains topology export until a TLV chart lands.  
-- **Steward directives** remain JSON files (become receipts when applied).  
-- Optional: export integrity hash (terminal receipt digest over display) for board anti-fooling — not authority.
-
----
-
-## 6. Smoke
+## 5. Smoke
 
 ```bash
-# Engine must not need state.json for resume
 test -f var/worlds/<world>/chronicle.tlv
+test -f var/worlds/<world>/planets/*/state.tlv
+# no state.json written on new record:
+test ! -f var/worlds/<world>/planets/*/state.json
 
-# Observer material from TLV
 python3 tools/observer.py arc --plain | head
-# Rows present only when state.tlv exists
-
-# Login writes plain profile, not JSON
-# var/operators/<name> contains: station … / world …
+python3 tools/steward.py list
+# registry cards are .civ after create/load migrate
 ```

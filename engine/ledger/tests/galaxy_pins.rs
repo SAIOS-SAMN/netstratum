@@ -76,7 +76,7 @@ fn the_frontier_reading_wraps_on_the_torus() {
     assert!(created.is_none(), "wrapped L1 = 1 stands INSIDE the founding reach");
 }
 
-/// SEAL C: `galaxies.json` is a rendering. Delete the card — replay
+/// SEAL C: `galaxies.card` is a rendering. Delete the card — replay
 /// from the universe ledger rebuilds it exactly (the receipt is the
 /// truth, 13_GALAXY §4).
 #[test]
@@ -87,7 +87,7 @@ fn the_card_is_a_rendering_the_ledger_is_the_truth() {
         .expect("the deed executes");
     let before = m.galaxies();
     assert_eq!(before.len(), 2);
-    fs::remove_file(root.join("galaxies.json")).expect("the card is deletable");
+    fs::remove_file(root.join("galaxies.card")).expect("the card is deletable");
     assert_eq!(m.galaxies(), before, "rebuilt from receipts, identical reading");
 }
 

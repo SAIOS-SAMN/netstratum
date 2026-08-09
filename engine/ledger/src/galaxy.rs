@@ -1,7 +1,7 @@
 //! GALAXY-1a (13_GALAXY §3–§4): the observation deed and its readings.
 //! One universe, structurally — galaxies are lazy REGIONS of the one
 //! torus, never new tori. The universe ledger (`convergence.tlv`) is
-//! the truth; `galaxies.json` is a rendering; membership derives from
+//! the truth; `galaxies.card` is a TLV rendering; membership derives from
 //! position and is never stored. The frontier is a distance, never an
 //! outside: wrapped-L1 to every charted center against its reach.
 
@@ -13,9 +13,7 @@ use cfe::persist;
 use cfe::ratio::{ratio, Ratio};
 use cfe::vrp::Chronicle;
 
-use crate::extract::extract_string;
-use pen::JsonWriter;
-use crate::{ratio_str, sanitize, wrapped_abs, Ledger};
+use crate::{card, ratio_str, sanitize, wrapped_abs, Ledger};
 
 /// A charted galaxy: a named region of the ONE torus — center S in
 /// exact rationals, reach an L1 radius. Reach is a placeholder
@@ -90,11 +88,9 @@ impl Ledger {
     /// Every charted world on the star-chart, chart order — the
     /// S-side population a galaxy reading sweeps.
     pub fn charted_worlds(&self) -> Vec<String> {
-        let Ok(text) = fs::read_to_string(self.root.join("starchart.json")) else {
-            return Vec::new();
-        };
-        text.lines()
-            .filter_map(|line| extract_string(line, "world"))
+        self.load_starchart_entries()
+            .into_iter()
+            .map(|(name, _)| name)
             .collect()
     }
 
@@ -103,7 +99,7 @@ impl Ledger {
     /// deed ever executed; a new galaxy is CREATED only when the
     /// anchor stands past the frontier — wrapped-L1 to EVERY charted
     /// center exceeding its reach (a far region, never an outside).
-    /// Both receipts append to the universe ledger; `galaxies.json`
+    /// Both receipts append to the universe ledger; `galaxies.card`
     /// re-renders after (SEAL C). Returns the created galaxy, or None
     /// when the anchor lies inside a charted sky.
     ///
@@ -205,25 +201,18 @@ impl Ledger {
         Ok(())
     }
 
-    /// The card: one line per galaxy, a REFLECTION of the ledger —
-    /// deleting it loses nothing (SEAL C).
+    /// The card: TLV reflection of the ledger — deleting it loses nothing (SEAL C).
     fn render_galaxies_card(&self, galaxies: &[Galaxy]) -> std::io::Result<()> {
-        let mut out = String::new();
+        let mut out = Vec::new();
         for galaxy in galaxies {
-            let mut w = JsonWriter::new();
-            w.open();
-            w.field_str("galaxy", &galaxy.name);
-            w.field_str("x", &ratio_str(&galaxy.center.0));
-            w.field_str("y", &ratio_str(&galaxy.center.1));
-            w.field_str("z", &ratio_str(&galaxy.center.2));
-            w.field_str("reach", &ratio_str(&galaxy.reach));
-            w.close();
-            out.push_str(&w.finish());
-            out.push('\n');
+            card::put_str(card::galaxy::NAME, &galaxy.name, &mut out);
+            card::put_str(card::galaxy::CX, &ratio_str(&galaxy.center.0), &mut out);
+            card::put_str(card::galaxy::CY, &ratio_str(&galaxy.center.1), &mut out);
+            card::put_str(card::galaxy::CZ, &ratio_str(&galaxy.center.2), &mut out);
+            card::put_str(card::galaxy::REACH, &ratio_str(&galaxy.reach), &mut out);
+            card::put(card::galaxy::END, &[], &mut out);
         }
-        let tmp = self.root.join("galaxies.json.tmp");
-        fs::write(&tmp, out)?;
-        fs::rename(&tmp, self.root.join("galaxies.json"))
+        card::write_atomic(&self.root.join("galaxies.card"), &out)
     }
 }
 
