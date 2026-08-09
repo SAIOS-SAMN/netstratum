@@ -112,9 +112,10 @@ fn the_journal_regenerates_byte_identically() {
     let appended = scribe::record_journal(&book, "sol", &world, &voice())
         .expect("records");
     assert_eq!(appended, 2, "two completed years, two entries");
-    let path = book.world_dir("sol").join("journal.jsonl");
-    let first = fs::read(&path).expect("journal exists");
+    let path = book.world_dir("sol").join("journal.jrn");
+    let first = fs::read(&path).expect("journal.jrn exists");
     let wall_first = fs::read(root.join("wall.html")).expect("wall exists");
+    assert!(!book.world_dir("sol").join("journal.jsonl").exists());
 
     // Idempotence: a re-record appends NOTHING.
     let again = scribe::record_journal(&book, "sol", &world, &voice()).expect("re-records");
@@ -188,10 +189,13 @@ fn growth_math_is_exact() {
         "one zone over two standing — exact, never a percentage"
     );
     assert_eq!(entries[1].cycle, "00:00:00:00:02:00");
-    // No decimal ever enters the feed.
+    // No decimal ever enters the TLV feed (as UTF-8 substrings in fields).
     for entry in &entries {
-        let line = scribe::journal::render_entry(entry);
-        assert!(!line.contains("0.5"), "no float rendering: {line}");
+        let payload = scribe::journal::render_entry_tlv(entry);
+        assert!(
+            !payload.windows(3).any(|w| w == b"0.5"),
+            "no float in tlv payload"
+        );
     }
 }
 
@@ -291,7 +295,7 @@ fn a_journal_free_replay_is_unaffected() {
     let receipts = world.chronicle().receipts().len();
 
     scribe::record_journal(&book, "sol", &world, &voice()).expect("journals");
-    let _ = fs::remove_file(book.world_dir("sol").join("journal.jsonl"));
+    let _ = fs::remove_file(book.world_dir("sol").join("journal.jrn"));
     let _ = fs::remove_file(root.join("wall.html"));
 
     // Nothing moved: journal is display-only; SEAL B chronicle is intact.
@@ -319,7 +323,9 @@ fn the_terminology_law_holds_in_the_feed() {
         ("emberhold", furnace_world()),
     ] {
         for entry in journal(world_name, &world, &voice(), YEAR_TICKS) {
-            feed.push_str(&scribe::journal::render_entry(&entry));
+            // Narration fields as text for terminology scan (not JSON).
+            feed.push_str(&entry.headline);
+            feed.push_str(&entry.body);
             feed.push('\n');
         }
     }

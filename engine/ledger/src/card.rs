@@ -150,3 +150,90 @@ pub mod sol {
     pub const CERT: u8 = 3;
     pub const DEPTH: u8 = 4;
 }
+
+/// Journal entry payload tags (`journal.jrn` frames).
+pub mod jrn {
+    pub const YEAR: u8 = 1;
+    pub const TICK: u8 = 2;
+    pub const CYCLE: u8 = 3;
+    pub const WORLD: u8 = 4;
+    pub const CIVILIZATION: u8 = 5;
+    pub const ARCHETYPE: u8 = 6;
+    pub const ALERT: u8 = 7;
+    pub const HEADLINE: u8 = 8;
+    pub const BODY: u8 = 9;
+    pub const BANKED_JOULES: u8 = 10;
+    pub const HEATING_NEED: u8 = 11;
+    pub const ENTROPY_VENTED: u8 = 12;
+    pub const VENTED_YEAR: u8 = 13;
+    pub const BANKED_SINK: u8 = 14;
+    pub const ZONES: u8 = 15;
+    pub const ZONES_BUILT: u8 = 16;
+    pub const ZONES_RAZED: u8 = 17;
+    pub const GROWTH: u8 = 18;
+    pub const FAMINE: u8 = 19; // repeated
+    pub const TRADE_REQUEST: u8 = 20;
+}
+
+/// Fiber residual card (`fiber/<world>.fiber`).
+pub mod fiber {
+    pub const WORLD: u8 = 1;
+    pub const STATE: u8 = 2;
+    pub const SPATIAL: u8 = 3;
+    pub const GAUGE: u8 = 4;
+}
+
+/// Count LE32-framed records in a journal.jrn file (for append cursor).
+pub fn count_frames(data: &[u8]) -> usize {
+    let mut at = 0usize;
+    let mut n = 0usize;
+    while at + 4 <= data.len() {
+        let len = u32::from_le_bytes(data[at..at + 4].try_into().unwrap()) as usize;
+        at += 4;
+        if at + len > data.len() {
+            break; // torn tail — stop
+        }
+        at += len;
+        n += 1;
+    }
+    n
+}
+
+/// Append one framed payload to a journal file (LE32 len ‖ payload).
+pub fn append_frame(path: &Path, payload: &[u8]) -> std::io::Result<()> {
+    use std::io::Write;
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)?;
+    }
+    let mut file = fs::OpenOptions::new().create(true).append(true).open(path)?;
+    file.write_all(&(payload.len() as u32).to_le_bytes())?;
+    file.write_all(payload)?;
+    Ok(())
+}
+
+/// Iterate framed payloads from a journal.jrn file.
+pub fn frames(data: &[u8]) -> impl Iterator<Item = &[u8]> + '_ {
+    FrameIter { data, at: 0 }
+}
+
+struct FrameIter<'a> {
+    data: &'a [u8],
+    at: usize,
+}
+
+impl<'a> Iterator for FrameIter<'a> {
+    type Item = &'a [u8];
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.at + 4 > self.data.len() {
+            return None;
+        }
+        let len = u32::from_le_bytes(self.data[self.at..self.at + 4].try_into().ok()?) as usize;
+        self.at += 4;
+        if self.at + len > self.data.len() {
+            return None;
+        }
+        let slice = &self.data[self.at..self.at + len];
+        self.at += len;
+        Some(slice)
+    }
+}

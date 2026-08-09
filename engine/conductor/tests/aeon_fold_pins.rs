@@ -99,15 +99,11 @@ fn the_fold_seals_rotates_and_the_next_aeon_converges_it() {
     let book3 = ledger::Ledger::at(var.join("worlds"));
     let eras3 = ledger::converge::default_era_roots(&var_str);
     ledger::converge::converge(&book3, &eras3).expect("third-aeon convergence");
-    let chart = fs::read_to_string(var.join("worlds/starchart.json")).expect("chart");
+    let book_chart = ledger::Ledger::at(var.join("worlds"));
     let gauge_of = |world: &str| -> String {
-        chart
-            .lines()
-            .find(|line| line.contains(&format!("\"world\":\"{world}\"")))
-            .and_then(|line| {
-                line.split("\"g\":\"").nth(1).and_then(|rest| rest.split('\"').next())
-            })
-            .map(str::to_string)
+        book_chart
+            .charted_position(world)
+            .map(|(_, g)| format!("{}/{}", g.numer(), g.denom()))
             .unwrap_or_default()
     };
     let first = gauge_of("var-era1--cinder-reach");

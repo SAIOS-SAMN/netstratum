@@ -708,22 +708,68 @@ def read_all(var_root):
     return rows, worlds
 
 
+def _iter_tlv(data: bytes):
+    at = 0
+    while at + 5 <= len(data):
+        tag = data[at]
+        ln = int.from_bytes(data[at + 1 : at + 5], "little")
+        val = data[at + 5 : at + 5 + ln]
+        if len(val) < ln:
+            break
+        yield tag, val
+        at += 5 + ln
+
+
 def load_starchart(var_root):
+    """starchart.card TLV (WORLD/X/Y/Z/G/END)."""
     chart = {}
-    path = Path(var_root) / "worlds" / "starchart.json"
-    if path.exists():
-        for line in path.read_text(encoding="utf-8").splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                card = json.loads(line)
-                chart[card["world"]] = (
-                    frac(card["x"]), frac(card["y"]), frac(card.get("z", "0")),
-                    frac(card.get("g", "0")),
+    path = Path(var_root) / "worlds" / "starchart.card"
+    if not path.exists():
+        return chart
+    try:
+        data = path.read_bytes()
+    except OSError:
+        return chart
+    cur = None
+    coords = ["0", "0", "0", "0"]
+    for tag, val in _iter_tlv(data):
+        try:
+            s = val.decode("utf-8")
+        except Exception:
+            s = ""
+        if tag == 1:  # WORLD
+            if cur is not None:
+                chart[cur] = (
+                    frac(coords[0]),
+                    frac(coords[1]),
+                    frac(coords[2]),
+                    frac(coords[3]),
                 )
-            except (json.JSONDecodeError, KeyError, ValueError):
-                continue
+            cur = s
+            coords = ["0", "0", "0", "0"]
+        elif tag == 2:
+            coords[0] = s
+        elif tag == 3:
+            coords[1] = s
+        elif tag == 4:
+            coords[2] = s
+        elif tag == 5:
+            coords[3] = s
+        elif tag == 0 and cur is not None:  # END
+            chart[cur] = (
+                frac(coords[0]),
+                frac(coords[1]),
+                frac(coords[2]),
+                frac(coords[3]),
+            )
+            cur = None
+    if cur is not None:
+        chart[cur] = (
+            frac(coords[0]),
+            frac(coords[1]),
+            frac(coords[2]),
+            frac(coords[3]),
+        )
     return chart
 
 
@@ -734,7 +780,7 @@ def universe_card(var_root):
 
 
 def load_universe(var_root):
-    """Full universe.json card with safe defaults."""
+    """universe.card TLV with safe defaults."""
     defaults = {
         "topology": "torus",
         "span": Fraction(64),
@@ -742,45 +788,67 @@ def load_universe(var_root):
         "ticks": 60,
         "fiber": "—",
     }
-    path = Path(var_root) / "worlds" / "universe.json"
+    path = Path(var_root) / "worlds" / "universe.card"
     if not path.exists():
         return defaults
     try:
-        card = json.loads(path.read_text(encoding="utf-8"))
-    except (json.JSONDecodeError, OSError):
+        data = path.read_bytes()
+    except OSError:
         return defaults
-    return {
-        "topology": card.get("topology", defaults["topology"]),
-        "span": frac(card.get("span", "64")),
-        "tuniversal": card.get("tuniversal", defaults["tuniversal"]),
-        "ticks": int(card.get("ticks", defaults["ticks"])),
-        "fiber": card.get("fiber", defaults["fiber"]),
-    }
+    out = dict(defaults)
+    for tag, val in _iter_tlv(data):
+        try:
+            s = val.decode("utf-8")
+        except Exception:
+            s = ""
+        if tag == 1:
+            out["topology"] = s
+        elif tag == 2:
+            out["span"] = frac(s)
+        elif tag == 3:
+            out["tuniversal"] = s
+        elif tag == 4 and len(val) == 8:
+            out["ticks"] = int.from_bytes(val, "little")
+        elif tag == 5:
+            out["fiber"] = s
+    return out
 
 
 def load_galaxies(var_root):
-    """galaxies.json is one JSON object per line (the starchart pattern)."""
-    path = Path(var_root) / "worlds" / "galaxies.json"
+    """galaxies.card TLV (NAME/CX/CY/CZ/REACH/END)."""
+    path = Path(var_root) / "worlds" / "galaxies.card"
     galaxies = []
     if not path.exists():
         return galaxies
-    for line in path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line:
-            continue
+    try:
+        data = path.read_bytes()
+    except OSError:
+        return galaxies
+    cur = {"name": "?", "center": (Fraction(0), Fraction(0), Fraction(0)), "reach": Fraction(16)}
+    c = ["0", "0", "0"]
+    for tag, val in _iter_tlv(data):
         try:
-            card = json.loads(line)
-            galaxies.append({
-                "name": card.get("galaxy", "?"),
-                "center": (
-                    frac(card.get("x", "0")),
-                    frac(card.get("y", "0")),
-                    frac(card.get("z", "0")),
-                ),
-                "reach": frac(card.get("reach", "16")),
-            })
-        except (json.JSONDecodeError, ValueError, KeyError):
-            continue
+            s = val.decode("utf-8")
+        except Exception:
+            s = ""
+        if tag == 1:
+            cur = {
+                "name": s,
+                "center": (Fraction(0), Fraction(0), Fraction(0)),
+                "reach": Fraction(16),
+            }
+            c = ["0", "0", "0"]
+        elif tag == 2:
+            c[0] = s
+        elif tag == 3:
+            c[1] = s
+        elif tag == 4:
+            c[2] = s
+        elif tag == 5:
+            cur["reach"] = frac(s)
+        elif tag == 0:
+            cur["center"] = (frac(c[0]), frac(c[1]), frac(c[2]))
+            galaxies.append(cur)
     return galaxies
 
 

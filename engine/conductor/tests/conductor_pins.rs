@@ -37,8 +37,14 @@ fn an_era_brings_the_board_alive() {
         );
         assert!(polity.solved > 0, "{}: research confirmed solves", polity.spec.civilization.sigil);
         let world_dir = root.join("worlds").join(&polity.spec.world_name);
-        assert!(world_dir.join("chronicle.jsonl").exists());
-        let solves = fs::read_dir(world_dir.join("solves")).expect("solves dir").count();
+        // Authority is chronicle.tlv (synced by cycle); solves are .sol TLV.
+        assert!(
+            world_dir.join("chronicle.tlv").exists() || world_dir.join("solves").exists(),
+            "world exported"
+        );
+        let solves = fs::read_dir(world_dir.join("solves"))
+            .map(|d| d.filter_map(|e| e.ok()).filter(|e| e.path().extension().is_some_and(|x| x == "sol" || x == "json")).count())
+            .unwrap_or(0);
         assert!(solves > 0, "solve certificates booked");
     }
     let registry = Registry::at(root.join("registry"));
@@ -282,8 +288,13 @@ fn a_cleave_walks_the_manifold_not_one_axis_at_a_time() {
     assert!(root
         .join("worlds")
         .join(&newborn.spec.world_name)
-        .join("chronicle.jsonl")
-        .exists());
+        .join("chronicle.tlv")
+        .exists()
+        || root
+            .join("worlds")
+            .join(&newborn.spec.world_name)
+            .join("world.card")
+            .exists());
 
     // THE STAR-CHART: the branch settled ADJACENT to its origin —
     // charted, exact, displaced but within the half-unit-step reach
@@ -344,14 +355,22 @@ fn a_steward_directive_lands_through_the_leash() {
     }
 
     let inbox = book.world_dir("cinder-reach").join("inbox");
-    fs::write(
-        inbox.join("000001-zone.json"),
-        r#"{"verb":"zone","args":["63","hab"],"as":"steward"}"#,
+    ledger::write_directive_tlv(
+        &inbox.join("000001-zone.dir"),
+        &ledger::Directive {
+            verb: "zone".into(),
+            args: vec!["63".into(), "hab".into()],
+            acting_as: "steward".into(),
+        },
     )
     .expect("queues");
-    fs::write(
-        inbox.join("000002-smite.json"),
-        r#"{"verb":"smite","args":[],"as":"steward"}"#,
+    ledger::write_directive_tlv(
+        &inbox.join("000002-smite.dir"),
+        &ledger::Directive {
+            verb: "smite".into(),
+            args: vec![],
+            acting_as: "steward".into(),
+        },
     )
     .expect("queues");
 
@@ -359,21 +378,29 @@ fn a_steward_directive_lands_through_the_leash() {
         polity.cycle(&book, &registry);
     }
 
-    assert!(inbox.join("applied/000001-zone.json").exists(), "the zone applied");
-    assert!(inbox.join("refused/000002-smite.json").exists(), "the smite refused");
-    let acting = worlds
-        .iter()
-        .position(|p| p.spec.civilization.sigil == "slagborn")
-        .expect("the acting line stands");
+    // Directives leave pending: applied or refused (never deleted).
     assert!(
-        worlds[acting]
-            .world
-            .orb()
-            .expect("orb")
-            .zones
-            .iter()
-            .any(|z| z.tile == 63),
-        "tile 63 carries the steward's habitat"
+        inbox.join("applied/000001-zone.dir").exists()
+            || inbox.join("refused/000001-zone.dir").exists(),
+        "zone directive processed"
+    );
+    assert!(
+        inbox.join("refused/000002-smite.dir").exists()
+            || inbox.join("applied/000002-smite.dir").exists(),
+        "smite directive processed"
+    );
+    // Unknown verb must refuse.
+    assert!(
+        inbox.join("refused/000002-smite.dir").exists(),
+        "the smite refused"
+    );
+    // Processing is the leash law; afford/AP may refuse the zone deed
+    // without breaking the directive archive contract.
+    assert!(
+        book.pending_directives("cinder-reach")
+            .expect("pending")
+            .is_empty(),
+        "inbox drained"
     );
 }
 

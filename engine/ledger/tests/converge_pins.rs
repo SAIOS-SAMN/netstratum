@@ -146,9 +146,9 @@ fn placement_is_a_measurement_not_a_hash() {
     // the razed build and the revoked grant leave residuals the plain
     // life does not carry.
     let fiber_plain =
-        fs::read_to_string(live_a.join("worlds/fiber/var-era1--amber.json")).expect("fiber");
+        fs::read(live_a.join("worlds/fiber/var-era1--amber.fiber")).expect("fiber");
     let fiber_loops =
-        fs::read_to_string(live_a.join("worlds/fiber/var-era1--loops.json")).expect("fiber");
+        fs::read(live_a.join("worlds/fiber/var-era1--loops.fiber")).expect("fiber");
     assert_ne!(fiber_plain, fiber_loops);
 }
 

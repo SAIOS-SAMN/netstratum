@@ -76,15 +76,27 @@ JSON is not “enabled” for these surfaces. Casual edit-as-text is gone.
 
 ---
 
-## 5. Smoke
+## 5. Zero JSON on the write path
+
+| Was | Now |
+|-----|-----|
+| journal.jsonl | **journal.jrn** (framed TLV) |
+| fiber/*.json | **fiber/*.fiber** |
+| agent response JSON | **line wire** (`ok`/`actor`/`deed`/…) |
+| /data/index.json | **/data/index.txt** |
+
+`wall.html` remains HTML presentation of journals (not a law file).
+
+`pen::JsonWriter` remains only for unit tests of the pen crate — no production call site.
+
+## 6. Smoke
 
 ```bash
 test -f var/worlds/<world>/chronicle.tlv
 test -f var/worlds/<world>/planets/*/state.tlv
-# no state.json written on new record:
 test ! -f var/worlds/<world>/planets/*/state.json
+test ! -f var/worlds/<world>/journal.jsonl
 
 python3 tools/observer.py arc --plain | head
 python3 tools/steward.py list
-# registry cards are .civ after create/load migrate
 ```

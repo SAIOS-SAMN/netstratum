@@ -68,10 +68,7 @@ fn the_display_re_serves_from_the_chain_byte_for_byte() {
     assert_eq!(committed, world.committed(), "the head projection is the played state");
 }
 
-/// The RICH rendering re-serves from the chain: resume the World from
-/// its chronicle (every link recomputed on load), render through the
-/// moved renderer — byte-for-byte the display's state.json. The
-/// display half is deletable whole.
+/// Resume from chronicle.tlv re-derives committed state (no state.json).
 #[test]
 fn the_rich_rendering_re_serves_from_the_chronicle() {
     let root = scratch("rich");
@@ -80,31 +77,21 @@ fn the_rich_rendering_re_serves_from_the_chronicle() {
     let book = Ledger::at(root.join("worlds"));
     scribe::record(&book, "meridian", "meridian-prime", "test-sigil", &world)
         .expect("the display records");
-    let display = fs::read_to_string(
-        book.world_dir("meridian")
-            .join("planets")
-            .join("meridian-prime")
-            .join("state.json"),
-    )
-    .expect("the export exists");
+    let tlv_path = book
+        .world_dir("meridian")
+        .join("planets")
+        .join("meridian-prime")
+        .join("state.tlv");
+    let display = fs::read(&tlv_path).expect("state.tlv exists");
+    assert!(!tlv_path.with_extension("json").exists());
 
-    // The chronicle is the chain-verified record; the lens resumes
-    // the World from it and renders — no display file consulted.
     let chronicle_path = root.join("chronicle.tlv");
     cfe::persist::sync(world.chronicle(), &chronicle_path).expect("syncs");
     let resumed = lens::world(&chronicle_path).expect("resumes by replay");
-    // #45: the export carries the cognition mass scribe derived (the
-    // lens is GIVEN it, per its charter). This fixture minted nothing,
-    // so the mass is exactly zero — the re-derivation passes what the
-    // kernel would compute over an empty work set.
-    let projected = lens::render::render_state_with(
-        "meridian",
-        "meridian-prime",
-        "test-sigil",
-        &resumed,
-        Some("0"),
-    );
-    assert_eq!(projected, display, "the rich export re-derives byte-for-byte");
+    assert_eq!(resumed.committed(), world.committed());
+    // Wire re-derives from resumed orb.
+    let projected = resumed.orb().expect("orb").wire_bytes();
+    assert_eq!(projected, display, "state.tlv re-derives byte-for-byte");
 }
 
 #[test]

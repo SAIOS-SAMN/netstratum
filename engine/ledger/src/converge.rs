@@ -22,8 +22,7 @@ use num_traits::Zero;
 use physics::{AxisVector, Triple};
 
 use crate::extract;
-use pen::JsonWriter;
-use crate::{sanitize, Ledger};
+use crate::{card, sanitize, Ledger};
 
 /// One archived receipt, reconstructed from a chronicle.jsonl line —
 /// raw event bytes carried whole so verification never needs to decode
@@ -455,19 +454,14 @@ fn write_fiber_card(
             .collect::<Vec<_>>()
             .join(" ")
     };
-    let mut w = JsonWriter::new();
-    w.open();
-    w.field_str("world", chart_name);
+    let mut out = Vec::new();
+    card::put_str(card::fiber::WORLD, chart_name, &mut out);
     if derelict {
-        w.field_str("state", "derelict");
+        card::put_str(card::fiber::STATE, "derelict", &mut out);
     }
-    w.field_str("residual_spatial", &render(&residual.spatial));
-    w.field_str("residual_gauge", &render(&residual.gauge));
-    w.close();
-    fs::write(
-        dir.join(format!("{}.json", sanitize(chart_name))),
-        w.finish(),
-    )
+    card::put_str(card::fiber::SPATIAL, &render(&residual.spatial), &mut out);
+    card::put_str(card::fiber::GAUGE, &render(&residual.gauge), &mut out);
+    card::write_atomic(&dir.join(format!("{}.fiber", sanitize(chart_name))), &out)
 }
 
 /// Parse one archived chronicle.jsonl into raw receipts, with the

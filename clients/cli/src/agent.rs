@@ -41,30 +41,31 @@ impl Response {
     fn refused(deed: &str, detail: String) -> Response {
         Response { ok: false, deed: deed.to_string(), receipt: None, detail }
     }
-    /// Render as one JSON object — the uplink's own shape, so an agent
-    /// reads responses with the same parser it reads state with.
-    pub fn json(&self, actor: &str) -> String {
-        let mut out = String::from("{");
-        out.push_str(&format!("\"actor\":\"{}\",", escape(actor)));
-        out.push_str(&format!("\"deed\":\"{}\",", escape(&self.deed)));
-        out.push_str(&format!("\"ok\":{},", self.ok));
+    /// Render as plain key-lines (not JSON) — uplink shape for agents.
+    ///
+    /// ```text
+    /// ok true
+    /// actor rover
+    /// deed zone
+    /// receipt <hex>
+    /// detail ...
+    /// ```
+    pub fn wire(&self, actor: &str) -> String {
+        let mut out = String::new();
+        out.push_str(&format!("ok {}\n", self.ok));
+        out.push_str(&format!("actor {}\n", one_line(actor)));
+        out.push_str(&format!("deed {}\n", one_line(&self.deed)));
         if let Some(receipt) = &self.receipt {
-            out.push_str(&format!("\"receipt\":\"{receipt}\","));
+            out.push_str(&format!("receipt {receipt}\n"));
         }
-        out.push_str(&format!("\"detail\":\"{}\"", escape(&self.detail)));
-        out.push('}');
+        out.push_str(&format!("detail {}\n", one_line(&self.detail)));
         out
     }
 }
 
-fn escape(text: &str) -> String {
+fn one_line(text: &str) -> String {
     text.chars()
-        .flat_map(|c| match c {
-            '"' => vec!['\\', '"'],
-            '\\' => vec!['\\', '\\'],
-            '\n' => vec!['\\', 'n'],
-            held => vec![held],
-        })
+        .map(|c| if c == '\n' || c == '\r' { ' ' } else { c })
         .collect()
 }
 
@@ -298,18 +299,24 @@ mod tests {
     }
 
     #[test]
-    fn the_answer_is_json_the_uplink_shape() {
+    fn the_answer_is_line_wire_not_json() {
         let mut world = played();
         let agent = world.register_agent("rover").expect("registers");
         world.grant(agent, Scope::Collect).expect("grants");
         let answer = handle(&mut world, "rover", "look");
-        let json = answer.json("rover");
-        assert!(json.starts_with('{') && json.ends_with('}'), "{json}");
-        assert!(json.contains("\"actor\":\"rover\""), "{json}");
-        assert!(json.contains("\"ok\":true"), "{json}");
-        // A quote in a name does not break the object.
-        let odd = Response::refused("zone", "he said \"no\"".into());
-        assert!(odd.json("ro\"ver").contains("\\\""));
+        let wire = answer.wire("rover");
+        assert!(wire.contains("ok true"), "{wire}");
+        assert!(wire.contains("actor rover"), "{wire}");
+        assert!(!wire.contains('{'), "no JSON: {wire}");
+        let odd = Response {
+            ok: false,
+            deed: "zone".into(),
+            receipt: None,
+            detail: "he said \"no\"\nline".into(),
+        };
+        let w = odd.wire("rover");
+        assert!(!w.contains('{'));
+        assert!(!w.lines().any(|l| l.contains('\n') && l.starts_with("detail")));
     }
 
     #[test]

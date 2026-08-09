@@ -34,7 +34,6 @@ use cfe::vrp::{Chronicle, Receipt};
 use cfe::world::{replay, Committed, World};
 use physics::Beacon;
 use std::fs;
-use std::io::Write as _;
 
 use ledger::registry::Civilization;
 use ledger::Ledger;
@@ -662,68 +661,61 @@ fn narrate(
     }
 }
 
-/// Render one entry as its journal.jsonl line (08 §3) — flat JSON via
-/// the ledger's own writer, one line, no trailing newline.
-pub fn render_entry(entry: &JournalEntry) -> String {
-    let mut w = pen::JsonWriter::new();
-    w.open();
-    w.field_u64("year", entry.year);
-    w.field_u64("tick", entry.tick);
-    w.field_str("cycle", &entry.cycle);
-    w.field_str("world", &entry.world);
-    w.field_str("civilization", &entry.civilization);
-    w.field_str("archetype", &entry.archetype);
-    w.field_str("alert", entry.alert.word());
-    w.field_str("headline", &entry.headline);
-    w.field_str("body", &entry.body);
-    w.key("economics");
-    w.open();
-    w.field_str("banked_joules", &entry.economics.banked_joules);
-    w.field_str("heating_need_year", &entry.economics.heating_need_year);
-    w.field_str("entropy_vented", &entry.economics.entropy_vented);
-    w.field_str("vented_this_year", &entry.economics.vented_this_year);
-    w.field_str("banked_sink", &entry.economics.banked_sink);
-    w.field_u64("zones", entry.economics.zones);
-    w.field_u64("zones_built", entry.economics.zones_built);
-    w.field_u64("zones_razed", entry.economics.zones_razed);
-    w.field_str("growth_per_year", &entry.economics.growth_per_year);
-    w.close();
-    w.key("famine");
-    w.array(entry.famine.iter().cloned());
-    if let Some(request) = &entry.trade_request {
-        w.field_str("trade_request", request);
+/// Encode one journal entry as TLV payload (not JSON).
+pub fn render_entry_tlv(entry: &JournalEntry) -> Vec<u8> {
+    use ledger::card::{self, jrn};
+    let mut out = Vec::new();
+    card::put_u64(jrn::YEAR, entry.year, &mut out);
+    card::put_u64(jrn::TICK, entry.tick, &mut out);
+    card::put_str(jrn::CYCLE, &entry.cycle, &mut out);
+    card::put_str(jrn::WORLD, &entry.world, &mut out);
+    card::put_str(jrn::CIVILIZATION, &entry.civilization, &mut out);
+    card::put_str(jrn::ARCHETYPE, &entry.archetype, &mut out);
+    card::put_str(jrn::ALERT, entry.alert.word(), &mut out);
+    card::put_str(jrn::HEADLINE, &entry.headline, &mut out);
+    card::put_str(jrn::BODY, &entry.body, &mut out);
+    card::put_str(jrn::BANKED_JOULES, &entry.economics.banked_joules, &mut out);
+    card::put_str(jrn::HEATING_NEED, &entry.economics.heating_need_year, &mut out);
+    card::put_str(jrn::ENTROPY_VENTED, &entry.economics.entropy_vented, &mut out);
+    card::put_str(jrn::VENTED_YEAR, &entry.economics.vented_this_year, &mut out);
+    card::put_str(jrn::BANKED_SINK, &entry.economics.banked_sink, &mut out);
+    card::put_u64(jrn::ZONES, entry.economics.zones, &mut out);
+    card::put_u64(jrn::ZONES_BUILT, entry.economics.zones_built, &mut out);
+    card::put_u64(jrn::ZONES_RAZED, entry.economics.zones_razed, &mut out);
+    card::put_str(jrn::GROWTH, &entry.economics.growth_per_year, &mut out);
+    for f in &entry.famine {
+        card::put_str(jrn::FAMINE, f, &mut out);
     }
-    w.close();
-    w.finish()
+    if let Some(request) = &entry.trade_request {
+        card::put_str(jrn::TRADE_REQUEST, request, &mut out);
+    }
+    out
 }
 
-/// Reflect one world's journal (08 §3): append the years the file
-/// does not yet carry to `<world>/journal.jsonl` — idempotent (a
-/// re-record appends NOTHING; a deleted file regenerates
-/// byte-identically, 08 §1.1) — then regenerate the wall. Returns
-/// how many years were appended. (Moved from `Ledger::record_journal`
-/// at the inversion — a scribe function over the world-dir paths.)
+/// Reflect one world's journal to `journal.jrn` (framed TLV, not JSON).
+/// Idempotent append; regenerates byte-identically. Returns years appended.
 pub fn record_journal(
     book: &Ledger,
     world_name: &str,
     world: &World,
     voice: &Voice,
 ) -> std::io::Result<usize> {
+    use ledger::card;
     let entries = journal(world_name, world, voice, YEAR_TICKS);
     let dir = book.world_dir(world_name);
-        fs::create_dir_all(&dir)?;
-        let path = dir.join("journal.jsonl");
+    fs::create_dir_all(&dir)?;
+    let path = dir.join("journal.jrn");
+    // Drop legacy JSON journal if present.
+    let _ = fs::remove_file(dir.join("journal.jsonl"));
     let already = match path.exists() {
-        true => fs::read_to_string(&path)?.lines().count(),
+        true => card::count_frames(&fs::read(&path)?),
         false => 0,
     };
     let mut appended = 0usize;
     if entries.len() > already {
-        let mut file = fs::OpenOptions::new().create(true).append(true).open(&path)?;
         for entry in &entries[already..] {
-            let mut line = render_entry(entry);
-            line.push('\n');
-            file.write_all(line.as_bytes())?;
+            let payload = render_entry_tlv(entry);
+            card::append_frame(&path, &payload)?;
             appended += 1;
         }
     }
@@ -731,32 +723,27 @@ pub fn record_journal(
     Ok(appended)
 }
 
-/// Regenerate the Terminal Wall (08 §3): one static, self-contained
-/// page over every world's journal.jsonl — inline CSS/JS only, no
-/// external requests; content is static, animation is cosmetic.
-/// Atomic replace, like every lens card. (Moved from
-/// `Ledger::render_wall` at the inversion.)
+/// Regenerate the Terminal Wall from every world's `journal.jrn`.
 pub fn render_wall(book: &Ledger) -> std::io::Result<()> {
+    use ledger::card;
     let mut cards: Vec<WallCard> = Vec::new();
     if let Ok(entries) = fs::read_dir(book.root()) {
-            let mut world_dirs: Vec<_> = entries
-                .filter_map(|e| e.ok().map(|e| e.path()))
-                .filter(|p| p.is_dir())
-                .collect();
-            world_dirs.sort();
-            for dir in world_dirs {
-                let Ok(text) = fs::read_to_string(dir.join("journal.jsonl")) else {
-                    continue;
-                };
-                for line in text.lines() {
-                    if let Some(card) = parse_wall_card(line) {
-                        cards.push(card);
-                    }
+        let mut world_dirs: Vec<_> = entries
+            .filter_map(|e| e.ok().map(|e| e.path()))
+            .filter(|p| p.is_dir())
+            .collect();
+        world_dirs.sort();
+        for dir in world_dirs {
+            let Ok(data) = fs::read(dir.join("journal.jrn")) else {
+                continue;
+            };
+            for frame in card::frames(&data) {
+                if let Some(card) = parse_wall_card_tlv(frame) {
+                    cards.push(card);
                 }
             }
         }
-    // Newest first; ties break by world then civilization so the
-    // wall is a pure function of the journals (deterministic).
+    }
     cards.sort_by(|a, b| {
         b.tick
             .cmp(&a.tick)
@@ -770,7 +757,7 @@ pub fn render_wall(book: &Ledger) -> std::io::Result<()> {
     fs::rename(&tmp, book.root().join("wall.html"))
 }
 
-/// One wall card — the display fields of one journal line.
+/// One wall card — the display fields of one journal entry.
 struct WallCard {
     tick: u64,
     year: u64,
@@ -784,19 +771,39 @@ struct WallCard {
     trade_request: Option<String>,
 }
 
-fn parse_wall_card(line: &str) -> Option<WallCard> {
-    Some(WallCard {
-        tick: ledger::extract::extract_u64(line, "tick")?,
-        year: ledger::extract::extract_u64(line, "year")?,
-        cycle: ledger::extract::extract_string(line, "cycle")?,
-        world: ledger::extract::extract_string(line, "world")?,
-        civilization: ledger::extract::extract_string(line, "civilization")?,
-        archetype: ledger::extract::extract_string(line, "archetype")?,
-        alert: ledger::extract::extract_string(line, "alert")?,
-        headline: ledger::extract::extract_string(line, "headline")?,
-        body: ledger::extract::extract_string(line, "body")?,
-        trade_request: ledger::extract::extract_string(line, "trade_request"),
-    })
+fn parse_wall_card_tlv(payload: &[u8]) -> Option<WallCard> {
+    use ledger::card::{self, jrn};
+    let mut card = WallCard {
+        tick: 0,
+        year: 0,
+        cycle: String::new(),
+        world: String::new(),
+        civilization: String::new(),
+        archetype: String::new(),
+        alert: String::new(),
+        headline: String::new(),
+        body: String::new(),
+        trade_request: None,
+    };
+    for (tag, value) in card::records(payload) {
+        match tag {
+            jrn::YEAR => card.year = card::u64_of(value).unwrap_or(0),
+            jrn::TICK => card.tick = card::u64_of(value).unwrap_or(0),
+            jrn::CYCLE => card.cycle = card::str_of(value).unwrap_or_default(),
+            jrn::WORLD => card.world = card::str_of(value).unwrap_or_default(),
+            jrn::CIVILIZATION => card.civilization = card::str_of(value).unwrap_or_default(),
+            jrn::ARCHETYPE => card.archetype = card::str_of(value).unwrap_or_default(),
+            jrn::ALERT => card.alert = card::str_of(value).unwrap_or_default(),
+            jrn::HEADLINE => card.headline = card::str_of(value).unwrap_or_default(),
+            jrn::BODY => card.body = card::str_of(value).unwrap_or_default(),
+            jrn::TRADE_REQUEST => card.trade_request = card::str_of(value),
+            _ => {}
+        }
+    }
+    if card.world.is_empty() {
+        return None;
+    }
+    Some(card)
 }
 
 /// Escape text for HTML — the wall shows journal text verbatim.

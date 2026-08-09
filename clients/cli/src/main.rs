@@ -5280,7 +5280,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             Some(handle) if words.clone().next().is_some() => {
                 let request: Vec<&str> = words.collect();
                 let answer = agent::handle(world, handle, &request.join(" "));
-                println!("{}", answer.json(handle));
+                println!("{}", answer.wire(handle));
             }
             Some(handle) => match world.register_agent(handle) {
                 Ok(id) => println!(
