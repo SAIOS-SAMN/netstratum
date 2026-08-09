@@ -125,7 +125,6 @@ dependencies = [
  "cfe",
  "num-bigint",
  "num-traits",
- "pen",
  "physics",
  "ratio",
  "scribe",
@@ -141,7 +140,6 @@ dependencies = [
  "mesh",
  "num-bigint",
  "num-traits",
- "pen",
  "rfa-core",
  "scribe",
 ]
@@ -217,10 +215,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pen"
-version = "0.1.0"
-
-[[package]]
 name = "physics"
 version = "0.1.0"
 dependencies = [
@@ -260,7 +254,6 @@ dependencies = [
  "kernel",
  "ledger",
  "lens",
- "pen",
  "physics",
 ]
 

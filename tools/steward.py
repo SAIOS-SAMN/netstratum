@@ -52,7 +52,6 @@ def world_dirs(root):
         and (
             (d / "world.card").exists()
             or (d / "chronicle.tlv").exists()
-            or (d / "world.json").exists()  # legacy during migrate
         )
         and not d.name.startswith(".")
         and "--closed-" not in d.name
@@ -115,7 +114,7 @@ def cmd_list(root):
             pending = sum(
                 1
                 for p in inbox.iterdir()
-                if p.is_file() and p.suffix in (".dir", ".json")
+                if p.is_file() and p.suffix == ".dir"
             )
         print(
             f"  {wname:<20} planets {', '.join(planets) or '(none)':<24} "
@@ -128,7 +127,6 @@ def cmd_send(root, world, verb, args):
     if not (
         (world_dir / "world.card").exists()
         or (world_dir / "chronicle.tlv").exists()
-        or (world_dir / "world.json").exists()
     ):
         sys.exit(
             f"steward: no exported world '{world}' under {root} "
@@ -159,9 +157,9 @@ def cmd_status(root, world):
             if p.is_file() and p.suffix in exts
         )
 
-    pending = names((".dir", ".json"), inbox)
-    applied = names((".dir", ".json"), inbox / "applied")
-    refused = names((".dir", ".json"), inbox / "refused")
+    pending = names((".dir",), inbox)
+    applied = names((".dir",), inbox / "applied")
+    refused = names((".dir",), inbox / "refused")
     print(
         f"{world}: {len(pending)} pending · {len(applied)} applied · {len(refused)} refused"
     )

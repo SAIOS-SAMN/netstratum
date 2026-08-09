@@ -10,9 +10,7 @@ cfe = { path = "../cfe" }
 # the arities of THIS crate's closed vocabularies, and the requirement is
 # proved here against the live lists rather than copied down.
 ratio = { path = "../ratio" }
-pen = { path = "../pen" }
-# The JSON emitter is `pen` — a crate BELOW both this and the lens, so
-# the one-way arrow holds without either borrowing the other's writer.
+# pen (JSON emitter) retired — binary cards + TLV only.
 physics = { path = "../physics" }
 num-bigint.workspace = true
 num-traits.workspace = true

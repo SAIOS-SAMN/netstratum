@@ -5,7 +5,7 @@
 <title>netstratum observatory</title>
 <style>
   /* Text-first, cyber-noir — the Terminal Wall's sibling. The GPU is
-     the map; the text is the interface. */
+     the map; the text is the interface. No JSON: binary cards + TLV. */
   :root { --bg:#07090c; --fg:#c8d6d0; --dim:#5c6b66; --hot:#e8734a;
           --cold:#5ab8d4; --good:#6fd48a; --bad:#e05555; --head:#8be0d0; }
   * { box-sizing: border-box; }
@@ -29,7 +29,7 @@
 </head>
 <body>
 <canvas id="torus"></canvas>
-<div id="legend">NETSTRATUM OBSERVATORY — the 3-torus (edges wrap · G = hue · mass = crowd)</div>
+<div id="legend">NETSTRATUM OBSERVATORY — the 3-torus (edges wrap · G = hue · mass = crowd) · TLV only</div>
 <div id="hover"></div>
 <div id="panels">
   <div class="panel" id="board"><h2>THE BOARD</h2><span class="dim">reading…</span></div>
@@ -41,35 +41,171 @@
 "use strict";
 /* Exact fractions arrive as strings; floats appear ONLY here, at the
    pixel (the render boundary — the no-float law binds the engine,
-   never the reflection's screen). */
+   never the reflection's screen). NO JSON.parse — TLV binary only. */
 const F = t => { if (typeof t !== "string") return Number(t||0);
   const s = t.split("/"); return s.length===2 ? Number(s[0])/Number(s[1]) : Number(t); };
 const esc = t => String(t).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
 const TIER = st => ({progenitor:"T0", watcher:"T1", observer:"T1", sovereign:"T2"})[st] || "T3";
+const RESOURCES = {1:"iron",2:"biomass",3:"alloy",4:"diamond",5:"joule",6:"sink",7:"crystal"};
 
-/* ── data: the lens's own files, polled ─────────────────────────── */
-async function j(path){ const r = await fetch(path); if(!r.ok) throw 0; return r.json(); }
 async function text(path){ const r = await fetch(path); if(!r.ok) throw 0; return r.text(); }
+async function bin(path){
+  const r = await fetch(path);
+  if(!r.ok) throw 0;
+  return new Uint8Array(await r.arrayBuffer());
+}
 
-async function readBoard(){
-  const index = await j("/data/index.json");
-  const universe = await j("/data/worlds/universe.json").catch(()=>({span:"64",tuniversal:"—"}));
-  const chartLines = await text("/data/worlds/starchart.json").catch(()=> "");
-  const chart = {};
-  for (const line of chartLines.split("\n")) {
-    const t = line.trim(); if (!t) continue;
-    try { const c = JSON.parse(t); chart[c.world] = c; } catch (e) {}
+/* ── NS-1 TLV: tag u8 ‖ LE32(len) ‖ value ───────────────────────── */
+function* tlvRecords(data){
+  let at = 0;
+  while (at + 5 <= data.length){
+    const tag = data[at];
+    const len = data[at+1] | (data[at+2]<<8) | (data[at+3]<<16) | (data[at+4]<<24);
+    const start = at + 5, end = start + len;
+    if (end > data.length) return;
+    yield [tag, data.subarray(start, end)];
+    at = end;
   }
+}
+function u8str(bytes){
+  try { return new TextDecoder("utf-8").decode(bytes); } catch(e){ return ""; }
+}
+function u64le(bytes){
+  if (bytes.length < 8) return 0;
+  let n = 0n;
+  for (let i = 7; i >= 0; i--) n = (n << 8n) | BigInt(bytes[i]);
+  return Number(n);
+}
+function tlvRatio(value, at=0){
+  if (at >= value.length) return ["0", at];
+  const sign = value[at++];
+  const parts = [];
+  for (let k = 0; k < 2; k++){
+    if (at + 4 > value.length) return ["0", at];
+    const ln = value[at] | (value[at+1]<<8) | (value[at+2]<<16) | (value[at+3]<<24);
+    at += 4;
+    let n = 0n;
+    for (let i = 0; i < ln && at + i < value.length; i++)
+      n = (n << 8n) | BigInt(value[at + i]);
+    at += ln;
+    parts.push(n);
+  }
+  const [numer, denom] = parts;
+  if (denom === 0n) return ["0", at];
+  const s = (sign === 1 ? "-" : "") + numer.toString() +
+    (denom === 1n ? "" : "/" + denom.toString());
+  return [s, at];
+}
+
+function parseCiv(data){
+  const card = {name:"",sigil:"",species:"",clade:"",station:null};
+  for (const [tag, val] of tlvRecords(data)){
+    const s = u8str(val);
+    if (tag===1) card.name = s;
+    else if (tag===2) card.sigil = s;
+    else if (tag===3) card.species = s;
+    else if (tag===4) card.clade = s;
+    else if (tag===11) card.station = s || null;
+  }
+  return card.sigil ? card : null;
+}
+function parseUniverse(data){
+  const out = {span:"64", tuniversal:"—", topology:"torus"};
+  for (const [tag, val] of tlvRecords(data)){
+    if (tag===1) out.topology = u8str(val);
+    else if (tag===2) out.span = u8str(val);
+    else if (tag===3) out.tuniversal = u8str(val);
+  }
+  return out;
+}
+function parseStarchart(data){
+  const chart = {};
+  let cur = null, coords = ["0","0","0","0"];
+  const flush = () => {
+    if (cur) chart[cur] = {world:cur, x:coords[0], y:coords[1], z:coords[2], g:coords[3]};
+  };
+  for (const [tag, val] of tlvRecords(data)){
+    const s = u8str(val);
+    if (tag===1){ flush(); cur = s; coords = ["0","0","0","0"]; }
+    else if (tag===2) coords[0] = s;
+    else if (tag===3) coords[1] = s;
+    else if (tag===4) coords[2] = s;
+    else if (tag===5) coords[3] = s;
+    else if (tag===0){ flush(); cur = null; }
+  }
+  flush();
+  return chart;
+}
+function parseOrb(data, world, planet){
+  const orb = {
+    world, planet, colony: planet, civilization: world.split("-")[0]||"?",
+    clock: 0, banked: {}, famine: [], zones: [], offers: [],
+    entropy_vented: "0", stamp: "0", habitats: 0,
+  };
+  for (const [tag, val] of tlvRecords(data)){
+    if (tag===16 && val.length >= 8){
+      try { orb.colony = u8str(val.subarray(8)) || planet; orb.planet = orb.colony; } catch(e){}
+    } else if (tag===17 && val.length >= 3){
+      const kind = val[2];
+      orb.zones.push({tile: val[0] | (val[1]<<8), kind});
+      if (kind === 2) orb.habitats++;
+    } else if (tag===18 && val.length > 1){
+      const res = RESOURCES[val[0]] || ("r"+val[0]);
+      const [amt] = tlvRatio(val, 1);
+      orb.banked[res] = amt;
+    } else if (tag===19 && val.length){
+      const res = RESOURCES[val[0]];
+      if (res) orb.famine.push(res);
+    } else if (tag===28){
+      const [amt] = tlvRatio(val, 0);
+      orb.entropy_vented = amt;
+    } else if (tag===73){
+      const [amt] = tlvRatio(val, 0);
+      orb.stamp = amt;
+    }
+  }
+  return orb;
+}
+function parseIndex(txt){
+  const worlds = [], registry = [];
+  let cur = null;
+  for (const line of txt.split("\n")){
+    const t = line.trim();
+    if (!t || t.startsWith("#") || t.startsWith("[")) continue;
+    if (t.startsWith("world ")){
+      cur = {world: t.slice(6).trim(), planets: []};
+      worlds.push(cur);
+    } else if (t.startsWith("planet ") && cur){
+      cur.planets.push(t.slice(7).trim());
+    } else if (t.startsWith("civ ")){
+      registry.push(t.slice(4).trim());
+    }
+  }
+  return {worlds, registry};
+}
+
+/* ── data: TLV + plain index only ───────────────────────────────── */
+async function readBoard(){
+  const index = parseIndex(await text("/data/index.txt"));
+  let universe = {span:"64", tuniversal:"—"};
+  try { universe = parseUniverse(await bin("/data/worlds/universe.card")); } catch(e){}
+  let chart = {};
+  try { chart = parseStarchart(await bin("/data/worlds/starchart.card")); } catch(e){}
   const registry = {};
   await Promise.all(index.registry.map(async sig => {
-    registry[sig] = await j(`/data/registry/${sig}.json`).catch(()=>({}));
+    try {
+      const card = parseCiv(await bin(`/data/registry/${sig}.civ`));
+      if (card) registry[sig] = card;
+    } catch(e){}
   }));
   const planets = [];
   await Promise.all(index.worlds.map(async w => {
-    for (const p of w.planets) {
-      const st = await j(`/data/worlds/${w.world}/planets/${p}/state.json`).catch(()=>null);
-      if (st) planets.push(st);
-    }
+    await Promise.all(w.planets.map(async p => {
+      try {
+        const st = parseOrb(await bin(`/data/worlds/${w.world}/planets/${p}/state.tlv`), w.world, p);
+        planets.push(st);
+      } catch(e){}
+    }));
   }));
   return { index, universe, chart, registry, planets };
 }
@@ -78,7 +214,7 @@ async function readBoard(){
 function renderPanels(d){
   const tiers = {T0:[],T1:[],T2:[],T3:[]};
   for (const [sig, card] of Object.entries(d.registry))
-    tiers[TIER(card.station)].push({sig, card});
+    (tiers[TIER(card.station)] || tiers.T3).push({sig, card});
   const census = ["T0","T1","T2","T3"].map(t=>`${t} ${tiers[t].length}`).join(" · ");
   document.getElementById("board").innerHTML =
     `<h2>THE BOARD</h2>` +
@@ -87,31 +223,20 @@ function renderPanels(d){
     `<span class="strong">${d.index.worlds.length}</span> worlds · ` +
     `<span class="strong">${d.planets.length}</span> settled planets\n\n` +
     d.planets.map(p => {
-      const stack = (p.constellation||[]);
-      const held = stack.filter(n => n.held).length;
-      const strip = stack.length ? ` <span class="cold">${held}/7✶</span>` : "";
       return `${esc(p.world)}<span class="dim">/${esc(p.planet)}</span> ` +
-        `<span class="dim">t${p.clock} · ${(p.zones||[]).length}z</span>${strip}`;
+        `<span class="dim">${(p.zones||[]).length}z · ${p.habitats||0}h</span>`;
     }).join("\n");
 
   const stressed = [];
   for (const p of d.planets) {
     const flags = [];
-    if ((p.famine||[]).length) flags.push(`<span class="bad">⚠${p.famine.join(",")}</span> <span class="dim">the want strikes</span>`);
-    for (const w of (p.wants||[])) flags.push(`<span class="bad">◌${esc(w)}</span> <span class="dim">a famine of the mind</span>`);
-    if (F(p.entropy_vented||"0") > 0) flags.push(`<span class="hot">♨${esc(p.entropy_vented)}</span>`);
+    if ((p.famine||[]).length) flags.push(`<span class="bad">short ${p.famine.join("+")}</span>`);
+    if (F(p.entropy_vented||"0") > 0) flags.push(`<span class="hot">vent ${esc(p.entropy_vented)}</span>`);
     if (flags.length) stressed.push(`${esc(p.world)}/${esc(p.planet)}  ${flags.join(" ")}`);
   }
-  const offers = [];
-  for (const p of d.planets)
-    for (const o of (p.offers||[]))
-      offers.push(`${esc(p.world)} <span class="dim">#${o.offer}</span> ` +
-        `<span class="strong">${esc(o.give_amount)}</span> ${esc(o.give)} ` +
-        `<span class="dim">for</span> <span class="strong">${esc(o.want_amount)}</span> ${esc(o.want)}`);
   document.getElementById("market").innerHTML = `<h2>THE TRADE BOARD</h2>` +
-    (offers.length ? offers.join("\n")
-      : `<span class="dim">no intents rest — the market waits</span>`) +
-    `\n\n<span class="dim">the price is the ratio — no absolute price exists</span>`;
+    `<span class="dim">offers ride the engine World — state.tlv mirrors banks only</span>\n` +
+    `<span class="dim">the price is the ratio — no absolute price exists</span>`;
   document.getElementById("stress").innerHTML = `<h2>STRESS — THE T0 READ</h2>` +
     (stressed.length ? stressed.join("\n")
       : `<span class="good">none — the board breathes</span>`) +
@@ -132,11 +257,11 @@ function renderPanels(d){
 const canvas = document.getElementById("torus");
 const gl = canvas.getContext("webgl", { antialias:true });
 const VS = `
-attribute vec3 at; attribute float ag;      // x,y wrapped; z depth; g key
+attribute vec3 at; attribute float ag;
 uniform vec2 pan; uniform float span;
 varying float vg; varying float vz;
 void main(){
-  vec2 p = mod(at.xy - pan, span) / span;   // THE WRAP — edges meet
+  vec2 p = mod(at.xy - pan, span) / span;
   vg = ag; vz = at.z / span;
   gl_Position = vec4(p*2.0-1.0, 0.0, 1.0);
   gl_PointSize = 14.0 + 26.0 * (0.5 - abs(vz - 0.5));
@@ -147,11 +272,10 @@ void main(){
   float d = length(gl_PointCoord - 0.5);
   if (d > 0.5) discard;
   float glow = smoothstep(0.5, 0.0, d);
-  // G as hue: 0 = frost-cyan, climbing through violet toward ember.
   vec3 cold = vec3(0.35, 0.72, 0.83);
   vec3 warm = vec3(0.91, 0.45, 0.29);
   vec3 tone = mix(cold, warm, fract(vg));
-  gl_FragColor = vec4(tone, glow * 0.85);   // additive: crowds GLOW
+  gl_FragColor = vec4(tone, glow * 0.85);
 }`;
 function shader(kind, src){ const s = gl.createShader(kind);
   gl.shaderSource(s, src); gl.compileShader(s); return s; }
@@ -211,7 +335,6 @@ canvas.addEventListener("mousemove", e => {
     pan.y -= (e.clientY - dragging.y) / canvas.clientHeight * span;
     dragging = {x:e.clientX, y:e.clientY};
   }
-  // Nearest world to the cursor, the wrapped way (L1 in screen space).
   let best = null, bestD = 28;
   names.forEach((n, i) => {
     const wx = ((points[i*4]-pan.x)%span+span)%span / span * canvas.clientWidth;
@@ -226,8 +349,6 @@ canvas.addEventListener("mousemove", e => {
   } else hover.style.display = "none";
 });
 
-/* ── the push loop (WEB-1 phase 2): SSE drives; polling is the
-      fallback when the stream drops ─────────────────────────────── */
 let refreshQueued = false;
 async function refresh(){
   if (refreshQueued) return; refreshQueued = true;
@@ -236,7 +357,7 @@ async function refresh(){
     lastBoard = d;
     renderPanels(d);
     upload(d.chart, d.universe.span);
-  } catch (e) { /* the window stays calm mid-write */ }
+  } catch (e) { /* calm mid-write */ }
   refreshQueued = false;
 }
 let lastBoard = null;
@@ -246,10 +367,8 @@ try {
   stream.addEventListener("tick", refresh);
   stream.onerror = () => setTimeout(refresh, 2000);
 } catch (e) { setInterval(refresh, 2000); }
-setInterval(refresh, 15000); // the heartbeat floor
+setInterval(refresh, 15000);
 
-/* ── the drill-down (WEB-1 phase 3): click a world on the torus —
-      its panel takes the board's place until dismissed ───────────── */
 canvas.addEventListener("click", e => {
   let best = null, bestD = 28;
   names.forEach((n, i) => {
@@ -262,18 +381,13 @@ canvas.addEventListener("click", e => {
   const p = lastBoard.planets.find(x => x.world === best);
   const el = document.getElementById("board");
   if (!p) { el.innerHTML = `<h2>${esc(best)}</h2><span class="dim">charted, not settled — an annexed or far world</span>`; return; }
-  const stack = (p.constellation||[]);
-  const strip = stack.map(n => n.held ? (n.condition === 6 ? "◆" : "✶")
-    : (n.threshold > 1 && n.condition !== 6 ? `${n.progress}/${n.threshold}` : "○")).join(" ");
   el.innerHTML = `<h2>WORLD ${esc(p.world)}</h2>` +
-    `planet <span class="strong">${esc(p.planet)}</span> · t${p.clock} · ` +
-    `${(p.zones||[]).length} zone(s)\n` +
+    `planet <span class="strong">${esc(p.planet)}</span> · ` +
+    `${(p.zones||[]).length} zone(s) · ${p.habitats||0} habitat(s)\n` +
     `civilization <span class="strong">${esc(p.civilization)}</span>\n` +
     `banked: ${Object.entries(p.banked||{}).map(([k,v])=>`${k} <span class="strong">${esc(v)}</span>`).join(" · ")||"—"}\n` +
-    ((p.famine||[]).length ? `<span class="bad">⚠ famine: ${p.famine.join(", ")}</span>\n` : "") +
-    ((p.wants||[]).length ? `<span class="bad">◌ wants: ${p.wants.map(esc).join(", ")}</span>\n` : "") +
-    (stack.length ? `base-7: ${strip}\n` : "") +
-    `<span class="dim">click empty space to return</span>`;
+    ((p.famine||[]).length ? `<span class="bad">short: ${p.famine.join(", ")}</span>\n` : "") +
+    `<span class="dim">click empty space to return · TLV authority</span>`;
   if (bestD >= 28) refresh();
 });
 </script>

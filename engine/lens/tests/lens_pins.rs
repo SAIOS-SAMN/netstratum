@@ -33,7 +33,7 @@ fn the_display_re_serves_from_the_chain_byte_for_byte() {
     let root = scratch("reserve");
     let world = played_world();
 
-    // The display half writes its export (state.tlv beside state.json).
+    // The display half writes its export (state.tlv only).
     let book = Ledger::at(root.join("worlds"));
     scribe::record(&book, "meridian", "meridian-prime", "test-sigil", &world)
         .expect("the display records");

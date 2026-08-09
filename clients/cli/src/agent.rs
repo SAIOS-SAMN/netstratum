@@ -4,7 +4,7 @@
 //! The conductor's automaton has been the only AI player and it is
 //! COMPILED IN: it calls `World` directly, so "an AI plays netstratum"
 //! has meant "an AI we shipped plays netstratum". This is the inbound
-//! half of the uplink — the outbound half being `lens::render_state`,
+//! half of the uplink — outbound is the line wire (no JSON),
 //! which has always been able to tell an outsider what is happening
 //! without any way for one to answer.
 //!

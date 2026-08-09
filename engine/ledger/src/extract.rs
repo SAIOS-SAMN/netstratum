@@ -1,35 +1,13 @@
-//! THE LEDGER'S READ-BACK — flat-JSON extractors, and nothing else.
+//! ONE-SHOT migrate extractors for legacy JSON on disk.
 //!
-//! Tier-A law: directive files and the adopted registry/galaxy reads.
-//! **No NEW read-back path ever** — the §11 standing test. Pub for the
-//! SCRIBE's two adopted read-backs (the chronicle-line and wall-card
-//! reads).
+//! Production write path emits **no** JSON. These readers exist only so
+//! `load` / chart / universe can convert residual files once and delete
+//! them. **No new JSON read-back path** — when migrate is complete these
+//! helpers become dead code safe to delete.
 //!
-//! # WHY THIS FILE IS NAMED FOR ITS JOB
-//!
-//! It was `json.rs`, and it held the extractors AND a `JsonWriter` that
-//! duplicated the lens's writer symbol for symbol. The duplication was
-//! deliberate and its reasoning was recorded here:
-//!
-//! > *two small pens, one per layer, neither borrowing the other's —
-//! > the duplication is the price of the one-way arrows, paid knowingly
-//! > (the shim it replaces was the cycle).*
-//!
-//! The constraint was real — this crate may never depend on a lens —
-//! but the option it missed was a crate BELOW both rather than a shim
-//! BETWEEN them. Nothing with zero dependencies can close a cycle. The
-//! writer now lives in `pen` and the exact-rational text form in
-//! `cfe::ratio`, beside the type it governs.
-//!
-//! **What remains is genuinely the ledger's own.** Reading JSON BACK is
-//! a persistence concern, and this crate is the only one that has it: a
-//! lens writes JSON that is never read as state (`19_LENS` §15a).
-//! Naming this file after the FORMAT is what let a writer hide in it;
-//! naming it after the JOB is what keeps one from coming back.
+//! Exact-rational text form lives at `cfe::ratio::ratio_str`.
 
-/// Extract `"key":"value"` from flat JSON (directive files are written
-/// by our own steward tool; this is a reader of known shapes, not a
-/// general parser — the game loop re-validates everything).
+/// Extract `"key":"value"` from flat legacy JSON (migrate-only).
 pub fn extract_string(text: &str, key: &str) -> Option<String> {
     let needle = format!("\"{key}\"");
     let after = &text[text.find(&needle)? + needle.len()..];

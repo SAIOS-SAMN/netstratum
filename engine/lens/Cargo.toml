@@ -14,7 +14,6 @@ mesh = { path = "../mesh" }
 # `deletability::no_sealed_crate_depends_on_a_lens`). The peel takes the
 # relation it is GIVEN, so the lens needs no kernel dependency to see.
 rfa-core = { path = "../rfa-core" }
-pen = { path = "../pen" }
 num-bigint.workspace = true
 num-traits.workspace = true
 

@@ -72,9 +72,9 @@ pub fn state_tlv(arbor: &Arbor) -> Result<Option<Vec<u8>>, LensRefused> {
 
 /// The replay-grounded projection: rebuild the live World from its
 /// chronicle (`chronicle.tlv` — chain-verified bytes, every link
-/// recomputed on load; the lawful read, never an export). The rich
-/// renderings ([`render::render_state`], journals) project from this
-/// World — the whole display re-derives from the chain.
+/// recomputed on load; the lawful read, never an export). Journals and
+/// the wall project from this World — the whole display re-derives from
+/// the chain (no JSON export).
 pub fn world(chronicle: &Path) -> Result<cfe::world::World, LensRefused> {
     let chronicle = cfe::persist::load(chronicle).map_err(LensRefused::Chronicle)?;
     Ok(cfe::world::World::resume(chronicle))

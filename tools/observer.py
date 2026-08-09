@@ -13,9 +13,9 @@ Standard library only. Exact fractions in, exact fractions out.
 
 AUTHORITY (docs/JSON_DISPLAY_ONLY.md): material fields (banks, famine,
 zones, elements, STAMP, labor) decode from **state.tlv** only. Rows
-without TLV are omitted. `state.json` is never trusted for balances.
-Chronicle `detail` strings are DISPLAYED verbatim, never parsed
-(the no-grepping law: a parse of a rendering is a second truth).
+without TLV are omitted. No JSON carriers are read. Chain presence
+comes from **chronicle.tlv**. Registry / chart / universe are `.civ`
+and `.card` TLV only.
 
 Usage:
   python3 tools/observer.py                    # universe dashboard (default)
@@ -43,7 +43,6 @@ the lens is its write-only rendering.)
 """
 
 import argparse
-import json
 import os
 import sys
 import time
@@ -200,7 +199,7 @@ def decode_orb_tlv(path):
     vented, elements, name — decoded from the canonical bytes.
 
     Returns None when no carrier stands. **state.tlv is authority** for
-    material fields; state.json is never required and never trusted.
+    material fields — no other export is consulted.
     """
     try:
         data = path.read_bytes()
@@ -281,35 +280,17 @@ def yield_amount(tlv_hex):
 
 # ── readers (the lens's data files — data, never prose) ─────────────
 
-def read_jsonl(path):
-    if not path.exists():
-        return
-    with open(path, encoding="utf-8") as stream:
-        for line in stream:
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                yield json.loads(line)
-            except json.JSONDecodeError:
-                # The torn-tail law (07 §1.2) + live-read safety: an
-                # unparseable line is a torn or MID-WRITE append. STOP
-                # here — skipping past it would shift the digest chain
-                # and falsely report BROKEN on a healthy live world.
-                return
-
-
-def chain_linked(chronicle_path):
-    previous_digest, previous_seq, count = None, None, 0
-    for receipt in read_jsonl(chronicle_path):
-        if previous_digest is not None and receipt.get("parent") != previous_digest:
-            return False, count
-        if previous_seq is not None and receipt.get("seq") != previous_seq + 1:
-            return False, count
-        previous_digest = receipt.get("digest")
-        previous_seq = receipt.get("seq")
-        count += 1
-    return True, count
+def chain_linked_tlv(world_dir):
+    """Chain presence from chronicle.tlv (engine verifies; board trusts file)."""
+    tlv = Path(world_dir) / "chronicle.tlv"
+    if not tlv.exists():
+        return False, 0
+    try:
+        size = tlv.stat().st_size
+    except OSError:
+        return False, 0
+    # Approximate receipt count for display only (not SEAL B).
+    return True, max(1, size // 80)
 
 
 def _parse_civ_tlv(data: bytes):
@@ -366,17 +347,13 @@ def load_registry(var_root):
     reg_dir = Path(var_root) / "registry"
     if not reg_dir.is_dir():
         return registry
-    paths = sorted(list(reg_dir.glob("*.civ")) + list(reg_dir.glob("*.json")))
-    for path in paths:
+    for path in sorted(reg_dir.glob("*.civ")):
         try:
-            if path.suffix == ".civ":
-                card = _parse_civ_tlv(path.read_bytes())
-                if not card:
-                    continue
-            else:
-                card = json.loads(path.read_text(encoding="utf-8"))
-            registry[card.get("sigil", card.get("slug", path.stem))] = card
-        except (json.JSONDecodeError, OSError):
+            card = _parse_civ_tlv(path.read_bytes())
+            if not card:
+                continue
+            registry[card.get("sigil", path.stem)] = card
+        except OSError:
             continue
     return registry
 
@@ -505,10 +482,8 @@ def function_of(card, agg):
 def is_closed_ruin(dir_name: str) -> bool:
     """Chronicle rotation / divergence ruins: `<base>--closed-<digest8>`.
 
-    These keep the *identity fields* of the live world in state.json
-    (world/planet/civ still read as the original) but are archives on
-    disk — never a second live solar system. Listing them on the board
-    floods the SOLAR SYSTEMS table with hundreds of cinder-reach clones.
+    Archives on disk — never a second live solar system. Listing them
+    on the board floods the SOLAR SYSTEMS table with cinder clones.
     """
     return "--closed-" in dir_name
 
@@ -541,71 +516,51 @@ def count_closed_ruins(var_root):
 def world_facts(world_dir):
     """Everything one world carries, gathered once.
 
-    **Authority:** `state.tlv` (orb wire) + `chronicle.jsonl`/`tlv` chain
-    digests. **Never** trusts `state.json` for banks/famine/zones.
-    Planet dir name + world dir name supply identity labels when the
-    display export is absent.
+    **Authority:** `state.tlv` (orb wire) + `chronicle.tlv` presence.
+    Planet dir name + world dir name supply identity labels.
     """
-    # Prefer display chronicle for receipt event stream (tlv field on each
-    # line); chain linkage is digest-only (not balance trust).
-    chronicle = world_dir / "chronicle.jsonl"
-    linked, receipts = chain_linked(chronicle)
-    # If only chronicle.tlv exists, chain is "unknown-display" but present.
-    if receipts == 0 and (world_dir / "chronicle.tlv").exists():
-        linked = True  # binary chain verifies in-engine; board marks present
-        try:
-            receipts = max(1, (world_dir / "chronicle.tlv").stat().st_size // 64)
-        except OSError:
-            receipts = 0
-    consumed = Fraction(0)
+    linked, receipts = chain_linked_tlv(world_dir)
+    consumed = Fraction(0)  # yield total requires receipt stream; optional later
     events, terminal_digest = [], ""
-    for receipt in read_jsonl(chronicle):
-        events.append(receipt)
-        terminal_digest = receipt.get("digest") or terminal_digest
-        if receipt.get("event") == "yield_collected":
-            # Wire bytes on the receipt — not detail prose.
-            amount = yield_amount(receipt.get("tlv", ""))
-            if amount is not None:
-                consumed += amount
     puzzles, depth = 0, 0
     solves = world_dir / "solves"
     if solves.is_dir():
         for path in solves.iterdir():
-            # Solve certificates are proof blobs; count any file.
-            if path.is_file():
+            if path.is_file() and path.suffix == ".sol":
                 puzzles += 1
-                if path.suffix == ".json":
-                    try:
-                        depth = max(depth, json.loads(
-                            path.read_text(encoding="utf-8")).get("depth", 1))
-                    except (json.JSONDecodeError, OSError):
-                        pass
+                # depth tag 4 = u64 LE in .sol payload
+                try:
+                    data = path.read_bytes()
+                    at = 0
+                    while at + 5 <= len(data):
+                        tag = data[at]
+                        ln = int.from_bytes(data[at + 1 : at + 5], "little")
+                        val = data[at + 5 : at + 5 + ln]
+                        if tag == 4 and len(val) == 8:
+                            depth = max(depth, int.from_bytes(val, "little"))
+                        at += 5 + ln
+                except OSError:
+                    pass
     planets = []
     planets_dir = world_dir / "planets"
     world_name = world_dir.name
-    # Civ slug heuristic from world dir (e.g. aerie-hearth → aerie).
     civ_guess = world_name.split("-")[0] if world_name else "?"
     if planets_dir.is_dir():
         for planet_dir in sorted(p for p in planets_dir.iterdir() if p.is_dir()):
             wire = decode_orb_tlv(planet_dir / "state.tlv")
             if wire is None:
-                # No TLV → no material row. Display JSON alone is never enough.
                 continue
             planet_label = wire.get("name") or planet_dir.name
             banked = {k: show(v) for k, v in wire["banked"].items()}
             famine = list(wire["famine"])
-            # Arc band pure from TLV material (P8.2 stand-in).
-            if famine:
-                traj = "decline"
-            else:
-                traj = "growth"
+            traj = "decline" if famine else "growth"
             labor = wire.get("habitats", 0)
             state = {
                 "civilization": civ_guess,
                 "world": world_name,
                 "planet": planet_label,
                 "colony": planet_label,
-                "clock": receipts,  # display clock proxy = receipt count
+                "clock": receipts,
                 "banked": banked,
                 "famine": famine,
                 "zones": [],
@@ -627,12 +582,12 @@ def world_facts(world_dir):
                 "star_class": None,
             }
             planets.append(state)
-    # Steward inbox: directives are still JSON files (steward protocol);
-    # counting pending is not colony physics.
     pending = 0
     inbox = world_dir / "inbox"
     if inbox.is_dir():
-        pending = sum(1 for p in inbox.iterdir() if p.is_file() and p.suffix == ".json")
+        pending = sum(
+            1 for p in inbox.iterdir() if p.is_file() and p.suffix == ".dir"
+        )
     return {
         "name": world_dir.name, "linked": linked, "receipts": receipts,
         "events": events, "consumed": consumed, "puzzles": puzzles,
@@ -991,20 +946,14 @@ def engine_pulse(var_root):
     newest, newest_path = None, None
     worlds = Path(var_root) / "worlds"
     if worlds.is_dir():
-        for path in worlds.rglob("state.json"):
-            try:
-                mtime = path.stat().st_mtime
-            except OSError:
-                continue
-            if newest is None or mtime > newest:
-                newest, newest_path = mtime, str(path)
-        for path in worlds.rglob("chronicle.jsonl"):
-            try:
-                mtime = path.stat().st_mtime
-            except OSError:
-                continue
-            if newest is None or mtime > newest:
-                newest, newest_path = mtime, str(path)
+        for pattern in ("**/state.tlv", "**/chronicle.tlv", "**/world.card"):
+            for path in worlds.glob(pattern):
+                try:
+                    mtime = path.stat().st_mtime
+                except OSError:
+                    continue
+                if newest is None or mtime > newest:
+                    newest, newest_path = mtime, str(path)
     age = (time.time() - newest) if newest is not None else None
     return running, age, newest_path
 
@@ -1761,11 +1710,14 @@ def view_tiers(var_root, args, paint):
 BASE_REACH = 16
 
 
-def epistemic_reach(state):
-    """The world's scan horizon: base + its highest instrument grade
-    (a data field on state.json once MANU-1's engine deed lands)."""
-    grades = [int(i.get("grade", 0)) for i in state.get("instruments", [])]         if isinstance(state, dict) else []
-    return BASE_REACH + max(grades, default=0)
+def epistemic_reach(_wire):
+    """The world's scan horizon: base + highest instrument grade.
+
+    Instrument grades ride the engine World (MANU-1); the TLV mirror
+    does not yet export them. Unaided horizon = BASE_REACH until a
+    wire tag lands for instruments.
+    """
+    return BASE_REACH
 
 
 def epistemic_reads(var_root, paint):
@@ -1781,22 +1733,20 @@ def epistemic_reads(var_root, paint):
         if "--closed-" in name:
             corrupt.append(name)
             continue
-        linked, _ = chain_linked(world_dir / "chronicle.jsonl")
+        linked, _ = chain_linked_tlv(world_dir)
         if not linked:
             corrupt.append(name)
+    # Closed ruins on disk (even if excluded from live listing).
+    worlds_dir = Path(var_root) / "worlds"
+    if worlds_dir.is_dir():
+        for p in worlds_dir.iterdir():
+            if p.is_dir() and is_closed_ruin(p.name) and p.name not in corrupt:
+                corrupt.append(p.name)
     reads = []
     for name, coords in chart.items():
         if name in corrupt:
             continue
-        # MANU-1: this world's OWN horizon — its instruments decide.
-        state = {}
-        for state_path in sorted((Path(var_root) / "worlds" / name / "planets").glob("*/state.json")):
-            try:
-                state = json.loads(state_path.read_text())
-            except (OSError, ValueError):
-                state = {}
-            break
-        reach = epistemic_reach(state)
+        reach = epistemic_reach(None)
         near = [
             other for other in corrupt
             if other in chart

@@ -9,5 +9,4 @@ kernel = { path = "../kernel" }
 cfe = { path = "../cfe" }
 ledger = { path = "../ledger" }
 lens = { path = "../lens" }
-pen = { path = "../pen" }
 physics = { path = "../physics" }

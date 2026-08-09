@@ -2,12 +2,7 @@
 name = "pen"
 version = "0.1.0"
 edition = "2021"
-description = "The shared JSON pen — emitter mechanics only, below every layer that writes"
+description = "RETIRED — JSON pen struck; binary TLV/cards only (docs/JSON_DISPLAY_ONLY.md)"
 
-# DELIBERATELY EMPTY. The pen writes text and knows nothing about state,
-# so it depends on nothing and can sit below every crate that emits.
-# That is the whole reason it exists: `ledger` and `lens` both need a
-# writer, the ledger may never depend on a lens (held by
-# `deletability::the_ledger_never_depends_on_a_lens_at_runtime`), and a
-# shim between them was the cycle. A crate below both is neither.
+# Empty placeholder. JsonWriter is gone. Do not reintroduce JSON emission.
 [dependencies]

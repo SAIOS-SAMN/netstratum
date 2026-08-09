@@ -51,8 +51,6 @@ def build_index(root):
         lines.append("[registry]")
         for p in sorted(reg_dir.glob("*.civ")):
             lines.append(f"civ {p.stem}")
-        for p in sorted(reg_dir.glob("*.json")):  # legacy only
-            lines.append(f"civ-legacy {p.stem}")
     return "\n".join(lines) + "\n"
 
 
