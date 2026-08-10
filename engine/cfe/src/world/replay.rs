@@ -830,16 +830,16 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             ClosureEvent::WantRelieved { orb_id, kind } => {
                 wants.retain(|(o, k)| !(o == orb_id && k == kind));
             }
-            // MARKET-1: the intent rests; the clear removes it.
+            // MARKET-1 / E-MKT-1: the intent rests; the clear removes it.
             ClosureEvent::OfferPosted {
                 offer, orb_id, give, give_amount, want, want_amount,
             } => {
                 offers.push(Offer {
                     offer: *offer,
                     orb: *orb_id,
-                    give: *give,
+                    give: give.clone(),
                     give_amount: give_amount.clone(),
-                    want: *want,
+                    want: want.clone(),
                     want_amount: want_amount.clone(),
                     posted: receipt.stamp,
                 });

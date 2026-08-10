@@ -72,8 +72,9 @@ ruins   — closed archive history (P8.4)
 
 | ID | Open | Notes |
 |----|------|-------|
-| **E3.6 ★** | **Element market cargo on offers** | **E-MKT-1 · load now** · NPC market_step |
-| **E3.7–E3.9** | WANT-1 element ids · observer routes · treaty allow-lists | after E3.6 |
+| **E3.6** | ~~Element market cargo~~ **LANDED** | `Cargo` · tag 49 · clear_trade · market_step |
+| **E3.7 ★** | WANT-1 may target element ids | next · after E3.6 |
+| **E3.8–E3.9** | Observer routes/refineries · treaty allow-lists | after E3.7 |
 | **I5.x** | SHARE/NOTE/FUT/PERP lifecycle residual | Wave 5 |
 | Court | Rename Earth-culture line names | operator only |
 | Deep deeds | More hub leaves still status+verb | incremental |

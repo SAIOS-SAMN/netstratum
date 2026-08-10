@@ -6956,6 +6956,19 @@ fn resource_name(resource: Resource) -> &'static str {
     }
 }
 
+/// E-MKT-1 display: closed carrier word or short element id hex.
+fn cargo_name(cargo: &cfe::dop::Cargo) -> String {
+    match cargo {
+        cfe::dop::Cargo::Resource(r) => resource_name(*r).to_string(),
+        cfe::dop::Cargo::Element(id) => {
+            format!(
+                "element-{:02x}{:02x}{:02x}{:02x}",
+                id[0], id[1], id[2], id[3]
+            )
+        }
+    }
+}
+
 fn amount(value: &Ratio) -> String {
     match value.denom() == &num_bigint::BigInt::from(1) {
         true => value.numer().to_string(),
@@ -8240,9 +8253,9 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::OfferPosted { offer, give, give_amount, want, want_amount, .. } => format!(
                 "⇋ offer {offer} RESTS — {} {} for {} {}; the market holds intents, never escrows",
                 style.strong(&amount(give_amount)),
-                resource_name(*give),
+                cargo_name(give),
                 style.strong(&amount(want_amount)),
-                resource_name(*want)
+                cargo_name(want)
             ),
             cfe::dop::ClosureEvent::OfferCleared { offer, deal } => format!(
                 "⇌ offer {offer} CLEARED at the crossing — deal {} carries the fill",

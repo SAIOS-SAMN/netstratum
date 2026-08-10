@@ -23,7 +23,7 @@
 //! other component in the workspace may produce a second encoding of
 //! committed state.
 
-use cfe::dop::{ColonyOrb, Resource};
+use cfe::dop::{Cargo, ColonyOrb, Resource};
 use cfe::ipsal::{Entity, Scope};
 use cfe::ratio::{self, Ratio};
 use cfe::thermal::StarClass;
@@ -207,9 +207,10 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
     for offer in &committed.offers {
         put_u64(&mut out, offer.offer);
         put_u64(&mut out, offer.orb);
-        out.push(offer.give as u8);
+        // E-MKT-1: Cargo wire (Resource 1..=7 or 0‖ElementId).
+        offer.give.encode(&mut out);
         ratio::encode(&offer.give_amount, &mut out);
-        out.push(offer.want as u8);
+        offer.want.encode(&mut out);
         ratio::encode(&offer.want_amount, &mut out);
         put_u64(&mut out, offer.posted);
     }
@@ -558,6 +559,13 @@ impl<'a> Take<'a> {
         Resource::from_wire(self.u8()?)
     }
 
+    /// E-MKT-1: Cargo wire (Resource 1..=7 or 0 ‖ ElementId).
+    fn cargo(&mut self) -> Option<Cargo> {
+        let (cargo, used) = Cargo::decode(self.bytes.get(self.at..)?)?;
+        self.at += used;
+        Some(cargo)
+    }
+
     fn done(&self) -> bool {
         self.at == self.bytes.len()
     }
@@ -681,9 +689,9 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         offers.push(Offer {
             offer: take.u64()?,
             orb: take.u64()?,
-            give: take.resource()?,
+            give: take.cargo()?,
             give_amount: take.ratio()?,
-            want: take.resource()?,
+            want: take.cargo()?,
             want_amount: take.ratio()?,
             posted: take.u64()?,
         });

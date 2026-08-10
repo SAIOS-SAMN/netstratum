@@ -413,6 +413,28 @@ fn haul(
     Ok(())
 }
 
+/// E-MKT-1 — dispatch haul by cargo kind (closed carrier vs element).
+#[allow(clippy::too_many_arguments)]
+fn haul_cargo(
+    src: &mut World,
+    from: u64,
+    dst: &mut World,
+    to: u64,
+    cargo: &crate::dop::Cargo,
+    amount: Ratio,
+    deal: u64,
+    melt: &Ratio,
+) -> Result<(), ActionRefused> {
+    match cargo {
+        crate::dop::Cargo::Resource(resource) => {
+            haul(src, from, dst, to, *resource, amount, deal, melt)
+        }
+        crate::dop::Cargo::Element(element) => {
+            haul_element(src, from, dst, to, *element, amount, deal, melt)
+        }
+    }
+}
+
 /// E-APT-1 — the element twin of [`haul`]. Same shield/war/melt doors;
 /// banks the open-matter ledger (no demurrage touch).
 #[allow(clippy::too_many_arguments)]
@@ -1103,7 +1125,8 @@ pub fn clear_trade(
         .find(|held| held.offer == offer_b)
         .cloned()
         .ok_or(ActionRefused::NoSuchOffer { offer: offer_b })?;
-    // Complementary resources, or no crossing exists.
+    // Complementary cargos, or no crossing exists (E-MKT-1: Resource
+    // or Element — PartialEq on Cargo).
     if held_a.give != held_b.want || held_a.want != held_b.give {
         return Err(ActionRefused::NoCrossing);
     }
@@ -1137,10 +1160,10 @@ pub fn clear_trade(
     // pair_melt, nothing recomputes the formula.
     // Phase-2: distance arg is D_chart; melt sees D_eff.
     let melt = route_melt(a, b, &distance);
-    // The two directions — each an aperture pair, shield-checked,
-    // demurrage-touched; sent − received = the void's exact share.
-    haul(a, held_a.orb, b, held_b.orb, held_a.give, x, deal, &melt)?;
-    haul(b, held_b.orb, a, held_a.orb, held_b.give, y, deal + 1, &melt)?;
+    // The two directions — each an aperture pair (resource or element),
+    // shield-checked; sent − received = the void's exact share.
+    haul_cargo(a, held_a.orb, b, held_b.orb, &held_a.give, x, deal, &melt)?;
+    haul_cargo(b, held_b.orb, a, held_a.orb, &held_b.give, y, deal + 1, &melt)?;
     // Both intents close; replay removes them.
     a.offers.retain(|held| held.offer != offer_a);
     b.offers.retain(|held| held.offer != offer_b);

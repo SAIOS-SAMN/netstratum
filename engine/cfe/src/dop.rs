@@ -355,6 +355,8 @@
 //!    161  ClosureEvent::ScienceExploded (LAB — explosion residual slash.)
 //!    162  ClosureEvent::RogueFactionStruck (LAB — synthetic matrix residual.)
 //!    Phase-5 claim ledger: next free **163**. Seated science labs.
+//!    E-MKT-1 (2026-08-10): tag **49** OfferPosted wire extended in place
+//!    (Resource codes 1..=7 unchanged; Element = 0 ‖ id[32]) — no new tag.
 //!         Orb TLV: 73 STAMP, 74 scrap. ZoneKind::ShipYard = 10.
 //!         (Historic free tags below top: 14, 15, 56, 57, 58, 64, 66,
 //!         83, 84, 87; 9 and 51 reserved; 65 retired forever.)
@@ -509,28 +511,96 @@ pub fn among(members: &[u64]) -> Among {
         .expect("an among literal must hold three or more distinct members")
 }
 
-/// **TWO DISTINCT RESOURCES, proven at construction** (P1). An offer
+/// E-MKT-1 (31_ELEMENT_COMMERCE §4): one side of a market offer —
+/// either a closed law carrier or an open-matter element identity.
+/// Elements never join the Resource enum; wire uses code 0 + 32-byte id
+/// so legacy Resource-only offers (codes 1..=7) still decode.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Cargo {
+    Resource(Resource),
+    Element([u8; 32]),
+}
+
+impl Cargo {
+    pub fn resource(r: Resource) -> Self {
+        Cargo::Resource(r)
+    }
+    pub fn element(id: [u8; 32]) -> Self {
+        Cargo::Element(id)
+    }
+    pub fn as_resource(&self) -> Option<Resource> {
+        match self {
+            Cargo::Resource(r) => Some(*r),
+            Cargo::Element(_) => None,
+        }
+    }
+    pub fn as_element(&self) -> Option<[u8; 32]> {
+        match self {
+            Cargo::Resource(_) => None,
+            Cargo::Element(id) => Some(*id),
+        }
+    }
+    /// Wire: Resource → code 1..=7; Element → 0 ‖ id[32].
+    pub fn encode(&self, out: &mut Vec<u8>) {
+        match self {
+            Cargo::Resource(r) => out.push(*r as u8),
+            Cargo::Element(id) => {
+                out.push(0);
+                out.extend_from_slice(id);
+            }
+        }
+    }
+    /// Decode one cargo; returns (cargo, bytes consumed).
+    pub fn decode(data: &[u8]) -> Option<(Cargo, usize)> {
+        let code = *data.first()?;
+        if code == 0 {
+            let id: [u8; 32] = data.get(1..33)?.try_into().ok()?;
+            Some((Cargo::Element(id), 33))
+        } else {
+            let r = Resource::from_wire(code)?;
+            Some((Cargo::Resource(r), 1))
+        }
+    }
+}
+
+/// **TWO DISTINCT CARGOES, proven at construction** (P1). An offer
 /// that gives what it wants trades nothing — `give == want` was
 /// `BadOffer`'s shape half. An `Exchange` cannot be reflexive.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// Closed-carrier form via [`Exchange::new`] / [`exchange`]; open
+/// matter via [`Exchange::cargo`].
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Exchange {
-    give: Resource,
-    want: Resource,
+    give: Cargo,
+    want: Cargo,
 }
 
 impl Exchange {
+    /// Closed-carrier exchange (MARKET-1 original door).
     pub fn new(give: Resource, want: Resource) -> Option<Exchange> {
+        (give != want).then_some(Exchange {
+            give: Cargo::Resource(give),
+            want: Cargo::Resource(want),
+        })
+    }
+    /// E-MKT-1: any two distinct cargos (Resource↔Resource, Element↔Resource, …).
+    pub fn cargo(give: Cargo, want: Cargo) -> Option<Exchange> {
         (give != want).then_some(Exchange { give, want })
     }
-    pub fn give(&self) -> Resource {
-        self.give
+    pub fn give(&self) -> Cargo {
+        self.give.clone()
     }
-    pub fn want(&self) -> Resource {
-        self.want
+    pub fn want(&self) -> Cargo {
+        self.want.clone()
+    }
+    pub fn give_resource(&self) -> Option<Resource> {
+        self.give.as_resource()
+    }
+    pub fn want_resource(&self) -> Option<Resource> {
+        self.want.as_resource()
     }
 }
 
-/// The literal door for exchanges.
+/// The literal door for closed-carrier exchanges.
 pub fn exchange(give: Resource, want: Resource) -> Exchange {
     Exchange::new(give, want).expect("an exchange literal must trade two distinct resources")
 }
@@ -2412,18 +2482,16 @@ pub enum ClosureEvent {
     /// flag, never consulted by any game rule — the world's own
     /// mechanics are blind to it).
     HandoffSealed { from: u64, to: u64 },
-    /// MARKET-1 (BUILD_ORDER §3a) — an OFFER posts: this orb stands
-    /// ready to GIVE `give_amount` of `give` for `want_amount` of
-    /// `want`. The price IS the ratio (no absolute price exists —
-    /// guardrail 6); the offer RESTS as committed state until a
-    /// crossing clears it or it is never met. No escrow: affordability
-    /// is gated at the fill, and a stale offer refuses then.
+    /// MARKET-1 / E-MKT-1 — an OFFER posts: this orb stands ready to
+    /// GIVE `give_amount` of `give` cargo for `want_amount` of `want`
+    /// cargo. Cargo is Resource or Element (31 §4). The price IS the
+    /// ratio; the offer RESTS until a crossing clears it. No escrow.
     OfferPosted {
         offer: u64,
         orb_id: u64,
-        give: Resource,
+        give: Cargo,
         give_amount: Ratio,
-        want: Resource,
+        want: Cargo,
         want_amount: Ratio,
     },
     /// MARKET-1 — the offer CLEARED: a crossing filled it. The fill's
@@ -3453,9 +3521,9 @@ impl ClosureEvent {
             Self::OfferPosted { offer, orb_id, give, give_amount, want, want_amount } => {
                 let mut value = offer.to_le_bytes().to_vec();
                 value.extend_from_slice(&orb_id.to_le_bytes());
-                value.push(*give as u8);
+                give.encode(&mut value);
                 ratio::encode(give_amount, &mut value);
-                value.push(*want as u8);
+                want.encode(&mut value);
                 ratio::encode(want_amount, &mut value);
                 tlv::put(49, &value, &mut out);
             }
@@ -4670,11 +4738,13 @@ impl ClosureEvent {
             49 => {
                 let offer = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let orb_id = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
-                let give = Resource::from_wire(*value.get(16)?)?;
-                let (give_amount, used) = ratio::decode(value.get(17..)?)?;
-                let at = 17 + used;
-                let want = Resource::from_wire(*value.get(at)?)?;
-                let (want_amount, _) = ratio::decode(value.get(at + 1..)?)?;
+                let (give, g_used) = Cargo::decode(value.get(16..)?)?;
+                let at = 16 + g_used;
+                let (give_amount, used) = ratio::decode(value.get(at..)?)?;
+                let at = at + used;
+                let (want, w_used) = Cargo::decode(value.get(at..)?)?;
+                let at = at + w_used;
+                let (want_amount, _) = ratio::decode(value.get(at..)?)?;
                 Some(Self::OfferPosted { offer, orb_id, give, give_amount, want, want_amount })
             }
             50 => {

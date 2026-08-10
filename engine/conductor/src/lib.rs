@@ -306,6 +306,50 @@ pub fn trade_intent(
     None
 }
 
+/// E-MKT-1: when an orb holds open-matter stock, offer half of the
+/// largest element bank for the leanest closed carrier its zones burn
+/// (or iron if no upkeep map). Never invents element ids — only banked
+/// identities.
+fn element_trade_intent(
+    world: &World,
+) -> Option<(cfe::dop::Cargo, Ratio, cfe::dop::Cargo, Ratio)> {
+    let orb = world.orb()?;
+    let (element, stock) = orb
+        .elements
+        .iter()
+        .max_by_key(|(_, amount)| amount.clone())?;
+    if *stock <= ratio(2, 1) {
+        return None;
+    }
+    let half = stock.clone() / ratio(2, 1);
+    let give = lot(&half);
+    if give <= ratio(0, 1) {
+        return None;
+    }
+    // Prefer a resource the zones burn and the bank is lean on; else iron.
+    let burns: Vec<Resource> = orb
+        .zones
+        .iter()
+        .flat_map(|z| z.kind.upkeep_per_tick())
+        .map(|(resource, _)| resource)
+        .collect();
+    let want_res = burns
+        .iter()
+        .min_by_key(|r| orb.banked_amount(**r))
+        .copied()
+        .unwrap_or(Resource::Iron);
+    let want = lot(&relaxed_want(&give, stock));
+    if want <= ratio(0, 1) {
+        return None;
+    }
+    Some((
+        cfe::dop::Cargo::Element(*element),
+        give,
+        cfe::dop::Cargo::Resource(want_res),
+        want,
+    ))
+}
+
 /// OFFER-1a: one market beat over the whole board — post fresh
 /// intents (one open offer per world; the offer id is the chronicle
 /// length at posting, deterministic), then clear the FIRST crossing
@@ -322,14 +366,38 @@ pub fn market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
         if polity.penned {
             continue;
         }
+        // E-MKT-1: element surplus before closed-carrier intents when
+        // the line holds banked open matter above a floor.
         if let Some((give, give_amount, want, want_amount)) =
-            trade_intent(&polity.world, &polity.spec.civilization.metabolism)
+            element_trade_intent(&polity.world)
         {
-            if polity
+            if !polity
                 .world
                 .offers()
                 .iter()
                 .any(|held| held.give == give && held.want == want)
+            {
+                let offer = polity.world.chronicle().receipts().len() as u64;
+                let orb = cfe::world::FIRST_ORB;
+                if let (Some(pair), Some(ga), Some(wa)) = (
+                    cfe::dop::Exchange::cargo(give, want),
+                    cfe::dop::Positive::new(give_amount),
+                    cfe::dop::Positive::new(want_amount),
+                ) {
+                    let _ = polity.world.post_offer(orb, pair, ga, wa, offer);
+                }
+            }
+        }
+        if let Some((give, give_amount, want, want_amount)) =
+            trade_intent(&polity.world, &polity.spec.civilization.metabolism)
+        {
+            let give_c = cfe::dop::Cargo::Resource(give);
+            let want_c = cfe::dop::Cargo::Resource(want);
+            if polity
+                .world
+                .offers()
+                .iter()
+                .any(|held| held.give == give_c && held.want == want_c)
             {
                 continue;
             }
@@ -3085,10 +3153,13 @@ pub fn merchant_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String, S
                 if back <= ask_a.want_amount {
                     continue;
                 }
+                // Merchant arbitrage stays on closed carriers for now
+                // (element triangles need element banks on the middle).
+                let Some(want_a) = ask_a.want.as_resource() else { continue };
                 let held = worlds[m]
                     .world
                     .orb()
-                    .map(|orb| orb.banked_amount(ask_a.want))
+                    .map(|orb| orb.banked_amount(want_a))
                     .unwrap_or_else(|| ratio(0, 1));
                 if held < ask_a.want_amount {
                     continue;
@@ -3098,7 +3169,7 @@ pub fn merchant_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String, S
                 // already proved them); a None here skips the caravan.
                 let counter = worlds[m].world.chronicle().receipts().len() as u64;
                 let (Some(pair), Some(give_amount), Some(want_amount)) = (
-                    cfe::dop::Exchange::new(ask_a.want, ask_a.give),
+                    cfe::dop::Exchange::cargo(ask_a.want.clone(), ask_a.give.clone()),
                     cfe::dop::Positive::new(ask_a.want_amount.clone()),
                     cfe::dop::Positive::new(ask_a.give_amount.clone()),
                 ) else {
@@ -3127,7 +3198,7 @@ pub fn merchant_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String, S
                 // here leaves M holding cargo: merchant risk, lawful.
                 let counter = worlds[m].world.chronicle().receipts().len() as u64;
                 let (Some(pair), Some(give_amount), Some(want_amount)) = (
-                    cfe::dop::Exchange::new(ask_b.want, ask_b.give),
+                    cfe::dop::Exchange::cargo(ask_b.want.clone(), ask_b.give.clone()),
                     cfe::dop::Positive::new(ask_b.want_amount.clone()),
                     cfe::dop::Positive::new(ask_b.give_amount.clone()),
                 ) else {

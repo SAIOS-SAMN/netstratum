@@ -64,7 +64,7 @@ strand-adapter · isthmus/datum-adapter
 | E3.3 | [x] Conductor `element_trade_step` NPC | E3.1 | pure NPC clear in `wave1_era_pins` |
 | E3.4 | [x] **REFINE-1** ElementRefinery zone; derive rates from family/tier | 14 §5 | two seeds different chains |
 | E3.5 | [x] Conductor build prefers refinery when raw surplus | E3.4 | pin |
-| E3.6 | [ ] **E-MKT-1** offers carry ElementId cargo | E3.1, MARKET-1 | NPC market_step |
+| E3.6 | [x] **E-MKT-1** offers carry ElementId cargo | E3.1, MARKET-1 | `Cargo` union; tag 49 wire; clear_trade; `market_step` element intents; `element_market_pins` |
 | E3.7 | [ ] WANT-1 may target element ids | E3.6 | |
 | E3.8 | [ ] Observer `routes` + `refineries` views | E3.2, E3.4 | |
 | E3.9 | [ ] Treaty allow-lists for element ids | E3.1, TREATY | |

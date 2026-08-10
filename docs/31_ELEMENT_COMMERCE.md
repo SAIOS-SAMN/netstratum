@@ -3,7 +3,10 @@
 **Status:** PARTIAL LAND — operator directive 2026-08-07; **Wave-1
 `2109bf0`** REFINE-1; **Wave-2** E-APT-1 (tags 108–109) +
 `element_trade_step`; **Wave-3** ElementRouteChartered (tag 110) +
-SCHEMA_V6 + rail on charter. **E-MKT cargo still open.**
+SCHEMA_V6 + rail on charter; **E-MKT-1 LANDED** — MARKET-1 offers carry
+`Cargo = Resource | Element` (tag 49 wire: Resource 1..=7 or `0‖id[32]`;
+`clear_trade` hauls via `haul`/`haul_element`; conductor `market_step`
+posts element surplus intents).
 Depends on GROUND STEP and composes with ROUTE-1, MARKET-1, MERCHANT-1,
 APERTURE-1, TREATY-1.
 

@@ -11,12 +11,10 @@ impl World {
     pub fn offers(&self) -> &[Offer] {
         &self.offers
     }
-    /// MARKET-1 (BUILD_ORDER §3a): POST an offer — a receipted intent
-    /// to give one resource for another at an exact-rational price
-    /// (want/give — no absolute price exists, guardrail 6). No escrow:
-    /// the fill gates affordability when a crossing clears; an offer
-    /// that outlived its bank refuses THEN, harming no one now. An
-    /// unmatched offer rests.
+    /// MARKET-1 / E-MKT-1: POST an offer — a receipted intent to give
+    /// one cargo for another at an exact-rational price (want/give —
+    /// no absolute price, guardrail 6). Cargo is Resource or Element.
+    /// No escrow: the fill gates affordability when a crossing clears.
     pub fn post_offer(
         &mut self,
         orb: u64,
@@ -28,7 +26,8 @@ impl World {
         // The reflexive trade and the non-positive amounts died at the
         // `Exchange` and `Positive` doors (29_CONSTRUCTION); the
         // fresh-id FACT keeps its own name.
-        let (give, want) = (pair.give(), pair.want());
+        let give = pair.give();
+        let want = pair.want();
         let give_amount = give_amount.value().clone();
         let want_amount = want_amount.value().clone();
         // P8.1 — shared AP (quote family).
@@ -43,14 +42,21 @@ impl World {
         self.offers.push(Offer {
             offer,
             orb,
-            give,
+            give: give.clone(),
             give_amount: give_amount.clone(),
-            want,
+            want: want.clone(),
             want_amount: want_amount.clone(),
             posted,
         });
         self.close(
-            ClosureEvent::OfferPosted { offer, orb_id: orb, give, give_amount, want, want_amount },
+            ClosureEvent::OfferPosted {
+                offer,
+                orb_id: orb,
+                give,
+                give_amount,
+                want,
+                want_amount,
+            },
             SOVEREIGN,
         );
         Ok(())

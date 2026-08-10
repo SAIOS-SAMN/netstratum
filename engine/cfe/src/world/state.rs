@@ -72,15 +72,16 @@ pub struct Forward {
     pub window: u64,
 }
 
-/// MARKET-1: a resting offer — a receipted intent to trade, no
-/// escrow; the price IS want/give (guardrail 6: no absolute price).
+/// MARKET-1 / E-MKT-1: a resting offer — a receipted intent to trade,
+/// no escrow; the price IS want/give (guardrail 6: no absolute price).
+/// Cargo is Resource or ElementId (31 §4) — never a second Resource code.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Offer {
     pub offer: u64,
     pub orb: u64,
-    pub give: Resource,
+    pub give: crate::dop::Cargo,
     pub give_amount: Ratio,
-    pub want: Resource,
+    pub want: crate::dop::Cargo,
     pub want_amount: Ratio,
     pub posted: u64,
 }
