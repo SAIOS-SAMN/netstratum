@@ -873,11 +873,115 @@ pub fn tech_node_name(condition: u8, node: &[u8; 32]) -> String {
 }
 
 /// Founding banks the bootstrap reserves (02 §2.1): 20 iron, 10 biomass.
+///
+/// This is the **pre-sky bronze kit** and the chart-transfer packet
+/// (conservation on `ColonyCharted`). Once a sun is commissioned the
+/// genesis orb is top-upped to [`star_endowment`] — pure from class,
+/// replayed on `StarCommissioned`. G-class targets match this kit so
+/// legacy G fixtures are byte-stable.
 pub fn founding_reserves() -> Vec<(Resource, Ratio)> {
     vec![
         (Resource::Iron, ratio(20, 1)),    // APPROVED-SEED: founding endowment
         (Resource::Biomass, ratio(10, 1)), // APPROVED-SEED: founding endowment
     ]
+}
+
+/// **STAR-ENDOW-1** — absolute kit targets after the sun is known.
+///
+/// Applied as a TOP-UP (never strips spent banks): for each resource,
+/// if held < target, bank `target − held`. Pure of class alone so
+/// `StarCommissioned` replay re-derives without extra receipt fields.
+///
+/// Metallicity / life bias by class (exact rationals; no free dials —
+/// integers built from the founding seed scale):
+/// - cool dwarfs: lean metal, richer biomass / sink
+/// - G: founding kit (no change)
+/// - hot / remnant: metal-rich, life-hard, crystal seed on extremes
+pub fn star_endowment(class: crate::thermal::StarClass) -> Vec<(Resource, Ratio)> {
+    use crate::thermal::StarClass as S;
+    // Scale relative to the founding seed (20 iron / 10 biomass = G).
+    match class {
+        S::BrownDwarf => vec![
+            (Resource::Iron, ratio(12, 1)),
+            (Resource::Biomass, ratio(12, 1)),
+            (Resource::Sink, ratio(4, 1)),
+        ],
+        S::M => vec![
+            (Resource::Iron, ratio(16, 1)),
+            (Resource::Biomass, ratio(16, 1)),
+        ],
+        S::K => vec![
+            (Resource::Iron, ratio(18, 1)),
+            (Resource::Biomass, ratio(12, 1)),
+        ],
+        S::G => vec![
+            (Resource::Iron, ratio(20, 1)),
+            (Resource::Biomass, ratio(10, 1)),
+        ],
+        S::F | S::A => vec![
+            (Resource::Iron, ratio(28, 1)),
+            (Resource::Biomass, ratio(10, 1)),
+        ],
+        S::O | S::B => vec![
+            (Resource::Iron, ratio(36, 1)),
+            (Resource::Biomass, ratio(8, 1)),
+            (Resource::Crystal, ratio(1, 1)),
+        ],
+        S::RedGiant => vec![
+            (Resource::Iron, ratio(22, 1)),
+            (Resource::Biomass, ratio(6, 1)),
+        ],
+        S::WhiteDwarf => vec![
+            (Resource::Iron, ratio(18, 1)),
+            (Resource::Biomass, ratio(6, 1)),
+            (Resource::Crystal, ratio(2, 1)),
+        ],
+        S::NeutronStar | S::WolfRayet => vec![
+            (Resource::Iron, ratio(30, 1)),
+            (Resource::Biomass, ratio(4, 1)),
+            (Resource::Crystal, ratio(4, 1)),
+        ],
+        S::LuminalWhiteHole => vec![
+            (Resource::Iron, ratio(40, 1)),
+            (Resource::Biomass, ratio(6, 1)),
+            (Resource::Crystal, ratio(8, 1)),
+        ],
+    }
+}
+
+/// **ORBIT-ENDOW-1** — small band gift at siting (place, not free mint).
+///
+/// Mesic (the default G/r=1 home) adds nothing — founding kit already
+/// assumes habitable place. Cryogenic: sink. Hyperthermal: iron.
+/// Bandless: none. Amounts are `1+1` (=2). Pure of band so
+/// `PlanetSited` replay matches.
+pub fn orbit_endowment(band: Option<crate::thermal::SubstrateBand>) -> Vec<(Resource, Ratio)> {
+    let two = ratio(1, 1) + ratio(1, 1);
+    match band {
+        Some(crate::thermal::SubstrateBand::Mesic) => Vec::new(),
+        Some(crate::thermal::SubstrateBand::Cryogenic) => vec![(Resource::Sink, two)],
+        Some(crate::thermal::SubstrateBand::HyperThermal) => vec![(Resource::Iron, two)],
+        None => Vec::new(),
+    }
+}
+
+/// Top-up orb banks to each absolute target (never strips). Shared by
+/// live deeds and replay (`StarCommissioned`).
+pub fn apply_endowment_top_up(orb: &mut ColonyOrb, kit: &[(Resource, Ratio)]) {
+    for (resource, target) in kit {
+        let have = orb.banked_amount(*resource);
+        if target > &have {
+            orb.bank(*resource, target.clone() - have);
+        }
+    }
+}
+
+/// Credit kit amounts (additive). Shared by live deeds and replay
+/// (`PlanetSited` orbit-band gift).
+pub fn apply_endowment_add(orb: &mut ColonyOrb, kit: &[(Resource, Ratio)]) {
+    for (resource, amount) in kit {
+        orb.bank(*resource, amount.clone());
+    }
 }
 
 /// THERMAL-1 (05 §1.2, placeholder): joules one active encasement

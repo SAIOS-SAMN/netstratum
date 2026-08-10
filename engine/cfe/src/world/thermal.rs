@@ -22,6 +22,10 @@ impl World {
             return Err(ActionRefused::StarAlreadyCommissioned);
         }
         self.star = Some(class);
+        // STAR-ENDOW-1: top-up genesis orb kit from the sky (pure of class).
+        if let Some(orb) = peel(&mut self.orbs, FIRST_ORB) {
+            crate::dop::apply_endowment_top_up(orb, &crate::dop::star_endowment(class));
+        }
         self.close(ClosureEvent::StarCommissioned { class: class as u8 }, SOVEREIGN);
         Ok(())
     }
@@ -164,6 +168,15 @@ impl World {
             // (by the receipt). Only replay_fidelity catches this.
             psi: psi.clone(),
         });
+        // ORBIT-ENDOW-1: band gift from place (pure of star + site).
+        let class = self.star.expect("checked above");
+        let teq = crate::thermal::t_eq4(
+            &class.luminosity(),
+            albedo.value(),
+            orbit_r.value(),
+        );
+        let band = crate::thermal::band_of(&teq);
+        crate::dop::apply_endowment_add(held, &crate::dop::orbit_endowment(band));
         // TECH-1a (12_UNION §5a): a world's FIRST thermal opt-in
         // receipts the kernel SOLAR LEAP — its people now know their
         // sun. Once per world, never per orb; the node id is seeded

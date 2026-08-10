@@ -78,6 +78,14 @@ also refuse when the vein's periodic LINE exceeds `civ_reach` — a
 people may chart a deep identity and still be unable to mine it until
 sky tech grows. Solar leap (condition 0) does not deepen the mine.
 
+**STAR-ENDOW-1 / ORBIT-ENDOW-1 (landed):** closed-carrier kit scales
+with the sky. `ColonyFounded` banks the bronze packet (20 iron / 10
+biomass). `StarCommissioned` top-ups the genesis orb to a class kit
+(G matches founding; O/B metal-rich + crystal seed; M biomass-rich;
+brown dwarf seeds sink). Never strips spent banks. `PlanetSited`
+adds a small band gift (cryo→sink, hyperthermal→iron; mesic home
+none). Chart transfers still move the founding packet (conservation).
+
 Conservation: an element enters banked stores only by extraction
 against `richness` per tick (the extractor pattern, terrain-multiplied
 by D3's chart) — the mint creates IDENTITY, never matter.

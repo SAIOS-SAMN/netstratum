@@ -74,6 +74,7 @@ ruins   — closed archive history (P8.4)
 |----|------|-------|
 | **E3.6** | ~~Element market cargo~~ **LANDED** | `Cargo` · tag 49 · clear_trade · market_step |
 | **CIV-REACH-1** | ~~Bronze dig depth~~ **LANDED** | `civ_reach` · prospect stratum · assay/refine line gates |
+| **STAR-ENDOW-1** | ~~Star-scaled kit~~ **LANDED** | `star_endowment` on commission · orbit band gift on site |
 | **E3.7 ★** | WANT-1 may target element ids | next · after E3.6 |
 | **E3.8–E3.9** | Observer routes/refineries · treaty allow-lists | after E3.7 |
 | **I5.x** | SHARE/NOTE/FUT/PERP lifecycle residual | Wave 5 |

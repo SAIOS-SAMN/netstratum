@@ -371,6 +371,10 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             // THERMAL-1 replay arms.
             ClosureEvent::StarCommissioned { class } => {
                 star = crate::thermal::StarClass::from_wire(*class);
+                // STAR-ENDOW-1: top-up genesis kit (pure of class).
+                if let (Some(c), Some(held)) = (star, peel(&mut orbs, FIRST_ORB)) {
+                    crate::dop::apply_endowment_top_up(held, &crate::dop::star_endowment(c));
+                }
             }
             ClosureEvent::PlanetSited { orb_id, albedo, orbit_r, theta, psi } => {
                 if let Some(held) = peel(&mut orbs, *orb_id) {
@@ -385,6 +389,19 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                         theta: theta.clone(),
                         psi: psi.clone(),
                     });
+                    // ORBIT-ENDOW-1: band gift (pure of star + site).
+                    if let Some(class) = star {
+                        let teq = crate::thermal::t_eq4(
+                            &class.luminosity(),
+                            albedo.value(),
+                            orbit_r.value(),
+                        );
+                        let band = crate::thermal::band_of(&teq);
+                        crate::dop::apply_endowment_add(
+                            held,
+                            &crate::dop::orbit_endowment(band),
+                        );
+                    }
                 }
             }
             ClosureEvent::OverheatStruck { orb_id, .. } => {
