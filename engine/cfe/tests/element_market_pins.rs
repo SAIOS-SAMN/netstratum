@@ -6,7 +6,7 @@ use cfe::dop::{
 };
 use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
-use cfe::world::{clear_trade, replay, World, FIRST_ORB};
+use cfe::world::{clear_trade, replay, World, FIRST_ORB, SOVEREIGN};
 
 fn sunlit(name: &str) -> World {
     let mut world = World::new();
@@ -16,6 +16,10 @@ fn sunlit(name: &str) -> World {
         .site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None)
         .expect("sites");
     world.zone(0, ZoneKind::Extractor).expect("zones");
+    // CIV-REACH-1: industrial dig so market pins can assay drawn veins.
+    for c in 1u8..=5 {
+        world.grant_tech_as(SOVEREIGN, FIRST_ORB, c).expect("tech");
+    }
     world
 }
 
@@ -32,13 +36,26 @@ fn equip_hauler(world: &mut World) {
 }
 
 fn bank_element(world: &mut World) -> [u8; 32] {
-    let struck = world.prospect(FIRST_ORB, 1).expect("prospects");
-    for _ in 0..16 {
-        world.tick();
+    // Open strata until a vein assays (pressure + civ_reach may refuse some).
+    let dig = world.civ_reach().max(1);
+    let mut chosen = None;
+    for s in 1..=dig {
+        if let Ok(struck) = world.prospect(FIRST_ORB, s) {
+            for _ in 0..8 {
+                world.tick();
+            }
+            if world.assay(FIRST_ORB, struck.element).is_ok() {
+                chosen = Some(struck.element);
+                break;
+            }
+        }
     }
-    let drawn = world.assay(FIRST_ORB, struck.element).expect("assays");
-    assert!(drawn > ratio(0, 1), "assay banks mass");
-    struck.element
+    let element = chosen.expect("at least one mineable vein under full tech");
+    assert!(
+        world.orb().unwrap().element_amount(&element) > ratio(0, 1),
+        "assay banks mass"
+    );
+    element
 }
 
 #[test]
@@ -78,14 +95,12 @@ fn element_for_iron_crossing_conserves() {
     let mut seller = sunlit("ore-side");
     let mut buyer = sunlit("iron-side");
     // Keep clocks matched so orbital melt stays zero (same site, same now).
-    let struck = seller.prospect(FIRST_ORB, 1).expect("prospects");
-    let element = struck.element;
-    for _ in 0..16 {
-        seller.tick();
+    let element = bank_element(&mut seller);
+    while buyer.now() < seller.now() {
         buyer.tick();
     }
-    let drawn = seller.assay(FIRST_ORB, element).expect("assays");
-    assert!(drawn >= ratio(1, 1), "enough mass for a unit fill: {drawn}");
+    let stock = seller.orb().unwrap().element_amount(&element);
+    assert!(stock >= ratio(1, 1), "enough mass for a unit fill: {stock}");
     equip_hauler(&mut seller);
     equip_hauler(&mut buyer);
     // Unit fill stays under grade-0 hauler capacity (4).

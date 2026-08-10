@@ -127,6 +127,11 @@ pub enum ActionRefused {
     /// element's LINE: deep matter simply does not occur under a
     /// shallow star. A fact of the sky, at the verb forever.
     ElementNotLocal { element: [u8; 32] },
+    /// CIV-REACH-1 — the people have not grown deep enough. Bronze
+    /// surface work (reach 2) cannot open helium / exotic lines;
+    /// crystallize sky tech (base-7 conditions) to raise the ceiling.
+    /// `need` is the line or stratum asked; `have` is current civ_reach.
+    CivReachShort { need: u8, have: u8 },
     /// ELEMENT-CHEMISTRY (#37) — the orb has not opened deep enough to
     /// release this element: the pressure its line demands is above
     /// the deepest stratum prospected here.

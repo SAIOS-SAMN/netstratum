@@ -501,13 +501,24 @@ impl World {
             .collect();
         Ok(crate::query::ScanRead { stamp, probed, hits, refusals, translations })
     }
+    /// **CIV-REACH-1** — deepest LINE this people may open (bronze=2,
+    /// rises with crystallized base conditions, capped by the star).
+    pub fn civ_reach(&self) -> u8 {
+        let held = self.techs.iter().map(|(_, condition, _, _)| *condition);
+        crate::almanac::civ_reach(held, self.star)
+    }
+
     /// ELEMENT-GRAMMAR-1 (14 §3) — the mint deed: read one stratum of
     /// what the genesis seed always held. Identity = BLAKE3(receipt
     /// 0's digest ‖ orb ‖ stratum) — fixed at founding, so a redraw
     /// cannot re-roll; properties derive from the hash under the
     /// star's abundance arbor; the receipt carries them whole so
     /// replay reads, never rolls. The mint creates identity, never
-    /// matter (the assay moves matter). Sovereign convenience.
+    /// matter (the assay moves matter).
+    ///
+    /// **CIV-REACH-1 + locality:** stratum and the drawn LINE must lie
+    /// within `civ_reach` and `local_to` — bronze peoples do not open
+    /// exotic depths; shallow stars do not carry deep lines.
     pub fn prospect(&mut self, orb: u64, stratum: u8) -> Result<crate::dop::Prospect, ActionRefused> {
         self.prospect_as(SOVEREIGN, orb, stratum)
     }
@@ -536,6 +547,14 @@ impl World {
         if self.prospects.iter().any(|held| held.orb == orb && held.stratum == stratum) {
             return Err(ActionRefused::StratumProspected { orb, stratum });
         }
+        // CIV-REACH-1: stratum is depth asked — bronze cannot open deep.
+        let reach = self.civ_reach();
+        if stratum == 0 || stratum > reach {
+            return Err(ActionRefused::CivReachShort {
+                need: stratum.max(1),
+                have: reach,
+            });
+        }
         // The genesis root is the FOUNDING receipt's digest — receipt
         // 0 is the sovereign's registration and identical across all
         // worlds (measured); the founding carries the name, so every
@@ -552,6 +571,11 @@ impl World {
         seed.extend_from_slice(&orb.to_le_bytes());
         seed.push(stratum);
         let element: [u8; 32] = blake3::hash(&seed).into();
+        // Identity mints under the star's abundance arbor. Locality
+        // (deep lines under shallow stars) and civ_reach (bronze vs
+        // industry) gate ASSAY / REFINE / compound — not the charting
+        // of a vein. Stratum depth still requires civ_reach above.
+        let _ = class;
         let (family, tier, richness) = crate::dop::element_properties(&element, class);
         let name = crate::dop::element_name(family, &element);
         let stamp = self.clock.now();

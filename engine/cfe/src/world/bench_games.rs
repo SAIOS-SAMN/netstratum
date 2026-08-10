@@ -128,6 +128,8 @@ pub struct StellarCapacityBoard {
     pub star: Option<crate::thermal::StarClass>,
     /// `lines_of(class)` — deepest line this sun forges.
     pub reach: u8,
+    /// CIV-REACH-1 — deepest line this *people* may open (≤ star reach).
+    pub civ_reach: u8,
     /// Table depth (`LINES`).
     pub table_lines: u8,
     pub lines: Vec<StellarLineRow>,
@@ -380,6 +382,9 @@ impl World {
 
         let star = self.star;
         let reach = star.map(lines_of).unwrap_or(0);
+        let civ_reach = self.civ_reach();
+        // Workable depth is the min of sky forge and civilization growth.
+        let work_reach = reach.min(civ_reach);
         let deepest_open = self
             .prospects
             .iter()
@@ -387,11 +392,11 @@ impl World {
             .map(|p| p.stratum)
             .max()
             .unwrap_or(0);
-        // Opened stratum depth as pressure input: clamp to reach when star stands.
-        let stratum_for_pressure = if reach == 0 {
+        // Opened stratum depth as pressure input: clamp to work reach.
+        let stratum_for_pressure = if work_reach == 0 {
             deepest_open
         } else {
-            deepest_open.min(reach)
+            deepest_open.min(work_reach)
         };
         let pressure_now = star
             .map(|c| pressure(stratum_for_pressure, c))
@@ -439,7 +444,8 @@ impl World {
 
         let mut lines = Vec::new();
         for line in 1..=LINES {
-            let reachable = reach > 0 && line <= reach;
+            // Reachable to work: sky forge AND civ growth.
+            let reachable = work_reach > 0 && line <= work_reach;
             let pressure_at = star
                 .map(|c| pressure(line, c))
                 .unwrap_or_else(|| ratio(0, 1));
@@ -458,34 +464,44 @@ impl World {
 
         let next_move = if star.is_none() {
             "commission a star — `star <class>` then reopen capacity".into()
+        } else if civ_reach < reach && open_strata == 0 {
+            format!(
+                "bronze civ_reach {civ_reach} (star forges {reach}) — prospect stratum 1..{civ_reach}; \
+                 crystallize sky tech to mine deeper"
+            )
         } else if open_strata == 0 {
             format!(
-                "prospect stratum 1..{} — open the ground under this sun (reach {reach})",
-                reach.max(1)
+                "prospect stratum 1..{} — open the ground (civ {civ_reach} · star {reach})",
+                work_reach.max(1)
             )
         } else if refinable_now > 0 {
             format!(
                 "{refinable_now} vein(s) refine at pressure {} — assay · refine through ElementRefinery",
                 format!("{}/{}", pressure_now.numer(), pressure_now.denom())
             )
-        } else if deepest_open < reach {
+        } else if deepest_open < work_reach {
             format!(
-                "prospect deeper (next stratum {}) — reach {reach} still open under this star",
+                "prospect deeper (next stratum {}) — work reach {work_reach} (civ {civ_reach} · star {reach})",
                 deepest_open.saturating_add(1)
+            )
+        } else if civ_reach < reach {
+            format!(
+                "civ_reach {civ_reach} caps the mine (star forges {reach}) — crystallize base-7 tech to deepen"
             )
         } else if local_veins < open_strata {
             format!(
-                "deep veins beyond reach {reach} stay raw here — trade them or age/commission a heavier class"
+                "deep veins beyond star reach {reach} stay raw here — trade them or age/commission a heavier class"
             )
         } else {
             format!(
-                "capacity saturated at reach {reach} — refine local matter · trade off-depth · age star"
+                "capacity saturated at work reach {work_reach} — refine local matter · trade off-depth · age star"
             )
         };
 
         StellarCapacityBoard {
             star,
             reach,
+            civ_reach,
             table_lines: LINES,
             lines,
             veins,

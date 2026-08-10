@@ -371,6 +371,33 @@ impl World {
         if self.is_veiled() {
             self.require_detection(Self::detection_need_veiled_scan())?;
         }
+        let Some(class) = self.star else {
+            return Err(ActionRefused::NoStarCommissioned);
+        };
+        // Vein must stand before workability gates (identity already mint).
+        let Some(opened) = self
+            .prospects
+            .iter()
+            .find(|held| held.orb == orb && held.element == element)
+        else {
+            return Err(ActionRefused::NoSuchElement { element });
+        };
+        // CIV-REACH-1 + locality + pressure: banking deep matter needs
+        // the people's growth, the sky's forge, and opened stratum.
+        if !crate::almanac::local_to(&element, class) {
+            return Err(ActionRefused::ElementNotLocal { element });
+        }
+        let line = crate::almanac::periodic_of(&element).line;
+        let reach = self.civ_reach();
+        if line > reach {
+            return Err(ActionRefused::CivReachShort {
+                need: line,
+                have: reach,
+            });
+        }
+        if !crate::almanac::refines(&element, opened.stratum, class) {
+            return Err(ActionRefused::PressureUnreached { element });
+        }
         // ECO-1 (#40): the loop's two inputs, read before the vein is
         // borrowed — the star (proven Some only once a vein is found:
         // prospecting requires it, and nothing uncommissions a sun)

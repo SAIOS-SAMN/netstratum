@@ -10,7 +10,7 @@ use cfe::dop::{positive, unit, ClosureEvent, ZoneKind};
 use cfe::ratio::ratio;
 use cfe::thermal::StarClass;
 use cfe::vrp::ChainRead;
-use cfe::world::{replay, ActionRefused, World, FIRST_ORB};
+use cfe::world::{replay, ActionRefused, World, FIRST_ORB, SOVEREIGN};
 
 fn charted(name: &str, class: StarClass) -> World {
     let mut world = World::new();
@@ -18,6 +18,10 @@ fn charted(name: &str, class: StarClass) -> World {
     world.commission_star(class).expect("commissions");
     world.site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None).expect("sites");
     world.zone(0, ZoneKind::Extractor).expect("zones");
+    // CIV-REACH-1: industrial dig so grammar pins may open deep strata.
+    for c in 1u8..=5 {
+        let _ = world.grant_tech_as(SOVEREIGN, FIRST_ORB, c);
+    }
     world
 }
 
@@ -68,7 +72,9 @@ fn the_spine_binds_the_draw_to_the_sky() {
     // drawn under a class is one the arbor WEIGHTS for that class —
     // a zero-weighted family never yields (14 §4).
     let mut world = charted("arbor-read", StarClass::M);
-    for stratum in 1..=8u8 {
+    // Dig only within civ_reach ∩ lines_of(M)=3.
+    let dig = world.civ_reach().min(3);
+    for stratum in 1..=dig {
         let struck = world.prospect(FIRST_ORB, stratum).expect("opens");
         assert!(
             cfe::dop::spine_weight(StarClass::M, struck.family) > ratio(0, 1),
@@ -82,35 +88,51 @@ fn the_spine_binds_the_draw_to_the_sky() {
 #[test]
 fn the_assay_banks_richness_times_elapsed_in_one_receipt() {
     let mut world = charted("assay-hold", StarClass::G);
-    let struck = world.prospect(FIRST_ORB, 1).expect("opens");
-    let opened_at = world.now();
-    for _ in 0..8 {
-        world.tick();
+    let dig = world.civ_reach();
+    for s in 1..=dig {
+        let struck = world.prospect(FIRST_ORB, s).expect("opens");
+        let opened_at = world.now();
+        for _ in 0..8 {
+            world.tick();
+        }
+        let receipts_before = world.chronicle().receipts().len();
+        match world.assay(FIRST_ORB, struck.element) {
+            Ok(drawn) => {
+                let elapsed = ratio((world.now() - opened_at) as i64, 1);
+                assert_eq!(
+                    drawn,
+                    struck.richness.clone() * elapsed,
+                    "richness × elapsed, exact"
+                );
+                assert_eq!(
+                    world.chronicle().receipts().len(),
+                    receipts_before + 1,
+                    "one receipt moves the whole span — the bond-settle shape"
+                );
+                assert_eq!(
+                    world.orb().expect("stands").element_amount(&struck.element),
+                    drawn,
+                    "banked element stores carry the draw"
+                );
+                let refusal = world
+                    .assay(FIRST_ORB, struck.element)
+                    .expect_err("no new span");
+                assert_eq!(refusal, ActionRefused::NothingAccrued);
+                let unknown = [7u8; 32];
+                assert!(matches!(
+                    world.assay(FIRST_ORB, unknown),
+                    Err(ActionRefused::NoSuchElement { .. })
+                ));
+                assert_eq!(replay(world.chronicle()), world.committed());
+                return;
+            }
+            Err(ActionRefused::PressureUnreached { .. })
+            | Err(ActionRefused::CivReachShort { .. })
+            | Err(ActionRefused::ElementNotLocal { .. }) => continue,
+            Err(other) => panic!("unexpected assay refusal: {other:?}"),
+        }
     }
-    let receipts_before = world.chronicle().receipts().len();
-    let drawn = world.assay(FIRST_ORB, struck.element).expect("the vein pays");
-    let elapsed = ratio((world.now() - opened_at) as i64, 1);
-    assert_eq!(drawn, struck.richness.clone() * elapsed, "richness × elapsed, exact");
-    assert_eq!(
-        world.chronicle().receipts().len(),
-        receipts_before + 1,
-        "one receipt moves the whole span — the bond-settle shape"
-    );
-    assert_eq!(
-        world.orb().expect("stands").element_amount(&struck.element),
-        drawn,
-        "banked element stores carry the draw"
-    );
-    // A second assay immediately banks only the new delta: zero.
-    let refusal = world.assay(FIRST_ORB, struck.element).expect_err("no new span");
-    assert_eq!(refusal, ActionRefused::NothingAccrued);
-    // An unprospected identity refuses typed.
-    let unknown = [7u8; 32];
-    assert!(matches!(
-        world.assay(FIRST_ORB, unknown),
-        Err(ActionRefused::NoSuchElement { .. })
-    ));
-    assert_eq!(replay(world.chronicle()), world.committed());
+    panic!("no mineable vein under full tech on G");
 }
 
 #[test]

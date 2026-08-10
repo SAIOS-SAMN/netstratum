@@ -29,7 +29,7 @@ pub mod taxon_table;
 pub mod thermal;
 
 pub use compound::{compounds, gem_of, knowledge_of, recipe_of, Compoundable};
-pub use locality::{lines_of, local_to, pressure, refines, workable_in};
+pub use locality::{civ_may_work, civ_reach, lines_of, local_to, pressure, refines, workable_in};
 pub use periodic::{periodic_of, Periodic, CELLS, LANES, LINES, PHASES, SHELLS, SPINS};
 pub use science::{
     bill_crystal_portion, dark_utility, explodes, explosion_risk, explosion_threshold, isomorphic,

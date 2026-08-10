@@ -85,7 +85,26 @@ impl World {
         let Some(class) = self.star else {
             return Err(ActionRefused::NoStarCommissioned);
         };
+        // CIV-REACH-1: refining deep lines needs the same ceiling as assay.
+        let line = crate::almanac::periodic_of(&raw).line;
+        let reach = self.civ_reach();
+        if line > reach {
+            return Err(ActionRefused::CivReachShort {
+                need: line,
+                have: reach,
+            });
+        }
+        if !crate::almanac::local_to(&raw, class) {
+            return Err(ActionRefused::ElementNotLocal { element: raw });
+        }
         let (mut spend, refined, yielded) = crate::dop::refine_recipe(&raw, class);
+        let refined_line = crate::almanac::periodic_of(&refined).line;
+        if refined_line > reach {
+            return Err(ActionRefused::CivReachShort {
+                need: refined_line,
+                have: reach,
+            });
+        }
         // O6.2 T5 Crucible — office advantage (not a gate): half the
         // spend. Derive half as (1+1); no new ratio dial (ratchet 112).
         // Q-T2 coded default: T3 may still refine; Crucible only eases.

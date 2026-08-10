@@ -70,6 +70,14 @@ refuses typed (the once-per-stratum law — nothing mints twice); a
 barren draw is a lawful typed verdict carrying its stratum, never a
 silent nothing.
 
+**CIV-REACH-1 (landed):** dig depth is capped by civilization growth,
+not only by the star. Bronze / pre-industry (`civ_reach = 2`) may open
+only strata 1..=2. Each crystallized base condition **1..=5** raises
+the ceiling by one; never above `lines_of(star)`. **Assay and refine**
+also refuse when the vein's periodic LINE exceeds `civ_reach` — a
+people may chart a deep identity and still be unable to mine it until
+sky tech grows. Solar leap (condition 0) does not deepen the mine.
+
 Conservation: an element enters banked stores only by extraction
 against `richness` per tick (the extractor pattern, terrain-multiplied
 by D3's chart) — the mint creates IDENTITY, never matter.

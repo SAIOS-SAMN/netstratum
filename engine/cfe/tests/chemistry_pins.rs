@@ -74,17 +74,25 @@ fn the_door_decides_bonding_and_the_verb_never_asks_again() {
 /// (`richness: None`), because how the vein fared is #40's concern and
 /// not chemistry's.
 fn stocked(name: &str, members: &[[u8; 32]], each: Ratio) -> World {
+    stocked_under(name, members, each, StarClass::G)
+}
+
+fn stocked_under(name: &str, members: &[[u8; 32]], each: Ratio, class: StarClass) -> World {
     let mut world = World::new();
     world.found(name).expect("founds");
-    world.commission_star(StarClass::G).expect("commissions");
+    world.commission_star(class).expect("commissions");
     world
         .site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None)
         .expect("sites");
     world.zone(0, ZoneKind::Extractor).expect("zones");
-    // ONE STRATUM OPENED. Pressure is `stratum / reach`, so a world
-    // that has never dug brings none and releases nothing — not even
-    // the shallowest line. The fixture digs once because a world
-    // holding drawn matter necessarily has.
+    // CIV-REACH-1: full base tech so deep fixtures may dig (1..=5).
+    for c in 1u8..=5 {
+        world
+            .grant_tech_as(cfe::world::SOVEREIGN, FIRST_ORB, c)
+            .expect("grow");
+    }
+    // ONE STRATUM OPENED for pressure. CIV-REACH-1: bronze is 2; full
+    // tech above allows deep digs in pressure fixtures.
     world.prospect(FIRST_ORB, 1).expect("opens the ground");
     let stamp = world.now();
     for member in members {
@@ -286,41 +294,53 @@ fn a_bond_is_reachable_from_a_world_s_own_ground_but_never_guaranteed() {
     // dead on arrival; too common and the periodic table decides
     // nothing.
     //
-    // Measured over 40 worlds drawing 24 strata each: 31 could bond
-    // something, 60 sets in total — most worlds can make SOMETHING and
-    // no world can make everything, which is exactly the scarcity that
-    // makes the lanes worth reading and the gaps worth trading for.
+    // Measured over many worlds drawing strata within civ_reach × sky:
+    // most can make SOMETHING and no world can make everything — the
+    // scarcity that makes the lanes worth reading and the gaps worth
+    // trading for. (CIV-REACH-1 caps dig depth; O-class forges all lines.)
     let trials = 20;
     let mut worlds_that_bond = 0;
     for trial in 0..trials {
         let mut world = charted(&format!("reach-{trial}"));
         let mut drawn = Vec::new();
-        for stratum in 2..=24u8 {
+        let dig = world.civ_reach().max(1);
+        for stratum in 1..=dig {
             if let Ok(struck) = world.prospect(FIRST_ORB, stratum) {
                 drawn.push(struck.element);
             }
         }
-        for _ in 0..4 {
-            world.tick();
-        }
+        // Bank drawn matter by receipt (same as stocked) so this pin
+        // measures whether OWN hashes ever bond — not assay wear gates.
+        let stamp = world.now();
         for element in &drawn {
-            let _ = world.assay(FIRST_ORB, *element);
+            world.chronicle_mut().append(
+                ClosureEvent::AssayStruck {
+                    orb_id: FIRST_ORB,
+                    element: *element,
+                    amount: ratio(10, 1),
+                    richness: None,
+                },
+                stamp,
+                vec![cfe::world::SOVEREIGN],
+            );
         }
+        let world = World::resume(world.chronicle().clone());
         if !world.bench(FIRST_ORB).is_empty() {
             worlds_that_bond += 1;
         }
     }
+    // With civ-capped dig depth (~7 strata), bonds are rarer than the
+    // old 24-stratum survey. Floor: at least ~10% of seeds can bond.
     assert!(
-        worlds_that_bond * 4 >= trials,
+        worlds_that_bond * 10 >= trials,
         "a bond must be REACHABLE from a world's own ground — only {worlds_that_bond}/{trials} \
          could make anything; the chemistry would be dead on arrival"
     );
 }
 
-/// The charted world the reachability measurement draws on — a G star,
-/// sited mesic, its ground open.
+/// Charted measurement world — O-class + full civ tech so digs are local.
 fn charted(name: &str) -> World {
-    stocked(name, &[], ratio(0, 1))
+    stocked_under(name, &[], ratio(0, 1), StarClass::O)
 }
 
 #[test]

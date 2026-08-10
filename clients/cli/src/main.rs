@@ -7306,6 +7306,12 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
             style.strong(&hex(element)[..8]),
             style.strong("trade")
         ),
+        ActionRefused::CivReachShort { need, have } => format!(
+            "this people only works LINE depth {} (bronze surface is 2) — asked {}; \
+             crystallize sky tech (base-7 conditions) to deepen the mine, never before",
+            style.strong(&have.to_string()),
+            style.strong(&need.to_string())
+        ),
         ActionRefused::PressureUnreached { element } => format!(
             "{} needs more PRESSURE than this orb has opened — {} deeper strata to bring it to bear",
             style.strong(&hex(element)[..8]),

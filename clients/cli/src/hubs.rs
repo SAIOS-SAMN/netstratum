@@ -535,10 +535,11 @@ fn star_bench(
     // Capacity strip (always visible).
     let board = world.stellar_capacity_board(current);
     println!(
-        "  {} reach {}/{} · open {} · local {} · refine-ready {}",
+        "  {} star {}/{} · civ {} · open {} · local {} · refine-ready {}",
         style.section("capacity"),
         board.reach,
         board.table_lines,
+        board.civ_reach,
         board.open_strata,
         board.local_veins,
         board.refinable_now
@@ -557,10 +558,11 @@ fn stellar_capacity_board(world: &World, style: &Style, current: u64) {
     banner(style, "BENCH › STAR › CAPACITY — lines_of as play");
     match b.star {
         Some(c) => println!(
-            "  sun {:?} · reach {} of {} table lines · pressure {}",
+            "  sun {:?} · star forge {} of {} lines · civ_reach {} · pressure {}",
             c,
             b.reach,
             b.table_lines,
+            b.civ_reach,
             amount(&b.pressure_now)
         ),
         None => println!("  {}", style.warn("no sun — commission before capacity plays")),
@@ -568,6 +570,12 @@ fn stellar_capacity_board(world: &World, style: &Style, current: u64) {
     println!(
         "  open strata {} · local veins {} · refinable now {} · deepest open {}",
         b.open_strata, b.local_veins, b.refinable_now, b.deepest_open
+    );
+    println!(
+        "  {}",
+        style.dim(
+            "CIV-REACH-1: bronze digs lines 1–2; crystallize base-7 tech to mine deeper (capped by the sun)"
+        )
     );
     println!();
     println!("  {}", style.section("LINES (star depth)"));

@@ -42,6 +42,49 @@ pub fn local_to(element: &[u8; 32], class: StarClass) -> bool {
     periodic_of(element).line <= lines_of(class)
 }
 
+/// **CIV-REACH-1** — deepest periodic LINE a people may open.
+///
+/// The sky (`lines_of`) says what the system *carries*. Civilization
+/// reach says what the people may *work*.
+///
+/// - **No star** → 0 (prospect refuses `NoStarCommissioned` first).
+/// - **Star known, no grown tech** (solar leap alone is the sun, not
+///   an age) → **2** (bronze surface lines 1..=2).
+/// - Each crystallized base condition **1..=5** raises the ceiling by
+///   one. Never exceeds the star's forge depth or `LINES`.
+///
+/// ```text
+/// grown conditions (1..=5)   civ_reach (before star cap)
+/// 0  (bronze under a sun)    2
+/// 1                          3
+/// …
+/// 5                          7  (= LINES)
+/// ```
+///
+/// Condition 0 (solar leap, often granted at commission) does **not**
+/// deepen the mine — knowing the sun is prerequisite, not industry.
+pub fn civ_reach(held_conditions: impl IntoIterator<Item = u8>, star: Option<StarClass>) -> u8 {
+    // Growth ladder: insulation…stores (1..=5). Solar (0) is not depth.
+    let mut growth = [false; 5];
+    for c in held_conditions {
+        if (1..=5).contains(&c) {
+            growth[(c - 1) as usize] = true;
+        }
+    }
+    let n = growth.iter().filter(|&&h| h).count() as u8;
+    // Bronze surface: lines 1..=2. One grown condition → 3, …, five → 7.
+    let grown = (2u8.saturating_add(n)).min(LINES);
+    match star {
+        Some(class) => grown.min(lines_of(class)),
+        None => 0,
+    }
+}
+
+/// May this people open this LINE under this sky?
+pub fn civ_may_work(line: u8, held_conditions: impl IntoIterator<Item = u8>, star: Option<StarClass>) -> bool {
+    line > 0 && line <= civ_reach(held_conditions, star)
+}
+
 /// **THE PRESSURE OF A SYSTEM** — the stratum an orb has opened,
 /// against the deepest line its star offers.
 pub fn pressure(stratum: u8, class: StarClass) -> Ratio {
