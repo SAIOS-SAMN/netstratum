@@ -705,7 +705,7 @@ pub fn record_journal(
     let dir = book.world_dir(world_name);
     fs::create_dir_all(&dir)?;
     let path = dir.join("journal.jrn");
-    // Drop legacy JSON journal if present.
+    // Hygiene: non-architecture residue is not a carrier.
     let _ = fs::remove_file(dir.join("journal.jsonl"));
     let already = match path.exists() {
         true => card::count_frames(&fs::read(&path)?),

@@ -69,7 +69,8 @@ pub fn record(
         card::write_atomic(&dir.join("world.card"), &out)?;
     }
 
-    // Drop legacy JSON display files if present.
+    // Hygiene: remove non-architecture residue if an old tree still holds it.
+    // These are not read; they are not carriers. Write path is TLV only.
     let _ = fs::remove_file(planet_dir.join("state.json"));
     let _ = fs::remove_file(dir.join("world.json"));
     let _ = fs::remove_file(dir.join("chronicle.jsonl"));

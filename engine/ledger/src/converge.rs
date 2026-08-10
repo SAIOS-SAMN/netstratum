@@ -21,10 +21,9 @@ use cfe::vrp::{receipt_digest, ReceiptHash};
 use num_traits::Zero;
 use physics::{AxisVector, Triple};
 
-use crate::extract;
 use crate::{card, sanitize, Ledger};
 
-/// One archived receipt, reconstructed from a chronicle.jsonl line —
+/// One archived receipt from `chronicle.tlv` —
 /// raw event bytes carried whole so verification never needs to decode
 /// the event (unknown tags still verify: SEAL A).
 struct RawReceipt {
@@ -128,11 +127,7 @@ pub fn converge(book: &Ledger, eras: &[(String, PathBuf)]) -> std::io::Result<Co
             .map(|entries| {
                 entries
                     .filter_map(|e| e.ok().map(|e| e.path()))
-                    .filter(|p| {
-                        p.is_dir()
-                            && (p.join("chronicle.tlv").exists()
-                                || p.join("chronicle.jsonl").exists())
-                    })
+                    .filter(|p| p.is_dir() && p.join("chronicle.tlv").exists())
                     .collect()
             })
             .unwrap_or_default();
@@ -142,60 +137,30 @@ pub fn converge(book: &Ledger, eras: &[(String, PathBuf)]) -> std::io::Result<Co
                 .file_name()
                 .map(|n| n.to_string_lossy().into_owned())
                 .unwrap_or_default();
-            // Prefer binary chronicle.tlv; fall back to legacy jsonl archives.
-            let (receipts, torn) = if dir.join("chronicle.tlv").exists() {
-                match cfe::persist::load(&dir.join("chronicle.tlv")) {
-                    Ok(ch) => {
-                        let receipts: Vec<RawReceipt> = ch
-                            .receipts()
-                            .iter()
-                            .map(|r| RawReceipt {
-                                sequence: r.sequence,
-                                stamp: r.stamp,
-                                parent: r.parent.0,
-                                digest: r.own.0,
-                                by: r.provenance.clone(),
-                                event_bytes: r.event.wire_bytes(),
-                            })
-                            .collect();
-                        (receipts, false)
-                    }
-                    Err(_) => {
-                        read.quarantined.push(Quarantined {
-                            era: era.clone(),
-                            world,
-                            at: u64::MAX,
-                        });
-                        continue;
-                    }
-                }
-            } else {
-                let lines = match fs::read_to_string(dir.join("chronicle.jsonl")) {
-                    Ok(text) => text,
-                    Err(_) => {
-                        read.quarantined.push(Quarantined {
-                            era: era.clone(),
-                            world,
-                            at: u64::MAX,
-                        });
-                        continue;
-                    }
-                };
-                match parse_chronicle(&lines) {
-                    ParsedChronicle::Parsed { receipts, torn } => (receipts, torn),
-                    ParsedChronicle::Malformed { at } => {
-                        read.quarantined.push(Quarantined {
-                            era: era.clone(),
-                            world,
-                            at,
-                        });
-                        continue;
-                    }
+            // Authority only: chronicle.tlv (SEAL B verified load).
+            // Torn-tail is a JSONL concept; binary load is all-or-quarantine.
+            let receipts = match cfe::persist::load(&dir.join("chronicle.tlv")) {
+                Ok(ch) => ch
+                    .receipts()
+                    .iter()
+                    .map(|r| RawReceipt {
+                        sequence: r.sequence,
+                        stamp: r.stamp,
+                        parent: r.parent.0,
+                        digest: r.own.0,
+                        by: r.provenance.clone(),
+                        event_bytes: r.event.wire_bytes(),
+                    })
+                    .collect::<Vec<_>>(),
+                Err(_) => {
+                    read.quarantined.push(Quarantined {
+                        era: era.clone(),
+                        world,
+                        at: u64::MAX,
+                    });
+                    continue;
                 }
             };
-            if torn {
-                read.torn.push((era.clone(), world.clone()));
-            }
             // The verification door (07 §1.2) — the real chain law over
             // the RAW event bytes; unknown event tags still verify.
             if let Some(at) = first_break(&receipts) {
@@ -464,52 +429,6 @@ fn write_fiber_card(
     card::write_atomic(&dir.join(format!("{}.fiber", sanitize(chart_name))), &out)
 }
 
-/// Parse one archived chronicle.jsonl into raw receipts, with the
-/// TORN-TAIL LAW (07 §1.2): a killed writer leaves a final line of NUL
-/// bytes or a half-written record — an append that never completed. By
-/// SEAL B (what has no receipt does not persist) the world annexes at
-/// its verified prefix and the tear is recorded. Pure-garbage lines
-/// (NUL/whitespace only) carry no receipt data and are skipped — if one
-/// ever hid a LOST receipt, the chain law breaks at the next parent
-/// link and the world quarantines anyway. A content-bearing malformed
-/// line anywhere BUT the tail is interior corruption: quarantine.
-fn parse_chronicle(text: &str) -> ParsedChronicle {
-    let lines: Vec<&str> = text
-        .lines()
-        .filter(|l| !l.trim_matches(['\0', ' ', '\t', '\r']).is_empty())
-        .collect();
-    let mut out = Vec::new();
-    let mut torn = false;
-    for (index, line) in lines.iter().enumerate() {
-        match parse_receipt_line(line) {
-            Some(receipt) => out.push(receipt),
-            None if index == lines.len() - 1 => torn = true,
-            None => return ParsedChronicle::Malformed { at: index as u64 },
-        }
-    }
-    ParsedChronicle::Parsed { receipts: out, torn }
-}
-
-enum ParsedChronicle {
-    Parsed { receipts: Vec<RawReceipt>, torn: bool },
-    /// Interior corruption at a content-bearing line — quarantine.
-    Malformed { at: u64 },
-}
-
-fn parse_receipt_line(line: &str) -> Option<RawReceipt> {
-    Some(RawReceipt {
-        sequence: extract::extract_u64(line, "seq")?,
-        stamp: extract::extract_u64(line, "stamp")?,
-        parent: hex32(&extract::extract_string(line, "parent")?)?,
-        digest: hex32(&extract::extract_string(line, "digest")?)?,
-        by: extract::extract_string_array(line, "by")?
-            .iter()
-            .map(|s| s.parse().ok())
-            .collect::<Option<Vec<u64>>>()?,
-        event_bytes: hex_bytes(&extract::extract_string(line, "tlv")?)?,
-    })
-}
-
 /// The real chain law (NS-3 §2.1) over raw event bytes: parent links
 /// and recomputed digests, first break named.
 fn first_break(receipts: &[RawReceipt]) -> Option<u64> {
@@ -533,20 +452,6 @@ fn first_break(receipts: &[RawReceipt]) -> Option<u64> {
 fn decode_event(event_bytes: &[u8]) -> Option<ClosureEvent> {
     let (tag, value) = tlv::records(event_bytes).next()?;
     ClosureEvent::from_wire(tag, value)
-}
-
-fn hex_bytes(text: &str) -> Option<Vec<u8>> {
-    if !text.len().is_multiple_of(2) {
-        return None;
-    }
-    (0..text.len())
-        .step_by(2)
-        .map(|i| u8::from_str_radix(&text[i..i + 2], 16).ok())
-        .collect()
-}
-
-fn hex32(text: &str) -> Option<[u8; 32]> {
-    hex_bytes(text)?.try_into().ok()
 }
 
 fn io_error(refused: persist::PersistRefused) -> std::io::Error {

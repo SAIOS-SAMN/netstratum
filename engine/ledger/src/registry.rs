@@ -350,8 +350,7 @@ impl Registry {
             }
         }
         let path = self.root.join(format!("{}.civ", civilization.sigil));
-        let legacy = self.root.join(format!("{}.json", civilization.sigil));
-        if path.exists() || legacy.exists() {
+        if path.exists() {
             return Err(RegistryRefused::AlreadyRegistered {
                 sigil: civilization.sigil.clone(),
             });
@@ -388,19 +387,10 @@ impl Registry {
         card::write_atomic(path, &out)
     }
 
-    /// Load one entry by sigil (`.civ` TLV; migrates legacy `.json` once).
+    /// Load one entry by sigil (`.civ` TLV only).
     pub fn load(&self, sigil: &str) -> Option<Civilization> {
-        let civ_path = self.root.join(format!("{sigil}.civ"));
-        if let Some(data) = card::read(&civ_path) {
-            return parse_civ_tlv(&data);
-        }
-        // Migrate legacy JSON once.
-        let json_path = self.root.join(format!("{sigil}.json"));
-        let text = fs::read_to_string(&json_path).ok()?;
-        let c = parse_civ_legacy_json(&text)?;
-        let _ = self.write_civ_tlv(&civ_path, &c);
-        let _ = fs::remove_file(&json_path);
-        Some(c)
+        let data = card::read(&self.root.join(format!("{sigil}.civ")))?;
+        parse_civ_tlv(&data)
     }
 
     /// Every registered civilization, slug-ascending — the directory a
@@ -413,12 +403,10 @@ impl Registry {
             .filter_map(|e| e.ok())
             .filter_map(|e| {
                 let path = e.path();
-                let ext = path.extension()?.to_str()?;
-                if ext == "civ" || ext == "json" {
-                    Some(path.file_stem()?.to_string_lossy().into_owned())
-                } else {
-                    None
+                if path.extension()?.to_str()? != "civ" {
+                    return None;
                 }
+                Some(path.file_stem()?.to_string_lossy().into_owned())
             })
             .collect();
         slugs.sort();
@@ -465,25 +453,6 @@ fn parse_civ_tlv(data: &[u8]) -> Option<Civilization> {
         return None;
     }
     Some(c)
-}
-
-fn parse_civ_legacy_json(text: &str) -> Option<Civilization> {
-    use crate::extract::extract_string;
-    Some(Civilization {
-        name: extract_string(text, "name")?,
-        sigil: extract_string(text, "sigil").or_else(|| extract_string(text, "slug"))?,
-        species: extract_string(text, "species").unwrap_or_default(),
-        clade: extract_string(text, "clade").unwrap_or_default(),
-        motto: extract_string(text, "motto").unwrap_or_default(),
-        disposition: extract_string(text, "disposition")?,
-        metabolism: extract_string(text, "metabolism")?,
-        perception: extract_string(text, "perception")?,
-        founder: extract_string(text, "founder").unwrap_or_default(),
-        lineage: extract_string(text, "lineage")
-            .map(|joined| joined.split_whitespace().map(String::from).collect())
-            .unwrap_or_default(),
-        station: extract_string(text, "station"),
-    })
 }
 
 /// Derive a slug the way the ledger sanitizes names.
@@ -547,9 +516,8 @@ impl Registry {
             }
         }
         card.station = Some(station.into());
-        // Rewrite TLV card (drop legacy json if present).
+        // Rewrite the TLV card whole.
         let path = self.root.join(format!("{sigil}.civ"));
-        let _ = fs::remove_file(self.root.join(format!("{sigil}.json")));
         let _ = fs::remove_file(&path);
         self.create(&card)
     }

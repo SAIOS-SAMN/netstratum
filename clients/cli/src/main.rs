@@ -89,22 +89,14 @@ fn banner(style: &Style) {
 /// BLOCKER A3: the active profile's station — the authority the
 /// Operator seat claim — **session config**, not colony law.
 ///
-/// Prefers line-oriented `var/operators/<name>` (no JSON). Legacy
-/// `.json` profiles still parse for one transition, then retire.
+/// Plain text `var/operators/<name>` only (`station <word>` lines).
 /// Engine deeds never trust this string as physics — mint/station
 /// gates re-check the chain.
 fn active_station() -> String {
     let Some(name) = active_line() else {
         return "player".into();
     };
-    // Preferred: plain text profile `station <word>` lines.
     if let Ok(text) = std::fs::read_to_string(format!("var/operators/{name}")) {
-        if let Some(s) = profile_field(&text, "station") {
-            return s;
-        }
-    }
-    // Transition: legacy .json profile (display-era debt — do not extend).
-    if let Ok(text) = std::fs::read_to_string(format!("var/operators/{name}.json")) {
         if let Some(s) = profile_field(&text, "station") {
             return s;
         }
@@ -133,10 +125,9 @@ fn tier0_gate(style: &Style) -> bool {
     false
 }
 
-/// Read a key from operator profile text (plain `key value` or legacy `"key":"value"`).
+/// Read a key from plain operator profile text (`key value` / `key=value`).
 /// **Not for colony state** — session config only. Colony truth is chronicle.tlv.
 fn profile_field(text: &str, key: &str) -> Option<String> {
-    // Plain: `station progenitor` / `world aerie-hearth`
     for line in text.lines() {
         let line = line.trim();
         if line.is_empty() || line.starts_with('#') {
@@ -153,10 +144,7 @@ fn profile_field(text: &str, key: &str) -> Option<String> {
             }
         }
     }
-    // Legacy JSON fragment: "key":"value"
-    let tag = format!("\"{key}\":\"");
-    let start = text.find(&tag)? + tag.len();
-    text[start..].split('\"').next().map(str::to_string)
+    None
 }
 
 /// THE FAR WORLD (union wiring, 2026-07-30): cross-world deeds load
@@ -232,7 +220,7 @@ fn seat_hand() -> u64 {
 
 /// MARKET-2: a world's charted position.
 ///
-/// Topology export (`starchart.json`) is a **display cache** of chart
+/// Topology export (`starchart.card`) is a **chart cache** of
 /// facts — not colony banks. Prefer resume of the live world and
 /// fall back to the chart file only as coordinates (never balance).
 /// Uncharted reads as the origin.
@@ -2162,23 +2150,16 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 };
                 let dir = std::path::PathBuf::from("var/operators");
                 let _ = std::fs::create_dir_all(&dir);
-                // Plain profile (no JSON) — session config, not colony law.
+                // Plain profile — session config, not colony law.
                 let profile = dir.join(&sigil);
                 let world = std::fs::read_to_string(&profile)
                     .ok()
                     .and_then(|text| profile_field(&text, "world"))
-                    .or_else(|| {
-                        std::fs::read_to_string(dir.join(format!("{sigil}.json")))
-                            .ok()
-                            .and_then(|text| profile_field(&text, "world"))
-                    })
                     .unwrap_or_default();
                 let _ = std::fs::write(
                     &profile,
                     format!("# operator seat claim — not a receipt\nstation {station}\nworld {world}\n"),
                 );
-                // Drop legacy .json if present (display-era residue).
-                let _ = std::fs::remove_file(dir.join(format!("{sigil}.json")));
                 let _ = std::fs::write(dir.join("active"), &sigil);
                 println!(
                     "{} logged in as {} [{}] — {} resumes your last saved world",
@@ -2196,13 +2177,8 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                     println!("{}", style.head("OPERATORS ON THIS MACHINE"));
                     for entry in entries.filter_map(|e| e.ok()) {
                         let name = entry.file_name().to_string_lossy().into_owned();
-                        if name == "active" || name.ends_with(".json") {
-                            // .json listed only as legacy until re-login migrates.
-                            if let Some(sigil) = name.strip_suffix(".json") {
-                                listed += 1;
-                                let mark = if sigil == active.trim() { " ← active (legacy json)" } else { " (legacy json — re-login)" };
-                                println!("  {}{}", style.strong(sigil), style.dim(mark));
-                            }
+                        if name == "active" || name.contains('.') {
+                            // Only extensionless plain profiles are operators.
                             continue;
                         }
                         if entry.path().is_file() {
@@ -2234,9 +2210,8 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 println!("{} {} first", style.bad("✗"), style.strong("login <name>"));
                 return;
             }
-            let profile = std::fs::read_to_string(format!("var/operators/{sigil}"))
-                .or_else(|_| std::fs::read_to_string(format!("var/operators/{sigil}.json")))
-                .unwrap_or_default();
+            let profile =
+                std::fs::read_to_string(format!("var/operators/{sigil}")).unwrap_or_default();
             let last = profile_field(&profile, "world").unwrap_or_default();
             match last.as_str() {
                 "" => println!(
@@ -3981,10 +3956,6 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                     orb.name
                                 ),
                             );
-                            let _ = std::fs::remove_file(format!(
-                                "var/operators/{}.json",
-                                active.trim()
-                            ));
                         }
                         println!(
                             "{} world saved — {} receipt(s) appended to {} (the file only grows)",

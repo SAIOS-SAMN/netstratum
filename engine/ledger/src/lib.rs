@@ -40,13 +40,12 @@ use std::path::PathBuf;
 pub mod card;
 pub mod converge;
 pub mod galaxy;
-pub mod extract;
 pub mod registry;
 pub(crate) use cfe::ratio::ratio_str;
 
 /// THE UNIVERSAL CLOCK RENDERING — T of TUniversal{S, G, T} as the
 /// six-field base-60 odometer string the law cards carry
-/// (universe.json's `tuniversal`). The law writes its own cards with
+/// (`universe.card` tuniversal). The law writes its own cards with
 /// its own pen (the inversion dropped the lens dependency); the
 /// lens's display copy renders the same law for the eye.
 pub fn universal_clock(ticks: u64) -> String {
@@ -113,7 +112,7 @@ impl Ledger {
 
     /// Read pending directives, inbox-name ascending (the steward
     /// numbers them; order is the steward's stated order).
-    /// Carriers: `*.dir` TLV (preferred). Legacy `*.json` one-shot migrate.
+    /// Carriers: `*.dir` TLV only.
     pub fn pending_directives(&self, world: &str) -> std::io::Result<Vec<PendingDirective>> {
         let inbox = self.world_dir(world).join("inbox");
         if !inbox.exists() {
@@ -121,34 +120,12 @@ impl Ledger {
         }
         let mut paths: Vec<PathBuf> = fs::read_dir(&inbox)?
             .filter_map(|e| e.ok().map(|e| e.path()))
-            .filter(|p| {
-                p.is_file()
-                    && p.extension()
-                        .is_some_and(|x| x == "dir" || x == "json")
-            })
+            .filter(|p| p.is_file() && p.extension().is_some_and(|x| x == "dir"))
             .collect();
         paths.sort();
         let mut out = Vec::new();
         for path in paths {
-            let directive = if path.extension().is_some_and(|x| x == "dir") {
-                parse_directive_tlv(&fs::read(&path)?)
-            } else {
-                // Legacy JSON → rewrite as .dir and drop JSON.
-                let text = fs::read_to_string(&path)?;
-                let d = parse_directive_legacy_json(&text);
-                if let Some(ref dir) = d {
-                    let tlv_path = path.with_extension("dir");
-                    let _ = write_directive_tlv(&tlv_path, dir);
-                    let _ = fs::remove_file(&path);
-                    out.push(PendingDirective {
-                        path: tlv_path,
-                        directive: dir.clone(),
-                    });
-                    continue;
-                }
-                d
-            };
-            if let Some(directive) = directive {
+            if let Some(directive) = parse_directive_tlv(&fs::read(&path)?) {
                 out.push(PendingDirective { path, directive });
             }
         }
@@ -200,18 +177,7 @@ impl Ledger {
     }
 
     fn read_universe_span(&self) -> Option<Ratio> {
-        let data = card::read(&self.universe_card_path())
-            .or_else(|| {
-                // One-shot migrate from legacy universe.json
-                let text = fs::read_to_string(self.root.join("universe.json")).ok()?;
-                let span = extract::extract_string(&text, "span")?;
-                let ticks = extract::extract_string(&text, "ticks")
-                    .and_then(|t| t.parse().ok())
-                    .unwrap_or(0u64);
-                let _ = self.write_universe_card_inner(&span, ticks);
-                let _ = fs::remove_file(self.root.join("universe.json"));
-                card::read(&self.universe_card_path())
-            })?;
+        let data = card::read(&self.universe_card_path())?;
         for (tag, value) in card::records(&data) {
             if tag == card::uni::SPAN {
                 return card::str_of(value).and_then(|s| parse_ratio(&s));
@@ -263,10 +229,8 @@ impl Ledger {
         g: &Ratio,
     ) -> std::io::Result<()> {
         fs::create_dir_all(&self.root)?;
-        if !self.universe_card_path().exists() && !self.root.join("universe.json").exists() {
+        if !self.universe_card_path().exists() {
             self.write_universe_card(0)?;
-        } else if !self.universe_card_path().exists() {
-            let _ = self.read_universe_span(); // migrate
         }
         let span = self.universe_span();
         let wrap = |v: &Ratio| -> Ratio { v - (v / &span).floor() * &span };
@@ -283,30 +247,10 @@ impl Ledger {
     }
 
     fn load_starchart_entries(&self) -> Vec<(String, [String; 4])> {
-        if let Some(data) = card::read(&self.starchart_path()) {
-            return parse_starchart_tlv(&data);
+        match card::read(&self.starchart_path()) {
+            Some(data) => parse_starchart_tlv(&data),
+            None => Vec::new(),
         }
-        // Migrate legacy starchart.json
-        let Ok(text) = fs::read_to_string(self.root.join("starchart.json")) else {
-            return Vec::new();
-        };
-        let mut entries = Vec::new();
-        for line in text.lines() {
-            if let (Some(name), Some(px), Some(py)) = (
-                extract::extract_string(line, "world"),
-                extract::extract_string(line, "x"),
-                extract::extract_string(line, "y"),
-            ) {
-                let pz = extract::extract_string(line, "z").unwrap_or_else(|| "0".into());
-                let pg = extract::extract_string(line, "g").unwrap_or_else(|| "0".into());
-                entries.push((name, [px, py, pz, pg]));
-            }
-        }
-        if !entries.is_empty() {
-            let _ = self.write_starchart_entries(&entries);
-            let _ = fs::remove_file(self.root.join("starchart.json"));
-        }
-        entries
     }
 
     fn write_starchart_entries(
@@ -491,16 +435,4 @@ pub fn write_directive_tlv(path: &std::path::Path, d: &Directive) -> std::io::Re
     }
     card::put_str(card::dir::ACTING_AS, &d.acting_as, &mut out);
     card::write_atomic(path, &out)
-}
-
-/// Legacy JSON directive (migrate-only).
-fn parse_directive_legacy_json(text: &str) -> Option<Directive> {
-    let verb = extract::extract_string(text, "verb")?;
-    let acting_as = extract::extract_string(text, "as").unwrap_or_else(|| "steward".into());
-    let args = extract::extract_string_array(text, "args").unwrap_or_default();
-    Some(Directive {
-        verb,
-        args,
-        acting_as,
-    })
 }

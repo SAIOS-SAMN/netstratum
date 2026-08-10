@@ -126,20 +126,22 @@ Every console session reflects its civilization to `var/worlds/<world>/`:
 |------|------|
 | **`chronicle.tlv`** | **Authority** — resume carrier, SEAL B |
 | **`state.tlv`** | **Machine mirror** — committed orb wire |
-| `state.json` | Display snapshot only (never read back as law) |
-| `chronicle.jsonl` | Display receipt stream (lines carry `tlv` hex) |
-| `solves/` | Proof-of-solution certificates |
-| `inbox/` | Steward directives → applied/refused |
+| `world.card` | World/planet identity card (TLV) |
+| `solves/*.sol` | Proof-of-solution certificates (TLV) |
+| `inbox/*.dir` | Steward directives → applied/refused (TLV) |
+| `journal.jrn` | Year voice (framed TLV) |
 
-Quantities render exact (`9/2`, never `4.5`). Full law:
-**`docs/JSON_DISPLAY_ONLY.md`**.
+**JSON is not architecture** — the system does not write, load, or migrate
+`*.json` / `*.jsonl`. Full law: **`docs/JSON_DISPLAY_ONLY.md`**.
+
+Quantities render exact (`9/2`, never `4.5`).
 
 - **Primitive:** `scribe::record` / `scribe::record_solve` for the
   write side, `ledger::Ledger` (`pending_directives`, `archive`) for the
   steward inbox. (Formerly `mirror::Mirror`; `engine/mirror` was EXCISED
   2026-07-31 — d606b01 — and MIRROR is deprecated as a framing whole,
   12 §2c. A lens derives from the one chain and holds no copy.) The lens
-  is a DERIVATION, never an authority — **nothing reads `state.json` back
+  is a DERIVATION, never an authority — **nothing reads a display file back
   into a world**; replay of `chronicle.tlv` grounds worlds. Persistence
   and observation share one chain: world = replay(chronicle).
 - **Tools:** `tools/observer.py` — read-only by construction;
@@ -187,7 +189,7 @@ are NAMED now so they can grow at D3 (terrain/planets, multi-colony) and N6
 per-planet. "World" is retired as a container term; where it appears
 colloquially it means *a planet*, never the container.
 
-- **Registry (`var/registry/<slug>.json`):** who exists. Entries are
+- **Registry (`var/registry/<sigil>.civ` TLV):** who exists. Entries are
   created by players at founding (join the directory or add to it):
   name, species (free text — the encyclopedia grows itself), motto,
   the three genesis axes from the CLOSED vocabulary (Ch. 2 §1), and
@@ -214,8 +216,8 @@ colloquially it means *a planet*, never the container.
 - **Primitive:** `ledger::registry::Registry` (`create` with typed
   refusals `AlreadyRegistered`/`UnknownAxis`, `load`, `list`);
   `scribe::record(world, planet, civilization, &World)` writing
-  `worlds/<world>/world.json` + `planets/<planet>/state.json`;
-  directives and solves at world altitude.
+  `worlds/<world>/world.card` + `planets/<planet>/state.tlv`;
+  directives (`.dir`) and solves (`.sol`) at world altitude.
 - **Witness:** `ledger_pins` (topology layout, per-world chain,
   registry vocabulary enforcement).
 - **coder-02 seam:** founding becomes the character screen — pick or
