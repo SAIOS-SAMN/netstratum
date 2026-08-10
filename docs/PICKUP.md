@@ -76,8 +76,8 @@ ruins   — closed archive history (P8.4)
 | **CIV-REACH-1** | ~~Bronze dig depth~~ **LANDED** | `civ_reach` · prospect stratum · assay/refine line gates |
 | **STAR-ENDOW-1** | ~~Star-scaled kit~~ **LANDED** | `star_endowment` on commission · orbit band gift on site |
 | **E3.7** | ~~WANT-1 element ids~~ **LANDED** | tags 163–164 · element_wants · market demand |
-| **E3.8 ★** | Observer `routes` + `refineries` views | next |
-| **E3.9** | Treaty allow-lists for element ids | after E3.8 |
+| **E3.8** | ~~Observer routes/refineries~~ **LANDED** | `observer routes` · `observer refineries` · chronicle/state TLV |
+| **E3.9 ★** | Treaty allow-lists for element ids | next |
 | **I5.x** | SHARE/NOTE/FUT/PERP lifecycle residual | Wave 5 |
 | Court | Rename Earth-culture line names | operator only |
 | Deep deeds | More hub leaves still status+verb | incremental |
@@ -108,7 +108,9 @@ touches element diversity.
 | **E3.6b** | `post_offer` / `counter_offer` / `clear_trade` honor Element cargo + bank debit/credit | `world_market` + element pins red→green |
 | **E3.6c** | Conductor `market_step` (or sibling) posts element surplus intents | NPC pin in `wave1_era_pins` or dedicated |
 | **E3.6d** | CLI `trade` / bench surface for element offer (if needed) | smoke line |
-| **E3.7+** | WANT-1 element ids · observer routes · treaty allow-lists | separate landings |
+| **E3.7** | WANT-1 element ids | **LANDED** |
+| **E3.8** | Observer routes / refineries | **LANDED** |
+| **E3.9** | Treaty allow-lists for element ids | next |
 
 **Touch map (expected):**
 

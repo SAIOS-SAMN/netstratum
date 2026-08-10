@@ -66,7 +66,7 @@ strand-adapter · isthmus/datum-adapter
 | E3.5 | [x] Conductor build prefers refinery when raw surplus | E3.4 | pin |
 | E3.6 | [x] **E-MKT-1** offers carry ElementId cargo | E3.1, MARKET-1 | `Cargo` union; tag 49 wire; clear_trade; `market_step` element intents; `element_market_pins` |
 | E3.7 | [x] WANT-1 may target element ids | E3.6 | tags 163–164 · element_wants · market demand intents · SCHEMA_V18 |
-| E3.8 | [ ] Observer `routes` + `refineries` views | E3.2, E3.4 | |
+| E3.8 | [x] Observer `routes` + `refineries` views | E3.2, E3.4 | `tools/observer.py` routes/refineries; chronicle tag 110−80; state zone kind 9 |
 | E3.9 | [ ] Treaty allow-lists for element ids | E3.1, TREATY | |
 
 ---

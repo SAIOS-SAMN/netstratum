@@ -1105,13 +1105,12 @@ on external strand/isthmus/datum crates.
 
 ### Resume board — **NEXT PHASE** (operator go)
 
-1. **E3.6** Element market cargo on offers (E-MKT-1)  
-2. **E3.7–E3.9** WANT-1 elements · observer routes · treaty allow-lists  
-3. **I5.x** instrument lifecycle residual (SHARE/NOTE/FUT/PERP)  
-4. Court rename of Earth-culture line names (optional)  
-5. More deep hub deeds (incremental)
+1. **E3.9** Treaty allow-lists for element ids  
+2. **I5.x** instrument lifecycle residual (SHARE/NOTE/FUT/PERP)  
+3. Court rename of Earth-culture line names (optional)  
+4. More deep hub deeds (incremental)
 
-**Landed this arc:** H1.3 · C1.6 · C1.7 · P8.1–P8.5 · POL.1–3 · planetary deep deeds · R2.6 rail column.
+**Landed this arc:** H1.3 · C1.6 · C1.7 · P8.1–P8.5 · POL.1–3 · planetary deep deeds · R2.6 rail column · E3.6–E3.8 · CIV-REACH · STAR-ENDOW.
 
 ### Smoke on cold start
 

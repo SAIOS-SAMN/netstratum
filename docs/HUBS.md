@@ -188,7 +188,8 @@ Dual:    polity  ←activity→  bench polity
 
 | ID | Open |
 |----|------|
-| E3.6–E3.9 | Element market cargo · WANT-1 elements · observer routes · treaty allow-lists |
+| E3.6–E3.8 | Element market cargo · WANT-1 · observer routes/refineries **landed** |
+| E3.9 | Treaty allow-lists for element ids |
 | I5.x | SHARE/NOTE/FUT/PERP instrument lifecycle residual |
 | Court | Rename Earth-culture line names (operator only) |
 | Deep deeds | more domain leaves still status+verb (partial: planetary prospect/assay/refine fire) |

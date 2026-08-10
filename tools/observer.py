@@ -29,6 +29,8 @@ Usage:
   python3 tools/observer.py techs              # crystallized nodes
   python3 tools/observer.py chart              # the star chart
   python3 tools/observer.py market             # resting offers
+  python3 tools/observer.py routes             # E3.8 element lanes (chronicle)
+  python3 tools/observer.py refineries         # E3.8 element-refinery zones
   python3 tools/observer.py arc                # P8.2 trajectory · hunger · rail · labor
   python3 tools/observer.py ruins              # P8.4 closed-ruins history
   python3 tools/observer.py <view> --watch 2   # any view, refreshed
@@ -210,6 +212,8 @@ def decode_orb_tlv(path):
         "vented": Fraction(0), "elements": [],
         "stamp": Fraction(0), "name": None, "orb_id": None,
         "habitats": 0,
+        "refineries": [],
+        "zone_kinds": [],
     }
     for tag, value in tlv_records(data):
         if tag == 16 and len(value) >= 8:
@@ -222,10 +226,14 @@ def decode_orb_tlv(path):
         elif tag == 17 and len(value) >= 3:
             # tile u16 LE ‖ kind u8
             orb["zones"] += 1
+            tile = int.from_bytes(value[:2], "little")
             kind = value[2]
-            # ZoneKind::Habitat = 2 (dop wire)
+            # ZoneKind::Habitat = 2 · ElementRefinery = 9 (dop wire)
             if kind == 2:
                 orb["habitats"] += 1
+            if kind == 9:
+                orb.setdefault("refineries", []).append(tile)
+            orb.setdefault("zone_kinds", []).append((tile, kind))
         elif tag == 18 and len(value) > 1:
             name = RESOURCE_NAMES.get(value[0])
             if name:
@@ -291,6 +299,106 @@ def chain_linked_tlv(world_dir):
         return False, 0
     # Approximate receipt count for display only (not SEAL B).
     return True, max(1, size // 80)
+
+
+# Chronicle event tags (cfe::dop / vrp) — display scan only.
+_EVT_ZONE_BUILT = 2
+_EVT_ZONE_RAZED = 7
+_EVT_ROUTE_LAPSED = 80
+_EVT_ELEMENT_ROUTE = 110
+_RECEIPT_FRAME = 20
+_ZONE_ELEMENT_REFINERY = 9
+_RAIL_WORD = {1: "R1", 2: "R2", 3: "R3", 4: "R4"}
+
+
+def iter_chronicle_events(world_dir):
+    """Yield (event_tag, event_value) from chronicle.tlv receipt frames.
+
+    Skips torn/unknown frames (SEAL A). Not a full SEAL B verify — the
+    engine owns that; the board only displays route/refinery history.
+    """
+    path = Path(world_dir) / "chronicle.tlv"
+    if not path.exists():
+        return
+    try:
+        data = path.read_bytes()
+    except OSError:
+        return
+    for tag, value in tlv_records(data):
+        if tag != _RECEIPT_FRAME or len(value) < 84:
+            continue
+        count = int.from_bytes(value[80:84], "little")
+        at = 84 + count * 8
+        if at > len(value):
+            continue
+        for etag, eval_ in tlv_records(value[at:]):
+            yield etag, eval_
+            break  # one event per receipt
+
+
+def load_element_routes(world_dir):
+    """Live element routes: charter (110) minus lapse (80), by deal id."""
+    routes = {}
+    for etag, value in iter_chronicle_events(world_dir):
+        if etag == _EVT_ELEMENT_ROUTE and len(value) >= 40:
+            deal = int.from_bytes(value[:8], "little")
+            element = bytes(value[8:40])
+            try:
+                eta, used = tlv_ratio(value, 40)
+            except (IndexError, ValueError):
+                continue
+            rail_at = 40 + used
+            rail = value[rail_at] if rail_at < len(value) else 0
+            routes[deal] = {
+                "deal": deal,
+                "element": element,
+                "eta": eta,
+                "rail": rail,
+            }
+        elif etag == _EVT_ROUTE_LAPSED and len(value) >= 8:
+            deal = int.from_bytes(value[:8], "little")
+            routes.pop(deal, None)
+    return list(routes.values())
+
+
+def load_refineries_from_chronicle(world_dir):
+    """ElementRefinery zones still standing (ZoneBuilt kind 9 − ZoneRazed)."""
+    # key (orb_id, tile) -> True
+    standing = {}
+    for etag, value in iter_chronicle_events(world_dir):
+        if etag == _EVT_ZONE_BUILT and len(value) >= 11:
+            orb_id = int.from_bytes(value[:8], "little")
+            tile = int.from_bytes(value[8:10], "little")
+            kind = value[10]
+            if kind == _ZONE_ELEMENT_REFINERY:
+                standing[(orb_id, tile)] = True
+        elif etag == _EVT_ZONE_RAZED and len(value) >= 10:
+            orb_id = int.from_bytes(value[:8], "little")
+            tile = int.from_bytes(value[8:10], "little")
+            standing.pop((orb_id, tile), None)
+    return [
+        {"orb_id": orb, "tile": tile}
+        for (orb, tile) in sorted(standing)
+    ]
+
+
+def load_refineries_from_state(world_dir):
+    """Live mirror: ElementRefinery tiles on state.tlv (preferred when present)."""
+    out = []
+    planets = Path(world_dir) / "planets"
+    if not planets.is_dir():
+        return out
+    for planet_dir in sorted(p for p in planets.iterdir() if p.is_dir()):
+        wire = decode_orb_tlv(planet_dir / "state.tlv")
+        if not wire:
+            continue
+        for tile in wire.get("refineries") or []:
+            out.append({
+                "orb_id": wire.get("orb_id"),
+                "tile": tile,
+                "planet": wire.get("name") or planet_dir.name,
+            })
+    return out
 
 
 def _parse_civ_tlv(data: bytes):
@@ -1839,6 +1947,91 @@ def view_market(var_root, args, paint):
         f"  crossings cleared to date: {paint.strong(str(cleared // 2))}"
         + paint.dim("  (each clear is two books)"))
     lines.append(paint.dim("  the price is the ratio — no absolute price exists (guardrail 6)"))
+    lines.append(paint.dim("  element lanes: observer routes · refineries: observer refineries"))
+    return "\n".join(lines)
+
+
+def view_routes(var_root, args, paint):
+    """E3.8 — element trade routes (E-ROUTE-1) from chronicle.tlv.
+
+    Live set = ElementRouteChartered (tag 110) minus RouteLapsed (80).
+    Display only; engine owns SEAL B verify.
+    """
+    lines = [paint.head(
+        "ELEMENT ROUTES — open matter lanes (deal · rail · η · element)")]
+    total = 0
+    by_rail = {1: 0, 2: 0, 3: 0, 4: 0}
+    for world_dir in world_dirs(var_root):
+        routes = load_element_routes(world_dir)
+        if not routes:
+            continue
+        lines.append(paint.strong(f"  {display_name(world_dir.name)}"))
+        for r in sorted(routes, key=lambda x: x["deal"]):
+            total += 1
+            rail = int(r.get("rail") or 0)
+            by_rail[rail] = by_rail.get(rail, 0) + 1
+            eid = r["element"]
+            ename = element_name(eid)
+            lines.append(
+                f"    deal {paint.strong(str(r['deal'])):<8} "
+                f"{_RAIL_WORD.get(rail, f'R{rail}')}  "
+                f"η={show(r['eta']):<8}  "
+                f"{ename}  "
+                f"{paint.dim(eid[:4].hex())}"
+            )
+    if total == 0:
+        lines.append("  " + paint.dim(
+            "no element routes charted — charter after E-APT / E-ROUTE deeds"))
+    else:
+        rail_bits = " · ".join(
+            f"{_RAIL_WORD.get(k, k)} {v}" for k, v in sorted(by_rail.items()) if v)
+        lines.append(
+            f"  {paint.strong(str(total))} live lane(s)"
+            + (f"  ({rail_bits})" if rail_bits else "")
+        )
+    lines.append(paint.dim(
+        "  authority: chronicle.tlv (charter 110 · lapse 80) · melt rides the haul"))
+    return "\n".join(lines)
+
+
+def view_refineries(var_root, args, paint):
+    """E3.8 — ElementRefinery zones (Wave-1 REFINE-1).
+
+    Prefer state.tlv mirror (live tiles). Fall back to chronicle
+    ZoneBuilt(kind=9) − ZoneRazed when the mirror is empty.
+    """
+    lines = [paint.head(
+        "ELEMENT REFINERIES — open-matter converters (zone kind 9)")]
+    total = 0
+    for world_dir in world_dirs(var_root):
+        from_state = load_refineries_from_state(world_dir)
+        if from_state:
+            rows = from_state
+            source = "state.tlv"
+        else:
+            rows = load_refineries_from_chronicle(world_dir)
+            source = "chronicle"
+        if not rows:
+            continue
+        lines.append(
+            paint.strong(f"  {display_name(world_dir.name)}")
+            + paint.dim(f"  [{source}]")
+        )
+        for row in rows:
+            total += 1
+            planet = row.get("planet") or f"orb {row.get('orb_id', '?')}"
+            lines.append(
+                f"    {planet:<20} tile {paint.strong(str(row['tile']))}  "
+                f"element-refinery"
+            )
+    if total == 0:
+        lines.append("  " + paint.dim(
+            "no element-refineries standing — raise ZoneKind::ElementRefinery "
+            "(DEEPENING / T5 eases spend)"))
+    else:
+        lines.append(f"  {paint.strong(str(total))} refinery zone(s) standing")
+    lines.append(paint.dim(
+        "  throughput derives from element family/tier (14 §5) — no hand recipes"))
     return "\n".join(lines)
 
 
@@ -1970,6 +2163,7 @@ def view_arc(var_root, args, paint):
 
 VIEWS = {
     "board": view_board, "civs": view_civs, "worlds": view_worlds, "market": view_market,
+    "routes": view_routes, "refineries": view_refineries,
     "world": view_world, "civ": view_civ, "tiers": view_tiers,
     "stress": view_stress, "techs": view_techs, "chart": view_chart,
     "ruins": view_ruins, "arc": view_arc,

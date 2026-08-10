@@ -192,8 +192,8 @@ Want / market:
 | Surface | Show |
 |---------|------|
 | SOLAR SYSTEMS | ELEMENTS kinds·mass (already) |
-| New view `routes` | element routes, melt, rail, upkeep |
-| New view `refineries` | tuned element, throughput, heat |
+| New view `routes` | element routes, melt, rail, upkeep (**E3.8 landed**) |
+| New view `refineries` | tuned element, throughput, heat (**E3.8 landed**) |
 | Civ drill-down | top 3 elements by mass; open routes |
 
 ---
@@ -206,7 +206,7 @@ Want / market:
 | **E-APT-1** | Element aperture | Tags for element legs; conservation |
 | **REFINE-1** | Element refinery zone | Derive rates; ZoneBuilt tuning; pins |
 | **E-MKT-1** | Element offers | MARKET-1 cargo union; NPC market_step |
-| **E-OBS-1** | Observer surfaces | routes / refineries views |
+| **E-OBS-1** | Observer surfaces | routes / refineries views (**E3.8 landed**) |
 
 ---
 
