@@ -7,25 +7,27 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 
 ---
 
-## 0. STAND-DOWN SNAPSHOT (2026-08-09) — **read this first**
+## 0. STAND-DOWN SNAPSHOT (2026-08-10) — **read this first**
 
-Workspace **clean** on `main` after Wave-8 / polity dual-law land.
+Workspace **clean** on `main`. Wave-8 / polity dual-law + **JSON-off
+architecture** closed. **Next phase: E3.6 E-MKT-1** (element market cargo).
 
 | Fact | Value |
 |------|--------|
-| **Tip** | see `git log -1` (Wave 8 complete + polity dual law) |
+| **Tip** | `2834d4c` (architecture: JSON is not a format the system speaks) |
 | Branch | **`main`** |
 | Kernel | **0.37.0** (next free minor **38**) |
-| Next free claim tag | **163** (no new residual this pass) |
-| Codec | **SCHEMA_V17** |
+| Next free claim tag | **163** (E-MKT may claim if wire grows) |
+| Codec | **SCHEMA_V17** (element-cargo offers may need **V18**) |
 | Class / clade | **13** / **345** (u16 open) |
 | CLI roots | bench · intel · trade · diplomatic · **polity** (dual law all five) |
-| **Authority** | **`chronicle.tlv` + `state.tlv`** · cards **`.civ` / `.card` / `.dir` / `.sol`** — no JSON law (`docs/JSON_DISPLAY_ONLY.md`) |
+| **Authority** | **`chronicle.tlv` + `state.tlv`** · cards **`.civ` / `.card` / `.dir` / `.sol`** — JSON is not architecture (`docs/JSON_DISPLAY_ONLY.md`) |
 
 ### What landed this session arc (newest first)
 
 | Area | What |
 |------|------|
+| **JSON-off** | No JSON write/read/migrate; TLV/cards only; pen/extract struck |
 | **P8.2–P8.5** | Observer arc/traj/hunger/rail · labor force · ruins view · AP ruled table |
 | **POL.2–3** | `bench polity` dual law · NPC `identity_step` |
 | **Deep** | `bench planetary prospect|assay|refine` fire deeds |
@@ -70,11 +72,54 @@ ruins   — closed archive history (P8.4)
 
 | ID | Open | Notes |
 |----|------|-------|
-| **E3.6** | Element market cargo on offers | E-MKT-1 · NPC market_step |
+| **E3.6 ★** | **Element market cargo on offers** | **E-MKT-1 · load now** · NPC market_step |
 | **E3.7–E3.9** | WANT-1 element ids · observer routes · treaty allow-lists | after E3.6 |
 | **I5.x** | SHARE/NOTE/FUT/PERP lifecycle residual | Wave 5 |
 | Court | Rename Earth-culture line names | operator only |
 | Deep deeds | More hub leaves still status+verb | incremental |
+
+### Phase load — **E3.6 / E-MKT-1** (authority `docs/31_ELEMENT_COMMERCE.md` §4, §6)
+
+**Problem:** MARKET-1 offers are `Resource ↔ Resource` only
+(`Offer` / tag 49 `OfferPosted`). Open matter (elements, tag 72) trades
+via E-APT / routes, not the resting book — so price discovery never
+touches element diversity.
+
+**Law (31 §1, §4):**
+
+- Cargo is a **union**: `Resource | ElementId` — elements never join the
+  closed `Resource` enum.
+- Price stays a **ratio** (want/give); no absolute price.
+- Conservation exact at fill; SEAL B replay.
+- NPCs never invent element ids — only receipted / banked identities.
+
+**Depends:** E3.1 (E-APT), MARKET-1 (`post_offer` / `clear_trade` /
+`market_step`) — all landed.
+
+**Landing slices (suggested order):**
+
+| Slice | Deliverable | Exit |
+|-------|-------------|------|
+| **E3.6a** | `Cargo` / offer side type; `Offer` + tag 49 wire (backward-compat Resource form) | codec pin · SCHEMA bump if needed |
+| **E3.6b** | `post_offer` / `counter_offer` / `clear_trade` honor Element cargo + bank debit/credit | `world_market` + element pins red→green |
+| **E3.6c** | Conductor `market_step` (or sibling) posts element surplus intents | NPC pin in `wave1_era_pins` or dedicated |
+| **E3.6d** | CLI `trade` / bench surface for element offer (if needed) | smoke line |
+| **E3.7+** | WANT-1 element ids · observer routes · treaty allow-lists | separate landings |
+
+**Touch map (expected):**
+
+```text
+engine/cfe/src/world/state.rs     Offer
+engine/cfe/src/world/economy.rs   post_offer · clear_trade path
+engine/cfe/src/dop.rs             OfferPosted wire (tag 49 extend or additive)
+engine/cfe/src/world/replay.rs    OfferPosted arm
+engine/codec                      SCHEMA_V18 if committed offer shape changes
+engine/conductor/src/lib.rs       market_step · trade_intent
+engine/cfe/tests/world_market.rs  + new element_market pins
+clients/cli                       trade/bench offer path (optional this land)
+```
+
+**Do not re-open:** dual-law hubs, u16 clade fights, JSON carriers.
 
 ### Smoke on resume (minimal)
 
