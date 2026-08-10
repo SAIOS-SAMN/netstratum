@@ -8256,6 +8256,16 @@ fn chronicle(world: &World, style: &Style) {
                 "◍ the {} want relieved — orb {orb_id}'s mind is fed",
                 style.ok(match kind { 2 => "resonance", 3 => "novelty", _ => "unnamed" })
             ),
+            cfe::dop::ClosureEvent::ElementWantStruck { orb_id, element, reading } => format!(
+                "◌ a famine of MATTER — orb {orb_id} hungers for element-{:02x}{:02x}{:02x}{:02x} \
+                 ({} ticks empty); assay the vein or bid on the market",
+                element[0], element[1], element[2], element[3],
+                style.strong(&amount(reading))
+            ),
+            cfe::dop::ClosureEvent::ElementWantRelieved { orb_id, element } => format!(
+                "◍ matter want relieved — orb {orb_id} banks element-{:02x}{:02x}{:02x}{:02x}",
+                element[0], element[1], element[2], element[3]
+            ),
             cfe::dop::ClosureEvent::OfferPosted { offer, give, give_amount, want, want_amount, .. } => format!(
                 "⇋ offer {offer} RESTS — {} {} for {} {}; the market holds intents, never escrows",
                 style.strong(&amount(give_amount)),
