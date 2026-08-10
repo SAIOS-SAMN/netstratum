@@ -103,6 +103,9 @@ pub const SCHEMA_V16: u8 = 16;
 /// **SCHEMA v17 — open clade (u16 LE in taxon field; no u8 tax cap).**
 pub const SCHEMA_V17: u8 = 17;
 
+/// **SCHEMA v18 — element_wants (E3.7 material WANT-1 targets).**
+pub const SCHEMA_V18: u8 = 18;
+
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
 }
@@ -123,7 +126,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V17];
+    let mut out = vec![SCHEMA_V18];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -498,6 +501,12 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         put_u64(&mut out, *orb);
         out.push(*p);
     }
+    // SCHEMA v18 trailing: element material wants.
+    put_u32(&mut out, committed.element_wants.len() as u32);
+    for (orb, element) in &committed.element_wants {
+        put_u64(&mut out, *orb);
+        out.extend_from_slice(element);
+    }
     out
 }
 
@@ -591,6 +600,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         && schema != SCHEMA_V15
         && schema != SCHEMA_V16
         && schema != SCHEMA_V17
+        && schema != SCHEMA_V18
     {
         return None;
     }
@@ -1095,6 +1105,15 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         }
     }
 
+    let mut element_wants = Vec::new();
+    if schema >= SCHEMA_V18 {
+        for _ in 0..take.u32()? {
+            let orb = take.u64()?;
+            let element = take.array32()?;
+            element_wants.push((orb, element));
+        }
+    }
+
     if !take.done() {
         return None;
     }
@@ -1110,6 +1129,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         offers,
         techs,
         wants,
+        element_wants,
         crossed,
         gauge,
         genesis,

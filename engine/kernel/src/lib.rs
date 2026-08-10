@@ -1376,7 +1376,9 @@ fn covered(event: &ClosureEvent) -> bool {
         // exactness alone).
         | E::FamineRelieved { .. } | E::GalaxyObserved { .. } | E::OverheatStruck { .. }
         | E::OverheatCleared { .. } | E::VentSettled { .. } | E::AbsorptionLapsed { .. }
-        | E::WantStruck { .. } | E::WantRelieved { .. } | E::HandoffSealed { .. }
+        | E::WantStruck { .. } | E::WantRelieved { .. }
+        | E::ElementWantStruck { .. } | E::ElementWantRelieved { .. }
+        | E::HandoffSealed { .. }
         | E::GaugeShifted { .. } | E::Diverged { .. } | E::StarAged { .. }
         | E::TechDiscovered { .. } | E::IncursionStruck { .. } | E::VoidShare { .. }
         | E::RouteLapsed { .. }
@@ -2383,7 +2385,10 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // line with different axes NEVER EXPERIENCES THE MECHANIC. That
         // is civilizational by the exact criterion: a people's own, and
         // never a precondition for anyone else's standing.
-        E::WantStruck { .. } | E::WantRelieved { .. } => Some(Layer::Civilizational),
+        E::WantStruck { .. } | E::WantRelieved { .. }
+        | E::ElementWantStruck { .. } | E::ElementWantRelieved { .. } => {
+            Some(Layer::Civilizational)
+        }
 
         // IncursionStruck LOOKED like it spanned all three layers,
         // carrying era, world AND line. It does not, and the puzzle
@@ -2505,6 +2510,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::VentSettled { .. } | E::DemurrageSettled { .. } | E::DemurrageTouched { .. }
         | E::AbsorptionLapsed { .. }
         | E::ForwardSlashed { .. } | E::WantStruck { .. } | E::WantRelieved { .. }
+        | E::ElementWantStruck { .. } | E::ElementWantRelieved { .. }
         | E::HandoffSealed { .. } | E::GaugeShifted { .. } | E::Diverged { .. }
         | E::Confluent { .. } | E::StarAged { .. } | E::EraFolded { .. }
         | E::CouncilClosed { .. } | E::TechDiscovered { .. } | E::IncursionStruck { .. }

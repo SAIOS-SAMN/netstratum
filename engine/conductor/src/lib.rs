@@ -306,6 +306,33 @@ pub fn trade_intent(
     None
 }
 
+/// E3.7: when an orb hungers for a prospected ElementId, offer half
+/// the largest closed-carrier bank for a unit of that element.
+fn element_want_intent(
+    world: &World,
+) -> Option<(cfe::dop::Cargo, Ratio, cfe::dop::Cargo, Ratio)> {
+    let orb = world.orb()?;
+    let (_, element) = world.element_wants().iter().find(|(o, _)| *o == orb.orb_id)?;
+    let biggest = Resource::ALL
+        .iter()
+        .max_by_key(|r| orb.banked_amount(**r))?;
+    let stock = orb.banked_amount(*biggest);
+    if stock <= ratio(0, 1) {
+        return None;
+    }
+    let give = lot(&(stock.clone() / ratio(2, 1)));
+    let want = lot(&relaxed_want(&give, &stock));
+    if give <= ratio(0, 1) || want <= ratio(0, 1) {
+        return None;
+    }
+    Some((
+        cfe::dop::Cargo::Resource(*biggest),
+        give,
+        cfe::dop::Cargo::Element(*element),
+        want,
+    ))
+}
+
 /// E-MKT-1: when an orb holds open-matter stock, offer half of the
 /// largest element bank for the leanest closed carrier its zones burn
 /// (or iron if no upkeep map). Never invents element ids — only banked
@@ -365,6 +392,27 @@ pub fn market_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String)> {
     for polity in worlds.iter_mut() {
         if polity.penned {
             continue;
+        }
+        // E3.7: demand first — element_wants bid resource for open matter.
+        if let Some((give, give_amount, want, want_amount)) =
+            element_want_intent(&polity.world)
+        {
+            if !polity
+                .world
+                .offers()
+                .iter()
+                .any(|held| held.give == give && held.want == want)
+            {
+                let offer = polity.world.chronicle().receipts().len() as u64;
+                let orb = cfe::world::FIRST_ORB;
+                if let (Some(pair), Some(ga), Some(wa)) = (
+                    cfe::dop::Exchange::cargo(give, want),
+                    cfe::dop::Positive::new(give_amount),
+                    cfe::dop::Positive::new(want_amount),
+                ) {
+                    let _ = polity.world.post_offer(orb, pair, ga, wa, offer);
+                }
+            }
         }
         // E-MKT-1: element surplus before closed-carrier intents when
         // the line holds banked open matter above a floor.

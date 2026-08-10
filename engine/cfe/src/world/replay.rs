@@ -25,6 +25,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut techs: Vec<(u64, u8, [u8; 32], Ratio)> = Vec::new();
     let mut offers: Vec<Offer> = Vec::new();
     let mut wants: Vec<(u64, u8)> = Vec::new();
+    let mut element_wants: Vec<(u64, [u8; 32])> = Vec::new();
     let mut prospects: Vec<Prospected> = Vec::new();
     let mut crossed = false;
     let mut gauge = vec![ratio(0, 1)];
@@ -846,6 +847,17 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             }
             ClosureEvent::WantRelieved { orb_id, kind } => {
                 wants.retain(|(o, k)| !(o == orb_id && k == kind));
+            }
+            ClosureEvent::ElementWantStruck { orb_id, element, .. } => {
+                if !element_wants
+                    .iter()
+                    .any(|(o, e)| *o == *orb_id && e == element)
+                {
+                    element_wants.push((*orb_id, *element));
+                }
+            }
+            ClosureEvent::ElementWantRelieved { orb_id, element } => {
+                element_wants.retain(|(o, e)| !(*o == *orb_id && e == element));
             }
             // MARKET-1 / E-MKT-1: the intent rests; the clear removes it.
             ClosureEvent::OfferPosted {
@@ -1702,7 +1714,8 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
         }
     }
     Committed {
-        orbs, entities, star, debts, bonds, forwards, councils, offers, techs, wants, crossed,
+        orbs, entities, star, debts, bonds, forwards, councils, offers, techs, wants,
+        element_wants, crossed,
         gauge, genesis, terrain_seed, practices, instruments, routes, element_routes, treaties,
         prospects, warded, veiled, taxon, stations, hulls, notes, futures, last_clears, shares,
         perps, clear_depths, market_sealed_until, cascade_pressures, tamper_pressures,

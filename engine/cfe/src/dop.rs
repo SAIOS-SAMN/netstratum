@@ -354,9 +354,10 @@
 //!    160  ClosureEvent::LabCreated (LAB — dual ± creation; may explode.)
 //!    161  ClosureEvent::ScienceExploded (LAB — explosion residual slash.)
 //!    162  ClosureEvent::RogueFactionStruck (LAB — synthetic matrix residual.)
-//!    Phase-5 claim ledger: next free **163**. Seated science labs.
-//!    E-MKT-1 (2026-08-10): tag **49** OfferPosted wire extended in place
-//!    (Resource codes 1..=7 unchanged; Element = 0 ‖ id[32]) — no new tag.
+//!    Phase-5 claim ledger: next free **165** (163–164 ElementWant).
+//!    Seated science labs. E-MKT-1 (2026-08-10): tag **49** OfferPosted
+//!    wire extended in place (Resource 1..=7; Element = 0 ‖ id[32]).
+//!    E3.7 (2026-08-10): tags **163–164** ElementWantStruck/Relieved.
 //!         Orb TLV: 73 STAMP, 74 scrap. ZoneKind::ShipYard = 10.
 //!         (Historic free tags below top: 14, 15, 56, 57, 58, 64, 66,
 //!         83, 84, 87; 9 and 51 reserved; 65 retired forever.)
@@ -2580,6 +2581,16 @@ pub enum ClosureEvent {
     /// WANT-1 — the want relieved: the mind fed (a new link, a fresh
     /// discovery). World-driven at the year voice, the famine shape.
     WantRelieved { orb_id: u64, kind: u8 },
+    /// E3.7 / WANT-1 material (tag 163) — an orb hungers for a
+    /// prospected ElementId it cannot bank yet (line within civ_reach,
+    /// empty element ledger). Demand for the open-matter market.
+    ElementWantStruck {
+        orb_id: u64,
+        element: [u8; 32],
+        reading: Ratio,
+    },
+    /// E3.7 (tag 164) — material want relieved (assay/bank fed the vein).
+    ElementWantRelieved { orb_id: u64, element: [u8; 32] },
     /// MESH-1b (NS-5 §7) — the receipted handoff: the yielding hand
     /// `from` seals, naming successor `to`. One writer per clock;
     /// authority derives by the mesh's walk of the arbor (never a
@@ -3616,6 +3627,21 @@ impl ClosureEvent {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.push(*kind);
                 tlv::put(63, &value, &mut out);
+            }
+            Self::ElementWantStruck {
+                orb_id,
+                element,
+                reading,
+            } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(element);
+                ratio::encode(reading, &mut value);
+                tlv::put(163, &value, &mut out);
+            }
+            Self::ElementWantRelieved { orb_id, element } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(element);
+                tlv::put(164, &value, &mut out);
             }
             Self::HandoffSealed { from, to } => {
                 let mut value = from.to_le_bytes().to_vec();
@@ -4833,6 +4859,21 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let kind = *value.get(8)?;
                 Some(Self::WantRelieved { orb_id, kind })
+            }
+            163 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
+                let (reading, _) = ratio::decode(value.get(40..)?)?;
+                Some(Self::ElementWantStruck {
+                    orb_id,
+                    element,
+                    reading,
+                })
+            }
+            164 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
+                Some(Self::ElementWantRelieved { orb_id, element })
             }
             67 => {
                 let from = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

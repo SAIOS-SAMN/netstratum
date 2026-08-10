@@ -130,6 +130,8 @@ pub struct Committed {
     /// WANT-1: the struck cognitive wants — (orb, kind), replay-
     /// derived like famine; kinds per the tag-62 table.
     pub wants: Vec<(u64, u8)>,
+    /// E3.7: material wants — (orb, ElementId) for open-matter demand.
+    pub element_wants: Vec<(u64, [u8; 32])>,
     /// THRESHOLD-1: has this world CROSSED — does its chronicle hold
     /// an aperture leg? A world is a star system, so any leg is an
     /// interstellar deed; the first is the crossing (12_UNION §7).
@@ -291,6 +293,8 @@ pub struct World {
     pub(super) shear_cursor: (usize, Vec<(u64, CrystalDeposit)>),
     /// WANT-1: the struck cognitive wants (committed, famine-shaped).
     pub(super) wants: Vec<(u64, u8)>,
+    /// E3.7: material element wants (committed, famine-shaped).
+    pub(super) element_wants: Vec<(u64, [u8; 32])>,
     /// THRESHOLD-1: the crossing flag (committed, replay-derived).
     pub(super) crossed: bool,
     /// GAUGE-N: the graded gauge key (committed, replay-derived,

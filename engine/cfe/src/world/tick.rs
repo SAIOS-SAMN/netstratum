@@ -538,6 +538,8 @@ impl World {
                 }
             }
         }
+        // E3.7 — material element wants (per tick, famine-shaped).
+        self.sweep_element_wants(stamp);
         // TECH-1b (10 §2–§3): CRYSTALLIZATION at the year voice — on
         // each year boundary every orb's chronicle is weighed against
         // the condition table; a condition that holds crystallizes its
@@ -738,6 +740,70 @@ impl World {
                         resource,
                     },
                     stamp,
+                    vec![],
+                );
+            }
+        }
+    }
+
+    /// E3.7 — strike/relieve material wants for prospected open matter.
+    ///
+    /// Strike: vein prospected, line within civ_reach, local to star,
+    /// bank empty, not already wanted. Reading = ticks since prospect
+    /// (last_assay as proxy).
+    /// Relieve: bank holds any positive amount of that element.
+    fn sweep_element_wants(&mut self, stamp_now: u64) {
+        let reach = self.civ_reach();
+        let class = self.star;
+        let prospects: Vec<_> = self
+            .prospects
+            .iter()
+            .map(|p| (p.orb, p.element, p.last_assay))
+            .collect();
+        for (orb, element, last) in prospects {
+            let line = crate::almanac::periodic_of(&element).line;
+            if line == 0 || line > reach {
+                continue;
+            }
+            if let Some(c) = class {
+                if !crate::almanac::local_to(&element, c) {
+                    continue;
+                }
+            }
+            let banked = self
+                .orb_by_id(orb)
+                .map(|held| held.element_amount(&element))
+                .unwrap_or_else(|| ratio(0, 1));
+            let wanted = self
+                .element_wants
+                .iter()
+                .any(|(o, e)| *o == orb && e == &element);
+            if banked > ratio(0, 1) {
+                if wanted {
+                    self.element_wants
+                        .retain(|(o, e)| !(*o == orb && e == &element));
+                    self.chronicle.append(
+                        ClosureEvent::ElementWantRelieved {
+                            orb_id: orb,
+                            element,
+                        },
+                        stamp_now,
+                        vec![],
+                    );
+                }
+                continue;
+            }
+            // Empty bank + opened vein → hunger (once).
+            if !wanted {
+                let reading = ratio(stamp_now.saturating_sub(last) as i64, 1);
+                self.element_wants.push((orb, element));
+                self.chronicle.append(
+                    ClosureEvent::ElementWantStruck {
+                        orb_id: orb,
+                        element,
+                        reading,
+                    },
+                    stamp_now,
                     vec![],
                 );
             }

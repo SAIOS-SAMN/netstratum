@@ -179,9 +179,11 @@ prospect → assay → bank element (R1)
 
 Want / market:
 
-- WANT-1 may target **element ids** (not only iron/biomass).
-- MARKET-1 offers gain `cargo: Resource | ElementId`.
-- Treaties may enumerate allowed element ids.
+- WANT-1 may target **element ids** (**E3.7 landed**): `ElementWantStruck`
+  / `Relieved` (tags 163–164); `element_wants` on the World; NPC
+  `market_step` bids Resource→Element for hungers.
+- MARKET-1 offers gain `cargo: Resource | ElementId` (**E3.6 landed**).
+- Treaties may enumerate allowed element ids (E3.9 open).
 
 ---
 

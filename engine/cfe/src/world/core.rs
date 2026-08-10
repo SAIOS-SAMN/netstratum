@@ -36,6 +36,11 @@ impl World {
     pub fn wants(&self) -> &[(u64, u8)] {
         &self.wants
     }
+
+    /// E3.7: material wants — (orb, ElementId).
+    pub fn element_wants(&self) -> &[(u64, [u8; 32])] {
+        &self.element_wants
+    }
     /// COUNCIL-1 (12_UNION §7) — the WARRING IMPERIUM reading, derived
     /// from the landed books and never stored: an orb whose extraction
     /// runs past double its reciprocity while its breaches outweigh
@@ -309,6 +314,7 @@ impl World {
             offers: self.offers.clone(),
             techs: self.techs.clone(),
             wants: self.wants.clone(),
+            element_wants: self.element_wants.clone(),
             crossed: self.crossed,
             gauge: self.gauge.clone(),
             genesis: self.genesis.clone(),
@@ -437,6 +443,22 @@ impl World {
         vein.last_assay = now;
         let held = peel(&mut self.orbs, orb).expect("judged above");
         held.bank_element(element, amount.clone());
+        // E3.7: banking feeds the material want.
+        if self
+            .element_wants
+            .iter()
+            .any(|(o, e)| *o == orb && e == &element)
+        {
+            self.element_wants
+                .retain(|(o, e)| !(*o == orb && e == &element));
+            self.close(
+                ClosureEvent::ElementWantRelieved {
+                    orb_id: orb,
+                    element,
+                },
+                actor,
+            );
+        }
         self.close(
             ClosureEvent::AssayStruck {
                 orb_id: orb,
