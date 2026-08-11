@@ -58,15 +58,23 @@ fn opportunity_cost_shared_across_families() {
             break;
         }
     }
-    // Spend remaining AP on prospects until one left or zero.
-    let mut stratum = 1u8;
-    while w.ap_available() > 1 && stratum < 30 {
+    // Spend remaining AP across the other families: prospect what the
+    // people can reach (CIV-REACH-1 caps the dig, a refused prospect
+    // spends nothing), then quotes drain the rest of the shared pool.
+    for stratum in 1..=w.civ_reach() {
+        if w.ap_available() == 0 {
+            break;
+        }
         let _ = w.prospect(FIRST_ORB, stratum);
-        stratum = stratum.saturating_add(1);
     }
-    // If any AP remains, spend it on prospect; next gated deed refuses.
-    if w.ap_available() >= 1 {
-        let _ = w.prospect(FIRST_ORB, stratum);
+    let pair = Exchange::new(Resource::Iron, Resource::Biomass).expect("pair");
+    let mut nonce = 100u64;
+    while w.ap_available() > 0 {
+        let give = Positive::new(ratio(1, 1)).expect("g");
+        let want = Positive::new(ratio(1, 1)).expect("w");
+        w.post_offer(FIRST_ORB, pair.clone(), give, want, nonce)
+            .expect("quote spends the shared pool");
+        nonce += 1;
     }
     assert_eq!(w.ap_available(), 0, "window fully spent");
     let refuse = w.zone(50, ZoneKind::Extractor).expect_err("AP exhausted");

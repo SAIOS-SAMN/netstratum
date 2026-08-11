@@ -21,7 +21,24 @@
 use cfe::almanac::Compoundable;
 use cfe::dop::{positive, unit, ZoneKind};
 use cfe::thermal::StarClass;
-use cfe::world::{World, FIRST_ORB};
+use cfe::world::{World, FIRST_ORB, SOVEREIGN};
+
+/// CIV-REACH-1: the differential wants a RICH stock, so the fixture
+/// digs at full industry — techs 1..=5 open every stratum the G forge
+/// carries (reach 5); the shear/sweep agreement is what's under test,
+/// not the growth ladder.
+fn industrial_dig(world: &mut World) -> Vec<[u8; 32]> {
+    for c in 1u8..=5 {
+        world.grant_tech_as(SOVEREIGN, FIRST_ORB, c).expect("tech");
+    }
+    let mut drawn = Vec::new();
+    for stratum in 1..=world.civ_reach() {
+        if let Ok(struck) = world.prospect(FIRST_ORB, stratum) {
+            drawn.push(struck.element);
+        }
+    }
+    drawn
+}
 
 /// THE REFERENCE ORACLE — the original sweep, verbatim: every subset up
 /// to five bodies, each put to the door. Slow and obviously correct,
@@ -59,12 +76,7 @@ fn the_shear_finds_exactly_what_the_sweep_found() {
             .site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None)
             .expect("sites");
         world.zone(0, ZoneKind::Extractor).expect("zones");
-        let mut drawn = Vec::new();
-        for stratum in 1..=24u8 {
-            if let Ok(struck) = world.prospect(FIRST_ORB, stratum) {
-                drawn.push(struck.element);
-            }
-        }
+        let drawn = industrial_dig(&mut world);
         for _ in 0..4 {
             world.tick();
         }
@@ -117,12 +129,7 @@ fn the_shear_never_leaves_its_plane() {
         .site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None)
         .expect("sites");
     world.zone(0, ZoneKind::Extractor).expect("zones");
-    let mut drawn = Vec::new();
-    for stratum in 1..=24u8 {
-        if let Ok(struck) = world.prospect(FIRST_ORB, stratum) {
-            drawn.push(struck.element);
-        }
-    }
+    let drawn = industrial_dig(&mut world);
     for _ in 0..4 {
         world.tick();
     }

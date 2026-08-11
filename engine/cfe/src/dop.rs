@@ -1746,7 +1746,13 @@ pub fn refined_identity(raw: &[u8; 32]) -> [u8; 32] {
     let mut hasher = blake3::Hasher::new();
     hasher.update(b"netstratum.element.refine.v1");
     hasher.update(raw);
-    *hasher.finalize().as_bytes()
+    let mut refined: [u8; 32] = *hasher.finalize().as_bytes();
+    // Refinement PURIFIES — it never transmutes depth. The refined
+    // identity inherits the raw's LINE axis (byte 3), so a people that
+    // can work a vein can always work what it refines into; every
+    // other axis re-draws from the content hash.
+    refined[3] = raw[3];
+    refined
 }
 
 /// **REFINE-1 — THE RECIPE** (14 §5 / 31 §3): spend and yield DERIVE

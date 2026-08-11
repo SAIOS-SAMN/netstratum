@@ -570,12 +570,17 @@ impl World {
         let mut seed = root.to_vec();
         seed.extend_from_slice(&orb.to_le_bytes());
         seed.push(stratum);
-        let element: [u8; 32] = blake3::hash(&seed).into();
-        // Identity mints under the star's abundance arbor. Locality
-        // (deep lines under shallow stars) and civ_reach (bronze vs
-        // industry) gate ASSAY / REFINE / compound — not the charting
-        // of a vein. Stratum depth still requires civ_reach above.
-        let _ = class;
+        let mut element: [u8; 32] = blake3::hash(&seed).into();
+        // THE DEPOSIT LAW (`almanac::strata_lines`): the identity's
+        // LINE axis (byte 3, uncorrelated with the other axes by
+        // construction) is quantized to what this stratum's pressure
+        // could have deposited under this star — a vein is matter the
+        // forge put there, so a line the place cannot hold is never
+        // charted. Still fixed at founding per (root, orb, stratum);
+        // a redraw cannot re-roll. civ_reach may still lag the drawn
+        // line mid-growth (stratum 3 under G can hold line 4), so the
+        // ASSAY / REFINE ceilings keep their teeth.
+        element[3] %= crate::almanac::strata_lines(stratum, class);
         let (family, tier, richness) = crate::dop::element_properties(&element, class);
         let name = crate::dop::element_name(family, &element);
         let stamp = self.clock.now();

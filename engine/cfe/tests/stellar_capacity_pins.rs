@@ -31,8 +31,12 @@ fn capacity_board_matches_lines_of() {
         assert_eq!(b.reach, lines_of(class));
         assert_eq!(b.table_lines, LINES);
         assert_eq!(b.lines.len(), LINES as usize);
+        // CIV-REACH-1: `reachable` reads the PEOPLE's working ceiling
+        // (civ_reach ∩ the sky), not the sky alone — the sky stands in
+        // `b.reach` untouched.
+        let work = w.civ_reach().min(lines_of(class));
         for row in &b.lines {
-            assert_eq!(row.reachable, row.line <= lines_of(class));
+            assert_eq!(row.reachable, row.line <= work);
         }
         assert_eq!(b.open_strata, 0);
         assert!(
@@ -73,8 +77,11 @@ fn m_dwarf_marks_deep_lines_unreachable() {
     let b = w.stellar_capacity_board(FIRST_ORB);
     assert_eq!(b.reach, 3);
     let deep = b.lines.iter().filter(|r| r.line > 3).count();
-    let shallow = b.lines.iter().filter(|r| r.line <= 3 && r.reachable).count();
-    assert_eq!(shallow, 3);
+    // CIV-REACH-1: a bronze people works 2 of the 3 lines the M sky
+    // carries — the third opens with grown tech, the rest never.
+    let workable = b.lines.iter().filter(|r| r.reachable).count();
+    assert_eq!(workable, usize::from(w.civ_reach()));
+    assert_eq!(w.civ_reach(), 2, "bronze under an M dwarf");
     assert_eq!(deep, (LINES - 3) as usize);
     assert!(b.lines.iter().filter(|r| r.line > 3).all(|r| !r.reachable));
 }

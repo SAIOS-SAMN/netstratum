@@ -4,7 +4,7 @@
 //! caps what the people may work. Prospect / assay / refine refuse
 //! when asked depth exceeds either.
 
-use cfe::almanac::{civ_reach, LINES};
+use cfe::almanac::{civ_reach, lines_of, periodic_of, refines, strata_lines, LINES};
 use cfe::dop::{positive, unit, ZoneKind};
 use cfe::thermal::StarClass;
 use cfe::world::{ActionRefused, World, FIRST_ORB, SOVEREIGN};
@@ -121,6 +121,86 @@ fn assay_refuses_lines_beyond_civ_reach() {
     let board = world.stellar_capacity_board(FIRST_ORB);
     assert_eq!(board.civ_reach, 2);
     assert!(board.civ_reach <= board.reach);
+}
+
+/// THE DEPOSIT LAW — a vein carries only lines its stratum's pressure
+/// could have deposited under its star, and stratum 1 always carries a
+/// workable line-1 vein (the bronze floor). Before this law the LINE
+/// axis drew uniform 1..=7 regardless of depth, so ~61% of bronze
+/// worlds could bank nothing at all and stratum 2 under G charted
+/// line-7 veins the system does not carry (locality broken at the
+/// draw).
+#[test]
+fn veins_carry_only_lines_their_stratum_deposits() {
+    // The table itself: G forges 5, so the releasable ladder is exact.
+    assert_eq!(strata_lines(1, StarClass::G), 1);
+    assert_eq!(strata_lines(2, StarClass::G), 2);
+    assert_eq!(strata_lines(3, StarClass::G), 4);
+    assert_eq!(strata_lines(4, StarClass::G), 5);
+    assert_eq!(strata_lines(5, StarClass::G), 5, "capped by the forge");
+    // A shallow forge compresses the whole ladder into few strata:
+    // under a brown dwarf (forge 2) stratum 1 already presses 1/2,
+    // releasing both lines the system carries.
+    assert_eq!(strata_lines(1, StarClass::BrownDwarf), 2);
+    assert_eq!(strata_lines(2, StarClass::BrownDwarf), 2);
+    // Drawn veins obey it — many worlds, every reachable stratum.
+    for (name, class) in [
+        ("deposit-a", StarClass::G),
+        ("deposit-b", StarClass::G),
+        ("deposit-c", StarClass::M),
+        ("deposit-d", StarClass::O),
+    ] {
+        let mut world = sunlit(name, class);
+        for c in 1u8..=5 {
+            world.grant_tech_as(SOVEREIGN, FIRST_ORB, c).expect("tech");
+        }
+        for stratum in 1..=world.civ_reach() {
+            let struck = world.prospect(FIRST_ORB, stratum).expect("opens");
+            let line = periodic_of(&struck.element).line;
+            assert!(
+                line <= strata_lines(stratum, class),
+                "{name} stratum {stratum} drew line {line} past the deposit \
+                 ceiling {}",
+                strata_lines(stratum, class)
+            );
+            assert!(line <= lines_of(class), "locality holds at the draw");
+        }
+    }
+}
+
+/// The bronze floor: every sunlit world's stratum-1 vein is line 1 and
+/// refines at its own depth — a bronze people always has SOMETHING to
+/// mine, and the growth path stays real for the deeper strata.
+#[test]
+fn bronze_always_banks_its_surface() {
+    for name in ["floor-a", "floor-b", "floor-c"] {
+        let mut world = sunlit(name, StarClass::G);
+        let struck = world.prospect(FIRST_ORB, 1).expect("surface opens");
+        assert_eq!(periodic_of(&struck.element).line, 1);
+        assert!(refines(&struck.element, 1, StarClass::G));
+        for _ in 0..4 {
+            world.tick();
+        }
+        world.assay(FIRST_ORB, struck.element).expect("surface banks");
+    }
+}
+
+/// Refinement PURIFIES — the refined identity inherits the raw's LINE
+/// axis, so a people that can work a vein can always work what it
+/// refines into. Before this law the refined line re-drew uniform
+/// 1..=7, refusing ~5/7 of bronze refines at the CivReachShort gate.
+#[test]
+fn refinement_never_transmutes_depth() {
+    for seed in 0u8..16 {
+        let raw = [seed; 32];
+        let refined = cfe::dop::refined_identity(&raw);
+        assert_ne!(raw, refined, "refined is a new identity");
+        assert_eq!(
+            periodic_of(&raw).line,
+            periodic_of(&refined).line,
+            "depth survives the crucible"
+        );
+    }
 }
 
 #[test]

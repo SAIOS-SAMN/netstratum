@@ -9,6 +9,48 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 
 ## 0. STAND-DOWN SNAPSHOT (2026-08-10) — **read this first**
 
+> **REPAIR 2026-08-11 (read before trusting any green-board claim
+> below):** the 2026-08-10 arc landed RED — six suites broken on `main`
+> at `4a37e53` while this file recorded none. Measured and fixed:
+>
+> - `wave1_era_pins` (4/5 red) + `ap_budget_pins` — broken by
+>   CIV-REACH-1 (`f7b22ad`): `ground_step` still prospected stratum 0
+>   (now always refused, and its `Err(_) => break` left every orb
+>   uncharted) so pure NPCs banked nothing; and the LINE axis drew
+>   uniform 1..=7 regardless of depth, so ~61 % of bronze worlds had
+>   ZERO workable veins (all five wave-1 fixture worlds, measured
+>   10/10 veins unworkable) and stratum 2 under G charted line-7 veins
+>   the system does not carry — locality broken at the draw.
+> - `dop_wire` — did not COMPILE since E3.6's `Cargo` offer union;
+>   adapted + an Element-side round-trip case added.
+> - `bench_shear_pins` · `stellar_capacity_pins` — CIV-REACH-1 fixture
+>   drift (bronze dig; dual-reach `reachable` = people ∩ sky) — adapted.
+> - `thermal_flow` — two separate stale exacts: taxon-economy yield
+>   scales (`75c35ca`, red for five landings) and STAR-ENDOW-1's cryo
+>   band gift (`c2242de`) — re-derived exact.
+>
+> **Law amendments landed with the repair (SEALED MATH — every lane's
+> news):** (1) **THE DEPOSIT LAW** — `almanac::strata_lines`; the
+> prospect draw quantizes the identity's LINE byte (3) to what the
+> stratum's pressure could deposit under the star: bronze always banks
+> its surface, locality holds at the draw, deeper strata still outrun
+> `civ_reach` mid-growth so the cure keeps naming the growth path.
+> (2) **Refinement purifies** — `refined_identity` inherits the raw's
+> LINE byte, never re-rolls depth. Both change only identities drawn
+> after this landing (receipts carry identities; replay reads, never
+> rolls) — any lane pinning exact element ids re-measures. Conductor:
+> `ground_step` walks strata `1..=civ_reach`; `build_step` gained an
+> ENCASE-FIRST arm on the temperate seat (vented > contained ⇒ one
+> shell) — without it the 34 balance gate refused ALL bronze
+> order-work forever (syntropy 0; regenerator unaffordable at 10
+> biomass on a mineral line). Witnesses: `civ_reach_pins` +3.
+>
+> **STANDING DEBT, not fixed here:** `tuned_constant_ratchet` is red on
+> `main` — 170 tuned ratio literals against the 112 ceiling (58 dials
+> entered during the Wave-6..8/E3 arc without derivation). The ceiling
+> does not rise by law; the debt needs its own remediation cadence
+> (derive, measure, or mint per dial — anchor-provenance ruling).
+
 Workspace **clean** on `main`. Wave-8 / polity dual-law + **JSON-off
 architecture** closed. **Next phase: E3.6 E-MKT-1** (element market cargo).
 

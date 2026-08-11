@@ -83,9 +83,11 @@ fn the_furnace_mints_and_only_the_overflow_vents() {
     assert!(world.orb().expect("orb").overheat);
     // Syntropic arm: 2 encased, minus the warm leak 1/8.
     assert_eq!(joules(&world), ratio(2, 1) - ratio(1, 8));
-    // Entropic arm: yields degrade by exactly 2/3.
-    // iron: 3/2 × 2/3 − 1/4 (hab) − 1/4 (shell upkeep) = 1/2.
-    assert_eq!(iron(&world), ratio(1, 2));
+    // Entropic arm: yields degrade by exactly 2/3 — and TAXON ECONOMY
+    // (37) scales the extractor first: the unsealed flatlander baseline
+    // prefers mesic, this r = 1/2 siting is torrid ⇒ Tolerant fit 3/4.
+    // iron: 3/2 × 3/4 × 2/3 − 1/4 (hab) − 1/4 (shell upkeep) = 1/4.
+    assert_eq!(iron(&world), ratio(1, 4));
 
     // Second tick: overheat persists (no second strike receipt), the
     // store accrues another exact 15/8.
@@ -274,9 +276,11 @@ fn the_vault_captures_sink_and_charges_no_demurrage() {
         .expect("sink accrued");
     assert_eq!(sink, ratio(19_999, 10_000));
     world.collect().expect("collects");
+    // ORBIT-ENDOW-1: siting a cryogenic band gifted 2 sink into the
+    // bank at founding; the first settle adds the captured headroom.
     assert_eq!(
         world.orb().expect("orb").banked_amount(Resource::Sink),
-        ratio(19_999, 10_000)
+        ratio(2, 1) + ratio(19_999, 10_000)
     );
     // Let time pass; a second settle in the vault charges no demurrage.
     world.tick();

@@ -96,6 +96,13 @@ fn the_assay_banks_richness_times_elapsed_in_one_receipt() {
             world.tick();
         }
         let receipts_before = world.chronicle().receipts().len();
+        // E3.7: a standing want on this element relieves in its own
+        // receipt beside the assay's one.
+        let want_stands = world
+            .committed()
+            .element_wants
+            .iter()
+            .any(|(o, e)| *o == FIRST_ORB && e == &struck.element);
         match world.assay(FIRST_ORB, struck.element) {
             Ok(drawn) => {
                 let elapsed = ratio((world.now() - opened_at) as i64, 1);
@@ -106,8 +113,9 @@ fn the_assay_banks_richness_times_elapsed_in_one_receipt() {
                 );
                 assert_eq!(
                     world.chronicle().receipts().len(),
-                    receipts_before + 1,
-                    "one receipt moves the whole span — the bond-settle shape"
+                    receipts_before + 1 + usize::from(want_stands),
+                    "one receipt moves the whole span — the bond-settle shape \
+                     (plus the E3.7 relief when a want stood)"
                 );
                 assert_eq!(
                     world.orb().expect("stands").element_amount(&struck.element),

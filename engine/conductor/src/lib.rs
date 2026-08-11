@@ -1202,12 +1202,16 @@ impl Polity {
             .collect();
 
         // PROSPECT — one success per beat, lowest stratum first.
+        // CIV-REACH-1: stratum 0 always refuses and depth is capped by
+        // the people's growth, so the walk is 1..=civ_reach — a bronze
+        // line digs its two shallow strata and deepens as tech lands.
+        let reach = self.world.civ_reach();
         let mut prospected = false;
         for orb in &orbs {
             if prospected {
                 break;
             }
-            for stratum in 0u8..=31 {
+            for stratum in 1u8..=reach {
                 match self.world.prospect_as(automaton, *orb, stratum) {
                     Ok(_) => {
                         prospected = true;
@@ -1997,7 +2001,25 @@ impl Polity {
                     None // the runway is short: STOP expanding
                 }
             }
-            None => with_refine(settlement),
+            None => {
+                // ENCASE-FIRST (05 §1.2) holds on the temperate seat
+                // too: a colony whose vented book outruns its contained
+                // one is bleeding the currency order-work is priced in
+                // (34's gate reads exactly these two arms), and no
+                // amount of sprawl repays that. One shell, then back to
+                // the settlement line.
+                let venting = world
+                    .orb()
+                    .is_some_and(|orb| orb.entropy_vented > orb.syntropy_contained);
+                if venting
+                    && zone_count(world, ZoneKind::Encasement) == 0
+                    && affords(world, ZoneKind::Encasement)
+                {
+                    Some(ZoneKind::Encasement)
+                } else {
+                    with_refine(settlement)
+                }
+            }
         };
         if let (Some(kind), Some(tile)) = (wanted, next_free_tile(world)) {
             // REFINE-1: ElementRefinery needs DEEPENING (condition 3),

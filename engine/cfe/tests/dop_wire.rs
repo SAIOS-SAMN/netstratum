@@ -134,13 +134,23 @@ fn events_round_trip_through_their_wire_records() {
             fulfilled: false,
             banked: ratio(0, 1),
         },
+        // E3.6: offer sides are Cargo — the Resource form round-trips
+        // and an Element side rides the same tag.
         ClosureEvent::OfferPosted {
             offer: 7,
             orb_id: 1,
-            give: Resource::Joule,
+            give: cfe::dop::Cargo::Resource(Resource::Joule),
             give_amount: ratio(9, 2),
-            want: Resource::Sink,
+            want: cfe::dop::Cargo::Resource(Resource::Sink),
             want_amount: ratio(9, 2),
+        },
+        ClosureEvent::OfferPosted {
+            offer: 8,
+            orb_id: 1,
+            give: cfe::dop::Cargo::Element([11u8; 32]),
+            give_amount: ratio(3, 2),
+            want: cfe::dop::Cargo::Resource(Resource::Iron),
+            want_amount: ratio(4, 1),
         },
         ClosureEvent::OfferCleared { offer: 7, deal: 100 },
         ClosureEvent::GaugeShiftedAt { grade: 2, gauge: ratio(2, 3) },

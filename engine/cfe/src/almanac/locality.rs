@@ -85,6 +85,24 @@ pub fn civ_may_work(line: u8, held_conditions: impl IntoIterator<Item = u8>, sta
     line > 0 && line <= civ_reach(held_conditions, star)
 }
 
+/// **THE DEPOSIT LAW** — which LINES a stratum of this system can hold.
+///
+/// The forge that deposited a vein is the same pressure that releases
+/// it, so a stratum carries exactly the lines its own pressure refines:
+/// the deepest `l` with `pressure(stratum) >= l/LINES`, at least 1,
+/// never past the star's forge depth. This is what makes "bronze digs
+/// shallow" yield SHALLOW MATTER rather than unworkable curios — and it
+/// is locality made total: a line the system does not carry is never
+/// charted in it.
+pub fn strata_lines(stratum: u8, class: StarClass) -> u8 {
+    let forge = lines_of(class);
+    if forge == 0 {
+        return 1;
+    }
+    let releasable = (u16::from(stratum.min(forge)) * u16::from(LINES) / u16::from(forge)) as u8;
+    releasable.clamp(1, forge)
+}
+
 /// **THE PRESSURE OF A SYSTEM** — the stratum an orb has opened,
 /// against the deepest line its star offers.
 pub fn pressure(stratum: u8, class: StarClass) -> Ratio {
