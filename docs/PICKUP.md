@@ -70,6 +70,18 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 > `kernel/tests/endowment_pins.rs` (3). The Phase-3 flip's judge-side
 > preconditions are now measured clean on the live board.
 >
+> **THE FAIL-FAST BLINDNESS (found 2026-08-12):** `cargo test` stops
+> at the first failing TARGET, and the ratchet has been red for days —
+> so every "full board" run silently skipped the suites ordered after
+> it (all of conductor's and the CLI's). Boards were reported green
+> that never ran them. Run boards with `--no-fail-fast`. Surfaced by
+> the sweep: `conductor_pins`' two era pins wedged >10 min (pre-existing
+> at `4a37e53`, REMOVED 2026-08-12 — condition-driven eras via
+> `run_era_until`/`_among` + the optimized test profile; suite now 64s);
+> still red and PRE-EXISTING, owed diagnosis:
+> `measured_bounds::the_settlement_thresholds_measure_and_pin` and
+> `merchant_pins::the_caravan_bridges_the_walled_pair_at_a_profit`.
+>
 > **STANDING DEBT, not fixed here:** `tuned_constant_ratchet` is red on
 > `main` — 170 tuned ratio literals against the 112 ceiling (58 dials
 > entered during the Wave-6..8/E3 arc without derivation). The ceiling

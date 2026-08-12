@@ -149,9 +149,9 @@ fn main() {
         // MESH-1b (#2): the pen door — yields seal at the beat
         // boundary; penned worlds wait, and the file poll notices
         // the pen coming home.
-        for line in conductor::pen_service(
+        for line in conductor::profile::timed("pen_service", || conductor::pen_service(
             &mut worlds, &registry, &book, &control_path, epoch_base + beat,
-        ) {
+        )) {
             println!("beat {beat}: {line}");
         }
         let mut newborns = Vec::new();
@@ -188,28 +188,28 @@ fn main() {
             worlds.push(Polity::genesis(spec, &registry, &book));
         }
         // FLEET-1: salvage/mint/assign before hauls need capacity.
-        conductor::fleet_step(&mut worlds);
+        conductor::profile::timed("fleet_step", || conductor::fleet_step(&mut worlds));
         // OFFER-1a: the market beat — intents post, crossings clear
         // (one aperture pair each way, receipted both sides).
-        for (seller, buyer) in conductor::market_step(&mut worlds, beat) {
+        for (seller, buyer) in conductor::profile::timed("market_step", || conductor::market_step(&mut worlds, beat)) {
             println!(
                 "beat {beat}: THE CROSSING CLEARS — {seller} ⇌ {buyer}; the autarkies trade"
             );
         }
         // MERCHANT-1: the caravan bridges what the void walled.
-        for (m, a, b) in conductor::merchant_step(&mut worlds, beat) {
+        for (m, a, b) in conductor::profile::timed("merchant_step", || conductor::merchant_step(&mut worlds, beat)) {
             println!(
                 "beat {beat}: THE CARAVAN — {m} bridges {a} ⇌ {b}; the walled trade flows"
             );
         }
         // E3.3: pure NPC element aperture hauls (Wave-2).
-        for (from, to) in conductor::element_trade_step(&mut worlds, beat) {
+        for (from, to) in conductor::profile::timed("element_trade_step", || conductor::element_trade_step(&mut worlds, beat)) {
             println!(
                 "beat {beat}: ELEMENT CROSSING — {from} → {to}; open matter rides the void"
             );
         }
         // STAMP MM-1: mint + spot clear (Wave-4).
-        for (buyer, seller) in conductor::stamp_market_step(&mut worlds, beat) {
+        for (buyer, seller) in conductor::profile::timed("stamp_market_step", || conductor::stamp_market_step(&mut worlds, beat)) {
             println!(
                 "beat {beat}: STAMP SPOT — {buyer} ⇌ {seller}; crystal clears for STAMP"
             );
@@ -288,6 +288,10 @@ fn main() {
                 })
                 .collect();
             println!("beat {beat}: {}", summary.join("  "));
+        }
+        // Task #8: the opt-in phase profile (NETSTRATUM_PROFILE=1).
+        for (name, spent) in conductor::profile::drain() {
+            println!("beat {beat}: PROFILE {name} {spent:?}");
         }
         if cycles > 0 && beat >= cycles {
             break;

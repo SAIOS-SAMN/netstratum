@@ -2692,23 +2692,28 @@ impl Polity {
     /// elements; office seats T4/T6; refine converts raw; chemistry
     /// seats labs / catalogs / compounds — all pure NPC.
     pub fn cycle(&mut self, book: &Ledger, registry: &Registry) -> Option<PolitySpec> {
-        self.drain_inbox(book);
-        self.build_step();
-        self.ground_step();
-        self.office_step(registry);
-        self.refine_step();
-        self.chemistry_step();
-        self.identity_step();
-        self.world.tick();
+        profile::timed("drain_inbox", || self.drain_inbox(book));
+        profile::timed("build_step", || self.build_step());
+        profile::timed("ground_step", || self.ground_step());
+        profile::timed("office_step", || self.office_step(registry));
+        profile::timed("refine_step", || self.refine_step());
+        profile::timed("chemistry_step", || self.chemistry_step());
+        profile::timed("identity_step", || self.identity_step());
+        profile::timed("tick", || {
+            self.world.tick();
+        });
         // Every settled orb collects — a chartered survey site left
         // uncollected would starve at its own upkeep.
-        let orbs: Vec<u64> = self.world.committed().orbs.iter().map(|o| o.orb_id).collect();
-        for orb in orbs {
-            let _ = self.world.collect_as(self.automaton, orb);
-        }
-        self.survey_step();
-        self.research_step(book);
-        let newborn = self.divergence_step(registry);
+        profile::timed("collect", || {
+            let orbs: Vec<u64> =
+                self.world.committed().orbs.iter().map(|o| o.orb_id).collect();
+            for orb in orbs {
+                let _ = self.world.collect_as(self.automaton, orb);
+            }
+        });
+        profile::timed("survey_step", || self.survey_step());
+        profile::timed("research_step", || self.research_step(book));
+        let newborn = profile::timed("divergence_step", || self.divergence_step(registry));
         // THE RESUME CARRIER (task 25, 2026-07-30): every polity
         // world syncs its tlv chronicle beside the ledger exports — an
         // append-only resume copy (cfe::persist grows the file, never
@@ -2716,12 +2721,14 @@ impl Polity {
         // the WRITING hand stays refused at the CLI (two writers on
         // one clock is the split-brain NS-5 exists to arbitrate) —
         // intervention still goes through the steward inbox.
-        let _ = cfe::persist::sync(
-            self.world.chronicle(),
-            &book
-                .world_dir(&self.spec.world_name)
-                .join("chronicle.tlv"),
-        );
+        profile::timed("persist_sync", || {
+            let _ = cfe::persist::sync(
+                self.world.chronicle(),
+                &book
+                    .world_dir(&self.spec.world_name)
+                    .join("chronicle.tlv"),
+            );
+        });
         // #36 KERNEL-OBSERVED PLAY: the beat chains. The committed
         // state extends this world's arbor at the world clock —
         // adopted once at first sight (the pre-chain founding stamped
@@ -2731,14 +2738,18 @@ impl Polity {
         // arbor stalls with its pen (MESH-1b). Best-effort like the
         // counterpart writes at this observed phase: a refused chain
         // leaves the arbor short, a visible stall, never a crash.
-        let _ = self.chain_beat(book);
-        let _ = scribe::record(
+        profile::timed("chain_beat", || {
+            let _ = self.chain_beat(book);
+        });
+        profile::timed("scribe_record", || {
+            let _ = scribe::record(
             book,
             &self.spec.world_name,
             &self.spec.planet,
-            &self.spec.civilization.sigil,
-            &self.world,
-        );
+                &self.spec.civilization.sigil,
+                &self.world,
+            );
+        });
         newborn
     }
 
@@ -2787,6 +2798,60 @@ impl Polity {
         // un-inspected interior where a local unlawful step shelters
         // behind a net-positive whole.
         //
+        // THE JUDGED WATERMARK (task #8, measured 2026-08-12): the
+        // cursor was memory-only, so EVERY conductor boot re-judged
+        // every world's whole history — O(receipts²) prefix replays,
+        // measured at 421s of a 430s beat across 153 grown worlds
+        // (98 %; the "94 % research_step" reading was true at 33 young
+        // worlds and is history). `kernel::admits` is deterministic on
+        // (prior, next, step) — re-deriving identical verdicts each
+        // boot is the R5-memo shape the board already ruled against —
+        // so the cursor and the refused SEQUENCES persist beside the
+        // spine, and a boot re-judges only what the record does not
+        // hold. No sidecar (or an inconsistent one — a shorter
+        // chronicle is a foreign tree) → the full re-judgment, today's
+        // behavior, once. The permanent refusal record survives BETTER
+        // than before: it is carried, not recomputed; the few recorded
+        // refusals re-derive their typed verdicts at one prefix replay
+        // each, so the narrator still announces them once per process.
+        if self.chained == 0 {
+            if let Some((watermark, refused_seqs)) =
+                read_judged_sidecar(&book.world_dir(&self.spec.world_name))
+            {
+                if watermark <= receipts.len() {
+                    self.chained = watermark;
+                    for sequence in refused_seqs {
+                        if let Some(at) =
+                            receipts.iter().position(|r| r.sequence == sequence)
+                        {
+                            let prior = cfe::world::replay(
+                                &cfe::vrp::Chronicle::from_receipts(receipts[..at].to_vec())
+                                    .map_err(|_| mesh::arbor::ArborRefused::StateUndecodable)?,
+                            );
+                            let next = cfe::world::replay(
+                                &cfe::vrp::Chronicle::from_receipts(
+                                    receipts[..=at].to_vec(),
+                                )
+                                .map_err(|_| mesh::arbor::ArborRefused::StateUndecodable)?,
+                            );
+                            let receipt = &receipts[at];
+                            let step = kernel::Step {
+                                event: receipt.event.clone(),
+                                actor: receipt
+                                    .provenance
+                                    .first()
+                                    .copied()
+                                    .unwrap_or(cfe::world::SOVEREIGN),
+                                stamp: receipt.stamp,
+                            };
+                            if let Err(unlawful) = kernel::admits(&prior, &next, &step) {
+                                self.refused.push((receipt.sequence, unlawful));
+                            }
+                        }
+                    }
+                }
+            }
+        }
         // Prior/next are taken by replaying the chronicle prefix, which
         // is O(deeds × history) per beat. That is honest and bounded at
         // this scale; the cure when it bites is a stepping replay in
@@ -2813,6 +2878,11 @@ impl Polity {
             prior = next;
         }
         self.chained = receipts.len();
+        write_judged_sidecar(
+            &book.world_dir(&self.spec.world_name),
+            self.chained,
+            &self.refused,
+        );
 
         // THE COMMITMENT STAYS ONE PER BEAT — and that is NOT batching
         // the judgment, which happened per deed above. It is the arbor's
@@ -2895,21 +2965,36 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, Stri
     let mut cleared = Vec::new();
     let mut seq: u64 = 0;
     let n = worlds.len();
+    // PEELS AND SHEARS, NOT SWEEPS (standing ruling; measured
+    // 2026-08-12 at 66s of a 110s beat, 153 worlds): the pair loop
+    // re-folded BOTH sides' whole element ledgers per pair — O(n²)
+    // exact-rational folds — and re-granted the solar leap per pair.
+    // The mass is a per-WORLD reading: cache it once, refresh only the
+    // two participants a clear actually moved; grant the leap once per
+    // world in a pre-pass. Same pairs, same order, same choices —
+    // WHERE TO LOOK moved, never what clears.
+    let mass_of = |p: &Polity| -> Ratio {
+        p.world
+            .orb()
+            .map(|o| {
+                o.elements
+                    .iter()
+                    .fold(ratio(0, 1), |s, (_, a)| s + a.clone())
+            })
+            .unwrap_or_else(|| ratio(0, 1))
+    };
+    // THRESHOLD-1 pre-pass: aperture needs the solar leap (condition 0).
+    for held in worlds.iter_mut() {
+        if !held.penned && !held.world.knows_its_sun() {
+            let steward = held.steward;
+            let _ = held.world.grant_tech_as(steward, cfe::world::FIRST_ORB, 0);
+        }
+    }
+    let mut masses: Vec<Ratio> = worlds.iter().map(mass_of).collect();
     for a in 0..n {
         for b in (a + 1)..n {
             if worlds[a].penned || worlds[b].penned {
                 continue;
-            }
-            // THRESHOLD-1: aperture needs the solar leap (condition 0).
-            for i in [a, b] {
-                if !worlds[i].world.knows_its_sun() {
-                    let steward = worlds[i].steward;
-                    let _ = worlds[i].world.grant_tech_as(
-                        steward,
-                        cfe::world::FIRST_ORB,
-                        0,
-                    );
-                }
             }
             let distance = spatial_l1(&worlds[a].spec.position, &worlds[b].spec.position);
             let melt = cfe::world::route_melt(
@@ -2921,17 +3006,7 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, Stri
                 continue; // walled direct — merchant territory, not element haul
             }
             // Prefer shipping from the side with more total element mass.
-            let mass = |p: &Polity| -> Ratio {
-                p.world
-                    .orb()
-                    .map(|o| {
-                        o.elements
-                            .iter()
-                            .fold(ratio(0, 1), |s, (_, a)| s + a.clone())
-                    })
-                    .unwrap_or_else(|| ratio(0, 1))
-            };
-            let (exporter, importer) = if mass(&worlds[a]) >= mass(&worlds[b]) {
+            let (exporter, importer) = if masses[a] >= masses[b] {
                 (a, b)
             } else {
                 (b, a)
@@ -2975,6 +3050,10 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, Stri
                     ex.spec.world_name.clone(),
                     im.spec.world_name.clone(),
                 ));
+                // The clear moved matter: refresh exactly the two
+                // touched readings (the cache's whole bargain).
+                masses[exporter] = mass_of(&worlds[exporter]);
+                masses[importer] = mass_of(&worlds[importer]);
             }
         }
     }
@@ -3181,6 +3260,15 @@ pub fn merchant_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String, S
     // unsold leg-2 counter stays on the open market like any offer.
     let mut crossings = Vec::new();
     let mut seq: u64 = 0;
+    // PEELS AND SHEARS (measured 2026-08-12, 21s of a 45s beat): the
+    // melt is a PAIR reading — keys, routes, seats, siting — and none
+    // of those move inside one merchant sweep (a cleared triangle
+    // apertures cargo; it charters nothing and unfolds nothing). So
+    // the triangle loop reads each pair's melt ONCE through a lazy
+    // memo instead of re-deriving it per (m, a, b). Same triangles,
+    // same order, same clears.
+    let mut melt_memo: std::collections::HashMap<(usize, usize), Ratio> =
+        std::collections::HashMap::new();
     for m in 0..n {
         if worlds[m].penned {
             continue;
@@ -3200,18 +3288,34 @@ pub fn merchant_step(worlds: &mut [Polity], beat: u64) -> Vec<(String, String, S
                 if ask_b.want != ask_a.give || ask_b.give != ask_a.want {
                     continue;
                 }
+                let melt_of = |memo: &mut std::collections::HashMap<(usize, usize), Ratio>,
+                               worlds: &[Polity],
+                               x: usize,
+                               y: usize|
+                 -> Ratio {
+                    let key = (x.min(y), x.max(y));
+                    memo.entry(key)
+                        .or_insert_with(|| {
+                            let d = spatial_l1(
+                                &worlds[x].spec.position,
+                                &worlds[y].spec.position,
+                            );
+                            cfe::world::route_melt(&worlds[x].world, &worlds[y].world, &d)
+                        })
+                        .clone()
+                };
                 // Strictly additive: the direct pair must be walled.
-                let d_ab = spatial_l1(&worlds[a].spec.position, &worlds[b].spec.position);
-                if cfe::world::route_melt(&worlds[a].world, &worlds[b].world, &d_ab) < one() {
+                if melt_of(&mut melt_memo, worlds, a, b) < one() {
                     continue;
                 }
-                let d_am = spatial_l1(&worlds[a].spec.position, &worlds[m].spec.position);
-                let d_mb = spatial_l1(&worlds[m].spec.position, &worlds[b].spec.position);
-                let melt_am = cfe::world::route_melt(&worlds[a].world, &worlds[m].world, &d_am);
-                let melt_mb = cfe::world::route_melt(&worlds[m].world, &worlds[b].world, &d_mb);
+                let melt_am = melt_of(&mut melt_memo, worlds, a, m);
+                let melt_mb = melt_of(&mut melt_memo, worlds, m, b);
                 if melt_am >= one() || melt_mb >= one() {
                     continue;
                 }
+                // The clear legs still carry their chart distances.
+                let d_am = spatial_l1(&worlds[a].spec.position, &worlds[m].spec.position);
+                let d_mb = spatial_l1(&worlds[m].spec.position, &worlds[b].spec.position);
                 // The profit test, exact: bought must fill B's ask,
                 // and the quote coming back must exceed the quote
                 // paid — else the caravan stays home.
@@ -3589,9 +3693,51 @@ pub fn run_era(var_root: &str, cycles: u32) -> Vec<Polity> {
     run_era_with(var_root, cycles, SearchMode::default())
 }
 
+/// **THE CONDITION-DRIVEN ERA** (wedge removal, 2026-08-12): run at
+/// most `cycles` beats, stopping EARLY once `arrived` reads true on
+/// the board — checked at each beat's close. The era pins wait for a
+/// CONDITION (a cleave, an unlocked smelter), and a fixed 45-beat run
+/// wedges in debug builds as divergence multiplies worlds (measured:
+/// pre-existing at 4a37e53, >10 min; the condition itself arrives by
+/// ~beat 13). Stopping when the witnessed thing has happened keeps
+/// every assertion's meaning and cuts the dead tail. The full-length
+/// form remains `run_era` — production pacing is the binary's, not
+/// this runner's.
+pub fn run_era_until(
+    var_root: &str,
+    cycles: u32,
+    arrived: impl Fn(&[Polity]) -> bool,
+) -> Vec<Polity> {
+    run_era_inner(var_root, cycles, SearchMode::default(), None, Some(&arrived))
+}
+
+/// The condition-driven era over a SEATED PREFIX of the founding
+/// roster — a fixture scale for pins whose law is per-line (a smelter
+/// rising, a rung earned): a smaller board proves the same claim at a
+/// fraction of the beat cost, and the full-roster form stays for the
+/// pins whose law is board-wide.
+pub fn run_era_until_among(
+    var_root: &str,
+    cycles: u32,
+    seats: usize,
+    arrived: impl Fn(&[Polity]) -> bool,
+) -> Vec<Polity> {
+    run_era_inner(var_root, cycles, SearchMode::default(), Some(seats), Some(&arrived))
+}
+
 /// The era runner, under a named search regime — the seam the
 /// three-path benchmark drives.
 pub fn run_era_with(var_root: &str, cycles: u32, mode: SearchMode) -> Vec<Polity> {
+    run_era_inner(var_root, cycles, mode, None, None)
+}
+
+fn run_era_inner(
+    var_root: &str,
+    cycles: u32,
+    mode: SearchMode,
+    seats: Option<usize>,
+    arrived: Option<&dyn Fn(&[Polity]) -> bool>,
+) -> Vec<Polity> {
     let registry = Registry::at(format!("{var_root}/registry"));
     let book = Ledger::at(format!("{var_root}/worlds"));
     let eras = ledger::converge::default_era_roots(var_root);
@@ -3600,8 +3746,11 @@ pub fn run_era_with(var_root: &str, cycles: u32, mode: SearchMode) -> Vec<Polity
         .unwrap_or(0);
     // 11 §5.2: the live aeon's G-sheet (see main.rs — same law).
     let live_base = cfe::world::wrap_gauge(ratio(eras.len() as i64, 12));
-    let mut worlds: Vec<Polity> = polities::founding_polities()
+    let roster = polities::founding_polities();
+    let take = seats.unwrap_or(roster.len()).min(roster.len());
+    let mut worlds: Vec<Polity> = roster
         .into_iter()
+        .take(take)
         .map(|mut spec| {
             let opening = spec.gauge.take().unwrap_or_else(|| ratio(0, 1));
             spec.gauge = Some(cfe::world::wrap_gauge(opening + live_base.clone()));
@@ -3650,6 +3799,9 @@ pub fn run_era_with(var_root: &str, cycles: u32, mode: SearchMode) -> Vec<Polity
             // (11 §1 — board-scale shifts read yearly).
             let _ = observe_crossings(&worlds, &registry, &book, epoch_base + u64::from(beat) + 1);
         }
+        if arrived.is_some_and(|done| done(&worlds)) {
+            break;
+        }
     }
     worlds
 }
@@ -3657,6 +3809,83 @@ pub fn run_era_with(var_root: &str, cycles: u32, mode: SearchMode) -> Vec<Polity
 /// PHASE-4 — pure NPC instrument lifecycle (P4.7): honest spot clears,
 /// redeem matured notes, settle expired futures; issue a small Note
 /// when listable and STAMP affords half-face collateral.
+/// THE JUDGED SIDECAR — `judged.cursor` beside the world's exports:
+/// first line the watermark (receipts judged), then one refused
+/// SEQUENCE per line. Verdicts are never stored — they re-derive
+/// deterministically at boot from the sequences (one prefix replay
+/// each; refusals are rare). Best-effort like every export: a missing
+/// or unreadable sidecar means the full re-judgment, never a crash.
+fn read_judged_sidecar(dir: &std::path::Path) -> Option<(usize, Vec<u64>)> {
+    let text = std::fs::read_to_string(dir.join("judged.cursor")).ok()?;
+    let mut lines = text.lines();
+    let watermark: usize = lines.next()?.trim().parse().ok()?;
+    let refused = lines.filter_map(|line| line.trim().parse().ok()).collect();
+    Some((watermark, refused))
+}
+
+fn write_judged_sidecar(dir: &std::path::Path, watermark: usize, refused: &[(u64, kernel::Refused)]) {
+    // UNION with what already stands: the narrator DRAINS the
+    // in-memory record for its ten-beat tally, so the sidecar is the
+    // permanent copy and must never shrink by a display read.
+    let mut sequences: Vec<u64> = read_judged_sidecar(dir)
+        .map(|(_, held)| held)
+        .unwrap_or_default();
+    for (sequence, _) in refused {
+        if !sequences.contains(sequence) {
+            sequences.push(*sequence);
+        }
+    }
+    sequences.sort_unstable();
+    let mut text = format!("{watermark}\n");
+    for sequence in sequences {
+        text.push_str(&format!("{sequence}\n"));
+    }
+    let _ = std::fs::create_dir_all(dir);
+    let _ = std::fs::write(dir.join("judged.cursor"), text);
+}
+
+/// **OPT-IN PHASE PROFILE** (task #8, 2026-08-12) — measures where the
+/// beat goes. Armed by `NETSTRATUM_PROFILE=1`; unarmed it is one
+/// atomic load per phase. An instrument, never a mechanic — it appends
+/// nothing, gates nothing (the cost_probe discipline).
+pub mod profile {
+    use std::sync::{Mutex, OnceLock};
+    use std::time::{Duration, Instant};
+
+    static ARMED: OnceLock<bool> = OnceLock::new();
+    static BOOK: Mutex<Vec<(&'static str, Duration)>> = Mutex::new(Vec::new());
+
+    fn armed() -> bool {
+        *ARMED.get_or_init(|| std::env::var_os("NETSTRATUM_PROFILE").is_some())
+    }
+
+    pub fn timed<T>(name: &'static str, run: impl FnOnce() -> T) -> T {
+        if !armed() {
+            return run();
+        }
+        let at = Instant::now();
+        let out = run();
+        let spent = at.elapsed();
+        let mut book = BOOK.lock().expect("profile book");
+        match book.iter_mut().find(|(held, _)| *held == name) {
+            Some((_, total)) => *total += spent,
+            None => book.push((name, spent)),
+        }
+        out
+    }
+
+    /// Drain the accumulated per-beat totals, costliest first.
+    pub fn drain() -> Vec<(&'static str, Duration)> {
+        if !armed() {
+            return Vec::new();
+        }
+        let mut book = BOOK.lock().expect("profile book");
+        let mut out: Vec<_> = book.drain(..).collect();
+        out.sort_by(|a, b| b.1.cmp(&a.1));
+        out
+    }
+}
+
 pub fn instrument_step(worlds: &mut [Polity]) {
     for polity in worlds.iter_mut() {
         if polity.penned {

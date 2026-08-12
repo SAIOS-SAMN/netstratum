@@ -3,7 +3,7 @@
 //! end-to-end, research unlocks industry, and a thriving line
 //! speciates — chronicle-chosen, lineage-recorded.
 
-use conductor::{founding_polities, run_era, Polity};
+use conductor::{founding_polities, run_era, run_era_until, run_era_until_among, Polity};
 use ledger::registry::Registry;
 use ledger::Ledger;
 use std::fs;
@@ -74,16 +74,27 @@ fn policies_diverge() {
 #[test]
 fn research_unlocks_industry() {
     let root = scratch("unlock");
-    let worlds = run_era(&root.to_string_lossy(), 45);
-    let smelting = worlds.iter().any(|polity| {
-        polity.level >= 3
-            && polity.world.orb().is_some_and(|orb| {
-                orb.zones
-                    .iter()
-                    .any(|z| z.kind == cfe::dop::ZoneKind::Smelter)
-            })
-    });
-    assert!(smelting, "an earned rung turned surplus into smelters");
+    // The pin witnesses a CONDITION; the era stops when it arrives
+    // (wedge removal 2026-08-12 — a fixed 45 beats wedged in debug as
+    // divergence multiplied worlds; the smelter lands far earlier).
+    let smelting = |worlds: &[Polity]| {
+        worlds.iter().any(|polity| {
+            polity.level >= 3
+                && polity.world.orb().is_some_and(|orb| {
+                    orb.zones
+                        .iter()
+                        .any(|z| z.kind == cfe::dop::ZoneKind::Smelter)
+                })
+        })
+    };
+    // A SEATED-PREFIX board (the pin's law is per-line, not
+    // board-wide) with the room the taxon-scaled biomass economy now
+    // needs: the 10-bio smelter bill accumulates at ~1/4 per beat
+    // under the yield scales, landing near beat 34 (measured) — past
+    // the old 45 with a full roster's beat cost, comfortably inside
+    // 90 on six seats.
+    let worlds = run_era_until_among(&root.to_string_lossy(), 90, 6, smelting);
+    assert!(smelting(&worlds), "an earned rung turned surplus into smelters");
 }
 
 /// DIVERGENCE (AEON-1b, 11 §3): a long era CLEAVES at least one line
@@ -120,7 +131,25 @@ fn research_unlocks_industry() {
 fn a_cleave_walks_the_manifold_not_one_axis_at_a_time() {
     let root = scratch("speciate");
     let var = root.to_string_lossy().into_owned();
-    let worlds = run_era(&var, 45);
+    // The pin witnesses a runtime CLEAVE; the era stops once one
+    // stands (wedge removal 2026-08-12 — same law as the smelter pin;
+    // the seeded roster is excluded exactly as the assertions below
+    // exclude it).
+    let seeded_sigils: Vec<String> = founding_polities()
+        .iter()
+        .map(|p| p.civilization.sigil.clone())
+        .collect();
+    // The era stops once a runtime branch BEATS ALONGSIDE — clock
+    // run, not merely founded (a newborn joins at its founding beat's
+    // close with now() = 0; the pin's own law asks for a beating
+    // branch, so the exit arrives exactly one beat later).
+    let worlds = run_era_until(&var, 45, |worlds| {
+        worlds.iter().any(|b| {
+            !b.spec.civilization.lineage.is_empty()
+                && !seeded_sigils.contains(&b.spec.civilization.sigil)
+                && b.world.now() > 0
+        })
+    });
     assert!(
         worlds.iter().any(|b| !b.spec.civilization.lineage.is_empty()),
         "a branch joined the board"
