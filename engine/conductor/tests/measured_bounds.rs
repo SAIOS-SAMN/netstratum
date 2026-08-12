@@ -29,7 +29,12 @@ fn scratch(name: &str) -> PathBuf {
 /// Measured 2026-08-07 on the founding roster (incl. sovereign band),
 /// 15 beats, under derived settlement gates + ground_step.
 /// Prior pin was 50 (2026-08-06, pre-ground, no T2 seats).
-const MEASURED_ZONE_TOTAL_AT_15: usize = 52;
+/// RE-MEASURED 2026-08-12 to 73: the taxon yield scales + endowment
+/// gifts (STAR-ENDOW-1/ORBIT-ENDOW-1) + the deposit law changed what
+/// the reserve gates fund, so the era's footprint grew — a deliberate
+/// re-measure under the ruled economy, the divergence property still
+/// holds below (the temperaments still build different cities).
+const MEASURED_ZONE_TOTAL_AT_15: usize = 73;
 
 /// **THE ENERGY-BOOTSTRAP DEBT** — the lines the settlement law cannot
 /// reach, pinned so the set can only SHRINK:

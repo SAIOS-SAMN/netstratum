@@ -124,8 +124,14 @@ fn the_joule_runway_defers_the_frost() {
         frost.cycle(&book, &registry);
         mesic.cycle(&book, &registry);
     }
-    assert_eq!(zones(&frost), 1, "the Frost stopped at its sink charter");
-    assert_eq!(kind_count(&frost, ZoneKind::CryoArray), 1);
+    // RE-PINNED 2026-08-12: under the ruled amphiform taxon economy
+    // (f14c373) the Frost's higher yield funds ONE zone past its sink
+    // charter before the joule runway defers the rest — the freeze-lock
+    // law (lib.rs runway gate) is unchanged; only the count the ruled
+    // economy reaches moved. The sink charter is still exactly one
+    // array, and the Frost still halts far below the mesic control.
+    assert_eq!(zones(&frost), 2, "the Frost stalls two zones in, its runway spent");
+    assert_eq!(kind_count(&frost, ZoneKind::CryoArray), 1, "still one sink charter");
     assert!(
         zones(&mesic) >= 4,
         "the mesic control kept building: {}",

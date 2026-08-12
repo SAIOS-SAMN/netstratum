@@ -3932,6 +3932,24 @@ fn run_era_inner(
             break;
         }
     }
+    // THE FINAL SYNC (resume-carrier gap, 2026-08-12): `cycle` syncs
+    // each world's `chronicle.tlv` at its own close, but the beat's
+    // GLOBAL steps (market · element · stamp · fleet · instrument)
+    // append receipts AFTER that sync — so the LAST beat's global
+    // receipts never reached the resume carrier, and a world resumed
+    // mid-era came back one crossing short. The binary beats forever
+    // and re-syncs next cycle, so it never saw this; a bounded era
+    // ending on a global crossing did. One sync per world at era end
+    // closes it — the carrier now reflects the whole final state.
+    for polity in &worlds {
+        if polity.penned {
+            continue;
+        }
+        let _ = cfe::persist::sync(
+            polity.world.chronicle(),
+            &book.world_dir(&polity.spec.world_name).join("chronicle.tlv"),
+        );
+    }
     worlds
 }
 

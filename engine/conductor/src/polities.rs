@@ -245,7 +245,7 @@ pub fn founding_polities() -> Vec<PolitySpec> {
         // of it; the first cut of this roster orphaned the clade by
         // dropping the only line that wears it.
         seat(
-            "Draco", "draco", "draconiform-umbra", "draconiform",
+            "Draco", "draco", "draconiform-umbra", "draconic",
             "the union is the evidence; the seat above re-checks it",
             "epicurean", "biotic", "umbral",
             Some("observer"), &[],
