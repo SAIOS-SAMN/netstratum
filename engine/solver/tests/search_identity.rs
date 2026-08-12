@@ -38,19 +38,24 @@ const RECORDED: &[(u32, u8, &str)] = &[
     (2, 5, "rotate90"),
     (3, 0, "recolor[9,7,6,8,0,2,4,3,1,5]"),
     (3, 1, "rotate90|flip_v"),
-    (3, 2, "flip_h|recolor[9,5,2,6,4,0,3,1,8,7]"),
+    // RE-RECORDED 2026-08-12 with R4 (task #20 — derived operators
+    // enumerate FIRST): five rows moved to equal-action alternative
+    // spellings the new order reaches first, which is exactly the
+    // reviewed re-recording this table exists to force. Closure count
+    // measured unchanged (85/120) before and after the reorder.
+    (3, 2, "recolor[9,5,2,6,4,0,3,1,8,7]|flip_h"),
     (3, 3, "recolor[1,7,8,5,2,9,3,4,0,6]"),
-    (3, 4, "transpose|recolor[0,8,5,2,9,4,1,3,7,6]"),
+    (3, 4, "recolor[0,8,5,2,9,4,1,3,7,6]|transpose"),
     (3, 5, "rotate180"),
     (4, 0, "rotate90|tile3x2(odd_row=cols,odd_col=both)"),
     (4, 1, "flip_v|tile2x1(odd_row=rows,odd_col=none)"),
     (4, 2, "UNSOLVED"),
     (4, 3, "UNSOLVED"),
-    (4, 4, "transpose|tile2x2(odd_row=rows,odd_col=rows)"),
+    (4, 4, "tile2x2(odd_row=cols,odd_col=cols)|rotate270"),
     (4, 5, "UNSOLVED"),
     (5, 0, "UNSOLVED"),
-    (5, 1, "transpose|recolor[8,0,2,5,6,7,3,9,1,4]"),
-    (5, 2, "rotate270|tile2x2(odd_row=none,odd_col=cols)"),
+    (5, 1, "recolor[8,0,2,5,6,7,3,9,1,4]|transpose"),
+    (5, 2, "tile2x2(odd_row=rows,odd_col=none)|rotate270"),
     (5, 3, "UNSOLVED"),
     (5, 4, "recolor[2,8,1,0,5,4,3,7,9,6]"),
     (5, 5, "UNSOLVED"),
