@@ -118,6 +118,37 @@ perspectives, not deeper solitary search.
   spread of `translation_survival` across the confirming frames — an
   axiom confirmed by distant frames outranks one confirmed by clones.
 
+**LANDED (the algebra), 2026-08-12** — `solver::perspective`: the pure
+core, fully pinned (`perspective_pins`). A `Perspective` reads its own
+structured residual and silhouette count (4-connected clusters via the
+sealed segmentation, background fixed at 0 so a whole-grid residual
+does not invert); `compound` assembles the per-cell majority, localizes
+divergent cells, reports exact-rational consensus, and flags a
+systematic gap when residual-bearing views agree on the count. Delete
+any caller and no path changes (the no-hardcoding law).
+
+**OWED (the orchestration), operator-sequenced with the mesh lane
+(#19)** — the two policy decisions the algebra deliberately does NOT
+make, because they are mesh-coupled and touch the second head:
+
+1. **WHICH lines attempt one task.** Today each line forges its OWN
+   task from its OWN chronicle digest; compounding needs N lines on
+   ONE grid. The natural shape is a HARD-TASK escalation: a task a
+   line reads a systematic gap on (its residual clusters, its
+   vocabulary cannot close) is offered to the mesh, and lines whose
+   perception/hunger fit it attempt it — the membrane's work pool,
+   in netstratum's file-borne mesh. This is a mesh design, not a
+   solver one; it rides task #19.
+2. **HOW a compound crystallizes.** The shared-knowledge deed (a new
+   wire tag, header-claimed) with its `translation_survival` hardness
+   is a cross-LINE convergence — the consilience-at-zero law applied
+   to cognition — and belongs beside `mesh::agree`, not inside the
+   single-world chain. It lands when the escalation does.
+
+The split is deliberate and matches the house pattern: the algebra is
+pure and testable now; the orchestration is a ruling-shaped design
+that sequences with the mesh.
+
 ## 6. LANDING: ORBIT-DIRECTED HUNGER (task #15)
 
 **What.** Curiosity from structure, not time. Today a line is

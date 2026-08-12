@@ -23,6 +23,7 @@
 pub mod derive;
 pub mod mint;
 pub mod need;
+pub mod perspective;
 pub mod search;
 pub mod nsearch;
 pub mod volume;
