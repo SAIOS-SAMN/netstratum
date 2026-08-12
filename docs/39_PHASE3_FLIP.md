@@ -10,10 +10,11 @@ This document exists so both are decidable from measurement.
 ## 1. What the flip is
 
 Today the kernel judges **beside** the chain: every deed is run through
-`kernel::admits` every beat, refusals are recorded in `Polity::refused`
-and announced once — but the deed **STANDS regardless**, because
-`cfe::world::replay` is still the live transition. The commitment the
-conductor writes carries `judged = false` (`arbor::extend(.., None)`).
+`kernel::admits` every beat, refusals are recorded and read back through
+`Polity::refusals` and announced once — but the deed **STANDS
+regardless**, because `cfe::world::replay` is still the live transition.
+The commitment the conductor writes carries `judged = false`
+(`arbor::extend(.., None)`).
 
 The flip demotes `replay` to a proposer and makes the kernel the live
 gate: a deed the judge refuses **no longer stands**. This is the one
