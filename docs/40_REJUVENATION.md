@@ -1,8 +1,10 @@
 # 40 — PLANETARY REJUVENATION (the regrowth law)
 
-**Status:** DESIGN, ruled 2026-08-12 (operator, Gemini relay). One fork
-open — the exact-rational growth form (§4). Charter-law translation of
-the relayed design; **not** a transcription. Task #28.
+**Status:** DESIGN, ruled 2026-08-12 (operator, Gemini relay). Growth
+form RULED: **(B) rational sigmoid on a grain** (§4) — preserve the
+S-curve so collapse from near-zero is genuinely expensive to recover.
+Charter-law translation of the relayed design; **not** a transcription.
+Task #28.
 
 ## 0. Why
 
@@ -123,14 +125,14 @@ Two netstratum-legal translations, each a permanent SEAL-B choice:
   expensive to recover from. **Cost:** more design and more witnesses;
   the surrogate's shape is a chosen approximation.
 
-**Recommendation: (B)** — the S-curve is the whole point of the
+**RULED (B), 2026-08-12** — the S-curve is the whole point of the
 Locust/Custodian tension (slow recovery from collapse is what forces
 the jump), and the grain precedent shows exact arithmetic can carry it
-bounded. (A) is the fallback if we want the simplest possible landing
-first and accept linear recovery.
-
-**This is the ruling owed before consensus code lands**, because the
-curve's exact form is written into every replay forever.
+bounded. The rational surrogate and its grain are to be designed as the
+first landing slice of task #28; its shape becomes SEAL-B law once a
+receipt reads it, so it lands red-first with witnesses pinning the
+S-shape (slow near 0, fast at mid-stock, saturating at K) and the
+bounded-denominator property, exactly as `grained_t_eq4` pinned heat.
 
 ## 5. What this composes with
 
