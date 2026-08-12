@@ -785,6 +785,13 @@ pub struct Polity {
     /// clone of state (O(state)), never a prefix replay (O(history)).
     /// Workspace like `chained`: seeded at first chain of a process.
     stepper: Option<cfe::world::Replayer>,
+    /// NOVELTY-GATE (38 §4): this line's minted solver library —
+    /// workspace cache of the `SolverWordMinted` fold, seeded lazily
+    /// at the first research beat of a process.
+    library: solver::mint::Library,
+    library_folded: bool,
+    /// Words seeking their three confirms: (orbit, expansion, cited).
+    word_pending: Vec<([u8; 32], Vec<solver_verify::grid::Op>, Vec<[u8; 32]>)>,
     /// Planes this line has OPENED — the unfold, one per earned mint.
     /// The fiber's grade count is `world.key().len()`; this counts the
     /// openings that got it there.
@@ -1058,6 +1065,9 @@ impl Polity {
                     return Polity {
                         chained: 0,
                         stepper: None,
+                        library: solver::mint::Library::new(),
+                        library_folded: false,
+                        word_pending: Vec::new(),
                         refused: Vec::new(),
                         unfolded: 0,
                         lane_refused: Vec::new(),
@@ -1160,6 +1170,9 @@ impl Polity {
         Polity {
             chained: 0,
             stepper: None,
+            library: solver::mint::Library::new(),
+            library_folded: false,
+            word_pending: Vec::new(),
             refused: Vec::new(),
             unfolded: 0,
             lane_refused: Vec::new(),
@@ -2257,6 +2270,45 @@ impl Polity {
         } else {
             let difficulty = Difficulty::level(self.level);
             let task = forge_task(digest, difficulty);
+            // NOVELTY-GATE (38 §4): the library folds once per process
+            // from this line's own receipts — the chronicle is the
+            // register, this cache only spares the re-read.
+            if !self.library_folded {
+                for (orbit, bytes, cited) in
+                    cfe::vocabulary::solver_words(self.world.chronicle())
+                {
+                    if let Some(expansion) = solver_verify::program_from_bytes(&bytes) {
+                        self.library.adopt(solver::mint::MintedWord {
+                            orbit,
+                            expansion,
+                            cited,
+                        });
+                    }
+                }
+                self.library_folded = true;
+            }
+            // THE PRE-REACH: a library word tried whole before any
+            // search. A hit is a full lawful proof — the certificate
+            // seals the EXPANSION and `verify_work` re-derives it at
+            // the gate exactly as a searched program.
+            let pre_reached = solver::mint::pre_reach(&task, &self.library).map(|expansion| {
+                let mut output = task.test_in.clone();
+                for op in &expansion {
+                    output = op.apply(&output);
+                }
+                let certificate =
+                    solver_verify::SolveCertificate::seal(&task, &expansion, &output);
+                let matches = task
+                    .test_expected
+                    .as_ref()
+                    .map(|expected| expected == &output);
+                SolveRead::Solved {
+                    program: expansion,
+                    matches_expected: matches,
+                    certificate,
+                    test_output: output,
+                }
+            });
             // THE SECTOR DOOR is the live forge path. The search only
             // PROPOSES; nothing crosses until every training pair has
             // been re-derived exactly, which is the same re-derivation
@@ -2304,7 +2356,10 @@ impl Polity {
             };
             // WHICH PATH ACTUALLY PAID FOR THIS BEAT — captured before
             // the trajectory advances, because promotion reads it.
-            let read = match self.mode {
+            let read = if let Some(hit) = pre_reached {
+                hit
+            } else {
+                match self.mode {
                 SearchMode::Uncoupled => {
                     self.swept = self.swept.saturating_add(1);
                     solve_consulted(&task, difficulty.word_len)
@@ -2326,6 +2381,7 @@ impl Polity {
                     }
                 },
 
+                }
             };
             match read {
                 SolveRead::Solved {
@@ -2334,6 +2390,53 @@ impl Polity {
                     certificate,
                     test_output,
                 } => {
+                    // NOVELTY-GATE: a confirmed composite is a WORD
+                    // candidate. Gates 1–2 run here (unique orbit vs
+                    // library and this task's standing letters; depth
+                    // ≥ 2 by `consider`); each DISTINCT task digest is
+                    // one confirmation; the third mints — receipted,
+                    // adopted, and a depth-1 letter from then on.
+                    if program.len() >= 2 {
+                        let standing = solver::mint::standing_orbits(
+                            &solver::search::sweep_vocabulary(&task),
+                        );
+                        if let Some(orbit) =
+                            solver::mint::consider(&program, &self.library, &standing)
+                        {
+                            let pending = match self
+                                .word_pending
+                                .iter_mut()
+                                .find(|(held, _, _)| *held == orbit)
+                            {
+                                Some(held) => held,
+                                None => {
+                                    self.word_pending.push((orbit, program.clone(), Vec::new()));
+                                    self.word_pending.last_mut().expect("just pushed")
+                                }
+                            };
+                            if !pending.2.contains(&digest) {
+                                pending.2.push(digest);
+                            }
+                            if pending.2.len() >= solver::mint::CONFIRMS_TO_MINT {
+                                let cited = pending.2.clone();
+                                let expansion = pending.1.clone();
+                                if let Some(bytes) = solver_verify::program_bytes(&expansion) {
+                                    if self
+                                        .world
+                                        .mint_solver_word_as(self.automaton, orbit, bytes, cited.clone())
+                                        .is_ok()
+                                    {
+                                        self.library.adopt(solver::mint::MintedWord {
+                                            orbit,
+                                            expansion,
+                                            cited,
+                                        });
+                                        self.word_pending.retain(|(held, _, _)| *held != orbit);
+                                    }
+                                }
+                            }
+                        }
+                    }
                     let word: Vec<String> = program.iter().map(|op| op.describe()).collect();
                     let cert_hex = hex(&certificate.output);
                     // THE PROOF, riding WHOLE (the opaque-payload law):

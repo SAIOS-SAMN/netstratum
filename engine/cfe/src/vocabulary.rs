@@ -626,6 +626,25 @@ pub fn practice_word(code: u8) -> &'static str {
     }
 }
 
+/// **THE SOLVER-WORD FOLD** (NOVELTY-GATE, 38 §4) — a line's minted
+/// solver library, read whole from its own receipts: (orbit, opaque
+/// expansion, confirming digests) in mint order. The same fold law as
+/// the axis vocabularies: the chronicle is the register, nothing is
+/// committed twice, and every node folds to the same library forever.
+pub fn solver_words(
+    chronicle: &crate::vrp::Chronicle,
+) -> Vec<([u8; 32], Vec<u8>, Vec<[u8; 32]>)> {
+    let mut out = Vec::new();
+    for receipt in chronicle.receipts() {
+        if let crate::dop::ClosureEvent::SolverWordMinted { orbit, expansion, cited } =
+            &receipt.event
+        {
+            out.push((*orbit, expansion.clone(), cited.clone()));
+        }
+    }
+    out
+}
+
 /// **THE FOLD** — `seed ∪ minted`, in chronicle order.
 ///
 /// Same chain, same vocabulary, on every node, forever. This is the

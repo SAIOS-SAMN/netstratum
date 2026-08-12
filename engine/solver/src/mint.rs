@@ -1,0 +1,173 @@
+//! **THE NOVELTY GATE** (38_COGNITION_CONVERGENCE §4, task #13) — the
+//! knocker for the vocabulary's mint door.
+//!
+//! A candidate WORD is a composition of existing total primitives — a
+//! macro letter. Minting one changes REACHABILITY, never capability
+//! class (the nursery's closed-algebra law): the word expands to its
+//! constituent ops in every certificate, so the judge never learns a
+//! new symbol and the tag-86 wire never moves.
+//!
+//! **THE ORBIT IS AN ACTION FINGERPRINT**, not an RCF class. The RCF
+//! quotients out frames — and a word IS a frame change, so the RCF
+//! identifies away exactly what a word is (charter §4 amended at this
+//! landing). Two words are the same letter iff they act identically on
+//! the canonical probe family: `rot90∘rot90` hashes with `rot180`,
+//! and a re-spelling can never re-mint.
+//!
+//! The gates, in order (none is a tunable):
+//!
+//! ```text
+//! 1. UNIQUE      orbit ∉ library ∪ orbits(standing letters)
+//! 2. PRODUCTIVE  the word CLOSED a task at depth ≥ 2 — the standing
+//!                letters, as letters, could not (a depth-1 sweep is
+//!                a strict subset of every deeper sweep)
+//! 3. CONSERVED   the verifier re-derives the expansion against every
+//!                training pair (existing law; nothing here waives it)
+//! 4. CONFIRMED   three DISTINCT tasks closed by the same orbit — the
+//!                rung ladder's own promote count, applied to words.
+//!                (Cross-LINE convergence is #14's crystallization.)
+//! ```
+
+use solver_verify::grid::{Grid, Op};
+
+/// One minted word: its action orbit, its expansion (the letters it
+/// spells to — what every certificate carries), and the tasks that
+/// confirmed it (digests, in confirmation order).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MintedWord {
+    pub orbit: [u8; 32],
+    pub expansion: Vec<Op>,
+    pub cited: Vec<[u8; 32]>,
+}
+
+/// A line's own minted library — the fold of its `SolverWordMinted`
+/// receipts. Never persisted here: the chronicle is the register and
+/// the conductor re-folds it (the vocabulary fold's own law).
+#[derive(Debug, Clone, Default)]
+pub struct Library {
+    words: Vec<MintedWord>,
+}
+
+impl Library {
+    pub fn new() -> Library {
+        Library { words: Vec::new() }
+    }
+    pub fn holds(&self, orbit: &[u8; 32]) -> bool {
+        self.words.iter().any(|w| &w.orbit == orbit)
+    }
+    pub fn adopt(&mut self, word: MintedWord) {
+        if !self.holds(&word.orbit) {
+            self.words.push(word);
+        }
+    }
+    pub fn words(&self) -> &[MintedWord] {
+        &self.words
+    }
+}
+
+/// **THE CANONICAL PROBE FAMILY** — the fixed basis every word's
+/// action is read against. Asymmetric shapes (so every symmetry acts
+/// distinguishably), the whole hue ladder (so every recolor acts), and
+/// separable objects on a background (so every object op acts). These
+/// are canonical basis DATA, the polities.rs class — definition, not
+/// tuning; changing them re-keys every orbit and is a reviewed act.
+fn probes() -> Vec<Grid> {
+    let ramp = |rows: usize, cols: usize| -> Grid {
+        let cells = (0..rows * cols).map(|k| (k % 10) as u8).collect();
+        Grid::new(rows, cols, cells).expect("canonical ramp probe")
+    };
+    // Two objects (hue 3 and hue 5 blocks) on a zero background —
+    // different sizes so Keep/Delete/Crop-largest all distinguish.
+    let objects = Grid::new(
+        4,
+        5,
+        vec![
+            3, 3, 0, 0, 0, //
+            3, 3, 0, 5, 0, //
+            0, 0, 0, 5, 0, //
+            0, 0, 0, 0, 0,
+        ],
+    )
+    .expect("canonical object probe");
+    vec![ramp(2, 3), ramp(3, 3), ramp(3, 4), objects]
+}
+
+/// The word's ACTION ORBIT: blake3 over its outputs on the canonical
+/// probe family. Total — an op that cannot act on a probe (dimension
+/// or content mismatch) contributes the untouched probe, so partial
+/// domains still fingerprint deterministically.
+pub fn word_orbit(word: &[Op]) -> [u8; 32] {
+    let mut hasher = blake3::Hasher::new();
+    hasher.update(b"netstratum.solver.word-orbit.v1");
+    for probe in probes() {
+        let mut grid = probe;
+        for op in word {
+            grid = op.apply(&grid);
+        }
+        hasher.update(&(grid.rows as u32).to_le_bytes());
+        hasher.update(&(grid.cols as u32).to_le_bytes());
+        hasher.update(&grid.cells);
+    }
+    *hasher.finalize().as_bytes()
+}
+
+/// The standing letters' orbits — the single-op fingerprints of a
+/// task's own sweep vocabulary. A macro whose action equals ANY single
+/// letter is a re-spelling, not a word.
+pub fn standing_orbits(vocabulary: &[Op]) -> Vec<[u8; 32]> {
+    vocabulary
+        .iter()
+        .map(|op| word_orbit(std::slice::from_ref(op)))
+        .collect()
+}
+
+/// GATES 1 + 2 on one candidate: a program that closed `cited` at
+/// depth ≥ 2, against this line's library and the standing letters.
+/// Returns the candidate's orbit if it may seek confirmation; `None`
+/// names no fault — most compositions are re-spellings, lawfully.
+pub fn consider(
+    word: &[Op],
+    library: &Library,
+    standing: &[[u8; 32]],
+) -> Option<[u8; 32]> {
+    if word.len() < 2 {
+        return None; // a single letter is already in the alphabet
+    }
+    let orbit = word_orbit(word);
+    if library.holds(&orbit) || standing.contains(&orbit) {
+        return None; // gate 1 — a re-spelling never re-mints
+    }
+    Some(orbit)
+}
+
+/// GATE 4's count: the rung ladder's own promote number, derived from
+/// the same law (three confirms promote), never a fresh dial.
+pub const CONFIRMS_TO_MINT: usize = 3;
+
+/// **THE PRE-REACH** — the library read before the sweep: each minted
+/// word tried whole, as a depth-1 letter. A hit returns the EXPANSION
+/// (the certificate's form); the judge sees only letters it already
+/// knows. The sweep runs unchanged behind it, so nothing previously
+/// reachable is lost and the enumeration order of the old search is
+/// untouched (same first match for everything the library misses).
+pub fn pre_reach(
+    task: &solver_verify::loader::Task,
+    library: &Library,
+) -> Option<Vec<Op>> {
+    if task.train.is_empty() {
+        return None; // the vacuous-solve refusal, upheld here too
+    }
+    for word in library.words() {
+        let closes = task.train.iter().all(|pair| {
+            let mut grid = pair.input.clone();
+            for op in &word.expansion {
+                grid = op.apply(&grid);
+            }
+            grid == pair.output
+        });
+        if closes {
+            return Some(word.expansion.clone());
+        }
+    }
+    None
+}

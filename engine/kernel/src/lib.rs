@@ -1308,6 +1308,11 @@ fn covered(event: &ClosureEvent) -> bool {
         // cap, metered postage) are checked there against the receipt's
         // own seed and covering. BY HAND, as ever.
         | E::ParcelConveyed { .. }
+        // NOVELTY-GATE (tag 166) — banked-neutral: a minted solver
+        // word is identity vocabulary, never matter; the mints it
+        // later enables are judged at tag 86 by verify_work as ever.
+        // {I2 containment, I3 exactness} complete it. BY HAND.
+        | E::SolverWordMinted { .. }
         // E3.9 (tag 165) — banked-neutral: the allow-list annex
         // re-rules WHICH matter may cross the pair and moves nothing
         // by itself; the haul it later refuses or admits is the
@@ -2338,6 +2343,9 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // move it: the deed carries a definition; the tick carries the
         // consequence.
         | E::VocabularyMinted { .. }
+        // NOVELTY-GATE (tag 166): a solver word is a LINE's own
+        // instrument — identity vocabulary in the axis mint's class.
+        | E::SolverWordMinted { .. }
         // P2 (tag 103): a chartered parameter is a DEFINITION the
         // world's rules read, exactly as a minted vocabulary entry is.
         | E::ParameterChartered { .. }
@@ -2496,6 +2504,9 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // the vocabulary, which is the progenitor's own office
         // (12_UNION ruling 4: *create new spaces*).
         | E::VocabularyMinted { .. }
+        // NOVELTY-GATE: a solver-word mint extends what the LINE can
+        // reach — the same founding class.
+        | E::SolverWordMinted { .. }
         // P2 (tag 103): chartering a parameter re-rules the board —
         // Build-class, the progenitor's own office.
         | E::ParameterChartered { .. }

@@ -249,6 +249,45 @@ impl World {
             _ => false,
         }
     }
+    /// **NOVELTY-GATE (tag 166, 38 §4)** — mint a solver WORD into this
+    /// line's own library. Build scope (the mint re-rules what this
+    /// line can REACH, the founding class). The gates that make the
+    /// candidate lawful (unique orbit · productive · verifier-conserved
+    /// · three confirms) run prover-side in `solver::mint`; this door
+    /// holds the CHAIN's share: an orbit already receipted refuses (a
+    /// re-spelling can never re-mint — the fold's own idempotence), an
+    /// empty expansion or short confirmation refuses (nothing enters
+    /// the library unearned).
+    pub fn mint_solver_word_as(
+        &mut self,
+        actor: u64,
+        orbit: [u8; 32],
+        expansion: Vec<u8>,
+        cited: Vec<[u8; 32]>,
+    ) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if expansion.is_empty() {
+            return Err(ActionRefused::SolverWordEmpty);
+        }
+        if cited.len() < 3 {
+            return Err(ActionRefused::SolverWordUnconfirmed { confirms: cited.len() as u8 });
+        }
+        let known = self.chronicle.receipts().iter().any(|receipt| {
+            matches!(
+                &receipt.event,
+                ClosureEvent::SolverWordMinted { orbit: held, .. } if *held == orbit
+            )
+        });
+        if known {
+            return Err(ActionRefused::SolverWordKnown { orbit });
+        }
+        self.close(
+            ClosureEvent::SolverWordMinted { orbit, expansion, cited },
+            actor,
+        );
+        Ok(())
+    }
+
     /// PRACTICE-1 — adopt a discipline: one benefit, one friction,
     /// bound by receipt (the derived creed never binds; the practice
     /// does). Build scope. The Overdrive (5) takes only the tempered —

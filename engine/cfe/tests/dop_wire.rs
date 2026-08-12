@@ -152,6 +152,12 @@ fn events_round_trip_through_their_wire_records() {
             want: cfe::dop::Cargo::Resource(Resource::Iron),
             want_amount: ratio(4, 1),
         },
+        // NOVELTY-GATE (tag 166): orbit ‖ cited ‖ opaque expansion.
+        ClosureEvent::SolverWordMinted {
+            orbit: [7u8; 32],
+            expansion: vec![2, 0, 1, 4],
+            cited: vec![[1u8; 32], [2u8; 32], [3u8; 32]],
+        },
         ClosureEvent::OfferCleared { offer: 7, deal: 100 },
         ClosureEvent::GaugeShiftedAt { grade: 2, gauge: ratio(2, 3) },
         ClosureEvent::InstrumentForged { orb_id: 4, tech_hash: [3u8; 32], grade: 3 },

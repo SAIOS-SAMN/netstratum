@@ -156,6 +156,10 @@ impl Replayer {
             element_allowlists,
         } = &mut self.state;
     match &receipt.event {
+        // NOVELTY-GATE (tag 166): the solver library is a FOLD of
+        // these receipts (`vocabulary::solver_words`) — no committed
+        // field moves, so replay carries nothing for it.
+        ClosureEvent::SolverWordMinted { .. } => {}
         // BOOK-1 (19_LENS §16) — the open registry rebuilds from
         // receipts alone, like every other committed ledger here.
         // LIT-1 — the literature rebuilds from receipts alone.

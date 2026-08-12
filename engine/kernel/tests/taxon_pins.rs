@@ -402,6 +402,8 @@ fn every_deed() -> Vec<ClosureEvent> {
         E::TreatyStruck { deal: 1, partner: "far".into(), broken: false },
         // E3.9: the element allow-list annex (tag 165).
         E::TreatyElementsAllowed { deal: 1, partner: "far".into(), elements: vec![bytes] },
+        // NOVELTY-GATE: the solver-word mint (tag 166).
+        E::SolverWordMinted { orbit: bytes, expansion: vec![1, 0, 1], cited: vec![bytes] },
     ]
 }
 
@@ -423,7 +425,7 @@ fn coverage_is_total_the_sealed_default_is_unreachable() {
     // (112 -> 113); the tag registry in `dop.rs` is the other place
     // that must move.
     let deeds = every_deed();
-    assert_eq!(deeds.len(), 113, "one instance of every ClosureEvent variant");
+    assert_eq!(deeds.len(), 114, "one instance of every ClosureEvent variant");
     let state = seated();
     for event in deeds {
         let verdict = admits(&state, &state, &step(event.clone(), SOVEREIGN));

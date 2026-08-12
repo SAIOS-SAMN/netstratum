@@ -282,6 +282,22 @@ fn put_program(program: &Program, out: &mut Vec<u8>) -> Option<()> {
     Some(())
 }
 
+/// **THE ONE PROGRAM ENCODING, exported** (NOVELTY-GATE, task #13) —
+/// a minted word's expansion rides receipts as opaque bytes, and those
+/// bytes must be THIS wire form, never a second table that drifts.
+/// Round-trips with [`program_from_bytes`]; trailing bytes refuse.
+pub fn program_bytes(program: &Program) -> Option<Vec<u8>> {
+    let mut out = Vec::new();
+    put_program(program, &mut out)?;
+    Some(out)
+}
+
+pub fn program_from_bytes(bytes: &[u8]) -> Option<Program> {
+    let mut reader = Reader { bytes, at: 0 };
+    let program = reader.program()?;
+    (reader.at == bytes.len()).then_some(program)
+}
+
 fn put_volume(v: &Volume, out: &mut Vec<u8>) -> Option<()> {
     put_u16(v.depth(), out)?;
     for layer in v.layers() {

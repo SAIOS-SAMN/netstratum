@@ -171,6 +171,14 @@ pub enum ActionRefused {
     /// trade treaty with this partner carries that deal, so there is
     /// nothing for the list to ride.
     AllowListNeedsTrade { deal: u64 },
+    /// NOVELTY-GATE (38 §4) — this orbit already stands in the line's
+    /// library: a re-spelling can never re-mint.
+    SolverWordKnown { orbit: [u8; 32] },
+    /// NOVELTY-GATE — a word with no expansion spells nothing.
+    SolverWordEmpty,
+    /// NOVELTY-GATE — fewer than the three confirming closes the
+    /// promote law demands; nothing enters the library unearned.
+    SolverWordUnconfirmed { confirms: u8 },
     /// ZONE-VOCABULARY (#41) — no zone-axis entry in the FOLD carries
     /// this code. A fact of the chain, not a shape: what the fold holds
     /// grows by receipt, so this can never move to a door (the

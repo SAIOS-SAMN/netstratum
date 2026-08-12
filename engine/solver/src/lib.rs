@@ -21,6 +21,7 @@
 //!   not a solution). Finding is search; checking is O(program length).
 
 pub mod derive;
+pub mod mint;
 pub mod need;
 pub mod search;
 pub mod nsearch;

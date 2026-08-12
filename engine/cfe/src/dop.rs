@@ -357,8 +357,13 @@
 //!    165  ClosureEvent::TreatyElementsAllowed (E3.9 — element allow-list
 //!         annexed to a standing trade pact; crossings refuse ids outside
 //!         the pair's union while any list lives.)
-//!    Phase-5 claim ledger: next free **166** (163–164 ElementWant,
-//!    165 TreatyElementsAllowed).
+//!    166  ClosureEvent::SolverWordMinted (NOVELTY-GATE, 38 §4 — a line's
+//!         minted solver word: action orbit ‖ opaque expansion (the ONE
+//!         program wire form) ‖ three confirming task digests. The
+//!         library is a FOLD of these receipts; certificates carry the
+//!         expansion, so the judge's wire never moves.)
+//!    Phase-5 claim ledger: next free **167** (163–164 ElementWant,
+//!    165 TreatyElementsAllowed, 166 SolverWordMinted).
 //!    Seated science labs. E-MKT-1 (2026-08-10): tag **49** OfferPosted
 //!    wire extended in place (Resource 1..=7; Element = 0 ‖ id[32]).
 //!    E3.7 (2026-08-10): tags **163–164** ElementWantStruck/Relieved.
@@ -2512,6 +2517,20 @@ pub enum ClosureEvent {
         partner: String,
         elements: Vec<[u8; 32]>,
     },
+    /// **NOVELTY-GATE (tag 166, 38_COGNITION_CONVERGENCE §4)** — a line
+    /// mints a solver WORD into its own library: `orbit` is the word's
+    /// action fingerprint (a re-spelling can never re-mint), `expansion`
+    /// is the word spelled in the ONE program wire form (opaque here —
+    /// the solver owns the encoding, the opaque-payload law), and
+    /// `cited` are the three distinct task digests that confirmed it
+    /// (the rung ladder's own promote count). The library is a FOLD of
+    /// these receipts — no committed field, no codec run; certificates
+    /// always carry the expansion, so tag 86's wire never moves.
+    SolverWordMinted {
+        orbit: [u8; 32],
+        expansion: Vec<u8>,
+        cited: Vec<[u8; 32]>,
+    },
     /// **ELEMENT-CHEMISTRY (tag 104, #37) — MATTER BONDS.** The
     /// almanac's first consumer: a set of banked elements whose lanes
     /// saturate bonds into a GEM, each member spending its lane's
@@ -3535,6 +3554,17 @@ impl ClosureEvent {
                 }
                 value.extend_from_slice(partner.as_bytes());
                 tlv::put(165, &value, &mut out);
+            }
+            Self::SolverWordMinted { orbit, expansion, cited } => {
+                // orbit[32] ‖ cited count u8 ‖ count × digest[32] ‖
+                // expansion (rest, opaque).
+                let mut value = orbit.to_vec();
+                value.push(cited.len() as u8);
+                for digest in cited {
+                    value.extend_from_slice(digest);
+                }
+                value.extend_from_slice(expansion);
+                tlv::put(166, &value, &mut out);
             }
             Self::GemCompounded { orb_id, members, gem } => {
                 // orb ‖ gem ‖ members — the member count is the
@@ -4768,6 +4798,19 @@ impl ClosureEvent {
                 }
                 let partner = String::from_utf8(value.get(at..)?.to_vec()).ok()?;
                 Some(Self::TreatyElementsAllowed { deal, partner, elements })
+            }
+            166 => {
+                let orbit: [u8; 32] = value.get(..32)?.try_into().ok()?;
+                let count = *value.get(32)? as usize;
+                let mut at = 33usize;
+                let mut cited = Vec::with_capacity(count);
+                for _ in 0..count {
+                    let digest: [u8; 32] = value.get(at..at + 32)?.try_into().ok()?;
+                    at += 32;
+                    cited.push(digest);
+                }
+                let expansion = value.get(at..)?.to_vec();
+                Some(Self::SolverWordMinted { orbit, expansion, cited })
             }
             104 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

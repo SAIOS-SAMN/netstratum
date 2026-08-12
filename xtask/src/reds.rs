@@ -15,10 +15,14 @@ pub const KNOWN_REDS: &[(&str, &str)] = &[
     ("mint_loop_pins", "task #10 — judge refusals reached a chronicle"),
     ("offer_pins", "task #10 — famine-ask price cross fails post-arc"),
     ("polity_therm_pins", "task #10 — Frost sink charter count moved"),
-    ("incursion_pins", "task #10 — undiagnosed (baseline sweep)"),
-    ("pen_pins", "task #10 — undiagnosed (baseline sweep)"),
     ("recurrence_guard", "task #10 — undiagnosed (baseline sweep)"),
     ("resume_pins", "task #10 — undiagnosed (baseline sweep)"),
     ("roster_claim_pins", "task #10 — undiagnosed (baseline sweep)"),
-    ("world_tech_arcs", "task #10 — undiagnosed (baseline sweep)"),
+    // Cured 2026-08-12 (the gate's own reading): incursion_pins ·
+    // pen_pins · world_tech_arcs — removed per the cured rule.
+    // Recovered 2026-08-12: present in the recorded baseline run; the
+    // first ledger extraction's grep window missed them.
+    ("vertical_axis_pins", "task #10 — undiagnosed (baseline sweep)"),
+    ("ring_derivation_pins", "task #10 — undiagnosed (baseline sweep)"),
+    ("arbor_pins", "task #10 — undiagnosed (baseline sweep)"),
 ];

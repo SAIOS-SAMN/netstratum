@@ -7224,6 +7224,20 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
             style.strong("trade treaty"),
             style.strong(&deal.to_string())
         ),
+        ActionRefused::SolverWordKnown { orbit } => format!(
+            "the word-orbit {} already stands in this line's library — a re-spelling never \
+             re-mints",
+            style.strong(&hex(orbit)[..8])
+        ),
+        ActionRefused::SolverWordEmpty => {
+            "a word with no expansion spells nothing — nothing enters the library unearned"
+                .to_string()
+        }
+        ActionRefused::SolverWordUnconfirmed { confirms } => format!(
+            "{confirms} confirming close(s) — the promote law asks {} distinct tasks before a \
+             word mints",
+            style.strong("three")
+        ),
         ActionRefused::MatterDoesNotBond => format!(
             "this matter does not BOND — a set compounds when every member shares the geometry \
              and the phase, the count equals the geometry's arity, and the binds saturate. \
@@ -8481,6 +8495,11 @@ fn chronicle(world: &World, style: &Style) {
                 "⚑ the pact with {} is FENCED to {} — only enumerated matter crosses",
                 style.strong(partner),
                 style.strong(&format!("{} element id(s)", elements.len()))
+            ),
+            cfe::dop::ClosureEvent::SolverWordMinted { orbit, cited, .. } => format!(
+                "◈ a WORD enters the library — orbit {} confirmed by {} tasks; the language grew",
+                style.strong(&hex(orbit)[..8]),
+                style.strong(&cited.len().to_string())
             ),
             cfe::dop::ClosureEvent::GemCompounded { members, gem, .. } => format!(
                 "◈ {} bond into {} — the lanes saturate and the matter holds",
