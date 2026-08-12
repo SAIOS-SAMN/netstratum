@@ -99,7 +99,11 @@ fn the_spine_walks_and_reloads_whole() {
 
     let genesis = arbor.extend(coord(0), &bytes_a, None).expect("genesis").clone();
     assert_eq!(genesis.parent, [0u8; 32], "genesis is parentless");
-    assert_eq!(genesis.schema, codec::SCHEMA_V5, "the record repeats the blob's form");
+    // The record repeats the BLOB'S OWN leading byte — read against
+    // the blob, not a frozen version constant (re-pinned 2026-08-12:
+    // the codec is at v19 now, and every schema bump since v5 broke a
+    // hardcoded assertion; the LAW is "the record echoes the blob").
+    assert_eq!(genesis.schema, bytes_a[0], "the record repeats the blob's form");
     assert_eq!(genesis.kernel, kernel::VERSION);
     assert!(!genesis.judged, "genesis is honestly unjudged");
 
@@ -305,8 +309,9 @@ fn the_record_speaks_the_blobs_schema() {
     );
     assert_eq!(
         genesis.schema,
-        codec::SCHEMA_V5,
-        "the codec emits v5 today — #42 appended the standing pacts"
+        codec::SCHEMA_V19,
+        "the codec emits v19 today — E3.9 appended element_allowlists \
+         (a deliberate version tripwire: bump this WITH the codec)"
     );
 }
 
