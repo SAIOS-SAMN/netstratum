@@ -96,7 +96,7 @@ pub use cog_cyb::{CogIntegrity, CybIntegrity};
 pub use espionage::EspionageIntegrity;
 pub use deep_rails::DeepRailStatus;
 
-pub use replay::replay;
+pub use replay::{replay, Replayer};
 pub use fleet::hull_voice;
 pub use state::{
     AbsorptionDebt, Bond, Committed, Council, Forward, Genesis, Leap, Offer, Prospected,
