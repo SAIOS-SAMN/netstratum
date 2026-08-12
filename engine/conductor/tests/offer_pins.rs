@@ -22,6 +22,60 @@ fn scratch(name: &str) -> PathBuf {
     dir
 }
 
+/// FLEET-1 staging (ratified 2026-08-12): Phase-2 gives auto-sited
+/// worlds distinct orbital phases, so even a chart-distance-0 clear
+/// runs positive melt and needs hull capacity. A grade-0 hauler adds
+/// capacity without arithmetic drift (hull_eta = 0); it stages at
+/// genesis, inside the 34 balance gate's bootstrap window.
+fn equip_hauler(world: &mut cfe::world::World) {
+    world.zone(40, ZoneKind::ShipYard).expect("yard");
+    world
+        .salvage_scrap(cfe::world::FIRST_ORB, cfe::dop::positive(4, 1))
+        .expect("scrap");
+    world
+        .mint_hull(cfe::world::FIRST_ORB, cfe::dop::HullRole::Hauler, 0)
+        .expect("hauler");
+    // The hull outlives its yard; razing it spares the starvation
+    // fixtures 200 ticks of yard upkeep that would distort the very
+    // famine dynamics under test.
+    world
+        .raze_as(cfe::world::SOVEREIGN, cfe::world::FIRST_ORB, 40)
+        .expect("yard razed");
+}
+
+/// Constructed staging (the realignment pattern): a warrant mints the
+/// stake the fixture's arithmetic needs, receipted — the founding kit
+/// cannot fund both the hauler and the fixture's zones, and this pin's
+/// charter is the MARKET rescue, not the bootstrap economy.
+fn stake(world: &mut cfe::world::World, resource: Resource, amount: i64) {
+    struct TestWarrant;
+    impl cfe::world::MintWarrant for TestWarrant {
+        fn earns(&self, _work: &[u8]) -> Option<cfe::ratio::Ratio> {
+            Some(ratio(1_000, 1))
+        }
+        fn admits(
+            &self,
+            _prior: &cfe::world::Committed,
+            _next: &cfe::world::Committed,
+            _event: &ClosureEvent,
+            _actor: u64,
+            _stamp: u64,
+        ) -> bool {
+            true
+        }
+    }
+    world
+        .mint_discovery_as(
+            cfe::world::SOVEREIGN,
+            cfe::world::FIRST_ORB,
+            resource,
+            cfe::dop::NonNegative::new(ratio(amount, 1)).expect("nn"),
+            vec![1u8; 32],
+            &TestWarrant,
+        )
+        .expect("the warrant stakes the fixture");
+}
+
 fn seat(sigil: &str, star: StarClass, albedo: (i64, i64), orbit: (i64, i64)) -> PolitySpec {
     PolitySpec {
         civilization: Civilization {
@@ -60,6 +114,10 @@ fn the_crossing_relieves_the_freeze() {
         seat("embermarket", StarClass::G, (1, 2), (1, 2)), &registry, &book);
     let mut frost = Polity::genesis(
         seat("rimemarket", StarClass::M, (0, 1), (1, 1)), &registry, &book);
+    equip_hauler(&mut furnace.world);
+    equip_hauler(&mut frost.world);
+    // The hauler's salvage spent the iron the shell needs.
+    stake(&mut furnace.world, Resource::Iron, 4);
 
     // The Furnace banks a surplus: extractor+habitat sustain, a shell
     // encases the overflow into joules, collected each year.
@@ -144,6 +202,13 @@ fn any_famine_can_ask_the_market() {
         seat("lodemarket", StarClass::G, (1, 4), (1, 1)), &registry, &book);
     let mut grower = Polity::genesis(
         seat("mossmarket", StarClass::G, (1, 4), (1, 1)), &registry, &book);
+    equip_hauler(&mut miner.world);
+    equip_hauler(&mut grower.world);
+    // KNOWN RED (ledgered 2026-08-12, task #10): the crossing below
+    // no longer clears — the staging restores capacity but the steep
+    // famine bids' price cross fails under the post-arc stocks. The
+    // freeze pin proves the rescue law; this one still owes its
+    // diagnosis.
 
     // The miner extracts only (iron banks, biomass drains); the
     // grower inhabits only (biomass banks, iron drains).
