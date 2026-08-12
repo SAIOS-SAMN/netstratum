@@ -888,8 +888,9 @@ pinning the minting branch, so the polarity is held by a test and not by
 prose.**~~ **PAID 2026-08-12 (task #19):** `FoldReading::mints_residue()`
 names the polarity in code — only `TorsionVeto(SignaturesDiffer)`
 (proven genuine difference) mints; a `GaugeFold` and every unproven
-veto mint nothing. Held by `fold_pins::the_minting_branch_is_proven_
-difference`; a comment can never flip it again.
+veto mint nothing. Held by the `fold_pins` witness
+`the_minting_branch_is_proven_difference`; a comment can never flip it
+again.
 
 **MESH-LANE STATUS (task #19, 2026-08-12).** Of §8a/§8b's remainder:
 the polarity witness is PAID (above); **S1 is verified SAFE** — the
