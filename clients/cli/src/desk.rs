@@ -829,7 +829,7 @@ fn render_diplo(style: Style, home: &World) -> Vec<String> {
     }
     lines.push(format!(
         "  {}",
-        style.hint("renounce: treaty renounce <deal> <world>  ·  help diplo")
+        style.hint("renounce: treaty renounce <deal> <world>  ·  fence: treaty elements <deal> <world> <id>...  ·  help diplo")
     ));
     let _ = TreatyKind::Trade;
     lines

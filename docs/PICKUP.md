@@ -59,8 +59,8 @@ architecture** closed. **Next phase: E3.6 E-MKT-1** (element market cargo).
 | **Tip** | `2834d4c` (architecture: JSON is not a format the system speaks) |
 | Branch | **`main`** |
 | Kernel | **0.37.0** (next free minor **38**) |
-| Next free claim tag | **163** (E-MKT may claim if wire grows) |
-| Codec | **SCHEMA_V17** (element-cargo offers may need **V18**) |
+| Next free claim tag | **166** (163–164 ElementWant · 165 TreatyElementsAllowed) |
+| Codec | **SCHEMA_V19** (v18 element_wants · v19 element_allowlists; v18's bump had landed unratified — codec_gate pins ratified at v19) |
 | Class / clade | **13** / **345** (u16 open) |
 | CLI roots | bench · intel · trade · diplomatic · **polity** (dual law all five) |
 | **Authority** | **`chronicle.tlv` + `state.tlv`** · cards **`.civ` / `.card` / `.dir` / `.sol`** — JSON is not architecture (`docs/JSON_DISPLAY_ONLY.md`) |
@@ -119,7 +119,7 @@ ruins   — closed archive history (P8.4)
 | **STAR-ENDOW-1** | ~~Star-scaled kit~~ **LANDED** | `star_endowment` on commission · orbit band gift on site |
 | **E3.7** | ~~WANT-1 element ids~~ **LANDED** | tags 163–164 · element_wants · market demand |
 | **E3.8** | ~~Observer routes/refineries~~ **LANDED** | `observer routes` · `observer refineries` · chronicle/state TLV |
-| **E3.9 ★** | Treaty allow-lists for element ids | next |
+| **E3.9** | ~~Treaty allow-lists~~ **LANDED** (2026-08-12) | tag 165 · `element_allowlists` · SCHEMA_V19 · `treaty elements` CLI · 10 pins |
 | **I5.x** | SHARE/NOTE/FUT/PERP lifecycle residual | Wave 5 |
 | Court | Rename Earth-culture line names | operator only |
 | Deep deeds | More hub leaves still status+verb | incremental |
@@ -152,7 +152,7 @@ touches element diversity.
 | **E3.6d** | CLI `trade` / bench surface for element offer (if needed) | smoke line |
 | **E3.7** | WANT-1 element ids | **LANDED** |
 | **E3.8** | Observer routes / refineries | **LANDED** |
-| **E3.9** | Treaty allow-lists for element ids | next |
+| **E3.9** | Treaty allow-lists for element ids | **LANDED** (2026-08-12) |
 
 **Touch map (expected):**
 

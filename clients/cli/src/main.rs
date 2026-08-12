@@ -6220,6 +6220,62 @@ fn treaty_command(world: &mut World, mut words: std::str::SplitWhitespace, style
         "war" => Some(TreatyKind::War),
         _ => None,
     }) else {
+        // E3.9: fence a standing trade pact to enumerated matter.
+        // treaty elements <deal> <world> <id-prefix>...
+        if let Some("elements") = kind_word {
+            let deal = words.next().and_then(|w| w.parse::<u64>().ok());
+            let partner = words.next().map(str::to_string);
+            let prefixes: Vec<String> = words.map(str::to_string).collect();
+            let (Some(deal), Some(partner)) = (deal, partner) else {
+                return println!(
+                    "{} usage: {} — prefixes resolve against banked stock and open veins",
+                    style.bad("✗"),
+                    style.strong("treaty elements <deal> <world> <id-prefix>...")
+                );
+            };
+            if prefixes.is_empty() {
+                return refuse(world, &ActionRefused::AllowListEmpty, style);
+            }
+            // Resolve each prefix against every id this book knows —
+            // banked stores and opened veins alike (a fence may name
+            // matter you hold or matter you mean to receive).
+            let known: Vec<[u8; 32]> = {
+                let committed = world.committed();
+                committed
+                    .orbs
+                    .iter()
+                    .flat_map(|orb| orb.elements.iter().map(|(id, _)| *id))
+                    .chain(committed.prospects.iter().map(|vein| vein.element))
+                    .collect()
+            };
+            let mut elements = Vec::new();
+            for prefix in &prefixes {
+                match known.iter().find(|id| hex_prefix(id).starts_with(prefix.as_str())) {
+                    Some(id) => {
+                        if !elements.contains(id) {
+                            elements.push(*id);
+                        }
+                    }
+                    None => {
+                        return println!(
+                            "{} no known element matches prefix {} — `elements` lists stock, \
+                             `prospects` the open veins",
+                            style.bad("✗"),
+                            style.strong(prefix)
+                        )
+                    }
+                }
+            }
+            return match world.treaty_elements(deal, &partner, elements.clone()) {
+                Ok(()) => println!(
+                    "{} the pact with {} is FENCED — {} element id(s) may cross; all else refuses",
+                    style.ok("⚑"),
+                    style.strong(&partner),
+                    style.strong(&elements.len().to_string())
+                ),
+                Err(refusal) => refuse(world, &refusal, style),
+            };
+        }
         if let Some("renounce") = kind_word {
             let deal = words.next().and_then(|w| w.parse::<u64>().ok());
             let partner = words.next();
@@ -6278,11 +6334,36 @@ fn treaty_command(world: &mut World, mut words: std::str::SplitWhitespace, style
                     .join(" ")
             );
         }
+        // E3.9: the fences — live allow-lists riding the pacts above.
+        let fences = &world.committed().element_allowlists;
+        for (deal, partner, elements) in fences {
+            if standing
+                .iter()
+                .any(|pact| pact.deal == *deal && pact.partner == *partner)
+            {
+                println!(
+                    "  {} deal {} with {} — {}",
+                    style.strong("fence"),
+                    deal,
+                    style.strong(partner),
+                    elements
+                        .iter()
+                        .map(hex_prefix)
+                        .collect::<Vec<_>>()
+                        .join(" ")
+                );
+            }
+        }
         if !standing.is_empty() {
             println!(
                 "  {} {}",
                 style.dim("↳"),
                 style.dim("treaty <trade|defense|peace|war> with <world> [deal <n>] [for <n>] [melt <p>/<q>]")
+            );
+            println!(
+                "  {} {}",
+                style.dim("↳"),
+                style.dim("treaty elements <deal> <world> <id-prefix>... — fence a trade pact to enumerated matter")
             );
         }
         return;
@@ -7117,6 +7198,24 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
              seal a {} to open the way again",
             style.strong(partner),
             style.strong("peace")
+        ),
+        ActionRefused::ElementNotAllowed { element, partner } => format!(
+            "element {} is NOT ON THE LIST — an allow-list stands with {} and only enumerated \
+             matter crosses a fenced pair. Annex the id with {} or trade what the pact names",
+            style.strong(&hex(element)[..8]),
+            style.strong(partner),
+            style.strong("treaty elements")
+        ),
+        ActionRefused::AllowListEmpty => format!(
+            "an allow-list that names NOTHING would wall all matter — barring everything is \
+             war's job, not a trade annex's. Enumerate at least one {}",
+            style.strong("element id")
+        ),
+        ActionRefused::AllowListNeedsTrade { deal } => format!(
+            "no live {} carries deal {} — an allow-list annexes a standing trade pact; seal \
+             the pact first, then fence it",
+            style.strong("trade treaty"),
+            style.strong(&deal.to_string())
         ),
         ActionRefused::MatterDoesNotBond => format!(
             "this matter does not BOND — a set compounds when every member shares the geometry \
@@ -8370,6 +8469,11 @@ fn chronicle(world: &World, style: &Style) {
                     true => style.bad("is BROKEN — the load posts to this world's own book"),
                     false => style.dim("is renounced"),
                 }
+            ),
+            cfe::dop::ClosureEvent::TreatyElementsAllowed { partner, elements, .. } => format!(
+                "⚑ the pact with {} is FENCED to {} — only enumerated matter crosses",
+                style.strong(partner),
+                style.strong(&format!("{} element id(s)", elements.len()))
             ),
             cfe::dop::ClosureEvent::GemCompounded { members, gem, .. } => format!(
                 "◈ {} bond into {} — the lanes saturate and the matter holds",

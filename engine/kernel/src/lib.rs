@@ -1308,6 +1308,12 @@ fn covered(event: &ClosureEvent) -> bool {
         // cap, metered postage) are checked there against the receipt's
         // own seed and covering. BY HAND, as ever.
         | E::ParcelConveyed { .. }
+        // E3.9 (tag 165) — banked-neutral: the allow-list annex
+        // re-rules WHICH matter may cross the pair and moves nothing
+        // by itself; the haul it later refuses or admits is the
+        // conserved deed. {I2 containment, I3 exactness} complete it,
+        // the treaty pair's own shape. BY HAND, as ever.
+        | E::TreatyElementsAllowed { .. }
         // THE COUNTER (tag 99) — banked-neutral: it re-terms a resting
         // offer and moves nothing; the fill that later clears is the
         // conserved deed. BY HAND: the compiler does not force this
@@ -2356,8 +2362,10 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::RogueFactionStruck { .. }
         // #42: a treaty is WORLD-layer. It is keyed on the pair, and
         // the pair is two worlds — not a line's identity (a pact
-        // outlives whoever signed it) and not one place.
+        // outlives whoever signed it) and not one place. E3.9's
+        // element annex rides the same key.
         | E::TreatySealed { .. } | E::TreatyStruck { .. }
+        | E::TreatyElementsAllowed { .. }
         | E::InstrumentForged { .. }
         | E::TechDiscovered { .. } | E::TechLicensed { .. } => Some(Layer::World),
 
@@ -2427,8 +2435,10 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::PracticeAdopted { .. } | E::PracticeReleased { .. } | E::ProspectStruck { .. }
         // #42: sealing or ending a pact re-rules what crossing this
         // pair costs — Build, the founding class of act, beside the
-        // chartered parameter it most resembles.
+        // chartered parameter it most resembles. E3.9's element annex
+        // re-rules what crossing this pair CARRIES — the same class.
         | E::TreatySealed { .. } | E::TreatyStruck { .. }
+        | E::TreatyElementsAllowed { .. }
         | E::ElderWarded { .. } | E::VeilDrawn { .. } | E::InstrumentForged { .. }
         | E::RouteChartered { .. } | E::ElementRouteChartered { .. }
         | E::OfferPosted { .. } | E::OfferCountered { .. } | E::LineSucceeded { .. }

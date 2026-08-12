@@ -2536,6 +2536,7 @@ fn diplo_local(world: &World, style: &Style) {
     }
     leaf(style, "treaty trade|defense|peace|war with <world>", "seal");
     leaf(style, "treaties · renounce <deal> <world>", "list / drop");
+    leaf(style, "treaty elements <deal> <world> <id>...", "fence a trade pact (E3.9)");
     leaf(style, "diplomatic stellar", "interstellar wall / haul / license");
     leaf(style, "bench diplomatic", "craft components first");
     foot_diplomatic(style, Some("local"));

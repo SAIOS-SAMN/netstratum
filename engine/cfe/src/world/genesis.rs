@@ -60,6 +60,7 @@ impl World {
             synth_mods: Vec::new(),
             skin_mods: Vec::new(),
             rogue_pressure: Vec::new(),
+            element_allowlists: Vec::new(),
         }
     }
     /// P2-PERSIST — resume a world from its chronicle: the committed
@@ -130,6 +131,7 @@ impl World {
             synth_mods: committed.synth_mods,
             skin_mods: committed.skin_mods,
             rogue_pressure: committed.rogue_pressure,
+            element_allowlists: committed.element_allowlists,
         }
     }
     /// ELEVATE-1 (12_UNION §6) — THE THREE-GATE GAUGE CLIMB, the

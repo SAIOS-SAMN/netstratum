@@ -400,6 +400,8 @@ fn every_deed() -> Vec<ClosureEvent> {
             term: 0,
         },
         E::TreatyStruck { deal: 1, partner: "far".into(), broken: false },
+        // E3.9: the element allow-list annex (tag 165).
+        E::TreatyElementsAllowed { deal: 1, partner: "far".into(), elements: vec![bytes] },
     ]
 }
 
@@ -416,11 +418,12 @@ fn coverage_is_total_the_sealed_default_is_unreachable() {
     // THE COUNT IS BY HAND and that is a known weakness: Rust cannot
     // count an enum's variants, so a new deed left out of
     // `every_deed()` passes this pin silently. #37's GemCompounded was
-    // added here deliberately when it landed (64 -> 65), and #42's two
-    // treaty deeds after it (65 -> 67); the tag registry in `dop.rs` is
-    // the other place that must move.
+    // added here deliberately when it landed (64 -> 65), #42's two
+    // treaty deeds after it (65 -> 67), and E3.9's allow-list annex
+    // (112 -> 113); the tag registry in `dop.rs` is the other place
+    // that must move.
     let deeds = every_deed();
-    assert_eq!(deeds.len(), 112, "one instance of every ClosureEvent variant");
+    assert_eq!(deeds.len(), 113, "one instance of every ClosureEvent variant");
     let state = seated();
     for event in deeds {
         let verdict = admits(&state, &state, &step(event.clone(), SOVEREIGN));

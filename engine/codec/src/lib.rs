@@ -106,6 +106,9 @@ pub const SCHEMA_V17: u8 = 17;
 /// **SCHEMA v18 — element_wants (E3.7 material WANT-1 targets).**
 pub const SCHEMA_V18: u8 = 18;
 
+/// **SCHEMA v19 — element_allowlists (E3.9 treaty element annexes).**
+pub const SCHEMA_V19: u8 = 19;
+
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
 }
@@ -126,7 +129,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V18];
+    let mut out = vec![SCHEMA_V19];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -507,6 +510,18 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         put_u64(&mut out, *orb);
         out.extend_from_slice(element);
     }
+    // SCHEMA v19 trailing: treaty element allow-lists (E3.9) —
+    // (deal, partner, ids), append order. The additive-trailing law:
+    // a v18 reader stops before this run and decodes a whole state.
+    put_u32(&mut out, committed.element_allowlists.len() as u32);
+    for (deal, partner, elements) in &committed.element_allowlists {
+        put_u64(&mut out, *deal);
+        put_text(&mut out, partner);
+        put_u32(&mut out, elements.len() as u32);
+        for element in elements {
+            out.extend_from_slice(element);
+        }
+    }
     out
 }
 
@@ -601,6 +616,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         && schema != SCHEMA_V16
         && schema != SCHEMA_V17
         && schema != SCHEMA_V18
+        && schema != SCHEMA_V19
     {
         return None;
     }
@@ -1114,6 +1130,19 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         }
     }
 
+    let mut element_allowlists = Vec::new();
+    if schema >= SCHEMA_V19 {
+        for _ in 0..take.u32()? {
+            let deal = take.u64()?;
+            let partner = take.text()?;
+            let mut elements = Vec::new();
+            for _ in 0..take.u32()? {
+                elements.push(take.array32()?);
+            }
+            element_allowlists.push((deal, partner, elements));
+        }
+    }
+
     if !take.done() {
         return None;
     }
@@ -1166,5 +1195,6 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         synth_mods,
         skin_mods,
         rogue_pressure,
+        element_allowlists,
     })
 }

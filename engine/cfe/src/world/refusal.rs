@@ -160,6 +160,17 @@ pub enum ActionRefused {
     /// war, and a pair at war exchanges nothing. The same shape as the
     /// elder's reverse shield, reached by politics instead of by age.
     AtWar { partner: String },
+    /// E3.9 — an element allow-list stands on this pair and this id is
+    /// not in the union: only enumerated matter crosses a fenced pair.
+    ElementNotAllowed { element: [u8; 32], partner: String },
+    /// E3.9 — an allow-list that enumerates nothing would wall all
+    /// matter, and barring everything is war's job, not a trade
+    /// annex's. Refused at the door (the PeaceBindsNothing shape).
+    AllowListEmpty,
+    /// E3.9 — an allow-list annexes a STANDING TRADE PACT: no live
+    /// trade treaty with this partner carries that deal, so there is
+    /// nothing for the list to ride.
+    AllowListNeedsTrade { deal: u64 },
     /// ZONE-VOCABULARY (#41) — no zone-axis entry in the FOLD carries
     /// this code. A fact of the chain, not a shape: what the fold holds
     /// grows by receipt, so this can never move to a door (the

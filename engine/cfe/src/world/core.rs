@@ -351,6 +351,7 @@ impl World {
             synth_mods: self.synth_mods.clone(),
             skin_mods: self.skin_mods.clone(),
             rogue_pressure: self.rogue_pressure.clone(),
+            element_allowlists: self.element_allowlists.clone(),
         }
     }
     /// ELEMENT-GRAMMAR-1 (14 §3) — the extraction closure: richness ×

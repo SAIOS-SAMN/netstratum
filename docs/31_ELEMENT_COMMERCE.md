@@ -183,7 +183,18 @@ Want / market:
   / `Relieved` (tags 163–164); `element_wants` on the World; NPC
   `market_step` bids Resource→Element for hungers.
 - MARKET-1 offers gain `cargo: Resource | ElementId` (**E3.6 landed**).
-- Treaties may enumerate allowed element ids (E3.9 open).
+- Treaties may enumerate allowed element ids (**E3.9 landed**,
+  2026-08-12): `TreatyElementsAllowed` (tag 165) annexes a STANDING
+  TRADE pact — while any live list stands on a pair, element hauls,
+  element-cargo clears and element-route charters between them refuse
+  ids outside the union of every live list (two-book, the war wall's
+  shape). No list ⇒ open matter unfenced. The annex dies with the
+  pact (strike / renounce / expiry); an empty list refuses
+  (`AllowListEmpty` — barring everything is war's job); a non-trade
+  deal refuses (`AllowListNeedsTrade`). Committed as
+  `element_allowlists` (SCHEMA_V19 trailing run); CLI
+  `treaty elements <deal> <world> <id-prefix>...`; witnesses
+  `treaty_allowlist_pins` (10).
 
 ---
 

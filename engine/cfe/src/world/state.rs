@@ -226,6 +226,14 @@ pub struct Committed {
     pub skin_mods: Vec<(u64, u8)>,
     /// LAB: rogue faction pressure per orb (synthetic matrix residual).
     pub rogue_pressure: Vec<(u64, u8)>,
+    /// E3.9: element allow-lists annexed to standing trade pacts —
+    /// (deal, partner, enumerated ids), append order. A list LIVES
+    /// only while a live trade treaty with that partner carries its
+    /// deal (liveness is a reading, never stored); it is pruned when
+    /// the pact is struck or renounced. While any live list stands on
+    /// a pair, element crossings between them refuse ids outside the
+    /// union of every live list; no list ⇒ open matter flows unfenced.
+    pub element_allowlists: Vec<(u64, String, Vec<[u8; 32]>)>,
 }
 
 /// G1 (04 §1): a civilization's sealed axes, as the world holds them.
@@ -353,6 +361,9 @@ pub struct World {
     pub(super) skin_mods: Vec<(u64, u8)>,
     /// LAB: rogue faction pressure.
     pub(super) rogue_pressure: Vec<(u64, u8)>,
+    /// E3.9: element allow-lists (replay of TreatyElementsAllowed;
+    /// pruned with the pact they ride).
+    pub(super) element_allowlists: Vec<(u64, String, Vec<[u8; 32]>)>,
 }
 
 /// PLANNER-1: what a licensed leap carries — the condition and name

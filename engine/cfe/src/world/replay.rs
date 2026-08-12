@@ -36,6 +36,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
     let mut routes: Vec<(u64, crate::dop::Unit)> = Vec::new();
     let mut element_routes: Vec<(u64, crate::dop::Unit, [u8; 32], u8)> = Vec::new();
     let mut treaties: Vec<crate::treaty::Treaty> = Vec::new();
+    let mut element_allowlists: Vec<(u64, String, Vec<[u8; 32]>)> = Vec::new();
     let mut warded: Option<bool> = None;
     let mut veiled = false;
     let mut taxon: Option<(u8, u16)> = None;
@@ -327,12 +328,24 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
             // the two definitions agree by construction.
             ClosureEvent::TreatyStruck { deal, partner, broken } => {
                 treaties.retain(|held| !(held.deal == *deal && held.partner == *partner));
+                // E3.9: the annex dies with the pact it rides — the
+                // verb prunes at renounce AND at displacement, and
+                // both paths receipt this strike, so one arm agrees
+                // with both.
+                element_allowlists
+                    .retain(|(held, other, _)| !(*held == *deal && other == partner));
                 if *broken {
                     let load = crate::dop::commensurate_weight(Resource::Iron);
                     if let Some(orb) = orbs.first_mut() {
                         orb.severance_load += load;
                     }
                 }
+            }
+            // E3.9: an element allow-list annexes its pact. The verb
+            // proved the trade treaty stood; replay reads, never
+            // re-judges (liveness is a reading over `treaties`).
+            ClosureEvent::TreatyElementsAllowed { deal, partner, elements } => {
+                element_allowlists.push((*deal, partner.clone(), elements.clone()));
             }
             ClosureEvent::IncursionStruck { .. } => {}
             ClosureEvent::ElderWarded {} => warded = Some(false),
@@ -1721,7 +1734,7 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
         perps, clear_depths, market_sealed_until, cascade_pressures, tamper_pressures,
         posture_disposition, posture_perception, posture_primary, intel_hashes, spy_marks,
         vault_stamp, chem_catalog, science_seats, clone_counts, synth_mods, skin_mods,
-        rogue_pressure,
+        rogue_pressure, element_allowlists,
     }
 }
 

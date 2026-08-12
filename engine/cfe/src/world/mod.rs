@@ -464,6 +464,15 @@ fn haul_element(
             partner: dst.name().to_string(),
         });
     }
+    // E3.9: a fenced pair passes enumerated matter only — either
+    // book's live allow-list bars the id (the war wall's two-book
+    // shape; each world's fence is its own committed law).
+    if src.element_barred(dst.name(), &element) || dst.element_barred(src.name(), &element) {
+        return Err(ActionRefused::ElementNotAllowed {
+            element,
+            partner: dst.name().to_string(),
+        });
+    }
     if !src.knows_its_sun() || !dst.knows_its_sun() {
         return Err(ActionRefused::Shielded {
             source_shielded: !src.knows_its_sun(),
@@ -552,6 +561,14 @@ pub fn charter_element_route(
 ) -> Result<(), ActionRefused> {
     if crate::dop::Rail::from_wire(rail).is_none() {
         return Err(ActionRefused::UnknownAxisValue { axis: 0, code: rail });
+    }
+    // E3.9: a lane specialized to a barred element cannot be
+    // chartered — the fence reads at the charter as at the haul.
+    if a.element_barred(b.name(), &element) || b.element_barred(a.name(), &element) {
+        return Err(ActionRefused::ElementNotAllowed {
+            element,
+            partner: b.name().to_string(),
+        });
     }
     if !a.knows_its_sun() || !b.knows_its_sun() {
         return Err(ActionRefused::Shielded {

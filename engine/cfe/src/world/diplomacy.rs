@@ -110,6 +110,9 @@ impl World {
                 let broken = kind == TreatyKind::War;
                 self.treaties
                     .retain(|other| !(other.deal == held.deal && other.partner == *partner));
+                // E3.9: the annex dies with the pact it rides.
+                self.element_allowlists
+                    .retain(|(deal, other, _)| !(*deal == held.deal && other == partner));
                 self.close(
                     ClosureEvent::TreatyStruck {
                         deal: held.deal,
@@ -153,6 +156,91 @@ impl World {
         Ok(())
     }
 
+    /// **E3.9 — ANNEX AN ELEMENT ALLOW-LIST to a standing trade pact.**
+    pub fn treaty_elements(
+        &mut self,
+        deal: u64,
+        partner: &str,
+        elements: Vec<[u8; 32]>,
+    ) -> Result<(), ActionRefused> {
+        self.treaty_elements_as(SOVEREIGN, deal, partner, elements)
+    }
+
+    /// The contained form. Build scope — the list re-rules what may
+    /// cross the pair, the same founding class of act as the pact it
+    /// rides.
+    ///
+    /// The list ANNEXES a live TRADE treaty (same deal, same partner):
+    /// trade is the only kind that binds goods — defense and peace
+    /// bind none, and war walls everything already. It dies with the
+    /// pact (strike, renounce, or expiry — liveness is read from the
+    /// treaty, never stored). Lists on one deal COMPOSE BY UNION,
+    /// append-only, like every additive receipt here. An empty list
+    /// refuses: barring all matter is war's job, not a trade annex's
+    /// (the PeaceBindsNothing shape).
+    pub fn treaty_elements_as(
+        &mut self,
+        actor: u64,
+        deal: u64,
+        partner: &str,
+        elements: Vec<[u8; 32]>,
+    ) -> Result<(), ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        if elements.is_empty() {
+            return Err(ActionRefused::AllowListEmpty);
+        }
+        let now = self.clock.now();
+        let rides = self.treaties.iter().any(|held| {
+            held.deal == deal
+                && held.partner == partner
+                && held.kind == TreatyKind::Trade
+                && !held.expired(now)
+        });
+        if !rides {
+            return Err(ActionRefused::AllowListNeedsTrade { deal });
+        }
+        self.element_allowlists
+            .push((deal, partner.to_string(), elements.clone()));
+        self.close(
+            ClosureEvent::TreatyElementsAllowed {
+                deal,
+                partner: partner.to_string(),
+                elements,
+            },
+            actor,
+        );
+        Ok(())
+    }
+
+    /// **E3.9 — IS THIS ELEMENT BARRED toward this partner?** The
+    /// reading every element crossing consults, on BOTH books (the
+    /// war wall's two-book shape). A list is LIVE only while the
+    /// trade treaty it rides stands; while any live list stands on
+    /// the pair, only the union of enumerated ids crosses. No live
+    /// list ⇒ nothing is barred — the fence exists only where a pair
+    /// co-signed one.
+    pub fn element_barred(&self, partner: &str, element: &[u8; 32]) -> bool {
+        let now = self.clock.now();
+        let live: Vec<&Vec<[u8; 32]>> = self
+            .element_allowlists
+            .iter()
+            .filter(|(deal, held, _)| {
+                held == partner
+                    && self.treaties.iter().any(|pact| {
+                        pact.deal == *deal
+                            && pact.partner == *held
+                            && pact.kind == TreatyKind::Trade
+                            && !pact.expired(now)
+                    })
+            })
+            .map(|(_, _, elements)| elements)
+            .collect();
+        if live.is_empty() {
+            return false;
+        }
+        !live.iter().any(|elements| elements.contains(element))
+    }
+
     /// **RENOUNCE THIS WORLD'S OWN LEG.** Not a breach: a pact this
     /// world sealed, this world may end. What it cannot do is end the
     /// PARTNER's leg — that book is not ours to write, which is what
@@ -177,6 +265,9 @@ impl World {
         }
         self.treaties
             .retain(|held| !(held.deal == deal && held.partner == partner));
+        // E3.9: the annex dies with the pact it rides.
+        self.element_allowlists
+            .retain(|(held, other, _)| !(*held == deal && other == partner));
         self.close(
             ClosureEvent::TreatyStruck {
                 deal,

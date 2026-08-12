@@ -354,10 +354,15 @@
 //!    160  ClosureEvent::LabCreated (LAB — dual ± creation; may explode.)
 //!    161  ClosureEvent::ScienceExploded (LAB — explosion residual slash.)
 //!    162  ClosureEvent::RogueFactionStruck (LAB — synthetic matrix residual.)
-//!    Phase-5 claim ledger: next free **165** (163–164 ElementWant).
+//!    165  ClosureEvent::TreatyElementsAllowed (E3.9 — element allow-list
+//!         annexed to a standing trade pact; crossings refuse ids outside
+//!         the pair's union while any list lives.)
+//!    Phase-5 claim ledger: next free **166** (163–164 ElementWant,
+//!    165 TreatyElementsAllowed).
 //!    Seated science labs. E-MKT-1 (2026-08-10): tag **49** OfferPosted
 //!    wire extended in place (Resource 1..=7; Element = 0 ‖ id[32]).
 //!    E3.7 (2026-08-10): tags **163–164** ElementWantStruck/Relieved.
+//!    E3.9 (2026-08-12): tag **165** TreatyElementsAllowed.
 //!         Orb TLV: 73 STAMP, 74 scrap. ZoneKind::ShipYard = 10.
 //!         (Historic free tags below top: 14, 15, 56, 57, 58, 64, 66,
 //!         83, 84, 87; 9 and 51 reserved; 65 retired forever.)
@@ -2481,6 +2486,19 @@ pub enum ClosureEvent {
     /// posts against whoever did it; one renounced by its own holder
     /// is not.
     TreatyStruck { deal: u64, partner: String, broken: bool },
+    /// **TREATIES (tag 165, E3.9) — THE ELEMENT ALLOW-LIST.** An annex
+    /// to a STANDING TRADE PACT (same deal, same partner): while any
+    /// live list stands on a pair, element crossings between them
+    /// refuse ids outside the union of every live list — enumerated
+    /// matter only. No list ⇒ open matter flows unfenced (today's
+    /// law). The list dies with the pact it rides (strike, renounce,
+    /// or expiry); it is never a wall of its own — an empty list
+    /// refuses at the door, because barring everything is war's job.
+    TreatyElementsAllowed {
+        deal: u64,
+        partner: String,
+        elements: Vec<[u8; 32]>,
+    },
     /// **ELEMENT-CHEMISTRY (tag 104, #37) — MATTER BONDS.** The
     /// almanac's first consumer: a set of banked elements whose lanes
     /// saturate bonds into a GEM, each member spending its lane's
@@ -3494,6 +3512,16 @@ impl ClosureEvent {
                 value.push(u8::from(*broken));
                 value.extend_from_slice(partner.as_bytes());
                 tlv::put(106, &value, &mut out);
+            }
+            Self::TreatyElementsAllowed { deal, partner, elements } => {
+                // deal ‖ count u16 ‖ count × id[32] ‖ partner (rest).
+                let mut value = deal.to_le_bytes().to_vec();
+                value.extend_from_slice(&(elements.len() as u16).to_le_bytes());
+                for element in elements {
+                    value.extend_from_slice(element);
+                }
+                value.extend_from_slice(partner.as_bytes());
+                tlv::put(165, &value, &mut out);
             }
             Self::GemCompounded { orb_id, members, gem } => {
                 // orb ‖ gem ‖ members — the member count is the
@@ -4714,6 +4742,19 @@ impl ClosureEvent {
                 let broken = *value.get(8)? != 0;
                 let partner = String::from_utf8(value.get(9..)?.to_vec()).ok()?;
                 Some(Self::TreatyStruck { deal, partner, broken })
+            }
+            165 => {
+                let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let count = u16::from_le_bytes(value.get(8..10)?.try_into().ok()?) as usize;
+                let mut at = 10usize;
+                let mut elements = Vec::with_capacity(count);
+                for _ in 0..count {
+                    let element: [u8; 32] = value.get(at..at + 32)?.try_into().ok()?;
+                    at += 32;
+                    elements.push(element);
+                }
+                let partner = String::from_utf8(value.get(at..)?.to_vec()).ok()?;
+                Some(Self::TreatyElementsAllowed { deal, partner, elements })
             }
             104 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
