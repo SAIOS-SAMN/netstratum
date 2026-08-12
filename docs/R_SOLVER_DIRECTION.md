@@ -5,6 +5,9 @@
 `/opt/ipsal-autic-v0.1/saios-arc`.
 **Status:** research directive. Closes the R1–R5 optimisation track and
 the 3a–3d search track with it.
+**2026-08-12:** the convergence-engine concept map is charter law at
+`38_COGNITION_CONVERGENCE.md` — perspective compounding (§5) is the
+ARC-AGI-2 device this file's geometry reading feeds into.
 
 ---
 
