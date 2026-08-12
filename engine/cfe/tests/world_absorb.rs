@@ -71,7 +71,13 @@ fn furnace_and_coldstore() -> (World, u64) {
 #[test]
 fn the_absorption_invariant_measures_across_two_orbs() {
     let (mut world, charted) = furnace_and_coldstore();
-    assert_eq!(banked(&world, charted, Resource::Sink), ratio(59_997, 10_000));
+    // 59997/10000 captured + the ORBIT-ENDOW-1 cryogenic band gift
+    // (2 sink at siting, c2242de) — re-derived 2026-08-12; the gift
+    // landed unratified behind the fail-fast blindness.
+    assert_eq!(
+        banked(&world, charted, Resource::Sink),
+        ratio(59_997, 10_000) + ratio(2, 1)
+    );
     assert_eq!(world.vent_pending_of(FIRST_ORB), ratio(1, 1));
     assert!(world.orb_by_id(FIRST_ORB).expect("orb").overheat);
     // The fixture's relief gift already posted both crisis books.
@@ -86,8 +92,11 @@ fn the_absorption_invariant_measures_across_two_orbs() {
 
     world.absorb(cfe::dop::between(FIRST_ORB, charted), cfe::dop::positive(1, 1)).expect("absorbs"); // @19
 
-    // sink_consumed = 1:
-    assert_eq!(banked(&world, charted, Resource::Sink), ratio(49_997, 10_000));
+    // sink_consumed = 1 (the band gift rides the bank unchanged):
+    assert_eq!(
+        banked(&world, charted, Resource::Sink),
+        ratio(49_997, 10_000) + ratio(2, 1)
+    );
     // vented_after_shed = 1, on the ABSORBER's ledger:
     assert_eq!(
         world.orb_by_id(charted).expect("orb").entropy_vented,

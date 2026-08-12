@@ -26,6 +26,39 @@ fn burning(pairs: u16) -> World {
         world.zone(pair, ZoneKind::Extractor).expect("zones");
         world.zone(8 + pair, ZoneKind::Habitat).expect("zones");
     }
+    // CONSTRUCTED RATIONS (realignment 2026-08-12): this pin's charter
+    // is the THERMAL tree — sustained overheat crystallizing nodes —
+    // and its "self-sustaining pairs" premise died when the taxon
+    // yield scales left the farm net-negative: the zones starved
+    // dormant, factory heat collapsed, and the world never overheated
+    // at all (measured: overheat=false through 301 ticks). A warrant
+    // mints the rations so heat is the only variable under test.
+    struct TestWarrant;
+    impl cfe::world::MintWarrant for TestWarrant {
+        fn earns(&self, _work: &[u8]) -> Option<cfe::ratio::Ratio> {
+            Some(ratio(1_000, 1))
+        }
+        fn admits(
+            &self,
+            _prior: &cfe::world::Committed,
+            _next: &cfe::world::Committed,
+            _event: &ClosureEvent,
+            _actor: u64,
+            _stamp: u64,
+        ) -> bool {
+            true
+        }
+    }
+    world
+        .mint_discovery_as(
+            cfe::world::SOVEREIGN,
+            FIRST_ORB,
+            cfe::dop::Resource::Biomass,
+            cfe::dop::NonNegative::new(ratio(1_000, 1)).expect("nn"),
+            vec![1u8; 32],
+            &TestWarrant,
+        )
+        .expect("the warrant stocks the rations");
     world
 }
 
