@@ -17,8 +17,31 @@ fn sunlit(name: &str) -> World {
     let mut world = World::new();
     world.found(name).expect("founds");
     world.commission_star(StarClass::G).expect("commissions");
-    world.site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None).expect("sites");
+    // EXPLICIT SHARED PHASE: these pins state melt-zero arithmetic
+    // (resting-price fills, exact conservation), and Phase-2 law gives
+    // auto-sited worlds distinct orbital phases — D_orbit > 0 even at
+    // chart distance 0, which melts fills and demands hull capacity.
+    // The pins pin the MARKET law, not the orbit law, so the fixture
+    // sits both worlds at one phase; the orbit law keeps its own pins.
+    let phase = || Some(cfe::dop::Slot::from_index(0));
     world
+        .site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), phase(), phase())
+        .expect("sites");
+    world
+}
+
+/// FLEET-1: a positive-melt haul needs hull capacity, so the
+/// melt-positive pins stage a grade-0 hauler on each book — capacity
+/// without arithmetic drift (`hull_eta(Hauler, 0) = 0`, so the melt
+/// the pin states is the melt that runs).
+fn equip_hauler(world: &mut World) {
+    world.zone(40, cfe::dop::ZoneKind::ShipYard).expect("yard");
+    world
+        .salvage_scrap(FIRST_ORB, positive(4, 1))
+        .expect("scrap");
+    world
+        .mint_hull(FIRST_ORB, cfe::dop::HullRole::Hauler, 0)
+        .expect("hauler");
 }
 
 /// Posting refuses typed; an unmatched offer RESTS in committed state
@@ -129,6 +152,8 @@ fn the_gap_melts_the_cargo_and_distance_walls() {
     // Clashing pair at spatial distance 6: melt = (6 + 1/2)/64 = 13/128.
     let mut c = sunlit("discord-c");
     let mut d = sunlit("discord-d");
+    equip_hauler(&mut c);
+    equip_hauler(&mut d);
     c.shift_gauge(ratio(1, 2));
     c.post_offer(FIRST_ORB, exchange(Resource::Iron, Resource::Biomass), positive(2, 1), positive(1, 1), 3)
         .expect("posts");
@@ -136,11 +161,20 @@ fn the_gap_melts_the_cargo_and_distance_walls() {
         .expect("posts");
     let d_iron = d.orb().unwrap().banked_amount(Resource::Iron);
     clear_trade(&mut c, 3, &mut d, 4, 20, ratio(6, 1)).expect("clears");
-    // d receives 2 × (1 − 13/128) = 115/64; the void took 13/64.
+    // THE COMPOSED CROSSING LAW (ratified 2026-08-12 — this pin's
+    // "exactly φ·D" predated P5-A and went red the day interdiction
+    // landed, unseen behind the fail-fast blindness):
+    //   after_melt   = 2 × (1 − 13/128)          = 115/64
+    //   interdicted  = after_melt × risk/2, risk = 3/16 uncovered
+    //                  (bare eighth + slow-ring half-eighth, no
+    //                  escort on the deal)        = 345/2048
+    //   delivered    = 115/64 − 345/2048         = 3335/2048
+    // Every term is receipted: melt in VoidShare, the residual in
+    // InterdictionStruck, and sent = delivered + void, exactly.
     assert_eq!(
         d.orb().unwrap().banked_amount(Resource::Iron) - d_iron,
-        ratio(115, 64),
-        "the void takes exactly φ·D of the cargo"
+        ratio(3335, 2048),
+        "the void takes φ·D and the uncovered convoy pays its residual"
     );
     let received = d.chronicle().receipts().iter().find_map(|r| match &r.event {
         ClosureEvent::ApertureReceived { resource: Resource::Iron, amount, .. } => {
@@ -148,7 +182,20 @@ fn the_gap_melts_the_cargo_and_distance_walls() {
         }
         _ => None,
     });
-    assert_eq!(received, Some(ratio(115, 64)), "the receipt speaks what LANDED");
+    assert_eq!(received, Some(ratio(3335, 2048)), "the receipt speaks what LANDED");
+    // P5-A: the interdiction residual is receipted on the SENDING
+    // book, wearing its risk.
+    let interdicted = c.chronicle().receipts().iter().find_map(|r| match &r.event {
+        ClosureEvent::InterdictionStruck { resource: Resource::Iron, amount, risk, .. } => {
+            Some((amount.clone(), risk.clone()))
+        }
+        _ => None,
+    });
+    assert_eq!(
+        interdicted,
+        Some((ratio(345, 2048), ratio(3, 16))),
+        "the convoy's loss is receipted, never silent"
+    );
     // THE CONFORM RULING: the void's share is a first-class receipt
     // on the receiving book — sent = received + void share; every
     // deal sums to zero under ONE rule, and the gate only sums.
@@ -156,9 +203,9 @@ fn the_gap_melts_the_cargo_and_distance_walls() {
         ClosureEvent::VoidShare { resource: Resource::Iron, amount, .. } => Some(amount.clone()),
         _ => None,
     });
-    assert_eq!(void_share, Some(ratio(13, 64)), "the void's share is receipted, never silent");
+    assert_eq!(void_share, Some(ratio(761, 2048)), "the void's share is receipted, never silent");
     assert_eq!(
-        ratio(115, 64) + ratio(13, 64),
+        ratio(3335, 2048) + ratio(761, 2048),
         ratio(2, 1),
         "sent = received + void share — zero-sum stays universal"
     );
@@ -218,25 +265,44 @@ fn no_crossing_no_movement() {
 fn the_lane_bends_the_melt_then_lapses() {
     use cfe::dop::ClosureEvent;
     use cfe::world::charter_route;
-    // Both partners pay for infrastructure: the smelting arc banks
-    // the charter's alloy (the world_industry staging).
+    // CONSTRUCTED STATE, not weather (realignment 2026-08-12): this
+    // pin's charter is the LANE law — the melt bend and the lapse —
+    // and it used to stage its alloy by simulating a 60-tick smelting
+    // economy, which broke every time any economic factor moved (the
+    // taxon yield scales left the farm net-zero and the 34 balance
+    // gate refused the hauler's salvage after the venting storm). The
+    // fixture now mints its inputs through a test warrant (the
+    // instrument_pins pattern) and stages the hauler inside the
+    // bootstrap window; the receipts still replay whole.
     let alloyed = |name: &str| {
         let mut world = sunlit(name);
-        world.zone(0, cfe::dop::ZoneKind::Extractor).expect("zones");
-        world.zone(1, cfe::dop::ZoneKind::Extractor).expect("zones");
-        world.zone(8, cfe::dop::ZoneKind::Habitat).expect("zones");
-        world.zone(9, cfe::dop::ZoneKind::Habitat).expect("zones");
-        for _ in 0..10 {
-            world.tick();
-        }
-        world.collect().expect("collects");
-        world.zone(16, cfe::dop::ZoneKind::Smelter).expect("the chain stands");
-        for tick in 1..=60 {
-            world.tick();
-            if tick % 10 == 0 {
-                let _ = world.collect();
+        equip_hauler(&mut world);
+        struct TestWarrant;
+        impl cfe::world::MintWarrant for TestWarrant {
+            fn earns(&self, work: &[u8]) -> Option<cfe::ratio::Ratio> {
+                Some(ratio(i64::from(work.first().copied().unwrap_or(1)), 1))
+            }
+            fn admits(
+                &self,
+                _prior: &cfe::world::Committed,
+                _next: &cfe::world::Committed,
+                _event: &ClosureEvent,
+                _actor: u64,
+                _stamp: u64,
+            ) -> bool {
+                true
             }
         }
+        world
+            .mint_discovery_as(
+                cfe::world::SOVEREIGN,
+                FIRST_ORB,
+                Resource::Alloy,
+                cfe::dop::NonNegative::new(ratio(8, 1)).expect("nn"),
+                vec![8u8; 32],
+                &TestWarrant,
+            )
+            .expect("the warrant banks the charter's alloy");
         world
     };
     let mut a = alloyed("waypoint-a");
@@ -250,7 +316,10 @@ fn the_lane_bends_the_melt_then_lapses() {
         "one charter per deal"
     );
     // Distance 16, no gap: raw melt 16/64 = 1/4; the lane halves it
-    // to 1/8 — delivered = 2 × 7/8 = 7/4.
+    // to 1/8 — after_melt = 2 × 7/8 = 7/4. P5-A then takes the
+    // uncovered convoy's residual (risk 3/16, half applied):
+    // delivered = 7/4 × (1 − 3/32) = 203/128 (ratified 2026-08-12 —
+    // the bare 7/4 predated interdiction).
     a.post_offer(FIRST_ORB, exchange(Resource::Iron, Resource::Biomass), positive(2, 1), positive(1, 1), 1)
         .expect("posts");
     b.post_offer(FIRST_ORB, exchange(Resource::Biomass, Resource::Iron), positive(1, 1), positive(2, 1), 2)
@@ -259,8 +328,8 @@ fn the_lane_bends_the_melt_then_lapses() {
     clear_trade(&mut a, 1, &mut b, 2, 50, ratio(16, 1)).expect("clears");
     assert_eq!(
         b.orb().unwrap().banked_amount(Resource::Iron) - b_iron,
-        ratio(7, 4),
-        "the lane bends the melt exactly"
+        ratio(203, 128),
+        "the lane bends the melt exactly; the convoy pays its residual"
     );
     // Starve b's lane: repeated maintenance draws drain the joule
     // bank until the lapse lands — the pair dies with either leg.
