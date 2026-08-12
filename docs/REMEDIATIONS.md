@@ -448,3 +448,38 @@ alongside this file.
 - **§8e's duplicate `constellation` key is CONFIRMED STILL LIVE** —
   `lens/src/render.rs:121` and `:204` both emit the key into the same
   object. `[READ]`
+
+---
+
+## R20 — THE DIAL DEBT, MAPPED (2026-08-12, kernel lane) `[MEASURED]`
+
+`tuned_constant_ratchet` is red on `main`: **170** tuned ratio
+literals against the **112** ceiling — 58 dials entered during the
+Wave-6..8/E3 arc without derivation. The ceiling does not rise by law.
+Measured per file (census parser identical to the ratchet's own):
+
+| dials | file | cluster character |
+|------:|------|-------------------|
+| 66 | `cfe/src/dop.rs` | zone economics · yields · refinement · endowments |
+| 37 | `cfe/src/vocabulary.rs` | practice/binding factors |
+| 20 | `conductor/src/lib.rs` | NPC policy thresholds |
+| 10 | `cfe/src/almanac/science.rs` | lab fees · utilities · risk |
+|  8 | `cfe/src/almanac/taxon_economy.rs` | mode/fit yield scales |
+|  7 | `cfe/src/parameter.rs` | chartered parameter seeds |
+| 22 | fifteen files, ≤ 4 each | long tail |
+
+**Sequencing (proposed, not begun):** (1) `parameter.rs` seeds —
+these are ALREADY the chartered-parameter mechanism's seed values;
+they likely convert to APPROVED-SEED or anchor citations by one
+operator word (the polities.rs precedent). (2) `taxon_economy.rs` +
+`vocabulary.rs` — balance choices; need either measured anchors from
+live-board play or an operator approval marker. (3) `dop.rs` — the
+big cluster; walk by family (zone costs · yields · refinement ·
+endowment), asking per family whether the number derives from a law
+already expressed elsewhere (call-not-copy) or needs a ruling.
+(4) conductor thresholds last — policy, not physics, and several are
+already named in BALANCE_NOTES.
+
+**The trap, named:** deriving numbers by fiat to make the count fall
+is laundering, which the census exists to bar. Each conversion needs
+its justification in the commit that lowers the ceiling.
