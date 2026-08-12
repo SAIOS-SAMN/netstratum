@@ -483,3 +483,24 @@ already named in BALANCE_NOTES.
 **The trap, named:** deriving numbers by fiat to make the count fall
 is laundering, which the census exists to bar. Each conversion needs
 its justification in the commit that lowers the ceiling.
+
+### R20 UPDATE (2026-08-12) — the parameter seeds sealed (7 retired)
+
+Task #3 advanced: the seven `parameter::seed` values (Encasement
+throughput, radiator base, joule leak, heating/zone, sink throughput,
+friction rate, veil toll) moved from the OPEN-DIAL census to the
+SEALED class. They earned it, provably: each is the epoch-0 value every
+pre-charter beat read, so editing one recomputes every old chronicle's
+heat — breaking SEAL B. Their lawful movement is a receipted
+`ParameterChartered` deed (P2, tag 103), never an edit. That is the
+SEALED-RATE property, not tuning.
+
+Live dial count **170 → 163**; sealed-class pin **3 → 10**. The ratchet
+stays RED (163 > 112 ceiling): the remaining **51 excess dials** are
+the BALANCE clusters — `dop.rs` (zone economics · yields · refinement ·
+endowments), `vocabulary.rs` (practice bindings), conductor thresholds
+— whose conversion needs measured anchors or operator approval per
+cluster. Deriving them by fiat is the laundering the census bars, so
+they wait on rulings. The next free move is `dop.rs`'s endowment kit
+(a candidate APPROVED-SEED class like the founding roster) — one
+operator word, the polities.rs precedent.

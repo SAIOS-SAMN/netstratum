@@ -56,7 +56,14 @@ const SOURCE_TREES: [&str; 11] = [
 ];
 
 /// **THE CEILING — measured 2026-08-05, and it only falls.**
-const TUNED_LITERAL_CEILING: usize = 112; // held at 112; Wave-6 derives four prior dials
+/// Held at 112. The live count fell 170 → 163 on 2026-08-12 (task #3:
+/// the seven chartered-parameter seeds moved to the SEALED class,
+/// where they belong — see `the_sealed_class_...`). 163 still exceeds
+/// 112: the remaining 51 excess dials are the BALANCE clusters
+/// (`dop.rs` 59 · `vocabulary.rs` 37 · conductor) whose conversion is
+/// operator-gated per R20 — deriving them by fiat is the laundering
+/// the census exists to bar, so the ratchet stands red until ruled.
+const TUNED_LITERAL_CEILING: usize = 112; // held at 112; balance clusters await operator rulings
 
 /// Parse `ratio(<int>, <int>)` starting at `text` (just past the open
 /// paren). Returns the pair only when both arguments are integer
@@ -204,9 +211,14 @@ fn the_sealed_class_is_exactly_as_large_as_sealed() {
     }
     assert!(files > 0, "the walk found no source files — the paths moved");
     assert_eq!(
-        marks, 3,
+        marks, 10,
         "the sealed class moved — an epoch closed (lawful, pin it here \
-         in review) or a dial put on a seal it did not earn"
+         in review) or a dial put on a seal it did not earn. \
+         Grew 3 → 10 on 2026-08-12 (task #3): the SEVEN chartered-\
+         parameter seeds (`parameter::seed`) are epoch-0 rates —\
+         editing one recomputes every pre-charter chronicle's heat, so \
+         they move only by a receipted ParameterChartered deed, which \
+         is the SEALED-RATE property, not tuning."
     );
     let mut seeded = 0usize;
     let mut seed_files = 0usize;

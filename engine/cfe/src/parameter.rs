@@ -68,16 +68,28 @@ impl Parameter {
     pub fn code(self) -> u8 {
         self as u8
     }
-    /// The founding value — the dial, moved here whole.
+    /// The founding value — THE CHARTERED-PARAMETER SEED (P2, tag 103).
+    ///
+    /// **These are SEALED RATES, not open dials** (task #3, 2026-08-12).
+    /// Each is the epoch-0 value every PRE-CHARTER beat read: the live
+    /// value folds `seed ∪ charters` (`crate::parameter::of`), so with
+    /// no charter the seed IS the rate, and editing it here would
+    /// recompute every old chronicle's heat — breaking SEAL B on
+    /// history. The lawful way to move one is a receipted
+    /// `ParameterChartered` deed, never an edit. That is exactly the
+    /// sealed-rate property (`21_KERNEL_PARAMETERS` §11): a rate whose
+    /// change is history, not tuning. They leave the open-dial census
+    /// wearing the seal, as the cliff and the flat sink rate do (the
+    /// per-arm markers below carry the seal; this prose only explains).
     pub fn seed(self) -> Ratio {
         match self {
-            Parameter::EncasementThroughput => ratio(2, 1),
-            Parameter::RadiatorBase => ratio(2, 1),
-            Parameter::JouleLeakPerTick => ratio(1, 8),
-            Parameter::HeatingPerZone => ratio(1, 4),
-            Parameter::SinkThroughput => ratio(2, 1),
-            Parameter::FrictionRate => ratio(1, 8),
-            Parameter::VeilToll => ratio(1, 4),
+            Parameter::EncasementThroughput => ratio(2, 1), // SEALED-RATE: epoch-0 charter seed
+            Parameter::RadiatorBase => ratio(2, 1), // SEALED-RATE: epoch-0 charter seed
+            Parameter::JouleLeakPerTick => ratio(1, 8), // SEALED-RATE: epoch-0 charter seed
+            Parameter::HeatingPerZone => ratio(1, 4), // SEALED-RATE: epoch-0 charter seed
+            Parameter::SinkThroughput => ratio(2, 1), // SEALED-RATE: epoch-0 charter seed
+            Parameter::FrictionRate => ratio(1, 8), // SEALED-RATE: epoch-0 charter seed
+            Parameter::VeilToll => ratio(1, 4), // SEALED-RATE: epoch-0 charter seed
         }
     }
     pub const ALL: [Parameter; 7] = [
