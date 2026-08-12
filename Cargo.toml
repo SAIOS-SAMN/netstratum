@@ -8,3 +8,18 @@ blake3 = "1.5"
 num-bigint = "0.4"
 num-rational = "0.4"
 num-traits = "0.2"
+
+# THE TACTICAL BLEED (operator order 2026-08-12): tests were running
+# exact-rational physics at opt-level 0 — the slowest possible
+# rendition of the hottest code, and the era pins wedged on it
+# (measured: ~23s/beat debug vs ~1s/beat release at the same board).
+# Tests now compile optimized; debug assertions stay on. The
+# structural cure (the checkpointable Replayer) is the next landing —
+# this line buys the cadence back, it does not retire the quadratic.
+[profile.test]
+opt-level = 3
+
+# Dependencies of tests share the optimization (BigRational lives in
+# num-* crates — leaving deps at 0 would keep the hot loop slow).
+[profile.test.package."*"]
+opt-level = 3
