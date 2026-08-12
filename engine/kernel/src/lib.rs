@@ -483,6 +483,17 @@ pub fn admits(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
     stamp_move(prior, next, step)
 }
 
+/// Does a Vault custody station sit in this state? Mirrors
+/// `World::vault_seated` on the `Committed` snapshot the kernel judges
+/// — the STAMP a Vault holds lives in `vault_stamp`, off the free-bank
+/// sum, so instrument collateral is only earmarked, never peeled.
+fn vault_seated(state: &Committed) -> bool {
+    state
+        .stations
+        .iter()
+        .any(|(_, s)| *s == cfe::dop::Station::Vault as u8)
+}
+
 /// STAMP-1 conservation: total orb.stamp moves by exactly the deed's
 /// declared delta (mint positive, aperture send negative, receive
 /// positive). Neutral deeds hold the total still.
@@ -575,6 +586,20 @@ fn stamp_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
         }
         ClosureEvent::AssayConsilience { .. } | ClosureEvent::AssaySlashed { .. } => {
             ratio(0, 1)
+        }
+        // PHASE-4 / I5: issuing a Note locks its collateral out of the
+        // free STAMP banks — the same off-bank move a VaultDeposited
+        // declares. With Vault seated the collateral is only earmarked
+        // (it stays in `vault_stamp`, already off the summed free bank),
+        // so the free-bank total holds still; without a Vault the
+        // collateral is peeled from the orb's free STAMP (`bank_stamp`
+        // in `lock_instrument_stamp`), a genuine debit of the sum.
+        ClosureEvent::NoteIssued { collateral, .. } => {
+            if vault_seated(prior) {
+                ratio(0, 1)
+            } else {
+                -collateral.clone()
+            }
         }
         _ => ratio(0, 1),
     };

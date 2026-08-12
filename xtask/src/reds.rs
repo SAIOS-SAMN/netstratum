@@ -9,7 +9,11 @@
 //! Task #10 diagnostic sweep closed EIGHT: world_market · world_absorb
 //! · world_tech_tree (the crossing-law batch) · vertical_axis_pins ·
 //! measured_bounds · roster_claim_pins · polity_therm_pins ·
-//! resume_pins · arbor_pins. Five remain, each root-caused below.
+//! resume_pins · arbor_pins. A ninth closed 2026-08-12: mint_loop_pins
+//! — the refused deed was NoteIssued (PHASE-4 note collateral peeled
+//! from the free STAMP bank), NOT the chemistry deeds the first
+//! diagnosis named; a `stamp_move` arm now declares that off-bank move.
+//! Four remain, each root-caused below.
 
 pub const KNOWN_REDS: &[(&str, &str)] = &[
     // OPERATOR-GATED —
@@ -22,14 +26,6 @@ pub const KNOWN_REDS: &[(&str, &str)] = &[
         "task #10 REAL/OPERATOR — offices grew to arity 16 (Nexus) but the θ-ring is 60 \
          and 16 does not divide it; the fix is a structural ruling (TURN_SLOTS 60→240, \
          re-keys every angle) OR removing tier-ladder offices from the ring vocabulary",
-    ),
-    // REAL DEFECTS, owed a focused landing (task #7's class) —
-    (
-        "mint_loop_pins",
-        "task #10 REAL — the judge refuses 6 crystal mints (ConservationBroken): the \
-         chemistry deeds (GemCompounded et al., classed as element-ledger moves) also \
-         bank/spend CRYSTAL, and that change is unaccounted in kernel::admitted_deltas. \
-         A crystal-accounting kernel landing, sibling to task #7's endowment arms.",
     ),
     // FIXTURE DRIFT, deeper than a re-pin (needs FLEET-1/Phase-2 staging + re-derived math) —
     (
