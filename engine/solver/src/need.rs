@@ -64,6 +64,12 @@ pub struct Need {
     /// How long the strongest want has starved (the `reading` WANT-1
     /// carries). A longer starve widens the reach — it never invents.
     pub starved_for: u64,
+    /// **ORBIT-DIRECTED HUNGER** (38 §6, task #15): the line's own
+    /// families ordered THINNEST-FIRST by its minted library — the
+    /// measured frontier. Empty = no census (a young or libraryless
+    /// line), and the static preference stands. Ordering only, as
+    /// ever: the observation still supplies every candidate.
+    pub thin: Vec<Family>,
 }
 
 impl Need {
@@ -74,7 +80,7 @@ impl Need {
 
     /// One struck want with its reading.
     pub fn struck(hunger: Hunger, starved_for: u64) -> Need {
-        Need { hungers: vec![hunger], starved_for }
+        Need { hungers: vec![hunger], starved_for, thin: Vec::new() }
     }
 
     /// Map the chronicle's `(kind, reading)` wants into a reach.
@@ -90,7 +96,7 @@ impl Need {
                 starved_for = starved_for.max(reading);
             }
         }
-        Need { hungers, starved_for }
+        Need { hungers, starved_for, thin: Vec::new() }
     }
 
     /// THE DEPTH THE NEED WILL COMPOSE TO.
@@ -118,8 +124,29 @@ impl Need {
             // Correspondence: what maps a thing onto its counterpart.
             Hunger::Resonance => matches!(family, Family::Symmetry | Family::Recolor),
             // Structure: what makes something that was not there.
-            Hunger::Novelty => matches!(family, Family::Tile | Family::Object),
+            // ORBIT-DIRECTED (38 §6): with a census standing, the
+            // starving mind reaches first for its THINNEST family —
+            // where its own language has the fewest words — instead
+            // of a fixed pair. No census, the fixed pair stands.
+            Hunger::Novelty => match self.thin.first() {
+                Some(thinnest) => family == *thinnest,
+                None => matches!(family, Family::Tile | Family::Object),
+            },
         })
+    }
+}
+
+/// The family an operator belongs to — the census's classifier, one
+/// home shared with the derivation module's own labels.
+pub fn family_of(op: &solver_verify::grid::Op) -> Family {
+    use solver_verify::grid::Op;
+    match op {
+        Op::Rotate90 | Op::Rotate180 | Op::Rotate270 | Op::FlipH | Op::FlipV | Op::Transpose => {
+            Family::Symmetry
+        }
+        Op::Recolor(_) => Family::Recolor,
+        Op::Tile { .. } => Family::Tile,
+        Op::Object(_) => Family::Object,
     }
 }
 

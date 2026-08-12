@@ -674,7 +674,11 @@ impl Trajectory {
             Trajectory::Growth | Trajectory::Decline => Need::sated(),
             Trajectory::Stagnation => match measured.is_empty() {
                 true => Need::struck(Hunger::Novelty, starved),
-                false => Need { hungers: measured, starved_for: starved },
+                false => Need {
+                    hungers: measured,
+                    starved_for: starved,
+                    thin: Vec::new(),
+                },
             },
         }
     }
@@ -2226,7 +2230,7 @@ impl Polity {
             true => 0,
             false => found.max(linked),
         };
-        Need { hungers, starved_for }
+        Need { hungers, starved_for, thin: Vec::new() }
     }
 
     fn research_step(&mut self, book: &Ledger) {
@@ -2330,7 +2334,15 @@ impl Polity {
             // invocations are BOUNDED by `SEARCH_BUDGET`, and blending
             // the two would ruin both yields.
             let reach = |polity: &mut Self| {
-                let need = polity.trajectory.need_of(polity.hunger().hungers, polity.starved);
+                let mut need =
+                    polity.trajectory.need_of(polity.hunger().hungers, polity.starved);
+                // ORBIT-DIRECTED HUNGER (38 §6): a starving mind reads
+                // its own library's census and reaches thinnest-first —
+                // curiosity pointed at the measured frontier. Sated
+                // minds and empty libraries keep the standing order.
+                if !need.hungers.is_empty() && !polity.library.words().is_empty() {
+                    need.thin = solver::mint::family_census(&polity.library);
+                }
                 // THE MEMO, restored into the coupled path (remediations
                 // R5). `propose` is pure: same digest, same difficulty,
                 // same need, same answer. Keyed on all three — a

@@ -144,6 +144,30 @@ pub fn consider(
 /// the same law (three confirms promote), never a fresh dial.
 pub const CONFIRMS_TO_MINT: usize = 3;
 
+/// **THE FAMILY CENSUS** (38 §6, task #15) — the line's own families
+/// ordered THINNEST-FIRST by how many minted words touch each: the
+/// measured frontier a novelty-starved mind reaches toward. A word
+/// counts toward every family its expansion spells (a composite is a
+/// citizen of each). Ties keep the declaration order — deterministic,
+/// no dial.
+pub fn family_census(library: &Library) -> Vec<crate::need::Family> {
+    use crate::need::{family_of, Family};
+    let families = [Family::Symmetry, Family::Recolor, Family::Tile, Family::Object];
+    let mut counts: Vec<(Family, usize)> = families
+        .iter()
+        .map(|family| {
+            let count = library
+                .words()
+                .iter()
+                .filter(|word| word.expansion.iter().any(|op| family_of(op) == *family))
+                .count();
+            (*family, count)
+        })
+        .collect();
+    counts.sort_by_key(|(_, count)| *count);
+    counts.into_iter().map(|(family, _)| family).collect()
+}
+
 /// **THE PRE-REACH** — the library read before the sweep: each minted
 /// word tried whole, as a depth-1 letter. A hit returns the EXPANSION
 /// (the certificate's form); the judge sees only letters it already

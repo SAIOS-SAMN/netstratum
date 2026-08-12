@@ -117,3 +117,42 @@ fn the_library_extends_the_reach_as_expansions() {
     };
     assert_eq!(pre_reach(&vacuous, &library), None, "nothing to close, nothing proved");
 }
+
+/// ORBIT-DIRECTED HUNGER (38 §6, task #15): the census orders the
+/// families thinnest-first from the library, and a novelty-starved
+/// Need reaches for the thinnest — while resonance and censusless
+/// minds keep the standing order.
+#[test]
+fn hunger_reaches_where_the_language_is_thinnest() {
+    use solver::mint::family_census;
+    use solver::need::{Family, Hunger, Need};
+    let mut library = Library::new();
+    // Two symmetry-touching words, nothing else: Symmetry is thick,
+    // the other three tie thin in declaration order.
+    for word in [vec![Op::Rotate90, Op::FlipV], vec![Op::Rotate270, Op::Transpose]] {
+        library.adopt(MintedWord {
+            orbit: word_orbit(&word),
+            expansion: word,
+            cited: Vec::new(),
+        });
+    }
+    let census = family_census(&library);
+    assert_eq!(
+        census,
+        vec![Family::Recolor, Family::Tile, Family::Object, Family::Symmetry],
+        "thinnest first; ties keep declaration order; the thick family sinks"
+    );
+    let mut need = Need::struck(Hunger::Novelty, 500);
+    // Without a census the static pair stands.
+    assert!(need.prefers(Family::Tile) && need.prefers(Family::Object));
+    assert!(!need.prefers(Family::Recolor));
+    // With the census, the THINNEST family leads and the static pair
+    // yields to the measured frontier.
+    need.thin = census;
+    assert!(need.prefers(Family::Recolor), "the frontier leads");
+    assert!(!need.prefers(Family::Tile), "the fixed pair yields");
+    // Resonance is untouched by the census.
+    let mut resonant = Need::struck(Hunger::Resonance, 500);
+    resonant.thin = vec![Family::Object];
+    assert!(resonant.prefers(Family::Symmetry) && resonant.prefers(Family::Recolor));
+}
