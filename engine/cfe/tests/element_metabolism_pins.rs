@@ -10,10 +10,10 @@
 //! refuses a ration off its axis, and the ration resolver returns an
 //! ELEMENT where one is declared and the compiled carrier where none is.
 
-use cfe::dop::{metabolic_ration, metabolic_ration_of, metabolic_harvest_of, name, ClosureEvent, Ration, Resource};
+use cfe::dop::{metabolic_ration, metabolic_ration_of, metabolic_harvest_of, name, ClosureEvent, Ration, Resource, ZoneKind};
 use cfe::ratio::ratio;
 use cfe::vocabulary::{trading, Axis, CHANNEL_UPKEEP, CHANNEL_YIELD};
-use cfe::world::World;
+use cfe::world::{replay, World, FIRST_ORB, SOVEREIGN};
 
 /// An element id seated at chosen periodic axes (the almanac fixture
 /// shape) — a shallow stone the stone-eaters farm.
@@ -167,4 +167,140 @@ fn the_wire_round_trips_the_ration_and_legacy_mints_decode_unchanged() {
             "legacy mints decode unchanged"
         );
     }
+}
+
+// ── LAYER 2: the tick, where a stone-eater farms and eats its element ──
+
+/// A world sealed to a MINTED element-metabolism (code 4) that eats
+/// `stone`, with an extractor and a habitat standing. No star is
+/// commissioned, so the thermal freeze never fires and the only thing
+/// that can stop the flows is the element famine under test. `banked`
+/// of the stone is laid down by receipt and the world resumed, so the
+/// fixture is chain-true.
+fn stone_eater(stone: [u8; 32], banked: cfe::ratio::Ratio) -> World {
+    let mut world = World::new();
+    world.found("stone-hold").expect("founds");
+    world
+        .seat_station(name("tunborn"), cfe::dop::Station::from_wire(1).expect("office"))
+        .expect("seats the progenitor");
+    let code = world
+        .mint_vocabulary_ration_as(
+            SOVEREIGN,
+            "tunborn",
+            Axis::Metabolism,
+            "◈",
+            name("lithovore"),
+            trading(vec![(CHANNEL_YIELD, ratio(5, 4)), (CHANNEL_UPKEEP, ratio(5, 4))]),
+            stone,
+        )
+        .expect("mints the stone-eater metabolism");
+    // Seal the line to that metabolism (disposition/perception are seed
+    // codes). EXPANSIONIST = 1, PLANAR = 1.
+    world.seal_genesis("stone-line", 1, code, 1).expect("seals");
+    world.zone(0, ZoneKind::Extractor).expect("builds");
+    world.zone(8, ZoneKind::Habitat).expect("builds");
+    if banked > ratio(0, 1) {
+        let stamp = world.now();
+        world.chronicle_mut().append(
+            ClosureEvent::AssayStruck {
+                orb_id: FIRST_ORB,
+                element: stone,
+                amount: banked,
+                richness: None,
+            },
+            stamp,
+            vec![SOVEREIGN],
+        );
+    }
+    World::resume(world.chronicle().clone())
+}
+
+#[test]
+fn a_fed_stone_eater_runs_and_keeps_its_biomass_economy_shut() {
+    // A line holding its element meets the food bill, so it is NOT frozen
+    // — its non-food flows run verbatim. (The depleting/farming element
+    // ECONOMY is a separate landing, task #29; this pins that stasis
+    // opens the gate and the biomass economy stays shut.)
+    let stone = element(1, 3);
+    let mut world = stone_eater(stone, ratio(100, 1));
+    for _ in 0..4 {
+        world.tick();
+    }
+    // The extractor still mines iron — production is not suspended.
+    assert!(
+        world.accrued().iter().any(|(resource, amount)| *resource == Resource::Iron
+            && *amount > ratio(0, 1)),
+        "a fed line runs its non-food flows: {:?}",
+        world.accrued()
+    );
+    // The FOOD SLOT is element, so BIOMASS never accrues — a stone-eater
+    // has no biomass economy at all.
+    assert!(
+        world.accrued().iter().all(|(resource, _)| *resource != Resource::Biomass),
+        "an element-eater touches no biomass: {:?}",
+        world.accrued()
+    );
+    assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
+}
+
+#[test]
+fn a_starved_stone_eater_freezes_whole_and_holds_its_structures() {
+    // No stone banked — the food bill cannot be met, so the line is in
+    // STASIS: every flow suspended.
+    let stone = element(1, 3);
+    let mut world = stone_eater(stone, ratio(0, 1));
+    let zones_before = world.orb().expect("stands").zones.len();
+    for _ in 0..4 {
+        world.tick();
+    }
+    // Production is suspended — no iron mined, no flow of any kind.
+    assert!(
+        world.accrued().is_empty()
+            || world.accrued().iter().all(|(_, amount)| *amount == ratio(0, 1)),
+        "a stasis'd world produces nothing: {:?}",
+        world.accrued()
+    );
+    // But the structures HOLD — stasis is not collapse.
+    assert_eq!(
+        world.orb().expect("stands").zones.len(),
+        zones_before,
+        "core structures hold through stasis"
+    );
+    assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
+}
+
+#[test]
+fn stasis_lifts_the_moment_the_element_bank_is_refilled() {
+    // The famine is a per-beat CONDITION, not a stored strike: a starved
+    // line that receives its element runs again the very next beat —
+    // "requires external trade or new internal minting to resolve."
+    let stone = element(1, 3);
+    let mut world = stone_eater(stone, ratio(0, 1));
+    world.tick();
+    assert!(
+        world.accrued().iter().all(|(_, amount)| *amount == ratio(0, 1)),
+        "frozen while empty"
+    );
+    // A gift of stone arrives (an assay, by receipt), and the world is
+    // resumed to fold it in.
+    let stamp = world.now();
+    world.chronicle_mut().append(
+        ClosureEvent::AssayStruck {
+            orb_id: FIRST_ORB,
+            element: stone,
+            amount: ratio(100, 1),
+            richness: None,
+        },
+        stamp,
+        vec![SOVEREIGN],
+    );
+    let mut world = World::resume(world.chronicle().clone());
+    world.tick();
+    assert!(
+        world.accrued().iter().any(|(resource, amount)| *resource == Resource::Iron
+            && *amount > ratio(0, 1)),
+        "the refilled line runs again: {:?}",
+        world.accrued()
+    );
+    assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
 }

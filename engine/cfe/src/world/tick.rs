@@ -287,6 +287,11 @@ impl World {
                 (*orb_id, held)
             })
             .collect();
+        // G2: the element a minted metabolism eats, read ONCE for the
+        // beat (None for every compiled metabolism, so v1 worlds are
+        // untouched). Where it stands, the food-slot flows divert from
+        // the resource store to this element's bank.
+        let element_ration = self.metabolic_element();
         for (orb_id, active) in &flows {
             let boon = boons
                 .iter()
@@ -420,6 +425,23 @@ impl World {
                     overheat_cleared.push(*orb_id);
                 }
             }
+            // G2 STASIS (ruled 2026-08-12): an element-eating line that
+            // cannot meet this beat's food bill in its own element is
+            // FROZEN — all local production suspended, structures held —
+            // exactly the whole-orb freeze a joule-famined sub-mesic orb
+            // takes. It is a per-beat CONDITION, recomputed and never
+            // stored: the moment trade or minting refills the element
+            // bank, the next beat's bill is met and the line runs again.
+            if let Some(element) = element_ration {
+                let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
+                let bill = Self::element_food_bill(active, metabolism);
+                let have = peek(&self.orbs, *orb_id)
+                    .map(|held| held.element_amount(&element))
+                    .unwrap_or_else(|| ratio(0, 1));
+                if have < bill {
+                    frozen = true;
+                }
+            }
             if !frozen {
                 // G2 (04 §1.2): every flow reads through the sealed
                 // metabolism's ration/harvest map — biotic and
@@ -483,14 +505,27 @@ impl World {
                         }
                         _ => {}
                     }
-                    accrue(
-                        &mut self.accrued,
-                        *orb_id,
-                        resource,
-                        amount * efficiency.clone() * boost * yield_factor.clone() * vigour.clone(),
-                    );
+                    // G2: an element-eater's FOOD SLOT (the biomass line)
+                    // is not a resource flow — it settles against the
+                    // element bank below, so it never accrues here.
+                    // Every other yield (iron extraction, joule capture)
+                    // rides the resource store verbatim.
+                    if !(element_ration.is_some() && resource == Resource::Biomass) {
+                        accrue(
+                            &mut self.accrued,
+                            *orb_id,
+                            resource,
+                            amount * efficiency.clone() * boost * yield_factor.clone() * vigour.clone(),
+                        );
+                    }
                     // A zone drawing half its inputs consumes half.
                     for (resource, amount) in crate::dop::zone_upkeep(seat, metabolism) {
+                        // G2: the biomass food component of an element-
+                        // eater's upkeep is likewise settled in element,
+                        // not accrued as a resource.
+                        if element_ration.is_some() && resource == Resource::Biomass {
+                            continue;
+                        }
                         accrue(
                             &mut self.accrued,
                             *orb_id,
@@ -744,6 +779,42 @@ impl World {
                 );
             }
         }
+    }
+
+    /// **G2 — THE ELEMENT THIS LINE EATS** (ruled 2026-08-12). The
+    /// periodic element a MINTED element-metabolism farms and consumes,
+    /// or `None` for the three compiled metabolisms and an unsealed
+    /// world. The compiled codes (1..=3) short-circuit BEFORE the fold,
+    /// so every v1 world reads `None` in O(1) and its flows are
+    /// untouched; only an element-eater (code >= 4, a deliberate mint)
+    /// pays the vocabulary fold to read its ration.
+    pub fn metabolic_element(&self) -> Option<[u8; 32]> {
+        let metabolism = self.genesis.as_ref().map(|held| held.metabolism)?;
+        if metabolism < 4 {
+            return None;
+        }
+        crate::vocabulary::fold(self.chronicle(), crate::vocabulary::Axis::Metabolism)
+            .into_iter()
+            .find(|entry| entry.code == metabolism)
+            .and_then(|entry| entry.ration)
+    }
+
+    /// G2: the base FOOD BILL an element-eater's active zones levy this
+    /// beat, in element units — the Biomass upkeep components (the food
+    /// slot) summed and vigour-weighted, exactly the shape ECON-J's
+    /// heating burn takes. This is both the STASIS threshold (a line
+    /// that cannot meet it freezes) and the amount consumed when it can.
+    pub(super) fn element_food_bill(
+        active: &[(Zone, Ratio)],
+        metabolism: u8,
+    ) -> Ratio {
+        active.iter().fold(ratio(0, 1), |sum, (zone, vigour)| {
+            let per_zone: Ratio = crate::dop::zone_upkeep(zone.priced_as(), metabolism)
+                .into_iter()
+                .filter(|(resource, _)| *resource == Resource::Biomass)
+                .fold(ratio(0, 1), |s, (_, amount)| s + amount);
+            sum + per_zone * vigour.clone()
+        })
     }
 
     /// E3.7 — strike/relieve material wants for prospected open matter.
