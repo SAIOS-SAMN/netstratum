@@ -56,12 +56,19 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 > live board's binding constraint. **Kernel-lane relays from the judge
 > tally (runs beside the chain, so observed not enforced):** (1)
 > STAR-ENDOW-1 kit top-ups + ORBIT-ENDOW-1 band gifts read as
-> `ConservationBroken` — the kernel was never taught the endowment
-> deeds create value (c2242de landed without kernel arms); (2)
-> `NoSuchEntity {{ actor: 1 }}` ×153/beat — the automaton actor is
-> outside the kernel's entity view (the known actor-100 seam's live
-> twin); (3) `DecayExceedsBound` ×31/beat vs bound 0 — decay-bound
-> drift, unattributed. All three precede the Phase-3 flip and gate it.
+> `ConservationBroken`; (2) `NoSuchEntity {{ actor: 1 }}`; (3)
+> `DecayExceedsBound`. **ALL THREE RESOLVED 2026-08-12** (judge_probe
+> example re-judged the live chronicles deed-by-deed): (1)+(2) were
+> real kernel gaps, CLOSED — `admitted_deltas` gained the
+> StarCommissioned/PlanetSited endowment arms (one home:
+> `endowment_top_up_deltas`), and containment gained THE FOUNDING
+> BOOTSTRAP (the first identity enters by its own hand; the door is
+> one deed wide). (3) is HISTORY CORRECTLY REFUSED — every hit sits in
+> `cinder-reach--closed-*` quarantined ruins, pre-seam per-row
+> demurrage (the elapsed-0 defect the atomic touch closed). Live board
+> re-judged: **zero refusals** on a 15-world sample. Witnesses:
+> `kernel/tests/endowment_pins.rs` (3). The Phase-3 flip's judge-side
+> preconditions are now measured clean on the live board.
 >
 > **STANDING DEBT, not fixed here:** `tuned_constant_ratchet` is red on
 > `main` — 170 tuned ratio literals against the 112 ceiling (58 dials
@@ -168,7 +175,7 @@ touches element diversity.
 |-------|-------------|------|
 | **E3.6a** | `Cargo` / offer side type; `Offer` + tag 49 wire (backward-compat Resource form) | codec pin · SCHEMA bump if needed |
 | **E3.6b** | `post_offer` / `counter_offer` / `clear_trade` honor Element cargo + bank debit/credit | `world_market` + element pins red→green |
-| **E3.6c** | Conductor `market_step` (or sibling) posts element surplus intents | NPC pin in `wave1_era_pins` or dedicated |
+| **E3.6c** | Conductor `market_step` (or a companion step) posts element surplus intents | NPC pin in `wave1_era_pins` or dedicated |
 | **E3.6d** | CLI `trade` / bench surface for element offer (if needed) | smoke line |
 | **E3.7** | WANT-1 element ids | **LANDED** |
 | **E3.8** | Observer routes / refineries | **LANDED** |

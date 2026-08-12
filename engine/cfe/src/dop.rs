@@ -973,12 +973,25 @@ pub fn orbit_endowment(band: Option<crate::thermal::SubstrateBand>) -> Vec<(Reso
 
 /// Top-up orb banks to each absolute target (never strips). Shared by
 /// live deeds and replay (`StarCommissioned`).
+/// STAR-ENDOW-1 — the top-up DELTAS a kit yields against a standing
+/// bank: exactly what [`apply_endowment_top_up`] will move, computed
+/// pure so the emitter, replay, and the kernel's conservation gate all
+/// read ONE home (call-not-copy; never strips spent banks).
+pub fn endowment_top_up_deltas(
+    orb: &ColonyOrb,
+    kit: &[(Resource, Ratio)],
+) -> Vec<(Resource, Ratio)> {
+    kit.iter()
+        .filter_map(|(resource, target)| {
+            let have = orb.banked_amount(*resource);
+            (target > &have).then(|| (*resource, target.clone() - have))
+        })
+        .collect()
+}
+
 pub fn apply_endowment_top_up(orb: &mut ColonyOrb, kit: &[(Resource, Ratio)]) {
-    for (resource, target) in kit {
-        let have = orb.banked_amount(*resource);
-        if target > &have {
-            orb.bank(*resource, target.clone() - have);
-        }
+    for (resource, delta) in endowment_top_up_deltas(orb, kit) {
+        orb.bank(resource, delta);
     }
 }
 

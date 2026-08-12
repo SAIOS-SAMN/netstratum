@@ -1810,6 +1810,40 @@ fn admitted_deltas(
         //   copied —
         // The chartered genesis mint: EXACTLY the founding reserves.
         E::ColonyFounded { .. } => cfe::dop::founding_reserves(),
+        // STAR-ENDOW-1: commissioning tops the genesis orb up to the
+        // class kit — EXACTLY the top-up, re-derived from `prior` by
+        // the same sealed pair the emitter and replay call
+        // (`star_endowment` · `endowment_top_up_deltas`; the kit never
+        // strips spent banks, so the delta depends on what stood).
+        // Found live (2026-08-12 judge tally): c2242de landed the mint
+        // without this arm, so every non-G commissioning read as
+        // ConservationBroken.
+        E::StarCommissioned { class } => match cfe::thermal::StarClass::from_wire(*class) {
+            Some(class) => prior
+                .orbs
+                .iter()
+                .find(|held| held.orb_id == cfe::world::FIRST_ORB)
+                .map(|orb| {
+                    cfe::dop::endowment_top_up_deltas(orb, &cfe::dop::star_endowment(class))
+                })
+                .unwrap_or_default(),
+            // An unknown class names no kit; the sky gate refuses the
+            // deed on its own terms before value is weighed.
+            None => Vec::new(),
+        },
+        // ORBIT-ENDOW-1: siting gifts the band's kit additively —
+        // re-derived from the star and the receipt's own siting by the
+        // same sealed reads the emitter used (`t_eq4` · `band_of` ·
+        // `orbit_endowment`). No star, no gift (the emitter refuses
+        // unsited commissioning first).
+        E::PlanetSited { albedo, orbit_r, .. } => match prior.star {
+            Some(class) => {
+                let teq =
+                    cfe::thermal::t_eq4(&class.luminosity(), albedo.value(), orbit_r.value());
+                cfe::dop::orbit_endowment(cfe::thermal::band_of(&teq))
+            }
+            None => Vec::new(),
+        },
         // #41: a build is PRICED on its base. A minted kind's base
         // lives in the FOLD, which this function cannot read — `prior`
         // is committed state and carries no chronicle — so the receipt
@@ -2223,6 +2257,17 @@ fn containment(prior: &Committed, step: &Step) -> Result<(), Refused> {
     let Some(scope) = scope_of(&step.event) else {
         return Ok(());
     };
+    // THE FOUNDING BOOTSTRAP (found live, 2026-08-12 judge tally —
+    // one refusal per world ever founded): a chronicle opens with the
+    // sovereign registering ITSELF, and no registrar can precede the
+    // first identity. The one deed whose actor may be unregistered is
+    // the registration of the FIRST entity by its own hand; every
+    // later registration needs a registered registrar with the scope.
+    if let ClosureEvent::EntityRegistered { entity_id, .. } = &step.event {
+        if prior.entities.is_empty() && *entity_id == step.actor {
+            return Ok(());
+        }
+    }
     let entity = prior
         .entities
         .iter()

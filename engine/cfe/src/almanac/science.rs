@@ -608,7 +608,7 @@ impl LabPath {
             Self::ChemWork => ("order-work entropy", "compounding vents entropy / crystal fee"),
             Self::BioChem => ("contamination toll", "biomass spent; contamination residual risk"),
             Self::SynthMod => ("identity shear", "synthetic graft taxes crystal + trust"),
-            Self::CloneWork => ("identity dilution", "clone pool strains habitat / kinship"),
+            Self::CloneWork => ("identity dilution", "clone pool strains habitat / line cohesion"),
             Self::SkinWork => ("unmask debt", "disguise leaves a residual if pierced"),
         }
     }
