@@ -140,6 +140,71 @@ fn matter_bonds_and_the_gem_is_banked() {
     assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
 }
 
+/// A TRIPLE that saturates: shell 2 takes THREE bodies (arity 3), and
+/// binds must sum to `arity · (LANES/2 + 1) / 2 = 9`. Lanes 2, 3, 4
+/// bind 2 + 3 + 4 = 9. Phase 4 is the refractory — workable in any
+/// band — and line 1 is shallow, so any star carries it and any sited
+/// orb can work it; the witness is then about ARITY alone.
+fn bonding_triple() -> [[u8; 32]; 3] {
+    [at(1, 2, 2, 4, 0), at(1, 3, 2, 4, 0), at(1, 4, 2, 4, 0)]
+}
+
+#[test]
+fn a_three_body_compound_is_struck_at_the_verb_and_no_pair_of_it_bonds() {
+    // **THE WIDENING'S LOAD-BEARING WITNESS, AT THE WORLD VERB.** The
+    // almanac pins prove `compounds` saturates a ternary set; this
+    // proves the DEED does — a genuine three-body compound is struck
+    // through `compound()`, its matter spent and its gem banked, on a
+    // world that drew the matter the way worlds do.
+    let triple = bonding_triple();
+    let mut world = stocked("three-body", &triple, ratio(10, 1));
+    let before: Vec<Ratio> = triple
+        .iter()
+        .map(|m| world.orb().expect("stands").element_amount(m))
+        .collect();
+
+    let gem = world.compound(&triple).expect("three bodies bond");
+    assert_eq!(gem, Compoundable::new(&triple).expect("bonds").gem());
+
+    // Mass-exact across three: each member gave up its lane's valence
+    // (2, 3, 4) and the gem carries the sum (9) away.
+    let set = Compoundable::new(&triple).expect("bonds");
+    let (spends, yielded) = recipe_of(&set);
+    assert_eq!(yielded, ratio(9, 1), "2 + 3 + 4 saturates arity 3");
+    for ((member, spend), had) in spends.iter().zip(before) {
+        assert_eq!(
+            world.orb().expect("stands").element_amount(member),
+            had - spend.clone(),
+            "the member spent exactly its valence"
+        );
+    }
+    assert_eq!(
+        world.orb().expect("stands").element_amount(&gem),
+        yielded,
+        "and the gem carries the sum away"
+    );
+
+    // **IRREDUCIBLY NOT A PAIR** — this is the whole reason the lanes
+    // were widened. Every two-of-three subset is banked and workable,
+    // yet none bonds: shell 2 demands three, so a pairwise projection
+    // cannot express the triangle. (The standing/vacuity law reads the
+    // same shape from the other side — a three-orb set whose edges are
+    // all inert is exactly what standing needs.)
+    for pair in [
+        [triple[0], triple[1]],
+        [triple[0], triple[2]],
+        [triple[1], triple[2]],
+    ] {
+        assert_eq!(
+            world.compound(&pair),
+            Err(ActionRefused::MatterDoesNotBond),
+            "no two of the three bond on their own"
+        );
+    }
+
+    assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
+}
+
 #[test]
 fn the_same_set_always_names_the_same_gem_in_every_world() {
     // The gem is content-addressed, so two worlds that never meet make
