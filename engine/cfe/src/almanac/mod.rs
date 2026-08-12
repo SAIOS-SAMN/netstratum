@@ -23,6 +23,7 @@
 pub mod compound;
 pub mod locality;
 pub mod periodic;
+pub mod rejuvenation;
 pub mod science;
 pub mod taxon_economy;
 pub mod taxon_table;
@@ -33,6 +34,7 @@ pub use locality::{
     civ_may_work, civ_reach, lines_of, local_to, pressure, refines, strata_lines, workable_in,
 };
 pub use periodic::{periodic_of, Periodic, CELLS, LANES, LINES, PHASES, SHELLS, SPINS};
+pub use rejuvenation::{grained_logistic, REGROWTH_GRAIN};
 pub use science::{
     bill_crystal_portion, dark_utility, explodes, explosion_risk, explosion_threshold, isomorphic,
     iso_union_knowledge, iso_union_product, iso_union_recipe, lab_create_bill, lab_pole_card,
