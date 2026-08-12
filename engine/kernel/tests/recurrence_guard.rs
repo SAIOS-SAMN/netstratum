@@ -84,8 +84,19 @@ fn runtime_deps(manifest: &Path) -> Vec<String> {
 /// The read-back detector: a source that names a JSON artifact AND
 /// reads from disk is a read-back candidate (§11 rule 2's shape).
 fn reads_json_back(source: &str) -> bool {
-    source.contains(".json")
-        && (source.contains("read_to_string") || source.contains("fs::read"))
+    // A JSON READ-BACK is reading a .json artifact's CONTENT. Directory
+    // enumeration (`read_dir`) is not a read-back — it lists names,
+    // parses nothing — so it is excluded (2026-08-12: it was the sole
+    // false positive, `desk.rs`'s `read_dir` matching the bare `fs::read`
+    // prefix beside a comment that merely NAMED `.json` to say it does
+    // NOT read it). The `.json` and the read must also share a line —
+    // a `.json` in prose two hundred lines from an unrelated read is
+    // not a read-back.
+    source.lines().any(|line| {
+        line.contains(".json")
+            && (line.contains("read_to_string") || line.contains("fs::read"))
+            && !line.contains("read_dir")
+    })
 }
 
 /// The retired-code detector: a line assigning 65 to a TAG constant.

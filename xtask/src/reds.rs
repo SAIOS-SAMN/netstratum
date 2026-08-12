@@ -31,12 +31,6 @@ pub const KNOWN_REDS: &[(&str, &str)] = &[
          bank/spend CRYSTAL, and that change is unaccounted in kernel::admitted_deltas. \
          A crystal-accounting kernel landing, sibling to task #7's endowment arms.",
     ),
-    (
-        "recurrence_guard",
-        "task #10 REAL — clients/cli/src/desk.rs added a JSON read-back path (§11 rule 2 \
-         violation: exports are write-only). Needs the read-back removed or moved behind \
-         the #36 adoption door; a lens-lane fix.",
-    ),
     // FIXTURE DRIFT, deeper than a re-pin (needs FLEET-1/Phase-2 staging + re-derived math) —
     (
         "merchant_pins",
