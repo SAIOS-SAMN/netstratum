@@ -64,6 +64,15 @@ impl World {
             return Err(ActionRefused::TreatyWithSelf);
         }
         let kind = terms.kind();
+        // BIO QUARANTINE (task #25): a world whose bio-pressure has
+        // crossed the threshold cannot open a TRADE pact — its Agent
+        // Door is sealed to inbound commerce until the pressure drops.
+        // War and peace still stand: quarantine seals the market, never
+        // the politics, and never the crossing.
+        if kind == crate::treaty::TreatyKind::Trade && self.world_quarantined() {
+            let orb = self.orb().map(|held| held.orb_id).unwrap_or(FIRST_ORB);
+            return Err(ActionRefused::WorldQuarantined { orb });
+        }
         let now = self.clock.now();
         // ONE LIVE PACT OF A KIND PER PARTNER. A second is not a
         // stronger pact, it is an ambiguous one — and `factor_on`

@@ -615,6 +615,13 @@ impl World {
         if self.orbs.is_empty() {
             return Err(ActionRefused::NoColony);
         }
+        // BIO QUARANTINE (task #25): inbound melt reciprocity is barred
+        // while the world is quarantined — the same seal the Agent Door
+        // takes on trade. The crossing is the only aperture left open.
+        if self.world_quarantined() {
+            let orb = self.orb().map(|held| held.orb_id).unwrap_or(FIRST_ORB);
+            return Err(ActionRefused::WorldQuarantined { orb });
+        }
         // Both shapes died at the doors (29_CONSTRUCTION C1).
         let (source, absorber) = (pair.from(), pair.to());
         let amount = amount.value().clone();

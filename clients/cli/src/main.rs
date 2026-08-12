@@ -7498,6 +7498,9 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
             style.strong(&hex(digest)[..8])
         ),
 
+        ActionRefused::WorldQuarantined { orb } => format!(
+            "orb {orb} is under BIO QUARANTINE — its Agent Door is sealed to inbound trade until the bio-pressure drops below the threshold; the crossing stays open",
+        ),
         ActionRefused::NoColony => format!(
             "no colony yet — start with {}",
             style.strong("found <name>")

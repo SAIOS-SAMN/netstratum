@@ -28,6 +28,13 @@ pub enum ActionRefused {
     /// tension this law exists to resolve.
     OrbitOccupied { orb: u64, slot: i64 },
 
+    /// BIO QUARANTINE (task #25, ruled 2026-08-12): the world's
+    /// bio-pressure has crossed the threshold, so its external apertures
+    /// are severed — inbound trade and melt/trade treaties are barred
+    /// until the pressure drops. The crossing (interstellar aperture) is
+    /// exempt; quarantine seals commerce, never the escape.
+    WorldQuarantined { orb: u64 },
+
     NoColony,
     ColonyAlreadyFounded,
     TileAlreadyZoned { tile: u16 },

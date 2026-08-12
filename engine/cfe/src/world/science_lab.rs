@@ -163,6 +163,30 @@ impl World {
             .unwrap_or(0)
     }
 
+    /// **THE QUARANTINE THRESHOLD (task #25, ruled 2026-08-12)** — the
+    /// bio-pressure at which a world's modification has run past what it
+    /// can safely hold. It is the SYNTH-GRADE CEILING (grades 1..=7),
+    /// the same bound `rogue_pressure` and the mod grades already cap at
+    /// (`apply_*` clamp with `.min(7)`) — not a chosen dial but the law's
+    /// own ceiling read as a threshold.
+    pub const QUARANTINE_PRESSURE: u64 = 7;
+
+    /// G2/BIO: has this ORB's bio-pressure crossed into QUARANTINE? Both
+    /// cascade (BioChemCross) and rogue (SynthRogue) pressure count, each
+    /// against the shared ceiling — either maxing out seals the world.
+    /// Pure over standing state, so replay reads it identically.
+    pub fn is_quarantined(&self, orb: u64) -> bool {
+        self.cascade_pressure_of(orb) >= Self::QUARANTINE_PRESSURE
+            || u64::from(self.rogue_pressure_of(orb)) >= Self::QUARANTINE_PRESSURE
+    }
+
+    /// BIO: does ANY orb of this world stand quarantined? A quarantine
+    /// severs the WORLD's external apertures (the Agent Door to inbound
+    /// trade, and melt/trade treaties), so the reading is world-wide.
+    pub fn world_quarantined(&self) -> bool {
+        self.orbs.iter().any(|held| self.is_quarantined(held.orb_id))
+    }
+
     fn set_science_seat(&mut self, orb: u64, discipline: ScienceDiscipline, rank: u8) {
         let d = discipline.as_wire();
         if let Some(slot) = self
