@@ -1236,8 +1236,7 @@ fn gauge_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
 /// gate (Phase 3) when this predicate is total (every event covered).
 fn covered(event: &ClosureEvent) -> bool {
     use ClosureEvent as E;
-    matches!(
-        event,
+    match event {
         // I1 conservation covers the intra-world move AND the aperture
         // legs (the convergence seam): a leg debits/credits exactly its
         // declared amount, the local half of pair conservation.
@@ -1265,8 +1264,11 @@ fn covered(event: &ClosureEvent) -> bool {
         // BOOK-1 (19_LENS §16): minting DECLARES a standing account and
         // archiving ALTERS one — both extend or amend the world's
         // structure, neither moves banked value. Matches
-        // `world::books`' own scope checks.
-        | E::BookMinted { .. } | E::BookArchived { .. }
+        // `world::books`' own scope checks. THE POSTING joins them
+        // (task #17, 2026-08-12 — the §0 audit's one missing row, at
+        // last): a dual entry moves book TALLIES (kept/lost), never
+        // `banked` — banked-neutral, {I2, I3} complete it.
+        | E::BookMinted { .. } | E::BookPosted { .. } | E::BookArchived { .. }
         // LIT-1: aspiring and claiming both add standing state and move
         // no banked value. Matches `world::literature`.
         | E::WorkAspired { .. } | E::WorkClaimed { .. }
@@ -1444,8 +1446,18 @@ fn covered(event: &ClosureEvent) -> bool {
         // {I2 containment, I3 exactness} complete it. WHO may charter
         // is the T0 standing gate at the world door; the band is a
         // door (`cfe::parameter::Chartered`).
-        | E::ParameterChartered { .. }
-    )
+        | E::ParameterChartered { .. } => true,
+        // **THE UNJUDGED SET IS EMPTY, AND THE COMPILER HOLDS IT SO**
+        // (task #17, 2026-08-12). This match carries NO wildcard by
+        // law: the hand-listed universe in `taxon_pins` fell behind
+        // twice because Rust cannot count an enum at runtime — so the
+        // totality now lives where the compiler enforces it. A new
+        // `ClosureEvent` variant BREAKS THIS BUILD until someone
+        // classifies it: covered above, or given an explicit `=> false`
+        // arm here wearing its reason. `BookPosted` — the §0 audit's
+        // one missing row — was the last, covered at this landing;
+        // the Phase-3 judged-precondition is now structural.
+    }
 }
 
 /// INVARIANT — conservation, TOTAL (the value-law wave, operator
