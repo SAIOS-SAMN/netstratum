@@ -1,0 +1,2 @@
+[alias]
+board = "run -p xtask --release --"
