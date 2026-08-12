@@ -399,6 +399,12 @@ pub struct Entry {
     /// declared one. `None` on every other axis and on a zone mint
     /// that leaves its base to be inferred — see [`zone_base`].
     pub base: Option<u8>,
+    /// **THE ELEMENT RATION (G2 hook, ruled 2026-08-12)** — for a
+    /// MINTED METABOLISM entry, the periodic element this line eats and
+    /// farms. `None` on every other axis and on the three compiled
+    /// metabolisms (mineral/biotic/plasmic read the closed resource
+    /// map). Read by [`crate::dop::metabolic_ration_of`].
+    pub ration: Option<[u8; 32]>,
 }
 
 /// **THE COMPILED SEED.** Genesis reads no chain — there is none yet —
@@ -412,6 +418,7 @@ pub fn seed(axis: Axis) -> Vec<Entry> {
         word: word.into(),
         binding: Vec::new(),
         base: None,
+        ration: None,
     };
     match axis {
         Axis::Disposition => vec![
@@ -433,6 +440,7 @@ pub fn seed(axis: Axis) -> Vec<Entry> {
                 word: crate::dop::archetype_word(code).into(),
                 binding: archetype_binding(code),
                 base: None,
+                ration: None,
             })
             .collect(),
         // Clade fold seed is LEGACY display only (0..=20). Expansion
@@ -460,6 +468,7 @@ pub fn seed(axis: Axis) -> Vec<Entry> {
                 word: practice_word(code).into(),
                 binding,
                 base: None,
+                ration: None,
             };
             vec![
                 // austerity: the habitats dim, the extractors ration.
@@ -661,6 +670,7 @@ pub fn fold(chronicle: &crate::vrp::Chronicle, axis: Axis) -> Vec<Entry> {
             word,
             binding,
             base,
+            ration,
         } = &receipt.event
         {
             if Axis::from_code(*on) == Some(axis) {
@@ -670,6 +680,7 @@ pub fn fold(chronicle: &crate::vrp::Chronicle, axis: Axis) -> Vec<Entry> {
                     word: word.clone(),
                     binding: binding.clone(),
                     base: *base,
+                    ration: *ration,
                 });
             }
         }
@@ -708,6 +719,7 @@ pub fn fold_at(chronicle: &crate::vrp::Chronicle, axis: Axis, stamp: u64) -> Vec
             word,
             binding,
             base,
+            ration,
         } = &receipt.event
         {
             if Axis::from_code(*on) == Some(axis) {
@@ -717,6 +729,7 @@ pub fn fold_at(chronicle: &crate::vrp::Chronicle, axis: Axis, stamp: u64) -> Vec
                     word: word.clone(),
                     binding: binding.clone(),
                     base: *base,
+                    ration: *ration,
                 });
             }
         }

@@ -161,6 +161,7 @@ fn the_mint_receipt_carries_the_base_and_the_sealed_form_decodes_without_it() {
         word: "deepworks".into(),
         binding: vec![(CHANNEL_YIELD, ratio(2, 1)), (CHANNEL_UPKEEP, ratio(2, 1))],
         base: Some(ZoneKind::Extractor.wire()),
+        ration: None,
     };
     let widened = deed.wire_bytes();
     let mut records = cfe::tlv::records(&widened);
@@ -178,6 +179,7 @@ fn the_mint_receipt_carries_the_base_and_the_sealed_form_decodes_without_it() {
         word: "deepworks".into(),
         binding: vec![(CHANNEL_YIELD, ratio(2, 1)), (CHANNEL_UPKEEP, ratio(2, 1))],
         base: None,
+        ration: None,
     };
     let sealed_bytes = sealed.wire_bytes();
     let sealed_value = cfe::tlv::records(&sealed_bytes).next().expect("one record").1;

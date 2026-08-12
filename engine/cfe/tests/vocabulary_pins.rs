@@ -412,6 +412,7 @@ fn the_mint_round_trips_the_wire() {
         // modulates a standing kind. This is the sealed form, and it
         // round-trips exactly as it always did.
         base: None,
+        ration: None,
     };
     let bytes = event.wire_bytes();
     // wire_bytes emits a TLV record: tag(1) | len(4 LE) | value.

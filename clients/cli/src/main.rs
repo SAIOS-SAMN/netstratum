@@ -8099,9 +8099,9 @@ fn chronicle(world: &World, style: &Style) {
                     amount(cost)
                 )
             }
-            cfe::dop::ClosureEvent::VocabularyMinted { axis, code, sigil, word, binding, base } => {
+            cfe::dop::ClosureEvent::VocabularyMinted { axis, code, sigil, word, binding, base, ration } => {
                 format!(
-                    "✎ VOCABULARY MINTED — axis {axis}, code {}, {} {} [{}]{}",
+                    "✎ VOCABULARY MINTED — axis {axis}, code {}, {} {} [{}]{}{}",
                     style.strong(&code.to_string()),
                     sigil,
                     style.strong(word),
@@ -8112,6 +8112,14 @@ fn chronicle(world: &World, style: &Style) {
                         .join(" "),
                     match base.and_then(cfe::dop::ZoneKind::from_wire) {
                         Some(kind) => format!(" on {}", style.strong(cfe::dop::zone_word(kind))),
+                        None => String::new(),
+                    },
+                    match ration {
+                        // G2: a stone-eating line — the element it farms.
+                        Some(id) => format!(
+                            " eats {}",
+                            style.strong(&id[..4].iter().map(|b| format!("{b:02x}")).collect::<String>())
+                        ),
                         None => String::new(),
                     }
                 )

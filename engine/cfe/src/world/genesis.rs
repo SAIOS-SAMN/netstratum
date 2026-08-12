@@ -485,6 +485,26 @@ impl World {
         self.mint_vocabulary_based_as(actor, line, axis, sigil, word, binding, None)
     }
 
+    /// **THE METABOLISM ELEMENT MINT (G2 hook, ruled 2026-08-12)** — a
+    /// minted metabolism value that eats a periodic ELEMENT rather than
+    /// a closed resource. The element rides the same [`ClosureEvent::VocabularyMinted`]
+    /// deed as any vocabulary (no new deed, no new gate); it is
+    /// meaningful only on [`crate::vocabulary::Axis::Metabolism`], and
+    /// it never co-occurs with a Zone `base`.
+    #[allow(clippy::too_many_arguments)]
+    pub fn mint_vocabulary_ration_as(
+        &mut self,
+        actor: u64,
+        line: &str,
+        axis: crate::vocabulary::Axis,
+        sigil: &str,
+        word: crate::dop::Name,
+        binding: crate::vocabulary::TradingBinding,
+        ration: [u8; 32],
+    ) -> Result<u8, ActionRefused> {
+        self.mint_vocabulary_full_as(actor, line, axis, sigil, word, binding, None, Some(ration))
+    }
+
     /// **THE ZONE MINT'S FULL FORM (#41)** — the same deed carrying a
     /// declared BASE, the first rung of the operator's resolution
     /// ladder (`vocabulary::zone_base`).
@@ -510,6 +530,24 @@ impl World {
         binding: crate::vocabulary::TradingBinding,
         base: Option<u8>,
     ) -> Result<u8, ActionRefused> {
+        self.mint_vocabulary_full_as(actor, line, axis, sigil, word, binding, base, None)
+    }
+
+    /// The full mint core: `base` (Zone-only) and `ration` (Metabolism-
+    /// only) are the two axis-scoped trailers, mutually exclusive by
+    /// construction. Every other mint path delegates here.
+    #[allow(clippy::too_many_arguments)]
+    pub fn mint_vocabulary_full_as(
+        &mut self,
+        actor: u64,
+        line: &str,
+        axis: crate::vocabulary::Axis,
+        sigil: &str,
+        word: crate::dop::Name,
+        binding: crate::vocabulary::TradingBinding,
+        base: Option<u8>,
+        ration: Option<[u8; 32]>,
+    ) -> Result<u8, ActionRefused> {
         use crate::vocabulary as vocab;
         self.permitted(actor, Scope::Build)?;
 
@@ -519,6 +557,19 @@ impl World {
             }
             if code == 0 || code > crate::dop::ZONE_KINDS {
                 return Err(ActionRefused::BaseUnknown { code });
+            }
+        }
+
+        // G2: a ration eats an ELEMENT, so it is meaningful only on the
+        // Metabolism axis, and it never rides the same mint as a Zone
+        // base — the wire tells the two apart by length, so a mint that
+        // carried both would be unreadable. Refuse at the door.
+        if ration.is_some() {
+            if axis != vocab::Axis::Metabolism {
+                return Err(ActionRefused::BaseOffAxis { axis: axis.code() });
+            }
+            if base.is_some() {
+                return Err(ActionRefused::BaseOffAxis { axis: axis.code() });
             }
         }
 
@@ -561,6 +612,7 @@ impl World {
                 word: word.to_string(),
                 binding: binding.into_entries(),
                 base,
+                ration,
             },
             actor,
         );

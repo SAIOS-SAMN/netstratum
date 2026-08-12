@@ -1584,6 +1584,49 @@ pub fn metabolic_harvest(metabolism: u8) -> (Resource, Ratio) {
     }
 }
 
+/// **THE FOOD SLOT'S CARRIER (G2 element hook, ruled 2026-08-12).** A
+/// ration is what fills the FOOD slot in a flow. For the three compiled
+/// metabolisms it is one of the closed [`Resource`] carriers; for a
+/// MINTED element-eating metabolism it is a periodic-table element id.
+/// The element rides its own metabolism's minted vocabulary entry
+/// (`vocabulary::Entry::ration`), not a new deed — so who may declare a
+/// stone-eating line is exactly who may mint any vocabulary (the T0
+/// standing gate), and the novelty gate judges it like any other.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Ration {
+    /// A closed resource carrier — the v1 metabolisms.
+    Resource(Resource),
+    /// A play-minted periodic element the line farms and consumes.
+    Element([u8; 32]),
+}
+
+/// G2: the ration a metabolism eats, element-aware. `element` is the
+/// fold-resolved ration of THIS metabolism's vocabulary entry
+/// (`Entry::ration`); where it is `Some`, the line is an element-eater
+/// and every other reading (the compiled `metabolic_ration` code map)
+/// is bypassed. Where `None`, the compiled ruleset stands verbatim, so
+/// an unsealed or v1 world reads byte-identically.
+pub fn metabolic_ration_of(metabolism: u8, element: Option<[u8; 32]>) -> Ration {
+    match element {
+        Some(id) => Ration::Element(id),
+        None => Ration::Resource(metabolic_ration(metabolism)),
+    }
+}
+
+/// G2: the habitat's harvest, element-aware. An element-eater FARMS its
+/// own element at the biotic rate (1/tick) — a stone-eating line grows
+/// its stone the way a biotic line grows biomass. Where no element is
+/// declared, the compiled harvest stands verbatim.
+pub fn metabolic_harvest_of(metabolism: u8, element: Option<[u8; 32]>) -> (Ration, Ratio) {
+    match element {
+        Some(id) => (Ration::Element(id), ratio(1, 1)),
+        None => {
+            let (resource, rate) = metabolic_harvest(metabolism);
+            (Ration::Resource(resource), rate)
+        }
+    }
+}
+
 /// G2: one zone's yield under the sealed metabolism — the habitat's
 /// biomass line is the FARM slot and reads the line's harvest; every
 /// other yield is extraction or conversion and never substitutes.
@@ -3238,6 +3281,16 @@ pub enum ClosureEvent {
         /// trailing byte by the additive pattern, so every sealed
         /// pre-zone mint decodes with it absent.
         base: Option<u8>,
+        /// **THE ELEMENT RATION (G2 hook, ruled 2026-08-12)** — for a
+        /// METABOLISM mint, the periodic element this line eats and
+        /// farms; `None` on every other axis and on a compiled-ration
+        /// metabolism. Rides as a trailing 32-byte block by the same
+        /// additive pattern as `base`, and the two never co-occur (base
+        /// is Zone-only, ration is Metabolism-only), so the decoder
+        /// tells them apart by the trailing length alone — 1 byte is a
+        /// base, 32 is a ration — and every sealed pre-ration mint
+        /// decodes with both absent, byte-exact.
+        ration: Option<[u8; 32]>,
     },
     /// THE VERTICAL AXIS (tag 89, 2026-08-01): a line takes an office.
     ///
@@ -4467,7 +4520,7 @@ impl ClosureEvent {
                 value.extend_from_slice(&clade.to_le_bytes());
                 tlv::put(85, &value, &mut out);
             }
-            Self::VocabularyMinted { axis, code, sigil, word, binding, base } => {
+            Self::VocabularyMinted { axis, code, sigil, word, binding, base, ration } => {
                 let mut value = vec![*axis, *code];
                 let mut text = |s: &String| {
                     let bytes = s.as_bytes();
@@ -4482,9 +4535,16 @@ impl ClosureEvent {
                     ratio::encode(factor, &mut value);
                 }
                 // #41: the declared base, trailing and optional — its
-                // ABSENCE is the sealed pre-zone form, byte-exact.
+                // ABSENCE is the sealed pre-zone form, byte-exact. G2:
+                // the element ration rides the same trailing slot as a
+                // 32-byte block; base (Zone) and ration (Metabolism)
+                // never co-occur, so the decoder reads them apart by
+                // length. A malformed caller that set both is refused at
+                // the mint door, never encoded.
                 if let Some(base) = base {
                     value.push(*base);
+                } else if let Some(ration) = ration {
+                    value.extend_from_slice(ration);
                 }
                 tlv::put(96, &value, &mut out);
             }
@@ -5805,10 +5865,19 @@ impl ClosureEvent {
                     at += used;
                     binding.push((channel, factor));
                 }
-                // #41: a byte past the binding is the declared base;
-                // the sealed pre-zone form ends exactly here.
-                let base = value.get(at).copied();
-                Some(Self::VocabularyMinted { axis, code, sigil, word, binding, base })
+                // #41 / G2: what trails the binding, read by LENGTH — a
+                // single byte is the Zone `base`, a 32-byte block is the
+                // Metabolism element `ration`, nothing is the sealed
+                // pre-trailer form. The two never co-occur, so length
+                // alone tells them apart and every legacy receipt (base
+                // = 1 byte, or none) decodes byte-exact.
+                let rest = value.get(at..).unwrap_or(&[]);
+                let (base, ration) = match rest.len() {
+                    1 => (Some(rest[0]), None),
+                    32 => (None, Some(<[u8; 32]>::try_from(rest).ok()?)),
+                    _ => (None, None),
+                };
+                Some(Self::VocabularyMinted { axis, code, sigil, word, binding, base, ration })
             }
             97 => {
                 let seed: [u8; 32] = value.get(..32)?.try_into().ok()?;
