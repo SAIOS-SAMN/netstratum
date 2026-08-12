@@ -34,15 +34,35 @@ fn entropy_dominance_blocks_hull_mint_until_regenerator() {
     let mut w = World::new();
     w.found("bal-strain").expect("found");
     w.commission_star(cfe::thermal::StarClass::G).expect("star");
-    // Yard + neutral scrap feed for the later mint.
+    // Yard, refinery and habitat each bill the habitat's 5 biomass
+    // and the founding kit holds 10 — so the farm goes up FIRST and
+    // stocks each later bill (upkeep eats whatever merely waits).
+    w.zone(3, ZoneKind::Habitat).expect("habitat");
+    // Iron income too: the salvage feed and the regenerator's 8-iron
+    // bill both draw on it, and founding iron alone runs short.
+    w.zone(0, ZoneKind::Extractor).expect("extractor");
+    let farm = |w: &mut World, need: cfe::ratio::Ratio| {
+        for _ in 0..32 {
+            if w.orb().map(|o| o.banked_amount(cfe::dop::Resource::Biomass))
+                .is_some_and(|b| b >= need)
+            {
+                break;
+            }
+            w.tick();
+            let _ = w.collect();
+        }
+    };
+    farm(&mut w, ratio(5, 1));
     w.zone(1, ZoneKind::ShipYard).expect("yard");
+    let _ = w.grant_tech_as(SOVEREIGN, FIRST_ORB, 3);
+    farm(&mut w, ratio(5, 1));
+    w.zone(2, ZoneKind::ElementRefinery).expect("refinery");
     let salvage = Positive::new(ratio(4, 1)).expect("pos");
     w.salvage_scrap(FIRST_ORB, salvage).expect("salvage");
 
     // Strain via refine (pure entropy arm without Regenerator) — 34 §2.3.
-    let _ = w.grant_tech_as(SOVEREIGN, FIRST_ORB, 3);
-    w.zone(2, ZoneKind::ElementRefinery).expect("refinery");
-    let _ = w.prospect(FIRST_ORB, 0);
+    // CIV-REACH-1: stratum 0 always refuses; the bronze surface is 1.
+    let _ = w.prospect(FIRST_ORB, 1);
     let element = w
         .committed()
         .prospects
@@ -69,12 +89,9 @@ fn entropy_dominance_blocks_hull_mint_until_regenerator() {
                 matches!(refuse, Err(ActionRefused::BalanceEntropyDominates { .. })),
                 "strained balance must gate hull mint: {refuse:?}"
             );
-            // Unlock: regenerator (8 iron + 10 bio). Restock bio via habitat.
-            w.zone(3, ZoneKind::Habitat).expect("habitat");
-            for _ in 0..16 {
-                w.tick();
-                let _ = w.collect();
-            }
+            // Unlock: regenerator (8 iron + 10 bio) — the farm has
+            // been yielding since founding; stock the bill.
+            farm(&mut w, ratio(10, 1));
             let regen = w.zone(4, ZoneKind::Regenerator);
             assert!(
                 regen.is_ok(),
@@ -101,7 +118,8 @@ fn element_salvage_feeds_scrap() {
     w.found("bal-elem").expect("found");
     w.commission_star(cfe::thermal::StarClass::G).expect("star");
     let _ = w.zone(1, ZoneKind::ShipYard);
-    let _ = w.prospect(FIRST_ORB, 0);
+    // CIV-REACH-1: stratum 0 always refuses; the bronze surface is 1.
+    let _ = w.prospect(FIRST_ORB, 1);
     let element = w.committed().prospects.first().map(|p| p.element);
     if let Some(el) = element {
         for _ in 0..5 {

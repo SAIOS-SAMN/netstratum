@@ -206,3 +206,91 @@ fn hull_financed_optional_note() {
         assert_eq!(replay(w.chronicle()), w.committed());
     }
 }
+
+/// I5.6 — THE DEFAULT IS ENTROPIC: what a redemption leaves unpaid
+/// posts to the issuer's severance book (the bond-severance shape),
+/// and replay derives the same posting from the receipt.
+#[test]
+fn note_default_posts_to_the_severance_book() {
+    let mut w = stamp_world();
+    seal_clear(&mut w, Resource::Crystal, &ratio(1, 1));
+    let free_before = w.orb().map(|o| o.stamp_amount()).expect("orb");
+    // Note 1: face 2, collateral 1, short term.
+    let face = Positive::new(ratio(2, 1)).expect("face");
+    let coll = Positive::new(ratio(1, 1)).expect("coll");
+    let id = w.issue_note(FIRST_ORB, SOVEREIGN, face, coll, 2).expect("issue");
+    // Drain the rest of the free stamp into a second note's collateral
+    // lock, so maturity finds the bank empty and the seize path runs.
+    let drain = free_before - ratio(1, 1);
+    if drain > ratio(0, 1) {
+        let face2 = Positive::new(drain.clone() + drain.clone()).expect("face2");
+        let coll2 = Positive::new(drain).expect("coll2");
+        let _ = w.issue_note(FIRST_ORB, SOVEREIGN, face2, coll2, 400);
+    }
+    for _ in 0..3 {
+        w.tick();
+    }
+    let severance_before = w
+        .orb()
+        .map(|o| o.severance_load.clone())
+        .expect("orb");
+    w.redeem_note(id).expect("mature note redeems (by seizure)");
+    let note = w.notes().iter().find(|n| n.note_id == id).expect("note").clone();
+    assert!(!note.open, "the note closed");
+    let redeemed = w
+        .chronicle()
+        .receipts()
+        .iter()
+        .rev()
+        .find_map(|r| match &r.event {
+            ClosureEvent::NoteRedeemed { note_id, paid, seized, .. }
+                if *note_id == id =>
+            {
+                Some((paid.clone(), seized.clone()))
+            }
+            _ => None,
+        })
+        .expect("the redemption receipted");
+    let (paid, seized) = redeemed;
+    assert!(seized > ratio(0, 1), "the seize path ran");
+    assert!(paid < note.notional, "the redemption fell short");
+    let severance_after = w.orb().map(|o| o.severance_load.clone()).expect("orb");
+    assert_eq!(
+        severance_after - severance_before,
+        note.notional - paid,
+        "the unpaid remainder posts to the severance book, exactly"
+    );
+    assert_eq!(replay(w.chronicle()), w.committed(), "SEAL B — replay derives the same posting");
+}
+
+/// I5.4 — a margin breach refuses funding, and the liquidation door
+/// closes the perp with the flag receipted (the conductor's
+/// instrument_step walks exactly this pair).
+#[test]
+fn margin_breach_refuses_funding_and_liquidation_closes() {
+    let mut w = stamp_world();
+    seal_clear(&mut w, Resource::Crystal, &ratio(2, 1));
+    // Thin margin against a fat notional: maint = n·entry/4 = 4 > 1/4.
+    let n = Positive::new(ratio(8, 1)).expect("n");
+    let m = Positive::new(ratio(1, 4)).expect("m");
+    let short = w.register_agent("thin-short").expect("agent");
+    let pid = w
+        .open_perp(FIRST_ORB, SOVEREIGN, short, Resource::Crystal, n, m)
+        .expect("perp opens (no maintenance gate at the door)");
+    // Move the mark so funding is positive.
+    seal_clear(&mut w, Resource::Crystal, &ratio(3, 1));
+    assert!(matches!(
+        w.fund_perp(pid),
+        Err(cfe::world::ActionRefused::PerpMarginBreach { .. })
+    ));
+    w.liquidate_perp(pid).expect("the breach liquidates");
+    assert!(w.perps().iter().any(|p| p.perp_id == pid && !p.open));
+    let liquidated = w.chronicle().receipts().iter().any(|r| {
+        matches!(
+            r.event,
+            ClosureEvent::PerpClosed { perp_id, liquidated: true, .. } if perp_id == pid
+        )
+    });
+    assert!(liquidated, "the close receipt carries the liquidation flag");
+    assert_eq!(replay(w.chronicle()), w.committed(), "SEAL B after liquidation");
+}

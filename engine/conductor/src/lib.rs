@@ -3882,7 +3882,9 @@ fn ensure_npc_instruments(world: &mut cfe::world::World, actor: u64) {
             }
         }
     }
-    // Fund open perps once per beat (premium ladder).
+    // Fund open perps once per beat (premium ladder). I5.4: a margin
+    // breach LIQUIDATES — a perp that cannot fund cannot stand, and
+    // swallowing the refusal left breached books open forever.
     let perps: Vec<u64> = world
         .perps()
         .iter()
@@ -3890,7 +3892,11 @@ fn ensure_npc_instruments(world: &mut cfe::world::World, actor: u64) {
         .map(|p| p.perp_id)
         .collect();
     for id in perps {
-        let _ = world.fund_perp_as(actor, id);
+        if let Err(cfe::world::ActionRefused::PerpMarginBreach { .. }) =
+            world.fund_perp_as(actor, id)
+        {
+            let _ = world.close_perp_as(actor, id, true);
+        }
     }
     // Empiricist (disposition 2) or Exchange: issue Iron share when listable and none open.
     if world.shares_listable() && world.shares().iter().all(|s| !s.open) {

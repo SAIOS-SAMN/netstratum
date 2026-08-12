@@ -2479,7 +2479,14 @@ pub fn diplo(
     match domain.as_deref() {
         None | Some("help") | Some("?") | Some("menu") | Some("index") => diplo_index(style),
         Some("local") | Some("treaty") | Some("treaties") | Some("pair") => {
-            diplo_local(world, style)
+            // DEEP DEEDS: further words fire the treaty grammar itself
+            // (call-not-copy — the one home in `treaty_command`);
+            // bare `diplomatic local` reads the board.
+            let mut rest = words.peekable();
+            match rest.peek().is_some() {
+                true => crate::treaty_command(world, rest, style),
+                false => diplo_local(world, style),
+            }
         }
         Some("stellar") | Some("interstellar") | Some("stars") | Some("union") | Some("cross") => {
             diplo_stellar(world, style)
@@ -2534,9 +2541,9 @@ fn diplo_local(world: &World, style: &Style) {
     for t in treaties.iter().take(16) {
         println!("  · deal {} · {:?} · partner {}", t.deal, t.kind, t.partner);
     }
-    leaf(style, "treaty trade|defense|peace|war with <world>", "seal");
-    leaf(style, "treaties · renounce <deal> <world>", "list / drop");
-    leaf(style, "treaty elements <deal> <world> <id>...", "fence a trade pact (E3.9)");
+    leaf(style, "diplomatic local trade|defense|peace|war with <world>", "seal (deep deed)");
+    leaf(style, "diplomatic local renounce <deal> <world>", "drop (deep deed)");
+    leaf(style, "diplomatic local elements <deal> <world> <id>...", "fence (deep deed, E3.9)");
     leaf(style, "diplomatic stellar", "interstellar wall / haul / license");
     leaf(style, "bench diplomatic", "craft components first");
     foot_diplomatic(style, Some("local"));

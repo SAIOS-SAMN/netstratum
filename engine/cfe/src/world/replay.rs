@@ -1093,6 +1093,15 @@ pub fn replay(chronicle: &Chronicle) -> Committed {
                             held.bank_stamp(-paid.clone());
                         }
                     }
+                    // I5.6: the unpaid remainder posts to the severance
+                    // book — derived from the receipt's paid against the
+                    // register's notional, the one home the verb read.
+                    let unpaid = n.notional.clone() - paid.clone();
+                    if unpaid > ratio(0, 1) {
+                        if let Some(held) = peel(&mut orbs, *orb_id) {
+                            held.severance_load += unpaid;
+                        }
+                    }
                 }
             }
             ClosureEvent::FutureOpened {

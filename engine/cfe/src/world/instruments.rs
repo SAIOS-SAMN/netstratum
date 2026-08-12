@@ -278,6 +278,18 @@ impl World {
             (pay, seize)
         };
         self.notes[at].open = false;
+        // I5.6 — THE DEFAULT IS ENTROPIC. What a redemption leaves
+        // unpaid posts to the issuer's own severance book — the same
+        // book a bond cut without notice and a broken peace post to,
+        // because it is the same act: an obligation ended short by one
+        // side. Replay mirrors this from the receipt's `paid` against
+        // its own notes register (notional lives there).
+        let unpaid = note.notional.clone() - paid.clone();
+        if unpaid > ratio(0, 1) {
+            if let Some(held) = peel(&mut self.orbs, orb) {
+                held.severance_load += unpaid;
+            }
+        }
         self.close(
             ClosureEvent::NoteRedeemed {
                 note_id,

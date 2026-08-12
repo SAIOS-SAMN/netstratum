@@ -151,7 +151,7 @@ trade          CIRCULATE / RUN
   (trade diplo|stellar → redirect to diplomatic root)
 
 diplomatic     DIPLOMACY ACTIVITY  (alias: diplo)
-  local        pair treaties · renounce
+  local        pair treaties · renounce · DEEP DEEDS: seal/renounce/fence fire from the leaf
   stellar      crossed · war walls · aperture · license
   mesh         councils · bonds · forwards standing
   craft        → bench diplomatic
@@ -192,7 +192,7 @@ Dual:    polity  ←activity→  bench polity
 | E3.9 | Treaty allow-lists for element ids |
 | I5.x | SHARE/NOTE/FUT/PERP instrument lifecycle residual |
 | Court | Rename Earth-culture line names (operator only) |
-| Deep deeds | more domain leaves still status+verb (partial: planetary prospect/assay/refine fire) |
+| Deep deeds | more domain leaves still status+verb (partial: planetary prospect/assay/refine fire; **diplomatic local seal/renounce/fence fire**, 2026-08-12 — `diplomatic local <treaty grammar>` delegates to the one home) |
 
 ### Landed this pass
 

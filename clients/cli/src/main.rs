@@ -696,7 +696,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         Some("corpus") => corpus_command(world, words, style, *current),
         // #42 THE POLITICAL SPECTRUM — trade · defense · peace · war.
         Some("treaty") | Some("treaties") | Some("pact") => {
-            treaty_command(world, words, style)
+            treaty_command(world, words.map(str::to_string), style)
         }
         Some("genesis") => {
             let civilization = words.next();
@@ -6209,11 +6209,18 @@ fn hex_prefix(element: &[u8; 32]) -> String {
 
 /// **#42 THE POLITICAL SPECTRUM** — `treaty <kind> with <world> [deal
 /// <n>] [for <n>] [melt <p>/<q>]`, and `treaties` to read what stands.
-fn treaty_command(world: &mut World, mut words: std::str::SplitWhitespace, style: &Style) {
+/// Deep-deed door: the DIPLOMATIC hub fires the same grammar through
+/// `diplomatic local …` (call-not-copy), so the iterator is generic
+/// over owned words rather than tied to the prompt's SplitWhitespace.
+pub(crate) fn treaty_command(
+    world: &mut World,
+    mut words: impl Iterator<Item = String>,
+    style: &Style,
+) {
     use cfe::treaty::{TreatyKind, TreatyTerms, PAIR_MELT};
     let kind_word = words.next();
     // Bare `treaties` (or an unknown first word) reads the board.
-    let Some(kind) = kind_word.and_then(|word| match word {
+    let Some(kind) = kind_word.as_deref().and_then(|word| match word {
         "trade" => Some(TreatyKind::Trade),
         "defense" | "defence" => Some(TreatyKind::Defense),
         "peace" => Some(TreatyKind::Peace),
@@ -6222,10 +6229,10 @@ fn treaty_command(world: &mut World, mut words: std::str::SplitWhitespace, style
     }) else {
         // E3.9: fence a standing trade pact to enumerated matter.
         // treaty elements <deal> <world> <id-prefix>...
-        if let Some("elements") = kind_word {
+        if let Some("elements") = kind_word.as_deref() {
             let deal = words.next().and_then(|w| w.parse::<u64>().ok());
-            let partner = words.next().map(str::to_string);
-            let prefixes: Vec<String> = words.map(str::to_string).collect();
+            let partner = words.next();
+            let prefixes: Vec<String> = words.collect();
             let (Some(deal), Some(partner)) = (deal, partner) else {
                 return println!(
                     "{} usage: {} — prefixes resolve against banked stock and open veins",
@@ -6276,15 +6283,15 @@ fn treaty_command(world: &mut World, mut words: std::str::SplitWhitespace, style
                 Err(refusal) => refuse(world, &refusal, style),
             };
         }
-        if let Some("renounce") = kind_word {
+        if let Some("renounce") = kind_word.as_deref() {
             let deal = words.next().and_then(|w| w.parse::<u64>().ok());
             let partner = words.next();
             return match (deal, partner) {
-                (Some(deal), Some(partner)) => match world.renounce(deal, partner) {
+                (Some(deal), Some(partner)) => match world.renounce(deal, &partner) {
                     Ok(()) => println!(
                         "{} the pact with {} is renounced — your own leg, and only yours",
                         style.ok("⚑"),
-                        style.strong(partner)
+                        style.strong(&partner)
                     ),
                     Err(refusal) => refuse(world, &refusal, style),
                 },
@@ -6375,16 +6382,16 @@ fn treaty_command(world: &mut World, mut words: std::str::SplitWhitespace, style
     let mut melt: Option<cfe::ratio::Ratio> = None;
     let mut malformed: Option<String> = None;
     while let Some(word) = words.next() {
-        match word {
-            "with" => partner = words.next().map(|held| held.to_string()),
+        match word.as_str() {
+            "with" => partner = words.next(),
             "deal" => deal = words.next().and_then(|w| w.parse().ok()).unwrap_or(1),
             "for" => term = words.next().and_then(|w| w.parse().ok()).unwrap_or(0),
             "melt" => {
-                let held = words.next().unwrap_or("");
-                let (numer, denom) = held.split_once('/').unwrap_or((held, "1"));
+                let held = words.next().unwrap_or_default();
+                let (numer, denom) = held.split_once('/').unwrap_or((held.as_str(), "1"));
                 match (numer.parse::<i64>(), denom.parse::<i64>()) {
                     (Ok(n), Ok(d)) if d != 0 => melt = Some(cfe::ratio::ratio(n, d)),
-                    _ => malformed = Some(held.to_string()),
+                    _ => malformed = Some(held.clone()),
                 }
             }
             other => malformed = Some(other.to_string()),
