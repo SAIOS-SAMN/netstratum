@@ -45,11 +45,31 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 > order-work forever (syntropy 0; regenerator unaffordable at 10
 > biomass on a mineral line). Witnesses: `civ_reach_pins` +3.
 >
+> **LIVE-BOARD RE-MEASURE (2026-08-12, 5 conductor beats on `var/`):**
+> the repair holds in play. Before: zero refineries, zero T4/T6 seats,
+> element economy frozen 2 days. After 5 beats: element crossings and
+> STAMP spots CLEAR, refineries stand (aerie · bloomdeep · borealis ·
+> cinderspan …), **41 Caravans + 41 Exchanges** seated, elements
+> 4817→5198 kinds, strata s1→s3/4, reach L2→L3/5 across the roster,
+> every chain intact. **Beat cost measured: ~7m15s/beat at 153 live
+> civilizations** — the R1+R3 remediation (REMEDIATIONS.md) is now the
+> live board's binding constraint. **Kernel-lane relays from the judge
+> tally (runs beside the chain, so observed not enforced):** (1)
+> STAR-ENDOW-1 kit top-ups + ORBIT-ENDOW-1 band gifts read as
+> `ConservationBroken` — the kernel was never taught the endowment
+> deeds create value (c2242de landed without kernel arms); (2)
+> `NoSuchEntity {{ actor: 1 }}` ×153/beat — the automaton actor is
+> outside the kernel's entity view (the known actor-100 seam's live
+> twin); (3) `DecayExceedsBound` ×31/beat vs bound 0 — decay-bound
+> drift, unattributed. All three precede the Phase-3 flip and gate it.
+>
 > **STANDING DEBT, not fixed here:** `tuned_constant_ratchet` is red on
 > `main` — 170 tuned ratio literals against the 112 ceiling (58 dials
 > entered during the Wave-6..8/E3 arc without derivation). The ceiling
 > does not rise by law; the debt needs its own remediation cadence
 > (derive, measure, or mint per dial — anchor-provenance ruling).
+> MAPPED 2026-08-12: `docs/REMEDIATIONS.md` R20 (dop 66 · vocabulary
+> 37 · conductor 20 · science 10 · taxon 8 · parameter 7 · tail 22).
 
 Workspace **clean** on `main`. Wave-8 / polity dual-law + **JSON-off
 architecture** closed. **Next phase: E3.6 E-MKT-1** (element market cargo).
