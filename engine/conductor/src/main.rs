@@ -108,12 +108,17 @@ fn main() {
     // polled each beat — the player's hand on the autonomous board.
     //   paused          the beats hold (nothing ticks, nothing ages)
     //   cadence N       seconds between beats (0 = flat out)
-    // The CLI writes it (`npcs pause|resume|speed N`); hand-editing is
-    // equally lawful. A missing or malformed file reads as defaults.
+    //   advance N       PUNCTUATED PLAY (task #11): run N beats flat
+    //                   out, then pause — the player owns the clock.
+    //                   The countdown lives in the FILE, so a crash
+    //                   mid-advance resumes honestly where it stood.
+    // The CLI writes it (`npcs pause|resume|speed N|advance N`);
+    // hand-editing is equally lawful. Missing/malformed = defaults.
     let control_path = PathBuf::from(&var_root).join("conductor.ctl");
-    let read_control = |fallback: u64| -> (bool, u64) {
+    let read_control = |fallback: u64| -> (bool, u64, Option<u64>) {
         let mut paused = false;
         let mut cadence = fallback;
+        let mut advance = None;
         if let Ok(text) = std::fs::read_to_string(&control_path) {
             for line in text.lines() {
                 let line = line.trim();
@@ -123,16 +128,58 @@ fn main() {
                     if let Ok(n) = word.trim().parse() {
                         cadence = n;
                     }
+                } else if let Some(word) = line.strip_prefix("advance ") {
+                    if let Ok(n) = word.trim().parse() {
+                        advance = Some(n);
+                    }
                 }
             }
         }
-        (paused, cadence)
+        (paused, cadence, advance)
+    };
+    // Rewrite ONLY the lines this loop owns; every other line (pen
+    // yields etc.) survives verbatim — the CLI's own rewrite law.
+    let write_control = |paused: bool, advance: Option<u64>| {
+        let mut text = String::new();
+        if let Ok(existing) = std::fs::read_to_string(&control_path) {
+            for line in existing.lines() {
+                let line = line.trim();
+                if line == "paused" || line.starts_with("advance ") || line.is_empty() {
+                    continue;
+                }
+                text.push_str(line);
+                text.push('\n');
+            }
+        }
+        if paused {
+            text.push_str("paused\n");
+        }
+        if let Some(n) = advance {
+            text.push_str(&format!("advance {n}\n"));
+        }
+        let _ = std::fs::write(&control_path, text);
     };
 
     let mut beat: u64 = 0;
     let mut announced_pause = false;
     loop {
-        let (paused, cadence) = read_control(cadence_secs);
+        let (paused, cadence, advance) = read_control(cadence_secs);
+        // PUNCTUATED PLAY: an advance overrides the pause and runs
+        // flat out; zero parks the board paused with its summary.
+        let (paused, cadence) = match advance {
+            Some(0) => {
+                write_control(true, None);
+                println!(
+                    "conductor: ADVANCE complete — the board pauses; `npcs resume` or `npcs advance N` to continue"
+                );
+                (true, cadence)
+            }
+            Some(n) => {
+                write_control(false, Some(n - 1));
+                (false, 0)
+            }
+            None => (paused, cadence),
+        };
         if paused {
             if !announced_pause {
                 println!("conductor: PAUSED — npcs resume (or edit {}) to continue", control_path.display());

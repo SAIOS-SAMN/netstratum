@@ -1559,10 +1559,28 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 }
                 (paused, cadence)
             };
+            let mut advance: Option<u64> = None;
             let verb = words.next();
             match verb {
                 Some("pause") => paused = true,
                 Some("resume") | Some("start") => paused = false,
+                // PUNCTUATED PLAY (task #11): run N beats flat out,
+                // then the board parks itself paused — advance a
+                // year, read the board, act, advance again.
+                Some("advance") => match words.next().and_then(|w| w.parse::<u64>().ok()) {
+                    Some(n) if n > 0 => {
+                        advance = Some(n);
+                        paused = false;
+                    }
+                    _ => {
+                        println!(
+                            "{} advance wants a beat count — e.g. {} (a year is 60)",
+                            style.bad("✗"),
+                            style.strong("npcs advance 60")
+                        );
+                        return;
+                    }
+                },
                 Some("speed") => match words.next().and_then(|w| w.parse::<u64>().ok()) {
                     Some(secs) => cadence = Some(secs),
                     None => {
@@ -1576,7 +1594,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 },
                 Some(other) => {
                     println!(
-                        "{} unknown npcs verb {} — pause · resume · speed <seconds>",
+                        "{} unknown npcs verb {} — pause · resume · speed <seconds> · advance <beats>",
                         style.bad("✗"),
                         style.strong(other)
                     );
@@ -1598,11 +1616,16 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             let mut text = String::new();
             // Pending `yield` asks (MESH-1b) and any other lines the
             // conductor understands survive the rewrite — this verb
-            // owns paused/cadence only.
+            // owns paused/cadence/advance only (a stale advance must
+            // not outlive the pause that countermands it).
             if let Ok(existing) = std::fs::read_to_string(&control) {
                 for line in existing.lines() {
                     let line = line.trim();
-                    if line == "paused" || line.starts_with("cadence ") || line.is_empty() {
+                    if line == "paused"
+                        || line.starts_with("cadence ")
+                        || line.starts_with("advance ")
+                        || line.is_empty()
+                    {
                         continue;
                     }
                     text.push_str(line);
@@ -1615,11 +1638,19 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
             if let Some(secs) = cadence {
                 text.push_str(&format!("cadence {secs}\n"));
             }
+            if let Some(beats) = advance {
+                text.push_str(&format!("advance {beats}\n"));
+            }
             match std::fs::write(&control, text) {
                 Ok(()) => println!(
                     "{} npc board {} — the conductor reads it on its next beat",
                     style.ok("✓"),
-                    if paused {
+                    if let Some(beats) = advance {
+                        format!(
+                            "will ADVANCE {} beat(s) flat out, then pause — read the board when it parks",
+                            style.strong(&beats.to_string())
+                        )
+                    } else if paused {
                         style.bad("PAUSED").to_string()
                     } else {
                         match cadence {
