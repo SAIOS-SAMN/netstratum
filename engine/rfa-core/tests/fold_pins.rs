@@ -139,6 +139,42 @@ fn the_polarity_is_pinned_against_inversion() {
     );
 }
 
+/// **THE MINTING BRANCH, PINNED** (task #19 — §8a's owed witness).
+/// The reading-polarity above says which VERDICT each input gets; this
+/// says which verdict MINTS, so the value-emitting branch is held by a
+/// test and not by a comment (the §8a defect was glosses that inverted
+/// it). Only proven genuine difference emits a residue.
+#[test]
+fn the_minting_branch_is_proven_difference() {
+    let coherent = anchor_3();
+    let incoherent = incoherent_3();
+    let ops = vec![identity_op(3), frame(3, &[1, 2, 0], 9)];
+
+    // Proven genuine difference → the residue emits → MINT.
+    assert!(
+        gated_fold(&coherent, &incoherent, &ops, None).mints_residue(),
+        "genuine difference is the ONE branch that mints"
+    );
+    // A proven frame change is paid for in gauge → mints NOTHING.
+    let identity_witness = OrbitWitness { operator_id: 0, step: 1 };
+    assert!(
+        !f_fold_star(&coherent, &coherent, &ops, Some(&identity_witness)).mints_residue(),
+        "a gauge fold mints nothing — anyone wiring the mint from a lock \
+         pays for a frame change and gets a false plane"
+    );
+    // Unproven (no witness, or a bad one) proves NEITHER gauge nor
+    // difference → mints nothing; the default is silence, not reward.
+    assert!(
+        !f_fold_star(&coherent, &coherent, &ops, None).mints_residue(),
+        "unproven conjugacy mints nothing"
+    );
+    let bad_witness = OrbitWitness { operator_id: 9, step: 1 };
+    assert!(
+        !f_fold_star(&coherent, &coherent, &ops, Some(&bad_witness)).mints_residue(),
+        "a witness that fails its re-walk mints nothing"
+    );
+}
+
 #[test]
 fn the_default_is_veto_not_fold() {
     // Absent proof, structure is preserved. An unproved fold destroys

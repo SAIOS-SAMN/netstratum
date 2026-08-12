@@ -185,6 +185,28 @@ pub enum FoldReading {
     TorsionVeto(TorsionCause),
 }
 
+impl FoldReading {
+    /// **THE MINTING POLARITY, IN CODE** (task #19, §8a's owed witness).
+    ///
+    /// Which reading emits a residue — and therefore MINTS. Only PROVEN
+    /// GENUINE DIFFERENCE does: `TorsionVeto(SignaturesDiffer)`, where
+    /// the invariant factors differ so no conjugation relates the two
+    /// states (16_UNIT §4a's bounce). A `GaugeFold` is a proven frame
+    /// change — paid for gauge, it mints NOTHING. An unproven veto
+    /// (`WitnessAbsent` / `WitnessInvalid`) has shown neither gauge NOR
+    /// genuine difference, so it mints nothing either: the default is
+    /// silence, never reward.
+    ///
+    /// This polarity was §8a's recorded defect — module glosses once
+    /// stated it inverted (lock found ⇒ mint), against the code. It now
+    /// lives HERE, held by `the_minting_branch_is_proven_difference`, so
+    /// a comment can never flip it again: whoever wires the mint reads
+    /// this method, and the test refuses the inversion.
+    pub fn mints_residue(&self) -> bool {
+        matches!(self, FoldReading::TorsionVeto(TorsionCause::SignaturesDiffer))
+    }
+}
+
 /// THE PROVER'S SEARCH — find an operator that carries `a` exactly onto
 /// `b` in ONE conjugation.
 ///

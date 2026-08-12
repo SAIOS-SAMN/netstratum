@@ -883,9 +883,28 @@ and the residue emits. The code was never wrong; only the two glosses
 were, which is the C(Δ)=0 lesson repeating. It matters because the
 polarity decides which branch MINTS: anyone wiring the mint from those
 comments would have paid for gauge and refused genuine difference.
-Corrected in place, `cargo check -p rfa-core` clean. **Owed: a witness
+Corrected in place, `cargo check -p rfa-core` clean. ~~**Owed: a witness
 pinning the minting branch, so the polarity is held by a test and not by
-prose.**
+prose.**~~ **PAID 2026-08-12 (task #19):** `FoldReading::mints_residue()`
+names the polarity in code — only `TorsionVeto(SignaturesDiffer)`
+(proven genuine difference) mints; a `GaugeFold` and every unproven
+veto mint nothing. Held by `fold_pins::the_minting_branch_is_proven_
+difference`; a comment can never flip it again.
+
+**MESH-LANE STATUS (task #19, 2026-08-12).** Of §8a/§8b's remainder:
+the polarity witness is PAID (above); **S1 is verified SAFE** — the
+conductor's volumetric arm (`lib.rs` ~2270) passes `None` as its proof,
+so the decorative certificate feeds NO live mint (the §8b danger was
+already closed by the non-minting arm; a real volumetric mint is
+positive future work needing tag 91 + a volumetric `mint_bound`). The
+THREE remaining items are the SECOND HEAD's economy and sequence AFTER
+the Phase-3 flip (#16, operator-gated): (1) the merge site calling
+`rfa_core::f_fold_star` (the re-convergence door for `branch`, now
+provably-polarised by the witness above); (2) a beat reading
+`mesh::agree`'s Σ_mesh and firing the re-sync trigger; (3) the PoUW
+anchor — peer weight = certificate-verified genuine difference
+(`SYSTEM_SPEC` §5's load-bearing gap for real value). All three want the
+judged chain the flip provides, so they wait on the same ruling.
 
 ### 8b. THE ANCHOR AND IDENTITY — constitutional, known, unbuilt
 
