@@ -39,7 +39,11 @@ fn main() {
         ("starved of signal", Need::struck(Hunger::Novelty, 480)),
         (
             "starved of both",
-            Need { hungers: vec![Hunger::Novelty, Hunger::Resonance], starved_for: 900 },
+            Need {
+                hungers: vec![Hunger::Novelty, Hunger::Resonance],
+                starved_for: 900,
+                thin: Vec::new(),
+            },
         ),
     ];
 
