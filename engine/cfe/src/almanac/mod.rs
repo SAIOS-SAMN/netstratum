@@ -34,7 +34,9 @@ pub use locality::{
     civ_may_work, civ_reach, lines_of, local_to, pressure, refines, strata_lines, workable_in,
 };
 pub use periodic::{periodic_of, Periodic, CELLS, LANES, LINES, PHASES, SHELLS, SPINS};
-pub use rejuvenation::{grained_logistic, REGROWTH_GRAIN};
+pub use rejuvenation::{
+    carrying_capacity, grained_logistic, habitability, intrinsic_rate, REGROWTH_GRAIN,
+};
 pub use science::{
     bill_crystal_portion, dark_utility, explodes, explosion_risk, explosion_threshold, isomorphic,
     iso_union_knowledge, iso_union_product, iso_union_recipe, lab_create_bill, lab_pole_card,

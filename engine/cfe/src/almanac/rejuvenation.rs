@@ -24,6 +24,8 @@
 //! keep jumping), and the arithmetic stays exact and bounded.
 
 use crate::ratio::{ratio, Ratio};
+use super::thermal::ThermalRegion;
+use crate::dop::ZoneKind;
 
 /// The half-recovery scale — `r·Δt = GRAIN` is where the surrogate
 /// reaches `1/2`, so `GRAIN/r` is the time to close half the gap to
@@ -57,4 +59,48 @@ pub fn grained_logistic(p0: &Ratio, k: &Ratio, r: &Ratio, dt: u64) -> Ratio {
     let num = k.clone() * p0.clone() * span.clone();
     let den = p0.clone() * span + (k.clone() - p0.clone()) * grain;
     num / den
+}
+
+/// **THE INTRINSIC GROWTH RATE `r`** — how fast the environment
+/// recovers. DERIVED, not dialed: it is the natural biomass rate, the
+/// `Habitat`'s own per-tick yield (life regrows at the rate life
+/// grows). This is the `r` the archetypes are measured against —
+/// extract below it and the Custodian holds; above it and the Locust
+/// collapses the world.
+pub fn intrinsic_rate() -> Ratio {
+    ZoneKind::Habitat.yield_per_tick().1
+}
+
+/// **HABITABILITY** — how life-bearing a thermal region is, in `[0,1]`.
+/// Biomass is workable only in the MESIC band (`workable_at`, phase 2),
+/// so habitability peaks there and tapers monotonically with distance
+/// FROM mesic: the temperate fringes carry half, the marginal bands a
+/// quarter, and the extremes nothing. It is the ordering that is the
+/// law (nearer mesic is more habitable); the fractions are the
+/// first-cut taper.
+pub fn habitability(region: ThermalRegion) -> Ratio {
+    match region {
+        // The life band.
+        ThermalRegion::Mesic => ratio(1, 1),
+        // The temperate fringes, one band out either way.
+        ThermalRegion::Sublime | ThermalRegion::Torrid => ratio(1, 2),
+        // The marginal bands, two out.
+        ThermalRegion::Cryogenic | ThermalRegion::HyperThermal => ratio(1, 4),
+        // The extremes and above the ceiling: barren.
+        ThermalRegion::Quenched | ThermalRegion::Incandescent | ThermalRegion::Beyond => {
+            ratio(0, 1)
+        }
+    }
+}
+
+/// **THE CARRYING CAPACITY `K`** — the natural ceiling of a world's
+/// biomass, from the three readings the ruling names: the living ZONES
+/// (habitats and regenerators — the ecological footprint), and the
+/// place (its thermal region, itself the star luminosity ⊗ orbit). A
+/// lush mesic world with many habitats carries a large `K`; a barren
+/// rock near zero. `living_zones` is the count of `Habitat` +
+/// `Regenerator` seats; each anchors one unit of capacity, scaled by
+/// the place's [`habitability`].
+pub fn carrying_capacity(living_zones: u64, region: ThermalRegion) -> Ratio {
+    ratio(living_zones as i64, 1) * habitability(region)
 }

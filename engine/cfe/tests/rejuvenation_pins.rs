@@ -90,3 +90,63 @@ fn the_denominator_cannot_run_away_however_long_the_wait() {
     }
     assert!(widest < 40, "the figure stays holdable across any wait: {widest} digits");
 }
+
+// ── K and r — the derivations that feed the curve ──
+
+use cfe::almanac::{carrying_capacity, habitability, intrinsic_rate, ThermalRegion};
+
+#[test]
+fn the_rate_is_the_natural_biomass_rate_not_a_dial() {
+    // r is the Habitat's own yield — life regrows at the rate life grows.
+    assert_eq!(intrinsic_rate(), cfe::dop::ZoneKind::Habitat.yield_per_tick().1);
+    assert!(intrinsic_rate() > ratio(0, 1), "a positive recovery rate");
+}
+
+#[test]
+fn habitability_peaks_at_mesic_and_tapers_to_the_extremes() {
+    // The ordering IS the law: nearer the life band is more habitable,
+    // and the extremes bear nothing.
+    let mesic = habitability(ThermalRegion::Mesic);
+    let fringe = habitability(ThermalRegion::Sublime);
+    let marginal = habitability(ThermalRegion::Cryogenic);
+    assert_eq!(mesic, ratio(1, 1), "the life band is fullest");
+    assert!(mesic > fringe, "the temperate fringe carries less");
+    assert!(fringe > marginal, "the marginal band less still");
+    assert_eq!(habitability(ThermalRegion::Torrid), fringe, "symmetric about mesic");
+    assert_eq!(habitability(ThermalRegion::HyperThermal), marginal, "symmetric about mesic");
+    for barren in [ThermalRegion::Quenched, ThermalRegion::Incandescent, ThermalRegion::Beyond] {
+        assert_eq!(habitability(barren), ratio(0, 1), "the extremes are barren");
+    }
+}
+
+#[test]
+fn a_lush_world_carries_more_than_a_barren_one_and_a_rock_carries_nothing() {
+    // K rises with the living footprint and with the place's
+    // habitability — a mesic world with many habitats holds a large K.
+    let lush = carrying_capacity(8, ThermalRegion::Mesic);
+    let cold = carrying_capacity(8, ThermalRegion::Cryogenic);
+    let rock = carrying_capacity(8, ThermalRegion::Incandescent);
+    assert!(lush > cold, "the same zones hold more life in the mesic band");
+    assert_eq!(rock, ratio(0, 1), "a scorched rock carries no biomass, whatever it builds");
+    // More living zones, more capacity — the footprint scales it.
+    assert!(
+        carrying_capacity(16, ThermalRegion::Mesic) > lush,
+        "a wider ecological footprint holds more"
+    );
+    // A world with no living zones has no natural biomass ceiling to speak of.
+    assert_eq!(carrying_capacity(0, ThermalRegion::Mesic), ratio(0, 1));
+}
+
+#[test]
+fn the_derivations_feed_the_curve_and_a_collapsed_lush_world_climbs_back() {
+    // The pieces compose: a mesic world stripped to an ember recovers
+    // toward its (large) K along the S-curve, slowly at first.
+    let k = carrying_capacity(10, ThermalRegion::Mesic);
+    let r = intrinsic_rate();
+    let ember = ratio(1, 10);
+    let early = cfe::almanac::grained_logistic(&ember, &k, &r, 10);
+    let late = cfe::almanac::grained_logistic(&ember, &k, &r, 10_000);
+    assert!(early > ember && early < k, "it has begun to climb");
+    assert!(late > early, "and keeps climbing toward its lush ceiling");
+    assert!(late <= k, "never past K");
+}
