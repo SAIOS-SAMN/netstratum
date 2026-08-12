@@ -75,6 +75,7 @@ pub mod bench_games;
 pub mod science_lab;
 pub mod ap_budget;
 pub mod labor;
+pub mod rejuvenation;
 
 pub use science_lab::{LabCreateResult, ScienceLabBoard};
 pub use bench_games::{

@@ -99,8 +99,11 @@ pub fn habitability(region: ThermalRegion) -> Ratio {
 /// place (its thermal region, itself the star luminosity ⊗ orbit). A
 /// lush mesic world with many habitats carries a large `K`; a barren
 /// rock near zero. `living_zones` is the count of `Habitat` +
-/// `Regenerator` seats; each anchors one unit of capacity, scaled by
-/// the place's [`habitability`].
+/// `Regenerator` seats; each sustains a RECOVERY-WINDOW's worth of
+/// stock — `REGROWTH_GRAIN` units, a living zone's unit output over the
+/// half-recovery span — scaled by the place's [`habitability`], so a
+/// lush world's `K` stands well above any young colony's founding
+/// stock and a scorched rock holds nothing.
 pub fn carrying_capacity(living_zones: u64, region: ThermalRegion) -> Ratio {
-    ratio(living_zones as i64, 1) * habitability(region)
+    ratio(living_zones as i64 * REGROWTH_GRAIN, 1) * habitability(region)
 }
