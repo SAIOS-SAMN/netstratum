@@ -260,17 +260,26 @@ pub fn frontier(vocabulary: usize, depth: usize) -> u128 {
 /// `VisitedNodes₃ = frontier(len, 3)` from the same call — the
 /// measurement and the search cannot drift (call-not-copy).
 pub fn sweep_vocabulary(task: &Task) -> Vec<Op> {
-    let mut vocabulary = vec![
+    // R4 (task #20, ruling: WIDEN): the operators DERIVED FROM THE
+    // OBSERVATION ITSELF — the ones most likely to close the task —
+    // enumerate FIRST. They sat last, so whenever a budget bit it
+    // starved exactly the informative candidates; and even unbudgeted,
+    // first-match order should prefer what the observation names over
+    // what the fixed alphabet happens to spell. The identity pins are
+    // re-recorded with this landing — an enumeration-order change is
+    // precisely what they exist to make visible in review.
+    let mut vocabulary: Vec<Op> = Vec::new();
+    vocabulary.extend(derived_recolors(task));
+    vocabulary.extend(derived_tiles(task));
+    vocabulary.extend([
         Op::Rotate90,
         Op::Rotate180,
         Op::Rotate270,
         Op::FlipH,
         Op::FlipV,
         Op::Transpose,
-    ];
+    ]);
     vocabulary.extend(solver_verify::objects::OBJ_OPS.iter().cloned().map(Op::Object));
-    vocabulary.extend(derived_recolors(task));
-    vocabulary.extend(derived_tiles(task));
     vocabulary
 }
 
