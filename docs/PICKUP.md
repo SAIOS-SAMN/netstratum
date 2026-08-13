@@ -99,10 +99,10 @@ architecture** closed. **Next phase: E3.6 E-MKT-1** (element market cargo).
 
 | Fact | Value |
 |------|--------|
-| **Tip** | `2834d4c` (architecture: JSON is not a format the system speaks); **STALE — corrected 2026-08-13: `main` is at `2162a8d` (44_LINEAGES), this fact row is not refreshed past Wave-8** |
+| **Tip** | `2834d4c` (architecture: JSON is not a format the system speaks); **STALE — corrected 2026-08-13: `main` is at `138cecb` (#51, the EVOLUTION deed), this fact row is not refreshed past Wave-8. This whole table moves fast — re-measure rather than trust it.** |
 | Branch | **`main`** |
 | Kernel | **0.37.0** (next free minor **38**) |
-| Next free claim tag | **168** — corrected 2026-08-13, was stale at 166; confirmed against `dop.rs:365` (163–164 ElementWant · 165 TreatyElementsAllowed · 166 SolverWordMinted · 167 PopulationSettled) |
+| Next free claim tag | **170** — this number moves fast, re-check `dop.rs:365` before trusting this row; as of `#51` (`EvolutionAdvanced`, tag 169): 163–164 ElementWant · 165 TreatyElementsAllowed · 166 SolverWordMinted · 167 PopulationSettled · 168 reserved (`#30` PressureEbbed) · 169 EvolutionAdvanced |
 | Codec | **SCHEMA_V19** (v18 element_wants · v19 element_allowlists; v18's bump had landed unratified — codec_gate pins ratified at v19) |
 | Class / clade | **13** / **345** (u16 open) |
 | CLI roots | bench · intel · trade · diplomatic · **polity** (dual law all five) |

@@ -4,6 +4,14 @@
 `00_CHARTER.md`. Supersedes the founding half of
 `04_CIVILIZATION_GENESIS.md` §4 and extends `01_ECONOMY.md` §2.
 
+> **STATUS CHECK 2026-08-13 (doc audit) — this is PARTIAL, not fully
+> landed.** §5's purse **IS built**: `world/economy.rs:776`, pinned by
+> `engine/cfe/tests/purse_pins.rs` (5 tests). §1-2's Elder/Ancient seats
+> and §3/§6a's tithe are **not** — zero hits for "Ancient" in `engine/`;
+> "Elder" only exists as the unrelated `ClosureEvent::ElderWarded` (tag
+> 74). This is `#32` on the build queue, HANDOFF's top-ranked item after
+> the Phase-3 flip. See `docs/GAME_SPEC.md` §2/§4 for the current board.
+
 ---
 
 ## §0 THE SUPREMACY CLAUSE
