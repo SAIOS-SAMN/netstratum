@@ -177,6 +177,141 @@ fn the_evolution_deed_round_trips_on_the_wire() {
     }
 }
 
+// ── THE CLASS AXIS IS LIVE ECONOMICS, not decoration — 14 archetypes,
+//    each with its OWN yield/upkeep/survey/demurrage character
+//    (`archetype_binding`, applied at `tick.rs`), so the roster is NOT
+//    three buckets but the cross-product of every axis. ──
+
+/// A world with `habitats` habitats and a sealed CLASS, biomass banked to
+/// build — the class binding is the only thing that varies.
+fn classed_world(class: u8, habitats: u16) -> World {
+    let mut world = World::new();
+    world.found("classed").expect("founds");
+    world.commission_star(StarClass::G).expect("commissions");
+    world
+        .site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None)
+        .expect("sites mesic");
+    let stamp = world.now();
+    world.chronicle_mut().append(
+        ClosureEvent::YieldCollected { orb_id: FIRST_ORB, resource: Resource::Biomass, amount: ratio(200, 1) },
+        stamp,
+        vec![SOVEREIGN],
+    );
+    let mut world = World::resume(world.chronicle().clone());
+    for tile in 0..habitats {
+        world.zone(tile, ZoneKind::Habitat).expect("habitat");
+    }
+    world.seal_taxon(class, 1).expect("seals the class");
+    world
+}
+
+#[test]
+fn distinct_classes_run_distinct_economies() {
+    fn yield_after(class: u8, beats: usize) -> cfe::ratio::Ratio {
+        let mut world = classed_world(class, 4);
+        for _ in 0..beats {
+            world.tick();
+        }
+        world
+            .accrued_of(FIRST_ORB)
+            .into_iter()
+            .filter(|(resource, _)| *resource == Resource::Biomass)
+            .map(|(_, amount)| amount)
+            .fold(ratio(0, 1), |sum, amount| sum + amount)
+    }
+    // The SAME four habitats, six different archetypes — each yields what
+    // its own binding dictates. A prolific biotic-swarm (yield 5/4) out-
+    // produces a patient lithovore (yield 3/4) on identical ground.
+    let swarm = yield_after(1, 8); // biotic-swarm
+    let lithovore = yield_after(2, 8); // geodic-lithovore
+    let plasma = yield_after(6, 8); // plasma-field
+    let banker = yield_after(12, 8); // thermal-banker
+    assert!(swarm > lithovore, "the swarm out-yields the stone-eater: {swarm} > {lithovore}");
+    // Across six archetypes there are several DISTINCT yield levels — the
+    // roster is not one economy, and certainly not three.
+    let levels: std::collections::BTreeSet<String> =
+        [swarm, lithovore, plasma, banker].iter().map(|r| r.to_string()).collect();
+    assert!(levels.len() >= 3, "distinct classes give distinct economies: {levels:?}");
+}
+
+#[test]
+fn the_class_governs_how_much_a_head_eats() {
+    use cfe::ratio::ratio;
+    // The class's own upkeep binding IS its per-capita appetite — read from
+    // the same table the core tick uses, so provisioning honours all 14
+    // archetypes, not the three seeded axes. An unclassed line eats the base.
+    let unclassed = {
+        let mut w = World::new();
+        w.found("bare").expect("founds");
+        w
+    };
+    assert_eq!(unclassed.class_ration_factor(), ratio(1, 1), "an unclassed line eats the base");
+    // Each archetype's factor is its binding's upkeep channel.
+    assert_eq!(lineage(3, 2, 1, 1).class_ration_factor(), ratio(5, 4), "biotic-swarm is a hungry crowd");
+    assert_eq!(lineage(3, 1, 1, 2).class_ration_factor(), ratio(3, 4), "the lithovore is frugal");
+    assert_eq!(lineage(3, 1, 1, 7).class_ration_factor(), ratio(1, 2), "the apex-solitary needs little");
+    // So the same disposition/metabolism eats DIFFERENTLY by class — the
+    // swarm's head eats more than twice the apex-solitary's.
+    assert!(
+        lineage(3, 2, 1, 1).per_capita_ration() > lineage(3, 2, 1, 7).per_capita_ration(),
+        "a swarm head out-eats a solitary one on the same substrate"
+    );
+}
+
+// ── CASTES (§2d) — the population differentiates by identity ──
+
+#[test]
+fn castes_partition_the_population_by_disposition() {
+    use cfe::dop::Caste;
+    // Population 10 splits cleanly on the banded weights: the sitting
+    // disposition takes 6 of its own caste, the other two take 2 each.
+    let cases = [
+        (1u8, Caste::Labour),    // expansionist → mostly Labour
+        (2, Caste::Cognition),   // empiricist   → mostly Cognition
+        (3, Caste::Artisan),     // epicurean    → mostly Artisan
+    ];
+    for (disposition, majority) in cases {
+        let world = lineage(disposition, 1, 1, 10);
+        let split = world.caste_split(FIRST_ORB);
+        assert_eq!(split.iter().sum::<u64>(), world.population_of(FIRST_ORB), "the caste split conserves every head");
+        assert_eq!(world.caste_of(FIRST_ORB, majority), 6, "disposition {disposition} is mostly its own caste");
+        for caste in Caste::ALL {
+            if caste != majority {
+                assert_eq!(world.caste_of(FIRST_ORB, caste), 2, "the minority castes take an equal fifth each");
+            }
+        }
+    }
+}
+
+#[test]
+fn the_same_headcount_morphs_to_each_identity() {
+    // The SAME ten people, three civilizations — three different societies.
+    let expansionist = lineage(1, 1, 1, 10).caste_split(FIRST_ORB);
+    let empiricist = lineage(2, 1, 1, 10).caste_split(FIRST_ORB);
+    let epicurean = lineage(3, 1, 1, 10).caste_split(FIRST_ORB);
+    assert_eq!(expansionist, [6, 2, 2], "the expansionist is a workforce");
+    assert_eq!(empiricist, [2, 6, 2], "the empiricist is a think-tank");
+    assert_eq!(epicurean, [2, 2, 6], "the epicurean is an atelier");
+    assert!(
+        expansionist != empiricist && empiricist != epicurean && expansionist != epicurean,
+        "one headcount, three distinct societies"
+    );
+}
+
+#[test]
+fn an_undifferentiated_line_is_all_labour() {
+    // A people with no sealed disposition has not specialized — every hand
+    // is a working hand.
+    let mut world = World::new();
+    world.found("unsealed").expect("founds");
+    world.settle_population(FIRST_ORB, 12);
+    assert_eq!(
+        world.caste_split(FIRST_ORB),
+        [12, 0, 0],
+        "no identity, no castes — all Labour"
+    );
+}
+
 #[test]
 fn a_plasmic_lineage_defers_its_population_to_the_energy_economy() {
     // HONEST GAP: a plasmic capture line (Vapor-Lattice / Thermo-Solder)

@@ -1575,6 +1575,34 @@ pub fn metabolic_ration(metabolism: u8) -> Resource {
     }
 }
 
+/// **THE CASTES** (`44_LINEAGES` §2d) — the specialized roles a
+/// population differentiates into. Not new state: a DERIVED partition of
+/// the standing people, weighted by disposition (`caste_split`). Three
+/// roles, one per disposition's economic emphasis — an expansionist line
+/// is mostly Labour, an empiricist mostly Cognition, an epicurean mostly
+/// Artisan — so the same headcount MORPHS to the civilization's identity.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[repr(u8)]
+pub enum Caste {
+    /// The many-hands production caste (expansionist emphasis).
+    Labour = 0,
+    /// The thinkers and researchers (empiricist emphasis).
+    Cognition = 1,
+    /// The makers of fine and luxury goods (epicurean emphasis).
+    Artisan = 2,
+}
+
+impl Caste {
+    pub const ALL: [Caste; 3] = [Caste::Labour, Caste::Cognition, Caste::Artisan];
+    pub fn word(self) -> &'static str {
+        match self {
+            Caste::Labour => "labour",
+            Caste::Cognition => "cognition",
+            Caste::Artisan => "artisan",
+        }
+    }
+}
+
 /// **THE LEISURE INVARIANT (`43_DISTRIBUTION` §3, ruled 2026-08-13).**
 /// The recreation good a line SAVOURS once its calories are met — the
 /// second demand tier a granary unlocks. Minted like a ration

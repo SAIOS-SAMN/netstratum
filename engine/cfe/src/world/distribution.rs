@@ -11,7 +11,7 @@
 
 use super::*;
 use crate::almanac::carrying_capacity;
-use crate::dop::{metabolic_leisure, Ration, Resource, ZoneKind};
+use crate::dop::{metabolic_leisure, Caste, Ration, Resource, ZoneKind};
 
 impl World {
     /// **DOES THIS ORB STAND A GRANARY?** The gate that flips the
@@ -64,6 +64,52 @@ impl World {
     /// earned `EvolutionAdvanced` deed.
     pub fn evolution_stage(&self) -> u8 {
         self.evolution_stage
+    }
+
+    /// **THE CASTE SPLIT** (`44_LINEAGES` §2d) — how the standing population
+    /// DIFFERENTIATES into its specialized roles `[Labour, Cognition,
+    /// Artisan]`. A DERIVED partition (no new state, no deed — the
+    /// `stability_of` precedent), weighted by the line's disposition through
+    /// the SAME banded weights the dark-pulls and utility already read
+    /// (`disposition_weights`): the sitting disposition takes the majority
+    /// of its own caste, so an expansionist line is mostly Labour, an
+    /// empiricist mostly Cognition, an epicurean mostly Artisan. The
+    /// headcount is CONSERVED exactly — the flooring remainder falls to the
+    /// majority caste, deterministically, so `sum == population`. A line
+    /// with no sealed disposition is undifferentiated: all Labour.
+    pub fn caste_split(&self, orb: u64) -> [u64; 3] {
+        let people = self.population_of(orb);
+        let Some(weights) = self
+            .civ_axes()
+            .and_then(|axes| crate::dop::disposition_weights(axes.disposition))
+        else {
+            return [people, 0, 0];
+        };
+        let mut split = [0u64; 3];
+        let mut assigned = 0u64;
+        for (slot, weight) in split.iter_mut().zip(weights.iter()) {
+            let share: u64 = (ratio(people as i64, 1) * weight.clone())
+                .floor()
+                .to_integer()
+                .try_into()
+                .unwrap_or(0);
+            *slot = share;
+            assigned += share;
+        }
+        // Conserve the headcount: the flooring remainder falls to the
+        // sitting disposition's own caste (its majority index), so the
+        // partition sums to the population exactly and replay-inert.
+        let major = self
+            .civ_axes()
+            .map(|axes| (axes.disposition.max(1) - 1).min(2) as usize)
+            .unwrap_or(0);
+        split[major] += people.saturating_sub(assigned);
+        split
+    }
+
+    /// The headcount standing in one caste — the `caste_split` component.
+    pub fn caste_of(&self, orb: u64, caste: Caste) -> u64 {
+        self.caste_split(orb)[caste as usize]
     }
 
     /// **ADVANCE THE LINE ALONG ITS ARC** (`44_LINEAGES` §2c) — the
@@ -138,13 +184,52 @@ impl World {
         (banked / demand).min(full)
     }
 
+    /// **THE PER-CAPITA RATION** — what one head eats per beat. The base is
+    /// R6's half-harvest (a pair to a habitat's yield); it is MODULATED by
+    /// the sitting CLASS, so an archetype that is costly to keep eats more
+    /// per head and a frugal one less. The modifier is the class's OWN
+    /// upkeep binding (`class_ration_factor`) — the same `archetype_binding`
+    /// the core tick reads — so every one of the 14 archetypes (and any
+    /// minted class) provisions distinctly, from the fold, with no new dial.
+    /// Both the caloric demand (population loop) and the leisure demand read
+    /// this ONE rate.
+    pub fn per_capita_ration(&self) -> Ratio {
+        let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
+        let pair = ratio(1, 1) + ratio(1, 1);
+        let base = crate::dop::metabolic_harvest_of(metabolism, self.metabolic_element()).1 / pair;
+        base * self.class_ration_factor()
+    }
+
+    /// **THE CLASS'S RATION MODIFIER** — how much this archetype eats per
+    /// head relative to the base, read as its UPKEEP factor from the class
+    /// binding. Reads the FOLD so a MINTED class carries its own (a compiled
+    /// class takes the fast `archetype_binding` path; a minted one is looked
+    /// up in `vocabulary::fold`). An unclassed line eats the base (factor 1).
+    pub fn class_ration_factor(&self) -> Ratio {
+        use crate::vocabulary::{archetype_binding, factor_on, fold, Axis, CHANNEL_UPKEEP};
+        let one = ratio(1, 1);
+        let Some((class, _)) = self.taxon else {
+            return one;
+        };
+        // Compiled archetypes take the compiled table directly (no chain
+        // scan); a minted class is resolved from the class fold, so its
+        // own upkeep binding governs how it eats.
+        let binding = if u16::from(class) <= u16::from(crate::dop::class_ceiling()) {
+            archetype_binding(class)
+        } else {
+            fold(self.chronicle(), Axis::Class)
+                .into_iter()
+                .find(|entry| entry.code == class)
+                .map(|entry| entry.binding)
+                .unwrap_or_default()
+        };
+        factor_on(&binding, CHANNEL_UPKEEP)
+    }
+
     /// The leisure the standing population demands over the span since the
-    /// last touch — the base per-capita rate (R6 half-harvest, as the
-    /// caloric demand) MODULATED by the disposition (§5): an expansionist
-    /// wants none (military rations), an epicurean twice as much (the
-    /// luxury appetite that pulls specialised labour), every other line the
-    /// base. Derived from the population loop's own rate and the disposition
-    /// factor (0 / 1 / 2, all built from identity ratios), no new dial.
+    /// last touch — the per-capita rate (class-modulated, `per_capita_ration`)
+    /// scaled by the disposition appetite (§5): an expansionist wants none,
+    /// an epicurean twice as much, every other line the base. No new dial.
     pub fn leisure_demand(&self, orb: u64, stamp: u64) -> Ratio {
         let zero = ratio(0, 1);
         let p = self.population_of(orb);
@@ -159,10 +244,7 @@ impl World {
         if factor <= zero {
             return zero;
         }
-        let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
-        let pair = ratio(1, 1) + ratio(1, 1);
-        let per_capita = crate::dop::metabolic_harvest_of(metabolism, self.metabolic_element()).1 / pair;
-        ratio(p as i64, 1) * per_capita * ratio(dt as i64, 1) * factor
+        ratio(p as i64, 1) * self.per_capita_ration() * ratio(dt as i64, 1) * factor
     }
 
     /// **THE DISPOSITION'S LEISURE APPETITE** (§5) — how much recreation a

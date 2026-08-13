@@ -20,7 +20,7 @@
 
 use super::*;
 use crate::almanac::{carrying_capacity, grained_logistic, intrinsic_rate, region_of, FLATLANDER_CLADE, ThermalRegion};
-use crate::dop::{metabolic_harvest_of, metabolic_ration_of, Ration, ZoneKind};
+use crate::dop::{metabolic_ration_of, Ration, ZoneKind};
 
 impl World {
     /// The living ECOLOGICAL FOOTPRINT of an orb — its habitats and
@@ -217,15 +217,13 @@ impl World {
         }
         let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
         let element = self.metabolic_element();
-        // R6 — per-capita demand is HALF the line's own farming rate: a
-        // PAIR shares a habitat's yield. The 2 is structural (the pair),
-        // DERIVED as 1+1 rather than dialed — a bare two-to-one literal is
-        // a tuned dial the census bars, but an identity ratio is algebra
-        // (value 1 is uncounted), the same derive-don't-dial discipline as
-        // `grain*4`. A rate-0 capture line (plasmoid) has no farmed ration
-        // to draw on; its population rides the energy economy — defer (#29).
-        let pair = ratio(1, 1) + ratio(1, 1);
-        let per_capita = metabolic_harvest_of(metabolism, element).1 / pair;
+        // R6 — per-capita demand is the line's own half-harvest, MODULATED
+        // by the sitting class (`per_capita_ration`): a costly archetype
+        // eats more per head, a frugal one less, so all 14 classes (and any
+        // minted class) provision distinctly, from the fold, no new dial. A
+        // rate-0 capture line (plasmoid) has no farmed ration to draw on;
+        // its population rides the energy economy — defer (#29).
+        let per_capita = self.per_capita_ration();
         if per_capita <= ratio(0, 1) {
             return None;
         }
