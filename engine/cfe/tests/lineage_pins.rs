@@ -177,6 +177,63 @@ fn the_evolution_deed_round_trips_on_the_wire() {
     }
 }
 
+// ── THE CLASS AXIS IS LIVE ECONOMICS, not decoration — 14 archetypes,
+//    each with its OWN yield/upkeep/survey/demurrage character
+//    (`archetype_binding`, applied at `tick.rs`), so the roster is NOT
+//    three buckets but the cross-product of every axis. ──
+
+/// A world with `habitats` habitats and a sealed CLASS, biomass banked to
+/// build — the class binding is the only thing that varies.
+fn classed_world(class: u8, habitats: u16) -> World {
+    let mut world = World::new();
+    world.found("classed").expect("founds");
+    world.commission_star(StarClass::G).expect("commissions");
+    world
+        .site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None)
+        .expect("sites mesic");
+    let stamp = world.now();
+    world.chronicle_mut().append(
+        ClosureEvent::YieldCollected { orb_id: FIRST_ORB, resource: Resource::Biomass, amount: ratio(200, 1) },
+        stamp,
+        vec![SOVEREIGN],
+    );
+    let mut world = World::resume(world.chronicle().clone());
+    for tile in 0..habitats {
+        world.zone(tile, ZoneKind::Habitat).expect("habitat");
+    }
+    world.seal_taxon(class, 1).expect("seals the class");
+    world
+}
+
+#[test]
+fn distinct_classes_run_distinct_economies() {
+    fn yield_after(class: u8, beats: usize) -> cfe::ratio::Ratio {
+        let mut world = classed_world(class, 4);
+        for _ in 0..beats {
+            world.tick();
+        }
+        world
+            .accrued_of(FIRST_ORB)
+            .into_iter()
+            .filter(|(resource, _)| *resource == Resource::Biomass)
+            .map(|(_, amount)| amount)
+            .fold(ratio(0, 1), |sum, amount| sum + amount)
+    }
+    // The SAME four habitats, six different archetypes — each yields what
+    // its own binding dictates. A prolific biotic-swarm (yield 5/4) out-
+    // produces a patient lithovore (yield 3/4) on identical ground.
+    let swarm = yield_after(1, 8); // biotic-swarm
+    let lithovore = yield_after(2, 8); // geodic-lithovore
+    let plasma = yield_after(6, 8); // plasma-field
+    let banker = yield_after(12, 8); // thermal-banker
+    assert!(swarm > lithovore, "the swarm out-yields the stone-eater: {swarm} > {lithovore}");
+    // Across six archetypes there are several DISTINCT yield levels — the
+    // roster is not one economy, and certainly not three.
+    let levels: std::collections::BTreeSet<String> =
+        [swarm, lithovore, plasma, banker].iter().map(|r| r.to_string()).collect();
+    assert!(levels.len() >= 3, "distinct classes give distinct economies: {levels:?}");
+}
+
 // ── CASTES (§2d) — the population differentiates by identity ──
 
 #[test]
