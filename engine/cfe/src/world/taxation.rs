@@ -1,4 +1,4 @@
-//! **THE CRAFTABLE TAX SYSTEM** (`45_TAXATION`, task #54/#55). A levy is a
+//! **THE CRAFTABLE TAX SYSTEM** (`49_TAXATION`, task #54/#55). A levy is a
 //! tax as data — what it draws, when, where it flows (`dop::Levy`). This
 //! module holds the readings the levies settle from; the continuity tax
 //! (§3) is the first concrete instance, a demurrage on KNOWLEDGE keyed to
@@ -19,7 +19,7 @@ impl World {
             .unwrap_or(false)
     }
 
-    /// **DOES A GOVERNMENT OFFICE STAND?** (`45_TAXATION` §2) — the levy
+    /// **DOES A GOVERNMENT OFFICE STAND?** (`49_TAXATION` §2) — the levy
     /// collection node. Where one stands, crafted levies collect without
     /// slip; the treasury/collection accounting rides this in the next
     /// fiscal layer.
@@ -27,13 +27,13 @@ impl World {
         self.has_civic(orb, ZoneKind::GovernmentOffice)
     }
 
-    /// **DOES A WELFARE HUB STAND?** (`45_TAXATION` §2) — the public-service
+    /// **DOES A WELFARE HUB STAND?** (`49_TAXATION` §2) — the public-service
     /// distribution node that feeds the welfare loop.
     pub fn has_welfare_hub(&self, orb: u64) -> bool {
         self.has_civic(orb, ZoneKind::WelfareHub)
     }
 
-    /// **THE WELFARE SUBSIDY** (`45_TAXATION` §3) — how much a WelfareHub
+    /// **THE WELFARE SUBSIDY** (`49_TAXATION` §3) — how much a WelfareHub
     /// lifts stability by siphoning the public RESERVE into the population's
     /// pool. It fills the stability GAP (`1 − leisure_coverage`) in
     /// proportion to how well-stocked the reserve ration is against the
@@ -66,7 +66,7 @@ impl World {
         gap * reserve_coverage
     }
 
-    /// **THE CONTINUITY TAX a line owes at each turnover** (`45_TAXATION`
+    /// **THE CONTINUITY TAX a line owes at each turnover** (`49_TAXATION`
     /// §3 / `42_LIFESPAN §3`) — the fraction of its unconfirmed knowledge
     /// (crystallized boons, adopted practices) that LAPSES when a generation
     /// turns over. Derived from lifespan (first-cut rate, flagged for
@@ -87,7 +87,7 @@ impl World {
         Levy::CONTINUITY
     }
 
-    /// The standing estate levy (`45_TAXATION` §4) — Estate / Turnover /
+    /// The standing estate levy (`49_TAXATION` §4) — Estate / Turnover /
     /// Sovereign. Its rate lands with #56; declared here so the seeded tax
     /// system is legible from one place.
     pub fn estate_levy(&self) -> Levy {

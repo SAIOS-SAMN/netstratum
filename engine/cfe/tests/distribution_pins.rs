@@ -321,7 +321,7 @@ fn the_research_siphon_tracks_the_cognition_caste() {
     assert_eq!(disposed_society(2, true, 10).research_siphon(FIRST_ORB, 0), 0, "no births, no siphon");
 }
 
-// ── 45_TAXATION §2–3: civic infrastructure + the welfare loop ──
+// ── 49_TAXATION §2–3: civic infrastructure + the welfare loop ──
 
 #[test]
 fn a_welfare_hub_buffers_a_stall_from_the_public_reserve() {

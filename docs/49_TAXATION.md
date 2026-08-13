@@ -1,4 +1,4 @@
-# 45_TAXATION — THE CRAFTABLE TAX SYSTEM
+# 49_TAXATION — THE CRAFTABLE TAX SYSTEM
 
 *Translated from operator directive 2026-08-13. A tax is not a hardcoded
 drain — it is a RULE a civilization crafts: what it draws, when, from whom,

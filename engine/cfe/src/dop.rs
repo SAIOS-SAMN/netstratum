@@ -1593,7 +1593,7 @@ pub fn metabolic_ration(metabolism: u8) -> Resource {
     }
 }
 
-/// **WHAT A LEVY DRAWS ON** (`45_TAXATION` §1) — the base a tax is levied
+/// **WHAT A LEVY DRAWS ON** (`49_TAXATION` §1) — the base a tax is levied
 /// against.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LevyBase {
@@ -1607,7 +1607,7 @@ pub enum LevyBase {
     Trade,
 }
 
-/// **WHEN A LEVY FIRES** (`45_TAXATION` §1).
+/// **WHEN A LEVY FIRES** (`49_TAXATION` §1).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LevyTrigger {
     /// At the settle touch, beside demurrage/rejuvenation.
@@ -1618,7 +1618,7 @@ pub enum LevyTrigger {
     Treaty,
 }
 
-/// **WHERE A LEVY FLOWS** (`45_TAXATION` §1).
+/// **WHERE A LEVY FLOWS** (`49_TAXATION` §1).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LevySink {
     /// To the seated authority (a receipted transfer).
@@ -1629,7 +1629,7 @@ pub enum LevySink {
     Counterparty,
 }
 
-/// **A LEVY** (`45_TAXATION` §1) — a crafted tax as data: what it draws,
+/// **A LEVY** (`49_TAXATION` §1) — a crafted tax as data: what it draws,
 /// when, where it flows. The RATE rides the minted binding
 /// (progenitor-crafted, `Axis::Levy`); base/trigger/sink name the levy. The
 /// two seeded levies are the continuity tax and the estate tax (§3–4).
@@ -2171,12 +2171,12 @@ pub enum ZoneKind {
     /// whose placement unlocks a law. Buildable freely (no deepening
     /// gate): provisioning is foundational, not a late technology.
     Granary = 11,
-    /// **THE GOVERNMENT OFFICE** (`45_TAXATION` §2, ruled 2026-08-13): the
+    /// **THE GOVERNMENT OFFICE** (`49_TAXATION` §2, ruled 2026-08-13): the
     /// civic collection node. Where one stands, crafted levies collect at
     /// full efficiency; without one, tax collection SLIPS (evasion/leakage).
     /// Infrastructure — no yield of its own, the Granary's bill.
     GovernmentOffice = 12,
-    /// **THE WELFARE HUB** (`45_TAXATION` §2): the public-service
+    /// **THE WELFARE HUB** (`49_TAXATION` §2): the public-service
     /// distribution node. It siphons the standing ration reserve into the
     /// population's stability during a stall or famine, buffering the crash
     /// (the welfare→stability loop). Infrastructure — no yield of its own.
