@@ -323,3 +323,52 @@ fn the_research_siphon_taxes_only_the_empiricist() {
     // A non-positive cohort is never taxed.
     assert_eq!(disposed_society(2, true, 10).research_siphon(0), 0, "no births, no siphon");
 }
+
+// ── L5: THE WORKBENCH (§7) — the deployed system made legible ──
+
+use cfe::world::workbench::BenchKind;
+
+#[test]
+fn the_depot_bench_reads_the_whole_provisioning_society() {
+    // A provisioned epicurean world with no leisure stocked — the depot
+    // bench surfaces the society and flags the stall.
+    let mut world = society(6, 2, false, 10);
+    world.seal_genesis("civ", 3, 2, 1).expect("epicurean biotic");
+    world.settle_population(FIRST_ORB, 10);
+    let view = world.workbench(FIRST_ORB, BenchKind::Depot).expect("the orb stands");
+    eprintln!("=== DEPOT BENCH ===");
+    for c in &view.components { eprintln!("  · {} [{}]", c.label, if c.active {"lit"} else {"dark"}); }
+    for (k, v) in &view.gauges { eprintln!("  {k:>16} : {v}"); }
+    for a in &view.alerts { eprintln!("  ! {a}"); }
+
+    assert!(!view.components.is_empty(), "the granary shows as a component");
+    assert!(view.gauges.iter().any(|(k, _)| k == "castes L/C/A"), "the caste split is a gauge");
+    assert!(view.gauges.iter().any(|(k, _)| k == "stability"), "stability is a gauge");
+    assert!(
+        view.alerts.iter().any(|a| a.contains("leisure short")),
+        "an unmet leisure tier is flagged"
+    );
+}
+
+#[test]
+fn a_bare_world_bench_flags_no_granary() {
+    let world = society(4, 0, false, 5);
+    let view = world.workbench(FIRST_ORB, BenchKind::Depot).expect("stands");
+    assert!(view.components.is_empty(), "no granary, no depot components");
+    assert!(view.alerts.iter().any(|a| a.contains("no granary")), "the missing granary is flagged");
+}
+
+#[test]
+fn every_bench_kind_reads_uniformly() {
+    // The abstraction is general: each bench kind returns the same shape,
+    // an empty deploy reading as a legible alert rather than an error.
+    let world = society(4, 1, false, 5);
+    for kind in [BenchKind::Depot, BenchKind::Refinery, BenchKind::ShipYard, BenchKind::Lab] {
+        let view = world.workbench(FIRST_ORB, kind).expect("every bench reads");
+        assert_eq!(view.kind, kind, "the view names its kind");
+        // Refinery/yard/lab aren't built here — each says so, uniformly.
+        if kind != BenchKind::Depot {
+            assert!(!view.alerts.is_empty(), "{}: an undeployed bench reports it", kind.word());
+        }
+    }
+}

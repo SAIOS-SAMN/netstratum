@@ -1,0 +1,188 @@
+//! **THE WORKBENCH** (`43_DISTRIBUTION` §7, task #49) — the read-only
+//! inspection surface that makes a deployed system LEGIBLE. Ruled a
+//! GENERAL, bench-type-agnostic abstraction: one shape over many bench
+//! kinds, so the console renders any of them uniformly and a new bench
+//! slots in without a new view. A workbench mints nothing and stores
+//! nothing — it is a pure reading over committed state, the `stability_of`
+//! precedent, replay-inert.
+//!
+//! The DEPOT bench is the showcase (the whole provisioning/lineage layer
+//! made visible: people, castes, the leisure good, stability, the arc
+//! stage, the class-modulated ration); the refinery, ship-yard, and lab
+//! report their component zones under the same shape.
+
+use super::*;
+use crate::dop::ZoneKind;
+
+/// A deployable system the workbench can inspect.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BenchKind {
+    /// PROVISION-1: the granary and the society it feeds.
+    Depot,
+    /// REFINE-1: the element refinery.
+    Refinery,
+    /// FLEET-1: the ship-yard.
+    ShipYard,
+    /// The science seats.
+    Lab,
+}
+
+impl BenchKind {
+    pub fn word(self) -> &'static str {
+        match self {
+            BenchKind::Depot => "depot",
+            BenchKind::Refinery => "refinery",
+            BenchKind::ShipYard => "ship-yard",
+            BenchKind::Lab => "lab",
+        }
+    }
+}
+
+/// One component of a bench — a standing part with a health flag.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BenchComponent {
+    pub label: String,
+    pub active: bool,
+}
+
+/// A uniform inspection of one bench: its parts, its gauges (label →
+/// value), and its unmet requirements. Every bench kind fills the same
+/// shape.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct WorkbenchView {
+    pub kind: BenchKind,
+    pub components: Vec<BenchComponent>,
+    pub gauges: Vec<(String, String)>,
+    pub alerts: Vec<String>,
+}
+
+impl World {
+    /// **INSPECT A BENCH** on an orb — the uniform read. `None` where the
+    /// orb does not exist; an empty component list is a bench not yet
+    /// deployed (a legible "nothing stands here", not an error).
+    pub fn workbench(&self, orb: u64, kind: BenchKind) -> Option<WorkbenchView> {
+        self.orb_by_id(orb)?;
+        Some(match kind {
+            BenchKind::Depot => self.depot_bench(orb),
+            BenchKind::Refinery => self.zone_bench(orb, kind, ZoneKind::ElementRefinery),
+            BenchKind::ShipYard => self.zone_bench(orb, kind, ZoneKind::ShipYard),
+            BenchKind::Lab => self.lab_bench(orb, kind),
+        })
+    }
+
+    /// The DEPOT bench — the provisioning society, fully read.
+    fn depot_bench(&self, orb: u64) -> WorkbenchView {
+        let held = self.orb_by_id(orb);
+        let components = held
+            .map(|h| {
+                h.zones
+                    .iter()
+                    .filter(|z| z.kind == ZoneKind::Granary)
+                    .map(|z| BenchComponent {
+                        label: format!("granary @{}", z.tile),
+                        active: h.zone_active(z),
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
+
+        // Project the flow readings over one nominal grain so coverage and
+        // stability are meaningful even at rest (dt>0).
+        let horizon = self.now() + crate::almanac::REGROWTH_GRAIN as u64;
+        let people = self.population_of(orb);
+        let [labour, cognition, artisan] = self.caste_split(orb);
+        let stability = self.stability_of(orb, horizon);
+        let mut gauges = vec![
+            ("people".into(), people.to_string()),
+            (
+                "castes L/C/A".into(),
+                format!("{labour}/{cognition}/{artisan}"),
+            ),
+            ("eats/head".into(), crate::ratio::ratio_str(&self.per_capita_ration())),
+            (
+                "leisure good".into(),
+                self.leisure_of(orb)
+                    .map(|r| format!("{r:?}"))
+                    .unwrap_or_else(|| "—".into()),
+            ),
+            ("stability".into(), crate::ratio::ratio_str(&stability)),
+            ("arc stage".into(), self.evolution_stage().to_string()),
+            (
+                "ceiling K".into(),
+                crate::ratio::ratio_str(&self.population_capacity(orb)),
+            ),
+            ("granaries".into(), self.granary_footprint(orb).to_string()),
+        ];
+        if people > 0 {
+            let cog = self.research_siphon(people as i64);
+            if cog > 0 {
+                gauges.push(("research/cohort".into(), cog.to_string()));
+            }
+        }
+
+        let mut alerts = Vec::new();
+        if !self.has_granary(orb) {
+            alerts.push("no granary — subsistence only (no leisure economy)".into());
+        } else if stability < ratio(1, 1) {
+            alerts.push("leisure short — growth STALLING before starvation".into());
+        }
+        if self.world_quarantined() {
+            alerts.push("QUARANTINED — the ration is decaying, not recovering".into());
+        }
+
+        WorkbenchView {
+            kind: BenchKind::Depot,
+            components,
+            gauges,
+            alerts,
+        }
+    }
+
+    /// A bench whose components are simply the standing zones of one kind
+    /// (refinery, ship-yard) — the uniform minimal read.
+    fn zone_bench(&self, orb: u64, kind: BenchKind, zone: ZoneKind) -> WorkbenchView {
+        let (components, active) = self
+            .orb_by_id(orb)
+            .map(|h| {
+                let comps: Vec<BenchComponent> = h
+                    .zones
+                    .iter()
+                    .filter(|z| z.kind == zone)
+                    .map(|z| BenchComponent {
+                        label: format!("{} @{}", crate::dop::zone_word(zone), z.tile),
+                        active: h.zone_active(z),
+                    })
+                    .collect();
+                let active = comps.iter().filter(|c| c.active).count();
+                (comps, active)
+            })
+            .unwrap_or_default();
+        let gauges = vec![("active".into(), active.to_string())];
+        let alerts = if components.is_empty() {
+            vec![format!("no {} stands on this orb", kind.word())]
+        } else {
+            Vec::new()
+        };
+        WorkbenchView { kind, components, gauges, alerts }
+    }
+
+    /// The LAB bench — the seated science disciplines.
+    fn lab_bench(&self, orb: u64, kind: BenchKind) -> WorkbenchView {
+        let components: Vec<BenchComponent> = self
+            .science_seats
+            .iter()
+            .filter(|(_, seat_orb, _)| *seat_orb == orb)
+            .map(|(discipline, _, grade)| BenchComponent {
+                label: format!("discipline {discipline} · grade {grade}"),
+                active: true,
+            })
+            .collect();
+        let gauges = vec![("seats".into(), components.len().to_string())];
+        let alerts = if components.is_empty() {
+            vec!["no science seated on this orb".into()]
+        } else {
+            Vec::new()
+        };
+        WorkbenchView { kind, components, gauges, alerts }
+    }
+}

@@ -5353,6 +5353,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         }
         Some("map") => map(world, style, *current),
         Some("status") => status(world, style, *current),
+        Some("bench") => workbench_panel(world, style, *current),
         Some("chronicle") => chronicle(world, style),
         Some("journal") => journal_feed(world, style),
         Some("verify") => match world.chronicle().verify_chain() {
@@ -8041,6 +8042,30 @@ fn journal_feed(world: &World, style: &Style) {
         if let Some(request) = &entry.trade_request {
             println!("    {} {}", style.warn("⇄ trade:"), request);
         }
+    }
+}
+
+/// THE WORKBENCH (43_DISTRIBUTION §7) — inspect every bench on the current
+/// orb under one uniform render: its components, its gauges, its unmet
+/// requirements. The depot bench surfaces the whole provisioning society.
+fn workbench_panel(world: &World, style: &Style, current: u64) {
+    use cfe::world::workbench::BenchKind;
+    for kind in [BenchKind::Depot, BenchKind::Refinery, BenchKind::ShipYard, BenchKind::Lab] {
+        let Some(view) = world.workbench(current, kind) else {
+            continue;
+        };
+        println!("{}", style.head(&format!("⚙ {} bench", kind.word())));
+        for component in &view.components {
+            let mark = if component.active { style.ok("●") } else { style.bad("○") };
+            println!("  {mark} {}", component.label);
+        }
+        for (label, value) in &view.gauges {
+            println!("  {:>18} {}", style.dim(label), style.strong(value));
+        }
+        for alert in &view.alerts {
+            println!("  {} {}", style.warn("!"), alert);
+        }
+        println!();
     }
 }
 
