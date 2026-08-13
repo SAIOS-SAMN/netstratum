@@ -55,8 +55,12 @@ impl World {
                     + self.evolution_stage() as u64;
                 // A cooling-driven line's ceiling ratchets with the thermal
                 // band (§2b); every other line reads a factor of 1.
+                // A cooling-driven line's ceiling ratchets with the band; a
+                // mobile line trades permanence for speed (§2b). Both default
+                // to 1, so a standard world is byte-identical.
                 carrying_capacity(footprint, self.rejuvenation_clade(), region)
                     * self.cooling_k_factor(orb)
+                    * self.footprint_permanence_factor(orb)
             }
             None => ratio(0, 1),
         }
@@ -132,6 +136,52 @@ impl World {
         let flux = self.stellar_flux_of(orb).max(1); // never zero the line out
         let baseline = ThermalRegion::Mesic.flux_level();
         ratio(flux as i64, baseline as i64)
+    }
+
+    /// **THE MEDIUM DENSITY an orb offers** (`44_LINEAGES` §2b) — read as
+    /// its albedo: a world wrapped in atmosphere or ocean reflects; a bare
+    /// airless crust or vacuum does not. A pure reading, 0 for an unsited or
+    /// airless orb.
+    pub fn medium_density_of(&self, orb: u64) -> Ratio {
+        self.orb_by_id(orb)
+            .and_then(|held| held.thermal.as_ref())
+            .map(|site| site.albedo.value().clone())
+            .unwrap_or_else(|| ratio(0, 1))
+    }
+
+    /// **IS THIS A MOVING-FOOTPRINT (MOBILE) LINE?** (`44_LINEAGES` §2b,
+    /// ruled 2026-08-13) — derived from PHYSICAL STATE, never a clade name.
+    /// Two objective checks: the line lives in a MEDIUM (its orb carries an
+    /// atmosphere/fluid — albedo > 0) AND its footprint is MOBILE (more
+    /// drifting bodies than anchored zones — population exceeds the built
+    /// footprint, the swarm/spore signature). A solid airless world (albedo
+    /// 0) or a well-anchored one is false, so every standard terrestrial
+    /// world stays byte-identical.
+    pub fn mobility_affine(&self, orb: u64) -> bool {
+        let in_medium = self.medium_density_of(orb) > ratio(0, 1);
+        let mobile_footprint = self.population_of(orb) > self.living_zones_of(orb);
+        in_medium && mobile_footprint
+    }
+
+    /// The mobile line's GROWTH multiplier (`44_LINEAGES` §2b): mobility in a
+    /// medium accelerates spread (ruled 4/3). A non-mobile line reads 1.
+    pub fn footprint_growth_factor(&self, orb: u64) -> Ratio {
+        if self.mobility_affine(orb) {
+            ratio(4, 3)
+        } else {
+            ratio(1, 1)
+        }
+    }
+
+    /// The mobile line's PERMANENCE multiplier — the price of mobility: low
+    /// structural permanence on its infrastructure ceiling (ruled 3/4, the
+    /// exact reciprocal of the growth boost, so the one dial spawns both).
+    pub fn footprint_permanence_factor(&self, orb: u64) -> Ratio {
+        if self.mobility_affine(orb) {
+            ratio(1, 1) / self.footprint_growth_factor(orb)
+        } else {
+            ratio(1, 1)
+        }
     }
 
     /// **IS THE SITTING CLADE COOLING-DRIVEN?** (`44_LINEAGES` §2b, ruled

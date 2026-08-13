@@ -207,6 +207,70 @@ fn a_cooling_driven_line_gains_capacity_as_its_world_cools() {
     assert_eq!(mesic.cooling_k_factor(FIRST_ORB), ratio(1, 1), "and its ceiling is unscaled — byte-identical");
 }
 
+// ── MOVING FOOTPRINT (§2b) — a swarm in a medium spreads, but anchors little ──
+
+/// A world with a chosen `albedo` (medium density) and a `pop`/`habitats`
+/// ratio — physical state, no clade label.
+fn medium_world(albedo_num: i64, albedo_den: i64, habitats: u16, pop: i64) -> World {
+    let mut world = World::new();
+    world.found("drifthold").expect("founds");
+    world.commission_star(StarClass::G).expect("commissions");
+    world
+        .site_planet(FIRST_ORB, unit(albedo_num, albedo_den), positive(1, 1), None, None)
+        .expect("sites with a medium");
+    let stamp = world.now();
+    world.chronicle_mut().append(
+        ClosureEvent::YieldCollected { orb_id: FIRST_ORB, resource: Resource::Biomass, amount: ratio(400, 1) },
+        stamp,
+        vec![SOVEREIGN],
+    );
+    let mut world = World::resume(world.chronicle().clone());
+    for tile in 0..habitats {
+        world.zone(tile, ZoneKind::Habitat).expect("habitat");
+    }
+    world.seal_taxon(1, 1).expect("seals");
+    world.settle_population(FIRST_ORB, pop);
+    world
+}
+
+#[test]
+fn mobility_is_a_physical_signal_not_a_clade_label() {
+    // Mobile = lives in a MEDIUM (albedo > 0) AND is over-dense (population >
+    // zones). Derived from physical state — no clade name checked.
+    let swarm = medium_world(1, 2, 2, 20); // atmosphere, 20 people on 2 zones
+    assert!(swarm.mobility_affine(FIRST_ORB), "a medium-dwelling over-dense line is mobile");
+    assert_eq!(swarm.footprint_growth_factor(FIRST_ORB), ratio(4, 3), "mobility speeds spread (4/3)");
+    assert_eq!(swarm.footprint_permanence_factor(FIRST_ORB), ratio(3, 4), "and costs permanence (3/4)");
+
+    // Same over-density, but AIRLESS (albedo 0) — no medium, not mobile.
+    let airless = medium_world(0, 1, 2, 20);
+    assert!(!airless.mobility_affine(FIRST_ORB), "no medium, no moving footprint");
+    assert_eq!(airless.footprint_growth_factor(FIRST_ORB), ratio(1, 1), "and byte-identical output");
+
+    // In a medium but well-anchored (few people, many zones) — not mobile.
+    let anchored = medium_world(1, 2, 6, 3);
+    assert!(!anchored.mobility_affine(FIRST_ORB), "an anchored line is not a swarm");
+}
+
+#[test]
+fn a_mobile_lines_ceiling_pays_the_permanence_price() {
+    // A controlled comparison — SAME medium (albedo, hence region), SAME
+    // zones, differing only in population density, so ONLY mobility toggles.
+    // The mobile (over-dense) line's ceiling is pressed to exactly 3/4 of the
+    // anchored line's, the ruled permanence price; its growth rate meanwhile
+    // takes the 4/3 boost (footprint_growth_factor).
+    let mobile = medium_world(1, 2, 2, 20); // 20 > 2 zones → mobile
+    let anchored = medium_world(1, 2, 2, 1); // 1 < 2 zones → anchored
+    assert!(mobile.mobility_affine(FIRST_ORB), "over-dense in a medium → mobile");
+    assert!(!anchored.mobility_affine(FIRST_ORB), "sparse → anchored");
+    assert_eq!(mobile.footprint_growth_factor(FIRST_ORB), ratio(4, 3), "the mobile line spreads at 4/3");
+    assert_eq!(
+        mobile.population_capacity(FIRST_ORB),
+        anchored.population_capacity(FIRST_ORB) * ratio(3, 4),
+        "and its ceiling pays the 3/4 permanence price"
+    );
+}
+
 // ── THE EVOLUTIONARY ARC (§2c) — a line transforms over the game ──
 
 /// Grant the deepening (condition 3) on the genesis orb — the earned

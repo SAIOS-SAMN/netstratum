@@ -257,7 +257,10 @@ impl World {
             // FED — births ride the #28 logistic on PEOPLE toward K_pop,
             // less the ordinary mortality; the people eat their full demand.
             let k = self.population_capacity(orb);
-            let r = intrinsic_rate(metabolism, element);
+            // MOVING FOOTPRINT (`44_LINEAGES` §2b): a mobile line in a medium
+            // spreads faster — its intrinsic rate takes the growth boost. A
+            // non-mobile line's factor is 1, so the #40–42 rate is unchanged.
+            let r = intrinsic_rate(metabolism, element) * self.footprint_growth_factor(orb);
             let grown = grained_logistic(&pr, &k, &r, dt);
             // STABILITY GATE (`43_DISTRIBUTION` §3–4): where a granary
             // stands, births scale by the leisure coverage — a fed but

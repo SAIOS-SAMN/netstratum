@@ -139,6 +139,19 @@ impl World {
                 ),
             ));
         }
+        if self.cooling_affine() {
+            gauges.push(("cooling K".into(), crate::ratio::ratio_str(&self.cooling_k_factor(orb))));
+        }
+        if self.mobility_affine(orb) {
+            gauges.push((
+                "mobile footprint".into(),
+                format!(
+                    "grow {} · permanence {}",
+                    crate::ratio::ratio_str(&self.footprint_growth_factor(orb)),
+                    crate::ratio::ratio_str(&self.footprint_permanence_factor(orb))
+                ),
+            ));
+        }
         if people > 0 {
             let cog = self.research_siphon(orb, people as i64);
             if cog > 0 {
