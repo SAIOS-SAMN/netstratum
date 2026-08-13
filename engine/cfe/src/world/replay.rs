@@ -11,18 +11,6 @@
 //! `crate::dop::commensurate_weight`, in the `ResourceTransferred`
 //! arm. Every other arm APPLIES the receipted amount rather than
 //! re-deriving it. So #30's surface is one call site, not 113 arms.
-//!
-//! **PHASE-3 FLIP LANDED** (`39_PHASE3_FLIP`, operator ruling
-//! 2026-08-13): this file's reconstruction is now explicitly A
-//! PROPOSER, never the live gate. `conductor::chain_beat` commits one
-//! `mesh::arbor` record per deed, each carrying its own kernel step —
-//! a deed the kernel refuses gets no arbor commitment, full stop. This
-//! module keeps replaying every receipt regardless (the world plays
-//! on; conductor's own policy has never yet proposed an unlawful
-//! deed), so `world.committed()` and the arbor's own head can now
-//! honestly diverge — that divergence, not agreement, is the point.
-
-
 
 use super::*;
 
