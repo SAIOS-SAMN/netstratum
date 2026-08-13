@@ -189,9 +189,43 @@ impl World {
         Levy::CONTINUITY
     }
 
+    /// **THE ESTATE TAX RATE** (`49_TAXATION` §4) — the share of a
+    /// generation's estate taxed to the sovereign at each turnover. It
+    /// shares the lifespan-derived TURNOVER rate with the continuity tax
+    /// (`grain/lifespan`): a short-lived line turns over often and is
+    /// taxed near its whole per-capita estate each time; a long-lived one
+    /// rarely, and only a quarter. One clock, one rate — the two levies
+    /// that fire at Turnover read it alike.
+    pub fn estate_tax(&self) -> Ratio {
+        self.continuity_tax()
+    }
+
+    /// **THE ESTATE TAX DUE at a turnover** (`49_TAXATION` §4) — what the
+    /// estate levy collects into the treasury for the generation
+    /// boundaries crossed this span. The estate is population-proportional
+    /// (ruled 2026-08-13): `population × per_capita_ration`, the
+    /// generation's worth. Collection needs a GovernmentOffice — no office
+    /// → nothing collected, so a world without one is byte-identical.
+    /// `boundaries` is how many full generations turned over this span
+    /// (`now/L − last_touch/L`), so a touch that spans several settles
+    /// them all at once.
+    pub fn estate_due_at_touch(&self, orb: u64, boundaries: u64) -> Ratio {
+        let zero = ratio(0, 1);
+        if boundaries == 0 || !self.has_government_office(orb) {
+            return zero;
+        }
+        let population = self.population_of(orb);
+        if population == 0 {
+            return zero;
+        }
+        let estate = ratio(population as i64, 1) * self.per_capita_ration();
+        self.estate_tax() * estate * ratio(boundaries as i64, 1)
+    }
+
     /// The standing estate levy (`49_TAXATION` §4) — Estate / Turnover /
-    /// Sovereign. Its rate lands with #56; declared here so the seeded tax
-    /// system is legible from one place.
+    /// Sovereign. `estate_tax` is its rate, `estate_due_at_touch` its
+    /// settle; declared here so the seeded tax system is legible from one
+    /// place.
     pub fn estate_levy(&self) -> Levy {
         Levy::ESTATE
     }

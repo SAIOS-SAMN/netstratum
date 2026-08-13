@@ -298,6 +298,15 @@ impl World {
         // population and the regrowth). Applied to the treasury after the
         // touch, at the same stamp.
         let welfare = self.welfare_spend(orb, self.clock.now());
+        // TAXATION (49 §4): the estate tax at a GENERATION TURNOVER — every
+        // L beats a generation turns and its population-proportional estate
+        // is taxed to the treasury. The boundaries crossed this span are
+        // read from the pre-touch `last_touch` (like the welfare/population),
+        // so a long-quiet colony settles all crossings at once.
+        let lifespan = self.lifespan_of().max(1);
+        let last_touch = self.orb_by_id(orb).map(|held| held.last_touch).unwrap_or(0);
+        let generations = self.clock.now() / lifespan - last_touch / lifespan;
+        let estate = self.estate_due_at_touch(orb, generations);
         let held = peel(&mut self.orbs, orb)
             .ok_or(ActionRefused::NoSuchOrb { orb })?;
         let mut settleable: Vec<(Resource, Ratio)> = Vec::new();
@@ -501,6 +510,10 @@ impl World {
         // nothing, so a world without one is byte-identical.
         let revenue = self.levy_collected_at_touch(orb, &taxable);
         self.settle_treasury(orb, revenue);
+        // TAXATION (49 §4): the estate tax INFLOW at each generation
+        // boundary crossed this span (read pre-touch above). No office /
+        // no population / no boundary → zero → no deed.
+        self.settle_treasury(orb, estate);
         // TAXATION (49 §5): the welfare OUTFLOW — spend the treasury (down
         // to what it holds, read pre-touch above) to close the stability
         // stall. No hub / no stall / empty treasury → zero → no deed, so a
