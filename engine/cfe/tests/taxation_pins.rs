@@ -49,6 +49,37 @@ fn run_collects(world: &mut World, rounds: usize) {
     }
 }
 
+/// A short-lived line (L = one grain = 64 beats) with a fed population and
+/// (optionally) a GovernmentOffice — the estate levy's setting. Both
+/// upkeep resources are stocked so the office stays lit across ticks.
+fn generation_world(office: bool) -> World {
+    let mut world = World::new();
+    world.found("estate-hold").expect("founds");
+    world.commission_star(StarClass::G).expect("star");
+    world
+        .site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None)
+        .expect("sites");
+    let stamp = world.now();
+    for res in [Resource::Biomass, Resource::Iron] {
+        world.chronicle_mut().append(
+            ClosureEvent::YieldCollected { orb_id: FIRST_ORB, resource: res, amount: ratio(1_000_000, 1) },
+            stamp,
+            vec![SOVEREIGN],
+        );
+    }
+    let mut world = World::resume(world.chronicle().clone());
+    for tile in 0..6 {
+        world.zone(tile, ZoneKind::Habitat).expect("habitat");
+    }
+    world.zone(50, ZoneKind::Granary).expect("granary");
+    if office {
+        world.zone(20, ZoneKind::GovernmentOffice).expect("office");
+    }
+    world.seal_taxon(1, 1).expect("short-lived, L=64");
+    world.settle_population(FIRST_ORB, 100);
+    world
+}
+
 #[test]
 fn the_seeded_levies_name_their_base_trigger_and_sink() {
     // The continuity tax draws on KNOWLEDGE and lapses to the VOID; the
@@ -198,4 +229,70 @@ fn a_touch_without_an_office_collects_no_levy_and_is_byte_identical() {
         "no reach → no receipt: the untaxed collect is byte-identical"
     );
     assert_eq!(replay(bare.chronicle()), bare.committed(), "untaxed replay MATCHES");
+}
+
+// ── §4: the estate tax at the generation turnover (population-proportional) ──
+
+#[test]
+fn the_estate_tax_is_population_proportional_and_office_gated() {
+    let world = generation_world(true);
+    let pop = world.population_of(FIRST_ORB);
+    assert!(pop > 0, "the line stands");
+    // No boundary crossed → nothing due.
+    assert_eq!(world.estate_due_at_touch(FIRST_ORB, 0), ratio(0, 1), "no turnover, no estate tax");
+    // One generation: estate_tax × (population × per_capita) — the estate is
+    // the generation's population-proportional worth (ruled 2026-08-13).
+    let estate = ratio(pop as i64, 1) * world.per_capita_ration();
+    let one = world.estate_tax() * estate;
+    assert_eq!(world.estate_due_at_touch(FIRST_ORB, 1), one, "one turnover taxes the estate once");
+    // Several boundaries in one span settle together — linear in the count.
+    assert_eq!(
+        world.estate_due_at_touch(FIRST_ORB, 3),
+        one.clone() + one.clone() + one,
+        "three turnovers settle at once"
+    );
+    // No office → uncollected, whatever the boundaries crossed.
+    let bare = generation_world(false);
+    assert_eq!(bare.estate_due_at_touch(FIRST_ORB, 5), ratio(0, 1), "no office → the estate tax slips");
+}
+
+#[test]
+fn the_estate_tax_lands_only_at_the_generation_boundary() {
+    // A producer-less office world: the treasury moves ONLY when a
+    // generation (L=64 beats) turns over — flat within a generation, a jump
+    // at each boundary. The clean face of the discrete-turnover ruling.
+    let mut gov = generation_world(true);
+    // Round to now≈40 — within the first generation, no boundary.
+    run_collects(&mut gov, 10); // 10×4 = 40 beats
+    let within_gen_1 = gov.treasury_of(FIRST_ORB);
+    assert_eq!(within_gen_1, ratio(0, 1), "no boundary crossed yet → an empty treasury");
+    // Cross the 64-beat boundary (to now≈80).
+    run_collects(&mut gov, 10); // now ≈ 80 — crossed 64
+    let after_boundary = gov.treasury_of(FIRST_ORB);
+    assert!(after_boundary > within_gen_1, "the estate tax lands at the turnover: 0 -> {after_boundary}");
+    // Stay inside the second generation (to now≈120) — the treasury holds.
+    run_collects(&mut gov, 10); // now ≈ 120 — no new boundary
+    assert_eq!(gov.treasury_of(FIRST_ORB), after_boundary, "flat within a generation");
+    // Cross the 128-beat boundary (to now≈160).
+    run_collects(&mut gov, 10); // now ≈ 160 — crossed 128
+    assert!(gov.treasury_of(FIRST_ORB) > after_boundary, "a second turnover taxes again");
+    assert_eq!(replay(gov.chronicle()), gov.committed(), "estate-tax replay MATCHES");
+}
+
+#[test]
+fn a_generation_turns_without_an_office_and_the_treasury_stays_empty() {
+    // The mirror: the same short-lived line turning over generation after
+    // generation, but no GovernmentOffice — the estate slips uncollected,
+    // so the treasury never fills and the world is byte-identical.
+    let mut bare = generation_world(false);
+    run_collects(&mut bare, 40); // ≈160 beats — two generations turned
+    assert_eq!(bare.treasury_of(FIRST_ORB), ratio(0, 1), "no office → the estate tax collects nothing");
+    assert!(
+        !bare
+            .chronicle()
+            .receipts()
+            .iter()
+            .any(|r| matches!(r.event, ClosureEvent::TreasurySettled { .. })),
+        "no reach, no boundary receipt: byte-identical to the pre-taxation era"
+    );
 }
