@@ -115,6 +115,10 @@ pub const SCHEMA_V20: u8 = 20;
 /// **SCHEMA v21 — treasury_balances (49_TAXATION §5, trailing run).**
 pub const SCHEMA_V21: u8 = 21;
 
+/// **SCHEMA v22 — collapsed (50_WIN_CONDITIONS, the failure state, one
+/// optional trailing stamp).**
+pub const SCHEMA_V22: u8 = 22;
+
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
 }
@@ -135,7 +139,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V21];
+    let mut out = vec![SCHEMA_V22];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -540,6 +544,16 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         put_u64(&mut out, *orb);
         ratio::encode(bal, &mut out);
     }
+    // SCHEMA v22 trailing: the failure state (50_WIN_CONDITIONS) — one
+    // flag byte, then the stamp if set. A v21 reader stops before it and
+    // decodes a whole state as not-collapsed.
+    match committed.collapsed {
+        Some(stamp) => {
+            out.push(1);
+            put_u64(&mut out, stamp);
+        }
+        None => out.push(0),
+    }
     out
 }
 
@@ -637,6 +651,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         && schema != SCHEMA_V19
         && schema != SCHEMA_V20
         && schema != SCHEMA_V21
+        && schema != SCHEMA_V22
     {
         return None;
     }
@@ -1178,6 +1193,17 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         }
     }
 
+    // SCHEMA v22 trailing: the failure state, or None for a pre-v22
+    // snapshot (no line had yet collapsed under this schema).
+    let collapsed = if schema >= SCHEMA_V22 {
+        match take.u8()? {
+            1 => Some(take.u64()?),
+            _ => None,
+        }
+    } else {
+        None
+    };
+
     if !take.done() {
         return None;
     }
@@ -1208,6 +1234,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         veiled,
         taxon,
         evolution_stage,
+        collapsed,
         stations,
         hulls,
         notes,

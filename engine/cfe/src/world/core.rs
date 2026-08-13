@@ -174,6 +174,12 @@ impl World {
         Ok(())
     }
     pub(super) fn permitted(&self, actor: u64, scope: Scope) -> Result<(), ActionRefused> {
+        // 50_WIN_CONDITIONS: a collapsed line accepts no further scoped
+        // action — checked FIRST, ahead of entity/grant lookups, so a
+        // collapsed world refuses uniformly regardless of who's asking.
+        if self.collapsed.is_some() {
+            return Err(ActionRefused::CivilizationCollapsed);
+        }
         let entity = self
             .entity(actor)
             .ok_or(ActionRefused::NoSuchEntity { entity: actor })?;
@@ -329,6 +335,7 @@ impl World {
             veiled: self.veiled,
             taxon: self.taxon,
             evolution_stage: self.evolution_stage,
+            collapsed: self.collapsed,
             stations: self.stations.clone(),
             hulls: self.hulls.clone(),
             notes: self.notes.clone(),

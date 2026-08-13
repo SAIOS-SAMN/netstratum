@@ -1,21 +1,21 @@
-# 50_WIN_CONDITIONS — closing a playthrough (PROPOSAL, no code lands with this doc)
+# 50_WIN_CONDITIONS — closing a playthrough (RULED)
 
-**Status: PROPOSAL, 2026-08-13.** Not a ruling. A grep across `engine/`,
-`clients/`, and `docs/` for `win_condition|game_over|victory|end_game`
-returns nothing — there is currently no way for a playthrough to
-conclude, and every mechanic landed to date (founding, zones,
-population, taxation, ideology, tech) runs forever with no closure.
-This doc exists to give the operator concrete candidates to rule on,
-grounded in what has actually landed, rather than leaving "how does the
-game end" unspecified indefinitely.
+**Status: RULED, 2026-08-13 (operator).** *"There is no win state —
+there is a failure state — otherwise the game should just continue in
+perpetuity."* This settles §2 below: **option E (no win condition) +
+option A (a loss/collapse condition) IS the law.** Options B, C, D are
+STRUCK — not deferred, not "later," struck — a "number go up" or
+"reach a threshold" WIN closes exactly the perpetual-play structure the
+ruling names as the point. The game has a way to fail and no way to
+"beat" it.
 
-**Why this is a proposal and not a landing:** picking a win condition
-picks what the game is ABOUT — it is exactly the class of decision this
-project routes through an operator ruling (see `[[code-is-the-law-anchoring]]`
-in memory; every prior systemic law in this codebase, from the tithe's
-sizing to the seat-scope ladder, was ruled before it was coded). Nothing
-here should be built until one of the options below (or an amendment) is
-chosen.
+A grep across `engine/`, `clients/`, and `docs/` for
+`win_condition|game_over|victory|end_game` still returns nothing —
+there is currently no way for a playthrough to conclude, in either
+direction. §2's option A is now the whole spec for what needs building;
+this doc stays live as the design record, no longer as an open
+proposal. See `docs/GAME_SPEC.md`'s open-work queue for the tracked
+implementation task.
 
 ## 1. What already exists to build a condition FROM
 
@@ -45,66 +45,50 @@ and a closure receipt:
   property of that coordinate's TRAJECTORY (where a line has traveled),
   not favor one axis over another by construction.
 
-## 2. Candidate end-states (pick one, several, or none of these)
+## 2. The ruled shape — option A, alone
 
-### A. Collapse / loss condition (arguably more load-bearing than a win)
+### A. Collapse / loss condition — THE LAW
 `stability_of` and the population logistic already model failure paths
 (famine, starved mortality, `#30` quarantine decay). A LOSS condition —
 population reaches 0, or stability holds below a threshold for N beats
-— may be the more honest thing to define first: the game already
-tracks how a civilization DIES; it just never CLOSES the chronicle when
-it does. Low implementation cost (a threshold check at the existing
-population/stability touch, `world/rejuvenation.rs` / `distribution.rs`),
-and every other candidate below needs a loss condition to be meaningful
-anyway (a "win" with no possible loss is not a game).
+— is the honest thing to define: the game already tracks how a
+civilization DIES; it just never CLOSES the chronicle when it does.
+Low implementation cost (a threshold check at the existing
+population/stability touch, `world/rejuvenation.rs` / `distribution.rs`).
+**This is the entire closure mechanic the game gets.**
 
-### B. Economic closure — the purse crosses a threshold
-`purse()` already sums a line's whole economy. A target (in STAMP, per
-`32_STAMP_MARKET.md`'s universal unit of account — deliberately NOT a
-raw resource total, since resource identity is metabolism-relative per
-this session's zone-cost work) closes the game when crossed. Cheapest
-to implement; least thematically satisfying on its own (a "number go up"
-ending sits oddly next to the disposition/metabolism/perception design
-this project has invested heavily in).
+### ~~B. Economic closure — the purse crosses a threshold~~ STRUCK
+~~`purse()` already sums a line's whole economy...~~ **STRUCK by the
+2026-08-13 ruling.** A "number go up" win is exactly the kind of
+artificial stopping point the ruling rejects — the economy keeps
+running after any threshold, same as before it.
 
-### C. Evolutionary/civilizational maturity — the arc completes
-`evolution_stage()` (`44_LINEAGES §2c`) already stages a line's growth.
-A final stage (not yet defined — the arc currently has no ceiling) could
-BE the win condition: reaching it is "the civilization has become what
-it was becoming." Fits the project's own thesis (44_LINEAGES: "a
-civilization is a coordinate... given depth by four dimensions") more
-than a resource-count win would. Cost: needs the evolutionary arc's
-depth dimensions (2b/2d, castes/environment-coupling — still open per
-`GAME_SPEC.md §3`) fleshed out enough that a "final stage" means
-something, not just a number increment.
+### ~~C. Evolutionary/civilizational maturity — the arc completes~~ STRUCK
+~~`evolution_stage()`...~~ **STRUCK.** The evolutionary arc
+(`44_LINEAGES §2c`) stays open-ended by the same ruling — a line keeps
+advancing for as long as it's played, with no "final stage" that ends
+anything. `evolution_stage()` remains a live reading, just never a
+closure trigger.
 
-### D. Diplomatic closure — cohesion crosses a threshold with every
-known civilization
-Uses the already-landed ideology ledger (`09_IDEOLOGY.md`). A "concord"
-ending: every civilization in a shared World reaches sustained positive
-cohesion. Thematically strong (matches the Project-Hail-Mary founding
-insight: "a discovery becomes real only when two measurably DIFFERENT
-civilizations confirm it independently" — a concord win rewards the
-game's own central mechanic). Cost: needs more than one civilization
-routinely coexisting in a played World to matter, which today mostly
-happens via `chart()`-derived colonies of the SAME line, not distinct
-civilizations (see `GAME_SPEC.md`'s multi-civilization note — one
-`World` seals exactly one `genesis`).
+### ~~D. Diplomatic closure — cohesion crosses a threshold~~ STRUCK
+~~Uses the already-landed ideology ledger...~~ **STRUCK**, same reason.
+Cohesion stays a standing to maintain (or lose), not a target to hit
+and stop at.
 
-### E. No win condition — only a loss condition, by design
-A legitimate fifth option: some strategy/builder games (the genre this
-project explicitly targets, per the "Cities:Skylines-style civilization
-builder" framing this session opened with) have no win state at all —
-only a standing to maintain and a collapse to avoid. If this is the
-ruling, (A) alone is the whole answer and B/C/D become optional
-score-tracking, not closure conditions.
+### E. No win condition — RULED, this is why A stands alone
+Confirmed by the operator directly: some strategy/builder games (the
+genre this project explicitly targets, per the "Cities:Skylines-style
+civilization builder" framing this session opened with) have no win
+state at all — only a standing to maintain and a collapse to avoid.
+**(A) is the whole answer.** B/C/D's underlying readings
+(`purse`/`evolution_stage`/cohesion) remain legitimate SCORE-TRACKING —
+a player or the observer can watch them — they are simply never gates
+that end a chronicle.
 
 ## 3. What this doc does NOT decide
 
-- Whether multiple end-states can coexist (e.g., A always active, C as
-  an optional "achievement" ending).
 - The exact thresholds (population 0? stability below what, for how
-  long? which STAMP figure?) — these are balance rulings, deferred the
+  long?) — these are balance rulings, deferred the
   same way every other numeric constant in this codebase is (see the
   `tuned_constant_ratchet` discipline — do not add a threshold literal
   without an operator sign-off).
@@ -113,9 +97,9 @@ score-tracking, not closure conditions.
   `ColonyAlreadyFounded` blocks re-founding, or does closure freeze the
   World the way `GenesisAlreadySealed` freezes axis-picking?).
 
-## 4. Recommended sequencing once ruled
+## 4. What ships (tracked implementation task)
 
-Land the LOSS condition (A) first regardless of which win condition is
-chosen — it is cheap, it is honest about what the game already
-simulates, and every other candidate needs it to mean anything. Then
-layer whichever win condition(s) the operator rules on top.
+Only the loss condition (A). No further ruling is owed before building
+it — the open questions in §3 (thresholds, replayability) are
+implementation-detail decisions the builder can make and pin, not
+another round of "which end-state." Land it, pin it, done.

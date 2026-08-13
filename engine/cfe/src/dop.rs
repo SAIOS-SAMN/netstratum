@@ -369,12 +369,17 @@
 //!         today raises a new world and tithes to the ANCIENT seat;
 //!         PURCHASE/COMMISSION (the elder path, an existing planet) are
 //!         deferred per HANDOFF_2026-08-13.)
-//!    Phase-5 claim ledger: next free **172** (163–164 ElementWant,
+//!    172  ClosureEvent::CivilizationCollapsed (`50_WIN_CONDITIONS`,
+//!         operator ruling 2026-08-13 — the failure state, the only
+//!         closure this game has; no win-state deed exists or ever
+//!         will, by the same ruling.)
+//!    Phase-5 claim ledger: next free **173** (163–164 ElementWant,
 //!    165 TreatyElementsAllowed, 166 SolverWordMinted, 167
 //!    PopulationSettled — 41_PROVISION §3, 169 EvolutionAdvanced —
 //!    44_LINEAGES §2c, 170 TitheReceipted, 171 TreasurySettled —
-//!    49_TAXATION §5). Note: quarantine relief's
-//!    PressureEbbed (ruling R3) is reserved 168 for when #30 lands.
+//!    49_TAXATION §5, 172 CivilizationCollapsed). Note: quarantine
+//!    relief's PressureEbbed (ruling R3) is reserved 168 for when
+//!    #30 lands.
 //!    Seated science labs. E-MKT-1 (2026-08-10): tag **49** OfferPosted
 //!    wire extended in place (Resource 1..=7; Element = 0 ‖ id[32]).
 //!    E3.7 (2026-08-10): tags **163–164** ElementWantStruck/Relieved.
@@ -2983,6 +2988,18 @@ pub enum ClosureEvent {
     /// never crafts a levy nor stands a WelfareHub emits none, so it
     /// replays byte-identical.
     TreasurySettled { orb_id: u64, delta: Ratio },
+    /// **THE FAILURE STATE** (`50_WIN_CONDITIONS`, operator ruling
+    /// 2026-08-13, tag 172): *"there is no win state — there is a
+    /// failure state — otherwise the game should just continue in
+    /// perpetuity."* Fires once, when the genesis orb's population
+    /// settles to zero at a `PopulationSettled` touch — the only
+    /// closure this game has. `orb_id` names the genesis orb for the
+    /// receipt's own record; the flag it sets is world-scoped
+    /// (`Committed::collapsed`), since one World holds exactly one
+    /// sealed civilization. Idempotent by construction: `settle_population`
+    /// only ever crosses zero once (it floors there and stays), so this
+    /// event can never fire twice for one line.
+    CivilizationCollapsed { orb_id: u64 },
     /// MESH-1b (NS-5 §7) — the receipted handoff: the yielding hand
     /// `from` seals, naming successor `to`. One writer per clock;
     /// authority derives by the mesh's walk of the arbor (never a
@@ -4093,6 +4110,9 @@ impl ClosureEvent {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 ratio::encode(delta, &mut value);
                 tlv::put(171, &value, &mut out);
+            }
+            Self::CivilizationCollapsed { orb_id } => {
+                tlv::put(172, &orb_id.to_le_bytes(), &mut out);
             }
             Self::HandoffSealed { from, to } => {
                 let mut value = from.to_le_bytes().to_vec();
@@ -5378,6 +5398,10 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let (delta, _) = ratio::decode(value.get(8..)?)?;
                 Some(Self::TreasurySettled { orb_id, delta })
+            }
+            172 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                Some(Self::CivilizationCollapsed { orb_id })
             }
             67 => {
                 let from = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

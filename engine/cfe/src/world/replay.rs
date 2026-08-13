@@ -68,6 +68,7 @@ impl Replayer {
                 veiled: false,
                 taxon: None,
                 evolution_stage: 0,
+                collapsed: None,
                 stations: Vec::new(),
                 hulls: Vec::new(),
                 notes: Vec::new(),
@@ -133,6 +134,7 @@ impl Replayer {
             veiled,
             taxon,
             evolution_stage,
+            collapsed,
             stations,
             hulls,
             notes,
@@ -1012,6 +1014,12 @@ impl Replayer {
             if next > ratio(0, 1) {
                 treasury_balances.push((*orb_id, next));
             }
+        }
+        // 50_WIN_CONDITIONS, operator ruling 2026-08-13: the failure
+        // state, world-scoped and one-way — replay sets the stamp it
+        // fired at and never clears it.
+        ClosureEvent::CivilizationCollapsed { .. } => {
+            *collapsed = Some(receipt.stamp);
         }
         // MARKET-1 / E-MKT-1: the intent rests; the clear removes it.
         ClosureEvent::OfferPosted {

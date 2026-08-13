@@ -177,6 +177,12 @@ pub struct Committed {
     /// the line has advanced along its arc. 0 at founding; the gated
     /// `EvolutionAdvanced` deed increments it. Lifts provisioning capacity.
     pub evolution_stage: u8,
+    /// **THE FAILURE STATE** (`50_WIN_CONDITIONS`, operator ruling
+    /// 2026-08-13: "there is no win state — there is a failure
+    /// state"). `Some(stamp)` once the genesis orb's population has
+    /// settled to zero; `None` while the line stands. The only closure
+    /// this game has — there is no win to pair it with.
+    pub collapsed: Option<u64>,
     /// THE VERTICAL AXIS (tag 89, 2026-08-01): the seats held, as
     /// (line, station) in seating order. A station GATES AUTHORITY, and
     /// until this landing it lived only in an editable registry file —
@@ -339,6 +345,8 @@ pub struct World {
     pub(super) taxon: Option<(u8, u16)>,
     /// THE EVOLUTIONARY STAGE (tag 169): the arc position (replay).
     pub(super) evolution_stage: u8,
+    /// THE FAILURE STATE (tag 172): `Some(stamp)` once collapsed (replay).
+    pub(super) collapsed: Option<u64>,
     /// THE VERTICAL AXIS (tag 89): the seats held, (line, station).
     pub(super) stations: Vec<(String, u8)>,
     /// FLEET-1 hulls.
