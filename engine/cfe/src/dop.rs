@@ -1593,6 +1593,69 @@ pub fn metabolic_ration(metabolism: u8) -> Resource {
     }
 }
 
+/// **WHAT A LEVY DRAWS ON** (`45_TAXATION` §1) — the base a tax is levied
+/// against.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LevyBase {
+    /// Standing stock (demurrage's own base).
+    Stock,
+    /// The estate handed to the next generation at turnover.
+    Estate,
+    /// Crystallized boons and adopted practices — a line's retained law.
+    Knowledge,
+    /// Flows crossing a treaty border.
+    Trade,
+}
+
+/// **WHEN A LEVY FIRES** (`45_TAXATION` §1).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LevyTrigger {
+    /// At the settle touch, beside demurrage/rejuvenation.
+    Touch,
+    /// At a lifespan turnover (the `42_LIFESPAN` mortality settle).
+    Turnover,
+    /// At a bond/transfer crossing a treaty border.
+    Treaty,
+}
+
+/// **WHERE A LEVY FLOWS** (`45_TAXATION` §1).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LevySink {
+    /// To the seated authority (a receipted transfer).
+    Sovereign,
+    /// It simply lapses — demurrage's admitted decay, no counterparty.
+    Void,
+    /// To the other side of a treaty.
+    Counterparty,
+}
+
+/// **A LEVY** (`45_TAXATION` §1) — a crafted tax as data: what it draws,
+/// when, where it flows. The RATE rides the minted binding
+/// (progenitor-crafted, `Axis::Levy`); base/trigger/sink name the levy. The
+/// two seeded levies are the continuity tax and the estate tax (§3–4).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Levy {
+    pub base: LevyBase,
+    pub trigger: LevyTrigger,
+    pub sink: LevySink,
+}
+
+impl Levy {
+    /// THE CONTINUITY TAX (§3) — unconfirmed knowledge lapses each turnover.
+    pub const CONTINUITY: Levy = Levy {
+        base: LevyBase::Knowledge,
+        trigger: LevyTrigger::Turnover,
+        sink: LevySink::Void,
+    };
+    /// THE ESTATE TAX (§4) — the estate is taxed to the sovereign at each
+    /// generational handover.
+    pub const ESTATE: Levy = Levy {
+        base: LevyBase::Estate,
+        trigger: LevyTrigger::Turnover,
+        sink: LevySink::Sovereign,
+    };
+}
+
 /// **THE CASTES** (`44_LINEAGES` §2d) — the specialized roles a population
 /// differentiates into. NOT a fixed set: a caste IS a disposition-role, so
 /// the castes of a line are exactly its disposition axis's values —
@@ -2048,6 +2111,8 @@ pub fn zone_word(kind: ZoneKind) -> &'static str {
         ZoneKind::ElementRefinery => "element-refinery",
         ZoneKind::ShipYard => "shipyard",
         ZoneKind::Granary => "granary",
+        ZoneKind::GovernmentOffice => "government-office",
+        ZoneKind::WelfareHub => "welfare-hub",
         // #41: a minted kind's WORD lives in the fold, not the table.
         // The chronicle names it; this answers only that it is one.
         ZoneKind::Minted(_) => "minted",
@@ -2106,6 +2171,16 @@ pub enum ZoneKind {
     /// whose placement unlocks a law. Buildable freely (no deepening
     /// gate): provisioning is foundational, not a late technology.
     Granary = 11,
+    /// **THE GOVERNMENT OFFICE** (`45_TAXATION` §2, ruled 2026-08-13): the
+    /// civic collection node. Where one stands, crafted levies collect at
+    /// full efficiency; without one, tax collection SLIPS (evasion/leakage).
+    /// Infrastructure — no yield of its own, the Granary's bill.
+    GovernmentOffice = 12,
+    /// **THE WELFARE HUB** (`45_TAXATION` §2): the public-service
+    /// distribution node. It siphons the standing ration reserve into the
+    /// population's stability during a stall or famine, buffering the crash
+    /// (the welfare→stability loop). Infrastructure — no yield of its own.
+    WelfareHub = 13,
     /// **A MINTED BUILDING (#41)** — the fold code of a zone-axis entry
     /// past the compiled table. Its economics are its BASE's, modulated
     /// by its binding (`vocabulary::zone_base`), so they are read
@@ -2339,6 +2414,8 @@ impl ZoneKind {
             Self::ElementRefinery => 9,
             Self::ShipYard => 10,
             Self::Granary => 11,
+            Self::GovernmentOffice => 12,
+            Self::WelfareHub => 13,
             Self::Minted(code) => code,
         }
     }
@@ -2367,6 +2444,8 @@ impl ZoneKind {
             9 => Some(Self::ElementRefinery),
             10 => Some(Self::ShipYard),
             11 => Some(Self::Granary),
+            12 => Some(Self::GovernmentOffice),
+            13 => Some(Self::WelfareHub),
             _ => None,
         }
     }
@@ -2429,6 +2508,9 @@ impl ZoneKind {
             // DERIVED: the habitat's bill. A granary is a ration house —
             // the same founding-ration cost the habitat pays, no new dial.
             Self::Granary => Self::Habitat.cost(),
+            // DERIVED: civic buildings are raised on the founding ration
+            // bill, like the granary — a public work, not a producer.
+            Self::GovernmentOffice | Self::WelfareHub => Self::Habitat.cost(),
         }
     }
 
@@ -2468,6 +2550,9 @@ impl ZoneKind {
             // PROVISION-1: the granary produces nothing — it is the
             // provisioning LAW's unlock, not a yield line. Zero rate.
             Self::Granary => (Resource::Biomass, ratio(0, 1)),
+            // Civic infrastructure produces no resource — it collects and
+            // distributes, it does not farm.
+            Self::GovernmentOffice | Self::WelfareHub => (Resource::Biomass, ratio(0, 1)),
             // #41: the ground state — see `cost`. A minted kind yields
             // through `World::zone_economics`, never here.
             Self::Minted(_) => (Resource::Iron, ratio(0, 1)),
@@ -2512,6 +2597,8 @@ impl ZoneKind {
             // DERIVED: the habitat's own life-support line — a granary is
             // maintained like the ration house it is.
             Self::Granary => Self::Habitat.upkeep_per_tick(),
+            // DERIVED: the habitat's life-support line — a staffed civic office.
+            Self::GovernmentOffice | Self::WelfareHub => Self::Habitat.upkeep_per_tick(),
             // #41: the ground state — see `cost`.
             Self::Minted(_) => Vec::new(),
         }
@@ -2532,7 +2619,11 @@ impl ZoneKind {
             }
             // Passive storage/capture infrastructure runs cold: the
             // granary joins the shell and the cryo-array at zero.
-            Self::Encasement | Self::CryoArray | Self::Granary => ratio(0, 1),
+            Self::Encasement
+            | Self::CryoArray
+            | Self::Granary
+            | Self::GovernmentOffice
+            | Self::WelfareHub => ratio(0, 1),
             // #41: the ground state — see `cost`.
             Self::Minted(_) => ratio(0, 1),
         }

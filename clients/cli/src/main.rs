@@ -3965,6 +3965,8 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                                 cfe::dop::ZoneKind::ElementRefinery => 'F',
                                 cfe::dop::ZoneKind::ShipYard => 'P',
                                 cfe::dop::ZoneKind::Granary => 'A',
+                                cfe::dop::ZoneKind::GovernmentOffice => 'O',
+                                cfe::dop::ZoneKind::WelfareHub => 'W',
                                 // #41: a minted building — the chain
                                 // named it, so the map marks it as one.
                                 cfe::dop::ZoneKind::Minted(_) => 'M',
@@ -7984,6 +7986,8 @@ fn map(world: &World, style: &Style, current: u64) {
                     ZoneKind::ElementRefinery => "f",
                     ZoneKind::ShipYard => "p",
                     ZoneKind::Granary => "a",
+                    ZoneKind::GovernmentOffice => "o",
+                    ZoneKind::WelfareHub => "w",
                     ZoneKind::Minted(_) => "m",
                 }),
                 Some(zone) => match zone.kind {
@@ -7998,6 +8002,8 @@ fn map(world: &World, style: &Style, current: u64) {
                     ZoneKind::ElementRefinery => style.warn("F"),
                     ZoneKind::ShipYard => style.route("P"),
                     ZoneKind::Granary => style.ok("A"),
+                    ZoneKind::GovernmentOffice => style.head("O"),
+                    ZoneKind::WelfareHub => style.ok("W"),
                     ZoneKind::Minted(_) => style.strong("M"),
                 },
                 None => style.dim("·"),

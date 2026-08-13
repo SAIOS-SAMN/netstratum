@@ -277,6 +277,8 @@ fn zone_word(kind: ZoneKind) -> &'static str {
         ZoneKind::ElementRefinery => "element refinery",
         ZoneKind::ShipYard => "shipyard",
         ZoneKind::Granary => "granary",
+        ZoneKind::GovernmentOffice => "government office",
+        ZoneKind::WelfareHub => "welfare hub",
         // #41: a minted building's word lives in the FOLD; the journal
         // is prose over receipts and names it generically rather than
         // re-reading the chain here. (This keeps its own long-form
