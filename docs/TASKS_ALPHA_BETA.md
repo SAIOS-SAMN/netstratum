@@ -98,13 +98,16 @@ generic-ration read) is **landed and green** (commits `100b0a7`,
 `06c5ff7`, `e76989d`, `f467876`). One piece was scoped from the start
 and never built:
 
-- [ ] **The mutating settle-at-touch deed.** Bank the grown stock at a
-  real extraction/collect touch, emit the receipt digest (the
-  `ExtractionResolved`-shaped outcome `40_REJUVENATION.md` §2 already
-  names), advance `last_touch`. Today only the read-only scan
-  (`World::regrown_ration`) exists — a player's grown stock is never
-  actually banked. Needs a kernel conservation arm for the mint (same
-  class of fix as task #21's `ConservationBroken` repair).
+- [x] **The mutating settle-at-touch — LANDED (`e017ac2`).** At
+  `collect_as`, before `touch()` seals demurrage (its mirror),
+  `rejuvenation_settle` folds the ration's growth-since-`last_touch`
+  into the touch's own `YieldCollected` amount. No separate deed (per
+  the operator's "physics get no deed" design — the §2 digest rides the
+  collected amount); SEAL-B-safe with NO new machinery, because the
+  kernel already admits `YieldCollected` as a `+amount` mint and replay
+  banks from the receipt. No kernel arm was needed after all. Regression
+  green incl. `wave1_era_pins`. **This unblocks #29 and #30** — same
+  fold-into-a-touch pattern.
 
 **Why this gates other work:** per standing project memory, tasks #29
 (element economy famine/relief) and #30 (quarantine decay/relief) both
