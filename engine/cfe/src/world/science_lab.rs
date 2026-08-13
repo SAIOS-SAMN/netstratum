@@ -189,6 +189,22 @@ impl World {
             stamp,
             vec![],
         );
+        // 50_WIN_CONDITIONS, operator ruling 2026-08-13: THE FAILURE
+        // STATE. Once every orb this line holds stands at zero clones,
+        // the civilization has collapsed — the only closure this game
+        // has. Checked here, not derived lazily, because it must fire
+        // exactly once and receipt when it happens (a reading has no
+        // moment to fire AT). Idempotent: collapsed only ever goes
+        // None -> Some, so a line that later re-seeds (if that's ever
+        // lawful) does not re-fire or un-collapse.
+        if self.collapsed.is_none() && self.clone_counts.iter().all(|(_, count)| *count == 0) {
+            self.collapsed = Some(stamp);
+            self.chronicle.append(
+                crate::dop::ClosureEvent::CivilizationCollapsed { orb_id: FIRST_ORB },
+                stamp,
+                vec![],
+            );
+        }
     }
 
     pub fn synth_grade_of(&self, orb: u64) -> u8 {

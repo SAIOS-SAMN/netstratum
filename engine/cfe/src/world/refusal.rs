@@ -45,6 +45,10 @@ pub enum ActionRefused {
     HandleTaken { handle: String },
     NotPermitted { entity: u64, scope: Scope },
     NotAnAgent { entity: u64 },
+    /// 50_WIN_CONDITIONS, operator ruling 2026-08-13: the line has
+    /// collapsed (every orb at zero population) — the chronicle is
+    /// closed to further scoped action. The only closure this game has.
+    CivilizationCollapsed,
     /// P1 — no orb holds this id.
     NoSuchOrb { orb: u64 },
     /// P1 — a planet name is unique within its world.

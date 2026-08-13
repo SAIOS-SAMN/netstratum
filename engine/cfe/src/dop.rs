@@ -369,13 +369,26 @@
 //!         today raises a new world and tithes to the ANCIENT seat;
 //!         PURCHASE/COMMISSION (the elder path, an existing planet) are
 //!         deferred per HANDOFF_2026-08-13.)
-//!    Phase-5 claim ledger: next free **174** (163–164 ElementWant,
+//!    172  ClosureEvent::PracticesLapsed (`49_TAXATION` §3 — the
+//!         continuity levy: practices lapse to the void at a
+//!         generation turnover.)
+//!    173  ClosureEvent::ElementFarmed (G2 element economy `#29`.)
+//!    174  ClosureEvent::CivilizationCollapsed (`50_WIN_CONDITIONS`,
+//!         operator ruling 2026-08-13 — the failure state, the only
+//!         closure this game has; no win-state deed exists or ever
+//!         will, by the same ruling. RENUMBERED twice: 172 -> 173
+//!         collided with PracticesLapsed, which committed to main
+//!         first; 173 -> 174 then collided with ElementFarmed, which
+//!         ALSO committed to main first. Landed concurrently with two
+//!         separate lanes claiming the same next-free tag in a row.)
+//!    Phase-5 claim ledger: next free **175** (163–164 ElementWant,
 //!    165 TreatyElementsAllowed, 166 SolverWordMinted, 167
 //!    PopulationSettled — 41_PROVISION §3, 169 EvolutionAdvanced —
 //!    44_LINEAGES §2c, 170 TitheReceipted, 171 TreasurySettled —
-//!    49_TAXATION §5, 172 PracticesLapsed — 49_TAXATION §3, 168
-//!    PressureEbbed — bio quarantine relief #30, ruling R3, 173
-//!    ElementFarmed — G2 element economy #29).
+//!    49_TAXATION §5, 168 PressureEbbed — bio quarantine relief #30,
+//!    ruling R3, 172 PracticesLapsed — 49_TAXATION §3, 173
+//!    ElementFarmed — G2 element economy #29, 174
+//!    CivilizationCollapsed — 50_WIN_CONDITIONS).
 //!    Seated science labs. E-MKT-1 (2026-08-10): tag **49** OfferPosted
 //!    wire extended in place (Resource 1..=7; Element = 0 ‖ id[32]).
 //!    E3.7 (2026-08-10): tags **163–164** ElementWantStruck/Relieved.
@@ -3018,6 +3031,18 @@ pub enum ClosureEvent {
         joule: Ratio,
         minted: Ratio,
     },
+    /// **THE FAILURE STATE** (`50_WIN_CONDITIONS`, operator ruling
+    /// 2026-08-13, tag 174): *"there is no win state — there is a
+    /// failure state — otherwise the game should just continue in
+    /// perpetuity."* Fires once, when the genesis orb's population
+    /// settles to zero at a `PopulationSettled` touch — the only
+    /// closure this game has. `orb_id` names the genesis orb for the
+    /// receipt's own record; the flag it sets is world-scoped
+    /// (`Committed::collapsed`), since one World holds exactly one
+    /// sealed civilization. Idempotent by construction: `settle_population`
+    /// only ever crosses zero once (it floors there and stays), so this
+    /// event can never fire twice for one line.
+    CivilizationCollapsed { orb_id: u64 },
     /// MESH-1b (NS-5 §7) — the receipted handoff: the yielding hand
     /// `from` seals, naming successor `to`. One writer per clock;
     /// authority derives by the mesh's walk of the arbor (never a
@@ -4141,6 +4166,9 @@ impl ClosureEvent {
                 ratio::encode(joule, &mut value);
                 ratio::encode(minted, &mut value);
                 tlv::put(173, &value, &mut out);
+            }
+            Self::CivilizationCollapsed { orb_id } => {
+                tlv::put(174, &orb_id.to_le_bytes(), &mut out);
             }
             Self::HandoffSealed { from, to } => {
                 let mut value = from.to_le_bytes().to_vec();
@@ -5437,6 +5465,10 @@ impl ClosureEvent {
                 let (joule, used) = ratio::decode(value.get(40..)?)?;
                 let (minted, _) = ratio::decode(value.get(40 + used..)?)?;
                 Some(Self::ElementFarmed { orb_id, element, joule, minted })
+            }
+            174 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                Some(Self::CivilizationCollapsed { orb_id })
             }
             67 => {
                 let from = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

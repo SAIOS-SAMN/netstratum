@@ -7737,6 +7737,9 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
             scope,
             style.strong("grant <handle> <scope>")
         ),
+        ActionRefused::CivilizationCollapsed => {
+            "the line has collapsed — the chronicle is closed, there is no further action to take".to_string()
+        }
         ActionRefused::NotAnAgent { entity } => format!(
             "entity {} is sovereign — its authority is by construction, never by grant",
             style.strong(&entity.to_string())
@@ -8648,6 +8651,10 @@ fn chronicle(world: &World, style: &Style) {
                 "⬡ element SYNTHESIZED — orb {orb_id} spent {} joule to mint {} of its food-element",
                 style.strong(&amount(joule)),
                 style.strong(&amount(minted))
+            ),
+            cfe::dop::ClosureEvent::CivilizationCollapsed { .. } => format!(
+                "{} the line has COLLAPSED — every orb stands at zero; the chronicle closes here, there is no win to reach for instead",
+                style.bad("☠")
             ),
             cfe::dop::ClosureEvent::OfferPosted { offer, give, give_amount, want, want_amount, .. } => format!(
                 "⇋ offer {offer} RESTS — {} {} for {} {}; the market holds intents, never escrows",
