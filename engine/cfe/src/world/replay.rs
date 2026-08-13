@@ -271,8 +271,10 @@ impl Replayer {
                 // #41: the build was PRICED on its base — replay
                 // reads the receipt's own declaration rather than
                 // re-resolving the fold, so a minted kind replays
-                // at exactly what it was raised for.
-                for (resource, cost) in base.unwrap_or(*kind).cost() {
+                // at exactly what it was raised for. The metabolism
+                // substitution mirrors the live zone_as path.
+                let met = genesis.as_ref().map(|g| g.metabolism).unwrap_or(2);
+                for (resource, cost) in crate::dop::zone_cost(base.unwrap_or(*kind), met) {
                     held.bank(resource, -cost);
                 }
                 held.zones.push(Zone { tile: *tile, kind: *kind, base: *base });

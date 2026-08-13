@@ -93,12 +93,16 @@ impl World {
         // The build is PRICED on the base — the binding modulates what
         // a building does, never what it costs to raise.
         let priced = base.unwrap_or(kind);
+        // The zone_upkeep/zone_yield substitution, applied to cost: the
+        // FOOD-slot (Biomass) line prices in the line's own ration;
+        // structural lines never substitute.
+        let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
         let held = peel(&mut self.orbs, orb)
             .ok_or(ActionRefused::NoSuchOrb { orb })?;
         if held.zones.iter().any(|zone| zone.tile == tile) {
             return Err(ActionRefused::TileAlreadyZoned { tile });
         }
-        for (resource, cost) in priced.cost() {
+        for (resource, cost) in crate::dop::zone_cost(priced, metabolism) {
             let have = held.banked_amount(resource);
             if have < cost {
                 return Err(ActionRefused::CannotAfford {
@@ -108,7 +112,7 @@ impl World {
                 });
             }
         }
-        for (resource, cost) in priced.cost() {
+        for (resource, cost) in crate::dop::zone_cost(priced, metabolism) {
             held.bank(resource, -cost);
         }
         held.zones.push(Zone { tile, kind, base });
