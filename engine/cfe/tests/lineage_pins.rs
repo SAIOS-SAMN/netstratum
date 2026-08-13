@@ -263,8 +263,9 @@ fn the_class_governs_how_much_a_head_eats() {
 #[test]
 fn castes_partition_the_population_by_disposition() {
     use cfe::dop::Caste;
-    // Population 10 splits cleanly on the banded weights: the sitting
-    // disposition takes 6 of its own caste, the other two take 2 each.
+    // Population 10 splits cleanly: the sitting disposition takes 6 of its
+    // own caste, the other two take 2 each — but the split is a Vec keyed by
+    // disposition CODE, not a fixed three, so a minted role would extend it.
     let cases = [
         (1u8, Caste::Labour),    // expansionist → mostly Labour
         (2, Caste::Cognition),   // empiricist   → mostly Cognition
@@ -273,9 +274,10 @@ fn castes_partition_the_population_by_disposition() {
     for (disposition, majority) in cases {
         let world = lineage(disposition, 1, 1, 10);
         let split = world.caste_split(FIRST_ORB);
-        assert_eq!(split.iter().sum::<u64>(), world.population_of(FIRST_ORB), "the caste split conserves every head");
+        let total: u64 = split.iter().map(|(_, n)| n).sum();
+        assert_eq!(total, world.population_of(FIRST_ORB), "the caste split conserves every head");
         assert_eq!(world.caste_of(FIRST_ORB, majority), 6, "disposition {disposition} is mostly its own caste");
-        for caste in Caste::ALL {
+        for caste in Caste::SEEDED {
             if caste != majority {
                 assert_eq!(world.caste_of(FIRST_ORB, caste), 2, "the minority castes take an equal fifth each");
             }
@@ -286,12 +288,13 @@ fn castes_partition_the_population_by_disposition() {
 #[test]
 fn the_same_headcount_morphs_to_each_identity() {
     // The SAME ten people, three civilizations — three different societies.
+    // (code, headcount) pairs over the three seeded disposition roles.
     let expansionist = lineage(1, 1, 1, 10).caste_split(FIRST_ORB);
     let empiricist = lineage(2, 1, 1, 10).caste_split(FIRST_ORB);
     let epicurean = lineage(3, 1, 1, 10).caste_split(FIRST_ORB);
-    assert_eq!(expansionist, [6, 2, 2], "the expansionist is a workforce");
-    assert_eq!(empiricist, [2, 6, 2], "the empiricist is a think-tank");
-    assert_eq!(epicurean, [2, 2, 6], "the epicurean is an atelier");
+    assert_eq!(expansionist, vec![(1, 6), (2, 2), (3, 2)], "the expansionist is a workforce");
+    assert_eq!(empiricist, vec![(1, 2), (2, 6), (3, 2)], "the empiricist is a think-tank");
+    assert_eq!(epicurean, vec![(1, 2), (2, 2), (3, 6)], "the epicurean is an atelier");
     assert!(
         expansionist != empiricist && empiricist != epicurean && expansionist != epicurean,
         "one headcount, three distinct societies"
@@ -299,16 +302,67 @@ fn the_same_headcount_morphs_to_each_identity() {
 }
 
 #[test]
-fn an_undifferentiated_line_is_all_labour() {
-    // A people with no sealed disposition has not specialized — every hand
-    // is a working hand.
+fn a_minted_disposition_becomes_a_fourth_caste() {
+    // THE VENT IS OPEN: castes are the disposition axis's values, read from
+    // the fold — so minting a FOURTH disposition yields a FOURTH caste with
+    // no code change. The people is not stuck in three roles.
+    use cfe::vocabulary::{trading, Axis, CHANNEL_UPKEEP, CHANNEL_YIELD};
+    let mut world = World::new();
+    world.found("mint-hold").expect("founds");
+    world
+        .seat_station(cfe::dop::name("tunborn"), cfe::dop::Station::from_wire(1).expect("band office"))
+        .expect("seats the progenitor");
+    world
+        .mint_vocabulary(
+            "tunborn",
+            Axis::Disposition,
+            "✦",
+            cfe::dop::name("collectivist"),
+            trading(vec![(CHANNEL_YIELD, ratio(5, 4)), (CHANNEL_UPKEEP, ratio(5, 4))]),
+        )
+        .expect("mints a fourth disposition");
+    // Seal the line to the minted disposition (code 4) and give it people.
+    world.seal_genesis("tunborn", 4, 2, 1).expect("seals the minted disposition");
+    world.settle_population(FIRST_ORB, 10);
+
+    let split = world.caste_split(FIRST_ORB);
+    assert_eq!(split.len(), 4, "four dispositions, FOUR castes — not three: {split:?}");
+    let sitting = split.iter().find(|(code, _)| *code == 4).expect("the minted caste exists");
+    let others_max = split.iter().filter(|(c, _)| *c != 4).map(|(_, n)| *n).max().unwrap_or(0);
+    assert!(sitting.1 > others_max, "the minted disposition is the majority of its own caste");
+    assert_eq!(split.iter().map(|(_, n)| n).sum::<u64>(), 10, "every head still counted");
+    assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
+}
+
+#[test]
+fn disposition_traits_are_one_generic_read_not_scattered_checks() {
+    // THE TRAIT VENT: freight-affinity, novelty-hunger, and vanity were
+    // three hardcoded `disposition == N` checks in three subsystems. Now
+    // they are DATA in one table, read by ONE generic method — so the
+    // capability follows the identity from a single home, and futures
+    // listing (the freight site) reads it rather than a bespoke `== 1`.
+    use cfe::dop::DispositionTrait::*;
+    let expansionist = lineage(1, 1, 1, 1);
+    let epicurean = lineage(3, 1, 1, 1);
+    assert!(expansionist.disposition_carries(FreightAffinity), "the expansionist bears freight affinity");
+    assert!(!expansionist.disposition_carries(VanityDisplay), "and not the epicurean's vanity");
+    assert!(epicurean.disposition_carries(VanityDisplay), "the epicurean bears vanity display");
+    assert!(!epicurean.disposition_carries(FreightAffinity), "and not the expansionist's freight");
+    // The freight site now reads the trait: an expansionist may list futures
+    // with no cargo banked, an epicurean may not (it falls to the cargo test).
+    assert!(expansionist.futures_listable(), "freight affinity lets the expansionist list futures");
+}
+
+#[test]
+fn an_undifferentiated_line_has_no_castes() {
+    // A people with no sealed disposition has not specialized at all — the
+    // split is empty (every hand is the same), not forced into a role.
     let mut world = World::new();
     world.found("unsealed").expect("founds");
     world.settle_population(FIRST_ORB, 12);
-    assert_eq!(
-        world.caste_split(FIRST_ORB),
-        [12, 0, 0],
-        "no identity, no castes — all Labour"
+    assert!(
+        world.caste_split(FIRST_ORB).is_empty(),
+        "no identity, no castes — an undifferentiated people"
     );
 }
 

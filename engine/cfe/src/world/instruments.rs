@@ -35,12 +35,10 @@ impl World {
         if self.exchange_seated() {
             return true;
         }
-        if self
-            .genesis
-            .as_ref()
-            .is_some_and(|g| g.disposition == 1)
-        {
-            return true; // expansionist freight affinity
+        // Freight affinity is a disposition TRAIT, read generically — the
+        // expansionist bears it, and so does any line minted from one.
+        if self.disposition_carries(crate::dop::DispositionTrait::FreightAffinity) {
+            return true;
         }
         self.orb().is_some_and(|o| {
             o.banked_amount(Resource::Iron) > ratio(0, 1)

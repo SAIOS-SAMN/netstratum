@@ -66,50 +66,102 @@ impl World {
         self.evolution_stage
     }
 
-    /// **THE CASTE SPLIT** (`44_LINEAGES` §2d) — how the standing population
-    /// DIFFERENTIATES into its specialized roles `[Labour, Cognition,
-    /// Artisan]`. A DERIVED partition (no new state, no deed — the
-    /// `stability_of` precedent), weighted by the line's disposition through
-    /// the SAME banded weights the dark-pulls and utility already read
-    /// (`disposition_weights`): the sitting disposition takes the majority
-    /// of its own caste, so an expansionist line is mostly Labour, an
-    /// empiricist mostly Cognition, an epicurean mostly Artisan. The
-    /// headcount is CONSERVED exactly — the flooring remainder falls to the
-    /// majority caste, deterministically, so `sum == population`. A line
-    /// with no sealed disposition is undifferentiated: all Labour.
-    pub fn caste_split(&self, orb: u64) -> [u64; 3] {
-        let people = self.population_of(orb);
-        let Some(weights) = self
-            .civ_axes()
-            .and_then(|axes| crate::dop::disposition_weights(axes.disposition))
-        else {
-            return [people, 0, 0];
+    /// **DOES THIS LINE'S DISPOSITION CARRY A TRAIT?** (`44_LINEAGES`) — the
+    /// generic reader that replaces the scattered `disposition == N` checks.
+    /// A seeded disposition carries the traits its table declares; a MINTED
+    /// disposition inherits the traits of its BASE (the seeded disposition
+    /// its mint modulates), read from the fold — so freight-affinity,
+    /// novelty-hunger, and vanity are no longer stuck to three codes but flow
+    /// to any line that IS, or descends from, one that bears them.
+    pub fn disposition_carries(&self, wanted: crate::dop::DispositionTrait) -> bool {
+        let Some(code) = self.civ_axes().map(|axes| axes.disposition) else {
+            return false;
         };
-        let mut split = [0u64; 3];
+        if crate::dop::disposition_traits(code).contains(&wanted) {
+            return true;
+        }
+        // A minted disposition inherits its base's traits. FORWARD-COMPAT:
+        // the mint law currently binds `base` to the Zone axis only
+        // (`BaseOffAxis`), so a disposition entry carries `None` today and
+        // this path is inert; the moment base-inheritance is chartered for
+        // dispositions, minted lines inherit their base's traits with no
+        // further change here.
+        if code > 3 {
+            if let Some(base) = crate::vocabulary::fold(self.chronicle(), crate::vocabulary::Axis::Disposition)
+                .into_iter()
+                .find(|entry| entry.code == code)
+                .and_then(|entry| entry.base)
+            {
+                return crate::dop::disposition_traits(base).contains(&wanted);
+            }
+        }
+        false
+    }
+
+    /// **THE DISPOSITION AXIS'S VALUES** — every disposition code the
+    /// vocabulary carries (the three seeded, plus any minted), read from the
+    /// fold. The caste set is exactly this set, so castes are as open as the
+    /// axis is — never a fixed three.
+    pub fn disposition_codes(&self) -> Vec<u8> {
+        let mut codes: Vec<u8> = crate::vocabulary::fold(self.chronicle(), crate::vocabulary::Axis::Disposition)
+            .into_iter()
+            .map(|entry| entry.code)
+            .filter(|&code| code != 0) // 0 is the unclassed ground state
+            .collect();
+        codes.sort_unstable();
+        codes.dedup();
+        codes
+    }
+
+    /// **THE CASTE SPLIT** (`44_LINEAGES` §2d) — how the standing population
+    /// DIFFERENTIATES into its specialized roles, `(disposition code,
+    /// headcount)`, ONE bucket per disposition the vocabulary knows. A
+    /// DERIVED partition (no new state, no deed — the `stability_of`
+    /// precedent), weighted by `self_emphasis`: the sitting disposition
+    /// takes the majority of its own caste, the rest split the remainder.
+    /// The headcount is CONSERVED exactly — the flooring remainder falls to
+    /// the sitting caste — so the components sum to the population. NOT three
+    /// buckets: a minted fourth disposition is a fourth caste here, with no
+    /// code change. A line with no sealed disposition is undifferentiated
+    /// (an empty split — every hand is the same).
+    pub fn caste_split(&self, orb: u64) -> Vec<(u8, u64)> {
+        let people = self.population_of(orb);
+        let Some(sitting) = self.civ_axes().map(|axes| axes.disposition) else {
+            return Vec::new();
+        };
+        let codes = self.disposition_codes();
+        if codes.is_empty() {
+            return Vec::new();
+        }
+        let mut split: Vec<(u8, u64)> = Vec::with_capacity(codes.len());
         let mut assigned = 0u64;
-        for (slot, weight) in split.iter_mut().zip(weights.iter()) {
-            let share: u64 = (ratio(people as i64, 1) * weight.clone())
+        for (code, weight) in crate::dop::self_emphasis(sitting, &codes) {
+            let share: u64 = (ratio(people as i64, 1) * weight)
                 .floor()
                 .to_integer()
                 .try_into()
                 .unwrap_or(0);
-            *slot = share;
+            split.push((code, share));
             assigned += share;
         }
         // Conserve the headcount: the flooring remainder falls to the
-        // sitting disposition's own caste (its majority index), so the
-        // partition sums to the population exactly and replay-inert.
-        let major = self
-            .civ_axes()
-            .map(|axes| (axes.disposition.max(1) - 1).min(2) as usize)
-            .unwrap_or(0);
-        split[major] += people.saturating_sub(assigned);
+        // sitting disposition's own caste, so the split sums to the
+        // population exactly and stays replay-inert.
+        if let Some(entry) = split.iter_mut().find(|(code, _)| *code == sitting) {
+            entry.1 += people.saturating_sub(assigned);
+        }
         split
     }
 
-    /// The headcount standing in one caste — the `caste_split` component.
+    /// The headcount standing in one NAMED (seeded) caste — its disposition
+    /// bucket in the `caste_split`. Minted castes are read from the split
+    /// directly by code.
     pub fn caste_of(&self, orb: u64, caste: Caste) -> u64 {
-        self.caste_split(orb)[caste as usize]
+        self.caste_split(orb)
+            .into_iter()
+            .find(|(code, _)| *code == caste.disposition())
+            .map(|(_, headcount)| headcount)
+            .unwrap_or(0)
     }
 
     /// **ADVANCE THE LINE ALONG ITS ARC** (`44_LINEAGES` §2c) — the
