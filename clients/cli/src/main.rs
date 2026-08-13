@@ -54,7 +54,14 @@ fn main() {
                 print!("{} ", style.prompt("netstratum»"));
                 io::stdout().flush().ok();
                 let mut line = String::new();
-                match stdin.lock().read_line(&mut line) {
+                // Bind the read's Result BEFORE matching on it — matching
+                // directly on `stdin.lock().read_line(...)` extends the
+                // StdinLock temporary's lifetime across the whole match
+                // arm (a standard Rust footgun), which deadlocks any
+                // command below (like the guided genesis picker) that
+                // locks stdin again while still "inside" this match.
+                let read = stdin.lock().read_line(&mut line);
+                match read {
                     Ok(0) => break,
                     Ok(_) => {
                         let line = line.trim().to_string();
@@ -698,6 +705,12 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
         Some("treaty") | Some("treaties") | Some("pact") => {
             treaty_command(world, words.map(str::to_string), style)
         }
+        // 20_FOUNDING §1 step 3: "offered a LIST OF TYPES; picks the
+        // one most interesting to them" — bare `genesis` (no args at
+        // all) launches the guided picker instead of demanding all
+        // four typed arguments up front. `genesis <civ> <disp> <met>
+        // <perc>` still works unchanged for anyone who already knows
+        // what they want.
         Some("genesis") => {
             let civilization = words.next();
             let axes = (
@@ -716,11 +729,13 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         Err(refusal) => refuse(world, &refusal, style),
                     }
                 }
+                (None, (None, None, None)) => genesis_picker(world, style),
                 _ => println!(
-                    "{} usage: {} — e.g. {}",
+                    "{} usage: {} — e.g. {}, or type {} alone for a guided pick",
                     style.bad("✗"),
                     style.strong("genesis <civ> <disposition> <metabolism> <perception>"),
-                    style.strong("genesis deep-chorus epicurean biotic harmonic")
+                    style.strong("genesis deep-chorus epicurean biotic harmonic"),
+                    style.strong("genesis")
                 ),
             }
         }
@@ -5446,7 +5461,12 @@ fn desk_command(
         print!("{} ", style.prompt("desk»"));
         io::stdout().flush().ok();
         let mut line = String::new();
-        match stdin.lock().read_line(&mut line) {
+        // See the netstratum» loop's comment: bind before matching so
+        // the StdinLock temporary doesn't outlive the read and deadlock
+        // a nested prompt (e.g. the guided genesis picker) reached from
+        // a desk command below.
+        let read = stdin.lock().read_line(&mut line);
+        match read {
             Ok(0) => break,
             Ok(_) => {
                 let line = line.trim();
@@ -6861,6 +6881,118 @@ fn parse_perception(word: &str) -> Option<u8> {
         "harmonic" => Some(3),
         "umbral" => Some(4),
         _ => None,
+    }
+}
+
+/// **THE GUIDED FOUNDING** (`20_FOUNDING` §1 step 3): walks the three
+/// genesis axes one at a time — DISPOSITION, METABOLISM, PERCEPTION —
+/// then the civilization name, and seals. Flavor text is drawn from
+/// `04_CIVILIZATION_GENESIS.md`/`44_LINEAGES.md`; the codes it returns
+/// are the exact ones `parse_disposition`/`parse_metabolism`/
+/// `parse_perception` already validate, so a picked axis and a typed
+/// one seal identically. `q` at any prompt cancels with nothing
+/// chronicled.
+fn genesis_picker(world: &mut World, style: &Style) {
+    println!(
+        "{} {} — three axes, then a name. {} cancels at any point.",
+        style.ok("✶"),
+        style.strong("GUIDED FOUNDING"),
+        style.key("q")
+    );
+    let stdin = io::stdin();
+    let Some(disposition) = pick_axis(
+        &stdin,
+        style,
+        "DISPOSITION",
+        &[
+            (1, "expansionist", "growth and reach — provisioning appetite, research siphon"),
+            (2, "empiricist", "knowledge and precision — the research-first line"),
+            (3, "epicurean", "comfort and craft — leisure-weighted provisioning"),
+        ],
+    ) else {
+        println!("{} founding cancelled", style.dim("○"));
+        return;
+    };
+    let Some(metabolism) = pick_axis(
+        &stdin,
+        style,
+        "METABOLISM",
+        &[
+            (1, "mineral", "eats iron, farms iron — a smelter economy"),
+            (2, "biotic", "eats biomass, farms biomass — the common ration"),
+            (3, "plasmic", "eats joules — plasmic agriculture IS the thermal loop, encasement-fed"),
+        ],
+    ) else {
+        println!("{} founding cancelled", style.dim("○"));
+        return;
+    };
+    let Some(perception) = pick_axis(
+        &stdin,
+        style,
+        "PERCEPTION",
+        &[
+            (1, "planar", "the 2D grid — the plain read"),
+            (2, "volumetric", "reads the whole depth, not the surface"),
+            (3, "harmonic", "frequency-basis — the civ that speaks in music"),
+            (4, "umbral", "occlusion-basis — reads by what is shadowed"),
+        ],
+    ) else {
+        println!("{} founding cancelled", style.dim("○"));
+        return;
+    };
+    print!("{} ", style.prompt("civilization name>"));
+    io::stdout().flush().ok();
+    let mut name = String::new();
+    if stdin.lock().read_line(&mut name).unwrap_or(0) == 0 {
+        println!("{} founding cancelled", style.dim("○"));
+        return;
+    }
+    let name = name.trim();
+    if name.is_empty() || name == "q" {
+        println!("{} founding cancelled — no name given", style.dim("○"));
+        return;
+    }
+    match world.seal_genesis(name, disposition, metabolism, perception) {
+        Ok(()) => println!(
+            "{} {} seals its three axes — the binding copy lives in THIS chronicle; the registry is a cache from here on",
+            style.ok("✶"),
+            style.strong(name)
+        ),
+        Err(refusal) => refuse(world, &refusal, style),
+    }
+}
+
+/// One numbered menu: prints `options`, reads a line, accepts either
+/// the numeric code or the axis word typed out, loops on anything
+/// else. `q`/`quit`/EOF returns `None` (cancel).
+fn pick_axis(stdin: &io::Stdin, style: &Style, label: &str, options: &[(u8, &str, &str)]) -> Option<u8> {
+    loop {
+        println!("{}", style.strong(label));
+        for (code, name, blurb) in options {
+            println!("  {} {} — {}", style.key(&code.to_string()), style.strong(name), blurb);
+        }
+        print!("{} ", style.prompt("choice>"));
+        io::stdout().flush().ok();
+        let mut line = String::new();
+        match stdin.lock().read_line(&mut line) {
+            Ok(0) => return None,
+            Ok(_) => {
+                let trimmed = line.trim();
+                if trimmed == "q" || trimmed == "quit" {
+                    return None;
+                }
+                if let Ok(code) = trimmed.parse::<u8>() {
+                    if options.iter().any(|(c, _, _)| *c == code) {
+                        return Some(code);
+                    }
+                }
+                if let Some((code, _, _)) = options.iter().find(|(_, name, _)| *name == trimmed) {
+                    return Some(*code);
+                }
+                println!("{} not a valid choice — type a number or the name, or {} to cancel", style.bad("✗"), style.key("q"));
+            }
+            Err(_) => return None,
+        }
     }
 }
 
