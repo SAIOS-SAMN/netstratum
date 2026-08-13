@@ -967,6 +967,21 @@ impl Replayer {
         ClosureEvent::ElementWantRelieved { orb_id, element } => {
             element_wants.retain(|(o, e)| !(*o == *orb_id && e == element));
         }
+        // PROVISION (41 §3): the population settles by its net delta.
+        // The elastic population is the clone count (R5), floored at zero
+        // — a settled cull can empty a line but never take it negative.
+        ClosureEvent::PopulationSettled { orb_id, delta } => {
+            let current = clone_counts
+                .iter()
+                .find(|(o, _)| *o == *orb_id)
+                .map(|(_, c)| *c)
+                .unwrap_or(0);
+            let next = (current as i64 + *delta).max(0) as u64;
+            clone_counts.retain(|(o, _)| *o != *orb_id);
+            if next > 0 {
+                clone_counts.push((*orb_id, next));
+            }
+        }
         // MARKET-1 / E-MKT-1: the intent rests; the clear removes it.
         ClosureEvent::OfferPosted {
             offer, orb_id, give, give_amount, want, want_amount,

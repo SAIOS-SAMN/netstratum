@@ -1416,6 +1416,7 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::OverheatCleared { .. } | E::VentSettled { .. } | E::AbsorptionLapsed { .. }
         | E::WantStruck { .. } | E::WantRelieved { .. }
         | E::ElementWantStruck { .. } | E::ElementWantRelieved { .. }
+        | E::PopulationSettled { .. }
         | E::HandoffSealed { .. }
         | E::GaugeShifted { .. } | E::Diverged { .. } | E::StarAged { .. }
         | E::TechDiscovered { .. } | E::IncursionStruck { .. } | E::VoidShare { .. }
@@ -2484,7 +2485,8 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // is civilizational by the exact criterion: a people's own, and
         // never a precondition for anyone else's standing.
         E::WantStruck { .. } | E::WantRelieved { .. }
-        | E::ElementWantStruck { .. } | E::ElementWantRelieved { .. } => {
+        | E::ElementWantStruck { .. } | E::ElementWantRelieved { .. }
+        | E::PopulationSettled { .. } => {
             Some(Layer::Civilizational)
         }
 
@@ -2614,6 +2616,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::AbsorptionLapsed { .. }
         | E::ForwardSlashed { .. } | E::WantStruck { .. } | E::WantRelieved { .. }
         | E::ElementWantStruck { .. } | E::ElementWantRelieved { .. }
+        | E::PopulationSettled { .. }
         | E::HandoffSealed { .. } | E::GaugeShifted { .. } | E::Diverged { .. }
         | E::Confluent { .. } | E::StarAged { .. } | E::EraFolded { .. }
         | E::CouncilClosed { .. } | E::TechDiscovered { .. } | E::IncursionStruck { .. }

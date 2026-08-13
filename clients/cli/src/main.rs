@@ -8428,6 +8428,10 @@ fn chronicle(world: &World, style: &Style) {
                 "◍ matter want relieved — orb {orb_id} banks element-{:02x}{:02x}{:02x}{:02x}",
                 element[0], element[1], element[2], element[3]
             ),
+            cfe::dop::ClosureEvent::PopulationSettled { orb_id, delta } => {
+                let verb = if *delta >= 0 { "grew" } else { "starved" };
+                format!("👥 population {verb} — orb {orb_id} by {delta} (the fed/starved logistic)")
+            }
             cfe::dop::ClosureEvent::OfferPosted { offer, give, give_amount, want, want_amount, .. } => format!(
                 "⇋ offer {offer} RESTS — {} {} for {} {}; the market holds intents, never escrows",
                 style.strong(&amount(give_amount)),

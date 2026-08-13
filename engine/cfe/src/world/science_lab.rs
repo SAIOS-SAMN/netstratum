@@ -139,6 +139,56 @@ impl World {
             .unwrap_or(0)
     }
 
+    /// **THE ELASTIC POPULATION** (41_PROVISION, ruling R5) — the clone
+    /// count IS the population that births and dies; habitats are the
+    /// fixed housing floor. Population dynamics grow and cull this.
+    pub fn population_of(&self, orb: u64) -> u64 {
+        self.clone_count_of(orb)
+    }
+
+    /// **THE SPECIES LIFESPAN `L`** (42_LIFESPAN §1, ruling R7) — DERIVED
+    /// from the recovery grain, a 4× spread: the mineral / energy /
+    /// lattice classes (geodic-lithovore 2, plasma-field 6, crystal-mind
+    /// 10, thermal-banker 12 — beings of stone, energy, and crystal)
+    /// live FOUR grains; every other class, biotic and collective, one
+    /// grain. No new dial — `REGROWTH_GRAIN` and a factor of four.
+    pub fn lifespan_of(&self) -> u64 {
+        let class = self.taxon.map(|(class, _)| class).unwrap_or(0);
+        let long_lived = matches!(class, 2 | 6 | 10 | 12);
+        let grain = crate::almanac::REGROWTH_GRAIN as u64;
+        if long_lived {
+            grain * 4
+        } else {
+            grain
+        }
+    }
+
+    /// **THE POPULATION CEILING `K_pop`** — the same living footprint ×
+    /// clade habitability that bounds the ration stock (#28): a lush
+    /// world in the clade's own band sustains a large population, a
+    /// hostile one a small one.
+    pub fn population_capacity(&self, orb: u64) -> Ratio {
+        self.ration_capacity_of(orb)
+    }
+
+    /// **SETTLE THE POPULATION** (41_PROVISION §3, tag 167) — apply a NET
+    /// change (births − deaths) to the elastic population, floored at
+    /// zero, and receipt it so replay applies the same delta. Population
+    /// is a logistic, not a ledger — the receipt carries the net.
+    pub fn settle_population(&mut self, orb: u64, delta: i64) {
+        if delta == 0 {
+            return;
+        }
+        let next = (self.clone_count_of(orb) as i64 + delta).max(0) as u64;
+        self.set_clone_count(orb, next);
+        let stamp = self.clock.now();
+        self.chronicle.append(
+            crate::dop::ClosureEvent::PopulationSettled { orb_id: orb, delta },
+            stamp,
+            vec![],
+        );
+    }
+
     pub fn synth_grade_of(&self, orb: u64) -> u8 {
         self.synth_mods
             .iter()

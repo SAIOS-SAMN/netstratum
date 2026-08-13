@@ -362,8 +362,10 @@
 //!         program wire form) ‖ three confirming task digests. The
 //!         library is a FOLD of these receipts; certificates carry the
 //!         expansion, so the judge's wire never moves.)
-//!    Phase-5 claim ledger: next free **167** (163–164 ElementWant,
-//!    165 TreatyElementsAllowed, 166 SolverWordMinted).
+//!    Phase-5 claim ledger: next free **168** (163–164 ElementWant,
+//!    165 TreatyElementsAllowed, 166 SolverWordMinted, 167
+//!    PopulationSettled — 41_PROVISION §3). Note: quarantine relief's
+//!    PressureEbbed (ruling R3) takes 168 when #30 lands.
 //!    Seated science labs. E-MKT-1 (2026-08-10): tag **49** OfferPosted
 //!    wire extended in place (Resource 1..=7; Element = 0 ‖ id[32]).
 //!    E3.7 (2026-08-10): tags **163–164** ElementWantStruck/Relieved.
@@ -2690,6 +2692,14 @@ pub enum ClosureEvent {
     },
     /// E3.7 (tag 164) — material want relieved (assay/bank fed the vein).
     ElementWantRelieved { orb_id: u64, element: [u8; 32] },
+    /// **PROVISION (41_PROVISION §3, tag 167)** — the population settled
+    /// at a touch: the NET change to the elastic population (the clone
+    /// count, ruling R5) over the beats since the last touch — births
+    /// from a fed surplus net of the species' mortality, or deaths from
+    /// starvation and turnover combined (R7b). Population is a logistic,
+    /// not a ledger — it is not conserved — so the receipt carries the
+    /// net and replay applies it straight (saturating at zero).
+    PopulationSettled { orb_id: u64, delta: i64 },
     /// MESH-1b (NS-5 §7) — the receipted handoff: the yielding hand
     /// `from` seals, naming successor `to`. One writer per clock;
     /// authority derives by the mesh's walk of the arbor (never a
@@ -3772,6 +3782,11 @@ impl ClosureEvent {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.extend_from_slice(element);
                 tlv::put(164, &value, &mut out);
+            }
+            Self::PopulationSettled { orb_id, delta } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(&delta.to_le_bytes());
+                tlv::put(167, &value, &mut out);
             }
             Self::HandoffSealed { from, to } => {
                 let mut value = from.to_le_bytes().to_vec();
@@ -5037,6 +5052,11 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
                 Some(Self::ElementWantRelieved { orb_id, element })
+            }
+            167 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let delta = i64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
+                Some(Self::PopulationSettled { orb_id, delta })
             }
             67 => {
                 let from = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

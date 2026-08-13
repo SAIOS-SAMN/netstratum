@@ -74,3 +74,50 @@ fn the_ration_and_its_harvest_name_the_same_carrier() {
         assert_eq!(eats, farms, "a line farms exactly the ration it eats (metabolism {metabolism})");
     }
 }
+
+// ── PopDyn 2 (#39): the population as a mutable, settle-safe quantity ──
+
+use cfe::dop::ClosureEvent;
+use cfe::world::{replay, World, FIRST_ORB};
+
+#[test]
+fn the_population_deed_round_trips_both_directions() {
+    for delta in [7i64, -3, 1, -1, 0] {
+        let deed = ClosureEvent::PopulationSettled { orb_id: 5, delta };
+        let bytes = deed.wire_bytes();
+        let mut records = cfe::tlv::records(&bytes);
+        let (tag, value) = records.next().expect("one record");
+        assert_eq!(tag, 167, "PopulationSettled is tag 167");
+        assert_eq!(ClosureEvent::from_wire(tag, value).expect("decodes"), deed);
+    }
+}
+
+#[test]
+fn settle_population_grows_and_culls_the_elastic_population_replay_safe() {
+    let mut world = World::new();
+    world.found("hold").expect("founds");
+    assert_eq!(world.population_of(FIRST_ORB), 0, "a fresh world has no clone population");
+    world.settle_population(FIRST_ORB, 10);
+    assert_eq!(world.population_of(FIRST_ORB), 10, "births grow it");
+    world.settle_population(FIRST_ORB, -4);
+    assert_eq!(world.population_of(FIRST_ORB), 6, "deaths cull it");
+    // Floored at zero — a cull never takes it negative.
+    world.settle_population(FIRST_ORB, -100);
+    assert_eq!(world.population_of(FIRST_ORB), 0, "a line can empty but never go negative");
+    assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
+}
+
+#[test]
+fn lifespan_is_the_grain_for_short_lived_and_four_grains_for_long() {
+    let grain = cfe::almanac::REGROWTH_GRAIN as u64;
+    let mut swarm = World::new();
+    swarm.found("swarm").expect("founds");
+    swarm.seal_taxon(1, 1).expect("biotic-swarm");
+    assert_eq!(swarm.lifespan_of(), grain, "a biotic swarm lives one grain");
+
+    let mut stone = World::new();
+    stone.found("stone").expect("founds");
+    stone.seal_taxon(2, 2).expect("geodic-lithovore");
+    assert_eq!(stone.lifespan_of(), grain * 4, "a lithovore lives four grains");
+    assert!(stone.lifespan_of() > swarm.lifespan_of(), "the stone-being outlives the swarm");
+}
