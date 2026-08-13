@@ -1,4 +1,4 @@
-//! **THE CRAFTABLE TAX SYSTEM** (`45_TAXATION`, #54/#55). The levy model as
+//! **THE CRAFTABLE TAX SYSTEM** (`49_TAXATION`, #54/#55). The levy model as
 //! data, and the continuity tax — a demurrage on KNOWLEDGE keyed to
 //! lifespan turnover: the Locust churns, the Custodian accumulates.
 
