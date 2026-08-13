@@ -802,6 +802,33 @@ impl World {
         held
     }
 
+    /// **THE SEAT TREASURY — a FOLD over `TitheReceipted`, never a
+    /// stored balance** (`#32`, `20_FOUNDING` §3, the `purse`/`fold`
+    /// precedent). What one seat scope (`SEAT_ELDER`/`SEAT_ANCIENT`)
+    /// has been paid across every founding tithe on this chronicle,
+    /// summed by resource. There is no seat-holder orb in this engine
+    /// to bank the tithe INTO — this reading is the closest thing to
+    /// one until a seat-holder identity exists (`#32` phase 2,
+    /// PURCHASE/COMMISSION, still deferred). Replay-inert: reading a
+    /// treasury settles nothing and mints nothing.
+    pub fn seat_treasury(&self, to_seat: u8) -> Vec<(Resource, Ratio)> {
+        let mut held: Vec<(Resource, Ratio)> = Vec::new();
+        for receipt in self.chronicle().receipts() {
+            if let ClosureEvent::TitheReceipted { to_seat: seat, resource, amount, .. } =
+                &receipt.event
+            {
+                if *seat == to_seat {
+                    match held.iter_mut().find(|(r, _)| r == resource) {
+                        Some((_, sum)) => *sum += amount.clone(),
+                        None => held.push((*resource, amount.clone())),
+                    }
+                }
+            }
+        }
+        held.sort_by_key(|(resource, _)| *resource as u8);
+        held
+    }
+
     /// **THE VALUE-LOSS BOOK — derived, never stored** (SYN-1/SYN-2,
     /// operator ruling 2026-08-02).
     ///

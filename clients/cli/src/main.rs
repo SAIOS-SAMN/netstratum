@@ -724,6 +724,28 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                 ),
             }
         }
+        // #32, 20_FOUNDING §3: what every founding tithe has paid, by
+        // seat — a fold over the chronicle's TitheReceipted receipts,
+        // never a stored balance (world.seat_treasury).
+        Some("treasury") => {
+            for (label, seat) in [("elder", cfe::dop::SEAT_ELDER), ("ancient", cfe::dop::SEAT_ANCIENT)] {
+                let held = world.seat_treasury(seat);
+                if held.is_empty() {
+                    println!("{} the {} treasury holds nothing yet", style.dim("○"), style.strong(label));
+                } else {
+                    let listed: Vec<String> = held
+                        .iter()
+                        .map(|(resource, value)| format!("{} {}", amount(value), resource_name(*resource)))
+                        .collect();
+                    println!(
+                        "{} the {} treasury holds {}",
+                        style.ok("✶"),
+                        style.strong(label),
+                        style.strong(&listed.join(", "))
+                    );
+                }
+            }
+        }
         Some("tick") => {
             let count = words
                 .next()
