@@ -46,27 +46,27 @@ fn the_place_and_the_footprint_set_the_capacity() {
     let world = greenhold(8);
     assert_eq!(world.orb_region(FIRST_ORB), Some(ThermalRegion::Mesic), "sited in the life band");
     assert_eq!(world.living_zones_of(FIRST_ORB), 8, "eight habitats are the footprint");
-    let k = world.biomass_capacity_of(FIRST_ORB);
+    let k = world.ration_capacity_of(FIRST_ORB);
     assert!(k > ratio(100, 1), "a lush world holds a large K: {k}");
     // A world with no living zones holds no natural biomass ceiling.
     let bare = greenhold(0);
-    assert_eq!(bare.biomass_capacity_of(FIRST_ORB), ratio(0, 1), "no footprint, no capacity");
+    assert_eq!(bare.ration_capacity_of(FIRST_ORB), ratio(0, 1), "no footprint, no capacity");
 }
 
 #[test]
 fn a_scan_shows_biomass_climbing_toward_capacity_over_time() {
     let world = greenhold(8);
     let now = world.orb().expect("stands").banked_amount(Resource::Biomass);
-    let k = world.biomass_capacity_of(FIRST_ORB);
+    let k = world.ration_capacity_of(FIRST_ORB);
     assert!(now < k, "the young colony sits below its lush ceiling: {now} < {k}");
 
     // At the present beat, the scan reads today's stock unchanged.
-    assert_eq!(world.regrown_biomass(FIRST_ORB, world.now()), now, "no time, no growth");
+    assert_eq!(world.regrown_ration(FIRST_ORB, world.now()), now, "no time, no growth");
 
     // As beats pass the scan reads MORE, monotonically, never past K.
     let mut last = now.clone();
     for stamp in [10u64, 100, 1_000, 100_000] {
-        let grown = world.regrown_biomass(FIRST_ORB, stamp);
+        let grown = world.regrown_ration(FIRST_ORB, stamp);
         assert!(grown >= last, "regrowth is monotone in the scan: {grown} >= {last}");
         assert!(grown <= k, "and never past the ceiling: {grown} <= {k}");
         last = grown;
@@ -85,10 +85,10 @@ fn a_barren_world_never_regrows_and_a_rock_holds_nothing() {
         .site_planet(FIRST_ORB, unit(0, 1), positive(1, 2), None, None)
         .expect("sites in the furnace");
     world.zone(0, ZoneKind::Habitat).expect("builds");
-    assert_eq!(world.biomass_capacity_of(FIRST_ORB), ratio(0, 1), "the furnace bears no life");
+    assert_eq!(world.ration_capacity_of(FIRST_ORB), ratio(0, 1), "the furnace bears no life");
     let now = world.orb().expect("stands").banked_amount(Resource::Biomass);
     // Over capacity (any stock over K=0) settles toward zero, never up.
-    assert!(world.regrown_biomass(FIRST_ORB, 1_000_000) <= now, "a rock does not bloom");
+    assert!(world.regrown_ration(FIRST_ORB, 1_000_000) <= now, "a rock does not bloom");
 }
 
 #[test]
@@ -100,7 +100,7 @@ fn a_scan_is_not_a_deed_and_changes_nothing() {
     let before_receipts = world.chronicle().receipts().len();
     let before_bank = world.orb().expect("stands").banked_amount(Resource::Biomass);
     for stamp in [1u64, 100, 10_000, 1_000_000] {
-        let _ = world.regrown_biomass(FIRST_ORB, stamp);
+        let _ = world.regrown_ration(FIRST_ORB, stamp);
     }
     assert_eq!(
         world.chronicle().receipts().len(),

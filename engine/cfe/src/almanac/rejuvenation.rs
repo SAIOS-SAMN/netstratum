@@ -24,8 +24,9 @@
 //! keep jumping), and the arithmetic stays exact and bounded.
 
 use crate::ratio::{ratio, Ratio};
+use super::taxon_economy::clade_preferred_region;
 use super::thermal::ThermalRegion;
-use crate::dop::ZoneKind;
+use crate::dop::metabolic_harvest_of;
 
 /// The half-recovery scale — `r·Δt = GRAIN` is where the surrogate
 /// reaches `1/2`, so `GRAIN/r` is the time to close half the gap to
@@ -62,48 +63,53 @@ pub fn grained_logistic(p0: &Ratio, k: &Ratio, r: &Ratio, dt: u64) -> Ratio {
 }
 
 /// **THE INTRINSIC GROWTH RATE `r`** — how fast the environment
-/// recovers. DERIVED, not dialed: it is the natural biomass rate, the
-/// `Habitat`'s own per-tick yield (life regrows at the rate life
-/// grows). This is the `r` the archetypes are measured against —
+/// recovers. DERIVED, not dialed: it is the line's OWN ration rate, the
+/// same G2 metabolic-harvest map every other flow reads
+/// ([`metabolic_harvest_of`]) — a biotic line regrows biomass at the
+/// rate biotic life grows, a mineral line regrows iron at the rate ore
+/// bodies form, a stone-eater regrows its own minted element at the
+/// biotic rate. This is the `r` the archetypes are measured against —
 /// extract below it and the Custodian holds; above it and the Locust
-/// collapses the world.
-pub fn intrinsic_rate() -> Ratio {
-    ZoneKind::Habitat.yield_per_tick().1
+/// collapses the world. Plasmic farms no yield line (rate 0): captured
+/// heat has no stock to regrow.
+pub fn intrinsic_rate(metabolism: u8, element: Option<[u8; 32]>) -> Ratio {
+    metabolic_harvest_of(metabolism, element).1
 }
 
-/// **HABITABILITY** — how life-bearing a thermal region is, in `[0,1]`.
-/// Biomass is workable only in the MESIC band (`workable_at`, phase 2),
-/// so habitability peaks there and tapers monotonically with distance
-/// FROM mesic: the temperate fringes carry half, the marginal bands a
-/// quarter, and the extremes nothing. It is the ordering that is the
-/// law (nearer mesic is more habitable); the fractions are the
-/// first-cut taper.
-pub fn habitability(region: ThermalRegion) -> Ratio {
-    match region {
-        // The life band.
-        ThermalRegion::Mesic => ratio(1, 1),
-        // The temperate fringes, one band out either way.
-        ThermalRegion::Sublime | ThermalRegion::Torrid => ratio(1, 2),
-        // The marginal bands, two out.
-        ThermalRegion::Cryogenic | ThermalRegion::HyperThermal => ratio(1, 4),
-        // The extremes and above the ceiling: barren.
-        ThermalRegion::Quenched | ThermalRegion::Incandescent | ThermalRegion::Beyond => {
-            ratio(0, 1)
-        }
+/// **HABITABILITY** — how life-bearing a thermal region is FOR A GIVEN
+/// CLADE, in `[0,1]`. Every clade has its own workable band
+/// ([`clade_preferred_region`] — Mesic for the bimaniform flatlander,
+/// Cryogenic for a cryophage, HyperThermal for a magmatic line, and so
+/// on), and habitability peaks there and tapers monotonically with
+/// thermal-band DISTANCE from that preference: one band out is half,
+/// two bands out a quarter, three or more barren. It is the ordering
+/// that is the law (nearer a clade's own preference is more habitable);
+/// the fractions are the first-cut taper. `ThermalRegion`'s declared
+/// order IS the band ladder ([`ThermalRegion`] derives `Ord`), so the
+/// distance is just the ladder-index gap.
+pub fn habitability(clade: u16, region: ThermalRegion) -> Ratio {
+    let pref = clade_preferred_region(clade);
+    let distance = (region as i32 - pref as i32).unsigned_abs();
+    match distance {
+        0 => ratio(1, 1),
+        1 => ratio(1, 2),
+        2 => ratio(1, 4),
+        _ => ratio(0, 1),
     }
 }
 
 /// **THE CARRYING CAPACITY `K`** — the natural ceiling of a world's
-/// biomass, from the three readings the ruling names: the living ZONES
-/// (habitats and regenerators — the ecological footprint), and the
-/// place (its thermal region, itself the star luminosity ⊗ orbit). A
-/// lush mesic world with many habitats carries a large `K`; a barren
-/// rock near zero. `living_zones` is the count of `Habitat` +
-/// `Regenerator` seats; each sustains a RECOVERY-WINDOW's worth of
-/// stock — `REGROWTH_GRAIN` units, a living zone's unit output over the
-/// half-recovery span — scaled by the place's [`habitability`], so a
-/// lush world's `K` stands well above any young colony's founding
-/// stock and a scorched rock holds nothing.
-pub fn carrying_capacity(living_zones: u64, region: ThermalRegion) -> Ratio {
-    ratio(living_zones as i64 * REGROWTH_GRAIN, 1) * habitability(region)
+/// ration stock, from the three readings the ruling names: the living
+/// ZONES (habitats and regenerators — the ecological footprint), and
+/// the place (its thermal region, itself the star luminosity ⊗ orbit)
+/// AS READ BY THE SITTING CLADE. A lush world in a clade's own band
+/// with many habitats carries a large `K`; a barren rock near zero.
+/// `living_zones` is the count of `Habitat` + `Regenerator` seats; each
+/// sustains a RECOVERY-WINDOW's worth of stock — `REGROWTH_GRAIN`
+/// units, a living zone's unit output over the half-recovery span —
+/// scaled by the place's [`habitability`] for that clade, so a lush
+/// world's `K` stands well above any young colony's founding stock and
+/// a scorched rock holds nothing.
+pub fn carrying_capacity(living_zones: u64, clade: u16, region: ThermalRegion) -> Ratio {
+    ratio(living_zones as i64 * REGROWTH_GRAIN, 1) * habitability(clade, region)
 }

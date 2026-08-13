@@ -6528,6 +6528,16 @@ impl ColonyOrb {
             .unwrap_or_else(|| ratio(0, 1))
     }
 
+    /// G2: the banked read of a [`Ration`] — a closed [`Resource`]
+    /// carrier reads the resource ledger, a minted element reads the
+    /// element ledger. One call, either carrier.
+    pub fn ration_amount(&self, ration: &Ration) -> Ratio {
+        match ration {
+            Ration::Resource(resource) => self.banked_amount(*resource),
+            Ration::Element(id) => self.element_amount(id),
+        }
+    }
+
     /// ELEMENT-GRAMMAR-1: the element ledger, the bank's own laws —
     /// id-ascending canonical order, zero entries dropped.
     pub fn bank_element(&mut self, element: [u8; 32], amount: Ratio) {
