@@ -8,6 +8,17 @@
 //! reverse — so the requirement is stated down there and PROVED here,
 //! against the live lists. Copying the numbers down would be the
 //! two-truths defect; stating and proving is not.
+//!
+//! **THIS FILE IS RED, PRE-EXISTING (2026-08-13 doc-audit finding, not
+//! caused by this pass).** `STATIONS` grew 4 → 10 (Wave-1, 2026-08-07,
+//! `RING_ARITIES` updated to match) then 10 → 16 (T10-T15, 2026-08-08,
+//! `RING_ARITIES` NOT updated — the drift these tests exist to catch,
+//! uncaught until now) then 16 → 18 (elder/ancient, T16-T17, this pass).
+//! Fixing it means bumping `ratio::TURN_SLOTS` (60 → 180), which is
+//! load-bearing far outside this crate — `solver-verify/src/shell.rs`'s
+//! orbital shell geometry and `shell_pins.rs` hard-assert `TURN_SLOTS ==
+//! 60` — a cross-cutting change out of this task's scope. Left red and
+//! named rather than silently worked around; owed as its own task.
 
 use ledger::registry::{DISPOSITIONS, METABOLISMS, PERCEPTIONS, STATIONS};
 
