@@ -29,7 +29,7 @@ fn scratch(name: &str) -> PathBuf {
 }
 
 fn coord(t: u64) -> Coordinate {
-    Coordinate { branch: String::new(), s: [ratio(0, 1), ratio(0, 1), ratio(0, 1)], g: ratio(0, 1), t }
+    Coordinate { branch: String::new(), s: [ratio(0, 1), ratio(0, 1), ratio(0, 1)], g: ratio(0, 1), t, sub: 0 }
 }
 
 fn orb(id: u64, iron: (i64, i64)) -> ColonyOrb {

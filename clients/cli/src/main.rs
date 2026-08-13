@@ -8644,6 +8644,9 @@ fn chronicle(world: &World, style: &Style) {
                 "📉 {} practice(s) LAPSED at the generation turnover — the continuity tax to the void",
                 style.strong(&count.to_string())
             ),
+            cfe::dop::ClosureEvent::PressureEbbed { orb_id } => format!(
+                "🌡 bio-pressure EBBED — orb {orb_id} recovers a step toward lifting quarantine"
+            ),
             cfe::dop::ClosureEvent::CivilizationCollapsed { .. } => format!(
                 "{} the line has COLLAPSED — every orb stands at zero; the chronicle closes here, there is no win to reach for instead",
                 style.bad("☠")

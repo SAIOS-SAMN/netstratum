@@ -685,6 +685,37 @@ impl World {
         }
     }
 
+    fn set_cascade_pressure(&mut self, orb: u64, pressure: u64) {
+        self.cascade_pressures.retain(|(o, _)| *o != orb);
+        if pressure > 0 {
+            self.cascade_pressures.push((orb, pressure));
+        }
+    }
+
+    /// **BIO QUARANTINE RELIEF (task #30, ruling R3, tag 168)** — a
+    /// quarantined orb recovers ONE step at the touch: both bio-pressure
+    /// axes (cascade and rogue) ebb by one, the mirror of the `+1` each
+    /// explosion accrued, and the recovery is receipted. When the maxed
+    /// axis falls below `QUARANTINE_PRESSURE` the world's apertures
+    /// reopen. Not quarantined → no ebb → no deed → byte-identical. (The
+    /// step is the accrual's own unit, not a dial; a slower recovery arc
+    /// is a rate the operator can rule later.)
+    pub fn ebb_pressure(&mut self, orb: u64) {
+        if !self.is_quarantined(orb) {
+            return;
+        }
+        let cascade = self.cascade_pressure_of(orb).saturating_sub(1);
+        let rogue = self.rogue_pressure_of(orb).saturating_sub(1);
+        self.set_cascade_pressure(orb, cascade);
+        self.set_rogue_pressure(orb, rogue);
+        let stamp = self.clock.now();
+        self.chronicle.append(
+            crate::dop::ClosureEvent::PressureEbbed { orb_id: orb },
+            stamp,
+            vec![],
+        );
+    }
+
     /// Board reading for CLI science index.
     pub fn science_lab_board(&self, orb: u64) -> ScienceLabBoard {
         let met = self.civ_axes().map(|a| a.metabolism).unwrap_or(2);

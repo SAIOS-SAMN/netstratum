@@ -527,6 +527,10 @@ impl World {
         // Zero → no deed, so a line that keeps its knowledge is byte-identical.
         self.lapse_practices(lapse);
         self.relieve_recovered(orb);
+        // BIO QUARANTINE RELIEF (#30): a quarantined orb recovers a step at
+        // the touch — both pressure axes ebb by one. Not quarantined → no
+        // ebb → no deed, so an unmodified world is byte-identical.
+        self.ebb_pressure(orb);
         Ok(count)
     }
     /// Transfer banked value between two orbs as the sovereign.
