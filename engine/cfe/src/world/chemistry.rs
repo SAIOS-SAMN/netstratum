@@ -427,8 +427,9 @@ impl World {
         if crystal_thin || cascade {
             out.push((DarkPull::Green, if cascade { one.clone() } else { half.clone() }));
         }
-        // VANITY — epicurean surplus display.
-        if self.civ_axes().is_some_and(|a| a.disposition == 3) {
+        // VANITY — surplus display, the epicurean trait read generically
+        // (a line minted from an epicurean displays too; `44_LINEAGES`).
+        if self.disposition_carries(crate::dop::DispositionTrait::VanityDisplay) {
             let rich = self.orb().is_some_and(|o| o.stamp_amount() > ratio(1, 1));
             if rich {
                 out.push((DarkPull::Vanity, half.clone()));

@@ -554,11 +554,23 @@ impl World {
         self.permitted(actor, Scope::Build)?;
 
         if let Some(code) = base {
-            if axis != vocab::Axis::Zone {
-                return Err(ActionRefused::BaseOffAxis { axis: axis.code() });
-            }
-            if code == 0 || code > crate::dop::ZONE_KINDS {
-                return Err(ActionRefused::BaseUnknown { code });
+            match axis {
+                // #41: a zone mint modulates a base zone kind.
+                vocab::Axis::Zone => {
+                    if code == 0 || code > crate::dop::ZONE_KINDS {
+                        return Err(ActionRefused::BaseUnknown { code });
+                    }
+                }
+                // CHARTER (a), 2026-08-13: a minted DISPOSITION may declare
+                // the seeded disposition it descends from, inheriting that
+                // base's traits through its lineage charter (`44_LINEAGES`).
+                // The base must be one of the three trait-bearing archetypes.
+                vocab::Axis::Disposition => {
+                    if !(1..=3).contains(&code) {
+                        return Err(ActionRefused::BaseUnknown { code });
+                    }
+                }
+                _ => return Err(ActionRefused::BaseOffAxis { axis: axis.code() }),
             }
         }
 
