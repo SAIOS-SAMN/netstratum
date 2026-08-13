@@ -22,14 +22,22 @@ fn scratch(name: &str) -> PathBuf {
     dir
 }
 
-/// A mainline coordinate at tick `t` (unchartered S, base gauge).
+/// A mainline coordinate at tick `t`, sub-tick 0 (unchartered S, base gauge).
 fn coord(t: u64) -> Coordinate {
     Coordinate {
         branch: String::new(),
         s: [ratio(0, 1), ratio(0, 1), ratio(0, 1)],
         g: ratio(0, 1),
         t,
+        sub: 0,
     }
+}
+
+/// A mainline coordinate at tick `t`, an explicit sub-tick — the
+/// Phase-3 flip's addressing law (`39_PHASE3_FLIP` §3): several deeds
+/// share one `t`, distinguished by `sub`.
+fn coord_at(t: u64, sub: u32) -> Coordinate {
+    Coordinate { sub, ..coord(t) }
 }
 
 fn branch_coord(branch: &str, t: u64) -> Coordinate {
@@ -349,4 +357,66 @@ fn adoption_is_once_and_names_its_debt() {
     let chained = arbor.extend(coord(2), &next, Some(&step)).expect("judged").clone();
     assert!(chained.judged, "the step after adoption is judged, the flag stamped");
     assert_eq!(chained.parent, adopted.commit, "the path links through the door");
+}
+
+/// **THE PHASE-3 ADDRESSING LAW** (`39_PHASE3_FLIP` §3, operator
+/// ruling 2026-08-13, option A): several deeds sharing one world tick
+/// commit as SEPARATE records, addressed by an ascending `sub` — not
+/// one commitment per beat, one per deed.
+#[test]
+fn several_deeds_share_one_tick_addressed_by_sub() {
+    let root = scratch("sub-index");
+    let mut arbor = Arbor::open(&root).expect("opens");
+    let prior = two_orb_state((6, 1), (4, 1));
+    let after_first = two_orb_state((3, 1), (7, 1));
+    let after_second = two_orb_state((0, 1), (10, 1));
+    arbor.extend(coord(0), &prior, None).expect("genesis");
+
+    // Two deeds, same tick (t=1), distinct sub — both must land.
+    let first = arbor
+        .extend(coord_at(1, 0), &after_first, Some(&transfer_step(1)))
+        .expect("the first deed at t=1 commits")
+        .clone();
+    assert!(first.judged);
+
+    let second = arbor
+        .extend(coord_at(1, 1), &after_second, Some(&transfer_step(1)))
+        .expect("a second deed at the SAME t, next sub, commits")
+        .clone();
+    assert!(second.judged);
+    assert_eq!(second.parent, first.commit, "the second deed chains off the first");
+
+    // The old law — one record per tick — is gone: a second deed at
+    // t=1 sub=0 (repeating the first's exact address) still refuses
+    // OCCUPIED, but sub=1 no longer collides the way a same-t retry
+    // used to (measured, pre-flip: "per-deed commitment refuses
+    // Occupied on the second deed of any beat").
+    assert_eq!(
+        arbor.extend(coord_at(1, 0), &after_first, None).unwrap_err(),
+        ArborRefused::Occupied
+    );
+
+    // A THIRD tick, sub back at 0, still ascends cleanly on top of
+    // (t=1, sub=1) — the arrow reads (t, sub) lexicographically, not
+    // sub alone.
+    let third = arbor
+        .extend(coord_at(2, 0), &prior, None)
+        .expect("a fresh tick, sub 0, still ascends past (1, 1)")
+        .clone();
+    assert_eq!(third.parent, second.commit);
+
+    // And sub cannot regress within a held tick even on a fresh open.
+    drop(arbor);
+    let mut reopened = Arbor::open(&root).expect("reopens and reverifies the whole stream");
+    assert!(matches!(
+        reopened.extend(coord_at(2, 0), &prior, None).unwrap_err(),
+        ArborRefused::Occupied
+    ));
+    assert!(matches!(
+        // A fresh address (t=1, sub=5 was never committed) that is
+        // still BEHIND the head (t=2, sub=0) — Occupied cannot fire
+        // (the address is free); the arrow catches it instead.
+        reopened.extend(coord_at(1, 5), &after_first, None).unwrap_err(),
+        ArborRefused::ArrowBroken { .. }
+    ));
 }

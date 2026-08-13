@@ -52,6 +52,7 @@ fn the_display_re_serves_from_the_chain_byte_for_byte() {
         s: [ratio(0, 1), ratio(0, 1), ratio(0, 1)],
         g: ratio(0, 1),
         t: world.now(),
+        sub: 0,
     };
     arbor
         .adopt(coordinate, &codec::state_bytes(&world.committed()))

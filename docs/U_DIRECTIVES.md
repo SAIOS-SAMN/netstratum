@@ -419,7 +419,15 @@ U0 · PROPORTION-1 · U1a · U1 · U1f (I1–I5 whole).
       ∥ the mesh half — Σ_mesh, re-sync, resonance, the verified-work
          anchor (the rate rides the kernel's mint_bound once ruled)
       → Phase 3 flip (Unjudged unreachable — ALL waves + U2 complete
-         → the kernel is the door)
+         → the kernel is the door) — **LANDED 2026-08-13**
+         (`39_PHASE3_FLIP.md`, operator ruling: sub-coordinate
+         addressing + sign-off). `mesh::arbor::Coordinate` gained
+         `sub: u32`; `conductor::chain_beat` commits one arbor record
+         per deed, gated live; a refused deed gets no commitment.
+         U2/W-waves were a DIFFERENT precondition this doc names —
+         39_PHASE3_FLIP's own §2 audit found coverage already total
+         and the live board already re-judging clean, which is the
+         precondition this flip actually landed against.
       → U3 (after #36/#37) → U4 (the rulings open the mint)
 
 Calibration note: after #36 the whole single-player + NPC economy runs

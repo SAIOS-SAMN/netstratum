@@ -54,13 +54,23 @@ pub const SEGMENT_STEP_TAG: u8 = 88;
 
 /// A position on the one clock (NS-5 §9.1): the nursery branch (""
 /// is the mainline), the wrapped torus triple, the gauge sheet, the
-/// attested tick.
+/// attested tick, and the sub-tick deed index.
+///
+/// **`sub` — THE PHASE-3 FLIP** (`39_PHASE3_FLIP` §3, operator ruling
+/// 2026-08-13, option A). Several deeds share one world tick, and
+/// judgment is per-deed while the old coordinate addressed per-tick —
+/// a second deed's commitment refused `Occupied` on contact (measured).
+/// `sub` is the deed index within one tick, hashed into every commit
+/// like every other field: one commitment PER DEED, each carrying its
+/// own kernel verdict. Resets to 0 whenever `t` advances; within one
+/// `t`, `sub` counts 0, 1, 2… in deed order.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Coordinate {
     pub branch: String,
     pub s: [Ratio; 3],
     pub g: Ratio,
     pub t: u64,
+    pub sub: u32,
 }
 
 impl Coordinate {
@@ -74,8 +84,18 @@ impl Coordinate {
         }
         ratio::encode(&self.g, &mut out);
         out.extend_from_slice(&self.t.to_le_bytes());
+        out.extend_from_slice(&self.sub.to_le_bytes());
         out
     }
+}
+
+/// THE ARROW, ascending on `(t, sub)` — the Phase-3 addressing law
+/// (`39_PHASE3_FLIP` §3). A later commit on one branch must be later in
+/// (tick, sub-tick) lexicographic order: `t` strictly ahead, or the
+/// same `t` with `sub` strictly ahead — a fresh tick always resets
+/// `sub`'s meaning, since it addresses THAT tick's deeds only.
+fn ascends(next: &Coordinate, head: &Coordinate) -> bool {
+    (next.t, next.sub) > (head.t, head.sub)
 }
 
 /// One arbor commitment record (tag 84): one state bound to one
@@ -185,6 +205,8 @@ impl Commitment {
         let g = take_ratio(&mut at)?;
         let t = u64::from_le_bytes(value.get(at..at + 8)?.try_into().ok()?);
         at += 8;
+        let sub = u32::from_le_bytes(value.get(at..at + 4)?.try_into().ok()?);
+        at += 4;
         let schema = *value.get(at)?;
         at += 1;
         let kernel = u64::from_le_bytes(value.get(at..at + 8)?.try_into().ok()?);
@@ -204,7 +226,7 @@ impl Commitment {
         if at != value.len() {
             return None;
         }
-        Some(Commitment { coordinate: Coordinate { branch, s, g, t }, schema, kernel, judged, state, parent, commit })
+        Some(Commitment { coordinate: Coordinate { branch, s, g, t, sub }, schema, kernel, judged, state, parent, commit })
     }
 }
 
@@ -251,7 +273,7 @@ impl Arbor {
                         if record.parent != head.commit {
                             return Err(ArborRefused::Forged { frame });
                         }
-                        if record.coordinate.t <= head.coordinate.t {
+                        if !ascends(&record.coordinate, &head.coordinate) {
                             return Err(ArborRefused::ArrowBroken {
                                 t: record.coordinate.t,
                                 head: head.coordinate.t,
@@ -274,6 +296,7 @@ impl Arbor {
                         let copies = fork.coordinate.s == record.coordinate.s
                             && fork.coordinate.g == record.coordinate.g
                             && fork.coordinate.t == record.coordinate.t
+                            && fork.coordinate.sub == record.coordinate.sub
                             && fork.state == record.state;
                         if !copies {
                             return Err(ArborRefused::Forged { frame });
@@ -341,7 +364,7 @@ impl Arbor {
         }
         let parent = match self.head(&coordinate.branch) {
             Some(head) => {
-                if coordinate.t <= head.coordinate.t {
+                if !ascends(&coordinate, &head.coordinate) {
                     return Err(ArborRefused::ArrowBroken {
                         t: coordinate.t,
                         head: head.coordinate.t,
@@ -417,6 +440,7 @@ impl Arbor {
                 s: fork.coordinate.s.clone(),
                 g: fork.coordinate.g.clone(),
                 t: fork.coordinate.t,
+                sub: fork.coordinate.sub,
             },
             fork.schema,
             kernel::VERSION,
@@ -573,7 +597,7 @@ impl Arbor {
                 if record.parent != head.commit {
                     return Err(ArborRefused::Forged { frame });
                 }
-                if record.coordinate.t <= head.coordinate.t {
+                if !ascends(&record.coordinate, &head.coordinate) {
                     return Err(ArborRefused::ArrowBroken {
                         t: record.coordinate.t,
                         head: head.coordinate.t,
@@ -596,6 +620,7 @@ impl Arbor {
                 let copies = fork.coordinate.s == record.coordinate.s
                     && fork.coordinate.g == record.coordinate.g
                     && fork.coordinate.t == record.coordinate.t
+                    && fork.coordinate.sub == record.coordinate.sub
                     && fork.state == record.state;
                 if !copies {
                     return Err(ArborRefused::Forged { frame });

@@ -59,16 +59,15 @@ fn the_beat_chains_and_the_debt_is_named() {
         !arbor.records()[0].judged,
         "the adoption alone is unjudged: pre-chain history is a debt NAMED, never hidden"
     );
-    // The RECORDS carry gated=false because the commitment is one per
-    // beat, and a beat's record has no single step to name. That is the
-    // arbor's addressing law, not an unjudged economy: DIRECTIVE 19 runs
-    // `kernel::admits` on every deed individually before the beat
-    // commits (see `Polity::refused`). Per-deed COMMITMENT — and so a
-    // gated=true stamp per deed — waits on a coordinate sub-index,
-    // which is a wire amendment.
+    // THE PHASE-3 FLIP LANDED (`39_PHASE3_FLIP`, operator ruling
+    // 2026-08-13): the coordinate sub-index this pin's own comment
+    // named as the missing wire amendment is now `Coordinate.sub`.
+    // Every record past the adoption door carries its own step and is
+    // stamped `judged = true` — the adoption alone stays unjudged (the
+    // pre-chain debt, named above), everything after is gated live.
     assert!(
-        arbor.records().iter().all(|r| !r.judged),
-        "one record per beat carries no single step to stamp"
+        arbor.records().iter().skip(1).all(|r| r.judged),
+        "every record past the adoption carries its own admitted step"
     );
 
     // The store carries the geometry whole: the head blob decodes to
