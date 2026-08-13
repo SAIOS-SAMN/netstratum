@@ -124,6 +124,68 @@ fn the_farming_lineages_grow_and_replay_byte_exact() {
     }
 }
 
+// ── FLUX-TIED OUTPUT (§2b) — a hot-blooded line runs on stellar flux ──
+
+/// A world at a chosen orbit (closer = hotter), sealed to a `clade`, fed and
+/// peopled. Orbit sets the thermal band, hence the flux.
+fn world_at_orbit(orbit_num: i64, orbit_den: i64, clade: u16) -> World {
+    let mut world = World::new();
+    world.found("fluxhold").expect("founds");
+    world.commission_star(StarClass::G).expect("commissions");
+    world
+        .site_planet(FIRST_ORB, unit(0, 1), positive(orbit_num, orbit_den), None, None)
+        .expect("sites at orbit");
+    let stamp = world.now();
+    world.chronicle_mut().append(
+        ClosureEvent::YieldCollected { orb_id: FIRST_ORB, resource: Resource::Biomass, amount: ratio(400, 1) },
+        stamp,
+        vec![SOVEREIGN],
+    );
+    let mut world = World::resume(world.chronicle().clone());
+    for tile in 0..6 {
+        world.zone(tile, ZoneKind::Habitat).expect("habitat");
+    }
+    world.seal_taxon(1, clade).expect("seals a clade");
+    world.settle_population(FIRST_ORB, 10);
+    world
+}
+
+#[test]
+fn a_flux_driven_line_scales_its_output_with_the_star() {
+    // Clade 12 prefers the hot bands, so it is flux-driven: its output rises
+    // near a star and falls far out. A mesic clade (1) is untouched.
+    let hot = world_at_orbit(1, 2, 12); // Torrid
+    let cold = world_at_orbit(4, 1, 12); // Sublime
+    assert!(hot.flux_affine(), "a hot-preferred clade runs on flux");
+    assert!(hot.flux_output_factor(FIRST_ORB) > ratio(1, 1), "near the star it is lifted");
+    assert!(cold.flux_output_factor(FIRST_ORB) < ratio(1, 1), "far out it is starved");
+
+    let mesic = world_at_orbit(1, 1, 1);
+    assert!(!mesic.flux_affine(), "a mesic clade does not run on flux");
+    assert_eq!(mesic.flux_output_factor(FIRST_ORB), ratio(1, 1), "and its output is unscaled — every existing world byte-identical");
+}
+
+#[test]
+fn a_flux_driven_line_grows_faster_in_the_heat() {
+    // The coupling reaches the population: the same flux-driven clade grows a
+    // larger people near the star than far out, over the same beats, replay-
+    // exact.
+    fn grown(mut world: World, rounds: usize) -> (u64, World) {
+        for _ in 0..rounds {
+            for _ in 0..8 {
+                world.tick();
+            }
+            let _ = world.collect();
+        }
+        (world.population_of(FIRST_ORB), world)
+    }
+    let (hot, hw) = grown(world_at_orbit(1, 2, 12), 6);
+    let (cold, cw) = grown(world_at_orbit(4, 1, 12), 6);
+    assert!(hot > cold, "the flux-driven line grows faster in the heat: {hot} > {cold}");
+    assert_eq!(replay(hw.chronicle()), hw.committed(), "hot replay MATCHES");
+    assert_eq!(replay(cw.chronicle()), cw.committed(), "cold replay MATCHES");
+}
+
 // ── THE EVOLUTIONARY ARC (§2c) — a line transforms over the game ──
 
 /// Grant the deepening (condition 3) on the genesis orb — the earned
