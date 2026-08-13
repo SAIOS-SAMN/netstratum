@@ -293,6 +293,39 @@ impl World {
             },
             actor,
         );
+        // #32, 20_FOUNDING §3: the founding tithe — the economy's
+        // genesis transaction. Denominated in the line's OWN
+        // metabolic ration (G2), never a flat amount: mineral tithes
+        // iron, biotic tithes biomass, plasmic tithes joules (rate 0
+        // today — plasmic agriculture is #29, still open, so this is
+        // byte-identically a no-op debit for that metabolism until it
+        // lands, not a special case here). FALLBACK siting is the
+        // only landed acquisition path (PURCHASE/COMMISSION deferred
+        // per HANDOFF_2026-08-13), so every founding today raises a
+        // new world and tithes to the ANCIENT seat.
+        let resource = crate::dop::metabolic_ration(metabolism);
+        // Capped at what's actually banked — a founding that has
+        // already spent its kit down (a colony grown before its type
+        // was ever picked, same as an established one) owes no more
+        // than it holds; the tithe is real, never a negative balance.
+        let amount = self
+            .orbs
+            .iter()
+            .find(|orb| orb.orb_id == FIRST_ORB)
+            .map(|orb| crate::dop::metabolic_harvest(metabolism).1.min(orb.banked_amount(resource)))
+            .unwrap_or_else(|| crate::dop::metabolic_harvest(metabolism).1);
+        if let Some(held) = self.orbs.iter_mut().find(|orb| orb.orb_id == FIRST_ORB) {
+            held.bank(resource, -amount.clone());
+        }
+        self.close(
+            ClosureEvent::TitheReceipted {
+                orb_id: FIRST_ORB,
+                to_seat: crate::dop::SEAT_ANCIENT,
+                resource,
+                amount,
+            },
+            actor,
+        );
         Ok(())
     }
     /// G1: the sealed line, if any.

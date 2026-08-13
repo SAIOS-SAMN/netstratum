@@ -452,6 +452,14 @@ impl Replayer {
         // KERNEL-TAXON: the seal replays — identity is forever.
         ClosureEvent::TaxonSealed { class, clade } => *taxon = Some((*class, *clade)),
         ClosureEvent::EvolutionAdvanced { stage } => *evolution_stage = *stage,
+        // #32, 20_FOUNDING §3: the tithe leaves the founding orb's
+        // bank. One-sided (the DemurrageSettled precedent) — no
+        // last_touch move, this is not a rejuvenation-clock event.
+        ClosureEvent::TitheReceipted { orb_id, resource, amount, .. } => {
+            if let Some(held) = peel(&mut *orbs, *orb_id) {
+                held.bank(*resource, -amount.clone());
+            }
+        }
         // 28_VOCABULARY V2: the mint carries no per-world state —
         // the vocabulary is READ from the chronicle by
         // `vocabulary::fold`, never mirrored into `Committed`. A

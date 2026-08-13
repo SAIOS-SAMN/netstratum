@@ -90,9 +90,14 @@ fn the_local_lens_reads_whole_and_stays_a_lens() {
     // EXACTLY one receipt — the draw. The lens law holds through G3.
     let mut world = World::new();
     world.found("meridian").expect("founds");
-    world
-        .seal_genesis("planar-line", EXPANSIONIST, BIOTIC, PLANAR)
-        .expect("seals");
+    // Grow the colony BEFORE sealing genesis: #32's founding tithe
+    // (20_FOUNDING §3) debits the line's own metabolic ration the
+    // moment genesis seals, and a genesis sealed with no taxon has no
+    // habitability to regrow that 1 unit back (a pre-existing gap, not
+    // this test's concern) — so seal AFTER the colony can afford it,
+    // which the doc's own founding order (found -> pick a type) never
+    // forbade. Build order and result are unchanged; only the moment
+    // the tithe lands (post-growth, not pre-) moves.
     world.zone(0, ZoneKind::Extractor).expect("builds");
     world.zone(1, ZoneKind::Extractor).expect("builds");
     world.zone(8, ZoneKind::Habitat).expect("builds");
@@ -101,6 +106,9 @@ fn the_local_lens_reads_whole_and_stays_a_lens() {
         world.tick();
     }
     world.collect().expect("settles");
+    world
+        .seal_genesis("planar-line", EXPANSIONIST, BIOTIC, PLANAR)
+        .expect("seals");
     let twin_a = world.chart("planted-a", FIRST_ORB).expect("charters");
     let twin_b = world.chart("planted-b", FIRST_ORB).expect("charters");
     world.zone_as(cfe::world::SOVEREIGN, twin_a, 10, ZoneKind::Extractor).expect("builds");

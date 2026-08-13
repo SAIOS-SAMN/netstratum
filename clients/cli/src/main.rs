@@ -8250,6 +8250,12 @@ fn chronicle(world: &World, style: &Style) {
                 "⇑ the line EVOLVES — stage {} (the arc advances)",
                 style.strong(&stage.to_string())
             ),
+            cfe::dop::ClosureEvent::TitheReceipted { to_seat, resource, amount, .. } => format!(
+                "⚑ the founding TITHE fires — {} {:?} paid to the {}",
+                style.strong(&cfe::ratio::ratio_str(amount)),
+                resource,
+                style.strong(if *to_seat == cfe::dop::SEAT_ELDER { "elder" } else { "ancient" })
+            ),
             cfe::dop::ClosureEvent::ElderWarded {} => 
                 "⛨ the ELDER stands warded — the reverse shield seats".to_string(),
             cfe::dop::ClosureEvent::WardLifted { claimer } => format!(
