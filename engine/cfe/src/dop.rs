@@ -373,9 +373,8 @@
 //!    165 TreatyElementsAllowed, 166 SolverWordMinted, 167
 //!    PopulationSettled — 41_PROVISION §3, 169 EvolutionAdvanced —
 //!    44_LINEAGES §2c, 170 TitheReceipted, 171 TreasurySettled —
-//!    49_TAXATION §5, 172 PracticesLapsed — 49_TAXATION §3). Note:
-//!    quarantine relief's
-//!    PressureEbbed (ruling R3) is reserved 168 for when #30 lands.
+//!    49_TAXATION §5, 172 PracticesLapsed — 49_TAXATION §3, 168
+//!    PressureEbbed — bio quarantine relief #30, ruling R3).
 //!    Seated science labs. E-MKT-1 (2026-08-10): tag **49** OfferPosted
 //!    wire extended in place (Resource 1..=7; Element = 0 ‖ id[32]).
 //!    E3.7 (2026-08-10): tags **163–164** ElementWantStruck/Relieved.
@@ -2994,6 +2993,15 @@ pub enum ClosureEvent {
     /// line that adopts no practice, or has sealed no lifespan class,
     /// emits none and is byte-identical.
     PracticesLapsed { count: u8 },
+    /// **BIO QUARANTINE RELIEF (task #30, ruling R3, tag 168)** — a
+    /// quarantined orb RECOVERS a step at the touch: its bio-pressure
+    /// (both the cascade and the rogue axes) ebbs by one, the mirror of
+    /// the `+1` each explosion accrues. When a maxed axis falls below the
+    /// quarantine threshold the world's apertures reopen. The receipt
+    /// carries only the orb; replay ebbs both axes by one (saturating),
+    /// exactly as the settle did. A world that never quarantines emits
+    /// none and is byte-identical.
+    PressureEbbed { orb_id: u64 },
     /// MESH-1b (NS-5 §7) — the receipted handoff: the yielding hand
     /// `from` seals, naming successor `to`. One writer per clock;
     /// authority derives by the mesh's walk of the arbor (never a
@@ -4107,6 +4115,9 @@ impl ClosureEvent {
             }
             Self::PracticesLapsed { count } => {
                 tlv::put(172, &[*count], &mut out);
+            }
+            Self::PressureEbbed { orb_id } => {
+                tlv::put(168, &orb_id.to_le_bytes(), &mut out);
             }
             Self::HandoffSealed { from, to } => {
                 let mut value = from.to_le_bytes().to_vec();
@@ -5394,6 +5405,9 @@ impl ClosureEvent {
                 Some(Self::TreasurySettled { orb_id, delta })
             }
             172 => Some(Self::PracticesLapsed { count: *value.first()? }),
+            168 => Some(Self::PressureEbbed {
+                orb_id: u64::from_le_bytes(value.get(..8)?.try_into().ok()?),
+            }),
             67 => {
                 let from = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let to = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);

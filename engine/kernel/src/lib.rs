@@ -1386,6 +1386,7 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::IsoUnionStruck { .. } | E::ChemCataloged { .. } | E::DarkPullStruck { .. }
         | E::ScienceSeated { .. } | E::LabCreated { .. } | E::ScienceExploded { .. }
         | E::RogueFactionStruck { .. }
+        | E::PressureEbbed { .. }
         | E::GenesisSealed { .. } | E::ProspectStruck { .. } | E::LineSucceeded { .. }
         | E::TechLicensed { .. } | E::InstrumentForged { .. } | E::RouteChartered { .. }
         | E::OfferPosted { .. } | E::BondSealed { .. }
@@ -1657,7 +1658,8 @@ fn admitted_deltas(
         | E::AssayConsilience { .. }
         | E::IsoUnionStruck { .. }
         | E::DarkPullStruck { .. }
-        | E::RogueFactionStruck { .. } => Vec::new(),
+        | E::RogueFactionStruck { .. }
+        | E::PressureEbbed { .. } => Vec::new(),
         E::AssaySlashed { slash, .. } => {
             non_negative(Resource::Crystal, slash)?;
             vec![(Resource::Crystal, -slash.clone())]
@@ -2461,6 +2463,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::IsoUnionStruck { .. } | E::ChemCataloged { .. } | E::DarkPullStruck { .. }
         | E::ScienceSeated { .. } | E::LabCreated { .. } | E::ScienceExploded { .. }
         | E::RogueFactionStruck { .. }
+        | E::PressureEbbed { .. }
         // #42: a treaty is WORLD-layer. It is keyed on the pair, and
         // the pair is two worlds — not a line's identity (a pact
         // outlives whoever signed it) and not one place. E3.9's
@@ -2624,6 +2627,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::ChemCataloged { .. }
         | E::ScienceSeated { .. } | E::LabCreated { .. } | E::ScienceExploded { .. }
         | E::RogueFactionStruck { .. }
+        | E::PressureEbbed { .. }
         // U1: the discovery mint settles banked value against verified
         // work — Collect, like the yield it banks beside. Ratified by
         // the U1 witnesses as it enters covered().

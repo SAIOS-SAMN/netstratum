@@ -8641,6 +8641,9 @@ fn chronicle(world: &World, style: &Style) {
                 "📉 {} practice(s) LAPSED at the generation turnover — the continuity tax to the void",
                 style.strong(&count.to_string())
             ),
+            cfe::dop::ClosureEvent::PressureEbbed { orb_id } => format!(
+                "🌡 bio-pressure EBBED — orb {orb_id} recovers a step toward lifting quarantine"
+            ),
             cfe::dop::ClosureEvent::OfferPosted { offer, give, give_amount, want, want_amount, .. } => format!(
                 "⇋ offer {offer} RESTS — {} {} for {} {}; the market holds intents, never escrows",
                 style.strong(&amount(give_amount)),

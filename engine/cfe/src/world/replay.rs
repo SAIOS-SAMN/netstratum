@@ -1881,6 +1881,19 @@ impl Replayer {
                 rogue_pressure.push((*orb_id, *pressure));
             }
         }
+        // BIO QUARANTINE RELIEF (#30): a recovery step — both pressure
+        // axes ebb by one (saturating), the mirror of the +1 each
+        // explosion accrued.
+        ClosureEvent::PressureEbbed { orb_id } => {
+            if let Some(slot) = cascade_pressures.iter_mut().find(|(o, _)| *o == *orb_id) {
+                slot.1 = slot.1.saturating_sub(1);
+            }
+            cascade_pressures.retain(|(_, p)| *p > 0);
+            if let Some(slot) = rogue_pressure.iter_mut().find(|(o, _)| *o == *orb_id) {
+                slot.1 = slot.1.saturating_sub(1);
+            }
+            rogue_pressure.retain(|(_, p)| *p > 0);
+        }
     }
     }
 }

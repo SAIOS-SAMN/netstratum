@@ -12,10 +12,11 @@
 //! unchanged; only NEW inbound proposals meet the seal.
 
 use cfe::almanac::ExplosionKind;
-use cfe::dop::ClosureEvent;
+use cfe::dop::{positive, unit, ClosureEvent, Resource, ZoneKind};
 use cfe::ratio::ratio;
+use cfe::thermal::StarClass;
 use cfe::treaty::{TreatyKind, TreatyTerms, PAIR_MELT};
-use cfe::world::{ActionRefused, World, FIRST_ORB, SOVEREIGN};
+use cfe::world::{replay, ActionRefused, World, FIRST_ORB, SOVEREIGN};
 
 /// A world driven to `bumps` cascade-pressure strikes by receipt, then
 /// resumed so the pressure is chain-true (replay rebuilds it from the
@@ -95,5 +96,94 @@ fn a_clean_world_is_never_quarantined_by_this_gate() {
             Err(ActionRefused::WorldQuarantined { .. })
         ),
         "a clean world is never quarantine-sealed"
+    );
+}
+
+// ── task #30: the pressure relief — quarantine is not permanent ──
+
+/// A collectable world driven to `rogue` rogue-pressure by receipt (an
+/// extractor over a stocked bank, so a collect always settles).
+fn quarantined_collectable(rogue: u8) -> World {
+    let mut world = World::new();
+    world.found("quar-hold").expect("founds");
+    world.commission_star(StarClass::G).expect("star");
+    world
+        .site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None)
+        .expect("sites");
+    let stamp = world.now();
+    for res in [Resource::Biomass, Resource::Iron] {
+        world.chronicle_mut().append(
+            ClosureEvent::YieldCollected { orb_id: FIRST_ORB, resource: res, amount: ratio(1_000_000, 1) },
+            stamp,
+            vec![SOVEREIGN],
+        );
+    }
+    world.chronicle_mut().append(
+        ClosureEvent::RogueFactionStruck { orb_id: FIRST_ORB, pressure: rogue },
+        stamp,
+        vec![SOVEREIGN],
+    );
+    let mut world = World::resume(world.chronicle().clone());
+    world.zone(0, ZoneKind::Extractor).expect("extractor");
+    world
+}
+
+fn collect_once(world: &mut World) {
+    for _ in 0..4 {
+        world.tick();
+    }
+    let _ = world.collect();
+}
+
+#[test]
+fn the_pressure_deed_round_trips() {
+    let deed = ClosureEvent::PressureEbbed { orb_id: 42 };
+    let bytes = deed.wire_bytes();
+    let mut records = cfe::tlv::records(&bytes);
+    let (tag, value) = records.next().expect("one record");
+    assert_eq!(tag, 168, "PressureEbbed is tag 168");
+    assert_eq!(ClosureEvent::from_wire(tag, value).expect("decodes"), deed);
+}
+
+#[test]
+fn a_quarantined_world_recovers_a_step_at_the_touch_and_lifts() {
+    // Maxed rogue pressure quarantines the world; a collect touch ebbs it
+    // one step, dropping below the threshold — quarantine LIFTS. It was
+    // permanent before this settle deed.
+    let mut world = quarantined_collectable(7);
+    assert!(world.world_quarantined(), "the modification maxed out — quarantined");
+    collect_once(&mut world);
+    assert_eq!(world.rogue_pressure_of(FIRST_ORB), 6, "the pressure ebbed one step");
+    assert!(!world.world_quarantined(), "the apertures reopen once below the threshold");
+    assert!(
+        world
+            .chronicle()
+            .receipts()
+            .iter()
+            .any(|r| matches!(r.event, ClosureEvent::PressureEbbed { .. })),
+        "the recovery is receipted"
+    );
+    assert_eq!(replay(world.chronicle()), world.committed(), "pressure-relief replay MATCHES");
+    // Below the threshold the ebb stops — the residual is a lasting scar.
+    collect_once(&mut world);
+    assert_eq!(world.rogue_pressure_of(FIRST_ORB), 6, "recovered below quarantine, the ebb rests");
+}
+
+#[test]
+fn a_sub_threshold_pressure_never_ebbs_so_it_is_byte_identical() {
+    // A world modified but NOT past the ceiling (pressure 3) is not
+    // quarantined; the collect emits no relief deed and leaves the
+    // pressure untouched — byte-identical to the pre-#30 era.
+    let mut world = quarantined_collectable(3);
+    assert!(!world.world_quarantined(), "below the ceiling, no quarantine");
+    collect_once(&mut world);
+    assert_eq!(world.rogue_pressure_of(FIRST_ORB), 3, "a sub-threshold pressure does not ebb");
+    assert!(
+        !world
+            .chronicle()
+            .receipts()
+            .iter()
+            .any(|r| matches!(r.event, ClosureEvent::PressureEbbed { .. })),
+        "no quarantine → no relief deed → byte-identical"
     );
 }
