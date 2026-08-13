@@ -78,6 +78,7 @@ pub mod labor;
 pub mod rejuvenation;
 pub mod distribution;
 pub mod workbench;
+pub mod taxation;
 
 pub use science_lab::{LabCreateResult, ScienceLabBoard};
 pub use bench_games::{

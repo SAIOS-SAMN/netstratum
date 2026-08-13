@@ -1593,6 +1593,69 @@ pub fn metabolic_ration(metabolism: u8) -> Resource {
     }
 }
 
+/// **WHAT A LEVY DRAWS ON** (`45_TAXATION` §1) — the base a tax is levied
+/// against.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LevyBase {
+    /// Standing stock (demurrage's own base).
+    Stock,
+    /// The estate handed to the next generation at turnover.
+    Estate,
+    /// Crystallized boons and adopted practices — a line's retained law.
+    Knowledge,
+    /// Flows crossing a treaty border.
+    Trade,
+}
+
+/// **WHEN A LEVY FIRES** (`45_TAXATION` §1).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LevyTrigger {
+    /// At the settle touch, beside demurrage/rejuvenation.
+    Touch,
+    /// At a lifespan turnover (the `42_LIFESPAN` mortality settle).
+    Turnover,
+    /// At a bond/transfer crossing a treaty border.
+    Treaty,
+}
+
+/// **WHERE A LEVY FLOWS** (`45_TAXATION` §1).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LevySink {
+    /// To the seated authority (a receipted transfer).
+    Sovereign,
+    /// It simply lapses — demurrage's admitted decay, no counterparty.
+    Void,
+    /// To the other side of a treaty.
+    Counterparty,
+}
+
+/// **A LEVY** (`45_TAXATION` §1) — a crafted tax as data: what it draws,
+/// when, where it flows. The RATE rides the minted binding
+/// (progenitor-crafted, `Axis::Levy`); base/trigger/sink name the levy. The
+/// two seeded levies are the continuity tax and the estate tax (§3–4).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Levy {
+    pub base: LevyBase,
+    pub trigger: LevyTrigger,
+    pub sink: LevySink,
+}
+
+impl Levy {
+    /// THE CONTINUITY TAX (§3) — unconfirmed knowledge lapses each turnover.
+    pub const CONTINUITY: Levy = Levy {
+        base: LevyBase::Knowledge,
+        trigger: LevyTrigger::Turnover,
+        sink: LevySink::Void,
+    };
+    /// THE ESTATE TAX (§4) — the estate is taxed to the sovereign at each
+    /// generational handover.
+    pub const ESTATE: Levy = Levy {
+        base: LevyBase::Estate,
+        trigger: LevyTrigger::Turnover,
+        sink: LevySink::Sovereign,
+    };
+}
+
 /// **THE CASTES** (`44_LINEAGES` §2d) — the specialized roles a population
 /// differentiates into. NOT a fixed set: a caste IS a disposition-role, so
 /// the castes of a line are exactly its disposition axis's values —
