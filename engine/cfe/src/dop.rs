@@ -1892,6 +1892,35 @@ pub fn refine_recipe(
     (spend, refined, yielded)
 }
 
+/// **A DISPOSITION TRAIT** (`44_LINEAGES`) — a named behavioural capability
+/// a disposition carries. Formerly these were scattered as inline
+/// `disposition == N` checks across the instrument, tick, and dark-pull
+/// subsystems, so a MINTED disposition could inherit none of them. Here they
+/// are DATA in one table, read generically (`World::disposition_carries`),
+/// and a minted disposition inherits its base's traits.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DispositionTrait {
+    /// Expansionist: an affinity for freight/haulage instruments.
+    FreightAffinity,
+    /// Empiricist: a mind that hungers for the NEXT discovery.
+    NoveltyHunger,
+    /// Epicurean: the pull to display surplus (a dark-7 vanity).
+    VanityDisplay,
+}
+
+/// The traits a SEEDED disposition carries — the one home for what was three
+/// scattered `== N` checks. A minted disposition carries none of its own
+/// here; it inherits its base's (see `World::disposition_carries`).
+pub fn disposition_traits(disposition: u8) -> &'static [DispositionTrait] {
+    use DispositionTrait::*;
+    match disposition {
+        1 => &[FreightAffinity], // expansionist
+        2 => &[NoveltyHunger],   // empiricist
+        3 => &[VanityDisplay],   // epicurean
+        _ => &[],
+    }
+}
+
 /// **SELF-EMPHASIS OVER AN OPEN SET OF SLOTS** — the shape a disposition
 /// (or any identity axis) takes when it favours its OWN slot: `sitting`
 /// holds the majority, the rest split the remainder evenly, summing to 1.

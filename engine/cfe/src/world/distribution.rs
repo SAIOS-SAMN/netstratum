@@ -66,6 +66,38 @@ impl World {
         self.evolution_stage
     }
 
+    /// **DOES THIS LINE'S DISPOSITION CARRY A TRAIT?** (`44_LINEAGES`) — the
+    /// generic reader that replaces the scattered `disposition == N` checks.
+    /// A seeded disposition carries the traits its table declares; a MINTED
+    /// disposition inherits the traits of its BASE (the seeded disposition
+    /// its mint modulates), read from the fold — so freight-affinity,
+    /// novelty-hunger, and vanity are no longer stuck to three codes but flow
+    /// to any line that IS, or descends from, one that bears them.
+    pub fn disposition_carries(&self, wanted: crate::dop::DispositionTrait) -> bool {
+        let Some(code) = self.civ_axes().map(|axes| axes.disposition) else {
+            return false;
+        };
+        if crate::dop::disposition_traits(code).contains(&wanted) {
+            return true;
+        }
+        // A minted disposition inherits its base's traits. FORWARD-COMPAT:
+        // the mint law currently binds `base` to the Zone axis only
+        // (`BaseOffAxis`), so a disposition entry carries `None` today and
+        // this path is inert; the moment base-inheritance is chartered for
+        // dispositions, minted lines inherit their base's traits with no
+        // further change here.
+        if code > 3 {
+            if let Some(base) = crate::vocabulary::fold(self.chronicle(), crate::vocabulary::Axis::Disposition)
+                .into_iter()
+                .find(|entry| entry.code == code)
+                .and_then(|entry| entry.base)
+            {
+                return crate::dop::disposition_traits(base).contains(&wanted);
+            }
+        }
+        false
+    }
+
     /// **THE DISPOSITION AXIS'S VALUES** — every disposition code the
     /// vocabulary carries (the three seeded, plus any minted), read from the
     /// fold. The caste set is exactly this set, so castes are as open as the

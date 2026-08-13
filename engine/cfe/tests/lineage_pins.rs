@@ -335,6 +335,25 @@ fn a_minted_disposition_becomes_a_fourth_caste() {
 }
 
 #[test]
+fn disposition_traits_are_one_generic_read_not_scattered_checks() {
+    // THE TRAIT VENT: freight-affinity, novelty-hunger, and vanity were
+    // three hardcoded `disposition == N` checks in three subsystems. Now
+    // they are DATA in one table, read by ONE generic method — so the
+    // capability follows the identity from a single home, and futures
+    // listing (the freight site) reads it rather than a bespoke `== 1`.
+    use cfe::dop::DispositionTrait::*;
+    let expansionist = lineage(1, 1, 1, 1);
+    let epicurean = lineage(3, 1, 1, 1);
+    assert!(expansionist.disposition_carries(FreightAffinity), "the expansionist bears freight affinity");
+    assert!(!expansionist.disposition_carries(VanityDisplay), "and not the epicurean's vanity");
+    assert!(epicurean.disposition_carries(VanityDisplay), "the epicurean bears vanity display");
+    assert!(!epicurean.disposition_carries(FreightAffinity), "and not the expansionist's freight");
+    // The freight site now reads the trait: an expansionist may list futures
+    // with no cargo banked, an epicurean may not (it falls to the cargo test).
+    assert!(expansionist.futures_listable(), "freight affinity lets the expansionist list futures");
+}
+
+#[test]
 fn an_undifferentiated_line_has_no_castes() {
     // A people with no sealed disposition has not specialized at all — the
     // split is empty (every hand is the same), not forced into a role.
