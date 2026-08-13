@@ -8644,6 +8644,11 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::PressureEbbed { orb_id } => format!(
                 "🌡 bio-pressure EBBED — orb {orb_id} recovers a step toward lifting quarantine"
             ),
+            cfe::dop::ClosureEvent::ElementFarmed { orb_id, joule, minted, .. } => format!(
+                "⬡ element SYNTHESIZED — orb {orb_id} spent {} joule to mint {} of its food-element",
+                style.strong(&amount(joule)),
+                style.strong(&amount(minted))
+            ),
             cfe::dop::ClosureEvent::OfferPosted { offer, give, give_amount, want, want_amount, .. } => format!(
                 "⇋ offer {offer} RESTS — {} {} for {} {}; the market holds intents, never escrows",
                 style.strong(&amount(give_amount)),

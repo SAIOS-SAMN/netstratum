@@ -1088,6 +1088,34 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             }
             vec![(*element, amount.clone())]
         }
+        // G2 (#29): an element-eater SYNTHESIZES its food-element from
+        // energy — a conserved TRANSMUTATION (the joule spend is checked
+        // in conservation(); here we bound the element MINT). The bound
+        // is the element's own natural flow (richness): minted ≤ joule ×
+        // richness, so a rarer element yields less per joule and costs
+        // more energy to eat. No star → no lawful recipe → zero bound.
+        ClosureEvent::ElementFarmed { element, joule, minted, .. } => {
+            if *minted < ratio(0, 1) || *joule < ratio(0, 1) {
+                return Err(Refused::ElementNotPositive {
+                    element: *element,
+                    amount: Box::new(minted.clone()),
+                });
+            }
+            let bound = match prior.star {
+                Some(class) => {
+                    let (_, _, richness) = cfe::dop::element_properties(element, class);
+                    joule.clone() * richness
+                }
+                None => ratio(0, 1),
+            };
+            if *minted > bound {
+                return Err(Refused::AssayExceedsVein {
+                    bound: Box::new(bound),
+                    claimed: Box::new(minted.clone()),
+                });
+            }
+            vec![(*element, minted.clone())]
+        }
         // 34: element → scrap; element mass leaves the open-matter ledger.
         ClosureEvent::ElementSalvaged { element, amount, .. } => {
             if *amount < ratio(0, 1) {
@@ -1449,6 +1477,9 @@ fn covered(event: &ClosureEvent) -> bool {
         // richness × elapsed, and zero-invariant for every other deed.
         // Witnessed in `element_pins.rs`.
         | E::AssayStruck { .. }
+        // G2 (#29): the element-food synthesis — a conserved transmutation
+        // (joule spend + bounded element mint), covered by the value law.
+        | E::ElementFarmed { .. }
         // THE LAST DEED (operator ruling 2026-08-01, folded to arch-01):
         // TaxonSealed — class and clade sealed as identity, once per
         // star (15 §4). {I2 containment (Build), I3 exactness} complete
@@ -1741,6 +1772,13 @@ fn admitted_deltas(
         E::CrystalDrawn { amount, .. } => {
             non_negative(Resource::Crystal, amount)?;
             vec![(Resource::Crystal, -amount.clone())]
+        }
+        // G2 (#29): the JOULE spent to synthesize the food-element leaves
+        // the resource ledger (the element mint is checked in
+        // element_move). Sign-guarded — a farm cannot bank energy.
+        E::ElementFarmed { joule, .. } => {
+            non_negative(Resource::Joule, joule)?;
+            vec![(Resource::Joule, -joule.clone())]
         }
         // CONVEY — the postal theorems, held at the gate. The move nets
         // zero (amount out, amount in); only the postage leaves the
@@ -2439,6 +2477,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         | E::FamineStruck { .. } | E::FamineRelieved { .. }
         | E::GaugeShifted { .. } | E::GaugeShiftedAt { .. }
         | E::ProspectStruck { .. } | E::AssayStruck { .. } | E::CrystalDrawn { .. }
+        | E::ElementFarmed { .. }
         // ELEMENT-CHEMISTRY (#37): a bond is WORLD-layer beside the
         // mint and the assay it consumes — it carries an orb's matter,
         // not a line's identity. The gem's name is content-addressed
@@ -2602,7 +2641,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::YieldCollected { .. } | E::UpkeepSettled { .. } | E::ResourceTransferred { .. }
         | E::OverflowAbsorbed { .. } | E::BondSettled { .. } | E::ForwardReleased { .. }
         | E::FrictionSettled { .. } | E::ApertureSent { .. } | E::ApertureReceived { .. }
-        | E::CrystalDrawn { .. } | E::AssayStruck { .. } | E::OfferCleared { .. }
+        | E::CrystalDrawn { .. } | E::AssayStruck { .. } | E::ElementFarmed { .. } | E::OfferCleared { .. }
         // ELEMENT-CHEMISTRY (#37): compounding SPENDS banked element
         // value and banks a gem — Collect, exactly as the assay that
         // filled the ledger it draws on. Ratified by the chemistry

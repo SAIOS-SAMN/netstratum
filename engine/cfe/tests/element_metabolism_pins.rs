@@ -10,7 +10,8 @@
 //! refuses a ration off its axis, and the ration resolver returns an
 //! ELEMENT where one is declared and the compiled carrier where none is.
 
-use cfe::dop::{metabolic_ration, metabolic_ration_of, metabolic_harvest_of, name, ClosureEvent, Ration, Resource, ZoneKind};
+use cfe::dop::{metabolic_ration, metabolic_ration_of, metabolic_harvest_of, name, positive, unit, ClosureEvent, Ration, Resource, ZoneKind};
+use cfe::thermal::StarClass;
 use cfe::ratio::ratio;
 use cfe::vocabulary::{trading, Axis, CHANNEL_UPKEEP, CHANNEL_YIELD};
 use cfe::world::{replay, World, FIRST_ORB, SOVEREIGN};
@@ -303,4 +304,116 @@ fn stasis_lifts_the_moment_the_element_bank_is_refilled() {
         world.accrued()
     );
     assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
+}
+
+// ── task #29: the element economy — a stone-eater FARMS its own stone ──
+
+/// A stone-eater under a sun, with Joule to burn and extractors to run —
+/// the food economy's setting (extractors levy the biomass food slot,
+/// which for an element-eater is paid in stone). Iron/Biomass are stocked
+/// only to afford the builds.
+fn energized_stone_eater(stone: [u8; 32], extractors: u16) -> World {
+    let mut world = World::new();
+    world.found("stone-forge").expect("founds");
+    world
+        .seat_station(name("tunborn"), cfe::dop::Station::from_wire(1).expect("office"))
+        .expect("seats the progenitor");
+    let code = world
+        .mint_vocabulary_ration_as(
+            SOVEREIGN, "tunborn", Axis::Metabolism, "◈", name("lithovore"),
+            trading(vec![(CHANNEL_YIELD, ratio(5, 4)), (CHANNEL_UPKEEP, ratio(5, 4))]),
+            stone,
+        )
+        .expect("mints the stone-eater metabolism");
+    world.seal_genesis("stone-line", 1, code, 1).expect("seals");
+    world.commission_star(StarClass::G).expect("commissions a sun");
+    world
+        .site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None)
+        .expect("sites");
+    let stamp = world.now();
+    for (res, amt) in [(Resource::Joule, 1_000_000i64), (Resource::Iron, 1_000_000), (Resource::Biomass, 1_000_000)] {
+        world.chronicle_mut().append(
+            ClosureEvent::YieldCollected { orb_id: FIRST_ORB, resource: res, amount: ratio(amt, 1) },
+            stamp, vec![SOVEREIGN],
+        );
+    }
+    let mut world = World::resume(world.chronicle().clone());
+    for tile in 0..extractors {
+        world.zone(tile, ZoneKind::Extractor).expect("builds an extractor");
+    }
+    world
+}
+
+fn stone_bank(world: &World, stone: &[u8; 32]) -> cfe::ratio::Ratio {
+    world.orb_by_id(FIRST_ORB).map(|held| held.element_amount(stone)).unwrap_or_else(|| ratio(0, 1))
+}
+
+#[test]
+fn a_stone_eater_synthesizes_its_food_from_energy_and_unfreezes() {
+    // Starved of stone, the line begins in STASIS (no stone banked). But
+    // under a sun with joule to burn, the collect touch SYNTHESIZES its
+    // stone from energy — the larder fills, STASIS lifts, and the
+    // extractors run. It feeds ITSELF, no gift needed. (#29, the unblock.)
+    let stone = element(1, 3);
+    let mut world = energized_stone_eater(stone, 4);
+    assert_eq!(stone_bank(&world, &stone), ratio(0, 1), "the larder starts empty — frozen");
+
+    // First cycle: frozen, but the collect farms the food-element in.
+    for _ in 0..4 { world.tick(); }
+    let joule_before = world.orb_by_id(FIRST_ORB).map(|h| h.banked_amount(Resource::Joule)).unwrap();
+    let _ = world.collect();
+    let stone_after = stone_bank(&world, &stone);
+    let joule_after = world.orb_by_id(FIRST_ORB).map(|h| h.banked_amount(Resource::Joule)).unwrap();
+    assert!(stone_after > ratio(0, 1), "the stone-eater synthesized its food: {stone_after}");
+    assert!(joule_after < joule_before, "it SPENT energy to do so (a conserved transmutation)");
+    assert!(
+        world.chronicle().receipts().iter().any(|r| matches!(r.event, ClosureEvent::ElementFarmed { .. })),
+        "the synthesis is receipted as ElementFarmed"
+    );
+    assert_eq!(replay(world.chronicle()), world.committed(), "element-farm replay MATCHES");
+
+    // Fed now, the next cycle's extractors RUN — it mines iron again.
+    for _ in 0..4 { world.tick(); }
+    let iron_running = world.accrued().iter().any(|(res, amt)| *res == Resource::Iron && *amt > ratio(0, 1));
+    assert!(iron_running, "the fed stone-eater runs its industry: {:?}", world.accrued());
+}
+
+#[test]
+fn a_stone_eater_without_a_sun_cannot_farm_and_stays_frozen() {
+    // No star → no lawful synthesis (the kernel bounds the mint by the
+    // element's richness under a star). The old STASIS holds; no
+    // ElementFarmed deed — byte-identical to the pre-#29 era.
+    let stone = element(1, 3);
+    let mut world = stone_eater(stone, ratio(0, 1)); // the sun-less helper
+    for _ in 0..4 { world.tick(); }
+    let _ = world.collect();
+    assert_eq!(stone_bank(&world, &stone), ratio(0, 1), "no sun, no synthesis");
+    assert!(
+        !world.chronicle().receipts().iter().any(|r| matches!(r.event, ClosureEvent::ElementFarmed { .. })),
+        "no farm deed without a star — byte-identical"
+    );
+}
+
+#[test]
+fn a_biotic_world_never_farms_an_element() {
+    // A v1 biotic line (metabolism 2) has no metabolic element; the collect
+    // emits no ElementFarmed — the whole layer is invisible to it.
+    let mut world = World::new();
+    world.found("green").expect("founds");
+    world.commission_star(StarClass::G).expect("star");
+    world.site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None).expect("sites");
+    let stamp = world.now();
+    world.chronicle_mut().append(
+        ClosureEvent::YieldCollected { orb_id: FIRST_ORB, resource: Resource::Biomass, amount: ratio(1_000_000, 1) },
+        stamp, vec![SOVEREIGN],
+    );
+    let mut world = World::resume(world.chronicle().clone());
+    world.zone(0, ZoneKind::Extractor).expect("extractor");
+    assert!(world.metabolic_element().is_none(), "a biotic line eats no element");
+    for _ in 0..4 { world.tick(); }
+    let _ = world.collect();
+    assert!(
+        !world.chronicle().receipts().iter().any(|r| matches!(r.event, ClosureEvent::ElementFarmed { .. })),
+        "a biotic world never emits ElementFarmed — byte-identical"
+    );
 }

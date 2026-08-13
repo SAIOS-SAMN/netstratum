@@ -292,6 +292,11 @@ impl World {
         // change (`pop_delta`) receipts as its own `PopulationSettled`
         // after the touch, at the same stamp.
         let population = self.population_touch_delta(orb, self.clock.now());
+        // G2 (#29): the food-element an element-eater synthesizes this
+        // touch (joule → element, conserved). Read pre-touch; settled as
+        // its own ElementFarmed receipt after the touch. `None` for every
+        // non-eater, so a v1 world is byte-identical.
+        let farm = self.element_farm_at_touch(orb, self.clock.now());
         // TAXATION (49 §5): the welfare OUTFLOW is read HERE, before the
         // touch advances `last_touch` — the demand it funds is measured
         // over the span just ended (the same pre-touch reading as the
@@ -342,7 +347,7 @@ impl World {
                 None => settleable.push((*resource, -consumed.clone())),
             }
         }
-        if settleable.is_empty() {
+        if settleable.is_empty() && farm.is_none() {
             return Err(ActionRefused::NothingAccrued);
         }
         // TAXATION (49 §5): the taxable throughput this touch — the net
@@ -531,6 +536,21 @@ impl World {
         // the touch — both pressure axes ebb by one. Not quarantined → no
         // ebb → no deed, so an unmodified world is byte-identical.
         self.ebb_pressure(orb);
+        // G2 (#29): the food-element synthesis settles — joule → element,
+        // banked, receipted as ElementFarmed. `None` for every non-eater,
+        // so a v1 world emits nothing and is byte-identical.
+        if let Some((element, joule, minted)) = farm {
+            let stamp = self.clock.now();
+            if let Some(held) = peel(&mut self.orbs, orb) {
+                held.bank(Resource::Joule, -joule.clone());
+                held.bank_element(element, minted.clone());
+            }
+            self.chronicle.append(
+                ClosureEvent::ElementFarmed { orb_id: orb, element, joule, minted },
+                stamp,
+                vec![actor],
+            );
+        }
         Ok(count)
     }
     /// Transfer banked value between two orbs as the sovereign.

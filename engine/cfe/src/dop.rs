@@ -369,12 +369,13 @@
 //!         today raises a new world and tithes to the ANCIENT seat;
 //!         PURCHASE/COMMISSION (the elder path, an existing planet) are
 //!         deferred per HANDOFF_2026-08-13.)
-//!    Phase-5 claim ledger: next free **173** (163–164 ElementWant,
+//!    Phase-5 claim ledger: next free **174** (163–164 ElementWant,
 //!    165 TreatyElementsAllowed, 166 SolverWordMinted, 167
 //!    PopulationSettled — 41_PROVISION §3, 169 EvolutionAdvanced —
 //!    44_LINEAGES §2c, 170 TitheReceipted, 171 TreasurySettled —
 //!    49_TAXATION §5, 172 PracticesLapsed — 49_TAXATION §3, 168
-//!    PressureEbbed — bio quarantine relief #30, ruling R3).
+//!    PressureEbbed — bio quarantine relief #30, ruling R3, 173
+//!    ElementFarmed — G2 element economy #29).
 //!    Seated science labs. E-MKT-1 (2026-08-10): tag **49** OfferPosted
 //!    wire extended in place (Resource 1..=7; Element = 0 ‖ id[32]).
 //!    E3.7 (2026-08-10): tags **163–164** ElementWantStruck/Relieved.
@@ -3002,6 +3003,21 @@ pub enum ClosureEvent {
     /// exactly as the settle did. A world that never quarantines emits
     /// none and is byte-identical.
     PressureEbbed { orb_id: u64 },
+    /// **G2 ELEMENT ECONOMY (task #29, tag 173)** — an element-eating
+    /// line SYNTHESIZES its metabolic element at the collect touch: it
+    /// SPENDS `joule` and MINTS `minted` of `element`. A conserved
+    /// TRANSMUTATION (energy in, matter out) — not a free mint: the
+    /// kernel bounds `minted ≤ joule × richness` (the element's own
+    /// natural flow from `element_properties`), so a rarer element yields
+    /// less per joule and costs more energy to eat. Replay banks the
+    /// joule spend and the element mint. A world with no element-eater
+    /// emits none and is byte-identical.
+    ElementFarmed {
+        orb_id: u64,
+        element: [u8; 32],
+        joule: Ratio,
+        minted: Ratio,
+    },
     /// MESH-1b (NS-5 §7) — the receipted handoff: the yielding hand
     /// `from` seals, naming successor `to`. One writer per clock;
     /// authority derives by the mesh's walk of the arbor (never a
@@ -4118,6 +4134,13 @@ impl ClosureEvent {
             }
             Self::PressureEbbed { orb_id } => {
                 tlv::put(168, &orb_id.to_le_bytes(), &mut out);
+            }
+            Self::ElementFarmed { orb_id, element, joule, minted } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(element);
+                ratio::encode(joule, &mut value);
+                ratio::encode(minted, &mut value);
+                tlv::put(173, &value, &mut out);
             }
             Self::HandoffSealed { from, to } => {
                 let mut value = from.to_le_bytes().to_vec();
@@ -5408,6 +5431,13 @@ impl ClosureEvent {
             168 => Some(Self::PressureEbbed {
                 orb_id: u64::from_le_bytes(value.get(..8)?.try_into().ok()?),
             }),
+            173 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
+                let (joule, used) = ratio::decode(value.get(40..)?)?;
+                let (minted, _) = ratio::decode(value.get(40 + used..)?)?;
+                Some(Self::ElementFarmed { orb_id, element, joule, minted })
+            }
             67 => {
                 let from = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let to = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);

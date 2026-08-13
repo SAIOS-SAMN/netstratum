@@ -805,6 +805,58 @@ impl World {
             .and_then(|entry| entry.ration)
     }
 
+    /// **G2 (#29) — THE FOOD-ELEMENT FARMED at a collect touch.** An
+    /// element-eater SYNTHESIZES its metabolic element from ENERGY,
+    /// topping its larder toward the food demand over the span: it spends
+    /// Joule to mint the element (a conserved transmutation, bounded by
+    /// the element's own richness — `minted ≤ joule × richness`, so a
+    /// rarer element costs more energy). Returns `(element, joule_spent,
+    /// minted)` to receipt as `ElementFarmed`, or `None` for a non-eater,
+    /// no deficit, no joule, or no star. Every v1 (biotic/unsealed) world
+    /// reads `None` in O(1), so it is byte-identical.
+    pub(super) fn element_farm_at_touch(
+        &self,
+        orb: u64,
+        stamp: u64,
+    ) -> Option<([u8; 32], Ratio, Ratio)> {
+        let element = self.metabolic_element()?;
+        let class = self.star?;
+        let metabolism = self.genesis.as_ref().map(|held| held.metabolism)?;
+        let held = self.orb_by_id(orb)?;
+        let dt = stamp.saturating_sub(held.last_touch);
+        if dt == 0 {
+            return None;
+        }
+        // This beat's food bill, from the active zones (vigour-weighted).
+        let active: Vec<(crate::dop::Zone, Ratio)> = held
+            .zones
+            .iter()
+            .filter(|zone| held.zone_active(zone))
+            .map(|zone| (zone.clone(), held.zone_vigour(zone)))
+            .collect();
+        let bill = Self::element_food_bill(&active, metabolism);
+        if bill <= ratio(0, 1) {
+            return None;
+        }
+        // Top the larder toward a span's worth of food; never overfill.
+        let demand = bill * ratio(dt as i64, 1);
+        let deficit = (demand - held.element_amount(&element)).max(ratio(0, 1));
+        if deficit <= ratio(0, 1) {
+            return None;
+        }
+        // Bound the mint by the joule on hand × the element's richness.
+        let (_, _, richness) = crate::dop::element_properties(&element, class);
+        if richness <= ratio(0, 1) {
+            return None;
+        }
+        let joule = held.banked_amount(Resource::Joule);
+        let minted = deficit.min(joule * richness.clone());
+        if minted <= ratio(0, 1) {
+            return None;
+        }
+        Some((element, minted.clone() / richness, minted))
+    }
+
     /// G2: the base FOOD BILL an element-eater's active zones levy this
     /// beat, in element units — the Biomass upkeep components (the food
     /// slot) summed and vigour-weighted, exactly the shape ECON-J's
