@@ -8647,6 +8647,11 @@ fn chronicle(world: &World, style: &Style) {
             cfe::dop::ClosureEvent::PressureEbbed { orb_id } => format!(
                 "🌡 bio-pressure EBBED — orb {orb_id} recovers a step toward lifting quarantine"
             ),
+            cfe::dop::ClosureEvent::ElementFarmed { orb_id, joule, minted, .. } => format!(
+                "⬡ element SYNTHESIZED — orb {orb_id} spent {} joule to mint {} of its food-element",
+                style.strong(&amount(joule)),
+                style.strong(&amount(minted))
+            ),
             cfe::dop::ClosureEvent::CivilizationCollapsed { .. } => format!(
                 "{} the line has COLLAPSED — every orb stands at zero; the chronicle closes here, there is no win to reach for instead",
                 style.bad("☠")

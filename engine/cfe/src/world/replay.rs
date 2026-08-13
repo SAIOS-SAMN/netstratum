@@ -725,6 +725,14 @@ impl Replayer {
                 held.bank_element(*element, amount.clone());
             }
         }
+        // G2 (#29): the food-element synthesis — spend joule, mint the
+        // element (a conserved transmutation, bounded in the kernel).
+        ClosureEvent::ElementFarmed { orb_id, element, joule, minted } => {
+            if let Some(held) = peel(&mut *orbs, *orb_id) {
+                held.bank(Resource::Joule, -joule.clone());
+                held.bank_element(*element, minted.clone());
+            }
+        }
         // ABSORB-1: the three-way move replays — the absorber's
         // ledger carries the shed; the window opens; crisis reads
         // match the live order exactly.

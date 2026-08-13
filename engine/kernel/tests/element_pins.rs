@@ -346,3 +346,67 @@ fn an_element_change_under_a_neutral_deed_refuses() {
         "no deed mints an element undeclared"
     );
 }
+
+// ── task #29: the element-food synthesis — a conserved transmutation ──
+
+/// A sunlit one-orb state with `joule` banked and the sovereign seated —
+/// the setting for an element-eater synthesizing its food from energy.
+fn sunlit_with_joule(joule: Ratio) -> Committed {
+    let mut committed = World::new().committed();
+    let mut orb = ColonyOrb { orb_id: 1, name: "forge".into(), ..Default::default() };
+    orb.bank(cfe::dop::Resource::Joule, joule);
+    committed.orbs = vec![orb];
+    committed.entities = vec![Entity {
+        entity_id: SOVEREIGN,
+        handle: "sovereign".into(),
+        principal: None,
+        grants: vec![],
+    }];
+    committed.star = Some(cfe::thermal::StarClass::G);
+    committed
+}
+
+fn farm(element: [u8; 32], joule: Ratio, minted: Ratio, stamp: u64) -> Step {
+    Step {
+        event: ClosureEvent::ElementFarmed { orb_id: 1, element, joule, minted },
+        actor: SOVEREIGN,
+        stamp,
+    }
+}
+
+#[test]
+fn an_honest_element_farm_admits_the_conserved_transmutation() {
+    // Spend joule, mint the element at exactly the richness bound — energy
+    // leaves the ledger, matter enters, both declared. The kernel admits.
+    let element = ELEMENT;
+    let prior = sunlit_with_joule(ratio(100, 1));
+    let (_, _, richness) = cfe::dop::element_properties(&element, cfe::thermal::StarClass::G);
+    let joule = ratio(10, 1);
+    let minted = joule.clone() * richness.clone(); // exactly minted ≤ joule × richness
+    let mut next = prior.clone();
+    next.orbs[0].bank(cfe::dop::Resource::Joule, -joule.clone());
+    next.orbs[0].bank_element(element, minted.clone());
+    assert_eq!(admits(&prior, &next, &farm(element, joule, minted, 5)), Ok(()));
+}
+
+#[test]
+fn an_element_farm_past_the_richness_bound_refuses() {
+    // Mint MORE element than the joule buys at the element's richness —
+    // conjuring matter. The kernel refuses, bounded (the AssayExceedsVein
+    // law, shared with the vein and the refinery).
+    let element = ELEMENT;
+    let prior = sunlit_with_joule(ratio(100, 1));
+    let (_, _, richness) = cfe::dop::element_properties(&element, cfe::thermal::StarClass::G);
+    let joule = ratio(10, 1);
+    let greedy = joule.clone() * richness + ratio(1, 1); // one over the bound
+    let mut next = prior.clone();
+    next.orbs[0].bank(cfe::dop::Resource::Joule, -joule.clone());
+    next.orbs[0].bank_element(element, greedy.clone());
+    assert!(
+        matches!(
+            admits(&prior, &next, &farm(element, joule, greedy, 5)),
+            Err(Refused::AssayExceedsVein { .. })
+        ),
+        "a farm cannot conjure more matter than its energy buys"
+    );
+}

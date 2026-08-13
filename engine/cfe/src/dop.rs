@@ -372,18 +372,22 @@
 //!    172  ClosureEvent::PracticesLapsed (`49_TAXATION` §3 — the
 //!         continuity levy: practices lapse to the void at a
 //!         generation turnover.)
-//!    173  ClosureEvent::CivilizationCollapsed (`50_WIN_CONDITIONS`,
+//!    173  ClosureEvent::ElementFarmed (G2 element economy `#29`.)
+//!    174  ClosureEvent::CivilizationCollapsed (`50_WIN_CONDITIONS`,
 //!         operator ruling 2026-08-13 — the failure state, the only
 //!         closure this game has; no win-state deed exists or ever
-//!         will, by the same ruling. RENUMBERED 172 -> 173: landed
-//!         concurrently with PracticesLapsed under the same next-free
-//!         tag; PracticesLapsed committed to main first.)
-//!    Phase-5 claim ledger: next free **174** (163–164 ElementWant,
+//!         will, by the same ruling. RENUMBERED twice: 172 -> 173
+//!         collided with PracticesLapsed, which committed to main
+//!         first; 173 -> 174 then collided with ElementFarmed, which
+//!         ALSO committed to main first. Landed concurrently with two
+//!         separate lanes claiming the same next-free tag in a row.)
+//!    Phase-5 claim ledger: next free **175** (163–164 ElementWant,
 //!    165 TreatyElementsAllowed, 166 SolverWordMinted, 167
 //!    PopulationSettled — 41_PROVISION §3, 169 EvolutionAdvanced —
 //!    44_LINEAGES §2c, 170 TitheReceipted, 171 TreasurySettled —
 //!    49_TAXATION §5, 168 PressureEbbed — bio quarantine relief #30,
 //!    ruling R3, 172 PracticesLapsed — 49_TAXATION §3, 173
+//!    ElementFarmed — G2 element economy #29, 174
 //!    CivilizationCollapsed — 50_WIN_CONDITIONS).
 //!    Seated science labs. E-MKT-1 (2026-08-10): tag **49** OfferPosted
 //!    wire extended in place (Resource 1..=7; Element = 0 ‖ id[32]).
@@ -3012,8 +3016,23 @@ pub enum ClosureEvent {
     /// exactly as the settle did. A world that never quarantines emits
     /// none and is byte-identical.
     PressureEbbed { orb_id: u64 },
+    /// **G2 ELEMENT ECONOMY (task #29, tag 173)** — an element-eating
+    /// line SYNTHESIZES its metabolic element at the collect touch: it
+    /// SPENDS `joule` and MINTS `minted` of `element`. A conserved
+    /// TRANSMUTATION (energy in, matter out) — not a free mint: the
+    /// kernel bounds `minted ≤ joule × richness` (the element's own
+    /// natural flow from `element_properties`), so a rarer element yields
+    /// less per joule and costs more energy to eat. Replay banks the
+    /// joule spend and the element mint. A world with no element-eater
+    /// emits none and is byte-identical.
+    ElementFarmed {
+        orb_id: u64,
+        element: [u8; 32],
+        joule: Ratio,
+        minted: Ratio,
+    },
     /// **THE FAILURE STATE** (`50_WIN_CONDITIONS`, operator ruling
-    /// 2026-08-13, tag 173): *"there is no win state — there is a
+    /// 2026-08-13, tag 174): *"there is no win state — there is a
     /// failure state — otherwise the game should just continue in
     /// perpetuity."* Fires once, when the genesis orb's population
     /// settles to zero at a `PopulationSettled` touch — the only
@@ -4141,8 +4160,15 @@ impl ClosureEvent {
             Self::PressureEbbed { orb_id } => {
                 tlv::put(168, &orb_id.to_le_bytes(), &mut out);
             }
+            Self::ElementFarmed { orb_id, element, joule, minted } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                value.extend_from_slice(element);
+                ratio::encode(joule, &mut value);
+                ratio::encode(minted, &mut value);
+                tlv::put(173, &value, &mut out);
+            }
             Self::CivilizationCollapsed { orb_id } => {
-                tlv::put(173, &orb_id.to_le_bytes(), &mut out);
+                tlv::put(174, &orb_id.to_le_bytes(), &mut out);
             }
             Self::HandoffSealed { from, to } => {
                 let mut value = from.to_le_bytes().to_vec();
@@ -5434,6 +5460,13 @@ impl ClosureEvent {
                 orb_id: u64::from_le_bytes(value.get(..8)?.try_into().ok()?),
             }),
             173 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
+                let (joule, used) = ratio::decode(value.get(40..)?)?;
+                let (minted, _) = ratio::decode(value.get(40 + used..)?)?;
+                Some(Self::ElementFarmed { orb_id, element, joule, minted })
+            }
+            174 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 Some(Self::CivilizationCollapsed { orb_id })
             }
