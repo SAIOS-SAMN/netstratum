@@ -274,6 +274,14 @@ impl World {
             self.chronicle(),
             crate::parameter::Parameter::EncasementThroughput,
         );
+        // REJUVENATION (task #28): the natural ration's growth since the
+        // last touch settles HERE — the exact mirror of the demurrage
+        // decay `touch()` seals just below, computed BEFORE the touch so
+        // it reads the old `last_touch`. It folds into this touch's own
+        // `YieldCollected` (no deed of its own — the §2 digest rides the
+        // collected amount), so replay banks it straight from the
+        // receipt and `last_touch` advances by the same carrier.
+        let rejuvenated = self.rejuvenation_settle(orb, self.clock.now());
         let held = peel(&mut self.orbs, orb)
             .ok_or(ActionRefused::NoSuchOrb { orb })?;
         let mut settleable: Vec<(Resource, Ratio)> = Vec::new();
@@ -286,6 +294,16 @@ impl World {
                 false => *owner != orb,
             }
         });
+        // Fold the regrown ration into this touch's yield — merged with
+        // its resource where the tick also accrued some, otherwise its
+        // own line. A world can collect on regrowth ALONE, so this joins
+        // before the empty gate.
+        if let Some((resource, grown)) = rejuvenated {
+            match settleable.iter_mut().find(|(held_res, _)| *held_res == resource) {
+                Some((_, amount)) => *amount += grown,
+                None => settleable.push((resource, grown)),
+            }
+        }
         if settleable.is_empty() {
             return Err(ActionRefused::NothingAccrued);
         }

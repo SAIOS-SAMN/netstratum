@@ -98,4 +98,27 @@ impl World {
         let dt = stamp.saturating_sub(held.last_touch);
         grained_logistic(&p0, &k, &intrinsic_rate(metabolism, self.metabolic_element()), dt)
     }
+
+    /// **THE SETTLE — what a real TOUCH banks.** The stock the natural
+    /// ration has GROWN by since the last touch, ready to fold into the
+    /// touch's own `YieldCollected` receipt (the `40_REJUVENATION` §2
+    /// digest, carried implicitly in the collected amount rather than a
+    /// separate deed — "deterministic physics get no deed of their own").
+    /// `None` when nothing grew: a stock already at or above `K` (a
+    /// well-farmed world), a barren place, or — for now — an
+    /// element-eater, whose ration settles with the element economy
+    /// (task #29). Only a Resource ration below its ceiling regrows here.
+    ///
+    /// Because the growth folds into `YieldCollected`, which the kernel
+    /// already admits as a `+amount` yield mint and replay banks straight
+    /// from the receipt, the whole settle is SEAL-B-safe with no new deed,
+    /// no wire change, and no kernel arm.
+    pub fn rejuvenation_settle(&self, orb: u64, stamp: u64) -> Option<(Resource, Ratio)> {
+        let Ration::Resource(resource) = self.ration_of(orb) else {
+            return None;
+        };
+        let held = self.orb_by_id(orb)?;
+        let grown = self.regrown_ration(orb, stamp) - held.banked_amount(resource);
+        (grown > ratio(0, 1)).then_some((resource, grown))
+    }
 }

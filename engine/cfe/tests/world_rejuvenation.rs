@@ -127,3 +127,54 @@ fn a_scan_is_not_a_deed_and_changes_nothing() {
     let world = World::resume(world.chronicle().clone());
     assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
 }
+
+// ── the SETTLE: regrowth banks at a real collect touch ──
+
+#[test]
+fn a_collect_banks_the_regrown_ration_folded_into_its_yield() {
+    // A depleted mesic world, left to run: at the collect touch its
+    // natural biomass has climbed, and that growth banks WITH the farmed
+    // yield — one receipt, no separate deed.
+    let mut world = greenhold(8);
+    for _ in 0..50 {
+        world.tick();
+    }
+    let before = world.orb().expect("stands").banked_amount(Resource::Biomass);
+    let farmed: cfe::ratio::Ratio = world
+        .accrued()
+        .iter()
+        .filter(|(resource, _)| *resource == Resource::Biomass)
+        .map(|(_, amount)| amount.clone())
+        .fold(ratio(0, 1), |sum, amount| sum + amount);
+    let grown = world.regrown_ration(FIRST_ORB, world.now()) - before.clone();
+    assert!(grown > ratio(0, 1), "a depleted mesic world has regrowth to settle: {grown}");
+
+    world.collect().expect("collects");
+    let after = world.orb().expect("stands").banked_amount(Resource::Biomass);
+    assert_eq!(
+        after,
+        before + farmed + grown,
+        "the collect banks farmed yield AND the regrown stock, in one touch"
+    );
+    assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
+}
+
+#[test]
+fn a_world_at_capacity_regrows_nothing_at_the_touch() {
+    // Rejuvenation only aids RECOVERY: a stock already at or above its
+    // ceiling settles no growth (farming may still push it higher, but
+    // the natural law adds nothing above K).
+    let world = greenhold(8);
+    let k = world.ration_capacity_of(FIRST_ORB);
+    assert!(k > ratio(0, 1), "a lush world has a ceiling");
+    // Nothing has elapsed and the stock sits below K, but the SETTLE at
+    // t=last_touch is zero regardless (no time, no growth).
+    assert_eq!(world.rejuvenation_settle(FIRST_ORB, world.now()), None, "no time, no settle");
+    // And an over-capacity stock never settles growth, however long it waits.
+    // (Read the curve directly: a stock at K stays at K.)
+    assert_eq!(
+        cfe::almanac::grained_logistic(&k, &k, &cfe::almanac::intrinsic_rate(2, None), 10_000),
+        k,
+        "at capacity, the curve holds — the settle would bank nothing"
+    );
+}
