@@ -112,6 +112,9 @@ pub const SCHEMA_V19: u8 = 19;
 /// **SCHEMA v20 — evolution_stage (44_LINEAGES §2c, one trailing byte).**
 pub const SCHEMA_V20: u8 = 20;
 
+/// **SCHEMA v21 — treasury_balances (49_TAXATION §5, trailing run).**
+pub const SCHEMA_V21: u8 = 21;
+
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
 }
@@ -132,7 +135,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V20];
+    let mut out = vec![SCHEMA_V21];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -526,9 +529,17 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
         }
     }
     // SCHEMA v20 trailing: the evolutionary stage (44_LINEAGES §2c) — one
-    // byte, LAST. A v19 reader stops before it and decodes a whole state
-    // at stage 0.
+    // byte. A v19 reader stops before it and decodes a whole state at
+    // stage 0.
     out.push(committed.evolution_stage);
+    // SCHEMA v21 trailing: sovereign treasury balances (49_TAXATION §5) —
+    // (orb, balance) run, LAST. A v20 reader stops before it and decodes a
+    // whole state with an empty treasury.
+    put_u32(&mut out, committed.treasury_balances.len() as u32);
+    for (orb, bal) in &committed.treasury_balances {
+        put_u64(&mut out, *orb);
+        ratio::encode(bal, &mut out);
+    }
     out
 }
 
@@ -625,6 +636,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         && schema != SCHEMA_V18
         && schema != SCHEMA_V19
         && schema != SCHEMA_V20
+        && schema != SCHEMA_V21
     {
         return None;
     }
@@ -1155,6 +1167,17 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
     // pre-v20 snapshot (a line that had not yet advanced).
     let evolution_stage = if schema >= SCHEMA_V20 { take.u8()? } else { 0 };
 
+    // SCHEMA v21 trailing: sovereign treasury balances, or empty for a
+    // pre-v21 snapshot (no line had yet collected a levy).
+    let mut treasury_balances = Vec::new();
+    if schema >= SCHEMA_V21 {
+        for _ in 0..take.u32()? {
+            let orb = take.u64()?;
+            let bal = take.ratio()?;
+            treasury_balances.push((orb, bal));
+        }
+    }
+
     if !take.done() {
         return None;
     }
@@ -1205,6 +1228,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         chem_catalog,
         science_seats,
         clone_counts,
+        treasury_balances,
         synth_mods,
         skin_mods,
         rogue_pressure,

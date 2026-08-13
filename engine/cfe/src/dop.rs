@@ -369,10 +369,11 @@
 //!         today raises a new world and tithes to the ANCIENT seat;
 //!         PURCHASE/COMMISSION (the elder path, an existing planet) are
 //!         deferred per HANDOFF_2026-08-13.)
-//!    Phase-5 claim ledger: next free **171** (163–164 ElementWant,
+//!    Phase-5 claim ledger: next free **172** (163–164 ElementWant,
 //!    165 TreatyElementsAllowed, 166 SolverWordMinted, 167
 //!    PopulationSettled — 41_PROVISION §3, 169 EvolutionAdvanced —
-//!    44_LINEAGES §2c, 170 TitheReceipted). Note: quarantine relief's
+//!    44_LINEAGES §2c, 170 TitheReceipted, 171 TreasurySettled —
+//!    49_TAXATION §5). Note: quarantine relief's
 //!    PressureEbbed (ruling R3) is reserved 168 for when #30 lands.
 //!    Seated science labs. E-MKT-1 (2026-08-10): tag **49** OfferPosted
 //!    wire extended in place (Resource 1..=7; Element = 0 ‖ id[32]).
@@ -2971,6 +2972,17 @@ pub enum ClosureEvent {
     /// not a ledger — it is not conserved — so the receipt carries the
     /// net and replay applies it straight (saturating at zero).
     PopulationSettled { orb_id: u64, delta: i64 },
+    /// **TAXATION (49_TAXATION §5, tag 171)** — the SOVEREIGN TREASURY
+    /// settled by a net change: crafted levies collected INTO the
+    /// treasury (positive) net of a welfare budget spent OUT of it
+    /// (negative). The treasury is an abstract fiscal reserve — a
+    /// store, not a conserved Resource (like the population, it is not
+    /// a ledger line under conservation) — so the receipt carries the
+    /// NET and replay applies it straight, floored at zero: a spend
+    /// can empty the treasury but never overdraw it. A world that
+    /// never crafts a levy nor stands a WelfareHub emits none, so it
+    /// replays byte-identical.
+    TreasurySettled { orb_id: u64, delta: Ratio },
     /// MESH-1b (NS-5 §7) — the receipted handoff: the yielding hand
     /// `from` seals, naming successor `to`. One writer per clock;
     /// authority derives by the mesh's walk of the arbor (never a
@@ -4076,6 +4088,11 @@ impl ClosureEvent {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.extend_from_slice(&delta.to_le_bytes());
                 tlv::put(167, &value, &mut out);
+            }
+            Self::TreasurySettled { orb_id, delta } => {
+                let mut value = orb_id.to_le_bytes().to_vec();
+                ratio::encode(delta, &mut value);
+                tlv::put(171, &value, &mut out);
             }
             Self::HandoffSealed { from, to } => {
                 let mut value = from.to_le_bytes().to_vec();
@@ -5356,6 +5373,11 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let delta = i64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
                 Some(Self::PopulationSettled { orb_id, delta })
+            }
+            171 => {
+                let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
+                let (delta, _) = ratio::decode(value.get(8..)?)?;
+                Some(Self::TreasurySettled { orb_id, delta })
             }
             67 => {
                 let from = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);

@@ -224,6 +224,10 @@ pub struct Committed {
     pub science_seats: Vec<(u8, u64, u8)>,
     /// LAB: bio clone counts per orb.
     pub clone_counts: Vec<(u64, u64)>,
+    /// TAXATION (49 §5): the sovereign treasury balance per orb — an
+    /// abstract fiscal reserve levies flow into and welfare spends from
+    /// (replay of `TreasurySettled`, floored at zero).
+    pub treasury_balances: Vec<(u64, Ratio)>,
     /// LAB: synthetic mod grade per orb.
     pub synth_mods: Vec<(u64, u8)>,
     /// LAB: skin/face mod grade per orb.
@@ -361,6 +365,9 @@ pub struct World {
     pub(super) science_seats: Vec<(u8, u64, u8)>,
     /// LAB: clone counts — replay of LabCreated (clone path).
     pub(super) clone_counts: Vec<(u64, u64)>,
+    /// TAXATION (49 §5): sovereign treasury balances — replay of
+    /// `TreasurySettled` (levies in, welfare out; floored at zero).
+    pub(super) treasury_balances: Vec<(u64, Ratio)>,
     /// LAB: synth mod grades.
     pub(super) synth_mods: Vec<(u64, u8)>,
     /// LAB: skin mod grades.

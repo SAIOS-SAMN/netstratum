@@ -8630,6 +8630,13 @@ fn chronicle(world: &World, style: &Style) {
                 let verb = if *delta >= 0 { "grew" } else { "starved" };
                 format!("👥 population {verb} — orb {orb_id} by {delta} (the fed/starved logistic)")
             }
+            cfe::dop::ClosureEvent::TreasurySettled { orb_id, delta } => {
+                let verb = if *delta >= cfe::ratio::ratio(0, 1) { "collected" } else { "spent" };
+                format!(
+                    "🏛 treasury {verb} — orb {orb_id} by {} (levies in, welfare out)",
+                    style.strong(&amount(delta))
+                )
+            }
             cfe::dop::ClosureEvent::OfferPosted { offer, give, give_amount, want, want_amount, .. } => format!(
                 "⇋ offer {offer} RESTS — {} {} for {} {}; the market holds intents, never escrows",
                 style.strong(&amount(give_amount)),

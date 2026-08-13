@@ -81,6 +81,43 @@ impl World {
         ratio(grain, lifespan).min(ratio(1, 1))
     }
 
+    /// **THE SOVEREIGN TREASURY BALANCE** (`49_TAXATION` §5) — the
+    /// abstract fiscal reserve standing on this orb: everything crafted
+    /// levies have collected, net of everything welfare has spent. A
+    /// world that never collected a levy reads zero. Folded from the
+    /// `TreasurySettled` receipts (floored at zero, so it never goes
+    /// negative).
+    pub fn treasury_of(&self, orb: u64) -> Ratio {
+        self.treasury_balances
+            .iter()
+            .find(|(o, _)| *o == orb)
+            .map(|(_, bal)| bal.clone())
+            .unwrap_or_else(|| ratio(0, 1))
+    }
+
+    /// **SETTLE THE TREASURY** (`49_TAXATION` §5, tag 171) — apply a NET
+    /// fiscal change to the sovereign treasury (levies collected in,
+    /// welfare spent out), floored at zero, and receipt it so replay
+    /// applies the same delta. A zero delta emits nothing, so a world
+    /// that neither taxes nor spends is byte-identical.
+    pub fn settle_treasury(&mut self, orb: u64, delta: Ratio) {
+        let zero = ratio(0, 1);
+        if delta == zero {
+            return;
+        }
+        let next = (self.treasury_of(orb) + delta.clone()).max(zero.clone());
+        self.treasury_balances.retain(|(o, _)| *o != orb);
+        if next > zero {
+            self.treasury_balances.push((orb, next));
+        }
+        let stamp = self.clock.now();
+        self.chronicle.append(
+            crate::dop::ClosureEvent::TreasurySettled { orb_id: orb, delta },
+            stamp,
+            vec![],
+        );
+    }
+
     /// The standing continuity levy — its base/trigger/sink (Knowledge /
     /// Turnover / Void). The `continuity_tax` is its measured rate.
     pub fn continuity_levy(&self) -> Levy {

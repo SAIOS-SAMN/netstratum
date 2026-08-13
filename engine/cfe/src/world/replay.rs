@@ -88,6 +88,7 @@ impl Replayer {
                 chem_catalog: Vec::new(),
                 science_seats: Vec::new(),
                 clone_counts: Vec::new(),
+                treasury_balances: Vec::new(),
                 synth_mods: Vec::new(),
                 skin_mods: Vec::new(),
                 rogue_pressure: Vec::new(),
@@ -152,6 +153,7 @@ impl Replayer {
             chem_catalog,
             science_seats,
             clone_counts,
+            treasury_balances,
             synth_mods,
             skin_mods,
             rogue_pressure,
@@ -993,6 +995,22 @@ impl Replayer {
             clone_counts.retain(|(o, _)| *o != *orb_id);
             if next > 0 {
                 clone_counts.push((*orb_id, next));
+            }
+        }
+        // TAXATION (49 §5): the treasury settles by its net delta —
+        // levies collected in (positive), welfare spent out (negative)
+        // — floored at zero. An abstract fiscal reserve; the receipt
+        // carries the net, so replay applies it straight.
+        ClosureEvent::TreasurySettled { orb_id, delta } => {
+            let current = treasury_balances
+                .iter()
+                .find(|(o, _)| *o == *orb_id)
+                .map(|(_, b)| b.clone())
+                .unwrap_or_else(|| ratio(0, 1));
+            let next = (current + delta.clone()).max(ratio(0, 1));
+            treasury_balances.retain(|(o, _)| *o != *orb_id);
+            if next > ratio(0, 1) {
+                treasury_balances.push((*orb_id, next));
             }
         }
         // MARKET-1 / E-MKT-1: the intent rests; the clear removes it.

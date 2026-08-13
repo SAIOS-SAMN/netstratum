@@ -349,6 +349,7 @@ impl World {
             chem_catalog: self.chem_catalog.clone(),
             science_seats: self.science_seats.clone(),
             clone_counts: self.clone_counts.clone(),
+            treasury_balances: self.treasury_balances.clone(),
             synth_mods: self.synth_mods.clone(),
             skin_mods: self.skin_mods.clone(),
             rogue_pressure: self.rogue_pressure.clone(),
