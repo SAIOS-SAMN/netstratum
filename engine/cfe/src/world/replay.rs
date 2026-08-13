@@ -67,6 +67,7 @@ impl Replayer {
                 warded: None,
                 veiled: false,
                 taxon: None,
+                evolution_stage: 0,
                 stations: Vec::new(),
                 hulls: Vec::new(),
                 notes: Vec::new(),
@@ -130,6 +131,7 @@ impl Replayer {
             warded,
             veiled,
             taxon,
+            evolution_stage,
             stations,
             hulls,
             notes,
@@ -449,6 +451,7 @@ impl Replayer {
         ClosureEvent::VeilLifted { .. } => *veiled = false,
         // KERNEL-TAXON: the seal replays — identity is forever.
         ClosureEvent::TaxonSealed { class, clade } => *taxon = Some((*class, *clade)),
+        ClosureEvent::EvolutionAdvanced { stage } => *evolution_stage = *stage,
         // 28_VOCABULARY V2: the mint carries no per-world state —
         // the vocabulary is READ from the chronicle by
         // `vocabulary::fold`, never mirrored into `Committed`. A

@@ -109,6 +109,9 @@ pub const SCHEMA_V18: u8 = 18;
 /// **SCHEMA v19 — element_allowlists (E3.9 treaty element annexes).**
 pub const SCHEMA_V19: u8 = 19;
 
+/// **SCHEMA v20 — evolution_stage (44_LINEAGES §2c, one trailing byte).**
+pub const SCHEMA_V20: u8 = 20;
+
 fn put_u16(out: &mut Vec<u8>, value: u16) {
     out.extend_from_slice(&value.to_le_bytes());
 }
@@ -129,7 +132,7 @@ fn put_text(out: &mut Vec<u8>, text: &str) {
 /// The one encoding: schema byte, then every committed family in
 /// declaration order, positionally, canonically.
 pub fn state_bytes(committed: &Committed) -> Vec<u8> {
-    let mut out = vec![SCHEMA_V19];
+    let mut out = vec![SCHEMA_V20];
 
     put_u32(&mut out, committed.orbs.len() as u32);
     for orb in &committed.orbs {
@@ -522,6 +525,10 @@ pub fn state_bytes(committed: &Committed) -> Vec<u8> {
             out.extend_from_slice(element);
         }
     }
+    // SCHEMA v20 trailing: the evolutionary stage (44_LINEAGES §2c) — one
+    // byte, LAST. A v19 reader stops before it and decodes a whole state
+    // at stage 0.
+    out.push(committed.evolution_stage);
     out
 }
 
@@ -617,6 +624,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         && schema != SCHEMA_V17
         && schema != SCHEMA_V18
         && schema != SCHEMA_V19
+        && schema != SCHEMA_V20
     {
         return None;
     }
@@ -1143,6 +1151,10 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         }
     }
 
+    // SCHEMA v20 trailing: the evolutionary stage — one byte, or 0 for a
+    // pre-v20 snapshot (a line that had not yet advanced).
+    let evolution_stage = if schema >= SCHEMA_V20 { take.u8()? } else { 0 };
+
     if !take.done() {
         return None;
     }
@@ -1172,6 +1184,7 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         warded,
         veiled,
         taxon,
+        evolution_stage,
         stations,
         hulls,
         notes,

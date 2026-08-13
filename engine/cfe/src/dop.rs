@@ -362,10 +362,11 @@
 //!         program wire form) ‖ three confirming task digests. The
 //!         library is a FOLD of these receipts; certificates carry the
 //!         expansion, so the judge's wire never moves.)
-//!    Phase-5 claim ledger: next free **168** (163–164 ElementWant,
+//!    Phase-5 claim ledger: next free **170** (163–164 ElementWant,
 //!    165 TreatyElementsAllowed, 166 SolverWordMinted, 167
-//!    PopulationSettled — 41_PROVISION §3). Note: quarantine relief's
-//!    PressureEbbed (ruling R3) takes 168 when #30 lands.
+//!    PopulationSettled — 41_PROVISION §3, 169 EvolutionAdvanced —
+//!    44_LINEAGES §2c). Note: quarantine relief's PressureEbbed (ruling
+//!    R3) is reserved 168 for when #30 lands.
 //!    Seated science labs. E-MKT-1 (2026-08-10): tag **49** OfferPosted
 //!    wire extended in place (Resource 1..=7; Element = 0 ‖ id[32]).
 //!    E3.7 (2026-08-10): tags **163–164** ElementWantStruck/Relieved.
@@ -3301,6 +3302,14 @@ pub enum ClosureEvent {
     /// register-side forever.
     /// KERNEL-TAXON — class u8, clade **u16** (open expansion; tag 85).
     TaxonSealed { class: u8, clade: u16 },
+    /// **THE EVOLUTIONARY ARC** (`44_LINEAGES` §2c, tag 169): a line
+    /// ADVANCES along its arc — a gated, earned transformation, not a
+    /// founding fact. The deed carries the new stage; replay sets it.
+    /// A neutral Civilizational-layer deed like `TaxonSealed`: it moves
+    /// the line's identity, not the ledger, so it mints and conserves
+    /// nothing. Stage lifts the civilization's provisioning capacity
+    /// (`population_ceiling`) — an evolved people sustains more.
+    EvolutionAdvanced { stage: u8 },
     /// **THE VOCABULARY MINT** (tag 90, `28_VOCABULARY` §7,
     /// 2026-08-05): a T0 progenitor adds an entry to a vocabulary.
     ///
@@ -4575,6 +4584,9 @@ impl ClosureEvent {
                 let mut value = vec![*class];
                 value.extend_from_slice(&clade.to_le_bytes());
                 tlv::put(85, &value, &mut out);
+            }
+            Self::EvolutionAdvanced { stage } => {
+                tlv::put(169, &[*stage], &mut out);
             }
             Self::VocabularyMinted { axis, code, sigil, word, binding, base, ration } => {
                 let mut value = vec![*axis, *code];
@@ -5902,6 +5914,7 @@ impl ClosureEvent {
                 };
                 Some(Self::TaxonSealed { class, clade })
             }
+            169 => Some(Self::EvolutionAdvanced { stage: *value.first()? }),
             96 => {
                 let axis = *value.first()?;
                 let code = *value.get(1)?;

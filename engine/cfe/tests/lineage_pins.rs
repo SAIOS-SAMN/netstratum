@@ -124,6 +124,59 @@ fn the_farming_lineages_grow_and_replay_byte_exact() {
     }
 }
 
+// ── THE EVOLUTIONARY ARC (§2c) — a line transforms over the game ──
+
+/// Grant the deepening (condition 3) on the genesis orb — the earned
+/// technology door evolution passes, the same the regenerator/refinery use.
+fn crystallize_deepening(world: &mut World) {
+    world.grant_tech_as(SOVEREIGN, FIRST_ORB, 3).expect("grants the deepening");
+}
+
+#[test]
+fn evolution_is_gated_earned_and_replay_exact() {
+    let mut world = lineage(3, 1, 1, 10); // Crystalline-Core
+    assert_eq!(world.evolution_stage(), 0, "a line founds at stage 0");
+
+    // UNGATED: an un-deepened line cannot evolve — the arc is earned.
+    assert!(world.evolve().is_err(), "evolution refuses without the crystallized deepening");
+    assert_eq!(world.evolution_stage(), 0, "a refused evolution advances nothing");
+
+    // Crystallize the technology door, then the arc advances.
+    let mut world = World::resume(world.chronicle().clone());
+    crystallize_deepening(&mut world);
+    let mut world = World::resume(world.chronicle().clone());
+    assert_eq!(world.evolve().expect("deepened — evolution proceeds"), 1, "the first advance reaches stage 1");
+    assert_eq!(world.evolve().expect("advances again"), 2, "and stage 2");
+    assert_eq!(world.evolution_stage(), 2, "the stage stands where the arc left it");
+    assert_eq!(replay(world.chronicle()), world.committed(), "evolution replay MATCHES");
+}
+
+#[test]
+fn an_evolved_line_sustains_a_larger_population() {
+    // Each stage is earned CAPACITY: an advanced civilization provisions
+    // more people per world. The ceiling rises with the arc.
+    let mut base = lineage(3, 1, 1, 10);
+    let k0 = base.population_capacity(FIRST_ORB);
+    crystallize_deepening(&mut base);
+    let mut evolved = World::resume(base.chronicle().clone());
+    evolved.evolve().expect("advances");
+    evolved.evolve().expect("advances");
+    let k2 = evolved.population_capacity(FIRST_ORB);
+    assert!(k2 > k0, "two stages of evolution lift the population ceiling: {k2} > {k0}");
+}
+
+#[test]
+fn the_evolution_deed_round_trips_on_the_wire() {
+    for stage in [1u8, 7, 42, 255] {
+        let deed = ClosureEvent::EvolutionAdvanced { stage };
+        let bytes = deed.wire_bytes();
+        let mut records = cfe::tlv::records(&bytes);
+        let (tag, value) = records.next().expect("one record");
+        assert_eq!(tag, 169, "EvolutionAdvanced is tag 169");
+        assert_eq!(ClosureEvent::from_wire(tag, value).expect("decodes"), deed);
+    }
+}
+
 #[test]
 fn a_plasmic_lineage_defers_its_population_to_the_energy_economy() {
     // HONEST GAP: a plasmic capture line (Vapor-Lattice / Thermo-Solder)

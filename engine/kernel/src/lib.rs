@@ -1452,6 +1452,7 @@ fn covered(event: &ClosureEvent) -> bool {
         // witnessed in `taxon_pins.rs`). The sealed default stays as
         // defense for FUTURE enum additions (refuse-unknown).
         | E::TaxonSealed { .. }
+        | E::EvolutionAdvanced { .. }
         // THE VERTICAL AXIS (tag 89): the seat is banked-neutral — it
         // moves no value, no element and no key — so {I2 containment,
         // I3 exactness} complete it. Containment is the whole point:
@@ -2373,6 +2374,7 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         E::GenesisSealed { .. }        // civilization + the three axes
         | E::LineMinted { .. }         // a people enters — line-keyed by nature
         | E::TaxonSealed { .. }        // class, clade
+        | E::EvolutionAdvanced { .. }  // the arc advances — identity, not ledger
         // THE VOCABULARY MINT is CIVILIZATIONAL, and the row is keyed on
         // what the deed CARRIES rather than on what it enables. It is
         // authored by a LINE holding a progenitor seat and it names a
@@ -2537,6 +2539,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         // KERNEL-TAXON: the drafted Build-class arm coder-03 named for
         // their #42 — unenforced until their covered() entry + witness.
         | E::TaxonSealed { .. }
+        | E::EvolutionAdvanced { .. }
         | E::StationSeated { .. }
         // Build-class: a mint EXTENDS what the world can express. It
         // creates nothing bankable and razes nothing — it opens room in

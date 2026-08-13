@@ -173,6 +173,10 @@ pub struct Committed {
     /// KERNEL-TAXON (15 §4): the sealed (class, clade), or None —
     /// unclassed is lawful until the seat.
     pub taxon: Option<(u8, u16)>,
+    /// **THE EVOLUTIONARY STAGE** (`44_LINEAGES` §2c, tag 169): how far
+    /// the line has advanced along its arc. 0 at founding; the gated
+    /// `EvolutionAdvanced` deed increments it. Lifts provisioning capacity.
+    pub evolution_stage: u8,
     /// THE VERTICAL AXIS (tag 89, 2026-08-01): the seats held, as
     /// (line, station) in seating order. A station GATES AUTHORITY, and
     /// until this landing it lived only in an editable registry file —
@@ -329,6 +333,8 @@ pub struct World {
     pub(super) veiled: bool,
     /// KERNEL-TAXON: the sealed taxon (replay of the receipt).
     pub(super) taxon: Option<(u8, u16)>,
+    /// THE EVOLUTIONARY STAGE (tag 169): the arc position (replay).
+    pub(super) evolution_stage: u8,
     /// THE VERTICAL AXIS (tag 89): the seats held, (line, station).
     pub(super) stations: Vec<(String, u8)>,
     /// FLEET-1 hulls.
