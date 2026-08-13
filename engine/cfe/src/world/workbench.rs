@@ -130,7 +130,7 @@ impl World {
             ("granaries".into(), self.granary_footprint(orb).to_string()),
         ];
         if people > 0 {
-            let cog = self.research_siphon(people as i64);
+            let cog = self.research_siphon(orb, people as i64);
             if cog > 0 {
                 gauges.push(("research/cohort".into(), cog.to_string()));
             }

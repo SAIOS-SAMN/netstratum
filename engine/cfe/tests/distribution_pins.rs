@@ -304,24 +304,19 @@ fn an_empiricist_spends_births_on_knowledge_and_grows_slower() {
 }
 
 #[test]
-fn the_research_siphon_taxes_only_the_empiricist() {
-    // The siphon redirects half of a positive birth cohort — for the
-    // empiricist alone; every other disposition spends its surplus on people.
+fn the_research_siphon_tracks_the_cognition_caste() {
+    // Research EMERGES from caste composition, not a disposition flag: the
+    // empiricist (a big cognition caste) spends the most of a birth cohort on
+    // knowledge, but every line with a cognition caste spends some.
     let cohort = 8;
-    assert_eq!(
-        disposed_society(2, true, 10).research_siphon(cohort),
-        cohort / 2,
-        "the empiricist siphons half its births to knowledge"
-    );
-    for disposition in [1u8, 3] {
-        assert_eq!(
-            disposed_society(disposition, true, 10).research_siphon(cohort),
-            0,
-            "disposition {disposition} spends its surplus on people, not research"
-        );
-    }
+    let empiricist = disposed_society(2, true, 10).research_siphon(FIRST_ORB, cohort);
+    let expansionist = disposed_society(1, true, 10).research_siphon(FIRST_ORB, cohort);
+    let epicurean = disposed_society(3, true, 10).research_siphon(FIRST_ORB, cohort);
+    assert_eq!(empiricist, 4, "the empiricist, mostly cognition, spends the most (6/10 of the cohort)");
+    assert!(expansionist > 0 && expansionist < empiricist, "an expansionist still yields some research: {expansionist}");
+    assert_eq!(expansionist, epicurean, "the two minority-cognition lines match (2/10 each)");
     // A non-positive cohort is never taxed.
-    assert_eq!(disposed_society(2, true, 10).research_siphon(0), 0, "no births, no siphon");
+    assert_eq!(disposed_society(2, true, 10).research_siphon(FIRST_ORB, 0), 0, "no births, no siphon");
 }
 
 // ── L5: THE WORKBENCH (§7) — the deployed system made legible ──
