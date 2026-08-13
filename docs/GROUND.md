@@ -34,7 +34,7 @@ ledger's display halves, tools, and the solver's SEARCH half.
 ## §2 THE GATE — do not rebuild what already stands
 
 **Before building a mechanism, find its organ above and look there.** The
-recorded cost of skipping this is not hypothetical: `19_REGISTRY` §3
+recorded cost of skipping this is not hypothetical: `47_REGISTRY` §3
 records TIER implemented three times with no authority, and `20_FOUNDING`
 §6a records a tithe drafted from scratch when `demurrage_due` — flat rate
 × ease × elapsed, settled at the touch, kernel-bounded — was already the
@@ -176,4 +176,4 @@ code citation and would not have caught this file's absence while the
 charter cited it. **A citation to a DOCUMENT should resolve the same way
 a citation to a symbol does** — that is a small
 addition to a lint that already exists, and it belongs with the registry
-lint (`19_REGISTRY` §5).
+lint (`47_REGISTRY` §5).

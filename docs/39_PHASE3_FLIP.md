@@ -18,7 +18,7 @@ The commitment the conductor writes carries `judged = false`
 
 The flip demotes `replay` to a proposer and makes the kernel the live
 gate: a deed the judge refuses **no longer stands**. This is the one
-defect between "having a judge" and "having a kernel" (`19_KERNEL`
+defect between "having a judge" and "having a kernel" (`46_KERNEL`
 §3), and it is the PoUW precondition — a distributed economy cannot
 anchor value on a transition each node defines for itself.
 

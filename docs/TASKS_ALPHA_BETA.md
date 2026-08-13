@@ -67,7 +67,7 @@ found in the whole sweep, because founding is literally step one.
   calculation, no recipient selection (existing planet → elder,
   new world → ancient), no value movement. `ward_elder()`
   (`genesis.rs:303`) sets a bare boolean, nothing more.
-- [ ] **Wire the seat-scope ladder for real (`19_REGISTRY.md` §4a).**
+- [ ] **Wire the seat-scope ladder for real (`47_REGISTRY.md` §4a).**
   `Entity`/`Scope` (`ipsal.rs`) has no Elder/Ancient seat today —
   tithe routing needs one to exist before it can route anything.
 - [ ] **Fix the `seat_width()` None-placeholder defect.** 7 call sites

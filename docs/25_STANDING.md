@@ -35,6 +35,17 @@ computation, hiding one behind vocabulary is cosmetic.
    arithmetic would have implemented a corpse. What the lens owed
    instead was a SURFACE for the row a world stands in, which nothing
    displayed; that is `lens::standing` (`19_LENS` §12).
+
+   **CORRECTED 2026-08-13 (doc audit):** both citations above are dead.
+   `dual_pole` / `Vacuity` were STRUCK by operator ruling 2026-08-04
+   (`engine/rfa-core/src/boundary.rs:36-45` — "THE DUAL-POLE LOCK IS
+   STRUCK... both the type and its verdict are removed"; measured
+   60 beats / 374 solves / 0 mints / 124 withheld before the strike).
+   The four-row classification (Void/Unframed/Stasis/Entangled) no
+   longer exists as a type; `boundary_form`'s divergence reading
+   survives as `24_FORM §2d`'s sign law input. `lens::standing` /
+   `19_LENS §12` is also gone — that lane's own doc marks §12 REMOVED
+   2026-08-04. This paragraph's claim is superseded, not current law.
 2. **`D` is not measured.** `PhiK I^(3)` ("rank: dim of the relational
    structure") specifies it and no code reads it. Until `D` is
    measured, Articles II, III and IV have no operand.
@@ -79,7 +90,7 @@ computation, hiding one behind vocabulary is cosmetic.
    | `is_pure_circulation` | rfa-core::capacity | THE SIGN LAW's enforcement point (§2d) |
    | `expanded_from` | rfa-core::reduce | the support-expansion mint rule |
    | `commutes_with`, `congruate`, `is_identity` | rfa-core::fiber | the non-abelian fiber's caller |
-   | `is_admitted` | rfa-core::boundary | the `Vacuity` gate |
+   | `is_admitted` | rfa-core::boundary | the `Vacuity` gate — **DEAD, see the 2026-08-13 correction at §1** (struck 2026-08-04) |
 
 5a. **`rank_is_defined` is a recorded obligation, not enforcement.**
    Its doc-comment claimed callers "MUST" consult it while no caller
@@ -129,7 +140,7 @@ is not a mechanism.
 
 | claim | why not local | where it lives |
 |---|---|---|
-| **Art. III standing surface** — which row a state occupies (Void / Unframed / Stasis / Entangled) | a property of one state, read for display and never gating | `lens::standing` (landed) |
+| **Art. III standing surface** — which row a state occupies (Void / Unframed / Stasis / Entangled) | a property of one state, read for display and never gating | `lens::standing` — **DEAD, see the 2026-08-13 correction at §1** (`19_LENS §12` REMOVED 2026-08-04) |
 | **Art. III allocation** — the Eclipse, as claim-revocation | a policy over many actors | conductor / mesh |
 | **§2e traverse congruence** — `α ≅ Ω` | spans a whole chain | `lens` over the spine |
 | **§2c union** — one `Δ`, two complementary projections | a property of one state's algebra, already computed | `rfa_core::boundary` + `capacity` (landed) |

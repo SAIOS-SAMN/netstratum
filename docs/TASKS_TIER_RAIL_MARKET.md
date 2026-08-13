@@ -24,7 +24,7 @@ strand-adapter · isthmus/datum-adapter
 | D0.1 | [x] `30_OFFICES_AND_RAILS` — T4–T9 + R1–R4 named | file exists |
 | D0.2 | [x] `31_ELEMENT_COMMERCE` — routes + refineries | file exists |
 | D0.3 | [x] `32_STAMP_MARKET` — currency + instruments | file exists |
-| D0.4 | [x] Pointers from 12_UNION / 01_ECONOMY / 14_ALMANAC / OPEN_QUESTIONS | patches |
+| D0.4 | [x] Pointers from 12_UNION / 01_ECONOMY / 45_ALMANAC / OPEN_QUESTIONS | patches |
 | D0.5 | [~] Q-T1/Q-T2 **coded as defaults** in Wave-1; Q-R/Q-S still open | recorded + landed defaults |
 
 ---

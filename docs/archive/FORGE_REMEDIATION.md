@@ -1,5 +1,7 @@
 # FORGE REMEDIATION PLAN — the 94 %
 
+> **ARCHIVED 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
+
 **Lane:** `remediations-lane`. **Written:** 2026-08-02.
 **Target:** `engine/solver/src/search.rs` — measured at **94.2 % of a
 beat** (`REMEDIATIONS.md` §1).

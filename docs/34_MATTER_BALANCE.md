@@ -2,7 +2,7 @@
 
 **Status:** PARTIAL LAND — design lock + first coupling (session).  
 **Authority for the dual books:** `EQUATIONS` §6, `05_THERMAL_BALANCE`,
-`09_IDEOLOGY` (syntropy ratio), `14_ALMANAC`, `31_ELEMENT_COMMERCE`,
+`09_IDEOLOGY` (syntropy ratio), `45_ALMANAC`, `31_ELEMENT_COMMERCE`,
 `33_TRADE_FLEET_AND_DESK`.  
 **Does not** invent a second heat law or float energy. **Does not**
 replace I1 resource conservation.

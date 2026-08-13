@@ -99,10 +99,10 @@ architecture** closed. **Next phase: E3.6 E-MKT-1** (element market cargo).
 
 | Fact | Value |
 |------|--------|
-| **Tip** | `2834d4c` (architecture: JSON is not a format the system speaks) |
+| **Tip** | `2834d4c` (architecture: JSON is not a format the system speaks); **STALE — corrected 2026-08-13: `main` is at `2162a8d` (44_LINEAGES), this fact row is not refreshed past Wave-8** |
 | Branch | **`main`** |
 | Kernel | **0.37.0** (next free minor **38**) |
-| Next free claim tag | **166** (163–164 ElementWant · 165 TreatyElementsAllowed) |
+| Next free claim tag | **168** — corrected 2026-08-13, was stale at 166; confirmed against `dop.rs:365` (163–164 ElementWant · 165 TreatyElementsAllowed · 166 SolverWordMinted · 167 PopulationSettled) |
 | Codec | **SCHEMA_V19** (v18 element_wants · v19 element_allowlists; v18's bump had landed unratified — codec_gate pins ratified at v19) |
 | Class / clade | **13** / **345** (u16 open) |
 | CLI roots | bench · intel · trade · diplomatic · **polity** (dual law all five) |
@@ -681,7 +681,7 @@ coder-04's flag.
   the N5-ready cross-frame seam. The whole G1→G2→G3 ladder closed in
   one cadence, then the TECH-1b witness debt (deepening/long-stores
   arcs) and the G1×NOVEL-1 audit fix (the deed releases the seal).
-  `14_ALMANAC.md` DRAFTED (the ruled element grammar — awaits
+  `45_ALMANAC.md` DRAFTED (the ruled element grammar — awaits
   ratification for ELEMENT-GRAMMAR-1). VENTURE-1 composition witness
   LANDED (`world_venture.rs` — one deal binds the leap and the
   exchange across two books, one node in two skies, conservation
@@ -694,7 +694,7 @@ coder-04's flag.
   relief-by-arrival (seam split with coder-01 pending), the umbral
   seat (one operator word away). **ELEMENT-GRAMMAR-1 LANDED**
   (tags 70-72 after the live 68/69 collision with PRACTICE-1 — the
-  later claimant moved, inscribed; 14_ALMANAC §4a/§5a add the
+  later claimant moved, inscribed; 45_ALMANAC §4a/§5a add the
   dispersal law and element apertures, specced). **OPPOSITION-1
   LANDED (2026-07-31, the mesh board's #4, cfe side):** the
   anti-mirror readings — pure two-book functions (`cfe::opposition`):
@@ -744,7 +744,7 @@ longer be opened. Those entries cannot be looked up at all until
 someone re-locates them in `world/`. A line number in a document is
 only as durable as the file it names.
 
-**Read `docs/20_WORLD_REFACTOR.md` before modifying
+**Read `docs/archive/20_WORLD_REFACTOR.md` before modifying
 `engine/cfe/src/world.rs`.** The file carries the same banner at its
 head.
 
@@ -755,14 +755,14 @@ touches this file for exactly THREE items (`Committed`,
 `demurrage_due`, `ease_of`), so the seam is already thin and worth
 keeping thin.
 
-The load-bearing consequence (`19_KERNEL` §3): `replay` is a SECOND
+The load-bearing consequence (`46_KERNEL` §3): `replay` is a SECOND
 definition of the transition standing beside `kernel::admits`, with
 nothing forcing them to agree. Changing an arm changes what a deed
 MEANS and the judge does not notice. That is the one defect between
 having a judge and having a kernel.
 
 Planned split (PROPOSED, none of these modules exist yet — see
-`20_WORLD_REFACTOR` §4): a state module, the interpreter, the proposer,
+`archive/20_WORLD_REFACTOR` §4): a state module, the interpreter, the proposer,
 and the sealed rules, each in its own home. Mechanical, no behaviour
 change. **`engine/cfe/` is
 UNOWNED on the lane map** — the refactor needs an owner assigned before

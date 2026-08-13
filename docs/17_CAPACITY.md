@@ -627,7 +627,7 @@ tearing a third of the capacity meter out. With it, the universal
 mechanism keeps its place under an honest name and the civilizational
 instrument is free to be gated. **Neither ruling is safe alone.**
 
-**AND THE GATE CANNOT BE BUILT TODAY.** `19_REGISTRY` §5 already found
+**AND THE GATE CANNOT BE BUILT TODAY.** `47_REGISTRY` §5 already found
 why, and this ruling is the first thing that needs it fixed:
 
 > **TIER (T0–T3) HAS NO ENGINE AUTHORITY AT ALL.** The station→tier law
@@ -641,7 +641,7 @@ and today the only mapping lives in a Python tool that anyone with a
 shell can edit. What makes it buildable now is `StationSeated`
 (tag 89) — `{ line, station: u8 }` — which put the station into the
 CHAIN. Tier becomes derivable from a receipted station rather than from
-a file, and the one authority belongs where `19_REGISTRY` §5 already
+a file, and the one authority belongs where `47_REGISTRY` §5 already
 put it. **Relayed to capacity-lane, not taken from here.**
 
 **A NOTE ON WHAT IS BEING GATED.** After the rename there is no

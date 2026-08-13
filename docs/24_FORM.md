@@ -614,7 +614,7 @@ inversion and it is withdrawn.**
 Defining the forward link AS a covenant would make the kernel inherit
 the game's resource enumeration, its collateral rule and its window
 semantics — the game supplying the kernel's vocabulary instead of the
-kernel supplying the game's. `19_KERNEL` §2 measured the kernel's
+kernel supplying the game's. `46_KERNEL` §2 measured the kernel's
 dependency on `cfe::world` at exactly three items; this would have
 quietly added a fourth and the worst-shaped one.
 

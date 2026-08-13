@@ -4,6 +4,10 @@
 document (CHARTER §1). Constants here marked *placeholder* tune at balance
 time; everything marked *law* binds.
 
+> **CORRECTED 2026-08-13 (doc audit): this is DESIGN-STAGE, not landed.**
+> Zero hits in `engine/` for `TUniversal`, `convergence_pass`, or era
+> annexation — the "LANDING SPEC" label was never made good on.
+
 **The problem (operator, 2026-07-27).** Three archive eras exist
 (`var-era1`: 22 worlds, `var-era2`: 38, `var`: prior runs of the current
 root) whose receipts carry only LOCAL stamps — era1's `stamp 65` and era2's

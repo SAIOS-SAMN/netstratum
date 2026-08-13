@@ -1,5 +1,7 @@
 # 20 — THE `world.rs` REFACTOR: what the kernel pulls, what stays
 
+> **ARCHIVED 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
+
 **Status:** ~~SPEC~~ **LANDED** (kernel lane, 2026-08-02; confirmed by
 measurement 2026-08-04). The split is DONE: `engine/cfe/src/world.rs`
 no longer exists and `engine/cfe/src/world/` holds **19 files, 6,860
@@ -65,7 +67,7 @@ Only the first two live here.
 ### 2c. The interpreter — `replay`
 
 113 match arms defining what each deed DOES to state. **This is the
-transition**, and per `19_KERNEL` §3 it is currently a SECOND
+transition**, and per `46_KERNEL` §3 it is currently a SECOND
 definition standing beside `lawful`. It must move out of the proposer's
 file regardless of what happens to the duplication, because a reader
 cannot presently tell the transition from the game around it.
@@ -129,7 +131,7 @@ Three reasons, in order of weight:
 ## §6 SEQUENCE AND OWNERSHIP
 
 Order: §4's split first (mechanical, unblocks reading), then
-`19_KERNEL` §3's cure — derive apply from judge where the judge already
+`46_KERNEL` §3's cure — derive apply from judge where the judge already
 knows, pin the remainder red-first.
 
 **`engine/cfe/` is UNOWNED on the lane map.** `world.rs` is the largest
@@ -152,7 +154,7 @@ tests passing. Their shape is finer than §4's four-module proposal:
 
 `rules.rs` is the cut §4 asked for and could not name: `ease_of` and
 `demurrage_due` in 74 lines, apart from the game. `replay.rs` labels
-THE SECOND DEFINITION as one, which is `19_KERNEL` §3 made structural.
+THE SECOND DEFINITION as one, which is `46_KERNEL` §3 made structural.
 
 ### 7a. THE MERGE, MEASURED
 
@@ -202,7 +204,7 @@ Most likely both hold and describe different things — replay may not
 call the rule DIRECTLY while the divergence travels through a
 tick-computed consequence. **Unresolved, and it must be resolved before
 the merge**, because it decides whether #30 is one call site or 113
-arms, and therefore how much of `19_KERNEL` §3 is real work.
+arms, and therefore how much of `46_KERNEL` §3 is real work.
 
 The epoch mechanism (`65963b4`) closed the observed divergence either
 way, so nothing is blocked on the answer — only the size of #30 is.

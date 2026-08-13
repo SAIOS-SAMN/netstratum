@@ -1,4 +1,6 @@
 > **SUPERSEDED IN PART, 2026-08-05 — THE DEFINITION LAW.** Everything
+
+> **ARCHIVED 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
 > below concerning `seeds/aeon1-polities.json`, `var/polities.json`,
 > `tools/claim_roster.py`, `load_polities` and `write_default_polities`
 > describes machinery that is STRUCK. The roster compiles
@@ -395,7 +397,7 @@ reassignment is the operator's and is recorded here and in the shared
 lane map so the lens node is not walked into. Nothing has been landed in
 `engine/scribe/` on this lane yet.
 
-Relayed, never landed here: `19_KERNEL` §4/§7 still measures a
+Relayed, never landed here: `46_KERNEL` §4/§7 still measures a
 5001-line `engine/cfe/src/world.rs` and orders its split as step 1 —
 the file does not exist on `main`, the organ landed, and the step is
 DONE (kernel lane's doc). `kernel/src/lib.rs` doc comments reportedly
