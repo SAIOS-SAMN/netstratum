@@ -1575,25 +1575,34 @@ pub fn metabolic_ration(metabolism: u8) -> Resource {
     }
 }
 
-/// **THE CASTES** (`44_LINEAGES` §2d) — the specialized roles a
-/// population differentiates into. Not new state: a DERIVED partition of
-/// the standing people, weighted by disposition (`caste_split`). Three
-/// roles, one per disposition's economic emphasis — an expansionist line
-/// is mostly Labour, an empiricist mostly Cognition, an epicurean mostly
-/// Artisan — so the same headcount MORPHS to the civilization's identity.
+/// **THE CASTES** (`44_LINEAGES` §2d) — the specialized roles a population
+/// differentiates into. NOT a fixed set: a caste IS a disposition-role, so
+/// the castes of a line are exactly its disposition axis's values —
+/// three seeded, more the moment a disposition is minted. `caste_split`
+/// keys the partition by disposition CODE (open), and this enum is only the
+/// convenience NAME for the three seeded roles; a minted disposition gets
+/// its own caste bucket with no variant here. Each maps to its disposition
+/// code, so an expansionist line is mostly Labour, an empiricist mostly
+/// Cognition, an epicurean mostly Artisan.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(u8)]
 pub enum Caste {
-    /// The many-hands production caste (expansionist emphasis).
-    Labour = 0,
-    /// The thinkers and researchers (empiricist emphasis).
-    Cognition = 1,
-    /// The makers of fine and luxury goods (epicurean emphasis).
-    Artisan = 2,
+    /// The many-hands production caste — expansionist (disposition 1).
+    Labour = 1,
+    /// The thinkers and researchers — empiricist (disposition 2).
+    Cognition = 2,
+    /// The makers of fine and luxury goods — epicurean (disposition 3).
+    Artisan = 3,
 }
 
 impl Caste {
-    pub const ALL: [Caste; 3] = [Caste::Labour, Caste::Cognition, Caste::Artisan];
+    /// The three SEEDED roles. The caste set itself is open — see
+    /// `World::caste_split`, keyed by disposition code.
+    pub const SEEDED: [Caste; 3] = [Caste::Labour, Caste::Cognition, Caste::Artisan];
+    /// The disposition code this named caste stands for.
+    pub fn disposition(self) -> u8 {
+        self as u8
+    }
     pub fn word(self) -> &'static str {
         match self {
             Caste::Labour => "labour",
@@ -1883,17 +1892,39 @@ pub fn refine_recipe(
     (spend, refined, yielded)
 }
 
-/// G1 (04 §1.1, placeholder weights): the disposition's value
-/// weighting over the three v1 counters — territory closures, verified
-/// discoveries, consumed yield — exact rationals summing to 1. The
-/// physics never differs; only which history counts as winning.
+/// **SELF-EMPHASIS OVER AN OPEN SET OF SLOTS** — the shape a disposition
+/// (or any identity axis) takes when it favours its OWN slot: `sitting`
+/// holds the majority, the rest split the remainder evenly, summing to 1.
+/// The one balance dial — the 3/5 majority — is written ONCE here instead
+/// of nine times across a fixed table, and the shape opens to ANY number
+/// of slots: three seeded dispositions today, four the moment one is
+/// minted, with no code change. Returns `(code, weight)` in `codes` order.
+pub fn self_emphasis(sitting: u8, codes: &[u8]) -> Vec<(u8, Ratio)> {
+    let major = ratio(3, 5); // a self favours its own slot three-fifths
+    let others = codes.iter().filter(|&&c| c != sitting).count();
+    let minor = if others > 0 {
+        (ratio(1, 1) - major.clone()) / ratio(others as i64, 1)
+    } else {
+        ratio(1, 1)
+    };
+    codes
+        .iter()
+        .map(|&code| (code, if code == sitting { major.clone() } else { minor.clone() }))
+        .collect()
+}
+
+/// G1 (04 §1.1): the disposition's value weighting over the three v1
+/// counters — territory closures, verified discoveries, consumed yield —
+/// exact rationals summing to 1. Now DERIVED from [`self_emphasis`] over
+/// the three seeded disposition slots, so the values are unchanged but the
+/// majority lives in one place. The physics never differs; only which
+/// history counts as winning.
 pub fn disposition_weights(disposition: u8) -> Option<[Ratio; 3]> {
-    match disposition {
-        1 => Some([ratio(3, 5), ratio(1, 5), ratio(1, 5)]),
-        2 => Some([ratio(1, 5), ratio(3, 5), ratio(1, 5)]),
-        3 => Some([ratio(1, 5), ratio(1, 5), ratio(3, 5)]),
-        _ => None,
+    if !(1..=3).contains(&disposition) {
+        return None;
     }
+    let weights = self_emphasis(disposition, &[1, 2, 3]);
+    Some([weights[0].1.clone(), weights[1].1.clone(), weights[2].1.clone()])
 }
 
 /// IDEO-1 (09 §2.5): the derived axis reading — syntropic /

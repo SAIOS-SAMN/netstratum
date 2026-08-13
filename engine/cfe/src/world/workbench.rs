@@ -90,13 +90,29 @@ impl World {
         // stability are meaningful even at rest (dt>0).
         let horizon = self.now() + crate::almanac::REGROWTH_GRAIN as u64;
         let people = self.population_of(orb);
-        let [labour, cognition, artisan] = self.caste_split(orb);
+        // Castes are open — one bucket per disposition the vocabulary knows,
+        // named by its own word, so a minted role shows here without a code
+        // change.
+        let disposition_word: std::collections::BTreeMap<u8, String> =
+            crate::vocabulary::fold(self.chronicle(), crate::vocabulary::Axis::Disposition)
+                .into_iter()
+                .map(|entry| (entry.code, entry.word))
+                .collect();
+        let castes = self
+            .caste_split(orb)
+            .into_iter()
+            .map(|(code, n)| {
+                let name = disposition_word.get(&code).cloned().unwrap_or_else(|| code.to_string());
+                format!("{name} {n}")
+            })
+            .collect::<Vec<_>>()
+            .join(", ");
         let stability = self.stability_of(orb, horizon);
         let mut gauges = vec![
             ("people".into(), people.to_string()),
             (
-                "castes L/C/A".into(),
-                format!("{labour}/{cognition}/{artisan}"),
+                "castes".into(),
+                if castes.is_empty() { "—".into() } else { castes },
             ),
             ("eats/head".into(), crate::ratio::ratio_str(&self.per_capita_ration())),
             (

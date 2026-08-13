@@ -342,7 +342,7 @@ fn the_depot_bench_reads_the_whole_provisioning_society() {
     for a in &view.alerts { eprintln!("  ! {a}"); }
 
     assert!(!view.components.is_empty(), "the granary shows as a component");
-    assert!(view.gauges.iter().any(|(k, _)| k == "castes L/C/A"), "the caste split is a gauge");
+    assert!(view.gauges.iter().any(|(k, _)| k == "castes"), "the caste split is a gauge");
     assert!(view.gauges.iter().any(|(k, _)| k == "stability"), "stability is a gauge");
     assert!(
         view.alerts.iter().any(|a| a.contains("leisure short")),
