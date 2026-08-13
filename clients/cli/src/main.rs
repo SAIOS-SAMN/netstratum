@@ -8210,7 +8210,7 @@ fn journal_feed(world: &World, style: &Style) {
 /// requirements. The depot bench surfaces the whole provisioning society.
 fn workbench_panel(world: &World, style: &Style, current: u64) {
     use cfe::world::workbench::BenchKind;
-    for kind in [BenchKind::Depot, BenchKind::Refinery, BenchKind::ShipYard, BenchKind::Lab] {
+    for kind in [BenchKind::Depot, BenchKind::Refinery, BenchKind::ShipYard, BenchKind::Lab, BenchKind::Civic] {
         let Some(view) = world.workbench(current, kind) else {
             continue;
         };

@@ -437,6 +437,34 @@ fn a_bare_world_bench_flags_no_granary() {
 }
 
 #[test]
+fn the_civic_bench_reads_the_fiscal_loop() {
+    // A line with no civic zone: the bench stands but flags both gaps and
+    // shows an empty treasury.
+    let mut world = society(4, 1, false, 5);
+    let bare = world.workbench(FIRST_ORB, BenchKind::Civic).expect("the orb stands");
+    assert!(bare.components.is_empty(), "no civic zone stands yet");
+    assert!(bare.alerts.iter().any(|a| a.contains("no government office")), "the missing office is flagged");
+    assert!(bare.alerts.iter().any(|a| a.contains("no welfare hub")), "the missing hub is flagged");
+    assert!(bare.gauges.iter().any(|(k, _)| k == "treasury"), "the treasury is a Revenue-Policy gauge");
+    assert!(bare.gauges.iter().any(|(k, _)| k == "governance reach"), "governance reach is a gauge");
+    assert!(bare.gauges.iter().any(|(k, _)| k == "welfare spend"), "welfare spend is a Public-Services gauge");
+
+    // Stand the offices and fund the treasury: the components light and the
+    // office/hub alerts clear.
+    world.zone(30, ZoneKind::GovernmentOffice).expect("office");
+    world.zone(31, ZoneKind::WelfareHub).expect("hub");
+    world.settle_treasury(FIRST_ORB, ratio(1_000, 1));
+    let civic = world.workbench(FIRST_ORB, BenchKind::Civic).expect("stands");
+    assert_eq!(civic.components.len(), 2, "the office and the hub show as components");
+    assert!(!civic.alerts.iter().any(|a| a.contains("no government office")), "the office alert clears");
+    assert!(!civic.alerts.iter().any(|a| a.contains("no welfare hub")), "the hub alert clears");
+    assert!(
+        civic.gauges.iter().any(|(k, v)| k == "treasury" && v != "0"),
+        "the funded treasury reads on the bench"
+    );
+}
+
+#[test]
 fn every_bench_kind_reads_uniformly() {
     // The abstraction is general: each bench kind returns the same shape,
     // an empty deploy reading as a legible alert rather than an error.

@@ -25,6 +25,9 @@ pub enum BenchKind {
     ShipYard,
     /// The science seats.
     Lab,
+    /// TAXATION (49 §5): the civic engine — the fiscal loop under
+    /// diplomacy (revenue policy, public services, civic infrastructure).
+    Civic,
 }
 
 impl BenchKind {
@@ -34,6 +37,7 @@ impl BenchKind {
             BenchKind::Refinery => "refinery",
             BenchKind::ShipYard => "ship-yard",
             BenchKind::Lab => "lab",
+            BenchKind::Civic => "civic",
         }
     }
 }
@@ -67,7 +71,64 @@ impl World {
             BenchKind::Refinery => self.zone_bench(orb, kind, ZoneKind::ElementRefinery),
             BenchKind::ShipYard => self.zone_bench(orb, kind, ZoneKind::ShipYard),
             BenchKind::Lab => self.lab_bench(orb, kind),
+            BenchKind::Civic => self.civic_bench(orb),
         })
+    }
+
+    /// **THE CIVIC BENCH** (`49_TAXATION` §5) — the fiscal loop made
+    /// legible under diplomacy, in the three panels the sovereign works:
+    /// REVENUE POLICY (the treasury, governance reach, the standing
+    /// levies), PUBLIC SERVICES (the welfare spend it funds, the
+    /// stability it buys), and CIVIC INFRASTRUCTURE (the offices and hubs
+    /// that stand). A pure reading — deploying a zone or crafting a levy
+    /// is the act; this only shows what stands. Empty everywhere for a
+    /// line that has raised no civic zone.
+    fn civic_bench(&self, orb: u64) -> WorkbenchView {
+        // The civic zones that stand — the Infrastructure panel.
+        let components = self
+            .orb_by_id(orb)
+            .map(|h| {
+                h.zones
+                    .iter()
+                    .filter(|z| {
+                        matches!(z.kind, ZoneKind::GovernmentOffice | ZoneKind::WelfareHub)
+                    })
+                    .map(|z| BenchComponent {
+                        label: format!("{} @{}", crate::dop::zone_word(z.kind), z.tile),
+                        active: h.zone_active(z),
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
+
+        // Project the flow readings over one nominal grain so the welfare
+        // spend and stability are meaningful at rest (dt>0).
+        let horizon = self.now() + crate::almanac::REGROWTH_GRAIN as u64;
+        let continuity = self.continuity_levy();
+        let estate = self.estate_levy();
+        let gauges = vec![
+            // — REVENUE POLICY —
+            ("treasury".into(), crate::ratio::ratio_str(&self.treasury_of(orb))),
+            ("governance reach".into(), crate::ratio::ratio_str(&self.governance_reach(orb))),
+            ("continuity tax".into(), crate::ratio::ratio_str(&self.continuity_tax())),
+            ("continuity levy".into(), format!("{continuity:?}")),
+            ("estate levy".into(), format!("{estate:?}")),
+            // — PUBLIC SERVICES —
+            ("welfare spend".into(), crate::ratio::ratio_str(&self.welfare_spend(orb, horizon))),
+            ("stability".into(), crate::ratio::ratio_str(&self.stability_of(orb, horizon))),
+        ];
+
+        let mut alerts = Vec::new();
+        if !self.has_government_office(orb) {
+            alerts.push("no government office — levies slip uncollected (zero reach)".into());
+        }
+        if !self.has_welfare_hub(orb) {
+            alerts.push("no welfare hub — the treasury funds no stability".into());
+        } else if self.treasury_of(orb) <= ratio(0, 1) {
+            alerts.push("treasury empty — welfare cannot pay the stall".into());
+        }
+
+        WorkbenchView { kind: BenchKind::Civic, components, gauges, alerts }
     }
 
     /// The DEPOT bench — the provisioning society, fully read.
