@@ -1574,6 +1574,22 @@ pub fn metabolic_ration(metabolism: u8) -> Resource {
     }
 }
 
+/// **THE LEISURE INVARIANT (`43_DISTRIBUTION` §3, ruled 2026-08-13).**
+/// The recreation good a line SAVOURS once its calories are met — the
+/// second demand tier a granary unlocks. Minted like a ration
+/// (species-specific: a stone-being's leisure ≠ a plasmoid's), drawn
+/// from the REFINED/luxury resources (never a new closed carrier): a
+/// mineral line savours worked alloy, a biotic line gems, a plasmic line
+/// resonance. FIRST-CUT map — the exact goods are a §9.2 balance ruling;
+/// the LAW is that leisure follows the clade, as food does.
+pub fn metabolic_leisure(metabolism: u8) -> Resource {
+    match metabolism {
+        1 => Resource::Alloy,   // a mineral line savours worked metal
+        3 => Resource::Crystal, // a plasmic line savours resonance
+        _ => Resource::Diamond, // a biotic line savours gems
+    }
+}
+
 /// G2: the habitat's harvest under the sealed metabolism — what the
 /// line farms. Biotic farms biomass (v1 verbatim); mineral farms
 /// iron; plasmic farms NOTHING (rate 0 — its food is captured heat,

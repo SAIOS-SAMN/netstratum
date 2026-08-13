@@ -261,7 +261,17 @@ impl World {
             let k = self.population_capacity(orb);
             let r = intrinsic_rate(metabolism, element);
             let grown = grained_logistic(&pr, &k, &r, dt);
-            let births: i64 = (grown - pr).floor().to_integer().try_into().unwrap_or(0);
+            // STABILITY GATE (`43_DISTRIBUTION` §3–4): where a granary
+            // stands, births scale by the leisure coverage — a fed but
+            // un-entertained people STALLS (births→0, only mortality runs)
+            // rather than starving. Without a granary stability reads 1, so
+            // this multiplies by one and the #40–42 path is byte-identical.
+            let births_raw = (grown - pr).floor();
+            let births: i64 = (births_raw * self.stability_of(orb, stamp))
+                .floor()
+                .to_integer()
+                .try_into()
+                .unwrap_or(0);
             Some((births - mortality, resource, demand))
         } else {
             // STARVED — only the people the span's food can feed survive;

@@ -163,12 +163,14 @@ impl World {
         }
     }
 
-    /// **THE POPULATION CEILING `K_pop`** — the same living footprint ×
-    /// clade habitability that bounds the ration stock (#28): a lush
-    /// world in the clade's own band sustains a large population, a
-    /// hostile one a small one.
+    /// **THE POPULATION CEILING `K_pop`** — the living footprint × clade
+    /// habitability that bounds the ration stock (#28), LIFTED by the
+    /// provisioning footprint (`43_DISTRIBUTION` §2): each active granary
+    /// sustains more people. With no granary this is exactly the
+    /// ecological `ration_capacity_of`, so every #40–42 world is
+    /// byte-identical.
     pub fn population_capacity(&self, orb: u64) -> Ratio {
-        self.ration_capacity_of(orb)
+        self.population_ceiling(orb)
     }
 
     /// **SETTLE THE POPULATION** (41_PROVISION §3, tag 167) — apply a NET
