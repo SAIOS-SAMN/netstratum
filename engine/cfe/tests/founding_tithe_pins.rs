@@ -5,7 +5,7 @@
 //! so every founding raises a new world and tithes to the ANCIENT seat
 //! (PURCHASE/COMMISSION, the elder path, are deferred).
 
-use cfe::dop::{ClosureEvent, Resource, SEAT_ANCIENT};
+use cfe::dop::{ClosureEvent, Resource, SEAT_ANCIENT, SEAT_ELDER};
 use cfe::world::{replay, World, FIRST_ORB};
 
 const EXPANSIONIST: u8 = 1;
@@ -86,4 +86,23 @@ fn the_founding_tithe_replays_byte_exact() {
         .seal_genesis("replay-line", EXPANSIONIST, MINERAL, PLANAR)
         .expect("seals");
     assert_eq!(replay(world.chronicle()), world.committed(), "founding-tithe replay MATCHES");
+}
+
+#[test]
+fn the_ancient_treasury_folds_the_tithe() {
+    let mut world = World::new();
+    world.found("treasury-hold").expect("founds");
+    world
+        .seal_genesis("treasury-line", EXPANSIONIST, MINERAL, PLANAR)
+        .expect("seals");
+    let ancient = world.seat_treasury(SEAT_ANCIENT);
+    assert_eq!(
+        ancient,
+        vec![(Resource::Iron, cfe::ratio::ratio(1, 1))],
+        "the ancient's treasury folds the one iron tithe this founding paid"
+    );
+    assert!(
+        world.seat_treasury(SEAT_ELDER).is_empty(),
+        "no founding has tithed the elder yet — fallback siting always pays the ancient"
+    );
 }
