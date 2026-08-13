@@ -274,6 +274,15 @@ impl World {
             // growth on KNOWLEDGE, not mouths — the research siphon redirects
             // those births (the metric rides `research_siphon`). Zero for
             // every other disposition, so their growth is untouched.
+            // FLUX-TIED OUTPUT (`44_LINEAGES` §2b): a flux-driven line grows
+            // by the stellar flux it stands in — faster near a star, starved
+            // in the cold. A line that is not flux-driven scales by one, so a
+            // mesic world is unchanged.
+            let births: i64 = (ratio(births, 1) * self.flux_output_factor(orb))
+                .floor()
+                .to_integer()
+                .try_into()
+                .unwrap_or(0);
             let births = births - self.research_siphon(orb, births);
             Some((births - mortality, resource, demand))
         } else {

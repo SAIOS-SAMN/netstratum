@@ -39,6 +39,25 @@ pub enum ThermalRegion {
     Beyond,
 }
 
+impl ThermalRegion {
+    /// **THE STELLAR FLUX LEVEL** (`44_LINEAGES` §2b) — the band's rank on
+    /// the temperature line, coldest 0 to hottest 7. The flux an orb bathes
+    /// in IS its thermal band, so this is a reading, not a new number: a
+    /// flux-driven line (`44_LINEAGES`) reads its output off it.
+    pub fn flux_level(self) -> u8 {
+        match self {
+            ThermalRegion::Quenched => 0,
+            ThermalRegion::Cryogenic => 1,
+            ThermalRegion::Sublime => 2,
+            ThermalRegion::Mesic => 3,
+            ThermalRegion::Torrid => 4,
+            ThermalRegion::HyperThermal => 5,
+            ThermalRegion::Incandescent => 6,
+            ThermalRegion::Beyond => 7,
+        }
+    }
+}
+
 /// **THE ORBIT GRAIN** — the lattice a lawful orbit sits on.
 ///
 /// Heat is amplified by closeness — `t_eq4 = L(1-a)k / r²` — and the

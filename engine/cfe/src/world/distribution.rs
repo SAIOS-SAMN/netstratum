@@ -98,6 +98,39 @@ impl World {
         false
     }
 
+    /// **THE STELLAR FLUX AN ORB BATHES IN** (`44_LINEAGES` §2b) — the flux
+    /// level of its thermal band (0 coldest … 7 hottest). A pure reading.
+    pub fn stellar_flux_of(&self, orb: u64) -> u8 {
+        self.orb_region(orb).map(|region| region.flux_level()).unwrap_or(0)
+    }
+
+    /// **IS THE SITTING CLADE FLUX-DRIVEN?** (`44_LINEAGES` §2b) — a line
+    /// whose HOME band is hot (Torrid or hotter) is adapted to run on stellar
+    /// flux: its output rises in heat and falls in cold. DERIVED from the
+    /// clade's own preferred region (no new map) — the reptilian Scale-Matrix
+    /// and the plasmoid Vapor-Stalker are flux-driven because their clades
+    /// prefer the hot bands; a mesic clade is not.
+    pub fn flux_affine(&self) -> bool {
+        use crate::almanac::ThermalRegion;
+        crate::almanac::clade_preferred_region(self.rejuvenation_clade()) >= ThermalRegion::Torrid
+    }
+
+    /// **THE FLUX OUTPUT FACTOR** (`44_LINEAGES` §2b) — a flux-driven line's
+    /// output scales with the flux it stands in, relative to the temperate
+    /// baseline (Mesic): hot bands lift it, cold bands starve it. A line that
+    /// is NOT flux-driven reads 1 (unchanged), so every mesic world — and
+    /// every existing pin — is byte-identical. Derived from band ordinals, no
+    /// new dial (the ratio's args are computed, not literal).
+    pub fn flux_output_factor(&self, orb: u64) -> Ratio {
+        use crate::almanac::ThermalRegion;
+        if !self.flux_affine() {
+            return ratio(1, 1);
+        }
+        let flux = self.stellar_flux_of(orb).max(1); // never zero the line out
+        let baseline = ThermalRegion::Mesic.flux_level();
+        ratio(flux as i64, baseline as i64)
+    }
+
     /// **THE DISPOSITION AXIS'S VALUES** — every disposition code the
     /// vocabulary carries (the three seeded, plus any minted), read from the
     /// fold. The caste set is exactly this set, so castes are as open as the

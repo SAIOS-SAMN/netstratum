@@ -129,6 +129,16 @@ impl World {
             ),
             ("granaries".into(), self.granary_footprint(orb).to_string()),
         ];
+        if self.flux_affine() {
+            gauges.push((
+                "flux output".into(),
+                format!(
+                    "{} (band {})",
+                    crate::ratio::ratio_str(&self.flux_output_factor(orb)),
+                    self.stellar_flux_of(orb)
+                ),
+            ));
+        }
         if people > 0 {
             let cog = self.research_siphon(orb, people as i64);
             if cog > 0 {
