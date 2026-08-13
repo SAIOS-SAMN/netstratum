@@ -8246,6 +8246,10 @@ fn chronicle(world: &World, style: &Style) {
                 style.strong(&class.to_string()),
                 style.strong(&clade.to_string())
             ),
+            cfe::dop::ClosureEvent::EvolutionAdvanced { stage } => format!(
+                "⇑ the line EVOLVES — stage {} (the arc advances)",
+                style.strong(&stage.to_string())
+            ),
             cfe::dop::ClosureEvent::ElderWarded {} => 
                 "⛨ the ELDER stands warded — the reverse shield seats".to_string(),
             cfe::dop::ClosureEvent::WardLifted { claimer } => format!(

@@ -328,6 +328,7 @@ impl World {
             warded: self.warded,
             veiled: self.veiled,
             taxon: self.taxon,
+            evolution_stage: self.evolution_stage,
             stations: self.stations.clone(),
             hulls: self.hulls.clone(),
             notes: self.notes.clone(),

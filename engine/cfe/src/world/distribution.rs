@@ -40,20 +40,60 @@ impl World {
     }
 
     /// **THE POPULATION CEILING `K_pop`** (§2) — the ecological footprint
-    /// PLUS the provisioning footprint, read by the sitting clade at its
-    /// place. A granary is provisioning capacity: it lifts how many people
-    /// a world can sustain (never the food's own regrowth ceiling, which
-    /// stays ecological). With no granary the footprint is exactly
-    /// `living_zones_of`, so the ceiling — and every #40–42 world — is
-    /// byte-identical.
+    /// PLUS the provisioning footprint PLUS the evolutionary stage, read by
+    /// the sitting clade at its place. A granary is provisioning capacity;
+    /// an advanced STAGE (`44_LINEAGES` §2c) is earned capacity — an
+    /// evolved civilization sustains more people per world. Never the food's
+    /// own regrowth ceiling, which stays ecological. With no granary and no
+    /// advancement the footprint is exactly `living_zones_of`, so the
+    /// ceiling — and every #40–42 world — is byte-identical.
     pub fn population_ceiling(&self, orb: u64) -> Ratio {
         match self.orb_region(orb) {
             Some(region) => {
-                let footprint = self.living_zones_of(orb) + self.granary_footprint(orb);
+                let footprint = self.living_zones_of(orb)
+                    + self.granary_footprint(orb)
+                    + self.evolution_stage() as u64;
                 carrying_capacity(footprint, self.rejuvenation_clade(), region)
             }
             None => ratio(0, 1),
         }
+    }
+
+    /// **THE EVOLUTIONARY STAGE** (`44_LINEAGES` §2c) — how far this line
+    /// has advanced along its arc. 0 at founding; raised only by the gated,
+    /// earned `EvolutionAdvanced` deed.
+    pub fn evolution_stage(&self) -> u8 {
+        self.evolution_stage
+    }
+
+    /// **ADVANCE THE LINE ALONG ITS ARC** (`44_LINEAGES` §2c) — the
+    /// transformation deed. A line does not sit at its founding coordinate:
+    /// once it has CRYSTALLIZED the deepening (condition 3, the earned
+    /// technology door the regenerator and refinery already pass), it may
+    /// advance a stage, lifting its provisioning capacity. Gated (an
+    /// un-deepened line is refused), receipted (replay-exact), and bounded
+    /// by `u8`. Build scope. The arc is EARNED, never free.
+    pub fn evolve(&mut self) -> Result<u8, ActionRefused> {
+        self.evolve_as(SOVEREIGN)
+    }
+
+    pub fn evolve_as(&mut self, actor: u64) -> Result<u8, ActionRefused> {
+        self.permitted(actor, Scope::Build)?;
+        // The technology door: the deepening must stand crystallized on the
+        // genesis orb — evolution is understood, not stumbled into.
+        let deepened = self
+            .techs
+            .iter()
+            .any(|(_, condition, _, _)| *condition == 3);
+        if !deepened {
+            return Err(ActionRefused::ConditionUncrystallized { condition: 3 });
+        }
+        let Some(stage) = self.evolution_stage.checked_add(1) else {
+            return Err(ActionRefused::ConditionUncrystallized { condition: 3 });
+        };
+        self.close(ClosureEvent::EvolutionAdvanced { stage }, actor);
+        self.evolution_stage = stage;
+        Ok(stage)
     }
 
     /// The per-clade LEISURE good this orb's line savours (§3), or `None`
