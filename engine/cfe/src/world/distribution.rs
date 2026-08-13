@@ -352,7 +352,12 @@ impl World {
             .orb_by_id(orb)
             .map(|held| held.banked_amount(leisure))
             .unwrap_or_else(|| ratio(0, 1));
-        (banked / demand).min(full)
+        let leisure_coverage = (banked / demand).min(full.clone());
+        // THE WELFARE LOOP (`45_TAXATION` §3): a WelfareHub fills the
+        // stability gap from the public reserve —
+        //   Stability = Leisure Coverage + Welfare Subsidy
+        // capped at one. No hub → subsidy 0 → byte-identical.
+        (leisure_coverage.clone() + self.welfare_subsidy(orb, stamp, &leisure_coverage)).min(full)
     }
 
     /// **THE PER-CAPITA RATION** — what one head eats per beat. The base is

@@ -62,9 +62,11 @@ fn the_granary_wire_code_round_trips_and_is_not_minted() {
     assert_eq!(ZoneKind::Granary.wire(), 11, "the granary is compiled code 11");
     assert_eq!(ZoneKind::from_wire(11), Some(ZoneKind::Granary), "11 decodes to the granary");
     assert!(ZoneKind::Granary.compiled(), "it is a compiled kind, not minted");
-    // The first minted code now floats one higher, above the granary.
+    // The civic zones took 12 and 13; minted codes now float above them.
+    assert_eq!(ZoneKind::from_wire(12), Some(ZoneKind::GovernmentOffice), "12 is the government office");
+    assert_eq!(ZoneKind::from_wire(13), Some(ZoneKind::WelfareHub), "13 is the welfare hub");
     assert!(
-        matches!(ZoneKind::from_wire(12), Some(ZoneKind::Minted(12))),
+        matches!(ZoneKind::from_wire(14), Some(ZoneKind::Minted(14))),
         "minted zone codes float above the compiled table"
     );
 }
@@ -317,6 +319,41 @@ fn the_research_siphon_tracks_the_cognition_caste() {
     assert_eq!(expansionist, epicurean, "the two minority-cognition lines match (2/10 each)");
     // A non-positive cohort is never taxed.
     assert_eq!(disposed_society(2, true, 10).research_siphon(FIRST_ORB, 0), 0, "no births, no siphon");
+}
+
+// ── 45_TAXATION §2–3: civic infrastructure + the welfare loop ──
+
+#[test]
+fn a_welfare_hub_buffers_a_stall_from_the_public_reserve() {
+    // A granary world with NO leisure stocked stalls (stability 0). Build a
+    // WelfareHub and the public ration reserve fills the stability gap —
+    // Stability = Leisure Coverage + Welfare Subsidy — so a fed-but-bored
+    // people no longer crashes. Without the hub the world is byte-identical.
+    let stamp_ahead = |w: &World| w.now() + 8;
+
+    let bored = society(6, 2, false, 10); // granary, no leisure → stall
+    assert_eq!(bored.stability_of(FIRST_ORB, stamp_ahead(&bored)), ratio(0, 1), "no leisure, no welfare → a stall");
+
+    let mut welfare = society(6, 2, false, 10);
+    assert!(!welfare.has_welfare_hub(FIRST_ORB), "none stands yet");
+    welfare.zone(40, ZoneKind::WelfareHub).expect("builds a welfare hub");
+    assert!(welfare.has_welfare_hub(FIRST_ORB), "the hub stands");
+    assert!(
+        welfare.stability_of(FIRST_ORB, stamp_ahead(&welfare)) > ratio(0, 1),
+        "welfare from the reserve lifts the stall: {}",
+        welfare.stability_of(FIRST_ORB, stamp_ahead(&welfare))
+    );
+}
+
+#[test]
+fn civic_zones_build_and_read() {
+    let mut world = society(4, 1, false, 5);
+    assert!(!world.has_government_office(FIRST_ORB), "none yet");
+    world.zone(30, ZoneKind::GovernmentOffice).expect("builds a government office");
+    world.zone(31, ZoneKind::WelfareHub).expect("builds a welfare hub");
+    assert!(world.has_government_office(FIRST_ORB), "the office stands");
+    assert!(world.has_welfare_hub(FIRST_ORB), "the hub stands");
+    assert_eq!(replay(world.chronicle()), world.committed(), "civic build replay MATCHES");
 }
 
 // ── L5: THE WORKBENCH (§7) — the deployed system made legible ──

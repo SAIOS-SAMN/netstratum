@@ -2079,6 +2079,8 @@ pub fn zone_word(kind: ZoneKind) -> &'static str {
         ZoneKind::ElementRefinery => "element-refinery",
         ZoneKind::ShipYard => "shipyard",
         ZoneKind::Granary => "granary",
+        ZoneKind::GovernmentOffice => "government-office",
+        ZoneKind::WelfareHub => "welfare-hub",
         // #41: a minted kind's WORD lives in the fold, not the table.
         // The chronicle names it; this answers only that it is one.
         ZoneKind::Minted(_) => "minted",
@@ -2137,6 +2139,16 @@ pub enum ZoneKind {
     /// whose placement unlocks a law. Buildable freely (no deepening
     /// gate): provisioning is foundational, not a late technology.
     Granary = 11,
+    /// **THE GOVERNMENT OFFICE** (`45_TAXATION` §2, ruled 2026-08-13): the
+    /// civic collection node. Where one stands, crafted levies collect at
+    /// full efficiency; without one, tax collection SLIPS (evasion/leakage).
+    /// Infrastructure — no yield of its own, the Granary's bill.
+    GovernmentOffice = 12,
+    /// **THE WELFARE HUB** (`45_TAXATION` §2): the public-service
+    /// distribution node. It siphons the standing ration reserve into the
+    /// population's stability during a stall or famine, buffering the crash
+    /// (the welfare→stability loop). Infrastructure — no yield of its own.
+    WelfareHub = 13,
     /// **A MINTED BUILDING (#41)** — the fold code of a zone-axis entry
     /// past the compiled table. Its economics are its BASE's, modulated
     /// by its binding (`vocabulary::zone_base`), so they are read
@@ -2370,6 +2382,8 @@ impl ZoneKind {
             Self::ElementRefinery => 9,
             Self::ShipYard => 10,
             Self::Granary => 11,
+            Self::GovernmentOffice => 12,
+            Self::WelfareHub => 13,
             Self::Minted(code) => code,
         }
     }
@@ -2398,6 +2412,8 @@ impl ZoneKind {
             9 => Some(Self::ElementRefinery),
             10 => Some(Self::ShipYard),
             11 => Some(Self::Granary),
+            12 => Some(Self::GovernmentOffice),
+            13 => Some(Self::WelfareHub),
             _ => None,
         }
     }
@@ -2460,6 +2476,9 @@ impl ZoneKind {
             // DERIVED: the habitat's bill. A granary is a ration house —
             // the same founding-ration cost the habitat pays, no new dial.
             Self::Granary => Self::Habitat.cost(),
+            // DERIVED: civic buildings are raised on the founding ration
+            // bill, like the granary — a public work, not a producer.
+            Self::GovernmentOffice | Self::WelfareHub => Self::Habitat.cost(),
         }
     }
 
@@ -2499,6 +2518,9 @@ impl ZoneKind {
             // PROVISION-1: the granary produces nothing — it is the
             // provisioning LAW's unlock, not a yield line. Zero rate.
             Self::Granary => (Resource::Biomass, ratio(0, 1)),
+            // Civic infrastructure produces no resource — it collects and
+            // distributes, it does not farm.
+            Self::GovernmentOffice | Self::WelfareHub => (Resource::Biomass, ratio(0, 1)),
             // #41: the ground state — see `cost`. A minted kind yields
             // through `World::zone_economics`, never here.
             Self::Minted(_) => (Resource::Iron, ratio(0, 1)),
@@ -2543,6 +2565,8 @@ impl ZoneKind {
             // DERIVED: the habitat's own life-support line — a granary is
             // maintained like the ration house it is.
             Self::Granary => Self::Habitat.upkeep_per_tick(),
+            // DERIVED: the habitat's life-support line — a staffed civic office.
+            Self::GovernmentOffice | Self::WelfareHub => Self::Habitat.upkeep_per_tick(),
             // #41: the ground state — see `cost`.
             Self::Minted(_) => Vec::new(),
         }
@@ -2563,7 +2587,11 @@ impl ZoneKind {
             }
             // Passive storage/capture infrastructure runs cold: the
             // granary joins the shell and the cryo-array at zero.
-            Self::Encasement | Self::CryoArray | Self::Granary => ratio(0, 1),
+            Self::Encasement
+            | Self::CryoArray
+            | Self::Granary
+            | Self::GovernmentOffice
+            | Self::WelfareHub => ratio(0, 1),
             // #41: the ground state — see `cost`.
             Self::Minted(_) => ratio(0, 1),
         }
