@@ -188,6 +188,24 @@ Phased:
   Coherent proving-node role, Marrow terraforming) that are flavor
   text today with no mechanical hook.
 
+## 6. The society layer — new design scope (2026-08-13)
+
+Surfaced by the food-distribution / species / lifespan review this
+session. Food IDENTITY is landed (species→ration, `41_PROVISION` §1);
+the society that eats it is missing:
+
+- [ ] **`41_PROVISION` (#36)** — the fed population: per-capita ration
+  demand, population growth-from-surplus (the #28 logistic on people),
+  and distribution by archetype/disposition. Reuses the settle seam.
+- [ ] **`42_LIFESPAN` (#37)** — per-species lifespan as the mortality
+  term of the #36 population; the growth-vs-continuity trade (the third
+  face of Locust/Custodian). Ships WITH #36.
+- Both READ the species→planet fit; ENFORCING it at creation (a
+  plasmoid founded on a hot world) stays Phase 4 (#34).
+
+These are post-founding depth (beta-facing), independent of Phases 1–3;
+schedule after the founding blocker (§1) unless ruled otherwise.
+
 ---
 
 ## Dependency sketch
