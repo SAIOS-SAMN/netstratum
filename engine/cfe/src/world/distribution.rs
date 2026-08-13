@@ -321,16 +321,26 @@ impl World {
     /// provisioning margin (the metric here; the `DiscoveryMinted` deed is
     /// the follow-up). Zero for every other disposition — they spend the
     /// surplus on people. Derived (half = 1/(1+1)), no new dial.
-    pub fn research_siphon(&self, births: i64) -> i64 {
+    pub fn research_siphon(&self, orb: u64, births: i64) -> i64 {
         if births <= 0 {
             return 0;
         }
-        match self.civ_axes().map(|axes| axes.disposition) {
-            Some(2) => {
-                let half = ratio(1, 1) / (ratio(1, 1) + ratio(1, 1));
-                (ratio(births, 1) * half).floor().to_integer().try_into().unwrap_or(0)
-            }
-            _ => 0,
+        let people = self.population_of(orb);
+        if people == 0 {
+            return 0;
         }
+        // Research is the work of the COGNITION caste (the empiricist-role
+        // fraction, `caste_of`). The siphon is the surplus growth that caste
+        // spends on knowledge, so it EMERGES from composition — an
+        // empiricist line, mostly cognition, spends the most; any line with
+        // a cognition caste spends some; a minted line spends per its own
+        // mix. No `disposition == N` — this is the vent opened one level
+        // deeper: the caste drives the output.
+        let cognition = self.caste_of(orb, crate::dop::Caste::Cognition);
+        ((ratio(births, 1) * ratio(cognition as i64, 1)) / ratio(people as i64, 1))
+            .floor()
+            .to_integer()
+            .try_into()
+            .unwrap_or(0)
     }
 }

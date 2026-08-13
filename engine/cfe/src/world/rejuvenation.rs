@@ -274,7 +274,7 @@ impl World {
             // growth on KNOWLEDGE, not mouths — the research siphon redirects
             // those births (the metric rides `research_siphon`). Zero for
             // every other disposition, so their growth is untouched.
-            let births = births - self.research_siphon(births);
+            let births = births - self.research_siphon(orb, births);
             Some((births - mortality, resource, demand))
         } else {
             // STARVED — only the people the span's food can feed survive;
