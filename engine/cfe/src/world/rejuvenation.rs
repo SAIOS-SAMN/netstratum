@@ -20,7 +20,7 @@
 
 use super::*;
 use crate::almanac::{carrying_capacity, grained_logistic, intrinsic_rate, region_of, FLATLANDER_CLADE, ThermalRegion};
-use crate::dop::{metabolic_ration_of, Ration, ZoneKind};
+use crate::dop::{metabolic_harvest_of, metabolic_ration_of, Ration, ZoneKind};
 
 impl World {
     /// The living ECOLOGICAL FOOTPRINT of an orb — its habitats and
@@ -96,7 +96,21 @@ impl World {
         let k = self.ration_capacity_of(orb);
         let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
         let dt = stamp.saturating_sub(held.last_touch);
-        grained_logistic(&p0, &k, &intrinsic_rate(metabolism, self.metabolic_element()), dt)
+        let grown = grained_logistic(&p0, &k, &intrinsic_rate(metabolism, self.metabolic_element()), dt);
+        // FLOOR ONTO THE LATTICE (the `stock.rs` §lattice ruling). The
+        // logistic is an exact rational whose denominator compounds every
+        // time its output is banked and fed back as the next `p0` — the
+        // very 2^414305-after-16-ticks explosion that lattice-flooring
+        // exists to stop, measured here at ~1 denominator-digit per collect
+        // on the settle path. Quantizing to `LATTICE` bounds the
+        // denominator forever, is a deterministic replayable floor (never a
+        // round), and preserves the curve: a settle mints the floored
+        // amount, its receipt carries it, and replay banks the same value.
+        // No residue is owed — `YieldCollected` is an admitted free mint
+        // with no conservation counterparty (the #28 settle law), so
+        // minting the floored quantity leaks nothing.
+        let lattice = crate::world::stock::lattice();
+        (grown * lattice.clone()).floor() / lattice
     }
 
     /// **THE SETTLE — what a real TOUCH banks.** The stock the natural
@@ -159,6 +173,107 @@ impl World {
                 .map(|(resource, decay)| (resource, -decay))
         } else {
             self.rejuvenation_settle(orb, stamp)
+        }
+    }
+
+    /// **THE POPULATION NET-DELTA at a collect touch** (#40/#41/#42,
+    /// `41_PROVISION` §2–3 / `42_LIFESPAN` §1–2). The elastic population
+    /// eats its ration, births from the surplus toward `K_pop`, and turns
+    /// over across its lifespan — all computed lazily at the touch from
+    /// the beats elapsed since `last_touch`, the same clock the ration
+    /// settle reads. Returns `(Δpop, resource, consumed)`:
+    /// `settle_population(Δpop)` receipts the headcount, and `consumed`
+    /// folds into the touch's ration as a DEBIT (the food eaten this
+    /// span), the exact mirror of the regrowth credit — so the whole
+    /// thing rides existing receipts and stays SEAL-B-safe.
+    ///
+    /// `None` when nothing is driven here: a world with no people, a
+    /// zero-span touch, an element-eater (its ration rides #29), or a
+    /// rate-0 CAPTURE line (the plasmoid, whose energy population rides
+    /// the heat economy, not a farmed stock). Only a farming Resource
+    /// line with standing people is driven.
+    ///
+    /// The food AVAILABLE this span is the standing bank plus the harvest
+    /// the same beats produced (farmed yield + natural regrowth), so a
+    /// world that farms plenty feeds its people however seldom it collects.
+    /// - **FED** (`available ≥ demand`): the population grows an S-curve
+    ///   toward its ceiling ([`grained_logistic`] on people, the #28
+    ///   curve), less the ordinary mortality; it eats its full demand.
+    /// - **STARVED** (`available < demand`): only the people the span's
+    ///   food can feed survive — the unfed die atop the mortality — and
+    ///   all of it is eaten.
+    pub fn population_touch_delta(&self, orb: u64, stamp: u64) -> Option<(i64, Resource, Ratio)> {
+        let p = self.population_of(orb);
+        if p == 0 {
+            return None;
+        }
+        let Ration::Resource(resource) = self.ration_of(orb) else {
+            return None;
+        };
+        let held = self.orb_by_id(orb)?;
+        let dt = stamp.saturating_sub(held.last_touch);
+        if dt == 0 {
+            return None;
+        }
+        let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
+        let element = self.metabolic_element();
+        // R6 — per-capita demand is HALF the line's own farming rate: a
+        // PAIR shares a habitat's yield. The 2 is structural (the pair),
+        // DERIVED as 1+1 rather than dialed — a bare two-to-one literal is
+        // a tuned dial the census bars, but an identity ratio is algebra
+        // (value 1 is uncounted), the same derive-don't-dial discipline as
+        // `grain*4`. A rate-0 capture line (plasmoid) has no farmed ration
+        // to draw on; its population rides the energy economy — defer (#29).
+        let pair = ratio(1, 1) + ratio(1, 1);
+        let per_capita = metabolic_harvest_of(metabolism, element).1 / pair;
+        if per_capita <= ratio(0, 1) {
+            return None;
+        }
+        let pr = ratio(p as i64, 1);
+        let dtr = ratio(dt as i64, 1);
+        let demand = pr.clone() * per_capita.clone() * dtr.clone();
+        // R7b — mortality: the population turns over once per lifespan `L`,
+        // so `p·Δt/L` die this span. u128 math floored, never zero-div
+        // (`lifespan_of` ≥ one grain).
+        let mortality = ((p as u128 * dt as u128) / self.lifespan_of() as u128) as i64;
+        // THE FOOD AVAILABLE THIS SPAN — the standing bank PLUS what the
+        // world produced over the same beats (the farmed yield accrued by
+        // the ticks, and the natural regrowth/decay settling at this same
+        // touch). The people eat from the period's whole harvest, not last
+        // touch's leftover — a world that farms plenty feeds its people
+        // however seldom its sovereign collects, the same path-independence
+        // the lazy ration settle already gives. All three fold into this
+        // touch, so `consumed ≤ available` keeps the settled bank ≥ 0.
+        let harvested: Ratio = self
+            .accrued_of(orb)
+            .into_iter()
+            .filter(|(res, _)| *res == resource)
+            .map(|(_, amount)| amount)
+            .fold(ratio(0, 1), |sum, amount| sum + amount);
+        let natural = match self.ration_touch_delta(orb, stamp) {
+            Some((res, signed)) if res == resource => signed,
+            _ => ratio(0, 1),
+        };
+        let available = held.banked_amount(resource) + harvested + natural;
+        if available >= demand {
+            // FED — births ride the #28 logistic on PEOPLE toward K_pop,
+            // less the ordinary mortality; the people eat their full demand.
+            let k = self.population_capacity(orb);
+            let r = intrinsic_rate(metabolism, element);
+            let grown = grained_logistic(&pr, &k, &r, dt);
+            let births: i64 = (grown - pr).floor().to_integer().try_into().unwrap_or(0);
+            Some((births - mortality, resource, demand))
+        } else {
+            // STARVED — only the people the span's food can feed survive;
+            // the unfed die atop the ordinary mortality, and all of it is
+            // eaten.
+            let fed: i64 = (available.clone() / per_capita / dtr)
+                .floor()
+                .to_integer()
+                .try_into()
+                .unwrap_or(0);
+            let unfed = (p as i64 - fed).max(0);
+            Some((-(mortality + unfed), resource, available))
         }
     }
 }

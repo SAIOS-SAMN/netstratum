@@ -284,6 +284,14 @@ impl World {
         // settled amount), so replay banks it straight from the receipt
         // and `last_touch` advances by the same carrier.
         let rejuvenated = self.ration_touch_delta(orb, self.clock.now());
+        // POPULATION (task #40/#41/#42): the elastic population eats its
+        // ration, births from the surplus, and turns over — computed HERE
+        // from the pre-touch state (the old `last_touch`, the old bank),
+        // exactly as the regrowth is. The food eaten folds into this
+        // touch's ration as a debit (`pop_consumed`); the net headcount
+        // change (`pop_delta`) receipts as its own `PopulationSettled`
+        // after the touch, at the same stamp.
+        let population = self.population_touch_delta(orb, self.clock.now());
         let held = peel(&mut self.orbs, orb)
             .ok_or(ActionRefused::NoSuchOrb { orb })?;
         let mut settleable: Vec<(Resource, Ratio)> = Vec::new();
@@ -304,6 +312,16 @@ impl World {
             match settleable.iter_mut().find(|(held_res, _)| *held_res == resource) {
                 Some((_, amount)) => *amount += grown,
                 None => settleable.push((resource, grown)),
+            }
+        }
+        // Fold the food the population ate this span into the same touch as
+        // a DEBIT — the mirror of the regrowth credit. Never exceeds the
+        // pre-touch bank (FED caps at demand ≤ bank; STARVED eats the whole
+        // bank), so the settled net stays ≥ 0 after regrowth and yield.
+        if let Some((_, resource, consumed)) = &population {
+            match settleable.iter_mut().find(|(held_res, _)| held_res == resource) {
+                Some((_, amount)) => *amount -= consumed.clone(),
+                None => settleable.push((*resource, -consumed.clone())),
             }
         }
         if settleable.is_empty() {
@@ -455,6 +473,12 @@ impl World {
             .collect();
         for (source, target, resource) in touching {
             self.settle_bond(source, target, resource, stamp, vec![actor], None);
+        }
+        // The net headcount change receipts at this same touch — after the
+        // ration settled, so the food it ate is banked first. Zero deltas
+        // no-op (no deed), so a world at demographic rest is byte-identical.
+        if let Some((delta, _, _)) = population {
+            self.settle_population(orb, delta);
         }
         self.relieve_recovered(orb);
         Ok(count)

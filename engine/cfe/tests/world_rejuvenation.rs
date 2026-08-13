@@ -220,6 +220,163 @@ fn quarantined_greenhold(habitats: u16) -> World {
     world
 }
 
+// ── POPULATION DYNAMICS (#40/#41/#42): the elastic people eat, breed,
+//    and die at the collect touch — driven off the same lazy clock ──
+
+/// A greenhold with a sealed lifespan class and a seeded population.
+/// `class` 2 is long-lived (4 grains); 1 short-lived (one grain). The
+/// metabolism stays the biotic default, so both eat Biomass at the same
+/// rate — the ONLY difference between two classes is the lifespan `L`.
+fn peopled(habitats: u16, class: u8, seed: i64) -> World {
+    let mut world = greenhold(habitats);
+    world.seal_taxon(class, 1).expect("seals the lifespan class");
+    world.settle_population(FIRST_ORB, seed);
+    world
+}
+
+#[test]
+fn a_collect_applies_the_population_net_delta_and_debits_its_food() {
+    // The touch settles what the reading predicts: the headcount moves by
+    // exactly `population_touch_delta`'s Δ, and the food it ate leaves the
+    // biomass bank as part of the same touch — one lazy settle, replay-exact.
+    let mut world = peopled(8, 2, 10);
+    for _ in 0..8 {
+        world.tick();
+    }
+    let (delta, resource, consumed) = world
+        .population_touch_delta(FIRST_ORB, world.now())
+        .expect("a peopled, farming world drives population");
+    assert_eq!(resource, Resource::Biomass, "a biotic line's people eat biomass");
+    assert!(consumed > ratio(0, 1), "the people ate this span: {consumed}");
+    let before = world.population_of(FIRST_ORB);
+    world.collect().expect("collects");
+    assert_eq!(
+        world.population_of(FIRST_ORB) as i64,
+        before as i64 + delta,
+        "the collect applies exactly the predicted net delta"
+    );
+    assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
+}
+
+#[test]
+fn a_fed_line_grows_and_an_overpopulated_one_is_culled() {
+    // Below the food ceiling the fed population BIRTHS (net positive delta);
+    // far above it the same world STARVES and culls. Both are the same law
+    // read at different densities, and both replay byte-exact.
+    let mut fed = peopled(8, 2, 10);
+    for _ in 0..8 {
+        fed.tick();
+    }
+    let (grow, _, _) = fed.population_touch_delta(FIRST_ORB, fed.now()).expect("driven");
+    assert!(grow > 0, "a small fed population grows: Δ={grow}");
+    fed.collect().expect("collects");
+    assert!(fed.population_of(FIRST_ORB) > 10, "the people multiplied");
+    assert_eq!(replay(fed.chronicle()), fed.committed(), "fed replay MATCHES");
+
+    // A world seeded far past what its habitats can feed collapses.
+    let mut crowded = peopled(8, 2, 4000);
+    for _ in 0..8 {
+        crowded.tick();
+    }
+    let (cull, _, _) = crowded.population_touch_delta(FIRST_ORB, crowded.now()).expect("driven");
+    assert!(cull < 0, "an overpopulated world culls: Δ={cull}");
+    crowded.collect().expect("collects");
+    assert!(crowded.population_of(FIRST_ORB) < 4000, "the famine took its toll");
+    assert_eq!(replay(crowded.chronicle()), crowded.committed(), "cull replay MATCHES");
+}
+
+#[test]
+fn a_small_population_holds_across_many_collects() {
+    // A population well within its world's food economy is SUSTAINED —
+    // neither exploding nor dying — collect after collect, replay-exact.
+    let mut world = peopled(8, 2, 2);
+    for _ in 0..25 {
+        for _ in 0..8 {
+            world.tick();
+        }
+        world.collect().expect("collects");
+    }
+    assert!(world.population_of(FIRST_ORB) > 0, "a sustainable line endures");
+    assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
+}
+
+#[test]
+fn the_settle_denominator_stays_bounded_over_many_collects() {
+    // THE #28 LATTICE GUARD. The regrowth logistic is an exact rational
+    // whose denominator compounds each time its output banks and feeds
+    // back as the next p0 — the 2^414305-after-16 explosion `stock.rs`
+    // lattice-flooring exists to stop. Measured on the settle path at ~1
+    // denominator-digit PER COLLECT before the floor. With it, the banked
+    // ration stays on the lattice (denominator divides `LATTICE`) forever.
+    let lattice = 1024u64; // cfe::world::stock::lattice() numerator
+    // No population — the pure regrowth-settle path, so the habitats keep
+    // farming and the only fractional injector is the logistic itself.
+    let mut world = greenhold(8);
+    for _ in 0..40 {
+        for _ in 0..8 {
+            world.tick();
+        }
+        world.collect().expect("collects");
+        let bank = world.orb().expect("stands").banked_amount(Resource::Biomass);
+        let denom: u64 = bank.denom().try_into().expect("a bounded denominator fits u64");
+        assert!(
+            lattice % denom == 0,
+            "the banked ration stays on the lattice, never exploding: denom={denom}"
+        );
+    }
+    assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
+}
+
+#[test]
+fn a_longer_lived_line_outgrows_a_short_lived_one() {
+    // R7 — the ONLY difference is lifespan `L`: same world, same food, same
+    // seed. The long-lived line dies more slowly (mortality `p·Δt/L`), so
+    // its net births carry it to a HIGHER peak than the short-lived line,
+    // which the mortality holds flat. Lifespan is a population lever.
+    fn peak(class: u8) -> u64 {
+        let mut world = peopled(8, class, 10);
+        let mut top = world.population_of(FIRST_ORB);
+        for _ in 0..6 {
+            for _ in 0..8 {
+                world.tick();
+            }
+            // A collapsed line leaves nothing to collect (NothingAccrued);
+            // that is a clean no-op, so the peak still stands.
+            let _ = world.collect();
+            top = top.max(world.population_of(FIRST_ORB));
+        }
+        assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
+        top
+    }
+    let short = peak(1);
+    let long = peak(2);
+    assert!(
+        long > short,
+        "the long-lived line reaches a higher population: long={long} > short={short}"
+    );
+}
+
+#[test]
+fn a_capture_line_population_rides_the_energy_economy_not_the_ration() {
+    // A plasmoid FARMS nothing (harvest rate 0 — it captures heat, 04 §1.2);
+    // there is no ration stock to feed a population from, so the ration path
+    // does not drive it. Its people ride the energy economy (#29), so the
+    // touch delta is None however many stand.
+    let mut world = greenhold(8);
+    world
+        .seal_genesis("plasmoid", 1, 3, 1)
+        .expect("seals a plasmic genesis");
+    world.settle_population(FIRST_ORB, 50);
+    for _ in 0..8 {
+        world.tick();
+    }
+    assert_eq!(
+        world.population_touch_delta(FIRST_ORB, world.now()),
+        None,
+        "a capture line's population is not driven by the ration path"
+    );
+}
+
 #[test]
 fn a_quarantined_world_starves_its_ration_at_the_touch() {
     let mut world = quarantined_greenhold(8);
