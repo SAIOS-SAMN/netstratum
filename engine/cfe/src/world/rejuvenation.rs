@@ -121,4 +121,44 @@ impl World {
         let grown = self.regrown_ration(orb, stamp) - held.banked_amount(resource);
         (grown > ratio(0, 1)).then_some((resource, grown))
     }
+
+    /// **THE QUARANTINE DECAY — what a sealed world LOSES at a touch**
+    /// (task #30, ruled 2026-08-12). While a world is quarantined
+    /// (bio-pressure past the threshold), its ration does not recover —
+    /// it STARVES, decaying at the same intrinsic rate it would else
+    /// grow: a derived flat `r·Δt`, the per-beat decay the ruling names,
+    /// settled lazily at the touch exactly as the regrowth it replaces.
+    /// Capped at the stock (never below zero). `None` when the world
+    /// stands free, holds no ration, or is an element-eater (whose stock
+    /// rides the element economy, #29).
+    ///
+    /// Folds into the touch as a resource DEBIT (an `UpkeepSettled`) — the
+    /// mirror of the regrowth credit — so it too is SEAL-B-safe with no
+    /// new deed, wire, or kernel arm.
+    pub fn quarantine_decay(&self, orb: u64, stamp: u64) -> Option<(Resource, Ratio)> {
+        if !self.world_quarantined() {
+            return None;
+        }
+        let Ration::Resource(resource) = self.ration_of(orb) else {
+            return None;
+        };
+        let held = self.orb_by_id(orb)?;
+        let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
+        let dt = ratio(stamp.saturating_sub(held.last_touch) as i64, 1);
+        let decay = (intrinsic_rate(metabolism, self.metabolic_element()) * dt)
+            .min(held.banked_amount(resource));
+        (decay > ratio(0, 1)).then_some((resource, decay))
+    }
+
+    /// The ration delta a collect TOUCH settles: a starving DEBIT while
+    /// quarantined, else the recovery CREDIT. One or the other, never
+    /// both — a sealed world does not recover.
+    pub fn ration_touch_delta(&self, orb: u64, stamp: u64) -> Option<(Resource, Ratio)> {
+        if self.world_quarantined() {
+            self.quarantine_decay(orb, stamp)
+                .map(|(resource, decay)| (resource, -decay))
+        } else {
+            self.rejuvenation_settle(orb, stamp)
+        }
+    }
 }

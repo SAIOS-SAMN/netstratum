@@ -274,14 +274,16 @@ impl World {
             self.chronicle(),
             crate::parameter::Parameter::EncasementThroughput,
         );
-        // REJUVENATION (task #28): the natural ration's growth since the
-        // last touch settles HERE — the exact mirror of the demurrage
-        // decay `touch()` seals just below, computed BEFORE the touch so
-        // it reads the old `last_touch`. It folds into this touch's own
-        // `YieldCollected` (no deed of its own — the §2 digest rides the
-        // collected amount), so replay banks it straight from the
-        // receipt and `last_touch` advances by the same carrier.
-        let rejuvenated = self.rejuvenation_settle(orb, self.clock.now());
+        // REJUVENATION (task #28) / QUARANTINE DECAY (task #30): the
+        // natural ration's delta since the last touch settles HERE — a
+        // recovery CREDIT for a free world, a starving DEBIT for a
+        // quarantined one — the exact mirror of the demurrage decay
+        // `touch()` seals just below, computed BEFORE the touch so it
+        // reads the old `last_touch`. It folds into this touch's own
+        // yield receipt (no deed of its own — the §2 digest rides the
+        // settled amount), so replay banks it straight from the receipt
+        // and `last_touch` advances by the same carrier.
+        let rejuvenated = self.ration_touch_delta(orb, self.clock.now());
         let held = peel(&mut self.orbs, orb)
             .ok_or(ActionRefused::NoSuchOrb { orb })?;
         let mut settleable: Vec<(Resource, Ratio)> = Vec::new();

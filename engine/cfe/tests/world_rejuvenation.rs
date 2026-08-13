@@ -178,3 +178,82 @@ fn a_world_at_capacity_regrows_nothing_at_the_touch() {
         "at capacity, the curve holds — the settle would bank nothing"
     );
 }
+
+// ── QUARANTINE (task #30): a sealed world starves instead of recovering ──
+
+/// A lush mesic greenhold whose bio-pressure has been driven past the
+/// quarantine threshold (cascade strikes by receipt), so it is sealed.
+fn quarantined_greenhold(habitats: u16) -> World {
+    let mut world = World::new();
+    world.found("sealed-hold").expect("founds");
+    world.commission_star(StarClass::G).expect("commissions");
+    world
+        .site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None)
+        .expect("sites in the mesic band");
+    let stamp = world.now();
+    world.chronicle_mut().append(
+        ClosureEvent::YieldCollected {
+            orb_id: FIRST_ORB,
+            resource: Resource::Biomass,
+            amount: ratio(100, 1),
+        },
+        stamp,
+        vec![SOVEREIGN],
+    );
+    for _ in 0..World::QUARANTINE_PRESSURE {
+        world.chronicle_mut().append(
+            ClosureEvent::ScienceExploded {
+                orb_id: FIRST_ORB,
+                path: 0,
+                kind: cfe::almanac::ExplosionKind::BioChemCross.as_wire(),
+                resource: Resource::Biomass as u8,
+                slash: ratio(0, 1),
+            },
+            stamp,
+            vec![SOVEREIGN],
+        );
+    }
+    let mut world = World::resume(world.chronicle().clone());
+    for tile in 0..habitats {
+        world.zone(tile, ZoneKind::Habitat).expect("builds a habitat");
+    }
+    world
+}
+
+#[test]
+fn a_quarantined_world_starves_its_ration_at_the_touch() {
+    let mut world = quarantined_greenhold(8);
+    assert!(world.world_quarantined(), "the world is sealed by bio-pressure");
+    for _ in 0..50 {
+        world.tick();
+    }
+    let before = world.orb().expect("stands").banked_amount(Resource::Biomass);
+    let farmed: cfe::ratio::Ratio = world
+        .accrued()
+        .iter()
+        .filter(|(resource, _)| *resource == Resource::Biomass)
+        .map(|(_, amount)| amount.clone())
+        .fold(ratio(0, 1), |sum, amount| sum + amount);
+    // A sealed world DECAYS where a free one would regrow.
+    let (resource, decay) = world
+        .quarantine_decay(FIRST_ORB, world.now())
+        .expect("a sealed world starves");
+    assert_eq!(resource, Resource::Biomass);
+    assert!(decay > ratio(0, 1), "the ration is decaying: {decay}");
+    // The TOUCH settles a starving DEBIT, not a recovery credit — the
+    // quarantine branch overrides regrowth for a sealed world.
+    assert_eq!(
+        world.ration_touch_delta(FIRST_ORB, world.now()),
+        Some((Resource::Biomass, -decay.clone())),
+        "a sealed world's touch is a debit, never a credit"
+    );
+
+    world.collect().expect("collects — quarantine seals TRADE, not internal yield");
+    let after = world.orb().expect("stands").banked_amount(Resource::Biomass);
+    assert_eq!(
+        after,
+        before + farmed - decay,
+        "the sealed world banks farmed yield MINUS the starving decay"
+    );
+    assert_eq!(replay(world.chronicle()), world.committed(), "replay MATCHES");
+}
