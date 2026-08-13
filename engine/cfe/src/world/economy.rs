@@ -292,6 +292,12 @@ impl World {
         // change (`pop_delta`) receipts as its own `PopulationSettled`
         // after the touch, at the same stamp.
         let population = self.population_touch_delta(orb, self.clock.now());
+        // TAXATION (49 §5): the welfare OUTFLOW is read HERE, before the
+        // touch advances `last_touch` — the demand it funds is measured
+        // over the span just ended (the same pre-touch reading as the
+        // population and the regrowth). Applied to the treasury after the
+        // touch, at the same stamp.
+        let welfare = self.welfare_spend(orb, self.clock.now());
         let held = peel(&mut self.orbs, orb)
             .ok_or(ActionRefused::NoSuchOrb { orb })?;
         let mut settleable: Vec<(Resource, Ratio)> = Vec::new();
@@ -495,6 +501,11 @@ impl World {
         // nothing, so a world without one is byte-identical.
         let revenue = self.levy_collected_at_touch(orb, &taxable);
         self.settle_treasury(orb, revenue);
+        // TAXATION (49 §5): the welfare OUTFLOW — spend the treasury (down
+        // to what it holds, read pre-touch above) to close the stability
+        // stall. No hub / no stall / empty treasury → zero → no deed, so a
+        // world without the welfare loop is byte-identical.
+        self.settle_treasury(orb, -welfare);
         self.relieve_recovered(orb);
         Ok(count)
     }

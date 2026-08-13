@@ -336,27 +336,38 @@ impl World {
     /// the population STALLS (births halt, only mortality runs). A world
     /// with no granary, or no leisure pairing, reads full stability — the
     /// leisure tier simply does not apply to it, so it never stalls on it.
-    pub fn stability_of(&self, orb: u64, stamp: u64) -> Ratio {
+    /// **THE BARE LEISURE COVERAGE** — banked leisure over the leisure
+    /// demand, capped at one, BEFORE any welfare. `None` when there is no
+    /// provisioned stall to speak of (no granary, no leisure good, or no
+    /// demand → stability is simply full and welfare is moot). The one
+    /// reading both `stability_of` and the welfare loop share.
+    pub fn leisure_coverage_of(&self, orb: u64, stamp: u64) -> Option<Ratio> {
         let full = ratio(1, 1);
         if !self.has_granary(orb) {
-            return full;
+            return None;
         }
-        let Some(leisure) = self.leisure_of(orb) else {
-            return full;
-        };
+        let leisure = self.leisure_of(orb)?;
         let demand = self.leisure_demand(orb, stamp);
         if demand <= ratio(0, 1) {
-            return full;
+            return None;
         }
         let banked = self
             .orb_by_id(orb)
             .map(|held| held.banked_amount(leisure))
             .unwrap_or_else(|| ratio(0, 1));
-        let leisure_coverage = (banked / demand).min(full.clone());
-        // THE WELFARE LOOP (`49_TAXATION` §3): a WelfareHub fills the
-        // stability gap from the public reserve —
+        Some((banked / demand).min(full))
+    }
+
+    pub fn stability_of(&self, orb: u64, stamp: u64) -> Ratio {
+        let full = ratio(1, 1);
+        let Some(leisure_coverage) = self.leisure_coverage_of(orb, stamp) else {
+            return full;
+        };
+        // THE WELFARE LOOP (`49_TAXATION` §3/§5): a WelfareHub fills the
+        // stability gap by spending the sovereign TREASURY —
         //   Stability = Leisure Coverage + Welfare Subsidy
-        // capped at one. No hub → subsidy 0 → byte-identical.
+        // capped at one. No hub or an empty treasury → subsidy 0 →
+        // byte-identical.
         (leisure_coverage.clone() + self.welfare_subsidy(orb, stamp, &leisure_coverage)).min(full)
     }
 

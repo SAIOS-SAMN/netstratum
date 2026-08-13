@@ -324,11 +324,12 @@ fn the_research_siphon_tracks_the_cognition_caste() {
 // ── 49_TAXATION §2–3: civic infrastructure + the welfare loop ──
 
 #[test]
-fn a_welfare_hub_buffers_a_stall_from_the_public_reserve() {
-    // A granary world with NO leisure stocked stalls (stability 0). Build a
-    // WelfareHub and the public ration reserve fills the stability gap —
-    // Stability = Leisure Coverage + Welfare Subsidy — so a fed-but-bored
-    // people no longer crashes. Without the hub the world is byte-identical.
+fn a_welfare_hub_spends_the_treasury_to_buffer_a_stall() {
+    // A granary world with NO leisure stocked stalls (stability 0). A
+    // WelfareHub closes the stability gap by spending the sovereign
+    // TREASURY — the fiscal loop, not the ration reserve. So the hub
+    // alone, over an EMPTY treasury, still cannot pay; only a funded
+    // treasury lifts the stall. Without the hub the world is byte-identical.
     let stamp_ahead = |w: &World| w.now() + 8;
 
     let bored = society(6, 2, false, 10); // granary, no leisure → stall
@@ -338,11 +339,56 @@ fn a_welfare_hub_buffers_a_stall_from_the_public_reserve() {
     assert!(!welfare.has_welfare_hub(FIRST_ORB), "none stands yet");
     welfare.zone(40, ZoneKind::WelfareHub).expect("builds a welfare hub");
     assert!(welfare.has_welfare_hub(FIRST_ORB), "the hub stands");
+    // The hub over an empty treasury buys nothing — welfare is funded by
+    // collected levies now, not the reserve.
+    assert_eq!(
+        welfare.stability_of(FIRST_ORB, stamp_ahead(&welfare)),
+        ratio(0, 1),
+        "an empty treasury buys no welfare"
+    );
+    // Fund the treasury as a taxed collect would, and welfare pays out,
+    // lifting the stall.
+    welfare.settle_treasury(FIRST_ORB, ratio(1_000_000, 1));
     assert!(
         welfare.stability_of(FIRST_ORB, stamp_ahead(&welfare)) > ratio(0, 1),
-        "welfare from the reserve lifts the stall: {}",
+        "welfare from the treasury lifts the stall: {}",
         welfare.stability_of(FIRST_ORB, stamp_ahead(&welfare))
     );
+}
+
+#[test]
+fn the_welfare_spend_draws_the_treasury_down_at_the_touch() {
+    // The closed loop's outflow: a WelfareHub over a funded treasury and a
+    // stall (granary, no leisure, a fed population) spends the treasury at
+    // the collect touch to buffer stability. The treasury falls; the spend
+    // is receipted, so it replays byte-exact.
+    let mut world = society(6, 2, false, 10);
+    world.zone(40, ZoneKind::WelfareHub).expect("welfare hub");
+    world.settle_treasury(FIRST_ORB, ratio(1_000_000, 1));
+    let before = world.treasury_of(FIRST_ORB);
+    for _ in 0..4 {
+        world.tick();
+    }
+    world.collect().expect("collects");
+    let after = world.treasury_of(FIRST_ORB);
+    assert!(after < before, "the welfare hub drew the treasury down: {before} -> {after}");
+    assert_eq!(replay(world.chronicle()), world.committed(), "welfare-spend replay MATCHES");
+}
+
+#[test]
+fn a_touch_without_a_hub_spends_no_welfare_and_leaves_the_treasury() {
+    // The mirror: the SAME funded treasury, but no WelfareHub — the collect
+    // spends nothing on welfare, so the treasury stands untouched by the
+    // welfare path (a world without the loop is byte-identical to one that
+    // never had the spend).
+    let mut world = society(6, 2, false, 10);
+    world.settle_treasury(FIRST_ORB, ratio(1_000_000, 1));
+    let before = world.treasury_of(FIRST_ORB);
+    for _ in 0..4 {
+        world.tick();
+    }
+    world.collect().expect("collects");
+    assert_eq!(world.treasury_of(FIRST_ORB), before, "no hub → no welfare spend → the treasury stands");
 }
 
 #[test]

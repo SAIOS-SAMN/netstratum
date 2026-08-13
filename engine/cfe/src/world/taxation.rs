@@ -5,7 +5,7 @@
 //! the lifespan turnover.
 
 use super::*;
-use crate::dop::{Levy, Ration, ZoneKind};
+use crate::dop::{Levy, ZoneKind};
 
 impl World {
     /// Does an ACTIVE civic zone of `kind` stand on this orb?
@@ -33,37 +33,62 @@ impl World {
         self.has_civic(orb, ZoneKind::WelfareHub)
     }
 
-    /// **THE WELFARE SUBSIDY** (`49_TAXATION` §3) — how much a WelfareHub
-    /// lifts stability by siphoning the public RESERVE into the population's
-    /// pool. It fills the stability GAP (`1 − leisure_coverage`) in
-    /// proportion to how well-stocked the reserve ration is against the
-    /// caloric demand — a full granary lets welfare cover the whole stall, an
-    /// empty one cannot. No hub → 0, so a world without one is byte-identical.
-    /// (First-cut: the reserve path; the tax-revenue/Treasury path is the
-    /// next fiscal layer.)
-    pub fn welfare_subsidy(&self, orb: u64, stamp: u64, leisure_coverage: &Ratio) -> Ratio {
+    /// **THE WELFARE BUDGET NEEDED** (`49_TAXATION` §5) — the fiscal cost
+    /// to fully close the stability stall this cycle: the gap
+    /// (`1 − leisure_coverage`) times the population's leisure demand.
+    /// This is what welfare WOULD spend to erase the stall entirely; the
+    /// treasury may or may not hold that much. Zero when there is no hub,
+    /// no stall, or no demand.
+    fn welfare_budget_needed(&self, orb: u64, stamp: u64) -> Ratio {
         let zero = ratio(0, 1);
         if !self.has_welfare_hub(orb) {
             return zero;
         }
-        let Ration::Resource(ration) = self.ration_of(orb) else {
+        let Some(leisure_coverage) = self.leisure_coverage_of(orb, stamp) else {
             return zero;
         };
+        let gap = (ratio(1, 1) - leisure_coverage).max(zero.clone());
+        if gap <= zero {
+            return zero;
+        }
+        let demand = self.leisure_demand(orb, stamp);
+        if demand <= zero {
+            return zero;
+        }
+        gap * demand
+    }
+
+    /// **THE WELFARE SPEND at a touch** (`49_TAXATION` §5) — what the
+    /// WelfareHub actually draws from the sovereign TREASURY this cycle:
+    /// the budget it needs to close the stall, capped by what the
+    /// treasury holds. An empty treasury spends nothing; a flush one
+    /// spends only what the stall costs. This is the fiscal OUTFLOW the
+    /// collect touch settles (a negative `TreasurySettled`).
+    pub fn welfare_spend(&self, orb: u64, stamp: u64) -> Ratio {
+        self.treasury_of(orb).min(self.welfare_budget_needed(orb, stamp))
+    }
+
+    /// **THE WELFARE SUBSIDY** (`49_TAXATION` §5) — how much a WelfareHub
+    /// lifts stability by spending the sovereign TREASURY into the
+    /// population's pool. It fills the stability GAP in proportion to how
+    /// far the treasury covers the fiscal cost of the stall — a flush
+    /// treasury buys the whole gap, an empty one buys nothing. The tax
+    /// loop closes here: levies fund the treasury (`levy_collected_at_touch`),
+    /// the treasury funds welfare, welfare lifts stability. No hub or an
+    /// empty treasury → 0, so a world without the loop is byte-identical.
+    pub fn welfare_subsidy(&self, orb: u64, stamp: u64, leisure_coverage: &Ratio) -> Ratio {
+        let zero = ratio(0, 1);
         let gap = (ratio(1, 1) - leisure_coverage.clone()).max(zero.clone());
         if gap <= zero {
             return zero;
         }
-        // How stocked the public reserve is against what the people eat.
-        let demand = self.leisure_demand(orb, stamp); // same per-capita span
-        if demand <= zero {
+        let budget_needed = self.welfare_budget_needed(orb, stamp);
+        if budget_needed <= zero {
             return zero;
         }
-        let reserve = self
-            .orb_by_id(orb)
-            .map(|held| held.banked_amount(ration))
-            .unwrap_or_else(|| zero.clone());
-        let reserve_coverage = (reserve / demand).min(ratio(1, 1));
-        gap * reserve_coverage
+        // What fraction of the stall the treasury can actually fund.
+        let treasury_coverage = (self.welfare_spend(orb, stamp) / budget_needed).min(ratio(1, 1));
+        gap * treasury_coverage
     }
 
     /// **THE CONTINUITY TAX a line owes at each turnover** (`49_TAXATION`
