@@ -12,8 +12,15 @@ governs is generalized off biomass (landed, commit `f467876` — `K`/`r`/
 not a hardcoded biomass/Mesic pair). §6 below is a PROPOSED ruling,
 five pillars pre-authorized, extending the same law to a ration that is
 NOT privately banked but belongs to the planet itself — with the
-public-externality and counter-play consequences that implies. Not yet
-implemented; land as its own task once the open forks in §6.3 close.
+public-externality and counter-play consequences that implies. §6.2's
+counter-play was revised the same day: struck an ad-hoc mesh-layer
+"shared star" concept and re-anchored to the standing `Station::
+progenitor` / delegation law (`12_UNION.md` §2/§2a) — sovereigns lease
+delegated orbits, progenitors own the star, and the delegation gate is
+now a fourth counter-play lever (arbitrate, revoke, or hard-cap at the
+system level). That law is itself unimplemented, which is now §6's
+gating dependency (§6.3). Not yet implemented; land as its own task
+once the open forks in §6.3 close.
 
 ## 0. Why
 
@@ -216,86 +223,113 @@ question was resolved (§6.2) and before any code lands:
    every clade's own habitability re-derives from the SAME read with
    no new cross-wiring.
 
-### 6.2 The counter-play — RESOLVED 2026-08-13: system-level physics coupling
+### 6.2 The counter-play — REVISED 2026-08-13: anchored to the Tier-0 progenitor, not a new mesh concept
 
-The open question before any of §6.1 can be implemented: `World` is
-one sovereign's entire domain (`state.rs`) — one `star`, one
-`orbs: Vec<ColonyOrb>`, one taxon, one genesis metabolism. Other
-sovereigns are separate `World`s, reachable only through the typed
-`Treaty` layer (`world/diplomacy.rs`, `partner: &str`). Orbs are
-**single-tenant** — there is no shared orb today, so pillar 5's drift,
-taken alone, only ever touches the extracting sovereign's OWN
-habitability. That is still just the private case with extra steps.
+**Struck.** The original text here proposed inventing an ad-hoc
+"multiple sovereigns' orbits around one shared star" concept, parked at
+the mesh layer for want of a home. That was reading only
+`cfe::world::state.rs` — where `star: Option<StarClass>` is private to
+one `World`, set by a self-service `commission_star()` with no other
+actor in the loop — and mistaking that prototype's narrowness for the
+LAW's narrowness. It is struck under `20_FOUNDING.md` §0 (the document
+yields to the standing ruling, not the reverse).
 
-Two more literal readings were considered and set aside for THIS
-ruling:
+**What actually stands, in `12_UNION.md` §2/§2a — the correct anchor.**
+The station axis (`ledger/src/registry.rs::STATIONS`) is `progenitor ·
+watcher · observer · sovereign`, and **progenitors are Tier 0, "the
+Board-Makers"** — the seat that "contracts and expands the board...
+creates it. Everything else plays on it." The progenitor powers table
+names this split exactly: **"create a new star"** is a progenitor
+power (chartering a world with a seated star); **"create a new
+planet"** is a new orbit under an *existing* sun, also progenitor work.
+Planets then pass to sovereigns through **the delegation law**: *"A
+progenitor delegating a planet... is council-gated by default... The
+power to create is sovereign; the power to hand what was created into
+another people's world passes through diplomacy."*
 
-- **Trade/treaty-mediated only** — cheapest, reuses `world_quarantined`
-  and `treaty_elements` almost verbatim, but the harm to a neighbor
-  stays purely economic/legal (lost supply, breach grounds), never a
-  number moving on their own world. Rejected as too weak a payoff for
-  what was pitched.
-- **True shared/condominium orbs** — the literal reading (rival species
-  standing on the same rock), but it requires zone-level ownership,
-  per-tile taxon/metabolism, and multi-actor `K`/habitability reads —
-  a foundational rewrite of `ColonyOrb` and every `taxon_economy_of`
-  call site. Rejected as out of scope for this ruling; may be worth
-  its own SEAL later.
+**RULED: a shared star is a progenitor's domain object; sovereigns hold
+DELEGATED planets (orbits) under it — never peers who co-own it.** A
+Medium strip on one delegated orbit contributes to a shared SYSTEM
+perturbation term (dust, radiation, magnetospheric disruption — the ATM
+domain's own vocabulary), read into `t_eq4` for every OTHER orbit the
+*same progenitor* has delegated under that star, sovereign or not. This
+gives the physical coupling of the earlier draft its correct owner: the
+progenitor's star object is not new state belonging to nobody, it is
+the creation the progenitor already, by charter, holds — sovereigns
+lease orbits within it, they do not co-found the star. A neighbor's
+`ThermalRegion` can still drift from a rival's action with no treaty
+required between the two SOVEREIGNS, because neither of them is the
+authority the drift answers to — the progenitor is.
 
-**RULED: system-level physics coupling.** Orbs stay single-tenant, but
-a star system is widened to host **multiple sovereigns' orbits around
-one shared star** (a concept that does not exist yet — today's `star`
-is private to one `World`). A Medium strip on one sovereign's orbit
-contributes to a shared SYSTEM perturbation term (dust, radiation,
-magnetospheric disruption — the ATM domain's own vocabulary), and that
-term is read into `t_eq4` for every OTHER orbit around the same star,
-sovereign or not. A neighbor's `ThermalRegion` can drift from a
-rival's action with **no consent and no treaty required** — which is
-what gives the political layer a genuine, involuntary grievance to
-organize around, not just a bilateral inconvenience either side could
-have simply declined to sign.
+**The code dependency, named plainly.** `12_UNION.md` §2/§2a is itself
+still DESIGN-status: nothing in `engine/` implements a progenitor
+creating a star and delegating distinct orbits to distinct sovereigns.
+`cfe::World::commission_star` is the only star-creation path today and
+it is sovereign-private. **This ruling cannot be simulated across
+multiple sovereigns while that remains true** — §6.1's pillars can land
+as single-sovereign mechanics (a world striking its own Medium, its own
+`ThermalRegion` drifting) without this dependency, but the CROSS-
+sovereign externality that is this section's entire point cannot, until
+at least a minimal slice of progenitor-mediated, multi-delegated star
+ownership exists in code. That slice is not authorized by this ruling
+and needs its own task.
 
-Once the harm is real and chronicle-visible, the counter-play composes
-from precedent already standing:
+Once a shared star has a real progenitor owner, the counter-play
+composes from precedent already standing, four levers deep:
 
-- **Diplomatic** — a new treaty annex, sibling to `treaty_elements`
-  (E3.9): a rate-CAP annex on a live Trade pact between co-signed
-  system-mates, capping a partner's Medium extraction rate the same
-  way an element allow-list caps what crosses. Consensual, dies with
-  the pact it rides, composes by union — the existing annex shape,
-  reused, not reinvented.
+- **Diplomatic** — a rate-CAP annex sibling to `treaty_elements`
+  (E3.9): a live Trade pact between co-signed sovereigns capping a
+  partner's Medium extraction rate the same way an element allow-list
+  caps what crosses. Consensual, dies with the pact it rides, composes
+  by union — the existing annex shape, reused, not reinvented.
 - **Legal** — breaching a live rate-cap annex is a treaty breach, and
-  the existing War/Peace displacement law (§1 of `12_UNION`-adjacent
-  diplomacy code, `TreatyKind::War` vs `Trade`) already makes a breach
-  lawful grounds for war. No new pact kind needed.
+  the existing War/Peace displacement law (`TreatyKind::War` vs
+  `Trade`, `world/diplomacy.rs`) already makes a breach lawful grounds
+  for war. No new pact kind needed.
 - **Economic** — a declared war already walls trade (peace binds
   nothing; war walls everything, the `element_barred`/displacement
-  shape). That alone is real teeth: the offender loses market access
-  to everyone it angered.
-- **Kinetic — OPEN, not ruled here.** Whether a declared war should
-  unlock a NEW mechanic to strike an enemy's Medium-extraction zones
+  shape). That alone is real teeth: the offender loses market access to
+  everyone it angered.
+- **The delegation gate (NEW, authorized this revision) — the
+  structural check, above the other three.** Because the star is the
+  progenitor's creation and every orbit on it is only ever DELEGATED,
+  not owned, the grant itself is a lever no sovereign-to-sovereign
+  treaty can be: the progenitor who delegated the strip-mined orbit can
+  **arbitrate** the dispute between its delegated sovereigns (a Tier-0
+  seat with standing over both, where no sovereign has standing over
+  its peer), **revoke the charter** (undelegate the offending orbit —
+  the same "power to create is sovereign" that granted it can un-grant
+  it), or **enforce a hard conservation cap at the system level**
+  (a system-wide ceiling on cumulative Medium extraction the progenitor
+  sets as a condition of every delegation under that star, independent
+  of and prior to any bilateral treaty). This is the top-down
+  counterpart to the bottom-up diplomatic/legal/economic levers above —
+  a Locust who out-negotiates or out-wars every neighbor still answers
+  to the seat that made the room it is standing on.
+- **Kinetic — still OPEN, not ruled here.** Whether a declared war
+  should unlock a mechanic to strike an enemy's Medium-extraction zones
   directly (extending `strike_interdiction`'s cargo-in-transit
-  precedent, `defense.rs`, to standing infrastructure) is real scope:
-  today `raze`/`raze_as` (`world/core.rs`) is self-service only — no
-  mechanic anywhere lets one `World` destroy another `World`'s zone.
-  "Wars fought over extraction rates" wants more than a trade wall to
-  have real teeth; this needs its own ruling and is NOT authorized by
-  this ruling.
+  precedent, `defense.rs`, to standing infrastructure) is separate
+  scope: today `raze`/`raze_as` (`world/core.rs`) is self-service only.
+  Left for its own ruling.
 
 ### 6.3 What is NOT ruled yet — open forks before code
 
-- **The system perturbation term itself.** How a stripped orbit's
-  Medium level enters a sibling orbit's `t_eq4` needs its own
-  derivation, the same weight of design `t_eq4`'s luminosity/albedo/
-  orbit_r composition already got — not a bare tuned literal (the
-  tuned-constant ratchet, `tests/tuned_constant_ratchet.rs`, is
-  already red against 112 and only falls; this cannot add to it).
-- **Where a multi-sovereign system lives in the data model.** `World`
-  currently owns its `star` privately. A shared star spanning several
-  `World`s is new state that belongs to neither `World` alone — likely
-  a mesh-layer concern given the standing mesh-second build order, and
-  needs its scope pinned (kernel-local proxy vs true mesh object)
-  before any code starts.
+- **The progenitor-delegation slice itself.** The hard dependency named
+  above: a progenitor entity that creates a star and delegates distinct
+  orbits to distinct `World`s. `12_UNION.md` §2/§2a is charter law but
+  unimplemented — this is now the gating task, ahead of anything else
+  in §6.
+- **The system perturbation term.** How a stripped orbit's Medium level
+  enters a sibling orbit's `t_eq4` needs its own derivation, the same
+  weight of design `t_eq4`'s luminosity/albedo/orbit_r composition
+  already got — not a bare tuned literal (the tuned-constant ratchet,
+  `tests/tuned_constant_ratchet.rs`, is already red against 112 and
+  only falls; this cannot add to it).
+- **The system conservation cap's own shape.** The delegation gate's
+  "hard cap at the system level" needs its formula (does it split
+  evenly across delegated orbits? weight by K? by seniority of grant?)
+  before it is enforceable rather than merely named.
 - **The rate-cap annex's wire shape.** Its `ClosureEvent` tag and any
   new `Ration`/`TreatyKind` wire codes are shared registers (the
   numbered manifest at the top of `dop.rs`) and must be CLAIMED there
@@ -308,6 +342,9 @@ from precedent already standing:
 
 ### 6.4 What this composes with (in addition to §5)
 
+- `12_UNION.md` §2/§2a — the progenitor powers table and the
+  delegation law: the corrected anchor for §6.2, and the source of the
+  delegation-gate counter-play lever.
 - `36_DEFENSE_AXIOMS` §3.3 and the ATM domain table — the
   species-relative "atmosphere" and the "vacuum strip → band shift"
   consequence this ruling implements in engine terms.
