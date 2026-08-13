@@ -53,7 +53,10 @@ impl World {
                 let footprint = self.living_zones_of(orb)
                     + self.granary_footprint(orb)
                     + self.evolution_stage() as u64;
+                // A cooling-driven line's ceiling ratchets with the thermal
+                // band (§2b); every other line reads a factor of 1.
                 carrying_capacity(footprint, self.rejuvenation_clade(), region)
+                    * self.cooling_k_factor(orb)
             }
             None => ratio(0, 1),
         }
@@ -129,6 +132,39 @@ impl World {
         let flux = self.stellar_flux_of(orb).max(1); // never zero the line out
         let baseline = ThermalRegion::Mesic.flux_level();
         ratio(flux as i64, baseline as i64)
+    }
+
+    /// **IS THE SITTING CLADE COOLING-DRIVEN?** (`44_LINEAGES` §2b, ruled
+    /// 2026-08-13) — the MIRROR of `flux_affine`: a line whose HOME band is
+    /// cold (Sublime or colder) is a structural, slow-growth kind
+    /// (lithovore, crystalline) whose living volume and permanence EXPAND as
+    /// a world cools. Derived from the clade's preferred region, no new map.
+    pub fn cooling_affine(&self) -> bool {
+        use crate::almanac::ThermalRegion;
+        crate::almanac::clade_preferred_region(self.rejuvenation_clade()) < ThermalRegion::Mesic
+    }
+
+    /// **THE COOLING-CYCLE K FACTOR** (`44_LINEAGES` §2b) — for a cooling-
+    /// driven line, the population ceiling ratchets INVERSELY with thermal
+    /// flux: a hot/volcanic band cramps it (ruled 0.75), a cooled band
+    /// unlocks the ceiling (ruled 1.25). The ruled band is expressed through
+    /// the Mesic ordinal (`m/(m+1)` = 3/4, `(m+2)/(m+1)` = 5/4) so the factor
+    /// stays a reading of the temperature line, not a dialed literal. A line
+    /// that is not cooling-driven reads 1 — every existing world byte-exact.
+    pub fn cooling_k_factor(&self, orb: u64) -> Ratio {
+        use crate::almanac::ThermalRegion;
+        if !self.cooling_affine() {
+            return ratio(1, 1);
+        }
+        let flux = self.stellar_flux_of(orb) as i64;
+        let mesic = ThermalRegion::Mesic.flux_level() as i64;
+        if flux > mesic {
+            ratio(mesic, mesic + 1) // 3/4 — cramped by heat
+        } else if flux < mesic {
+            ratio(mesic + 2, mesic + 1) // 5/4 — the ceiling unlocks in the cold
+        } else {
+            ratio(1, 1)
+        }
     }
 
     /// **THE DISPOSITION AXIS'S VALUES** — every disposition code the

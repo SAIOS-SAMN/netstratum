@@ -186,6 +186,27 @@ fn a_flux_driven_line_grows_faster_in_the_heat() {
     assert_eq!(replay(cw.chronicle()), cw.committed(), "cold replay MATCHES");
 }
 
+#[test]
+fn a_cooling_driven_line_gains_capacity_as_its_world_cools() {
+    // Clade 3 prefers the cold, so it is cooling-driven: its population
+    // ceiling ratchets INVERSELY with heat — cramped in a hot band, unlocked
+    // in the cold (the ruled [0.75, 1.25] band). A mesic clade is untouched.
+    let hot = world_at_orbit(1, 2, 3); // Torrid — above the clade's cold home
+    let cold = world_at_orbit(4, 1, 3); // Sublime — its own band
+    assert!(hot.cooling_affine(), "a cold-preferring clade runs on cooling");
+    assert_eq!(hot.cooling_k_factor(FIRST_ORB), ratio(3, 4), "heat cramps the ceiling to 3/4");
+    assert_eq!(cold.cooling_k_factor(FIRST_ORB), ratio(5, 4), "the cold unlocks it to 5/4");
+    assert!(
+        cold.population_capacity(FIRST_ORB) > hot.population_capacity(FIRST_ORB),
+        "the cooled world sustains more: {} > {}",
+        cold.population_capacity(FIRST_ORB),
+        hot.population_capacity(FIRST_ORB)
+    );
+    let mesic = world_at_orbit(1, 1, 1);
+    assert!(!mesic.cooling_affine(), "a mesic clade does not run on cooling");
+    assert_eq!(mesic.cooling_k_factor(FIRST_ORB), ratio(1, 1), "and its ceiling is unscaled — byte-identical");
+}
+
 // ── THE EVOLUTIONARY ARC (§2c) — a line transforms over the game ──
 
 /// Grant the deepening (condition 3) on the genesis orb — the earned
