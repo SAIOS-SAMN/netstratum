@@ -177,6 +177,60 @@ fn the_evolution_deed_round_trips_on_the_wire() {
     }
 }
 
+// ── CASTES (§2d) — the population differentiates by identity ──
+
+#[test]
+fn castes_partition_the_population_by_disposition() {
+    use cfe::dop::Caste;
+    // Population 10 splits cleanly on the banded weights: the sitting
+    // disposition takes 6 of its own caste, the other two take 2 each.
+    let cases = [
+        (1u8, Caste::Labour),    // expansionist → mostly Labour
+        (2, Caste::Cognition),   // empiricist   → mostly Cognition
+        (3, Caste::Artisan),     // epicurean    → mostly Artisan
+    ];
+    for (disposition, majority) in cases {
+        let world = lineage(disposition, 1, 1, 10);
+        let split = world.caste_split(FIRST_ORB);
+        assert_eq!(split.iter().sum::<u64>(), world.population_of(FIRST_ORB), "the caste split conserves every head");
+        assert_eq!(world.caste_of(FIRST_ORB, majority), 6, "disposition {disposition} is mostly its own caste");
+        for caste in Caste::ALL {
+            if caste != majority {
+                assert_eq!(world.caste_of(FIRST_ORB, caste), 2, "the minority castes take an equal fifth each");
+            }
+        }
+    }
+}
+
+#[test]
+fn the_same_headcount_morphs_to_each_identity() {
+    // The SAME ten people, three civilizations — three different societies.
+    let expansionist = lineage(1, 1, 1, 10).caste_split(FIRST_ORB);
+    let empiricist = lineage(2, 1, 1, 10).caste_split(FIRST_ORB);
+    let epicurean = lineage(3, 1, 1, 10).caste_split(FIRST_ORB);
+    assert_eq!(expansionist, [6, 2, 2], "the expansionist is a workforce");
+    assert_eq!(empiricist, [2, 6, 2], "the empiricist is a think-tank");
+    assert_eq!(epicurean, [2, 2, 6], "the epicurean is an atelier");
+    assert!(
+        expansionist != empiricist && empiricist != epicurean && expansionist != epicurean,
+        "one headcount, three distinct societies"
+    );
+}
+
+#[test]
+fn an_undifferentiated_line_is_all_labour() {
+    // A people with no sealed disposition has not specialized — every hand
+    // is a working hand.
+    let mut world = World::new();
+    world.found("unsealed").expect("founds");
+    world.settle_population(FIRST_ORB, 12);
+    assert_eq!(
+        world.caste_split(FIRST_ORB),
+        [12, 0, 0],
+        "no identity, no castes — all Labour"
+    );
+}
+
 #[test]
 fn a_plasmic_lineage_defers_its_population_to_the_energy_economy() {
     // HONEST GAP: a plasmic capture line (Vapor-Lattice / Thermo-Solder)

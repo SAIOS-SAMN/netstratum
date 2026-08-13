@@ -11,7 +11,7 @@
 
 use super::*;
 use crate::almanac::carrying_capacity;
-use crate::dop::{metabolic_leisure, Ration, Resource, ZoneKind};
+use crate::dop::{metabolic_leisure, Caste, Ration, Resource, ZoneKind};
 
 impl World {
     /// **DOES THIS ORB STAND A GRANARY?** The gate that flips the
@@ -64,6 +64,52 @@ impl World {
     /// earned `EvolutionAdvanced` deed.
     pub fn evolution_stage(&self) -> u8 {
         self.evolution_stage
+    }
+
+    /// **THE CASTE SPLIT** (`44_LINEAGES` §2d) — how the standing population
+    /// DIFFERENTIATES into its specialized roles `[Labour, Cognition,
+    /// Artisan]`. A DERIVED partition (no new state, no deed — the
+    /// `stability_of` precedent), weighted by the line's disposition through
+    /// the SAME banded weights the dark-pulls and utility already read
+    /// (`disposition_weights`): the sitting disposition takes the majority
+    /// of its own caste, so an expansionist line is mostly Labour, an
+    /// empiricist mostly Cognition, an epicurean mostly Artisan. The
+    /// headcount is CONSERVED exactly — the flooring remainder falls to the
+    /// majority caste, deterministically, so `sum == population`. A line
+    /// with no sealed disposition is undifferentiated: all Labour.
+    pub fn caste_split(&self, orb: u64) -> [u64; 3] {
+        let people = self.population_of(orb);
+        let Some(weights) = self
+            .civ_axes()
+            .and_then(|axes| crate::dop::disposition_weights(axes.disposition))
+        else {
+            return [people, 0, 0];
+        };
+        let mut split = [0u64; 3];
+        let mut assigned = 0u64;
+        for (slot, weight) in split.iter_mut().zip(weights.iter()) {
+            let share: u64 = (ratio(people as i64, 1) * weight.clone())
+                .floor()
+                .to_integer()
+                .try_into()
+                .unwrap_or(0);
+            *slot = share;
+            assigned += share;
+        }
+        // Conserve the headcount: the flooring remainder falls to the
+        // sitting disposition's own caste (its majority index), so the
+        // partition sums to the population exactly and replay-inert.
+        let major = self
+            .civ_axes()
+            .map(|axes| (axes.disposition.max(1) - 1).min(2) as usize)
+            .unwrap_or(0);
+        split[major] += people.saturating_sub(assigned);
+        split
+    }
+
+    /// The headcount standing in one caste — the `caste_split` component.
+    pub fn caste_of(&self, orb: u64, caste: Caste) -> u64 {
+        self.caste_split(orb)[caste as usize]
     }
 
     /// **ADVANCE THE LINE ALONG ITS ARC** (`44_LINEAGES` §2c) — the
