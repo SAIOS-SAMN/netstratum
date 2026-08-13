@@ -234,6 +234,30 @@ fn distinct_classes_run_distinct_economies() {
     assert!(levels.len() >= 3, "distinct classes give distinct economies: {levels:?}");
 }
 
+#[test]
+fn the_class_governs_how_much_a_head_eats() {
+    use cfe::ratio::ratio;
+    // The class's own upkeep binding IS its per-capita appetite — read from
+    // the same table the core tick uses, so provisioning honours all 14
+    // archetypes, not the three seeded axes. An unclassed line eats the base.
+    let unclassed = {
+        let mut w = World::new();
+        w.found("bare").expect("founds");
+        w
+    };
+    assert_eq!(unclassed.class_ration_factor(), ratio(1, 1), "an unclassed line eats the base");
+    // Each archetype's factor is its binding's upkeep channel.
+    assert_eq!(lineage(3, 2, 1, 1).class_ration_factor(), ratio(5, 4), "biotic-swarm is a hungry crowd");
+    assert_eq!(lineage(3, 1, 1, 2).class_ration_factor(), ratio(3, 4), "the lithovore is frugal");
+    assert_eq!(lineage(3, 1, 1, 7).class_ration_factor(), ratio(1, 2), "the apex-solitary needs little");
+    // So the same disposition/metabolism eats DIFFERENTLY by class — the
+    // swarm's head eats more than twice the apex-solitary's.
+    assert!(
+        lineage(3, 2, 1, 1).per_capita_ration() > lineage(3, 2, 1, 7).per_capita_ration(),
+        "a swarm head out-eats a solitary one on the same substrate"
+    );
+}
+
 // ── CASTES (§2d) — the population differentiates by identity ──
 
 #[test]
