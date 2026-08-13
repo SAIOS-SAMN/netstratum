@@ -864,7 +864,7 @@ beside `spine.tlv` so `present()` can emit tag-88 frames for them
 only thing that gives `branch` a re-convergence door; (4) a beat that
 reads Σ_mesh and fires the re-sync trigger.
 
-**ALTITUDE CORRECTION (2026-08-01, `17_CAPACITY` §13d).** Item (3) must
+**ALTITUDE CORRECTION (2026-08-01, `48_CAPACITY_THREAT_MODEL` §13d).** Item (3) must
 NOT be read as "the kernel calls `orbit_lock`." `orbit_lock` runs a
 SEARCH over every operator (the tunable bound STRUCK, DIRECTIVE 01); the kernel is pure,
 total, cheap, and must never search. The split is the house pattern

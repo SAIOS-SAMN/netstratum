@@ -14,10 +14,29 @@ where it belongs so the physics subset stays a physics subset.
 
 ---
 
-**Companion:** `17_CAPACITY.md` §10bis–§10ter defines the cage from the
-other side (the exile of C, the door, C consulted, the access/authority
-trade). **Two documents describing one subject is a second readable
-truth (CHARTER §11 rule 2), and reconciling them is owed.**
+**FOLDED IN 2026-08-13 (docs audit).** `17_CAPACITY.md` §10bis–§10ter
+— "the exile of C, the door, C consulted, the access/authority trade" —
+is now §10bis–§10ter below, in this document. It was flagged as a
+companion piece the day this document split out (*"Two documents
+describing one subject … reconciling them is owed"*, struck above) and
+was never reconciled; this fold is that reconciliation. Section numbers
+are preserved exactly, so "17_CAPACITY §10bis" and "17_CAPACITY §10ter"
+still resolve — now to this file.
+
+**The duplicate line that anchors the fold.** Both documents independently
+stated *"approximation may PROPOSE; only exactness may DISPOSE"* — this
+document at §2m.1 (line 41, the path-algebra door) and the incoming
+§10bis/§10ter (the C-cage door). It is the same law derived twice from
+two different sectors (the path algebra, and C's own cage). The
+duplication is NOT stripped on the fold: §2m.1 derives it for paths,
+§10ter.a derives it for C, and each derivation is load-bearing for its
+own sector. What follows is otherwise new material — `cage.rs`'s three
+seals, the cage-as-workshop, C consulted, and the access/authority
+trade — none of which the §2n/§2n.3 `C_bound` material below already
+carried; §2n.3 is about `C_bound`'s slot allocation and isolation from
+the connection fiber, while §10bis/§10ter is about the cage MECHANISM
+(`Lens`, no ordering, the door) and C's role as the sector's own
+consultant/defender. Read together, not redundantly.
 
 ---
 
@@ -446,4 +465,283 @@ The two clauses that follow are exact as relayed:
 
 **STATUS.** `d150497` stands as written. `K5` (#32) is unaffected and
 clean — it was never about `C`. The per-edge fibers remain pure.
+
+---
+
+## §10bis THE EXILE OF C — containment, and C's own V
+
+**LAW (operator rulings 2026-08-01).**
+
+> put all of the things that tried to be universal into a little box so
+> it doesn't leak out and infect other parts and destroy the determinism
+>
+> C cannot leak into D and needs to find his own V — cage it, wrap it
+
+**THE CONTAINMENT LAW: a claim of universality is the WARNING, not the
+credential.** Everything that leaked into the deterministic core
+announced itself identically — `C` claimed to be *the* measure of
+convergence, the damped-gradient term claimed to be *the* driver, "the master equation"
+claimed to be *the* composition. Three constructs, one signature, all
+three struck or caged within a day.
+
+**Containment, never prohibition.** This system is all-encompassing and
+must be able to REPRESENT dogma, narrative and transcendental readings —
+a universe that cannot represent them is not all-encompassing, and
+pretending they do not exist is how they return wearing new vocabulary.
+The error was never that such things exist; it was granting them
+universal scope. So they are boxed, not banished — and because nothing
+escapes the box, it may safely hold what a deterministic path could
+never lawfully touch: floats, roots, transcendentals, sampled values
+bound for a chart. **Prohibition makes the system unable to say them;
+containment lets it say them while determinism is guaranteed.**
+
+**Three seals, landed** (`engine/rfa-core/src/cage.rs`, `cage_pins`,
+`cage_arrow`):
+
+1. **NO ORDERING.** `Lens` derives `PartialEq` and deliberately not
+   `PartialOrd`. Ordering is what descent needs, so `a < b`,
+   `a > epsilon`, `.min()`, `.sort()` are TYPE ERRORS. Identity is what
+   witnesses need, so `assert_eq!` still states what a state measures.
+   Knowing WHAT a reading is cannot be descended; knowing which SIDE of
+   something it falls on can.
+2. **NO USABLE INTERIOR.** The cage holds a 2×2 containment vector, and
+   the caged value sits in no cell — canonical `p/q` is split to
+   opposite diagonal corners at maximum inverse opposition, and the
+   assembly rule exists only inside `show()`. A leak yields components,
+   never a magnitude.
+3. **C's OWN V — the closed algebra.** A cage with no interior life
+   invites opening, because the value inside is still wanted. So C is
+   given its own universe: every operation on a `Lens` yields a `Lens`,
+   C may combine and accumulate freely inside its own space, and there
+   is no fold, sum or combination producing anything the engine computes
+   on. **C is not starved; it is exiled with everything it needs.**
+
+**THE ARROW, enforced by a standing test** (`cage_arrow.rs`, the
+`recurrence_guard` pattern — editing the test IS the amendment): no
+module on the computing path — `potential`, `reduce`, `fold`, `gates`,
+`rcf` — may name `Lens` or call `coherence_functional`. This is stronger
+than *does not gate on C*: it is **does not know C exists**, which is the
+only version that cannot rot, since a dependency cannot be reintroduced
+on a name the module never mentions.
+
+Why the seals and not the docstrings: "do not gate on this" failed TWICE
+in one day, in `validate_step`'s productivity gate and the kernel
+bridge's `rank_is_defined`, and both times the prose was correct
+while the code did the opposite. The compiler does not forget and does
+not need re-reading.
+
+**Owed:** the kernel bridge's `defect()` is still a bare `Ratio` wearing
+a "do not gate on this" comment — the last instance of the protection
+that has already failed twice.
+
+## §10ter WHAT THE CAGE IS FOR — and why V is never a candidate
+
+**LAW (operator ruling 2026-08-01).**
+
+> the cage is for expansion of variables we don't want impacting the
+> totality of the mathematics of the universe — floats, approximations,
+> dogma, etc
+
+**The test is CORRUPTION, not shape.** A thing is caged because
+admitting it would break exactness, reproducibility or falsifiability —
+never because it happens to be one number:
+
+| caged | why |
+|---|---|
+| floats, approximations, sampled or truncated values | not exact; one admitted anywhere makes the universe non-reproducible |
+| dogma | unfalsifiable by construction (Article III LAW 6) — no experiment refutes it, so no rule may rest on it |
+| aggregates used as scores (`C`, the conservation distance) | exact, but they collapse many into one and what remains is RANKABLE — a descent waiting for a caller |
+
+**`V` IS NOT A CANDIDATE, AND NEITHER IS `D`, `Δ`, OR ANY OF THEIR
+INVARIANTS.** They are the totality the cage exists to protect.
+Enclosing one would be enclosing the thing the enclosure is for. This is
+categorical rather than a judgement call, and it is pinned by
+`cage_arrow::the_cage_names_no_manifold_machinery`.
+
+**AGGREGATE versus INVARIANT — the line that keeps V free.** The
+distinction is structural, and the proof is already in the crate:
+
+    AGGREGATE   C = Σ|R| collapses MANY into one and destroys which
+                residual broke and by how much. CAGED.
+
+    INVARIANT   rcf_signature, a holonomy's conjugacy class — the exact
+                canonical fingerprint of ONE object, destroying nothing:
+                two Deltas share it IFF conjugate. NOT CAGED.
+
+`Lens` and `RcfSignature` carry the SAME derives — `PartialEq, Eq`, no
+`PartialOrd`. Their algebra is identical. The ONLY difference is the
+arrow ban. **So the no-ordering property — the thing that actually stops
+descent — is available WITHOUT containment**, and a canonical invariant
+follows the `RcfSignature` pattern: equality-only, uncaged,
+kernel-eligible. Containment is a second and heavier act, reserved for
+readings that compute nothing.
+
+**And the escape route does not exist for SL₂.** With `det = 1` the
+characteristic polynomial is `x² − Tr(A)·x + 1`, so the conjugacy class
+is parameterised BY the trace. "Keep the class instead of the trace"
+renames a scalar rather than avoiding one. The lawful move was never to
+avoid scalars — it is to forbid ORDERING them and keep them as IDENTITY.
+
+### §10ter.a THE DOOR — the cage as workshop, and C as its defence
+
+**LAW (operator ruling 2026-08-01).** The cage is not only a quarantine,
+it is a WORKSHOP. Worlds and civilizations may call INTO it to run
+algorithmic potentials — float pipelines, GPU kernels, heuristics,
+sampling — and withdraw ANSWERS and FUNCTIONS, without the approximation
+spreading outward.
+
+**One sentence carries it: approximation may PROPOSE; only exactness may
+DISPOSE.**
+
+This is U1a's prover/verifier split generalised from solving to compute.
+There, `solver` searches by any means and `verify_work` re-forges,
+re-applies and re-chains exactly — the search may be a GPU grinding
+floats and the judgment never touches one. The door is that shape made
+general:
+
+```text
+call in    →  the inside may use ANY means. No purity is asked of it,
+              because nothing it produces is believed.
+withdraw   →  what leaves is a PROPOSAL: an exact candidate that the
+              outside re-derives for itself.
+```
+
+**A proposal is a GUESS, never evidence** — the outside does not accept
+it because the cage produced it, it re-checks it under its own exact
+rules, exactly as a mesh peer re-judges an incoming step instead of
+trusting its sender. A proposal that fails verification costs nothing,
+because nothing was trusted.
+
+**The type stops the disease, not care.** `Proposal<T>` carries only
+`T: Exact`, and `Exact` is implemented for the exact carriers alone. A
+float has no impl, so `Proposal<f64>` DOES NOT EXIST — the approximation
+cannot be named at the door, never mind carried through it.
+
+**D AND V DO NOT LIVE IN HERE.** They stay outside with the rest of the
+mathematics; the door is how the outside USES the inside, never how the
+inside acquires the outside (§10ter).
+
+**C's elevation, if it is ever elevated, is as the DEFENCE OF THIS
+SECTOR.** Not a promotion out of the box — a post inside it. C's proper
+work is guarding the containment: checking that what sits in the sector
+stays consistent with itself and that nothing crossing the door carries
+inconsistency outward. It reads the cage, never the manifold. That is
+the only elevation available to a quantity whose whole nature is to
+collapse structure: **it cannot measure a universe, but it can watch a
+box.**
+
+### §10ter.b C IS CONSULTED — the resident, not the prisoner
+
+**LAW (operator ruling 2026-08-01).**
+
+> C is the culmination of congruence / coherence / cohesion /
+> conversation / communication / comingling / consilience — he might
+> need the tools inside the containment sector, so he should be
+> CONSULTED, which is why we have C(Δ): it can use any tool in the
+> toolbox to perform those actions without them impacting the external
+> determinism.
+
+**This reframes the containment entirely, and correctly.** Every member
+of that family is a RECONCILIATION — *are these the same? does this hold
+together? can these exchange? do independent lines agree?* — and none of
+them can be answered exactly in the general case. They need search,
+comparison, heuristics, sampling: the whole dirty toolbox.
+
+**So C is not a prisoner in the sector. C is its RESIDENT.** It was
+never banished; it was housed where the tools its work requires already
+live — the same tools that may never touch the outside. `C(Δ)` is the
+knock on that door: a CALL, not a score.
+
+    consult(question, tool) -> Proposal<Exact>
+
+The tool may do anything internally — floats, a GPU kernel, a sampled
+search, an approximation unlawful anywhere else. Only its ANSWER
+crosses, only if exactly representable, and even then only as a guess
+the caller re-derives under its own rules.
+
+**THE LOOP THIS CLOSES, and it is worth naming.** Charter §11 excised
+the reconciliation instruments — consilience, the manifold, the census,
+the triangle — on the ground that a second readable truth is not a
+measurement. That was right *as law*. **They return here as TOOLS, and
+they cannot become a second truth in this room**, because a proposal
+carries no authority: reconciliation that must be re-verified before use
+is ADVICE, and advice is all it was ever fit to be. The instruments were
+not wrong; they were mis-seated. This is their seat.
+
+**Why consultation is safe where scoring was not.** A score is consumed
+as a verdict; a proposal is consumed as a hypothesis. The first grants
+authority to whatever produced it, the second grants none — which is why
+the same quantity that was unlawful as a gate is unremarkable as a
+consultant.
+
+### §10ter.c THE ACCESS/AUTHORITY TRADE — how C is protected, and how C protects
+
+**The claim, measured rather than asserted** (operator 2026-08-01: *C is
+the strongest on the board; every major event is a word starting with
+C*). Checked against the corpus:
+
+- At the DEED level it is 9 of 64 — `ColonyFounded`, `ColonyCharted`,
+  `ForwardSealed/Released/Slashed`, `Confluent`, `CouncilSealed/Closed`,
+  `CrystalDrawn`.
+- At the CONCEPT level it is total. **39 of 39 tested C-words are
+  load-bearing**, most of them heavily: chronicle (974), class (633),
+  council (395), covenant (380), charter (353), colony (347),
+  civilization (327), capacity (300), crystal (284), claim (261),
+  collateral (230), coordinate (221), certificate (208), conservation
+  (198), convergence (157), crossing (142), coboundary (121), coherence
+  (115) — and beneath them cocycle, conjugacy, connection, curvature,
+  circulation.
+- Three of the six kernel invariants are C-words: I1 **conservation**,
+  I2 **containment**, I4 **creation**.
+
+So C is not one reading among many. **C is the semantic spine**, and the
+question "pipe anything through C" is asking the system to consult its
+own organising vocabulary.
+
+**THE PROTECTION, and it is ONE mechanism doing BOTH jobs.** The proposal
+boundary protects in both directions at once:
+
+    protects OTHERS from C   nothing it produces is authoritative; a
+                             wrong answer dies on exact re-derivation
+                             and costs nothing, because nothing was
+                             trusted.
+
+    protects C from OTHERS   it can never be made a gate or a score
+                             again — which is exactly what corrupted it
+                             — because a proposal cannot bind anything.
+
+**THE LAW THIS REVEALS: access is purchased with authority.** The two are
+traded inversely, and the trade is what makes both ends safe:
+
+```text
+THE KERNEL   minimal access  — pure, total, no I/O, encoding-blind
+             maximal authority — its verdict is final and binding
+
+C            maximal access  — any tool, floats, GPU, sampling, search
+             zero authority   — everything it produces is a guess
+```
+
+**C may touch everything precisely BECAUSE nothing it says binds.** That
+is not a limitation placed on it; it is what buys its reach. A judge
+must be starved of the world to be trusted with the verdict, and a
+consultant must be denied the verdict to be trusted with the world.
+
+**And it is why C cannot be "promoted" without being destroyed.**
+Granting it authority would immediately cost it access — the moment
+its word binds, it may no longer hold a float, because a binding word
+made of approximation is the contamination the sector exists to stop.
+**To protect C is to keep it unbinding.** §10ter.a's post — defence of
+the sector — is the only elevation that adds standing without taking
+reach, because guarding a boundary is an act, not a verdict.
+
+**NOTE on `rank_is_defined` (2026-08-13 correction, carried over from
+`17_CAPACITY`'s own drift).** The "kernel bridge's `rank_is_defined`"
+named above as a 2026-08-01 instance of a failed docstring-only
+protection was deleted that same day, but the deletion did not hold: it
+is ALIVE today as the PHANTOM-RANK GATE, landed `153a70c` 2026-08-04, at
+`engine/kernel/src/bridge.rs:304` and consulted from `engine/kernel/src/
+lib.rs:660,777,783`. The point this section makes — that a docstring
+alone failed to hold the line twice — is undisturbed by the method's
+later return; it is recorded here only so a reader does not go looking
+for a deleted function that is, in fact, back.
 

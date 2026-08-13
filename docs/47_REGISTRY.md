@@ -32,7 +32,7 @@ this contradicted the table two lines above it.** `standing` and
 either. `kernel::admits` reaches `bridge::read_entangled`. That is the
 whole of D and V inside the kernel today. **C is consulted from nowhere
 in the kernel and must never be** —
-it has zero authority by construction (`17_CAPACITY` §10ter.c).
+it has zero authority by construction (`22_CONTAINMENT` §10ter.c).
 
 
 **Renames already survived, recorded so a reader does not chase a

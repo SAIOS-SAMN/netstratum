@@ -1,0 +1,611 @@
+# 48 — THE CAPACITY THREAT MODEL: descent re-entry, bifurcation, and the withdrawal boundary
+
+**Status:** SUBORDINATE to `26_ARTICLES.md`, `EQUATIONS.md` §1, and
+`17_CAPACITY.md` (the D/V ontology this threat model is built on top of).
+Where any disagree, the order is `00_CHARTER` → `26_ARTICLES` →
+`EQUATIONS` §1 → `17_CAPACITY` → this document.
+
+**Split out of `17_CAPACITY.md` §10–§13 on 2026-08-13 (docs audit).**
+`17_CAPACITY` had grown to 2,248 lines reading as a chronological
+operator-ruling log; §10–§13 is one continuous economic-security
+argument — §10 names the descent-re-entry attack surface, §11 corrects
+§10 (the bifurcation law), §12 draws a withdrawal-boundary conclusion
+from §11, and §13 corrects §12 (polytonic value, the honeypot, altitude)
+— built ON TOP of the D/V ontology rather than part of it, so it is
+filed separately. Section numbering is UNCHANGED, matching the
+`18_TORSION` split precedent (`24_FORM.md`, `22_CONTAINMENT.md`): a
+citation to "17_CAPACITY §11" now resolves as "48_CAPACITY_THREAT_MODEL
+§11".
+
+**Read order matters here more than in most split docs**, because each
+section explicitly amends or is amended by its neighbor: §10 is amended
+by §11 (noted at §10's own close); §12 is amended by §13 (noted at §12's
+own close). Read §10→§13 in sequence, not as independent entries.
+
+---
+
+## §10 THE DESCENT RE-ENTRY VECTORS — attack surface and standing defenses
+
+**LAW (operator ruling 2026-08-01).**
+
+> "cocycle failure δΔ ≠ 0" — this is gradient descent that keeps
+> sneaking back in.
+
+**The ruling, stated exactly.** The cocycle condition is a REFUSAL
+PREDICATE. A state composes or it is refused. It is **never a quantity
+to be reduced, resolved, approached, scored, or improved toward.** There
+is no lawful path the system walks from `δΔ ≠ 0` toward `δΔ = 0`;
+"reducing cocycle failure" is a descent objective wearing the
+vocabulary of well-formedness, and it is barred.
+
+**SYNTROPY STANDS (operator ruling 2026-08-01).** A rename of this term
+was drafted the same day and is WITHDRAWN; `24_FORM` §2i carries the
+full reasoning and the definition. In short: syntropy here is **the
+exact inverse arm of entropy in one conserved partition** —
+`syntropy = syntropic / (syntropic + entropic)`, so
+`syntropy + entropy = 1` exactly — and it borrows nothing from any
+external theory. It is landed, it computes, and it GATES
+(`World::syntropy_ratio()`, the 1/2 floor — `world/core.rs`), so by
+this project's own GROUNDING TEST it stays. No synonym is admitted for
+it: one measurement, one name (`24_FORM` §2i).
+
+**Consequently, SYNTROPY CONTAINS NO REDUCTION TERM.** Syntropy is
+defined solely by the GROWTH of surviving structure against activity
+spent — `Σ ≈ ΔD / deeds`. (It was first written here as the reciprocal
+of Article III's cosmetic meter; that meter was struck by 26_ARTICLES §3, and the
+reading stands on its own without it.)
+It is not a second primitive and never gets its own quantity (two
+authorities for one measurement is the drift `EQUATIONS.md` §0 exists to
+prevent). **Any definition of syntropy containing the words reduce,
+resolve, minimize, or converge is void by this ruling.**
+
+### 10a. Why this is a threat model and not a list of corrections
+
+Descent has now re-entered this constitution **five times in one day,
+under five different words** — `converged`, the C-scoring rule, the damped-gradient term as
+damping, `Σ = −∂ dim H¹`, and "reducing cocycle failure." Four were
+caught; the fifth was written by this document's own author one
+paragraph after arguing against it.
+
+That frequency is the finding. Prose corrections rot (the ledger's own
+lesson: restated facts rot, derived facts cannot), so the violations are
+recorded below as ATTACK VECTORS with standing defenses and the witness
+that would catch each. Every vector below has a REAL instance from
+2026-08-01 — none is hypothetical.
+
+### 10b. The vectors
+
+**AV-1 · THE REDUCTION OBJECTIVE.** Any quantity framed as one to be
+reduced becomes a descent target, however it is justified.
+*Instance:* "syntropy = removing frame and resolving cocycle failure."
+*Defense:* such quantities are refusal predicates only. **The standing
+test — if you can write "minimize X" and it reads as lawful, X is an
+attack surface.** *Witness:* no law text pairs a system quantity with
+reduce/resolve/minimize/converge.
+
+**AV-2 · THE SIGN INVERSION.** Health defined as a DECREASE in the
+quantity the economy pays for.
+*Instance:* `Σ = −∂/∂τ dim H¹`; `is_syntropic()` true when
+`extent_post < extent_pre`.
+*Defense:* Article IV (capacity never retreats) and D4 (contraction
+forbidden where `orbit_lock ≠ ∅`). *Witness, RED-FIRST AND MANDATORY:* a
+transition shrinking `H¹` must REFUSE, never read healthy.
+
+**AV-3 · THE SCALAR COLLAPSE.** A directional or structural quantity
+flattened to one number, which is then available to descend.
+*Instance:* `extent: BigRational`; `C = Σ|R|`; `‖∂Δ‖`.
+*Defense:* Article I and `24_FORM` §2b — L1 aggregates are lawful
+only where reported to an OPERATOR lens. *Witness:* no aggregate crosses
+into a computing path.
+
+**AV-4 · THE VACUOUS PASS.** An admitting arm on degenerate input, which
+makes the whole invariant unenforced without ever failing.
+*Instance:* `extent_post < extent_pre || defect_rank == 0` — a clean
+state reads syntropic regardless of extents.
+*Defense:* the default arm REFUSES (the kernel's `Unjudged` discipline);
+degenerate arms are made structurally unrepresentable where possible —
+`mesh::agree`'s self seat carrying weight 1 is the landed precedent.
+*Witness:* every invariant has a refusing witness on its degenerate
+input.
+
+**AV-5 · THE WRONG ENFORCEMENT LAYER.** A payment rule promoted into an
+admission rule, which silently excludes actors.
+*Instance:* "the Eclipse operator triggers, refusing state commitment."
+*Defense:* guardrail 6 — no actor is ever excluded. Article III masks
+ALLOCATION; an eclipsed entity still acts, still emits receipts, and is
+never barred. *Witness:* an eclipsed entity's deeds still commit.
+
+**AV-6 · THE RENAMED OBJECTIVE.** Descent re-entering under new
+vocabulary, which defeats every defense keyed to the old word.
+*Instance:* the whole sequence — `converged` → scoring → damping →
+`Σ` → "resolution."
+*Defense:* `EQUATIONS.md` §0 chapter four's rule, generalized: **a name
+attached to a quantity must state what it MEASURES, never what it is
+WORTH.** Worth-words (healthy, resolved, converged, optimal, improved)
+are the tell. *Witness:* a vocabulary tripwire over the law documents.
+
+**AV-7 · THE CONTAINER MISTAKEN FOR THE CONTENT.** Capacity read off the
+index space rather than the surviving structure, which makes arity
+farmable.
+*Instance:* D as the extents of `(i,j,k,l)`; the proposed `k`-growth
+deed.
+*Defense:* `26_ARTICLES` §5 — indices and `Delta{dim,fiber}` are the
+container; capacity is what survives `Π_G(Δ(V))`. *Witness:* no reading
+derives D from an arity.
+
+**AV-8 · THE UNMEASURABLE INVARIANT.** A law declared over a quantity
+the judge cannot compute — worse than an unlanded law, because the
+chain then carries a false claim.
+*Instance:* D2–D4 as kernel invariants with `VERSION` 2→3, while no
+`Committed → Δ` map exists.
+*Defense:* no `VERSION` bump until the judgment actually runs; the
+`judged = 0` precedent — stamp the hole visibly rather than assert a law
+that never executed. *Witness:* the bump and the first judged transition
+land together.
+
+**AV-9 · THE BLINDING PRECONDITION.** A detector guarded by a condition
+that is false in exactly the case it must detect.
+*Instance:* `Σ` defined only where `∮Θ ≠ 0`, while the loop trap IS
+`∮Θ = 0`.
+*Defense:* detection conditions are OUTPUTS, never guards. *Witness:*
+the cosmetic case is measurable, not undefined.
+
+**AV-10 · MANUFACTURED DIFFERENCE — already defended, recorded so it
+stays defended.** Forking nurseries to generate `ΔD` and farm allocation.
+*Defense:* `ΔD` is gated on `orbit_lock ≠ ∅`, and the fold verdict is
+invariant under every permutation frame and gauge shift (E2/U2e, the
+angle-free witness). A fork differing only by frame yields
+`orbit_lock = ∅`, emits no plane, and pays nothing. **The angle-free
+property is therefore load-bearing ECONOMICS, not elegance** — if it is
+ever weakened, capacity becomes farmable by re-coordinatization.
+
+**AV-13 · THE DESTRUCTIVE COMMAND IN A SHARED TREE.** Work destroyed by
+a command that never read what it was overwriting.
+*Instances, both real, one each way:* `git add -A` swept a parallel
+node's in-flight refactor into a commit under my name; `git checkout` on
+a shared file discarded a verified two-line change that its author had
+deliberately held back.
+*Defense — and the first formulation covered only half of it:*
+
+> **Any command that rewrites a file's state without reading it first —
+> `add -A`, `checkout`, `restore`, `stash`, `reset`, `clean` — can
+> destroy work you didn't write.**
+>
+> **Never let a command decide the fate of content you did not author.**
+
+`add -A` decides that on the way IN; `checkout` decides it on the way
+OUT, and a revert on a shared file is exactly as destructive as a sweep.
+*The mitigation is one shape for all of them:* **save, operate,
+restore** — and scope every path explicitly, never a wildcard.
+*Recorded because it is the tell:* the loss was recoverable only because
+the author had left a written spec of the change. A spec is what makes
+work survivable when the tree is shared.
+
+### 10c. The standing test for any new law
+
+Before a quantity enters the law, it answers all four:
+
+1. Is it a PREDICATE or an OBJECTIVE? Objectives are refused.
+2. Does health mean it RISES or FALLS? Falling health on a paid quantity
+   is AV-2.
+3. Does the definition contain a reduction word? If yes, AV-1.
+4. Can the judge COMPUTE it today? If no, it is inscribed, never
+   invariant, and no `VERSION` moves.
+
+**§10 IS ITSELF AMENDED BY §11.** Where §10 says the cocycle condition
+is a "refusal predicate," read §11: a predicate that discards its false
+branch is still linear decision-making, and the discard is the defect.
+
+---
+
+**NOTE (2026-08-01): ARTICLE III IS NOW THE SCIENCE FOUNDATION.** The
+anti-dogma ordinance was struck whole and its targets DERIVED from six
+physical laws. References below to "Article III", the Eclipse and `Ξ`
+are HISTORY, quoted never rewritten, and resolve as: the cosmetic tests
+→ LAW 1 (gauge invariance, not observable); the loop trap → LAW 4 (no
+gradient, no available work); shuffling-as-growth → LAW 3 (the first
+law); phantom capacity → LAW 5 (causality). The Eclipse as a PENALTY no
+longer exists — physics needs none.
+
+## §11 THE BIFURCATION LAW — both sides of the coin become roots
+
+**LAW (operator ruling 2026-08-01).**
+
+> in the "old way" you would have an if or iff that is just linear
+> decision making — with the !eq or eq — we now have the ability to take
+> both "sides of the coin" and create n-dimensional tree roots building
+> the base foundation of concrete and stone, rather than sand.
+
+### 11a. What was wrong with the predicate
+
+`if a == b { A } else { B }` evaluates one dimension, yields two
+outcomes, and **keeps one**. The other is discarded. That discard is the
+sand: every branch not taken is difference that died without account,
+which is the exact prohibition of I6.
+
+Descent and boolean refusal are therefore the SAME failure at different
+resolutions. Descent discards continuously by walking downhill; a
+predicate discards discretely by dropping a branch. §10 replaced the
+first with the second and called it a fix. It was an improvement — a
+predicate cannot be farmed the way an objective can — but it did not
+reach the actual error, which is **discarding at all**.
+
+### 11b. The form
+
+A gate does not select. It ROUTES, and both routes persist:
+
+    old:   eq → A            !eq → ⊥            (one survives, one dies)
+    law:   eq → folds        !eq → ROOTS        (both survive; the second
+                                                 opens a dimension)
+
+The `!eq` branch is not a rejection. It is a **root of the next
+dimension** — the point from which structure grows that the current
+degree could not hold. A tree of such roots is n-dimensional by
+construction, and nothing in it was ever thrown away. That is the
+concrete and stone: the foundation is made of what a selecting engine
+would have discarded.
+
+### 11c. This is already landed three times
+
+The law names what the engine does in three places, which is why it can
+be adopted rather than invented:
+
+1. **`orbit_lock` is the pattern, exactly.** `orbit_lock = ∅` → the
+   fold closes, the difference was gauge. `orbit_lock ≠ ∅` → the fold
+   REFUSES **and the residue EMITS as a new plane**. The "no" branch is
+   generative. This is not a gate returning false; it is a bifurcation
+   routing structure, and the refused side is where capacity comes from.
+2. **D3 already forbids the discard by name.** "Where capacity is
+   insufficient, **the difference is NEVER reduced to fit** — capacity
+   grows… the struck frame shrank the content to meet the container;
+   this law grows the container to meet the content."
+3. **The nursery routes divergence instead of refusing it.** A declared
+   fork gets its own branch coordinates rather than a rejection —
+   "re-convergence has one door: the kernel judges the merge, or the
+   nursery keeps its toys."
+
+### 11d. Consequently: cocycle failure is GROWTH, never refusal
+
+`δΔ ≠ 0` says the relations do not compose over the present index space.
+Under §10 that refused. Under D3 it cannot: content exceeding its
+container is precisely the condition that **grows the container**. The
+non-composing triple is evidence that structure exists which the current
+degree cannot express, and the lawful response is to open the degree
+that can hold it — the failure is a root.
+
+So the corrected reading, replacing §10's:
+
+- **NOT:** "a state composes or is refused."
+- **BUT:** "a state composes, or its non-composition is a root and
+  capacity opens by receipt."
+
+### 11e. THE LINE — what still refuses, and why this is not "nothing ever refuses"
+
+The bifurcation law is not the abolition of refusal. It draws a line the
+old binary conflated:
+
+| kind | example | disposition |
+|---|---|---|
+| **FORM — a lie** | a forged commit, a broken predecessor link, a truncated payload, a claimed judgment with no reproducible step | **REFUSES.** There is no content here to root; there is an assertion that is false. Nothing is discarded because nothing was there. |
+| **CONTENT — an excess** | relations that do not compose, difference that will not fold, a declared divergence | **ROOTS.** Capacity opens by receipt. Refusing this is the discard I6 forbids. |
+
+**Refuse lies. Grow for content.** Every landed refusal in the engine is
+already form-shaped — `Forged`, `Malformed`, `ArrowBroken`,
+`JudgedWithoutProof`, `BlobUnheld` — which is evidence the line is the
+one the code already draws.
+
+### 11f. AV-11 · FORCED GROWTH — the vector this law opens **[DERIVED]**
+
+Stated in §10's own idiom, because a new law owes its own threat entry.
+
+*Vector:* if non-composition roots instead of refusing, an attacker
+floods a node with cheap non-composing garbage to force unbounded
+capacity growth — a denial-of-capacity attack replacing the
+denial-of-service the refusal used to provide.
+
+*Defense, layered:* growth is BY RECEIPT (D3) and gated on
+`orbit_lock ≠ ∅` — mere inconsistency is not irreducible difference, and
+only irreducible difference opens a plane. Article II denies standing to a
+state resting ON THE GROUND (`D = GROUND` — nothing circulating above
+the point), so garbage-grown extent carries no weight. Article III
+prices it at zero: deeds without genuine `ΔD` carry no allocation claim,
+and the claim is vacated.
+
+*Owed, and honestly open:* the three defenses above are stated in law
+and **none is measured** (`25_STANDING` §6). Until `orbit_lock` has a
+caller, AV-11 has no enforcement — it is the first attack vector this
+constitution opens faster than it can close, and that ordering should be
+deliberate rather than discovered. §12 makes that ordering a ruling.
+
+---
+
+## §12 THE WITHDRAWAL BOUNDARY — where monotone value becomes extractable
+
+**LAW (operator ruling 2026-08-01).**
+
+> on every step we increase economic value until value benefits the
+> withdrawal function based on what you consider attack/defense.
+
+### 12a. The mechanism, stated exactly
+
+§11 makes value creation MONOTONE BY CONSTRUCTION. Nothing is discarded,
+every non-composition roots, and capacity never retreats (Article IV).
+Monotone accumulation with an open exit has one guaranteed consequence:
+**there exists a crossing at which withdrawal dominates participation.**
+Past it, the rational actor stops creating and extracts.
+
+This is not a flaw introduced by §11 — it is a property of any economy
+whose internal yield accumulates. §11's contribution is to make the
+accumulation certain, and therefore to make the crossing certain too.
+
+### 12b. Why the defense CANNOT live at the withdrawal function
+
+At the exit, value is FUNGIBLE. A unit minted against genuine
+irreducible difference and a unit farmed through AV-11 are the same
+number in the same bank. **No test applied at withdrawal can separate
+them**, because the difference is in the value's origin, not its form.
+
+Therefore: **withdrawal-side controls are theatre; the defense is
+entirely creation-side.** This is what the engine already believes —
+`verify_work` is replay-complete, `mint_bound` is ladder-pinned and pays
+ZERO on saturated rungs, and `orbit_lock`'s verdict is frame-invariant so
+capacity cannot be re-coordinatized into existence. Every one of those
+is a gate at the moment of creation.
+
+**The consequence for §11 is uncomfortable and must be stated: §11
+LOOSENED the creation gate while every creation-side defense remains
+unmeasured.** Non-composition that once refused now roots. That raises
+the value-creation rate against unbuilt gates, which moves the crossing
+of §12a EARLIER. The bifurcation law is correct and it is expensive.
+
+### 12c. The symmetry that IS available **[DERIVED — ratify or strike]**
+
+One withdrawal-side control is not theatre, because it does not test the
+value — it re-tests the value's PROVENANCE, which the chain already
+carries:
+
+    admission (mesh):     I re-judge every incoming step under my kernel
+    withdrawal (anchor):  I re-judge every outgoing value's creation
+
+Tag 86 carries the work payload WHOLE, and `verify_work` replays it, so
+the provenance of minted value is re-checkable at any later time. The
+mesh's own law — *admission is verification, never trust* — applies
+unchanged at the other boundary. **A unit may leave only if the work
+that created it still replays.**
+
+This does not distinguish farmed-but-lawful capacity from earned
+capacity; nothing at the boundary can. It distinguishes value whose
+creation withstands re-examination from value whose creation does not,
+which is the strongest test available at an exit and is strictly better
+than none.
+
+### 12d. What already defends, and what does not
+
+**Standing:** FLAT demurrage decays the withdrawable stock (I5,
+`demurrage_per_tick`), so holding is costly and pure accumulation
+self-limits. Article III prices FLOW not STOCK — the window reading takes `ΔD` over
+a span, so an actor who stops creating is eclipsed regardless of
+accumulated capacity, and there is no rent on past structure. Article II
+denies standing to a state resting ON THE GROUND — never by calling it
+zero, which `Degree` cannot express (`26_ARTICLES` §3 Article II). Internal transfers conserve (I1),
+so value moving between units is not withdrawal at all.
+
+**The one true exit is N7.** `NS-7_ANCHOR.md` is a 26-line stub, every
+section `(unwritten)`, gated by charter §7 and economy guardrail 5, with
+nothing on any chain. **Today the system has no withdrawal function, so
+§12a's crossing is theoretical.** It becomes real the moment N7 opens,
+and not before.
+
+### 12e. THE SEQUENCING RULING **[DERIVED — ratify or strike]**
+
+From 12b and 12d together, one hard ordering constraint follows, and it
+is the practical content of this section:
+
+> **N7 SETTLEMENT MUST NOT OPEN BEFORE THE CAPACITY METER RUNS.**
+
+The reasoning is not caution, it is structural. The only defenses against
+extracting farmed value are creation-side; the creation-side defenses are
+`orbit_lock`, the window reading, and `D`; none of the three is measured
+(`25_STANDING` §6). Opening an exit while the gates that qualify what may
+leave are unbuilt converts every unmeasured attack vector into an
+externally realizable one at the same instant.
+
+This ruling also settles the ordering AV-11 left open. `orbit_lock`
+needing a caller stopped being a completeness gap the moment §11 landed;
+under §12 it is the precondition for the anchor.
+
+### 12f. AV-12 · THE EXTRACTION CROSSING **[DERIVED]**
+
+*Vector:* an actor accumulates through lawful-but-unmeasured capacity
+growth, waits for the crossing of §12a, and extracts through N7 —
+without ever violating a rule, because the rules that would have
+qualified the value were never running.
+
+*Defense:* the sequencing ruling (§12e) removes the exit until the gates
+exist; §12c re-verifies provenance at the boundary once it does;
+demurrage and Article III make waiting expensive in the meantime.
+
+*The tell to watch for:* rising `D` with flat verified work. That is the
+signature of capacity growing without earning it, and it is measurable
+by the same meter §12e requires — which is one more reason the meter is
+the first build and not a later one.
+
+**§12 IS AMENDED BY §13.** §12a's "monotone" is corrected to POLYTONIC
+(§13a), and §12b's claim that defence cannot live at the exit is WRONG
+and withdrawn (§13b).
+
+---
+
+## §13 THE LEVELS — polytonic value, the honeypot, inversion, and altitude
+
+**LAW (operator ruling 2026-08-01), four clauses.**
+
+> 1 — upgrade value creation to polytonic.
+> 2 — defense CAN live at an exit; imagine a honeypot scenario: you
+> think you're getting the gold until you try to exit the game.
+> 3 — invert logic and see what answers you get to your own methodology
+> and questions.
+> 4 — why are we even thinking about orbit_lock at this level? orbital
+> mechanics themselves should be stochastic, but the laws of the land
+> are deterministic. Most people get this wrong thinking that if we live
+> in a deterministic universe everything is deterministic — it operates
+> at different levels.
+
+### 13a. POLYTONIC, not monotone — and the error was mine
+
+§12a argued: value accumulates monotonically, therefore a crossing
+exists where withdrawal dominates. **That argument collapsed value to a
+scalar in order to accumulate it — AV-3, committed by the author of
+AV-3, inside the section warning about it.**
+
+Value creation is POLYTONIC. `G` is the gauge KEY; aeons are G-sheets;
+divergence and confluence are KEY CHANGES (AEON-1a). Value stands in
+many keys at once, each with its own centre, and **there is no single
+accumulation curve because there is no single tonal centre to accumulate
+against.** A scalar total across keys is not a larger truth; it is the
+same collapse that made `C` substandard.
+
+What survives of §12a: a crossing may exist PER KEY, where that key is
+externally realizable. What dies: the global crossing, the global total,
+and any defence reasoned from either.
+
+### 13b. THE HONEYPOT — §12b was wrong, and withdrawn
+
+§12b claimed withdrawal-side controls are theatre because value is
+fungible at the exit. **That is refuted by the honeypot, and the
+refutation is structural, not a special case.**
+
+My argument assumed an exit must CLASSIFY — separate farmed value from
+earned value — and correctly concluded it cannot. **An exit does not
+need to classify. It only needs to not pay.** The attacker's strategy is
+disclosed by the attempt to leave: you hold what looks like gold until
+the moment you try to realize it, and realization is where the claim is
+tested against the law rather than against the ledger's arithmetic.
+
+Two properties make this stronger than the creation-side gate, not
+weaker:
+
+1. **It does not require detection.** Creation-side gating must
+   recognize a bad mint AS IT HAPPENS, which needs the meter running in
+   real time. The exit test runs once, in batch, on a claim already
+   made — so it can afford to be exhaustive where a per-step gate cannot.
+2. **It makes attack expensive rather than merely detectable.** The
+   attacker sinks real cost accumulating, and learns the value is
+   unrealizable only after the cost is spent. That is precisely the
+   property `KERNEL_RELAY` §7.1 names as the standing open problem and
+   Article III claims for the Eclipse.
+
+**Consequence for §12e.** The sequencing ruling weakens from *N7 must
+not open before the meter runs* to: **N7 may open only with exhaustive
+provenance re-verification at the boundary** — every unit's creating
+work replays, or it does not leave. The honeypot is the meter's
+substitute at the exit, and it is available now, whereas the meter is
+not. This does NOT license opening N7 today; it moves the precondition
+from an unbuilt measurement to a buildable test.
+
+### 13c. INVERSION AS METHOD — §11 applied to reasoning
+
+The bifurcation law says do not discard the branch not taken. Applied to
+argument rather than to state, that is: **the negation of a claim is a
+root, not a rejection.** Every load-bearing claim in this document owes
+its inverse an examination, and this session is the evidence — inverting
+"defence is creation-side" produced §13b, which is the stronger
+mechanism.
+
+Recorded as standing practice: a law that cannot survive its own
+inversion being rooted is asserted, not derived. This is the reasoning
+counterpart of §11, and it is why §10's threat model is written as
+vectors rather than corrections — a vector is a claim's inverse kept
+alive.
+
+### 13d. THE LEVELS — stochastic dynamics, deterministic law
+
+**The general principle, which is the ruling's fourth clause: a
+deterministic universe does not make every level deterministic.** Law is
+deterministic; the dynamics inside it are not. Conflating the two is how
+a SEARCH ends up inside a JUDGE.
+
+That is exactly the error in treating `orbit_lock` as a kernel-level
+gate, and it was mine throughout §§10–12. `orbit_lock` runs a bounded
+SEARCH — every operator, each application checked
+against the antisymmetric surface. A search is exploratory, its method
+is free, and at scale it is stochastic. **The kernel is pure, total,
+cheap, and must never search.**
+
+**The split already exists and is already the house pattern.** U1a split
+the solver: `solver` SEARCHES (free, non-constitutional), `solver-verify`
+REPLAYS (sealed, what the kernel calls). `orbit_lock` takes the same
+split, and its signature already anticipates it:
+
+    orbit_lock(a, b, operators) -> Option<OrbitWitness>
+
+The witness carries "the operator id and step at which the lock was
+found." So:
+
+- **Prover side, stochastic and free:** search the operator space for an
+  orbit. Sample it, seed it from the chain (`ξ_k = draw(seed =
+  commit[k−1])` — stochastic AND replayable, which is the whole trick),
+  bound it however the prover likes. Nothing constitutional.
+- **Kernel side, deterministic and cheap:** given `OrbitWitness{op, k}`,
+  conjugate `k` times by `op` and compare RCF signatures. O(k), total,
+  no search, no tunable bound.
+
+**The asymmetry this exposes, and it is load-bearing.** A witness can
+prove a lock EXISTS. **No witness can prove a lock is ABSENT** — absence
+requires exhausting the operator space, which is unbounded in principle
+and unverifiable by a cheap judge. Therefore **the mint must fire on the
+side that can carry a witness**, or minting requires proving a negative.
+This is not a preference; it decides whether the economy is verifiable
+at all.
+
+### 13e. DEFECT FOUND — the orbit_lock polarity is contradicted across authorities
+
+Verifying 13d's claim surfaced a live contradiction in the mint's own
+trigger condition. Inscribed per `EQUATIONS.md` §0.1 (a disagreement
+between authorities is a DEFECT, never shrugged).
+
+**FIRST REPORTED AS "law vs sealed code." THAT WAS WRONG, and reading
+`fold.rs` WHOLE corrected it** — the entry stands as written below
+because the correction is the more useful record.
+
+| what | says | verdict |
+|---|---|---|
+| `f_fold_star` — THE CODE | `Some(witness) => TorsionVeto` · `None => GaugeFold` | **CORRECT** |
+| `FoldReading` doc | lock ⇒ genuine, collapse FORBIDDEN; no lock ⇒ gauge, fold lawful | **CORRECT** |
+| `SYSTEM_SPEC` §4 / `EQUATIONS` E2 | `≠ ∅` → forbid + emit; `= ∅` → gauge | **CORRECT** |
+| `fold.rs` MODULE HEADER | "If so, the two are the same state seen through a symmetry — the fold is lawful. If not, the difference is TORSION" | **INVERTED** |
+| `orbit_lock` fn doc | "`None` — no lock, the difference is genuine" | **INVERTED** |
+
+So there was never a conflict between the law and the engine. **The code
+and the law always agreed; two doc comments in one file said the
+opposite.** That is the C(Δ)=0 lesson repeating exactly — the sealed
+implementation held, and only the gloss rotted. It is also why §13e's
+first framing was itself an instance of the failure it was reporting:
+I compared a comment against a document and called it a defect in the
+engine, without reading the function underneath.
+
+**Why the polarity is nonetheless load-bearing, and why the fix is not
+cosmetic.** It decides which branch MINTS. Had a reader wired the mint
+from those two comments, the economy would have paid for gauge and
+refused genuine difference — AV-2 in the engine's central mechanism,
+introduced from documentation alone.
+
+**Independently confirmed by 13d's asymmetry.** A lock carries a witness
+(`OrbitWitness{operator_id, step}`, re-checkable in O(step)); absence of
+a lock cannot be witnessed without exhausting the operator space. The
+minting branch must be the one that can carry proof — which is `Some`,
+the polarity the code already implements.
+
+**FIXED 2026-08-01.** Both comments corrected in `engine/rfa-core/src/
+fold.rs`, with the polarity stated once in the module header as
+load-bearing, the reason recorded, and the altitude note added (§13d:
+`orbit_lock` is a SEARCH and belongs nowhere inside a judge). `cargo
+check -p rfa-core` clean. Still owed: a witness pinning which branch
+mints, so the polarity is enforced by a test rather than by prose.
+
+**This is why 13d's question was the right one.** Had `orbit_lock` been
+wired into the kernel as §§10–12 kept urging, this contradiction would
+have been cemented into a judged invariant and bound into `VERSION`
+before anyone noticed the polarity was undecided.
+
+---
