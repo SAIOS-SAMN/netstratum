@@ -1,9 +1,18 @@
-# 39 — THE PHASE-3 FLIP (ruling-ready, awaiting operator)
+# 39 — THE PHASE-3 FLIP (LANDED)
 
-**Status:** design, 2026-08-12 (task #16). Everything the conductor
-and kernel can do WITHOUT a wire amendment is landed; the flip itself
-is gated on one operator ruling (§3) and one operator sign-off (§4).
-This document exists so both are decidable from measurement.
+**Status: LANDED 2026-08-13.** The operator ruled §3 option A
+(sub-coordinate index) and signed off §4. `mesh::arbor::Coordinate`
+gained `sub: u32`, hashed into every commit like every other field —
+several deeds sharing one world tick now address distinctly. §5's
+sequence landed in full: the sub-coordinate wire amendment (with its
+own round-trip coverage via `arbor.rs`'s existing open()/extend()
+tests), per-deed commitment in `chain_beat` (each deed threads
+`Some(&step)` into `extend`, gated live), and the demotion itself —
+`conductor::chain_beat` only advances `arbor_committed` past a deed
+the kernel actually admitted; a refused deed gets no arbor
+commitment and blocks further commits that beat until it resolves.
+`world/replay.rs`'s banner records the new role. See
+`docs/U_DIRECTIVES.md` §7's roadmap line for the cross-reference.
 
 ---
 

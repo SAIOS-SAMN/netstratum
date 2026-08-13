@@ -789,6 +789,15 @@ pub struct Polity {
     /// clone of state (O(state)), never a prefix replay (O(history)).
     /// Workspace like `chained`: seeded at first chain of a process.
     stepper: Option<cfe::world::Replayer>,
+    /// **THE PHASE-3 FLIP** (`39_PHASE3_FLIP` §5, operator ruling
+    /// 2026-08-13): how many receipts have an ARBOR commitment, not
+    /// just a judgment. Distinct from `chained` — `chained` advances
+    /// on every deed judged (lawful or not, purely for the refusal
+    /// report); `arbor_committed` advances only past deeds the kernel
+    /// ADMITTED, since a refused deed gets no commitment at all. The
+    /// two marks diverge exactly when a refusal happens, which is the
+    /// live measure of "replay demoted to proposer."
+    arbor_committed: usize,
     /// NOVELTY-GATE (38 §4): this line's minted solver library —
     /// workspace cache of the `SolverWordMinted` fold, seeded lazily
     /// at the first research beat of a process.
@@ -1068,6 +1077,7 @@ impl Polity {
                     });
                     return Polity {
                         chained: 0,
+                        arbor_committed: 0,
                         stepper: None,
                         library: solver::mint::Library::new(),
                         library_folded: false,
@@ -1173,6 +1183,7 @@ impl Polity {
         }
         Polity {
             chained: 0,
+            arbor_committed: 0,
             stepper: None,
             library: solver::mint::Library::new(),
             library_folded: false,
@@ -2907,9 +2918,11 @@ impl Polity {
                 s: seat.clone(),
                 g: self.world.gauge().clone(),
                 t: self.world.now(),
+                sub: 0,
             };
             arbor.adopt(coordinate, &bytes)?;
             self.chained = receipts.len();
+            self.arbor_committed = receipts.len();
             return Ok(());
         }
 
@@ -2994,6 +3007,24 @@ impl Polity {
             self.stepper = Some(stepper);
         }
         let stepper = self.stepper.as_mut().expect("seeded above");
+        // **THE PHASE-3 FLIP** (`39_PHASE3_FLIP` §5, operator ruling
+        // 2026-08-13): one arbor commitment PER DEED, each carrying its
+        // own step, so `mesh::arbor::extend` gates it live — the sub-
+        // coordinate ruling (§3, option A) is what makes this possible;
+        // several deeds sharing one tick address distinctly by `sub`.
+        //
+        // `still_admitting` tracks whether every deed so far THIS CALL
+        // has committed to the arbor. Judgment (for the refusal report,
+        // `self.refused`) runs over every new deed unconditionally, same
+        // as before — but the arbor only ever extends along its own
+        // head, so the first refusal stops arbor commits for the rest
+        // of this call. Later deeds stay judged-and-reported but
+        // uncommitted; `self.arbor_committed` simply does not advance
+        // past them, so the NEXT call retries from the same point. This
+        // is the live meaning of "replay demoted to a proposer": the
+        // world keeps playing regardless, but the arbor — the live gate
+        // — only ever holds what the kernel actually admitted.
+        let mut still_admitting = true;
         for receipt in &receipts[self.chained..] {
             let step = kernel::Step {
                 event: receipt.event.clone(),
@@ -3002,8 +3033,38 @@ impl Polity {
             };
             let prior = stepper.state().clone();
             stepper.apply(receipt);
-            if let Err(unlawful) = kernel::admits(&prior, stepper.state(), &step) {
-                self.refused.push((receipt.sequence, unlawful));
+            let next = stepper.state();
+            match kernel::admits(&prior, next, &step) {
+                Ok(()) => {
+                    if still_admitting {
+                        let sub = match arbor.head("") {
+                            Some(head) if head.coordinate.t == receipt.stamp => {
+                                head.coordinate.sub + 1
+                            }
+                            _ => 0,
+                        };
+                        let coordinate = mesh::arbor::Coordinate {
+                            branch: String::new(),
+                            s: seat.clone(),
+                            g: self.world.gauge().clone(),
+                            t: receipt.stamp,
+                            sub,
+                        };
+                        match arbor.extend(coordinate, &codec::state_bytes(next), Some(&step)) {
+                            Ok(_) => self.arbor_committed += 1,
+                            // The judge admitted it live but the arbor's
+                            // own re-derivation (from ITS head, which may
+                            // sit behind `next` if an earlier deed this
+                            // call never reached its extend()) disagrees
+                            // — stop committing, keep judging/reporting.
+                            Err(_) => still_admitting = false,
+                        }
+                    }
+                }
+                Err(unlawful) => {
+                    self.refused.push((receipt.sequence, unlawful));
+                    still_admitting = false;
+                }
             }
         }
         self.chained = receipts.len();
@@ -3012,25 +3073,7 @@ impl Polity {
             self.chained,
             &self.refused,
         );
-
-        // THE COMMITMENT STAYS ONE PER BEAT — and that is NOT batching
-        // the judgment, which happened per deed above. It is the arbor's
-        // ADDRESSING law: `t` must strictly increase and coordinates must
-        // be unique, so the store is addressed one record per clock tick
-        // and several deeds share a tick (measured: per-deed commitment
-        // refuses `Occupied` on the second deed of any beat). A finer
-        // address — a sub-index on the coordinate — is a WIRE amendment,
-        // since the coordinate is hashed into every commit. Operator
-        // ruling, not a conductor change. Recorded, not worked around.
-        let coordinate = mesh::arbor::Coordinate {
-            branch: String::new(),
-            s: seat,
-            g: self.world.gauge().clone(),
-            t: self.world.now(),
-        };
-        arbor
-            .extend(coordinate, &codec::state_bytes(&self.world.committed()), None)
-            .map(|_| ())
+        Ok(())
     }
 
     /// DIRECTIVE 19 — every deed this world's gate REFUSED, by receipt
