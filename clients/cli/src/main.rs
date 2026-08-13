@@ -8640,6 +8640,10 @@ fn chronicle(world: &World, style: &Style) {
                     style.strong(&amount(delta))
                 )
             }
+            cfe::dop::ClosureEvent::PracticesLapsed { count } => format!(
+                "📉 {} practice(s) LAPSED at the generation turnover — the continuity tax to the void",
+                style.strong(&count.to_string())
+            ),
             cfe::dop::ClosureEvent::CivilizationCollapsed { .. } => format!(
                 "{} the line has COLLAPSED — every orb stands at zero; the chronicle closes here, there is no win to reach for instead",
                 style.bad("☠")

@@ -49,12 +49,13 @@ fn run_collects(world: &mut World, rounds: usize) {
     }
 }
 
-/// A short-lived line (L = one grain = 64 beats) with a fed population and
-/// (optionally) a GovernmentOffice — the estate levy's setting. Both
-/// upkeep resources are stocked so the office stays lit across ticks.
-fn generation_world(office: bool) -> World {
+/// A lifespan-classed line with a fed population, habitats + granary (so a
+/// collect always settles), Iron stocked (so a civic office stays lit),
+/// and optional practices adopted and a GovernmentOffice. `class` 1 is
+/// short-lived (L=64), 2 long-lived (L=256).
+fn generation_line(class: u8, office: bool, practices: &[u8]) -> World {
     let mut world = World::new();
-    world.found("estate-hold").expect("founds");
+    world.found("turnover-hold").expect("founds");
     world.commission_star(StarClass::G).expect("star");
     world
         .site_planet(FIRST_ORB, unit(0, 1), positive(1, 1), None, None)
@@ -75,9 +76,17 @@ fn generation_world(office: bool) -> World {
     if office {
         world.zone(20, ZoneKind::GovernmentOffice).expect("office");
     }
-    world.seal_taxon(1, 1).expect("short-lived, L=64");
+    world.seal_taxon(class, 1).expect("seals the lifespan class");
+    for p in practices {
+        world.adopt_practice(*p).expect("adopts a practice");
+    }
     world.settle_population(FIRST_ORB, 100);
     world
+}
+
+/// The estate levy's setting: a short-lived line (L=64), fed, no practices.
+fn generation_world(office: bool) -> World {
+    generation_line(1, office, &[])
 }
 
 #[test]
@@ -294,5 +303,78 @@ fn a_generation_turns_without_an_office_and_the_treasury_stays_empty() {
             .iter()
             .any(|r| matches!(r.event, ClosureEvent::TreasurySettled { .. })),
         "no reach, no boundary receipt: byte-identical to the pre-taxation era"
+    );
+}
+
+// ── §3: the continuity levy — practices lapse to the void at turnover ──
+
+#[test]
+fn the_continuity_deed_round_trips() {
+    for count in [0u8, 1, 7, 255] {
+        let deed = ClosureEvent::PracticesLapsed { count };
+        let bytes = deed.wire_bytes();
+        let mut records = cfe::tlv::records(&bytes);
+        let (tag, value) = records.next().expect("one record");
+        assert_eq!(tag, 172, "PracticesLapsed is tag 172");
+        assert_eq!(ClosureEvent::from_wire(tag, value).expect("decodes"), deed);
+    }
+}
+
+#[test]
+fn the_continuity_lapse_falls_with_lifespan() {
+    // The short-lived Locust (rate 1) forgets ALL four practices at a
+    // turnover; the long-lived Custodian (rate 1/4) loses only one.
+    let locust = generation_line(1, false, &[1, 2, 3, 4]);
+    let custodian = generation_line(2, false, &[1, 2, 3, 4]);
+    assert_eq!(locust.practice_count(), 4, "the line adopted four");
+    assert_eq!(locust.continuity_lapse_at_touch(1), 4, "the Locust re-earns everything each generation");
+    assert_eq!(custodian.continuity_lapse_at_touch(1), 1, "the Custodian keeps three of four");
+    // No turnover, no lapse; no sealed lifespan class, no lapse.
+    assert_eq!(locust.continuity_lapse_at_touch(0), 0, "no turnover, nothing lapses");
+    let mut unsealed = World::new();
+    unsealed.found("x").expect("founds");
+    unsealed.adopt_practice(1).expect("adopts");
+    assert_eq!(
+        unsealed.continuity_lapse_at_touch(5),
+        0,
+        "a line with no sealed lifespan class never turns over → byte-identical"
+    );
+}
+
+#[test]
+fn a_short_lived_line_forgets_its_practices_at_the_turnover() {
+    // The Locust adopts four practices; crossing its 64-beat generation
+    // boundary lapses them all to the void. Replay drops the same.
+    let mut locust = generation_line(1, false, &[1, 2, 3, 4]);
+    assert_eq!(locust.practice_count(), 4, "four practices stand");
+    // Within the first generation: nothing lapses yet.
+    run_collects(&mut locust, 10); // now ≈ 40 (< 64)
+    assert_eq!(locust.practice_count(), 4, "no turnover yet — knowledge held");
+    // Cross the 64-beat boundary: the generation turns, all practices lapse.
+    run_collects(&mut locust, 10); // now ≈ 80 (crossed 64)
+    assert_eq!(locust.practice_count(), 0, "the generation turned — its unkept knowledge lapsed");
+    assert!(
+        locust
+            .chronicle()
+            .receipts()
+            .iter()
+            .any(|r| matches!(r.event, ClosureEvent::PracticesLapsed { .. })),
+        "the lapse is receipted"
+    );
+    assert_eq!(replay(locust.chronicle()), locust.committed(), "continuity-lapse replay MATCHES");
+}
+
+#[test]
+fn a_line_with_no_practices_or_no_lifespan_class_never_lapses() {
+    // A sealed line that adopted no practice emits no lapse deed.
+    let mut no_practice = generation_line(1, false, &[]);
+    run_collects(&mut no_practice, 30); // ≈120 beats — a generation turned
+    assert!(
+        !no_practice
+            .chronicle()
+            .receipts()
+            .iter()
+            .any(|r| matches!(r.event, ClosureEvent::PracticesLapsed { .. })),
+        "no practices → no lapse deed → byte-identical"
     );
 }

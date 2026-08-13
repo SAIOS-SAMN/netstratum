@@ -1422,6 +1422,7 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::ElementWantStruck { .. } | E::ElementWantRelieved { .. }
         | E::PopulationSettled { .. }
         | E::TreasurySettled { .. }
+        | E::PracticesLapsed { .. }
         // 50_WIN_CONDITIONS, operator ruling 2026-08-13: the failure
         // state is world-driven and moves no value — I2 containment +
         // I3 exactness cover it the same as PopulationSettled.
@@ -2505,6 +2506,9 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // precondition for anyone else's standing (the Civilizational
         // criterion), exactly like their population.
         | E::TreasurySettled { .. }
+        // TAXATION (49 §3): a line's practices lapsing at its own
+        // generation turnover — its own knowledge, no one else's.
+        | E::PracticesLapsed { .. }
         // 50_WIN_CONDITIONS: whether a line has collapsed is exactly a
         // fact about that CIVILIZATION, not one orb among several — the
         // Civilizational criterion fits it more than any other layer.
@@ -2645,6 +2649,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::ElementWantStruck { .. } | E::ElementWantRelieved { .. }
         | E::PopulationSettled { .. }
         | E::TreasurySettled { .. }
+        | E::PracticesLapsed { .. }
         | E::CivilizationCollapsed { .. }
         | E::HandoffSealed { .. } | E::GaugeShifted { .. } | E::Diverged { .. }
         | E::Confluent { .. } | E::StarAged { .. } | E::EraFolded { .. }

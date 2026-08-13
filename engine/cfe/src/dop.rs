@@ -369,15 +369,21 @@
 //!         today raises a new world and tithes to the ANCIENT seat;
 //!         PURCHASE/COMMISSION (the elder path, an existing planet) are
 //!         deferred per HANDOFF_2026-08-13.)
-//!    172  ClosureEvent::CivilizationCollapsed (`50_WIN_CONDITIONS`,
+//!    172  ClosureEvent::PracticesLapsed (`49_TAXATION` §3 — the
+//!         continuity levy: practices lapse to the void at a
+//!         generation turnover.)
+//!    173  ClosureEvent::CivilizationCollapsed (`50_WIN_CONDITIONS`,
 //!         operator ruling 2026-08-13 — the failure state, the only
 //!         closure this game has; no win-state deed exists or ever
-//!         will, by the same ruling.)
-//!    Phase-5 claim ledger: next free **173** (163–164 ElementWant,
+//!         will, by the same ruling. RENUMBERED 172 -> 173: landed
+//!         concurrently with PracticesLapsed under the same next-free
+//!         tag; PracticesLapsed committed to main first.)
+//!    Phase-5 claim ledger: next free **174** (163–164 ElementWant,
 //!    165 TreatyElementsAllowed, 166 SolverWordMinted, 167
 //!    PopulationSettled — 41_PROVISION §3, 169 EvolutionAdvanced —
 //!    44_LINEAGES §2c, 170 TitheReceipted, 171 TreasurySettled —
-//!    49_TAXATION §5, 172 CivilizationCollapsed). Note: quarantine
+//!    49_TAXATION §5, 172 PracticesLapsed — 49_TAXATION §3, 173
+//!    CivilizationCollapsed — 50_WIN_CONDITIONS). Note: quarantine
 //!    relief's PressureEbbed (ruling R3) is reserved 168 for when
 //!    #30 lands.
 //!    Seated science labs. E-MKT-1 (2026-08-10): tag **49** OfferPosted
@@ -2988,8 +2994,18 @@ pub enum ClosureEvent {
     /// never crafts a levy nor stands a WelfareHub emits none, so it
     /// replays byte-identical.
     TreasurySettled { orb_id: u64, delta: Ratio },
+    /// **TAXATION (49_TAXATION §3, tag 172)** — the CONTINUITY levy at a
+    /// generation turnover: `count` of the line's most-recently adopted
+    /// practices LAPSE to the void (its unconfirmed knowledge, unkept as
+    /// the generation turns). A short-lived line loses all of them each
+    /// turnover and must re-adopt; a long-lived one keeps most. The
+    /// receipt carries the count; replay drops that many from the tail of
+    /// the practice list (LIFO — the newest, least-confirmed first). A
+    /// line that adopts no practice, or has sealed no lifespan class,
+    /// emits none and is byte-identical.
+    PracticesLapsed { count: u8 },
     /// **THE FAILURE STATE** (`50_WIN_CONDITIONS`, operator ruling
-    /// 2026-08-13, tag 172): *"there is no win state — there is a
+    /// 2026-08-13, tag 173): *"there is no win state — there is a
     /// failure state — otherwise the game should just continue in
     /// perpetuity."* Fires once, when the genesis orb's population
     /// settles to zero at a `PopulationSettled` touch — the only
@@ -4111,8 +4127,11 @@ impl ClosureEvent {
                 ratio::encode(delta, &mut value);
                 tlv::put(171, &value, &mut out);
             }
+            Self::PracticesLapsed { count } => {
+                tlv::put(172, &[*count], &mut out);
+            }
             Self::CivilizationCollapsed { orb_id } => {
-                tlv::put(172, &orb_id.to_le_bytes(), &mut out);
+                tlv::put(173, &orb_id.to_le_bytes(), &mut out);
             }
             Self::HandoffSealed { from, to } => {
                 let mut value = from.to_le_bytes().to_vec();
@@ -5399,7 +5418,8 @@ impl ClosureEvent {
                 let (delta, _) = ratio::decode(value.get(8..)?)?;
                 Some(Self::TreasurySettled { orb_id, delta })
             }
-            172 => {
+            172 => Some(Self::PracticesLapsed { count: *value.first()? }),
+            173 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 Some(Self::CivilizationCollapsed { orb_id })
             }
