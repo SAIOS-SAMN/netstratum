@@ -23,25 +23,27 @@ once food buffers and moves, the market machinery has something to price.
 
 ## 1. THE DEPOT — a buildable provisioning node (`ZoneKind::Granary`)
 
-A new zone, deployed like any other structure the player builds, per orb
-(a world's provisioning centre), typed to the sitting clade's ration. It
-holds **depot stock** — an intermediate quantity DISTINCT from the raw
-extraction bank (`banked_amount`), so that the raw harvest at an extraction
-site and the provisioned food at a population centre are different things
-that a transport step (layer 2, §6) must bridge.
+*(RULED 2026-08-13: the depot REUSES the raw ration bank — no separate
+stock, no new deed. The granary flips the consumption LAW on; it does not
+introduce a second quantity. Logistics/transport (§6) therefore stays inert
+for this layer, by the same ruling.)*
 
-**Presence changes the law, not just the numbers.** With no granary a world
-runs subsistence — the #40–42 model stands verbatim, harvest→stomach, byte
-identical (a world without a depot replays exactly as today). Build one and
-the provisioned economy switches on: the population draws from the depot,
-the caloric surplus buffers against famine, and the leisure/stability tiers
-(§3–4) come alive. The granary is the technology that turns a ledger into
-an economy — the REGEN-1 precedent (a zone whose placement unlocks a law).
+A new zone, deployed like any other structure the player builds, per orb (a
+world's provisioning centre), typed to the sitting clade's ration. Its
+STOCK is the orb's existing banked ration (`banked_amount`) — the granary
+is not a second buffer but the INFRASTRUCTURE that changes how the standing
+bank is consumed.
 
-Depot stock is a NEW STORED QUANTITY, so — like `PopulationSettled` (#39) —
-it rides a carrier deed **`DepotSettled { orb_id, good, delta }`** (tag
-168) so replay banks it from the receipt. It settles at the collect touch,
-folded in beside the population delta (§8).
+**Presence changes the law, not the numbers.** With no granary a world runs
+subsistence — the #40–42 model stands verbatim, harvest→stomach, byte
+identical (a world without a granary replays exactly as today). Build one
+and the provisioned economy switches on: the caloric surplus is allowed to
+compound into growth under a leisure/stability discipline (§3–4) and the
+disposition factors (§5) come into force. The granary is the technology that
+turns a ledger into an economy — the REGEN-1 precedent (a zone whose
+placement unlocks a law), and it stores nothing new, mints no deed, so the
+whole layer stays SEAL-B-free on the state side. All new quantities
+(stability, coverage, leisure demand) are DERIVED at the touch (§4/§8).
 
 ## 2. THE CONSUMPTION CYCLE — draw from the depot, not the harvest
 
@@ -117,49 +119,61 @@ cross-orb transport is layer 2, built on the existing bond/transfer rails.
 
 ## 7. THE WORKBENCH — design, deploy, and INSPECT a deployable system
 
-The player builds the distribution engine to their civilisation's
-requirements, and a **workbench view** displays the bench's
-components, health, throughput, and unmet tiers — so the layer is legible,
-not a black box. The depot is the FIRST bench: its view shows the granary
-zones, each good's fill vs capacity, the stability reading, the caloric and
-leisure coverage, and the disposition factors in force. It is a READ-ONLY
-inspection surface (a `world` query + a CLI panel) over a deployed system,
-generalising to other benches (refinery, ship-yard, lab) later. The
-workbench is how "grow/design/deploy via civilisational requirements"
-becomes visible and steerable at the console.
+*(RULED: build a GENERAL, bench-type-agnostic workbench abstraction up
+front, not a depot-only view.)*
+
+The player builds the distribution engine (and every other deployable
+system) to their civilisation's requirements, and a **workbench** displays
+any bench's components, health, throughput, and unmet requirements — so
+each layer is legible, not a black box. The abstraction is one shape over
+many bench TYPES: a bench reports its component zones, each with a
+fill/health/throughput reading and its unmet demands; the console renders
+any bench uniformly. The bench types are the deployable systems already in
+the engine — **depot** (granary zones; food/leisure coverage, stability,
+disposition factors), **refinery** (ElementRefinery), **ship-yard**
+(ShipYard), **lab** (research) — with the depot wired in as the first
+concrete bench that exercises the abstraction. It is READ-ONLY (a `world`
+query + a CLI panel) over deployed state. The workbench is how "grow/design/
+deploy via civilisational requirements" becomes visible and steerable at
+the console.
 
 ## 8. SETTLE DISCIPLINE
 
-- **Depot stock** — real state, per `(orb, good)`. Carrier deed
-  `DepotSettled` (tag 168), settled at the collect touch, folded beside the
-  population delta and the ration delta. Replay banks from the receipt.
-- **Stability, coverage, factors** — all DERIVED at the touch/read; no
-  stored field, no deed (the `regrown_ration` precedent).
-- **The touch order** — harvest banks → flows into depot (capped) →
-  population draws from depot (calories then leisure) → births/cull settle →
-  research siphon (empiricist). One touch, one coherent set of receipts.
-- **No depot → no change** — the #40–42 path is untouched where no granary
+*(RULED: depot stock = the raw bank, so there is NO new stored quantity and
+NO `DepotSettled` deed. Everything this layer adds is derived at the touch.)*
+
+- **Depot stock** — the orb's existing banked ration; settles through the
+  ration deeds already in the collect touch (`YieldCollected`/`UpkeepSettled`),
+  no new carrier.
+- **Stability, coverage, leisure demand, factors** — all DERIVED at the
+  touch/read; no stored field, no deed (the `regrown_ration` precedent).
+- **The touch order** — harvest banks → population draws its calories, then
+  its leisure, from the bank (granary present) → stability gates the births/
+  cull that settle → research siphon (empiricist). One touch, existing
+  receipts.
+- **No granary → no change** — the #40–42 path is untouched where no granary
   stands, so every existing world and pin replays byte-identical.
 
-## 9. RULINGS OWED (the forks the translation surfaces)
+## 9. RULINGS (2026-08-13)
 
-1. **The depot's nature** — a `ZoneKind::Granary` holding a SEPARATE depot
-   stock (proposed, enables §6 transport), vs reusing the raw bank as the
-   depot (simpler, but no logistics seam). Buildable/workbench-able either
-   way.
-2. **The leisure good** — a derived per-clade recreation invariant minted
-   like a ration (proposed), vs reusing an existing resource (e.g. a luxury
-   Joule draw), vs a new closed `Resource::Recreation`.
-3. **Stability semantics** — derived-only reading gating growth (proposed),
-   vs a stored, receipted stability quantity that itself decays/recovers.
-4. **The severity ordering** — confirm: leisure-short STALLS (no death),
-   calorie-short STARVES; stability bleeds in the stall band before any
-   cull. (Operator stated this; pinning it.)
+1. **The depot's nature — RULED: reuse the raw bank.** No separate stock, no
+   `DepotSettled` deed; the granary flips the consumption law on. Logistics
+   (§6) stays inert this layer by the same ruling.
+2. **The leisure good — RULED: a derived per-clade recreation invariant**,
+   minted like a ration (`metabolic_ration_of` precedent) — species-
+   specific (a swarm's leisure ≠ a stone-being's), no new closed resource.
+3. **Stability semantics — RULED: a derived-at-touch reading** in `[0,1]`
+   gating growth; stores nothing, mints no deed (the `regrown_ration`
+   precedent). May be promoted to stored state later if it needs momentum.
+4. **The severity ordering — RULED (confirmed):** leisure-short STALLS (no
+   death), calorie-short STARVES; stability bleeds in the stall band before
+   any cull.
 5. **The disposition factors** — the fourfold-banded numbers for lean/deep/
-   research over the provision channel (extends R8), derive-not-dial.
-6. **The workbench scope now** — the depot's read-only inspection view this
-   layer (proposed), vs a general workbench abstraction across all bench
-   types up front.
+   research over the provision channel (extends R8), derive-not-dial. *(Open:
+   the exact bands, to settle when L4 lands; propose-and-confirm.)*
+6. **The workbench scope — RULED: a GENERAL workbench abstraction up front**
+   — bench-type-agnostic (depot, refinery, ship-yard, lab all as benches),
+   the depot wired in as the first concrete bench. See §7.
 
 ## 10. What this composes with
 
