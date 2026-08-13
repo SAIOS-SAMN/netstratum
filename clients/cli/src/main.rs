@@ -8637,6 +8637,10 @@ fn chronicle(world: &World, style: &Style) {
                     style.strong(&amount(delta))
                 )
             }
+            cfe::dop::ClosureEvent::PracticesLapsed { count } => format!(
+                "📉 {} practice(s) LAPSED at the generation turnover — the continuity tax to the void",
+                style.strong(&count.to_string())
+            ),
             cfe::dop::ClosureEvent::OfferPosted { offer, give, give_amount, want, want_amount, .. } => format!(
                 "⇋ offer {offer} RESTS — {} {} for {} {}; the market holds intents, never escrows",
                 style.strong(&amount(give_amount)),

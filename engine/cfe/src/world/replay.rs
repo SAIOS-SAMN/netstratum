@@ -388,6 +388,13 @@ impl Replayer {
         ClosureEvent::WorldCharted { seed } => *terrain_seed = Some(*seed),
         // PRACTICE-1: the disciplines replay in adoption order.
         ClosureEvent::PracticeAdopted { practice } => practices.push(*practice),
+        // TAXATION (49 §3): the continuity levy lapses the `count`
+        // most-recently adopted practices at a generation turnover —
+        // dropped from the tail (LIFO, the least-confirmed first).
+        ClosureEvent::PracticesLapsed { count } => {
+            let keep = practices.len().saturating_sub(*count as usize);
+            practices.truncate(keep);
+        }
         ClosureEvent::PracticeReleased { practice } => {
             if let Some(at) = practices.iter().position(|held| held == practice) {
                 practices.remove(at);

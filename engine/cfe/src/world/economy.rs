@@ -307,6 +307,9 @@ impl World {
         let last_touch = self.orb_by_id(orb).map(|held| held.last_touch).unwrap_or(0);
         let generations = self.clock.now() / lifespan - last_touch / lifespan;
         let estate = self.estate_due_at_touch(orb, generations);
+        // TAXATION (49 §3): the continuity levy — practices the line does
+        // not keep across the same generation turnover lapse to the void.
+        let lapse = self.continuity_lapse_at_touch(generations);
         let held = peel(&mut self.orbs, orb)
             .ok_or(ActionRefused::NoSuchOrb { orb })?;
         let mut settleable: Vec<(Resource, Ratio)> = Vec::new();
@@ -519,6 +522,10 @@ impl World {
         // stall. No hub / no stall / empty treasury → zero → no deed, so a
         // world without the welfare loop is byte-identical.
         self.settle_treasury(orb, -welfare);
+        // TAXATION (49 §3): the continuity levy lapses the unkept practices
+        // to the void at the generation turnover (read pre-touch above).
+        // Zero → no deed, so a line that keeps its knowledge is byte-identical.
+        self.lapse_practices(lapse);
         self.relieve_recovered(orb);
         Ok(count)
     }

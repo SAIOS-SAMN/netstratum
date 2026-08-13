@@ -1422,6 +1422,7 @@ fn covered(event: &ClosureEvent) -> bool {
         | E::ElementWantStruck { .. } | E::ElementWantRelieved { .. }
         | E::PopulationSettled { .. }
         | E::TreasurySettled { .. }
+        | E::PracticesLapsed { .. }
         | E::HandoffSealed { .. }
         | E::GaugeShifted { .. } | E::Diverged { .. } | E::StarAged { .. }
         | E::TechDiscovered { .. } | E::IncursionStruck { .. } | E::VoidShare { .. }
@@ -2500,7 +2501,10 @@ pub fn layer_of(event: &ClosureEvent) -> Option<Layer> {
         // fiscal store — universal to every founded line, yet never a
         // precondition for anyone else's standing (the Civilizational
         // criterion), exactly like their population.
-        | E::TreasurySettled { .. } => {
+        | E::TreasurySettled { .. }
+        // TAXATION (49 §3): a line's practices lapsing at its own
+        // generation turnover — its own knowledge, no one else's.
+        | E::PracticesLapsed { .. } => {
             Some(Layer::Civilizational)
         }
 
@@ -2637,6 +2641,7 @@ fn scope_of(event: &ClosureEvent) -> Option<Scope> {
         | E::ElementWantStruck { .. } | E::ElementWantRelieved { .. }
         | E::PopulationSettled { .. }
         | E::TreasurySettled { .. }
+        | E::PracticesLapsed { .. }
         | E::HandoffSealed { .. } | E::GaugeShifted { .. } | E::Diverged { .. }
         | E::Confluent { .. } | E::StarAged { .. } | E::EraFolded { .. }
         | E::CouncilClosed { .. } | E::TechDiscovered { .. } | E::IncursionStruck { .. }

@@ -183,8 +183,71 @@ impl World {
         self.governance_reach(orb) * taxable.clone()
     }
 
+    /// How many practices the line currently holds — the knowledge the
+    /// continuity levy taxes.
+    pub fn practice_count(&self) -> usize {
+        self.practices.len()
+    }
+
+    /// **THE CONTINUITY LAPSE at a turnover** (`49_TAXATION` §3) — how
+    /// many of the line's adopted practices lapse to the void for the
+    /// `boundaries` generation turnovers crossed this span. Per boundary
+    /// `floor(continuity_tax × standing)` lapse, applied in turn: a
+    /// short-lived Locust (rate 1) forgets ALL of them at the first
+    /// turnover and must re-adopt; a long-lived Custodian (rate 1/4) keeps
+    /// most, its law compounding. Zero unless a lifespan class is sealed
+    /// AND practices stand — a line with neither is byte-identical to the
+    /// pre-taxation era. The lapse is LIFO (the newest, least-confirmed
+    /// knowledge first); the `PracticesLapsed` receipt carries the count.
+    pub fn continuity_lapse_at_touch(&self, boundaries: u64) -> u8 {
+        if boundaries == 0 || self.taxon().is_none() {
+            return 0;
+        }
+        let start = self.practices.len() as i64;
+        if start == 0 {
+            return 0;
+        }
+        let rate = self.continuity_tax();
+        let mut remaining = start;
+        for _ in 0..boundaries {
+            let lapse: i64 = (rate.clone() * ratio(remaining, 1))
+                .floor()
+                .to_integer()
+                .try_into()
+                .unwrap_or(0);
+            if lapse <= 0 {
+                break; // a long-lived line keeps its last few — settled
+            }
+            remaining -= lapse;
+            if remaining <= 0 {
+                remaining = 0;
+                break;
+            }
+        }
+        (start - remaining) as u8
+    }
+
+    /// **LAPSE THE PRACTICES** (`49_TAXATION` §3, tag 172) — drop `count`
+    /// practices from the tail (LIFO) and receipt it so replay drops the
+    /// same. A zero count emits nothing, so a line that keeps all its
+    /// knowledge is byte-identical.
+    pub fn lapse_practices(&mut self, count: u8) {
+        if count == 0 {
+            return;
+        }
+        let keep = self.practices.len().saturating_sub(count as usize);
+        self.practices.truncate(keep);
+        let stamp = self.clock.now();
+        self.chronicle.append(
+            crate::dop::ClosureEvent::PracticesLapsed { count },
+            stamp,
+            vec![],
+        );
+    }
+
     /// The standing continuity levy — its base/trigger/sink (Knowledge /
-    /// Turnover / Void). The `continuity_tax` is its measured rate.
+    /// Turnover / Void). `continuity_tax` is its rate,
+    /// `continuity_lapse_at_touch` its settle.
     pub fn continuity_levy(&self) -> Levy {
         Levy::CONTINUITY
     }
